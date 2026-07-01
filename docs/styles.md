@@ -1,425 +1,515 @@
-# Square Share — Design System & Style Guide
+# Square Share — Product Design System & Style Guide
 
-> A complete specification for replicating the Square Share visual language. Written so an AI agent (or a human) can rebuild the look, feel, and motion of the site from scratch. Stack: **Next.js (App Router) + React + TypeScript + Tailwind CSS v4 + shadcn/ui + Framer Motion + lucide-react**.
+> The design system for the **Square Share product** — the creator dashboard
+> (`store.squareshare.to`), the marketplace, and the discovery feed. Written so an
+> agent or a human can rebuild the look and feel from scratch.
+> Stack: **Next.js (App Router) + React + TypeScript + Tailwind CSS v4 (`@theme`) +
+> shadcn/ui + lucide-react**.
+>
+> This supersedes the earlier brutalist/dark spec (which described the public
+> marketing landing only). The product UI is **light, calm, and content-first**.
+
+---
+
+## 0. The one rule: EVERYTHING is tokenized
+
+**No raw values in components. Ever.** Every color, radius, spacing step, font
+size, weight, line-height, shadow, duration, and z-index a component uses **must**
+reference a token defined in §2–§9. If you need a value that has no token, **add
+the token first**, then use it.
+
+- ❌ `className="bg-[#0a0a0a] rounded-[8px] p-[16px] text-[#737373]"`
+- ✅ `className="bg-primary rounded-md p-4 text-muted-foreground"`
+- ❌ inline `style={{ color: "#a855f7" }}`
+- ✅ a token: `text-brand` (and only where §2.4 permits)
+
+Tokens are declared once in Tailwind v4 `@theme` (primitives) + a semantic layer
+(`:root`). Components consume only the **semantic** and **utility** tokens, never
+the raw primitives directly. This keeps the whole product themeable from one file
+and makes a future dark mode or white-label a token swap, not a refactor.
 
 ---
 
 ## 1. Brand Essence
 
-Square Share turns any website into a store. The visual language is **brutalist-tech-meets-pixel-craft**:
+Square Share is where creators show and sell their work. **The creators' artwork
+is the color; the interface is not.** The chrome stays out of the way.
 
-- **High contrast.** Pure black and pure white surfaces, never grey-washed. Sections hard-cut between dark and light.
-- **Zero rounding on brand elements.** The global radius token is `0rem`. Square corners are the identity (the name is "**Square** Share"). Only inherited shadcn primitives (inputs, buttons) keep small radii.
-- **One accent, used sparingly.** Electric purple (`#a855f7`, internally "acid") is the *only* chromatic color. Everything else is neutral (black/white/greys). Purple is a scalpel, not a paintbrush — a single glow, a hover state, a selection highlight.
-- **Pixel motif.** Squares/pixels recur everywhere: pixel-sweep buttons, pixel-grid footer, jagged "pixel edge" section seams, a cursor-swarm that spells words, a weaving pixel trail. The grid cell is a first-class design unit.
-- **Motion is purposeful and reduced-motion-safe.** Every animation has a `prefers-reduced-motion` fallback. Nothing moves just to move.
-- **Built-in-the-open, handcrafted voice.** Founder copy uses a hand-written font for self-corrections. Tone is plain, confident, no marketing fluff.
+- **Light and clean.** White surfaces, generous whitespace, thin neutral
+  hairlines. A modern, quiet SaaS canvas that lets photos and art pop.
+- **Black is the action color.** Primary buttons, the logo mark, the active nav
+  state, and key emphasis are near-black on white. High contrast, zero fuss.
+- **Neutral greys do the structural work.** Borders, muted text, placeholder
+  cells, icons — all from a single neutral ramp. No competing hues.
+- **Purple is reserved, not decorative.** The brand purple exists but is used
+  **sparingly** (see §2.4). Default to neutral/black; reach for purple only for a
+  single deliberate brand moment. If you can avoid it, avoid it.
+- **Soft, not brutalist.** Corners are rounded on a small radius scale — pills for
+  search and avatars, gentle radii for cards, buttons, and tiles. (The black
+  **square** logo still nods to the name; the rest of the UI breathes.)
+- **The grid is the hero.** The bento/masonry grid of artifacts is the core
+  layout unit. Empty slots are first-class (dashed placeholder cells).
+- **Motion is quiet and reduced-motion-safe.** Short, functional transitions
+  only. Every animation has a `prefers-reduced-motion` fallback.
 
-**Copy rule:** No em dashes in user-facing copy. Use commas, periods, or "no spam"-style phrasing instead.
+**Copy voice:** plain, direct, lowercase-friendly, no marketing fluff, **no em
+dashes** in user-facing copy (use commas or periods).
 
 ---
 
-## 2. Color System
+## 2. Color
 
-### 2.1 Brand tokens (Tailwind v4 `@theme`)
+### 2.1 Primitive palette (Tailwind v4 `@theme`)
+
+Raw values live here and **nowhere else**. Neutral ramp is pure grey (no blue
+tint), matching the product.
 
 ```css
 @theme {
-  --color-acid:          #a855f7;  /* electric purple — the only accent */
-  --color-acid-hover:    #9333ea;  /* darker purple for hover */
-  --color-surface-dark:  #000000;  /* pure black */
-  --color-surface-light: #F9F9F9;  /* near-white section bg */
-  --shadow-btn-glow:     0 0 30px rgba(168, 85, 247, 0.3);
+  --color-white:        #ffffff;
+  --color-neutral-50:   #fafafa;
+  --color-neutral-100:  #f5f5f5;
+  --color-neutral-200:  #e5e5e5;
+  --color-neutral-300:  #d4d4d4;
+  --color-neutral-400:  #a3a3a3;
+  --color-neutral-500:  #737373;
+  --color-neutral-600:  #525252;
+  --color-neutral-700:  #404040;
+  --color-neutral-800:  #262626;
+  --color-neutral-900:  #171717;
+  --color-neutral-950:  #0a0a0a;
+  --color-black:        #000000;
+
+  /* Reserved brand accent — see §2.4. Default components do NOT use this. */
+  --color-brand-purple: #a855f7;
+
+  /* Feedback */
+  --color-danger:  #ef4444;
+  --color-success: #16a34a;
 }
 ```
 
-These expose Tailwind utilities like `text-acid`, `bg-acid`, `border-acid`, `shadow-btn-glow`.
+### 2.2 Semantic tokens (`:root`)
 
-### 2.2 Core palette
-
-| Role | Value | Usage |
-|---|---|---|
-| **Acid / Primary** | `#a855f7` (= `rgb(168,85,247)`) | Accent glow, hover, focus ring, selection, links-on-hover, checkmarks, heart |
-| Acid hover | `#9333ea` | Pressed/darker purple |
-| Pure black | `#000000` | Dark section backgrounds, dark text on light |
-| Off-black (cards) | `#0a0a0c` / `#0a0a0a` | Card base over black (future cards, pixel-button hover) |
-| Card fade black | `rgb(6, 6, 8)` | Edge-fade gradients over images |
-| Pure white | `#ffffff` | Light section bg, text on dark |
-| Light surface | `#F9F9F9` | "How It Works" section bg |
-| Scrollbar track | `#000000` | — |
-| Scrollbar thumb | `#333333` (hover `#a855f7`) | — |
-| Error | `red-500` (`#ef4444`) | Invalid input border |
-
-### 2.3 Text opacity ladder (on dark)
-
-White text is tinted by opacity, never by hue. Memorize this ladder — it is used everywhere:
-
-| Token | Use |
-|---|---|
-| `text-white` | Headlines, primary text |
-| `text-white/60` | Emphasized link |
-| `text-white/50` | Body / subheads / nav links |
-| `text-white/40` | Footer captions, muted credit |
-| `text-white/30` | Placeholder, faint labels |
-
-On light backgrounds the neutral ladder is: `text-neutral-900` (headings) → `text-neutral-600` (body) → `text-neutral-500` (muted) → `text-neutral-400` (eyebrow/faint) → `text-neutral-300/200` (giant ghost numbers).
-
-### 2.4 Border opacity ladder (on dark)
-
-| Token | Use |
-|---|---|
-| `border-white/20` | Input border (hero) |
-| `border-white/18` | Card hover border |
-| `border-white/10` | Default card / section dividers / icon buttons |
-
-### 2.5 shadcn / theme variables (OKLCH)
-
-The app runs **dark mode by default** (`<html class="dark">`). The `.dark` block overrides shadcn tokens to the brand:
+Components consume **these**, not the primitives above. (shadcn-compatible names,
+so `bg-background`, `text-foreground`, `border-border`, `bg-primary`, etc. work.)
 
 ```css
-.dark {
-  --background: oklch(0 0 0);          /* black */
-  --foreground: oklch(1 0 0);          /* white */
-  --card: oklch(0.18 0 0);
-  --primary: #a855f7;                  /* acid */
-  --primary-foreground: #000000;
-  --accent: #a855f7;
-  --accent-foreground: #000000;
-  --muted-foreground: oklch(0.708 0 0);
-  --border: oklch(1 0 0 / 12%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: #a855f7;
-  --destructive: oklch(0.704 0.191 22.216);
-  --radius: 0rem;                      /* inherited from :root — square */
+:root {
+  /* Surfaces */
+  --background:          var(--color-white);      /* app background */
+  --surface:             var(--color-white);      /* cards, bars, sheets */
+  --surface-muted:       var(--color-neutral-50);  /* subtle fills, hover rows */
+
+  /* Text */
+  --foreground:          var(--color-neutral-900); /* primary text, headings */
+  --muted-foreground:    var(--color-neutral-500); /* meta, email, placeholder text */
+  --subtle-foreground:   var(--color-neutral-400); /* faintest labels, icons idle */
+
+  /* Lines */
+  --border:              var(--color-neutral-200); /* default hairline */
+  --border-strong:       var(--color-neutral-300); /* inputs, emphasized edges */
+  --input:               var(--color-neutral-200);
+  --ring:                var(--color-neutral-900); /* focus ring (with offset) */
+
+  /* Primary action = black */
+  --primary:             var(--color-neutral-950);
+  --primary-hover:       var(--color-neutral-800);
+  --primary-foreground:  var(--color-white);
+
+  /* Secondary / neutral surfaces */
+  --secondary:           var(--color-neutral-100);
+  --secondary-foreground:var(--color-neutral-900);
+  --muted:               var(--color-neutral-100);
+  --accent:              var(--color-neutral-100); /* hover surface for controls */
+  --accent-foreground:   var(--color-neutral-900);
+
+  /* Card + popover (shadcn) */
+  --card:                var(--surface);
+  --card-foreground:     var(--foreground);
+  --popover:             var(--surface);
+  --popover-foreground:  var(--foreground);
+
+  /* Grid placeholders (empty bento cells) */
+  --placeholder:         var(--color-neutral-100); /* filled empty cell */
+  --placeholder-border:  var(--color-neutral-200); /* dashed empty cell */
+
+  /* Feedback */
+  --destructive:         var(--color-danger);
+  --destructive-foreground: var(--color-white);
+
+  /* Reserved brand — map, but use per §2.4 only */
+  --brand:               var(--color-brand-purple);
+  --brand-foreground:    var(--color-white);
 }
 ```
 
-`:root` (light) keeps neutral greyscale OKLCH ramps; `--radius: 0rem` globally.
+### 2.3 Usage ladder
 
-### 2.6 Selection & scrollbar
-
-```css
-::selection { background: var(--color-acid); color: var(--color-surface-dark); }
-/* Scrollbar: 6px wide, black track, #333 thumb → acid on hover */
-* { scrollbar-width: thin; scrollbar-color: #333333 #000000; }
-```
-
----
-
-## 3. Typography
-
-### 3.1 Font families (self-hosted via `next/font/local`, all `display: swap`)
-
-| CSS var | Family | Weight range | Role |
-|---|---|---|---|
-| `--font-display` | **Space Grotesk** | `300 700` | Display headlines (`font-display`) |
-| `--font-sans` | **Geist** | `100 900` | Body / UI default (`font-sans`) |
-| `--font-mono` | **JetBrains Mono** | `100 800` | Eyebrows, labels, code, footer meta (`font-mono`) |
-| `--font-hand` | **Shadows Into Light** | `400` | Hand-written founder voice / self-corrections (`font-hand`) |
-
-> Note: `@theme` declares the *fallback stacks* as `"Space Grotesk"`, `"Inter"`, `"JetBrains Mono"`, but the actual loaded faces are the `localFont` files above (Geist replaces Inter as the sans). Fonts live in `src/app/fonts/*.woff2`. The `<html>` element gets all four `variable` classes plus `font-sans`.
-
-```tsx
-// layout.tsx pattern
-const spaceGrotesk = localFont({ src: "./fonts/SpaceGrotesk.woff2", weight: "300 700", variable: "--font-display", display: "swap" });
-const geist        = localFont({ src: "./fonts/Geist.woff2",        weight: "100 900", variable: "--font-sans",    display: "swap" });
-// <html className={cn("dark", spaceGrotesk.variable, jetbrainsMono.variable, shadowsIntoLight.variable, "font-sans", geist.variable)}>
-```
-
-### 3.2 Type scale & weights
-
-**Weight rule:** display and important headings are **`font-black` (900)**. There is almost no medium-weight heading — it's black or it's body.
-
-| Element | Classes |
-|---|---|
-| **Hero H1** | `text-6xl md:text-8xl lg:text-9xl font-black leading-[1.16] md:leading-[0.92] tracking-tight font-display` |
-| **Section H2 (dark)** | `font-display text-4xl font-black leading-[1.05] tracking-tight text-white md:text-6xl` |
-| **Section H2 (light)** | `font-display text-5xl font-black leading-[1.05] text-neutral-900 md:text-8xl` |
-| **About H2** | `font-display text-4xl font-black leading-tight text-neutral-900 md:text-6xl` |
-| **CTA H3** | `font-display text-3xl font-black text-neutral-900 md:text-5xl` |
-| **Step title H3** | `font-display text-3xl font-black leading-tight text-neutral-900 md:text-4xl` |
-| **Card title H3** | `font-display text-xl font-black md:text-2xl` |
-| **Giant step number** | `font-display text-6xl font-black leading-none text-neutral-200 md:text-7xl` (ghost grey) |
-| **Lead paragraph** | `text-lg md:text-xl text-white/50` (dark) / `text-neutral-600` (light) |
-| **Body** | `text-base leading-relaxed text-neutral-600` / `text-white/50` |
-| **Small body** | `text-sm leading-relaxed` |
-| **Eyebrow / label** | `font-mono text-xs uppercase tracking-[0.25em] text-neutral-400` |
-| **Nav / meta link** | `font-mono text-xs uppercase tracking-widest text-white/50` |
-
-**Tracking conventions:**
-- Display headlines: `tracking-tight`.
-- Footer wordmark: `tracking-tighter`.
-- Eyebrows: `tracking-[0.25em]` (wide). Read-more: `tracking-[0.2em]`. Nav: `tracking-widest`.
-
-**Footer wordmark** (signature element): fluid, full-bleed, uppercase, ultra-tight.
-```
-text-[clamp(2.5rem,11vw,9rem)] font-black uppercase leading-[0.82] tracking-tighter
-```
-
-### 3.3 Eyebrow pattern
-
-Every section that has one uses: mono, xs, uppercase, wide tracking, faint color. Example: `<p class="font-mono text-xs uppercase tracking-[0.25em] text-neutral-400">Our Story</p>`.
-
----
-
-## 4. Spacing, Layout & Containers
-
-### 4.1 Container widths
-
-| Width | Class | Use |
+| Role | Token | Where |
 |---|---|---|
-| Narrow prose | `max-w-2xl` / `max-w-3xl` | Founder copy, section headers |
-| Hero | `max-w-5xl` | Hero content |
-| Standard section | `max-w-6xl` | How It Works, Future |
-| Wide / footer | `max-w-7xl` | Footer |
-| Form (hero) | `max-w-lg`; (footer variant) `max-w-2xl` | Waitlist |
+| Page background | `--background` | app shell, page |
+| Card / bar / sheet | `--surface` / `--card` | collection cards, search bar, top bar |
+| Heading / primary text | `--foreground` | "My photos", "builderboy", body |
+| Meta / secondary text | `--muted-foreground` | "5 artifacts · 3/15/2026", email, placeholders |
+| Faint / idle icon | `--subtle-foreground` | idle sidebar icons, faint captions |
+| Hairline / divider | `--border` | card borders, footer top, sidebar edge |
+| Input / strong edge | `--border-strong` / `--input` | search bar, text inputs |
+| Primary button / logo / active nav | `--primary` (+ `--primary-foreground`) | Add Artifact, Follow, logo, active icon |
+| Hover surface | `--accent` / `--surface-muted` | icon-button hover, list-row hover |
+| Empty grid cell | `--placeholder` / `--placeholder-border` | bento placeholder tiles |
+| Focus ring | `--ring` | keyboard focus (with `--ring-offset`) |
+| Error | `--destructive` | invalid input, error text |
 
-Standard horizontal padding: **`px-6`** everywhere. Always `mx-auto` to center.
+### 2.4 Purple policy (read this before using purple)
 
-### 4.2 Section rhythm
+`--brand` (purple `#a855f7`) is a **reserved** token. The product UI in the
+reference screenshots uses **zero** purple in its chrome — buttons, nav, cards,
+and text are all neutral/black. Follow that.
 
-- Full-viewport hero/founder sections: `min-h-screen flex items-center justify-center`.
-- Vertical padding: `py-24 md:py-32` (large sections), hero `pt-20 pb-16`.
-- Section header to body gap: `mb-10`–`mb-20`.
-- `scroll-mt-24` on anchored sections so the sticky offset clears anchors.
-- `overflow-x-hidden` on body; `overflow-x-clip` on sections with bleeding art.
+Purple is permitted **only** for a single, intentional brand moment and only when
+a neutral would genuinely be worse. Sanctioned uses, at most one per surface:
 
-### 4.3 Section background alternation (the core rhythm)
+- Text **selection** highlight (`::selection`) — optional.
+- A one-off brand flourish on a marketing/empty-state illustration.
 
-Sections hard-cut between dark and light to create the brutalist contrast:
-
-1. **Hero** — `bg-black`, white text.
-2. **How It Works** — `bg-[#F9F9F9]` (light), neutral-900 text. Seam from dark above is broken by a **`PixelEdge`** (jagged black pixel border), never a flat line.
-3. **Founder / About** — `bg-white`, neutral text.
-4. **Future** — `bg-black`, white text.
-5. **Footer** — `bg-black` with interactive pixel grid; `border-t border-white/10` and a top fade seam.
-
-### 4.4 Grid & gap conventions
-
-- Two-column rows: `grid items-center gap-8 lg:grid-cols-2 lg:gap-16`. On desktop, alternate sides with `lg:order-1` / `lg:order-2` (`reverse` prop); on mobile always stack text-first.
-- Form layout: `flex flex-col sm:flex-row gap-3`.
-- Footer columns: `flex flex-col gap-10 sm:flex-row sm:gap-12`, nav link stacks `gap-3`.
+Purple is **not** allowed for: primary buttons, links, focus rings, hovers,
+active states, borders, or icons. When in doubt, use `--primary`/neutral.
 
 ---
 
-## 5. Components
+## 3. Radius
 
-### 5.1 PixelButton — the signature CTA
+Soft, small scale. Pills for round things, gentle radii for surfaces.
 
-A button whose hover state is a **pixel sweep**: a grid of square cells fades in from the exact point the cursor entered (radial wipe + seeded jitter), and drains back out toward the exit point. The label is two stacked copies that crossfade so text never flashes black-on-black.
-
-**Visual defaults:**
-- Base: `#a855f7` background + matching `border-2`, black (`#000000`) label text.
-- Hover fill color: `#0a0a0a` (near-black); label crossfades to `hoverTextColor` (commonly `#a855f7` or `#ffffff`).
-- Shape: square (no radius), `font-black`, `whitespace-nowrap`, `overflow-hidden`, `isolate`.
-- Press: `active:scale-95`, `transition-transform duration-150`.
-- Focus: `focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black`.
-- Disabled: `disabled:opacity-50 disabled:pointer-events-none`.
-- Reduced motion: `motion-reduce:transition-colors` + the pixel overlay is `motion-reduce:hidden` — falls back to a plain color crossfade.
-
-**Key props:** `baseColor`, `hoverColor`, `hoverTextColor`, `pixelSize` (default `13`px square cell), `sweepMs` (default `420`), `directionalWeight` (0..1, default `0.8` = mostly radial-from-cursor, some random jitter).
-
-**Mechanics to replicate:**
-- The button width is snapped to a whole number of square cells (`cell = height / rows`, `cols = round(width / cell)`), re-measured on resize and after `document.fonts.ready`, so cells are *always perfect squares*, never rectangles.
-- Per-pixel `transition-delay` = `progress * sweepMs`, where `progress = directional * directionalWeight + rand * (1 - directionalWeight)`; `directional` is normalized distance from the pointer origin to the farthest corner. Each cell: `transition-opacity`, `transitionDuration: 150ms`, `boxShadow: 0 0 0 1px hoverColor` (hides sub-pixel seams).
-- Hover state is driven by React state (not CSS `:hover`) so origin + opacity land in the same commit.
-
-Typical usage: `<PixelButton className="px-8 py-4 text-base" hoverTextColor="#ffffff">Join the Waitlist</PixelButton>`.
-
-### 5.2 shadcn Button (`ui/button.tsx`)
-
-Secondary system for non-hero buttons (cva variants). Rounded `rounded-lg`, `text-sm font-medium`, `transition-all`, `active:translate-y-px`, `focus-visible:ring-3 focus-visible:ring-ring/50`.
-- Variants: `default` (primary acid), `outline`, `secondary`, `ghost`, `destructive`, `link`.
-- Sizes: `xs h-6`, `sm h-7`, `default h-8`, `lg h-9`, plus `icon` square sizes. Icons auto-size to `size-4`.
-
-### 5.3 Plain secondary button (Instagram CTA pattern)
-
-For solid non-pixel buttons: `inline-flex items-center justify-center gap-2.5 px-7 py-3.5 text-sm font-bold transition-colors duration-200`, square corners, `bg-white text-black hover:bg-white/85` on dark (or `bg-neutral-900 text-white hover:bg-neutral-700` on light), with `focus-visible:ring-2 focus-visible:ring-offset-2`.
-
-### 5.4 Input (`ui/input.tsx` + waitlist overrides)
-
-Base shadcn input is small (`h-8`, `rounded-lg`). The **waitlist** overrides it to the brand sizing:
-- `flex-1 h-auto px-6 py-4 text-base font-medium`
-- `focus-visible:border-[#a855f7] focus-visible:ring-0` (acid border on focus, no ring)
-- Hero variant: `bg-white/5 border-2 border-white/20 text-white placeholder:text-white/30`
-- Footer variant: `bg-white border-2 border-neutral-300 text-neutral-900 placeholder:text-neutral-400`
-- Error: append `border-red-500`.
-- **Always** set `font-size: 16px` inline (and globally via `input[type=email]{font-size:16px!important}`) to prevent iOS zoom-on-focus.
-
-### 5.5 Cards
-
-**Future roadmap card** (`.future-card`) — opaque dark card that sits "on the road":
 ```css
-border-radius: 0;
-border: 1px solid rgba(255,255,255,0.1);
-background:
-  linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.02)),
-  #0a0a0c;                                   /* opaque, NOT translucent */
-transition: border-color 0.3s ease;          /* hover → rgba(255,255,255,0.18) */
-overflow: hidden;
-```
-Inside a card you may layer: a glow, a dot/line grid, an edge-fade mask, a 3D tilt — but **every effect stays clipped inside the card** (`overflow: hidden`).
-
-**Waitlist success card:** `border px-8 py-9`, dark variant `border-white/10 bg-white/[0.04]`; light variant `border-neutral-200 bg-white shadow-[0_2px_24px_rgba(0,0,0,0.05)]`. Includes an oversized watermark icon (`h-60 w-60`, `text-[#a855f7]/[0.15]`) bleeding off the right edge.
-
-### 5.6 Icon buttons (footer social)
-
-`h-12 w-12 flex items-center justify-center border border-white/10 text-white/50` (square). Hover: `hover:border-acid hover:bg-acid hover:text-black hover:shadow-[0_0_24px_-2px_rgba(168,85,247,0.55)]`; inner SVG `group-hover:scale-125 transition-transform`. Sized to snap onto the footer's 52px pixel grid.
-
-### 5.7 Links
-
-- Default muted (`text-white/50` or `text-neutral-*`), `transition-colors duration-200`, hover → `hover:text-acid`.
-- Inline text links: `underline decoration-white/20 underline-offset-2 hover:decoration-acid`.
-- "Read more" toggle: `font-mono text-xs uppercase tracking-[0.2em]` with a chevron that does `group-hover:animate-arrow-nudge` (rotates 180° when expanded).
-
-### 5.8 Dividers
-
-Gradient hairline: `h-px w-full bg-gradient-to-r from-transparent via-neutral-300 to-transparent` (light) / `via-white/10` (dark). Footer uses solid `border-t border-white/10`.
-
----
-
-## 6. Iconography
-
-- **Library:** `lucide-react` (e.g. `Check`, `Loader2`, `Heart`, `Mail`). Default `strokeWidth={2}`; thin watermarks use `strokeWidth={1.5}`.
-- **Brand glyphs:** lucide dropped brand marks, so social icons are inline `simple-icons` SVG path data (Instagram, YouTube, Facebook, GitHub) on a `0 0 24 24` viewBox, `fill="currentColor"`. Keep these as raw `<path d="…">` constants.
-- Heart accent uses `fill-acid text-acid`.
-- Chevrons: hand-rolled `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">`.
-
----
-
-## 7. Motion & Animation
-
-**Global rule:** every animated element must have a `@media (prefers-reduced-motion: reduce)` or `motion-reduce:` fallback, and React components read `useReducedMotion()` from Framer Motion to gate transitions (`reduce ? { duration: 0 } : {...}`).
-
-### 7.1 Framer Motion scroll-reveal (the standard entrance)
-
-```tsx
-initial={{ opacity: 0, y: 40 }}
-whileInView={{ opacity: 1, y: 0 }}
-viewport={{ once: true, margin: "-100px" }}
-transition={{ duration: 0.8 }}        // staggered children add delay: 0.2
-```
-Mockups add a horizontal nudge: `x: reverse ? -20 : 20 → 0`, `duration: 0.6–0.7`, `ease: "easeOut"`.
-
-**Signature easing curve:** `[0.22, 1, 0.36, 1]` (a soft "back-out") for reveals and height expansions.
-
-### 7.2 CSS keyframe animations (in `globals.css` / `FutureSection.css`)
-
-| Name | Class | Duration / timing | Effect |
-|---|---|---|---|
-| `blob-drift` | `.animate-blob-drift` | `20s ease-in-out infinite` | Slow drift/scale/rotate of gradient blobs |
-| `gradient-wave` | `.gradient-wave-text` | `6s linear infinite` | Band of acid sweeps across white text (bg-clip-text) |
-| `arrow-nudge` | `.animate-arrow-nudge` | `0.9s ease-in-out infinite` | 2px downward bounce on hover |
-| `future-bob` | `.future-bubble` | floats `-5px` | Idle bob |
-| `future-caret` | `.future-caret` | `1.05s steps(1) infinite` | Terminal caret blink |
-| `rocket-liftoff` | `.rocket-launch` | `7s linear infinite` | Rocket rest → ignition shake → accelerating ascent that recedes/shrinks → resets while invisible |
-| `rocket-exhaust` | `.rocket-launch .rocket-exhaust` | `7s linear infinite` | Tapered flame plume synced to the liftoff |
-
-**Gradient-wave text recipe:**
-```css
-background-image: linear-gradient(100deg, #fff 0%, #fff 35%, var(--color-acid) 50%, #fff 65%, #fff 100%);
-background-size: 200% auto;
-background-clip: text; -webkit-background-clip: text;
-color: transparent; -webkit-text-fill-color: transparent;
-animation: gradient-wave 6s linear infinite;
+@theme {
+  --radius-none: 0px;
+  --radius-sm:   0.375rem;  /* 6px  — buttons, icon buttons, inputs, image tiles, cells */
+  --radius-md:   0.5rem;    /* 8px  — cards, popovers, menus */
+  --radius-lg:   0.75rem;   /* 12px — large panels / modals */
+  --radius-full: 9999px;    /* pills: search bar, chips; circles: avatars */
+}
+:root { --radius: var(--radius-md); } /* default surface radius */
 ```
 
-### 7.3 Canvas / generative effects (pixel motif)
-
-- **CursorWord** — a fixed full-screen canvas renders a swarm of colored "cursor" sprites that fly in and *spell a word* (the hero's "Store"), hold as readable text for `assembleDelayMs` (hero uses 7000ms), then occasionally morph into a storefront icon. The real text stays in the DOM (transparent, for a11y) with engine-matched `letterSpacing`. Engine is framework-agnostic in `cursorWord/cursorWordEngine.ts`; React component is a thin wrapper. Reduced motion → static text in inherited color.
-- **PixelGrid** (footer) — a canvas grid of squares that light up acid near the cursor. `cellSize={52}`, `gap={4}`. The social-button row is JS-snapped to the nearest 52px cell boundary (re-aligned on resize + `document.fonts.ready`).
-- **PixelEdge** — jagged run of black squares forming an irregular border at a dark→light section seam (replaces a flat divider).
-- **RoadmapTrail** (Future) — a `<canvas>` weaving pixel trail down the section; numbered nodes ride the weave, cards alternate sides (44% width, odd→`flex-start`, even→`flex-end` on `md+`), and the trail passes *behind* opaque cards so each reads as sitting "on the road."
-
-### 7.4 Multi-phase interaction example (Waitlist submit)
-
-1. Submit → `loading` (spinner `Loader2 animate-spin` + "Joining…").
-2. Success → checkmark SVG **draws itself** (`pathLength: 0→1`, circle 0.5s then tick at 0.45s delay, spring `stiffness 240 damping 16`).
-3. After 1400ms → card slides up (`opacity/y` with `[0.22,1,0.36,1]`, 0.4s) showing confirmation + Instagram CTA. Reduced motion skips straight to the card.
-
-Section transitions in/out use `<AnimatePresence mode="wait">` with `opacity` fades (`duration 0.2–0.25`).
-
-### 7.5 Card-internal effect layers (Future cards)
-
-Stay inside the card; purple appears as *one* accent only.
-
-- **Glow:** `radial-gradient(55% 55% at var(--glow-x,50%) var(--glow-y,55%), rgba(255,255,255,0.07), transparent 70%)`, `blur(36px)`. Accent variant swaps to `rgba(168,85,247,0.65)…`, `blur(52px)`.
-- **Dot grid:** `radial-gradient(rgba(255,255,255,0.09) 1px, transparent 1.5px)` at `22px 22px`. Line grid: 1px white/0.05 lines at `2rem 2rem`. Optionally masked with a `--radial` or `--bottom` fade mask.
-- **Edge-fade masks:** `mask-image: linear-gradient(to bottom, #000 58%, transparent 100%)` (and a `to bottom right` variant) to dissolve a mockup into the card surface.
-- **3D tilt (desktop only):** `transform: perspective(1500px) rotateX(4deg) rotateY(-10deg) rotate(-2deg) scale(0.92)`; upright on mobile. Parent gets `perspective: 1500px`.
-- **Corner fade** over a clipped image: stacked linear-gradients from `rgb(6,6,8)` on the right + bottom + bottom-left corner.
-
----
-
-## 8. Elevation & Effects
-
-| Effect | Value |
+| Element | Token |
 |---|---|
-| Button glow token | `--shadow-btn-glow: 0 0 30px rgba(168,85,247,0.3)` |
-| Icon hover glow | `0 0 24px -2px rgba(168,85,247,0.55)` |
-| Light card shadow | `0_2px_24px_rgba(0,0,0,0.05)` |
-| Card glow blur | `blur(36px)` neutral / `blur(52px)` accent |
-| Seam fade | `bg-gradient-to-b from-black to-transparent h-24` (top of footer) |
-
-Shadows are rare and either purple glows or very soft neutral lifts. No default drop-shadows on cards — depth comes from borders + glows + masks.
+| Search bar, chips, avatar | `--radius-full` |
+| Buttons, icon buttons, inputs, image/artifact tiles, placeholder cells | `--radius-sm` |
+| Cards (collection card), popovers, dropdowns | `--radius-md` |
+| Modals, large panels | `--radius-lg` |
+| Logo square | `--radius-sm` (subtle) |
 
 ---
 
-## 9. Accessibility & Responsive Rules
+## 4. Spacing & sizing
 
-- **Reduced motion is mandatory** for every animation (see §7). Canvas effects degrade to static.
-- **iOS zoom guard:** all text inputs forced to `font-size: 16px`.
-- **Focus visibility:** `focus-visible:ring-2 ring-offset-2` (offset color matches the surface: `ring-offset-black` on dark). PixelButton + shadcn both honor `:focus-visible` only (not mouse focus).
-- **Hydration safety:** interactive form/button elements carry `suppressHydrationWarning` (form-filler extensions inject `fdprocessedid`). Canvas/MQ components use `useSyncExternalStore` with a `false` server snapshot to keep SSR and first client render in sync.
-- **A11y text:** decorative elements `aria-hidden`; real text kept in the DOM even when visually replaced by canvas; icons get `aria-label`; nav landmarks labelled (`aria-label="Explore"` / `"Legal"`).
-- **Breakpoints (Tailwind defaults):** `sm 640`, `md 768`, `lg 1024`, `xl 1280`. Type roughly doubles between base and `md`/`lg`. Trail/tilt/alternating layouts engage at `md`+; columns stack and lead with text on mobile.
+4px base scale. Use steps; never arbitrary px.
 
----
-
-## 10. Voice & Content Rules
-
-- **No em dashes** in copy. Ever.
-- **No dates, no "live" claims** in the roadmap/Future section — everything is "planned."
-- Founder voice is plain and first-person ("We're four sixteen-year-olds from Europe"), self-correcting, built-in-the-open. Hand font (`font-hand`) reserved for self-corrections.
-- Eyebrows are short, uppercase, mono (e.g. "Our Story", "Build your shelf").
-- CTAs are direct: "Join the Waitlist", "Be First in Line.", "Read more".
-- Numbers as labels are zero-padded (`01`, `02`, `03`) and rendered as giant ghost-grey display numerals.
-
----
-
-## 11. Quick-Reference Token Sheet
-
-```
-ACCENT      #a855f7  (acid)        hover #9333ea
-SURFACES    #000000  #0a0a0c  #0a0a0a  rgb(6,6,8)  #ffffff  #F9F9F9
-TEXT/DARK   white • white/60 • /50 • /40 • /30
-TEXT/LIGHT  neutral-900 • 600 • 500 • 400 • 300/200
-BORDERS     white/20 • /18 • /10   |  neutral-300 • 200
-RADIUS      0 (brand)   |  rounded-lg (shadcn inputs/buttons only)
-FONTS       display: Space Grotesk (900)   body: Geist
-            mono: JetBrains Mono            hand: Shadows Into Light
-WEIGHT      headings = font-black (900); body = normal
-EASE        reveal/expand = cubic-bezier(0.22, 1, 0.36, 1)
-REVEAL      opacity 0→1 + y 40→0, dur .8, viewport once margin -100px
-PADDING     section py-24 md:py-32 px-6 ; containers max-w-2xl…7xl mx-auto
-GLOW        btn 0 0 30px rgba(168,85,247,.3) ; icon 0 0 24px -2px …/.55
-MOTIF       squares everywhere; cell unit 52px (footer) / 13px (button)
-RULE        one purple accent per surface; reduced-motion fallback always
+```css
+@theme {
+  --spacing-0:  0px;      --spacing-1: 0.25rem;  --spacing-2: 0.5rem;
+  --spacing-3:  0.75rem;  --spacing-4: 1rem;     --spacing-5: 1.25rem;
+  --spacing-6:  1.5rem;   --spacing-8: 2rem;     --spacing-10: 2.5rem;
+  --spacing-12: 3rem;     --spacing-16: 4rem;    --spacing-20: 5rem;
+}
 ```
 
+Layout sizing tokens:
+
+```css
+:root {
+  --rail-width:     4rem;    /* 64px left icon sidebar */
+  --header-height:  4rem;    /* top bar */
+  --container-max:  80rem;   /* ~1280px content column */
+  --container-pad:  1.5rem;  /* horizontal page padding (px-6) */
+  --grid-gap:       0.5rem;  /* bento gap (8px) */
+  --card-pad:       1rem;    /* card inner padding */
+}
+```
+
+- Standard page: `max-width: var(--container-max)`, centered, `padding-inline: var(--container-pad)`.
+- Content sits to the right of the fixed rail (`margin-left: var(--rail-width)` or a grid column).
+
 ---
 
-## 12. Replication Checklist (for an agent)
+## 5. Typography
 
-1. Set up Next.js App Router + Tailwind v4 + shadcn (dark mode default, `--radius: 0rem`).
-2. Self-host the four fonts via `next/font/local`; wire `--font-display/sans/mono/hand` onto `<html class="dark …">`.
-3. Add the `@theme` brand tokens (`--color-acid`, surfaces, `--shadow-btn-glow`) and the `.dark` OKLCH overrides.
-4. Add globals: smooth scroll, font-smoothing, 16px input guard, custom scrollbar, acid `::selection`, and the keyframes (`blob-drift`, `gradient-wave`, `arrow-nudge`).
-5. Build `PixelButton` (square-cell sweep) as the primary CTA; use shadcn Button for secondary.
-6. Compose pages as alternating black/light full-bleed sections with `max-w-6xl px-6` containers and the type scale in §3.
-7. Add the pixel-motif set: `PixelGrid` footer, `PixelEdge` seams, `CursorWord` hero, `RoadmapTrail`.
-8. Use the standard Framer reveal + `[0.22,1,0.36,1]` easing; gate everything behind `useReducedMotion()` / `prefers-reduced-motion`.
-9. Keep purple to a single accent per surface; everything else neutral.
-10. Enforce copy rules: no em dashes, no dates in roadmap, plain built-in-the-open voice.
+### 5.1 Families (self-hosted via `next/font/local`)
+
+```css
+@theme {
+  --font-sans:     "Geist", ui-sans-serif, system-ui, sans-serif;   /* UI + body (default) */
+  --font-ui-muted: "Inter", ui-sans-serif, system-ui, sans-serif;   /* muted captions / labels */
+  --font-display:  "Space Grotesk", var(--font-sans);               /* marketing hero only */
+  --font-mono:     "JetBrains Mono", ui-monospace, monospace;       /* code / technical meta only */
+  --font-hand:     "Shadows Into Light", cursive;                   /* founder voice (marketing only) */
+}
 ```
+
+- **`--font-sans` (Geist)** is the product default: headings, body, buttons, nav.
+- **`--font-ui-muted` (Inter)** for muted caption/label text (meta rows, eyebrows,
+  footer, form labels). Utility: `font-inter`.
+- `--font-display` is **not** used in product UI — reserve Space Grotesk for the
+  public marketing hero. Product headings are `--font-sans` semibold.
+
+### 5.2 Scale, weight, line-height, tracking
+
+```css
+@theme {
+  --text-xs:   0.75rem;   --text-sm:  0.875rem;  --text-base: 1rem;
+  --text-lg:   1.125rem;  --text-xl:  1.25rem;   --text-2xl:  1.5rem;
+  --text-3xl:  1.875rem;  --text-4xl: 2.25rem;
+
+  --font-weight-normal:   400;
+  --font-weight-medium:   500;
+  --font-weight-semibold: 600;
+  --font-weight-bold:     700;
+
+  --leading-tight:  1.2;  --leading-snug: 1.35;
+  --leading-normal: 1.5;  --leading-relaxed: 1.625;
+
+  --tracking-tight:  -0.02em;
+  --tracking-normal: 0em;
+  --tracking-wide:   0.05em;
+  --tracking-label:  0.1em;   /* uppercase eyebrows */
+}
+```
+
+**Weight rule (product):** headings are **semibold (600)** or **bold (700)** — never
+900. Body is normal (400); emphasized meta is medium (500). This is the key break
+from the old brutalist spec (no `font-black` in the app).
+
+| Element | Tokens |
+|---|---|
+| Page title ("My photos") | `--font-sans` · `--text-2xl` md:`--text-3xl` · `--font-weight-semibold` · `--foreground` |
+| Section heading ("Collections") | `--font-sans` · `--text-xl` · `--font-weight-semibold` · `--foreground` |
+| Profile name ("builderboy") | `--font-sans` · `--text-2xl` · `--font-weight-bold` · `--foreground` |
+| Card title ("tester") | `--font-sans` · `--text-base` · `--font-weight-semibold` · `--foreground` |
+| Body | `--font-sans` · `--text-base` · `--leading-normal` · `--foreground` |
+| Meta / caption | `--font-ui-muted` · `--text-sm` · `--muted-foreground` |
+| Eyebrow / label | `--font-ui-muted` · `--text-xs` · uppercase · `--tracking-label` · `--muted-foreground` |
+| Button label | `--font-sans` · `--text-sm` · `--font-weight-medium` |
+
+---
+
+## 6. Elevation & motion
+
+### 6.1 Shadows (soft, rare — depth comes from borders first)
+
+```css
+@theme {
+  --shadow-xs: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+  --shadow-lg: 0 12px 32px rgba(0,0,0,0.12);
+}
+:root { --ring-offset: var(--background); }
+```
+
+Cards use a **border first**, with `--shadow-sm` at most. Overlays (menus, modals)
+use `--shadow-md`/`--shadow-lg`.
+
+### 6.2 Motion
+
+```css
+@theme {
+  --duration-fast: 120ms;
+  --duration:      180ms;
+  --duration-slow: 260ms;
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out:      cubic-bezier(0.16, 1, 0.3, 1);
+}
+```
+
+- Hover/focus color + background transitions: `--duration` · `--ease-standard`.
+- Entrance/expansion: `--duration-slow` · `--ease-out`.
+- **Reduced motion:** wrap every non-trivial animation in
+  `@media (prefers-reduced-motion: reduce)` (or `motion-reduce:`) and fall back to
+  an instant state change. No parallax, no decorative movement.
+
+### 6.3 Z-index
+
+```css
+@theme {
+  --z-base: 0; --z-rail: 30; --z-header: 20; --z-dropdown: 40; --z-overlay: 50; --z-toast: 60;
+}
+```
+
+---
+
+## 7. Layout shell
+
+```
+┌────┬──────────────────────────────────────────────┐
+│    │  [ top bar: title / search ........ actions ] │
+│ R  ├──────────────────────────────────────────────┤
+│ A  │                                                │
+│ I  │        content column (container-max)          │
+│ L  │        bento grid / collection cards           │
+│    │                                                │
+│    ├──────────────────────────────────────────────┤
+│    │                 footer (feed)                  │
+└────┴──────────────────────────────────────────────┘
+```
+
+- **Rail (left icon sidebar):** fixed, `width: --rail-width`, `background: --surface`,
+  `border-right: 1px solid --border`, `z-index: --z-rail`. Vertical stack: logo
+  (top), primary nav icons, flex spacer, then avatar + sign-out at the bottom.
+- **Content:** offset by the rail; centered `--container-max` with `--container-pad`.
+- **Top bar:** `height: --header-height`; page title or centered search on the left/
+  center, primary actions on the right.
+- **Footer (feed/marketplace):** `border-top: 1px solid --border`, centered muted
+  links separated by a divider glyph, `--text-sm` · `--muted-foreground`.
+
+---
+
+## 8. Components (token-only)
+
+Every value below is a token reference. If a component needs something new, add a
+token in §2–§6 first.
+
+### 8.1 Logo mark
+Black rounded square with white monogram. `size: --spacing-8` (or `2rem`),
+`background: --primary`, `color: --primary-foreground`, `radius: --radius-sm`,
+`--font-sans` · `--font-weight-bold`. Centered "S"/"SS".
+
+### 8.2 Rail nav icon button
+`size: --spacing-10` square, `radius: --radius-sm`, `color: --subtle-foreground`
+idle → `--foreground` on hover/active, hover `background: --accent`. Active route
+gets `color: --foreground` (and optionally a subtle `--accent` fill). Icons from
+lucide (`User`, `Settings`, `Layers`), `stroke-width: 2`, sized to `size-5`.
+Focus: `--ring` with `--ring-offset`.
+
+### 8.3 Primary button (Add Artifact, Follow)
+`background: --primary` → hover `--primary-hover`; `color: --primary-foreground`;
+`radius: --radius-sm`; padding `--spacing-2` `--spacing-4`; `--font-sans` ·
+`--text-sm` · `--font-weight-medium`; optional leading lucide icon (`Plus`,
+`UserPlus`) at `size-4`, gap `--spacing-2`. Focus: `2px --ring` + `2px --ring-offset`.
+Press: subtle `active` scale (respect reduced motion). Disabled: `opacity 0.5`.
+
+### 8.4 Secondary / icon button (top-right gear, pin toggle)
+`background: --surface`; `border: 1px solid --border`; `color: --muted-foreground`;
+`radius: --radius-sm`; hover `background: --surface-muted`,
+`border-color: --border-strong`. Square for icon-only (`size: --spacing-10`).
+
+### 8.5 Search bar (feed)
+Pill: `radius: --radius-full`; `background: --surface`; `border: 1px solid --border`;
+height ≈ `--spacing-12`; leading `Search` icon in `--subtle-foreground`; placeholder
+text `--muted-foreground` ("Search for creators or collections"); centered, capped
+at a comfortable `max-width`. Focus: `border-color: --border-strong` + `--ring`.
+
+### 8.6 Text input
+`background: --surface`; `border: 1px solid --input`; `radius: --radius-sm`;
+`color: --foreground`; placeholder `--muted-foreground`; padding `--spacing-3`
+`--spacing-4`; focus `border-color: --foreground` (or `--ring`), no color shift.
+Force `font-size: 16px` on mobile text inputs to prevent iOS zoom. Error: `border:
+--destructive`, message `--text-sm` · `--destructive`.
+
+### 8.7 Collection card
+`background: --card`; `border: 1px solid --border`; `radius: --radius-md`;
+`box-shadow: --shadow-sm`; padding `--card-pad`. Contents top→bottom:
+1. **Preview** — a mini bento grid (see §8.9) filling the card top, `radius: --radius-sm`
+   clip, with `--placeholder` empty cells to convey the grid.
+2. **Title** — `--text-base` · `--font-weight-semibold` · `--foreground`.
+3. **Meta row** — leading `Image` icon (`--subtle-foreground`) + "N artifacts ·
+   M/D/YYYY" in `--font-ui-muted` · `--text-sm` · `--muted-foreground`.
+Optional pin/unpin toggle top-right (§8.4). Hover: `border-color: --border-strong`
+(and/or `--shadow-md`), `transition: --duration`.
+
+### 8.8 Avatar
+Circle: `radius: --radius-full`; sizes `--spacing-8` (rail/inline) up to a larger
+profile size; optional `1px --border` ring. Image `object-cover`; fallback = initials
+on `--secondary` / `--secondary-foreground`.
+
+### 8.9 Bento / artifact grid
+The core layout. CSS grid, `gap: --grid-gap`, square base cell; artifacts span
+`1×1`, `2×1`, `2×2`, etc. Tiles: `radius: --radius-sm`, `object-fit: cover`,
+`background: --surface-muted` while loading.
+- **Placeholder / empty cell** (grid editor): `radius: --radius-sm`, either a
+  filled `background: --placeholder` cell **or** a `1px dashed --placeholder-border`
+  outline over transparent. Represents an open drop target.
+
+### 8.10 Footer (feed)
+`border-top: 1px solid --border`; centered row: "© {year} SquareShare" +
+divider + "Community Guidelines" + "Privacy Policy"; links `--muted-foreground` →
+hover `--foreground`; `--font-ui-muted` · `--text-sm`.
+
+### 8.11 Divider
+Hairline `1px --border`. Vertical separators (footer) `1px --border`,
+`height: 1em`, `--subtle-foreground`.
+
+---
+
+## 9. Iconography
+
+- **Library:** `lucide-react`, `stroke-width: 2` (idle icons may use `--subtle-foreground`).
+  Seen: `User`, `Settings`, `Layers`, `Plus`, `UserPlus`, `Search`, `Image`,
+  `Pin`/`PinOff`, `LogOut`.
+- Icons inherit `currentColor` from a semantic text token — never hardcode icon
+  colors. Sizes: `size-4` (in buttons), `size-5` (rail).
+- Brand social glyphs (marketing) remain inline `simple-icons` paths.
+
+---
+
+## 10. Accessibility & responsive
+
+- **Contrast:** body/heading text uses `--foreground` (≥ AA on `--background`).
+  `--muted-foreground` (neutral-500) is for secondary text only.
+- **Focus:** visible `--ring` + `--ring-offset` on every interactive element
+  (`:focus-visible`), never removed.
+- **Reduced motion:** mandatory fallback for all motion (§6.2).
+- **iOS zoom guard:** text inputs at `font-size: 16px`.
+- **Landmarks/labels:** icon-only buttons get `aria-label`; the rail is a labelled
+  `nav`; decorative images `aria-hidden`.
+- **Breakpoints (Tailwind defaults):** `sm 640 · md 768 · lg 1024 · xl 1280`. The
+  rail may collapse to a bottom bar under `md`; bento columns reduce; content keeps
+  `--container-pad` gutters.
+
+---
+
+## 11. Quick-reference token sheet
+
+```
+SURFACES     --background / --surface (white) · --surface-muted (neutral-50)
+TEXT         --foreground (n-900) · --muted-foreground (n-500) · --subtle-foreground (n-400)
+LINES        --border (n-200) · --border-strong (n-300) · --input (n-200)
+ACTION       --primary (n-950 / black) · --primary-hover (n-800) · --primary-foreground (white)
+NEUTRAL      --secondary / --muted / --accent (n-100)
+PLACEHOLDER  --placeholder (n-100) · --placeholder-border (n-200)
+FOCUS        --ring (n-900) + --ring-offset (background)
+FEEDBACK     --destructive (#ef4444)
+BRAND        --brand (#a855f7)  ← reserved, sparing, never in chrome (§2.4)
+RADIUS       sm 6 · md 8 · lg 12 · full ∞   (default --radius = md)
+SPACE        4px base: 1..20
+FONTS        sans: Geist (UI/body) · inter: Inter (muted labels)
+             display: Space Grotesk (marketing only) · mono: JetBrains Mono (code only)
+WEIGHT       headings 600/700 (NO 900) · body 400 · emphasis 500
+SHADOW       xs/sm (cards) · md/lg (overlays) — borders first
+MOTION       --duration 180ms · --ease-standard · reduced-motion fallback always
+LAYOUT       rail 64 · header 64 · container 1280 · pad 24 · grid-gap 8
+RULE         one primary = black · purple reserved · everything tokenized
+```
+
+---
+
+## 12. Replication checklist
+
+1. Declare the **primitive** palette, radius, spacing, type, shadow, motion, and
+   z-index tokens in Tailwind v4 `@theme` (§2.1, §3–§6).
+2. Declare the **semantic** layer in `:root` (§2.2) — `--primary` is **black**,
+   `--radius` is non-zero, `--brand` is purple but unused by default.
+3. Wire fonts via `next/font/local`; `--font-sans` (Geist) is the UI default,
+   `font-inter` for muted labels. No `font-display` in product UI.
+4. Build the shell: fixed icon **rail**, top bar, `--container-max` content, feed
+   footer (§7).
+5. Build components from §8 — **token references only**, no literals.
+6. Keep the palette neutral: black primary, grey structure, artwork provides color.
+   Purple only per §2.4.
+7. Corners rounded on the §3 scale (pills for search/avatar).
+8. Headings semibold/bold, never 900.
+9. Focus rings + reduced-motion fallbacks everywhere (§10).
+10. Lint for raw values: no hex, no arbitrary `[...]` px/color in components — if
+    you reach for one, add a token instead.
 ```

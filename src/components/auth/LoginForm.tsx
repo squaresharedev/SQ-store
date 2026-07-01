@@ -1,112 +1,197 @@
 "use client";
 
 import * as React from "react";
+import { useActionState } from "react";
+import { authenticate, type AuthState } from "@/lib/auth/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/ui/password-input";
+import { Spinner } from "@/components/ui/spinner";
+import { GoogleButton } from "@/components/auth/GoogleButton";
+import { cn } from "@/lib/utils";
 
-type Mode = "password" | "magic";
+type Mode = "signin" | "signup" | "magic";
 
-/**
- * Auth screen — UI ONLY.
- *
- * ⚠️ NEXT AGENT: wire the auth logic here. Nothing below talks to Supabase yet.
- * Recommended approach (works with the HttpOnly, server-driven session):
- *   • password sign-in  -> a Server Action calling `supabase.auth.signInWithPassword`
- *                          using the SERVER client (@/lib/supabase/server), then redirect.
- *   • magic link        -> Server Action calling `supabase.auth.signInWithOtp`,
- *                          with a `/auth/callback` Route Handler to exchange the code.
- *   • surface real errors in the `formError` slot and drive the loading state
- *     off the action's pending status (e.g. useActionState / useFormStatus).
- * See @/lib/supabase/server.ts and cookie-options.ts for the session model.
- */
-export function LoginForm() {
-  const [mode, setMode] = React.useState<Mode>("password");
-  const [email, setEmail] = React.useState("");
-  const [password, setPassword] = React.useState("");
+const INITIAL: AuthState = {};
 
-  // Static placeholder — the next agent replaces this with real error state.
-  const formError: string | null = null;
+export function LoginForm({ next = "/" }: { next?: string }) {
+  const [mode, setMode] = React.useState<Mode>("signin");
+  const [state, formAction, isPending] = useActionState(authenticate, INITIAL);
+  const formRef = React.useRef<HTMLFormElement>(null);
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    // TODO(next agent): call the sign-in Server Action here.
-    // - mode === "password": signInWithPassword({ email, password })
-    // - mode === "magic":    signInWithOtp({ email })
-    // Intentionally a no-op for now (auth screen UI only).
-    console.warn("[login] auth not wired yet", { mode, email });
+  const isMagic = mode === "magic";
+  // The clicked submit button carries the intent, so exactly one is submitted.
+  const primaryIntent = isMagic ? "magic" : mode;
+  const cta =
+    mode === "signup"
+      ? "Create account"
+      : mode === "magic"
+        ? "Send magic link"
+        : "Sign in";
+
+  // "Forgot?" reuses the current form (email) but with the reset intent. It is a
+  // plain button (not a second submit) so Enter always triggers the primary CTA.
+  function submitReset() {
+    if (!formRef.current) return;
+    const data = new FormData(formRef.current);
+    data.set("intent", "reset");
+    React.startTransition(() => formAction(data));
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-5" noValidate>
-      {/* Email */}
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="email">Email</Label>
-        <Input
-          id="email"
-          name="email"
-          type="email"
-          autoComplete="email"
-          inputMode="email"
-          placeholder="you@studio.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
+    <div className="flex flex-col gap-3">
+      {/* Google OAuth (separate form — never nests in the email form) */}
+      <GoogleButton next={next} />
+
+      {/* Divider */}
+      <div className="flex items-center gap-4">
+        <span className="h-px flex-1 bg-neutral-200" />
+        <span className="font-inter text-xs text-neutral-400">or</span>
+        <span className="h-px flex-1 bg-neutral-200" />
       </div>
 
-      {/* Password (hidden in magic-link mode) */}
-      {mode === "password" && (
-        <div className="flex flex-col gap-2">
-          <div className="flex items-baseline justify-between">
-            <Label htmlFor="password">Password</Label>
-            {/* TODO(next agent): route to a real password-reset flow. */}
-            <a
-              href="#"
-              className="font-mono text-xs uppercase tracking-[0.2em] text-white/30 transition-colors hover:text-acid"
-            >
-              Forgot?
-            </a>
+      <form
+        ref={formRef}
+        action={formAction}
+        className="flex flex-col gap-3"
+        noValidate
+      >
+        <input type="hidden" name="next" value={next} />
+
+        {/* Sign in / Sign up switch (hidden in magic-link mode) */}
+        {!isMagic && (
+          <div className="grid grid-cols-2 border border-neutral-200">
+            {(["signin", "signup"] as const).map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => setMode(m)}
+                suppressHydrationWarning
+                className={cn(
+                  "py-2 font-inter text-sm font-medium transition-colors",
+                  mode === m
+                    ? "bg-neutral-100 text-neutral-900"
+                    : "text-neutral-400 hover:bg-neutral-50 hover:text-neutral-700",
+                )}
+              >
+                {m === "signin" ? "Sign in" : "Sign up"}
+              </button>
+            ))}
           </div>
+        )}
+
+        {/* Email */}
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="email">Email</Label>
           <Input
-            id="password"
-            name="password"
-            type="password"
-            autoComplete="current-password"
-            placeholder="••••••••"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            id="email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            inputMode="email"
+            placeholder="you@studio.com"
             required
           />
         </div>
-      )}
 
-      {/* Error slot (reserved; static for now) */}
-      {formError && (
-        <p role="alert" className="text-sm font-medium text-red-500">
-          {formError}
-        </p>
-      )}
+        {/* Password (hidden in magic-link mode) */}
+        {!isMagic && (
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-baseline justify-between">
+              <Label htmlFor="password">Password</Label>
+              {mode === "signin" && (
+                <button
+                  type="button"
+                  onClick={submitReset}
+                  disabled={isPending}
+                  suppressHydrationWarning
+                  className="font-inter text-xs text-neutral-400 transition-colors hover:text-neutral-700 disabled:opacity-50"
+                >
+                  Forgot?
+                </button>
+              )}
+            </div>
+            <PasswordInput
+              id="password"
+              name="password"
+              autoComplete={
+                mode === "signup" ? "new-password" : "current-password"
+              }
+              placeholder="••••••••"
+              required
+            />
+            {mode === "signup" && (
+              <p className="font-inter text-xs text-neutral-400">
+                At least 8 characters.
+              </p>
+            )}
+          </div>
+        )}
 
-      {/* Primary CTA */}
-      <Button type="submit" className="mt-1 w-full px-8 py-4 text-base">
-        {mode === "password" ? "Sign in" : "Send magic link"}
-      </Button>
+        {/* Confirm password (sign-up only) */}
+        {mode === "signup" && (
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="confirm_password">Confirm password</Label>
+            <PasswordInput
+              id="confirm_password"
+              name="confirm_password"
+              autoComplete="new-password"
+              placeholder="••••••••"
+              required
+            />
+          </div>
+        )}
 
-      {/* Mode toggle */}
-      <div className="flex items-center justify-center pt-1">
-        <button
-          type="button"
-          onClick={() =>
-            setMode((m) => (m === "password" ? "magic" : "password"))
-          }
-          className="font-mono text-xs uppercase tracking-[0.2em] text-white/40 transition-colors hover:text-acid"
+        {/* Status: error (red) or confirmation (neutral) */}
+        {(state.error || state.message) && (
+          <div aria-live="polite">
+            {state.error && (
+              <p role="alert" className="text-sm font-medium text-red-500">
+                {state.error}
+              </p>
+            )}
+            {state.message && (
+              <p className="text-sm font-medium text-neutral-700">
+                {state.message}
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Primary CTA — the only submit button, so Enter always lands here. */}
+        <Button
+          type="submit"
+          name="intent"
+          value={primaryIntent}
+          disabled={isPending}
+          suppressHydrationWarning
+          className="mt-1 w-full px-8 py-3.5 text-base"
         >
-          {mode === "password"
-            ? "Email me a magic link instead"
-            : "Use a password instead"}
-        </button>
-      </div>
-    </form>
+          {isPending ? (
+            <>
+              <Spinner />
+              Working…
+            </>
+          ) : (
+            cta
+          )}
+        </Button>
+
+        {/* Magic-link toggle — visible container on hover */}
+        <div className="flex justify-center">
+          <button
+            type="button"
+            onClick={() => setMode((m) => (m === "magic" ? "signin" : "magic"))}
+            suppressHydrationWarning
+            className="rounded-md px-3 py-1.5 font-inter text-sm text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-900"
+          >
+            {isMagic
+              ? "Use a password instead"
+              : "Email me a magic link instead"}
+          </button>
+        </div>
+      </form>
+    </div>
   );
 }

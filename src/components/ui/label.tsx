@@ -2,8 +2,8 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * Brand field label (styles.md §3.3 eyebrow pattern): mono, xs, uppercase,
- * wide tracking, faint.
+ * Brand field label: Inter, small, medium weight, sentence case (not uppercase),
+ * muted neutral.
  */
 export function Label({
   className,
@@ -12,7 +12,7 @@ export function Label({
   return (
     <label
       className={cn(
-        "font-mono text-xs uppercase tracking-[0.2em] text-white/50",
+        "font-inter text-sm font-medium text-neutral-700",
         className,
       )}
       {...props}

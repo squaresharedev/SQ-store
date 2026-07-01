@@ -28,6 +28,15 @@ const jetbrainsMono = localFont({
   display: "swap",
 });
 
+// Inter — used for the muted caption/label texts (eyebrows, footer notes, form
+// labels). Self-hosted variable face.
+const inter = localFont({
+  src: "./fonts/Inter.woff2",
+  weight: "100 900",
+  variable: "--font-inter",
+  display: "swap",
+});
+
 // Hand-written founder voice, used only for the occasional self-correction, so
 // we skip render-time preload.
 const shadowsIntoLight = localFont({
@@ -49,7 +58,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#000000",
+  themeColor: "#ffffff",
 };
 
 export default function RootLayout({
@@ -61,10 +70,12 @@ export default function RootLayout({
     <html
       lang="en"
       className={cn(
-        "dark",
+        // Dashboard runs in light mode. (The .dark tokens remain in globals.css
+        // so a future dark toggle can re-add the "dark" class here.)
         spaceGrotesk.variable,
         geist.variable,
         jetbrainsMono.variable,
+        inter.variable,
         shadowsIntoLight.variable,
         "font-sans",
       )}

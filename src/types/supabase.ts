@@ -2,9 +2,6 @@
 // fdpviaqzbxowvonuoktc). Regenerate after schema changes with:
 //   pnpm dlx supabase gen types typescript --project-id fdpviaqzbxowvonuoktc > src/types/supabase.ts
 // (or via the Supabase MCP `generate_typescript_types` tool).
-//
-// The public schema is currently empty — the store dashboard tables (products,
-// stores, grid layout, stripe connections, etc.) will be added by later work.
 export type Json =
   | string
   | number
@@ -21,7 +18,33 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          is_seller: boolean
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id: string
+          is_seller?: boolean
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          is_seller?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

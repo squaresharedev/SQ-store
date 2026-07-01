@@ -27,7 +27,8 @@
 @theme inline {
   --font-display: var(--font-space-grotesk); /* Space Grotesk (headlines) */
   --font-sans: var(--font-geist); /* Geist (body / UI) */
-  --font-mono: var(--font-jetbrains-mono); /* JetBrains Mono (labels) */
+  --font-mono: var(--font-jetbrains-mono); /* JetBrains Mono (code / meta) */
+  --font-inter: var(--font-inter); /* Inter (muted captions / labels) */
   --font-hand: var(--font-shadows-into-light); /* Shadows Into Light (voice) */
 
   /* shadcn-compatible semantic color tokens (see :root / .dark below). */
@@ -145,17 +146,40 @@ textarea {
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #000000;
+  background: #f4f4f5;
 }
 ::-webkit-scrollbar-thumb {
-  background: #333333;
+  background: #d4d4d8;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-acid);
 }
 * {
   scrollbar-width: thin;
-  scrollbar-color: #333333 #000000;
+  scrollbar-color: #d4d4d8 #f4f4f5;
+}
+
+/* ============================================================
+   DOT-GRID BACKDROP
+   Static pixel/dot-matrix texture that fades out at the edges (radial mask).
+   Purely decorative background for the auth screen. No JS, no motion.
+   ============================================================ */
+.dot-grid {
+  background-image: radial-gradient(
+    rgba(0, 0, 0, 0.08) 1px,
+    transparent 1.6px
+  );
+  background-size: 22px 22px;
+  -webkit-mask-image: radial-gradient(
+    ellipse 70% 62% at 50% 42%,
+    #000 6%,
+    transparent 78%
+  );
+  mask-image: radial-gradient(
+    ellipse 70% 62% at 50% 42%,
+    #000 6%,
+    transparent 78%
+  );
 }
 
 /* ============================================================
