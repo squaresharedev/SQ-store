@@ -1,36 +1,66 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# store.squareshare.to — Creator Dashboard
 
-## Getting Started
+The Square Share seller/creator dashboard: manage products, design the bento-grid
+storefront, connect Stripe, and view analytics.
 
-First, run the development server:
+## Stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **Next.js 16** (App Router, TypeScript) + **Tailwind CSS v4**
+- **Cloudflare Workers** via **@opennextjs/cloudflare** (Node runtime — **not** Vercel, **not** edge)
+- **Supabase** (DB + auth) via **@supabase/ssr** (cookie-based sessions)
+- **pnpm**
+
+Design system: see [`docs/styles.md`](docs/styles.md). Product context: [`docs/context.md`](docs/context.md).
+
+## Setup
+
+1. `pnpm install`
+2. Copy env: `cp .env.example .env.local` (already present locally). Fill in:
+   - `NEXT_PUBLIC_SUPABASE_URL` — `https://fdpviaqzbxowvonuoktc.supabase.co`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` — the publishable key (`sb_publishable_…`)
+   - `SUPABASE_SERVICE_ROLE_KEY` — server-only secret, add when privileged
+     server calls are needed (keep out of any `NEXT_PUBLIC_` var).
+3. `pnpm dev` → http://localhost:3000 (auth screen at `/login`).
+
+`.env.local` is gitignored. **Never** commit real keys.
+
+## Scripts
+
+| Script | What it does |
+|---|---|
+| `pnpm dev` | Next dev server (Cloudflare bindings via OpenNext) |
+| `pnpm build` | `next build` |
+| `pnpm typecheck` | `tsc --noEmit` |
+| `pnpm lint` | ESLint |
+| `pnpm preview` | OpenNext build + local Workers preview |
+| `pnpm deploy` | OpenNext build + deploy to Cloudflare |
+| `pnpm cf-typegen` | Regenerate `cloudflare-env.d.ts` from `wrangler.jsonc` |
+
+> **Windows note:** `opennextjs-cloudflare build` (used by `preview`/`deploy`)
+> creates symlinks and needs **Developer Mode enabled** or an **elevated shell**.
+> CI (Linux) and normal deploys are unaffected. `pnpm build`/`dev` work anywhere.
+
+## Auth model
+
+The Supabase session cookie is scoped to `.squareshare.to` (shared with the
+marketplace subdomain later) and is **HttpOnly** — so auth is **server-driven**:
+read the session from Server Components / Route Handlers / Server Actions using
+the **server** client. See `src/lib/supabase/*` and `src/lib/supabase/cookie-options.ts`.
+
+Do **not** put Supabase session logic in `middleware.ts` — `cookies()` from
+`next/headers` is Node-only and breaks in middleware on Workers.
+
+## Structure
+
 ```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+src/
+  app/            routes (/, /login), layout, globals.css, fonts/
+  components/
+    ui/           Button, Input, Label (brand primitives)
+    auth/         LoginForm (UI only — auth logic is TODO)
+  lib/
+    supabase/     client.ts (browser), server.ts, cookie-options.ts
+    utils/        cn()
+    site.ts       shared constants
+  types/          generated Supabase Database types + re-exports
+```

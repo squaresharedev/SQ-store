@@ -1,0 +1,8 @@
+# Workers-runtime env vars for local `opennextjs-cloudflare preview` / `wrangler dev`.
+# Copy to `.dev.vars` (gitignored). `next dev` reads `.env.local` instead — this
+# file only matters when you run the app through the Workers runtime locally.
+#
+# Mirror the public Supabase vars here, and add server-only secrets as needed.
+NEXT_PUBLIC_SUPABASE_URL="https://fdpviaqzbxowvonuoktc.supabase.co"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="sb_publishable_xxxxxxxxxxxxxxxxxxxxxxxx"
+# SUPABASE_SERVICE_ROLE_KEY="paste-service-role-secret-here"
