@@ -1,0 +1,56 @@
+# Deploy the store dashboard to Cloudflare Workers (via OpenNext) on every
+# push to main. This is the app's real target — it needs a server runtime for
+# auth, Server Actions, and route handlers, so it can NOT run on GitHub Pages.
+#
+# Required repository secrets (Settings → Secrets and variables → Actions):
+#   CLOUDFLARE_API_TOKEN         Token with "Edit Cloudflare Workers" permission
+#   CLOUDFLARE_ACCOUNT_ID        Target Cloudflare account id
+#   NEXT_PUBLIC_SUPABASE_URL     Supabase project URL (public, inlined at build)
+#   NEXT_PUBLIC_SUPABASE_ANON_KEY  Supabase publishable/anon key (public)
+#
+# NEXT_PUBLIC_* values are baked into the client bundle at build time, so they
+# must be present during the build step, not just at deploy.
+name: Deploy to Cloudflare
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+# One deploy at a time; a newer push supersedes an in-flight run.
+concurrency:
+  group: deploy-cloudflare
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build and deploy
+        run: pnpm run deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
