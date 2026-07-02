@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -26,7 +27,7 @@ const NAV = [
 
 function navItemClasses(active: boolean, danger?: boolean) {
   return cn(
-    "flex shrink-0 items-center gap-2.5 px-3 py-2 text-sm font-medium transition-colors",
+    "flex shrink-0 snap-start items-center gap-2.5 px-3 py-2.5 text-sm font-medium transition-colors",
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-acid focus-visible:ring-offset-2 focus-visible:ring-offset-white",
     active
       ? danger
@@ -45,6 +46,17 @@ function navItemClasses(active: boolean, danger?: boolean) {
  */
 export function SettingsShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const navRef = React.useRef<HTMLElement>(null);
+
+  // On mobile the sub-nav scrolls horizontally, so the active tab can start
+  // off-screen (e.g. landing on Danger zone). Nudge it into view on route
+  // change. Instant scroll respects reduced-motion by construction.
+  React.useEffect(() => {
+    const active = navRef.current?.querySelector<HTMLElement>(
+      '[aria-current="page"]',
+    );
+    active?.scrollIntoView({ block: "nearest", inline: "center" });
+  }, [pathname]);
 
   const nav = NAV.map((item) => {
     const active = pathname.startsWith(item.href);
@@ -58,7 +70,7 @@ export function SettingsShell({ children }: { children: React.ReactNode }) {
           key={item.href}
           aria-disabled
           title="Coming soon"
-          className="flex shrink-0 cursor-not-allowed items-center gap-2.5 px-3 py-2 text-sm font-medium text-neutral-300"
+          className="flex shrink-0 snap-start cursor-not-allowed items-center gap-2.5 px-3 py-2.5 text-sm font-medium text-neutral-300"
         >
           <Icon aria-hidden className="size-4" />
           {item.label}
@@ -100,13 +112,22 @@ export function SettingsShell({ children }: { children: React.ReactNode }) {
       </header>
 
       <div className="flex flex-col gap-8 md:flex-row md:gap-12">
-        {/* Mobile: scrolling tab row. Desktop: left rail. */}
-        <nav
-          aria-label="Settings sections"
-          className="-mx-6 flex gap-1 overflow-x-auto border-b border-neutral-200 px-6 pb-2 md:m-0 md:w-52 md:shrink-0 md:flex-col md:overflow-visible md:border-0 md:p-0"
-        >
-          {nav}
-        </nav>
+        {/* Mobile: horizontally scrolling tab row with a right-edge fade that
+            hints at the tabs (Danger zone) sitting off-screen. Desktop: a
+            static left rail with no scroll or fade. */}
+        <div className="relative -mx-6 md:mx-0 md:w-52 md:shrink-0">
+          <nav
+            ref={navRef}
+            aria-label="Settings sections"
+            className="flex snap-x gap-1 overflow-x-auto scroll-px-6 border-b border-neutral-200 px-6 pb-2 md:snap-none md:flex-col md:overflow-visible md:border-0 md:px-0 md:pb-0"
+          >
+            {nav}
+          </nav>
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-background to-transparent md:hidden"
+          />
+        </div>
 
         <div className="min-w-0 flex-1 md:max-w-2xl">{children}</div>
       </div>
