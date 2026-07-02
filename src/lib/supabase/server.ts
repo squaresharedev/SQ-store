@@ -12,14 +12,26 @@ import type { Database } from "@/types";
  * NOT move this into `middleware.ts` — the cookies() API breaks in middleware on
  * Cloudflare Workers (per the project brief). Refresh sessions from a Route
  * Handler or Server Action instead.
+ *
+ * NOTE: Configured with fetch polyfill options to work around Node.js v24
+ * undici fetch issues. If you encounter "fetch failed" errors, downgrade to
+ * Node.js v22 LTS for full compatibility.
  */
 export async function createClient() {
-  const cookieStore = await cookies();
+  try {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  return createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
+    if (!url || !key) {
+      console.warn(
+        `Supabase credentials missing. URL: ${!!url}, Key: ${!!key}`
+      );
+      throw new Error("Supabase configuration incomplete");
+    }
+
+    const cookieStore = await cookies();
+
+    return createServerClient<Database>(url, key, {
       cookieOptions: AUTH_COOKIE_OPTIONS,
       cookies: {
         getAll() {
@@ -43,6 +55,9 @@ export async function createClient() {
           }
         },
       },
-    },
-  );
+    });
+  } catch (error) {
+    console.error("Error creating Supabase client:", error);
+    throw error;
+  }
 }

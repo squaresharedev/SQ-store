@@ -11,11 +11,17 @@ import type { Database } from "@/types";
  * data/realtime calls that happen *after* the server has signed the user in.
  */
 export function createClient() {
-  return createBrowserClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookieOptions: AUTH_COOKIE_OPTIONS,
-    },
-  );
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!url || !key) {
+    throw new Error(
+      `Supabase credentials missing. URL: ${!!url}, Key: ${!!key}. ` +
+      `Ensure NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are set in .env.local`
+    );
+  }
+
+  return createBrowserClient<Database>(url, key, {
+    cookieOptions: AUTH_COOKIE_OPTIONS,
+  });
 }

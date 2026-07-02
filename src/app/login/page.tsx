@@ -28,7 +28,15 @@ export default async function LoginPage({
   searchParams: Promise<{ error?: string; next?: string }>;
 }) {
   // Already signed in? Skip the form.
-  const user = await getUser();
+  let user = null;
+  try {
+    user = await getUser();
+  } catch (error) {
+    // If getUser() fails (e.g., fetch error), treat as unauthenticated
+    // The user can still sign in via the form
+    console.error("Error checking auth status:", error);
+  }
+
   const sp = await searchParams;
   const next = sanitizeNext(sp.next);
   if (user) redirect(next);
