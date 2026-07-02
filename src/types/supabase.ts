@@ -18,29 +18,122 @@ export type Database = {
   }
   public: {
     Tables: {
+      products: {
+        Row: {
+          created_at: string
+          currency: string
+          description: string | null
+          digital_file_key: string | null
+          id: string
+          image_key: string | null
+          owner_id: string
+          price_cents: number
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          description?: string | null
+          digital_file_key?: string | null
+          id?: string
+          image_key?: string | null
+          owner_id: string
+          price_cents: number
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          description?: string | null
+          digital_file_key?: string | null
+          id?: string
+          image_key?: string | null
+          owner_id?: string
+          price_cents?: number
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
           created_at: string
+          deletion_requested_at: string | null
           display_name: string | null
           id: string
           is_seller: boolean
+          legal_accepted_at: string | null
+          legal_accepted_version: string | null
+          notify_marketing: boolean
+          notify_product_updates: boolean
+          notify_sales: boolean
+          tax_business_name: string | null
+          tax_country: string | null
+          tax_vat_id: string | null
           updated_at: string
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          deletion_requested_at?: string | null
           display_name?: string | null
           id: string
           is_seller?: boolean
+          legal_accepted_at?: string | null
+          legal_accepted_version?: string | null
+          notify_marketing?: boolean
+          notify_product_updates?: boolean
+          notify_sales?: boolean
+          tax_business_name?: string | null
+          tax_country?: string | null
+          tax_vat_id?: string | null
           updated_at?: string
         }
         Update: {
           avatar_url?: string | null
           created_at?: string
+          deletion_requested_at?: string | null
           display_name?: string | null
           id?: string
           is_seller?: boolean
+          legal_accepted_at?: string | null
+          legal_accepted_version?: string | null
+          notify_marketing?: boolean
+          notify_product_updates?: boolean
+          notify_sales?: boolean
+          tax_business_name?: string | null
+          tax_country?: string | null
+          tax_vat_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      storefronts: {
+        Row: {
+          config: Json
+          created_at: string
+          id: string
+          owner_id: string
+          updated_at: string
+        }
+        Insert: {
+          config?: Json
+          created_at?: string
+          id?: string
+          owner_id: string
+          updated_at?: string
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          id?: string
+          owner_id?: string
           updated_at?: string
         }
         Relationships: []
