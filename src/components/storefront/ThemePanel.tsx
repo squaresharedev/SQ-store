@@ -15,6 +15,7 @@ import {
 import { ColorInput } from "@/components/ui/color-input";
 import { Select, type SelectOption } from "@/components/ui/select";
 import { labelClass } from "@/components/ui/control-styles";
+import { BackgroundPresetPicker } from "./BackgroundPresetPicker";
 
 const FONT_OPTIONS: readonly SelectOption<StorefrontFont>[] =
   STOREFRONT_FONTS.map((font) => ({
@@ -85,9 +86,7 @@ export function ThemePanel({
 
   return (
     <div className="space-y-4">
-      <ColorInput
-        id={`${fieldId}-background`}
-        label="Background"
+      <BackgroundPresetPicker
         value={theme.background}
         onChange={(background) => onChange({ ...theme, background })}
       />

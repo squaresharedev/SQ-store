@@ -1,20 +1,23 @@
 "use client";
 
-import { useId } from "react";
+import { useId, useMemo, useState } from "react";
 import {
   DndContext,
+  DragOverlay,
   KeyboardSensor,
   PointerSensor,
   closestCenter,
   useSensor,
   useSensors,
   type DragEndEvent,
+  type DragStartEvent,
 } from "@dnd-kit/core";
 import {
   SortableContext,
   rectSortingStrategy,
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
+import { LayoutGrid } from "lucide-react";
 import type { Product } from "@/types/product";
 import {
   blockKey,
@@ -22,11 +25,12 @@ import {
   type StorefrontBlock,
   type StorefrontTheme,
 } from "@/types/storefront";
-import { isStrictHexColor } from "@/lib/validation/storefront";
 import { cn } from "@/lib/utils";
+import { BlockFace } from "./BlockFace";
 import { BlockTile } from "./BlockTile";
 import type { TextBlockPatch } from "./TextTileContent";
-import { FONT_CLASSES } from "./config-maps";
+import { resolveBackgroundStyle } from "./background-presets";
+import { FONT_CLASSES, RADIUS_CLASSES } from "./config-maps";
 
 /**
  * The live preview: renders the current config as the bento grid the buyer's
@@ -59,8 +63,21 @@ export function DesignerCanvas({
   // between server and client render — without it hydration mismatches.
   const dndId = useId();
 
+  // The block being dragged, rendered as a floating copy in the DragOverlay
+  // while the in-place tile dims to mark the drop slot.
+  const [activeKey, setActiveKey] = useState<string | null>(null);
+  const activeBlock = useMemo(
+    () => blocks.find((block) => blockKey(block) === activeKey) ?? null,
+    [blocks, activeKey],
+  );
+
+  function handleDragStart(event: DragStartEvent) {
+    setActiveKey(String(event.active.id));
+  }
+
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
+    setActiveKey(null);
     if (over && active.id !== over.id) {
       onReorder(String(active.id), String(over.id));
     }
@@ -72,20 +89,25 @@ export function DesignerCanvas({
         "rounded-md border border-border p-4",
         FONT_CLASSES[theme.font],
       )}
-      // Background is schema-constrained hex; re-gate before styling anyway.
-      style={
-        isStrictHexColor(theme.background)
-          ? { backgroundColor: theme.background }
-          : undefined
-      }
+      // Schema-constrained: preset keys resolve through the fixed allowlist
+      // map, hex is re-gated by the strict regex. Anything else styles nothing.
+      style={resolveBackgroundStyle(theme.background)}
     >
       {blocks.length === 0 ? (
-        <div className="flex min-h-64 flex-col items-center justify-center rounded-sm border border-dashed border-border p-6 text-center">
+        <div className="flex min-h-64 flex-col items-center justify-center rounded-sm border border-dashed border-border bg-background/60 p-6 text-center">
+          <div className="mb-4 flex size-12 items-center justify-center rounded-full border border-border bg-background shadow-xs">
+            <LayoutGrid
+              className="size-5 text-muted-foreground"
+              strokeWidth={2}
+              aria-hidden="true"
+            />
+          </div>
           <p className="text-sm font-medium text-foreground">
             Your grid is empty
           </p>
-          <p className="mt-1 font-inter text-sm text-muted-foreground">
-            Add products from the panel to start arranging your storefront.
+          <p className="mt-1 max-w-xs font-inter text-sm text-muted-foreground">
+            Add products or a text block from the panel to start arranging
+            your storefront.
           </p>
         </div>
       ) : (
@@ -93,7 +115,9 @@ export function DesignerCanvas({
           id={dndId}
           sensors={sensors}
           collisionDetection={closestCenter}
+          onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
+          onDragCancel={() => setActiveKey(null)}
         >
           <SortableContext
             items={blocks.map(blockKey)}
@@ -123,6 +147,33 @@ export function DesignerCanvas({
               })}
             </ul>
           </SortableContext>
+
+          {/* Floating copy that follows the cursor while dragging (ported
+              from the SquareShare grid) — the strongest cue for what is
+              being moved and where it will land. */}
+          <DragOverlay dropAnimation={null}>
+            {activeBlock ? (
+              <div
+                // DragOverlay sizes itself to the dragged tile's rect, so no
+                // grid span classes are needed here.
+                className={cn(
+                  "flex h-full w-full flex-col overflow-hidden border border-border bg-card shadow-lg ring-2 ring-ring/30",
+                  RADIUS_CLASSES[theme.radius],
+                  FONT_CLASSES[theme.font],
+                )}
+              >
+                <BlockFace
+                  block={activeBlock}
+                  product={
+                    activeBlock.type === "product"
+                      ? (productsById.get(activeBlock.productId) ?? null)
+                      : null
+                  }
+                  theme={theme}
+                />
+              </div>
+            ) : null}
+          </DragOverlay>
         </DndContext>
       )}
     </div>

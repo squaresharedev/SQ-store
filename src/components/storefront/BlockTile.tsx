@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { AlertCircle, GripVertical, Pencil, X } from "lucide-react";
+import { GripVertical, Pencil, X } from "lucide-react";
 import type { Product } from "@/types/product";
 import {
   BLOCK_SIZES,
@@ -14,8 +14,8 @@ import {
 } from "@/types/storefront";
 import { cn } from "@/lib/utils";
 import { RADIUS_CLASSES, SIZE_CLASSES, SIZE_LABELS } from "./config-maps";
-import { ProductTileContent } from "./ProductTileContent";
-import { TextTileContent, type TextBlockPatch } from "./TextTileContent";
+import { BlockFace } from "./BlockFace";
+import type { TextBlockPatch } from "./TextTileContent";
 
 const TILE_CONTROL_CLASS =
   "inline-flex size-6 items-center justify-center rounded-none text-muted-foreground transition-colors duration-180 ease-in-out hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background motion-reduce:transition-none";
@@ -46,6 +46,27 @@ export function BlockTile({
     useSortable({ id: blockKey(block) });
   const [editingText, setEditingText] = useState(false);
 
+  // Split the sortable listeners: the whole tile is a pointer drag surface
+  // (like the source grid's cards) — except while editing text, so textarea
+  // selection drags stay selection drags. Keyboard drag stays on the handle
+  // button (the focusable control); pointer events from the handle bubble to
+  // the tile, so the handle is never wired directly (no double activation).
+  // dnd-kit types listener-map values as bare `Function`; narrow to React's
+  // handler types at the split.
+  const pointerDragProps =
+    !editingText && listeners?.onPointerDown
+      ? {
+          onPointerDown:
+            listeners.onPointerDown as React.PointerEventHandler<HTMLLIElement>,
+        }
+      : {};
+  const keyboardDragProps = listeners?.onKeyDown
+    ? {
+        onKeyDown:
+          listeners.onKeyDown as React.KeyboardEventHandler<HTMLButtonElement>,
+      }
+    : {};
+
   // Include the text content so several text blocks stay distinguishable to
   // screen readers.
   const label =
@@ -59,21 +80,34 @@ export function BlockTile({
     <li
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
+      {...pointerDragProps}
       className={cn(
         "group relative flex flex-col overflow-hidden border border-border bg-card",
         SIZE_CLASSES[block.size],
         RADIUS_CLASSES[theme.radius],
-        isDragging && "z-10 opacity-80 shadow-md",
+        !editingText && "cursor-grab",
+        // The DragOverlay carries the floating copy; the in-place tile stays
+        // as a dimmed placeholder so the drop slot reads clearly.
+        isDragging && "z-10 cursor-grabbing opacity-40",
       )}
     >
-      {/* Tile controls: drag handle, size choices, edit (text), remove. */}
-      <div className="absolute right-1 top-1 z-20 flex items-center gap-0.5 rounded-sm border border-border bg-background/95 p-0.5">
+      {/* Tile controls: drag handle, size choices, edit (text), remove.
+          Revealed on hover/focus for mouse users to keep the preview clean;
+          always visible on coarse pointers, which have no hover. */}
+      <div
+        className={cn(
+          "absolute right-1 top-1 z-20 flex items-center gap-0.5 rounded-sm border border-border bg-background/95 p-0.5",
+          "transition-opacity duration-180 ease-in-out motion-reduce:transition-none",
+          "pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100 pointer-fine:group-focus-within:opacity-100",
+          editingText && "pointer-fine:opacity-100",
+        )}
+      >
         <button
           type="button"
           aria-label={`Reorder ${label}`}
           className={cn(TILE_CONTROL_CLASS, "cursor-grab active:cursor-grabbing")}
           {...attributes}
-          {...listeners}
+          {...keyboardDragProps}
         >
           <GripVertical className="size-3.5" strokeWidth={2} aria-hidden="true" />
         </button>
@@ -117,28 +151,14 @@ export function BlockTile({
         </button>
       </div>
 
-      {block.type === "text" ? (
-        <TextTileContent
-          block={block}
-          theme={theme}
-          editing={editingText}
-          onUpdate={onUpdateText}
-          onDoneEditing={() => setEditingText(false)}
-        />
-      ) : product ? (
-        <ProductTileContent product={product} theme={theme} />
-      ) : (
-        <div className="flex flex-1 flex-col items-center justify-center gap-1 p-2 text-center">
-          <AlertCircle
-            className="size-5 text-destructive"
-            strokeWidth={2}
-            aria-hidden="true"
-          />
-          <span className="font-inter text-xs text-muted-foreground">
-            Product removed. Delete this block.
-          </span>
-        </div>
-      )}
+      <BlockFace
+        block={block}
+        product={product}
+        theme={theme}
+        editingText={editingText}
+        onUpdateText={onUpdateText}
+        onDoneEditingText={() => setEditingText(false)}
+      />
     </li>
   );
 }
