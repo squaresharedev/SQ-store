@@ -22,7 +22,8 @@ export function DisplayNameForm({ displayName }: { displayName: string }) {
   return (
     <SettingsCard
       title="Display name"
-      description="What buyers see on your storefront and in the marketplace."
+      description="What buyers see on your storefront and in the marketplace. Pick something you'll be happy to see in lights."
+      decoration="dots"
     >
       <form action={formAction} className="flex flex-col gap-4" noValidate>
         <div className="flex flex-col gap-1.5">
@@ -39,7 +40,7 @@ export function DisplayNameForm({ displayName }: { displayName: string }) {
         </div>
         <FormStatus state={state} />
         <div>
-          <SaveButton pending={isPending} />
+          <SaveButton pending={isPending} state={state} />
         </div>
       </form>
     </SettingsCard>

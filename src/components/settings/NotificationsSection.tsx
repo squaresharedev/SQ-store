@@ -22,12 +22,12 @@ const PREFS = [
   {
     name: "notify_product_updates",
     label: "Product updates",
-    blurb: "New dashboard features and improvements, when they ship.",
+    blurb: "New dashboard features and improvements, as soon as they're ready to ship.",
   },
   {
     name: "notify_marketing",
     label: "Tips & marketplace news",
-    blurb: "Occasional ideas to sell more. No spam, promise.",
+    blurb: "Occasional ideas to help you sell more. We keep it light, no spam.",
   },
 ] as const;
 
@@ -47,16 +47,16 @@ export function NotificationsSection({
   return (
     <SettingsCard
       title="Email notifications"
-      description="Pick what lands in your inbox. Security and payment emails always send, we can't let those go quiet."
+      description="Pick what lands in your inbox. Security and payment emails sneak through regardless, we can't let those go quiet."
     >
       <form action={formAction} className="flex flex-col gap-4">
         <div className="flex flex-col divide-y divide-neutral-200">
           {PREFS.map((pref) => (
             <div
               key={pref.name}
-              className="flex items-center justify-between gap-6 py-4 first:pt-0 last:pb-0"
+              className="flex items-center justify-between gap-4 py-4 first:pt-0 last:pb-0 sm:gap-6"
             >
-              <div>
+              <div className="min-w-0">
                 <p
                   id={`${pref.name}-label`}
                   className="text-sm font-medium text-neutral-900"
@@ -86,7 +86,7 @@ export function NotificationsSection({
         </div>
         <FormStatus state={state} />
         <div>
-          <SaveButton pending={isPending} />
+          <SaveButton pending={isPending} state={state} />
         </div>
       </form>
     </SettingsCard>

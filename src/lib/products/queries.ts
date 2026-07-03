@@ -6,8 +6,9 @@ import { productIdSchema } from "@/lib/validation/product";
 
 // Server-side reads for the signed-in seller's products. Server Components /
 // Route Handlers only (createClient uses next/headers cookies — never call
-// from middleware). RLS already scopes rows to the owner; the explicit
-// owner_id filter is defense in depth.
+// from middleware). RLS scopes every row to `owner_id = auth.uid()`, so these
+// reads need no caller-supplied id — that would just be an unverified value
+// to fetch and pass around for no additional safety.
 
 type ProductRow = Tables<"products">;
 
@@ -38,21 +39,17 @@ async function rowToProduct(row: ProductRow): Promise<Product> {
   };
 }
 
-export async function listProducts(ownerId: string): Promise<Product[]> {
+export async function listProducts(): Promise<Product[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("products")
     .select("*")
-    .eq("owner_id", ownerId)
     .order("created_at", { ascending: false });
   if (error) throw new Error(`Failed to load products: ${error.message}`);
   return Promise.all(data.map(rowToProduct));
 }
 
-export async function getProduct(
-  id: string,
-  ownerId: string,
-): Promise<Product | null> {
+export async function getProduct(id: string): Promise<Product | null> {
   // Guard before querying so a garbage URL param 404s instead of erroring.
   if (!productIdSchema.safeParse(id).success) return null;
   const supabase = await createClient();
@@ -60,7 +57,6 @@ export async function getProduct(
     .from("products")
     .select("*")
     .eq("id", id)
-    .eq("owner_id", ownerId)
     .maybeSingle();
   if (error) throw new Error(`Failed to load product: ${error.message}`);
   return data ? await rowToProduct(data) : null;

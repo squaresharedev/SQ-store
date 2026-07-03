@@ -10,20 +10,20 @@ import { LEGAL_VERSION } from "@/lib/settings/constants";
 
 const INITIAL: SettingsActionState = {};
 
-// Placeholder drafts — REAL LEGAL COPY IS PENDING legal review. Swap the
+// Placeholder drafts. REAL LEGAL COPY IS PENDING legal review. Swap the
 // bodies (and bump LEGAL_VERSION) when it lands.
 const DOCS = [
   {
     title: "Seller Agreement",
-    body: "You own your work, always. We take a small cut per sale, handle payments through Stripe, and keep the lights on. You keep it legal and ship what you sell. Draft placeholder, the real agreement is being written.",
+    body: "You own your work, always. We take a small cut per sale, handle payments through Stripe, and keep the servers humming along. You keep it legal and ship what you actually sell. This is a draft placeholder; the real agreement is on its way.",
   },
   {
     title: "Terms of Service",
-    body: "Don't abuse the platform, don't sell things that hurt people, don't try to break other creators' stores. We can suspend accounts that do. Draft placeholder, the real terms are being written.",
+    body: "Don't abuse the platform, don't sell things that hurt people, and play nice with other creators' stores. This is a draft placeholder; the real terms are on their way.",
   },
   {
     title: "Privacy Policy",
-    body: "We store what you give us (profile, products, storefront), never sell it, and delete it when you leave. Payments are handled by Stripe, we never see your card. Draft placeholder, the real policy is being written.",
+    body: "We store what you give us (profile, products, storefront), never sell it, and delete it when you leave. Payments run through Stripe, so your card details stay with them, not us. This is a draft placeholder; the real policy is on its way.",
   },
 ] as const;
 
@@ -50,7 +50,7 @@ export function LegalSection({
   return (
     <SettingsCard
       title="Seller Agreement, Terms & Privacy"
-      description="The current drafts, in plain language. Real legal copy is on its way; accepting now covers this draft version."
+      description="The current drafts, in plain language, because nobody reads legalese for fun. Real legal copy is on its way; accepting now covers this draft version."
     >
       <div className="flex flex-col gap-4">
         <div className="flex flex-col divide-y divide-neutral-200 border border-neutral-200">
@@ -88,7 +88,7 @@ export function LegalSection({
             <input type="hidden" name="version" value={LEGAL_VERSION} />
             <FormStatus state={state} />
             <div className="flex flex-col gap-2">
-              <SaveButton pending={isPending} pendingLabel="Recording…">
+              <SaveButton pending={isPending} state={state} pendingLabel="Recording…">
                 I accept
               </SaveButton>
               <p className="font-inter text-xs text-neutral-400">

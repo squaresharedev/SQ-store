@@ -27,7 +27,7 @@ function formatDate(iso: string) {
 
 /**
  * Deliberate, two-step deletion: reveal, then type-to-confirm. Submitting
- * flags the account for deletion (soft flag + server log) — the full
+ * flags the account for deletion (soft flag + server log). The full
  * hard-delete cascade runs as a service-role job, never from here.
  */
 export function DeleteAccountForm({
@@ -50,7 +50,7 @@ export function DeleteAccountForm({
     return (
       <SettingsCard
         title="Deletion requested"
-        description={`You asked us to delete this account on ${formatDate(deletionRequestedAt)}. It's flagged for permanent deletion — products and storefront included. Until that runs, you can still change your mind.`}
+        description={`You asked us to delete this account on ${formatDate(deletionRequestedAt)}. It's flagged for permanent deletion, products and storefront included. Until that actually runs, you can still change your mind.`}
         danger
       >
         <form action={cancelAction} className="flex flex-col gap-4">
@@ -59,6 +59,7 @@ export function DeleteAccountForm({
             <SaveButton
               variant="secondary"
               pending={cancelPending}
+              state={cancelState}
               pendingLabel="Cancelling…"
             >
               Keep my account
@@ -105,6 +106,7 @@ export function DeleteAccountForm({
             <SaveButton
               variant="destructive"
               pending={deletePending}
+              state={deleteState}
               pendingLabel="Flagging…"
               disabled={
                 deletePending ||

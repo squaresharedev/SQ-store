@@ -1,12 +1,7 @@
-import { requireUser } from "@/lib/auth/session";
+import { redirect } from "next/navigation";
 
-// PROTECTED — unauthenticated users are redirected to /login.
-export default async function DashboardHomePage() {
-  await requireUser("/");
-
-  return (
-    <main className="p-6">
-      <p className="text-foreground">Coming soon</p>
-    </main>
-  );
+// PROTECTED by (dashboard)/layout.tsx. The Overview page lives at /dashboard;
+// this bare "/" segment just forwards there.
+export default function DashboardHomePage() {
+  redirect("/dashboard");
 }

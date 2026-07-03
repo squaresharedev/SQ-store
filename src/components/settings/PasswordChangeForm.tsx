@@ -4,10 +4,13 @@ import { useActionState } from "react";
 import { FormStatus } from "@/components/settings/FormStatus";
 import { SaveButton } from "@/components/settings/SaveButton";
 import { SettingsCard } from "@/components/settings/SettingsCard";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
+import { Spinner } from "@/components/ui/spinner";
 import {
   changePassword,
+  sendPasswordReset,
   type SettingsActionState,
 } from "@/lib/settings/actions";
 
@@ -23,7 +26,7 @@ export function PasswordChangeForm() {
   return (
     <SettingsCard
       title="Password"
-      description="We ask for your current password first. An open laptop shouldn't be enough to lock you out."
+      description="We ask for your current password first, just to double-check it's really you."
     >
       <form action={formAction} className="flex flex-col gap-4" noValidate>
         <div className="flex flex-col gap-1.5">
@@ -61,11 +64,48 @@ export function PasswordChangeForm() {
         </div>
         <FormStatus state={state} />
         <div>
-          <SaveButton pending={isPending} pendingLabel="Updating…">
+          <SaveButton pending={isPending} state={state} pendingLabel="Updating…">
             Update password
           </SaveButton>
         </div>
       </form>
+
+      <ForgotPasswordReset />
     </SettingsCard>
+  );
+}
+
+/**
+ * Escape hatch for when the current password is forgotten: emails a recovery
+ * link to the account address. Sits under the change form, quietly, so it's
+ * only reached for when you actually need it.
+ */
+function ForgotPasswordReset() {
+  const [state, formAction, isPending] = useActionState(
+    sendPasswordReset,
+    INITIAL,
+  );
+
+  return (
+    <div className="mt-6 border-t border-neutral-200 pt-5">
+      <p className="font-inter text-sm text-neutral-500">
+        Don&rsquo;t remember your current password?
+      </p>
+      <form action={formAction} className="mt-3 flex flex-col gap-3">
+        <FormStatus state={state} showSuccess />
+        <div>
+          <Button type="submit" variant="secondary" disabled={isPending}>
+            {isPending ? (
+              <>
+                <Spinner />
+                Sending…
+              </>
+            ) : (
+              "Email me a reset link"
+            )}
+          </Button>
+        </div>
+      </form>
+    </div>
   );
 }

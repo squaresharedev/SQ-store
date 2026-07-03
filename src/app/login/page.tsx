@@ -20,6 +20,8 @@ function sanitizeNext(value: string | string[] | undefined): string {
 const ERROR_MESSAGES: Record<string, string> = {
   auth_callback: "That link is invalid or has expired. Try signing in again.",
   auth_confirm: "That link is invalid or has expired. Try signing in again.",
+  reset_expired:
+    "That password reset link has expired. Request a new one below.",
   oauth: "Google sign-in could not be started. Please try again.",
 };
 

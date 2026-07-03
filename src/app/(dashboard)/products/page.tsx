@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Plus } from "lucide-react";
-import { requireUser } from "@/lib/auth/session";
 import { listProducts } from "@/lib/products/queries";
 import { ProductList } from "@/components/products/ProductList";
 import { primaryButtonClass } from "@/components/ui/control-styles";
@@ -10,10 +9,9 @@ export const metadata: Metadata = {
   title: "Products",
 };
 
-// PROTECTED — unauthenticated users are redirected to /login.
+// PROTECTED by (dashboard)/layout.tsx.
 export default async function ProductsPage() {
-  const user = await requireUser("/products");
-  const products = await listProducts(user.id);
+  const products = await listProducts();
 
   return (
     <main className="mx-auto max-w-7xl px-6 py-8">

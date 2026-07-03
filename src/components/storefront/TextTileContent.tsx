@@ -37,7 +37,7 @@ const ALIGN_ICONS: Record<TextAlign, typeof AlignLeft> = {
 };
 
 const ALIGN_BUTTON_CLASS =
-  "inline-flex size-7 items-center justify-center rounded-sm border border-border text-muted-foreground transition-colors duration-180 ease-in-out hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background motion-reduce:transition-none";
+  "inline-flex size-7 items-center justify-center rounded-none border border-border text-muted-foreground transition-colors duration-180 ease-in-out hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background motion-reduce:transition-none";
 
 /**
  * The text face of a grid tile. View mode renders the text as a plain React

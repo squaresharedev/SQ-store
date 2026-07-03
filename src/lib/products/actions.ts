@@ -168,12 +168,27 @@ export async function updateProduct(
     status: data.status,
   };
   // Three-state keys: undefined = keep stored key, null = clear, string = replace.
-  if (data.imageKey !== undefined) update.image_key = data.imageKey;
-  if (data.digitalFileKey !== undefined) {
-    update.digital_file_key = data.digitalFileKey;
-  }
+  const replacingImage = data.imageKey !== undefined;
+  const replacingFile = data.digitalFileKey !== undefined;
+  if (replacingImage) update.image_key = data.imageKey;
+  if (replacingFile) update.digital_file_key = data.digitalFileKey;
 
   const supabase = await createClient();
+
+  // If a stored file is being replaced or cleared, read the old keys first so
+  // the now-detached R2 objects can be evicted after a successful write.
+  let oldKeys: { image_key: string | null; digital_file_key: string | null } | null =
+    null;
+  if (replacingImage || replacingFile) {
+    const { data: existing } = await supabase
+      .from("products")
+      .select("image_key, digital_file_key")
+      .eq("id", id)
+      .eq("owner_id", user.id)
+      .maybeSingle();
+    oldKeys = existing ?? null;
+  }
+
   const { data: row, error } = await supabase
     .from("products")
     .update(update)
@@ -187,6 +202,18 @@ export async function updateProduct(
     return { ok: false, error: GENERIC_WRITE_ERROR };
   }
   if (!row) return { ok: false, error: "Product not found." };
+
+  if (oldKeys) {
+    const stale: (string | null)[] = [];
+    if (replacingImage && oldKeys.image_key !== data.imageKey) {
+      stale.push(oldKeys.image_key);
+    }
+    if (replacingFile && oldKeys.digital_file_key !== data.digitalFileKey) {
+      stale.push(oldKeys.digital_file_key);
+    }
+    await evictObjects(stale);
+  }
+
   revalidatePath("/products");
   return { ok: true, id: row.id };
 }
@@ -198,20 +225,37 @@ export async function deleteProduct(id: string): Promise<ProductActionResult> {
     return { ok: false, error: "Product not found." };
   }
 
-  // TODO(delivery stage): also delete the product's R2 objects (image_key /
-  // digital_file_key) so removed products don't leave orphaned files. Replaced
-  // uploads leave orphans too — needs a small cleanup pass server-side.
   const supabase = await createClient();
-  const { error } = await supabase
+  // Return the deleted row so we can (a) confirm something was actually removed
+  // — a missing/again-someone-else's id matches zero rows, which is NOT success
+  // — and (b) evict its R2 objects instead of leaving them orphaned.
+  const { data: deleted, error } = await supabase
     .from("products")
     .delete()
     .eq("id", id)
-    .eq("owner_id", user.id);
+    .eq("owner_id", user.id)
+    .select("id, image_key, digital_file_key")
+    .maybeSingle();
 
   if (error) {
     console.error("[products] delete failed", error);
     return { ok: false, error: "Could not delete the product. Try again." };
   }
+  if (!deleted) return { ok: false, error: "Product not found." };
+
+  await evictObjects([deleted.image_key, deleted.digital_file_key]);
   revalidatePath("/products");
   return { ok: true, id };
+}
+
+/** Best-effort R2 cleanup — storage cleanup never fails the parent operation. */
+async function evictObjects(keys: (string | null | undefined)[]): Promise<void> {
+  const present = keys.filter((key): key is string => Boolean(key));
+  await Promise.all(
+    present.map((key) =>
+      deleteObject(key).catch((error) =>
+        console.warn("[products] failed to evict object", key, error),
+      ),
+    ),
+  );
 }

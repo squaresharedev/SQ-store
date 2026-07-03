@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { helpTextClass } from "@/components/ui/control-styles";
 
 const ADD_BUTTON_CLASS =
-  "inline-flex size-8 shrink-0 items-center justify-center rounded-sm border border-border bg-background text-muted-foreground transition-colors duration-180 ease-in-out hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-40 motion-reduce:transition-none";
+  "inline-flex size-8 shrink-0 items-center justify-center rounded-none border border-border bg-background text-muted-foreground transition-colors duration-180 ease-in-out hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-40 motion-reduce:transition-none";
 
 /** Pick from the seller's existing products; each can be in the grid once. */
 export function ProductPicker({

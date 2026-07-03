@@ -18,7 +18,7 @@ import { ProductTileContent } from "./ProductTileContent";
 import { TextTileContent, type TextBlockPatch } from "./TextTileContent";
 
 const TILE_CONTROL_CLASS =
-  "inline-flex size-6 items-center justify-center rounded-sm text-muted-foreground transition-colors duration-180 ease-in-out hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background motion-reduce:transition-none";
+  "inline-flex size-6 items-center justify-center rounded-none text-muted-foreground transition-colors duration-180 ease-in-out hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background motion-reduce:transition-none";
 
 /**
  * Sortable shell for one grid block: drag handle, size buttons, remove (and

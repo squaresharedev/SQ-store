@@ -1,0 +1,4 @@
+{
+  "//": "Makes every .ts file in this folder an ES module so Node 24's native type-stripping can run them directly (node scripts/seed.ts). These scripts are dev-only tooling and are never imported by the Next.js app.",
+  "type": "module"
+}

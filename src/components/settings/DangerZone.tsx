@@ -17,7 +17,7 @@ export function DangerZone({
     <div className="flex flex-col gap-6">
       <SettingsCard
         title="Export my data"
-        description="Everything we hold about you — profile, products, storefront config — as one JSON file. It's your data; take it anywhere."
+        description="Everything we hold about you: profile, products, storefront config, all bundled into one JSON file. It's your data, yours to keep."
       >
         <a
           href="/settings/export"

@@ -13,7 +13,7 @@ import { EU_COUNTRIES } from "@/lib/settings/constants";
 const INITIAL: SettingsActionState = {};
 
 /**
- * EU tax details. Collected ahead of the VAT/invoicing work — nothing
+ * EU tax details. Collected ahead of the VAT/invoicing work: nothing
  * downstream reads these fields yet, they're stored so launch day is a
  * non-event.
  */
@@ -31,7 +31,7 @@ export function TaxSection({
   return (
     <SettingsCard
       title="Business & VAT"
-      description="For EU sellers. We store this now so invoices and VAT are ready the day payouts need them, it isn't used anywhere yet."
+      description="For EU sellers. We're saving this now so invoices and VAT are all set the day payouts need it."
     >
       <form action={formAction} className="flex flex-col gap-4" noValidate>
         <div className="flex flex-col gap-1.5">
@@ -71,7 +71,7 @@ export function TaxSection({
         </div>
         <FormStatus state={state} />
         <div>
-          <SaveButton pending={isPending} />
+          <SaveButton pending={isPending} state={state} />
         </div>
       </form>
     </SettingsCard>
