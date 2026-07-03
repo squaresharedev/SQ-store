@@ -4,16 +4,17 @@ import { useEffect, useRef, useState } from "react";
 import type { DragEvent } from "react";
 import { Image as ImageIcon, UploadCloud, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  IMAGE_CONTENT_TYPES,
+  IMAGE_MAX_BYTES,
+} from "@/lib/validation/product";
 
-// Display-image picker: drop zone + file input with a local preview. UI + local
-// state ONLY. No upload happens here.
-//
-// TODO(next stage): on file select, request a signed URL and upload the bytes
-// to R2, then persist the returned object URL. Client-side type/size checks
-// below are a UX nicety, NOT a security boundary: the real, enforceable
-// validation must also run server-side.
-const ACCEPTED_TYPES = ["image/png", "image/jpeg", "image/webp"];
-const MAX_MB = 5;
+// Display-image picker: drop zone + file input with a local preview. The
+// selected File is handed to the parent; ProductForm uploads it to R2 on save.
+// The type/size checks here are UX only — the presign endpoint re-validates
+// against the same shared schema (the security boundary).
+const ACCEPTED_TYPES: readonly string[] = IMAGE_CONTENT_TYPES;
+const MAX_MB = IMAGE_MAX_BYTES / (1024 * 1024);
 
 export function ImageDropzone({
   inputId,
@@ -48,7 +49,7 @@ export function ImageDropzone({
 
   function selectFile(file: File) {
     if (!ACCEPTED_TYPES.includes(file.type)) {
-      setError("Use a PNG, JPG, or WEBP image.");
+      setError("Use a PNG, JPG, WEBP, GIF, or AVIF image.");
       return;
     }
     if (file.size > MAX_MB * 1024 * 1024) {
@@ -90,7 +91,7 @@ export function ImageDropzone({
           onDragLeave={() => setDragging(false)}
           onDrop={handleDrop}
           className={cn(
-            "flex aspect-[4/3] w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-[0.375rem] border border-dashed bg-background text-center transition-colors duration-[180ms] ease-[cubic-bezier(0.4,0,0.2,1)] motion-reduce:transition-none",
+            "flex aspect-[4/3] w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-sm border border-dashed bg-background text-center transition-colors duration-180 ease-in-out motion-reduce:transition-none",
             "has-[input:focus-visible]:ring-2 has-[input:focus-visible]:ring-ring has-[input:focus-visible]:ring-offset-2 has-[input:focus-visible]:ring-offset-background",
             dragging ? "border-foreground bg-accent" : "border-border hover:bg-accent",
           )}
@@ -117,7 +118,7 @@ export function ImageDropzone({
                 Drop an image or click to upload
               </span>
               <span className="font-inter text-xs text-muted-foreground">
-                PNG, JPG, or WEBP, up to {MAX_MB} MB
+                PNG, JPG, WEBP, GIF, or AVIF, up to {MAX_MB} MB
               </span>
             </span>
           )}
@@ -128,7 +129,7 @@ export function ImageDropzone({
             type="button"
             onClick={handleRemove}
             aria-label="Remove display image"
-            className="absolute right-2 top-2 inline-flex size-8 items-center justify-center rounded-[0.375rem] border border-border bg-background text-muted-foreground transition-colors duration-[180ms] ease-[cubic-bezier(0.4,0,0.2,1)] hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none"
+            className="absolute right-2 top-2 inline-flex size-8 items-center justify-center rounded-sm border border-border bg-background text-muted-foreground transition-colors duration-180 ease-in-out hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none"
           >
             <X className="size-4" strokeWidth={2} aria-hidden="true" />
           </button>

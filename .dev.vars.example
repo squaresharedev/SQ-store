@@ -6,3 +6,10 @@
 NEXT_PUBLIC_SUPABASE_URL="https://fdpviaqzbxowvonuoktc.supabase.co"
 NEXT_PUBLIC_SUPABASE_ANON_KEY="sb_publishable_xxxxxxxxxxxxxxxxxxxxxxxx"
 # SUPABASE_SERVICE_ROLE_KEY="paste-service-role-secret-here"
+
+# Cloudflare R2 (product uploads) — same values as .env.local. In production
+# set these with `wrangler secret put` / the CF dashboard, never in wrangler.jsonc.
+R2_ACCOUNT_ID="32f68a5e041d51b08934ca72a42a2922"
+R2_ACCESS_KEY_ID="paste-r2-access-key-id-here"
+R2_SECRET_ACCESS_KEY="paste-r2-secret-access-key-here"
+R2_BUCKET_NAME="squareshare-products"

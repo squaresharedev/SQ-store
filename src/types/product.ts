@@ -19,15 +19,14 @@ export interface Product {
   currency: Currency;
   status: ProductStatus;
   /**
-   * Display image shown on the storefront card. `null` until one is uploaded
-   * (rendered as a placeholder tile). A later stage replaces this with the R2
-   * object URL.
+   * Display image for the storefront card. Bytes live in R2 under the row's
+   * `image_key`; this stays `null` (placeholder tile) until the image read
+   * path (public/CDN or signed GET) is built.
    */
   imageUrl: string | null;
   /**
-   * Name of the digital file the buyer downloads after purchase. `null` until
-   * one is uploaded. The bytes themselves live in R2 (wired later); the row
-   * only stores the display name / key.
+   * Display name of the digital file the buyer downloads after purchase,
+   * derived from the row's `digital_file_key`. `null` until one is uploaded.
    */
   digitalFileName: string | null;
 }
@@ -46,21 +45,5 @@ export interface ProductFormValues {
   status: ProductStatus;
 }
 
-/**
- * The shape the form would send to the API in a later stage. Uploads are
- * referenced by name only here; the actual bytes go to R2 out of band. This is
- * the object the current UI-only stage logs on submit instead of calling an API.
- */
-export interface ProductDraftPayload {
-  /** `null` when creating, the existing id when editing. */
-  id: string | null;
-  title: string;
-  description: string;
-  price: number;
-  currency: Currency;
-  status: ProductStatus;
-  hasNewImage: boolean;
-  imageFileName: string | null;
-  hasNewDigitalFile: boolean;
-  digitalFileName: string | null;
-}
+// The write payload lives in lib/validation/product.ts as `ProductWriteInput`
+// (Zod-inferred), so client and server validate against one schema.

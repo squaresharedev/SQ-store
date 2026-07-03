@@ -10,10 +10,13 @@ import {
   PRODUCT_STATUSES,
   type Currency,
   type Product,
-  type ProductDraftPayload,
   type ProductFormValues,
   type ProductStatus,
 } from "@/types/product";
+import { createProduct, updateProduct } from "@/lib/products/actions";
+import { uploadToR2 } from "@/lib/products/upload";
+import type { ProductWriteInput } from "@/lib/validation/product";
+import { Select, type SelectOption } from "@/components/ui/select";
 import {
   errorTextClass,
   fieldBaseClass,
@@ -21,14 +24,23 @@ import {
   labelClass,
   primaryButtonClass,
   secondaryButtonClass,
-} from "./control-styles";
+} from "@/components/ui/control-styles";
 import { ImageDropzone } from "./ImageDropzone";
 import { FileDropzone } from "./FileDropzone";
 
-const STATUS_LABELS: Record<ProductStatus, string> = {
-  draft: "Draft, hidden from buyers",
-  active: "Active, visible for sale",
-};
+const CURRENCY_OPTIONS: readonly SelectOption<Currency>[] = CURRENCIES.map(
+  (currency) => ({ value: currency, label: currency }),
+);
+
+const STATUS_OPTIONS: readonly SelectOption<ProductStatus>[] =
+  PRODUCT_STATUSES.map((status) => ({
+    value: status,
+    label: { draft: "Draft", active: "Active" }[status],
+    description: {
+      draft: "Hidden from buyers",
+      active: "Visible for sale",
+    }[status],
+  }));
 
 type FieldErrors = Partial<Record<"title" | "price", string>>;
 
@@ -42,9 +54,9 @@ function initialValues(product?: Product): ProductFormValues {
   };
 }
 
-// Client-side validation is for UX feedback only. It is NOT a security boundary:
-// the same rules (and anything security-relevant) must be re-checked server-side
-// when this is wired to a real API in a later stage.
+// Client-side validation is for UX feedback only. It is NOT a security
+// boundary: the server actions re-validate everything with Zod
+// (lib/validation/product.ts) before any write.
 function validate(values: ProductFormValues): FieldErrors {
   const errors: FieldErrors = {};
 
@@ -72,6 +84,11 @@ export function ProductForm({ product }: { product?: Product }) {
   );
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [digitalFile, setDigitalFile] = useState<File | null>(null);
+  // Whether the seller interacted with the digital-file picker at all. Needed
+  // to tell "left the stored file alone" (keep) apart from "removed it" (clear).
+  const [digitalTouched, setDigitalTouched] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [errors, setErrors] = useState<FieldErrors>({});
   // Only surface errors after the first submit, so the form does not shout at
   // the seller while they are still filling it in.
@@ -88,31 +105,56 @@ export function ProductForm({ product }: { product?: Product }) {
     });
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSubmitAttempted(true);
+    setSubmitError(null);
 
     const foundErrors = validate(values);
     setErrors(foundErrors);
     if (Object.keys(foundErrors).length > 0) return;
 
-    const payload: ProductDraftPayload = {
-      id: product?.id ?? null,
-      title: values.title.trim(),
-      description: values.description.trim(),
-      price: Number(values.price),
-      currency: values.currency,
-      status: values.status,
-      hasNewImage: imageFile !== null,
-      imageFileName: imageFile?.name ?? null,
-      hasNewDigitalFile: digitalFile !== null,
-      digitalFileName: digitalFile?.name ?? product?.digitalFileName ?? null,
-    };
+    setSubmitting(true);
+    try {
+      // Upload straight to R2 via short-lived presigned URLs, then store only
+      // the returned keys. `undefined` keeps a stored key, `null` clears it.
+      const imageKey = imageFile ? await uploadToR2(imageFile, "image") : undefined;
+      const digitalFileKey = digitalFile
+        ? await uploadToR2(digitalFile, "file")
+        : digitalTouched
+          ? null
+          : undefined;
 
-    // UI-ONLY STAGE: no API / Supabase / R2 call here. Log the payload shape the
-    // next stage will send, then return to the list.
-    console.info("[products] submit payload", payload);
-    router.push("/products");
+      const input: ProductWriteInput = {
+        title: values.title.trim(),
+        description: values.description.trim(),
+        // The form shows decimal major units; the DB stores integer cents.
+        priceCents: Math.round(Number(values.price) * 100),
+        currency: values.currency,
+        status: values.status,
+        imageKey,
+        digitalFileKey,
+      };
+
+      const result = product
+        ? await updateProduct(product.id, input)
+        : await createProduct(input);
+      if (!result.ok) {
+        setSubmitError(result.error);
+        return;
+      }
+
+      router.push("/products");
+      router.refresh();
+    } catch (error) {
+      setSubmitError(
+        error instanceof Error
+          ? error.message
+          : "Something went wrong. Try again.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   const titleErrorId = `${fieldId}-title-error`;
@@ -123,10 +165,24 @@ export function ProductForm({ product }: { product?: Product }) {
 
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-8">
+      {submitError && (
+        <div
+          role="alert"
+          className="flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/5 px-4 py-3"
+        >
+          <AlertCircle
+            className="mt-0.5 size-4 shrink-0 text-destructive"
+            strokeWidth={2}
+            aria-hidden="true"
+          />
+          <p className="font-inter text-sm text-destructive">{submitError}</p>
+        </div>
+      )}
+
       {hasErrors && (
         <div
           role="alert"
-          className="flex items-start gap-2 rounded-[0.5rem] border border-destructive/40 bg-destructive/5 px-4 py-3"
+          className="flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/5 px-4 py-3"
         >
           <AlertCircle
             className="mt-0.5 size-4 shrink-0 text-destructive"
@@ -204,20 +260,12 @@ export function ProductForm({ product }: { product?: Product }) {
             <label htmlFor={`${fieldId}-currency`} className={labelClass}>
               Currency
             </label>
-            <select
+            <Select
               id={`${fieldId}-currency`}
               value={values.currency}
-              onChange={(event) =>
-                updateField("currency", event.target.value as Currency)
-              }
-              className={fieldBaseClass}
-            >
-              {CURRENCIES.map((currency) => (
-                <option key={currency} value={currency}>
-                  {currency}
-                </option>
-              ))}
-            </select>
+              options={CURRENCY_OPTIONS}
+              onChange={(currency) => updateField("currency", currency)}
+            />
           </div>
         </div>
 
@@ -225,20 +273,12 @@ export function ProductForm({ product }: { product?: Product }) {
           <label htmlFor={`${fieldId}-status`} className={labelClass}>
             Status
           </label>
-          <select
+          <Select
             id={`${fieldId}-status`}
             value={values.status}
-            onChange={(event) =>
-              updateField("status", event.target.value as ProductStatus)
-            }
-            className={fieldBaseClass}
-          >
-            {PRODUCT_STATUSES.map((status) => (
-              <option key={status} value={status}>
-                {STATUS_LABELS[status]}
-              </option>
-            ))}
-          </select>
+            options={STATUS_OPTIONS}
+            onChange={(status) => updateField("status", status)}
+          />
         </div>
       </div>
 
@@ -270,7 +310,10 @@ export function ProductForm({ product }: { product?: Product }) {
             inputId={`${fieldId}-file`}
             describedById={fileHintId}
             initialFileName={product?.digitalFileName ?? null}
-            onFileChange={setDigitalFile}
+            onFileChange={(file) => {
+              setDigitalFile(file);
+              setDigitalTouched(true);
+            }}
           />
         </div>
       </div>
@@ -280,8 +323,8 @@ export function ProductForm({ product }: { product?: Product }) {
         <Link href="/products" className={secondaryButtonClass}>
           Cancel
         </Link>
-        <button type="submit" className={primaryButtonClass}>
-          {product ? "Save changes" : "Save product"}
+        <button type="submit" disabled={submitting} className={primaryButtonClass}>
+          {submitting ? "Saving…" : product ? "Save changes" : "Save product"}
         </button>
       </div>
     </form>

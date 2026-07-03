@@ -72,7 +72,7 @@ export async function authenticate(
   let supabase;
   try {
     supabase = await createClient();
-  } catch (error) {
+  } catch {
     return {
       error: "Could not connect to authentication service. Please try again.",
     };
@@ -81,36 +81,34 @@ export async function authenticate(
   // --- Magic link (passwordless OTP) ---
   if (intent === "magic") {
     if (!email) return { error: "Enter your email." };
-    try {
-      const origin = await siteOrigin();
-      const { error } = await supabase.auth.signInWithOtp({
+    const origin = await siteOrigin();
+    const result = await supabase.auth
+      .signInWithOtp({
         email,
         options: { emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}` },
-      });
-      if (error) return { error: friendly(error) };
-      return { message: "Check your email for a link to sign in." };
-    } catch (error) {
-      return {
-        error: "Could not send email. Please check your connection and try again.",
-      };
+      })
+      .catch(() => ({ error: null, networkError: true }) as const);
+    if ("networkError" in result) {
+      return { error: "Could not send email. Please check your connection and try again." };
     }
+    if (result.error) return { error: friendly(result.error) };
+    return { message: "Check your email for a link to sign in." };
   }
 
   // --- Password reset ---
   if (intent === "reset") {
     if (!email) return { error: "Enter your email to reset your password." };
-    try {
-      const origin = await siteOrigin();
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    const origin = await siteOrigin();
+    const result = await supabase.auth
+      .resetPasswordForEmail(email, {
         redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
-      });
-      if (error) return { error: friendly(error) };
-      return { message: "If that email has an account, a reset link is on its way." };
-    } catch (error) {
-      return {
-        error: "Could not send reset email. Please check your connection and try again.",
-      };
+      })
+      .catch(() => ({ error: null, networkError: true }) as const);
+    if ("networkError" in result) {
+      return { error: "Could not send reset email. Please check your connection and try again." };
     }
+    if (result.error) return { error: friendly(result.error) };
+    return { message: "If that email has an account, a reset link is on its way." };
   }
 
   // --- Password sign-up / sign-in ---
@@ -126,39 +124,37 @@ export async function authenticate(
     if (password !== confirmPassword) {
       return { error: "Passwords do not match." };
     }
-    try {
-      const origin = await siteOrigin();
-      const { data, error } = await supabase.auth.signUp({
+    const origin = await siteOrigin();
+    const result = await supabase.auth
+      .signUp({
         email,
         password,
         options: { emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}` },
-      });
-      if (error) return { error: friendly(error) };
-      // With email confirmation ON, there is no session yet.
-      if (!data.session) {
-        return {
-          message: "Account created. Check your email to confirm, then sign in.",
-        };
-      }
-      // Confirmation disabled -> already signed in.
-      redirect(next);
-    } catch (error) {
+      })
+      .catch(() => ({ data: null, error: null, networkError: true }) as const);
+    if ("networkError" in result) {
+      return { error: "Could not create account. Please check your connection and try again." };
+    }
+    if (result.error) return { error: friendly(result.error) };
+    // With email confirmation ON, there is no session yet.
+    if (!result.data.session) {
       return {
-        error: "Could not create account. Please check your connection and try again.",
+        message: "Account created. Check your email to confirm, then sign in.",
       };
     }
+    // Confirmation disabled -> already signed in.
+    redirect(next);
   }
 
   // intent === "signin"
-  try {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) return { error: friendly(error) };
-    redirect(next);
-  } catch (error) {
-    return {
-      error: "Could not sign in. Please check your connection and try again.",
-    };
+  const result = await supabase.auth
+    .signInWithPassword({ email, password })
+    .catch(() => ({ error: null, networkError: true }) as const);
+  if ("networkError" in result) {
+    return { error: "Could not sign in. Please check your connection and try again." };
   }
+  if (result.error) return { error: friendly(result.error) };
+  redirect(next);
 }
 
 /**
@@ -168,23 +164,29 @@ export async function authenticate(
  * Requires the Google provider to be enabled in the Supabase dashboard.
  */
 export async function signInWithGoogle(formData: FormData): Promise<void> {
+  const next = sanitizeNext(formData.get("next"));
+  const origin = await siteOrigin();
+
+  let supabase;
   try {
-    const next = sanitizeNext(formData.get("next"));
-    const origin = await siteOrigin();
-    const supabase = await createClient();
-    const { data, error } = await supabase.auth.signInWithOAuth({
+    supabase = await createClient();
+  } catch {
+    redirect("/login?error=oauth");
+  }
+
+  const result = await supabase.auth
+    .signInWithOAuth({
       provider: "google",
       options: {
         redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
       },
-    });
-    if (error || !data.url) {
-      redirect("/login?error=oauth");
-    }
-    redirect(data.url);
-  } catch (error) {
+    })
+    .catch(() => ({ data: null, error: null }) as const);
+
+  if (result.error || !result.data?.url) {
     redirect("/login?error=oauth");
   }
+  redirect(result.data.url);
 }
 
 /** Sign out and return to the login screen. */

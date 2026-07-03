@@ -18,6 +18,72 @@ export type Database = {
   }
   public: {
     Tables: {
+      products: {
+        Row: {
+          created_at: string
+          currency: string
+          description: string | null
+          digital_file_key: string | null
+          id: string
+          image_key: string | null
+          owner_id: string
+          price_cents: number
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          description?: string | null
+          digital_file_key?: string | null
+          id?: string
+          image_key?: string | null
+          owner_id: string
+          price_cents: number
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          description?: string | null
+          digital_file_key?: string | null
+          id?: string
+          image_key?: string | null
+          owner_id?: string
+          price_cents?: number
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      storefronts: {
+        Row: {
+          config: Json
+          created_at: string
+          id: string
+          owner_id: string
+          updated_at: string
+        }
+        Insert: {
+          config?: Json
+          created_at?: string
+          id?: string
+          owner_id: string
+          updated_at?: string
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          id?: string
+          owner_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

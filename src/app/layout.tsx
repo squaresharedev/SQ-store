@@ -69,6 +69,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      // globals.css sets scroll-behavior: smooth; Next 16 wants it declared
+      // here too so it can disable smooth scrolling during route transitions.
+      data-scroll-behavior="smooth"
       className={cn(
         // Dashboard runs in light mode. (The .dark tokens remain in globals.css
         // so a future dark toggle can re-add the "dark" class here.)

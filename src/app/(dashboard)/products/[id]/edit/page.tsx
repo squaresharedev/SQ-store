@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth/session";
-import { findMockProduct } from "@/lib/products/mock";
+import { getProduct } from "@/lib/products/queries";
 import { ProductFormView } from "@/components/products/ProductFormView";
 
 export const metadata: Metadata = {
@@ -15,10 +15,9 @@ export default async function EditProductPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  await requireUser(`/products/${id}/edit`);
+  const user = await requireUser(`/products/${id}/edit`);
 
-  // UI-only stage: prefill from sample data. A later stage reads the real row.
-  const product = findMockProduct(id);
+  const product = await getProduct(id, user.id);
   if (!product) notFound();
 
   return (

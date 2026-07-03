@@ -51,9 +51,24 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  --radius-sm: var(--radius);
-  --radius-md: var(--radius);
-  --radius-lg: var(--radius);
+  /* Product-UI radius scale (styles.md §3). The auth/marketing surfaces keep
+     their square identity via --radius (0) + rounded-none; product components
+     use these tokens. Primary CTAs are deliberately SHARP (rounded-none) — a
+     brand rule encoded in the shared Button primitive, not per-component. */
+  --radius-sm: 0.375rem; /* buttons, inputs, tiles */
+  --radius-md: 0.5rem; /* cards, popovers */
+  --radius-lg: 0.75rem; /* modals, large panels */
+}
+
+/* Soft shadow ramp (styles.md §6.1) — borders first, shadows sparingly. */
+@theme {
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.12);
+
+  /* Bento grid base row height (storefront designer / future embed preview). */
+  --spacing-tile-row: 6rem;
 }
 
 /* ============================================================

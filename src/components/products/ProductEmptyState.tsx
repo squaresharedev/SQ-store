@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { Package, Plus } from "lucide-react";
-import { primaryButtonClass } from "./control-styles";
+import { primaryButtonClass } from "@/components/ui/control-styles";
 
 // First screen a new seller is likely to see, so it explains the next step and
 // gives one clear call to action (styles.md: calm, direct, no fluff).
 export function ProductEmptyState() {
   return (
-    <div className="flex flex-col items-center justify-center rounded-[0.5rem] border border-dashed border-border bg-background px-6 py-16 text-center">
+    <div className="flex flex-col items-center justify-center rounded-md border border-dashed border-border bg-background px-6 py-16 text-center">
       <div className="flex size-12 items-center justify-center rounded-full bg-muted">
         <Package
           className="size-6 text-muted-foreground"

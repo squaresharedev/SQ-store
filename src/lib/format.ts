@@ -1,5 +1,8 @@
 import type { Currency } from "@/types/product";
 
+// Shared display formatters (products list, storefront designer, future
+// storefront embed all render prices the same way).
+
 // EUR-primary market, so format with a European English locale for consistent
 // grouping between server render and client.
 const PRICE_LOCALE = "en-IE";

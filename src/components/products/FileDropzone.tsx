@@ -4,16 +4,14 @@ import { useRef, useState } from "react";
 import type { DragEvent } from "react";
 import { FileText, FileUp, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { formatBytes } from "./product-format";
+import { DIGITAL_FILE_MAX_BYTES } from "@/lib/validation/product";
+import { formatBytes } from "@/lib/format";
 
-// Digital-file picker (the asset the buyer downloads after purchase). UI + local
-// state ONLY. No upload happens here.
-//
-// TODO(next stage): stream the selected file to R2 via a signed URL and store
-// the resulting key. Any real, security-relevant validation (type allow-list,
-// size limits, malware scanning) MUST run server-side; the size hint below is
-// UX only.
-const MAX_MB = 200;
+// Digital-file picker (the asset the buyer downloads after purchase). The
+// selected File is handed to the parent; ProductForm uploads it to R2 on save.
+// Type/size are enforced server-side at presign time (shared Zod schema); the
+// hint below is UX only.
+const MAX_MB = DIGITAL_FILE_MAX_BYTES / (1024 * 1024);
 
 type Selected = { name: string; size: number | null };
 
@@ -63,7 +61,7 @@ export function FileDropzone({
         onDragLeave={() => setDragging(false)}
         onDrop={handleDrop}
         className={cn(
-          "flex w-full cursor-pointer items-center gap-3 rounded-[0.375rem] border border-dashed bg-background px-4 py-4 transition-colors duration-[180ms] ease-[cubic-bezier(0.4,0,0.2,1)] motion-reduce:transition-none",
+          "flex w-full cursor-pointer items-center gap-3 rounded-sm border border-dashed bg-background px-4 py-4 transition-colors duration-180 ease-in-out motion-reduce:transition-none",
           "has-[input:focus-visible]:ring-2 has-[input:focus-visible]:ring-ring has-[input:focus-visible]:ring-offset-2 has-[input:focus-visible]:ring-offset-background",
           dragging ? "border-foreground bg-accent" : "border-border hover:bg-accent",
         )}
@@ -79,7 +77,7 @@ export function FileDropzone({
             if (file) selectFile(file);
           }}
         />
-        <span className="flex size-10 shrink-0 items-center justify-center rounded-[0.375rem] bg-muted">
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-sm bg-muted">
           {selected ? (
             <FileText className="size-5 text-foreground" strokeWidth={1.5} aria-hidden="true" />
           ) : (
@@ -114,7 +112,7 @@ export function FileDropzone({
           type="button"
           onClick={handleRemove}
           aria-label="Remove digital file"
-          className="absolute right-2 top-2 inline-flex size-8 items-center justify-center rounded-[0.375rem] border border-border bg-background text-muted-foreground transition-colors duration-[180ms] ease-[cubic-bezier(0.4,0,0.2,1)] hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none"
+          className="absolute right-2 top-2 inline-flex size-8 items-center justify-center rounded-sm border border-border bg-background text-muted-foreground transition-colors duration-180 ease-in-out hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none"
         >
           <X className="size-4" strokeWidth={2} aria-hidden="true" />
         </button>

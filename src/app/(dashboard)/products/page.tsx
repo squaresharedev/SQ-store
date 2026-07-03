@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { requireUser } from "@/lib/auth/session";
-import { MOCK_PRODUCTS } from "@/lib/products/mock";
+import { listProducts } from "@/lib/products/queries";
 import { ProductList } from "@/components/products/ProductList";
-import { primaryButtonClass } from "@/components/products/control-styles";
+import { primaryButtonClass } from "@/components/ui/control-styles";
 
 export const metadata: Metadata = {
   title: "Products",
@@ -12,13 +12,11 @@ export const metadata: Metadata = {
 
 // PROTECTED — unauthenticated users are redirected to /login.
 export default async function ProductsPage() {
-  await requireUser("/products");
-
-  // UI-only stage: sample data. A later stage reads the seller's real products.
-  const products = MOCK_PRODUCTS;
+  const user = await requireUser("/products");
+  const products = await listProducts(user.id);
 
   return (
-    <main className="mx-auto max-w-[80rem] px-6 py-8">
+    <main className="mx-auto max-w-7xl px-6 py-8">
       <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold text-foreground md:text-3xl">

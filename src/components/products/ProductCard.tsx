@@ -2,8 +2,8 @@ import Link from "next/link";
 import { Image as ImageIcon, Pencil, Trash2 } from "lucide-react";
 import type { Product } from "@/types/product";
 import { cn } from "@/lib/utils";
-import { iconButtonClass } from "./control-styles";
-import { formatPrice } from "./product-format";
+import { iconButtonClass } from "@/components/ui/control-styles";
+import { formatPrice } from "@/lib/format";
 import { StatusBadge } from "./StatusBadge";
 
 // Presentational card (styles.md §8.7). Interactive handlers come from the
@@ -18,10 +18,10 @@ export function ProductCard({
   const { id, title, price, currency, status, imageUrl } = product;
 
   return (
-    <div className="flex flex-col rounded-[0.5rem] border border-border bg-card p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_1px_2px_rgba(0,0,0,0.04)] transition-shadow duration-[180ms] ease-[cubic-bezier(0.4,0,0.2,1)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] motion-reduce:transition-none">
-      <div className="relative aspect-[4/3] overflow-hidden rounded-[0.375rem] bg-muted">
+    <div className="flex flex-col rounded-md border border-border bg-card p-4 shadow-sm transition-shadow duration-180 ease-in-out hover:shadow-md motion-reduce:transition-none">
+      <div className="relative aspect-[4/3] overflow-hidden rounded-sm bg-muted">
         {imageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element -- placeholder path only; real thumbnails come from R2 (next stage).
+          // eslint-disable-next-line @next/next/no-img-element -- signed R2 URL with query params; next/image adds no value here.
           <img
             src={imageUrl}
             alt=""
