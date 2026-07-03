@@ -25,7 +25,7 @@ type NavLink = {
 };
 
 const MAIN_NAV: NavLink[] = [
-  { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
+  { label: "Overview", href: "/", icon: LayoutDashboard },
   { label: "Products", href: "/products", icon: Package },
   { label: "Storefront", href: "/storefront", icon: Store },
   { label: "Orders", href: "/orders", icon: ShoppingCart },

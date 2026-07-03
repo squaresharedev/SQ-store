@@ -1,5 +1,5 @@
 import { cache } from "react";
-import { redirect } from "next/navigation";
+import { redirect, unstable_rethrow } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import type { Profile } from "@/types";
@@ -18,36 +18,24 @@ import type { Profile } from "@/types";
  * Wrapped in React `cache` so repeated calls within one request/render dedupe
  * to a single network round-trip.
  *
- * NOTE: Handles Node.js v24 fetch errors gracefully by returning null.
+ * Catches genuine network failures (e.g. Supabase unreachable) and treats
+ * them as signed-out rather than crashing the render. `unstable_rethrow` lets
+ * Next.js's own control-flow errors (the dynamic-usage signal `cookies()`
+ * throws during static generation, or a `redirect()`) pass through uncaught —
+ * see https://nextjs.org/docs/app/api-reference/functions/unstable_rethrow.
  */
-
 export const getUser = cache(async (): Promise<User | null> => {
   try {
-    let supabase;
-    try {
-      supabase = await createClient();
-    } catch (clientError) {
-      console.warn("Failed to create Supabase client:", clientError);
-      return null;
-    }
-
-    try {
-      const {
-        data: { user },
-        error,
-      } = await supabase.auth.getUser();
-      if (error) {
-        console.warn("Auth error:", error);
-        return null;
-      }
-      return user;
-    } catch (authError) {
-      console.warn("Failed to get user:", authError);
-      return null;
-    }
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
+    if (error) return null;
+    return user;
   } catch (error) {
-    // Handle any unexpected errors gracefully
-    console.warn("Unexpected error in getUser:", error);
+    unstable_rethrow(error);
+    console.warn("Could not reach Supabase auth:", error);
     return null;
   }
 });
