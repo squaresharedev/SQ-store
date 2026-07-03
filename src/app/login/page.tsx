@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { LoginForm } from "@/components/auth/LoginForm";
+import { BackgroundArrow } from "@/components/ui/BackgroundArrow";
 import { SquareShareLogo } from "@/components/ui/square-share-logo";
 import { getUser } from "@/lib/auth/session";
 import { MARKETPLACE_URL } from "@/lib/site";
@@ -51,52 +52,10 @@ export default async function LoginPage({
         className="dot-grid pointer-events-none absolute inset-0"
       />
 
-      {/* Giant faint arrows bleeding off each side (desktop only). Left points
-          northeast, right points the opposite (southwest). */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute left-[-6rem] top-1/2 hidden -translate-y-1/2 text-neutral-900 opacity-[0.05] md:block"
-      >
-        <svg
-          width="600"
-          height="600"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="0.6"
-          strokeLinecap="butt"
-          strokeLinejoin="miter"
-          style={{ overflow: "visible" }}
-        >
-          {/* Shaft extended well past the icon's own bounds so it bleeds off
-              the screen edge and gets clipped by main's overflow-hidden,
-              while the tip (drawn by the second path) stays anchored in place. */}
-          <path d="M-13 37 17 7" />
-          <path d="M7 7h10v10" />
-        </svg>
-      </div>
-      <div
-        aria-hidden
-        className="pointer-events-none absolute right-[-6rem] top-1/2 hidden -translate-y-1/2 text-neutral-900 opacity-[0.05] md:block"
-      >
-        <svg
-          width="600"
-          height="600"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="0.6"
-          strokeLinecap="butt"
-          strokeLinejoin="miter"
-          style={{ overflow: "visible" }}
-        >
-          {/* Shaft extended well past the icon's own bounds so it bleeds off
-              the screen edge and gets clipped by main's overflow-hidden,
-              while the tip (drawn by the second path) stays anchored in place. */}
-          <path d="M37 -13 7 17" />
-          <path d="M17 17H7V7" />
-        </svg>
-      </div>
+      {/* Giant faint arrows bleeding off each side (desktop only) — shared
+          decorative motif, also used across /settings. */}
+      <BackgroundArrow side="left" />
+      <BackgroundArrow side="right" />
 
       <div className="relative z-10 w-full max-w-md">
         {/* Brand header: pixel mark + Space Grotesk wordmark */}

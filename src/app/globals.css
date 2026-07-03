@@ -20,6 +20,9 @@
 
   /* Signature glow */
   --shadow-btn-glow: 0 0 30px rgba(168, 85, 247, 0.3);
+
+  /* Feedback (styles.md §2.1) */
+  --color-success: #16a34a;
 }
 
 /* Font utilities map to the next/font local faces set on <html> in layout.tsx.
@@ -94,6 +97,10 @@
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
   --radius: 0rem; /* square corners are the identity */
+
+  /* Giant decorative background arrows (auth + settings). Low enough that
+     text drawn over them keeps full contrast. */
+  --decor-opacity: 0.05;
 }
 
 .dark {

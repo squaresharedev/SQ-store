@@ -24,6 +24,10 @@ export const secondaryButtonClass = `${BUTTON_BASE} rounded-sm border border-bor
 /** Quiet text button. */
 export const ghostButtonClass = `${BUTTON_BASE} rounded-sm text-muted-foreground hover:bg-accent hover:text-foreground`;
 
+/** Dangerous actions only (e.g. delete account). Outlined destructive token
+ *  that fills on hover — unmistakable, still square like every other CTA. */
+export const destructiveButtonClass = `${BUTTON_BASE} rounded-none border border-destructive bg-background text-destructive hover:bg-destructive hover:text-destructive-foreground`;
+
 /** Square icon-only button (styles.md §8.4). */
 export const iconButtonClass = `inline-flex size-9 items-center justify-center rounded-sm border border-border bg-background text-muted-foreground hover:bg-accent hover:text-foreground ${TRANSITION} ${FOCUS_RING}`;
 

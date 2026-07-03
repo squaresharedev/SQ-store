@@ -60,6 +60,60 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          deletion_requested_at: string | null
+          display_name: string | null
+          id: string
+          is_seller: boolean
+          legal_accepted_at: string | null
+          legal_accepted_version: string | null
+          notify_marketing: boolean
+          notify_product_updates: boolean
+          notify_sales: boolean
+          tax_business_name: string | null
+          tax_country: string | null
+          tax_vat_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          deletion_requested_at?: string | null
+          display_name?: string | null
+          id: string
+          is_seller?: boolean
+          legal_accepted_at?: string | null
+          legal_accepted_version?: string | null
+          notify_marketing?: boolean
+          notify_product_updates?: boolean
+          notify_sales?: boolean
+          tax_business_name?: string | null
+          tax_country?: string | null
+          tax_vat_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          deletion_requested_at?: string | null
+          display_name?: string | null
+          id?: string
+          is_seller?: boolean
+          legal_accepted_at?: string | null
+          legal_accepted_version?: string | null
+          notify_marketing?: boolean
+          notify_product_updates?: boolean
+          notify_sales?: boolean
+          tax_business_name?: string | null
+          tax_country?: string | null
+          tax_vat_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       storefronts: {
         Row: {
           config: Json
@@ -80,33 +134,6 @@ export type Database = {
           created_at?: string
           id?: string
           owner_id?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      profiles: {
-        Row: {
-          avatar_url: string | null
-          created_at: string
-          display_name: string | null
-          id: string
-          is_seller: boolean
-          updated_at: string
-        }
-        Insert: {
-          avatar_url?: string | null
-          created_at?: string
-          display_name?: string | null
-          id: string
-          is_seller?: boolean
-          updated_at?: string
-        }
-        Update: {
-          avatar_url?: string | null
-          created_at?: string
-          display_name?: string | null
-          id?: string
-          is_seller?: boolean
           updated_at?: string
         }
         Relationships: []
