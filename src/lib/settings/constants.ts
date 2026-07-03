@@ -2,7 +2,7 @@
 
 /**
  * Version tag recorded when a user accepts the legal docs. Bump this whenever
- * the Seller Agreement / Terms / Privacy copy materially changes — users who
+ * the Seller Agreement / Terms / Privacy copy materially changes. Users who
  * accepted an older version are prompted to re-accept.
  *
  * NOTE: the current docs are placeholder drafts; real legal copy is pending.
@@ -14,7 +14,7 @@ export const DELETE_CONFIRM_PHRASE = "delete my account";
 
 /**
  * EU member states for the tax section (ISO 3166-1 alpha-2). Collected for
- * upcoming VAT/invoicing work — nothing downstream consumes these yet.
+ * upcoming VAT/invoicing work, nothing downstream consumes these yet.
  */
 export const EU_COUNTRIES = [
   { code: "AT", name: "Austria" },

@@ -14,7 +14,7 @@ import {
 const INITIAL: SettingsActionState = {};
 
 /**
- * Email changes never touch the DB directly — Supabase sends a confirmation
+ * Email changes never touch the DB directly: Supabase sends a confirmation
  * link and the address only switches once it's clicked.
  */
 export function EmailChangeForm({ email }: { email: string }) {
@@ -26,7 +26,7 @@ export function EmailChangeForm({ email }: { email: string }) {
   return (
     <SettingsCard
       title="Email"
-      description="Changing it sends a confirmation link. Nothing moves until you click it."
+      description="Changing it sends a confirmation link first. Nothing moves until you actually click it, so typos here are low stakes."
     >
       <form action={formAction} className="flex flex-col gap-4" noValidate>
         <p className="font-inter text-sm text-neutral-500">
@@ -45,9 +45,14 @@ export function EmailChangeForm({ email }: { email: string }) {
             required
           />
         </div>
-        <FormStatus state={state} />
+        <FormStatus state={state} showSuccess />
         <div>
-          <SaveButton pending={isPending} pendingLabel="Sending…">
+          <SaveButton
+            pending={isPending}
+            state={state}
+            pendingLabel="Sending…"
+            savedLabel="Sent"
+          >
             Send confirmation link
           </SaveButton>
         </div>

@@ -1,11 +1,11 @@
 // Shared control class strings for the product UI (dashboard features import
-// these — never per-feature copies). Every value is a token: radius from the
+// these, never per-feature copies). Every value is a token: radius from the
 // styles.md scale (globals.css @theme), motion from duration-180 +
 // ease-in-out (= styles.md --duration / --ease-standard), colors semantic.
 //
-// BRAND RULE: primary CTAs are SHARP (rounded-none). Everything else uses the
-// normal radius tokens. Defined once here (and consumed by the Button
-// primitive) — never set CTA radius ad hoc in a component.
+// BRAND RULE: every button is SHARP (rounded-none). Only nav/menu items keep
+// a radius. Defined once here (and consumed by the Button primitive), never
+// set corner radius ad hoc in a component.
 
 const TRANSITION =
   "transition-colors duration-180 ease-in-out motion-reduce:transition-none";
@@ -18,18 +18,19 @@ const BUTTON_BASE = `inline-flex items-center justify-center gap-2 px-4 py-2.5 t
 /** Primary action: solid black, SHARP corners (styles.md §8.3 + CTA rule). */
 export const primaryButtonClass = `${BUTTON_BASE} rounded-none bg-primary text-primary-foreground hover:bg-primary/90`;
 
-/** Secondary / neutral action: bordered surface (styles.md §8.4). */
-export const secondaryButtonClass = `${BUTTON_BASE} rounded-sm border border-border bg-background text-foreground hover:bg-accent`;
+/** Secondary / neutral action: bordered surface (styles.md §8.4). Sharp
+ *  corners like every other button, only nav/menu items stay rounded. */
+export const secondaryButtonClass = `${BUTTON_BASE} rounded-none border border-border bg-background text-foreground hover:bg-accent`;
 
 /** Quiet text button. */
-export const ghostButtonClass = `${BUTTON_BASE} rounded-sm text-muted-foreground hover:bg-accent hover:text-foreground`;
+export const ghostButtonClass = `${BUTTON_BASE} rounded-none text-muted-foreground hover:bg-accent hover:text-foreground`;
 
 /** Dangerous actions only (e.g. delete account). Outlined destructive token
- *  that fills on hover — unmistakable, still square like every other CTA. */
+ *  that fills on hover: unmistakable, still square like every other CTA. */
 export const destructiveButtonClass = `${BUTTON_BASE} rounded-none border border-destructive bg-background text-destructive hover:bg-destructive hover:text-destructive-foreground`;
 
 /** Square icon-only button (styles.md §8.4). */
-export const iconButtonClass = `inline-flex size-9 items-center justify-center rounded-sm border border-border bg-background text-muted-foreground hover:bg-accent hover:text-foreground ${TRANSITION} ${FOCUS_RING}`;
+export const iconButtonClass = `inline-flex size-9 items-center justify-center rounded-none border border-border bg-background text-muted-foreground hover:bg-accent hover:text-foreground ${TRANSITION} ${FOCUS_RING}`;
 
 /** Text input / select / textarea (styles.md §8.6). `aria-invalid` flips the
  *  border to the destructive token; an inline message is always shown too. */

@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Spinner } from "@/components/ui/spinner";
 import { GoogleButton } from "@/components/auth/GoogleButton";
+import { PasswordResetModal } from "@/components/auth/PasswordResetModal";
 import { cn } from "@/lib/utils";
 
 type Mode = "signin" | "signup" | "magic";
@@ -19,6 +20,8 @@ export function LoginForm({ next = "/" }: { next?: string }) {
   const [mode, setMode] = React.useState<Mode>("signin");
   const [state, formAction, isPending] = useActionState(authenticate, INITIAL);
   const formRef = React.useRef<HTMLFormElement>(null);
+  const [resetOpen, setResetOpen] = React.useState(false);
+  const [resetEmail, setResetEmail] = React.useState("");
 
   const isMagic = mode === "magic";
   // The clicked submit button carries the intent, so exactly one is submitted.
@@ -30,13 +33,12 @@ export function LoginForm({ next = "/" }: { next?: string }) {
         ? "Send magic link"
         : "Sign in";
 
-  // "Forgot?" reuses the current form (email) but with the reset intent. It is a
-  // plain button (not a second submit) so Enter always triggers the primary CTA.
-  function submitReset() {
-    if (!formRef.current) return;
-    const data = new FormData(formRef.current);
-    data.set("intent", "reset");
-    React.startTransition(() => formAction(data));
+  // "Forgot?" opens the reset modal, prefilled with whatever email was typed.
+  function openReset() {
+    const typed =
+      formRef.current?.querySelector<HTMLInputElement>("#email")?.value ?? "";
+    setResetEmail(typed);
+    setResetOpen(true);
   }
 
   return (
@@ -103,10 +105,9 @@ export function LoginForm({ next = "/" }: { next?: string }) {
               {mode === "signin" && (
                 <button
                   type="button"
-                  onClick={submitReset}
-                  disabled={isPending}
+                  onClick={openReset}
                   suppressHydrationWarning
-                  className="font-inter text-xs text-neutral-400 transition-colors hover:text-neutral-700 disabled:opacity-50"
+                  className="font-inter text-xs text-neutral-400 transition-colors hover:text-neutral-700"
                 >
                   Forgot?
                 </button>
@@ -192,6 +193,13 @@ export function LoginForm({ next = "/" }: { next?: string }) {
           </button>
         </div>
       </form>
+
+      <PasswordResetModal
+        open={resetOpen}
+        onClose={() => setResetOpen(false)}
+        defaultEmail={resetEmail}
+        next={next}
+      />
     </div>
   );
 }

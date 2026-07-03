@@ -6,8 +6,8 @@ import {
 } from "@/types/storefront";
 
 // Server Components / Route Handlers only (cookies() is Node-only — never
-// middleware). RLS scopes rows to the owner; the explicit filter is defense
-// in depth.
+// middleware). RLS scopes every row to `owner_id = auth.uid()`, so this read
+// needs no caller-supplied id.
 
 export type StorefrontRecord = {
   /** Stable public id — the future embed / sales-attribution key. */
@@ -20,14 +20,11 @@ export type StorefrontRecord = {
  * config that fails the schema (stale shape, the initial '{}' default) falls
  * back to the default config rather than erroring.
  */
-export async function getStorefront(
-  ownerId: string,
-): Promise<StorefrontRecord | null> {
+export async function getStorefront(): Promise<StorefrontRecord | null> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("storefronts")
     .select("id, config")
-    .eq("owner_id", ownerId)
     .maybeSingle();
   if (error) throw new Error(`Failed to load storefront: ${error.message}`);
   if (!data) return null;

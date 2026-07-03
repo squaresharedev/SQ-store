@@ -4,8 +4,8 @@ import { PasswordChangeForm } from "@/components/settings/PasswordChangeForm";
 
 /**
  * Account section: display name, email (Supabase re-verification flow) and
- * password. Avatar upload is deferred — image uploads live in the storefront
- * slice's R2 path, and settings won't grow a second one.
+ * password. Avatar upload is deferred: image uploads already live in the
+ * storefront slice's R2 path, and settings won't grow a second one.
  */
 export function AccountSection({
   displayName,
@@ -20,7 +20,8 @@ export function AccountSection({
       <EmailChangeForm email={email} />
       <PasswordChangeForm />
       <p className="font-inter text-sm text-neutral-400">
-        Profile photos are coming soon, right after storefront images land.
+        Profile photos are coming soon. Until then, your initials get to do
+        all the work.
       </p>
     </div>
   );

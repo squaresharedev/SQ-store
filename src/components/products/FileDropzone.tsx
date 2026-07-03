@@ -112,7 +112,7 @@ export function FileDropzone({
           type="button"
           onClick={handleRemove}
           aria-label="Remove digital file"
-          className="absolute right-2 top-2 inline-flex size-8 items-center justify-center rounded-sm border border-border bg-background text-muted-foreground transition-colors duration-180 ease-in-out hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none"
+          className="absolute right-2 top-2 inline-flex size-8 items-center justify-center rounded-none border border-border bg-background text-muted-foreground transition-colors duration-180 ease-in-out hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none"
         >
           <X className="size-4" strokeWidth={2} aria-hidden="true" />
         </button>

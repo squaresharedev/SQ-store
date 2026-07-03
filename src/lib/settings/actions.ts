@@ -62,7 +62,7 @@ async function updateOwnProfile(
   const { error } = await supabase
     .from("profiles")
     .update({ ...update, updated_at: new Date().toISOString() })
-    .eq("id", userId); // owner id from the session — RLS enforces it again
+    .eq("id", userId); // owner id from the session, RLS enforces it again
   return !error;
 }
 
@@ -100,7 +100,7 @@ export async function updateDisplayName(
 }
 
 /**
- * Email changes go through Supabase's re-verification flow — never a DB
+ * Email changes go through Supabase's re-verification flow, never a DB
  * write. The address only switches once the confirmation link is clicked.
  */
 export async function requestEmailChange(
@@ -154,7 +154,7 @@ export async function changePassword(
   if (!parsed.success) return firstIssue(parsed.error);
 
   const supabase = await createClient();
-  // Re-authenticate before allowing the change — a stolen open session must
+  // Re-authenticate before allowing the change: a stolen open session must
   // not be enough to take over the account.
   const { error: reauthError } = await supabase.auth.signInWithPassword({
     email: user.email,
@@ -171,6 +171,35 @@ export async function changePassword(
       : { error: "Could not update the password. Try again." };
   }
   return { success: "Password updated." };
+}
+
+/**
+ * "Forgot your current password?" escape hatch for a signed-in user who can't
+ * complete the change-password form (which requires the current password).
+ * Emails a recovery link to their own account address, never a
+ * client-supplied one, which lands on /reset-password to set a new password
+ * without the old.
+ */
+export async function sendPasswordReset(
+  _prev: SettingsActionState,
+  formData: FormData,
+): Promise<SettingsActionState> {
+  const user = await getUser();
+  if (!user?.email) return SIGNED_OUT;
+  const rejected = unknownFieldError(formData, []);
+  if (rejected) return rejected;
+
+  const origin = await siteOrigin();
+  const supabase = await createClient();
+  const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
+    redirectTo: `${origin}/auth/callback?next=${encodeURIComponent("/reset-password")}`,
+  });
+  if (error) {
+    return error.code === "over_email_send_rate_limit"
+      ? { error: "Too many requests. Wait a minute and try again." }
+      : { error: "Could not send the reset email. Try again." };
+  }
+  return { success: "Reset link sent. Check your inbox." };
 }
 
 // --- Legal -----------------------------------------------------------------
@@ -259,7 +288,7 @@ export async function saveNotifications(
 /**
  * Deliberately a "request deletion" soft flag, not a hard delete. A complete
  * hard delete needs a service-role job (auth.admin.deleteUser cascades to
- * profiles/products/storefronts) plus R2 object cleanup — wiring that here
+ * profiles/products/storefronts) plus R2 object cleanup. Wiring that here
  * with the anon-key client would silently half-delete, so we flag instead.
  * Owner-scoped: the id comes from the session, never from the client.
  */

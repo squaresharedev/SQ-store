@@ -50,6 +50,7 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -93,6 +94,7 @@
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0 0);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
@@ -120,6 +122,7 @@
   --accent: #a855f7;
   --accent-foreground: #000000;
   --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: oklch(0.985 0 0);
   --border: oklch(1 0 0 / 12%);
   --input: oklch(1 0 0 / 15%);
   --ring: #a855f7;
@@ -232,11 +235,50 @@ textarea {
   animation: gradient-wave 6s linear infinite;
 }
 
+/* Success checkmark: the stroke draws itself in while the whole mark pops. Used
+   by the settings Save buttons when a submit succeeds. */
+@keyframes check-draw {
+  from {
+    stroke-dashoffset: 24;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes check-pop {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.animate-check-pop {
+  animation: check-pop 260ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.animate-check-draw {
+  stroke-dasharray: 24;
+  stroke-dashoffset: 24;
+  animation: check-draw 300ms cubic-bezier(0.65, 0, 0.35, 1) 80ms forwards;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
   }
   .gradient-wave-text {
     animation: none;
+  }
+  .animate-check-pop {
+    animation: none;
+  }
+  .animate-check-draw {
+    animation: none;
+    stroke-dashoffset: 0;
   }
 }
