@@ -1,5 +1,6 @@
 import { z } from "zod";
 import {
+  BACKGROUND_PRESETS,
   BLOCK_SIZES,
   CARD_STYLES,
   DEFAULT_STOREFRONT_CONFIG,
@@ -32,8 +33,16 @@ const hexColorSchema = z.string().regex(HEX_COLOR_PATTERN, {
 /** Sanity cap on grid size; the designer UI stays comfortably under it. */
 export const MAX_BLOCKS = 60;
 
+// Background accepts strict hex OR a named preset key (fixed allowlist).
+// Either way the stored value is only ever a key into code-defined styles or
+// a regex-gated color — never a raw CSS/gradient string.
+const backgroundSchema = z.union([
+  hexColorSchema,
+  z.enum(BACKGROUND_PRESETS),
+]);
+
 const themeSchema = z.strictObject({
-  background: hexColorSchema,
+  background: backgroundSchema,
   accent: hexColorSchema,
   font: z.enum(STOREFRONT_FONTS),
   radius: z.enum(STOREFRONT_RADII),

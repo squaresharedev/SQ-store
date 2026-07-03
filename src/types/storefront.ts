@@ -16,6 +16,28 @@ export type StorefrontRadius = (typeof STOREFRONT_RADII)[number];
 export const BLOCK_SIZES = ["1x1", "2x1", "2x2"] as const;
 export type BlockSize = (typeof BLOCK_SIZES)[number];
 
+/**
+ * Named background presets — a fixed allowlist. The config stores only the
+ * KEY; each key maps to predefined safe style values in
+ * components/storefront/background-presets.ts. User input never becomes a raw
+ * CSS/gradient string.
+ */
+export const BACKGROUND_PRESETS = [
+  "linen",
+  "mist",
+  "blush",
+  "sage",
+  "sky",
+  "lilac",
+  "sand",
+  "ink",
+] as const;
+export type BackgroundPreset = (typeof BACKGROUND_PRESETS)[number];
+
+export function isBackgroundPreset(value: string): value is BackgroundPreset {
+  return (BACKGROUND_PRESETS as readonly string[]).includes(value);
+}
+
 /** How a product tile lays out its info: bar under the image, bar overlaid on
  *  the image, or image-only with info revealed on hover/focus. */
 export const CARD_STYLES = ["standard", "overlay", "minimal"] as const;
@@ -35,7 +57,7 @@ export type TextAlign = (typeof TEXT_ALIGNS)[number];
 export const TEXT_MAX_LENGTH = 300;
 
 export type StorefrontTheme = {
-  /** Strict #rrggbb only — enforced by the schema before it touches a style. */
+  /** Strict #rrggbb hex OR a BackgroundPreset key — nothing else parses. */
   background: string;
   /** Strict #rrggbb only. */
   accent: string;

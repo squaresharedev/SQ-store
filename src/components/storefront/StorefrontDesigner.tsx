@@ -42,6 +42,9 @@ export function StorefrontDesigner({
     [...initialConfig.blocks].sort((a, b) => a.order - b.order),
   );
   const [saveState, setSaveState] = useState<SaveState>({ status: "idle" });
+  // Unsaved-edits flag, separate from saveState so "idle after load" and
+  // "idle with pending edits" render differently next to the Save button.
+  const [dirty, setDirty] = useState(false);
 
   const productsById = useMemo(
     () => new Map(products.map((product) => [product.id, product])),
@@ -58,6 +61,7 @@ export function StorefrontDesigner({
   );
 
   function markDirty() {
+    setDirty(true);
     setSaveState((current) =>
       current.status === "saving" ? current : { status: "idle" },
     );
@@ -147,6 +151,7 @@ export function StorefrontDesigner({
         ),
       );
     }
+    setDirty(false);
     setSaveState({ status: "saved", droppedBlocks: result.droppedBlocks });
   }
 
@@ -168,6 +173,11 @@ export function StorefrontDesigner({
               {saveState.droppedBlocks > 0
                 ? `Saved. ${saveState.droppedBlocks} removed product(s) were dropped.`
                 : "Saved."}
+            </span>
+          )}
+          {dirty && saveState.status === "idle" && (
+            <span role="status" className={helpTextClass}>
+              Unsaved changes
             </span>
           )}
           <Button onClick={handleSave} disabled={saveState.status === "saving"}>
