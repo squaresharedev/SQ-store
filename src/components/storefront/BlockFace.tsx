@@ -4,40 +4,26 @@ import { AlertCircle } from "lucide-react";
 import type { Product } from "@/types/product";
 import type { StorefrontBlock, StorefrontTheme } from "@/types/storefront";
 import { ProductTileContent } from "./ProductTileContent";
-import { TextTileContent, type TextBlockPatch } from "./TextTileContent";
+import { TextTileContent } from "./TextTileContent";
 
 /**
- * The visual face of one grid block, independent of drag/sort plumbing:
- * dispatches to the text or product content, or the flagged "product removed"
- * state when a referenced product no longer exists (never a crash). Used by
- * the sortable tile AND the drag overlay, so the floating copy always matches.
+ * The visual face of one grid block, independent of tile chrome: dispatches to
+ * the text or product content, or the flagged "product removed" state when a
+ * referenced product no longer exists (never a crash). Used by the in-place
+ * tile AND the drag overlay, so the floating copy always matches. View-only —
+ * text editing happens in the side panel.
  */
 export function BlockFace({
   block,
   product,
   theme,
-  editingText = false,
-  onUpdateText,
-  onDoneEditingText,
 }: {
   block: StorefrontBlock;
   product: Product | null;
   theme: StorefrontTheme;
-  /** Text editing is only wired on the live tile, never on the overlay. */
-  editingText?: boolean;
-  onUpdateText?: (patch: TextBlockPatch) => void;
-  onDoneEditingText?: () => void;
 }) {
   if (block.type === "text") {
-    return (
-      <TextTileContent
-        block={block}
-        theme={theme}
-        editing={editingText}
-        onUpdate={onUpdateText ?? (() => {})}
-        onDoneEditing={onDoneEditingText ?? (() => {})}
-      />
-    );
+    return <TextTileContent block={block} theme={theme} />;
   }
   if (product) {
     return <ProductTileContent product={product} theme={theme} />;

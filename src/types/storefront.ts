@@ -7,36 +7,53 @@
 // Type aliases (not interfaces) on purpose: aliases get TypeScript's implicit
 // index signature, so the config assigns cleanly to Supabase's `Json`.
 
-export const STOREFRONT_FONTS = ["sans", "serif", "mono"] as const;
+export const STOREFRONT_FONTS = [
+  "sans",
+  "serif",
+  "mono",
+  "display",
+  "hand",
+] as const;
 export type StorefrontFont = (typeof STOREFRONT_FONTS)[number];
 
 export const STOREFRONT_RADII = ["none", "sm", "md", "lg"] as const;
 export type StorefrontRadius = (typeof STOREFRONT_RADII)[number];
 
-export const BLOCK_SIZES = ["1x1", "2x1", "2x2"] as const;
+// Every rectangle from 1×1 up to 3×3 (`<cols>x<rows>`) — small, wide, tall, and
+// large squares — for shape variety. Must stay identical to the shared grid's
+// GridSize (components/grid/gridConstants.ts) so the two interoperate.
+export const BLOCK_SIZES = [
+  "1x1", "2x1", "3x1",
+  "1x2", "2x2", "3x2",
+  "1x3", "2x3", "3x3",
+] as const;
 export type BlockSize = (typeof BLOCK_SIZES)[number];
 
 /**
- * Named background presets — a fixed allowlist. The config stores only the
- * KEY; each key maps to predefined safe style values in
- * components/storefront/background-presets.ts. User input never becomes a raw
- * CSS/gradient string.
+ * Named texture patterns — a fixed allowlist. The config stores only the KEY;
+ * each maps to predefined safe CSS in components/storefront/background-presets.ts.
+ * User input never becomes a raw CSS string.
  */
-export const BACKGROUND_PRESETS = [
-  "linen",
-  "mist",
-  "blush",
-  "sage",
-  "sky",
-  "lilac",
-  "sand",
-  "ink",
+export const PATTERN_PRESETS = [
+  "dots",
+  "grid",
+  "graph",
+  "diagonal",
+  "crosshatch",
+  "checker",
 ] as const;
-export type BackgroundPreset = (typeof BACKGROUND_PRESETS)[number];
+export type PatternPreset = (typeof PATTERN_PRESETS)[number];
 
-export function isBackgroundPreset(value: string): value is BackgroundPreset {
-  return (BACKGROUND_PRESETS as readonly string[]).includes(value);
-}
+/**
+ * The storefront canvas background — a closed set of safe shapes: a solid hex,
+ * a custom two-stop gradient (hex + hex + angle), or a pattern preset over a
+ * base hex. Everything resolves through code-defined CSS (resolveBackgroundStyle);
+ * no raw CSS/gradient string is ever stored or rendered.
+ */
+export type StorefrontBackground =
+  | { kind: "solid"; color: string }
+  | { kind: "gradient"; from: string; to: string; angle: number }
+  | { kind: "pattern"; preset: PatternPreset; color: string };
 
 /** How a product tile lays out its info: bar under the image, bar overlaid on
  *  the image, or image-only with info revealed on hover/focus. */
@@ -46,6 +63,29 @@ export type CardStyle = (typeof CARD_STYLES)[number];
 /** Price on product tiles: always visible, revealed on hover/focus, or hidden. */
 export const PRICE_DISPLAYS = ["always", "hover", "never"] as const;
 export type PriceDisplay = (typeof PRICE_DISPLAYS)[number];
+
+/** Extra clip on PRODUCT tiles: force sharp, follow the theme radius, or a
+ *  full circle (best on 1×1 blocks). Text blocks keep the theme radius. */
+export const CARD_SHAPES = ["square", "rounded", "circle"] as const;
+export type CardShape = (typeof CARD_SHAPES)[number];
+
+/** Where the price tag sits on a product tile. `hidden` wins over
+ *  `priceDisplay` (either can hide the price). */
+export const PRICE_TAG_POSITIONS = [
+  "below",
+  "onImage",
+  "corner",
+  "hidden",
+] as const;
+export type PriceTagPosition = (typeof PRICE_TAG_POSITIONS)[number];
+
+export const PRICE_TAG_STYLES = ["plain", "pill"] as const;
+export type PriceTagStyle = (typeof PRICE_TAG_STYLES)[number];
+
+/** How the storefront lays out blocks. `carousel` is UI + schema only for
+ *  now — the designer previews it as a placeholder (TODO: real carousel). */
+export const DISPLAY_MODES = ["grid", "carousel"] as const;
+export type DisplayMode = (typeof DISPLAY_MODES)[number];
 
 export const TEXT_VARIANTS = ["heading", "subheading", "body"] as const;
 export type TextVariant = (typeof TEXT_VARIANTS)[number];
@@ -57,14 +97,19 @@ export type TextAlign = (typeof TEXT_ALIGNS)[number];
 export const TEXT_MAX_LENGTH = 300;
 
 export type StorefrontTheme = {
-  /** Strict #rrggbb hex OR a BackgroundPreset key — nothing else parses. */
-  background: string;
+  /** Solid / gradient / pattern — see StorefrontBackground. */
+  background: StorefrontBackground;
   /** Strict #rrggbb only. */
   accent: string;
   font: StorefrontFont;
   radius: StorefrontRadius;
   cardStyle: CardStyle;
   priceDisplay: PriceDisplay;
+  cardShape: CardShape;
+  priceTagPosition: PriceTagPosition;
+  priceTagStyle: PriceTagStyle;
+  showTitle: boolean;
+  displayMode: DisplayMode;
 };
 
 export type ProductBlock = {
@@ -85,6 +130,10 @@ export type TextBlock = {
   align: TextAlign;
   size: BlockSize;
   order: number;
+  /** Inline formatting toggles. Applied as tokenized classes (never markup). */
+  bold?: boolean;
+  italic?: boolean;
+  underline?: boolean;
 };
 
 export type StorefrontBlock = ProductBlock | TextBlock;
@@ -102,12 +151,18 @@ export type StorefrontConfig = {
 /** Starting point for sellers who have not saved a storefront yet. */
 export const DEFAULT_STOREFRONT_CONFIG: StorefrontConfig = {
   theme: {
-    background: "#ffffff",
+    background: { kind: "solid", color: "#ffffff" },
     accent: "#171717",
     font: "sans",
-    radius: "sm",
+    radius: "none",
     cardStyle: "standard",
     priceDisplay: "always",
+    // Defaults render identically to configs saved before these fields existed.
+    cardShape: "rounded",
+    priceTagPosition: "below",
+    priceTagStyle: "plain",
+    showTitle: true,
+    displayMode: "grid",
   },
   blocks: [],
 };

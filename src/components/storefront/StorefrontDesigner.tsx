@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { AlertCircle } from "lucide-react";
+import Link from "next/link";
+import { AlertCircle, ArrowLeft } from "lucide-react";
 import type { Product } from "@/types/product";
 import {
   blockKey,
@@ -9,14 +10,16 @@ import {
   type StorefrontBlock,
   type StorefrontConfig,
   type StorefrontTheme,
+  type TextBlock,
 } from "@/types/storefront";
 import { MAX_BLOCKS } from "@/lib/validation/storefront";
 import { saveStorefront } from "@/lib/storefront/actions";
+import { STOREFRONT_NAME_MAX } from "@/lib/validation/storefront";
 import { Button } from "@/components/ui/button";
-import { helpTextClass } from "@/components/ui/control-styles";
+import { helpTextClass, iconButtonClass } from "@/components/ui/control-styles";
 import { ControlsPanel } from "./ControlsPanel";
 import { DesignerCanvas } from "./DesignerCanvas";
-import type { TextBlockPatch } from "./TextTileContent";
+import type { TextBlockPatch } from "./TextBlockEditor";
 
 type SaveState =
   | { status: "idle" }
@@ -31,12 +34,17 @@ type SaveState =
  * re-checks product ownership server-side.
  */
 export function StorefrontDesigner({
+  storefrontId,
+  initialName,
   initialConfig,
   products,
 }: {
+  storefrontId: string;
+  initialName: string;
   initialConfig: StorefrontConfig;
   products: Product[];
 }) {
+  const [name, setName] = useState(initialName);
   const [theme, setTheme] = useState<StorefrontTheme>(initialConfig.theme);
   const [blocks, setBlocks] = useState<StorefrontBlock[]>(() =>
     [...initialConfig.blocks].sort((a, b) => a.order - b.order),
@@ -45,6 +53,8 @@ export function StorefrontDesigner({
   // Unsaved-edits flag, separate from saveState so "idle after load" and
   // "idle with pending edits" render differently next to the Save button.
   const [dirty, setDirty] = useState(false);
+  // Which text block (by key) is open in the side-panel editor, if any.
+  const [editingKey, setEditingKey] = useState<string | null>(null);
 
   const productsById = useMemo(
     () => new Map(products.map((product) => [product.id, product])),
@@ -59,6 +69,11 @@ export function StorefrontDesigner({
       ),
     [blocks],
   );
+  const editingTextBlock = useMemo<TextBlock | null>(() => {
+    if (!editingKey) return null;
+    const block = blocks.find((b) => blockKey(b) === editingKey);
+    return block && block.type === "text" ? block : null;
+  }, [blocks, editingKey]);
 
   function markDirty() {
     setDirty(true);
@@ -79,23 +94,24 @@ export function StorefrontDesigner({
   function addTextBlock() {
     if (blocks.length >= MAX_BLOCKS) return;
     markDirty();
-    setBlocks((current) => [
-      ...current,
-      {
-        type: "text",
-        id: crypto.randomUUID(),
-        text: "Your text here",
-        variant: "heading",
-        align: "left",
-        size: "2x1",
-        order: current.length,
-      },
-    ]);
+    const newBlock: TextBlock = {
+      type: "text",
+      id: crypto.randomUUID(),
+      text: "Your text here",
+      variant: "heading",
+      align: "left",
+      size: "2x1",
+      order: blocks.length,
+    };
+    setBlocks((current) => [...current, { ...newBlock, order: current.length }]);
+    // Open the new block in the side-panel editor immediately.
+    setEditingKey(blockKey(newBlock));
   }
 
   function removeBlock(key: string) {
     markDirty();
     setBlocks((current) => current.filter((b) => blockKey(b) !== key));
+    setEditingKey((current) => (current === key ? null : current));
   }
 
   function setBlockSize(key: string, size: BlockSize) {
@@ -132,13 +148,18 @@ export function StorefrontDesigner({
     setTheme(next);
   }
 
+  function updateName(next: string) {
+    markDirty();
+    setName(next);
+  }
+
   async function handleSave() {
     setSaveState({ status: "saving" });
     const config: StorefrontConfig = {
       theme,
       blocks: blocks.map((block, index) => ({ ...block, order: index })),
     };
-    const result = await saveStorefront(config);
+    const result = await saveStorefront(storefrontId, { name, config });
     if (!result.ok) {
       setSaveState({ status: "error", message: result.error });
       return;
@@ -156,75 +177,104 @@ export function StorefrontDesigner({
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold text-foreground md:text-3xl">
-            Storefront
-          </h1>
-          <p className="mt-1 font-inter text-sm text-muted-foreground">
-            Arrange products and text into the grid buyers will see, and set
-            your theme.
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          {saveState.status === "saved" && (
-            <span role="status" className={helpTextClass}>
-              {saveState.droppedBlocks > 0
-                ? `Saved. ${saveState.droppedBlocks} removed product(s) were dropped.`
-                : "Saved."}
-            </span>
-          )}
-          {dirty && saveState.status === "idle" && (
-            <span role="status" className={helpTextClass}>
-              Unsaved changes
-            </span>
-          )}
-          <Button onClick={handleSave} disabled={saveState.status === "saving"}>
-            {saveState.status === "saving" ? "Saving…" : "Save storefront"}
-          </Button>
-        </div>
-      </div>
+    <div className="min-h-screen bg-background">
+      {/* Full-screen editor top bar — no sidebar here, so this is the only
+          chrome. Sticky so Save + the storefront name stay reachable. */}
+      <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+        <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 sm:px-6">
+          <Link
+            href="/storefront"
+            aria-label="Back to storefronts"
+            className={iconButtonClass}
+          >
+            <ArrowLeft className="size-4" strokeWidth={2} aria-hidden="true" />
+          </Link>
 
-      {saveState.status === "error" && (
-        <div
-          role="alert"
-          className="flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/5 px-4 py-3"
-        >
-          <AlertCircle
-            className="mt-0.5 size-4 shrink-0 text-destructive"
-            strokeWidth={2}
-            aria-hidden="true"
-          />
-          <p className="font-inter text-sm text-destructive">
-            {saveState.message}
-          </p>
-        </div>
-      )}
+          <div className="min-w-0 flex-1">
+            <label htmlFor="storefront-name" className="sr-only">
+              Storefront name
+            </label>
+            <input
+              id="storefront-name"
+              value={name}
+              onChange={(event) => updateName(event.target.value)}
+              placeholder="Untitled storefront"
+              maxLength={STOREFRONT_NAME_MAX}
+              spellCheck={false}
+              className="w-full max-w-md truncate rounded-sm border border-transparent bg-transparent px-2 py-1 text-lg font-semibold text-foreground placeholder:text-muted-foreground hover:border-border focus:border-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            />
+          </div>
 
-      <div className="flex flex-col gap-6 lg:flex-row">
-        <div className="shrink-0 lg:w-72">
-          <ControlsPanel
-            products={products}
-            usedProductIds={usedProductIds}
-            theme={theme}
-            onAddProduct={addProduct}
-            onAddText={addTextBlock}
-            onThemeChange={updateTheme}
-          />
+          <div className="flex items-center gap-3">
+            {saveState.status === "saved" && (
+              <span role="status" className={`hidden sm:inline ${helpTextClass}`}>
+                {saveState.droppedBlocks > 0
+                  ? `Saved. ${saveState.droppedBlocks} removed product(s) were dropped.`
+                  : "Saved."}
+              </span>
+            )}
+            {dirty && saveState.status === "idle" && (
+              <span role="status" className={`hidden sm:inline ${helpTextClass}`}>
+                Unsaved changes
+              </span>
+            )}
+            <Button
+              onClick={handleSave}
+              disabled={saveState.status === "saving"}
+            >
+              {saveState.status === "saving" ? "Saving…" : "Save"}
+            </Button>
+          </div>
         </div>
-        <div className="min-w-0 flex-1">
-          <DesignerCanvas
-            blocks={blocks}
-            productsById={productsById}
-            theme={theme}
-            onReorder={reorderBlocks}
-            onSizeChange={setBlockSize}
-            onRemove={removeBlock}
-            onUpdateText={updateTextBlock}
-          />
+      </header>
+
+      <main className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6">
+        {saveState.status === "error" && (
+          <div
+            role="alert"
+            className="flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/5 px-4 py-3"
+          >
+            <AlertCircle
+              className="mt-0.5 size-4 shrink-0 text-destructive"
+              strokeWidth={2}
+              aria-hidden="true"
+            />
+            <p className="font-inter text-sm text-destructive">
+              {saveState.message}
+            </p>
+          </div>
+        )}
+
+        <div className="flex flex-col gap-6 lg:flex-row">
+          <div className="min-w-0 flex-1">
+            <DesignerCanvas
+              blocks={blocks}
+              productsById={productsById}
+              theme={theme}
+              onReorder={reorderBlocks}
+              onSizeChange={setBlockSize}
+              onRemove={removeBlock}
+              editingKey={editingKey}
+              onEditText={setEditingKey}
+            />
+          </div>
+          <div className="shrink-0 lg:w-72">
+            <ControlsPanel
+              products={products}
+              usedProductIds={usedProductIds}
+              theme={theme}
+              editingTextBlock={editingTextBlock}
+              onAddProduct={addProduct}
+              onAddText={addTextBlock}
+              onThemeChange={updateTheme}
+              onUpdateTextBlock={(patch) =>
+                editingKey && updateTextBlock(editingKey, patch)
+              }
+              onDoneEditingText={() => setEditingKey(null)}
+            />
+          </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

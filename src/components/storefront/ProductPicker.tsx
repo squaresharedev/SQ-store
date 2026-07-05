@@ -35,6 +35,42 @@ export function ProductPicker({
     );
   }
 
+  const selected = products.filter((product) => usedProductIds.has(product.id));
+  const available = products.filter((product) => !usedProductIds.has(product.id));
+
+  return (
+    <div className="space-y-3">
+      {selected.length > 0 && (
+        <div className="space-y-1">
+          <p className="font-inter text-xs font-medium text-muted-foreground">
+            In grid
+          </p>
+          <ProductList products={selected} usedProductIds={usedProductIds} onAdd={onAdd} />
+        </div>
+      )}
+      {available.length > 0 && (
+        <div className="space-y-1">
+          {selected.length > 0 && (
+            <p className="font-inter text-xs font-medium text-muted-foreground">
+              Available
+            </p>
+          )}
+          <ProductList products={available} usedProductIds={usedProductIds} onAdd={onAdd} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ProductList({
+  products,
+  usedProductIds,
+  onAdd,
+}: {
+  products: Product[];
+  usedProductIds: ReadonlySet<string>;
+  onAdd: (productId: string) => void;
+}) {
   return (
     <ul className="space-y-1">
       {products.map((product) => {

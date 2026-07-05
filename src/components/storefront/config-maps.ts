@@ -1,5 +1,5 @@
 import type {
-  BlockSize,
+  CardShape,
   StorefrontFont,
   StorefrontRadius,
   TextAlign,
@@ -14,6 +14,8 @@ export const FONT_CLASSES: Record<StorefrontFont, string> = {
   sans: "font-sans",
   serif: "font-serif",
   mono: "font-mono",
+  display: "font-display",
+  hand: "font-hand",
 };
 
 export const RADIUS_CLASSES: Record<StorefrontRadius, string> = {
@@ -23,18 +25,14 @@ export const RADIUS_CLASSES: Record<StorefrontRadius, string> = {
   lg: "rounded-lg",
 };
 
-/** Spans on the fixed 4-column bento grid (2 columns under `sm`). */
-export const SIZE_CLASSES: Record<BlockSize, string> = {
-  "1x1": "col-span-1 row-span-1",
-  "2x1": "col-span-2 row-span-1",
-  "2x2": "col-span-2 row-span-2",
+// Extra clip applied to PRODUCT tiles only — text tiles keep the theme radius.
+// `rounded` intentionally inherits the cell's own clip (no override needed).
+export const CARD_SHAPE_CLASSES: Record<CardShape, string> = {
+  square: "rounded-none overflow-hidden",
+  rounded: "",
+  circle: "rounded-full overflow-hidden",
 };
 
-export const SIZE_LABELS: Record<BlockSize, string> = {
-  "1x1": "Small square",
-  "2x1": "Wide",
-  "2x2": "Large square",
-};
 
 export const TEXT_VARIANT_CLASSES: Record<TextVariant, string> = {
   heading: "text-xl font-semibold sm:text-2xl",

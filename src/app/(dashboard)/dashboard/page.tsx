@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getDashboardOrders, getProductsSummary } from "@/lib/dashboard/queries";
-import { getStorefront } from "@/lib/storefront/queries";
+import { listStorefronts } from "@/lib/storefront/queries";
 import { DashboardHome } from "@/components/dashboard/DashboardHome";
 
 export const metadata: Metadata = {
@@ -10,19 +10,26 @@ export const metadata: Metadata = {
 // PROTECTED by (dashboard)/layout.tsx. All reads are owner-scoped (session +
 // RLS) and strictly read-only against products / storefronts / orders.
 export default async function DashboardOverviewPage() {
-  const [orders, products, storefront] = await Promise.all([
+  const [orders, products, storefronts] = await Promise.all([
     getDashboardOrders(),
     getProductsSummary(),
-    getStorefront(),
+    listStorefronts(),
   ]);
+
+  // The overview's storefront tile summarizes across all of the seller's
+  // storefronts: "saved" once any exist, block count summed over them.
+  const storefrontBlockCount = storefronts.reduce(
+    (total, storefront) => total + storefront.blockCount,
+    0,
+  );
 
   return (
     <main>
       <DashboardHome
         orders={orders}
         products={products}
-        storefrontSaved={storefront !== null}
-        storefrontBlockCount={storefront?.config.blocks.length ?? 0}
+        storefrontSaved={storefronts.length > 0}
+        storefrontBlockCount={storefrontBlockCount}
       />
     </main>
   );

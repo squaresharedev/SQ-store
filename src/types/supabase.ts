@@ -119,6 +119,7 @@ export type Database = {
           config: Json
           created_at: string
           id: string
+          name: string
           owner_id: string
           updated_at: string
         }
@@ -126,6 +127,7 @@ export type Database = {
           config?: Json
           created_at?: string
           id?: string
+          name?: string
           owner_id: string
           updated_at?: string
         }
@@ -133,6 +135,7 @@ export type Database = {
           config?: Json
           created_at?: string
           id?: string
+          name?: string
           owner_id?: string
           updated_at?: string
         }

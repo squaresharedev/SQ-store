@@ -1,14 +1,13 @@
-import { formatPrice } from "@/lib/format";
 import type { Currency } from "@/types/product";
-import { toCurrency, type MoneyByCurrency } from "./queries";
+import { formatCents } from "@/lib/format/money";
+import type { MoneyByCurrency } from "./queries";
 
 // Display helpers for dashboard money/dates. Money is ALWAYS integer cents in
 // (from the DB) and formatted major units out — never float math on amounts.
+// The single cents→display formatter lives in lib/format/money.ts (client-safe);
+// this module re-exports it for existing dashboard imports.
 
-/** `1400` + `"EUR"` -> `"€14.00"`. */
-export function formatCents(cents: number, currency: string): string {
-  return formatPrice(cents / 100, toCurrency(currency));
-}
+export { formatCents } from "@/lib/format/money";
 
 /**
  * Per-currency totals joined for display, e.g. `"€64.00 · US$12.00"`.

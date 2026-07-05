@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { SettingsShell } from "@/components/settings/SettingsShell";
-import { requireUser } from "@/lib/auth/session";
+import { getProfile, requireUser } from "@/lib/auth/session";
 
 export const metadata: Metadata = {
   title: "Settings",
@@ -21,11 +21,13 @@ export default async function SettingsLayout({
 }: {
   children: React.ReactNode;
 }) {
-  await requireUser("/settings");
+  const user = await requireUser("/settings");
+  const profile = await getProfile();
+  const username = profile?.display_name || user.email?.split("@")[0] || "Account";
 
   return (
     <div className="min-h-screen bg-background">
-      <Sidebar />
+      <Sidebar username={username} />
       <div className="md:pl-64">
         <SettingsShell>{children}</SettingsShell>
       </div>

@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/session";
+import { toCurrency } from "@/lib/format/money";
 import type { Currency } from "@/types/product";
 
 // READ-ONLY dashboard aggregates. Server Components / Route Handlers only
@@ -35,12 +36,23 @@ export type MetricWindow = {
   aov: MoneyByCurrency;
 };
 
-export type ChannelStats = { revenue: MoneyByCurrency; sales: number };
-
 export type TopProduct = {
   title: string;
   revenue: MoneyByCurrency;
   sales: number;
+};
+
+/**
+ * Direction of the last 30 days vs the 30 days before it — drives the sparkline
+ * colour. `surge` (>=10x) is a deliberate purple easter egg for real breakouts.
+ */
+export type TrendTone = "up" | "down" | "flat" | "surge";
+
+/** A bare trend line: daily values (oldest->newest) + its period-over-period tone. */
+export type MetricTrend = {
+  /** ~30 daily buckets over the last 30 days, oldest first. */
+  points: number[];
+  tone: TrendTone;
 };
 
 export type DashboardOrdersData = {
@@ -48,8 +60,10 @@ export type DashboardOrdersData = {
   available: boolean;
   last30d: MetricWindow;
   allTime: MetricWindow;
-  /** Paid orders only, all-time. */
-  channelSplit: Record<OrderChannel, ChannelStats>;
+  /** Daily sales-count trend, last 30 days vs the 30 before. */
+  salesTrend: MetricTrend;
+  /** Daily average-order-value trend, last 30 days vs the 30 before. */
+  aovTrend: MetricTrend;
   /** Latest ~5, any status. */
   recentOrders: DashboardOrder[];
   /** Top ~5 by paid revenue, all-time (product_title snapshot). */
@@ -60,10 +74,39 @@ export type DashboardOrdersData = {
 
 /** Read cap — seeded/early data is far below this; revisit with real volume. */
 const ORDERS_READ_LIMIT = 1000;
-const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+const DAY_MS = 24 * 60 * 60 * 1000;
+const TREND_DAYS = 30;
+const THIRTY_DAYS_MS = TREND_DAYS * DAY_MS;
+/** A 10x period-over-period jump trips the purple "surge" easter egg. */
+const SURGE_RATIO = 10;
 
-export function toCurrency(value: string): Currency {
-  return value === "USD" ? "USD" : "EUR";
+export { toCurrency };
+
+/** Colour signal for a metric: last window vs the one before it. */
+function trendTone(current: number, previous: number): TrendTone {
+  // No prior baseline -> no ratio to speak of; any new activity reads as "up".
+  if (previous <= 0) return current > 0 ? "up" : "flat";
+  if (current >= previous * SURGE_RATIO) return "surge";
+  if (current > previous) return "up";
+  if (current < previous) return "down";
+  return "flat";
+}
+
+/**
+ * Paid orders bucketed into `TREND_DAYS` daily slots (oldest first) relative to
+ * `now`. Orders outside the window are ignored; empty days stay 0.
+ */
+function dailyBuckets(orders: DashboardOrder[], now: number) {
+  const revenue = new Array<number>(TREND_DAYS).fill(0);
+  const count = new Array<number>(TREND_DAYS).fill(0);
+  for (const order of orders) {
+    const ageDays = Math.floor((now - new Date(order.created_at).getTime()) / DAY_MS);
+    if (ageDays < 0 || ageDays >= TREND_DAYS) continue;
+    const idx = TREND_DAYS - 1 - ageDays; // oldest -> newest
+    revenue[idx] += order.amount_cents;
+    count[idx] += 1;
+  }
+  return { revenue, count };
 }
 
 function addMoney(target: MoneyByCurrency, currency: string, cents: number) {
@@ -80,10 +123,8 @@ export function emptyOrdersData(available = false): DashboardOrdersData {
     available,
     last30d: emptyWindow(),
     allTime: emptyWindow(),
-    channelSplit: {
-      embed: { revenue: {}, sales: 0 },
-      marketplace: { revenue: {}, sales: 0 },
-    },
+    salesTrend: { points: [], tone: "flat" },
+    aovTrend: { points: [], tone: "flat" },
     recentOrders: [],
     topProducts: [],
     refundedCount: 0,
@@ -134,22 +175,40 @@ export async function getDashboardOrders(): Promise<DashboardOrdersData> {
     return emptyOrdersData();
   }
 
-  const orders = (data ?? []) as DashboardOrder[];
+  // EUR-only for now: USD orders don't count anywhere on the dashboard until
+  // multi-currency viewing/transacting ships. MoneyByCurrency stays multi-key
+  // so that work is additive later, not a rewrite.
+  const orders = ((data ?? []) as DashboardOrder[]).filter(
+    (order) => toCurrency(order.currency) === "EUR",
+  );
   const paid = orders.filter((order) => order.status === "paid");
-  const cutoff = Date.now() - THIRTY_DAYS_MS;
+  const now = Date.now();
+  const cutoff = now - THIRTY_DAYS_MS;
+  const cutoffPrev = now - THIRTY_DAYS_MS * 2;
   const paidLast30d = paid.filter(
     (order) => new Date(order.created_at).getTime() >= cutoff,
   );
+  // The 30 days before last30d — the baseline every trend is measured against.
+  const paidPrev30d = paid.filter((order) => {
+    const time = new Date(order.created_at).getTime();
+    return time >= cutoffPrev && time < cutoff;
+  });
+  const last30d = windowFromPaid(paidLast30d);
+  const prev30d = windowFromPaid(paidPrev30d);
 
-  const channelSplit: Record<OrderChannel, ChannelStats> = {
-    embed: { revenue: {}, sales: 0 },
-    marketplace: { revenue: {}, sales: 0 },
+  // Sparkline series: daily buckets over the last 30 days (colour compares the
+  // whole window to the prior one, not the noisy day-to-day points).
+  const buckets = dailyBuckets(paidLast30d, now);
+  const salesTrend: MetricTrend = {
+    points: buckets.count,
+    tone: trendTone(last30d.sales, prev30d.sales),
   };
-  for (const order of paid) {
-    const channel = order.channel === "marketplace" ? "marketplace" : "embed";
-    addMoney(channelSplit[channel].revenue, order.currency, order.amount_cents);
-    channelSplit[channel].sales += 1;
-  }
+  const aovTrend: MetricTrend = {
+    points: buckets.revenue.map((rev, i) =>
+      buckets.count[i] > 0 ? Math.round(rev / buckets.count[i]) : 0,
+    ),
+    tone: trendTone(last30d.aov.EUR ?? 0, prev30d.aov.EUR ?? 0),
+  };
 
   const byTitle = new Map<string, TopProduct>();
   for (const order of paid) {
@@ -168,9 +227,10 @@ export async function getDashboardOrders(): Promise<DashboardOrdersData> {
 
   return {
     available: true,
-    last30d: windowFromPaid(paidLast30d),
+    last30d,
     allTime: windowFromPaid(paid),
-    channelSplit,
+    salesTrend,
+    aovTrend,
     recentOrders: orders.slice(0, 5),
     topProducts,
     refundedCount: orders.filter((o) => o.status === "refunded").length,

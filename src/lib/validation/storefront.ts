@@ -1,18 +1,24 @@
 import { z } from "zod";
 import {
-  BACKGROUND_PRESETS,
   BLOCK_SIZES,
+  CARD_SHAPES,
   CARD_STYLES,
   DEFAULT_STOREFRONT_CONFIG,
+  DISPLAY_MODES,
+  PATTERN_PRESETS,
   PRICE_DISPLAYS,
+  PRICE_TAG_POSITIONS,
+  PRICE_TAG_STYLES,
   STOREFRONT_FONTS,
   STOREFRONT_RADII,
   TEXT_ALIGNS,
   TEXT_MAX_LENGTH,
   TEXT_VARIANTS,
   blockKey,
+  type StorefrontBackground,
   type StorefrontConfig,
 } from "@/types/storefront";
+import { LEGACY_BACKGROUND_GRADIENTS } from "@/components/storefront/background-presets";
 
 // The security contract for storefront configs. Parsed server-side on EVERY
 // save (client checks are UX only). Hard rules: strict hex colors, enums only
@@ -26,6 +32,19 @@ export function isStrictHexColor(value: string): boolean {
   return HEX_COLOR_PATTERN.test(value);
 }
 
+/** A storefront's public id (also the future embed/attribution key). Guards
+ *  URL params + action inputs so a garbage id 404s instead of erroring. */
+export const storefrontIdSchema = z.uuid();
+
+/** Display name shown in the storefront list. Mirrors the DB check
+ *  (char_length 1..80); trimmed before validation by callers. */
+export const STOREFRONT_NAME_MAX = 80;
+export const storefrontNameSchema = z
+  .string()
+  .trim()
+  .min(1, { error: "Give your storefront a name." })
+  .max(STOREFRONT_NAME_MAX, { error: "Storefront names are 80 characters or fewer." });
+
 const hexColorSchema = z.string().regex(HEX_COLOR_PATTERN, {
   error: "Colors must be 6-digit hex, like #a855f7.",
 });
@@ -33,12 +52,23 @@ const hexColorSchema = z.string().regex(HEX_COLOR_PATTERN, {
 /** Sanity cap on grid size; the designer UI stays comfortably under it. */
 export const MAX_BLOCKS = 60;
 
-// Background accepts strict hex OR a named preset key (fixed allowlist).
-// Either way the stored value is only ever a key into code-defined styles or
-// a regex-gated color — never a raw CSS/gradient string.
-const backgroundSchema = z.union([
-  hexColorSchema,
-  z.enum(BACKGROUND_PRESETS),
+// Background is a closed, structured shape: a solid hex, a custom gradient
+// (hex + hex + integer angle), or a pattern preset over a base hex. The stored
+// value is only ever code-defined styles fed by regex-gated colors / an
+// allowlisted key — never a raw CSS/gradient string.
+const backgroundSchema = z.discriminatedUnion("kind", [
+  z.strictObject({ kind: z.literal("solid"), color: hexColorSchema }),
+  z.strictObject({
+    kind: z.literal("gradient"),
+    from: hexColorSchema,
+    to: hexColorSchema,
+    angle: z.number().int().min(0).max(360),
+  }),
+  z.strictObject({
+    kind: z.literal("pattern"),
+    preset: z.enum(PATTERN_PRESETS),
+    color: hexColorSchema,
+  }),
 ]);
 
 const themeSchema = z.strictObject({
@@ -48,6 +78,11 @@ const themeSchema = z.strictObject({
   radius: z.enum(STOREFRONT_RADII),
   cardStyle: z.enum(CARD_STYLES),
   priceDisplay: z.enum(PRICE_DISPLAYS),
+  cardShape: z.enum(CARD_SHAPES),
+  priceTagPosition: z.enum(PRICE_TAG_POSITIONS),
+  priceTagStyle: z.enum(PRICE_TAG_STYLES),
+  showTitle: z.boolean(),
+  displayMode: z.enum(DISPLAY_MODES),
 });
 
 const sizeSchema = z.enum(BLOCK_SIZES);
@@ -77,6 +112,10 @@ const textBlockSchema = z.strictObject({
   align: z.enum(TEXT_ALIGNS),
   size: sizeSchema,
   order: orderSchema,
+  // Inline formatting — optional so v1 blocks (without them) still parse.
+  bold: z.boolean().optional(),
+  italic: z.boolean().optional(),
+  underline: z.boolean().optional(),
 });
 
 const blockSchema = z.discriminatedUnion("type", [
@@ -96,9 +135,26 @@ export const storefrontConfigSchema = z.strictObject({
 }) satisfies z.ZodType<StorefrontConfig>;
 
 /**
+ * Normalize a stored `theme.background` into the structured model. v1 stored a
+ * bare string: a hex (→ solid) or a named preset key (→ its legacy gradient).
+ * Anything already-structured passes through for the schema to validate.
+ */
+function upgradeBackground(value: unknown): StorefrontBackground {
+  if (value !== null && typeof value === "object" && "kind" in value) {
+    return value as StorefrontBackground;
+  }
+  if (typeof value === "string") {
+    if (isStrictHexColor(value)) return { kind: "solid", color: value };
+    const legacy = LEGACY_BACKGROUND_GRADIENTS[value];
+    if (legacy) return { kind: "gradient", ...legacy };
+  }
+  return DEFAULT_STOREFRONT_CONFIG.theme.background;
+}
+
+/**
  * Parse a stored config, upgrading older saved shapes instead of discarding
- * them: v1 product blocks had no `type`, and v1 themes lack
- * cardStyle/priceDisplay. Returns null when the value is unrecognizable.
+ * them: v1 product blocks had no `type`, v1 themes lack cardStyle/priceDisplay,
+ * and v1 backgrounds were a bare string. Returns null when unrecognizable.
  */
 export function parseStoredStorefrontConfig(
   raw: unknown,
@@ -108,12 +164,15 @@ export function parseStoredStorefrontConfig(
 
   if (typeof raw !== "object" || raw === null) return null;
   const candidate = raw as { theme?: unknown; blocks?: unknown };
+  const rawTheme =
+    typeof candidate.theme === "object" && candidate.theme !== null
+      ? (candidate.theme as Record<string, unknown>)
+      : {};
   const upgraded = {
     theme: {
       ...DEFAULT_STOREFRONT_CONFIG.theme,
-      ...(typeof candidate.theme === "object" && candidate.theme !== null
-        ? candidate.theme
-        : {}),
+      ...rawTheme,
+      background: upgradeBackground(rawTheme.background),
     },
     blocks: Array.isArray(candidate.blocks)
       ? candidate.blocks.map((block: unknown) =>

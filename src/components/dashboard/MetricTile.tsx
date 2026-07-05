@@ -5,6 +5,8 @@ import {
   type CardBackdropTone,
   type CardBackdropVariant,
 } from "@/components/ui/CardBackdrop";
+import type { MetricTrend } from "@/lib/dashboard/queries";
+import { Sparkline } from "./Sparkline";
 
 /**
  * One headline metric. `value` is pre-formatted by the caller (money always
@@ -18,6 +20,8 @@ export function MetricTile({
   hint,
   zeroText = "No sales yet",
   pending = false,
+  emphasis = false,
+  trend,
   decoration,
   decorationTone,
   children,
@@ -28,10 +32,14 @@ export function MetricTile({
   hint?: string;
   zeroText?: string;
   pending?: boolean;
+  /** Render the value as the page's one hero number: large, gradient-filled. */
+  emphasis?: boolean;
+  /** Show a bare trend line to the right of a (bigger) value. */
+  trend?: MetricTrend;
   /** Fade a decorative texture into the corner — for the hero metric only. */
   decoration?: CardBackdropVariant;
   decorationTone?: CardBackdropTone;
-  /** Custom body (e.g. the channel split rows) instead of a single value. */
+  /** Custom body instead of a single value. */
   children?: ReactNode;
 }) {
   return (
@@ -63,8 +71,27 @@ export function MetricTile({
           </p>
         ) : children ? (
           children
+        ) : value && trend ? (
+          // Bigger value pinned left, bare trend line filling the right.
+          <div className="flex items-center gap-3">
+            <p className="truncate text-3xl font-semibold text-foreground sm:text-4xl">
+              {value}
+            </p>
+            <Sparkline
+              points={trend.points}
+              tone={trend.tone}
+              className="ml-auto h-10 w-20 shrink-0 sm:w-28"
+            />
+          </div>
         ) : value ? (
-          <p className="truncate text-2xl font-semibold text-foreground">
+          <p
+            className={cn(
+              "truncate",
+              emphasis
+                ? "text-4xl font-bold text-success sm:text-5xl lg:text-6xl"
+                : "text-2xl font-semibold text-foreground",
+            )}
+          >
             {value}
           </p>
         ) : (

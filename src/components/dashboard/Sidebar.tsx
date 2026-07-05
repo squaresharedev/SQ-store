@@ -17,6 +17,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { SquareShareLogo } from "@/components/ui/square-share-logo";
 
 type NavLink = {
   label: string;
@@ -89,7 +90,7 @@ function NavLinkItem({
   );
 }
 
-export function Sidebar() {
+export function Sidebar({ username }: { username: string }) {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const toggleButtonRef = useRef<HTMLButtonElement>(null);
@@ -182,6 +183,16 @@ export function Sidebar() {
           isOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
+        {/* Brand row: logo + signed-in user. Extra bottom padding + a border
+            give it more room than the nav rows below, so it reads as its own
+            header rather than just the first item in the list. */}
+        <div className="flex items-center gap-2.5 border-b border-border px-4 py-5">
+          <SquareShareLogo className="size-6 shrink-0 text-foreground" />
+          <span className="truncate text-sm font-medium text-foreground">
+            {username}
+          </span>
+        </div>
+
         <div className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
           {MAIN_NAV.map((item) => (
             <NavLinkItem

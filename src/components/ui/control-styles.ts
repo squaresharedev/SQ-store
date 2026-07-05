@@ -44,3 +44,7 @@ export const helpTextClass = "font-inter text-sm text-muted-foreground";
 
 /** Inline validation message. */
 export const errorTextClass = "font-inter text-sm text-destructive";
+
+/** "Soon" chip for stubbed, not-yet-wired controls. */
+export const stubBadgeClass =
+  "ml-2 inline-flex shrink-0 items-center rounded-full border border-border bg-muted px-1.5 py-0.5 font-inter text-xs font-medium uppercase tracking-wide text-muted-foreground";

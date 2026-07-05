@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
-import { Sidebar } from "@/components/dashboard/Sidebar";
-import { requireUser } from "@/lib/auth/session";
+import { DashboardShell } from "@/components/dashboard/DashboardShell";
+import { getProfile, requireUser } from "@/lib/auth/session";
 
 /**
  * PROTECTED — single auth gate for the whole route group. Layouts persist
@@ -15,12 +15,9 @@ export default async function DashboardLayout({
 }: {
   children: ReactNode;
 }) {
-  await requireUser("/");
+  const user = await requireUser("/");
+  const profile = await getProfile();
+  const username = profile?.display_name || user.email?.split("@")[0] || "Account";
 
-  return (
-    <div className="min-h-screen bg-background">
-      <Sidebar />
-      <div className="md:pl-64">{children}</div>
-    </div>
-  );
+  return <DashboardShell username={username}>{children}</DashboardShell>;
 }

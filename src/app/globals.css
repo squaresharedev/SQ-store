@@ -71,8 +71,11 @@
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.12);
 
-  /* Bento grid base row height (storefront designer / future embed preview). */
+  /* Bento grid base row height (legacy storefront designer preview). */
   --spacing-tile-row: 6rem;
+
+  /* Shared bento grid gutter (styles.md §4). Equal gap on all four sides. */
+  --grid-gap: 0.5rem;
 }
 
 /* ============================================================
@@ -126,6 +129,37 @@
   --border: oklch(1 0 0 / 12%);
   --input: oklch(1 0 0 / 15%);
   --ring: #a855f7;
+}
+
+/* ============================================================
+   SHARED BENTO GRID  (components/grid/Grid.tsx)
+   Presentation-agnostic grid used by the storefront builder AND the
+   marketplace. Cells are TRUE squares at any width: row height is derived
+   from the container's inline size so it always equals a column's width,
+   including the gap. Blocks span 1x1 / 2x1 / 2x2 with ONE equal gap on all
+   four sides (no shared/intersecting borders). Column counts are injected
+   from gridConstants via --ss-cols-desktop / --ss-cols-mobile.
+   ============================================================ */
+.ss-grid-container {
+  container-type: inline-size;
+}
+.ss-grid {
+  --ss-cols: var(--ss-cols-mobile, 2);
+  display: grid;
+  grid-template-columns: repeat(var(--ss-cols), minmax(0, 1fr));
+  /* row height = column width = (container - gaps) / columns → square cells */
+  grid-auto-rows: calc(
+    (100cqw - (var(--ss-cols) - 1) * var(--grid-gap)) / var(--ss-cols)
+  );
+  gap: var(--grid-gap);
+}
+/* Container query (not viewport): the column switch keys off the grid's OWN
+   width, the same box the 100cqw row-height math measures — so a grid embedded
+   in a narrow panel drops to the mobile column count regardless of viewport. */
+@container (min-width: 40rem) {
+  .ss-grid {
+    --ss-cols: var(--ss-cols-desktop, 4);
+  }
 }
 
 /* ============================================================
