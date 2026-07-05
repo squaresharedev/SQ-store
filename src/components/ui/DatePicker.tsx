@@ -29,6 +29,8 @@ type CommonProps = {
   max?: string;
   /** Id for the trigger, so an external <label htmlFor> can point at it. */
   id?: string;
+  /** Optional className overrides for the trigger button (e.g., padding). */
+  triggerClassName?: string;
 };
 
 type DatePickerProps =
@@ -50,7 +52,7 @@ function rangeLabel(from: Date | null, to: Date | null): string {
  * Calendar; positioning + focus return live in Popover.
  */
 export function DatePicker(props: DatePickerProps) {
-  const { mode, label, placeholder, min, max, id } = props;
+  const { mode, label, placeholder, min, max, id, triggerClassName } = props;
   const [open, setOpen] = useState(false);
 
   const minDate = fromISODate(min);
@@ -118,6 +120,7 @@ export function DatePicker(props: DatePickerProps) {
             className={cn(
               fieldBaseClass,
               "flex items-center justify-between gap-2 text-left",
+              triggerClassName,
             )}
           >
             <span className={cn("truncate", !display && "text-muted-foreground")}>

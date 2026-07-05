@@ -29,6 +29,12 @@ export interface Product {
    * derived from the row's `digital_file_key`. `null` until one is uploaded.
    */
   digitalFileName: string | null;
+  /** Stock tracking is opt-in per product; false = unlimited (no badge). */
+  trackStock: boolean;
+  /** Units on hand. Set (>= 0) whenever `trackStock`; null when not tracking. */
+  stockQuantity: number | null;
+  /** At or below this remaining count the public badge shows "Only N left". */
+  lowStockThreshold: number;
 }
 
 /**
@@ -43,6 +49,10 @@ export interface ProductFormValues {
   price: string;
   currency: Currency;
   status: ProductStatus;
+  trackStock: boolean;
+  /** In-progress input strings, parsed + validated on submit like `price`. */
+  stockQuantity: string;
+  lowStockThreshold: string;
 }
 
 // The write payload lives in lib/validation/product.ts as `ProductWriteInput`

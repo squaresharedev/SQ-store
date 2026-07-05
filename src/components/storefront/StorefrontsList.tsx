@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AlertCircle, Plus, Store } from "lucide-react";
 import { primaryButtonClass } from "@/components/ui/control-styles";
@@ -11,17 +11,22 @@ import {
   deleteStorefront,
 } from "@/lib/storefront/actions";
 import type { StorefrontSummary } from "@/lib/storefront/queries";
+import type { Product } from "@/types/product";
 import { StorefrontCard } from "./StorefrontCard";
+import { EmbedModal } from "./EmbedModal";
 
 /**
  * Client wrapper owning the visible storefront set. Create inserts a row and
  * navigates straight into its editor; delete confirms, then removes the card
- * optimistically and restores it if the server rejects.
+ * optimistically and restores it if the server rejects. `products` feeds the
+ * cards' live grid previews.
  */
 export function StorefrontsList({
   storefronts: initial,
+  products,
 }: {
   storefronts: StorefrontSummary[];
+  products: Product[];
 }) {
   const router = useRouter();
   const [storefronts, setStorefronts] = useState(initial);
@@ -31,6 +36,14 @@ export function StorefrontsList({
     null,
   );
   const [deleting, setDeleting] = useState(false);
+  const [embedTarget, setEmbedTarget] = useState<StorefrontSummary | null>(
+    null,
+  );
+
+  const productsById = useMemo(
+    () => new Map(products.map((product) => [product.id, product])),
+    [products],
+  );
 
   // Adopt fresh props after a server revalidation (same render-time reset the
   // ProductList / Sidebar use).
@@ -126,12 +139,26 @@ export function StorefrontsList({
             <li key={storefront.id}>
               <StorefrontCard
                 storefront={storefront}
+                productsById={productsById}
+                onEmbed={() => setEmbedTarget(storefront)}
                 onDelete={() => setPendingDelete(storefront)}
               />
             </li>
           ))}
         </ul>
       )}
+
+      <EmbedModal
+        storefront={embedTarget}
+        onClose={() => setEmbedTarget(null)}
+        onSaved={(id, embed) =>
+          setStorefronts((current) =>
+            current.map((s) =>
+              s.id === id ? { ...s, config: { ...s.config, embed } } : s,
+            ),
+          )
+        }
+      />
 
       <Modal
         open={pendingDelete !== null}

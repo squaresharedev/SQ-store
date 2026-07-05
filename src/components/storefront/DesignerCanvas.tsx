@@ -7,14 +7,17 @@ import {
   blockKey,
   type BlockSize,
   type StorefrontBlock,
+  type StorefrontHeader,
   type StorefrontTheme,
 } from "@/types/storefront";
 import { cn } from "@/lib/utils";
 import { Grid } from "@/components/grid/Grid";
 import type { GridBlock } from "@/components/grid/gridConstants";
 import { BlockTile } from "./BlockTile";
+import { CarouselStrip } from "./CarouselStrip";
+import { StorefrontMasthead } from "./StorefrontMasthead";
 import { resolveBackgroundStyle } from "./background-presets";
-import { FONT_CLASSES, RADIUS_CLASSES } from "./config-maps";
+import { DENSITY_CLASSES, FONT_CLASSES, RADIUS_CLASSES } from "./config-maps";
 
 /** Accessible label for a block's drag/resize handles. */
 function blockLabel(block: StorefrontBlock, product: Product | null): string {
@@ -35,19 +38,24 @@ export function DesignerCanvas({
   blocks,
   productsById,
   theme,
+  header,
   onReorder,
   onSizeChange,
   onRemove,
+  onToggleSoldOut,
   editingKey,
   onEditText,
 }: {
   blocks: StorefrontBlock[];
   productsById: Map<string, Product>;
   theme: StorefrontTheme;
+  /** Optional masthead (name + bio) rendered above the grid when shown. */
+  header: StorefrontHeader;
   /** All callbacks are keyed by blockKey(block). */
   onReorder: (activeKey: string, overKey: string) => void;
   onSizeChange: (key: string, size: BlockSize) => void;
   onRemove: (key: string) => void;
+  onToggleSoldOut: (key: string) => void;
   /** Key of the text block currently being edited in the side panel, if any. */
   editingKey: string | null;
   onEditText: (key: string | null) => void;
@@ -76,6 +84,15 @@ export function DesignerCanvas({
       })),
     [blocks],
   );
+
+  // Carousel reorder: move one slot by handing the neighbor's key to the same
+  // onReorder the grid's drag uses — one reorder path for both display modes.
+  function moveBlock(key: string, direction: -1 | 1) {
+    const index = blocks.findIndex((block) => blockKey(block) === key);
+    const neighbor = blocks[index + direction];
+    if (index < 0 || !neighbor) return;
+    onReorder(key, blockKey(neighbor));
+  }
 
   // Shared toggle button style — SHARP buttons (rounded-none), brand convention.
   const toggleBase =
@@ -108,26 +125,23 @@ export function DesignerCanvas({
         </button>
       </div>
 
-      {/* Canvas frame — narrows to max-w-sm when mobile preview is active.
-          TODO: true mobile reflow (fonts/spacing) — this only narrows the frame + columns. */}
+      {/* Canvas frame — narrows to a phone-width column in mobile preview.
+          That alone IS the mobile render: the grid's container query keys off
+          its own width, so columns, wrapping, and square-cell math all reflow
+          exactly as they will on a real phone. */}
       <div className={cn(previewMode === "mobile" && "mx-auto w-full max-w-sm")}>
         <div
           className={cn(
             "rounded-md border border-border p-4",
             FONT_CLASSES[theme.font],
+            // Density picks the --grid-gap override the .ss-grid rule inherits.
+            DENSITY_CLASSES[theme.density],
           )}
           // Schema-constrained: preset keys resolve through the fixed allowlist
           // map, hex is re-gated by the strict regex. Anything else styles nothing.
           style={resolveBackgroundStyle(theme.background)}
         >
-          {/* TODO: carousel display mode — placeholder only, no behavior yet. */}
-          {theme.displayMode === "carousel" && (
-            <div className="mb-3 rounded-sm border border-dashed border-border bg-background/80 px-3 py-2">
-              <p className="font-inter text-xs text-muted-foreground">
-                Carousel layout is coming soon. Editing in grid view.
-              </p>
-            </div>
-          )}
+          <StorefrontMasthead header={header} theme={theme} />
 
           {blocks.length === 0 ? (
             <div className="flex min-h-64 flex-col items-center justify-center rounded-sm border border-dashed border-border bg-background/60 p-6 text-center">
@@ -146,15 +160,34 @@ export function DesignerCanvas({
                 your storefront.
               </p>
             </div>
+          ) : theme.displayMode === "carousel" ? (
+            <>
+              <CarouselStrip
+                blocks={blocks}
+                getProduct={productFor}
+                theme={theme}
+                editable
+                editingKey={editingKey}
+                onEditText={onEditText}
+                onRemove={onRemove}
+                onToggleSoldOut={onToggleSoldOut}
+                onMove={moveBlock}
+              />
+              <p className="mt-2 font-inter text-xs text-muted-foreground">
+                Buyers swipe through this row. Use the arrows to reorder; block
+                sizes apply in grid mode.
+              </p>
+            </>
           ) : (
             <Grid
               editable
               showEmptyCells
               blocks={gridBlocks}
               ariaLabel="Storefront grid"
-              // Finer 6-column grid (3 under sm) → more cells, more shape freedom.
-              // Mobile preview narrows the frame and drops to 3 columns.
-              columns={previewMode === "mobile" ? 3 : 6}
+              // Finer 6-column grid (3 in narrow containers) → more cells,
+              // more shape freedom. The mobile preview needs no override: the
+              // narrowed frame trips the grid's own container query.
+              columns={6}
               mobileColumns={3}
               // Theme radius drives the cell clip (overrides the grid's rounded-sm).
               // Product-tile shape clip is handled inside ProductTileContent.
@@ -175,6 +208,7 @@ export function DesignerCanvas({
                     onEditText(editingKey === gridBlock.key ? null : gridBlock.key)
                   }
                   onRemove={() => onRemove(gridBlock.key)}
+                  onToggleSoldOut={() => onToggleSoldOut(gridBlock.key)}
                 />
               )}
             />

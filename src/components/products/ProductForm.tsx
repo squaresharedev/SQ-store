@@ -3,20 +3,24 @@
 import { useId, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AlertCircle } from "lucide-react";
-import { cn } from "@/lib/utils";
 import {
-  CURRENCIES,
-  PRODUCT_STATUSES,
-  type Currency,
-  type Product,
-  type ProductFormValues,
-  type ProductStatus,
+  AlertCircle,
+  Boxes,
+  Eye,
+  ImageIcon,
+  Package,
+  Tag,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import type {
+  Product,
+  ProductFormValues,
+  ProductStatus,
 } from "@/types/product";
 import { createProduct, updateProduct } from "@/lib/products/actions";
 import { uploadToR2 } from "@/lib/products/upload";
 import type { ProductWriteInput } from "@/lib/validation/product";
-import { Select, type SelectOption } from "@/components/ui/select";
+import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import {
   errorTextClass,
   fieldBaseClass,
@@ -25,24 +29,27 @@ import {
   primaryButtonClass,
   secondaryButtonClass,
 } from "@/components/ui/control-styles";
+import { FormSection } from "./FormSection";
+import { PriceField } from "./PriceField";
 import { ImageDropzone } from "./ImageDropzone";
 import { FileDropzone } from "./FileDropzone";
+import { StockFields } from "./StockFields";
 
-const CURRENCY_OPTIONS: readonly SelectOption<Currency>[] = CURRENCIES.map(
-  (currency) => ({ value: currency, label: currency }),
-);
+const STATUS_OPTIONS: readonly { value: ProductStatus; label: string }[] = [
+  // Active first: it is the default for new products — a seller adding a
+  // product almost always wants it on sale immediately.
+  { value: "active", label: "Active" },
+  { value: "draft", label: "Draft" },
+];
 
-const STATUS_OPTIONS: readonly SelectOption<ProductStatus>[] =
-  PRODUCT_STATUSES.map((status) => ({
-    value: status,
-    label: { draft: "Draft", active: "Active" }[status],
-    description: {
-      draft: "Hidden from buyers",
-      active: "Visible for sale",
-    }[status],
-  }));
+const STATUS_HINTS: Record<ProductStatus, string> = {
+  active: "Live. Buyers can see and purchase it right away.",
+  draft: "Hidden from buyers until you switch it to Active.",
+};
 
-type FieldErrors = Partial<Record<"title" | "price", string>>;
+type FieldErrors = Partial<
+  Record<"title" | "price" | "stockQuantity" | "lowStockThreshold", string>
+>;
 
 function initialValues(product?: Product): ProductFormValues {
   return {
@@ -50,7 +57,13 @@ function initialValues(product?: Product): ProductFormValues {
     description: product?.description ?? "",
     price: product ? String(product.price) : "",
     currency: product?.currency ?? "EUR",
-    status: product?.status ?? "draft",
+    // Common-answer default: new products go live on save. Existing products
+    // keep whatever the seller chose.
+    status: product?.status ?? "active",
+    trackStock: product?.trackStock ?? false,
+    stockQuantity:
+      product?.stockQuantity != null ? String(product.stockQuantity) : "",
+    lowStockThreshold: String(product?.lowStockThreshold ?? 5),
   };
 }
 
@@ -70,6 +83,28 @@ function validate(values: ProductFormValues): FieldErrors {
     errors.price = "Set a price.";
   } else if (!Number.isFinite(priceNumber) || priceNumber <= 0) {
     errors.price = "Price must be a number greater than zero.";
+  }
+
+  if (values.trackStock) {
+    const trimmedQty = values.stockQuantity.trim();
+    if (!trimmedQty) {
+      errors.stockQuantity = "How many are in stock?";
+    } else if (
+      !Number.isInteger(Number(trimmedQty)) ||
+      Number(trimmedQty) < 0
+    ) {
+      errors.stockQuantity = "Stock must be a whole number of 0 or more.";
+    }
+  }
+
+  const trimmedThreshold = values.lowStockThreshold.trim();
+  if (trimmedThreshold) {
+    if (
+      !Number.isInteger(Number(trimmedThreshold)) ||
+      Number(trimmedThreshold) < 0
+    ) {
+      errors.lowStockThreshold = "Threshold must be a whole number of 0 or more.";
+    }
   }
 
   return errors;
@@ -134,6 +169,13 @@ export function ProductForm({ product }: { product?: Product }) {
         status: values.status,
         imageKey,
         digitalFileKey,
+        trackStock: values.trackStock,
+        stockQuantity: values.trackStock
+          ? Number(values.stockQuantity)
+          : null,
+        lowStockThreshold: values.lowStockThreshold.trim()
+          ? Number(values.lowStockThreshold)
+          : undefined,
       };
 
       const result = product
@@ -161,10 +203,11 @@ export function ProductForm({ product }: { product?: Product }) {
   const priceErrorId = `${fieldId}-price-error`;
   const imageHintId = `${fieldId}-image-hint`;
   const fileHintId = `${fieldId}-file-hint`;
+  const statusHintId = `${fieldId}-status-hint`;
   const hasErrors = submitAttempted && Object.keys(errors).length > 0;
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="space-y-8">
+    <form onSubmit={handleSubmit} noValidate className="space-y-5">
       {submitError && (
         <div
           role="alert"
@@ -195,128 +238,150 @@ export function ProductForm({ product }: { product?: Product }) {
         </div>
       )}
 
-      {/* Details */}
-      <div className="space-y-5">
-        <div className="space-y-1.5">
-          <label htmlFor={`${fieldId}-title`} className={labelClass}>
-            Title
-          </label>
-          <input
-            id={`${fieldId}-title`}
-            type="text"
-            value={values.title}
-            onChange={(event) => updateField("title", event.target.value)}
-            placeholder="e.g. Ambient Loops Vol. 1"
-            aria-invalid={errors.title ? true : undefined}
-            aria-describedby={errors.title ? titleErrorId : undefined}
-            className={fieldBaseClass}
-          />
-          {errors.title && (
-            <p id={titleErrorId} className={errorTextClass}>
-              {errors.title}
-            </p>
-          )}
-        </div>
-
-        <div className="space-y-1.5">
-          <label htmlFor={`${fieldId}-description`} className={labelClass}>
-            Description{" "}
-            <span className="font-normal text-muted-foreground">(optional)</span>
-          </label>
-          <textarea
-            id={`${fieldId}-description`}
-            value={values.description}
-            onChange={(event) => updateField("description", event.target.value)}
-            rows={4}
-            placeholder="What is it, and what does the buyer get?"
-            className={cn(fieldBaseClass, "resize-y")}
-          />
-        </div>
-
-        <div className="flex flex-col gap-5 sm:flex-row">
-          <div className="flex-1 space-y-1.5">
-            <label htmlFor={`${fieldId}-price`} className={labelClass}>
-              Price
+      <FormSection
+        icon={Package}
+        title="Details"
+        description="What you are selling, in your words."
+      >
+        <div className="space-y-5">
+          <div className="space-y-1.5">
+            <label htmlFor={`${fieldId}-title`} className={labelClass}>
+              Title
             </label>
+            {/* The one field every product needs — visually the biggest. */}
             <input
-              id={`${fieldId}-price`}
+              id={`${fieldId}-title`}
               type="text"
-              inputMode="decimal"
-              value={values.price}
-              onChange={(event) => updateField("price", event.target.value)}
-              placeholder="0.00"
-              aria-invalid={errors.price ? true : undefined}
-              aria-describedby={errors.price ? priceErrorId : undefined}
-              className={fieldBaseClass}
+              value={values.title}
+              onChange={(event) => updateField("title", event.target.value)}
+              placeholder="e.g. Ambient Loops Vol. 1"
+              aria-invalid={errors.title ? true : undefined}
+              aria-describedby={errors.title ? titleErrorId : undefined}
+              className={cn(fieldBaseClass, "py-3 text-lg font-medium")}
             />
-            {errors.price && (
-              <p id={priceErrorId} className={errorTextClass}>
-                {errors.price}
+            {errors.title && (
+              <p id={titleErrorId} className={errorTextClass}>
+                {errors.title}
               </p>
             )}
           </div>
 
-          <div className="space-y-1.5 sm:w-40">
-            <label htmlFor={`${fieldId}-currency`} className={labelClass}>
-              Currency
+          <div className="space-y-1.5">
+            <label htmlFor={`${fieldId}-description`} className={labelClass}>
+              Description{" "}
+              <span className="font-normal text-muted-foreground">
+                (optional)
+              </span>
             </label>
-            <Select
-              id={`${fieldId}-currency`}
-              value={values.currency}
-              options={CURRENCY_OPTIONS}
-              onChange={(currency) => updateField("currency", currency)}
+            <textarea
+              id={`${fieldId}-description`}
+              value={values.description}
+              onChange={(event) => updateField("description", event.target.value)}
+              rows={4}
+              placeholder="What is it, and what does the buyer get?"
+              className={cn(fieldBaseClass, "resize-y")}
             />
           </div>
         </div>
+      </FormSection>
 
-        <div className="space-y-1.5 sm:max-w-xs">
-          <label htmlFor={`${fieldId}-status`} className={labelClass}>
-            Status
-          </label>
-          <Select
-            id={`${fieldId}-status`}
+      <FormSection
+        icon={Tag}
+        title="Pricing"
+        description="What buyers pay. You keep it minus the platform cut."
+      >
+        <div className="sm:max-w-sm">
+          <PriceField
+            id={`${fieldId}-price`}
+            errorId={priceErrorId}
+            price={values.price}
+            currency={values.currency}
+            error={errors.price}
+            onPriceChange={(price) => updateField("price", price)}
+            onCurrencyChange={(currency) => updateField("currency", currency)}
+          />
+        </div>
+      </FormSection>
+
+      <FormSection
+        icon={Boxes}
+        title="Stock"
+        description="Unlimited by default. Track it to prevent overselling."
+      >
+        <StockFields
+          values={{
+            trackStock: values.trackStock,
+            stockQuantity: values.stockQuantity,
+            lowStockThreshold: values.lowStockThreshold,
+          }}
+          errors={{
+            stockQuantity: errors.stockQuantity,
+            lowStockThreshold: errors.lowStockThreshold,
+          }}
+          onChange={(key, value) =>
+            updateField(key as keyof ProductFormValues, value)
+          }
+        />
+      </FormSection>
+
+      <FormSection
+        icon={ImageIcon}
+        title="Media and delivery"
+        description="How it looks in the grid, and what the buyer receives."
+      >
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          <div className="space-y-1.5">
+            <label htmlFor={`${fieldId}-image`} className={labelClass}>
+              Display image
+            </label>
+            <p id={imageHintId} className={helpTextClass}>
+              Shown on your storefront and embeds.
+            </p>
+            <ImageDropzone
+              inputId={`${fieldId}-image`}
+              describedById={imageHintId}
+              initialPreviewUrl={product?.imageUrl ?? null}
+              onFileChange={setImageFile}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label htmlFor={`${fieldId}-file`} className={labelClass}>
+              Digital file
+            </label>
+            <p id={fileHintId} className={helpTextClass}>
+              The file your buyer downloads after purchase.
+            </p>
+            <FileDropzone
+              inputId={`${fieldId}-file`}
+              describedById={fileHintId}
+              initialFileName={product?.digitalFileName ?? null}
+              onFileChange={(file) => {
+                setDigitalFile(file);
+                setDigitalTouched(true);
+              }}
+            />
+          </div>
+        </div>
+      </FormSection>
+
+      <FormSection
+        icon={Eye}
+        title="Visibility"
+        description="Whether buyers can see this product."
+      >
+        <div className="space-y-2 sm:max-w-xs">
+          <SegmentedControl
             value={values.status}
             options={STATUS_OPTIONS}
             onChange={(status) => updateField("status", status)}
+            ariaLabel="Product status"
           />
-        </div>
-      </div>
-
-      {/* Uploads */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-        <div className="space-y-1.5">
-          <label htmlFor={`${fieldId}-image`} className={labelClass}>
-            Display image
-          </label>
-          <p id={imageHintId} className={helpTextClass}>
-            Shown on your storefront and embeds.
+          <p id={statusHintId} className={helpTextClass} aria-live="polite">
+            {STATUS_HINTS[values.status]}
           </p>
-          <ImageDropzone
-            inputId={`${fieldId}-image`}
-            describedById={imageHintId}
-            initialPreviewUrl={product?.imageUrl ?? null}
-            onFileChange={setImageFile}
-          />
         </div>
-
-        <div className="space-y-1.5">
-          <label htmlFor={`${fieldId}-file`} className={labelClass}>
-            Digital file
-          </label>
-          <p id={fileHintId} className={helpTextClass}>
-            The file your buyer downloads after purchase.
-          </p>
-          <FileDropzone
-            inputId={`${fieldId}-file`}
-            describedById={fileHintId}
-            initialFileName={product?.digitalFileName ?? null}
-            onFileChange={(file) => {
-              setDigitalFile(file);
-              setDigitalTouched(true);
-            }}
-          />
-        </div>
-      </div>
+      </FormSection>
 
       {/* Actions */}
       <div className="flex flex-col-reverse gap-3 border-t border-border pt-6 sm:flex-row sm:justify-end">

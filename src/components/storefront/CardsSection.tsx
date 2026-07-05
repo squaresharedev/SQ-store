@@ -15,7 +15,7 @@ import {
 import { Select, type SelectOption } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
-import { labelClass, stubBadgeClass } from "@/components/ui/control-styles";
+import { labelClass } from "@/components/ui/control-styles";
 
 const CARD_SHAPE_OPTIONS: readonly { value: CardShape; label: string }[] = [
   { value: "square", label: "Square" },
@@ -154,18 +154,18 @@ export function CardsSection({
         />
       </div>
 
-      {/* TODO(stub): sold-out badge — UI only, not wired or persisted yet. */}
+      {/* Shows the badge on blocks the seller marked sold out (the tag toggle
+          on each product tile). */}
       <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center">
-          <span className={labelClass}>Sold-out badge</span>
-          <span className={stubBadgeClass}>Soon</span>
-        </div>
+        <label htmlFor={`${fieldId}-sold-out-badge`} className={labelClass}>
+          Sold-out badge
+        </label>
         <Switch
-          checked={false}
-          onCheckedChange={() => {
-            // stub — not wired
-          }}
-          disabled
+          id={`${fieldId}-sold-out-badge`}
+          checked={theme.soldOutBadge}
+          onCheckedChange={(soldOutBadge) =>
+            onChange({ ...theme, soldOutBadge })
+          }
         />
       </div>
     </div>

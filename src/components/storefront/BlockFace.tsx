@@ -26,7 +26,13 @@ export function BlockFace({
     return <TextTileContent block={block} theme={theme} />;
   }
   if (product) {
-    return <ProductTileContent product={product} theme={theme} />;
+    return (
+      <ProductTileContent
+        product={product}
+        theme={theme}
+        soldOut={block.soldOut === true}
+      />
+    );
   }
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-1 p-2 text-center">

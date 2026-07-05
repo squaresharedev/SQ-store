@@ -2,7 +2,10 @@
 // jsonb in `storefronts.config` and validated by lib/validation/storefront.ts
 // (the single source of truth) on every write. The future buyer-facing embed
 // renders this exact shape — keep it renderable as typed React data only (no
-// HTML, no URLs, no free-form CSS anywhere in it).
+// HTML, no URLs, no free-form CSS anywhere in it). The one non-visual member
+// is `embed` (widget settings; hostname-regex-gated) — the public embed
+// serializer must STRIP it and must drop blocks hidden by
+// `theme.hideSoldOut` before anything leaves the owner's session.
 //
 // Type aliases (not interfaces) on purpose: aliases get TypeScript's implicit
 // index signature, so the config assigns cleanly to Supabase's `Json`.
@@ -87,6 +90,48 @@ export type PriceTagStyle = (typeof PRICE_TAG_STYLES)[number];
 export const DISPLAY_MODES = ["grid", "carousel"] as const;
 export type DisplayMode = (typeof DISPLAY_MODES)[number];
 
+/** Grid gutter density. Each key maps to a code-defined gap token override
+ *  (config-maps.ts DENSITY_CLASSES) — never a raw length from user data. */
+export const DENSITIES = ["compact", "comfy", "spacious"] as const;
+export type Density = (typeof DENSITIES)[number];
+
+/** Store header text caps — plain text only, rendered as React text nodes. */
+export const HEADER_NAME_MAX = 60;
+export const HEADER_BIO_MAX = 160;
+
+/** Optional storefront masthead above the grid: a display name + short bio.
+ *  Both are plain text (same control-character rules as text blocks). */
+export type StorefrontHeader = {
+  show: boolean;
+  name: string;
+  bio: string;
+};
+
+export const DEFAULT_STOREFRONT_HEADER: StorefrontHeader = {
+  show: false,
+  name: "",
+  bio: "",
+};
+
+/** Embed-widget cap on origin allowlist size. */
+export const EMBED_MAX_DOMAINS = 10;
+
+/**
+ * Non-visual embed-widget settings, stored inside the config jsonb (the table
+ * has no dedicated columns). `domains` is an origin allowlist of bare
+ * hostnames — each one hostname-regex-gated by the schema, only ever compared
+ * against request origins or rendered as a text node, never used in markup.
+ */
+export type EmbedSettings = {
+  enabled: boolean;
+  domains: string[];
+};
+
+export const DEFAULT_EMBED_SETTINGS: EmbedSettings = {
+  enabled: false,
+  domains: [],
+};
+
 export const TEXT_VARIANTS = ["heading", "subheading", "body"] as const;
 export type TextVariant = (typeof TEXT_VARIANTS)[number];
 
@@ -110,6 +155,11 @@ export type StorefrontTheme = {
   priceTagStyle: PriceTagStyle;
   showTitle: boolean;
   displayMode: DisplayMode;
+  density: Density;
+  /** Show a badge on blocks the seller marked sold out. */
+  soldOutBadge: boolean;
+  /** Hide sold-out blocks from buyers (the designer still shows them dimmed). */
+  hideSoldOut: boolean;
 };
 
 export type ProductBlock = {
@@ -118,6 +168,10 @@ export type ProductBlock = {
   productId: string;
   size: BlockSize;
   order: number;
+  /** Seller-controlled sold-out mark (products have no inventory yet; real
+   *  stock tracking can drive this same flag later). Optional so configs
+   *  saved before the flag existed still parse. */
+  soldOut?: boolean;
 };
 
 export type TextBlock = {
@@ -146,6 +200,11 @@ export function blockKey(block: StorefrontBlock): string {
 export type StorefrontConfig = {
   theme: StorefrontTheme;
   blocks: StorefrontBlock[];
+  /** Optional so configs saved before the header feature still assign. */
+  header?: StorefrontHeader;
+  /** Optional for the same reason. NON-VISUAL — stripped from the public
+   *  embed payload; edited only via updateEmbedSettings, never the designer. */
+  embed?: EmbedSettings;
 };
 
 /** Starting point for sellers who have not saved a storefront yet. */
@@ -163,6 +222,11 @@ export const DEFAULT_STOREFRONT_CONFIG: StorefrontConfig = {
     priceTagStyle: "plain",
     showTitle: true,
     displayMode: "grid",
+    density: "comfy",
+    soldOutBadge: true,
+    hideSoldOut: false,
   },
   blocks: [],
+  header: DEFAULT_STOREFRONT_HEADER,
+  embed: DEFAULT_EMBED_SETTINGS,
 };

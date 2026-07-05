@@ -1,90 +1,41 @@
 "use client";
 
+import { useId } from "react";
+import type { StorefrontTheme } from "@/types/storefront";
 import { Switch } from "@/components/ui/switch";
-import { SegmentedControl } from "@/components/ui/SegmentedControl";
-import {
-  fieldBaseClass,
-  helpTextClass,
-  labelClass,
-  stubBadgeClass,
-} from "@/components/ui/control-styles";
-
-const SPACING_OPTIONS: readonly { value: "tight" | "normal" | "roomy"; label: string }[] = [
-  { value: "tight", label: "Tight" },
-  { value: "normal", label: "Normal" },
-  { value: "roomy", label: "Roomy" },
-];
+import { helpTextClass, labelClass } from "@/components/ui/control-styles";
 
 /**
- * AdvancedSection — roadmap controls, all stubbed and disabled. No props
- * because nothing here is persisted yet.
+ * AdvancedSection — power-user display rules. (Store header/bio graduated to
+ * HeaderSection; block spacing merged into the Layout section's density.)
  */
-export function AdvancedSection() {
+export function AdvancedSection({
+  theme,
+  onChange,
+}: {
+  theme: StorefrontTheme;
+  onChange: (theme: StorefrontTheme) => void;
+}) {
+  const fieldId = useId();
+
   return (
     <div className="space-y-4">
-      <p className={helpTextClass}>
-        These options are on the roadmap and not saved yet.
-      </p>
-
-      {/* TODO(stub): store header — UI only, not wired. */}
-      <div className="space-y-1.5">
-        <div className="flex items-center">
-          <label className={labelClass}>Store header</label>
-          <span className={stubBadgeClass}>Soon</span>
-        </div>
-        <input
-          type="text"
-          className={fieldBaseClass}
-          disabled
-          placeholder="Store name shown to buyers"
-        />
-      </div>
-
-      {/* TODO(stub): bio — UI only, not wired. */}
-      <div className="space-y-1.5">
-        <div className="flex items-center">
-          <label className={labelClass}>Bio</label>
-          <span className={stubBadgeClass}>Soon</span>
-        </div>
-        <textarea
-          className={fieldBaseClass}
-          rows={2}
-          disabled
-          placeholder="A short line about your shop"
-        />
-      </div>
-
-      {/* TODO(stub): block spacing — UI only, not wired. */}
-      <div className="space-y-1.5">
-        <div className="flex items-center">
-          <span className={labelClass}>Block spacing</span>
-          <span className={stubBadgeClass}>Soon</span>
-        </div>
-        <SegmentedControl
-          value="normal"
-          options={SPACING_OPTIONS}
-          onChange={() => {
-            // stub — not wired
-          }}
-          ariaLabel="Block spacing"
-          disabled
-        />
-      </div>
-
-      {/* TODO(stub): hide sold-out products — UI only, not wired. */}
+      {/* Drops sold-out-marked blocks from the buyer view; the designer keeps
+          showing them dimmed so they stay manageable. */}
       <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center">
-          <span className={labelClass}>Hide sold-out products</span>
-          <span className={stubBadgeClass}>Soon</span>
-        </div>
+        <label htmlFor={`${fieldId}-hide-sold-out`} className={labelClass}>
+          Hide sold-out products
+        </label>
         <Switch
-          checked={false}
-          onCheckedChange={() => {
-            // stub — not wired
-          }}
-          disabled
+          id={`${fieldId}-hide-sold-out`}
+          checked={theme.hideSoldOut}
+          onCheckedChange={(hideSoldOut) => onChange({ ...theme, hideSoldOut })}
         />
       </div>
+      <p className={helpTextClass}>
+        Buyers won&apos;t see products you marked sold out. In the editor they
+        stay visible but dimmed.
+      </p>
     </div>
   );
 }

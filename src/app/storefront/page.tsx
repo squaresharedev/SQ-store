@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getProfile, getUser } from "@/lib/auth/session";
+import { listProducts } from "@/lib/products/queries";
 import { listStorefronts } from "@/lib/storefront/queries";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { StorefrontsList } from "@/components/storefront/StorefrontsList";
@@ -11,10 +12,12 @@ export const metadata: Metadata = {
 // Auth is enforced by storefront/layout.tsx. This page wears the dashboard
 // shell (sidebar) so it reads as a normal section; the editor route does not.
 export default async function StorefrontsPage() {
-  const [user, profile, storefronts] = await Promise.all([
+  // Products feed the cards' live grid previews (image tiles).
+  const [user, profile, storefronts, products] = await Promise.all([
     getUser(),
     getProfile(),
     listStorefronts(),
+    listProducts(),
   ]);
   const username =
     profile?.display_name || user?.email?.split("@")[0] || "Account";
@@ -32,7 +35,7 @@ export default async function StorefrontsPage() {
           </p>
         </div>
 
-        <StorefrontsList storefronts={storefronts} />
+        <StorefrontsList storefronts={storefronts} products={products} />
       </main>
     </DashboardShell>
   );

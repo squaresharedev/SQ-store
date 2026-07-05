@@ -36,6 +36,10 @@ async function rowToProduct(row: ProductRow): Promise<Product> {
     // R2 credentials are not configured — cards show the placeholder tile.
     imageUrl: row.image_key ? await presignGetUrl(row.image_key) : null,
     digitalFileName: fileNameFromKey(row.digital_file_key),
+    // Stock columns — owner-scoped reads; sellers may see real numbers.
+    trackStock: row.track_stock,
+    stockQuantity: row.stock_quantity,
+    lowStockThreshold: row.low_stock_threshold,
   };
 }
 

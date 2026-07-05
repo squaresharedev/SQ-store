@@ -69,8 +69,62 @@ const PRODUCT_ADJECTIVES = [
   "Cyber", "Minimal", "Vaporwave", "Cinematic", "Lo-Fi", "Aurora", "Grain",
 ] as const;
 
+// Stock photo categories for different product types (picsum.photos URLs).
+const STOCK_IMAGES = {
+  "Lightroom Preset Pack": [
+    "https://picsum.photos/400/300?random=1",
+    "https://picsum.photos/400/300?random=2",
+    "https://picsum.photos/400/300?random=3",
+  ],
+  "Procreate Brush Set": [
+    "https://picsum.photos/400/300?random=10",
+    "https://picsum.photos/400/300?random=11",
+    "https://picsum.photos/400/300?random=12",
+  ],
+  "Notion Template": [
+    "https://picsum.photos/400/300?random=20",
+    "https://picsum.photos/400/300?random=21",
+    "https://picsum.photos/400/300?random=22",
+  ],
+  "Icon Pack": [
+    "https://picsum.photos/400/300?random=30",
+    "https://picsum.photos/400/300?random=31",
+    "https://picsum.photos/400/300?random=32",
+  ],
+  "Font Family": [
+    "https://picsum.photos/400/300?random=40",
+    "https://picsum.photos/400/300?random=41",
+    "https://picsum.photos/400/300?random=42",
+  ],
+  "Sample Pack": [
+    "https://picsum.photos/400/300?random=50",
+    "https://picsum.photos/400/300?random=51",
+    "https://picsum.photos/400/300?random=52",
+  ],
+  "LUT Collection": [
+    "https://picsum.photos/400/300?random=60",
+    "https://picsum.photos/400/300?random=61",
+    "https://picsum.photos/400/300?random=62",
+  ],
+  "UI Kit": [
+    "https://picsum.photos/400/300?random=70",
+    "https://picsum.photos/400/300?random=71",
+    "https://picsum.photos/400/300?random=72",
+  ],
+  "E-book": [
+    "https://picsum.photos/400/300?random=80",
+    "https://picsum.photos/400/300?random=81",
+    "https://picsum.photos/400/300?random=82",
+  ],
+  "Wallpaper Bundle": [
+    "https://picsum.photos/400/300?random=90",
+    "https://picsum.photos/400/300?random=91",
+    "https://picsum.photos/400/300?random=92",
+  ],
+} as const;
+
 // Each type carries a realistic price band in cents.
-const PRODUCT_TYPES = [
+export const PRODUCT_TYPES = [
   { noun: "Lightroom Preset Pack", min: 1200, max: 3900 },
   { noun: "Procreate Brush Set", min: 700, max: 2400 },
   { noun: "Notion Template", min: 900, max: 4900 },
@@ -98,14 +152,16 @@ export function generateProducts(rng: Rng, ownerId: string, count: number): Prod
     // Mostly active; a few drafts. Drafts are excluded from order generation.
     const status = weightedPick<string>(rng, [["active", 8], ["draft", 2]]);
     const currency = weightedPick<string>(rng, [["EUR", 5], ["USD", 1]]);
+    // Pick a random stock image for the product type.
+    const images = STOCK_IMAGES[type.noun as keyof typeof STOCK_IMAGES];
+    const image_key = pick(rng, images);
     products.push({
       owner_id: ownerId,
       title,
       description: `${title}. A digital product for creators — instant download after purchase.`,
       price_cents,
       currency,
-      // Placeholder key only. Nothing is uploaded to R2 by the seed.
-      image_key: `seed/placeholder-${i + 1}.png`,
+      image_key,
       status,
     });
   }

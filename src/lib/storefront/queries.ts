@@ -6,7 +6,6 @@ import {
 import {
   DEFAULT_STOREFRONT_CONFIG,
   type StorefrontConfig,
-  type StorefrontTheme,
 } from "@/types/storefront";
 
 // Server Components / Route Handlers only (cookies() is Node-only — never
@@ -22,15 +21,16 @@ export type StorefrontRecord = {
   config: StorefrontConfig;
 };
 
-/** A storefront as it appears in the list (no full block payload needed). */
+/** A storefront as it appears in the list. */
 export type StorefrontSummary = {
   id: string;
   name: string;
+  /** Kept alongside config for the dashboard's cheap aggregate. */
   blockCount: number;
   /** ISO timestamp of the last save, for "updated X" + list ordering. */
   updatedAt: string;
-  /** Theme only, so the card can render a faithful background preview. */
-  theme: StorefrontTheme;
+  /** Full parsed config, so the card renders a faithful grid preview. */
+  config: StorefrontConfig;
 };
 
 /**
@@ -54,7 +54,7 @@ export async function listStorefronts(): Promise<StorefrontSummary[]> {
       name: row.name,
       blockCount: config.blocks.length,
       updatedAt: row.updated_at,
-      theme: config.theme,
+      config,
     };
   });
 }

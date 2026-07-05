@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { getUser } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import {
+  embedSettingsSchema,
+  parseStoredStorefrontConfig,
   storefrontConfigSchema,
   storefrontIdSchema,
   storefrontNameSchema,
@@ -132,6 +134,8 @@ export async function saveStorefront(
       .slice()
       .sort((a, b) => a.order - b.order)
       .map((block, index) => ({ ...block, order: index })),
+    // Optional masthead — only persisted when the client sent one.
+    ...(parsed.data.header ? { header: parsed.data.header } : {}),
   };
 
   const { data: row, error } = await supabase
@@ -158,6 +162,72 @@ export async function saveStorefront(
     ok: true,
     droppedBlocks: parsed.data.blocks.length - config.blocks.length,
   };
+}
+
+export type UpdateEmbedSettingsResult =
+  | { ok: true }
+  | { ok: false; error: string };
+
+/**
+ * Save one storefront's embed-widget settings (enabled flag + domain
+ * allowlist). They live inside the config jsonb (the table has no dedicated
+ * columns), so this is a read-modify-write scoped to the owner: only the
+ * `embed` member changes; theme/blocks/header pass through untouched. A
+ * concurrent designer save can win the race — acceptable for now, both writes
+ * are fully validated and last-write-wins.
+ */
+export async function updateEmbedSettings(
+  id: string,
+  input: unknown,
+): Promise<UpdateEmbedSettingsResult> {
+  const user = await getUser();
+  if (!user) return { ok: false, error: SESSION_ERROR };
+  if (!storefrontIdSchema.safeParse(id).success) {
+    return { ok: false, error: NOT_FOUND };
+  }
+
+  // The security boundary: strict shape, hostname-regex-gated domains.
+  const parsed = embedSettingsSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      ok: false,
+      error: parsed.error.issues[0]?.message ?? "Invalid embed settings.",
+    };
+  }
+
+  const supabase = await createClient();
+  const { data: row, error: readError } = await supabase
+    .from("storefronts")
+    .select("config")
+    .eq("id", id)
+    .eq("owner_id", user.id)
+    .maybeSingle();
+  if (readError) {
+    console.error("[storefront] embed settings read failed", readError);
+    return { ok: false, error: "Could not save embed settings. Try again." };
+  }
+  if (!row) return { ok: false, error: NOT_FOUND };
+
+  const config: StorefrontConfig = {
+    ...(parseStoredStorefrontConfig(row.config) ?? DEFAULT_STOREFRONT_CONFIG),
+    embed: parsed.data,
+  };
+
+  const { data: updated, error } = await supabase
+    .from("storefronts")
+    .update({ config, updated_at: new Date().toISOString() })
+    .eq("id", id)
+    .eq("owner_id", user.id)
+    .select("id")
+    .maybeSingle();
+  if (error) {
+    console.error("[storefront] embed settings save failed", error);
+    return { ok: false, error: "Could not save embed settings. Try again." };
+  }
+  if (!updated) return { ok: false, error: NOT_FOUND };
+
+  revalidatePath("/storefront");
+  return { ok: true };
 }
 
 /** Delete one storefront. Its orders are detached (FK on delete set null). */

@@ -4,7 +4,11 @@ import {
   CARD_SHAPES,
   CARD_STYLES,
   DEFAULT_STOREFRONT_CONFIG,
+  DENSITIES,
   DISPLAY_MODES,
+  EMBED_MAX_DOMAINS,
+  HEADER_BIO_MAX,
+  HEADER_NAME_MAX,
   PATTERN_PRESETS,
   PRICE_DISPLAYS,
   PRICE_TAG_POSITIONS,
@@ -49,6 +53,13 @@ const hexColorSchema = z.string().regex(HEX_COLOR_PATTERN, {
   error: "Colors must be 6-digit hex, like #a855f7.",
 });
 
+// Plain-text gates shared by every free-text config field (text blocks, the
+// store header). Control characters are rejected; the multiline variant only
+// re-admits newline. Text is ALWAYS rendered as React text nodes, never markup.
+const TEXT_ERROR = { error: "Text contains unsupported characters." };
+const MULTILINE_TEXT_PATTERN = /^(?:[^\u0000-\u001f\u007f]|\n)*$/;
+const SINGLE_LINE_TEXT_PATTERN = /^[^\u0000-\u001f\u007f]*$/;
+
 /** Sanity cap on grid size; the designer UI stays comfortably under it. */
 export const MAX_BLOCKS = 60;
 
@@ -83,6 +94,41 @@ const themeSchema = z.strictObject({
   priceTagStyle: z.enum(PRICE_TAG_STYLES),
   showTitle: z.boolean(),
   displayMode: z.enum(DISPLAY_MODES),
+  density: z.enum(DENSITIES),
+  soldOutBadge: z.boolean(),
+  hideSoldOut: z.boolean(),
+});
+
+// The optional masthead above the grid: show toggle + capped plain text.
+const headerSchema = z.strictObject({
+  show: z.boolean(),
+  name: z.string().max(HEADER_NAME_MAX).regex(SINGLE_LINE_TEXT_PATTERN, TEXT_ERROR),
+  bio: z.string().max(HEADER_BIO_MAX).regex(MULTILINE_TEXT_PATTERN, TEXT_ERROR),
+});
+
+// Bare lowercase hostname, RFC-shaped: dot-separated alnum/hyphen labels
+// (≤ 63 chars, no leading/trailing hyphen), alpha TLD, ≤ 253 chars total.
+// No protocol, path, port, or wildcard — it is only ever compared against a
+// request origin's hostname or rendered as a text node, never used in markup.
+const HOSTNAME_PATTERN =
+  /^(?=[a-z0-9.-]{4,253}$)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?[.])+[a-z]{2,63}$/;
+
+/** Embed-widget settings (non-visual member of the config jsonb). Shared by
+ *  the updateEmbedSettings action (the boundary) and the modal (UX only). */
+export const embedSettingsSchema = z.strictObject({
+  enabled: z.boolean(),
+  domains: z
+    .array(
+      z.string().regex(HOSTNAME_PATTERN, {
+        error: "Use bare lowercase domains like yoursite.com — no https:// or paths.",
+      }),
+    )
+    .max(EMBED_MAX_DOMAINS, {
+      error: `List up to ${EMBED_MAX_DOMAINS} domains.`,
+    })
+    .refine((domains) => new Set(domains).size === domains.length, {
+      error: "Each domain can only be listed once.",
+    }),
 });
 
 const sizeSchema = z.enum(BLOCK_SIZES);
@@ -93,6 +139,8 @@ const productBlockSchema = z.strictObject({
   productId: z.uuid(),
   size: sizeSchema,
   order: orderSchema,
+  // Seller-controlled sold-out mark — optional so older blocks still parse.
+  soldOut: z.boolean().optional(),
 });
 
 // Plain text only. Rendered exclusively as a React text node (React escapes
@@ -105,9 +153,7 @@ const textBlockSchema = z.strictObject({
     .max(TEXT_MAX_LENGTH)
     // Control characters (other than newline) are rejected so stored text
     // stays sane; sellers can still write multi-line text.
-    .regex(/^(?:[^\u0000-\u001f\u007f]|\n)*$/, {
-      error: "Text contains unsupported characters.",
-    }),
+    .regex(MULTILINE_TEXT_PATTERN, TEXT_ERROR),
   variant: z.enum(TEXT_VARIANTS),
   align: z.enum(TEXT_ALIGNS),
   size: sizeSchema,
@@ -132,6 +178,9 @@ export const storefrontConfigSchema = z.strictObject({
       (blocks) => new Set(blocks.map(blockKey)).size === blocks.length,
       { error: "Grid blocks must be unique." },
     ),
+  // Optional so configs saved before these features still parse directly.
+  header: headerSchema.optional(),
+  embed: embedSettingsSchema.optional(),
 }) satisfies z.ZodType<StorefrontConfig>;
 
 /**
@@ -163,7 +212,12 @@ export function parseStoredStorefrontConfig(
   if (direct.success) return direct.data;
 
   if (typeof raw !== "object" || raw === null) return null;
-  const candidate = raw as { theme?: unknown; blocks?: unknown };
+  const candidate = raw as {
+    theme?: unknown;
+    blocks?: unknown;
+    header?: unknown;
+    embed?: unknown;
+  };
   const rawTheme =
     typeof candidate.theme === "object" && candidate.theme !== null
       ? (candidate.theme as Record<string, unknown>)
@@ -181,6 +235,15 @@ export function parseStoredStorefrontConfig(
             : block,
         )
       : [],
+    // Carry stored header/embed through the retry, but only when each
+    // validates on its own — a malformed part degrades to "absent", never a
+    // lost config.
+    ...(headerSchema.safeParse(candidate.header).success
+      ? { header: candidate.header }
+      : {}),
+    ...(embedSettingsSchema.safeParse(candidate.embed).success
+      ? { embed: candidate.embed }
+      : {}),
   };
   const retry = storefrontConfigSchema.safeParse(upgraded);
   return retry.success ? retry.data : null;

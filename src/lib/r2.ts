@@ -162,6 +162,10 @@ const GET_EXPIRY_SECONDS = 2 * 60 * 60;
  * stricter path (purchase check + short expiry) — do not reuse this for them.
  */
 export async function presignGetUrl(key: string): Promise<string | null> {
+  // If the key is already a full URL (e.g., external stock photo), return it directly.
+  if (key.startsWith("http://") || key.startsWith("https://")) {
+    return key;
+  }
   if (!hasR2Credentials()) return null;
   try {
     const url = objectUrl(key);

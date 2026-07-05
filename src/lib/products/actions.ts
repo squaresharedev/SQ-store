@@ -131,6 +131,11 @@ export async function createProduct(
       status: data.status,
       image_key: data.imageKey ?? null,
       digital_file_key: data.digitalFileKey ?? null,
+      track_stock: data.trackStock ?? false,
+      // Quantity is only meaningful (and only stored) when tracking is enabled.
+      stock_quantity:
+        (data.trackStock ?? false) ? (data.stockQuantity ?? null) : null,
+      low_stock_threshold: data.lowStockThreshold ?? 5,
     })
     .select("id")
     .single();
@@ -172,6 +177,22 @@ export async function updateProduct(
   const replacingFile = data.digitalFileKey !== undefined;
   if (replacingImage) update.image_key = data.imageKey;
   if (replacingFile) update.digital_file_key = data.digitalFileKey;
+  // Three-state stock columns: only written when the field was explicitly
+  // included in the payload (undefined = leave the stored value untouched).
+  if (data.trackStock !== undefined) {
+    update.track_stock = data.trackStock;
+    // Turning tracking off clears the quantity — the DB check constraint
+    // requires a quantity when tracking, and a stale number is misleading.
+    if (!data.trackStock) update.stock_quantity = null;
+  }
+  if (data.stockQuantity !== undefined) {
+    // stockQuantity is nullish in the schema; write the value as-is (the
+    // refine already enforced quantity present when trackStock === true).
+    update.stock_quantity = data.stockQuantity ?? null;
+  }
+  if (data.lowStockThreshold !== undefined) {
+    update.low_stock_threshold = data.lowStockThreshold;
+  }
 
   const supabase = await createClient();
 

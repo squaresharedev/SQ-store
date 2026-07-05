@@ -19,14 +19,18 @@ const HOVER_REVEAL_CLASS =
  * bottom, `minimal` = image only with info revealed on hover/focus. The
  * theme's priceDisplay independently shows the price always / on hover /
  * never. priceTagPosition controls placement (below / onImage / corner /
- * hidden); priceTagStyle controls chip appearance (plain / pill).
+ * hidden); priceTagStyle controls chip appearance (plain / pill). A block the
+ * seller marked sold out dims its image and (per theme.soldOutBadge) wears a
+ * corner badge.
  */
 export function ProductTileContent({
   product,
   theme,
+  soldOut = false,
 }: {
   product: Product;
   theme: StorefrontTheme;
+  soldOut?: boolean;
 }) {
   const overlaid = theme.cardStyle !== "standard";
 
@@ -108,7 +112,14 @@ export function ProductTileContent({
       <div className="relative min-h-0 flex-1 bg-muted">
         {product.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element -- signed R2 URL with query params; next/image adds no value here.
-          <img src={product.imageUrl} alt="" className="size-full object-cover" />
+          <img
+            src={product.imageUrl}
+            alt=""
+            className={cn(
+              "size-full object-cover",
+              soldOut && "opacity-60 grayscale",
+            )}
+          />
         ) : (
           <div className="flex size-full items-center justify-center">
             <ImageIcon
@@ -120,6 +131,11 @@ export function ProductTileContent({
         )}
         {/* Floated price (onImage / corner) — positioned over the image area. */}
         {floatedPrice}
+        {soldOut && theme.soldOutBadge && (
+          <span className="absolute left-2 top-2 z-10 rounded-sm bg-primary px-1.5 py-0.5 font-inter text-xs font-medium text-primary-foreground">
+            Sold out
+          </span>
+        )}
       </div>
       {infoBar}
     </div>

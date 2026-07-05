@@ -18,6 +18,69 @@ export type Database = {
   }
   public: {
     Tables: {
+      orders: {
+        Row: {
+          amount_cents: number
+          buyer_email: string | null
+          channel: string
+          created_at: string
+          currency: string
+          id: string
+          platform_fee_cents: number
+          product_id: string | null
+          product_price_cents: number
+          product_title: string
+          seller_id: string
+          status: string
+          storefront_id: string | null
+        }
+        Insert: {
+          amount_cents: number
+          buyer_email?: string | null
+          channel: string
+          created_at?: string
+          currency?: string
+          id?: string
+          platform_fee_cents?: number
+          product_id?: string | null
+          product_price_cents: number
+          product_title: string
+          seller_id: string
+          status?: string
+          storefront_id?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          buyer_email?: string | null
+          channel?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          platform_fee_cents?: number
+          product_id?: string | null
+          product_price_cents?: number
+          product_title?: string
+          seller_id?: string
+          status?: string
+          storefront_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_storefront_id_fkey"
+            columns: ["storefront_id"]
+            isOneToOne: false
+            referencedRelation: "storefronts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           created_at: string
@@ -26,10 +89,13 @@ export type Database = {
           digital_file_key: string | null
           id: string
           image_key: string | null
+          low_stock_threshold: number
           owner_id: string
           price_cents: number
           status: string
+          stock_quantity: number | null
           title: string
+          track_stock: boolean
           updated_at: string
         }
         Insert: {
@@ -39,10 +105,13 @@ export type Database = {
           digital_file_key?: string | null
           id?: string
           image_key?: string | null
+          low_stock_threshold?: number
           owner_id: string
           price_cents: number
           status?: string
+          stock_quantity?: number | null
           title: string
+          track_stock?: boolean
           updated_at?: string
         }
         Update: {
@@ -52,10 +121,13 @@ export type Database = {
           digital_file_key?: string | null
           id?: string
           image_key?: string | null
+          low_stock_threshold?: number
           owner_id?: string
           price_cents?: number
           status?: string
+          stock_quantity?: number | null
           title?: string
+          track_stock?: boolean
           updated_at?: string
         }
         Relationships: []
@@ -146,7 +218,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      decrement_stock: {
+        Args: { p_product_id: string; p_quantity: number }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

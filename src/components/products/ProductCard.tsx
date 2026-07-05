@@ -5,6 +5,8 @@ import { cn } from "@/lib/utils";
 import { iconButtonClass } from "@/components/ui/control-styles";
 import { formatPrice } from "@/lib/format";
 import { StatusBadge } from "./StatusBadge";
+import { StockBadge } from "@/components/ui/StockBadge";
+import { deriveStockBadge } from "@/lib/stock/badge";
 
 // Presentational card (styles.md §8.7). Interactive handlers come from the
 // parent list, which owns product state; edit is a plain route link.
@@ -15,7 +17,8 @@ export function ProductCard({
   product: Product;
   onDelete: () => void;
 }) {
-  const { id, title, price, currency, status, imageUrl } = product;
+  const { id, title, price, currency, status, imageUrl, trackStock, stockQuantity, lowStockThreshold } = product;
+  const stockBadge = deriveStockBadge({ trackStock, stockQuantity, lowStockThreshold });
 
   return (
     <div className="flex flex-col rounded-md border border-border bg-card p-4 shadow-sm transition-shadow duration-180 ease-in-out hover:shadow-md motion-reduce:transition-none">
@@ -47,6 +50,11 @@ export function ProductCard({
           <p className="mt-0.5 font-inter text-sm text-muted-foreground">
             {formatPrice(price, currency)}
           </p>
+          {stockBadge !== null && (
+            <div className="mt-1.5">
+              <StockBadge badge={stockBadge} />
+            </div>
+          )}
         </div>
 
         <div className="flex shrink-0 items-center gap-1">

@@ -2,8 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { fieldBaseClass, secondaryButtonClass } from "@/components/ui/control-styles";
-import { cn } from "@/lib/utils";
+import { secondaryButtonClass } from "@/components/ui/control-styles";
 import type {
   OrderFilters,
   OrderSort,
@@ -13,22 +12,13 @@ import type {
 import { OrderDetail } from "./OrderDetail";
 import { OrdersEmptyState } from "./OrdersEmptyState";
 import { OrdersTable } from "./OrdersTable";
-import { OrdersToolbar } from "./OrdersToolbar";
+import { OrdersToolbar, type SortValue } from "./OrdersToolbar";
 
 // Composition only: filters/sort/page live in the URL (the server page reads
 // them and re-queries); this component just wires toolbar -> URL -> table ->
 // detail. No data access here.
 
 const SEARCH_DEBOUNCE_MS = 300;
-
-type SortValue = `${OrderSort["field"]}-${OrderSort["direction"]}`;
-
-const SORT_OPTIONS: { value: SortValue; label: string }[] = [
-  { value: "createdAt-desc", label: "newest first" },
-  { value: "createdAt-asc", label: "oldest first" },
-  { value: "amount-desc", label: "amount: high to low" },
-  { value: "amount-asc", label: "amount: low to high" },
-];
 
 function hasAnyFilter(filters: OrderFilters): boolean {
   return Boolean(
@@ -141,29 +131,12 @@ export function OrdersPage({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <OrdersToolbar filters={draft} onChange={handleFilters} />
-        <div className="flex flex-col gap-1">
-          <label
-            htmlFor="orders-sort"
-            className="font-inter text-xs font-medium text-foreground"
-          >
-            sort
-          </label>
-          <select
-            id="orders-sort"
-            value={`${sort.field}-${sort.direction}` as SortValue}
-            onChange={(event) => handleSort(event.target.value as SortValue)}
-            className={cn(fieldBaseClass, "w-48")}
-          >
-            {SORT_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
+      <OrdersToolbar
+        filters={draft}
+        onChange={handleFilters}
+        sort={sort}
+        onSortChange={handleSort}
+      />
 
       {data.rows.length === 0 ? (
         <OrdersEmptyState

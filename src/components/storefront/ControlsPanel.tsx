@@ -6,6 +6,7 @@ import type { Product } from "@/types/product";
 import {
   STOREFRONT_FONTS,
   type StorefrontFont,
+  type StorefrontHeader,
   type StorefrontTheme,
   type TextBlock,
 } from "@/types/storefront";
@@ -15,6 +16,7 @@ import { Select, type SelectOption } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { ProductPicker } from "./ProductPicker";
 import { ThemePanel } from "./ThemePanel";
+import { HeaderSection } from "./HeaderSection";
 import { CardsSection } from "./CardsSection";
 import { LayoutSection } from "./LayoutSection";
 import { AdvancedSection } from "./AdvancedSection";
@@ -43,21 +45,25 @@ export function ControlsPanel({
   products,
   usedProductIds,
   theme,
+  header,
   editingTextBlock,
   onAddProduct,
   onAddText,
   onThemeChange,
+  onHeaderChange,
   onUpdateTextBlock,
   onDoneEditingText,
 }: {
   products: Product[];
   usedProductIds: ReadonlySet<string>;
   theme: StorefrontTheme;
+  header: StorefrontHeader;
   /** The text block being edited (pencil-selected on the canvas), if any. */
   editingTextBlock: TextBlock | null;
   onAddProduct: (productId: string) => void;
   onAddText: () => void;
   onThemeChange: (theme: StorefrontTheme) => void;
+  onHeaderChange: (header: StorefrontHeader) => void;
   onUpdateTextBlock: (patch: TextBlockPatch) => void;
   onDoneEditingText: () => void;
 }) {
@@ -97,6 +103,10 @@ export function ControlsPanel({
         <ThemePanel theme={theme} onChange={onThemeChange} />
       </CollapsibleSection>
 
+      <CollapsibleSection title="Header" collapsible defaultOpen={false}>
+        <HeaderSection header={header} onChange={onHeaderChange} />
+      </CollapsibleSection>
+
       <CollapsibleSection title="Cards" collapsible defaultOpen={false}>
         <CardsSection theme={theme} onChange={onThemeChange} />
       </CollapsibleSection>
@@ -134,7 +144,7 @@ export function ControlsPanel({
       </CollapsibleSection>
 
       <CollapsibleSection title="Advanced" collapsible defaultOpen={false}>
-        <AdvancedSection />
+        <AdvancedSection theme={theme} onChange={onThemeChange} />
       </CollapsibleSection>
     </div>
   );

@@ -1,5 +1,6 @@
 import type {
   CardShape,
+  Density,
   StorefrontFont,
   StorefrontRadius,
   TextAlign,
@@ -31,6 +32,14 @@ export const CARD_SHAPE_CLASSES: Record<CardShape, string> = {
   square: "rounded-none overflow-hidden",
   rounded: "",
   circle: "rounded-full overflow-hidden",
+};
+
+// Density → the --grid-gap override classes defined next to .ss-grid in
+// globals.css. Set on the grid's ancestor; gap AND square-cell math follow.
+export const DENSITY_CLASSES: Record<Density, string> = {
+  compact: "ss-gap-compact",
+  comfy: "ss-gap-comfy",
+  spacious: "ss-gap-spacious",
 };
 
 

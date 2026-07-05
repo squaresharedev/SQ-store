@@ -5,10 +5,12 @@ import Link from "next/link";
 import { AlertCircle, ArrowLeft } from "lucide-react";
 import type { Product } from "@/types/product";
 import {
+  DEFAULT_STOREFRONT_HEADER,
   blockKey,
   type BlockSize,
   type StorefrontBlock,
   type StorefrontConfig,
+  type StorefrontHeader,
   type StorefrontTheme,
   type TextBlock,
 } from "@/types/storefront";
@@ -46,6 +48,9 @@ export function StorefrontDesigner({
 }) {
   const [name, setName] = useState(initialName);
   const [theme, setTheme] = useState<StorefrontTheme>(initialConfig.theme);
+  const [header, setHeader] = useState<StorefrontHeader>(
+    initialConfig.header ?? DEFAULT_STOREFRONT_HEADER,
+  );
   const [blocks, setBlocks] = useState<StorefrontBlock[]>(() =>
     [...initialConfig.blocks].sort((a, b) => a.order - b.order),
   );
@@ -121,6 +126,17 @@ export function StorefrontDesigner({
     );
   }
 
+  function toggleSoldOut(key: string) {
+    markDirty();
+    setBlocks((current) =>
+      current.map((b) =>
+        b.type === "product" && blockKey(b) === key
+          ? { ...b, soldOut: !b.soldOut }
+          : b,
+      ),
+    );
+  }
+
   function updateTextBlock(key: string, patch: TextBlockPatch) {
     markDirty();
     setBlocks((current) =>
@@ -148,6 +164,11 @@ export function StorefrontDesigner({
     setTheme(next);
   }
 
+  function updateHeader(next: StorefrontHeader) {
+    markDirty();
+    setHeader(next);
+  }
+
   function updateName(next: string) {
     markDirty();
     setName(next);
@@ -158,6 +179,7 @@ export function StorefrontDesigner({
     const config: StorefrontConfig = {
       theme,
       blocks: blocks.map((block, index) => ({ ...block, order: index })),
+      header,
     };
     const result = await saveStorefront(storefrontId, { name, config });
     if (!result.ok) {
@@ -246,14 +268,19 @@ export function StorefrontDesigner({
         )}
 
         <div className="flex flex-col gap-6 lg:flex-row">
-          <div className="min-w-0 flex-1">
+          {/* Pinned preview: on lg+ the canvas sticks below the top bar and
+              scrolls internally, so it stays visible while the (often longer)
+              controls panel scrolls the page. */}
+          <div className="min-w-0 flex-1 lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:self-start lg:overflow-y-auto">
             <DesignerCanvas
               blocks={blocks}
               productsById={productsById}
               theme={theme}
+              header={header}
               onReorder={reorderBlocks}
               onSizeChange={setBlockSize}
               onRemove={removeBlock}
+              onToggleSoldOut={toggleSoldOut}
               editingKey={editingKey}
               onEditText={setEditingKey}
             />
@@ -263,10 +290,12 @@ export function StorefrontDesigner({
               products={products}
               usedProductIds={usedProductIds}
               theme={theme}
+              header={header}
               editingTextBlock={editingTextBlock}
               onAddProduct={addProduct}
               onAddText={addTextBlock}
               onThemeChange={updateTheme}
+              onHeaderChange={updateHeader}
               onUpdateTextBlock={(patch) =>
                 editingKey && updateTextBlock(editingKey, patch)
               }

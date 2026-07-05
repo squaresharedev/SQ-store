@@ -1,13 +1,23 @@
 "use client";
 
-import { Pencil, X } from "lucide-react";
+import { Pencil, Tag, X } from "lucide-react";
 import type { Product } from "@/types/product";
 import type { StorefrontBlock, StorefrontTheme } from "@/types/storefront";
 import { cn } from "@/lib/utils";
 import { BlockFace } from "./BlockFace";
 
-const TILE_CONTROL_CLASS =
-  "inline-flex size-6 items-center justify-center rounded-none text-muted-foreground transition-colors duration-180 ease-in-out hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background motion-reduce:transition-none";
+/** Small square control button used in tile chrome (also by CarouselStrip's
+ *  move buttons, so all tile controls look identical). */
+export const TILE_CONTROL_CLASS =
+  "inline-flex size-6 items-center justify-center rounded-none text-muted-foreground transition-colors duration-180 ease-in-out hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background motion-reduce:transition-none disabled:pointer-events-none disabled:opacity-40";
+
+/** The floating chip that holds tile controls, revealed on hover/focus for
+ *  fine pointers (the surrounding grid/strip cell is the `group`). */
+export const TILE_CONTROL_CHIP_CLASS = cn(
+  "absolute z-20 flex items-center gap-0.5 rounded-sm border border-border bg-background/95 p-0.5",
+  "transition-opacity duration-180 ease-in-out motion-reduce:transition-none",
+  "pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100 pointer-fine:group-focus-within:opacity-100",
+);
 
 /**
  * The surface of one storefront block inside the shared <Grid>: the product or
@@ -22,18 +32,22 @@ export function BlockTile({
   product,
   theme,
   editable,
-  isEditing,
+  isEditing = false,
   onToggleEdit,
   onRemove,
+  onToggleSoldOut,
 }: {
   block: StorefrontBlock;
   product: Product | null;
   theme: StorefrontTheme;
   editable: boolean;
   /** True when this block is the one being edited in the side panel. */
-  isEditing: boolean;
-  onToggleEdit: () => void;
-  onRemove: () => void;
+  isEditing?: boolean;
+  /** Edit-mode callbacks — only consulted when `editable` (static previews omit them). */
+  onToggleEdit?: () => void;
+  onRemove?: () => void;
+  /** Flip the seller-controlled sold-out mark (product blocks only). */
+  onToggleSoldOut?: () => void;
 }) {
   // Include the text content so several text blocks stay distinguishable to
   // screen readers.
@@ -56,6 +70,13 @@ export function BlockTile({
         // Inset ring so the "being edited" state reads clearly without being
         // clipped by the grid cell's overflow.
         isEditing && "ring-2 ring-inset ring-ring",
+        // In the designer, a block buyers won't see (sold out + hideSoldOut)
+        // stays visible but dimmed so the seller can still manage it.
+        editable &&
+          block.type === "product" &&
+          block.soldOut &&
+          theme.hideSoldOut &&
+          "opacity-50",
       )}
     >
       {/* Edit (text) + remove. Revealed on hover/focus for fine pointers (the
@@ -64,12 +85,29 @@ export function BlockTile({
       {editable && (
         <div
           className={cn(
-            "absolute right-1 top-1 z-20 flex items-center gap-0.5 rounded-sm border border-border bg-background/95 p-0.5",
-            "transition-opacity duration-180 ease-in-out motion-reduce:transition-none",
-            "pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100 pointer-fine:group-focus-within:opacity-100",
+            TILE_CONTROL_CHIP_CLASS,
+            "right-1 top-1",
             isEditing && "pointer-fine:opacity-100",
           )}
         >
+          {block.type === "product" && (
+            <button
+              type="button"
+              onClick={onToggleSoldOut}
+              aria-label={
+                block.soldOut
+                  ? `Mark ${label} as available`
+                  : `Mark ${label} as sold out`
+              }
+              aria-pressed={block.soldOut === true}
+              className={cn(
+                TILE_CONTROL_CLASS,
+                block.soldOut && "bg-accent text-foreground",
+              )}
+            >
+              <Tag className="size-3.5" strokeWidth={2} aria-hidden="true" />
+            </button>
+          )}
           {block.type === "text" && (
             <button
               type="button"
