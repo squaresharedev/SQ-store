@@ -1,6 +1,7 @@
 import { DisplayNameForm } from "@/components/settings/DisplayNameForm";
 import { EmailChangeForm } from "@/components/settings/EmailChangeForm";
 import { PasswordChangeForm } from "@/components/settings/PasswordChangeForm";
+import { SignOutSection } from "@/components/settings/SignOutSection";
 
 /**
  * Account section: display name, email (Supabase re-verification flow) and
@@ -23,6 +24,7 @@ export function AccountSection({
         Profile photos are coming soon. Until then, your initials get to do
         all the work.
       </p>
+      <SignOutSection />
     </div>
   );
 }

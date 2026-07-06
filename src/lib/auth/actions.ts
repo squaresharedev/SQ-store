@@ -251,9 +251,30 @@ export async function signInWithGoogle(formData: FormData): Promise<void> {
   redirect(result.data.url);
 }
 
-/** Sign out and return to the login screen. */
+/**
+ * Sign out of the *current* session only, then return to the login screen.
+ *
+ * Supabase's `signOut()` defaults to `global` scope — which revokes every
+ * session on every device the user is signed in on. That's surprising for a
+ * routine "Sign out" button, so we pass `local` to end just this session and
+ * leave the user's other devices alone. Use `signOutEverywhere()` for the
+ * deliberate all-devices sweep.
+ */
 export async function signOut(): Promise<void> {
   const supabase = await createClient();
-  await supabase.auth.signOut();
+  await supabase.auth.signOut({ scope: "local" });
+  redirect("/login");
+}
+
+/**
+ * Sign out of *every* device by revoking all of the user's refresh tokens
+ * (Supabase `global` scope), then return to the login screen. This is the
+ * "I left myself logged in somewhere" / "my account may be compromised"
+ * escape hatch. Note: already-issued access-token JWTs remain valid until they
+ * expire; what this guarantees is that no session can be refreshed past that.
+ */
+export async function signOutEverywhere(): Promise<void> {
+  const supabase = await createClient();
+  await supabase.auth.signOut({ scope: "global" });
   redirect("/login");
 }
