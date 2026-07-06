@@ -36,12 +36,6 @@ export type MetricWindow = {
   aov: MoneyByCurrency;
 };
 
-export type TopProduct = {
-  title: string;
-  revenue: MoneyByCurrency;
-  sales: number;
-};
-
 /**
  * Direction of the last 30 days vs the 30 days before it — drives the sparkline
  * colour. `surge` (>=10x) is a deliberate purple easter egg for real breakouts.
@@ -66,8 +60,6 @@ export type DashboardOrdersData = {
   aovTrend: MetricTrend;
   /** Latest ~5, any status. */
   recentOrders: DashboardOrder[];
-  /** Top ~5 by paid revenue, all-time (product_title snapshot). */
-  topProducts: TopProduct[];
   refundedCount: number;
   disputedCount: number;
 };
@@ -126,7 +118,6 @@ export function emptyOrdersData(available = false): DashboardOrdersData {
     salesTrend: { points: [], tone: "flat" },
     aovTrend: { points: [], tone: "flat" },
     recentOrders: [],
-    topProducts: [],
     refundedCount: 0,
     disputedCount: 0,
   };
@@ -210,21 +201,6 @@ export async function getDashboardOrders(): Promise<DashboardOrdersData> {
     tone: trendTone(last30d.aov.EUR ?? 0, prev30d.aov.EUR ?? 0),
   };
 
-  const byTitle = new Map<string, TopProduct>();
-  for (const order of paid) {
-    const entry = byTitle.get(order.product_title) ?? {
-      title: order.product_title,
-      revenue: {},
-      sales: 0,
-    };
-    addMoney(entry.revenue, order.currency, order.amount_cents);
-    entry.sales += 1;
-    byTitle.set(order.product_title, entry);
-  }
-  const topProducts = [...byTitle.values()]
-    .sort((a, b) => maxRevenue(b.revenue) - maxRevenue(a.revenue))
-    .slice(0, 5);
-
   return {
     available: true,
     last30d,
@@ -232,15 +208,9 @@ export async function getDashboardOrders(): Promise<DashboardOrdersData> {
     salesTrend,
     aovTrend,
     recentOrders: orders.slice(0, 5),
-    topProducts,
     refundedCount: orders.filter((o) => o.status === "refunded").length,
     disputedCount: orders.filter((o) => o.status === "disputed").length,
   };
-}
-
-/** Ranking key for top products: a product's largest single-currency revenue. */
-function maxRevenue(revenue: MoneyByCurrency): number {
-  return Math.max(0, ...Object.values(revenue));
 }
 
 export type ProductsSummary = {

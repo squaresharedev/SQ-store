@@ -19,7 +19,9 @@ const KINDS: readonly { value: Kind; label: string }[] = [
   { value: "pattern", label: "Pattern" },
 ];
 
-const DEFAULT_GRADIENT_TO = "#e5e7eb";
+// Data default for the config's second gradient stop (configs store raw hex
+// by design) — matches the design system's neutral-200.
+const DEFAULT_GRADIENT_TO = "#e5e5e5";
 
 /** A base color to carry across type switches. */
 function baseColor(background: StorefrontBackground): string {

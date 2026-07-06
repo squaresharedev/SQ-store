@@ -18,9 +18,7 @@ const NAV = [
   { href: "/settings/legal", label: "Legal", icon: ScrollText },
   { href: "/settings/tax", label: "Tax", icon: Receipt },
   { href: "/settings/notifications", label: "Notifications", icon: Bell },
-  // Team & access is a separate slice; its /settings/team route isn't built
-  // yet, so the entry renders disabled instead of 404ing.
-  { href: "/settings/team", label: "Team & access", icon: Users, soon: true },
+  { href: "/settings/team", label: "Team & access", icon: Users },
   { href: "/settings/danger", label: "Danger zone", icon: TriangleAlert, danger: true },
 ] as const;
 
@@ -62,25 +60,8 @@ export function SettingsShell({ children }: { children: React.ReactNode }) {
   const nav = NAV.map((item) => {
     const active = pathname.startsWith(item.href);
     const Icon = item.icon;
-    const soon = "soon" in item && item.soon;
     const danger = "danger" in item && item.danger;
 
-    if (soon) {
-      return (
-        <span
-          key={item.href}
-          aria-disabled
-          title="Coming soon"
-          className="flex shrink-0 snap-start cursor-not-allowed items-center gap-2.5 rounded-[0.375rem] px-3 py-2.5 text-sm font-medium text-muted-foreground opacity-50"
-        >
-          <Icon aria-hidden className="size-4" />
-          {item.label}
-          <span className="rounded-sm border border-border px-1.5 py-0.5 font-inter text-xs uppercase tracking-wide text-muted-foreground">
-            soon
-          </span>
-        </span>
-      );
-    }
     return (
       <Link
         key={item.href}

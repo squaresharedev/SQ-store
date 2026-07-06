@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AlertCircle, ArrowRight, CheckCircle2 } from "lucide-react";
+import { iconNudgeRightClass } from "@/components/ui/control-styles";
 import { ModuleCard } from "./ModuleCard";
 
 export type AttentionItem = {
@@ -47,10 +48,14 @@ export function NeedsAttention({ items }: { items: AttentionItem[] }) {
               </div>
               <Link
                 href={item.href}
-                className="inline-flex items-center gap-1 font-inter text-xs font-medium text-foreground underline decoration-border underline-offset-4 transition-colors duration-180 ease-in-out hover:decoration-foreground motion-reduce:transition-none"
+                className="group/btn inline-flex items-center gap-1 font-inter text-xs font-medium text-foreground underline decoration-border underline-offset-4 transition-colors duration-180 ease-in-out hover:decoration-foreground motion-reduce:transition-none"
               >
                 {item.actionLabel}
-                <ArrowRight className="size-3" strokeWidth={2} aria-hidden="true" />
+                <ArrowRight
+                  className={`size-3 ${iconNudgeRightClass}`}
+                  strokeWidth={2}
+                  aria-hidden="true"
+                />
               </Link>
             </li>
           ))}

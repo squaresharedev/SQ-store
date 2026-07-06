@@ -136,6 +136,9 @@ export async function saveStorefront(
       .map((block, index) => ({ ...block, order: index })),
     // Optional masthead — only persisted when the client sent one.
     ...(parsed.data.header ? { header: parsed.data.header } : {}),
+    // Embed settings ride along validated so a designer save can't wipe what
+    // updateEmbedSettings stored (the designer passes its loaded value through).
+    ...(parsed.data.embed ? { embed: parsed.data.embed } : {}),
   };
 
   const { data: row, error } = await supabase

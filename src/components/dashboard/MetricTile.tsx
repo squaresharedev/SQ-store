@@ -45,7 +45,7 @@ export function MetricTile({
   return (
     <div
       className={cn(
-        "rounded-md border bg-card p-4 shadow-xs",
+        "flex flex-col justify-center rounded-md border bg-card p-4 shadow-xs",
         pending ? "border-dashed border-border" : "border-border",
         decoration && "relative overflow-hidden",
       )}

@@ -72,7 +72,11 @@ export async function authenticate(
   let supabase;
   try {
     supabase = await createClient();
-  } catch {
+  } catch (err) {
+    console.error(
+      "[auth] failed to create Supabase client:",
+      err instanceof Error ? err.message : String(err),
+    );
     return {
       error: "Could not connect to authentication service. Please try again.",
     };
@@ -82,13 +86,14 @@ export async function authenticate(
   if (intent === "magic") {
     if (!email) return { error: "Enter your email." };
     const origin = await siteOrigin();
-    const result = await supabase.auth
-      .signInWithOtp({
+    let result;
+    try {
+      result = await supabase.auth.signInWithOtp({
         email,
         options: { emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}` },
-      })
-      .catch(() => ({ error: null, networkError: true }) as const);
-    if ("networkError" in result) {
+      });
+    } catch (err) {
+      console.error("[auth] magic link failed:", err instanceof Error ? err.message : String(err));
       return { error: "Could not send email. Please check your connection and try again." };
     }
     if (result.error) return { error: friendly(result.error) };
@@ -101,12 +106,13 @@ export async function authenticate(
     const origin = await siteOrigin();
     // The recovery link always lands on /reset-password (where the new password
     // is chosen), regardless of the page's own post-login `next`.
-    const result = await supabase.auth
-      .resetPasswordForEmail(email, {
+    let result;
+    try {
+      result = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${origin}/auth/callback?next=${encodeURIComponent("/reset-password")}`,
-      })
-      .catch(() => ({ error: null, networkError: true }) as const);
-    if ("networkError" in result) {
+      });
+    } catch (err) {
+      console.error("[auth] reset password failed:", err instanceof Error ? err.message : String(err));
       return { error: "Could not send reset email. Please check your connection and try again." };
     }
     if (result.error) return { error: friendly(result.error) };
@@ -127,14 +133,15 @@ export async function authenticate(
       return { error: "Passwords do not match." };
     }
     const origin = await siteOrigin();
-    const result = await supabase.auth
-      .signUp({
+    let result;
+    try {
+      result = await supabase.auth.signUp({
         email,
         password,
         options: { emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}` },
-      })
-      .catch(() => ({ data: null, error: null, networkError: true }) as const);
-    if ("networkError" in result) {
+      });
+    } catch (err) {
+      console.error("[auth] signup failed:", err instanceof Error ? err.message : String(err));
       return { error: "Could not create account. Please check your connection and try again." };
     }
     if (result.error) return { error: friendly(result.error) };
@@ -149,12 +156,17 @@ export async function authenticate(
   }
 
   // intent === "signin"
-  const result = await supabase.auth
-    .signInWithPassword({ email, password })
-    .catch(() => ({ error: null, networkError: true }) as const);
-  if ("networkError" in result) {
+  let result;
+  try {
+    result = await supabase.auth.signInWithPassword({ email, password });
+  } catch (err) {
+    console.error(
+      "[auth] sign-in request failed:",
+      err instanceof Error ? err.message : String(err),
+    );
     return { error: "Could not sign in. Please check your connection and try again." };
   }
+
   if (result.error) return { error: friendly(result.error) };
   redirect(next);
 }
@@ -203,10 +215,11 @@ export async function resetPassword(
     };
   }
 
-  const result = await supabase.auth
-    .updateUser({ password })
-    .catch(() => ({ error: null, networkError: true }) as const);
-  if ("networkError" in result) {
+  let result;
+  try {
+    result = await supabase.auth.updateUser({ password });
+  } catch (err) {
+    console.error("[auth] update password failed:", err instanceof Error ? err.message : String(err));
     return { error: "Could not update your password. Check your connection and try again." };
   }
   if (result.error) {

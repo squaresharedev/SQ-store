@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Package, Plus } from "lucide-react";
-import { primaryButtonClass } from "@/components/ui/control-styles";
+import { iconPopClass, primaryButtonClass } from "@/components/ui/control-styles";
 import { CardBackdrop } from "@/components/ui/CardBackdrop";
 
 // First screen a new seller is likely to see, so it explains the next step and
@@ -25,7 +25,11 @@ export function ProductEmptyState() {
           You can save it as a draft and publish when you are ready.
         </p>
         <Link href="/products/new" className={`mt-6 ${primaryButtonClass}`}>
-          <Plus className="size-4" strokeWidth={2} aria-hidden="true" />
+          <Plus
+            className={`size-4 ${iconPopClass}`}
+            strokeWidth={2}
+            aria-hidden="true"
+          />
           Add product
         </Link>
       </div>

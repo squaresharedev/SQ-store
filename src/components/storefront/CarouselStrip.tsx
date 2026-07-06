@@ -28,9 +28,8 @@ export function CarouselStrip({
   theme,
   editable = false,
   editingKey = null,
-  onEditText,
+  onSelect,
   onRemove,
-  onToggleSoldOut,
   onMove,
   compact = false,
 }: {
@@ -39,11 +38,10 @@ export function CarouselStrip({
   getProduct: (block: StorefrontBlock) => Product | null;
   theme: StorefrontTheme;
   editable?: boolean;
-  /** Key of the text block open in the side panel (editable mode only). */
+  /** Key of the block open in the inspector panel (editable mode only). */
   editingKey?: string | null;
-  onEditText?: (key: string | null) => void;
+  onSelect?: (key: string | null) => void;
   onRemove?: (key: string) => void;
-  onToggleSoldOut?: (key: string) => void;
   /** Move a block one slot left (-1) or right (1). */
   onMove?: (key: string, direction: -1 | 1) => void;
   compact?: boolean;
@@ -73,14 +71,11 @@ export function CarouselStrip({
               editable={editable}
               isEditing={editingKey === key}
               onToggleEdit={
-                onEditText
-                  ? () => onEditText(editingKey === key ? null : key)
+                onSelect
+                  ? () => onSelect(editingKey === key ? null : key)
                   : undefined
               }
               onRemove={onRemove ? () => onRemove(key) : undefined}
-              onToggleSoldOut={
-                onToggleSoldOut ? () => onToggleSoldOut(key) : undefined
-              }
             />
 
             {/* Reorder arrows (the grid's drag handle has no meaning here). */}

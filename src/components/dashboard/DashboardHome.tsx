@@ -1,15 +1,14 @@
 import Link from "next/link";
 import { Plus } from "lucide-react";
-import { primaryButtonClass } from "@/components/ui/control-styles";
+import { iconPopClass, primaryButtonClass } from "@/components/ui/control-styles";
 import { BackgroundArrow } from "@/components/ui/BackgroundArrow";
 import type { DashboardOrdersData, ProductsSummary } from "@/lib/dashboard/queries";
 import { formatMoney } from "@/lib/dashboard/format";
 import { MetricTile } from "./MetricTile";
+import { DesktopRevenueHero, MobileRevenueHero } from "./MobileRevenueHero";
 import { NeedsAttention, type AttentionItem } from "./NeedsAttention";
 import { OnboardingSlot } from "./OnboardingSlot";
 import { RecentOrders } from "./RecentOrders";
-import { StorefrontStatus } from "./StorefrontStatus";
-import { TopProducts } from "./TopProducts";
 
 const RECENT_ORDERS_ID = "recent-orders";
 
@@ -85,7 +84,9 @@ export function DashboardHome({
       <BackgroundArrow side="right" />
 
       <div className="relative mx-auto max-w-7xl space-y-6 px-6 py-8">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        {/* On mobile the title + Add action live in the top bar (Sidebar) and
+            revenue becomes the hero below, so this header is desktop-only. */}
+        <div className="hidden flex-wrap items-center justify-between gap-3 md:flex">
           <div>
             <h1 className="text-2xl font-semibold text-foreground md:text-3xl">
               Overview
@@ -95,21 +96,27 @@ export function DashboardHome({
             </p>
           </div>
           <Link href="/products/new" className={primaryButtonClass}>
-            <Plus className="size-4" strokeWidth={2} aria-hidden="true" />
+            <Plus
+              className={`size-4 ${iconPopClass}`}
+              strokeWidth={2}
+              aria-hidden="true"
+            />
             Add product
           </Link>
         </div>
 
+        <MobileRevenueHero value={formatMoney(last30d.revenue)} />
+
+        {/* On mobile everything below the hero rides a white sheet with a
+            rounded top that overlaps the glow (same radius family as the
+            Modal bottom sheet). From md up the wrapper is invisible. */}
+        <div className="relative -mx-6 -mt-14 space-y-6 rounded-t-lg bg-background px-6 pt-6 md:mx-0 md:mt-0 md:rounded-none md:bg-transparent md:p-0">
         <OnboardingSlot />
 
         {/* Headline metrics: last 30 days only — all-time and per-channel/click trends live in Analytics. */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <MetricTile
-            label="Revenue · 30 days"
-            value={formatMoney(last30d.revenue)}
-            decoration="dots"
-            emphasis
-          />
+          {/* Mobile shows revenue as the hero above instead of this cell. */}
+          <DesktopRevenueHero value={formatMoney(last30d.revenue)} />
           <MetricTile
             label="Sales · 30 days"
             value={last30d.sales > 0 ? String(last30d.sales) : null}
@@ -123,25 +130,17 @@ export function DashboardHome({
         </div>
 
         {/* Status modules. */}
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-          <div className="space-y-4 lg:col-span-2">
-            <NeedsAttention
-              items={buildAttentionItems(
-                orders,
-                products,
-                storefrontSaved,
-                storefrontBlockCount,
-              )}
-            />
-            <RecentOrders orders={orders.recentOrders} id={RECENT_ORDERS_ID} />
-          </div>
-          <div className="space-y-4">
-            <StorefrontStatus
-              saved={storefrontSaved}
-              blockCount={storefrontBlockCount}
-            />
-            <TopProducts products={orders.topProducts} />
-          </div>
+        <div className="space-y-4">
+          <NeedsAttention
+            items={buildAttentionItems(
+              orders,
+              products,
+              storefrontSaved,
+              storefrontBlockCount,
+            )}
+          />
+          <RecentOrders orders={orders.recentOrders} id={RECENT_ORDERS_ID} />
+        </div>
         </div>
       </div>
     </div>

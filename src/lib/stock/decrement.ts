@@ -61,6 +61,14 @@ export async function decrementStock(
 
   // The function returns true on success, false/null on insufficient stock
   // (not tracking, already at zero, or would go negative).
-  if (data === true) return { ok: true };
+  if (data === true) {
+    // TODO(notifications:stock): when the post-decrement quantity falls to/below
+    // the product's low_stock_threshold, notify the owner. The producer lives at
+    // the checkout/order-creation caller (which knows the owner id + new qty):
+    //   await createNotification({ userId: ownerId, type: "stock",
+    //     title: `${title} is low on stock`, data: { href: `/products/${id}/edit` } });
+    // (from "@/lib/notifications/create"). Not wired: nothing calls decrementStock yet.
+    return { ok: true };
+  }
   return { ok: false, reason: "insufficient_stock" };
 }

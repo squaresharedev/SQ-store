@@ -90,6 +90,11 @@ interface GridCommonProps<TData> {
   showEmptyCells?: boolean;
   /** Extra empty rows to show below the content when showEmptyCells (default 1). */
   emptyRows?: number;
+  /** Editable mode only: make the WHOLE cell surface a drag-to-reorder target
+   *  (Figma-style direct manipulation), not just the grip. Presses on the
+   *  cell's own buttons (grip, resize, tile controls) are ignored so their
+   *  clicks still work; the grip keeps the keyboard + touch path. */
+  dragOnCell?: boolean;
 }
 
 /**
@@ -124,6 +129,7 @@ export function Grid<TData>(props: GridProps<TData>) {
     cellClassName,
     showEmptyCells = false,
     emptyRows = 1,
+    dragOnCell = false,
   } = props;
 
   const ordered = useMemo(
@@ -191,6 +197,7 @@ export function Grid<TData>(props: GridProps<TData>) {
       className={className}
       cellClassName={cellClassName}
       placeholderCount={placeholderCount}
+      dragOnCell={dragOnCell}
     />
   );
 }
@@ -252,6 +259,7 @@ function EditableGrid<TData>({
   className,
   cellClassName,
   placeholderCount,
+  dragOnCell,
 }: {
   ordered: GridBlock<TData>[];
   rootStyle: React.CSSProperties;
@@ -264,6 +272,7 @@ function EditableGrid<TData>({
   className?: string;
   cellClassName?: string;
   placeholderCount: number;
+  dragOnCell: boolean;
 }) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -322,6 +331,7 @@ function EditableGrid<TData>({
                 onResize={handleResize}
                 label={getBlockLabel?.(block)}
                 cellClassName={cellClassName}
+                dragOnCell={dragOnCell}
               />
             ))}
             {/* Dashed open slots after the real blocks. They auto-flow into the
@@ -369,6 +379,7 @@ function EditableCell<TData>({
   onResize,
   label,
   cellClassName,
+  dragOnCell,
 }: {
   block: GridBlock<TData>;
   columns: number;
@@ -376,6 +387,7 @@ function EditableCell<TData>({
   onResize: (key: string, size: GridSize) => void;
   label?: string;
   cellClassName?: string;
+  dragOnCell: boolean;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: block.key });
@@ -402,10 +414,25 @@ function EditableCell<TData>({
   const span = clampSpanToColumns(SIZE_SPANS[previewSize], columns);
   const dragListeners = listeners ?? {};
 
+  // Whole-surface drag (dragOnCell): reuse the sortable pointer activator on
+  // the cell itself, skipping presses that land on the cell's own buttons
+  // (grip, resize, tile controls) so their clicks keep working. The grip
+  // still carries the pointer/keyboard/touch path for a11y.
+  const cellPointerDown = dragListeners.onPointerDown as
+    | React.PointerEventHandler<HTMLLIElement>
+    | undefined;
+  const handleCellPointerDown: React.PointerEventHandler<HTMLLIElement> = (
+    event,
+  ) => {
+    if ((event.target as HTMLElement).closest("button")) return;
+    cellPointerDown?.(event);
+  };
+
   return (
     <li
       ref={setRefs}
       data-grid-cell=""
+      onPointerDown={dragOnCell ? handleCellPointerDown : undefined}
       style={{
         ...spanStyle(span),
         transform: CSS.Transform.toString(transform),
@@ -415,6 +442,7 @@ function EditableCell<TData>({
         "group relative overflow-hidden",
         GRID_CELL_RADIUS_CLASS,
         cellClassName,
+        dragOnCell && "cursor-grab active:cursor-grabbing",
         // The DragOverlay carries the floating copy; the in-place tile stays a
         // dimmed placeholder so the drop slot reads clearly.
         isDragging && "z-10 opacity-40",

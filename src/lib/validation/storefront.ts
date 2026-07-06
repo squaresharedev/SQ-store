@@ -13,6 +13,7 @@ import {
   PRICE_DISPLAYS,
   PRICE_TAG_POSITIONS,
   PRICE_TAG_STYLES,
+  SHAPE_KINDS,
   STOREFRONT_FONTS,
   STOREFRONT_RADII,
   TEXT_ALIGNS,
@@ -164,9 +165,20 @@ const textBlockSchema = z.strictObject({
   underline: z.boolean().optional(),
 });
 
+// Decorative shape: allowlisted kind + regex-gated color, nothing free-form.
+const shapeBlockSchema = z.strictObject({
+  type: z.literal("shape"),
+  id: z.uuid(),
+  kind: z.enum(SHAPE_KINDS),
+  color: hexColorSchema,
+  size: sizeSchema,
+  order: orderSchema,
+});
+
 const blockSchema = z.discriminatedUnion("type", [
   productBlockSchema,
   textBlockSchema,
+  shapeBlockSchema,
 ]);
 
 export const storefrontConfigSchema = z.strictObject({

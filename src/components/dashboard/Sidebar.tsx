@@ -10,6 +10,7 @@ import {
   LayoutDashboard,
   Menu,
   Package,
+  Plus,
   Settings,
   ShoppingCart,
   Store,
@@ -17,6 +18,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { iconPopClass, primaryButtonClass } from "@/components/ui/control-styles";
 import { SquareShareLogo } from "@/components/ui/square-share-logo";
 
 type NavLink = {
@@ -26,7 +28,9 @@ type NavLink = {
 };
 
 const MAIN_NAV: NavLink[] = [
-  { label: "Overview", href: "/", icon: LayoutDashboard },
+  // The Overview page lives at /dashboard ("/" merely redirects there);
+  // linking it directly keeps the active state working and skips the hop.
+  { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
   { label: "Products", href: "/products", icon: Package },
   { label: "Storefront", href: "/storefront", icon: Store },
   { label: "Orders", href: "/orders", icon: ShoppingCart },
@@ -42,6 +46,14 @@ const SETTINGS_LINK: NavLink = {
 
 function isNavLinkActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+/** Title shown in the mobile top bar — the active nav item's label. */
+function mobileTitle(pathname: string): string | null {
+  const item = [...MAIN_NAV, SETTINGS_LINK].find((link) =>
+    isNavLinkActive(pathname, link.href),
+  );
+  return item?.label ?? null;
 }
 
 // Shared with the mobile menu-toggle button so hover/focus/motion read as one
@@ -90,7 +102,18 @@ function NavLinkItem({
   );
 }
 
-export function Sidebar({ username }: { username: string }) {
+export function Sidebar({
+  username,
+  topBarSlot,
+}: {
+  username: string;
+  /**
+   * Optional control rendered at the right of the mobile top bar, beside the
+   * hamburger row (the dashboard shell passes the notification bell here). Left
+   * undefined by other consumers (e.g. settings), which then render no slot.
+   */
+  topBarSlot?: React.ReactNode;
+}) {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const toggleButtonRef = useRef<HTMLButtonElement>(null);
@@ -138,9 +161,16 @@ export function Sidebar({ username }: { username: string }) {
 
   return (
     <>
-      {/* Mobile-only slim top bar. Hidden entirely at the md breakpoint, where
-          the sidebar is always visible instead. */}
-      <header className="sticky top-0 z-30 flex h-14 items-center border-b border-border bg-background px-4 md:hidden">
+      {/* Mobile-only top bar: menu toggle + current page title (+ the Add
+          quick action on Overview). Hidden entirely at the md breakpoint,
+          where the sidebar is always visible instead. Overview drops the
+          bottom hairline so its hero bloom meets the bar seamlessly. */}
+      <header
+        className={cn(
+          "sticky top-0 z-30 flex h-14 items-center gap-2 bg-background px-4 md:hidden",
+          !isNavLinkActive(pathname, "/dashboard") && "border-b border-border",
+        )}
+      >
         <button
           ref={toggleButtonRef}
           type="button"
@@ -160,6 +190,29 @@ export function Sidebar({ username }: { username: string }) {
             <Menu className="size-5" strokeWidth={2} aria-hidden="true" />
           )}
         </button>
+
+        <span className="min-w-0 flex-1 truncate text-xl font-semibold text-foreground">
+          {mobileTitle(pathname)}
+        </span>
+
+        {/* Right cluster: the (Overview-only) add shortcut, then the shared
+            top-bar slot (notification bell). */}
+        <div className="ml-auto flex shrink-0 items-center gap-1">
+          {isNavLinkActive(pathname, "/dashboard") && (
+            <Link
+              href="/products/new"
+              aria-label="Add product"
+              className={cn(primaryButtonClass, "size-10 shrink-0 p-0")}
+            >
+              <Plus
+                className={cn("size-5", iconPopClass)}
+                strokeWidth={2}
+                aria-hidden="true"
+              />
+            </Link>
+          )}
+          {topBarSlot}
+        </div>
       </header>
 
       {/* Dimmed backdrop, mobile drawer mode only. */}

@@ -13,6 +13,13 @@ import type {
 // READ-ONLY paginated orders list. Server Components / Route Handlers only
 // (cookies() is Node-only — never middleware).
 //
+// TODO(notifications:order): when an order lands (the future checkout / Stripe
+// webhook that WRITES orders, not this read path), notify the seller. The
+// producer belongs in that server-side writer, which knows the seller id:
+//   await createNotification({ userId: sellerId, type: "order",
+//     title: `New order: ${productTitle}`, data: { href: "/orders" } });
+// (from "@/lib/notifications/create"). Not wired: orders are seed-only for now.
+//
 // The generated Database types don't include `orders` (owned by the concurrent
 // seed work), so reads go through an untyped client cast against the agreed
 // column contract below. Column contract (do not rename):

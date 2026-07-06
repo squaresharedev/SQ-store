@@ -23,6 +23,12 @@ export function LoginForm({ next = "/" }: { next?: string }) {
   const [resetOpen, setResetOpen] = React.useState(false);
   const [resetEmail, setResetEmail] = React.useState("");
 
+  React.useEffect(() => {
+    if (state.error) {
+      console.error("[LoginForm] Auth error:", state.error);
+    }
+  }, [state.error]);
+
   const isMagic = mode === "magic";
   // The clicked submit button carries the intent, so exactly one is submitted.
   const primaryIntent = isMagic ? "magic" : mode;
@@ -32,6 +38,17 @@ export function LoginForm({ next = "/" }: { next?: string }) {
       : mode === "magic"
         ? "Send magic link"
         : "Sign in";
+
+  // Wrap formAction to log submission attempts
+  const wrappedFormAction = async (formData: FormData) => {
+    console.log("[LoginForm] Submitting with intent:", formData.get("intent"));
+    try {
+      return await formAction(formData);
+    } catch (error) {
+      console.error("[LoginForm] Form submission error:", error);
+      throw error;
+    }
+  };
 
   // "Forgot?" opens the reset modal, prefilled with whatever email was typed.
   function openReset() {
@@ -55,7 +72,7 @@ export function LoginForm({ next = "/" }: { next?: string }) {
 
       <form
         ref={formRef}
-        action={formAction}
+        action={wrappedFormAction}
         className="flex flex-col gap-3"
         noValidate
       >

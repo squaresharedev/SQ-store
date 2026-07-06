@@ -1,6 +1,6 @@
-// Auto-generated from the shared Supabase project ("Homepage",
-// fdpviaqzbxowvonuoktc). Regenerate after schema changes with:
-//   pnpm dlx supabase gen types typescript --project-id fdpviaqzbxowvonuoktc > src/types/supabase.ts
+// Auto-generated from the Supabase project ("SQ-store", vnyfndqpdllwhvhinjoi).
+// Regenerate after schema changes with:
+//   pnpm dlx supabase gen types typescript --project-id vnyfndqpdllwhvhinjoi > src/types/supabase.ts
 // (or via the Supabase MCP `generate_typescript_types` tool).
 export type Json =
   | string
@@ -18,6 +18,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          data: Json
+          id: string
+          read: boolean
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          data?: Json
+          id?: string
+          read?: boolean
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          data?: Json
+          id?: string
+          read?: boolean
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           amount_cents: number
@@ -213,6 +246,57 @@ export type Database = {
         }
         Relationships: []
       }
+      team_members: {
+        Row: {
+          accepted_at: string | null
+          account_owner_id: string
+          id: string
+          invited_at: string
+          invited_email: string
+          member_user_id: string | null
+          role: Database["public"]["Enums"]["team_role"]
+          status: Database["public"]["Enums"]["team_member_status"]
+          updated_at: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          account_owner_id: string
+          id?: string
+          invited_at?: string
+          invited_email: string
+          member_user_id?: string | null
+          role?: Database["public"]["Enums"]["team_role"]
+          status?: Database["public"]["Enums"]["team_member_status"]
+          updated_at?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          account_owner_id?: string
+          id?: string
+          invited_at?: string
+          invited_email?: string
+          member_user_id?: string | null
+          role?: Database["public"]["Enums"]["team_role"]
+          status?: Database["public"]["Enums"]["team_member_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_members_account_owner_id_fkey"
+            columns: ["account_owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_members_member_user_id_fkey"
+            columns: ["member_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -222,9 +306,47 @@ export type Database = {
         Args: { p_product_id: string; p_quantity: number }
         Returns: boolean
       }
+      team_accept_invite: { Args: { p_invite_id: string }; Returns: boolean }
+      team_actor_role: {
+        Args: { account: string }
+        Returns: Database["public"]["Enums"]["team_role"]
+      }
+      team_jwt_email: { Args: never; Returns: string }
+      team_my_pending_invites: {
+        Args: never
+        Returns: {
+          account_owner_id: string
+          id: string
+          invited_at: string
+          role: Database["public"]["Enums"]["team_role"]
+          store_name: string
+        }[]
+      }
+      team_role_can: {
+        Args: { action: string; r: Database["public"]["Enums"]["team_role"] }
+        Returns: boolean
+      }
+      team_role_rank: {
+        Args: { r: Database["public"]["Enums"]["team_role"] }
+        Returns: number
+      }
+      team_roster: {
+        Args: { account: string; page_limit?: number; page_offset?: number }
+        Returns: {
+          accepted_at: string
+          display_name: string
+          id: string
+          invited_at: string
+          invited_email: string
+          member_user_id: string
+          role: Database["public"]["Enums"]["team_role"]
+          status: Database["public"]["Enums"]["team_member_status"]
+        }[]
+      }
     }
     Enums: {
-      [_ in never]: never
+      team_member_status: "invited" | "active" | "revoked"
+      team_role: "owner" | "editor" | "viewer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -351,6 +473,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      team_member_status: ["invited", "active", "revoked"],
+      team_role: ["owner", "editor", "viewer"],
+    },
   },
 } as const

@@ -85,8 +85,8 @@ export type PriceTagPosition = (typeof PRICE_TAG_POSITIONS)[number];
 export const PRICE_TAG_STYLES = ["plain", "pill"] as const;
 export type PriceTagStyle = (typeof PRICE_TAG_STYLES)[number];
 
-/** How the storefront lays out blocks. `carousel` is UI + schema only for
- *  now — the designer previews it as a placeholder (TODO: real carousel). */
+/** How the storefront lays out blocks: the bento grid, or a horizontal
+ *  scroll-snap carousel (rendered by CarouselStrip in designer + previews). */
 export const DISPLAY_MODES = ["grid", "carousel"] as const;
 export type DisplayMode = (typeof DISPLAY_MODES)[number];
 
@@ -131,6 +131,20 @@ export const DEFAULT_EMBED_SETTINGS: EmbedSettings = {
   enabled: false,
   domains: [],
 };
+
+/**
+ * Decorative shape blocks — a fixed allowlist of kinds, each mapping to
+ * code-defined markup in ShapeTileContent. `spacer` is layout whitespace:
+ * buyers see nothing, the designer shows a dashed outline.
+ */
+export const SHAPE_KINDS = [
+  "square",
+  "circle",
+  "ring",
+  "diamond",
+  "spacer",
+] as const;
+export type ShapeKind = (typeof SHAPE_KINDS)[number];
 
 export const TEXT_VARIANTS = ["heading", "subheading", "body"] as const;
 export type TextVariant = (typeof TEXT_VARIANTS)[number];
@@ -190,11 +204,30 @@ export type TextBlock = {
   underline?: boolean;
 };
 
-export type StorefrontBlock = ProductBlock | TextBlock;
+export type ShapeBlock = {
+  type: "shape";
+  /** Client-minted uuid; only used to key/reorder the block. */
+  id: string;
+  /** Allowlisted kind — resolves through ShapeTileContent's fixed map. */
+  kind: ShapeKind;
+  /** Strict #rrggbb only. Ignored by `spacer`. */
+  color: string;
+  size: BlockSize;
+  order: number;
+};
 
-/** Stable identity for sortable keys and lookups, across both block kinds. */
+export type StorefrontBlock = ProductBlock | TextBlock | ShapeBlock;
+
+/** Stable identity for sortable keys and lookups, across all block kinds. */
 export function blockKey(block: StorefrontBlock): string {
-  return block.type === "product" ? `p_${block.productId}` : `t_${block.id}`;
+  switch (block.type) {
+    case "product":
+      return `p_${block.productId}`;
+    case "text":
+      return `t_${block.id}`;
+    case "shape":
+      return `s_${block.id}`;
+  }
 }
 
 export type StorefrontConfig = {

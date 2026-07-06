@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AlertCircle, Plus, Store } from "lucide-react";
-import { primaryButtonClass } from "@/components/ui/control-styles";
+import { iconPopClass, primaryButtonClass } from "@/components/ui/control-styles";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import {
@@ -102,7 +102,11 @@ export function StorefrontsList({
           {storefronts.length} storefront{storefronts.length === 1 ? "" : "s"}
         </p>
         <Button onClick={handleCreate} disabled={creating}>
-          <Plus className="size-4" strokeWidth={2} aria-hidden="true" />
+          <Plus
+            className={`size-4 ${iconPopClass}`}
+            strokeWidth={2}
+            aria-hidden="true"
+          />
           {creating ? "Creating…" : "New storefront"}
         </Button>
       </div>
@@ -129,7 +133,11 @@ export function StorefrontsList({
             disabled={creating}
             className={`${primaryButtonClass} mt-5`}
           >
-            <Plus className="size-4" strokeWidth={2} aria-hidden="true" />
+            <Plus
+              className={`size-4 ${iconPopClass}`}
+              strokeWidth={2}
+              aria-hidden="true"
+            />
             {creating ? "Creating…" : "Create storefront"}
           </button>
         </div>

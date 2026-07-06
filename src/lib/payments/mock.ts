@@ -172,6 +172,13 @@ export async function getPayoutMethod(): Promise<PayoutMethod | null> {
 
 /** TODO(stripe): replace with `stripe.payouts.list(...)` on the connected account. */
 export async function listPayouts(): Promise<Payout[]> {
+  // TODO(notifications:payment): when the Stripe `payout.failed` webhook fires,
+  // notify the seller. The producer belongs in the webhook handler (which knows
+  // the seller's user id):
+  //   await createNotification({ userId: sellerId, type: "payment",
+  //     title: "A payout failed", body: "Your bank rejected a payout. Check your details.",
+  //     data: { href: "/payments" } });
+  // (from "@/lib/notifications/create"). Not wired: payouts are still mock data.
   return MOCK_CONNECTED ? MOCK_PAYOUTS : [];
 }
 
