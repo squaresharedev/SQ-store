@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
-import { getUser } from "@/lib/auth/session";
+import { getActiveAccount } from "@/lib/team/account-context";
 import type {
   OrderView,
   OrderFilters,
@@ -88,21 +88,22 @@ export async function listOrders(options?: {
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
-  const user = await getUser();
-  if (!user) return emptyPage(page, pageSize);
+  const account = await getActiveAccount();
+  if (!account) return emptyPage(page, pageSize);
 
   const supabase = await createClient();
   const filters = options?.filters;
   const sort = options?.sort ?? { field: "createdAt", direction: "desc" };
 
   // Build the base query — select only needed columns; count for pagination.
+  // Scoped to the ACTIVE account's store (own, or one you're a member of).
   let query = (supabase as SupabaseClient)
     .from("orders")
     .select(
       "id, product_title, amount_cents, platform_fee_cents, currency, channel, status, buyer_email, created_at",
       { count: "exact" },
     )
-    .eq("seller_id", user.id);
+    .eq("seller_id", account.accountId);
 
   // --- Filters ---
   if (filters?.status) {

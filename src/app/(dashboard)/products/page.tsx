@@ -4,6 +4,8 @@ import { Plus } from "lucide-react";
 import { listProducts } from "@/lib/products/queries";
 import { ProductList } from "@/components/products/ProductList";
 import { primaryButtonClass } from "@/components/ui/control-styles";
+import { getActiveAccount } from "@/lib/team/account-context";
+import { can } from "@/lib/team/permissions";
 
 export const metadata: Metadata = {
   title: "Products",
@@ -11,7 +13,11 @@ export const metadata: Metadata = {
 
 // PROTECTED by (dashboard)/layout.tsx.
 export default async function ProductsPage() {
-  const products = await listProducts();
+  const [products, account] = await Promise.all([
+    listProducts(),
+    getActiveAccount(),
+  ]);
+  const canWrite = can(account?.role, "products.write");
 
   return (
     <main className="mx-auto max-w-7xl px-6 py-8">
@@ -24,13 +30,15 @@ export default async function ProductsPage() {
             Manage the products you sell through your store and embeds.
           </p>
         </div>
-        <Link href="/products/new" className={primaryButtonClass}>
-          <Plus className="size-4" strokeWidth={2} aria-hidden="true" />
-          Add product
-        </Link>
+        {canWrite && (
+          <Link href="/products/new" className={primaryButtonClass}>
+            <Plus className="size-4" strokeWidth={2} aria-hidden="true" />
+            Add product
+          </Link>
+        )}
       </div>
 
-      <ProductList products={products} />
+      <ProductList products={products} canWrite={canWrite} />
     </main>
   );
 }

@@ -19,18 +19,20 @@
  */
 
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { getProfile, getUser } from "@/lib/auth/session";
-import { createNotification } from "@/lib/notifications/create";
-import { can, canGrant } from "@/lib/team/permissions";
+import { createNotification, resolveUserIdByEmail } from "@/lib/notifications/create";
+import { can, canGrant, ROLE_LABELS } from "@/lib/team/permissions";
 import { getActorRole } from "@/lib/team/queries";
+import { ACTIVE_ACCOUNT_COOKIE } from "@/lib/team/account-context";
 import {
   teamInviteSchema,
   teamAcceptSchema,
   teamChangeRoleSchema,
   teamRevokeSchema,
 } from "@/lib/validation/team";
-import type { z } from "zod";
+import { z } from "zod";
 
 export type TeamActionState = {
   error?: string;
@@ -133,12 +135,44 @@ export async function inviteMember(
     return { error: "Could not send the invite. Give it another try." };
   }
 
+  // In-app notification: if the invitee already has an account, drop a
+  // notification into their bell now so they discover the invite immediately
+  // (and can deep-link to this page to accept). If they haven't signed up yet
+  // there is no account to notify — the email path (stubbed below) covers that
+  // case once it exists. Best-effort: the whole block is guarded so nothing here
+  // — resolver, getProfile, or the insert — can throw out and break the invite
+  // that was already written.
+  let notifiedExistingUser = false;
+  try {
+    const inviteeUserId = await resolveUserIdByEmail(invited_email);
+    if (inviteeUserId) {
+      const inviterProfile = await getProfile();
+      const storeLabel =
+        inviterProfile?.display_name?.trim() || "A SquareShare store";
+      await createNotification({
+        userId: inviteeUserId,
+        type: "team",
+        title: "You have a team invite",
+        body: `${storeLabel} invited you to join as ${ROLE_LABELS[role]}. Open Team & access to accept.`,
+        data: { href: SETTINGS_TEAM_PATH },
+      });
+      notifiedExistingUser = true;
+    }
+  } catch (err) {
+    console.error(
+      "[team] invite notification failed (non-blocking):",
+      err instanceof Error ? err.message : String(err),
+    );
+  }
+
   // TODO(email): send the invite email once the email system exists. The
   // invite record is live; the invitee sees it under "Invites for you" after
-  // signing in with this address.
+  // signing in with this address (and in their bell if they already have an
+  // account, per the block above).
   console.info("[team] invite email stub — no email sent", {
     account: account_owner_id,
     role,
+    notifiedExistingUser,
   });
 
   revalidatePath(SETTINGS_TEAM_PATH);
@@ -361,4 +395,42 @@ export async function revokeMemberAccess(
   );
   revalidatePath(SETTINGS_TEAM_PATH);
   return { success: "Member removed." };
+}
+
+// ---------------------------------------------------------------------------
+// Active account (store switching)
+// ---------------------------------------------------------------------------
+
+const accountIdSchema = z.uuid();
+
+/**
+ * Switch the dashboard to operate on `accountId` (your own store, or a store you
+ * actively belong to). Server-authoritative: the target is only accepted if it's
+ * your own id or one where team_actor_role confirms an active membership — a
+ * tampered value is ignored. Persisted in a cookie that getActiveAccount()
+ * re-validates on every request; RLS is the real access boundary regardless.
+ */
+export async function setActiveAccount(
+  accountId: string,
+): Promise<{ ok: boolean }> {
+  const user = await getUser();
+  if (!user) return { ok: false };
+  if (!accountIdSchema.safeParse(accountId).success) return { ok: false };
+
+  if (accountId !== user.id) {
+    const role = await getActorRole(accountId);
+    if (!role) return { ok: false }; // not a member — refuse to switch
+  }
+
+  const store = await cookies();
+  store.set(ACTIVE_ACCOUNT_COOKIE, accountId, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 365,
+  });
+  // Everything under the dashboard reads account-scoped data — refresh it all.
+  revalidatePath("/", "layout");
+  return { ok: true };
 }

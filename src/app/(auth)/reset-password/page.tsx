@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { ResetPasswordForm } from "@/components/auth/ResetPasswordForm";
 import { BackgroundArrow } from "@/components/ui/BackgroundArrow";
-import { SquareShareLogo } from "@/components/ui/square-share-logo";
 import { getUser } from "@/lib/auth/session";
 
 export const metadata: Metadata = {
@@ -30,7 +29,12 @@ export default async function ResetPasswordPage() {
 
       <div className="relative z-10 w-full max-w-md">
         <div className="mb-3 flex items-center gap-3">
-          <SquareShareLogo className="h-8 w-8 text-neutral-900" />
+          {/* eslint-disable-next-line @next/next/no-img-element -- static public asset; next/image adds no value here. */}
+          <img
+            src="/img/logo.png"
+            alt="Square Share"
+            className="h-8 w-8 shrink-0 object-contain"
+          />
           <div className="flex flex-col leading-tight">
             <span className="font-display text-lg font-black tracking-tight text-neutral-900">
               Square Share

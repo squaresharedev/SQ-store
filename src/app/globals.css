@@ -103,6 +103,17 @@
   --ring: oklch(0.708 0 0);
   --radius: 0rem; /* square corners are the identity */
 
+  /* Analytics chart series ramp (styles.md §0: token first, then use).
+     Ordered by emphasis: the accent series first, then progressively
+     quieter neutrals. Semantic feedback series map to the feedback tokens
+     so "refund = red, healthy = green" stays consistent product-wide. */
+  --chart-1: var(--primary);
+  --chart-2: oklch(0.556 0 0); /* = muted-foreground tier */
+  --chart-3: oklch(0.708 0 0);
+  --chart-4: oklch(0.85 0 0);
+  --chart-positive: var(--color-success);
+  --chart-negative: var(--destructive);
+
   /* Giant decorative background arrows (auth + settings). Low enough that
      text drawn over them keeps full contrast. */
   --decor-opacity: 0.05;
@@ -129,6 +140,14 @@
   --border: oklch(1 0 0 / 12%);
   --input: oklch(1 0 0 / 15%);
   --ring: #a855f7;
+
+  /* Chart ramp, dark: acid accent first, then quieter light neutrals. */
+  --chart-1: var(--primary);
+  --chart-2: oklch(0.708 0 0);
+  --chart-3: oklch(0.556 0 0);
+  --chart-4: oklch(0.37 0 0);
+  --chart-positive: var(--color-success);
+  --chart-negative: var(--destructive);
 }
 
 /* ============================================================
@@ -314,6 +333,73 @@ textarea {
   animation: check-draw 300ms cubic-bezier(0.65, 0, 0.35, 1) 80ms forwards;
 }
 
+/* Payments: a card glides through the reader, dwells to be read, and is
+   approved, looping. Hero motion for the Connect-with-Stripe onboarding
+   (components/payments/CardSwipe). translateX is relative to a flex-centred
+   card, so 0% offscreen-left -> dwell at centre -> offscreen-right. */
+@keyframes card-swipe {
+  0% {
+    transform: translateX(-165%) rotate(-3deg);
+  }
+  36%,
+  54% {
+    transform: translateX(0) rotate(0deg);
+  }
+  100% {
+    transform: translateX(165%) rotate(3deg);
+  }
+}
+/* The "approved" badge pops in only while the card dwells at the reader. */
+@keyframes swipe-approve {
+  0%,
+  40% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  47% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+  54%,
+  64% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  76%,
+  100% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+/* A soft light sweep crosses the card as it is read. */
+@keyframes swipe-sheen {
+  0%,
+  30% {
+    opacity: 0;
+    transform: translateX(-120%) skewX(-12deg);
+  }
+  44% {
+    opacity: 0.5;
+  }
+  58% {
+    opacity: 0;
+    transform: translateX(120%) skewX(-12deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(120%) skewX(-12deg);
+  }
+}
+.animate-card-swipe {
+  animation: card-swipe 3s cubic-bezier(0.5, 0, 0.2, 1) infinite;
+}
+.animate-swipe-approve {
+  animation: swipe-approve 3s ease-in-out infinite;
+}
+.animate-swipe-sheen {
+  animation: swipe-sheen 3s cubic-bezier(0.5, 0, 0.2, 1) infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -327,5 +413,19 @@ textarea {
   .animate-check-draw {
     animation: none;
     stroke-dashoffset: 0;
+  }
+  /* Card swipe rests as a static "approved at the reader" tableau. */
+  .animate-card-swipe {
+    animation: none;
+    transform: translateX(0) rotate(0deg);
+  }
+  .animate-swipe-approve {
+    animation: none;
+    opacity: 1;
+    transform: scale(1);
+  }
+  .animate-swipe-sheen {
+    animation: none;
+    opacity: 0;
   }
 }

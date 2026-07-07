@@ -4,6 +4,7 @@ import { ArrowUpRight, Landmark, ShieldCheck, Timer } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { stubBadgeClass } from "@/components/ui/control-styles";
+import { CardSwipe } from "./CardSwipe";
 
 const POINTS = [
   {
@@ -49,6 +50,8 @@ export function ConnectStripeModal({
       title="Connect with Stripe"
       description="Get paid for what you sell. Setup happens on Stripe, not here."
     >
+      <CardSwipe className="mb-5" />
+
       <ul className="space-y-4">
         {POINTS.map((point) => (
           <li key={point.title} className="flex gap-3">

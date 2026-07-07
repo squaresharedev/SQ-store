@@ -80,6 +80,15 @@ async function siteOrigin(): Promise<string> {
 
 // --- Account ---------------------------------------------------------------
 
+/**
+ * A user's name is also their unique handle (case-insensitive) — no separate
+ * username field. The live availability check (see
+ * /api/settings/display-name-available) is a UX nicety only; the real guard
+ * is the DB's partial unique index on lower(display_name), so a race between
+ * two tabs still can't produce a collision. We don't use updateOwnProfile
+ * here because we need the raw Postgres error code to tell "taken" apart
+ * from a generic save failure.
+ */
 export async function updateDisplayName(
   _prev: SettingsActionState,
   formData: FormData,
@@ -94,7 +103,20 @@ export async function updateDisplayName(
   });
   if (!parsed.success) return firstIssue(parsed.error);
 
-  if (!(await updateOwnProfile(user.id, parsed.data))) return SAVE_FAILED;
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("profiles")
+    .update({
+      display_name: parsed.data.display_name,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", user.id);
+
+  if (error) {
+    return error.code === "23505"
+      ? { error: "That name is taken. Try another." }
+      : SAVE_FAILED;
+  }
   revalidatePath("/settings/account");
   return { success: "Name saved." };
 }

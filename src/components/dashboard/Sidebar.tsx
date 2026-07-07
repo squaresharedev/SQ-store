@@ -10,7 +10,6 @@ import {
   LayoutDashboard,
   Menu,
   Package,
-  Plus,
   Settings,
   ShoppingCart,
   Store,
@@ -18,8 +17,6 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { iconPopClass, primaryButtonClass } from "@/components/ui/control-styles";
-import { SquareShareLogo } from "@/components/ui/square-share-logo";
 
 type NavLink = {
   label: string;
@@ -103,14 +100,12 @@ function NavLinkItem({
 }
 
 export function Sidebar({
-  username,
   topBarSlot,
 }: {
-  username: string;
   /**
-   * Optional control rendered at the right of the mobile top bar, beside the
-   * hamburger row (the dashboard shell passes the notification bell here). Left
-   * undefined by other consumers (e.g. settings), which then render no slot.
+   * Optional controls rendered at the right of the mobile top bar, beside the
+   * hamburger row (the dashboard shell passes the notification bell + profile
+   * menu here). Left undefined by other consumers (e.g. settings).
    */
   topBarSlot?: React.ReactNode;
 }) {
@@ -195,24 +190,8 @@ export function Sidebar({
           {mobileTitle(pathname)}
         </span>
 
-        {/* Right cluster: the (Overview-only) add shortcut, then the shared
-            top-bar slot (notification bell). */}
-        <div className="ml-auto flex shrink-0 items-center gap-1">
-          {isNavLinkActive(pathname, "/dashboard") && (
-            <Link
-              href="/products/new"
-              aria-label="Add product"
-              className={cn(primaryButtonClass, "size-10 shrink-0 p-0")}
-            >
-              <Plus
-                className={cn("size-5", iconPopClass)}
-                strokeWidth={2}
-                aria-hidden="true"
-              />
-            </Link>
-          )}
-          {topBarSlot}
-        </div>
+        {/* Right cluster: the shared top-bar slot (notification bell + menu). */}
+        <div className="ml-auto shrink-0">{topBarSlot}</div>
       </header>
 
       {/* Dimmed backdrop, mobile drawer mode only. */}
@@ -236,13 +215,18 @@ export function Sidebar({
           isOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
-        {/* Brand row: logo + signed-in user. Extra bottom padding + a border
-            give it more room than the nav rows below, so it reads as its own
-            header rather than just the first item in the list. */}
-        <div className="flex items-center gap-2.5 border-b border-border px-4 py-5">
-          <SquareShareLogo className="size-6 shrink-0 text-foreground" />
-          <span className="truncate text-sm font-medium text-foreground">
-            {username}
+        {/* Brand row: logo + product name. Fixed to the top-bar height (h-14)
+            so its bottom hairline lines up with the notification bar's across
+            the rail seam. */}
+        <div className="flex h-14 items-center gap-2.5 border-b border-border px-4">
+          {/* eslint-disable-next-line @next/next/no-img-element -- static public asset; next/image adds no value here. */}
+          <img
+            src="/img/logo.png"
+            alt="Square Share"
+            className="size-6 shrink-0 rounded-sm object-contain"
+          />
+          <span className="truncate text-lg font-semibold tracking-tight text-foreground">
+            Dashboard
           </span>
         </div>
 

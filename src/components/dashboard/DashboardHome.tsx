@@ -5,7 +5,7 @@ import { BackgroundArrow } from "@/components/ui/BackgroundArrow";
 import type { DashboardOrdersData, ProductsSummary } from "@/lib/dashboard/queries";
 import { formatMoney } from "@/lib/dashboard/format";
 import { MetricTile } from "./MetricTile";
-import { DesktopRevenueHero, MobileRevenueHero } from "./MobileRevenueHero";
+import { MobileRevenueHero } from "./MobileRevenueHero";
 import { NeedsAttention, type AttentionItem } from "./NeedsAttention";
 import { OnboardingSlot } from "./OnboardingSlot";
 import { RecentOrders } from "./RecentOrders";
@@ -116,7 +116,13 @@ export function DashboardHome({
         {/* Headline metrics: last 30 days only — all-time and per-channel/click trends live in Analytics. */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {/* Mobile shows revenue as the hero above instead of this cell. */}
-          <DesktopRevenueHero value={formatMoney(last30d.revenue)} />
+          <div className="hidden md:block">
+            <MetricTile
+              label="Revenue · 30 days"
+              value={formatMoney(last30d.revenue)}
+              emphasis
+            />
+          </div>
           <MetricTile
             label="Sales · 30 days"
             value={last30d.sales > 0 ? String(last30d.sales) : null}

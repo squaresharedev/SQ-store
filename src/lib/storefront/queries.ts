@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getActiveAccount } from "@/lib/team/account-context";
 import {
   parseStoredStorefrontConfig,
   storefrontIdSchema,
@@ -9,9 +10,10 @@ import {
 } from "@/types/storefront";
 
 // Server Components / Route Handlers only (cookies() is Node-only — never
-// middleware). RLS scopes every row to `owner_id = auth.uid()`, so a caller
-// never supplies an owner id; `getStorefront` still takes the row id because a
-// seller now owns MANY storefronts and the URL selects which one.
+// middleware). RLS now permits reading any store you're a member of, so reads
+// filter by the ACTIVE account id explicitly (your own store, or one you belong
+// to). `getStorefront` still takes the row id because a store owns MANY
+// storefronts and the URL selects which one — scoped to the active account.
 
 /** One storefront, fully loaded for the editor. */
 export type StorefrontRecord = {
@@ -39,10 +41,13 @@ export type StorefrontSummary = {
  * default config rather than dropping the row from the list.
  */
 export async function listStorefronts(): Promise<StorefrontSummary[]> {
+  const account = await getActiveAccount();
+  if (!account) return [];
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("storefronts")
     .select("id, name, config, updated_at")
+    .eq("owner_id", account.accountId)
     .order("updated_at", { ascending: false });
   if (error) throw new Error(`Failed to load storefronts: ${error.message}`);
 
@@ -67,11 +72,14 @@ export async function getStorefront(
   id: string,
 ): Promise<StorefrontRecord | null> {
   if (!storefrontIdSchema.safeParse(id).success) return null;
+  const account = await getActiveAccount();
+  if (!account) return null;
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("storefronts")
     .select("id, name, config")
     .eq("id", id)
+    .eq("owner_id", account.accountId)
     .maybeSingle();
   if (error) throw new Error(`Failed to load storefront: ${error.message}`);
   if (!data) return null;

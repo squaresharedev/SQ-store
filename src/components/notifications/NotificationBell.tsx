@@ -61,7 +61,8 @@ export function NotificationBell({ className }: { className?: string }) {
         onOpenChange={setOpen}
         trigger={trigger}
         label="Notifications"
-        panelClassName="sm:right-0 sm:left-auto p-0 overflow-hidden"
+        variant="anchored"
+        panelClassName="w-[22rem] p-0 overflow-hidden"
       >
         <NotificationList
           notifications={notifications}

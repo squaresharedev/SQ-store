@@ -33,7 +33,7 @@ export function NotificationList({
   const recent = notifications.slice(0, DROPDOWN_LIMIT);
 
   return (
-    <div className="flex max-h-[70vh] flex-col sm:max-h-[26rem] sm:w-[22rem]">
+    <div className="flex max-h-[75vh] w-full flex-col sm:max-h-[26rem]">
       <div className="flex items-center justify-between gap-2 border-b border-border px-3 py-2.5">
         <h2 className="text-sm font-semibold text-foreground">
           Notifications

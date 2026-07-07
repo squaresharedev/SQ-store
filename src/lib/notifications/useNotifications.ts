@@ -42,6 +42,12 @@ const MAX_IN_MEMORY = 30;
 const TOKEN_REFRESH_MS = 45 * 60 * 1000; // access tokens live ~1h
 const COUNT_SYNC_DEBOUNCE_MS = 400;
 
+// Monotonic id so each subscription gets its OWN channel topic. Reusing a topic
+// (e.g. across a StrictMode remount before the old channel finishes removing)
+// makes supabase return the cached, already-subscribed channel, and adding a
+// postgres_changes listener to it throws "cannot add ... after subscribe()".
+let channelSeq = 0;
+
 function asNotification(row: NotificationRow): Notification {
   return row as Notification;
 }
@@ -117,12 +123,16 @@ export function useNotifications(): UseNotifications {
 
   React.useEffect(() => {
     mountedRef.current = true;
+    // Per-run flag: a stale start() from a StrictMode double-invoke must bail
+    // even though mountedRef gets re-set to true by the second mount. Without
+    // this, two start()s race and both try to build the same channel.
+    let active = true;
     let channel: RealtimeChannel | null = null;
     let refreshTimer: ReturnType<typeof setInterval> | null = null;
 
     async function start() {
       const snap = await fetchNotificationSnapshot();
-      if (!mountedRef.current) return;
+      if (!active) return;
       if (!snap) {
         setLoading(false);
         setStatus("error");
@@ -133,7 +143,7 @@ export function useNotifications(): UseNotifications {
       setLoading(false);
 
       const token = await getRealtimeToken();
-      if (!mountedRef.current) return;
+      if (!active) return;
       if (!token) {
         // No token → cannot authorize an RLS-filtered subscription. Keep the
         // static snapshot rather than opening an unauthenticated stream.
@@ -141,10 +151,12 @@ export function useNotifications(): UseNotifications {
         return;
       }
       await supabase.realtime.setAuth(token);
+      if (!active) return;
 
       const filter = `user_id=eq.${snap.userId}`;
+      // Unique topic per run so we never re-attach to a cached channel.
       channel = supabase
-        .channel(`notifications:${snap.userId}`)
+        .channel(`notifications:${snap.userId}:${channelSeq++}`)
         .on(
           "postgres_changes",
           { event: "INSERT", schema: "public", table: "notifications", filter },
@@ -158,7 +170,7 @@ export function useNotifications(): UseNotifications {
             applyUpdate(payload.new),
         )
         .subscribe((channelStatus) => {
-          if (!mountedRef.current) return;
+          if (!active) return;
           if (channelStatus === "SUBSCRIBED") setStatus("live");
           else if (channelStatus === "CHANNEL_ERROR" || channelStatus === "TIMED_OUT")
             setStatus("error");
@@ -168,13 +180,14 @@ export function useNotifications(): UseNotifications {
       // events after a token rotation.
       refreshTimer = setInterval(async () => {
         const fresh = await getRealtimeToken();
-        if (mountedRef.current && fresh) await supabase.realtime.setAuth(fresh);
+        if (active && fresh) await supabase.realtime.setAuth(fresh);
       }, TOKEN_REFRESH_MS);
     }
 
     void start();
 
     return () => {
+      active = false;
       mountedRef.current = false;
       if (refreshTimer) clearInterval(refreshTimer);
       if (countTimerRef.current) clearTimeout(countTimerRef.current);

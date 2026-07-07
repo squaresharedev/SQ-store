@@ -19,12 +19,13 @@ export async function GET() {
     return NextResponse.json({ error: "Not signed in." }, { status: 401 });
   }
 
-  const [profile, products, storefront] = await Promise.all([
+  const [profile, products, storefronts] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
     supabase.from("products").select("*").eq("owner_id", user.id),
-    supabase.from("storefronts").select("*").eq("owner_id", user.id).maybeSingle(),
+    // A user can own MANY storefronts — export all of them, not just one.
+    supabase.from("storefronts").select("*").eq("owner_id", user.id),
   ]);
-  if (profile.error || products.error || storefront.error) {
+  if (profile.error || products.error || storefronts.error) {
     return NextResponse.json(
       { error: "Export failed. Try again in a minute." },
       { status: 500 },
@@ -41,7 +42,7 @@ export async function GET() {
     },
     profile: profile.data,
     products: products.data,
-    storefront: storefront.data,
+    storefronts: storefronts.data,
   };
 
   return new NextResponse(JSON.stringify(payload, null, 2), {

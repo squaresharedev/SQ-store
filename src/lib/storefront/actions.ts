@@ -1,7 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { getUser } from "@/lib/auth/session";
+import { getActiveAccount } from "@/lib/team/account-context";
+import { can } from "@/lib/team/permissions";
 import { createClient } from "@/lib/supabase/server";
 import {
   embedSettingsSchema,
@@ -15,13 +16,17 @@ import {
   type StorefrontConfig,
 } from "@/types/storefront";
 
-// Storefront CRUD. A seller owns MANY storefronts now, so every mutation is
-// keyed by row id and scoped to the caller (explicit owner_id + RLS). Every
-// write: session check -> Zod parse (the security boundary; client validation
-// is UX only) -> product-ownership re-check -> owner-scoped mutation.
+// Storefront CRUD for the ACTIVE account's store. A store owns MANY storefronts,
+// so every mutation is keyed by row id and scoped to the active account (explicit
+// owner_id + RLS). Every write: resolve + authorize the active account
+// (storefront.write) -> Zod parse (the security boundary; client validation is UX
+// only) -> product-ownership re-check -> account-scoped mutation. RLS re-checks
+// the same permission at the DB, so a viewer can never write.
 
 const SESSION_ERROR = "Your session expired. Sign in again.";
 const NOT_FOUND = "Storefront not found.";
+const NO_WRITE_PERMISSION =
+  "You don't have permission to edit the storefront in this store.";
 
 export type CreateStorefrontResult =
   | { ok: true; id: string }
@@ -43,8 +48,11 @@ export type DeleteStorefrontResult =
 export async function createStorefront(
   name?: unknown,
 ): Promise<CreateStorefrontResult> {
-  const user = await getUser();
-  if (!user) return { ok: false, error: SESSION_ERROR };
+  const account = await getActiveAccount();
+  if (!account) return { ok: false, error: SESSION_ERROR };
+  if (!can(account.role, "storefront.write")) {
+    return { ok: false, error: NO_WRITE_PERMISSION };
+  }
 
   // Name is optional at creation; fall back to a sensible default the seller
   // can rename in the editor.
@@ -61,7 +69,7 @@ export async function createStorefront(
   const { data: row, error } = await supabase
     .from("storefronts")
     .insert({
-      owner_id: user.id,
+      owner_id: account.accountId,
       name: finalName,
       config: DEFAULT_STOREFRONT_CONFIG,
     })
@@ -87,8 +95,11 @@ export async function saveStorefront(
   id: string,
   input: unknown,
 ): Promise<SaveStorefrontResult> {
-  const user = await getUser();
-  if (!user) return { ok: false, error: SESSION_ERROR };
+  const account = await getActiveAccount();
+  if (!account) return { ok: false, error: SESSION_ERROR };
+  if (!can(account.role, "storefront.write")) {
+    return { ok: false, error: NO_WRITE_PERMISSION };
+  }
   if (!storefrontIdSchema.safeParse(id).success) {
     return { ok: false, error: NOT_FOUND };
   }
@@ -115,7 +126,7 @@ export async function saveStorefront(
     const { data: ownedRows, error } = await supabase
       .from("products")
       .select("id")
-      .eq("owner_id", user.id)
+      .eq("owner_id", account.accountId)
       .in("id", productIds);
     if (error) {
       console.error("[storefront] ownership check failed", error);
@@ -149,7 +160,7 @@ export async function saveStorefront(
       updated_at: new Date().toISOString(),
     })
     .eq("id", id)
-    .eq("owner_id", user.id)
+    .eq("owner_id", account.accountId)
     .select("id")
     .maybeSingle();
 
@@ -183,8 +194,11 @@ export async function updateEmbedSettings(
   id: string,
   input: unknown,
 ): Promise<UpdateEmbedSettingsResult> {
-  const user = await getUser();
-  if (!user) return { ok: false, error: SESSION_ERROR };
+  const account = await getActiveAccount();
+  if (!account) return { ok: false, error: SESSION_ERROR };
+  if (!can(account.role, "storefront.write")) {
+    return { ok: false, error: NO_WRITE_PERMISSION };
+  }
   if (!storefrontIdSchema.safeParse(id).success) {
     return { ok: false, error: NOT_FOUND };
   }
@@ -203,7 +217,7 @@ export async function updateEmbedSettings(
     .from("storefronts")
     .select("config")
     .eq("id", id)
-    .eq("owner_id", user.id)
+    .eq("owner_id", account.accountId)
     .maybeSingle();
   if (readError) {
     console.error("[storefront] embed settings read failed", readError);
@@ -220,7 +234,7 @@ export async function updateEmbedSettings(
     .from("storefronts")
     .update({ config, updated_at: new Date().toISOString() })
     .eq("id", id)
-    .eq("owner_id", user.id)
+    .eq("owner_id", account.accountId)
     .select("id")
     .maybeSingle();
   if (error) {
@@ -237,8 +251,11 @@ export async function updateEmbedSettings(
 export async function deleteStorefront(
   id: string,
 ): Promise<DeleteStorefrontResult> {
-  const user = await getUser();
-  if (!user) return { ok: false, error: SESSION_ERROR };
+  const account = await getActiveAccount();
+  if (!account) return { ok: false, error: SESSION_ERROR };
+  if (!can(account.role, "storefront.write")) {
+    return { ok: false, error: NO_WRITE_PERMISSION };
+  }
   if (!storefrontIdSchema.safeParse(id).success) {
     return { ok: false, error: NOT_FOUND };
   }
@@ -250,7 +267,7 @@ export async function deleteStorefront(
     .from("storefronts")
     .delete()
     .eq("id", id)
-    .eq("owner_id", user.id)
+    .eq("owner_id", account.accountId)
     .select("id")
     .maybeSingle();
 

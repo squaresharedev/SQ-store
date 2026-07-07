@@ -2,7 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { getUser } from "@/lib/auth/session";
+import { getActiveAccount } from "@/lib/team/account-context";
+import { can } from "@/lib/team/permissions";
 import { createClient } from "@/lib/supabase/server";
 import { STOCK_QUANTITY_MAX } from "@/lib/validation/product";
 
@@ -42,8 +43,14 @@ export async function updateStockSettings(
   productId: string,
   input: unknown,
 ): Promise<StockActionResult> {
-  const user = await getUser();
-  if (!user) return { ok: false, error: "Your session expired. Sign in again." };
+  const account = await getActiveAccount();
+  if (!account) return { ok: false, error: "Your session expired. Sign in again." };
+  if (!can(account.role, "products.write")) {
+    return {
+      ok: false,
+      error: "You don't have permission to edit products in this store.",
+    };
+  }
 
   // Validate product id shape before querying (prevents garbage URL params from
   // reaching the DB as a mal-formed uuid parameter).
@@ -70,7 +77,7 @@ export async function updateStockSettings(
       low_stock_threshold: lowStockThreshold,
     })
     .eq("id", idCheck.data)
-    .eq("owner_id", user.id)
+    .eq("owner_id", account.accountId)
     .select("id")
     .maybeSingle();
 

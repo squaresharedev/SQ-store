@@ -4,8 +4,9 @@ import { iconPopClass, primaryButtonClass } from "@/components/ui/control-styles
 import { CardBackdrop } from "@/components/ui/CardBackdrop";
 
 // First screen a new seller is likely to see, so it explains the next step and
-// gives one clear call to action (styles.md: calm, direct, no fluff).
-export function ProductEmptyState() {
+// gives one clear call to action (styles.md: calm, direct, no fluff). Read-only
+// members of the active store see the same empty state without the CTA.
+export function ProductEmptyState({ canWrite = true }: { canWrite?: boolean }) {
   return (
     <div className="relative flex flex-col items-center justify-center overflow-hidden rounded-md border border-dashed border-border bg-background px-6 py-16 text-center">
       <CardBackdrop variant="dots" corner="center" />
@@ -21,17 +22,20 @@ export function ProductEmptyState() {
           No products yet
         </h2>
         <p className="mt-1 max-w-sm font-inter text-sm text-muted-foreground">
-          Add your first product to start selling through your store and embeds.
-          You can save it as a draft and publish when you are ready.
+          {canWrite
+            ? "Add your first product to start selling through your store and embeds. You can save it as a draft and publish when you are ready."
+            : "This store has no products yet."}
         </p>
-        <Link href="/products/new" className={`mt-6 ${primaryButtonClass}`}>
-          <Plus
-            className={`size-4 ${iconPopClass}`}
-            strokeWidth={2}
-            aria-hidden="true"
-          />
-          Add product
-        </Link>
+        {canWrite && (
+          <Link href="/products/new" className={`mt-6 ${primaryButtonClass}`}>
+            <Plus
+              className={`size-4 ${iconPopClass}`}
+              strokeWidth={2}
+              aria-hidden="true"
+            />
+            Add product
+          </Link>
+        )}
       </div>
     </div>
   );

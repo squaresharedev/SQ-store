@@ -7,10 +7,15 @@ const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 /**
- * Anchored overlay shared by the DatePicker and ColorPicker. The consumer owns
- * the trigger (and its `aria-haspopup="dialog"` / `aria-expanded`); this
- * component positions the panel under it on desktop and as a full-width bottom
- * sheet on mobile (native pickers shine on touch — don't regress that).
+ * Anchored overlay shared by the DatePicker, ColorPicker, and the top-bar menus.
+ * The consumer owns the trigger (and its `aria-haspopup="dialog"` /
+ * `aria-expanded`).
+ *
+ * `variant`:
+ *   - "sheet" (default): anchored under the trigger on desktop, full-width
+ *     BOTTOM SHEET on mobile (native pickers shine on touch — don't regress it).
+ *   - "anchored": a dropdown anchored under the trigger at EVERY breakpoint (the
+ *     bell / account menus want the same small popup on mobile as on desktop).
  *
  * While open: focus is moved into the panel (to a `[data-autofocus]` element if
  * present), trapped with Tab/Shift+Tab, and returned to the trigger on close.
@@ -23,6 +28,7 @@ export function Popover({
   label,
   children,
   panelClassName,
+  variant = "sheet",
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -31,8 +37,9 @@ export function Popover({
   /** Accessible name for the dialog panel. */
   label: string;
   children: React.ReactNode;
-  /** Extra panel classes, e.g. a desktop width (`sm:w-[19rem]`). */
+  /** Extra panel classes, e.g. a width (`sm:w-[19rem]`) or `right-0` anchor. */
   panelClassName?: string;
+  variant?: "sheet" | "anchored";
 }) {
   const rootRef = React.useRef<HTMLDivElement>(null);
   const panelRef = React.useRef<HTMLDivElement>(null);
@@ -53,7 +60,7 @@ export function Popover({
     // Lock background scroll only for the mobile bottom sheet.
     const mobile = window.matchMedia("(max-width: 639px)").matches;
     const prevOverflow = document.body.style.overflow;
-    if (mobile) document.body.style.overflow = "hidden";
+    if (variant === "sheet" && mobile) document.body.style.overflow = "hidden";
 
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
@@ -93,18 +100,21 @@ export function Popover({
       document.body.style.overflow = prevOverflow;
       previouslyFocused?.focus?.();
     };
-  }, [open, onOpenChange]);
+  }, [open, onOpenChange, variant]);
 
   return (
     <div ref={rootRef} className="relative inline-flex w-full flex-col">
       {trigger}
       {open && (
         <>
-          <div
-            aria-hidden
-            onClick={() => onOpenChange(false)}
-            className="fixed inset-0 z-40 bg-black/40 sm:hidden"
-          />
+          {/* Dimmed backdrop only for the mobile bottom sheet. */}
+          {variant === "sheet" && (
+            <div
+              aria-hidden
+              onClick={() => onOpenChange(false)}
+              className="fixed inset-0 z-40 bg-black/40 sm:hidden"
+            />
+          )}
           <div
             ref={panelRef}
             role="dialog"
@@ -113,10 +123,13 @@ export function Popover({
             tabIndex={-1}
             className={cn(
               "z-50 border border-border bg-popover text-popover-foreground shadow-lg focus:outline-none",
-              // Mobile: full-width bottom sheet.
-              "fixed inset-x-0 bottom-0 w-full rounded-t-lg p-4",
-              // Desktop: anchored under the trigger.
-              "sm:absolute sm:inset-x-auto sm:bottom-auto sm:left-0 sm:top-full sm:mt-2 sm:w-auto sm:rounded-md sm:p-3",
+              variant === "sheet"
+                ? // Mobile: full-width bottom sheet; desktop: anchored under the trigger.
+                  "fixed inset-x-0 bottom-0 w-full rounded-t-lg p-4 sm:absolute sm:inset-x-auto sm:bottom-auto sm:left-0 sm:top-full sm:mt-2 sm:w-auto sm:rounded-md sm:p-3"
+                : // Dropdown that never becomes a sheet. Mobile: pinned to the
+                  // top-right of the viewport (below the h-14 header), capped to
+                  // fit. Desktop: anchored under the trigger, right-aligned.
+                  "fixed right-2 top-[3.75rem] max-w-[calc(100vw-1rem)] rounded-md sm:absolute sm:right-0 sm:top-full sm:mt-2 sm:max-w-none",
               panelClassName,
             )}
           >

@@ -1,16 +1,11 @@
 import type { CSSProperties } from "react";
 
 /**
- * Revenue heroes for the Overview page: the 30-day revenue as one big green
- * number floating over a grainy green bloom.
- *
- * Mobile (below md): the bloom rises from the BOTTOM of the hero — the content
- * sheet below overlaps it with a rounded top, so the glow reads as light
- * escaping from behind the sheet.
- *
- * Desktop (md and up): the hero sits in the first metrics-grid column and the
- * bloom is anchored to the LEFT, bleeding past the cell toward the sidebar and
- * fading out to the right/bottom.
+ * Mobile-only hero for the Overview page: the 30-day revenue as one big green
+ * number floating over a grainy green bloom that rises from the BOTTOM of the
+ * hero — the content sheet below overlaps it with a rounded top, so the glow
+ * reads as light escaping from behind the sheet. Replaces the Revenue
+ * MetricTile below the md breakpoint (the tile stays on desktop/tablet).
  *
  * The backdrop is decorative code-defined styling in the CardBackdrop mold:
  * a success-green radial fade plus an SVG-turbulence grain layer, both masked
@@ -39,28 +34,6 @@ const GRAIN_STYLE: CSSProperties = {
   mixBlendMode: "multiply",
   WebkitMaskImage: FADE_MASK,
   maskImage: FADE_MASK,
-};
-
-// Desktop bloom: same green family, but rising from the BOTTOM up (like the
-// mobile hero) rather than a clean diagonal fade. A few offset blobs of
-// different sizes/alphas and slightly different bottom anchors make the wash
-// read as irregular and hand-lit, not a symmetric gradient.
-const DESKTOP_BLOOM = [
-  "radial-gradient(95% 115% at 42% 118%, rgba(22,163,74,0.22) 0%, rgba(22,163,74,0.06) 46%, transparent 74%)",
-  "radial-gradient(70% 90% at 12% 108%, rgba(22,163,74,0.13) 0%, transparent 62%)",
-  "radial-gradient(60% 80% at 78% 126%, rgba(22,163,74,0.11) 0%, transparent 60%)",
-  "radial-gradient(45% 55% at 60% 92%, rgba(22,163,74,0.08) 0%, transparent 58%)",
-].join(", ");
-
-const DESKTOP_FADE_MASK =
-  "radial-gradient(120% 108% at 42% 112%, #000 0%, #000 44%, transparent 80%)";
-
-const DESKTOP_GRAIN_STYLE: CSSProperties = {
-  backgroundImage: NOISE_TEXTURE,
-  opacity: 0.42,
-  mixBlendMode: "multiply",
-  WebkitMaskImage: DESKTOP_FADE_MASK,
-  maskImage: DESKTOP_FADE_MASK,
 };
 
 export function MobileRevenueHero({ value }: { value: string | null }) {
@@ -96,54 +69,6 @@ export function MobileRevenueHero({ value }: { value: string | null }) {
               No sales yet
             </p>
             <p className="mt-2 font-inter text-xs text-muted-foreground">
-              Revenue · 30 days
-            </p>
-          </>
-        )}
-      </div>
-    </section>
-  );
-}
-
-/**
- * Desktop counterpart: replaces the Revenue MetricTile in the first column of
- * the metrics grid from md up. Borderless — the bloom overflows the grid cell
- * (up toward the header, left past the content padding) so it reads as part of
- * the page, not a card.
- */
-export function DesktopRevenueHero({ value }: { value: string | null }) {
-  return (
-    <section
-      aria-label="Revenue, last 30 days"
-      className="relative hidden flex-col items-center justify-center px-8 py-10 text-center md:flex"
-    >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -bottom-20 -left-12 -right-6 -top-6 select-none"
-        style={{ background: DESKTOP_BLOOM }}
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -bottom-20 -left-12 -right-6 -top-6 select-none"
-        style={DESKTOP_GRAIN_STYLE}
-      />
-
-      <div className="relative">
-        {value ? (
-          <>
-            <p className="text-5xl font-bold tracking-tight text-success lg:text-6xl">
-              {value}
-            </p>
-            <p className="mt-4 font-inter text-sm text-muted-foreground">
-              Revenue · 30 days
-            </p>
-          </>
-        ) : (
-          <>
-            <p className="text-xl font-medium text-muted-foreground">
-              No sales yet
-            </p>
-            <p className="mt-2 font-inter text-sm text-muted-foreground">
               Revenue · 30 days
             </p>
           </>

@@ -1,14 +1,15 @@
 import { createClient } from "@/lib/supabase/server";
+import { getActiveAccount } from "@/lib/team/account-context";
 import { presignGetUrl } from "@/lib/r2";
 import type { Tables } from "@/types";
 import type { Product } from "@/types/product";
 import { productIdSchema } from "@/lib/validation/product";
 
-// Server-side reads for the signed-in seller's products. Server Components /
-// Route Handlers only (createClient uses next/headers cookies — never call
-// from middleware). RLS scopes every row to `owner_id = auth.uid()`, so these
-// reads need no caller-supplied id — that would just be an unverified value
-// to fetch and pass around for no additional safety.
+// Server-side reads for the ACTIVE account's products (your own store, or one
+// you're a team member of). Server Components / Route Handlers only. RLS now
+// permits reading any store you belong to, so every query MUST filter by the
+// resolved active account id explicitly — otherwise a member's list would mix
+// every store they can see. `getActiveAccount()` validates that selection.
 
 type ProductRow = Tables<"products">;
 
@@ -44,10 +45,13 @@ async function rowToProduct(row: ProductRow): Promise<Product> {
 }
 
 export async function listProducts(): Promise<Product[]> {
+  const account = await getActiveAccount();
+  if (!account) return [];
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("products")
     .select("*")
+    .eq("owner_id", account.accountId)
     .order("created_at", { ascending: false });
   if (error) throw new Error(`Failed to load products: ${error.message}`);
   return Promise.all(data.map(rowToProduct));
@@ -56,11 +60,14 @@ export async function listProducts(): Promise<Product[]> {
 export async function getProduct(id: string): Promise<Product | null> {
   // Guard before querying so a garbage URL param 404s instead of erroring.
   if (!productIdSchema.safeParse(id).success) return null;
+  const account = await getActiveAccount();
+  if (!account) return null;
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("products")
     .select("*")
     .eq("id", id)
+    .eq("owner_id", account.accountId)
     .maybeSingle();
   if (error) throw new Error(`Failed to load product: ${error.message}`);
   return data ? await rowToProduct(data) : null;

@@ -19,19 +19,39 @@ export type TeamRole = Enums<"team_role">;
 export type TeamMemberStatus = Enums<"team_member_status">;
 
 export const TEAM_ACTIONS = [
+  // Team roster management.
   "team.read",
   "team.invite",
   "team.change_role",
   "team.revoke",
+  // Store data access. `store.read` covers products, storefront, orders and the
+  // dashboard/analytics (everything a member views). Writes are per-resource.
+  "store.read",
+  "products.write",
+  "storefront.write",
 ] as const;
 
 export type TeamAction = (typeof TEAM_ACTIONS)[number];
 
 /** role -> permission set. The single editable source of truth. */
 export const TEAM_PERMISSIONS: Record<TeamRole, readonly TeamAction[]> = {
-  owner: ["team.read", "team.invite", "team.change_role", "team.revoke"],
-  editor: ["team.read", "team.invite"],
-  viewer: ["team.read"],
+  owner: [
+    "team.read",
+    "team.invite",
+    "team.change_role",
+    "team.revoke",
+    "store.read",
+    "products.write",
+    "storefront.write",
+  ],
+  editor: [
+    "team.read",
+    "team.invite",
+    "store.read",
+    "products.write",
+    "storefront.write",
+  ],
+  viewer: ["team.read", "store.read"],
 };
 
 /**
@@ -75,6 +95,7 @@ export const ROLE_LABELS: Record<TeamRole, string> = {
 
 export const ROLE_DESCRIPTIONS: Record<TeamRole, string> = {
   owner: "Full control. Exactly one per store, cannot be changed or removed.",
-  editor: "Can manage the team roster and invite members at or below their role.",
-  viewer: "Can see the team. Read-only.",
+  editor:
+    "Can view the store and edit products and the storefront. Can invite members at or below their role.",
+  viewer: "Can view the store and team. Read-only.",
 };

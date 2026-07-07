@@ -24,9 +24,12 @@ import { EmbedModal } from "./EmbedModal";
 export function StorefrontsList({
   storefronts: initial,
   products,
+  canWrite,
 }: {
   storefronts: StorefrontSummary[];
   products: Product[];
+  /** Hide create/delete/embed controls when the active role is read-only. */
+  canWrite: boolean;
 }) {
   const router = useRouter();
   const [storefronts, setStorefronts] = useState(initial);
@@ -101,14 +104,16 @@ export function StorefrontsList({
         <p className="font-inter text-sm text-muted-foreground">
           {storefronts.length} storefront{storefronts.length === 1 ? "" : "s"}
         </p>
-        <Button onClick={handleCreate} disabled={creating}>
-          <Plus
-            className={`size-4 ${iconPopClass}`}
-            strokeWidth={2}
-            aria-hidden="true"
-          />
-          {creating ? "Creating…" : "New storefront"}
-        </Button>
+        {canWrite && (
+          <Button onClick={handleCreate} disabled={creating}>
+            <Plus
+              className={`size-4 ${iconPopClass}`}
+              strokeWidth={2}
+              aria-hidden="true"
+            />
+            {creating ? "Creating…" : "New storefront"}
+          </Button>
+        )}
       </div>
 
       {storefronts.length === 0 ? (
@@ -124,22 +129,25 @@ export function StorefrontsList({
             No storefronts yet
           </h2>
           <p className="mt-1 max-w-sm font-inter text-sm text-muted-foreground">
-            Create your first storefront to arrange products into a grid buyers
-            can browse and buy from.
+            {canWrite
+              ? "Create your first storefront to arrange products into a grid buyers can browse and buy from."
+              : "This store has no storefronts yet."}
           </p>
-          <button
-            type="button"
-            onClick={handleCreate}
-            disabled={creating}
-            className={`${primaryButtonClass} mt-5`}
-          >
-            <Plus
-              className={`size-4 ${iconPopClass}`}
-              strokeWidth={2}
-              aria-hidden="true"
-            />
-            {creating ? "Creating…" : "Create storefront"}
-          </button>
+          {canWrite && (
+            <button
+              type="button"
+              onClick={handleCreate}
+              disabled={creating}
+              className={`${primaryButtonClass} mt-5`}
+            >
+              <Plus
+                className={`size-4 ${iconPopClass}`}
+                strokeWidth={2}
+                aria-hidden="true"
+              />
+              {creating ? "Creating…" : "Create storefront"}
+            </button>
+          )}
         </div>
       ) : (
         <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -148,6 +156,7 @@ export function StorefrontsList({
               <StorefrontCard
                 storefront={storefront}
                 productsById={productsById}
+                canWrite={canWrite}
                 onEmbed={() => setEmbedTarget(storefront)}
                 onDelete={() => setPendingDelete(storefront)}
               />

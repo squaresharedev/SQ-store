@@ -12,9 +12,12 @@ import { deriveStockBadge } from "@/lib/stock/badge";
 // parent list, which owns product state; edit is a plain route link.
 export function ProductCard({
   product,
+  canWrite,
   onDelete,
 }: {
   product: Product;
+  /** Hide edit/delete controls when the active role is read-only. */
+  canWrite: boolean;
   onDelete: () => void;
 }) {
   const { id, title, price, currency, status, imageUrl, trackStock, stockQuantity, lowStockThreshold } = product;
@@ -57,23 +60,25 @@ export function ProductCard({
           )}
         </div>
 
-        <div className="flex shrink-0 items-center gap-1">
-          <Link
-            href={`/products/${id}/edit`}
-            aria-label={`Edit ${title}`}
-            className={iconButtonClass}
-          >
-            <Pencil className="size-4" strokeWidth={2} aria-hidden="true" />
-          </Link>
-          <button
-            type="button"
-            onClick={onDelete}
-            aria-label={`Delete ${title}`}
-            className={cn(iconButtonClass, "hover:text-destructive")}
-          >
-            <Trash2 className="size-4" strokeWidth={2} aria-hidden="true" />
-          </button>
-        </div>
+        {canWrite && (
+          <div className="flex shrink-0 items-center gap-1">
+            <Link
+              href={`/products/${id}/edit`}
+              aria-label={`Edit ${title}`}
+              className={iconButtonClass}
+            >
+              <Pencil className="size-4" strokeWidth={2} aria-hidden="true" />
+            </Link>
+            <button
+              type="button"
+              onClick={onDelete}
+              aria-label={`Delete ${title}`}
+              className={cn(iconButtonClass, "hover:text-destructive")}
+            >
+              <Trash2 className="size-4" strokeWidth={2} aria-hidden="true" />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

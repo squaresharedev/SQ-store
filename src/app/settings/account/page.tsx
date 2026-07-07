@@ -14,6 +14,7 @@ export default async function AccountSettingsPage() {
     <AccountSection
       displayName={profile?.display_name ?? ""}
       email={user.email ?? ""}
+      avatarUrl={profile?.avatar_url ?? null}
     />
   );
 }

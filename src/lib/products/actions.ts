@@ -1,8 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import type { User } from "@supabase/supabase-js";
-import { getUser } from "@/lib/auth/session";
+import { getActiveAccount } from "@/lib/team/account-context";
+import { can } from "@/lib/team/permissions";
 import { createClient } from "@/lib/supabase/server";
 import { deleteObject, headObject } from "@/lib/r2";
 import type { TablesUpdate } from "@/types";
@@ -16,32 +16,38 @@ import {
   type UploadKind,
 } from "@/lib/validation/product";
 
-// Product CRUD. Every write: session check -> Zod parse (the security
-// boundary; client validation is UX only) -> object-key ownership check ->
-// owner-scoped mutation. RLS enforces ownership at the DB as well; the
-// explicit owner_id here is defense in depth.
+// Product CRUD for the ACTIVE account's store (your own, or one you can edit as
+// an owner/editor). Every write: resolve + authorize the active account
+// (products.write) -> Zod parse (the security boundary; client validation is UX
+// only) -> object-key ownership check (against the UPLOADER) -> account-scoped
+// mutation. RLS re-checks the same permission at the DB (defense in depth), so a
+// viewer can never write even if this layer were bypassed.
 
 export type ProductActionResult =
   | { ok: true; id: string }
   | { ok: false; error: string };
 
 const GENERIC_WRITE_ERROR = "Could not save the product. Try again.";
+const NO_WRITE_PERMISSION =
+  "You don't have permission to edit products in this store.";
 
 /**
  * Parse + authorize a write payload. Returns the validated input or an error
- * result. Keys must be well-formed and live under the caller's own R2 prefix.
+ * result. Object keys must be well-formed and live under the UPLOADER's own R2
+ * prefix (an editor legitimately uploads under their own id, then references it
+ * on the owner's product).
  */
 function parseWrite(
-  user: User,
+  uploaderId: string,
   input: unknown,
 ): { data: ProductWriteInput } | { error: string } {
   const parsed = productWriteSchema.safeParse(input);
   if (!parsed.success) return { error: "Invalid product data." };
   const { imageKey, digitalFileKey } = parsed.data;
-  if (imageKey && !isOwnedObjectKey(imageKey, "image", user.id)) {
+  if (imageKey && !isOwnedObjectKey(imageKey, "image", uploaderId)) {
     return { error: "Invalid image reference." };
   }
-  if (digitalFileKey && !isOwnedObjectKey(digitalFileKey, "file", user.id)) {
+  if (digitalFileKey && !isOwnedObjectKey(digitalFileKey, "file", uploaderId)) {
     return { error: "Invalid file reference." };
   }
   return { data: parsed.data };
@@ -109,10 +115,15 @@ async function verifyNewKeys(
 export async function createProduct(
   input: unknown,
 ): Promise<ProductActionResult> {
-  const user = await getUser();
-  if (!user) return { ok: false, error: "Your session expired. Sign in again." };
+  const account = await getActiveAccount();
+  if (!account) {
+    return { ok: false, error: "Your session expired. Sign in again." };
+  }
+  if (!can(account.role, "products.write")) {
+    return { ok: false, error: NO_WRITE_PERMISSION };
+  }
 
-  const parsed = parseWrite(user, input);
+  const parsed = parseWrite(account.userId, input);
   if ("error" in parsed) return { ok: false, error: parsed.error };
   const { data } = parsed;
 
@@ -123,7 +134,7 @@ export async function createProduct(
   const { data: row, error } = await supabase
     .from("products")
     .insert({
-      owner_id: user.id,
+      owner_id: account.accountId,
       title: data.title,
       description: data.description || null,
       price_cents: data.priceCents,
@@ -152,13 +163,18 @@ export async function updateProduct(
   id: string,
   input: unknown,
 ): Promise<ProductActionResult> {
-  const user = await getUser();
-  if (!user) return { ok: false, error: "Your session expired. Sign in again." };
+  const account = await getActiveAccount();
+  if (!account) {
+    return { ok: false, error: "Your session expired. Sign in again." };
+  }
+  if (!can(account.role, "products.write")) {
+    return { ok: false, error: NO_WRITE_PERMISSION };
+  }
   if (!productIdSchema.safeParse(id).success) {
     return { ok: false, error: "Product not found." };
   }
 
-  const parsed = parseWrite(user, input);
+  const parsed = parseWrite(account.userId, input);
   if ("error" in parsed) return { ok: false, error: parsed.error };
   const { data } = parsed;
 
@@ -205,7 +221,7 @@ export async function updateProduct(
       .from("products")
       .select("image_key, digital_file_key")
       .eq("id", id)
-      .eq("owner_id", user.id)
+      .eq("owner_id", account.accountId)
       .maybeSingle();
     oldKeys = existing ?? null;
   }
@@ -214,7 +230,7 @@ export async function updateProduct(
     .from("products")
     .update(update)
     .eq("id", id)
-    .eq("owner_id", user.id)
+    .eq("owner_id", account.accountId)
     .select("id")
     .maybeSingle();
 
@@ -240,8 +256,13 @@ export async function updateProduct(
 }
 
 export async function deleteProduct(id: string): Promise<ProductActionResult> {
-  const user = await getUser();
-  if (!user) return { ok: false, error: "Your session expired. Sign in again." };
+  const account = await getActiveAccount();
+  if (!account) {
+    return { ok: false, error: "Your session expired. Sign in again." };
+  }
+  if (!can(account.role, "products.write")) {
+    return { ok: false, error: NO_WRITE_PERMISSION };
+  }
   if (!productIdSchema.safeParse(id).success) {
     return { ok: false, error: "Product not found." };
   }
@@ -254,7 +275,7 @@ export async function deleteProduct(id: string): Promise<ProductActionResult> {
     .from("products")
     .delete()
     .eq("id", id)
-    .eq("owner_id", user.id)
+    .eq("owner_id", account.accountId)
     .select("id, image_key, digital_file_key")
     .maybeSingle();
 

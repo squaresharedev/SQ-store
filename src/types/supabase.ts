@@ -306,12 +306,29 @@ export type Database = {
         Args: { p_product_id: string; p_quantity: number }
         Returns: boolean
       }
+      is_display_name_available: {
+        Args: { p_display_name: string }
+        Returns: boolean
+      }
+      rl_take: {
+        Args: { p_action: string; p_max: number; p_window_seconds: number }
+        Returns: boolean
+      }
       team_accept_invite: { Args: { p_invite_id: string }; Returns: boolean }
       team_actor_role: {
         Args: { account: string }
         Returns: Database["public"]["Enums"]["team_role"]
       }
       team_jwt_email: { Args: never; Returns: string }
+      team_my_accounts: {
+        Args: never
+        Returns: {
+          account_owner_id: string
+          role: Database["public"]["Enums"]["team_role"]
+          store_name: string
+          is_self: boolean
+        }[]
+      }
       team_my_pending_invites: {
         Args: never
         Returns: {
@@ -343,6 +360,7 @@ export type Database = {
           status: Database["public"]["Enums"]["team_member_status"]
         }[]
       }
+      user_id_by_email: { Args: { p_email: string }; Returns: string }
     }
     Enums: {
       team_member_status: "invited" | "active" | "revoked"

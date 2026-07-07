@@ -1,8 +1,9 @@
 "use client";
 
-import { ArrowUpRight, BadgeCheck, CreditCard } from "lucide-react";
+import { ArrowUpRight, BadgeCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { AccountStatus } from "@/lib/payments/types";
+import { CardSwipe } from "./CardSwipe";
 
 function StatusDot({ ok, label }: { ok: boolean; label: string }) {
   return (
@@ -35,22 +36,19 @@ export function ConnectionStatusCard({
     return (
       <section
         aria-label="Stripe connection"
-        className="rounded-md border border-border bg-card p-6 shadow-xs"
+        className="overflow-hidden rounded-md border border-border bg-card shadow-xs"
       >
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-start gap-4">
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-sm bg-secondary text-foreground">
-              <CreditCard className="size-5" strokeWidth={2} aria-hidden />
-            </span>
-            <div>
-              <h2 className="text-base font-semibold text-foreground">
-                Connect Stripe to get paid
-              </h2>
-              <p className="mt-1 max-w-md font-inter text-sm text-muted-foreground">
-                Payouts go straight to your bank. Setup happens securely on
-                Stripe, we never see or store your bank details.
-              </p>
-            </div>
+        {/* Hero: a card being swiped — the "get paid" moment made tangible. */}
+        <CardSwipe className="rounded-none border-x-0 border-t-0" />
+        <div className="flex flex-wrap items-center justify-between gap-4 p-6">
+          <div>
+            <h2 className="text-base font-semibold text-foreground">
+              Connect Stripe to get paid
+            </h2>
+            <p className="mt-1 max-w-md font-inter text-sm text-muted-foreground">
+              Payouts go straight to your bank. Setup happens securely on
+              Stripe, we never see or store your bank details.
+            </p>
           </div>
           <Button onClick={onConnect}>
             Connect with Stripe

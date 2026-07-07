@@ -52,3 +52,36 @@ export async function createNotification(
     return false;
   }
 }
+
+/**
+ * Resolve an email to an existing user's id, or null if nobody has signed up
+ * with it yet. Used by producers that address a notification by email (e.g. a
+ * team invite) before the recipient has linked their account.
+ *
+ * Server-side only. Goes through the `user_id_by_email` SECURITY DEFINER
+ * function, which is granted to service_role ONLY (not anon/authenticated), so
+ * this email → id lookup is never exposed to clients as an enumeration oracle.
+ */
+export async function resolveUserIdByEmail(
+  email: string,
+): Promise<string | null> {
+  const normalized = email.trim().toLowerCase();
+  if (!normalized) return null;
+  try {
+    const supabase = createAdminClient();
+    const { data, error } = await supabase.rpc("user_id_by_email", {
+      p_email: normalized,
+    });
+    if (error) {
+      console.error("[notifications] user_id_by_email failed:", error.message);
+      return null;
+    }
+    return data ?? null;
+  } catch (err) {
+    console.error(
+      "[notifications] resolveUserIdByEmail threw:",
+      err instanceof Error ? err.message : String(err),
+    );
+    return null;
+  }
+}

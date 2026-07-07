@@ -4,6 +4,8 @@ import { listProducts } from "@/lib/products/queries";
 import { listStorefronts } from "@/lib/storefront/queries";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { StorefrontsList } from "@/components/storefront/StorefrontsList";
+import { getActiveAccount } from "@/lib/team/account-context";
+import { can } from "@/lib/team/permissions";
 
 export const metadata: Metadata = {
   title: "Storefronts",
@@ -13,14 +15,16 @@ export const metadata: Metadata = {
 // shell (sidebar) so it reads as a normal section; the editor route does not.
 export default async function StorefrontsPage() {
   // Products feed the cards' live grid previews (image tiles).
-  const [user, profile, storefronts, products] = await Promise.all([
+  const [user, profile, storefronts, products, account] = await Promise.all([
     getUser(),
     getProfile(),
     listStorefronts(),
     listProducts(),
+    getActiveAccount(),
   ]);
   const username =
     profile?.display_name || user?.email?.split("@")[0] || "Account";
+  const canWrite = can(account?.role, "storefront.write");
 
   return (
     <DashboardShell username={username}>
@@ -35,7 +39,11 @@ export default async function StorefrontsPage() {
           </p>
         </div>
 
-        <StorefrontsList storefronts={storefronts} products={products} />
+        <StorefrontsList
+          storefronts={storefronts}
+          products={products}
+          canWrite={canWrite}
+        />
       </main>
     </DashboardShell>
   );

@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
-import { getUser } from "@/lib/auth/session";
+import { getActiveAccount } from "@/lib/team/account-context";
 import { toCurrency } from "@/lib/format/money";
 import type { Currency } from "@/types/product";
 
@@ -145,17 +145,17 @@ function windowFromPaid(orders: DashboardOrder[]): MetricWindow {
  * the DB.
  */
 export async function getDashboardOrders(): Promise<DashboardOrdersData> {
-  const user = await getUser();
-  if (!user) return emptyOrdersData();
+  const account = await getActiveAccount();
+  if (!account) return emptyOrdersData();
 
   const supabase = await createClient();
   // The generated Database types don't include `orders` yet (owned by the
   // concurrent seed work), so read through an untyped client view against the
-  // agreed column contract above.
+  // agreed column contract above. Scoped to the ACTIVE account's store.
   const { data, error } = await (supabase as SupabaseClient)
     .from("orders")
     .select("product_title, channel, status, amount_cents, currency, created_at")
-    .eq("seller_id", user.id)
+    .eq("seller_id", account.accountId)
     .order("created_at", { ascending: false })
     .limit(ORDERS_READ_LIMIT);
 
@@ -224,10 +224,13 @@ export type ProductsSummary = {
  * R2 credentials happen to be configured; RLS scopes rows to the owner.
  */
 export async function getProductsSummary(): Promise<ProductsSummary> {
+  const account = await getActiveAccount();
+  if (!account) return { total: 0, missingImage: [] };
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("products")
-    .select("id, title, image_key");
+    .select("id, title, image_key")
+    .eq("owner_id", account.accountId);
   if (error) throw new Error(`Failed to load products: ${error.message}`);
   return {
     total: data.length,

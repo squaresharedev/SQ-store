@@ -1,11 +1,17 @@
-import { getUser } from "@/lib/auth/session";
+import { getActiveAccount } from "@/lib/team/account-context";
+import { can } from "@/lib/team/permissions";
 import { buildObjectKey, hasR2Credentials, presignPutUrl } from "@/lib/r2";
 import { presignRequestSchema } from "@/lib/validation/product";
 
 /**
  * POST /api/uploads/presign — mint a short-lived presigned PUT URL for a
- * direct-to-R2 upload. Auth required; the object key is built server-side from
- * the session's user id (the client never chooses its own key).
+ * direct-to-R2 upload. The object key is built server-side under the UPLOADER's
+ * own id (the client never chooses its own key).
+ *
+ * AUTHORIZATION: uploads only serve the product write flow, so the caller must
+ * hold products.write on the ACTIVE account. Without this, a read-only viewer
+ * could mint URLs and dump files into R2 (storage/egress abuse) even though the
+ * object could never be linked to a product (createProduct also gates on write).
  *
  * kind/type/size are validated here for early UX rejection ONLY — a presigned
  * PUT can bind neither Content-Type nor Content-Length, so these are not the
@@ -13,9 +19,15 @@ import { presignRequestSchema } from "@/lib/validation/product";
  * (verifyUploadedObject in lib/products/actions.ts).
  */
 export async function POST(request: Request) {
-  const user = await getUser();
-  if (!user) {
+  const account = await getActiveAccount();
+  if (!account) {
     return Response.json({ error: "Sign in to upload files." }, { status: 401 });
+  }
+  if (!can(account.role, "products.write")) {
+    return Response.json(
+      { error: "You don't have permission to upload here." },
+      { status: 403 },
+    );
   }
 
   let body: unknown;
@@ -54,7 +66,7 @@ export async function POST(request: Request) {
   }
 
   const { kind, filename, contentType } = parsed.data;
-  const key = buildObjectKey(kind, user.id, filename);
+  const key = buildObjectKey(kind, account.userId, filename);
 
   try {
     const url = await presignPutUrl(key, contentType);

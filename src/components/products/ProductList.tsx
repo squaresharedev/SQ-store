@@ -9,7 +9,14 @@ import { ProductEmptyState } from "./ProductEmptyState";
 
 // Client wrapper that owns the visible product set. Delete removes the card
 // optimistically, calls the server action, and restores the list if it fails.
-export function ProductList({ products: initial }: { products: Product[] }) {
+export function ProductList({
+  products: initial,
+  canWrite,
+}: {
+  products: Product[];
+  /** Whether the active account's role may edit/delete (hides those controls). */
+  canWrite: boolean;
+}) {
   const [products, setProducts] = useState<Product[]>(initial);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
@@ -33,7 +40,7 @@ export function ProductList({ products: initial }: { products: Product[] }) {
   }
 
   if (products.length === 0) {
-    return <ProductEmptyState />;
+    return <ProductEmptyState canWrite={canWrite} />;
   }
 
   return (
@@ -56,6 +63,7 @@ export function ProductList({ products: initial }: { products: Product[] }) {
         <li key={product.id}>
           <ProductCard
             product={product}
+            canWrite={canWrite}
             onDelete={() => handleDelete(product.id)}
           />
         </li>

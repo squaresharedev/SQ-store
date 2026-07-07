@@ -4,6 +4,7 @@ import * as React from "react";
 import { UserPlus } from "lucide-react";
 import { MemberList } from "@/components/settings/team/MemberList";
 import { InviteModal } from "@/components/settings/team/InviteModal";
+import { InvitePromptModal } from "@/components/settings/team/InvitePromptModal";
 import { PendingInvites } from "@/components/settings/team/PendingInvites";
 import { SettingsCard } from "@/components/settings/SettingsCard";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,10 @@ export function TeamSection({
 
   return (
     <div className="flex flex-col gap-6">
+      {/* Auto-opening prompt so a pending invite is impossible to miss (also the
+          landing surface for the invite notification's deep link). */}
+      <InvitePromptModal invites={pendingInvites} />
+
       {pendingInvites.length > 0 && (
         <PendingInvites invites={pendingInvites} />
       )}
