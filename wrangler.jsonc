@@ -1,11 +1,11 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "squareshare-store",
+  "name": "squareshare-dashboard",
   "main": ".open-next/worker.js",
   // Store dashboard runs on the Cloudflare Workers *Node* runtime via OpenNext.
   // nodejs_compat is required by @opennextjs/cloudflare; the compatibility_date
   // must be >= 2024-09-23 for nodejs_compat to take effect.
-  "compatibility_date": "2026-07-01",
+  "compatibility_date": "2026-07-07",
   "compatibility_flags": ["nodejs_compat"],
   "assets": {
     "directory": ".open-next/assets",

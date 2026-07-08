@@ -10,4 +10,4 @@ export const DASHBOARD_URL = "https://store.squareshare.to";
 export const MARKETPLACE_URL = "https://squareshare.to";
 
 /** Parent domain the session cookie is scoped to in production. */
-export const COOKIE_DOMAIN = ".squareshare.to";
+export const COOKIE_DOMAIN = ".squareshare.eu";

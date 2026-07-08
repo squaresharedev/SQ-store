@@ -3,8 +3,8 @@ import type { CookieOptions } from "@supabase/ssr";
 /**
  * Shared attributes for every auth cookie the server writes.
  *
- * WHY A PARENT-DOMAIN COOKIE: the session is scoped to `.squareshare.to` so the
- * same login is valid across `store.squareshare.to` (this dashboard) and the
+ * WHY A PARENT-DOMAIN COOKIE: the session is scoped to `.squareshare.eu` so the
+ * same login is valid across `dashboard.squareshare.eu` (this dashboard) and the
  * marketplace subdomains that come later. In local dev we fall back to a
  * host-only cookie (no Domain, not Secure) so `http://localhost` still works.
  *
@@ -22,7 +22,7 @@ const isProd = process.env.NODE_ENV === "production";
 // otherwise use the shared parent domain in prod and a host-only cookie in dev.
 const cookieDomain =
   process.env.NEXT_PUBLIC_COOKIE_DOMAIN ||
-  (isProd ? ".squareshare.to" : undefined);
+  (isProd ? ".squareshare.eu" : undefined);
 
 export const AUTH_COOKIE_OPTIONS: CookieOptions = {
   domain: cookieDomain,
