@@ -13,6 +13,17 @@
   },
   "observability": {
     "enabled": true
+  },
+  // NEXT_PUBLIC_* vars only — these ship to the browser bundle already, so
+  // committing them here is no additional exposure. `wrangler deploy` treats
+  // this object as authoritative and wipes any dashboard-added vars not
+  // listed here, so this is also the fix for vars disappearing after deploy.
+  // Secrets (SUPABASE_SERVICE_ROLE_KEY, STRIPE_SECRET_KEY, R2 keys, etc.) do
+  // NOT go here — set those with `wrangler secret put` / the CF dashboard.
+  "vars": {
+    "NEXT_PUBLIC_SUPABASE_URL": "https://vnyfndqpdllwhvhinjoi.supabase.co",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZueWZuZHFwZGxsd2h2aGluam9pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzMDExNTYsImV4cCI6MjA5ODg3NzE1Nn0.y_SUEDhSU6fmx2HU8r-DHe4XolwAo7JevqBTLtn6ebI",
+    "NEXT_PUBLIC_APP_URL": "https://dashboard.squareshare.eu"
   }
   // Bindings (KV/R2/D1/Hyperdrive/secrets) get added here as the dashboard
   // grows. Secrets for the Workers runtime go in `.dev.vars` (local) and
