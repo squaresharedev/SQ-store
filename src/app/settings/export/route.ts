@@ -8,7 +8,12 @@ import { createClient } from "@/lib/supabase/server";
  * OWNER-SCOPED ONLY: the user id comes exclusively from the validated session
  * (never from query/body), every query filters on it, and RLS enforces the
  * same boundary underneath. There is no way to export someone else's data.
+ *
+ * force-dynamic: not covered by settings/layout.tsx's auth gate (Route
+ * Handlers sit outside the page/layout tree). See (dashboard)/layout.tsx for
+ * why implicit cookies()-based dynamic detection isn't reliable here.
  */
+export const dynamic = "force-dynamic";
 export async function GET() {
   const supabase = await createClient();
   const {

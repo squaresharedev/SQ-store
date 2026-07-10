@@ -8,6 +8,11 @@ export const metadata: Metadata = {
   title: "Set a new password",
 };
 
+// force-dynamic: reads session state via getUser() (Supabase server client)
+// below. See (dashboard)/layout.tsx for why implicit cookies()-based dynamic
+// detection isn't reliable here.
+export const dynamic = "force-dynamic";
+
 /**
  * Landing page for password-recovery links. By the time the user reaches here,
  * /auth/callback has exchanged the recovery code for a session — so an absent

@@ -10,6 +10,11 @@ export const metadata: Metadata = {
   description: "Sign in to your Square Share creator dashboard.",
 };
 
+// force-dynamic: reads session state via getUser() (Supabase server client)
+// below to redirect already-signed-in visitors. See (dashboard)/layout.tsx
+// for why implicit cookies()-based dynamic detection isn't reliable here.
+export const dynamic = "force-dynamic";
+
 function sanitizeNext(value: string | string[] | undefined): string {
   const next = Array.isArray(value) ? value[0] : value;
   if (next && next.startsWith("/") && !next.startsWith("//")) return next;

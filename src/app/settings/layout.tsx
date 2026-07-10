@@ -7,6 +7,11 @@ export const metadata: Metadata = {
   title: "Settings",
 };
 
+// force-dynamic: see (dashboard)/layout.tsx — requireUser()'s cookies() call
+// happens after an env-var guard that can throw first, so implicit dynamic
+// detection isn't reliable if NEXT_PUBLIC_SUPABASE_* is unset at build time.
+export const dynamic = "force-dynamic";
+
 /**
  * Settings shell — PROTECTED. Session is read server-side here (and again in
  * every page/action); never in middleware.
