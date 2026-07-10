@@ -8,7 +8,7 @@ vi.mock("@/lib/team/account-context", () => ({
 }));
 
 const hasR2Credentials = vi.fn(() => true);
-const presignPutUrl = vi.fn(async (key: string) => `https://r2.example/${key}?sig=x`);
+const presignPutUrl = vi.fn(async (key: string, _ct?: string) => `https://r2.example/${key}?sig=x`);
 vi.mock("@/lib/r2", async (importOriginal) => {
   const real = await importOriginal<typeof import("@/lib/r2")>();
   return {
