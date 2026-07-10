@@ -31,13 +31,13 @@ export function MemberList({
       </ul>
 
       {onlyOwner && (
-        <p className="mt-4 font-inter text-sm text-neutral-400">
+        <p className="mt-4 font-inter text-sm text-neutral-500">
           Just you so far. Invite someone.
         </p>
       )}
 
       {members.length >= 50 && (
-        <p className="mt-3 font-inter text-sm text-neutral-400">
+        <p className="mt-3 font-inter text-sm text-neutral-500">
           Showing the first 50 members.
         </p>
       )}

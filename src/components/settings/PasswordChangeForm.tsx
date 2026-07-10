@@ -48,7 +48,7 @@ export function PasswordChangeForm() {
             placeholder="••••••••"
             required
           />
-          <p className="font-inter text-xs text-neutral-400">
+          <p className="font-inter text-xs text-neutral-500">
             At least 8 characters.
           </p>
         </div>

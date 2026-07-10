@@ -35,7 +35,7 @@ export function ResetPasswordForm({ email }: { email?: string }) {
           placeholder="••••••••"
           required
         />
-        <p className="font-inter text-xs text-neutral-400">At least 8 characters.</p>
+        <p className="font-inter text-xs text-neutral-500">At least 8 characters.</p>
       </div>
 
       <div className="flex flex-col gap-1.5">

@@ -14,7 +14,7 @@ const STATUS_CLASSES: Record<PayoutStatus, string> = {
   pending: "text-foreground",
   in_transit: "text-foreground",
   canceled: "text-muted-foreground",
-  failed: "text-destructive",
+  failed: "text-danger-strong",
 };
 
 /** Same pill family as OrderStatusBadge, mapped to Stripe payout statuses. */

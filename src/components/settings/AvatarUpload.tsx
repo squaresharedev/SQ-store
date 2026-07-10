@@ -53,6 +53,7 @@ export function AvatarUpload({
               ref={fileRef}
               type="file"
               name="avatar"
+              aria-label="Choose profile photo"
               accept="image/jpeg,image/png,image/webp"
               className="sr-only"
               onChange={() => uploadFormRef.current?.requestSubmit()}

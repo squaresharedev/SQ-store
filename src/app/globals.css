@@ -22,7 +22,8 @@
   --shadow-btn-glow: 0 0 30px rgba(168, 85, 247, 0.3);
 
   /* Feedback (styles.md §2.1) */
-  --color-success: #16a34a;
+  --color-success: #15803d; /* green-700: AA contrast for small text on white/neutral-100 */
+  --color-danger-strong: #b91c1c; /* red-700: AA contrast for small text on white/neutral-100 */
 }
 
 /* Font utilities map to the next/font local faces set on <html> in layout.tsx.

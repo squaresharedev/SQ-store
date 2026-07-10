@@ -137,7 +137,7 @@ export function DisplayNameForm({ displayName }: { displayName: string }) {
               aria-live="polite"
               className={cn(
                 "font-inter text-xs",
-                status === "taken" ? "text-red-500" : "text-neutral-400",
+                status === "taken" ? "text-danger-strong" : "text-neutral-500",
               )}
             >
               {status === "mine" && "That's your name."}

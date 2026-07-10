@@ -73,7 +73,7 @@ export function SignOutSection() {
           </SignOutButton>
         </form>
       </div>
-      <p className="mt-4 font-inter text-xs text-neutral-400">
+      <p className="mt-4 font-inter text-xs text-neutral-500">
         Signing out everywhere ends your session on every device and browser
         you&rsquo;re signed in on. You&rsquo;ll need to sign in again each place.
       </p>

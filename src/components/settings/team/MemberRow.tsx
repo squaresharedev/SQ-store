@@ -134,7 +134,7 @@ export function MemberRow({
           )}
 
           {member.status === "revoked" && (
-            <span className="inline-flex items-center rounded-[0.25rem] bg-red-50 px-2 py-0.5 font-inter text-xs text-red-500">
+            <span className="inline-flex items-center rounded-[0.25rem] bg-red-50 px-2 py-0.5 font-inter text-xs text-red-700">
               Revoked
             </span>
           )}
