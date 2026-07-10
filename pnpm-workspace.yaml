@@ -6,3 +6,5 @@ onlyBuiltDependencies:
 ignoredBuiltDependencies:
   - sharp
   - unrs-resolver
+allowBuilds:
+  '@embedded-postgres/windows-x64': true
