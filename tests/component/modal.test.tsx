@@ -158,7 +158,7 @@ describe("Modal", () => {
       children: <button>Second</button>,
     });
 
-    const buttons = screen.getAllByRole("button");
+    const _buttons = screen.getAllByRole("button");
     // Focusable order: Close, Second
     const closeBtn = screen.getByRole("button", { name: "Close" });
     const secondBtn = screen.getByRole("button", { name: "Second" });

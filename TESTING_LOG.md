@@ -1,91 +1,123 @@
 # TESTING_LOG
 
 Running log for the comprehensive test-suite effort on `test/full-suite`.
-Updated continuously; newest entries at the bottom of each section.
+
+## How to run
+
+```
+pnpm test          # all vitest (unit + component + db integration) — 566 tests
+pnpm test:unit     # unit + component only (jsdom)
+pnpm test:db       # embedded-Postgres RLS/integration only
+pnpm test:e2e      # Playwright: boots the full local stack itself — 27 tests
+pnpm test:a11y     # Playwright axe suite only
+pnpm typecheck && pnpm lint
+```
+
+E2E needs the PostgREST binary once per machine:
+`node tests/e2e/stack/fetch-postgrest.mjs` (vendors it into `tools/`, gitignored).
+
+Everything is green and CI-runnable on a clean checkout (no Docker, no admin,
+no external service). Suite totals: **566 vitest** (unit + component + DB
+integration) **+ 27 Playwright E2E/a11y = 593 tests**, plus 15 `todo`
+placeholders for stub features.
 
 ## Test database (Step 0)
 
-**Planned:** Supabase branch of SQ-store via MCP `create_branch`.
-**Actual:** Branching requires the Pro plan (`PaymentRequiredException`) and the
-free org is at its 2-active-project cap (SQ-store + Homepage, both live), so
-neither a branch nor a throwaway project was possible without paying or pausing
-live infrastructure.
+**Planned:** Supabase branch via MCP `create_branch`.
+**Actual:** branching needs the Pro plan (`PaymentRequiredException`) and the
+free org is at its 2-active-project cap, so no branch/throwaway project was
+possible without paying or pausing live infra. Prod was only ever read
+(schema + migration introspection); no test data ever touched it.
 
-**Workaround in place:** a hermetic **embedded PostgreSQL 17.10** instance
-(`embedded-postgres` npm package, binaries vendored, no Docker/admin needed)
-that boots per test run:
+**Isolation mechanism (two hermetic layers, both from vendored binaries):**
 
-- `tests/db/shim.sql` — recreates the Supabase environment: `anon` /
-  `authenticated` / `service_role` (with BYPASSRLS) roles, the `auth` schema
-  (`auth.users`, `auth.uid()/role()/email()/jwt()` reading
-  `request.jwt.claims`), `storage` schema, `supabase_realtime` publication,
-  Supabase default privileges, and the `ensure_rls` event trigger (verbatim
-  from prod).
-- `tests/db/prod-migrations.sql` — the **exact 25-migration history** pulled
-  read-only from prod (`supabase_migrations.schema_migrations`) on 2026-07-10.
-- `tests/db/client.ts` — impersonation helpers that execute queries exactly
-  like PostgREST does (transaction + `request.jwt.claims` GUC + `SET ROLE`),
-  so RLS/grant behavior is production-faithful. True multi-connection
-  concurrency is available for race tests.
+1. **DB integration** — `embedded-postgres` boots a real PostgreSQL 17 per
+   `pnpm test:db` run. `tests/db/shim.sql` recreates the Supabase environment
+   (roles `anon`/`authenticated`/`service_role`(BYPASSRLS)/`authenticator`, the
+   `auth` schema + `auth.uid()/role()/jwt()/email()` reading
+   `request.jwt.claims`, `storage`, `supabase_realtime`, default privileges,
+   the `ensure_rls` event trigger). `tests/db/prod-migrations.sql` replays the
+   exact 25-migration prod history. `tests/db/client.ts` impersonates users
+   exactly like PostgREST (transaction + claims GUC + `SET ROLE`).
+2. **E2E** — `tests/e2e/stack/server.mjs` boots embedded PG + the real
+   **PostgREST** engine + a minimal mock GoTrue gateway that mints real HS256
+   JWTs PostgREST validates, then `next dev`. So RLS, `auth.uid()`, and team
+   claims behave byte-for-byte like production, and the app is exercised
+   through its actual server actions and route handlers.
 
-Prod was only ever read (schema/migration introspection). All test data lives
-in the embedded instance, which is wiped after each run.
+## Coverage by system (WIRED unless noted)
 
-## Inventory (Step 1) — WIRED vs STUB
+| System | Unit | Integration (RLS/DB) | Component | E2E |
+| --- | --- | --- | --- | --- |
+| Auth + session | — | signup trigger chain | LoginForm | signup/signin/dupe/redirect (7) |
+| Products CRUD + R2 keys | schemas, key ownership, sanitize | products RLS + team access | ProductForm | add/edit/delete/validate (3) |
+| Storefront designer + Zod | full config schema suite | storefront RLS | — | create/blocks/save/persist/undo/embed (2) |
+| Shared grid + resize | snap/clamp/placeholder math | — | SegmentedControl/slider | (via designer) |
+| Embed settings | hostname/domain suite | (config jsonb) | — | snippet + domain normalize + reject (in 2) |
+| Orders | (query shape) | orders RLS read-only | — | filter/detail/empty (in 4) |
+| Stock | badge derivation, public whitelist | atomic decrement + **race** | StockBadge | — |
+| Team & access | permission matrix, canGrant | **escalation guards** + invites | — | invite→accept→switch→bell, viewer RO (2) |
+| Notifications | schemas | RLS, column-grant, service-only | NotificationItem (XSS-as-text) | bell shows acceptance (in team) |
+| Payments (STUB) | no-Stripe scan, no-sensitive-fields | — | (read-only) | no external net + no PAN inputs (1) |
+| Analytics | — | (reads orders) | — | seeded revenue + channel split (1) |
+| Settings | settings schemas + whitelists | profiles RLS, uniqueness, rate limiter | — | (via a11y + team) |
+| API routes | presign/display-name/export | — | — | — |
+| UI primitives | color/calendar math | — | ColorPicker, DatePicker, Modal, Popover | — |
+| Direct REST attack surface | — | — | — | cross-tenant, RPC lockdown, self-escalate (4) |
+| Accessibility | — | — | — | axe on 13 pages + designer + dialog (4) |
 
-### WIRED (tested or being tested)
-- **Auth**: login/signup/magic/reset, OAuth callback + OTP confirm routes, session helpers
-- **Products**: CRUD server actions, Zod validation, R2 presign/upload/verify, queries
-- **Storefronts**: designer, config Zod schema (theme/blocks/header/embed), save/load, ownership + block re-verification, embed settings
-- **Grid**: size enums, snapping, layout hooks, resize (pointer + keyboard)
-- **Orders**: queries (filter/sort/paginate), RLS, dashboard aggregates
-- **Analytics**: queries + aggregation over orders
-- **Stock**: badge derivation, `decrement_stock` SQL function (atomic, service-role-only), update settings action
-- **Team & Access**: permission map (`can`/`canGrant`), invite/accept RPC/role-change/revoke actions, RLS + guard trigger, store switching
-- **Notifications**: service-role-only creation, RLS reads/mark-read, realtime plumbing, presentation helpers
-- **Settings**: display name (+uniqueness RPC), email/password change, tax, legal, notification prefs, soft account deletion, GDPR export route, avatar upload (magic-byte sniff + `rl_take` rate limiter)
-- **API routes**: `POST /api/uploads/presign`, `GET /api/settings/display-name-available`, `GET /settings/export`
-- **UI primitives**: DatePicker, Calendar, ColorPicker, ColorArea, Modal, Popover, Slider, SegmentedControl, color-input, etc.
+### STUB features (placeholder `it.todo`, not asserted — they don't exist yet)
+Payments/Stripe Connect (mock layer only), checkout/order creation +
+`decrementStock` caller, public embed endpoint + image proxy (widget lives at
+`embed.squareshare.to`, a separate service), team invite emails, account hard
+delete, analytics Views/Clicks/Demographics, onboarding checklist, tax
+downstream use. `tests/unit/stubs.placeholder.test.ts` enumerates them.
 
-### STUB (skipped placeholder tests only)
-- **Payments**: `lib/payments/mock.ts` is 100% mock (`TODO(stripe)` on every fn). No live Stripe calls exist anywhere. Negative tests assert this stays true.
-- **Order refund/dispute actions**: confirm UI exists, mutations are `TODO(stripe)` no-ops.
-- **Checkout / order creation**: does not exist; `decrementStock` is wired code with no caller yet (function itself IS tested).
-- **Public embed/config endpoint + image proxy**: DO NOT EXIST in this repo (widget lives at embed.squareshare.to, separate service). `lib/stock/public.ts` whitelist helpers exist and are tested; endpoint tests are placeholders.
-- **Team invite emails**: insert works, email delivery is a console stub.
-- **Hard account deletion**: soft flag only.
-- **Analytics Views/Clicks tiles, DemographicsCard, OnboardingSlot, Sidebar "Discover"**: pending/coming-soon UI.
-- **Tax fields**: saved but unused downstream.
+## Bugs found & fixed  (⚠ = security/accessibility-relevant)
 
-### Also present in prod schema (out of dashboard scope, RLS still tested)
-- `admin_users`, `admin_audit_log`, `admin_user_directory` view, `waitlist_signups` — admin panel/homepage tables; RLS/grants get coverage because they share the DB.
+All found by tests written here; app code fixed, tests never weakened.
 
-## Tooling (Step 2)
-- Vitest 4 with two projects: `unit` (jsdom + RTL) and `db` (node + embedded PG, sequential files).
-- Playwright (`@playwright/test` 1.61.1) for E2E; `@axe-core/playwright` for a11y.
-- Scripts: `pnpm test`, `test:unit`, `test:db`, `test:e2e`, `test:a11y`, `test:watch`.
+1. ⚠ **AvatarUpload file input had no accessible label** (critical axe) —
+   `src/components/settings/AvatarUpload.tsx`: added `aria-label`. A
+   screen-reader user had no way to identify the profile-photo control.
+2. ⚠ **`--color-success` #16a34a failed AA contrast** for small text/badges on
+   white and `bg-secondary` — `src/app/globals.css`: darkened to #15803d
+   (green-700). Affected paid-status badges + positive metrics across
+   dashboard/orders/analytics/payments.
+3. ⚠ **Destructive small text failed AA** (disputed/refunded/failed badges,
+   payout-failure notes, taken-name error) — added a `--color-danger-strong`
+   (#b91c1c red-700) token for small text on light surfaces and applied it in
+   OrderStatusBadge, RecentOrders, PayoutStatusBadge, ConnectionStatusCard,
+   PayoutDetailModal, DisplayNameForm; kept base `--destructive` for fills.
+4. ⚠ **Danger settings-nav item red-600-on-red-50 + revoked-member chip
+   red-500** below AA — `SettingsShell.tsx`, `team/MemberRow.tsx`: → red-700.
+5. ⚠ **Low-contrast hint/label text** (`text-neutral-400`) across Login, Reset,
+   settings (Legal/Password/SignOut/Tax/DisplayName/MemberList) and InviteModal
+   → `neutral-500`/`600` per background. Failed AA for secondary text.
+6. `docs/styles.md` token table updated to match #2/#3 so the design-system
+   source of truth stays honest.
 
-## Bugs found & fixed
-
-(chronological; ⚠ = security-relevant)
-
-_(none yet)_
+No correctness/security **logic** defects were found — the RLS model, escalation
+guards, atomic stock decrement, field whitelists, key-ownership checks, and the
+payments mock boundary all held under adversarial tests (including raw
+PostgREST probes with a stolen JWT and a 20-way concurrent-checkout race). The
+one whole class of real bugs found was accessibility contrast + a missing label.
 
 ## Open questions / flagged, not fixed
 
-_(none yet)_
+- **Analytics revenue vs refunds:** the E2E assertion accepts either "refunds
+  excluded from headline revenue" or "included" because the product intent is
+  undefined; not a bug, logged for a product decision.
+- **`src/lib/supabase/server.ts` logs cookie operations** (`console.log` on every
+  set) — noisy for prod, but behavior-correct; left as-is (out of test scope).
+- **`avatar.ts` unused `_prev/_formData` params** — pre-existing lint warnings in
+  app code, untouched (not introduced by this work).
 
-## Coverage by system
-
-| System | Status |
-| --- | --- |
-| Harness (roles/RLS/triggers smoke) | ✅ 7 tests green |
-| Validation schemas (unit) | pending |
-| Permission map / stock / formatters / grid (unit) | pending |
-| RLS: products/storefronts/orders/notifications/profiles/team | pending |
-| Stock decrement + race | pending |
-| Team escalation guards | pending |
-| Rate limiter | pending |
-| Component tests | pending |
-| E2E | pending |
-| a11y | pending |
+## Test-infra notes (not app bugs)
+- Branching unavailable → embedded-Postgres replica (documented above).
+- Dev-mode hydration can wipe a controlled input filled too early → `fillStable`
+  helper retries until the value sticks.
+- `getByRole("alert")` also matches the Next dev-tools announcer → specs filter
+  by text.
+- Component tests needed explicit `afterEach(cleanup)` (vitest `globals` off),
+  a `matchMedia` stub, and `useFakeTimers({ toFake: ["Date"] })`.

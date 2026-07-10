@@ -1,5 +1,4 @@
 import { expect, type Page } from "@playwright/test";
-// eslint-disable-next-line -- plain mjs module shared with the stack server
 import { ANON_KEY, GATEWAY_URL, SERVICE_KEY } from "./stack/keys.mjs";
 
 let counter = 0;

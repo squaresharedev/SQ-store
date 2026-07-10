@@ -12,7 +12,22 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Vendored E2E tooling (downloaded binaries, generated).
+    "tools/**",
   ]),
+  {
+    // Test scaffolding legitimately uses `any` for chainable supabase/mock
+    // stubs and keeps intentionally-unused fixtures for readability. Relax the
+    // two rules that fight that without weakening app-code linting.
+    files: ["tests/**/*.{ts,tsx,mjs}"],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
+      ],
+    },
+  },
 ]);
 
 export default eslintConfig;

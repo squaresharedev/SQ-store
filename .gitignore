@@ -51,3 +51,7 @@ next-env.d.ts
 
 # e2e tooling (downloaded binaries)
 /tools/
+
+# test artifacts
+/test-results/
+/playwright-report/

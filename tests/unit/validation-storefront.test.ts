@@ -115,7 +115,6 @@ describe("storefrontConfigSchema — hostile input", () => {
 
   it("rejects control characters in text blocks; allows newline", () => {
     const base = validConfig();
-    const textBlock = base.blocks[1];
 
     // Built via fromCharCode so no raw control bytes live in this file:
     // NUL, unit separator (0x1f), DEL (0x7f), carriage return, tab.
@@ -124,12 +123,12 @@ describe("storefrontConfigSchema — hostile input", () => {
     );
     for (const text of hostile) {
       const cfg = structuredClone(base);
-      (cfg.blocks[1] as typeof textBlock & { text: string }).text = text;
+      (cfg.blocks[1] as { text: string }).text = text;
       expect(storefrontConfigSchema.safeParse(cfg).success, JSON.stringify(text)).toBe(false);
     }
 
     const okCfg = structuredClone(base);
-    (okCfg.blocks[1] as typeof textBlock & { text: string }).text = "line1" + String.fromCharCode(10) + "line2";
+    (okCfg.blocks[1] as { text: string }).text = "line1" + String.fromCharCode(10) + "line2";
     expect(storefrontConfigSchema.safeParse(okCfg).success).toBe(true);
   });
 

@@ -22,7 +22,7 @@ beforeAll(() => {
 import userEvent from "@testing-library/user-event";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { Calendar } from "@/components/ui/Calendar";
-import { startOfMonth, startOfDay, fullDateLabel } from "@/lib/format/calendar";
+import { startOfMonth, fullDateLabel } from "@/lib/format/calendar";
 
 /** Exact accessible-name for a calendar day button (avoids substring ambiguity). */
 const day = (year: number, month: number, d: number) =>
@@ -33,7 +33,7 @@ const day = (year: number, month: number, d: number) =>
 const FIXED_DATE = new Date(2025, 6, 10); // July 10 2025
 const FIXED_YEAR = 2025;
 const FIXED_MONTH = 6; // 0-indexed = July
-const FIXED_DAY = 10;
+const _FIXED_DAY = 10;
 
 beforeEach(() => {
   // Only fake the Date constructor so "today" is deterministic.
@@ -329,7 +329,7 @@ describe("Calendar keyboard navigation", () => {
   });
 
   it("PageDown advances month by 1", async () => {
-    const user = userEvent.setup({ delay: null });
+    const _user = userEvent.setup({ delay: null });
     render(
       <Calendar
         mode="single"

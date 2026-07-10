@@ -2,7 +2,6 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 import {
   createProductViaUI,
-  fillStable,
   freshUser,
   gotoApp,
   seedOrders,
