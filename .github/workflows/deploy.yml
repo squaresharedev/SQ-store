@@ -49,6 +49,8 @@ jobs:
 
       - name: Build and deploy
         run: |
+          echo "SUPABASE_URL present: ${NEXT_PUBLIC_SUPABASE_URL:+yes}${NEXT_PUBLIC_SUPABASE_URL:-NO}"
+          echo "ANON_KEY present: ${NEXT_PUBLIC_SUPABASE_ANON_KEY:+yes}${NEXT_PUBLIC_SUPABASE_ANON_KEY:-NO}"
           npx opennextjs-cloudflare build
           pnpm run deploy
         env:
