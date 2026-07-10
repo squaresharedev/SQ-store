@@ -26,8 +26,14 @@ begin
   if not exists (select 1 from pg_roles where rolname = 'service_role') then
     create role service_role nologin noinherit bypassrls;
   end if;
+  -- PostgREST's login role (used by the E2E stack; harmless elsewhere).
+  if not exists (select 1 from pg_roles where rolname = 'authenticator') then
+    create role authenticator noinherit login password 'postgres';
+  end if;
 end
 $$;
+
+grant anon, authenticated, service_role to authenticator;
 
 -- ---- auth schema ------------------------------------------------------------
 create schema if not exists auth;
