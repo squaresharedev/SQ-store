@@ -1172,3 +1172,19 @@ grant select on public.admin_user_directory to service_role;
 
 -- ===== 20260707121316 waitlist_signups_unique_email ==========================
 create unique index waitlist_signups_email_lower_idx on public.waitlist_signups (lower(email));
+
+-- ===== 20260711_cost_audit_indexes ==========================================
+-- Additive covering indexes for hot read paths + unindexed FKs (see the matching
+-- supabase/migrations file). Result-neutral; planner options only.
+create index if not exists orders_product_id_idx
+  on public.orders (product_id);
+create index if not exists orders_storefront_id_idx
+  on public.orders (storefront_id);
+create index if not exists orders_seller_status_idx
+  on public.orders (seller_id, status);
+create index if not exists orders_seller_amount_idx
+  on public.orders (seller_id, amount_cents);
+create index if not exists products_owner_created_idx
+  on public.products (owner_id, created_at desc);
+create index if not exists storefronts_owner_updated_idx
+  on public.storefronts (owner_id, updated_at desc);
