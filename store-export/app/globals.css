@@ -1,0 +1,432 @@
+@import "tailwindcss";
+
+/* Dark-mode variant driven by the `.dark` class on <html> (set in layout.tsx).
+   The dashboard runs dark by default. */
+@custom-variant dark (&:is(.dark *));
+
+/* ============================================================
+   SQUARE SHARE — BRAND TOKENS
+   Mirrors styles.md / the marketplace (Home) design system.
+   ============================================================ */
+@theme {
+  /* One accent only: electric purple ("acid"). Used as a scalpel. */
+  --color-acid: #a855f7;
+  --color-acid-hover: #9333ea;
+
+  /* Surfaces */
+  --color-surface-dark: #000000;
+  --color-surface-light: #f9f9f9;
+  --color-card-base: #0a0a0c;
+
+  /* Signature glow */
+  --shadow-btn-glow: 0 0 30px rgba(168, 85, 247, 0.3);
+
+  /* Feedback (styles.md §2.1) */
+  --color-success: #15803d; /* green-700: AA contrast for small text on white/neutral-100 */
+  --color-danger-strong: #b91c1c; /* red-700: AA contrast for small text on white/neutral-100 */
+}
+
+/* Font utilities map to the next/font local faces set on <html> in layout.tsx.
+   `inline` so the utility resolves the runtime variable directly. */
+@theme inline {
+  --font-display: var(--font-space-grotesk); /* Space Grotesk (headlines) */
+  --font-sans: var(--font-geist); /* Geist (body / UI) */
+  --font-mono: var(--font-jetbrains-mono); /* JetBrains Mono (code / meta) */
+  --font-inter: var(--font-inter); /* Inter (muted captions / labels) */
+  --font-hand: var(--font-shadows-into-light); /* Shadows Into Light (voice) */
+
+  /* shadcn-compatible semantic color tokens (see :root / .dark below). */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Product-UI radius scale (styles.md §3). The auth/marketing surfaces keep
+     their square identity via --radius (0) + rounded-none; product components
+     use these tokens. Primary CTAs are deliberately SHARP (rounded-none) — a
+     brand rule encoded in the shared Button primitive, not per-component. */
+  --radius-sm: 0.375rem; /* buttons, inputs, tiles */
+  --radius-md: 0.5rem; /* cards, popovers */
+  --radius-lg: 0.75rem; /* modals, large panels */
+}
+
+/* Soft shadow ramp (styles.md §6.1) — borders first, shadows sparingly. */
+@theme {
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.12);
+
+  /* Bento grid base row height (legacy storefront designer preview). */
+  --spacing-tile-row: 6rem;
+
+  /* Shared bento grid gutter (styles.md §4). Equal gap on all four sides. */
+  --grid-gap: 0.5rem;
+}
+
+/* ============================================================
+   SEMANTIC TOKENS (OKLCH) — square corners, brutalist contrast
+   ============================================================ */
+:root {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --radius: 0rem; /* square corners are the identity */
+
+  /* Analytics chart series ramp (styles.md §0: token first, then use).
+     Ordered by emphasis: the accent series first, then progressively
+     quieter neutrals. Semantic feedback series map to the feedback tokens
+     so "refund = red, healthy = green" stays consistent product-wide. */
+  --chart-1: var(--primary);
+  --chart-2: oklch(0.556 0 0); /* = muted-foreground tier */
+  --chart-3: oklch(0.708 0 0);
+  --chart-4: oklch(0.85 0 0);
+  --chart-positive: var(--color-success);
+  --chart-negative: var(--destructive);
+
+  /* Giant decorative background arrows (auth + settings). Low enough that
+     text drawn over them keeps full contrast. */
+  --decor-opacity: 0.05;
+}
+
+.dark {
+  /* Square Share brand: pure-black surfaces, electric-purple primary. */
+  --background: oklch(0 0 0);
+  --foreground: oklch(1 0 0);
+  --card: oklch(0.18 0 0);
+  --card-foreground: oklch(1 0 0);
+  --popover: oklch(0.18 0 0);
+  --popover-foreground: oklch(1 0 0);
+  --primary: #a855f7;
+  --primary-foreground: #000000;
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: #a855f7;
+  --accent-foreground: #000000;
+  --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: #a855f7;
+
+  /* Chart ramp, dark: acid accent first, then quieter light neutrals. */
+  --chart-1: var(--primary);
+  --chart-2: oklch(0.708 0 0);
+  --chart-3: oklch(0.556 0 0);
+  --chart-4: oklch(0.37 0 0);
+  --chart-positive: var(--color-success);
+  --chart-negative: var(--destructive);
+}
+
+/* ============================================================
+   SHARED BENTO GRID  (components/grid/Grid.tsx)
+   Presentation-agnostic grid used by the storefront builder AND the
+   marketplace. Cells are TRUE squares at any width: row height is derived
+   from the container's inline size so it always equals a column's width,
+   including the gap. Blocks span 1x1 / 2x1 / 2x2 with ONE equal gap on all
+   four sides (no shared/intersecting borders). Column counts are injected
+   from gridConstants via --ss-cols-desktop / --ss-cols-mobile.
+   ============================================================ */
+.ss-grid-container {
+  container-type: inline-size;
+}
+.ss-grid {
+  --ss-cols: var(--ss-cols-mobile, 2);
+  display: grid;
+  grid-template-columns: repeat(var(--ss-cols), minmax(0, 1fr));
+  /* row height = column width = (container - gaps) / columns → square cells */
+  grid-auto-rows: calc(
+    (100cqw - (var(--ss-cols) - 1) * var(--grid-gap)) / var(--ss-cols)
+  );
+  gap: var(--grid-gap);
+}
+/* Container query (not viewport): the column switch keys off the grid's OWN
+   width, the same box the 100cqw row-height math measures — so a grid embedded
+   in a narrow panel drops to the mobile column count regardless of viewport. */
+@container (min-width: 40rem) {
+  .ss-grid {
+    --ss-cols: var(--ss-cols-desktop, 4);
+  }
+}
+/* Grid density: overrides the --grid-gap custom property that .ss-grid's gap
+   AND square-cell row math both consume (so cells stay true squares at every
+   density). Applied on a grid ancestor via the fixed enum→class map in
+   components/storefront/config-maps.ts — never from raw user values. */
+.ss-gap-compact {
+  --grid-gap: 0.25rem;
+}
+.ss-gap-comfy {
+  --grid-gap: 0.5rem;
+}
+.ss-gap-spacious {
+  --grid-gap: 1rem;
+}
+
+/* ============================================================
+   BASE STYLES
+   ============================================================ */
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+    overflow-x: hidden;
+  }
+}
+
+/* iOS zoom guard: force 16px on text inputs so focus never zooms the viewport. */
+input[type="email"],
+input[type="password"],
+input[type="text"],
+textarea {
+  font-size: 16px !important;
+}
+
+/* ============================================================
+   SELECTION + SCROLLBAR (acid accent)
+   ============================================================ */
+::selection {
+  background-color: var(--color-acid);
+  color: var(--color-surface-dark);
+}
+::-moz-selection {
+  background-color: var(--color-acid);
+  color: var(--color-surface-dark);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f4f4f5;
+}
+::-webkit-scrollbar-thumb {
+  background: #d4d4d8;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-acid);
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #d4d4d8 #f4f4f5;
+}
+
+/* ============================================================
+   DOT-GRID BACKDROP
+   Static pixel/dot-matrix texture that fades out at the edges (radial mask).
+   Purely decorative background for the auth screen. No JS, no motion.
+   ============================================================ */
+.dot-grid {
+  background-image: radial-gradient(
+    rgba(0, 0, 0, 0.08) 1px,
+    transparent 1.6px
+  );
+  background-size: 22px 22px;
+  -webkit-mask-image: radial-gradient(
+    ellipse 70% 62% at 50% 42%,
+    #000 6%,
+    transparent 78%
+  );
+  mask-image: radial-gradient(
+    ellipse 70% 62% at 50% 42%,
+    #000 6%,
+    transparent 78%
+  );
+}
+
+/* ============================================================
+   KEYFRAMES (all reduced-motion safe)
+   ============================================================ */
+@keyframes gradient-wave {
+  0% {
+    background-position: 200% center;
+  }
+  100% {
+    background-position: -200% center;
+  }
+}
+.gradient-wave-text {
+  background-image: linear-gradient(
+    100deg,
+    #ffffff 0%,
+    #ffffff 35%,
+    var(--color-acid) 50%,
+    #ffffff 65%,
+    #ffffff 100%
+  );
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation: gradient-wave 6s linear infinite;
+}
+
+/* Success checkmark: the stroke draws itself in while the whole mark pops. Used
+   by the settings Save buttons when a submit succeeds. */
+@keyframes check-draw {
+  from {
+    stroke-dashoffset: 24;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes check-pop {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.animate-check-pop {
+  animation: check-pop 260ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.animate-check-draw {
+  stroke-dasharray: 24;
+  stroke-dashoffset: 24;
+  animation: check-draw 300ms cubic-bezier(0.65, 0, 0.35, 1) 80ms forwards;
+}
+
+/* Payments: a card glides through the reader, dwells to be read, and is
+   approved, looping. Hero motion for the Connect-with-Stripe onboarding
+   (components/payments/CardSwipe). translateX is relative to a flex-centred
+   card, so 0% offscreen-left -> dwell at centre -> offscreen-right. */
+@keyframes card-swipe {
+  0% {
+    transform: translateX(-165%) rotate(-3deg);
+  }
+  36%,
+  54% {
+    transform: translateX(0) rotate(0deg);
+  }
+  100% {
+    transform: translateX(165%) rotate(3deg);
+  }
+}
+/* The "approved" badge pops in only while the card dwells at the reader. */
+@keyframes swipe-approve {
+  0%,
+  40% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  47% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+  54%,
+  64% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  76%,
+  100% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+/* A soft light sweep crosses the card as it is read. */
+@keyframes swipe-sheen {
+  0%,
+  30% {
+    opacity: 0;
+    transform: translateX(-120%) skewX(-12deg);
+  }
+  44% {
+    opacity: 0.5;
+  }
+  58% {
+    opacity: 0;
+    transform: translateX(120%) skewX(-12deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(120%) skewX(-12deg);
+  }
+}
+.animate-card-swipe {
+  animation: card-swipe 3s cubic-bezier(0.5, 0, 0.2, 1) infinite;
+}
+.animate-swipe-approve {
+  animation: swipe-approve 3s ease-in-out infinite;
+}
+.animate-swipe-sheen {
+  animation: swipe-sheen 3s cubic-bezier(0.5, 0, 0.2, 1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .gradient-wave-text {
+    animation: none;
+  }
+  .animate-check-pop {
+    animation: none;
+  }
+  .animate-check-draw {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+  /* Card swipe rests as a static "approved at the reader" tableau. */
+  .animate-card-swipe {
+    animation: none;
+    transform: translateX(0) rotate(0deg);
+  }
+  .animate-swipe-approve {
+    animation: none;
+    opacity: 1;
+    transform: scale(1);
+  }
+  .animate-swipe-sheen {
+    animation: none;
+    opacity: 0;
+  }
+}

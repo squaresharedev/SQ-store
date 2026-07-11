@@ -27,6 +27,8 @@ describe("embedded supabase replica", () => {
     expect(names).toEqual([
       "admin_audit_log",
       "admin_users",
+      "artifacts",
+      "collections",
       "notifications",
       "orders",
       "products",
