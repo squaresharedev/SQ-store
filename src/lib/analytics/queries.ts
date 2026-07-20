@@ -262,7 +262,12 @@ export async function getAnalytics(range: AnalyticsRange): Promise<AnalyticsData
     .select(
       "product_title, channel, status, amount_cents, platform_fee_cents, currency, buyer_email, created_at",
     )
-    .eq("seller_id", account.accountId);
+    .eq("seller_id", account.accountId)
+    // EUR-only, pushed DOWN to the DB. Exactly mirrors toCurrency(), which
+    // treats anything that is not the literal "USD" as EUR — so this is the
+    // same row set the JS filter below produces, not an approximation. Doing it
+    // here means USD rows no longer burn the ORDERS_READ_LIMIT budget.
+    .neq("currency", "USD");
   if (range.from) query = query.gte("created_at", `${range.from}T00:00:00Z`);
   if (range.to) query = query.lte("created_at", `${range.to}T23:59:59.999Z`);
   const { data, error } = await query
@@ -276,8 +281,20 @@ export async function getAnalytics(range: AnalyticsRange): Promise<AnalyticsData
     return emptyAnalyticsData();
   }
 
+  // CORRECTNESS TRIPWIRE: at the cap the window is truncated, so every figure
+  // below (revenue, AOV, buyer counts) silently UNDER-REPORTS. Aggregation must
+  // move into SQL before any seller can reach this — the warning exists so that
+  // shows up in logs first instead of as wrong numbers on a seller's dashboard.
+  if ((data?.length ?? 0) >= ORDERS_READ_LIMIT) {
+    console.warn(
+      `[analytics] hit the ${ORDERS_READ_LIMIT}-order read cap — figures are computed from a TRUNCATED window and under-report. Move aggregation into SQL.`,
+    );
+  }
+
   // EUR-only for now, same rule as the dashboard: USD orders don't count
-  // anywhere until multi-currency viewing/transacting ships.
+  // anywhere until multi-currency viewing/transacting ships. The DB now
+  // pre-filters this (see .neq above); kept so the semantics hold even if that
+  // predicate is ever changed.
   const orders = ((data ?? []) as AnalyticsOrder[]).filter(
     (order) => toCurrency(order.currency) === "EUR",
   );

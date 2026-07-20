@@ -1189,6 +1189,31 @@ create index if not exists products_owner_created_idx
 create index if not exists storefronts_owner_updated_idx
   on public.storefronts (owner_id, updated_at desc);
 
+-- ===== 20260720_cost_audit_buyer_email_trgm =================================
+-- Trigram index so the orders buyer_email ILIKE '%term%' search is index-backed
+-- instead of scanning the seller's orders.
+create extension if not exists pg_trgm;
+create index if not exists orders_buyer_email_trgm_idx
+  on public.orders using gin (buyer_email gin_trgm_ops);
+
+-- ===== 20260720_cost_audit_bound_pending_invites ============================
+-- Bound the pending-invites RPC (body otherwise unchanged).
+create or replace function public.team_my_pending_invites()
+ returns table(id uuid, account_owner_id uuid, role team_role, invited_at timestamp with time zone, store_name text)
+ language sql
+ stable security definer
+ set search_path to ''
+as $function$
+  select tm.id, tm.account_owner_id, tm.role, tm.invited_at,
+         coalesce(p.display_name, 'A SquareShare store')
+  from public.team_members tm
+  left join public.profiles p on p.id = tm.account_owner_id
+  where tm.status = 'invited'
+    and lower(tm.invited_email) = (select public.team_jwt_email())
+  order by tm.invited_at desc
+  limit 50
+$function$;
+
 -- ===== 20260711_curation_foundation =========================================
 -- =============================================================================
 -- CURATION FOUNDATION (SQ-app): the content-curation SPA shares this project's

@@ -36,6 +36,13 @@ export type StorefrontSummary = {
 };
 
 /**
+ * Safety bound, not pagination. Each row carries a full `config` JSONB that is
+ * then Zod-parsed, so the per-row cost is real. Set far above any plausible
+ * number of storefronts per seller.
+ */
+const STOREFRONT_LIST_LIMIT = 100;
+
+/**
  * The signed-in seller's storefronts, newest-edited first. A stored config that
  * fails the schema (stale shape, the initial '{}' default) falls back to the
  * default config rather than dropping the row from the list.
@@ -48,8 +55,14 @@ export async function listStorefronts(): Promise<StorefrontSummary[]> {
     .from("storefronts")
     .select("id, name, config, updated_at")
     .eq("owner_id", account.accountId)
-    .order("updated_at", { ascending: false });
+    .order("updated_at", { ascending: false })
+    .limit(STOREFRONT_LIST_LIMIT);
   if (error) throw new Error(`Failed to load storefronts: ${error.message}`);
+  if (data.length >= STOREFRONT_LIST_LIMIT) {
+    console.warn(
+      `[storefronts] hit the ${STOREFRONT_LIST_LIMIT}-storefront read cap — this list is TRUNCATED. Add pagination.`,
+    );
+  }
 
   return data.map((row) => {
     const config =

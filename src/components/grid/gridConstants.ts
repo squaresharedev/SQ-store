@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 // Shared, presentation-agnostic constants + types for the bento grid primitive.
 // Reused by BOTH the storefront builder and (later) the marketplace. Nothing in
@@ -56,6 +56,19 @@ export const GRID_COLUMNS_MOBILE = 2;
 /** Widest span the size set can produce, in either axis (up to 3×3). */
 export const MAX_COL_SPAN = 3;
 export const MAX_ROW_SPAN = 3;
+
+/**
+ * Inline track span for a cell. Lives here (not in Grid.tsx) so the static and
+ * the lazily-loaded editable grid share one definition without importing each
+ * other — that import cycle is what would drag dnd-kit back into the static
+ * bundle.
+ */
+export function spanStyle(span: GridSpan): CSSProperties {
+  return {
+    gridColumnEnd: `span ${span.colSpan}`,
+    gridRowEnd: `span ${span.rowSpan}`,
+  };
+}
 
 /**
  * Clamp a raw span to the available columns so a block can never overflow the
