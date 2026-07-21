@@ -53,7 +53,11 @@ export async function markNotificationRead(
   const { error } = await supabase
     .from("notifications")
     .update({ read: true })
-    .eq("id", parsed.data.id); // RLS also pins user_id = auth.uid()
+    .eq("id", parsed.data.id)
+    // Explicit owner predicate alongside RLS. The read path already does this;
+    // without it the write relied on RLS as a single point of failure, so any
+    // future policy slip would let a guessed UUID mark someone else's row read.
+    .eq("user_id", user.id);
 
   return { ok: !error, unreadCount: await getUnreadCount() };
 }
@@ -70,7 +74,10 @@ export async function markAllNotificationsRead(): Promise<{
   const { error } = await supabase
     .from("notifications")
     .update({ read: true })
-    .eq("read", false); // RLS scopes to the caller's own rows
+    .eq("read", false)
+    // As above: explicit owner predicate rather than trusting RLS alone. Also
+    // keeps this off a full-table update path if a policy is ever loosened.
+    .eq("user_id", user.id);
 
   return { ok: !error, unreadCount: error ? await getUnreadCount() : 0 };
 }

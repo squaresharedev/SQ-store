@@ -1,5 +1,10 @@
 import { z } from "zod";
 import {
+  MULTILINE_TEXT_PATTERN,
+  SINGLE_LINE_TEXT_PATTERN,
+  TEXT_ERROR,
+} from "@/lib/validation/text";
+import {
   BLOCK_SIZES,
   CARD_SHAPES,
   CARD_STYLES,
@@ -54,12 +59,9 @@ const hexColorSchema = z.string().regex(HEX_COLOR_PATTERN, {
   error: "Colors must be 6-digit hex, like #a855f7.",
 });
 
-// Plain-text gates shared by every free-text config field (text blocks, the
-// store header). Control characters are rejected; the multiline variant only
-// re-admits newline. Text is ALWAYS rendered as React text nodes, never markup.
-const TEXT_ERROR = { error: "Text contains unsupported characters." };
-const MULTILINE_TEXT_PATTERN = /^(?:[^\u0000-\u001f\u007f]|\n)*$/;
-const SINGLE_LINE_TEXT_PATTERN = /^[^\u0000-\u001f\u007f]*$/;
+// Plain-text gates live in lib/validation/text.ts so profile fields share
+// the same rule — they previously did not. Text is ALWAYS rendered as
+// React text nodes, never markup.
 
 /** Sanity cap on grid size; the designer UI stays comfortably under it. */
 export const MAX_BLOCKS = 60;

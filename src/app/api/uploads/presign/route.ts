@@ -2,6 +2,7 @@ import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
 import { buildObjectKey, hasR2Credentials, presignPutUrl } from "@/lib/r2";
 import { presignRequestSchema } from "@/lib/validation/product";
+import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
 
 /**
  * POST /api/uploads/presign — mint a short-lived presigned PUT URL for a
@@ -27,6 +28,15 @@ export async function POST(request: Request) {
     return Response.json(
       { error: "You don't have permission to upload here." },
       { status: 403 },
+    );
+  }
+
+  // Every mint authorises bytes into R2, so cap how fast one account can ask.
+  // After the permission checks: a caller who may not upload never spends it.
+  if (!(await rateLimit("upload_presign", RATE_LIMITS.uploadPresign))) {
+    return Response.json(
+      { error: "Too many uploads right now. Try again shortly." },
+      { status: 429 },
     );
   }
 

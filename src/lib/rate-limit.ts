@@ -1,0 +1,143 @@
+import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+
+// SERVER ONLY. rateLimitKey uses the service-role admin client; this module must
+// never be imported from a Client Component. (Enforced by convention here — the
+// `server-only` package is not a dependency of this project.)
+
+/**
+ * Server-side rate limiting. Both helpers are backed by an EXACT SLIDING WINDOW
+ * in Postgres (see supabase/migrations/20260721_sliding_window_rate_limits.sql),
+ * so a caller cannot spend a full budget just before a boundary and another one
+ * just after — every take counts the hits in the PRECEDING window, continuously.
+ *
+ * Postgres (not memory) is the right home for this on Cloudflare Workers: there
+ * is no shared memory between isolates, so an in-process counter would reset on
+ * every cold start and be trivially bypassed by spreading requests around.
+ *
+ * FAIL CLOSED. If the limiter itself errors we deny the action. These guard
+ * spam and abuse surfaces; letting traffic through when the limiter is broken
+ * defeats the point.
+ */
+
+/** Budgets in one place so limits are reviewable without grepping call sites. */
+export const RATE_LIMITS = {
+  /** Emails aimed at an ADDRESS (magic link, reset). Keyed on the target. */
+  authEmailPerAddress: { max: 3, windowSeconds: 60 * 60 },
+  /** All auth email sends from one client, regardless of target address. */
+  authEmailPerClient: { max: 8, windowSeconds: 60 * 60 },
+  /** Password attempts per client — brute-force brake, not a lockout. */
+  authSignInPerClient: { max: 10, windowSeconds: 15 * 60 },
+  /** Account creation per client. */
+  authSignUpPerClient: { max: 5, windowSeconds: 60 * 60 },
+  /** Team invites sent by one user: the in-app "spam a stranger" vector. */
+  teamInvite: { max: 20, windowSeconds: 60 * 60 },
+  /** Upload URL minting — each one authorises bytes into R2. */
+  uploadPresign: { max: 60, windowSeconds: 60 * 60 },
+  /** Display-name probing (also an enumeration brake). */
+  displayNameCheck: { max: 60, windowSeconds: 60 * 60 },
+  /** Avatar uploads (pre-existing budget, unchanged). */
+  avatarUpload: { max: 5, windowSeconds: 60 * 60 },
+} as const;
+
+export type RateLimitBudget = { max: number; windowSeconds: number };
+
+/**
+ * Hash before storing. Rate-limit keys are emails and IP addresses; hashing
+ * keeps the limiter from quietly becoming a log of who tried to sign in from
+ * where. Sliding-window state only needs equality, so a digest is sufficient.
+ *
+ * Not a password hash and not trying to be: the point is to avoid persisting
+ * plaintext identifiers, not to resist offline cracking of a known-small space.
+ */
+async function hashKey(raw: string): Promise<string> {
+  const bytes = new TextEncoder().encode(raw.trim().toLowerCase());
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return Array.from(new Uint8Array(digest))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+/**
+ * Take from the SIGNED-IN user's budget for `action`. Identity comes from
+ * auth.uid() inside Postgres — never from an argument — so one user can neither
+ * spend nor inspect another's budget.
+ *
+ * Returns true when the action may proceed.
+ */
+export async function rateLimit(
+  action: string,
+  budget: RateLimitBudget,
+): Promise<boolean> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("rl_take", {
+      p_action: action,
+      p_max: budget.max,
+      p_window_seconds: budget.windowSeconds,
+    });
+    if (error) {
+      console.warn(`[rate-limit] ${action} check failed:`, error.message);
+      return false; // fail closed
+    }
+    return data === true;
+  } catch (err) {
+    console.warn(
+      `[rate-limit] ${action} threw:`,
+      err instanceof Error ? err.message : String(err),
+    );
+    return false; // fail closed
+  }
+}
+
+/**
+ * Take from a budget keyed on an arbitrary identifier, for surfaces with no
+ * session yet (sending a magic link, a reset email, signing up).
+ *
+ * `rawKey` is hashed here and the RPC is service_role-only, so a client can
+ * never call it directly with a key of its own choosing — which would make the
+ * limit meaningless.
+ */
+export async function rateLimitKey(
+  rawKey: string,
+  action: string,
+  budget: RateLimitBudget,
+): Promise<boolean> {
+  if (!rawKey) return false;
+  try {
+    const admin = createAdminClient();
+    const { data, error } = await admin.rpc("rl_take_key", {
+      p_key: await hashKey(rawKey),
+      p_action: action,
+      p_max: budget.max,
+      p_window_seconds: budget.windowSeconds,
+    });
+    if (error) {
+      console.warn(`[rate-limit] ${action} (keyed) check failed:`, error.message);
+      return false; // fail closed
+    }
+    return data === true;
+  } catch (err) {
+    console.warn(
+      `[rate-limit] ${action} (keyed) threw:`,
+      err instanceof Error ? err.message : String(err),
+    );
+    return false; // fail closed
+  }
+}
+
+/**
+ * Best-effort client identity for anonymous limits.
+ *
+ * On Cloudflare, CF-Connecting-IP is set by the edge and cannot be spoofed by
+ * the client. The x-forwarded-for fallback is only for local dev — a client CAN
+ * forge that header, so anonymous limits are defence-in-depth (paired with a
+ * per-target-address limit that no header can influence), never the sole guard.
+ */
+export async function clientKey(headerList: Headers): Promise<string> {
+  return (
+    headerList.get("cf-connecting-ip") ??
+    headerList.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    "unknown-client"
+  );
+}

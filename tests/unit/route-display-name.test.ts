@@ -9,6 +9,14 @@ vi.mock("@/lib/supabase/server", () => ({
   createClient: async () => ({ rpc }),
 }));
 
+// Rate limiter stub — the real one hits Postgres and fails closed, which would
+// 429 every case below. Flipped per-test to cover the denial path.
+const rateLimit = vi.fn(async () => true);
+vi.mock("@/lib/rate-limit", async (importOriginal) => {
+  const real = await importOriginal<typeof import("@/lib/rate-limit")>();
+  return { ...real, rateLimit: () => rateLimit() };
+});
+
 import { GET } from "@/app/api/settings/display-name-available/route";
 
 function request(name?: string): Request {
@@ -19,6 +27,7 @@ function request(name?: string): Request {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  rateLimit.mockResolvedValue(true);
 });
 
 describe("GET /api/settings/display-name-available", () => {
@@ -26,6 +35,15 @@ describe("GET /api/settings/display-name-available", () => {
     getUser.mockResolvedValue(null);
     const res = await GET(request("someone"));
     expect(res.status).toBe(401);
+    expect(rpc).not.toHaveBeenCalled();
+  });
+
+  it("429 once the check budget is spent — caps name enumeration", async () => {
+    getUser.mockResolvedValue({ id: "u1" });
+    rateLimit.mockResolvedValue(false);
+    const res = await GET(request("someone"));
+    expect(res.status).toBe(429);
+    // No lookup happens, so a throttled caller learns nothing about the name.
     expect(rpc).not.toHaveBeenCalled();
   });
 

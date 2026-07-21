@@ -4,6 +4,8 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import type { AuthError } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { safeInternalPath } from "@/lib/utils/safe-path";
+import { RATE_LIMITS, clientKey, rateLimitKey } from "@/lib/rate-limit";
 
 export type AuthIntent = "signin" | "signup" | "magic" | "reset";
 
@@ -15,9 +17,7 @@ export type AuthState = {
 
 /** Only allow internal, absolute paths as post-login redirect targets. */
 function sanitizeNext(next: FormDataEntryValue | null): string {
-  const value = typeof next === "string" ? next : "";
-  if (value.startsWith("/") && !value.startsWith("//")) return value;
-  return "/";
+  return safeInternalPath(next);
 }
 
 /** Absolute origin for building email redirect links. */
@@ -31,6 +31,35 @@ async function siteOrigin(): Promise<string> {
     h.get("x-forwarded-proto") ??
     (host.startsWith("localhost") ? "http" : "https");
   return `${proto}://${host}`;
+}
+
+/** Shown whenever a limiter denies — deliberately identical everywhere so it
+ *  reveals nothing about which budget was hit or whether an account exists. */
+const TOO_MANY = "Too many attempts. Wait a while and try again.";
+
+/**
+ * Gate an outbound auth email on TWO sliding-window budgets:
+ *
+ *  1. per TARGET ADDRESS — the one that matters. An attacker aiming magic links
+ *     or reset mails at someone else's inbox cannot dodge this by changing IP,
+ *     clearing cookies, or waiting for a window boundary.
+ *  2. per CLIENT — stops one client working through many addresses. Best-effort:
+ *     the IP comes from a header, which is trustworthy behind Cloudflare but
+ *     forgeable in local dev, so it never stands alone.
+ *
+ * Both are checked before the send. Supabase has its own limits, but those are
+ * project-wide rather than per-recipient — this is the per-recipient guard.
+ */
+async function allowAuthEmail(email: string): Promise<boolean> {
+  const perAddress = await rateLimitKey(
+    email,
+    "auth_email_address",
+    RATE_LIMITS.authEmailPerAddress,
+  );
+  if (!perAddress) return false;
+
+  const who = await clientKey(await headers());
+  return rateLimitKey(who, "auth_email_client", RATE_LIMITS.authEmailPerClient);
 }
 
 /** Map Supabase auth errors to friendly, non-leaky copy. */
@@ -86,6 +115,8 @@ export async function authenticate(
   // --- Magic link (passwordless OTP) ---
   if (intent === "magic") {
     if (!email) return { error: "Enter your email." };
+    // Deny BEFORE calling Supabase: the email is the side effect to prevent.
+    if (!(await allowAuthEmail(email))) return { error: TOO_MANY };
     const origin = await siteOrigin();
     let result;
     try {
@@ -104,6 +135,14 @@ export async function authenticate(
   // --- Password reset ---
   if (intent === "reset") {
     if (!email) return { error: "Enter your email to reset your password." };
+    // Same gate as the magic link — this one mails a password-reset link, so
+    // aiming it at someone else's inbox is the higher-value abuse.
+    if (!(await allowAuthEmail(email))) {
+      // Mirror the success copy exactly. The unthrottled path already refuses
+      // to confirm whether an account exists; a distinct "rate limited" reply
+      // here would reintroduce that oracle for anyone probing addresses.
+      return { message: "If that email has an account, a reset link is on its way." };
+    }
     const origin = await siteOrigin();
     // The recovery link always lands on /reset-password (where the new password
     // is chosen), regardless of the page's own post-login `next`.
@@ -133,6 +172,15 @@ export async function authenticate(
     if (password !== confirmPassword) {
       return { error: "Passwords do not match." };
     }
+    // Sign-up also sends a confirmation email, so it needs the per-address gate
+    // as well as a cap on how many accounts one client can spin up.
+    if (!(await allowAuthEmail(email))) return { error: TOO_MANY };
+    const signUpOk = await rateLimitKey(
+      await clientKey(await headers()),
+      "auth_signup_client",
+      RATE_LIMITS.authSignUpPerClient,
+    );
+    if (!signUpOk) return { error: TOO_MANY };
     const origin = await siteOrigin();
     let result;
     try {
@@ -157,6 +205,16 @@ export async function authenticate(
   }
 
   // intent === "signin"
+  // Brute-force brake. Keyed on the CLIENT, not the account: keying on the
+  // email would let anyone lock a victim out of their own account by burning
+  // the budget on their address.
+  const signInOk = await rateLimitKey(
+    await clientKey(await headers()),
+    "auth_signin_client",
+    RATE_LIMITS.authSignInPerClient,
+  );
+  if (!signInOk) return { error: TOO_MANY };
+
   let result;
   try {
     result = await supabase.auth.signInWithPassword({ email, password });

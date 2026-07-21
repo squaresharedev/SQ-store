@@ -18,6 +18,15 @@ vi.mock("@/lib/r2", async (importOriginal) => {
   };
 });
 
+// The route is rate limited; the limiter talks to Postgres and FAILS CLOSED,
+// so it must be stubbed here or every case below would 429. Flipped per-test to
+// cover the denial path.
+const rateLimit = vi.fn(async () => true);
+vi.mock("@/lib/rate-limit", async (importOriginal) => {
+  const real = await importOriginal<typeof import("@/lib/rate-limit")>();
+  return { ...real, rateLimit: () => rateLimit() };
+});
+
 import { POST } from "@/app/api/uploads/presign/route";
 
 const OWNER_UUID = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee";
@@ -50,6 +59,7 @@ const VALID_BODY = {
 beforeEach(() => {
   vi.clearAllMocks();
   hasR2Credentials.mockReturnValue(true);
+  rateLimit.mockResolvedValue(true);
 });
 
 describe("POST /api/uploads/presign", () => {
@@ -57,6 +67,15 @@ describe("POST /api/uploads/presign", () => {
     getActiveAccount.mockResolvedValue(null);
     const res = await POST(request(VALID_BODY));
     expect(res.status).toBe(401);
+  });
+
+  it("429 once the upload budget is spent, without minting a URL", async () => {
+    getActiveAccount.mockResolvedValue(ownerAccount());
+    rateLimit.mockResolvedValue(false);
+    const res = await POST(request(VALID_BODY));
+    expect(res.status).toBe(429);
+    // The whole point: no presigned URL is handed out when the limit is hit.
+    expect(presignPutUrl).not.toHaveBeenCalled();
   });
 
   it("403 for a viewer (read-only roles cannot mint upload URLs)", async () => {

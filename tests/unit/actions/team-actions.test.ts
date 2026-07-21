@@ -31,6 +31,14 @@ vi.mock("@/lib/notifications/create", () => ({
 
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 
+// Invites are rate limited; the real limiter hits Postgres and fails closed.
+// Stubbed permissive by default, flipped in the throttling test below.
+const rateLimitMock = vi.fn(async () => true);
+vi.mock("@/lib/rate-limit", async (importOriginal) => {
+  const real = await importOriginal<typeof import("@/lib/rate-limit")>();
+  return { ...real, rateLimit: () => rateLimitMock() };
+});
+
 const cookiesSetMock = vi.fn();
 const cookiesMockFn = vi.fn();
 vi.mock("next/headers", () => ({
@@ -129,6 +137,7 @@ beforeEach(() => {
   createNotificationMock.mockResolvedValue(false);
   getProfileMock.mockResolvedValue(null);
   cookiesMockFn.mockResolvedValue({ set: cookiesSetMock, get: vi.fn() });
+  rateLimitMock.mockResolvedValue(true);
 });
 
 // ==========================================================================
@@ -164,6 +173,29 @@ describe("inviteMember - auth / role gates", () => {
 
     expect(result.error).toMatch(/permission/i);
     expect(db.insert).not.toHaveBeenCalled();
+  });
+
+  it("throttled inviter is refused and no invite row is written", async () => {
+    getUserMock.mockResolvedValue(OWNER_USER);
+    getActorRoleMock.mockResolvedValue("owner");
+    rateLimitMock.mockResolvedValue(false);
+
+    const result = await inviteMember(PREV, makeInviteForm());
+
+    expect(result.error).toMatch(/invites/i);
+    // Nothing is written and nobody is notified — the spam never lands.
+    expect(db.insert).not.toHaveBeenCalled();
+    expect(createNotificationMock).not.toHaveBeenCalled();
+  });
+
+  it("permission is checked before the rate limit, so a denied actor spends no budget", async () => {
+    getUserMock.mockResolvedValue(OWNER_USER);
+    getActorRoleMock.mockResolvedValue("viewer");
+
+    await inviteMember(PREV, makeInviteForm());
+
+    // Otherwise a viewer hammering invites could exhaust the owner's budget.
+    expect(rateLimitMock).not.toHaveBeenCalled();
   });
 
   it("editor actor can invite at the editor role (canGrant: editor <= editor)", async () => {

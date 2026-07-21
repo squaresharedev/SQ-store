@@ -173,7 +173,7 @@ describe("rate_limits table + rl_take()", () => {
     const msg = await expectDbError(
       asUser(alice, (q) =>
         q.query(
-          `insert into public.rate_limits (user_id, action, count) values ($1, 'x', 0)`,
+          `insert into public.rate_limits (user_id, action, hits) values ($1, 'x', '{}')`,
           [alice.id],
         ),
       ),
@@ -199,18 +199,20 @@ describe("rate_limits table + rl_take()", () => {
     expect(rows[0].ok).toBe(true);
   });
 
-  it("rl_take window expiry resets the counter", async () => {
-    // Exhaust with a 1-second window, then backdate the window and take again.
+  it("hits age out of the window", async () => {
     await asUser(alice, (q) => q.query(`select public.rl_take('expire_action', 1, 3600)`));
     const denied = await asUser(alice, (q) =>
       q.query(`select public.rl_take('expire_action', 1, 3600) as ok`),
     );
     expect(denied.rows[0].ok).toBe(false);
 
+    // Backdate the recorded hit past the window; it should fall out of the
+    // sliding count and free the budget.
     await asSuper((q) =>
       q.query(
-        `update public.rate_limits set window_start = now() - interval '2 hours'
-         where user_id = $1 and action = 'expire_action'`,
+        `update public.rate_limits
+            set hits = array(select now() - interval '2 hours' from unnest(hits))
+          where user_id = $1 and action = 'expire_action'`,
         [alice.id],
       ),
     );
@@ -218,6 +220,66 @@ describe("rate_limits table + rl_take()", () => {
       q.query(`select public.rl_take('expire_action', 1, 3600) as ok`),
     );
     expect(renewed.rows[0].ok).toBe(true);
+  });
+
+  // REGRESSION: the limiter used to be a fixed window that hard-reset its
+  // counter once window_start aged out. That let a caller spend the whole
+  // budget just before the boundary and the whole budget again just after
+  // (send at 20:59, send again at 21:01). A sliding window has no such
+  // boundary — these two cases pin that down.
+  it("does not reset at a window boundary (spend-before / spend-after)", async () => {
+    const take = () =>
+      asUser(alice, (q) =>
+        q.query(`select public.rl_take('boundary_action', 3, 3600) as ok`),
+      ).then((r) => r.rows[0].ok as boolean);
+
+    expect([await take(), await take(), await take()]).toEqual([true, true, true]);
+    expect(await take()).toBe(false);
+
+    // Age the burst to 59 minutes: still inside a 60-minute window. A fixed
+    // window whose start had rolled over would wrongly hand back a full budget.
+    await asSuper((q) =>
+      q.query(
+        `update public.rate_limits
+            set hits = array(select now() - interval '59 minutes' from unnest(hits))
+          where user_id = $1 and action = 'boundary_action'`,
+        [alice.id],
+      ),
+    );
+    expect(await take()).toBe(false);
+
+    // Past the window the same hits drop out and the budget genuinely returns.
+    await asSuper((q) =>
+      q.query(
+        `update public.rate_limits
+            set hits = array(select now() - interval '61 minutes' from unnest(hits))
+          where user_id = $1 and action = 'boundary_action'`,
+        [alice.id],
+      ),
+    );
+    expect(await take()).toBe(true);
+  });
+
+  it("denied takes do not extend the window or grow the log", async () => {
+    const take = () =>
+      asUser(alice, (q) =>
+        q.query(`select public.rl_take('nogrow_action', 2, 3600) as ok`),
+      ).then((r) => r.rows[0].ok as boolean);
+
+    await take();
+    await take();
+    // Hammer well past the cap; every one of these must be refused.
+    for (let i = 0; i < 5; i += 1) expect(await take()).toBe(false);
+
+    // The log is bounded by max: only ALLOWED takes are recorded.
+    const { rows } = await asSuper((q) =>
+      q.query(
+        `select coalesce(array_length(hits, 1), 0) as n
+           from public.rate_limits where user_id = $1 and action = 'nogrow_action'`,
+        [alice.id],
+      ),
+    );
+    expect(rows[0].n).toBe(2);
   });
 
   it("anon rl_take is denied outright", async () => {

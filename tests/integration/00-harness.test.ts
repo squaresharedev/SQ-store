@@ -33,6 +33,7 @@ describe("embedded supabase replica", () => {
       "orders",
       "products",
       "profiles",
+      "rate_limit_keys",
       "rate_limits",
       "storefronts",
       "team_members",

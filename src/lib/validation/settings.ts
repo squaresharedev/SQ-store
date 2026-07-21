@@ -4,6 +4,7 @@ import {
   EU_COUNTRY_CODES,
   LEGAL_VERSION,
 } from "@/lib/settings/constants";
+import { SINGLE_LINE_TEXT_PATTERN, TEXT_ERROR } from "@/lib/validation/text";
 
 /**
  * Settings validation schemas, shared by the client (UX hints) and the server
@@ -22,7 +23,12 @@ export const displayNameSchema = z.strictObject({
     .string()
     .trim()
     .min(1, "Give yourself a name, even a weird one.")
-    .max(50, "Keep it under 50 characters."),
+    .max(50, "Keep it under 50 characters.")
+    // A display name is echoed into notification bodies ("<name> joined your
+    // team") and will go into invite email headers once that stub is wired,
+    // where an embedded CR/LF is header injection. Reject control characters
+    // at the boundary rather than escaping at each use site.
+    .regex(SINGLE_LINE_TEXT_PATTERN, TEXT_ERROR),
 });
 
 export const emailChangeSchema = z.strictObject({
@@ -46,11 +52,15 @@ export const passwordChangeSchema = z
   });
 
 /** Empty string means "not set" and is stored as NULL. */
+/** Optional single-line free text. Control characters are rejected here so
+ *  every field built on this helper inherits the gate (tax_business_name ends
+ *  up on invoices and in tax exports). */
 const optionalTrimmed = (max: number, label: string) =>
   z
     .string()
     .trim()
     .max(max, `${label} is too long.`)
+    .regex(SINGLE_LINE_TEXT_PATTERN, TEXT_ERROR)
     .transform((v) => (v === "" ? null : v));
 
 export const taxSchema = z.strictObject({
