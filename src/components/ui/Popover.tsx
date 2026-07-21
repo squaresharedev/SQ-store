@@ -27,6 +27,7 @@ export function Popover({
   trigger,
   label,
   children,
+  rootClassName,
   panelClassName,
   variant = "sheet",
 }: {
@@ -37,6 +38,11 @@ export function Popover({
   /** Accessible name for the dialog panel. */
   label: string;
   children: React.ReactNode;
+  /**
+   * Extra classes for the positioning wrapper. Defaults to filling its column
+   * (form fields); pass `w-auto` for a trigger that should hug its content.
+   */
+  rootClassName?: string;
   /** Extra panel classes, e.g. a width (`sm:w-[19rem]`) or `right-0` anchor. */
   panelClassName?: string;
   variant?: "sheet" | "anchored";
@@ -103,7 +109,7 @@ export function Popover({
   }, [open, onOpenChange, variant]);
 
   return (
-    <div ref={rootRef} className="relative inline-flex w-full flex-col">
+    <div ref={rootRef} className={cn("relative inline-flex w-full flex-col", rootClassName)}>
       {trigger}
       {open && (
         <>
