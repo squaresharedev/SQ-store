@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { AUTH_COOKIE_OPTIONS } from "./cookie-options";
+import { resilientFetch } from "./fetch";
 import type { Database } from "@/types";
 
 /**
@@ -33,6 +34,9 @@ export async function createClient() {
 
   return createServerClient<Database>(url, key, {
     cookieOptions: AUTH_COOKIE_OPTIONS,
+    // Replays transport-level failures (dead keep-alive sockets) so a blip
+    // doesn't surface as `AuthRetryableFetchError: fetch failed` mid-render.
+    global: { fetch: resilientFetch },
     cookies: {
       getAll() {
         return cookieStore.getAll();

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import Link from "next/link";
 import {
   ArrowDownAZ,
@@ -14,6 +14,7 @@ import {
 import type { Product, ProductSalesSummary } from "@/types/product";
 import type { ProductSort } from "@/lib/products/sort";
 import { FilterSelect, type FilterOption } from "@/components/orders/FilterSelect";
+import { SortSlidersIcon } from "@/components/ui/SortSlidersIcon";
 import { primaryButtonClass } from "@/components/ui/control-styles";
 import { ProductList } from "./ProductList";
 
@@ -54,7 +55,16 @@ export function ProductsBrowser({
       {/* items-end from sm up drops the actions onto the description's line
           instead of the h1's top edge. */}
       <div className="mb-6 flex flex-wrap items-start justify-between gap-3 sm:items-end">
-        {heading}
+        {/* Keyed wrapper, not decoration. `heading` is an element built in a
+            Server Component and handed over as a PROP, so React's JSX runtime
+            never key-validates it — it crosses the RSC boundary with no key and
+            `_store.validated === 0`. Sitting here as one of two children, it
+            gets reconciled as an array, and React demands a key of every array
+            member: "Each child in a list should have a unique key prop... it
+            was passed a child from ProductsPage". The key belongs on this
+            wrapper rather than on the element in page.tsx, because it is this
+            array that creates the requirement. Renders no DOM. */}
+        <Fragment key="heading">{heading}</Fragment>
         {/* Mobile: own full-width row, so the CTA lands on the right edge of the
             grid below it. Desktop: hugs its content beside the heading. Never
             wraps internally — the two controls stay side by side at every width. */}
@@ -70,11 +80,15 @@ export function ProductsBrowser({
               // Resting state reads as the control it is; once the seller picks
               // an ordering the trigger shows that instead.
               triggerLabel={sort === "default" ? "Sort" : undefined}
+              // Always the sliders icon (not the selected option's): it is the
+              // control's identity, and its handles animate on hover.
+              triggerIcon={<SortSlidersIcon className="size-4 shrink-0" />}
               iconOnlyOnMobile
               // h-10 on both controls: the outlined trigger's border would
               // otherwise make it 2px taller than the CTA, and the icon-only
               // mobile state 2px shorter.
-              triggerClassName="h-10 shrink-0"
+              // `group/sort` is the hover/focus scope the handle motion keys off.
+              triggerClassName="group/sort h-10 shrink-0"
               panelClassName="sm:w-60"
             />
           )}

@@ -34,6 +34,7 @@ export function FilterSelect<T extends string>({
   onChange,
   mutedValue,
   triggerLabel,
+  triggerIcon,
   iconOnlyOnMobile = false,
   triggerClassName,
   panelClassName = "sm:w-56",
@@ -49,6 +50,11 @@ export function FilterSelect<T extends string>({
   mutedValue?: T;
   /** Fixed trigger text (e.g. "Sort"); defaults to the selected option's label. */
   triggerLabel?: string;
+  /**
+   * Fixed trigger icon; defaults to the selected option's icon. Pass one when
+   * the control itself has an identity (and an animation) of its own.
+   */
+  triggerIcon?: React.ReactNode;
   /**
    * Collapse the trigger to its icon below `sm`. The label stays in the a11y
    * tree (sr-only), so the button keeps its accessible name on touch.
@@ -88,10 +94,12 @@ export function FilterSelect<T extends string>({
           )}
         >
           <span className="flex min-w-0 items-center gap-2">
-            <CurrentIcon
-              className={cn("size-4 shrink-0", isMuted ? "text-muted-foreground" : current.tone)}
-              aria-hidden="true"
-            />
+            {triggerIcon ?? (
+              <CurrentIcon
+                className={cn("size-4 shrink-0", isMuted ? "text-muted-foreground" : current.tone)}
+                aria-hidden="true"
+              />
+            )}
             <span
               className={cn(
                 "truncate text-sm",

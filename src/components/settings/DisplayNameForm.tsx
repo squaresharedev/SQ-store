@@ -101,7 +101,7 @@ export function DisplayNameForm({ displayName }: { displayName: string }) {
   return (
     <SettingsCard
       title="Display name"
-      description="What buyers see on your storefront and in the marketplace — and your unique handle, so no two accounts can share one."
+      description="What buyers see on your storefront and in the marketplace. It's also your unique handle, so no two accounts can share one."
       decoration="dots"
     >
       <form action={formAction} className="flex flex-col gap-4" noValidate>

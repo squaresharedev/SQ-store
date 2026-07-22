@@ -25,12 +25,22 @@ export function Select<T extends string>({
   options,
   onChange,
   disabled,
+  align = "left",
+  triggerClassName,
 }: {
   id: string;
   value: T;
   options: readonly SelectOption<T>[];
   onChange: (value: T) => void;
   disabled?: boolean;
+  /** Override trigger geometry (height, corners) where it sits beside other controls. */
+  triggerClassName?: string;
+  /**
+   * Which edge the (wider-than-trigger) panel is anchored to. Use "right" for a
+   * narrow trigger sitting at the right of its container, so the panel grows
+   * inward instead of off the edge.
+   */
+  align?: "left" | "right";
 }) {
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -113,7 +123,11 @@ export function Select<T extends string>({
         disabled={disabled}
         onClick={() => (open ? setOpen(false) : openList())}
         onKeyDown={handleKeyDown}
-        className={cn(fieldBaseClass, "flex items-center justify-between gap-2 text-left")}
+        className={cn(
+          fieldBaseClass,
+          "flex items-center justify-between gap-2 text-left",
+          triggerClassName,
+        )}
       >
         <span className="truncate">{selected?.label ?? ""}</span>
         <ChevronDown
@@ -131,7 +145,14 @@ export function Select<T extends string>({
           id={listboxId}
           role="listbox"
           aria-labelledby={id}
-          className="absolute left-0 right-0 top-full z-40 mt-1 max-h-64 overflow-y-auto rounded-md border border-border bg-popover p-1 shadow-md"
+          className={cn(
+            // The panel sizes to its CONTENT (min = the trigger's width), so a
+            // two-option list with descriptions doesn't wrap itself into a
+            // scrolling column behind a narrow trigger. Capped to the viewport.
+            "absolute top-full z-40 mt-1 w-max min-w-full max-w-[min(22rem,calc(100vw-2rem))]",
+            "max-h-64 overflow-y-auto rounded-md border border-border bg-popover p-1 shadow-md",
+            align === "right" ? "right-0" : "left-0",
+          )}
         >
           {options.map((option, index) => {
             const isSelected = option.value === value;

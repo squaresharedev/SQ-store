@@ -57,6 +57,12 @@ export type UseNotifications = {
   notifications: Notification[];
   unreadCount: number;
   status: ConnectionStatus;
+  /**
+   * Increments once per notification that ARRIVES over realtime (never on the
+   * initial snapshot). A counter rather than a boolean so consumers can react
+   * to back-to-back arrivals; the bell replays its ring on every change.
+   */
+  arrivalSeq: number;
   markRead: (id: string) => void;
   markAllRead: () => void;
   refresh: () => void;
@@ -67,6 +73,7 @@ export function useNotifications(): UseNotifications {
   const [unreadCount, setUnreadCount] = React.useState(0);
   const [loading, setLoading] = React.useState(true);
   const [status, setStatus] = React.useState<ConnectionStatus>("connecting");
+  const [arrivalSeq, setArrivalSeq] = React.useState(0);
 
   // Stable browser client (realtime only — reads go through server actions,
   // since this client has no session of its own).
@@ -76,6 +83,9 @@ export function useNotifications(): UseNotifications {
 
   const mountedRef = React.useRef(true);
   const countTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Ids already rung for, so a duplicate INSERT event (or a StrictMode replay)
+  // can't double-fire the bell. Bounded below alongside the in-memory list.
+  const ringedIdsRef = React.useRef<Set<string>>(new Set());
 
   // Debounced authoritative unread-count reconcile. Coalesces bursts (a single
   // refetch after the last event), so echoes of the client's own writes and
@@ -96,6 +106,18 @@ export function useNotifications(): UseNotifications {
         if (prev.some((n) => n.id === incoming.id)) return prev;
         return [incoming, ...prev].slice(0, MAX_IN_MEMORY);
       });
+      // Ring once per genuinely new unread row. Deduped against a ref rather
+      // than a flag set inside the updater above — updaters are re-invoked
+      // under StrictMode, so side effects there fire twice.
+      if (!incoming.read && !ringedIdsRef.current.has(incoming.id)) {
+        // Bound the set so a long-lived tab can't grow it without limit; the
+        // oldest ids can never be re-delivered as fresh INSERTs anyway.
+        if (ringedIdsRef.current.size >= MAX_IN_MEMORY * 2) {
+          ringedIdsRef.current = new Set();
+        }
+        ringedIdsRef.current.add(incoming.id);
+        setArrivalSeq((n) => n + 1);
+      }
       if (!incoming.read) setUnreadCount((c) => c + 1); // optimistic
       scheduleCountSync(); // authoritative reconcile
     },
@@ -223,6 +245,7 @@ export function useNotifications(): UseNotifications {
     notifications,
     unreadCount,
     status,
+    arrivalSeq,
     markRead,
     markAllRead,
     refresh,

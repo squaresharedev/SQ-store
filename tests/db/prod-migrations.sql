@@ -1438,7 +1438,10 @@ as $$
   offset greatest(coalesce(page_offset, 0), 0)
 $$;
 
-revoke execute on function public.team_roster(uuid, integer, integer) from anon;
+-- `from public` as well as `from anon`: CREATE FUNCTION grants PUBLIC an
+-- implicit EXECUTE that anon inherits, so revoking anon alone would leave this
+-- callable signed-out — a privilege the dropped function did not have.
+revoke execute on function public.team_roster(uuid, integer, integer) from public, anon;
 grant execute on function public.team_roster(uuid, integer, integer)
   to authenticated, service_role;
 

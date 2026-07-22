@@ -1,4 +1,5 @@
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import { resilientFetch } from "./fetch";
 import type { Database } from "@/types";
 
 /**
@@ -31,5 +32,6 @@ export function createAdminClient() {
   // No session persistence/refresh: this client is stateless and per-call.
   return createSupabaseClient<Database>(url, serviceKey, {
     auth: { persistSession: false, autoRefreshToken: false },
+    global: { fetch: resilientFetch },
   });
 }

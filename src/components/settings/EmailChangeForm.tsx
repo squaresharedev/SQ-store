@@ -1,11 +1,13 @@
 "use client";
 
 import { useActionState } from "react";
+import { ArrowRight } from "lucide-react";
 import { FormStatus } from "@/components/settings/FormStatus";
 import { SaveButton } from "@/components/settings/SaveButton";
 import { SettingsCard } from "@/components/settings/SettingsCard";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { iconNudgeRightClass } from "@/components/ui/control-styles";
 import {
   requestEmailChange,
   type SettingsActionState,
@@ -52,8 +54,18 @@ export function EmailChangeForm({ email }: { email: string }) {
             state={state}
             pendingLabel="Sending…"
             savedLabel="Sent"
+            // Plain text on the error state: it already carries an X, and a
+            // "go" arrow beside it would point at an action that just failed.
+            failedLabel="Send confirmation link"
           >
             Send confirmation link
+            {/* Trailing arrow = a "go / next" action (styles.md §6.2); the
+                shared nudge class slides it on hover and keyboard focus. */}
+            <ArrowRight
+              className={`size-4 ${iconNudgeRightClass}`}
+              strokeWidth={2}
+              aria-hidden
+            />
           </SaveButton>
         </div>
       </form>

@@ -26,6 +26,8 @@ export type TeamMemberRow = {
   invited_at: string;
   accepted_at: string | null;
   display_name: string | null;
+  /** Public avatars-bucket URL, or null when they haven't set a photo. */
+  avatar_url: string | null;
 };
 
 export type PendingInviteRow = {

@@ -17,11 +17,14 @@ export function TeamSection({
   actorRole,
   members,
   pendingInvites,
+  viewerUserId,
 }: {
   accountOwnerId: string;
   actorRole: TeamRole | null;
   members: TeamMemberRow[];
   pendingInvites: PendingInviteRow[];
+  /** The signed-in user, so their own row can be marked "(you)". */
+  viewerUserId?: string | null;
 }) {
   const [inviteOpen, setInviteOpen] = React.useState(false);
 
@@ -37,12 +40,13 @@ export function TeamSection({
 
       <SettingsCard
         title="Team"
-        description="Everyone listed here can sign in and access this store. Roles control what they can see and do."
+        description="People who can sign in to this store. Their role controls what they can see and change."
       >
         <MemberList
           accountOwnerId={accountOwnerId}
           actorRole={actorRole}
           members={members}
+          viewerUserId={viewerUserId}
         />
 
         {can(actorRole, "team.invite") && (
