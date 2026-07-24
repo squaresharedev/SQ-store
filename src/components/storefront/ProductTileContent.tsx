@@ -2,11 +2,15 @@
 
 import { Image as ImageIcon } from "lucide-react";
 import type { Product } from "@/types/product";
-import type { StorefrontTheme } from "@/types/storefront";
+import { resolvePriceTagCorner, type StorefrontTheme } from "@/types/storefront";
 import { isStrictHexColor } from "@/lib/validation/storefront";
 import { formatPrice } from "@/lib/format";
 import { cn } from "@/lib/utils";
-import { CARD_SHAPE_CLASSES } from "./config-maps";
+import {
+  CARD_SHAPE_CLASSES,
+  PRICE_TAG_CORNER_CLASSES,
+  PRICE_TAG_SIZE_CLASSES,
+} from "./config-maps";
 
 // Reveal-on-hover also reveals on keyboard focus within the tile; with
 // reduced motion the change is instant instead of faded.
@@ -42,19 +46,22 @@ export function ProductTileContent({
   const accentStyle =
     isStrictHexColor(theme.accent) ? { color: theme.accent } : undefined;
 
+  // Tag sizing (text + padding) is one axis, chip style (plain/pill) another —
+  // both resolve through fixed maps. Legacy "corner" configs float top-right
+  // via resolvePriceTagCorner; new configs carry an explicit corner.
+  const tagSizeClass = PRICE_TAG_SIZE_CLASSES[theme.priceTagSize ?? "md"];
+
   // Price floated on the image gets a translucent backing for legibility.
   const floatedPrice =
     !priceHidden && theme.priceTagPosition !== "below" ? (
       <span
         className={cn(
-          "absolute z-10 font-inter text-xs",
-          // Placement
-          theme.priceTagPosition === "onImage" && "bottom-2 left-2",
-          theme.priceTagPosition === "corner" && "top-2 right-2",
-          // Style chip
+          "absolute z-10 font-inter",
+          PRICE_TAG_CORNER_CLASSES[resolvePriceTagCorner(theme)],
+          tagSizeClass,
           theme.priceTagStyle === "pill"
-            ? "rounded-full border border-border bg-card/90 px-2 py-0.5"
-            : "rounded-sm bg-card/90 px-1.5 py-0.5",
+            ? "rounded-full border border-border bg-card/90"
+            : "rounded-sm bg-card/90",
           theme.priceDisplay === "hover" && HOVER_REVEAL_CLASS,
         )}
         style={accentStyle}
@@ -68,9 +75,12 @@ export function ProductTileContent({
     !priceHidden && theme.priceTagPosition === "below" ? (
       <span
         className={cn(
-          "shrink-0 font-inter text-xs",
+          "shrink-0 font-inter",
+          // In the bar, size means text size; padding only once it's a chip.
+          tagSizeClass,
+          theme.priceTagStyle !== "pill" && "p-0",
           theme.priceTagStyle === "pill" &&
-            "rounded-full border border-border bg-card/90 px-2 py-0.5",
+            "rounded-full border border-border bg-card/90",
           theme.priceDisplay === "hover" && HOVER_REVEAL_CLASS,
         )}
         style={accentStyle}

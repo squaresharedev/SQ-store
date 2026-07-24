@@ -525,6 +525,7 @@ export function StorefrontDesigner({
                   ) : selectedBlock?.type === "text" ? (
                     <TextBlockEditor
                       block={selectedBlock}
+                      accent={theme.accent}
                       onUpdate={(patch) =>
                         updateTextBlock(blockKey(selectedBlock), patch)
                       }

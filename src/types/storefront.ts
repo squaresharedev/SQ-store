@@ -73,7 +73,9 @@ export const CARD_SHAPES = ["square", "rounded", "circle"] as const;
 export type CardShape = (typeof CARD_SHAPES)[number];
 
 /** Where the price tag sits on a product tile. `hidden` wins over
- *  `priceDisplay` (either can hide the price). */
+ *  `priceDisplay` (either can hide the price). `corner` is a legacy alias for
+ *  a floated tag pinned top-right, kept so saved configs parse; the editor now
+ *  writes `onImage` + an explicit `priceTagCorner`. */
 export const PRICE_TAG_POSITIONS = [
   "below",
   "onImage",
@@ -82,8 +84,35 @@ export const PRICE_TAG_POSITIONS = [
 ] as const;
 export type PriceTagPosition = (typeof PRICE_TAG_POSITIONS)[number];
 
+/** Which corner of the image a floated price tag pins to. */
+export const PRICE_TAG_CORNERS = [
+  "topLeft",
+  "topRight",
+  "bottomLeft",
+  "bottomRight",
+] as const;
+export type PriceTagCorner = (typeof PRICE_TAG_CORNERS)[number];
+
+export const PRICE_TAG_SIZES = ["sm", "md", "lg"] as const;
+export type PriceTagSize = (typeof PRICE_TAG_SIZES)[number];
+
 export const PRICE_TAG_STYLES = ["plain", "pill"] as const;
 export type PriceTagStyle = (typeof PRICE_TAG_STYLES)[number];
+
+/**
+ * Effective corner for a floated tag: the explicit pick when present, else the
+ * corner each legacy position value implied (`corner` = top-right chip,
+ * `onImage` = bottom-left bar position).
+ */
+export function resolvePriceTagCorner(theme: {
+  priceTagPosition: PriceTagPosition;
+  priceTagCorner?: PriceTagCorner;
+}): PriceTagCorner {
+  return (
+    theme.priceTagCorner ??
+    (theme.priceTagPosition === "corner" ? "topRight" : "bottomLeft")
+  );
+}
 
 /** How the storefront lays out blocks: the bento grid, or a horizontal
  *  scroll-snap carousel (rendered by CarouselStrip in designer + previews). */
@@ -149,6 +178,10 @@ export type ShapeKind = (typeof SHAPE_KINDS)[number];
 export const TEXT_VARIANTS = ["heading", "subheading", "body"] as const;
 export type TextVariant = (typeof TEXT_VARIANTS)[number];
 
+/** Optional per-block size override. Absent = the variant's default scale. */
+export const TEXT_SIZES = ["sm", "md", "lg", "xl", "2xl"] as const;
+export type TextSize = (typeof TEXT_SIZES)[number];
+
 export const TEXT_ALIGNS = ["left", "center", "right"] as const;
 export type TextAlign = (typeof TEXT_ALIGNS)[number];
 
@@ -167,6 +200,11 @@ export type StorefrontTheme = {
   cardShape: CardShape;
   priceTagPosition: PriceTagPosition;
   priceTagStyle: PriceTagStyle;
+  /** Corner a floated tag pins to. Optional: configs saved before the corner
+   *  picker existed fall back via resolvePriceTagCorner(). */
+  priceTagCorner?: PriceTagCorner;
+  /** Tag chip size. Optional for the same reason; absent = "md". */
+  priceTagSize?: PriceTagSize;
   showTitle: boolean;
   displayMode: DisplayMode;
   density: Density;
@@ -202,6 +240,14 @@ export type TextBlock = {
   bold?: boolean;
   italic?: boolean;
   underline?: boolean;
+  /** Strict #rrggbb override. Absent = variant default (heading follows the
+   *  theme accent, other variants the foreground). */
+  color?: string;
+  /** Size override; absent = the variant's default scale. */
+  fontSize?: TextSize;
+  /** Per-block font family from the same allowlist as the theme font.
+   *  Absent = inherit the canvas font. */
+  font?: StorefrontFont;
 };
 
 export type ShapeBlock = {
@@ -253,6 +299,8 @@ export const DEFAULT_STOREFRONT_CONFIG: StorefrontConfig = {
     cardShape: "rounded",
     priceTagPosition: "below",
     priceTagStyle: "plain",
+    priceTagCorner: "bottomLeft",
+    priceTagSize: "md",
     showTitle: true,
     displayMode: "grid",
     density: "comfy",

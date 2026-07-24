@@ -16,13 +16,16 @@ import {
   HEADER_NAME_MAX,
   PATTERN_PRESETS,
   PRICE_DISPLAYS,
+  PRICE_TAG_CORNERS,
   PRICE_TAG_POSITIONS,
+  PRICE_TAG_SIZES,
   PRICE_TAG_STYLES,
   SHAPE_KINDS,
   STOREFRONT_FONTS,
   STOREFRONT_RADII,
   TEXT_ALIGNS,
   TEXT_MAX_LENGTH,
+  TEXT_SIZES,
   TEXT_VARIANTS,
   blockKey,
   type StorefrontBackground,
@@ -95,6 +98,9 @@ const themeSchema = z.strictObject({
   cardShape: z.enum(CARD_SHAPES),
   priceTagPosition: z.enum(PRICE_TAG_POSITIONS),
   priceTagStyle: z.enum(PRICE_TAG_STYLES),
+  // Optional so configs saved before the corner/size controls still parse.
+  priceTagCorner: z.enum(PRICE_TAG_CORNERS).optional(),
+  priceTagSize: z.enum(PRICE_TAG_SIZES).optional(),
   showTitle: z.boolean(),
   displayMode: z.enum(DISPLAY_MODES),
   density: z.enum(DENSITIES),
@@ -165,6 +171,11 @@ const textBlockSchema = z.strictObject({
   bold: z.boolean().optional(),
   italic: z.boolean().optional(),
   underline: z.boolean().optional(),
+  // Per-block styling overrides — optional for the same reason. Color stays
+  // regex-gated hex; size and font resolve through fixed class maps only.
+  color: hexColorSchema.optional(),
+  fontSize: z.enum(TEXT_SIZES).optional(),
+  font: z.enum(STOREFRONT_FONTS).optional(),
 });
 
 // Decorative shape: allowlisted kind + regex-gated color, nothing free-form.

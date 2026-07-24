@@ -70,11 +70,7 @@ export function CarouselStrip({
               theme={theme}
               editable={editable}
               isEditing={editingKey === key}
-              onToggleEdit={
-                onSelect
-                  ? () => onSelect(editingKey === key ? null : key)
-                  : undefined
-              }
+              onSelect={onSelect ? () => onSelect(key) : undefined}
               onRemove={onRemove ? () => onRemove(key) : undefined}
             />
 

@@ -45,6 +45,52 @@ describe("storefrontConfigSchema — happy path", () => {
     expect(storefrontConfigSchema.safeParse(validConfig()).success).toBe(true);
   });
 
+  it("accepts text-block style overrides and rejects hostile variants", () => {
+    const config = validConfig();
+    const textBlock = config.blocks[1] as Record<string, unknown>;
+    textBlock.color = "#ff0000";
+    textBlock.fontSize = "xl";
+    textBlock.font = "mono";
+    expect(storefrontConfigSchema.safeParse(config).success).toBe(true);
+
+    // Non-strict color, off-list size/font must all fail.
+    for (const patch of [
+      { color: "red" },
+      { color: "#fff" },
+      { fontSize: "97px" },
+      { font: "comic-sans" },
+    ]) {
+      const bad = validConfig();
+      Object.assign(bad.blocks[1] as Record<string, unknown>, patch);
+      expect(storefrontConfigSchema.safeParse(bad).success).toBe(false);
+    }
+  });
+
+  it("accepts price tag corner/size and rejects off-list values", () => {
+    const config = validConfig();
+    config.theme.priceTagPosition = "onImage";
+    config.theme.priceTagCorner = "bottomRight";
+    config.theme.priceTagSize = "lg";
+    expect(storefrontConfigSchema.safeParse(config).success).toBe(true);
+
+    // Configs saved before the fields existed (absent keys) still parse,
+    // including the legacy "corner" position value.
+    const legacy = validConfig();
+    delete legacy.theme.priceTagCorner;
+    delete legacy.theme.priceTagSize;
+    legacy.theme.priceTagPosition = "corner";
+    expect(storefrontConfigSchema.safeParse(legacy).success).toBe(true);
+
+    for (const patch of [
+      { priceTagCorner: "center" },
+      { priceTagSize: "xl" },
+    ]) {
+      const bad = validConfig();
+      Object.assign(bad.theme as Record<string, unknown>, patch);
+      expect(storefrontConfigSchema.safeParse(bad).success).toBe(false);
+    }
+  });
+
   it("accepts configs without optional header/embed (older saves)", () => {
     const cfg = validConfig();
     delete cfg.header;

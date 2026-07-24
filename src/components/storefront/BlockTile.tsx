@@ -1,6 +1,7 @@
 "use client";
 
-import { Pencil, X } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { X } from "lucide-react";
 import type { Product } from "@/types/product";
 import type { StorefrontBlock, StorefrontTheme } from "@/types/storefront";
 import { cn } from "@/lib/utils";
@@ -21,11 +22,12 @@ export const TILE_CONTROL_CHIP_CLASS = cn(
 
 /**
  * The surface of one storefront block inside the shared <Grid>: the product,
- * text, or shape face, plus (in editable mode) the select-pencil and remove
- * controls. The pencil SELECTS the block — its editor card opens in the
- * inspector panel; no styling controls live on the tile itself. Reorder and
- * resize are the grid's own drag + corner handles. A product block whose
- * product no longer exists renders a flagged, removable tile — never a crash.
+ * text, or shape face, plus (in editable mode) the remove control. CLICKING
+ * THE TILE selects it — its editor card opens in the inspector panel; there is
+ * no separate edit button. Keyboard users get the same via a focusable overlay
+ * (see below). Reorder and resize are the grid's own drag + corner handles.
+ * A product block whose product no longer exists renders a flagged, removable
+ * tile — never a crash.
  */
 export function BlockTile({
   block,
@@ -33,7 +35,8 @@ export function BlockTile({
   theme,
   editable,
   isEditing = false,
-  onToggleEdit,
+  isDragging = false,
+  onSelect,
   onRemove,
 }: {
   block: StorefrontBlock;
@@ -42,10 +45,35 @@ export function BlockTile({
   editable: boolean;
   /** True when this block is the one open in the inspector panel. */
   isEditing?: boolean;
+  /** True while the grid is dragging this block (suppresses the click). */
+  isDragging?: boolean;
   /** Edit-mode callbacks — only consulted when `editable` (static previews omit them). */
-  onToggleEdit?: () => void;
+  onSelect?: () => void;
   onRemove?: () => void;
 }) {
+  // A drag can end with the browser still firing a click on the dragged tile;
+  // without this guard every reorder would also open the inspector. Armed by
+  // the isDragging effect, cleared at the START of each pointer interaction —
+  // clearing on pointerdown (not on consumption) matters because a drag that
+  // ends over a DIFFERENT element fires no click at all, and a consumed-flag
+  // scheme would swallow the next legitimate click instead.
+  const wasDragged = useRef(false);
+  useEffect(() => {
+    if (isDragging) wasDragged.current = true;
+  }, [isDragging]);
+
+  function handleTilePointerDown() {
+    wasDragged.current = false;
+  }
+
+  function handleTileClick(event: React.MouseEvent<HTMLDivElement>) {
+    if (!editable || !onSelect) return;
+    // Ignore clicks on real controls inside the tile (remove, grid handles).
+    if ((event.target as HTMLElement).closest("button")) return;
+    if (wasDragged.current) return;
+    onSelect();
+  }
+
   // Include the text content so several text blocks stay distinguishable to
   // screen readers.
   const label =
@@ -60,7 +88,12 @@ export function BlockTile({
           : "Text block";
 
   return (
+    // Click-to-select is a pointer convenience layered on the tile; the
+    // accessible path is the overlay button below, so the div itself
+    // deliberately carries no role.
     <div
+      onClick={handleTileClick}
+      onPointerDown={handleTilePointerDown}
       className={cn(
         "relative flex h-full w-full flex-col",
         // Product blocks are bordered cards; text and shape blocks sit
@@ -80,9 +113,25 @@ export function BlockTile({
           "opacity-50",
       )}
     >
-      {/* Edit (text) + remove. Revealed on hover/focus for fine pointers (the
-          grid cell is the `group`); always visible on coarse pointers. Reorder
-          + resize live on the grid's own handles. */}
+      {/* Keyboard path for "open the editor": an invisible, focusable overlay.
+          pointer-events-none keeps every pointer interaction (click-select,
+          whole-tile drag) on the elements beneath; keyboard activation still
+          fires because the events target the FOCUSED element. Paints a ring
+          over the tile only while focused. */}
+      {editable && onSelect && (
+        <button
+          type="button"
+          onClick={onSelect}
+          aria-label={`Edit ${label}`}
+          aria-pressed={isEditing}
+          tabIndex={0}
+          className="pointer-events-none absolute inset-0 z-10 opacity-0 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+        />
+      )}
+
+      {/* Remove control. Revealed on hover/focus for fine pointers (the grid
+          cell is the `group`); always visible on coarse pointers. Reorder +
+          resize live on the grid's own handles. */}
       {editable && (
         <div
           className={cn(
@@ -91,18 +140,6 @@ export function BlockTile({
             isEditing && "pointer-fine:opacity-100",
           )}
         >
-          <button
-            type="button"
-            onClick={onToggleEdit}
-            aria-label={isEditing ? `Close ${label} settings` : `Edit ${label}`}
-            aria-pressed={isEditing}
-            className={cn(
-              TILE_CONTROL_CLASS,
-              isEditing && "bg-accent text-foreground",
-            )}
-          >
-            <Pencil className="size-3.5" strokeWidth={2} aria-hidden="true" />
-          </button>
           <button
             type="button"
             onClick={onRemove}

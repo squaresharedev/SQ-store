@@ -178,11 +178,11 @@ export function DesignerCanvas({
                 theme={theme}
                 editable={state.editable}
                 isEditing={selectedKey === gridBlock.key}
-                onToggleEdit={() =>
-                  onSelectBlock(
-                    selectedKey === gridBlock.key ? null : gridBlock.key,
-                  )
-                }
+                isDragging={state.isDragging}
+                // Click selects (opens the inspector); it never toggles closed,
+                // so a stray second click can't yank the panel away. Closing
+                // lives on the panel's X.
+                onSelect={() => onSelectBlock(gridBlock.key)}
                 onRemove={() => onRemove(gridBlock.key)}
               />
             )}
