@@ -51,13 +51,24 @@ export function ProductTileContent({
   // via resolvePriceTagCorner; new configs carry an explicit corner.
   const tagSizeClass = PRICE_TAG_SIZE_CLASSES[theme.priceTagSize ?? "md"];
 
+  // Corner-pinned tags get clipped when the tile is rounded/circular (those
+  // shapes carry overflow-hidden + a corner radius), so on non-square tiles we
+  // center the tag on the vertical axis — bottom-center, or top-center when the
+  // configured corner was a top one — where the clip is at its fullest.
+  const tagCorner = resolvePriceTagCorner(theme);
+  const isRoundedTile = theme.cardShape !== "square";
+  const isTopEdge = tagCorner === "topLeft" || tagCorner === "topRight";
+  const floatedPositionClass = isRoundedTile
+    ? cn("left-1/2 -translate-x-1/2", isTopEdge ? "top-2" : "bottom-2")
+    : PRICE_TAG_CORNER_CLASSES[tagCorner];
+
   // Price floated on the image gets a translucent backing for legibility.
   const floatedPrice =
     !priceHidden && theme.priceTagPosition !== "below" ? (
       <span
         className={cn(
           "absolute z-10 font-inter",
-          PRICE_TAG_CORNER_CLASSES[resolvePriceTagCorner(theme)],
+          floatedPositionClass,
           tagSizeClass,
           theme.priceTagStyle === "pill"
             ? "rounded-full border border-border bg-card/90"
