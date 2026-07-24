@@ -42,15 +42,24 @@ export function ProductTileContent({
   const accentStyle =
     isStrictHexColor(theme.accent) ? { color: theme.accent } : undefined;
 
+  // Corner-pinned tags get clipped when the tile is rounded/circular (those
+  // shapes carry overflow-hidden + a corner radius), so on non-square tiles we
+  // center the tag on the vertical axis — top-center or bottom-center — where
+  // the clip is at its fullest, instead of pinning it into a hidden corner.
+  const isRoundedTile = theme.cardShape !== "square";
+  const centerX = "left-1/2 -translate-x-1/2";
+
   // Price floated on the image gets a translucent backing for legibility.
   const floatedPrice =
     !priceHidden && theme.priceTagPosition !== "below" ? (
       <span
         className={cn(
           "absolute z-10 font-inter text-xs",
-          // Placement
-          theme.priceTagPosition === "onImage" && "bottom-2 left-2",
-          theme.priceTagPosition === "corner" && "top-2 right-2",
+          // Placement — centered on the vertical axis when the tile is rounded.
+          theme.priceTagPosition === "onImage" &&
+            (isRoundedTile ? cn("bottom-2", centerX) : "bottom-2 left-2"),
+          theme.priceTagPosition === "corner" &&
+            (isRoundedTile ? cn("top-2", centerX) : "top-2 right-2"),
           // Style chip
           theme.priceTagStyle === "pill"
             ? "rounded-full border border-border bg-card/90 px-2 py-0.5"
