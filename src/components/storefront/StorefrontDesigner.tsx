@@ -19,6 +19,7 @@ import { MAX_BLOCKS, STOREFRONT_NAME_MAX } from "@/lib/validation/storefront";
 import { saveStorefront } from "@/lib/storefront/actions";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Modal } from "@/components/ui/modal";
 import { CollapsibleSection } from "@/components/ui/CollapsibleSection";
 import {
   helpTextClass,
@@ -33,6 +34,7 @@ import { ProductBlockEditor } from "./ProductBlockEditor";
 import { ShapeBlockEditor, type ShapeBlockPatch } from "./ShapeBlockEditor";
 import { TextBlockEditor, type TextBlockPatch } from "./TextBlockEditor";
 import { useEditorHistory } from "./useEditorHistory";
+import { useUnsavedChangesGuard } from "./useUnsavedChangesGuard";
 
 type SaveState =
   | { status: "idle" }
@@ -110,6 +112,9 @@ export function StorefrontDesigner({
     "desktop",
   );
   const history = useEditorHistory<EditorSnapshot>();
+  // Prompt to save/discard when leaving with unsaved edits (Back link, browser
+  // Back button, refresh/close). `dirty` alone drives whether it's armed.
+  const leaveGuard = useUnsavedChangesGuard(dirty);
 
   const productsById = useMemo(
     () => new Map(products.map((product) => [product.id, product])),
@@ -327,7 +332,9 @@ export function StorefrontDesigner({
     setName(next);
   }
 
-  async function handleSave() {
+  /** Returns whether the save succeeded, so callers (e.g. save-then-leave) can
+   *  branch on it without re-reading async state. */
+  async function handleSave(): Promise<boolean> {
     setSaveState({ status: "saving" });
     const config: StorefrontConfig = {
       theme,
@@ -340,7 +347,7 @@ export function StorefrontDesigner({
     const result = await saveStorefront(storefrontId, { name, config });
     if (!result.ok) {
       setSaveState({ status: "error", message: result.error });
-      return;
+      return false;
     }
     if (result.droppedBlocks > 0) {
       // Server dropped refs to deleted products; mirror that locally.
@@ -352,6 +359,14 @@ export function StorefrontDesigner({
     }
     setDirty(false);
     setSaveState({ status: "saved", droppedBlocks: result.droppedBlocks });
+    return true;
+  }
+
+  // Save from inside the leave prompt: only navigate away if it actually saved,
+  // otherwise close the prompt so the inline error banner is visible.
+  async function handleSaveAndLeave() {
+    if (await handleSave()) leaveGuard.leave();
+    else leaveGuard.cancel();
   }
 
   const inspectorTitle =
@@ -375,6 +390,12 @@ export function StorefrontDesigner({
             href="/storefront"
             aria-label="Back to storefronts"
             className={iconButtonClass}
+            // Route through the guard so unsaved edits prompt first; keep the
+            // href so middle-click / open-in-new-tab still work.
+            onClick={(event) => {
+              event.preventDefault();
+              leaveGuard.requestLeave("/storefront");
+            }}
           >
             <ArrowLeft
               className={cn("size-4", iconNudgeLeftClass)}
@@ -559,6 +580,39 @@ export function StorefrontDesigner({
         settingsOpen={settingsOpen}
         onToggleSettings={toggleSettings}
       />
+
+      <Modal
+        open={leaveGuard.promptOpen}
+        onClose={leaveGuard.cancel}
+        title="Save your changes?"
+        description="You have unsaved changes to this storefront. Save them before leaving, or discard them."
+      >
+        <div className="flex flex-col gap-2 sm:flex-row-reverse">
+          <Button
+            onClick={handleSaveAndLeave}
+            disabled={saveState.status === "saving"}
+          >
+            {saveState.status === "saving" ? "Saving…" : "Save changes"}
+          </Button>
+          <Button
+            variant="destructive"
+            onClick={leaveGuard.leave}
+            disabled={saveState.status === "saving"}
+          >
+            Discard changes
+          </Button>
+          {/* mr-auto pushes "Keep editing" to the opposite end from the two
+              leave actions, so it's not mistaken for one of them. */}
+          <Button
+            variant="ghost"
+            onClick={leaveGuard.cancel}
+            disabled={saveState.status === "saving"}
+            className="sm:mr-auto"
+          >
+            Keep editing
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 }

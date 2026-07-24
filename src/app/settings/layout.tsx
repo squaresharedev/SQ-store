@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { Sidebar } from "@/components/dashboard/Sidebar";
+import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { SettingsShell } from "@/components/settings/SettingsShell";
-import { requireUser } from "@/lib/auth/session";
+import { getProfile, requireUser } from "@/lib/auth/session";
 
 export const metadata: Metadata = {
   title: "Settings",
@@ -16,24 +16,26 @@ export const dynamic = "force-dynamic";
  * Settings shell — PROTECTED. Session is read server-side here (and again in
  * every page/action); never in middleware.
  *
- * Settings is NOT a separate overlay: it renders inside the same dashboard
- * chrome as the rest of the app. The main `Sidebar` stays visible on the left
- * (with "Settings" highlighted), and `SettingsShell` adds the settings
- * sub-navigation as a second rail right beside it.
+ * Settings is NOT a separate overlay: it renders inside the SAME chrome as the
+ * rest of the app. `DashboardShell` supplies the left Sidebar, the top bar
+ * (notification bell + account menu), the "viewing another store" banner and
+ * the notifications provider; `SettingsShell` then adds the settings
+ * sub-navigation as a second rail beside the main one. Assembling that chrome
+ * by hand here is what previously left settings with no top bar.
  */
 export default async function SettingsLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  await requireUser("/settings");
+  const user = await requireUser("/settings");
+  const profile = await getProfile();
+  const username =
+    profile?.display_name || user.email?.split("@")[0] || "Account";
 
   return (
-    <div className="min-h-screen bg-background">
-      <Sidebar />
-      <div className="md:pl-64">
-        <SettingsShell>{children}</SettingsShell>
-      </div>
-    </div>
+    <DashboardShell username={username}>
+      <SettingsShell>{children}</SettingsShell>
+    </DashboardShell>
   );
 }

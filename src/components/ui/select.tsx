@@ -6,6 +6,9 @@ import { Check, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { fieldBaseClass } from "./control-styles";
 
+/** How long consecutive keystrokes count as one type-ahead search. */
+const TYPEAHEAD_MS = 600;
+
 export type SelectOption<T extends string> = {
   value: T;
   label: string;
@@ -45,7 +48,16 @@ export function Select<T extends string>({
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const rootRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
   const listboxId = useId();
+
+  // Type-ahead buffer. A native <select> jumps to the first match as you type,
+  // and long lists (the EU country picker) are unusable without it. Keystrokes
+  // within TYPEAHEAD_MS accumulate, so "ne" reaches Netherlands, not Norway.
+  const typeahead = useRef<{ buffer: string; timer: ReturnType<typeof setTimeout> | null }>({
+    buffer: "",
+    timer: null,
+  });
 
   const selectedIndex = options.findIndex((option) => option.value === value);
   const selected = options[selectedIndex];
@@ -61,6 +73,40 @@ export function Select<T extends string>({
     setOpen(false);
   }
 
+  // Keep the active option in view: the panel caps at max-h-64, so on a long
+  // list (countries) arrowing past the fold would otherwise move an invisible
+  // highlight. "nearest" scrolls only when it actually falls outside.
+  useEffect(() => {
+    if (!open) return;
+    listRef.current
+      ?.querySelector<HTMLElement>(`#${CSS.escape(`${listboxId}-option-${activeIndex}`)}`)
+      ?.scrollIntoView({ block: "nearest" });
+  }, [open, activeIndex, listboxId]);
+
+  // Drop any pending type-ahead timer on unmount.
+  useEffect(() => {
+    const state = typeahead.current;
+    return () => {
+      if (state.timer) clearTimeout(state.timer);
+    };
+  }, []);
+
+  /** Move the highlight to the first option matching the accumulated buffer. */
+  function runTypeahead(key: string) {
+    const state = typeahead.current;
+    if (state.timer) clearTimeout(state.timer);
+    state.buffer += key.toLowerCase();
+    state.timer = setTimeout(() => {
+      state.buffer = "";
+    }, TYPEAHEAD_MS);
+
+    const match = options.findIndex((option) =>
+      option.label.toLowerCase().startsWith(state.buffer),
+    );
+    if (match >= 0) setActiveIndex(match);
+    return match >= 0;
+  }
+
   // Close when clicking/tapping anywhere outside.
   useEffect(() => {
     if (!open) return;
@@ -71,12 +117,36 @@ export function Select<T extends string>({
     return () => document.removeEventListener("pointerdown", onPointerDown);
   }, [open]);
 
+  /** A single printable character, i.e. a type-ahead search key. */
+  function isSearchKey(event: KeyboardEvent<HTMLButtonElement>) {
+    return (
+      event.key.length === 1 &&
+      event.key !== " " &&
+      !event.ctrlKey &&
+      !event.metaKey &&
+      !event.altKey
+    );
+  }
+
   function handleKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
     if (!open) {
       if (["ArrowDown", "ArrowUp", "Enter", " "].includes(event.key)) {
         event.preventDefault();
         openList();
+        return;
       }
+      // Typing on a closed select opens it at the match, like a native one.
+      if (isSearchKey(event)) {
+        event.preventDefault();
+        setOpen(true);
+        runTypeahead(event.key);
+      }
+      return;
+    }
+
+    if (isSearchKey(event)) {
+      event.preventDefault();
+      runTypeahead(event.key);
       return;
     }
     switch (event.key) {
@@ -142,6 +212,7 @@ export function Select<T extends string>({
 
       {open && (
         <ul
+          ref={listRef}
           id={listboxId}
           role="listbox"
           aria-labelledby={id}

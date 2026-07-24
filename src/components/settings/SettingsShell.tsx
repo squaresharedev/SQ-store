@@ -79,7 +79,9 @@ export function SettingsShell({ children }: { children: React.ReactNode }) {
     <div className="md:flex md:items-stretch">
       {/* Settings secondary sidebar. Full-height sticky rail on desktop, a
           scrolling tab strip on mobile. */}
-      <aside className="md:sticky md:top-0 md:h-screen md:w-60 md:shrink-0 md:overflow-y-auto md:border-r md:border-border">
+      {/* Sticks BELOW the shell's h-14 top bar (not at top-0), so the rail's
+          heading can't slide under the bar's translucent backdrop. */}
+      <aside className="md:sticky md:top-14 md:h-[calc(100vh-3.5rem)] md:w-60 md:shrink-0 md:overflow-y-auto md:border-r md:border-border">
         <div className="px-6 pt-6 md:px-4 md:pt-8">
           <h1 className="text-lg font-semibold tracking-tight text-foreground">
             Settings

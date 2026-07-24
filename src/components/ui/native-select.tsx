@@ -11,8 +11,12 @@ export interface NativeSelectProps
  * Brand select: a styled native <select> matching the Input treatment (square,
  * 2px neutral border, acid focus) with a lucide chevron. Native for free
  * keyboard/mobile behavior and so it participates in uncontrolled form-action
- * submissions (see TaxSection). For controlled client-state pickers with a
- * typed `options` list, use `./select` instead.
+ * submissions.
+ *
+ * CURRENTLY UNUSED in the product UI: the dashboard uses `./select` (a listbox
+ * that carries the settings/dropdown styling and can't be themed natively),
+ * with the chosen value submitted via a hidden input. Kept for auth/marketing
+ * surfaces, which still wear this heavier brutalist treatment.
  */
 export function NativeSelect({
   className,

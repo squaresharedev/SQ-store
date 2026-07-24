@@ -1,16 +1,22 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { FormStatus } from "@/components/settings/FormStatus";
 import { SaveButton } from "@/components/settings/SaveButton";
 import { SettingsCard } from "@/components/settings/SettingsCard";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { NativeSelect } from "@/components/ui/native-select";
+import { Select, type SelectOption } from "@/components/ui/select";
 import { saveTaxInfo, type SettingsActionState } from "@/lib/settings/actions";
 import { EU_COUNTRIES } from "@/lib/settings/constants";
 
 const INITIAL: SettingsActionState = {};
+
+/** "" is a real choice (non-EU / declined), so it leads the list. */
+const COUNTRY_OPTIONS: readonly SelectOption<string>[] = [
+  { value: "", label: "Not in the EU / prefer not to say" },
+  ...EU_COUNTRIES.map((c) => ({ value: c.code, label: c.name })),
+];
 
 /**
  * EU tax details. Collected ahead of the VAT/invoicing work: nothing
@@ -27,6 +33,10 @@ export function TaxSection({
   country: string;
 }) {
   const [state, formAction, isPending] = useActionState(saveTaxInfo, INITIAL);
+  // The shared Select is a button + listbox, so it can't be submitted by the
+  // form on its own — its value rides along in a hidden input, the same pattern
+  // the invite modal uses for its role picker.
+  const [countryCode, setCountryCode] = useState(country);
 
   return (
     <SettingsCard
@@ -60,14 +70,14 @@ export function TaxSection({
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="tax_country">Country</Label>
-          <NativeSelect id="tax_country" name="tax_country" defaultValue={country}>
-            <option value="">Not in the EU / prefer not to say</option>
-            {EU_COUNTRIES.map((c) => (
-              <option key={c.code} value={c.code}>
-                {c.name}
-              </option>
-            ))}
-          </NativeSelect>
+          <input type="hidden" name="tax_country" value={countryCode} />
+          <Select
+            id="tax_country"
+            value={countryCode}
+            options={COUNTRY_OPTIONS}
+            onChange={setCountryCode}
+            disabled={isPending}
+          />
         </div>
         <FormStatus state={state} />
         <div>
