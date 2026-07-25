@@ -17,9 +17,11 @@ import type {
   ProductFormValues,
   ProductStatus,
 } from "@/types/product";
+import { unexpectedError, type ActionError } from "@/lib/errors";
 import { createProduct, updateProduct } from "@/lib/products/actions";
-import { uploadToR2 } from "@/lib/products/upload";
+import { UploadError, uploadToR2 } from "@/lib/products/upload";
 import type { ProductWriteInput } from "@/lib/validation/product";
+import { ActionErrorNotice } from "@/components/ui/ActionErrorNotice";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import {
   errorTextClass,
@@ -123,7 +125,7 @@ export function ProductForm({ product }: { product?: Product }) {
   // to tell "left the stored file alone" (keep) apart from "removed it" (clear).
   const [digitalTouched, setDigitalTouched] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<ActionError | null>(null);
   const [errors, setErrors] = useState<FieldErrors>({});
   // Only surface errors after the first submit, so the form does not shout at
   // the seller while they are still filling it in.
@@ -190,9 +192,9 @@ export function ProductForm({ product }: { product?: Product }) {
       router.refresh();
     } catch (error) {
       setSubmitError(
-        error instanceof Error
-          ? error.message
-          : "Something went wrong. Try again.",
+        error instanceof UploadError
+          ? error.info
+          : unexpectedError(error instanceof Error ? error.message : undefined),
       );
     } finally {
       setSubmitting(false);
@@ -208,19 +210,7 @@ export function ProductForm({ product }: { product?: Product }) {
 
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-5">
-      {submitError && (
-        <div
-          role="alert"
-          className="flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/5 px-4 py-3"
-        >
-          <AlertCircle
-            className="mt-0.5 size-4 shrink-0 text-destructive"
-            strokeWidth={2}
-            aria-hidden="true"
-          />
-          <p className="font-inter text-sm text-destructive">{submitError}</p>
-        </div>
-      )}
+      {submitError && <ActionErrorNotice error={submitError} />}
 
       {hasErrors && (
         <div

@@ -5,6 +5,7 @@ import { getStorefront } from "@/lib/storefront/queries";
 import { StorefrontDesigner } from "@/components/storefront/StorefrontDesigner";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
+import { presignGetUrl } from "@/lib/r2";
 
 export const metadata: Metadata = {
   title: "Edit storefront",
@@ -34,12 +35,19 @@ export default async function StorefrontEditorPage({
   ]);
   if (!storefront) notFound();
 
+  // Image backgrounds store only the R2 object key; sign a display URL here
+  // (server-only credentials) so the client never mints URLs itself.
+  const background = storefront.config.theme.background;
+  const backgroundImageUrl =
+    background.kind === "image" ? await presignGetUrl(background.key) : null;
+
   return (
     <StorefrontDesigner
       storefrontId={storefront.id}
       initialName={storefront.name}
       initialConfig={storefront.config}
       products={products}
+      initialBackgroundImageUrl={backgroundImageUrl}
     />
   );
 }

@@ -15,6 +15,23 @@ import {
   DEFAULT_STOREFRONT_CONFIG,
   type StorefrontConfig,
 } from "@/types/storefront";
+import {
+  failure,
+  invalidInput,
+  notFound,
+  permissionDenied,
+  serverError,
+  sessionExpired,
+  uploadFailed,
+  type ActionError,
+  type ActionFailure,
+} from "@/lib/errors";
+import { deleteObject, headObject } from "@/lib/r2";
+import {
+  isAllowedContentType,
+  isOwnedObjectKey,
+  maxBytesForKind,
+} from "@/lib/validation/product";
 
 // Storefront CRUD for the ACTIVE account's store. A store owns MANY storefronts,
 // so every mutation is keyed by row id and scoped to the active account (explicit
@@ -22,15 +39,9 @@ import {
 // (storefront.write) -> Zod parse (the security boundary; client validation is UX
 // only) -> product-ownership re-check -> account-scoped mutation. RLS re-checks
 // the same permission at the DB, so a viewer can never write.
+// Failures are structured ActionErrors (lib/errors.ts): message + how to fix.
 
-const SESSION_ERROR = "Your session expired. Sign in again.";
-const NOT_FOUND = "Storefront not found.";
-const NO_WRITE_PERMISSION =
-  "You don't have permission to edit the storefront in this store.";
-
-export type CreateStorefrontResult =
-  | { ok: true; id: string }
-  | { ok: false; error: string };
+export type CreateStorefrontResult = { ok: true; id: string } | ActionFailure;
 
 export type SaveStorefrontResult =
   | {
@@ -38,20 +49,18 @@ export type SaveStorefrontResult =
       /** Blocks removed because their product no longer exists / isn't owned. */
       droppedBlocks: number;
     }
-  | { ok: false; error: string };
+  | ActionFailure;
 
-export type DeleteStorefrontResult =
-  | { ok: true }
-  | { ok: false; error: string };
+export type DeleteStorefrontResult = { ok: true } | ActionFailure;
 
 /** Create a fresh, empty storefront and return its id (caller navigates to it). */
 export async function createStorefront(
   name?: unknown,
 ): Promise<CreateStorefrontResult> {
   const account = await getActiveAccount();
-  if (!account) return { ok: false, error: SESSION_ERROR };
+  if (!account) return failure(sessionExpired());
   if (!can(account.role, "storefront.write")) {
-    return { ok: false, error: NO_WRITE_PERMISSION };
+    return failure(permissionDenied(account.role, "create storefronts"));
   }
 
   // Name is optional at creation; fall back to a sensible default the seller
@@ -78,7 +87,7 @@ export async function createStorefront(
 
   if (error || !row) {
     console.error("[storefront] create failed", error);
-    return { ok: false, error: "Could not create the storefront. Try again." };
+    return failure(serverError("create the storefront"));
   }
 
   revalidatePath("/storefront");
@@ -96,22 +105,32 @@ export async function saveStorefront(
   input: unknown,
 ): Promise<SaveStorefrontResult> {
   const account = await getActiveAccount();
-  if (!account) return { ok: false, error: SESSION_ERROR };
+  if (!account) return failure(sessionExpired());
   if (!can(account.role, "storefront.write")) {
-    return { ok: false, error: NO_WRITE_PERMISSION };
+    return failure(permissionDenied(account.role, "edit storefronts"));
   }
   if (!storefrontIdSchema.safeParse(id).success) {
-    return { ok: false, error: NOT_FOUND };
+    return failure(notFound("storefront"));
   }
 
   const payload = (input ?? {}) as { name?: unknown; config?: unknown };
   const parsedName = storefrontNameSchema.safeParse(payload.name);
   if (!parsedName.success) {
-    return { ok: false, error: "Give your storefront a name (1 to 80 characters)." };
+    return failure(
+      invalidInput(
+        "The storefront needs a name.",
+        "Type a name (1 to 80 characters) in the field at the top of the editor, then save again.",
+      ),
+    );
   }
   const parsed = storefrontConfigSchema.safeParse(payload.config);
   if (!parsed.success) {
-    return { ok: false, error: "Invalid storefront configuration." };
+    return failure(
+      invalidInput(
+        "The storefront layout data is invalid.",
+        "Refresh the editor and try saving again.",
+      ),
+    );
   }
 
   const supabase = await createClient();
@@ -130,7 +149,7 @@ export async function saveStorefront(
       .in("id", productIds);
     if (error) {
       console.error("[storefront] ownership check failed", error);
-      return { ok: false, error: "Could not save your storefront. Try again." };
+      return failure(serverError("save your storefront"));
     }
     const ownedIds = new Set(ownedRows.map((row) => row.id));
     blocks = blocks.filter(
@@ -152,6 +171,40 @@ export async function saveStorefront(
     ...(parsed.data.embed ? { embed: parsed.data.embed } : {}),
   };
 
+  // Image background: the config stores only the R2 object KEY. A key that
+  // differs from the one already saved must be a NEW upload by this user:
+  // enforce uploader ownership and re-check the stored object's real
+  // size/type (presign-time checks are advisory only). The pre-save read also
+  // gives us the old key so a replaced image can be evicted afterwards.
+  const nextBackgroundKey =
+    config.theme.background.kind === "image"
+      ? config.theme.background.key
+      : null;
+  const { data: existingRow, error: existingError } = await supabase
+    .from("storefronts")
+    .select("config")
+    .eq("id", id)
+    .eq("owner_id", account.accountId)
+    .maybeSingle();
+  if (existingError) {
+    console.error("[storefront] pre-save read failed", existingError);
+    return failure(serverError("save your storefront"));
+  }
+  if (!existingRow) return failure(notFound("storefront"));
+  const previousBackgroundKey = storedBackgroundKey(existingRow.config);
+  if (nextBackgroundKey && nextBackgroundKey !== previousBackgroundKey) {
+    if (!isOwnedObjectKey(nextBackgroundKey, "image", account.userId)) {
+      return failure(
+        invalidInput(
+          "That background image can't be used.",
+          "Re-upload the image, then save again.",
+        ),
+      );
+    }
+    const verified = await verifyBackgroundImage(nextBackgroundKey);
+    if (!verified.ok) return failure(verified.error);
+  }
+
   const { data: row, error } = await supabase
     .from("storefronts")
     .update({
@@ -166,9 +219,14 @@ export async function saveStorefront(
 
   if (error) {
     console.error("[storefront] save failed", error);
-    return { ok: false, error: "Could not save your storefront. Try again." };
+    return failure(serverError("save your storefront"));
   }
-  if (!row) return { ok: false, error: NOT_FOUND };
+  if (!row) return failure(notFound("storefront"));
+
+  // Replaced or removed image background: evict the detached object.
+  if (previousBackgroundKey && previousBackgroundKey !== nextBackgroundKey) {
+    await evictObject(previousBackgroundKey);
+  }
 
   revalidatePath("/storefront");
   revalidatePath(`/storefront/${id}`);
@@ -178,9 +236,72 @@ export async function saveStorefront(
   };
 }
 
-export type UpdateEmbedSettingsResult =
-  | { ok: true }
-  | { ok: false; error: string };
+/** The image-background object key inside a stored (untrusted) config jsonb. */
+function storedBackgroundKey(config: unknown): string | null {
+  if (typeof config !== "object" || config === null) return null;
+  const background = (
+    config as { theme?: { background?: { kind?: unknown; key?: unknown } } }
+  ).theme?.background;
+  return background?.kind === "image" && typeof background.key === "string"
+    ? background.key
+    : null;
+}
+
+/** Best-effort R2 cleanup: never fails the parent operation. */
+async function evictObject(key: string): Promise<void> {
+  await deleteObject(key).catch((error) =>
+    console.warn("[storefront] failed to evict object", key, error),
+  );
+}
+
+/**
+ * Post-upload boundary for a NEW background image key, mirroring the product
+ * image rules: the stored object's REAL size and type are checked via HEAD;
+ * anything oversized or non-image is evicted and never linked to a config.
+ */
+async function verifyBackgroundImage(
+  key: string,
+): Promise<{ ok: true } | { ok: false; error: ActionError }> {
+  let meta;
+  try {
+    meta = await headObject(key);
+  } catch (error) {
+    console.error("[storefront] background verification failed", error);
+    return { ok: false, error: serverError("verify your background image") };
+  }
+  if (!meta) {
+    return {
+      ok: false,
+      error: uploadFailed(
+        "Your background image upload didn't finish.",
+        "Select the image again and re-upload it before saving.",
+      ),
+    };
+  }
+  const tooBig =
+    !Number.isFinite(meta.size) ||
+    meta.size <= 0 ||
+    meta.size > maxBytesForKind("image");
+  const wrongType = !isAllowedContentType("image", meta.contentType);
+  if (tooBig || wrongType) {
+    await evictObject(key);
+    return {
+      ok: false,
+      error: tooBig
+        ? uploadFailed(
+            "That background image is too large.",
+            "Use an image under 10 MB, then re-upload it.",
+          )
+        : uploadFailed(
+            "That file type is not supported.",
+            "Use a JPEG, PNG, WebP, GIF, or AVIF image.",
+          ),
+    };
+  }
+  return { ok: true };
+}
+
+export type UpdateEmbedSettingsResult = { ok: true } | ActionFailure;
 
 /**
  * Save one storefront's embed-widget settings (enabled flag + domain
@@ -195,21 +316,23 @@ export async function updateEmbedSettings(
   input: unknown,
 ): Promise<UpdateEmbedSettingsResult> {
   const account = await getActiveAccount();
-  if (!account) return { ok: false, error: SESSION_ERROR };
+  if (!account) return failure(sessionExpired());
   if (!can(account.role, "storefront.write")) {
-    return { ok: false, error: NO_WRITE_PERMISSION };
+    return failure(permissionDenied(account.role, "edit storefronts"));
   }
   if (!storefrontIdSchema.safeParse(id).success) {
-    return { ok: false, error: NOT_FOUND };
+    return failure(notFound("storefront"));
   }
 
   // The security boundary: strict shape, hostname-regex-gated domains.
   const parsed = embedSettingsSchema.safeParse(input);
   if (!parsed.success) {
-    return {
-      ok: false,
-      error: parsed.error.issues[0]?.message ?? "Invalid embed settings.",
-    };
+    return failure(
+      invalidInput(
+        parsed.error.issues[0]?.message ?? "Invalid embed settings.",
+        "Check the domain list (comma-separated hostnames like example.com) and save again.",
+      ),
+    );
   }
 
   const supabase = await createClient();
@@ -221,9 +344,9 @@ export async function updateEmbedSettings(
     .maybeSingle();
   if (readError) {
     console.error("[storefront] embed settings read failed", readError);
-    return { ok: false, error: "Could not save embed settings. Try again." };
+    return failure(serverError("save the embed settings"));
   }
-  if (!row) return { ok: false, error: NOT_FOUND };
+  if (!row) return failure(notFound("storefront"));
 
   const config: StorefrontConfig = {
     ...(parseStoredStorefrontConfig(row.config) ?? DEFAULT_STOREFRONT_CONFIG),
@@ -239,9 +362,9 @@ export async function updateEmbedSettings(
     .maybeSingle();
   if (error) {
     console.error("[storefront] embed settings save failed", error);
-    return { ok: false, error: "Could not save embed settings. Try again." };
+    return failure(serverError("save the embed settings"));
   }
-  if (!updated) return { ok: false, error: NOT_FOUND };
+  if (!updated) return failure(notFound("storefront"));
 
   revalidatePath("/storefront");
   return { ok: true };
@@ -252,12 +375,12 @@ export async function deleteStorefront(
   id: string,
 ): Promise<DeleteStorefrontResult> {
   const account = await getActiveAccount();
-  if (!account) return { ok: false, error: SESSION_ERROR };
+  if (!account) return failure(sessionExpired());
   if (!can(account.role, "storefront.write")) {
-    return { ok: false, error: NO_WRITE_PERMISSION };
+    return failure(permissionDenied(account.role, "delete storefronts"));
   }
   if (!storefrontIdSchema.safeParse(id).success) {
-    return { ok: false, error: NOT_FOUND };
+    return failure(notFound("storefront"));
   }
 
   const supabase = await createClient();
@@ -268,14 +391,18 @@ export async function deleteStorefront(
     .delete()
     .eq("id", id)
     .eq("owner_id", account.accountId)
-    .select("id")
+    .select("id, config")
     .maybeSingle();
 
   if (error) {
     console.error("[storefront] delete failed", error);
-    return { ok: false, error: "Could not delete the storefront. Try again." };
+    return failure(serverError("delete the storefront"));
   }
-  if (!deleted) return { ok: false, error: NOT_FOUND };
+  if (!deleted) return failure(notFound("storefront"));
+
+  // Evict the image background object (if any) along with its storefront.
+  const backgroundKey = storedBackgroundKey(deleted.config);
+  if (backgroundKey) await evictObject(backgroundKey);
 
   revalidatePath("/storefront");
   return { ok: true };

@@ -17,7 +17,11 @@ import { BlockTile } from "./BlockTile";
 import { CarouselStrip } from "./CarouselStrip";
 import { StorefrontMasthead } from "./StorefrontMasthead";
 import { resolveBackgroundStyle } from "./background-presets";
-import { DENSITY_CLASSES, FONT_CLASSES, RADIUS_CLASSES } from "./config-maps";
+import {
+  DENSITY_CLASSES,
+  FONT_CLASSES,
+  scaledCornerRadius,
+} from "./config-maps";
 
 /** Accessible label for a block's drag/resize handles. */
 function blockLabel(block: StorefrontBlock, product: Product | null): string {
@@ -44,6 +48,7 @@ export function DesignerCanvas({
   theme,
   header,
   previewMode,
+  backgroundImageUrl = null,
   onReorder,
   onSizeChange,
   onRemove,
@@ -57,6 +62,9 @@ export function DesignerCanvas({
   header: StorefrontHeader;
   /** Desktop or phone-width frame — set from the toolbar, preview only. */
   previewMode: "desktop" | "mobile";
+  /** Display URL for an image background (signed server-side, or a local
+   *  object URL right after an upload). Null renders the neutral base. */
+  backgroundImageUrl?: string | null;
   /** All callbacks are keyed by blockKey(block). */
   onReorder: (activeKey: string, overKey: string) => void;
   onSizeChange: (key: string, size: BlockSize) => void;
@@ -111,7 +119,7 @@ export function DesignerCanvas({
         )}
         // Schema-constrained: preset keys resolve through the fixed allowlist
         // map, hex is re-gated by the strict regex. Anything else styles nothing.
-        style={resolveBackgroundStyle(theme.background)}
+        style={resolveBackgroundStyle(theme.background, backgroundImageUrl)}
       >
         <StorefrontMasthead header={header} theme={theme} />
 
@@ -153,8 +161,9 @@ export function DesignerCanvas({
           <Grid
             editable
             showEmptyCells
-            // Whole-tile drag: grab a shape/product/text anywhere to move it
-            // (the grip handle stays for keyboard + touch).
+            // Whole-tile drag: grab a shape/product/text anywhere to move it;
+            // a plain click selects the block (BlockTile). No visible grip:
+            // the hidden handle appears only on keyboard focus.
             dragOnCell
             blocks={gridBlocks}
             ariaLabel="Storefront grid"
@@ -163,9 +172,12 @@ export function DesignerCanvas({
             // narrowed frame trips the grid's own container query.
             columns={6}
             mobileColumns={3}
-            // Theme radius drives the cell clip (overrides the grid's rounded-sm).
-            // Product-tile shape clip is handled inside ProductTileContent.
-            cellClassName={RADIUS_CLASSES[theme.radius]}
+            // Corner roundness drives the cell clip (style beats the grid's
+            // default rounded-sm class); tiles inherit it, no clip of their
+            // own. Scaled per tile size so big tiles round like small ones.
+            cellStyle={(size) => ({
+              borderRadius: scaledCornerRadius(theme.cornerRadius, size),
+            })}
             getBlockLabel={(gridBlock) =>
               blockLabel(gridBlock.data, productFor(gridBlock.data))
             }

@@ -113,8 +113,9 @@ export type ProductWriteInput = z.infer<typeof productWriteSchema>;
 export const productIdSchema = z.uuid();
 
 // Keys are minted server-side as {prefix}/{ownerId}/{uuid}-{sanitizedName}
-// (see lib/r2.ts), so a stored key must match that shape exactly.
-const OBJECT_KEY_PATTERN =
+// (see lib/r2.ts), so a stored key must match that shape exactly. Exported for
+// other schemas that store object keys (e.g. storefront background images).
+export const OBJECT_KEY_PATTERN =
   /^(images|files)\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}-[A-Za-z0-9._-]{1,200}$/;
 
 /**

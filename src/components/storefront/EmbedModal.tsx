@@ -2,16 +2,17 @@
 
 import { useState } from "react";
 import { Check, Copy } from "lucide-react";
+import { ActionErrorNotice } from "@/components/ui/ActionErrorNotice";
 import { Modal } from "@/components/ui/modal";
 import { Switch } from "@/components/ui/switch";
 import {
-  errorTextClass,
   fieldBaseClass,
   helpTextClass,
   labelClass,
   primaryButtonClass,
   secondaryButtonClass,
 } from "@/components/ui/control-styles";
+import { invalidInput, type ActionError } from "@/lib/errors";
 import { embedSettingsSchema } from "@/lib/validation/storefront";
 import { updateEmbedSettings } from "@/lib/storefront/actions";
 import type { StorefrontSummary } from "@/lib/storefront/queries";
@@ -49,7 +50,7 @@ type SaveState =
   | { status: "idle" }
   | { status: "saving" }
   | { status: "saved" }
-  | { status: "error"; message: string };
+  | { status: "error"; error: ActionError };
 
 /**
  * Embed settings for one storefront: the copyable snippet (keyed by the
@@ -105,14 +106,17 @@ export function EmbedModal({
     if (!parsed.success) {
       setSaveState({
         status: "error",
-        message: parsed.error.issues[0]?.message ?? "Invalid embed settings.",
+        error: invalidInput(
+          parsed.error.issues[0]?.message ?? "Invalid embed settings.",
+          "Check the domain list (comma-separated hostnames like example.com) and save again.",
+        ),
       });
       return;
     }
     setSaveState({ status: "saving" });
     const result = await updateEmbedSettings(storefront.id, parsed.data);
     if (!result.ok) {
-      setSaveState({ status: "error", message: result.error });
+      setSaveState({ status: "error", error: result.error });
       return;
     }
     setDomainsText(parsed.data.domains.join(", "));
@@ -201,9 +205,7 @@ export function EmbedModal({
           </div>
 
           {saveState.status === "error" && (
-            <p role="alert" className={errorTextClass}>
-              {saveState.message}
-            </p>
+            <ActionErrorNotice error={saveState.error} variant="inline" />
           )}
 
           <div className="flex items-center justify-end gap-3">

@@ -1,90 +1,34 @@
-"use client";
+﻿"use client";
 
 import { useId } from "react";
 import {
-  CARD_STYLES,
-  PRICE_DISPLAYS,
-  PRICE_TAG_POSITIONS,
-  type CardShape,
-  type CardStyle,
-  type PriceDisplay,
-  type PriceTagPosition,
+  CORNER_RADIUS_MAX,
+  PRICE_TAG_CORNER_LIMIT,
+  coercePriceTagPosition,
+  type PriceTagFloatPosition,
   type PriceTagStyle,
   type StorefrontTheme,
 } from "@/types/storefront";
-import { Select, type SelectOption } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
-import { labelClass } from "@/components/ui/control-styles";
+import { infoTextClass, strongLabelClass } from "@/components/ui/control-styles";
+import {
+  PriceTagModePicker,
+  PriceTagPositionPicker,
+  type PriceTagMode,
+} from "./PriceTagPositionPicker";
+import { TitleStylePicker } from "./TitleStylePicker";
 
-const CARD_SHAPE_OPTIONS: readonly { value: CardShape; label: string }[] = [
-  { value: "square", label: "Square" },
-  { value: "rounded", label: "Rounded" },
-  { value: "circle", label: "Circle" },
-];
 
-const CARD_STYLE_OPTIONS: readonly SelectOption<CardStyle>[] = CARD_STYLES.map(
-  (style) => ({
-    value: style,
-    label: {
-      standard: "Standard",
-      overlay: "Overlay",
-      minimal: "Minimal",
-    }[style],
-    description: {
-      standard: "Title and price under the image",
-      overlay: "Title and price over the image",
-      minimal: "Image only, details on hover",
-    }[style],
-  }),
-);
 
-const PRICE_DISPLAY_OPTIONS: readonly SelectOption<PriceDisplay>[] =
-  PRICE_DISPLAYS.map((display) => ({
-    value: display,
-    label: {
-      always: "Always visible",
-      hover: "Show on hover",
-      never: "Hidden",
-    }[display],
-  }));
-
-const PRICE_TAG_POSITION_OPTIONS: readonly SelectOption<PriceTagPosition>[] =
-  PRICE_TAG_POSITIONS.map((position) => ({
-    value: position,
-    label: {
-      below: "Below the image",
-      onImage: "On the image",
-      corner: "Top corner",
-      hidden: "Hidden",
-    }[position],
-  }));
 
 const PRICE_TAG_STYLE_OPTIONS: readonly { value: PriceTagStyle; label: string }[] = [
   { value: "plain", label: "Plain" },
   { value: "pill", label: "Pill" },
 ];
 
-function Field({
-  id,
-  label,
-  children,
-}: {
-  id: string;
-  label: React.ReactNode;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="space-y-1.5">
-      <label htmlFor={id} className={labelClass}>
-        {label}
-      </label>
-      {children}
-    </div>
-  );
-}
-
-/** Card appearance controls: shape, style, title toggle, price display and tag. */
+/** Card appearance controls: shape, title area, price tag, sold-out badge. */
 export function CardsSection({
   theme,
   onChange,
@@ -94,29 +38,54 @@ export function CardsSection({
 }) {
   const fieldId = useId();
 
+  const tagPosition = theme.priceTagPosition;
+  const tagMode: PriceTagMode =
+    tagPosition === "below"
+      ? "below"
+      : tagPosition === "hidden"
+        ? "hidden"
+        : "float";
+  // The picker highlights the coerced spot, so on heavily rounded cards a
+  // stored corner shows (and behaves) as its center-axis fallback.
+  const floatValue = coercePriceTagPosition(tagPosition, theme.cornerRadius);
+
+  function setTagMode(mode: PriceTagMode) {
+    if (mode === tagMode) return;
+    onChange({
+      ...theme,
+      priceTagPosition:
+        mode === "float"
+          ? coercePriceTagPosition("bottom-left", theme.cornerRadius)
+          : mode,
+    });
+  }
+
   return (
     <div className="space-y-4">
       <div className="space-y-1.5">
-        <span className={labelClass}>Shape</span>
-        <SegmentedControl
-          value={theme.cardShape}
-          options={CARD_SHAPE_OPTIONS}
-          onChange={(cardShape) => onChange({ ...theme, cardShape })}
-          ariaLabel="Card shape"
+        <div className="flex items-center justify-between">
+          <span className={strongLabelClass}>Corner roundness</span>
+          <span className={infoTextClass}>
+            {theme.cornerRadius === 0
+              ? "Sharp"
+              : theme.cornerRadius >= CORNER_RADIUS_MAX
+                ? "Circle"
+                : theme.cornerRadius}
+          </span>
+        </div>
+        <Slider
+          min={0}
+          max={CORNER_RADIUS_MAX}
+          step={2}
+          value={theme.cornerRadius}
+          onChange={(cornerRadius) => onChange({ ...theme, cornerRadius })}
+          ariaLabel="Corner roundness"
+          valueText={`${theme.cornerRadius} pixels`}
         />
       </div>
 
-      <Field id={`${fieldId}-card-style`} label="Card style">
-        <Select
-          id={`${fieldId}-card-style`}
-          value={theme.cardStyle}
-          options={CARD_STYLE_OPTIONS}
-          onChange={(cardStyle) => onChange({ ...theme, cardStyle })}
-        />
-      </Field>
-
       <div className="flex items-center justify-between gap-3">
-        <label htmlFor={`${fieldId}-show-title`} className={labelClass}>
+        <label htmlFor={`${fieldId}-show-title`} className={strongLabelClass}>
           Show title
         </label>
         <Switch
@@ -126,26 +95,83 @@ export function CardsSection({
         />
       </div>
 
-      <Field id={`${fieldId}-price-display`} label="Price">
-        <Select
-          id={`${fieldId}-price-display`}
-          value={theme.priceDisplay}
-          options={PRICE_DISPLAY_OPTIONS}
-          onChange={(priceDisplay) => onChange({ ...theme, priceDisplay })}
-        />
-      </Field>
+      {theme.showTitle && (
+        <>
+          <div className="space-y-1.5">
+            <span className={strongLabelClass}>Title style</span>
+            <TitleStylePicker
+              value={theme.titleStyle}
+              onChange={(titleStyle) => onChange({ ...theme, titleStyle })}
+            />
+          </div>
 
-      <Field id={`${fieldId}-price-tag-position`} label="Price tag position">
-        <Select
-          id={`${fieldId}-price-tag-position`}
-          value={theme.priceTagPosition}
-          options={PRICE_TAG_POSITION_OPTIONS}
-          onChange={(priceTagPosition) => onChange({ ...theme, priceTagPosition })}
-        />
-      </Field>
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between gap-3">
+              <label htmlFor={`${fieldId}-title-hover`} className={strongLabelClass}>
+                Show title on hover
+              </label>
+              <Switch
+                id={`${fieldId}-title-hover`}
+                checked={theme.titleDisplay === "hover"}
+                onCheckedChange={(hover) =>
+                  onChange({
+                    ...theme,
+                    titleDisplay: hover ? "hover" : "always",
+                  })
+                }
+              />
+            </div>
+            <p className={infoTextClass}>
+              {theme.titleStyle === "overlay"
+                ? "The bar slides up from the bottom when a buyer hovers."
+                : "The title stays hidden until a buyer hovers over the product."}
+            </p>
+          </div>
+        </>
+      )}
 
       <div className="space-y-1.5">
-        <span className={labelClass}>Price tag style</span>
+        <span className={strongLabelClass}>Price tag position</span>
+        <PriceTagModePicker value={tagMode} onChange={setTagMode} />
+        {tagMode === "float" && (
+          <PriceTagPositionPicker
+            value={floatValue as PriceTagFloatPosition}
+            cornerRadius={theme.cornerRadius}
+            onChange={(priceTagPosition) =>
+              onChange({ ...theme, priceTagPosition })
+            }
+          />
+        )}
+        {tagMode === "float" && theme.cornerRadius >= PRICE_TAG_CORNER_LIMIT && (
+          <p className={infoTextClass}>
+            Rounded cards keep the tag on the center axis.
+          </p>
+        )}
+      </div>
+
+      {/* Hover reveal only matters while a tag is shown at all. */}
+      {tagMode !== "hidden" && (
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between gap-3">
+            <label htmlFor={`${fieldId}-price-hover`} className={strongLabelClass}>
+              Show price on hover
+            </label>
+            <Switch
+              id={`${fieldId}-price-hover`}
+              checked={theme.priceDisplay === "hover"}
+              onCheckedChange={(hover) =>
+                onChange({ ...theme, priceDisplay: hover ? "hover" : "always" })
+              }
+            />
+          </div>
+          <p className={infoTextClass}>
+            The price stays hidden until a buyer hovers over the product.
+          </p>
+        </div>
+      )}
+
+      <div className="space-y-1.5">
+        <span className={strongLabelClass}>Price tag style</span>
         <SegmentedControl
           value={theme.priceTagStyle}
           options={PRICE_TAG_STYLE_OPTIONS}
@@ -157,7 +183,7 @@ export function CardsSection({
       {/* Shows the badge on blocks the seller marked sold out (the tag toggle
           on each product tile). */}
       <div className="flex items-center justify-between gap-3">
-        <label htmlFor={`${fieldId}-sold-out-badge`} className={labelClass}>
+        <label htmlFor={`${fieldId}-sold-out-badge`} className={strongLabelClass}>
           Sold-out badge
         </label>
         <Switch

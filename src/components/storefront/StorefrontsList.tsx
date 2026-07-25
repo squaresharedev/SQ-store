@@ -2,10 +2,12 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { AlertCircle, Plus, Store } from "lucide-react";
+import { Plus, Store } from "lucide-react";
 import { iconPopClass, primaryButtonClass } from "@/components/ui/control-styles";
+import { ActionErrorNotice } from "@/components/ui/ActionErrorNotice";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
+import type { ActionError } from "@/lib/errors";
 import {
   createStorefront,
   deleteStorefront,
@@ -34,7 +36,7 @@ export function StorefrontsList({
   const router = useRouter();
   const [storefronts, setStorefronts] = useState(initial);
   const [creating, setCreating] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<ActionError | null>(null);
   const [pendingDelete, setPendingDelete] = useState<StorefrontSummary | null>(
     null,
   );
@@ -86,19 +88,7 @@ export function StorefrontsList({
 
   return (
     <>
-      {error && (
-        <div
-          role="alert"
-          className="mb-4 flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/5 px-4 py-3"
-        >
-          <AlertCircle
-            className="mt-0.5 size-4 shrink-0 text-destructive"
-            strokeWidth={2}
-            aria-hidden="true"
-          />
-          <p className="font-inter text-sm text-destructive">{error}</p>
-        </div>
-      )}
+      {error && <ActionErrorNotice error={error} className="mb-4" />}
 
       <div className="mb-4 flex items-center justify-between gap-3">
         <p className="font-inter text-sm text-muted-foreground">

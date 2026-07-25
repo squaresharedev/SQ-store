@@ -63,6 +63,16 @@ function spanStyle(span: GridSpan): React.CSSProperties {
   };
 }
 
+type CellStyle = React.CSSProperties | ((size: GridSize) => React.CSSProperties);
+
+/** Resolve a static-or-size-dependent cell style for one cell. */
+function resolveCellStyle(
+  cellStyle: CellStyle | undefined,
+  size: GridSize,
+): React.CSSProperties | undefined {
+  return typeof cellStyle === "function" ? cellStyle(size) : cellStyle;
+}
+
 /** The two CSS custom properties the `.ss-grid` rule reads. Typed (not cast)
  *  so a typo in a var name is a compile error, not a silent CSS fallback. */
 type GridVars = React.CSSProperties & {
@@ -85,15 +95,21 @@ interface GridCommonProps<TData> {
   /** Extra classes for each cell surface (e.g. a theme radius). Overrides the
    *  default `rounded-sm` via tailwind-merge; the square sizing is unaffected. */
   cellClassName?: string;
+  /** Inline styles for each cell surface, for values classes can't express
+   *  (e.g. a numeric border-radius). Pass a function to vary the style by the
+   *  cell's (live) size, e.g. size-scaled corner rounding. Wins over
+   *  cellClassName where they overlap. */
+  cellStyle?: React.CSSProperties | ((size: GridSize) => React.CSSProperties);
   /** Render dashed empty-slot placeholders in the grid's open cells, so the
    *  grid reads as a grid (drop targets), not just floating tiles. */
   showEmptyCells?: boolean;
   /** Extra empty rows to show below the content when showEmptyCells (default 1). */
   emptyRows?: number;
   /** Editable mode only: make the WHOLE cell surface a drag-to-reorder target
-   *  (Figma-style direct manipulation), not just the grip. Presses on the
-   *  cell's own buttons (grip, resize, tile controls) are ignored so their
-   *  clicks still work; the grip keeps the keyboard + touch path. */
+   *  (Figma-style direct manipulation) and hide the grip button, which stays
+   *  in the tab order (revealed on keyboard focus) as the keyboard reorder
+   *  path. Presses on the cell's own buttons (resize, tile controls) are
+   *  ignored so their clicks still work. */
   dragOnCell?: boolean;
 }
 
@@ -127,6 +143,7 @@ export function Grid<TData>(props: GridProps<TData>) {
     getBlockLabel,
     className,
     cellClassName,
+    cellStyle,
     showEmptyCells = false,
     emptyRows = 1,
     dragOnCell = false,
@@ -177,6 +194,7 @@ export function Grid<TData>(props: GridProps<TData>) {
               columns={clampColumns}
               renderBlock={renderBlock}
               cellClassName={cellClassName}
+              cellStyle={cellStyle}
             />
           ))}
         </ul>
@@ -196,6 +214,7 @@ export function Grid<TData>(props: GridProps<TData>) {
       getBlockLabel={getBlockLabel}
       className={className}
       cellClassName={cellClassName}
+      cellStyle={cellStyle}
       placeholderCount={placeholderCount}
       dragOnCell={dragOnCell}
     />
@@ -203,10 +222,17 @@ export function Grid<TData>(props: GridProps<TData>) {
 }
 
 /** A dashed empty grid slot (open drop target). Decorative; not sortable. */
-function PlaceholderCell({ cellClassName }: { cellClassName?: string }) {
+function PlaceholderCell({
+  cellClassName,
+  cellStyle,
+}: {
+  cellClassName?: string;
+  cellStyle?: CellStyle;
+}) {
   return (
     <li
       aria-hidden="true"
+      style={resolveCellStyle(cellStyle, "1x1")}
       className={cn(
         "pointer-events-none border border-dashed border-border bg-background/40",
         GRID_CELL_RADIUS_CLASS,
@@ -223,16 +249,18 @@ function StaticCell<TData>({
   columns,
   renderBlock,
   cellClassName,
+  cellStyle,
 }: {
   block: GridBlock<TData>;
   columns: number;
   renderBlock: RenderGridBlock<TData>;
   cellClassName?: string;
+  cellStyle?: CellStyle;
 }) {
   const span = clampSpanToColumns(SIZE_SPANS[block.size], columns);
   return (
     <li
-      style={spanStyle(span)}
+      style={{ ...spanStyle(span), ...resolveCellStyle(cellStyle, block.size) }}
       className={cn("relative overflow-hidden", GRID_CELL_RADIUS_CLASS, cellClassName)}
     >
       {renderBlock(block, {
@@ -258,6 +286,7 @@ function EditableGrid<TData>({
   getBlockLabel,
   className,
   cellClassName,
+  cellStyle,
   placeholderCount,
   dragOnCell,
 }: {
@@ -271,6 +300,7 @@ function EditableGrid<TData>({
   getBlockLabel?: (block: GridBlock<TData>) => string;
   className?: string;
   cellClassName?: string;
+  cellStyle?: CellStyle;
   placeholderCount: number;
   dragOnCell: boolean;
 }) {
@@ -331,6 +361,7 @@ function EditableGrid<TData>({
                 onResize={handleResize}
                 label={getBlockLabel?.(block)}
                 cellClassName={cellClassName}
+                cellStyle={cellStyle}
                 dragOnCell={dragOnCell}
               />
             ))}
@@ -338,7 +369,11 @@ function EditableGrid<TData>({
                 grid's empty cells + a growth row, so the grid reads as a grid.
                 Not sortable (outside SortableContext.items). */}
             {Array.from({ length: placeholderCount }, (_, index) => (
-              <PlaceholderCell key={`empty-${index}`} cellClassName={cellClassName} />
+              <PlaceholderCell
+                key={`empty-${index}`}
+                cellClassName={cellClassName}
+                cellStyle={cellStyle}
+              />
             ))}
           </ul>
         </SortableContext>
@@ -352,6 +387,7 @@ function EditableGrid<TData>({
         <DragOverlay dropAnimation={null}>
           {activeBlock ? (
             <div
+              style={resolveCellStyle(cellStyle, activeBlock.size)}
               className={cn(
                 "h-full w-full overflow-hidden shadow-lg",
                 GRID_CELL_RADIUS_CLASS,
@@ -379,6 +415,7 @@ function EditableCell<TData>({
   onResize,
   label,
   cellClassName,
+  cellStyle,
   dragOnCell,
 }: {
   block: GridBlock<TData>;
@@ -387,6 +424,7 @@ function EditableCell<TData>({
   onResize: (key: string, size: GridSize) => void;
   label?: string;
   cellClassName?: string;
+  cellStyle?: CellStyle;
   dragOnCell: boolean;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
@@ -435,6 +473,9 @@ function EditableCell<TData>({
       onPointerDown={dragOnCell ? handleCellPointerDown : undefined}
       style={{
         ...spanStyle(span),
+        // previewSize (not block.size) so size-dependent styles track a
+        // resize drag live.
+        ...resolveCellStyle(cellStyle, previewSize),
         transform: CSS.Transform.toString(transform),
         transition,
       }}
@@ -455,11 +496,26 @@ function EditableCell<TData>({
         previewSize,
       })}
 
-      {/* Drag-to-reorder handle (pointer + keyboard, via dnd-kit). */}
+      {/* Drag-to-reorder handle (pointer + keyboard, via dnd-kit). With
+          dragOnCell the whole surface is the pointer drag target, so the grip
+          is removed visually but kept for keyboard users: invisible and
+          click-through until it receives keyboard focus. */}
       <button
         type="button"
         aria-label={label ? `Reorder ${label}` : "Reorder block"}
-        className={cn(HANDLE_CLASS, "left-1 top-1 cursor-grab touch-none active:cursor-grabbing")}
+        className={
+          dragOnCell
+            ? cn(
+                "absolute left-1 top-1 z-20 inline-flex size-6 items-center justify-center rounded-sm border border-border bg-background/95 text-muted-foreground shadow-xs",
+                "pointer-events-none opacity-0 focus-visible:pointer-events-auto focus-visible:opacity-100",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background",
+                "touch-none",
+              )
+            : cn(
+                HANDLE_CLASS,
+                "left-1 top-1 cursor-grab touch-none active:cursor-grabbing",
+              )
+        }
         {...attributes}
         {...dragListeners}
       >

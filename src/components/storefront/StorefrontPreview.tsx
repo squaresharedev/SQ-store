@@ -15,7 +15,11 @@ import { BlockTile } from "./BlockTile";
 import { CarouselStrip } from "./CarouselStrip";
 import { StorefrontMasthead } from "./StorefrontMasthead";
 import { resolveBackgroundStyle } from "./background-presets";
-import { DENSITY_CLASSES, FONT_CLASSES, RADIUS_CLASSES } from "./config-maps";
+import {
+  DENSITY_CLASSES,
+  FONT_CLASSES,
+  scaledCornerRadius,
+} from "./config-maps";
 
 /** Enough blocks to fill any clipped preview box; keeps 60-block grids from
  *  rendering DOM the card never shows. */
@@ -32,10 +36,14 @@ export function StorefrontPreview({
   config,
   productsById,
   className,
+  backgroundImageUrl = null,
 }: {
   config: StorefrontConfig;
   productsById: ReadonlyMap<string, Product>;
   className?: string;
+  /** Display URL for an image background; without one the preview shows the
+   *  neutral base color instead. */
+  backgroundImageUrl?: string | null;
 }) {
   const { theme, blocks, header } = config;
 
@@ -79,7 +87,7 @@ export function StorefrontPreview({
       )}
       // Schema-constrained, same as the canvas: preset keys resolve through
       // the fixed allowlist map, hex is re-gated by the strict regex.
-      style={resolveBackgroundStyle(theme.background)}
+      style={resolveBackgroundStyle(theme.background, backgroundImageUrl)}
     >
       <StorefrontMasthead
         header={header ?? DEFAULT_STOREFRONT_HEADER}
@@ -100,7 +108,9 @@ export function StorefrontPreview({
             ariaLabel="Storefront preview"
             columns={6}
             mobileColumns={3}
-            cellClassName={RADIUS_CLASSES[theme.radius]}
+            cellStyle={(size) => ({
+              borderRadius: scaledCornerRadius(theme.cornerRadius, size),
+            })}
             renderBlock={(gridBlock) => (
               <BlockTile
                 block={gridBlock.data}

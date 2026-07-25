@@ -1,28 +1,30 @@
 import { z } from "zod";
 import {
+  BACKGROUND_IMAGE_SCALE_MAX,
+  BACKGROUND_IMAGE_SCALE_MIN,
   BLOCK_SIZES,
-  CARD_SHAPES,
-  CARD_STYLES,
+  CORNER_RADIUS_MAX,
   DEFAULT_STOREFRONT_CONFIG,
   DENSITIES,
   DISPLAY_MODES,
   EMBED_MAX_DOMAINS,
   HEADER_BIO_MAX,
   HEADER_NAME_MAX,
-  PATTERN_PRESETS,
   PRICE_DISPLAYS,
   PRICE_TAG_POSITIONS,
   PRICE_TAG_STYLES,
   SHAPE_KINDS,
   STOREFRONT_FONTS,
-  STOREFRONT_RADII,
   TEXT_ALIGNS,
   TEXT_MAX_LENGTH,
   TEXT_VARIANTS,
+  TITLE_DISPLAYS,
+  TITLE_STYLES,
   blockKey,
   type StorefrontBackground,
   type StorefrontConfig,
 } from "@/types/storefront";
+import { OBJECT_KEY_PATTERN } from "@/lib/validation/product";
 import { LEGACY_BACKGROUND_GRADIENTS } from "@/components/storefront/background-presets";
 
 // The security contract for storefront configs. Parsed server-side on EVERY
@@ -65,9 +67,11 @@ const SINGLE_LINE_TEXT_PATTERN = /^[^\u0000-\u001f\u007f]*$/;
 export const MAX_BLOCKS = 60;
 
 // Background is a closed, structured shape: a solid hex, a custom gradient
-// (hex + hex + integer angle), or a pattern preset over a base hex. The stored
-// value is only ever code-defined styles fed by regex-gated colors / an
-// allowlisted key — never a raw CSS/gradient string.
+// (hex + hex + integer angle), or an uploaded image. The stored value is only
+// ever code-defined styles fed by regex-gated colors / an allowlisted key,
+// never a raw CSS/gradient string. The image variant stores an R2 object KEY
+// (shape-checked here; ownership + size/type of NEW keys are re-checked in
+// saveStorefront) plus position/zoom.
 const backgroundSchema = z.discriminatedUnion("kind", [
   z.strictObject({ kind: z.literal("solid"), color: hexColorSchema }),
   z.strictObject({
@@ -77,21 +81,43 @@ const backgroundSchema = z.discriminatedUnion("kind", [
     angle: z.number().int().min(0).max(360),
   }),
   z.strictObject({
-    kind: z.literal("pattern"),
-    preset: z.enum(PATTERN_PRESETS),
-    color: hexColorSchema,
+    kind: z.literal("image"),
+    key: z
+      .string()
+      .max(600)
+      .regex(OBJECT_KEY_PATTERN)
+      .refine((key) => key.startsWith("images/"), {
+        error: "Background images must be image uploads.",
+      }),
+    x: z.number().int().min(0).max(100),
+    y: z.number().int().min(0).max(100),
+    scale: z
+      .number()
+      .int()
+      .min(BACKGROUND_IMAGE_SCALE_MIN)
+      .max(BACKGROUND_IMAGE_SCALE_MAX),
   }),
 ]);
 
-const themeSchema = z.strictObject({
+const themeObjectSchema = z.strictObject({
   background: backgroundSchema,
   accent: hexColorSchema,
   font: z.enum(STOREFRONT_FONTS),
-  radius: z.enum(STOREFRONT_RADII),
-  cardStyle: z.enum(CARD_STYLES),
+  cornerRadius: z.number().int().min(0).max(CORNER_RADIUS_MAX),
+  titleStyle: z.enum(TITLE_STYLES),
+  titleDisplay: z.enum(TITLE_DISPLAYS),
   priceDisplay: z.enum(PRICE_DISPLAYS),
-  cardShape: z.enum(CARD_SHAPES),
-  priceTagPosition: z.enum(PRICE_TAG_POSITIONS),
+  // Legacy configs stored "onImage"/"corner" before the 7-spot picker existed;
+  // map them to the equivalent explicit spots so old storefronts still parse.
+  priceTagPosition: z.preprocess(
+    (value) =>
+      value === "onImage"
+        ? "bottom-left"
+        : value === "corner"
+          ? "top-right"
+          : value,
+    z.enum(PRICE_TAG_POSITIONS),
+  ),
   priceTagStyle: z.enum(PRICE_TAG_STYLES),
   showTitle: z.boolean(),
   displayMode: z.enum(DISPLAY_MODES),
@@ -99,6 +125,62 @@ const themeSchema = z.strictObject({
   soldOutBadge: z.boolean(),
   hideSoldOut: z.boolean(),
 });
+
+/** Legacy `radius` enum -> px, matching the old rounded-sm/md/lg classes. */
+const LEGACY_RADIUS_PX: Record<string, number> = { none: 0, sm: 4, md: 6, lg: 8 };
+
+// Legacy-theme migrations, applied before the strict parse:
+// - priceDisplay "never" predates the position picker's Hidden mode; fold it
+//   into priceTagPosition "hidden" so hiding the price has ONE representation.
+// - cardStyle (standard/overlay/minimal) conflated title placement with hover
+//   visibility; split it into titleStyle + titleDisplay and drop the key
+//   (strictObject would reject it).
+// - radius (none/sm/md/lg) + cardShape (square/rounded/circle) merged into
+//   the numeric cornerRadius: circle -> full, square -> sharp, rounded -> the
+//   radius enum's px value.
+// - pattern backgrounds were removed; they fall back to their base color.
+const themeSchema = z.preprocess((value) => {
+  if (typeof value !== "object" || value === null) return value;
+  const theme = { ...(value as Record<string, unknown>) };
+  const background = theme.background as
+    | { kind?: unknown; color?: unknown }
+    | null
+    | undefined;
+  if (
+    typeof background === "object" &&
+    background !== null &&
+    background.kind === "pattern"
+  ) {
+    theme.background = {
+      kind: "solid",
+      color: typeof background.color === "string" ? background.color : "#ffffff",
+    };
+  }
+  if (theme.priceDisplay === "never") {
+    theme.priceDisplay = "always";
+    theme.priceTagPosition = "hidden";
+  }
+  if ("cardStyle" in theme) {
+    if (theme.titleStyle === undefined) {
+      theme.titleStyle = theme.cardStyle === "standard" ? "bar" : "overlay";
+      theme.titleDisplay = theme.cardStyle === "minimal" ? "hover" : "always";
+    }
+    delete theme.cardStyle;
+  }
+  if ("radius" in theme || "cardShape" in theme) {
+    if (theme.cornerRadius === undefined) {
+      theme.cornerRadius =
+        theme.cardShape === "circle"
+          ? CORNER_RADIUS_MAX
+          : theme.cardShape === "square"
+            ? 0
+            : (LEGACY_RADIUS_PX[String(theme.radius)] ?? 0);
+    }
+    delete theme.radius;
+    delete theme.cardShape;
+  }
+  return theme;
+}, themeObjectSchema);
 
 // The optional masthead above the grid: show toggle + capped plain text.
 const headerSchema = z.strictObject({
@@ -214,8 +296,9 @@ function upgradeBackground(value: unknown): StorefrontBackground {
 
 /**
  * Parse a stored config, upgrading older saved shapes instead of discarding
- * them: v1 product blocks had no `type`, v1 themes lack cardStyle/priceDisplay,
- * and v1 backgrounds were a bare string. Returns null when unrecognizable.
+ * them: v1 product blocks had no `type`, older themes lack newer fields (the
+ * defaults fill them; themeSchema's preprocess migrates renamed ones), and v1
+ * backgrounds were a bare string. Returns null when unrecognizable.
  */
 export function parseStoredStorefrontConfig(
   raw: unknown,

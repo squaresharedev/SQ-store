@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { AlertCircle, ArrowLeft, X } from "lucide-react";
+import { ArrowLeft, X } from "lucide-react";
+import type { ActionError } from "@/lib/errors";
 import type { Product } from "@/types/product";
 import {
   DEFAULT_STOREFRONT_HEADER,
@@ -18,6 +19,7 @@ import {
 import { MAX_BLOCKS, STOREFRONT_NAME_MAX } from "@/lib/validation/storefront";
 import { saveStorefront } from "@/lib/storefront/actions";
 import { cn } from "@/lib/utils";
+import { ActionErrorNotice } from "@/components/ui/ActionErrorNotice";
 import { Button } from "@/components/ui/button";
 import { CollapsibleSection } from "@/components/ui/CollapsibleSection";
 import {
@@ -38,7 +40,7 @@ type SaveState =
   | { status: "idle" }
   | { status: "saving" }
   | { status: "saved"; droppedBlocks: number }
-  | { status: "error"; message: string };
+  | { status: "error"; error: ActionError };
 
 /** What the left inspector column shows: the product picker, or the editor
  *  card for one selected block. */
@@ -83,13 +85,27 @@ export function StorefrontDesigner({
   initialName,
   initialConfig,
   products,
+  initialBackgroundImageUrl = null,
 }: {
   storefrontId: string;
   initialName: string;
   initialConfig: StorefrontConfig;
   products: Product[];
+  /** Signed display URL for a stored image background (null when none). */
+  initialBackgroundImageUrl?: string | null;
 }) {
   const [name, setName] = useState(initialName);
+  // Display URL for the image background: server-signed at load; replaced by
+  // a local object URL right after an in-session upload. NOT part of the
+  // config (the config stores only the object key).
+  const [backgroundImageUrl, setBackgroundImageUrl] = useState(
+    initialBackgroundImageUrl,
+  );
+  // Catalog snapshot, updated in place after inline product edits. Product
+  // facts (name/price) are saved to the DB immediately by the block editor;
+  // they are NOT part of the storefront config, so they bypass the dirty flag
+  // and undo history; this state only keeps the canvas tiles in sync.
+  const [catalog, setCatalog] = useState(products);
   const [theme, setTheme] = useState<StorefrontTheme>(initialConfig.theme);
   const [header, setHeader] = useState<StorefrontHeader>(
     initialConfig.header ?? DEFAULT_STOREFRONT_HEADER,
@@ -112,8 +128,8 @@ export function StorefrontDesigner({
   const history = useEditorHistory<EditorSnapshot>();
 
   const productsById = useMemo(
-    () => new Map(products.map((product) => [product.id, product])),
-    [products],
+    () => new Map(catalog.map((product) => [product.id, product])),
+    [catalog],
   );
   const usedProductIds = useMemo(
     () =>
@@ -327,6 +343,12 @@ export function StorefrontDesigner({
     setName(next);
   }
 
+  function applyProductUpdate(updated: Product) {
+    setCatalog((current) =>
+      current.map((p) => (p.id === updated.id ? updated : p)),
+    );
+  }
+
   async function handleSave() {
     setSaveState({ status: "saving" });
     const config: StorefrontConfig = {
@@ -339,7 +361,7 @@ export function StorefrontDesigner({
     };
     const result = await saveStorefront(storefrontId, { name, config });
     if (!result.ok) {
-      setSaveState({ status: "error", message: result.error });
+      setSaveState({ status: "error", error: result.error });
       return;
     }
     if (result.droppedBlocks > 0) {
@@ -424,19 +446,7 @@ export function StorefrontDesigner({
       {/* pb clears the floating toolbar so nothing hides behind it. */}
       <main className="mx-auto max-w-7xl space-y-6 px-4 py-6 pb-24 sm:px-6">
         {saveState.status === "error" && (
-          <div
-            role="alert"
-            className="flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/5 px-4 py-3"
-          >
-            <AlertCircle
-              className="mt-0.5 size-4 shrink-0 text-destructive"
-              strokeWidth={2}
-              aria-hidden="true"
-            />
-            <p className="font-inter text-sm text-destructive">
-              {saveState.message}
-            </p>
-          </div>
+          <ActionErrorNotice error={saveState.error} />
         )}
 
         <div className="flex flex-col gap-6 lg:flex-row">
@@ -451,6 +461,7 @@ export function StorefrontDesigner({
               theme={theme}
               header={header}
               previewMode={previewMode}
+              backgroundImageUrl={backgroundImageUrl}
               onReorder={reorderBlocks}
               onSizeChange={setBlockSize}
               onRemove={removeBlock}
@@ -480,18 +491,22 @@ export function StorefrontDesigner({
                 >
                   {inspector?.kind === "picker" ? (
                     <ProductPicker
-                      products={products}
+                      products={catalog}
                       usedProductIds={usedProductIds}
                       onAdd={addProduct}
                     />
                   ) : selectedBlock?.type === "product" ? (
                     <ProductBlockEditor
+                      // Keyed by product so the name/price drafts reset when
+                      // the selection moves to a different product tile.
+                      key={selectedBlock.productId}
                       block={selectedBlock}
                       product={productsById.get(selectedBlock.productId) ?? null}
                       onToggleSoldOut={() =>
                         toggleSoldOut(blockKey(selectedBlock))
                       }
                       onRemove={() => removeBlock(blockKey(selectedBlock))}
+                      onProductSaved={applyProductUpdate}
                     />
                   ) : selectedBlock?.type === "shape" ? (
                     <ShapeBlockEditor
@@ -538,6 +553,8 @@ export function StorefrontDesigner({
                 header={header}
                 onThemeChange={updateTheme}
                 onHeaderChange={updateHeader}
+                backgroundImageUrl={backgroundImageUrl}
+                onBackgroundImageChange={setBackgroundImageUrl}
               />
             </div>
           </div>

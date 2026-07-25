@@ -5,6 +5,15 @@ import { z } from "zod";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
 import { createClient } from "@/lib/supabase/server";
+import {
+  failure,
+  invalidInput,
+  notFound,
+  permissionDenied,
+  serverError,
+  sessionExpired,
+  type ActionFailure,
+} from "@/lib/errors";
 import { STOCK_QUANTITY_MAX } from "@/lib/validation/product";
 
 // Stock settings server action. Follows the same session-check → Zod parse →
@@ -13,9 +22,7 @@ import { STOCK_QUANTITY_MAX } from "@/lib/validation/product";
 // race — so restocking is safe under concurrent writes.
 
 /** Mirrors lib/products/actions.ts result shape for uniform client handling. */
-export type StockActionResult = { ok: true } | { ok: false; error: string };
-
-const GENERIC_WRITE_ERROR = "Could not save stock settings. Try again.";
+export type StockActionResult = { ok: true } | ActionFailure;
 
 // Local schema: only the stock fields. Quantity is required when tracking is
 // enabled — mirrors the DB check constraint and productWriteSchema's refine.
@@ -44,21 +51,25 @@ export async function updateStockSettings(
   input: unknown,
 ): Promise<StockActionResult> {
   const account = await getActiveAccount();
-  if (!account) return { ok: false, error: "Your session expired. Sign in again." };
+  if (!account) return failure(sessionExpired());
   if (!can(account.role, "products.write")) {
-    return {
-      ok: false,
-      error: "You don't have permission to edit products in this store.",
-    };
+    return failure(permissionDenied(account.role, "edit products"));
   }
 
   // Validate product id shape before querying (prevents garbage URL params from
   // reaching the DB as a mal-formed uuid parameter).
   const idCheck = z.string().uuid().safeParse(productId);
-  if (!idCheck.success) return { ok: false, error: "Product not found." };
+  if (!idCheck.success) return failure(notFound("product"));
 
   const parsed = stockSettingsSchema.safeParse(input);
-  if (!parsed.success) return { ok: false, error: "Invalid stock settings." };
+  if (!parsed.success) {
+    return failure(
+      invalidInput(
+        "The stock settings didn't pass validation.",
+        "Quantity and threshold must be whole numbers of 0 or more, and when tracking is on, set how many are in stock.",
+      ),
+    );
+  }
 
   const { trackStock, stockQuantity, lowStockThreshold } = parsed.data;
 
@@ -83,9 +94,9 @@ export async function updateStockSettings(
 
   if (error) {
     console.error("[stock] updateStockSettings failed", error);
-    return { ok: false, error: GENERIC_WRITE_ERROR };
+    return failure(serverError("save the stock settings"));
   }
-  if (!row) return { ok: false, error: "Product not found." };
+  if (!row) return failure(notFound("product"));
 
   revalidatePath("/products");
   return { ok: true };

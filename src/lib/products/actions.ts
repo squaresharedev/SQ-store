@@ -7,6 +7,16 @@ import { createClient } from "@/lib/supabase/server";
 import { deleteObject, headObject } from "@/lib/r2";
 import type { TablesUpdate } from "@/types";
 import {
+  failure,
+  invalidInput,
+  notFound,
+  permissionDenied,
+  serverError,
+  sessionExpired,
+  uploadFailed,
+  type ActionError,
+} from "@/lib/errors";
+import {
   isAllowedContentType,
   isOwnedObjectKey,
   maxBytesForKind,
@@ -22,14 +32,11 @@ import {
 // only) -> object-key ownership check (against the UPLOADER) -> account-scoped
 // mutation. RLS re-checks the same permission at the DB (defense in depth), so a
 // viewer can never write even if this layer were bypassed.
+// Failures are structured ActionErrors (lib/errors.ts): message + how to fix.
 
 export type ProductActionResult =
   | { ok: true; id: string }
-  | { ok: false; error: string };
-
-const GENERIC_WRITE_ERROR = "Could not save the product. Try again.";
-const NO_WRITE_PERMISSION =
-  "You don't have permission to edit products in this store.";
+  | { ok: false; error: ActionError };
 
 /**
  * Parse + authorize a write payload. Returns the validated input or an error
@@ -40,15 +47,32 @@ const NO_WRITE_PERMISSION =
 function parseWrite(
   uploaderId: string,
   input: unknown,
-): { data: ProductWriteInput } | { error: string } {
+): { data: ProductWriteInput } | { error: ActionError } {
   const parsed = productWriteSchema.safeParse(input);
-  if (!parsed.success) return { error: "Invalid product data." };
+  if (!parsed.success) {
+    return {
+      error: invalidInput(
+        "The product details didn't pass validation.",
+        "Check the name, price, and other fields, then try saving again.",
+      ),
+    };
+  }
   const { imageKey, digitalFileKey } = parsed.data;
   if (imageKey && !isOwnedObjectKey(imageKey, "image", uploaderId)) {
-    return { error: "Invalid image reference." };
+    return {
+      error: invalidInput(
+        "That image upload can't be used with this product.",
+        "Re-upload the image, then save again.",
+      ),
+    };
   }
   if (digitalFileKey && !isOwnedObjectKey(digitalFileKey, "file", uploaderId)) {
-    return { error: "Invalid file reference." };
+    return {
+      error: invalidInput(
+        "That file upload can't be used with this product.",
+        "Re-upload the file, then save again.",
+      ),
+    };
   }
   return { data: parsed.data };
 }
@@ -65,17 +89,24 @@ const KIND_NOUN: Record<UploadKind, string> = { image: "image", file: "file" };
 async function verifyUploadedObject(
   key: string,
   kind: UploadKind,
-): Promise<{ ok: true } | { ok: false; error: string }> {
+): Promise<{ ok: true } | { ok: false; error: ActionError }> {
   const noun = KIND_NOUN[kind];
+  const maxLabel = `${Math.round(maxBytesForKind(kind) / 1024 / 1024)} MB`;
   let meta;
   try {
     meta = await headObject(key);
   } catch (error) {
     console.error("[products] object verification failed", error);
-    return { ok: false, error: GENERIC_WRITE_ERROR };
+    return { ok: false, error: serverError(`verify your ${noun} upload`) };
   }
   if (!meta) {
-    return { ok: false, error: `Your ${noun} upload did not finish. Try again.` };
+    return {
+      ok: false,
+      error: uploadFailed(
+        `Your ${noun} upload didn't finish.`,
+        `Select the ${noun} again and re-upload it before saving.`,
+      ),
+    };
   }
   const tooBig =
     !Number.isFinite(meta.size) ||
@@ -90,8 +121,16 @@ async function verifyUploadedObject(
     return {
       ok: false,
       error: tooBig
-        ? `That ${noun} is too large.`
-        : "That file type is not supported.",
+        ? uploadFailed(
+            `That ${noun} is too large.`,
+            `Use a ${noun} under ${maxLabel}, then re-upload it.`,
+          )
+        : uploadFailed(
+            "That file type is not supported.",
+            kind === "image"
+              ? "Use a JPEG, PNG, WebP, GIF, or AVIF image."
+              : "Use a ZIP, PDF, EPUB, MP3, WAV, MP4, JPEG, PNG, WebP, or TXT file.",
+          ),
     };
   }
   return { ok: true };
@@ -100,8 +139,9 @@ async function verifyUploadedObject(
 /** Verify every newly-set object key on a write (skips keep/clear states). */
 async function verifyNewKeys(
   data: ProductWriteInput,
-): Promise<{ ok: true } | { ok: false; error: string }> {
-  const checks: Promise<{ ok: true } | { ok: false; error: string }>[] = [];
+): Promise<{ ok: true } | { ok: false; error: ActionError }> {
+  const checks: Promise<{ ok: true } | { ok: false; error: ActionError }>[] =
+    [];
   if (typeof data.imageKey === "string") {
     checks.push(verifyUploadedObject(data.imageKey, "image"));
   }
@@ -116,19 +156,17 @@ export async function createProduct(
   input: unknown,
 ): Promise<ProductActionResult> {
   const account = await getActiveAccount();
-  if (!account) {
-    return { ok: false, error: "Your session expired. Sign in again." };
-  }
+  if (!account) return failure(sessionExpired());
   if (!can(account.role, "products.write")) {
-    return { ok: false, error: NO_WRITE_PERMISSION };
+    return failure(permissionDenied(account.role, "create products"));
   }
 
   const parsed = parseWrite(account.userId, input);
-  if ("error" in parsed) return { ok: false, error: parsed.error };
+  if ("error" in parsed) return failure(parsed.error);
   const { data } = parsed;
 
   const verified = await verifyNewKeys(data);
-  if (!verified.ok) return { ok: false, error: verified.error };
+  if (!verified.ok) return failure(verified.error);
 
   const supabase = await createClient();
   const { data: row, error } = await supabase
@@ -153,7 +191,7 @@ export async function createProduct(
 
   if (error || !row) {
     console.error("[products] create failed", error);
-    return { ok: false, error: GENERIC_WRITE_ERROR };
+    return failure(serverError("create the product"));
   }
   revalidatePath("/products");
   return { ok: true, id: row.id };
@@ -164,22 +202,20 @@ export async function updateProduct(
   input: unknown,
 ): Promise<ProductActionResult> {
   const account = await getActiveAccount();
-  if (!account) {
-    return { ok: false, error: "Your session expired. Sign in again." };
-  }
+  if (!account) return failure(sessionExpired());
   if (!can(account.role, "products.write")) {
-    return { ok: false, error: NO_WRITE_PERMISSION };
+    return failure(permissionDenied(account.role, "edit products"));
   }
   if (!productIdSchema.safeParse(id).success) {
-    return { ok: false, error: "Product not found." };
+    return failure(notFound("product"));
   }
 
   const parsed = parseWrite(account.userId, input);
-  if ("error" in parsed) return { ok: false, error: parsed.error };
+  if ("error" in parsed) return failure(parsed.error);
   const { data } = parsed;
 
   const verified = await verifyNewKeys(data);
-  if (!verified.ok) return { ok: false, error: verified.error };
+  if (!verified.ok) return failure(verified.error);
 
   const update: TablesUpdate<"products"> = {
     title: data.title,
@@ -236,9 +272,9 @@ export async function updateProduct(
 
   if (error) {
     console.error("[products] update failed", error);
-    return { ok: false, error: GENERIC_WRITE_ERROR };
+    return failure(serverError("save the product"));
   }
-  if (!row) return { ok: false, error: "Product not found." };
+  if (!row) return failure(notFound("product"));
 
   if (oldKeys) {
     const stale: (string | null)[] = [];
@@ -257,14 +293,12 @@ export async function updateProduct(
 
 export async function deleteProduct(id: string): Promise<ProductActionResult> {
   const account = await getActiveAccount();
-  if (!account) {
-    return { ok: false, error: "Your session expired. Sign in again." };
-  }
+  if (!account) return failure(sessionExpired());
   if (!can(account.role, "products.write")) {
-    return { ok: false, error: NO_WRITE_PERMISSION };
+    return failure(permissionDenied(account.role, "delete products"));
   }
   if (!productIdSchema.safeParse(id).success) {
-    return { ok: false, error: "Product not found." };
+    return failure(notFound("product"));
   }
 
   const supabase = await createClient();
@@ -281,9 +315,9 @@ export async function deleteProduct(id: string): Promise<ProductActionResult> {
 
   if (error) {
     console.error("[products] delete failed", error);
-    return { ok: false, error: "Could not delete the product. Try again." };
+    return failure(serverError("delete the product"));
   }
-  if (!deleted) return { ok: false, error: "Product not found." };
+  if (!deleted) return failure(notFound("product"));
 
   await evictObjects([deleted.image_key, deleted.digital_file_key]);
   revalidatePath("/products");

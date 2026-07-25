@@ -47,8 +47,16 @@ export const fieldBaseClass = `w-full rounded-sm border border-input bg-backgrou
 /** Form field label: Inter, small, medium weight (styles.md §5). */
 export const labelClass = "font-inter text-sm font-medium text-foreground";
 
+/** Editor-panel control label: semibold so the setting names carry the visual
+ *  hierarchy in dense panels (the storefront designer's sections). */
+export const strongLabelClass = "font-inter text-sm font-semibold text-foreground";
+
 /** Muted helper text under a field. */
 export const helpTextClass = "font-inter text-sm text-muted-foreground";
+
+/** De-emphasized hint line in dense editor panels: smaller and dimmer than
+ *  helpTextClass so labels and controls stay the loudest thing on screen. */
+export const infoTextClass = "font-inter text-xs text-muted-foreground/80";
 
 /** Inline validation message. */
 export const errorTextClass = "font-inter text-sm text-destructive";

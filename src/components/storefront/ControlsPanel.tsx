@@ -39,17 +39,27 @@ export function ControlsPanel({
   header,
   onThemeChange,
   onHeaderChange,
+  backgroundImageUrl,
+  onBackgroundImageChange,
 }: {
   theme: StorefrontTheme;
   header: StorefrontHeader;
   onThemeChange: (theme: StorefrontTheme) => void;
   onHeaderChange: (header: StorefrontHeader) => void;
+  /** Display URL for an image background (signed or local object URL). */
+  backgroundImageUrl: string | null;
+  onBackgroundImageChange: (url: string | null) => void;
 }) {
   const fontFieldId = useId();
   return (
     <div className="space-y-4">
       <CollapsibleSection title="Theme" collapsible>
-        <ThemePanel theme={theme} onChange={onThemeChange} />
+        <ThemePanel
+          theme={theme}
+          onChange={onThemeChange}
+          backgroundImageUrl={backgroundImageUrl}
+          onBackgroundImageChange={onBackgroundImageChange}
+        />
       </CollapsibleSection>
 
       <CollapsibleSection title="Header" collapsible defaultOpen={false}>

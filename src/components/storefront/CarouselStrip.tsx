@@ -13,7 +13,6 @@ import {
   TILE_CONTROL_CHIP_CLASS,
   TILE_CONTROL_CLASS,
 } from "./BlockTile";
-import { RADIUS_CLASSES } from "./config-maps";
 
 /**
  * The `carousel` display mode's renderer: a horizontal scroll-snap strip of
@@ -58,10 +57,10 @@ export function CarouselStrip({
         return (
           <li
             key={key}
+            style={{ borderRadius: theme.cornerRadius }}
             className={cn(
               "group relative aspect-square shrink-0 snap-start overflow-hidden",
               compact ? "w-24" : "w-40 sm:w-48",
-              RADIUS_CLASSES[theme.radius],
             )}
           >
             <BlockTile

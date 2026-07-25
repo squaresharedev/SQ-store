@@ -19,8 +19,15 @@ export const STOREFRONT_FONTS = [
 ] as const;
 export type StorefrontFont = (typeof STOREFRONT_FONTS)[number];
 
-export const STOREFRONT_RADII = ["none", "sm", "md", "lg"] as const;
-export type StorefrontRadius = (typeof STOREFRONT_RADII)[number];
+/** Corner roundness of grid cells and product tiles, in px. CSS clamps a
+ *  radius at half the element's size, so the top of the range reads as a
+ *  circle on square tiles (and a pill on wide ones). Replaces the legacy
+ *  `radius` enum + `cardShape` pair; the schema migrates both on parse. */
+export const CORNER_RADIUS_MAX = 100;
+
+/** At or past this roundness the tile corners are clipped away, so corner
+ *  price tag spots coerce onto the center vertical axis. */
+export const PRICE_TAG_CORNER_LIMIT = 32;
 
 // Every rectangle from 1×1 up to 3×3 (`<cols>x<rows>`) — small, wide, tall, and
 // large squares — for shape variety. Must stay identical to the shared grid's
@@ -33,54 +40,107 @@ export const BLOCK_SIZES = [
 export type BlockSize = (typeof BLOCK_SIZES)[number];
 
 /**
- * Named texture patterns — a fixed allowlist. The config stores only the KEY;
- * each maps to predefined safe CSS in components/storefront/background-presets.ts.
- * User input never becomes a raw CSS string.
- */
-export const PATTERN_PRESETS = [
-  "dots",
-  "grid",
-  "graph",
-  "diagonal",
-  "crosshatch",
-  "checker",
-] as const;
-export type PatternPreset = (typeof PATTERN_PRESETS)[number];
-
-/**
  * The storefront canvas background — a closed set of safe shapes: a solid hex,
- * a custom two-stop gradient (hex + hex + angle), or a pattern preset over a
- * base hex. Everything resolves through code-defined CSS (resolveBackgroundStyle);
- * no raw CSS/gradient string is ever stored or rendered.
+ * a custom two-stop gradient (hex + hex + angle), or an uploaded image.
+ * Everything resolves through code-defined CSS (resolveBackgroundStyle); no
+ * raw CSS/gradient string is ever stored or rendered. The image variant
+ * stores only the R2 object KEY (validated shape, never a URL) plus
+ * position/zoom; URLs are signed server-side at render time. Legacy configs
+ * stored a `pattern` kind; the schema migrates it to its base color on parse.
  */
 export type StorefrontBackground =
   | { kind: "solid"; color: string }
   | { kind: "gradient"; from: string; to: string; angle: number }
-  | { kind: "pattern"; preset: PatternPreset; color: string };
+  | {
+      kind: "image";
+      /** R2 object key (`images/{uploaderId}/{uuid}-{name}`), never a URL. */
+      key: string;
+      /** background-position, integer percentages. */
+      x: number;
+      y: number;
+      /** background-size width, integer percent of the canvas (100 = fit). */
+      scale: number;
+    };
 
-/** How a product tile lays out its info: bar under the image, bar overlaid on
- *  the image, or image-only with info revealed on hover/focus. */
-export const CARD_STYLES = ["standard", "overlay", "minimal"] as const;
-export type CardStyle = (typeof CARD_STYLES)[number];
+/** Position/zoom defaults for a freshly uploaded background image. */
+export const DEFAULT_BACKGROUND_IMAGE_PLACEMENT = {
+  x: 50,
+  y: 50,
+  scale: 100,
+} as const;
 
-/** Price on product tiles: always visible, revealed on hover/focus, or hidden. */
-export const PRICE_DISPLAYS = ["always", "hover", "never"] as const;
+export const BACKGROUND_IMAGE_SCALE_MIN = 100;
+export const BACKGROUND_IMAGE_SCALE_MAX = 300;
+
+/** How the title area renders on a product tile: a solid bar under the image,
+ *  a translucent bar over the image bottom, or text over a bottom gradient
+ *  shadow on the image itself. A "below" price tag shares this area. Legacy
+ *  configs stored cardStyle (standard/overlay/minimal); the schema migrates
+ *  it to titleStyle + titleDisplay on parse. */
+export const TITLE_STYLES = ["bar", "overlay", "shadow"] as const;
+export type TitleStyle = (typeof TITLE_STYLES)[number];
+
+/** Title-area visibility: always visible, or hidden until the tile is
+ *  hovered/focused. On reveal the overlay bar slides up from the bottom
+ *  edge; the other styles fade in. */
+export const TITLE_DISPLAYS = ["always", "hover"] as const;
+export type TitleDisplay = (typeof TITLE_DISPLAYS)[number];
+
+/** Price tag visibility: always visible, or hidden until the tile is
+ *  hovered/focused. Legacy configs stored a third value "never"; the schema
+ *  migrates it to priceTagPosition "hidden" on parse. */
+export const PRICE_DISPLAYS = ["always", "hover"] as const;
 export type PriceDisplay = (typeof PRICE_DISPLAYS)[number];
 
-/** Extra clip on PRODUCT tiles: force sharp, follow the theme radius, or a
- *  full circle (best on 1×1 blocks). Text blocks keep the theme radius. */
-export const CARD_SHAPES = ["square", "rounded", "circle"] as const;
-export type CardShape = (typeof CARD_SHAPES)[number];
 
-/** Where the price tag sits on a product tile. `hidden` wins over
- *  `priceDisplay` (either can hide the price). */
+/** Floating price tag spots over the image: the 4 corners plus the center
+ *  vertical axis (top, middle, bottom). Circle tiles clip their corners
+ *  entirely, so on circles only the vertical axis is offered/rendered. */
+export const PRICE_TAG_FLOAT_POSITIONS = [
+  "top-left",
+  "top-center",
+  "top-right",
+  "middle-center",
+  "bottom-left",
+  "bottom-center",
+  "bottom-right",
+] as const;
+export type PriceTagFloatPosition =
+  (typeof PRICE_TAG_FLOAT_POSITIONS)[number];
+
+/** Where the price tag sits on a product tile: in the info bar (`below`), at
+ *  one of the floating spots, or `hidden` (the ONE way to hide the price).
+ *  Legacy configs stored `onImage`/`corner`; the schema migrates them to
+ *  `bottom-left`/`top-right` on parse. */
 export const PRICE_TAG_POSITIONS = [
   "below",
-  "onImage",
-  "corner",
+  ...PRICE_TAG_FLOAT_POSITIONS,
   "hidden",
 ] as const;
 export type PriceTagPosition = (typeof PRICE_TAG_POSITIONS)[number];
+
+/**
+ * Corner spots do not exist on heavily rounded tiles (the clip removes them),
+ * so past PRICE_TAG_CORNER_LIMIT corners fall back to the same row's center
+ * spot. Storage keeps the seller's corner choice; only rendering and the
+ * picker coerce, so easing the roundness back restores the original corner.
+ */
+export function coercePriceTagPosition(
+  position: PriceTagPosition,
+  cornerRadius: number,
+): PriceTagPosition {
+  if (cornerRadius < PRICE_TAG_CORNER_LIMIT) return position;
+  switch (position) {
+    case "top-left":
+    case "top-right":
+      return "top-center";
+    case "bottom-left":
+    case "bottom-right":
+      return "bottom-center";
+    default:
+      return position;
+  }
+}
 
 export const PRICE_TAG_STYLES = ["plain", "pill"] as const;
 export type PriceTagStyle = (typeof PRICE_TAG_STYLES)[number];
@@ -161,10 +221,11 @@ export type StorefrontTheme = {
   /** Strict #rrggbb only. */
   accent: string;
   font: StorefrontFont;
-  radius: StorefrontRadius;
-  cardStyle: CardStyle;
+  /** 0 = sharp .. CORNER_RADIUS_MAX = circle/pill, in px (CSS clamps). */
+  cornerRadius: number;
+  titleStyle: TitleStyle;
+  titleDisplay: TitleDisplay;
   priceDisplay: PriceDisplay;
-  cardShape: CardShape;
   priceTagPosition: PriceTagPosition;
   priceTagStyle: PriceTagStyle;
   showTitle: boolean;
@@ -246,11 +307,11 @@ export const DEFAULT_STOREFRONT_CONFIG: StorefrontConfig = {
     background: { kind: "solid", color: "#ffffff" },
     accent: "#171717",
     font: "sans",
-    radius: "none",
-    cardStyle: "standard",
-    priceDisplay: "always",
     // Defaults render identically to configs saved before these fields existed.
-    cardShape: "rounded",
+    cornerRadius: 0,
+    titleStyle: "bar",
+    titleDisplay: "always",
+    priceDisplay: "always",
     priceTagPosition: "below",
     priceTagStyle: "plain",
     showTitle: true,
