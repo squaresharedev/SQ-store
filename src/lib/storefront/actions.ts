@@ -159,11 +159,9 @@ export async function saveStorefront(
 
   const config: StorefrontConfig = {
     theme: parsed.data.theme,
-    // Normalize order to a clean 0..n sequence.
-    blocks: blocks
-      .slice()
-      .sort((a, b) => a.order - b.order)
-      .map((block, index) => ({ ...block, order: index })),
+    // Blocks carry their own coordinates: the schema already verified they sit
+    // inside the canvas and don't overlap, so array order is irrelevant.
+    blocks,
     // Optional masthead — only persisted when the client sent one.
     ...(parsed.data.header ? { header: parsed.data.header } : {}),
     // Embed settings ride along validated so a designer save can't wipe what

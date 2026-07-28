@@ -10,7 +10,10 @@
 
 import { useState } from "react";
 import {
+  Maximize2,
+  Minus,
   Monitor,
+  Plus,
   Redo2,
   Shapes,
   ShoppingBag,
@@ -18,6 +21,7 @@ import {
   Smartphone,
   Type,
   Undo2,
+  WandSparkles,
 } from "lucide-react";
 import { SHAPE_KINDS, type ShapeKind } from "@/types/storefront";
 import { cn } from "@/lib/utils";
@@ -70,6 +74,13 @@ export function EditorToolbar({
   canRedo,
   onUndo,
   onRedo,
+  zoom,
+  onZoomIn,
+  onZoomOut,
+  onZoomReset,
+  onZoomFit,
+  onTidy,
+  canTidy,
   previewMode,
   onPreviewModeChange,
   settingsOpen,
@@ -84,6 +95,15 @@ export function EditorToolbar({
   canRedo: boolean;
   onUndo: () => void;
   onRedo: () => void;
+  /** Canvas scale, 1 = 100%. */
+  zoom: number;
+  onZoomIn: () => void;
+  onZoomOut: () => void;
+  onZoomReset: () => void;
+  onZoomFit: () => void;
+  /** Pack every block toward the top-left, in reading order. */
+  onTidy: () => void;
+  canTidy: boolean;
   previewMode: "desktop" | "mobile";
   onPreviewModeChange: (mode: "desktop" | "mobile") => void;
   /** Mobile only: the Design bottom sheet (global settings) toggle. */
@@ -209,9 +229,60 @@ export function EditorToolbar({
         <Redo2 className="size-4" strokeWidth={2} aria-hidden="true" />
       </button>
 
+      <button
+        type="button"
+        className={ICON_BTN}
+        onClick={onTidy}
+        disabled={!canTidy}
+        aria-label="Tidy the canvas"
+        title="Tidy: pack blocks to the top-left"
+      >
+        <WandSparkles className="size-4" strokeWidth={2} aria-hidden="true" />
+      </button>
+
       <Divider />
 
-      {/* -- Group 3: PREVIEW mode -- */}
+      {/* -- Group 3: ZOOM. The percentage doubles as "reset to 100%". -- */}
+      <button
+        type="button"
+        className={ICON_BTN}
+        onClick={onZoomOut}
+        aria-label="Zoom out"
+        title="Zoom out (Ctrl -)"
+      >
+        <Minus className="size-4" strokeWidth={2} aria-hidden="true" />
+      </button>
+      <button
+        type="button"
+        onClick={onZoomReset}
+        aria-label={`Zoom ${Math.round(zoom * 100)} percent. Reset to 100%`}
+        title="Reset zoom (Ctrl 0)"
+        className={`${INSERT_BTN} min-w-14 justify-center tabular-nums`}
+      >
+        {Math.round(zoom * 100)}%
+      </button>
+      <button
+        type="button"
+        className={ICON_BTN}
+        onClick={onZoomIn}
+        aria-label="Zoom in"
+        title="Zoom in (Ctrl +)"
+      >
+        <Plus className="size-4" strokeWidth={2} aria-hidden="true" />
+      </button>
+      <button
+        type="button"
+        className={ICON_BTN}
+        onClick={onZoomFit}
+        aria-label="Fit the canvas to the screen"
+        title="Zoom to fit"
+      >
+        <Maximize2 className="size-4" strokeWidth={2} aria-hidden="true" />
+      </button>
+
+      <Divider />
+
+      {/* -- Group 4: PREVIEW mode -- */}
       <button
         type="button"
         className={`${ICON_BTN} ${previewMode === "desktop" ? PREVIEW_ACTIVE : PREVIEW_IDLE}`}
@@ -234,7 +305,7 @@ export function EditorToolbar({
         <Smartphone className="size-4" strokeWidth={2} aria-hidden="true" />
       </button>
 
-      {/* -- Group 4 (mobile only): the Design settings sheet. On lg+ the
+      {/* -- Group 5 (mobile only): the Design settings sheet. On lg+ the
             settings panel is always visible as the right column. -- */}
       <div className="flex items-center gap-1 lg:hidden">
         <Divider />

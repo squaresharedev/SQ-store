@@ -6,16 +6,24 @@ import { ArrowLeft, ChevronLeft, ChevronRight, X } from "lucide-react";
 import type { ActionError } from "@/lib/errors";
 import type { Product } from "@/types/product";
 import {
+  CANVAS_COLUMNS_MIN,
+  CANVAS_ROWS_MAX,
+  CANVAS_ROWS_MIN,
   DEFAULT_STOREFRONT_HEADER,
   blockKey,
-  type BlockSize,
+  readingOrder,
+  type BlockPlacement,
   type ShapeKind,
   type StorefrontBlock,
   type StorefrontConfig,
   type StorefrontHeader,
   type StorefrontTheme,
-  type TextBlock,
 } from "@/types/storefront";
+import {
+  findFreeCell,
+  packFirstFit,
+  placementIsFree,
+} from "@/components/grid/gridConstants";
 import { MAX_BLOCKS, STOREFRONT_NAME_MAX } from "@/lib/validation/storefront";
 import { saveStorefront } from "@/lib/storefront/actions";
 import { cn } from "@/lib/utils";
@@ -69,6 +77,17 @@ const INSPECTOR_CLOSE_CLASS =
 /** Mobile emergency-edit layout: panels become slide-up bottom sheets over the
  *  canvas (scrollable, padded to clear the floating toolbar); on lg+ the same
  *  element renders as a plain block in the right column. */
+/** Canvas zoom bounds. A view preference only: never saved, never seen by
+ *  buyers, and deliberately NOT affecting layout width, so zooming out never
+ *  trips the grid's small-screen reflow. */
+const ZOOM_MIN = 0.25;
+const ZOOM_MAX = 2;
+const ZOOM_STEP = 0.1;
+
+function clampZoom(value: number): number {
+  return Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, Math.round(value * 100) / 100));
+}
+
 /** Design panel width bounds, in px (desktop only). Dragging the edge below
  *  the minimum collapses the panel rather than squeezing it unusably narrow. */
 const PANEL_MIN_WIDTH = 260;
@@ -123,9 +142,8 @@ export function StorefrontDesigner({
   const [header, setHeader] = useState<StorefrontHeader>(
     initialConfig.header ?? DEFAULT_STOREFRONT_HEADER,
   );
-  const [blocks, setBlocks] = useState<StorefrontBlock[]>(() =>
-    [...initialConfig.blocks].sort((a, b) => a.order - b.order),
-  );
+  // Placement is explicit, so the array is just a bag of blocks.
+  const [blocks, setBlocks] = useState<StorefrontBlock[]>(initialConfig.blocks);
   const [saveState, setSaveState] = useState<SaveState>({ status: "idle" });
   // Unsaved-edits flag, separate from saveState so "idle after load" and
   // "idle with pending edits" render differently next to the Save button.
@@ -144,6 +162,13 @@ export function StorefrontDesigner({
   // minimum: a drag that would go narrower closes the panel instead, so
   // reopening never lands on an unusably thin strip.
   const [panelWidth, setPanelWidth] = useState(PANEL_DEFAULT_WIDTH);
+  const [zoom, setZoom] = useState(1);
+  // The free cell the seller clicked, so the next inserted block lands there.
+  const [insertHint, setInsertHint] = useState<{ x: number; y: number } | null>(
+    null,
+  );
+  // The scroll area around the canvas: owns wheel-zoom and fit-on-open.
+  const canvasScrollRef = useRef<HTMLElement>(null);
   // Preview device for the canvas frame — toolbar-owned, never persisted.
   const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">(
     "desktop",
@@ -231,11 +256,87 @@ export function StorefrontDesigner({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
+  // Ctrl/Cmd + wheel zooms the canvas (trackpad pinch arrives as the same
+  // event). Registered non-passively so the browser's own page zoom can be
+  // prevented; plain scrolling is left alone.
+  useEffect(() => {
+    const area = canvasScrollRef.current;
+    if (!area) return;
+    function onWheel(event: WheelEvent) {
+      if (!event.ctrlKey && !event.metaKey) return;
+      event.preventDefault();
+      setZoom((current) =>
+        clampZoom(current - Math.sign(event.deltaY) * ZOOM_STEP),
+      );
+    }
+    area.addEventListener("wheel", onWheel, { passive: false });
+    return () => area.removeEventListener("wheel", onWheel);
+  }, []);
+
+  // Cmd/Ctrl +/-/0, the shortcuts every canvas tool shares.
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if (!(event.ctrlKey || event.metaKey)) return;
+      const target = event.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+      if (event.key === "=" || event.key === "+") {
+        event.preventDefault();
+        setZoom((current) => clampZoom(current + ZOOM_STEP));
+      } else if (event.key === "-") {
+        event.preventDefault();
+        setZoom((current) => clampZoom(current - ZOOM_STEP));
+      } else if (event.key === "0") {
+        event.preventDefault();
+        setZoom(1);
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
+
   // The inspector and the mobile settings sheet share the small screen — at
   // most one is open at a time.
   function selectBlock(key: string | null) {
     setInspector(key === null ? null : { kind: "block", key });
     if (key !== null) setSettingsOpen(false);
+  }
+
+  /** Clicking a free cell opens the picker; whatever is added next lands in
+   *  that cell rather than the first free one. */
+  function insertAt(x: number, y: number) {
+    setInsertHint({ x, y });
+    setInspector({ kind: "picker" });
+    setSettingsOpen(false);
+  }
+
+  /** Consume the pending insert cell (one use only). */
+  function takeInsertHint(): { x: number; y: number } | undefined {
+    const hint = insertHint ?? undefined;
+    if (hint) setInsertHint(null);
+    return hint;
+  }
+
+  function zoomBy(delta: number) {
+    setZoom((current) => clampZoom(current + delta));
+  }
+
+  /** Scale the canvas so the whole board fits the viewport width. */
+  function zoomToFit() {
+    const area = canvasScrollRef.current;
+    const stage = area?.firstElementChild as HTMLElement | null;
+    if (!area || !stage) return;
+    // The stage is already scaled, so back the natural width out of it.
+    const natural = stage.offsetWidth / zoom;
+    if (natural <= 0) return;
+    // Leave the canvas its padding rather than butting against the edges.
+    setZoom(clampZoom((area.clientWidth - 48) / natural));
   }
 
   function togglePicker() {
@@ -251,46 +352,109 @@ export function StorefrontDesigner({
     if (next) setInspector(null);
   }
 
-  function addProduct(productId: string) {
-    if (usedProductIds.has(productId) || blocks.length >= MAX_BLOCKS) return;
+  /** The blocks as the grid's placement helpers want them. */
+  function canvasBlocks() {
+    return blocks.map((block) => ({
+      key: blockKey(block),
+      x: block.x,
+      y: block.y,
+      w: block.w,
+      h: block.h,
+      data: null,
+    }));
+  }
+
+  /**
+   * Where a new w x h block should land: the cell the seller pointed at when
+   * it is free, otherwise the first free spot, otherwise a freshly grown row.
+   * Null when the board is full at its maximum height.
+   */
+  function findSpot(
+    w: number,
+    h: number,
+    at?: { x: number; y: number },
+  ): (BlockPlacement & { growRows?: number }) | null {
+    const existing = canvasBlocks();
+    const { columns, rows } = theme;
+    if (
+      at &&
+      placementIsFree(existing, { ...at, w, h }, null, columns, rows)
+    ) {
+      return { ...at, w, h };
+    }
+    const free = findFreeCell(existing, w, h, columns, rows);
+    if (free) return { ...free, w, h };
+
+    // Board full: grow it rather than refusing the block.
+    const grown = Math.min(CANVAS_ROWS_MAX, rows + h);
+    if (grown > rows) {
+      const spot = findFreeCell(existing, w, h, columns, grown);
+      if (spot) return { ...spot, w, h, growRows: grown };
+    }
+    return null;
+  }
+
+  /** Commit a new block at a found spot, growing the canvas if that's what
+   *  the spot needed. */
+  function insertBlock(
+    build: (placement: BlockPlacement) => StorefrontBlock,
+    w: number,
+    h: number,
+    at?: { x: number; y: number },
+  ): StorefrontBlock | null {
+    if (blocks.length >= MAX_BLOCKS) return null;
+    const spot = findSpot(w, h, at);
+    if (!spot) return null;
     recordChange();
-    setBlocks((current) => [
-      ...current,
-      { type: "product", productId, size: "1x1", order: current.length },
-    ]);
+    if (spot.growRows) setTheme({ ...theme, rows: spot.growRows });
+    const block = build({ x: spot.x, y: spot.y, w: spot.w, h: spot.h });
+    setBlocks((current) => [...current, block]);
+    return block;
+  }
+
+  function addProduct(productId: string) {
+    if (usedProductIds.has(productId)) return;
+    insertBlock(
+      (placement) => ({ type: "product", productId, ...placement }),
+      1,
+      1,
+      takeInsertHint(),
+    );
     // The picker stays open so several products can be added in one pass.
   }
 
   function addTextBlock() {
-    if (blocks.length >= MAX_BLOCKS) return;
-    recordChange();
-    const newBlock: TextBlock = {
-      type: "text",
-      id: crypto.randomUUID(),
-      text: "Your text here",
-      variant: "heading",
-      align: "left",
-      size: "2x1",
-      order: blocks.length,
-    };
-    setBlocks((current) => [...current, { ...newBlock, order: current.length }]);
-    selectBlock(blockKey(newBlock));
+    const block = insertBlock(
+      (placement) => ({
+        type: "text",
+        id: crypto.randomUUID(),
+        text: "Your text here",
+        variant: "heading",
+        align: "left",
+        ...placement,
+      }),
+      Math.min(2, theme.columns),
+      1,
+      takeInsertHint(),
+    );
+    if (block) selectBlock(blockKey(block));
   }
 
   function addShapeBlock(kind: ShapeKind) {
-    if (blocks.length >= MAX_BLOCKS) return;
-    recordChange();
-    const newBlock: StorefrontBlock = {
-      type: "shape",
-      id: crypto.randomUUID(),
-      kind,
-      // Accent is the natural starting fill.
-      color: theme.accent,
-      size: "1x1",
-      order: blocks.length,
-    };
-    setBlocks((current) => [...current, { ...newBlock, order: current.length }]);
-    selectBlock(blockKey(newBlock));
+    const block = insertBlock(
+      (placement) => ({
+        type: "shape",
+        id: crypto.randomUUID(),
+        kind,
+        // Accent is the natural starting fill.
+        color: theme.accent,
+        ...placement,
+      }),
+      1,
+      1,
+      takeInsertHint(),
+    );
+    if (block) selectBlock(blockKey(block));
   }
 
   function removeBlock(key: string) {
@@ -301,11 +465,55 @@ export function StorefrontDesigner({
     );
   }
 
-  function setBlockSize(key: string, size: BlockSize) {
+  function moveBlock(key: string, x: number, y: number) {
+    recordChange(`move:${key}`);
+    setBlocks((current) =>
+      current.map((b) => (blockKey(b) === key ? { ...b, x, y } : b)),
+    );
+  }
+
+  function resizeBlock(key: string, w: number, h: number) {
     recordChange(`size:${key}`);
     setBlocks((current) =>
-      current.map((b) => (blockKey(b) === key ? { ...b, size } : b)),
+      current.map((b) => (blockKey(b) === key ? { ...b, w, h } : b)),
     );
+  }
+
+  /** Pack every block toward the top-left in reading order — the old
+   *  auto-flow layout, available on demand for sellers who don't want to
+   *  place things by hand. */
+  function tidyBlocks() {
+    recordChange();
+    setBlocks((current) => {
+      const ordered = readingOrder(current);
+      const packed = packFirstFit(
+        ordered.map((block) => ({ w: block.w, h: block.h })),
+        theme.columns,
+      );
+      return ordered.map((block, index) => ({
+        ...block,
+        x: packed[index].x,
+        y: packed[index].y,
+      }));
+    });
+  }
+
+  /** Resize the canvas itself. Shrinking never cuts a block off: the minimum
+   *  is whatever the current content extends to. */
+  function updateCanvas(columns: number, rows: number) {
+    const minColumns = blocks.reduce(
+      (max, block) => Math.max(max, block.x + block.w),
+      CANVAS_COLUMNS_MIN,
+    );
+    const minRows = blocks.reduce(
+      (max, block) => Math.max(max, block.y + block.h),
+      CANVAS_ROWS_MIN,
+    );
+    updateTheme({
+      ...theme,
+      columns: Math.max(columns, minColumns),
+      rows: Math.max(rows, minRows),
+    });
   }
 
   function toggleSoldOut(key: string) {
@@ -335,19 +543,6 @@ export function StorefrontDesigner({
         b.type === "shape" && blockKey(b) === key ? { ...b, ...patch } : b,
       ),
     );
-  }
-
-  function reorderBlocks(activeKey: string, overKey: string) {
-    recordChange();
-    setBlocks((current) => {
-      const from = current.findIndex((b) => blockKey(b) === activeKey);
-      const to = current.findIndex((b) => blockKey(b) === overKey);
-      if (from < 0 || to < 0) return current;
-      const next = [...current];
-      const [moved] = next.splice(from, 1);
-      next.splice(to, 0, moved);
-      return next;
-    });
   }
 
   function updateTheme(next: StorefrontTheme) {
@@ -429,7 +624,8 @@ export function StorefrontDesigner({
     setSaveState({ status: "saving" });
     const config: StorefrontConfig = {
       theme,
-      blocks: blocks.map((block, index) => ({ ...block, order: index })),
+      // Blocks carry their own coordinates, so array order is irrelevant.
+      blocks,
       header,
       // Embed settings are edited in the list-page modal, not here — pass the
       // loaded value through so a designer save never wipes them.
@@ -527,7 +723,10 @@ export function StorefrontDesigner({
       <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
         {/* The canvas owns the viewport and scrolls INTERNALLY, but only when
             the storefront outgrows it. pb clears the floating toolbar. */}
-        <main className="min-w-0 flex-1 space-y-6 overflow-y-auto px-4 py-6 pb-24 sm:px-6">
+        <main
+          ref={canvasScrollRef}
+          className="min-w-0 flex-1 space-y-6 overflow-auto px-4 py-6 pb-24 sm:px-6"
+        >
           {saveState.status === "error" && (
             <ActionErrorNotice error={saveState.error} />
           )}
@@ -540,9 +739,11 @@ export function StorefrontDesigner({
             previewMode={previewMode}
             backgroundImageUrl={backgroundImageUrl}
             showGrid={showGrid}
-            onReorder={reorderBlocks}
-            onSizeChange={setBlockSize}
+            zoom={zoom}
+            onMoveBlock={moveBlock}
+            onResizeBlock={resizeBlock}
             onRemove={removeBlock}
+            onEmptyCellClick={insertAt}
             selectedKey={inspector?.kind === "block" ? inspector.key : null}
             onSelectBlock={selectBlock}
           />
@@ -686,6 +887,7 @@ export function StorefrontDesigner({
                 onBackgroundImageChange={setBackgroundImageUrl}
                 showGrid={showGrid}
                 onShowGridChange={setShowGrid}
+                onCanvasChange={updateCanvas}
               />
             </div>
           </div>
@@ -697,6 +899,13 @@ export function StorefrontDesigner({
         onAddText={addTextBlock}
         onAddShape={addShapeBlock}
         canAddBlocks={blocks.length < MAX_BLOCKS}
+        zoom={zoom}
+        onZoomIn={() => zoomBy(ZOOM_STEP)}
+        onZoomOut={() => zoomBy(-ZOOM_STEP)}
+        onZoomReset={() => setZoom(1)}
+        onZoomFit={zoomToFit}
+        onTidy={tidyBlocks}
+        canTidy={blocks.length > 0}
         canUndo={history.canUndo}
         canRedo={history.canRedo}
         onUndo={undo}

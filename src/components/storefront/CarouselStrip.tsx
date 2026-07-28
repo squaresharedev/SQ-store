@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { Product } from "@/types/product";
 import {
   blockKey,
+  readingOrder,
   type StorefrontBlock,
   type StorefrontTheme,
 } from "@/types/storefront";
@@ -157,7 +158,7 @@ export function CarouselStrip({
         // The shared bento gap token (density override included) — code-defined.
         style={{ gap: "var(--grid-gap)" }}
       >
-        {blocks.map((block, index) => {
+        {readingOrder(blocks).map((block, index, ordered) => {
           const key = blockKey(block);
           return (
             <li
@@ -206,7 +207,7 @@ export function CarouselStrip({
                   <button
                     type="button"
                     onClick={() => onMove(key, 1)}
-                    disabled={index === blocks.length - 1}
+                    disabled={index === ordered.length - 1}
                     aria-label="Move block right"
                     className={TILE_CONTROL_CLASS}
                   >

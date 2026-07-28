@@ -155,30 +155,28 @@
    Presentation-agnostic grid used by the storefront builder AND the
    marketplace. Cells are TRUE squares at any width: row height is derived
    from the container's inline size so it always equals a column's width,
-   including the gap. Blocks span 1x1 / 2x1 / 2x2 with ONE equal gap on all
-   four sides (no shared/intersecting borders). Column counts are injected
-   from gridConstants via --ss-cols-desktop / --ss-cols-mobile.
+   including the gap. Blocks are placed at explicit coordinates and span as
+   many cells as they state, with ONE equal gap on all four sides (no
+   shared/intersecting borders). The canvas size is injected by Grid.tsx via
+   --ss-cols / --ss-rows; Grid also decides when a narrow container should
+   reflow to fewer columns, so no container query is needed here.
    ============================================================ */
 .ss-grid-container {
   container-type: inline-size;
 }
 .ss-grid {
-  --ss-cols: var(--ss-cols-mobile, 2);
   display: grid;
-  grid-template-columns: repeat(var(--ss-cols), minmax(0, 1fr));
-  /* row height = column width = (container - gaps) / columns → square cells */
+  grid-template-columns: repeat(var(--ss-cols, 6), minmax(0, 1fr));
+  /* row height = column width = (container - gaps) / columns → square cells.
+     The explicit rows draw the board; auto-rows catch anything past it. */
+  grid-template-rows: repeat(
+    var(--ss-rows, 1),
+    calc((100cqw - (var(--ss-cols, 6) - 1) * var(--grid-gap)) / var(--ss-cols, 6))
+  );
   grid-auto-rows: calc(
-    (100cqw - (var(--ss-cols) - 1) * var(--grid-gap)) / var(--ss-cols)
+    (100cqw - (var(--ss-cols, 6) - 1) * var(--grid-gap)) / var(--ss-cols, 6)
   );
   gap: var(--grid-gap);
-}
-/* Container query (not viewport): the column switch keys off the grid's OWN
-   width, the same box the 100cqw row-height math measures — so a grid embedded
-   in a narrow panel drops to the mobile column count regardless of viewport. */
-@container (min-width: 40rem) {
-  .ss-grid {
-    --ss-cols: var(--ss-cols-desktop, 4);
-  }
 }
 /* Grid density: the storefront canvas sets --grid-gap inline on a grid
    ancestor (config-maps.ts gridGapStyle, from the schema-bounded integer

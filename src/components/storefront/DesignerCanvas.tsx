@@ -1,11 +1,11 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { LayoutGrid } from "lucide-react";
 import type { Product } from "@/types/product";
 import {
   blockKey,
-  type BlockSize,
+  readingOrder,
   type StorefrontBlock,
   type StorefrontHeader,
   type StorefrontTheme,
@@ -40,6 +40,18 @@ function blockLabel(block: StorefrontBlock, product: Product | null): string {
  * owned by StorefrontDesigner (the toolbar and inspector need them too). The
  * buyer-facing embed can later render the same <Grid> with `editable={false}`.
  */
+/**
+ * Cell size the DESIGN canvas renders at, in px. The editor shows the board
+ * at its natural size and zooms, rather than squeezing cells to fit the
+ * window — that way a 12-column storefront is still designed as 12 columns on
+ * a laptop. The buyer-facing render stays fluid.
+ */
+const DESIGN_CELL_PX = 96;
+
+/** The canvas frame's own padding + border (p-4 plus a 1px edge), which
+ *  border-box sizing folds into the width we set. */
+const DESIGN_FRAME_CHROME_PX = 16 * 2 + 2;
+
 export function DesignerCanvas({
   blocks,
   productsById,
@@ -48,9 +60,11 @@ export function DesignerCanvas({
   previewMode,
   backgroundImageUrl = null,
   showGrid = true,
-  onReorder,
-  onSizeChange,
+  zoom = 1,
+  onMoveBlock,
+  onResizeBlock,
   onRemove,
+  onEmptyCellClick,
   selectedKey,
   onSelectBlock,
 }: {
@@ -59,17 +73,22 @@ export function DesignerCanvas({
   theme: StorefrontTheme;
   /** Optional masthead (name + bio) rendered above the grid when shown. */
   header: StorefrontHeader;
-  /** Desktop or phone-width frame — set from the toolbar, preview only. */
+  /** Desktop designs at natural size + zoom; mobile previews fluid, so the
+   *  seller sees the real small-screen reflow. */
   previewMode: "desktop" | "mobile";
   /** Display URL for an image background (signed server-side, or a local
    *  object URL right after an upload). Null renders the neutral base. */
   backgroundImageUrl?: string | null;
-  /** Draw the dashed empty slots (editor guide only, never for buyers). */
+  /** Draw the free cells (editor guide only, never for buyers). */
   showGrid?: boolean;
+  /** Canvas scale, 1 = 100%. Desktop preview only. */
+  zoom?: number;
   /** All callbacks are keyed by blockKey(block). */
-  onReorder: (activeKey: string, overKey: string) => void;
-  onSizeChange: (key: string, size: BlockSize) => void;
+  onMoveBlock: (key: string, x: number, y: number) => void;
+  onResizeBlock: (key: string, w: number, h: number) => void;
   onRemove: (key: string) => void;
+  /** Clicking a free cell inserts there. */
+  onEmptyCellClick: (x: number, y: number) => void;
   /** Key of the block currently open in the inspector panel, if any. */
   selectedKey: string | null;
   onSelectBlock: (key: string | null) => void;
@@ -82,48 +101,56 @@ export function DesignerCanvas({
     [productsById],
   );
 
-  // Map storefront blocks -> generic grid blocks. `order` is the ARRAY INDEX:
-  // StorefrontDesigner keeps blocks in visual order and only writes the `order`
-  // field on save, so the index is the authoritative current order.
+  // Map storefront blocks -> generic grid blocks. Each carries its own
+  // coordinates, so the array order means nothing.
   const gridBlocks = useMemo<GridBlock<StorefrontBlock>[]>(
     () =>
-      blocks.map((block, index) => ({
+      blocks.map((block) => ({
         key: blockKey(block),
-        size: block.size,
-        order: index,
+        x: block.x,
+        y: block.y,
+        w: block.w,
+        h: block.h,
         data: block,
       })),
     [blocks],
   );
 
-  // Carousel reorder: move one slot by handing the neighbor's key to the same
-  // onReorder the grid's drag uses — one reorder path for both display modes.
-  function moveBlock(key: string, direction: -1 | 1) {
-    const index = blocks.findIndex((block) => blockKey(block) === key);
-    const neighbor = blocks[index + direction];
+  // Carousel mode has no coordinates: it reads the board top-to-bottom,
+  // left-to-right and swaps neighbours in that sequence.
+  function shiftInCarousel(key: string, direction: -1 | 1) {
+    const ordered = readingOrder(blocks);
+    const index = ordered.findIndex((block) => blockKey(block) === key);
+    const neighbor = ordered[index + direction];
     if (index < 0 || !neighbor) return;
-    onReorder(key, blockKey(neighbor));
+    const moved = ordered[index];
+    onMoveBlock(key, neighbor.x, neighbor.y);
+    onMoveBlock(blockKey(neighbor), moved.x, moved.y);
   }
 
-  return (
-    // Canvas frame — narrows to a phone-width column in mobile preview. That
-    // alone IS the mobile render: the grid's container query keys off its own
-    // width, so columns, wrapping, and square-cell math all reflow exactly as
-    // they will on a real phone.
-    <div className={cn(previewMode === "mobile" && "mx-auto w-full max-w-sm")}>
-      <div
-        className={cn(
-          "rounded-md border border-border p-4",
-          FONT_CLASSES[theme.font],
-        )}
-        // Schema-constrained: hex is re-gated by the strict regex, the gap is
-        // a bounded integer. gridGapStyle sets the --grid-gap token the
-        // .ss-grid rule (and the carousel strip) inherit.
-        style={{
-          ...resolveBackgroundStyle(theme.background, backgroundImageUrl),
-          ...gridGapStyle(theme.gridGap),
-        }}
-      >
+  // The design canvas renders at its natural size and is scaled; the mobile
+  // preview stays fluid so the seller sees the real reflow.
+  const isDesign = previewMode === "desktop";
+  const naturalWidth = isDesign
+    ? theme.columns * DESIGN_CELL_PX +
+      (theme.columns - 1) * theme.gridGap +
+      DESIGN_FRAME_CHROME_PX
+    : undefined;
+
+  const canvas = (
+    <div
+      className={cn(
+        "rounded-md border border-border p-4",
+        FONT_CLASSES[theme.font],
+      )}
+      // Schema-constrained: hex is re-gated by the strict regex, the gap is
+      // a bounded integer. gridGapStyle sets the --grid-gap token the
+      // .ss-grid rule (and the carousel strip) inherit.
+      style={{
+        ...resolveBackgroundStyle(theme.background, backgroundImageUrl),
+        ...gridGapStyle(theme.gridGap),
+      }}
+    >
         <StorefrontMasthead header={header} theme={theme} />
 
         {blocks.length === 0 ? (
@@ -153,39 +180,33 @@ export function DesignerCanvas({
               editingKey={selectedKey}
               onSelect={onSelectBlock}
               onRemove={onRemove}
-              onMove={moveBlock}
+              onMove={shiftInCarousel}
             />
             <p className="mt-2 font-inter text-xs text-muted-foreground">
               Buyers swipe through this row, or tap the arrows at its edges. Use
-              the arrows on a tile to reorder; block sizes apply in grid mode.
+              the arrows on a tile to reorder; placement applies in grid mode.
             </p>
           </>
         ) : (
           <Grid
             editable
             showEmptyCells={showGrid}
-            // Whole-tile drag: grab a shape/product/text anywhere to move it;
-            // a plain click selects the block (BlockTile). No visible grip:
-            // the hidden handle appears only on keyboard focus.
-            dragOnCell
             blocks={gridBlocks}
-            ariaLabel="Storefront grid"
-            // Finer 6-column grid (3 in narrow containers) → more cells,
-            // more shape freedom. The mobile preview needs no override: the
-            // narrowed frame trips the grid's own container query.
-            columns={6}
-            mobileColumns={3}
+            ariaLabel="Storefront canvas"
+            columns={theme.columns}
+            rows={theme.rows}
             // Corner roundness drives the cell clip (style beats the grid's
             // default rounded-sm class); tiles inherit it, no clip of their
             // own. Scaled per tile size so big tiles round like small ones.
-            cellStyle={(size) => ({
-              borderRadius: scaledCornerRadius(theme.cornerRadius, size),
+            cellStyle={(placement) => ({
+              borderRadius: scaledCornerRadius(theme.cornerRadius, placement),
             })}
             getBlockLabel={(gridBlock) =>
               blockLabel(gridBlock.data, productFor(gridBlock.data))
             }
-            onReorder={onReorder}
-            onResize={onSizeChange}
+            onMove={onMoveBlock}
+            onResize={onResizeBlock}
+            onEmptyCellClick={onEmptyCellClick}
             renderBlock={(gridBlock, state) => (
               <BlockTile
                 block={gridBlock.data}
@@ -203,6 +224,63 @@ export function DesignerCanvas({
             )}
           />
         )}
+    </div>
+  );
+
+  // Mobile preview: a phone-width column, fluid, so the grid reflows exactly
+  // as it will on a real device.
+  if (!isDesign) {
+    return <div className="mx-auto w-full max-w-sm">{canvas}</div>;
+  }
+
+  // Design view: natural size, scaled by the zoom. The outer box is sized to
+  // the SCALED dimensions so the scroll area stays honest (a transform alone
+  // does not affect layout).
+  return (
+    <ZoomStage zoom={zoom} width={naturalWidth ?? 0}>
+      {canvas}
+    </ZoomStage>
+  );
+}
+
+/**
+ * Scales its child and reports the scaled footprint to the scroll container.
+ * The child is measured UNSCALED (offsetHeight ignores transforms), so the
+ * spacer height stays correct at any zoom.
+ */
+function ZoomStage({
+  zoom,
+  width,
+  children,
+}: {
+  zoom: number;
+  width: number;
+  children: React.ReactNode;
+}) {
+  const stageRef = useRef<HTMLDivElement>(null);
+  const [height, setHeight] = useState(0);
+
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage) return;
+    const measure = () => setHeight(stage.offsetHeight);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(stage);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div style={{ width: width * zoom, height: height * zoom }}>
+      <div
+        ref={stageRef}
+        style={{
+          width,
+          transform: `scale(${zoom})`,
+          transformOrigin: "0 0",
+        }}
+      >
+        {children}
       </div>
     </div>
   );

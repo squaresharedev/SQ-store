@@ -145,6 +145,9 @@ export function ProductTileContent({
           <img
             src={product.imageUrl}
             alt=""
+            // Images are natively draggable, which hijacks a tile drag on the
+            // canvas and shows a not-allowed cursor.
+            draggable={false}
             className={cn(
               "size-full object-cover",
               soldOut && "opacity-60 grayscale",

@@ -43,11 +43,14 @@ export function ControlsPanel({
   onBackgroundImageChange,
   showGrid,
   onShowGridChange,
+  onCanvasChange,
 }: {
   theme: StorefrontTheme;
   header: StorefrontHeader;
   onThemeChange: (theme: StorefrontTheme) => void;
   onHeaderChange: (header: StorefrontHeader) => void;
+  /** Canvas resize, guarded against cutting off placed blocks. */
+  onCanvasChange: (columns: number, rows: number) => void;
   /** Display URL for an image background (signed or local object URL). */
   backgroundImageUrl: string | null;
   onBackgroundImageChange: (url: string | null) => void;
@@ -80,7 +83,11 @@ export function ControlsPanel({
       </CollapsibleSection>
 
       <CollapsibleSection title="Layout" collapsible defaultOpen={false}>
-        <LayoutSection theme={theme} onChange={onThemeChange} />
+        <LayoutSection
+          theme={theme}
+          onChange={onThemeChange}
+          onCanvasChange={onCanvasChange}
+        />
       </CollapsibleSection>
 
       <CollapsibleSection title="Typography" collapsible defaultOpen={false}>

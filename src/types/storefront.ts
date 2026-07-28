@@ -29,15 +29,24 @@ export const CORNER_RADIUS_MAX = 100;
  *  price tag spots coerce onto the center vertical axis. */
 export const PRICE_TAG_CORNER_LIMIT = 32;
 
-// Every rectangle from 1×1 up to 3×3 (`<cols>x<rows>`) — small, wide, tall, and
-// large squares — for shape variety. Must stay identical to the shared grid's
-// GridSize (components/grid/gridConstants.ts) so the two interoperate.
-export const BLOCK_SIZES = [
-  "1x1", "2x1", "3x1",
-  "1x2", "2x2", "3x2",
-  "1x3", "2x3", "3x3",
-] as const;
-export type BlockSize = (typeof BLOCK_SIZES)[number];
+// CANVAS MODEL. Blocks are placed FREELY: each one stores its own cell
+// coordinates (x, y) and span (w, h) on a board of `theme.columns` by
+// `theme.rows` cells. There is no auto-flow and no `order` — the gaps between
+// blocks are deliberate whitespace, and reading order is derived from the
+// coordinates (see readingOrder) whenever a linear sequence is needed.
+//
+// Placements are always non-overlapping and inside the canvas; the schema and
+// the server re-check both on every save.
+
+export const CANVAS_COLUMNS_MIN = 3;
+export const CANVAS_COLUMNS_MAX = 12;
+export const CANVAS_ROWS_MIN = 2;
+// Generous headroom: a board this tall is only reachable by scrolling, but the
+// cap has to clear whatever the tallest legacy auto-flow layout packs into.
+export const CANVAS_ROWS_MAX = 60;
+
+/** Where a block sits on the canvas and how many cells it covers. */
+export type BlockPlacement = { x: number; y: number; w: number; h: number };
 
 /**
  * The storefront canvas background — a closed set of safe shapes: a solid hex,
@@ -238,6 +247,9 @@ export type StorefrontTheme = {
   /** Strict #rrggbb only. */
   accent: string;
   font: StorefrontFont;
+  /** Canvas size in blocks. Blocks are placed freely inside it. */
+  columns: number;
+  rows: number;
   /** 0 = sharp .. CORNER_RADIUS_MAX = circle/pill, in px (CSS clamps). */
   cornerRadius: number;
   titleStyle: TitleStyle;
@@ -255,28 +267,24 @@ export type StorefrontTheme = {
   hideSoldOut: boolean;
 };
 
-export type ProductBlock = {
+export type ProductBlock = BlockPlacement & {
   type: "product";
   /** References the seller's own products; ownership re-checked on save. */
   productId: string;
-  size: BlockSize;
-  order: number;
   /** Seller-controlled sold-out mark (products have no inventory yet; real
    *  stock tracking can drive this same flag later). Optional so configs
    *  saved before the flag existed still parse. */
   soldOut?: boolean;
 };
 
-export type TextBlock = {
+export type TextBlock = BlockPlacement & {
   type: "text";
-  /** Client-minted uuid; only used to key/reorder the block. */
+  /** Client-minted uuid; only used to key the block. */
   id: string;
   /** Plain text. NEVER rendered as markup — React text node only. */
   text: string;
   variant: TextVariant;
   align: TextAlign;
-  size: BlockSize;
-  order: number;
   /** Inline formatting toggles. Applied as tokenized classes (never markup). */
   bold?: boolean;
   italic?: boolean;
@@ -289,16 +297,14 @@ export const SHAPE_BORDER_WIDTH_MAX = 24;
 /** Ring thickness when the block carries no explicit borderWidth. */
 export const RING_DEFAULT_WIDTH = 8;
 
-export type ShapeBlock = {
+export type ShapeBlock = BlockPlacement & {
   type: "shape";
-  /** Client-minted uuid; only used to key/reorder the block. */
+  /** Client-minted uuid; only used to key the block. */
   id: string;
   /** Allowlisted kind — resolves through ShapeTileContent's fixed map. */
   kind: ShapeKind;
   /** Strict #rrggbb only. The fill, or the stroke on a `ring`. */
   color: string;
-  size: BlockSize;
-  order: number;
   /**
    * Outline width in px, 0..SHAPE_BORDER_WIDTH_MAX. On a `ring` this is the
    * ring's own thickness (defaulting to RING_DEFAULT_WIDTH); on the filled
@@ -315,7 +321,27 @@ export type ShapeBlock = {
 
 export type StorefrontBlock = ProductBlock | TextBlock | ShapeBlock;
 
-/** Stable identity for sortable keys and lookups, across all block kinds. */
+/**
+ * Reading order for anything that needs a LINE rather than a board: the
+ * small-screen reflow, the carousel display mode, screen readers. Top-to-
+ * bottom, then left-to-right, exactly how the eye crosses the canvas.
+ */
+export function readingOrder<T extends BlockPlacement>(blocks: T[]): T[] {
+  return [...blocks].sort((a, b) => a.y - b.y || a.x - b.x);
+}
+
+/**
+ * Do two placements cover any of the same cells? Deliberately mirrored in
+ * components/grid/gridConstants: the schema (a server boundary) must not have
+ * to import a client component module to enforce a core rule.
+ */
+export function placementsOverlap(a: BlockPlacement, b: BlockPlacement): boolean {
+  return (
+    a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h
+  );
+}
+
+/** Stable identity for keys and lookups, across all block kinds. */
 export function blockKey(block: StorefrontBlock): string {
   switch (block.type) {
     case "product":
@@ -344,6 +370,8 @@ export const DEFAULT_STOREFRONT_CONFIG: StorefrontConfig = {
     accent: "#171717",
     font: "sans",
     // Defaults render identically to configs saved before these fields existed.
+    columns: 6,
+    rows: 6,
     cornerRadius: 0,
     titleStyle: "bar",
     titleDisplay: "always",

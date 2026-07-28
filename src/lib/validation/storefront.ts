@@ -2,7 +2,10 @@ import { z } from "zod";
 import {
   BACKGROUND_IMAGE_SCALE_MAX,
   BACKGROUND_IMAGE_SCALE_MIN,
-  BLOCK_SIZES,
+  CANVAS_COLUMNS_MAX,
+  CANVAS_COLUMNS_MIN,
+  CANVAS_ROWS_MAX,
+  CANVAS_ROWS_MIN,
   CORNER_RADIUS_MAX,
   DEFAULT_STOREFRONT_CONFIG,
   DISPLAY_MODES,
@@ -22,6 +25,7 @@ import {
   TITLE_DISPLAYS,
   TITLE_STYLES,
   blockKey,
+  placementsOverlap,
   type StorefrontBackground,
   type StorefrontConfig,
 } from "@/types/storefront";
@@ -64,8 +68,10 @@ const TEXT_ERROR = { error: "Text contains unsupported characters." };
 const MULTILINE_TEXT_PATTERN = /^(?:[^\u0000-\u001f\u007f]|\n)*$/;
 const SINGLE_LINE_TEXT_PATTERN = /^[^\u0000-\u001f\u007f]*$/;
 
-/** Sanity cap on grid size; the designer UI stays comfortably under it. */
-export const MAX_BLOCKS = 60;
+/** Sanity cap on grid size. Sized above the biggest canvas (12 x 24 cells)
+ *  can sensibly hold, so it bounds the stored jsonb without ever being the
+ *  thing a seller runs into. */
+export const MAX_BLOCKS = 120;
 
 // Background is a closed, structured shape: a solid hex, a custom gradient
 // (hex + hex + integer angle), or an uploaded image. The stored value is only
@@ -104,6 +110,8 @@ const themeObjectSchema = z.strictObject({
   background: backgroundSchema,
   accent: hexColorSchema,
   font: z.enum(STOREFRONT_FONTS),
+  columns: z.number().int().min(CANVAS_COLUMNS_MIN).max(CANVAS_COLUMNS_MAX),
+  rows: z.number().int().min(CANVAS_ROWS_MIN).max(CANVAS_ROWS_MAX),
   cornerRadius: z.number().int().min(0).max(CORNER_RADIUS_MAX),
   titleStyle: z.enum(TITLE_STYLES),
   titleDisplay: z.enum(TITLE_DISPLAYS),
@@ -229,14 +237,20 @@ export const embedSettingsSchema = z.strictObject({
     }),
 });
 
-const sizeSchema = z.enum(BLOCK_SIZES);
-const orderSchema = z.number().int().min(0).max(9999);
+// Free placement: every block carries its own cell coordinates and span. The
+// per-field caps here are absolute (canvas maximums); the config-level refine
+// below enforces the tighter, per-storefront bounds and non-overlap.
+const placementFields = {
+  x: z.number().int().min(0).max(CANVAS_COLUMNS_MAX - 1),
+  y: z.number().int().min(0).max(CANVAS_ROWS_MAX - 1),
+  w: z.number().int().min(1).max(CANVAS_COLUMNS_MAX),
+  h: z.number().int().min(1).max(CANVAS_ROWS_MAX),
+};
 
 const productBlockSchema = z.strictObject({
   type: z.literal("product"),
   productId: z.uuid(),
-  size: sizeSchema,
-  order: orderSchema,
+  ...placementFields,
   // Seller-controlled sold-out mark — optional so older blocks still parse.
   soldOut: z.boolean().optional(),
 });
@@ -254,8 +268,7 @@ const textBlockSchema = z.strictObject({
     .regex(MULTILINE_TEXT_PATTERN, TEXT_ERROR),
   variant: z.enum(TEXT_VARIANTS),
   align: z.enum(TEXT_ALIGNS),
-  size: sizeSchema,
-  order: orderSchema,
+  ...placementFields,
   // Inline formatting — optional so v1 blocks (without them) still parse.
   bold: z.boolean().optional(),
   italic: z.boolean().optional(),
@@ -268,8 +281,7 @@ const shapeBlockSchema = z.strictObject({
   id: z.uuid(),
   kind: z.enum(SHAPE_KINDS),
   color: hexColorSchema,
-  size: sizeSchema,
-  order: orderSchema,
+  ...placementFields,
   // Styling — optional so blocks saved before it existed still parse.
   borderWidth: z.number().int().min(0).max(SHAPE_BORDER_WIDTH_MAX).optional(),
   borderColor: hexColorSchema.optional(),
@@ -282,35 +294,167 @@ const blockSchema = z.discriminatedUnion("type", [
   shapeBlockSchema,
 ]);
 
-export const storefrontConfigSchema = z.strictObject({
-  theme: themeSchema,
-  // Legacy `spacer` shape blocks (invisible whitespace) were removed; drop
-  // them from stored configs before the strict parse so old grids still load.
-  blocks: z.preprocess(
-    (value) =>
-      Array.isArray(value)
-        ? value.filter(
-            (block) =>
-              !(
-                typeof block === "object" &&
-                block !== null &&
-                (block as Record<string, unknown>).type === "shape" &&
-                (block as Record<string, unknown>).kind === "spacer"
-              ),
-          )
-        : value,
-    z
+const configObjectSchema = z
+  .strictObject({
+    theme: themeSchema,
+    blocks: z
       .array(blockSchema)
       .max(MAX_BLOCKS)
       .refine(
         (blocks) => new Set(blocks.map(blockKey)).size === blocks.length,
         { error: "Grid blocks must be unique." },
       ),
-  ),
-  // Optional so configs saved before these features still parse directly.
-  header: headerSchema.optional(),
-  embed: embedSettingsSchema.optional(),
-}) satisfies z.ZodType<StorefrontConfig>;
+    // Optional so configs saved before these features still parse directly.
+    header: headerSchema.optional(),
+    embed: embedSettingsSchema.optional(),
+  })
+  // The canvas invariants, checked here because they span theme + blocks:
+  // every block sits inside the board, and no two cover the same cell. These
+  // are REJECTED rather than repaired — silently moving a block would scramble
+  // a layout the seller can see.
+  .superRefine((config, ctx) => {
+    const { columns, rows } = config.theme;
+    config.blocks.forEach((block, index) => {
+      if (block.x + block.w > columns || block.y + block.h > rows) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["blocks", index],
+          message: "A block sits outside the canvas.",
+        });
+      }
+      for (let other = index + 1; other < config.blocks.length; other += 1) {
+        if (placementsOverlap(block, config.blocks[other])) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["blocks", other],
+            message: "Blocks cannot overlap.",
+          });
+          return;
+        }
+      }
+    });
+  });
+
+/**
+ * Convert a pre-free-placement config: blocks used to carry `order` + a
+ * `"<cols>x<rows>"` size string and were positioned by CSS auto-flow. Running
+ * that same first-fit packing ONCE reproduces the exact layout the seller last
+ * saw, cell for cell, so the upgrade is invisible to them.
+ */
+function migrateLegacyBlocks(
+  raw: unknown[],
+  columns: number,
+): { blocks: Record<string, unknown>[]; rows: number } {
+  const occupied = new Set<string>();
+  const taken = (x: number, y: number) => occupied.has(`${x},${y}`);
+  const fits = (x: number, y: number, w: number, h: number) => {
+    for (let row = y; row < y + h; row += 1) {
+      for (let col = x; col < x + w; col += 1) if (taken(col, row)) return false;
+    }
+    return true;
+  };
+
+  // The auto-flow cursor: placement never searches backwards past it, which is
+  // what CSS's sparse row flow does.
+  let cursorRow = 0;
+  let cursorCol = 0;
+  let usedRows = 0;
+
+  const ordered = [...raw]
+    .filter((block): block is Record<string, unknown> =>
+      typeof block === "object" && block !== null,
+    )
+    .sort((a, b) => Number(a.order ?? 0) - Number(b.order ?? 0));
+
+  const blocks = ordered.map((block) => {
+    const [rawW, rawH] = String(block.size ?? "1x1").split("x").map(Number);
+    const w = Math.min(Number.isFinite(rawW) ? Math.max(1, rawW) : 1, columns);
+    const h = Number.isFinite(rawH) ? Math.max(1, rawH) : 1;
+
+    let row = cursorRow;
+    let col = cursorCol;
+    for (;;) {
+      if (col + w > columns) {
+        row += 1;
+        col = 0;
+        continue;
+      }
+      if (fits(col, row, w, h)) break;
+      col += 1;
+    }
+    for (let r = row; r < row + h; r += 1) {
+      for (let c = col; c < col + w; c += 1) occupied.add(`${c},${r}`);
+    }
+    usedRows = Math.max(usedRows, row + h);
+    cursorRow = row;
+    cursorCol = col + w;
+    if (cursorCol >= columns) {
+      cursorRow = row + 1;
+      cursorCol = 0;
+    }
+
+    const rest = { ...block };
+    delete rest.size;
+    delete rest.order;
+    return { ...rest, x: col, y: row, w, h };
+  });
+
+  return { blocks, rows: usedRows };
+}
+
+/**
+ * Config-level migrations, applied before the strict parse:
+ * - legacy `spacer` shape blocks (invisible whitespace) are dropped;
+ * - legacy auto-flow blocks (`order` + `size`) gain explicit coordinates,
+ *   and the canvas gains the row count that layout needed.
+ */
+export const storefrontConfigSchema = z.preprocess((value) => {
+  if (typeof value !== "object" || value === null) return value;
+  const config = { ...(value as Record<string, unknown>) };
+  if (!Array.isArray(config.blocks)) return config;
+
+  const live = config.blocks.filter(
+    (block) =>
+      !(
+        typeof block === "object" &&
+        block !== null &&
+        (block as Record<string, unknown>).type === "shape" &&
+        (block as Record<string, unknown>).kind === "spacer"
+      ),
+  );
+
+  // Already placed? Nothing to do beyond the spacer drop.
+  const needsPlacement = live.some(
+    (block) =>
+      typeof block === "object" &&
+      block !== null &&
+      (block as Record<string, unknown>).x === undefined,
+  );
+  if (!needsPlacement) return { ...config, blocks: live };
+
+  const theme =
+    typeof config.theme === "object" && config.theme !== null
+      ? (config.theme as Record<string, unknown>)
+      : {};
+  // 6 is what the designer laid out with before the canvas was configurable.
+  const columns = Number(theme.columns ?? 6);
+  const { blocks, rows } = migrateLegacyBlocks(live, columns);
+
+  return {
+    ...config,
+    theme: {
+      ...theme,
+      columns,
+      // The board must be at least as tall as the packing needed, or blocks
+      // would land outside a canvas that only ever had a default row count.
+      rows: Math.min(
+        CANVAS_ROWS_MAX,
+        Math.max(Number(theme.rows ?? 0) || 0, rows, CANVAS_ROWS_MIN),
+      ),
+    },
+    blocks,
+  };
+}, configObjectSchema);
 
 /**
  * Normalize a stored `theme.background` into the structured model. v1 stored a

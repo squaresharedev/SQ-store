@@ -7,6 +7,9 @@
 #   CLOUDFLARE_ACCOUNT_ID        Target Cloudflare account id
 #   NEXT_PUBLIC_SUPABASE_URL     Supabase project URL (public, inlined at build)
 #   NEXT_PUBLIC_SUPABASE_ANON_KEY  Supabase publishable/anon key (public)
+#   GH_PACKAGES_TOKEN            CLASSIC PAT with read:packages, required once
+#                                @squaresharedev/* packages are dependencies
+#                                (GitHub Packages rejects fine-grained tokens)
 #
 # NEXT_PUBLIC_* values are baked into the client bundle at build time, so they
 # must be present during the build step, not just at deploy.
@@ -43,6 +46,12 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
+
+      - name: Authenticate GitHub Packages registry
+        if: ${{ secrets.GH_PACKAGES_TOKEN != '' }}
+        run: pnpm config set "//npm.pkg.github.com/:_authToken" "$GH_PACKAGES_TOKEN"
+        env:
+          GH_PACKAGES_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

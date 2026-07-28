@@ -83,6 +83,7 @@ function ProductList({
                 <img
                   src={product.imageUrl}
                   alt=""
+                  draggable={false}
                   className="size-full object-cover"
                 />
               ) : (

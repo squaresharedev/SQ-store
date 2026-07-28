@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { SIZE_SPANS, type GridSize } from "@/components/grid/gridConstants";
+import type { GridPlacement } from "@/components/grid/gridConstants";
 import type {
   PriceTagFloatPosition,
   StorefrontFont,
@@ -32,10 +32,9 @@ export const FONT_CLASSES: Record<StorefrontFont, string> = {
  */
 export function scaledCornerRadius(
   cornerRadius: number,
-  size: GridSize,
+  placement: Pick<GridPlacement, "w" | "h">,
 ): number {
-  const span = SIZE_SPANS[size];
-  return cornerRadius * Math.min(span.colSpan, span.rowSpan);
+  return cornerRadius * Math.min(placement.w, placement.h);
 }
 
 // Floating price tag spot -> absolute placement over the image area. Center

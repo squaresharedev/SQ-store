@@ -5,6 +5,7 @@ import type { Product } from "@/types/product";
 import {
   DEFAULT_STOREFRONT_HEADER,
   blockKey,
+  readingOrder,
   type StorefrontBlock,
   type StorefrontConfig,
 } from "@/types/storefront";
@@ -49,24 +50,26 @@ export function StorefrontPreview({
 
   const visibleBlocks = useMemo<StorefrontBlock[]>(
     () =>
-      [...blocks]
-        // Buyer-facing view: hideSoldOut drops marked blocks entirely (the
-        // designer canvas keeps showing them dimmed so the seller can manage).
-        .filter(
+      readingOrder(
+        blocks.filter(
+          // Buyer-facing view: hideSoldOut drops marked blocks entirely (the
+          // designer canvas keeps showing them dimmed so the seller can
+          // manage them).
           (block) =>
             !(theme.hideSoldOut && block.type === "product" && block.soldOut),
-        )
-        .sort((a, b) => a.order - b.order)
-        .slice(0, PREVIEW_MAX_BLOCKS),
+        ),
+      ).slice(0, PREVIEW_MAX_BLOCKS),
     [blocks, theme.hideSoldOut],
   );
 
   const gridBlocks = useMemo<GridBlock<StorefrontBlock>[]>(
     () =>
-      visibleBlocks.map((block, index) => ({
+      visibleBlocks.map((block) => ({
         key: blockKey(block),
-        size: block.size,
-        order: index,
+        x: block.x,
+        y: block.y,
+        w: block.w,
+        h: block.h,
         data: block,
       })),
     [visibleBlocks],
@@ -104,10 +107,10 @@ export function StorefrontPreview({
           <Grid
             blocks={gridBlocks}
             ariaLabel="Storefront preview"
-            columns={6}
-            mobileColumns={3}
-            cellStyle={(size) => ({
-              borderRadius: scaledCornerRadius(theme.cornerRadius, size),
+            columns={theme.columns}
+            rows={theme.rows}
+            cellStyle={(placement) => ({
+              borderRadius: scaledCornerRadius(theme.cornerRadius, placement),
             })}
             renderBlock={(gridBlock) => (
               <BlockTile
