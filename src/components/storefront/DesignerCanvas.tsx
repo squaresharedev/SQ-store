@@ -18,17 +18,15 @@ import { CarouselStrip } from "./CarouselStrip";
 import { StorefrontMasthead } from "./StorefrontMasthead";
 import { resolveBackgroundStyle } from "./background-presets";
 import {
-  DENSITY_CLASSES,
   FONT_CLASSES,
+  gridGapStyle,
   scaledCornerRadius,
 } from "./config-maps";
 
 /** Accessible label for a block's drag/resize handles. */
 function blockLabel(block: StorefrontBlock, product: Product | null): string {
   if (block.type === "product") return product?.title ?? "Removed product";
-  if (block.type === "shape") {
-    return block.kind === "spacer" ? "Spacer" : `${block.kind} shape`;
-  }
+  if (block.type === "shape") return `${block.kind} shape`;
   const text = block.text.trim();
   return text ? `Text: ${text.slice(0, 30)}` : "Text block";
 }
@@ -49,6 +47,7 @@ export function DesignerCanvas({
   header,
   previewMode,
   backgroundImageUrl = null,
+  showGrid = true,
   onReorder,
   onSizeChange,
   onRemove,
@@ -65,6 +64,8 @@ export function DesignerCanvas({
   /** Display URL for an image background (signed server-side, or a local
    *  object URL right after an upload). Null renders the neutral base. */
   backgroundImageUrl?: string | null;
+  /** Draw the dashed empty slots (editor guide only, never for buyers). */
+  showGrid?: boolean;
   /** All callbacks are keyed by blockKey(block). */
   onReorder: (activeKey: string, overKey: string) => void;
   onSizeChange: (key: string, size: BlockSize) => void;
@@ -114,12 +115,14 @@ export function DesignerCanvas({
         className={cn(
           "rounded-md border border-border p-4",
           FONT_CLASSES[theme.font],
-          // Density picks the --grid-gap override the .ss-grid rule inherits.
-          DENSITY_CLASSES[theme.density],
         )}
-        // Schema-constrained: preset keys resolve through the fixed allowlist
-        // map, hex is re-gated by the strict regex. Anything else styles nothing.
-        style={resolveBackgroundStyle(theme.background, backgroundImageUrl)}
+        // Schema-constrained: hex is re-gated by the strict regex, the gap is
+        // a bounded integer. gridGapStyle sets the --grid-gap token the
+        // .ss-grid rule (and the carousel strip) inherit.
+        style={{
+          ...resolveBackgroundStyle(theme.background, backgroundImageUrl),
+          ...gridGapStyle(theme.gridGap),
+        }}
       >
         <StorefrontMasthead header={header} theme={theme} />
 
@@ -153,14 +156,14 @@ export function DesignerCanvas({
               onMove={moveBlock}
             />
             <p className="mt-2 font-inter text-xs text-muted-foreground">
-              Buyers swipe through this row. Use the arrows to reorder; block
-              sizes apply in grid mode.
+              Buyers swipe through this row, or tap the arrows at its edges. Use
+              the arrows on a tile to reorder; block sizes apply in grid mode.
             </p>
           </>
         ) : (
           <Grid
             editable
-            showEmptyCells
+            showEmptyCells={showGrid}
             // Whole-tile drag: grab a shape/product/text anywhere to move it;
             // a plain click selects the block (BlockTile). No visible grip:
             // the hidden handle appears only on keyboard focus.

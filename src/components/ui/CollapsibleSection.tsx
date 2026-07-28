@@ -1,11 +1,16 @@
 "use client";
 
 /**
- * CollapsibleSection — reusable panel section extracted from the inline
- * PanelSection in ControlsPanel.tsx. Renders a card-style section with an
- * optional collapsible toggle (ChevronDown), an optional header action slot,
- * and children in the body. When `collapsible` is false the section is always
- * open and the header is a plain <h2>.
+ * CollapsibleSection — reusable side-panel section. Renders FLUSH: no card
+ * chrome, so the content spans the panel's full width and neighbouring
+ * sections are told apart by a divider line alone. Carries an optional
+ * collapsible toggle (ChevronDown) and an optional header action slot; when
+ * `collapsible` is false the section is always open and the header is a plain
+ * <h2>.
+ *
+ * The horizontal padding lives HERE rather than on the panel, so the dividers
+ * run edge to edge. On mobile the padding is dropped: there these sections sit
+ * inside a bottom sheet that already provides its own.
  */
 
 import { useState } from "react";
@@ -29,8 +34,8 @@ export function CollapsibleSection({
   const isOpen = !collapsible || open;
 
   return (
-    <section className="rounded-md border border-border bg-card p-4 shadow-xs">
-      <div className="mb-3 flex items-center justify-between gap-2">
+    <section className="border-b border-border">
+      <div className="flex items-center justify-between gap-2 py-3 lg:px-4">
         {collapsible ? (
           <button
             type="button"
@@ -53,7 +58,7 @@ export function CollapsibleSection({
         )}
         {headerAction}
       </div>
-      {isOpen && children}
+      {isOpen && <div className="pb-4 lg:px-4">{children}</div>}
     </section>
   );
 }

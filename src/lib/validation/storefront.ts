@@ -5,14 +5,15 @@ import {
   BLOCK_SIZES,
   CORNER_RADIUS_MAX,
   DEFAULT_STOREFRONT_CONFIG,
-  DENSITIES,
   DISPLAY_MODES,
+  GRID_GAP_MAX,
   EMBED_MAX_DOMAINS,
   HEADER_BIO_MAX,
   HEADER_NAME_MAX,
   PRICE_DISPLAYS,
   PRICE_TAG_POSITIONS,
   PRICE_TAG_STYLES,
+  SHAPE_BORDER_WIDTH_MAX,
   SHAPE_KINDS,
   STOREFRONT_FONTS,
   TEXT_ALIGNS,
@@ -121,13 +122,20 @@ const themeObjectSchema = z.strictObject({
   priceTagStyle: z.enum(PRICE_TAG_STYLES),
   showTitle: z.boolean(),
   displayMode: z.enum(DISPLAY_MODES),
-  density: z.enum(DENSITIES),
+  gridGap: z.number().int().min(0).max(GRID_GAP_MAX),
   soldOutBadge: z.boolean(),
   hideSoldOut: z.boolean(),
 });
 
 /** Legacy `radius` enum -> px, matching the old rounded-sm/md/lg classes. */
 const LEGACY_RADIUS_PX: Record<string, number> = { none: 0, sm: 4, md: 6, lg: 8 };
+
+/** Legacy `density` enum -> gap px, matching the old ss-gap-* classes. */
+const LEGACY_DENSITY_PX: Record<string, number> = {
+  compact: 4,
+  comfy: 8,
+  spacious: 16,
+};
 
 // Legacy-theme migrations, applied before the strict parse:
 // - priceDisplay "never" predates the position picker's Hidden mode; fold it
@@ -139,6 +147,7 @@ const LEGACY_RADIUS_PX: Record<string, number> = { none: 0, sm: 4, md: 6, lg: 8 
 //   the numeric cornerRadius: circle -> full, square -> sharp, rounded -> the
 //   radius enum's px value.
 // - pattern backgrounds were removed; they fall back to their base color.
+// - density (compact/comfy/spacious) became the numeric gridGap (gap px).
 const themeSchema = z.preprocess((value) => {
   if (typeof value !== "object" || value === null) return value;
   const theme = { ...(value as Record<string, unknown>) };
@@ -178,6 +187,12 @@ const themeSchema = z.preprocess((value) => {
     }
     delete theme.radius;
     delete theme.cardShape;
+  }
+  if ("density" in theme) {
+    if (theme.gridGap === undefined) {
+      theme.gridGap = LEGACY_DENSITY_PX[String(theme.density)] ?? 8;
+    }
+    delete theme.density;
   }
   return theme;
 }, themeObjectSchema);
@@ -255,6 +270,10 @@ const shapeBlockSchema = z.strictObject({
   color: hexColorSchema,
   size: sizeSchema,
   order: orderSchema,
+  // Styling — optional so blocks saved before it existed still parse.
+  borderWidth: z.number().int().min(0).max(SHAPE_BORDER_WIDTH_MAX).optional(),
+  borderColor: hexColorSchema.optional(),
+  opacity: z.number().int().min(0).max(100).optional(),
 });
 
 const blockSchema = z.discriminatedUnion("type", [
@@ -265,13 +284,29 @@ const blockSchema = z.discriminatedUnion("type", [
 
 export const storefrontConfigSchema = z.strictObject({
   theme: themeSchema,
-  blocks: z
-    .array(blockSchema)
-    .max(MAX_BLOCKS)
-    .refine(
-      (blocks) => new Set(blocks.map(blockKey)).size === blocks.length,
-      { error: "Grid blocks must be unique." },
-    ),
+  // Legacy `spacer` shape blocks (invisible whitespace) were removed; drop
+  // them from stored configs before the strict parse so old grids still load.
+  blocks: z.preprocess(
+    (value) =>
+      Array.isArray(value)
+        ? value.filter(
+            (block) =>
+              !(
+                typeof block === "object" &&
+                block !== null &&
+                (block as Record<string, unknown>).type === "shape" &&
+                (block as Record<string, unknown>).kind === "spacer"
+              ),
+          )
+        : value,
+    z
+      .array(blockSchema)
+      .max(MAX_BLOCKS)
+      .refine(
+        (blocks) => new Set(blocks.map(blockKey)).size === blocks.length,
+        { error: "Grid blocks must be unique." },
+      ),
+  ),
   // Optional so configs saved before these features still parse directly.
   header: headerSchema.optional(),
   embed: embedSettingsSchema.optional(),

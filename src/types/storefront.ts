@@ -150,10 +150,10 @@ export type PriceTagStyle = (typeof PRICE_TAG_STYLES)[number];
 export const DISPLAY_MODES = ["grid", "carousel"] as const;
 export type DisplayMode = (typeof DISPLAY_MODES)[number];
 
-/** Grid gutter density. Each key maps to a code-defined gap token override
- *  (config-maps.ts DENSITY_CLASSES) — never a raw length from user data. */
-export const DENSITIES = ["compact", "comfy", "spacious"] as const;
-export type Density = (typeof DENSITIES)[number];
+/** Grid gutter cap, in px. The value drives the shared --grid-gap token that
+ *  .ss-grid's gap AND square-cell row math consume. Legacy configs stored a
+ *  density enum (compact/comfy/spacious); the schema migrates it on parse. */
+export const GRID_GAP_MAX = 32;
 
 /** Store header text caps — plain text only, rendered as React text nodes. */
 export const HEADER_NAME_MAX = 60;
@@ -194,15 +194,32 @@ export const DEFAULT_EMBED_SETTINGS: EmbedSettings = {
 
 /**
  * Decorative shape blocks — a fixed allowlist of kinds, each mapping to
- * code-defined markup in ShapeTileContent. `spacer` is layout whitespace:
- * buyers see nothing, the designer shows a dashed outline.
+ * code-defined markup in ShapeTileContent. A legacy `spacer` kind existed
+ * (invisible layout whitespace); the schema drops those blocks on parse.
  */
 export const SHAPE_KINDS = [
   "square",
   "circle",
   "ring",
   "diamond",
-  "spacer",
+  "rounded",
+  "pill",
+  "half",
+  "quarter",
+  "bar",
+  "triangle",
+  "wedge",
+  "pentagon",
+  "hexagon",
+  "octagon",
+  "star",
+  "sparkle",
+  "cross",
+  "arrow",
+  "chevron",
+  "trapezoid",
+  "parallelogram",
+  "burst",
 ] as const;
 export type ShapeKind = (typeof SHAPE_KINDS)[number];
 
@@ -230,7 +247,8 @@ export type StorefrontTheme = {
   priceTagStyle: PriceTagStyle;
   showTitle: boolean;
   displayMode: DisplayMode;
-  density: Density;
+  /** Grid gutter in px, 0..GRID_GAP_MAX (smaller = denser). */
+  gridGap: number;
   /** Show a badge on blocks the seller marked sold out. */
   soldOutBadge: boolean;
   /** Hide sold-out blocks from buyers (the designer still shows them dimmed). */
@@ -265,16 +283,34 @@ export type TextBlock = {
   underline?: boolean;
 };
 
+/** Outline thickness cap for shape blocks, in px. */
+export const SHAPE_BORDER_WIDTH_MAX = 24;
+
+/** Ring thickness when the block carries no explicit borderWidth. */
+export const RING_DEFAULT_WIDTH = 8;
+
 export type ShapeBlock = {
   type: "shape";
   /** Client-minted uuid; only used to key/reorder the block. */
   id: string;
   /** Allowlisted kind — resolves through ShapeTileContent's fixed map. */
   kind: ShapeKind;
-  /** Strict #rrggbb only. Ignored by `spacer`. */
+  /** Strict #rrggbb only. The fill, or the stroke on a `ring`. */
   color: string;
   size: BlockSize;
   order: number;
+  /**
+   * Outline width in px, 0..SHAPE_BORDER_WIDTH_MAX. On a `ring` this is the
+   * ring's own thickness (defaulting to RING_DEFAULT_WIDTH); on the filled
+   * kinds it adds an outline around the shape. Optional so blocks saved
+   * before shape styling existed still parse.
+   */
+  borderWidth?: number;
+  /** Strict #rrggbb. Outline color on the filled kinds; unused by `ring`
+   *  (its stroke is `color`). Optional for the same reason. */
+  borderColor?: string;
+  /** Whole-shape opacity as a percent, 0..100. Absent = fully opaque. */
+  opacity?: number;
 };
 
 export type StorefrontBlock = ProductBlock | TextBlock | ShapeBlock;
@@ -316,7 +352,7 @@ export const DEFAULT_STOREFRONT_CONFIG: StorefrontConfig = {
     priceTagStyle: "plain",
     showTitle: true,
     displayMode: "grid",
-    density: "comfy",
+    gridGap: 8,
     soldOutBadge: true,
     hideSoldOut: false,
   },

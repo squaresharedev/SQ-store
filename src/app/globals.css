@@ -180,19 +180,10 @@
     --ss-cols: var(--ss-cols-desktop, 4);
   }
 }
-/* Grid density: overrides the --grid-gap custom property that .ss-grid's gap
-   AND square-cell row math both consume (so cells stay true squares at every
-   density). Applied on a grid ancestor via the fixed enum→class map in
-   components/storefront/config-maps.ts — never from raw user values. */
-.ss-gap-compact {
-  --grid-gap: 0.25rem;
-}
-.ss-gap-comfy {
-  --grid-gap: 0.5rem;
-}
-.ss-gap-spacious {
-  --grid-gap: 1rem;
-}
+/* Grid density: the storefront canvas sets --grid-gap inline on a grid
+   ancestor (config-maps.ts gridGapStyle, from the schema-bounded integer
+   theme.gridGap). .ss-grid's gap AND square-cell row math both consume it,
+   so cells stay true squares at every gap. */
 
 /* ============================================================
    BASE STYLES

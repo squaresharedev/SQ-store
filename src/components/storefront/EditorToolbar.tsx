@@ -8,6 +8,7 @@
  * over the canvas does not fight for the same layer.
  */
 
+import { useState } from "react";
 import {
   Monitor,
   Redo2,
@@ -15,15 +16,18 @@ import {
   ShoppingBag,
   SlidersHorizontal,
   Smartphone,
-  SquareDashed,
   Type,
   Undo2,
 } from "lucide-react";
+import { SHAPE_KINDS, type ShapeKind } from "@/types/storefront";
+import { cn } from "@/lib/utils";
 import {
   focusRingClass as FOCUS_RING,
   iconPopClass,
   transitionClass as TRANSITION,
 } from "@/components/ui/control-styles";
+import { ShapeKindGlyph } from "./ShapeTileContent";
+import { SHAPE_SPECS } from "./shape-specs";
 
 /** Labelled insert-tool button: icon + text label (label hidden on mobile).
  *  `group/btn` lets the icon pop on hover/focus (see iconPopClass below). */
@@ -61,7 +65,6 @@ export function EditorToolbar({
   onAddProduct,
   onAddText,
   onAddShape,
-  onAddSpacer,
   canAddBlocks,
   canUndo,
   canRedo,
@@ -74,9 +77,9 @@ export function EditorToolbar({
 }: {
   onAddProduct: () => void;   // opens the product picker card (does not insert directly)
   onAddText: () => void;
-  onAddShape: () => void;
-  onAddSpacer: () => void;
-  canAddBlocks: boolean;      // false when the block cap is reached -> disable the 4 insert tools
+  /** Insert a shape of the given kind (chosen from the hover menu). */
+  onAddShape: (kind: ShapeKind) => void;
+  canAddBlocks: boolean;      // false when the block cap is reached -> disable the insert tools
   canUndo: boolean;
   canRedo: boolean;
   onUndo: () => void;
@@ -87,11 +90,15 @@ export function EditorToolbar({
   settingsOpen: boolean;
   onToggleSettings: () => void;
 }) {
+  // Touch/click fallback for the shape menu (hover has no meaning there).
+  const [shapeMenuOpen, setShapeMenuOpen] = useState(false);
+
   return (
     <div
       role="toolbar"
       aria-label="Editor tools"
-      className="fixed bottom-4 left-1/2 z-40 -translate-x-1/2 flex max-w-[calc(100vw-2rem)] items-center gap-1 overflow-x-auto rounded-md border border-border bg-background/95 p-1.5 shadow-md backdrop-blur"
+      // No overflow clipping here: the shape menu pops out above the bar.
+      className="fixed bottom-4 left-1/2 z-40 -translate-x-1/2 flex max-w-[calc(100vw-2rem)] items-center gap-1 rounded-md border border-border bg-background/95 p-1.5 shadow-md backdrop-blur"
     >
       {/* -- Group 1: INSERT tools -- */}
       <button
@@ -118,29 +125,64 @@ export function EditorToolbar({
         <span className="hidden sm:inline">Text</span>
       </button>
 
-      <button
-        type="button"
-        className={INSERT_BTN}
-        onClick={onAddShape}
-        disabled={!canAddBlocks}
-        aria-label="Add shape"
-        title="Add shape"
+      {/* Shape tool: hovering (or clicking, on touch) reveals a horizontal
+          menu of the shapes themselves; picking one inserts it. */}
+      <div
+        className="group/shape relative"
+        onMouseLeave={() => setShapeMenuOpen(false)}
       >
-        <Shapes className={INSERT_ICON} strokeWidth={2} aria-hidden="true" />
-        <span className="hidden sm:inline">Shape</span>
-      </button>
+        <button
+          type="button"
+          className={INSERT_BTN}
+          onClick={() => setShapeMenuOpen((open) => !open)}
+          disabled={!canAddBlocks}
+          aria-label="Add shape"
+          aria-haspopup="true"
+          aria-expanded={shapeMenuOpen}
+          title="Add shape"
+        >
+          <Shapes className={INSERT_ICON} strokeWidth={2} aria-hidden="true" />
+          <span className="hidden sm:inline">Shape</span>
+        </button>
 
-      <button
-        type="button"
-        className={INSERT_BTN}
-        onClick={onAddSpacer}
-        disabled={!canAddBlocks}
-        aria-label="Add spacer"
-        title="Add spacer"
-      >
-        <SquareDashed className={INSERT_ICON} strokeWidth={2} aria-hidden="true" />
-        <span className="hidden sm:inline">Spacer</span>
-      </button>
+        {/* pb-1.5 (not a margin) bridges the visual gap between button and
+            menu, so hover never drops while the pointer crosses it. */}
+        <div
+          className={cn(
+            "absolute bottom-full left-1/2 z-50 -translate-x-1/2 pb-1.5",
+            "transition-opacity duration-180 ease-in-out motion-reduce:transition-none",
+            shapeMenuOpen
+              ? "visible opacity-100"
+              : "invisible opacity-0 group-hover/shape:visible group-hover/shape:opacity-100 group-focus-within/shape:visible group-focus-within/shape:opacity-100",
+          )}
+        >
+          {/* Horizontal strip: the library outgrew the viewport, so it
+              scrolls sideways rather than wrapping into a block. */}
+          <div
+            role="menu"
+            aria-label="Shapes"
+            className="flex max-w-[min(90vw,32rem)] items-center gap-1 overflow-x-auto rounded-md border border-border bg-background/95 p-1.5 shadow-md backdrop-blur"
+          >
+            {SHAPE_KINDS.map((kind) => (
+              <button
+                key={kind}
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  onAddShape(kind);
+                  setShapeMenuOpen(false);
+                }}
+                disabled={!canAddBlocks}
+                aria-label={`Add ${SHAPE_SPECS[kind].label.toLowerCase()}`}
+                title={SHAPE_SPECS[kind].label}
+                className={cn(ICON_BTN, "shrink-0")}
+              >
+                <ShapeKindGlyph kind={kind} />
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
 
       <Divider />
 

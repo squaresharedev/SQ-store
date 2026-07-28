@@ -1,6 +1,6 @@
+import type { CSSProperties } from "react";
 import { SIZE_SPANS, type GridSize } from "@/components/grid/gridConstants";
 import type {
-  Density,
   PriceTagFloatPosition,
   StorefrontFont,
   TextAlign,
@@ -50,13 +50,15 @@ export const PRICE_TAG_FLOAT_CLASSES: Record<PriceTagFloatPosition, string> = {
   "bottom-right": "bottom-2 right-2",
 };
 
-// Density → the --grid-gap override classes defined next to .ss-grid in
-// globals.css. Set on the grid's ancestor; gap AND square-cell math follow.
-export const DENSITY_CLASSES: Record<Density, string> = {
-  compact: "ss-gap-compact",
-  comfy: "ss-gap-comfy",
-  spacious: "ss-gap-spacious",
-};
+/**
+ * Inline style driving the shared --grid-gap token (see .ss-grid in
+ * globals.css). Set on a grid ancestor; the gap AND the square-cell row math
+ * both consume it, so cells stay true squares at any gap. `gridGap` is the
+ * schema-bounded integer from theme.gridGap, never raw user text.
+ */
+export function gridGapStyle(gridGap: number): CSSProperties {
+  return { "--grid-gap": `${gridGap}px` } as CSSProperties;
+}
 
 
 export const TEXT_VARIANT_CLASSES: Record<TextVariant, string> = {

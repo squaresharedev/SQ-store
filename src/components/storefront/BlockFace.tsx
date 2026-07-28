@@ -21,19 +21,16 @@ export function BlockFace({
   block,
   product,
   theme,
-  editable = false,
 }: {
   block: StorefrontBlock;
   product: Product | null;
   theme: StorefrontTheme;
-  /** Pass true inside the designer so shape spacers show their dashed outline. */
-  editable?: boolean;
 }) {
   if (block.type === "text") {
     return <TextTileContent block={block} theme={theme} />;
   }
   if (block.type === "shape") {
-    return <ShapeTileContent block={block} editable={editable} />;
+    return <ShapeTileContent block={block} />;
   }
   if (product) {
     return (

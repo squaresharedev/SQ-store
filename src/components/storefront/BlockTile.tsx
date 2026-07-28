@@ -54,9 +54,7 @@ export function BlockTile({
     block.type === "product"
       ? (product?.title ?? "Removed product")
       : block.type === "shape"
-        ? block.kind === "spacer"
-          ? "Spacer"
-          : `${block.kind} shape`
+        ? `${block.kind} shape`
         : block.text.trim()
           ? `Text: ${block.text.trim().slice(0, 30)}`
           : "Text block";
@@ -113,6 +111,12 @@ export function BlockTile({
       onKeyDown={selectable ? handleKeyDown : undefined}
       className={cn(
         "relative flex h-full w-full flex-col",
+        // The tile fills its cell exactly, so inheriting the cell's corner
+        // radius makes the card border and the selection ring CURVE with the
+        // roundness setting instead of being sliced square by the cell's clip.
+        // Inherited (not passed in) so the grid, the carousel strip, and the
+        // drag overlay all stay in sync for free.
+        "rounded-[inherit]",
         // Product blocks are bordered cards; text and shape blocks sit
         // chrome-less on the canvas, so the kinds never read as the same thing.
         block.type === "product"
@@ -153,12 +157,7 @@ export function BlockTile({
         </div>
       )}
 
-      <BlockFace
-        block={block}
-        product={product}
-        theme={theme}
-        editable={editable}
-      />
+      <BlockFace block={block} product={product} theme={theme} />
     </div>
   );
 }

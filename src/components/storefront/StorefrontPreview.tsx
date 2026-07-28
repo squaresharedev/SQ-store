@@ -16,8 +16,8 @@ import { CarouselStrip } from "./CarouselStrip";
 import { StorefrontMasthead } from "./StorefrontMasthead";
 import { resolveBackgroundStyle } from "./background-presets";
 import {
-  DENSITY_CLASSES,
   FONT_CLASSES,
+  gridGapStyle,
   scaledCornerRadius,
 } from "./config-maps";
 
@@ -79,15 +79,13 @@ export function StorefrontPreview({
 
   return (
     <div
-      className={cn(
-        "size-full p-2",
-        FONT_CLASSES[theme.font],
-        DENSITY_CLASSES[theme.density],
-        className,
-      )}
-      // Schema-constrained, same as the canvas: preset keys resolve through
-      // the fixed allowlist map, hex is re-gated by the strict regex.
-      style={resolveBackgroundStyle(theme.background, backgroundImageUrl)}
+      className={cn("size-full p-2", FONT_CLASSES[theme.font], className)}
+      // Schema-constrained, same as the canvas: hex is re-gated by the strict
+      // regex, the gap is a bounded integer feeding the --grid-gap token.
+      style={{
+        ...resolveBackgroundStyle(theme.background, backgroundImageUrl),
+        ...gridGapStyle(theme.gridGap),
+      }}
     >
       <StorefrontMasthead
         header={header ?? DEFAULT_STOREFRONT_HEADER}

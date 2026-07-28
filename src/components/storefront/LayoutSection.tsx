@@ -1,11 +1,12 @@
 "use client";
 
 import {
-  type Density,
+  GRID_GAP_MAX,
   type DisplayMode,
   type StorefrontTheme,
 } from "@/types/storefront";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
+import { Slider } from "@/components/ui/slider";
 import { helpTextClass, labelClass } from "@/components/ui/control-styles";
 
 const DISPLAY_MODE_OPTIONS: readonly { value: DisplayMode; label: string }[] = [
@@ -13,13 +14,7 @@ const DISPLAY_MODE_OPTIONS: readonly { value: DisplayMode; label: string }[] = [
   { value: "carousel", label: "Carousel" },
 ];
 
-const DENSITY_OPTIONS: readonly { value: Density; label: string }[] = [
-  { value: "compact", label: "Compact" },
-  { value: "comfy", label: "Comfy" },
-  { value: "spacious", label: "Spacious" },
-];
-
-/** Layout controls: display mode and grid density, both persisted. */
+/** Layout controls: display mode and the grid gap, both persisted. */
 export function LayoutSection({
   theme,
   onChange,
@@ -45,12 +40,20 @@ export function LayoutSection({
       </div>
 
       <div className="space-y-1.5">
-        <span className={labelClass}>Grid density</span>
-        <SegmentedControl
-          value={theme.density}
-          options={DENSITY_OPTIONS}
-          onChange={(density) => onChange({ ...theme, density })}
+        <div className="flex items-center justify-between">
+          <span className={labelClass}>Grid density</span>
+          <span className={helpTextClass}>
+            {theme.gridGap === 0 ? "No gap" : `${theme.gridGap}px gap`}
+          </span>
+        </div>
+        <Slider
+          min={0}
+          max={GRID_GAP_MAX}
+          step={2}
+          value={theme.gridGap}
+          onChange={(gridGap) => onChange({ ...theme, gridGap })}
           ariaLabel="Grid density"
+          valueText={`${theme.gridGap} pixel gap`}
         />
       </div>
     </div>

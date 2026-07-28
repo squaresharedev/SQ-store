@@ -41,6 +41,8 @@ export function ControlsPanel({
   onHeaderChange,
   backgroundImageUrl,
   onBackgroundImageChange,
+  showGrid,
+  onShowGridChange,
 }: {
   theme: StorefrontTheme;
   header: StorefrontHeader;
@@ -49,16 +51,23 @@ export function ControlsPanel({
   /** Display URL for an image background (signed or local object URL). */
   backgroundImageUrl: string | null;
   onBackgroundImageChange: (url: string | null) => void;
+  /** Editor-only view preference, not part of the saved config. */
+  showGrid: boolean;
+  onShowGridChange: (show: boolean) => void;
 }) {
   const fontFieldId = useId();
   return (
-    <div className="space-y-4">
+    // No gaps: the sections are flush and read as one column, divided by the
+    // lines they draw themselves.
+    <div>
       <CollapsibleSection title="Theme" collapsible>
         <ThemePanel
           theme={theme}
           onChange={onThemeChange}
           backgroundImageUrl={backgroundImageUrl}
           onBackgroundImageChange={onBackgroundImageChange}
+          showGrid={showGrid}
+          onShowGridChange={onShowGridChange}
         />
       </CollapsibleSection>
 

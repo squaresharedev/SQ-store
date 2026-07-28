@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, X } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, X } from "lucide-react";
 import type { ActionError } from "@/lib/errors";
 import type { Product } from "@/types/product";
 import {
@@ -69,6 +69,19 @@ const INSPECTOR_CLOSE_CLASS =
 /** Mobile emergency-edit layout: panels become slide-up bottom sheets over the
  *  canvas (scrollable, padded to clear the floating toolbar); on lg+ the same
  *  element renders as a plain block in the right column. */
+/** Design panel width bounds, in px (desktop only). Dragging the edge below
+ *  the minimum collapses the panel rather than squeezing it unusably narrow. */
+const PANEL_MIN_WIDTH = 260;
+const PANEL_MAX_WIDTH = 560;
+const PANEL_DEFAULT_WIDTH = 320;
+/** How far one arrow-key press nudges the panel edge. */
+const PANEL_RESIZE_STEP = 16;
+
+/** The little tab that collapses / reopens the panel: a chip clipped to the
+ *  panel's left edge (desktop only — mobile uses bottom sheets). */
+const PANEL_TAB_CLASS =
+  "absolute top-1/2 z-30 hidden h-12 w-5 -translate-y-1/2 items-center justify-center rounded-l-md border border-r-0 border-border bg-background text-muted-foreground shadow-sm transition-colors duration-180 ease-in-out hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none lg:flex";
+
 const SHEET_ON_MOBILE_CLASS =
   "fixed inset-x-0 bottom-0 z-40 max-h-[70vh] overflow-y-auto rounded-t-lg border-t border-border bg-background p-4 pb-24 shadow-lg lg:static lg:z-auto lg:max-h-none lg:overflow-visible lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0 lg:pb-0 lg:shadow-none";
 
@@ -121,6 +134,16 @@ export function StorefrontDesigner({
   // Mobile only: whether the global-settings bottom sheet is open (on lg+ the
   // settings panel is always visible, so this is ignored there).
   const [settingsOpen, setSettingsOpen] = useState(false);
+  // Desktop only: whether the edge-docked design panel is shown. Collapsing
+  // it gives the canvas the full viewport width.
+  const [panelOpen, setPanelOpen] = useState(true);
+  // Dashed empty-slot guides on the canvas. A VIEW preference: buyers never
+  // see them, so it stays out of the saved config (and out of undo history).
+  const [showGrid, setShowGrid] = useState(true);
+  // Desktop panel width, dragged from its left edge. Kept at or above the
+  // minimum: a drag that would go narrower closes the panel instead, so
+  // reopening never lands on an unusably thin strip.
+  const [panelWidth, setPanelWidth] = useState(PANEL_DEFAULT_WIDTH);
   // Preview device for the canvas frame — toolbar-owned, never persisted.
   const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">(
     "desktop",
@@ -261,8 +284,7 @@ export function StorefrontDesigner({
       type: "shape",
       id: crypto.randomUUID(),
       kind,
-      // Accent is the natural starting fill (schema requires a color even for
-      // spacers, which ignore it).
+      // Accent is the natural starting fill.
       color: theme.accent,
       size: "1x1",
       order: blocks.length,
@@ -343,6 +365,60 @@ export function StorefrontDesigner({
     setName(next);
   }
 
+  /** Commit a dragged/keyed panel edge: clamp to the max, and treat anything
+   *  under the minimum as "collapse" rather than shrinking further. */
+  function resizePanelTo(width: number): boolean {
+    if (width < PANEL_MIN_WIDTH) {
+      setPanelOpen(false);
+      return false;
+    }
+    setPanelWidth(Math.min(PANEL_MAX_WIDTH, width));
+    return true;
+  }
+
+  /** Pointer-drag the panel's left edge. The panel is flush with the right
+   *  side of the viewport, so its width is simply the distance from the
+   *  pointer to that edge. */
+  function startPanelResize(event: React.PointerEvent<HTMLDivElement>) {
+    if (event.button !== 0) return;
+    event.preventDefault();
+    const startWidth = panelWidth;
+
+    function onMove(moveEvent: PointerEvent) {
+      if (!resizePanelTo(window.innerWidth - moveEvent.clientX)) {
+        // Collapsed by dragging past the minimum: reopen at the width the
+        // panel had BEFORE this drag, not the sliver it passed through on
+        // the way out.
+        setPanelWidth(startWidth);
+        stop();
+      }
+    }
+    function stop() {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", stop);
+      window.removeEventListener("pointercancel", stop);
+      // Restore the text selection / cursor suppression used while dragging.
+      document.body.style.userSelect = "";
+      document.body.style.cursor = "";
+    }
+
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", stop);
+    window.addEventListener("pointercancel", stop);
+    document.body.style.userSelect = "none";
+    document.body.style.cursor = "col-resize";
+  }
+
+  function onPanelResizeKey(event: React.KeyboardEvent<HTMLDivElement>) {
+    if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      resizePanelTo(panelWidth + PANEL_RESIZE_STEP);
+    } else if (event.key === "ArrowRight") {
+      event.preventDefault();
+      resizePanelTo(panelWidth - PANEL_RESIZE_STEP);
+    }
+  }
+
   function applyProductUpdate(updated: Product) {
     setCatalog((current) =>
       current.map((p) => (p.id === updated.id ? updated : p)),
@@ -388,11 +464,14 @@ export function StorefrontDesigner({
     inspector?.kind === "picker" || selectedBlock !== null;
 
   return (
-    <div className="min-h-screen bg-background">
+    // Fixed-height workspace: the PAGE never scrolls. The canvas column and
+    // the design panel each scroll on their own, so a tall storefront moves
+    // under the toolbar without dragging the chrome off screen.
+    <div className="flex h-dvh flex-col overflow-hidden bg-background">
       {/* Full-screen editor top bar — no sidebar here, so this is the only
-          chrome. Sticky so Save + the storefront name stay reachable. */}
-      <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-        <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 sm:px-6">
+          chrome. Pinned by the layout, so it needs no sticky positioning. */}
+      <header className="shrink-0 border-b border-border bg-background">
+        <div className="flex items-center gap-3 px-4 py-3 sm:px-6">
           <Link
             href="/storefront"
             aria-label="Back to storefronts"
@@ -443,37 +522,87 @@ export function StorefrontDesigner({
         </div>
       </header>
 
-      {/* pb clears the floating toolbar so nothing hides behind it. */}
-      <main className="mx-auto max-w-7xl space-y-6 px-4 py-6 pb-24 sm:px-6">
-        {saveState.status === "error" && (
-          <ActionErrorNotice error={saveState.error} />
+      {/* Full-width workspace: the canvas takes all remaining room next to
+          the edge-docked panel. */}
+      <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
+        {/* The canvas owns the viewport and scrolls INTERNALLY, but only when
+            the storefront outgrows it. pb clears the floating toolbar. */}
+        <main className="min-w-0 flex-1 space-y-6 overflow-y-auto px-4 py-6 pb-24 sm:px-6">
+          {saveState.status === "error" && (
+            <ActionErrorNotice error={saveState.error} />
+          )}
+
+          <DesignerCanvas
+            blocks={blocks}
+            productsById={productsById}
+            theme={theme}
+            header={header}
+            previewMode={previewMode}
+            backgroundImageUrl={backgroundImageUrl}
+            showGrid={showGrid}
+            onReorder={reorderBlocks}
+            onSizeChange={setBlockSize}
+            onRemove={removeBlock}
+            selectedKey={inspector?.kind === "block" ? inspector.key : null}
+            onSelectBlock={selectBlock}
+          />
+        </main>
+
+        {/* Reopen tab, pinned to the screen edge while the panel is away. */}
+        {!panelOpen && (
+          <button
+            type="button"
+            onClick={() => setPanelOpen(true)}
+            aria-label="Show design panel"
+            title="Show design panel"
+            className={cn(PANEL_TAB_CLASS, "fixed right-0")}
+          >
+            <ChevronLeft className="size-4" strokeWidth={2} aria-hidden="true" />
+          </button>
         )}
 
-        <div className="flex flex-col gap-6 lg:flex-row">
-          {/* Pinned preview: on lg+ the canvas sticks below the top bar and
-              scrolls internally, so it stays visible while the (often longer)
-              controls panel scrolls the page. On mobile it owns the screen and
-              the panels slide over it as bottom sheets. */}
-          <div className="min-w-0 flex-1 lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:self-start lg:overflow-y-auto">
-            <DesignerCanvas
-              blocks={blocks}
-              productsById={productsById}
-              theme={theme}
-              header={header}
-              previewMode={previewMode}
-              backgroundImageUrl={backgroundImageUrl}
-              onReorder={reorderBlocks}
-              onSizeChange={setBlockSize}
-              onRemove={removeBlock}
-              selectedKey={inspector?.kind === "block" ? inspector.key : null}
-              onSelectBlock={selectBlock}
-            />
-          </div>
+        {/* RIGHT: the design panel, docked to the page edge on desktop
+            (selected element's card on top, global settings below), scrolling
+            on its own. Its left edge carries the collapse tab and doubles as
+            a drag handle for resizing. On mobile both render as bottom
+            sheets, one at a time. */}
+        <div
+          // Width only binds on lg+; on mobile the children are fixed sheets.
+          style={{ "--panel-w": `${panelWidth}px` } as React.CSSProperties}
+          className={cn(
+            "relative shrink-0 lg:w-[var(--panel-w)] lg:border-l lg:border-border",
+            !panelOpen && "lg:hidden",
+          )}
+        >
+          {/* Drag handle straddling the border. Focusable + arrow-key
+              resizable, per the ARIA separator pattern. */}
+          <div
+            role="separator"
+            aria-orientation="vertical"
+            aria-label="Resize design panel"
+            aria-valuenow={panelWidth}
+            aria-valuemin={PANEL_MIN_WIDTH}
+            aria-valuemax={PANEL_MAX_WIDTH}
+            tabIndex={0}
+            onPointerDown={startPanelResize}
+            onKeyDown={onPanelResizeKey}
+            className="absolute inset-y-0 -left-1 z-20 hidden w-2 cursor-col-resize focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:block"
+          />
 
-          {/* RIGHT column: the selected element's card on top (ask: cards open
-              to the RIGHT of the storefront), global design settings below.
-              On mobile both render as bottom sheets, at most one at a time. */}
-          <div className="shrink-0 lg:w-72 lg:space-y-4">
+          {/* Collapse tab, clipped to the panel's own left edge. */}
+          <button
+            type="button"
+            onClick={() => setPanelOpen(false)}
+            aria-label="Hide design panel"
+            title="Hide design panel"
+            className={cn(PANEL_TAB_CLASS, "left-0 -translate-x-full")}
+          >
+            <ChevronRight className="size-4" strokeWidth={2} aria-hidden="true" />
+          </button>
+
+          {/* No padding here: each section pads itself so the dividers can
+              run the full width of the panel. */}
+          <div className="contents lg:block lg:h-full lg:overflow-y-auto">
             {showInspector && (
               <div className={SHEET_ON_MOBILE_CLASS}>
                 <CollapsibleSection
@@ -555,17 +684,18 @@ export function StorefrontDesigner({
                 onHeaderChange={updateHeader}
                 backgroundImageUrl={backgroundImageUrl}
                 onBackgroundImageChange={setBackgroundImageUrl}
+                showGrid={showGrid}
+                onShowGridChange={setShowGrid}
               />
             </div>
           </div>
         </div>
-      </main>
+      </div>
 
       <EditorToolbar
         onAddProduct={togglePicker}
         onAddText={addTextBlock}
-        onAddShape={() => addShapeBlock("square")}
-        onAddSpacer={() => addShapeBlock("spacer")}
+        onAddShape={addShapeBlock}
         canAddBlocks={blocks.length < MAX_BLOCKS}
         canUndo={history.canUndo}
         canRedo={history.canRedo}
