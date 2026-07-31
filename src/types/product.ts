@@ -38,6 +38,27 @@ export interface Product {
 }
 
 /**
+ * Sales rollup for ONE product, derived from paid orders. Deliberately kept
+ * off `Product`: the form, mocks, and write path have no business carrying
+ * revenue, and a product with zero sales simply has no entry.
+ */
+export interface ProductSales {
+  /** Paid orders referencing this product. */
+  unitsSold: number;
+  /** Gross paid revenue, integer cents (never floats). */
+  revenueCents: number;
+  /** Currency of those orders; falls back to the product's own currency. */
+  currency: Currency;
+}
+
+/** Per-product sales keyed by product id, plus the single best seller. */
+export interface ProductSalesSummary {
+  byProduct: Record<string, ProductSales>;
+  /** Highest-revenue product that has at least one paid sale; null if none. */
+  bestsellerId: string | null;
+}
+
+/**
  * The editable text fields captured by the form. Kept separate from `Product`
  * because `price` is an in-progress input string here (validated + parsed to a
  * number on submit), and uploads are tracked as `File` objects in local state

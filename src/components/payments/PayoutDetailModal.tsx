@@ -63,7 +63,7 @@ export function PayoutDetailModal({
       </div>
 
       {payout.status === "failed" && (
-        <p className="mt-4 border-t border-border pt-4 font-inter text-sm text-destructive">
+        <p className="mt-4 border-t border-border pt-4 font-inter text-sm text-danger-strong">
           This payout could not be delivered. Stripe retries automatically, and
           the amount stays in your available balance until it succeeds.
         </p>

@@ -12,9 +12,9 @@ const STATUS_LABELS: Record<OrderStatus, string> = {
 
 const STATUS_CLASSES: Record<OrderStatus, string> = {
   paid: "text-success",
-  refunded: "text-destructive",
-  disputed: "text-destructive",
-  pending: "text-muted-foreground",
+  refunded: "text-danger-strong",
+  disputed: "text-danger-strong",
+  pending: "text-neutral-600",
 };
 
 const CHANNEL_LABELS: Record<DashboardOrder["channel"], string> = {

@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import type { Product } from "@/types/product";
+import { useMemo, useState } from "react";
+import type { Product, ProductSalesSummary } from "@/types/product";
 import type { ActionError } from "@/lib/errors";
+import { sortProducts, type ProductSort } from "@/lib/products/sort";
 import { deleteProduct } from "@/lib/products/actions";
 import { ActionErrorNotice } from "@/components/ui/ActionErrorNotice";
 import { ProductCard } from "./ProductCard";
@@ -13,10 +14,16 @@ import { ProductEmptyState } from "./ProductEmptyState";
 export function ProductList({
   products: initial,
   canWrite,
+  sales,
+  sort = "default",
 }: {
   products: Product[];
   /** Whether the active account's role may edit/delete (hides those controls). */
   canWrite: boolean;
+  /** Per-product paid-order rollup + bestseller, fetched server-side. */
+  sales: ProductSalesSummary;
+  /** Grid ordering chosen in the toolbar; applied to the live list below. */
+  sort?: ProductSort;
 }) {
   const [products, setProducts] = useState<Product[]>(initial);
   const [deleteError, setDeleteError] = useState<ActionError | null>(null);
@@ -40,6 +47,13 @@ export function ProductList({
     }
   }
 
+  // Ordering is derived, never stored: deletes mutate `products` and the sort
+  // re-applies on top, so the two can't disagree.
+  const visible = useMemo(
+    () => sortProducts(products, sort, sales.byProduct),
+    [products, sort, sales.byProduct],
+  );
+
   if (products.length === 0) {
     return <ProductEmptyState canWrite={canWrite} />;
   }
@@ -47,12 +61,15 @@ export function ProductList({
   return (
     <>
       {deleteError && <ActionErrorNotice error={deleteError} className="mb-4" />}
-      <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {products.map((product) => (
+      {/* Four-up from the laptop breakpoint (lg): the smaller card carries it. */}
+      <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+      {visible.map((product) => (
         <li key={product.id}>
           <ProductCard
             product={product}
             canWrite={canWrite}
+            sales={sales.byProduct[product.id]}
+            isBestseller={sales.bestsellerId === product.id}
             onDelete={() => handleDelete(product.id)}
           />
         </li>

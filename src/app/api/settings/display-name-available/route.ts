@@ -1,6 +1,7 @@
 import { getUser } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { displayNameSchema } from "@/lib/validation/settings";
+import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
 
 /**
  * GET /api/settings/display-name-available?name=foo — live availability
@@ -19,6 +20,15 @@ export async function GET(request: Request) {
   const user = await getUser();
   if (!user) {
     return Response.json({ error: "Sign in required." }, { status: 401 });
+  }
+
+  // This endpoint answers "does someone hold this name?", so an unthrottled
+  // caller could walk a dictionary through it to enumerate taken handles.
+  if (!(await rateLimit("display_name_check", RATE_LIMITS.displayNameCheck))) {
+    return Response.json(
+      { error: "Too many checks. Try again shortly." },
+      { status: 429 },
+    );
   }
 
   const { searchParams } = new URL(request.url);

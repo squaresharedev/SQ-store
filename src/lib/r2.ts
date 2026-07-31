@@ -162,8 +162,15 @@ const GET_EXPIRY_SECONDS = 2 * 60 * 60;
  * stricter path (purchase check + short expiry) — do not reuse this for them.
  */
 export async function presignGetUrl(key: string): Promise<string | null> {
-  // If the key is already a full URL (e.g., external stock photo), return it directly.
-  if (key.startsWith("http://") || key.startsWith("https://")) {
+  // Seeded dev data stores full https:// stock-photo URLs in image_key (see
+  // scripts/lib/fake-data.ts), so pass those straight through.
+  //
+  // This is NOT a user-reachable path: every app write validates image_key
+  // against OBJECT_KEY_PATTERN (lib/validation/product.ts), which only admits
+  // `images/<uuid>/<uuid>-<name>` — a URL can never survive it. Only
+  // service_role seed scripts can put one here. https only: a plaintext http
+  // URL would be mixed content on a secure page.
+  if (key.startsWith("https://")) {
     return key;
   }
   if (!hasR2Credentials()) return null;

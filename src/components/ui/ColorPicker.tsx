@@ -105,6 +105,7 @@ export function ColorPicker({
             type="button"
             aria-haspopup="dialog"
             aria-expanded={open}
+            data-testid="color-picker-trigger"
             onClick={() => setOpen((prev) => !prev)}
             className={cn(fieldBaseClass, "flex items-center gap-2 text-left")}
           >

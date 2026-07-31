@@ -38,6 +38,7 @@ export default async function TeamSettingsPage() {
       actorRole={actorRole}
       members={members}
       pendingInvites={pendingInvites}
+      viewerUserId={user.id}
     />
   );
 }

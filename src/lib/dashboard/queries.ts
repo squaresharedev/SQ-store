@@ -156,6 +156,10 @@ export async function getDashboardOrders(): Promise<DashboardOrdersData> {
     .from("orders")
     .select("product_title, channel, status, amount_cents, currency, created_at")
     .eq("seller_id", account.accountId)
+    // EUR-only, pushed DOWN to the DB. Exactly mirrors toCurrency() (anything
+    // not the literal "USD" is EUR), so the row set is unchanged — but USD rows
+    // no longer consume the ORDERS_READ_LIMIT budget.
+    .neq("currency", "USD")
     .order("created_at", { ascending: false })
     .limit(ORDERS_READ_LIMIT);
 
@@ -166,9 +170,19 @@ export async function getDashboardOrders(): Promise<DashboardOrdersData> {
     return emptyOrdersData();
   }
 
+  // CORRECTNESS TRIPWIRE: at the cap the window is truncated and all-time
+  // totals silently UNDER-REPORT. Surfaces in logs before it shows up as wrong
+  // numbers on a seller's dashboard. Fix is SQL-side aggregation.
+  if ((data?.length ?? 0) >= ORDERS_READ_LIMIT) {
+    console.warn(
+      `[dashboard] hit the ${ORDERS_READ_LIMIT}-order read cap — all-time figures are computed from a TRUNCATED window. Move aggregation into SQL.`,
+    );
+  }
+
   // EUR-only for now: USD orders don't count anywhere on the dashboard until
   // multi-currency viewing/transacting ships. MoneyByCurrency stays multi-key
-  // so that work is additive later, not a rewrite.
+  // so that work is additive later, not a rewrite. The DB now pre-filters this
+  // (see .neq above); kept so the semantics hold if that predicate changes.
   const orders = ((data ?? []) as DashboardOrder[]).filter(
     (order) => toCurrency(order.currency) === "EUR",
   );

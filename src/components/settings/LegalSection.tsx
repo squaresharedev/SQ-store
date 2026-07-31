@@ -91,7 +91,7 @@ export function LegalSection({
               <SaveButton pending={isPending} state={state} pendingLabel="Recording…">
                 I accept
               </SaveButton>
-              <p className="font-inter text-xs text-neutral-400">
+              <p className="font-inter text-xs text-neutral-500">
                 Accepting records the date and version{" "}
                 <span className="font-mono">{LEGAL_VERSION}</span> to your
                 account.

@@ -27,15 +27,21 @@ export async function getNotificationSnapshot(): Promise<NotificationSnapshot | 
   if (!user) return null;
 
   const supabase = await createClient();
+  // RLS already scopes to user_id = auth.uid(); passing user_id explicitly (the
+  // SESSION user, never a caller arg) gives the planner a direct equality qual
+  // so it uses the (user_id, created_at) / (user_id, read) indexes instead of
+  // relying on policy-qual push-down. Same rows either way.
   const [listResult, countResult] = await Promise.all([
     supabase
       .from("notifications")
       .select(SELECT_COLS)
+      .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .limit(RECENT_LIMIT),
     supabase
       .from("notifications")
       .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
       .eq("read", false),
   ]);
 
@@ -59,6 +65,7 @@ export async function getUnreadCount(): Promise<number> {
   const { count, error } = await supabase
     .from("notifications")
     .select("id", { count: "exact", head: true })
+    .eq("user_id", user.id)
     .eq("read", false);
   if (error) return 0;
   return count ?? 0;
@@ -80,6 +87,7 @@ export async function getNotificationPage(opts?: {
   let query = supabase
     .from("notifications")
     .select(SELECT_COLS)
+    .eq("user_id", user.id) // explicit session-user qual for index use (RLS-equivalent)
     .order("created_at", { ascending: false })
     .limit(limit + 1); // fetch one extra to detect a next page
   if (opts?.cursor) query = query.lt("created_at", opts.cursor);

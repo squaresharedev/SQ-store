@@ -6,6 +6,9 @@ import { Check, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { fieldBaseClass } from "./control-styles";
 
+/** How long consecutive keystrokes count as one type-ahead search. */
+const TYPEAHEAD_MS = 600;
+
 export type SelectOption<T extends string> = {
   value: T;
   label: string;
@@ -25,17 +28,36 @@ export function Select<T extends string>({
   options,
   onChange,
   disabled,
+  align = "left",
+  triggerClassName,
 }: {
   id: string;
   value: T;
   options: readonly SelectOption<T>[];
   onChange: (value: T) => void;
   disabled?: boolean;
+  /** Override trigger geometry (height, corners) where it sits beside other controls. */
+  triggerClassName?: string;
+  /**
+   * Which edge the (wider-than-trigger) panel is anchored to. Use "right" for a
+   * narrow trigger sitting at the right of its container, so the panel grows
+   * inward instead of off the edge.
+   */
+  align?: "left" | "right";
 }) {
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const rootRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
   const listboxId = useId();
+
+  // Type-ahead buffer. A native <select> jumps to the first match as you type,
+  // and long lists (the EU country picker) are unusable without it. Keystrokes
+  // within TYPEAHEAD_MS accumulate, so "ne" reaches Netherlands, not Norway.
+  const typeahead = useRef<{ buffer: string; timer: ReturnType<typeof setTimeout> | null }>({
+    buffer: "",
+    timer: null,
+  });
 
   const selectedIndex = options.findIndex((option) => option.value === value);
   const selected = options[selectedIndex];
@@ -51,6 +73,40 @@ export function Select<T extends string>({
     setOpen(false);
   }
 
+  // Keep the active option in view: the panel caps at max-h-64, so on a long
+  // list (countries) arrowing past the fold would otherwise move an invisible
+  // highlight. "nearest" scrolls only when it actually falls outside.
+  useEffect(() => {
+    if (!open) return;
+    listRef.current
+      ?.querySelector<HTMLElement>(`#${CSS.escape(`${listboxId}-option-${activeIndex}`)}`)
+      ?.scrollIntoView({ block: "nearest" });
+  }, [open, activeIndex, listboxId]);
+
+  // Drop any pending type-ahead timer on unmount.
+  useEffect(() => {
+    const state = typeahead.current;
+    return () => {
+      if (state.timer) clearTimeout(state.timer);
+    };
+  }, []);
+
+  /** Move the highlight to the first option matching the accumulated buffer. */
+  function runTypeahead(key: string) {
+    const state = typeahead.current;
+    if (state.timer) clearTimeout(state.timer);
+    state.buffer += key.toLowerCase();
+    state.timer = setTimeout(() => {
+      state.buffer = "";
+    }, TYPEAHEAD_MS);
+
+    const match = options.findIndex((option) =>
+      option.label.toLowerCase().startsWith(state.buffer),
+    );
+    if (match >= 0) setActiveIndex(match);
+    return match >= 0;
+  }
+
   // Close when clicking/tapping anywhere outside.
   useEffect(() => {
     if (!open) return;
@@ -61,12 +117,36 @@ export function Select<T extends string>({
     return () => document.removeEventListener("pointerdown", onPointerDown);
   }, [open]);
 
+  /** A single printable character, i.e. a type-ahead search key. */
+  function isSearchKey(event: KeyboardEvent<HTMLButtonElement>) {
+    return (
+      event.key.length === 1 &&
+      event.key !== " " &&
+      !event.ctrlKey &&
+      !event.metaKey &&
+      !event.altKey
+    );
+  }
+
   function handleKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
     if (!open) {
       if (["ArrowDown", "ArrowUp", "Enter", " "].includes(event.key)) {
         event.preventDefault();
         openList();
+        return;
       }
+      // Typing on a closed select opens it at the match, like a native one.
+      if (isSearchKey(event)) {
+        event.preventDefault();
+        setOpen(true);
+        runTypeahead(event.key);
+      }
+      return;
+    }
+
+    if (isSearchKey(event)) {
+      event.preventDefault();
+      runTypeahead(event.key);
       return;
     }
     switch (event.key) {
@@ -113,7 +193,11 @@ export function Select<T extends string>({
         disabled={disabled}
         onClick={() => (open ? setOpen(false) : openList())}
         onKeyDown={handleKeyDown}
-        className={cn(fieldBaseClass, "flex items-center justify-between gap-2 text-left")}
+        className={cn(
+          fieldBaseClass,
+          "flex items-center justify-between gap-2 text-left",
+          triggerClassName,
+        )}
       >
         <span className="truncate">{selected?.label ?? ""}</span>
         <ChevronDown
@@ -128,10 +212,18 @@ export function Select<T extends string>({
 
       {open && (
         <ul
+          ref={listRef}
           id={listboxId}
           role="listbox"
           aria-labelledby={id}
-          className="absolute left-0 right-0 top-full z-40 mt-1 max-h-64 overflow-y-auto rounded-md border border-border bg-popover p-1 shadow-md"
+          className={cn(
+            // The panel sizes to its CONTENT (min = the trigger's width), so a
+            // two-option list with descriptions doesn't wrap itself into a
+            // scrolling column behind a narrow trigger. Capped to the viewport.
+            "absolute top-full z-40 mt-1 w-max min-w-full max-w-[min(22rem,calc(100vw-2rem))]",
+            "max-h-64 overflow-y-auto rounded-md border border-border bg-popover p-1 shadow-md",
+            align === "right" ? "right-0" : "left-0",
+          )}
         >
           {options.map((option, index) => {
             const isSelected = option.value === value;

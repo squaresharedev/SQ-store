@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { safeInternalPath } from "@/lib/utils/safe-path";
 
 /**
  * OAuth / PKCE code exchange. Also handles the default Supabase email links
@@ -25,6 +26,5 @@ export async function GET(request: Request) {
 }
 
 function sanitizeNext(next: string | null): string {
-  if (next && next.startsWith("/") && !next.startsWith("//")) return next;
-  return "/";
+  return safeInternalPath(next);
 }

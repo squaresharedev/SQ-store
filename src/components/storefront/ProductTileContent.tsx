@@ -10,7 +10,7 @@ import {
 import { isStrictHexColor } from "@/lib/validation/storefront";
 import { formatPrice } from "@/lib/format";
 import { cn } from "@/lib/utils";
-import { PRICE_TAG_FLOAT_CLASSES } from "./config-maps";
+import { PRICE_TAG_FLOAT_CLASSES, PRICE_TAG_SIZE_CLASSES } from "./config-maps";
 
 // Reveal-on-hover also reveals on keyboard focus within the tile; with
 // reduced motion the change is instant instead of faded.
@@ -63,17 +63,23 @@ export function ProductTileContent({
     theme.cornerRadius,
   );
 
+  // Size is the tag's other axis: text size everywhere, plus chip padding once
+  // the tag has a backing. Kept separate from the style map so the two never
+  // fight over the same classes.
+  const tagSizeClass = PRICE_TAG_SIZE_CLASSES[theme.priceTagSize ?? "md"];
+
   // Price floated on the image gets a translucent backing for legibility.
   const floatedPrice =
     !priceHidden && tagPosition !== "below" && tagPosition !== "hidden" ? (
       <span
         className={cn(
-          "absolute z-10 font-inter text-xs",
+          "absolute z-10 font-inter",
           PRICE_TAG_FLOAT_CLASSES[tagPosition as PriceTagFloatPosition],
+          tagSizeClass,
           // Style chip
           theme.priceTagStyle === "pill"
-            ? "rounded-full border border-border bg-card/90 px-2 py-0.5"
-            : "rounded-sm bg-card/90 px-1.5 py-0.5",
+            ? "rounded-full border border-border bg-card/90"
+            : "rounded-sm bg-card/90",
           theme.priceDisplay === "hover" && HOVER_REVEAL_CLASS,
         )}
         style={accentStyle}
@@ -89,9 +95,12 @@ export function ProductTileContent({
     !priceHidden && theme.priceTagPosition === "below" ? (
       <span
         className={cn(
-          "shrink-0 font-inter text-xs",
+          "shrink-0 font-inter",
+          tagSizeClass,
+          // In the bar, size means text size; padding only once it's a chip.
+          theme.priceTagStyle !== "pill" && "p-0",
           theme.priceTagStyle === "pill"
-            ? "rounded-full border border-border bg-card/90 px-2 py-0.5"
+            ? "rounded-full border border-border bg-card/90"
             : shadowArea && "text-white",
           theme.priceDisplay === "hover" && HOVER_REVEAL_CLASS,
         )}

@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { safeInternalPath } from "@/lib/utils/safe-path";
 import { TYPE_DOT, TYPE_LABEL, formatRelativeTime } from "@/lib/notifications/presentation";
 import type { Notification } from "@/lib/notifications/types";
 
@@ -79,7 +80,9 @@ function safeInAppHref(data: Notification["data"]): string | null {
   if (!data || typeof data !== "object" || Array.isArray(data)) return null;
   const href = (data as Record<string, unknown>).href;
   if (typeof href !== "string") return null;
-  // Must be a root-relative path ("/...") and not "//host" (protocol-relative).
-  if (!href.startsWith("/") || href.startsWith("//")) return null;
-  return href;
+  // Shared with the auth redirect guard: resolve against a placeholder origin
+  // and require it to hold. A prefix check would let "/\t/evil.com" through,
+  // which a browser parses as the protocol-relative "//evil.com".
+  const safe = safeInternalPath(href, "");
+  return safe === "" ? null : safe;
 }

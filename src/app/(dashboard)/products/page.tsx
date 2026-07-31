@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { Plus } from "lucide-react";
-import { listProducts } from "@/lib/products/queries";
-import { ProductList } from "@/components/products/ProductList";
-import { primaryButtonClass } from "@/components/ui/control-styles";
+import { listProducts, getProductSales } from "@/lib/products/queries";
+import { ProductsBrowser } from "@/components/products/ProductsBrowser";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
 
@@ -13,32 +10,32 @@ export const metadata: Metadata = {
 
 // PROTECTED by (dashboard)/layout.tsx.
 export default async function ProductsPage() {
-  const [products, account] = await Promise.all([
+  const [products, account, sales] = await Promise.all([
     listProducts(),
     getActiveAccount(),
+    getProductSales(),
   ]);
   const canWrite = can(account?.role, "products.write");
 
   return (
     <main className="mx-auto max-w-7xl px-6 py-8">
-      <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold text-foreground md:text-3xl">
-            Products
-          </h1>
-          <p className="mt-1 font-inter text-sm text-muted-foreground">
-            Manage the products you sell through your store and embeds.
-          </p>
-        </div>
-        {canWrite && (
-          <Link href="/products/new" className={primaryButtonClass}>
-            <Plus className="size-4" strokeWidth={2} aria-hidden="true" />
-            Add product
-          </Link>
-        )}
-      </div>
-
-      <ProductList products={products} canWrite={canWrite} />
+      {/* The sort control and the grid share state, so the header actions live
+          in ProductsBrowser; the title block stays server-rendered here. */}
+      <ProductsBrowser
+        products={products}
+        canWrite={canWrite}
+        sales={sales}
+        heading={
+          <div>
+            <h1 className="text-2xl font-semibold text-foreground md:text-3xl">
+              Products
+            </h1>
+            <p className="mt-1 font-inter text-sm text-muted-foreground">
+              Manage the products you sell through your store and embeds.
+            </p>
+          </div>
+        }
+      />
     </main>
   );
 }

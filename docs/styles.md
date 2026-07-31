@@ -85,7 +85,8 @@ tint), matching the product.
 
   /* Feedback */
   --color-danger:  #ef4444;
-  --color-success: #16a34a;
+  --color-danger-strong: #b91c1c; /* small text on light surfaces (badges) */
+  --color-success: #15803d;
 }
 ```
 

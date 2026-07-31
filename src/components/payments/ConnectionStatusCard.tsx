@@ -85,7 +85,7 @@ export function ConnectionStatusCard({
         </div>
       </div>
       {account.requirementsDue.length > 0 && (
-        <p className="mt-3 border-t border-border pt-3 font-inter text-sm text-destructive">
+        <p className="mt-3 border-t border-border pt-3 font-inter text-sm text-danger-strong">
           Stripe needs more information before payouts can continue.
         </p>
       )}

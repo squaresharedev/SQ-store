@@ -10,20 +10,33 @@ import {
   Underline,
 } from "lucide-react";
 import {
+  STOREFRONT_FONTS,
   TEXT_MAX_LENGTH,
+  TEXT_SIZES,
   TEXT_VARIANTS,
+  type StorefrontFont,
   type TextAlign,
   type TextBlock,
+  type TextSize,
 } from "@/types/storefront";
 import { cn } from "@/lib/utils";
 import { Select, type SelectOption } from "@/components/ui/select";
+import { ColorPicker } from "@/components/ui/ColorPicker";
 import { fieldBaseClass, labelClass } from "@/components/ui/control-styles";
-import { TEXT_VARIANT_LABELS } from "./config-maps";
+import { TEXT_SIZE_LABELS, TEXT_VARIANT_LABELS } from "./config-maps";
 
 export type TextBlockPatch = Partial<
   Pick<
     TextBlock,
-    "text" | "variant" | "align" | "bold" | "italic" | "underline"
+    | "text"
+    | "variant"
+    | "align"
+    | "bold"
+    | "italic"
+    | "underline"
+    | "color"
+    | "fontSize"
+    | "font"
   >
 >;
 
@@ -32,6 +45,29 @@ const VARIANT_OPTIONS: readonly SelectOption<(typeof TEXT_VARIANTS)[number]>[] =
     value: variant,
     label: TEXT_VARIANT_LABELS[variant],
   }));
+
+// "Inherit" sentinels: the block stores NOTHING for theme-default font/size —
+// the select just needs a concrete value to point at.
+type FontChoice = StorefrontFont | "theme";
+type SizeChoice = TextSize | "default";
+
+const FONT_LABELS: Record<StorefrontFont, string> = {
+  sans: "Sans",
+  serif: "Serif",
+  mono: "Mono",
+  display: "Display",
+  hand: "Handwritten",
+};
+
+const FONT_OPTIONS: readonly SelectOption<FontChoice>[] = [
+  { value: "theme", label: "Theme font", description: "Follow the storefront font" },
+  ...STOREFRONT_FONTS.map((font) => ({ value: font, label: FONT_LABELS[font] })),
+];
+
+const SIZE_OPTIONS: readonly SelectOption<SizeChoice>[] = [
+  { value: "default", label: "Auto", description: "Sized by the style above" },
+  ...TEXT_SIZES.map((size) => ({ value: size, label: TEXT_SIZE_LABELS[size] })),
+];
 
 const ALIGN_ICONS: Record<TextAlign, typeof AlignLeft> = {
   left: AlignLeft,
@@ -43,15 +79,19 @@ const TOGGLE_CLASS =
   "inline-flex size-8 items-center justify-center rounded-none border border-border text-muted-foreground transition-colors duration-180 ease-in-out hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background motion-reduce:transition-none";
 
 /**
- * Text-block editor rendered in the side panel: content, style, formatting, and
- * alignment. Every change is applied live (no "done" step); the tile updates as
- * you type. The tile itself just displays the text.
+ * Text-block editor rendered in the side panel: content, style, formatting,
+ * alignment, and per-block font / size / color overrides (all optional — a
+ * fresh block simply follows the theme). Every change is applied live (no
+ * "done" step); the tile updates as you type.
  */
 export function TextBlockEditor({
   block,
+  accent,
   onUpdate,
 }: {
   block: TextBlock;
+  /** Theme accent — what a heading renders in when no override is set. */
+  accent: string;
   onUpdate: (patch: TextBlockPatch) => void;
 }) {
   const fieldId = useId();
@@ -64,6 +104,11 @@ export function TextBlockEditor({
     setPrevId(block.id);
     setDraft(block.text);
   }
+
+  // What the picker shows when no override is stored: the color the tile is
+  // actually rendering with (heading = accent, others = near-black foreground).
+  const effectiveColor =
+    block.color ?? (block.variant === "heading" ? accent : "#171717");
 
   return (
     <div className="space-y-3">
@@ -94,6 +139,52 @@ export function TextBlockEditor({
           options={VARIANT_OPTIONS}
           onChange={(variant) => onUpdate({ variant })}
         />
+      </div>
+
+      <div className="space-y-1.5">
+        <label htmlFor={`${fieldId}-font`} className={labelClass}>
+          Font
+        </label>
+        <Select
+          id={`${fieldId}-font`}
+          value={(block.font ?? "theme") as FontChoice}
+          options={FONT_OPTIONS}
+          onChange={(font) =>
+            onUpdate({ font: font === "theme" ? undefined : font })
+          }
+        />
+      </div>
+
+      <div className="space-y-1.5">
+        <label htmlFor={`${fieldId}-size`} className={labelClass}>
+          Size
+        </label>
+        <Select
+          id={`${fieldId}-size`}
+          value={(block.fontSize ?? "default") as SizeChoice}
+          options={SIZE_OPTIONS}
+          onChange={(fontSize) =>
+            onUpdate({ fontSize: fontSize === "default" ? undefined : fontSize })
+          }
+        />
+      </div>
+
+      <div className="space-y-1.5">
+        <ColorPicker
+          id={`${fieldId}-color`}
+          label="Color"
+          value={effectiveColor}
+          onChange={(color) => onUpdate({ color })}
+        />
+        {block.color && (
+          <button
+            type="button"
+            onClick={() => onUpdate({ color: undefined })}
+            className="font-inter text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+          >
+            Reset to theme color
+          </button>
+        )}
       </div>
 
       <div className="space-y-1.5">

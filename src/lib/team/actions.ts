@@ -26,6 +26,7 @@ import { createNotification, resolveUserIdByEmail } from "@/lib/notifications/cr
 import { can, canGrant, ROLE_LABELS } from "@/lib/team/permissions";
 import { getActorRole } from "@/lib/team/queries";
 import { ACTIVE_ACCOUNT_COOKIE } from "@/lib/team/account-context";
+import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
 import {
   teamInviteSchema,
   teamAcceptSchema,
@@ -116,6 +117,18 @@ export async function inviteMember(
   // Block inviting yourself — you're already here.
   if (user.email && invited_email === user.email.toLowerCase()) {
     return { error: "You're already here." };
+  }
+
+  // An invite notifies (and will email) an arbitrary address of the inviter's
+  // choosing, so it is the main in-app path for spamming a stranger. Keyed on
+  // auth.uid() inside Postgres, so it cannot be shaken off by rotating IP or
+  // clearing cookies, and the sliding window means a burst cannot be repeated
+  // by waiting for a boundary. Checked AFTER the permission checks so a user
+  // without invite rights can never spend the budget.
+  if (!(await rateLimit("team_invite", RATE_LIMITS.teamInvite))) {
+    return {
+      error: "You've sent a lot of invites recently. Try again a bit later.",
+    };
   }
 
   const supabase = await createClient();

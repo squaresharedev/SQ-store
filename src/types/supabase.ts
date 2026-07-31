@@ -314,6 +314,16 @@ export type Database = {
         Args: { p_action: string; p_max: number; p_window_seconds: number }
         Returns: boolean
       }
+      rl_take_key: {
+        Args: {
+          p_key: string
+          p_action: string
+          p_max: number
+          p_window_seconds: number
+        }
+        Returns: boolean
+      }
+      rl_gc_keys: { Args: never; Returns: number }
       team_accept_invite: { Args: { p_invite_id: string }; Returns: boolean }
       team_actor_role: {
         Args: { account: string }

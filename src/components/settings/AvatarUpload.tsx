@@ -2,8 +2,9 @@
 
 import * as React from "react";
 import { useActionState } from "react";
-import { ImageUp, Loader2, Trash2 } from "lucide-react";
+import { Loader2, Trash2 } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
+import { ImageUpIcon } from "@/components/ui/ImageUpIcon";
 import { SettingsCard } from "@/components/settings/SettingsCard";
 import { FormStatus } from "@/components/settings/FormStatus";
 import { secondaryButtonClass } from "@/components/ui/control-styles";
@@ -53,6 +54,7 @@ export function AvatarUpload({
               ref={fileRef}
               type="file"
               name="avatar"
+              aria-label="Choose profile photo"
               accept="image/jpeg,image/png,image/webp"
               className="sr-only"
               onChange={() => uploadFormRef.current?.requestSubmit()}
@@ -67,7 +69,7 @@ export function AvatarUpload({
               {uploading ? (
                 <Loader2 className="size-4 animate-spin motion-reduce:animate-none" aria-hidden />
               ) : (
-                <ImageUp className="size-4" strokeWidth={2} aria-hidden />
+                <ImageUpIcon className="size-4" />
               )}
               {avatarUrl ? "Change photo" : "Upload photo"}
             </button>

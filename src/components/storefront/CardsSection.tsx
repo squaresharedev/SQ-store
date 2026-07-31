@@ -6,6 +6,7 @@ import {
   PRICE_TAG_CORNER_LIMIT,
   coercePriceTagPosition,
   type PriceTagFloatPosition,
+  type PriceTagSize,
   type PriceTagStyle,
   type StorefrontTheme,
 } from "@/types/storefront";
@@ -26,6 +27,12 @@ import { TitleStylePicker } from "./TitleStylePicker";
 const PRICE_TAG_STYLE_OPTIONS: readonly { value: PriceTagStyle; label: string }[] = [
   { value: "plain", label: "Plain" },
   { value: "pill", label: "Pill" },
+];
+
+const PRICE_TAG_SIZE_OPTIONS: readonly { value: PriceTagSize; label: string }[] = [
+  { value: "sm", label: "S" },
+  { value: "md", label: "M" },
+  { value: "lg", label: "L" },
 ];
 
 /** Card appearance controls: shape, title area, price tag, sold-out badge. */
@@ -177,6 +184,18 @@ export function CardsSection({
           options={PRICE_TAG_STYLE_OPTIONS}
           onChange={(priceTagStyle) => onChange({ ...theme, priceTagStyle })}
           ariaLabel="Price tag style"
+        />
+      </div>
+
+      {/* Chip size is its own axis: it sets the tag's text size and padding
+          wherever the tag sits, floated or in the info bar. */}
+      <div className="space-y-1.5">
+        <span className={strongLabelClass}>Price tag size</span>
+        <SegmentedControl
+          value={theme.priceTagSize ?? "md"}
+          options={PRICE_TAG_SIZE_OPTIONS}
+          onChange={(priceTagSize) => onChange({ ...theme, priceTagSize })}
+          ariaLabel="Price tag size"
         />
       </div>
 

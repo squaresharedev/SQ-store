@@ -4,6 +4,7 @@ import { LoginForm } from "@/components/auth/LoginForm";
 import { BackgroundArrow } from "@/components/ui/BackgroundArrow";
 import { getUser } from "@/lib/auth/session";
 import { MARKETPLACE_URL } from "@/lib/site";
+import { safeInternalPath } from "@/lib/utils/safe-path";
 
 export const metadata: Metadata = {
   title: "Sign in",
@@ -16,9 +17,7 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 function sanitizeNext(value: string | string[] | undefined): string {
-  const next = Array.isArray(value) ? value[0] : value;
-  if (next && next.startsWith("/") && !next.startsWith("//")) return next;
-  return "/";
+  return safeInternalPath(Array.isArray(value) ? value[0] : value);
 }
 
 const ERROR_MESSAGES: Record<string, string> = {

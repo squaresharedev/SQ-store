@@ -66,7 +66,7 @@ export function LoginForm({ next = "/" }: { next?: string }) {
       {/* Divider */}
       <div className="flex items-center gap-4">
         <span className="h-px flex-1 bg-neutral-200" />
-        <span className="font-inter text-xs text-neutral-400">or</span>
+        <span className="font-inter text-xs text-neutral-500">or</span>
         <span className="h-px flex-1 bg-neutral-200" />
       </div>
 
@@ -91,7 +91,7 @@ export function LoginForm({ next = "/" }: { next?: string }) {
                   "py-2 font-inter text-sm font-medium transition-colors",
                   mode === m
                     ? "bg-neutral-100 text-neutral-900"
-                    : "text-neutral-400 hover:bg-neutral-50 hover:text-neutral-700",
+                    : "text-neutral-500 hover:bg-neutral-50 hover:text-neutral-700",
                 )}
               >
                 {m === "signin" ? "Sign in" : "Sign up"}
@@ -124,7 +124,7 @@ export function LoginForm({ next = "/" }: { next?: string }) {
                   type="button"
                   onClick={openReset}
                   suppressHydrationWarning
-                  className="font-inter text-xs text-neutral-400 transition-colors hover:text-neutral-700"
+                  className="font-inter text-xs text-neutral-500 transition-colors hover:text-neutral-700"
                 >
                   Forgot?
                 </button>
@@ -140,7 +140,7 @@ export function LoginForm({ next = "/" }: { next?: string }) {
               required
             />
             {mode === "signup" && (
-              <p className="font-inter text-xs text-neutral-400">
+              <p className="font-inter text-xs text-neutral-500">
                 At least 8 characters.
               </p>
             )}
@@ -184,6 +184,7 @@ export function LoginForm({ next = "/" }: { next?: string }) {
           value={primaryIntent}
           disabled={isPending}
           suppressHydrationWarning
+          data-testid="login-submit"
           className="mt-1 w-full px-8 py-3.5 text-base"
         >
           {isPending ? (

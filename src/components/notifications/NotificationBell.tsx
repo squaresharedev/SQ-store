@@ -13,7 +13,7 @@ import { useNotificationsContext } from "@/components/notifications/Notification
  * (desktop top bar + mobile header) stay in sync behind one subscription.
  */
 export function NotificationBell({ className }: { className?: string }) {
-  const { notifications, unreadCount, loading, markRead, markAllRead } =
+  const { notifications, unreadCount, loading, arrivalSeq, markRead, markAllRead } =
     useNotificationsContext();
   const [open, setOpen] = React.useState(false);
 
@@ -35,12 +35,21 @@ export function NotificationBell({ className }: { className?: string }) {
       aria-expanded={open}
       onClick={() => setOpen((v) => !v)}
       className={cn(
-        "relative flex size-10 items-center justify-center rounded-[0.375rem] text-foreground",
+        // `group/bell` is the hover/focus scope the bell-nudge CSS keys off.
+        "group/bell relative flex size-10 items-center justify-center rounded-[0.375rem] text-foreground",
         "transition-colors duration-[180ms] ease-[cubic-bezier(0.4,0,0.2,1)] motion-reduce:transition-none",
         "hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
       )}
     >
-      <Bell className="size-5" strokeWidth={2} aria-hidden />
+      {/* `key` restarts the ring on every arrival: a changed key remounts the
+          icon, which replays the CSS animation from 0 — no state, no timers,
+          and back-to-back notifications each get their own ring. */}
+      <Bell
+        key={arrivalSeq}
+        className={cn("bell-icon size-5", arrivalSeq > 0 && "animate-bell-ring")}
+        strokeWidth={2}
+        aria-hidden
+      />
       {!loading && unreadCount > 0 && (
         <span
           aria-hidden
