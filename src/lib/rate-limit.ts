@@ -32,10 +32,23 @@ export const RATE_LIMITS = {
   authSignUpPerClient: { max: 5, windowSeconds: 60 * 60 },
   /** Team invites sent by one user: the in-app "spam a stranger" vector. */
   teamInvite: { max: 20, windowSeconds: 60 * 60 },
+  /**
+   * Membership changes (role grants, access revocation). These edit who can do
+   * what inside a store, so an automated loop against them is a privilege
+   * problem, not just load. Well above any real team's churn.
+   */
+  teamMembership: { max: 60, windowSeconds: 60 * 60 },
   /** Upload URL minting — each one authorises bytes into R2. */
   uploadPresign: { max: 60, windowSeconds: 60 * 60 },
   /** Display-name probing (also an enumeration brake). */
   displayNameCheck: { max: 60, windowSeconds: 60 * 60 },
+  /**
+   * Public embed reads, keyed on the requesting CLIENT (no session exists).
+   * Generous, because one page view can legitimately be one request and a
+   * popular embedding site shares an egress IP — this is a scraping and cost
+   * brake, not an access control. The origin allowlist is the access control.
+   */
+  embedFetch: { max: 600, windowSeconds: 60 * 60 },
   /** Avatar uploads (pre-existing budget, unchanged). */
   avatarUpload: { max: 5, windowSeconds: 60 * 60 },
 
@@ -54,6 +67,13 @@ export const RATE_LIMITS = {
   emailChange: { max: 5, windowSeconds: 60 * 60 },
   /** Reset mail to the account's OWN address; still mail, so still bounded. */
   passwordReset: { max: 5, windowSeconds: 60 * 60 },
+  /**
+   * Re-authentication attempts from inside a session (password change, email
+   * change). These VERIFY a caller-supplied password, so an unbounded version
+   * is a password oracle a hijacked session could grind against. Tighter than
+   * the sign-in budget because a legitimate user knows their own password.
+   */
+  passwordReauth: { max: 10, windowSeconds: 15 * 60 },
   /** Product create/update/delete: each can head or evict an R2 object. */
   productWrite: { max: 120, windowSeconds: 60 * 60 },
   /** Storefront saves: the heaviest write path (multi-query + R2 verify). */
@@ -62,6 +82,13 @@ export const RATE_LIMITS = {
   stockWrite: { max: 240, windowSeconds: 60 * 60 },
   /** Profile / tax / notification-preference writes. */
   settingsWrite: { max: 60, windowSeconds: 60 * 60 },
+  /**
+   * GDPR data export. Reads the caller's ENTIRE account (profile + every
+   * product + every storefront config) in three parallel queries and streams
+   * it back as a file. A human exports rarely; anything faster than this is a
+   * scripted loop hammering the most expensive read in the app.
+   */
+  dataExport: { max: 5, windowSeconds: 60 * 60 },
 } as const;
 
 export type RateLimitBudget = { max: number; windowSeconds: number };

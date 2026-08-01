@@ -28,6 +28,15 @@ vi.mock("@/lib/supabase/server", () => ({
   }),
 }));
 
+// The route takes from the dataExport budget before querying. Allowed by
+// default here; the 429 test flips it. The real limiter is covered by its own
+// suite; what matters in THIS suite is that the route respects the answer.
+const rateLimit = vi.fn<() => Promise<boolean>>();
+vi.mock("@/lib/rate-limit", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/rate-limit")>()),
+  rateLimit: (...args: unknown[]) => rateLimit(...(args as [])),
+}));
+
 import { GET } from "@/app/settings/export/route";
 
 const USER = {
@@ -38,6 +47,7 @@ const USER = {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  rateLimit.mockResolvedValue(true);
   for (const k of Object.keys(tables)) delete tables[k];
   for (const k of Object.keys(filters)) delete filters[k];
 });
@@ -47,6 +57,17 @@ describe("GET /settings/export", () => {
     getUser.mockResolvedValue({ data: { user: null }, error: null } as never);
     const res = await GET();
     expect(res.status).toBe(401);
+    // Signed-out callers must not spend anyone's budget.
+    expect(rateLimit).not.toHaveBeenCalled();
+  });
+
+  it("429 when the export budget is exhausted — before any query runs", async () => {
+    getUser.mockResolvedValue({ data: { user: USER }, error: null } as never);
+    rateLimit.mockResolvedValue(false);
+    const res = await GET();
+    expect(res.status).toBe(429);
+    // The refusal happened before the expensive reads: no table was touched.
+    expect(Object.keys(filters)).toEqual([]);
   });
 
   it("exports ONLY session-scoped data with download headers", async () => {
