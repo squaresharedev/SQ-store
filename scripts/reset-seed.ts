@@ -6,6 +6,17 @@
 //
 // Same prod guard as the seed script (see scripts/lib/env.ts): it will refuse
 // to run unless SEED_ENV=dev.
+//
+// INTERACTION WITH THE SALES SIMULATOR. If the pg_cron simulator is enabled for
+// this seller (supabase/migrations/20260801_demo_sales_sim.sql), it keeps
+// inserting orders every 20 minutes. A reset does not stop it, and it does not
+// need to: with the products deleted the simulator finds an empty catalogue and
+// inserts nothing, then picks straight back up once `pnpm seed` recreates them.
+// The only visible effect is that a tick landing mid-reset can leave a handful
+// of orders behind, which is what the "some rows remain" line below is about.
+// To silence it entirely for the duration of a reset:
+//
+//   update demo.sales_sim set enabled = false where id;   -- then true again
 
 import { parseArgs } from "node:util";
 import { createServiceClient, fail, requireDevConfig } from "./lib/env.ts";
@@ -74,7 +85,10 @@ async function main(): Promise<void> {
   if (ordersLeft === 0 && productsLeft === 0) {
     console.log("  ✓ Test account is clean.\n");
   } else {
-    console.log("  ! Some rows remain — check for non-seed data on this account.\n");
+    console.log(
+      "  ! Some rows remain: either non-seed data on this account, or the sales\n" +
+        "    simulator ticked mid-reset. Re-run to clear.\n",
+    );
   }
 }
 

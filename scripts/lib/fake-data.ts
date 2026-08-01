@@ -2,6 +2,21 @@
 // reset script). Deterministic when given a --seed, so runs are reproducible.
 //
 // HARD RULE: all money is integer cents. No floats are ever stored.
+//
+// RELATIONSHIP TO THE SALES SIMULATOR. `pnpm seed` bootstraps a store from
+// nothing: it creates the products, then backfills a history of orders. The
+// pg_cron simulator in supabase/migrations/20260801_demo_sales_sim.sql takes it
+// from there, adding a few orders every 20 minutes so the dashboard keeps
+// moving. The two MUST model sales the same way or a backfilled day and a live
+// day would look different in the same chart, so the four properties below are
+// deliberately mirrored on both sides:
+//
+//   1. ONE currency per store  - the analytics reader is EUR-only, so a mixed
+//      catalogue silently drops half the dataset before it reaches a chart.
+//   2. A recurring buyer pool  - a fresh random email per order pins the
+//      analytics "repeat buyers" figure to 0 forever.
+//   3. Time-of-day shape       - real stores do not sell evenly at 04:00.
+//   4. Pareto product mix      - uniform picking makes "top products" noise.
 
 // ---------------------------------------------------------------------------
 // Deterministic RNG + small sampling helpers
@@ -142,25 +157,41 @@ function toNinetyNine(rawCents: number): number {
   return Math.max(99, Math.round(rawCents / 100) * 100 - 1);
 }
 
+/**
+ * The store's single currency.
+ *
+ * WHY NOT a per-product mix: getAnalytics() pushes `.neq("currency", "USD")`
+ * down to the database, so every USD row is invisible to the revenue tiles, the
+ * time series, the channel split and the top-products table. A catalogue priced
+ * half in USD therefore renders as a store with half the sales, for no reason a
+ * reader could ever deduce from the UI. One store, one currency.
+ */
+export const STORE_CURRENCY = "EUR";
+
 export function generateProducts(rng: Rng, ownerId: string, count: number): ProductInsert[] {
   const products: ProductInsert[] = [];
+  const usedTitles = new Set<string>();
   for (let i = 0; i < count; i += 1) {
     const type = pick(rng, PRODUCT_TYPES);
     const adjective = pick(rng, PRODUCT_ADJECTIVES);
     const title = `${adjective} ${type.noun}`;
+    // Titles are snapshotted onto orders, and the top-products table groups by
+    // that snapshot. Two products sharing a title would merge into one row and
+    // overstate it, so skip the collision rather than create it.
+    if (usedTitles.has(title)) continue;
+    usedTitles.add(title);
     const price_cents = toNinetyNine(randInt(rng, type.min, type.max));
     // Mostly active; a few drafts. Drafts are excluded from order generation.
     const status = weightedPick<string>(rng, [["active", 8], ["draft", 2]]);
-    const currency = weightedPick<string>(rng, [["EUR", 5], ["USD", 1]]);
     // Pick a random stock image for the product type.
     const images = STOCK_IMAGES[type.noun as keyof typeof STOCK_IMAGES];
     const image_key = pick(rng, images);
     products.push({
       owner_id: ownerId,
       title,
-      description: `${title}. A digital product for creators — instant download after purchase.`,
+      description: `${title}. A digital product for creators, instant download after purchase.`,
       price_cents,
-      currency,
+      currency: STORE_CURRENCY,
       image_key,
       status,
     });
@@ -210,11 +241,90 @@ const BUYER_LAST = [
   "olsen", "costa", "tran", "abadi", "weber", "koch", "flores", "park",
 ] as const;
 
-/** Clearly-fake buyer email on a reserved .test domain (never deliverable). */
-export function fakeBuyerEmail(rng: Rng): string {
-  const first = pick(rng, BUYER_FIRST);
-  const last = pick(rng, BUYER_LAST);
-  return `${first}.${last}${randInt(rng, 1, 999)}@example.test`;
+/**
+ * Deterministic address for a buyer INDEX, on a reserved .test domain so it is
+ * never deliverable to a real inbox. Index-addressed (rather than freshly
+ * random) so the same index always means the same person, which is what makes
+ * repeat purchases expressible at all.
+ */
+export function buyerEmailForIndex(index: number): string {
+  const first = BUYER_FIRST[index % BUYER_FIRST.length]!;
+  const last = BUYER_LAST[Math.floor(index / BUYER_FIRST.length) % BUYER_LAST.length]!;
+  return `${first}.${last}${100 + index}@example.test`;
+}
+
+/** Share of orders placed by someone who has bought before. */
+export const RETURNING_BUYER_RATE = 0.28;
+/** How many distinct regulars the store has. */
+export const BUYER_POOL_SIZE = 90;
+
+/**
+ * Pick the buyer for one order: usually a first-timer, sometimes a regular.
+ *
+ * Both degenerate models read as obviously fake on the analytics page, which
+ * reports unique buyers and repeat buyers side by side:
+ *   - a fresh random address every time (what this generator used to do) gives
+ *     416 orders, 416 buyers, and a repeat-buyer count pinned to 0;
+ *   - drawing only from a fixed pool makes EVERY buyer a repeat buyer, so the
+ *     store never appears to acquire anyone.
+ * Mixing the two in a ~28/72 split produces both numbers at once.
+ */
+export function pickBuyerEmail(rng: Rng, poolSize = BUYER_POOL_SIZE): string {
+  if (rng() < RETURNING_BUYER_RATE) {
+    // Mild skew (exponent 1.3) so a few regulars stand out. A harder skew
+    // concentrates the store on one address: at 2.2 the top buyer took 15% of
+    // every order placed, which is not a customer, it is a bug that looks like
+    // a customer.
+    return buyerEmailForIndex(Math.floor(Math.pow(rng(), 1.3) * poolSize));
+  }
+  // First-timer: an index far outside the pool, so it can never collide with a
+  // regular and silently turn them into a repeat buyer.
+  return buyerEmailForIndex(poolSize + Math.floor(rng() * 1_000_000));
+}
+
+/**
+ * Relative sales intensity by UTC hour, normalised to mean 1 so it re-shapes
+ * WHEN orders land without changing HOW MANY there are. A flat clock is the
+ * most obvious tell in a demo dataset: nobody buys evenly at 04:00 and 20:00.
+ */
+const HOUR_WEIGHTS = [
+  0.25, 0.15, 0.1, 0.1, 0.12, 0.2, // 00-05 night
+  0.4, 0.7, 1.0, 1.2, 1.3, 1.25, // 06-11 morning ramp
+  1.1, 1.2, 1.3, 1.35, 1.4, 1.5, // 12-17 afternoon
+  1.7, 1.8, 1.6, 1.2, 0.8, 0.45, // 18-23 evening peak
+] as const;
+
+/** Seconds past midnight for one order, drawn from the hour-of-day shape. */
+export function pickSecondOfDay(rng: Rng): number {
+  const total = HOUR_WEIGHTS.reduce((sum, w) => sum + w, 0);
+  let roll = rng() * total;
+  for (let hour = 0; hour < HOUR_WEIGHTS.length; hour += 1) {
+    roll -= HOUR_WEIGHTS[hour]!;
+    if (roll < 0) return hour * 3600 + Math.floor(rng() * 3600);
+  }
+  return 23 * 3600 + Math.floor(rng() * 3600);
+}
+
+/**
+ * Relative popularity per product, by catalogue position: weight ~ 1/rank^0.7.
+ *
+ * Uniform picking gives every product the same sales, which makes the dashboard
+ * "top products" table a list of ties in random order, i.e. pure noise. Real
+ * catalogues have a head and a long tail.
+ */
+export function popularityWeights(count: number): number[] {
+  return Array.from({ length: count }, (_, i) => Math.pow(i + 1, -0.7));
+}
+
+/** Draw an index in [0, weights.length) proportional to `weights`. */
+export function weightedIndex(rng: Rng, weights: readonly number[]): number {
+  const total = weights.reduce((sum, w) => sum + w, 0);
+  let roll = rng() * total;
+  for (let i = 0; i < weights.length; i += 1) {
+    roll -= weights[i]!;
+    if (roll < 0) return i;
+  }
+  return weights.length - 1;
 }
 
 export interface GenerateOrdersOptions {
@@ -253,8 +363,9 @@ function makeOrder(
   // Embed sales flow through the seller's storefront widget; marketplace sales
   // come from the (future) discovery feed and aren't tied to a storefront.
   const storefront_id = channel === "embed" ? storefrontId : null;
-  // Random time-of-day, clamped so "today" never lands in the future.
-  const at = Math.min(dayStart.getTime() + randInt(rng, 0, 86_399) * 1000, now.getTime());
+  // Time-of-day follows the hour shape, clamped so "today" never lands in the
+  // future (the current day is only partly elapsed).
+  const at = Math.min(dayStart.getTime() + pickSecondOfDay(rng) * 1000, now.getTime());
   return {
     seller_id: sellerId,
     product_id: product.id,
@@ -264,7 +375,7 @@ function makeOrder(
     amount_cents,
     platform_fee_cents,
     currency: product.currency,
-    buyer_email: fakeBuyerEmail(rng),
+    buyer_email: pickBuyerEmail(rng),
     product_title: product.title,
     product_price_cents: product.price_cents,
     created_at: new Date(at).toISOString(),
@@ -281,6 +392,10 @@ export function generateOrders(rng: Rng, opts: GenerateOrdersOptions): OrderInse
   const active = products.filter((p) => p.status === "active");
   const pool = active.length > 0 ? active : products;
   if (pool.length === 0) return [];
+  // Fixed popularity per catalogue position, drawn once so a product's
+  // standing is stable for the whole window. Re-rolling per order would
+  // average every product back to the same volume.
+  const popularity = popularityWeights(pool.length);
 
   // 1) Build a per-day weight from trend × weekend × noise × occasional spike.
   const weights: number[] = [];
@@ -305,9 +420,8 @@ export function generateOrders(rng: Rng, opts: GenerateOrdersOptions): OrderInse
     const dayStart = new Date(now.getTime() - (days - 1 - d) * DAY_MS);
     dayStart.setUTCHours(0, 0, 0, 0);
     for (let i = 0; i < count; i += 1) {
-      orders.push(
-        makeOrder(rng, { sellerId, storefrontId, product: pick(rng, pool), dayStart, now }),
-      );
+      const product = pool[weightedIndex(rng, popularity)]!;
+      orders.push(makeOrder(rng, { sellerId, storefrontId, product, dayStart, now }));
     }
   }
   return orders;
