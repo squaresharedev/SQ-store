@@ -124,12 +124,12 @@ export function DisplayNameForm({ displayName }: { displayName: string }) {
               className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3.5"
             >
               {status === "checking" && (
-                <Spinner className="text-neutral-400" />
+                <Spinner className="text-muted-foreground" />
               )}
               {(status === "available" || status === "mine") && (
                 <Check className="size-4 text-success" />
               )}
-              {status === "taken" && <X className="size-4 text-red-500" />}
+              {status === "taken" && <X className="size-4 text-destructive" />}
             </div>
           </div>
           {status !== "idle" && (
@@ -137,7 +137,7 @@ export function DisplayNameForm({ displayName }: { displayName: string }) {
               aria-live="polite"
               className={cn(
                 "font-inter text-xs",
-                status === "taken" ? "text-danger-strong" : "text-neutral-500",
+                status === "taken" ? "text-danger-strong" : "text-muted-foreground",
               )}
             >
               {status === "mine" && "That's your name."}

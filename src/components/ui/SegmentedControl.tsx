@@ -42,7 +42,7 @@ export function SegmentedControl<T extends string>({
             onClick={() => onChange(option.value)}
             className={cn(
               "flex-1 border border-border px-3 py-1.5 font-inter text-xs font-medium",
-              "transition-colors duration-180 ease-in-out motion-reduce:transition-none",
+              "transition-colors duration-base ease-standard motion-reduce:transition-none",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background",
               "disabled:opacity-50 disabled:pointer-events-none",
               index > 0 && "-ml-px",

@@ -37,7 +37,7 @@ export function NotificationBell({ className }: { className?: string }) {
       className={cn(
         // `group/bell` is the hover/focus scope the bell-nudge CSS keys off.
         "group/bell relative flex size-10 items-center justify-center rounded-[0.375rem] text-foreground",
-        "transition-colors duration-[180ms] ease-[cubic-bezier(0.4,0,0.2,1)] motion-reduce:transition-none",
+        "transition-colors duration-base ease-standard motion-reduce:transition-none",
         "hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
       )}
     >

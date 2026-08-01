@@ -11,9 +11,9 @@ function GoogleButtonInner() {
       type="submit"
       disabled={pending}
       suppressHydrationWarning
-      className="inline-flex w-full items-center justify-center gap-3 border-2 border-neutral-300 bg-white px-7 py-2.5 text-sm font-bold text-neutral-900 transition-colors hover:border-neutral-400 hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:pointer-events-none disabled:opacity-50"
+      className="inline-flex w-full items-center justify-center gap-3 border-2 border-input bg-background px-7 py-2.5 text-sm font-bold text-foreground transition-colors hover:border-ring hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50"
     >
-      {pending ? <Spinner className="text-neutral-500" /> : <GoogleLogo />}
+      {pending ? <Spinner className="text-muted-foreground" /> : <GoogleLogo />}
       Continue with Google
     </button>
   );

@@ -59,12 +59,12 @@ export function PasswordResetModal({
         {(state.error || state.message) && (
           <div aria-live="polite">
             {state.error && (
-              <p role="alert" className="text-sm font-medium text-red-500">
+              <p role="alert" className="text-sm font-medium text-destructive">
                 {state.error}
               </p>
             )}
             {state.message && (
-              <p className="text-sm font-medium text-neutral-700">
+              <p className="text-sm font-medium text-foreground">
                 {state.message}
               </p>
             )}

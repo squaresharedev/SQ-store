@@ -47,17 +47,17 @@ export async function createClient() {
           // keeping Supabase's own maxAge/expires. Our options are spread last
           // so they win over the library defaults.
           cookiesToSet.forEach(({ name, value, options }) => {
-            console.log("[supabase] Setting cookie:", { name, hasValue: !!value, options: AUTH_COOKIE_OPTIONS });
             cookieStore.set(name, value, {
               ...options,
               ...AUTH_COOKIE_OPTIONS,
             });
           });
-        } catch (err) {
-          // `setAll` was called from a Server Component render, where writing
-          // cookies is disallowed. Safe to ignore when a Route Handler or
-          // Server Action is responsible for refreshing the session.
-          console.warn("[supabase] Failed to set cookies:", err instanceof Error ? err.message : String(err));
+        } catch {
+          // EXPECTED, not an error: `setAll` was called during a Server
+          // Component render, where Next disallows cookie writes. The session
+          // refresh that matters happens in a Route Handler or Server Action,
+          // which can write. Logging here fired on ordinary page renders and
+          // read as a failure, so it is deliberately silent.
         }
       },
     },

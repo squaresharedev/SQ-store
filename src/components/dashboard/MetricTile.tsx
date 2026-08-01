@@ -5,6 +5,7 @@ import {
   type CardBackdropTone,
   type CardBackdropVariant,
 } from "@/components/ui/CardBackdrop";
+import { CountUp } from "@/components/ui/CountUp";
 import type { MetricTrend } from "@/lib/dashboard/queries";
 import { Sparkline } from "./Sparkline";
 
@@ -58,7 +59,7 @@ export function MetricTile({
           {label}
         </span>
         {pending && (
-          <span className="rounded-full bg-secondary px-2 py-0.5 font-inter text-xs text-neutral-600">
+          <span className="rounded-full bg-secondary px-2 py-0.5 font-inter text-xs text-muted-foreground">
             Coming soon
           </span>
         )}
@@ -75,7 +76,7 @@ export function MetricTile({
           // Bigger value pinned left, bare trend line filling the right.
           <div className="flex items-center gap-3">
             <p className="truncate text-3xl font-semibold text-foreground sm:text-4xl">
-              {value}
+              <CountUp value={value} />
             </p>
             <Sparkline
               points={trend.points}
@@ -92,7 +93,7 @@ export function MetricTile({
                 : "text-2xl font-semibold text-foreground",
             )}
           >
-            {value}
+            <CountUp value={value} />
           </p>
         ) : (
           <p className="text-base font-medium text-muted-foreground">

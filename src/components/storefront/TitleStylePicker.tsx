@@ -25,7 +25,7 @@ function StyleGlyph({ style }: { style: TitleStyle }) {
         )}
         {style === "shadow" && (
           <span className="absolute inset-x-0 bottom-0 flex h-5 items-end bg-gradient-to-t from-neutral-900/70 to-transparent px-1 pb-1">
-            <span className="h-1 w-5 rounded-full bg-white/90" />
+            <span className="h-1 w-5 rounded-full bg-background/90" />
           </span>
         )}
       </span>

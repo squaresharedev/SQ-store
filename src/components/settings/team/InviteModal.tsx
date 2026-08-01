@@ -116,7 +116,7 @@ export function InviteModal({
 
         <FormStatus state={state} showSuccess />
 
-        <p className="font-inter text-xs text-neutral-500">
+        <p className="font-inter text-xs text-muted-foreground">
           Email notifications aren&apos;t wired up yet — the invite takes effect
           when they sign in. You may want to let them know directly.
         </p>

@@ -38,6 +38,30 @@ export const RATE_LIMITS = {
   displayNameCheck: { max: 60, windowSeconds: 60 * 60 },
   /** Avatar uploads (pre-existing budget, unchanged). */
   avatarUpload: { max: 5, windowSeconds: 60 * 60 },
+
+  // --- Signed-in write budgets ------------------------------------------
+  // These sit on top of RLS and role checks, which already decide WHETHER a
+  // caller may write. What they bound is VOLUME: a compromised session or a
+  // runaway client can otherwise drive unbounded DB writes and R2 traffic
+  // inside its own account. Set well above real human use, so they only ever
+  // catch automation.
+
+  /**
+   * Email-change requests. The lowest budget here by a wide margin because it
+   * is the only signed-in action that sends mail to an address the CALLER
+   * supplies — i.e. it can be aimed at a stranger's inbox.
+   */
+  emailChange: { max: 5, windowSeconds: 60 * 60 },
+  /** Reset mail to the account's OWN address; still mail, so still bounded. */
+  passwordReset: { max: 5, windowSeconds: 60 * 60 },
+  /** Product create/update/delete: each can head or evict an R2 object. */
+  productWrite: { max: 120, windowSeconds: 60 * 60 },
+  /** Storefront saves: the heaviest write path (multi-query + R2 verify). */
+  storefrontWrite: { max: 240, windowSeconds: 60 * 60 },
+  /** Stock edits: a single UPDATE, but trivially scriptable. */
+  stockWrite: { max: 240, windowSeconds: 60 * 60 },
+  /** Profile / tax / notification-preference writes. */
+  settingsWrite: { max: 60, windowSeconds: 60 * 60 },
 } as const;
 
 export type RateLimitBudget = { max: number; windowSeconds: number };

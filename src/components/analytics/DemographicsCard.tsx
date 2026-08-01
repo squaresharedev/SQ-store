@@ -19,7 +19,7 @@ export function DemographicsCard() {
             Where your buyers are.
           </p>
         </div>
-        <span className="shrink-0 rounded-full bg-secondary px-2 py-0.5 font-inter text-xs text-neutral-600">
+        <span className="shrink-0 rounded-full bg-secondary px-2 py-0.5 font-inter text-xs text-muted-foreground">
           Coming soon
         </span>
       </div>

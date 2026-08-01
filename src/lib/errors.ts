@@ -23,6 +23,7 @@ export type ActionErrorCode =
   | "not_found"
   | "invalid_input"
   | "upload_failed"
+  | "rate_limited"
   | "server_error"
   | "unexpected";
 
@@ -88,6 +89,22 @@ export function uploadFailed(message: string, fix: string): ActionError {
 }
 
 /** `what` is the failed operation as a verb phrase, e.g. "save the product". */
+/**
+ * A signed-in write budget is spent (lib/rate-limit.ts).
+ *
+ * Deliberately does NOT state the limit or when it resets: the numbers are an
+ * implementation detail, and publishing them mainly helps someone pace their
+ * requests to sit just under. A real user hitting one of these budgets has
+ * almost certainly got a stuck client, which the fix speaks to.
+ */
+export function rateLimited(what: string): ActionError {
+  return {
+    code: "rate_limited",
+    message: `Too many attempts to ${what} in a short time.`,
+    fix: "Wait a few minutes and try again. If nothing is retrying in the background, reload the page first.",
+  };
+}
+
 export function serverError(what: string): ActionError {
   return {
     code: "server_error",

@@ -1,9 +1,13 @@
-// Client-side ordering for the products grid. The list is already fully loaded
-// (listProducts returns the account's products in one read), so sorting is a
-// pure array operation — no refetch, no URL state. If the list ever paginates,
-// this moves server-side and these keys become query params.
+// The sort vocabulary for the products grid, and the semantics of the two
+// orderings the database cannot express.
+//
+// Ordering is applied SERVER-side (lib/products/queries.ts) now that the list
+// paginates: sorting only the fetched page would rank an arbitrary slice.
+// Most sorts map straight to a column; "unitsSold" and "revenue" rank by a
+// rollup that lives in the ORDERS table, which this schema cannot join onto
+// products, so the query layer ranks those in memory using `metricValue`.
 
-import type { Product, ProductSales } from "@/types/product";
+import type { ProductSales } from "@/types/product";
 
 /** Ordering options offered by the products toolbar. */
 export const PRODUCT_SORTS = [
@@ -17,44 +21,24 @@ export const PRODUCT_SORTS = [
 
 export type ProductSort = (typeof PRODUCT_SORTS)[number];
 
-/** Sales lookup keyed by product id; products with no sales are absent. */
-type SalesByProduct = Record<string, ProductSales | undefined>;
+/** The sorts that rank by the sales rollup rather than a product column. */
+export const METRIC_SORTS = ["unitsSold", "revenue"] as const;
 
-const NO_SALES: ProductSales = { unitsSold: 0, revenueCents: 0, currency: "EUR" };
+export type MetricSort = (typeof METRIC_SORTS)[number];
+
+export function isMetricSort(sort: ProductSort): sort is MetricSort {
+  return (METRIC_SORTS as readonly ProductSort[]).includes(sort);
+}
 
 /**
- * Return a NEW array ordered by `sort`. `default` preserves the incoming order
- * (listProducts already returns newest-first), so it is the identity case.
- *
- * Metric sorts are descending — "best first" is the only useful direction for
- * units/revenue — and fall back to the incoming order on ties, which keeps the
- * result stable and makes repeated sorts idempotent.
+ * The number a metric sort ranks by, descending. A product with no paid sales
+ * has no rollup entry and scores 0, which puts it below everything that sold —
+ * the only sensible reading of "best selling".
  */
-export function sortProducts(
-  products: Product[],
-  sort: ProductSort,
-  sales: SalesByProduct,
-): Product[] {
-  if (sort === "default") return products;
-
-  const metrics = (product: Product) => sales[product.id] ?? NO_SALES;
-  const sorted = [...products];
-
-  switch (sort) {
-    case "unitsSold":
-      return sorted.sort((a, b) => metrics(b).unitsSold - metrics(a).unitsSold);
-    case "revenue":
-      return sorted.sort((a, b) => metrics(b).revenueCents - metrics(a).revenueCents);
-    case "priceHigh":
-      return sorted.sort((a, b) => b.price - a.price);
-    case "priceLow":
-      return sorted.sort((a, b) => a.price - b.price);
-    case "title":
-      // Locale-aware + case-insensitive, so "apple" and "Apple" sort together.
-      return sorted.sort((a, b) =>
-        a.title.localeCompare(b.title, undefined, { sensitivity: "base" }),
-      );
-    default:
-      return sorted;
-  }
+export function metricValue(
+  sales: ProductSales | undefined,
+  sort: MetricSort,
+): number {
+  if (!sales) return 0;
+  return sort === "revenue" ? sales.revenueCents : sales.unitsSold;
 }

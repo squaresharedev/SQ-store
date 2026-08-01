@@ -5,6 +5,7 @@ import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/session";
 import { LEGAL_VERSION } from "@/lib/settings/constants";
+import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
 import {
   deleteConfirmSchema,
   displayNameSchema,
@@ -27,6 +28,13 @@ const SIGNED_OUT: SettingsActionState = {
 };
 const SAVE_FAILED: SettingsActionState = {
   error: "Could not save. Give it another try.",
+};
+
+/** Shown when a signed-in write budget is spent. Deliberately vague about the
+ *  exact limit: the number is an implementation detail, and naming it only
+ *  helps someone pace around it. */
+const TOO_MANY: SettingsActionState = {
+  error: "That's a lot of changes in a short time. Try again a bit later.",
 };
 
 /**
@@ -104,6 +112,10 @@ export async function updateDisplayName(
   });
   if (!parsed.success) return firstIssue(parsed.error);
 
+  if (!(await rateLimit("settings_write", RATE_LIMITS.settingsWrite))) {
+    return TOO_MANY;
+  }
+
   const supabase = await createClient();
   const { error } = await supabase
     .from("profiles")
@@ -125,6 +137,10 @@ export async function updateDisplayName(
 /**
  * Email changes go through Supabase's re-verification flow, never a DB
  * write. The address only switches once the confirmation link is clicked.
+ *
+ * RE-AUTHENTICATED. This is a takeover-grade action: whoever controls the
+ * account's address can request a password reset to it, so an open session
+ * alone must not be enough to move it. Same bar as changing the password.
  */
 export async function requestEmailChange(
   _prev: SettingsActionState,
@@ -132,19 +148,46 @@ export async function requestEmailChange(
 ): Promise<SettingsActionState> {
   const user = await getUser();
   if (!user) return SIGNED_OUT;
-  const rejected = unknownFieldError(formData, ["new_email"]);
+  const rejected = unknownFieldError(formData, ["new_email", "current_password"]);
   if (rejected) return rejected;
 
   const parsed = emailChangeSchema.safeParse({
     new_email: String(formData.get("new_email") ?? "").trim(),
+    current_password: String(formData.get("current_password") ?? ""),
   });
   if (!parsed.success) return firstIssue(parsed.error);
   if (parsed.data.new_email === user.email) {
     return { error: "That's already your email." };
   }
 
+  // Checked AFTER validation so a malformed request can't burn the budget,
+  // but BEFORE the send: this is the one signed-in action that mails an
+  // address the caller chose, so it is the one that can be aimed at someone
+  // else's inbox. It also bounds the re-auth attempts below.
+  if (!(await rateLimit("email_change", RATE_LIMITS.emailChange))) {
+    return {
+      error:
+        "Too many email-change requests. Wait a while before trying again.",
+    };
+  }
+
   const origin = await siteOrigin();
   const supabase = await createClient();
+
+  // Accounts created through an OAuth provider have no password to verify.
+  // Their address is the provider's, so requiring one would lock them out of
+  // a field they can still legitimately change.
+  if (hasPasswordIdentity(user)) {
+    if (!parsed.data.current_password) {
+      return { error: "Enter your current password to change your email." };
+    }
+    const { error: reauthError } = await supabase.auth.signInWithPassword({
+      email: user.email!,
+      password: parsed.data.current_password,
+    });
+    if (reauthError) return { error: "Current password is incorrect." };
+  }
+
   const { error } = await supabase.auth.updateUser(
     { email: parsed.data.new_email },
     { emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent("/settings/account")}` },
@@ -212,6 +255,13 @@ export async function sendPasswordReset(
   const rejected = unknownFieldError(formData, []);
   if (rejected) return rejected;
 
+  // Only ever mails the account's own address, so this bounds nuisance volume
+  // rather than a vector at a third party. Supabase enforces its own send
+  // limit too; ours keeps the request from reaching it in the first place.
+  if (!(await rateLimit("password_reset", RATE_LIMITS.passwordReset))) {
+    return { error: "Too many reset emails. Wait a while before trying again." };
+  }
+
   const origin = await siteOrigin();
   const supabase = await createClient();
   const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
@@ -274,6 +324,10 @@ export async function saveTaxInfo(
   });
   if (!parsed.success) return firstIssue(parsed.error);
 
+  if (!(await rateLimit("settings_write", RATE_LIMITS.settingsWrite))) {
+    return TOO_MANY;
+  }
+
   if (!(await updateOwnProfile(user.id, parsed.data))) return SAVE_FAILED;
   revalidatePath("/settings/tax");
   return { success: "Tax details saved." };
@@ -300,6 +354,10 @@ export async function saveNotifications(
     notify_marketing: formData.get("notify_marketing") === "on",
   });
   if (!parsed.success) return firstIssue(parsed.error);
+
+  if (!(await rateLimit("settings_write", RATE_LIMITS.settingsWrite))) {
+    return TOO_MANY;
+  }
 
   if (!(await updateOwnProfile(user.id, parsed.data))) return SAVE_FAILED;
   revalidatePath("/settings/notifications");

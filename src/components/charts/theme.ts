@@ -65,7 +65,7 @@ export const TOOLTIP_GLIDE = { duration: 100, easing: "ease-out" } as const;
 
 /** Tailwind classes for the hover dim: the highlighted series stays at full
  *  strength while siblings recede, as a smooth interruptible fade. */
-export const dimmableClass = "transition-opacity duration-180 ease-in-out";
+export const dimmableClass = "transition-opacity duration-base ease-standard";
 export const dimmedClass = "opacity-25";
 
 /** Mark specs (marks stay thin; the data is the only thing allowed to be loud). */

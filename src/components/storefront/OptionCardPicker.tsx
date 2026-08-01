@@ -36,7 +36,7 @@ export function OptionCardPicker<T extends string>({
             onClick={() => onChange(option.value)}
             aria-pressed={selected}
             className={cn(
-              "flex flex-1 flex-col items-center gap-1.5 rounded-none border p-2 transition-colors duration-180 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none",
+              "flex flex-1 flex-col items-center gap-1.5 rounded-none border p-2 transition-colors duration-base ease-standard focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none",
               selected
                 ? "border-foreground bg-accent"
                 : "border-border hover:bg-accent/50",

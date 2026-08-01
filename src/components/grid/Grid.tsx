@@ -40,7 +40,7 @@ const DRAG_THRESHOLD = 4;
  *  always visible on coarse (touch) pointers, which have no hover. */
 const HANDLE_CLASS = cn(
   "absolute z-20 inline-flex size-6 items-center justify-center rounded-sm border border-border",
-  "bg-background/95 text-muted-foreground shadow-xs transition-opacity duration-180 ease-in-out",
+  "bg-background/95 text-muted-foreground shadow-xs transition-opacity duration-base ease-standard",
   "hover:text-foreground focus-visible:opacity-100 focus-visible:outline-none",
   "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background",
   "motion-reduce:transition-none",
@@ -80,6 +80,14 @@ type GridVars = React.CSSProperties & {
 type ActiveGesture = {
   key: string;
   mode: "move" | "resize";
+};
+
+/**
+ * The live gesture, held in a REF and written to the DOM once per frame.
+ * Routing it through React state instead meant one re-render of every tile
+ * per pointermove, which no amount of memoisation makes free.
+ */
+type GesturePreview = ActiveGesture & {
   placement: GridPlacement;
   valid: boolean;
   offset: { x: number; y: number };
@@ -150,11 +158,65 @@ export function Grid<TData>(props: GridProps<TData>) {
   const containerRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLUListElement>(null);
   const [metrics, setMetrics] = useState({ width: 0, gap: 0 });
+  // Which block is under a gesture — set ONCE when it starts, cleared when it
+  // ends. The moment-to-moment preview lives in gestureRef and is painted
+  // straight to the DOM, so a drag costs two renders rather than one per
+  // pointer event.
   const [active, setActive] = useState<ActiveGesture | null>(null);
+  const gestureRef = useRef<GesturePreview | null>(null);
+  const cellNodes = useRef(new Map<string, HTMLLIElement>());
+  const ghostRef = useRef<HTMLLIElement | null>(null);
+  const frameRef = useRef(0);
   // Teardown for an in-flight gesture, so unmounting mid-drag detaches the
   // window listeners instead of leaking them.
   const cleanupRef = useRef<(() => void) | null>(null);
   useEffect(() => () => cleanupRef.current?.(), []);
+
+  /** Write the live preview: the tile floats/stretches, the ghost marks the
+   *  cells it will snap to. One rAF per frame, however fast events arrive. */
+  const paintGesture = useCallback(() => {
+    frameRef.current = 0;
+    const gesture = gestureRef.current;
+    if (!gesture) return;
+    const cell = cellNodes.current.get(gesture.key);
+    if (cell) {
+      if (gesture.mode === "move") {
+        cell.style.transform = `translate3d(${gesture.offset.x}px, ${gesture.offset.y}px, 0)`;
+      } else if (gesture.size) {
+        cell.style.width = `${gesture.size.w}px`;
+        cell.style.height = `${gesture.size.h}px`;
+      }
+      cell.dataset.valid = String(gesture.valid);
+    }
+    const ghost = ghostRef.current;
+    if (ghost) {
+      ghost.style.gridColumn = `${gesture.placement.x + 1} / span ${gesture.placement.w}`;
+      ghost.style.gridRow = `${gesture.placement.y + 1} / span ${gesture.placement.h}`;
+      ghost.dataset.valid = String(gesture.valid);
+    }
+  }, []);
+
+  const scheduleGesturePaint = useCallback(() => {
+    if (frameRef.current) return;
+    frameRef.current = requestAnimationFrame(paintGesture);
+  }, [paintGesture]);
+
+  /** Hand the cell back to the layout once the gesture is over. */
+  const clearGestureStyles = useCallback(() => {
+    if (frameRef.current) {
+      cancelAnimationFrame(frameRef.current);
+      frameRef.current = 0;
+    }
+    const gesture = gestureRef.current;
+    const cell = gesture ? cellNodes.current.get(gesture.key) : null;
+    if (cell) {
+      cell.style.transform = "";
+      cell.style.width = "";
+      cell.style.height = "";
+      delete cell.dataset.valid;
+    }
+    gestureRef.current = null;
+  }, []);
 
   // Measure LAYOUT width (clientWidth ignores any zoom transform on an
   // ancestor), so zooming never changes which responsive tier we are in.
@@ -233,9 +295,10 @@ export function Grid<TData>(props: GridProps<TData>) {
       window.removeEventListener("pointercancel", onUp);
       setDragCursorLock(false);
       cleanupRef.current = null;
+      clearGestureStyles();
       setActive(null);
     },
-    [],
+    [clearGestureStyles],
   );
 
   function startMove(
@@ -268,6 +331,9 @@ export function Grid<TData>(props: GridProps<TData>) {
       if (!dragging) {
         dragging = true;
         setDragCursorLock(true);
+        // The only render this gesture causes: it mounts the ghost and marks
+        // the tile as lifted.
+        setActive({ key: block.key, mode: "move" });
       }
       const candidate = clampToCanvas(
         {
@@ -280,14 +346,15 @@ export function Grid<TData>(props: GridProps<TData>) {
       );
       latest = candidate;
       latestValid = placementIsFree(blocks, candidate, block.key, columns, rows);
-      setActive({
+      gestureRef.current = {
         key: block.key,
         mode: "move",
         placement: candidate,
         valid: latestValid,
         // Unscaled, so the tile tracks the cursor 1:1 at any zoom.
         offset: { x: dx / strides.scale, y: dy / strides.scale },
-      });
+      };
+      scheduleGesturePaint();
     };
 
     const handleUp = () => {
@@ -321,6 +388,8 @@ export function Grid<TData>(props: GridProps<TData>) {
     let latest: GridPlacement = { x: block.x, y: block.y, w: block.w, h: block.h };
     let latestValid = true;
     setDragCursorLock(true);
+    // One render, up front: mounts the ghost and lifts the tile.
+    setActive({ key: block.key, mode: "resize" });
 
     // Pixel bounds for the live preview: at least one cell, at most the room
     // left on the board. Unscaled, so the edge tracks the cursor at any zoom.
@@ -351,7 +420,7 @@ export function Grid<TData>(props: GridProps<TData>) {
       };
       latest = candidate;
       latestValid = placementIsFree(blocks, candidate, block.key, columns, rows);
-      setActive({
+      gestureRef.current = {
         key: block.key,
         mode: "resize",
         placement: candidate,
@@ -362,7 +431,8 @@ export function Grid<TData>(props: GridProps<TData>) {
           w: clamp((moveEvent.clientX - rect.left) / strides.scale, minW, maxW),
           h: clamp((moveEvent.clientY - rect.top) / strides.scale, minH, maxH),
         },
-      });
+      };
+      scheduleGesturePaint();
     };
 
     const handleUp = () => {
@@ -446,19 +516,20 @@ export function Grid<TData>(props: GridProps<TData>) {
         className={cn(GRID_ROOT_CLASS, "m-0 list-none p-0")}
         style={rootStyle}
       >
-        {/* Ghost: the cells the tile will occupy once the gesture ends. */}
+        {/* Ghost: the cells the tile will occupy once the gesture ends. Its
+            position and validity are written imperatively each frame; the
+            colours come from the data-valid attribute so no re-render is
+            needed to flip them. */}
         {active && (
           <li
+            ref={ghostRef}
             aria-hidden="true"
-            style={{
-              ...placementStyle(active.placement),
-              ...cellStyle?.(active.placement),
-            }}
+            data-valid="true"
+            style={cellStyle?.({ x: 0, y: 0, w: 1, h: 1 })}
             className={cn(
               "pointer-events-none border-2 border-dashed",
-              active.valid
-                ? "border-ring bg-accent/40"
-                : "border-destructive bg-destructive/10",
+              "data-[valid=true]:border-ring data-[valid=true]:bg-accent/40",
+              "data-[valid=false]:border-destructive data-[valid=false]:bg-destructive/10",
               GRID_CELL_RADIUS_CLASS,
               cellClassName,
             )}
@@ -481,6 +552,11 @@ export function Grid<TData>(props: GridProps<TData>) {
           return (
             <li
               key={block.key}
+              ref={(node) => {
+                // The gesture painter writes straight to these nodes.
+                if (node) cellNodes.current.set(block.key, node);
+                else cellNodes.current.delete(block.key);
+              }}
               data-grid-cell=""
               onPointerDown={
                 interactive ? (event) => startMove(event, block) : undefined
@@ -494,17 +570,9 @@ export function Grid<TData>(props: GridProps<TData>) {
               style={{
                 ...placementStyle(placement),
                 ...cellStyle?.(placement),
-                ...(moving
-                  ? {
-                      transform: `translate(${gesture.offset.x}px, ${gesture.offset.y}px)`,
-                      willChange: "transform",
-                    }
-                  : {}),
-                // Stretch past the grid area while resizing; the cell it
-                // will settle into is the ghost underneath.
-                ...(resizing && gesture.size
-                  ? { width: gesture.size.w, height: gesture.size.h }
-                  : {}),
+                // The transform / size of a tile under gesture is written
+                // imperatively, so it is deliberately absent here.
+                ...(gesture ? { willChange: "transform" } : {}),
               }}
               className={cn(
                 "group relative overflow-hidden",
@@ -516,7 +584,7 @@ export function Grid<TData>(props: GridProps<TData>) {
                 gesture &&
                   cn(
                     "z-10 ring-2 ring-inset",
-                    gesture.valid ? "ring-ring" : "ring-destructive",
+                    "data-[valid=true]:ring-ring data-[valid=false]:ring-destructive",
                   ),
               )}
             >
@@ -560,7 +628,7 @@ export function Grid<TData>(props: GridProps<TData>) {
                 aria-label={`Add a block at column ${cell.x + 1}, row ${cell.y + 1}`}
                 style={cellStyle?.({ ...cell, w: 1, h: 1 })}
                 className={cn(
-                  "size-full border border-dashed border-border bg-background/40 transition-colors duration-180 ease-in-out hover:border-foreground/40 hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring motion-reduce:transition-none",
+                  "size-full border border-dashed border-border bg-background/40 transition-colors duration-base ease-standard hover:border-foreground/40 hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring motion-reduce:transition-none",
                   GRID_CELL_RADIUS_CLASS,
                   cellClassName,
                 )}

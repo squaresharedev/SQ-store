@@ -167,7 +167,7 @@ export function ColorPicker({
                   title={preset.name}
                   style={{ backgroundColor: preset.value }}
                   className={cn(
-                    "size-8 rounded-sm border border-border transition-shadow duration-180 ease-in-out motion-reduce:transition-none",
+                    "size-8 rounded-sm border border-border transition-shadow duration-base ease-standard motion-reduce:transition-none",
                     FOCUS_RING,
                     active
                       ? "ring-2 ring-ring ring-offset-2 ring-offset-background"

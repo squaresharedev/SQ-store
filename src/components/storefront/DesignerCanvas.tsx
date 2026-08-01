@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import { LayoutGrid } from "lucide-react";
 import type { Product } from "@/types/product";
 import {
@@ -22,6 +22,7 @@ import {
   gridGapStyle,
   scaledCornerRadius,
 } from "./config-maps";
+import type { CanvasViewport } from "./useCanvasViewport";
 
 /** Accessible label for a block's drag/resize handles. */
 function blockLabel(block: StorefrontBlock, product: Product | null): string {
@@ -52,7 +53,7 @@ const DESIGN_CELL_PX = 96;
  *  border-box sizing folds into the width we set. */
 const DESIGN_FRAME_CHROME_PX = 16 * 2 + 2;
 
-export function DesignerCanvas({
+export const DesignerCanvas = memo(function DesignerCanvas({
   blocks,
   productsById,
   theme,
@@ -60,7 +61,7 @@ export function DesignerCanvas({
   previewMode,
   backgroundImageUrl = null,
   showGrid = true,
-  zoom = 1,
+  viewport,
   onMoveBlock,
   onResizeBlock,
   onRemove,
@@ -81,8 +82,9 @@ export function DesignerCanvas({
   backgroundImageUrl?: string | null;
   /** Draw the free cells (editor guide only, never for buyers). */
   showGrid?: boolean;
-  /** Canvas scale, 1 = 100%. Desktop preview only. */
-  zoom?: number;
+  /** Owns the live pan + zoom and writes them to the stage imperatively.
+   *  Desktop preview only. */
+  viewport?: CanvasViewport;
   /** All callbacks are keyed by blockKey(block). */
   onMoveBlock: (key: string, x: number, y: number) => void;
   onResizeBlock: (key: string, w: number, h: number) => void;
@@ -100,6 +102,20 @@ export function DesignerCanvas({
         : null,
     [productsById],
   );
+
+  // Tile callbacks that never change identity: the live handlers are read
+  // through a ref, so memoised tiles are not invalidated every render.
+  const handlers = useRef({ onSelectBlock, onRemove, selectedKey });
+  useEffect(() => {
+    handlers.current = { onSelectBlock, onRemove, selectedKey };
+  });
+  const toggleSelection = useCallback((key: string) => {
+    const { selectedKey: current, onSelectBlock: select } = handlers.current;
+    select(current === key ? null : key);
+  }, []);
+  const removeByKey = useCallback((key: string) => {
+    handlers.current.onRemove(key);
+  }, []);
 
   // Map storefront blocks -> generic grid blocks. Each carries its own
   // coordinates, so the array order means nothing.
@@ -209,17 +225,16 @@ export function DesignerCanvas({
             onEmptyCellClick={onEmptyCellClick}
             renderBlock={(gridBlock, state) => (
               <BlockTile
+                blockKey={gridBlock.key}
                 block={gridBlock.data}
                 product={productFor(gridBlock.data)}
                 theme={theme}
                 editable={state.editable}
                 isEditing={selectedKey === gridBlock.key}
-                onToggleEdit={() =>
-                  onSelectBlock(
-                    selectedKey === gridBlock.key ? null : gridBlock.key,
-                  )
-                }
-                onRemove={() => onRemove(gridBlock.key)}
+                // Stable across renders, so a memoised tile only re-renders
+                // when its OWN data or selection changes.
+                onToggleEdit={toggleSelection}
+                onRemove={removeByKey}
               />
             )}
           />
@@ -233,55 +248,24 @@ export function DesignerCanvas({
     return <div className="mx-auto w-full max-w-sm">{canvas}</div>;
   }
 
-  // Design view: natural size, scaled by the zoom. The outer box is sized to
-  // the SCALED dimensions so the scroll area stays honest (a transform alone
-  // does not affect layout).
+  // Design view: the board floats on an endless workspace at its natural
+  // size. The transform is NOT rendered here — the viewport writes it
+  // straight to this element every frame (see useCanvasViewport), so panning
+  // and zooming never re-render the canvas.
   return (
-    <ZoomStage zoom={zoom} width={naturalWidth ?? 0}>
+    <div
+      ref={viewport?.registerStage}
+      data-canvas-stage=""
+      style={{
+        width: naturalWidth,
+        transformOrigin: "0 0",
+        // Promote the stage to its own compositor layer up front, so a pan is
+        // a GPU transform rather than a repaint of every tile.
+        willChange: "transform",
+      }}
+      className="absolute left-0 top-0"
+    >
       {canvas}
-    </ZoomStage>
-  );
-}
-
-/**
- * Scales its child and reports the scaled footprint to the scroll container.
- * The child is measured UNSCALED (offsetHeight ignores transforms), so the
- * spacer height stays correct at any zoom.
- */
-function ZoomStage({
-  zoom,
-  width,
-  children,
-}: {
-  zoom: number;
-  width: number;
-  children: React.ReactNode;
-}) {
-  const stageRef = useRef<HTMLDivElement>(null);
-  const [height, setHeight] = useState(0);
-
-  useEffect(() => {
-    const stage = stageRef.current;
-    if (!stage) return;
-    const measure = () => setHeight(stage.offsetHeight);
-    measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(stage);
-    return () => observer.disconnect();
-  }, []);
-
-  return (
-    <div style={{ width: width * zoom, height: height * zoom }}>
-      <div
-        ref={stageRef}
-        style={{
-          width,
-          transform: `scale(${zoom})`,
-          transformOrigin: "0 0",
-        }}
-      >
-        {children}
-      </div>
     </div>
   );
-}
+});

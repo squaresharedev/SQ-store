@@ -71,7 +71,7 @@ export function PriceField({
                 onClick={() => onCurrencyChange(option)}
                 className={cn(
                   "rounded-none border border-border px-2.5 py-1 font-inter text-xs font-medium",
-                  "transition-colors duration-180 ease-in-out motion-reduce:transition-none",
+                  "transition-colors duration-base ease-standard motion-reduce:transition-none",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                   "-ml-px first:ml-0",
                   active

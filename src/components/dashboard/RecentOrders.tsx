@@ -14,7 +14,7 @@ const STATUS_CLASSES: Record<OrderStatus, string> = {
   paid: "text-success",
   refunded: "text-danger-strong",
   disputed: "text-danger-strong",
-  pending: "text-neutral-600",
+  pending: "text-muted-foreground",
 };
 
 const CHANNEL_LABELS: Record<DashboardOrder["channel"], string> = {

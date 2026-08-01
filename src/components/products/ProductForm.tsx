@@ -1,7 +1,6 @@
 "use client";
 
-import { useId, useState, type FormEvent } from "react";
-import Link from "next/link";
+import { useId, useMemo, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import {
   AlertCircle,
@@ -22,8 +21,12 @@ import { createProduct, updateProduct } from "@/lib/products/actions";
 import { UploadError, uploadToR2 } from "@/lib/products/upload";
 import type { ProductWriteInput } from "@/lib/validation/product";
 import { ActionErrorNotice } from "@/components/ui/ActionErrorNotice";
+import { ProgressBar } from "@/components/ui/ProgressBar";
+import { Modal } from "@/components/ui/modal";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
+import { useUnsavedChangesGuard } from "@/lib/hooks/useUnsavedChangesGuard";
 import {
+  destructiveButtonClass,
   errorTextClass,
   fieldBaseClass,
   helpTextClass,
@@ -125,11 +128,32 @@ export function ProductForm({ product }: { product?: Product }) {
   // to tell "left the stored file alone" (keep) apart from "removed it" (clear).
   const [digitalTouched, setDigitalTouched] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  // Which upload is in flight and how far along, or null when none is.
+  const [upload, setUpload] = useState<{
+    what: "image" | "file";
+    fraction: number;
+  } | null>(null);
   const [submitError, setSubmitError] = useState<ActionError | null>(null);
   const [errors, setErrors] = useState<FieldErrors>({});
   // Only surface errors after the first submit, so the form does not shout at
   // the seller while they are still filling it in.
   const [submitAttempted, setSubmitAttempted] = useState(false);
+  // Set the moment a save succeeds, so the redirect that follows is not itself
+  // treated as abandoning unsaved work.
+  const [saved, setSaved] = useState(false);
+
+  // Unsaved-work guard. A product form holds typed copy AND picked files, so
+  // leaving by accident can cost real effort. Compared against the pristine
+  // values rather than a mutation flag, so editing a field and undoing it
+  // correctly counts as clean.
+  const pristine = useMemo(
+    () => JSON.stringify(initialValues(product)),
+    [product],
+  );
+  const dirty =
+    !saved &&
+    (JSON.stringify(values) !== pristine || imageFile !== null || digitalTouched);
+  const leaveGuard = useUnsavedChangesGuard(dirty, "/products");
 
   function updateField<Key extends keyof ProductFormValues>(
     key: Key,
@@ -155,12 +179,22 @@ export function ProductForm({ product }: { product?: Product }) {
     try {
       // Upload straight to R2 via short-lived presigned URLs, then store only
       // the returned keys. `undefined` keeps a stored key, `null` clears it.
-      const imageKey = imageFile ? await uploadToR2(imageFile, "image") : undefined;
+      // Uploads are the slow part of a save (a file can be tens of MB), so
+      // each reports real byte progress instead of leaving the button on an
+      // indeterminate "Saving…" for a minute.
+      const imageKey = imageFile
+        ? await uploadToR2(imageFile, "image", (fraction) =>
+            setUpload({ what: "image", fraction }),
+          )
+        : undefined;
       const digitalFileKey = digitalFile
-        ? await uploadToR2(digitalFile, "file")
+        ? await uploadToR2(digitalFile, "file", (fraction) =>
+            setUpload({ what: "file", fraction }),
+          )
         : digitalTouched
           ? null
           : undefined;
+      setUpload(null);
 
       const input: ProductWriteInput = {
         title: values.title.trim(),
@@ -188,6 +222,9 @@ export function ProductForm({ product }: { product?: Product }) {
         return;
       }
 
+      // Disarm the guard before navigating: the work is saved, so the
+      // redirect is not an abandonment.
+      setSaved(true);
       router.push("/products");
       router.refresh();
     } catch (error) {
@@ -198,6 +235,7 @@ export function ProductForm({ product }: { product?: Product }) {
       );
     } finally {
       setSubmitting(false);
+      setUpload(null);
     }
   }
 
@@ -374,14 +412,70 @@ export function ProductForm({ product }: { product?: Product }) {
       </FormSection>
 
       {/* Actions */}
-      <div className="flex flex-col-reverse gap-3 border-t border-border pt-6 sm:flex-row sm:justify-end">
-        <Link href="/products" className={secondaryButtonClass}>
-          Cancel
-        </Link>
-        <button type="submit" disabled={submitting} className={primaryButtonClass}>
-          {submitting ? "Saving…" : product ? "Save changes" : "Save product"}
-        </button>
+      <div className="border-t border-border pt-6">
+        {/* Upload progress, shown only while bytes are actually moving. The
+            percentage is the honest signal here: a big file makes the save
+            look hung without it. */}
+        {upload && (
+          <div className="mb-4 flex flex-col gap-1.5">
+            <div className="flex items-center justify-between gap-3">
+              <span className="font-inter text-sm text-muted-foreground">
+                Uploading {upload.what === "image" ? "image" : "file"}…
+              </span>
+              <span className="font-mono text-xs tabular-nums text-muted-foreground">
+                {Math.round(upload.fraction * 100)}%
+              </span>
+            </div>
+            <ProgressBar
+              value={upload.fraction}
+              label={`Uploading ${upload.what === "image" ? "image" : "file"}`}
+            />
+          </div>
+        )}
+
+        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+          {/* A button, not a Link: leaving has to run through the guard so
+              half-written work isn't dropped on a stray click. */}
+          <button
+            type="button"
+            onClick={() => leaveGuard.requestLeave("/products")}
+            className={secondaryButtonClass}
+          >
+            Cancel
+          </button>
+          <button type="submit" disabled={submitting} className={primaryButtonClass}>
+            {submitting ? "Saving…" : product ? "Save changes" : "Save product"}
+          </button>
+        </div>
       </div>
+
+      <Modal
+        open={leaveGuard.promptOpen}
+        onClose={leaveGuard.cancel}
+        title="Discard your changes?"
+        description={
+          product
+            ? "The edits you've made to this product haven't been saved yet."
+            : "This product hasn't been saved yet, so nothing will be kept."
+        }
+      >
+        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+          <button
+            type="button"
+            onClick={leaveGuard.cancel}
+            className={secondaryButtonClass}
+          >
+            Keep editing
+          </button>
+          <button
+            type="button"
+            onClick={leaveGuard.leave}
+            className={destructiveButtonClass}
+          >
+            Discard changes
+          </button>
+        </div>
+      </Modal>
     </form>
   );
 }

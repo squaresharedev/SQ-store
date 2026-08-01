@@ -32,12 +32,12 @@ export function NativeSelect({
         style={{ fontSize: 16, ...style }}
         className={cn(
           "w-full appearance-none px-4 py-2.5 pr-10 text-base font-medium",
-          "bg-white text-neutral-900",
-          "border-2 border-neutral-300",
-          "transition-colors duration-200",
+          "bg-background text-foreground",
+          "border-2 border-input",
+          "transition-colors duration-base ease-standard motion-reduce:transition-none",
           "focus-visible:outline-none focus-visible:border-acid focus-visible:ring-0",
           "disabled:opacity-50 disabled:pointer-events-none",
-          invalid && "border-red-500 focus-visible:border-red-500",
+          invalid && "border-destructive focus-visible:border-destructive",
         )}
         {...props}
       >
@@ -45,7 +45,7 @@ export function NativeSelect({
       </select>
       <ChevronDown
         aria-hidden
-        className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-neutral-400"
+        className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
       />
     </div>
   );

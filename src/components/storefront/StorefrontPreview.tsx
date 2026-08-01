@@ -114,6 +114,7 @@ export function StorefrontPreview({
             })}
             renderBlock={(gridBlock) => (
               <BlockTile
+                blockKey={gridBlock.key}
                 block={gridBlock.data}
                 product={getProduct(gridBlock.data)}
                 theme={theme}

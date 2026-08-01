@@ -76,7 +76,7 @@ const ALIGN_ICONS: Record<TextAlign, typeof AlignLeft> = {
 };
 
 const TOGGLE_CLASS =
-  "inline-flex size-8 items-center justify-center rounded-none border border-border text-muted-foreground transition-colors duration-180 ease-in-out hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background motion-reduce:transition-none";
+  "inline-flex size-8 items-center justify-center rounded-none border border-border text-muted-foreground transition-colors duration-base ease-standard hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background motion-reduce:transition-none";
 
 /**
  * Text-block editor rendered in the side panel: content, style, formatting,

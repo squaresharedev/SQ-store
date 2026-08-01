@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Copy } from "lucide-react";
 import { ActionErrorNotice } from "@/components/ui/ActionErrorNotice";
+import { CopyButton } from "@/components/ui/CopyButton";
 import { Modal } from "@/components/ui/modal";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -10,7 +10,6 @@ import {
   helpTextClass,
   labelClass,
   primaryButtonClass,
-  secondaryButtonClass,
 } from "@/components/ui/control-styles";
 import { invalidInput, type ActionError } from "@/lib/errors";
 import { embedSettingsSchema } from "@/lib/validation/storefront";
@@ -70,7 +69,6 @@ export function EmbedModal({
   /** Mirrors a successful save into the caller's local list state. */
   onSaved: (id: string, embed: EmbedSettings) => void;
 }) {
-  const [copied, setCopied] = useState(false);
   const [enabled, setEnabled] = useState(false);
   const [domainsText, setDomainsText] = useState("");
   const [saveState, setSaveState] = useState<SaveState>({ status: "idle" });
@@ -83,19 +81,7 @@ export function EmbedModal({
     const embed = storefront?.config.embed ?? DEFAULT_EMBED_SETTINGS;
     setEnabled(embed.enabled);
     setDomainsText(embed.domains.join(", "));
-    setCopied(false);
     setSaveState({ status: "idle" });
-  }
-
-  async function handleCopy() {
-    if (!storefront) return;
-    try {
-      await navigator.clipboard.writeText(embedSnippet(storefront.id));
-      setCopied(true);
-    } catch {
-      // Clipboard can be denied (permissions/insecure context); the seller can
-      // still select the snippet text manually.
-    }
   }
 
   async function handleSave() {
@@ -153,18 +139,11 @@ export function EmbedModal({
                 The embed widget is in development. Your snippet is ready and
                 will start rendering the moment it ships.
               </p>
-              <button
-                type="button"
-                onClick={handleCopy}
-                className={`${secondaryButtonClass} shrink-0 px-3 py-1.5 text-xs`}
-              >
-                {copied ? (
-                  <Check className="size-3.5" strokeWidth={2} aria-hidden="true" />
-                ) : (
-                  <Copy className="size-3.5" strokeWidth={2} aria-hidden="true" />
-                )}
-                {copied ? "Copied" : "Copy"}
-              </button>
+              <CopyButton
+                value={embedSnippet(storefront.id)}
+                label="embed snippet"
+                variant="labelled"
+              />
             </div>
           </div>
 

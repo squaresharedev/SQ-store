@@ -28,6 +28,16 @@ vi.mock("@/lib/supabase/server", () => ({
   createClient: async () => clientWrapper,
 }));
 
+
+// Rate limiting is exercised by its own tests; here it defaults to ALLOWED so
+// these specs assert the action logic. Each file also has one case that flips
+// it to denied, since the limiter fails closed and that path must be covered.
+const rateLimitMock = vi.fn();
+vi.mock('@/lib/rate-limit', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/rate-limit')>()),
+  rateLimit: (...args: unknown[]) => rateLimitMock(...args),
+}));
+
 // ---- imports -------------------------------------------------------------
 
 import { updateStockSettings } from "@/lib/stock/actions";
@@ -57,6 +67,7 @@ function validInput(overrides: Record<string, unknown> = {}) {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  rateLimitMock.mockResolvedValue(true);
   dbFn.mockResolvedValue({ data: null, error: null });
   for (const m of ["from", "select", "insert", "update", "delete", "eq", "neq", "in"]) {
     db[m].mockReturnValue(db);
@@ -68,6 +79,18 @@ beforeEach(() => {
 // ==========================================================================
 // updateStockSettings
 // ==========================================================================
+
+describe("updateStockSettings - rate limit", () => {
+  it("refuses the write when the budget is spent, with no DB call", async () => {
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+    rateLimitMock.mockResolvedValue(false);
+
+    const result = await updateStockSettings(PRODUCT_ID, validInput());
+
+    expect(result).toMatchObject({ ok: false, error: { code: "rate_limited" } });
+    expect(db.update).not.toHaveBeenCalled();
+  });
+});
 
 describe("updateStockSettings - auth gates", () => {
   it("session expired returns {ok:false} with no DB call", async () => {

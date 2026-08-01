@@ -24,7 +24,7 @@ const SCROLL_EPSILON = 1;
  *  for a thumb (touch targets), and tinted with the app tokens the rest of the
  *  tile chrome uses so it stays legible on any storefront background. */
 const NAV_BUTTON_CLASS =
-  "absolute top-1/2 z-30 inline-flex size-9 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-background/90 text-foreground shadow-sm backdrop-blur-sm transition-colors duration-180 ease-in-out hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none";
+  "absolute top-1/2 z-30 inline-flex size-9 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-background/90 text-foreground shadow-sm backdrop-blur-sm transition-colors duration-base ease-standard hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none";
 
 /**
  * The `carousel` display mode's renderer: a horizontal scroll-snap strip of
@@ -175,6 +175,7 @@ export function CarouselStrip({
               )}
             >
               <BlockTile
+                blockKey={key}
                 block={block}
                 product={getProduct(block)}
                 theme={theme}
@@ -185,7 +186,7 @@ export function CarouselStrip({
                     ? () => onSelect(editingKey === key ? null : key)
                     : undefined
                 }
-                onRemove={onRemove ? () => onRemove(key) : undefined}
+                onRemove={onRemove}
               />
 
               {/* Reorder arrows (the grid's drag handle has no meaning here). */}

@@ -49,6 +49,16 @@ vi.mock("@/lib/supabase/server", () => ({
   createClient: async () => clientWrapper,
 }));
 
+
+// Rate limiting is exercised by its own tests; here it defaults to ALLOWED so
+// these specs assert the action logic. Each file also has one case that flips
+// it to denied, since the limiter fails closed and that path must be covered.
+const rateLimitMock = vi.fn();
+vi.mock('@/lib/rate-limit', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/rate-limit')>()),
+  rateLimit: (...args: unknown[]) => rateLimitMock(...args),
+}));
+
 // ---- imports -------------------------------------------------------------
 
 import {
@@ -59,6 +69,7 @@ import {
   requestAccountDeletion,
   cancelAccountDeletion,
   changePassword,
+  requestEmailChange,
 } from "@/lib/settings/actions";
 import { LEGAL_VERSION } from "@/lib/settings/constants";
 
@@ -70,6 +81,7 @@ const PREV: { error?: string; success?: string } = {};
 
 beforeEach(() => {
   vi.clearAllMocks();
+  rateLimitMock.mockResolvedValue(true);
   dbFn.mockResolvedValue({ error: null });
   for (const m of ["from", "select", "insert", "update", "delete", "eq", "neq", "in"]) {
     db[m].mockReturnValue(db);
@@ -412,5 +424,62 @@ describe("changePassword", () => {
     const result = await changePassword(PREV, validPasswordForm());
     expect(result.error).toMatch(/session/i);
     expect(db.auth.signInWithPassword).not.toHaveBeenCalled();
+  });
+});
+
+// ==========================================================================
+// Rate limits on signed-in writes
+// ==========================================================================
+
+describe("requestEmailChange - rate limit", () => {
+  function emailForm(next = "new@example.com") {
+    const fd = new FormData();
+    fd.append("new_email", next);
+    return fd;
+  }
+
+  it("sends the confirmation mail when the budget allows it", async () => {
+    getUserMock.mockResolvedValue(USER);
+    const result = await requestEmailChange(PREV, emailForm());
+    expect(result.success).toBeTruthy();
+    expect(db.auth.updateUser).toHaveBeenCalled();
+  });
+
+  it("refuses to send when the budget is spent", async () => {
+    // This is the one signed-in action that mails an address the CALLER
+    // chose, so an unbounded version can be aimed at a stranger's inbox.
+    getUserMock.mockResolvedValue(USER);
+    rateLimitMock.mockResolvedValue(false);
+
+    const result = await requestEmailChange(PREV, emailForm());
+
+    expect(result.error).toMatch(/too many/i);
+    expect(db.auth.updateUser).not.toHaveBeenCalled();
+  });
+
+  it("spends the budget only on a valid, changed address", async () => {
+    getUserMock.mockResolvedValue(USER);
+    // Same address as the account: rejected before the budget is touched, so
+    // a no-op request can't burn someone's allowance.
+    await requestEmailChange(PREV, emailForm(USER.email));
+    expect(rateLimitMock).not.toHaveBeenCalled();
+
+    // Malformed address: likewise rejected first.
+    await requestEmailChange(PREV, emailForm("not-an-email"));
+    expect(rateLimitMock).not.toHaveBeenCalled();
+  });
+});
+
+describe("settings writes - rate limit", () => {
+  it("refuses a profile write when the budget is spent", async () => {
+    getUserMock.mockResolvedValue(USER);
+    rateLimitMock.mockResolvedValue(false);
+
+    const fd = new FormData();
+    fd.append("display_name", "valid-name");
+    const result = await updateDisplayName(PREV, fd);
+
+    expect(result.error).toMatch(/short time/i);
+    expect(db.update).not.toHaveBeenCalled();
   });
 });

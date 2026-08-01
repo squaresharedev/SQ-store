@@ -128,7 +128,7 @@ export function PriceTagPositionPicker({
             aria-label={`Price tag ${FLOAT_POSITION_LABELS[position].toLowerCase()}`}
             aria-pressed={selected}
             className={cn(
-              "absolute z-10 flex size-5 items-center justify-center rounded-full transition-colors duration-180 ease-in-out hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none",
+              "absolute z-10 flex size-5 items-center justify-center rounded-full transition-colors duration-base ease-standard hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none",
               PRICE_TAG_FLOAT_CLASSES[position],
             )}
           >

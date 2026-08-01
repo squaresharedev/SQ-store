@@ -17,7 +17,7 @@ export function FormStatus({
   if (state.error) {
     return (
       <div aria-live="polite">
-        <p role="alert" className="text-sm font-medium text-red-500">
+        <p role="alert" className="text-sm font-medium text-destructive">
           {state.error}
         </p>
       </div>

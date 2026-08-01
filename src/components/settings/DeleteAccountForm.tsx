@@ -83,7 +83,7 @@ export function DeleteAccountForm({
       ) : (
         <form action={deleteAction} className="flex flex-col gap-4" noValidate>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="confirm" className="text-red-600">
+            <Label htmlFor="confirm" className="text-destructive">
               Type{" "}
               <span className="font-mono text-xs">
                 {DELETE_CONFIRM_PHRASE}

@@ -24,7 +24,7 @@ export function PasswordInput({ className, ...props }: InputProps) {
         aria-label={show ? "Hide password" : "Show password"}
         aria-pressed={show}
         suppressHydrationWarning
-        className="absolute inset-y-0 right-0 flex items-center px-3 text-neutral-400 transition-colors hover:text-acid focus-visible:outline-none focus-visible:text-acid"
+        className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground transition-colors duration-base ease-standard motion-reduce:transition-none hover:text-acid focus-visible:outline-none focus-visible:text-acid"
       >
         {show ? <EyeOff /> : <Eye />}
       </button>

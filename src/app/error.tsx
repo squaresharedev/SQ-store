@@ -25,12 +25,12 @@ export default function ErrorBoundary({
   }, [error]);
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#f5f5f5] px-6 py-5">
-      <div className="w-full max-w-md border border-neutral-200 bg-white px-6 py-7 shadow-[0_8px_40px_rgba(0,0,0,0.08)] sm:px-7">
-        <h1 className="font-display text-lg font-black tracking-tight text-neutral-900">
+    <main className="flex min-h-screen items-center justify-center bg-muted px-6 py-5">
+      <div className="w-full max-w-md border border-border bg-background px-6 py-7 shadow-lg sm:px-7">
+        <h1 className="font-display text-lg font-black tracking-tight text-foreground">
           Something went wrong
         </h1>
-        <p className="mt-2 text-sm text-neutral-600">
+        <p className="mt-2 text-sm text-muted-foreground">
           We couldn&apos;t load this page. This is usually a temporary
           connection problem — your account is fine and you&apos;re still signed
           in.
@@ -39,19 +39,19 @@ export default function ErrorBoundary({
           <button
             type="button"
             onClick={reset}
-            className="bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-neutral-700"
+            className="bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors duration-base ease-standard hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none"
           >
             Try again
           </button>
           <a
             href="/dashboard"
-            className="text-sm font-medium text-neutral-900 underline decoration-neutral-300 underline-offset-4 transition-colors hover:decoration-neutral-500"
+            className="text-sm font-medium text-foreground underline decoration-border underline-offset-4 transition-colors duration-base ease-standard hover:decoration-foreground motion-reduce:transition-none"
           >
             Back to dashboard
           </a>
         </div>
         {error.digest && (
-          <p className="mt-5 font-mono text-xs text-neutral-400">
+          <p className="mt-5 font-mono text-xs text-muted-foreground">
             Reference: {error.digest}
           </p>
         )}

@@ -52,6 +52,18 @@ export interface ProductSales {
 }
 
 /** Per-product sales keyed by product id, plus the single best seller. */
+/**
+ * Server-side filters for the products list. Every field is optional and
+ * absent means "no constraint"; the query layer trims and escapes `search`
+ * before it reaches the database.
+ */
+export interface ProductFilters {
+  /** Case-insensitive substring match on the product title. */
+  search?: string;
+  /** Exact lifecycle match. */
+  status?: ProductStatus;
+}
+
 export interface ProductSalesSummary {
   byProduct: Record<string, ProductSales>;
   /** Highest-revenue product that has at least one paid sale; null if none. */

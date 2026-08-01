@@ -40,7 +40,7 @@ const DRAG_THRESHOLD = 4;
  *  always visible on coarse (touch) pointers, which have no hover. */
 const HANDLE_CLASS = cn(
   "absolute z-20 inline-flex size-6 items-center justify-center rounded-sm border border-border",
-  "bg-background/95 text-muted-foreground shadow-xs transition-opacity duration-180 ease-in-out",
+  "bg-background/95 text-muted-foreground shadow-xs transition-opacity duration-base ease-standard",
   "hover:text-foreground focus-visible:opacity-100 focus-visible:outline-none",
   "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background",
   "motion-reduce:transition-none",
@@ -560,7 +560,7 @@ export function Grid<TData>(props: GridProps<TData>) {
                 aria-label={`Add a block at column ${cell.x + 1}, row ${cell.y + 1}`}
                 style={cellStyle?.({ ...cell, w: 1, h: 1 })}
                 className={cn(
-                  "size-full border border-dashed border-border bg-background/40 transition-colors duration-180 ease-in-out hover:border-foreground/40 hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring motion-reduce:transition-none",
+                  "size-full border border-dashed border-border bg-background/40 transition-colors duration-base ease-standard hover:border-foreground/40 hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring motion-reduce:transition-none",
                   GRID_CELL_RADIUS_CLASS,
                   cellClassName,
                 )}

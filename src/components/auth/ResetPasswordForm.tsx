@@ -20,9 +20,9 @@ export function ResetPasswordForm({ email }: { email?: string }) {
   return (
     <form action={formAction} className="flex flex-col gap-4" noValidate>
       {email && (
-        <p className="font-inter text-sm text-neutral-500">
+        <p className="font-inter text-sm text-muted-foreground">
           Setting a new password for{" "}
-          <span className="font-medium text-neutral-900">{email}</span>
+          <span className="font-medium text-foreground">{email}</span>
         </p>
       )}
 
@@ -35,7 +35,7 @@ export function ResetPasswordForm({ email }: { email?: string }) {
           placeholder="••••••••"
           required
         />
-        <p className="font-inter text-xs text-neutral-500">At least 8 characters.</p>
+        <p className="font-inter text-xs text-muted-foreground">At least 8 characters.</p>
       </div>
 
       <div className="flex flex-col gap-1.5">
@@ -50,7 +50,7 @@ export function ResetPasswordForm({ email }: { email?: string }) {
       </div>
 
       {state.error && (
-        <p role="alert" className="text-sm font-medium text-red-500">
+        <p role="alert" className="text-sm font-medium text-destructive">
           {state.error}
         </p>
       )}

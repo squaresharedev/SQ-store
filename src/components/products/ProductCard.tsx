@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Image as ImageIcon, Pencil, Trash2, TrendingUp } from "lucide-react";
 import type { Product, ProductSales } from "@/types/product";
 import { cn } from "@/lib/utils";
-import { iconButtonClass } from "@/components/ui/control-styles";
+import { hoverLiftClass, iconButtonClass } from "@/components/ui/control-styles";
 import { formatPrice } from "@/lib/format";
 import { formatCents } from "@/lib/format/money";
 import { StatusBadge } from "./StatusBadge";
@@ -35,7 +35,12 @@ export function ProductCard({
   const stockBadge = deriveStockBadge({ trackStock, stockQuantity, lowStockThreshold });
 
   return (
-    <div className="flex flex-col rounded-none border border-border bg-card p-3 shadow-sm transition-shadow duration-180 ease-in-out hover:shadow-md motion-reduce:transition-none">
+    <div
+      className={cn(
+        "flex flex-col rounded-none border border-border bg-card p-3 shadow-sm",
+        hoverLiftClass,
+      )}
+    >
       <div className="relative aspect-[4/3] overflow-hidden rounded-none bg-muted">
         {imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element -- signed R2 URL with query params; next/image adds no value here.

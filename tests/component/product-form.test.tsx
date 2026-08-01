@@ -297,3 +297,91 @@ describe("ProductForm", () => {
     expect(summary).toBeDefined();
   });
 });
+
+// ---------------------------------------------------------------------------
+// Unsaved-changes guard
+// ---------------------------------------------------------------------------
+
+describe("ProductForm - unsaved changes", () => {
+  beforeEach(() => {
+    mockPush.mockClear();
+    mockRefresh.mockClear();
+    mockCreateProduct.mockClear();
+    mockCreateProduct.mockResolvedValue({ ok: true, id: "prod-123" });
+  });
+
+  it("leaves immediately when nothing has been typed", async () => {
+    const user = userEvent.setup();
+    render(<ProductForm />);
+
+    await user.click(screen.getByRole("button", { name: /^cancel$/i }));
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(mockPush).toHaveBeenCalledWith("/products");
+  });
+
+  it("asks before discarding typed work", async () => {
+    const user = userEvent.setup();
+    render(<ProductForm />);
+
+    await user.type(screen.getByPlaceholderText(/ambient loops/i), "Half typed");
+    await user.click(screen.getByRole("button", { name: /^cancel$/i }));
+
+    expect(await screen.findByRole("dialog")).toBeInTheDocument();
+    // Still on the form: nothing navigated.
+    expect(mockPush).not.toHaveBeenCalled();
+  });
+
+  it("keeps editing when the prompt is dismissed", async () => {
+    const user = userEvent.setup();
+    render(<ProductForm />);
+
+    await user.type(screen.getByPlaceholderText(/ambient loops/i), "Half typed");
+    await user.click(screen.getByRole("button", { name: /^cancel$/i }));
+    await user.click(await screen.findByRole("button", { name: /keep editing/i }));
+
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
+    );
+    expect(mockPush).not.toHaveBeenCalled();
+    expect(screen.getByPlaceholderText(/ambient loops/i)).toHaveValue("Half typed");
+  });
+
+  it("navigates once the discard is confirmed", async () => {
+    const user = userEvent.setup();
+    render(<ProductForm />);
+
+    await user.type(screen.getByPlaceholderText(/ambient loops/i), "Half typed");
+    await user.click(screen.getByRole("button", { name: /^cancel$/i }));
+    await user.click(await screen.findByRole("button", { name: /discard changes/i }));
+
+    await waitFor(() => expect(mockPush).toHaveBeenCalledWith("/products"));
+  });
+
+  it("treats a typed-then-undone edit as clean", async () => {
+    // Compared against the pristine values, not a mutation flag, so undoing an
+    // edit really does leave the form clean.
+    const user = userEvent.setup();
+    render(<ProductForm />);
+
+    const title = screen.getByPlaceholderText(/ambient loops/i);
+    await user.type(title, "abc");
+    await user.clear(title);
+    await user.click(screen.getByRole("button", { name: /^cancel$/i }));
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(mockPush).toHaveBeenCalledWith("/products");
+  });
+
+  it("does not prompt on the redirect that follows a successful save", async () => {
+    const user = userEvent.setup();
+    render(<ProductForm />);
+
+    await user.type(screen.getByPlaceholderText(/ambient loops/i), "Product");
+    await user.type(screen.getByLabelText(/price/i), "5.00");
+    await user.click(screen.getByRole("button", { name: /save product/i }));
+
+    await waitFor(() => expect(mockPush).toHaveBeenCalledWith("/products"));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+});

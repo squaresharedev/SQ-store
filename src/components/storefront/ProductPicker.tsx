@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { helpTextClass } from "@/components/ui/control-styles";
 
 const ADD_BUTTON_CLASS =
-  "inline-flex size-8 shrink-0 items-center justify-center rounded-none border border-border bg-background text-muted-foreground transition-colors duration-180 ease-in-out hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-40 motion-reduce:transition-none";
+  "inline-flex size-8 shrink-0 items-center justify-center rounded-none border border-border bg-background text-muted-foreground transition-colors duration-base ease-standard hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-40 motion-reduce:transition-none";
 
 /** Pick from the seller's existing products; each can be in the grid once. */
 export function ProductPicker({
@@ -26,7 +26,7 @@ export function ProductPicker({
         You have no products yet.{" "}
         <Link
           href="/products"
-          className="font-medium text-foreground underline decoration-border underline-offset-4 transition-colors duration-180 ease-in-out hover:decoration-foreground motion-reduce:transition-none"
+          className="font-medium text-foreground underline decoration-border underline-offset-4 transition-colors duration-base ease-standard hover:decoration-foreground motion-reduce:transition-none"
         >
           Add a product
         </Link>{" "}

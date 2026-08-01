@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getProfile, getUser } from "@/lib/auth/session";
-import { listProducts } from "@/lib/products/queries";
+import { listAllProducts } from "@/lib/products/queries";
 import { listStorefronts } from "@/lib/storefront/queries";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { StorefrontsList } from "@/components/storefront/StorefrontsList";
@@ -19,7 +19,7 @@ export default async function StorefrontsPage() {
     getUser(),
     getProfile(),
     listStorefronts(),
-    listProducts(),
+    listAllProducts(),
     getActiveAccount(),
   ]);
   const username =

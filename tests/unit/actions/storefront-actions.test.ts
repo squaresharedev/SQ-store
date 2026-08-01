@@ -35,6 +35,16 @@ vi.mock("@/lib/supabase/server", () => ({
   createClient: async () => clientWrapper,
 }));
 
+
+// Rate limiting is exercised by its own tests; here it defaults to ALLOWED so
+// these specs assert the action logic. Each file also has one case that flips
+// it to denied, since the limiter fails closed and that path must be covered.
+const rateLimitMock = vi.fn();
+vi.mock('@/lib/rate-limit', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/rate-limit')>()),
+  rateLimit: (...args: unknown[]) => rateLimitMock(...args),
+}));
+
 // ---- imports -------------------------------------------------------------
 
 import {
@@ -77,6 +87,7 @@ function validSaveInput(overrides: Record<string, unknown> = {}) {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  rateLimitMock.mockResolvedValue(true);
   dbFn.mockResolvedValue({ data: null, error: null });
   for (const m of ["from", "select", "insert", "update", "delete", "eq", "neq", "in"]) {
     db[m].mockReturnValue(db);
@@ -133,6 +144,24 @@ describe("createStorefront - happy path", () => {
 // ==========================================================================
 // saveStorefront
 // ==========================================================================
+
+describe("saveStorefront - rate limit", () => {
+  it("refuses the save when the budget is spent, with no DB write", async () => {
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+    rateLimitMock.mockResolvedValue(false);
+
+    const result = await saveStorefront(STOREFRONT_ID, validSaveInput());
+
+    expect(result).toMatchObject({ ok: false, error: { code: "rate_limited" } });
+    expect(db.update).not.toHaveBeenCalled();
+  });
+
+  it("checks the budget only after the role gate", async () => {
+    getActiveAccountMock.mockResolvedValue(viewerAccount());
+    await saveStorefront(STOREFRONT_ID, validSaveInput());
+    expect(rateLimitMock).not.toHaveBeenCalled();
+  });
+});
 
 describe("saveStorefront - auth gates", () => {
   it("session expired returns {ok:false}", async () => {

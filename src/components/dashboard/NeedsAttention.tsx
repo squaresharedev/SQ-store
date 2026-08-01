@@ -48,7 +48,7 @@ export function NeedsAttention({ items }: { items: AttentionItem[] }) {
               </div>
               <Link
                 href={item.href}
-                className="group/btn inline-flex items-center gap-1 font-inter text-xs font-medium text-foreground underline decoration-border underline-offset-4 transition-colors duration-180 ease-in-out hover:decoration-foreground motion-reduce:transition-none"
+                className="group/btn inline-flex items-center gap-1 font-inter text-xs font-medium text-foreground underline decoration-border underline-offset-4 transition-colors duration-base ease-standard hover:decoration-foreground motion-reduce:transition-none"
               >
                 {item.actionLabel}
                 <ArrowRight

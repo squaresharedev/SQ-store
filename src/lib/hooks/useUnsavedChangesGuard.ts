@@ -4,31 +4,39 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 /**
- * Intercept attempts to leave the storefront editor while it has unsaved edits,
- * so the caller can offer save / discard / keep-editing instead of silently
- * losing work. Covers the three ways out of a full-screen editor:
+ * Intercept attempts to leave an editor while it has unsaved edits, so the
+ * caller can offer save / discard / keep-editing instead of silently losing
+ * work. Covers the three ways out of a form:
  *
- *   1. In-app links (the header "Back") — route them through `requestLeave`,
- *      which opens the prompt when dirty and navigates straight through when not.
- *   2. The browser Back button — a sentinel history entry is pushed so the first
- *      Back lands us right back here; we re-arm it and open the prompt instead
- *      of leaving. Armed only while dirty.
+ *   1. In-app links (a header "Back", a Cancel button) — route them through
+ *      `requestLeave`, which opens the prompt when dirty and navigates
+ *      straight through when not.
+ *   2. The browser Back button — a sentinel history entry is pushed so the
+ *      first Back lands us right back here; we re-arm it and open the prompt
+ *      instead of leaving. Armed only while dirty.
  *   3. Hard navigations the SPA can't intercept (refresh, tab close, typing a
- *      new URL) — `beforeunload`, where the browser only allows its OWN generic
- *      prompt. That's a deliberate backstop, not the custom modal.
+ *      new URL) — `beforeunload`, where the browser only allows its OWN
+ *      generic prompt. That's a deliberate backstop, not the custom modal.
  *
  * `leave()` performs the actual navigation once the user confirms; because it
- * uses the client router (a soft navigation) the beforeunload guard never fires
- * for it, even though `dirty` is still true at that moment.
+ * uses the client router (a soft navigation) the beforeunload guard never
+ * fires for it, even though `dirty` is still true at that moment.
+ *
+ * `fallbackHref` is where a browser-Back prompt goes if the user confirms:
+ * the list this editor was opened from.
  */
-export function useUnsavedChangesGuard(dirty: boolean) {
+export function useUnsavedChangesGuard(dirty: boolean, fallbackHref: string) {
   const router = useRouter();
   const [pendingHref, setPendingHref] = useState<string | null>(null);
-  // Read the latest dirty inside stable callbacks without re-creating them.
+  // Read the latest values inside stable callbacks without re-creating them.
   const dirtyRef = useRef(dirty);
   useEffect(() => {
     dirtyRef.current = dirty;
   }, [dirty]);
+  const fallbackRef = useRef(fallbackHref);
+  useEffect(() => {
+    fallbackRef.current = fallbackHref;
+  }, [fallbackHref]);
 
   useEffect(() => {
     if (!dirty) return;
@@ -48,7 +56,7 @@ export function useUnsavedChangesGuard(dirty: boolean) {
     const onPopState = () => {
       // Re-arm the buffer so we stay put, then prompt.
       window.history.pushState(null, "", window.location.href);
-      setPendingHref("/storefront");
+      setPendingHref(fallbackRef.current);
     };
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
@@ -71,7 +79,7 @@ export function useUnsavedChangesGuard(dirty: boolean) {
 
   /** Leave for the pending destination, abandoning any unsaved edits. */
   const leave = useCallback(() => {
-    const href = pendingHref ?? "/storefront";
+    const href = pendingHref ?? fallbackRef.current;
     setPendingHref(null);
     router.push(href);
   }, [pendingHref, router]);

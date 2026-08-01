@@ -33,19 +33,23 @@ export function Switch({
       onClick={() => onCheckedChange(!checked)}
       suppressHydrationWarning
       className={cn(
-        "relative inline-flex h-6 w-11 shrink-0 items-center rounded-full border-2 transition-colors duration-200",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-acid focus-visible:ring-offset-2 focus-visible:ring-offset-white",
+        "relative inline-flex h-6 w-11 shrink-0 items-center rounded-full border-2",
+        "transition-colors duration-base ease-standard motion-reduce:transition-none",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-acid focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         "disabled:opacity-50 disabled:pointer-events-none",
-        checked
-          ? "border-neutral-900 bg-neutral-900"
-          : "border-neutral-300 bg-neutral-200",
+        // On reads as the primary action colour; off is a plain control
+        // surface, so the two states never rely on hue alone.
+        checked ? "border-primary bg-primary" : "border-input bg-input",
       )}
       {...aria}
     >
       <span
         aria-hidden
         className={cn(
-          "pointer-events-none block size-4 rounded-full bg-white shadow-sm transition-transform duration-200 motion-reduce:transition-none",
+          // The knob rides on top of both track colours, so it takes the
+          // foreground-on-primary token rather than a literal white.
+          "pointer-events-none block size-4 rounded-full bg-primary-foreground shadow-sm",
+          "transition-transform duration-base ease-standard motion-reduce:transition-none",
           checked ? "translate-x-5.5" : "translate-x-0.5",
         )}
       />

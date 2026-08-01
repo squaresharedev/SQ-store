@@ -35,7 +35,7 @@ export function NotificationItem({
       onClick={handleClick}
       className={cn(
         "flex w-full items-start gap-3 px-3 py-3 text-left",
-        "transition-colors duration-[180ms] ease-[cubic-bezier(0.4,0,0.2,1)] motion-reduce:transition-none",
+        "transition-colors duration-base ease-standard motion-reduce:transition-none",
         "hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
         !read && "bg-accent/40",
       )}

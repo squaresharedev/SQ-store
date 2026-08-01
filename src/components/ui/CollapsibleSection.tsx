@@ -46,7 +46,7 @@ export function CollapsibleSection({
             {title}
             <ChevronDown
               className={cn(
-                "size-4 text-muted-foreground transition-transform duration-180 ease-in-out motion-reduce:transition-none",
+                "size-4 text-muted-foreground transition-transform duration-base ease-standard motion-reduce:transition-none",
                 isOpen && "rotate-180",
               )}
               strokeWidth={2}

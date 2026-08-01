@@ -134,7 +134,7 @@ export function OrdersToolbar({
                 aria-pressed={isActive}
                 onClick={() => handleChannel(value)}
                 className={cn(
-                  "flex items-center gap-1.5 px-3 py-2 text-sm font-medium transition-colors duration-180",
+                  "flex items-center gap-1.5 px-3 py-2 text-sm font-medium transition-colors duration-base",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
                   i > 0 && "border-l border-border",
                   isActive

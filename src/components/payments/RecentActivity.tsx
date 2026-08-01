@@ -48,7 +48,7 @@ export function RecentActivity({
                 <button
                   type="button"
                   onClick={() => onSelect(transaction)}
-                  className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors duration-180 hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring motion-reduce:transition-none"
+                  className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors duration-base hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring motion-reduce:transition-none"
                 >
                   <span className="flex size-8 shrink-0 items-center justify-center rounded-sm bg-secondary text-muted-foreground">
                     <Icon className="size-4" strokeWidth={2} aria-hidden />

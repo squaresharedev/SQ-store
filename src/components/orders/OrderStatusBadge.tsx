@@ -10,7 +10,7 @@ const STATUS_LABELS: Record<OrderStatus, string> = {
 
 const STATUS_CLASSES: Record<OrderStatus, string> = {
   paid: "text-success",
-  refunded: "text-neutral-600",
+  refunded: "text-muted-foreground",
   disputed: "text-danger-strong",
   pending: "text-foreground",
 };

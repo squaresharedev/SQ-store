@@ -50,7 +50,7 @@ export function NotificationsSection({
       description="Pick what lands in your inbox. Security and payment emails sneak through regardless, we can't let those go quiet."
     >
       <form action={formAction} className="flex flex-col gap-4">
-        <div className="flex flex-col divide-y divide-neutral-200">
+        <div className="flex flex-col divide-y divide-border">
           {PREFS.map((pref) => (
             <div
               key={pref.name}
@@ -59,11 +59,11 @@ export function NotificationsSection({
               <div className="min-w-0">
                 <p
                   id={`${pref.name}-label`}
-                  className="text-sm font-medium text-neutral-900"
+                  className="text-sm font-medium text-foreground"
                 >
                   {pref.label}
                 </p>
-                <p className="mt-0.5 font-inter text-sm text-neutral-500">
+                <p className="mt-0.5 font-inter text-sm text-muted-foreground">
                   {pref.blurb}
                 </p>
               </div>

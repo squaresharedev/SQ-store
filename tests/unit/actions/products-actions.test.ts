@@ -46,6 +46,16 @@ vi.mock("@/lib/supabase/server", () => ({
   createClient: async () => clientWrapper,
 }));
 
+
+// Rate limiting is exercised by its own tests; here it defaults to ALLOWED so
+// these specs assert the action logic. Each file also has one case that flips
+// it to denied, since the limiter fails closed and that path must be covered.
+const rateLimitMock = vi.fn();
+vi.mock('@/lib/rate-limit', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/rate-limit')>()),
+  rateLimit: (...args: unknown[]) => rateLimitMock(...args),
+}));
+
 // ---- imports -------------------------------------------------------------
 
 import { createProduct, updateProduct, deleteProduct } from "@/lib/products/actions";
@@ -83,6 +93,7 @@ function validInput(overrides: Record<string, unknown> = {}) {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  rateLimitMock.mockResolvedValue(true);
   dbFn.mockResolvedValue({ data: null, error: null });
   deleteObjectMock.mockResolvedValue(undefined);
   headObjectMock.mockResolvedValue({ size: 512, contentType: "image/png" });
@@ -96,6 +107,25 @@ beforeEach(() => {
 // ==========================================================================
 // createProduct
 // ==========================================================================
+
+describe("createProduct - rate limit", () => {
+  it("refuses the write when the budget is spent, before touching the DB or R2", async () => {
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+    rateLimitMock.mockResolvedValue(false);
+
+    const result = await createProduct(validInput());
+
+    expect(result).toMatchObject({ ok: false, error: { code: "rate_limited" } });
+    expect(db.insert).not.toHaveBeenCalled();
+    expect(headObjectMock).not.toHaveBeenCalled();
+  });
+
+  it("checks the budget only after the role gate, so a viewer can't spend it", async () => {
+    getActiveAccountMock.mockResolvedValue(viewerAccount());
+    await createProduct(validInput());
+    expect(rateLimitMock).not.toHaveBeenCalled();
+  });
+});
 
 describe("createProduct - auth gates", () => {
   it("session expired returns {ok:false} with no supabase call", async () => {

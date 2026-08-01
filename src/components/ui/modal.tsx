@@ -79,6 +79,9 @@ export function Modal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4">
+      {/* Scrim. Deliberately a fixed black wash rather than a theme token: a
+          scrim's job is to darken whatever is behind it, which is the same
+          requirement on a light or a dark page. */}
       <div
         aria-hidden
         onClick={onClose}
@@ -91,7 +94,7 @@ export function Modal({
         aria-labelledby={titleId}
         aria-describedby={description ? descId : undefined}
         className={cn(
-          "relative z-10 max-h-[90vh] w-full overflow-y-auto border border-neutral-200 bg-white p-6 shadow-[0_8px_40px_rgba(0,0,0,0.12)]",
+          "relative z-10 max-h-[90vh] w-full overflow-y-auto border border-border bg-popover p-6 shadow-lg",
           "rounded-t-lg sm:max-w-md sm:rounded-lg",
           className,
         )}
@@ -100,14 +103,14 @@ export function Modal({
           <div>
             <h2
               id={titleId}
-              className="text-lg font-semibold tracking-tight text-neutral-900"
+              className="text-lg font-semibold tracking-tight text-popover-foreground"
             >
               {title}
             </h2>
             {description && (
               <p
                 id={descId}
-                className="mt-1 font-inter text-sm text-neutral-500"
+                className="mt-1 font-inter text-sm text-muted-foreground"
               >
                 {description}
               </p>
@@ -117,7 +120,7 @@ export function Modal({
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="-mr-1.5 -mt-1.5 flex size-9 shrink-0 items-center justify-center rounded-none text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="-mr-1.5 -mt-1.5 flex size-9 shrink-0 items-center justify-center rounded-none text-muted-foreground transition-colors duration-base ease-standard hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none"
           >
             <X className="size-5" aria-hidden />
           </button>

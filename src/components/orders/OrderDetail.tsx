@@ -2,6 +2,7 @@
 
 import { X } from "lucide-react";
 import { iconButtonClass } from "@/components/ui/control-styles";
+import { CopyButton } from "@/components/ui/CopyButton";
 import { formatOrderDateTime } from "@/lib/format/date";
 import { formatCents } from "@/lib/format/money";
 import type { OrderView } from "@/types/order-view";
@@ -77,7 +78,14 @@ export function OrderDetail({
 
         <Row label="Buyer email">
           {order.buyerEmail ? (
-            <span className="text-sm text-foreground">{order.buyerEmail}</span>
+            // Copyable: the buyer's email is the thing a seller reaches for
+            // when answering a support message about this order.
+            <div className="flex items-center gap-1">
+              <span className="min-w-0 break-all text-sm text-foreground">
+                {order.buyerEmail}
+              </span>
+              <CopyButton value={order.buyerEmail} label="buyer email" />
+            </div>
           ) : (
             <span className="text-sm text-muted-foreground">no email</span>
           )}
@@ -96,9 +104,12 @@ export function OrderDetail({
         </Row>
 
         <Row label="Order ID">
-          <span className="break-all font-mono text-xs text-muted-foreground">
-            {order.id}
-          </span>
+          <div className="flex items-center gap-1">
+            <span className="min-w-0 break-all font-mono text-xs text-muted-foreground">
+              {order.id}
+            </span>
+            <CopyButton value={order.id} label="order ID" />
+          </div>
         </Row>
       </div>
 

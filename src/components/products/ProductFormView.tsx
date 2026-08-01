@@ -19,7 +19,7 @@ export function ProductFormView({
     <main className="mx-auto max-w-3xl px-6 py-8">
       <Link
         href="/products"
-        className="group/btn inline-flex items-center gap-1.5 font-inter text-sm text-muted-foreground transition-colors duration-180 ease-in-out hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none"
+        className="group/btn inline-flex items-center gap-1.5 font-inter text-sm text-muted-foreground transition-colors duration-base ease-standard hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none"
       >
         <ArrowLeft
           className={`size-4 ${iconNudgeLeftClass}`}

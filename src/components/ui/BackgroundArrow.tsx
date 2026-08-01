@@ -21,7 +21,7 @@ export function BackgroundArrow({
     <div
       aria-hidden
       className={cn(
-        "pointer-events-none absolute top-1/2 hidden -translate-y-1/2 select-none text-neutral-900 opacity-(--decor-opacity) md:block",
+        "pointer-events-none absolute top-1/2 hidden -translate-y-1/2 select-none text-foreground opacity-(--decor-opacity) md:block",
         side === "left" ? "-left-24" : "-right-24",
         className,
       )}

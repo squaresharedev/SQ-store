@@ -99,7 +99,7 @@ export function CompositionBar({
                 tabIndex={0}
                 className={cn(
                   "h-full min-w-1 outline-none",
-                  "transition-[transform,opacity] duration-180 ease-in-out motion-reduce:transition-none",
+                  "transition-[transform,opacity] duration-base ease-standard motion-reduce:transition-none",
                   animate && "chart-seg-enter",
                   "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card",
                   rounded && position === 0 && "rounded-l-full",

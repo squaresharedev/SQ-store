@@ -1,7 +1,10 @@
 @import "tailwindcss";
 
-/* Dark-mode variant driven by the `.dark` class on <html> (set in layout.tsx).
-   The dashboard runs dark by default. */
+/* Dark-mode variant, driven by a `.dark` class on <html>.
+   NOTE: nothing sets that class today — layout.tsx renders the dashboard in
+   LIGHT mode. The .dark token block below is kept ready so a future toggle is
+   a one-line change, and components spend semantic tokens (not fixed
+   neutrals) so they will follow it when it lands. */
 @custom-variant dark (&:is(.dark *));
 
 /* ============================================================
@@ -73,6 +76,28 @@
   --radius-lg: 0.75rem; /* modals, large panels */
 }
 
+/* Motion scale (styles.md §6.2). Declared here so components spend TOKENS
+   (`duration-base`, `ease-standard`) instead of ad-hoc `duration-[180ms]` /
+   `ease-[cubic-bezier(...)]` strings.
+
+   Naming notes:
+   - `--transition-duration-*` is the namespace Tailwind turns into `duration-*`
+     utilities; `base` rather than a bare `--transition-duration` so the utility
+     has a name to spell.
+   - styles.md calls the entrance curve `--ease-out`, but Tailwind already ships
+     an `ease-out` (cubic-bezier(0, 0, 0.2, 1)) that this codebase uses. Naming
+     ours `ease-entrance` adds the curve without silently re-pointing every
+     existing `ease-out`.
+   - The standard curve is identical to Tailwind's `ease-in-out`; `ease-standard`
+     is the spec's name for it, so both spellings are correct. */
+@theme {
+  --transition-duration-fast: 120ms;
+  --transition-duration-base: 180ms;
+  --transition-duration-slow: 260ms;
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-entrance: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 /* Soft shadow ramp (styles.md §6.1) — borders first, shadows sparingly. */
 @theme {
   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
@@ -133,6 +158,13 @@
   /* Giant decorative background arrows (auth + settings). Low enough that
      text drawn over them keeps full contrast. */
   --decor-opacity: 0.05;
+
+  /* Headline metric count-up (components/ui/CountUp). Longer than the motion
+     scale's --transition-duration-slow because this is a figure being read,
+     not a state change being acknowledged: it needs long enough to register
+     as counting, short enough that the real number is never withheld. Lives
+     here (not @theme) because it is read from JS, not spent as a utility. */
+  --duration-countup: 900ms;
 }
 
 .dark {
@@ -182,6 +214,12 @@
    ============================================================ */
 .ss-grid-container {
   container-type: inline-size;
+}
+/* Each cell is its own layout/paint island, so the browser never has to
+   consider a tile's internals when something elsewhere on the board changes.
+   Measured to matter most on big boards (12 x 60 = 720 cells). */
+.ss-grid > * {
+  contain: layout paint style;
 }
 .ss-grid {
   display: grid;

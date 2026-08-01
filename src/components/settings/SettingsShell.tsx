@@ -25,14 +25,14 @@ const NAV = [
 function navItemClasses(active: boolean, danger?: boolean) {
   return cn(
     "flex shrink-0 snap-start items-center gap-2.5 rounded-[0.375rem] px-3 py-2.5 text-sm font-medium",
-    "transition-colors duration-[180ms] ease-[cubic-bezier(0.4,0,0.2,1)] motion-reduce:transition-none",
+    "transition-colors duration-base ease-standard motion-reduce:transition-none",
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
     active
       ? danger
-        ? "bg-red-50 text-red-700"
+        ? "bg-destructive/5 text-destructive"
         : "bg-accent text-foreground"
       : danger
-        ? "text-muted-foreground hover:bg-red-50 hover:text-red-700"
+        ? "text-muted-foreground hover:bg-destructive/5 hover:text-destructive"
         : "text-muted-foreground hover:bg-accent hover:text-foreground",
   );
 }

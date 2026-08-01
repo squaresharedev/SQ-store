@@ -27,7 +27,7 @@ export function OrderRow({
         }
       }}
       tabIndex={0}
-      className="cursor-pointer transition-colors duration-180 motion-reduce:transition-none hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+      className="cursor-pointer transition-colors duration-base motion-reduce:transition-none hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
     >
       {/* product */}
       <td className="py-2.5 px-3 max-w-xs truncate text-sm font-medium text-foreground">

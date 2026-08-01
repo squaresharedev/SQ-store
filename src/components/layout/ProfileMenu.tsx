@@ -14,7 +14,7 @@ import type { AccountOption } from "@/lib/team/account-context";
 
 const ITEM = cn(
   "flex w-full items-center gap-2.5 rounded-[0.375rem] px-2.5 py-2 text-left text-sm text-foreground",
-  "transition-colors duration-[180ms] ease-[cubic-bezier(0.4,0,0.2,1)] motion-reduce:transition-none",
+  "transition-colors duration-base ease-standard motion-reduce:transition-none",
   "hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
 );
 
@@ -70,7 +70,7 @@ export function ProfileMenu({
         // Grows on hover/focus so it reads as a control, not a static portrait.
         // Transform-only (no layout shift), and it holds the larger size while
         // the menu is open so the trigger stays visibly active.
-        "transition-transform duration-[180ms] ease-[cubic-bezier(0.4,0,0.2,1)] motion-reduce:transition-none",
+        "transition-transform duration-base ease-standard motion-reduce:transition-none",
         "hover:scale-110 focus-visible:scale-110 active:scale-105",
         open && "scale-110",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",

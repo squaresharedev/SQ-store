@@ -202,7 +202,7 @@ export function Select<T extends string>({
         <span className="truncate">{selected?.label ?? ""}</span>
         <ChevronDown
           className={cn(
-            "size-4 shrink-0 text-muted-foreground transition-transform duration-180 ease-in-out motion-reduce:transition-none",
+            "size-4 shrink-0 text-muted-foreground transition-transform duration-base ease-standard motion-reduce:transition-none",
             open && "rotate-180",
           )}
           strokeWidth={2}
@@ -241,7 +241,7 @@ export function Select<T extends string>({
                   commit(index);
                 }}
                 className={cn(
-                  "flex cursor-pointer items-start justify-between gap-2 rounded-sm px-3 py-2 transition-colors duration-180 ease-in-out motion-reduce:transition-none",
+                  "flex cursor-pointer items-start justify-between gap-2 rounded-sm px-3 py-2 transition-colors duration-base ease-standard motion-reduce:transition-none",
                   isActive && "bg-accent",
                 )}
               >

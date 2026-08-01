@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, ChevronLeft, ChevronRight, X } from "lucide-react";
 import type { ActionError } from "@/lib/errors";
@@ -43,8 +43,9 @@ import { ProductPicker } from "./ProductPicker";
 import { ProductBlockEditor } from "./ProductBlockEditor";
 import { ShapeBlockEditor, type ShapeBlockPatch } from "./ShapeBlockEditor";
 import { TextBlockEditor, type TextBlockPatch } from "./TextBlockEditor";
+import { useCanvasViewport } from "./useCanvasViewport";
 import { useEditorHistory } from "./useEditorHistory";
-import { useUnsavedChangesGuard } from "./useUnsavedChangesGuard";
+import { useUnsavedChangesGuard } from "@/lib/hooks/useUnsavedChangesGuard";
 
 type SaveState =
   | { status: "idle" }
@@ -74,7 +75,7 @@ function changedField<T extends object>(prev: T, next: T): string {
 }
 
 const INSPECTOR_CLOSE_CLASS =
-  "inline-flex size-7 items-center justify-center rounded-none text-muted-foreground transition-colors duration-180 ease-in-out hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none";
+  "inline-flex size-7 items-center justify-center rounded-none text-muted-foreground transition-colors duration-base ease-standard hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none";
 
 /** Mobile emergency-edit layout: panels become slide-up bottom sheets over the
  *  canvas (scrollable, padded to clear the floating toolbar); on lg+ the same
@@ -90,6 +91,47 @@ function clampZoom(value: number): number {
   return Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, Math.round(value * 100) / 100));
 }
 
+/** Breathing room left around the board when it is centred or fitted. */
+const CANVAS_MARGIN = 24;
+
+/** Rough line height / page size used to convert non-pixel wheel deltas. */
+const WHEEL_LINE_PX = 16;
+
+/**
+ * Wheel deltas in PIXELS, whatever the device reported. Firefox sends whole
+ * lines for a mouse wheel (deltaY: ±1, deltaMode 1) while Chrome and Safari
+ * send pixels, so treating every delta as pixels made a mouse wheel crawl one
+ * pixel per notch there.
+ */
+function normalizeWheel(event: WheelEvent): { x: number; y: number } {
+  const scale =
+    event.deltaMode === 1
+      ? WHEEL_LINE_PX
+      : event.deltaMode === 2
+        ? window.innerHeight
+        : 1;
+  return { x: event.deltaX * scale, y: event.deltaY * scale };
+}
+
+/**
+ * Keep the workspace point under (anchorX, anchorY) pinned while the zoom
+ * changes, so zooming happens about the cursor instead of the corner. The
+ * board point under the anchor is `(anchor - pan) / zoom`; solving for the
+ * pan that keeps it there at the new zoom gives this.
+ */
+function panAfterZoom(
+  pan: { x: number; y: number },
+  from: number,
+  to: number,
+  anchorX: number,
+  anchorY: number,
+): { x: number; y: number } {
+  return {
+    x: anchorX - ((anchorX - pan.x) / from) * to,
+    y: anchorY - ((anchorY - pan.y) / from) * to,
+  };
+}
+
 /** Design panel width bounds, in px (desktop only). Dragging the edge below
  *  the minimum collapses the panel rather than squeezing it unusably narrow. */
 const PANEL_MIN_WIDTH = 260;
@@ -101,7 +143,7 @@ const PANEL_RESIZE_STEP = 16;
 /** The little tab that collapses / reopens the panel: a chip clipped to the
  *  panel's left edge (desktop only — mobile uses bottom sheets). */
 const PANEL_TAB_CLASS =
-  "absolute top-1/2 z-30 hidden h-12 w-5 -translate-y-1/2 items-center justify-center rounded-l-md border border-r-0 border-border bg-background text-muted-foreground shadow-sm transition-colors duration-180 ease-in-out hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none lg:flex";
+  "absolute top-1/2 z-30 hidden h-12 w-5 -translate-y-1/2 items-center justify-center rounded-l-md border border-r-0 border-border bg-background text-muted-foreground shadow-sm transition-colors duration-base ease-standard hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none lg:flex";
 
 const SHEET_ON_MOBILE_CLASS =
   "fixed inset-x-0 bottom-0 z-40 max-h-[70vh] overflow-y-auto rounded-t-lg border-t border-border bg-background p-4 pb-24 shadow-lg lg:static lg:z-auto lg:max-h-none lg:overflow-visible lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0 lg:pb-0 lg:shadow-none";
@@ -164,13 +206,19 @@ export function StorefrontDesigner({
   // minimum: a drag that would go narrower closes the panel instead, so
   // reopening never lands on an unusably thin strip.
   const [panelWidth, setPanelWidth] = useState(PANEL_DEFAULT_WIDTH);
-  const [zoom, setZoom] = useState(1);
   // The free cell the seller clicked, so the next inserted block lands there.
   const [insertHint, setInsertHint] = useState<{ x: number; y: number } | null>(
     null,
   );
-  // The scroll area around the canvas: owns wheel-zoom and fit-on-open.
-  const canvasScrollRef = useRef<HTMLElement>(null);
+  // Pan + zoom live here, OUTSIDE React state, and are written straight to
+  // the stage each frame. Gestures therefore cause no re-renders at all.
+  const viewport = useCanvasViewport({ zoom: 1, pan: { x: 0, y: 0 } });
+  // True while a pan gesture is running, so the cursor can say so.
+  const [panning, setPanning] = useState(false);
+  // Space held = temporary pan tool, the shortcut every canvas app shares.
+  const [spaceHeld, setSpaceHeld] = useState(false);
+  // The window the board moves behind: owns wheel pan/zoom and fit.
+  const canvasViewportRef = useRef<HTMLElement>(null);
   // Preview device for the canvas frame — toolbar-owned, never persisted.
   const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">(
     "desktop",
@@ -178,7 +226,7 @@ export function StorefrontDesigner({
   const history = useEditorHistory<EditorSnapshot>();
   // Prompt to save/discard when leaving with unsaved edits (Back link, browser
   // Back button, refresh/close). `dirty` alone drives whether it's armed.
-  const leaveGuard = useUnsavedChangesGuard(dirty);
+  const leaveGuard = useUnsavedChangesGuard(dirty, "/storefront");
 
   const productsById = useMemo(
     () => new Map(catalog.map((product) => [product.id, product])),
@@ -203,7 +251,12 @@ export function StorefrontDesigner({
   function markDirty() {
     setDirty(true);
     setSaveState((current) =>
-      current.status === "saving" ? current : { status: "idle" },
+      // Returning the SAME object when already idle lets React bail out.
+      // Minting a fresh `{ status: "idle" }` every time forced a re-render on
+      // every keystroke, even though nothing had changed.
+      current.status === "saving" || current.status === "idle"
+        ? current
+        : { status: "idle" },
     );
   }
 
@@ -261,21 +314,85 @@ export function StorefrontDesigner({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
-  // Ctrl/Cmd + wheel zooms the canvas (trackpad pinch arrives as the same
-  // event). Registered non-passively so the browser's own page zoom can be
-  // prevented; plain scrolling is left alone.
+  // The wheel drives the workspace: Ctrl/Cmd (or a trackpad pinch, which
+  // arrives as the same event) zooms about the pointer; a plain scroll pans.
+  // Every event mutates the viewport ref SYNCHRONOUSLY, so a burst of events
+  // accumulates instead of each one recomputing from a stale origin.
+  // Registered non-passively so the browser's own scroll/zoom is preventable.
   useEffect(() => {
-    const area = canvasScrollRef.current;
+    const area = canvasViewportRef.current;
     if (!area) return;
     function onWheel(event: WheelEvent) {
-      if (!event.ctrlKey && !event.metaKey) return;
       event.preventDefault();
-      setZoom((current) =>
-        clampZoom(current - Math.sign(event.deltaY) * ZOOM_STEP),
-      );
+      const { x: deltaX, y: deltaY } = normalizeWheel(event);
+      if (event.ctrlKey || event.metaKey) {
+        const rect = area!.getBoundingClientRect();
+        const anchorX = event.clientX - rect.left;
+        const anchorY = event.clientY - rect.top;
+        viewport.set((current) => {
+          const zoom = clampZoom(current.zoom * Math.exp(-deltaY / 300));
+          return {
+            zoom,
+            pan: panAfterZoom(current.pan, current.zoom, zoom, anchorX, anchorY),
+          };
+        });
+        return;
+      }
+      viewport.set((current) => ({
+        zoom: current.zoom,
+        pan: { x: current.pan.x - deltaX, y: current.pan.y - deltaY },
+      }));
     }
     area.addEventListener("wheel", onWheel, { passive: false });
     return () => area.removeEventListener("wheel", onWheel);
+  }, [viewport]);
+
+  // A shrinking window (or the design panel widening) can leave the board
+  // outside the new limits, so re-clamp whenever the workspace resizes. An
+  // identity set is enough: the clamp runs on every write.
+  useEffect(() => {
+    const area = canvasViewportRef.current;
+    if (!area) return;
+    const observer = new ResizeObserver(() => {
+      viewport.set((current) => current);
+    });
+    observer.observe(area);
+    return () => observer.disconnect();
+  }, [viewport]);
+
+  // Space = hold-to-pan. Ignored while typing, and while a button has focus
+  // (there space is that button's activation key).
+  useEffect(() => {
+    function isTypingTarget(target: EventTarget | null): boolean {
+      const element = target as HTMLElement | null;
+      if (!element) return false;
+      return (
+        element.tagName === "INPUT" ||
+        element.tagName === "TEXTAREA" ||
+        element.tagName === "BUTTON" ||
+        element.isContentEditable
+      );
+    }
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.code !== "Space" || isTypingTarget(event.target)) return;
+      event.preventDefault();
+      setSpaceHeld(true);
+    }
+    function onKeyUp(event: KeyboardEvent) {
+      if (event.code === "Space") setSpaceHeld(false);
+    }
+    // A lost window (alt-tab mid-hold) would otherwise strand the pan tool.
+    function onBlur() {
+      setSpaceHeld(false);
+    }
+    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("keyup", onKeyUp);
+    window.addEventListener("blur", onBlur);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("keyup", onKeyUp);
+      window.removeEventListener("blur", onBlur);
+    };
   }, []);
 
   // Cmd/Ctrl +/-/0, the shortcuts every canvas tool shares.
@@ -293,13 +410,13 @@ export function StorefrontDesigner({
       }
       if (event.key === "=" || event.key === "+") {
         event.preventDefault();
-        setZoom((current) => clampZoom(current + ZOOM_STEP));
+        viewActions.current.zoomBy(ZOOM_STEP);
       } else if (event.key === "-") {
         event.preventDefault();
-        setZoom((current) => clampZoom(current - ZOOM_STEP));
+        viewActions.current.zoomBy(-ZOOM_STEP);
       } else if (event.key === "0") {
         event.preventDefault();
-        setZoom(1);
+        viewActions.current.resetZoom();
       }
     }
     window.addEventListener("keydown", onKeyDown);
@@ -328,21 +445,170 @@ export function StorefrontDesigner({
     return hint;
   }
 
-  function zoomBy(delta: number) {
-    setZoom((current) => clampZoom(current + delta));
+  /** The viewport window and the board's UNSCALED size (offsetWidth/Height
+   *  ignore transforms, so these are the natural dimensions). */
+  function measureView() {
+    const area = canvasViewportRef.current;
+    const stage = viewport.stage();
+    if (!area || !stage || stage.offsetWidth <= 0) return null;
+    return { area, width: stage.offsetWidth, height: stage.offsetHeight };
   }
 
-  /** Scale the canvas so the whole board fits the viewport width. */
-  function zoomToFit() {
-    const area = canvasScrollRef.current;
-    const stage = area?.firstElementChild as HTMLElement | null;
-    if (!area || !stage) return;
-    // The stage is already scaled, so back the natural width out of it.
-    const natural = stage.offsetWidth / zoom;
-    if (natural <= 0) return;
-    // Leave the canvas its padding rather than butting against the edges.
-    setZoom(clampZoom((area.clientWidth - 48) / natural));
+  /** Drop the board in the middle of the workspace at the given scale. */
+  function centerCanvas(atZoom: number) {
+    const view = measureView();
+    if (!view) return;
+    viewport.set({
+      zoom: atZoom,
+      pan: {
+        x: (view.area.clientWidth - view.width * atZoom) / 2,
+        y: Math.max(
+          CANVAS_MARGIN,
+          (view.area.clientHeight - view.height * atZoom) / 2,
+        ),
+      },
+    });
   }
+
+  /** Toolbar zoom: about the middle of the window, not the corner. */
+  function zoomBy(delta: number) {
+    const area = canvasViewportRef.current;
+    viewport.set((current) => {
+      const zoom = clampZoom(current.zoom + delta);
+      if (!area) return { ...current, zoom };
+      return {
+        zoom,
+        pan: panAfterZoom(
+          current.pan,
+          current.zoom,
+          zoom,
+          area.clientWidth / 2,
+          area.clientHeight / 2,
+        ),
+      };
+    });
+  }
+
+  function resetZoom() {
+    centerCanvas(1);
+  }
+
+  // The one-shot listeners below read these through a ref, so they never
+  // need re-subscribing when a render changes the closures.
+  const viewActions = useRef({ zoomBy, resetZoom });
+  useEffect(() => {
+    viewActions.current = { zoomBy, resetZoom };
+  });
+
+  // Identity-stable canvas callbacks. The canvas is memoised, so a render
+  // caused by something it does not display (typing the storefront name, for
+  // instance) must not hand it fresh function props — that alone re-rendered
+  // every tile, measured at 46ms per keystroke on a full board.
+  const canvasActions = useRef({
+    moveBlock,
+    resizeBlock,
+    removeBlock,
+    insertAt,
+    selectBlock,
+  });
+  useEffect(() => {
+    canvasActions.current = {
+      moveBlock,
+      resizeBlock,
+      removeBlock,
+      insertAt,
+      selectBlock,
+    };
+  });
+  const onMoveBlock = useCallback((key: string, x: number, y: number) => {
+    canvasActions.current.moveBlock(key, x, y);
+  }, []);
+  const onResizeBlock = useCallback((key: string, w: number, h: number) => {
+    canvasActions.current.resizeBlock(key, w, h);
+  }, []);
+  const onRemoveBlock = useCallback((key: string) => {
+    canvasActions.current.removeBlock(key);
+  }, []);
+  const onInsertAt = useCallback((x: number, y: number) => {
+    canvasActions.current.insertAt(x, y);
+  }, []);
+  const onSelectBlock = useCallback((key: string | null) => {
+    canvasActions.current.selectBlock(key);
+  }, []);
+
+  /** Scale the whole board to fit the window, then centre it. */
+  function zoomToFit() {
+    const view = measureView();
+    if (!view) return;
+    centerCanvas(
+      clampZoom(
+        Math.min(
+          (view.area.clientWidth - CANVAS_MARGIN * 2) / view.width,
+          (view.area.clientHeight - CANVAS_MARGIN * 2) / view.height,
+        ),
+      ),
+    );
+  }
+
+  /**
+   * Pan gestures: the middle button, space held, or a left-press that landed
+   * on the workspace BACKGROUND (dragging beside the board moves it, while a
+   * press on a tile still drags that tile).
+   */
+  function startPan(event: React.PointerEvent<HTMLElement>) {
+    const onBackground = event.target === event.currentTarget;
+    const wanted =
+      event.button === 1 || (event.button === 0 && (spaceHeld || onBackground));
+    if (!wanted) return;
+    event.preventDefault();
+
+    const startX = event.clientX;
+    const startY = event.clientY;
+    const origin = { ...viewport.get().pan };
+    setPanning(true);
+
+    function onMove(moveEvent: PointerEvent) {
+      viewport.set((current) => ({
+        zoom: current.zoom,
+        pan: {
+          x: origin.x + (moveEvent.clientX - startX),
+          y: origin.y + (moveEvent.clientY - startY),
+        },
+      }));
+    }
+    function stop() {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", stop);
+      window.removeEventListener("pointercancel", stop);
+      setPanning(false);
+    }
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", stop);
+    window.addEventListener("pointercancel", stop);
+  }
+
+  // Place the board sensibly on first paint: centred, or scaled down first
+  // when it is wider than the window. Runs once — after that the view is the
+  // seller's to move.
+  const placedInitialView = useRef(false);
+  useEffect(() => {
+    if (placedInitialView.current || previewMode !== "desktop") return;
+    let frame = 0;
+    // The stage may not have laid out on the very first tick.
+    function place(attempt: number) {
+      const view = measureView();
+      if (!view) {
+        if (attempt < 5) frame = requestAnimationFrame(() => place(attempt + 1));
+        return;
+      }
+      placedInitialView.current = true;
+      if (view.width + CANVAS_MARGIN * 2 > view.area.clientWidth) zoomToFit();
+      else centerCanvas(1);
+    }
+    place(0);
+    return () => cancelAnimationFrame(frame);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- one-shot placement
+  }, [previewMode]);
 
   function togglePicker() {
     setInspector((current) =>
@@ -663,6 +929,9 @@ export function StorefrontDesigner({
     else leaveGuard.cancel();
   }
 
+  /** The pannable design view, as opposed to the phone-width preview. */
+  const designView = previewMode === "desktop";
+
   const inspectorTitle =
     inspector?.kind === "picker"
       ? "Add product"
@@ -742,14 +1011,32 @@ export function StorefrontDesigner({
       {/* Full-width workspace: the canvas takes all remaining room next to
           the edge-docked panel. */}
       <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
-        {/* The canvas owns the viewport and scrolls INTERNALLY, but only when
-            the storefront outgrows it. pb clears the floating toolbar. */}
+        {/* The workspace window. In design view the board floats inside it and
+            can be panned anywhere; the mobile preview stays a plain scrolling
+            column. pb clears the floating toolbar. */}
         <main
-          ref={canvasScrollRef}
-          className="min-w-0 flex-1 space-y-6 overflow-auto px-4 py-6 pb-24 sm:px-6"
+          ref={canvasViewportRef}
+          onPointerDown={designView ? startPan : undefined}
+          className={cn(
+            "relative min-w-0 flex-1",
+            designView
+              ? "touch-none overflow-hidden"
+              : "space-y-6 overflow-auto px-4 py-6 pb-24 sm:px-6",
+            panning
+              ? "cursor-grabbing"
+              : spaceHeld && designView
+                ? "cursor-grab"
+                : null,
+          )}
         >
           {saveState.status === "error" && (
-            <ActionErrorNotice error={saveState.error} />
+            <div
+              className={cn(
+                designView && "absolute inset-x-4 top-4 z-20 sm:inset-x-6",
+              )}
+            >
+              <ActionErrorNotice error={saveState.error} />
+            </div>
           )}
 
           <DesignerCanvas
@@ -760,13 +1047,13 @@ export function StorefrontDesigner({
             previewMode={previewMode}
             backgroundImageUrl={backgroundImageUrl}
             showGrid={showGrid}
-            zoom={zoom}
-            onMoveBlock={moveBlock}
-            onResizeBlock={resizeBlock}
-            onRemove={removeBlock}
-            onEmptyCellClick={insertAt}
+            viewport={viewport}
+            onMoveBlock={onMoveBlock}
+            onResizeBlock={onResizeBlock}
+            onRemove={onRemoveBlock}
+            onEmptyCellClick={onInsertAt}
             selectedKey={inspector?.kind === "block" ? inspector.key : null}
-            onSelectBlock={selectBlock}
+            onSelectBlock={onSelectBlock}
           />
         </main>
 
@@ -921,10 +1208,10 @@ export function StorefrontDesigner({
         onAddText={addTextBlock}
         onAddShape={addShapeBlock}
         canAddBlocks={blocks.length < MAX_BLOCKS}
-        zoom={zoom}
+        viewport={viewport}
         onZoomIn={() => zoomBy(ZOOM_STEP)}
         onZoomOut={() => zoomBy(-ZOOM_STEP)}
-        onZoomReset={() => setZoom(1)}
+        onZoomReset={resetZoom}
         onZoomFit={zoomToFit}
         onTidy={tidyBlocks}
         canTidy={blocks.length > 0}

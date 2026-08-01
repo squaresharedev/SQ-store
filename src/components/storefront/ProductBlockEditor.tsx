@@ -290,11 +290,11 @@ export function ProductBlockEditor({
         description="This edits the product itself. Every storefront, checkout link, and your product catalog will show the new details, not just this grid."
       >
         <div className="space-y-4">
-          <ul className="space-y-1 font-inter text-sm text-neutral-600">
+          <ul className="space-y-1 font-inter text-sm text-muted-foreground">
             {titleChanged && (
               <li>
                 Name: <span className="line-through">{product.title}</span>{" "}
-                <span className="font-medium text-neutral-900">
+                <span className="font-medium text-foreground">
                   {trimmedTitle}
                 </span>
               </li>
@@ -305,7 +305,7 @@ export function ProductBlockEditor({
                 <span className="line-through">
                   {formatPrice(product.price, product.currency)}
                 </span>{" "}
-                <span className="font-medium text-neutral-900">
+                <span className="font-medium text-foreground">
                   {formatPrice(draftCents / 100, product.currency)}
                 </span>
               </li>

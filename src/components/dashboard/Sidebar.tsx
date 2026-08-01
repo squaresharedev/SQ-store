@@ -56,7 +56,7 @@ function mobileTitle(pathname: string): string | null {
 // Shared with the mobile menu-toggle button so hover/focus/motion read as one
 // family of controls.
 const CONTROL_TRANSITION = cn(
-  "transition-colors duration-[180ms] ease-[cubic-bezier(0.4,0,0.2,1)]",
+  "transition-colors duration-base ease-standard",
   "motion-reduce:transition-none",
 );
 
@@ -210,7 +210,7 @@ export function Sidebar({
         aria-label="Dashboard"
         className={cn(
           "fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-border bg-background",
-          "transition-transform duration-[260ms] ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none",
+          "transition-transform duration-slow ease-entrance motion-reduce:transition-none",
           "md:translate-x-0",
           isOpen ? "translate-x-0" : "-translate-x-full",
         )}

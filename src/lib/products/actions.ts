@@ -11,11 +11,13 @@ import {
   invalidInput,
   notFound,
   permissionDenied,
+  rateLimited,
   serverError,
   sessionExpired,
   uploadFailed,
   type ActionError,
 } from "@/lib/errors";
+import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
 import {
   isAllowedContentType,
   isOwnedObjectKey,
@@ -160,6 +162,11 @@ export async function createProduct(
   if (!can(account.role, "products.write")) {
     return failure(permissionDenied(account.role, "create products"));
   }
+  // After the role check, before any R2 head or DB write: RLS decides WHETHER
+  // this caller may write, the budget bounds HOW MUCH.
+  if (!(await rateLimit("product_write", RATE_LIMITS.productWrite))) {
+    return failure(rateLimited("create products"));
+  }
 
   const parsed = parseWrite(account.userId, input);
   if ("error" in parsed) return failure(parsed.error);
@@ -205,6 +212,9 @@ export async function updateProduct(
   if (!account) return failure(sessionExpired());
   if (!can(account.role, "products.write")) {
     return failure(permissionDenied(account.role, "edit products"));
+  }
+  if (!(await rateLimit("product_write", RATE_LIMITS.productWrite))) {
+    return failure(rateLimited("edit products"));
   }
   if (!productIdSchema.safeParse(id).success) {
     return failure(notFound("product"));
@@ -296,6 +306,9 @@ export async function deleteProduct(id: string): Promise<ProductActionResult> {
   if (!account) return failure(sessionExpired());
   if (!can(account.role, "products.write")) {
     return failure(permissionDenied(account.role, "delete products"));
+  }
+  if (!(await rateLimit("product_write", RATE_LIMITS.productWrite))) {
+    return failure(rateLimited("delete products"));
   }
   if (!productIdSchema.safeParse(id).success) {
     return failure(notFound("product"));

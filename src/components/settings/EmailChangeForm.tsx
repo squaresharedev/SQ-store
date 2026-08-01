@@ -31,9 +31,9 @@ export function EmailChangeForm({ email }: { email: string }) {
       description="Changing it sends a confirmation link first. Nothing moves until you actually click it, so typos here are low stakes."
     >
       <form action={formAction} className="flex flex-col gap-4" noValidate>
-        <p className="font-inter text-sm text-neutral-500">
+        <p className="font-inter text-sm text-muted-foreground">
           Currently signed in as{" "}
-          <span className="font-medium text-neutral-900">{email}</span>
+          <span className="font-medium text-foreground">{email}</span>
         </p>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="new_email">New email</Label>

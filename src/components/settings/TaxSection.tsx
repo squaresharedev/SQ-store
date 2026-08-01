@@ -54,7 +54,7 @@ export function TaxSection({
             maxLength={200}
             autoComplete="organization"
           />
-          <p className="font-inter text-xs text-neutral-500">
+          <p className="font-inter text-xs text-muted-foreground">
             Selling as yourself? Leave it empty.
           </p>
         </div>

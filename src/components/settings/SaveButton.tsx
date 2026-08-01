@@ -64,6 +64,9 @@ export function SaveButton({
     );
   }
 
+  // The result states fill with a saturated feedback colour, and white is the
+  // legible pairing for both in any theme — these are not neutrals that should
+  // follow the surface.
   if (showResult && state?.success) {
     return (
       <Button

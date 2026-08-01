@@ -30,9 +30,9 @@ export function SettingsCard({
   return (
     <section
       className={cn(
-        "border bg-white p-6 sm:p-7",
+        "border bg-background p-6 sm:p-7",
         decoration && "relative overflow-hidden",
-        danger ? "border-red-200" : "border-neutral-200",
+        danger ? "border-destructive/40" : "border-border",
       )}
     >
       {decoration && <CardBackdrop variant={decoration} corner="tr" />}
@@ -40,13 +40,13 @@ export function SettingsCard({
         <h2
           className={cn(
             "text-base font-semibold",
-            danger ? "text-red-600" : "text-neutral-900",
+            danger ? "text-destructive" : "text-foreground",
           )}
         >
           {title}
         </h2>
         {description && (
-          <p className="mt-1 font-inter text-sm leading-relaxed text-neutral-500">
+          <p className="mt-1 font-inter text-sm leading-relaxed text-muted-foreground">
             {description}
           </p>
         )}

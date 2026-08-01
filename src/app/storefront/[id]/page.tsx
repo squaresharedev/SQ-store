@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
-import { listProducts } from "@/lib/products/queries";
+import { listAllProducts } from "@/lib/products/queries";
 import { getStorefront } from "@/lib/storefront/queries";
 import { StorefrontDesigner } from "@/components/storefront/StorefrontDesigner";
 import { getActiveAccount } from "@/lib/team/account-context";
@@ -31,7 +31,7 @@ export default async function StorefrontEditorPage({
 
   const [storefront, products] = await Promise.all([
     getStorefront(id),
-    listProducts(),
+    listAllProducts(),
   ]);
   if (!storefront) notFound();
 

@@ -1,7 +1,7 @@
 // Shared control class strings for the product UI (dashboard features import
 // these, never per-feature copies). Every value is a token: radius from the
-// styles.md scale (globals.css @theme), motion from duration-180 +
-// ease-in-out (= styles.md --duration / --ease-standard), colors semantic.
+// styles.md scale (globals.css @theme), motion from the motion scale
+// (duration-fast/base/slow + ease-standard/ease-entrance), colors semantic.
 //
 // BRAND RULE: every button is SHARP (rounded-none). Only nav/menu items keep
 // a radius. Defined once here (and consumed by the Button primitive), never
@@ -10,7 +10,7 @@
 /** Shared motion + focus primitives, exported for one-off controls that
  *  can't wear a full button class (toolbars, tile chrome). */
 export const transitionClass =
-  "transition-colors duration-180 ease-in-out motion-reduce:transition-none";
+  "transition-colors duration-base ease-standard motion-reduce:transition-none";
 
 export const focusRingClass =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background";
@@ -74,12 +74,39 @@ export const stubBadgeClass =
 
 /** Nudge right: "go / open / next / sign out" actions (a trailing arrow). */
 export const iconNudgeRightClass =
-  "transition-transform duration-180 ease-out group-hover/btn:translate-x-0.5 group-focus-visible/btn:translate-x-0.5 motion-reduce:transition-none";
+  "transition-transform duration-base ease-entrance group-hover/btn:translate-x-0.5 group-focus-visible/btn:translate-x-0.5 motion-reduce:transition-none";
 
 /** Nudge left: "back" navigation (a leading arrow). */
 export const iconNudgeLeftClass =
-  "transition-transform duration-180 ease-out group-hover/btn:-translate-x-0.5 group-focus-visible/btn:-translate-x-0.5 motion-reduce:transition-none";
+  "transition-transform duration-base ease-entrance group-hover/btn:-translate-x-0.5 group-focus-visible/btn:-translate-x-0.5 motion-reduce:transition-none";
 
 /** Pop: "add / create / new" actions (a Plus). */
 export const iconPopClass =
-  "transition-transform duration-180 ease-out group-hover/btn:scale-110 group-focus-visible/btn:scale-110 motion-reduce:transition-none";
+  "transition-transform duration-base ease-entrance group-hover/btn:scale-110 group-focus-visible/btn:scale-110 motion-reduce:transition-none";
+
+/**
+ * Hover lift for a CARD: rises a hair and picks up the next shadow step, so a
+ * grid of tiles reads as a set of targets rather than a static mosaic.
+ *
+ * Fires on three signals so the card responds however it is reached:
+ * pointer hover, keyboard focus on the card itself (when it is the control),
+ * and keyboard focus on a control INSIDE it (`has-[:focus-visible]`, e.g. a
+ * card whose edit/delete buttons are the real targets). `focus-within` is
+ * deliberately not used — it also fires for mouse clicks, which would leave a
+ * card stuck in the lifted state after a click.
+ *
+ * `--shadow-sm` -> `--shadow-md` is the styles.md §6.1 step: cards lead with a
+ * border and borrow a shadow only while active. Transform + shadow only, so
+ * nothing reflows and neighbours never shift. Under reduced motion the shadow
+ * still changes (the affordance survives) but the movement does not.
+ *
+ * Not for table rows: `<tr>` doesn't paint box-shadow reliably, so rows use a
+ * background change instead.
+ */
+export const hoverLiftClass =
+  "transition-[transform,box-shadow] duration-base ease-standard " +
+  "hover:-translate-y-0.5 hover:shadow-md " +
+  "focus-visible:-translate-y-0.5 focus-visible:shadow-md " +
+  "has-[:focus-visible]:-translate-y-0.5 has-[:focus-visible]:shadow-md " +
+  "motion-reduce:transition-none motion-reduce:hover:translate-y-0 " +
+  "motion-reduce:focus-visible:translate-y-0 motion-reduce:has-[:focus-visible]:translate-y-0";

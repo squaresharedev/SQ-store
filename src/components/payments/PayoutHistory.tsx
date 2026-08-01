@@ -58,7 +58,7 @@ export function PayoutHistory({
                   }}
                   tabIndex={0}
                   aria-label={`Payout ${formatCents(payout.amountCents, payout.currency)}, view details`}
-                  className="cursor-pointer border-b border-border last:border-b-0 transition-colors duration-180 hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring motion-reduce:transition-none"
+                  className="cursor-pointer border-b border-border last:border-b-0 transition-colors duration-base hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring motion-reduce:transition-none"
                 >
                   <td className="whitespace-nowrap px-3 py-2.5 text-sm font-medium text-foreground">
                     {formatCents(payout.amountCents, payout.currency)}

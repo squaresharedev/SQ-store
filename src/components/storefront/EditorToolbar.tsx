@@ -32,6 +32,13 @@ import {
 } from "@/components/ui/control-styles";
 import { ShapeKindGlyph } from "./ShapeTileContent";
 import { SHAPE_SPECS } from "./shape-specs";
+import { useZoomValue, type CanvasViewport } from "./useCanvasViewport";
+
+/** The live zoom percentage. Its own component so that subscribing to the
+ *  viewport re-renders this text alone. */
+function ZoomReadout({ viewport }: { viewport: CanvasViewport }) {
+  return <>{Math.round(useZoomValue(viewport) * 100)}%</>;
+}
 
 /** Labelled insert-tool button: icon + text label (label hidden on mobile).
  *  `group/btn` lets the icon pop on hover/focus (see iconPopClass below). */
@@ -74,7 +81,7 @@ export function EditorToolbar({
   canRedo,
   onUndo,
   onRedo,
-  zoom,
+  viewport,
   onZoomIn,
   onZoomOut,
   onZoomReset,
@@ -95,8 +102,9 @@ export function EditorToolbar({
   canRedo: boolean;
   onUndo: () => void;
   onRedo: () => void;
-  /** Canvas scale, 1 = 100%. */
-  zoom: number;
+  /** Live pan + zoom. Only the readout subscribes, so a gesture re-renders
+   *  a single <span> rather than the toolbar (let alone the canvas). */
+  viewport: CanvasViewport;
   onZoomIn: () => void;
   onZoomOut: () => void;
   onZoomReset: () => void;
@@ -170,7 +178,7 @@ export function EditorToolbar({
         <div
           className={cn(
             "absolute bottom-full left-1/2 z-50 -translate-x-1/2 pb-1.5",
-            "transition-opacity duration-180 ease-in-out motion-reduce:transition-none",
+            "transition-opacity duration-base ease-standard motion-reduce:transition-none",
             shapeMenuOpen
               ? "visible opacity-100"
               : "invisible opacity-0 group-hover/shape:visible group-hover/shape:opacity-100 group-focus-within/shape:visible group-focus-within/shape:opacity-100",
@@ -255,11 +263,11 @@ export function EditorToolbar({
       <button
         type="button"
         onClick={onZoomReset}
-        aria-label={`Zoom ${Math.round(zoom * 100)} percent. Reset to 100%`}
+        aria-label="Reset zoom to 100%"
         title="Reset zoom (Ctrl 0)"
         className={`${INSERT_BTN} min-w-14 justify-center tabular-nums`}
       >
-        {Math.round(zoom * 100)}%
+        <ZoomReadout viewport={viewport} />
       </button>
       <button
         type="button"

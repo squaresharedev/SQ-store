@@ -45,10 +45,6 @@ export type OrderSort = {
   direction: "asc" | "desc";
 };
 
-/** Offset pagination envelope. `page` is 1-based. */
-export type Paginated<T> = {
-  rows: T[];
-  total: number;
-  page: number;
-  pageSize: number;
-};
+/** Offset pagination envelope. `page` is 1-based. Defined in types/pagination
+ *  (products paginate too); re-exported here so existing imports keep working. */
+export type { Paginated } from "./pagination";

@@ -39,17 +39,6 @@ export function LoginForm({ next = "/" }: { next?: string }) {
         ? "Send magic link"
         : "Sign in";
 
-  // Wrap formAction to log submission attempts
-  const wrappedFormAction = async (formData: FormData) => {
-    console.log("[LoginForm] Submitting with intent:", formData.get("intent"));
-    try {
-      return await formAction(formData);
-    } catch (error) {
-      console.error("[LoginForm] Form submission error:", error);
-      throw error;
-    }
-  };
-
   // "Forgot?" opens the reset modal, prefilled with whatever email was typed.
   function openReset() {
     const typed =
@@ -65,14 +54,14 @@ export function LoginForm({ next = "/" }: { next?: string }) {
 
       {/* Divider */}
       <div className="flex items-center gap-4">
-        <span className="h-px flex-1 bg-neutral-200" />
-        <span className="font-inter text-xs text-neutral-500">or</span>
-        <span className="h-px flex-1 bg-neutral-200" />
+        <span className="h-px flex-1 bg-border" />
+        <span className="font-inter text-xs text-muted-foreground">or</span>
+        <span className="h-px flex-1 bg-border" />
       </div>
 
       <form
         ref={formRef}
-        action={wrappedFormAction}
+        action={formAction}
         className="flex flex-col gap-3"
         noValidate
       >
@@ -80,7 +69,7 @@ export function LoginForm({ next = "/" }: { next?: string }) {
 
         {/* Sign in / Sign up switch (hidden in magic-link mode) */}
         {!isMagic && (
-          <div className="grid grid-cols-2 border border-neutral-200">
+          <div className="grid grid-cols-2 border border-border">
             {(["signin", "signup"] as const).map((m) => (
               <button
                 key={m}
@@ -90,8 +79,8 @@ export function LoginForm({ next = "/" }: { next?: string }) {
                 className={cn(
                   "py-2 font-inter text-sm font-medium transition-colors",
                   mode === m
-                    ? "bg-neutral-100 text-neutral-900"
-                    : "text-neutral-500 hover:bg-neutral-50 hover:text-neutral-700",
+                    ? "bg-accent text-foreground"
+                    : "text-muted-foreground hover:bg-accent hover:text-foreground",
                 )}
               >
                 {m === "signin" ? "Sign in" : "Sign up"}
@@ -124,7 +113,7 @@ export function LoginForm({ next = "/" }: { next?: string }) {
                   type="button"
                   onClick={openReset}
                   suppressHydrationWarning
-                  className="font-inter text-xs text-neutral-500 transition-colors hover:text-neutral-700"
+                  className="font-inter text-xs text-muted-foreground transition-colors hover:text-foreground"
                 >
                   Forgot?
                 </button>
@@ -140,7 +129,7 @@ export function LoginForm({ next = "/" }: { next?: string }) {
               required
             />
             {mode === "signup" && (
-              <p className="font-inter text-xs text-neutral-500">
+              <p className="font-inter text-xs text-muted-foreground">
                 At least 8 characters.
               </p>
             )}
@@ -165,12 +154,12 @@ export function LoginForm({ next = "/" }: { next?: string }) {
         {(state.error || state.message) && (
           <div aria-live="polite">
             {state.error && (
-              <p role="alert" className="text-sm font-medium text-red-500">
+              <p role="alert" className="text-sm font-medium text-destructive">
                 {state.error}
               </p>
             )}
             {state.message && (
-              <p className="text-sm font-medium text-neutral-700">
+              <p className="text-sm font-medium text-foreground">
                 {state.message}
               </p>
             )}
@@ -203,7 +192,7 @@ export function LoginForm({ next = "/" }: { next?: string }) {
             type="button"
             onClick={() => setMode((m) => (m === "magic" ? "signin" : "magic"))}
             suppressHydrationWarning
-            className="rounded-md px-3 py-1.5 font-inter text-sm text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-900"
+            className="rounded-md px-3 py-1.5 font-inter text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
           >
             {isMagic
               ? "Use a password instead"

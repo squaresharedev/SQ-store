@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Code, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { hoverLiftClass } from "@/components/ui/control-styles";
 import { formatOrderDate } from "@/lib/format/date";
 import type { Product } from "@/types/product";
 import type { StorefrontSummary } from "@/lib/storefront/queries";
@@ -10,7 +11,7 @@ import { StorefrontPreview } from "./StorefrontPreview";
 
 const CARD_ACTION_CLASS = cn(
   "inline-flex size-9 items-center justify-center rounded-none border border-border bg-background text-muted-foreground",
-  "transition-colors duration-180 ease-in-out motion-reduce:transition-none hover:bg-accent",
+  "transition-colors duration-base ease-standard motion-reduce:transition-none hover:bg-accent",
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
 );
 
@@ -34,7 +35,12 @@ export function StorefrontCard({
   const { id, name, blockCount, updatedAt, config } = storefront;
 
   return (
-    <div className="relative flex flex-col rounded-md border border-border bg-card p-4 shadow-sm transition-shadow duration-180 ease-in-out hover:shadow-md motion-reduce:transition-none">
+    <div
+      className={cn(
+        "relative flex flex-col rounded-md border border-border bg-card p-4 shadow-sm",
+        hoverLiftClass,
+      )}
+    >
       {canWrite && (
         <Link
           href={`/storefront/${id}`}

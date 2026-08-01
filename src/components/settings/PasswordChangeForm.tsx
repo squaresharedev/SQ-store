@@ -48,7 +48,7 @@ export function PasswordChangeForm() {
             placeholder="••••••••"
             required
           />
-          <p className="font-inter text-xs text-neutral-500">
+          <p className="font-inter text-xs text-muted-foreground">
             At least 8 characters.
           </p>
         </div>
@@ -87,8 +87,8 @@ function ForgotPasswordReset() {
   );
 
   return (
-    <div className="mt-6 border-t border-neutral-200 pt-5">
-      <p className="font-inter text-sm text-neutral-500">
+    <div className="mt-6 border-t border-border pt-5">
+      <p className="font-inter text-sm text-muted-foreground">
         Don&rsquo;t remember your current password?
       </p>
       <form action={formAction} className="mt-3 flex flex-col gap-3">

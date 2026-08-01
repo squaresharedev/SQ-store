@@ -31,10 +31,20 @@ export const displayNameSchema = z.strictObject({
     .regex(SINGLE_LINE_TEXT_PATTERN, TEXT_ERROR),
 });
 
+/**
+ * Changing the account email is a takeover-grade action: whoever controls the
+ * address can request a password reset to it. So the current password is
+ * required, exactly like a password change.
+ *
+ * Optional in the SCHEMA because accounts created through an OAuth provider
+ * have no password to type; the action checks whether this account actually
+ * has a password identity and enforces it there, where that is knowable.
+ */
 export const emailChangeSchema = z.strictObject({
   new_email: z
     .email("That doesn't look like an email address.")
     .max(254, "That email is too long."),
+  current_password: z.string().max(72).optional(),
 });
 
 export const passwordChangeSchema = z

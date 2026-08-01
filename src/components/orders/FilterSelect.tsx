@@ -113,7 +113,7 @@ export function FilterSelect<T extends string>({
           <ChevronDown
             aria-hidden="true"
             className={cn(
-              "size-4 shrink-0 text-muted-foreground transition-transform duration-180",
+              "size-4 shrink-0 text-muted-foreground transition-transform duration-base",
               open && "rotate-180",
               iconOnlyOnMobile && "max-sm:hidden",
             )}
@@ -136,7 +136,7 @@ export function FilterSelect<T extends string>({
                   setOpen(false);
                 }}
                 className={cn(
-                  "flex w-full items-center gap-2.5 rounded-[0.5rem] px-2 py-2 text-left transition-colors duration-180",
+                  "flex w-full items-center gap-2.5 rounded-[0.5rem] px-2 py-2 text-left transition-colors duration-base",
                   isSelected ? "bg-accent" : "hover:bg-accent",
                 )}
               >

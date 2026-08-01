@@ -10,10 +10,12 @@ import {
   invalidInput,
   notFound,
   permissionDenied,
+  rateLimited,
   serverError,
   sessionExpired,
   type ActionFailure,
 } from "@/lib/errors";
+import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
 import { STOCK_QUANTITY_MAX } from "@/lib/validation/product";
 
 // Stock settings server action. Follows the same session-check → Zod parse →
@@ -54,6 +56,9 @@ export async function updateStockSettings(
   if (!account) return failure(sessionExpired());
   if (!can(account.role, "products.write")) {
     return failure(permissionDenied(account.role, "edit products"));
+  }
+  if (!(await rateLimit("stock_write", RATE_LIMITS.stockWrite))) {
+    return failure(rateLimited("update stock"));
   }
 
   // Validate product id shape before querying (prevents garbage URL params from

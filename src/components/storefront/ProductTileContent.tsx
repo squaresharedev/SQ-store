@@ -15,12 +15,12 @@ import { PRICE_TAG_FLOAT_CLASSES, PRICE_TAG_SIZE_CLASSES } from "./config-maps";
 // Reveal-on-hover also reveals on keyboard focus within the tile; with
 // reduced motion the change is instant instead of faded.
 const HOVER_REVEAL_CLASS =
-  "opacity-0 transition-opacity duration-180 ease-in-out group-hover:opacity-100 group-focus-within:opacity-100 motion-reduce:transition-none";
+  "opacity-0 transition-opacity duration-base ease-standard group-hover:opacity-100 group-focus-within:opacity-100 motion-reduce:transition-none";
 
 // Slide-up reveal for the overlay title bar: it rises from the tile's bottom
 // edge on hover/focus (the grid cell clips the off-canvas start position).
 const HOVER_RISE_CLASS =
-  "translate-y-full opacity-0 transition-[transform,opacity] duration-180 ease-in-out group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100 motion-reduce:transition-none";
+  "translate-y-full opacity-0 transition-[transform,opacity] duration-base ease-standard group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100 motion-reduce:transition-none";
 
 /**
  * The product face of a grid tile. The title area renders per the theme's

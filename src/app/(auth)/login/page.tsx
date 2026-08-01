@@ -42,7 +42,7 @@ export default async function LoginPage({
   const linkError = sp.error ? (ERROR_MESSAGES[sp.error] ?? null) : null;
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#f5f5f5] px-6 py-5">
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-muted px-6 py-5">
       {/* Static dot-grid texture (fades at the edges). */}
       <div
         aria-hidden
@@ -64,19 +64,19 @@ export default async function LoginPage({
             className="h-8 w-8 shrink-0 object-contain"
           />
           <div className="flex flex-col leading-tight">
-            <span className="font-display text-lg font-black tracking-tight text-neutral-900">
+            <span className="font-display text-lg font-black tracking-tight text-foreground">
               Square Share
             </span>
-            <span className="text-xs text-neutral-500">Creator dashboard</span>
+            <span className="text-xs text-muted-foreground">Creator dashboard</span>
           </div>
         </div>
 
         {/* Auth card — hard corners, sits above the grid */}
-        <div className="border border-neutral-200 bg-white px-6 pt-7 pb-5 shadow-[0_8px_40px_rgba(0,0,0,0.08)] sm:px-7 sm:pt-8">
+        <div className="border border-border bg-background px-6 pt-7 pb-5 shadow-lg sm:px-7 sm:pt-8">
           {linkError && (
             <p
               role="alert"
-              className="mb-4 border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600"
+              className="mb-4 border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm font-medium text-destructive"
             >
               {linkError}
             </p>
@@ -85,11 +85,11 @@ export default async function LoginPage({
         </div>
 
         {/* Access note — creators onboard via the marketplace waitlist. */}
-        <p className="mt-4 text-center text-sm text-neutral-500">
+        <p className="mt-4 text-center text-sm text-muted-foreground">
           No account yet?{" "}
           <a
             href={MARKETPLACE_URL}
-            className="font-medium text-neutral-900 underline decoration-neutral-300 underline-offset-4 transition-colors hover:decoration-neutral-500"
+            className="font-medium text-foreground underline decoration-border underline-offset-4 transition-colors duration-base ease-standard hover:decoration-foreground motion-reduce:transition-none"
           >
             Request access
           </a>

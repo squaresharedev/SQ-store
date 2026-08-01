@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { escapeIlike } from "@/lib/supabase/ilike";
 import { getActiveAccount } from "@/lib/team/account-context";
 import type {
   OrderView,
@@ -33,11 +34,6 @@ const MAX_PAGE_SIZE = 100;
 /** Return an empty paginated envelope with the given page/pageSize echoed back. */
 function emptyPage(page: number, pageSize: number): Paginated<OrderView> {
   return { rows: [], total: 0, page, pageSize };
-}
-
-/** Escape ilike wildcard characters (%, _, \) in a user-supplied search term. */
-function escapeIlike(term: string): string {
-  return term.replace(/\\/g, "\\\\").replace(/%/g, "\\%").replace(/_/g, "\\_");
 }
 
 /** Coerce an unknown channel string to a valid OrderChannel. */

@@ -20,12 +20,14 @@ import {
   invalidInput,
   notFound,
   permissionDenied,
+  rateLimited,
   serverError,
   sessionExpired,
   uploadFailed,
   type ActionError,
   type ActionFailure,
 } from "@/lib/errors";
+import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
 import { deleteObject, headObject } from "@/lib/r2";
 import {
   isAllowedContentType,
@@ -61,6 +63,9 @@ export async function createStorefront(
   if (!account) return failure(sessionExpired());
   if (!can(account.role, "storefront.write")) {
     return failure(permissionDenied(account.role, "create storefronts"));
+  }
+  if (!(await rateLimit("storefront_write", RATE_LIMITS.storefrontWrite))) {
+    return failure(rateLimited("create storefronts"));
   }
 
   // Name is optional at creation; fall back to a sensible default the seller
@@ -111,6 +116,9 @@ export async function saveStorefront(
   }
   if (!storefrontIdSchema.safeParse(id).success) {
     return failure(notFound("storefront"));
+  }
+  if (!(await rateLimit("storefront_write", RATE_LIMITS.storefrontWrite))) {
+    return failure(rateLimited("save storefronts"));
   }
 
   const payload = (input ?? {}) as { name?: unknown; config?: unknown };
@@ -321,6 +329,9 @@ export async function updateEmbedSettings(
   if (!storefrontIdSchema.safeParse(id).success) {
     return failure(notFound("storefront"));
   }
+  if (!(await rateLimit("storefront_write", RATE_LIMITS.storefrontWrite))) {
+    return failure(rateLimited("save storefronts"));
+  }
 
   // The security boundary: strict shape, hostname-regex-gated domains.
   const parsed = embedSettingsSchema.safeParse(input);
@@ -379,6 +390,9 @@ export async function deleteStorefront(
   }
   if (!storefrontIdSchema.safeParse(id).success) {
     return failure(notFound("storefront"));
+  }
+  if (!(await rateLimit("storefront_write", RATE_LIMITS.storefrontWrite))) {
+    return failure(rateLimited("delete storefronts"));
   }
 
   const supabase = await createClient();

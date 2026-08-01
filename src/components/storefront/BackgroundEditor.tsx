@@ -12,6 +12,7 @@ import { unexpectedError, type ActionError } from "@/lib/errors";
 import { UploadError, uploadToR2 } from "@/lib/products/upload";
 import { cn } from "@/lib/utils";
 import { ActionErrorNotice } from "@/components/ui/ActionErrorNotice";
+import { ProgressBar } from "@/components/ui/ProgressBar";
 import { ColorPicker } from "@/components/ui/ColorPicker";
 import { Slider } from "@/components/ui/slider";
 import {
@@ -80,6 +81,8 @@ export function BackgroundEditor({
   // only becomes {kind:"image"} once an upload succeeds.
   const [imageTab, setImageTab] = useState(false);
   const [uploading, setUploading] = useState(false);
+  /** 0..1 while the current image uploads; meaningless unless `uploading`. */
+  const [progress, setProgress] = useState(0);
   const [uploadError, setUploadError] = useState<ActionError | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   // Drag-to-position bookkeeping: pointer + position at drag start.
@@ -111,10 +114,13 @@ export function BackgroundEditor({
     if (!file) return;
     setUploadError(null);
     setUploading(true);
+    setProgress(0);
     try {
       // Type/size are validated inside uploadToR2 (before any network call),
       // so every failure arrives as a structured UploadError with a reason.
-      const key = await uploadToR2(file, "image");
+      // Background images are full-bleed art and routinely the largest upload
+      // in the app, so the byte progress matters more here than anywhere.
+      const key = await uploadToR2(file, "image", setProgress);
       onChange({ kind: "image", key, ...DEFAULT_BACKGROUND_IMAGE_PLACEMENT });
       onImageChange(URL.createObjectURL(file));
     } catch (error) {
@@ -185,7 +191,7 @@ export function BackgroundEditor({
               aria-pressed={active}
               className={cn(
                 "flex-1 border border-border px-3 py-1.5 font-inter text-xs font-medium",
-                "transition-colors duration-180 ease-in-out motion-reduce:transition-none",
+                "transition-colors duration-base ease-standard motion-reduce:transition-none",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background",
                 index > 0 && "-ml-px",
                 active
@@ -249,11 +255,12 @@ export function BackgroundEditor({
           >
             <ImagePlus className="size-4" strokeWidth={2} aria-hidden="true" />
             {uploading
-              ? "Uploading…"
+              ? `Uploading… ${Math.round(progress * 100)}%`
               : value.kind === "image"
                 ? "Replace image"
                 : "Upload image"}
           </button>
+          {uploading && <ProgressBar value={progress} label="Uploading background image" />}
           <p className={infoTextClass}>Up to 10 MB. JPEG, PNG, WebP, GIF, or AVIF.</p>
           {uploadError && (
             <ActionErrorNotice error={uploadError} variant="inline" />
