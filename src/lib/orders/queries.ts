@@ -133,9 +133,11 @@ export async function listOrders(options?: {
   const { data, error, count } = await query;
 
   if (error) {
-    // Table not created yet, or transient failure: render the calm zero state.
-    console.warn("[orders] listOrders read unavailable:", error.message);
-    return emptyPage(page, pageSize);
+    // THROW, do not soft-fail. A swallowed error here renders the calm
+    // "no orders yet" empty state, which for a store with sales is a lie the
+    // user cannot distinguish from reality. error.tsx gives them the truth
+    // and a retry button instead.
+    throw new Error(`Orders are unavailable right now: ${error.message}`);
   }
 
   const rows = ((data ?? []) as Record<string, unknown>[]).map(toOrderView);

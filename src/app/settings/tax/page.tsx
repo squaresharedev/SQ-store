@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { TaxSection } from "@/components/settings/TaxSection";
-import { getProfile, requireUser } from "@/lib/auth/session";
+import { requireProfile, requireUser } from "@/lib/auth/session";
 
 export const metadata: Metadata = {
   title: "Tax settings",
@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default async function TaxSettingsPage() {
   await requireUser("/settings/tax");
-  const profile = await getProfile();
+  const profile = await requireProfile();
 
   return (
     <TaxSection

@@ -164,10 +164,9 @@ export async function getDashboardOrders(): Promise<DashboardOrdersData> {
     .limit(ORDERS_READ_LIMIT);
 
   if (error) {
-    // Table not created yet (or transient failure): the dashboard renders its
-    // calm zero states instead of erroring.
-    console.warn("[dashboard] orders read unavailable:", error.message);
-    return emptyOrdersData();
+    // THROW, do not soft-fail. "€0.00 all-time revenue" from a failed read is
+    // indistinguishable from a real zero; error.tsx with a retry is honest.
+    throw new Error(`Dashboard orders are unavailable right now: ${error.message}`);
   }
 
   // CORRECTNESS TRIPWIRE: at the cap the window is truncated and all-time

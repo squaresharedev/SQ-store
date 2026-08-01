@@ -169,7 +169,11 @@ export function StorefrontsList({
 
       <Modal
         open={pendingDelete !== null}
-        onClose={() => (deleting ? undefined : setPendingDelete(null))}
+        // Closable even while the delete is in flight: the action carries on
+        // server-side and its outcome still lands (row removed on success, the
+        // page-level ActionErrorNotice on failure). Blocking ESC/backdrop/X
+        // here turned a hung request into a user trapped in a modal.
+        onClose={() => setPendingDelete(null)}
         title="Delete storefront?"
         description={
           pendingDelete

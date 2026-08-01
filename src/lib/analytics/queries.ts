@@ -275,10 +275,9 @@ export async function getAnalytics(range: AnalyticsRange): Promise<AnalyticsData
     .limit(ORDERS_READ_LIMIT);
 
   if (error) {
-    // Table not created yet (or transient failure): the analytics page renders
-    // its calm zero states instead of erroring.
-    console.warn("[analytics] orders read unavailable:", error.message);
-    return emptyAnalyticsData();
+    // THROW, do not soft-fail. All-zero charts from a failed read look exactly
+    // like a store with no sales; error.tsx with a retry is honest.
+    throw new Error(`Analytics are unavailable right now: ${error.message}`);
   }
 
   // CORRECTNESS TRIPWIRE: at the cap the window is truncated, so every figure

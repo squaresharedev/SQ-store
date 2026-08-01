@@ -31,6 +31,32 @@ import type { Profile } from "@/types";
  * two: treating a network blip as "signed out" bounces a seller to /login and
  * looks, to them, like a random logout.
  */
+/**
+ * Revoke every OTHER session for the current user, keeping this one alive.
+ *
+ * Call after any credential change. Supabase does not drop existing sessions
+ * when a password is updated, so without this a reset performed BECAUSE an
+ * account was compromised would leave the intruder signed in. `others` scope
+ * so the person doing the change is not logged out of the tab they are in.
+ *
+ * Best-effort by design: the credential has already changed by the time this
+ * runs, so a failure here must not turn a successful change into an error the
+ * user might retry. It is logged instead.
+ */
+export async function revokeOtherSessions(client: {
+  auth: { signOut: (options: { scope: "others" }) => Promise<{ error: unknown }> };
+}): Promise<void> {
+  try {
+    const { error } = await client.auth.signOut({ scope: "others" });
+    if (error) console.warn("[auth] could not revoke other sessions:", error);
+  } catch (err) {
+    console.warn(
+      "[auth] revoking other sessions threw:",
+      err instanceof Error ? err.message : String(err),
+    );
+  }
+}
+
 export class AuthUnreachableError extends Error {
   constructor(cause: unknown) {
     super("Could not reach Supabase Auth.", { cause });
@@ -124,7 +150,14 @@ export const getUser = cache(async (): Promise<User | null> => {
   return user;
 });
 
-/** The current user's profile row, or null if signed out. */
+/**
+ * The current user's profile row, or null if signed out. A read failure also
+ * reads as null, which is correct only for COSMETIC consumers (the nav avatar,
+ * a username fallback). Pages that render FORMS from the profile must use
+ * `requireProfile` instead: seeded from a silent null, a settings form shows
+ * blank fields and default toggles, and saving it would overwrite the user's
+ * real data with those blanks.
+ */
 export const getProfile = cache(async (): Promise<Profile | null> => {
   const user = await getUser();
   if (!user) return null;
@@ -134,6 +167,33 @@ export const getProfile = cache(async (): Promise<Profile | null> => {
     .select("*")
     .eq("id", user.id)
     .single();
+  return data;
+});
+
+/**
+ * The profile row for a page that EDITS it. Signed-out callers are redirected
+ * by the surrounding layout's requireUser gate before this runs; here a
+ * missing row means the read failed (signup provisions the row), so throw to
+ * the error boundary rather than seed a form with blanks.
+ */
+export const requireProfile = cache(async (): Promise<Profile> => {
+  const user = await getUser();
+  if (!user) {
+    // No session: the layout's requireUser will have redirected already; this
+    // guards direct misuse from an unguarded call site.
+    redirect("/login");
+  }
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single();
+  if (error || !data) {
+    throw new Error(
+      `Your profile is unavailable right now: ${error?.message ?? "row missing"}`,
+    );
+  }
   return data;
 });
 

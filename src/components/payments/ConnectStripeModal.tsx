@@ -36,12 +36,11 @@ export function ConnectStripeModal({
   open: boolean;
   onClose: () => void;
 }) {
-  function handleConnect() {
-    // TODO(stripe): call the server to create an Account Link
-    // (stripe.accountLinks.create with type "account_onboarding") and redirect
-    // the browser to the returned Stripe-hosted URL. No financial data is ever
-    // collected in-app.
-  }
+  // TODO(stripe): when Connect ships, this becomes a server call that creates
+  // an Account Link (stripe.accountLinks.create, type "account_onboarding")
+  // and redirects to the returned Stripe-hosted URL. No financial data is
+  // ever collected in-app. Until then the CTA is DISABLED: a clickable button
+  // that does nothing reads as broken, not as "coming soon".
 
   return (
     <Modal
@@ -72,7 +71,7 @@ export function ConnectStripeModal({
         <Button variant="ghost" onClick={onClose}>
           Not now
         </Button>
-        <Button onClick={handleConnect}>
+        <Button disabled title="Stripe payouts are coming soon.">
           Continue to Stripe
           <ArrowUpRight className="size-4" strokeWidth={2} aria-hidden />
           <span className={stubBadgeClass}>Soon</span>

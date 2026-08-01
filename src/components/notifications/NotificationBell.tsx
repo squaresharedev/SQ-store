@@ -13,8 +13,15 @@ import { useNotificationsContext } from "@/components/notifications/Notification
  * (desktop top bar + mobile header) stay in sync behind one subscription.
  */
 export function NotificationBell({ className }: { className?: string }) {
-  const { notifications, unreadCount, loading, arrivalSeq, markRead, markAllRead } =
-    useNotificationsContext();
+  const {
+    notifications,
+    unreadCount,
+    loading,
+    arrivalSeq,
+    status,
+    markRead,
+    markAllRead,
+  } = useNotificationsContext();
   const [open, setOpen] = React.useState(false);
 
   const badge = unreadCount > 99 ? "99+" : String(unreadCount);
@@ -77,6 +84,7 @@ export function NotificationBell({ className }: { className?: string }) {
           notifications={notifications}
           unreadCount={unreadCount}
           loading={loading}
+          live={status !== "error"}
           onActivate={handleActivate}
           onMarkAll={markAllRead}
           onNavigateAway={() => setOpen(false)}

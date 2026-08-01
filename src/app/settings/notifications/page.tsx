@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { NotificationsSection } from "@/components/settings/NotificationsSection";
-import { getProfile, requireUser } from "@/lib/auth/session";
+import { requireProfile, requireUser } from "@/lib/auth/session";
 
 export const metadata: Metadata = {
   title: "Notification settings",
@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default async function NotificationsSettingsPage() {
   await requireUser("/settings/notifications");
-  const profile = await getProfile();
+  const profile = await requireProfile();
 
   return (
     <NotificationsSection

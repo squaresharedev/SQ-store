@@ -283,8 +283,12 @@ export function ProductBlockEditor({
 
       <Modal
         open={confirmOpen}
+        // Closable even while the save is in flight: the update carries on
+        // server-side and the outcome still lands in the panel (saved state or
+        // the inline ActionErrorNotice below the fields). Blocking ESC and the
+        // backdrop while `saving` turned a hung request into a trapped user.
         onClose={() => {
-          if (!saving) setConfirmOpen(false);
+          setConfirmOpen(false);
         }}
         title="Update product everywhere?"
         description="This edits the product itself. Every storefront, checkout link, and your product catalog will show the new details, not just this grid."

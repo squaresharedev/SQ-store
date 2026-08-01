@@ -27,6 +27,7 @@ export function NotificationsPageClient({
   const [items, setItems] = React.useState<Notification[]>(initial);
   const [cursor, setCursor] = React.useState<string | null>(initialCursor);
   const [loadingMore, setLoadingMore] = React.useState(false);
+  const [loadError, setLoadError] = React.useState(false);
 
   const hasUnread = items.some((n) => !n.read);
 
@@ -45,6 +46,7 @@ export function NotificationsPageClient({
   async function loadMore() {
     if (!cursor || loadingMore) return;
     setLoadingMore(true);
+    setLoadError(false);
     try {
       const page = await fetchNotificationPage(cursor);
       setItems((prev) => {
@@ -52,6 +54,11 @@ export function NotificationsPageClient({
         return [...prev, ...page.notifications.filter((n) => !seen.has(n.id))];
       });
       setCursor(page.nextCursor);
+    } catch {
+      // Without this catch the spinner stopped and NOTHING happened, leaving
+      // the user unable to tell "loading failed" from "there is no more".
+      // The cursor is untouched, so the same click simply retries.
+      setLoadError(true);
     } finally {
       setLoadingMore(false);
     }
@@ -95,7 +102,13 @@ export function NotificationsPageClient({
       )}
 
       {cursor && (
-        <div className="mt-6 flex justify-center">
+        <div className="mt-6 flex flex-col items-center gap-2">
+          {loadError && (
+            <p role="alert" className="font-inter text-sm text-destructive">
+              Couldn&apos;t load more notifications. Check your connection and
+              try again.
+            </p>
+          )}
           <button
             type="button"
             onClick={loadMore}
@@ -103,7 +116,7 @@ export function NotificationsPageClient({
             className="flex items-center gap-2 rounded-[0.375rem] border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-60"
           >
             {loadingMore && <Spinner />}
-            {loadingMore ? "Loading" : "Load more"}
+            {loadingMore ? "Loading" : loadError ? "Try again" : "Load more"}
           </button>
         </div>
       )}

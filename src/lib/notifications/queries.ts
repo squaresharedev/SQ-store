@@ -94,8 +94,10 @@ export async function getNotificationPage(opts?: {
 
   const { data, error } = await query;
   if (error) {
-    console.warn("[notifications] page error", error.message);
-    return { notifications: [], nextCursor: null };
+    // Throw rather than render a false "no notifications yet": the page's
+    // server read reaches error.tsx, and the client "Load more" path catches
+    // this and shows an inline retry.
+    throw new Error(`Notifications are unavailable right now: ${error.message}`);
   }
 
   const rows = (data ?? []) as Notification[];

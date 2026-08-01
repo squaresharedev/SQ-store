@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { LegalSection } from "@/components/settings/LegalSection";
-import { getProfile, requireUser } from "@/lib/auth/session";
+import { requireProfile, requireUser } from "@/lib/auth/session";
 
 export const metadata: Metadata = {
   title: "Legal settings",
@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default async function LegalSettingsPage() {
   await requireUser("/settings/legal");
-  const profile = await getProfile();
+  const profile = await requireProfile();
 
   return (
     <LegalSection

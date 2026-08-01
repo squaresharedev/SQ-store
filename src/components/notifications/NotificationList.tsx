@@ -18,6 +18,7 @@ export function NotificationList({
   notifications,
   unreadCount,
   loading,
+  live = true,
   onActivate,
   onMarkAll,
   onNavigateAway,
@@ -25,6 +26,8 @@ export function NotificationList({
   notifications: Notification[];
   unreadCount: number;
   loading: boolean;
+  /** False when the realtime channel is down: the list is stale, say so. */
+  live?: boolean;
   onActivate: (id: string, href: string | null) => void;
   onMarkAll: () => void;
   /** Called when the user follows a link out of the dropdown (to close it). */
@@ -53,6 +56,18 @@ export function NotificationList({
           Mark all read
         </button>
       </div>
+
+      {/* Realtime channel down: the list still works but no longer updates
+          itself. Without this line a broken subscription silently freezes the
+          bell and the user has no reason to refresh. */}
+      {!live && (
+        <p
+          role="status"
+          className="border-b border-border bg-muted px-3 py-1.5 font-inter text-xs text-muted-foreground"
+        >
+          Live updates paused. Refresh to see the latest.
+        </p>
+      )}
 
       <div className="min-h-0 flex-1 overflow-y-auto">
         {loading ? (

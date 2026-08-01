@@ -5,9 +5,14 @@ import type { TeamRole, TeamMemberStatus } from "@/lib/team/permissions";
  * Server-side read helpers for Team & Access.
  *
  * All three functions call SECURITY DEFINER RPCs that are self-gated (RLS
- * applies inside them). On any error the functions return a safe empty value
- * rather than throwing — callers (Server Components) should treat an empty
- * roster as "not visible to this user" rather than an error.
+ * applies inside them).
+ *
+ * Error convention: the PAGE reads (roster, pending invites) THROW so a DB
+ * failure reaches error.tsx as an error, not as a calm "just you" roster the
+ * owner cannot tell apart from reality. getActorRole is the exception: it is
+ * an authorization probe consumed by server actions, and there null means
+ * "no permission", which is the correct fail-closed answer when the check
+ * itself cannot run.
  *
  * The generated Supabase types for `team_roster` wrongly mark `display_name`,
  * `member_user_id`, and `accepted_at` as non-null. We cast each RPC result to
@@ -55,8 +60,9 @@ export async function getTeamRoster(
     page_offset: opts?.offset ?? 0,
   });
   if (error) {
-    console.warn("[team] getTeamRoster error", error.message);
-    return [];
+    // A swallowed error renders as "just you", which for a real team is
+    // indistinguishable from everyone having been removed.
+    throw new Error(`The team roster is unavailable right now: ${error.message}`);
   }
   // Cast: generated types wrongly mark display_name / member_user_id /
   // accepted_at as non-null. Our TeamMemberRow declares them nullable.
@@ -71,8 +77,8 @@ export async function getMyPendingInvites(): Promise<PendingInviteRow[]> {
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("team_my_pending_invites");
   if (error) {
-    console.warn("[team] getMyPendingInvites error", error.message);
-    return [];
+    // Swallowing here made pending invites silently vanish on failure.
+    throw new Error(`Pending invites are unavailable right now: ${error.message}`);
   }
   return (data ?? []) as PendingInviteRow[];
 }
