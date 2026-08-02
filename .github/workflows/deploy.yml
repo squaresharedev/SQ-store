@@ -32,6 +32,13 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      # Exposed at JOB level so the auth step's `if` can test it: the `secrets`
+      # context is NOT available inside a step-level `if` expression, and using
+      # it there makes the whole workflow file invalid. GitHub then records a
+      # run named after the file path with zero jobs and conclusion "failure",
+      # which is how every deploy since that line landed silently died.
+      GH_PACKAGES_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -48,10 +55,8 @@ jobs:
           cache: pnpm
 
       - name: Authenticate GitHub Packages registry
-        if: ${{ secrets.GH_PACKAGES_TOKEN != '' }}
+        if: ${{ env.GH_PACKAGES_TOKEN != '' }}
         run: pnpm config set "//npm.pkg.github.com/:_authToken" "$GH_PACKAGES_TOKEN"
-        env:
-          GH_PACKAGES_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
