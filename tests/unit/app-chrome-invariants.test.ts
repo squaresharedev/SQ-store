@@ -58,6 +58,9 @@ describe("dashboard chrome placement", () => {
     // acceptable for routes that are intentionally full-screen or unauthed.
     const CHROMELESS_BY_DESIGN = new Set<string>([
       // Add a route here only if it genuinely renders without the sidebar.
+      // The storefront EDITOR is full-screen: no sidebar exists on the real
+      // page, so its skeleton must not pretend otherwise.
+      "storefront/[id]/loading.tsx",
     ]);
 
     const unwrapped: string[] = [];

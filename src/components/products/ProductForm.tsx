@@ -168,12 +168,20 @@ export function ProductForm({ product }: { product?: Product }) {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    await performSave();
+  }
+
+  /** The whole save flow (validate, upload, write, navigate on success).
+   *  Shared by the submit button and the leave-guard's "Save and leave", and
+   *  returns whether it succeeded so the guard can branch without re-reading
+   *  async state. */
+  async function performSave(): Promise<boolean> {
     setSubmitAttempted(true);
     setSubmitError(null);
 
     const foundErrors = validate(values);
     setErrors(foundErrors);
-    if (Object.keys(foundErrors).length > 0) return;
+    if (Object.keys(foundErrors).length > 0) return false;
 
     setSubmitting(true);
     try {
@@ -219,7 +227,7 @@ export function ProductForm({ product }: { product?: Product }) {
         : await createProduct(input);
       if (!result.ok) {
         setSubmitError(result.error);
-        return;
+        return false;
       }
 
       // Disarm the guard before navigating: the work is saved, so the
@@ -227,16 +235,28 @@ export function ProductForm({ product }: { product?: Product }) {
       setSaved(true);
       router.push("/products");
       router.refresh();
+      return true;
     } catch (error) {
       setSubmitError(
         error instanceof UploadError
           ? error.info
           : unexpectedError(error instanceof Error ? error.message : undefined),
       );
+      return false;
     } finally {
       setSubmitting(false);
       setUpload(null);
     }
+  }
+
+  /** Guard modal's third option: save first, leave only if the save lands.
+   *  On failure the prompt closes so the error notice and field messages are
+   *  visible instead of hidden behind the modal. Mirrors the storefront
+   *  designer's three-button guard, which shipped first. */
+  async function handleSaveAndLeave() {
+    const ok = await performSave();
+    if (!ok) leaveGuard.cancel();
+    // Success needs no leave(): performSave already navigated to /products.
   }
 
   const titleErrorId = `${fieldId}-title-error`;
@@ -463,6 +483,7 @@ export function ProductForm({ product }: { product?: Product }) {
           <button
             type="button"
             onClick={leaveGuard.cancel}
+            disabled={submitting}
             className={secondaryButtonClass}
           >
             Keep editing
@@ -470,9 +491,18 @@ export function ProductForm({ product }: { product?: Product }) {
           <button
             type="button"
             onClick={leaveGuard.leave}
+            disabled={submitting}
             className={destructiveButtonClass}
           >
             Discard changes
+          </button>
+          <button
+            type="button"
+            onClick={handleSaveAndLeave}
+            disabled={submitting}
+            className={primaryButtonClass}
+          >
+            {submitting ? "Saving…" : "Save and leave"}
           </button>
         </div>
       </Modal>
