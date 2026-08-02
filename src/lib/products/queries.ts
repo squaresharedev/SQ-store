@@ -14,7 +14,6 @@ import type {
 import type { Paginated } from "@/types/pagination";
 import {
   isMetricSort,
-  metricValue,
   type MetricSort,
   type ProductSort,
 } from "@/lib/products/sort";
@@ -218,29 +217,31 @@ export async function listProducts(options?: {
     };
   }
 
-  // Metric sort: rank the whole filtered set by ids first. `sort` is narrowed
-  // by the branch above, since every non-metric sort has a DB column.
+  // Metric sort: ranking lives in SQL (public.products_ranked_by_metric),
+  // which orders the WHOLE filtered catalogue by the orders-table rollup and
+  // returns one page of ids plus the exact total. The removed JS path read the
+  // newest 500 ids and ranked only those, so older products silently fell out
+  // of "best sellers" and the total lied at 500.
   const metricSort = sort as MetricSort;
-  let idQuery = supabase.from("products").select("id, created_at");
-  idQuery = applyProductFilters(idQuery, account.accountId, options?.filters);
-  const { data: idRows, error: idError } = await idQuery
-    .order("created_at", { ascending: false })
-    .order("id", { ascending: true })
-    .limit(PRODUCT_LIST_LIMIT);
-  if (idError) throw new Error(`Failed to load products: ${idError.message}`);
-
-  const ids = (idRows ?? []).map((row) => row.id);
-  if (ids.length >= PRODUCT_LIST_LIMIT) {
-    console.warn(
-      `[products] metric sort hit the ${PRODUCT_LIST_LIMIT}-id cap; ranking is computed over the newest ${PRODUCT_LIST_LIMIT} products only.`,
-    );
+  const search = options?.filters?.search?.trim();
+  const { data: rankPayload, error: rankError } = await (
+    supabase as SupabaseClient
+  ).rpc("products_ranked_by_metric", {
+    p_seller_id: account.accountId,
+    p_metric: metricSort,
+    p_status: options?.filters?.status ?? null,
+    // Same escaping as applyProductFilters; the SQL wraps it in %...%.
+    p_search: search ? escapeIlike(search) : null,
+    p_limit: pageSize,
+    p_offset: (page - 1) * pageSize,
+  });
+  if (rankError) {
+    throw new Error(`Failed to load products: ${rankError.message}`);
   }
-
-  const sales = await getProductSales();
-  const ranked = rankIdsByMetric(ids, metricSort, sales.byProduct);
-  const pageIds = ranked.slice((page - 1) * pageSize, page * pageSize);
+  const ranked = rankPayload as { total: number; ids: string[] };
+  const pageIds = ranked.ids;
   if (pageIds.length === 0) {
-    return { rows: [], total: ranked.length, page, pageSize };
+    return { rows: [], total: ranked.total, page, pageSize };
   }
 
   const { data, error } = await supabase
@@ -258,39 +259,24 @@ export async function listProducts(options?: {
 
   return {
     rows: await Promise.all(ordered.map(rowToProduct)),
-    total: ranked.length,
+    total: ranked.total,
     page,
     pageSize,
   };
 }
 
-/** Order ids by a sales metric, descending, newest-first on ties. `ids` is
- *  already in created_at-desc order, so a stable sort keeps that tiebreak. */
-function rankIdsByMetric(
-  ids: string[],
-  sort: MetricSort,
-  byProduct: Record<string, ProductSales | undefined>,
-): string[] {
-  // Array.prototype.sort is stable in every engine we target.
-  return [...ids].sort(
-    (a, b) => metricValue(byProduct[b], sort) - metricValue(byProduct[a], sort),
-  );
-}
-
-/** Read cap, mirroring lib/analytics/queries.ts — revisit with real volume. */
-const SALES_READ_LIMIT = 5000;
-
 /**
- * Per-product sales rollup for the ACTIVE account's card metrics.
+ * Per-product sales rollup for the ACTIVE account's card metrics, computed in
+ * SQL (public.product_sales_aggregate). PAID orders only: refunded, disputed
+ * or pending revenue is not money earned, so counting it would overstate every
+ * card. Aggregated by product_id, so orders whose product was deleted
+ * (ON DELETE SET NULL) drop out; correct here, since there is no card left to
+ * attribute them to. No read cap: the removed JS path aggregated at most
+ * 5,000 rows, past which the bestseller badge could point at the wrong
+ * product.
  *
- * PAID orders only: refunded/disputed/pending revenue is not money earned, so
- * counting it would overstate every card. Aggregated by `product_id`, so
- * orders whose product was deleted (ON DELETE SET NULL) drop out — correct
- * here, since there is no card left to attribute them to.
- *
- * Like the other order readers, this goes through an untyped client (the
- * generated Database types don't include `orders`) and fails soft: an error
- * yields an empty summary and the cards simply render without metrics.
+ * Fails SOFT (empty summary) by design: cards render fine without metrics,
+ * unlike the page-level reads which throw.
  */
 export async function getProductSales(): Promise<ProductSalesSummary> {
   const empty: ProductSalesSummary = { byProduct: {}, bestsellerId: null };
@@ -298,56 +284,29 @@ export async function getProductSales(): Promise<ProductSalesSummary> {
   if (!account) return empty;
 
   const supabase = await createClient();
-  const { data, error } = await (supabase as SupabaseClient)
-    .from("orders")
-    .select("product_id, amount_cents, currency")
-    .eq("seller_id", account.accountId)
-    .eq("status", "paid")
-    .not("product_id", "is", null)
-    .limit(SALES_READ_LIMIT);
-
+  const { data, error } = await (supabase as SupabaseClient).rpc(
+    "product_sales_aggregate",
+    { p_seller_id: account.accountId },
+  );
   if (error || !data) return empty;
 
-  // CORRECTNESS TRIPWIRE: at the cap this rollup is computed from a truncated
-  // window, so unitsSold/revenueCents under-report and the bestseller badge can
-  // point at the wrong product. This one is a plain GROUP BY (no bucketing or
-  // zero-fill), so it is the cheapest of the three JS rollups to push into SQL:
-  //   select product_id, count(*), sum(amount_cents) ... group by product_id
-  if (data.length >= SALES_READ_LIMIT) {
-    console.warn(
-      `[products] hit the ${SALES_READ_LIMIT}-order read cap — per-product sales are computed from a TRUNCATED window and under-report. Move this rollup into SQL.`,
-    );
-  }
+  const payload = data as {
+    by_product: Record<
+      string,
+      { units_sold: number; revenue_cents: number; currency: string }
+    >;
+    bestseller_id: string | null;
+  };
 
   const byProduct: Record<string, ProductSales> = {};
-  for (const row of data as Record<string, unknown>[]) {
-    const productId = String(row.product_id);
-    const existing = byProduct[productId];
-    if (existing) {
-      existing.unitsSold += 1;
-      existing.revenueCents += Number(row.amount_cents ?? 0);
-    } else {
-      byProduct[productId] = {
-        unitsSold: 1,
-        revenueCents: Number(row.amount_cents ?? 0),
-        // A product sells in one currency in practice; first order wins.
-        currency: toCurrency(String(row.currency ?? "")),
-      };
-    }
+  for (const [productId, sales] of Object.entries(payload.by_product)) {
+    byProduct[productId] = {
+      unitsSold: sales.units_sold,
+      revenueCents: sales.revenue_cents,
+      currency: toCurrency(sales.currency),
+    };
   }
-
-  // Bestseller = most revenue, not most units: a card boasting "bestseller"
-  // should point at the product actually earning the most.
-  let bestsellerId: string | null = null;
-  let bestRevenue = 0;
-  for (const [productId, sales] of Object.entries(byProduct)) {
-    if (sales.revenueCents > bestRevenue) {
-      bestRevenue = sales.revenueCents;
-      bestsellerId = productId;
-    }
-  }
-
-  return { byProduct, bestsellerId };
+  return { byProduct, bestsellerId: payload.bestseller_id };
 }
 
 export async function getProduct(id: string): Promise<Product | null> {

@@ -1,59 +1,59 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveAccount } from "@/lib/team/account-context";
-import { toCurrency } from "@/lib/format/money";
 import type { OrderChannel, OrderStatus } from "@/types/order-view";
-import {
-  TOP_PRODUCTS_LIMIT,
-  type AnalyticsData,
-  type AnalyticsRange,
-  type ChannelSlice,
-  type RevenuePoint,
-  type StatusSlice,
-  type TopProduct,
-  type WeekdaySlice,
+import type {
+  AnalyticsData,
+  AnalyticsRange,
+  ChannelSlice,
+  RevenuePoint,
+  StatusSlice,
+  TopProduct,
+  WeekdaySlice,
 } from "@/lib/analytics/types";
 
 // READ-ONLY analytics aggregates. Server Components / Route Handlers only
-// (cookies() is Node-only — never middleware).
+// (cookies() is Node-only, never middleware).
 //
-// The `orders` table and its columns are OWNED BY THE SEED/ORDERS WORK — this
-// module never creates or alters it, and reads fail soft (calm zero states)
-// while that table is still landing. Column contract (do not rename):
-//   seller_id, product_id, storefront_id, channel, status, amount_cents,
-//   platform_fee_cents, currency, product_title, product_price_cents,
-//   created_at
+// Aggregation happens IN SQL (public.analytics_aggregate, see
+// supabase/migrations/20260802_analytics_sql_aggregates.sql): the database
+// scans an index and returns a few hundred bytes of jsonb, so there is no
+// read cap and no order count at which these figures go quietly wrong. The
+// removed JS path read at most 5,000 rows and silently under-reported past
+// that. What remains here is presentation: zero-filling calendars, re-bucketing
+// long spans by month, and pinning fixed display orders.
 
-/** The subset of order columns analytics reads. */
-type AnalyticsOrder = {
-  product_title: string;
-  channel: string;
-  status: string;
-  amount_cents: number;
-  platform_fee_cents: number;
-  currency: string;
-  buyer_email: string | null;
-  created_at: string;
+/** Shape of the jsonb payload analytics_aggregate returns. */
+type AggregatePayload = {
+  totals: {
+    revenue_cents: number;
+    sales: number;
+    fees_cents: number;
+    refunded_count: number;
+    refunded_cents: number;
+    unique_buyers: number;
+    repeat_buyers: number;
+  };
+  first_paid_date: string | null;
+  first_order_date: string | null;
+  series_days: { date: string; revenue_cents: number; sales: number }[];
+  channels: { channel: string; revenue_cents: number; sales: number }[];
+  top_products: { title: string; revenue_cents: number; sales: number }[];
+  weekdays: { isodow: number; revenue_cents: number; sales: number }[];
+  statuses: { status: string; count: number }[];
 };
 
-/** Read cap — seeded/early data is far below this; revisit with real volume. */
-const ORDERS_READ_LIMIT = 5000;
 const DAY_MS = 24 * 60 * 60 * 1000;
 /** Ranges up to ~3 months bucket by day; anything longer buckets by month. */
 const MAX_DAILY_SPAN_DAYS = 92;
 
-/** Coerce an unknown channel string to a valid OrderChannel. */
-function toChannel(value: unknown): OrderChannel {
-  return value === "marketplace" ? "marketplace" : "embed";
-}
-
-/** Fixed status display order for the breakdown — zeros included. */
+/** Fixed status display order for the breakdown, zeros included. */
 const STATUS_ORDER: OrderStatus[] = ["paid", "refunded", "disputed", "pending"];
 
-/** Mon-first weekday labels; getUTCDay() is Sun-first, hence the remap. */
+/** Mon-first weekday labels; SQL returns ISO dow (1 = Monday .. 7 = Sunday). */
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
 
-/** UTC ms for an ISO "YYYY-MM-DD" day start. Deterministic — no locale. */
+/** UTC ms for an ISO "YYYY-MM-DD" day start. Deterministic, no locale. */
 function dayStartUtc(isoDate: string): number {
   const [y, m, d] = isoDate.split("-").map(Number);
   return Date.UTC(y, m - 1, d);
@@ -70,16 +70,19 @@ function toMonthStart(isoDate: string): string {
 }
 
 /**
- * Revenue trend buckets, oldest → newest, empty buckets included as 0.
- * Day buckets for spans ≤ MAX_DAILY_SPAN_DAYS, month buckets beyond that.
- * All-time ranges start at the earliest returned order.
+ * Revenue trend buckets, oldest to newest, empty buckets included as 0.
+ * Day buckets for spans up to MAX_DAILY_SPAN_DAYS, month buckets beyond.
+ * All-time ranges start at the first PAID order (the series charts paid
+ * revenue, so leading refund-only days would render as misleading zeros).
  */
-function buildSeries(orders: AnalyticsOrder[], range: AnalyticsRange): RevenuePoint[] {
-  if (orders.length === 0) return [];
+function buildSeries(
+  days: AggregatePayload["series_days"],
+  range: AnalyticsRange,
+  firstPaidDate: string | null,
+): RevenuePoint[] {
+  if (days.length === 0) return [];
 
-  // Orders arrive oldest-first; created_at is ISO so slicing the date part is
-  // deterministic UTC date math.
-  const start = range.from ?? orders[0].created_at.slice(0, 10);
+  const start = range.from ?? firstPaidDate ?? days[0].date;
   const end = range.to ?? toIsoDay(Date.now());
   const startMs = dayStartUtc(start);
   const endMs = dayStartUtc(end);
@@ -88,7 +91,7 @@ function buildSeries(orders: AnalyticsOrder[], range: AnalyticsRange): RevenuePo
   const spanDays = Math.floor((endMs - startMs) / DAY_MS);
   const byMonth = spanDays > MAX_DAILY_SPAN_DAYS;
 
-  // Empty buckets first, then pour the orders in.
+  // Empty buckets first, then pour the day rows in.
   const buckets = new Map<string, RevenuePoint>();
   if (byMonth) {
     const [endY, endM] = toMonthStart(end).split("-").map(Number);
@@ -109,14 +112,13 @@ function buildSeries(orders: AnalyticsOrder[], range: AnalyticsRange): RevenuePo
     }
   }
 
-  for (const order of orders) {
-    const day = order.created_at.slice(0, 10);
-    const bucket = buckets.get(byMonth ? toMonthStart(day) : day);
+  for (const day of days) {
+    const bucket = buckets.get(byMonth ? toMonthStart(day.date) : day.date);
     if (!bucket) continue;
-    bucket.revenueCents += order.amount_cents;
-    bucket.sales += 1;
+    bucket.revenueCents += day.revenue_cents;
+    bucket.sales += day.sales;
   }
-  // Per-bucket AOV once the sums are in — integer cents, 0 for empty buckets.
+  // Per-bucket AOV once the sums are in: integer cents, 0 for empty buckets.
   for (const bucket of buckets.values()) {
     bucket.aovCents =
       bucket.sales > 0 ? Math.round(bucket.revenueCents / bucket.sales) : 0;
@@ -125,90 +127,55 @@ function buildSeries(orders: AnalyticsOrder[], range: AnalyticsRange): RevenuePo
 }
 
 /** Always both channels, embed first, zeros included. */
-function buildChannels(orders: AnalyticsOrder[]): ChannelSlice[] {
+function buildChannels(rows: AggregatePayload["channels"]): ChannelSlice[] {
   const slices: Record<OrderChannel, ChannelSlice> = {
     embed: { channel: "embed", revenueCents: 0, sales: 0 },
     marketplace: { channel: "marketplace", revenueCents: 0, sales: 0 },
   };
-  for (const order of orders) {
-    const slice = slices[toChannel(order.channel)];
-    slice.revenueCents += order.amount_cents;
-    slice.sales += 1;
+  for (const row of rows) {
+    const slice = slices[row.channel === "marketplace" ? "marketplace" : "embed"];
+    slice.revenueCents += row.revenue_cents;
+    slice.sales += row.sales;
   }
   return [slices.embed, slices.marketplace];
 }
 
-/** Top products by paid revenue (product_title snapshot — rename-resilient). */
-function buildTopProducts(orders: AnalyticsOrder[]): TopProduct[] {
-  const byTitle = new Map<string, TopProduct>();
-  for (const order of orders) {
-    const entry = byTitle.get(order.product_title) ?? {
-      title: order.product_title,
-      revenueCents: 0,
-      sales: 0,
-    };
-    entry.revenueCents += order.amount_cents;
-    entry.sales += 1;
-    byTitle.set(order.product_title, entry);
-  }
-  return [...byTitle.values()]
-    .sort((a, b) => b.revenueCents - a.revenueCents)
-    .slice(0, TOP_PRODUCTS_LIMIT);
-}
-
-/** Paid sales by day of week, Mon..Sun, zeros included. */
-function buildWeekdays(orders: AnalyticsOrder[]): WeekdaySlice[] {
+/** All seven weekdays Mon..Sun, zeros included. */
+function buildWeekdays(rows: AggregatePayload["weekdays"]): WeekdaySlice[] {
   const slices = WEEKDAYS.map((weekday) => ({
     weekday,
     sales: 0,
     revenueCents: 0,
   }));
-  for (const order of orders) {
-    // getUTCDay(): 0 Sun .. 6 Sat -> Mon-first index.
-    const dow = new Date(order.created_at).getUTCDay();
-    const slice = slices[(dow + 6) % 7];
-    slice.sales += 1;
-    slice.revenueCents += order.amount_cents;
+  for (const row of rows) {
+    // ISO dow 1..7 -> Mon-first index 0..6.
+    const slice = slices[(row.isodow + 6) % 7];
+    if (!slice) continue;
+    slice.sales += row.sales;
+    slice.revenueCents += row.revenue_cents;
   }
   return slices;
 }
 
-/** Order mix by status across ALL orders in range, fixed order, zeros kept. */
-function buildStatuses(orders: AnalyticsOrder[]): StatusSlice[] {
+/** Fixed status order, zeros kept; unknown statuses were folded into pending
+ *  by the SQL already. */
+function buildStatuses(rows: AggregatePayload["statuses"]): StatusSlice[] {
   const counts = new Map<OrderStatus, number>(
     STATUS_ORDER.map((status) => [status, 0]),
   );
-  for (const order of orders) {
-    const status = STATUS_ORDER.includes(order.status as OrderStatus)
-      ? (order.status as OrderStatus)
+  for (const row of rows) {
+    const status = STATUS_ORDER.includes(row.status as OrderStatus)
+      ? (row.status as OrderStatus)
       : "pending";
-    counts.set(status, (counts.get(status) ?? 0) + 1);
+    counts.set(status, (counts.get(status) ?? 0) + row.count);
   }
   return STATUS_ORDER.map((status) => ({ status, count: counts.get(status) ?? 0 }));
 }
 
-/** Distinct + repeat paid buyers, keyed on the lowercased email snapshot. */
-function buildBuyers(orders: AnalyticsOrder[]): {
-  uniqueBuyers: number;
-  repeatBuyers: number;
-} {
-  const perBuyer = new Map<string, number>();
-  for (const order of orders) {
-    const email = order.buyer_email?.trim().toLowerCase();
-    if (!email) continue;
-    perBuyer.set(email, (perBuyer.get(email) ?? 0) + 1);
-  }
-  let repeatBuyers = 0;
-  for (const count of perBuyer.values()) {
-    if (count >= 2) repeatBuyers += 1;
-  }
-  return { uniqueBuyers: perBuyer.size, repeatBuyers };
-}
-
 /** Inclusive days the data window covers (all-time starts at the earliest
- *  order). 0 when there is nothing to measure. */
-function rangeDays(orders: AnalyticsOrder[], range: AnalyticsRange): number {
-  const start = range.from ?? orders[0]?.created_at.slice(0, 10);
+ *  order of ANY status). 0 when there is nothing to measure. */
+function rangeDays(range: AnalyticsRange, firstOrderDate: string | null): number {
+  const start = range.from ?? firstOrderDate;
   if (!start) return 0;
   const end = range.to ?? toIsoDay(Date.now());
   const span = Math.floor((dayStartUtc(end) - dayStartUtc(start)) / DAY_MS);
@@ -243,36 +210,26 @@ export function emptyAnalyticsData(available = false): AnalyticsData {
 }
 
 /**
- * All analytics aggregates in one owner-scoped read of the range's orders
- * (every status — refund rate and the status mix need the non-paid rows;
- * money/series metrics use the paid subset only). The seller id comes from
- * the session (never from a caller); RLS enforces the same boundary at the
- * DB.
+ * All analytics aggregates in one RPC round-trip. The seller id comes from the
+ * session (never from a caller); the function is SECURITY INVOKER, so RLS
+ * enforces the same boundary inside the SQL: a forged id returns zero rows,
+ * not another seller's numbers. EUR-only semantics live in the SQL
+ * (currency <> 'USD', mirroring toCurrency exactly).
  */
 export async function getAnalytics(range: AnalyticsRange): Promise<AnalyticsData> {
   const account = await getActiveAccount();
   if (!account) return emptyAnalyticsData();
 
   const supabase = await createClient();
-  // The generated Database types don't include `orders` yet (owned by the
-  // concurrent seed work), so read through an untyped client view against the
-  // agreed column contract above. Scoped to the ACTIVE account's store.
-  let query = (supabase as SupabaseClient)
-    .from("orders")
-    .select(
-      "product_title, channel, status, amount_cents, platform_fee_cents, currency, buyer_email, created_at",
-    )
-    .eq("seller_id", account.accountId)
-    // EUR-only, pushed DOWN to the DB. Exactly mirrors toCurrency(), which
-    // treats anything that is not the literal "USD" as EUR — so this is the
-    // same row set the JS filter below produces, not an approximation. Doing it
-    // here means USD rows no longer burn the ORDERS_READ_LIMIT budget.
-    .neq("currency", "USD");
-  if (range.from) query = query.gte("created_at", `${range.from}T00:00:00Z`);
-  if (range.to) query = query.lte("created_at", `${range.to}T23:59:59.999Z`);
-  const { data, error } = await query
-    .order("created_at", { ascending: true })
-    .limit(ORDERS_READ_LIMIT);
+  // Untyped rpc: the generated Database types predate these functions.
+  const { data, error } = await (supabase as SupabaseClient).rpc(
+    "analytics_aggregate",
+    {
+      p_seller_id: account.accountId,
+      p_from: range.from ?? null,
+      p_to: range.to ?? null,
+    },
+  );
 
   if (error) {
     // THROW, do not soft-fail. All-zero charts from a failed read look exactly
@@ -280,56 +237,35 @@ export async function getAnalytics(range: AnalyticsRange): Promise<AnalyticsData
     throw new Error(`Analytics are unavailable right now: ${error.message}`);
   }
 
-  // CORRECTNESS TRIPWIRE: at the cap the window is truncated, so every figure
-  // below (revenue, AOV, buyer counts) silently UNDER-REPORTS. Aggregation must
-  // move into SQL before any seller can reach this — the warning exists so that
-  // shows up in logs first instead of as wrong numbers on a seller's dashboard.
-  if ((data?.length ?? 0) >= ORDERS_READ_LIMIT) {
-    console.warn(
-      `[analytics] hit the ${ORDERS_READ_LIMIT}-order read cap — figures are computed from a TRUNCATED window and under-report. Move aggregation into SQL.`,
-    );
-  }
-
-  // EUR-only for now, same rule as the dashboard: USD orders don't count
-  // anywhere until multi-currency viewing/transacting ships. The DB now
-  // pre-filters this (see .neq above); kept so the semantics hold even if that
-  // predicate is ever changed.
-  const orders = ((data ?? []) as AnalyticsOrder[]).filter(
-    (order) => toCurrency(order.currency) === "EUR",
-  );
-  const paid = orders.filter((order) => order.status === "paid");
-  const refunded = orders.filter((order) => order.status === "refunded");
-
-  // All money in integer cents — no floats ever.
-  const revenueCents = paid.reduce((sum, order) => sum + order.amount_cents, 0);
-  const feesCents = paid.reduce(
-    (sum, order) => sum + order.platform_fee_cents,
-    0,
-  );
-  const refundedCents = refunded.reduce(
-    (sum, order) => sum + order.amount_cents,
-    0,
-  );
-  const sales = paid.length;
+  const payload = data as AggregatePayload;
+  const totals = payload.totals;
 
   return {
     available: true,
     totals: {
-      revenueCents,
-      sales,
-      aovCents: sales > 0 ? Math.round(revenueCents / sales) : 0,
-      feesCents,
-      netRevenueCents: revenueCents - feesCents,
-      ...buildBuyers(paid),
-      refundedCount: refunded.length,
-      refundedCents,
-      rangeDays: rangeDays(orders, range),
+      revenueCents: totals.revenue_cents,
+      sales: totals.sales,
+      aovCents:
+        totals.sales > 0 ? Math.round(totals.revenue_cents / totals.sales) : 0,
+      feesCents: totals.fees_cents,
+      netRevenueCents: totals.revenue_cents - totals.fees_cents,
+      uniqueBuyers: totals.unique_buyers,
+      repeatBuyers: totals.repeat_buyers,
+      refundedCount: totals.refunded_count,
+      refundedCents: totals.refunded_cents,
+      rangeDays: rangeDays(range, payload.first_order_date),
       currency: "EUR",
     },
-    series: buildSeries(paid, range),
-    channels: buildChannels(paid),
-    topProducts: buildTopProducts(paid),
-    weekdays: buildWeekdays(paid),
-    statuses: buildStatuses(orders),
+    series: buildSeries(payload.series_days, range, payload.first_paid_date),
+    channels: buildChannels(payload.channels),
+    topProducts: payload.top_products.map(
+      (row): TopProduct => ({
+        title: row.title,
+        revenueCents: row.revenue_cents,
+        sales: row.sales,
+      }),
+    ),
+    weekdays: buildWeekdays(payload.weekdays),
+    statuses: buildStatuses(payload.statuses),
   };
 }

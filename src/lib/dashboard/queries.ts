@@ -64,15 +64,22 @@ export type DashboardOrdersData = {
   disputedCount: number;
 };
 
-/** Read cap — seeded/early data is far below this; revisit with real volume. */
-const ORDERS_READ_LIMIT = 1000;
-const DAY_MS = 24 * 60 * 60 * 1000;
 const TREND_DAYS = 30;
-const THIRTY_DAYS_MS = TREND_DAYS * DAY_MS;
 /** A 10x period-over-period jump trips the purple "surge" easter egg. */
 const SURGE_RATIO = 10;
 
 export { toCurrency };
+
+/** Shape of the jsonb payload dashboard_orders_aggregate returns. */
+type DashboardPayload = {
+  all_time: { revenue_cents: number; sales: number };
+  last_30d: { revenue_cents: number; sales: number };
+  prev_30d: { revenue_cents: number; sales: number };
+  trend_days: { age_days: number; revenue_cents: number; sales: number }[];
+  refunded_count: number;
+  disputed_count: number;
+  recent_orders: DashboardOrder[];
+};
 
 /** Colour signal for a metric: last window vs the one before it. */
 function trendTone(current: number, previous: number): TrendTone {
@@ -84,30 +91,34 @@ function trendTone(current: number, previous: number): TrendTone {
   return "flat";
 }
 
-/**
- * Paid orders bucketed into `TREND_DAYS` daily slots (oldest first) relative to
- * `now`. Orders outside the window are ignored; empty days stay 0.
- */
-function dailyBuckets(orders: DashboardOrder[], now: number) {
+/** Pour SQL's per-age rows into TREND_DAYS slots, oldest first, zeros kept. */
+function trendBuckets(rows: DashboardPayload["trend_days"]) {
   const revenue = new Array<number>(TREND_DAYS).fill(0);
   const count = new Array<number>(TREND_DAYS).fill(0);
-  for (const order of orders) {
-    const ageDays = Math.floor((now - new Date(order.created_at).getTime()) / DAY_MS);
-    if (ageDays < 0 || ageDays >= TREND_DAYS) continue;
-    const idx = TREND_DAYS - 1 - ageDays; // oldest -> newest
-    revenue[idx] += order.amount_cents;
-    count[idx] += 1;
+  for (const row of rows) {
+    if (row.age_days < 0 || row.age_days >= TREND_DAYS) continue;
+    const idx = TREND_DAYS - 1 - row.age_days; // oldest -> newest
+    revenue[idx] += row.revenue_cents;
+    count[idx] += row.sales;
   }
   return { revenue, count };
 }
 
-function addMoney(target: MoneyByCurrency, currency: string, cents: number) {
-  const key = toCurrency(currency);
-  target[key] = (target[key] ?? 0) + cents;
-}
-
 function emptyWindow(): MetricWindow {
   return { revenue: {}, sales: 0, aov: {} };
+}
+
+/** EUR-keyed MetricWindow from the SQL window sums. The whole read is EUR-only
+ *  (currency <> 'USD' inside the function), so a single key is correct; the
+ *  MoneyByCurrency shape stays so multi-currency later is additive. */
+function windowFromSums(sums: { revenue_cents: number; sales: number }): MetricWindow {
+  const window = emptyWindow();
+  if (sums.sales > 0) {
+    window.revenue.EUR = sums.revenue_cents;
+    window.sales = sums.sales;
+    window.aov.EUR = Math.round(sums.revenue_cents / sums.sales);
+  }
+  return window;
 }
 
 export function emptyOrdersData(available = false): DashboardOrdersData {
@@ -123,45 +134,24 @@ export function emptyOrdersData(available = false): DashboardOrdersData {
   };
 }
 
-function windowFromPaid(orders: DashboardOrder[]): MetricWindow {
-  const window = emptyWindow();
-  for (const order of orders) {
-    addMoney(window.revenue, order.currency, order.amount_cents);
-    window.sales += 1;
-  }
-  // AOV per currency: cross-currency averages would be meaningless.
-  const counts: MoneyByCurrency = {};
-  for (const order of orders) addMoney(counts, order.currency, 1);
-  for (const [currency, revenue] of Object.entries(window.revenue)) {
-    const count = counts[currency as Currency] ?? 0;
-    if (count > 0) window.aov[currency as Currency] = Math.round(revenue / count);
-  }
-  return window;
-}
-
 /**
- * All dashboard order metrics in one owner-scoped read. The seller id comes
- * from the session (never from a caller); RLS enforces the same boundary at
- * the DB.
+ * All dashboard order metrics in one RPC round-trip
+ * (public.dashboard_orders_aggregate, SECURITY INVOKER: RLS enforces the
+ * boundary inside the SQL, and a forged seller id returns zeros). No read cap:
+ * the removed JS path aggregated the newest 1,000 rows and silently
+ * under-reported all-time totals past that. EUR-only semantics live in the
+ * SQL (currency <> 'USD', mirroring toCurrency exactly).
  */
 export async function getDashboardOrders(): Promise<DashboardOrdersData> {
   const account = await getActiveAccount();
   if (!account) return emptyOrdersData();
 
   const supabase = await createClient();
-  // The generated Database types don't include `orders` yet (owned by the
-  // concurrent seed work), so read through an untyped client view against the
-  // agreed column contract above. Scoped to the ACTIVE account's store.
-  const { data, error } = await (supabase as SupabaseClient)
-    .from("orders")
-    .select("product_title, channel, status, amount_cents, currency, created_at")
-    .eq("seller_id", account.accountId)
-    // EUR-only, pushed DOWN to the DB. Exactly mirrors toCurrency() (anything
-    // not the literal "USD" is EUR), so the row set is unchanged — but USD rows
-    // no longer consume the ORDERS_READ_LIMIT budget.
-    .neq("currency", "USD")
-    .order("created_at", { ascending: false })
-    .limit(ORDERS_READ_LIMIT);
+  // Untyped rpc: the generated Database types predate these functions.
+  const { data, error } = await (supabase as SupabaseClient).rpc(
+    "dashboard_orders_aggregate",
+    { p_seller_id: account.accountId },
+  );
 
   if (error) {
     // THROW, do not soft-fail. "€0.00 all-time revenue" from a failed read is
@@ -169,40 +159,13 @@ export async function getDashboardOrders(): Promise<DashboardOrdersData> {
     throw new Error(`Dashboard orders are unavailable right now: ${error.message}`);
   }
 
-  // CORRECTNESS TRIPWIRE: at the cap the window is truncated and all-time
-  // totals silently UNDER-REPORT. Surfaces in logs before it shows up as wrong
-  // numbers on a seller's dashboard. Fix is SQL-side aggregation.
-  if ((data?.length ?? 0) >= ORDERS_READ_LIMIT) {
-    console.warn(
-      `[dashboard] hit the ${ORDERS_READ_LIMIT}-order read cap — all-time figures are computed from a TRUNCATED window. Move aggregation into SQL.`,
-    );
-  }
-
-  // EUR-only for now: USD orders don't count anywhere on the dashboard until
-  // multi-currency viewing/transacting ships. MoneyByCurrency stays multi-key
-  // so that work is additive later, not a rewrite. The DB now pre-filters this
-  // (see .neq above); kept so the semantics hold if that predicate changes.
-  const orders = ((data ?? []) as DashboardOrder[]).filter(
-    (order) => toCurrency(order.currency) === "EUR",
-  );
-  const paid = orders.filter((order) => order.status === "paid");
-  const now = Date.now();
-  const cutoff = now - THIRTY_DAYS_MS;
-  const cutoffPrev = now - THIRTY_DAYS_MS * 2;
-  const paidLast30d = paid.filter(
-    (order) => new Date(order.created_at).getTime() >= cutoff,
-  );
-  // The 30 days before last30d — the baseline every trend is measured against.
-  const paidPrev30d = paid.filter((order) => {
-    const time = new Date(order.created_at).getTime();
-    return time >= cutoffPrev && time < cutoff;
-  });
-  const last30d = windowFromPaid(paidLast30d);
-  const prev30d = windowFromPaid(paidPrev30d);
+  const payload = data as DashboardPayload;
+  const last30d = windowFromSums(payload.last_30d);
+  const prev30d = windowFromSums(payload.prev_30d);
 
   // Sparkline series: daily buckets over the last 30 days (colour compares the
   // whole window to the prior one, not the noisy day-to-day points).
-  const buckets = dailyBuckets(paidLast30d, now);
+  const buckets = trendBuckets(payload.trend_days);
   const salesTrend: MetricTrend = {
     points: buckets.count,
     tone: trendTone(last30d.sales, prev30d.sales),
@@ -217,12 +180,12 @@ export async function getDashboardOrders(): Promise<DashboardOrdersData> {
   return {
     available: true,
     last30d,
-    allTime: windowFromPaid(paid),
+    allTime: windowFromSums(payload.all_time),
     salesTrend,
     aovTrend,
-    recentOrders: orders.slice(0, 5),
-    refundedCount: orders.filter((o) => o.status === "refunded").length,
-    disputedCount: orders.filter((o) => o.status === "disputed").length,
+    recentOrders: payload.recent_orders,
+    refundedCount: payload.refunded_count,
+    disputedCount: payload.disputed_count,
   };
 }
 

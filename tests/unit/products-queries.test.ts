@@ -70,8 +70,18 @@ function makeChain(table: string): Record<string, unknown> {
   return chain;
 }
 
+/** Recorded rpc invocations: name + args object, response staged like tables
+ *  under the key `rpc:<name>`. */
+const rpcCalls: { fn: string; args: Record<string, unknown> }[] = [];
+
 vi.mock("@/lib/supabase/server", () => ({
-  createClient: async () => ({ from: (table: string) => makeChain(table) }),
+  createClient: async () => ({
+    from: (table: string) => makeChain(table),
+    rpc: (fn: string, args: Record<string, unknown>) => {
+      rpcCalls.push({ fn, args });
+      return makeChain(`rpc:${fn}`);
+    },
+  }),
 }));
 
 // ---- imports -------------------------------------------------------------
@@ -117,6 +127,7 @@ function argsOf(table: string, method: string): unknown[][] {
 beforeEach(() => {
   recorded.length = 0;
   responses.clear();
+  rpcCalls.length = 0;
   vi.clearAllMocks();
   getActiveAccountMock.mockResolvedValue(ownerAccount());
 });
@@ -222,47 +233,63 @@ describe("listProducts - sorting", () => {
     }
   });
 
-  it("ranks a metric sort across the whole catalogue, not just one page", async () => {
-    // Ids come back newest-first; "b" outsells "a" despite being older.
-    stageResponse("products", {
-      data: [{ id: "a", created_at: "2026-02-01" }, { id: "b", created_at: "2026-01-01" }],
+  // Metric-sort ranking now happens IN SQL (products_ranked_by_metric); the
+  // real ordering and totals are proven against a live Postgres in
+  // tests/integration/16-aggregate-rpcs.test.ts. What the unit layer pins is
+  // the CONTRACT: the right rpc, the right params, hydration in the ranked
+  // order, and the exact (uncapped) total flowing through.
+  it("delegates metric ranking to the rpc and hydrates in ranked order", async () => {
+    stageResponse("rpc:products_ranked_by_metric", {
+      data: { total: 612, ids: ["b", "a"] },
     });
-    stageResponse("orders", {
-      data: [
-        { product_id: "b", amount_cents: 5000, currency: "EUR" },
-        { product_id: "b", amount_cents: 5000, currency: "EUR" },
-        { product_id: "a", amount_cents: 1000, currency: "EUR" },
-      ],
-    });
+    // Hydration returns rows in arbitrary DB order; the ranked order wins.
     stageResponse("products", { data: [productRow("a"), productRow("b")] });
 
     const result = await listProducts({ sort: "revenue" });
 
     expect(result.rows.map((p) => p.id)).toEqual(["b", "a"]);
-    expect(result.total).toBe(2);
+    // The total is the rpc's exact count, NOT the page size and NOT capped.
+    expect(result.total).toBe(612);
     // Only the page's ids are hydrated.
     expect(argsOf("products", "in")).toEqual([["id", ["b", "a"]]]);
+    expect(rpcCalls).toEqual([
+      {
+        fn: "products_ranked_by_metric",
+        args: {
+          p_seller_id: OWNER,
+          p_metric: "revenue",
+          p_status: null,
+          p_search: null,
+          p_limit: 24,
+          p_offset: 0,
+        },
+      },
+    ]);
   });
 
-  it("keeps products with no sales, ranked below every seller", async () => {
-    stageResponse("products", {
-      data: [{ id: "sold", created_at: "2026-01-02" }, { id: "never", created_at: "2026-01-01" }],
+  it("passes filters through with the search term ilike-escaped", async () => {
+    stageResponse("rpc:products_ranked_by_metric", { data: { total: 0, ids: [] } });
+    await listProducts({
+      sort: "unitsSold",
+      filters: { status: "active", search: "50% off" },
+      page: 3,
+      pageSize: 10,
     });
-    stageResponse("orders", {
-      data: [{ product_id: "sold", amount_cents: 100, currency: "EUR" }],
+    expect(rpcCalls[0].args).toMatchObject({
+      p_metric: "unitsSold",
+      p_status: "active",
+      p_search: "50\\% off",
+      p_limit: 10,
+      p_offset: 20,
     });
-    stageResponse("products", { data: [productRow("never"), productRow("sold")] });
-
-    const result = await listProducts({ sort: "unitsSold" });
-    expect(result.rows.map((p) => p.id)).toEqual(["sold", "never"]);
   });
 
-  it("scopes the metric sort's id read to the account too", async () => {
-    stageResponse("products", { data: [] });
-    stageResponse("orders", { data: [] });
-    const result = await listProducts({ sort: "revenue" });
-    expect(argsOf("products", "eq")).toContainEqual(["owner_id", OWNER]);
-    expect(result.rows).toEqual([]);
+  it("surfaces a ranking rpc failure instead of a silently empty store", async () => {
+    stageResponse("rpc:products_ranked_by_metric", {
+      data: null,
+      error: { message: "rank boom" },
+    });
+    await expect(listProducts({ sort: "revenue" })).rejects.toThrow(/rank boom/);
   });
 });
 

@@ -84,12 +84,12 @@ describe("page reads throw on DB error instead of faking emptiness", () => {
   });
 
   it("getDashboardOrders", async () => {
-    responses.set("orders", { data: null, error: DB_ERROR });
+    responses.set("rpc:dashboard_orders_aggregate", { data: null, error: DB_ERROR });
     await expect(getDashboardOrders()).rejects.toThrow(/unavailable/i);
   });
 
   it("getAnalytics", async () => {
-    responses.set("orders", { data: null, error: DB_ERROR });
+    responses.set("rpc:analytics_aggregate", { data: null, error: DB_ERROR });
     await expect(getAnalytics({ preset: "all", from: null, to: null } as never)).rejects.toThrow(
       /unavailable/i,
     );
