@@ -1,5 +1,6 @@
 "use client";
 
+import { useId } from "react";
 import { Trash2 } from "lucide-react";
 import {
   RING_DEFAULT_WIDTH,
@@ -44,6 +45,7 @@ export function ShapeBlockEditor({
   onUpdate: (patch: ShapeBlockPatch) => void;
   onRemove: () => void;
 }) {
+  const fieldId = useId();
   const isRing = block.kind === "ring";
   const borderWidth =
     block.borderWidth ?? (isRing ? RING_DEFAULT_WIDTH : 0);
@@ -90,7 +92,7 @@ export function ShapeBlockEditor({
       </div>
 
       <ColorPicker
-        id="shape-fill"
+        id={`${fieldId}-fill`}
         label={isRing ? "Color" : "Fill"}
         value={block.color}
         onChange={(color) => onUpdate({ color })}
@@ -119,7 +121,7 @@ export function ShapeBlockEditor({
       {/* Border color only matters on the filled kinds with an outline on. */}
       {!isRing && borderWidth > 0 && (
         <ColorPicker
-          id="shape-border-color"
+          id={`${fieldId}-border-color`}
           label="Border color"
           value={block.borderColor ?? DEFAULT_BORDER_COLOR}
           onChange={(borderColor) => onUpdate({ borderColor })}

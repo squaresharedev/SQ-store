@@ -1,5 +1,10 @@
 import { z } from "zod";
 import { NOTIFICATION_TYPES } from "@/lib/notifications/types";
+import {
+  multiLineText,
+  singleLineText,
+  uuidField,
+} from "@/lib/validation/inputs";
 
 /**
  * Notification validation schemas, shared by the server (the real gate — every
@@ -12,13 +17,10 @@ import { NOTIFICATION_TYPES } from "@/lib/notifications/types";
 const jsonRecord = z.record(z.string(), z.unknown());
 
 export const createNotificationSchema = z.strictObject({
-  userId: z.uuid("A notification needs a valid recipient."),
+  userId: uuidField("A notification recipient"),
   type: z.enum(NOTIFICATION_TYPES),
-  title: z.string().trim().min(1, "A notification needs a title.").max(200),
-  body: z
-    .string()
-    .trim()
-    .max(1000)
+  title: singleLineText({ label: "A notification title", max: 200 }),
+  body: multiLineText({ label: "A notification body", max: 1000 })
     .optional()
     .transform((v) => (v ? v : null)),
   data: jsonRecord.optional().default({}),

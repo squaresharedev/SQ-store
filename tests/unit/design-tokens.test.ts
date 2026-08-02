@@ -39,6 +39,16 @@ const BANNED: { pattern: RegExp; why: string }[] = [
     pattern: /\bease-\[[^\]]+\]/,
     why: "ad-hoc easing: use ease-standard / ease-entrance",
   },
+  {
+    // Caught a real leak: the auth pages set bg-[#f5f5f5], which the
+    // neutral-* pattern above never saw, so they stayed light under .dark.
+    pattern: /\b(?:bg|text|border|decoration|ring|from|via|to)-\[#[0-9a-fA-F]{3,8}\]/,
+    why: "hardcoded hex: use a semantic colour token",
+  },
+  {
+    pattern: /\bshadow-\[[^\]]+\]/,
+    why: "ad-hoc shadow: use the shadow-xs/sm/md/lg ramp",
+  },
 ];
 
 /**

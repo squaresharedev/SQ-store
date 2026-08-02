@@ -1,4 +1,9 @@
 import { z } from "zod";
+import {
+  boundedInt,
+  multiLineText,
+  singleLineText,
+} from "@/lib/validation/inputs";
 import { CURRENCIES, PRODUCT_STATUSES } from "@/types/product";
 
 // Zod schemas shared by client (UX feedback) and server (the security
@@ -57,7 +62,8 @@ export function isAllowedContentType(
   return allowed.includes(bare);
 }
 
-const filenameSchema = z.string().trim().min(1).max(200);
+// A user-supplied file NAME (the stored key is server-minted separately).
+const filenameSchema = singleLineText({ label: "A filename", max: 200 });
 
 export const presignRequestSchema = z.discriminatedUnion("kind", [
   z.object({
@@ -89,9 +95,9 @@ export const STOCK_QUANTITY_MAX = 1_000_000;
  */
 export const productWriteSchema = z
   .object({
-    title: z.string().trim().min(1).max(200),
-    description: z.string().trim().max(5000),
-    priceCents: z.number().int().min(1).max(PRICE_CENTS_MAX),
+    title: singleLineText({ label: "A product title", max: 200 }),
+    description: multiLineText({ label: "A product description", max: 5000 }),
+    priceCents: boundedInt({ label: "Price", min: 1, max: PRICE_CENTS_MAX }),
     currency: z.enum(CURRENCIES),
     status: z.enum(PRODUCT_STATUSES),
     imageKey: z.string().max(600).nullish(),

@@ -69,6 +69,9 @@ const SIZE_OPTIONS: readonly SelectOption<SizeChoice>[] = [
   ...TEXT_SIZES.map((size) => ({ value: size, label: TEXT_SIZE_LABELS[size] })),
 ];
 
+/** What a non-heading block renders in when it has no color override. */
+const DEFAULT_TEXT_COLOR = "#171717";
+
 const ALIGN_ICONS: Record<TextAlign, typeof AlignLeft> = {
   left: AlignLeft,
   center: AlignCenter,
@@ -105,10 +108,9 @@ export function TextBlockEditor({
     setDraft(block.text);
   }
 
-  // What the picker shows when no override is stored: the color the tile is
-  // actually rendering with (heading = accent, others = near-black foreground).
-  const effectiveColor =
-    block.color ?? (block.variant === "heading" ? accent : "#171717");
+  // What the tile renders with when no override is stored, and what the
+  // picker's "Theme color" option points at.
+  const themeColor = block.variant === "heading" ? accent : DEFAULT_TEXT_COLOR;
 
   return (
     <div className="space-y-3">
@@ -169,23 +171,20 @@ export function TextBlockEditor({
         />
       </div>
 
-      <div className="space-y-1.5">
-        <ColorPicker
-          id={`${fieldId}-color`}
-          label="Color"
-          value={effectiveColor}
-          onChange={(color) => onUpdate({ color })}
-        />
-        {block.color && (
-          <button
-            type="button"
-            onClick={() => onUpdate({ color: undefined })}
-            className="font-inter text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
-          >
-            Reset to theme color
-          </button>
-        )}
-      </div>
+      {/* "Follow the theme" is an option INSIDE the picker, not a reset link
+          beside it — same affordance every optional color field gets. */}
+      <ColorPicker
+        id={`${fieldId}-color`}
+        label="Color"
+        value={block.color ?? themeColor}
+        onChange={(color) => onUpdate({ color })}
+        inherit={{
+          label: "Theme color",
+          value: themeColor,
+          active: block.color === undefined,
+          onSelect: () => onUpdate({ color: undefined }),
+        }}
+      />
 
       <div className="space-y-1.5">
         <span className={labelClass}>Format</span>

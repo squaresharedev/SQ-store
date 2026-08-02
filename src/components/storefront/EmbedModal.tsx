@@ -6,14 +6,17 @@ import { CopyButton } from "@/components/ui/CopyButton";
 import { Modal } from "@/components/ui/modal";
 import { Switch } from "@/components/ui/switch";
 import {
+  destructiveButtonClass,
   fieldBaseClass,
   helpTextClass,
   labelClass,
   primaryButtonClass,
+  secondaryButtonClass,
 } from "@/components/ui/control-styles";
 import { invalidInput, type ActionError } from "@/lib/errors";
 import { embedSettingsSchema } from "@/lib/validation/storefront";
-import { updateEmbedSettings } from "@/lib/storefront/actions";
+import { normalizeHostname } from "@/lib/validation/inputs";
+import { rotateEmbedKey, updateEmbedSettings } from "@/lib/storefront/actions";
 import type { StorefrontSummary } from "@/lib/storefront/queries";
 import {
   DEFAULT_EMBED_SETTINGS,
@@ -21,34 +24,47 @@ import {
   type EmbedSettings,
 } from "@/types/storefront";
 
-/** The snippet sellers will paste into their own site. The storefront id is a
- *  server-issued uuid rendered as text — never user-controlled markup. */
-function embedSnippet(storefrontId: string): string {
+/**
+ * The snippet sellers paste into their own site.
+ *
+ * Keyed by the storefront's EMBED KEY, not its row id: this string ends up in
+ * someone else's HTML permanently, so it has to be revocable. Rotating the key
+ * invalidates every pasted copy without touching the storefront itself.
+ *
+ * The key is a server-issued uuid rendered as text, never user-controlled markup.
+ */
+function embedSnippet(embedKey: string): string {
   return [
-    `<div data-squareshare-storefront="${storefrontId}"></div>`,
+    `<div data-squareshare-storefront="${embedKey}"></div>`,
     `<script async src="https://embed.squareshare.to/widget.js"></script>`,
   ].join("\n");
 }
 
-/** Comma-separated input → normalized hostname list: trimmed, lowercased,
- *  scheme/path stripped (paste-friendly), deduped. Validation happens after. */
+/** Comma-separated input → normalized hostname list, deduped. Normalization is
+ *  paste-friendliness only; the shared hostname primitive still decides what is
+ *  valid, so nothing here can rescue a bad host into a good one. */
 function parseDomains(text: string): string[] {
-  const domains = text
-    .split(",")
-    .map((raw) => {
-      let domain = raw.trim().toLowerCase();
-      if (domain.startsWith("https://")) domain = domain.slice(8);
-      else if (domain.startsWith("http://")) domain = domain.slice(7);
-      return domain.split("/")[0] ?? "";
-    })
-    .filter(Boolean);
+  const domains = text.split(",").map(normalizeHostname).filter(Boolean);
   return [...new Set(domains)];
 }
+
+/** Sentinel for "no storefront adopted yet". Not null/undefined, because both
+ *  are legitimate values of `storefront?.id` when the modal is closed. */
+const UNSET = Symbol("unset") as unknown as string;
 
 type SaveState =
   | { status: "idle" }
   | { status: "saving" }
   | { status: "saved" }
+  | { status: "error"; error: ActionError };
+
+/** Rotation is a separate, destructive flow with its own confirm + errors, so
+ *  a failed rotation never reads as a failed settings save. */
+type RotateState =
+  | { status: "idle" }
+  | { status: "confirming" }
+  | { status: "rotating" }
+  | { status: "rotated" }
   | { status: "error"; error: ActionError };
 
 /**
@@ -72,16 +88,29 @@ export function EmbedModal({
   const [enabled, setEnabled] = useState(false);
   const [domainsText, setDomainsText] = useState("");
   const [saveState, setSaveState] = useState<SaveState>({ status: "idle" });
+  // Held separately from the `storefront` prop so a rotation updates the
+  // snippet immediately, without waiting for the list to refetch.
+  const [embedKey, setEmbedKey] = useState("");
+  const [rotateState, setRotateState] = useState<RotateState>({ status: "idle" });
 
   // Adopt the target storefront's stored settings when the modal (re)opens
   // (render-time adopt, same pattern as StorefrontsList).
-  const [prevId, setPrevId] = useState(storefront?.id);
+  //
+  // Seeded with a sentinel no real id can equal, so the FIRST render adopts
+  // too. Seeding with `storefront?.id` would make the initial state depend on
+  // how the caller mounts this: today the list always mounts it closed
+  // (storefront=null) and the id transition does the work, but a caller that
+  // mounted it already-open would show the defaults instead of the stored
+  // settings — i.e. report embedding as OFF for a storefront where it is ON.
+  const [prevId, setPrevId] = useState<string | null | undefined>(UNSET);
   if (storefront?.id !== prevId) {
     setPrevId(storefront?.id);
     const embed = storefront?.config.embed ?? DEFAULT_EMBED_SETTINGS;
     setEnabled(embed.enabled);
     setDomainsText(embed.domains.join(", "));
+    setEmbedKey(storefront?.embedKey ?? "");
     setSaveState({ status: "idle" });
+    setRotateState({ status: "idle" });
   }
 
   async function handleSave() {
@@ -110,6 +139,18 @@ export function EmbedModal({
     onSaved(storefront.id, parsed.data);
   }
 
+  async function handleRotate() {
+    if (!storefront || rotateState.status === "rotating") return;
+    setRotateState({ status: "rotating" });
+    const result = await rotateEmbedKey(storefront.id);
+    if (!result.ok) {
+      setRotateState({ status: "error", error: result.error });
+      return;
+    }
+    setEmbedKey(result.embedKey);
+    setRotateState({ status: "rotated" });
+  }
+
   function markDirty() {
     setSaveState((current) =>
       current.status === "saving" ? current : { status: "idle" },
@@ -132,7 +173,7 @@ export function EmbedModal({
           <div className="space-y-1.5">
             <span className={labelClass}>Snippet</span>
             <pre className="overflow-x-auto rounded-sm border border-border bg-muted p-3 font-mono text-xs text-foreground">
-              {embedSnippet(storefront.id)}
+              {embedSnippet(embedKey)}
             </pre>
             <div className="flex items-center justify-between gap-3">
               <p className={helpTextClass}>
@@ -140,11 +181,69 @@ export function EmbedModal({
                 will start rendering the moment it ships.
               </p>
               <CopyButton
-                value={embedSnippet(storefront.id)}
+                value={embedSnippet(embedKey)}
                 label="embed snippet"
                 variant="labelled"
               />
             </div>
+          </div>
+
+          {/* Revoke. Its own section, its own confirm, its own errors: this is
+              the only control here that breaks working embeds. */}
+          <div className="space-y-1.5 rounded-sm border border-border bg-muted/40 p-3">
+            <span className={labelClass}>Snippet key</span>
+            {rotateState.status === "confirming" ? (
+              <>
+                <p className={helpTextClass}>
+                  Rotating issues a new key. Every copy of the old snippet stops
+                  working immediately, including ones on sites you still want —
+                  you&apos;ll need to paste the new snippet everywhere.
+                </p>
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={handleRotate}
+                    className={`${destructiveButtonClass} px-3 py-1.5 text-xs`}
+                  >
+                    Rotate key
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRotateState({ status: "idle" })}
+                    className={`${secondaryButtonClass} px-3 py-1.5 text-xs`}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <p className={helpTextClass}>
+                  Pasted somewhere it shouldn&apos;t be? Rotate the key to
+                  revoke every existing snippet.
+                </p>
+                <div className="flex flex-wrap items-center gap-3 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setRotateState({ status: "confirming" })}
+                    disabled={rotateState.status === "rotating"}
+                    className={`${secondaryButtonClass} px-3 py-1.5 text-xs`}
+                  >
+                    {rotateState.status === "rotating"
+                      ? "Rotating…"
+                      : "Rotate key"}
+                  </button>
+                  {rotateState.status === "rotated" && (
+                    <span role="status" className={helpTextClass}>
+                      New key issued. Re-paste the snippet above.
+                    </span>
+                  )}
+                </div>
+              </>
+            )}
+            {rotateState.status === "error" && (
+              <ActionErrorNotice error={rotateState.error} variant="inline" />
+            )}
           </div>
 
           <div className="flex items-center justify-between gap-3">
@@ -178,9 +277,18 @@ export function EmbedModal({
               className={fieldBaseClass}
             />
             <p className={helpTextClass}>
-              Up to {EMBED_MAX_DOMAINS}, comma-separated. Leave empty to allow
-              any site.
+              Up to {EMBED_MAX_DOMAINS}, comma-separated. Paste a URL and
+              we&apos;ll trim it to the domain.
             </p>
+            {/* Deny-by-default: an empty list serves nowhere. Said plainly
+                here, because "enabled but blank" otherwise looks like it
+                should work and silently doesn't. */}
+            {enabled && parseDomains(domainsText).length === 0 && (
+              <p role="status" className="font-inter text-sm text-destructive">
+                Add at least one domain. While this is empty the storefront
+                won&apos;t load anywhere, even though embedding is on.
+              </p>
+            )}
           </div>
 
           {saveState.status === "error" && (

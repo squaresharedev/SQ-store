@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import type { AuthError } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { revokeOtherSessions } from "@/lib/auth/session";
 import { safeInternalPath } from "@/lib/utils/safe-path";
 import { RATE_LIMITS, clientKey, rateLimitKey } from "@/lib/rate-limit";
 
@@ -155,7 +156,18 @@ export async function authenticate(
       console.error("[auth] reset password failed:", err instanceof Error ? err.message : String(err));
       return { error: "Could not send reset email. Please check your connection and try again." };
     }
-    if (result.error) return { error: friendly(result.error) };
+    // Supabase's own reply is NOT surfaced here. Its errors are
+    // address-specific ("user_not_found", and its per-address send throttle),
+    // so echoing them would undo the anti-enumeration work above: an attacker
+    // could tell real addresses apart by which ones produce an error. Logged
+    // server-side instead, where it is useful and not a signal to the caller.
+    if (result.error) {
+      console.warn(
+        "[auth] reset email not sent:",
+        result.error.code,
+        result.error.message,
+      );
+    }
     return { message: "If that email has an account, a reset link is on its way." };
   }
 
@@ -286,6 +298,12 @@ export async function resetPassword(
       ? { error: "That's already your password. Pick a new one." }
       : { error: friendly(result.error) };
   }
+
+  // A recovery reset is the flow people reach for when they think someone
+  // else is in their account, so the old credential's sessions must not
+  // survive it. `others` scope keeps THIS (recovery) session alive so the
+  // redirect below lands them signed in.
+  await revokeOtherSessions(supabase);
 
   // The session is valid, so drop them straight into the app.
   redirect("/");

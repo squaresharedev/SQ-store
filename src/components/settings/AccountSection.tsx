@@ -12,18 +12,22 @@ export function AccountSection({
   displayName,
   email,
   avatarUrl,
+  hasPassword,
 }: {
   displayName: string;
   email: string;
   avatarUrl: string | null;
+  /** Whether this account has a password identity (i.e. is not OAuth-only).
+   *  Drives whether the email change asks for re-authentication. */
+  hasPassword: boolean;
 }) {
   const name = displayName || email.split("@")[0] || "Account";
   return (
     <div className="flex flex-col gap-6">
       <AvatarUpload avatarUrl={avatarUrl} name={name} />
       <DisplayNameForm displayName={displayName} />
-      <EmailChangeForm email={email} />
-      <PasswordChangeForm />
+      <EmailChangeForm email={email} hasPassword={hasPassword} />
+      {hasPassword && <PasswordChangeForm />}
       <SignOutSection />
     </div>
   );

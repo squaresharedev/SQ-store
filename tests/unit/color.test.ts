@@ -1,8 +1,35 @@
 import { describe, expect, it } from "vitest";
-import { clamp, hexToHsv, hsvToHex } from "@/lib/format/color";
+import { clamp, hexToHsv, hsvToHex, isLightColor } from "@/lib/format/color";
 import { isStrictHexColor } from "@/lib/validation/storefront";
 
 const STRICT_HEX = /^#[0-9a-f]{6}$/;
+
+describe("isLightColor", () => {
+  it("white and pale tints are light", () => {
+    expect(isLightColor("#ffffff")).toBe(true);
+    expect(isLightColor("#fffdf5")).toBe(true);
+    expect(isLightColor("#f59e0b")).toBe(true);
+  });
+
+  it("black and saturated darks are not light", () => {
+    expect(isLightColor("#000000")).toBe(false);
+    expect(isLightColor("#171717")).toBe(false);
+    expect(isLightColor("#2563eb")).toBe(false);
+  });
+
+  it("green reads lighter than blue at the same nominal brightness", () => {
+    // Luminance is channel-weighted, not a naive average — this is why the
+    // check mark over a swatch flips ink color where a mean would not.
+    expect(isLightColor("#00ff00")).toBe(true);
+    expect(isLightColor("#0000ff")).toBe(false);
+  });
+
+  it("anything that is not strict 6-digit hex is not light", () => {
+    expect(isLightColor("#fff")).toBe(false);
+    expect(isLightColor("white")).toBe(false);
+    expect(isLightColor("")).toBe(false);
+  });
+});
 
 describe("hsvToHex", () => {
   it("primary corners", () => {

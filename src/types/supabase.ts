@@ -223,6 +223,7 @@ export type Database = {
         Row: {
           config: Json
           created_at: string
+          embed_key: string
           id: string
           name: string
           owner_id: string
@@ -231,6 +232,7 @@ export type Database = {
         Insert: {
           config?: Json
           created_at?: string
+          embed_key?: string
           id?: string
           name?: string
           owner_id: string
@@ -239,6 +241,7 @@ export type Database = {
         Update: {
           config?: Json
           created_at?: string
+          embed_key?: string
           id?: string
           name?: string
           owner_id?: string

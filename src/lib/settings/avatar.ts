@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { getUser } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
 
 /**
  * Profile-photo upload — SERVER-SIDE ONLY, client-hostile by construction:
@@ -12,7 +13,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
  *   - The real content type is sniffed from the file's MAGIC BYTES, never the
  *     client-supplied `file.type` or extension.
  *   - Size is capped here AND by the bucket's file_size_limit (defense in depth).
- *   - Rate limited in Postgres (rl_take): 5 uploads/hour/user.
+ *   - Rate limited in Postgres via the shared limiter (RATE_LIMITS.avatarUpload).
  *   - The profile row update is scoped to auth.uid() (RLS enforces it too).
  */
 
@@ -20,9 +21,6 @@ export type AvatarActionState = { error?: string; success?: string };
 
 const BUCKET = "avatars";
 const MAX_BYTES = 2 * 1024 * 1024; // 2 MB
-const RL_ACTION = "avatar_upload";
-const RL_MAX = 5;
-const RL_WINDOW_SECONDS = 60 * 60;
 
 /** Identify the image from its magic bytes. Returns null for anything else. */
 function sniffImage(b: Uint8Array): { mime: string; ext: string } | null {
@@ -61,18 +59,14 @@ export async function uploadAvatar(
     return { error: "Unexpected form data was rejected." };
   }
 
-  const supabase = await createClient();
-
   // Rate limit BEFORE doing any work (server-authoritative, per user).
-  const { data: allowed, error: rlError } = await supabase.rpc("rl_take", {
-    p_action: RL_ACTION,
-    p_max: RL_MAX,
-    p_window_seconds: RL_WINDOW_SECONDS,
-  });
-  if (rlError) return { error: "Could not process the upload. Try again." };
-  if (!allowed) {
+  // Goes through the shared helper so the budget lives in ONE place with every
+  // other budget, and so the fail-closed behaviour is the same everywhere.
+  if (!(await rateLimit("avatar_upload", RATE_LIMITS.avatarUpload))) {
     return { error: "Too many photo changes. Wait a while and try again." };
   }
+
+  const supabase = await createClient();
 
   const file = formData.get("avatar");
   if (!(file instanceof File) || file.size === 0) {
@@ -131,6 +125,12 @@ export async function removeAvatar(
 ): Promise<AvatarActionState> {
   const user = await getUser();
   if (!user) return { error: "Your session expired. Sign in again." };
+
+  // Shares the upload budget: remove-then-upload is the same churn as two
+  // uploads, so a separate allowance would just be a way around this one.
+  if (!(await rateLimit("avatar_upload", RATE_LIMITS.avatarUpload))) {
+    return { error: "Too many photo changes. Wait a while and try again." };
+  }
 
   const admin = createAdminClient();
   const folder = user.id;

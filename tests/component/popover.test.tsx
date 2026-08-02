@@ -229,3 +229,49 @@ describe("Popover", () => {
     expect(document.activeElement).toBe(trigger);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Outside-click must survive ancestors that swallow the event
+// ---------------------------------------------------------------------------
+
+describe("Popover outside click vs stopPropagation", () => {
+  /**
+   * The designer canvas calls stopPropagation on pointerdown (so a resize
+   * gesture can't also start a move). A bubble-phase document listener never
+   * sees those events and the popover stays stuck open, so the outside-click
+   * listener CAPTURES. Regression guard for that.
+   */
+  function renderInsideSwallowingAncestor(onOpenChange: (open: boolean) => void) {
+    return render(
+      <div onPointerDownCapture={(event) => event.stopPropagation()}>
+        <Popover
+          open
+          onOpenChange={onOpenChange}
+          label="Test popover"
+          trigger={<button type="button">Open</button>}
+        >
+          <button>Inside</button>
+        </Popover>
+        <button data-testid="outside">Outside</button>
+      </div>,
+    );
+  }
+
+  it("closes on an outside click even when an ancestor stops propagation", async () => {
+    const onOpenChange = vi.fn();
+    const user = userEvent.setup();
+    renderInsideSwallowingAncestor(onOpenChange);
+
+    await user.click(screen.getByTestId("outside"));
+    expect(onOpenChange).toHaveBeenCalledWith(false);
+  });
+
+  it("still does NOT close for a click inside the panel", async () => {
+    const onOpenChange = vi.fn();
+    const user = userEvent.setup();
+    renderInsideSwallowingAncestor(onOpenChange);
+
+    await user.click(screen.getByRole("button", { name: "Inside" }));
+    expect(onOpenChange).not.toHaveBeenCalled();
+  });
+});

@@ -50,6 +50,18 @@ export function Popover({
   const rootRef = React.useRef<HTMLDivElement>(null);
   const panelRef = React.useRef<HTMLDivElement>(null);
 
+  // The effect below OWNS focus while the popover is open, so it must run once
+  // per open/close — never on an unrelated re-render. Consumers routinely pass
+  // an inline `onOpenChange`, which changes identity every render; listing it
+  // as a dependency would tear down and re-run the effect each time, refocusing
+  // the trigger and then snapping focus back to the panel's first control. That
+  // makes any panel with a text field unusable (every keystroke re-renders the
+  // parent, and focus leaves the field). Read it through a ref instead.
+  const onOpenChangeRef = React.useRef(onOpenChange);
+  React.useEffect(() => {
+    onOpenChangeRef.current = onOpenChange;
+  });
+
   React.useEffect(() => {
     if (!open) return;
     const previouslyFocused = document.activeElement as HTMLElement | null;
@@ -71,7 +83,7 @@ export function Popover({
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
         event.preventDefault();
-        onOpenChange(false);
+        onOpenChangeRef.current(false);
         return;
       }
       if (event.key !== "Tab" || !panel) return;
@@ -95,18 +107,24 @@ export function Popover({
     }
 
     function onPointerDown(event: PointerEvent) {
-      if (!rootRef.current?.contains(event.target as Node)) onOpenChange(false);
+      if (!rootRef.current?.contains(event.target as Node))
+        onOpenChangeRef.current(false);
     }
 
     document.addEventListener("keydown", onKeyDown);
-    document.addEventListener("pointerdown", onPointerDown);
+    // CAPTURE phase, deliberately. In the bubble phase any ancestor that calls
+    // stopPropagation on pointerdown (the designer canvas does, to keep a
+    // resize gesture from also starting a move) swallows the event before it
+    // reaches the document, and the popover stays stuck open. Capturing runs
+    // before those handlers, so "click outside closes" holds everywhere.
+    document.addEventListener("pointerdown", onPointerDown, true);
     return () => {
       document.removeEventListener("keydown", onKeyDown);
-      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("pointerdown", onPointerDown, true);
       document.body.style.overflow = prevOverflow;
       previouslyFocused?.focus?.();
     };
-  }, [open, onOpenChange, variant]);
+  }, [open, variant]);
 
   return (
     <div ref={rootRef} className={cn("relative inline-flex w-full flex-col", rootClassName)}>

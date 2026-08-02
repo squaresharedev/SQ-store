@@ -4,7 +4,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 // ---- mocks ---------------------------------------------------------------
 
 const getUserMock = vi.fn();
-vi.mock("@/lib/auth/session", () => ({
+// Only getUser is faked. revokeOtherSessions stays REAL so these specs assert
+// the actual revocation call the action makes, not a stub of it.
+vi.mock("@/lib/auth/session", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/auth/session")>()),
   getUser: () => getUserMock(),
 }));
 
@@ -36,6 +39,7 @@ db.auth = {
   signInWithPassword: vi.fn(),
   updateUser: vi.fn(),
   getSession: vi.fn(),
+  signOut: vi.fn(),
 };
 
 // Non-thenable wrapper: prevents async () => db from unwrapping via thenable protocol.
@@ -91,6 +95,7 @@ beforeEach(() => {
   db.auth.signInWithPassword.mockResolvedValue({ error: null });
   db.auth.updateUser.mockResolvedValue({ error: null });
   db.auth.getSession.mockResolvedValue({ data: { session: null } });
+  db.auth.signOut.mockResolvedValue({ error: null });
 });
 
 // ==========================================================================
@@ -481,5 +486,146 @@ describe("settings writes - rate limit", () => {
 
     expect(result.error).toMatch(/short time/i);
     expect(db.update).not.toHaveBeenCalled();
+  });
+});
+
+// ==========================================================================
+// Account-takeover hardening
+// ==========================================================================
+
+/** A password-backed account: has an "email" identity to re-authenticate. */
+const PASSWORD_USER = {
+  ...USER,
+  identities: [{ provider: "email" }],
+};
+
+/** An OAuth-only account: no password exists to ask for. */
+const OAUTH_USER = {
+  ...USER,
+  identities: [{ provider: "google" }],
+};
+
+function emailChangeForm(email = "new@example.com", password?: string) {
+  const fd = new FormData();
+  fd.append("new_email", email);
+  if (password !== undefined) fd.append("current_password", password);
+  return fd;
+}
+
+describe("requestEmailChange - re-authentication", () => {
+  // Whoever controls the account's address can request a password reset to it,
+  // so a stolen session alone must not be able to move the address. Without
+  // this gate the chain is: hijack session -> change email -> reset password.
+  it("refuses without the current password on a password-backed account", async () => {
+    getUserMock.mockResolvedValue(PASSWORD_USER);
+
+    const result = await requestEmailChange(PREV, emailChangeForm());
+
+    expect(result.error).toMatch(/current password/i);
+    expect(db.auth.updateUser).not.toHaveBeenCalled();
+  });
+
+  it("refuses when the current password is wrong, and sends no mail", async () => {
+    getUserMock.mockResolvedValue(PASSWORD_USER);
+    db.auth.signInWithPassword.mockResolvedValue({
+      error: { message: "Invalid login credentials" },
+    });
+
+    const result = await requestEmailChange(PREV, emailChangeForm("new@example.com", "wrong"));
+
+    expect(result.error).toMatch(/incorrect/i);
+    expect(db.auth.updateUser).not.toHaveBeenCalled();
+  });
+
+  it("proceeds once the current password checks out", async () => {
+    getUserMock.mockResolvedValue(PASSWORD_USER);
+
+    const result = await requestEmailChange(
+      PREV,
+      emailChangeForm("new@example.com", "correct-horse"),
+    );
+
+    expect(result.success).toBeTruthy();
+    expect(db.auth.signInWithPassword).toHaveBeenCalledWith({
+      email: USER.email,
+      password: "correct-horse",
+    });
+    expect(db.auth.updateUser).toHaveBeenCalled();
+  });
+
+  it("does not demand a password from an OAuth-only account", async () => {
+    // Such an account has none to give; requiring one would lock them out of
+    // a field they can still legitimately change.
+    getUserMock.mockResolvedValue(OAUTH_USER);
+
+    const result = await requestEmailChange(PREV, emailChangeForm());
+
+    expect(result.success).toBeTruthy();
+    expect(db.auth.signInWithPassword).not.toHaveBeenCalled();
+  });
+
+  it("rejects a smuggled extra field rather than ignoring it", async () => {
+    getUserMock.mockResolvedValue(PASSWORD_USER);
+    const fd = emailChangeForm("new@example.com", "correct-horse");
+    fd.append("is_seller", "true");
+
+    const result = await requestEmailChange(PREV, fd);
+
+    expect(result.error).toMatch(/is_seller/);
+    expect(db.auth.updateUser).not.toHaveBeenCalled();
+  });
+});
+
+describe("changePassword - oracle and session hardening", () => {
+  function passwordForm() {
+    const fd = new FormData();
+    fd.append("current_password", "old-pass-word-1");
+    fd.append("new_password", "new-pass-word-2");
+    fd.append("confirm_password", "new-pass-word-2");
+    return fd;
+  }
+
+  it("bounds re-auth attempts BEFORE checking the guess", async () => {
+    // This endpoint verifies a caller-supplied password, so unbounded it is a
+    // password oracle a hijacked session could grind against.
+    getUserMock.mockResolvedValue(USER);
+    rateLimitMock.mockResolvedValue(false);
+
+    const result = await changePassword(PREV, passwordForm());
+
+    expect(result.error).toMatch(/too many/i);
+    expect(db.auth.signInWithPassword).not.toHaveBeenCalled();
+    expect(db.auth.updateUser).not.toHaveBeenCalled();
+  });
+
+  it("revokes other sessions after a successful change", async () => {
+    // A password change made BECAUSE an account was compromised is pointless
+    // if the intruder's existing session survives it.
+    getUserMock.mockResolvedValue(USER);
+
+    const result = await changePassword(PREV, passwordForm());
+
+    expect(result.success).toBeTruthy();
+    expect(db.auth.signOut).toHaveBeenCalledWith({ scope: "others" });
+  });
+
+  it("keeps THIS session alive (scope 'others', never 'global')", async () => {
+    getUserMock.mockResolvedValue(USER);
+    await changePassword(PREV, passwordForm());
+    const scopes = db.auth.signOut.mock.calls.map(
+      ([opts]: [{ scope: string }]) => opts.scope,
+    );
+    expect(scopes).not.toContain("global");
+    expect(scopes).not.toContain("local");
+  });
+
+  it("does not revoke anything when the change fails", async () => {
+    getUserMock.mockResolvedValue(USER);
+    db.auth.updateUser.mockResolvedValue({ error: { message: "nope" } });
+
+    const result = await changePassword(PREV, passwordForm());
+
+    expect(result.error).toBeTruthy();
+    expect(db.auth.signOut).not.toHaveBeenCalled();
   });
 });

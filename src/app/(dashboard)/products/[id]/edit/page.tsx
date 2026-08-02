@@ -18,10 +18,15 @@ export default async function EditProductPage({
 }) {
   const { id } = await params;
 
-  const account = await getActiveAccount();
+  // Both reads in one round trip. Safe to overlap the permission check with
+  // the product read because getProduct scopes itself to the active account
+  // (and RLS backs that up) — the role check gates EDITING, not reading, and
+  // nothing is rendered before it is applied below.
+  const [account, product] = await Promise.all([
+    getActiveAccount(),
+    getProduct(id),
+  ]);
   if (!can(account?.role, "products.write")) redirect("/products");
-
-  const product = await getProduct(id);
   if (!product) notFound();
 
   return (

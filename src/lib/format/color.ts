@@ -34,6 +34,34 @@ export function hsvToHex({ h, s, v }: Hsv): string {
   return `#${toHex2((r + m) * 255)}${toHex2((g + m) * 255)}${toHex2((b + m) * 255)}`;
 }
 
+/**
+ * The relative luminance at which black and white ink have EQUAL WCAG contrast
+ * against a background: sqrt(0.05 * 1.05) - 0.05. Above it black wins, below it
+ * white wins. Deliberately not 0.5 — luminance is channel-weighted and heavily
+ * gamma-compressed, so a naive midpoint calls obviously-light colors (amber,
+ * cyan) dark and prints white on them.
+ */
+const INK_FLIP_LUMINANCE = Math.sqrt(0.05 * 1.05) - 0.05;
+
+/**
+ * True when a color is light enough that dark ink reads better on top of it.
+ * Uses the WCAG relative-luminance formula, so the check mark drawn over a
+ * chosen swatch stays legible on both #fffdf5 and #171717. Returns false for
+ * anything that is not strict 6-digit hex.
+ */
+export function isLightColor(hex: string): boolean {
+  const match = HEX.exec(hex);
+  if (!match) return false;
+  const int = parseInt(match[1], 16);
+  const channels = [(int >> 16) & 255, (int >> 8) & 255, int & 255].map((c) => {
+    const s = c / 255;
+    return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+  });
+  const luminance =
+    0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
+  return luminance > INK_FLIP_LUMINANCE;
+}
+
 /** Strict "#rrggbb" → HSV, or null if the string is not 6-digit hex. */
 export function hexToHsv(hex: string): Hsv | null {
   const match = HEX.exec(hex);

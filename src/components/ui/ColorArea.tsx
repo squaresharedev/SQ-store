@@ -1,22 +1,37 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import type { KeyboardEvent, PointerEvent as ReactPointerEvent } from "react";
 import { cn } from "@/lib/utils";
-import { clamp, type Hsv } from "@/lib/format/color";
+import { focusRingClass } from "./control-styles";
+import { clamp, hsvToHex, type Hsv } from "@/lib/format/color";
 
-const FOCUS_RING =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background";
+/** Half the hue thumb's width in px, used to keep it inside its track. */
+const HUE_THUMB_RADIUS = 12;
 
-const THUMB =
-  "pointer-events-none absolute size-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white shadow-sm ring-1 ring-black/30";
+/**
+ * Shared thumb: a white ring filled with the color it currently points at, so
+ * the handle reads as "this is your color" rather than as a generic dot. The
+ * dark outer ring keeps it visible on white; the white border keeps it visible
+ * on black. It grows a hair while dragging.
+ */
+function thumbClass(dragging: boolean, size: string) {
+  return cn(
+    "pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 rounded-full",
+    "border-[3px] border-white shadow-md ring-1 ring-black/20",
+    "transition-transform duration-fast ease-standard motion-reduce:transition-none",
+    size,
+    dragging && "scale-110",
+  );
+}
 
 /**
  * The keyboard- and pointer-operable color surface: a 2D saturation/brightness
- * square over a hue slider. Both are `role="slider"` with arrow-key control and
- * live `aria-valuetext`. Chrome (borders, thumbs) is tokenized; the gradient
- * fills are the working color VALUES the user is choosing, which the brief
- * permits. Emits HSV upward; the parent converts to strict hex.
+ * square over a hue slider. Both are `role="slider"` with arrow-key control
+ * (Home/End jump to the ends) and live `aria-valuetext`. Chrome (borders,
+ * thumbs) is tokenized; the gradient fills are the working color VALUES the
+ * user is choosing, which the brief permits. Emits HSV upward; the parent
+ * converts to strict hex.
  */
 export function ColorArea({
   hsv,
@@ -27,6 +42,10 @@ export function ColorArea({
 }) {
   const svRef = useRef<HTMLDivElement>(null);
   const hueRef = useRef<HTMLDivElement>(null);
+  const [dragging, setDragging] = useState<"sv" | "hue" | null>(null);
+
+  const hex = hsvToHex(hsv);
+  const hueHex = hsvToHex({ h: hsv.h, s: 100, v: 100 });
 
   function svFromPointer(event: ReactPointerEvent<HTMLDivElement>) {
     const rect = svRef.current?.getBoundingClientRect();
@@ -51,6 +70,8 @@ export function ColorArea({
       case "ArrowRight": s += step; break;
       case "ArrowUp": v += step; break;
       case "ArrowDown": v -= step; break;
+      case "Home": s = 0; break;
+      case "End": s = 100; break;
       default: return;
     }
     event.preventDefault();
@@ -62,6 +83,8 @@ export function ColorArea({
     let h = hsv.h;
     if (event.key === "ArrowLeft" || event.key === "ArrowDown") h -= step;
     else if (event.key === "ArrowRight" || event.key === "ArrowUp") h += step;
+    else if (event.key === "Home") h = 0;
+    else if (event.key === "End") h = 359;
     else return;
     event.preventDefault();
     onChange({ ...hsv, h: (h + 360) % 360 });
@@ -82,29 +105,40 @@ export function ColorArea({
         onPointerDown={(event) => {
           event.preventDefault();
           event.currentTarget.setPointerCapture(event.pointerId);
+          setDragging("sv");
           svFromPointer(event);
         }}
         onPointerMove={(event) => {
           if (event.buttons === 1) svFromPointer(event);
         }}
+        onPointerUp={() => setDragging(null)}
+        onPointerCancel={() => setDragging(null)}
         className={cn(
-          "relative h-40 w-full touch-none cursor-crosshair rounded-sm border border-border",
-          FOCUS_RING,
+          "relative h-44 w-full touch-none cursor-crosshair rounded-lg",
+          // Inset ring instead of a border: the gradient runs edge to edge and
+          // still has a defined edge against a white panel. NOT overflow-hidden
+          // — the thumb is meant to ride over the edge at the extremes.
+          "ring-1 ring-inset ring-black/10",
+          focusRingClass,
         )}
-        style={{ backgroundColor: `hsl(${Math.round(hsv.h)}, 100%, 50%)` }}
+        style={{ backgroundColor: hueHex }}
       >
         <div
-          className="absolute inset-0 rounded-sm"
+          className="absolute inset-0 rounded-lg"
           style={{ background: "linear-gradient(to right, #fff, transparent)" }}
         />
         <div
-          className="absolute inset-0 rounded-sm"
+          className="absolute inset-0 rounded-lg"
           style={{ background: "linear-gradient(to top, #000, transparent)" }}
         />
         <span
           aria-hidden
-          className={THUMB}
-          style={{ left: `${hsv.s}%`, top: `${100 - hsv.v}%` }}
+          className={thumbClass(dragging === "sv", "size-5")}
+          style={{
+            left: `${hsv.s}%`,
+            top: `${100 - hsv.v}%`,
+            backgroundColor: hex,
+          }}
         />
       </div>
 
@@ -121,14 +155,18 @@ export function ColorArea({
         onPointerDown={(event) => {
           event.preventDefault();
           event.currentTarget.setPointerCapture(event.pointerId);
+          setDragging("hue");
           hueFromPointer(event);
         }}
         onPointerMove={(event) => {
           if (event.buttons === 1) hueFromPointer(event);
         }}
+        onPointerUp={() => setDragging(null)}
+        onPointerCancel={() => setDragging(null)}
         className={cn(
-          "relative h-4 w-full touch-none cursor-ew-resize rounded-full border border-border",
-          FOCUS_RING,
+          "relative h-4 w-full touch-none cursor-ew-resize rounded-full",
+          "ring-1 ring-inset ring-black/10",
+          focusRingClass,
         )}
         style={{
           background:
@@ -137,8 +175,15 @@ export function ColorArea({
       >
         <span
           aria-hidden
-          className={cn(THUMB, "top-1/2")}
-          style={{ left: `${(hsv.h / 360) * 100}%` }}
+          // Deliberately taller than the track, so it reads as a handle sitting
+          // ON the spectrum rather than a notch cut into it.
+          className={cn(thumbClass(dragging === "hue", "size-6"), "top-1/2")}
+          // Nudge by the thumb radius so it stays fully on the track at both
+          // ends instead of hanging off at 0deg and 360deg.
+          style={{
+            left: `calc(${(hsv.h / 360) * 100}% + ${(0.5 - hsv.h / 360) * (HUE_THUMB_RADIUS * 2)}px)`,
+            backgroundColor: hueHex,
+          }}
         />
       </div>
     </div>

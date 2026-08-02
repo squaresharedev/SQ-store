@@ -2,8 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
+import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
-import { getUser } from "@/lib/auth/session";
+import { getUser, revokeOtherSessions } from "@/lib/auth/session";
 import { LEGAL_VERSION } from "@/lib/settings/constants";
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
 import {
@@ -36,6 +37,18 @@ const SAVE_FAILED: SettingsActionState = {
 const TOO_MANY: SettingsActionState = {
   error: "That's a lot of changes in a short time. Try again a bit later.",
 };
+
+/**
+ * Whether this account can be re-authenticated with a password.
+ *
+ * Accounts created purely through an OAuth provider have no password, so
+ * asking for one would be an unanswerable question rather than a security
+ * control. Checked against the identity list rather than assumed from the
+ * presence of an email, since OAuth accounts have an email too.
+ */
+function hasPasswordIdentity(user: User): boolean {
+  return (user.identities ?? []).some((identity) => identity.provider === "email");
+}
 
 /**
  * FIELD WHITELIST (privilege-escalation guard): reject any submitted field
@@ -219,6 +232,16 @@ export async function changePassword(
   });
   if (!parsed.success) return firstIssue(parsed.error);
 
+  // The re-auth below verifies a caller-supplied password, which makes this
+  // endpoint a password ORACLE: without a budget, a hijacked session could sit
+  // here guessing the current password unthrottled. Bounded before the guess
+  // is checked, and shares the budget with the reset mail for the same reason.
+  if (!(await rateLimit("password_reauth", RATE_LIMITS.passwordReauth))) {
+    return {
+      error: "Too many attempts. Wait a few minutes before trying again.",
+    };
+  }
+
   const supabase = await createClient();
   // Re-authenticate before allowing the change: a stolen open session must
   // not be enough to take over the account.
@@ -236,7 +259,14 @@ export async function changePassword(
       ? { error: "That's already your password." }
       : { error: "Could not update the password. Try again." };
   }
-  return { success: "Password updated." };
+
+  // Changing a password must not leave the OLD credential's sessions alive.
+  // If the reason for the change is "someone else got in", a still-valid
+  // session elsewhere defeats the entire point. `others` keeps this device
+  // signed in, so the user is not logged out of the tab they are using.
+  await revokeOtherSessions(supabase);
+
+  return { success: "Password updated. Other devices have been signed out." };
 }
 
 /**
@@ -386,6 +416,10 @@ export async function requestAccountDeletion(
     confirm: String(formData.get("confirm") ?? ""),
   });
   if (!parsed.success) return firstIssue(parsed.error);
+
+  if (!(await rateLimit("settings_write", RATE_LIMITS.settingsWrite))) {
+    return TOO_MANY;
+  }
 
   const requestedAt = new Date().toISOString();
   const ok = await updateOwnProfile(user.id, {

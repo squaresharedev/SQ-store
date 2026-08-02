@@ -2,15 +2,28 @@
 
 /**
  * Figma-style floating toolbar fixed at the bottom-center of the storefront
- * designer. Three groups: insert tools, history, and preview-mode toggles.
+ * designer: insert tools, history, zoom, preview mode.
+ *
+ * PHONES GET A DIFFERENT BAR. The full set is ~570px wide, so below `sm` it
+ * used to overflow a 390px screen and silently clip everything past the zoom
+ * readout — including the Design button, which is the ONLY way to reach global
+ * settings on mobile. Rather than let it scroll (a primary action nobody would
+ * find), the bar is split by priority:
+ *
+ *   phone : insert · undo · Design · More
+ *   sm+   : the full bar
+ *
+ * "More" holds what a thumb rarely needs mid-edit — redo, tidy, preview mode.
+ * Zoom buttons are desktop-only: pinch handles it on touch, far better than
+ * a pair of 36px targets.
  *
  * z-40 - intentionally sits below modals/sheets (z-50) so a panel opening
  * over the canvas does not fight for the same layer.
  */
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
-  Maximize2,
+  Ellipsis,
   Minus,
   Monitor,
   Plus,
@@ -43,18 +56,25 @@ function ZoomReadout({ viewport }: { viewport: CanvasViewport }) {
 /** Labelled insert-tool button: icon + text label (label hidden on mobile).
  *  `group/btn` lets the icon pop on hover/focus (see iconPopClass below). */
 const INSERT_BTN =
-  `group/btn inline-flex h-9 shrink-0 items-center gap-1.5 rounded-none px-2.5 text-xs font-medium ` +
+  `group/btn inline-flex h-11 shrink-0 items-center gap-1.5 rounded-none px-2.5 text-xs font-medium sm:h-9 ` +
   `text-muted-foreground hover:bg-accent hover:text-foreground ` +
   `disabled:pointer-events-none disabled:opacity-50 ${TRANSITION} ${FOCUS_RING}`;
 
 /** The insert tools' icons all share the additive "pop" microinteraction. */
 const INSERT_ICON = `size-4 ${iconPopClass}`;
 
-/** Icon-only square button (size-9 = h-9 w-9). */
+/** Icon-only square button. 44px on touch (the Apple/Material minimum), 36px
+ *  from `sm` up where a pointer makes the smaller target fine. */
 const ICON_BTN =
-  `inline-flex size-9 shrink-0 items-center justify-center rounded-none ` +
+  `inline-flex size-11 shrink-0 items-center justify-center rounded-none sm:size-9 ` +
   `text-muted-foreground hover:bg-accent hover:text-foreground ` +
   `disabled:pointer-events-none disabled:opacity-50 ${TRANSITION} ${FOCUS_RING}`;
+
+/** Row inside the "More" sheet: a full-width, comfortably tappable menu item. */
+const MORE_ITEM =
+  `flex w-full items-center gap-3 rounded-sm px-3 py-2.5 text-left text-sm font-medium ` +
+  `text-foreground hover:bg-accent disabled:pointer-events-none disabled:opacity-50 ` +
+  `${TRANSITION} ${FOCUS_RING}`;
 
 /** Active state for the preview-mode pair. */
 const PREVIEW_ACTIVE = "bg-primary text-primary-foreground";
@@ -85,7 +105,6 @@ export function EditorToolbar({
   onZoomIn,
   onZoomOut,
   onZoomReset,
-  onZoomFit,
   onTidy,
   canTidy,
   previewMode,
@@ -108,7 +127,6 @@ export function EditorToolbar({
   onZoomIn: () => void;
   onZoomOut: () => void;
   onZoomReset: () => void;
-  onZoomFit: () => void;
   /** Pack every block toward the top-left, in reading order. */
   onTidy: () => void;
   canTidy: boolean;
@@ -120,6 +138,42 @@ export function EditorToolbar({
 }) {
   // Touch/click fallback for the shape menu (hover has no meaning there).
   const [shapeMenuOpen, setShapeMenuOpen] = useState(false);
+  // Phone-only overflow menu (see the file header for what lands in it).
+  const [moreOpen, setMoreOpen] = useState(false);
+  const shapeRef = useRef<HTMLDivElement>(null);
+  const moreRef = useRef<HTMLDivElement>(null);
+
+  /**
+   * Tap away (or press Esc) to dismiss either menu.
+   *
+   * Deliberately a document listener rather than a full-screen backdrop
+   * element: the toolbar is centred with `-translate-x-1/2`, and a transformed
+   * ancestor becomes the containing block for `position: fixed` children — so
+   * a `fixed inset-0` backdrop nested in here covers the TOOLBAR, not the
+   * viewport, and taps on the canvas sail straight past it.
+   *
+   * Capture phase, because the canvas stops propagation on pointerdown to keep
+   * a resize gesture from also starting a move.
+   */
+  useEffect(() => {
+    if (!shapeMenuOpen && !moreOpen) return;
+    function onPointerDown(event: PointerEvent) {
+      const target = event.target as Node;
+      if (!shapeRef.current?.contains(target)) setShapeMenuOpen(false);
+      if (!moreRef.current?.contains(target)) setMoreOpen(false);
+    }
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key !== "Escape") return;
+      setShapeMenuOpen(false);
+      setMoreOpen(false);
+    }
+    document.addEventListener("pointerdown", onPointerDown, true);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown, true);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [shapeMenuOpen, moreOpen]);
 
   return (
     <div
@@ -156,6 +210,7 @@ export function EditorToolbar({
       {/* Shape tool: hovering (or clicking, on touch) reveals a horizontal
           menu of the shapes themselves; picking one inserts it. */}
       <div
+        ref={shapeRef}
         className="group/shape relative"
         onMouseLeave={() => setShapeMenuOpen(false)}
       >
@@ -226,95 +281,98 @@ export function EditorToolbar({
         <Undo2 className="size-4" strokeWidth={2} aria-hidden="true" />
       </button>
 
-      <button
-        type="button"
-        className={ICON_BTN}
-        onClick={onRedo}
-        disabled={!canRedo}
-        aria-label="Redo"
-        title="Redo (Ctrl+Shift+Z)"
-      >
-        <Redo2 className="size-4" strokeWidth={2} aria-hidden="true" />
-      </button>
+      {/* Redo and Tidy move into "More" on a phone — a thumb mid-edit reaches
+          for undo far more often than either.
+          Hidden via a WRAPPER, not `hidden sm:inline-flex` on the buttons:
+          ICON_BTN already sets `inline-flex`, and two display utilities of
+          equal specificity are settled by stylesheet order, not class order —
+          `inline-flex` wins and the buttons never hide. */}
+      <div className="hidden items-center gap-1 sm:flex">
+        <button
+          type="button"
+          className={ICON_BTN}
+          onClick={onRedo}
+          disabled={!canRedo}
+          aria-label="Redo"
+          title="Redo (Ctrl+Shift+Z)"
+        >
+          <Redo2 className="size-4" strokeWidth={2} aria-hidden="true" />
+        </button>
 
-      <button
-        type="button"
-        className={ICON_BTN}
-        onClick={onTidy}
-        disabled={!canTidy}
-        aria-label="Tidy the canvas"
-        title="Tidy: pack blocks to the top-left"
-      >
-        <WandSparkles className="size-4" strokeWidth={2} aria-hidden="true" />
-      </button>
+        <button
+          type="button"
+          className={ICON_BTN}
+          onClick={onTidy}
+          disabled={!canTidy}
+          aria-label="Tidy the canvas"
+          title="Tidy: pack blocks to the top-left"
+        >
+          <WandSparkles className="size-4" strokeWidth={2} aria-hidden="true" />
+        </button>
+      </div>
 
-      <Divider />
-
-      {/* -- Group 3: ZOOM. The percentage doubles as "reset to 100%". -- */}
-      <button
-        type="button"
-        className={ICON_BTN}
-        onClick={onZoomOut}
-        aria-label="Zoom out"
-        title="Zoom out (Ctrl -)"
-      >
-        <Minus className="size-4" strokeWidth={2} aria-hidden="true" />
-      </button>
-      <button
-        type="button"
-        onClick={onZoomReset}
-        aria-label="Reset zoom to 100%"
-        title="Reset zoom (Ctrl 0)"
-        className={`${INSERT_BTN} min-w-14 justify-center tabular-nums`}
-      >
-        <ZoomReadout viewport={viewport} />
-      </button>
-      <button
-        type="button"
-        className={ICON_BTN}
-        onClick={onZoomIn}
-        aria-label="Zoom in"
-        title="Zoom in (Ctrl +)"
-      >
-        <Plus className="size-4" strokeWidth={2} aria-hidden="true" />
-      </button>
-      <button
-        type="button"
-        className={ICON_BTN}
-        onClick={onZoomFit}
-        aria-label="Fit the canvas to the screen"
-        title="Zoom to fit"
-      >
-        <Maximize2 className="size-4" strokeWidth={2} aria-hidden="true" />
-      </button>
-
-      <Divider />
+      {/* -- Group 3: ZOOM. The percentage doubles as "reset to 100%".
+            Pointer-only: on touch, pinching the canvas is the zoom control. -- */}
+      <div className="hidden items-center gap-1 sm:flex">
+        <Divider />
+        <button
+          type="button"
+          className={ICON_BTN}
+          onClick={onZoomOut}
+          aria-label="Zoom out"
+          title="Zoom out (Ctrl -)"
+        >
+          <Minus className="size-4" strokeWidth={2} aria-hidden="true" />
+        </button>
+        <button
+          type="button"
+          onClick={onZoomReset}
+          aria-label="Reset zoom to 100%"
+          title="Reset zoom (Ctrl 0)"
+          className={`${INSERT_BTN} min-w-14 justify-center tabular-nums`}
+        >
+          <ZoomReadout viewport={viewport} />
+        </button>
+        <button
+          type="button"
+          className={ICON_BTN}
+          onClick={onZoomIn}
+          aria-label="Zoom in"
+          title="Zoom in (Ctrl +)"
+        >
+          <Plus className="size-4" strokeWidth={2} aria-hidden="true" />
+        </button>
+      </div>
 
       {/* -- Group 4: PREVIEW mode -- */}
-      <button
-        type="button"
-        className={`${ICON_BTN} ${previewMode === "desktop" ? PREVIEW_ACTIVE : PREVIEW_IDLE}`}
-        onClick={() => onPreviewModeChange("desktop")}
-        aria-pressed={previewMode === "desktop"}
-        aria-label="Desktop preview"
-        title="Desktop preview"
-      >
-        <Monitor className="size-4" strokeWidth={2} aria-hidden="true" />
-      </button>
+      <div className="hidden items-center gap-1 sm:flex">
+        <Divider />
+        <button
+          type="button"
+          className={`${ICON_BTN} ${previewMode === "desktop" ? PREVIEW_ACTIVE : PREVIEW_IDLE}`}
+          onClick={() => onPreviewModeChange("desktop")}
+          aria-pressed={previewMode === "desktop"}
+          aria-label="Desktop preview"
+          title="Desktop preview"
+        >
+          <Monitor className="size-4" strokeWidth={2} aria-hidden="true" />
+        </button>
 
-      <button
-        type="button"
-        className={`${ICON_BTN} ${previewMode === "mobile" ? PREVIEW_ACTIVE : PREVIEW_IDLE}`}
-        onClick={() => onPreviewModeChange("mobile")}
-        aria-pressed={previewMode === "mobile"}
-        aria-label="Mobile preview"
-        title="Mobile preview"
-      >
-        <Smartphone className="size-4" strokeWidth={2} aria-hidden="true" />
-      </button>
+        <button
+          type="button"
+          className={`${ICON_BTN} ${previewMode === "mobile" ? PREVIEW_ACTIVE : PREVIEW_IDLE}`}
+          onClick={() => onPreviewModeChange("mobile")}
+          aria-pressed={previewMode === "mobile"}
+          aria-label="Mobile preview"
+          title="Mobile preview"
+        >
+          <Smartphone className="size-4" strokeWidth={2} aria-hidden="true" />
+        </button>
+      </div>
 
-      {/* -- Group 5 (mobile only): the Design settings sheet. On lg+ the
-            settings panel is always visible as the right column. -- */}
+      {/* -- Group 5: Design settings. On lg+ the settings panel is always
+            visible as the right column, so the button is only for smaller
+            screens — and on a phone it is the ONLY route to them. -- */}
       <div className="flex items-center gap-1 lg:hidden">
         <Divider />
         <button
@@ -331,6 +389,100 @@ export function EditorToolbar({
             aria-hidden="true"
           />
         </button>
+      </div>
+
+      {/* -- Group 6 (phone only): everything the bar had to give up. -- */}
+      <div ref={moreRef} className="relative sm:hidden">
+        <button
+          type="button"
+          className={`${ICON_BTN} ${moreOpen ? PREVIEW_ACTIVE : PREVIEW_IDLE}`}
+          onClick={() => setMoreOpen((open) => !open)}
+          aria-haspopup="menu"
+          aria-expanded={moreOpen}
+          aria-label="More tools"
+          title="More tools"
+        >
+          <Ellipsis className="size-4" strokeWidth={2} aria-hidden="true" />
+        </button>
+
+        {moreOpen && (
+          <div
+            role="menu"
+            aria-label="More tools"
+            className="absolute bottom-full right-0 z-50 mb-2 w-52 rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-lg"
+          >
+              <button
+                type="button"
+                role="menuitem"
+                className={MORE_ITEM}
+                onClick={() => {
+                  onRedo();
+                  setMoreOpen(false);
+                }}
+                disabled={!canRedo}
+              >
+                <Redo2 className="size-4" strokeWidth={2} aria-hidden="true" />
+                Redo
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                className={MORE_ITEM}
+                onClick={() => {
+                  onTidy();
+                  setMoreOpen(false);
+                }}
+                disabled={!canTidy}
+              >
+                <WandSparkles className="size-4" strokeWidth={2} aria-hidden="true" />
+                Tidy up
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                className={MORE_ITEM}
+                onClick={() => {
+                  onZoomReset();
+                  setMoreOpen(false);
+                }}
+              >
+                <Plus className="size-4" strokeWidth={2} aria-hidden="true" />
+                Reset zoom
+              </button>
+
+              <div aria-hidden="true" className="my-1 h-px bg-border" />
+
+              {/* menuitemradio, not menuitem: the two preview modes are one
+                  mutually-exclusive choice, and `menuitem` does not support a
+                  selected state at all. */}
+              <button
+                type="button"
+                role="menuitemradio"
+                aria-checked={previewMode === "desktop"}
+                className={cn(MORE_ITEM, previewMode === "desktop" && "bg-accent")}
+                onClick={() => {
+                  onPreviewModeChange("desktop");
+                  setMoreOpen(false);
+                }}
+              >
+                <Monitor className="size-4" strokeWidth={2} aria-hidden="true" />
+                Desktop preview
+              </button>
+              <button
+                type="button"
+                role="menuitemradio"
+                aria-checked={previewMode === "mobile"}
+                className={cn(MORE_ITEM, previewMode === "mobile" && "bg-accent")}
+                onClick={() => {
+                  onPreviewModeChange("mobile");
+                  setMoreOpen(false);
+                }}
+              >
+                <Smartphone className="size-4" strokeWidth={2} aria-hidden="true" />
+                Mobile preview
+              </button>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -7,6 +7,7 @@ import { SaveButton } from "@/components/settings/SaveButton";
 import { SettingsCard } from "@/components/settings/SettingsCard";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/ui/password-input";
 import { iconNudgeRightClass } from "@/components/ui/control-styles";
 import {
   requestEmailChange,
@@ -19,7 +20,14 @@ const INITIAL: SettingsActionState = {};
  * Email changes never touch the DB directly: Supabase sends a confirmation
  * link and the address only switches once it's clicked.
  */
-export function EmailChangeForm({ email }: { email: string }) {
+export function EmailChangeForm({
+  email,
+  hasPassword,
+}: {
+  email: string;
+  /** OAuth-only accounts have no password, so they are not asked for one. */
+  hasPassword: boolean;
+}) {
   const [state, formAction, isPending] = useActionState(
     requestEmailChange,
     INITIAL,
@@ -47,6 +55,22 @@ export function EmailChangeForm({ email }: { email: string }) {
             required
           />
         </div>
+        {hasPassword && (
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="email_current_password">Current password</Label>
+            <PasswordInput
+              id="email_current_password"
+              name="current_password"
+              autoComplete="current-password"
+              placeholder="••••••••"
+              required
+            />
+            <p className="font-inter text-xs text-muted-foreground">
+              Whoever controls your email address can reset your password, so
+              this change needs your password to confirm it&apos;s you.
+            </p>
+          </div>
+        )}
         <FormStatus state={state} showSuccess />
         <div>
           <SaveButton

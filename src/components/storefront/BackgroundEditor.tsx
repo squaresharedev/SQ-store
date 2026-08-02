@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { ImagePlus } from "lucide-react";
 import {
   BACKGROUND_IMAGE_SCALE_MAX,
@@ -79,6 +79,7 @@ export function BackgroundEditor({
 }) {
   // "Image" tab can be open before any upload exists; the stored background
   // only becomes {kind:"image"} once an upload succeeds.
+  const fieldId = useId();
   const [imageTab, setImageTab] = useState(false);
   const [uploading, setUploading] = useState(false);
   /** 0..1 while the current image uploads; meaningless unless `uploading`. */
@@ -270,7 +271,7 @@ export function BackgroundEditor({
 
       {value.kind === "solid" && (
         <ColorPicker
-          id="bg-solid"
+          id={`${fieldId}-solid`}
           label="Color"
           value={value.color}
           onChange={(color) => onChange({ kind: "solid", color })}
@@ -280,13 +281,13 @@ export function BackgroundEditor({
       {value.kind === "gradient" && (
         <div className="space-y-3">
           <ColorPicker
-            id="bg-grad-from"
+            id={`${fieldId}-grad-from`}
             label="From"
             value={value.from}
             onChange={(from) => onChange({ ...value, from })}
           />
           <ColorPicker
-            id="bg-grad-to"
+            id={`${fieldId}-grad-to`}
             label="To"
             value={value.to}
             onChange={(to) => onChange({ ...value, to })}

@@ -4,7 +4,12 @@ import {
   EU_COUNTRY_CODES,
   LEGAL_VERSION,
 } from "@/lib/settings/constants";
-import { SINGLE_LINE_TEXT_PATTERN, TEXT_ERROR } from "@/lib/validation/text";
+import {
+  emailAddress,
+  optionalSingleLineText,
+  referenceCode,
+  singleLineText,
+} from "@/lib/validation/inputs";
 
 /**
  * Settings validation schemas, shared by the client (UX hints) and the server
@@ -19,16 +24,9 @@ import { SINGLE_LINE_TEXT_PATTERN, TEXT_ERROR } from "@/lib/validation/text";
  */
 
 export const displayNameSchema = z.strictObject({
-  display_name: z
-    .string()
-    .trim()
-    .min(1, "Give yourself a name, even a weird one.")
-    .max(50, "Keep it under 50 characters.")
-    // A display name is echoed into notification bodies ("<name> joined your
-    // team") and will go into invite email headers once that stub is wired,
-    // where an embedded CR/LF is header injection. Reject control characters
-    // at the boundary rather than escaping at each use site.
-    .regex(SINGLE_LINE_TEXT_PATTERN, TEXT_ERROR),
+  // A display name is echoed into notification bodies and will reach invite
+  // email headers, so the gate comes from the shared primitive.
+  display_name: singleLineText({ label: "A display name", max: 50 }),
 });
 
 /**
@@ -41,9 +39,7 @@ export const displayNameSchema = z.strictObject({
  * has a password identity and enforces it there, where that is knowable.
  */
 export const emailChangeSchema = z.strictObject({
-  new_email: z
-    .email("That doesn't look like an email address.")
-    .max(254, "That email is too long."),
+  new_email: emailAddress("That email"),
   current_password: z.string().max(72).optional(),
 });
 
@@ -66,20 +62,13 @@ export const passwordChangeSchema = z
  *  every field built on this helper inherits the gate (tax_business_name ends
  *  up on invoices and in tax exports). */
 const optionalTrimmed = (max: number, label: string) =>
-  z
-    .string()
-    .trim()
-    .max(max, `${label} is too long.`)
-    .regex(SINGLE_LINE_TEXT_PATTERN, TEXT_ERROR)
-    .transform((v) => (v === "" ? null : v));
+  optionalSingleLineText({ label, max }).transform((v) => (v === "" ? null : v));
 
 export const taxSchema = z.strictObject({
   tax_business_name: optionalTrimmed(200, "Business name"),
-  tax_vat_id: z
-    .string()
-    .trim()
-    .regex(/^$|^[A-Za-z0-9 .-]{2,32}$/, "VAT IDs are 2 to 32 letters and digits.")
-    .transform((v) => (v === "" ? null : v.toUpperCase())),
+  tax_vat_id: referenceCode({ label: "A VAT ID", min: 2, max: 32 }).transform(
+    (v) => (v === "" ? null : v.toUpperCase()),
+  ),
   tax_country: z
     .string()
     .refine((v) => v === "" || (EU_COUNTRY_CODES as string[]).includes(v), {
