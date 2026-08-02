@@ -24,7 +24,11 @@ import { createClient } from "@/lib/supabase/server";
 import { getProfile, getUser } from "@/lib/auth/session";
 import { createNotification, resolveUserIdByEmail } from "@/lib/notifications/create";
 import { can, canGrant, ROLE_LABELS } from "@/lib/team/permissions";
-import { getActorRole } from "@/lib/team/queries";
+import {
+  getActorRole,
+  getTeamRoster,
+  type TeamMemberRow,
+} from "@/lib/team/queries";
 import { ACTIVE_ACCOUNT_COOKIE } from "@/lib/team/account-context";
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
 import {
@@ -312,6 +316,9 @@ export async function changeMemberRole(
   if (!can(actorRole, "team.change_role")) {
     return { error: "You don't have permission to change roles." };
   }
+  if (!(await rateLimit("team_membership", RATE_LIMITS.teamMembership))) {
+    return { error: "Too many membership changes. Try again shortly." };
+  }
   if (!canGrant(actorRole, role)) {
     return { error: "You can't assign a role higher than your own." };
   }
@@ -368,6 +375,9 @@ export async function revokeMemberAccess(
   const actorRole = await getActorRole(account_owner_id);
   if (!can(actorRole, "team.revoke")) {
     return { error: "You don't have permission to remove members." };
+  }
+  if (!(await rateLimit("team_membership", RATE_LIMITS.teamMembership))) {
+    return { error: "Too many membership changes. Try again shortly." };
   }
 
   // Fetch the target row to check if the actor is revoking themselves.
@@ -446,4 +456,22 @@ export async function setActiveAccount(
   // Everything under the dashboard reads account-scoped data — refresh it all.
   revalidatePath("/", "layout");
   return { ok: true };
+}
+
+/**
+ * One further page of the roster, for the team page's "Load more". Read-only:
+ * the team_roster RPC is self-gated (returns nothing to non-members), and the
+ * offset is clamped server-side. Exists because the page seeds only the first
+ * TEAM_PAGE_SIZE rows; without it, members 51+ were invisible with no
+ * indicator, which for an owner reads as "these people are not on my team".
+ */
+export async function fetchTeamRosterPage(
+  accountOwnerId: string,
+  offset: number,
+): Promise<TeamMemberRow[]> {
+  const user = await getUser();
+  if (!user) return [];
+  if (!accountIdSchema.safeParse(accountOwnerId).success) return [];
+  const safeOffset = Math.max(0, Math.trunc(offset));
+  return getTeamRoster(accountOwnerId, { offset: safeOffset });
 }

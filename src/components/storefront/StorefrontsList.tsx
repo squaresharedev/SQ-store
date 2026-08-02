@@ -11,6 +11,7 @@ import type { ActionError } from "@/lib/errors";
 import {
   createStorefront,
   deleteStorefront,
+  fetchStorefrontsPage,
 } from "@/lib/storefront/actions";
 import type { StorefrontSummary } from "@/lib/storefront/queries";
 import type { Product } from "@/types/product";
@@ -25,10 +26,14 @@ import { EmbedModal } from "./EmbedModal";
  */
 export function StorefrontsList({
   storefronts: initial,
+  total,
   products,
   canWrite,
 }: {
   storefronts: StorefrontSummary[];
+  /** Exact count of ALL storefronts; more exist than `storefronts` when the
+   *  first page is truncated, and the list must say so. */
+  total: number;
   products: Product[];
   /** Hide create/delete/embed controls when the active role is read-only. */
   canWrite: boolean;
@@ -37,6 +42,29 @@ export function StorefrontsList({
   const [storefronts, setStorefronts] = useState(initial);
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<ActionError | null>(null);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [loadMoreFailed, setLoadMoreFailed] = useState(false);
+  // Deletes shrink the true count locally between server revalidations.
+  const [removed, setRemoved] = useState(0);
+  const knownTotal = Math.max(storefronts.length, total - removed);
+  const hasMore = storefronts.length < knownTotal;
+
+  async function handleLoadMore() {
+    if (loadingMore) return;
+    setLoadingMore(true);
+    setLoadMoreFailed(false);
+    try {
+      const page = await fetchStorefrontsPage(storefronts.length);
+      setStorefronts((current) => {
+        const seen = new Set(current.map((s) => s.id));
+        return [...current, ...page.rows.filter((s) => !seen.has(s.id))];
+      });
+    } catch {
+      setLoadMoreFailed(true); // same click retries; offset is re-derived
+    } finally {
+      setLoadingMore(false);
+    }
+  }
   const [pendingDelete, setPendingDelete] = useState<StorefrontSummary | null>(
     null,
   );
@@ -51,11 +79,13 @@ export function StorefrontsList({
   );
 
   // Adopt fresh props after a server revalidation (same render-time reset the
-  // ProductList / Sidebar use).
+  // ProductList / Sidebar use). The local delete offset resets with them: the
+  // fresh `total` already reflects the deletions.
   const [prevInitial, setPrevInitial] = useState(initial);
   if (initial !== prevInitial) {
     setPrevInitial(initial);
     setStorefronts(initial);
+    setRemoved(0);
   }
 
   async function handleCreate() {
@@ -84,6 +114,7 @@ export function StorefrontsList({
       return;
     }
     setStorefronts((current) => current.filter((s) => s.id !== target.id));
+    setRemoved((n) => n + 1);
   }
 
   return (
@@ -92,7 +123,9 @@ export function StorefrontsList({
 
       <div className="mb-4 flex items-center justify-between gap-3">
         <p className="font-inter text-sm text-muted-foreground">
-          {storefronts.length} storefront{storefronts.length === 1 ? "" : "s"}
+          {hasMore
+            ? `Showing ${storefronts.length} of ${knownTotal} storefronts`
+            : `${storefronts.length} storefront${storefronts.length === 1 ? "" : "s"}`}
         </p>
         {canWrite && (
           <Button onClick={handleCreate} disabled={creating}>
@@ -153,6 +186,28 @@ export function StorefrontsList({
             </li>
           ))}
         </ul>
+      )}
+
+      {hasMore && (
+        <div className="mt-6 flex flex-col items-center gap-2">
+          {loadMoreFailed && (
+            <p role="alert" className="font-inter text-sm text-destructive">
+              Couldn&apos;t load more storefronts. Try again.
+            </p>
+          )}
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={handleLoadMore}
+            disabled={loadingMore}
+          >
+            {loadingMore
+              ? "Loading…"
+              : loadMoreFailed
+                ? "Try again"
+                : `Load more (${knownTotal - storefronts.length} remaining)`}
+          </Button>
+        </div>
       )}
 
       <EmbedModal

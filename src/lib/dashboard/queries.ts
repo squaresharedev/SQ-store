@@ -194,24 +194,46 @@ export type ProductsSummary = {
   missingImage: { id: string; title: string }[];
 };
 
+/** The needs-attention module lists a handful of items; reading every
+ *  imageless product to render three is wasted transfer at large catalogues. */
+const MISSING_IMAGE_LIMIT = 25;
+
 /**
  * Lightweight product facts for status modules. Reads image_key directly
  * (rather than listProducts) so "missing image" reflects the DB, not whether
  * R2 credentials happen to be configured; RLS scopes rows to the owner.
+ *
+ * Bounded on purpose: `total` is a head-only exact count (no rows leave the
+ * database), and the missing-image list is capped at MISSING_IMAGE_LIMIT
+ * newest. The previous shape read the ENTIRE catalogue to count it, the one
+ * dashboard read whose cost grew without limit.
  */
 export async function getProductsSummary(): Promise<ProductsSummary> {
   const account = await getActiveAccount();
   if (!account) return { total: 0, missingImage: [] };
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("products")
-    .select("id, title, image_key")
-    .eq("owner_id", account.accountId);
-  if (error) throw new Error(`Failed to load products: ${error.message}`);
+  const [counted, missing] = await Promise.all([
+    supabase
+      .from("products")
+      .select("id", { count: "exact", head: true })
+      .eq("owner_id", account.accountId),
+    supabase
+      .from("products")
+      .select("id, title")
+      .eq("owner_id", account.accountId)
+      .is("image_key", null)
+      .order("created_at", { ascending: false })
+      .limit(MISSING_IMAGE_LIMIT),
+  ]);
+  if (counted.error)
+    throw new Error(`Failed to count products: ${counted.error.message}`);
+  if (missing.error)
+    throw new Error(`Failed to load products: ${missing.error.message}`);
   return {
-    total: data.length,
-    missingImage: data
-      .filter((row) => row.image_key === null)
-      .map((row) => ({ id: row.id, title: row.title })),
+    total: counted.count ?? 0,
+    missingImage: (missing.data ?? []).map((row) => ({
+      id: row.id,
+      title: row.title,
+    })),
   };
 }

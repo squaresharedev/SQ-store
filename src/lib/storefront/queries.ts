@@ -33,6 +33,8 @@ export type StorefrontSummary = {
   updatedAt: string;
   /** Full parsed config, so the card renders a faithful grid preview. */
   config: StorefrontConfig;
+  /** Public, rotatable identifier used by the embed snippet. */
+  embedKey: string;
 };
 
 /**
@@ -42,29 +44,41 @@ export type StorefrontSummary = {
  */
 const STOREFRONT_LIST_LIMIT = 100;
 
+/** The list page's read: one bounded page of summaries plus the EXACT total,
+ *  so truncation is visible instead of silent. */
+export type StorefrontsPage = {
+  rows: StorefrontSummary[];
+  /** Exact count of ALL the account's storefronts, not just the rows here. */
+  total: number;
+};
+
 /**
- * The signed-in seller's storefronts, newest-edited first. A stored config that
- * fails the schema (stale shape, the initial '{}' default) falls back to the
- * default config rather than dropping the row from the list.
+ * The signed-in seller's storefronts, newest-edited first, with an exact
+ * total. A stored config that fails the schema (stale shape, the initial '{}'
+ * default) falls back to the default config rather than dropping the row from
+ * the list.
+ *
+ * `offset` fetches further pages for the list's "Load more"; the bound stays
+ * (each row carries a full Zod-parsed config JSONB, so per-row cost is real)
+ * but past it the UI now shows "Showing X of N" + a way to get the rest,
+ * instead of silently hiding the oldest storefronts.
  */
-export async function listStorefronts(): Promise<StorefrontSummary[]> {
+export async function listStorefronts(offset = 0): Promise<StorefrontsPage> {
   const account = await getActiveAccount();
-  if (!account) return [];
+  if (!account) return { rows: [], total: 0 };
   const supabase = await createClient();
-  const { data, error } = await supabase
+  const from = Math.max(0, Math.trunc(offset));
+  const { data, error, count } = await supabase
     .from("storefronts")
-    .select("id, name, config, updated_at")
+    .select("id, name, config, updated_at, embed_key", { count: "exact" })
     .eq("owner_id", account.accountId)
     .order("updated_at", { ascending: false })
-    .limit(STOREFRONT_LIST_LIMIT);
+    // Stable tiebreak so paging can't skip or duplicate a row on ties.
+    .order("id", { ascending: true })
+    .range(from, from + STOREFRONT_LIST_LIMIT - 1);
   if (error) throw new Error(`Failed to load storefronts: ${error.message}`);
-  if (data.length >= STOREFRONT_LIST_LIMIT) {
-    console.warn(
-      `[storefronts] hit the ${STOREFRONT_LIST_LIMIT}-storefront read cap — this list is TRUNCATED. Add pagination.`,
-    );
-  }
 
-  return data.map((row) => {
+  const rows = (data ?? []).map((row) => {
     const config =
       parseStoredStorefrontConfig(row.config) ?? DEFAULT_STOREFRONT_CONFIG;
     return {
@@ -73,8 +87,10 @@ export async function listStorefronts(): Promise<StorefrontSummary[]> {
       blockCount: config.blocks.length,
       updatedAt: row.updated_at,
       config,
+      embedKey: row.embed_key,
     };
   });
+  return { rows, total: count ?? rows.length };
 }
 
 /**

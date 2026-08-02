@@ -1,9 +1,13 @@
 import { z } from "zod";
 import {
-  MULTILINE_TEXT_PATTERN,
-  SINGLE_LINE_TEXT_PATTERN,
-  TEXT_ERROR,
-} from "@/lib/validation/text";
+  hexColor,
+  hostname,
+  isStrictHexColor,
+  multiLineText,
+  singleLineText,
+  uniqueList,
+  uuidField,
+} from "@/lib/validation/inputs";
 import {
   BACKGROUND_IMAGE_SCALE_MAX,
   BACKGROUND_IMAGE_SCALE_MIN,
@@ -44,33 +48,28 @@ import { LEGACY_BACKGROUND_GRADIENTS } from "@/components/storefront/background-
 // for font/size/radius, no field that can hold HTML/URLs/CSS. `strictObject`
 // rejects unknown keys so nothing smuggles extra data into the jsonb.
 
-const HEX_COLOR_PATTERN = /^#[0-9a-fA-F]{6}$/;
-
-/** Gate every color before it goes anywhere near a style attribute. */
-export function isStrictHexColor(value: string): boolean {
-  return HEX_COLOR_PATTERN.test(value);
-}
+/** Gate every color before it goes anywhere near a style attribute.
+ *  Re-exported from the primitives so the render path and the schema can
+ *  never drift onto two different definitions of "valid hex". */
+export { isStrictHexColor };
 
 /** A storefront's public id (also the future embed/attribution key). Guards
  *  URL params + action inputs so a garbage id 404s instead of erroring. */
-export const storefrontIdSchema = z.uuid();
+export const storefrontIdSchema = uuidField("That storefront id");
 
 /** Display name shown in the storefront list. Mirrors the DB check
  *  (char_length 1..80); trimmed before validation by callers. */
 export const STOREFRONT_NAME_MAX = 80;
-export const storefrontNameSchema = z
-  .string()
-  .trim()
-  .min(1, { error: "Give your storefront a name." })
-  .max(STOREFRONT_NAME_MAX, { error: "Storefront names are 80 characters or fewer." });
-
-const hexColorSchema = z.string().regex(HEX_COLOR_PATTERN, {
-  error: "Colors must be 6-digit hex, like #a855f7.",
+export const storefrontNameSchema = singleLineText({
+  label: "A storefront name",
+  max: STOREFRONT_NAME_MAX,
 });
 
-// Plain-text gates live in lib/validation/text.ts so profile fields share
-// the same rule — they previously did not. Text is ALWAYS rendered as
-// React text nodes, never markup.
+const hexColorSchema = hexColor();
+
+// Plain-text gates come from lib/validation/inputs.ts, so every field that
+// accepts prose inherits the same rule by construction. Text is ALWAYS
+// rendered as React text nodes, never markup.
 
 /** Sanity cap on grid size. Sized above the biggest canvas (12 x 24 cells)
  *  can sensibly hold, so it bounds the stored jsonb without ever being the
@@ -218,33 +217,16 @@ const themeSchema = z.preprocess((value) => {
 // The optional masthead above the grid: show toggle + capped plain text.
 const headerSchema = z.strictObject({
   show: z.boolean(),
-  name: z.string().max(HEADER_NAME_MAX).regex(SINGLE_LINE_TEXT_PATTERN, TEXT_ERROR),
-  bio: z.string().max(HEADER_BIO_MAX).regex(MULTILINE_TEXT_PATTERN, TEXT_ERROR),
+  name: singleLineText({ label: "A store name", max: HEADER_NAME_MAX, min: 0 }),
+  bio: multiLineText({ label: "A store bio", max: HEADER_BIO_MAX }),
 });
 
-// Bare lowercase hostname, RFC-shaped: dot-separated alnum/hyphen labels
-// (≤ 63 chars, no leading/trailing hyphen), alpha TLD, ≤ 253 chars total.
-// No protocol, path, port, or wildcard — it is only ever compared against a
-// request origin's hostname or rendered as a text node, never used in markup.
-const HOSTNAME_PATTERN =
-  /^(?=[a-z0-9.-]{4,253}$)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?[.])+[a-z]{2,63}$/;
 
 /** Embed-widget settings (non-visual member of the config jsonb). Shared by
  *  the updateEmbedSettings action (the boundary) and the modal (UX only). */
 export const embedSettingsSchema = z.strictObject({
   enabled: z.boolean(),
-  domains: z
-    .array(
-      z.string().regex(HOSTNAME_PATTERN, {
-        error: "Use bare lowercase domains like yoursite.com — no https:// or paths.",
-      }),
-    )
-    .max(EMBED_MAX_DOMAINS, {
-      error: `List up to ${EMBED_MAX_DOMAINS} domains.`,
-    })
-    .refine((domains) => new Set(domains).size === domains.length, {
-      error: "Each domain can only be listed once.",
-    }),
+  domains: uniqueList(hostname(), { label: "domains", max: EMBED_MAX_DOMAINS }),
 });
 
 // Free placement: every block carries its own cell coordinates and span. The
@@ -269,13 +251,8 @@ const productBlockSchema = z.strictObject({
 // it); the schema still refuses control characters so stored data stays sane.
 const textBlockSchema = z.strictObject({
   type: z.literal("text"),
-  id: z.uuid(),
-  text: z
-    .string()
-    .max(TEXT_MAX_LENGTH)
-    // Control characters (other than newline) are rejected so stored text
-    // stays sane; sellers can still write multi-line text.
-    .regex(MULTILINE_TEXT_PATTERN, TEXT_ERROR),
+  id: uuidField("A block id"),
+  text: multiLineText({ label: "Block text", max: TEXT_MAX_LENGTH }),
   variant: z.enum(TEXT_VARIANTS),
   align: z.enum(TEXT_ALIGNS),
   ...placementFields,
@@ -293,7 +270,7 @@ const textBlockSchema = z.strictObject({
 // Decorative shape: allowlisted kind + regex-gated color, nothing free-form.
 const shapeBlockSchema = z.strictObject({
   type: z.literal("shape"),
-  id: z.uuid(),
+  id: uuidField("A block id"),
   kind: z.enum(SHAPE_KINDS),
   color: hexColorSchema,
   ...placementFields,
@@ -314,7 +291,11 @@ const configObjectSchema = z
     theme: themeSchema,
     blocks: z
       .array(blockSchema)
-      .max(MAX_BLOCKS)
+      // Custom message: Zod's default ("Array must contain at most...") leaks
+      // implementation vocabulary at the one seller-facing cap in this schema.
+      .max(MAX_BLOCKS, {
+        error: `A storefront can hold up to ${MAX_BLOCKS} blocks. Remove some blocks or split this storefront in two.`,
+      })
       .refine(
         (blocks) => new Set(blocks.map(blockKey)).size === blocks.length,
         { error: "Grid blocks must be unique." },

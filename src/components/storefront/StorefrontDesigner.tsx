@@ -141,9 +141,13 @@ const PANEL_DEFAULT_WIDTH = 320;
 const PANEL_RESIZE_STEP = 16;
 
 /** The little tab that collapses / reopens the panel: a chip clipped to the
- *  panel's left edge (desktop only — mobile uses bottom sheets). */
+ *  panel's left edge (desktop only — mobile uses bottom sheets).
+ *
+ *  No shadow: the tab has no right border (it butts up against the panel), so
+ *  a box-shadow spills out of that open edge and paints a seam down the join.
+ *  The border on the other three sides is the whole affordance. */
 const PANEL_TAB_CLASS =
-  "absolute top-1/2 z-30 hidden h-12 w-5 -translate-y-1/2 items-center justify-center rounded-l-md border border-r-0 border-border bg-background text-muted-foreground shadow-sm transition-colors duration-base ease-standard hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none lg:flex";
+  "absolute top-1/2 z-30 hidden h-12 w-5 -translate-y-1/2 items-center justify-center rounded-l-md border border-r-0 border-border bg-background text-muted-foreground transition-colors duration-base ease-standard hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none lg:flex";
 
 const SHEET_ON_MOBILE_CLASS =
   "fixed inset-x-0 bottom-0 z-40 max-h-[70vh] overflow-y-auto rounded-t-lg border-t border-border bg-background p-4 pb-24 shadow-lg lg:static lg:z-auto lg:max-h-none lg:overflow-visible lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0 lg:pb-0 lg:shadow-none";
@@ -536,19 +540,140 @@ export function StorefrontDesigner({
     canvasActions.current.selectBlock(key);
   }, []);
 
-  /** Scale the whole board to fit the window, then centre it. */
-  function zoomToFit() {
+  /**
+   * Scale the whole board to fit the window, then centre it. Used ONLY for the
+   * first paint, when the board is wider than the workspace (always the case on
+   * a phone) — without it the editor would open cropped at 100% with the
+   * content off-screen. There is deliberately no "zoom to fit" control: zoom is
+   * a per-gesture thing, and the toolbar reads better with fewer buttons.
+   */
+  function fitOnFirstPaint() {
     const view = measureView();
     if (!view) return;
-    centerCanvas(
-      clampZoom(
-        Math.min(
-          (view.area.clientWidth - CANVAS_MARGIN * 2) / view.width,
-          (view.area.clientHeight - CANVAS_MARGIN * 2) / view.height,
-        ),
+    const zoom = clampZoom(
+      Math.min(
+        (view.area.clientWidth - CANVAS_MARGIN * 2) / view.width,
+        (view.area.clientHeight - CANVAS_MARGIN * 2) / view.height,
       ),
     );
+    viewport.set({
+      zoom,
+      pan: {
+        x: (view.area.clientWidth - view.width * zoom) / 2,
+        // Top-aligned, NOT vertically centred. A fitted board is short relative
+        // to the window (on a phone it lands around half the height), and
+        // centring it left a dead band across the top of the screen with the
+        // content stranded in the middle. Starting at the top puts the board
+        // where the eye lands and leaves the free space at the bottom, where
+        // the sheets and toolbar live anyway.
+        y: CANVAS_MARGIN,
+      },
+    });
   }
+
+  /**
+   * Two-finger pinch: the ONLY way to zoom on a phone, where the toolbar's
+   * zoom buttons are hidden (they cost more thumb-width than they are worth).
+   * The workspace sets `touch-none`, so no native gesture competes and we get
+   * raw pointer events for both fingers.
+   *
+   * Tracked here rather than in the canvas because zoom and pan live on the
+   * viewport store this component owns.
+   */
+  const touchPoints = useRef(new Map<number, { x: number; y: number }>());
+  const pinchStart = useRef<{
+    distance: number;
+    zoom: number;
+    midX: number;
+    midY: number;
+    pan: { x: number; y: number };
+  } | null>(null);
+
+  function pinchGeometry() {
+    const [a, b] = [...touchPoints.current.values()];
+    return {
+      distance: Math.hypot(b.x - a.x, b.y - a.y),
+      midX: (a.x + b.x) / 2,
+      midY: (a.y + b.y) / 2,
+    };
+  }
+
+  function onCanvasPointerDown(event: React.PointerEvent<HTMLElement>) {
+    if (event.pointerType === "touch") {
+      touchPoints.current.set(event.pointerId, {
+        x: event.clientX,
+        y: event.clientY,
+      });
+      if (touchPoints.current.size === 2) {
+        const { distance, midX, midY } = pinchGeometry();
+        pinchStart.current = {
+          distance,
+          zoom: viewport.get().zoom,
+          midX,
+          midY,
+          pan: { ...viewport.get().pan },
+        };
+        // A finger may already be dragging a tile or panning. Both of those
+        // end on pointercancel, so this hands the gesture over cleanly instead
+        // of letting a tile follow one finger through the pinch.
+        window.dispatchEvent(new PointerEvent("pointercancel"));
+        return;
+      }
+    }
+    startPan(event);
+  }
+
+  function onCanvasPointerMove(event: React.PointerEvent<HTMLElement>) {
+    if (event.pointerType !== "touch") return;
+    if (!touchPoints.current.has(event.pointerId)) return;
+    touchPoints.current.set(event.pointerId, {
+      x: event.clientX,
+      y: event.clientY,
+    });
+
+    const start = pinchStart.current;
+    if (!start || touchPoints.current.size !== 2) return;
+    event.preventDefault();
+
+    const { distance, midX, midY } = pinchGeometry();
+    if (start.distance === 0) return;
+    const zoom = clampZoom((distance / start.distance) * start.zoom);
+    // Keep the board point that started under the pinch centre pinned there,
+    // then add however far the centre itself travelled (pinch pans too).
+    const pinned = panAfterZoom(start.pan, start.zoom, zoom, start.midX, start.midY);
+    viewport.set(() => ({
+      zoom,
+      pan: {
+        x: pinned.x + (midX - start.midX),
+        y: pinned.y + (midY - start.midY),
+      },
+    }));
+  }
+
+  function onCanvasPointerUp(event: React.PointerEvent<HTMLElement>) {
+    if (event.pointerType !== "touch") return;
+    touchPoints.current.delete(event.pointerId);
+    // Lifting one finger ends the pinch; it does NOT resume a pan, or the
+    // board would jump to track the remaining finger.
+    if (touchPoints.current.size < 2) pinchStart.current = null;
+  }
+
+  // A finger can leave the workspace before it lifts, and then the element's
+  // own pointerup never fires. Without this the id would stay in the map and
+  // the next single touch would look like a second finger, starting a phantom
+  // pinch. Pruning on window catches the release wherever it happens.
+  useEffect(() => {
+    function prune(event: PointerEvent) {
+      touchPoints.current.delete(event.pointerId);
+      if (touchPoints.current.size < 2) pinchStart.current = null;
+    }
+    window.addEventListener("pointerup", prune);
+    window.addEventListener("pointercancel", prune);
+    return () => {
+      window.removeEventListener("pointerup", prune);
+      window.removeEventListener("pointercancel", prune);
+    };
+  }, []);
 
   /**
    * Pan gestures: the middle button, space held, or a left-press that landed
@@ -602,7 +727,7 @@ export function StorefrontDesigner({
         return;
       }
       placedInitialView.current = true;
-      if (view.width + CANVAS_MARGIN * 2 > view.area.clientWidth) zoomToFit();
+      if (view.width + CANVAS_MARGIN * 2 > view.area.clientWidth) fitOnFirstPaint();
       else centerCanvas(1);
     }
     place(0);
@@ -891,6 +1016,23 @@ export function StorefrontDesigner({
     );
   }
 
+  /**
+   * Merge picker-search results into the catalogue. The seed catalogue is
+   * bounded (newest 500), so a search can surface products this component has
+   * never seen; they must exist in `catalog` before a block referencing them
+   * renders, or the block would be dropped as unknown. Existing entries win:
+   * they may carry local edits (applyProductUpdate) not yet reflected in a
+   * stale search payload.
+   */
+  const mergeFoundProducts = useCallback((found: Product[]) => {
+    if (found.length === 0) return;
+    setCatalog((current) => {
+      const known = new Set(current.map((p) => p.id));
+      const fresh = found.filter((p) => !known.has(p.id));
+      return fresh.length > 0 ? [...current, ...fresh] : current;
+    });
+  }, []);
+
   /** Returns whether the save succeeded, so callers (e.g. save-then-leave) can
    *  branch on it without re-reading async state. */
   async function handleSave(): Promise<boolean> {
@@ -986,16 +1128,35 @@ export function StorefrontDesigner({
           </div>
 
           <div className="flex items-center gap-3">
+            {/* Save feedback must survive the phone. These used to be
+                `hidden sm:inline`, so tapping Save on a 390px screen confirmed
+                nothing at all — and `display:none` drops a node from the
+                accessibility tree too, so the `role="status"` never announced
+                either. The wording shortens instead of disappearing. */}
             {saveState.status === "saved" && (
-              <span role="status" className={`hidden sm:inline ${helpTextClass}`}>
-                {saveState.droppedBlocks > 0
-                  ? `Saved. ${saveState.droppedBlocks} removed product(s) were dropped.`
-                  : "Saved."}
+              <span role="status" className={`shrink-0 ${helpTextClass}`}>
+                <span className="hidden sm:inline">
+                  {saveState.droppedBlocks > 0
+                    ? `Saved. ${saveState.droppedBlocks} removed product(s) were dropped.`
+                    : "Saved."}
+                </span>
+                <span className="sm:hidden">
+                  {saveState.droppedBlocks > 0
+                    ? `Saved · ${saveState.droppedBlocks} dropped`
+                    : "Saved."}
+                </span>
               </span>
             )}
             {dirty && saveState.status === "idle" && (
-              <span role="status" className={`hidden sm:inline ${helpTextClass}`}>
-                Unsaved changes
+              <span role="status" className={`shrink-0 ${helpTextClass}`}>
+                <span className="hidden sm:inline">Unsaved changes</span>
+                {/* No room for the phrase beside the Save button on a phone,
+                    so a phone gets the familiar unsaved dot — announced in
+                    full for anyone who cannot see it. */}
+                <span aria-hidden="true" className="sm:hidden" title="Unsaved changes">
+                  ●
+                </span>
+                <span className="sr-only sm:hidden">Unsaved changes</span>
               </span>
             )}
             <Button
@@ -1016,7 +1177,10 @@ export function StorefrontDesigner({
             column. pb clears the floating toolbar. */}
         <main
           ref={canvasViewportRef}
-          onPointerDown={designView ? startPan : undefined}
+          onPointerDown={designView ? onCanvasPointerDown : undefined}
+          onPointerMove={designView ? onCanvasPointerMove : undefined}
+          onPointerUp={designView ? onCanvasPointerUp : undefined}
+          onPointerCancel={designView ? onCanvasPointerUp : undefined}
           className={cn(
             "relative min-w-0 flex-1",
             designView
@@ -1132,6 +1296,7 @@ export function StorefrontDesigner({
                       products={catalog}
                       usedProductIds={usedProductIds}
                       onAdd={addProduct}
+                      onFound={mergeFoundProducts}
                     />
                   ) : selectedBlock?.type === "product" ? (
                     <ProductBlockEditor
@@ -1212,7 +1377,6 @@ export function StorefrontDesigner({
         onZoomIn={() => zoomBy(ZOOM_STEP)}
         onZoomOut={() => zoomBy(-ZOOM_STEP)}
         onZoomReset={resetZoom}
-        onZoomFit={zoomToFit}
         onTidy={tidyBlocks}
         canTidy={blocks.length > 0}
         canUndo={history.canUndo}

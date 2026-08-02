@@ -21,6 +21,7 @@ export default async function StorefrontsPage() {
     getActiveAccount(),
   ]);
   const canWrite = can(account?.role, "storefront.write");
+  const { rows: storefrontRows, total: storefrontTotal } = storefronts;
 
   return (
     <main className="mx-auto max-w-7xl px-6 py-8">
@@ -35,7 +36,8 @@ export default async function StorefrontsPage() {
       </div>
 
       <StorefrontsList
-        storefronts={storefronts}
+        storefronts={storefrontRows}
+        total={storefrontTotal}
         products={products}
         canWrite={canWrite}
       />

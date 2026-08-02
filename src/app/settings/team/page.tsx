@@ -5,6 +5,7 @@ import {
   getActorRole,
   getMyPendingInvites,
   getTeamRoster,
+  TEAM_PAGE_SIZE,
 } from "@/lib/team/queries";
 
 export const metadata: Metadata = {
@@ -37,6 +38,7 @@ export default async function TeamSettingsPage() {
       accountOwnerId={accountOwnerId}
       actorRole={actorRole}
       members={members}
+      pageSize={TEAM_PAGE_SIZE}
       pendingInvites={pendingInvites}
       viewerUserId={user.id}
     />

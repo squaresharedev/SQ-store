@@ -16,9 +16,10 @@ export default async function DashboardOverviewPage() {
     listStorefronts(),
   ]);
 
-  // The overview's storefront tile summarizes across all of the seller's
-  // storefronts: "saved" once any exist, block count summed over them.
-  const storefrontBlockCount = storefronts.reduce(
+  // The overview's storefront tile summarizes across the seller's storefronts:
+  // "saved" once any exist, block count summed over the loaded page (the sum
+  // is decorative; the exact `total` is what says whether any exist).
+  const storefrontBlockCount = storefronts.rows.reduce(
     (total, storefront) => total + storefront.blockCount,
     0,
   );
@@ -28,7 +29,7 @@ export default async function DashboardOverviewPage() {
       <DashboardHome
         orders={orders}
         products={products}
-        storefrontSaved={storefronts.length > 0}
+        storefrontSaved={storefronts.total > 0}
         storefrontBlockCount={storefrontBlockCount}
       />
     </main>
