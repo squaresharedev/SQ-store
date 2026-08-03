@@ -1,5 +1,15 @@
 packages:
   - "."
+
+# MUST match `auto-install-peers=false` in .npmrc, and must live HERE as well.
+# pnpm 11 no longer reads pnpm-specific settings from .npmrc, so it silently
+# defaulted this to true and rewrote the lockfile's `settings.autoInstallPeers`.
+# CI runs pnpm 10 with --frozen-lockfile, which refuses a lockfile whose
+# recorded setting disagrees with the configured one
+# (ERR_PNPM_LOCKFILE_CONFIG_MISMATCH) — so the deploy died at install.
+# Peers are declared explicitly in package.json; auto-installing them would
+# drag the whole of "next" in via @squaresharedev/db.
+autoInstallPeers: false
 onlyBuiltDependencies:
   - esbuild
   - workerd
