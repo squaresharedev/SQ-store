@@ -399,6 +399,50 @@ export function StorefrontDesigner({
     };
   }, []);
 
+  /**
+   * Delete / Backspace removes the selected block — the shortcut every canvas
+   * tool has. Same subscribe-once + ref shape as the undo listener above, so
+   * selecting a tile never churns add/removeListener.
+   *
+   * Guarded on the event target, not just on "is something selected": the
+   * inspector for the selected block is full of fields (the text block's
+   * textarea, a product's name and price, the hex input), and a Backspace
+   * there must edit the value the seller is typing, never delete the tile
+   * they are typing about. Modified presses are left alone too — Cmd/Alt +
+   * Backspace are word/line deletes that belong to whatever has focus.
+   *
+   * preventDefault because Backspace outside a field is historically "go
+   * back", and losing unsaved design work to a navigation would be brutal.
+   */
+  const deleteShortcut = useRef<{ selectedKey: string | null }>({
+    selectedKey: null,
+  });
+  useEffect(() => {
+    deleteShortcut.current.selectedKey =
+      inspector?.kind === "block" ? inspector.key : null;
+  });
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key !== "Delete" && event.key !== "Backspace") return;
+      if (event.ctrlKey || event.metaKey || event.altKey) return;
+      const key = deleteShortcut.current.selectedKey;
+      if (!key) return;
+      const target = event.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+      event.preventDefault();
+      canvasActions.current.removeBlock(key);
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
+
   // Cmd/Ctrl +/-/0, the shortcuts every canvas tool shares.
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -527,8 +571,8 @@ export function StorefrontDesigner({
   const onMoveBlock = useCallback((key: string, x: number, y: number) => {
     canvasActions.current.moveBlock(key, x, y);
   }, []);
-  const onResizeBlock = useCallback((key: string, w: number, h: number) => {
-    canvasActions.current.resizeBlock(key, w, h);
+  const onResizeBlock = useCallback((key: string, placement: BlockPlacement) => {
+    canvasActions.current.resizeBlock(key, placement);
   }, []);
   const onRemoveBlock = useCallback((key: string) => {
     canvasActions.current.removeBlock(key);
@@ -868,10 +912,12 @@ export function StorefrontDesigner({
     );
   }
 
-  function resizeBlock(key: string, w: number, h: number) {
+  /** Takes the whole placement: stretching a tile up or left moves its origin
+   *  as well as its span, so x/y have to travel with w/h. */
+  function resizeBlock(key: string, placement: BlockPlacement) {
     recordChange(`size:${key}`);
     setBlocks((current) =>
-      current.map((b) => (blockKey(b) === key ? { ...b, w, h } : b)),
+      current.map((b) => (blockKey(b) === key ? { ...b, ...placement } : b)),
     );
   }
 

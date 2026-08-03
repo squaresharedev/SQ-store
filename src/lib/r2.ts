@@ -112,6 +112,44 @@ export async function presignPutUrl(
   return signed.url;
 }
 
+/**
+ * SERVER-SIDE PutObject — upload bytes we are already holding.
+ *
+ * This is how product images get into the bucket. It is not a performance
+ * choice: a presigned browser PUT means the bytes never pass through us, which
+ * makes content moderation impossible and makes every upload depend on the
+ * bucket's CORS allowlist naming each origin the app runs from. Both problems
+ * disappear when the upload is a same-origin POST to our own API and we do the
+ * PUT ourselves.
+ *
+ * `contentType` must be the SNIFFED type (see lib/uploads/sniff.ts), never the
+ * client's claim — it is what R2 will serve the object back as.
+ */
+export async function putObject(
+  key: string,
+  // Explicitly ArrayBuffer-backed: a SharedArrayBuffer-backed view is not a
+  // valid request body, and the wider `Uint8Array` type admits one.
+  bytes: Uint8Array<ArrayBuffer>,
+  contentType: string,
+): Promise<void> {
+  const res = await r2Client().fetch(objectUrl(key).toString(), {
+    method: "PUT",
+    headers: {
+      "Content-Type": contentType,
+      // MUST be explicit. R2 refuses a chunked PUT with 411 Length Required,
+      // and Next patches global fetch — through that patch a Uint8Array,
+      // ArrayBuffer or Blob body all go out without a Content-Length and get
+      // streamed. It only looked fine for tiny bodies; anything from ~100 KB
+      // up failed, i.e. every real photo.
+      "Content-Length": String(bytes.byteLength),
+    },
+    body: bytes,
+  });
+  if (!res.ok) {
+    throw new Error(`R2 PUT ${key} failed: ${res.status}`);
+  }
+}
+
 /** Real size (bytes) and stored Content-Type of an object, or null if absent. */
 export type ObjectMeta = { size: number; contentType: string | null };
 

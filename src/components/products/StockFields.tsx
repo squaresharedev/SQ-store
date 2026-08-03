@@ -7,8 +7,9 @@ import {
   errorTextClass,
   fieldBaseClass,
   helpTextClass,
-  iconButtonClass,
   labelClass,
+  stepperButtonClass,
+  stepperFieldClass,
 } from "@/components/ui/control-styles";
 import { STOCK_QUANTITY_MAX } from "@/lib/validation/product";
 
@@ -42,10 +43,16 @@ export function StockFields({ values, errors, onChange }: Props) {
   const thresholdErrorId = `${fieldId}-threshold-error`;
   const thresholdHintId = `${fieldId}-threshold-hint`;
 
+  // The typed value as a number. A field mid-edit can hold "" or junk, which
+  // is not an error yet — it reads as 0 for stepping and for the bounds.
+  const parsedQuantity = parseInt(values.stockQuantity, 10);
+  const currentQuantity = Number.isFinite(parsedQuantity) ? parsedQuantity : 0;
+
   function stepQuantity(delta: 1 | -1) {
-    const parsed = parseInt(values.stockQuantity, 10);
-    const current = Number.isFinite(parsed) ? parsed : 0;
-    const next = Math.max(0, Math.min(STOCK_QUANTITY_MAX, current + delta));
+    const next = Math.max(
+      0,
+      Math.min(STOCK_QUANTITY_MAX, currentQuantity + delta),
+    );
     onChange("stockQuantity", String(next));
   }
 
@@ -75,14 +82,22 @@ export function StockFields({ values, errors, onChange }: Props) {
             <label htmlFor={stockQtyId} className={labelClass}>
               In stock
             </label>
-            <div className="flex items-stretch gap-0 sm:max-w-xs">
+            {/* One control, three parts: the buttons and the field share a
+                height and sit flush, with no gap to break them apart.
+                `w-fit` rather than `inline-flex` — a <label> is inline, so an
+                inline-level stepper wraps up onto the label's line. */}
+            <div className="flex w-fit items-stretch">
               <button
                 type="button"
                 aria-label="Decrease stock"
                 onClick={() => stepQuantity(-1)}
-                className={iconButtonClass}
+                // Nothing below zero is a real stock level, and the stepper
+                // clamps there anyway — say so rather than letting the button
+                // look live at the floor.
+                disabled={currentQuantity <= 0}
+                className={stepperButtonClass}
               >
-                <Minus className="size-4" aria-hidden="true" />
+                <Minus className="size-4" strokeWidth={2} aria-hidden="true" />
               </button>
               <input
                 id={stockQtyId}
@@ -97,15 +112,16 @@ export function StockFields({ values, errors, onChange }: Props) {
                 aria-describedby={
                   errors.stockQuantity ? stockQtyErrorId : undefined
                 }
-                className={`${fieldBaseClass} rounded-none text-center`}
+                className={stepperFieldClass}
               />
               <button
                 type="button"
                 aria-label="Increase stock"
                 onClick={() => stepQuantity(1)}
-                className={iconButtonClass}
+                disabled={currentQuantity >= STOCK_QUANTITY_MAX}
+                className={stepperButtonClass}
               >
-                <Plus className="size-4" aria-hidden="true" />
+                <Plus className="size-4" strokeWidth={2} aria-hidden="true" />
               </button>
             </div>
             {errors.stockQuantity && (

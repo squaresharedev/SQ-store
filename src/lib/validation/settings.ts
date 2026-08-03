@@ -1,6 +1,7 @@
 import { z } from "zod";
 import {
   DELETE_CONFIRM_PHRASE,
+  DISPLAY_NAME_MAX_LENGTH,
   EU_COUNTRY_CODES,
   LEGAL_VERSION,
 } from "@/lib/settings/constants";
@@ -24,9 +25,14 @@ import {
  */
 
 export const displayNameSchema = z.strictObject({
-  // A display name is echoed into notification bodies and will reach invite
-  // email headers, so the gate comes from the shared primitive.
-  display_name: singleLineText({ label: "A display name", max: 50 }),
+  // A username is echoed into notification bodies and will reach invite email
+  // headers, so the gate comes from the shared primitive. The length cap is
+  // enforced HERE, on every server write path — the input's `maxLength` is a
+  // typing hint only and a direct POST never sees it.
+  display_name: singleLineText({
+    label: "A username",
+    max: DISPLAY_NAME_MAX_LENGTH,
+  }),
 });
 
 /**

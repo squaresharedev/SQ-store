@@ -23,8 +23,9 @@ import type {
   ProductStatus,
 } from "@/types/product";
 import type { Paginated } from "@/types/pagination";
-import type { ProductSort } from "@/lib/products/sort";
-import { FilterSelect, type FilterOption } from "@/components/orders/FilterSelect";
+import { PRODUCT_SORTS, type ProductSort } from "@/lib/products/sort";
+import { FilterMenu } from "@/components/ui/FilterMenu";
+import type { FilterOption } from "@/components/ui/FilterOptionList";
 import { SortSlidersIcon } from "@/components/ui/SortSlidersIcon";
 import { Spinner } from "@/components/ui/spinner";
 import {
@@ -39,6 +40,11 @@ import { ProductList } from "./ProductList";
 // URL (the server page reads them and re-queries), so this component only
 // wires toolbar -> URL -> list. No data access here. The heading itself stays
 // a server-rendered node passed in as `heading`.
+//
+// Status and ordering share ONE trigger (FilterMenu). Two popovers for two
+// settings a seller changes rarely was a lot of toolbar for a page whose real
+// control is the search box; folded together, the row is search + Clear, and
+// the merged trigger states what it is doing rather than hiding it.
 
 /** Matches the orders toolbar, so typing feels the same on both pages. */
 const SEARCH_DEBOUNCE_MS = 300;
@@ -145,14 +151,19 @@ export function ProductsBrowser({
     debounceRef.current = setTimeout(() => navigate(next, sort, 1), SEARCH_DEBOUNCE_MS);
   }
 
-  function handleStatus(value: ProductStatus | "") {
-    const next = { ...draft, status: value === "" ? undefined : value };
+  // Both handlers take a plain string and narrow: the merged menu holds two
+  // groups of different value types, and these values round-trip through the
+  // URL, so a runtime check is the honest boundary rather than a cast.
+  function handleStatus(value: string) {
+    const status: ProductStatus | undefined =
+      value === "active" || value === "draft" ? value : undefined;
+    const next = { ...draft, status };
     setDraft(next);
     navigate(next, sort, 1);
   }
 
-  function handleSort(value: ProductSort) {
-    navigate(draft, value, 1);
+  function handleSort(value: string) {
+    navigate(draft, PRODUCT_SORTS.find((option) => option === value) ?? "default", 1);
   }
 
   function handlePage(page: number) {
@@ -189,25 +200,37 @@ export function ProductsBrowser({
             grid below it. Desktop: hugs its content beside the heading. */}
         <div className="flex w-full flex-nowrap items-center justify-between gap-2 sm:w-auto sm:justify-end">
           {showToolbar && (
-            <FilterSelect
-              ariaLabel="Sort products"
-              variant="button"
-              value={sort}
-              options={SORT_OPTIONS}
-              onChange={handleSort}
-              // Resting state reads as the control it is; once the seller picks
-              // an ordering the trigger shows that instead.
-              triggerLabel={sort === "default" ? "Sort" : undefined}
+            <FilterMenu
+              ariaLabel="Sort and filter products"
+              restingLabel="Sort"
+              sections={[
+                {
+                  label: "Status",
+                  value: draft.status ?? "",
+                  options: STATUS_OPTIONS,
+                  onChange: handleStatus,
+                  defaultValue: "",
+                },
+                {
+                  label: "Sort by",
+                  value: sort,
+                  options: SORT_OPTIONS,
+                  onChange: handleSort,
+                  defaultValue: "default",
+                },
+              ]}
               // Always the sliders icon (not the selected option's): it is the
               // control's identity, and its handles animate on hover.
               triggerIcon={<SortSlidersIcon className="size-4 shrink-0" />}
               iconOnlyOnMobile
               // h-10 on both controls: the outlined trigger's border would
               // otherwise make it 2px taller than the CTA, and the icon-only
-              // mobile state 2px shorter.
+              // mobile state 2px shorter. `max-w-[13rem]` keeps a two-group
+              // summary from crowding the CTA — it truncates, the panel and the
+              // tooltip carry the full text.
               // `group/sort` is the hover/focus scope the handle motion keys off.
-              triggerClassName="group/sort h-10 shrink-0"
-              panelClassName="sm:w-60"
+              triggerClassName="group/sort h-10 max-w-[13rem] shrink-0"
+              panelClassName="sm:w-64"
             />
           )}
           {canWrite && (
@@ -244,16 +267,6 @@ export function ProductsBrowser({
               />
             </div>
           </div>
-
-          <FilterSelect
-            id="products-status"
-            ariaLabel="Filter by status"
-            value={draft.status ?? ""}
-            options={STATUS_OPTIONS}
-            mutedValue=""
-            onChange={handleStatus}
-            triggerClassName="h-10 w-40"
-          />
 
           {filtered && (
             <button

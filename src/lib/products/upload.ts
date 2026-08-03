@@ -44,25 +44,33 @@ function presignFix(status: number): string {
 type PutOutcome = { reached: true; ok: boolean } | { reached: false };
 
 /**
- * PUT the file with upload progress. XHR rather than fetch: `fetch` gives no
- * way to observe request-body progress, so a large file would sit on an
- * indeterminate spinner with no sign of life.
+ * Send a request body with upload progress. XHR rather than fetch: `fetch`
+ * gives no way to observe request-body progress, so a large file would sit on
+ * an indeterminate spinner with no sign of life.
  *
- * `onProgress` receives 0..1, and only while the total is known
- * (`lengthComputable`); callers fall back to an indeterminate bar otherwise.
+ * `onProgress` receives 0..1 while bytes are moving and the total is known
+ * (`lengthComputable`), then NULL once the body is fully sent and we are
+ * waiting on the far end. That second phase is real work — for an image the
+ * server still has to sniff, moderate and PUT it to R2 — and without the
+ * signal the bar parks at 100%% and looks hung.
  */
-function putWithProgress(
+function sendWithProgress(
+  method: "PUT" | "POST",
   url: string,
-  file: File,
-  onProgress?: (fraction: number) => void,
-): Promise<PutOutcome> {
+  body: File | FormData,
+  onProgress?: (fraction: number | null) => void,
+  /** Only for the presigned PUT, whose signature covers Content-Type. A
+   *  multipart POST must let the browser set its own boundary header. */
+  contentType?: string,
+): Promise<PutOutcome & { status: number; text: string }> {
   return new Promise((resolve) => {
     const xhr = new XMLHttpRequest();
-    xhr.open("PUT", url);
-    // Content-Type is part of the presigned signature; it must match exactly.
-    xhr.setRequestHeader("Content-Type", file.type);
+    xhr.open(method, url);
+    if (contentType) xhr.setRequestHeader("Content-Type", contentType);
 
     if (onProgress) {
+      // Body fully sent; everything after this is the far end working.
+      xhr.upload.onload = () => onProgress(null);
       xhr.upload.onprogress = (event) => {
         if (event.lengthComputable && event.total > 0) {
           onProgress(Math.min(1, event.loaded / event.total));
@@ -70,15 +78,100 @@ function putWithProgress(
       };
     }
 
-    // A 4xx/5xx still counts as "reached storage"; only transport failures
+    // A 4xx/5xx still counts as "reached the server"; only transport failures
     // (blocked request, dropped connection, abort) do not.
-    xhr.onload = () => resolve({ reached: true, ok: xhr.status >= 200 && xhr.status < 300 });
-    xhr.onerror = () => resolve({ reached: false });
-    xhr.ontimeout = () => resolve({ reached: false });
-    xhr.onabort = () => resolve({ reached: false });
+    xhr.onload = () =>
+      resolve({
+        reached: true,
+        ok: xhr.status >= 200 && xhr.status < 300,
+        status: xhr.status,
+        text: xhr.responseText,
+      });
+    const dead = () => resolve({ reached: false, status: 0, text: "" });
+    xhr.onerror = dead;
+    xhr.ontimeout = dead;
+    xhr.onabort = dead;
 
-    xhr.send(file);
+    xhr.send(body);
   });
+}
+
+/**
+ * Upload an image THROUGH our own server (same origin), which stores it in R2
+ * after sniffing its real type and running it past moderation.
+ *
+ * Deliberately not a presigned browser PUT to R2: that is cross-origin, so it
+ * depends on the bucket's CORS allowlist naming every origin the app is served
+ * from. Ours named only http://localhost:3000, so uploads failed at preflight
+ * everywhere else and no image ever reached the database. Same-origin has no
+ * preflight to get wrong.
+ */
+/** Read a { key } | { error, fix } response from one of our upload routes. */
+function keyFromResponse(
+  outcome: PutOutcome & { status: number; text: string },
+  noun: string,
+): string {
+  if (!outcome.reached) {
+    throw new UploadError(
+      uploadFailed(
+        `The ${noun} never reached the server.`,
+        "Check your internet connection and try again.",
+      ),
+    );
+  }
+  const payload = (() => {
+    try {
+      return JSON.parse(outcome.text) as { key?: string; error?: string; fix?: string };
+    } catch {
+      return null;
+    }
+  })();
+  // A 2xx WITHOUT a key means the server took the file but it is not usable —
+  // today that is "held for review" (202). Treating it as success would
+  // attach a key that does not exist.
+  if (!outcome.ok || !payload?.key) {
+    throw new UploadError(
+      uploadFailed(
+        payload?.error ?? `Could not upload that ${noun}.`,
+        payload?.fix ?? presignFix(outcome.status),
+      ),
+    );
+  }
+  return payload.key;
+}
+
+/**
+ * Stream a digital file THROUGH our server. The body is the file itself (not
+ * multipart) so the server can pipe it straight into storage without ever
+ * holding 200 MB in memory; the filename and type ride in the query string.
+ */
+async function uploadFileViaServer(
+  file: File,
+  onProgress?: (fraction: number | null) => void,
+): Promise<string> {
+  const query = new URLSearchParams({
+    filename: file.name,
+    contentType: file.type,
+  });
+  const outcome = await sendWithProgress(
+    "POST",
+    `/api/uploads/file?${query}`,
+    file,
+    onProgress,
+    file.type,
+  );
+  return keyFromResponse(outcome, "file");
+}
+
+async function uploadImageViaServer(
+  file: File,
+  onProgress?: (fraction: number | null) => void,
+): Promise<string> {
+  const body = new FormData();
+  body.append("image", file);
+
+  const outcome = await sendWithProgress("POST", "/api/uploads/image", body, onProgress);
+  return keyFromResponse(outcome, "image");
 }
 
 /**
@@ -94,7 +187,7 @@ export async function uploadToR2(
   file: File,
   kind: UploadKind,
   /** Called with 0..1 as the body uploads, when the total size is known. */
-  onProgress?: (fraction: number) => void,
+  onProgress?: (fraction: number | null) => void,
 ): Promise<string> {
   const noun = kind === "image" ? "image" : "file";
 
@@ -113,60 +206,11 @@ export async function uploadToR2(
     );
   }
 
-  let presignResponse: Response;
-  try {
-    presignResponse = await fetch("/api/uploads/presign", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        kind,
-        filename: file.name,
-        contentType: file.type,
-        size: file.size,
-      }),
-    });
-  } catch {
-    throw new UploadError(
-      uploadFailed(
-        "Could not reach the server to start the upload.",
-        "Check your internet connection and try again.",
-      ),
-    );
-  }
-  if (!presignResponse.ok) {
-    const body = (await presignResponse.json().catch(() => null)) as {
-      error?: string;
-    } | null;
-    throw new UploadError(
-      uploadFailed(
-        body?.error ?? "Could not prepare the upload.",
-        presignFix(presignResponse.status),
-      ),
-    );
-  }
-
-  const { url, key } = (await presignResponse.json()) as {
-    url: string;
-    key: string;
-  };
-
-  const outcome = await putWithProgress(url, file, onProgress);
-  if (!outcome.reached) {
-    throw new UploadError(
-      uploadFailed(
-        "The upload never reached storage: the browser blocked it or the connection dropped.",
-        "Check your internet connection and try again. If every upload fails this way, storage isn't set up for this site yet; contact the site owner.",
-      ),
-    );
-  }
-  if (!outcome.ok) {
-    throw new UploadError(
-      uploadFailed(
-        "The upload failed partway through.",
-        "Check your connection and try the same file again.",
-      ),
-    );
-  }
-
-  return key;
+  // BOTH kinds go through our own server, same origin. Neither touches R2
+  // directly any more: a cross-origin PUT depends on the bucket's CORS
+  // allowlist naming every origin the app is served from, which silently
+  // broke uploads on every dev port and every deployed domain but one.
+  return kind === "image"
+    ? uploadImageViaServer(file, onProgress)
+    : uploadFileViaServer(file, onProgress);
 }

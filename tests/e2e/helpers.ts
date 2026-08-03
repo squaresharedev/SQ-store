@@ -43,8 +43,27 @@ export function freshUser(tag: string) {
   };
 }
 
+/**
+ * Forget the per-client auth budgets before an auth step.
+ *
+ * Sign-up and sign-in are rate limited PER CLIENT, and every spec in this
+ * suite is the same client (127.0.0.1) creating yet another fresh user. A run
+ * of 40+ specs therefore spends a production HOUR's budget in a few minutes,
+ * after which every remaining spec sits on the login form until it times out —
+ * a failure that says nothing about the code under test.
+ *
+ * The limits themselves are deliberately left at their production values; only
+ * the ledger is cleared, and only between specs. The limiter's own behaviour is
+ * covered by unit tests, which can drive it directly rather than through 40
+ * unrelated user journeys.
+ */
+export async function clearAuthRateLimits() {
+  await serviceRest("/rate_limit_keys?key=not.is.null", { method: "DELETE" });
+}
+
 /** Sign up through the real UI; lands on the dashboard. */
 export async function signUp(page: Page, user: { email: string; password: string }) {
+  await clearAuthRateLimits();
   await page.goto("/login");
   await page.getByRole("button", { name: /sign up/i }).click();
   await page.locator('input[name="email"]').fill(user.email);
@@ -56,6 +75,7 @@ export async function signUp(page: Page, user: { email: string; password: string
 
 /** Sign in through the real UI. */
 export async function signIn(page: Page, user: { email: string; password: string }) {
+  await clearAuthRateLimits();
   await page.goto("/login");
   await page.locator('input[name="email"]').fill(user.email);
   await page.locator('input[name="password"]').fill(user.password);

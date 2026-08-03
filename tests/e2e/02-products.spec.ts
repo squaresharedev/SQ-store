@@ -31,10 +31,15 @@ test.describe("products CRUD", () => {
 
     // --- delete ---
     await page.getByRole("button", { name: "Delete E2E Print v2" }).click();
-    // If a confirm step exists, take it.
-    const confirm = page.getByRole("button", { name: /^delete$|confirm/i });
-    if (await confirm.isVisible().catch(() => false)) await confirm.click();
-    await expect(page.getByText("E2E Print v2")).not.toBeVisible({ timeout: 15_000 });
+    // The confirm step is REQUIRED, not "take it if it happens to be there".
+    // The optional version silently passed while never confirming anything,
+    // because its /^delete$/ never matched the real button ("Delete product").
+    await page.getByRole("button", { name: "Delete product" }).click();
+    // The CARD has to go. Matching on bare text would also match the confirm
+    // dialog's copy, which quotes the title back at you.
+    await expect(page.getByRole("heading", { name: "E2E Print v2" })).toBeHidden({
+      timeout: 15_000,
+    });
   });
 
   test("client validation blocks an empty title and bad price", async ({ page }) => {

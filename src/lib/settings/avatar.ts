@@ -5,6 +5,7 @@ import { getUser } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
+import { sniffImage } from "@/lib/uploads/sniff";
 
 /**
  * Profile-photo upload — SERVER-SIDE ONLY, client-hostile by construction:
@@ -22,24 +23,9 @@ export type AvatarActionState = { error?: string; success?: string };
 const BUCKET = "avatars";
 const MAX_BYTES = 2 * 1024 * 1024; // 2 MB
 
-/** Identify the image from its magic bytes. Returns null for anything else. */
-function sniffImage(b: Uint8Array): { mime: string; ext: string } | null {
-  if (b.length < 12) return null;
-  if (b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) {
-    return { mime: "image/jpeg", ext: "jpg" };
-  }
-  if (b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47) {
-    return { mime: "image/png", ext: "png" };
-  }
-  // RIFF....WEBP
-  if (
-    b[0] === 0x52 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x46 &&
-    b[8] === 0x57 && b[9] === 0x45 && b[10] === 0x42 && b[11] === 0x50
-  ) {
-    return { mime: "image/webp", ext: "webp" };
-  }
-  return null;
-}
+/** Avatars accept a narrower set than product images: no GIF (animated
+ *  profile photos) and no AVIF (Supabase image transforms do not cover it). */
+const AVATAR_MIMES = ["image/jpeg", "image/png", "image/webp"];
 
 function rejectUnknownFields(formData: FormData): boolean {
   for (const key of formData.keys()) {
@@ -78,7 +64,7 @@ export async function uploadAvatar(
 
   const bytes = new Uint8Array(await file.arrayBuffer());
   const sniffed = sniffImage(bytes);
-  if (!sniffed) {
+  if (!sniffed || !AVATAR_MIMES.includes(sniffed.mime)) {
     return { error: "Use a JPEG, PNG, or WebP image." };
   }
 

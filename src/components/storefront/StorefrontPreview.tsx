@@ -16,22 +16,29 @@ import { BlockTile } from "./BlockTile";
 import { CarouselStrip } from "./CarouselStrip";
 import { StorefrontMasthead } from "./StorefrontMasthead";
 import { resolveBackgroundStyle } from "./background-presets";
+import { useFitToBox } from "./useFitToBox";
 import {
   FONT_CLASSES,
   gridGapStyle,
   scaledCornerRadius,
 } from "./config-maps";
 
-/** Enough blocks to fill any clipped preview box; keeps 60-block grids from
- *  rendering DOM the card never shows. */
-const PREVIEW_MAX_BLOCKS = 18;
-
 /**
  * Read-only miniature of a storefront (list cards, and later anywhere a
  * storefront needs to be shown without the editor). Renders through the SAME
  * pieces as the designer canvas — shared <Grid> in static mode, BlockTile,
  * the masthead, and the enum→class maps — so the preview can never drift from
- * what the editor shows. The parent decides the box (aspect ratio + clip).
+ * what the editor shows.
+ *
+ * FITS, rather than crops. The board is laid out at the box's full width and
+ * then scaled down by however much it takes to bring the WHOLE thing inside
+ * (see useFitToBox). Previously the box simply clipped, so a tall storefront
+ * showed only its top few rows and every card looked like it started the same
+ * way — the one thing a preview exists to disprove.
+ *
+ * Every block is rendered, not a slice of them: a preview that silently drops
+ * blocks is not a preview of that storefront. The schema's MAX_BLOCKS (120) is
+ * the real bound on how much DOM this can produce.
  */
 export function StorefrontPreview({
   config,
@@ -47,6 +54,7 @@ export function StorefrontPreview({
   backgroundImageUrl?: string | null;
 }) {
   const { theme, blocks, header } = config;
+  const { boxRef, contentRef, scale } = useFitToBox();
 
   const visibleBlocks = useMemo<StorefrontBlock[]>(
     () =>
@@ -58,7 +66,7 @@ export function StorefrontPreview({
           (block) =>
             !(theme.hideSoldOut && block.type === "product" && block.soldOut),
         ),
-      ).slice(0, PREVIEW_MAX_BLOCKS),
+      ),
     [blocks, theme.hideSoldOut],
   );
 
@@ -82,47 +90,72 @@ export function StorefrontPreview({
 
   return (
     <div
-      className={cn("size-full p-2", FONT_CLASSES[theme.font], className)}
+      ref={boxRef}
+      className={cn(
+        // The box. Centres the scaled board on both axes, so a board that
+        // shrinks to fit its height sits in the middle rather than hugging a
+        // corner. overflow-hidden is a backstop only — nothing should exceed
+        // this box once scaled.
+        "flex size-full items-center justify-center overflow-hidden",
+        FONT_CLASSES[theme.font],
+        className,
+      )}
       // Schema-constrained, same as the canvas: hex is re-gated by the strict
       // regex, the gap is a bounded integer feeding the --grid-gap token.
+      // The background lives on the BOX, not the scaled board, so it fills the
+      // whole card even when the board is scaled down and leaves gutters.
       style={{
         ...resolveBackgroundStyle(theme.background, backgroundImageUrl),
         ...gridGapStyle(theme.gridGap),
       }}
     >
-      <StorefrontMasthead
-        header={header ?? DEFAULT_STOREFRONT_HEADER}
-        theme={theme}
-        compact
-      />
-      {visibleBlocks.length > 0 &&
-        (theme.displayMode === "carousel" ? (
-          <CarouselStrip
-            blocks={visibleBlocks}
-            getProduct={getProduct}
-            theme={theme}
-            compact
-          />
-        ) : (
-          <Grid
-            blocks={gridBlocks}
-            ariaLabel="Storefront preview"
-            columns={theme.columns}
-            rows={theme.rows}
-            cellStyle={(placement) => ({
-              borderRadius: scaledCornerRadius(theme.cornerRadius, placement),
-            })}
-            renderBlock={(gridBlock) => (
-              <BlockTile
-                blockKey={gridBlock.key}
-                block={gridBlock.data}
-                product={getProduct(gridBlock.data)}
-                theme={theme}
-                editable={false}
-              />
-            )}
-          />
-        ))}
+      <div
+        ref={contentRef}
+        // Laid out at the box's full width, then scaled. `w-full` keeps the
+        // grid's container query resolving against the real card width, so
+        // cell size is the same proportion it would be at full size.
+        className="w-full shrink-0 p-2"
+        style={{ transform: `scale(${scale})` }}
+      >
+        <StorefrontMasthead
+          header={header ?? DEFAULT_STOREFRONT_HEADER}
+          theme={theme}
+          compact
+        />
+        {visibleBlocks.length > 0 &&
+          (theme.displayMode === "carousel" ? (
+            <CarouselStrip
+              blocks={visibleBlocks}
+              getProduct={getProduct}
+              theme={theme}
+              compact
+            />
+          ) : (
+            <Grid
+              blocks={gridBlocks}
+              ariaLabel="Storefront preview"
+              columns={theme.columns}
+              rows={theme.rows}
+              // Never reflow: the preview is scaled down as a whole, so the
+              // board keeps the exact column count and coordinates the seller
+              // designed. Reflowing would show a layout the storefront doesn't
+              // have — the one thing a preview must not do.
+              responsive={false}
+              cellStyle={(placement) => ({
+                borderRadius: scaledCornerRadius(theme.cornerRadius, placement),
+              })}
+              renderBlock={(gridBlock) => (
+                <BlockTile
+                  blockKey={gridBlock.key}
+                  block={gridBlock.data}
+                  product={getProduct(gridBlock.data)}
+                  theme={theme}
+                  editable={false}
+                />
+              )}
+            />
+          ))}
+      </div>
     </div>
   );
 }

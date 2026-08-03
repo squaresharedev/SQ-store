@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import { FormStatus } from "@/components/settings/FormStatus";
-import { SaveButton } from "@/components/settings/SaveButton";
+import { SaveButton } from "@/components/ui/SaveButton";
 import { SettingsCard } from "@/components/settings/SettingsCard";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";

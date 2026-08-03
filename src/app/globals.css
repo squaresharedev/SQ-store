@@ -127,10 +127,21 @@
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
+  /* 0.545, not 0.556. Muted text is read on the SECONDARY/MUTED surface as
+     often as on the page background (every status chip is
+     `bg-secondary text-muted-foreground`), and 0.556 cleared 4.5:1 only
+     against pure white — 4.35:1 on the chip, a WCAG AA failure at 12px. This
+     lightness clears AA on both (4.54:1 on the chip, 4.95:1 on white) and is
+     a 3/255 darkening, i.e. invisible. Dark mode already passed at 5.86:1. */
+  --muted-foreground: oklch(0.545 0 0);
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
+  /* 0.55, not 0.577. Destructive text is read on the destructive/5 tint (the
+     danger panels), where 0.577 gave 4.36:1 — below WCAG AA on exactly the
+     copy explaining an irreversible action. This clears AA on the tint and on
+     white, and raises white-on-destructive button contrast too, since a darker
+     red only helps there. Dark mode is a separate token and already passed. */
+  --destructive: oklch(0.55 0.245 27.325);
   --destructive-foreground: oklch(0.985 0 0);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);

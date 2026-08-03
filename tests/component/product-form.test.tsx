@@ -1,5 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, waitFor, cleanup } from "@testing-library/react";
+import { render as rtlRender, screen, waitFor, cleanup, within } from "@testing-library/react";
+import type { ReactElement } from "react";
+import { ToastProvider } from "@/components/ui/Toast";
 import userEvent from "@testing-library/user-event";
 
 afterEach(cleanup);
@@ -74,6 +76,24 @@ async function fillRequiredFields(
 // Tests
 // ---------------------------------------------------------------------------
 
+/** The form raises toasts, and useToast refuses to no-op outside a provider —
+ *  deliberately, so a lost message is a loud failure. Render through it. */
+function render(ui: ReactElement) {
+  return rtlRender(<ToastProvider>{ui}</ToastProvider>);
+}
+
+/** The inline, field-level messages. */
+const inForm = () => within(document.querySelector("form") as HTMLElement);
+
+/** The toast that fires at the point of action. */
+async function toastAlert(): Promise<HTMLElement> {
+  const alerts = await screen.findAllByRole("alert");
+  const form = document.querySelector("form");
+  const outside = alerts.find((el) => !form?.contains(el));
+  if (!outside) throw new Error("expected a toast outside the form");
+  return outside;
+}
+
 describe("ProductForm", () => {
   beforeEach(() => {
     mockCreateProduct.mockClear();
@@ -97,7 +117,7 @@ describe("ProductForm", () => {
 
     const titleInput = screen.getByPlaceholderText(/ambient loops/i);
     expect(titleInput).toHaveAttribute("aria-invalid", "true");
-    expect(screen.getByText(/give your product a title/i)).toBeInTheDocument();
+    expect(inForm().getByText(/give your product a title/i)).toBeInTheDocument();
   });
 
   it("title error is wired to aria-describedby", async () => {
@@ -142,7 +162,7 @@ describe("ProductForm", () => {
     // Leave price empty and submit.
     await user.click(screen.getByRole("button", { name: /save product/i }));
 
-    expect(screen.getByText(/set a price/i)).toBeInTheDocument();
+    expect(inForm().getByText(/set a price/i)).toBeInTheDocument();
   });
 
   it("price of 0 shows 'must be greater than zero' error", async () => {
@@ -156,7 +176,7 @@ describe("ProductForm", () => {
     await user.type(priceInput, "0");
 
     await user.click(screen.getByRole("button", { name: /save product/i }));
-    expect(screen.getByText(/greater than zero/i)).toBeInTheDocument();
+    expect(inForm().getByText(/greater than zero/i)).toBeInTheDocument();
   });
 
   it("negative price shows error", async () => {
@@ -170,7 +190,7 @@ describe("ProductForm", () => {
     await user.type(priceInput, "-5");
 
     await user.click(screen.getByRole("button", { name: /save product/i }));
-    expect(screen.getByText(/greater than zero/i)).toBeInTheDocument();
+    expect(inForm().getByText(/greater than zero/i)).toBeInTheDocument();
   });
 
   // --- Stock quantity validation ---
@@ -187,7 +207,7 @@ describe("ProductForm", () => {
 
     // Leave stock quantity empty and submit.
     await user.click(screen.getByRole("button", { name: /save product/i }));
-    expect(screen.getByText(/how many are in stock/i)).toBeInTheDocument();
+    expect(inForm().getByText(/how many units are in stock/i)).toBeInTheDocument();
   });
 
   it("trackStock with valid quantity has no stockQuantity error", async () => {
@@ -203,7 +223,7 @@ describe("ProductForm", () => {
     await user.type(qtyInput, "50");
 
     await user.click(screen.getByRole("button", { name: /save product/i }));
-    expect(screen.queryByText(/how many are in stock/i)).not.toBeInTheDocument();
+    expect(inForm().queryByText(/how many units are in stock/i)).not.toBeInTheDocument();
   });
 
   // --- Successful submit — priceCents mapping ---
@@ -253,9 +273,14 @@ describe("ProductForm", () => {
     await user.type(screen.getByLabelText(/price/i), "5.00");
     await user.click(screen.getByRole("button", { name: /save product/i }));
 
-    await waitFor(() => {
-      expect(mockPush).toHaveBeenCalledWith("/products");
-    });
+    // The redirect is deliberately held back so the button can show "Saved"
+    // first (SAVED_HOLD_MS in ProductForm), hence the longer window here.
+    await waitFor(
+      () => {
+        expect(mockPush).toHaveBeenCalledWith("/products");
+      },
+      { timeout: 15000 },
+    );
   });
 
   it("server error is displayed in role=alert, with its fix", async () => {
@@ -277,25 +302,38 @@ describe("ProductForm", () => {
     await user.type(screen.getByLabelText(/price/i), "5.00");
     await user.click(screen.getByRole("button", { name: /save product/i }));
 
-    const alert = await screen.findByRole("alert");
-    expect(alert).toHaveTextContent("Your Viewer role can't add products in this store.");
-    expect(alert).toHaveTextContent("Ask the store owner to change your role.");
+    // In the page, beside the Save button, where it persists…
+    await waitFor(() => {
+      const notice = inForm().getByRole("alert");
+      expect(notice).toHaveTextContent("Your Viewer role can't add products in this store.");
+      expect(notice).toHaveTextContent("Ask the store owner to change your role.");
+    });
+
+    // …and as a toast, so it is seen even if the notice is off-screen.
+    const alerts = await screen.findAllByRole("alert");
+    expect(
+      alerts.some((el) =>
+        el.textContent?.includes("Your Viewer role can't add products in this store."),
+      ),
+    ).toBe(true);
   });
 
-  // --- Summary alert for multiple validation errors ---
-
-  it("shows a summary alert when there are multiple validation errors", async () => {
+  it("names every problem in the toast when a save is blocked", async () => {
+    // The specifics matter: "can't be saved" alone sends the seller hunting
+    // up a long form for whatever is wrong.
     const user = userEvent.setup();
     render(<ProductForm />);
-    // Submit with nothing filled in.
+
     await user.click(screen.getByRole("button", { name: /save product/i }));
-    const alerts = screen.getAllByRole("alert");
-    // Should include the summary "please fix" alert.
-    const summary = alerts.find((a) =>
-      /please fix/i.test(a.textContent ?? ""),
-    );
-    expect(summary).toBeDefined();
+
+    const toast = await toastAlert();
+    expect(toast).toHaveTextContent(/2 things to fix/i);
+    expect(toast).toHaveTextContent(/give your product a title/i);
+    expect(toast).toHaveTextContent(/set a price before saving/i);
+    // createProduct is never reached — this is a client-side block.
+    expect(mockCreateProduct).not.toHaveBeenCalled();
   });
+
 });
 
 // ---------------------------------------------------------------------------
@@ -373,7 +411,7 @@ describe("ProductForm - unsaved changes", () => {
     expect(mockPush).toHaveBeenCalledWith("/products");
   });
 
-  it("does not prompt on the redirect that follows a successful save", async () => {
+  it("confirms on the button BEFORE redirecting, so a save is visibly a save", async () => {
     const user = userEvent.setup();
     render(<ProductForm />);
 
@@ -381,7 +419,23 @@ describe("ProductForm - unsaved changes", () => {
     await user.type(screen.getByLabelText(/price/i), "5.00");
     await user.click(screen.getByRole("button", { name: /save product/i }));
 
-    await waitFor(() => expect(mockPush).toHaveBeenCalledWith("/products"));
+    // The whole point of the hold: redirecting in the same tick left the
+    // seller with no evidence the save had happened at all.
+    expect(await screen.findByRole("button", { name: /saved/i })).toBeInTheDocument();
+    expect(mockPush).not.toHaveBeenCalled();
+  });
+
+  it("then redirects, without the unsaved-work prompt", async () => {
+    const user = userEvent.setup();
+    render(<ProductForm />);
+
+    await user.type(screen.getByPlaceholderText(/ambient loops/i), "Product");
+    await user.type(screen.getByLabelText(/price/i), "5.00");
+    await user.click(screen.getByRole("button", { name: /save product/i }));
+
+    await waitFor(() => expect(mockPush).toHaveBeenCalledWith("/products"), {
+      timeout: 15000,
+    });
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 });

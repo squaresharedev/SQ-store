@@ -368,23 +368,38 @@ console.log(`[stack] gateway on :${GATEWAY_PORT} (anon key + service key minted)
 // ---------------------------------------------------------------------------
 // 4. next dev
 // ---------------------------------------------------------------------------
-const next = spawn("pnpm", ["exec", "next", "dev", "-p", String(NEXT_PORT)], {
-  cwd: REPO,
-  shell: true,
-  env: {
-    ...process.env,
-    NODE_ENV: "development",
-    NEXT_PUBLIC_SUPABASE_URL: `http://127.0.0.1:${GATEWAY_PORT}`,
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: ANON_KEY,
-    SUPABASE_SERVICE_ROLE_KEY: SERVICE_KEY,
-    // R2 deliberately unset: uploads degrade gracefully (503 presign).
-    R2_ACCOUNT_ID: "",
-    R2_BUCKET_NAME: "",
-    R2_ACCESS_KEY_ID: "",
-    R2_SECRET_ACCESS_KEY: "",
+// Next's own bin, not `pnpm exec next`: going through the package manager made
+// the whole E2E stack depend on pnpm's pre-run dependency check, which fails
+// the moment the installed pnpm disagrees with node_modules (a major upgrade is
+// enough) and takes every spec down with it. The binary is right there.
+const next = spawn(
+  process.execPath,
+  [join(REPO, "node_modules", "next", "dist", "bin", "next"), "dev", "-p", String(NEXT_PORT)],
+  {
+    cwd: REPO,
+    env: {
+      ...process.env,
+      NODE_ENV: "development",
+      NEXT_PUBLIC_SUPABASE_URL: `http://127.0.0.1:${GATEWAY_PORT}`,
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ANON_KEY,
+      SUPABASE_SERVICE_ROLE_KEY: SERVICE_KEY,
+      // R2 deliberately unset by default, so a normal run stays hermetic and
+      // the presign route's "not configured" path (503 -> graceful degrade) is
+      // what gets exercised. E2E_REAL_R2=1 passes the configured bucket
+      // through instead, which is the ONLY way to cover the real upload path
+      // end to end; it writes real objects, so it is opt-in, never the default.
+      ...(process.env.E2E_REAL_R2 === "1"
+        ? {}
+        : {
+            R2_ACCOUNT_ID: "",
+            R2_BUCKET_NAME: "",
+            R2_ACCESS_KEY_ID: "",
+            R2_SECRET_ACCESS_KEY: "",
+          }),
+    },
+    stdio: ["ignore", "inherit", "inherit"],
   },
-  stdio: ["ignore", "inherit", "inherit"],
-});
+);
 next.on("exit", (code) => {
   console.log(`[stack] next dev exited (${code})`);
   shutdown(code ?? 1);

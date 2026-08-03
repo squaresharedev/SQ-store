@@ -3,43 +3,61 @@
 import { useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  BarChart3,
-  Compass,
-  CreditCard,
-  LayoutDashboard,
-  Menu,
-  Package,
-  Settings,
-  ShoppingCart,
-  Store,
-  X,
-  type LucideIcon,
-} from "lucide-react";
+import { Menu, X } from "lucide-react";
+import { MotionConfig, motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
+import {
+  AnalyticsIcon,
+  DiscoverIcon,
+  OrdersIcon,
+  OverviewIcon,
+  PaymentsIcon,
+  ProductsIcon,
+  SettingsIcon,
+  StorefrontIcon,
+  type NavIconProps,
+} from "@/components/dashboard/nav-icons";
 
 type NavLink = {
   label: string;
   href: string;
-  icon: LucideIcon;
+  icon: (props: NavIconProps) => React.ReactNode;
 };
 
 const MAIN_NAV: NavLink[] = [
   // The Overview page lives at /dashboard ("/" merely redirects there);
   // linking it directly keeps the active state working and skips the hop.
-  { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Products", href: "/products", icon: Package },
-  { label: "Storefront", href: "/storefront", icon: Store },
-  { label: "Orders", href: "/orders", icon: ShoppingCart },
-  { label: "Analytics", href: "/analytics", icon: BarChart3 },
-  { label: "Payments", href: "/payments", icon: CreditCard },
+  { label: "Overview", href: "/dashboard", icon: OverviewIcon },
+  { label: "Products", href: "/products", icon: ProductsIcon },
+  { label: "Storefront", href: "/storefront", icon: StorefrontIcon },
+  { label: "Orders", href: "/orders", icon: OrdersIcon },
+  { label: "Analytics", href: "/analytics", icon: AnalyticsIcon },
+  { label: "Payments", href: "/payments", icon: PaymentsIcon },
 ];
 
 const SETTINGS_LINK: NavLink = {
   label: "Settings",
   href: "/settings",
-  icon: Settings,
+  icon: SettingsIcon,
 };
+
+// The nav row is the animation trigger: switching the variant label here
+// propagates "hover" down to the icon's motion sub-elements, so hovering the
+// text animates the glyph too. Tap covers touch, focus covers keyboards.
+// Reduced-motion users never receive the label, so icons stay static.
+const MotionLink = motion.create(Link);
+
+function useNavAnimationProps(): Record<string, string> {
+  const reducedMotion = useReducedMotion();
+  return reducedMotion
+    ? { initial: "idle" as const }
+    : {
+        initial: "idle" as const,
+        whileHover: "hover" as const,
+        whileTap: "hover" as const,
+        whileFocus: "hover" as const,
+      };
+}
 
 function isNavLinkActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
@@ -81,11 +99,21 @@ function NavLinkItem({
   onNavigate: () => void;
 }) {
   const active = isNavLinkActive(pathname, item.href);
+  const animationProps = useNavAnimationProps();
+  const [hoverCount, setHoverCount] = useState(0);
+  const countHover = () => setHoverCount((count) => count + 1);
   return (
-    <Link
+    <MotionLink
       href={item.href}
       onClick={onNavigate}
       aria-current={active ? "page" : undefined}
+      {...animationProps}
+      // Plain component state, for the icons whose story is a one-shot that
+      // must not rewind when the pointer leaves (see NavIconProps.hoverCount).
+      // Only the starts are counted: nothing here has to be cleared, so a
+      // missed pointer-leave cannot wedge the next hover.
+      onHoverStart={countHover}
+      onFocus={countHover}
       className={cn(
         NAV_ITEM_CLASSES,
         active
@@ -93,9 +121,37 @@ function NavLinkItem({
           : "text-muted-foreground hover:bg-accent hover:text-foreground",
       )}
     >
-      <item.icon className="size-5 shrink-0" strokeWidth={2} aria-hidden="true" />
+      <item.icon hoverCount={hoverCount} />
       {item.label}
-    </Link>
+    </MotionLink>
+  );
+}
+
+// Disabled "coming soon" row. Still animates on hover: the compass needle
+// searching for a bearing is the tease for a page that isn't here yet.
+function DiscoverRow() {
+  const animationProps = useNavAnimationProps();
+  return (
+    <motion.div
+      aria-disabled="true"
+      // Explicit so motion's tap gesture doesn't inject tabindex="0" on the
+      // client only (hydration mismatch), and a disabled row shouldn't be
+      // focusable anyway.
+      tabIndex={-1}
+      {...animationProps}
+      className={cn(
+        NAV_ITEM_CLASSES,
+        "cursor-not-allowed justify-between text-muted-foreground opacity-50",
+      )}
+    >
+      <span className="flex items-center gap-2">
+        <DiscoverIcon />
+        Discover
+      </span>
+      <span className="font-inter text-xs text-muted-foreground">
+        Coming soon
+      </span>
+    </motion.div>
   );
 }
 
@@ -155,7 +211,10 @@ export function Sidebar({
   }
 
   return (
-    <>
+    // Belt and braces under the useNavAnimationProps gate: even an animation
+    // that slips past the per-row check gets its transforms suppressed for
+    // reduced-motion users at the motion-runtime level.
+    <MotionConfig reducedMotion="user">
       {/* Mobile-only top bar: menu toggle + current page title (+ the Add
           quick action on Overview). Hidden entirely at the md breakpoint,
           where the sidebar is always visible instead. Overview drops the
@@ -248,23 +307,9 @@ export function Sidebar({
             onNavigate={closeDrawer}
           />
 
-          <div
-            aria-disabled="true"
-            className={cn(
-              NAV_ITEM_CLASSES,
-              "cursor-not-allowed justify-between text-muted-foreground opacity-50",
-            )}
-          >
-            <span className="flex items-center gap-2">
-              <Compass className="size-5 shrink-0" strokeWidth={2} aria-hidden="true" />
-              Discover
-            </span>
-            <span className="font-inter text-xs text-muted-foreground">
-              Coming soon
-            </span>
-          </div>
+          <DiscoverRow />
         </div>
       </nav>
-    </>
+    </MotionConfig>
   );
 }

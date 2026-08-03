@@ -5,8 +5,9 @@ import { PasswordChangeForm } from "@/components/settings/PasswordChangeForm";
 import { SignOutSection } from "@/components/settings/SignOutSection";
 
 /**
- * Account section: profile photo, display name (also the account's unique
- * handle), email (Supabase re-verification flow) and password.
+ * Account section: profile photo, username (stored as the profile's display
+ * name, and also the account's unique handle), email (Supabase re-verification
+ * flow) and password.
  */
 export function AccountSection({
   displayName,

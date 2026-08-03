@@ -121,9 +121,15 @@ export function CountUp({
   }, [value]);
 
   // Announce only the settled figure: a live count would spam assistive tech.
+  //
+  // A visually hidden text node, NOT aria-label on the wrapper: aria-label is
+  // prohibited on a generic element (a span with no role) and is widely ignored
+  // by screen readers there, so the figure risked being announced as nothing at
+  // all. Real text is read reliably and needs no role invented for it.
   return (
-    <span className={className} aria-label={value}>
+    <span className={className}>
       <span aria-hidden="true">{display}</span>
+      <span className="sr-only">{value}</span>
     </span>
   );
 }

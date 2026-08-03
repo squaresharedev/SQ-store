@@ -9,6 +9,18 @@
  */
 export const LEGAL_VERSION = "2026-07-draft.1";
 
+/**
+ * Hard cap on a username (the display name, which doubles as the account's
+ * unique handle).
+ *
+ * The ENFORCEMENT lives on the server: `displayNameSchema` is built from this
+ * and every write path re-parses through it (the update action, the
+ * availability route), so a hand-rolled POST that skips the form is rejected
+ * exactly the same way. The field's `maxLength` attribute is a typing hint
+ * derived from this number, never the gate.
+ */
+export const DISPLAY_NAME_MAX_LENGTH = 50;
+
 /** Exact phrase a user must type to confirm account deletion. */
 export const DELETE_CONFIRM_PHRASE = "delete my account";
 

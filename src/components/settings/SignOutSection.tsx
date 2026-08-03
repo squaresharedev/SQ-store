@@ -48,6 +48,10 @@ function SignOutButton({
  * `local`); "Sign out everywhere" revokes every refresh token so all other
  * devices are logged out too (scope `global`). Each lives in its own <form>
  * so the pending spinner is scoped to exactly the button that was clicked.
+ *
+ * The everywhere variant wears `ghost-danger` — quiet at rest, destructive red
+ * on hover/focus — because it is the one here with consequences beyond this
+ * tab, without being a danger-zone CTA like account deletion.
  */
 export function SignOutSection() {
   return (
@@ -68,7 +72,7 @@ export function SignOutSection() {
           </SignOutButton>
         </form>
         <form action={signOutEverywhere}>
-          <SignOutButton variant="ghost" pendingLabel="Signing out…">
+          <SignOutButton variant="ghost-danger" pendingLabel="Signing out…">
             Sign out everywhere
           </SignOutButton>
         </form>

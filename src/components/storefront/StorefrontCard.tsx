@@ -50,7 +50,8 @@ export function StorefrontCard({
       )}
 
       <div className="pointer-events-none relative z-0">
-        {/* Live miniature of the actual storefront, clipped to the card box. */}
+        {/* Live miniature of the actual storefront: the WHOLE board, scaled
+            down to fit this box rather than cropped to it. */}
         <div
           aria-hidden="true"
           className="aspect-[4/3] w-full overflow-hidden rounded-sm border border-border"

@@ -8,3 +8,8 @@ ignoredBuiltDependencies:
   - unrs-resolver
 allowBuilds:
   '@embedded-postgres/windows-x64': true
+  # Mirrors onlyBuiltDependencies / ignoredBuiltDependencies above.
+  esbuild: true
+  sharp: false
+  unrs-resolver: false
+  workerd: true

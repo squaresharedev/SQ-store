@@ -12,7 +12,7 @@ import {
 } from "@/types/storefront";
 import { cn } from "@/lib/utils";
 import { Grid } from "@/components/grid/Grid";
-import type { GridBlock } from "@/components/grid/gridConstants";
+import type { GridBlock, GridPlacement } from "@/components/grid/gridConstants";
 import { BlockTile } from "./BlockTile";
 import { CarouselStrip } from "./CarouselStrip";
 import { StorefrontMasthead } from "./StorefrontMasthead";
@@ -87,7 +87,7 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   viewport?: CanvasViewport;
   /** All callbacks are keyed by blockKey(block). */
   onMoveBlock: (key: string, x: number, y: number) => void;
-  onResizeBlock: (key: string, w: number, h: number) => void;
+  onResizeBlock: (key: string, placement: GridPlacement) => void;
   onRemove: (key: string) => void;
   /** Clicking a free cell inserts there. */
   onEmptyCellClick: (x: number, y: number) => void;

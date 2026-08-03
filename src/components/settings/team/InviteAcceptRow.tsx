@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useActionState } from "react";
 import { FormStatus } from "@/components/settings/FormStatus";
-import { SaveButton } from "@/components/settings/SaveButton";
+import { SaveButton } from "@/components/ui/SaveButton";
 import { ROLE_LABELS } from "@/lib/team/permissions";
 import type { PendingInviteRow } from "@/lib/team/queries";
 import { acceptInvite } from "@/lib/team/actions";

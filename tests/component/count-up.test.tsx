@@ -22,44 +22,60 @@ function stubReducedMotion(reduced: boolean) {
   });
 }
 
+/**
+ * The two halves of the component, addressed separately because they say
+ * different things: the aria-hidden node is what a sighted user watches
+ * counting up, and the sr-only node is the settled figure assistive tech reads.
+ */
+function animated(container: HTMLElement): HTMLElement {
+  const node = container.querySelector<HTMLElement>('[aria-hidden="true"]');
+  if (!node) throw new Error("no aria-hidden node — the animated digits are missing");
+  return node;
+}
+
 beforeEach(() => {
   stubReducedMotion(false);
 });
 
 describe("CountUp", () => {
-  it("always exposes the settled figure as the accessible name", () => {
-    render(<CountUp value="€1,234.56" />);
-    // The animated digits are aria-hidden, so only the final figure is read.
-    expect(screen.getByLabelText("€1,234.56")).toBeInTheDocument();
+  it("exposes the settled figure to assistive tech as real text", () => {
+    const { container } = render(<CountUp value="€1,234.56" />);
+    // Real (visually hidden) text, NOT aria-label: aria-label is prohibited on
+    // a role-less span and is widely ignored by screen readers there, which
+    // would leave the figure announced as nothing at all.
+    expect(screen.getByText("€1,234.56")).toHaveClass("sr-only");
+    expect(container.querySelector("[aria-label]")).toBeNull();
+  });
+
+  it("hides the animating digits from assistive tech", () => {
+    // Otherwise every frame of the count would be announced.
+    const { container } = render(<CountUp value="42" />);
+    expect(animated(container)).toBeInTheDocument();
   });
 
   it("lands on the exact original string", async () => {
-    render(<CountUp value="€1,234.56" />);
-    await waitFor(
-      () => expect(screen.getByLabelText("€1,234.56")).toHaveTextContent("€1,234.56"),
-      { timeout: 3000 },
-    );
+    const { container } = render(<CountUp value="€1,234.56" />);
+    await waitFor(() => expect(animated(container)).toHaveTextContent("€1,234.56"), {
+      timeout: 3000,
+    });
   });
 
   it("skips the animation under reduced motion", () => {
     stubReducedMotion(true);
-    render(<CountUp value="42" />);
-    expect(screen.getByLabelText("42")).toHaveTextContent("42");
+    const { container } = render(<CountUp value="42" />);
+    expect(animated(container)).toHaveTextContent("42");
   });
 
   it("renders a string with no digits unchanged", () => {
     stubReducedMotion(true);
-    render(<CountUp value="No sales yet" />);
-    expect(screen.getByLabelText("No sales yet")).toHaveTextContent("No sales yet");
+    const { container } = render(<CountUp value="No sales yet" />);
+    expect(animated(container)).toHaveTextContent("No sales yet");
   });
 
   it("handles a multi-currency figure without dropping either part", async () => {
-    render(<CountUp value="€100.00 · $50.00" />);
+    const { container } = render(<CountUp value="€100.00 · $50.00" />);
     await waitFor(
-      () =>
-        expect(screen.getByLabelText("€100.00 · $50.00")).toHaveTextContent(
-          "€100.00 · $50.00",
-        ),
+      () => expect(animated(container)).toHaveTextContent("€100.00 · $50.00"),
       { timeout: 3000 },
     );
   });

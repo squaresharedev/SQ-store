@@ -31,6 +31,12 @@ import {
 // honouring coordinates and reflows (see reflowBlocks) into as many columns as
 // fit. Editing is disabled while reflowed — the seller would be dragging a
 // layout that is not the one being stored.
+//
+// `responsive={false}` turns that off, for consumers that scale the whole
+// board down instead of reflowing it (the storefront preview). Reflow exists
+// to keep cells legible at small sizes; a caller that shrinks the board is
+// deliberately trading legibility for fidelity, and a reflowed miniature would
+// show a layout the storefront does not have.
 
 /** Pointer travel (px) before a press on a cell becomes a drag rather than a
  *  click. Matches the threshold the tile's own click guard uses. */
@@ -104,6 +110,10 @@ interface GridCommonProps<TData> {
   /** Canvas size in cells. */
   columns?: number;
   rows?: number;
+  /** Reflow into fewer columns when the container is too narrow for legible
+   *  cells. Off for boards that are scaled down as a whole rather than
+   *  re-laid-out, where the designed coordinates ARE the thing being shown. */
+  responsive?: boolean;
   /** Accessible name for the grid list. */
   ariaLabel?: string;
   /** Accessible name per block, for its drag/resize affordances. */
@@ -134,7 +144,9 @@ export type GridProps<TData> =
   | (GridCommonProps<TData> & {
       editable: true;
       onMove: (key: string, x: number, y: number) => void;
-      onResize: (key: string, w: number, h: number) => void;
+      /** The WHOLE placement: dragging a west/north corner moves the origin as
+       *  well as the extent, so w/h alone cannot describe the result. */
+      onResize: (key: string, placement: GridPlacement) => void;
     });
 
 export function Grid<TData>(props: GridProps<TData>) {
@@ -144,6 +156,7 @@ export function Grid<TData>(props: GridProps<TData>) {
     editable = false,
     columns = GRID_COLUMNS_DEFAULT,
     rows = GRID_ROWS_DEFAULT,
+    responsive = true,
     onMove,
     onResize,
     ariaLabel = "Grid",
@@ -183,6 +196,10 @@ export function Grid<TData>(props: GridProps<TData>) {
       if (gesture.mode === "move") {
         cell.style.transform = `translate3d(${gesture.offset.x}px, ${gesture.offset.y}px, 0)`;
       } else if (gesture.size) {
+        // Resizing translates as well as stretches: a tile keeps its committed
+        // cell in the layout, so growing west/north has to be drawn as "same
+        // box, shifted back" or the pinned edge would visibly drift.
+        cell.style.transform = `translate3d(${gesture.offset.x}px, ${gesture.offset.y}px, 0)`;
         cell.style.width = `${gesture.size.w}px`;
         cell.style.height = `${gesture.size.h}px`;
       }
@@ -222,7 +239,9 @@ export function Grid<TData>(props: GridProps<TData>) {
   // ancestor), so zooming never changes which responsive tier we are in.
   useEffect(() => {
     const container = containerRef.current;
-    if (!container) return;
+    // A non-responsive grid never consults its width, so it also never pays
+    // for the observer — which matters on a page of preview cards.
+    if (!container || !responsive) return;
     const measure = () => {
       const grid = gridRef.current;
       const gap = grid
@@ -234,10 +253,10 @@ export function Grid<TData>(props: GridProps<TData>) {
     const observer = new ResizeObserver(measure);
     observer.observe(container);
     return () => observer.disconnect();
-  }, []);
+  }, [responsive]);
 
   const renderColumns =
-    metrics.width > 0
+    responsive && metrics.width > 0
       ? columnsThatFit(metrics.width, metrics.gap, columns)
       : columns;
 
@@ -384,6 +403,10 @@ export function Grid<TData>(props: GridProps<TData>) {
     const cell = event.currentTarget.closest("li");
     if (!strides || !cell) return;
 
+    // Captured ONCE, and deliberately never re-read: the gesture mutates this
+    // element's width/height/transform, so a fresh rect mid-drag would be the
+    // preview measuring itself. These stay the committed box, which is what
+    // the pinned edges are anchored to.
     const rect = cell.getBoundingClientRect();
     let latest: GridPlacement = { x: block.x, y: block.y, w: block.w, h: block.h };
     let latestValid = true;
@@ -391,46 +414,73 @@ export function Grid<TData>(props: GridProps<TData>) {
     // One render, up front: mounts the ghost and lifts the tile.
     setActive({ key: block.key, mode: "resize" });
 
-    // Pixel bounds for the live preview: at least one cell, at most the room
-    // left on the board. Unscaled, so the edge tracks the cursor at any zoom.
+    /**
+     * The tile's own top-left CELL is the anchor and always stays part of the
+     * result; the block spans from it to whichever cell the cursor is over.
+     * Drag right/down and that is the familiar grow. Drag past the anchor and
+     * the span simply lands on the other side of it, so one handle stretches
+     * up and left without a second control to aim for.
+     *
+     * Everything here is SCREEN px (strides already are), converted to
+     * unscaled px only when handed to the painter.
+     */
     const cellW = strides.strideX - strides.gapX;
     const cellH = strides.strideY - strides.gapY;
-    const roomCols = columns - block.x;
-    const roomRows = rows - block.y;
-    const minW = cellW / strides.scale;
-    const minH = cellH / strides.scale;
-    const maxW =
-      (roomCols * cellW + (roomCols - 1) * strides.gapX) / strides.scale;
-    const maxH =
-      (roomRows * cellH + (roomRows - 1) * strides.gapY) / strides.scale;
+    // The board's origin, derived from the tile's committed box and its column.
+    const boardLeft = rect.left - block.x * strides.strideX;
+    const boardTop = rect.top - block.y * strides.strideY;
+    const anchorCellRight = rect.left + cellW;
+    const anchorCellBottom = rect.top + cellH;
+    const spanPxX = (n: number) => n * cellW + (n - 1) * strides.gapX;
+    const spanPxY = (n: number) => n * cellH + (n - 1) * strides.gapY;
 
     const handleMove = (moveEvent: PointerEvent) => {
-      // n cells occupy n·cell + (n-1)·gap, so n = (extent + gap) / stride.
-      const wantW = Math.round(
-        (moveEvent.clientX - rect.left + strides.gapX) / strides.strideX,
+      // Which cell is under the cursor, in board coordinates.
+      const col = clamp(
+        Math.floor((moveEvent.clientX - boardLeft) / strides.strideX),
+        0,
+        columns - 1,
       );
-      const wantH = Math.round(
-        (moveEvent.clientY - rect.top + strides.gapY) / strides.strideY,
+      const row = clamp(
+        Math.floor((moveEvent.clientY - boardTop) / strides.strideY),
+        0,
+        rows - 1,
       );
       const candidate: GridPlacement = {
-        x: block.x,
-        y: block.y,
-        w: clamp(wantW, 1, roomCols),
-        h: clamp(wantH, 1, roomRows),
+        x: Math.min(block.x, col),
+        y: Math.min(block.y, row),
+        w: Math.abs(col - block.x) + 1,
+        h: Math.abs(row - block.y) + 1,
       };
       latest = candidate;
       latestValid = placementIsFree(blocks, candidate, block.key, columns, rows);
+
+      // The box follows the cursor; the ghost shows where it will snap. Once
+      // flipped, the anchor CELL's far edge is what stays still.
+      const flippedX = col < block.x;
+      const flippedY = row < block.y;
+      const sizeW = clamp(
+        flippedX ? anchorCellRight - moveEvent.clientX : moveEvent.clientX - rect.left,
+        cellW,
+        spanPxX(flippedX ? block.x + 1 : columns - block.x),
+      );
+      const sizeH = clamp(
+        flippedY ? anchorCellBottom - moveEvent.clientY : moveEvent.clientY - rect.top,
+        cellH,
+        spanPxY(flippedY ? block.y + 1 : rows - block.y),
+      );
       gestureRef.current = {
         key: block.key,
         mode: "resize",
         placement: candidate,
         valid: latestValid,
-        offset: { x: 0, y: 0 },
-        // The box follows the cursor; the ghost shows where it will snap.
-        size: {
-          w: clamp((moveEvent.clientX - rect.left) / strides.scale, minW, maxW),
-          h: clamp((moveEvent.clientY - rect.top) / strides.scale, minH, maxH),
+        // A tile keeps its committed cell in the layout, so a flipped preview
+        // has to be translated back by however far it now reaches.
+        offset: {
+          x: flippedX ? (anchorCellRight - sizeW - rect.left) / strides.scale : 0,
+          y: flippedY ? (anchorCellBottom - sizeH - rect.top) / strides.scale : 0,
         },
+        size: { w: sizeW / strides.scale, h: sizeH / strides.scale },
       };
       scheduleGesturePaint();
     };
@@ -438,8 +488,13 @@ export function Grid<TData>(props: GridProps<TData>) {
     const handleUp = () => {
       endGesture(handleMove, handleUp);
       if (!latestValid) return;
-      if (latest.w !== block.w || latest.h !== block.h) {
-        onResize?.(block.key, latest.w, latest.h);
+      if (
+        latest.x !== block.x ||
+        latest.y !== block.y ||
+        latest.w !== block.w ||
+        latest.h !== block.h
+      ) {
+        onResize?.(block.key, latest);
       }
     };
 
@@ -484,7 +539,9 @@ export function Grid<TData>(props: GridProps<TData>) {
       rows,
     );
     if (!placementIsFree(blocks, candidate, block.key, columns, rows)) return;
-    if (event.shiftKey) onResize?.(block.key, candidate.w, candidate.h);
+    // Keyboard resize stays anchored at the top-left (Shift+Arrow grows or
+    // shrinks the far edge). Corner dragging is where the other anchors live.
+    if (event.shiftKey) onResize?.(block.key, candidate);
     else onMove?.(block.key, candidate.x, candidate.y);
   }
 
@@ -595,8 +652,10 @@ export function Grid<TData>(props: GridProps<TData>) {
                 placement,
               })}
 
-              {/* Corner resize handle: drag to span more cells, arrows (with
-                  Shift, on the tile) do the same from the keyboard. */}
+              {/* One resize handle. Drag it ANY direction: past the tile's own
+                  top-left it flips and the tile grows up / left instead.
+                  Arrows (with Shift, on the tile) do the same from the
+                  keyboard. */}
               {interactive && (
                 <button
                   type="button"

@@ -4,7 +4,7 @@ import * as React from "react";
 import { useActionState } from "react";
 import { Mail } from "lucide-react";
 import { FormStatus } from "@/components/settings/FormStatus";
-import { SaveButton } from "@/components/settings/SaveButton";
+import { SaveButton } from "@/components/ui/SaveButton";
 import { Modal } from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

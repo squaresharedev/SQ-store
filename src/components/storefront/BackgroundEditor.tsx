@@ -83,7 +83,9 @@ export function BackgroundEditor({
   const [imageTab, setImageTab] = useState(false);
   const [uploading, setUploading] = useState(false);
   /** 0..1 while the current image uploads; meaningless unless `uploading`. */
-  const [progress, setProgress] = useState(0);
+  // null once the bytes are sent and the server is still working (sniff,
+  // moderate, store) — an indeterminate bar, not a stalled 100%.
+  const [progress, setProgress] = useState<number | null>(0);
   const [uploadError, setUploadError] = useState<ActionError | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   // Drag-to-position bookkeeping: pointer + position at drag start.
@@ -256,7 +258,11 @@ export function BackgroundEditor({
           >
             <ImagePlus className="size-4" strokeWidth={2} aria-hidden="true" />
             {uploading
-              ? `Uploading… ${Math.round(progress * 100)}%`
+              ? progress === null
+                ? // Bytes are all sent; the server is still sniffing,
+                  // moderating and storing. A frozen "100%" reads as hung.
+                  "Processing…"
+                : `Uploading… ${Math.round(progress * 100)}%`
               : value.kind === "image"
                 ? "Replace image"
                 : "Upload image"}

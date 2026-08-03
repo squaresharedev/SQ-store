@@ -5,7 +5,7 @@ import { useActionState } from "react";
 import { Crown, UserMinus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FormStatus } from "@/components/settings/FormStatus";
-import { SaveButton } from "@/components/settings/SaveButton";
+import { SaveButton } from "@/components/ui/SaveButton";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";

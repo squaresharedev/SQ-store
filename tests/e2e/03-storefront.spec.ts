@@ -39,8 +39,15 @@ test.describe("storefront designer", () => {
     await page.goto("/storefront");
     await page.getByRole("button", { name: /^Embed / }).first().click();
     const snippet = page.locator("pre");
-    await expect(snippet).toContainText(storefrontId);
+    // The snippet carries the storefront's rotatable EMBED KEY, never its id.
+    // Publishing the id would make the embed impossible to revoke without
+    // deleting the storefront, and would leak the dashboard's own identifier
+    // into every page that embeds it.
     await expect(snippet).toContainText("embed.squareshare.to/widget.js");
+    await expect(snippet).toContainText(
+      /data-squareshare-storefront="[0-9a-f-]{36}"/,
+    );
+    await expect(snippet).not.toContainText(storefrontId);
 
     // Embed settings: enable + set a domain, save.
     await page.locator("#embed-enabled").click();

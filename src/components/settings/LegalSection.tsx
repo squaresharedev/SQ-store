@@ -3,7 +3,7 @@
 import { useActionState } from "react";
 import { Check } from "lucide-react";
 import { FormStatus } from "@/components/settings/FormStatus";
-import { SaveButton } from "@/components/settings/SaveButton";
+import { SaveButton } from "@/components/ui/SaveButton";
 import { SettingsCard } from "@/components/settings/SettingsCard";
 import { acceptLegal, type SettingsActionState } from "@/lib/settings/actions";
 import { LEGAL_VERSION } from "@/lib/settings/constants";

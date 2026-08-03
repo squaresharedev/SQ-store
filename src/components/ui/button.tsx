@@ -3,11 +3,17 @@ import { cn } from "@/lib/utils";
 import {
   destructiveButtonClass,
   ghostButtonClass,
+  ghostDangerButtonClass,
   primaryButtonClass,
   secondaryButtonClass,
 } from "./control-styles";
 
-type Variant = "primary" | "secondary" | "ghost" | "destructive";
+type Variant =
+  | "primary"
+  | "secondary"
+  | "ghost"
+  | "ghost-danger"
+  | "destructive";
 
 // Single source of truth is control-styles.ts, so <Link> CTAs styled with the
 // same constants stay pixel-identical to <Button>.
@@ -17,6 +23,7 @@ const variantClasses: Record<Variant, string> = {
   primary: primaryButtonClass,
   secondary: secondaryButtonClass,
   ghost: ghostButtonClass,
+  "ghost-danger": ghostDangerButtonClass,
   destructive: destructiveButtonClass,
 };
 
@@ -35,8 +42,8 @@ export function buttonClassName(variant: Variant = "primary", className?: string
 
 /**
  * Shared product-UI button (styles.md §8.3–§8.4): black sharp primary,
- * bordered secondary, quiet ghost, outlined destructive. Tokenized motion +
- * focus ring, reduced-motion safe.
+ * bordered secondary, quiet ghost, ghost that turns red on hover, outlined
+ * destructive. Tokenized motion + focus ring, reduced-motion safe.
  */
 export function Button({
   className,
