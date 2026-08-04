@@ -37,10 +37,15 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files — ignore real env files, but keep the committed examples
+# env files — ignore real env files, but keep the committed examples.
+# `.env.production` is a deliberate exception: it holds NEXT_PUBLIC_* values
+# only (already public in wrangler.jsonc) and MUST be in the repo, because
+# those are inlined at build time and a CI build without them ships a dead
+# client bundle. Never put a secret in it.
 .env
 .env.*
 !.env.example
+!.env.production
 
 # vercel
 .vercel

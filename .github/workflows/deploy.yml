@@ -5,14 +5,17 @@
 # Required repository secrets (Settings → Secrets and variables → Actions):
 #   CLOUDFLARE_API_TOKEN         Token with "Edit Cloudflare Workers" permission
 #   CLOUDFLARE_ACCOUNT_ID        Target Cloudflare account id
-#   NEXT_PUBLIC_SUPABASE_URL     Supabase project URL (public, inlined at build)
-#   NEXT_PUBLIC_SUPABASE_ANON_KEY  Supabase publishable/anon key (public)
 #   GH_PACKAGES_TOKEN            CLASSIC PAT with read:packages, required once
 #                                @squaresharedev/* packages are dependencies
 #                                (GitHub Packages rejects fine-grained tokens)
 #
+# Optional secrets (override the committed values):
+#   NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY
+#
 # NEXT_PUBLIC_* values are baked into the client bundle at build time, so they
-# must be present during the build step, not just at deploy.
+# must be present during the BUILD step, not just at deploy. They now come from
+# the committed .env.production, so a missing secret can no longer white-screen
+# production; the verify step below fails the run if they are absent anyway.
 name: Deploy to Cloudflare
 
 on:
@@ -61,14 +64,34 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build and deploy
+      - name: Build
+        run: npx opennextjs-cloudflare build
+        env:
+          # Optional overrides. The committed .env.production supplies these,
+          # so an unset secret is no longer fatal — but process.env still wins
+          # if a secret IS set, which is the escape hatch for a rotated key.
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+
+      # NEXT_PUBLIC_* are INLINED into the browser bundle by `next build`. A
+      # build that ran without them produces JavaScript no runtime var can
+      # rescue: createClient() throws "Supabase credentials missing" and every
+      # page dies at the error boundary. That shipped to production once,
+      # because the build step only echoed a warning and deployed anyway.
+      # Assert against the built artifact rather than the environment — the
+      # artifact is what users download, and it is the only thing that proves
+      # the inlining actually happened.
+      - name: Verify the client bundle carries the Supabase config
         run: |
-          echo "SUPABASE_URL present: ${NEXT_PUBLIC_SUPABASE_URL:+yes}${NEXT_PUBLIC_SUPABASE_URL:-NO}"
-          echo "ANON_KEY present: ${NEXT_PUBLIC_SUPABASE_ANON_KEY:+yes}${NEXT_PUBLIC_SUPABASE_ANON_KEY:-NO}"
-          npx opennextjs-cloudflare build
-          pnpm run deploy
+          set -euo pipefail
+          if ! grep -rqF "supabase.co" .open-next/assets/_next/static; then
+            echo "::error::Client bundle has no Supabase URL inlined. next build ran without NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY (check .env.production and the repo secrets). Refusing to deploy a bundle that would white-screen."
+            exit 1
+          fi
+          echo "Supabase config present in the client bundle."
+
+      - name: Deploy
+        run: pnpm run deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}

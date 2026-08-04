@@ -7,6 +7,11 @@ import { safeInternalPath } from "@/lib/utils/safe-path";
  * (confirmation, magic link, password recovery) which redirect here with a
  * `?code=` param. Route Handlers may write cookies, so the exchanged session is
  * persisted here. Node runtime (no `export const runtime = "edge"`).
+ *
+ * If sign-in never reaches this route and the browser lands on the ROOT of
+ * another host with `?code=` instead, this file is not the problem: Supabase
+ * dropped a `redirect_to` that isn't in its allowlist and fell back to the
+ * project's Site URL. See docs/auth-urls.md.
  */
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
