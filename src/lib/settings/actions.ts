@@ -6,16 +6,19 @@ import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { getUser, revokeOtherSessions } from "@/lib/auth/session";
 import { LEGAL_VERSION } from "@/lib/settings/constants";
-import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
+import { RATE_LIMITS, clientKey, rateLimit, rateLimitKey } from "@/lib/rate-limit";
+import { alertSecurityEvent } from "@/lib/security/events";
+import { accountHasPassword } from "@/lib/auth/has-password";
 import {
   deleteConfirmSchema,
-  displayNameSchema,
   emailChangeSchema,
   legalAcceptSchema,
   notificationsSchema,
   passwordChangeSchema,
   taxSchema,
 } from "@/lib/validation/settings";
+import { passwordProblem } from "@/lib/auth/password";
+import { usernameSchema } from "@/lib/validation/auth";
 import type { TablesUpdate } from "@/types";
 import type { z } from "zod";
 
@@ -39,15 +42,25 @@ const TOO_MANY: SettingsActionState = {
 };
 
 /**
- * Whether this account can be re-authenticated with a password.
+ * Audit + notify, guaranteed not to throw AT THE CALL SITE.
  *
- * Accounts created purely through an OAuth provider have no password, so
- * asking for one would be an unanswerable question rather than a security
- * control. Checked against the identity list rather than assumed from the
- * presence of an email, since OAuth accounts have an email too.
+ * `alertSecurityEvent` already promises this, but the promise is only worth
+ * what the implementation makes it worth, and these call sites run AFTER a
+ * password or email has already changed. Turning a completed credential change
+ * into an error the user might retry is a worse outcome than a missing audit
+ * row, so the guarantee is enforced here too rather than assumed.
  */
-function hasPasswordIdentity(user: User): boolean {
-  return (user.identities ?? []).some((identity) => identity.provider === "email");
+async function safeAlert(
+  ...args: Parameters<typeof alertSecurityEvent>
+): Promise<void> {
+  try {
+    await alertSecurityEvent(...args);
+  } catch (err) {
+    console.error(
+      "[settings] security alert failed:",
+      err instanceof Error ? err.message : String(err),
+    );
+  }
 }
 
 /**
@@ -103,25 +116,32 @@ async function siteOrigin(): Promise<string> {
 // --- Account ---------------------------------------------------------------
 
 /**
- * A user's name is also their unique handle (case-insensitive) — no separate
- * username field. The live availability check (see
- * /api/settings/display-name-available) is a UX nicety only; the real guard
- * is the DB's partial unique index on lower(display_name), so a race between
- * two tabs still can't produce a collision. We don't use updateOwnProfile
- * here because we need the raw Postgres error code to tell "taken" apart
- * from a generic save failure.
+ * The account's ONE name: the handle buyers see AND the one they sign in with.
+ * Changing it changes a credential, so the value is normalized to a single
+ * canonical form (lowercased by usernameSchema) before it is stored, and the
+ * same lower() comparison decides uniqueness, resolution at sign-in, and this
+ * write.
+ *
+ * Same shape as updateDisplayName and for the same reason: the raw Postgres
+ * code is what tells "someone got there first" apart from a generic failure,
+ * and profiles_username_lower_idx, not the availability check, is what actually
+ * settles a race between two tabs.
+ *
+ * Releasing a handle makes it immediately claimable by someone else. That is
+ * the accepted cost of letting people change it at all; nothing grants access
+ * by handle, so a released one confers nothing on whoever takes it next.
  */
-export async function updateDisplayName(
+export async function updateUsername(
   _prev: SettingsActionState,
   formData: FormData,
 ): Promise<SettingsActionState> {
   const user = await getUser();
   if (!user) return SIGNED_OUT;
-  const rejected = unknownFieldError(formData, ["display_name"]);
+  const rejected = unknownFieldError(formData, ["username"]);
   if (rejected) return rejected;
 
-  const parsed = displayNameSchema.safeParse({
-    display_name: String(formData.get("display_name") ?? ""),
+  const parsed = usernameSchema.safeParse({
+    username: String(formData.get("username") ?? ""),
   });
   if (!parsed.success) return firstIssue(parsed.error);
 
@@ -133,18 +153,18 @@ export async function updateDisplayName(
   const { error } = await supabase
     .from("profiles")
     .update({
-      display_name: parsed.data.display_name,
+      username: parsed.data.username,
       updated_at: new Date().toISOString(),
     })
     .eq("id", user.id);
 
   if (error) {
     return error.code === "23505"
-      ? { error: "That name is taken. Try another." }
+      ? { error: "That username is taken. Try another." }
       : SAVE_FAILED;
   }
   revalidatePath("/settings/account");
-  return { success: "Name saved." };
+  return { success: "Username saved." };
 }
 
 /**
@@ -187,10 +207,12 @@ export async function requestEmailChange(
   const origin = await siteOrigin();
   const supabase = await createClient();
 
-  // Accounts created through an OAuth provider have no password to verify.
-  // Their address is the provider's, so requiring one would lock them out of
-  // a field they can still legitimately change.
-  if (hasPasswordIdentity(user)) {
+  // Accounts created through an OAuth provider and never given a password have
+  // none to verify, so requiring one would lock them out of a field they can
+  // still legitimately change. Everyone else must prove they hold it: this is
+  // a takeover-grade action, since whoever controls the address can reset the
+  // password to it.
+  if (await accountHasPassword(user.id)) {
     if (!parsed.data.current_password) {
       return { error: "Enter your current password to change your email." };
     }
@@ -206,6 +228,12 @@ export async function requestEmailChange(
     { emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent("/settings/account")}` },
   );
   if (error) return { error: "Could not start the email change. Try again." };
+
+  await safeAlert(user.id, "email.change_requested", {
+    title: "Email change requested",
+    body: "Someone asked to move this account to a new email address. It only takes effect once the link in that inbox is confirmed. If this wasn't you, change your password now.",
+  });
+
   return {
     success: "Check your inbox. The change applies once you confirm the link.",
   };
@@ -231,6 +259,18 @@ export async function changePassword(
     confirm_password: String(formData.get("confirm_password") ?? ""),
   });
   if (!parsed.success) return firstIssue(parsed.error);
+
+  // Same strength bar as sign-up and recovery reset. All three set a password,
+  // so all three answer to one rule; a weaker one here would be the way around
+  // the other two.
+  const weak = passwordProblem(parsed.data.new_password, {
+    email: user.email,
+    username:
+      typeof user.user_metadata?.username === "string"
+        ? user.user_metadata.username
+        : undefined,
+  });
+  if (weak) return { error: weak };
 
   // The re-auth below verifies a caller-supplied password, which makes this
   // endpoint a password ORACLE: without a budget, a hijacked session could sit
@@ -266,6 +306,11 @@ export async function changePassword(
   // signed in, so the user is not logged out of the tab they are using.
   await revokeOtherSessions(supabase);
 
+  await safeAlert(user.id, "password.changed", {
+    title: "Your password was changed",
+    body: "The password on this account was just changed and other devices were signed out. If this wasn't you, reset your password immediately.",
+  });
+
   return { success: "Password updated. Other devices have been signed out." };
 }
 
@@ -285,10 +330,21 @@ export async function sendPasswordReset(
   const rejected = unknownFieldError(formData, []);
   if (rejected) return rejected;
 
-  // Only ever mails the account's own address, so this bounds nuisance volume
-  // rather than a vector at a third party. Supabase enforces its own send
-  // limit too; ours keeps the request from reaching it in the first place.
+  // TWO budgets, and the second is not redundant. The per-user one is spent by
+  // whoever holds a session, so an attacker working through several
+  // compromised accounts gets a fresh five per victim. The client-keyed one
+  // caps what a single origin can send in total, so inbox-flooding cost does
+  // not scale with how many accounts they have reached. Same pairing the
+  // signed-out mail path uses (allowAuthEmail).
   if (!(await rateLimit("password_reset", RATE_LIMITS.passwordReset))) {
+    return { error: "Too many reset emails. Wait a while before trying again." };
+  }
+  const perClient = await rateLimitKey(
+    await clientKey(await headers()),
+    "password_reset_client",
+    RATE_LIMITS.passwordResetPerClient,
+  );
+  if (!perClient) {
     return { error: "Too many reset emails. Wait a while before trying again." };
   }
 
@@ -302,6 +358,14 @@ export async function sendPasswordReset(
       ? { error: "Too many requests. Wait a minute and try again." }
       : { error: "Could not send the reset email. Try again." };
   }
+
+  // The one alert that reliably reaches its target: requesting a link does not
+  // sign anyone out, so the owner is still able to read this and act.
+  await safeAlert(user.id, "password.reset_requested", {
+    title: "A password reset link was requested",
+    body: "Someone asked for a link to set a new password on this account. If it wasn't you, ignore the email and change your password.",
+  });
+
   return { success: "Reset link sent. Check your inbox." };
 }
 

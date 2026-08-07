@@ -43,8 +43,15 @@ export function TaxSection({
       title="Business & VAT"
       description="For EU sellers. We're saving this now so invoices and VAT are all set the day payouts need it."
     >
-      <form action={formAction} className="flex flex-col gap-4" noValidate>
-        <div className="flex flex-col gap-1.5">
+      {/* The ids on each field wrapper are universal search's landing points
+          (/settings/tax#vat and friends); scroll-mt clears the sticky top bar
+          so the anchor doesn't land under it. */}
+      <form
+        action={formAction}
+        className="flex flex-col gap-4 [&>div]:scroll-mt-20"
+        noValidate
+      >
+        <div id="business-name" className="flex flex-col gap-1.5">
           <Label htmlFor="tax_business_name">Business name</Label>
           <Input
             id="tax_business_name"
@@ -58,7 +65,7 @@ export function TaxSection({
             Selling as yourself? Leave it empty.
           </p>
         </div>
-        <div className="flex flex-col gap-1.5">
+        <div id="vat" className="flex flex-col gap-1.5">
           <Label htmlFor="tax_vat_id">VAT ID</Label>
           <Input
             id="tax_vat_id"
@@ -68,7 +75,7 @@ export function TaxSection({
             maxLength={32}
           />
         </div>
-        <div className="flex flex-col gap-1.5">
+        <div id="country" className="flex flex-col gap-1.5">
           <Label htmlFor="tax_country">Country</Label>
           <input type="hidden" name="tax_country" value={countryCode} />
           <Select

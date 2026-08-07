@@ -127,24 +127,34 @@ describe("multiple storefronts per owner", () => {
 });
 
 describe("signup trigger maps identity metadata", () => {
-  it("password signup maps display_name from metadata", async () => {
-    const u = await createUser("meta1@test.squareshare.to", { display_name: "From Display" });
+  it("password signup takes the username straight from metadata", async () => {
+    const u = await createUser("meta1@test.squareshare.to", { username: "from_signup" });
     const { rows } = await asSuper((q) =>
-      q.query(`select display_name from public.profiles where id = $1`, [u.id]),
+      q.query(`select username from public.profiles where id = $1`, [u.id]),
     );
-    expect(rows[0].display_name).toBe("From Display");
+    expect(rows[0].username).toBe("from_signup");
   });
 
-  it("OAuth-style metadata (full_name / name / picture) is picked up", async () => {
+  it("OAuth-style metadata (full_name / name / picture) is slugged into a handle", async () => {
+    // Google sends a human name, not a handle. Slugging it beats failing the
+    // format check or leaving the account with no identity at all.
     const u = await createUser("meta2@test.squareshare.to", {
       full_name: "OAuth Person",
       picture: "https://example.com/a.png",
     });
     const { rows } = await asSuper((q) =>
-      q.query(`select display_name, avatar_url from public.profiles where id = $1`, [u.id]),
+      q.query(`select username, avatar_url from public.profiles where id = $1`, [u.id]),
     );
-    expect(rows[0].display_name).toBe("OAuth Person");
+    expect(rows[0].username).toBe("oauth_person");
     expect(rows[0].avatar_url).toBe("https://example.com/a.png");
+  });
+
+  it("leaves the handle null when metadata has nothing usable", async () => {
+    const u = await createUser("meta4@test.squareshare.to", { full_name: "x" });
+    const { rows } = await asSuper((q) =>
+      q.query(`select username from public.profiles where id = $1`, [u.id]),
+    );
+    expect(rows[0].username).toBeNull();
   });
 
   it("every new profile is seeded with exactly one active owner membership", async () => {

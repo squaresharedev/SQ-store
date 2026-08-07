@@ -35,6 +35,7 @@ describe("embedded supabase replica", () => {
       "profiles",
       "rate_limit_keys",
       "rate_limits",
+      "security_events",
       "storefronts",
       "team_members",
       "waitlist_signups",
@@ -54,15 +55,15 @@ describe("embedded supabase replica", () => {
 
   it("signup trigger chain creates profile + owner team membership", async () => {
     const user = await createUser("harness-owner@test.squareshare.to", {
-      display_name: "Harness Owner",
+      username: "harness_owner",
     });
 
     const profile = await asSuper((q) =>
-      q.query(`select display_name from public.profiles where id = $1`, [
+      q.query(`select username from public.profiles where id = $1`, [
         user.id,
       ]),
     );
-    expect(profile.rows[0]?.display_name).toBe("Harness Owner");
+    expect(profile.rows[0]?.username).toBe("harness_owner");
 
     const owner = await asSuper((q) =>
       q.query(

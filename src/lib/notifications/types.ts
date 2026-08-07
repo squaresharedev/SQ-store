@@ -12,6 +12,10 @@ export const NOTIFICATION_TYPES = [
   "stock",
   "order",
   "system",
+  /** Credential-level events: password changed, reset requested, email moved.
+   *  Separate from "system" so it can be styled to actually catch the eye,
+   *  which is the entire point of telling someone their password changed. */
+  "security",
 ] as const;
 
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number];

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, Search, X } from "lucide-react";
 import type { ActionError } from "@/lib/errors";
 import type { Product } from "@/types/product";
 import {
@@ -46,6 +46,8 @@ import { TextBlockEditor, type TextBlockPatch } from "./TextBlockEditor";
 import { useCanvasViewport } from "./useCanvasViewport";
 import { useEditorHistory } from "./useEditorHistory";
 import { useUnsavedChangesGuard } from "@/lib/hooks/useUnsavedChangesGuard";
+import { SearchProvider, useSearch } from "@/components/search/SearchProvider";
+import type { TeamRole } from "@/lib/team/permissions";
 
 type SaveState =
   | { status: "idle" }
@@ -166,6 +168,8 @@ export function StorefrontDesigner({
   initialConfig,
   products,
   initialBackgroundImageUrl = null,
+  role = null,
+  accountId = null,
 }: {
   storefrontId: string;
   initialName: string;
@@ -173,6 +177,10 @@ export function StorefrontDesigner({
   products: Product[];
   /** Signed display URL for a stored image background (null when none). */
   initialBackgroundImageUrl?: string | null;
+  /** Active account role, for universal search's action gating. */
+  role?: TeamRole | null;
+  /** Active account id, for universal search's snapshot cache. */
+  accountId?: string | null;
 }) {
   const [name, setName] = useState(initialName);
   // Display URL for the image background: server-signed at load; replaced by
@@ -1132,10 +1140,23 @@ export function StorefrontDesigner({
     inspector?.kind === "picker" || selectedBlock !== null;
 
   return (
-    // Fixed-height workspace: the PAGE never scrolls. The canvas column and
-    // the design panel each scroll on their own, so a tall storefront moves
-    // under the toolbar without dragging the chrome off screen.
-    <div className="flex h-dvh flex-col overflow-hidden bg-background">
+    // Universal search, mounted here rather than inherited: the editor renders
+    // full-screen OUTSIDE the dashboard shell (see storefront/layout.tsx), so
+    // without this ⌘K would be dead on the one surface people sit in longest.
+    //
+    // `navigate` goes through the leave guard on purpose. A bare router.push
+    // from a search result would walk out of the editor and take any unsaved
+    // canvas edits with it, silently — the same trap the header's Back link
+    // already routes around.
+    <SearchProvider
+      role={role}
+      accountId={accountId}
+      navigate={leaveGuard.requestLeave}
+    >
+      {/* Fixed-height workspace: the PAGE never scrolls. The canvas column and
+          the design panel each scroll on their own, so a tall storefront moves
+          under the toolbar without dragging the chrome off screen. */}
+      <div className="flex h-dvh flex-col overflow-hidden bg-background">
       {/* Full-screen editor top bar — no sidebar here, so this is the only
           chrome. Pinned by the layout, so it needs no sticky positioning. */}
       <header className="shrink-0 border-b border-border bg-background">
@@ -1174,6 +1195,7 @@ export function StorefrontDesigner({
           </div>
 
           <div className="flex items-center gap-3">
+            <DesignerSearchButton />
             {/* Save feedback must survive the phone. These used to be
                 `hidden sm:inline`, so tapping Save on a 390px screen confirmed
                 nothing at all — and `display:none` drops a node from the
@@ -1467,6 +1489,38 @@ export function StorefrontDesigner({
           </Button>
         </div>
       </Modal>
-    </div>
+      </div>
+    </SearchProvider>
+  );
+}
+
+/**
+ * Search entry point for the editor's own top bar. A separate component
+ * because it has to be a DESCENDANT of the SearchProvider above to read its
+ * context — the designer itself renders that provider, so it cannot use the
+ * hook directly. Styled with the editor's icon-button chrome rather than the
+ * dashboard trigger, since this bar has no room for a field.
+ */
+function DesignerSearchButton() {
+  const search = useSearch();
+  // Anchor the palette under this button, same as the dashboard trigger — the
+  // editor's is at the bar's right, so the panel drops down right-side there.
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const registerAnchor = search?.registerAnchor;
+  useEffect(() => registerAnchor?.(buttonRef.current), [registerAnchor]);
+  if (!search) return null;
+  return (
+    <button
+      ref={buttonRef}
+      type="button"
+      onClick={search.open}
+      aria-label="Search"
+      aria-haspopup="dialog"
+      aria-expanded={search.isOpen}
+      aria-keyshortcuts="Meta+K Control+K"
+      className={iconButtonClass}
+    >
+      <Search className="size-4" strokeWidth={2} aria-hidden="true" />
+    </button>
   );
 }

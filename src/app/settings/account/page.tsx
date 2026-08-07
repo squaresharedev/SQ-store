@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { AccountSection } from "@/components/settings/AccountSection";
+import { accountHasPassword } from "@/lib/auth/has-password";
 import { requireProfile, requireUser } from "@/lib/auth/session";
 
 export const metadata: Metadata = {
@@ -14,15 +15,18 @@ export default async function AccountSettingsPage() {
     requireUser("/settings/account"),
     requireProfile(),
   ]);
+  const hasPassword = await accountHasPassword(user.id);
 
   return (
     <AccountSection
-      displayName={profile?.display_name ?? ""}
+      username={profile?.username ?? ""}
       email={user.email ?? ""}
       avatarUrl={profile?.avatar_url ?? null}
-      // Password-backed accounts must re-authenticate to move their email;
-      // OAuth-only accounts have no password to ask for.
-      hasPassword={(user.identities ?? []).some((i) => i.provider === "email")}
+      // From the password HASH, not from `identities`: setting a password on an
+      // OAuth account writes the hash without creating an `email` identity, so
+      // the old check reported "no password" for accounts that had one. See
+      // lib/auth/has-password.ts for what that broke.
+      hasPassword={hasPassword}
     />
   );
 }

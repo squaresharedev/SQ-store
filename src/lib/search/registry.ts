@@ -1,0 +1,299 @@
+import { rankEntries } from "@/lib/search/rank";
+import {
+  MAIN_NAV,
+  SETTINGS_LINK,
+  SETTINGS_NAV,
+} from "@/lib/search/nav-constants";
+import type { SearchGroup, SearchResult } from "@/lib/search/types";
+import { can, type TeamAction, type TeamRole } from "@/lib/team/permissions";
+
+/**
+ * THE LOCAL INDEX — every page, settings section, settings FIELD and quick
+ * action, matched synchronously in the browser with no network at all.
+ *
+ * This is what makes the search bar "always work". The remote half (products,
+ * orders, storefronts, team, notifications) can be slow, rate limited, offline
+ * or 500ing; the palette still answers on the first keystroke, because
+ * everything here is a few hundred strings already in the bundle.
+ *
+ * Pages come from the shared nav map, so a route added to the sidebar is
+ * searchable without touching this file. Settings FIELDS are hand-written,
+ * because "change my username" has to find a control that no route list knows
+ * about — that mapping only exists here.
+ *
+ * SYNONYMS are the point, not decoration. People search for what they want to
+ * do ("log out", "vat", "add product"), not for the label we happened to pick.
+ */
+
+type LocalEntry = {
+  id: string;
+  /** Title first, then every synonym worth matching. */
+  terms: string[];
+  /** Hidden entirely when the active role lacks this. Cosmetic — the route
+   *  and the server action re-check regardless. */
+  permission?: TeamAction;
+  result: SearchResult;
+};
+
+function entry(
+  id: string,
+  result: Omit<SearchResult, "id">,
+  synonyms: string[] = [],
+  permission?: TeamAction,
+): LocalEntry {
+  return {
+    id,
+    terms: [result.title, ...(result.subtitle ? [result.subtitle] : []), ...synonyms],
+    permission,
+    result: { id, ...result },
+  };
+}
+
+const PAGE_SYNONYMS: Record<string, string[]> = {
+  "/dashboard": ["home", "overview", "summary", "start"],
+  "/products": ["catalogue", "catalog", "items", "inventory", "stock", "listings"],
+  "/storefront": ["shop", "store", "designer", "editor", "embed", "widget"],
+  "/orders": ["sales", "purchases", "transactions", "buyers", "customers"],
+  "/analytics": ["stats", "statistics", "metrics", "reports", "revenue", "charts"],
+  "/payments": ["payouts", "stripe", "money", "bank", "balance"],
+  "/settings": ["preferences", "options", "configuration", "account"],
+};
+
+const PAGES: LocalEntry[] = [...MAIN_NAV, SETTINGS_LINK].map((link) =>
+  entry(
+    `page:${link.href}`,
+    { type: "page", title: link.label, href: link.href },
+    PAGE_SYNONYMS[link.href] ?? [],
+  ),
+);
+
+const SETTINGS_SECTIONS: LocalEntry[] = SETTINGS_NAV.map((link) =>
+  entry(`settings:${link.href}`, {
+    type: "settings",
+    title: link.label,
+    subtitle: "Settings",
+    href: link.href,
+  }),
+);
+
+/**
+ * Individual settings CONTROLS. The `#hash` targets the element id on the
+ * section that owns the field, so the browser scrolls straight to it.
+ */
+const SETTINGS_FIELDS: LocalEntry[] = [
+  // One name now, so the old "display name" search terms land here too: the
+  // username IS the store name buyers see as well as the sign-in handle.
+  entry(
+    "field:username",
+    { type: "settings", title: "Username", subtitle: "Settings › Account", href: "/settings/account#username" },
+    [
+      "handle",
+      "sign in name",
+      "login name",
+      "at name",
+      "@",
+      "display name",
+      "store name",
+      "public name",
+      "shop name",
+      "rename",
+      "nickname",
+    ],
+  ),
+  entry(
+    "field:avatar",
+    { type: "settings", title: "Profile photo", subtitle: "Settings › Account", href: "/settings/account#avatar" },
+    ["avatar", "picture", "image", "headshot", "logo"],
+  ),
+  entry(
+    "field:email",
+    { type: "settings", title: "Email address", subtitle: "Settings › Account", href: "/settings/account#email" },
+    ["change email", "mail", "address"],
+  ),
+  entry(
+    "field:password",
+    { type: "settings", title: "Password", subtitle: "Settings › Account", href: "/settings/account#password" },
+    ["change password", "reset password", "security", "credentials"],
+  ),
+  entry(
+    "field:sign-out",
+    { type: "settings", title: "Sign out", subtitle: "Settings › Account", href: "/settings/account#sign-out" },
+    ["log out", "logout", "leave", "exit"],
+  ),
+  entry(
+    "field:vat",
+    { type: "settings", title: "VAT ID", subtitle: "Settings › Tax", href: "/settings/tax#vat" },
+    ["tax number", "vat number", "tax id", "eu vat"],
+  ),
+  entry(
+    "field:business-name",
+    { type: "settings", title: "Business name", subtitle: "Settings › Tax", href: "/settings/tax#business-name" },
+    ["company name", "legal name", "trading name"],
+  ),
+  entry(
+    "field:tax-country",
+    { type: "settings", title: "Tax country", subtitle: "Settings › Tax", href: "/settings/tax#country" },
+    ["country", "eu", "residence", "jurisdiction"],
+  ),
+  entry(
+    "field:notify-sales",
+    { type: "settings", title: "Sales emails", subtitle: "Settings › Notifications", href: "/settings/notifications#preferences" },
+    ["email me when something sells", "order emails", "sale alerts"],
+  ),
+  entry(
+    "field:notify-marketing",
+    { type: "settings", title: "Marketing emails", subtitle: "Settings › Notifications", href: "/settings/notifications#preferences" },
+    ["tips", "newsletter", "marketplace news", "unsubscribe"],
+  ),
+  entry(
+    "field:notify-product",
+    { type: "settings", title: "Product update emails", subtitle: "Settings › Notifications", href: "/settings/notifications#preferences" },
+    ["feature announcements", "changelog emails"],
+  ),
+  entry(
+    "field:legal",
+    { type: "settings", title: "Seller agreement", subtitle: "Settings › Legal", href: "/settings/legal" },
+    ["terms of service", "terms", "privacy policy", "gdpr", "contract"],
+  ),
+  entry(
+    "field:export",
+    { type: "settings", title: "Export my data", subtitle: "Settings › Danger zone", href: "/settings/danger#export" },
+    ["download my data", "gdpr export", "backup", "data dump"],
+  ),
+  entry(
+    "field:delete-account",
+    { type: "settings", title: "Delete account", subtitle: "Settings › Danger zone", href: "/settings/danger#delete" },
+    ["close account", "remove account", "cancel account", "delete everything"],
+  ),
+];
+
+/** Things you DO, not places you go. Ordered by how often they're wanted. */
+const ACTIONS: LocalEntry[] = [
+  entry(
+    "action:new-product",
+    { type: "action", title: "New product", subtitle: "Create", href: "/products/new" },
+    ["add product", "create product", "sell something", "upload", "list an item"],
+    "products.write",
+  ),
+  entry(
+    "action:new-storefront",
+    { type: "action", title: "New storefront", subtitle: "Create", href: "/storefront" },
+    ["add storefront", "create shop", "design a store", "embed"],
+    "storefront.write",
+  ),
+  entry(
+    "action:invite-member",
+    { type: "action", title: "Invite a team member", subtitle: "Team & access", href: "/settings/team#invite" },
+    ["add teammate", "add user", "share access", "collaborator", "invite"],
+    "team.invite",
+  ),
+  entry(
+    "action:notifications",
+    { type: "action", title: "Notification history", subtitle: "Go to", href: "/notifications" },
+    ["alerts", "inbox", "unread", "bell"],
+  ),
+];
+
+const ALL_ENTRIES: LocalEntry[] = [
+  ...PAGES,
+  ...ACTIONS,
+  ...SETTINGS_SECTIONS,
+  ...SETTINGS_FIELDS,
+];
+
+/** Exported for the registry test, which asserts every nav route is indexed. */
+export const LOCAL_ENTRY_COUNT = ALL_ENTRIES.length;
+
+const GROUP_ORDER: { type: SearchResult["type"]; label: string }[] = [
+  { type: "page", label: "Pages" },
+  { type: "action", label: "Actions" },
+  { type: "settings", label: "Settings" },
+];
+
+/**
+ * The EMPTY-STATE curation. An empty palette used to suggest only the nav
+ * pages — the tabs already one glance away in the sidebar, i.e. the least
+ * useful thing to suggest. What people actually open a search for is the
+ * buried stuff: reset my password, export my data, invite someone. So the
+ * empty state leads with actions and a hand-picked set of settings intents,
+ * and recommends no pages at all.
+ *
+ * The settings picks reference existing entries BY ID (never duplicated), so
+ * their titles, synonyms and deep-link hashes stay defined in one place.
+ */
+const SUGGESTION_SETTINGS_IDS = new Set([
+  "field:password", // "reset password" lives in its synonyms
+  "field:username",
+  "field:email",
+  "field:export",
+  "field:notify-sales",
+]);
+
+// Pages are DELIBERATELY absent: the sidebar already shows every page, so
+// recommending them here is noise. They stay fully searchable — this list
+// only shapes the empty state, never the query path.
+const EMPTY_STATE_GROUPS: {
+  type: SearchResult["type"];
+  label: string;
+  source: LocalEntry[];
+}[] = [
+  { type: "action", label: "Actions", source: ACTIONS },
+  {
+    type: "settings",
+    label: "Settings",
+    source: SETTINGS_FIELDS.filter((item) => SUGGESTION_SETTINGS_IDS.has(item.id)),
+  },
+];
+
+const DEFAULT_LIMIT = 12;
+
+/** Permission gate: a viewer must not be offered "New product" only to be
+ *  refused by the page they land on. Null role fails closed. */
+function allowedFor(
+  entries: LocalEntry[],
+  role: TeamRole | null | undefined,
+): LocalEntry[] {
+  return entries.filter(
+    (item) => !item.permission || (role ? can(role, item.permission) : false),
+  );
+}
+
+/**
+ * Match the local index. Synchronous by design: it runs inside the same render
+ * as the keystroke, so results never lag the caret.
+ *
+ * An EMPTY query is not an empty result — it returns curated suggestions
+ * (actions and common settings intents; never pages), so opening the palette
+ * offers the things search exists to make reachable rather than a void.
+ */
+export function searchLocalRegistry(
+  query: string,
+  options?: { role?: TeamRole | null; limit?: number },
+): SearchGroup[] {
+  const limit = options?.limit ?? DEFAULT_LIMIT;
+  const role = options?.role;
+  const term = query.trim();
+
+  if (!term) {
+    return EMPTY_STATE_GROUPS.map(({ type, label, source }) => ({
+      type,
+      label,
+      results: allowedFor(source, role).map((item) => item.result),
+    })).filter((group) => group.results.length > 0);
+  }
+
+  const matched = rankEntries(
+    allowedFor(ALL_ENTRIES, role),
+    term,
+    (item) => item.terms,
+    limit,
+  );
+
+  return GROUP_ORDER.map(({ type, label }) => ({
+    type,
+    label,
+    results: matched
+      .filter((item) => item.result.type === type)
+      .map((item) => item.result),
+  })).filter((group) => group.results.length > 0);
+}

@@ -77,7 +77,9 @@ export function TeamSection({
         <PendingInvites invites={pendingInvites} />
       )}
 
+      {/* id: universal search's landing point for "invite a team member". */}
       <SettingsCard
+        id="invite"
         title="Team"
         description="People who can sign in to this store. Their role controls what they can see and change."
       >

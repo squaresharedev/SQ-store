@@ -73,8 +73,19 @@ export class AuthUnreachableError extends Error {
  * unreachable Supabase hangs the response for ~27s (measured) before anything
  * renders. Auth normally answers well inside a second, so we stop waiting long
  * before auth-js does and report "unreachable" ourselves.
+ *
+ * `next dev` GETS A LONGER LEASH, because this bound is wall-clock and dev has
+ * one other thing that eats it: a cold Turbopack compile. The first render of a
+ * heavy route after `.next` is cleared blocks the event loop long enough that
+ * the timer fires while the auth fetch (0.2s of actual network) is still
+ * queued. That surfaces as "Could not reach Supabase Auth" on the dashboard and
+ * sends you hunting for a network or credentials problem that does not exist —
+ * the very next request renders in ~450ms. Production compiles ahead of time,
+ * so it keeps the 5s ceiling this bound is really for, and so does `test`, so
+ * the suite exercises the real number.
  */
-const AUTH_TIMEOUT_MS = 5_000;
+const AUTH_TIMEOUT_MS =
+  process.env.NODE_ENV === "development" ? 20_000 : 5_000;
 
 /** Resolves to `timeoutValue` if `promise` hasn't settled in time. */
 async function withTimeout<T>(promise: Promise<T>, timeoutValue: T): Promise<T> {

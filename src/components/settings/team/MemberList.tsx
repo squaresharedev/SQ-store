@@ -1,4 +1,4 @@
-import { MemberRow, displayNameFor } from "@/components/settings/team/MemberRow";
+import { MemberRow, usernameFor } from "@/components/settings/team/MemberRow";
 import type { TeamRole } from "@/lib/team/permissions";
 import type { TeamMemberRow } from "@/lib/team/queries";
 
@@ -8,7 +8,7 @@ const ROLE_ORDER: Record<TeamRole, number> = { owner: 0, editor: 1, viewer: 2 };
 function byRoleThenName(a: TeamMemberRow, b: TeamMemberRow): number {
   const rank = ROLE_ORDER[a.role] - ROLE_ORDER[b.role];
   if (rank !== 0) return rank;
-  return displayNameFor(a).localeCompare(displayNameFor(b), undefined, {
+  return usernameFor(a).localeCompare(usernameFor(b), undefined, {
     sensitivity: "base",
   });
 }

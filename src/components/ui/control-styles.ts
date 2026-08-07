@@ -98,6 +98,19 @@ export const infoTextClass = "font-inter text-xs text-muted-foreground";
 /** Inline validation message. */
 export const errorTextClass = "font-inter text-sm text-destructive";
 
+/** "Last used" chip marking the sign-in option this browser used last.
+ *
+ *  Sentence case, not uppercase: this is a quiet aside to a returning user, and
+ *  caps + letterspacing gave a two-word hint the weight of a section label.
+ *  Sized below the chip scale (11px) so it rides alongside a control without
+ *  competing with it, with the padding pulled in to match.
+ *
+ *  `text-foreground` rather than muted keeps it legible at that size, and it is
+ *  deliberately NOT the acid accent: purple on the card surface lands around
+ *  3.5:1 here, under AA, and position already does the work colour would. */
+export const lastUsedBadgeClass =
+  "inline-flex shrink-0 items-center rounded-full border border-border bg-muted px-1.5 py-px font-inter text-[0.6875rem] font-medium leading-tight text-foreground";
+
 /** "Soon" chip for stubbed, not-yet-wired controls. */
 export const stubBadgeClass =
   "ml-2 inline-flex shrink-0 items-center rounded-full border border-border bg-muted px-1.5 py-0.5 font-inter text-xs font-medium uppercase tracking-wide text-muted-foreground";

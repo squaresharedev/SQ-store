@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
   deleteConfirmSchema,
-  displayNameSchema,
   emailChangeSchema,
   legalAcceptSchema,
   notificationsSchema,
   passwordChangeSchema,
   taxSchema,
 } from "@/lib/validation/settings";
+import { usernameSchema } from "@/lib/validation/auth";
 import {
   teamAcceptSchema,
   teamChangeRoleSchema,
@@ -23,16 +23,26 @@ import { LEGAL_VERSION } from "@/lib/settings/constants";
 
 const UUID = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee";
 
-describe("displayNameSchema", () => {
-  it("accepts and trims a name", () => {
-    const r = displayNameSchema.safeParse({ display_name: "  builderboy  " });
-    expect(r.success && r.data.display_name).toBe("builderboy");
+describe("usernameSchema (the account's one name)", () => {
+  it("accepts, trims and normalizes to the stored form", () => {
+    const r = usernameSchema.safeParse({ username: "  BuilderBoy  " });
+    expect(r.success && r.data.username).toBe("builderboy");
   });
-  it("rejects empty / whitespace / >50 chars", () => {
-    expect(displayNameSchema.safeParse({ display_name: "" }).success).toBe(false);
-    expect(displayNameSchema.safeParse({ display_name: "   " }).success).toBe(false);
-    expect(displayNameSchema.safeParse({ display_name: "x".repeat(51) }).success).toBe(false);
+
+  it("rejects empty, whitespace and over-length", () => {
+    expect(usernameSchema.safeParse({ username: "" }).success).toBe(false);
+    expect(usernameSchema.safeParse({ username: "   " }).success).toBe(false);
+    expect(usernameSchema.safeParse({ username: "x".repeat(31) }).success).toBe(false);
   });
+
+  it("rejects what a free-form display name used to allow", () => {
+    // This field is now half of a credential, so spaces and non-ASCII are out:
+    // they invite look-alike accounts that a case-fold cannot catch.
+    for (const bad of ["Builder Boy", "buildér", "builder-boy", "аdmin", "ab"]) {
+      expect(usernameSchema.safeParse({ username: bad }).success, bad).toBe(false);
+    }
+  });
+
   it("strictObject: rejects smuggled profile fields (field whitelist)", () => {
     for (const extra of [
       { is_seller: true },
@@ -41,7 +51,7 @@ describe("displayNameSchema", () => {
       { role: "owner" },
     ]) {
       expect(
-        displayNameSchema.safeParse({ display_name: "ok", ...extra }).success,
+        usernameSchema.safeParse({ username: "okname", ...extra }).success,
         JSON.stringify(extra),
       ).toBe(false);
     }

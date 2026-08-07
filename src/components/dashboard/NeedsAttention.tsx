@@ -1,15 +1,8 @@
 import Link from "next/link";
 import { AlertCircle, ArrowRight, CheckCircle2 } from "lucide-react";
 import { iconNudgeRightClass } from "@/components/ui/control-styles";
+import type { AttentionItem } from "@/lib/dashboard/attention";
 import { ModuleCard } from "./ModuleCard";
-
-export type AttentionItem = {
-  key: string;
-  label: string;
-  description: string;
-  href: string;
-  actionLabel: string;
-};
 
 /** Real, data-backed action items; quiet "all clear" when there are none. */
 export function NeedsAttention({ items }: { items: AttentionItem[] }) {

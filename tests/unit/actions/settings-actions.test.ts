@@ -31,7 +31,7 @@ for (const m of ["from", "select", "insert", "update", "delete", "eq", "neq", "i
 }
 db.single = vi.fn(() => dbFn());
 db.maybeSingle = vi.fn(() => dbFn());
-// Thenable for direct-await (updateOwnProfile and updateDisplayName pattern)
+// Thenable for direct-await (updateOwnProfile and updateUsername pattern)
 db.then = (resolve: (v: unknown) => void, reject?: (e: unknown) => void) =>
   Promise.resolve(dbFn()).then(resolve, reject);
 // Auth methods for changePassword
@@ -40,6 +40,7 @@ db.auth = {
   updateUser: vi.fn(),
   getSession: vi.fn(),
   signOut: vi.fn(),
+  resetPasswordForEmail: vi.fn(),
 };
 
 // Non-thenable wrapper: prevents async () => db from unwrapping via thenable protocol.
@@ -58,15 +59,35 @@ vi.mock("@/lib/supabase/server", () => ({
 // these specs assert the action logic. Each file also has one case that flips
 // it to denied, since the limiter fails closed and that path must be covered.
 const rateLimitMock = vi.fn();
+const rateLimitKeyMock = vi.fn();
 vi.mock('@/lib/rate-limit', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/lib/rate-limit')>()),
   rateLimit: (...args: unknown[]) => rateLimitMock(...args),
+  rateLimitKey: (...args: unknown[]) => rateLimitKeyMock(...args),
+  clientKey: async () => "test-client",
+}));
+
+/**
+ * The has-password lookup. It is the fix for a real hole: `identities` said no
+ * for accounts that had a password, and requestEmailChange skips
+ * re-authentication when it believes there is none.
+ */
+const hasPasswordMock = vi.fn();
+vi.mock("@/lib/auth/has-password", () => ({
+  accountHasPassword: (...args: unknown[]) => hasPasswordMock(...args),
+}));
+
+/** Audit + bell. Best-effort by contract, so specs assert it is CALLED but
+ *  also that a failure never fails the credential change. */
+const alertMock = vi.fn();
+vi.mock("@/lib/security/events", () => ({
+  alertSecurityEvent: (...args: unknown[]) => alertMock(...args),
 }));
 
 // ---- imports -------------------------------------------------------------
 
 import {
-  updateDisplayName,
+  updateUsername,
   saveTaxInfo,
   saveNotifications,
   acceptLegal,
@@ -74,6 +95,7 @@ import {
   cancelAccountDeletion,
   changePassword,
   requestEmailChange,
+  sendPasswordReset,
 } from "@/lib/settings/actions";
 import { LEGAL_VERSION } from "@/lib/settings/constants";
 
@@ -86,6 +108,9 @@ const PREV: { error?: string; success?: string } = {};
 beforeEach(() => {
   vi.clearAllMocks();
   rateLimitMock.mockResolvedValue(true);
+  rateLimitKeyMock.mockResolvedValue(true);
+  hasPasswordMock.mockResolvedValue(true);
+  alertMock.mockResolvedValue(undefined);
   dbFn.mockResolvedValue({ error: null });
   for (const m of ["from", "select", "insert", "update", "delete", "eq", "neq", "in"]) {
     db[m].mockReturnValue(db);
@@ -96,67 +121,68 @@ beforeEach(() => {
   db.auth.updateUser.mockResolvedValue({ error: null });
   db.auth.getSession.mockResolvedValue({ data: { session: null } });
   db.auth.signOut.mockResolvedValue({ error: null });
+  db.auth.resetPasswordForEmail.mockResolvedValue({ error: null });
 });
 
 // ==========================================================================
-// updateDisplayName
+// updateUsername
 // ==========================================================================
 
-describe("updateDisplayName - field whitelist", () => {
+describe("updateUsername - field whitelist", () => {
   it("injected 'is_seller' field is rejected, no DB write", async () => {
     getUserMock.mockResolvedValue(USER);
     const fd = new FormData();
-    fd.append("display_name", "Alice");
+    fd.append("username", "alice");
     fd.append("is_seller", "true"); // privilege-escalation attempt
 
-    const result = await updateDisplayName(PREV, fd);
+    const result = await updateUsername(PREV, fd);
 
     expect(result.error).toMatch(/is_seller/);
     expect(db.update).not.toHaveBeenCalled();
   });
 });
 
-describe("updateDisplayName - auth", () => {
+describe("updateUsername - auth", () => {
   it("signed out returns session expired error", async () => {
     getUserMock.mockResolvedValue(null);
     const fd = new FormData();
-    fd.append("display_name", "Alice");
-    const result = await updateDisplayName(PREV, fd);
+    fd.append("username", "alice");
+    const result = await updateUsername(PREV, fd);
     expect(result.error).toMatch(/session/i);
     expect(db.update).not.toHaveBeenCalled();
   });
 });
 
-describe("updateDisplayName - validation", () => {
-  it("empty display_name returns validation error", async () => {
+describe("updateUsername - validation", () => {
+  it("empty username returns validation error", async () => {
     getUserMock.mockResolvedValue(USER);
     const fd = new FormData();
-    fd.append("display_name", "");
-    const result = await updateDisplayName(PREV, fd);
+    fd.append("username", "");
+    const result = await updateUsername(PREV, fd);
     expect(result.error).toBeTruthy();
     expect(db.update).not.toHaveBeenCalled();
   });
 
-  it("duplicate name (DB error code 23505) returns friendly 'taken' error", async () => {
+  it("duplicate username (DB error code 23505) returns friendly 'taken' error", async () => {
     getUserMock.mockResolvedValue(USER);
     dbFn.mockResolvedValueOnce({ error: { code: "23505", message: "unique violation" } });
     const fd = new FormData();
-    fd.append("display_name", "takenname");
+    fd.append("username", "takenname");
 
-    const result = await updateDisplayName(PREV, fd);
+    const result = await updateUsername(PREV, fd);
 
     expect(result.error).toMatch(/taken/i);
   });
 });
 
-describe("updateDisplayName - happy path", () => {
+describe("updateUsername - happy path", () => {
   it("success: update scoped to session user id", async () => {
     getUserMock.mockResolvedValue(USER);
     dbFn.mockResolvedValueOnce({ error: null });
     const fd = new FormData();
-    fd.append("display_name", "Alice");
+    fd.append("username", "alice");
 
-    const result = await updateDisplayName(PREV, fd);
+    const result = await updateUsername(PREV, fd);
 
     expect(result.success).toBeTruthy();
     // Verify the update was scoped to the session user id
@@ -445,6 +471,9 @@ describe("requestEmailChange - rate limit", () => {
 
   it("sends the confirmation mail when the budget allows it", async () => {
     getUserMock.mockResolvedValue(USER);
+    // This spec is about the BUDGET, so use an account with no password and
+    // keep the re-auth gate (covered in its own block) out of the way.
+    hasPasswordMock.mockResolvedValue(false);
     const result = await requestEmailChange(PREV, emailForm());
     expect(result.success).toBeTruthy();
     expect(db.auth.updateUser).toHaveBeenCalled();
@@ -481,8 +510,8 @@ describe("settings writes - rate limit", () => {
     rateLimitMock.mockResolvedValue(false);
 
     const fd = new FormData();
-    fd.append("display_name", "valid-name");
-    const result = await updateDisplayName(PREV, fd);
+    fd.append("username", "valid_name");
+    const result = await updateUsername(PREV, fd);
 
     expect(result.error).toMatch(/short time/i);
     expect(db.update).not.toHaveBeenCalled();
@@ -553,15 +582,54 @@ describe("requestEmailChange - re-authentication", () => {
     expect(db.auth.updateUser).toHaveBeenCalled();
   });
 
-  it("does not demand a password from an OAuth-only account", async () => {
+  it("does not demand a password from an account that genuinely has none", async () => {
     // Such an account has none to give; requiring one would lock them out of
     // a field they can still legitimately change.
     getUserMock.mockResolvedValue(OAUTH_USER);
+    hasPasswordMock.mockResolvedValue(false);
 
     const result = await requestEmailChange(PREV, emailChangeForm());
 
     expect(result.success).toBeTruthy();
     expect(db.auth.signInWithPassword).not.toHaveBeenCalled();
+  });
+
+  it("DEMANDS a password from an OAuth account that has one, despite `identities`", async () => {
+    // The regression this whole change exists for. Setting a password through
+    // the recovery flow writes the hash but creates no `email` identity, so the
+    // old `identities.some(provider === "email")` check said "no password" and
+    // this gate was skipped entirely. That made the chain: hijack a session ->
+    // move the email with no proof -> reset the password to the new inbox.
+    getUserMock.mockResolvedValue(OAUTH_USER); // identities says google only
+    hasPasswordMock.mockResolvedValue(true); // the database says otherwise
+
+    const result = await requestEmailChange(PREV, emailChangeForm());
+
+    expect(result.error).toMatch(/current password/i);
+    expect(db.auth.updateUser).not.toHaveBeenCalled();
+  });
+
+  it("fails CLOSED: an unreadable has-password answer still demands one", async () => {
+    // accountHasPassword returns true on error for exactly this reason, but
+    // assert it here too so the gate cannot be loosened by a broken lookup.
+    getUserMock.mockResolvedValue(OAUTH_USER);
+    hasPasswordMock.mockResolvedValue(true);
+
+    const result = await requestEmailChange(PREV, emailChangeForm());
+
+    expect(result.error).toMatch(/current password/i);
+  });
+
+  it("records the request so a silent address move leaves a trail", async () => {
+    getUserMock.mockResolvedValue(PASSWORD_USER);
+
+    await requestEmailChange(PREV, emailChangeForm("new@example.com", "correct-horse"));
+
+    expect(alertMock).toHaveBeenCalledWith(
+      USER_ID,
+      "email.change_requested",
+      expect.objectContaining({ title: expect.any(String) }),
+    );
   });
 
   it("rejects a smuggled extra field rather than ignoring it", async () => {
@@ -627,5 +695,118 @@ describe("changePassword - oracle and session hardening", () => {
 
     expect(result.error).toBeTruthy();
     expect(db.auth.signOut).not.toHaveBeenCalled();
+  });
+});
+
+// ==========================================================================
+// sendPasswordReset — the escape hatch, and the only way an account with no
+// password gets one
+// ==========================================================================
+
+describe("sendPasswordReset - budgets", () => {
+  it("mails the account's OWN address, never one from the form", async () => {
+    // There is no email field by design. Assert the address comes from the
+    // session, so nothing can aim this at a stranger's inbox.
+    getUserMock.mockResolvedValue(PASSWORD_USER);
+
+    const result = await sendPasswordReset(PREV, new FormData());
+
+    expect(result.success).toBeTruthy();
+    expect(db.auth.resetPasswordForEmail).toHaveBeenCalledWith(
+      USER.email,
+      expect.objectContaining({ redirectTo: expect.stringContaining("/auth/callback") }),
+    );
+  });
+
+  it("stops on the PER-USER budget", async () => {
+    getUserMock.mockResolvedValue(PASSWORD_USER);
+    rateLimitMock.mockResolvedValue(false);
+
+    const result = await sendPasswordReset(PREV, new FormData());
+
+    expect(result.error).toMatch(/too many/i);
+    expect(db.auth.resetPasswordForEmail).not.toHaveBeenCalled();
+  });
+
+  it("stops on the PER-CLIENT budget too", async () => {
+    // Not redundant with the per-user one: that is spent per victim, so an
+    // attacker holding several sessions gets a fresh allowance for each. This
+    // caps what one origin can send in total.
+    getUserMock.mockResolvedValue(PASSWORD_USER);
+    rateLimitKeyMock.mockResolvedValue(false);
+
+    const result = await sendPasswordReset(PREV, new FormData());
+
+    expect(result.error).toMatch(/too many/i);
+    expect(db.auth.resetPasswordForEmail).not.toHaveBeenCalled();
+  });
+
+  it("rejects a smuggled field rather than ignoring it", async () => {
+    getUserMock.mockResolvedValue(PASSWORD_USER);
+    const fd = new FormData();
+    fd.append("email", "attacker@example.com");
+
+    const result = await sendPasswordReset(PREV, fd);
+
+    expect(result.error).toMatch(/email/);
+    expect(db.auth.resetPasswordForEmail).not.toHaveBeenCalled();
+  });
+
+  it("alerts the owner, which is the one alert that reaches them", async () => {
+    // Requesting a link signs nobody out, so unlike a completed change this
+    // notification actually lands somewhere the owner can still read it.
+    getUserMock.mockResolvedValue(PASSWORD_USER);
+
+    await sendPasswordReset(PREV, new FormData());
+
+    expect(alertMock).toHaveBeenCalledWith(
+      USER_ID,
+      "password.reset_requested",
+      expect.objectContaining({ title: expect.any(String) }),
+    );
+  });
+
+  it("works for an account with no password, which is how it gets one", async () => {
+    getUserMock.mockResolvedValue(OAUTH_USER);
+    hasPasswordMock.mockResolvedValue(false);
+
+    const result = await sendPasswordReset(PREV, new FormData());
+
+    expect(result.success).toBeTruthy();
+    expect(db.auth.resetPasswordForEmail).toHaveBeenCalled();
+  });
+});
+
+describe("changePassword - audit", () => {
+  it("records the change and notifies after the password is already set", async () => {
+    getUserMock.mockResolvedValue(PASSWORD_USER);
+    const fd = new FormData();
+    fd.append("current_password", "old-Password-1");
+    fd.append("new_password", "Kettle-Boat-99");
+    fd.append("confirm_password", "Kettle-Boat-99");
+
+    const result = await changePassword(PREV, fd);
+
+    expect(result.success).toBeTruthy();
+    expect(alertMock).toHaveBeenCalledWith(
+      USER_ID,
+      "password.changed",
+      expect.objectContaining({ title: expect.any(String) }),
+    );
+  });
+
+  it("a failing audit write never fails the password change", async () => {
+    // The log is best-effort by contract. Turning a completed credential
+    // change into an error the user retries would be worse than a missing row.
+    getUserMock.mockResolvedValue(PASSWORD_USER);
+    alertMock.mockRejectedValue(new Error("audit down"));
+    const fd = new FormData();
+    fd.append("current_password", "old-Password-1");
+    fd.append("new_password", "Kettle-Boat-99");
+    fd.append("confirm_password", "Kettle-Boat-99");
+
+    await expect(changePassword(PREV, fd)).resolves.toEqual(
+      expect.objectContaining({ success: expect.any(String) }),
+    );
   });
 });

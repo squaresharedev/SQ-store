@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { BackgroundArrow } from "@/components/ui/BackgroundArrow";
+import { readSignInMethod } from "@/lib/auth/last-method";
 import { getUser } from "@/lib/auth/session";
 import { MARKETPLACE_URL } from "@/lib/site";
 import { safeInternalPath } from "@/lib/utils/safe-path";
@@ -41,8 +42,16 @@ export default async function LoginPage({
 
   const linkError = sp.error ? (ERROR_MESSAGES[sp.error] ?? null) : null;
 
+  // Read server-side so the "Last used" pill is in the first paint rather than
+  // appearing a beat later. This page is already force-dynamic.
+  const lastUsed = await readSignInMethod();
+
+  // The card below clips sideways but NOT vertically (overflow-x-hidden rather
+  // than overflow-hidden): the decorative arrows still need clipping, while
+  // sign-up mode is now tall enough to exceed a short laptop viewport, and
+  // clipping vertically would strand the submit button off-screen unreachable.
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-muted px-6 py-5">
+    <main className="relative flex min-h-screen items-center justify-center overflow-x-hidden bg-muted px-6 py-8">
       {/* Static dot-grid texture (fades at the edges). */}
       <div
         aria-hidden
@@ -72,7 +81,7 @@ export default async function LoginPage({
         </div>
 
         {/* Auth card — hard corners, sits above the grid */}
-        <div className="border border-border bg-background px-6 pt-7 pb-5 shadow-lg sm:px-7 sm:pt-8">
+        <div className="border border-border bg-background px-6 pt-8 pb-7 shadow-lg sm:px-8 sm:pt-9 sm:pb-8">
           {linkError && (
             <p
               role="alert"
@@ -81,7 +90,7 @@ export default async function LoginPage({
               {linkError}
             </p>
           )}
-          <LoginForm next={next} />
+          <LoginForm next={next} lastUsed={lastUsed} />
         </div>
 
         {/* Access note — creators onboard via the marketplace waitlist. */}

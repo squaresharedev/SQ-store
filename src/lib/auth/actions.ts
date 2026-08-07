@@ -5,7 +5,13 @@ import { redirect } from "next/navigation";
 import type { AuthError } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { revokeOtherSessions } from "@/lib/auth/session";
+import { rememberSignInMethod } from "@/lib/auth/last-method";
+import { emailForUsername, isUsernameTaken } from "@/lib/auth/handles";
+import { passwordProblem } from "@/lib/auth/password";
+import { accountHasPassword } from "@/lib/auth/has-password";
+import { alertSecurityEvent } from "@/lib/security/events";
 import { safeInternalPath } from "@/lib/utils/safe-path";
+import { looksLikeEmail, usernameSchema } from "@/lib/validation/auth";
 import { RATE_LIMITS, clientKey, rateLimitKey } from "@/lib/rate-limit";
 
 export type AuthIntent = "signin" | "signup" | "magic" | "reset";
@@ -39,6 +45,46 @@ async function siteOrigin(): Promise<string> {
 const TOO_MANY = "Too many attempts. Wait a while and try again.";
 
 /**
+ * THE answer to every failed password attempt, whichever way it failed: wrong
+ * password, no such email, no such handle. Named once and used by both the
+ * error map and the sign-in path so the two can never drift into telling an
+ * attacker apart the cases we went to some trouble to make identical.
+ */
+const BAD_CREDENTIALS = "Incorrect email or password.";
+
+/**
+ * An address that provably belongs to no one, minted fresh each time.
+ *
+ * Used to spend a real password round trip on a handle nobody holds (see
+ * `authenticate`). `.invalid` is reserved by RFC 6761 and can never be
+ * registered; the random label matters just as much, because a CONSTANT probe
+ * address would eventually trip Supabase's own per-address throttle and start
+ * answering "too many attempts" instead of "wrong credentials", which is the
+ * enumeration oracle back again wearing a different hat.
+ */
+function unclaimableAddress(): string {
+  return `probe-${crypto.randomUUID()}@sign-in.invalid`;
+}
+
+/**
+ * Audit + notify, guaranteed not to throw AT THE CALL SITE. The password has
+ * already been set by the time this runs, so a failure here must never become
+ * an error the user might act on. See the twin in lib/settings/actions.ts.
+ */
+async function safeAlert(
+  ...args: Parameters<typeof alertSecurityEvent>
+): Promise<void> {
+  try {
+    await alertSecurityEvent(...args);
+  } catch (err) {
+    console.error(
+      "[auth] security alert failed:",
+      err instanceof Error ? err.message : String(err),
+    );
+  }
+}
+
+/**
  * Gate an outbound auth email on TWO sliding-window budgets:
  *
  *  1. per TARGET ADDRESS — the one that matters. An attacker aiming magic links
@@ -63,11 +109,49 @@ async function allowAuthEmail(email: string): Promise<boolean> {
   return rateLimitKey(who, "auth_email_client", RATE_LIMITS.authEmailPerClient);
 }
 
+/**
+ * Resolve whatever was typed into the identifier box to an email address, since
+ * that is the only thing Supabase's password grant accepts.
+ *
+ * "missing" covers a handle nobody holds, a handle that could not be a handle,
+ * and a failed lookup. The caller must render all three exactly as it renders a
+ * wrong password.
+ */
+type Resolution =
+  | { kind: "email"; email: string }
+  | { kind: "missing" }
+  | { kind: "denied" };
+
+async function resolveSignInEmail(identifier: string): Promise<Resolution> {
+  // An "@" means they typed an email; hand it straight over, unchanged.
+  if (looksLikeEmail(identifier)) return { kind: "email", email: identifier };
+
+  // A SECOND budget, spent on top of the sign-in budget the caller already
+  // took, never instead of it. Working through a handle list therefore costs an
+  // attacker both, while the person who fat-fingered their own handle still has
+  // as many goes as they would have had by email. Taken BEFORE the shape check
+  // so a flood of nonsense cannot probe for free.
+  const allowed = await rateLimitKey(
+    await clientKey(await headers()),
+    "auth_username_resolve",
+    RATE_LIMITS.usernameResolvePerClient,
+  );
+  if (!allowed) return { kind: "denied" };
+
+  // Something that cannot be a handle cannot match a row, so it never reaches
+  // the database. Rejecting it here leaks nothing: the shape rule is public.
+  const parsed = usernameSchema.safeParse({ username: identifier });
+  if (!parsed.success) return { kind: "missing" };
+
+  const email = await emailForUsername(parsed.data.username);
+  return email ? { kind: "email", email } : { kind: "missing" };
+}
+
 /** Map Supabase auth errors to friendly, non-leaky copy. */
 function friendly(error: AuthError): string {
   switch (error.code) {
     case "invalid_credentials":
-      return "Incorrect email or password.";
+      return BAD_CREDENTIALS;
     case "email_not_confirmed":
       return "Confirm your email first — check your inbox for the link.";
     case "user_already_exists":
@@ -80,6 +164,13 @@ function friendly(error: AuthError): string {
       return "Too many attempts. Wait a minute and try again.";
     case "validation_failed":
       return "Enter a valid email address.";
+    case "unexpected_failure":
+      // What a raised exception inside handle_new_user surfaces as, which for
+      // us means the handle was claimed between the availability check and the
+      // insert. The raw message carries the Postgres error text (constraint
+      // and index names included), so it must never reach the default branch
+      // below and get printed at the user.
+      return "Could not create that account. Try a different username.";
     default:
       return error.message || "Something went wrong. Please try again.";
   }
@@ -96,9 +187,21 @@ export async function authenticate(
   formData: FormData,
 ): Promise<AuthState> {
   const intent = (formData.get("intent") as AuthIntent) ?? "signin";
-  const email = String(formData.get("email") ?? "").trim();
+  // The sign-in screen posts `identifier` (an email OR a handle). Everything
+  // else on this action still posts `email`, and always will: only the password
+  // grant can take a handle, because it is the only flow that has somewhere to
+  // resolve one FROM. A reset or a magic link has to reach an inbox.
+  const identifier = String(
+    formData.get("identifier") ?? formData.get("email") ?? "",
+  ).trim();
   const password = String(formData.get("password") ?? "");
   const next = sanitizeNext(formData.get("next"));
+
+  // Every other intent has to reach an inbox, so for those the identifier is
+  // read as an address and a handle is refused up front.
+  const email = identifier;
+  const notAnAddress =
+    intent !== "signin" && email !== "" && !looksLikeEmail(email);
 
   let supabase;
   try {
@@ -113,6 +216,8 @@ export async function authenticate(
     };
   }
 
+  if (notAnAddress) return { error: "Enter a valid email address." };
+
   // --- Magic link (passwordless OTP) ---
   if (intent === "magic") {
     if (!email) return { error: "Enter your email." };
@@ -123,7 +228,13 @@ export async function authenticate(
     try {
       result = await supabase.auth.signInWithOtp({
         email,
-        options: { emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}` },
+        // `method=magic` is what tells the callback to remember this option.
+        // Sent here rather than inferred there: an emailed link that lands on
+        // the callback might equally be a signup confirmation or a recovery,
+        // and those are not a choice of sign-in method.
+        options: {
+          emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}&method=magic`,
+        },
       });
     } catch (err) {
       console.error("[auth] magic link failed:", err instanceof Error ? err.message : String(err));
@@ -178,12 +289,24 @@ export async function authenticate(
 
   if (intent === "signup") {
     const confirmPassword = String(formData.get("confirm_password") ?? "");
-    if (password.length < 8) {
-      return { error: "Password must be at least 8 characters." };
-    }
     if (password !== confirmPassword) {
       return { error: "Passwords do not match." };
     }
+    const parsedUsername = usernameSchema.safeParse({
+      username: String(formData.get("username") ?? ""),
+    });
+    if (!parsedUsername.success) {
+      return {
+        error:
+          parsedUsername.error.issues[0]?.message ?? "Pick a valid username.",
+      };
+    }
+    const username = parsedUsername.data.username;
+    // Strength is checked AFTER the handle is known, so "your password is your
+    // username" can actually be caught. Both are in hand by this point and
+    // neither has been spent on a network call yet.
+    const weak = passwordProblem(password, { email, username });
+    if (weak) return { error: weak };
     // Sign-up also sends a confirmation email, so it needs the per-address gate
     // as well as a cap on how many accounts one client can spin up.
     if (!(await allowAuthEmail(email))) return { error: TOO_MANY };
@@ -193,13 +316,31 @@ export async function authenticate(
       RATE_LIMITS.authSignUpPerClient,
     );
     if (!signUpOk) return { error: TOO_MANY };
+    // Readable copy for the ordinary case. It is NOT the guard: the real one is
+    // profiles_username_lower_idx, which decides the race between two people
+    // submitting the same handle in the same instant. A failed check (null)
+    // therefore falls through rather than blocking a legitimate signup.
+    if (await isUsernameTaken(username)) {
+      return { error: "That username is taken. Try another." };
+    }
     const origin = await siteOrigin();
     let result;
     try {
       result = await supabase.auth.signUp({
         email,
         password,
-        options: { emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}` },
+        options: {
+          // The handle travels as user metadata so handle_new_user claims it in
+          // the SAME transaction as the auth.users insert. This is what makes a
+          // duplicate impossible rather than merely unlikely: a collision aborts
+          // the whole insert, leaving no account at all instead of an account
+          // with no handle. Just as important, when the address already belongs
+          // to someone GoTrue never inserts, so the handle is discarded rather
+          // than stapled onto an account this signer-up does not control, which
+          // is exactly what a follow-up UPDATE here would have allowed.
+          data: { username },
+          emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
+        },
       });
     } catch (err) {
       console.error("[auth] signup failed:", err instanceof Error ? err.message : String(err));
@@ -227,9 +368,20 @@ export async function authenticate(
   );
   if (!signInOk) return { error: TOO_MANY };
 
+  const resolution = await resolveSignInEmail(identifier);
+  if (resolution.kind === "denied") return { error: TOO_MANY };
+
   let result;
   try {
-    result = await supabase.auth.signInWithPassword({ email, password });
+    // A handle nobody holds STILL costs a full password round trip, against an
+    // address that cannot exist. Returning early instead would make "no such
+    // handle" measurably quicker than "wrong password", which hands back by the
+    // clock exactly what the shared error message refuses to say in words.
+    result = await supabase.auth.signInWithPassword({
+      email:
+        resolution.kind === "email" ? resolution.email : unclaimableAddress(),
+      password,
+    });
   } catch (err) {
     console.error(
       "[auth] sign-in request failed:",
@@ -238,7 +390,14 @@ export async function authenticate(
     return { error: "Could not sign in. Please check your connection and try again." };
   }
 
+  // Whatever the probe came back with is discarded: an unknown handle answers
+  // with the one credentials message, same as an unknown email and a wrong
+  // password.
+  if (resolution.kind === "missing") return { error: BAD_CREDENTIALS };
   if (result.error) return { error: friendly(result.error) };
+  // Only now, with the sign-in actually through: a failed attempt must not
+  // relabel the option this browser last used successfully.
+  await rememberSignInMethod("password");
   redirect(next);
 }
 
@@ -258,15 +417,15 @@ export async function resetPassword(
   const password = String(formData.get("password") ?? "");
   const confirmPassword = String(formData.get("confirm_password") ?? "");
 
-  if (password.length < 8) {
-    return { error: "Password must be at least 8 characters." };
-  }
-  if (password.length > 72) {
-    return { error: "Keep it under 72 characters." };
-  }
   if (password !== confirmPassword) {
     return { error: "Passwords do not match." };
   }
+  // The same bar as sign-up, and for a concrete reason: without it, "reset my
+  // password" is a way to walk around the sign-up gate and land on `password1`.
+  // Run bare first so an obviously weak password is refused before we spend a
+  // round trip on the session.
+  const weak = passwordProblem(password);
+  if (weak) return { error: weak };
 
   let supabase;
   try {
@@ -286,6 +445,22 @@ export async function resetPassword(
     };
   }
 
+  // Now that we know WHO is resetting, re-check against their own identity —
+  // the one rule that needs the account in hand.
+  const weakForUser = passwordProblem(password, {
+    email: user.email,
+    username:
+      typeof user.user_metadata?.username === "string"
+        ? user.user_metadata.username
+        : undefined,
+  });
+  if (weakForUser) return { error: weakForUser };
+
+  // Captured BEFORE the update, since afterwards every account has one. Tells
+  // "an OAuth user set their first password" apart from "an existing password
+  // was replaced", and only the second is a credential rotation worth alarm.
+  const hadPassword = await accountHasPassword(user.id);
+
   let result;
   try {
     result = await supabase.auth.updateUser({ password });
@@ -304,6 +479,17 @@ export async function resetPassword(
   // survive it. `others` scope keeps THIS (recovery) session alive so the
   // redirect below lands them signed in.
   await revokeOtherSessions(supabase);
+
+  // Recorded BEFORE the redirect, which throws. `password.set` when the account
+  // had none (an OAuth user establishing their first one) and `password.changed`
+  // when it replaced an existing password: the distinction is worth keeping,
+  // because the second one means a credential was taken over or rotated.
+  await safeAlert(user.id, hadPassword ? "password.changed" : "password.set", {
+    title: hadPassword ? "Your password was changed" : "A password was set on your account",
+    body: hadPassword
+      ? "A reset link was used to set a new password, and other devices were signed out. If this wasn't you, reset it again immediately."
+      : "This account can now sign in with a password as well as Google. If this wasn't you, reset it immediately.",
+  });
 
   // The session is valid, so drop them straight into the app.
   redirect("/");
@@ -330,7 +516,10 @@ export async function signInWithGoogle(formData: FormData): Promise<void> {
     .signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
+        // `method=google` rides along so the callback can record the option
+        // only once consent actually came back, not when we merely sent the
+        // user to Google (they can still abandon it there).
+        redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}&method=google`,
       },
     })
     .catch(() => ({ data: null, error: null }) as const);

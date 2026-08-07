@@ -2020,3 +2020,551 @@ grant execute on function public.product_sales_aggregate(uuid) to authenticated,
 
 revoke execute on function public.products_ranked_by_metric(uuid, text, text, text, integer, integer) from public, anon;
 grant execute on function public.products_ranked_by_metric(uuid, text, text, text, integer, integer) to authenticated, service_role;
+
+-- ===== 20260804_username_sign_in ============================================
+-- =============================================================================
+-- USERNAME SIGN-IN: let people sign in with their handle instead of their email.
+--
+-- Adds the server-side resolver, and teaches the signup trigger to claim a
+-- handle in the SAME TRANSACTION as the auth.users insert. Email is untouched:
+-- it stays the account's real address for confirmation, recovery and OAuth.
+--
+-- profiles.username already exists (see the curation-foundation migration): it
+-- is nullable, case-insensitively unique via profiles_username_lower_idx, and
+-- format-checked. Nothing here redefines those; the column is shared with the
+-- curation app, which owns its format rule.
+-- =============================================================================
+
+-- ---- username -> email resolver ---------------------------------------------
+-- Resolve a sign-in handle to the account's email so it can be handed to
+-- GoTrue's password grant, which only ever accepts an email.
+--
+-- SECURITY DEFINER so it can read auth.users and see past the owner-only RLS on
+-- profiles, but EXECUTE is granted to service_role ONLY. It is never exposed on
+-- the client RPC surface, so it cannot be used as a handle-enumeration oracle:
+-- the one caller is the service-role admin client behind the sign-in action,
+-- which rate limits the resolve step and returns the same generic error whether
+-- the handle is unknown or the password is wrong.
+--
+-- Matching is case-insensitive on both sides, so it agrees exactly with
+-- profiles_username_lower_idx: whatever that index treats as one handle, this
+-- resolves as one account.
+create or replace function public.email_by_username(p_username text)
+returns text
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select u.email
+  from public.profiles p
+  join auth.users u on u.id = p.id
+  where p.username is not null
+    and lower(p.username) = lower(btrim(p_username))
+  limit 1
+$$;
+
+-- The plain revoke from `public` does NOT reach anon and authenticated: this
+-- schema has a default-privileges rule that auto-grants EXECUTE on every new
+-- function to both, so without naming them the resolver would be reachable
+-- straight through PostgREST and the rate limiting above would be moot. Same
+-- trap documented on is_display_name_available and user_id_by_email.
+revoke execute on function public.email_by_username(text) from public, anon, authenticated;
+grant execute on function public.email_by_username(text) to service_role;
+
+-- ---- availability ------------------------------------------------------------
+-- "Does anyone already hold this handle?", backing the checkmark on the settings
+-- field and the readable "that one is taken" at sign-up.
+--
+-- service_role ONLY, exactly like the resolver: it answers the same question the
+-- resolver does, so exposing it to anon or authenticated would hand back the
+-- enumeration oracle that keeping the resolver private is meant to deny. Both
+-- callers are server-side and rate limited.
+--
+-- p_except is the caller's own id, so re-saving the handle you already hold
+-- reads as available. Passing a caller-supplied id is only safe BECAUSE this is
+-- service_role-only and our own server code supplies the session's id; it is
+-- deliberately not the auth.uid() pattern used by is_display_name_available,
+-- which is reachable by authenticated callers and therefore must not trust an
+-- argument for that.
+--
+-- Matching is a plain lower() equality rather than ILIKE: `_` is legal in a
+-- handle and is a LIKE wildcard, so a pattern match would report `a_b` as
+-- colliding with `axb`.
+create or replace function public.username_taken(p_username text, p_except uuid default null)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select exists (
+    select 1
+    from public.profiles p
+    where p.username is not null
+      and lower(p.username) = lower(btrim(p_username))
+      and (p_except is null or p.id <> p_except)
+  );
+$$;
+
+revoke execute on function public.username_taken(text, uuid) from public, anon, authenticated;
+grant execute on function public.username_taken(text, uuid) to service_role;
+
+-- ---- claim the handle at signup ---------------------------------------------
+-- The username now rides in on raw_user_meta_data (set from signUp's
+-- options.data) so the profile row claims it in the same transaction that
+-- creates the auth user. This is what keeps duplicates impossible:
+--
+--   * A collision raises on profiles_username_lower_idx and aborts the WHOLE
+--     insert, so there is never an auth user left holding a half-claimed
+--     handle, and never an auth user with no profile.
+--   * When the email already exists GoTrue does not insert at all, so this
+--     trigger never runs and the submitted handle is silently discarded. A
+--     post-signup UPDATE would instead let someone staple their handle onto an
+--     account they do not control.
+--
+-- raw_user_meta_data is caller-supplied, so the format CHECK and unique index
+-- on the column are the real gate; the sign-up action's validation is only
+-- there to turn a rejection into readable copy.
+--
+-- Stored lowercase. Lookup already folds case, so this is purely about having
+-- one canonical form for the handles this app writes.
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  insert into public.profiles (id, display_name, avatar_url, username)
+  values (
+    new.id,
+    coalesce(
+      new.raw_user_meta_data ->> 'display_name',
+      new.raw_user_meta_data ->> 'full_name',
+      new.raw_user_meta_data ->> 'name'
+    ),
+    coalesce(
+      new.raw_user_meta_data ->> 'avatar_url',
+      new.raw_user_meta_data ->> 'picture'
+    ),
+    nullif(btrim(lower(new.raw_user_meta_data ->> 'username')), '')
+  )
+  on conflict (id) do nothing;
+  return new;
+end;
+$$;
+
+-- create or replace keeps the existing grants on this function, but restate the
+-- lockdown so a future replay of this file alone still lands hardened. Only the
+-- on_auth_user_created trigger may run it; it is not an RPC.
+revoke execute on function public.handle_new_user() from public, anon, authenticated;
+
+-- ===== 20260806_universal_search_indexes ====================================
+-- =============================================================================
+-- UNIVERSAL SEARCH: trigram GIN indexes behind the top-bar search bar's
+-- ILIKE '%term%' matches. pg_trgm is already enabled above
+-- (20260720_cost_audit_buyer_email_trgm), as is orders.buyer_email's index.
+-- =============================================================================
+create index if not exists products_title_trgm_idx
+  on public.products using gin (title gin_trgm_ops);
+
+create index if not exists storefronts_name_trgm_idx
+  on public.storefronts using gin (name gin_trgm_ops);
+
+create index if not exists orders_product_title_trgm_idx
+  on public.orders using gin (product_title gin_trgm_ops);
+
+create index if not exists notifications_title_trgm_idx
+  on public.notifications using gin (title gin_trgm_ops);
+
+-- ===== 20260806_merge_display_name_into_username =============================
+-- =============================================================================
+-- ONE IDENTITY: display_name and username merge into `username`.
+--
+-- The account had two names: `display_name` (free-form, what buyers saw) and
+-- `username` (the sign-in handle). Two names for one account is one too many —
+-- it splits "who is this" across two columns, lets them disagree, and makes
+-- "is this taken?" two different questions. From here there is one field, and
+-- it is `username`.
+--
+-- It keeps the HANDLE's rules rather than the display name's, because this
+-- value is now half of a credential: lowercase a-z0-9_ , 3 to 30 characters,
+-- case-insensitively unique. Free-form Unicode with spaces cannot be a login
+-- identifier without inviting look-alike accounts.
+--
+-- Safe across the estate: the marketplace app references neither column, and
+-- the curation app already uses `username` exclusively. This migration moves
+-- the store app onto the same column the curation app was always using.
+-- =============================================================================
+
+-- ---- backfill ----------------------------------------------------------------
+-- Every existing display_name becomes a handle. Slugified rather than dropped,
+-- so nobody loses the name they chose: lowercased, runs of anything outside
+-- [a-z0-9_] collapsed to a single underscore, trimmed of leading/trailing
+-- underscores ("Adrian Edwards" -> "adrian_edwards").
+--
+-- Then padded/truncated into the 3..30 the constraint requires, and finally
+-- de-duplicated against the unique index by suffixing a counter. Done in one
+-- statement per row via a DO block so collisions can be resolved as we go.
+do $$
+declare
+  r record;
+  base text;
+  candidate text;
+  n integer;
+begin
+  for r in
+    select id, display_name
+    from public.profiles
+    where username is null
+      and nullif(btrim(display_name), '') is not null
+    order by created_at
+  loop
+    base := regexp_replace(lower(btrim(r.display_name)), '[^a-z0-9_]+', '_', 'g');
+    base := btrim(base, '_');
+    -- Too short to be a handle: pad rather than invent something unrelated.
+    if length(base) < 3 then
+      base := rpad(coalesce(nullif(base, ''), 'user'), 3, '0');
+    end if;
+    base := left(base, 30);
+
+    candidate := base;
+    n := 1;
+    while exists (
+      select 1 from public.profiles p where lower(p.username) = candidate
+    ) loop
+      n := n + 1;
+      -- Keep room for the suffix inside the 30-character ceiling.
+      candidate := left(base, 30 - length(n::text) - 1) || '_' || n::text;
+    end loop;
+
+    update public.profiles set username = candidate where id = r.id;
+  end loop;
+end $$;
+
+-- ---- dependents of the column -------------------------------------------------
+-- Two views project display_name, and an RLS policy on artifacts reads one of
+-- them, so the column cannot be dropped until all three are rebuilt. Dropping
+-- a view cascades to that policy, hence the explicit recreate below: the
+-- cascade is deliberate and accounted for, not discovered later.
+--
+-- Both views keep security_invoker=false (the default they already had). That
+-- matters for public_profiles: the artifacts policy consults it on behalf of
+-- ANONYMOUS readers, and profiles has no anon select policy, so an invoker-
+-- rights view would evaluate against an empty set and silently hide every
+-- public artifact.
+drop view if exists public.public_profiles cascade;
+drop view if exists public.admin_user_directory;
+
+-- ---- the store's own reads move to username ----------------------------------
+-- team_roster/team_my_accounts/team_my_pending_invites all surfaced the
+-- account's name from display_name. Their RETURNS TABLE shape changes, so they
+-- must be dropped and recreated rather than replaced, and their grants restated
+-- (a new function does not inherit them).
+
+drop function if exists public.team_roster(uuid, integer, integer);
+
+create function public.team_roster(
+  account uuid,
+  page_limit integer default 50,
+  page_offset integer default 0
+)
+returns table (
+  id uuid,
+  member_user_id uuid,
+  invited_email text,
+  role team_role,
+  status team_member_status,
+  invited_at timestamptz,
+  accepted_at timestamptz,
+  username text,
+  avatar_url text
+)
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select tm.id, tm.member_user_id, tm.invited_email, tm.role, tm.status,
+         tm.invited_at, tm.accepted_at, p.username, p.avatar_url
+  from public.team_members tm
+  left join public.profiles p on p.id = tm.member_user_id
+  where tm.account_owner_id = account
+    and public.team_role_can(public.team_actor_role(account), 'team.read')
+  order by public.team_role_rank(tm.role) desc, tm.invited_at asc, tm.id asc
+  limit least(greatest(coalesce(page_limit, 50), 1), 100)
+  offset greatest(coalesce(page_offset, 0), 0)
+$$;
+
+revoke execute on function public.team_roster(uuid, integer, integer) from public, anon;
+grant execute on function public.team_roster(uuid, integer, integer) to authenticated, service_role;
+
+drop function if exists public.team_my_accounts();
+
+create function public.team_my_accounts()
+returns table (
+  account_owner_id uuid,
+  role team_role,
+  store_name text,
+  is_self boolean
+)
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select
+    tm.account_owner_id,
+    tm.role,
+    coalesce(nullif(btrim(p.username), ''), 'A SquareShare store') as store_name,
+    (tm.account_owner_id = (select auth.uid())) as is_self
+  from public.team_members tm
+  left join public.profiles p on p.id = tm.account_owner_id
+  where tm.member_user_id = (select auth.uid())
+    and tm.status = 'active'
+  order by (tm.account_owner_id = (select auth.uid())) desc, store_name asc
+$$;
+
+revoke execute on function public.team_my_accounts() from public, anon;
+grant execute on function public.team_my_accounts() to authenticated, service_role;
+
+drop function if exists public.team_my_pending_invites();
+
+create function public.team_my_pending_invites()
+returns table (
+  id uuid,
+  account_owner_id uuid,
+  role team_role,
+  invited_at timestamptz,
+  store_name text
+)
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select tm.id, tm.account_owner_id, tm.role, tm.invited_at,
+         coalesce(p.username, 'A SquareShare store')
+  from public.team_members tm
+  left join public.profiles p on p.id = tm.account_owner_id
+  where tm.status = 'invited'
+    and lower(tm.invited_email) = (select public.team_jwt_email())
+  order by tm.invited_at desc
+  limit 50
+$$;
+
+revoke execute on function public.team_my_pending_invites() from public, anon;
+grant execute on function public.team_my_pending_invites() to authenticated, service_role;
+
+-- ---- signup writes one name --------------------------------------------------
+-- An OAuth signup brings a human name ("Adrian Edwards") rather than a handle,
+-- so the same slug rule used for the backfill runs here: the account still gets
+-- a usable handle instead of failing the format check or landing with none.
+-- A collision is left to the unique index, which aborts the signup rather than
+-- silently handing out someone else's identity.
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  raw text;
+  slug text;
+begin
+  raw := coalesce(
+    new.raw_user_meta_data ->> 'username',
+    new.raw_user_meta_data ->> 'display_name',
+    new.raw_user_meta_data ->> 'full_name',
+    new.raw_user_meta_data ->> 'name'
+  );
+  slug := btrim(regexp_replace(lower(btrim(coalesce(raw, ''))), '[^a-z0-9_]+', '_', 'g'), '_');
+  if length(slug) < 3 then
+    slug := null;  -- nothing usable; the account claims a handle later
+  else
+    slug := left(slug, 30);
+  end if;
+
+  insert into public.profiles (id, username, avatar_url)
+  values (
+    new.id,
+    slug,
+    coalesce(
+      new.raw_user_meta_data ->> 'avatar_url',
+      new.raw_user_meta_data ->> 'picture'
+    )
+  )
+  on conflict (id) do nothing;
+  return new;
+end;
+$$;
+
+revoke execute on function public.handle_new_user() from public, anon, authenticated;
+
+-- ---- retire display_name ------------------------------------------------------
+-- Its availability check goes with it; is_username_available's job is done by
+-- username_taken (service_role-only, see the username sign-in migration).
+drop function if exists public.is_display_name_available(text);
+drop index if exists public.profiles_display_name_lower_idx;
+
+alter table public.profiles drop column if exists display_name;
+
+-- ---- rebuild the dependents on the surviving column ---------------------------
+create view public.public_profiles as
+  select id, username, avatar_url
+  from public.profiles
+  where is_public = true
+    and username is not null;
+
+revoke all on public.public_profiles from anon, authenticated;
+grant select on public.public_profiles to anon, authenticated, service_role;
+
+-- Restored verbatim apart from the view it reads, which no longer carries a
+-- display_name. The policy only ever matched on pp.id, so nothing about its
+-- meaning changes.
+create policy artifacts_public_read on public.artifacts
+  for select to anon, authenticated
+  using (
+    (collection_id is not null and exists (
+      select 1 from public.collections c
+      where c.id = artifacts.collection_id and c.is_public = true
+    ))
+    or
+    (collection_id is null and exists (
+      select 1 from public.public_profiles pp where pp.id = artifacts.owner_id
+    ))
+  );
+
+-- Admin directory: same shape, one name. The metadata fallbacks stay, since an
+-- account that never claimed a handle still has whatever its provider sent.
+create view public.admin_user_directory as
+  select
+    u.id,
+    u.email::text as email,
+    coalesce(
+      p.username,
+      u.raw_user_meta_data ->> 'username',
+      u.raw_user_meta_data ->> 'name',
+      u.raw_user_meta_data ->> 'full_name'
+    ) as username,
+    u.created_at,
+    u.banned_until,
+    u.email_confirmed_at,
+    p.id is not null as is_seller
+  from auth.users u
+  left join public.profiles p on p.id = u.id;
+
+-- Same trap, higher stakes: this view reads auth.users, so an inherited anon
+-- grant would publish every email, ban state and confirmation timestamp
+-- through PostgREST.
+revoke all on public.admin_user_directory from anon, authenticated;
+grant select on public.admin_user_directory to service_role;
+
+comment on column public.profiles.username is
+  'The account''s ONE identifier: sign-in handle and the name shown to buyers. Lowercase a-z0-9_, 3-30 chars, case-insensitively unique via profiles_username_lower_idx. Resolved to an email by email_by_username() for the password grant.';
+
+-- ===== 20260807_password_security ===========================================
+-- =============================================================================
+-- PASSWORD SECURITY: an honest has-password signal, and a record of every
+-- credential-level event.
+--
+-- Two problems this fixes.
+--
+-- 1. The app asked the wrong question. It decided an account had a password by
+--    looking for an `email` row in auth.identities. Setting a password on an
+--    OAuth account through the recovery flow writes auth.users.encrypted_password
+--    but does NOT create that identity row, so an account with a real password
+--    read as having none. That hid the password card, and worse, it let
+--    requestEmailChange skip re-authentication entirely: a hijacked session
+--    could move the account's address without proving anything and then request
+--    a reset to the new inbox. user_has_password() asks the real question.
+--
+-- 2. Nothing recorded a credential change. There was no way to see, after the
+--    fact, that a password was changed or a reset requested, or from where.
+-- =============================================================================
+
+-- ---- does this account actually have a password? ------------------------------
+-- SECURITY DEFINER so it can read auth.users, which no client role may touch.
+-- service_role ONLY: the answer is about a specific account, and while a caller
+-- learning it about THEMSELVES is harmless, the argument is a caller-supplied
+-- id, so exposing it would answer the question about anyone.
+--
+-- The plain revoke from `public` does NOT reach anon and authenticated: this
+-- schema auto-grants EXECUTE on every new function to both. Same trap
+-- documented on email_by_username and user_id_by_email.
+create or replace function public.user_has_password(p_user_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select coalesce(u.encrypted_password, '') <> ''
+  from auth.users u
+  where u.id = p_user_id
+$$;
+
+revoke execute on function public.user_has_password(uuid) from public, anon, authenticated;
+grant execute on function public.user_has_password(uuid) to service_role;
+
+comment on function public.user_has_password(uuid) is
+  'True when the account has a password hash, regardless of whether an `email` identity row exists. Setting a password on an OAuth account writes the hash without the identity, so identities is not a reliable signal.';
+
+-- ---- credential event log ------------------------------------------------------
+-- Append-only from the server's point of view: RLS carries a SELECT policy for
+-- the owner and NOTHING else, so there is no insert, update or delete path for
+-- any client. Writes go through the service-role recorder in lib/security/events.ts,
+-- exactly like notifications.
+create table if not exists public.security_events (
+  id         uuid primary key default gen_random_uuid(),
+  user_id    uuid not null references auth.users (id) on delete cascade,
+  -- A closed vocabulary of slugs ("password.changed"), so the log stays
+  -- groupable instead of drifting into free text.
+  event      text not null check (event ~ '^[a-z][a-z_.]{2,63}$'),
+  -- HASHED, never the raw address. An audit log that quietly becomes a record
+  -- of where someone lives is a liability, and equality is all this needs.
+  ip_hash    text,
+  meta       jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+
+comment on table public.security_events is
+  'Credential-level events per user (password changed, reset requested, email change requested). Written server-side by service_role only; the owner may read their own. IP is stored as a SHA-256 hash, never raw.';
+
+-- Newest-first per user is the only read pattern.
+create index if not exists security_events_user_created_idx
+  on public.security_events (user_id, created_at desc);
+
+alter table public.security_events enable row level security;
+
+drop policy if exists "Users read their own security events" on public.security_events;
+create policy "Users read their own security events"
+  on public.security_events
+  for select
+  to authenticated
+  using ( (select auth.uid()) = user_id );
+
+-- A NEW TABLE is auto-granted INSERT/UPDATE/DELETE to anon and authenticated by
+-- this schema's default privileges. Without this revoke the owner-read policy
+-- above would sit on top of a table any signed-in caller could write to, and an
+-- audit log a suspect can forge is worse than none.
+revoke all on public.security_events from anon, authenticated;
+grant select on public.security_events to authenticated;
+
+-- ---- notification vocabulary ---------------------------------------------------
+-- The type list lives in TWO places: NOTIFICATION_TYPES in
+-- lib/notifications/types.ts and this CHECK. Adding "security" to the TypeScript
+-- enum alone made createNotification fail the insert, and because notification
+-- creation is best-effort by contract it failed SILENTLY: the password change
+-- succeeded and the alert simply never arrived. Exactly the sort of quiet gap a
+-- security alert must not have.
+alter table public.notifications
+  drop constraint if exists notifications_type_check;
+
+alter table public.notifications
+  add constraint notifications_type_check
+  check (type = any (array['team','payment','stock','order','system','security']));
+
+comment on constraint notifications_type_check on public.notifications is
+  'Mirror of NOTIFICATION_TYPES in lib/notifications/types.ts. Update both together: a type present in one and not the other fails the insert silently.';

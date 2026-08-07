@@ -39,9 +39,9 @@ const ROLE_OPTIONS: readonly SelectOption<"editor" | "viewer">[] =
     description: ROLE_DESCRIPTIONS[r],
   }));
 
-/** Name if we have one, else the local part of the email (never the raw uuid). */
-export function displayNameFor(member: TeamMemberRow): string {
-  if (member.display_name) return member.display_name;
+/** Username if they have claimed one, else the local part of the email (never the raw uuid). */
+export function usernameFor(member: TeamMemberRow): string {
+  if (member.username) return member.username;
   const at = member.invited_email.indexOf("@");
   return at > 0 ? member.invited_email.slice(0, at) : member.invited_email;
 }
@@ -73,7 +73,7 @@ export function MemberRow({
   variant?: "member" | "invite";
 }) {
   const isOwner = member.role === "owner";
-  const name = displayNameFor(member);
+  const name = usernameFor(member);
 
   const [pendingRole, setPendingRole] = React.useState<"editor" | "viewer" | null>(null);
   const [confirmMode, setConfirmMode] = React.useState<"role" | "revoke" | null>(null);

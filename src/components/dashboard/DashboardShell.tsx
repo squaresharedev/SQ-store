@@ -5,6 +5,8 @@ import { ViewingBanner } from "@/components/layout/ViewingBanner";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { ProfileMenu } from "@/components/layout/ProfileMenu";
 import { NotificationsProvider } from "@/components/notifications/NotificationsProvider";
+import { SearchProvider } from "@/components/search/SearchProvider";
+import { SearchMobileTrigger } from "@/components/search/SearchMobileTrigger";
 import {
   getAccessibleAccounts,
   getActiveAccount,
@@ -35,7 +37,7 @@ export async function DashboardShell({
 
   const currentAccountId = account?.accountId ?? "";
   const email = user?.email ?? "";
-  const name = profile?.display_name?.trim() || email.split("@")[0] || username;
+  const name = profile?.username?.trim() || email.split("@")[0] || username;
   const avatarUrl = profile?.avatar_url ?? null;
 
   const viewingOther = account && !account.isOwner ? account : null;
@@ -44,9 +46,10 @@ export async function DashboardShell({
       "another store"
     : null;
 
-  // Mobile: bell + profile menu ride in the Sidebar's mobile header.
+  // Mobile: search + bell + profile menu ride in the Sidebar's mobile header.
   const mobileControls = (
     <div className="flex items-center gap-1">
+      <SearchMobileTrigger />
       <NotificationBell />
       <ProfileMenu
         name={name}
@@ -60,26 +63,33 @@ export async function DashboardShell({
 
   return (
     <NotificationsProvider>
-      <div className="min-h-screen bg-background">
-        <Sidebar topBarSlot={mobileControls} />
-        <div className="md:pl-64">
-          <TopBar
-            accounts={accounts}
-            currentAccountId={currentAccountId}
-            name={name}
-            email={email}
-            avatarUrl={avatarUrl}
-          />
-          {viewingOther && viewingStoreName && (
-            <ViewingBanner
-              storeName={viewingStoreName}
-              role={viewingOther.role}
-              ownAccountId={viewingOther.userId}
+      {/* Universal search wraps the whole shell so ⌘K works from any page that
+          wears it, and the palette renders above the sidebar and its drawer. */}
+      <SearchProvider
+        role={account?.role ?? null}
+        accountId={account?.accountId ?? null}
+      >
+        <div className="min-h-screen bg-background">
+          <Sidebar topBarSlot={mobileControls} />
+          <div className="md:pl-64">
+            <TopBar
+              accounts={accounts}
+              currentAccountId={currentAccountId}
+              name={name}
+              email={email}
+              avatarUrl={avatarUrl}
             />
-          )}
-          {children}
+            {viewingOther && viewingStoreName && (
+              <ViewingBanner
+                storeName={viewingStoreName}
+                role={viewingOther.role}
+                ownAccountId={viewingOther.userId}
+              />
+            )}
+            {children}
+          </div>
         </div>
-      </div>
+      </SearchProvider>
     </NotificationsProvider>
   );
 }

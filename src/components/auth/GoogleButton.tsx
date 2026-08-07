@@ -2,29 +2,42 @@
 
 import { useFormStatus } from "react-dom";
 import { signInWithGoogle } from "@/lib/auth/actions";
+import { LastUsedBadge } from "@/components/auth/LastUsedBadge";
 import { Spinner } from "@/components/ui/spinner";
 
-function GoogleButtonInner() {
+function GoogleButtonInner({ lastUsed }: { lastUsed: boolean }) {
   const { pending } = useFormStatus();
   return (
     <button
       type="submit"
       disabled={pending}
       suppressHydrationWarning
-      className="inline-flex w-full items-center justify-center gap-3 border-2 border-input bg-background px-7 py-2.5 text-sm font-bold text-foreground transition-colors hover:border-ring hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50"
+      className="inline-flex w-full items-center justify-center gap-2.5 border-2 border-input bg-background px-4 py-2.5 text-sm font-bold text-foreground transition-colors hover:border-ring hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50"
     >
       {pending ? <Spinner className="text-muted-foreground" /> : <GoogleLogo />}
       Continue with Google
+      {/* In FLOW, not absolutely positioned. An overlaid badge sits on top of
+          whatever is under it, which on a narrow viewport is the label itself;
+          as a flex sibling it can only ever push, never cover. The label group
+          stays centred as a whole. */}
+      {lastUsed && <LastUsedBadge />}
     </button>
   );
 }
 
 /** Google OAuth entry point — its own form so it never nests in the email form. */
-export function GoogleButton({ next = "/" }: { next?: string }) {
+export function GoogleButton({
+  next = "/",
+  lastUsed = false,
+}: {
+  next?: string;
+  /** Whether this browser last signed in with Google. */
+  lastUsed?: boolean;
+}) {
   return (
     <form action={signInWithGoogle}>
       <input type="hidden" name="next" value={next} />
-      <GoogleButtonInner />
+      <GoogleButtonInner lastUsed={lastUsed} />
     </form>
   );
 }

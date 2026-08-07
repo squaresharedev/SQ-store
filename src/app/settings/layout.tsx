@@ -31,7 +31,7 @@ export default async function SettingsLayout({
   const user = await requireUser("/settings");
   const profile = await getProfile();
   const username =
-    profile?.display_name || user.email?.split("@")[0] || "Account";
+    profile?.username || user.email?.split("@")[0] || "Account";
 
   return (
     <DashboardShell username={username}>

@@ -170,8 +170,8 @@ export type Database = {
           avatar_url: string | null
           created_at: string
           deletion_requested_at: string | null
-          display_name: string | null
           id: string
+          is_public: boolean
           is_seller: boolean
           legal_accepted_at: string | null
           legal_accepted_version: string | null
@@ -182,13 +182,14 @@ export type Database = {
           tax_country: string | null
           tax_vat_id: string | null
           updated_at: string
+          username: string | null
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string
           deletion_requested_at?: string | null
-          display_name?: string | null
           id: string
+          is_public?: boolean
           is_seller?: boolean
           legal_accepted_at?: string | null
           legal_accepted_version?: string | null
@@ -199,13 +200,14 @@ export type Database = {
           tax_country?: string | null
           tax_vat_id?: string | null
           updated_at?: string
+          username?: string | null
         }
         Update: {
           avatar_url?: string | null
           created_at?: string
           deletion_requested_at?: string | null
-          display_name?: string | null
           id?: string
+          is_public?: boolean
           is_seller?: boolean
           legal_accepted_at?: string | null
           legal_accepted_version?: string | null
@@ -216,6 +218,34 @@ export type Database = {
           tax_country?: string | null
           tax_vat_id?: string | null
           updated_at?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
+      security_events: {
+        Row: {
+          created_at: string
+          event: string
+          id: string
+          ip_hash: string | null
+          meta: Json
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event: string
+          id?: string
+          ip_hash?: string | null
+          meta?: Json
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event?: string
+          id?: string
+          ip_hash?: string | null
+          meta?: Json
+          user_id?: string
         }
         Relationships: []
       }
@@ -309,12 +339,20 @@ export type Database = {
         Args: { p_product_id: string; p_quantity: number }
         Returns: boolean
       }
-      is_display_name_available: {
-        Args: { p_display_name: string }
-        Returns: boolean
+      email_by_username: {
+        Args: { p_username: string }
+        Returns: string
       }
       rl_take: {
         Args: { p_action: string; p_max: number; p_window_seconds: number }
+        Returns: boolean
+      }
+      user_has_password: {
+        Args: { p_user_id: string }
+        Returns: boolean
+      }
+      username_taken: {
+        Args: { p_username: string; p_except?: string }
         Returns: boolean
       }
       rl_take_key: {
@@ -364,13 +402,13 @@ export type Database = {
         Args: { account: string; page_limit?: number; page_offset?: number }
         Returns: {
           accepted_at: string
-          display_name: string
           id: string
           invited_at: string
           invited_email: string
           member_user_id: string
           role: Database["public"]["Enums"]["team_role"]
           status: Database["public"]["Enums"]["team_member_status"]
+          username: string
         }[]
       }
       user_id_by_email: { Args: { p_email: string }; Returns: string }

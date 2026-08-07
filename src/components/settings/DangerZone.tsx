@@ -14,8 +14,11 @@ export function DangerZone({
   deletionRequestedAt: string | null;
 }) {
   return (
+    // The ids are universal search's landing points (/settings/danger#export,
+    // #delete), so "download my data" goes straight to the right card.
     <div className="flex flex-col gap-6">
       <SettingsCard
+        id="export"
         title="Export my data"
         description="Everything we hold about you: profile, products, storefront config, all bundled into one JSON file. It's your data, yours to keep."
       >
@@ -29,7 +32,9 @@ export function DangerZone({
         </a>
       </SettingsCard>
 
-      <DeleteAccountForm deletionRequestedAt={deletionRequestedAt} />
+      <div id="delete" className="scroll-mt-20">
+        <DeleteAccountForm deletionRequestedAt={deletionRequestedAt} />
+      </div>
     </div>
   );
 }

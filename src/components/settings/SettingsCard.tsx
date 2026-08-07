@@ -13,12 +13,17 @@ import {
  * card of a section, not every form, so it stays a signal (styles.md §2.4).
  */
 export function SettingsCard({
+  id,
   title,
   description,
   danger,
   decoration,
   children,
 }: {
+  /** Anchor target, so universal search can deep-link to this exact card.
+   *  `scroll-mt` clears the sticky top bar the anchor would otherwise land
+   *  under. */
+  id?: string;
   title: string;
   description?: string;
   /** Red border treatment for danger-zone cards. */
@@ -29,8 +34,9 @@ export function SettingsCard({
 }) {
   return (
     <section
+      id={id}
       className={cn(
-        "border bg-background p-6 sm:p-7",
+        "border bg-background p-6 sm:p-7 scroll-mt-20",
         decoration && "relative overflow-hidden",
         danger ? "border-destructive/40" : "border-border",
       )}

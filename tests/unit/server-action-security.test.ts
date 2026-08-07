@@ -44,7 +44,7 @@ const REGISTRY: Record<string, Classification> = {
   "lib/auth/actions.ts::signOutEverywhere": read(),
 
   // --- settings -----------------------------------------------------------
-  "lib/settings/actions.ts::updateDisplayName": limited(),
+  "lib/settings/actions.ts::updateUsername": limited(),
   "lib/settings/actions.ts::requestEmailChange": limited(),
   "lib/settings/actions.ts::changePassword": limited(),
   "lib/settings/actions.ts::sendPasswordReset": limited(),

@@ -212,6 +212,14 @@
   --chart-accent: #3987e5;
 }
 
+/* Bottom padding that clears the home indicator on a notched phone. Needed by
+   anything that runs to the bottom edge of the viewport — today the universal
+   search sheet, whose result list would otherwise put its last row under the
+   gesture bar. The 0px fallback makes it a no-op everywhere else. */
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
 /* ============================================================
    SHARED BENTO GRID  (components/grid/Grid.tsx)
    Presentation-agnostic grid used by the storefront builder AND the

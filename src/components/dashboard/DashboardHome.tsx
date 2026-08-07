@@ -3,79 +3,28 @@ import { Plus } from "lucide-react";
 import { iconPopClass, primaryButtonClass } from "@/components/ui/control-styles";
 import { BackgroundArrow } from "@/components/ui/BackgroundArrow";
 import type { DashboardOrdersData, ProductsSummary } from "@/lib/dashboard/queries";
+import {
+  buildAttentionItems,
+  type StorefrontAttentionInfo,
+} from "@/lib/dashboard/attention";
 import { formatMoney } from "@/lib/dashboard/format";
 import { MetricTile } from "./MetricTile";
 import { MobileRevenueHero } from "./MobileRevenueHero";
-import { NeedsAttention, type AttentionItem } from "./NeedsAttention";
+import { NeedsAttention } from "./NeedsAttention";
 import { OnboardingSlot } from "./OnboardingSlot";
 import { RecentOrders } from "./RecentOrders";
 
 const RECENT_ORDERS_ID = "recent-orders";
 
-function buildAttentionItems(
-  orders: DashboardOrdersData,
-  products: ProductsSummary,
-  storefrontSaved: boolean,
-  storefrontBlockCount: number,
-): AttentionItem[] {
-  const items: AttentionItem[] = [
-    // Always present until Stripe Connect exists (payments stage).
-    {
-      key: "stripe",
-      label: "Connect Stripe to get paid",
-      description: "Payouts stay blocked until your account is connected.",
-      href: "/settings",
-      actionLabel: "Go to settings",
-    },
-  ];
-  if (!storefrontSaved || storefrontBlockCount === 0) {
-    items.push({
-      key: "storefront",
-      label: storefrontSaved ? "Your storefront is empty" : "Save your storefront",
-      description: storefrontSaved
-        ? "Add products to your grid so buyers have something to see."
-        : "Arrange your grid and save it to go live.",
-      href: "/storefront",
-      actionLabel: "Open designer",
-    });
-  }
-  if (products.missingImage.length > 0) {
-    const [first] = products.missingImage;
-    items.push({
-      key: "images",
-      label: `${products.missingImage.length} product${products.missingImage.length === 1 ? "" : "s"} missing an image`,
-      description:
-        products.missingImage.length === 1
-          ? `"${first.title}" has no display image yet.`
-          : "Products without images look empty on your storefront.",
-      href: "/products",
-      actionLabel: "Fix products",
-    });
-  }
-  const flagged = orders.refundedCount + orders.disputedCount;
-  if (flagged > 0) {
-    items.push({
-      key: "flagged-orders",
-      label: `${flagged} order${flagged === 1 ? "" : "s"} to review`,
-      description: `${orders.disputedCount} disputed, ${orders.refundedCount} refunded.`,
-      href: `#${RECENT_ORDERS_ID}`,
-      actionLabel: "Review orders",
-    });
-  }
-  return items;
-}
-
 /** Composition only: lays the modules out; all data arrives as props. */
 export function DashboardHome({
   orders,
   products,
-  storefrontSaved,
-  storefrontBlockCount,
+  storefronts,
 }: {
   orders: DashboardOrdersData;
   products: ProductsSummary;
-  storefrontSaved: boolean;
-  storefrontBlockCount: number;
+  storefronts: StorefrontAttentionInfo;
 }) {
   const { last30d } = orders;
 
@@ -138,12 +87,7 @@ export function DashboardHome({
         {/* Status modules. */}
         <div className="space-y-4">
           <NeedsAttention
-            items={buildAttentionItems(
-              orders,
-              products,
-              storefrontSaved,
-              storefrontBlockCount,
-            )}
+            items={buildAttentionItems({ orders, products, storefronts })}
           />
           <RecentOrders orders={orders.recentOrders} id={RECENT_ORDERS_ID} />
         </div>

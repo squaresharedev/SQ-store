@@ -96,6 +96,32 @@ export function emailAddress(label = "That email") {
 }
 
 /**
+ * An account HANDLE: what someone types into the sign-in box instead of their
+ * email. ASCII lowercase letters, digits and underscore, 3 to 30 characters.
+ *
+ * Deliberately far narrower than a display name, because a handle is half of a
+ * credential AND is shown to other people. It must not admit anything that can
+ * render as something it is not: no spaces, no case ambiguity, and no non-ASCII
+ * (a Cyrillic "а" would otherwise sit beside a Latin "a" as a different but
+ * visually identical account). Same homograph reasoning as `hostname` below.
+ *
+ * Trimmed and lowercased BEFORE the check, so "  BuilderBoy " is accepted and
+ * normalized to "builderboy" rather than rejected. The parsed output is the
+ * canonical form and is what every write path stores.
+ */
+const HANDLE_PATTERN = /^[a-z0-9_]{3,30}$/;
+
+export function handle(label = "A username") {
+  return z
+    .string()
+    .trim()
+    .toLowerCase()
+    .regex(HANDLE_PATTERN, {
+      error: `${label} must be 3 to 30 characters, using only letters, numbers and underscores.`,
+    });
+}
+
+/**
  * A bare hostname, as typed into an origin allowlist.
  *
  * ASCII only, lowercase, dot-separated labels of ≤63 chars with an alphabetic

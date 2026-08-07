@@ -14,6 +14,9 @@ export const TYPE_DOT: Record<NotificationType, string> = {
   payment: "bg-success",
   stock: "bg-destructive",
   system: "bg-muted-foreground",
+  // Destructive, like a stock warning: "your password changed" is the one row
+  // in this feed a person must not scroll past.
+  security: "bg-destructive",
 };
 
 export const TYPE_LABEL: Record<NotificationType, string> = {
@@ -22,6 +25,7 @@ export const TYPE_LABEL: Record<NotificationType, string> = {
   payment: "Payment",
   stock: "Stock",
   system: "System",
+  security: "Security",
 };
 
 const ABSOLUTE_DATE = new Intl.DateTimeFormat("en-IE", {

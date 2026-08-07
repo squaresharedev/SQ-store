@@ -70,6 +70,32 @@ test.describe("accessibility", () => {
     }
   });
 
+  test("universal search palette", async ({ page }) => {
+    // A combobox is the pattern axe has the most to say about: a dangling
+    // aria-activedescendant, an aria-controls pointing nowhere, or options
+    // outside their listbox are all serious violations, and all are easy to
+    // reintroduce while editing the results markup.
+    await signUp(page, freshUser("a11y-search"));
+    await gotoApp(page, "/dashboard");
+
+    await page.keyboard.press("ControlOrMeta+k");
+    const input = page.getByRole("combobox", { name: "Search" });
+    await expect(input).toBeFocused();
+    await expectNoSeriousViolations(page, "search palette (suggestions)");
+
+    await input.fill("settings");
+    await expect(page.getByRole("option").first()).toBeVisible();
+    await expectNoSeriousViolations(page, "search palette (results)");
+
+    // ...and with the highlight moved, which is when activedescendant is live.
+    await page.keyboard.press("ArrowDown");
+    await expectNoSeriousViolations(page, "search palette (active option)");
+
+    await input.fill("zzzzqqqqnothing");
+    await expect(page.getByText(/Nothing matches/i)).toBeVisible();
+    await expectNoSeriousViolations(page, "search palette (empty)");
+  });
+
   test("storefront designer incl. pickers", async ({ page }) => {
     const user = freshUser("a11y-designer");
     await signUp(page, user);

@@ -40,7 +40,28 @@ export function freshUser(tag: string) {
   return {
     email: `${tag}-${Date.now()}-${counter}@e2e.squareshare.to`,
     password: "e2e-password-123",
+    // Sign-up also claims a handle: letters/numbers/underscores, 3-30 chars,
+    // and never one of the reserved words (several spec tags — "orders",
+    // "products", "team" — are reserved, hence the prefix).
+    username: `e2e_${tag.replace(/[^a-z0-9]/gi, "").slice(0, 8)}_${
+      Date.now() % 1_000_000_000
+    }${counter}`.toLowerCase(),
   };
+}
+
+type TestUser = { email: string; password: string; username?: string };
+
+/**
+ * Fill the login form's identity field.
+ *
+ * The field is `identifier` (it takes an email OR a username on sign-in); the
+ * `email` fallback keeps this working against older builds of the form.
+ */
+async function fillIdentifier(page: Page, value: string) {
+  await page
+    .locator('input[name="identifier"], input[name="email"]')
+    .first()
+    .fill(value);
 }
 
 /**
@@ -62,11 +83,24 @@ export async function clearAuthRateLimits() {
 }
 
 /** Sign up through the real UI; lands on the dashboard. */
-export async function signUp(page: Page, user: { email: string; password: string }) {
+export async function signUp(page: Page, user: TestUser) {
   await clearAuthRateLimits();
   await page.goto("/login");
-  await page.getByRole("button", { name: /sign up/i }).click();
-  await page.locator('input[name="email"]').fill(user.email);
+  // The mode tabs are client state: a click that lands before hydration leaves
+  // the form in sign-in mode, where the sign-up-only fields never exist. Retry
+  // the tab until they do.
+  await expect(async () => {
+    await page.getByRole("button", { name: /^sign up$/i }).first().click();
+    await expect(page.locator('input[name="confirm_password"]')).toBeVisible({
+      timeout: 1_000,
+    });
+  }).toPass({ timeout: 20_000 });
+  await fillIdentifier(page, user.email);
+  // Sign-up claims a handle too; older builds of the form have no such field.
+  const username = page.locator('input[name="username"]');
+  if (await username.count()) {
+    await username.fill(user.username ?? `e2e_${Date.now() % 1_000_000_000}`);
+  }
   await page.locator('input[name="password"]').fill(user.password);
   await page.locator('input[name="confirm_password"]').fill(user.password);
   await page.locator('button[name="intent"]').click();
@@ -74,10 +108,10 @@ export async function signUp(page: Page, user: { email: string; password: string
 }
 
 /** Sign in through the real UI. */
-export async function signIn(page: Page, user: { email: string; password: string }) {
+export async function signIn(page: Page, user: TestUser) {
   await clearAuthRateLimits();
   await page.goto("/login");
-  await page.locator('input[name="email"]').fill(user.email);
+  await fillIdentifier(page, user.email);
   await page.locator('input[name="password"]').fill(user.password);
   await page.locator('button[name="intent"]').click();
   await page.waitForURL(/\/dashboard/, { timeout: 30_000 });
@@ -133,6 +167,46 @@ export async function userIdByEmail(email: string): Promise<string> {
   )) as string | null;
   expect(rows, `no user for ${email}`).toBeTruthy();
   return rows as string;
+}
+
+/**
+ * Seed products straight into the database for an owner.
+ *
+ * Use this when a spec needs a product to EXIST but is not testing the product
+ * form — `createProductViaUI` drives a multi-field form and, on a mobile
+ * viewport especially, makes an unrelated spec fail for reasons that say
+ * nothing about what it was checking.
+ */
+export async function seedProducts(
+  ownerId: string,
+  products: Array<{
+    title: string;
+    price_cents?: number;
+    status?: "active" | "draft";
+  }>,
+) {
+  await serviceRest(`/products`, {
+    method: "POST",
+    body: products.map((p) => ({
+      owner_id: ownerId,
+      title: p.title,
+      price_cents: p.price_cents ?? 1000,
+      currency: "EUR",
+      status: p.status ?? "active",
+    })),
+  });
+}
+
+/** Seed storefronts straight into the database for an owner. Same reasoning
+ *  as seedProducts: specs that need one to EXIST shouldn't drive the UI. */
+export async function seedStorefronts(
+  ownerId: string,
+  storefronts: Array<{ name: string }>,
+) {
+  await serviceRest(`/storefronts`, {
+    method: "POST",
+    body: storefronts.map((s) => ({ owner_id: ownerId, name: s.name })),
+  });
 }
 
 /** Seed a batch of orders for a seller (service-written, like the real webhook). */

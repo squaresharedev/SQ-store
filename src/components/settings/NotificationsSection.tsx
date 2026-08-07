@@ -46,6 +46,8 @@ export function NotificationsSection({
 
   return (
     <SettingsCard
+      // Universal search's landing point for "sales emails", "newsletter", etc.
+      id="preferences"
       title="Email notifications"
       description="Pick what lands in your inbox. Security and payment emails sneak through regardless, we can't let those go quiet."
     >

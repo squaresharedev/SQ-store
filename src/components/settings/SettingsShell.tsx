@@ -3,24 +3,10 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Bell,
-  Receipt,
-  ScrollText,
-  TriangleAlert,
-  User,
-  Users,
-} from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const NAV = [
-  { href: "/settings/account", label: "Account", icon: User },
-  { href: "/settings/legal", label: "Legal", icon: ScrollText },
-  { href: "/settings/tax", label: "Tax", icon: Receipt },
-  { href: "/settings/notifications", label: "Notifications", icon: Bell },
-  { href: "/settings/team", label: "Team & access", icon: Users },
-  { href: "/settings/danger", label: "Danger zone", icon: TriangleAlert, danger: true },
-] as const;
+// The settings map itself lives in @/lib/search/nav-constants so the universal
+// search registry indexes exactly what this rail renders.
+import { SETTINGS_NAV } from "@/lib/search/nav-constants";
 
 function navItemClasses(active: boolean, danger?: boolean) {
   return cn(
@@ -57,10 +43,10 @@ export function SettingsShell({ children }: { children: React.ReactNode }) {
     active?.scrollIntoView({ block: "nearest", inline: "center" });
   }, [pathname]);
 
-  const nav = NAV.map((item) => {
+  const nav = SETTINGS_NAV.map((item) => {
     const active = pathname.startsWith(item.href);
     const Icon = item.icon;
-    const danger = "danger" in item && item.danger;
+    const danger = item.danger;
 
     return (
       <Link

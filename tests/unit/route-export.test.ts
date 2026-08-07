@@ -72,7 +72,7 @@ describe("GET /settings/export", () => {
 
   it("exports ONLY session-scoped data with download headers", async () => {
     getUser.mockResolvedValue({ data: { user: USER }, error: null } as never);
-    tables.profiles = { data: { id: USER.id, display_name: "Me" }, error: null };
+    tables.profiles = { data: { id: USER.id, username: "me" }, error: null };
     tables.products = { data: [{ id: "p1", owner_id: USER.id }], error: null };
     tables.storefronts = { data: [{ id: "s1", owner_id: USER.id }], error: null };
 

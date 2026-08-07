@@ -50,7 +50,8 @@ const ICONS: Array<{
   },
   {
     name: "Payments",
-    story: "The card tips, and lies back down when you leave.",
+    story:
+      "The card tips and throws off a sparkle, then lies back down when you leave.",
     icon: PaymentsIcon,
   },
   {

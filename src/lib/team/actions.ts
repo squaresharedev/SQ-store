@@ -165,7 +165,7 @@ export async function inviteMember(
     if (inviteeUserId) {
       const inviterProfile = await getProfile();
       const storeLabel =
-        inviterProfile?.display_name?.trim() || "A SquareShare store";
+        inviterProfile?.username?.trim() || "A SquareShare store";
       await createNotification({
         userId: inviteeUserId,
         type: "team",
@@ -269,7 +269,7 @@ export async function acceptInvite(
   // throws and returns false on error).
   const profile = await getProfile();
   const joinerName =
-    profile?.display_name?.trim() || user.email?.split("@")[0] || "A new member";
+    profile?.username?.trim() || user.email?.split("@")[0] || "A new member";
   await createNotification({
     userId: invite.account_owner_id,
     type: "team",

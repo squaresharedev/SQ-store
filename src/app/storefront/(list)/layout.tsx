@@ -33,7 +33,7 @@ export default async function StorefrontListLayout({
 }) {
   const [user, profile] = await Promise.all([getUser(), getProfile()]);
   const username =
-    profile?.display_name || user?.email?.split("@")[0] || "Account";
+    profile?.username || user?.email?.split("@")[0] || "Account";
 
   return <DashboardShell username={username}>{children}</DashboardShell>;
 }

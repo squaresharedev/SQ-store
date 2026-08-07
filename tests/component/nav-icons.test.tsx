@@ -70,13 +70,19 @@ describe("nav icons", () => {
   it("PaymentsIcon rests as the plain lucide card, nothing more", () => {
     const { container } = render(<PaymentsIcon />);
     // A hover that needs extra furniture has to add it without leaving any of
-    // it on the resting glyph. This pins the resting glyph itself: card plus
-    // stripe, and no other shape.
+    // it on the resting glyph. The card and its stripe are the whole resting
+    // glyph, and the hover sparkles carry opacity 0 on the element itself, so
+    // they stay invisible even where no variant label reaches them (reduced
+    // motion, or an icon rendered outside a nav row).
     expect(container.querySelectorAll("rect")).toHaveLength(1);
     expect(container.querySelectorAll("line")).toHaveLength(1);
-    expect(container.querySelectorAll("path, polyline, circle")).toHaveLength(
-      0,
-    );
+    expect(container.querySelectorAll("polyline, circle")).toHaveLength(0);
+
+    const sparkles = [...container.querySelectorAll("path")];
+    expect(sparkles.length).toBeGreaterThan(0);
+    for (const sparkle of sparkles) {
+      expect(sparkle.getAttribute("opacity")).toBe("0");
+    }
   });
 
   it("ProductsIcon shuts its four lids onto lines the icon already draws", () => {

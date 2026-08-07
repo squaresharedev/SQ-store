@@ -31,7 +31,7 @@ import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
 export const dynamic = "force-dynamic";
 
 const PROFILE_COLUMNS =
-  "display_name, username, avatar_url, created_at, updated_at, " +
+  "username, avatar_url, created_at, updated_at, " +
   "notify_sales, notify_product_updates, notify_marketing, " +
   "tax_business_name, tax_vat_id, tax_country, " +
   "legal_accepted_at, legal_accepted_version, deletion_requested_at";

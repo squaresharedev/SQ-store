@@ -31,3 +31,9 @@ export const AUTH_COOKIE_OPTIONS: CookieOptions = {
   secure: isProd,
   httpOnly: true,
 };
+
+/** The same host scope and transport rules, for non-Supabase cookies the auth
+ *  slice writes (see lib/auth/last-method.ts). Exported rather than recomputed
+ *  so there is one definition of "where this app's cookies live". */
+export const AUTH_COOKIE_DOMAIN = cookieDomain;
+export const AUTH_COOKIE_SECURE = isProd;

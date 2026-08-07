@@ -6,40 +6,16 @@ import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { MotionConfig, motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
+import { DiscoverIcon } from "@/components/dashboard/nav-icons";
 import {
-  AnalyticsIcon,
-  DiscoverIcon,
-  OrdersIcon,
-  OverviewIcon,
-  PaymentsIcon,
-  ProductsIcon,
-  SettingsIcon,
-  StorefrontIcon,
-  type NavIconProps,
-} from "@/components/dashboard/nav-icons";
+  MAIN_NAV,
+  SETTINGS_LINK,
+  type NavEntry,
+} from "@/lib/search/nav-constants";
 
-type NavLink = {
-  label: string;
-  href: string;
-  icon: (props: NavIconProps) => React.ReactNode;
-};
-
-const MAIN_NAV: NavLink[] = [
-  // The Overview page lives at /dashboard ("/" merely redirects there);
-  // linking it directly keeps the active state working and skips the hop.
-  { label: "Overview", href: "/dashboard", icon: OverviewIcon },
-  { label: "Products", href: "/products", icon: ProductsIcon },
-  { label: "Storefront", href: "/storefront", icon: StorefrontIcon },
-  { label: "Orders", href: "/orders", icon: OrdersIcon },
-  { label: "Analytics", href: "/analytics", icon: AnalyticsIcon },
-  { label: "Payments", href: "/payments", icon: PaymentsIcon },
-];
-
-const SETTINGS_LINK: NavLink = {
-  label: "Settings",
-  href: "/settings",
-  icon: SettingsIcon,
-};
+// The nav map itself lives in @/lib/search/nav-constants so the universal
+// search registry indexes exactly what this rail renders.
+type NavLink = NavEntry;
 
 // The nav row is the animation trigger: switching the variant label here
 // propagates "hover" down to the icon's motion sub-elements, so hovering the

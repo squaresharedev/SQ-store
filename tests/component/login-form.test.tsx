@@ -56,6 +56,83 @@ describe("LoginForm", () => {
     expect(tabs.length).toBeGreaterThanOrEqual(2);
   });
 
+  // --- Pending state ---
+
+  it("names the action under way rather than saying 'Working'", async () => {
+    // Three modes share one button, so a generic label cannot be honest about
+    // all of them, and the sign-in wait is ~1s of real credential checking.
+    let release: (value: { error: string }) => void = () => {};
+    mockAuthenticate.mockImplementation(
+      () => new Promise((resolve) => { release = resolve; }),
+    );
+    const user = userEvent.setup();
+    render(<LoginForm />);
+
+    await user.type(screen.getByLabelText("Email or username"), "a@b.com");
+    await user.type(screen.getByLabelText("Password"), "secret123");
+    await user.click(screen.getByTestId("login-submit"));
+
+    await waitFor(() =>
+      expect(screen.getByTestId("login-submit")).toHaveTextContent(/signing in/i),
+    );
+    expect(screen.getByTestId("login-submit")).not.toHaveTextContent(/working/i);
+
+    release({ error: "done" });
+  });
+
+  // --- Identifier field (email or username) ---
+
+  it("offers the identifier field as email OR username when signing in", () => {
+    render(<LoginForm />);
+    const field = screen.getByLabelText("Email or username");
+    // Not type="email": that would hand a box that also accepts a handle to
+    // autofill and mobile keyboards as address-only.
+    expect(field).toHaveAttribute("type", "text");
+    expect(field).toHaveAttribute("name", "identifier");
+    expect(field).toHaveAttribute("autocomplete", "username");
+  });
+
+  it("goes back to email-only where a handle cannot work", async () => {
+    const user = userEvent.setup();
+    render(<LoginForm />);
+
+    for (const open of [/^sign up$/i, /email me a magic link/i]) {
+      await user.click(screen.getByRole("button", { name: open }));
+      const field = screen.getByLabelText("Email");
+      expect(field).toHaveAttribute("type", "email");
+      expect(
+        screen.queryByLabelText("Email or username"),
+      ).not.toBeInTheDocument();
+    }
+  });
+
+  it("asks for a username when creating an account", async () => {
+    const user = userEvent.setup();
+    render(<LoginForm />);
+    await user.click(screen.getByRole("button", { name: /^sign up$/i }));
+
+    const field = screen.getByLabelText("Username");
+    expect(field).toHaveAttribute("name", "username");
+    expect(screen.getByText(/letters, numbers and underscores/i)).toBeInTheDocument();
+  });
+
+  it("does not ask for a username when signing in", () => {
+    render(<LoginForm />);
+    expect(screen.queryByLabelText("Username")).not.toBeInTheDocument();
+  });
+
+  it("keeps what was typed when switching between modes", async () => {
+    // Same element in the same position in every mode, so a tab switch is not
+    // punished by making people retype their address.
+    const user = userEvent.setup();
+    render(<LoginForm />);
+
+    await user.type(screen.getByLabelText("Email or username"), "a@b.com");
+    await user.click(screen.getByRole("button", { name: /^sign up$/i }));
+
+    expect(screen.getByLabelText("Email")).toHaveValue("a@b.com");
+  });
+
   // --- Sign-up mode ---
 
   it("switching to sign-up shows confirm_password field", async () => {
@@ -65,11 +142,17 @@ describe("LoginForm", () => {
     expect(screen.getByLabelText(/confirm password/i)).toBeInTheDocument();
   });
 
-  it("sign-up shows 'At least 8 characters' hint", async () => {
+  it("states the real password rule, not just the length floor", async () => {
+    // An understated hint invites a password the form then rejects, so the
+    // hint has to name the mix requirement and the passphrase escape hatch.
     const user = userEvent.setup();
     render(<LoginForm />);
     await user.click(screen.getByRole("button", { name: /^sign up$/i }));
-    expect(screen.getByText(/at least 8 characters/i)).toBeInTheDocument();
+
+    const hint = screen.getByText(/at least 8 characters/i);
+    expect(hint).toBeInTheDocument();
+    expect(hint).toHaveTextContent(/mixing cases, numbers or symbols/i);
+    expect(hint).toHaveTextContent(/16\+/);
   });
 
   it("sign-up changes submit button label to 'Create account'", async () => {

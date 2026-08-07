@@ -28,6 +28,17 @@ export const RATE_LIMITS = {
   authEmailPerClient: { max: 8, windowSeconds: 60 * 60 },
   /** Password attempts per client — brute-force brake, not a lockout. */
   authSignInPerClient: { max: 10, windowSeconds: 15 * 60 },
+  /**
+   * Resolving a sign-in HANDLE to an account email. Spent on top of the
+   * sign-in budget, never instead of it, so probing handles can never buy a
+   * caller extra password attempts.
+   *
+   * Same size as the sign-in budget on purpose: signing in by handle must not
+   * be stingier than signing in by email for the person who simply mistyped.
+   * What it adds is a second, independent brake on the one surface that could
+   * otherwise answer "does this handle exist?" faster than a password attempt.
+   */
+  usernameResolvePerClient: { max: 10, windowSeconds: 15 * 60 },
   /** Account creation per client. */
   authSignUpPerClient: { max: 5, windowSeconds: 60 * 60 },
   /** Team invites sent by one user: the in-app "spam a stranger" vector. */
@@ -40,8 +51,10 @@ export const RATE_LIMITS = {
   teamMembership: { max: 60, windowSeconds: 60 * 60 },
   /** Upload URL minting — each one authorises bytes into R2. */
   uploadPresign: { max: 60, windowSeconds: 60 * 60 },
-  /** Display-name probing (also an enumeration brake). */
-  displayNameCheck: { max: 60, windowSeconds: 60 * 60 },
+  /** Handle probing from the settings field. An enumeration brake, and the
+   *  handle is half a credential, so the answer is worth something to an
+   *  attacker even though the field is public. */
+  usernameCheck: { max: 60, windowSeconds: 60 * 60 },
   /**
    * Public embed reads, keyed on the requesting CLIENT (no session exists).
    * Generous, because one page view can legitimately be one request and a
@@ -51,6 +64,23 @@ export const RATE_LIMITS = {
   embedFetch: { max: 600, windowSeconds: 60 * 60 },
   /** Avatar uploads (pre-existing budget, unchanged). */
   avatarUpload: { max: 5, windowSeconds: 60 * 60 },
+  /**
+   * Universal search. A READ budget, and the only one spent per keystroke, so
+   * it is the loosest here by design: the palette debounces to roughly one
+   * request per 300ms of typing, which a determined session of searching can
+   * legitimately sustain for a while. What it stops is a script walking the
+   * catalogue through the one endpoint that returns rows from five tables at
+   * once. Every query is still account-scoped and capped at a handful of rows,
+   * so the ceiling is about DB load, not disclosure.
+   */
+  searchQuery: { max: 600, windowSeconds: 60 * 60 },
+  /**
+   * The search SNAPSHOT: one compact per-account index fetch, warmed shortly
+   * after the shell mounts and refreshed on a 60s client TTL. Remounts (route
+   *-group hops, account switches) each spend one; 120/hour clears any human
+   * pattern while staying 5x tighter than the per-keystroke budget above.
+   */
+  searchSnapshot: { max: 120, windowSeconds: 60 * 60 },
 
   // --- Signed-in write budgets ------------------------------------------
   // These sit on top of RLS and role checks, which already decide WHETHER a
@@ -67,6 +97,16 @@ export const RATE_LIMITS = {
   emailChange: { max: 5, windowSeconds: 60 * 60 },
   /** Reset mail to the account's OWN address; still mail, so still bounded. */
   passwordReset: { max: 5, windowSeconds: 60 * 60 },
+  /**
+   * The same reset mail, bounded a second time on the CLIENT rather than the
+   * user. Not redundant: the per-user budget above is spent by whoever holds a
+   * session, so someone working through several compromised sessions gets a
+   * fresh 5 per victim. This one caps what a single origin can send in total,
+   * so the inbox-flooding cost does not scale with the number of accounts an
+   * attacker has reached. Mirrors the pair on the signed-out mail path
+   * (authEmailPerAddress + authEmailPerClient).
+   */
+  passwordResetPerClient: { max: 5, windowSeconds: 60 * 60 },
   /**
    * Re-authentication attempts from inside a session (password change, email
    * change). These VERIFY a caller-supplied password, so an unbounded version

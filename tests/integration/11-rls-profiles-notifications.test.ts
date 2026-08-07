@@ -20,9 +20,9 @@ let aliceNotificationId: string;
 
 beforeAll(async () => {
   alice = await createUser("alice-prof@test.squareshare.to", {
-    display_name: "Alice",
+    username: "alice",
   });
-  bob = await createUser("bob-prof@test.squareshare.to", { display_name: "Bob" });
+  bob = await createUser("bob-prof@test.squareshare.to", { username: "bob" });
 
   aliceNotificationId = await asService(async (q) => {
     const { rows } = await q.query(
@@ -44,7 +44,7 @@ describe("profiles RLS", () => {
 
   it("users cannot update another's profile", async () => {
     const res = await asUser(bob, (q) =>
-      q.query(`update public.profiles set display_name = 'Pwned' where id = $1`, [alice.id]),
+      q.query(`update public.profiles set username = 'pwned' where id = $1`, [alice.id]),
     );
     expect(res.rowCount).toBe(0);
   });
@@ -52,7 +52,7 @@ describe("profiles RLS", () => {
   it("users cannot INSERT profiles directly (trigger-only creation)", async () => {
     const msg = await expectDbError(
       asUser(bob, (q) =>
-        q.query(`insert into public.profiles (id, display_name) values ($1, 'fake')`, [bob.id]),
+        q.query(`insert into public.profiles (id, username) values ($1, 'fake')`, [bob.id]),
       ),
     );
     // bob already has a row (pkey) OR RLS rejects — either way the write path is closed.
@@ -66,35 +66,36 @@ describe("profiles RLS", () => {
     expect(res.rowCount).toBe(0);
   });
 
-  it("display-name uniqueness is enforced case-insensitively at the DB", async () => {
+  it("username uniqueness is enforced case-insensitively at the DB", async () => {
+    // One identifier now, so this index is the only thing standing between two
+    // accounts and the same identity.
     await asUser(alice, (q) =>
-      q.query(`update public.profiles set display_name = 'UniqueName' where id = $1`, [alice.id]),
+      q.query(`update public.profiles set username = 'uniquename' where id = $1`, [alice.id]),
     );
     const msg = await expectDbError(
       asUser(bob, (q) =>
-        q.query(`update public.profiles set display_name = 'uniquename' where id = $1`, [bob.id]),
+        q.query(`update public.profiles set username = 'UniqueName' where id = $1`, [bob.id]),
       ),
     );
-    expect(msg).toMatch(/duplicate key|profiles_display_name_lower_idx/i);
+    expect(msg).toMatch(/duplicate key|profiles_username_lower_idx/i);
   });
 
-  it("is_display_name_available: taken names report false, own name reports true", async () => {
-    const taken = await asUser(bob, (q) =>
-      q.query(`select public.is_display_name_available('UniqueName') as ok`),
-    );
-    expect(taken.rows[0].ok).toBe(false);
-
-    const own = await asUser(alice, (q) =>
-      q.query(`select public.is_display_name_available('uniquename') as ok`),
-    );
-    expect(own.rows[0].ok).toBe(true);
-  });
-
-  it("anon cannot call is_display_name_available (name enumeration gate)", async () => {
+  it("the display-name availability RPC is gone with the column", async () => {
+    // Its job passed to username_taken, which is service_role-only rather than
+    // callable by any signed-in user.
     const msg = await expectDbError(
-      asAnon((q) => q.query(`select public.is_display_name_available('anything')`)),
+      asUser(alice, (q) => q.query(`select public.is_display_name_available('anything')`)),
     );
-    expect(msg).toMatch(/permission denied/i);
+    expect(msg).toMatch(/does not exist/i);
+  });
+
+  it("username_taken stays unreachable by anon and authenticated", async () => {
+    for (const run of [
+      asAnon((q) => q.query(`select public.username_taken('uniquename')`)),
+      asUser(bob, (q) => q.query(`select public.username_taken('uniquename')`)),
+    ]) {
+      expect(await expectDbError(run)).toMatch(/permission denied/i);
+    }
   });
 });
 
@@ -336,5 +337,159 @@ describe("admin + waitlist surfaces", () => {
     );
     const rows = await asUser(staff, (q) => q.query(`select user_id from public.admin_users`));
     expect(rows.rows.map((r) => r.user_id)).toContain(staff.id);
+  });
+});
+
+describe("user_has_password + security_events", () => {
+  it("user_has_password is service_role-only", async () => {
+    // It reads auth.users and takes a caller-supplied id, so exposing it would
+    // answer "does this account have a password?" about anybody.
+    for (const run of [
+      asAnon((q) => q.query(`select public.user_has_password($1)`, [alice.id])),
+      asUser(bob, (q) => q.query(`select public.user_has_password($1)`, [alice.id])),
+    ]) {
+      expect(await expectDbError(run)).toMatch(/permission denied/i);
+    }
+
+    const ok = await asService((q) =>
+      q.query(`select public.user_has_password($1) as has`, [alice.id]),
+    );
+    expect(typeof ok.rows[0].has).toBe("boolean");
+  });
+
+  it("answers from the password HASH, not from the identities list", async () => {
+    // The whole point: an OAuth account that set a password through recovery
+    // has a hash but no `email` identity row. The old check read that as "no
+    // password" and skipped email-change re-authentication.
+    await asSuper((q) =>
+      q.query(`update auth.users set encrypted_password = '$2a$10$fakehashfakehashfake' where id = $1`, [
+        alice.id,
+      ]),
+    );
+    await asSuper((q) =>
+      q.query(`update auth.users set encrypted_password = null where id = $1`, [bob.id]),
+    );
+
+    const aliceHas = await asService((q) =>
+      q.query(`select public.user_has_password($1) as has`, [alice.id]),
+    );
+    const bobHas = await asService((q) =>
+      q.query(`select public.user_has_password($1) as has`, [bob.id]),
+    );
+
+    // Neither account has an `email` identity (the shim has no identities
+    // table at all, and these users were created straight into auth.users), so
+    // the OLD signal would have answered false for both. The hash is what
+    // separates them.
+    expect(aliceHas.rows[0].has).toBe(true);
+    expect(bobHas.rows[0].has).toBe(false);
+  });
+
+  it("security_events: the owner reads their own and nobody else's", async () => {
+    await asService((q) =>
+      q.query(
+        `insert into public.security_events (user_id, event) values ($1, 'password.changed')`,
+        [alice.id],
+      ),
+    );
+
+    const mine = await asUser(alice, (q) =>
+      q.query(`select event from public.security_events`),
+    );
+    expect(mine.rows).toEqual([{ event: "password.changed" }]);
+
+    const theirs = await asUser(bob, (q) =>
+      q.query(`select event from public.security_events`),
+    );
+    expect(theirs.rows).toHaveLength(0);
+  });
+
+  it("security_events is APPEND-ONLY to clients: no insert, update or delete", async () => {
+    // An audit log a suspect can write to is worse than no audit log. There is
+    // no insert/update/delete policy at all, and the table grant is SELECT only.
+    const forged = await expectDbError(
+      asUser(bob, (q) =>
+        q.query(
+          `insert into public.security_events (user_id, event) values ($1, 'password.changed')`,
+          [bob.id],
+        ),
+      ),
+    );
+    expect(forged).toMatch(/permission denied/i);
+
+    // Even aimed at their OWN row, and even as anon.
+    expect(
+      await expectDbError(
+        asAnon((q) =>
+          q.query(
+            `insert into public.security_events (user_id, event) values ($1, 'password.changed')`,
+            [alice.id],
+          ),
+        ),
+      ),
+    ).toMatch(/permission denied/i);
+
+    expect(
+      await expectDbError(
+        asUser(alice, (q) =>
+          q.query(`update public.security_events set event = 'nope'`),
+        ),
+      ),
+    ).toMatch(/permission denied/i);
+
+    expect(
+      await expectDbError(
+        asUser(alice, (q) => q.query(`delete from public.security_events`)),
+      ),
+    ).toMatch(/permission denied/i);
+  });
+
+  it("refuses an event slug outside the shape the column allows", async () => {
+    const message = await expectDbError(
+      asService((q) =>
+        q.query(
+          `insert into public.security_events (user_id, event) values ($1, 'Password Changed!')`,
+          [alice.id],
+        ),
+      ),
+    );
+    expect(message).toMatch(/check constraint|security_events_event/i);
+  });
+});
+
+describe("notification type vocabulary", () => {
+  it("the DB CHECK accepts every type the app can emit", async () => {
+    // These two lists drift silently: createNotification is best-effort, so a
+    // type the app knows and the constraint does not fails the insert and the
+    // caller never hears about it. That is how the first "security" alert went
+    // missing after a password change.
+    const appTypes = ["team", "payment", "stock", "order", "system", "security"];
+    for (const type of appTypes) {
+      await asService((q) =>
+        q.query(
+          `insert into public.notifications (user_id, type, title) values ($1, $2, 'vocabulary probe')`,
+          [alice.id, type],
+        ),
+      );
+    }
+    const { rows } = await asService((q) =>
+      q.query(
+        `select count(*)::int as n from public.notifications where user_id = $1 and title = 'vocabulary probe'`,
+        [alice.id],
+      ),
+    );
+    expect(rows[0].n).toBe(appTypes.length);
+  });
+
+  it("still refuses a type outside that list", async () => {
+    const message = await expectDbError(
+      asService((q) =>
+        q.query(
+          `insert into public.notifications (user_id, type, title) values ($1, 'invented', 'x')`,
+          [alice.id],
+        ),
+      ),
+    );
+    expect(message).toMatch(/notifications_type_check|check constraint/i);
   });
 });

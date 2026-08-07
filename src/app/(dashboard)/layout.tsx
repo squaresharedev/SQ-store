@@ -26,7 +26,7 @@ export default async function DashboardLayout({
 }) {
   const user = await requireUser("/");
   const profile = await getProfile();
-  const username = profile?.display_name || user.email?.split("@")[0] || "Account";
+  const username = profile?.username || user.email?.split("@")[0] || "Account";
 
   // Toasts live at the route-group root so any dashboard page can raise one
   // without threading a provider through its own tree, and so a toast survives

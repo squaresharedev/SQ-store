@@ -48,6 +48,10 @@ export default async function StorefrontEditorPage({
       initialConfig={storefront.config}
       products={products}
       initialBackgroundImageUrl={backgroundImageUrl}
+      // The designer renders its own universal-search provider (it is outside
+      // the dashboard shell), so it needs the role the shell would have given.
+      role={account?.role ?? null}
+      accountId={account?.accountId ?? null}
     />
   );
 }

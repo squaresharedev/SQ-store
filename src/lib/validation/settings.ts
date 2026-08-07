@@ -1,7 +1,6 @@
 import { z } from "zod";
 import {
   DELETE_CONFIRM_PHRASE,
-  DISPLAY_NAME_MAX_LENGTH,
   EU_COUNTRY_CODES,
   LEGAL_VERSION,
 } from "@/lib/settings/constants";
@@ -9,7 +8,6 @@ import {
   emailAddress,
   optionalSingleLineText,
   referenceCode,
-  singleLineText,
 } from "@/lib/validation/inputs";
 
 /**
@@ -24,16 +22,9 @@ import {
  * through settings.
  */
 
-export const displayNameSchema = z.strictObject({
-  // A username is echoed into notification bodies and will reach invite email
-  // headers, so the gate comes from the shared primitive. The length cap is
-  // enforced HERE, on every server write path — the input's `maxLength` is a
-  // typing hint only and a direct POST never sees it.
-  display_name: singleLineText({
-    label: "A username",
-    max: DISPLAY_NAME_MAX_LENGTH,
-  }),
-});
+// The account's one name lives in lib/validation/auth.ts as `usernameSchema`,
+// beside the sign-in rules it shares. It is a credential as well as a public
+// name, so it answers to the handle primitive rather than to free-form text.
 
 /**
  * Changing the account email is a takeover-grade action: whoever controls the

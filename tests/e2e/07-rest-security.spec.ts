@@ -166,12 +166,26 @@ test.describe("direct REST security probes", () => {
     });
     expect([401, 403, 404]).toContain(oracle.status);
 
-    // is_display_name_available: blocked for anon (enumeration gate).
-    const anonCheck = await rest(`/rpc/is_display_name_available`, ANON_KEY, {
+    // username_taken: blocked for anon AND for a signed-in caller. The handle
+    // is half a credential now, so "does this one exist?" is service_role-only.
+    const anonCheck = await rest(`/rpc/username_taken`, ANON_KEY, {
       method: "POST",
-      body: { p_display_name: "whatever" },
+      body: { p_username: "whatever" },
     });
     expect([401, 403, 404]).toContain(anonCheck.status);
+
+    const authedCheck = await rest(`/rpc/username_taken`, token, {
+      method: "POST",
+      body: { p_username: "whatever" },
+    });
+    expect([401, 403, 404]).toContain(authedCheck.status);
+
+    // email_by_username: the sign-in resolver is never on the client surface.
+    const resolver = await rest(`/rpc/email_by_username`, token, {
+      method: "POST",
+      body: { p_username: "whatever" },
+    });
+    expect([401, 403, 404]).toContain(resolver.status);
 
     // notifications: no client insert path even self-addressed.
     const notif = await rest(`/notifications`, token, {

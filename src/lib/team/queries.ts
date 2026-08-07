@@ -14,7 +14,7 @@ import type { TeamRole, TeamMemberStatus } from "@/lib/team/permissions";
  * "no permission", which is the correct fail-closed answer when the check
  * itself cannot run.
  *
- * The generated Supabase types for `team_roster` wrongly mark `display_name`,
+ * The generated Supabase types for `team_roster` wrongly mark `username`,
  * `member_user_id`, and `accepted_at` as non-null. We cast each RPC result to
  * our own row type (below) which reflects the real nullability.
  *
@@ -30,7 +30,7 @@ export type TeamMemberRow = {
   status: TeamMemberStatus;
   invited_at: string;
   accepted_at: string | null;
-  display_name: string | null;
+  username: string | null;
   /** Public avatars-bucket URL, or null when they haven't set a photo. */
   avatar_url: string | null;
 };
@@ -64,7 +64,7 @@ export async function getTeamRoster(
     // indistinguishable from everyone having been removed.
     throw new Error(`The team roster is unavailable right now: ${error.message}`);
   }
-  // Cast: generated types wrongly mark display_name / member_user_id /
+  // Cast: generated types wrongly mark username / member_user_id /
   // accepted_at as non-null. Our TeamMemberRow declares them nullable.
   return (data ?? []) as TeamMemberRow[];
 }
