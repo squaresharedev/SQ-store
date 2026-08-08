@@ -79,3 +79,37 @@ export const usernameSchema = z.strictObject({
 export function looksLikeEmail(identifier: string): boolean {
   return identifier.includes("@");
 }
+
+/**
+ * Which flow the auth screen is asking for, carried by the clicked submit
+ * button. Parsed rather than cast: `formData.get()` returns whatever was
+ * posted, and asserting a union over it is a claim the code cannot make.
+ *
+ * An unrecognised value resolves to "signin", the most restrictive branch
+ * (it still demands a valid password), so a malformed post cannot reach a
+ * flow that sends mail.
+ */
+export const AUTH_INTENTS = ["signin", "signup", "magic", "reset"] as const;
+
+export type AuthIntent = (typeof AUTH_INTENTS)[number];
+
+export const authIntentSchema = z.enum(AUTH_INTENTS);
+
+/**
+ * The OTP kinds /auth/confirm will hand to Supabase's verifyOtp.
+ *
+ * Supabase types this as a union widened with `(string & {})`, so TypeScript
+ * accepts any string and the cast that used to sit here asserted a guarantee
+ * nobody was checking. This is the closed set the email templates actually
+ * link to; anything else is refused before it reaches the auth server.
+ */
+export const EMAIL_OTP_TYPES = [
+  "signup",
+  "invite",
+  "magiclink",
+  "recovery",
+  "email_change",
+  "email",
+] as const;
+
+export const emailOtpTypeSchema = z.enum(EMAIL_OTP_TYPES);

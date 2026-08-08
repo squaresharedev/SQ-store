@@ -1,4 +1,14 @@
 -- =============================================================================
+-- STATUS: NOT APPLIED TO PRODUCTION as of 2026-08-07.
+--
+-- This file is in the repo but absent from supabase_migrations.schema_migrations,
+-- so `public.interaction_events` does not exist in the live database. Nothing in
+-- this repo writes to it (the ingestion route belongs to SQ-app), so nothing is
+-- broken by that — but do not read the file's presence as proof the table is
+-- there. Verify before building against it, and if SQ-app ships /api/events,
+-- apply this and add it to tests/db/prod-migrations.sql (see `pnpm
+-- check:migrations`, which will report it as untriaged once applied).
+--
 -- INTERACTION EVENTS (SQ-app): behavioral capture for the future feed
 -- algorithm, per SQ-app algorithm.md §6 (canonical spec — column-for-column).
 -- Append-only system of record for the recommender. CAPTURE ONLY: nothing

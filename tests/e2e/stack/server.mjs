@@ -380,6 +380,12 @@ const next = spawn(
     env: {
       ...process.env,
       NODE_ENV: "development",
+      // Its OWN build dir (see distDir in next.config.ts). The NEXT_PUBLIC_*
+      // values below are inlined into the compiled chunks, so sharing `.next`
+      // with the developer's own `next dev` leaves the gateway URL baked into
+      // whatever this run compiled — and the next ordinary dev session serves
+      // it, talking to a mock stack that is no longer running.
+      NEXT_DIST_DIR: ".next-e2e",
       NEXT_PUBLIC_SUPABASE_URL: `http://127.0.0.1:${GATEWAY_PORT}`,
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ANON_KEY,
       SUPABASE_SERVICE_ROLE_KEY: SERVICE_KEY,

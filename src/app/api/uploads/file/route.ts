@@ -6,7 +6,12 @@ import {
   DIGITAL_FILE_MAX_BYTES,
 } from "@/lib/validation/product";
 import { singleLineText } from "@/lib/validation/inputs";
+import { fileBytesContradictType } from "@/lib/uploads/sniff";
+import { peekStream } from "@/lib/uploads/peek";
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
+
+/** Enough for every container signature the sniffer checks (longest reaches byte 11). */
+const SNIFF_BYTES = 12;
 
 /**
  * POST /api/uploads/file — upload a product's digital file THROUGH the server.
@@ -24,12 +29,17 @@ import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
  *   - Content-Length is forwarded explicitly. R2 rejects a chunked PUT with
  *     411 Length Required.
  *
- * The file's real bytes are therefore never inspected here, unlike an image
- * (see /api/uploads/image, which sniffs and moderates). That is deliberate:
- * digital files are never displayed publicly and are only released to a buyer
- * after purchase. The size and stored type are still re-checked server-side
- * before the key is attached to a product (verifyUploadedObject in
- * lib/products/actions.ts), which is the boundary that actually matters.
+ * The file's bytes are inspected only at the HEAD, unlike an image (see
+ * /api/uploads/image, which holds the whole file, sniffs it and moderates it).
+ * A 200 MB body cannot be buffered in a Worker, so this peeks at the first few
+ * bytes, refuses a declared type the container signature contradicts, and
+ * forwards the stream untouched. That catches the case that matters — binary
+ * content stored under a type nothing will scrutinise — without pretending to
+ * be full content inspection.
+ *
+ * The size and stored type are re-checked server-side again before the key is
+ * attached to a product (verifyUploadedObject in lib/products/actions.ts),
+ * which remains the boundary that actually decides what reaches a buyer.
  */
 
 const filenameSchema = singleLineText({ label: "A filename", max: 200 });
@@ -44,8 +54,10 @@ export async function POST(request: Request) {
   if (!can(account.role, "products.write")) {
     return bad(403, "You don't have permission to upload here.");
   }
-  if (!(await rateLimit("upload_presign", RATE_LIMITS.uploadPresign))) {
-    return bad(429, "Too many uploads right now. Try again shortly.");
+  // Its own budget, not the shared upload one: each call here authorises up to
+  // 200 MB into R2, so it is priced far more tightly than an image upload.
+  if (!(await rateLimit("file_upload", RATE_LIMITS.fileUpload))) {
+    return bad(429, "Too many file uploads right now. Try again shortly.");
   }
   if (!hasR2Credentials()) {
     console.error(
@@ -88,6 +100,21 @@ export async function POST(request: Request) {
   }
   if (!request.body) return bad(400, "No file was uploaded.");
 
+  // Look at the leading bytes before storing anything. This route cannot sniff
+  // the way the image route does — it never holds the file — so it peeks at the
+  // head and forwards a stream that replays it, leaving the body byte-identical
+  // for the Content-Length below. The question answered here is narrow: is the
+  // declared type a PROVABLE lie? A zip announcing itself as text/plain is how
+  // a binary payload gets stored under a type nothing will scrutinise.
+  const { head, body } = await peekStream(request.body, SNIFF_BYTES);
+  if (head.byteLength >= SNIFF_BYTES && fileBytesContradictType(head, contentType)) {
+    return bad(
+      415,
+      "That file's contents don't match its type.",
+      "Re-export the file, or pick the format that matches what you're uploading.",
+    );
+  }
+
   const key = buildObjectKey("file", account.userId, filename.data);
 
   try {
@@ -98,7 +125,7 @@ export async function POST(request: Request) {
         "Content-Type": contentType,
         "Content-Length": String(declared),
       },
-      body: request.body,
+      body,
       // Required to send a stream as a request body.
       duplex: "half",
     } as RequestInit & { duplex: "half" });

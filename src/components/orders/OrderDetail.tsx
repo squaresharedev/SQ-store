@@ -36,8 +36,13 @@ export function OrderDetail({
 
   return (
     <div className="flex flex-col bg-card border border-border h-full">
-      {/* Header */}
-      <div className="flex items-start gap-3 border-b border-border px-4 py-3">
+      {/* Header. h-14 is the app's bar height (TopBar, the mobile header, the
+          sidebar brand row all use it), so the panel's top edge lines up with
+          the page's own bar instead of sitting a few pixels off it. */}
+      <div
+        data-testid="order-detail-header"
+        className="flex h-14 shrink-0 items-center gap-3 border-b border-border px-4"
+      >
         <div className="min-w-0 flex-1">
           <p className="truncate text-lg font-semibold text-foreground">
             {order.productTitle}

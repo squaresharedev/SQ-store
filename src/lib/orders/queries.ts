@@ -62,6 +62,38 @@ function toOrderView(row: Record<string, unknown>): OrderView {
   };
 }
 
+/** The column list every order read selects — one contract, one place. */
+const ORDER_COLUMNS =
+  "id, product_title, amount_cents, platform_fee_cents, currency, channel, status, buyer_email, created_at";
+
+/** Postgres would error on a malformed uuid, so a bad id is filtered out here
+ *  rather than surfaced as "orders are unavailable". */
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * One order by id, scoped to the active account (RLS enforces the same at the
+ * DB). Returns null when the id is malformed, the order does not exist, or it
+ * belongs to someone else — all three are "nothing to show", never an error:
+ * this backs a deep link (/orders?order=<id>) whose id can be stale.
+ */
+export async function getOrderById(id: string): Promise<OrderView | null> {
+  if (!UUID.test(id)) return null;
+
+  const account = await getActiveAccount();
+  if (!account) return null;
+
+  const supabase = await createClient();
+  const { data, error } = await (supabase as SupabaseClient)
+    .from("orders")
+    .select(ORDER_COLUMNS)
+    .eq("seller_id", account.accountId)
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error || !data) return null;
+  return toOrderView(data as Record<string, unknown>);
+}
+
 /**
  * Owner-scoped, paginated order list. The seller id comes from the session
  * (never from the caller); RLS enforces the same boundary at the DB.
@@ -95,10 +127,7 @@ export async function listOrders(options?: {
   // Scoped to the ACTIVE account's store (own, or one you're a member of).
   let query = (supabase as SupabaseClient)
     .from("orders")
-    .select(
-      "id, product_title, amount_cents, platform_fee_cents, currency, channel, status, buyer_email, created_at",
-      { count: "exact" },
-    )
+    .select(ORDER_COLUMNS, { count: "exact" })
     .eq("seller_id", account.accountId);
 
   // --- Filters ---

@@ -24,17 +24,25 @@ describe("embedded supabase replica", () => {
       ),
     );
     const names = rows.map((r) => r.table_name);
+    // Exhaustive on purpose: a table appearing here that nobody expected is
+    // the signal. artifact_likes, follows and reports arrived exactly that
+    // way — SQ-app shares this database and added them to production, and the
+    // replica did not carry them until 2026-08-07, so no test could see them.
+    // If this list needs changing, check `pnpm check:migrations` first.
     expect(names).toEqual([
       "admin_audit_log",
       "admin_users",
+      "artifact_likes",
       "artifacts",
       "collections",
+      "follows",
       "notifications",
       "orders",
       "products",
       "profiles",
       "rate_limit_keys",
       "rate_limits",
+      "reports",
       "security_events",
       "storefronts",
       "team_members",

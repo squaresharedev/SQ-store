@@ -64,6 +64,27 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # Quality gates. Until these landed, a push to main went straight from
+      # install to build to deploy: 566 Vitest tests and a typechecker existed
+      # and none of them could stop a broken deploy.
+      #
+      # Kept as SEPARATE steps rather than one `pnpm test` so a red run names
+      # the layer that failed. The DB suite is last because it is the only one
+      # that boots a real Postgres (embedded-postgres, no Docker), so it is the
+      # slowest and the likeliest to fail for environmental reasons rather than
+      # because the code is wrong.
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Unit and component tests
+        run: pnpm test:unit
+
+      - name: Database integration tests
+        run: pnpm test:db
+
       - name: Build
         run: npx opennextjs-cloudflare build
         env:

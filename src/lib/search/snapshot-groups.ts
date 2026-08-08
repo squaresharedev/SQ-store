@@ -1,3 +1,4 @@
+import { orderResultHref } from "@/lib/search/hrefs";
 import { rankEntries } from "@/lib/search/rank";
 import type {
   SearchGroup,
@@ -65,7 +66,7 @@ function toResults(snapshot: SearchSnapshot): SearchResult[] {
         type: "order",
         title: row.product_title || "Order",
         subtitle: row.buyer_email ?? undefined,
-        href: "/orders",
+        href: orderResultHref(row.id, row.buyer_email),
         badge: row.status || undefined,
       }),
     ),
@@ -130,10 +131,12 @@ export function buildRecentGroup(
 ): SearchGroup | null {
   if (!snapshot) return null;
   // Snapshot arrays are newest-first by contract (see the route handler).
+  // Three rows total: the resting card shows Recent + Actions + Settings and
+  // must fit its cap without scrolling.
   const results: SearchResult[] = toResults({
     ...snapshot,
-    products: snapshot.products.slice(0, 3),
-    storefronts: snapshot.storefronts.slice(0, 2),
+    products: snapshot.products.slice(0, 2),
+    storefronts: snapshot.storefronts.slice(0, 1),
     team: [],
     orders: [],
     notifications: [],

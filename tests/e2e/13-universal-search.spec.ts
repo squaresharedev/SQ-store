@@ -3,6 +3,7 @@ import {
   createProductViaUI,
   freshUser,
   gotoApp,
+  seedOrders,
   seedStorefronts,
   signUp,
   userIdByEmail,
@@ -254,6 +255,61 @@ test.describe("universal search — desktop", () => {
     expect(liveCalls).toBe(0);
   });
 
+  test("an order result highlights its row and opens nothing", async ({
+    page,
+  }) => {
+    // Landing straight in the detail panel puts the user in a modal over a
+    // list they never saw. The row is marked instead, and opening it stays
+    // their move — this is the guard for that whole contract.
+    const sellerId = await userIdByEmail(user.email);
+    const buyer = `beacon-${Date.now()}@ex.com`;
+    // The wanted order is the OLDEST, so an unfiltered list (newest first,
+    // 20 to a page) buries it past page 1: this only passes because the
+    // result narrows the list to the buyer. Every row carries created_at —
+    // PostgREST rejects a bulk insert whose objects differ in their keys.
+    await seedOrders(sellerId, [
+      {
+        amount_cents: 4200,
+        buyer_email: buyer,
+        product_title: "Wanted order",
+        created_at: "2026-01-02T10:00:00.000Z",
+      },
+      ...Array.from({ length: 22 }, (_, i) => ({
+        amount_cents: 100 + i,
+        buyer_email: `noise-${i}@ex.com`,
+        product_title: `Noise ${i}`,
+        created_at: `2026-06-${String((i % 28) + 1).padStart(2, "0")}T10:00:00.000Z`,
+      })),
+    ]);
+
+    await gotoApp(page, "/dashboard");
+    await openWithShortcut(page);
+    await combobox(page).fill(buyer);
+    await page
+      .getByRole("option")
+      .filter({ hasText: "Wanted order" })
+      .first()
+      .click();
+
+    await expect(page).toHaveURL(/\/orders\?.*highlight=/);
+    // The panel is NOT open.
+    await expect(
+      page.getByRole("dialog", { name: /order details/i }),
+    ).toBeHidden();
+
+    // Exactly one row is marked, it is the right one, and it is focused — so
+    // the next Enter is what opens the panel.
+    const marked = page.locator("tr[aria-current]");
+    await expect(marked).toHaveCount(1);
+    await expect(marked).toContainText("Wanted order");
+    await expect(marked).toBeFocused();
+
+    await page.keyboard.press("Enter");
+    const detail = page.getByRole("dialog", { name: /order details/i });
+    await expect(detail).toBeVisible();
+    await expect(detail).toContainText("Wanted order");
+  });
+
   test("it works inside the full-screen storefront designer", async ({ page }) => {
     // The designer renders outside the dashboard shell, so it mounts its own
     // provider — this is the regression guard for that.
@@ -271,6 +327,26 @@ test.describe("universal search — desktop", () => {
     await trigger.click();
     await combobox(page).fill("orders");
     await expect(page.getByRole("option").first()).toBeVisible();
+
+    // THE PANEL MUST NOT COVER SAVE. This trigger is an icon button with the
+    // save state and the Save button right beside it, so the palette expands
+    // leftward here; growing rightward (the dashboard's direction) laid it
+    // straight over Save, and the panel is z-[60], so Save became unclickable.
+    const panel = page.getByRole("dialog", { name: "Search" });
+    const save = page.getByRole("button", { name: /^save$/i });
+    const [panelBox, saveBox] = [
+      await panel.boundingBox(),
+      await save.boundingBox(),
+    ];
+    expect(panelBox!.x + panelBox!.width).toBeLessThanOrEqual(saveBox!.x);
+    // Not merely uncovered: still the thing a click at its centre lands on.
+    await expect(save).toBeVisible();
+    expect(
+      await page.evaluate(([x, y]) => {
+        const el = document.elementFromPoint(x, y);
+        return el?.closest("button")?.textContent?.trim() ?? null;
+      }, [saveBox!.x + saveBox!.width / 2, saveBox!.y + saveBox!.height / 2]),
+    ).toMatch(/^save$/i);
 
     // ...and the shortcut reaches it here too, which is the part that would
     // silently break if the provider stopped being mounted on this route.

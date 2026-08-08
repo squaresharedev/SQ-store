@@ -17,6 +17,7 @@
     "seed": "node --env-file-if-exists=.env.local scripts/seed.ts",
     "reset-seed": "node --env-file-if-exists=.env.local scripts/reset-seed.ts",
     "stock-smoke": "node --env-file-if-exists=.env.local scripts/stock-smoke.ts",
+    "check:migrations": "node --env-file-if-exists=.env.local scripts/check-prod-migrations.ts",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "build:cf": "opennextjs-cloudflare build",
     "deploy": "wrangler deploy",

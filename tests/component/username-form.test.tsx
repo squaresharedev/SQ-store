@@ -51,9 +51,14 @@ describe("UsernameForm", () => {
     );
   });
 
-  it("reads your own handle back as yours without asking the server", async () => {
+  it("recognises your own handle without asking the server", async () => {
     render(<UsernameForm username="builderboy" />);
-    expect(await screen.findByText("That's your username.")).toBeInTheDocument();
+    // The tick appears; nothing is said. Announcing that your own username is
+    // yours is noise, so the "mine" state is deliberately silent.
+    await waitFor(() =>
+      expect(document.querySelector("svg.text-success")).not.toBeNull(),
+    );
+    expect(screen.queryByText(/your username/i)).toBeNull();
     expect(fetchMock).not.toHaveBeenCalled();
   });
 

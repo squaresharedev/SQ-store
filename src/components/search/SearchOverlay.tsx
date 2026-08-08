@@ -3,7 +3,6 @@
 import * as React from "react";
 import {
   Bell,
-  CornerDownLeft,
   FileText,
   LayoutGrid,
   Plus,
@@ -16,6 +15,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { focusRingClass, transitionClass } from "@/components/ui/control-styles";
+import { useIsMacPlatform } from "@/lib/hooks/useIsMacPlatform";
 import { searchLocalRegistry } from "@/lib/search/registry";
 import {
   buildRecentGroup,
@@ -53,6 +53,57 @@ import type { TeamRole } from "@/lib/team/permissions";
 const SEARCH_DEBOUNCE_MS = 300; // Same feel as the products/orders toolbars.
 const REQUEST_TIMEOUT_MS = 5_000;
 const RETRY_DELAY_MS = 1_000;
+
+/** Breathing room kept between the panel and the viewport edges. */
+const EDGE_GUTTER = 16;
+/** 30rem: noticeably wider than the resting bar, without the near-half-screen
+ *  spread the first cut had. */
+const PANEL_WIDTH = 480;
+
+/**
+ * Where the anchored panel sits, and WHICH WAY IT GROWS.
+ *
+ * Rightward is the default and fits the dashboard, whose trigger sits at the
+ * bar's left with nothing beside it. The storefront designer is the opposite
+ * case: its trigger is a 36px icon button with the save state and the Save
+ * button immediately to its right, and a panel growing rightward from there
+ * expanded straight over Save (the panel is z-[60], so it wins).
+ *
+ * So when the full width does not fit to the right, the panel pins its RIGHT
+ * edge to the trigger's and grows leftward instead, over the empty stretch of
+ * bar rather than the controls. Collapsed it is the trigger's own width either
+ * way, so the opening morph still starts pixel-matched on top of it.
+ *
+ * The leftward case sets `right` rather than a computed `left`: the pinned edge
+ * then needs no arithmetic, and `width` stays the only animated property in
+ * both directions.
+ *
+ * Exported for tests — the geometry is the whole behaviour here, and it is far
+ * cheaper to assert on than to drive through a layout.
+ */
+export function anchoredPanelStyle(
+  rect: DOMRect,
+  expanded: boolean,
+  viewportWidth: number,
+): React.CSSProperties {
+  const left = Math.max(rect.left, EDGE_GUTTER);
+  const roomRight = viewportWidth - EDGE_GUTTER - left;
+  const roomLeft = rect.right - EDGE_GUTTER;
+  const growLeft = roomRight < PANEL_WIDTH && roomLeft > roomRight;
+  // max(rect.width, …) so a cramped trigger never expands NARROWER than the
+  // bar it is covering, which would read as the control shrinking.
+  const width = Math.min(
+    PANEL_WIDTH,
+    Math.max(rect.width, growLeft ? roomLeft : roomRight),
+  );
+  return {
+    top: rect.top,
+    width: expanded ? width : rect.width,
+    ...(growLeft
+      ? { right: Math.max(EDGE_GUTTER, viewportWidth - rect.right) }
+      : { left: Math.min(left, viewportWidth - width - EDGE_GUTTER) }),
+  };
+}
 
 /** What the remote half is currently doing. Local results ignore all of it. */
 type RemoteStatus = "idle" | "loading" | "ok" | "error" | "auth" | "throttled";
@@ -108,6 +159,9 @@ export function SearchOverlay({
   const [remoteStatus, setRemoteStatus] = React.useState<RemoteStatus>("idle");
   /** The row the user arrowed or hovered onto. See `activeId` below. */
   const [chosenId, setChosenId] = React.useState<string | null>(null);
+  // Same hook the trigger uses, so its ⌘K/Ctrl K chip and this one never
+  // disagree about which platform they're on.
+  const isMac = useIsMacPlatform();
 
   const inputRef = React.useRef<HTMLInputElement>(null);
   const listboxId = React.useId();
@@ -468,6 +522,11 @@ export function SearchOverlay({
         ? `No results for ${trimmed}`
         : `${count} result${count === 1 ? "" : "s"} for ${trimmed}`;
 
+  // Anchored is desktop-only by construction (the provider never captures a
+  // rect under the sm breakpoint), so the anchored branches below can use
+  // plain, unprefixed classes.
+  const anchored = effectiveAnchorRect !== null;
+
   return (
     // z-[60]: above the mobile drawer (z-50), which can be open behind this.
     // pointer-events-none: NO scrim and NO blocking — the page behind stays
@@ -480,57 +539,48 @@ export function SearchOverlay({
         // Modal only as the mobile sheet, which really does cover everything.
         // The anchored expansion leaves the page live, and claiming otherwise
         // would have a screen reader treat the whole app as inert.
-        aria-modal={effectiveAnchorRect ? undefined : "true"}
+        aria-modal={anchored ? undefined : "true"}
         aria-label="Search"
-        // Anchored: the panel's TOP sits at the trigger's top, so the input
-        // row lands exactly over the bar and the whole thing reads as the bar
-        // expanding downward rather than a popup appearing elsewhere. Width
-        // and max-height START at the trigger's own size and transition to the
-        // full panel (the morph); LEFT is clamped so a right-edge trigger (the
-        // designer toolbar's) slides the panel leftward instead of squeezing
-        // it into the strip beside the viewport edge. The inline values beat
-        // the class inset on desktop; on mobile the provider never captures a
-        // rect, so the sheet classes run the show.
+        // Anchored: a TRANSPARENT column sitting exactly on the trigger. Its
+        // first child is a bar that pixel-matches the trigger it covers, so
+        // what the user sees is THE SAME BAR — which then widens (the width
+        // transition here) while the results drop in as their own card below.
+        // It grows away from whatever is beside the trigger; see
+        // anchoredPanelStyle.
         style={
           effectiveAnchorRect
-            ? (() => {
-                const width = Math.min(640, window.innerWidth - 32);
-                return {
-                  top: effectiveAnchorRect.top,
-                  left: Math.max(
-                    16,
-                    Math.min(
-                      effectiveAnchorRect.left,
-                      window.innerWidth - width - 16,
-                    ),
-                  ),
-                  width: expanded ? width : effectiveAnchorRect.width,
-                  maxHeight: expanded ? "70vh" : effectiveAnchorRect.height,
-                };
-              })()
+            ? anchoredPanelStyle(effectiveAnchorRect, expanded, window.innerWidth)
             : undefined
         }
         className={cn(
-          // Mobile: a full-screen sheet. `inset-0` follows the VISUAL viewport,
-          // so when the on-screen keyboard opens the sheet shrinks with it and
-          // the input stays above the keys instead of behind them.
-          // pointer-events-auto: the panel re-enables what its wrapper
-          // disables, so IT is interactive while everything around it passes
-          // clicks through to the page.
-          "pointer-events-auto absolute inset-0 flex flex-col overflow-hidden bg-background",
-          effectiveAnchorRect
-            ? // Desktop, anchored under the trigger (the normal case). The
-              // max-height rides in the inline style so the morph can animate
-              // it; entrance curve + slow token per the motion scale.
-              "sm:inset-auto sm:h-auto sm:transition-[width,max-height] sm:duration-slow sm:ease-entrance motion-reduce:transition-none"
-            : // Desktop with no registered trigger (tests, future surfaces):
-              // the centred palette in the upper third, no morph.
-              "sm:inset-x-0 sm:bottom-auto sm:top-[10vh] sm:mx-auto sm:h-auto sm:max-h-[70vh] sm:w-[calc(100%-2rem)] sm:max-w-xl",
-          "sm:rounded-none sm:border sm:border-border sm:bg-popover sm:shadow-lg",
+          "pointer-events-auto absolute flex flex-col",
+          anchored
+            ? // Desktop, anchored (the normal case): no chrome of its own —
+              // the bar and the card each carry theirs. Only width animates.
+              "transition-[width] duration-slow ease-entrance motion-reduce:transition-none"
+            : cn(
+                // Mobile: a full-screen sheet. `inset-0` follows the VISUAL
+                // viewport, so when the on-screen keyboard opens the sheet
+                // shrinks with it and the input stays above the keys.
+                "inset-0 overflow-hidden bg-background",
+                // Desktop with no registered trigger (tests, future
+                // surfaces): the centred palette in the upper third.
+                "sm:inset-x-0 sm:bottom-auto sm:top-[10vh] sm:mx-auto sm:h-auto sm:max-h-[70vh] sm:w-[calc(100%-2rem)] sm:max-w-xl",
+                "sm:rounded-none sm:border sm:border-border sm:bg-popover sm:shadow-lg",
+              ),
         )}
       >
-        {/* Input row. Sticky on mobile so it survives the results scrolling. */}
-        <div className="flex shrink-0 items-center gap-2 border-b border-border px-4 py-3">
+        {/* THE BAR. Anchored: identical to the trigger underneath — same
+            h-9, same border, same padding, same text size — so covering it is
+            invisible and the expansion reads as that bar getting wider, never
+            as a new control appearing. Sheet/fallback: the roomier row. */}
+        <div
+          className={
+            anchored
+              ? "flex h-9 shrink-0 items-center gap-2 rounded-none border border-input bg-background px-3"
+              : "flex shrink-0 items-center gap-2 border-b border-border px-4 py-3"
+          }
+        >
           <SearchIcon
             className="size-4 shrink-0 text-muted-foreground"
             aria-hidden
@@ -553,52 +603,69 @@ export function SearchOverlay({
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             onKeyDown={onKeyDown}
-            // text-base, NOT text-sm: anything under 16px makes iOS Safari zoom
-            // the whole page the moment this is focused.
-            className="min-w-0 flex-1 bg-transparent text-base text-foreground outline-none placeholder:text-muted-foreground"
+            // Sheet: text-base, NOT text-sm — anything under 16px makes iOS
+            // Safari zoom the page on focus. Anchored (desktop-only): text-sm,
+            // matching the trigger this bar impersonates.
+            className={cn(
+              "min-w-0 flex-1 bg-transparent text-foreground outline-none placeholder:text-muted-foreground",
+              anchored ? "text-sm" : "text-base",
+            )}
           />
-          {query && (
-            <button
-              type="button"
-              aria-label="Clear search"
-              // Keep focus in the input: a blur here would collapse the combobox.
-              onMouseDown={(event) => event.preventDefault()}
-              onClick={() => {
-                setQuery("");
-                inputRef.current?.focus();
-              }}
-              className={cn(
-                "flex size-8 shrink-0 items-center justify-center rounded-none text-muted-foreground",
-                "hover:bg-accent hover:text-foreground",
-                transitionClass,
-                focusRingClass,
-              )}
-            >
-              <X className="size-4" aria-hidden />
-            </button>
-          )}
-          {/* Mobile close: the same size-9 X every modal wears (modal.tsx),
-              not a text button — one dismiss affordance across the app. The
-              size-8 X beside it clears the FIELD; this one closes the sheet,
-              and the size step plus position (far right, always present)
-              keeps the two apart. Desktop closes via Esc / outside click. */}
+          {/* ONE X, with Escape's exact semantics: clears while there is
+              text, closes once there isn't. Two side-by-side X buttons (a
+              field-clear and a sheet-close) read as a coin toss on mobile —
+              this way every press of the only X does the obvious next step,
+              and keyboard (Esc) and touch behave identically. On desktop it
+              exists only while there is text, purely as the field-clear
+              (closing is Esc / a click outside). */}
           <button
             type="button"
-            onClick={onClose}
-            aria-label="Close search"
+            aria-label={query ? "Clear search" : "Close search"}
+            // Keep focus in the input: a blur here would collapse the combobox.
+            onMouseDown={(event) => event.preventDefault()}
+            onClick={() => {
+              if (query) {
+                setQuery("");
+                inputRef.current?.focus();
+              } else {
+                onClose();
+              }
+            }}
             className={cn(
-              "flex size-9 shrink-0 items-center justify-center rounded-none text-muted-foreground",
-              "hover:bg-accent hover:text-foreground sm:hidden",
+              "shrink-0 items-center justify-center rounded-none text-muted-foreground",
+              "hover:bg-accent hover:text-foreground",
+              // The modal-standard size-9 X (modal.tsx) in the roomy sheet
+              // row; a size-8 inside the anchored h-9 bar so it sits inset
+              // like a field affordance rather than flush to the borders.
+              anchored ? "size-8" : "size-9",
+              // Empty + desktop = nothing to clear and Esc closes: hidden.
+              query ? "flex" : "flex sm:hidden",
               transitionClass,
               focusRingClass,
             )}
           >
-            <X className="size-5" aria-hidden />
+            <X className={anchored ? "size-4" : "size-5"} aria-hidden />
           </button>
+          {/* The trigger's own ⌘K/Ctrl K chip, carried into the bar it became
+              — Ctrl+K still closes from here (the provider's listener is on
+              `document`, capture phase, so it fires whether or not this input
+              has focus), and the chip is the reminder of that. It disappears
+              the moment there is something to type instead of a shortcut to
+              reach for, and never existed for touch (no keyboard, no reason
+              for the hint). `hidden sm:flex`, like the input's own text-sm
+              step, applies whether the panel actually anchored or fell back
+              to the centred desktop layout. */}
+          {!query && isMac !== null && (
+            <kbd
+              aria-hidden
+              className="hidden shrink-0 rounded-none border border-border bg-muted px-1.5 py-0.5 font-inter text-[0.6875rem] leading-none text-muted-foreground sm:flex"
+            >
+              {isMac ? "⌘K" : "Ctrl K"}
+            </kbd>
+          )}
         </div>
 
-        {/* Results. `overflow-y-auto` + `flex-1` gives the mobile sheet a
-            scrolling body between a fixed input and the safe area.
+        {/* Results. `overflow-y-auto` + `flex-1` gives the scrolling body.
 
             The SCROLLING ELEMENT IS THE LISTBOX ITSELF, not a wrapper. A plain
             scrollable div with no focusable content inside it cannot be
@@ -611,60 +678,92 @@ export function SearchOverlay({
             It is also rendered ONLY when it has options: an empty
             role="listbox" is a critical ARIA violation (the role requires
             option children), and the input's aria-controls is dropped to match
-            rather than left naming an element that isn't there. */}
-        {count > 0 ? (
-          <div
-            id={listboxId}
-            role="listbox"
-            aria-label="Search results"
-            tabIndex={-1}
-            className="flex-1 overflow-y-auto overscroll-contain pb-safe focus:outline-none"
-          >
-            {groups.map((group) => (
-              <SearchResultGroup
-                key={`${group.type}:${group.label}`}
-                group={group}
-                activeId={activeId}
-                optionId={optionId}
-                onActivate={activate}
-                onHover={setChosenId}
-              />
-            ))}
-          </div>
-        ) : (
-          <p className="flex-1 px-4 py-8 text-center font-inter text-sm text-muted-foreground">
-            {trimmed
-              ? `Nothing matches “${trimmed}”.`
-              : "Start typing to search."}
-          </p>
-        )}
+            rather than left naming an element that isn't there.
 
-        {/* Footer: the remote-half notice when there is one, otherwise the key
-            hints. Never both, and never a notice that hides the fact results
-            are on screen. */}
-        <div className="shrink-0 border-t border-border px-4 py-2">
-          {notice ? (
-            <p role="status" className="font-inter text-xs text-muted-foreground">
-              {notice}
-            </p>
-          ) : (
-            <p className="hidden items-center gap-3 font-inter text-xs text-muted-foreground sm:flex">
-              <span className="inline-flex items-center gap-1">
-                <Kbd>↑</Kbd>
-                <Kbd>↓</Kbd> to navigate
-              </span>
-              <span className="inline-flex items-center gap-1">
-                <Kbd>
-                  <CornerDownLeft className="size-3" aria-hidden />
-                </Kbd>{" "}
-                to open
-              </span>
-              <span className="inline-flex items-center gap-1">
-                <Kbd>esc</Kbd> to close
-              </span>
-            </p>
-          )}
-        </div>
+            ANCHORED, the results live in their OWN card, dropped under the bar
+            with a visible gap: the bar is the bar, and this is the modal that
+            opens beneath it. It unfolds (max-height + opacity) on the same
+            tokens the bar widens with. Sheet/fallback render the same body
+            directly inside the panel. */}
+        {(() => {
+          const body = (
+            <>
+              {count > 0 ? (
+                <div
+                  id={listboxId}
+                  role="listbox"
+                  aria-label="Search results"
+                  tabIndex={-1}
+                  className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-safe focus:outline-none"
+                >
+                  {groups.map((group) => (
+                    <SearchResultGroup
+                      key={`${group.type}:${group.label}`}
+                      group={group}
+                      activeId={activeId}
+                      optionId={optionId}
+                      onActivate={activate}
+                      onHover={setChosenId}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <p className="flex-1 px-4 py-8 text-center font-inter text-sm text-muted-foreground">
+                  {trimmed
+                    ? `Nothing matches “${trimmed}”.`
+                    : "Start typing to search."}
+                </p>
+              )}
+
+              {/* Footer only when something needs SAYING (a degraded remote
+                  half). The keyboard-hints bar it used to carry is gone: the
+                  arrows and Esc work whether or not a legend says so, and the
+                  legend cost a permanent row of chrome. */}
+              {notice && (
+                <div className="shrink-0 border-t border-border px-4 py-2">
+                  <p
+                    role="status"
+                    className="font-inter text-xs text-muted-foreground"
+                  >
+                    {notice}
+                  </p>
+                </div>
+              )}
+            </>
+          );
+
+          if (!effectiveAnchorRect) return body;
+
+          const below =
+            effectiveAnchorRect.top + effectiveAnchorRect.height + 8;
+          return (
+            <div
+              style={{
+                // Hugs its content (the card is only as tall as its rows) up
+                // to a cap: 540px keeps a typed search from running to the
+                // floor, and the viewport bound covers genuinely short
+                // screens. The cap is sized ABOVE the resting suggestions'
+                // worst case (~524px: 3 Recent + 3 Actions + 3 Settings), so
+                // the default state never scrolls; a long result list does.
+                // Trimming suggestions and this number are one budget — grow
+                // one, grow the other.
+                maxHeight: expanded
+                  ? Math.max(
+                      160,
+                      Math.min(window.innerHeight - below - 16, 540),
+                    )
+                  : 0,
+                opacity: expanded ? 1 : 0,
+              }}
+              className={cn(
+                "mt-2 flex min-h-0 flex-col overflow-hidden rounded-none border border-border bg-popover shadow-lg",
+                "transition-[max-height,opacity] duration-slow ease-entrance motion-reduce:transition-none",
+              )}
+            >
+              {body}
+            </div>
+          );
+        })()}
 
         {/* Result counts, announced politely. Permanently mounted so the first
             update after opening is not swallowed by the region appearing. */}
@@ -754,10 +853,3 @@ function SearchResultGroup({
   );
 }
 
-function Kbd({ children }: { children: React.ReactNode }) {
-  return (
-    <kbd className="inline-flex min-w-5 items-center justify-center rounded-none border border-border bg-muted px-1 py-0.5 font-inter text-[0.6875rem] leading-none text-muted-foreground">
-      {children}
-    </kbd>
-  );
-}

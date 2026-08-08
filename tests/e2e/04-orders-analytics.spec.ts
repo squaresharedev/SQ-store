@@ -47,9 +47,64 @@ test.describe("orders + analytics (seeded)", () => {
     await expect(detail).toContainText("€42.00");
     await expect(detail).toContainText("buyer@detail.com");
 
+    // The panel's top bar is the same height as the page's own top bar (the
+    // one carrying search), so the two read as one line across the screen.
+    const height = (locator: ReturnType<typeof page.getByTestId>) =>
+      locator.evaluate((el) => el.getBoundingClientRect().height);
+    const pageBar = await height(page.getByTestId("top-bar"));
+    expect(pageBar).toBeGreaterThan(0);
+    expect(await height(page.getByTestId("order-detail-header"))).toBe(pageBar);
+
     // Esc closes the panel.
     await page.keyboard.press("Escape");
     await expect(detail).not.toBeVisible();
+  });
+
+  test("overview's Recent orders rows open that order's detail", async ({ page }) => {
+    const user = freshUser("recentorders");
+    await signUp(page, user);
+    const sellerId = await userIdByEmail(user.email);
+    await seedOrders(sellerId, [
+      { amount_cents: 1100, product_title: "Recent one", buyer_email: "one@ex.com" },
+      { amount_cents: 2200, product_title: "Recent two", buyer_email: "two@ex.com" },
+    ]);
+
+    await page.goto("/dashboard");
+    const card = page.locator("#recent-orders");
+    await expect(card.getByRole("link", { name: /Recent two/ })).toBeVisible();
+
+    // Every row is a link, and each one carries its own order id.
+    const hrefs = await card.getByRole("link").evaluateAll((nodes) =>
+      nodes.map((n) => n.getAttribute("href") ?? ""),
+    );
+    expect(hrefs.length).toBe(2);
+    for (const href of hrefs) {
+      expect(href).toMatch(/^\/orders\?order=[0-9a-f-]{36}$/);
+    }
+    expect(new Set(hrefs).size).toBe(2);
+
+    // Follow the row's OWN href: it must land on that order's detail panel.
+    // Navigated rather than clicked because <Link> clicks do not commit in
+    // this dev stack at all — the sidebar's own links behave identically, so
+    // clicking would test the dev server, not the card. The href is the part
+    // this feature owns.
+    const two = await card
+      .getByRole("link", { name: /Recent two/ })
+      .getAttribute("href");
+    await page.goto(two!);
+
+    const detail = page.getByRole("dialog", { name: /order details/i });
+    await expect(detail).toBeVisible();
+    await expect(detail).toContainText("Recent two");
+    await expect(detail).toContainText("€22.00");
+    await expect(detail).toContainText("two@ex.com");
+
+    // Closing drops the param, so a reload does not reopen the panel.
+    await expect(async () => {
+      await page.keyboard.press("Escape");
+      await expect(detail).not.toBeVisible({ timeout: 3_000 });
+    }).toPass({ timeout: 20_000 });
+    await expect(page).not.toHaveURL(/order=/);
   });
 
   test("analytics shows seeded revenue and channel split", async ({ page }) => {

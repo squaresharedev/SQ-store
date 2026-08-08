@@ -1,7 +1,26 @@
 -- =============================================================================
 -- PROD MIGRATION REPLAY — SQ-store (vnyfndqpdllwhvhinjoi)
--- Extracted verbatim from supabase_migrations.schema_migrations on 2026-07-10.
--- 25 migrations, applied in version order. Do not edit; regenerate from prod.
+--
+-- Extracted from supabase_migrations.schema_migrations. Last reconciled
+-- 2026-08-07 against 45 applied migrations.
+--
+-- HOW TO REFRESH: `pnpm check:migrations` reports which applied
+-- migrations are missing here. It is a CHECK, not a generator — this
+-- file is hand-curated (see the exclusion below), so a blind dump would undo
+-- that. Add what it reports, in dependency order, and update the date above.
+--
+-- WHY THIS MATTERS: the DB integration and E2E suites build their whole
+-- database from this file. Anything in prod but not here is a table the RLS
+-- tests cannot see. That is not hypothetical — artifact_likes, follows and
+-- reports (SQ-app, migration 20260711195645) were missing until 2026-08-07,
+-- so nothing tested them despite their being reachable with this app's
+-- publishable anon key.
+--
+-- DELIBERATE EXCLUSION: 20260801140113 demo_sales_sim / 20260801140742
+-- demo_sales_sim_reconcile. They require pg_cron, which the embedded-Postgres
+-- test stack does not ship, so replaying them fails the whole suite at setup.
+-- The demo schema is unreachable over PostgREST and has no bearing on any
+-- security invariant under test. The checker knows to skip them.
 -- =============================================================================
 
 -- ===== 20260706081542 create_profiles_with_rls ===============================
@@ -1397,6 +1416,123 @@ create trigger artifacts_set_updated_at
   before update on public.artifacts
   for each row execute function public.set_updated_at();
 
+-- ===== 20260711171820 sq_app_profiles_private_by_default ====================
+-- SQ-app's privacy copy promises "private by default"; this makes the column
+-- default match.
+--
+-- MISSING from this replica until 2026-08-07, and it mattered: profiles
+-- defaulted to PUBLIC here and PRIVATE in production, so every test reasoning
+-- about who can see a profile, a collection, an artifact or a follow was
+-- running against the opposite privacy posture from the real database.
+alter table public.profiles alter column is_public set default false;
+update public.profiles set is_public = false where username is null;
+
+-- ===== 20260711195645 sq_app_likes_follows_reports ==========================
+-- SQ-app social additions: likes, follows, reports. ADDITIVE ONLY — no changes
+-- to existing tables or policies. These belong to the SIBLING app, which shares
+-- this database; they are replayed here because they are reachable with the
+-- same publishable anon key this dashboard ships, so the RLS tests must see
+-- them. Do not change these policies from the Store repo without coordinating.
+create table public.artifact_likes (
+  id uuid primary key default gen_random_uuid(),
+  artifact_id uuid not null references public.artifacts (id) on delete cascade,
+  user_id uuid not null references auth.users (id) on delete cascade,
+  created_at timestamptz not null default now(),
+  -- one like per user per artifact (API maps 23505 -> idempotent 200)
+  constraint artifact_likes_artifact_user_key unique (artifact_id, user_id)
+);
+
+create index artifact_likes_artifact_id_idx on public.artifact_likes (artifact_id);
+
+alter table public.artifact_likes enable row level security;
+
+-- Counts (and therefore rows) are public BY DESIGN — this is the like graph
+-- for a public social product, not an oversight.
+create policy "artifact_likes_public_read"
+  on public.artifact_likes
+  for select
+  to anon, authenticated
+  using (true);
+
+create policy "artifact_likes_own_insert"
+  on public.artifact_likes
+  for insert
+  to authenticated
+  with check ((select auth.uid()) = user_id);
+
+create policy "artifact_likes_own_delete"
+  on public.artifact_likes
+  for delete
+  to authenticated
+  using ((select auth.uid()) = user_id);
+
+create table public.follows (
+  id uuid primary key default gen_random_uuid(),
+  follower_id uuid not null references auth.users (id) on delete cascade,
+  followee_id uuid not null references auth.users (id) on delete cascade,
+  created_at timestamptz not null default now(),
+  constraint follows_follower_followee_key unique (follower_id, followee_id),
+  constraint follows_no_self_check check (follower_id <> followee_id)
+);
+
+create index follows_follower_id_idx on public.follows (follower_id);
+create index follows_followee_id_idx on public.follows (followee_id);
+
+alter table public.follows enable row level security;
+
+create policy "follows_public_read"
+  on public.follows
+  for select
+  to anon, authenticated
+  using (true);
+
+create policy "follows_own_insert"
+  on public.follows
+  for insert
+  to authenticated
+  with check ((select auth.uid()) = follower_id);
+
+create policy "follows_own_delete"
+  on public.follows
+  for delete
+  to authenticated
+  using ((select auth.uid()) = follower_id);
+
+create table public.reports (
+  -- polymorphic target: no FK on purpose (artifact rows may be deleted after
+  -- reporting; profile targets live in a shared table)
+  id uuid primary key default gen_random_uuid(),
+  target_type text not null
+    check (target_type in ('artifact', 'profile')),
+  target_id uuid not null,
+  reporter_id uuid references auth.users (id) on delete set null,
+  reason text not null
+    check (reason in ('spam', 'abuse', 'nudity', 'copyright', 'other')),
+  details text not null default ''
+    check (char_length(details) <= 1000),
+  status text not null default 'open'
+    check (status in ('open', 'reviewed', 'dismissed')),
+  created_at timestamptz not null default now()
+);
+
+create index reports_target_idx on public.reports (target_type, target_id);
+create index reports_status_idx on public.reports (status);
+
+alter table public.reports enable row level security;
+
+create policy "reports_own_insert"
+  on public.reports
+  for insert
+  to authenticated
+  with check ((select auth.uid()) = reporter_id);
+
+-- Staff-only read, no UPDATE/DELETE policy: status changes are staff tooling.
+create policy "reports_staff_read"
+  on public.reports
+  for select
+  to authenticated
+  using (public.is_squareshare_staff());
+
 -- ===== 20260721_team_roster_avatar ==========================================
 -- Team & Access shows real profile photos instead of initials, so the roster
 -- needs each member's avatar_url alongside their display_name.
@@ -1697,6 +1833,9 @@ create unique index if not exists storefronts_embed_key_key
 -- product_sales_aggregate, products_ranked_by_metric + composite index.
 -- SECURITY INVOKER: RLS enforces the seller boundary inside each function.
 -- Mirrors supabase/migrations/20260802_analytics_sql_aggregates.sql.
+-- Folded in: 20260808_recent_orders_id — dashboard_orders_aggregate's
+-- recent_orders entries carry the order id, so the overview's Recent orders
+-- rows can deep-link to /orders?order=<id>.
 
 create index if not exists orders_seller_status_created_idx
   on public.orders (seller_id, status, created_at);
@@ -1888,6 +2027,7 @@ select jsonb_build_object(
     select jsonb_agg(entry order by ts desc)
     from (
       select created_at as ts, jsonb_build_object(
+        'id', id,
         'product_title', product_title,
         'channel', channel,
         'status', status,
@@ -2568,3 +2708,115 @@ alter table public.notifications
 
 comment on constraint notifications_type_check on public.notifications is
   'Mirror of NOTIFICATION_TYPES in lib/notifications/types.ts. Update both together: a type present in one and not the other fails the insert silently.';
+
+-- ===== 20260807 scope_sq_app_social_reads ===================================
+-- Like and follow visibility now follows the visibility of the thing it is
+-- about. See supabase/migrations/20260807_scope_sq_app_social_reads.sql for
+-- the reasoning; the short version is that profiles are private by default
+-- while these two tables were world-readable.
+drop policy if exists "artifact_likes_public_read" on public.artifact_likes;
+
+create policy "artifact_likes_visible_read"
+  on public.artifact_likes
+  for select
+  to anon, authenticated
+  using (
+    exists (
+      select 1
+      from public.artifacts a
+      where a.id = artifact_likes.artifact_id
+    )
+    or (select auth.uid()) = user_id
+  );
+
+drop policy if exists "follows_public_read" on public.follows;
+
+create policy "follows_visible_read"
+  on public.follows
+  for select
+  to anon, authenticated
+  using (
+    -- Consults the public_profiles VIEW, which is how prod's own
+    -- artifacts_public_read policy asks the same question. The view is
+    -- SECURITY DEFINER precisely so a policy can check "is this profile
+    -- public?" for an anonymous reader without profiles carrying an anon
+    -- select policy (it holds tax_vat_id and must never have one).
+    exists (select 1 from public.public_profiles pp where pp.id = follows.follower_id)
+    or exists (select 1 from public.public_profiles pp where pp.id = follows.followee_id)
+    or (select auth.uid()) = follower_id
+    or (select auth.uid()) = followee_id
+  );
+
+-- ===== 20260807 db_hygiene ==================================================
+-- Only the parts that can exist in the replica. Deliberately omitted:
+--   - `alter table demo.sales_sim enable row level security` — the demo schema
+--     is excluded from this replica (it needs pg_cron; see the file header).
+--   - `cron.schedule('rate-limit-gc', ...)` — pg_cron is not available in
+--     embedded Postgres.
+-- Both are pure infrastructure and gate no invariant under test.
+drop policy if exists "public can join waitlist" on public.waitlist_signups;
+
+create policy "public can join waitlist"
+  on public.waitlist_signups
+  for insert
+  to anon, authenticated
+  with check (
+    owner_id is null
+    and list_id is null
+    and char_length(email) <= 254
+    and char_length(coalesce(source, '')) <= 64
+  );
+
+-- ===== RECONCILIATION 2026-08-07: curation policies match production ========
+-- Discovered while scoping the SQ-app social reads: this replica and production
+-- had materially DIFFERENT authorization models for collections and artifacts,
+-- and had done for some time.
+--
+--   production: collections_owner_all + collections_public_read
+--               artifacts_owner_all   + artifacts_public_read
+--               public.profile_is_public()  -- DOES NOT EXIST
+--
+--   replica:    the original per-command generation (select/insert/update/
+--               delete_own, *_select_public) *plus* artifacts_public_read,
+--               and profile_is_public() still defined
+--
+-- RLS policies are permissive and OR together, so the replica granted strictly
+-- MORE than production. Every curation test was therefore written against an
+-- authorization model the real database does not run.
+--
+-- This section ends the file in production's exact state. It is expressed as
+-- drops-then-creates rather than by editing the sections above, so the file
+-- still reads as the history that actually happened.
+drop policy if exists collections_select_own    on public.collections;
+drop policy if exists collections_insert_own    on public.collections;
+drop policy if exists collections_update_own    on public.collections;
+drop policy if exists collections_delete_own    on public.collections;
+drop policy if exists collections_select_public on public.collections;
+
+create policy collections_owner_all on public.collections
+  for all to authenticated
+  using ((select auth.uid()) = owner_id)
+  with check ((select auth.uid()) = owner_id);
+
+create policy collections_public_read on public.collections
+  for select to anon, authenticated
+  using (is_public = true);
+
+drop policy if exists artifacts_select_own    on public.artifacts;
+drop policy if exists artifacts_insert_own    on public.artifacts;
+drop policy if exists artifacts_update_own    on public.artifacts;
+drop policy if exists artifacts_delete_own    on public.artifacts;
+drop policy if exists artifacts_select_public on public.artifacts;
+
+create policy artifacts_owner_all on public.artifacts
+  for all to authenticated
+  using ((select auth.uid()) = owner_id)
+  with check ((select auth.uid()) = owner_id);
+
+-- artifacts_public_read is already created above, verbatim from production.
+
+-- Nothing in production references this any more; the policies consult the
+-- public_profiles view directly. Dropped so the replica cannot keep a helper
+-- alive that prod does not have, and so a policy written against it fails here
+-- rather than in production.
+drop function if exists public.profile_is_public(uuid);

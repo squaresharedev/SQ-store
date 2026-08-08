@@ -18,7 +18,12 @@ beforeEach(() => {
   vi.clearAllMocks();
   changePasswordMock.mockResolvedValue({});
   sendPasswordResetMock.mockResolvedValue({});
+  // The resend cooldown is persisted, so it would otherwise leak between tests.
+  sessionStorage.clear();
 });
+
+const LAST_SENT_KEY = "sq:password-reset-sent-at";
+const RESET_SENT = { success: "Reset link sent. Check your inbox." };
 
 const noop = () => {};
 
@@ -148,5 +153,87 @@ describe("PasswordModal — wiring", () => {
     await user.click(screen.getByRole("button", { name: /update password/i }));
 
     await waitFor(() => expect(onClose).toHaveBeenCalled(), { timeout: 3000 });
+  });
+});
+
+/**
+ * The real budgets are server-side (5/hour per user and per client). This
+ * cooldown exists so an impatient user does not spend an hour's allowance in
+ * ten seconds waiting for mail that is already on its way, and so the button
+ * stops claiming to be a first send once one has gone out.
+ */
+describe("PasswordModal: resend cooldown", () => {
+  const openReset = () =>
+    render(
+      <PasswordModal open onClose={noop} hasPassword={false} email="a@b.com" />,
+    );
+
+  it("offers a first send when nothing has gone out yet", () => {
+    openReset();
+    const button = screen.getByRole("button", { name: /email me a link/i });
+    expect(button).toBeEnabled();
+  });
+
+  it("shuts the button and counts down once a link is sent", async () => {
+    sendPasswordResetMock.mockResolvedValue(RESET_SENT);
+    const user = userEvent.setup();
+    openReset();
+
+    await user.click(screen.getByRole("button", { name: /email me a link/i }));
+
+    const button = await screen.findByRole("button", { name: /resend in \d+s/i });
+    expect(button).toBeDisabled();
+    expect(screen.queryByRole("button", { name: /email me a link/i })).toBeNull();
+  });
+
+  it("does not start a cooldown when the send failed", async () => {
+    sendPasswordResetMock.mockResolvedValue({ error: "Could not send the reset email. Try again." });
+    const user = userEvent.setup();
+    openReset();
+
+    await user.click(screen.getByRole("button", { name: /email me a link/i }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(/could not send/i);
+    // Still a first send: a link that never went out must be retryable.
+    const button = screen.getByRole("button", { name: /email me a link/i });
+    expect(button).toBeEnabled();
+    expect(sessionStorage.getItem(LAST_SENT_KEY)).toBeNull();
+  });
+
+  it("keeps counting after the modal is closed and reopened", () => {
+    // A cooldown you can skip by pressing Escape is not a cooldown.
+    sessionStorage.setItem(LAST_SENT_KEY, String(Date.now() - 5_000));
+    openReset();
+
+    const button = screen.getByRole("button", { name: /resend in 5[0-9]s/i });
+    expect(button).toBeDisabled();
+  });
+
+  it("settles on Resend email once the countdown runs out", async () => {
+    sessionStorage.setItem(LAST_SENT_KEY, String(Date.now() - 59_000));
+    openReset();
+
+    expect(screen.getByRole("button", { name: /resend in 1s/i })).toBeDisabled();
+    const button = await screen.findByRole(
+      "button",
+      { name: /^resend email$/i },
+      { timeout: 3000 },
+    );
+    expect(button).toBeEnabled();
+  });
+
+  it("ignores an unusable sessionStorage rather than breaking the form", () => {
+    const getItem = vi
+      .spyOn(Storage.prototype, "getItem")
+      .mockImplementation(() => {
+        throw new Error("storage disabled");
+      });
+    try {
+      openReset();
+      // Falls back to a first send; the server limit is what actually bounds it.
+      expect(screen.getByRole("button", { name: /email me a link/i })).toBeEnabled();
+    } finally {
+      getItem.mockRestore();
+    }
   });
 });

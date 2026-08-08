@@ -76,4 +76,52 @@ describe("security headers", () => {
     expect(CONFIG).toContain('"nosniff"');
     expect(CONFIG).toContain('"Referrer-Policy"');
   });
+
+  it("forces HTTPS across every subdomain", () => {
+    // The session cookie is scoped to .squareshare.eu, so ONE sibling served
+    // over plaintext is enough to leak it. includeSubDomains is the point.
+    expect(CONFIG).toContain('"Strict-Transport-Security"');
+    expect(CONFIG).toContain("includeSubDomains");
+  });
+
+  describe("content security policy", () => {
+    it("ships the directives that do not need a nonce", () => {
+      // A nonce is unavailable on this stack (Next 16 Proxy is Node-only,
+      // OpenNext rejects Node middleware), so script-src/style-src must keep
+      // 'unsafe-inline'. These five are what the policy is actually FOR, and
+      // each closes a distinct hole: framing, base-tag injection, plugin
+      // content, offsite form posts, and everything not otherwise named.
+      expect(CONFIG).toContain("default-src 'self'");
+      expect(CONFIG).toContain("frame-ancestors 'none'");
+      expect(CONFIG).toContain("base-uri 'self'");
+      expect(CONFIG).toContain("form-action 'self'");
+      expect(CONFIG).toContain("object-src 'none'");
+    });
+
+    it("allows the Supabase realtime socket", () => {
+      // connect-src is the directive most likely to break something real: the
+      // notification bell holds a wss: Realtime subscription, and omitting the
+      // scheme kills live notifications silently rather than loudly.
+      expect(CONFIG).toMatch(/wss:/);
+      expect(CONFIG).toContain("connect-src 'self'");
+    });
+
+    it("is still report-only", () => {
+      // Deliberate: this policy has not yet run against real traffic. Flipping
+      // to enforcement is a separate, considered step — when it happens, this
+      // assertion should be inverted rather than deleted, so the change is
+      // impossible to make by accident.
+      expect(CONFIG).toContain('"Content-Security-Policy-Report-Only"');
+    });
+
+    it("never allows unsafe-eval in a production build", () => {
+      // React needs it in dev only. A static 'unsafe-eval' would hand an
+      // injected string a way to become code. Comments are stripped first:
+      // the directive is legitimately NAMED in the prose explaining why it is
+      // conditional, and counting that occurrence fails an honest config.
+      const code = stripComments(CONFIG);
+      expect(code).toMatch(/isDev\s*\?\s*" 'unsafe-eval'"\s*:\s*""/);
+      expect(code.match(/'unsafe-eval'/g) ?? []).toHaveLength(1);
+    });
+  });
 });

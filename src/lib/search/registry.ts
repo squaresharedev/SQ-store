@@ -171,25 +171,25 @@ const SETTINGS_FIELDS: LocalEntry[] = [
 const ACTIONS: LocalEntry[] = [
   entry(
     "action:new-product",
-    { type: "action", title: "New product", subtitle: "Create", href: "/products/new" },
+    { type: "action", title: "New product", href: "/products/new" },
     ["add product", "create product", "sell something", "upload", "list an item"],
     "products.write",
   ),
   entry(
     "action:new-storefront",
-    { type: "action", title: "New storefront", subtitle: "Create", href: "/storefront" },
+    { type: "action", title: "New storefront", href: "/storefront" },
     ["add storefront", "create shop", "design a store", "embed"],
     "storefront.write",
   ),
   entry(
     "action:invite-member",
-    { type: "action", title: "Invite a team member", subtitle: "Team & access", href: "/settings/team#invite" },
+    { type: "action", title: "Invite a team member", href: "/settings/team#invite" },
     ["add teammate", "add user", "share access", "collaborator", "invite"],
     "team.invite",
   ),
   entry(
     "action:notifications",
-    { type: "action", title: "Notification history", subtitle: "Go to", href: "/notifications" },
+    { type: "action", title: "Notification history", href: "/notifications" },
     ["alerts", "inbox", "unread", "bell"],
   ),
 ];
@@ -221,12 +221,13 @@ const GROUP_ORDER: { type: SearchResult["type"]; label: string }[] = [
  * The settings picks reference existing entries BY ID (never duplicated), so
  * their titles, synonyms and deep-link hashes stay defined in one place.
  */
+// Three, not every useful field: the resting card must FIT WITHOUT SCROLLING
+// (a dropdown that opens pre-scrolled reads as overflowing), and everything
+// trimmed here is still one keystroke away in the query path.
 const SUGGESTION_SETTINGS_IDS = new Set([
   "field:password", // "reset password" lives in its synonyms
   "field:username",
-  "field:email",
   "field:export",
-  "field:notify-sales",
 ]);
 
 // Pages are DELIBERATELY absent: the sidebar already shows every page, so
@@ -237,7 +238,8 @@ const EMPTY_STATE_GROUPS: {
   label: string;
   source: LocalEntry[];
 }[] = [
-  { type: "action", label: "Actions", source: ACTIONS },
+  // The first three actions only, same fit-without-scrolling budget as above.
+  { type: "action", label: "Actions", source: ACTIONS.slice(0, 3) },
   {
     type: "settings",
     label: "Settings",

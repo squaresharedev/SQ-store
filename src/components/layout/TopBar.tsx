@@ -24,7 +24,10 @@ export function TopBar({
   avatarUrl: string | null;
 }) {
   return (
-    <div className="sticky top-0 z-20 hidden h-14 items-center gap-1 border-b border-border bg-background/80 px-6 backdrop-blur md:flex">
+    <div
+      data-testid="top-bar"
+      className="sticky top-0 z-20 hidden h-14 items-center gap-1 border-b border-border bg-background/80 px-6 backdrop-blur md:flex"
+    >
       <SearchTrigger />
       {/* Pushes the account controls back to the right edge now that the left
           half is occupied. */}

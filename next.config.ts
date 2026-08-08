@@ -1,33 +1,134 @@
 import type { NextConfig } from "next";
 import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 
+const isDev = process.env.NODE_ENV === "development";
+
+/**
+ * Origins the browser is allowed to talk to, derived from the same env var the
+ * browser client reads so a preview deployment on a different Supabase project
+ * does not need this file edited. Falls back to nothing rather than to a
+ * wildcard: a missing URL should narrow the policy, never widen it.
+ */
+const supabaseOrigin = (() => {
+  const raw = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!raw) return null;
+  try {
+    return new URL(raw).origin;
+  } catch {
+    return null;
+  }
+})();
+
+/**
+ * CONTENT SECURITY POLICY.
+ *
+ * WHY THERE IS NO NONCE. A per-request nonce is the strong form of this header,
+ * and it is not reachable on this stack. Next.js 16 renamed `middleware.ts` to
+ * `proxy.ts` and pinned Proxy to the Node runtime (the `runtime` option throws),
+ * while @opennextjs/cloudflare fails the build outright on Node middleware
+ * ("Node.js middleware is not currently supported"). `headers()` below is
+ * evaluated once at startup, so it cannot emit a fresh random value per request.
+ * That leaves 'unsafe-inline' for scripts, which Next.js needs anyway for the
+ * RSC flight-data stream it inlines into every response.
+ *
+ * WHAT THIS STILL BUYS. The directives that do NOT need a nonce are the ones
+ * that close real surface here: framing, base-tag injection, plugin content,
+ * and — the valuable one — form-action and connect-src, which bound where data
+ * can be sent even if script did run. The app currently has no XSS sink at all
+ * (no dangerouslySetInnerHTML, innerHTML, postMessage, or eval), so the marginal
+ * value of a nonce is small and the cost, a deprecated edge middleware plus the
+ * loss of static optimisation, is not.
+ *
+ * `style-src` keeps 'unsafe-inline' regardless: app/global-error.tsx styles
+ * itself with inline `style` props, and a nonce does not cover style ATTRIBUTES.
+ */
+const csp = [
+  "default-src 'self'",
+  // 'unsafe-eval' is React's dev-time requirement only; it never ships to prod.
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
+  "style-src 'self' 'unsafe-inline'",
+  // blob: covers client-side image previews before an upload is committed;
+  // R2 serves presigned product images, Supabase Storage serves avatars.
+  `img-src 'self' data: blob: https://*.r2.cloudflarestorage.com${supabaseOrigin ? ` ${supabaseOrigin}` : ""}`,
+  // next/font/local self-hosts every face, so no third-party font origin.
+  "font-src 'self'",
+  // wss: is load-bearing — the notification bell holds a Supabase Realtime
+  // socket, and omitting it silently kills live notifications.
+  [
+    "connect-src 'self'",
+    supabaseOrigin,
+    supabaseOrigin?.replace(/^https:/, "wss:"),
+    // Turbopack's HMR socket.
+    isDev ? "ws://localhost:*" : null,
+  ]
+    .filter(Boolean)
+    .join(" "),
+  // Supersedes X-Frame-Options where both are understood.
+  "frame-ancestors 'none'",
+  "base-uri 'self'",
+  // Stops an injected form from posting a session-authenticated request offsite.
+  "form-action 'self'",
+  "object-src 'none'",
+  // Mostly redundant next to HSTS, but HSTS only applies once the browser has
+  // seen the header at least once; this covers that first visit.
+  //
+  // PRODUCTION ONLY. The directive upgrades ws:// to wss:// as well as http://,
+  // which would break Turbopack's HMR socket on http://localhost the moment
+  // this policy stops being report-only.
+  isDev ? null : "upgrade-insecure-requests",
+]
+  .filter(Boolean)
+  .join("; ");
+
 const nextConfig: NextConfig = {
   // OpenNext runs the Node runtime on Workers. Never set
   // `export const runtime = "edge"` anywhere in the app.
+
+  /**
+   * SEPARATE BUILD CACHE FOR THE E2E STACK, which runs its own `next dev` on the
+   * same port from the same checkout (tests/e2e/stack/server.mjs) pointed at the
+   * mock gateway on 127.0.0.1:54321.
+   *
+   * Sharing `.next` with it is not merely untidy — NEXT_PUBLIC_* values are
+   * inlined into the compiled chunks, so once a test run has compiled a route,
+   * an ordinary `pnpm dev` serves that cached chunk with the TEST Supabase URL
+   * baked in. It surfaces as the app talking to 127.0.0.1:54321 (Google sign-in
+   * lands on the mock gateway's /auth/v1/authorize, which does not exist) with
+   * a .env.local that plainly says otherwise.
+   */
+  distDir: process.env.NEXT_DIST_DIR || ".next",
 
   // Baseline security headers on every response. The dashboard is a private,
   // session-cookie-authenticated app with no legitimate reason to be framed,
   // so denying framing closes the clickjacking surface outright. (The future
   // public embed widget is a SEPARATE origin serving its own script; it is not
   // affected by the dashboard's frame policy.)
-  //
-  // Deliberately NOT here: a full Content-Security-Policy. Next.js inline
-  // scripts/styles need nonces or hashes to coexist with one, which is a
-  // project of its own; a hasty CSP in report-nothing mode is decoration and
-  // a strict one would break the app. Tracked as a follow-up.
   async headers() {
     return [
       {
         source: "/:path*",
         headers: [
-          // Legacy header, still the broadest-supported framing block; CSP
-          // frame-ancestors will supersede it when the CSP lands.
+          // REPORT-ONLY on purpose. This policy has never run against real
+          // traffic, and an enforcing CSP that is one directive short breaks
+          // the whole app for everyone at once. Ship it observing, confirm the
+          // violation report is clean, then rename the key to
+          // "Content-Security-Policy" to enforce.
+          { key: "Content-Security-Policy-Report-Only", value: csp },
+          // Legacy header, still the broadest-supported framing block; the CSP
+          // frame-ancestors directive above supersedes it where understood.
           { key: "X-Frame-Options", value: "DENY" },
           // Browsers must not MIME-sniff responses into executable types.
           { key: "X-Content-Type-Options", value: "nosniff" },
           // Cross-origin requests learn the origin, never the full URL
           // (dashboard URLs carry ids worth keeping private).
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          // Two years, subdomains included. The cookie is scoped to
+          // .squareshare.eu, so a single plaintext sibling would be enough to
+          // leak it; HSTS is what forecloses that.
+          {
+            key: "Strict-Transport-Security",
+            value: "max-age=63072000; includeSubDomains; preload",
+          },
         ],
       },
     ];

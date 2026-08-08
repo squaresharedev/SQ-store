@@ -144,7 +144,11 @@ export function UsernameForm({ username }: { username: string }) {
               className="shrink-0"
             />
           </div>
-          {status !== "idle" && (
+          {/* "mine" deliberately says nothing. Telling someone the handle
+              already in their own field is theirs is a line of text for a
+              non-event; the tick in the field is all the confirmation that
+              state needs. */}
+          {status !== "idle" && status !== "mine" && (
             <p
               aria-live="polite"
               className={cn(
@@ -154,7 +158,6 @@ export function UsernameForm({ username }: { username: string }) {
                   : "text-muted-foreground",
               )}
             >
-              {status === "mine" && "That's your username."}
               {status === "available" && "Available."}
               {status === "taken" &&
                 "Someone already has this username, try another."}

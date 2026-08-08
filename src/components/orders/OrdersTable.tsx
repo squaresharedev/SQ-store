@@ -6,9 +6,12 @@ import { OrderRow } from "./OrderRow";
 export function OrdersTable({
   orders,
   onSelect,
+  highlightId = null,
 }: {
   orders: OrderView[];
   onSelect: (order: OrderView) => void;
+  /** Row to mark as the one the user arrived for (see OrdersPage). */
+  highlightId?: string | null;
 }) {
   return (
     <div className="overflow-x-auto">
@@ -37,7 +40,12 @@ export function OrdersTable({
         </thead>
         <tbody className="divide-y divide-border">
           {orders.map((order) => (
-            <OrderRow key={order.id} order={order} onSelect={onSelect} />
+            <OrderRow
+              key={order.id}
+              order={order}
+              onSelect={onSelect}
+              highlighted={order.id === highlightId}
+            />
           ))}
         </tbody>
       </table>

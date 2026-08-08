@@ -162,6 +162,23 @@ export const getUser = cache(async (): Promise<User | null> => {
 });
 
 /**
+ * The session read for a SERVER ACTION, which reports failure as returned state
+ * rather than by redirecting. Such an action cannot use `getUser`: a null there
+ * means "signed out OR never got an answer", and answering a network blip with
+ * "your session expired, sign in again" sends the user off to re-authenticate a
+ * session that was fine all along. It cannot use `requireUser` either — that
+ * throws to an error boundary, which discards the form the action was invoked
+ * from. So it needs both facts, separately.
+ */
+export async function actionUser(): Promise<{
+  user: User | null;
+  unreachable: boolean;
+}> {
+  const { user, unreachable } = await loadUser();
+  return { user, unreachable: unreachable != null };
+}
+
+/**
  * The current user's profile row, or null if signed out. A read failure also
  * reads as null, which is correct only for COSMETIC consumers (the nav avatar,
  * a username fallback). Pages that render FORMS from the profile must use

@@ -315,6 +315,24 @@ textarea {
   scrollbar-color: #d4d4d8 #f4f4f5;
 }
 
+/* Swipe strips: a scroller the finger drives, with no scrollbar drawn.
+   A classic (non-overlay) scrollbar eats a row of the strip's own height and
+   reads as chrome the touch UI never needed; the affordance is the content
+   running off the edge under a fade, not a bar. Overrides the `*` rule above
+   on specificity, and `display:none` beats the global ::-webkit-scrollbar.
+   `overscroll-behavior` keeps a swipe past the end from scrolling the page
+   behind it (or triggering the browser's back gesture). */
+.swipe-x {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  overscroll-behavior-x: contain;
+}
+.swipe-x::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
 /* ============================================================
    DOT-GRID BACKDROP
    Static pixel/dot-matrix texture that fades out at the edges (radial mask).
@@ -594,6 +612,29 @@ textarea {
 .animate-bell-ring {
   transform-origin: top center;
   animation: bell-ring 900ms cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+/* An arrival also plays the button's hover look: the accent background swells
+   under the ringing icon and fades away. The rotation alone is easy to miss in
+   peripheral vision on a page the user is already working in; the filled square
+   is what actually catches the eye. Painted as its own layer rather than a
+   class on the button so it can't fight `hover:bg-accent`. */
+@keyframes bell-arrival-flash {
+  0% {
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.bell-arrival-flash {
+  opacity: 0;
+  animation: bell-arrival-flash 900ms var(--ease-standard) both;
 }
 /* Hover/focus tap. Scoped to the group so the whole button is the hit area,
    and suppressed while the louder arrival ring is playing. */

@@ -27,6 +27,16 @@ beforeAll(async () => {
   carol = await createUser("carol-curation@test.squareshare.to");
   dave = await createUser("dave-curation@test.squareshare.to");
 
+  // Carol opts IN to the public directory, explicitly. Profiles are private by
+  // default (sq_app_profiles_private_by_default), so without this her loose
+  // artifacts — the ones that hang off the profile grid rather than a
+  // collection — are invisible to everyone, and the visibility tests below have
+  // nothing to observe. Stated here rather than inherited from the column
+  // default, because that default is exactly what silently drifted once.
+  await asService((q) =>
+    q.query(`update public.profiles set is_public = true where id = $1`, [carol.id]),
+  );
+
   [publicCollectionId, privateCollectionId] = await asUser(carol, async (q) => {
     const { rows } = await q.query(
       `insert into public.collections (owner_id, name, is_public)
@@ -56,11 +66,18 @@ beforeAll(async () => {
 afterAll(closePool);
 
 describe("profiles: username + is_public", () => {
-  it("existing users start with username null and is_public true", async () => {
-    const { rows } = await asUser(carol, (q) =>
-      q.query(`select username, is_public from public.profiles where id = $1`, [carol.id]),
+  it("new profiles are PRIVATE by default", async () => {
+    // Reads dave, who is never toggled — carol is made public in beforeAll so
+    // the artifact tests below have something public to look at.
+    //
+    // This asserted `is_public: true` until 2026-08-07 and passed, because the
+    // test replica was missing sq_app_profiles_private_by_default and defaulted
+    // the column the wrong way round. The suite was confidently testing the
+    // opposite privacy posture from production.
+    const { rows } = await asUser(dave, (q) =>
+      q.query(`select username, is_public from public.profiles where id = $1`, [dave.id]),
     );
-    expect(rows[0]).toEqual({ username: null, is_public: true });
+    expect(rows[0]).toEqual({ username: null, is_public: false });
   });
 
   it("owner can claim a mixed-case username (format checked after lowering)", async () => {
@@ -90,12 +107,14 @@ describe("profiles: username + is_public", () => {
     expect(msg).toMatch(/profiles_username_lower_idx/);
   });
 
-  it("signup trigger still works; new profiles default to username null / public", async () => {
+  it("signup trigger still works; a brand-new profile is private with no username", async () => {
+    // "Private by default" is SQ-app's stated privacy promise, so the trigger
+    // path has to honour it too, not just the column default.
     const fresh = await createUser("fresh-curation@test.squareshare.to");
     const { rows } = await asSuper((q) =>
       q.query(`select username, is_public from public.profiles where id = $1`, [fresh.id]),
     );
-    expect(rows[0]).toEqual({ username: null, is_public: true });
+    expect(rows[0]).toEqual({ username: null, is_public: false });
   });
 });
 

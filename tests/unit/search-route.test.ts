@@ -279,6 +279,26 @@ describe("GET /api/search — results", () => {
     expect(body.groups.find((g) => g.type === "order")?.results).toHaveLength(1);
   });
 
+  it("sends an order result to its highlighted ROW, never the detail panel", async () => {
+    tableRows.orders = [
+      {
+        id: "o1",
+        product_title: "Shoes",
+        buyer_email: "shoes@example.com",
+        status: "paid",
+        amount_cents: 1000,
+        currency: "EUR",
+        created_at: "2026-01-01",
+      },
+    ];
+    const res = await GET(request("shoes"));
+    const body = (await res.json()) as SearchApiResponse;
+    const href = body.groups.find((g) => g.type === "order")?.results[0]?.href;
+    // `?order=` is the param that OPENS the panel — this must not be it.
+    expect(href).not.toContain("order=o1");
+    expect(href).toBe("/orders?q=shoes%40example.com&highlight=o1");
+  });
+
   it("omits empty groups instead of returning hollow headings", async () => {
     const res = await GET(request("nothingmatches"));
     const body = (await res.json()) as SearchApiResponse;

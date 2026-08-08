@@ -31,7 +31,10 @@ beforeAll(() => {
   Element.prototype.scrollIntoView = vi.fn();
 });
 
-import { SearchOverlay } from "@/components/search/SearchOverlay";
+import {
+  SearchOverlay,
+  anchoredPanelStyle,
+} from "@/components/search/SearchOverlay";
 import {
   EMPTY_SNAPSHOT,
   type SearchApiResponse,
@@ -499,6 +502,60 @@ describe("SearchOverlay — it always works", () => {
   });
 });
 
+// ---- where the anchored panel grows -------------------------------------
+
+describe("anchoredPanelStyle", () => {
+  const VIEWPORT = 1440;
+
+  it("grows rightward from a trigger with room beside it (the dashboard bar)", () => {
+    const rect = new DOMRect(24, 10, 320, 36);
+    const style = anchoredPanelStyle(rect, true, VIEWPORT);
+    expect(style.left).toBe(24);
+    expect(style.right).toBeUndefined();
+    expect(style.width).toBe(480);
+  });
+
+  it("grows leftward when the trigger is against the right end of its bar", () => {
+    // The storefront designer: a 36px icon button with Save to its right.
+    const rect = new DOMRect(1274, 10, 36, 36);
+    const style = anchoredPanelStyle(rect, true, VIEWPORT);
+    // Right edge pinned to the trigger's, so nothing to the right of it is
+    // covered; the panel takes the empty bar to the LEFT instead.
+    expect(style.right).toBe(VIEWPORT - rect.right);
+    expect(style.left).toBeUndefined();
+    expect(style.width).toBe(480);
+  });
+
+  it("starts collapsed at the trigger's width in both directions", () => {
+    for (const rect of [
+      new DOMRect(24, 10, 320, 36),
+      new DOMRect(1274, 10, 36, 36),
+    ]) {
+      expect(anchoredPanelStyle(rect, false, VIEWPORT).width).toBe(rect.width);
+    }
+  });
+
+  it("never expands narrower than the trigger it is covering", () => {
+    // A wide trigger pinned near the right edge: expanding must not shrink it.
+    const rect = new DOMRect(1100, 10, 324, 36);
+    const style = anchoredPanelStyle(rect, true, VIEWPORT);
+    expect(Number(style.width)).toBeGreaterThanOrEqual(rect.width);
+  });
+
+  it("keeps both edges inside the viewport", () => {
+    const rect = new DOMRect(700, 10, 36, 36);
+    const style = anchoredPanelStyle(rect, true, 760);
+    // Right-aligned against a cramped viewport: the left edge still clears the
+    // gutter rather than running off screen.
+    expect(760 - Number(style.right) - Number(style.width)).toBeGreaterThanOrEqual(16);
+  });
+
+  it("pins the top to the trigger, so the bar covers it exactly", () => {
+    const rect = new DOMRect(24, 10, 320, 36);
+    expect(anchoredPanelStyle(rect, true, VIEWPORT).top).toBe(10);
+  });
+});
+
 // ---- the anchored expansion ---------------------------------------------
 
 describe("SearchOverlay — anchored expansion", () => {
@@ -551,19 +608,76 @@ describe("SearchOverlay — anchored expansion", () => {
     expect(document.body.style.overflow).not.toBe("hidden");
   });
 
-  it("morphs open: first paint at the trigger's size, then the full panel", async () => {
+  it("morphs open: first paint at the trigger's own width, then widens", async () => {
     renderAnchored();
     const dialog = screen.getByRole("dialog", { name: "Search" });
-    // First paint: the panel IS the old bar — its width and height.
-    expect(dialog).toHaveStyle({ width: "320px", maxHeight: "36px" });
-    // A frame later the CSS transition targets take over (jsdom has no real
+    // First paint: the visible bar IS the old bar — same width, same spot.
+    expect(dialog).toHaveStyle({ width: "320px" });
+    // A frame later the CSS transition target takes over (jsdom has no real
     // transitions, so the style flip itself is the observable).
-    await waitFor(() => expect(dialog).toHaveStyle({ maxHeight: "70vh" }));
+    await waitFor(() => expect(dialog).toHaveStyle({ width: "480px" }));
+  });
+
+  it("keeps the bar and drops the results in a separate card below it", () => {
+    renderAnchored();
+    const dialog = screen.getByRole("dialog", { name: "Search" });
+    // The dialog itself carries no panel chrome — it is a transparent column
+    // holding the bar and the card, so the gap between them shows the page.
+    expect(dialog.className).not.toContain("bg-popover");
+    // The results card is its own bordered surface UNDER the bar (mt-2 gap),
+    // and the listbox lives inside it.
+    const card = screen.getByRole("listbox", { name: "Search results" })
+      .parentElement as HTMLElement;
+    expect(card.className).toContain("mt-2");
+    expect(card.className).toContain("border");
+    expect(card.className).toContain("bg-popover");
+  });
+
+  it("carries the trigger's own Ctrl K chip into the bar it became", () => {
+    // jsdom's userAgent is not a Mac, so this is the same label the trigger
+    // would show a Windows/Linux user for the identical shortcut.
+    renderAnchored();
+    expect(screen.getByText("Ctrl K")).toBeInTheDocument();
+  });
+
+  it("the chip disappears the moment there is something to type instead", async () => {
+    const user = userEvent.setup();
+    renderAnchored();
+    expect(screen.getByText("Ctrl K")).toBeInTheDocument();
+    await user.type(screen.getByRole("combobox"), "l");
+    expect(screen.queryByText("Ctrl K")).not.toBeInTheDocument();
+  });
+
+  it("the chip comes back once the field is cleared back to empty", async () => {
+    const user = userEvent.setup();
+    renderAnchored();
+    await user.type(screen.getByRole("combobox"), "lantern");
+    expect(screen.queryByText("Ctrl K")).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Clear search" }));
+    expect(screen.getByText("Ctrl K")).toBeInTheDocument();
   });
 
   it("closes from the mobile X — the same affordance every modal wears", async () => {
     const user = userEvent.setup();
     renderOverlay();
+    await user.click(screen.getByRole("button", { name: "Close search" }));
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("the single X mirrors Escape: clears while there is text, then closes", async () => {
+    // ONE X, never two side by side: with text it is the field-clear, empty
+    // it is the sheet-close — the same two-step Escape already performs.
+    const user = userEvent.setup();
+    renderOverlay();
+    await user.type(screen.getByRole("combobox"), "lantern");
+    expect(
+      screen.queryByRole("button", { name: "Close search" }),
+    ).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Clear search" }));
+    expect(screen.getByRole("combobox")).toHaveValue("");
+    expect(onClose).not.toHaveBeenCalled();
+
     await user.click(screen.getByRole("button", { name: "Close search" }));
     expect(onClose).toHaveBeenCalledTimes(1);
   });

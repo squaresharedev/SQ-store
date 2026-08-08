@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { getUser } from "@/lib/auth/session";
+import { actionUser } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
@@ -19,6 +19,20 @@ import { sniffImage } from "@/lib/uploads/sniff";
  */
 
 export type AvatarActionState = { error?: string; success?: string };
+
+/**
+ * What an unanswered auth call reports. Kept apart from the signed-out copy
+ * below because the two ask for opposite things: this one says "try again",
+ * that one says "go and sign in", and telling someone with a perfectly good
+ * session to re-authenticate over a DNS blip is how a network hiccup turns
+ * into a support ticket.
+ */
+const UNREACHABLE: AvatarActionState = {
+  error: "Could not reach the server. Check your connection and try again.",
+};
+const SIGNED_OUT: AvatarActionState = {
+  error: "Your session expired. Sign in again.",
+};
 
 const BUCKET = "avatars";
 const MAX_BYTES = 2 * 1024 * 1024; // 2 MB
@@ -39,8 +53,9 @@ export async function uploadAvatar(
   _prev: AvatarActionState,
   formData: FormData,
 ): Promise<AvatarActionState> {
-  const user = await getUser();
-  if (!user) return { error: "Your session expired. Sign in again." };
+  const { user, unreachable } = await actionUser();
+  if (unreachable) return UNREACHABLE;
+  if (!user) return SIGNED_OUT;
   if (rejectUnknownFields(formData)) {
     return { error: "Unexpected form data was rejected." };
   }
@@ -109,8 +124,9 @@ export async function removeAvatar(
   _prev: AvatarActionState,
   _formData: FormData,
 ): Promise<AvatarActionState> {
-  const user = await getUser();
-  if (!user) return { error: "Your session expired. Sign in again." };
+  const { user, unreachable } = await actionUser();
+  if (unreachable) return UNREACHABLE;
+  if (!user) return SIGNED_OUT;
 
   // Shares the upload budget: remove-then-upload is the same churn as two
   // uploads, so a separate allowance would just be a way around this one.

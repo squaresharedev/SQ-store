@@ -5,12 +5,11 @@ export default function ProductsLoading() {
   return (
     <main className="mx-auto max-w-7xl px-6 py-8">
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-foreground md:text-3xl">
+        {/* Same size as the real header (products/page.tsx) so the title does
+            not resize when the data lands. */}
+        <h1 className="text-3xl font-semibold text-foreground md:text-4xl">
           Products
         </h1>
-        <p className="mt-1 font-inter text-sm text-muted-foreground">
-          Manage the products you sell through your store and embeds.
-        </p>
       </div>
       <CardGridSkeleton label="products" />
     </main>

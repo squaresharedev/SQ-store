@@ -5,6 +5,7 @@ import { Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { focusRingClass, transitionClass } from "@/components/ui/control-styles";
 import { useSearch } from "@/components/search/SearchProvider";
+import { useIsMacPlatform } from "@/lib/hooks/useIsMacPlatform";
 
 /**
  * The MINIMIZED state of universal search, desktop: a quiet field-shaped button
@@ -12,21 +13,9 @@ import { useSearch } from "@/components/search/SearchProvider";
  * because clicking it opens the palette whose input is the real one — two live
  * text fields would mean two places for the caret to be.
  */
-/** The platform is a browser fact, not React state, so it is read as an
- *  external store: the server snapshot is `null` (unknown), the client snapshot
- *  is the real answer. That keeps hydration honest without a setState-in-effect
- *  — showing the wrong modifier for a frame would be worse than showing none. */
-const NEVER_CHANGES = () => () => {};
-const readIsMac = () => /Mac|iPhone|iPad|iPod/i.test(navigator.userAgent);
-const UNKNOWN_ON_SERVER = () => null;
-
 export function SearchTrigger() {
   const search = useSearch();
-  const isMac = React.useSyncExternalStore(
-    NEVER_CHANGES,
-    readIsMac,
-    UNKNOWN_ON_SERVER,
-  );
+  const isMac = useIsMacPlatform();
 
   // Announce this button as the palette's anchor: the maximized state opens
   // attached under it, so the bar reads as expanding rather than a popup.
@@ -55,6 +44,15 @@ export function SearchTrigger() {
         "group/search flex h-9 w-full max-w-xs items-center gap-2 rounded-none border border-input",
         "bg-background px-3 text-left text-sm text-muted-foreground",
         "hover:border-border hover:bg-accent hover:text-foreground",
+        // The bar centers this vertically (h-14 around this h-9), leaving a
+        // measured ~10.5px gap below it — smaller than the ~24px the bar's
+        // own px-6 gives it on the left. This margin closes that mismatch so
+        // the trigger sits the same distance from the bar's left edge as from
+        // its bottom edge. On the BUTTON itself, not a wrapper: a wrapper div
+        // around a `w-full` flex child breaks its width:100% resolution (the
+        // wrapper has no definite width of its own to be 100% of), which
+        // shrank it to fit-content the one time this was tried.
+        "-ml-[13.5px]",
         transitionClass,
         focusRingClass,
       )}

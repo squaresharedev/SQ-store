@@ -182,6 +182,12 @@ describe("dashboard_orders_aggregate", () => {
     expect(j.recent_orders.length).toBe(5);
     expect(j.recent_orders[0].amount_cents).toBe(1000);
     for (const row of j.recent_orders) expect(row.currency).not.toBe("USD");
+    // Each row carries its id: the overview's Recent orders card links on it.
+    for (const row of j.recent_orders) {
+      expect(row.id).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+      );
+    }
   });
 
   it("returns zeros for a stranger (RLS)", async () => {

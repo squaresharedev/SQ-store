@@ -28,6 +28,7 @@ function setContext(overrides: Partial<UseNotifications> = {}) {
 }
 
 const bellIcon = () => document.querySelector(".bell-icon")!;
+const flash = () => document.querySelector(".bell-arrival-flash");
 
 describe("NotificationBell ring animation", () => {
   it("does not ring before any notification has arrived", () => {
@@ -57,6 +58,30 @@ describe("NotificationBell ring animation", () => {
     rerender(<NotificationBell />);
     expect(bellIcon()).not.toBe(first);
     expect(bellIcon().classList.contains("animate-bell-ring")).toBe(true);
+  });
+
+  it("plays the hover background on arrival, and never before one", () => {
+    setContext({ arrivalSeq: 0 });
+    const { rerender } = render(<NotificationBell />);
+    expect(flash()).toBeNull();
+
+    setContext({ arrivalSeq: 1, unreadCount: 1 });
+    rerender(<NotificationBell />);
+    const first = flash();
+    expect(first).not.toBeNull();
+    // Same layer the hover state uses, so the two read as one gesture.
+    expect(first!.className).toContain("bg-accent");
+    expect(first!.getAttribute("aria-hidden")).toBe("true");
+
+    // A re-render on the same arrival must not replay it.
+    setContext({ arrivalSeq: 1, unreadCount: 2 });
+    rerender(<NotificationBell />);
+    expect(flash()).toBe(first);
+
+    // The next arrival remounts the layer so the animation restarts from 0.
+    setContext({ arrivalSeq: 2, unreadCount: 3 });
+    rerender(<NotificationBell />);
+    expect(flash()).not.toBe(first);
   });
 
   it("carries the group/bell hover scope and an accessible unread label", () => {

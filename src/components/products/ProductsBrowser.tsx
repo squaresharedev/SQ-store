@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useRef, useState, useTransition } from "react";
+import { Fragment, useTransition } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -12,7 +12,6 @@ import {
   FileEdit,
   ListFilter,
   Plus,
-  Search,
   ShoppingBag,
   SlidersHorizontal,
 } from "lucide-react";
@@ -29,25 +28,27 @@ import type { FilterOption } from "@/components/ui/FilterOptionList";
 import { SortSlidersIcon } from "@/components/ui/SortSlidersIcon";
 import { Spinner } from "@/components/ui/spinner";
 import {
-  fieldBaseClass,
   primaryButtonClass,
   secondaryButtonClass,
 } from "@/components/ui/control-styles";
 import { cn } from "@/lib/utils";
 import { ProductList } from "./ProductList";
 
-// Owns the products page toolbar + paging. Search/status/sort/page live in the
-// URL (the server page reads them and re-queries), so this component only
-// wires toolbar -> URL -> list. No data access here. The heading itself stays
-// a server-rendered node passed in as `heading`.
+// Owns the products page toolbar + paging. Status/sort/page live in the URL
+// (the server page reads them and re-queries), so this component only wires
+// toolbar -> URL -> list. No data access here. The heading itself stays a
+// server-rendered node passed in as `heading`.
 //
-// Status and ordering share ONE trigger (FilterMenu). Two popovers for two
-// settings a seller changes rarely was a lot of toolbar for a page whose real
-// control is the search box; folded together, the row is search + Clear, and
-// the merged trigger states what it is doing rather than hiding it.
-
-/** Matches the orders toolbar, so typing feels the same on both pages. */
-const SEARCH_DEBOUNCE_MS = 300;
+// NO SEARCH BOX. Finding a product by name is universal search's job (⌘K,
+// which reaches products from anywhere and goes straight to the one you
+// picked); a second field doing a worse version of it on this page alone was
+// the only reason this component held a debounce, a draft copy of the filters
+// and a resync-on-back/forward. Status and ordering share ONE trigger
+// (FilterMenu), so what remains is a menu, a Clear and the CTA.
+//
+// The `search` filter still exists in the QUERY layer — the storefront
+// designer's product picker runs on it (lib/products/picker-actions). It is
+// only the page's own box, and its `?q=` param, that are gone.
 
 const SORT_OPTIONS: FilterOption<ProductSort>[] = [
   { value: "default", label: "Newest first", icon: SlidersHorizontal },
@@ -72,16 +73,11 @@ function buildQuery(
   page: number,
 ): string {
   const params = new URLSearchParams();
-  if (filters.search) params.set("q", filters.search);
   if (filters.status) params.set("status", filters.status);
   if (sort !== "default") params.set("sort", sort);
   if (page > 1) params.set("page", String(page));
   const query = params.toString();
   return query ? `?${query}` : "";
-}
-
-function hasAnyFilter(filters: ProductFilters): boolean {
-  return Boolean(filters.search || filters.status);
 }
 
 export function ProductsBrowser({
@@ -106,49 +102,19 @@ export function ProductsBrowser({
   const router = useRouter();
   const pathname = usePathname();
 
-  // Local echo of the search box so typing is instant while the URL (and the
-  // server re-query) catches up debounced.
-  const [draft, setDraft] = useState<ProductFilters>(filters);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // Back/forward changes the props; resync the toolbar. Adjusted during render
-  // (React's documented pattern for derived resets) rather than in an effect.
-  const filtersKey = JSON.stringify(filters);
-  const [syncedKey, setSyncedKey] = useState(filtersKey);
-  if (syncedKey !== filtersKey) {
-    setSyncedKey(filtersKey);
-    setDraft(filters);
-  }
-
-  useEffect(() => {
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, []);
-
-  // The grid below is stale until the server responds. `isPending` covers the
-  // round trip; `queued` covers the debounce window before it starts.
+  // Every remaining control navigates on the spot (no typing to debounce), so
+  // the URL is the only copy of the view: no draft state, and nothing to
+  // resync when back/forward changes the props. `isPending` alone covers the
+  // busy treatment now — the `queued` flag it used to pair with existed only
+  // to cover the search box's debounce window.
   const [isPending, startTransition] = useTransition();
-  const [queued, setQueued] = useState(false);
-  const busy = queued || isPending;
 
   function navigate(next: ProductFilters, nextSort: ProductSort, page: number) {
-    setQueued(false);
     startTransition(() => {
       router.replace(`${pathname}${buildQuery(next, nextSort, page)}`, {
         scroll: false,
       });
     });
-  }
-
-  function handleSearch(event: React.ChangeEvent<HTMLInputElement>) {
-    const value = event.target.value;
-    const next = { ...draft, search: value === "" ? undefined : value };
-    setDraft(next);
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    setQueued(true);
-    // Any filter change restarts at page 1.
-    debounceRef.current = setTimeout(() => navigate(next, sort, 1), SEARCH_DEBOUNCE_MS);
   }
 
   // Both handlers take a plain string and narrow: the merged menu holds two
@@ -157,34 +123,33 @@ export function ProductsBrowser({
   function handleStatus(value: string) {
     const status: ProductStatus | undefined =
       value === "active" || value === "draft" ? value : undefined;
-    const next = { ...draft, status };
-    setDraft(next);
-    navigate(next, sort, 1);
+    // Any filter change restarts at page 1.
+    navigate({ status }, sort, 1);
   }
 
   function handleSort(value: string) {
-    navigate(draft, PRODUCT_SORTS.find((option) => option === value) ?? "default", 1);
+    navigate(filters, PRODUCT_SORTS.find((option) => option === value) ?? "default", 1);
   }
 
   function handlePage(page: number) {
-    navigate(draft, sort, page);
+    navigate(filters, sort, page);
   }
 
   function handleClear() {
-    setDraft({});
     navigate({}, sort, 1);
   }
 
   const totalPages = Math.max(1, Math.ceil(data.total / data.pageSize));
-  const filtered = hasAnyFilter(filters);
+  const filtered = filters.status !== undefined;
   // The toolbar stays available whenever the seller has products OR is
   // filtering: hiding it on a no-results page would strand them there.
   const showToolbar = data.total > 0 || filtered;
 
   return (
     <>
-      {/* items-end from sm up drops the actions onto the description's line
-          instead of the h1's top edge. */}
+      {/* items-end from sm up sits the actions on the title's baseline rather
+          than its top edge, which matters now the title is the tallest thing
+          in the row. */}
       <div className="mb-6 flex flex-wrap items-start justify-between gap-3 sm:items-end">
         {/* Keyed wrapper, not decoration. `heading` is an element built in a
             Server Component and handed over as a PROP, so React's JSX runtime
@@ -206,7 +171,7 @@ export function ProductsBrowser({
               sections={[
                 {
                   label: "Status",
-                  value: draft.status ?? "",
+                  value: filters.status ?? "",
                   options: STATUS_OPTIONS,
                   onChange: handleStatus,
                   defaultValue: "",
@@ -233,6 +198,20 @@ export function ProductsBrowser({
               panelClassName="sm:w-64"
             />
           )}
+          {/* Reset, kept beside the menu now the search row that used to hold
+              it is gone. Only while a filter is actually on: a permanent
+              Clear next to the CTA is a control that does nothing most of
+              the time. The menu's own "All statuses" does the same job; this
+              is the one-click version of it. */}
+          {filtered && (
+            <button
+              type="button"
+              onClick={handleClear}
+              className={cn(secondaryButtonClass, "h-10 shrink-0 px-3 py-2 text-sm")}
+            >
+              Clear
+            </button>
+          )}
           {canWrite && (
             <Link href="/products/new" className={`${primaryButtonClass} h-10 shrink-0`}>
               <Plus className="size-4" strokeWidth={2} aria-hidden="true" />
@@ -242,54 +221,16 @@ export function ProductsBrowser({
         </div>
       </div>
 
-      {showToolbar && (
-        <div
-          role="search"
-          aria-label="product filters"
-          className="mb-4 flex flex-wrap items-end gap-x-3 gap-y-3"
-        >
-          <div className="flex min-w-0 flex-1 flex-col gap-1.5 sm:max-w-xs">
-            <label htmlFor="products-search" className="sr-only">
-              Search products by name
-            </label>
-            <div className="relative flex items-center">
-              <Search
-                aria-hidden="true"
-                className="pointer-events-none absolute left-3 size-4 text-muted-foreground"
-              />
-              <input
-                type="text"
-                id="products-search"
-                placeholder="search by name"
-                value={draft.search ?? ""}
-                onChange={handleSearch}
-                className={cn(fieldBaseClass, "!py-2 h-10 pl-9")}
-              />
-            </div>
-          </div>
-
-          {filtered && (
-            <button
-              type="button"
-              onClick={handleClear}
-              className={cn(secondaryButtonClass, "h-10 px-3 py-2 text-sm")}
-            >
-              Clear
-            </button>
-          )}
-        </div>
-      )}
-
       {/* Results region. While a re-query is in flight the current cards stay
           put (no layout jump) but dim and stop taking clicks. */}
       <div
-        aria-busy={busy}
+        aria-busy={isPending}
         className={cn(
           "relative transition-opacity duration-base ease-standard motion-reduce:transition-none",
-          busy && "pointer-events-none opacity-60",
+          isPending && "pointer-events-none opacity-60",
         )}
       >
-        {busy && (
+        {isPending && (
           <div className="pointer-events-none absolute right-3 top-3 z-10 flex items-center gap-2 rounded-[0.375rem] border border-border bg-background/90 px-2 py-1 shadow-sm backdrop-blur">
             <Spinner className="size-3.5 text-muted-foreground" />
             <span className="font-inter text-xs text-muted-foreground">

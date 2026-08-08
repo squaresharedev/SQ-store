@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { secondaryButtonClass } from "@/components/ui/control-styles";
 import { Spinner } from "@/components/ui/spinner";
@@ -54,10 +54,20 @@ export function OrdersPage({
   data,
   filters,
   sort,
+  deepLinkedOrder = null,
+  highlightId = null,
 }: {
   data: Paginated<OrderView>;
   filters: OrderFilters;
   sort: OrderSort;
+  /** Order named by `?order=<id>`; its detail panel opens on arrival. */
+  deepLinkedOrder?: OrderView | null;
+  /** Order named by `?highlight=<id>` (universal search): its row is marked
+   *  and focused, and NOTHING opens. Only the id, because the row is already
+   *  on screen — if it is not, nothing highlights and the list is just a list.
+   *  It survives until the next navigation: buildQuery never emits the param,
+   *  so the first filter, sort or page change drops the marker with it. */
+  highlightId?: string | null;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -65,7 +75,7 @@ export function OrdersPage({
   // Local echo of the filters so typing in the search box is instant while the
   // URL (and server re-query) catches up debounced.
   const [draft, setDraft] = useState<OrderFilters>(filters);
-  const [selected, setSelected] = useState<OrderView | null>(null);
+  const [selected, setSelected] = useState<OrderView | null>(deepLinkedOrder);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Every filter/sort/page change re-queries on the SERVER, so the table below
@@ -87,29 +97,50 @@ export function OrdersPage({
     setDraft(filters);
   }
 
+  // Same derived-reset pattern for the deep link: landing on (or navigating
+  // to) /orders?order=<id> opens that order's panel.
+  const deepLinkedId = deepLinkedOrder?.id ?? null;
+  const [syncedOrderId, setSyncedOrderId] = useState(deepLinkedId);
+  if (syncedOrderId !== deepLinkedId) {
+    setSyncedOrderId(deepLinkedId);
+    setSelected(deepLinkedOrder);
+  }
+
   useEffect(() => {
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
   }, []);
 
+  const navigate = useCallback(
+    (next: OrderFilters, nextSort: OrderSort, page: number) => {
+      setQueued(false);
+      startTransition(() => {
+        router.replace(`${pathname}${buildQuery(next, nextSort, page)}`, {
+          scroll: false,
+        });
+      });
+    },
+    [pathname, router],
+  );
+
+  /** Close the panel, and drop `?order=` with it — otherwise a refresh (or the
+   *  next filter change, which rebuilds the URL) would reopen it. buildQuery
+   *  never emits that param, so re-navigating is the whole fix. Memoised
+   *  because the Escape listener below depends on it. */
+  const closeDetail = useCallback(() => {
+    setSelected(null);
+    if (deepLinkedId) navigate(draft, sort, data.page);
+  }, [data.page, deepLinkedId, draft, navigate, sort]);
+
   useEffect(() => {
     if (!selected) return;
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") setSelected(null);
+      if (event.key === "Escape") closeDetail();
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [selected]);
-
-  function navigate(next: OrderFilters, nextSort: OrderSort, page: number) {
-    setQueued(false);
-    startTransition(() => {
-      router.replace(`${pathname}${buildQuery(next, nextSort, page)}`, {
-        scroll: false,
-      });
-    });
-  }
+  }, [selected, closeDetail]);
 
   function handleFilters(next: OrderFilters) {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -180,7 +211,11 @@ export function OrdersPage({
           />
         ) : (
           <div className="border border-border bg-card">
-            <OrdersTable orders={data.rows} onSelect={setSelected} />
+            <OrdersTable
+              orders={data.rows}
+              onSelect={setSelected}
+              highlightId={highlightId}
+            />
             <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-4 py-3">
               <p className="font-inter text-sm text-muted-foreground">
                 {data.total} order{data.total === 1 ? "" : "s"} · page{" "}
@@ -215,10 +250,10 @@ export function OrdersPage({
             type="button"
             className="absolute inset-0 bg-foreground/40"
             aria-label="Close order details"
-            onClick={() => setSelected(null)}
+            onClick={closeDetail}
           />
           <div className="relative h-full w-full max-w-md shadow-lg">
-            <OrderDetail order={selected} onClose={() => setSelected(null)} />
+            <OrderDetail order={selected} onClose={closeDetail} />
           </div>
         </div>
       )}

@@ -6,6 +6,7 @@ import { escapeIlike } from "@/lib/supabase/ilike";
 import { getActiveAccount, type ActiveAccount } from "@/lib/team/account-context";
 import { getTeamRoster } from "@/lib/team/queries";
 import { can } from "@/lib/team/permissions";
+import { orderResultHref } from "@/lib/search/hrefs";
 import { rankEntries } from "@/lib/search/rank";
 import { parseSearchTypes, searchQuerySchema } from "@/lib/validation/search";
 import type {
@@ -223,7 +224,10 @@ function buildSources({
           ]
             .filter(Boolean)
             .join(" · "),
-          href: "/orders",
+          href: orderResultHref(
+            String(row.id),
+            row.buyer_email ? String(row.buyer_email) : null,
+          ),
           badge: row.status ? String(row.status) : undefined,
         });
 

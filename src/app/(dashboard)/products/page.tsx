@@ -15,14 +15,13 @@ export const metadata: Metadata = {
 };
 
 // PROTECTED by (dashboard)/layout.tsx. Reads are account-scoped (session +
-// RLS). Search/status/sort/page live in the URL so views are shareable and
+// RLS). Status/sort/page live in the URL so views are shareable and
 // back/forward works, exactly like the orders list.
+//
+// There is no `?q=`: finding a product by name is universal search's job, so
+// this page has no search box to feed one (see ProductsBrowser).
 
 type SearchParams = { [key: string]: string | string[] | undefined };
-
-/** Cap on the accepted search term. Longer input is truncated rather than
- *  rejected, so a paste never turns into an error the seller has to undo. */
-const SEARCH_MAX = 100;
 
 function first(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value;
@@ -40,9 +39,6 @@ function parseParams(params: SearchParams): {
   if (PRODUCT_STATUSES.includes(status as ProductStatus)) {
     filters.status = status as ProductStatus;
   }
-  const search = first(params.q)?.trim().slice(0, SEARCH_MAX);
-  if (search) filters.search = search;
-
   const sortParam = first(params.sort);
   const sort: ProductSort = PRODUCT_SORTS.includes(sortParam as ProductSort)
     ? (sortParam as ProductSort)
@@ -80,12 +76,9 @@ export default async function ProductsPage({
         sales={sales}
         heading={
           <div>
-            <h1 className="text-2xl font-semibold text-foreground md:text-3xl">
+            <h1 className="text-3xl font-semibold text-foreground md:text-4xl">
               Products
             </h1>
-            <p className="mt-1 font-inter text-sm text-muted-foreground">
-              Manage the products you sell through your store and embeds.
-            </p>
           </div>
         }
       />

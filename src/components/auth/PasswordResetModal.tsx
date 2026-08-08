@@ -27,7 +27,22 @@ export function PasswordResetModal({
   defaultEmail?: string;
   next?: string;
 }) {
-  const [state, formAction, isPending] = useActionState(authenticate, INITIAL);
+  // Wrapped, not passed bare: if the action's POST never lands (server
+  // restarting, connection dropped) the rejection propagates out of
+  // useActionState and takes the whole login page down to the error boundary.
+  // The reset branch never redirects, so nothing thrown here needs re-raising.
+  const [state, formAction, isPending] = useActionState(
+    async (prev: AuthState, formData: FormData): Promise<AuthState> => {
+      try {
+        return await authenticate(prev, formData);
+      } catch {
+        return {
+          error: "Could not reach the server. Check your connection and try again.",
+        };
+      }
+    },
+    INITIAL,
+  );
 
   return (
     <Modal
@@ -35,6 +50,7 @@ export function PasswordResetModal({
       onClose={onClose}
       title="Reset your password"
       description="Enter your email and we'll send a link to set a new one."
+      className="rounded-none sm:rounded-none"
     >
       <form action={formAction} className="flex flex-col gap-4" noValidate>
         {/* The reset branch ignores `next` for its own redirect, but the hidden

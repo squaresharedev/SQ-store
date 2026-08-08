@@ -11,10 +11,40 @@ import { passwordProblem } from "@/lib/auth/password";
 import { accountHasPassword } from "@/lib/auth/has-password";
 import { alertSecurityEvent } from "@/lib/security/events";
 import { safeInternalPath } from "@/lib/utils/safe-path";
-import { looksLikeEmail, usernameSchema } from "@/lib/validation/auth";
+import { authIntentSchema, looksLikeEmail, usernameSchema } from "@/lib/validation/auth";
+import { emailAddress } from "@/lib/validation/inputs";
 import { RATE_LIMITS, clientKey, rateLimitKey } from "@/lib/rate-limit";
 
-export type AuthIntent = "signin" | "signup" | "magic" | "reset";
+export type { AuthIntent } from "@/lib/validation/auth";
+
+/**
+ * The address every mail-sending branch is allowed to use.
+ *
+ * `looksLikeEmail` decides which PATH an identifier takes (handle or address);
+ * it is not a format check, and on its own it let anything containing an "@"
+ * through to a send. This is the format check, spent before the rate-limit
+ * budget so that garbage is refused without costing the caller their quota.
+ */
+const emailSchema = emailAddress("That email");
+
+/**
+ * The one reply a signup attempt ever gets.
+ *
+ * Identical for a brand-new address and one that is already registered, because
+ * anything that distinguishes them turns the signup form into a "does this
+ * person have an account here" lookup — worth having for a competitor, and
+ * worth more for anyone building a credential-stuffing list.
+ *
+ * The second sentence is the UX half of that trade, and it is why closing this
+ * costs the returning user nothing. They are the case the neutral copy would
+ * otherwise strand: they typed an address they forgot they had registered, and
+ * a bare "check your email" would leave them waiting for a mail that (for an
+ * existing account) never comes. Naming both paths tells them exactly what to
+ * do next while telling an attacker nothing, because everyone reads it.
+ */
+const SIGNUP_CHECK_EMAIL =
+  "Check your email for a link to confirm your account. " +
+  "If you already have an account with that address, sign in instead — or reset your password if you've forgotten it.";
 
 export type AuthState = {
   error?: string;
@@ -154,9 +184,11 @@ function friendly(error: AuthError): string {
       return BAD_CREDENTIALS;
     case "email_not_confirmed":
       return "Confirm your email first — check your inbox for the link.";
-    case "user_already_exists":
-    case "email_exists":
-      return "An account with that email already exists. Try signing in.";
+    // NOTE: user_already_exists / email_exists are deliberately absent. They are
+    // intercepted at the signup branch and answered with SIGNUP_CHECK_EMAIL,
+    // the same copy a new address gets. Adding a case for them here would
+    // quietly reopen the enumeration oracle, since `friendly` is what every
+    // other error path renders.
     case "weak_password":
       return "That password is too weak. Use at least 8 characters.";
     case "over_email_send_rate_limit":
@@ -186,7 +218,11 @@ export async function authenticate(
   _prev: AuthState,
   formData: FormData,
 ): Promise<AuthState> {
-  const intent = (formData.get("intent") as AuthIntent) ?? "signin";
+  // Parsed, not cast. An unrecognised intent resolves to "signin", the most
+  // restrictive branch — it still demands a valid password — so a hand-crafted
+  // post cannot steer itself into a flow that sends mail.
+  const parsedIntent = authIntentSchema.safeParse(formData.get("intent"));
+  const intent = parsedIntent.success ? parsedIntent.data : "signin";
   // The sign-in screen posts `identifier` (an email OR a handle). Everything
   // else on this action still posts `email`, and always will: only the password
   // grant can take a handle, because it is the only flow that has somewhere to
@@ -198,10 +234,13 @@ export async function authenticate(
   const next = sanitizeNext(formData.get("next"));
 
   // Every other intent has to reach an inbox, so for those the identifier is
-  // read as an address and a handle is refused up front.
+  // read as an address and a handle is refused up front. The full format parse
+  // (not just "contains an @") happens HERE, before any branch below spends a
+  // rate-limit budget: a malformed address should cost the caller nothing and
+  // never reach the auth server.
   const email = identifier;
   const notAnAddress =
-    intent !== "signin" && email !== "" && !looksLikeEmail(email);
+    intent !== "signin" && email !== "" && !emailSchema.safeParse(email).success;
 
   let supabase;
   try {
@@ -346,12 +385,29 @@ export async function authenticate(
       console.error("[auth] signup failed:", err instanceof Error ? err.message : String(err));
       return { error: "Could not create account. Please check your connection and try again." };
     }
-    if (result.error) return { error: friendly(result.error) };
-    // With email confirmation ON, there is no session yet.
-    if (!result.data.session) {
-      return {
-        message: "Account created. Check your email to confirm, then sign in.",
-      };
+    // "That address is already registered" must never be answerable from out
+    // here. GoTrue reveals it two different ways depending on how the project
+    // is configured, so both are folded into the same reply as a brand-new
+    // signup:
+    //
+    //   - confirmations OFF: an explicit user_already_exists / email_exists error
+    //   - confirmations ON:  no error at all, but a user whose `identities` array
+    //     is empty, which is GoTrue's documented signal for "already taken"
+    //
+    // Handling only one would leave the other as an oracle the moment someone
+    // flips that setting in the dashboard.
+    const alreadyRegistered =
+      result.error?.code === "user_already_exists" ||
+      result.error?.code === "email_exists" ||
+      (!result.error && result.data.user?.identities?.length === 0);
+
+    if (result.error && !alreadyRegistered) return { error: friendly(result.error) };
+
+    // With email confirmation ON there is no session yet — and there is no
+    // session for an existing address either, so these two cases return the
+    // same thing by construction rather than by remembering to.
+    if (alreadyRegistered || !result.data.session) {
+      return { message: SIGNUP_CHECK_EMAIL };
     }
     // Confirmation disabled -> already signed in.
     redirect(next);

@@ -48,12 +48,27 @@ export function NotificationBell({ className }: { className?: string }) {
         "hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
       )}
     >
+      {/* The hover background, played back on arrival so a notification landing
+          while the user is working elsewhere on the page still strikes them.
+          Keyed like the icon below, and behind it: the badge and glyph stay
+          fully legible while the accent swells and fades. */}
+      {arrivalSeq > 0 && (
+        <span
+          key={`flash-${arrivalSeq}`}
+          aria-hidden
+          className="bell-arrival-flash pointer-events-none absolute inset-0 rounded-[0.375rem] bg-accent"
+        />
+      )}
       {/* `key` restarts the ring on every arrival: a changed key remounts the
           icon, which replays the CSS animation from 0 — no state, no timers,
           and back-to-back notifications each get their own ring. */}
       <Bell
         key={arrivalSeq}
-        className={cn("bell-icon size-5", arrivalSeq > 0 && "animate-bell-ring")}
+        className={cn(
+          // `relative` keeps the glyph above the absolutely-positioned flash.
+          "bell-icon relative size-5",
+          arrivalSeq > 0 && "animate-bell-ring",
+        )}
         strokeWidth={2}
         aria-hidden
       />

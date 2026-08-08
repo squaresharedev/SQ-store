@@ -51,6 +51,23 @@ export const RATE_LIMITS = {
   teamMembership: { max: 60, windowSeconds: 60 * 60 },
   /** Upload URL minting — each one authorises bytes into R2. */
   uploadPresign: { max: 60, windowSeconds: 60 * 60 },
+  /**
+   * Digital-file uploads specifically, which are capped at 200 MB EACH — an
+   * order of magnitude larger than an image.
+   *
+   * Split out of uploadPresign because a per-request budget prices every call
+   * the same, and these are not the same: 60 image uploads is a busy afternoon,
+   * 60 file uploads is 12 GB. The limiter counts events and cannot weigh them
+   * by size (rate_limits stores bare timestamps), so the cheap way to bound
+   * bytes is to bound the calls that carry the most.
+   *
+   * Sized for the real workload: a seller attaches one file per digital
+   * product, so a dozen an hour is already an unusual amount of publishing.
+   * This bounds storage abuse, not orphan cleanup — an object uploaded and
+   * never attached to a product is still unreferenced, which is what the R2
+   * lifecycle rule is for.
+   */
+  fileUpload: { max: 12, windowSeconds: 60 * 60 },
   /** Handle probing from the settings field. An enumeration brake, and the
    *  handle is half a credential, so the answer is worth something to an
    *  attacker even though the field is public. */

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DEFAULT_PAGE_SIZE, listOrders } from "@/lib/orders/queries";
+import { DEFAULT_PAGE_SIZE, getOrderById, listOrders } from "@/lib/orders/queries";
 import { OrdersPage } from "@/components/orders/OrdersPage";
 import type {
   OrderChannel,
@@ -15,6 +15,18 @@ export const metadata: Metadata = {
 // PROTECTED by (dashboard)/layout.tsx. Reads are owner-scoped (session + RLS)
 // and strictly read-only against orders. Filters/sort/page live in the URL so
 // views are shareable and back/forward works.
+//
+// `?order=<id>` opens that order's detail panel. It is fetched by id rather
+// than looked up in the current page of rows, so the link works whatever the
+// filters, sort or page happen to be (the dashboard's Recent orders card links
+// here, and its newest five are not necessarily on page 1 of a filtered view).
+//
+// `?highlight=<id>` is the QUIETER arrival, and the one universal search uses:
+// it marks that order's row and focuses it, opening nothing. Two params rather
+// than one flag because they are two different intents — "show me this order"
+// and "take me into this order" — and the caller is the only one who knows
+// which it meant. Unlike `order`, this needs no fetch: the id is only ever
+// compared against the rows already on screen.
 
 type SearchParams = { [key: string]: string | string[] | undefined };
 
@@ -67,13 +79,16 @@ export default async function OrdersRoutePage({
 }: {
   searchParams: Promise<SearchParams>;
 }) {
-  const { filters, sort, page } = parseParams(await searchParams);
-  const data = await listOrders({
-    filters,
-    sort,
-    page,
-    pageSize: DEFAULT_PAGE_SIZE,
-  });
+  const params = await searchParams;
+  const { filters, sort, page } = parseParams(params);
+  const deepLinkedId = first(params.order);
+
+  const [data, deepLinked] = await Promise.all([
+    listOrders({ filters, sort, page, pageSize: DEFAULT_PAGE_SIZE }),
+    // A stale or foreign id resolves to null: the list still renders, just
+    // without a detail panel.
+    deepLinkedId ? getOrderById(deepLinkedId) : Promise.resolve(null),
+  ]);
 
   return (
     <main className="mx-auto max-w-7xl space-y-6 px-6 py-8">
@@ -85,7 +100,13 @@ export default async function OrdersRoutePage({
           Every sale across your embed and the marketplace.
         </p>
       </div>
-      <OrdersPage data={data} filters={filters} sort={sort} />
+      <OrdersPage
+        data={data}
+        filters={filters}
+        sort={sort}
+        deepLinkedOrder={deepLinked}
+        highlightId={first(params.highlight) ?? null}
+      />
     </main>
   );
 }

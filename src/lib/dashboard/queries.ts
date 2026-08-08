@@ -19,6 +19,8 @@ export type OrderStatus = "paid" | "refunded" | "disputed" | "pending";
 
 /** The subset of order columns the dashboard reads. */
 export type DashboardOrder = {
+  /** Row id — the Recent orders card links each row to /orders?order=<id>. */
+  id: string;
   product_title: string;
   channel: OrderChannel;
   status: OrderStatus;
