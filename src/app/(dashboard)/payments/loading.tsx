@@ -1,15 +1,15 @@
+import { Skeleton } from "@/components/ui/skeleton";
+import { cardClass, pageShellClass } from "@/components/ui/surface-styles";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { cn } from "@/lib/utils";
 /** Route-level loading state while the payments overview is assembled. */
 export default function PaymentsLoading() {
   return (
-    <main className="mx-auto max-w-7xl space-y-6 px-6 py-8">
-      <div>
-        <h1 className="text-2xl font-semibold text-foreground md:text-3xl">
-          Payments
-        </h1>
-        <p className="mt-1 font-inter text-sm text-muted-foreground">
-          Your balance, payouts and Stripe connection.
-        </p>
-      </div>
+    <main className={cn(pageShellClass, "space-y-6")}>
+      <PageHeader
+        title="Payments"
+        subtitle="Your balance, payouts and Stripe connection."
+      />
 
       <span className="sr-only">loading payments</span>
 
@@ -18,23 +18,23 @@ export default function PaymentsLoading() {
         {Array.from({ length: 3 }, (_, index) => (
           <div
             key={index}
-            className="flex flex-col gap-3 rounded-md border border-border bg-card p-4 shadow-xs"
+            className={cn(cardClass, "flex flex-col gap-3 p-4")}
           >
-            <div className="h-3 w-24 animate-pulse rounded-sm bg-secondary motion-reduce:animate-none" />
-            <div className="h-8 w-32 animate-pulse rounded-sm bg-secondary motion-reduce:animate-none" />
+            <Skeleton className="h-3 w-24" />
+            <Skeleton className="h-8 w-32" />
           </div>
         ))}
       </div>
 
       {/* Activity list */}
-      <div aria-hidden="true" className="rounded-md border border-border bg-card">
+      <div aria-hidden="true" className={cardClass}>
         {Array.from({ length: 5 }, (_, index) => (
           <div
             key={index}
             className="flex items-center justify-between gap-4 border-b border-border px-4 py-3 last:border-b-0"
           >
-            <div className="h-3 w-1/3 animate-pulse rounded-sm bg-secondary motion-reduce:animate-none" />
-            <div className="h-3 w-16 animate-pulse rounded-sm bg-secondary motion-reduce:animate-none" />
+            <Skeleton className="h-3 w-1/3" />
+            <Skeleton className="h-3 w-16" />
           </div>
         ))}
       </div>

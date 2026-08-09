@@ -1,3 +1,5 @@
+import { cn } from "@/lib/utils";
+import { cardClass } from "@/components/ui/surface-styles";
 import { formatCents } from "@/lib/format/money";
 import { formatOrderDate } from "@/lib/format/date";
 import type { Balance, MoneyAmount, UpcomingPayout } from "@/lib/payments/types";
@@ -24,7 +26,7 @@ function Tile({
   emphasis?: boolean;
 }) {
   return (
-    <div className="rounded-md border border-border bg-card p-4 shadow-xs">
+    <div className={cn(cardClass, "p-4")}>
       <span className="font-inter text-xs font-medium uppercase tracking-widest text-muted-foreground">
         {label}
       </span>

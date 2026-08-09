@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowDownLeft, ArrowUpRight, ReceiptText, Undo2 } from "lucide-react";
+import { cardClass, iconTileClass } from "@/components/ui/surface-styles";
 import { cn } from "@/lib/utils";
 import { formatCents } from "@/lib/format/money";
 import { formatOrderDate } from "@/lib/format/date";
@@ -28,7 +29,7 @@ export function RecentActivity({
   return (
     <section
       aria-label="Recent activity"
-      className="rounded-md border border-border bg-card shadow-xs"
+      className={cardClass}
     >
       <div className="border-b border-border px-4 py-3">
         <h2 className="text-base font-semibold text-foreground">Activity</h2>
@@ -50,7 +51,7 @@ export function RecentActivity({
                   onClick={() => onSelect(transaction)}
                   className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors duration-base hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring motion-reduce:transition-none"
                 >
-                  <span className="flex size-8 shrink-0 items-center justify-center rounded-sm bg-secondary text-muted-foreground">
+                  <span className={cn(iconTileClass, "size-8 text-muted-foreground")}>
                     <Icon className="size-4" strokeWidth={2} aria-hidden />
                   </span>
                   <span className="min-w-0 flex-1">

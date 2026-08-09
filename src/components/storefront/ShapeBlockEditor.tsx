@@ -1,11 +1,14 @@
 "use client";
 
 import { useId } from "react";
-import { Trash2 } from "lucide-react";
+import { Copy, Trash2 } from "lucide-react";
 import {
   RING_DEFAULT_WIDTH,
   SHAPE_BORDER_WIDTH_MAX,
   SHAPE_KINDS,
+  SHAPE_POINTS_MAX,
+  SHAPE_POINTS_MIN,
+  SHAPE_ROUNDNESS_MAX,
   type ShapeBlock,
 } from "@/types/storefront";
 import { cn } from "@/lib/utils";
@@ -14,15 +17,31 @@ import {
   focusRingClass,
   infoTextClass,
   labelClass,
+  secondaryButtonClass,
   transitionClass,
 } from "@/components/ui/control-styles";
 import { ColorPicker } from "@/components/ui/ColorPicker";
 import { Slider } from "@/components/ui/slider";
 import { ShapeKindGlyph } from "./ShapeTileContent";
 import { SHAPE_SPECS } from "./shape-specs";
+import {
+  STAR_DEFAULTS,
+  defaultRoundness,
+  supportsPoints,
+  supportsRoundness,
+} from "./shape-geometry";
 
 export type ShapeBlockPatch = Partial<
-  Pick<ShapeBlock, "kind" | "color" | "borderWidth" | "borderColor" | "opacity">
+  Pick<
+    ShapeBlock,
+    | "kind"
+    | "color"
+    | "borderWidth"
+    | "borderColor"
+    | "opacity"
+    | "roundness"
+    | "points"
+  >
 >;
 
 /** First border color when the seller turns an outline on. */
@@ -39,10 +58,13 @@ const KIND_BUTTON_CLASS = `inline-flex size-9 items-center justify-center rounde
 export function ShapeBlockEditor({
   block,
   onUpdate,
+  onDuplicate,
   onRemove,
 }: {
   block: ShapeBlock;
   onUpdate: (patch: ShapeBlockPatch) => void;
+  /** Insert a copy of this block (the no-keyboard copy/paste path). */
+  onDuplicate: () => void;
   onRemove: () => void;
 }) {
   const fieldId = useId();
@@ -50,6 +72,8 @@ export function ShapeBlockEditor({
   const borderWidth =
     block.borderWidth ?? (isRing ? RING_DEFAULT_WIDTH : 0);
   const opacity = block.opacity ?? 100;
+  const roundness = block.roundness ?? defaultRoundness(block.kind);
+  const points = block.points ?? STAR_DEFAULTS[block.kind]?.points ?? 5;
 
   function setBorderWidth(width: number) {
     // Turning an outline on for the first time also needs a visible color.
@@ -90,6 +114,46 @@ export function ShapeBlockEditor({
           })}
         </div>
       </div>
+
+      {/* Point count, on the star-family kinds only. */}
+      {supportsPoints(block.kind) && (
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between">
+            <span className={labelClass}>Points</span>
+            <span className={infoTextClass}>{points}</span>
+          </div>
+          <Slider
+            min={SHAPE_POINTS_MIN}
+            max={SHAPE_POINTS_MAX}
+            value={points}
+            onChange={(next) => onUpdate({ points: next })}
+            ariaLabel="Star points"
+            valueText={`${points} points`}
+          />
+        </div>
+      )}
+
+      {/* Corner roundness, on the kinds whose corners are not already fixed
+          by construction (circle, pill, ... stay as they are). */}
+      {supportsRoundness(block.kind) && (
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between">
+            <span className={labelClass}>Corner roundness</span>
+            <span className={infoTextClass}>
+              {roundness === 0 ? "Sharp" : roundness}
+            </span>
+          </div>
+          <Slider
+            min={0}
+            max={SHAPE_ROUNDNESS_MAX}
+            step={2}
+            value={roundness}
+            onChange={(next) => onUpdate({ roundness: next })}
+            ariaLabel="Corner roundness"
+            valueText={`${roundness} percent`}
+          />
+        </div>
+      )}
 
       <ColorPicker
         id={`${fieldId}-fill`}
@@ -143,6 +207,17 @@ export function ShapeBlockEditor({
           valueText={`${opacity} percent`}
         />
       </div>
+
+      {/* Copy/paste without a keyboard: one press inserts the copy beside
+          this block (Ctrl+C / Ctrl+V do the same from the canvas). */}
+      <button
+        type="button"
+        onClick={onDuplicate}
+        className={secondaryButtonClass + " w-full"}
+      >
+        <Copy className="size-4" strokeWidth={2} aria-hidden="true" />
+        Duplicate
+      </button>
 
       {/* Remove action */}
       <button

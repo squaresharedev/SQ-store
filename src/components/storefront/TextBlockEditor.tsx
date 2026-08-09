@@ -6,6 +6,7 @@ import {
   AlignLeft,
   AlignRight,
   Bold,
+  Copy,
   Italic,
   Underline,
 } from "lucide-react";
@@ -22,7 +23,11 @@ import {
 import { cn } from "@/lib/utils";
 import { Select, type SelectOption } from "@/components/ui/select";
 import { ColorPicker } from "@/components/ui/ColorPicker";
-import { fieldBaseClass, labelClass } from "@/components/ui/control-styles";
+import {
+  fieldBaseClass,
+  labelClass,
+  secondaryButtonClass,
+} from "@/components/ui/control-styles";
 import { TEXT_SIZE_LABELS, TEXT_VARIANT_LABELS } from "./config-maps";
 
 export type TextBlockPatch = Partial<
@@ -91,11 +96,14 @@ export function TextBlockEditor({
   block,
   accent,
   onUpdate,
+  onDuplicate,
 }: {
   block: TextBlock;
   /** Theme accent — what a heading renders in when no override is set. */
   accent: string;
   onUpdate: (patch: TextBlockPatch) => void;
+  /** Insert a copy of this block (the no-keyboard copy/paste path). */
+  onDuplicate: () => void;
 }) {
   const fieldId = useId();
   // Local draft so each keystroke doesn't churn the whole grid state.
@@ -243,6 +251,17 @@ export function TextBlockEditor({
           })}
         </div>
       </div>
+
+      {/* Copy/paste without a keyboard: one press inserts the copy beside
+          this block (Ctrl+C / Ctrl+V do the same from the canvas). */}
+      <button
+        type="button"
+        onClick={onDuplicate}
+        className={secondaryButtonClass + " w-full"}
+      >
+        <Copy className="size-4" strokeWidth={2} aria-hidden="true" />
+        Duplicate
+      </button>
     </div>
   );
 }

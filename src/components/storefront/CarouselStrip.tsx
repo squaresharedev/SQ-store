@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { Product } from "@/types/product";
 import {
+  blockCornerRadius,
   blockKey,
   readingOrder,
   type StorefrontBlock,
@@ -163,9 +164,12 @@ export function CarouselStrip({
           return (
             <li
               key={key}
-              style={{ borderRadius: theme.cornerRadius }}
+              // Product tiles may override the theme's roundness (block.style).
+              style={{ borderRadius: blockCornerRadius(theme, block) }}
               className={cn(
-                "group relative aspect-square shrink-0 overflow-hidden",
+                // No overflow clip: BlockTile's face wrapper clips content to
+                // the radius, so the tile controls survive round corners.
+                "group relative aspect-square shrink-0",
                 // Center alignment is what makes an arrow press land cleanly:
                 // mandatory snapping would otherwise drag a centered tile back
                 // to a start-aligned point the moment the smooth scroll ends.

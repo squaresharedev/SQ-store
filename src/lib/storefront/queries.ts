@@ -4,10 +4,12 @@ import {
   parseStoredStorefrontConfig,
   storefrontIdSchema,
 } from "@/lib/validation/storefront";
+import { parseStorefrontBrief } from "@/lib/validation/storefront-brief";
 import {
   DEFAULT_STOREFRONT_CONFIG,
   type StorefrontConfig,
 } from "@/types/storefront";
+import type { StorefrontBrief } from "@/types/storefront-brief";
 
 // Server Components / Route Handlers only (cookies() is Node-only — never
 // middleware). RLS now permits reading any store you're a member of, so reads
@@ -35,6 +37,10 @@ export type StorefrontSummary = {
   config: StorefrontConfig;
   /** Public, rotatable identifier used by the embed snippet. */
   embedKey: string;
+  /** Creation-flow answers. Empty when the flow was skipped or predates it.
+   *  Carried so the NEXT storefront's flow can arrive pre-answered instead of
+   *  asking the same seller the same questions again. */
+  brief: StorefrontBrief;
 };
 
 /**
@@ -70,7 +76,9 @@ export async function listStorefronts(offset = 0): Promise<StorefrontsPage> {
   const from = Math.max(0, Math.trunc(offset));
   const { data, error, count } = await supabase
     .from("storefronts")
-    .select("id, name, config, updated_at, embed_key", { count: "exact" })
+    .select("id, name, config, updated_at, embed_key, brief", {
+      count: "exact",
+    })
     .eq("owner_id", account.accountId)
     .order("updated_at", { ascending: false })
     // Stable tiebreak so paging can't skip or duplicate a row on ties.
@@ -88,6 +96,7 @@ export async function listStorefronts(offset = 0): Promise<StorefrontsPage> {
       updatedAt: row.updated_at,
       config,
       embedKey: row.embed_key,
+      brief: parseStorefrontBrief(row.brief),
     };
   });
   return { rows, total: count ?? rows.length };

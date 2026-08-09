@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { MotionConfig, motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
+import { focusRingClass, infoTextClass, overlayScrimClass, transitionClass } from "@/components/ui/control-styles";
 import { DiscoverIcon } from "@/components/dashboard/nav-icons";
 import {
   MAIN_NAV,
@@ -47,22 +48,13 @@ function mobileTitle(pathname: string): string | null {
   return item?.label ?? null;
 }
 
-// Shared with the mobile menu-toggle button so hover/focus/motion read as one
-// family of controls.
-const CONTROL_TRANSITION = cn(
-  "transition-colors duration-base ease-standard",
-  "motion-reduce:transition-none",
-);
-
-const FOCUS_RING = cn(
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-  "focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-);
-
+// Nav rows keep a radius (the brand rule squares buttons and overlays, not
+// in-page navigation), and share the app's motion + focus tokens so they read
+// as one family of controls with the mobile menu toggle.
 const NAV_ITEM_CLASSES = cn(
-  "flex items-center gap-2 rounded-[0.375rem] px-3 py-2.5 text-sm font-medium",
-  CONTROL_TRANSITION,
-  FOCUS_RING,
+  "flex items-center gap-2 rounded-sm px-3 py-2.5 text-sm font-medium",
+  transitionClass,
+  focusRingClass,
 );
 
 function NavLinkItem({
@@ -124,7 +116,7 @@ function DiscoverRow() {
         <DiscoverIcon />
         Discover
       </span>
-      <span className="font-inter text-xs text-muted-foreground">
+      <span className={infoTextClass}>
         Coming soon
       </span>
     </motion.div>
@@ -209,9 +201,9 @@ export function Sidebar({
           aria-controls={navId}
           onClick={() => setIsOpen((open) => !open)}
           className={cn(
-            "flex size-10 items-center justify-center rounded-[0.375rem] text-foreground hover:bg-accent",
-            CONTROL_TRANSITION,
-            FOCUS_RING,
+            "flex size-10 items-center justify-center rounded-sm text-foreground hover:bg-accent",
+            transitionClass,
+            focusRingClass,
           )}
         >
           {isOpen ? (
@@ -234,7 +226,7 @@ export function Sidebar({
         <div
           aria-hidden="true"
           onClick={closeDrawer}
-          className="fixed inset-0 z-40 bg-black/40 md:hidden"
+          className={cn(overlayScrimClass, "z-40 md:hidden")}
         />
       )}
 

@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import {
   createProductViaUI,
+  createStorefrontViaUI,
   freshUser,
   gotoApp,
   seedOrders,
@@ -314,11 +315,7 @@ test.describe("universal search — desktop", () => {
     // The designer renders outside the dashboard shell, so it mounts its own
     // provider — this is the regression guard for that.
     await gotoApp(page, "/storefront");
-    await page
-      .getByRole("button", { name: /new storefront|create storefront/i })
-      .first()
-      .click();
-    await page.waitForURL(/\/storefront\/[0-9a-f-]{36}/, { timeout: 30_000 });
+    await createStorefrontViaUI(page);
     await settle(page);
 
     // The editor has no dashboard chrome, so it carries its own trigger.

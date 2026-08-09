@@ -1,6 +1,7 @@
 "use client";
 
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
+import { infoTextClass } from "@/components/ui/control-styles";
 import type { ChannelSlice } from "@/lib/analytics/types";
 import { formatCents } from "@/lib/format/money";
 import {
@@ -82,7 +83,7 @@ export function ChannelSplitChart({
         </ResponsiveContainer>
         {/* Centred total — the donut's headline number. */}
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-          <span className="font-inter text-xs text-muted-foreground">Total</span>
+          <span className={infoTextClass}>Total</span>
           <span className="text-lg font-semibold text-foreground">
             {formatCents(totalCents, currency)}
           </span>

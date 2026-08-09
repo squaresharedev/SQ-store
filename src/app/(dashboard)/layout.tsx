@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
-import { ToastProvider } from "@/components/ui/Toast";
 import { getProfile, requireUser } from "@/lib/auth/session";
 
 /**
@@ -28,12 +27,7 @@ export default async function DashboardLayout({
   const profile = await getProfile();
   const username = profile?.username || user.email?.split("@")[0] || "Account";
 
-  // Toasts live at the route-group root so any dashboard page can raise one
-  // without threading a provider through its own tree, and so a toast survives
-  // the navigation that a page-local provider would unmount.
-  return (
-    <ToastProvider>
-      <DashboardShell username={username}>{children}</DashboardShell>
-    </ToastProvider>
-  );
+  // Toasts come from the ROOT layout (app/layout.tsx), not from here: they
+  // have to outlive a navigation out of this route group.
+  return <DashboardShell username={username}>{children}</DashboardShell>;
 }

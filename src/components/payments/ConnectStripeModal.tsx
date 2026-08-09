@@ -1,6 +1,8 @@
 "use client";
 
 import { ArrowUpRight, Landmark, ShieldCheck, Timer } from "lucide-react";
+import { iconTileClass } from "@/components/ui/surface-styles";
+import { cn } from "@/lib/utils";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { stubBadgeClass } from "@/components/ui/control-styles";
@@ -54,7 +56,7 @@ export function ConnectStripeModal({
       <ul className="space-y-4">
         {POINTS.map((point) => (
           <li key={point.title} className="flex gap-3">
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-sm bg-secondary text-foreground">
+            <span className={cn(iconTileClass, "size-9")}>
               <point.icon className="size-4" strokeWidth={2} aria-hidden />
             </span>
             <div>

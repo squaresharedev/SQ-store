@@ -278,6 +278,77 @@ export type StorefrontTheme = {
   hideSoldOut: boolean;
 };
 
+/**
+ * The card-appearance slice of the theme: everything that shapes ONE product
+ * tile, as opposed to the canvas around it. A ProductBlock may override any
+ * subset of these fields (block.style); resolveCardStyle merges theme and
+ * overrides so every renderer works from a single resolved shape and can
+ * never read half theme, half override. Accent and the sold-out badge stay
+ * theme-only on purpose: they are storefront identity, not tile shape.
+ */
+export type CardStyle = {
+  cornerRadius: number;
+  showTitle: boolean;
+  titleStyle: TitleStyle;
+  titleDisplay: TitleDisplay;
+  priceDisplay: PriceDisplay;
+  priceTagPosition: PriceTagPosition;
+  priceTagStyle: PriceTagStyle;
+  priceTagSize: PriceTagSize;
+};
+
+/** Per-block card styling: an absent field means "follow the theme", so a
+ *  block only ever stores the fields the seller actually changed. */
+export type CardStyleOverrides = Partial<CardStyle>;
+
+/** The theme's card defaults with a block's overrides laid on top. Field by
+ *  field (not a spread) so an explicit `undefined` in editor state can never
+ *  shadow a theme value. */
+export function resolveCardStyle(
+  theme: StorefrontTheme,
+  overrides?: CardStyleOverrides,
+): CardStyle {
+  return {
+    cornerRadius: overrides?.cornerRadius ?? theme.cornerRadius,
+    showTitle: overrides?.showTitle ?? theme.showTitle,
+    titleStyle: overrides?.titleStyle ?? theme.titleStyle,
+    titleDisplay: overrides?.titleDisplay ?? theme.titleDisplay,
+    priceDisplay: overrides?.priceDisplay ?? theme.priceDisplay,
+    priceTagPosition: overrides?.priceTagPosition ?? theme.priceTagPosition,
+    priceTagStyle: overrides?.priceTagStyle ?? theme.priceTagStyle,
+    priceTagSize: overrides?.priceTagSize ?? theme.priceTagSize ?? "md",
+  };
+}
+
+/**
+ * Merge a patch into a block's stored overrides. A patch field set to
+ * `undefined` clears that single override (the field goes back to following
+ * the theme); an override object that ends up empty becomes `undefined`, so
+ * a fully-reverted tile is indistinguishable from one never customized.
+ */
+export function mergeCardStyleOverrides(
+  current: CardStyleOverrides | undefined,
+  patch: CardStyleOverrides,
+): CardStyleOverrides | undefined {
+  const merged: CardStyleOverrides = { ...current, ...patch };
+  for (const key of Object.keys(merged) as (keyof CardStyleOverrides)[]) {
+    if (merged[key] === undefined) delete merged[key];
+  }
+  return Object.keys(merged).length > 0 ? merged : undefined;
+}
+
+/** Effective corner roundness for ANY block: product blocks may override the
+ *  theme's radius, the other kinds always follow it (shapes pick their form
+ *  via `kind`; text tiles have no visible box to round). */
+export function blockCornerRadius(
+  theme: StorefrontTheme,
+  block: StorefrontBlock,
+): number {
+  return block.type === "product"
+    ? (block.style?.cornerRadius ?? theme.cornerRadius)
+    : theme.cornerRadius;
+}
+
 export type ProductBlock = BlockPlacement & {
   type: "product";
   /** References the seller's own products; ownership re-checked on save. */
@@ -286,6 +357,10 @@ export type ProductBlock = BlockPlacement & {
    *  stock tracking can drive this same flag later). Optional so configs
    *  saved before the flag existed still parse. */
   soldOut?: boolean;
+  /** Per-tile look, overriding the theme's card settings field by field.
+   *  Optional (and dropped when emptied) so untouched tiles keep tracking
+   *  the theme, exactly like blocks saved before this existed. */
+  style?: CardStyleOverrides;
 };
 
 export type TextBlock = BlockPlacement & {
@@ -316,6 +391,14 @@ export const SHAPE_BORDER_WIDTH_MAX = 24;
 /** Ring thickness when the block carries no explicit borderWidth. */
 export const RING_DEFAULT_WIDTH = 8;
 
+/** Corner-roundness cap for shapes that support it, as a percent of the
+ *  shape's smaller side (50 turns a square into a circle). */
+export const SHAPE_ROUNDNESS_MAX = 50;
+
+/** Point-count bounds for the star-family kinds (star, sparkle, burst). */
+export const SHAPE_POINTS_MIN = 3;
+export const SHAPE_POINTS_MAX = 12;
+
 export type ShapeBlock = BlockPlacement & {
   type: "shape";
   /** Client-minted uuid; only used to key the block. */
@@ -336,6 +419,16 @@ export type ShapeBlock = BlockPlacement & {
   borderColor?: string;
   /** Whole-shape opacity as a percent, 0..100. Absent = fully opaque. */
   opacity?: number;
+  /**
+   * Corner roundness, 0..SHAPE_ROUNDNESS_MAX, for the kinds that support it
+   * (polygons, star family, and the box kinds; see shape-geometry). Percent
+   * of the shape's smaller side. Absent = the kind's default (`rounded` is
+   * born rounded, everything else sharp). Optional so older blocks parse.
+   */
+  roundness?: number;
+  /** Point count for the star-family kinds, SHAPE_POINTS_MIN..MAX. Absent =
+   *  the kind's classic default (star 5, sparkle 4, burst 10). */
+  points?: number;
 };
 
 export type StorefrontBlock = ProductBlock | TextBlock | ShapeBlock;
@@ -347,6 +440,24 @@ export type StorefrontBlock = ProductBlock | TextBlock | ShapeBlock;
  */
 export function readingOrder<T extends BlockPlacement>(blocks: T[]): T[] {
   return [...blocks].sort((a, b) => a.y - b.y || a.x - b.x);
+}
+
+/**
+ * The blocks a BUYER actually sees: everything except sold-out products the
+ * seller chose to hide. The designer canvas deliberately does not use this (it
+ * keeps showing hidden blocks dimmed, so they stay manageable); every read-only
+ * rendering of a storefront should.
+ *
+ * Shared rather than filtered inline at each call site because "does this
+ * storefront render as empty" has to mean the same thing everywhere. The
+ * preview and the card's empty state disagreeing about it is precisely how a
+ * card ends up blank with nothing explaining why.
+ */
+export function buyerVisibleBlocks(config: StorefrontConfig): StorefrontBlock[] {
+  return config.blocks.filter(
+    (block) =>
+      !(config.theme.hideSoldOut && block.type === "product" && block.soldOut),
+  );
 }
 
 /**

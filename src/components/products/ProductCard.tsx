@@ -2,12 +2,12 @@ import Link from "next/link";
 import { Image as ImageIcon, Pencil, Trash2, TrendingUp } from "lucide-react";
 import type { Product, ProductSales } from "@/types/product";
 import { cn } from "@/lib/utils";
-import { hoverLiftClass, iconButtonClass } from "@/components/ui/control-styles";
+import { hoverLiftClass, iconButtonClass, infoTextClass } from "@/components/ui/control-styles";
 import { formatPrice } from "@/lib/format";
 import { formatCents } from "@/lib/format/money";
-import { StatusBadge } from "./StatusBadge";
 import { StockBadge } from "@/components/ui/StockBadge";
 import { deriveStockBadge } from "@/lib/stock/badge";
+import { StatusBadge } from "./StatusBadge";
 
 // Presentational card (styles.md §8.7). Interactive handlers come from the
 // parent list, which owns product state; edit is a plain route link.
@@ -108,7 +108,7 @@ export function ProductCard({
       {/* Sales metrics. Zero-sale products keep the row (a quiet dash) so every
           card in the grid stays the same height. */}
       <div className="mt-2.5 flex items-baseline justify-between gap-2 border-t border-border pt-2">
-        <span className="font-inter text-xs text-muted-foreground">
+        <span className={infoTextClass}>
           {sales ? `${sales.unitsSold} sold` : "No sales yet"}
         </span>
         <span className="font-inter text-xs font-semibold text-foreground tabular-nums">

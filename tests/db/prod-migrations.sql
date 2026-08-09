@@ -2820,3 +2820,11 @@ create policy artifacts_owner_all on public.artifacts
 -- alive that prod does not have, and so a policy written against it fails here
 -- rather than in production.
 drop function if exists public.profile_is_public(uuid);
+
+-- ===== 20260808 storefront_brief =============================================
+-- Creation-flow answers (category / fulfilment / vibe) on the storefront row.
+-- No RLS change: the owner-scoped storefront policies already cover every
+-- column. Mirrors supabase/migrations/20260808_storefront_brief.sql.
+
+alter table public.storefronts
+  add column if not exists brief jsonb not null default '{}'::jsonb;

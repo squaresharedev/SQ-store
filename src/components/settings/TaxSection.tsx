@@ -1,7 +1,8 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { FormStatus } from "@/components/settings/FormStatus";
+import { infoTextClass } from "@/components/ui/control-styles";
+import { useActionToast } from "@/components/ui/Toast";
 import { SaveButton } from "@/components/ui/SaveButton";
 import { SettingsCard } from "@/components/settings/SettingsCard";
 import { Input } from "@/components/ui/input";
@@ -33,6 +34,7 @@ export function TaxSection({
   country: string;
 }) {
   const [state, formAction, isPending] = useActionState(saveTaxInfo, INITIAL);
+  useActionToast(state);
   // The shared Select is a button + listbox, so it can't be submitted by the
   // form on its own — its value rides along in a hidden input, the same pattern
   // the invite modal uses for its role picker.
@@ -61,7 +63,7 @@ export function TaxSection({
             maxLength={200}
             autoComplete="organization"
           />
-          <p className="font-inter text-xs text-muted-foreground">
+          <p className={infoTextClass}>
             Selling as yourself? Leave it empty.
           </p>
         </div>
@@ -86,7 +88,6 @@ export function TaxSection({
             disabled={isPending}
           />
         </div>
-        <FormStatus state={state} />
         <div>
           <SaveButton pending={isPending} state={state} />
         </div>

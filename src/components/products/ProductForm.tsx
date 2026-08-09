@@ -215,14 +215,12 @@ export function ProductForm({ product }: { product?: Product }) {
       // The fields carry their own messages, but on a form this long the
       // offending one is usually off-screen when Save is pressed — without
       // this the click reads as "nothing happened".
-      toast({
-        tone: "error",
-        title:
-          problems.length === 1
-            ? "This product can't be saved yet"
-            : `This product can't be saved yet — ${problems.length} things to fix`,
-        lines: problems,
-      });
+      toast.error(
+        problems.length === 1
+          ? "This product can't be saved yet"
+          : `This product can't be saved yet, ${problems.length} things to fix`,
+        { lines: problems },
+      );
       return false;
     }
 
@@ -271,9 +269,7 @@ export function ProductForm({ product }: { product?: Product }) {
       if (!result.ok) {
         setSubmitError(result.error);
         setSaveResult({ error: result.error.message });
-        toast({
-          tone: "error",
-          title: result.error.message,
+        toast.error(result.error.message, {
           lines: result.error.fix ? [result.error.fix] : undefined,
         });
         return false;
@@ -287,6 +283,14 @@ export function ProductForm({ product }: { product?: Product }) {
       // change — nothing ever said "saved", which is indistinguishable from a
       // no-op when the thing you were checking (an image) is easy to miss.
       setSaveResult({ success: "Saved" });
+      // Raised BEFORE the redirect on purpose: the toast provider lives at the
+      // root layout, so this survives the navigation and lands on the product
+      // list — where the seller can see the row it is talking about.
+      toast.success(
+        product
+          ? `"${input.title}" was saved.`
+          : `"${input.title}" was added to your products.`,
+      );
       redirectTimer.current = window.setTimeout(() => {
         // No router.refresh() alongside this: both server actions already
         // revalidatePath("/products"), and firing a refresh in the same tick
@@ -302,9 +306,7 @@ export function ProductForm({ product }: { product?: Product }) {
           : unexpectedError(error instanceof Error ? error.message : undefined);
       setSubmitError(info);
       setSaveResult({ error: info.message });
-      toast({
-        tone: "error",
-        title: info.message,
+      toast.error(info.message, {
         lines: info.fix ? [info.fix] : undefined,
       });
       return false;
@@ -498,7 +500,7 @@ export function ProductForm({ product }: { product?: Product }) {
         {upload && (
           <div className="mb-4 flex flex-col gap-1.5">
             <div className="flex items-center justify-between gap-3">
-              <span className="font-inter text-sm text-muted-foreground">
+              <span className={helpTextClass}>
                 {upload.fraction === null
                   ? `Processing ${upload.what === "image" ? "image" : "file"}…`
                   : `Uploading ${upload.what === "image" ? "image" : "file"}…`}

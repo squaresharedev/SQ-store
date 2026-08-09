@@ -3,13 +3,14 @@
 import * as React from "react";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { helpTextClass, overlayCloseButtonClass, overlayScrimClass, overlaySurfaceClass } from "@/components/ui/control-styles";
 
 const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 /**
  * Lightweight accessible modal dialog. Renders nothing when closed. On mobile
- * it's a bottom sheet (full-width, rounded top); from `sm` up it's a centered
+ * it's a bottom sheet (full-width); from `sm` up it's a centered
  * card. Esc and backdrop-click close it, focus is moved in on open and trapped,
  * and background scroll is locked.
  */
@@ -79,14 +80,7 @@ export function Modal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4">
-      {/* Scrim. Deliberately a fixed black wash rather than a theme token: a
-          scrim's job is to darken whatever is behind it, which is the same
-          requirement on a light or a dark page. */}
-      <div
-        aria-hidden
-        onClick={onClose}
-        className="absolute inset-0 bg-black/40"
-      />
+      <div aria-hidden onClick={onClose} className={overlayScrimClass} />
       <div
         ref={panelRef}
         role="dialog"
@@ -94,8 +88,8 @@ export function Modal({
         aria-labelledby={titleId}
         aria-describedby={description ? descId : undefined}
         className={cn(
-          "relative z-10 max-h-[90vh] w-full overflow-y-auto border border-border bg-popover p-6 shadow-lg",
-          "rounded-t-lg sm:max-w-md sm:rounded-lg",
+          overlaySurfaceClass,
+          "relative z-10 max-h-[90vh] w-full overflow-y-auto p-6 sm:max-w-md",
           className,
         )}
       >
@@ -110,7 +104,7 @@ export function Modal({
             {description && (
               <p
                 id={descId}
-                className="mt-1 font-inter text-sm text-muted-foreground"
+                className={cn(helpTextClass, "mt-1")}
               >
                 {description}
               </p>
@@ -120,7 +114,7 @@ export function Modal({
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="-mr-1.5 -mt-1.5 flex size-9 shrink-0 items-center justify-center rounded-none text-muted-foreground transition-colors duration-base ease-standard hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none"
+            className={cn(overlayCloseButtonClass, "-mr-1.5 -mt-1.5")}
           >
             <X className="size-5" aria-hidden />
           </button>

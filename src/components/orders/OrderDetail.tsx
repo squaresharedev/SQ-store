@@ -1,7 +1,11 @@
 "use client";
 
 import { X } from "lucide-react";
-import { iconButtonClass } from "@/components/ui/control-styles";
+import {
+  iconButtonClass,
+  overlaySurfaceClass,
+} from "@/components/ui/control-styles";
+import { cn } from "@/lib/utils";
 import { CopyButton } from "@/components/ui/CopyButton";
 import { formatOrderDateTime } from "@/lib/format/date";
 import { formatCents } from "@/lib/format/money";
@@ -35,7 +39,7 @@ export function OrderDetail({
   const youReceiveCents = order.amountCents - order.platformFeeCents;
 
   return (
-    <div className="flex flex-col bg-card border border-border h-full">
+    <div className={cn(overlaySurfaceClass, "flex h-full flex-col shadow-none")}>
       {/* Header. h-14 is the app's bar height (TopBar, the mobile header, the
           sidebar brand row all use it), so the panel's top edge lines up with
           the page's own bar instead of sitting a few pixels off it. */}

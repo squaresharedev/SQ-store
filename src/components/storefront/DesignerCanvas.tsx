@@ -4,6 +4,7 @@ import { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import { LayoutGrid } from "lucide-react";
 import type { Product } from "@/types/product";
 import {
+  blockCornerRadius,
   blockKey,
   readingOrder,
   type StorefrontBlock,
@@ -214,8 +215,14 @@ export const DesignerCanvas = memo(function DesignerCanvas({
             // Corner roundness drives the cell clip (style beats the grid's
             // default rounded-sm class); tiles inherit it, no clip of their
             // own. Scaled per tile size so big tiles round like small ones.
-            cellStyle={(placement) => ({
-              borderRadius: scaledCornerRadius(theme.cornerRadius, placement),
+            // Per block: a product tile may override the theme's roundness.
+            cellStyle={(placement, gridBlock) => ({
+              borderRadius: scaledCornerRadius(
+                gridBlock
+                  ? blockCornerRadius(theme, gridBlock.data)
+                  : theme.cornerRadius,
+                placement,
+              ),
             })}
             getBlockLabel={(gridBlock) =>
               blockLabel(gridBlock.data, productFor(gridBlock.data))

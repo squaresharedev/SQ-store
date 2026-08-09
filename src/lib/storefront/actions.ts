@@ -11,10 +11,13 @@ import {
   storefrontIdSchema,
   storefrontNameSchema,
 } from "@/lib/validation/storefront";
+import { parseStorefrontBrief } from "@/lib/validation/storefront-brief";
 import {
   DEFAULT_STOREFRONT_CONFIG,
   type StorefrontConfig,
 } from "@/types/storefront";
+import type { StorefrontBrief } from "@/types/storefront-brief";
+import { themeForVibe } from "@/lib/storefront/presets";
 import {
   failure,
   invalidInput,
@@ -49,6 +52,13 @@ import {
 
 export type CreateStorefrontResult = { ok: true; id: string } | ActionFailure;
 
+/** What the creation flow sends. Both halves are optional: the seller can skip
+ *  the flow entirely and still get a storefront. */
+export type CreateStorefrontInput = {
+  name?: string;
+  brief?: StorefrontBrief;
+};
+
 export type SaveStorefrontResult =
   | {
       ok: true;
@@ -59,9 +69,20 @@ export type SaveStorefrontResult =
 
 export type DeleteStorefrontResult = { ok: true } | ActionFailure;
 
-/** Create a fresh, empty storefront and return its id (caller navigates to it). */
+/**
+ * Create a storefront and return its id (the caller navigates to it).
+ *
+ * Takes what the creation flow collected: an optional name, and an optional
+ * brief describing the store. The brief is stored for the template recommender
+ * (lib/storefront/templates.ts) and its `vibe` also does immediate work, by
+ * selecting the theme the new storefront starts on.
+ *
+ * Nothing here is required. Skipping the flow, or abandoning it halfway, gives
+ * exactly the storefront this action produced before the flow existed: default
+ * theme, default name, empty brief.
+ */
 export async function createStorefront(
-  name?: unknown,
+  input?: unknown,
 ): Promise<CreateStorefrontResult> {
   const account = await getActiveAccount();
   if (!account) return failure(sessionExpired());
@@ -72,16 +93,20 @@ export async function createStorefront(
     return failure(rateLimited("create storefronts"));
   }
 
+  const payload: { name?: unknown; brief?: unknown } =
+    typeof input === "object" && input !== null
+      ? (input as { name?: unknown; brief?: unknown })
+      : {};
+
   // Name is optional at creation; fall back to a sensible default the seller
   // can rename in the editor.
-  const parsedName =
-    name === undefined ? null : storefrontNameSchema.safeParse(name);
-  const finalName =
-    parsedName === null
-      ? "Untitled storefront"
-      : parsedName.success
-        ? parsedName.data
-        : "Untitled storefront";
+  const parsedName = storefrontNameSchema.safeParse(payload.name);
+  const finalName = parsedName.success ? parsedName.data : "Untitled storefront";
+
+  // Same forgiveness for the brief: it is a hint for a recommender, never
+  // load-bearing, so a malformed one degrades to empty rather than costing the
+  // seller their storefront.
+  const brief = parseStorefrontBrief(payload.brief);
 
   const supabase = await createClient();
   const { data: row, error } = await supabase
@@ -89,7 +114,8 @@ export async function createStorefront(
     .insert({
       owner_id: account.accountId,
       name: finalName,
-      config: DEFAULT_STOREFRONT_CONFIG,
+      config: { ...DEFAULT_STOREFRONT_CONFIG, theme: themeForVibe(brief.vibe) },
+      brief,
     })
     .select("id")
     .single();

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { buttonClassName } from "@/components/ui/button";
 
 /**
  * Root error boundary for every nested segment (the dashboard, settings and
@@ -39,7 +40,7 @@ export default function ErrorBoundary({
           <button
             type="button"
             onClick={reset}
-            className="bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors duration-base ease-standard hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none"
+            className={buttonClassName("primary", "py-2")}
           >
             Try again
           </button>

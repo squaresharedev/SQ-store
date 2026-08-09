@@ -3,7 +3,7 @@
 import { ArrowUpRight, Landmark } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
-import { stubBadgeClass } from "@/components/ui/control-styles";
+import { infoTextClass, stubBadgeClass } from "@/components/ui/control-styles";
 import type { PayoutMethod } from "@/lib/payments/types";
 import { DetailRow } from "./DetailRow";
 
@@ -42,7 +42,7 @@ export function PayoutMethodModal({
           <p className="truncate text-sm font-medium text-foreground">
             {method.bankName} ···· {method.last4}
           </p>
-          <p className="font-inter text-xs text-muted-foreground">
+          <p className={infoTextClass}>
             Bank account · {method.currency} · {method.country}
           </p>
         </div>

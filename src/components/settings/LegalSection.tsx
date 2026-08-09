@@ -2,7 +2,8 @@
 
 import { useActionState } from "react";
 import { Check } from "lucide-react";
-import { FormStatus } from "@/components/settings/FormStatus";
+import { infoTextClass } from "@/components/ui/control-styles";
+import { useActionToast } from "@/components/ui/Toast";
 import { SaveButton } from "@/components/ui/SaveButton";
 import { SettingsCard } from "@/components/settings/SettingsCard";
 import { acceptLegal, type SettingsActionState } from "@/lib/settings/actions";
@@ -44,6 +45,7 @@ export function LegalSection({
   acceptedVersion: string | null;
 }) {
   const [state, formAction, isPending] = useActionState(acceptLegal, INITIAL);
+  useActionToast(state);
   const isCurrent = acceptedAt !== null && acceptedVersion === LEGAL_VERSION;
   const isOutdated = acceptedAt !== null && !isCurrent;
 
@@ -86,12 +88,11 @@ export function LegalSection({
               </p>
             )}
             <input type="hidden" name="version" value={LEGAL_VERSION} />
-            <FormStatus state={state} />
             <div className="flex flex-col gap-2">
               <SaveButton pending={isPending} state={state} pendingLabel="Recording…">
                 I accept
               </SaveButton>
-              <p className="font-inter text-xs text-muted-foreground">
+              <p className={infoTextClass}>
                 Accepting records the date and version{" "}
                 <span className="font-mono">{LEGAL_VERSION}</span> to your
                 account.

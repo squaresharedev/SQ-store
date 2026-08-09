@@ -4,6 +4,10 @@ import * as React from "react";
 import { Bell } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Popover } from "@/components/ui/Popover";
+import {
+  focusRingClass,
+  transitionClass,
+} from "@/components/ui/control-styles";
 import { NotificationList } from "@/components/notifications/NotificationList";
 import { useNotificationsContext } from "@/components/notifications/NotificationsProvider";
 
@@ -43,9 +47,9 @@ export function NotificationBell({ className }: { className?: string }) {
       onClick={() => setOpen((v) => !v)}
       className={cn(
         // `group/bell` is the hover/focus scope the bell-nudge CSS keys off.
-        "group/bell relative flex size-10 items-center justify-center rounded-[0.375rem] text-foreground",
-        "transition-colors duration-base ease-standard motion-reduce:transition-none",
-        "hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        "group/bell relative flex size-10 items-center justify-center rounded-sm text-foreground hover:bg-accent",
+        transitionClass,
+        focusRingClass,
       )}
     >
       {/* The hover background, played back on arrival so a notification landing
@@ -56,7 +60,7 @@ export function NotificationBell({ className }: { className?: string }) {
         <span
           key={`flash-${arrivalSeq}`}
           aria-hidden
-          className="bell-arrival-flash pointer-events-none absolute inset-0 rounded-[0.375rem] bg-accent"
+          className="bell-arrival-flash pointer-events-none absolute inset-0 rounded-sm bg-accent"
         />
       )}
       {/* `key` restarts the ring on every arrival: a changed key remounts the

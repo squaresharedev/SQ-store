@@ -1,5 +1,8 @@
 import type { ReactNode } from "react";
 import { ChartNoAxesColumn } from "lucide-react";
+import { helpTextClass } from "@/components/ui/control-styles";
+import { cardClass } from "@/components/ui/surface-styles";
+import { cn } from "@/lib/utils";
 
 /**
  * Card chrome shared by every analytics chart — same surface as MetricTile.
@@ -20,11 +23,11 @@ export function ChartCard({
   emptyText?: string;
 }) {
   return (
-    <div className="rounded-md border border-border bg-card p-4 shadow-xs">
+    <div className={cn(cardClass, "p-4")}>
       <div>
         <h2 className="text-base font-semibold text-foreground">{title}</h2>
         {description && (
-          <p className="font-inter text-sm text-muted-foreground">
+          <p className={helpTextClass}>
             {description}
           </p>
         )}
@@ -37,7 +40,7 @@ export function ChartCard({
               className="size-5 text-muted-foreground/60"
               aria-hidden="true"
             />
-            <p className="font-inter text-sm text-muted-foreground">
+            <p className={helpTextClass}>
               {emptyText}
             </p>
           </div>

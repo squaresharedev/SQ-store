@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { Package, Plus } from "lucide-react";
+import { emptyStateClass } from "@/components/ui/surface-styles";
+import { cn } from "@/lib/utils";
 import { iconPopClass, primaryButtonClass } from "@/components/ui/control-styles";
 import { CardBackdrop } from "@/components/ui/CardBackdrop";
 
@@ -8,7 +10,7 @@ import { CardBackdrop } from "@/components/ui/CardBackdrop";
 // members of the active store see the same empty state without the CTA.
 export function ProductEmptyState({ canWrite = true }: { canWrite?: boolean }) {
   return (
-    <div className="relative flex flex-col items-center justify-center overflow-hidden rounded-md border border-dashed border-border bg-background px-6 py-16 text-center">
+    <div className={cn(emptyStateClass, "relative overflow-hidden bg-background")}>
       <CardBackdrop variant="dots" corner="center" />
       <div className="relative flex flex-col items-center">
         <div className="flex size-12 items-center justify-center rounded-full bg-muted">

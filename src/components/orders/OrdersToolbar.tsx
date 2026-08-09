@@ -19,11 +19,12 @@ import {
 import { fieldBaseClass, ghostButtonClass } from "@/components/ui/control-styles";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { cn } from "@/lib/utils";
-import type {
-  OrderChannel,
-  OrderFilters,
-  OrderSort,
-  OrderStatus,
+import {
+  ORDERS_SEARCH_MAX_LENGTH,
+  type OrderChannel,
+  type OrderFilters,
+  type OrderSort,
+  type OrderStatus,
 } from "@/types/order-view";
 import { FilterSelect, type FilterOption } from "./FilterSelect";
 
@@ -97,7 +98,10 @@ export function OrdersToolbar({
   }
 
   function handleSearch(e: React.ChangeEvent<HTMLInputElement>) {
-    const v = e.target.value;
+    // Clamped as well as `maxLength`-ed: this value becomes the `?q=` URL
+    // param, and the page re-caps it on the way back in, so keeping the two
+    // ends agreed avoids a term that survives typing but not a page reload.
+    const v = e.target.value.slice(0, ORDERS_SEARCH_MAX_LENGTH);
     emit({ search: v === "" ? undefined : v });
   }
 
@@ -111,7 +115,7 @@ export function OrdersToolbar({
     <div
       role="search"
       aria-label="order filters"
-      className="flex flex-wrap items-end gap-x-3 gap-y-3 rounded-[0.75rem] border border-border bg-muted/50 p-4"
+      className="flex flex-wrap items-end gap-x-3 gap-y-3 rounded-lg border border-border bg-muted/50 p-4"
     >
       {/* Channel segmented toggle */}
       <div className="flex flex-col gap-1.5">
@@ -121,7 +125,7 @@ export function OrdersToolbar({
         <div
           role="group"
           aria-labelledby="orders-channel-label"
-          className="flex overflow-hidden rounded-[0.5rem] border border-border bg-background"
+          className="flex overflow-hidden rounded-md border border-border bg-background"
         >
           {CHANNEL_ORDER.map((value, i) => {
             const meta = CHANNEL_META[value];
@@ -164,6 +168,9 @@ export function OrdersToolbar({
             type="text"
             inputMode="email"
             id="orders-search"
+            // The column this matches is an email address, so the RFC's own
+            // maximum is the natural bound — see ORDERS_SEARCH_MAX_LENGTH.
+            maxLength={ORDERS_SEARCH_MAX_LENGTH}
             placeholder="search buyer email"
             value={filters.search ?? ""}
             onChange={handleSearch}

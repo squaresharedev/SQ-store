@@ -2,6 +2,10 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
+import {
+  overlayScrimClass,
+  overlaySurfaceClass,
+} from "@/components/ui/control-styles";
 
 const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -136,7 +140,7 @@ export function Popover({
             <div
               aria-hidden
               onClick={() => onOpenChange(false)}
-              className="fixed inset-0 z-40 bg-black/40 sm:hidden"
+              className={cn(overlayScrimClass, "z-40 sm:hidden")}
             />
           )}
           <div
@@ -146,14 +150,15 @@ export function Popover({
             aria-label={label}
             tabIndex={-1}
             className={cn(
-              "z-50 border border-border bg-popover text-popover-foreground shadow-lg focus:outline-none",
+              overlaySurfaceClass,
+              "z-50 focus:outline-none",
               variant === "sheet"
                 ? // Mobile: full-width bottom sheet; desktop: anchored under the trigger.
-                  "fixed inset-x-0 bottom-0 w-full rounded-t-lg p-4 sm:absolute sm:inset-x-auto sm:bottom-auto sm:left-0 sm:top-full sm:mt-2 sm:w-auto sm:rounded-md sm:p-3"
+                  "fixed inset-x-0 bottom-0 w-full p-4 sm:absolute sm:inset-x-auto sm:bottom-auto sm:left-0 sm:top-full sm:mt-2 sm:w-auto sm:p-3"
                 : // Dropdown that never becomes a sheet. Mobile: pinned to the
                   // top-right of the viewport (below the h-14 header), capped to
                   // fit. Desktop: anchored under the trigger, right-aligned.
-                  "fixed right-2 top-[3.75rem] max-w-[calc(100vw-1rem)] rounded-md sm:absolute sm:right-0 sm:top-full sm:mt-2 sm:max-w-none",
+                  "fixed right-2 top-[3.75rem] max-w-[calc(100vw-1rem)] sm:absolute sm:right-0 sm:top-full sm:mt-2 sm:max-w-none",
               panelClassName,
             )}
           >

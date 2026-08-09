@@ -1,3 +1,5 @@
+import { cn } from "@/lib/utils";
+import { badgeClass } from "@/components/ui/surface-styles";
 import type { StockBadge } from "@/types/stock";
 
 export function StockBadge({
@@ -8,28 +10,16 @@ export function StockBadge({
   showInStock?: boolean;
 }) {
   if (badge === null) return null;
+  // "In stock" is the default state, so it is noise unless a surface asks for
+  // it (a product page confirming availability, say).
+  if (badge.state === "in_stock" && !showInStock) return null;
 
-  switch (badge.state) {
-    case "in_stock":
-      if (!showInStock) return null;
-      return (
-        <span className="rounded-full bg-secondary px-2 py-0.5 font-inter text-xs font-medium text-muted-foreground">
-          In stock
-        </span>
-      );
+  const { label, tone } =
+    badge.state === "in_stock"
+      ? { label: "In stock", tone: "text-muted-foreground" }
+      : badge.state === "low_stock"
+        ? { label: `Only ${badge.remaining} left`, tone: "text-foreground" }
+        : { label: "Sold out", tone: "text-destructive" };
 
-    case "low_stock":
-      return (
-        <span className="rounded-full bg-secondary px-2 py-0.5 font-inter text-xs font-medium text-foreground">
-          {"Only "}{badge.remaining}{" left"}
-        </span>
-      );
-
-    case "sold_out":
-      return (
-        <span className="rounded-full bg-secondary px-2 py-0.5 font-inter text-xs font-medium text-destructive">
-          Sold out
-        </span>
-      );
-  }
+  return <span className={cn(badgeClass, tone)}>{label}</span>;
 }

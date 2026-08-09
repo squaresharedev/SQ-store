@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { secondaryButtonClass } from "@/components/ui/control-styles";
+import { helpTextClass, infoTextClass, overlayScrimClass, secondaryButtonClass } from "@/components/ui/control-styles";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 import type {
@@ -196,9 +196,9 @@ export function OrdersPage({
         )}
       >
         {busy && (
-          <div className="pointer-events-none absolute right-3 top-3 z-10 flex items-center gap-2 rounded-[0.375rem] border border-border bg-background/90 px-2 py-1 shadow-sm backdrop-blur">
+          <div className="pointer-events-none absolute right-3 top-3 z-10 flex items-center gap-2 rounded-sm border border-border bg-background/90 px-2 py-1 shadow-sm backdrop-blur">
             <Spinner className="size-3.5 text-muted-foreground" />
-            <span className="font-inter text-xs text-muted-foreground">
+            <span className={infoTextClass}>
               Updating…
             </span>
           </div>
@@ -217,7 +217,7 @@ export function OrdersPage({
               highlightId={highlightId}
             />
             <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-4 py-3">
-              <p className="font-inter text-sm text-muted-foreground">
+              <p className={helpTextClass}>
                 {data.total} order{data.total === 1 ? "" : "s"} · page{" "}
                 {data.page} of {totalPages}
               </p>
@@ -248,7 +248,7 @@ export function OrdersPage({
         <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true" aria-label="Order details">
           <button
             type="button"
-            className="absolute inset-0 bg-foreground/40"
+            className={overlayScrimClass}
             aria-label="Close order details"
             onClick={closeDetail}
           />

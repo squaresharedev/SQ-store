@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { infoTextClass } from "@/components/ui/control-styles";
+import { badgeClass } from "@/components/ui/surface-styles";
 import { cn } from "@/lib/utils";
 import type { DashboardOrder, OrderStatus } from "@/lib/dashboard/queries";
 import { formatCents, formatOrderDate } from "@/lib/dashboard/format";
@@ -28,7 +30,7 @@ function StatusBadge({ status }: { status: OrderStatus }) {
   return (
     <span
       className={cn(
-        "rounded-full bg-secondary px-2 py-0.5 font-inter text-xs font-medium",
+        badgeClass,
         STATUS_CLASSES[known],
       )}
     >
@@ -70,7 +72,7 @@ export function RecentOrders({
                   <p className="truncate text-sm font-medium text-foreground">
                     {order.product_title}
                   </p>
-                  <p className="font-inter text-xs text-muted-foreground">
+                  <p className={infoTextClass}>
                     {CHANNEL_LABELS[order.channel] ?? "Embed"} ·{" "}
                     {formatOrderDate(order.created_at)}
                   </p>

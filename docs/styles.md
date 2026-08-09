@@ -334,9 +334,14 @@ use `--shadow-md`/`--shadow-lg`.
 
 ```css
 @theme {
-  --z-base: 0; --z-rail: 30; --z-header: 20; --z-dropdown: 40; --z-overlay: 50; --z-toast: 60;
+  --z-base: 0; --z-rail: 30; --z-header: 20; --z-dropdown: 40; --z-overlay: 50;
+  --z-search: 60; --z-toast: 70;
 }
 ```
+
+Toasts sit above EVERYTHING, universal search included. Modals raise them (the
+invite modal, the password modal, every delete confirm), and a confirmation
+rendered behind the surface that triggered it is not a confirmation.
 
 ---
 
@@ -440,6 +445,104 @@ hover `--foreground`; `--font-ui-muted` · `--text-sm`.
 ### 8.11 Divider
 Hairline `1px --border`. Vertical separators (footer) `1px --border`,
 `height: 1em`, `--subtle-foreground`.
+
+### 8.12 Feedback: toast vs inline
+
+There is ONE rule, and it is about time, not about severity:
+
+- **Toast** (`components/ui/Toast.tsx`) — the OUTCOME of something the user
+  just did. Saved, uploaded, invited, removed, and the failures of all of
+  those. Success and error alike. The outcome is over, so the message may
+  leave. A save whose only evidence is "the page looks the same" is
+  indistinguishable from a no-op, which is the whole reason this exists.
+- **Inline** — anything the user must act on, or might need to re-read.
+  WHICH field is wrong (said beside that field), and page states that need a
+  decision or a retry button. A toast leaves; those must not.
+
+Never both for one SUCCESS. A form does not print "Saved." next to a button that
+has already gone green next to a toast that already said it.
+
+Failures have one sanctioned exception, and only one: **a form long enough that
+its Save button is off-screen from the field at fault** — today that is the
+product form alone. There the failure renders inline beside Save *and* as a
+toast. They are not duplicates doing the same job: the toast is what reaches the
+eye at the moment of the click, the notice is what is still on the page eight
+seconds later while the fix is being typed. Everywhere else, one channel.
+
+Shape: sharp corners and the same neutral `--border` as every other floating
+surface, the tone mark, a one-line headline, optional detail lines, a dismiss
+button on the card's vertical axis, and a hairline lifetime bar along the
+bottom. One column width (`w-96`), so a stack of three reads as one channel
+rather than three unrelated things.
+
+**Tone lives in the mark, and nowhere else.** A bare stroke — check, cross,
+"i" — drawn on in the tone's own colour as the toast arrives. No chip, plate or
+disc behind it: the card is already a bordered box, and a filled badge makes a
+second box inside the first. The border stays grey for every tone, because a red
+card restates louder what the mark has already said. Live specimens at
+`/dev/toast`.
+
+The marks are sized UNEVENLY on purpose: the check and cross ship at `size-5`
+running edge to edge of their viewBox, the "i" at `size-4`. Geometry reads small
+and carries the whole outcome; a glyph scaled to match stops reading as an icon
+and starts reading as a typo. All of them stay under the size of the words —
+a mark is what you glance at on the way to the message, and one sized to compete
+with the sentence becomes the thing being read. Each hangs in an `h-5` box so it
+centres on the headline's line regardless of its own size, and the stroke weight
+is set per tone so the on-screen weight comes out even.
+
+Anchored BOTTOM-right, the corner the eye returns to after pressing a button and
+the one furthest from the left nav rail's own controls. Nothing underneath is
+blocked: only the cards take pointer events, so a Save button beneath a toast
+stays pressable. Lifted clear of the phone's bottom furniture (the storefront
+editor's floating toolbar, the home indicator) and settled onto the corner from
+`sm` up, where the dismiss target relaxes from a 44px thumb target to the
+overlay standard.
+
+Dark mode: every colour is a token that the dark layer re-steps, with one
+exception worth knowing — `--color-success` is a green-700 chosen for white, so
+on the near-black card it needs its companion `--color-success-dark`
+(`text-success dark:text-success-dark`). Same pattern as `--color-crown`.
+
+Behaviour worth keeping if this is ever reimplemented: hover, focus and a
+backgrounded tab all pause the clock (and bank the remainder); an identical
+message refreshes the toast already on screen instead of stacking a copy; the
+stack caps at three, dropping the oldest.
+
+Server-action forms do not call it by hand — `useActionToast(state)` bridges a
+`useActionState` result straight through.
+
+### 8.13 Info tip: the one "?"
+
+There is ONE question mark in the product (`components/ui/InfoTip.tsx`, classes
+in `infoTipTriggerClass` / `infoTipBubbleClass`). Never draw a second one.
+
+When to reach for it, and when not to:
+
+- **A tip** — a caveat, a consequence, or a rule that only some people need:
+  where a save actually lands, which other setting a value inherits from.
+- **NOT a tip** — anything the user must act on (that is inline, §8.12), and
+  anything that only restates its own control. A paragraph under "Show price
+  on hover" reading "the price stays hidden until a buyer hovers" is noise; it
+  was deleted rather than tucked behind a "?".
+
+Shape: a 24px square button carrying the lucide `CircleQuestionMark` glyph,
+muted at rest and `--foreground` on hover, sitting immediately after the label
+it belongs to (`flex items-center gap-1.5`). The bubble it reveals is the same
+floating panel as every other overlay — sharp, hairline `--border`,
+`--popover`, `shadow-lg` — one column wide (`w-64`) so the sentence wraps like
+prose rather than stretching across a panel.
+
+Three ways in, because leaving any one out strands a whole input method:
+hover (mouse), Tab (keyboard, Esc closes), and tap (touch, where an outside
+press closes it). A pointer that is not a mouse must NOT be read as a hover:
+Chromium fires `pointerover` before a tap, so a tip that opens on any
+`pointerover` opens and is immediately closed by its own tap.
+
+The bubble is `position: fixed` in a portal on `<body>`, placed from the
+trigger's rect and clamped to the viewport. An absolutely-positioned tip is
+clipped the moment it is used inside anything that scrolls — which the
+storefront designer's side panel does.
 
 ---
 

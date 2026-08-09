@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useActionState } from "react";
+import { infoTextClass } from "@/components/ui/control-styles";
 import { authenticate, type AuthState } from "@/lib/auth/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -95,7 +96,7 @@ export function LoginForm({
       {/* Divider */}
       <div className="flex items-center gap-4">
         <span className="h-px flex-1 bg-border" />
-        <span className="font-inter text-xs text-muted-foreground">or</span>
+        <span className={infoTextClass}>or</span>
         <span className="h-px flex-1 bg-border" />
       </div>
 
@@ -178,7 +179,7 @@ export function LoginForm({
               maxLength={USERNAME_MAX_LENGTH}
               required
             />
-            <p className="font-inter text-xs text-muted-foreground">
+            <p className={infoTextClass}>
               Letters, numbers and underscores. You can sign in with this
               instead of your email.
             </p>
@@ -215,7 +216,7 @@ export function LoginForm({
                 worst kind of hint: it invites a password the form then
                 rejects. See lib/auth/password.ts. */}
             {mode === "signup" && (
-              <p className="font-inter text-xs text-muted-foreground">
+              <p className={infoTextClass}>
                 At least 8 characters, mixing cases, numbers or symbols (or a
                 passphrase of 16+).
               </p>

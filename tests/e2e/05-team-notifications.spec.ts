@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { fillStable, freshUser, gotoApp, signUp } from "./helpers";
+import { expectToast, fillStable, freshUser, gotoApp, signUp } from "./helpers";
 
 /** Open the profile menu and switch to a teammate's store; verified via the
  *  ViewingBanner ("Back to your store"), which only renders on foreign stores. */
@@ -66,11 +66,14 @@ test.describe("team & access + notifications", () => {
     const ownerPage = await ownerCtx.newPage();
     await signUp(ownerPage, owner);
 
-    // Name the store (display name doubles as store name in the switcher).
+    // Name the store. There is exactly ONE name on an account — the username
+    // is both the sign-in handle and what the store switcher shows — so this
+    // fills that field, rather than a separate display name that no longer
+    // exists (which is why `/^name$/i` matched nothing and hung here).
     await gotoApp(ownerPage, "/settings/account");
-    await fillStable(ownerPage, /^name$/i, storeName);
+    await fillStable(ownerPage, /username/i, storeName.toLowerCase());
     await ownerPage.getByRole("button", { name: /^save$/i }).first().click();
-    await expect(ownerPage.getByText(/saved|updated/i).first()).toBeVisible({ timeout: 10_000 });
+    await expectToast(ownerPage, /username saved/i);
 
     // Owner creates a product the member should later see.
     await gotoApp(ownerPage, "/products/new");
@@ -123,9 +126,9 @@ test.describe("team & access + notifications", () => {
     const ownerPage = await ownerCtx.newPage();
     await signUp(ownerPage, owner);
     await gotoApp(ownerPage, "/settings/account");
-    await fillStable(ownerPage, /^name$/i, storeName);
+    await fillStable(ownerPage, /username/i, storeName.toLowerCase());
     await ownerPage.getByRole("button", { name: /^save$/i }).first().click();
-    await expect(ownerPage.getByText(/saved|updated/i).first()).toBeVisible({ timeout: 10_000 });
+    await expectToast(ownerPage, /username saved/i);
 
     const viewerCtx = await browser.newContext();
     const viewerPage = await viewerCtx.newPage();

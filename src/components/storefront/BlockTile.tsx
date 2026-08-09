@@ -119,7 +119,7 @@ export const BlockTile = memo(function BlockTile({
       onClick={selectable ? handleClick : undefined}
       onKeyDown={selectable ? handleKeyDown : undefined}
       className={cn(
-        "relative flex h-full w-full flex-col",
+        "relative h-full w-full",
         // The tile fills its cell exactly, so inheriting the cell's corner
         // radius makes the card border and the selection ring CURVE with the
         // roundness setting instead of being sliced square by the cell's clip.
@@ -166,7 +166,13 @@ export const BlockTile = memo(function BlockTile({
         </div>
       )}
 
-      <BlockFace block={block} product={product} theme={theme} />
+      {/* The face clips ITSELF to the corner radius (the cell deliberately
+          no longer clips), so the controls above stay visible in the square
+          corner of a circle/pill tile. contain:paint keeps the per-cell paint
+          isolation the grid used to provide. */}
+      <div className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-[inherit] [contain:paint]">
+        <BlockFace block={block} product={product} theme={theme} />
+      </div>
     </div>
   );
 });

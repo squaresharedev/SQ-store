@@ -29,7 +29,7 @@ const FOCUS_RING =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background";
 
 const NAV_BUTTON = cn(
-  "flex size-8 items-center justify-center rounded-sm text-muted-foreground transition-colors duration-base ease-standard motion-reduce:transition-none hover:bg-accent hover:text-foreground",
+  "flex size-8 items-center justify-center rounded-none text-muted-foreground transition-colors duration-base ease-standard motion-reduce:transition-none hover:bg-accent hover:text-foreground",
   FOCUS_RING,
 );
 
@@ -205,9 +205,8 @@ export function Calendar({
                       className={cn(
                         "mx-auto my-0.5 flex size-9 items-center justify-center text-sm transition-colors duration-base ease-standard motion-reduce:transition-none",
                         FOCUS_RING,
-                        between
-                          ? "rounded-none bg-accent text-foreground"
-                          : "rounded-sm",
+                        "rounded-none",
+                        between && "bg-accent text-foreground",
                         isEndpoint
                           ? "bg-primary font-medium text-primary-foreground hover:bg-primary/90"
                           : !between && "hover:bg-accent",

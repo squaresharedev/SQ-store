@@ -39,6 +39,12 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
+# Local run output. `next dev` and a full Playwright run each produce megabytes
+# of it, and a captured log is a snapshot of one machine on one afternoon — it
+# ages badly and reviews as noise.
+/dev-server.log
+/e2e-run.log
+
 # env files — ignore real env files, but keep the committed examples.
 # `.env.production` is a deliberate exception: it holds NEXT_PUBLIC_* values
 # only (already public in wrangler.jsonc) and MUST be in the repo, because

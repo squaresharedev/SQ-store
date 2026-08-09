@@ -27,10 +27,7 @@ import { FilterMenu } from "@/components/ui/FilterMenu";
 import type { FilterOption } from "@/components/ui/FilterOptionList";
 import { SortSlidersIcon } from "@/components/ui/SortSlidersIcon";
 import { Spinner } from "@/components/ui/spinner";
-import {
-  primaryButtonClass,
-  secondaryButtonClass,
-} from "@/components/ui/control-styles";
+import { helpTextClass, infoTextClass, primaryButtonClass, secondaryButtonClass } from "@/components/ui/control-styles";
 import { cn } from "@/lib/utils";
 import { ProductList } from "./ProductList";
 
@@ -231,9 +228,9 @@ export function ProductsBrowser({
         )}
       >
         {isPending && (
-          <div className="pointer-events-none absolute right-3 top-3 z-10 flex items-center gap-2 rounded-[0.375rem] border border-border bg-background/90 px-2 py-1 shadow-sm backdrop-blur">
+          <div className="pointer-events-none absolute right-3 top-3 z-10 flex items-center gap-2 rounded-sm border border-border bg-background/90 px-2 py-1 shadow-sm backdrop-blur">
             <Spinner className="size-3.5 text-muted-foreground" />
-            <span className="font-inter text-xs text-muted-foreground">
+            <span className={infoTextClass}>
               Updating…
             </span>
           </div>
@@ -249,7 +246,7 @@ export function ProductsBrowser({
 
         {totalPages > 1 && (
           <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
-            <p className="font-inter text-sm text-muted-foreground">
+            <p className={helpTextClass}>
               {data.total} product{data.total === 1 ? "" : "s"} · page {data.page}{" "}
               of {totalPages}
             </p>

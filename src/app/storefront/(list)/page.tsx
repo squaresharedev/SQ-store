@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { pageShellClass } from "@/components/ui/surface-styles";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { listAllProducts } from "@/lib/products/queries";
 import { listStorefronts } from "@/lib/storefront/queries";
 import { StorefrontsList } from "@/components/storefront/StorefrontsList";
@@ -24,16 +26,12 @@ export default async function StorefrontsPage() {
   const { rows: storefrontRows, total: storefrontTotal } = storefronts;
 
   return (
-    <main className="mx-auto max-w-7xl px-6 py-8">
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-foreground md:text-3xl">
-          Storefronts
-        </h1>
-        <p className="mt-1 font-inter text-sm text-muted-foreground">
-          Each storefront is its own grid and theme. Create as many as you need,
-          then open one to edit it.
-        </p>
-      </div>
+    <main className={pageShellClass}>
+      <PageHeader
+        className="mb-6"
+        title="Storefronts"
+        subtitle="Each storefront is its own grid and theme. Create as many as you need, then open one to edit it."
+      />
 
       <StorefrontsList
         storefronts={storefrontRows}

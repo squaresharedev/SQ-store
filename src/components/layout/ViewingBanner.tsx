@@ -46,7 +46,7 @@ export function ViewingBanner({
         type="button"
         onClick={backToOwn}
         disabled={pending}
-        className="flex shrink-0 items-center gap-1 rounded-[0.375rem] px-2 py-1 font-inter text-xs font-medium text-muted-foreground transition-colors hover:bg-background hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
+        className="flex shrink-0 items-center gap-1 rounded-sm px-2 py-1 font-inter text-xs font-medium text-muted-foreground transition-colors hover:bg-background hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
       >
         <X className="size-3.5" aria-hidden />
         Back to your store

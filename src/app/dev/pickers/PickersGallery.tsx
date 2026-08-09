@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { helpTextClass } from "@/components/ui/control-styles";
 import { ColorPicker } from "@/components/ui/ColorPicker";
 import { COLOR_PRESETS } from "@/lib/theme/color-presets";
 
@@ -28,7 +29,7 @@ export function PickersGallery() {
         <h1 className="font-inter text-2xl font-semibold text-foreground">
           Color picker
         </h1>
-        <p className="font-inter text-sm text-muted-foreground">
+        <p className={helpTextClass}>
           One picker, every color field. The row is the whole control: a color
           wheel that opens the full picker, an eyedropper (Chromium only), and{" "}
           {COLOR_PRESETS.length} quick swatches. A custom color earns its own
@@ -64,7 +65,7 @@ export function PickersGallery() {
             }}
           />
         </div>
-        <p className="font-inter text-sm text-muted-foreground">
+        <p className={helpTextClass}>
           Stored value:{" "}
           <code className="font-mono">{textColor ?? "undefined (inherits)"}</code>
         </p>

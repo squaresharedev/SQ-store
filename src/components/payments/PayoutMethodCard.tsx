@@ -1,6 +1,9 @@
 "use client";
 
 import { Landmark } from "lucide-react";
+import { infoTextClass } from "@/components/ui/control-styles";
+import { cn } from "@/lib/utils";
+import { cardClass, iconTileClass } from "@/components/ui/surface-styles";
 import { Button } from "@/components/ui/button";
 import type { PayoutMethod } from "@/lib/payments/types";
 
@@ -19,7 +22,7 @@ export function PayoutMethodCard({
   return (
     <section
       aria-label="Payout method"
-      className="rounded-md border border-border bg-card p-4 shadow-xs"
+      className={cn(cardClass, "p-4")}
     >
       <div className="flex items-center justify-between gap-3">
         <h2 className="text-base font-semibold text-foreground">Payout method</h2>
@@ -32,14 +35,14 @@ export function PayoutMethodCard({
 
       {method ? (
         <div className="mt-3 flex items-center gap-3">
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-sm bg-secondary text-foreground">
+          <span className={cn(iconTileClass, "size-10")}>
             <Landmark className="size-5" strokeWidth={2} aria-hidden />
           </span>
           <div className="min-w-0">
             <p className="truncate text-sm font-medium text-foreground">
               {method.bankName} ···· {method.last4}
             </p>
-            <p className="font-inter text-xs text-muted-foreground">
+            <p className={infoTextClass}>
               {method.currency} · {method.country}
               {method.isDefault && " · Default"}
             </p>

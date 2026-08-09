@@ -2,12 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import {
-  destructiveButtonClass,
-  ghostButtonClass,
-  primaryButtonClass,
-  secondaryButtonClass,
-} from "@/components/ui/control-styles";
+import { destructiveButtonClass, ghostButtonClass, helpTextClass, primaryButtonClass, secondaryButtonClass } from "@/components/ui/control-styles";
 import type { OrderView } from "@/types/order-view";
 
 type ConfirmState = "idle" | "confirming" | "done";
@@ -18,7 +13,7 @@ function RefundAction() {
   if (state === "done") {
     return (
       <div className="flex flex-col gap-2">
-        <p className="font-inter text-sm text-muted-foreground">
+        <p className={helpTextClass}>
           Refunds require Stripe to be connected.
         </p>
         <Link href="/settings" className={secondaryButtonClass}>
@@ -73,7 +68,7 @@ function DisputeAction() {
 
   if (state === "done") {
     return (
-      <p className="font-inter text-sm text-muted-foreground">
+      <p className={helpTextClass}>
         Disputes are handled in your Stripe dashboard once Stripe is connected.
       </p>
     );
@@ -130,7 +125,7 @@ export function OrderActions({ order }: { order: OrderView }) {
 
   // status === "refunded" | "pending"
   return (
-    <p className="font-inter text-sm text-muted-foreground">
+    <p className={helpTextClass}>
       No actions are available for this order.
     </p>
   );

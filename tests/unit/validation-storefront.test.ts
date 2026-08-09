@@ -89,6 +89,78 @@ describe("storefrontConfigSchema — happy path", () => {
     }
   });
 
+  it("accepts per-tile card style overrides and rejects hostile variants", () => {
+    const config = validConfig();
+    const productBlock = config.blocks[0] as Record<string, unknown>;
+    productBlock.style = {
+      cornerRadius: 100,
+      showTitle: false,
+      titleStyle: "overlay",
+      titleDisplay: "hover",
+      priceDisplay: "hover",
+      priceTagPosition: "top-center",
+      priceTagStyle: "pill",
+      priceTagSize: "lg",
+    };
+    expect(storefrontConfigSchema.safeParse(config).success).toBe(true);
+
+    // A partial override (only what the seller changed) parses too.
+    const partial = validConfig();
+    (partial.blocks[0] as Record<string, unknown>).style = { cornerRadius: 50 };
+    expect(storefrontConfigSchema.safeParse(partial).success).toBe(true);
+
+    // Off-list enums, out-of-range ints, and unknown keys must all fail.
+    for (const style of [
+      { cornerRadius: 101 },
+      { cornerRadius: -1 },
+      { cornerRadius: 12.5 },
+      { titleStyle: "neon" },
+      { priceTagPosition: "everywhere" },
+      { priceTagSize: "xl" },
+      { background: "#ff0000" },
+      { className: "hacked" },
+    ]) {
+      const bad = validConfig();
+      (bad.blocks[0] as Record<string, unknown>).style = style;
+      expect(storefrontConfigSchema.safeParse(bad).success).toBe(false);
+    }
+
+    // Style on a non-product block is rejected (only product tiles carry it).
+    const wrongKind = validConfig();
+    (wrongKind.blocks[1] as Record<string, unknown>).style = { cornerRadius: 4 };
+    expect(storefrontConfigSchema.safeParse(wrongKind).success).toBe(false);
+  });
+
+  it("accepts shape geometry params and rejects out-of-range values", () => {
+    const config = validConfig();
+    config.blocks.push({
+      type: "shape",
+      id: "cccccccc-dddd-4eee-8fff-000000000000",
+      kind: "star",
+      color: "#171717",
+      x: 4,
+      y: 0,
+      w: 1,
+      h: 1,
+      roundness: 20,
+      points: 8,
+    });
+    expect(storefrontConfigSchema.safeParse(config).success).toBe(true);
+
+    for (const patch of [
+      { roundness: 51 },
+      { roundness: -1 },
+      { roundness: 10.5 },
+      { points: 2 },
+      { points: 13 },
+      { points: "5" },
+    ]) {
+      const bad = structuredClone(config);
+      Object.assign(bad.blocks[2] as Record<string, unknown>, patch);
+      expect(storefrontConfigSchema.safeParse(bad).success).toBe(false);
+    }
+  });
+
   it("accepts configs without optional header/embed (older saves)", () => {
     const cfg = validConfig();
     delete cfg.header;

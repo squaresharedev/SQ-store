@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useActionState } from "react";
 import { Check, X } from "lucide-react";
-import { FormStatus } from "@/components/settings/FormStatus";
+import { useActionToast } from "@/components/ui/Toast";
 import { SaveButton } from "@/components/ui/SaveButton";
 import { SettingsCard } from "@/components/settings/SettingsCard";
 import { Input } from "@/components/ui/input";
@@ -38,6 +38,7 @@ type CheckStatus = CheckResult | "checking" | "mine";
  */
 export function UsernameForm({ username }: { username: string }) {
   const [state, formAction, isPending] = useActionState(updateUsername, INITIAL);
+  useActionToast(state);
   const [value, setValue] = React.useState(username);
   const [checking, setChecking] = React.useState(false);
   const [checkResult, setCheckResult] = React.useState<CheckResult>("idle");
@@ -165,7 +166,6 @@ export function UsernameForm({ username }: { username: string }) {
             </p>
           )}
         </div>
-        <FormStatus state={state} />
       </form>
     </SettingsCard>
   );

@@ -3,7 +3,12 @@
 import * as React from "react";
 import Link from "next/link";
 import { CheckCheck } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Spinner } from "@/components/ui/spinner";
+import {
+  ghostButtonClass,
+  overlayItemClass,
+} from "@/components/ui/control-styles";
 import { NotificationItem } from "@/components/notifications/NotificationItem";
 import type { Notification } from "@/lib/notifications/types";
 
@@ -50,7 +55,10 @@ export function NotificationList({
           type="button"
           onClick={onMarkAll}
           disabled={unreadCount === 0}
-          className="flex items-center gap-1 rounded-[0.375rem] px-1.5 py-1 font-inter text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-40"
+          className={cn(
+            ghostButtonClass,
+            "min-h-0 gap-1 px-1.5 py-1 font-inter text-xs",
+          )}
         >
           <CheckCheck aria-hidden className="size-3.5" />
           Mark all read
@@ -93,7 +101,7 @@ export function NotificationList({
         <Link
           href="/notifications"
           onClick={onNavigateAway}
-          className="block rounded-[0.375rem] py-2 text-center text-sm font-medium text-foreground transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className={cn(overlayItemClass, "justify-center font-medium")}
         >
           View all
         </Link>

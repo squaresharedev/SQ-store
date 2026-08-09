@@ -9,6 +9,8 @@ const eslintConfig = defineConfig([
   globalIgnores([
     // Default ignores of eslint-config-next:
     ".next/**",
+    // The e2e suite's own Next build output, same reasoning as .next/.
+    ".next-e2e/**",
     "out/**",
     "build/**",
     "next-env.d.ts",

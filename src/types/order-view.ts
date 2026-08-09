@@ -1,6 +1,7 @@
 // Shared view contract for the /orders page. Every orders module (queries,
 // table, toolbar, detail, badges) speaks these types — no module invents its
-// own row shape. Types only: safe to import from client and server code.
+// own row shape. Types plus the bounds that belong to them, and nothing else:
+// no imports, no runtime dependencies, safe from client and server code alike.
 //
 // Money is ALWAYS integer cents; formatting happens in one place
 // (lib/format/money.ts). Dates are ISO strings from the DB.
@@ -26,6 +27,17 @@ export type OrderView = {
   createdAt: string;
 };
 
+/**
+ * Longest search term the orders list accepts.
+ *
+ * 254 is the RFC 5321 maximum for an email address, and `search` matches
+ * buyer_email — so this is "as long as a value in that column can be", not an
+ * arbitrary round number. It lives beside the filter contract because both
+ * ends need it: the toolbar input caps typing here, and the page caps the `?q=`
+ * URL param, which is the end nobody types into.
+ */
+export const ORDERS_SEARCH_MAX_LENGTH = 254;
+
 /** Toolbar output = query input. All fields optional; absent = no filter. */
 export type OrderFilters = {
   status?: OrderStatus;
@@ -34,7 +46,8 @@ export type OrderFilters = {
   dateFrom?: string;
   /** Inclusive ISO date (YYYY-MM-DD) upper bound on createdAt. */
   dateTo?: string;
-  /** Case-insensitive substring match on buyerEmail. */
+  /** Case-insensitive substring match on buyerEmail, capped at
+   *  ORDERS_SEARCH_MAX_LENGTH by whoever populates it. */
   search?: string;
 };
 

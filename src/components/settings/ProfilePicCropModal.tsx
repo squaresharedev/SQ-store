@@ -5,11 +5,7 @@ import { ZoomIn, ZoomOut } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 import { ImageUpIcon } from "@/components/ui/ImageUpIcon";
 import { cn } from "@/lib/utils";
-import {
-  focusRingClass,
-  primaryButtonClass,
-  secondaryButtonClass,
-} from "@/components/ui/control-styles";
+import { errorTextClass, focusRingClass, primaryButtonClass, secondaryButtonClass } from "@/components/ui/control-styles";
 
 /**
  * Pan/zoom crop surface for a profile photo, ported from the SquareShare app
@@ -290,7 +286,7 @@ export function ProfilePicCropModal({
           onPointerCancel={handlePointerUp}
           onKeyDown={handleKeyDown}
           className={cn(
-            "relative aspect-square w-full max-w-[280px] touch-none select-none overflow-hidden rounded-lg bg-black",
+            "relative aspect-square w-full max-w-[280px] touch-none select-none overflow-hidden rounded-none bg-black",
             focusRingClass,
             ready && (grabbing ? "cursor-grabbing" : "cursor-grab"),
           )}
@@ -359,7 +355,7 @@ export function ProfilePicCropModal({
         </div>
 
         {error && (
-          <p role="alert" className="font-inter text-sm text-destructive">
+          <p role="alert" className={errorTextClass}>
             {error}
           </p>
         )}

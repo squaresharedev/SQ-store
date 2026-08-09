@@ -1,9 +1,10 @@
+import { pageShellClass } from "@/components/ui/surface-styles";
 import { CardGridSkeleton } from "@/components/ui/CardGridSkeleton";
 
 /** Route-level loading state while the server queries the product page. */
 export default function ProductsLoading() {
   return (
-    <main className="mx-auto max-w-7xl px-6 py-8">
+    <main className={pageShellClass}>
       <div className="mb-6">
         {/* Same size as the real header (products/page.tsx) so the title does
             not resize when the data lands. */}

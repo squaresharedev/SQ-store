@@ -2,13 +2,13 @@
 
 import { useActionState } from "react";
 import { ArrowRight } from "lucide-react";
-import { FormStatus } from "@/components/settings/FormStatus";
+import { useActionToast } from "@/components/ui/Toast";
 import { SaveButton } from "@/components/ui/SaveButton";
 import { SettingsCard } from "@/components/settings/SettingsCard";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
-import { iconNudgeRightClass } from "@/components/ui/control-styles";
+import { helpTextClass, iconNudgeRightClass, infoTextClass } from "@/components/ui/control-styles";
 import {
   requestEmailChange,
   type SettingsActionState,
@@ -32,6 +32,7 @@ export function EmailChangeForm({
     requestEmailChange,
     INITIAL,
   );
+  useActionToast(state);
 
   return (
     <SettingsCard
@@ -39,7 +40,7 @@ export function EmailChangeForm({
       description="Changing it sends a confirmation link first. Nothing moves until you actually click it, so typos here are low stakes."
     >
       <form action={formAction} className="flex flex-col gap-4" noValidate>
-        <p className="font-inter text-sm text-muted-foreground">
+        <p className={helpTextClass}>
           Currently signed in as{" "}
           <span className="font-medium text-foreground">{email}</span>
         </p>
@@ -65,13 +66,12 @@ export function EmailChangeForm({
               placeholder="••••••••"
               required
             />
-            <p className="font-inter text-xs text-muted-foreground">
+            <p className={infoTextClass}>
               Whoever controls your email address can reset your password, so
               this change needs your password to confirm it&apos;s you.
             </p>
           </div>
         )}
-        <FormStatus state={state} showSuccess />
         <div>
           <SaveButton
             pending={isPending}

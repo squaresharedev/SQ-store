@@ -1,6 +1,6 @@
 "use client";
 
-import type { CSSProperties } from "react";
+import { useId, type CSSProperties } from "react";
 import {
   RING_DEFAULT_WIDTH,
   type ShapeBlock,
@@ -9,26 +9,34 @@ import {
 import { isStrictHexColor } from "@/lib/validation/storefront";
 import { cn } from "@/lib/utils";
 import { SHAPE_SPECS } from "./shape-specs";
+import { defaultRoundness, shapePath, supportsRoundness } from "./shape-geometry";
 
 /**
- * The visual face of a shape block. Every shape resolves through the fixed
- * SHAPE_SPECS map (code-defined classes + clip-paths, exhaustive over
- * ShapeKind); the only user data that reaches a style attribute is the block's
- * colors — each gated by `isStrictHexColor` — and its numeric border width and
- * opacity, both bounded by the schema. A color that fails the gate falls back
- * to `bg-muted` / `border-muted`, so the shape stays visible and the canvas
- * never crashes.
+ * The visual face of a shape block. Every shape fills its tile edge to edge
+ * and stretches with it (a circle on a wide tile is an oval; a stretched
+ * triangle is a wide triangle). The only user data that reaches a style
+ * attribute is the block's colors — each gated by `isStrictHexColor` — and
+ * its schema-bounded integers (border width, opacity, roundness, points). A
+ * color that fails the gate falls back to muted tokens, so the shape stays
+ * visible and the canvas never crashes.
  *
- * Allowlist contract: config data selects a spec by KEY only. User input NEVER
- * becomes raw CSS — not a class name, not a clip-path, not a property key.
+ * Allowlist contract: config data selects a shape by KEY only, and the
+ * geometry parameters resolve through shape-geometry's code-defined path
+ * generation. User input NEVER becomes raw CSS or raw path data.
  *
  * Three rendering paths:
- * - `ring`: border-only circle, its stroke painted by `color`.
- * - clip-path kinds: a border layer under an inset fill layer, because a real
- *   CSS border would be sliced in half by the clip.
- * - the rest: one box with a real CSS border.
+ * - `ring`: border-only ellipse, its stroke painted by `color`.
+ * - path kinds (star, hexagon, ...): ONE stretched SVG. The path is
+ *   generated (so point count and corner roundness are adjustable); the
+ *   outline is a stroke clipped to the shape's inside at double width, which
+ *   keeps it a uniform `borderWidth` px at any stretch
+ *   (vector-effect: non-scaling-stroke).
+ * - the box kinds: one div with a real CSS border; corner roundness is
+ *   applied in cqmin (percent of the tile's SHORTER side), so rounding
+ *   stays uniform when the tile is not square.
  */
 export function ShapeTileContent({ block }: { block: ShapeBlock }) {
+  const clipId = useId();
   const spec = SHAPE_SPECS[block.kind];
 
   // Gate the stored colors before they touch any style attribute.
@@ -44,13 +52,49 @@ export function ShapeTileContent({ block }: { block: ShapeBlock }) {
   const opacityStyle: CSSProperties =
     opacity < 100 ? { opacity: opacity / 100 } : {};
 
-  // Fallback classes for when a color is absent / invalid.
-  const fallbackFill = validColor ? "" : "bg-muted";
-  const fallbackBorder = validBorderColor ? "" : "bg-foreground";
+  const roundness = block.roundness ?? defaultRoundness(block.kind);
+  const path = shapePath(block.kind, {
+    points: block.points,
+    roundness,
+  });
 
   let shape: React.ReactNode;
 
-  if (block.kind === "ring") {
+  if (path) {
+    shape = (
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 100 100"
+        // The 100x100 shape box stretches with the tile; the outline stays
+        // uniform anyway via non-scaling-stroke below.
+        preserveAspectRatio="none"
+        className="size-full"
+        style={opacityStyle}
+      >
+        {borderWidth > 0 && (
+          <clipPath id={clipId}>
+            <path d={path} />
+          </clipPath>
+        )}
+        <path
+          d={path}
+          className={validColor ? undefined : "fill-muted"}
+          style={validColor ? { fill: validColor } : undefined}
+          {...(borderWidth > 0
+            ? {
+                // Centered stroke at double width, clipped to the shape:
+                // an INSIDE outline of exactly borderWidth, matching the
+                // CSS-border look of the box kinds.
+                clipPath: `url(#${clipId})`,
+                stroke: validBorderColor ?? "var(--color-foreground)",
+                strokeWidth: borderWidth * 2,
+                vectorEffect: "non-scaling-stroke" as const,
+              }
+            : {})}
+        />
+      </svg>
+    );
+  } else if (block.kind === "ring") {
     // The ring IS its stroke: `color` paints the border and the width slider
     // doubles as the ring's thickness.
     shape = (
@@ -65,51 +109,23 @@ export function ShapeTileContent({ block }: { block: ShapeBlock }) {
         }}
       />
     );
-  } else if (spec.clip) {
-    const clipStyle: CSSProperties = { clipPath: spec.clip };
-    shape = (
-      <div
-        aria-hidden="true"
-        className={cn("relative", spec.className)}
-        style={opacityStyle}
-      >
-        {/* Bottom layer: the outline color, or the fill when there is no
-            outline. */}
-        <div
-          className={cn(
-            "absolute inset-0",
-            borderWidth > 0 ? fallbackBorder : fallbackFill,
-          )}
-          style={{
-            ...clipStyle,
-            backgroundColor:
-              (borderWidth > 0 ? validBorderColor : validColor) ?? undefined,
-          }}
-        />
-        {/* Top layer: the fill, inset by the outline width. */}
-        {borderWidth > 0 && (
-          <div
-            className={cn("absolute", fallbackFill)}
-            style={{
-              ...clipStyle,
-              inset: borderWidth,
-              backgroundColor: validColor ?? undefined,
-            }}
-          />
-        )}
-      </div>
-    );
   } else {
     shape = (
       <div
         aria-hidden="true"
         className={cn(
           spec.className,
-          fallbackFill,
+          validColor ? "" : "bg-muted",
           borderWidth > 0 && !validBorderColor && "border-foreground",
         )}
         style={{
           ...(validColor ? { backgroundColor: validColor } : {}),
+          // Adjustable corner roundness for the box kinds that support it,
+          // in cqmin so corners stay uniform on stretched tiles. The fully
+          // round kinds (circle, pill, ...) carry their radius in classes.
+          ...(roundness > 0 && supportsRoundness(block.kind)
+            ? { borderRadius: `${roundness}cqmin` }
+            : {}),
           ...(borderWidth > 0
             ? {
                 borderStyle: "solid",
@@ -124,7 +140,11 @@ export function ShapeTileContent({ block }: { block: ShapeBlock }) {
   }
 
   return (
-    <div className="flex min-h-0 flex-1 items-center justify-center p-2">
+    // Edge to edge: no padding, the shape spans the whole tile. A SIZE
+    // container, so cqmin radii resolve against the tile's shorter side.
+    // Containment is safe here: the wrapper's size comes from the tile's
+    // flex column, never its content.
+    <div className="flex min-h-0 flex-1 items-center justify-center [container-type:size]">
       {shape}
     </div>
   );
@@ -134,10 +154,18 @@ export function ShapeTileContent({ block }: { block: ShapeBlock }) {
  * Tiny icon version of a shape kind, drawn in `currentColor` so it follows
  * the surrounding button's text color. Used by the toolbar's shape menu and
  * the shape inspector's kind grid — pickers show the SHAPES themselves, no
- * text.
+ * text. Path kinds draw their real (default-parameter) geometry.
  */
 export function ShapeKindGlyph({ kind }: { kind: ShapeKind }) {
   const spec = SHAPE_SPECS[kind];
+  const path = shapePath(kind);
+  if (path) {
+    return (
+      <svg aria-hidden="true" viewBox="0 0 100 100" className="size-3.5">
+        <path d={path} className="fill-current" />
+      </svg>
+    );
+  }
   if (kind === "ring") {
     return (
       <span
@@ -147,10 +175,6 @@ export function ShapeKindGlyph({ kind }: { kind: ShapeKind }) {
     );
   }
   return (
-    <span
-      aria-hidden="true"
-      className={cn(spec.glyphClassName, "bg-current")}
-      style={spec.clip ? { clipPath: spec.clip } : undefined}
-    />
+    <span aria-hidden="true" className={cn(spec.glyphClassName, "bg-current")} />
   );
 }

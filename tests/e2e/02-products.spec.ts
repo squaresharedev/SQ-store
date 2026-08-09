@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { freshUser, signUp } from "./helpers";
+import { expectToast, freshUser, signUp } from "./helpers";
 
 test.describe("products CRUD", () => {
   test("add → list → edit → delete a product", async ({ page }) => {
@@ -16,8 +16,11 @@ test.describe("products CRUD", () => {
     await page.getByRole("button", { name: /save product/i }).click();
 
     await page.waitForURL(/\/products$/, { timeout: 20_000 });
-    await expect(page.getByText("E2E Print")).toBeVisible();
+    // The CARD, by its heading. Bare text would also match the "saved" toast
+    // riding along from the form, which quotes the title back at you.
+    await expect(page.getByRole("heading", { name: "E2E Print" })).toBeVisible();
     await expect(page.getByText("€14.00")).toBeVisible();
+    await expectToast(page, /e2e print/i);
 
     // --- edit ---
     await page.getByRole("link", { name: "Edit E2E Print" }).click();
@@ -26,7 +29,7 @@ test.describe("products CRUD", () => {
     await page.getByLabel(/price/i).fill("21.50");
     await page.getByRole("button", { name: /save changes/i }).click();
     await page.waitForURL(/\/products$/, { timeout: 20_000 });
-    await expect(page.getByText("E2E Print v2")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "E2E Print v2" })).toBeVisible();
     await expect(page.getByText("€21.50")).toBeVisible();
 
     // --- delete ---
@@ -53,7 +56,15 @@ test.describe("products CRUD", () => {
     await page.getByLabel("Title").fill("Priced wrong");
     await page.getByLabel(/price/i).fill("0");
     await page.getByRole("button", { name: /save product/i }).click();
-    await expect(page.getByText(/price must be a number greater than zero/i)).toBeVisible();
+
+    // A blocked save is said in BOTH places, and that is the point rather than
+    // an accident: the field says which one is wrong, and the toast says it
+    // again where the Save button is — on a form this long the offending field
+    // is usually scrolled off screen, so the click otherwise reads as a no-op.
+    await expect(
+      page.locator("form").getByText(/price must be a number greater than zero/i),
+    ).toBeVisible();
+    await expectToast(page, /price must be a number greater than zero/i);
     // Still on the form — nothing was saved.
     await expect(page).toHaveURL(/\/products\/new/);
   });

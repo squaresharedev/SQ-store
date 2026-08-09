@@ -88,14 +88,22 @@ describe("security headers", () => {
     it("ships the directives that do not need a nonce", () => {
       // A nonce is unavailable on this stack (Next 16 Proxy is Node-only,
       // OpenNext rejects Node middleware), so script-src/style-src must keep
-      // 'unsafe-inline'. These five are what the policy is actually FOR, and
-      // each closes a distinct hole: framing, base-tag injection, plugin
-      // content, offsite form posts, and everything not otherwise named.
+      // 'unsafe-inline'. These four are what the policy is actually FOR, and
+      // each closes a distinct hole: base-tag injection, plugin content,
+      // offsite form posts, and everything not otherwise named.
       expect(CONFIG).toContain("default-src 'self'");
-      expect(CONFIG).toContain("frame-ancestors 'none'");
       expect(CONFIG).toContain("base-uri 'self'");
       expect(CONFIG).toContain("form-action 'self'");
       expect(CONFIG).toContain("object-src 'none'");
+    });
+
+    it("keeps frame-ancestors OUT of the report-only policy", () => {
+      // By spec, frame-ancestors is ignored in a report-only policy, and every
+      // browser logs a console warning saying so on every page load. Framing
+      // defence is X-Frame-Options DENY (asserted above); the directive joins
+      // the CSP only when the policy flips to enforcement. Comments are
+      // stripped first: the prose explaining this legitimately names it.
+      expect(stripComments(CONFIG)).not.toContain("frame-ancestors");
     });
 
     it("allows the Supabase realtime socket", () => {

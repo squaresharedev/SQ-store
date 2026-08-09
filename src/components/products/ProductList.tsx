@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { SearchX } from "lucide-react";
+import { emptyStateClass } from "@/components/ui/surface-styles";
 import type { Product, ProductSalesSummary } from "@/types/product";
-import type { ActionError } from "@/lib/errors";
 import { deleteProduct } from "@/lib/products/actions";
-import { ActionErrorNotice } from "@/components/ui/ActionErrorNotice";
+import { useToast } from "@/components/ui/Toast";
 import { Modal } from "@/components/ui/modal";
 import {
   destructiveButtonClass,
@@ -35,8 +35,8 @@ export function ProductList({
   filtered?: boolean;
   onClearFilters?: () => void;
 }) {
+  const toast = useToast();
   const [products, setProducts] = useState<Product[]>(initial);
-  const [deleteError, setDeleteError] = useState<ActionError | null>(null);
   // The product awaiting confirmation. Deleting takes the product's file and
   // image with it and cannot be undone, so it is never a single click.
   const [pendingDelete, setPendingDelete] = useState<Product | null>(null);
@@ -54,7 +54,6 @@ export function ProductList({
     const target = pendingDelete;
     if (!target || deleting) return;
     setDeleting(true);
-    setDeleteError(null);
     const previous = products;
     // Optimistic: the card goes as soon as the seller confirms, and comes back
     // with an explanation if the server refuses.
@@ -64,8 +63,13 @@ export function ProductList({
     setPendingDelete(null);
     if (!result.ok) {
       setProducts(previous);
-      setDeleteError(result.error);
+      toast.error(result.error.message, { lines: [result.error.fix] });
+      return;
     }
+    // The card leaving the grid is the only other evidence a delete worked,
+    // and on a full page of similar cards that is easy to miss — especially
+    // when the confirm modal was covering the one that went.
+    toast.success(`"${target.title}" was deleted.`);
   }
 
   if (products.length === 0) {
@@ -73,7 +77,7 @@ export function ProductList({
     // to someone who has 200 products and a typo would be nonsense.
     if (filtered) {
       return (
-        <div className="flex flex-col items-center justify-center rounded-md border border-dashed border-border px-6 py-16 text-center">
+        <div className={emptyStateClass}>
           <div className="mb-4 flex size-12 items-center justify-center rounded-full border border-border bg-background shadow-xs">
             <SearchX
               className="size-5 text-muted-foreground"
@@ -105,7 +109,6 @@ export function ProductList({
 
   return (
     <>
-      {deleteError && <ActionErrorNotice error={deleteError} className="mb-4" />}
       {/* Four-up from the laptop breakpoint (lg): the smaller card carries it. */}
       <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {products.map((product) => (

@@ -1,4 +1,6 @@
 import type { ReactNode } from "react";
+import { helpTextClass } from "@/components/ui/control-styles";
+import { cardClass } from "@/components/ui/surface-styles";
 import { cn } from "@/lib/utils";
 import {
   CardBackdrop,
@@ -35,7 +37,8 @@ export function ModuleCard({
     <section
       id={id}
       className={cn(
-        "rounded-md border border-border bg-card p-4 shadow-xs",
+        cardClass,
+        "p-4",
         decoration && "relative overflow-hidden",
         className,
       )}
@@ -56,5 +59,5 @@ export function ModuleCard({
 
 /** Muted one-liner used by every module's empty state. */
 export function ModuleEmptyText({ children }: { children: ReactNode }) {
-  return <p className="font-inter text-sm text-muted-foreground">{children}</p>;
+  return <p className={helpTextClass}>{children}</p>;
 }

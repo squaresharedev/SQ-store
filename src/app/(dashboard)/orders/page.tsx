@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
+import { pageShellClass } from "@/components/ui/surface-styles";
+import { cn } from "@/lib/utils";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { DEFAULT_PAGE_SIZE, getOrderById, listOrders } from "@/lib/orders/queries";
 import { OrdersPage } from "@/components/orders/OrdersPage";
-import type {
-  OrderChannel,
-  OrderFilters,
-  OrderSort,
-  OrderStatus,
+import {
+  ORDERS_SEARCH_MAX_LENGTH,
+  type OrderChannel,
+  type OrderFilters,
+  type OrderSort,
+  type OrderStatus,
 } from "@/types/order-view";
 
 export const metadata: Metadata = {
@@ -58,7 +62,16 @@ function parseParams(params: SearchParams): {
   if (from && ISO_DATE.test(from)) filters.dateFrom = from;
   const to = first(params.to);
   if (to && ISO_DATE.test(to)) filters.dateTo = to;
-  const search = first(params.q)?.trim();
+  // `?q=` is the one filter that is free text rather than a known literal, and
+  // it is reachable by anyone who can edit a URL — so it is bounded here, at
+  // the parse boundary, like every other param. The cap also governs what gets
+  // echoed back into the toolbar input as its value. Control characters are
+  // dropped for the same reason every other free-text field rejects them; here
+  // they can only have arrived by hand.
+  const search = first(params.q)
+    ?.replace(/[\u0000-\u001f\u007f]/g, "")
+    .trim()
+    .slice(0, ORDERS_SEARCH_MAX_LENGTH);
   if (search) filters.search = search;
 
   const sortField = first(params.sort);
@@ -91,15 +104,11 @@ export default async function OrdersRoutePage({
   ]);
 
   return (
-    <main className="mx-auto max-w-7xl space-y-6 px-6 py-8">
-      <div>
-        <h1 className="text-2xl font-semibold text-foreground md:text-3xl">
-          Orders
-        </h1>
-        <p className="mt-1 font-inter text-sm text-muted-foreground">
-          Every sale across your embed and the marketplace.
-        </p>
-      </div>
+    <main className={cn(pageShellClass, "space-y-6")}>
+      <PageHeader
+        title="Orders"
+        subtitle="Every sale across your embed and the marketplace."
+      />
       <OrdersPage
         data={data}
         filters={filters}

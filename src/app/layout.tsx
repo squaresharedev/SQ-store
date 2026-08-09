@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import { ToastProvider } from "@/components/ui/Toast";
 import { cn } from "@/lib/utils";
 
 // Self-hosted (downloaded from Google Fonts into ./fonts) so they build and
@@ -83,7 +84,14 @@ export default function RootLayout({
         "font-sans",
       )}
     >
-      <body className="min-h-screen antialiased">{children}</body>
+      {/* Toasts are mounted at the ROOT, not per route group. Every surface
+          that reports an outcome gets them — settings and the storefront
+          editor live outside (dashboard), and a provider per group meant a
+          toast raised just before a cross-group navigation was unmounted
+          mid-sentence by the very navigation it was confirming. */}
+      <body className="min-h-screen antialiased">
+        <ToastProvider>{children}</ToastProvider>
+      </body>
     </html>
   );
 }

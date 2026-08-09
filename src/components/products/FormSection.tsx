@@ -1,5 +1,8 @@
 import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
+import { infoTextClass } from "@/components/ui/control-styles";
+import { cn } from "@/lib/utils";
+import { cardClass, iconTileClass } from "@/components/ui/surface-styles";
 
 /**
  * One scannable group of the product form: a bordered card with an icon chip,
@@ -21,15 +24,15 @@ export function FormSection({
   return (
     <section
       aria-label={title}
-      className="rounded-md border border-border bg-card p-5 shadow-xs"
+      className={cn(cardClass, "p-5")}
     >
       <div className="mb-5 flex items-center gap-3">
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-sm bg-secondary text-foreground">
+        <span className={cn(iconTileClass, "size-9")}>
           <Icon className="size-4" strokeWidth={2} aria-hidden="true" />
         </span>
         <div>
           <h2 className="text-base font-semibold text-foreground">{title}</h2>
-          <p className="font-inter text-xs text-muted-foreground">
+          <p className={infoTextClass}>
             {description}
           </p>
         </div>

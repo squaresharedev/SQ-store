@@ -11,11 +11,15 @@ import {
   GRID_ROWS_DEFAULT,
   clampToCanvas,
   columnsThatFit,
+  edgeCursor,
+  edgesUnderPointer,
   placementIsFree,
   reflowBlocks,
+  resizeByEdges,
   type GridBlock,
   type GridPlacement,
   type RenderGridBlock,
+  type ResizeEdges,
 } from "./gridConstants";
 
 // PRESENTATION-AGNOSTIC canvas grid. Renders CELLS at the coordinates their
@@ -122,8 +126,13 @@ interface GridCommonProps<TData> {
   /** Extra classes for each cell surface (e.g. a theme radius). */
   cellClassName?: string;
   /** Inline styles per cell, for values classes can't express (e.g. a numeric
-   *  border-radius that scales with the block's span). */
-  cellStyle?: (placement: GridPlacement) => React.CSSProperties;
+   *  border-radius that scales with the block's span). Occupied cells also
+   *  receive their block, so a consumer can style cells per block (empty
+   *  cells and the drag ghost call it with the placement alone). */
+  cellStyle?: (
+    placement: GridPlacement,
+    block?: GridBlock<TData>,
+  ) => React.CSSProperties;
   /** Draw the free cells, so the board reads as a board. Editable only. */
   showEmptyCells?: boolean;
   /** Click a free cell (editable only) — used to insert right there. */
@@ -327,6 +336,22 @@ export function Grid<TData>(props: GridProps<TData>) {
     if (!interactive || event.button !== 0) return;
     // Presses on the cell's own controls (remove, resize) keep their behavior.
     if ((event.target as HTMLElement).closest("button")) return;
+
+    // A press near the cell's border resizes from that side; only the inner
+    // surface starts a move. Touch keeps the corner handle instead: edge
+    // strips are too thin for a finger, and a mis-grab there would resize a
+    // tile the finger meant to drag.
+    if (event.pointerType !== "touch") {
+      const edges = edgesUnderPointer(
+        event.currentTarget.getBoundingClientRect(),
+        event.clientX,
+        event.clientY,
+      );
+      if (edges) {
+        startEdgeResize(event, block, edges);
+        return;
+      }
+    }
     const strides = readStrides();
     if (!strides) return;
 
@@ -382,6 +407,118 @@ export function Grid<TData>(props: GridProps<TData>) {
       if (!dragging || !latestValid) return;
       if (latest.x !== origin.x || latest.y !== origin.y) {
         onMove?.(block.key, latest.x, latest.y);
+      }
+    };
+
+    window.addEventListener("pointermove", handleMove);
+    window.addEventListener("pointerup", handleUp);
+    window.addEventListener("pointercancel", handleUp);
+    cleanupRef.current = () => endGesture(handleMove, handleUp);
+  }
+
+  /**
+   * Resize by dragging a cell's own border: the grabbed side(s) follow the
+   * cursor, the opposite sides stay pinned (resizeByEdges owns that math).
+   * A press that never travels DRAG_THRESHOLD stays a click, so selecting a
+   * tile by its edge still works. Preview painting reuses the same
+   * gestureRef pipeline as the corner handle.
+   */
+  function startEdgeResize(
+    event: React.PointerEvent<HTMLLIElement>,
+    block: GridBlock<TData>,
+    edges: ResizeEdges,
+  ) {
+    const strides = readStrides();
+    const cell = event.currentTarget;
+    if (!strides) return;
+
+    // Captured ONCE (see startResize): the gesture mutates this element's
+    // box, so a fresh rect mid-drag would measure the preview.
+    const rect = cell.getBoundingClientRect();
+    const startX = event.clientX;
+    const startY = event.clientY;
+    const origin: GridPlacement = {
+      x: block.x,
+      y: block.y,
+      w: block.w,
+      h: block.h,
+    };
+    let dragging = false;
+    let latest = origin;
+    let latestValid = true;
+
+    const cellW = strides.strideX - strides.gapX;
+    const cellH = strides.strideY - strides.gapY;
+    const boardLeft = rect.left - block.x * strides.strideX;
+    const boardTop = rect.top - block.y * strides.strideY;
+    const boardRight = boardLeft + columns * cellW + (columns - 1) * strides.gapX;
+    const boardBottom = boardTop + rows * cellH + (rows - 1) * strides.gapY;
+
+    const handleMove = (moveEvent: PointerEvent) => {
+      const dx = moveEvent.clientX - startX;
+      const dy = moveEvent.clientY - startY;
+      // A short press is a click (select); only real travel starts the resize.
+      if (!dragging && Math.hypot(dx, dy) < DRAG_THRESHOLD) return;
+      if (!dragging) {
+        dragging = true;
+        setDragCursorLock(true);
+        setActive({ key: block.key, mode: "resize" });
+      }
+
+      const col = clamp(
+        Math.floor((moveEvent.clientX - boardLeft) / strides.strideX),
+        0,
+        columns - 1,
+      );
+      const row = clamp(
+        Math.floor((moveEvent.clientY - boardTop) / strides.strideY),
+        0,
+        rows - 1,
+      );
+      const candidate = resizeByEdges(origin, edges, col, row, columns, rows);
+      latest = candidate;
+      latestValid = placementIsFree(blocks, candidate, block.key, columns, rows);
+
+      // The preview box in SCREEN px: pinned sides keep the committed edge,
+      // dragged sides follow the cursor (clamped to one cell and the board).
+      const left = edges.w
+        ? clamp(moveEvent.clientX, boardLeft, rect.right - cellW)
+        : rect.left;
+      const right = edges.e
+        ? clamp(moveEvent.clientX, rect.left + cellW, boardRight)
+        : rect.right;
+      const top = edges.n
+        ? clamp(moveEvent.clientY, boardTop, rect.bottom - cellH)
+        : rect.top;
+      const bottom = edges.s
+        ? clamp(moveEvent.clientY, rect.top + cellH, boardBottom)
+        : rect.bottom;
+      gestureRef.current = {
+        key: block.key,
+        mode: "resize",
+        placement: candidate,
+        valid: latestValid,
+        // The tile keeps its committed cell in the layout, so a west/north
+        // stretch is drawn as "same box, shifted back" (unscaled px).
+        offset: {
+          x: (left - rect.left) / strides.scale,
+          y: (top - rect.top) / strides.scale,
+        },
+        size: { w: (right - left) / strides.scale, h: (bottom - top) / strides.scale },
+      };
+      scheduleGesturePaint();
+    };
+
+    const handleUp = () => {
+      endGesture(handleMove, handleUp);
+      if (!dragging || !latestValid) return;
+      if (
+        latest.x !== origin.x ||
+        latest.y !== origin.y ||
+        latest.w !== origin.w ||
+        latest.h !== origin.h
+      ) {
+        onResize?.(block.key, latest);
       }
     };
 
@@ -504,6 +641,33 @@ export function Grid<TData>(props: GridProps<TData>) {
     cleanupRef.current = () => endGesture(handleMove, handleUp);
   }
 
+  /**
+   * Hover feedback for the edge zones: a resize cursor near a border, the
+   * grab cursor (from the class) on the inner surface. Written straight to
+   * the node, never through state — this fires on every pointermove.
+   */
+  function updateHoverCursor(event: React.PointerEvent<HTMLLIElement>) {
+    if (!interactive || event.pointerType === "touch") return;
+    // Mid-gesture the drag owns the cursor; leave it alone.
+    if (gestureRef.current) return;
+    const cell = event.currentTarget;
+    if ((event.target as HTMLElement).closest("button")) {
+      cell.style.cursor = "";
+      return;
+    }
+    const edges = edgesUnderPointer(
+      cell.getBoundingClientRect(),
+      event.clientX,
+      event.clientY,
+    );
+    const next = edges ? edgeCursor(edges) : "";
+    if (cell.style.cursor !== next) cell.style.cursor = next;
+  }
+
+  function resetHoverCursor(event: React.PointerEvent<HTMLLIElement>) {
+    event.currentTarget.style.cursor = "";
+  }
+
   /** Arrows move the focused block; with Shift they resize it. This is the
    *  whole keyboard story for placement, so it must stay in step with drag. */
   function onCellKeyDown(
@@ -618,6 +782,8 @@ export function Grid<TData>(props: GridProps<TData>) {
               onPointerDown={
                 interactive ? (event) => startMove(event, block) : undefined
               }
+              onPointerMove={interactive ? updateHoverCursor : undefined}
+              onPointerLeave={interactive ? resetHoverCursor : undefined}
               onKeyDown={
                 interactive ? (event) => onCellKeyDown(event, block) : undefined
               }
@@ -626,13 +792,17 @@ export function Grid<TData>(props: GridProps<TData>) {
               onDragStart={(event) => event.preventDefault()}
               style={{
                 ...placementStyle(placement),
-                ...cellStyle?.(placement),
+                ...cellStyle?.(placement, block),
                 // The transform / size of a tile under gesture is written
                 // imperatively, so it is deliberately absent here.
                 ...(gesture ? { willChange: "transform" } : {}),
               }}
               className={cn(
-                "group relative overflow-hidden",
+                // NO overflow clip here: content clipping (to the corner
+                // radius) is renderBlock's job, so the remove chip and the
+                // resize handle can sit in the square corner of a heavily
+                // rounded tile instead of being cut off by its clip.
+                "group relative",
                 GRID_CELL_RADIUS_CLASS,
                 cellClassName,
                 interactive && "cursor-grab active:cursor-grabbing",

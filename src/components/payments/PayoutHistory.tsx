@@ -1,5 +1,6 @@
 "use client";
 
+import { cardClass } from "@/components/ui/surface-styles";
 import { formatCents } from "@/lib/format/money";
 import { formatOrderDate } from "@/lib/format/date";
 import type { Payout } from "@/lib/payments/types";
@@ -23,7 +24,7 @@ export function PayoutHistory({
   return (
     <section
       aria-label="Payout history"
-      className="rounded-md border border-border bg-card shadow-xs"
+      className={cardClass}
     >
       <div className="border-b border-border px-4 py-3">
         <h2 className="text-base font-semibold text-foreground">Payouts</h2>

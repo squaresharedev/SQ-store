@@ -3,8 +3,12 @@
 import { useId, useState } from "react";
 import { Image as ImageIcon, Trash2 } from "lucide-react";
 import type { Product } from "@/types/product";
-import type { ProductBlock } from "@/types/storefront";
-import type { ActionError } from "@/lib/errors";
+import {
+  resolveCardStyle,
+  type CardStyleOverrides,
+  type ProductBlock,
+  type StorefrontTheme,
+} from "@/types/storefront";
 import { formatPrice } from "@/lib/format";
 import { updateProduct } from "@/lib/products/actions";
 import {
@@ -12,18 +16,12 @@ import {
   type ProductWriteInput,
 } from "@/lib/validation/product";
 import { cn } from "@/lib/utils";
-import { ActionErrorNotice } from "@/components/ui/ActionErrorNotice";
-import {
-  destructiveButtonClass,
-  errorTextClass,
-  fieldBaseClass,
-  helpTextClass,
-  labelClass,
-  primaryButtonClass,
-  secondaryButtonClass,
-} from "@/components/ui/control-styles";
+import { useToast } from "@/components/ui/Toast";
+import { destructiveButtonClass, errorTextClass, fieldBaseClass, ghostButtonClass, infoTextClass, labelClass, primaryButtonClass, secondaryButtonClass, strongLabelClass } from "@/components/ui/control-styles";
+import { InfoTip } from "@/components/ui/InfoTip";
 import { Modal } from "@/components/ui/modal";
 import { Switch } from "@/components/ui/switch";
+import { CardStyleControls } from "./CardStyleControls";
 
 /** Decimal input string -> integer cents, or null when not a finite number. */
 function centsOf(input: string): number | null {
@@ -36,21 +34,33 @@ function centsOf(input: string): number | null {
 
 /**
  * Inspector card body for a PRODUCT block in the side panel. Block-level
- * settings (sold-out, remove) patch immediately like the other block editors.
+ * settings (sold-out, tile style, remove) patch immediately like the other
+ * block editors. The tile-style controls are the same CardStyleControls the
+ * theme's Cards section uses, working on this block's overrides: they show
+ * the RESOLVED style (theme + overrides) and each edit stores only the field
+ * that changed, so untouched fields keep following the theme.
  * The catalog facts (name, price) edit the PRODUCT itself, so they get a
  * draft + explicit save with a confirmation modal, since the change lands on every
  * storefront, checkout, and the product list, not just this grid.
  */
 export function ProductBlockEditor({
   block,
+  theme,
   product,
   onToggleSoldOut,
+  onStyleChange,
+  onStyleReset,
   onRemove,
   onProductSaved,
 }: {
   block: ProductBlock;
+  theme: StorefrontTheme;
   product: Product | null;
   onToggleSoldOut: () => void;
+  /** Merge a card-style patch into this block's overrides. */
+  onStyleChange: (patch: CardStyleOverrides) => void;
+  /** Drop every override so the tile follows the theme again. */
+  onStyleReset: () => void;
   onRemove: () => void;
   onProductSaved: (product: Product) => void;
 }) {
@@ -62,14 +72,13 @@ export function ProductBlockEditor({
   const [errors, setErrors] = useState<{ title?: string; price?: string }>({});
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [submitError, setSubmitError] = useState<ActionError | null>(null);
+  const toast = useToast();
 
   // Null product: catalog entry was deleted; only offer a remove action.
   if (product === null) {
     return (
       <div className="space-y-4">
-        <p className="font-inter text-sm text-destructive">
+        <p className={errorTextClass}>
           This product was removed from your catalog.
         </p>
         <button
@@ -89,12 +98,12 @@ export function ProductBlockEditor({
   const titleChanged = trimmedTitle !== product.title;
   const priceChanged = draftCents !== Math.round(product.price * 100);
   const dirty = titleChanged || priceChanged;
+  const hasStyleOverrides =
+    block.style !== undefined && Object.keys(block.style).length > 0;
 
   function editField(field: "title" | "price", value: string) {
     if (field === "title") setDraftTitle(value);
     else setDraftPrice(value);
-    setSaved(false);
-    setSubmitError(null);
     setErrors((current) =>
       current[field] ? { ...current, [field]: undefined } : current,
     );
@@ -123,7 +132,6 @@ export function ProductBlockEditor({
     // so the null narrowing doesn't reach this closure.
     if (product === null || draftCents === null) return;
     setSaving(true);
-    setSubmitError(null);
     // Full write payload: pass the stored values through for everything the
     // panel doesn't edit. Omitted keys (image/file/stock) mean "keep as is".
     const input: ProductWriteInput = {
@@ -137,14 +145,17 @@ export function ProductBlockEditor({
     setSaving(false);
     setConfirmOpen(false);
     if (!result.ok) {
-      setSubmitError(result.error);
+      toast.error(result.error.message, { lines: [result.error.fix] });
       return;
     }
     const price = draftCents / 100;
     setDraftTitle(trimmedTitle);
     setDraftPrice(String(price));
-    setSaved(true);
     onProductSaved({ ...product, title: trimmedTitle, price });
+    // This write reaches past the storefront being designed, so the
+    // confirmation says so rather than leaving the seller to wonder whether
+    // they just renamed one tile.
+    toast.success(`"${trimmedTitle}" was updated everywhere it appears.`);
   }
 
   // Stock status line: display-only, independent from the manual sold-out flag.
@@ -189,7 +200,7 @@ export function ProductBlockEditor({
           <p className="truncate text-sm font-medium text-foreground">
             {product.title}
           </p>
-          <p className="font-inter text-xs text-muted-foreground">
+          <p className={infoTextClass}>
             {formatPrice(product.price, product.currency)}
           </p>
         </div>
@@ -197,9 +208,15 @@ export function ProductBlockEditor({
 
       {/* Catalog facts: edit the product itself (saved via confirmation) */}
       <div className="space-y-1.5">
-        <label htmlFor={`${fieldId}-title`} className={labelClass}>
-          Name
-        </label>
+        <div className="flex items-center gap-1.5">
+          <label htmlFor={`${fieldId}-title`} className={labelClass}>
+            Name
+          </label>
+          <InfoTip label="Where a name or price change lands">
+            Name and price belong to the product, so saving updates them
+            everywhere it appears, not just this storefront.
+          </InfoTip>
+        </div>
         <input
           id={`${fieldId}-title`}
           value={draftTitle}
@@ -226,18 +243,8 @@ export function ProductBlockEditor({
           className={cn(fieldBaseClass, "text-sm")}
         />
         {errors.price && <p className={errorTextClass}>{errors.price}</p>}
-        <p className={helpTextClass}>
-          Name and price belong to the product, so saving updates them
-          everywhere it appears, not just this storefront.
-        </p>
       </div>
 
-      {submitError && <ActionErrorNotice error={submitError} variant="inline" />}
-      {saved && !dirty && (
-        <p role="status" className={helpTextClass}>
-          Product updated everywhere.
-        </p>
-      )}
       {dirty && (
         <button
           type="button"
@@ -250,26 +257,55 @@ export function ProductBlockEditor({
       )}
 
       {/* Sold-out toggle */}
-      <div className="space-y-1.5">
-        <div className="flex items-center justify-between gap-3">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-1.5">
           <label htmlFor={`${fieldId}-soldout`} className={labelClass}>
             Mark as sold out
           </label>
-          <Switch
-            id={`${fieldId}-soldout`}
-            checked={block.soldOut === true}
-            onCheckedChange={onToggleSoldOut}
-          />
+          <InfoTip label="How the sold-out badge is styled">
+            The sold-out badge follows the Cards section setting.
+          </InfoTip>
         </div>
-        <p className={helpTextClass}>
-          The sold-out badge follows the Cards section setting.
-        </p>
+        <Switch
+          id={`${fieldId}-soldout`}
+          checked={block.soldOut === true}
+          onCheckedChange={onToggleSoldOut}
+        />
       </div>
 
       {/* Inventory hint (display-only, only when stock tracking is on) */}
       {stockLine !== null && (
-        <p className="font-inter text-xs text-muted-foreground">{stockLine}</p>
+        <p className={infoTextClass}>{stockLine}</p>
       )}
+
+      {/* Per-tile style: the shared card controls, scoped to this block's
+          overrides. Values shown are the resolved style, so opening the
+          section on an untouched tile simply shows the theme. */}
+      <div className="space-y-4 border-t border-border pt-4">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-1.5">
+            <span className={strongLabelClass}>Tile style</span>
+            <InfoTip label="How this tile's style relates to the theme">
+              {hasStyleOverrides
+                ? "This tile has its own style. Settings you have not changed here keep following the theme."
+                : "Style this tile on its own. Anything you do not change keeps following the theme."}
+            </InfoTip>
+          </div>
+          {hasStyleOverrides && (
+            <button
+              type="button"
+              onClick={onStyleReset}
+              className={cn(ghostButtonClass, "px-2 py-1 text-xs")}
+            >
+              Reset to theme
+            </button>
+          )}
+        </div>
+        <CardStyleControls
+          value={resolveCardStyle(theme, block.style)}
+          onChange={onStyleChange}
+        />
+      </div>
 
       {/* Remove action */}
       <button
@@ -284,9 +320,9 @@ export function ProductBlockEditor({
       <Modal
         open={confirmOpen}
         // Closable even while the save is in flight: the update carries on
-        // server-side and the outcome still lands in the panel (saved state or
-        // the inline ActionErrorNotice below the fields). Blocking ESC and the
-        // backdrop while `saving` turned a hung request into a trapped user.
+        // server-side and its outcome still lands as a toast either way, which
+        // is what makes closing early safe. Blocking ESC and the backdrop
+        // while `saving` turned a hung request into a trapped user.
         onClose={() => {
           setConfirmOpen(false);
         }}

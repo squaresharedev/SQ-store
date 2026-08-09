@@ -40,7 +40,9 @@ const PRODUCT_COLUMNS =
   "id, title, description, price_cents, currency, status, " +
   "track_stock, stock_quantity, low_stock_threshold, created_at, updated_at";
 
-const STOREFRONT_COLUMNS = "id, name, config, created_at, updated_at";
+// `brief` is the seller's own answers from the creation flow, so it belongs in
+// their export. `embed_key` still does not: see the note above.
+const STOREFRONT_COLUMNS = "id, name, config, brief, created_at, updated_at";
 
 export async function GET() {
   const supabase = await createClient();

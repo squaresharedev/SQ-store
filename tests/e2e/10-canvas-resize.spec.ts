@@ -1,5 +1,11 @@
 import { expect, test, type Page } from "@playwright/test";
-import { freshUser, gotoApp, signUp } from "./helpers";
+import {
+  createStorefrontViaUI,
+  expectToast,
+  freshUser,
+  gotoApp,
+  signUp,
+} from "./helpers";
 
 /**
  * Resizing in the storefront designer.
@@ -101,11 +107,7 @@ test.beforeAll(async ({ browser }) => {
   await page.waitForLoadState("networkidle").catch(() => {});
 
   await gotoApp(page, "/storefront");
-  await page
-    .getByRole("button", { name: /new storefront|create storefront/i })
-    .first()
-    .click();
-  await page.waitForURL(/\/storefront\/[0-9a-f-]{36}/, { timeout: 30_000 });
+  await createStorefrontViaUI(page);
   await page.waitForLoadState("networkidle").catch(() => {});
   await expect(page.getByRole("toolbar", { name: "Editor tools" })).toBeVisible();
   await page.waitForTimeout(800);
@@ -201,9 +203,7 @@ test.describe("storefront canvas resize", () => {
   test("a resize survives a save and reload", async () => {
     const before = await placementOf();
     await page.getByRole("button", { name: /^save$/i }).click();
-    await expect(
-      page.locator('[role="status"]').filter({ hasText: /^Saved/ }).first(),
-    ).toBeVisible({ timeout: 20_000 });
+    await expectToast(page, /storefront saved/i);
 
     await page.reload();
     await page.waitForLoadState("networkidle").catch(() => {});

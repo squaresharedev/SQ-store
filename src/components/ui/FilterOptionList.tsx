@@ -1,7 +1,9 @@
 "use client";
 
 import { Check, type LucideIcon } from "lucide-react";
+import { iconTileClass } from "@/components/ui/surface-styles";
 import { cn } from "@/lib/utils";
+import { overlayItemClass } from "./control-styles";
 
 export interface FilterOption<T extends string> {
   value: T;
@@ -51,12 +53,9 @@ export function FilterOptionList<T extends string>({
               role="option"
               aria-selected={isSelected}
               onClick={() => onChange(option.value)}
-              className={cn(
-                "flex w-full items-center gap-2.5 rounded-[0.5rem] px-2 py-2 text-left transition-colors duration-base",
-                isSelected ? "bg-accent" : "hover:bg-accent",
-              )}
+              className={cn(overlayItemClass, "px-2", isSelected && "bg-accent")}
             >
-              <span className="flex size-7 shrink-0 items-center justify-center rounded-[0.45rem] bg-secondary">
+              <span className={cn(iconTileClass, "size-7 rounded-none")}>
                 <Icon className={cn("size-4", option.tone)} aria-hidden="true" />
               </span>
               <span className="flex-1 font-inter text-sm text-foreground">

@@ -3,9 +3,10 @@
 // styles.md scale (globals.css @theme), motion from the motion scale
 // (duration-fast/base/slow + ease-standard/ease-entrance), colors semantic.
 //
-// BRAND RULE: every button is SHARP (rounded-none). Only nav/menu items keep
-// a radius. Defined once here (and consumed by the Button primitive), never
-// set corner radius ad hoc in a component.
+// BRAND RULE: every button and every floating surface (modal, popover,
+// dropdown, menu, toast) is SHARP (rounded-none). Only in-page nav items keep
+// a radius. Defined once here (and consumed by the Button primitive and the
+// overlay tokens below), never set corner radius ad hoc in a component.
 
 /** Shared motion + focus primitives, exported for one-off controls that
  *  can't wear a full button class (toolbars, tile chrome). */
@@ -14,6 +15,11 @@ export const transitionClass =
 
 export const focusRingClass =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background";
+
+/** Focus ring for a control sitting INSIDE an overlay: drawn inset, since an
+ *  offset ring on a full-width menu row is clipped by the panel edge. */
+export const focusRingInsetClass =
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset";
 
 const TRANSITION = transitionClass;
 const FOCUS_RING = focusRingClass;
@@ -46,6 +52,47 @@ export const destructiveButtonClass = `${BUTTON_BASE} rounded-none border border
 /** Square icon-only button (styles.md §8.4). */
 export const iconButtonClass = `group/btn inline-flex size-9 items-center justify-center rounded-none border border-border bg-background text-muted-foreground hover:bg-accent hover:text-foreground ${TRANSITION} ${FOCUS_RING}`;
 
+/* --- Overlays: modal, popover, dropdown, listbox, menu, toast ----------
+   Every floating surface is the SAME panel — sharp corners, hairline border,
+   popover surface, lifted shadow — so a dropdown opened over a modal reads as
+   one system. Spelled once here; a surface that needs a variation (a tone
+   border on a toast, a tighter row in a listbox) composes with `cn`, which
+   de-duplicates the conflicting utility for it. */
+
+/** Dimmed wash behind a modal or a mobile sheet. Deliberately a fixed black
+ *  rather than a theme token: a scrim's job is to darken whatever is behind
+ *  it, which is the same requirement on a light or a dark page. */
+export const overlayScrimClass = "fixed inset-0 bg-black/40";
+
+/** The floating panel itself. Padding is the caller's, since a form modal and
+ *  a one-line menu want different room. */
+export const overlaySurfaceClass =
+  "rounded-none border border-border bg-popover text-popover-foreground shadow-lg";
+
+/** One selectable row inside an overlay: menu item, listbox option, action.
+ *  `min-h-11` is the thumb target — px-3 py-2 alone leaves it at about 36px. */
+export const overlayItemClass = `flex w-full min-h-11 items-center gap-2.5 rounded-none px-3 py-2 text-left text-sm text-foreground hover:bg-accent disabled:pointer-events-none disabled:opacity-50 ${TRANSITION} ${focusRingInsetClass}`;
+
+/** Icon-only dismiss control on an overlay (a modal header, a sheet). */
+export const overlayCloseButtonClass = `flex size-9 shrink-0 items-center justify-center rounded-none text-muted-foreground hover:bg-accent hover:text-foreground ${TRANSITION} ${focusRingInsetClass}`;
+
+/* --- Info tip: the one "?" in the product -------------------------------
+   Explanatory prose that only some people need is not a paragraph under the
+   control; it is a "?" beside its label that reveals the sentence on hover,
+   on keyboard focus, and on tap. Spelled once here and worn by the single
+   InfoTip component (components/ui/InfoTip.tsx) — never re-roll a second
+   question mark somewhere else. */
+
+/** The "?" affordance itself. Square like every other button (the circle is
+ *  the glyph, not the box), 24px so it clears the WCAG target minimum while
+ *  still riding alongside a label rather than competing with it. */
+export const infoTipTriggerClass = `inline-flex size-6 shrink-0 items-center justify-center rounded-none text-muted-foreground hover:text-foreground ${TRANSITION} ${FOCUS_RING}`;
+
+/** The bubble it reveals: the same floating panel as every other overlay,
+ *  capped to one column of readable text. Positioned `fixed` and placed from
+ *  JS, so it is never clipped by a scrolling side panel or a table cell. */
+export const infoTipBubbleClass = `${overlaySurfaceClass} fixed z-50 w-64 max-w-[calc(100vw-1rem)] px-3 py-2 font-inter text-sm leading-snug`;
+
 /* --- Numeric stepper: [−][ 12 ][+] -------------------------------------
    The three parts are one control, so they share a height and sit flush. The
    buttons are SOLID (primary), not bordered: a bordered −/+ either side of a
@@ -71,17 +118,6 @@ export const labelClass = "font-inter text-sm font-medium text-foreground";
 /** Editor-panel control label: semibold so the setting names carry the visual
  *  hierarchy in dense panels (the storefront designer's sections). */
 export const strongLabelClass = "font-inter text-sm font-semibold text-foreground";
-
-/** Gradient scrim for the right edge of a region whose content overflows
- *  horizontally: the last stretch dissolves into the surface instead of being
- *  cut mid-glyph, so the overflow reads as "keep scrolling". Fades to
- *  `background`, so only put it over a background-coloured surface.
- *
- *  Positioning is the caller's job (`absolute` + whatever inset clears an
- *  inline adornment), since how much room the fade gets depends on the
- *  control it sits on. */
-export const fadeRightScrimClass =
-  "pointer-events-none bg-gradient-to-r from-transparent to-background";
 
 /** Muted helper text under a field. */
 export const helpTextClass = "font-inter text-sm text-muted-foreground";

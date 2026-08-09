@@ -3,26 +3,27 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Store } from "lucide-react";
-import { iconPopClass, primaryButtonClass } from "@/components/ui/control-styles";
-import { ActionErrorNotice } from "@/components/ui/ActionErrorNotice";
+import { cn } from "@/lib/utils";
+import { errorTextClass, helpTextClass, iconPopClass, primaryButtonClass } from "@/components/ui/control-styles";
+import { emptyStateClass } from "@/components/ui/surface-styles";
+import { useToast } from "@/components/ui/Toast";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
-import type { ActionError } from "@/lib/errors";
 import {
-  createStorefront,
   deleteStorefront,
   fetchStorefrontsPage,
 } from "@/lib/storefront/actions";
 import type { StorefrontSummary } from "@/lib/storefront/queries";
 import type { Product } from "@/types/product";
 import { StorefrontCard } from "./StorefrontCard";
+import { CreateStorefrontWizard } from "./CreateStorefrontWizard";
 import { EmbedModal } from "./EmbedModal";
 
 /**
- * Client wrapper owning the visible storefront set. Create inserts a row and
- * navigates straight into its editor; delete confirms, then removes the card
- * optimistically and restores it if the server rejects. `products` feeds the
- * cards' live grid previews.
+ * Client wrapper owning the visible storefront set. Create opens the setup
+ * flow, which inserts the row itself and hands back an id to navigate to;
+ * delete confirms, then removes the card optimistically and restores it if the
+ * server rejects. `products` feeds the cards' live grid previews.
  */
 export function StorefrontsList({
   storefronts: initial,
@@ -39,9 +40,12 @@ export function StorefrontsList({
   canWrite: boolean;
 }) {
   const router = useRouter();
+  const toast = useToast();
   const [storefronts, setStorefronts] = useState(initial);
+  const [wizardOpen, setWizardOpen] = useState(false);
+  // Stays true from the moment the wizard hands back an id until the route
+  // change lands, so the create buttons can't fire a second time behind it.
   const [creating, setCreating] = useState(false);
-  const [error, setError] = useState<ActionError | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
   const [loadMoreFailed, setLoadMoreFailed] = useState(false);
   // Deletes shrink the true count locally between server revalidations.
@@ -88,47 +92,39 @@ export function StorefrontsList({
     setRemoved(0);
   }
 
-  async function handleCreate() {
-    setError(null);
+  function handleCreated(id: string) {
+    // Leave `creating` true: we're navigating away to the new editor.
     setCreating(true);
-    const result = await createStorefront();
-    if (!result.ok) {
-      setError(result.error);
-      setCreating(false);
-      return;
-    }
-    // Leave `creating` true — we're navigating away to the new editor.
-    router.push(`/storefront/${result.id}`);
+    setWizardOpen(false);
+    router.push(`/storefront/${id}`);
   }
 
   async function confirmDelete() {
     if (!pendingDelete) return;
     const target = pendingDelete;
     setDeleting(true);
-    setError(null);
     const result = await deleteStorefront(target.id);
     setDeleting(false);
     setPendingDelete(null);
     if (!result.ok) {
-      setError(result.error);
+      toast.error(result.error.message, { lines: [result.error.fix] });
       return;
     }
     setStorefronts((current) => current.filter((s) => s.id !== target.id));
     setRemoved((n) => n + 1);
+    toast.success(`"${target.name}" was deleted.`);
   }
 
   return (
     <>
-      {error && <ActionErrorNotice error={error} className="mb-4" />}
-
       <div className="mb-4 flex items-center justify-between gap-3">
-        <p className="font-inter text-sm text-muted-foreground">
+        <p className={helpTextClass}>
           {hasMore
             ? `Showing ${storefronts.length} of ${knownTotal} storefronts`
             : `${storefronts.length} storefront${storefronts.length === 1 ? "" : "s"}`}
         </p>
         {canWrite && (
-          <Button onClick={handleCreate} disabled={creating}>
+          <Button onClick={() => setWizardOpen(true)} disabled={creating}>
             <Plus
               className={`size-4 ${iconPopClass}`}
               strokeWidth={2}
@@ -140,7 +136,7 @@ export function StorefrontsList({
       </div>
 
       {storefronts.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-md border border-dashed border-border bg-background px-6 py-16 text-center">
+        <div className={cn(emptyStateClass, "bg-background")}>
           <div className="flex size-12 items-center justify-center rounded-full bg-muted">
             <Store
               className="size-6 text-muted-foreground"
@@ -159,7 +155,7 @@ export function StorefrontsList({
           {canWrite && (
             <button
               type="button"
-              onClick={handleCreate}
+              onClick={() => setWizardOpen(true)}
               disabled={creating}
               className={`${primaryButtonClass} mt-5`}
             >
@@ -191,7 +187,7 @@ export function StorefrontsList({
       {hasMore && (
         <div className="mt-6 flex flex-col items-center gap-2">
           {loadMoreFailed && (
-            <p role="alert" className="font-inter text-sm text-destructive">
+            <p role="alert" className={errorTextClass}>
               Couldn&apos;t load more storefronts. Try again.
             </p>
           )}
@@ -210,6 +206,18 @@ export function StorefrontsList({
         </div>
       )}
 
+      <CreateStorefrontWizard
+        open={wizardOpen}
+        // Dismissing is a cancel: the wizard only inserts a row when the seller
+        // finishes or skips, so nothing is left behind here.
+        onClose={() => setWizardOpen(false)}
+        onCreated={handleCreated}
+        productCount={products.length}
+        // Newest-edited first, so [0] is the storefront they last worked on and
+        // the likeliest source of answers that still hold.
+        previousBrief={storefronts[0]?.brief}
+      />
+
       <EmbedModal
         storefront={embedTarget}
         onClose={() => setEmbedTarget(null)}
@@ -225,8 +233,8 @@ export function StorefrontsList({
       <Modal
         open={pendingDelete !== null}
         // Closable even while the delete is in flight: the action carries on
-        // server-side and its outcome still lands (row removed on success, the
-        // page-level ActionErrorNotice on failure). Blocking ESC/backdrop/X
+        // server-side and its outcome still lands as a toast either way, which
+        // is exactly why closing early is now safe. Blocking ESC/backdrop/X
         // here turned a hung request into a user trapped in a modal.
         onClose={() => setPendingDelete(null)}
         title="Delete storefront?"

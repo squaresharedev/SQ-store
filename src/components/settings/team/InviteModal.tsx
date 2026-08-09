@@ -3,7 +3,8 @@
 import * as React from "react";
 import { useActionState } from "react";
 import { Mail } from "lucide-react";
-import { FormStatus } from "@/components/settings/FormStatus";
+import { infoTextClass } from "@/components/ui/control-styles";
+import { useActionToast } from "@/components/ui/Toast";
 import { SaveButton } from "@/components/ui/SaveButton";
 import { Modal } from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";
@@ -36,6 +37,7 @@ export function InviteModal({
   onClose: () => void;
 }) {
   const [state, formAction, isPending] = useActionState(inviteMember, INITIAL);
+  useActionToast(state);
   const [email, setEmail] = React.useState("");
   const [selectedRole, setSelectedRole] = React.useState<"editor" | "viewer">(
     DEFAULT_INVITE_ROLE === "owner" ? "viewer" : (DEFAULT_INVITE_ROLE as "editor" | "viewer"),
@@ -114,9 +116,7 @@ export function InviteModal({
           </div>
         )}
 
-        <FormStatus state={state} showSuccess />
-
-        <p className="font-inter text-xs text-muted-foreground">
+        <p className={infoTextClass}>
           Email notifications aren&apos;t wired up yet — the invite takes effect
           when they sign in. You may want to let them know directly.
         </p>

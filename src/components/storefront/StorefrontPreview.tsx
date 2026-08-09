@@ -4,7 +4,9 @@ import { useMemo } from "react";
 import type { Product } from "@/types/product";
 import {
   DEFAULT_STOREFRONT_HEADER,
+  blockCornerRadius,
   blockKey,
+  buyerVisibleBlocks,
   readingOrder,
   type StorefrontBlock,
   type StorefrontConfig,
@@ -53,21 +55,15 @@ export function StorefrontPreview({
    *  neutral base color instead. */
   backgroundImageUrl?: string | null;
 }) {
-  const { theme, blocks, header } = config;
+  const { theme, header } = config;
   const { boxRef, contentRef, scale } = useFitToBox();
 
+  // Buyer-facing view: hideSoldOut drops marked blocks entirely (the designer
+  // canvas keeps showing them dimmed so the seller can manage them). Shared
+  // with whatever else needs to know whether this renders as empty.
   const visibleBlocks = useMemo<StorefrontBlock[]>(
-    () =>
-      readingOrder(
-        blocks.filter(
-          // Buyer-facing view: hideSoldOut drops marked blocks entirely (the
-          // designer canvas keeps showing them dimmed so the seller can
-          // manage them).
-          (block) =>
-            !(theme.hideSoldOut && block.type === "product" && block.soldOut),
-        ),
-      ),
-    [blocks, theme.hideSoldOut],
+    () => readingOrder(buyerVisibleBlocks(config)),
+    [config],
   );
 
   const gridBlocks = useMemo<GridBlock<StorefrontBlock>[]>(
@@ -141,8 +137,13 @@ export function StorefrontPreview({
               // designed. Reflowing would show a layout the storefront doesn't
               // have — the one thing a preview must not do.
               responsive={false}
-              cellStyle={(placement) => ({
-                borderRadius: scaledCornerRadius(theme.cornerRadius, placement),
+              cellStyle={(placement, gridBlock) => ({
+                borderRadius: scaledCornerRadius(
+                  gridBlock
+                    ? blockCornerRadius(theme, gridBlock.data)
+                    : theme.cornerRadius,
+                  placement,
+                ),
               })}
               renderBlock={(gridBlock) => (
                 <BlockTile

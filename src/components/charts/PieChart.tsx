@@ -3,6 +3,7 @@
 import { useState, type ReactNode } from "react";
 import { Cell, Pie, PieChart as RPieChart, Sector, Tooltip } from "recharts";
 import type { PieSectorDataItem } from "recharts";
+import { infoTextClass } from "@/components/ui/control-styles";
 import { cn } from "@/lib/utils";
 import {
   CHART,
@@ -167,7 +168,7 @@ export function PieChart({
           <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
             {center ?? (
               <>
-                <span className="font-inter text-xs text-muted-foreground">Total</span>
+                <span className={infoTextClass}>Total</span>
                 <span className="text-lg font-semibold text-foreground">
                   {valueFormatter(total)}
                 </span>

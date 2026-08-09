@@ -4,6 +4,8 @@ import { Image as ImageIcon } from "lucide-react";
 import type { Product } from "@/types/product";
 import {
   coercePriceTagPosition,
+  resolveCardStyle,
+  type CardStyleOverrides,
   type PriceTagFloatPosition,
   type StorefrontTheme,
 } from "@/types/storefront";
@@ -23,34 +25,42 @@ const HOVER_RISE_CLASS =
   "translate-y-full opacity-0 transition-[transform,opacity] duration-base ease-standard group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100 motion-reduce:transition-none";
 
 /**
- * The product face of a grid tile. The title area renders per the theme's
- * titleStyle: `bar` = solid bar under the image, `overlay` = translucent bar
- * over the image bottom, `shadow` = text over a bottom gradient shadow on the
- * image. titleDisplay shows the area always or only on hover/focus; on reveal
- * the overlay bar slides up from the bottom edge, the others fade. The
- * theme's priceDisplay independently shows the price always or only on
- * hover/focus. priceTagPosition controls placement: in the title area
- * (`below`), at one of the floating spots (4 corners + center vertical axis),
- * or `hidden`. priceTagStyle controls chip appearance (plain / pill). A block
- * the seller marked sold out dims its image and (per theme.soldOutBadge)
- * wears a corner badge.
+ * The product face of a grid tile. Card appearance comes from ONE resolved
+ * CardStyle (the theme's card settings with the block's own overrides laid on
+ * top, see resolveCardStyle), so a tile styled individually renders through
+ * exactly the same logic as one following the theme. The title area renders
+ * per titleStyle: `bar` = solid bar under the image, `overlay` = translucent
+ * bar over the image bottom, `shadow` = text over a bottom gradient shadow on
+ * the image. titleDisplay shows the area always or only on hover/focus; on
+ * reveal the overlay bar slides up from the bottom edge, the others fade.
+ * priceDisplay independently shows the price always or only on hover/focus.
+ * priceTagPosition controls placement: in the title area (`below`), at one of
+ * the floating spots (4 corners + center vertical axis), or `hidden`.
+ * priceTagStyle controls chip appearance (plain / pill). A block the seller
+ * marked sold out dims its image and (per theme.soldOutBadge) wears a corner
+ * badge. Accent and the sold-out badge stay theme-wide by design.
  */
 export function ProductTileContent({
   product,
   theme,
+  overrides,
   soldOut = false,
 }: {
   product: Product;
   theme: StorefrontTheme;
+  /** The block's per-tile style overrides (block.style), if any. */
+  overrides?: CardStyleOverrides;
   soldOut?: boolean;
 }) {
+  const card = resolveCardStyle(theme, overrides);
+
   // Overlay + shadow render the title area over the image; bar sits below it.
-  const shadowArea = theme.titleStyle === "shadow";
-  const titleHover = theme.titleDisplay === "hover";
+  const shadowArea = card.titleStyle === "shadow";
+  const titleHover = card.titleDisplay === "hover";
 
   // "hidden" position is the single hide switch (legacy priceDisplay "never"
   // is migrated to it by the schema).
-  const priceHidden = theme.priceTagPosition === "hidden";
+  const priceHidden = card.priceTagPosition === "hidden";
 
   // Accent color re-gated before any style attribute.
   const accentStyle =
@@ -59,14 +69,14 @@ export function ProductTileContent({
   // Heavily rounded tiles clip their corners away, so corner spots are coerced
   // onto the same row's center spot (storage keeps the seller's corner choice).
   const tagPosition = coercePriceTagPosition(
-    theme.priceTagPosition,
-    theme.cornerRadius,
+    card.priceTagPosition,
+    card.cornerRadius,
   );
 
   // Size is the tag's other axis: text size everywhere, plus chip padding once
   // the tag has a backing. Kept separate from the style map so the two never
   // fight over the same classes.
-  const tagSizeClass = PRICE_TAG_SIZE_CLASSES[theme.priceTagSize ?? "md"];
+  const tagSizeClass = PRICE_TAG_SIZE_CLASSES[card.priceTagSize];
 
   // Price floated on the image gets a translucent backing for legibility.
   const floatedPrice =
@@ -77,10 +87,10 @@ export function ProductTileContent({
           PRICE_TAG_FLOAT_CLASSES[tagPosition as PriceTagFloatPosition],
           tagSizeClass,
           // Style chip
-          theme.priceTagStyle === "pill"
+          card.priceTagStyle === "pill"
             ? "rounded-full border border-border bg-card/90"
             : "rounded-sm bg-card/90",
-          theme.priceDisplay === "hover" && HOVER_REVEAL_CLASS,
+          card.priceDisplay === "hover" && HOVER_REVEAL_CLASS,
         )}
         style={accentStyle}
       >
@@ -92,19 +102,19 @@ export function ProductTileContent({
   // On the shadow gradient a plain price drops the accent for white so it
   // stays readable; the pill chip carries its own backing anywhere.
   const inlinePrice =
-    !priceHidden && theme.priceTagPosition === "below" ? (
+    !priceHidden && card.priceTagPosition === "below" ? (
       <span
         className={cn(
           "shrink-0 font-inter",
           tagSizeClass,
           // In the bar, size means text size; padding only once it's a chip.
-          theme.priceTagStyle !== "pill" && "p-0",
-          theme.priceTagStyle === "pill"
+          card.priceTagStyle !== "pill" && "p-0",
+          card.priceTagStyle === "pill"
             ? "rounded-full border border-border bg-card/90"
             : shadowArea && "text-white",
-          theme.priceDisplay === "hover" && HOVER_REVEAL_CLASS,
+          card.priceDisplay === "hover" && HOVER_REVEAL_CLASS,
         )}
-        style={shadowArea && theme.priceTagStyle !== "pill" ? undefined : accentStyle}
+        style={shadowArea && card.priceTagStyle !== "pill" ? undefined : accentStyle}
       >
         {formatPrice(product.price, product.currency)}
       </span>
@@ -113,23 +123,23 @@ export function ProductTileContent({
   // Title area: shown when the title is visible OR when the price sits below
   // (then it renders with just the price so the layout keeps its shape).
   const showTitleArea =
-    theme.showTitle || (!priceHidden && theme.priceTagPosition === "below");
+    card.showTitle || (!priceHidden && card.priceTagPosition === "below");
 
   const titleArea = showTitleArea ? (
     <div
       className={cn(
         "flex items-baseline justify-between gap-2 px-2 py-1.5",
-        theme.titleStyle === "bar" && "bg-card",
-        theme.titleStyle === "overlay" &&
+        card.titleStyle === "bar" && "bg-card",
+        card.titleStyle === "overlay" &&
           "absolute inset-x-0 bottom-0 bg-card/90",
         // Shadow: no bar, a bottom-up gradient over the image for legibility.
         shadowArea &&
           "absolute inset-x-0 bottom-0 items-end bg-gradient-to-t from-black/70 via-black/35 to-transparent pt-8",
         titleHover &&
-          (theme.titleStyle === "overlay" ? HOVER_RISE_CLASS : HOVER_REVEAL_CLASS),
+          (card.titleStyle === "overlay" ? HOVER_RISE_CLASS : HOVER_REVEAL_CLASS),
       )}
     >
-      {theme.showTitle && (
+      {card.showTitle && (
         <span
           className={cn(
             "truncate text-xs font-medium",
@@ -145,8 +155,8 @@ export function ProductTileContent({
 
   return (
     // Corner clipping comes from the grid cell / carousel tile (border-radius
-    // + overflow-hidden per theme.cornerRadius); the face needs no clip of
-    // its own.
+    // + overflow-hidden per the resolved cornerRadius); the face needs no
+    // clip of its own.
     <div className="relative flex min-h-0 flex-1 flex-col">
       <div className="relative min-h-0 flex-1 bg-muted">
         {product.imageUrl ? (

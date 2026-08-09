@@ -13,6 +13,32 @@ export async function gotoApp(page: Page, path: string) {
   await page.waitForLoadState("networkidle").catch(() => {});
 }
 
+/**
+ * The toast a completed action raises. Every save, upload, invite and delete
+ * in the dashboard reports through this one channel, so specs assert on it
+ * rather than hunting for a per-screen status line.
+ *
+ * `toBeVisible` on purpose: a confirmation that exists in the DOM but is
+ * hidden at the current viewport is not a confirmation. The storefront header
+ * used to hide its "Saved." at phone widths, which is the regression this
+ * shape guards against.
+ */
+export function toast(page: Page, text: RegExp | string) {
+  return page
+    .getByRole("region", { name: "Notifications" })
+    .getByText(text)
+    .first();
+}
+
+/** Wait for a confirmation toast carrying `text`. */
+export async function expectToast(
+  page: Page,
+  text: RegExp | string,
+  timeout = 20_000,
+) {
+  await expect(toast(page, text)).toBeVisible({ timeout });
+}
+
 /** Fill an input and verify the value stuck (guards against hydration wipes). */
 export async function fillStable(page: Page, label: string | RegExp, value: string) {
   await expect(async () => {
@@ -32,6 +58,23 @@ export async function createProductViaUI(
   await fillStable(page, /price/i, price);
   await page.getByRole("button", { name: /save product/i }).click();
   await page.waitForURL(/\/products$/, { timeout: 30_000 });
+}
+
+/**
+ * Create a storefront through the UI and land in its designer.
+ *
+ * "New storefront" opens the setup flow rather than inserting a row, so every
+ * spec that just needs A storefront takes the skip path. The flow itself is
+ * covered by 09-storefront-setup.spec.ts; repeating it here would only make
+ * unrelated specs fail when the questions change.
+ */
+export async function createStorefrontViaUI(page: Page) {
+  await page
+    .getByRole("button", { name: /new storefront|create storefront/i })
+    .first()
+    .click();
+  await page.getByRole("button", { name: /skip setup/i }).click();
+  await page.waitForURL(/\/storefront\/[0-9a-f-]{36}/, { timeout: 30_000 });
 }
 
 /** Unique-per-run credentials so specs never collide on the shared DB. */

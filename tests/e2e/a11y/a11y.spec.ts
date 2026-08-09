@@ -2,6 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 import {
   createProductViaUI,
+  createStorefrontViaUI,
   freshUser,
   gotoApp,
   seedOrders,
@@ -96,15 +97,52 @@ test.describe("accessibility", () => {
     await expectNoSeriousViolations(page, "search palette (empty)");
   });
 
-  test("storefront designer incl. pickers", async ({ page }) => {
-    const user = freshUser("a11y-designer");
+  test("storefront setup flow", async ({ page }) => {
+    const user = freshUser("a11y-setup");
     await signUp(page, user);
     await gotoApp(page, "/storefront");
     await page
       .getByRole("button", { name: /new storefront|create storefront/i })
       .first()
       .click();
-    await page.waitForURL(/\/storefront\/[0-9a-f-]{36}/);
+
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toBeVisible();
+
+    /**
+     * Wait out a step's entrance fade before scanning. axe measures what is on
+     * screen at that instant, and a label caught mid-fade reports a contrast
+     * ratio the settled control never has (muted text at 6% opacity reads as
+     * #f0f0f0 on white). The step container is the one focusable-by-script
+     * element in the dialog, which is what makes it findable here.
+     */
+    async function settled() {
+      const step = dialog.locator('[tabindex="-1"]');
+      await expect
+        .poll(() => step.evaluate((el) => getComputedStyle(el).opacity))
+        .toBe("1");
+    }
+
+    // The tile grid: 13 toggle buttons, each an icon over a label.
+    await settled();
+    await expectNoSeriousViolations(page, "setup flow (categories)");
+
+    // And the swatch step, where the only thing separating the tiles is
+    // colour, so the text label has to carry the meaning.
+    await dialog.getByRole("button", { name: "Art & prints" }).click();
+    await dialog.getByRole("button", { name: "Next" }).click();
+    await dialog.getByRole("button", { name: /I ship it/ }).click();
+    await dialog.getByRole("button", { name: "Next" }).click();
+    await expect(dialog).toContainText("Step 3 of 4");
+    await settled();
+    await expectNoSeriousViolations(page, "setup flow (looks)");
+  });
+
+  test("storefront designer incl. pickers", async ({ page }) => {
+    const user = freshUser("a11y-designer");
+    await signUp(page, user);
+    await gotoApp(page, "/storefront");
+    await createStorefrontViaUI(page);
     await page.waitForLoadState("networkidle").catch(() => {});
     await expectNoSeriousViolations(page, "designer");
   });

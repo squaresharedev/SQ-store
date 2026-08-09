@@ -7,16 +7,16 @@ import { Check, ChevronRight, LogOut, Store, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Avatar } from "@/components/ui/avatar";
 import { Popover } from "@/components/ui/Popover";
+import {
+  focusRingClass,
+  overlayItemClass,
+} from "@/components/ui/control-styles";
 import { setActiveAccount } from "@/lib/team/actions";
 import { signOut } from "@/lib/auth/actions";
 import { ROLE_LABELS } from "@/lib/team/permissions";
 import type { AccountOption } from "@/lib/team/account-context";
 
-const ITEM = cn(
-  "flex w-full items-center gap-2.5 rounded-[0.375rem] px-2.5 py-2 text-left text-sm text-foreground",
-  "transition-colors duration-base ease-standard motion-reduce:transition-none",
-  "hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
-);
+const ITEM = cn(overlayItemClass, "px-2.5");
 
 /**
  * Account menu behind the top-bar avatar: Account, Switch accounts (inline list
@@ -73,7 +73,7 @@ export function ProfileMenu({
         "transition-transform duration-base ease-standard motion-reduce:transition-none",
         "hover:scale-110 focus-visible:scale-110 active:scale-105",
         open && "scale-110",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        focusRingClass,
       )}
     >
       <Avatar src={avatarUrl} name={name} className="size-9" />

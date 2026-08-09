@@ -211,6 +211,91 @@ export function reflowBlocks<TData>(
   return { blocks: placed, rows };
 }
 
+// EDGE-GRAB RESIZE. A press near a cell's border resizes from that side
+// (corners combine two sides); a press on the inner surface stays a move.
+// The hit-test and the placement math live here, pure, so the gesture wiring
+// in Grid.tsx stays thin and this part stays unit-testable.
+
+/** Which sides of a block a gesture is dragging. */
+export interface ResizeEdges {
+  n: boolean;
+  e: boolean;
+  s: boolean;
+  w: boolean;
+}
+
+/** How close (screen px) to a cell border a press counts as an edge grab. */
+export const EDGE_GRAB_PX = 10;
+
+/**
+ * The edges under a pointer, or null when the press is on the inner surface
+ * (a move/select, not a resize). The grab zone is capped at a quarter of the
+ * cell per axis, so a small or zoomed-out tile always keeps an inner area to
+ * drag from instead of becoming all edge.
+ */
+export function edgesUnderPointer(
+  rect: { left: number; top: number; width: number; height: number },
+  x: number,
+  y: number,
+  grab: number = EDGE_GRAB_PX,
+): ResizeEdges | null {
+  if (rect.width <= 0 || rect.height <= 0) return null;
+  const grabX = Math.min(grab, rect.width / 4);
+  const grabY = Math.min(grab, rect.height / 4);
+  const edges = {
+    n: y - rect.top <= grabY,
+    s: rect.top + rect.height - y <= grabY,
+    w: x - rect.left <= grabX,
+    e: rect.left + rect.width - x <= grabX,
+  };
+  return edges.n || edges.e || edges.s || edges.w ? edges : null;
+}
+
+/**
+ * The placement after dragging the given edges to the cell under the cursor.
+ * Dragged sides follow the cursor; the opposite sides stay pinned, and the
+ * span never collapses below one cell or leaves the board.
+ */
+export function resizeByEdges(
+  origin: GridPlacement,
+  edges: ResizeEdges,
+  col: number,
+  row: number,
+  columns: number,
+  rows: number,
+): GridPlacement {
+  const right = origin.x + origin.w;
+  const bottom = origin.y + origin.h;
+  const cursorCol = Math.min(Math.max(col, 0), columns - 1);
+  const cursorRow = Math.min(Math.max(row, 0), rows - 1);
+  let { x, y, w, h } = origin;
+  if (edges.w) {
+    x = Math.min(cursorCol, right - 1);
+    w = right - x;
+  } else if (edges.e) {
+    w = Math.max(1, cursorCol - origin.x + 1);
+  }
+  if (edges.n) {
+    y = Math.min(cursorRow, bottom - 1);
+    h = bottom - y;
+  } else if (edges.s) {
+    h = Math.max(1, cursorRow - origin.y + 1);
+  }
+  return { x, y, w, h };
+}
+
+/** The standard resize cursor for a set of grabbed edges. */
+export function edgeCursor(edges: ResizeEdges): string {
+  const vertical = edges.n || edges.s;
+  const horizontal = edges.e || edges.w;
+  if (vertical && horizontal) {
+    return (edges.n && edges.w) || (edges.s && edges.e)
+      ? "nwse-resize"
+      : "nesw-resize";
+  }
+  return vertical ? "ns-resize" : "ew-resize";
+}
+
 /** Per-render state the grid hands to `renderBlock`, for content-level styling. */
 export interface GridBlockState {
   editable: boolean;

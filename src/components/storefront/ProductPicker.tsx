@@ -6,11 +6,18 @@ import { Image as ImageIcon, Plus, Search } from "lucide-react";
 import type { Product } from "@/types/product";
 import { formatPrice } from "@/lib/format";
 import { searchCatalogProducts } from "@/lib/products/picker-actions";
+import { PICKER_SEARCH_MAX_LENGTH } from "@/lib/products/picker-constants";
 import { cn } from "@/lib/utils";
-import { fieldBaseClass, helpTextClass } from "@/components/ui/control-styles";
+import {
+  fieldBaseClass,
+  helpTextClass,
+  iconButtonClass,
+} from "@/components/ui/control-styles";
 
-const ADD_BUTTON_CLASS =
-  "inline-flex size-8 shrink-0 items-center justify-center rounded-none border border-border bg-background text-muted-foreground transition-colors duration-base ease-standard hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-40 motion-reduce:transition-none";
+const ADD_BUTTON_CLASS = cn(
+  iconButtonClass,
+  "size-8 shrink-0 disabled:pointer-events-none disabled:opacity-40",
+);
 
 const SEARCH_DEBOUNCE_MS = 250;
 
@@ -119,8 +126,14 @@ export function ProductPicker({
         />
         <input
           type="search"
+          // Titles cap at 200 characters, so a longer term cannot match a
+          // product that exists. The action clamps to the same constant — this
+          // is the affordance, not the gate.
+          maxLength={PICKER_SEARCH_MAX_LENGTH}
           value={search}
-          onChange={(event) => setSearch(event.target.value)}
+          onChange={(event) =>
+            setSearch(event.target.value.slice(0, PICKER_SEARCH_MAX_LENGTH))
+          }
           placeholder="Search products"
           aria-label="Search your products"
           className={cn(fieldBaseClass, "py-2 pl-8 text-sm")}

@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { cn } from "@/lib/utils";
 import type { Product } from "@/types/product";
-import { iconNudgeLeftClass } from "@/components/ui/control-styles";
+import { helpTextClass, iconNudgeLeftClass } from "@/components/ui/control-styles";
 import { ProductForm } from "./ProductForm";
 
 // Shared page shell for the create and edit routes: back link, heading, and the
@@ -33,7 +34,7 @@ export function ProductFormView({
         <h1 className="text-2xl font-semibold text-foreground md:text-3xl">
           {title}
         </h1>
-        <p className="mt-1 font-inter text-sm text-muted-foreground">
+        <p className={cn(helpTextClass, "mt-1")}>
           {subtitle}
         </p>
       </div>

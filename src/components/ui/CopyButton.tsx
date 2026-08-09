@@ -87,7 +87,7 @@ export function CopyButton({
         variant === "labelled"
           ? `${secondaryButtonClass} shrink-0 px-3 py-1.5 text-xs`
           : cn(
-              "inline-flex size-8 shrink-0 items-center justify-center rounded-[0.375rem]",
+              "inline-flex size-8 shrink-0 items-center justify-center rounded-sm",
               "text-muted-foreground hover:bg-accent hover:text-foreground",
               transitionClass,
               focusRingClass,

@@ -98,6 +98,17 @@ export const RATE_LIMITS = {
    * pattern while staying 5x tighter than the per-keystroke budget above.
    */
   searchSnapshot: { max: 120, windowSeconds: 60 * 60 },
+  /**
+   * The storefront designer's PRODUCT PICKER search — also per-keystroke (250ms
+   * debounce), but on its own budget rather than sharing searchQuery, because
+   * the two calls do not cost the same. This one returns a 50-row product page,
+   * and every returned row costs an R2 presign (an HMAC each), so a call here
+   * is materially heavier than the handful of capped rows /api/search answers
+   * with. Half the universal-search budget: still far above anyone actually
+   * building a storefront, and it bounds the presign work a scripted loop can
+   * drive through a read that has no other brake on it.
+   */
+  pickerSearch: { max: 300, windowSeconds: 60 * 60 },
 
   // --- Signed-in write budgets ------------------------------------------
   // These sit on top of RLS and role checks, which already decide WHETHER a

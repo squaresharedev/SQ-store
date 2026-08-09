@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import { useActionState } from "react";
-import { FormStatus } from "@/components/settings/FormStatus";
+import { infoTextClass } from "@/components/ui/control-styles";
+import { useActionToast } from "@/components/ui/Toast";
 import { SaveButton } from "@/components/ui/SaveButton";
 import { ROLE_LABELS } from "@/lib/team/permissions";
 import type { PendingInviteRow } from "@/lib/team/queries";
@@ -29,6 +30,9 @@ export function InviteAcceptRow({
   onAccepted?: () => void;
 }) {
   const [state, formAction, isPending] = useActionState(acceptInvite, INITIAL);
+  // The row can be inside the auto-opening prompt, which closes itself once an
+  // invite is accepted. The confirmation has to survive that.
+  useActionToast(state);
 
   const firedRef = React.useRef(false);
   React.useEffect(() => {
@@ -45,10 +49,9 @@ export function InviteAcceptRow({
           <span className="font-semibold">{invite.store_name}</span> invited you
           as <span className="font-semibold">{ROLE_LABELS[invite.role]}</span>
         </p>
-        <p className="font-inter text-xs text-muted-foreground">
+        <p className={infoTextClass}>
           {new Date(invite.invited_at).toLocaleDateString()}
         </p>
-        <FormStatus state={state} showSuccess />
       </div>
       <form action={formAction} className="shrink-0">
         <input type="hidden" name="invite_id" value={invite.id} />

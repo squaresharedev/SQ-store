@@ -4,7 +4,7 @@ import * as React from "react";
 import { useActionState } from "react";
 import { Crown, UserMinus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { FormStatus } from "@/components/settings/FormStatus";
+import { useActionToast } from "@/components/ui/Toast";
 import { SaveButton } from "@/components/ui/SaveButton";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -83,6 +83,11 @@ export function MemberRow({
     revokeMemberAccess,
     INITIAL,
   );
+  // A successful revoke revalidates this row out of existence, and a role
+  // change replaces the confirm panel that used to hold the message. Both
+  // outcomes have to be reported somewhere that outlives the row.
+  useActionToast(roleState);
+  useActionToast(revokeState);
 
   // You can never change or remove the owner, nor remove yourself (the server
   // enforces both; this just keeps dead controls off the screen).
@@ -150,7 +155,7 @@ export function MemberRow({
             </div>
           ) : (
             <span
-              className="inline-flex items-center gap-1.5 rounded-[0.25rem] border border-border px-2 py-0.5 font-inter text-xs font-medium text-muted-foreground"
+              className="inline-flex items-center gap-1.5 rounded-sm border border-border px-2 py-0.5 font-inter text-xs font-medium text-muted-foreground"
               title={ROLE_DESCRIPTIONS[member.role]}
             >
               {isOwner && (
@@ -223,7 +228,6 @@ export function MemberRow({
               Cancel
             </Button>
           </div>
-          <FormStatus state={roleState} />
         </form>
       )}
 
@@ -261,7 +265,6 @@ export function MemberRow({
               Keep
             </Button>
           </div>
-          <FormStatus state={revokeState} />
         </form>
       )}
     </div>

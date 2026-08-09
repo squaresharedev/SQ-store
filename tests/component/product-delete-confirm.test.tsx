@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
-import { render, screen, cleanup, waitFor, within } from "@testing-library/react";
+import { render, screen, cleanup, waitFor, within } from "../setup/render";
 import userEvent from "@testing-library/user-event";
 
 const deleteProductMock = vi.fn();

@@ -92,9 +92,11 @@ const REGISTRY: Record<string, Classification> = {
   "lib/storefront/actions.ts::fetchStorefrontsPage": read(),
 
   // --- products ------------------------------------------------------------
-  // Picker search: one paged, account-scoped read via listProducts (which
-  // enforces the active-account boundary and ILIKE-escapes the term).
-  "lib/products/picker-actions.ts::searchCatalogProducts": read(),
+  // Picker search: a read, but a bounded one. listProducts enforces the
+  // active-account boundary and ILIKE-escapes the term, so the risk is not
+  // access — it is cost. Each call presigns up to 50 R2 objects, and a server
+  // action is callable in a loop by any session, so it takes from a budget.
+  "lib/products/picker-actions.ts::searchCatalogProducts": limited(),
 
   "lib/notifications/actions.ts::fetchNotificationSnapshot": read(),
   "lib/notifications/actions.ts::fetchUnreadCount": read(),

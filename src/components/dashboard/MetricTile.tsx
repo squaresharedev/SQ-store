@@ -1,4 +1,6 @@
 import type { ReactNode } from "react";
+import { helpTextClass } from "@/components/ui/control-styles";
+import { badgeClass } from "@/components/ui/surface-styles";
 import { cn } from "@/lib/utils";
 import {
   CardBackdrop,
@@ -59,7 +61,7 @@ export function MetricTile({
           {label}
         </span>
         {pending && (
-          <span className="rounded-full bg-secondary px-2 py-0.5 font-inter text-xs text-muted-foreground">
+          <span className={cn(badgeClass, "font-normal text-muted-foreground")}>
             Coming soon
           </span>
         )}
@@ -67,7 +69,7 @@ export function MetricTile({
 
       <div className="relative mt-2">
         {pending ? (
-          <p className="font-inter text-sm text-muted-foreground">
+          <p className={helpTextClass}>
             Available once analytics is connected.
           </p>
         ) : children ? (

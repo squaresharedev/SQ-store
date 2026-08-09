@@ -5,7 +5,11 @@ import { createPortal } from "react-dom";
 import type { KeyboardEvent } from "react";
 import { Check, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { fieldBaseClass } from "./control-styles";
+import {
+  fieldBaseClass,
+  overlayItemClass,
+  overlaySurfaceClass,
+} from "./control-styles";
 
 /** How long consecutive keystrokes count as one type-ahead search. */
 const TYPEAHEAD_MS = 600;
@@ -335,10 +339,11 @@ export function Select<T extends string>({
               maxHeight: position.maxHeight,
             }}
             className={cn(
+              overlaySurfaceClass,
               // The panel sizes to its CONTENT (min = the trigger's width), so
               // a two-option list with descriptions doesn't wrap itself into a
               // scrolling column behind a narrow trigger.
-              "z-[60] w-max overflow-y-auto overscroll-contain rounded-md border border-border bg-popover p-1 shadow-md",
+              "z-[60] w-max overflow-y-auto overscroll-contain p-1",
             )}
           >
             {options.map((option, index) => {
@@ -356,10 +361,9 @@ export function Select<T extends string>({
                     event.preventDefault();
                     commit(index);
                   }}
-                  // min-h-11: a comfortable thumb target for a one-line option,
-                  // which px-3 py-2 alone leaves at about 36px.
                   className={cn(
-                    "flex min-h-11 cursor-pointer items-center justify-between gap-2 rounded-sm px-3 py-2 transition-colors duration-base ease-standard motion-reduce:transition-none",
+                    overlayItemClass,
+                    "cursor-pointer justify-between gap-2",
                     isActive && "bg-accent",
                   )}
                 >

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useActionState } from "react";
-import { FormStatus } from "@/components/settings/FormStatus";
+import { useActionToast } from "@/components/ui/Toast";
 import { SaveButton } from "@/components/ui/SaveButton";
 import { SettingsCard } from "@/components/settings/SettingsCard";
 import { Button } from "@/components/ui/button";
@@ -45,6 +45,8 @@ export function DeleteAccountForm({
     cancelAccountDeletion,
     INITIAL,
   );
+  useActionToast(deleteState);
+  useActionToast(cancelState);
 
   if (deletionRequestedAt) {
     return (
@@ -54,7 +56,6 @@ export function DeleteAccountForm({
         danger
       >
         <form action={cancelAction} className="flex flex-col gap-4">
-          <FormStatus state={cancelState} />
           <div>
             <SaveButton
               variant="secondary"
@@ -101,7 +102,6 @@ export function DeleteAccountForm({
               required
             />
           </div>
-          <FormStatus state={deleteState} />
           <div className="flex flex-wrap items-center gap-3">
             <SaveButton
               variant="destructive"

@@ -1,3 +1,4 @@
+import { badgeClass } from "@/components/ui/surface-styles";
 import { cn } from "@/lib/utils";
 import type { OrderStatus } from "@/types/order-view";
 
@@ -20,7 +21,7 @@ export function OrderStatusBadge({ status }: { status: OrderStatus }) {
   return (
     <span
       className={cn(
-        "rounded-full bg-secondary px-2 py-0.5 font-inter text-xs font-medium",
+        badgeClass,
         STATUS_CLASSES[known],
       )}
     >

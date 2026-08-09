@@ -1,6 +1,7 @@
 "use client";
 
-import { ghostButtonClass } from "@/components/ui/control-styles";
+import { cn } from "@/lib/utils";
+import { ghostButtonClass, helpTextClass } from "@/components/ui/control-styles";
 
 export function OrdersEmptyState({
   filtered,
@@ -16,7 +17,7 @@ export function OrdersEmptyState({
           <p className="text-base font-semibold text-foreground">
             no orders match these filters
           </p>
-          <p className="mt-1 font-inter text-sm text-muted-foreground">
+          <p className={cn(helpTextClass, "mt-1")}>
             try widening the date range or clearing filters.
           </p>
           {onClear && (
@@ -34,7 +35,7 @@ export function OrdersEmptyState({
           <p className="text-base font-semibold text-foreground">
             no orders yet
           </p>
-          <p className="mt-1 font-inter text-sm text-muted-foreground">
+          <p className={cn(helpTextClass, "mt-1")}>
             orders show up here as soon as you make your first sale.
           </p>
         </>

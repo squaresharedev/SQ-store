@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import {
   createProductViaUI,
+  createStorefrontViaUI,
   freshUser,
   gotoApp,
   seedOrders,
@@ -45,11 +46,7 @@ test.describe("needs attention links", () => {
     expect(url.pathname).toBe("/storefront");
 
     // Create one and leave its grid empty.
-    await page
-      .getByRole("button", { name: /new storefront|create storefront/i })
-      .first()
-      .click();
-    await page.waitForURL(/\/storefront\/[0-9a-f-]{36}/, { timeout: 20_000 });
+    await createStorefrontViaUI(page);
     const storefrontId = page.url().match(/\/storefront\/([0-9a-f-]{36})/)![1];
 
     // --- empty storefront -> the designer for THAT storefront ---

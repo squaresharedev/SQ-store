@@ -1,5 +1,10 @@
 import { expect, test, type Page } from "@playwright/test";
-import { freshUser, gotoApp, signUp } from "./helpers";
+import {
+  createStorefrontViaUI,
+  freshUser,
+  gotoApp,
+  signUp,
+} from "./helpers";
 
 /**
  * Canvas keyboard shortcuts in the storefront designer.
@@ -41,11 +46,7 @@ test.beforeAll(async ({ browser }) => {
   await page.waitForLoadState("networkidle").catch(() => {});
 
   await gotoApp(page, "/storefront");
-  await page
-    .getByRole("button", { name: /new storefront|create storefront/i })
-    .first()
-    .click();
-  await page.waitForURL(/\/storefront\/[0-9a-f-]{36}/, { timeout: 30_000 });
+  await createStorefrontViaUI(page);
   await page.waitForLoadState("networkidle").catch(() => {});
   await expect(page.getByRole("toolbar", { name: "Editor tools" })).toBeVisible();
 });

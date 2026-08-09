@@ -6,14 +6,16 @@ import { Pencil, Trash2 } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { ImageUpIcon } from "@/components/ui/ImageUpIcon";
 import { SettingsCard } from "@/components/settings/SettingsCard";
-import { FormStatus } from "@/components/settings/FormStatus";
+import { useActionToast, useToast } from "@/components/ui/Toast";
 import { ProfilePicCropModal } from "@/components/settings/ProfilePicCropModal";
-import { secondaryButtonClass } from "@/components/ui/control-styles";
+import {
+  ghostButtonClass,
+  secondaryButtonClass,
+} from "@/components/ui/control-styles";
 import { cn } from "@/lib/utils";
 import { removeAvatar, uploadAvatar } from "@/lib/settings/avatar";
 
-type State = { error?: string; success?: string };
-const INITIAL: State = {};
+const INITIAL: { error?: string; success?: string } = {};
 
 const MAX_SOURCE_BYTES = 2 * 1024 * 1024; // matches the server's cap
 const ACCEPTED = "image/jpeg,image/png,image/webp";
@@ -35,6 +37,7 @@ export function AvatarUpload({
   name: string;
 }) {
   const fileRef = React.useRef<HTMLInputElement>(null);
+  const toast = useToast();
   const [uploadState, uploadAction, uploading] = useActionState(
     uploadAvatar,
     INITIAL,
@@ -43,6 +46,11 @@ export function AvatarUpload({
     removeAvatar,
     INITIAL,
   );
+  // Two independent actions, two independent results. Merging them into one
+  // "latest state" is what used to make a failed remove silently inherit the
+  // previous upload's success line.
+  useActionToast(uploadState);
+  useActionToast(removeState);
   const busy = uploading || removing;
 
   // Data URL of a freshly picked file. Null means "crop the current avatar",
@@ -50,16 +58,8 @@ export function AvatarUpload({
   // without digging the original out of their filesystem again.
   const [picked, setPicked] = React.useState<string | null>(null);
   const [cropOpen, setCropOpen] = React.useState(false);
-  const [clientError, setClientError] = React.useState<string | null>(null);
-
-  const state: State = clientError
-    ? { error: clientError }
-    : uploadState.error || uploadState.success
-      ? uploadState
-      : removeState;
 
   function openPicker() {
-    setClientError(null);
     fileRef.current?.click();
   }
 
@@ -70,29 +70,31 @@ export function AvatarUpload({
     event.target.value = "";
     if (!file) return;
 
+    // Client-side rejections are outcomes of a pick, exactly like the
+    // server's are outcomes of a save, so they travel the same way. The file
+    // input is visually hidden, so an inline message beside it had nothing to
+    // sit next to anyway.
     if (file.size > MAX_SOURCE_BYTES) {
-      setClientError("That image is too large. Keep it under 2 MB.");
+      toast.error("That image is too large. Keep it under 2 MB.");
       return;
     }
     if (!ACCEPTED.split(",").includes(file.type)) {
-      setClientError("Use a JPEG, PNG, or WebP image.");
+      toast.error("Use a JPEG, PNG, or WebP image.");
       return;
     }
 
     const reader = new FileReader();
     reader.onload = () => {
-      setClientError(null);
       setPicked(reader.result as string);
       setCropOpen(true);
     };
-    reader.onerror = () => setClientError("Could not read that file.");
+    reader.onerror = () => toast.error("Could not read that file.");
     reader.readAsDataURL(file);
   }
 
   function handleAvatarClick() {
     // An existing photo is worth re-cropping; a blank one has nothing to crop.
     if (picked || avatarUrl) {
-      setClientError(null);
       setCropOpen(true);
     } else {
       openPicker();
@@ -205,9 +207,7 @@ export function AvatarUpload({
                 type="submit"
                 disabled={busy}
                 suppressHydrationWarning
-                className={cn(
-                  "inline-flex items-center gap-2 rounded-none px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-50",
-                )}
+                className={cn(ghostButtonClass, "px-3 hover:text-destructive")}
               >
                 <Trash2 className="size-4" strokeWidth={2} aria-hidden />
                 Remove
@@ -215,10 +215,6 @@ export function AvatarUpload({
             </form>
           )}
         </div>
-      </div>
-
-      <div className="mt-3">
-        <FormStatus state={state} showSuccess />
       </div>
 
       {cropSrc && (

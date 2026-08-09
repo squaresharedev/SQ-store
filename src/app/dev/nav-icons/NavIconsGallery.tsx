@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { MotionConfig, motion, useReducedMotion } from "motion/react";
+import { cardClass } from "@/components/ui/surface-styles";
+import { helpTextClass } from "@/components/ui/control-styles";
 import { cn } from "@/lib/utils";
 import {
   AnalyticsIcon,
@@ -89,13 +91,13 @@ function Tile({
       // on the client only, which trips a hydration mismatch.
       tabIndex={-1}
       data-testid={`icon-tile-${name.toLowerCase()}`}
-      className="group cursor-default rounded-md border border-border bg-card p-4"
+      className={cn(cardClass, "group cursor-default p-4")}
     >
       <div className="flex items-center justify-between gap-4">
         {/* Rail-size replica of a sidebar row */}
         <div
           className={cn(
-            "flex items-center gap-2 rounded-[0.375rem] px-3 py-2.5 text-sm font-medium",
+            "flex items-center gap-2 rounded-sm px-3 py-2.5 text-sm font-medium",
             "text-muted-foreground transition-colors duration-base ease-standard",
             "motion-reduce:transition-none",
             "group-hover:bg-accent group-hover:text-foreground",
@@ -131,7 +133,7 @@ export function NavIconsGallery() {
           <h1 className="font-inter text-2xl font-semibold text-foreground">
             Animated nav icons
           </h1>
-          <p className="font-inter text-sm text-muted-foreground">
+          <p className={helpTextClass}>
             Hover any tile: the row is the trigger, exactly like the sidebar.
             Each icon performs its meaning in one color, and renders as its
             static lucide self for reduced-motion users.

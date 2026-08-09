@@ -42,6 +42,10 @@ const supabaseOrigin = (() => {
  * `style-src` keeps 'unsafe-inline' regardless: app/global-error.tsx styles
  * itself with inline `style` props, and a nonce does not cover style ATTRIBUTES.
  */
+/** Reporting API group name, shared by the `report-to` directive and the
+ *  Reporting-Endpoints header that declares where the group points. */
+const CSP_REPORT_GROUP = "csp-endpoint";
+
 const csp = [
   "default-src 'self'",
   // 'unsafe-eval' is React's dev-time requirement only; it never ships to prod.
@@ -63,8 +67,13 @@ const csp = [
   ]
     .filter(Boolean)
     .join(" "),
-  // Supersedes X-Frame-Options where both are understood.
-  "frame-ancestors 'none'",
+  // NO frame-ancestors HERE. It is ignored in a report-only policy by spec, and
+  // every browser says so out loud: "the directive 'frame-ancestors' is ignored
+  // when delivered in a report-only policy" was logged on every page load of
+  // the app. Framing is blocked by X-Frame-Options: DENY below, which is doing
+  // the actual work. Put this directive back the moment the header below is
+  // renamed to the enforcing "Content-Security-Policy", where it supersedes
+  // X-Frame-Options and is the stronger of the two.
   "base-uri 'self'",
   // Stops an injected form from posting a session-authenticated request offsite.
   "form-action 'self'",
@@ -76,6 +85,14 @@ const csp = [
   // which would break Turbopack's HMR socket on http://localhost the moment
   // this policy stops being report-only.
   isDev ? null : "upgrade-insecure-requests",
+  // WITHOUT THIS THE HEADER DOES NOTHING, and browsers said as much on every
+  // page load: "was delivered in report-only mode, but does not specify a
+  // 'report-to'; the policy will have no effect." A report-only policy with
+  // nowhere to report is not an observation period, it is an inert header —
+  // so the plan below (ship observing, confirm clean, then enforce) could
+  // never have produced a report to read. Names the endpoint declared in the
+  // Reporting-Endpoints header alongside it.
+  `report-to ${CSP_REPORT_GROUP}`,
 ]
   .filter(Boolean)
   .join("; ");
@@ -98,6 +115,11 @@ const nextConfig: NextConfig = {
    */
   distDir: process.env.NEXT_DIST_DIR || ".next",
 
+  // Out of the toast stack's corner (bottom-right): the badge sat directly on
+  // top of every confirmation in development, hiding the exact thing being
+  // worked on. Dev-only; production never renders it.
+  devIndicators: { position: "bottom-left" },
+
   // Baseline security headers on every response. The dashboard is a private,
   // session-cookie-authenticated app with no legitimate reason to be framed,
   // so denying framing closes the clickjacking surface outright. (The future
@@ -114,8 +136,16 @@ const nextConfig: NextConfig = {
           // violation report is clean, then rename the key to
           // "Content-Security-Policy" to enforce.
           { key: "Content-Security-Policy-Report-Only", value: csp },
-          // Legacy header, still the broadest-supported framing block; the CSP
-          // frame-ancestors directive above supersedes it where understood.
+          // Where the policy's `report-to` group actually goes. Same origin, so
+          // no CORS preflight and no third-party collector in the loop.
+          {
+            key: "Reporting-Endpoints",
+            value: `${CSP_REPORT_GROUP}="/api/csp-report"`,
+          },
+          // THE ONLY THING BLOCKING FRAMING TODAY. It used to be described as
+          // the legacy fallback behind CSP frame-ancestors, but that directive
+          // is inert in a report-only policy (see the CSP above), so this
+          // header has been carrying the clickjacking defence alone all along.
           { key: "X-Frame-Options", value: "DENY" },
           // Browsers must not MIME-sniff responses into executable types.
           { key: "X-Content-Type-Options", value: "nosniff" },

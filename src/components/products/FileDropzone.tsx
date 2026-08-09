@@ -3,7 +3,9 @@
 import { useRef, useState } from "react";
 import type { DragEvent } from "react";
 import { FileText, FileUp, X } from "lucide-react";
+import { iconTileClass } from "@/components/ui/surface-styles";
 import { cn } from "@/lib/utils";
+import { iconButtonClass } from "@/components/ui/control-styles";
 import { DIGITAL_FILE_MAX_BYTES } from "@/lib/validation/product";
 import { formatBytes } from "@/lib/format";
 
@@ -77,7 +79,7 @@ export function FileDropzone({
             if (file) selectFile(file);
           }}
         />
-        <span className="flex size-10 shrink-0 items-center justify-center rounded-sm bg-muted">
+        <span className={cn(iconTileClass, "size-10")}>
           {selected ? (
             <FileText className="size-5 text-foreground" strokeWidth={1.5} aria-hidden="true" />
           ) : (
@@ -112,7 +114,7 @@ export function FileDropzone({
           type="button"
           onClick={handleRemove}
           aria-label="Remove digital file"
-          className="absolute right-2 top-2 inline-flex size-8 items-center justify-center rounded-none border border-border bg-background text-muted-foreground transition-colors duration-base ease-standard hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none"
+          className={cn(iconButtonClass, "absolute right-2 top-2 size-8")}
         >
           <X className="size-4" strokeWidth={2} aria-hidden="true" />
         </button>

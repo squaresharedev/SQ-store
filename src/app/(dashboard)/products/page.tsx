@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageShellClass } from "@/components/ui/surface-styles";
 import {
   PRODUCTS_DEFAULT_PAGE_SIZE,
   getProductSales,
@@ -65,7 +66,7 @@ export default async function ProductsPage({
   const canWrite = can(account?.role, "products.write");
 
   return (
-    <main className="mx-auto max-w-7xl px-6 py-8">
+    <main className={pageShellClass}>
       {/* The toolbar and the grid share URL state, so the header actions live
           in ProductsBrowser; the title block stays server-rendered here. */}
       <ProductsBrowser

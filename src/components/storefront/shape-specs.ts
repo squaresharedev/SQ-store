@@ -1,26 +1,30 @@
 import type { ShapeKind } from "@/types/storefront";
 
 /**
- * The shape library: one code-defined spec per ShapeKind, the single source of
- * truth for how a shape renders on a tile AND as a picker glyph.
+ * The shape library: one code-defined spec per ShapeKind, the single source
+ * of truth for labels and for how the CSS-rendered kinds size themselves on
+ * a tile. The polygon kinds (diamond, star, hexagon, ...) carry no classes
+ * here: their geometry is generated as SVG path data in shape-geometry.ts,
+ * and ShapeTileContent stretches that over the tile.
  *
- * SECURITY: every value here is a literal written by us. Config data selects a
- * spec by its allowlisted KEY and never contributes a class name or a
- * clip-path string. Typing the map as Record<ShapeKind, ShapeSpec> makes it
- * exhaustive: adding a kind without a spec is a compile error.
+ * SIZING: every shape fills its whole tile, edge to edge, and stretches with
+ * it — a circle on a wide tile IS an oval (its `50%` radius resolves per
+ * axis, which is what makes the ellipse), and a stretched polygon elongates
+ * with the tile. Corner roundness for the box kinds is dynamic (cqmin of the
+ * tile's shorter side, applied inline by ShapeTileContent), so a rounded
+ * square stretched wide becomes a rounded RECTANGLE with uniform corners.
+ *
+ * SECURITY: every value here is a literal written by us. Config data selects
+ * a spec by its allowlisted KEY and never contributes a class name.
  */
 export type ShapeSpec = {
   label: string;
-  /** Sizing + radius classes for the shape body on a tile. */
-  className: string;
-  /** Same, scaled down for the ~14px picker glyph. */
-  glyphClassName: string;
-  /**
-   * Fixed polygon. When present the shape renders through the clipped path
-   * (outer border layer + inset fill layer) instead of a CSS border, because
-   * a clip-path would otherwise cut a real border in half.
-   */
-  clip?: string;
+  /** Sizing + radius classes for the CSS-rendered kinds; absent for the
+   *  path kinds (they render as one stretched SVG). */
+  className?: string;
+  /** Same, scaled down for the ~14px picker glyph; path kinds draw a mini
+   *  SVG of their real geometry instead. */
+  glyphClassName?: string;
 };
 
 export const SHAPE_SPECS: Record<ShapeKind, ShapeSpec> = {
@@ -31,23 +35,18 @@ export const SHAPE_SPECS: Record<ShapeKind, ShapeSpec> = {
   },
   circle: {
     label: "Circle",
-    className: "size-full rounded-full",
+    className: "size-full rounded-[50%]",
     glyphClassName: "size-3.5 rounded-full",
   },
   ring: {
     label: "Ring",
-    className: "size-full rounded-full",
+    className: "size-full rounded-[50%]",
     glyphClassName: "size-3.5 rounded-full",
   },
-  diamond: {
-    label: "Diamond",
-    className: "size-full",
-    glyphClassName: "size-3.5",
-    clip: "polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)",
-  },
+  diamond: { label: "Diamond" },
   rounded: {
     label: "Rounded square",
-    className: "size-full rounded-[22%]",
+    className: "size-full",
     glyphClassName: "size-3.5 rounded-[22%]",
   },
   pill: {
@@ -70,82 +69,17 @@ export const SHAPE_SPECS: Record<ShapeKind, ShapeSpec> = {
     className: "h-1/4 w-full",
     glyphClassName: "h-1 w-3.5",
   },
-  triangle: {
-    label: "Triangle",
-    className: "size-full",
-    glyphClassName: "size-3.5",
-    clip: "polygon(50% 0%, 100% 100%, 0% 100%)",
-  },
-  wedge: {
-    label: "Wedge",
-    className: "size-full",
-    glyphClassName: "size-3.5",
-    clip: "polygon(0% 0%, 0% 100%, 100% 100%)",
-  },
-  pentagon: {
-    label: "Pentagon",
-    className: "size-full",
-    glyphClassName: "size-3.5",
-    clip: "polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)",
-  },
-  hexagon: {
-    label: "Hexagon",
-    className: "size-full",
-    glyphClassName: "size-3.5",
-    clip: "polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)",
-  },
-  octagon: {
-    label: "Octagon",
-    className: "size-full",
-    glyphClassName: "size-3.5",
-    clip: "polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)",
-  },
-  star: {
-    label: "Star",
-    className: "size-full",
-    glyphClassName: "size-3.5",
-    clip: "polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)",
-  },
-  sparkle: {
-    label: "Sparkle",
-    className: "size-full",
-    glyphClassName: "size-3.5",
-    clip: "polygon(50% 0%, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0% 50%, 39% 39%)",
-  },
-  cross: {
-    label: "Cross",
-    className: "size-full",
-    glyphClassName: "size-3.5",
-    clip: "polygon(35% 0%, 65% 0%, 65% 35%, 100% 35%, 100% 65%, 65% 65%, 65% 100%, 35% 100%, 35% 65%, 0% 65%, 0% 35%, 35% 35%)",
-  },
-  arrow: {
-    label: "Arrow",
-    className: "size-full",
-    glyphClassName: "size-3.5",
-    clip: "polygon(0% 30%, 60% 30%, 60% 0%, 100% 50%, 60% 100%, 60% 70%, 0% 70%)",
-  },
-  chevron: {
-    label: "Chevron",
-    className: "size-full",
-    glyphClassName: "size-3.5",
-    clip: "polygon(0% 0%, 50% 0%, 100% 50%, 50% 100%, 0% 100%, 50% 50%)",
-  },
-  trapezoid: {
-    label: "Trapezoid",
-    className: "size-full",
-    glyphClassName: "size-3.5",
-    clip: "polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%)",
-  },
-  parallelogram: {
-    label: "Parallelogram",
-    className: "size-full",
-    glyphClassName: "size-3.5",
-    clip: "polygon(25% 0%, 100% 0%, 75% 100%, 0% 100%)",
-  },
-  burst: {
-    label: "Burst",
-    className: "size-full",
-    glyphClassName: "size-3.5",
-    clip: "polygon(50% 0%, 58% 22%, 79% 10%, 76% 33%, 98% 35%, 82% 50%, 98% 65%, 76% 67%, 79% 90%, 58% 78%, 50% 100%, 42% 78%, 21% 90%, 24% 67%, 2% 65%, 18% 50%, 2% 35%, 24% 33%, 21% 10%, 42% 22%)",
-  },
+  triangle: { label: "Triangle" },
+  wedge: { label: "Wedge" },
+  pentagon: { label: "Pentagon" },
+  hexagon: { label: "Hexagon" },
+  octagon: { label: "Octagon" },
+  star: { label: "Star" },
+  sparkle: { label: "Sparkle" },
+  cross: { label: "Cross" },
+  arrow: { label: "Arrow" },
+  chevron: { label: "Chevron" },
+  trapezoid: { label: "Trapezoid" },
+  parallelogram: { label: "Parallelogram" },
+  burst: { label: "Burst" },
 };

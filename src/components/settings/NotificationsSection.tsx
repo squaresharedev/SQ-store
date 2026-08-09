@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useActionState } from "react";
-import { FormStatus } from "@/components/settings/FormStatus";
+import { useActionToast } from "@/components/ui/Toast";
 import { SaveButton } from "@/components/ui/SaveButton";
 import { SettingsCard } from "@/components/settings/SettingsCard";
 import { Switch } from "@/components/ui/switch";
@@ -42,6 +42,7 @@ export function NotificationsSection({
     saveNotifications,
     INITIAL,
   );
+  useActionToast(state);
   const [prefs, setPrefs] = React.useState(defaults);
 
   return (
@@ -86,7 +87,6 @@ export function NotificationsSection({
             </div>
           ))}
         </div>
-        <FormStatus state={state} />
         <div>
           <SaveButton pending={isPending} state={state} />
         </div>

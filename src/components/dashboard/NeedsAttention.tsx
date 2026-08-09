@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { AlertCircle, ArrowRight, CheckCircle2 } from "lucide-react";
-import { iconNudgeRightClass } from "@/components/ui/control-styles";
+import { iconNudgeRightClass, infoTextClass } from "@/components/ui/control-styles";
 import type { AttentionItem } from "@/lib/dashboard/attention";
 import { ModuleCard } from "./ModuleCard";
 
@@ -34,7 +34,7 @@ export function NeedsAttention({ items }: { items: AttentionItem[] }) {
                   <p className="text-sm font-medium text-foreground">
                     {item.label}
                   </p>
-                  <p className="font-inter text-xs text-muted-foreground">
+                  <p className={infoTextClass}>
                     {item.description}
                   </p>
                 </div>

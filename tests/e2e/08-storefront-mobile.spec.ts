@@ -1,5 +1,12 @@
 import { devices, expect, test, type Page } from "@playwright/test";
-import { createProductViaUI, freshUser, gotoApp, signUp } from "./helpers";
+import {
+  createProductViaUI,
+  createStorefrontViaUI,
+  expectToast,
+  freshUser,
+  gotoApp,
+  signUp,
+} from "./helpers";
 
 /**
  * The storefront designer ON A PHONE.
@@ -25,11 +32,7 @@ async function settle(page: Page) {
 /** Open a fresh storefront designer and wait for the board to settle. */
 async function openDesigner(page: Page) {
   await gotoApp(page, "/storefront");
-  await page
-    .getByRole("button", { name: /new storefront|create storefront/i })
-    .first()
-    .click();
-  await page.waitForURL(/\/storefront\/[0-9a-f-]{36}/, { timeout: 30_000 });
+  await createStorefrontViaUI(page);
   await page.waitForLoadState("networkidle").catch(() => {});
   // The board places itself on the first frames after layout.
   await expect(page.getByRole("toolbar", { name: "Editor tools" })).toBeVisible();
@@ -186,13 +189,11 @@ test.describe("storefront designer on a phone", () => {
     await page.getByRole("button", { name: /blue mug/i }).first().click();
 
     await page.getByRole("button", { name: /^save$/i }).click();
-    // Must be a VISIBLE confirmation, not merely a present one: the status
-    // used to be `hidden sm:inline`, so a phone got no feedback that the save
-    // landed. Matching `:visible` is what makes this a regression guard —
-    // `.first()` would happily resolve to the desktop-only span.
-    await expect(
-      page.locator('[role="status"] span:visible').filter({ hasText: /^Saved/ }).first(),
-    ).toBeVisible({ timeout: 20_000 });
+    // Must be a VISIBLE confirmation, not merely a present one: the old header
+    // status was `hidden sm:inline`, so a phone got no feedback that the save
+    // landed at all. The toast renders at every width, and asserting on its
+    // visibility is what keeps that true.
+    await expectToast(page, /storefront saved/i);
   });
 
   test("pinch zooms the canvas — the only zoom control on touch", async ({

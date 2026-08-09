@@ -21,8 +21,10 @@ const RESULT_MS = 2500;
  * built-in pending state, plus result feedback baked into the button itself —
  * it flips solid green with a check ("Saved") when the last submit succeeded,
  * or solid red with a cross when it failed, then reverts after a couple of
- * seconds. The button IS the success confirmation, so forms don't also print a
- * redundant "saved" line (FormStatus only shows errors / opt-in info).
+ * seconds. The button is the LOCAL confirmation, right where the click landed;
+ * the toast raised alongside it (see useActionToast) carries the words. Forms
+ * never also print an inline "saved" line — that was the third copy of the
+ * same news.
  *
  * Pass `variant="destructive"` for dangerous actions; the success/fail
  * treatment overrides the base variant while a result is showing.

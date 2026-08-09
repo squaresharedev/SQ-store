@@ -1,6 +1,8 @@
 "use client";
 
 import { ArrowUpRight, BadgeCheck } from "lucide-react";
+import { cardClass } from "@/components/ui/surface-styles";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import type { AccountStatus } from "@/lib/payments/types";
 import { CardSwipe } from "./CardSwipe";
@@ -36,7 +38,7 @@ export function ConnectionStatusCard({
     return (
       <section
         aria-label="Stripe connection"
-        className="overflow-hidden rounded-md border border-border bg-card shadow-xs"
+        className={cn(cardClass, "overflow-hidden")}
       >
         {/* Hero: a card being swiped — the "get paid" moment made tangible. */}
         <CardSwipe className="rounded-none border-x-0 border-t-0" />
@@ -62,7 +64,7 @@ export function ConnectionStatusCard({
   return (
     <section
       aria-label="Stripe connection"
-      className="rounded-md border border-border bg-card p-4 shadow-xs"
+      className={cn(cardClass, "p-4")}
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">

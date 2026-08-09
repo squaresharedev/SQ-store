@@ -1,3 +1,5 @@
+import { helpTextClass } from "@/components/ui/control-styles";
+import { cn } from "@/lib/utils";
 import { MemberRow, usernameFor } from "@/components/settings/team/MemberRow";
 import type { TeamRole } from "@/lib/team/permissions";
 import type { TeamMemberRow } from "@/lib/team/queries";
@@ -69,7 +71,7 @@ export function MemberList({
           <h3 className="font-inter text-xs font-medium uppercase tracking-wide text-muted-foreground">
             Invited
           </h3>
-          <p className="mt-1 font-inter text-sm text-muted-foreground">
+          <p className={cn(helpTextClass, "mt-1")}>
             No access yet — an invite takes effect the first time they sign in
             with that email address.
           </p>

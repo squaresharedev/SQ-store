@@ -26,6 +26,7 @@
 
   /* Feedback (styles.md §2.1) */
   --color-success: #15803d; /* green-700: AA contrast for small text on white/neutral-100 */
+  --color-success-dark: #4ade80; /* green-400: the same signal on black cards, where green-700 sinks into the surface */
   --color-danger-strong: #b91c1c; /* red-700: AA contrast for small text on white/neutral-100 */
 
   /* Owner crown — the ONE gold in the UI, reserved for the store owner's badge.
@@ -69,11 +70,15 @@
 
   /* Product-UI radius scale (styles.md §3). The auth/marketing surfaces keep
      their square identity via --radius (0) + rounded-none; product components
-     use these tokens. Primary CTAs are deliberately SHARP (rounded-none) — a
-     brand rule encoded in the shared Button primitive, not per-component. */
-  --radius-sm: 0.375rem; /* buttons, inputs, tiles */
-  --radius-md: 0.5rem; /* cards, popovers */
-  --radius-lg: 0.75rem; /* modals, large panels */
+     use these tokens.
+
+     BRAND RULE, and it overrides styles.md: BUTTONS and every FLOATING SURFACE
+     (modal, popover, dropdown, menu, toast) are SHARP (rounded-none). That is
+     encoded once in control-styles.ts — the Button primitive and the overlay
+     tokens — never per-component, so nothing below applies to either. */
+  --radius-sm: 0.375rem; /* nav + settings rows, inputs, tiles */
+  --radius-md: 0.5rem; /* cards */
+  --radius-lg: 0.75rem; /* large in-page panels */
 }
 
 /* Motion scale (styles.md §6.2). Declared here so components spend TOKENS
@@ -234,11 +239,18 @@
 .ss-grid-container {
   container-type: inline-size;
 }
-/* Each cell is its own layout/paint island, so the browser never has to
+/* Each cell is its own layout/style island, so the browser never has to
    consider a tile's internals when something elsewhere on the board changes.
-   Measured to matter most on big boards (12 x 60 = 720 cells). */
+   Measured to matter most on big boards (12 x 60 = 720 cells).
+
+   NO `paint` here on purpose: paint containment clips children to the cell's
+   rounded border box, exactly like overflow hidden, which cut the remove chip
+   and resize handle off heavily rounded (circle/pill) tiles. The paint clip
+   lives one level down instead, on the tile FACE wrapper in BlockTile, so the
+   content still clips to the corner radius while the controls sit in the
+   cell's square corner untouched. */
 .ss-grid > * {
-  contain: layout paint style;
+  contain: layout style;
 }
 .ss-grid {
   display: grid;
@@ -646,6 +658,78 @@ textarea {
   animation: bell-nudge 600ms cubic-bezier(0.36, 0.07, 0.19, 0.97);
 }
 
+/* Toasts. They arrive from the edge they are pinned to (the bottom) and leave
+   the same way, so the motion always reads as "in from / out to" one place
+   rather than as the stack rearranging itself. The exit is faster than the
+   entrance: an answer that has been read should get out of the way. */
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem) scale(0.98);
+  }
+}
+@keyframes toast-out {
+  to {
+    opacity: 0;
+    transform: translateY(0.5rem) scale(0.98);
+  }
+}
+.toast-enter {
+  animation: toast-in var(--transition-duration-base) var(--ease-entrance) both;
+}
+.toast-leave {
+  animation: toast-out var(--transition-duration-fast) var(--ease-standard) both;
+}
+
+/* The lifetime bar. Duration comes from the toast's own remaining time as an
+   inline style, and `animation-play-state` is driven by the same hover/focus
+   flag that pauses the JS timer, so the drawn clock and the real one agree. */
+@keyframes toast-timer {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+.toast-timer {
+  transform-origin: left center;
+  animation-name: toast-timer;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+/* The tone mark (components/ui/toast-icons.tsx). It draws itself on as the
+   toast arrives, which is what makes a success feel confirmed rather than
+   merely reported. Every mark declares pathLength="1", so one keyframe draws
+   all three. */
+@keyframes toast-mark-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.toast-mark {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: toast-mark-draw 260ms cubic-bezier(0.65, 0, 0.35, 1) 110ms forwards;
+}
+/* The cross's second stroke, so the two do not draw as one motion. */
+.toast-mark-delayed {
+  animation-delay: 230ms;
+}
+
+@keyframes toast-tittle-in {
+  from {
+    opacity: 0;
+  }
+}
+.toast-tittle {
+  animation: toast-tittle-in 200ms var(--ease-standard) 200ms both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -705,5 +789,25 @@ textarea {
   }
   .chart-seg-enter {
     animation: none;
+  }
+  /* Toasts appear and disappear outright. The lifetime bar goes with the
+     motion: a hairline that cannot sweep says nothing, and a frozen full-width
+     one would claim time that is in fact running out. */
+  .toast-enter,
+  .toast-leave {
+    animation: none;
+  }
+  .toast-timer {
+    animation: none;
+    opacity: 0;
+  }
+  /* The mark arrives already made. It must still be VISIBLE, so the dash
+     offset is reset rather than left at its undrawn start. */
+  .toast-tittle {
+    animation: none;
+  }
+  .toast-mark {
+    animation: none;
+    stroke-dashoffset: 0;
   }
 }

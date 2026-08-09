@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { helpTextClass, infoTextClass } from "@/components/ui/control-styles";
 import { resetPassword, type AuthState } from "@/lib/auth/actions";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -20,7 +21,7 @@ export function ResetPasswordForm({ email }: { email?: string }) {
   return (
     <form action={formAction} className="flex flex-col gap-4" noValidate>
       {email && (
-        <p className="font-inter text-sm text-muted-foreground">
+        <p className={helpTextClass}>
           Setting a new password for{" "}
           <span className="font-medium text-foreground">{email}</span>
         </p>
@@ -35,7 +36,7 @@ export function ResetPasswordForm({ email }: { email?: string }) {
           placeholder="••••••••"
           required
         />
-        <p className="font-inter text-xs text-muted-foreground">At least 8 characters.</p>
+        <p className={infoTextClass}>At least 8 characters.</p>
       </div>
 
       <div className="flex flex-col gap-1.5">

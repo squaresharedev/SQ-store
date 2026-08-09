@@ -7,7 +7,14 @@ import {
   it,
   vi,
 } from "vitest";
-import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 afterEach(cleanup);
@@ -37,6 +44,7 @@ import {
 } from "@/components/search/SearchOverlay";
 import {
   EMPTY_SNAPSHOT,
+  MAX_QUERY_LENGTH,
   type SearchApiResponse,
   type SearchSnapshot,
 } from "@/lib/search/types";
@@ -361,6 +369,43 @@ describe("SearchOverlay — the remote half", () => {
     await waitFor(() =>
       expect(screen.queryByText("Blue lantern")).not.toBeInTheDocument(),
     );
+  });
+});
+
+// ---- the character limit ------------------------------------------------
+
+describe("SearchOverlay — character limit", () => {
+  it("declares the limit on the field itself", async () => {
+    renderOverlay();
+    expect(screen.getByRole("combobox")).toHaveAttribute(
+      "maxlength",
+      String(MAX_QUERY_LENGTH),
+    );
+  });
+
+  it("clamps a value that arrives past maxLength anyway", async () => {
+    // `maxLength` is the browser's affordance and does not cover every path
+    // that can set a value — fireEvent.change is the same kind of bypass an
+    // IME commit is. The slice in onChange is the enforcement, so the box must
+    // hold the capped string, not the pasted one.
+    renderOverlay();
+    const input = screen.getByRole("combobox") as HTMLInputElement;
+    fireEvent.change(input, { target: { value: "x".repeat(5_000) } });
+    expect(input.value).toHaveLength(MAX_QUERY_LENGTH);
+  });
+
+  it("never sends the server a query it is going to reject", async () => {
+    // The route 400s past MAX_QUERY_LENGTH, and the fetch below maps a 400 to
+    // "Can't reach the server" — a lie about a request that arrived fine. The
+    // bound exists so that request is never made in the first place.
+    renderOverlay();
+    const input = screen.getByRole("combobox");
+    fireEvent.change(input, { target: { value: "lantern".repeat(500) } });
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    const sent = new URL(String(fetchMock.mock.calls[0][0]), "http://localhost")
+      .searchParams.get("q");
+    expect(sent).not.toBeNull();
+    expect(sent!.length).toBeLessThanOrEqual(MAX_QUERY_LENGTH);
   });
 });
 

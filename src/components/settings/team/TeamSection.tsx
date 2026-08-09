@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { UserPlus } from "lucide-react";
+import { errorTextClass } from "@/components/ui/control-styles";
 import { MemberList } from "@/components/settings/team/MemberList";
 import { InviteModal } from "@/components/settings/team/InviteModal";
 import { InvitePromptModal } from "@/components/settings/team/InvitePromptModal";
@@ -93,7 +94,7 @@ export function TeamSection({
         {hasMore && (
           <div className="mt-3 flex flex-col items-start gap-1.5">
             {loadError && (
-              <p role="alert" className="font-inter text-sm text-destructive">
+              <p role="alert" className={errorTextClass}>
                 Couldn&apos;t load more members. Try again.
               </p>
             )}

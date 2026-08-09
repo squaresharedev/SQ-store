@@ -28,6 +28,9 @@ import {
   PRICE_TAG_STYLES,
   SHAPE_BORDER_WIDTH_MAX,
   SHAPE_KINDS,
+  SHAPE_POINTS_MAX,
+  SHAPE_POINTS_MIN,
+  SHAPE_ROUNDNESS_MAX,
   STOREFRONT_FONTS,
   TEXT_ALIGNS,
   TEXT_MAX_LENGTH,
@@ -239,12 +242,28 @@ const placementFields = {
   h: z.number().int().min(1).max(CANVAS_ROWS_MAX),
 };
 
+// Per-tile card styling: the SAME closed enums and bounded integers as the
+// theme's card fields, each one optional (absent = follow the theme). Strict,
+// so nothing free-form rides along inside a block's style member.
+const cardStyleOverridesSchema = z.strictObject({
+  cornerRadius: z.number().int().min(0).max(CORNER_RADIUS_MAX).optional(),
+  showTitle: z.boolean().optional(),
+  titleStyle: z.enum(TITLE_STYLES).optional(),
+  titleDisplay: z.enum(TITLE_DISPLAYS).optional(),
+  priceDisplay: z.enum(PRICE_DISPLAYS).optional(),
+  priceTagPosition: z.enum(PRICE_TAG_POSITIONS).optional(),
+  priceTagStyle: z.enum(PRICE_TAG_STYLES).optional(),
+  priceTagSize: z.enum(PRICE_TAG_SIZES).optional(),
+});
+
 const productBlockSchema = z.strictObject({
   type: z.literal("product"),
   productId: z.uuid(),
   ...placementFields,
   // Seller-controlled sold-out mark — optional so older blocks still parse.
   soldOut: z.boolean().optional(),
+  // Per-tile look, optional so blocks saved before it existed still parse.
+  style: cardStyleOverridesSchema.optional(),
 });
 
 // Plain text only. Rendered exclusively as a React text node (React escapes
@@ -278,6 +297,10 @@ const shapeBlockSchema = z.strictObject({
   borderWidth: z.number().int().min(0).max(SHAPE_BORDER_WIDTH_MAX).optional(),
   borderColor: hexColorSchema.optional(),
   opacity: z.number().int().min(0).max(100).optional(),
+  // Geometry parameters (bounded ints; resolved through code-defined path
+  // generation only), optional for the same back-compat reason.
+  roundness: z.number().int().min(0).max(SHAPE_ROUNDNESS_MAX).optional(),
+  points: z.number().int().min(SHAPE_POINTS_MIN).max(SHAPE_POINTS_MAX).optional(),
 });
 
 const blockSchema = z.discriminatedUnion("type", [

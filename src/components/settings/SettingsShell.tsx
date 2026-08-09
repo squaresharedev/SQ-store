@@ -4,15 +4,19 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import {
+  focusRingClass,
+  transitionClass,
+} from "@/components/ui/control-styles";
 // The settings map itself lives in @/lib/search/nav-constants so the universal
 // search registry indexes exactly what this rail renders.
 import { SETTINGS_NAV } from "@/lib/search/nav-constants";
 
 function navItemClasses(active: boolean, danger?: boolean) {
   return cn(
-    "flex shrink-0 snap-start items-center gap-2.5 rounded-[0.375rem] px-3 py-2.5 text-sm font-medium",
-    "transition-colors duration-base ease-standard motion-reduce:transition-none",
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+    "flex shrink-0 snap-start items-center gap-2.5 rounded-sm px-3 py-2.5 text-sm font-medium",
+    transitionClass,
+    focusRingClass,
     active
       ? danger
         ? "bg-destructive/5 text-destructive"

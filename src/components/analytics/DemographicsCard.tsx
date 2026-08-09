@@ -1,4 +1,7 @@
 import { Globe } from "lucide-react";
+import { helpTextClass } from "@/components/ui/control-styles";
+import { badgeClass, cardClass } from "@/components/ui/surface-styles";
+import { cn } from "@/lib/utils";
 
 // Buyer demographics (country) — honestly pending: orders carry no buyer
 // country today (no such column in the orders contract, and inventing one
@@ -9,17 +12,17 @@ import { Globe } from "lucide-react";
 /** "Coming soon" placeholder card for the country demographics module. */
 export function DemographicsCard() {
   return (
-    <div className="rounded-md border border-dashed border-border bg-card p-4 shadow-xs">
+    <div className={cn(cardClass, "border-dashed p-4")}>
       <div className="flex items-center justify-between gap-2">
         <div>
           <h2 className="text-base font-semibold text-foreground">
             Buyer countries
           </h2>
-          <p className="font-inter text-sm text-muted-foreground">
+          <p className={helpTextClass}>
             Where your buyers are.
           </p>
         </div>
-        <span className="shrink-0 rounded-full bg-secondary px-2 py-0.5 font-inter text-xs text-muted-foreground">
+        <span className={cn(badgeClass, "shrink-0 font-normal text-muted-foreground")}>
           Coming soon
         </span>
       </div>

@@ -14,7 +14,7 @@ import {
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { focusRingClass, transitionClass } from "@/components/ui/control-styles";
+import { infoTextClass, overlayCloseButtonClass, overlaySurfaceClass, transitionClass } from "@/components/ui/control-styles";
 import { useIsMacPlatform } from "@/lib/hooks/useIsMacPlatform";
 import { searchLocalRegistry } from "@/lib/search/registry";
 import {
@@ -22,6 +22,7 @@ import {
   buildSnapshotGroups,
 } from "@/lib/search/snapshot-groups";
 import {
+  MAX_QUERY_LENGTH,
   MIN_REMOTE_QUERY_LENGTH,
   type SearchApiResponse,
   type SearchGroup,
@@ -559,14 +560,15 @@ export function SearchOverlay({
               // the bar and the card each carry theirs. Only width animates.
               "transition-[width] duration-slow ease-entrance motion-reduce:transition-none"
             : cn(
-                // Mobile: a full-screen sheet. `inset-0` follows the VISUAL
-                // viewport, so when the on-screen keyboard opens the sheet
-                // shrinks with it and the input stays above the keys.
-                "inset-0 overflow-hidden bg-background",
+                // The shared panel from `sm` up; on mobile it is a full-screen
+                // sheet, so the chrome is dropped there. `inset-0` follows the
+                // VISUAL viewport, so when the on-screen keyboard opens the
+                // sheet shrinks with it and the input stays above the keys.
+                overlaySurfaceClass,
+                "inset-0 overflow-hidden max-sm:border-0 max-sm:bg-background max-sm:shadow-none",
                 // Desktop with no registered trigger (tests, future
                 // surfaces): the centred palette in the upper third.
                 "sm:inset-x-0 sm:bottom-auto sm:top-[10vh] sm:mx-auto sm:h-auto sm:max-h-[70vh] sm:w-[calc(100%-2rem)] sm:max-w-xl",
-                "sm:rounded-none sm:border sm:border-border sm:bg-popover sm:shadow-lg",
               ),
         )}
       >
@@ -600,8 +602,29 @@ export function SearchOverlay({
             autoCapitalize="off"
             spellCheck={false}
             placeholder="Search products, orders, settings…"
+            // THE CHARACTER LIMIT, in both forms on purpose.
+            //
+            // `maxLength` is the affordance: the browser refuses the 101st
+            // character and clamps a paste, so the field behaves like a bounded
+            // field rather than accepting text that will be rejected later.
+            // The slice is the ENFORCEMENT, because maxLength is not applied to
+            // every path that can set a value (an IME composition commits past
+            // it in some browsers) and this is the value the request is built
+            // from.
+            //
+            // It matters beyond tidiness. The server rejects anything over
+            // MAX_QUERY_LENGTH with a 400, which the fetch below maps to
+            // `error` — so without a client bound, a long paste reported "Can't
+            // reach the server" for a query that reached it fine. It also
+            // bounds the per-keystroke local work: the registry and snapshot
+            // matchers NFD-normalise the term against every cached entity name
+            // in the same render as the keystroke, which a pasted megabyte
+            // turns into a frozen tab.
+            maxLength={MAX_QUERY_LENGTH}
             value={query}
-            onChange={(event) => setQuery(event.target.value)}
+            onChange={(event) =>
+              setQuery(event.target.value.slice(0, MAX_QUERY_LENGTH))
+            }
             onKeyDown={onKeyDown}
             // Sheet: text-base, NOT text-sm — anything under 16px makes iOS
             // Safari zoom the page on focus. Anchored (desktop-only): text-sm,
@@ -632,16 +655,13 @@ export function SearchOverlay({
               }
             }}
             className={cn(
-              "shrink-0 items-center justify-center rounded-none text-muted-foreground",
-              "hover:bg-accent hover:text-foreground",
-              // The modal-standard size-9 X (modal.tsx) in the roomy sheet
-              // row; a size-8 inside the anchored h-9 bar so it sits inset
-              // like a field affordance rather than flush to the borders.
-              anchored ? "size-8" : "size-9",
+              overlayCloseButtonClass,
+              // The shared size-9 X in the roomy sheet row; a size-8 inside
+              // the anchored h-9 bar so it sits inset like a field affordance
+              // rather than flush to the borders.
+              anchored && "size-8",
               // Empty + desktop = nothing to clear and Esc closes: hidden.
               query ? "flex" : "flex sm:hidden",
-              transitionClass,
-              focusRingClass,
             )}
           >
             <X className={anchored ? "size-4" : "size-5"} aria-hidden />
@@ -723,7 +743,7 @@ export function SearchOverlay({
                 <div className="shrink-0 border-t border-border px-4 py-2">
                   <p
                     role="status"
-                    className="font-inter text-xs text-muted-foreground"
+                    className={infoTextClass}
                   >
                     {notice}
                   </p>
@@ -756,7 +776,8 @@ export function SearchOverlay({
                 opacity: expanded ? 1 : 0,
               }}
               className={cn(
-                "mt-2 flex min-h-0 flex-col overflow-hidden rounded-none border border-border bg-popover shadow-lg",
+                overlaySurfaceClass,
+                "mt-2 flex min-h-0 flex-col overflow-hidden",
                 "transition-[max-height,opacity] duration-slow ease-entrance motion-reduce:transition-none",
               )}
             >

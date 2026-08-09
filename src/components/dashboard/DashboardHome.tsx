@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Plus } from "lucide-react";
-import { iconPopClass, primaryButtonClass } from "@/components/ui/control-styles";
+import { cn } from "@/lib/utils";
+import { helpTextClass, iconPopClass, primaryButtonClass } from "@/components/ui/control-styles";
 import { BackgroundArrow } from "@/components/ui/BackgroundArrow";
 import type { DashboardOrdersData, ProductsSummary } from "@/lib/dashboard/queries";
 import {
@@ -40,7 +41,7 @@ export function DashboardHome({
             <h1 className="text-2xl font-semibold text-foreground md:text-3xl">
               Overview
             </h1>
-            <p className="mt-1 font-inter text-sm text-muted-foreground">
+            <p className={cn(helpTextClass, "mt-1")}>
               What is happening in your store.
             </p>
           </div>

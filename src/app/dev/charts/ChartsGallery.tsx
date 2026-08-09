@@ -1,5 +1,8 @@
 "use client";
 
+import { helpTextClass } from "@/components/ui/control-styles";
+import { pageShellClass } from "@/components/ui/surface-styles";
+import { cn } from "@/lib/utils";
 import { ChartCard } from "@/components/analytics/ChartCard";
 import {
   BarChart,
@@ -117,10 +120,10 @@ const CATEGORY_SALES = [
 
 export function ChartsGallery() {
   return (
-    <main className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+    <main className={cn(pageShellClass, "space-y-6")}>
       <div>
         <h1 className="text-xl font-semibold text-foreground">Chart kit</h1>
-        <p className="font-inter text-sm text-muted-foreground">
+        <p className={helpTextClass}>
           Reusable analytics graphs (components/charts) — every family and
           subtype, with sample data. Dev-only route.
         </p>

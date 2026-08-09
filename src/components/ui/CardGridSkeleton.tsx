@@ -1,3 +1,4 @@
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 /**
@@ -36,14 +37,14 @@ export function CardGridSkeleton({
             className="flex flex-col rounded-none border border-border bg-card p-3 shadow-sm"
           >
             {withImage && (
-              <div className="aspect-[4/3] w-full animate-pulse rounded-none bg-secondary motion-reduce:animate-none" />
+              <Skeleton className="aspect-[4/3] w-full rounded-none" />
             )}
             <div className="mt-3 flex flex-col gap-2">
-              <div className="h-4 w-3/4 animate-pulse rounded-sm bg-secondary motion-reduce:animate-none" />
-              <div className="h-3 w-1/3 animate-pulse rounded-sm bg-secondary motion-reduce:animate-none" />
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-3 w-1/3" />
             </div>
             <div className="mt-2.5 border-t border-border pt-2">
-              <div className="h-3 w-1/2 animate-pulse rounded-sm bg-secondary motion-reduce:animate-none" />
+              <Skeleton className="h-3 w-1/2" />
             </div>
           </li>
         ))}

@@ -1,4 +1,5 @@
 import { AlertCircle } from "lucide-react";
+import { errorTextClass, helpTextClass } from "@/components/ui/control-styles";
 import type { ActionError } from "@/lib/errors";
 import { cn } from "@/lib/utils";
 
@@ -20,8 +21,8 @@ export function ActionErrorNotice({
   if (variant === "inline") {
     return (
       <div role="alert" className={cn("space-y-0.5", className)}>
-        <p className="font-inter text-sm text-destructive">{error.message}</p>
-        <p className="font-inter text-sm text-muted-foreground">{error.fix}</p>
+        <p className={errorTextClass}>{error.message}</p>
+        <p className={helpTextClass}>{error.fix}</p>
       </div>
     );
   }
@@ -40,7 +41,7 @@ export function ActionErrorNotice({
         aria-hidden="true"
       />
       <div className="space-y-0.5">
-        <p className="font-inter text-sm text-destructive">{error.message}</p>
+        <p className={errorTextClass}>{error.message}</p>
         <p className="font-inter text-sm text-destructive/80">{error.fix}</p>
       </div>
     </div>

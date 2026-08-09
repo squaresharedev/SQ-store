@@ -1,4 +1,5 @@
 import { ArrowLeft } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { iconNudgeLeftClass } from "@/components/ui/control-styles";
 
 /**
@@ -12,14 +13,12 @@ import { iconNudgeLeftClass } from "@/components/ui/control-styles";
  * the user they are going somewhere they are not.
  */
 
-const shimmer = "animate-pulse rounded-sm bg-secondary motion-reduce:animate-none";
-
 /** One labelled field: a short label bar above a control-height box. */
 function FieldSkeleton({ control = "h-10" }: { control?: string }) {
   return (
     <div className="flex flex-col gap-2">
-      <div className={`h-3 w-24 ${shimmer}`} />
-      <div className={`w-full ${control} ${shimmer}`} />
+      <Skeleton className="h-3 w-24" />
+      <Skeleton className={`w-full ${control}`} />
     </div>
   );
 }
@@ -36,7 +35,7 @@ export function ProductFormSkeleton({ title }: { title: string }) {
 
       <div className="mb-8 mt-4">
         <h1 className="text-2xl font-semibold text-foreground md:text-3xl">{title}</h1>
-        <div className={`mt-2 h-3 w-72 max-w-full ${shimmer}`} />
+        <Skeleton className="mt-2 h-3 w-72 max-w-full" />
       </div>
 
       <div
@@ -52,14 +51,14 @@ export function ProductFormSkeleton({ title }: { title: string }) {
         </div>
         {/* Display image: the 4:3 dropzone. */}
         <div className="flex flex-col gap-2">
-          <div className={`h-3 w-28 ${shimmer}`} />
-          <div className={`aspect-[4/3] w-full ${shimmer}`} />
+          <Skeleton className="h-3 w-28" />
+          <Skeleton className="aspect-[4/3] w-full" />
         </div>
         <FieldSkeleton />
         <div className="border-t border-border pt-6">
           <div className="flex justify-end gap-3">
-            <div className={`h-10 w-24 ${shimmer}`} />
-            <div className={`h-10 w-32 ${shimmer}`} />
+            <Skeleton className="h-10 w-24" />
+            <Skeleton className="h-10 w-32" />
           </div>
         </div>
       </div>

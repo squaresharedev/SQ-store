@@ -26,7 +26,7 @@ export function SearchMobileTrigger() {
       aria-haspopup="dialog"
       aria-expanded={search.isOpen}
       className={cn(
-        "flex size-10 items-center justify-center rounded-[0.375rem] text-foreground",
+        "flex size-10 items-center justify-center rounded-sm text-foreground",
         "hover:bg-accent",
         transitionClass,
         focusRingClass,

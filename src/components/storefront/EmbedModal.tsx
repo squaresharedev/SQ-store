@@ -1,19 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { ActionErrorNotice } from "@/components/ui/ActionErrorNotice";
+import { useToast } from "@/components/ui/Toast";
 import { CopyButton } from "@/components/ui/CopyButton";
 import { Modal } from "@/components/ui/modal";
 import { Switch } from "@/components/ui/switch";
-import {
-  destructiveButtonClass,
-  fieldBaseClass,
-  helpTextClass,
-  labelClass,
-  primaryButtonClass,
-  secondaryButtonClass,
-} from "@/components/ui/control-styles";
-import { invalidInput, type ActionError } from "@/lib/errors";
+import { destructiveButtonClass, errorTextClass, fieldBaseClass, helpTextClass, labelClass, primaryButtonClass, secondaryButtonClass } from "@/components/ui/control-styles";
+import { invalidInput } from "@/lib/errors";
 import { embedSettingsSchema } from "@/lib/validation/storefront";
 import { normalizeHostname } from "@/lib/validation/inputs";
 import { rotateEmbedKey, updateEmbedSettings } from "@/lib/storefront/actions";
@@ -52,20 +45,14 @@ function parseDomains(text: string): string[] {
  *  are legitimate values of `storefront?.id` when the modal is closed. */
 const UNSET = Symbol("unset") as unknown as string;
 
-type SaveState =
-  | { status: "idle" }
-  | { status: "saving" }
-  | { status: "saved" }
-  | { status: "error"; error: ActionError };
-
-/** Rotation is a separate, destructive flow with its own confirm + errors, so
- *  a failed rotation never reads as a failed settings save. */
+/** Rotation is a separate, destructive flow with its own confirm step, so it
+ *  keeps its own state rather than sharing the settings save's. Outcomes of
+ *  both are toasts, which is what keeps a failed rotation from ever reading as
+ *  a failed settings save. */
 type RotateState =
   | { status: "idle" }
   | { status: "confirming" }
-  | { status: "rotating" }
-  | { status: "rotated" }
-  | { status: "error"; error: ActionError };
+  | { status: "rotating" };
 
 /**
  * Embed settings for one storefront: the copyable snippet (keyed by the
@@ -85,9 +72,10 @@ export function EmbedModal({
   /** Mirrors a successful save into the caller's local list state. */
   onSaved: (id: string, embed: EmbedSettings) => void;
 }) {
+  const toast = useToast();
   const [enabled, setEnabled] = useState(false);
   const [domainsText, setDomainsText] = useState("");
-  const [saveState, setSaveState] = useState<SaveState>({ status: "idle" });
+  const [saving, setSaving] = useState(false);
   // Held separately from the `storefront` prop so a rotation updates the
   // snippet immediately, without waiting for the list to refetch.
   const [embedKey, setEmbedKey] = useState("");
@@ -109,7 +97,7 @@ export function EmbedModal({
     setEnabled(embed.enabled);
     setDomainsText(embed.domains.join(", "));
     setEmbedKey(storefront?.embedKey ?? "");
-    setSaveState({ status: "idle" });
+    setSaving(false);
     setRotateState({ status: "idle" });
   }
 
@@ -119,24 +107,23 @@ export function EmbedModal({
     // Client-side parse for instant feedback; the action re-validates.
     const parsed = embedSettingsSchema.safeParse(settings);
     if (!parsed.success) {
-      setSaveState({
-        status: "error",
-        error: invalidInput(
-          parsed.error.issues[0]?.message ?? "Invalid embed settings.",
-          "Check the domain list (comma-separated hostnames like example.com) and save again.",
-        ),
-      });
+      const problem = invalidInput(
+        parsed.error.issues[0]?.message ?? "Invalid embed settings.",
+        "Check the domain list (comma-separated hostnames like example.com) and save again.",
+      );
+      toast.error(problem.message, { lines: [problem.fix] });
       return;
     }
-    setSaveState({ status: "saving" });
+    setSaving(true);
     const result = await updateEmbedSettings(storefront.id, parsed.data);
+    setSaving(false);
     if (!result.ok) {
-      setSaveState({ status: "error", error: result.error });
+      toast.error(result.error.message, { lines: [result.error.fix] });
       return;
     }
     setDomainsText(parsed.data.domains.join(", "));
-    setSaveState({ status: "saved" });
     onSaved(storefront.id, parsed.data);
+    toast.success("Embed settings saved.");
   }
 
   async function handleRotate() {
@@ -144,17 +131,18 @@ export function EmbedModal({
     setRotateState({ status: "rotating" });
     const result = await rotateEmbedKey(storefront.id);
     if (!result.ok) {
-      setRotateState({ status: "error", error: result.error });
+      setRotateState({ status: "idle" });
+      toast.error(result.error.message, { lines: [result.error.fix] });
       return;
     }
     setEmbedKey(result.embedKey);
-    setRotateState({ status: "rotated" });
-  }
-
-  function markDirty() {
-    setSaveState((current) =>
-      current.status === "saving" ? current : { status: "idle" },
-    );
+    setRotateState({ status: "idle" });
+    // The old snippet is dead the instant this lands, so the follow-up action
+    // travels WITH the confirmation rather than as a line the modal shows once
+    // and then loses on close.
+    toast.success("New embed key issued.", {
+      lines: ["Re-paste the snippet everywhere this storefront is embedded."],
+    });
   }
 
   return (
@@ -172,7 +160,7 @@ export function EmbedModal({
         <div className="space-y-5">
           <div className="space-y-1.5">
             <span className={labelClass}>Snippet</span>
-            <pre className="overflow-x-auto rounded-sm border border-border bg-muted p-3 font-mono text-xs text-foreground">
+            <pre className="overflow-x-auto rounded-none border border-border bg-muted p-3 font-mono text-xs text-foreground">
               {embedSnippet(embedKey)}
             </pre>
             <div className="flex items-center justify-between gap-3">
@@ -190,7 +178,7 @@ export function EmbedModal({
 
           {/* Revoke. Its own section, its own confirm, its own errors: this is
               the only control here that breaks working embeds. */}
-          <div className="space-y-1.5 rounded-sm border border-border bg-muted/40 p-3">
+          <div className="space-y-1.5 rounded-none border border-border bg-muted/40 p-3">
             <span className={labelClass}>Snippet key</span>
             {rotateState.status === "confirming" ? (
               <>
@@ -233,16 +221,8 @@ export function EmbedModal({
                       ? "Rotating…"
                       : "Rotate key"}
                   </button>
-                  {rotateState.status === "rotated" && (
-                    <span role="status" className={helpTextClass}>
-                      New key issued. Re-paste the snippet above.
-                    </span>
-                  )}
                 </div>
               </>
-            )}
-            {rotateState.status === "error" && (
-              <ActionErrorNotice error={rotateState.error} variant="inline" />
             )}
           </div>
 
@@ -253,10 +233,7 @@ export function EmbedModal({
             <Switch
               id="embed-enabled"
               checked={enabled}
-              onCheckedChange={(next) => {
-                setEnabled(next);
-                markDirty();
-              }}
+              onCheckedChange={setEnabled}
             />
           </div>
 
@@ -268,10 +245,7 @@ export function EmbedModal({
               id="embed-domains"
               type="text"
               value={domainsText}
-              onChange={(event) => {
-                setDomainsText(event.target.value);
-                markDirty();
-              }}
+              onChange={(event) => setDomainsText(event.target.value)}
               placeholder="yoursite.com, blog.yoursite.com"
               spellCheck={false}
               className={fieldBaseClass}
@@ -284,30 +258,21 @@ export function EmbedModal({
                 here, because "enabled but blank" otherwise looks like it
                 should work and silently doesn't. */}
             {enabled && parseDomains(domainsText).length === 0 && (
-              <p role="status" className="font-inter text-sm text-destructive">
+              <p role="status" className={errorTextClass}>
                 Add at least one domain. While this is empty the storefront
                 won&apos;t load anywhere, even though embedding is on.
               </p>
             )}
           </div>
 
-          {saveState.status === "error" && (
-            <ActionErrorNotice error={saveState.error} variant="inline" />
-          )}
-
           <div className="flex items-center justify-end gap-3">
-            {saveState.status === "saved" && (
-              <span role="status" className={helpTextClass}>
-                Saved.
-              </span>
-            )}
             <button
               type="button"
               onClick={handleSave}
-              disabled={saveState.status === "saving"}
+              disabled={saving}
               className={primaryButtonClass}
             >
-              {saveState.status === "saving" ? "Saving…" : "Save settings"}
+              {saving ? "Saving…" : "Save settings"}
             </button>
           </div>
         </div>

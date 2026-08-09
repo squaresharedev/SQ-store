@@ -41,6 +41,8 @@ import { cn } from "@/lib/utils";
 import {
   focusRingClass as FOCUS_RING,
   iconPopClass,
+  overlayItemClass,
+  overlaySurfaceClass,
   transitionClass as TRANSITION,
 } from "@/components/ui/control-styles";
 import { ShapeKindGlyph } from "./ShapeTileContent";
@@ -70,11 +72,8 @@ const ICON_BTN =
   `text-muted-foreground hover:bg-accent hover:text-foreground ` +
   `disabled:pointer-events-none disabled:opacity-50 ${TRANSITION} ${FOCUS_RING}`;
 
-/** Row inside the "More" sheet: a full-width, comfortably tappable menu item. */
-const MORE_ITEM =
-  `flex w-full items-center gap-3 rounded-sm px-3 py-2.5 text-left text-sm font-medium ` +
-  `text-foreground hover:bg-accent disabled:pointer-events-none disabled:opacity-50 ` +
-  `${TRANSITION} ${FOCUS_RING}`;
+/** Row inside the "More" sheet: the shared overlay row, a little roomier. */
+const MORE_ITEM = cn(overlayItemClass, "gap-3 py-2.5 font-medium");
 
 /** Active state for the preview-mode pair. */
 const PREVIEW_ACTIVE = "bg-primary text-primary-foreground";
@@ -180,7 +179,10 @@ export function EditorToolbar({
       role="toolbar"
       aria-label="Editor tools"
       // No overflow clipping here: the shape menu pops out above the bar.
-      className="fixed bottom-4 left-1/2 z-40 -translate-x-1/2 flex max-w-[calc(100vw-2rem)] items-center gap-1 rounded-md border border-border bg-background/95 p-1.5 shadow-md backdrop-blur"
+      className={cn(
+        overlaySurfaceClass,
+        "fixed bottom-4 left-1/2 z-40 -translate-x-1/2 flex max-w-[calc(100vw-2rem)] items-center gap-1 bg-background/95 p-1.5 backdrop-blur",
+      )}
     >
       {/* -- Group 1: INSERT tools -- */}
       <button
@@ -244,7 +246,10 @@ export function EditorToolbar({
           <div
             role="menu"
             aria-label="Shapes"
-            className="flex max-w-[min(90vw,32rem)] items-center gap-1 overflow-x-auto rounded-md border border-border bg-background/95 p-1.5 shadow-md backdrop-blur"
+            className={cn(
+              overlaySurfaceClass,
+              "flex max-w-[min(90vw,32rem)] items-center gap-1 overflow-x-auto bg-background/95 p-1.5 backdrop-blur",
+            )}
           >
             {SHAPE_KINDS.map((kind) => (
               <button
@@ -409,7 +414,10 @@ export function EditorToolbar({
           <div
             role="menu"
             aria-label="More tools"
-            className="absolute bottom-full right-0 z-50 mb-2 w-52 rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-lg"
+            className={cn(
+              overlaySurfaceClass,
+              "absolute bottom-full right-0 z-50 mb-2 w-52 p-1",
+            )}
           >
               <button
                 type="button"

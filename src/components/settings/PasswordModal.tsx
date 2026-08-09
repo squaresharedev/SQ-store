@@ -2,12 +2,13 @@
 
 import * as React from "react";
 import { useActionState } from "react";
+import { helpTextClass, infoTextClass } from "@/components/ui/control-styles";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Modal } from "@/components/ui/modal";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Spinner } from "@/components/ui/spinner";
-import { FormStatus } from "@/components/settings/FormStatus";
+import { useActionToast } from "@/components/ui/Toast";
 import {
   changePassword,
   sendPasswordReset,
@@ -92,6 +93,9 @@ function ChangeView({
   onDone: () => void;
 }) {
   const [state, formAction, isPending] = useActionState(changePassword, INITIAL);
+  // The modal closes itself on success (below), so the confirmation has to
+  // outlive it — which is exactly what a toast does and an inline line cannot.
+  useActionToast(state);
 
   // Closing on success keeps the modal from sitting there looking unfinished.
   // The card underneath re-renders from the server with the new state.
@@ -125,7 +129,7 @@ function ChangeView({
         />
         {/* The ACTUAL rule, so the form does not invite a password it will
             then reject. Mirrors passwordProblem() in lib/auth/password.ts. */}
-        <p className="font-inter text-xs text-muted-foreground">
+        <p className={infoTextClass}>
           At least 8 characters, mixing cases, numbers or symbols (or a
           passphrase of 16+).
         </p>
@@ -142,11 +146,9 @@ function ChangeView({
         />
       </div>
 
-      <p className="font-inter text-xs text-muted-foreground">
+      <p className={infoTextClass}>
         Every other device will be signed out.
       </p>
-
-      <FormStatus state={state} showSuccess />
 
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
         {/* type="button" matters: this sits INSIDE the change form, and a bare
@@ -209,6 +211,7 @@ function ResetView({
     sendPasswordReset,
     INITIAL,
   );
+  useActionToast(state);
   // Seeded from storage at mount, so reopening the modal picks the countdown
   // up where it left off. Safe to read during render here: the modal returns
   // null while closed, so this view only ever renders in the browser.
@@ -250,13 +253,11 @@ function ResetView({
   return (
     <form action={formAction} className="flex flex-col gap-4">
       {!hasPassword && (
-        <p className="font-inter text-sm text-muted-foreground">
+        <p className={helpTextClass}>
           This account signs in with Google. Setting a password lets you sign in
           with your email or username as well, and does not remove Google.
         </p>
       )}
-
-      <FormStatus state={state} showSuccess />
 
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
         <Button type="button" variant="ghost" onClick={onBack ?? onClose}>

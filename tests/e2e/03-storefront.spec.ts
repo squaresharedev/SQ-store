@@ -1,5 +1,12 @@
 import { expect, test } from "@playwright/test";
-import { createProductViaUI, freshUser, gotoApp, signUp } from "./helpers";
+import {
+  createProductViaUI,
+  createStorefrontViaUI,
+  expectToast,
+  freshUser,
+  gotoApp,
+  signUp,
+} from "./helpers";
 
 test.describe("storefront designer", () => {
   test("create → add blocks → save → embed snippet + settings", async ({ page }) => {
@@ -11,11 +18,7 @@ test.describe("storefront designer", () => {
 
     // --- create a storefront ---
     await gotoApp(page, "/storefront");
-    await page
-      .getByRole("button", { name: /new storefront|create storefront/i })
-      .first()
-      .click();
-    await page.waitForURL(/\/storefront\/[0-9a-f-]{36}/, { timeout: 20_000 });
+    await createStorefrontViaUI(page);
     const storefrontId = page.url().match(/\/storefront\/([0-9a-f-]{36})/)![1];
 
     // --- add a text block via the toolbar ---
@@ -29,7 +32,7 @@ test.describe("storefront designer", () => {
 
     // --- save ---
     await page.getByRole("button", { name: /^save$/i }).click();
-    await expect(page.getByText(/saved\.?$/i).first()).toBeVisible({ timeout: 15_000 });
+    await expectToast(page, /storefront saved/i, 15_000);
 
     // --- reload: config persisted ---
     await page.reload();
@@ -53,7 +56,7 @@ test.describe("storefront designer", () => {
     await page.locator("#embed-enabled").click();
     await page.locator("#embed-domains").fill("myblog.example.com");
     await page.getByRole("button", { name: /save/i }).last().click();
-    await expect(page.getByText(/^saved\.?$/i).first()).toBeVisible({ timeout: 10_000 });
+    await expectToast(page, /embed settings saved/i, 10_000);
 
     // Pasting a URL is normalized (scheme/path stripped), not rejected.
     await page.locator("#embed-domains").fill("https://pasted.example.com/shop");
@@ -68,16 +71,59 @@ test.describe("storefront designer", () => {
     ).toBeVisible();
   });
 
+  test("copy/paste duplicates shapes and text, never products", async ({ page }) => {
+    const user = freshUser("copypaste");
+    await signUp(page, user);
+    await createProductViaUI(page, { title: "Uncopyable", price: "5.00" });
+
+    await gotoApp(page, "/storefront");
+    await createStorefrontViaUI(page);
+    const cells = page.locator("li[data-grid-cell]");
+
+    // --- product blocks have no copy path ---
+    await page.getByRole("button", { name: "Add product", exact: true }).click();
+    await page.getByRole("button", { name: /add uncopyable|uncopyable/i }).first().click();
+    await expect(cells).toHaveCount(1);
+    await page.getByRole("button", { name: /edit uncopyable/i }).click();
+    await page.keyboard.press("ControlOrMeta+c");
+    await expect(page.getByText(/block copied/i)).not.toBeVisible();
+    await page.keyboard.press("ControlOrMeta+v");
+    await expect(cells).toHaveCount(1);
+
+    // --- keyboard copy/paste on a shape ---
+    await page.getByRole("button", { name: "Add shape", exact: true }).click();
+    await page.getByRole("menuitem", { name: "Add star" }).click();
+    await expect(cells).toHaveCount(2);
+    // Inserting selects the new block, so it is ready to copy.
+    await page.keyboard.press("ControlOrMeta+c");
+    await expect(page.getByText(/block copied/i)).toBeVisible();
+    await page.keyboard.press("ControlOrMeta+v");
+    await expect(cells).toHaveCount(3);
+    // Paste again: the clipboard survives and keeps stamping copies.
+    await page.keyboard.press("ControlOrMeta+v");
+    await expect(cells).toHaveCount(4);
+
+    // --- Duplicate button on a text block (the no-keyboard path) ---
+    await page.getByRole("button", { name: "Add text", exact: true }).click();
+    await expect(cells).toHaveCount(5);
+    await page.getByRole("button", { name: "Duplicate" }).click();
+    await expect(cells).toHaveCount(6);
+    // Scoped to the board: the inspector's textarea also carries this text.
+    await expect(cells.getByText("Your text here")).toHaveCount(2);
+
+    // --- copies are real blocks: they survive a save + reload ---
+    await page.getByRole("button", { name: /^save$/i }).click();
+    await expectToast(page, /storefront saved/i, 15_000);
+    await page.reload();
+    await expect(cells).toHaveCount(6, { timeout: 20_000 });
+  });
+
   test("undo/redo works from the toolbar", async ({ page }) => {
     const user = freshUser("undo");
     await signUp(page, user);
 
-    await page.goto("/storefront");
-    await page
-      .getByRole("button", { name: /new storefront|create storefront/i })
-      .first()
-      .click();
-    await page.waitForURL(/\/storefront\/[0-9a-f-]{36}/);
+    await gotoApp(page, "/storefront");
+    await createStorefrontViaUI(page);
 
     await page.getByRole("button", { name: "Add text", exact: true }).click();
     await expect(page.getByText("Your text here").first()).toBeVisible();

@@ -3,8 +3,8 @@
 import { useRef, useState } from "react";
 import type { KeyboardEvent, PointerEvent as ReactPointerEvent } from "react";
 import { cn } from "@/lib/utils";
-import { focusRingClass } from "./control-styles";
 import { clamp, hsvToHex, type Hsv } from "@/lib/format/color";
+import { focusRingClass } from "./control-styles";
 
 /** Half the hue thumb's width in px, used to keep it inside its track. */
 const HUE_THUMB_RADIUS = 12;
@@ -114,7 +114,7 @@ export function ColorArea({
         onPointerUp={() => setDragging(null)}
         onPointerCancel={() => setDragging(null)}
         className={cn(
-          "relative h-44 w-full touch-none cursor-crosshair rounded-lg",
+          "relative h-44 w-full touch-none cursor-crosshair rounded-none",
           // Inset ring instead of a border: the gradient runs edge to edge and
           // still has a defined edge against a white panel. NOT overflow-hidden
           // — the thumb is meant to ride over the edge at the extremes.
@@ -124,11 +124,11 @@ export function ColorArea({
         style={{ backgroundColor: hueHex }}
       >
         <div
-          className="absolute inset-0 rounded-lg"
+          className="absolute inset-0 rounded-none"
           style={{ background: "linear-gradient(to right, #fff, transparent)" }}
         />
         <div
-          className="absolute inset-0 rounded-lg"
+          className="absolute inset-0 rounded-none"
           style={{ background: "linear-gradient(to top, #000, transparent)" }}
         />
         <span

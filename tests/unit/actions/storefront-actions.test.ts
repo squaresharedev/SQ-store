@@ -54,6 +54,7 @@ import {
   deleteStorefront,
 } from "@/lib/storefront/actions";
 import { DEFAULT_STOREFRONT_CONFIG } from "@/types/storefront";
+import { VIBE_PRESETS } from "@/lib/storefront/presets";
 
 // ---- test constants ------------------------------------------------------
 
@@ -80,6 +81,10 @@ const VALID_THEME = {
 };
 
 const VALID_CONFIG = { theme: VALID_THEME, blocks: [] };
+
+/** Read from the shipped preset so the assertion tracks the design, not a copy
+ *  of it that would keep passing after someone retunes the vibe. */
+const VIBE_BOLD = VIBE_PRESETS.bold;
 
 function validSaveInput(overrides: Record<string, unknown> = {}) {
   return { name: "My Store", config: VALID_CONFIG, ...overrides };
@@ -110,7 +115,7 @@ describe("createStorefront - auth gates", () => {
 
   it("viewer role returns permission error with no DB call", async () => {
     getActiveAccountMock.mockResolvedValue(viewerAccount());
-    const result = await createStorefront("My Store");
+    const result = await createStorefront({ name: "My Store" });
     expect(result.ok).toBe(false);
     expect((result as { error: { code: string } }).error.code).toBe("permission_denied");
     expect(db.insert).not.toHaveBeenCalled();
@@ -122,7 +127,7 @@ describe("createStorefront - happy path", () => {
     getActiveAccountMock.mockResolvedValue(ownerAccount());
     dbFn.mockResolvedValueOnce({ data: { id: STOREFRONT_ID }, error: null });
 
-    const result = await createStorefront("My Store");
+    const result = await createStorefront({ name: "My Store" });
 
     expect(result).toEqual({ ok: true, id: STOREFRONT_ID });
     const insertPayload = db.insert.mock.calls[0][0] as Record<string, unknown>;
@@ -130,7 +135,7 @@ describe("createStorefront - happy path", () => {
     expect(insertPayload.name).toBe("My Store");
   });
 
-  it("falls back to 'Untitled storefront' when name is undefined", async () => {
+  it("falls back to 'Untitled storefront' when no input is given", async () => {
     getActiveAccountMock.mockResolvedValue(ownerAccount());
     dbFn.mockResolvedValueOnce({ data: { id: STOREFRONT_ID }, error: null });
 
@@ -138,6 +143,70 @@ describe("createStorefront - happy path", () => {
 
     const insertPayload = db.insert.mock.calls[0][0] as Record<string, unknown>;
     expect(insertPayload.name).toBe("Untitled storefront");
+    // Skipping the setup flow is a first-class outcome, not an error.
+    expect(insertPayload.brief).toEqual({});
+    expect(insertPayload.config).toEqual(DEFAULT_STOREFRONT_CONFIG);
+  });
+});
+
+describe("createStorefront - the setup brief", () => {
+  it("stores the answers and starts the storefront on the chosen vibe's theme", async () => {
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+    dbFn.mockResolvedValueOnce({ data: { id: STOREFRONT_ID }, error: null });
+
+    await createStorefront({
+      name: "Bold Store",
+      brief: { category: "art", fulfilment: "physical", vibe: "bold" },
+    });
+
+    const insertPayload = db.insert.mock.calls[0][0] as Record<string, unknown>;
+    expect(insertPayload.brief).toEqual({
+      category: "art",
+      fulfilment: "physical",
+      vibe: "bold",
+    });
+    // The one answer that does work immediately: the seller lands in a designer
+    // already wearing the look they picked.
+    const config = insertPayload.config as { theme: typeof VIBE_BOLD };
+    expect(config.theme).toMatchObject(VIBE_BOLD);
+  });
+
+  it("keeps otherCategory only alongside category 'other'", async () => {
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+    dbFn.mockResolvedValueOnce({ data: { id: STOREFRONT_ID }, error: null });
+
+    await createStorefront({
+      brief: { category: "art", otherCategory: "model kits" },
+    });
+
+    const insertPayload = db.insert.mock.calls[0][0] as Record<string, unknown>;
+    expect(insertPayload.brief).toEqual({ category: "art" });
+  });
+
+  it("degrades a tampered brief to empty rather than failing the create", async () => {
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+    dbFn.mockResolvedValueOnce({ data: { id: STOREFRONT_ID }, error: null });
+
+    const result = await createStorefront({
+      brief: { vibe: "NOT_A_VIBE", category: "<script>" },
+    });
+
+    expect(result).toEqual({ ok: true, id: STOREFRONT_ID });
+    const insertPayload = db.insert.mock.calls[0][0] as Record<string, unknown>;
+    expect(insertPayload.brief).toEqual({});
+    expect(insertPayload.config).toEqual(DEFAULT_STOREFRONT_CONFIG);
+  });
+
+  it("ignores a non-object input instead of throwing", async () => {
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+    dbFn.mockResolvedValueOnce({ data: { id: STOREFRONT_ID }, error: null });
+
+    const result = await createStorefront("My Store");
+
+    expect(result).toEqual({ ok: true, id: STOREFRONT_ID });
+    const insertPayload = db.insert.mock.calls[0][0] as Record<string, unknown>;
+    expect(insertPayload.name).toBe("Untitled storefront");
+    expect(insertPayload.brief).toEqual({});
   });
 });
 

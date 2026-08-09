@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { DragEvent } from "react";
 import { Image as ImageIcon, UploadCloud, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { iconButtonClass, infoTextClass } from "@/components/ui/control-styles";
 import {
   IMAGE_CONTENT_TYPES,
   IMAGE_MAX_BYTES,
@@ -117,7 +118,7 @@ export function ImageDropzone({
               <span className="font-inter text-sm text-foreground">
                 Drop an image or click to upload
               </span>
-              <span className="font-inter text-xs text-muted-foreground">
+              <span className={infoTextClass}>
                 PNG, JPG, WEBP, GIF, or AVIF, up to {MAX_MB} MB
               </span>
             </span>
@@ -129,7 +130,7 @@ export function ImageDropzone({
             type="button"
             onClick={handleRemove}
             aria-label="Remove display image"
-            className="absolute right-2 top-2 inline-flex size-8 items-center justify-center rounded-none border border-border bg-background text-muted-foreground transition-colors duration-base ease-standard hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none"
+            className={cn(iconButtonClass, "absolute right-2 top-2 size-8")}
           >
             <X className="size-4" strokeWidth={2} aria-hidden="true" />
           </button>

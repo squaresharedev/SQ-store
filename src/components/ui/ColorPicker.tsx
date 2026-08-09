@@ -310,7 +310,7 @@ export function ColorPicker({
                     aria-label="Pick a color from the screen"
                     title="Pick from screen"
                     className={cn(
-                      "inline-flex size-10 shrink-0 items-center justify-center rounded-lg border border-input",
+                      "inline-flex size-10 shrink-0 items-center justify-center rounded-none border border-input",
                       "bg-background text-muted-foreground hover:bg-accent hover:text-foreground",
                       transitionClass,
                       focusRingClass,
@@ -339,7 +339,7 @@ export function ColorPicker({
                   aria-invalid={invalid ? true : undefined}
                   aria-describedby={invalid ? errorId : undefined}
                   placeholder="#a855f7"
-                  className={cn(fieldBaseClass, "h-10 rounded-lg py-0 font-mono text-sm")}
+                  className={cn(fieldBaseClass, "h-10 rounded-none py-0 font-mono text-sm")}
                 />
                 <button
                   type="button"
@@ -347,7 +347,7 @@ export function ColorPicker({
                   aria-label={copied ? "Hex copied" : "Copy hex"}
                   title={copied ? "Copied" : "Copy hex"}
                   className={cn(
-                    "inline-flex size-10 shrink-0 items-center justify-center rounded-lg border border-input",
+                    "inline-flex size-10 shrink-0 items-center justify-center rounded-none border border-input",
                     "bg-background hover:bg-accent hover:text-foreground",
                     copied ? "text-foreground" : "text-muted-foreground",
                     transitionClass,

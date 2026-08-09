@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, ChevronLeft, ChevronRight, Search, X } from "lucide-react";
-import type { ActionError } from "@/lib/errors";
 import type { Product } from "@/types/product";
 import {
   CANVAS_COLUMNS_MIN,
@@ -11,13 +10,17 @@ import {
   CANVAS_ROWS_MIN,
   DEFAULT_STOREFRONT_HEADER,
   blockKey,
+  mergeCardStyleOverrides,
   readingOrder,
   type BlockPlacement,
+  type CardStyleOverrides,
+  type ShapeBlock,
   type ShapeKind,
   type StorefrontBlock,
   type StorefrontConfig,
   type StorefrontHeader,
   type StorefrontTheme,
+  type TextBlock,
 } from "@/types/storefront";
 import {
   findFreeCell,
@@ -27,7 +30,7 @@ import {
 import { MAX_BLOCKS, STOREFRONT_NAME_MAX } from "@/lib/validation/storefront";
 import { saveStorefront } from "@/lib/storefront/actions";
 import { cn } from "@/lib/utils";
-import { ActionErrorNotice } from "@/components/ui/ActionErrorNotice";
+import { useToast } from "@/components/ui/Toast";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { CollapsibleSection } from "@/components/ui/CollapsibleSection";
@@ -48,12 +51,6 @@ import { useEditorHistory } from "./useEditorHistory";
 import { useUnsavedChangesGuard } from "@/lib/hooks/useUnsavedChangesGuard";
 import { SearchProvider, useSearch } from "@/components/search/SearchProvider";
 import type { TeamRole } from "@/lib/team/permissions";
-
-type SaveState =
-  | { status: "idle" }
-  | { status: "saving" }
-  | { status: "saved"; droppedBlocks: number }
-  | { status: "error"; error: ActionError };
 
 /** What the left inspector column shows: the product picker, or the editor
  *  card for one selected block. */
@@ -182,6 +179,7 @@ export function StorefrontDesigner({
   /** Active account id, for universal search's snapshot cache. */
   accountId?: string | null;
 }) {
+  const toast = useToast();
   const [name, setName] = useState(initialName);
   // Display URL for the image background: server-signed at load; replaced by
   // a local object URL right after an in-session upload. NOT part of the
@@ -200,9 +198,11 @@ export function StorefrontDesigner({
   );
   // Placement is explicit, so the array is just a bag of blocks.
   const [blocks, setBlocks] = useState<StorefrontBlock[]>(initialConfig.blocks);
-  const [saveState, setSaveState] = useState<SaveState>({ status: "idle" });
-  // Unsaved-edits flag, separate from saveState so "idle after load" and
-  // "idle with pending edits" render differently next to the Save button.
+  const [saving, setSaving] = useState(false);
+  // Unsaved-edits flag. The header shows exactly one thing — whether there is
+  // work not yet written — while the OUTCOME of a save (done / dropped blocks
+  // / failed) is a toast, so it reaches the eye even in the full-screen editor
+  // where the Save button is a long way from the canvas being edited.
   const [dirty, setDirty] = useState(false);
   const [inspector, setInspector] = useState<InspectorState | null>(null);
   // Mobile only: whether the global-settings bottom sheet is open (on lg+ the
@@ -262,14 +262,6 @@ export function StorefrontDesigner({
 
   function markDirty() {
     setDirty(true);
-    setSaveState((current) =>
-      // Returning the SAME object when already idle lets React bail out.
-      // Minting a fresh `{ status: "idle" }` every time forced a re-render on
-      // every keystroke, even though nothing had changed.
-      current.status === "saving" || current.status === "idle"
-        ? current
-        : { status: "idle" },
-    );
   }
 
   /** Every undoable mutation calls this FIRST with an optional coalesce key. */
@@ -913,6 +905,86 @@ export function StorefrontDesigner({
     );
   }
 
+  // COPY / PASTE, for text and shape blocks. Editor-internal (a ref, not the
+  // system clipboard): the payload is a live config block, and pasting mints
+  // a fresh id, so nothing round-trips through serialized text. Product
+  // blocks are deliberately excluded — a product tile IS its product (one
+  // block per product, keyed by productId), so there is nothing valid a
+  // pasted copy could be.
+  const clipboard = useRef<TextBlock | ShapeBlock | null>(null);
+
+  /** Insert a copy of a text/shape block with a fresh id, preferring the
+   *  clicked cell, then the spot just right of the source, then the first
+   *  free cell (insertBlock's fallback). Selects the copy. */
+  function pasteBlock(source: TextBlock | ShapeBlock) {
+    const copy = insertBlock(
+      (placement) => ({
+        ...structuredClone(source),
+        id: crypto.randomUUID(),
+        ...placement,
+      }),
+      source.w,
+      source.h,
+      takeInsertHint() ?? { x: source.x + source.w, y: source.y },
+    );
+    if (copy) selectBlock(blockKey(copy));
+  }
+
+  /** Copy the selected block into the editor clipboard (text/shape only). */
+  function copySelectedBlock() {
+    if (inspector?.kind !== "block") return;
+    const source = blocks.find((b) => blockKey(b) === inspector.key);
+    if (!source || source.type === "product") return;
+    clipboard.current = structuredClone(source);
+    toast.success("Block copied.", { lines: ["Paste with Ctrl+V or Cmd+V."] });
+  }
+
+  function pasteClipboard() {
+    if (clipboard.current) pasteBlock(clipboard.current);
+  }
+
+  /** Copy + paste in one step, for the inspector's Duplicate button (the
+   *  no-keyboard path). Also fills the clipboard, so Ctrl+V repeats it. */
+  function duplicateBlock(key: string) {
+    const source = blocks.find((b) => blockKey(b) === key);
+    if (!source || source.type === "product") return;
+    clipboard.current = structuredClone(source);
+    pasteBlock(source);
+  }
+
+  // Ctrl/Cmd+C / V. Same subscribe-once + ref shape as the undo listener, and
+  // the same guards: never while typing (fields keep native copy/paste), and
+  // copy also yields whenever real text is selected on the page, so copying
+  // prose from the inspector never turns into copying the tile behind it.
+  const clipboardActions = useRef({ copySelectedBlock, pasteClipboard });
+  useEffect(() => {
+    clipboardActions.current = { copySelectedBlock, pasteClipboard };
+  });
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if (!(event.ctrlKey || event.metaKey) || event.altKey) return;
+      const key = event.key.toLowerCase();
+      if (key !== "c" && key !== "v") return;
+      const target = event.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+      if (key === "c") {
+        if (window.getSelection()?.toString()) return;
+        clipboardActions.current.copySelectedBlock();
+      } else {
+        clipboardActions.current.pasteClipboard();
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
+
   function moveBlock(key: string, x: number, y: number) {
     recordChange(`move:${key}`);
     setBlocks((current) =>
@@ -974,6 +1046,44 @@ export function StorefrontDesigner({
           ? { ...b, soldOut: !b.soldOut }
           : b,
       ),
+    );
+  }
+
+  /**
+   * Merge a card-style patch into one product block's overrides. Overrides
+   * store ONLY what differs from following the theme, so an override object
+   * that empties out is dropped entirely and the block goes back to being
+   * indistinguishable from one that was never customized (the merge
+   * semantics live in mergeCardStyleOverrides).
+   */
+  function updateProductBlockStyle(key: string, patch: CardStyleOverrides) {
+    // Coalesce per field, so a slider scrub is one undo step but edits to
+    // different controls stay separate steps.
+    recordChange(`pstyle:${key}:${Object.keys(patch)[0] ?? ""}`);
+    setBlocks((current) =>
+      current.map((b) => {
+        if (b.type !== "product" || blockKey(b) !== key) return b;
+        const style = mergeCardStyleOverrides(b.style, patch);
+        if (style === undefined) {
+          const rest = { ...b };
+          delete rest.style;
+          return rest;
+        }
+        return { ...b, style };
+      }),
+    );
+  }
+
+  /** Drop a product block's overrides so it follows the theme again. */
+  function resetProductBlockStyle(key: string) {
+    recordChange();
+    setBlocks((current) =>
+      current.map((b) => {
+        if (b.type !== "product" || blockKey(b) !== key || !b.style) return b;
+        const rest = { ...b };
+        delete rest.style;
+        return rest;
+      }),
     );
   }
 
@@ -1090,7 +1200,7 @@ export function StorefrontDesigner({
   /** Returns whether the save succeeded, so callers (e.g. save-then-leave) can
    *  branch on it without re-reading async state. */
   async function handleSave(): Promise<boolean> {
-    setSaveState({ status: "saving" });
+    setSaving(true);
     const config: StorefrontConfig = {
       theme,
       // Blocks carry their own coordinates, so array order is irrelevant.
@@ -1101,8 +1211,9 @@ export function StorefrontDesigner({
       ...(initialConfig.embed ? { embed: initialConfig.embed } : {}),
     };
     const result = await saveStorefront(storefrontId, { name, config });
+    setSaving(false);
     if (!result.ok) {
-      setSaveState({ status: "error", error: result.error });
+      toast.error(result.error.message, { lines: [result.error.fix] });
       return false;
     }
     if (result.droppedBlocks > 0) {
@@ -1114,7 +1225,19 @@ export function StorefrontDesigner({
       );
     }
     setDirty(false);
-    setSaveState({ status: "saved", droppedBlocks: result.droppedBlocks });
+    // Blocks silently vanishing from the canvas needs saying out loud —
+    // otherwise a save that quietly removed tiles reads as a save that broke
+    // the design.
+    toast.success("Storefront saved.", {
+      lines:
+        result.droppedBlocks > 0
+          ? [
+              result.droppedBlocks === 1
+                ? "1 block pointed at a deleted product and was removed."
+                : `${result.droppedBlocks} blocks pointed at deleted products and were removed.`,
+            ]
+          : undefined,
+    });
     return true;
   }
 
@@ -1196,26 +1319,12 @@ export function StorefrontDesigner({
 
           <div className="flex items-center gap-3">
             <DesignerSearchButton />
-            {/* Save feedback must survive the phone. These used to be
+            {/* The one thing the header says is whether there is work not yet
+                written. What HAPPENED when Save was pressed is a toast, which
+                reaches the phone and the desktop identically — this used to be
                 `hidden sm:inline`, so tapping Save on a 390px screen confirmed
-                nothing at all — and `display:none` drops a node from the
-                accessibility tree too, so the `role="status"` never announced
-                either. The wording shortens instead of disappearing. */}
-            {saveState.status === "saved" && (
-              <span role="status" className={`shrink-0 ${helpTextClass}`}>
-                <span className="hidden sm:inline">
-                  {saveState.droppedBlocks > 0
-                    ? `Saved. ${saveState.droppedBlocks} removed product(s) were dropped.`
-                    : "Saved."}
-                </span>
-                <span className="sm:hidden">
-                  {saveState.droppedBlocks > 0
-                    ? `Saved · ${saveState.droppedBlocks} dropped`
-                    : "Saved."}
-                </span>
-              </span>
-            )}
-            {dirty && saveState.status === "idle" && (
+                nothing at all. */}
+            {dirty && !saving && (
               <span role="status" className={`shrink-0 ${helpTextClass}`}>
                 <span className="hidden sm:inline">Unsaved changes</span>
                 {/* No room for the phrase beside the Save button on a phone,
@@ -1227,11 +1336,8 @@ export function StorefrontDesigner({
                 <span className="sr-only sm:hidden">Unsaved changes</span>
               </span>
             )}
-            <Button
-              onClick={handleSave}
-              disabled={saveState.status === "saving"}
-            >
-              {saveState.status === "saving" ? "Saving…" : "Save"}
+            <Button onClick={handleSave} disabled={saving}>
+              {saving ? "Saving…" : "Save"}
             </Button>
           </div>
         </div>
@@ -1261,16 +1367,10 @@ export function StorefrontDesigner({
                 : null,
           )}
         >
-          {saveState.status === "error" && (
-            <div
-              className={cn(
-                designView && "absolute inset-x-4 top-4 z-20 sm:inset-x-6",
-              )}
-            >
-              <ActionErrorNotice error={saveState.error} />
-            </div>
-          )}
-
+          {/* A failed save used to paint a banner over the canvas, covering
+              the very design the seller was about to try saving again. It is a
+              toast now; the "Unsaved changes" flag in the header is what keeps
+              saying the work is still not written. */}
           <DesignerCanvas
             blocks={blocks}
             productsById={productsById}
@@ -1372,9 +1472,16 @@ export function StorefrontDesigner({
                       // the selection moves to a different product tile.
                       key={selectedBlock.productId}
                       block={selectedBlock}
+                      theme={theme}
                       product={productsById.get(selectedBlock.productId) ?? null}
                       onToggleSoldOut={() =>
                         toggleSoldOut(blockKey(selectedBlock))
+                      }
+                      onStyleChange={(patch) =>
+                        updateProductBlockStyle(blockKey(selectedBlock), patch)
+                      }
+                      onStyleReset={() =>
+                        resetProductBlockStyle(blockKey(selectedBlock))
                       }
                       onRemove={() => removeBlock(blockKey(selectedBlock))}
                       onProductSaved={applyProductUpdate}
@@ -1385,6 +1492,7 @@ export function StorefrontDesigner({
                       onUpdate={(patch) =>
                         updateShapeBlock(blockKey(selectedBlock), patch)
                       }
+                      onDuplicate={() => duplicateBlock(blockKey(selectedBlock))}
                       onRemove={() => removeBlock(blockKey(selectedBlock))}
                     />
                   ) : selectedBlock?.type === "text" ? (
@@ -1394,6 +1502,7 @@ export function StorefrontDesigner({
                       onUpdate={(patch) =>
                         updateTextBlock(blockKey(selectedBlock), patch)
                       }
+                      onDuplicate={() => duplicateBlock(blockKey(selectedBlock))}
                     />
                   ) : null}
                 </CollapsibleSection>
@@ -1466,14 +1575,14 @@ export function StorefrontDesigner({
         <div className="flex flex-col gap-2 sm:flex-row-reverse">
           <Button
             onClick={handleSaveAndLeave}
-            disabled={saveState.status === "saving"}
+            disabled={saving}
           >
-            {saveState.status === "saving" ? "Saving…" : "Save changes"}
+            {saving ? "Saving…" : "Save changes"}
           </Button>
           <Button
             variant="destructive"
             onClick={leaveGuard.leave}
-            disabled={saveState.status === "saving"}
+            disabled={saving}
           >
             Discard changes
           </Button>
@@ -1482,7 +1591,7 @@ export function StorefrontDesigner({
           <Button
             variant="ghost"
             onClick={leaveGuard.cancel}
-            disabled={saveState.status === "saving"}
+            disabled={saving}
             className="sm:mr-auto"
           >
             Keep editing

@@ -1,5 +1,9 @@
 "use client";
 
+import { helpTextClass } from "@/components/ui/control-styles";
+import { cardClass } from "@/components/ui/surface-styles";
+import { cn } from "@/lib/utils";
+import { pageShellClass } from "@/components/ui/surface-styles";
 import type { Product } from "@/types/product";
 import {
   DEFAULT_STOREFRONT_CONFIG,
@@ -42,6 +46,19 @@ function shape(x: number, y: number, w = 1, h = 1, index = 0): StorefrontBlock {
   };
 }
 
+/** A specific shape kind at a placement, for the shape showcase cases. */
+function shapeOf(
+  kind: ShapeKind,
+  color: string,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  extra: Partial<Extract<StorefrontBlock, { type: "shape" }>> = {},
+): StorefrontBlock {
+  return { type: "shape", id: fixtureId(), kind, color, x, y, w, h, ...extra };
+}
+
 function text(x: number, y: number, w: number, h: number, body: string): StorefrontBlock {
   return {
     type: "text",
@@ -53,6 +70,46 @@ function text(x: number, y: number, w: number, h: number, body: string): Storefr
     y,
     w,
     h,
+  };
+}
+
+/** Product fixtures, so per-tile style cases render real product faces. */
+const FIXTURE_PRODUCTS: Product[] = ["Mug", "Print", "Tote", "Candle"].map(
+  (title, index) => ({
+    id: `00000000-0000-4000-9000-${String(index + 1).padStart(12, "0")}`,
+    title,
+    description: "",
+    price: 12.5 + index,
+    currency: "EUR",
+    status: "active",
+    imageUrl: null,
+    digitalFileName: null,
+    trackStock: false,
+    stockQuantity: null,
+    lowStockThreshold: 3,
+  }),
+);
+
+const PRODUCTS_BY_ID: ReadonlyMap<string, Product> = new Map(
+  FIXTURE_PRODUCTS.map((product) => [product.id, product]),
+);
+
+function productBlock(
+  index: number,
+  x: number,
+  y: number,
+  w = 1,
+  h = 1,
+  style?: Extract<StorefrontBlock, { type: "product" }>["style"],
+): StorefrontBlock {
+  return {
+    type: "product",
+    productId: FIXTURE_PRODUCTS[index].id,
+    x,
+    y,
+    w,
+    h,
+    ...(style ? { style } : {}),
   };
 }
 
@@ -175,6 +232,49 @@ const CASES: { title: string; note: string; config: StorefrontConfig }[] = [
     note: "Rows declared far below the lowest block; grid height follows rows.",
     config: config({ columns: 6, rows: 30 }, [shape(0, 0), shape(5, 29)]),
   },
+  {
+    title: "Stretched shapes",
+    note: "Every block is 2x1 or 1x2 and every shape fills its tile edge to edge, stretching with it: a circle becomes an OVAL, a star a wide star. Rounded keeps uniform corners (a rounded rectangle, cqmin radius, never per-axis).",
+    config: config({ columns: 4, rows: 5 }, [
+      shapeOf("circle", "#2563eb", 0, 0, 2, 1),
+      shapeOf("ring", "#16a34a", 2, 0, 1, 2),
+      shapeOf("rounded", "#a855f7", 0, 1, 2, 1),
+      shapeOf("star", "#171717", 3, 0, 1, 2),
+      shapeOf("hexagon", "#2563eb", 0, 2, 1, 2),
+      shapeOf("triangle", "#16a34a", 1, 2, 2, 1),
+      shapeOf("diamond", "#a855f7", 1, 3, 2, 1),
+      shapeOf("pill", "#171717", 3, 2, 1, 2),
+      shapeOf("arrow", "#2563eb", 0, 4, 3, 1),
+    ]),
+  },
+  {
+    title: "Shape parameters",
+    note: "Adjustable geometry: star points 4/5/8/12 across the top; corner roundness on a hexagon, triangle, star, and square below (the outlined hexagon shows the border following the rounded path).",
+    config: config({ columns: 4, rows: 2 }, [
+      shapeOf("star", "#171717", 0, 0, 1, 1, { points: 4 }),
+      shapeOf("star", "#2563eb", 1, 0, 1, 1),
+      shapeOf("star", "#16a34a", 2, 0, 1, 1, { points: 8 }),
+      shapeOf("star", "#a855f7", 3, 0, 1, 1, { points: 12 }),
+      shapeOf("hexagon", "#2563eb", 0, 1, 1, 1, {
+        roundness: 14,
+        borderWidth: 4,
+        borderColor: "#171717",
+      }),
+      shapeOf("triangle", "#16a34a", 1, 1, 1, 1, { roundness: 20 }),
+      shapeOf("star", "#a855f7", 2, 1, 1, 1, { roundness: 8 }),
+      shapeOf("square", "#171717", 3, 1, 1, 1, { roundness: 30 }),
+    ]),
+  },
+  {
+    title: "Per-tile styles",
+    note: "One board, four looks: theme square, circle override, overlay title, pill tag. Each product tile styles itself; unset fields follow the theme.",
+    config: config({ columns: 4, rows: 4, cornerRadius: 0 }, [
+      productBlock(0, 0, 0, 2, 2),
+      productBlock(1, 2, 0, 2, 2, { cornerRadius: 100, priceTagPosition: "hidden", showTitle: false }),
+      productBlock(2, 0, 2, 2, 2, { titleStyle: "overlay", cornerRadius: 24 }),
+      productBlock(3, 2, 2, 2, 2, { priceTagStyle: "pill", priceTagPosition: "top-right", priceTagSize: "lg" }),
+    ]),
+  },
 ];
 
 /** Renders one case in exactly the box the real storefront card uses. */
@@ -189,14 +289,13 @@ function Case({
   config: StorefrontConfig;
   width: number;
 }) {
-  const empty: ReadonlyMap<string, Product> = new Map();
   return (
-    <li className="flex flex-col rounded-md border border-border bg-card p-4 shadow-sm">
+    <li className={cn(cardClass, "flex flex-col p-4 shadow-sm")}>
       <div
         style={{ width }}
         className="mx-auto aspect-[4/3] overflow-hidden rounded-sm border border-border"
       >
-        <StorefrontPreview config={storefront} productsById={empty} />
+        <StorefrontPreview config={storefront} productsById={PRODUCTS_BY_ID} />
       </div>
       <h3 className="mt-3 text-base font-semibold text-foreground">{title}</h3>
       <p className="mt-0.5 font-inter text-sm text-muted-foreground">{note}</p>
@@ -206,7 +305,7 @@ function Case({
 
 export function PreviewGallery() {
   return (
-    <main className="mx-auto max-w-7xl px-6 py-8">
+    <main className={pageShellClass}>
       <h1 className="text-2xl font-semibold text-foreground md:text-3xl">
         Storefront preview — fit cases
       </h1>
@@ -228,7 +327,7 @@ export function PreviewGallery() {
       <h2 className="mt-10 text-lg font-semibold text-foreground">
         Narrow (~160px) — the responsive floor
       </h2>
-      <p className="mt-1 font-inter text-sm text-muted-foreground">
+      <p className={cn(helpTextClass, "mt-1")}>
         Same cases in a much smaller box. The column count must NOT change
         between the two rows: the preview scales instead of reflowing, so both
         show the same board at different sizes.

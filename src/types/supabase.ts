@@ -251,6 +251,7 @@ export type Database = {
       }
       storefronts: {
         Row: {
+          brief: Json
           config: Json
           created_at: string
           embed_key: string
@@ -260,6 +261,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          brief?: Json
           config?: Json
           created_at?: string
           embed_key?: string
@@ -269,6 +271,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          brief?: Json
           config?: Json
           created_at?: string
           embed_key?: string

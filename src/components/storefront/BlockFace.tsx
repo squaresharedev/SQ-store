@@ -1,6 +1,7 @@
 "use client";
 
 import { AlertCircle } from "lucide-react";
+import { infoTextClass } from "@/components/ui/control-styles";
 import type { Product } from "@/types/product";
 import type { StorefrontBlock, StorefrontTheme } from "@/types/storefront";
 import { ProductTileContent } from "./ProductTileContent";
@@ -37,6 +38,7 @@ export function BlockFace({
       <ProductTileContent
         product={product}
         theme={theme}
+        overrides={block.style}
         soldOut={block.soldOut === true}
       />
     );
@@ -48,7 +50,7 @@ export function BlockFace({
         strokeWidth={2}
         aria-hidden="true"
       />
-      <span className="font-inter text-xs text-muted-foreground">
+      <span className={infoTextClass}>
         Product removed. Delete this block.
       </span>
     </div>

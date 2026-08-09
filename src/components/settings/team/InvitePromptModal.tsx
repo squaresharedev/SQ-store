@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { InviteAcceptRow } from "@/components/settings/team/InviteAcceptRow";
 import type { PendingInviteRow } from "@/lib/team/queries";
@@ -56,13 +57,9 @@ export function InvitePromptModal({ invites }: { invites: PendingInviteRow[] }) 
       </ul>
 
       <div className="mt-4 flex justify-end">
-        <button
-          type="button"
-          onClick={() => setOpen(false)}
-          className="rounded-[0.375rem] px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-        >
+        <Button variant="ghost" onClick={() => setOpen(false)}>
           Maybe later
-        </button>
+        </Button>
       </div>
     </Modal>
   );

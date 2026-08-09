@@ -2,6 +2,9 @@
 
 import * as React from "react";
 import { CheckCheck } from "lucide-react";
+import { cardClass } from "@/components/ui/surface-styles";
+import { cn } from "@/lib/utils";
+import { errorTextClass, helpTextClass, secondaryButtonClass } from "@/components/ui/control-styles";
 import { Spinner } from "@/components/ui/spinner";
 import { NotificationItem } from "@/components/notifications/NotificationItem";
 import {
@@ -74,7 +77,7 @@ export function NotificationsPageClient({
           type="button"
           onClick={markAll}
           disabled={!hasUnread}
-          className="flex items-center gap-1.5 rounded-[0.375rem] border border-border px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-40"
+          className={cn(secondaryButtonClass, "gap-1.5 px-3 py-2 text-muted-foreground hover:text-foreground")}
         >
           <CheckCheck aria-hidden className="size-4" />
           Mark all read
@@ -82,14 +85,14 @@ export function NotificationsPageClient({
       </div>
 
       {items.length === 0 ? (
-        <div className="rounded-md border border-border bg-card py-16 text-center">
+        <div className={cn(cardClass, "py-16 text-center")}>
           <p className="text-sm font-medium text-foreground">No notifications yet</p>
-          <p className="mt-1 font-inter text-sm text-muted-foreground">
+          <p className={cn(helpTextClass, "mt-1")}>
             Team, order, and payment activity will show up here.
           </p>
         </div>
       ) : (
-        <ul className="divide-y divide-border overflow-hidden rounded-md border border-border bg-card">
+        <ul className={cn(cardClass, "divide-y divide-border overflow-hidden")}>
           {items.map((n) => (
             <li key={n.id}>
               <NotificationItem
@@ -104,7 +107,7 @@ export function NotificationsPageClient({
       {cursor && (
         <div className="mt-6 flex flex-col items-center gap-2">
           {loadError && (
-            <p role="alert" className="font-inter text-sm text-destructive">
+            <p role="alert" className={errorTextClass}>
               Couldn&apos;t load more notifications. Check your connection and
               try again.
             </p>
@@ -113,7 +116,7 @@ export function NotificationsPageClient({
             type="button"
             onClick={loadMore}
             disabled={loadingMore}
-            className="flex items-center gap-2 rounded-[0.375rem] border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-60"
+            className={cn(secondaryButtonClass, "py-2")}
           >
             {loadingMore && <Spinner />}
             {loadingMore ? "Loading" : loadError ? "Try again" : "Load more"}

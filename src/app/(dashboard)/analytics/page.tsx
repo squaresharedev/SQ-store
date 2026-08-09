@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+import { pageShellClass } from "@/components/ui/surface-styles";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { cn } from "@/lib/utils";
 import { getAnalytics } from "@/lib/analytics/queries";
 import type { AnalyticsRange, RangePreset } from "@/lib/analytics/types";
 import { AnalyticsPage } from "@/components/analytics/AnalyticsPage";
@@ -68,15 +71,11 @@ export default async function AnalyticsRoutePage({
   const data = await getAnalytics(effective);
 
   return (
-    <main className="mx-auto max-w-7xl space-y-6 px-6 py-8">
-      <div>
-        <h1 className="text-2xl font-semibold text-foreground md:text-3xl">
-          Analytics
-        </h1>
-        <p className="mt-1 font-inter text-sm text-muted-foreground">
-          How your store is performing across the embed and the marketplace.
-        </p>
-      </div>
+    <main className={cn(pageShellClass, "space-y-6")}>
+      <PageHeader
+        title="Analytics"
+        subtitle="How your store is performing across the embed and the marketplace."
+      />
       <AnalyticsPage data={data} preset={preset} range={custom} />
     </main>
   );

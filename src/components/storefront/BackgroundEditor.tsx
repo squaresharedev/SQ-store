@@ -8,18 +8,14 @@ import {
   DEFAULT_BACKGROUND_IMAGE_PLACEMENT,
   type StorefrontBackground,
 } from "@/types/storefront";
-import { unexpectedError, type ActionError } from "@/lib/errors";
+import { unexpectedError } from "@/lib/errors";
 import { UploadError, uploadToR2 } from "@/lib/products/upload";
 import { cn } from "@/lib/utils";
-import { ActionErrorNotice } from "@/components/ui/ActionErrorNotice";
+import { useToast } from "@/components/ui/Toast";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { ColorPicker } from "@/components/ui/ColorPicker";
 import { Slider } from "@/components/ui/slider";
-import {
-  infoTextClass,
-  labelClass,
-  secondaryButtonClass,
-} from "@/components/ui/control-styles";
+import { helpTextClass, infoTextClass, labelClass, secondaryButtonClass } from "@/components/ui/control-styles";
 import { resolveBackgroundStyle } from "./background-presets";
 
 type Kind = StorefrontBackground["kind"];
@@ -86,7 +82,7 @@ export function BackgroundEditor({
   // null once the bytes are sent and the server is still working (sniff,
   // moderate, store) — an indeterminate bar, not a stalled 100%.
   const [progress, setProgress] = useState<number | null>(0);
-  const [uploadError, setUploadError] = useState<ActionError | null>(null);
+  const toast = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   // Drag-to-position bookkeeping: pointer + position at drag start.
   const panStart = useRef<{
@@ -115,7 +111,6 @@ export function BackgroundEditor({
 
   async function handleFile(file: File | undefined) {
     if (!file) return;
-    setUploadError(null);
     setUploading(true);
     setProgress(0);
     try {
@@ -127,11 +122,14 @@ export function BackgroundEditor({
       onChange({ kind: "image", key, ...DEFAULT_BACKGROUND_IMAGE_PLACEMENT });
       onImageChange(URL.createObjectURL(file));
     } catch (error) {
-      setUploadError(
+      // The panel scrolls, and a background upload is usually started from the
+      // bottom of it — an inline notice under the button was routinely off
+      // screen by the time the failure arrived.
+      const info =
         error instanceof UploadError
           ? error.info
-          : unexpectedError(error instanceof Error ? error.message : undefined),
-      );
+          : unexpectedError(error instanceof Error ? error.message : undefined);
+      toast.error(info.message, { lines: [info.fix] });
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -269,9 +267,6 @@ export function BackgroundEditor({
           </button>
           {uploading && <ProgressBar value={progress} label="Uploading background image" />}
           <p className={infoTextClass}>Up to 10 MB. JPEG, PNG, WebP, GIF, or AVIF.</p>
-          {uploadError && (
-            <ActionErrorNotice error={uploadError} variant="inline" />
-          )}
         </div>
       )}
 
@@ -301,7 +296,7 @@ export function BackgroundEditor({
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <span className={labelClass}>Angle</span>
-              <span className="font-inter text-sm text-muted-foreground">
+              <span className={helpTextClass}>
                 {value.angle}°
               </span>
             </div>
