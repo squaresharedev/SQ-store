@@ -16,9 +16,9 @@ import {
   usernameSchema,
 } from "@/lib/validation/auth";
 import { cn } from "@/lib/utils";
+import { TYPING_DEBOUNCE_MS } from "@/lib/typing-debounce";
 
 const INITIAL: SettingsActionState = {};
-const CHECK_DEBOUNCE_MS = 400;
 
 type CheckResult = "idle" | "available" | "taken";
 type CheckStatus = CheckResult | "checking" | "mine";
@@ -87,7 +87,7 @@ export function UsernameForm({ username }: { username: string }) {
         }
       }
       void run();
-    }, CHECK_DEBOUNCE_MS);
+    }, TYPING_DEBOUNCE_MS);
 
     return () => {
       cancelled = true;

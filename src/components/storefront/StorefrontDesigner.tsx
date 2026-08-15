@@ -8,12 +8,20 @@ import {
   CANVAS_COLUMNS_MIN,
   CANVAS_ROWS_MAX,
   CANVAS_ROWS_MIN,
-  DEFAULT_STOREFRONT_HEADER,
+  EMPTY_STOREFRONT_HEADER,
+  HEADER_BASE_PX,
   blockKey,
+  headerStyleValue,
   mergeCardStyleOverrides,
   readingOrder,
+  setHeaderStyle,
   type BlockPlacement,
   type CardStyleOverrides,
+  type HeaderLine,
+  type HeaderStyleField,
+  type HeaderStyleValue,
+  type ImageBlock,
+  type ImagePlacement,
   type ShapeBlock,
   type ShapeKind,
   type StorefrontBlock,
@@ -21,7 +29,11 @@ import {
   type StorefrontHeader,
   type StorefrontTheme,
   type TextBlock,
+  type TextSpan,
 } from "@/types/storefront";
+import { applyFormatToRange } from "@/lib/storefront/text-spans";
+import { isDefaultPlacement } from "@/lib/images/placement";
+import { UploadError, uploadToR2 } from "@/lib/products/upload";
 import {
   findFreeCell,
   packFirstFit,
@@ -39,9 +51,38 @@ import {
   iconButtonClass,
   iconNudgeLeftClass,
 } from "@/components/ui/control-styles";
+import { ColorTargetProvider } from "@/lib/theme/color-context";
+import {
+  PRICE_TAG_COLOR_KEYS,
+  colorTargetKey,
+  primaryColorTarget,
+  resolveColorTarget,
+  type ColorTargetRef,
+} from "@/lib/theme/color-target";
+import { collectStorefrontColors } from "@/lib/theme/palette";
+import { ColorPanel, type PanelTypography } from "./ColorPanel";
+import type {
+  InlineFormatKey,
+  TextEditSource,
+  TextRange,
+} from "./InlineTextEditor";
+import { LibraryPanel, type LibraryTab } from "./LibraryPanel";
+import type { StorefrontUpload } from "./UploadsPanel";
+
+/**
+ * What the left-hand docked panel is showing. Colors name a specific field
+ * (and close themselves when it stops existing); the library names nothing and
+ * simply stays until dismissed.
+ */
+type LeftPanelState =
+  | { kind: "color"; ref: ColorTargetRef }
+  | { kind: "library"; tab: LibraryTab }
+  | null;
 import { ControlsPanel } from "./ControlsPanel";
 import { DesignerCanvas } from "./DesignerCanvas";
 import { EditorToolbar } from "./EditorToolbar";
+import { ImageBlockEditor } from "./ImageBlockEditor";
+import { MultiBlockEditor } from "./MultiBlockEditor";
 import { ProductPicker } from "./ProductPicker";
 import { ProductBlockEditor } from "./ProductBlockEditor";
 import { ShapeBlockEditor, type ShapeBlockPatch } from "./ShapeBlockEditor";
@@ -53,8 +94,9 @@ import { SearchProvider, useSearch } from "@/components/search/SearchProvider";
 import type { TeamRole } from "@/lib/team/permissions";
 
 /** What the left inspector column shows: the product picker, or the editor
- *  card for one selected block. */
-type InspectorState = { kind: "picker" } | { kind: "block"; key: string };
+ *  card for the selected block(s). One key = that block's own editor; several
+ *  = the group editor (MultiBlockEditor), applying changes to all of them. */
+type InspectorState = { kind: "picker" } | { kind: "blocks"; keys: string[] };
 
 /** The undoable slice of editor state (name is excluded — the top-bar input
  *  has its own native undo and per-keystroke history would drown edits). */
@@ -153,8 +195,10 @@ const SHEET_ON_MOBILE_CLASS =
 
 /**
  * Page-level composition + state owner for the storefront designer. Content is
- * inserted from the bottom toolbar; the selected block's editor card opens in
- * the LEFT inspector column; global design settings live in the RIGHT panel.
+ * inserted from the bottom toolbar. The RIGHT panel holds the selected block's
+ * editor card stacked over the global design settings; the LEFT panel is the
+ * color chooser, present only while a color is being edited and aimed by any
+ * color field via ColorTargetProvider.
  * Blocks are kept in array order; `order` integers are assigned on save.
  * Client-side constraints are UX only — the save action re-validates with Zod
  * and re-checks product ownership server-side.
@@ -165,6 +209,8 @@ export function StorefrontDesigner({
   initialConfig,
   products,
   initialBackgroundImageUrl = null,
+  initialCustomFontUrl = null,
+  initialElementUrls = {},
   role = null,
   accountId = null,
 }: {
@@ -174,6 +220,11 @@ export function StorefrontDesigner({
   products: Product[];
   /** Signed display URL for a stored image background (null when none). */
   initialBackgroundImageUrl?: string | null;
+  /** Signed display URL for a stored uploaded font (null when none). */
+  initialCustomFontUrl?: string | null;
+  /** Signed display URL per image block, keyed by blockKey. Blocks whose
+   *  signing failed are simply absent and render their placeholder. */
+  initialElementUrls?: Record<string, string>;
   /** Active account role, for universal search's action gating. */
   role?: TeamRole | null;
   /** Active account id, for universal search's snapshot cache. */
@@ -187,6 +238,23 @@ export function StorefrontDesigner({
   const [backgroundImageUrl, setBackgroundImageUrl] = useState(
     initialBackgroundImageUrl,
   );
+  // Same arrangement for the uploaded typeface: server-signed at load, a local
+  // object URL right after an upload, and never part of the config (which
+  // stores only the object key).
+  const [customFontUrl, setCustomFontUrl] = useState(initialCustomFontUrl);
+  // Display URL per image block, keyed by blockKey. Seeded with the signed
+  // URLs the server resolved at page load, then extended with a local object
+  // URL for each element added in this session (signing is server-side, so a
+  // block created here has no signed URL until the page is loaded again).
+  const [elementUrls, setElementUrls] = useState<Record<string, string>>(
+    initialElementUrls,
+  );
+  // True while an element upload is in flight, so the toolbar and the library
+  // panel can say so rather than looking inert on a slow connection.
+  const [uploadingElement, setUploadingElement] = useState(false);
+  // 0..1 while the bytes move, then null while the server sniffs, moderates
+  // and stores them — which is real work, and a bar parked at 100% looks hung.
+  const [uploadProgress, setUploadProgress] = useState<number | null>(0);
   // Catalog snapshot, updated in place after inline product edits. Product
   // facts (name/price) are saved to the DB immediately by the block editor;
   // they are NOT part of the storefront config, so they bypass the dirty flag
@@ -194,7 +262,9 @@ export function StorefrontDesigner({
   const [catalog, setCatalog] = useState(products);
   const [theme, setTheme] = useState<StorefrontTheme>(initialConfig.theme);
   const [header, setHeader] = useState<StorefrontHeader>(
-    initialConfig.header ?? DEFAULT_STOREFRONT_HEADER,
+    // EMPTY, not DEFAULT: a config with no header member predates the feature,
+    // and opening it must not put placeholder text over the storefront.
+    initialConfig.header ?? EMPTY_STOREFRONT_HEADER,
   );
   // Placement is explicit, so the array is just a bag of blocks.
   const [blocks, setBlocks] = useState<StorefrontBlock[]>(initialConfig.blocks);
@@ -218,6 +288,27 @@ export function StorefrontDesigner({
   // minimum: a drag that would go narrower closes the panel instead, so
   // reopening never lands on an unusably thin strip.
   const [panelWidth, setPanelWidth] = useState(PANEL_DEFAULT_WIDTH);
+  // WHAT THE LEFT PANEL IS SHOWING, or null when it is closed. It began as
+  // colors only; the shape library moved in when it outgrew the toolbar's
+  // hover strip, so the slot is now a small union rather than one ref.
+  //
+  // The color mode still stores a plain DESCRIPTOR rather than a value+setter
+  // pair, so deleting the block it names, undoing, or switching the background
+  // to an image simply makes it resolve to null instead of stranding the panel
+  // on something that no longer exists. The shapes mode names nothing, so it
+  // stays open until it is dismissed.
+  const [leftPanel, setLeftPanel] = useState<LeftPanelState>(null);
+
+  // The color slice, read and written exactly as it was before the union
+  // existed — which is what keeps every call site below unchanged. Clearing
+  // it closes the panel ONLY if colors are what it is currently showing, so
+  // deselecting a block cannot yank the shape library out from under a seller
+  // who just opened it.
+  const colorTarget = leftPanel?.kind === "color" ? leftPanel.ref : null;
+  function setColorTarget(ref: ColorTargetRef | null) {
+    if (ref) setLeftPanel({ kind: "color", ref });
+    else setLeftPanel((current) => (current?.kind === "color" ? null : current));
+  }
   // The free cell the seller clicked, so the next inserted block lands there.
   const [insertHint, setInsertHint] = useState<{ x: number; y: number } | null>(
     null,
@@ -253,12 +344,126 @@ export function StorefrontDesigner({
       ),
     [blocks],
   );
-  // The block whose card the inspector shows. Deriving (not storing) means a
-  // removed/undone-away block simply closes the card instead of going stale.
-  const selectedBlock = useMemo<StorefrontBlock | null>(() => {
-    if (inspector?.kind !== "block") return null;
-    return blocks.find((b) => blockKey(b) === inspector.key) ?? null;
+  // The blocks whose card the inspector shows, in selection order. Deriving
+  // (not storing) means removed/undone-away blocks simply drop out of the
+  // selection instead of going stale.
+  const selectedBlocks = useMemo<StorefrontBlock[]>(() => {
+    if (inspector?.kind !== "blocks") return [];
+    const byKey = new Map(blocks.map((b) => [blockKey(b), b]));
+    return inspector.keys
+      .map((key) => byKey.get(key))
+      .filter((b): b is StorefrontBlock => b !== undefined);
   }, [blocks, inspector]);
+  const selectedKeys = useMemo(
+    () => selectedBlocks.map(blockKey),
+    [selectedBlocks],
+  );
+  /** The single selection, when exactly one block is selected. */
+  const selectedBlock = selectedBlocks.length === 1 ? selectedBlocks[0] : null;
+
+  // The colors already on the canvas, for the left panel's "In this design".
+  const colorsInDesign = useMemo(
+    () => collectStorefrontColors(theme, blocks, header),
+    [theme, blocks, header],
+  );
+
+  /**
+   * TYPING MODE: a text block's words, typed on the tile itself rather than in
+   * a field in the panel. Held apart from the selection for the same reason
+   * frame mode is — "which block's settings are open" and "which block is
+   * taking keystrokes right now" are different questions — and mirrored into a
+   * ref so the document-level shortcut listeners can read it without
+   * re-subscribing.
+   *
+   * `selectAll` opens the editor with the text selected instead of a caret at
+   * the end: right for a block that was just inserted and still says "Your
+   * text here", wrong for one the seller is coming back to.
+   *
+   * `typingRange` is the selection INSIDE that editor, in character offsets,
+   * and is what makes "colour these two words" possible: a colour picked while
+   * part of the text is selected lands on that range instead of on the block.
+   * It lives up here because the picker that sends the colour is on the other
+   * side of the tree, and because the panel resolves against it below.
+   */
+  const [typing, setTyping] = useState<{
+    key: string;
+    selectAll: boolean;
+  } | null>(null);
+  const typingRef = useRef<string | null>(null);
+  const [typingRange, setTypingRange] = useState<TextRange | null>(null);
+
+  /** The selected block, when it is a text block with live selected words —
+   *  i.e. when a colour would land on part of the text rather than all of it. */
+  const textRangeTarget =
+    selectedBlock?.type === "text" &&
+    typing?.key === blockKey(selectedBlock) &&
+    typingRange !== null &&
+    typingRange.start !== typingRange.end
+      ? { block: selectedBlock, range: typingRange }
+      : null;
+
+  /**
+   * The panel's target against LIVE state. Null when it no longer names
+   * anything — the block was deleted or undone away, or the background changed
+   * to a kind with no such color — so the panel closes instead of editing a
+   * ghost.
+   */
+  const resolvedColorTarget = colorTarget
+    ? resolveColorTarget(
+        colorTarget,
+        theme,
+        blocks,
+        header,
+        textRangeTarget
+          ? {
+              blockKey: blockKey(textRangeTarget.block),
+              range: textRangeTarget.range,
+            }
+          : null,
+      )
+    : null;
+
+  // What the rest of the tree is told is active. Derived rather than corrected
+  // in an effect: a ref that has stopped resolving is simply not active, and
+  // nothing downstream should see it as such.
+  const activeColorTarget = resolvedColorTarget ? colorTarget : null;
+
+  /** Which masthead line the canvas should show as selected, if any. Falls out
+   *  of the same target the panel is on, so the two can never disagree. */
+  const activeHeaderLine: HeaderLine | null =
+    activeColorTarget?.kind === "header-name"
+      ? "name"
+      : activeColorTarget?.kind === "header-bio"
+        ? "bio"
+        : null;
+
+  // The panel is open when it has something to show. A color ref that has
+  // stopped resolving counts as nothing, which is what closes the panel on
+  // its own when the block it named is deleted or undone away.
+  const leftPanelOpen =
+    leftPanel?.kind === "library" ||
+    (resolvedColorTarget !== null && activeColorTarget !== null);
+
+  /**
+   * The DISTINCT artwork this storefront uses, for the library's Uploads tab.
+   *
+   * Keyed by the R2 object key, not by block: placing one logo in three
+   * corners is three blocks sharing a single upload, and the chooser should
+   * offer it once. The first block using a key also lends its alt text as the
+   * label, which is the only human name an upload ever has.
+   */
+  const uploads = useMemo<StorefrontUpload[]>(() => {
+    const byKey = new Map<string, StorefrontUpload>();
+    for (const block of blocks) {
+      if (block.type !== "image" || byKey.has(block.key)) continue;
+      byKey.set(block.key, {
+        key: block.key,
+        url: elementUrls[blockKey(block)] ?? null,
+        alt: block.alt,
+      });
+    }
+    return [...byKey.values()];
+  }, [blocks, elementUrls]);
 
   function markDirty() {
     setDirty(true);
@@ -414,19 +619,22 @@ export function StorefrontDesigner({
    * preventDefault because Backspace outside a field is historically "go
    * back", and losing unsaved design work to a navigation would be brutal.
    */
-  const deleteShortcut = useRef<{ selectedKey: string | null }>({
-    selectedKey: null,
+  const deleteShortcut = useRef<{ selectedKeys: readonly string[] }>({
+    selectedKeys: [],
   });
   useEffect(() => {
-    deleteShortcut.current.selectedKey =
-      inspector?.kind === "block" ? inspector.key : null;
+    deleteShortcut.current.selectedKeys = selectedKeys;
   });
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       if (event.key !== "Delete" && event.key !== "Backspace") return;
       if (event.ctrlKey || event.metaKey || event.altKey) return;
-      const key = deleteShortcut.current.selectedKey;
-      if (!key) return;
+      // Framing a picture is not a moment to delete the tile under it. The
+      // framed block is always selected, so without this the key that means
+      // "nudge nothing" would silently destroy the thing being worked on.
+      if (framingKeyRef.current !== null) return;
+      const keys = deleteShortcut.current.selectedKeys;
+      if (keys.length === 0) return;
       const target = event.target as HTMLElement | null;
       if (
         target &&
@@ -437,7 +645,56 @@ export function StorefrontDesigner({
         return;
       }
       event.preventDefault();
-      canvasActions.current.removeBlock(key);
+      canvasActions.current.removeBlocks(keys);
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
+
+  /**
+   * Ctrl/Cmd + B / I / U on the CANVAS: format every selected text block.
+   *
+   * The in-place editor handles the same keys while the caret is in a tile
+   * (there they can apply to just the selected words), so this listener stays
+   * out of any field — the guard below is the same one every other shortcut
+   * here uses. Blocks that are not text simply ignore it, so a mixed selection
+   * bolds its text and leaves the rest alone.
+   */
+  const formatShortcut = useRef<{
+    selectedKeys: readonly string[];
+    headerLine: HeaderLine | null;
+  }>({ selectedKeys: [], headerLine: null });
+  useEffect(() => {
+    formatShortcut.current.selectedKeys = selectedKeys;
+    formatShortcut.current.headerLine = headerLineOf(activeColorTarget);
+  });
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if (!(event.ctrlKey || event.metaKey) || event.altKey) return;
+      const key = event.key.toLowerCase();
+      if (key !== "b" && key !== "i" && key !== "u") return;
+      const target = event.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+      const { selectedKeys: keys, headerLine } = formatShortcut.current;
+      if (keys.length === 0 && headerLine === null) return;
+      // Ctrl+B and Ctrl+I are the browser's bookmark/history bars; Ctrl+U is
+      // view-source. None of them may fire over a design.
+      event.preventDefault();
+      const format = key === "b" ? "bold" : key === "i" ? "italic" : "underline";
+      // A masthead line is styled the same way from the keyboard as a block,
+      // even though it lives on the header rather than in the grid.
+      if (keys.length === 0 && headerLine) {
+        canvasActions.current.toggleHeaderFormat(headerLine, format);
+        return;
+      }
+      canvasActions.current.toggleBlocksFormat(keys, format);
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
@@ -473,9 +730,89 @@ export function StorefrontDesigner({
 
   // The inspector and the mobile settings sheet share the small screen — at
   // most one is open at a time.
-  function selectBlock(key: string | null) {
-    setInspector(key === null ? null : { kind: "block", key });
-    if (key !== null) setSettingsOpen(false);
+  /**
+   * Click selection. Plain click: select just this block, or deselect when it
+   * is already the sole selection (the tile is a toggle). Shift-click
+   * (`additive`): add the block to the selection, or drop it back out.
+   */
+  /**
+   * `justInserted` is how a freshly added block opens the color panel: it is not
+   * in `blocks` yet at this point in the tick (setBlocks has been called but the
+   * state has not re-rendered), so looking it up by key would find nothing.
+   */
+  function selectBlock(
+    key: string | null,
+    additive = false,
+    justInserted?: StorefrontBlock,
+  ) {
+    // Any selection change is the end of framing (and of typing): you cannot
+    // be positioning one tile's picture, or typing its words, while working on
+    // another.
+    if (framingKeyRef.current !== null && framingKeyRef.current !== key) {
+      exitFrameMode();
+    }
+    if (typingRef.current !== null && typingRef.current !== key) endTyping();
+    if (key === null) {
+      setInspector((current) => (current?.kind === "blocks" ? null : current));
+      return;
+    }
+    const wasSole =
+      inspector?.kind === "blocks" &&
+      inspector.keys.length === 1 &&
+      inspector.keys[0] === key;
+    setInspector((current) => {
+      const keys = current?.kind === "blocks" ? current.keys : [];
+      if (additive) {
+        const next = keys.includes(key)
+          ? keys.filter((k) => k !== key)
+          : [...keys, key];
+        return next.length > 0 ? { kind: "blocks", keys: next } : null;
+      }
+      if (keys.length === 1 && keys[0] === key) return null;
+      return { kind: "blocks", keys: [key] };
+    });
+    // Open the color panel on the block's leading color — but ONLY for a plain
+    // click. Shift-click is building a multi-selection, where one block's color
+    // is not what is being edited.
+    //
+    // Deliberately NOT driven off the selection state: the marquee below
+    // rewrites the selection on every pointer move, and a panel that opened
+    // and closed mid-drag would resize the canvas under the pointer the drag is
+    // being measured against.
+    //
+    // And NOT while the library is open, which is the case that made this a
+    // rule rather than a preference: adding a shape selects it, and selecting
+    // it would swap the left panel to that shape's fill — closing the very
+    // library the seller was picking from, one shape in. The panel stays;
+    // reaching for a colour deliberately (an inspector picker) still opens it.
+    if (!additive && leftPanel?.kind !== "library") {
+      const block = wasSole
+        ? null
+        : (justInserted ?? blocks.find((b) => blockKey(b) === key));
+      setColorTarget(block ? primaryColorTarget(block) : null);
+    }
+    setSettingsOpen(false);
+  }
+
+  /** Replace the whole selection (the marquee's channel). Empty = clear.
+   *  Leaves the color panel alone: see the note in selectBlock. */
+  function selectMany(keys: string[]) {
+    setInspector(keys.length > 0 ? { kind: "blocks", keys } : null);
+    if (keys.length > 0) setSettingsOpen(false);
+    // A marquee press preventDefaults, so the tile being typed in never loses
+    // focus on its own; rubber-banding over the board has to end the edit.
+    if (typingRef.current !== null) endTyping();
+  }
+
+  /**
+   * Clicking the store name or bio on the canvas aims the left-hand panel at
+   * that line, which is where its colour and size are set. The masthead is not
+   * a block, so it takes no part in the block selection: a click here clears
+   * that instead, exactly as clicking anything else on the board would.
+   */
+  function selectHeaderLine(line: HeaderLine) {
+    setInspector((current) => (current?.kind === "blocks" ? null : current));
+    openColorTarget(line === "name" ? { kind: "header-name" } : { kind: "header-bio" });
   }
 
   /** Clicking a free cell opens the picker; whatever is added next lands in
@@ -484,6 +821,9 @@ export function StorefrontDesigner({
     setInsertHint({ x, y });
     setInspector({ kind: "picker" });
     setSettingsOpen(false);
+    // Same reason as togglePicker: the picker needs the slot the colour sheet
+    // would otherwise be holding on a phone.
+    setColorTarget(null);
   }
 
   /** Consume the pending insert cell (one use only). */
@@ -556,16 +896,40 @@ export function StorefrontDesigner({
     moveBlock,
     resizeBlock,
     removeBlock,
+    removeBlocks,
     insertAt,
     selectBlock,
+    selectMany,
+    frameBlock,
+    updateImagePlacement,
+    exitFrameMode,
+    beginTyping,
+    setBlockText,
+    toggleBlockFormat,
+    toggleBlocksFormat,
+    toggleHeaderFormat,
+    endTyping,
+    selectHeaderLine,
   });
   useEffect(() => {
     canvasActions.current = {
       moveBlock,
       resizeBlock,
       removeBlock,
+      removeBlocks,
       insertAt,
       selectBlock,
+      selectMany,
+      frameBlock,
+      updateImagePlacement,
+      exitFrameMode,
+      beginTyping,
+      setBlockText,
+      toggleBlockFormat,
+      toggleBlocksFormat,
+      toggleHeaderFormat,
+      endTyping,
+      selectHeaderLine,
     };
   });
   const onMoveBlock = useCallback((key: string, x: number, y: number) => {
@@ -580,8 +944,44 @@ export function StorefrontDesigner({
   const onInsertAt = useCallback((x: number, y: number) => {
     canvasActions.current.insertAt(x, y);
   }, []);
-  const onSelectBlock = useCallback((key: string | null) => {
-    canvasActions.current.selectBlock(key);
+  const onSelectBlock = useCallback((key: string | null, additive?: boolean) => {
+    canvasActions.current.selectBlock(key, additive);
+  }, []);
+  const onSelectMany = useCallback((keys: string[]) => {
+    canvasActions.current.selectMany(keys);
+  }, []);
+  const onSelectHeaderLine = useCallback((line: HeaderLine) => {
+    canvasActions.current.selectHeaderLine(line);
+  }, []);
+  const onFrameBlock = useCallback((key: string) => {
+    canvasActions.current.frameBlock(key);
+  }, []);
+  const onFramePlacement = useCallback(
+    (key: string, placement: ImagePlacement) => {
+      canvasActions.current.updateImagePlacement(key, placement);
+    },
+    [],
+  );
+  const onFrameExit = useCallback(() => {
+    canvasActions.current.exitFrameMode();
+  }, []);
+  const onTypeStart = useCallback((key: string) => {
+    canvasActions.current.beginTyping(key);
+  }, []);
+  const onTextChange = useCallback(
+    (key: string, text: string, spans: TextSpan[], source: TextEditSource) => {
+      canvasActions.current.setBlockText(key, text, spans, source);
+    },
+    [],
+  );
+  const onToggleBlockFormat = useCallback(
+    (key: string, format: InlineFormatKey) => {
+      canvasActions.current.toggleBlockFormat(key, format);
+    },
+    [],
+  );
+  const onTypeEnd = useCallback(() => {
+    canvasActions.current.endTyping();
   }, []);
 
   /**
@@ -734,9 +1134,20 @@ export function StorefrontDesigner({
     const startX = event.clientX;
     const startY = event.clientY;
     const origin = { ...viewport.get().pan };
+    // A press on the empty workspace that never travels is a CLICK on nothing,
+    // and clicking on nothing means "I am done with that block". Only for the
+    // plain background press: space-held is the pan tool, where a click is
+    // just a pan that went nowhere.
+    const clearsSelection = onBackground && !spaceHeld && event.button === 0;
+    let travelled = false;
     setPanning(true);
 
     function onMove(moveEvent: PointerEvent) {
+      if (
+        Math.hypot(moveEvent.clientX - startX, moveEvent.clientY - startY) > 4
+      ) {
+        travelled = true;
+      }
       viewport.set((current) => ({
         zoom: current.zoom,
         pan: {
@@ -750,6 +1161,9 @@ export function StorefrontDesigner({
       window.removeEventListener("pointerup", stop);
       window.removeEventListener("pointercancel", stop);
       setPanning(false);
+      // selectBlock(null) also ends frame mode, so one click on the empty
+      // workspace backs out of everything at once.
+      if (clearsSelection && !travelled) selectBlock(null);
     }
     window.addEventListener("pointermove", onMove);
     window.addEventListener("pointerup", stop);
@@ -784,12 +1198,21 @@ export function StorefrontDesigner({
       current?.kind === "picker" ? null : { kind: "picker" },
     );
     setSettingsOpen(false);
+    // Choosing a product is a different job from choosing a colour, and on a
+    // phone they are the same bottom slot — leaving the colour sheet up would
+    // hide the picker behind it.
+    setColorTarget(null);
   }
 
   function toggleSettings() {
     const next = !settingsOpen;
     setSettingsOpen(next);
-    if (next) setInspector(null);
+    // On mobile all three are the same bottom slot, so opening this one has to
+    // clear the others.
+    if (next) {
+      setInspector(null);
+      setColorTarget(null);
+    }
   }
 
   /** The blocks as the grid's placement helpers want them. */
@@ -877,7 +1300,11 @@ export function StorefrontDesigner({
       1,
       takeInsertHint(),
     );
-    if (block) selectBlock(blockKey(block));
+    if (!block) return;
+    selectBlock(blockKey(block), false, block);
+    // Straight into typing, with the placeholder selected: "add text" means
+    // the seller has words in mind, and the first keystroke should be them.
+    beginTyping(blockKey(block), true);
   }
 
   function addShapeBlock(kind: ShapeKind) {
@@ -894,71 +1321,239 @@ export function StorefrontDesigner({
       1,
       takeInsertHint(),
     );
-    if (block) selectBlock(blockKey(block));
+    if (block) selectBlock(blockKey(block), false, block);
+  }
+
+  /**
+   * Upload the seller's own artwork and drop it on the canvas.
+   *
+   * Upload FIRST, insert second. The block stores an object key, so a block
+   * inserted before the upload finished would be one the schema rejects — and
+   * a failed upload would leave a permanent hole on the canvas that undo, not
+   * the seller, has to clean up. Nothing is recorded in history until there is
+   * a real key to record.
+   *
+   * The preview URL is the local file, not a signed one: the object exists in
+   * R2 by now, but signing is server-side, so the freshly-added element shows
+   * from the seller's own copy until the next page load hands down a real URL.
+   */
+  async function addImageBlock(file: File) {
+    if (blocks.length >= MAX_BLOCKS) {
+      toast.error("This storefront is full.", {
+        lines: [`A storefront can hold up to ${MAX_BLOCKS} blocks.`],
+      });
+      return;
+    }
+
+    let key: string;
+    setUploadingElement(true);
+    setUploadProgress(0);
+    try {
+      key = await uploadToR2(file, "element", setUploadProgress);
+    } catch (error) {
+      if (error instanceof UploadError) {
+        toast.error(error.info.message, { lines: [error.info.fix] });
+      } else {
+        toast.error("That image could not be uploaded.", {
+          lines: ["Try again in a moment."],
+        });
+      }
+      return;
+    } finally {
+      setUploadingElement(false);
+      setUploadProgress(0);
+    }
+
+    // The preview URL is the seller's own copy of the file. The object is in
+    // R2 by now, but signing is server-side, so this stands in until the next
+    // page load hands down a real signed URL.
+    placeImageBlock(key, "", URL.createObjectURL(file));
+  }
+
+  /**
+   * Put a block on the canvas for artwork that is ALREADY uploaded.
+   *
+   * Shared by a fresh upload and the library's "place it again", because they
+   * differ only in where the key came from. Re-placing costs no upload and no
+   * extra bytes for the buyer: two blocks holding one key are two views of one
+   * stored object, and saveStorefront's eviction only drops a key nothing
+   * references any more.
+   */
+  function placeImageBlock(key: string, alt: string, previewUrl?: string) {
+    const block = insertBlock(
+      (placement) => ({
+        type: "image",
+        id: crypto.randomUUID(),
+        key,
+        // Empty alt marks decorative artwork, which is what an element is
+        // until the seller says otherwise in the inspector.
+        alt,
+        ...placement,
+      }),
+      1,
+      1,
+      takeInsertHint(),
+    );
+    if (!block) return;
+
+    if (previewUrl) {
+      setElementUrls((current) => ({
+        ...current,
+        [blockKey(block)]: previewUrl,
+      }));
+    }
+    selectBlock(blockKey(block), false, block);
+  }
+
+  /** Place another copy of artwork already in this storefront. */
+  function placeUpload(upload: StorefrontUpload) {
+    placeImageBlock(upload.key, upload.alt, upload.url ?? undefined);
+  }
+
+  /** Remove several blocks in ONE undo step; the selection keeps whatever
+   *  survives. Single removals go through here too. */
+  function removeBlocks(keys: readonly string[]) {
+    if (keys.length === 0) return;
+    const gone = new Set(keys);
+    recordChange();
+    setBlocks((current) => current.filter((b) => !gone.has(blockKey(b))));
+    setInspector((current) => {
+      if (current?.kind !== "blocks") return current;
+      const left = current.keys.filter((k) => !gone.has(k));
+      return left.length > 0 ? { kind: "blocks", keys: left } : null;
+    });
   }
 
   function removeBlock(key: string) {
-    recordChange();
-    setBlocks((current) => current.filter((b) => blockKey(b) !== key));
-    setInspector((current) =>
-      current?.kind === "block" && current.key === key ? null : current,
-    );
+    removeBlocks([key]);
   }
 
   // COPY / PASTE, for text and shape blocks. Editor-internal (a ref, not the
-  // system clipboard): the payload is a live config block, and pasting mints
-  // a fresh id, so nothing round-trips through serialized text. Product
+  // system clipboard): the payload is live config blocks, and pasting mints
+  // fresh ids, so nothing round-trips through serialized text. Product
   // blocks are deliberately excluded — a product tile IS its product (one
   // block per product, keyed by productId), so there is nothing valid a
   // pasted copy could be.
-  const clipboard = useRef<TextBlock | ShapeBlock | null>(null);
+  const clipboard = useRef<(TextBlock | ShapeBlock | ImageBlock)[]>([]);
 
-  /** Insert a copy of a text/shape block with a fresh id, preferring the
-   *  clicked cell, then the spot just right of the source, then the first
-   *  free cell (insertBlock's fallback). Selects the copy. */
-  function pasteBlock(source: TextBlock | ShapeBlock) {
-    const copy = insertBlock(
-      (placement) => ({
+  /**
+   * Insert copies of text/shape blocks with fresh ids, as ONE undo step, and
+   * select them. Each copy prefers the clicked cell (first copy only), then
+   * the spot just right of its source, then the first free cell, growing the
+   * board when full. Placement runs against a WORKING occupancy list, so
+   * pasting several blocks in one go can never stack copies on one cell.
+   */
+  function pasteBlocks(sources: readonly (TextBlock | ShapeBlock | ImageBlock)[]) {
+    if (sources.length === 0) return;
+    const working = canvasBlocks();
+    const { columns } = theme;
+    let rows = theme.rows;
+    const hint = takeInsertHint();
+    const added: StorefrontBlock[] = [];
+
+    for (const source of sources) {
+      if (blocks.length + added.length >= MAX_BLOCKS) break;
+      const { w, h } = source;
+      const preferred = added.length === 0 && hint
+        ? hint
+        : { x: source.x + source.w, y: source.y };
+      let spot: BlockPlacement | null = placementIsFree(
+        working,
+        { ...preferred, w, h },
+        null,
+        columns,
+        rows,
+      )
+        ? { ...preferred, w, h }
+        : null;
+      if (!spot) {
+        const free = findFreeCell(working, w, h, columns, rows);
+        if (free) spot = { ...free, w, h };
+      }
+      if (!spot) {
+        const grown = Math.min(CANVAS_ROWS_MAX, rows + h);
+        if (grown > rows) {
+          const free = findFreeCell(working, w, h, columns, grown);
+          if (free) {
+            spot = { ...free, w, h };
+            rows = grown;
+          }
+        }
+      }
+      if (!spot) break;
+      const copy: StorefrontBlock = {
         ...structuredClone(source),
         id: crypto.randomUUID(),
-        ...placement,
-      }),
-      source.w,
-      source.h,
-      takeInsertHint() ?? { x: source.x + source.w, y: source.y },
-    );
-    if (copy) selectBlock(blockKey(copy));
+        ...spot,
+      };
+      added.push(copy);
+      working.push({ key: blockKey(copy), ...spot, data: null });
+    }
+
+    if (added.length === 0) return;
+    recordChange();
+    if (rows !== theme.rows) setTheme({ ...theme, rows });
+    setBlocks((current) => [...current, ...added]);
+    setInspector({ kind: "blocks", keys: added.map(blockKey) });
+    setSettingsOpen(false);
+
+    // A copied element points at the SAME stored object as its source, so the
+    // copy reuses the source's display URL. Without this the duplicate renders
+    // its placeholder until the page is loaded again, which reads as a broken
+    // paste rather than a working one.
+    const copiedUrls = added.flatMap((copy, index) => {
+      const source = sources[index];
+      if (copy.type !== "image" || source === undefined) return [];
+      const url = elementUrls[blockKey(source)];
+      return url ? [[blockKey(copy), url] as const] : [];
+    });
+    if (copiedUrls.length > 0) {
+      setElementUrls((current) => ({
+        ...current,
+        ...Object.fromEntries(copiedUrls),
+      }));
+    }
   }
 
-  /** Copy the selected block into the editor clipboard (text/shape only). */
-  function copySelectedBlock() {
-    if (inspector?.kind !== "block") return;
-    const source = blocks.find((b) => blockKey(b) === inspector.key);
-    if (!source || source.type === "product") return;
-    clipboard.current = structuredClone(source);
-    toast.success("Block copied.", { lines: ["Paste with Ctrl+V or Cmd+V."] });
+  /** Copy the selection's text/shape blocks into the editor clipboard. */
+  function copySelectedBlocks() {
+    const copyable = selectedBlocks.filter(
+      (b): b is TextBlock | ShapeBlock | ImageBlock => b.type !== "product",
+    );
+    if (copyable.length === 0) return;
+    clipboard.current = structuredClone(copyable);
+    toast.success(
+      copyable.length === 1
+        ? "Block copied."
+        : `${copyable.length} blocks copied.`,
+      { lines: ["Paste with Ctrl+V or Cmd+V."] },
+    );
   }
 
   function pasteClipboard() {
-    if (clipboard.current) pasteBlock(clipboard.current);
+    pasteBlocks(clipboard.current);
   }
 
   /** Copy + paste in one step, for the inspector's Duplicate button (the
    *  no-keyboard path). Also fills the clipboard, so Ctrl+V repeats it. */
-  function duplicateBlock(key: string) {
-    const source = blocks.find((b) => blockKey(b) === key);
-    if (!source || source.type === "product") return;
-    clipboard.current = structuredClone(source);
-    pasteBlock(source);
+  function duplicateBlocks(keys: readonly string[]) {
+    const wanted = new Set(keys);
+    const sources = blocks.filter(
+      (b): b is TextBlock | ShapeBlock | ImageBlock =>
+        wanted.has(blockKey(b)) && b.type !== "product",
+    );
+    if (sources.length === 0) return;
+    clipboard.current = structuredClone(sources);
+    pasteBlocks(sources);
   }
 
   // Ctrl/Cmd+C / V. Same subscribe-once + ref shape as the undo listener, and
   // the same guards: never while typing (fields keep native copy/paste), and
   // copy also yields whenever real text is selected on the page, so copying
   // prose from the inspector never turns into copying the tile behind it.
-  const clipboardActions = useRef({ copySelectedBlock, pasteClipboard });
+  const clipboardActions = useRef({ copySelectedBlocks, pasteClipboard });
   useEffect(() => {
-    clipboardActions.current = { copySelectedBlock, pasteClipboard };
+    clipboardActions.current = { copySelectedBlocks, pasteClipboard };
   });
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -976,7 +1571,7 @@ export function StorefrontDesigner({
       }
       if (key === "c") {
         if (window.getSelection()?.toString()) return;
-        clipboardActions.current.copySelectedBlock();
+        clipboardActions.current.copySelectedBlocks();
       } else {
         clipboardActions.current.pasteClipboard();
       }
@@ -1049,20 +1644,29 @@ export function StorefrontDesigner({
     );
   }
 
+  // The block update functions all take a KEY LIST: the single-block editors
+  // pass one key, the group editor passes the whole selection, and either way
+  // the edit is one undo step. Keys of the wrong block type are ignored, so a
+  // mixed selection can safely be handed to any of them.
+
   /**
-   * Merge a card-style patch into one product block's overrides. Overrides
-   * store ONLY what differs from following the theme, so an override object
-   * that empties out is dropped entirely and the block goes back to being
+   * Merge a card-style patch into product blocks' overrides. Overrides store
+   * ONLY what differs from following the theme, so an override object that
+   * empties out is dropped entirely and the block goes back to being
    * indistinguishable from one that was never customized (the merge
    * semantics live in mergeCardStyleOverrides).
    */
-  function updateProductBlockStyle(key: string, patch: CardStyleOverrides) {
+  function updateProductBlocksStyle(
+    keys: readonly string[],
+    patch: CardStyleOverrides,
+  ) {
+    const wanted = new Set(keys);
     // Coalesce per field, so a slider scrub is one undo step but edits to
     // different controls stay separate steps.
-    recordChange(`pstyle:${key}:${Object.keys(patch)[0] ?? ""}`);
+    recordChange(`pstyle:${keys.join("+")}:${Object.keys(patch)[0] ?? ""}`);
     setBlocks((current) =>
       current.map((b) => {
-        if (b.type !== "product" || blockKey(b) !== key) return b;
+        if (b.type !== "product" || !wanted.has(blockKey(b))) return b;
         const style = mergeCardStyleOverrides(b.style, patch);
         if (style === undefined) {
           const rest = { ...b };
@@ -1074,12 +1678,185 @@ export function StorefrontDesigner({
     );
   }
 
-  /** Drop a product block's overrides so it follows the theme again. */
-  function resetProductBlockStyle(key: string) {
+  /**
+   * FRAME MODE: positioning one product's photo inside its own tile.
+   *
+   * Held apart from the inspector selection because they answer different
+   * questions — which block's settings are open, versus which block's picture
+   * the pointer is currently moving. The ref mirrors it so the document-level
+   * shortcut listeners (delete, and selection changes) can read it without
+   * re-subscribing on every entry and exit.
+   */
+  const [framingKey, setFramingKey] = useState<string | null>(null);
+  const framingKeyRef = useRef<string | null>(null);
+
+  /**
+   * Enter frame mode on a tile, and make sure it is the selected one.
+   *
+   * The selection matters because a double-click fires TWO clicks first, which
+   * the tile's own handler would have toggled through select-then-deselect.
+   * The tile suppresses the second (detail > 1), so this only has to assert
+   * the end state rather than unpick the sequence.
+   */
+  function frameBlock(key: string) {
+    setInspector({ kind: "blocks", keys: [key] });
+    setSettingsOpen(false);
+    // The two in-place modes are exclusive: a picture cannot be framed while
+    // words are being typed somewhere else on the board.
+    if (typingRef.current !== null) endTyping();
+    setFramingKey(key);
+    framingKeyRef.current = key;
+  }
+
+  function exitFrameMode() {
+    setFramingKey(null);
+    framingKeyRef.current = null;
+  }
+
+  function beginTyping(key: string, selectAll = false) {
+    // The tile taking the keystrokes is the one whose settings are open.
+    setInspector({ kind: "blocks", keys: [key] });
+    setSettingsOpen(false);
+    exitFrameMode();
+    setTyping({ key, selectAll });
+    typingRef.current = key;
+  }
+
+  function endTyping() {
+    setTyping(null);
+    typingRef.current = null;
+    setTypingRange(null);
+  }
+
+  /** A block that stops existing (deleted, or undone away) takes typing mode
+   *  with it, rather than leaving the canvas typing into nothing. */
+  useEffect(() => {
+    if (typing === null) return;
+    if (!blocks.some((b) => blockKey(b) === typing.key)) endTyping();
+  }, [blocks, typing]);
+
+  /** One keystroke on the tile, or one in-place format. Text and spans travel
+   *  together, and coalesce into a single undo step per block exactly as the
+   *  panel's field used to. */
+  function setBlockText(
+    key: string,
+    text: string,
+    spans: TextSpan[],
+    source: TextEditSource,
+  ) {
+    updateTextBlocks(
+      [key],
+      {
+        text,
+        // Absent rather than empty, so a block nobody has part-formatted stays
+        // byte-identical to one saved before spans existed.
+        spans: spans.length > 0 ? spans : undefined,
+      },
+      source,
+    );
+  }
+
+  /**
+   * Ctrl+B / I / U with nothing selected: the whole block. The flag is flipped
+   * AND every range that overrode it is dropped, because "no selection" means
+   * the command was about all of the text — leaving a span behind would make
+   * the shortcut look broken on the words it had already coloured.
+   */
+  function toggleBlockFormat(key: string, format: InlineFormatKey) {
+    toggleBlocksFormat([key], format);
+  }
+
+  /**
+   * The same thing for a whole selection, which is what the canvas shortcut
+   * sends. Each block flips its OWN flag rather than being forced to a shared
+   * value: bolding a mixed selection should leave every block bold-toggled the
+   * way its own Format button would.
+   */
+  function toggleBlocksFormat(
+    keys: readonly string[],
+    format: InlineFormatKey,
+  ) {
+    const wanted = new Set(keys);
+    if (!blocks.some((b) => b.type === "text" && wanted.has(blockKey(b)))) return;
     recordChange();
     setBlocks((current) =>
       current.map((b) => {
-        if (b.type !== "product" || blockKey(b) !== key || !b.style) return b;
+        if (b.type !== "text" || !wanted.has(blockKey(b))) return b;
+        const spans = applyFormatToRange(
+          b.spans,
+          b.text.length,
+          { start: 0, end: b.text.length },
+          { [format]: null },
+        );
+        const next = { ...b, [format]: !b[format] };
+        if (spans.length > 0) next.spans = spans;
+        else delete next.spans;
+        return next;
+      }),
+    );
+  }
+
+  /** A block that stops existing (deleted, undone away, or replaced by a
+   *  fresh load) takes frame mode with it, rather than leaving the canvas in
+   *  a mode pinned to a key nothing answers to. */
+  useEffect(() => {
+    if (framingKey === null) return;
+    if (!blocks.some((b) => blockKey(b) === framingKey)) exitFrameMode();
+  }, [blocks, framingKey]);
+
+  function updateImagePlacement(key: string, placement: ImagePlacement) {
+    // One undo step per gesture, like a block drag: the coalesce key holds
+    // the whole drag together, and lifting the pointer for longer than the
+    // window starts a new one.
+    recordChange(`frame:${key}`);
+    setBlocks((current) =>
+      current.map((b) => {
+        // Product photos and uploaded elements share the placement model, so
+        // they share this mutator — the framer never needed to know which.
+        if ((b.type !== "product" && b.type !== "image") || blockKey(b) !== key) {
+          return b;
+        }
+        // Framing that lands back on centred-and-unzoomed drops the field, so
+        // a tile the seller reset is byte-identical to one never touched.
+        if (isDefaultPlacement(placement)) {
+          if (b.imagePlacement === undefined) return b;
+          const rest = { ...b };
+          delete rest.imagePlacement;
+          return rest;
+        }
+        return { ...b, imagePlacement: placement };
+      }),
+    );
+  }
+
+  /**
+   * Patch the selected image blocks. Coalesced per field so dragging the
+   * opacity slider is one undo step rather than twenty, exactly like the
+   * shape and text editors.
+   */
+  function updateImageBlocks(
+    keys: readonly string[],
+    patch: Partial<Pick<ImageBlock, "alt" | "fit" | "opacity">>,
+    coalesceKey?: string,
+  ) {
+    const wanted = new Set(keys);
+    recordChange(coalesceKey);
+    setBlocks((current) =>
+      current.map((b) =>
+        b.type === "image" && wanted.has(blockKey(b)) ? { ...b, ...patch } : b,
+      ),
+    );
+  }
+
+  /** Drop product blocks' overrides so they follow the theme again. */
+  function resetProductBlocksStyle(keys: readonly string[]) {
+    const wanted = new Set(keys);
+    recordChange();
+    setBlocks((current) =>
+      current.map((b) => {
+        if (b.type !== "product" || !wanted.has(blockKey(b)) || !b.style) {
+          return b;
+        }
         const rest = { ...b };
         delete rest.style;
         return rest;
@@ -1087,22 +1864,211 @@ export function StorefrontDesigner({
     );
   }
 
-  function updateTextBlock(key: string, patch: TextBlockPatch) {
-    recordChange(`text:${key}`);
+  /**
+   * `coalesce` names what KIND of change this is, and so which run of changes
+   * collapses into one undo step. A burst of keystrokes is one step; the bold
+   * applied after it is another, and the colour after that a third. Without
+   * the split, one Ctrl+Z would take back a format AND the sentence it was
+   * applied to.
+   */
+  function updateTextBlocks(
+    keys: readonly string[],
+    patch: TextBlockPatch,
+    coalesce = "text",
+  ) {
+    const wanted = new Set(keys);
+    recordChange(`${coalesce}:${keys.join("+")}`);
     setBlocks((current) =>
       current.map((b) =>
-        b.type === "text" && blockKey(b) === key ? { ...b, ...patch } : b,
+        b.type === "text" && wanted.has(blockKey(b)) ? { ...b, ...patch } : b,
       ),
     );
   }
 
-  function updateShapeBlock(key: string, patch: ShapeBlockPatch) {
-    recordChange(`shape:${key}`);
+  /**
+   * A colour for a text block. Onto the SELECTED WORDS when part of the text is
+   * selected in the in-place editor, onto the whole block otherwise — which is
+   * the one rule behind both the inspector's picker and the left-hand panel.
+   * `undefined` clears: back to the block for a range, back to the theme for
+   * the block itself.
+   */
+  function setTextColor(key: string, hex: string | undefined) {
+    const target = textRangeTarget;
+    if (!target || blockKey(target.block) !== key) {
+      updateTextBlocks([key], { color: hex });
+      return;
+    }
+    const spans = applyFormatToRange(
+      target.block.spans,
+      target.block.text.length,
+      target.range,
+      { color: hex ?? null },
+    );
+    updateTextBlocks(
+      [key],
+      { spans: spans.length > 0 ? spans : undefined },
+      // Its own undo step, and one that still coalesces while a colour is
+      // being dragged around the wheel.
+      "color",
+    );
+  }
+
+  function updateShapeBlocks(keys: readonly string[], patch: ShapeBlockPatch) {
+    const wanted = new Set(keys);
+    recordChange(`shape:${keys.join("+")}`);
     setBlocks((current) =>
       current.map((b) =>
-        b.type === "shape" && blockKey(b) === key ? { ...b, ...patch } : b,
+        b.type === "shape" && wanted.has(blockKey(b)) ? { ...b, ...patch } : b,
       ),
     );
+  }
+
+  /**
+   * Turn a color-panel pick back into a mutation. The ONE place a ColorTargetRef
+   * becomes a change, and it deliberately goes through the same mutators the
+   * inline editors use — so a color set from the left panel lands in undo
+   * history and flips the dirty flag exactly like one set from a swatch.
+   */
+  function applyColorTarget(ref: ColorTargetRef, hex: string) {
+    switch (ref.kind) {
+      case "theme-accent":
+        updateTheme({ ...theme, accent: hex });
+        return;
+      case "theme-background-solid":
+        if (theme.background.kind !== "solid") return;
+        updateTheme({ ...theme, background: { kind: "solid", color: hex } });
+        return;
+      case "theme-background-from":
+        if (theme.background.kind !== "gradient") return;
+        updateTheme({ ...theme, background: { ...theme.background, from: hex } });
+        return;
+      case "theme-background-to":
+        if (theme.background.kind !== "gradient") return;
+        updateTheme({ ...theme, background: { ...theme.background, to: hex } });
+        return;
+      case "header-name":
+        updateHeaderStyle("name", "color", hex);
+        return;
+      case "header-bio":
+        updateHeaderStyle("bio", "color", hex);
+        return;
+      case "shape-fill":
+        updateShapeBlocks([ref.blockKey], { color: hex });
+        return;
+      case "shape-border":
+        updateShapeBlocks([ref.blockKey], { borderColor: hex });
+        return;
+      case "text-color":
+        setTextColor(ref.blockKey, hex);
+        return;
+      case "price-tag":
+        setPriceTagColor(ref, hex);
+        return;
+    }
+  }
+
+  /**
+   * Write (or clear) one of the price tag's three colors. The one ref that
+   * spans both scopes: with a blockKey it is that tile's override, without one
+   * the theme's default for every tile.
+   */
+  function setPriceTagColor(
+    ref: Extract<ColorTargetRef, { kind: "price-tag" }>,
+    hex: string | undefined,
+  ) {
+    const patch = { [PRICE_TAG_COLOR_KEYS[ref.part]]: hex };
+    if (ref.blockKey) {
+      updateProductBlocksStyle([ref.blockKey], patch);
+      return;
+    }
+    // Drop the key rather than storing undefined, so a theme whose color was
+    // set and cleared is identical to one that never had it.
+    const next: Record<string, unknown> = { ...theme, ...patch };
+    if (hex === undefined) delete next[PRICE_TAG_COLOR_KEYS[ref.part]];
+    updateTheme(next as StorefrontTheme);
+  }
+
+  /**
+   * The masthead's lines have no tile and no inspector card, so the panel that
+   * edits their color is also where their SIZE is set. Every other target
+   * hands the panel colors alone and it renders as it always did.
+   */
+  function headerTypography(ref: ColorTargetRef): PanelTypography | undefined {
+    const line = headerLineOf(ref);
+    if (!line) return undefined;
+    const read = <F extends HeaderStyleField>(field: F) =>
+      headerStyleValue(header, line, field);
+    return {
+      size: read("size"),
+      autoSize: HEADER_BASE_PX[line],
+      onSizeChange: (size) => updateHeaderStyle(line, "size", size),
+      font: read("font"),
+      hasCustomFont: theme.customFont !== undefined,
+      onFontChange: (font) => updateHeaderStyle(line, "font", font),
+      bold: read("bold") === true,
+      italic: read("italic") === true,
+      underline: read("underline") === true,
+      onFormatToggle: (key) => toggleHeaderFormat(line, key),
+      align: read("align") ?? "left",
+      onAlignChange: (align) =>
+        // Left is what the masthead renders with no alignment at all, so
+        // choosing it clears the override instead of storing the default.
+        updateHeaderStyle(line, "align", align === "left" ? undefined : align),
+    };
+  }
+
+  /** Which masthead line a colour target names, if any. */
+  function headerLineOf(ref: ColorTargetRef | null): HeaderLine | null {
+    if (ref?.kind === "header-name") return "name";
+    if (ref?.kind === "header-bio") return "bio";
+    return null;
+  }
+
+  /** Write one masthead line's styling. The drop-the-key semantics live in
+   *  setHeaderStyle, so every path here shares them. */
+  function updateHeaderStyle<F extends HeaderStyleField>(
+    line: HeaderLine,
+    field: F,
+    value: HeaderStyleValue[F] | undefined,
+  ) {
+    updateHeader(setHeaderStyle(header, line, field, value));
+  }
+
+  /** Flip one of a line's formatting toggles, dropping the key on the way back
+   *  off so an unstyled masthead stays unstyled in storage. */
+  function toggleHeaderFormat(
+    line: HeaderLine,
+    field: "bold" | "italic" | "underline",
+  ) {
+    const next = headerStyleValue(header, line, field) !== true;
+    updateHeaderStyle(line, field, next ? true : undefined);
+  }
+
+  /** Clear an optional color override, sending the field back to the theme.
+   *  The header's two lines DROP their key rather than storing `undefined`, so
+   *  a header the seller never colored stays identical to a legacy one. */
+  function clearColorTarget(ref: ColorTargetRef) {
+    if (ref.kind === "text-color") {
+      setTextColor(ref.blockKey, undefined);
+      return;
+    }
+    if (ref.kind === "price-tag") {
+      setPriceTagColor(ref, undefined);
+      return;
+    }
+    if (ref.kind === "header-name" || ref.kind === "header-bio") {
+      updateHeaderStyle(ref.kind === "header-name" ? "name" : "bio", "color", undefined);
+    }
+  }
+
+  /**
+   * Open the panel on a field. Also closes the mobile sheets, because on a
+   * phone all three are the same bottom slot and only one can own it — the same
+   * rule the inspector and the settings sheet already apply to each other.
+   */
+  function openColorTarget(ref: ColorTargetRef) {
+    setColorTarget(ref);
+    setSettingsOpen(false);
   }
 
   function updateTheme(next: StorefrontTheme) {
@@ -1254,13 +2220,15 @@ export function StorefrontDesigner({
   const inspectorTitle =
     inspector?.kind === "picker"
       ? "Add product"
-      : selectedBlock?.type === "product"
-        ? "Product"
-        : selectedBlock?.type === "shape"
-          ? "Shape"
-          : "Text block";
+      : selectedBlocks.length > 1
+        ? `${selectedBlocks.length} blocks`
+        : selectedBlock?.type === "product"
+          ? "Product"
+          : selectedBlock?.type === "shape"
+            ? "Shape"
+            : "Text block";
   const showInspector =
-    inspector?.kind === "picker" || selectedBlock !== null;
+    inspector?.kind === "picker" || selectedBlocks.length > 0;
 
   return (
     // Universal search, mounted here rather than inherited: the editor renders
@@ -1271,6 +2239,17 @@ export function StorefrontDesigner({
     // from a search result would walk out of the editor and take any unsaved
     // canvas edits with it, silently — the same trap the header's Back link
     // already routes around.
+    // Lets every color field below — the theme colors in the right-hand panel
+    // and the block colors in the inspector — hand itself to the left-hand
+    // ColorPanel. Only the OPENER travels through context; the panel's data
+    // comes down as props from here.
+    <ColorTargetProvider
+      value={{
+        activeRef: activeColorTarget,
+        open: openColorTarget,
+        close: () => setColorTarget(null),
+      }}
+    >
     <SearchProvider
       role={role}
       accountId={accountId}
@@ -1346,6 +2325,65 @@ export function StorefrontDesigner({
       {/* Full-width workspace: the canvas takes all remaining room next to
           the edge-docked panel. */}
       <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
+        {/* LEFT: the color panel, docked opposite the design panel and present
+            only while a color is being edited, so the canvas keeps the full
+            width the rest of the time. Mirrors the right panel's chrome with
+            the border flipped; sections pad themselves (lg:px-4) so the
+            dividers run edge to edge, exactly as over there.
+
+            On mobile it is a bottom sheet like the other two, and the same
+            one-at-a-time rule applies: opening it closes them. */}
+        {leftPanelOpen && (
+          <div
+            // Reaching in here is still part of an in-place text edit: the
+            // editor keeps the words selected (and drawn) instead of ending
+            // the edit, so a colour picked here lands on them.
+            data-design-panel=""
+            className="relative shrink-0 lg:w-[17.5rem] lg:border-r lg:border-border"
+          >
+            {/* dir flip puts the scrollbar on the LEFT edge (requested); the
+                inner dir="ltr" undoes it for the actual content/text. */}
+            <div
+              dir="rtl"
+              className={cn(SHEET_ON_MOBILE_CLASS, "lg:h-full lg:overflow-y-auto")}
+            >
+              <div dir="ltr">
+              {resolvedColorTarget && activeColorTarget ? (
+                <ColorPanel
+                  // Remount when the field changes so the custom section's
+                  // working HSV starts from the new color instead of animating
+                  // over from the old one.
+                  key={colorTargetKey(activeColorTarget)}
+                  target={resolvedColorTarget}
+                  typography={headerTypography(activeColorTarget)}
+                  inDesign={colorsInDesign}
+                  onPick={(hex) => applyColorTarget(activeColorTarget, hex)}
+                  onInherit={
+                    resolvedColorTarget.inherit
+                      ? () => clearColorTarget(activeColorTarget)
+                      : undefined
+                  }
+                  onClose={() => setColorTarget(null)}
+                />
+              ) : (
+                <LibraryPanel
+                  tab={leftPanel?.kind === "library" ? leftPanel.tab : "uploads"}
+                  onTabChange={(tab) => setLeftPanel({ kind: "library", tab })}
+                  uploads={uploads}
+                  uploading={uploadingElement}
+                  uploadProgress={uploadProgress}
+                  canAddBlocks={blocks.length < MAX_BLOCKS}
+                  onUpload={addImageBlock}
+                  onPlaceUpload={placeUpload}
+                  onAddShape={addShapeBlock}
+                  onClose={() => setLeftPanel(null)}
+                />
+              )}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* The workspace window. In design view the board floats inside it and
             can be panned anywhere; the mobile preview stays a plain scrolling
             column. pb clears the floating toolbar. */}
@@ -1378,14 +2416,33 @@ export function StorefrontDesigner({
             header={header}
             previewMode={previewMode}
             backgroundImageUrl={backgroundImageUrl}
+            customFontUrl={customFontUrl}
+            elementUrls={elementUrls}
             showGrid={showGrid}
             viewport={viewport}
             onMoveBlock={onMoveBlock}
             onResizeBlock={onResizeBlock}
             onRemove={onRemoveBlock}
             onEmptyCellClick={onInsertAt}
-            selectedKey={inspector?.kind === "block" ? inspector.key : null}
+            selectedKeys={selectedKeys}
             onSelectBlock={onSelectBlock}
+            onSelectMany={onSelectMany}
+            activeHeaderLine={activeHeaderLine}
+            onSelectHeaderLine={onSelectHeaderLine}
+            framingKey={framingKey}
+            onFrameBlock={onFrameBlock}
+            onFramePlacement={onFramePlacement}
+            onFrameExit={onFrameExit}
+            typingKey={typing?.key ?? null}
+            typingSelectAll={typing?.selectAll ?? false}
+            onTypeStart={onTypeStart}
+            onTextChange={onTextChange}
+            onToggleBlockFormat={onToggleBlockFormat}
+            onTextRangeChange={setTypingRange}
+            onTypeEnd={onTypeEnd}
+            // Space is the hold-to-pan tool; while held, a drag on the frame
+            // pans the workspace instead of drawing a marquee.
+            disableMarquee={spaceHeld}
           />
         </main>
 
@@ -1408,6 +2465,9 @@ export function StorefrontDesigner({
             a drag handle for resizing. On mobile both render as bottom
             sheets, one at a time. */}
         <div
+          // Same as the colour panel: pressing in here does not end an
+          // in-place text edit, so the selected words survive the trip.
+          data-design-panel=""
           // Width only binds on lg+; on mobile the children are fixed sheets.
           style={{ "--panel-w": `${panelWidth}px` } as React.CSSProperties}
           className={cn(
@@ -1445,7 +2505,17 @@ export function StorefrontDesigner({
               run the full width of the panel. */}
           <div className="contents lg:block lg:h-full lg:overflow-y-auto">
             {showInspector && (
-              <div className={SHEET_ON_MOBILE_CLASS}>
+              <div
+                className={cn(
+                  SHEET_ON_MOBILE_CLASS,
+                  // On mobile every panel is the SAME bottom slot, and selecting
+                  // a shape opens both this and the color sheet — which would
+                  // stack one on top of the other. The color sheet wins while it
+                  // is open; closing it brings this back. On lg+ they are two
+                  // docked columns and both stay visible.
+                  activeColorTarget && "hidden lg:block",
+                )}
+              >
                 <CollapsibleSection
                   title={inspectorTitle}
                   headerAction={
@@ -1466,6 +2536,25 @@ export function StorefrontDesigner({
                       onAdd={addProduct}
                       onFound={mergeFoundProducts}
                     />
+                  ) : selectedBlocks.length > 1 ? (
+                    <MultiBlockEditor
+                      blocks={selectedBlocks}
+                      theme={theme}
+                      onProductStyleChange={(patch) =>
+                        updateProductBlocksStyle(selectedKeys, patch)
+                      }
+                      onProductStyleReset={() =>
+                        resetProductBlocksStyle(selectedKeys)
+                      }
+                      onShapeChange={(patch) =>
+                        updateShapeBlocks(selectedKeys, patch)
+                      }
+                      onTextChange={(patch) =>
+                        updateTextBlocks(selectedKeys, patch)
+                      }
+                      onDuplicate={() => duplicateBlocks(selectedKeys)}
+                      onRemove={() => removeBlocks(selectedKeys)}
+                    />
                   ) : selectedBlock?.type === "product" ? (
                     <ProductBlockEditor
                       // Keyed by product so the name/price drafts reset when
@@ -1478,10 +2567,10 @@ export function StorefrontDesigner({
                         toggleSoldOut(blockKey(selectedBlock))
                       }
                       onStyleChange={(patch) =>
-                        updateProductBlockStyle(blockKey(selectedBlock), patch)
+                        updateProductBlocksStyle([blockKey(selectedBlock)], patch)
                       }
                       onStyleReset={() =>
-                        resetProductBlockStyle(blockKey(selectedBlock))
+                        resetProductBlocksStyle([blockKey(selectedBlock)])
                       }
                       onRemove={() => removeBlock(blockKey(selectedBlock))}
                       onProductSaved={applyProductUpdate}
@@ -1490,19 +2579,54 @@ export function StorefrontDesigner({
                     <ShapeBlockEditor
                       block={selectedBlock}
                       onUpdate={(patch) =>
-                        updateShapeBlock(blockKey(selectedBlock), patch)
+                        updateShapeBlocks([blockKey(selectedBlock)], patch)
                       }
-                      onDuplicate={() => duplicateBlock(blockKey(selectedBlock))}
+                      onDuplicate={() =>
+                        duplicateBlocks([blockKey(selectedBlock)])
+                      }
                       onRemove={() => removeBlock(blockKey(selectedBlock))}
                     />
                   ) : selectedBlock?.type === "text" ? (
                     <TextBlockEditor
                       block={selectedBlock}
                       accent={theme.accent}
+                      hasCustomFont={theme.customFont !== undefined}
                       onUpdate={(patch) =>
-                        updateTextBlock(blockKey(selectedBlock), patch)
+                        updateTextBlocks([blockKey(selectedBlock)], patch)
                       }
-                      onDuplicate={() => duplicateBlock(blockKey(selectedBlock))}
+                      onDuplicate={() =>
+                        duplicateBlocks([blockKey(selectedBlock)])
+                      }
+                      onEditText={() => beginTyping(blockKey(selectedBlock))}
+                      // Colour follows the caret: with words selected on the
+                      // canvas it paints them, otherwise the whole block.
+                      selectedRange={textRangeTarget?.range ?? null}
+                      onColorChange={(color) =>
+                        setTextColor(blockKey(selectedBlock), color)
+                      }
+                    />
+                  ) : selectedBlock?.type === "image" ? (
+                    <ImageBlockEditor
+                      block={selectedBlock}
+                      canFrame={
+                        elementUrls[blockKey(selectedBlock)] !== undefined
+                      }
+                      onUpdate={(patch) =>
+                        updateImageBlocks(
+                          [blockKey(selectedBlock)],
+                          patch,
+                          // Coalesce the opacity drag into one undo step; a
+                          // fit or alt change is its own.
+                          patch.opacity !== undefined
+                            ? `image:${blockKey(selectedBlock)}`
+                            : undefined,
+                        )
+                      }
+                      onFrame={() => frameBlock(blockKey(selectedBlock))}
+                      onDuplicate={() =>
+                        duplicateBlocks([blockKey(selectedBlock)])
+                      }
+                      onRemove={() => removeBlock(blockKey(selectedBlock))}
                     />
                   ) : null}
                 </CollapsibleSection>
@@ -1536,6 +2660,8 @@ export function StorefrontDesigner({
                 onHeaderChange={updateHeader}
                 backgroundImageUrl={backgroundImageUrl}
                 onBackgroundImageChange={setBackgroundImageUrl}
+                customFontUrl={customFontUrl}
+                onCustomFontUrlChange={setCustomFontUrl}
                 showGrid={showGrid}
                 onShowGridChange={setShowGrid}
                 onCanvasChange={updateCanvas}
@@ -1549,6 +2675,12 @@ export function StorefrontDesigner({
         onAddProduct={togglePicker}
         onAddText={addTextBlock}
         onAddShape={addShapeBlock}
+        onAddElement={addImageBlock}
+        uploadingElement={uploadingElement}
+        onOpenShapesPanel={() => {
+          setLeftPanel({ kind: "library", tab: "shapes" });
+          setSettingsOpen(false);
+        }}
         canAddBlocks={blocks.length < MAX_BLOCKS}
         viewport={viewport}
         onZoomIn={() => zoomBy(ZOOM_STEP)}
@@ -1600,6 +2732,7 @@ export function StorefrontDesigner({
       </Modal>
       </div>
     </SearchProvider>
+    </ColorTargetProvider>
   );
 }
 

@@ -1,5 +1,7 @@
 import {
   DIGITAL_FILE_CONTENT_TYPES,
+  ELEMENT_CONTENT_TYPES,
+  FONT_CONTENT_TYPES,
   IMAGE_CONTENT_TYPES,
   maxBytesForKind,
   type UploadKind,
@@ -24,10 +26,29 @@ export class UploadError extends Error {
 const TYPE_FIX: Record<UploadKind, string> = {
   image: "Use a JPEG, PNG, WebP, GIF, or AVIF image.",
   file: "Use a ZIP, PDF, EPUB, MP3, WAV, MP4, JPEG, PNG, WebP, or TXT file.",
+  font: "Use a WOFF2, WOFF, TTF, or OTF font file.",
+  element: "Use an SVG, PNG, WebP, JPEG, GIF, or AVIF image.",
+};
+
+/** What each kind is CALLED in the messages a seller reads. */
+const UPLOAD_NOUN: Record<UploadKind, string> = {
+  image: "image",
+  file: "file",
+  font: "font",
+  element: "element",
 };
 
 function allowedTypes(kind: UploadKind): readonly string[] {
-  return kind === "image" ? IMAGE_CONTENT_TYPES : DIGITAL_FILE_CONTENT_TYPES;
+  switch (kind) {
+    case "image":
+      return IMAGE_CONTENT_TYPES;
+    case "font":
+      return FONT_CONTENT_TYPES;
+    case "element":
+      return ELEMENT_CONTENT_TYPES;
+    case "file":
+      return DIGITAL_FILE_CONTENT_TYPES;
+  }
 }
 
 /** Fix line for a failed presign response, keyed off the HTTP status. */
@@ -163,15 +184,43 @@ async function uploadFileViaServer(
   return keyFromResponse(outcome, "file");
 }
 
-async function uploadImageViaServer(
+/** Multipart POST to one of our own upload routes, under the field name that
+ *  route accepts. Shared by images and fonts, which differ only in those two. */
+async function uploadFormViaServer(
   file: File,
+  route: string,
+  field: string,
   onProgress?: (fraction: number | null) => void,
 ): Promise<string> {
   const body = new FormData();
-  body.append("image", file);
+  body.append(field, file);
 
-  const outcome = await sendWithProgress("POST", "/api/uploads/image", body, onProgress);
-  return keyFromResponse(outcome, "image");
+  const outcome = await sendWithProgress("POST", route, body, onProgress);
+  return keyFromResponse(outcome, field);
+}
+
+/** Font extensions, checked instead of `file.type`: browsers report font MIME
+ *  types inconsistently (often an empty string), so trusting the claim here
+ *  would refuse perfectly good uploads before they ever reached the sniffer. */
+const FONT_EXTENSIONS = [".woff2", ".woff", ".ttf", ".otf"];
+
+function looksLikeFont(file: File): boolean {
+  const name = file.name.toLowerCase();
+  return FONT_EXTENSIONS.some((extension) => name.endsWith(extension));
+}
+
+/**
+ * Elements accept SVG, and browsers are inconsistent about its MIME type —
+ * some report `image/svg+xml`, some an empty string, some `text/xml`. Judging
+ * the extension too keeps a perfectly good logo from being refused here,
+ * before the server ever gets to read the bytes.
+ *
+ * This is a UX pre-check ONLY. `sniffSvg` on the server decides what the file
+ * really is, and a `.svg` name proves nothing to it.
+ */
+function looksLikeElement(file: File): boolean {
+  if (allowedTypes("element").includes(file.type)) return true;
+  return file.name.toLowerCase().endsWith(".svg");
 }
 
 /**
@@ -189,9 +238,15 @@ export async function uploadToR2(
   /** Called with 0..1 as the body uploads, when the total size is known. */
   onProgress?: (fraction: number | null) => void,
 ): Promise<string> {
-  const noun = kind === "image" ? "image" : "file";
+  const noun = UPLOAD_NOUN[kind];
 
-  if (!allowedTypes(kind).includes(file.type)) {
+  const typeLooksRight =
+    kind === "font"
+      ? looksLikeFont(file)
+      : kind === "element"
+        ? looksLikeElement(file)
+        : allowedTypes(kind).includes(file.type);
+  if (!typeLooksRight) {
     throw new UploadError(
       uploadFailed("That file type is not supported.", TYPE_FIX[kind]),
     );
@@ -206,11 +261,18 @@ export async function uploadToR2(
     );
   }
 
-  // BOTH kinds go through our own server, same origin. Neither touches R2
+  // EVERY kind goes through our own server, same origin. Nothing touches R2
   // directly any more: a cross-origin PUT depends on the bucket's CORS
   // allowlist naming every origin the app is served from, which silently
   // broke uploads on every dev port and every deployed domain but one.
-  return kind === "image"
-    ? uploadImageViaServer(file, onProgress)
-    : uploadFileViaServer(file, onProgress);
+  switch (kind) {
+    case "image":
+      return uploadFormViaServer(file, "/api/uploads/image", "image", onProgress);
+    case "font":
+      return uploadFormViaServer(file, "/api/uploads/font", "font", onProgress);
+    case "element":
+      return uploadFormViaServer(file, "/api/uploads/element", "element", onProgress);
+    case "file":
+      return uploadFileViaServer(file, onProgress);
+  }
 }

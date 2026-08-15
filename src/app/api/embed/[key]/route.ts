@@ -4,6 +4,7 @@ import { decideEmbedAccess, embedCorsHeaders } from "@/lib/storefront/embed";
 import { parseStoredStorefrontConfig } from "@/lib/validation/storefront";
 import { uuidField } from "@/lib/validation/inputs";
 import { readingOrder, type StorefrontBlock } from "@/types/storefront";
+import { presignGetUrl } from "@/lib/r2";
 
 /**
  * GET /api/embed/[key] — the PUBLIC storefront payload for the embed widget.
@@ -102,6 +103,13 @@ export async function GET(
     {
       id: row.id,
       name: row.name,
+      // Theme and header travel whole: both are pure presentation, every member
+      // is schema-validated, and the widget needs all of it to render what the
+      // seller designed. (An uploaded font's object KEY rides along inside the
+      // theme, like the background image's already does; neither is a URL, and
+      // the widget cannot fetch either without a signature we do not hand out.
+      // Image BLOCKS are the deliberate exception — see publicBlocks: their
+      // artwork is the block, so it ships as a signed, expiring URL.)
       theme: config.theme,
       header: config.header ?? null,
       blocks: await publicBlocks(config.blocks),
@@ -156,6 +164,12 @@ async function publicBlocks(blocks: StorefrontBlock[]) {
           type: "product" as const,
           productId: block.productId,
           soldOut: block.soldOut ?? false,
+          // Framing IS the buyer-facing part of this block: the seller chose
+          // which part of the photo the tile shows, and an embed that dropped
+          // it would quietly re-centre every image they framed. Purely visual
+          // and derived from a picture the embed already serves, so none of
+          // the reasons this list is an allowlist apply.
+          imagePlacement: block.imagePlacement,
         };
       }
       if (block.type === "shape") {
@@ -168,6 +182,27 @@ async function publicBlocks(blocks: StorefrontBlock[]) {
           opacity: block.opacity,
         };
       }
+      if (block.type === "image") {
+        // The ONE block whose payload carries a URL rather than a key, and
+        // deliberately so: a widget cannot render `elements/{uuid}/...`, and
+        // the bucket is private. The stored config still holds only the key —
+        // this signature is minted per response and expires.
+        //
+        // (The theme's font and background keys stay unsigned: those are
+        // consumed by the widget's own CSS, which is not built here.)
+        const src = await presignGetUrl(block.key);
+        return {
+          ...placement,
+          type: "image" as const,
+          alt: block.alt,
+          fit: block.fit,
+          imagePlacement: block.imagePlacement,
+          opacity: block.opacity,
+          // Omitted rather than null when R2 is unconfigured, so the widget
+          // sees a block with no source instead of a broken one.
+          ...(src ? { src } : {}),
+        };
+      }
       return {
         ...placement,
         type: "text" as const,
@@ -178,6 +213,10 @@ async function publicBlocks(blocks: StorefrontBlock[]) {
         italic: block.italic,
         underline: block.underline,
         color: block.color,
+        // The ranges that override the four fields above. Plain numbers and
+        // hex, exactly as stored — the widget renders each run as its own
+        // text node, so this stays as far from markup as the text itself.
+        spans: block.spans,
         fontSize: block.fontSize,
         font: block.font,
       };

@@ -11,11 +11,24 @@ import { CURRENCIES, PRODUCT_STATUSES } from "@/types/product";
 // these on the server before anything touches the DB or R2 — the client-side
 // checks in ProductForm/ImageDropzone are convenience only.
 
-export const UPLOAD_KINDS = ["image", "file"] as const;
+export const UPLOAD_KINDS = ["image", "file", "font", "element"] as const;
 export type UploadKind = (typeof UPLOAD_KINDS)[number];
 
 export const IMAGE_MAX_BYTES = 10 * 1024 * 1024; // 10 MB
 export const DIGITAL_FILE_MAX_BYTES = 200 * 1024 * 1024; // 200 MB
+/**
+ * Decorative artwork a seller drops on the storefront canvas: a logo, an icon,
+ * a graphic. Deliberately far tighter than a product photo — an element is
+ * chrome, not the subject, and every buyer who loads the storefront fetches it.
+ */
+export const ELEMENT_MAX_BYTES = 2 * 1024 * 1024; // 2 MB
+/**
+ * Fonts are small by nature: a subset WOFF2 is tens of KB and a full-coverage
+ * TTF rarely passes 1 MB. The cap is deliberately tight, because this file is fetched
+ * by every buyer who loads the storefront, so a font big enough to be felt is a
+ * font the seller should be compressing instead.
+ */
+export const FONT_MAX_BYTES = 2 * 1024 * 1024; // 2 MB
 
 export const IMAGE_CONTENT_TYPES = [
   "image/jpeg",
@@ -42,9 +55,62 @@ export const DIGITAL_FILE_CONTENT_TYPES = [
   "text/plain",
 ] as const;
 
+/**
+ * Web font formats a storefront may use. WOFF2 first because it is the one to
+ * use: it is the smallest and every browser this app supports reads it. The
+ * others are accepted so a seller with only a TTF/OTF licence is not stuck.
+ */
+export const FONT_CONTENT_TYPES = [
+  "font/woff2",
+  "font/woff",
+  "font/ttf",
+  "font/otf",
+] as const;
+
+/**
+ * Canvas elements: every raster a product image may be, PLUS SVG.
+ *
+ * SVG IS ADMITTED HERE AND NOWHERE ELSE, and that isolation is the point. It is
+ * markup, so it is the one upload in this product that could carry script, and
+ * confining it to its own kind (and its own `elements/` prefix) means product
+ * images, backgrounds, fonts and digital files keep exactly the allowlists they
+ * had. Two things make it safe to accept at all: `sniffSvg` rejects any file
+ * carrying script, event handlers, external references or entity declarations
+ * before it is ever stored, and ImageTileContent renders elements only through
+ * `<img src>`, where the spec puts SVG in secure static mode — no scripts, no
+ * external fetches, no interactivity. It is never inlined into the DOM.
+ */
+export const ELEMENT_CONTENT_TYPES = [
+  ...IMAGE_CONTENT_TYPES,
+  "image/svg+xml",
+] as const;
+
 /** Max stored-object size for a kind — the cap enforced server-side via HEAD. */
 export function maxBytesForKind(kind: UploadKind): number {
-  return kind === "image" ? IMAGE_MAX_BYTES : DIGITAL_FILE_MAX_BYTES;
+  switch (kind) {
+    case "image":
+      return IMAGE_MAX_BYTES;
+    case "font":
+      return FONT_MAX_BYTES;
+    case "file":
+      return DIGITAL_FILE_MAX_BYTES;
+    case "element":
+      return ELEMENT_MAX_BYTES;
+  }
+}
+
+/** The allowlist of stored Content-Types for a kind. */
+function contentTypesForKind(kind: UploadKind): readonly string[] {
+  switch (kind) {
+    case "image":
+      return IMAGE_CONTENT_TYPES;
+    case "font":
+      return FONT_CONTENT_TYPES;
+    case "file":
+      return DIGITAL_FILE_CONTENT_TYPES;
+    case "element":
+      return ELEMENT_CONTENT_TYPES;
+  }
 }
 
 /**
@@ -57,9 +123,7 @@ export function isAllowedContentType(
 ): boolean {
   if (!contentType) return false;
   const bare = contentType.split(";")[0]!.trim().toLowerCase();
-  const allowed: readonly string[] =
-    kind === "image" ? IMAGE_CONTENT_TYPES : DIGITAL_FILE_CONTENT_TYPES;
-  return allowed.includes(bare);
+  return contentTypesForKind(kind).includes(bare);
 }
 
 // A user-supplied file NAME (the stored key is server-minted separately).
@@ -122,7 +186,22 @@ export const productIdSchema = z.uuid();
 // (see lib/r2.ts), so a stored key must match that shape exactly. Exported for
 // other schemas that store object keys (e.g. storefront background images).
 export const OBJECT_KEY_PATTERN =
-  /^(images|files)\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}-[A-Za-z0-9._-]{1,200}$/;
+  /^(images|files|fonts|elements)\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}-[A-Za-z0-9._-]{1,200}$/;
+
+/** The bucket prefix a kind's objects live under. One place, because the key
+ *  pattern, the key builder and the ownership check must agree exactly. */
+export function objectKeyPrefix(kind: UploadKind): string {
+  switch (kind) {
+    case "image":
+      return "images";
+    case "font":
+      return "fonts";
+    case "file":
+      return "files";
+    case "element":
+      return "elements";
+  }
+}
 
 /**
  * True if `key` is well-formed AND lives under the caller's own prefix for the
@@ -134,8 +213,8 @@ export function isOwnedObjectKey(
   kind: UploadKind,
   ownerId: string,
 ): boolean {
-  const prefix = kind === "image" ? "images" : "files";
   return (
-    OBJECT_KEY_PATTERN.test(key) && key.startsWith(`${prefix}/${ownerId}/`)
+    OBJECT_KEY_PATTERN.test(key) &&
+    key.startsWith(`${objectKeyPrefix(kind)}/${ownerId}/`)
   );
 }

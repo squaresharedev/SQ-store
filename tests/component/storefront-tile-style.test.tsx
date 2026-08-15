@@ -150,4 +150,88 @@ describe("per-tile style overrides", () => {
     // overridden tile hid its tag, so exactly one price renders.
     expect(screen.getAllByText("€12.50")).toHaveLength(1);
   });
+
+  it("renders every price tag appearance field from the tile's overrides", () => {
+    render(
+      <StorefrontPreview
+        config={configWith([
+          {
+            type: "product",
+            productId: PRODUCT_A,
+            x: 0,
+            y: 0,
+            w: 1,
+            h: 1,
+            style: {
+              priceTagPosition: "top-right",
+              priceTagFont: "mono",
+              priceTagSize: 14,
+              priceTagColor: "#fbbf24",
+              priceTagTextColor: "#1c1917",
+              priceTagBorderColor: "#d97706",
+              priceTagBorderWidth: 2,
+              priceTagRadius: 4,
+            },
+          },
+        ])}
+        productsById={PRODUCTS}
+      />,
+    );
+    const tag = screen.getByText("€12.50");
+    expect(tag).toHaveClass("font-mono");
+    expect(tag.style.fontSize).toBe("14px");
+    expect(tag.style.backgroundColor).toBe("rgb(251, 191, 36)");
+    expect(tag.style.color).toBe("rgb(28, 25, 23)");
+    expect(tag.style.borderColor).toBe("rgb(217, 119, 6)");
+    expect(tag.style.borderWidth).toBe("2px");
+    expect(tag.style.borderRadius).toBe("4px");
+    // Padding scales with the type, so one slider sizes the whole chip.
+    expect(tag.style.paddingInline).toBe("7px");
+  });
+
+  it("draws no border at all at thickness 0, even with a border color stored", () => {
+    render(
+      <StorefrontPreview
+        config={configWith([
+          {
+            type: "product",
+            productId: PRODUCT_A,
+            x: 0,
+            y: 0,
+            w: 1,
+            h: 1,
+            style: { priceTagBorderColor: "#d97706", priceTagBorderWidth: 0 },
+          },
+        ])}
+        productsById={PRODUCTS}
+      />,
+    );
+    expect(screen.getByText("€12.50").style.borderWidth).toBe("");
+  });
+
+  it("lifts a bottom price tag off an overlay title so the two never collide", () => {
+    render(
+      <StorefrontPreview
+        config={configWith([
+          {
+            type: "product",
+            productId: PRODUCT_A,
+            x: 0,
+            y: 0,
+            w: 1,
+            h: 1,
+            // The title bar is drawn over the image's bottom edge, which is
+            // the same box this floated tag sits in.
+            style: { titleStyle: "overlay", priceTagPosition: "bottom-left" },
+          },
+        ])}
+        productsById={PRODUCTS}
+      />,
+    );
+    const tag = screen.getByText("€12.50");
+    expect(tag).toHaveClass("top-2");
+    expect(tag).not.toHaveClass("bottom-2");
+    // And the title is still there, at the bottom, unmoved.
+    expect(screen.getByText("Plain tile")).toBeInTheDocument();
+  });
 });

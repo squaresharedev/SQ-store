@@ -1,32 +1,14 @@
 "use client";
 
-import { useId } from "react";
-import {
-  STOREFRONT_FONTS,
-  type StorefrontFont,
-  type StorefrontHeader,
-  type StorefrontTheme,
-} from "@/types/storefront";
+import type { StorefrontHeader, StorefrontTheme } from "@/types/storefront";
 import { CollapsibleSection } from "@/components/ui/CollapsibleSection";
-import { labelClass } from "@/components/ui/control-styles";
-import { Select, type SelectOption } from "@/components/ui/select";
 import { ThemePanel } from "./ThemePanel";
 import { HeaderSection } from "./HeaderSection";
 import { CardsSection } from "./CardsSection";
+import { PriceTagSection } from "./PriceTagSection";
 import { LayoutSection } from "./LayoutSection";
+import { TypographySection } from "./TypographySection";
 import { AdvancedSection } from "./AdvancedSection";
-
-const FONT_OPTIONS: readonly SelectOption<StorefrontFont>[] =
-  STOREFRONT_FONTS.map((font) => ({
-    value: font,
-    label: {
-      sans: "Sans (default)",
-      serif: "Serif",
-      mono: "Mono",
-      display: "Display",
-      hand: "Handwritten",
-    }[font],
-  }));
 
 /**
  * Right side panel: GLOBAL design settings only, organized for progressive
@@ -41,6 +23,8 @@ export function ControlsPanel({
   onHeaderChange,
   backgroundImageUrl,
   onBackgroundImageChange,
+  customFontUrl,
+  onCustomFontUrlChange,
   showGrid,
   onShowGridChange,
   onCanvasChange,
@@ -54,11 +38,13 @@ export function ControlsPanel({
   /** Display URL for an image background (signed or local object URL). */
   backgroundImageUrl: string | null;
   onBackgroundImageChange: (url: string | null) => void;
+  /** Display URL for the uploaded font (signed or local object URL). */
+  customFontUrl: string | null;
+  onCustomFontUrlChange: (url: string | null) => void;
   /** Editor-only view preference, not part of the saved config. */
   showGrid: boolean;
   onShowGridChange: (show: boolean) => void;
 }) {
-  const fontFieldId = useId();
   return (
     // No gaps: the sections are flush and read as one column, divided by the
     // lines they draw themselves.
@@ -75,11 +61,20 @@ export function ControlsPanel({
       </CollapsibleSection>
 
       <CollapsibleSection title="Header" collapsible defaultOpen={false}>
-        <HeaderSection header={header} onChange={onHeaderChange} />
+        <HeaderSection
+          header={header}
+          onChange={onHeaderChange}
+        />
       </CollapsibleSection>
 
       <CollapsibleSection title="Cards" collapsible defaultOpen={false}>
         <CardsSection theme={theme} onChange={onThemeChange} />
+      </CollapsibleSection>
+
+      {/* Its own section rather than a corner of Cards: the price tag carries
+          seven settings of its own, which buried the four that shape a card. */}
+      <CollapsibleSection title="Price tag" collapsible defaultOpen={false}>
+        <PriceTagSection theme={theme} onChange={onThemeChange} />
       </CollapsibleSection>
 
       <CollapsibleSection title="Layout" collapsible defaultOpen={false}>
@@ -91,17 +86,12 @@ export function ControlsPanel({
       </CollapsibleSection>
 
       <CollapsibleSection title="Typography" collapsible defaultOpen={false}>
-        <div className="space-y-1.5">
-          <label htmlFor={`${fontFieldId}-font`} className={labelClass}>
-            Font
-          </label>
-          <Select
-            id={`${fontFieldId}-font`}
-            value={theme.font}
-            options={FONT_OPTIONS}
-            onChange={(font) => onThemeChange({ ...theme, font })}
-          />
-        </div>
+        <TypographySection
+          theme={theme}
+          onChange={onThemeChange}
+          fontUrl={customFontUrl}
+          onFontUrlChange={onCustomFontUrlChange}
+        />
       </CollapsibleSection>
 
       <CollapsibleSection title="Advanced" collapsible defaultOpen={false}>

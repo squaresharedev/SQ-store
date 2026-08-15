@@ -4,6 +4,7 @@ import { useId, useState } from "react";
 import { Image as ImageIcon, Trash2 } from "lucide-react";
 import type { Product } from "@/types/product";
 import {
+  blockKey,
   resolveCardStyle,
   type CardStyleOverrides,
   type ProductBlock,
@@ -22,6 +23,7 @@ import { InfoTip } from "@/components/ui/InfoTip";
 import { Modal } from "@/components/ui/modal";
 import { Switch } from "@/components/ui/switch";
 import { CardStyleControls } from "./CardStyleControls";
+import { PriceTagControls } from "./PriceTagControls";
 
 /** Decimal input string -> integer cents, or null when not a finite number. */
 function centsOf(input: string): number | null {
@@ -304,6 +306,19 @@ export function ProductBlockEditor({
         <CardStyleControls
           value={resolveCardStyle(theme, block.style)}
           onChange={onStyleChange}
+        />
+      </div>
+
+      {/* The price tag, on the same overrides. Its own group for the same
+          reason it has its own section in the theme panel: seven settings
+          under "Tile style" would bury the four that shape the tile. */}
+      <div className="space-y-4 border-t border-border pt-4">
+        <span className={strongLabelClass}>Price tag</span>
+        <PriceTagControls
+          theme={theme}
+          overrides={block.style ?? {}}
+          onChange={onStyleChange}
+          scope={{ blockKey: blockKey(block) }}
         />
       </div>
 

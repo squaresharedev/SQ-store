@@ -10,6 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import {
   fieldBaseClass,
   helpTextClass,
+  infoTextClass,
   labelClass,
 } from "@/components/ui/control-styles";
 
@@ -23,9 +24,15 @@ function sanitize(value: string, allowNewlines: boolean): string {
 }
 
 /**
- * Store header controls: a show toggle plus plain-text name + bio rendered as
- * a masthead above the grid. Client caps are UX only — the save path
- * re-validates with the header schema (lengths + control-character rules).
+ * Store header controls: a show toggle plus the plain text of the two lines
+ * rendered as a masthead above the grid. Client caps are UX only — the save
+ * path re-validates with the header schema (lengths + control-character rules).
+ *
+ * The WORDS live here; how they LOOK does not. Font, size, colour, formatting
+ * and alignment are set by clicking the line itself on the canvas, which opens
+ * the left-hand panel on it — the same place every other colour in the
+ * storefront is chosen, and the same gesture that selects anything else on the
+ * board.
  */
 export function HeaderSection({
   header,
@@ -86,6 +93,11 @@ export function HeaderSection({
           {HEADER_BIO_MAX - header.bio.length} characters left
         </p>
       </div>
+
+      <p className={infoTextClass}>
+        Click the name or bio on the canvas to change its font, size, colour,
+        formatting and alignment.
+      </p>
     </div>
   );
 }

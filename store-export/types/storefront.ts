@@ -151,12 +151,94 @@ export function coercePriceTagPosition(
   }
 }
 
-/** Chip size for the price tag, independent of where it sits. */
-export const PRICE_TAG_SIZES = ["sm", "md", "lg"] as const;
-export type PriceTagSize = (typeof PRICE_TAG_SIZES)[number];
+/**
+ * Where the tag ACTUALLY renders. Two structural facts can take a spot away.
+ * One is roundness (above). The other is the title area: `overlay` and
+ * `shadow` put the product name at the bottom of the IMAGE box, which is the
+ * same box a floated tag sits in, so a bottom spot would stack the price on
+ * the name. Bottom flips to the matching top spot instead.
+ *
+ * Both rules are structural — they read the config the renderer already holds,
+ * never a measured size — so the picker can call this too and highlight the
+ * spot that will really be used. Storage keeps the seller's choice: turning
+ * the overlay title off puts the tag back where they put it.
+ *
+ * Two overlaps are deliberately NOT coerced here. A `top-left` tag can meet
+ * the sold-out badge, but that depends on `block.soldOut` rather than on
+ * config, and moving the price when a tile sells out would shift the layout
+ * under the buyer. And `middle-center` can sit within a tall `shadow`
+ * gradient, which is a contrast question that gradient exists to answer.
+ */
+export function resolvePriceTagPosition(
+  position: PriceTagPosition,
+  opts: { cornerRadius: number; titleOverlaysImage: boolean },
+): PriceTagPosition {
+  let lifted = position;
+  if (opts.titleOverlaysImage) {
+    switch (position) {
+      case "bottom-left":
+        lifted = "top-left";
+        break;
+      case "bottom-center":
+        lifted = "top-center";
+        break;
+      case "bottom-right":
+        lifted = "top-right";
+        break;
+    }
+  }
+  return coercePriceTagPosition(lifted, opts.cornerRadius);
+}
 
-export const PRICE_TAG_STYLES = ["plain", "pill"] as const;
-export type PriceTagStyle = (typeof PRICE_TAG_STYLES)[number];
+/** Whether the title area is drawn OVER the image rather than under it. The
+ *  one thing the collision rule above needs to know about the title. */
+export function titleOverlaysImage(titleStyle: TitleStyle): boolean {
+  return titleStyle === "overlay" || titleStyle === "shadow";
+}
+
+/** The three faces a price tag may take. Deliberately its own list rather
+ *  than a slice of STOREFRONT_FONTS: a chip is read at 10px, where display
+ *  and handwritten faces stop being legible. */
+export const PRICE_TAG_FONTS = ["inter", "serif", "mono"] as const;
+export type PriceTagFont = (typeof PRICE_TAG_FONTS)[number];
+
+/** Price tag type size in px. The chip's padding is derived from it (see
+ *  priceTagChipStyle), so this one number scales the whole tag. */
+export const PRICE_TAG_SIZE_MIN = 8;
+export const PRICE_TAG_SIZE_MAX = 32;
+export const PRICE_TAG_SIZE_DEFAULT = 12;
+
+/** Outline thickness in px; 0 (the default) draws no border at all. */
+export const PRICE_TAG_BORDER_WIDTH_MAX = 8;
+
+/** Chip corner roundness in px. The top of the range is past half the height
+ *  of even a 32px tag, so CSS clamps it into a pill — which is what the
+ *  retired `pill` style preset was. */
+export const PRICE_TAG_RADIUS_MAX = 24;
+export const PRICE_TAG_RADIUS_DEFAULT = 2;
+
+/** What the chip paints with no color of its own. Real hex rather than a CSS
+ *  token, so the renderer, the picker's inherit dot and anything reading the
+ *  config all see the same value. Mirrors --card / --border. */
+export const PRICE_TAG_DEFAULT_FILL = "#ffffff";
+export const PRICE_TAG_DEFAULT_BORDER = "#e5e5e5";
+
+/**
+ * The chip's fill when the seller has set none, which depends on where the tag
+ * sits — the one property of the price tag that is not a single value.
+ *
+ * A tag floated over a photo needs a backing or the price is unreadable on a
+ * light image. A tag in the info bar already sits on the bar's own surface, and
+ * a second box around it would be chrome for nothing. Exported so the renderer
+ * and the picker's "Auto" dot resolve it identically.
+ */
+export function defaultPriceTagFill(position: PriceTagPosition): string {
+  return position === "below" ? "transparent" : PRICE_TAG_DEFAULT_FILL;
+}
+
+/** What the price paints on a `shadow` title area with no color of its own:
+ *  the gradient is dark by construction, so the accent would sink into it. */
+export const PRICE_TAG_SHADOW_TEXT = "#ffffff";
 
 /** How the storefront lays out blocks: the bento grid, or a horizontal
  *  scroll-snap carousel (rendered by CarouselStrip in designer + previews). */
@@ -264,10 +346,22 @@ export type StorefrontTheme = {
   titleDisplay: TitleDisplay;
   priceDisplay: PriceDisplay;
   priceTagPosition: PriceTagPosition;
-  priceTagStyle: PriceTagStyle;
-  /** Tag chip size. Optional so configs saved before the size control existed
-   *  keep parsing; absent = "md". */
-  priceTagSize?: PriceTagSize;
+  /**
+   * The price tag's own appearance. Every one is optional: absent means the
+   * coded default (see PRICE_TAG_* constants), which is what lets a config
+   * saved before any of these existed keep parsing untouched.
+   */
+  priceTagFont?: PriceTagFont;
+  /** Type size in px; the chip's padding scales with it. */
+  priceTagSize?: number;
+  /** Chip fill, strict #rrggbb. */
+  priceTagColor?: string;
+  /** Price text, strict #rrggbb. Absent follows the theme accent. */
+  priceTagTextColor?: string;
+  /** Outline color, strict #rrggbb. Only drawn when priceTagBorderWidth > 0. */
+  priceTagBorderColor?: string;
+  priceTagBorderWidth?: number;
+  priceTagRadius?: number;
   showTitle: boolean;
   displayMode: DisplayMode;
   /** Grid gutter in px, 0..GRID_GAP_MAX (smaller = denser). */
@@ -396,8 +490,9 @@ export const DEFAULT_STOREFRONT_CONFIG: StorefrontConfig = {
     titleDisplay: "always",
     priceDisplay: "always",
     priceTagPosition: "below",
-    priceTagStyle: "plain",
-    priceTagSize: "md",
+    // The price tag's appearance fields are deliberately absent: every one
+    // has a coded default, so a fresh storefront and one saved before they
+    // existed are the same config.
     showTitle: true,
     displayMode: "grid",
     gridGap: 8,

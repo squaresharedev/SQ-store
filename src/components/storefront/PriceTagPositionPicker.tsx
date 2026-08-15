@@ -83,41 +83,58 @@ const FLOAT_POSITION_LABELS: Record<PriceTagFloatPosition, string> = {
   "bottom-right": "Bottom right",
 };
 
-/** Spots offered on heavily rounded tiles: only the center vertical axis
- *  (the clip removes the corners). Softer tiles offer all 7 spots. */
-const AXIS_POSITIONS: readonly PriceTagFloatPosition[] = [
-  "top-center",
-  "middle-center",
-  "bottom-center",
-];
+/**
+ * Which spots a tile actually has, mirroring resolvePriceTagPosition. Corners
+ * go first on heavily rounded tiles (the clip removes them), and the bottom
+ * row goes when an overlay/shadow title bar occupies it — offering a spot that
+ * silently renders somewhere else is worse than not offering it.
+ */
+function availablePositions(
+  cornerRadius: number,
+  titleOverlaysImage: boolean,
+): readonly PriceTagFloatPosition[] {
+  return PRICE_TAG_FLOAT_POSITIONS.filter((position) => {
+    if (cornerRadius >= PRICE_TAG_CORNER_LIMIT && !position.endsWith("-center")) {
+      return false;
+    }
+    return !(titleOverlaysImage && position.startsWith("bottom-"));
+  });
+}
 
 /**
  * Visual spot picker for the floating price tag: a miniature card at the
  * current corner roundness with a dot at each available spot. Click a dot to
  * place the tag there. The dot layout reuses the exact placement classes the
- * real tile renders with, so what you pick is what you get.
+ * real tile renders with, so what you pick is what you get — including the
+ * title bar, drawn along the bottom when it covers that edge.
  */
 export function PriceTagPositionPicker({
   value,
   cornerRadius,
+  titleOverlaysImage = false,
   onChange,
 }: {
   value: PriceTagFloatPosition;
   cornerRadius: number;
+  /** True when an overlay/shadow title bar sits on the image's bottom edge. */
+  titleOverlaysImage?: boolean;
   onChange: (position: PriceTagFloatPosition) => void;
 }) {
-  const positions =
-    cornerRadius >= PRICE_TAG_CORNER_LIMIT
-      ? AXIS_POSITIONS
-      : PRICE_TAG_FLOAT_POSITIONS;
+  const positions = availablePositions(cornerRadius, titleOverlaysImage);
 
   return (
     <div
       role="group"
       aria-label="Price tag spot"
       style={{ borderRadius: cornerRadius }}
-      className="relative h-24 w-24 border border-border bg-muted"
+      className="relative h-24 w-24 overflow-hidden border border-border bg-muted"
     >
+      {titleOverlaysImage && (
+        <span
+          aria-hidden="true"
+          className="absolute inset-x-0 bottom-0 h-4 bg-foreground/15"
+        />
+      )}
       {positions.map((position) => {
         const selected = position === value;
         return (

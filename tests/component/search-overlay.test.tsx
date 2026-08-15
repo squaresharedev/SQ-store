@@ -8,6 +8,7 @@ import {
   vi,
 } from "vitest";
 import {
+  act,
   cleanup,
   fireEvent,
   render,
@@ -38,6 +39,7 @@ beforeAll(() => {
   Element.prototype.scrollIntoView = vi.fn();
 });
 
+import { TYPING_DEBOUNCE_MS } from "@/lib/typing-debounce";
 import {
   SearchOverlay,
   anchoredPanelStyle,
@@ -877,5 +879,84 @@ describe("SearchOverlay — announcements", () => {
     await waitFor(() =>
       expect(liveRegion().textContent).toMatch(/No results for zzzzqqqq/i),
     );
+  });
+});
+
+
+// ---- DEBOUNCE -----------------------------------------------------------
+
+/**
+ * A field that looks something up while you type spends a request, a Postgres
+ * query and a rate-limit take per KEYSTROKE unless it waits. These hold the
+ * search bar to one request per burst, at the one interval the whole product
+ * shares (lib/typing-debounce).
+ *
+ * Typed with fireEvent rather than userEvent: each call is a single synchronous
+ * change event, which is what lets fake timers step the debounce window
+ * exactly. userEvent drives its own timers and deadlocks against them here.
+ */
+describe("SearchOverlay — debounce", () => {
+  /** Type `word` one character at a time, letting `gap` ms pass between them. */
+  async function typeAcross(input: HTMLElement, word: string, gap: number) {
+    for (let i = 1; i <= word.length; i += 1) {
+      fireEvent.change(input, { target: { value: word.slice(0, i) } });
+      if (gap > 0) {
+        await act(async () => {
+          vi.advanceTimersByTime(gap);
+        });
+      }
+    }
+  }
+
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
+
+  it("asks the server once for a burst of typing, not once per keystroke", async () => {
+    renderOverlay();
+    const input = screen.getByRole("combobox");
+    // Seven keystrokes, each one well inside the window.
+    await typeAcross(input, "lantern", 40);
+    expect(fetchMock).not.toHaveBeenCalled();
+
+    await act(async () => {
+      vi.advanceTimersByTime(TYPING_DEBOUNCE_MS);
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    // And for the whole word, not for a prefix nobody asked about.
+    expect(String(fetchMock.mock.calls[0][0])).toContain("lantern");
+  });
+
+  it("waits the full interval before it fires", async () => {
+    renderOverlay();
+    fireEvent.change(screen.getByRole("combobox"), {
+      target: { value: "lantern" },
+    });
+
+    await act(async () => {
+      vi.advanceTimersByTime(TYPING_DEBOUNCE_MS - 1);
+    });
+    expect(fetchMock).not.toHaveBeenCalled();
+
+    await act(async () => {
+      vi.advanceTimersByTime(1);
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("a pause long enough to settle does spend a second request", async () => {
+    renderOverlay();
+    const input = screen.getByRole("combobox");
+    // Two bursts with a real settle between them: deliberate, so two requests
+    // is right. This is the other half of the contract — the debounce delays
+    // requests, it does not swallow them.
+    await typeAcross(input, "lantern", 40);
+    await act(async () => {
+      vi.advanceTimersByTime(TYPING_DEBOUNCE_MS);
+    });
+    fireEvent.change(input, { target: { value: "lanterns" } });
+    await act(async () => {
+      vi.advanceTimersByTime(TYPING_DEBOUNCE_MS);
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 });

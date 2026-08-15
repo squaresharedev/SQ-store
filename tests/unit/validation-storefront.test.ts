@@ -11,6 +11,7 @@ import {
 import {
   DEFAULT_STOREFRONT_CONFIG,
   EMBED_MAX_DOMAINS,
+  IMAGE_ALT_MAX,
   TEXT_MAX_LENGTH,
   type StorefrontConfig,
 } from "@/types/storefront";
@@ -68,20 +69,44 @@ describe("storefrontConfigSchema — happy path", () => {
     }
   });
 
-  it("accepts price tag size and rejects off-list values", () => {
+  it("accepts every price tag appearance field and rejects off-list values", () => {
     const config = validConfig();
-    config.theme.priceTagPosition = "bottom-right";
-    config.theme.priceTagSize = "lg";
+    Object.assign(config.theme, {
+      priceTagPosition: "bottom-right",
+      priceTagFont: "mono",
+      priceTagSize: 14,
+      priceTagColor: "#fbbf24",
+      priceTagTextColor: "#1c1917",
+      priceTagBorderColor: "#d97706",
+      priceTagBorderWidth: 1,
+      priceTagRadius: 4,
+    });
     expect(storefrontConfigSchema.safeParse(config).success).toBe(true);
 
-    // Configs saved before the size control existed (absent key) still parse.
+    // Configs saved before any of these existed (absent keys) still parse.
     const legacy = validConfig();
     delete legacy.theme.priceTagSize;
     expect(storefrontConfigSchema.safeParse(legacy).success).toBe(true);
 
     for (const patch of [
       { priceTagPosition: "center" },
-      { priceTagSize: "xl" },
+      // Bounds, both ends, and non-integers.
+      { priceTagSize: 7 },
+      { priceTagSize: 33 },
+      { priceTagSize: 12.5 },
+      // NB not "lg": the theme preprocess migrates the retired enum to px, so
+      // a legacy value parses rather than failing (see the migration tests).
+      { priceTagSize: "huge" },
+      { priceTagBorderWidth: -1 },
+      { priceTagBorderWidth: 9 },
+      { priceTagRadius: 25 },
+      // A face that exists in STOREFRONT_FONTS but not on the tag's own list.
+      { priceTagFont: "display" },
+      { priceTagFont: "custom" },
+      // Colors are strict 6-digit hex, like every other color in the config.
+      { priceTagColor: "red" },
+      { priceTagTextColor: "#fff" },
+      { priceTagBorderColor: "rgba(0,0,0,.5)" },
     ]) {
       const bad = validConfig();
       Object.assign(bad.theme as Record<string, unknown>, patch);
@@ -99,8 +124,13 @@ describe("storefrontConfigSchema — happy path", () => {
       titleDisplay: "hover",
       priceDisplay: "hover",
       priceTagPosition: "top-center",
-      priceTagStyle: "pill",
-      priceTagSize: "lg",
+      priceTagFont: "serif",
+      priceTagSize: 14,
+      priceTagColor: "#fbbf24",
+      priceTagTextColor: "#1c1917",
+      priceTagBorderColor: "#d97706",
+      priceTagBorderWidth: 2,
+      priceTagRadius: 24,
     };
     expect(storefrontConfigSchema.safeParse(config).success).toBe(true);
 
@@ -116,7 +146,10 @@ describe("storefrontConfigSchema — happy path", () => {
       { cornerRadius: 12.5 },
       { titleStyle: "neon" },
       { priceTagPosition: "everywhere" },
-      { priceTagSize: "xl" },
+      { priceTagSize: 33 },
+      { priceTagFont: "display" },
+      { priceTagRadius: -1 },
+      { priceTagColor: "red" },
       { background: "#ff0000" },
       { className: "hacked" },
     ]) {
@@ -278,6 +311,115 @@ describe("storefrontConfigSchema — hostile input", () => {
     const cfg2 = validConfig();
     cfg2.header = { show: true, name: "one line", bio: "two\nlines ok" };
     expect(storefrontConfigSchema.safeParse(cfg2).success).toBe(true);
+  });
+
+  it("accepts header colors and rejects non-strict hex", () => {
+    const cfg = validConfig();
+    cfg.header = {
+      show: true,
+      name: "Shop",
+      bio: "Hello",
+      nameColor: "#ff0000",
+      bioColor: "#00ff00",
+    };
+    expect(storefrontConfigSchema.safeParse(cfg).success).toBe(true);
+
+    // Absent colors (every header saved before this) still parse.
+    const legacy = validConfig();
+    legacy.header = { show: true, name: "Shop", bio: "Hello" };
+    expect(storefrontConfigSchema.safeParse(legacy).success).toBe(true);
+
+    for (const patch of [
+      { nameColor: "red" },
+      { nameColor: "#fff" },
+      { bioColor: "rgb(0,0,0)" },
+      { bioColor: "#00ff00; background:url(x)" },
+    ]) {
+      const bad = validConfig();
+      bad.header = { show: true, name: "Shop", bio: "Hi", ...patch };
+      expect(storefrontConfigSchema.safeParse(bad).success).toBe(false);
+    }
+  });
+
+  it("accepts header sizes in px and rejects anything off the scale", () => {
+    const cfg = validConfig();
+    cfg.header = {
+      show: true,
+      name: "Shop",
+      bio: "Hello",
+      nameSize: 96,
+      bioSize: 8,
+    };
+    expect(storefrontConfigSchema.safeParse(cfg).success).toBe(true);
+
+    for (const patch of [
+      { nameSize: 7 },
+      { nameSize: 201 },
+      { bioSize: 16.5 },
+      { bioSize: "24px" },
+    ] as Record<string, unknown>[]) {
+      const bad = validConfig();
+      bad.header = { show: true, name: "Shop", bio: "Hi", ...patch } as never;
+      expect(storefrontConfigSchema.safeParse(bad).success).toBe(false);
+    }
+  });
+
+  it("takes free-form text sizes in px and migrates the old presets", () => {
+    for (const size of [8, 16, 97, 200]) {
+      const cfg = validConfig();
+      (cfg.blocks[1] as Record<string, unknown>).fontSize = size;
+      expect(storefrontConfigSchema.safeParse(cfg).success).toBe(true);
+    }
+
+    // The five old presets become the px they used to render at, so a
+    // storefront saved before free-form sizing is unchanged to the eye.
+    const legacy = validConfig();
+    (legacy.blocks[1] as Record<string, unknown>).fontSize = "2xl";
+    const parsed = storefrontConfigSchema.safeParse(legacy);
+    expect(parsed.success).toBe(true);
+    expect(
+      (parsed.data!.blocks[1] as { fontSize?: number }).fontSize,
+    ).toBe(36);
+
+    // Out of range, fractional, and non-numeric are all still refused.
+    for (const size of [7, 201, 16.5, "97px", "huge", null]) {
+      const bad = validConfig();
+      (bad.blocks[1] as Record<string, unknown>).fontSize = size;
+      expect(storefrontConfigSchema.safeParse(bad).success).toBe(false);
+    }
+  });
+
+  it("accepts an uploaded theme font by key and rejects anything else", () => {
+    const owner = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee";
+    const key = `fonts/${owner}/11111111-2222-4333-8444-555555555555-f.woff2`;
+    const cfg = validConfig();
+    cfg.theme.font = "custom";
+    cfg.theme.customFont = { key, name: "f.woff2" };
+    expect(storefrontConfigSchema.safeParse(cfg).success).toBe(true);
+
+    // Never a URL, never someone else's prefix, never a free-form path — and
+    // never an unknown member riding along inside it.
+    for (const customFont of [
+      { key: "https://evil.example/f.woff2", name: "f" },
+      { key: `images/${owner}/11111111-2222-4333-8444-555555555555-f.png`, name: "f" },
+      { key: "fonts/../secret", name: "f" },
+      { key, name: "x".repeat(61) },
+      { key, name: "f", src: "url(evil)" },
+      { key },
+    ]) {
+      const bad = validConfig();
+      bad.theme.customFont = customFont as never;
+      expect(storefrontConfigSchema.safeParse(bad).success).toBe(false);
+    }
+  });
+
+  it("accepts the new preset fonts on the theme and on a block", () => {
+    for (const font of ["inter", "montserrat"] as const) {
+      const cfg = validConfig();
+      cfg.theme.font = font;
+      (cfg.blocks[1] as Record<string, unknown>).font = font;
+      expect(storefrontConfigSchema.safeParse(cfg).success).toBe(true);
+    }
   });
 
   it("rejects more than MAX_BLOCKS blocks", () => {
@@ -473,6 +615,67 @@ describe("parseStoredStorefrontConfig — v1 upgrades", () => {
     }
   });
 
+  it("migrates the retired plain/pill style into radius + border width", () => {
+    for (const [style, radius, borderWidth] of [
+      ["pill", 24, 1],
+      ["plain", 2, undefined],
+    ] as const) {
+      const parsed = parseStoredStorefrontConfig({
+        ...validConfig(),
+        theme: { ...validConfig().theme, priceTagStyle: style },
+      });
+      expect(parsed, style).not.toBeNull();
+      expect(parsed!.theme.priceTagRadius, style).toBe(radius);
+      expect(parsed!.theme.priceTagBorderWidth, style).toBe(borderWidth);
+      // The retired key must be gone: strictObject would reject it on re-save.
+      expect(parsed!.theme).not.toHaveProperty("priceTagStyle");
+    }
+  });
+
+  it("migrates the retired sm/md/lg chip size to the px each one rendered at", () => {
+    for (const [legacy, px] of [
+      ["sm", 10],
+      ["md", 12],
+      ["lg", 14],
+    ] as const) {
+      const parsed = parseStoredStorefrontConfig({
+        ...validConfig(),
+        theme: { ...validConfig().theme, priceTagSize: legacy },
+      });
+      expect(parsed, legacy).not.toBeNull();
+      expect(parsed!.theme.priceTagSize, legacy).toBe(px);
+    }
+  });
+
+  it("migrates the retired presets on a per-tile override too", () => {
+    // A tile that overrode plain/pill or sm/md/lg carries the same two keys,
+    // and strictObject would reject the whole config if they survived.
+    const stored = validConfig();
+    (stored.blocks[0] as Record<string, unknown>).style = {
+      priceTagStyle: "pill",
+      priceTagSize: "sm",
+    };
+    const parsed = parseStoredStorefrontConfig(stored);
+    expect(parsed).not.toBeNull();
+    const style = (parsed!.blocks[0] as { style?: Record<string, unknown> }).style;
+    expect(style).toEqual({
+      priceTagRadius: 24,
+      priceTagBorderWidth: 1,
+      priceTagSize: 10,
+    });
+  });
+
+  it("keeps an explicit new value when a retired preset is present too", () => {
+    // Half-migrated configs exist: the seller set a radius before the old key
+    // was dropped. The stored number wins; the preset only fills a gap.
+    const parsed = parseStoredStorefrontConfig({
+      ...validConfig(),
+      theme: { ...validConfig().theme, priceTagStyle: "pill", priceTagRadius: 6 },
+    });
+    expect(parsed).not.toBeNull();
+    expect(parsed!.theme.priceTagRadius).toBe(6);
+  });
+
   it("malformed header/embed degrade to absent instead of nuking the config", () => {
     const stored = {
       ...validConfig(),
@@ -500,5 +703,152 @@ describe("parseStoredStorefrontConfig — v1 upgrades", () => {
     expect(parsed!.blocks).toEqual([]);
     expect(parsed!.theme).toEqual(DEFAULT_STOREFRONT_CONFIG.theme);
     expect(JSON.stringify(parsed)).not.toContain("evil");
+  });
+});
+
+const OWNER_UUID = "11111111-2222-4333-8444-555555555555";
+const OBJ_UUID = "66666666-7777-4888-8999-aaaaaaaaaaaa";
+const ELEMENT_KEY = `elements/${OWNER_UUID}/${OBJ_UUID}-logo.svg`;
+const IMAGE_KEY = `images/${OWNER_UUID}/${OBJ_UUID}-photo.png`;
+
+/** A config carrying one uploaded element, alone on the canvas. */
+function configWithElement(
+  overrides: Record<string, unknown> = {},
+): StorefrontConfig {
+  return structuredClone({
+    ...DEFAULT_STOREFRONT_CONFIG,
+    blocks: [
+      {
+        type: "image",
+        id: UUID2,
+        key: ELEMENT_KEY,
+        alt: "Our logo",
+        x: 0,
+        y: 0,
+        w: 2,
+        h: 2,
+        ...overrides,
+      },
+    ],
+  } as StorefrontConfig);
+}
+
+describe("image blocks — the seller's own artwork", () => {
+  it("accepts a minimal element block", () => {
+    expect(storefrontConfigSchema.safeParse(configWithElement()).success).toBe(true);
+  });
+
+  it("accepts every optional field at its bounds", () => {
+    for (const patch of [
+      { fit: "cover" },
+      { fit: "contain" },
+      { opacity: 0 },
+      { opacity: 100 },
+      { alt: "" },
+      { alt: "a".repeat(IMAGE_ALT_MAX) },
+      { imagePlacement: { x: 0, y: 100, scale: 300 } },
+    ]) {
+      const result = storefrontConfigSchema.safeParse(configWithElement(patch));
+      expect(result.success, JSON.stringify(patch)).toBe(true);
+    }
+  });
+
+  it("REFUSES a key that is not an element upload", () => {
+    // The load-bearing one. `elements/` is the only prefix whose upload route
+    // admits SVG, so an image block pointing anywhere else would render an
+    // object that was never checked by the SVG sniffer.
+    for (const key of [
+      IMAGE_KEY,
+      `fonts/${OWNER_UUID}/${OBJ_UUID}-face.woff2`,
+      `files/${OWNER_UUID}/${OBJ_UUID}-bundle.zip`,
+      `quarantine/elements/${OWNER_UUID}/${OBJ_UUID}-logo.svg`,
+    ]) {
+      const result = storefrontConfigSchema.safeParse(configWithElement({ key }));
+      expect(result.success, key).toBe(false);
+    }
+  });
+
+  it("REFUSES a key that is not a well-formed object key at all", () => {
+    for (const key of [
+      "https://evil.example/logo.svg",
+      `elements/${OWNER_UUID}/../${OBJ_UUID}-logo.svg`,
+      `elements/${OWNER_UUID}/not-a-uuid-logo.svg`,
+      "elements/",
+      "",
+    ]) {
+      const result = storefrontConfigSchema.safeParse(configWithElement({ key }));
+      expect(result.success, key).toBe(false);
+    }
+  });
+
+  it("refuses out-of-range and off-list field values", () => {
+    for (const patch of [
+      { fit: "fill" },
+      { fit: 1 },
+      { opacity: 101 },
+      { opacity: -1 },
+      { opacity: 50.5 },
+      { alt: "a".repeat(IMAGE_ALT_MAX + 1) },
+      { imagePlacement: { x: 0, y: 0, scale: 99 } },
+      { imagePlacement: { x: -1, y: 0, scale: 100 } },
+      { id: "not-a-uuid" },
+    ]) {
+      const result = storefrontConfigSchema.safeParse(configWithElement(patch));
+      expect(result.success, JSON.stringify(patch)).toBe(false);
+    }
+  });
+
+  it("rejects unknown keys, so nothing rides along in the jsonb", () => {
+    const result = storefrontConfigSchema.safeParse(
+      configWithElement({ onload: "evil()", src: "https://evil.example" }),
+    );
+    expect(result.success).toBe(false);
+  });
+
+  it("holds elements to the same canvas invariants as every other block", () => {
+    // Overlap and bounds are config-level rules; a new block type must not
+    // arrive with an exemption from them.
+    const overlapping = configWithElement();
+    overlapping.blocks.push({
+      type: "shape",
+      id: UUID,
+      kind: "circle",
+      color: "#171717",
+      x: 1,
+      y: 1,
+      w: 2,
+      h: 2,
+    });
+    expect(storefrontConfigSchema.safeParse(overlapping).success).toBe(false);
+
+    const outside = configWithElement({ x: 5, y: 5, w: 4, h: 4 });
+    expect(storefrontConfigSchema.safeParse(outside).success).toBe(false);
+  });
+
+  it("keys image blocks distinctly, so one cannot collide with another kind", () => {
+    const config = configWithElement();
+    // Same uuid on a text block: different key prefixes keep them unique.
+    config.blocks.push({
+      type: "text",
+      id: UUID2,
+      text: "hi",
+      variant: "body",
+      align: "left",
+      x: 3,
+      y: 0,
+      w: 1,
+      h: 1,
+    });
+    expect(storefrontConfigSchema.safeParse(config).success).toBe(true);
+  });
+
+  it("survives a store-and-reload round trip", () => {
+    const parsed = parseStoredStorefrontConfig(
+      JSON.parse(JSON.stringify(configWithElement({ fit: "contain", opacity: 40 }))),
+    );
+    expect(parsed).not.toBeNull();
+    const block = parsed!.blocks[0];
+    expect(block.type).toBe("image");
+    expect(block).toMatchObject({ key: ELEMENT_KEY, fit: "contain", opacity: 40 });
   });
 });

@@ -11,21 +11,29 @@ import {
 import {
   BACKGROUND_IMAGE_SCALE_MAX,
   BACKGROUND_IMAGE_SCALE_MIN,
+  IMAGE_SCALE_MAX,
+  IMAGE_SCALE_MIN,
   CANVAS_COLUMNS_MAX,
   CANVAS_COLUMNS_MIN,
   CANVAS_ROWS_MAX,
   CANVAS_ROWS_MIN,
   CORNER_RADIUS_MAX,
+  CUSTOM_FONT_NAME_MAX,
   DEFAULT_STOREFRONT_CONFIG,
   DISPLAY_MODES,
   GRID_GAP_MAX,
   EMBED_MAX_DOMAINS,
   HEADER_BIO_MAX,
   HEADER_NAME_MAX,
+  IMAGE_ALT_MAX,
+  IMAGE_FITS,
   PRICE_DISPLAYS,
+  PRICE_TAG_BORDER_WIDTH_MAX,
+  PRICE_TAG_FONTS,
   PRICE_TAG_POSITIONS,
-  PRICE_TAG_SIZES,
-  PRICE_TAG_STYLES,
+  PRICE_TAG_RADIUS_MAX,
+  PRICE_TAG_SIZE_MAX,
+  PRICE_TAG_SIZE_MIN,
   SHAPE_BORDER_WIDTH_MAX,
   SHAPE_KINDS,
   SHAPE_POINTS_MAX,
@@ -34,7 +42,9 @@ import {
   STOREFRONT_FONTS,
   TEXT_ALIGNS,
   TEXT_MAX_LENGTH,
-  TEXT_SIZES,
+  TEXT_SIZE_MAX,
+  TEXT_SIZE_MIN,
+  TEXT_SPANS_MAX,
   TEXT_VARIANTS,
   TITLE_DISPLAYS,
   TITLE_STYLES,
@@ -112,10 +122,84 @@ const backgroundSchema = z.discriminatedUnion("kind", [
   }),
 ]);
 
+// A seller-uploaded typeface: the R2 object KEY (shape-checked here; ownership
+// and the stored object's real size/type are re-checked in saveStorefront) plus
+// a plain-text label. Never a URL: display URLs are signed server-side.
+const customFontSchema = z.strictObject({
+  key: z
+    .string()
+    .max(600)
+    .regex(OBJECT_KEY_PATTERN)
+    .refine((key) => key.startsWith("fonts/"), {
+      error: "Custom fonts must be font uploads.",
+    }),
+  name: singleLineText({ label: "A font name", max: CUSTOM_FONT_NAME_MAX }),
+});
+
+/**
+ * The price tag's appearance, identical on the theme and on a per-tile
+ * override — spread into both so the two can never drift. Every field is
+ * optional: absent is the coded default on the theme, and "follow the theme"
+ * on an override.
+ */
+const priceTagAppearanceFields = {
+  priceTagFont: z.enum(PRICE_TAG_FONTS).optional(),
+  priceTagSize: z
+    .number()
+    .int()
+    .min(PRICE_TAG_SIZE_MIN)
+    .max(PRICE_TAG_SIZE_MAX)
+    .optional(),
+  priceTagColor: hexColorSchema.optional(),
+  priceTagTextColor: hexColorSchema.optional(),
+  priceTagBorderColor: hexColorSchema.optional(),
+  priceTagBorderWidth: z
+    .number()
+    .int()
+    .min(0)
+    .max(PRICE_TAG_BORDER_WIDTH_MAX)
+    .optional(),
+  priceTagRadius: z.number().int().min(0).max(PRICE_TAG_RADIUS_MAX).optional(),
+};
+
+/** Legacy chip size enum -> px, matching the text sizes each one rendered at
+ *  (text-[0.625rem] / text-xs / text-sm). */
+const LEGACY_PRICE_TAG_SIZE_PX: Record<string, number> = {
+  sm: 10,
+  md: 12,
+  lg: 14,
+};
+
+/**
+ * The price tag used to be two closed presets: priceTagStyle (plain/pill) and
+ * priceTagSize (sm/md/lg). Both are now numbers, so unpick them in place —
+ * on the theme AND on every per-tile override, which carried the same keys.
+ * `pill` was a fully-round chip with a hairline; `plain` a 2px-round one.
+ */
+function migrateLegacyPriceTag(target: Record<string, unknown>) {
+  if ("priceTagStyle" in target) {
+    if (target.priceTagRadius === undefined) {
+      target.priceTagRadius = target.priceTagStyle === "pill" ? 24 : 2;
+    }
+    if (target.priceTagStyle === "pill" && target.priceTagBorderWidth === undefined) {
+      target.priceTagBorderWidth = 1;
+    }
+    delete target.priceTagStyle;
+  }
+  // Only the three values that ever existed. Anything else is not a legacy
+  // config, it is junk, and it belongs to the schema to reject.
+  if (typeof target.priceTagSize === "string") {
+    const px = LEGACY_PRICE_TAG_SIZE_PX[target.priceTagSize];
+    if (px !== undefined) target.priceTagSize = px;
+  }
+}
+
 const themeObjectSchema = z.strictObject({
   background: backgroundSchema,
   accent: hexColorSchema,
   font: z.enum(STOREFRONT_FONTS),
+  // Optional: present only once the seller has uploaded a face.
+  customFont: customFontSchema.optional(),
   columns: z.number().int().min(CANVAS_COLUMNS_MIN).max(CANVAS_COLUMNS_MAX),
   rows: z.number().int().min(CANVAS_ROWS_MIN).max(CANVAS_ROWS_MAX),
   cornerRadius: z.number().int().min(0).max(CORNER_RADIUS_MAX),
@@ -133,15 +217,23 @@ const themeObjectSchema = z.strictObject({
           : value,
     z.enum(PRICE_TAG_POSITIONS),
   ),
-  priceTagStyle: z.enum(PRICE_TAG_STYLES),
-  // Optional so configs saved before the size control still parse.
-  priceTagSize: z.enum(PRICE_TAG_SIZES).optional(),
+  ...priceTagAppearanceFields,
   showTitle: z.boolean(),
   displayMode: z.enum(DISPLAY_MODES),
   gridGap: z.number().int().min(0).max(GRID_GAP_MAX),
   soldOutBadge: z.boolean(),
   hideSoldOut: z.boolean(),
 });
+
+/** Legacy text-size enum -> px, matching the classes each one rendered at
+ *  (text-sm / text-base / text-xl / text-3xl / text-4xl). */
+const LEGACY_TEXT_SIZE_PX: Record<string, number> = {
+  sm: 14,
+  md: 16,
+  lg: 20,
+  xl: 30,
+  "2xl": 36,
+};
 
 /** Legacy `radius` enum -> px, matching the old rounded-sm/md/lg classes. */
 const LEGACY_RADIUS_PX: Record<string, number> = { none: 0, sm: 4, md: 6, lg: 8 };
@@ -208,6 +300,7 @@ const themeSchema = z.preprocess((value) => {
   // priceTagPosition picker. Drop it so any config that carries one still
   // parses (strictObject would otherwise reject the unknown key).
   delete theme.priceTagCorner;
+  migrateLegacyPriceTag(theme);
   if ("density" in theme) {
     if (theme.gridGap === undefined) {
       theme.gridGap = LEGACY_DENSITY_PX[String(theme.density)] ?? 8;
@@ -217,11 +310,39 @@ const themeSchema = z.preprocess((value) => {
   return theme;
 }, themeObjectSchema);
 
-// The optional masthead above the grid: show toggle + capped plain text.
+/** A masthead line's own size, in the same bounded-px model text blocks use. */
+const headerSizeSchema = z
+  .number()
+  .int()
+  .min(TEXT_SIZE_MIN)
+  .max(TEXT_SIZE_MAX)
+  .optional();
+
+// The optional masthead above the grid: show toggle + capped plain text, each
+// line with an optional color and size of its own (absent = follows the theme).
 const headerSchema = z.strictObject({
   show: z.boolean(),
   name: singleLineText({ label: "A store name", max: HEADER_NAME_MAX, min: 0 }),
   bio: multiLineText({ label: "A store bio", max: HEADER_BIO_MAX }),
+  nameColor: hexColorSchema.optional(),
+  bioColor: hexColorSchema.optional(),
+  // Sizes share the text block's bounds; absent = the line's own default.
+  nameSize: headerSizeSchema,
+  bioSize: headerSizeSchema,
+  // The rest of a line's styling, matching a text block's field for field.
+  // All optional, so a masthead saved before any of them existed still parses.
+  nameBold: z.boolean().optional(),
+  bioBold: z.boolean().optional(),
+  nameItalic: z.boolean().optional(),
+  bioItalic: z.boolean().optional(),
+  nameUnderline: z.boolean().optional(),
+  bioUnderline: z.boolean().optional(),
+  nameAlign: z.enum(TEXT_ALIGNS).optional(),
+  bioAlign: z.enum(TEXT_ALIGNS).optional(),
+  // Same closed allowlist as everything else that names a typeface; "custom"
+  // resolves to the theme's upload, or simply inherits when there is none.
+  nameFont: z.enum(STOREFRONT_FONTS).optional(),
+  bioFont: z.enum(STOREFRONT_FONTS).optional(),
 });
 
 
@@ -244,16 +365,30 @@ const placementFields = {
 
 // Per-tile card styling: the SAME closed enums and bounded integers as the
 // theme's card fields, each one optional (absent = follow the theme). Strict,
-// so nothing free-form rides along inside a block's style member.
-const cardStyleOverridesSchema = z.strictObject({
+// so nothing free-form rides along inside a block's style member. Wrapped in
+// the same legacy price tag migration the theme runs, because a tile that
+// overrode the retired plain/pill or sm/md/lg presets carries them too.
+const cardStyleOverridesSchema = z.preprocess((value) => {
+  if (typeof value !== "object" || value === null) return value;
+  const style = { ...(value as Record<string, unknown>) };
+  migrateLegacyPriceTag(style);
+  return style;
+}, z.strictObject({
   cornerRadius: z.number().int().min(0).max(CORNER_RADIUS_MAX).optional(),
   showTitle: z.boolean().optional(),
   titleStyle: z.enum(TITLE_STYLES).optional(),
   titleDisplay: z.enum(TITLE_DISPLAYS).optional(),
   priceDisplay: z.enum(PRICE_DISPLAYS).optional(),
   priceTagPosition: z.enum(PRICE_TAG_POSITIONS).optional(),
-  priceTagStyle: z.enum(PRICE_TAG_STYLES).optional(),
-  priceTagSize: z.enum(PRICE_TAG_SIZES).optional(),
+  ...priceTagAppearanceFields,
+}));
+
+/** Focal point + zoom for an image inside a frame. The same bounded ints the
+ *  background has always stored, now shared with product tiles. */
+const imagePlacementSchema = z.strictObject({
+  x: z.number().int().min(0).max(100),
+  y: z.number().int().min(0).max(100),
+  scale: z.number().int().min(IMAGE_SCALE_MIN).max(IMAGE_SCALE_MAX),
 });
 
 const productBlockSchema = z.strictObject({
@@ -264,7 +399,30 @@ const productBlockSchema = z.strictObject({
   soldOut: z.boolean().optional(),
   // Per-tile look, optional so blocks saved before it existed still parse.
   style: cardStyleOverridesSchema.optional(),
+  // How the product's photo is framed in this tile. Optional, and the editor
+  // drops it again when framing returns to centred — so an unframed tile is
+  // indistinguishable from one saved before framing existed.
+  imagePlacement: imagePlacementSchema.optional(),
 });
+
+/**
+ * One formatted run inside a text block: `[start, end)` in character offsets,
+ * carrying whichever of the four formatting fields it overrides. Bounds are
+ * gated here; the renderer clamps them against the live text as well, since a
+ * span can outlive the characters it named.
+ */
+const textSpanSchema = z
+  .strictObject({
+    start: z.number().int().min(0).max(TEXT_MAX_LENGTH),
+    end: z.number().int().min(1).max(TEXT_MAX_LENGTH),
+    color: hexColorSchema.optional(),
+    bold: z.boolean().optional(),
+    italic: z.boolean().optional(),
+    underline: z.boolean().optional(),
+  })
+  .refine((span) => span.start < span.end, {
+    message: "A formatted range must end after it starts",
+  });
 
 // Plain text only. Rendered exclusively as a React text node (React escapes
 // it); the schema still refuses control characters so stored data stays sane.
@@ -279,10 +437,22 @@ const textBlockSchema = z.strictObject({
   bold: z.boolean().optional(),
   italic: z.boolean().optional(),
   underline: z.boolean().optional(),
+  // Ranges that override the formatting above for part of the text.
+  spans: z.array(textSpanSchema).max(TEXT_SPANS_MAX).optional(),
   // Per-block styling overrides — optional for the same reason. Color stays
-  // regex-gated hex; size and font resolve through fixed class maps only.
+  // regex-gated hex; the font resolves through a fixed class map (or, for
+  // "custom", the theme's uploaded face); the size is a bounded integer.
   color: hexColorSchema.optional(),
-  fontSize: z.enum(TEXT_SIZES).optional(),
+  // Sizes used to be a five-value enum. Migrate those to the px they rendered
+  // at so old storefronts are unchanged to the eye; anything else that is not
+  // an in-range integer is rejected, exactly as before.
+  fontSize: z.preprocess(
+    (value) =>
+      typeof value === "string" && value in LEGACY_TEXT_SIZE_PX
+        ? LEGACY_TEXT_SIZE_PX[value]
+        : value,
+    z.number().int().min(TEXT_SIZE_MIN).max(TEXT_SIZE_MAX).optional(),
+  ),
   font: z.enum(STOREFRONT_FONTS).optional(),
 });
 
@@ -303,10 +473,35 @@ const shapeBlockSchema = z.strictObject({
   points: z.number().int().min(SHAPE_POINTS_MIN).max(SHAPE_POINTS_MAX).optional(),
 });
 
+// A seller's own artwork. Holds an R2 object KEY (shape-checked here; ownership
+// and the stored object's real size/type are re-checked in saveStorefront) and
+// nothing free-form: the alt text is plain text bound for an `alt` attribute,
+// the fit is a closed enum, and placement/opacity are bounded ints. The key
+// must sit under `elements/` — the one prefix whose upload route admits SVG —
+// so a product photo or a font can never be rendered as an element, nor an
+// element be linked as a product photo.
+const imageBlockSchema = z.strictObject({
+  type: z.literal("image"),
+  id: uuidField("A block id"),
+  key: z
+    .string()
+    .max(600)
+    .regex(OBJECT_KEY_PATTERN)
+    .refine((key) => key.startsWith("elements/"), {
+      error: "Elements must be element uploads.",
+    }),
+  alt: singleLineText({ label: "Element alt text", max: IMAGE_ALT_MAX, min: 0 }),
+  ...placementFields,
+  fit: z.enum(IMAGE_FITS).optional(),
+  imagePlacement: imagePlacementSchema.optional(),
+  opacity: z.number().int().min(0).max(100).optional(),
+});
+
 const blockSchema = z.discriminatedUnion("type", [
   productBlockSchema,
   textBlockSchema,
   shapeBlockSchema,
+  imageBlockSchema,
 ]);
 
 const configObjectSchema = z

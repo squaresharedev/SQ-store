@@ -46,6 +46,9 @@
   --font-mono: var(--font-jetbrains-mono); /* JetBrains Mono (code / meta) */
   --font-inter: var(--font-inter); /* Inter (muted captions / labels) */
   --font-hand: var(--font-shadows-into-light); /* Shadows Into Light (voice) */
+  /* Storefront-only: offered to sellers as a theme font, never used by the
+     dashboard's own chrome (the face is declared but not preloaded). */
+  --font-montserrat: var(--font-montserrat); /* Montserrat (storefronts) */
 
   /* shadcn-compatible semantic color tokens (see :root / .dark below). */
   --color-background: var(--background);

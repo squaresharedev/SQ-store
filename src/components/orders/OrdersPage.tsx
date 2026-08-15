@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { helpTextClass, infoTextClass, overlayScrimClass, secondaryButtonClass } from "@/components/ui/control-styles";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
+import { TYPING_DEBOUNCE_MS } from "@/lib/typing-debounce";
 import type {
   OrderFilters,
   OrderSort,
@@ -20,7 +21,6 @@ import { OrdersToolbar, type SortValue } from "./OrdersToolbar";
 // them and re-queries); this component just wires toolbar -> URL -> table ->
 // detail. No data access here.
 
-const SEARCH_DEBOUNCE_MS = 300;
 
 function hasAnyFilter(filters: OrderFilters): boolean {
   return Boolean(
@@ -154,7 +154,7 @@ export function OrdersPage({
     // Any filter change restarts at page 1.
     if (searchOnlyChange) {
       setQueued(true);
-      debounceRef.current = setTimeout(() => navigate(next, sort, 1), SEARCH_DEBOUNCE_MS);
+      debounceRef.current = setTimeout(() => navigate(next, sort, 1), TYPING_DEBOUNCE_MS);
     } else {
       navigate(next, sort, 1);
     }

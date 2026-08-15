@@ -108,7 +108,7 @@ test.describe("storefront designer", () => {
     await expect(cells).toHaveCount(5);
     await page.getByRole("button", { name: "Duplicate" }).click();
     await expect(cells).toHaveCount(6);
-    // Scoped to the board: the inspector's textarea also carries this text.
+    // Scoped to the board: both the block and its copy carry this text.
     await expect(cells.getByText("Your text here")).toHaveCount(2);
 
     // --- copies are real blocks: they survive a save + reload ---
@@ -116,6 +116,86 @@ test.describe("storefront designer", () => {
     await expectToast(page, /storefront saved/i, 15_000);
     await page.reload();
     await expect(cells).toHaveCount(6, { timeout: 20_000 });
+  });
+
+  test("multi-select: shift-click, marquee, group edit, group delete", async ({ page }) => {
+    const user = freshUser("multi");
+    await signUp(page, user);
+    await createProductViaUI(page, { title: "Solo", price: "3.00" });
+
+    await gotoApp(page, "/storefront");
+    await createStorefrontViaUI(page);
+    const cells = page.locator("li[data-grid-cell]");
+
+    // --- shift-click builds a selection; the group editor edits BOTH ---
+    await page.getByRole("button", { name: "Add shape", exact: true }).click();
+    await page.getByRole("menuitem", { name: "Add star" }).click();
+    await page.getByRole("button", { name: "Add shape", exact: true }).click();
+    await page.getByRole("menuitem", { name: "Add square", exact: true }).click();
+    await expect(cells).toHaveCount(2);
+
+    await page.getByRole("button", { name: /edit star shape/i }).click();
+    await page
+      .getByRole("button", { name: /edit square shape/i })
+      .click({ modifiers: ["Shift"] });
+    await expect(page.getByText("2 blocks", { exact: true })).toBeVisible();
+
+    // One change in the group editor lands on every selected block. The tile
+    // surface is the div[role=button]; its remove/resize controls carry the
+    // label too, so the selector pins the tile itself.
+    await page.getByRole("button", { name: "Circle", exact: true }).click();
+    await expect(
+      cells.locator('div[role="button"][aria-label*="circle shape"]'),
+    ).toHaveCount(2);
+
+    // Group delete removes the whole selection at once.
+    await page.keyboard.press("Delete");
+    await expect(cells).toHaveCount(0);
+
+    // --- marquee selects everything it touches, products included ---
+    await page.getByRole("button", { name: "Add product", exact: true }).click();
+    await page.getByRole("button", { name: /add solo|solo/i }).first().click();
+    await page.getByRole("button", { name: "Add shape", exact: true }).click();
+    await page.getByRole("menuitem", { name: "Add star" }).click();
+    await page.getByRole("button", { name: "Add text", exact: true }).click();
+    await expect(cells).toHaveCount(3);
+
+    const board = page.locator('ul[aria-label="Storefront canvas"]');
+    const box = (await board.boundingBox())!;
+    // Drag from an empty area of the frame across the tiles, like selecting
+    // text. Blocks sit in the top row; the drag starts mid-right, clear of
+    // them and of the floating toolbar.
+    //
+    // Clamped to the canvas VIEWPORT, not just the board: the board floats and
+    // can extend past the visible area (it does whenever a side panel is open,
+    // e.g. the colour panel), and a press beyond that edge lands on the panel
+    // instead of starting a marquee.
+    const view = (await page.locator("main").boundingBox())!;
+    const startX = Math.min(box.x + box.width, view.x + view.width) - 8;
+    await page.mouse.move(startX, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 8, box.y + 8, { steps: 8 });
+    await page.mouse.up();
+    await expect(page.getByText("3 blocks", { exact: true })).toBeVisible();
+    // Mixed selection: settings differ per type, so group actions only.
+    await expect(page.getByText(/different types/i)).toBeVisible();
+
+    // Duplicate covers the copyable blocks (the product is excluded)...
+    await page.getByRole("button", { name: /duplicate 2 blocks/i }).click();
+    await expect(cells).toHaveCount(5);
+    // ...and the fresh copies become the selection; Delete removes them.
+    await expect(page.getByText("2 blocks", { exact: true })).toBeVisible();
+    await page.keyboard.press("Delete");
+    await expect(cells).toHaveCount(3);
+
+    // Marquee again over everything, then delete the lot (product included).
+    await page.mouse.move(startX, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 8, box.y + 8, { steps: 8 });
+    await page.mouse.up();
+    await expect(page.getByText("3 blocks", { exact: true })).toBeVisible();
+    await page.keyboard.press("Delete");
+    await expect(cells).toHaveCount(0);
   });
 
   test("undo/redo works from the toolbar", async ({ page }) => {

@@ -14,7 +14,11 @@ import type { Product } from "@/types/product";
 import type { StorefrontSummary } from "@/lib/storefront/queries";
 import { buyerVisibleBlocks } from "@/types/storefront";
 import { isStrictHexColor } from "@/lib/validation/storefront";
-import { StorefrontPreview } from "./StorefrontPreview";
+import {
+  StorefrontPreview,
+  drawsProducts,
+  textlessBlocks,
+} from "./StorefrontPreview";
 
 const CARD_ACTION_CLASS = iconButtonClass;
 
@@ -130,10 +134,23 @@ export function StorefrontCard({
   onDelete: () => void;
 }) {
   const { id, name, blockCount, updatedAt, config } = storefront;
+
+  // A storefront with something to sell is previewed exactly as designed,
+  // words and all — the text is part of how that shop looks. One with no
+  // product tiles is previewed without them: with nothing else in the box, its
+  // type is all there is to see, and type shrunk to card size is a smudge
+  // sitting directly above the card's own (readable) heading. Dropping it
+  // leaves the shapes, or the empty-state hint below.
+  const textless = !drawsProducts(config, productsById);
+
   // Keyed off what the preview will actually RENDER, not the raw block count:
   // a storefront whose every block is a hidden sold-out product still draws a
-  // blank box, and that is the exact case an empty state has to cover.
-  const isEmpty = buyerVisibleBlocks(config).length === 0;
+  // blank box, and that is the exact case an empty state has to cover. Asked
+  // of the same block set the preview is about to draw, so a board of nothing
+  // but words counts as empty here rather than looking broken.
+  const isEmpty =
+    (textless ? textlessBlocks(config, productsById) : buyerVisibleBlocks(config))
+      .length === 0;
 
   return (
     <div
@@ -153,12 +170,17 @@ export function StorefrontCard({
 
       <div className="pointer-events-none relative z-0">
         {/* Live miniature of the actual storefront: the WHOLE board, scaled
-            down to fit this box rather than cropped to it. */}
+            down to fit this box rather than cropped to it. Wordless only when
+            there is no product behind the words (see above). */}
         <div
           aria-hidden="true"
           className="relative aspect-[4/3] w-full overflow-hidden rounded-sm border border-border"
         >
-          <StorefrontPreview config={config} productsById={productsById} />
+          <StorefrontPreview
+            config={config}
+            productsById={productsById}
+            textless={textless}
+          />
           {isEmpty && <EmptyPreviewHint accent={config.theme.accent} />}
         </div>
         <div className="mt-3 pr-9">

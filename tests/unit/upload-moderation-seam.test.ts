@@ -73,9 +73,11 @@ describe("images have exactly one route into storage", () => {
     ).toBe(false);
   });
 
-  it("the client sends BOTH kinds to our own server, never to R2", () => {
+  it("the client sends EVERY kind to our own server, never to R2", () => {
     const client = repoFile("src", "lib", "products", "upload.ts");
-    expect(client).toMatch(/uploadImageViaServer\(file, onProgress\)/);
+    // Each kind's destination is a path on this origin, not a bucket URL.
+    expect(client).toMatch(/"\/api\/uploads\/image"/);
+    expect(client).toMatch(/"\/api\/uploads\/font"/);
     expect(client).toMatch(/uploadFileViaServer\(file, onProgress\)/);
     // No bucket host anywhere in the client: a cross-origin PUT is what made
     // uploads depend on the bucket's CORS allowlist naming every origin.

@@ -21,6 +21,8 @@ function Harness(props: Partial<Parameters<typeof EditorToolbar>[0]> = {}) {
       onAddProduct={vi.fn()}
       onAddText={vi.fn()}
       onAddShape={vi.fn()}
+      onAddElement={vi.fn()}
+      onOpenShapesPanel={vi.fn()}
       canAddBlocks
       canUndo
       canRedo
@@ -165,5 +167,148 @@ describe("EditorToolbar zoom-to-fit removal", () => {
     expect(
       screen.getByRole("button", { name: /reset zoom to 100%/i }),
     ).toBeInTheDocument();
+  });
+});
+
+/**
+ * The Element tool. It replaced the Shape tool when uploading your own artwork
+ * moved into the toolbar, and the library it used to hold moved OUT: the menu
+ * now leads with upload, keeps six shapes inline, and sends the rest to the
+ * left panel. The hover mechanics are unchanged, so what is covered here is
+ * the contents and the wiring.
+ */
+const elementMenu = () => screen.queryByRole("menu", { name: "Elements" });
+
+/**
+ * Unlike the More menu, this one is always MOUNTED — it reveals on hover, which
+ * is a CSS concern, so React cannot be the thing that unmounts it. Its open
+ * state therefore lives on the trigger's aria-expanded, which is also what a
+ * screen reader goes by.
+ */
+const elementMenuOpen = () =>
+  screen.getByRole("button", { name: "Add element" }).getAttribute("aria-expanded") ===
+  "true";
+
+describe("EditorToolbar element tool", () => {
+  it("is labelled Element, not Shape", () => {
+    render(<Harness />);
+    expect(screen.getByRole("button", { name: "Add element" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Add shape" })).toBeNull();
+  });
+
+  it("leads with uploading your own image", async () => {
+    const user = userEvent.setup();
+    render(<Harness />);
+    await user.click(screen.getByRole("button", { name: "Add element" }));
+    expect(
+      within(elementMenu()!).getByRole("menuitem", { name: "Upload" }),
+    ).toBeInTheDocument();
+  });
+
+  it("says so while an upload is in flight, rather than looking inert", async () => {
+    const user = userEvent.setup();
+    render(<Harness uploadingElement />);
+    await user.click(screen.getByRole("button", { name: "Add element" }));
+    const item = within(elementMenu()!).getByRole("menuitem", { name: "Uploading…" });
+    expect(item).toBeDisabled();
+  });
+
+  it("keeps the quick shapes inline and inserts the one pressed", async () => {
+    const onAddShape = vi.fn();
+    const user = userEvent.setup();
+    render(<Harness onAddShape={onAddShape} />);
+    await user.click(screen.getByRole("button", { name: "Add element" }));
+    const menu = elementMenu()!;
+    for (const name of ["Add square", "Add circle"]) {
+      expect(within(menu).getByRole("menuitem", { name })).toBeInTheDocument();
+    }
+    await user.click(within(menu).getByRole("menuitem", { name: "Add circle" }));
+    expect(onAddShape).toHaveBeenCalledWith("circle");
+    expect(elementMenuOpen()).toBe(false);
+  });
+
+  it("is exactly four items, so it stays one row tall", async () => {
+    // The size IS the requirement here. This menu began as all 22 shapes and
+    // scrolled sideways; anything that grows it back past a single row has
+    // undone the point of moving the library into the panel.
+    const user = userEvent.setup();
+    render(<Harness />);
+    await user.click(screen.getByRole("button", { name: "Add element" }));
+    const items = within(elementMenu()!).getAllByRole("menuitem");
+    expect(items).toHaveLength(4);
+    expect(items.map((item) => item.getAttribute("aria-label") ?? item.textContent)).toEqual(
+      ["Upload", "All shapes", "Add square", "Add circle"],
+    );
+  });
+
+  it("no longer carries the whole library — that is what the panel is for", async () => {
+    const user = userEvent.setup();
+    render(<Harness />);
+    await user.click(screen.getByRole("button", { name: "Add element" }));
+    const menu = elementMenu()!;
+    // A kind deliberately left out of QUICK_SHAPE_KINDS.
+    expect(within(menu).queryByRole("menuitem", { name: "Add hexagon" })).toBeNull();
+  });
+
+  it("sends the seller to the panel for everything else", async () => {
+    const onOpenShapesPanel = vi.fn();
+    const user = userEvent.setup();
+    render(<Harness onOpenShapesPanel={onOpenShapesPanel} />);
+    await user.click(screen.getByRole("button", { name: "Add element" }));
+    await user.click(
+      within(elementMenu()!).getByRole("menuitem", { name: "All shapes" }),
+    );
+    expect(onOpenShapesPanel).toHaveBeenCalledTimes(1);
+    expect(elementMenuOpen()).toBe(false);
+  });
+
+  it("offers the library from the phone menu too, where hover means nothing", async () => {
+    const onOpenShapesPanel = vi.fn();
+    const user = userEvent.setup();
+    render(<Harness onOpenShapesPanel={onOpenShapesPanel} />);
+    await user.click(screen.getByRole("button", { name: "More tools" }));
+    await user.click(within(moreMenu()!).getByRole("menuitem", { name: "All shapes" }));
+    expect(onOpenShapesPanel).toHaveBeenCalledTimes(1);
+    expect(moreMenu()).toBeNull();
+  });
+
+  it("hands the picked file straight to the designer", async () => {
+    const onAddElement = vi.fn();
+    render(<Harness onAddElement={onAddElement} />);
+    const input = document.querySelector<HTMLInputElement>('input[type="file"]')!;
+    const file = new File(["<svg/>"], "logo.svg", { type: "image/svg+xml" });
+    fireEvent.change(input, { target: { files: [file] } });
+    expect(onAddElement).toHaveBeenCalledTimes(1);
+    expect(onAddElement.mock.calls[0][0]).toBe(file);
+  });
+
+  it("clears the input, so the same file can be picked again after a failure", async () => {
+    const onAddElement = vi.fn();
+    render(<Harness onAddElement={onAddElement} />);
+    const input = document.querySelector<HTMLInputElement>('input[type="file"]')!;
+    const file = new File(["<svg/>"], "logo.svg", { type: "image/svg+xml" });
+    fireEvent.change(input, { target: { files: [file] } });
+    // Without the reset, re-picking the SAME file fires no change event at all
+    // and a retry after a failed upload would silently do nothing.
+    expect(input.value).toBe("");
+  });
+
+  it("accepts SVG by extension as well as by type", () => {
+    render(<Harness />);
+    const input = document.querySelector<HTMLInputElement>('input[type="file"]')!;
+    // Browsers report SVG's MIME inconsistently, so the filter carries both.
+    expect(input.accept).toContain("image/svg+xml");
+    expect(input.accept).toContain(".svg");
+  });
+
+  it("disables inserting at the block cap", async () => {
+    const user = userEvent.setup();
+    render(<Harness canAddBlocks={false} />);
+    expect(screen.getByRole("button", { name: "Add element" })).toBeDisabled();
+    await user.click(screen.getByRole("button", { name: "More tools" }));
+    // The panel route stays open: browsing the library is not an insert.
+    expect(
+      within(moreMenu()!).getByRole("menuitem", { name: "All shapes" }),
+    ).toBeEnabled();
   });
 });

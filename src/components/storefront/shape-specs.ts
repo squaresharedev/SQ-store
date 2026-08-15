@@ -83,3 +83,51 @@ export const SHAPE_SPECS: Record<ShapeKind, ShapeSpec> = {
   parallelogram: { label: "Parallelogram" },
   burst: { label: "Burst" },
 };
+
+/**
+ * The library as a seller browses it, in the left-hand panel.
+ *
+ * Grouped by what a shape IS rather than by how it renders: the boxes-and-
+ * curves split matters to a designer picking one, while the CSS-vs-SVG split
+ * that ShapeTileContent cares about is an implementation detail and cuts
+ * across these groups. Every ShapeKind appears exactly once — the unit test
+ * holds this to SHAPE_KINDS, so a kind added later cannot go unbrowsable.
+ */
+export const SHAPE_GROUPS: readonly {
+  title: string;
+  kinds: readonly ShapeKind[];
+}[] = [
+  {
+    title: "Basic",
+    kinds: ["square", "rounded", "circle", "ring", "pill", "bar", "half", "quarter"],
+  },
+  {
+    title: "Polygons",
+    kinds: [
+      "triangle",
+      "wedge",
+      "diamond",
+      "pentagon",
+      "hexagon",
+      "octagon",
+      "trapezoid",
+      "parallelogram",
+    ],
+  },
+  {
+    title: "Accents",
+    kinds: ["star", "sparkle", "burst", "cross", "arrow", "chevron"],
+  },
+];
+
+/**
+ * The shapes the Element tool offers inline, without sending the seller to the
+ * panel.
+ *
+ * TWO, and that is the point. The toolbar used to carry all 22, which
+ * overflowed the bar and turned the library into a sideways-scrolling strip
+ * nobody read past. The menu is now a single row — upload, the library, and
+ * the two shapes anyone actually reaches for straight away. Everything else is
+ * one click away under "All shapes", where it can be browsed properly.
+ */
+export const QUICK_SHAPE_KINDS: readonly ShapeKind[] = ["square", "circle"];

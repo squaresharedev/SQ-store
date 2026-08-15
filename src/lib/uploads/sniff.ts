@@ -61,6 +61,150 @@ export function sniffImage(bytes: Uint8Array): SniffedImage | null {
   return null;
 }
 
+export type SniffedSvg = { mime: "image/svg+xml"; ext: "svg" };
+
+/**
+ * The shortest thing that could honestly be an SVG. Below this there is not
+ * room for a root element, so there is nothing to judge.
+ */
+const MIN_SVG_BYTES = 24;
+
+/**
+ * Constructs that disqualify an SVG outright. Matched against the LOWERCASED
+ * source, so the table only ever needs the lowercase form.
+ *
+ * Each entry answers "what could this do if the file were ever opened as a
+ * document rather than painted into an `<img>`" — because defence that depends
+ * on one render path staying the only render path is not defence.
+ */
+const SVG_REJECTIONS: readonly { pattern: RegExp; why: string }[] = [
+  { pattern: /<\s*script/, why: "inline script" },
+  { pattern: /<\s*\/\s*script/, why: "stray closing script tag" },
+  // Event-handler attributes: onload=, onclick=, onmouseover=, and the rest.
+  // `\son` (not `\bon`) so ordinary words ending in "on" cannot trip it.
+  { pattern: /\son[a-z]+\s*=/, why: "event-handler attribute" },
+  { pattern: /javascript\s*:/, why: "javascript: URL" },
+  // foreignObject escapes SVG into arbitrary HTML, taking every HTML sink
+  // with it. Nothing decorative needs it.
+  { pattern: /<\s*foreignobject/, why: "foreignObject" },
+  { pattern: /<\s*iframe/, why: "iframe" },
+  { pattern: /<\s*embed/, why: "embed" },
+  { pattern: /<\s*object/, why: "object" },
+  // References that leave the document: remote fetches (which also beacon the
+  // viewer's IP to a third party) and data: payloads, which would mean
+  // sniffing a second format inside this one. Same-document `#fragment`
+  // references — how a legitimate `<use>` works — are untouched.
+  {
+    pattern: /(?:xlink:)?href\s*=\s*["']?\s*(?:https?:|\/\/|data:)/,
+    why: "external or embedded reference",
+  },
+  // Same idea for the presentation-attribute form, url(http://...).
+  { pattern: /url\s*\(\s*["']?\s*(?:https?:|\/\/|data:)/, why: "external url()" },
+  { pattern: /@import/, why: "CSS @import" },
+  // A DOCTYPE is how both XXE and billion-laughs entity expansion get set up,
+  // and a plain SVG has no use for one.
+  { pattern: /<!\s*doctype/, why: "DOCTYPE" },
+  { pattern: /<!\s*entity/, why: "entity declaration" },
+  { pattern: /<!\[cdata\[/, why: "CDATA section" },
+];
+
+/**
+ * The real type of a CANVAS ELEMENT upload when the bytes are SVG, or null.
+ *
+ * SVG has no magic number — it is XML — so this reads the document itself:
+ * confirm the root element really is `<svg>`, then refuse anything that could
+ * execute, fetch, or expand. Null means reject, exactly as in {@link sniffImage}.
+ *
+ * IT REJECTS RATHER THAN SANITIZES, on purpose. Rewriting untrusted markup
+ * safely needs a real XML parser, and there is none available on this runtime
+ * (no DOMPurify; jsdom is a dev dependency and does not run on Workers).
+ * Hand-rolling one is how sanitizers grow bypasses. A rejection is a rule you
+ * can read, test, and be sure of — and the seller gets told what to change.
+ *
+ * This is defence in depth, not the only defence: elements render solely
+ * through `<img src>`, where SVG runs in the spec's secure static mode with
+ * scripting and external loads disabled.
+ */
+export function sniffSvg(bytes: Uint8Array): SniffedSvg | null {
+  if (bytes.length < MIN_SVG_BYTES) return null;
+
+  let text: string;
+  try {
+    // `fatal` so malformed UTF-8 is a rejection rather than a string full of
+    // replacement characters that the checks below would then scan in vain.
+    // A leading BOM needs no handling here: the UTF-8 decoder strips one by
+    // default (that is what `ignoreBOM: false`, the default, means).
+    text = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+  } catch {
+    return null;
+  }
+
+  // Walk past everything the XML prolog legally allows before the root element,
+  // so a real file with a declaration and a licence comment still parses.
+  let head = text.trimStart();
+  for (;;) {
+    if (head.startsWith("<?")) {
+      const end = head.indexOf("?>");
+      if (end === -1) return null;
+      head = head.slice(end + 2).trimStart();
+      continue;
+    }
+    if (head.startsWith("<!--")) {
+      const end = head.indexOf("-->");
+      if (end === -1) return null;
+      head = head.slice(end + 3).trimStart();
+      continue;
+    }
+    break;
+  }
+
+  // The root element must be <svg>, and it must be the WHOLE token: `<svgfoo`
+  // is not an SVG, so the next character has to end the name.
+  const root = /^<svg(?=[\s/>])/i.exec(head);
+  if (!root) return null;
+
+  // Scan the entire document, not just the prolog: the checks above prove what
+  // this file claims to be, and these prove it is not carrying anything active.
+  const lower = text.toLowerCase();
+  for (const { pattern } of SVG_REJECTIONS) {
+    if (pattern.test(lower)) return null;
+  }
+
+  return { mime: "image/svg+xml", ext: "svg" };
+}
+
+export type SniffedFont = { mime: string; ext: string };
+
+/**
+ * The real type of a FONT upload, or null if the bytes are not one of the
+ * formats a storefront can render. Null means "reject": a font is parsed by
+ * the browser's own font engine, so "probably fine" is not a standard worth
+ * applying to it.
+ *
+ * Signatures are the sfnt/WOFF headers: `wOF2` and `wOFF` for the two web
+ * wrappers, `OTTO` for CFF-flavoured OpenType, and the 1.0 sfnt version tag
+ * (00 01 00 00) for TrueType. Collections (`ttcf`) are deliberately absent,
+ * @font-face cannot address a face inside one.
+ */
+export function sniffFont(bytes: Uint8Array): SniffedFont | null {
+  if (bytes.length < MIN_SNIFF_BYTES) return null;
+
+  if (ascii(bytes, 0, "wOF2")) return { mime: "font/woff2", ext: "woff2" };
+  if (ascii(bytes, 0, "wOFF")) return { mime: "font/woff", ext: "woff" };
+  if (ascii(bytes, 0, "OTTO")) return { mime: "font/otf", ext: "otf" };
+  if (
+    bytes[0] === 0x00 &&
+    bytes[1] === 0x01 &&
+    bytes[2] === 0x00 &&
+    bytes[3] === 0x00
+  ) {
+    return { mime: "font/ttf", ext: "ttf" };
+  }
+  // Apple's legacy TrueType tag, still emitted by some foundries' exports.
+  if (ascii(bytes, 0, "true")) return { mime: "font/ttf", ext: "ttf" };
+  return null;
+}
+
 /**
  * The FAMILY a set of magic bytes belongs to.
  *

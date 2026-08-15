@@ -9,8 +9,10 @@ import {
   SHAPE_POINTS_MAX,
   SHAPE_POINTS_MIN,
   SHAPE_ROUNDNESS_MAX,
+  blockKey,
   type ShapeBlock,
 } from "@/types/storefront";
+import { DEFAULT_SHAPE_BORDER_COLOR } from "@/lib/theme/color-target";
 import { cn } from "@/lib/utils";
 import {
   destructiveButtonClass,
@@ -44,8 +46,10 @@ export type ShapeBlockPatch = Partial<
   >
 >;
 
-/** First border color when the seller turns an outline on. */
-const DEFAULT_BORDER_COLOR = "#171717";
+/** First border color when the seller turns an outline on. Shared with the
+ *  ColorPanel (lib/theme/color-target) so the field and the panel cannot
+ *  disagree about what "no border color set" looks like. */
+const DEFAULT_BORDER_COLOR = DEFAULT_SHAPE_BORDER_COLOR;
 
 const KIND_BUTTON_CLASS = `inline-flex size-9 items-center justify-center rounded-none border border-border bg-background text-muted-foreground hover:bg-accent hover:text-foreground ${transitionClass} ${focusRingClass}`;
 
@@ -160,6 +164,7 @@ export function ShapeBlockEditor({
         label={isRing ? "Color" : "Fill"}
         value={block.color}
         onChange={(color) => onUpdate({ color })}
+        target={{ kind: "shape-fill", blockKey: blockKey(block) }}
       />
 
       {/* Outline: on a ring this is the ring's own thickness. */}
@@ -189,6 +194,7 @@ export function ShapeBlockEditor({
           label="Border color"
           value={block.borderColor ?? DEFAULT_BORDER_COLOR}
           onChange={(borderColor) => onUpdate({ borderColor })}
+          target={{ kind: "shape-border", blockKey: blockKey(block) }}
         />
       )}
 

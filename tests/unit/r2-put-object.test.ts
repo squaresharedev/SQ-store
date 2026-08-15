@@ -61,3 +61,55 @@ describe("putObject", () => {
     expect(request.headers.get("content-type")).toBe("image/webp");
   });
 });
+
+/**
+ * `headObject` must ask for an UNENCODED response.
+ *
+ * This is the size half of the same class of bug. Whenever the caller's
+ * runtime advertises gzip — Node's fetch always does — Cloudflare compresses
+ * the reply and drops `content-length`, because a compressed body has no
+ * length to state up front. `size` then came back NaN, and verifyUpload reads
+ * a non-finite size as "too big": it EVICTS the object and refuses the save.
+ * Every freshly uploaded background image, custom font and canvas element
+ * would have been rejected as too large the moment it was saved.
+ *
+ * Verified against the real bucket: with gzip negotiated the header is absent,
+ * with `identity` it is the true object length.
+ */
+describe("headObject", () => {
+  it("asks for identity encoding, so content-length survives", async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(null, {
+        status: 200,
+        headers: { "content-length": "106", "content-type": "image/svg+xml" },
+      }),
+    );
+    const { headObject } = await import("@/lib/r2");
+    const meta = await headObject("elements/x/y.svg");
+
+    const request = fetchMock.mock.calls[0]![0] as Request;
+    expect(request.method).toBe("HEAD");
+    expect(request.headers.get("accept-encoding")).toBe("identity");
+    expect(meta).toEqual({ size: 106, contentType: "image/svg+xml" });
+  });
+
+  it("reports a missing length as non-finite, so callers fail closed", async () => {
+    // Belt and braces: if a length ever goes missing again, the value must be
+    // something verifyUpload rejects, never a 0 or a silent pass.
+    fetchMock.mockResolvedValueOnce(
+      new Response(null, {
+        status: 200,
+        headers: { "content-type": "image/png" },
+      }),
+    );
+    const { headObject } = await import("@/lib/r2");
+    const meta = await headObject("images/x/y.png");
+    expect(Number.isFinite(meta!.size)).toBe(false);
+  });
+
+  it("returns null for an object that is not there", async () => {
+    fetchMock.mockResolvedValueOnce(new Response(null, { status: 404 }));
+    const { headObject } = await import("@/lib/r2");
+    expect(await headObject("images/x/gone.png")).toBeNull();
+  });
+});

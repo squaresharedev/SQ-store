@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState, useSyncExternalStore } from "react";
+import { useEffect, useId, useRef, useState, useSyncExternalStore } from "react";
 import { Check, Copy, Pipette, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -13,6 +13,9 @@ import {
 import { isStrictHexColor } from "@/lib/validation/storefront";
 import { hexToHsv, hsvToHex, isLightColor, type Hsv } from "@/lib/format/color";
 import { COLOR_PRESETS } from "@/lib/theme/color-presets";
+import { isSameColorTarget, useColorTarget } from "@/lib/theme/color-context";
+import type { ColorTargetRef } from "@/lib/theme/color-target";
+import { recordRecentColor } from "@/lib/theme/recent-colors";
 import { Popover } from "./Popover";
 import { ColorArea } from "./ColorArea";
 
@@ -41,8 +44,9 @@ const readEyeDropperOnServer = () => false;
 const COLOR_WHEEL_GRADIENT =
   "conic-gradient(#ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000)";
 
-/** Every circle in the inline row is the same size and shape. */
-const DOT_BASE =
+/** Every circle in a swatch row is the same size and shape. Exported with
+ *  ColorDot so the ColorPanel's grids size their circles identically. */
+export const DOT_BASE =
   "flex aspect-square w-full items-center justify-center rounded-full";
 
 /**
@@ -53,10 +57,10 @@ const DOT_BASE =
  * computed `grid-cols-${n}`.
  */
 const ROW_COLUMNS: Record<number, string> = {
+  4: "grid-cols-4",
+  5: "grid-cols-5",
   6: "grid-cols-6",
   7: "grid-cols-7",
-  8: "grid-cols-8",
-  9: "grid-cols-9",
 };
 
 /**
@@ -75,8 +79,14 @@ export type ColorInheritOption = {
   onSelect: () => void;
 };
 
-/** Solid color dot; shows a check (in readable ink) when it is the current one. */
-function ColorDot({
+/**
+ * Solid color dot; shows a check (in readable ink) when it is the current one.
+ *
+ * Exported because the ColorPanel renders hundreds of these and must not
+ * re-implement the selection ring, the hairline that gives white and pale tints
+ * a visible edge, or the `isLightColor` check-mark flip.
+ */
+export function ColorDot({
   color,
   label,
   active,
@@ -127,10 +137,15 @@ function preserveHue(next: Hsv, prev: Hsv): Hsv {
  * The one color picker in the product — every field that chooses a color uses
  * this, so accent, background, text and shape colors all behave identically.
  *
- * SHAPE: a single row of circles, inline. The first two are actions — a color
- * wheel that opens the full picker, and an eyedropper — followed by the quick
- * swatches. The common case is one tap and no overlay at all; the saturation
- * square, hue slider and hex field only appear when the wheel is opened.
+ * SHAPE: a single row of circles, inline. The first two are actions — a wheel
+ * for "more colors", and an eyedropper — followed by the three fixed neutrals.
+ * The common case is one tap and no overlay at all.
+ *
+ * WHERE THE WHEEL GOES depends on `target`. Inside the storefront designer it
+ * aims the left-hand ColorPanel (the standard grid, palettes, recents, and the
+ * colors already in the design) at this field. Everywhere else it opens this
+ * component's own popover — the saturation square, hue slider and hex field —
+ * so the picker stays complete on its own outside the designer.
  *
  * `value`/`onChange` are STRICT 6-digit hex (`#rrggbb`); the component never
  * emits anything else, preserving the storefront security contract. Every path
@@ -145,12 +160,19 @@ export function ColorPicker({
   value,
   onChange,
   inherit,
+  target,
 }: {
   id?: string;
   label?: string;
   value: string;
   onChange: (hex: string) => void;
   inherit?: ColorInheritOption;
+  /**
+   * Names this field so the wheel can hand it to the left-hand ColorPanel
+   * instead of opening the popover. Without a target — or outside the designer,
+   * where there is no provider — the popover opens exactly as it always did.
+   */
+  target?: ColorTargetRef;
 }) {
   const hexId = useId();
   const errorId = `${hexId}-error`;
@@ -165,6 +187,18 @@ export function ColorPicker({
     readEyeDropper,
     readEyeDropperOnServer,
   );
+
+  // Inside the designer the wheel routes to the ColorPanel; everywhere else
+  // this is null and the popover below is the whole picker.
+  const colorTarget = useColorTarget();
+  const panelHandlesThis = Boolean(target && colorTarget);
+  const panelIsOnThisField =
+    panelHandlesThis && isSameColorTarget(colorTarget!.activeRef, target!);
+
+  // What the value was when the popover opened, so closing it can record the
+  // color the seller LANDED on. The saturation square emits on every pointer
+  // move; recording those would bury the list under one drag.
+  const panelOpenValue = useRef(value);
 
   // Clear the "Copied" flash without leaving a timer behind on unmount.
   useEffect(() => {
@@ -207,6 +241,38 @@ export function ColorPicker({
     if (parsed) emit(hex, preserveHue(parsed, hsv));
   }
 
+  /**
+   * Apply a color AND remember it. Every deliberate one-shot pick goes through
+   * here — a dot in either row, an eyedropper sample. Typing and dragging do
+   * not: both emit continuously, so their final value is recorded when the
+   * panel closes instead.
+   */
+  function commitHex(hex: string) {
+    applyHex(hex);
+    recordRecentColor(hex);
+  }
+
+  function handleOpenChange(next: boolean) {
+    if (next) panelOpenValue.current = value;
+    // Record what the popover was closed ON, not every value it passed through.
+    else if (value !== panelOpenValue.current) recordRecentColor(value);
+    setOpen(next);
+  }
+
+  /**
+   * The wheel. Inside the designer it aims the left-hand ColorPanel at this
+   * field (toggling it shut if it is already here, so the button stays a
+   * toggle either way); elsewhere it opens the popover.
+   */
+  function handleWheel() {
+    if (panelHandlesThis) {
+      if (panelIsOnThisField) colorTarget!.close();
+      else colorTarget!.open(target!);
+      return;
+    }
+    handleOpenChange(!open);
+  }
+
   function handleText(next: string) {
     setText(next);
     // Only ever propagate a value that passes the strict hex gate.
@@ -221,7 +287,7 @@ export function ColorPicker({
       // The API is specified to return sRGB hex, but it is still an external
       // string: re-gate it rather than trusting it into the contract.
       const lower = sRGBHex.toLowerCase();
-      if (isStrictHexColor(lower)) applyHex(lower);
+      if (isStrictHexColor(lower)) commitHex(lower);
     } catch {
       // The user pressed Esc or the browser refused — nothing to report.
     }
@@ -242,7 +308,7 @@ export function ColorPicker({
   // Presets already have one, and an inherited field has no override to show.
   const showCustomDot = !inheriting && !isPreset && isStrictHexColor(current);
 
-  // wheel + eyedropper? + inherit? + custom? + the quick swatches.
+  // wheel + eyedropper? + inherit? + custom? + the fixed swatches.
   const dotCount =
     1 +
     (hasEyeDropper ? 1 : 0) +
@@ -264,23 +330,26 @@ export function ColorPicker({
       <div
         role="group"
         aria-label={label ? `${label} swatches` : "Color swatches"}
-        className={cn("grid gap-1.5", ROW_COLUMNS[dotCount] ?? "grid-cols-8")}
+        className={cn("grid gap-1.5", ROW_COLUMNS[dotCount] ?? "grid-cols-7")}
       >
         <Popover
-          open={open}
-          onOpenChange={setOpen}
+          // Never open when the panel is doing this field's job: the wheel
+          // routes there instead, and a popover on top of it would be two
+          // choosers for one value.
+          open={open && !panelHandlesThis}
+          onOpenChange={handleOpenChange}
           label={label ? `${label} color picker` : "Color picker"}
           panelClassName="sm:w-[17rem]"
           trigger={
             <button
               id={id}
               type="button"
-              aria-haspopup="dialog"
-              aria-expanded={open}
-              aria-label="Custom color"
-              title="Custom color"
+              aria-haspopup={panelHandlesThis ? undefined : "dialog"}
+              aria-expanded={panelHandlesThis ? panelIsOnThisField : open}
+              aria-label={panelHandlesThis ? "More colors" : "Custom color"}
+              title={panelHandlesThis ? "More colors" : "Custom color"}
               data-testid="color-picker-trigger"
-              onClick={() => setOpen((prev) => !prev)}
+              onClick={handleWheel}
               className={cn(
                 DOT_BASE,
                 "relative transition-transform duration-base ease-standard motion-reduce:transition-none",
@@ -402,7 +471,7 @@ export function ColorPicker({
             color={current}
             label={`Current color ${current}`}
             active
-            onSelect={() => setOpen(true)}
+            onSelect={() => handleOpenChange(true)}
           />
         )}
 
@@ -412,7 +481,7 @@ export function ColorPicker({
             color={preset.value}
             label={`${preset.name} (${preset.value})`}
             active={!inheriting && current === preset.value}
-            onSelect={() => applyHex(preset.value)}
+            onSelect={() => commitHex(preset.value)}
           />
         ))}
       </div>

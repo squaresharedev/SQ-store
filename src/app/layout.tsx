@@ -48,6 +48,19 @@ const shadowsIntoLight = localFont({
   preload: false,
 });
 
+// Offered to SELLERS as a storefront typeface; the dashboard itself never sets
+// it. preload: false is the whole point: the face is declared on every page but
+// fetched only when something actually renders in it, so a font most storefronts
+// do not choose costs the app nothing. (Inter, above, is already loaded for the
+// dashboard's own caption text, so offering it as a storefront font is free.)
+const montserrat = localFont({
+  src: "./fonts/Montserrat.woff2",
+  weight: "100 900",
+  variable: "--font-montserrat",
+  display: "swap",
+  preload: false,
+});
+
 export const metadata: Metadata = {
   title: {
     default: "Square Share Dashboard",
@@ -81,6 +94,7 @@ export default function RootLayout({
         jetbrainsMono.variable,
         inter.variable,
         shadowsIntoLight.variable,
+        montserrat.variable,
         "font-sans",
       )}
     >

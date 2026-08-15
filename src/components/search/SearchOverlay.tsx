@@ -16,6 +16,7 @@ import {
 import { cn } from "@/lib/utils";
 import { infoTextClass, overlayCloseButtonClass, overlaySurfaceClass, transitionClass } from "@/components/ui/control-styles";
 import { useIsMacPlatform } from "@/lib/hooks/useIsMacPlatform";
+import { TYPING_DEBOUNCE_MS } from "@/lib/typing-debounce";
 import { searchLocalRegistry } from "@/lib/search/registry";
 import {
   buildRecentGroup,
@@ -51,7 +52,6 @@ import type { TeamRole } from "@/lib/team/permissions";
  * in a test; SearchProvider supplies them in the app.
  */
 
-const SEARCH_DEBOUNCE_MS = 300; // Same feel as the products/orders toolbars.
 const REQUEST_TIMEOUT_MS = 5_000;
 const RETRY_DELAY_MS = 1_000;
 
@@ -320,7 +320,10 @@ export function SearchOverlay({
       abortRef.current?.abort();
       return;
     }
-    const timer = setTimeout(() => void runRemoteSearch(trimmed), SEARCH_DEBOUNCE_MS);
+    const timer = setTimeout(
+      () => void runRemoteSearch(trimmed),
+      TYPING_DEBOUNCE_MS,
+    );
     return () => clearTimeout(timer);
   }, [open, trimmed, wantsRemote, runRemoteSearch]);
 

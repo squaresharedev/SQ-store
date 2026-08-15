@@ -226,6 +226,14 @@ export async function seedProducts(
     title: string;
     price_cents?: number;
     status?: "active" | "draft";
+    /**
+     * An https:// URL here is served straight through by presignGetUrl (the
+     * path dev seed data uses), which is the only way to give a product a
+     * picture without R2 credentials — the e2e stack deliberately has none.
+     * Only service_role writes can put a URL in this column; every app write
+     * validates it against OBJECT_KEY_PATTERN.
+     */
+    image_key?: string;
   }>,
 ) {
   await serviceRest(`/products`, {
@@ -236,6 +244,7 @@ export async function seedProducts(
       price_cents: p.price_cents ?? 1000,
       currency: "EUR",
       status: p.status ?? "active",
+      ...(p.image_key ? { image_key: p.image_key } : {}),
     })),
   });
 }

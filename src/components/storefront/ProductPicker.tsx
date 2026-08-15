@@ -8,6 +8,7 @@ import { formatPrice } from "@/lib/format";
 import { searchCatalogProducts } from "@/lib/products/picker-actions";
 import { PICKER_SEARCH_MAX_LENGTH } from "@/lib/products/picker-constants";
 import { cn } from "@/lib/utils";
+import { TYPING_DEBOUNCE_MS } from "@/lib/typing-debounce";
 import {
   fieldBaseClass,
   helpTextClass,
@@ -19,7 +20,6 @@ const ADD_BUTTON_CLASS = cn(
   "size-8 shrink-0 disabled:pointer-events-none disabled:opacity-40",
 );
 
-const SEARCH_DEBOUNCE_MS = 250;
 
 /**
  * Pick from the seller's existing products; each can be in the grid once.
@@ -72,7 +72,7 @@ export function ProductPicker({
         // Local matches still show; only the server reach failed.
         setRemoteState({ results: null, searching: false, failed: true });
       }
-    }, SEARCH_DEBOUNCE_MS);
+    }, TYPING_DEBOUNCE_MS);
     return () => {
       clearTimeout(timer);
       // Invalidate any in-flight response for the outgoing term.

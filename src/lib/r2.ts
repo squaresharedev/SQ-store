@@ -1,5 +1,5 @@
 import { AwsClient } from "aws4fetch";
-import type { UploadKind } from "@/lib/validation/product";
+import { objectKeyPrefix, type UploadKind } from "@/lib/validation/product";
 
 /**
  * SERVER-ONLY. Presigned-URL helpers for the private `squareshare-products` R2
@@ -33,14 +33,13 @@ export function sanitizeFilename(filename: string): string {
   return cleaned || "file";
 }
 
-/** `images/{ownerId}/{uuid}-{name}` or `files/{ownerId}/{uuid}-{name}`. */
+/** `{images|files|fonts}/{ownerId}/{uuid}-{name}`. */
 export function buildObjectKey(
   kind: UploadKind,
   ownerId: string,
   filename: string,
 ): string {
-  const prefix = kind === "image" ? "images" : "files";
-  return `${prefix}/${ownerId}/${crypto.randomUUID()}-${sanitizeFilename(filename)}`;
+  return `${objectKeyPrefix(kind)}/${ownerId}/${crypto.randomUUID()}-${sanitizeFilename(filename)}`;
 }
 
 /**
@@ -124,6 +123,14 @@ export async function presignPutUrl(
  *
  * `contentType` must be the SNIFFED type (see lib/uploads/sniff.ts), never the
  * client's claim — it is what R2 will serve the object back as.
+ *
+ * `contentDisposition` is stored alongside it and served back on every GET.
+ * Its one caller today is the SVG element upload, and the reason is narrow:
+ * `attachment` makes a browser DOWNLOAD the object if someone navigates
+ * straight to a presigned URL, instead of opening it as a document (where an
+ * SVG would run as markup, on R2's origin). It does NOT affect `<img>`,
+ * `<link>` or any other subresource load, so the artwork still renders
+ * normally wherever the app actually uses it.
  */
 export async function putObject(
   key: string,
@@ -131,11 +138,15 @@ export async function putObject(
   // valid request body, and the wider `Uint8Array` type admits one.
   bytes: Uint8Array<ArrayBuffer>,
   contentType: string,
+  contentDisposition?: string,
 ): Promise<void> {
   const res = await r2Client().fetch(objectUrl(key).toString(), {
     method: "PUT",
     headers: {
       "Content-Type": contentType,
+      ...(contentDisposition
+        ? { "Content-Disposition": contentDisposition }
+        : {}),
       // MUST be explicit. R2 refuses a chunked PUT with 411 Length Required,
       // and Next patches global fetch — through that patch a Uint8Array,
       // ArrayBuffer or Blob body all go out without a Content-Length and get
@@ -160,7 +171,18 @@ export type ObjectMeta = { size: number; contentType: string | null };
  * the caller fails closed rather than trusting an unverified upload.
  */
 export async function headObject(key: string): Promise<ObjectMeta | null> {
-  const res = await r2Client().fetch(objectUrl(key).toString(), { method: "HEAD" });
+  const res = await r2Client().fetch(objectUrl(key).toString(), {
+    method: "HEAD",
+    // MUST BE identity, and this is not a micro-optimisation. Whenever the
+    // caller's runtime advertises gzip (Node's fetch always does), Cloudflare
+    // compresses the response and drops `content-length` — a compressed body
+    // has no length to state up front. The header comes back EMPTY, so `size`
+    // was NaN, and verifyUpload treats a non-finite size as "too big": every
+    // freshly uploaded background, font and element would be evicted and
+    // refused with "that file is too large". Asking for an unencoded response
+    // is what makes the size a fact rather than a blank.
+    headers: { "Accept-Encoding": "identity" },
+  });
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`R2 HEAD ${key} failed: ${res.status}`);
   const length = res.headers.get("content-length");

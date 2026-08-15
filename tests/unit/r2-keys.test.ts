@@ -52,6 +52,12 @@ describe("buildObjectKey", () => {
     expect(isOwnedObjectKey(key, "file", OWNER)).toBe(true);
   });
 
+  it("mints an owned, well-formed element key", () => {
+    const key = buildObjectKey("element", OWNER, "logo.svg");
+    expect(key.startsWith(`elements/${OWNER}/`)).toBe(true);
+    expect(isOwnedObjectKey(key, "element", OWNER)).toBe(true);
+  });
+
   it("even a hostile filename produces a key owned by the caller", () => {
     const key = buildObjectKey("image", OWNER, `../../${OTHER}/steal.png`);
     expect(key.startsWith(`images/${OWNER}/`)).toBe(true);
@@ -78,6 +84,24 @@ describe("isOwnedObjectKey — the product-save security boundary", () => {
     const fileKey = `files/${OWNER}/${VALID_UUID}-secret.zip`;
     expect(isOwnedObjectKey(fileKey, "image", OWNER)).toBe(false);
     expect(isOwnedObjectKey(good, "file", OWNER)).toBe(false);
+  });
+
+  it("rejects kind confusion between elements/ and images/", () => {
+    // The one that matters most: `elements/` is the ONLY prefix that may hold
+    // an SVG. If an element key could pass as a product image or a background,
+    // markup would reach a surface whose allowlist deliberately excludes it.
+    const elementKey = `elements/${OWNER}/${VALID_UUID}-logo.svg`;
+    expect(isOwnedObjectKey(elementKey, "element", OWNER)).toBe(true);
+    expect(isOwnedObjectKey(elementKey, "image", OWNER)).toBe(false);
+    expect(isOwnedObjectKey(elementKey, "font", OWNER)).toBe(false);
+    expect(isOwnedObjectKey(elementKey, "file", OWNER)).toBe(false);
+    // ...and the reverse, so an element block cannot point at a product photo.
+    expect(isOwnedObjectKey(good, "element", OWNER)).toBe(false);
+  });
+
+  it("rejects another user's element key", () => {
+    const theirs = `elements/${OTHER}/${VALID_UUID}-logo.svg`;
+    expect(isOwnedObjectKey(theirs, "element", OWNER)).toBe(false);
   });
 
   it("rejects path traversal and malformed shapes", () => {

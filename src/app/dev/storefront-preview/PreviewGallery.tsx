@@ -7,9 +7,11 @@ import { pageShellClass } from "@/components/ui/surface-styles";
 import type { Product } from "@/types/product";
 import {
   DEFAULT_STOREFRONT_CONFIG,
+  EMPTY_STOREFRONT_HEADER,
   type ShapeKind,
   type StorefrontBlock,
   type StorefrontConfig,
+  type StorefrontFont,
 } from "@/types/storefront";
 import { StorefrontPreview } from "@/components/storefront/StorefrontPreview";
 
@@ -73,6 +75,30 @@ function text(x: number, y: number, w: number, h: number, body: string): Storefr
   };
 }
 
+/** A text block with an explicit pixel size, for the free-form sizing cases. */
+function sizedText(
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  body: string,
+  fontSize: number,
+): StorefrontBlock {
+  return { ...text(x, y, w, h, body), fontSize } as StorefrontBlock;
+}
+
+/** A text block naming its own face, for the typeface cases. */
+function fontedText(
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  body: string,
+  font: StorefrontFont,
+): StorefrontBlock {
+  return { ...text(x, y, w, h, body), font } as StorefrontBlock;
+}
+
 /** Product fixtures, so per-tile style cases render real product faces. */
 const FIXTURE_PRODUCTS: Product[] = ["Mug", "Print", "Tote", "Candle"].map(
   (title, index) => ({
@@ -131,7 +157,12 @@ function config(
     ...DEFAULT_STOREFRONT_CONFIG,
     theme: { ...DEFAULT_STOREFRONT_CONFIG.theme, ...over },
     blocks,
-    ...(header ? { header } : {}),
+    // No masthead unless a case asks for one. A new storefront DOES start with
+    // one (DEFAULT_STOREFRONT_HEADER), but these fixtures are about how a board
+    // fits its box, and a header on every card would put its variable height
+    // into every measurement — which is the one thing the masthead cases below
+    // exist to isolate.
+    header: header ?? EMPTY_STOREFRONT_HEADER,
   };
 }
 
@@ -190,6 +221,69 @@ const CASES: { title: string; note: string; config: StorefrontConfig }[] = [
       name: "Very Long Storefront Name That Wraps Onto Several Lines",
       bio: "A bio long enough to wrap more than once, because the masthead is the variable-height part of the board and the scale has to account for it rather than assume a fixed offset.",
     }),
+  },
+  {
+    title: "Masthead colors",
+    note: "Each line takes its own color; absent = name follows the accent, bio the ink.",
+    config: config({ accent: "#a855f7", columns: 6, rows: 4 }, fill(6, 4), {
+      show: true,
+      name: "Coloured Shop",
+      bio: "Two lines, two colours, neither of them the theme accent.",
+      nameColor: "#16a34a",
+      bioColor: "#2563eb",
+    }),
+  },
+  {
+    title: "Masthead sizes",
+    note: "Each line takes its own px size too. The compact preview keeps its own small type, so this card looks unchanged: that is the point.",
+    config: config({ columns: 6, rows: 4 }, fill(6, 4), {
+      show: true,
+      name: "Big Name Shop",
+      bio: "and a deliberately tiny bio",
+      nameSize: 64,
+      bioSize: 9,
+    }),
+  },
+  {
+    title: "Free-form text sizes",
+    note: "Any size in 8..200px, not five presets, and one block left on Auto.",
+    config: config({ columns: 6, rows: 6 }, [
+      sizedText(0, 0, 6, 2, "72px heading", 72),
+      sizedText(0, 2, 3, 1, "9px fine print", 9),
+      sizedText(3, 2, 3, 1, "31px between the old presets", 31),
+      text(0, 3, 6, 1, "Auto, sized by its style"),
+    ]),
+  },
+  {
+    title: "Preset fonts",
+    note: "Montserrat on the canvas; each block naming a different face.",
+    config: config({ font: "montserrat", columns: 6, rows: 5 }, [
+      text(0, 0, 6, 1, "Canvas font: Montserrat"),
+      fontedText(0, 1, 6, 1, "Inter on this block", "inter"),
+      fontedText(0, 2, 6, 1, "Serif on this block", "serif"),
+      fontedText(0, 3, 6, 1, "Handwritten on this block", "hand"),
+      fontedText(0, 4, 6, 1, "Mono on this block", "mono"),
+    ]),
+  },
+  {
+    title: "Uploaded font, unresolvable",
+    note: "A custom font with no signed URL here: everything must fall back to inheriting, never to blank text.",
+    config: config(
+      {
+        font: "custom",
+        customFont: {
+          key: "fonts/00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-000000000002-Seller.woff2",
+          name: "Seller.woff2",
+        },
+        columns: 6,
+        rows: 3,
+      },
+      [
+        text(0, 0, 6, 1, "Canvas set to the uploaded face"),
+        fontedText(0, 1, 6, 1, "Block set to it too", "custom"),
+        shape(0, 2, 6, 1),
+      ],
+    ),
   },
   {
     title: "Carousel mode",
@@ -272,7 +366,60 @@ const CASES: { title: string; note: string; config: StorefrontConfig }[] = [
       productBlock(0, 0, 0, 2, 2),
       productBlock(1, 2, 0, 2, 2, { cornerRadius: 100, priceTagPosition: "hidden", showTitle: false }),
       productBlock(2, 0, 2, 2, 2, { titleStyle: "overlay", cornerRadius: 24 }),
-      productBlock(3, 2, 2, 2, 2, { priceTagStyle: "pill", priceTagPosition: "top-right", priceTagSize: "lg" }),
+      productBlock(3, 2, 2, 2, 2, {
+        priceTagPosition: "top-right",
+        priceTagSize: 14,
+        priceTagRadius: 24,
+        priceTagBorderWidth: 1,
+      }),
+    ]),
+  },
+  {
+    title: "Price tag appearance",
+    note: "All seven settings at once, then each axis on its own: an amber mono chip with a dark outline, a big serif price with no fill, a hairline pill, and a sharp heavy border. Anything unset follows the theme.",
+    config: config({ columns: 4, rows: 2, cornerRadius: 0, accent: "#2563eb" }, [
+      productBlock(0, 0, 0, 2, 2, {
+        priceTagPosition: "top-left",
+        priceTagFont: "mono",
+        priceTagSize: 14,
+        priceTagColor: "#fbbf24",
+        priceTagTextColor: "#1c1917",
+        priceTagBorderColor: "#d97706",
+        priceTagBorderWidth: 2,
+        priceTagRadius: 4,
+      }),
+      productBlock(1, 2, 0, 1, 1, { priceTagFont: "serif", priceTagSize: 22 }),
+      productBlock(2, 3, 0, 1, 1, {
+        priceTagPosition: "middle-center",
+        priceTagRadius: 24,
+        priceTagBorderWidth: 1,
+      }),
+      productBlock(3, 2, 1, 2, 1, {
+        priceTagPosition: "bottom-right",
+        priceTagRadius: 0,
+        priceTagBorderWidth: 8,
+        priceTagBorderColor: "#171717",
+      }),
+    ]),
+  },
+  {
+    title: "Price tag never collides with the title",
+    note: "Every tile stores a BOTTOM tag. The first has a plain bar below the image, so it stays put. The rest draw the title over the image (overlay, shadow) or clip their corners away, so the tag lifts to the top instead of landing on the product name.",
+    config: config({ columns: 4, rows: 2, cornerRadius: 0 }, [
+      productBlock(0, 0, 0, 2, 2, { priceTagPosition: "bottom-left" }),
+      productBlock(1, 2, 0, 1, 1, {
+        titleStyle: "overlay",
+        priceTagPosition: "bottom-left",
+      }),
+      productBlock(2, 3, 0, 1, 1, {
+        titleStyle: "shadow",
+        priceTagPosition: "bottom-right",
+      }),
+      productBlock(3, 2, 1, 2, 1, {
+        titleStyle: "overlay",
+        cornerRadius: 40,
+        priceTagPosition: "bottom-right",
+      }),
     ]),
   },
 ];

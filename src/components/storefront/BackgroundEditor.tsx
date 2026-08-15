@@ -9,6 +9,7 @@ import {
   type StorefrontBackground,
 } from "@/types/storefront";
 import { unexpectedError } from "@/lib/errors";
+import { panPlacement } from "@/lib/images/placement";
 import { UploadError, uploadToR2 } from "@/lib/products/upload";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/Toast";
@@ -153,19 +154,18 @@ export function BackgroundEditor({
     if (!start || value.kind !== "image") return;
     const rect = event.currentTarget.getBoundingClientRect();
     if (rect.width === 0 || rect.height === 0) return;
-    // Dragging right reveals more of the image's left side, so position %
-    // moves opposite to the pointer.
-    const x = Math.round(
-      Math.min(
-        100,
-        Math.max(0, start.x - ((event.clientX - start.pointerX) / rect.width) * 100),
-      ),
-    );
-    const y = Math.round(
-      Math.min(
-        100,
-        Math.max(0, start.y - ((event.clientY - start.pointerY) / rect.height) * 100),
-      ),
+    // The shared placement maths (lib/images/placement.ts), which product
+    // tiles drag through too. It keeps this surface's original behaviour —
+    // the percentage moves against the pointer, because dragging right
+    // reveals more of the image's left side.
+    const { x, y } = panPlacement(
+      { x: start.x, y: start.y, scale: value.scale },
+      event.clientX - start.pointerX,
+      event.clientY - start.pointerY,
+      // "frame" keeps this surface's original feel exactly: one frame width
+      // sweeps the whole range. A background crops through background-size,
+      // not a transform, so the tiles' cover model would be wrong here.
+      { width: rect.width, height: rect.height, mode: "frame" },
     );
     if (x !== value.x || y !== value.y) onChange({ ...value, x, y });
   }
@@ -276,6 +276,7 @@ export function BackgroundEditor({
           label="Color"
           value={value.color}
           onChange={(color) => onChange({ kind: "solid", color })}
+          target={{ kind: "theme-background-solid" }}
         />
       )}
 
@@ -286,12 +287,14 @@ export function BackgroundEditor({
             label="From"
             value={value.from}
             onChange={(from) => onChange({ ...value, from })}
+            target={{ kind: "theme-background-from" }}
           />
           <ColorPicker
             id={`${fieldId}-grad-to`}
             label="To"
             value={value.to}
             onChange={(to) => onChange({ ...value, to })}
+            target={{ kind: "theme-background-to" }}
           />
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">

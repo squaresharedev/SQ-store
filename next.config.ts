@@ -54,8 +54,11 @@ const csp = [
   // blob: covers client-side image previews before an upload is committed;
   // R2 serves presigned product images, Supabase Storage serves avatars.
   `img-src 'self' data: blob: https://*.r2.cloudflarestorage.com${supabaseOrigin ? ` ${supabaseOrigin}` : ""}`,
-  // next/font/local self-hosts every face, so no third-party font origin.
-  "font-src 'self'",
+  // next/font/local self-hosts every face, so no third-party font origin. R2
+  // serves ONE more kind: a typeface the seller uploaded for their storefront,
+  // fetched through a presigned URL (blob: covers the local preview of a font
+  // in the moments between picking the file and saving).
+  "font-src 'self' blob: https://*.r2.cloudflarestorage.com",
   // wss: is load-bearing — the notification bell holds a Supabase Realtime
   // socket, and omitting it silently kills live notifications.
   [

@@ -40,6 +40,7 @@ import {
   isAllowedContentType,
   isOwnedObjectKey,
   maxBytesForKind,
+  type UploadKind,
 } from "@/lib/validation/product";
 
 // Storefront CRUD for the ACTIVE account's store. A store owns MANY storefronts,
@@ -207,15 +208,17 @@ export async function saveStorefront(
     ...(parsed.data.embed ? { embed: parsed.data.embed } : {}),
   };
 
-  // Image background: the config stores only the R2 object KEY. A key that
-  // differs from the one already saved must be a NEW upload by this user:
-  // enforce uploader ownership and re-check the stored object's real
-  // size/type (presign-time checks are advisory only). The pre-save read also
-  // gives us the old key so a replaced image can be evicted afterwards.
+  // Uploaded assets (image background, custom font): the config stores only the
+  // R2 object KEY. A key that differs from the one already saved must be a NEW
+  // upload by this user: enforce uploader ownership and re-check the stored
+  // object's real size/type (upload-time checks alone are not a boundary). The
+  // pre-save read also gives us the old keys, so replaced objects can be
+  // evicted afterwards.
   const nextBackgroundKey =
     config.theme.background.kind === "image"
       ? config.theme.background.key
       : null;
+  const nextFontKey = config.theme.customFont?.key ?? null;
   const { data: existingRow, error: existingError } = await supabase
     .from("storefronts")
     .select("config")
@@ -228,16 +231,44 @@ export async function saveStorefront(
   }
   if (!existingRow) return failure(notFound("storefront"));
   const previousBackgroundKey = storedBackgroundKey(existingRow.config);
+  const previousFontKey = storedFontKey(existingRow.config);
   if (nextBackgroundKey && nextBackgroundKey !== previousBackgroundKey) {
-    if (!isOwnedObjectKey(nextBackgroundKey, "image", account.userId)) {
-      return failure(
-        invalidInput(
-          "That background image can't be used.",
-          "Re-upload the image, then save again.",
-        ),
-      );
-    }
-    const verified = await verifyBackgroundImage(nextBackgroundKey);
+    const verified = await verifyUpload(
+      nextBackgroundKey,
+      "image",
+      account.userId,
+    );
+    if (!verified.ok) return failure(verified.error);
+  }
+  if (nextFontKey && nextFontKey !== previousFontKey) {
+    const verified = await verifyUpload(nextFontKey, "font", account.userId);
+    if (!verified.ok) return failure(verified.error);
+  }
+
+  // Elements are the one upload a config can hold MANY of, so this is a set
+  // difference rather than a pair of scalars. Only keys that are new to this
+  // storefront are verified: re-saving an untouched canvas costs no HEAD
+  // requests at all, however many elements it carries.
+  const previousElementKeys = storedElementKeys(existingRow.config);
+  const nextElementKeys = new Set(
+    config.blocks.flatMap((block) => (block.type === "image" ? [block.key] : [])),
+  );
+  const newElementKeys = [...nextElementKeys].filter(
+    (key) => !previousElementKeys.has(key),
+  );
+  // One HEAD each, so a crafted client must not be able to turn a single save
+  // into MAX_BLOCKS round-trips to R2. The designer uploads one element at a
+  // time, so this ceiling is far above anything the UI can produce.
+  if (newElementKeys.length > MAX_NEW_ELEMENT_KEYS_PER_SAVE) {
+    return failure(
+      invalidInput(
+        "Too many new images in one save.",
+        "Save your storefront, then add the rest.",
+      ),
+    );
+  }
+  for (const key of newElementKeys) {
+    const verified = await verifyUpload(key, "element", account.userId);
     if (!verified.ok) return failure(verified.error);
   }
 
@@ -259,9 +290,15 @@ export async function saveStorefront(
   }
   if (!row) return failure(notFound("storefront"));
 
-  // Replaced or removed image background: evict the detached object.
+  // Replaced or removed uploads: evict the detached objects.
   if (previousBackgroundKey && previousBackgroundKey !== nextBackgroundKey) {
     await evictObject(previousBackgroundKey);
+  }
+  if (previousFontKey && previousFontKey !== nextFontKey) {
+    await evictObject(previousFontKey);
+  }
+  for (const key of previousElementKeys) {
+    if (!nextElementKeys.has(key)) await evictObject(key);
   }
 
   revalidatePath("/storefront");
@@ -283,6 +320,39 @@ function storedBackgroundKey(config: unknown): string | null {
     : null;
 }
 
+/** The uploaded-font object key inside a stored (untrusted) config jsonb. */
+function storedFontKey(config: unknown): string | null {
+  if (typeof config !== "object" || config === null) return null;
+  const font = (config as { theme?: { customFont?: { key?: unknown } } }).theme
+    ?.customFont;
+  return typeof font?.key === "string" ? font.key : null;
+}
+
+/**
+ * Every element object key inside a stored (untrusted) config jsonb.
+ *
+ * A Set rather than a list, and read defensively field by field, because this
+ * runs against whatever is already in the column — including a config written
+ * before image blocks existed, or one whose shape no longer parses.
+ */
+function storedElementKeys(config: unknown): Set<string> {
+  const keys = new Set<string>();
+  if (typeof config !== "object" || config === null) return keys;
+  const blocks = (config as { blocks?: unknown }).blocks;
+  if (!Array.isArray(blocks)) return keys;
+  for (const block of blocks) {
+    if (typeof block !== "object" || block === null) continue;
+    const candidate = block as { type?: unknown; key?: unknown };
+    if (candidate.type === "image" && typeof candidate.key === "string") {
+      keys.add(candidate.key);
+    }
+  }
+  return keys;
+}
+
+/** How many NEW element uploads one save may introduce. See the call site. */
+const MAX_NEW_ELEMENT_KEYS_PER_SAVE = 10;
+
 /** Best-effort R2 cleanup: never fails the parent operation. */
 async function evictObject(key: string): Promise<void> {
   await deleteObject(key).catch((error) =>
@@ -290,49 +360,94 @@ async function evictObject(key: string): Promise<void> {
   );
 }
 
+/** What each verifiable upload is called and what a rejection tells the seller
+ *  to do about it. Keeps {@link verifyUpload} one function rather than two
+ *  copies that drift on everything except the noun. */
+const UPLOAD_COPY = {
+  image: {
+    noun: "background image",
+    missing: "Select the image again and re-upload it before saving.",
+    tooBig: {
+      message: "That background image is too large.",
+      fix: "Use an image under 10 MB, then re-upload it.",
+    },
+    wrongType: {
+      message: "That file type is not supported.",
+      fix: "Use a JPEG, PNG, WebP, GIF, or AVIF image.",
+    },
+  },
+  font: {
+    noun: "font",
+    missing: "Select the font again and re-upload it before saving.",
+    tooBig: {
+      message: "That font file is too large.",
+      fix: "Use a font under 2 MB. A WOFF2 is usually well under 100 KB.",
+    },
+    wrongType: {
+      message: "That file type is not supported.",
+      fix: "Use a WOFF2, WOFF, TTF, or OTF font file.",
+    },
+  },
+  element: {
+    noun: "image",
+    missing: "Add the image again and re-upload it before saving.",
+    tooBig: {
+      message: "That image is too large.",
+      fix: "Use an image under 2 MB, then add it again.",
+    },
+    wrongType: {
+      message: "That file type is not supported.",
+      fix:
+        "Use a PNG, JPEG, WebP, GIF, AVIF, or an SVG with no scripts, " +
+        "external links, or embedded images.",
+    },
+  },
+} as const satisfies Partial<Record<UploadKind, unknown>>;
+
 /**
- * Post-upload boundary for a NEW background image key, mirroring the product
- * image rules: the stored object's REAL size and type are checked via HEAD;
- * anything oversized or non-image is evicted and never linked to a config.
+ * Post-upload boundary for a NEW object key on a config, mirroring the product
+ * image rules: the key must be one this user uploaded, and the stored object's
+ * REAL size and type are checked via HEAD. Anything oversized or of the wrong
+ * type is evicted and never linked to a config.
  */
-async function verifyBackgroundImage(
+async function verifyUpload(
   key: string,
+  kind: keyof typeof UPLOAD_COPY,
+  uploaderId: string,
 ): Promise<{ ok: true } | { ok: false; error: ActionError }> {
+  const copy = UPLOAD_COPY[kind];
+  if (!isOwnedObjectKey(key, kind, uploaderId)) {
+    return {
+      ok: false,
+      error: invalidInput(`That ${copy.noun} can't be used.`, copy.missing),
+    };
+  }
+
   let meta;
   try {
     meta = await headObject(key);
   } catch (error) {
-    console.error("[storefront] background verification failed", error);
-    return { ok: false, error: serverError("verify your background image") };
+    console.error(`[storefront] ${kind} verification failed`, error);
+    return { ok: false, error: serverError(`verify your ${copy.noun}`) };
   }
   if (!meta) {
     return {
       ok: false,
       error: uploadFailed(
-        "Your background image upload didn't finish.",
-        "Select the image again and re-upload it before saving.",
+        `Your ${copy.noun} upload didn't finish.`,
+        copy.missing,
       ),
     };
   }
   const tooBig =
     !Number.isFinite(meta.size) ||
     meta.size <= 0 ||
-    meta.size > maxBytesForKind("image");
-  const wrongType = !isAllowedContentType("image", meta.contentType);
+    meta.size > maxBytesForKind(kind);
+  const wrongType = !isAllowedContentType(kind, meta.contentType);
   if (tooBig || wrongType) {
     await evictObject(key);
-    return {
-      ok: false,
-      error: tooBig
-        ? uploadFailed(
-            "That background image is too large.",
-            "Use an image under 10 MB, then re-upload it.",
-          )
-        : uploadFailed(
-            "That file type is not supported.",
-            "Use a JPEG, PNG, WebP, GIF, or AVIF image.",
-          ),
-    };
+    const reason = tooBig ? copy.tooBig : copy.wrongType;
+    return { ok: false, error: uploadFailed(reason.message, reason.fix) };
   }
   return { ok: true };
 }
@@ -442,9 +557,12 @@ export async function deleteStorefront(
   }
   if (!deleted) return failure(notFound("storefront"));
 
-  // Evict the image background object (if any) along with its storefront.
+  // Evict this storefront's uploaded objects (background, font) along with it.
   const backgroundKey = storedBackgroundKey(deleted.config);
   if (backgroundKey) await evictObject(backgroundKey);
+  const fontKey = storedFontKey(deleted.config);
+  if (fontKey) await evictObject(fontKey);
+  for (const key of storedElementKeys(deleted.config)) await evictObject(key);
 
   revalidatePath("/storefront");
   return { ok: true };

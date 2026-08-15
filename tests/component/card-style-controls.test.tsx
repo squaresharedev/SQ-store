@@ -25,14 +25,8 @@ describe("CardStyleControls", () => {
       <CardStyleControls value={resolveCardStyle(themed())} onChange={onChange} />,
     );
 
-    await user.click(screen.getByRole("button", { name: "Pill" }));
-    expect(onChange).toHaveBeenLastCalledWith({ priceTagStyle: "pill" });
-
     await user.click(screen.getByRole("switch", { name: "Show title" }));
     expect(onChange).toHaveBeenLastCalledWith({ showTitle: false });
-
-    await user.click(screen.getByRole("button", { name: "L" }));
-    expect(onChange).toHaveBeenLastCalledWith({ priceTagSize: "lg" });
 
     // No call ever carries more than its one field.
     for (const call of onChange.mock.calls) {
@@ -40,21 +34,16 @@ describe("CardStyleControls", () => {
     }
   });
 
-  it("switching price tag mode to float picks a coerced concrete spot", async () => {
-    const user = userEvent.setup();
-    const onChange = vi.fn();
-    // Heavily rounded: corners are clipped away, so the default float spot
-    // must land on the center axis, not a corner that does not exist.
+  it("holds no price tag controls: they live in their own panel", async () => {
     render(
-      <CardStyleControls
-        value={resolveCardStyle(themed(), { cornerRadius: 100 })}
-        onChange={onChange}
-      />,
+      <CardStyleControls value={resolveCardStyle(themed())} onChange={vi.fn()} />,
     );
-    await user.click(screen.getByRole("button", { name: "On image" }));
-    expect(onChange).toHaveBeenLastCalledWith({
-      priceTagPosition: "bottom-center",
-    });
+    // The whole price tag group moved to PriceTagControls. If any of it
+    // reappeared here, a seller would have two places to set one value.
+    expect(screen.queryByRole("group", { name: "Price tag placement" })).toBeNull();
+    expect(screen.queryByRole("group", { name: "Price tag font" })).toBeNull();
+    expect(screen.queryByRole("slider", { name: "Price tag size" })).toBeNull();
+    expect(screen.queryByRole("switch", { name: "Show on hover" })).toBeNull();
   });
 });
 
@@ -65,8 +54,8 @@ describe("CardsSection (theme scope)", () => {
     const theme = themed();
     render(<CardsSection theme={theme} onChange={onChange} />);
 
-    await user.click(screen.getByRole("button", { name: "Pill" }));
-    expect(onChange).toHaveBeenCalledWith({ ...theme, priceTagStyle: "pill" });
+    await user.click(screen.getByRole("switch", { name: "Show title" }));
+    expect(onChange).toHaveBeenCalledWith({ ...theme, showTitle: false });
   });
 
   it("still owns the theme-only sold-out badge switch", async () => {

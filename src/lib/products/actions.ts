@@ -79,7 +79,15 @@ function parseWrite(
   return { data: parsed.data };
 }
 
-const KIND_NOUN: Record<UploadKind, string> = { image: "image", file: "file" };
+const KIND_NOUN: Record<UploadKind, string> = {
+  image: "image",
+  file: "file",
+  // Products never carry either of these (a font belongs to a storefront's
+  // theme, an element to its canvas), but the kinds exist, so this map answers
+  // for them rather than leaving a hole.
+  font: "font",
+  element: "element",
+};
 
 /**
  * Post-upload security boundary. A presigned PUT can bind neither Content-Type

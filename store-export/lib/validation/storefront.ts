@@ -19,9 +19,12 @@ import {
   HEADER_BIO_MAX,
   HEADER_NAME_MAX,
   PRICE_DISPLAYS,
+  PRICE_TAG_BORDER_WIDTH_MAX,
+  PRICE_TAG_FONTS,
   PRICE_TAG_POSITIONS,
-  PRICE_TAG_SIZES,
-  PRICE_TAG_STYLES,
+  PRICE_TAG_RADIUS_MAX,
+  PRICE_TAG_SIZE_MAX,
+  PRICE_TAG_SIZE_MIN,
   SHAPE_BORDER_WIDTH_MAX,
   SHAPE_KINDS,
   STOREFRONT_FONTS,
@@ -110,6 +113,62 @@ const backgroundSchema = z.discriminatedUnion("kind", [
   }),
 ]);
 
+/**
+ * The price tag's appearance, spread into the theme schema. Every field
+ * is optional: absent means the coded default.
+ */
+const priceTagAppearanceFields = {
+  priceTagFont: z.enum(PRICE_TAG_FONTS).optional(),
+  priceTagSize: z
+    .number()
+    .int()
+    .min(PRICE_TAG_SIZE_MIN)
+    .max(PRICE_TAG_SIZE_MAX)
+    .optional(),
+  priceTagColor: hexColorSchema.optional(),
+  priceTagTextColor: hexColorSchema.optional(),
+  priceTagBorderColor: hexColorSchema.optional(),
+  priceTagBorderWidth: z
+    .number()
+    .int()
+    .min(0)
+    .max(PRICE_TAG_BORDER_WIDTH_MAX)
+    .optional(),
+  priceTagRadius: z.number().int().min(0).max(PRICE_TAG_RADIUS_MAX).optional(),
+};
+
+/** Legacy chip size enum -> px, matching the text sizes each one rendered at
+ *  (text-[0.625rem] / text-xs / text-sm). */
+const LEGACY_PRICE_TAG_SIZE_PX: Record<string, number> = {
+  sm: 10,
+  md: 12,
+  lg: 14,
+};
+
+/**
+ * The price tag used to be two closed presets: priceTagStyle (plain/pill) and
+ * priceTagSize (sm/md/lg). Both are now numbers, so unpick them in place —
+ * on the theme, and on every per-tile override in the app's own schema.
+ * `pill` was a fully-round chip with a hairline; `plain` a 2px-round one.
+ */
+function migrateLegacyPriceTag(target: Record<string, unknown>) {
+  if ("priceTagStyle" in target) {
+    if (target.priceTagRadius === undefined) {
+      target.priceTagRadius = target.priceTagStyle === "pill" ? 24 : 2;
+    }
+    if (target.priceTagStyle === "pill" && target.priceTagBorderWidth === undefined) {
+      target.priceTagBorderWidth = 1;
+    }
+    delete target.priceTagStyle;
+  }
+  // Only the three values that ever existed. Anything else is not a legacy
+  // config, it is junk, and it belongs to the schema to reject.
+  if (typeof target.priceTagSize === "string") {
+    const px = LEGACY_PRICE_TAG_SIZE_PX[target.priceTagSize];
+    if (px !== undefined) target.priceTagSize = px;
+  }
+}
+
 const themeObjectSchema = z.strictObject({
   background: backgroundSchema,
   accent: hexColorSchema,
@@ -131,9 +190,7 @@ const themeObjectSchema = z.strictObject({
           : value,
     z.enum(PRICE_TAG_POSITIONS),
   ),
-  priceTagStyle: z.enum(PRICE_TAG_STYLES),
-  // Optional so configs saved before the size control still parse.
-  priceTagSize: z.enum(PRICE_TAG_SIZES).optional(),
+  ...priceTagAppearanceFields,
   showTitle: z.boolean(),
   displayMode: z.enum(DISPLAY_MODES),
   gridGap: z.number().int().min(0).max(GRID_GAP_MAX),
@@ -206,6 +263,7 @@ const themeSchema = z.preprocess((value) => {
   // priceTagPosition picker. Drop it so any config that carries one still
   // parses (strictObject would otherwise reject the unknown key).
   delete theme.priceTagCorner;
+  migrateLegacyPriceTag(theme);
   if ("density" in theme) {
     if (theme.gridGap === undefined) {
       theme.gridGap = LEGACY_DENSITY_PX[String(theme.density)] ?? 8;

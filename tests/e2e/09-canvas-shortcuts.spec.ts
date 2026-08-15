@@ -28,9 +28,18 @@ test.describe.configure({ mode: "serial" });
 
 let page: Page;
 
-/** Insert a text block. It comes back already selected. */
+/** The block's words, typed on the tile itself. */
+const canvasText = () => page.getByRole("textbox", { name: "Block text" });
+
+/**
+ * Insert a text block. It comes back selected AND in typing mode (the words
+ * are edited on the tile now), so Escape is what hands the keyboard back to
+ * the canvas — every shortcut below is about a tile, not a caret.
+ */
 async function addTextBlock() {
   await page.getByRole("button", { name: "Add text", exact: true }).click();
+  await expect(canvasText()).toBeFocused();
+  await page.keyboard.press("Escape");
   const tile = page.getByText("Your text here").first();
   await expect(tile).toBeVisible();
   return tile;
@@ -39,6 +48,13 @@ async function addTextBlock() {
 /** The selected block's inspector card. */
 const inspector = () =>
   page.getByRole("button", { name: /close text block panel/i });
+
+/** Drop the selection. Closing the inspector is what clears it — clicking the
+ *  tile again would put the caret in it, not deselect. */
+async function deselect() {
+  await inspector().click();
+  await expect(inspector()).toBeHidden();
+}
 
 test.beforeAll(async ({ browser }) => {
   page = await browser.newPage();
@@ -74,9 +90,10 @@ test.describe("storefront canvas shortcuts", () => {
 
   test("a tile selected by clicking can be deleted", async () => {
     const tile = await addTextBlock();
-    await tile.click(); // toggles OFF
-    await expect(inspector()).toBeHidden();
-    await tile.click(); // toggles back ON
+    // Deselect from the panel, not by clicking the tile again: on a text
+    // block that second click means "let me type" (see 21-inplace-text).
+    await deselect();
+    await tile.click(); // selects it again
     await expect(inspector()).toBeVisible();
 
     await page.keyboard.press("Delete");
@@ -85,8 +102,7 @@ test.describe("storefront canvas shortcuts", () => {
 
   test("Delete does nothing when no block is selected", async () => {
     const tile = await addTextBlock();
-    await tile.click(); // deselect
-    await expect(inspector()).toBeHidden();
+    await deselect();
 
     await page.keyboard.press("Delete");
     await expect(tile).toBeVisible();
@@ -98,23 +114,21 @@ test.describe("storefront canvas shortcuts", () => {
   });
 
   test("Backspace while typing edits the text, it does not delete the block", async () => {
-    await addTextBlock();
+    const tile = await addTextBlock();
 
-    // The selected block's own inspector — a Backspace here must belong to the
-    // field, or the seller loses the tile they are editing.
-    const textarea = page.getByRole("textbox", { name: "Text" });
-    await expect(textarea).toBeVisible();
-    await textarea.click();
-    await textarea.fill("Hello");
+    // Typing happens ON the tile, and the tile is the very thing Backspace
+    // deletes when it is merely selected — so this is the shortcut's sharpest
+    // edge: the key must belong to the caret, not to the canvas.
+    await tile.click(); // already selected, so this puts the caret in it
+    await expect(canvasText()).toBeFocused();
+    await page.keyboard.press("Control+a");
+    await page.keyboard.type("Hello");
     await page.keyboard.press("Backspace");
 
-    await expect(textarea).toHaveValue("Hell");
     const edited = page.getByText("Hell", { exact: true }).first();
     await expect(edited).toBeVisible();
 
-    await page.keyboard.press("Escape"); // out of the field
-    await edited.click(); // deselect
-    await edited.click(); // reselect, focus on the canvas
+    await page.keyboard.press("Escape"); // out of the caret, block still selected
     await page.keyboard.press("Delete");
     await expect(edited).toBeHidden();
   });
@@ -129,5 +143,33 @@ test.describe("storefront canvas shortcuts", () => {
 
     await expect(name).toHaveValue("My sho");
     await expect(tile).toBeVisible();
+
+    // Leave the canvas empty for the next test.
+    await tile.click();
+    await page.keyboard.press("Delete");
+    await expect(tile).toBeHidden();
+  });
+
+  test("arrow keys move the caret while typing, and the block afterwards", async () => {
+    const tile = await addTextBlock();
+    const cell = page.locator("[data-grid-cell]").first();
+    const before = await cell.getAttribute("style");
+
+    await tile.click(); // selected already: the caret goes in
+    await expect(canvasText()).toBeFocused();
+    // Arrows belong to the caret here; the grid must not move the block under
+    // the seller mid-word.
+    await page.keyboard.press("ArrowRight");
+    await page.keyboard.press("ArrowDown");
+    await expect(cell).toHaveAttribute("style", before ?? "");
+
+    // Escape hands the keyboard back to the TILE, so the same keys are the
+    // block's again without any further clicking.
+    await page.keyboard.press("Escape");
+    await page.keyboard.press("ArrowRight");
+    await expect(cell).not.toHaveAttribute("style", before ?? "");
+
+    await page.keyboard.press("Delete");
+    await expect(tile).toBeHidden();
   });
 });

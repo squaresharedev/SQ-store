@@ -1,12 +1,13 @@
 import type { CSSProperties } from "react";
 import type { GridPlacement } from "@/components/grid/gridConstants";
-import type {
-  PriceTagFloatPosition,
-  PriceTagSize,
-  StorefrontFont,
-  TextAlign,
-  TextSize,
-  TextVariant,
+import {
+  PRICE_TAG_DEFAULT_BORDER,
+  type PriceTagFloatPosition,
+  type PriceTagFont,
+  type StorefrontFont,
+  type TextAlign,
+  type TextSize,
+  type TextVariant,
 } from "@/types/storefront";
 
 // Enum -> class lookups for rendering a StorefrontConfig. Config enums never
@@ -92,15 +93,70 @@ export const TEXT_SIZE_LABELS: Record<TextSize, string> = {
   "2xl": "Huge",
 };
 
-// Price tag chip sizing. Placement comes from PRICE_TAG_FLOAT_CLASSES above;
-// style (plain/pill) contributes only shape + border, and size contributes
-// text + padding. The axes are combined in ProductTileContent so they never
-// fight over the same classes.
-export const PRICE_TAG_SIZE_CLASSES: Record<PriceTagSize, string> = {
-  sm: "text-[0.625rem] px-1 py-px",
-  md: "text-xs px-1.5 py-0.5",
-  lg: "text-sm px-2 py-1",
+// Price tag typeface. Its own three-entry map rather than a slice of
+// FONT_CLASSES: a chip is read at 10px, where display and handwritten faces
+// stop being legible, so those are not on offer here.
+export const PRICE_TAG_FONT_CLASSES: Record<PriceTagFont, string> = {
+  inter: "font-inter",
+  serif: "font-serif",
+  mono: "font-mono",
 };
+
+export const PRICE_TAG_FONT_LABELS: Record<PriceTagFont, string> = {
+  inter: "Sans",
+  serif: "Serif",
+  mono: "Mono",
+};
+
+/** The resolved price tag appearance a renderer works from — structural, so
+ *  the app's CardStyle satisfies it without config-maps reaching back into
+ *  the per-tile override model to say so. */
+type PriceTagChip = {
+  priceTagSize: number;
+  priceTagBorderWidth: number;
+  priceTagRadius: number;
+  priceTagColor?: string;
+  priceTagTextColor?: string;
+  priceTagBorderColor?: string;
+};
+
+/**
+ * Every pixel of the price tag chip, from the resolved card style. All of it
+ * is inline rather than classes because each value is a schema-bounded number
+ * or a strict hex, and because "what colour is the tag" then has ONE answer a
+ * renderer, a picker and an agent can all read.
+ *
+ * Padding is derived from the size (half of it horizontally, a quarter
+ * vertically, floored so an 8px tag still has a chip) rather than being its
+ * own control: one slider scales the whole tag.
+ */
+export function priceTagChipStyle(
+  card: PriceTagChip,
+  /** What the chip paints where the seller set nothing — see
+   *  defaultPriceTagFill and the accent/shadow rule in ProductTileContent. */
+  fallback: { fill: string; text: string },
+): CSSProperties {
+  const size = card.priceTagSize;
+  const border = card.priceTagBorderWidth;
+  return {
+    fontSize: `${size}px`,
+    lineHeight: 1.25,
+    paddingInline: `${Math.max(2, Math.round(size * 0.5))}px`,
+    paddingBlock: `${Math.max(1, Math.round(size * 0.25))}px`,
+    borderRadius: `${card.priceTagRadius}px`,
+    backgroundColor: card.priceTagColor ?? fallback.fill,
+    color: card.priceTagTextColor ?? fallback.text,
+    // A zero-width border must emit NO border properties at all, or the chip
+    // still reserves the style's layout box.
+    ...(border > 0
+      ? {
+          borderWidth: `${border}px`,
+          borderStyle: "solid",
+          borderColor: card.priceTagBorderColor ?? PRICE_TAG_DEFAULT_BORDER,
+        }
+      : {}),
+  };
+}
 
 export const TEXT_VARIANT_LABELS: Record<TextVariant, string> = {
   heading: "Heading",

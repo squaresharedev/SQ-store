@@ -779,6 +779,9 @@ export function Grid<TData>(props: GridProps<TData>) {
                 else cellNodes.current.delete(block.key);
               }}
               data-grid-cell=""
+              // For consumers that hit-test cells from the DOM (the
+              // designer's marquee selection reads these back into keys).
+              data-grid-key={block.key}
               onPointerDown={
                 interactive ? (event) => startMove(event, block) : undefined
               }
@@ -853,6 +856,9 @@ export function Grid<TData>(props: GridProps<TData>) {
             <li key={`empty-${cell.x}-${cell.y}`} style={placementStyle({ ...cell, w: 1, h: 1 })}>
               <button
                 type="button"
+                // Marks a FREE-cell control: a consumer's drag gesture (the
+                // designer's marquee) may start here, unlike real controls.
+                data-grid-empty=""
                 onClick={() => onEmptyCellClick(cell.x, cell.y)}
                 aria-label={`Add a block at column ${cell.x + 1}, row ${cell.y + 1}`}
                 style={cellStyle?.({ ...cell, w: 1, h: 1 })}

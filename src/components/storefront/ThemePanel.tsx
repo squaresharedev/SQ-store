@@ -49,6 +49,7 @@ export function ThemePanel({
         label="Accent"
         value={theme.accent}
         onChange={(accent) => onChange({ ...theme, accent })}
+        target={{ kind: "theme-accent" }}
       />
 
       {/* Editor guide only: buyers never see the empty slots, so this is a

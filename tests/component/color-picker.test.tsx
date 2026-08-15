@@ -20,9 +20,16 @@ beforeAll(() => {
   });
 });
 import userEvent from "@testing-library/user-event";
+import { useState, type ReactNode } from "react";
 import { ColorPicker } from "@/components/ui/ColorPicker";
 import { ColorArea } from "@/components/ui/ColorArea";
 import { COLOR_PRESETS } from "@/lib/theme/color-presets";
+import { ColorTargetProvider } from "@/lib/theme/color-context";
+import type { ColorTargetRef } from "@/lib/theme/color-target";
+import {
+  __resetRecentColors,
+  getRecentColors,
+} from "@/lib/theme/recent-colors";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -33,9 +40,38 @@ const STRICT_HEX = /^#[0-9a-f]{6}$/;
 /** A hex that is deliberately NOT one of the quick swatches. */
 const CUSTOM = "#a855f7";
 
+// The recents store is module scope (deliberately — see recent-colors.ts), so
+// without this one test's picks are the next one's starting state.
+afterEach(() => __resetRecentColors());
+
 function swatchRow() {
   return screen.getByRole("group", { name: /color swatches/i });
 }
+
+/**
+ * Mount a picker inside the designer's opener context, so `target` routes the
+ * wheel to the ColorPanel. The panel itself is not rendered here — these tests
+ * are about what the PICKER does with a target.
+ */
+function WithColorTarget({
+  activeRef = null,
+  open = vi.fn(),
+  close = vi.fn(),
+  children,
+}: {
+  activeRef?: ColorTargetRef | null;
+  open?: (ref: ColorTargetRef) => void;
+  close?: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <ColorTargetProvider value={{ activeRef, open, close }}>
+      {children}
+    </ColorTargetProvider>
+  );
+}
+
+const TARGET: ColorTargetRef = { kind: "shape-fill", blockKey: "s_1" };
 
 /** Open the picker panel and return the hex input inside it. */
 async function openPanel(onChange: (hex: string) => void, value = CUSTOM) {
@@ -358,6 +394,196 @@ describe("ColorPicker eyedropper", () => {
       }),
     );
     expect(onChange).not.toHaveBeenCalled();
+  });
+});
+
+
+// ---------------------------------------------------------------------------
+// The wheel: popover on its own, ColorPanel inside the designer
+// ---------------------------------------------------------------------------
+
+describe("ColorPicker target routing", () => {
+  it("with no target, the wheel opens this component's own popover", async () => {
+    const user = userEvent.setup();
+    render(
+      <WithColorTarget>
+        <ColorPicker value={CUSTOM} onChange={vi.fn()} label="Color" />
+      </WithColorTarget>,
+    );
+    await user.click(screen.getByTestId("color-picker-trigger"));
+    expect(screen.getByRole("textbox", { name: /hex color/i })).toBeInTheDocument();
+  });
+
+  it("with a target but no provider, the popover still opens", async () => {
+    // The picker has to stay complete outside the designer.
+    const user = userEvent.setup();
+    render(
+      <ColorPicker value={CUSTOM} onChange={vi.fn()} label="Color" target={TARGET} />,
+    );
+    await user.click(screen.getByTestId("color-picker-trigger"));
+    expect(screen.getByRole("textbox", { name: /hex color/i })).toBeInTheDocument();
+  });
+
+  it("with a target AND a provider, the wheel aims the panel instead", async () => {
+    const open = vi.fn();
+    const user = userEvent.setup();
+    render(
+      <WithColorTarget open={open}>
+        <ColorPicker value={CUSTOM} onChange={vi.fn()} label="Color" target={TARGET} />
+      </WithColorTarget>,
+    );
+    await user.click(screen.getByTestId("color-picker-trigger"));
+    expect(open).toHaveBeenCalledWith(TARGET);
+    // And emphatically NOT both choosers at once.
+    expect(screen.queryByRole("textbox", { name: /hex color/i })).toBeNull();
+  });
+
+  it("clicking the wheel again closes a panel already on this field", async () => {
+    const close = vi.fn();
+    const open = vi.fn();
+    const user = userEvent.setup();
+    render(
+      <WithColorTarget activeRef={TARGET} open={open} close={close}>
+        <ColorPicker value={CUSTOM} onChange={vi.fn()} label="Color" target={TARGET} />
+      </WithColorTarget>,
+    );
+    await user.click(screen.getByTestId("color-picker-trigger"));
+    expect(close).toHaveBeenCalledTimes(1);
+    expect(open).not.toHaveBeenCalled();
+  });
+
+  it("a panel open on ANOTHER field is retargeted, not closed", async () => {
+    const close = vi.fn();
+    const open = vi.fn();
+    const user = userEvent.setup();
+    render(
+      <WithColorTarget
+        activeRef={{ kind: "shape-fill", blockKey: "s_other" }}
+        open={open}
+        close={close}
+      >
+        <ColorPicker value={CUSTOM} onChange={vi.fn()} label="Color" target={TARGET} />
+      </WithColorTarget>,
+    );
+    await user.click(screen.getByTestId("color-picker-trigger"));
+    expect(open).toHaveBeenCalledWith(TARGET);
+    expect(close).not.toHaveBeenCalled();
+  });
+
+  it("the wheel announces itself as expanded while the panel is on this field", () => {
+    render(
+      <WithColorTarget activeRef={TARGET}>
+        <ColorPicker value={CUSTOM} onChange={vi.fn()} label="Color" target={TARGET} />
+      </WithColorTarget>,
+    );
+    const wheel = screen.getByTestId("color-picker-trigger");
+    expect(wheel).toHaveAttribute("aria-expanded", "true");
+    expect(wheel).toHaveAttribute("aria-label", "More colors");
+    // No dialog to announce: the panel is a docked region, not an overlay.
+    expect(wheel).not.toHaveAttribute("aria-haspopup");
+  });
+
+  it("the fixed swatches still work as one-tap shortcuts under a target", async () => {
+    const onChange = vi.fn();
+    const user = userEvent.setup();
+    render(
+      <WithColorTarget>
+        <ColorPicker value={CUSTOM} onChange={onChange} label="Color" target={TARGET} />
+      </WithColorTarget>,
+    );
+    const preset = COLOR_PRESETS[0];
+    await user.click(
+      screen.getByRole("button", { name: `${preset.name} (${preset.value})` }),
+    );
+    expect(onChange).toHaveBeenLastCalledWith(preset.value);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Recording recents — only on commit, never per frame
+// ---------------------------------------------------------------------------
+
+describe("ColorPicker recent-color recording", () => {
+  it("a fixed swatch tap is recorded", async () => {
+    const user = userEvent.setup();
+    render(<ColorPicker value={CUSTOM} onChange={vi.fn()} label="Color" />);
+    const preset = COLOR_PRESETS[1];
+    await user.click(
+      screen.getByRole("button", { name: `${preset.name} (${preset.value})` }),
+    );
+    expect(getRecentColors()).toEqual([preset.value]);
+  });
+
+  it("an eyedropper sample is recorded", async () => {
+    (window as { EyeDropper?: unknown }).EyeDropper = class {
+      open() {
+        return Promise.resolve({ sRGBHex: "#AABBCC" });
+      }
+    };
+    const user = userEvent.setup();
+    render(<ColorPicker value={CUSTOM} onChange={vi.fn()} label="Color" />);
+    await user.click(
+      within(swatchRow()).getByRole("button", {
+        name: /pick a color from the screen/i,
+      }),
+    );
+    expect(getRecentColors()).toEqual(["#aabbcc"]);
+    delete (window as { EyeDropper?: unknown }).EyeDropper;
+  });
+
+  it("opening and closing the panel on an unchanged value records nothing", async () => {
+    const user = userEvent.setup();
+    render(<ColorPicker value={CUSTOM} onChange={vi.fn()} label="Color" />);
+    const trigger = screen.getByTestId("color-picker-trigger");
+    await user.click(trigger);
+    await user.click(trigger);
+    expect(getRecentColors()).toEqual([]);
+  });
+
+  it("closing the panel records the value the seller landed on", async () => {
+    // The parent owns the value, exactly as every real call site does, so the
+    // picker closes on the color the drag produced rather than the one it
+    // opened with.
+    function Harness() {
+      const [value, setValue] = useState(CUSTOM);
+      return <ColorPicker value={value} onChange={setValue} label="Color" />;
+    }
+    const user = userEvent.setup();
+    render(<Harness />);
+    const trigger = screen.getByTestId("color-picker-trigger");
+    await user.click(trigger);
+
+    // One drag of the saturation square: many emits, one commit.
+    const sv = screen.getByRole("slider", { name: /saturation and brightness/i });
+    fireEvent.keyDown(sv, { key: "ArrowRight" });
+    fireEvent.keyDown(sv, { key: "ArrowRight" });
+    fireEvent.keyDown(sv, { key: "ArrowUp" });
+    expect(getRecentColors()).toEqual([]);
+
+    await user.click(trigger);
+    expect(getRecentColors()).toHaveLength(1);
+    expect(getRecentColors()[0]).toMatch(STRICT_HEX);
+    expect(getRecentColors()[0]).not.toBe(CUSTOM);
+  });
+
+  it("typing in the hex field records only once, on close", async () => {
+    function Harness() {
+      const [value, setValue] = useState(CUSTOM);
+      return <ColorPicker value={value} onChange={setValue} label="Color" />;
+    }
+    const user = userEvent.setup();
+    render(<Harness />);
+    const trigger = screen.getByTestId("color-picker-trigger");
+    await user.click(trigger);
+
+    const hexInput = screen.getByRole("textbox", { name: /hex color/i });
+    await user.clear(hexInput);
+    await user.type(hexInput, "#ff0000");
+    // Every valid keystroke emits; none of them is a commit.
+    expect(getRecentColors()).toEqual([]);
+
+    await user.click(trigger);
+    expect(getRecentColors()).toEqual(["#ff0000"]);
   });
 });
 

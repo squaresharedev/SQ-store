@@ -9,6 +9,7 @@ import {
   readingOrder,
   type StorefrontBlock,
   type StorefrontTheme,
+  type TextSpan,
 } from "@/types/storefront";
 import { cn } from "@/lib/utils";
 import {
@@ -16,6 +17,11 @@ import {
   TILE_CONTROL_CHIP_CLASS,
   TILE_CONTROL_CLASS,
 } from "./BlockTile";
+import type {
+  InlineFormatKey,
+  TextEditSource,
+  TextRange,
+} from "./InlineTextEditor";
 
 /** Sub-pixel slack when comparing scrollLeft against its bounds — fractional
  *  layout widths mean an end-stopped strip rarely lands on an exact integer. */
@@ -46,10 +52,17 @@ export function CarouselStrip({
   getProduct,
   theme,
   editable = false,
-  editingKey = null,
+  editingKeys = [],
+  typingKey = null,
+  typingSelectAll = false,
   onSelect,
   onRemove,
   onMove,
+  onTypeStart,
+  onTextChange,
+  onToggleBlockFormat,
+  onTextRangeChange,
+  onTypeEnd,
   compact = false,
 }: {
   /** In visual order; the caller applies any hide-sold-out filtering. */
@@ -57,12 +70,23 @@ export function CarouselStrip({
   getProduct: (block: StorefrontBlock) => Product | null;
   theme: StorefrontTheme;
   editable?: boolean;
-  /** Key of the block open in the inspector panel (editable mode only). */
-  editingKey?: string | null;
-  onSelect?: (key: string | null) => void;
+  /** Keys of the blocks open in the inspector panel (editable mode only). */
+  editingKeys?: readonly string[];
+  /** The text block whose words are being typed on the tile, if any. */
+  typingKey?: string | null;
+  typingSelectAll?: boolean;
+  /** Toggle semantics live with the selection's owner; `additive` is a
+   *  shift-click (add/remove instead of replace). */
+  onSelect?: (key: string | null, additive?: boolean) => void;
   onRemove?: (key: string) => void;
   /** Move a block one slot left (-1) or right (1). */
   onMove?: (key: string, direction: -1 | 1) => void;
+  /** Text blocks: start / apply / end typing on the tile. */
+  onTypeStart?: (key: string) => void;
+  onTextChange?: (key: string, text: string, spans: TextSpan[], source: TextEditSource) => void;
+  onToggleBlockFormat?: (key: string, format: InlineFormatKey) => void;
+  onTextRangeChange?: (range: TextRange | null) => void;
+  onTypeEnd?: () => void;
   compact?: boolean;
 }) {
   const stripRef = useRef<HTMLUListElement>(null);
@@ -184,13 +208,19 @@ export function CarouselStrip({
                 product={getProduct(block)}
                 theme={theme}
                 editable={editable}
-                isEditing={editingKey === key}
-                onToggleEdit={
-                  onSelect
-                    ? () => onSelect(editingKey === key ? null : key)
-                    : undefined
+                isEditing={editingKeys.includes(key)}
+                isSoleSelection={
+                  editingKeys.length === 1 && editingKeys[0] === key
                 }
+                isTyping={typingKey === key}
+                typingSelectAll={typingSelectAll}
+                onToggleEdit={onSelect}
                 onRemove={onRemove}
+                onTypeStart={onTypeStart}
+                onTextChange={onTextChange}
+                onToggleBlockFormat={onToggleBlockFormat}
+                onTextRangeChange={onTextRangeChange}
+                onTypeEnd={onTypeEnd}
               />
 
               {/* Reorder arrows (the grid's drag handle has no meaning here). */}

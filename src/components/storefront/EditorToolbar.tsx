@@ -34,9 +34,10 @@ import {
   Smartphone,
   Type,
   Undo2,
+  Upload,
   WandSparkles,
 } from "lucide-react";
-import { SHAPE_KINDS, type ShapeKind } from "@/types/storefront";
+import { type ShapeKind } from "@/types/storefront";
 import { cn } from "@/lib/utils";
 import {
   focusRingClass as FOCUS_RING,
@@ -46,7 +47,15 @@ import {
   transitionClass as TRANSITION,
 } from "@/components/ui/control-styles";
 import { ShapeKindGlyph } from "./ShapeTileContent";
-import { SHAPE_SPECS } from "./shape-specs";
+import { QUICK_SHAPE_KINDS, SHAPE_SPECS } from "./shape-specs";
+
+/**
+ * What the file dialog offers. Extensions alongside the MIME types because
+ * browsers report SVG inconsistently — a filter of `image/svg+xml` alone can
+ * grey out the very .svg the seller is trying to pick.
+ */
+const ELEMENT_ACCEPT =
+  "image/png,image/jpeg,image/webp,image/gif,image/avif,image/svg+xml,.svg";
 import { useZoomValue, type CanvasViewport } from "./useCanvasViewport";
 
 /** The live zoom percentage. Its own component so that subscribing to the
@@ -75,6 +84,14 @@ const ICON_BTN =
 /** Row inside the "More" sheet: the shared overlay row, a little roomier. */
 const MORE_ITEM = cn(overlayItemClass, "gap-3 py-2.5 font-medium");
 
+/** Labelled button inside the single-row Element menu. Matches the toolbar's
+ *  own insert buttons rather than the "More" sheet's rows, because it sits in
+ *  a horizontal bar, not a vertical list. */
+const MENU_ROW_BTN =
+  `inline-flex h-9 shrink-0 items-center gap-1.5 rounded-none px-2.5 text-xs font-medium ` +
+  `text-muted-foreground hover:bg-accent hover:text-foreground ` +
+  `disabled:pointer-events-none disabled:opacity-50 ${TRANSITION} ${FOCUS_RING}`;
+
 /** Active state for the preview-mode pair. */
 const PREVIEW_ACTIVE = "bg-primary text-primary-foreground";
 /** Idle state for the preview-mode pair. */
@@ -95,6 +112,9 @@ export function EditorToolbar({
   onAddProduct,
   onAddText,
   onAddShape,
+  onAddElement,
+  onOpenShapesPanel,
+  uploadingElement = false,
   canAddBlocks,
   canUndo,
   canRedo,
@@ -115,6 +135,13 @@ export function EditorToolbar({
   onAddText: () => void;
   /** Insert a shape of the given kind (chosen from the hover menu). */
   onAddShape: (kind: ShapeKind) => void;
+  /** Upload the seller's own artwork and insert it as an image block. The
+   *  designer owns the upload, so failures surface as its toasts. */
+  onAddElement: (file: File) => void;
+  /** Open the left panel on the full shape library. */
+  onOpenShapesPanel: () => void;
+  /** True while an element upload is in flight. */
+  uploadingElement?: boolean;
   canAddBlocks: boolean;      // false when the block cap is reached -> disable the insert tools
   canUndo: boolean;
   canRedo: boolean;
@@ -141,6 +168,8 @@ export function EditorToolbar({
   const [moreOpen, setMoreOpen] = useState(false);
   const shapeRef = useRef<HTMLDivElement>(null);
   const moreRef = useRef<HTMLDivElement>(null);
+  // The element picker, driven by the menu's Upload row.
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   /**
    * Tap away (or press Esc) to dismiss either menu.
@@ -209,8 +238,9 @@ export function EditorToolbar({
         <span className="hidden sm:inline">Text</span>
       </button>
 
-      {/* Shape tool: hovering (or clicking, on touch) reveals a horizontal
-          menu of the shapes themselves; picking one inserts it. */}
+      {/* Element tool: hovering (or clicking, on touch) reveals the menu —
+          upload your own artwork, or drop in one of the common shapes. The
+          full library lives in the left panel, one click away. */}
       <div
         ref={shapeRef}
         className="group/shape relative"
@@ -221,13 +251,13 @@ export function EditorToolbar({
           className={INSERT_BTN}
           onClick={() => setShapeMenuOpen((open) => !open)}
           disabled={!canAddBlocks}
-          aria-label="Add shape"
+          aria-label="Add element"
           aria-haspopup="true"
           aria-expanded={shapeMenuOpen}
-          title="Add shape"
+          title="Add element: your own image, or a shape"
         >
           <Shapes className={INSERT_ICON} strokeWidth={2} aria-hidden="true" />
-          <span className="hidden sm:inline">Shape</span>
+          <span className="hidden sm:inline">Element</span>
         </button>
 
         {/* pb-1.5 (not a margin) bridges the visual gap between button and
@@ -241,17 +271,49 @@ export function EditorToolbar({
               : "invisible opacity-0 group-hover/shape:visible group-hover/shape:opacity-100 group-focus-within/shape:visible group-focus-within/shape:opacity-100",
           )}
         >
-          {/* Horizontal strip: the library outgrew the viewport, so it
-              scrolls sideways rather than wrapping into a block. */}
+          {/* ONE ROW, and deliberately so. This started as the whole 22-shape
+              library and scrolled sideways; the library now lives in the left
+              panel, which leaves exactly four things worth reaching for
+              without travelling: upload, the library, and the two shapes
+              nobody wants to open a panel for. */}
           <div
             role="menu"
-            aria-label="Shapes"
+            aria-label="Elements"
             className={cn(
               overlaySurfaceClass,
-              "flex max-w-[min(90vw,32rem)] items-center gap-1 overflow-x-auto bg-background/95 p-1.5 backdrop-blur",
+              "flex items-center gap-1 bg-background/95 p-1.5 backdrop-blur",
             )}
           >
-            {SHAPE_KINDS.map((kind) => (
+            {/* Upload leads: it is the reason this tool is called Element. */}
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={!canAddBlocks || uploadingElement}
+              title="Upload an SVG, PNG or JPEG (up to 2 MB)"
+              className={MENU_ROW_BTN}
+            >
+              <Upload className="size-4 shrink-0" strokeWidth={2} aria-hidden="true" />
+              {uploadingElement ? "Uploading…" : "Upload"}
+            </button>
+
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                onOpenShapesPanel();
+                setShapeMenuOpen(false);
+              }}
+              title="Browse the full shape library"
+              className={MENU_ROW_BTN}
+            >
+              <Shapes className="size-4 shrink-0" strokeWidth={2} aria-hidden="true" />
+              All shapes
+            </button>
+
+            <div aria-hidden="true" className="mx-0.5 h-6 w-px shrink-0 bg-border" />
+
+            {QUICK_SHAPE_KINDS.map((kind) => (
               <button
                 key={kind}
                 type="button"
@@ -270,6 +332,26 @@ export function EditorToolbar({
             ))}
           </div>
         </div>
+
+        {/* Outside the menu on purpose: the menu unmounts its hover state as
+            soon as the file dialog takes focus, and an input inside it would
+            go with it before `change` ever fired. */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept={ELEMENT_ACCEPT}
+          className="sr-only"
+          onChange={(event) => {
+            const file = event.target.files?.[0];
+            // Clear first: picking the SAME file twice fires no `change` at
+            // all unless the value is reset, so a failed upload could not be
+            // retried with the same file.
+            event.target.value = "";
+            if (!file) return;
+            setShapeMenuOpen(false);
+            onAddElement(file);
+          }}
+        />
       </div>
 
       <Divider />
@@ -456,6 +538,21 @@ export function EditorToolbar({
               >
                 <Plus className="size-4" strokeWidth={2} aria-hidden="true" />
                 Reset zoom
+              </button>
+
+              {/* The Element menu opens on HOVER, which a thumb does not do,
+                  so the library needs a route that does not depend on one. */}
+              <button
+                type="button"
+                role="menuitem"
+                className={MORE_ITEM}
+                onClick={() => {
+                  onOpenShapesPanel();
+                  setMoreOpen(false);
+                }}
+              >
+                <Shapes className="size-4" strokeWidth={2} aria-hidden="true" />
+                All shapes
               </button>
 
               <div aria-hidden="true" className="my-1 h-px bg-border" />
