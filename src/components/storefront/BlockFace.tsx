@@ -18,6 +18,7 @@ import { ImageTileContent } from "./ImageTileContent";
 import { ProductTileContent } from "./ProductTileContent";
 import { ShapeTileContent } from "./ShapeTileContent";
 import { TextTileContent } from "./TextTileContent";
+import type { TileSpotDrag } from "./TileSpotDragLayer";
 
 /**
  * The visual face of one grid block, independent of tile chrome: dispatches to
@@ -39,6 +40,7 @@ export function BlockFace({
   imageUrl,
   textEditing = false,
   textSelectAll = false,
+  spotDrag,
   onTextChange,
   onToggleBlockFormat,
   onTextRangeChange,
@@ -57,6 +59,9 @@ export function BlockFace({
   /** Text blocks only: this block's words are being typed in place. */
   textEditing?: boolean;
   textSelectAll?: boolean;
+  /** Product blocks only, editor only: arms the title and price for dragging.
+   *  Every other kind has nothing placeable on it. */
+  spotDrag?: TileSpotDrag;
   /** Text and the spans that format parts of it, always together. */
   onTextChange?: (text: string, spans: TextSpan[], source: TextEditSource) => void;
   /** Ctrl+B / I / U with nothing selected: the whole block. */
@@ -100,6 +105,7 @@ export function BlockFace({
         soldOut={block.soldOut === true}
         imagePlacement={block.imagePlacement}
         imageRef={imageRef}
+        spotDrag={spotDrag}
       />
     );
   }

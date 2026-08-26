@@ -114,6 +114,37 @@ describe("storefrontConfigSchema — happy path", () => {
     }
   });
 
+  it("accepts title placement on the theme and rejects off-board values", () => {
+    const config = validConfig();
+    Object.assign(config.theme, { titlePosition: "top-right", titleInset: 16 });
+    expect(storefrontConfigSchema.safeParse(config).success).toBe(true);
+
+    // Both are optional ON THE THEME as well as on an override: a config
+    // saved before the title could move carries neither.
+    const legacy = validConfig();
+    delete (legacy.theme as Record<string, unknown>).titlePosition;
+    delete (legacy.theme as Record<string, unknown>).titleInset;
+    expect(storefrontConfigSchema.safeParse(legacy).success).toBe(true);
+
+    for (const patch of [
+      // The seven spots and nothing else — "below"/"hidden" belong to the
+      // price tag's wider vocabulary, not to the title's.
+      { titlePosition: "middle-left" },
+      { titlePosition: "below" },
+      { titlePosition: "hidden" },
+      { titlePosition: "" },
+      // A bounded int, like every other spacing in the config.
+      { titleInset: -1 },
+      { titleInset: 41 },
+      { titleInset: 8.5 },
+      { titleInset: "8px" },
+    ]) {
+      const bad = validConfig();
+      Object.assign(bad.theme as Record<string, unknown>, patch);
+      expect(storefrontConfigSchema.safeParse(bad).success).toBe(false);
+    }
+  });
+
   it("accepts per-tile card style overrides and rejects hostile variants", () => {
     const config = validConfig();
     const productBlock = config.blocks[0] as Record<string, unknown>;
@@ -122,6 +153,8 @@ describe("storefrontConfigSchema — happy path", () => {
       showTitle: false,
       titleStyle: "overlay",
       titleDisplay: "hover",
+      titlePosition: "middle-center",
+      titleInset: 0,
       priceDisplay: "hover",
       priceTagPosition: "top-center",
       priceTagFont: "serif",
@@ -145,6 +178,8 @@ describe("storefrontConfigSchema — happy path", () => {
       { cornerRadius: -1 },
       { cornerRadius: 12.5 },
       { titleStyle: "neon" },
+      { titlePosition: "middle-right" },
+      { titleInset: 41 },
       { priceTagPosition: "everywhere" },
       { priceTagSize: 33 },
       { priceTagFont: "display" },
@@ -464,10 +499,21 @@ describe("storefrontConfigSchema — hostile input", () => {
     }
   });
 
-  it("rejects blocks that overlap each other", () => {
+  it("ACCEPTS blocks stacked on each other", () => {
+    // Stacking is a design move, not hostile input: a word over a shape, a
+    // chip over a photo. `z` decides which one paints on top, so there is
+    // nothing left for the schema to arbitrate. This used to be rejected, and
+    // the editor is now built to produce it.
     const cfg = validConfig();
     // The text block is at x:2; drop it straight onto the product block.
     Object.assign(cfg.blocks[1], { x: 0, y: 0, w: 2, h: 2 });
+    expect(storefrontConfigSchema.safeParse(cfg).success).toBe(true);
+  });
+
+  it("still refuses a block that leaves the canvas", () => {
+    // The one geometric rule left, and the one a seller can act on.
+    const cfg = validConfig();
+    Object.assign(cfg.blocks[1], { x: 5, y: 0, w: 4, h: 1 });
     expect(storefrontConfigSchema.safeParse(cfg).success).toBe(false);
   });
 
@@ -475,6 +521,91 @@ describe("storefrontConfigSchema — hostile input", () => {
     const cfg = validConfig();
     (cfg.blocks[0] as { productId: string }).productId = "1 OR 1=1";
     expect(storefrontConfigSchema.safeParse(cfg).success).toBe(false);
+  });
+});
+
+describe("block rotation", () => {
+  it("accepts a whole degree inside the range, on every block kind", () => {
+    const cfg = validConfig();
+    (cfg.blocks[0] as { rotation?: number }).rotation = 45;
+    (cfg.blocks[1] as { rotation?: number }).rotation = -180;
+    expect(storefrontConfigSchema.safeParse(cfg).success).toBe(true);
+  });
+
+  it("rejects anything that is not a bounded whole degree", () => {
+    for (const rotation of [181, -181, 45.5, "45", null, Number.NaN]) {
+      const cfg = validConfig();
+      (cfg.blocks[0] as { rotation?: unknown }).rotation = rotation;
+      expect(storefrontConfigSchema.safeParse(cfg).success).toBe(false);
+    }
+  });
+
+  it("leaves a config that never tilted anything byte-identical", () => {
+    // The whole point of the field being optional: a board saved before
+    // tilting existed must round-trip through the schema unchanged.
+    const cfg = validConfig();
+    const parsed = storefrontConfigSchema.safeParse(cfg);
+    expect(parsed.success).toBe(true);
+    expect(JSON.stringify(parsed.data)).toBe(JSON.stringify(cfg));
+  });
+
+  it("checks the STORED rect, not the painted corners of a tilt", () => {
+    // A turned block covers different cells (see blockFootprint), and near an
+    // edge its corners can reach past the board. That is the editor's business
+    // to keep in hand, not the schema's: at the extreme, a block wider than
+    // the board has no placement that hides its overhang, and refusing the
+    // save would strand a design the seller cannot repair.
+    const cfg = validConfig();
+    Object.assign(cfg.blocks[1], { x: 4, y: 0, w: 2, h: 1, rotation: 90 });
+    expect(storefrontConfigSchema.safeParse(cfg).success).toBe(true);
+
+    // The stored rect is still held to the board.
+    Object.assign(cfg.blocks[1], { x: 5, y: 0, w: 2, h: 1, rotation: 90 });
+    expect(storefrontConfigSchema.safeParse(cfg).success).toBe(false);
+  });
+});
+
+describe("block layering", () => {
+  it("accepts both ends of the depth range, on every block kind", () => {
+    const cfg = validConfig();
+    (cfg.blocks[0] as { z?: number }).z = 0;
+    (cfg.blocks[1] as { z?: number }).z = MAX_BLOCKS - 1;
+    expect(storefrontConfigSchema.safeParse(cfg).success).toBe(true);
+  });
+
+  it("rejects anything that is not a bounded whole depth", () => {
+    for (const z of [-1, MAX_BLOCKS, 1.5, "3", null, Number.NaN]) {
+      const cfg = validConfig();
+      (cfg.blocks[0] as { z?: unknown }).z = z;
+      expect(storefrontConfigSchema.safeParse(cfg).success).toBe(false);
+    }
+  });
+
+  it("leaves a config that never layered anything byte-identical", () => {
+    const cfg = validConfig();
+    const parsed = storefrontConfigSchema.safeParse(cfg);
+    expect(parsed.success).toBe(true);
+    expect(JSON.stringify(parsed.data)).toBe(JSON.stringify(cfg));
+  });
+
+  it("saves a board with duplicate or gapped depths rather than refusing it", () => {
+    // There is no config-level refinement on purpose: layerOrder breaks both
+    // cases with the reading index, so the board still has a well-defined
+    // paint order, and rejecting the save would be an error the seller has no
+    // way to act on.
+    const cfg = validConfig();
+    (cfg.blocks[0] as { z?: number }).z = 7;
+    (cfg.blocks[1] as { z?: number }).z = 7;
+    expect(storefrontConfigSchema.safeParse(cfg).success).toBe(true);
+  });
+
+  it("is what a stacked board is expected to carry", () => {
+    // Depth and overlap arrive together: two blocks on the same cells with a
+    // z each is the ordinary shape of a stacked design, not a suspicious one.
+    const cfg = validConfig();
+    Object.assign(cfg.blocks[0], { x: 0, y: 0, w: 2, h: 2, z: 0 });
+    Object.assign(cfg.blocks[1], { x: 0, y: 0, w: 2, h: 2, z: 1 });
+    expect(storefrontConfigSchema.safeParse(cfg).success).toBe(true);
   });
 });
 
@@ -806,10 +937,14 @@ describe("image blocks — the seller's own artwork", () => {
   });
 
   it("holds elements to the same canvas invariants as every other block", () => {
-    // Overlap and bounds are config-level rules; a new block type must not
-    // arrive with an exemption from them.
-    const overlapping = configWithElement();
-    overlapping.blocks.push({
+    // Bounds are a config-level rule; a new block type must not arrive with an
+    // exemption from it.
+    const outside = configWithElement({ x: 5, y: 5, w: 4, h: 4 });
+    expect(storefrontConfigSchema.safeParse(outside).success).toBe(false);
+
+    // And it may be stacked, exactly like every other block.
+    const stacked = configWithElement();
+    stacked.blocks.push({
       type: "shape",
       id: UUID,
       kind: "circle",
@@ -819,10 +954,7 @@ describe("image blocks — the seller's own artwork", () => {
       w: 2,
       h: 2,
     });
-    expect(storefrontConfigSchema.safeParse(overlapping).success).toBe(false);
-
-    const outside = configWithElement({ x: 5, y: 5, w: 4, h: 4 });
-    expect(storefrontConfigSchema.safeParse(outside).success).toBe(false);
+    expect(storefrontConfigSchema.safeParse(stacked).success).toBe(true);
   });
 
   it("keys image blocks distinctly, so one cannot collide with another kind", () => {

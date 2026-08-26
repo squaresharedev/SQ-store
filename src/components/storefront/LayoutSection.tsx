@@ -9,27 +9,49 @@ import {
   type DisplayMode,
   type StorefrontTheme,
 } from "@/types/storefront";
+import { useId } from "react";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { Slider } from "@/components/ui/slider";
-import { helpTextClass, labelClass } from "@/components/ui/control-styles";
+import { Switch } from "@/components/ui/switch";
+import {
+  helpTextClass,
+  infoTextClass,
+  labelClass,
+} from "@/components/ui/control-styles";
 
 const DISPLAY_MODE_OPTIONS: readonly { value: DisplayMode; label: string }[] = [
   { value: "grid", label: "Grid" },
   { value: "carousel", label: "Carousel" },
 ];
 
-/** Layout controls: canvas size, display mode, and the grid gap. */
+/**
+ * The canvas group: board size, display mode, the grid gap, and the designer's
+ * own grid guides.
+ *
+ * The guides are an editor view preference rather than a saved theme field, and
+ * they sit here BECAUSE of that: under "Theme", beside colours the buyer sees,
+ * a switch that only ever affects the seller's own screen read as one more
+ * thing being published.
+ */
 export function LayoutSection({
   theme,
   onChange,
   onCanvasChange,
+  showGrid,
+  onShowGridChange,
 }: {
   theme: StorefrontTheme;
   onChange: (theme: StorefrontTheme) => void;
   /** Canvas resize goes through the designer, which refuses to shrink the
    *  board smaller than the blocks already on it. */
   onCanvasChange: (columns: number, rows: number) => void;
+  /** Editor-only view preference, not part of the saved config. */
+  showGrid: boolean;
+  onShowGridChange: (show: boolean) => void;
 }) {
+  const fieldId = useId();
+
+
   return (
     <div className="space-y-4">
       <div className="space-y-1.5">
@@ -96,6 +118,23 @@ export function LayoutSection({
           ariaLabel="Grid density"
           valueText={`${theme.gridGap} pixel gap`}
         />
+      </div>
+
+      {/* Editor guide only: buyers never see the empty slots. */}
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between gap-3">
+          <label htmlFor={`${fieldId}-show-grid`} className={labelClass}>
+            Show grid
+          </label>
+          <Switch
+            id={`${fieldId}-show-grid`}
+            checked={showGrid}
+            onCheckedChange={onShowGridChange}
+          />
+        </div>
+        <p className={infoTextClass}>
+          Empty slots while you design. Never shown to buyers.
+        </p>
       </div>
     </div>
   );

@@ -1,8 +1,13 @@
 // Dev seed: generate realistic fake products + orders for the TEST seller so the
 // dashboard / orders / analytics surfaces have believable data to render.
 //
-//   pnpm seed            # random dataset
-//   pnpm seed --seed 42  # reproducible dataset
+//   pnpm seed                  # random dataset, random category
+//   pnpm seed --seed 42        # reproducible dataset
+//   pnpm seed --theme drones   # pin the catalogue's category
+//
+// Collections: furniture-brutalist, furniture-cozy, tech, fashion, drones
+// (see lib/catalog.ts). Each is one design language shot one way, so a seeded
+// store reads as a single shop rather than a stock-photo grab bag.
 //
 // Safe to run repeatedly (each run adds a batch). Use `pnpm reset-seed --yes`
 // to clear. Guarded so it can only run against an opted-in dev target — see
@@ -19,16 +24,25 @@ import {
   createRng,
   generateOrders,
   generateProducts,
+  pickTheme,
   randInt,
+  THEME_KEYS,
+  themeByKey,
   type OrderInsert,
+  type ProductTheme,
   type SeededProduct,
 } from "./lib/fake-data.ts";
 
 const DAYS = 90;
 const INSERT_CHUNK = 500;
 
+const OPTIONS = {
+  seed: { type: "string" },
+  theme: { type: "string" },
+} as const;
+
 function resolveSeed(): number {
-  const { values } = parseArgs({ options: { seed: { type: "string" } } });
+  const { values } = parseArgs({ options: OPTIONS });
   if (values.seed === undefined) {
     // No --seed: pick a random one and print it so the run can be reproduced.
     return Math.floor(Math.random() * 0xffffffff);
@@ -38,6 +52,21 @@ function resolveSeed(): number {
     fail(`--seed must be a non-negative integer (got "${values.seed}").`);
   }
   return parsed;
+}
+
+/**
+ * The one category the whole catalogue is drawn from. `--theme <key>` pins it;
+ * without the flag one is picked at random from the seeded RNG, so a plain
+ * `pnpm seed` still reproduces exactly under `--seed`.
+ */
+function resolveTheme(rng: Parameters<typeof pickTheme>[0]): ProductTheme {
+  const { values } = parseArgs({ options: OPTIONS });
+  if (values.theme === undefined) return pickTheme(rng);
+  const theme = themeByKey(values.theme);
+  if (!theme) {
+    fail(`--theme must be one of: ${THEME_KEYS.join(", ")} (got "${values.theme}").`);
+  }
+  return theme;
 }
 
 function formatCents(cents: number): string {
@@ -52,9 +81,11 @@ async function main(): Promise<void> {
   const seed = resolveSeed();
   const rng = createRng(seed);
 
-  // 1) Products for the test seller.
+  // 1) Products for the test seller — one theme for the whole catalogue, so
+  // the store reads as a real, specialised shop rather than a mixed bag.
+  const theme = resolveTheme(rng);
   const productCount = randInt(rng, 8, 15);
-  const productDrafts = generateProducts(rng, config.testSellerId, productCount);
+  const productDrafts = generateProducts(rng, config.testSellerId, productCount, theme);
   const { data: insertedProducts, error: productError } = await supabase
     .from("products")
     .insert(productDrafts)
@@ -88,16 +119,17 @@ async function main(): Promise<void> {
     if (error) fail(`Failed to insert orders (chunk at ${i}): ${error.message}`);
   }
 
-  printSummary({ seed, storefrontId, products: products.length, orders });
+  printSummary({ seed, theme: theme.label, storefrontId, products: products.length, orders });
 }
 
 function printSummary(args: {
   seed: number;
+  theme: string;
   storefrontId: string | null;
   products: number;
   orders: OrderInsert[];
 }): void {
-  const { seed, storefrontId, products, orders } = args;
+  const { seed, theme, storefrontId, products, orders } = args;
 
   const byStatus = new Map<string, number>();
   const byChannel = new Map<string, number>();
@@ -132,6 +164,7 @@ function printSummary(args: {
 
   console.log("\n✔ Seed complete");
   console.log(line("Seed (reproduce with)", `--seed ${seed}`));
+  console.log(line("Store theme", theme));
   console.log(line("Products created", String(products)));
   console.log(line("Orders created", String(orders.length)));
   console.log(

@@ -24,6 +24,7 @@
 import { useEffect, useRef, useState } from "react";
 import {
   Ellipsis,
+  LoaderCircle,
   Minus,
   Monitor,
   Plus,
@@ -264,7 +265,12 @@ export function EditorToolbar({
             menu, so hover never drops while the pointer crosses it. */}
         <div
           className={cn(
-            "absolute bottom-full left-1/2 z-50 -translate-x-1/2 pb-1.5",
+            // w-max is load-bearing. This is absolutely positioned, and an
+            // abspos box's shrink-to-fit width is capped by its containing
+            // block — here the Element BUTTON's wrapper, barely 100px wide. So
+            // the row was quietly squeezed and the last shape overflowed past
+            // the border by ~11px. max-content sizes it to the items instead.
+            "absolute bottom-full left-1/2 z-50 w-max -translate-x-1/2 pb-1.5",
             "transition-opacity duration-base ease-standard motion-reduce:transition-none",
             shapeMenuOpen
               ? "visible opacity-100"
@@ -284,17 +290,35 @@ export function EditorToolbar({
               "flex items-center gap-1 bg-background/95 p-1.5 backdrop-blur",
             )}
           >
-            {/* Upload leads: it is the reason this tool is called Element. */}
+            {/* Upload leads: it is the reason this tool is called Element.
+                ICON ONLY — its label was the widest thing in the row and
+                pushed the last shape past the edge. The icon is the universal
+                one and the tooltip carries the detail, so nothing is lost. */}
             <button
               type="button"
               role="menuitem"
               onClick={() => fileInputRef.current?.click()}
               disabled={!canAddBlocks || uploadingElement}
-              title="Upload an SVG, PNG or JPEG (up to 2 MB)"
-              className={MENU_ROW_BTN}
+              aria-label={uploadingElement ? "Uploading…" : "Upload"}
+              aria-busy={uploadingElement}
+              title={
+                uploadingElement
+                  ? "Uploading…"
+                  : "Upload an image: SVG, PNG or JPEG, up to 2 MB"
+              }
+              className={cn(ICON_BTN, "shrink-0")}
             >
-              <Upload className="size-4 shrink-0" strokeWidth={2} aria-hidden="true" />
-              {uploadingElement ? "Uploading…" : "Upload"}
+              {/* The one place the row still needs words is progress, and an
+                  icon-only button has none — so the icon itself spins. */}
+              {uploadingElement ? (
+                <LoaderCircle
+                  className="size-4 animate-spin motion-reduce:animate-none"
+                  strokeWidth={2}
+                  aria-hidden="true"
+                />
+              ) : (
+                <Upload className="size-4" strokeWidth={2} aria-hidden="true" />
+              )}
             </button>
 
             <button

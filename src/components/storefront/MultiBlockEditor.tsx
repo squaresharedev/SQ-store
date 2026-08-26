@@ -16,8 +16,8 @@ import {
   ghostButtonClass,
   helpTextClass,
   secondaryButtonClass,
-  strongLabelClass,
 } from "@/components/ui/control-styles";
+import { CollapsibleSection } from "@/components/ui/CollapsibleSection";
 import { CardStyleControls } from "./CardStyleControls";
 import { PriceTagControls } from "./PriceTagControls";
 import { ShapeBlockEditor, type ShapeBlockPatch } from "./ShapeBlockEditor";
@@ -115,35 +115,45 @@ export function MultiBlockEditor({
     );
     return (
       <div className="space-y-4">
-        <div className="flex items-center justify-between gap-3">
-          <span className={strongLabelClass}>Tile style</span>
-          {anyOverrides && (
-            <button
-              type="button"
-              onClick={onProductStyleReset}
-              className={cn(ghostButtonClass, "px-2 py-1 text-xs")}
-            >
-              Reset to theme
-            </button>
-          )}
-        </div>
         <p className={helpTextClass}>
           Styling {blocks.length} product tiles together. Values shown come
           from the first selected tile; every change applies to all of them.
         </p>
-        <CardStyleControls
-          value={resolveCardStyle(theme, products[0].style)}
-          onChange={onProductStyleChange}
-        />
-        <div className="space-y-4 border-t border-border pt-4">
-          <span className={strongLabelClass}>Price tag</span>
-          <PriceTagControls
-            theme={theme}
-            overrides={products[0].style ?? {}}
-            onChange={onProductStyleChange}
-            scope="many"
-          />
+
+        {/* The same two groups a single product tile gets, so styling one tile
+            and styling six read the same way. */}
+        <div className="-mx-4 border-t border-border">
+          <CollapsibleSection
+            title="Tile style"
+            collapsible
+            headerAction={
+              anyOverrides && (
+                <button
+                  type="button"
+                  onClick={onProductStyleReset}
+                  className={cn(ghostButtonClass, "px-2 py-1 text-xs")}
+                >
+                  Reset to theme
+                </button>
+              )
+            }
+          >
+            <CardStyleControls
+              value={resolveCardStyle(theme, products[0].style)}
+              onChange={onProductStyleChange}
+            />
+          </CollapsibleSection>
+
+          <CollapsibleSection title="Price tag" collapsible defaultOpen={false}>
+            <PriceTagControls
+              theme={theme}
+              overrides={products[0].style ?? {}}
+              onChange={onProductStyleChange}
+              scope="many"
+            />
+          </CollapsibleSection>
         </div>
+
         {removeAll}
       </div>
     );

@@ -157,7 +157,25 @@ export async function OPTIONS(
 async function publicBlocks(blocks: StorefrontBlock[]) {
   return Promise.all(
     readingOrder(blocks).map(async (block) => {
-      const placement = { x: block.x, y: block.y, w: block.w, h: block.h };
+      // Tilt travels with the placement for the same reason a product tile's
+      // framing does: it is a visual choice the seller made about a block the
+      // buyer can already see, and an embed that dropped it would quietly
+      // straighten every tilted tile. Spread rather than set, so a board
+      // nobody tilted produces the byte-identical payload it always has.
+      const placement = {
+        x: block.x,
+        y: block.y,
+        w: block.w,
+        h: block.h,
+        ...(block.rotation !== undefined ? { rotation: block.rotation } : {}),
+        // Depth travels as DATA because this array is ordered for reading, not
+        // for painting: the widget's DOM order is reading order (see the map
+        // above), so without z it would have no way to know which of two
+        // overlapping blocks the seller put in front. Spread for the same
+        // reason as the tilt: an unlayered board's payload is byte-identical
+        // to the one the widget already receives.
+        ...(block.z !== undefined ? { z: block.z } : {}),
+      };
       if (block.type === "product") {
         return {
           ...placement,

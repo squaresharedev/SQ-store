@@ -1,4 +1,4 @@
-import { devices, expect, test, type Page } from "@playwright/test";
+import { devices, expect, test, type Locator, type Page } from "@playwright/test";
 import {
   createProductViaUI,
   createStorefrontViaUI,
@@ -98,6 +98,52 @@ async function pinch(page: Page, fromHalfSpan: number, toHalfSpan: number) {
     { from: fromHalfSpan, to: toHalfSpan },
   );
   await page.waitForTimeout(300);
+}
+
+/** Drag one grid cell onto another with a plain pointer drag. The move
+ *  gesture itself is not pointerType-gated (only marquee and edge-resize
+ *  are), so a mouse-style drag reliably produces overlap regardless of the
+ *  touch behaviour under test. */
+async function dragOnto(page: Page, from: Locator, to: Locator) {
+  const fromBox = await from.boundingBox();
+  const toBox = await to.boundingBox();
+  if (!fromBox || !toBox) throw new Error("block has no box");
+  const start = { x: fromBox.x + fromBox.width / 2, y: fromBox.y + fromBox.height / 2 };
+  const end = { x: toBox.x + toBox.width / 2, y: toBox.y + toBox.height / 2 };
+  await page.mouse.move(start.x, start.y);
+  await page.mouse.down();
+  await page.mouse.move((start.x + end.x) / 2, (start.y + end.y) / 2, { steps: 5 });
+  await page.mouse.move(end.x, end.y, { steps: 5 });
+  await page.mouse.up();
+  await page.waitForTimeout(300);
+}
+
+/** A single touch tap at a fixed page point, dispatched straight at whatever
+ *  is physically there — the same real hit-testing a finger gets, which is
+ *  what makes repeated taps at one point a meaningful stack-cycle test. */
+async function touchTap(page: Page, x: number, y: number) {
+  await page.evaluate(
+    ({ x, y }) => {
+      const el = document.elementFromPoint(x, y);
+      if (!el) throw new Error(`nothing at ${x},${y}`);
+      const opts = {
+        pointerId: 77,
+        pointerType: "touch",
+        isPrimary: true,
+        clientX: x,
+        clientY: y,
+        bubbles: true,
+        cancelable: true,
+        button: 0,
+        buttons: 1,
+      };
+      el.dispatchEvent(new PointerEvent("pointerdown", opts));
+      el.dispatchEvent(new PointerEvent("pointerup", { ...opts, buttons: 0 }));
+      el.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, clientX: x, clientY: y }));
+    },
+    { x, y },
+  );
+  await page.waitForTimeout(150);
 }
 
 test.describe("storefront designer on a phone", () => {
@@ -222,5 +268,80 @@ test.describe("storefront designer on a phone", () => {
     // it would if a lifted pointer id were left behind in the tracking map.
     await pinch(page, 60, 60);
     expect(await canvasZoom(page)).toBe(squeezed);
+  });
+
+  test("the library sheet survives inserting a shape from it", async ({
+    page,
+  }) => {
+    await signUp(page, freshUser("mobile-libsheet"));
+    await settle(page);
+    await openDesigner(page);
+
+    // On lg+ the library is a column and the inspector is a separate one, so
+    // they never fight for space. On a phone both are `fixed inset-x-0
+    // bottom-0` bottom sheets, and inserting a shape auto-selects it — which
+    // used to pop the inspector sheet up over the library that was still
+    // open, hiding the very shapes the seller was choosing from.
+    await page.getByRole("button", { name: "Add element", exact: true }).click();
+    await page.getByRole("menu", { name: "Elements" }).getByRole("menuitem", { name: "All shapes" }).click();
+    await expect(page.getByRole("button", { name: "Add square" })).toBeVisible();
+
+    await page.getByRole("button", { name: "Add square" }).click();
+    await expect(page.locator("li[data-grid-cell]")).toHaveCount(1);
+
+    // The library must still be the thing on screen, reachable for a second
+    // insert, not covered by the newly selected block's inspector sheet.
+    await expect(page.getByRole("button", { name: "Add circle" })).toBeVisible();
+    await page.getByRole("button", { name: "Add circle" }).click();
+    await expect(page.locator("li[data-grid-cell]")).toHaveCount(2);
+  });
+
+  test("re-tapping a selected block reaches the one stacked underneath it", async ({
+    page,
+  }) => {
+    await signUp(page, freshUser("mobile-stack"));
+    await settle(page);
+    await openDesigner(page);
+
+    await page.getByRole("button", { name: "Add element", exact: true }).click();
+    await page.getByRole("menu", { name: "Elements" }).getByRole("menuitem", { name: "All shapes" }).click();
+    await page.getByRole("button", { name: "Add square" }).click();
+    await page.getByRole("button", { name: "Add circle" }).click();
+    await expect(page.locator("li[data-grid-cell]")).toHaveCount(2);
+    const closeLib = page.getByRole("button", { name: "Close library panel" });
+    if (await closeLib.count()) await closeLib.click();
+
+    // Full overlap: touch has no Alt key, so Alt+click's stack walk (covered
+    // by 24-layering.spec.ts) is unreachable on a phone. Repeatedly tapping
+    // the block already on top is the only gesture free for it.
+    const cells = page.locator("li[data-grid-cell]");
+    const topBox = await cells.nth(0).boundingBox();
+    await dragOnto(page, cells.nth(1), cells.nth(0));
+    if (!topBox) throw new Error("no box for the first cell");
+    const point = { x: topBox.x + topBox.width / 2, y: topBox.y + topBox.height / 2 };
+    const selected = () =>
+      page.evaluate(() =>
+        [...document.querySelectorAll("[data-block-tile]")]
+          .find((el) => el.getAttribute("aria-pressed") === "true")
+          ?.closest("[data-grid-key]")
+          ?.getAttribute("data-grid-key"),
+      );
+
+    await touchTap(page, point.x, point.y);
+    const first = await selected();
+    expect(first).not.toBeUndefined();
+
+    // A second tap at the exact same point must reach the OTHER block, not
+    // toggle the same one off (the pre-existing single-block behaviour) and
+    // not re-select the one on top (a plain, un-cycled tap).
+    await touchTap(page, point.x, point.y);
+    const second = await selected();
+    expect(second).not.toBe(first);
+    expect(second).not.toBeUndefined();
+
+    // A third tap wraps back to the first block, proving this is a full walk
+    // through the stack and not a one-shot swap.
+    await touchTap(page, point.x, point.y);
+    expect(await selected()).toBe(first);
   });
 });

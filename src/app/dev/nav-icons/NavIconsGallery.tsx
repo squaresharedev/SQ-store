@@ -30,7 +30,8 @@ const ICONS: Array<{
   },
   {
     name: "Products",
-    story: "The box opens, all four lids swinging outward.",
+    story:
+      "A label slaps on and the box ships off to the right, then coasts back in bare from the left.",
     icon: ProductsIcon,
   },
   {

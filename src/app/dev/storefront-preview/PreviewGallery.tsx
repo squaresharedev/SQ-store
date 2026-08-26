@@ -422,6 +422,83 @@ const CASES: { title: string; note: string; config: StorefrontConfig }[] = [
       }),
     ]),
   },
+  {
+    title: "Title position",
+    note: "The title is placed on the same seven-spot board as the price tag. Row picks the band (a bar above the picture, an overlay pinned to the top, a shadow across the middle); column steers the words inside it. The price follows the title into its band when it is set to Below, and a floated tag moves off whichever row the title took.",
+    config: config({ columns: 4, rows: 4, cornerRadius: 0 }, [
+      productBlock(0, 0, 0, 2, 2, {
+        titleStyle: "bar",
+        titlePosition: "top-center",
+      }),
+      productBlock(1, 2, 0, 2, 2, {
+        titleStyle: "overlay",
+        titlePosition: "top-left",
+        priceTagPosition: "bottom-right",
+      }),
+      productBlock(2, 0, 2, 2, 2, {
+        titleStyle: "shadow",
+        titlePosition: "middle-center",
+        priceTagPosition: "top-right",
+      }),
+      productBlock(3, 2, 2, 2, 2, {
+        titleStyle: "overlay",
+        titlePosition: "bottom-right",
+      }),
+    ]),
+  },
+  {
+    title: "Title stays clear of a rounded corner",
+    note: "The same title at four roundnesses (8, 24, 60, and 24 again). Edge spacing is AUTO: it grows with the radius the tile is actually clipped at, span included, so the words never run into the curve. Past the corner limit the spot itself moves to the center axis, where a clipped tile still has room. The last tile overrides the spacing by hand at 0, which is what running into the curve looks like.",
+    config: config({ columns: 4, rows: 4, cornerRadius: 0 }, [
+      productBlock(0, 0, 0, 2, 2, { titleStyle: "overlay", cornerRadius: 8 }),
+      productBlock(1, 2, 0, 2, 2, { titleStyle: "overlay", cornerRadius: 24 }),
+      productBlock(2, 0, 2, 2, 2, { titleStyle: "overlay", cornerRadius: 60 }),
+      productBlock(3, 2, 2, 2, 2, {
+        titleStyle: "overlay",
+        cornerRadius: 24,
+        titleInset: 0,
+      }),
+    ]),
+  },
+  {
+    title: "Layered, overlapping blocks",
+    note: "Four tilted bars whose painted corners cross, stacked back to front by z: the black bar is layered furthest back and the green one in front, so each one paints over the one before it. Depth is VISUAL only. The blocks still occupy disjoint cells, and the DOM keeps reading order, so what a screen reader walks is unchanged by which bar is on top.",
+    config: config({ columns: 4, rows: 4, cornerRadius: 4 }, [
+      shapeOf("bar", "#171717", 0, 0, 4, 1, { rotation: 12, z: 0 }),
+      shapeOf("bar", "#2563eb", 0, 1, 4, 1, { rotation: -10, z: 1 }),
+      shapeOf("bar", "#a855f7", 0, 2, 4, 1, { rotation: 8, z: 2 }),
+      shapeOf("bar", "#16a34a", 0, 3, 4, 1, { rotation: -14, z: 3 }),
+    ]),
+  },
+  {
+    title: "Stacked on the same cells",
+    note: "Four blocks sharing one 2x2 area, largest at the back: the arrangement the board used to reject outright. Nothing is dropped and nothing is moved aside, they simply paint in z order. This is what layering is FOR, and the case to check whenever the preview's depth mapping changes.",
+    config: config({ columns: 4, rows: 4, cornerRadius: 0 }, [
+      shapeOf("square", "#171717", 1, 1, 2, 2, { z: 0 }),
+      shapeOf("circle", "#2563eb", 1, 1, 2, 2, { z: 1 }),
+      shapeOf("diamond", "#a855f7", 1, 1, 2, 2, { z: 2 }),
+      shapeOf("star", "#facc15", 1, 1, 2, 2, { z: 3 }),
+    ]),
+  },
+  {
+    title: "Turned blocks lying the other way round",
+    note: "Three 1x3 bars turned a quarter turn. Each is STORED as the tall bar the seller drew and covers a 3x1 run of cells about the same centre, which is why they read as rows here. Same three cells' worth, the other way round: turning a block never changes how many squares it takes, never moves it, and never pushes a neighbour aside.",
+    config: config({ columns: 5, rows: 5, cornerRadius: 2 }, [
+      shapeOf("bar", "#171717", 2, 0, 1, 3, { rotation: 90 }),
+      shapeOf("bar", "#2563eb", 2, 1, 1, 3, { rotation: 90 }),
+      shapeOf("bar", "#16a34a", 2, 2, 1, 3, { rotation: 90 }),
+    ]),
+  },
+  {
+    title: "Layered against reading order",
+    note: "The same four bars with the stack INVERTED (z 3 down to 0), so the last block in reading order paints furthest back. The two cards prove depth is independent of the order the blocks are read in: nothing about the DOM, the embed payload or the carousel differs between them.",
+    config: config({ columns: 4, rows: 4, cornerRadius: 4 }, [
+      shapeOf("bar", "#171717", 0, 0, 4, 1, { rotation: 12, z: 3 }),
+      shapeOf("bar", "#2563eb", 0, 1, 4, 1, { rotation: -10, z: 2 }),
+      shapeOf("bar", "#a855f7", 0, 2, 4, 1, { rotation: 8, z: 1 }),
+      shapeOf("bar", "#16a34a", 0, 3, 4, 1, { rotation: -14, z: 0 }),
+    ]),
+  },
 ];
 
 /** Renders one case in exactly the box the real storefront card uses. */

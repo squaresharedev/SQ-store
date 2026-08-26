@@ -2,13 +2,13 @@
 
 import { EyeOff } from "lucide-react";
 import {
-  PRICE_TAG_CORNER_LIMIT,
   PRICE_TAG_FLOAT_POSITIONS,
+  spotRow,
   type PriceTagFloatPosition,
+  type SpotRow,
 } from "@/types/storefront";
-import { cn } from "@/lib/utils";
-import { PRICE_TAG_FLOAT_CLASSES } from "./config-maps";
 import { OptionCardPicker } from "./OptionCardPicker";
+import { TileSpotPicker, unclippedSpots } from "./TileSpotPicker";
 
 /** The three placement modes the mode picker offers; "float" opens the
  *  per-spot picker below it. */
@@ -84,83 +84,49 @@ const FLOAT_POSITION_LABELS: Record<PriceTagFloatPosition, string> = {
 };
 
 /**
- * Which spots a tile actually has, mirroring resolvePriceTagPosition. Corners
- * go first on heavily rounded tiles (the clip removes them), and the bottom
- * row goes when an overlay/shadow title bar occupies it — offering a spot that
- * silently renders somewhere else is worse than not offering it.
+ * Which spots a tile actually has, mirroring resolvePriceTagPosition: the
+ * corners go on heavily rounded tiles (the clip removes them), and the title's
+ * own row goes when an overlay/shadow band occupies it.
  */
 function availablePositions(
   cornerRadius: number,
-  titleOverlaysImage: boolean,
+  titleBand: SpotRow | null,
 ): readonly PriceTagFloatPosition[] {
-  return PRICE_TAG_FLOAT_POSITIONS.filter((position) => {
-    if (cornerRadius >= PRICE_TAG_CORNER_LIMIT && !position.endsWith("-center")) {
-      return false;
-    }
-    return !(titleOverlaysImage && position.startsWith("bottom-"));
-  });
+  return unclippedSpots(PRICE_TAG_FLOAT_POSITIONS, cornerRadius).filter(
+    (position) => spotRow(position) !== titleBand,
+  );
 }
 
 /**
- * Visual spot picker for the floating price tag: a miniature card at the
- * current corner roundness with a dot at each available spot. Click a dot to
- * place the tag there. The dot layout reuses the exact placement classes the
- * real tile renders with, so what you pick is what you get — including the
- * title bar, drawn along the bottom when it covers that edge.
+ * Visual spot picker for the floating price tag, on the shared seven-spot
+ * board (see TileSpotPicker). Click a dot to place the tag there; the title
+ * band is drawn across whichever row it holds, because that row is exactly the
+ * one the tag may not use.
  */
 export function PriceTagPositionPicker({
   value,
   cornerRadius,
-  titleOverlaysImage = false,
+  titleBand = null,
   onChange,
 }: {
   value: PriceTagFloatPosition;
   cornerRadius: number;
-  /** True when an overlay/shadow title bar sits on the image's bottom edge. */
-  titleOverlaysImage?: boolean;
+  /** Row an overlay/shadow title band covers, or null when the title is a bar
+   *  of its own (and so shares none of the image with the tag). */
+  titleBand?: SpotRow | null;
   onChange: (position: PriceTagFloatPosition) => void;
 }) {
-  const positions = availablePositions(cornerRadius, titleOverlaysImage);
-
   return (
-    <div
-      role="group"
-      aria-label="Price tag spot"
-      style={{ borderRadius: cornerRadius }}
-      className="relative h-24 w-24 overflow-hidden border border-border bg-muted"
-    >
-      {titleOverlaysImage && (
-        <span
-          aria-hidden="true"
-          className="absolute inset-x-0 bottom-0 h-4 bg-foreground/15"
-        />
-      )}
-      {positions.map((position) => {
-        const selected = position === value;
-        return (
-          <button
-            key={position}
-            type="button"
-            onClick={() => onChange(position)}
-            aria-label={`Price tag ${FLOAT_POSITION_LABELS[position].toLowerCase()}`}
-            aria-pressed={selected}
-            className={cn(
-              "absolute z-10 flex size-5 items-center justify-center rounded-full transition-colors duration-base ease-standard hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none",
-              PRICE_TAG_FLOAT_CLASSES[position],
-            )}
-          >
-            <span
-              aria-hidden="true"
-              className={cn(
-                "rounded-full",
-                selected
-                  ? "size-3 bg-primary"
-                  : "size-2 border border-muted-foreground bg-background",
-              )}
-            />
-          </button>
-        );
-      })}
-    </div>
+    <TileSpotPicker
+      value={value}
+      cornerRadius={cornerRadius}
+      available={availablePositions(cornerRadius, titleBand)}
+      band={titleBand}
+      ariaLabel="Price tag spot"
+      spotLabel={(spot) =>
+        `Price tag ${FLOAT_POSITION_LABELS[spot].toLowerCase()}`
+      }
+      onChange={onChange}
+    />
   );
 }

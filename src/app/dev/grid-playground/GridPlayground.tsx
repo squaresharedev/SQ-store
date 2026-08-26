@@ -6,9 +6,13 @@ import { secondaryButtonClass } from "@/components/ui/control-styles";
 import {
   DEFAULT_STOREFRONT_CONFIG,
   blockKey,
+  mergeCardStyleOverrides,
+  type CardStyleOverrides,
+  type ProductBlock,
   type ShapeBlock,
   type StorefrontBlock,
 } from "@/types/storefront";
+import type { Product } from "@/types/product";
 import type { GridPlacement } from "@/components/grid/gridConstants";
 import { Grid } from "@/components/grid/Grid";
 import { BlockTile } from "@/components/storefront/BlockTile";
@@ -17,9 +21,10 @@ import { gridGapStyle, scaledCornerRadius } from "@/components/storefront/config
 /**
  * Live editable-grid harness. Renders the same Grid + BlockTile pair the
  * designer canvas uses, but with self-contained state and a fixed 6x6 board,
- * so pointer gestures (drag to move, edge-grab resize, the corner handle)
- * can be exercised and asserted without auth or a storefront. The layout
- * readout below the board mirrors the state as JSON for the browser tests.
+ * so pointer gestures (drag to move, edge-grab resize, the corner handle,
+ * and dragging a product's title or price to a new spot) can be exercised and
+ * asserted without auth or a storefront. The layout readout below the board
+ * mirrors the state as JSON for the browser tests.
  */
 
 const COLUMNS = 6;
@@ -34,7 +39,33 @@ function shape(
   return { type: "shape", id, kind, color, ...placement };
 }
 
+/** One real product, so the tile that carries a title and a price is the same
+ *  component the designer renders rather than a stand-in. */
+const PRODUCT: Product = {
+  id: "00000000-0000-4000-9000-000000000001",
+  title: "Enamel mug",
+  description: "",
+  price: 12.5,
+  currency: "EUR",
+  status: "active",
+  imageUrl: null,
+  digitalFileName: null,
+  trackStock: false,
+  stockQuantity: null,
+  lowStockThreshold: 3,
+};
+
+const PRODUCT_BLOCK: ProductBlock = {
+  type: "product",
+  productId: PRODUCT.id,
+  x: 3,
+  y: 2,
+  w: 3,
+  h: 3,
+};
+
 const INITIAL_BLOCKS: StorefrontBlock[] = [
+  PRODUCT_BLOCK,
   shape("00000000-0000-4000-8000-000000000001", "square", "#2563eb", {
     x: 0,
     y: 0,
@@ -73,6 +104,22 @@ export function GridPlayground() {
     );
   }
 
+  /** The same override merge the designer commits a spot drag through. */
+  function patchStyle(key: string, patch: CardStyleOverrides) {
+    setBlocks((current) =>
+      current.map((b) => {
+        if (b.type !== "product" || blockKey(b) !== key) return b;
+        const style = mergeCardStyleOverrides(b.style, patch);
+        if (style === undefined) {
+          const rest = { ...b };
+          delete rest.style;
+          return rest;
+        }
+        return { ...b, style };
+      }),
+    );
+  }
+
   return (
     <main className={pageShellClass}>
       <h1 className="text-2xl font-semibold text-foreground">
@@ -81,7 +128,8 @@ export function GridPlayground() {
       <p className="mt-1 max-w-2xl font-inter text-sm text-muted-foreground">
         Drag a tile&apos;s inner surface to move it. Grab any side or corner to
         resize from that edge. Toggle roundness to confirm the controls stay
-        visible on circle tiles.
+        visible on circle tiles. Select the product tile, then drag its title or
+        its price to move that label to another spot.
       </p>
 
       <button
@@ -120,16 +168,29 @@ export function GridPlayground() {
             <BlockTile
               blockKey={gridBlock.key}
               block={gridBlock.data}
-              product={null}
+              product={
+                gridBlock.data.type === "product" ? PRODUCT : null
+              }
               theme={theme}
               editable={state.editable}
               isEditing={selected === gridBlock.key}
+              // A spot drag is armed by SOLE selection, so the harness has to
+              // say which tile that is or the tokens never appear.
+              isSoleSelection={selected === gridBlock.key}
               onToggleEdit={(key) =>
                 setSelected((current) => (current === key ? null : key))
               }
               onRemove={(key) =>
                 setBlocks((current) =>
                   current.filter((b) => blockKey(b) !== key),
+                )
+              }
+              onSpotChange={(key, token, drop) =>
+                patchStyle(
+                  key,
+                  token === "title"
+                    ? { titlePosition: drop === "below" ? undefined : drop }
+                    : { priceTagPosition: drop },
                 )
               }
             />
@@ -144,7 +205,17 @@ export function GridPlayground() {
       >
         {JSON.stringify(
           Object.fromEntries(
-            blocks.map((b) => [blockKey(b), { x: b.x, y: b.y, w: b.w, h: b.h }]),
+            blocks.map((b) => [
+              blockKey(b),
+              {
+                x: b.x,
+                y: b.y,
+                w: b.w,
+                h: b.h,
+                // Where a spot drag landed, for the browser tests to read back.
+                ...(b.type === "product" && b.style ? { style: b.style } : {}),
+              },
+            ]),
           ),
           null,
           2,

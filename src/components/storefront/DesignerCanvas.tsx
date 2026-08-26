@@ -6,6 +6,8 @@ import type { Product } from "@/types/product";
 import {
   blockCornerRadius,
   blockKey,
+  isFreelyArranged,
+  layerOrder,
   readingOrder,
   type HeaderLine,
   type ImagePlacement,
@@ -20,18 +22,24 @@ import {
   fontPresentation,
 } from "@/lib/theme/storefront-fonts";
 import { Grid } from "@/components/grid/Grid";
-import type { GridBlock, GridPlacement } from "@/components/grid/gridConstants";
+import {
+  FRAME_Z,
+  OVERLAY_Z,
+  type GridBlock,
+  type GridPlacement,
+} from "@/components/grid/gridConstants";
 import type {
   InlineFormatKey,
   TextEditSource,
   TextRange,
 } from "./InlineTextEditor";
 import { BlockTile } from "./BlockTile";
+import type { SpotDrop, SpotToken } from "./TileSpotDragLayer";
 import { CarouselStrip } from "./CarouselStrip";
 import { CustomFontFace } from "./CustomFontFace";
 import { StorefrontMasthead } from "./StorefrontMasthead";
 import { resolveBackgroundStyle } from "./background-presets";
-import { gridGapStyle, scaledCornerRadius } from "./config-maps";
+import { gridGapStyle, scaledCornerRadius, tileClipStyle } from "./config-maps";
 import type { CanvasViewport } from "./useCanvasViewport";
 
 /** Accessible label for a block's drag/resize handles. */
@@ -80,6 +88,7 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   viewport,
   onMoveBlock,
   onResizeBlock,
+  onRotateBlock,
   onRemove,
   onEmptyCellClick,
   selectedKeys,
@@ -87,6 +96,12 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   onSelectMany,
   activeHeaderLine = null,
   onSelectHeaderLine,
+  editingHeaderLine = null,
+  editingHeaderRange = null,
+  onEditHeaderLine,
+  onHeaderTextChange,
+  onToggleHeaderFormat,
+  onHeaderEditEnd,
   framingKey = null,
   onFrameBlock,
   onFramePlacement,
@@ -98,6 +113,7 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   onToggleBlockFormat,
   onTextRangeChange,
   onTypeEnd,
+  onSpotChange,
   disableMarquee = false,
 }: {
   blocks: StorefrontBlock[];
@@ -126,6 +142,8 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   /** All callbacks are keyed by blockKey(block). */
   onMoveBlock: (key: string, x: number, y: number) => void;
   onResizeBlock: (key: string, placement: GridPlacement) => void;
+  /** Tilt, in degrees. The block keeps the cells it had. */
+  onRotateBlock: (key: string, rotation: number) => void;
   onRemove: (key: string) => void;
   /** Clicking a free cell inserts there. */
   onEmptyCellClick: (x: number, y: number) => void;
@@ -140,6 +158,17 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   /** Clicking a masthead line aims the left-hand panel at it. Omitted in
    *  read-only renders, where the masthead is not selectable at all. */
   onSelectHeaderLine?: (line: HeaderLine) => void;
+  /** The masthead line whose words are being typed in place, if any. */
+  editingHeaderLine?: HeaderLine | null;
+  /** Where the caret goes when that editor opens (the double-clicked word). */
+  editingHeaderRange?: TextRange | null;
+  onEditHeaderLine?: (line: HeaderLine, range: TextRange | null) => void;
+  onHeaderTextChange?: (line: HeaderLine, value: string) => void;
+  onToggleHeaderFormat?: (
+    line: HeaderLine,
+    format: "bold" | "italic" | "underline",
+  ) => void;
+  onHeaderEditEnd?: () => void;
   /** The one tile whose image is being framed in place, if any. */
   framingKey?: string | null;
   onFrameBlock?: (key: string) => void;
@@ -157,6 +186,9 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   /** The live selection inside the editor, for the panel's colour picker. */
   onTextRangeChange?: (range: TextRange | null) => void;
   onTypeEnd?: () => void;
+  /** Product tiles: the seller dragged (or arrowed) the title or the price to
+   *  a new home. */
+  onSpotChange?: (key: string, token: SpotToken, drop: SpotDrop) => void;
   /** True while a pan tool owns frame drags (space held). */
   disableMarquee?: boolean;
 }) {
@@ -182,7 +214,12 @@ export const DesignerCanvas = memo(function DesignerCanvas({
     onToggleBlockFormat,
     onTextRangeChange,
     onTypeEnd,
+    onSpotChange,
     onSelectHeaderLine,
+    onEditHeaderLine,
+    onHeaderTextChange,
+    onToggleHeaderFormat,
+    onHeaderEditEnd,
     disableMarquee,
   });
   useEffect(() => {
@@ -198,7 +235,12 @@ export const DesignerCanvas = memo(function DesignerCanvas({
       onToggleBlockFormat,
       onTextRangeChange,
       onTypeEnd,
+      onSpotChange,
       onSelectHeaderLine,
+      onEditHeaderLine,
+      onHeaderTextChange,
+      onToggleHeaderFormat,
+      onHeaderEditEnd,
       disableMarquee,
     };
   });
@@ -222,6 +264,24 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   const selectHeaderLine = useCallback((line: HeaderLine) => {
     handlers.current.onSelectHeaderLine?.(line);
   }, []);
+  const editHeaderLine = useCallback(
+    (line: HeaderLine, range: TextRange | null) => {
+      handlers.current.onEditHeaderLine?.(line, range);
+    },
+    [],
+  );
+  const changeHeaderText = useCallback((line: HeaderLine, value: string) => {
+    handlers.current.onHeaderTextChange?.(line, value);
+  }, []);
+  const toggleHeaderFormat = useCallback(
+    (line: HeaderLine, format: "bold" | "italic" | "underline") => {
+      handlers.current.onToggleHeaderFormat?.(line, format);
+    },
+    [],
+  );
+  const endHeaderEdit = useCallback(() => {
+    handlers.current.onHeaderEditEnd?.();
+  }, []);
   const startTyping = useCallback((key: string) => {
     handlers.current.onTypeStart?.(key);
   }, []);
@@ -243,6 +303,12 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   const endTyping = useCallback(() => {
     handlers.current.onTypeEnd?.();
   }, []);
+  const changeSpot = useCallback(
+    (key: string, token: SpotToken, drop: SpotDrop) => {
+      handlers.current.onSpotChange?.(key, token, drop);
+    },
+    [],
+  );
 
   // MARQUEE SELECTION. A drag that starts on the shop frame itself (the
   // board's background, a gap between cells, or a free cell — never a tile
@@ -341,9 +407,99 @@ export const DesignerCanvas = memo(function DesignerCanvas({
     window.addEventListener("pointercancel", handleUp);
   }
 
-  /** After a marquee drag, swallow the click a free-cell button would fire
-   *  on release — the seller was selecting, not inserting. */
-  function suppressClickAfterMarquee(event: React.MouseEvent<HTMLDivElement>) {
+  /**
+   * Alt+click reaches the block UNDER the one on top.
+   *
+   * Once blocks can be stacked, the topmost is the only one a plain click can
+   * ever reach: it is the one that paints there, so it is the one the pointer
+   * hits. Repeated Alt+clicks walk down through everything under the cursor
+   * and then wrap, which is how Illustrator and Sketch have always done it,
+   * and it is the alternative to making the seller send the top block away to
+   * get at what is beneath it.
+   *
+   * `elementsFromPoint` is what makes it exact: it returns the real hit stack
+   * in paint order, so a tilted block counts where it PAINTS rather than
+   * wherever its bounding box happens to reach.
+   */
+  const stackClick = useRef(false);
+
+  /** The blocks painting at a point, front to back. Shared by Alt+click and
+   *  the touch tap-cycle below, both of which walk the same hit stack. */
+  function blocksUnderPoint(clientX: number, clientY: number): string[] {
+    const under: string[] = [];
+    for (const element of document.elementsFromPoint(clientX, clientY)) {
+      const key = (element as HTMLElement).closest?.<HTMLElement>(
+        "[data-grid-key]",
+      )?.dataset.gridKey;
+      if (key && !under.includes(key)) under.push(key);
+    }
+    return under;
+  }
+
+  function selectThroughStack(event: React.PointerEvent<HTMLDivElement>) {
+    if (!event.altKey || event.button !== 0 || event.pointerType === "touch") {
+      return;
+    }
+    const under = blocksUnderPoint(event.clientX, event.clientY);
+    if (under.length === 0) return;
+    // Own the whole press: no drag, and no click landing on the tile on top
+    // and selecting it straight back.
+    event.preventDefault();
+    event.stopPropagation();
+    stackClick.current = true;
+    const current = selectedKeys.length === 1 ? under.indexOf(selectedKeys[0]) : -1;
+    handlers.current.onSelectBlock(under[(current + 1) % under.length]);
+  }
+
+  /**
+   * Touch has no Alt key, so repeatedly tapping the same spot is what walks
+   * down a stack: each tap that lands on a point whose stack still contains
+   * the current selection advances to the next block down, wrapping at the
+   * bottom, exactly like repeated Alt+clicks. A tap whose stack does NOT
+   * contain the current selection -- the first touch anywhere, or a tap on an
+   * unrelated block -- is a plain select and must reach BlockTile's own click
+   * handling untouched. A real drag is untouched too, since this only fires
+   * on release and bails the moment the press has actually moved.
+   *
+   * Deferred to pointerup rather than intercepted on pointerdown the way
+   * Alt+click is: pointerdown is also where Grid's own move gesture starts,
+   * and a touch press cannot say yet whether it will become a drag.
+   */
+  const touchDownAt = useRef<{ x: number; y: number } | null>(null);
+
+  function noteTouchStart(event: React.PointerEvent<HTMLDivElement>) {
+    touchDownAt.current =
+      event.pointerType === "touch"
+        ? { x: event.clientX, y: event.clientY }
+        : null;
+  }
+
+  function cycleStackOnTap(event: React.PointerEvent<HTMLDivElement>) {
+    const down = touchDownAt.current;
+    touchDownAt.current = null;
+    if (event.pointerType !== "touch" || !down) return;
+    if (Math.hypot(event.clientX - down.x, event.clientY - down.y) > 6) return;
+
+    const under = blocksUnderPoint(event.clientX, event.clientY);
+    if (under.length < 2) return;
+    const current = selectedKeys.length === 1 ? under.indexOf(selectedKeys[0]) : -1;
+    if (current === -1) return;
+
+    event.stopPropagation();
+    stackClick.current = true;
+    handlers.current.onSelectBlock(under[(current + 1) % under.length]);
+  }
+
+  /** Swallow the click that follows a marquee drag or an Alt+click: in both
+   *  cases the press has already been spent on selecting, and letting it
+   *  through would insert a block or re-select the tile on top. */
+  function suppressSyntheticClick(event: React.MouseEvent<HTMLDivElement>) {
+    if (stackClick.current) {
+      stackClick.current = false;
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
     if (!marqueeDragged.current) return;
     marqueeDragged.current = false;
     event.preventDefault();
@@ -352,18 +508,35 @@ export const DesignerCanvas = memo(function DesignerCanvas({
 
   // Map storefront blocks -> generic grid blocks. Each carries its own
   // coordinates, so the array order means nothing.
-  const gridBlocks = useMemo<GridBlock<StorefrontBlock>[]>(
-    () =>
-      blocks.map((block) => ({
-        key: blockKey(block),
+  //
+  // Depth is resolved ONCE here rather than per cell: layerOrder sorts the
+  // whole board, and asking it per cell would sort a 120-block board 120 times
+  // for every paint.
+  const gridBlocks = useMemo<GridBlock<StorefrontBlock>[]>(() => {
+    const depths = new Map(
+      layerOrder(blocks).map((block, index) => [blockKey(block), index]),
+    );
+    return blocks.map((block) => {
+      const key = blockKey(block);
+      return {
+        key,
         x: block.x,
         y: block.y,
         w: block.w,
         h: block.h,
+        // Both visual only: the block still covers exactly the cells above, so
+        // the grid's placement rules never see either of them.
+        rotation: block.rotation,
+        z: depths.get(key),
         data: block,
-      })),
-    [blocks],
-  );
+      };
+    });
+  }, [blocks]);
+
+  // Whether this board is arranged in a way a straight line cannot express.
+  // Cheap enough to run per render on a 120-block board, and it has to follow
+  // the blocks, since one drag onto a neighbour is what changes the answer.
+  const freelyArranged = useMemo(() => isFreelyArranged(blocks), [blocks]);
 
   // Carousel mode has no coordinates: it reads the board top-to-bottom,
   // left-to-right and swaps neighbours in that sequence.
@@ -394,8 +567,17 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   const canvas = (
     <div
       ref={frameRef}
+      // Capture, so an Alt+press is claimed before the tile under it can turn
+      // it into a drag or a selection of its own. noteTouchStart only
+      // records; it never claims the press, so a touch drag still starts
+      // normally underneath it.
+      onPointerDownCapture={(event) => {
+        selectThroughStack(event);
+        noteTouchStart(event);
+      }}
+      onPointerUpCapture={cycleStackOnTap}
       onPointerDown={startMarquee}
-      onClickCapture={suppressClickAfterMarquee}
+      onClickCapture={suppressSyntheticClick}
       className={cn(
         // Relative: the marquee rubber band positions against this frame.
         "relative rounded-md border border-border p-4",
@@ -419,13 +601,24 @@ export const DesignerCanvas = memo(function DesignerCanvas({
         <div
           ref={marqueeRef}
           aria-hidden="true"
-          className="pointer-events-none absolute z-40 hidden border border-ring bg-ring/10"
+          // Above every block on the board, from the shared band rather than a
+          // `z-40` class: a layered board can put a block at any depth in the
+          // content range, and a rubber band drawn under one is invisible
+          // exactly when it is being used.
+          style={{ zIndex: OVERLAY_Z }}
+          className="pointer-events-none absolute hidden border border-ring bg-ring/10"
         />
         <StorefrontMasthead
           header={header}
           theme={theme}
           activeLine={activeHeaderLine}
           onSelectLine={selectHeaderLine}
+          editingLine={editingHeaderLine}
+          editingRange={editingHeaderRange}
+          onEditLine={editHeaderLine}
+          onLineTextChange={changeHeaderText}
+          onToggleLineFormat={toggleHeaderFormat}
+          onEditDone={endHeaderEdit}
         />
 
         {blocks.length === 0 ? (
@@ -472,27 +665,39 @@ export const DesignerCanvas = memo(function DesignerCanvas({
         ) : (
           <Grid
             editable
+            // Stacking is a design move here, not a mistake: a drop onto an
+            // occupied cell lands on top of it instead of springing back, and
+            // the Layer controls decide which one paints over the other.
+            allowOverlap
             showEmptyCells={showGrid}
             blocks={gridBlocks}
             ariaLabel="Storefront canvas"
             columns={theme.columns}
             rows={theme.rows}
+            // A board with a tilt or a stack on it has no honest narrow-screen
+            // repacking: pulling a word off the shape it sits on and setting
+            // the two side by side is a different design, not a smaller one.
+            // Such a board keeps its columns and its cells simply get smaller.
+            responsive={!freelyArranged}
             // Corner roundness drives the cell clip (style beats the grid's
             // default rounded-sm class); tiles inherit it, no clip of their
             // own. Scaled per tile size so big tiles round like small ones.
             // Per block: a product tile may override the theme's roundness.
             cellStyle={(placement, gridBlock) => ({
-              borderRadius: scaledCornerRadius(
-                gridBlock
-                  ? blockCornerRadius(theme, gridBlock.data)
-                  : theme.cornerRadius,
-                placement,
+              ...tileClipStyle(
+                scaledCornerRadius(
+                  gridBlock
+                    ? blockCornerRadius(theme, gridBlock.data)
+                    : theme.cornerRadius,
+                  placement,
+                ),
               ),
               // A tile being framed draws the rest of its picture OUTSIDE
-              // itself, and a later sibling would paint straight over it.
-              // Lifting the cell is what keeps the spill visible.
+              // itself, and any block in front would paint straight over it.
+              // Lifting the cell clear of the whole content band is what keeps
+              // the spill visible, including from the back of a deep stack.
               ...(gridBlock && framingKey === gridBlock.key
-                ? { zIndex: 30 }
+                ? { zIndex: FRAME_Z }
                 : {}),
             })}
             getBlockLabel={(gridBlock) =>
@@ -500,6 +705,7 @@ export const DesignerCanvas = memo(function DesignerCanvas({
             }
             onMove={onMoveBlock}
             onResize={onResizeBlock}
+            onRotate={onRotateBlock}
             onEmptyCellClick={onEmptyCellClick}
             renderBlock={(gridBlock, state) => (
               <BlockTile
@@ -528,6 +734,7 @@ export const DesignerCanvas = memo(function DesignerCanvas({
                 onToggleBlockFormat={toggleBlockFormat}
                 onTextRangeChange={changeTextRange}
                 onTypeEnd={endTyping}
+                onSpotChange={changeSpot}
               />
             )}
           />

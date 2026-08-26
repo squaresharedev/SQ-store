@@ -74,13 +74,15 @@ export function headerThemeColors(accent: string): {
 }
 
 /** Whether one masthead line is actually rendered right now. Mirrors what
- *  StorefrontMasthead draws: nothing while hidden, and nothing for a line with
- *  no text of its own. */
+ *  StorefrontMasthead draws: nothing while hidden, nothing for a line with no
+ *  text of its own — and the line being TYPED IN, which stays on the board as
+ *  a field once its words have been deleted. */
 export function headerLineVisible(
   header: StorefrontHeader,
   line: HeaderLine,
+  editingLine?: HeaderLine | null,
 ): boolean {
-  return header.show && header[line].trim().length > 0;
+  return header.show && (line === editingLine || header[line].trim().length > 0);
 }
 
 /**
@@ -230,6 +232,9 @@ export function resolveColorTarget(
    *  applies to them rather than to the whole block, so the panel has to
    *  resolve against them too. */
   selection?: TextSelectionTarget | null,
+  /** The masthead line the seller is typing in, if any: it counts as on
+   *  screen even with nothing in it yet. */
+  editingLine?: HeaderLine | null,
 ): ResolvedColorTarget | null {
   switch (ref.kind) {
     case "theme-accent":
@@ -240,7 +245,7 @@ export function resolveColorTarget(
     // panel closes rather than editing something invisible — the same rule the
     // background stops resolving under.
     case "header-name": {
-      if (!headerLineVisible(header, "name")) return null;
+      if (!headerLineVisible(header, "name", editingLine)) return null;
       const themeColor = headerThemeColors(theme.accent).name;
       return {
         label: "Store name",
@@ -254,7 +259,7 @@ export function resolveColorTarget(
     }
 
     case "header-bio": {
-      if (!headerLineVisible(header, "bio")) return null;
+      if (!headerLineVisible(header, "bio", editingLine)) return null;
       const themeColor = headerThemeColors(theme.accent).bio;
       return {
         label: "Bio",

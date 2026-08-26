@@ -16,6 +16,7 @@ import {
   IMAGE_SCALE_MIN,
   type ImagePlacement,
 } from "@/lib/images/placement";
+import { rotatedFootprint, type Box } from "@/lib/geometry/rotated-box";
 
 export type { ImagePlacement };
 export { DEFAULT_IMAGE_PLACEMENT, IMAGE_SCALE_MIN, IMAGE_SCALE_MAX };
@@ -61,8 +62,9 @@ export type StorefrontCustomFont = {
 export const CORNER_RADIUS_MAX = 100;
 
 /** At or past this roundness the tile corners are clipped away, so corner
- *  price tag spots coerce onto the center vertical axis. */
-export const PRICE_TAG_CORNER_LIMIT = 32;
+ *  spots (the price tag's AND the title's) coerce onto the center vertical
+ *  axis. See {@link coerceCornerSpot}. */
+export const CORNER_SPOT_LIMIT = 32;
 
 // CANVAS MODEL. Blocks are placed FREELY: each one stores its own cell
 // coordinates (x, y) and span (w, h) on a board of `theme.columns` by
@@ -70,8 +72,26 @@ export const PRICE_TAG_CORNER_LIMIT = 32;
 // blocks are deliberate whitespace, and reading order is derived from the
 // coordinates (see readingOrder) whenever a linear sequence is needed.
 //
-// Placements are always non-overlapping and inside the canvas; the schema and
-// the server re-check both on every save.
+// BLOCKS MAY OVERLAP. Stacking one thing on another is a design move, not a
+// mistake: a price chip over a photo, a word over a shape. Which one paints on
+// top is `z` (see layerOrder), and it is the only thing that decides it, so a
+// board never has to be argued out of an arrangement the seller chose.
+//
+// A block also stores x/y/w/h UNROTATED, and `rotation` turns it about its own
+// centre. Turning it changes WHICH WAY ROUND its cells lie and nothing else: a
+// quarter-turned 1x3 bar covers 3x1, the same three cells' worth, in the same
+// place. That transposed rect is its FOOTPRINT (see blockFootprint), derived
+// and never stored, so turning a block back restores exactly the block it was.
+// Anything asking "where is this block" wants the footprint; anything asking
+// "how big is it" (resize, the reflow's spans) wants x/y/w/h.
+//
+// Rotating never moves a block and never resizes it. A block turned against
+// the board's edge reaches past it, and that is left alone: shifting it would
+// make a rotate control that also repositions, and the overhang is something
+// the seller can see and drag back.
+//
+// The one rule left is that the STORED rect stays on the board, which is what
+// the schema checks and what a seller can act on.
 
 export const CANVAS_COLUMNS_MIN = 3;
 export const CANVAS_COLUMNS_MAX = 12;
@@ -80,8 +100,86 @@ export const CANVAS_ROWS_MIN = 2;
 // cap has to clear whatever the tallest legacy auto-flow layout packs into.
 export const CANVAS_ROWS_MAX = 60;
 
+/** Tilt bounds, in whole degrees. Centred on 0 rather than running 0..359 so
+ *  "no tilt" is the middle of the control's range and a small nudge either way
+ *  reads as a small number. */
+export const ROTATION_MIN = -180;
+export const ROTATION_MAX = 180;
+
 /** Where a block sits on the canvas and how many cells it covers. */
-export type BlockPlacement = { x: number; y: number; w: number; h: number };
+export type BlockPlacement = {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  /**
+   * Clockwise tilt in whole degrees, ROTATION_MIN..ROTATION_MAX. Absent = 0,
+   * and a block turned back to level drops the key again (see
+   * {@link withRotation}), so an untilted block stays byte-identical to one
+   * saved before tilting existed.
+   *
+   * PURELY VISUAL. The block still occupies exactly the cells x/y/w/h name:
+   * the non-overlap rule, {@link readingOrder} and the small-screen reflow all
+   * read the unrotated box, so a tilted corner may paint over its neighbour
+   * without any of them having an opinion about it.
+   */
+  rotation?: number;
+  /**
+   * Paint order, 0 (furthest back) to MAX_BLOCKS - 1. Absent means the block
+   * has never been layered and simply paints in reading order, which is how
+   * every board rendered before overlap was possible.
+   *
+   * VISUAL ONLY. DOM order stays reading order (see {@link readingOrder}), so
+   * screen readers, the embed payload and the carousel are all unaffected by
+   * which block is in front. A seller who sends a shape behind a product tile
+   * has said something about paint order, not about which one a blind buyer
+   * should hear about first.
+   *
+   * Layering operations rewrite z on EVERY block at once (see
+   * {@link layerOrder} and lib/storefront/layers), so a board is either
+   * entirely unlayered or entirely layered. A half-layered board would have no
+   * total order, and "bring forward" would have no answer.
+   */
+  z?: number;
+};
+
+/**
+ * Fold any angle into ROTATION_MIN..ROTATION_MAX as a whole degree.
+ *
+ * A rotate handle can be spun through several turns in one drag, and the value
+ * that reaches the schema has to be one bounded integer however far the wrist
+ * went. -180 and 180 are the same angle; this settles on 180 so the top of the
+ * slider's range is reachable.
+ */
+export function normalizeRotation(degrees: number): number {
+  if (!Number.isFinite(degrees)) return 0;
+  const wrapped = ((Math.round(degrees) % 360) + 360) % 360;
+  return wrapped > ROTATION_MAX ? wrapped - 360 : wrapped;
+}
+
+/**
+ * Set or clear a block's tilt.
+ *
+ * The ONE writer of `rotation`, for the same reason setHeaderStyle is the one
+ * writer of the masthead's styling: level means the key is absent, not that it
+ * holds a zero, and a second call site would eventually store one. Returns the
+ * block unchanged when it already sits at that angle, so a drag that ends where
+ * it started cannot mark the editor dirty.
+ */
+export function withRotation<T extends BlockPlacement>(
+  block: T,
+  degrees: number,
+): T {
+  const next = normalizeRotation(degrees);
+  const current = block.rotation ?? 0;
+  if (next === current) return block;
+  if (next === 0) {
+    const { rotation, ...level } = block;
+    void rotation;
+    return level as T;
+  }
+  return { ...block, rotation: next };
+}
 
 /**
  * The storefront canvas background — a closed set of safe shapes: a solid hex,
@@ -135,11 +233,17 @@ export type TitleDisplay = (typeof TITLE_DISPLAYS)[number];
 export const PRICE_DISPLAYS = ["always", "hover"] as const;
 export type PriceDisplay = (typeof PRICE_DISPLAYS)[number];
 
-
-/** Floating price tag spots over the image: the 4 corners plus the center
- *  vertical axis (top, middle, bottom). Circle tiles clip their corners
- *  entirely, so on circles only the vertical axis is offered/rendered. */
-export const PRICE_TAG_FLOAT_POSITIONS = [
+/**
+ * The seven spots something can take on a product tile: the 4 corners plus the
+ * center vertical axis (top, middle, bottom). Circle tiles clip their corners
+ * entirely, so on those only the vertical axis is offered/rendered.
+ *
+ * ONE list, shared by the price tag and the product title, so the two are
+ * picked the same way, coerce by the same rules ({@link coerceCornerSpot}) and
+ * can be checked against each other for collisions without translating between
+ * two vocabularies.
+ */
+export const TILE_SPOTS = [
   "top-left",
   "top-center",
   "top-right",
@@ -148,8 +252,37 @@ export const PRICE_TAG_FLOAT_POSITIONS = [
   "bottom-center",
   "bottom-right",
 ] as const;
-export type PriceTagFloatPosition =
-  (typeof PRICE_TAG_FLOAT_POSITIONS)[number];
+export type TileSpot = (typeof TILE_SPOTS)[number];
+
+export type SpotRow = "top" | "middle" | "bottom";
+export type SpotColumn = "left" | "center" | "right";
+
+/** Which of the three bands a spot sits in. */
+export function spotRow(spot: TileSpot): SpotRow {
+  return spot.split("-")[0] as SpotRow;
+}
+
+/** Which way a spot pulls horizontally. */
+export function spotColumn(spot: TileSpot): SpotColumn {
+  return spot.split("-")[1] as SpotColumn;
+}
+
+/**
+ * Corner spots do not exist on heavily rounded tiles (the clip removes them),
+ * so past CORNER_SPOT_LIMIT a corner falls back to its own row's center spot.
+ * Storage always keeps the seller's corner choice; only rendering and the
+ * pickers coerce, so easing the roundness back restores the original corner.
+ */
+export function coerceCornerSpot(spot: TileSpot, cornerRadius: number): TileSpot {
+  if (cornerRadius < CORNER_SPOT_LIMIT) return spot;
+  return spotColumn(spot) === "center"
+    ? spot
+    : (`${spotRow(spot)}-center` as TileSpot);
+}
+
+/** Floating price tag spots over the image — the shared seven. */
+export const PRICE_TAG_FLOAT_POSITIONS = TILE_SPOTS;
+export type PriceTagFloatPosition = TileSpot;
 
 /** Where the price tag sits on a product tile: in the info bar (`below`), at
  *  one of the floating spots, or `hidden` (the ONE way to hide the price).
@@ -162,35 +295,23 @@ export const PRICE_TAG_POSITIONS = [
 ] as const;
 export type PriceTagPosition = (typeof PRICE_TAG_POSITIONS)[number];
 
-/**
- * Corner spots do not exist on heavily rounded tiles (the clip removes them),
- * so past PRICE_TAG_CORNER_LIMIT corners fall back to the same row's center
- * spot. Storage keeps the seller's corner choice; only rendering and the
- * picker coerce, so easing the roundness back restores the original corner.
- */
+/** The corner rule (see {@link coerceCornerSpot}) over the wider price tag
+ *  vocabulary, where `below` and `hidden` are not spots at all. */
 export function coercePriceTagPosition(
   position: PriceTagPosition,
   cornerRadius: number,
 ): PriceTagPosition {
-  if (cornerRadius < PRICE_TAG_CORNER_LIMIT) return position;
-  switch (position) {
-    case "top-left":
-    case "top-right":
-      return "top-center";
-    case "bottom-left":
-    case "bottom-right":
-      return "bottom-center";
-    default:
-      return position;
-  }
+  if (position === "below" || position === "hidden") return position;
+  return coerceCornerSpot(position, cornerRadius);
 }
 
 /**
  * Where the tag ACTUALLY renders. Two structural facts can take a spot away.
- * One is roundness (above). The other is the title area: `overlay` and
- * `shadow` put the product name at the bottom of the IMAGE box, which is the
- * same box a floated tag sits in, so a bottom spot would stack the price on
- * the name. Bottom flips to the matching top spot instead.
+ * One is roundness (above). The other is the title band: `overlay` and
+ * `shadow` put the product name INSIDE the image box, which is the same box a
+ * floated tag sits in, so sharing a row would stack the price on the name. The
+ * tag flips to the opposite row instead — to the top when the title holds the
+ * bottom, and down to the bottom when the title holds the top or the middle.
  *
  * Both rules are structural — they read the config the renderer already holds,
  * never a measured size — so the picker can call this too and highlight the
@@ -205,29 +326,81 @@ export function coercePriceTagPosition(
  */
 export function resolvePriceTagPosition(
   position: PriceTagPosition,
-  opts: { cornerRadius: number; titleOverlaysImage: boolean },
+  opts: {
+    cornerRadius: number;
+    titleOverlaysImage: boolean;
+    /** Which row the overlaid title holds. Absent = the bottom, which is
+     *  where the title sat before it became placeable. */
+    titleRow?: SpotRow;
+  },
 ): PriceTagPosition {
   let lifted = position;
-  if (opts.titleOverlaysImage) {
-    switch (position) {
-      case "bottom-left":
-        lifted = "top-left";
-        break;
-      case "bottom-center":
-        lifted = "top-center";
-        break;
-      case "bottom-right":
-        lifted = "top-right";
-        break;
+  if (
+    opts.titleOverlaysImage &&
+    position !== "below" &&
+    position !== "hidden"
+  ) {
+    const titleRow = opts.titleRow ?? "bottom";
+    if (spotRow(position) === titleRow) {
+      const away: SpotRow = titleRow === "bottom" ? "top" : "bottom";
+      lifted = `${away}-${spotColumn(position)}` as TileSpot;
     }
   }
   return coercePriceTagPosition(lifted, opts.cornerRadius);
 }
 
-/** Whether the title area is drawn OVER the image rather than under it. The
- *  one thing the collision rule above needs to know about the title. */
+/** Whether the title band is drawn OVER the image rather than as a row of its
+ *  own. The one thing the collision rule above needs to know about the title. */
 export function titleOverlaysImage(titleStyle: TitleStyle): boolean {
   return titleStyle === "overlay" || titleStyle === "shadow";
+}
+
+/** Where the title sits with no position of its own: the bottom-left of the
+ *  tile, which is the only place it rendered before it became placeable. */
+export const DEFAULT_TITLE_POSITION: TileSpot = "bottom-left";
+
+/** Edge spacing cap for the title band, in px. Absent = auto, which derives
+ *  the spacing from the tile's own corner radius (see titleBandStyle). */
+export const TITLE_INSET_MAX = 40;
+
+/**
+ * The auto edge spacing rule, as three numbers rather than a formula spelled
+ * twice: the band's words are pushed in by this share of the tile's clip
+ * radius, never less than the flush look a square tile has always had and
+ * never more than a small tile can spare.
+ *
+ * titleBandStyle builds the CSS clamp from these (the browser is what knows
+ * the tile's real radius); {@link autoTitleInset} evaluates the same rule in
+ * JS so the control can say where auto had put things.
+ */
+export const TITLE_INSET_AUTO = { min: 8, max: 32, ratio: 0.35 } as const;
+
+/** What the auto rule yields at a given clip radius. */
+export function autoTitleInset(clipRadius: number): number {
+  return Math.min(
+    TITLE_INSET_AUTO.max,
+    Math.max(TITLE_INSET_AUTO.min, Math.round(clipRadius * TITLE_INSET_AUTO.ratio)),
+  );
+}
+
+/**
+ * Where the title band ACTUALLY sits.
+ *
+ * A `bar` title is a real row above or below the picture rather than something
+ * drawn on it, so it has no middle to sit in; `middle-center` falls to the
+ * bottom band. Everything else is the shared corner rule. Structural like the
+ * price tag's resolver, and called by the picker for the same reason: the spot
+ * shown selected is the spot that renders.
+ */
+export function resolveTitlePosition(
+  position: TileSpot,
+  opts: { titleStyle: TitleStyle; cornerRadius: number },
+): TileSpot {
+  const spot =
+    !titleOverlaysImage(opts.titleStyle) && spotRow(position) === "middle"
+      ? "bottom-center"
+      : position;
+  return coerceCornerSpot(spot, opts.cornerRadius);
 }
 
 /** The three faces a price tag may take. Deliberately its own list rather
@@ -565,6 +738,16 @@ export type StorefrontTheme = {
   cornerRadius: number;
   titleStyle: TitleStyle;
   titleDisplay: TitleDisplay;
+  /**
+   * Which of the seven spots the title band takes, the same board the price
+   * tag is placed on. Optional (absent = DEFAULT_TITLE_POSITION) so a config
+   * saved before the title could move keeps parsing and renders unchanged.
+   */
+  titlePosition?: TileSpot;
+  /** The band's horizontal breathing room in px, 0..TITLE_INSET_MAX. Absent =
+   *  auto, derived from the tile's corner radius so the words never run into
+   *  a rounded corner. */
+  titleInset?: number;
   priceDisplay: PriceDisplay;
   priceTagPosition: PriceTagPosition;
   /**
@@ -607,6 +790,11 @@ export type CardStyle = {
   showTitle: boolean;
   titleStyle: TitleStyle;
   titleDisplay: TitleDisplay;
+  titlePosition: TileSpot;
+  /** Stays OPTIONAL after resolution for the same reason the tag's colors do:
+   *  "auto" is a state a seller can choose, and the control has to be able to
+   *  show it. Renderers read it through titleBandStyle. */
+  titleInset?: number;
   priceDisplay: PriceDisplay;
   priceTagPosition: PriceTagPosition;
   priceTagFont: PriceTagFont;
@@ -641,6 +829,9 @@ export function resolveCardStyle(
     showTitle: overrides?.showTitle ?? theme.showTitle,
     titleStyle: overrides?.titleStyle ?? theme.titleStyle,
     titleDisplay: overrides?.titleDisplay ?? theme.titleDisplay,
+    titlePosition:
+      overrides?.titlePosition ?? theme.titlePosition ?? DEFAULT_TITLE_POSITION,
+    titleInset: overrides?.titleInset ?? theme.titleInset,
     priceDisplay: overrides?.priceDisplay ?? theme.priceDisplay,
     priceTagPosition: overrides?.priceTagPosition ?? theme.priceTagPosition,
     priceTagFont: overrides?.priceTagFont ?? theme.priceTagFont ?? "inter",
@@ -837,6 +1028,29 @@ export function readingOrder<T extends BlockPlacement>(blocks: T[]): T[] {
 }
 
 /**
+ * The blocks in PAINT order, back to front.
+ *
+ * An unlayered board falls back to reading order, which is exactly what the
+ * DOM already gave it, so a config saved before layering renders unchanged.
+ *
+ * A block with no z of its own sorts at its reading index, and ties break the
+ * same way. That rule is what keeps the order total for the one frame between
+ * a paste (which brings no z) and the next normalize, and it is why the schema
+ * needs no refinement over duplicate or gapped values.
+ */
+export function layerOrder<T extends BlockPlacement>(blocks: T[]): T[] {
+  const reading = readingOrder(blocks);
+  if (!reading.some((block) => block.z !== undefined)) return reading;
+  return reading
+    .map((block, index) => ({ block, index }))
+    .sort(
+      (a, b) =>
+        (a.block.z ?? a.index) - (b.block.z ?? b.index) || a.index - b.index,
+    )
+    .map((entry) => entry.block);
+}
+
+/**
  * The blocks a BUYER actually sees: everything except sold-out products the
  * seller chose to hide. The designer canvas deliberately does not use this (it
  * keeps showing hidden blocks dimmed, so they stay manageable); every read-only
@@ -857,11 +1071,55 @@ export function buyerVisibleBlocks(config: StorefrontConfig): StorefrontBlock[] 
 /**
  * Do two placements cover any of the same cells? Deliberately mirrored in
  * components/grid/gridConstants: the schema (a server boundary) must not have
- * to import a client component module to enforce a core rule.
+ * to import a client component module to share four lines of arithmetic.
+ *
+ * No longer a RULE, since blocks may be stacked (see the canvas model above).
+ * It is now a question the editor asks when it is looking for somewhere empty
+ * to put something, which is a preference rather than a constraint.
  */
 export function placementsOverlap(a: BlockPlacement, b: BlockPlacement): boolean {
   return (
     a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h
+  );
+}
+
+/**
+ * The cells a block covers, tilt included.
+ *
+ * The stored rect for a level block, and the SAME rect stood on its end for a
+ * block nearer a quarter turn: same number of cells, same centre, the other
+ * way round. This is what every "where is it" question reads: the board's
+ * minimum size, the editor's empty-cell guides, the drop ghost, the edges a
+ * resize grabs, and the search for somewhere free to drop a new block.
+ *
+ * Derived rather than stored, deliberately. Writing the turned rect back into
+ * x/y/w/h would leave no way back to the shape the seller drew, and a block
+ * nudged round in steps would ratchet through it.
+ */
+export function blockFootprint(block: BlockPlacement): Box {
+  return rotatedFootprint(block, block.rotation ?? 0);
+}
+
+/** Do two blocks cover any of the same cells once their tilt is accounted for? */
+export function blocksOverlap(a: BlockPlacement, b: BlockPlacement): boolean {
+  return placementsOverlap(blockFootprint(a), blockFootprint(b));
+}
+
+/**
+ * Is any part of this board arranged in a way a straight line cannot express:
+ * a tilted block, or two blocks sharing cells?
+ *
+ * The question a RENDERER asks before deciding to reflow. Repacking a board
+ * into fewer columns is a good answer for a plain grid on a narrow screen, and
+ * a destructive one here: it would pull a word off the shape it was placed on
+ * and set the two side by side, which is not the design in smaller form, it is
+ * a different design.
+ */
+export function isFreelyArranged(blocks: readonly BlockPlacement[]): boolean {
+  return blocks.some(
+    (block, index) =>
+      (block.rotation ?? 0) !== 0 ||
+      blocks.some((other, otherIndex) => otherIndex > index && blocksOverlap(block, other)),
   );
 }
 

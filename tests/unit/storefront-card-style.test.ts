@@ -1,17 +1,25 @@
 import { describe, expect, it } from "vitest";
 import {
+  CORNER_SPOT_LIMIT,
   DEFAULT_STOREFRONT_CONFIG,
+  DEFAULT_TITLE_POSITION,
   PRICE_TAG_POSITIONS,
   PRICE_TAG_RADIUS_DEFAULT,
   PRICE_TAG_SIZE_DEFAULT,
+  TILE_SPOTS,
+  TITLE_INSET_AUTO,
+  autoTitleInset,
   blockCornerRadius,
   defaultPriceTagFill,
   mergeCardStyleOverrides,
   resolveCardStyle,
   resolvePriceTagPosition,
+  resolveTitlePosition,
   titleOverlaysImage,
+  type PriceTagPosition,
   type ProductBlock,
   type ShapeBlock,
+  type SpotRow,
   type StorefrontTheme,
   type TextBlock,
 } from "@/types/storefront";
@@ -43,6 +51,10 @@ describe("resolveCardStyle", () => {
       showTitle: t.showTitle,
       titleStyle: "overlay",
       titleDisplay: t.titleDisplay,
+      // Absent everywhere: the title has never moved off its default spot,
+      // and its spacing follows the tile's roundness rather than a number.
+      titlePosition: DEFAULT_TITLE_POSITION,
+      titleInset: undefined,
       priceDisplay: t.priceDisplay,
       priceTagPosition: t.priceTagPosition,
       priceTagFont: "inter",
@@ -141,7 +153,7 @@ describe("resolveCardStyle", () => {
  * actually land. The table below IS the contract.
  */
 describe("resolvePriceTagPosition", () => {
-  const ROUND = 32; // PRICE_TAG_CORNER_LIMIT
+  const ROUND = CORNER_SPOT_LIMIT;
   // stored -> [plain, round, overlaid, round + overlaid]
   const TABLE: Record<string, [string, string, string, string]> = {
     below: ["below", "below", "below", "below"],
@@ -199,6 +211,105 @@ describe("resolvePriceTagPosition", () => {
     expect(
       resolvePriceTagPosition(stored, { cornerRadius: 0, titleOverlaysImage: false }),
     ).toBe("bottom-right");
+  });
+
+  // The title can now hold any row, so "get out of the title's way" has to
+  // mean the row the title actually holds — not the bottom by assumption.
+  it("moves the tag off whichever row the title band holds", () => {
+    const at = (position: PriceTagPosition, titleRow: SpotRow) =>
+      resolvePriceTagPosition(position, {
+        cornerRadius: 0,
+        titleOverlaysImage: true,
+        titleRow,
+      });
+    expect(at("top-left", "top")).toBe("bottom-left");
+    expect(at("bottom-left", "top")).toBe("bottom-left");
+    expect(at("middle-center", "middle")).toBe("bottom-center");
+    expect(at("bottom-right", "bottom")).toBe("top-right");
+    // A row the title does not hold is left exactly where it was stored.
+    expect(at("top-right", "middle")).toBe("top-right");
+    expect(at("bottom-center", "top")).toBe("bottom-center");
+  });
+
+  it("assumes the bottom when no title row is given", () => {
+    // Every caller written before the title could move keeps its meaning.
+    for (const position of PRICE_TAG_POSITIONS) {
+      const opts = { cornerRadius: 0, titleOverlaysImage: true };
+      expect(resolvePriceTagPosition(position, opts)).toBe(
+        resolvePriceTagPosition(position, { ...opts, titleRow: "bottom" }),
+      );
+    }
+  });
+});
+
+/**
+ * The title's own placement rule, the mirror of the tag's. Structural for the
+ * same reason: the picker resolves through this too, so the spot shown
+ * selected is the spot that renders.
+ */
+describe("resolveTitlePosition", () => {
+  it("drops a middle spot to the bottom for a bar, which has no middle", () => {
+    expect(
+      resolveTitlePosition("middle-center", {
+        titleStyle: "bar",
+        cornerRadius: 0,
+      }),
+    ).toBe("bottom-center");
+    for (const titleStyle of ["overlay", "shadow"] as const) {
+      expect(
+        resolveTitlePosition("middle-center", { titleStyle, cornerRadius: 0 }),
+      ).toBe("middle-center");
+    }
+  });
+
+  it("pulls a corner onto the center axis once the corners are clipped away", () => {
+    const at = (cornerRadius: number) =>
+      resolveTitlePosition("top-left", { titleStyle: "overlay", cornerRadius });
+    expect(at(CORNER_SPOT_LIMIT - 1)).toBe("top-left");
+    expect(at(CORNER_SPOT_LIMIT)).toBe("top-center");
+  });
+
+  it("leaves every spot alone on a square overlaid tile", () => {
+    for (const spot of TILE_SPOTS) {
+      expect(
+        resolveTitlePosition(spot, { titleStyle: "overlay", cornerRadius: 0 }),
+      ).toBe(spot);
+    }
+  });
+
+  it("restores the stored spot when the roundness is eased back", () => {
+    // Storage always keeps the seller's choice; only rendering coerces.
+    const stored = "bottom-right" as const;
+    const style = { titleStyle: "shadow" } as const;
+    expect(resolveTitlePosition(stored, { ...style, cornerRadius: 100 })).toBe(
+      "bottom-center",
+    );
+    expect(resolveTitlePosition(stored, { ...style, cornerRadius: 0 })).toBe(
+      "bottom-right",
+    );
+  });
+});
+
+/** The auto edge spacing: what holds the words off a rounded corner when the
+ *  seller has set no inset of their own. */
+describe("autoTitleInset", () => {
+  it("stays flush on a square tile and grows with the clip", () => {
+    expect(autoTitleInset(0)).toBe(TITLE_INSET_AUTO.min);
+    expect(autoTitleInset(60)).toBe(21);
+  });
+
+  it("never pads a small tile's words out of existence", () => {
+    // A 3x3 tile at full roundness clips at 300px; the band must not take it.
+    expect(autoTitleInset(300)).toBe(TITLE_INSET_AUTO.max);
+  });
+
+  it("rises monotonically, so more roundness is never less air", () => {
+    let previous = -1;
+    for (let radius = 0; radius <= 300; radius += 5) {
+      const inset = autoTitleInset(radius);
+      expect(inset).toBeGreaterThanOrEqual(previous);
+      previous = inset;
+    }
   });
 });
 

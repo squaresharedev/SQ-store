@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { rotatedFootprint } from "@/lib/geometry/rotated-box";
 
 // Shared, presentation-agnostic constants + placement math for the canvas
 // grid. Reused by BOTH the storefront builder and (later) the marketplace.
@@ -7,9 +8,16 @@ import type { ReactNode } from "react";
 //
 // PLACEMENT MODEL: every block states where it sits (x, y) and how many cells
 // it covers (w, h) on a fixed columns x rows board. There is no auto-flow, so
-// the gaps between blocks are deliberate. Placements never overlap and never
-// leave the board; the helpers below are the single source of truth for both
-// rules, used by the editor, the schema, and the server.
+// the gaps between blocks are deliberate.
+//
+// Blocks stay ON the board. Whether they may share cells is the CONSUMER's
+// call (see `allowOverlap` on Grid): a design canvas stacks things on purpose,
+// a packed listing grid must not. The helpers below answer both questions and
+// are the single source of truth for whichever one a consumer asks.
+//
+// A block may also carry a `rotation`, and a turned block paints outside the
+// cells it is placed in. Its FOOTPRINT (see blockFootprint) is what covers the
+// board; x/y/w/h stay the unrotated rect, so turning a block never resizes it.
 
 export interface GridPlacement {
   x: number;
@@ -27,6 +35,54 @@ export interface GridBlock<TData = unknown> extends GridPlacement {
   /** Stable identity: doubles as the drag id and the React key. */
   key: string;
   data: TData;
+  /**
+   * Clockwise tilt in degrees. VISUAL ONLY: the block still occupies exactly
+   * the cells x/y/w/h name, so overlap and packing are unaffected.
+   *
+   * Deliberately on the block rather than on GridPlacement, which is the
+   * payload move and resize hand back. A resize describes cells, and letting
+   * an absent rotation ride along in that payload is how a consumer spreading
+   * it over a block would silently straighten a tile it never touched.
+   */
+  rotation?: number;
+  /**
+   * Paint depth, 0 = furthest back, rendered through {@link layerZIndex}.
+   * VISUAL ONLY, and independent of DOM order: a consumer keeps handing blocks
+   * in whatever order its own reading order says, and states depth here.
+   *
+   * Absent = paint in DOM order, which is what every board did before there
+   * was anything to stack. Sharing GridBlock with `rotation` rather than
+   * GridPlacement for the same reason: move and resize hand a placement back,
+   * and depth must not ride along in that payload.
+   */
+  z?: number;
+}
+
+// PAINT ORDER BANDS. In ONE place because everything below shares a single
+// stacking context: grid cells are siblings, so their z-indexes are compared
+// against each other in the nearest stacking-context ancestor (the designer's
+// stage, which makes one with `willChange: transform`). A cell's own CONTENTS
+// are already isolated by `contain: layout` on `.ss-grid > *` (globals.css),
+// so a tile's chip, badges and framer need none of this.
+//
+// Content sits at the bottom of the range and is clamped to the ceiling, so a
+// board can never stack a block over the editor's own affordances however many
+// blocks it holds.
+
+/** Where a block's depth starts. Block z 0..n-1 maps onto this. */
+export const LAYER_Z_BASE = 1;
+/** Nothing content-driven paints above this, whatever a board's block count. */
+export const LAYER_Z_CEILING = 500;
+/** A tile lifted off the board by a drag or a resize. */
+export const GESTURE_Z = 600;
+/** A tile whose image is being framed, spilling past its own cell. */
+export const FRAME_Z = 600;
+/** Editor overlays drawn over the whole board: the marquee band, snap guides. */
+export const OVERLAY_Z = 700;
+
+/** A block's depth as a real z-index, clamped into the content band. */
+export function layerZIndex(z: number): number {
+  return Math.min(LAYER_Z_CEILING, LAYER_Z_BASE + Math.max(0, z));
 }
 
 /** Default board size when a consumer does not state one. */
@@ -49,7 +105,14 @@ export function placementsOverlap(a: GridPlacement, b: GridPlacement): boolean {
   );
 }
 
-/** Is this placement wholly inside a columns x rows board? */
+/**
+ * Is this placement wholly inside a columns x rows board?
+ *
+ * The STORED rect, deliberately, not the cells a turned block paints on. A
+ * turned block keeps its span (see blockFootprint), so its painted box can
+ * reach past an edge its rect sits against, and that overhang is not worth
+ * moving a block the seller only asked to turn.
+ */
 export function withinCanvas(
   placement: GridPlacement,
   columns: number,
@@ -79,7 +142,25 @@ export function clampToCanvas(
   };
 }
 
-/** Can `candidate` go here — inside the board, and clear of every other block? */
+/** The cells a grid block covers, tilt included. The same geometry the
+ *  storefront contract's own `blockFootprint` reads, over the grid's block
+ *  type instead of the config's. */
+export function blockFootprint(block: GridBlock<unknown>): GridPlacement {
+  return rotatedFootprint(block, block.rotation ?? 0);
+}
+
+/**
+ * Can `candidate` go here — inside the board, and clear of every other block?
+ *
+ * Every OTHER block is measured by its footprint, so a tilted neighbour is
+ * considered where it paints rather than where it is placed. Somewhere a
+ * turned bar visibly covers is not somewhere empty, whatever its stored rect
+ * says.
+ *
+ * On a board that allows stacking this is not a rule any more, only the
+ * question "is this spot empty" that an auto-placer asks before it falls back
+ * to putting the new block on top of something.
+ */
 export function placementIsFree(
   blocks: readonly GridBlock<unknown>[],
   candidate: GridPlacement,
@@ -89,7 +170,9 @@ export function placementIsFree(
 ): boolean {
   if (!withinCanvas(candidate, columns, rows)) return false;
   return !blocks.some(
-    (block) => block.key !== ignoreKey && placementsOverlap(block, candidate),
+    (block) =>
+      block.key !== ignoreKey &&
+      placementsOverlap(blockFootprint(block), candidate),
   );
 }
 
@@ -215,6 +298,13 @@ export function reflowBlocks<TData>(
 // (corners combine two sides); a press on the inner surface stays a move.
 // The hit-test and the placement math live here, pure, so the gesture wiring
 // in Grid.tsx stays thin and this part stays unit-testable.
+//
+// Everything below works on the box the seller can SEE, which for a turned
+// block is its footprint rather than its stored rect. That is what makes a
+// resize behave: the edge under the hand is the edge that moves, and it moves
+// the way the hand does. Reading the pointer in the block's own turned space
+// instead looks right at zero degrees and inverts at half a turn, where
+// dragging the top edge upwards would grow the block downwards.
 
 /** Which sides of a block a gesture is dragging. */
 export interface ResizeEdges {
@@ -232,6 +322,10 @@ export const EDGE_GRAB_PX = 10;
  * (a move/select, not a resize). The grab zone is capped at a quarter of the
  * cell per axis, so a small or zoomed-out tile always keeps an inner area to
  * drag from instead of becoming all edge.
+ *
+ * `rect` is the box the seller sees: the FOOTPRINT's box for a turned block,
+ * the cell's own for a level one. Both are axis aligned, so north here is
+ * north on screen, and the edge that comes back is the edge under the hand.
  */
 export function edgesUnderPointer(
   rect: { left: number; top: number; width: number; height: number },
@@ -284,14 +378,19 @@ export function resizeByEdges(
   return { x, y, w, h };
 }
 
-/** The standard resize cursor for a set of grabbed edges. */
+/**
+ * The standard resize cursor for a set of grabbed edges.
+ *
+ * No rotation to account for: the edges come from the footprint, which is
+ * axis aligned, so an edge that faces up on screen is the one that grows
+ * upwards when it is dragged.
+ */
 export function edgeCursor(edges: ResizeEdges): string {
   const vertical = edges.n || edges.s;
   const horizontal = edges.e || edges.w;
   if (vertical && horizontal) {
-    return (edges.n && edges.w) || (edges.s && edges.e)
-      ? "nwse-resize"
-      : "nesw-resize";
+    const falling = (edges.n && edges.w) || (edges.s && edges.e);
+    return falling ? "nwse-resize" : "nesw-resize";
   }
   return vertical ? "ns-resize" : "ew-resize";
 }

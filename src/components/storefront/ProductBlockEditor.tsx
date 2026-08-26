@@ -18,7 +18,9 @@ import {
 } from "@/lib/validation/product";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/Toast";
-import { destructiveButtonClass, errorTextClass, fieldBaseClass, ghostButtonClass, infoTextClass, labelClass, primaryButtonClass, secondaryButtonClass, strongLabelClass } from "@/components/ui/control-styles";
+import { destructiveButtonClass, errorTextClass, fieldBaseClass, ghostButtonClass, infoTextClass, labelClass, primaryButtonClass, secondaryButtonClass } from "@/components/ui/control-styles";
+import { CollapsibleSection } from "@/components/ui/CollapsibleSection";
+import { useSettingTarget } from "@/lib/storefront/setting-context";
 import { InfoTip } from "@/components/ui/InfoTip";
 import { Modal } from "@/components/ui/modal";
 import { Switch } from "@/components/ui/switch";
@@ -75,6 +77,13 @@ export function ProductBlockEditor({
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const toast = useToast();
+
+  // A setting opened by name lands HERE rather than on the theme's copy when a
+  // tile is selected, because the seller asking about "price position" with a
+  // tile in front of them means that tile's price. StorefrontDesigner decides
+  // which scope wins; this only has to know which half to flash.
+  const settingRef = useSettingTarget()?.activeRef ?? null;
+  const summoned = settingRef?.kind === "cards" ? settingRef.section : null;
 
   // Null product: catalog entry was deleted; only offer a remove action.
   if (product === null) {
@@ -280,46 +289,61 @@ export function ProductBlockEditor({
         <p className={infoTextClass}>{stockLine}</p>
       )}
 
-      {/* Per-tile style: the shared card controls, scoped to this block's
-          overrides. Values shown are the resolved style, so opening the
-          section on an untouched tile simply shows the theme. */}
-      <div className="space-y-4 border-t border-border pt-4">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-1.5">
-            <span className={strongLabelClass}>Tile style</span>
-            <InfoTip label="How this tile's style relates to the theme">
-              {hasStyleOverrides
-                ? "This tile has its own style. Settings you have not changed here keep following the theme."
-                : "Style this tile on its own. Anything you do not change keeps following the theme."}
-            </InfoTip>
-          </div>
-          {hasStyleOverrides && (
-            <button
-              type="button"
-              onClick={onStyleReset}
-              className={cn(ghostButtonClass, "px-2 py-1 text-xs")}
-            >
-              Reset to theme
-            </button>
-          )}
-        </div>
-        <CardStyleControls
-          value={resolveCardStyle(theme, block.style)}
-          onChange={onStyleChange}
-        />
-      </div>
+      {/* Per-tile style and the price tag, as collapsible groups rather than
+          two slabs divided by a rule: between them they are a dozen controls,
+          and the product's own name and price were being pushed off the top of
+          the panel by settings most tiles never override. Values shown are the
+          resolved style, so opening a group on an untouched tile simply shows
+          the theme.
 
-      {/* The price tag, on the same overrides. Its own group for the same
-          reason it has its own section in the theme panel: seven settings
-          under "Tile style" would bury the four that shape the tile. */}
-      <div className="space-y-4 border-t border-border pt-4">
-        <span className={strongLabelClass}>Price tag</span>
-        <PriceTagControls
-          theme={theme}
-          overrides={block.style ?? {}}
-          onChange={onStyleChange}
-          scope={{ blockKey: blockKey(block) }}
-        />
+          Both are collapsible and CAN be open together on purpose: the corner
+          roundness in one decides which spots the price tag in the other is
+          allowed to take (see PriceTagControls), so they have to be readable
+          side by side. */}
+      <div className="-mx-4 border-t border-border">
+        <CollapsibleSection
+          title="Tile style"
+          collapsible
+          defaultOpen={false}
+          summon={summoned === "cardStyle"}
+          headerAction={
+            <div className="flex items-center gap-1.5">
+              {hasStyleOverrides && (
+                <button
+                  type="button"
+                  onClick={onStyleReset}
+                  className={cn(ghostButtonClass, "px-2 py-1 text-xs")}
+                >
+                  Reset to theme
+                </button>
+              )}
+              <InfoTip label="How this tile's style relates to the theme">
+                {hasStyleOverrides
+                  ? "This tile has its own style. Settings you have not changed here keep following the theme."
+                  : "Style this tile on its own. Anything you do not change keeps following the theme."}
+              </InfoTip>
+            </div>
+          }
+        >
+          <CardStyleControls
+            value={resolveCardStyle(theme, block.style)}
+            onChange={onStyleChange}
+          />
+        </CollapsibleSection>
+
+        <CollapsibleSection
+          title="Price tag"
+          collapsible
+          defaultOpen={false}
+          summon={summoned === "priceTag"}
+        >
+          <PriceTagControls
+            theme={theme}
+            overrides={block.style ?? {}}
+            onChange={onStyleChange}
+            scope={{ blockKey: blockKey(block) }}
+          />
+        </CollapsibleSection>
       </div>
 
       {/* Remove action */}

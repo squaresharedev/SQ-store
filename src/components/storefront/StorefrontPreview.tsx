@@ -7,6 +7,7 @@ import {
   blockCornerRadius,
   blockKey,
   buyerVisibleBlocks,
+  layerOrder,
   readingOrder,
   type CardStyleOverrides,
   type ProductBlock,
@@ -27,7 +28,7 @@ import { CustomFontFace } from "./CustomFontFace";
 import { StorefrontMasthead } from "./StorefrontMasthead";
 import { resolveBackgroundStyle } from "./background-presets";
 import { useFitToBox } from "./useFitToBox";
-import { gridGapStyle, scaledCornerRadius } from "./config-maps";
+import { gridGapStyle, scaledCornerRadius, tileClipStyle } from "./config-maps";
 
 /**
  * Read-only miniature of a storefront (list cards, and later anywhere a
@@ -191,18 +192,34 @@ export function StorefrontPreview({
     [textless, theme],
   );
 
-  const gridBlocks = useMemo<GridBlock<StorefrontBlock>[]>(
-    () =>
-      visibleBlocks.map((block) => ({
-        key: blockKey(block),
+  // Resolved once for the whole board, not per cell: layerOrder sorts every
+  // block, and a preview page renders many of these side by side.
+  //
+  // Depth is taken over the blocks this preview actually DRAWS, so a hidden
+  // sold-out tile leaves no hole in the stack. The order between the blocks
+  // that remain is what the seller arranged, which is all a paint order has to
+  // preserve.
+  const gridBlocks = useMemo<GridBlock<StorefrontBlock>[]>(() => {
+    const depths = new Map(
+      layerOrder(visibleBlocks).map((block, index) => [blockKey(block), index]),
+    );
+    return visibleBlocks.map((block) => {
+      const key = blockKey(block);
+      return {
+        key,
         x: block.x,
         y: block.y,
         w: block.w,
         h: block.h,
+        // The miniature is tilted and stacked exactly as the board is. A
+        // preview that straightened or re-stacked everything would be a
+        // preview of a different design.
+        rotation: block.rotation,
+        z: depths.get(key),
         data: block,
-      })),
-    [visibleBlocks],
-  );
+      };
+    });
+  }, [visibleBlocks]);
 
   const getProduct = (block: StorefrontBlock): Product | null =>
     block.type === "product"
@@ -267,14 +284,16 @@ export function StorefrontPreview({
               // designed. Reflowing would show a layout the storefront doesn't
               // have — the one thing a preview must not do.
               responsive={false}
-              cellStyle={(placement, gridBlock) => ({
-                borderRadius: scaledCornerRadius(
-                  gridBlock
-                    ? blockCornerRadius(tileTheme, gridBlock.data)
-                    : tileTheme.cornerRadius,
-                  placement,
-                ),
-              })}
+              cellStyle={(placement, gridBlock) =>
+                tileClipStyle(
+                  scaledCornerRadius(
+                    gridBlock
+                      ? blockCornerRadius(tileTheme, gridBlock.data)
+                      : tileTheme.cornerRadius,
+                    placement,
+                  ),
+                )
+              }
               renderBlock={(gridBlock) => (
                 <BlockTile
                   blockKey={gridBlock.key}

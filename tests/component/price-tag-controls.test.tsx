@@ -144,17 +144,19 @@ describe("PriceTagControls", () => {
     expect(onChange).toHaveBeenLastCalledWith({ priceTagPosition: "top-left" });
   });
 
-  it("offers no bottom spot at all while the title covers the bottom", () => {
+  it("no longer holds a spot board: WHICH spot is the layout board's question", () => {
+    // Two boards for one tile is how the title's and the price's ideas of
+    // where they could sit came to disagree. This panel keeps the choice a
+    // board cannot express (in the bar, on the picture, or nowhere) and hands
+    // the rest to TileLayoutBoard, which shows both labels at once.
     renderControls({ titleStyle: "shadow", priceTagPosition: "top-left" });
-    // Offering a spot that silently renders somewhere else is worse than not
-    // offering it, so the whole bottom row is absent from the picker.
-    for (const name of ["Bottom left", "Bottom center", "Bottom right"]) {
-      expect(
-        screen.queryByRole("button", { name: `Price tag ${name.toLowerCase()}` }),
-      ).toBeNull();
-    }
+    expect(screen.queryByRole("group", { name: "Price tag spot" })).toBeNull();
     expect(
-      screen.getByRole("button", { name: "Price tag top left" }),
+      screen.queryByRole("button", { name: "Price tag top left" }),
+    ).toBeNull();
+    // The mode picker stays, because "hidden" and "below" are not spots.
+    expect(
+      screen.getByRole("group", { name: "Price tag placement" }),
     ).toBeInTheDocument();
   });
 

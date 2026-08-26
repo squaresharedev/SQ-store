@@ -2,11 +2,13 @@ import type { CSSProperties } from "react";
 import type { GridPlacement } from "@/components/grid/gridConstants";
 import {
   PRICE_TAG_DEFAULT_BORDER,
-  type PriceTagFloatPosition,
+  TITLE_INSET_AUTO,
   type PriceTagFont,
+  type SpotRow,
   type StorefrontFont,
   type TextAlign,
   type TextVariant,
+  type TileSpot,
 } from "@/types/storefront";
 
 // Enum -> class lookups for rendering a StorefrontConfig. Config enums never
@@ -56,9 +58,23 @@ export function scaledCornerRadius(
   return cornerRadius * Math.min(placement.w, placement.h);
 }
 
-// Floating price tag spot -> absolute placement over the image area. Center
-// spots translate back by half their own size so they sit on the exact axis.
-export const PRICE_TAG_FLOAT_CLASSES: Record<PriceTagFloatPosition, string> = {
+/**
+ * The clip one tile wears, applied by whoever owns the tile's box (the grid
+ * cell, the carousel item). It PUBLISHES the radius as `--tile-radius` as well
+ * as applying it, because the tile's own contents have to know how much of
+ * their corners the clip has eaten — see {@link titleBandStyle}. Descendants
+ * inherit the variable, so no renderer has to be handed the tile's span.
+ */
+export function tileClipStyle(radius: number): CSSProperties {
+  return {
+    borderRadius: `${radius}px`,
+    "--tile-radius": `${radius}px`,
+  } as CSSProperties;
+}
+
+// Tile spot -> absolute placement over the image area. Center spots translate
+// back by half their own size so they sit on the exact axis.
+export const TILE_SPOT_CLASSES: Record<TileSpot, string> = {
   "top-left": "left-2 top-2",
   "top-center": "left-1/2 top-2 -translate-x-1/2",
   "top-right": "right-2 top-2",
@@ -66,6 +82,59 @@ export const PRICE_TAG_FLOAT_CLASSES: Record<PriceTagFloatPosition, string> = {
   "bottom-left": "bottom-2 left-2",
   "bottom-center": "bottom-2 left-1/2 -translate-x-1/2",
   "bottom-right": "bottom-2 right-2",
+};
+
+/**
+ * The title band's horizontal padding.
+ *
+ * An explicit inset is the seller's own number. ABSENT is auto, and auto is
+ * the answer to rounded tiles: a clipped corner eats into the band from the
+ * side, so the text is pushed in by a share of the tile's own radius instead
+ * of running into the curve.
+ *
+ * The whole thing is a CSS expression rather than a computed number because
+ * only the browser knows the radius that MATTERS. `--tile-radius` (see
+ * tileClipStyle) carries the configured radius scaled by the tile's span, but
+ * CSS then clamps a border-radius at half the element's side — a 300px radius
+ * on a 110px tile really curves at 55 — and padding for the unclamped figure
+ * would push a small tile's own words out of existence. `50cqmin` is that
+ * clamp, read off the tile itself (ProductTileContent is the size container),
+ * so the two mins together give the curve as drawn. No variable in scope means
+ * no clip, so the floor applies and the band renders flush, the way every
+ * square tile always has.
+ *
+ * Same rule as {@link autoTitleInset}, which the control evaluates in JS —
+ * without the clamp, which is fine for its job of saying where the slider
+ * starts.
+ */
+export function titleBandStyle(inset: number | undefined): CSSProperties {
+  const { min, max, ratio } = TITLE_INSET_AUTO;
+  return {
+    paddingInline:
+      inset === undefined
+        ? `clamp(${min}px, calc(min(var(--tile-radius, 0px), 50cqmin) * ${ratio}), ${max}px)`
+        : `${inset}px`,
+  };
+}
+
+/** Where an overlaid title band is pinned, per row. The middle band centers
+ *  itself on the image's own axis. The band is always one line tall, so its
+ *  own padding — not an alignment — is what puts the words on the edge. */
+export const TITLE_BAND_ROW_CLASSES: Record<SpotRow, string> = {
+  top: "top-0",
+  middle: "top-1/2 -translate-y-1/2",
+  bottom: "bottom-0",
+};
+
+/**
+ * The `shadow` style's gradient, per row: it always fades AWAY from the edge
+ * the words sit against, so the type keeps its dark backing wherever the band
+ * is. The middle band has no edge to lean on, so it fades out both ways.
+ */
+export const TITLE_BAND_SHADOW_CLASSES: Record<SpotRow, string> = {
+  top: "bg-gradient-to-b from-black/70 via-black/35 to-transparent pb-8",
+  middle: "bg-gradient-to-b from-transparent via-black/55 to-transparent py-4",
+  bottom: "bg-gradient-to-t from-black/70 via-black/35 to-transparent pt-8",
 };
 
 /**

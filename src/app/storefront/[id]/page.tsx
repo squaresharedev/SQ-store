@@ -42,10 +42,17 @@ async function signElementUrls(
 // save the server would reject.
 export default async function StorefrontEditorPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  /** `?setting=<id>` arrives from a universal-search result picked OUTSIDE the
+   *  editor. Inside it, the designer intercepts its own links and never
+   *  navigates, so this is only the cold-start path. */
+  searchParams: Promise<{ setting?: string | string[] }>;
 }) {
   const { id } = await params;
+  const { setting } = await searchParams;
+  const initialSetting = Array.isArray(setting) ? setting[0] : setting;
 
   const account = await getActiveAccount();
   if (!can(account?.role, "storefront.write")) redirect("/storefront");
@@ -74,6 +81,7 @@ export default async function StorefrontEditorPage({
       initialBackgroundImageUrl={backgroundImageUrl}
       initialCustomFontUrl={customFontUrl}
       initialElementUrls={elementUrls}
+      initialSetting={initialSetting ?? null}
       // The designer renders its own universal-search provider (it is outside
       // the dashboard shell), so it needs the role the shell would have given.
       role={account?.role ?? null}

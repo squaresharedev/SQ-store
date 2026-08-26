@@ -19,14 +19,27 @@ export function OptionCardPicker<T extends string>({
   options,
   onChange,
   ariaLabel,
+  wrap = false,
 }: {
   value: T;
   options: readonly OptionCard<T>[];
   onChange: (value: T) => void;
   ariaLabel: string;
+  /**
+   * Lay the cards out three to a row instead of all on one.
+   *
+   * A row of three fits a 320px panel with the captions readable; a row of
+   * five does not, and squeezing them turns "Standard" into "Sta...". Past
+   * three options the caption is doing the work, so it has to survive.
+   */
+  wrap?: boolean;
 }) {
   return (
-    <div role="group" aria-label={ariaLabel} className="flex gap-2">
+    <div
+      role="group"
+      aria-label={ariaLabel}
+      className={wrap ? "grid grid-cols-3 gap-2" : "flex gap-2"}
+    >
       {options.map((option) => {
         const selected = option.value === value;
         return (
@@ -36,7 +49,10 @@ export function OptionCardPicker<T extends string>({
             onClick={() => onChange(option.value)}
             aria-pressed={selected}
             className={cn(
-              "flex flex-1 flex-col items-center gap-1.5 rounded-none border p-2 transition-colors duration-base ease-standard focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none",
+              // min-w-0 is what lets a row of five fit a 320px panel: without
+              // it the caption sets the button's floor and the last card is
+              // pushed off the edge.
+              "flex min-w-0 flex-1 flex-col items-center gap-1.5 rounded-none border p-2 transition-colors duration-base ease-standard focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none",
               selected
                 ? "border-foreground bg-accent"
                 : "border-border hover:bg-accent/50",
@@ -45,7 +61,7 @@ export function OptionCardPicker<T extends string>({
             {option.glyph}
             <span
               className={cn(
-                "font-inter text-xs",
+                "max-w-full truncate font-inter text-xs",
                 selected
                   ? "font-medium text-foreground"
                   : "text-muted-foreground",

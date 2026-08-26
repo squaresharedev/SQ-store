@@ -105,6 +105,23 @@ test.describe("the Element tool", () => {
     await expect(menu.getByRole("menuitem", { name: "Add circle" })).toBeVisible();
     // The library moved out; a kind outside the quick list is not in here.
     await expect(menu.getByRole("menuitem", { name: "Add hexagon" })).toHaveCount(0);
+
+    // GEOMETRY, not just membership. The menu is absolutely positioned, so its
+    // shrink-to-fit width is capped by the containing block — the Element
+    // button's wrapper, about 100px wide — and without `w-max` the row is
+    // silently squeezed and the last shape hangs past the border. Counting the
+    // items cannot see that; only measuring can.
+    const box = (await menu.boundingBox())!;
+    expect(box.height).toBeLessThan(80); // one row, not two
+    for (const item of await menu.getByRole("menuitem").all()) {
+      const b = (await item.boundingBox())!;
+      const label = await item.getAttribute("aria-label");
+      expect(b.x, `${label} starts inside the menu`).toBeGreaterThanOrEqual(box.x);
+      expect(
+        b.x + b.width,
+        `${label} ends inside the menu`,
+      ).toBeLessThanOrEqual(box.x + box.width);
+    }
   });
 
   test("a quick shape lands on the canvas", async ({ page }) => {

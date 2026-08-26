@@ -26,8 +26,8 @@ test.describe.configure({ mode: "serial" });
 let page: Page;
 let storefrontUrl: string;
 
-const name = () => page.getByRole("button", { name: "Style the store name" });
-const bio = () => page.getByRole("button", { name: "Style the store bio" });
+const name = () => page.getByRole("button", { name: "Edit the store name" });
+const bio = () => page.getByRole("button", { name: "Edit the store bio" });
 
 /** One rendered CSS property of a masthead line. */
 function css(line: Locator, property: string) {

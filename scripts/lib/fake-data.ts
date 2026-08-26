@@ -18,6 +18,8 @@
 //   3. Time-of-day shape       - real stores do not sell evenly at 04:00.
 //   4. Pareto product mix      - uniform picking makes "top products" noise.
 
+import { CATALOG } from "./catalog.ts";
+
 // ---------------------------------------------------------------------------
 // Deterministic RNG + small sampling helpers
 // ---------------------------------------------------------------------------
@@ -79,83 +81,77 @@ export interface ProductInsert {
   image_key: string;
 }
 
-const PRODUCT_ADJECTIVES = [
-  "Midnight", "Golden Hour", "Analog", "Neon", "Pastel", "Brutalist", "Retro",
-  "Cyber", "Minimal", "Vaporwave", "Cinematic", "Lo-Fi", "Aurora", "Grain",
-] as const;
-
-// Stock photo categories for different product types (picsum.photos URLs).
-const STOCK_IMAGES = {
-  "Lightroom Preset Pack": [
-    "https://picsum.photos/400/300?random=1",
-    "https://picsum.photos/400/300?random=2",
-    "https://picsum.photos/400/300?random=3",
-  ],
-  "Procreate Brush Set": [
-    "https://picsum.photos/400/300?random=10",
-    "https://picsum.photos/400/300?random=11",
-    "https://picsum.photos/400/300?random=12",
-  ],
-  "Notion Template": [
-    "https://picsum.photos/400/300?random=20",
-    "https://picsum.photos/400/300?random=21",
-    "https://picsum.photos/400/300?random=22",
-  ],
-  "Icon Pack": [
-    "https://picsum.photos/400/300?random=30",
-    "https://picsum.photos/400/300?random=31",
-    "https://picsum.photos/400/300?random=32",
-  ],
-  "Font Family": [
-    "https://picsum.photos/400/300?random=40",
-    "https://picsum.photos/400/300?random=41",
-    "https://picsum.photos/400/300?random=42",
-  ],
-  "Sample Pack": [
-    "https://picsum.photos/400/300?random=50",
-    "https://picsum.photos/400/300?random=51",
-    "https://picsum.photos/400/300?random=52",
-  ],
-  "LUT Collection": [
-    "https://picsum.photos/400/300?random=60",
-    "https://picsum.photos/400/300?random=61",
-    "https://picsum.photos/400/300?random=62",
-  ],
-  "UI Kit": [
-    "https://picsum.photos/400/300?random=70",
-    "https://picsum.photos/400/300?random=71",
-    "https://picsum.photos/400/300?random=72",
-  ],
-  "E-book": [
-    "https://picsum.photos/400/300?random=80",
-    "https://picsum.photos/400/300?random=81",
-    "https://picsum.photos/400/300?random=82",
-  ],
-  "Wallpaper Bundle": [
-    "https://picsum.photos/400/300?random=90",
-    "https://picsum.photos/400/300?random=91",
-    "https://picsum.photos/400/300?random=92",
-  ],
-} as const;
-
-// Each type carries a realistic price band in cents.
-export const PRODUCT_TYPES = [
-  { noun: "Lightroom Preset Pack", min: 1200, max: 3900 },
-  { noun: "Procreate Brush Set", min: 700, max: 2400 },
-  { noun: "Notion Template", min: 900, max: 4900 },
-  { noun: "Icon Pack", min: 500, max: 1900 },
-  { noun: "Font Family", min: 1900, max: 6900 },
-  { noun: "Sample Pack", min: 1500, max: 4500 },
-  { noun: "LUT Collection", min: 1900, max: 5900 },
-  { noun: "UI Kit", min: 2900, max: 9900 },
-  { noun: "E-book", min: 900, max: 3900 },
-  { noun: "Wallpaper Bundle", min: 300, max: 1500 },
-] as const;
-
-/** Snap a raw cents amount to friendly ".99" pricing, e.g. 2437 -> 2499. */
-function toNinetyNine(rawCents: number): number {
-  return Math.max(99, Math.round(rawCents / 100) * 100 - 1);
+/** One product the store actually sells: a real name, description, price and
+ *  photograph, snapshotted from a real catalogue. See scripts/build-catalog.ts. */
+export interface CatalogProduct {
+  title: string;
+  description: string;
+  /** Integer cents, like every other money value in this project. */
+  priceCents: number;
+  /** Absolute https URL to a photo OF THIS PRODUCT (not a themed stock shot).
+   *  presignGetUrl() passes full URLs straight through — see src/lib/r2.ts. */
+  imageUrl: string;
 }
+
+/**
+ * How a category is shot AND what it sells — the two halves of looking like one
+ * real shop rather than a stock-photo grab bag.
+ *
+ * `aesthetic` is the design language every product in the collection shares
+ * (one material palette, one era). It matters as much as the backdrop: a
+ * consistent white sweep behind an ornate carved bed, a red mid-century chair
+ * and a kitsch photo frame still reads as three unrelated shops.
+ *
+ * `prompt` is the shared instruction the collection's photography was
+ * generated from, kept so the set can be extended later without drifting.
+ */
+export interface PhotoStyle {
+  /** The lighting/backdrop treatment, e.g. "Low-key charcoal". */
+  name: string;
+  /** The collection's design language, e.g. "Brutalist concrete". */
+  aesthetic: string;
+  /** Shared generation prompt, so new products match the existing shots. */
+  prompt: string;
+}
+
+/** A themed slice of the catalogue, e.g. "Furniture". A store only ever draws
+ *  from ONE theme (see generateProducts), so it never ends up selling, say,
+ *  running shoes next to smartphones. */
+export interface ProductTheme {
+  key: string;
+  label: string;
+  photoStyle: PhotoStyle;
+  products: readonly CatalogProduct[];
+}
+
+/**
+ * The store categories, each ONE design collection. See lib/catalog.ts for the
+ * data and for why it is authored rather than scraped.
+ */
+export const PRODUCT_THEMES: readonly ProductTheme[] = CATALOG;
+
+/** Look a theme up by its key, e.g. for `pnpm seed --theme drones`. */
+export function themeByKey(key: string): ProductTheme | undefined {
+  return PRODUCT_THEMES.find((theme) => theme.key === key);
+}
+
+/** Every theme key, for CLI help and validation messages. */
+export const THEME_KEYS: readonly string[] = PRODUCT_THEMES.map((theme) => theme.key);
+
+/** Pick the one theme a store's whole catalogue will be drawn from. */
+export function pickTheme(rng: Rng): ProductTheme {
+  return pick(rng, PRODUCT_THEMES);
+}
+
+/** Every catalogue product across every theme. */
+export const CATALOG_PRODUCTS: readonly CatalogProduct[] = PRODUCT_THEMES.flatMap((t) => t.products);
+
+/** Find a catalogue entry by its exact title, for tools that need to restore a
+ *  seeded product's original photo (scripts/update-product-images.ts). */
+export function findCatalogProduct(title: string): CatalogProduct | undefined {
+  return CATALOG_PRODUCTS.find((product) => product.title === title);
+}
+
 
 /**
  * The store's single currency.
@@ -168,35 +164,47 @@ function toNinetyNine(rawCents: number): number {
  */
 export const STORE_CURRENCY = "EUR";
 
-export function generateProducts(rng: Rng, ownerId: string, count: number): ProductInsert[] {
-  const products: ProductInsert[] = [];
-  const usedTitles = new Set<string>();
-  for (let i = 0; i < count; i += 1) {
-    const type = pick(rng, PRODUCT_TYPES);
-    const adjective = pick(rng, PRODUCT_ADJECTIVES);
-    const title = `${adjective} ${type.noun}`;
-    // Titles are snapshotted onto orders, and the top-products table groups by
-    // that snapshot. Two products sharing a title would merge into one row and
-    // overstate it, so skip the collision rather than create it.
-    if (usedTitles.has(title)) continue;
-    usedTitles.add(title);
-    const price_cents = toNinetyNine(randInt(rng, type.min, type.max));
-    // Mostly active; a few drafts. Drafts are excluded from order generation.
-    const status = weightedPick<string>(rng, [["active", 8], ["draft", 2]]);
-    // Pick a random stock image for the product type.
-    const images = STOCK_IMAGES[type.noun as keyof typeof STOCK_IMAGES];
-    const image_key = pick(rng, images);
-    products.push({
-      owner_id: ownerId,
-      title,
-      description: `${title}. A digital product for creators, instant download after purchase.`,
-      price_cents,
-      currency: STORE_CURRENCY,
-      image_key,
-      status,
-    });
+/** Fisher-Yates, drawing from the seeded RNG so shuffles stay reproducible. */
+function shuffled<T>(rng: Rng, items: readonly T[]): T[] {
+  const out = [...items];
+  for (let i = out.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(rng() * (i + 1));
+    [out[i], out[j]] = [out[j]!, out[i]!];
   }
-  return products;
+  return out;
+}
+
+/**
+ * Generate a store's catalogue. Every product is drawn from a SINGLE theme
+ * (defaults to one picked at random) so a store never ends up selling, say,
+ * running shoes and smartphones side by side — real storefronts specialise.
+ *
+ * Products are SAMPLED WITHOUT REPLACEMENT from the theme's real catalogue, so
+ * a store never lists the same item twice. `count` is therefore capped at the
+ * theme's size — ask for 15 furniture items from a 10-item theme and you get
+ * 10, which is the honest answer rather than five duplicates.
+ */
+export function generateProducts(
+  rng: Rng,
+  ownerId: string,
+  count: number,
+  theme: ProductTheme = pickTheme(rng),
+): ProductInsert[] {
+  // Titles are snapshotted onto orders and the top-products table groups by
+  // that snapshot, so two rows sharing a title would merge into one overstated
+  // row. Sampling without replacement makes that impossible by construction.
+  return shuffled(rng, theme.products)
+    .slice(0, Math.min(count, theme.products.length))
+    .map((product) => ({
+      owner_id: ownerId,
+      title: product.title,
+      description: product.description,
+      price_cents: product.priceCents,
+      currency: STORE_CURRENCY,
+      image_key: product.imageUrl,
+      // Mostly active; a few drafts. Drafts are excluded from order generation.
+      status: weightedPick<string>(rng, [["active", 8], ["draft", 2]]),
+    }));
 }
 
 // ---------------------------------------------------------------------------

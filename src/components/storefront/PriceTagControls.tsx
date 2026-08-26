@@ -2,18 +2,19 @@
 
 import { useId } from "react";
 import {
+  CORNER_SPOT_LIMIT,
   PRICE_TAG_BORDER_WIDTH_MAX,
-  PRICE_TAG_CORNER_LIMIT,
   PRICE_TAG_FONTS,
   PRICE_TAG_RADIUS_MAX,
   PRICE_TAG_SIZE_MAX,
   PRICE_TAG_SIZE_MIN,
   resolveCardStyle,
   resolvePriceTagPosition,
+  resolveTitlePosition,
+  spotRow,
   titleOverlaysImage,
   type CardStyle,
   type CardStyleOverrides,
-  type PriceTagFloatPosition,
   type PriceTagFont,
   type StorefrontTheme,
 } from "@/types/storefront";
@@ -28,11 +29,7 @@ import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { ColorPicker } from "@/components/ui/ColorPicker";
 import { infoTextClass, strongLabelClass } from "@/components/ui/control-styles";
 import { PRICE_TAG_FONT_LABELS } from "./config-maps";
-import {
-  PriceTagModePicker,
-  PriceTagPositionPicker,
-  type PriceTagMode,
-} from "./PriceTagPositionPicker";
+import { PriceTagModePicker, type PriceTagMode } from "./PriceTagPositionPicker";
 
 const FONT_OPTIONS: readonly { value: PriceTagFont; label: string }[] =
   PRICE_TAG_FONTS.map((value) => ({ value, label: PRICE_TAG_FONT_LABELS[value] }));
@@ -81,14 +78,19 @@ export function PriceTagControls({
         : "float";
 
   const overlaid = titleOverlaysImage(value.titleStyle);
-  // The picker highlights the spot that will really be used, so a stored
-  // corner shows as its fallback on a round tile and a stored bottom shows
-  // lifted above an overlay title bar.
-  const floatValue = resolvePriceTagPosition(tagPosition, {
-    cornerRadius: value.cornerRadius,
-    titleOverlaysImage: overlaid,
-  });
-
+  // Which row the title band holds, when it holds one at all: the row the tag
+  // is not allowed to use. Resolved exactly as the tile resolves it — showTitle
+  // deliberately not consulted, because the tile reserves the row either way
+  // (an untitled band still carries a `below` price), so the strip in the
+  // picker explains every move the tag makes.
+  const titleBand = overlaid
+    ? spotRow(
+        resolveTitlePosition(value.titlePosition, {
+          titleStyle: value.titleStyle,
+          cornerRadius: value.cornerRadius,
+        }),
+      )
+    : null;
   function setTagMode(mode: PriceTagMode) {
     if (mode === tagMode) return;
     onChange({
@@ -97,6 +99,7 @@ export function PriceTagControls({
           ? resolvePriceTagPosition("bottom-left", {
               cornerRadius: value.cornerRadius,
               titleOverlaysImage: overlaid,
+              titleRow: titleBand ?? undefined,
             })
           : mode,
     });
@@ -130,25 +133,18 @@ export function PriceTagControls({
 
   return (
     <div className="space-y-4">
+      {/* Where the tag lives, but only at the level a board cannot express:
+          in the bar, on the picture, or nowhere. WHICH spot on the picture is
+          the layout board's question (see TileLayoutBoard), and asking it twice
+          in two places is how the two came to disagree. */}
       <div className="space-y-1.5">
-        <span className={strongLabelClass}>Position</span>
+        <span className={strongLabelClass}>Show the price</span>
         <PriceTagModePicker value={tagMode} onChange={setTagMode} />
         {tagMode === "float" && (
-          <PriceTagPositionPicker
-            value={floatValue as PriceTagFloatPosition}
-            cornerRadius={value.cornerRadius}
-            titleOverlaysImage={overlaid}
-            onChange={(priceTagPosition) => onChange({ priceTagPosition })}
-          />
-        )}
-        {tagMode === "float" && value.cornerRadius >= PRICE_TAG_CORNER_LIMIT && (
           <p className={infoTextClass}>
-            Rounded cards keep the tag on the center axis.
-          </p>
-        )}
-        {tagMode === "float" && overlaid && (
-          <p className={infoTextClass}>
-            The title covers the bottom of the image, so the tag stays above it.
+            {value.cornerRadius >= CORNER_SPOT_LIMIT
+              ? "Rounded cards keep the tag on the center axis."
+              : "Drag it on the tile, or use the layout board, to choose a spot."}
           </p>
         )}
       </div>

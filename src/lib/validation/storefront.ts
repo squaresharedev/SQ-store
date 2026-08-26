@@ -34,6 +34,8 @@ import {
   PRICE_TAG_RADIUS_MAX,
   PRICE_TAG_SIZE_MAX,
   PRICE_TAG_SIZE_MIN,
+  ROTATION_MAX,
+  ROTATION_MIN,
   SHAPE_BORDER_WIDTH_MAX,
   SHAPE_KINDS,
   SHAPE_POINTS_MAX,
@@ -46,10 +48,11 @@ import {
   TEXT_SIZE_MIN,
   TEXT_SPANS_MAX,
   TEXT_VARIANTS,
+  TILE_SPOTS,
   TITLE_DISPLAYS,
+  TITLE_INSET_MAX,
   TITLE_STYLES,
   blockKey,
-  placementsOverlap,
   type StorefrontBackground,
   type StorefrontConfig,
 } from "@/types/storefront";
@@ -137,6 +140,17 @@ const customFontSchema = z.strictObject({
 });
 
 /**
+ * Where the title band sits, identical on the theme and on a per-tile override
+ * — spread into both so the two can never drift. Both fields are optional on
+ * the theme too, not just on an override: a config saved before the title
+ * could move carries neither, and it must keep parsing untouched.
+ */
+const titlePlacementFields = {
+  titlePosition: z.enum(TILE_SPOTS).optional(),
+  titleInset: z.number().int().min(0).max(TITLE_INSET_MAX).optional(),
+};
+
+/**
  * The price tag's appearance, identical on the theme and on a per-tile
  * override — spread into both so the two can never drift. Every field is
  * optional: absent is the coded default on the theme, and "follow the theme"
@@ -205,6 +219,7 @@ const themeObjectSchema = z.strictObject({
   cornerRadius: z.number().int().min(0).max(CORNER_RADIUS_MAX),
   titleStyle: z.enum(TITLE_STYLES),
   titleDisplay: z.enum(TITLE_DISPLAYS),
+  ...titlePlacementFields,
   priceDisplay: z.enum(PRICE_DISPLAYS),
   // Legacy configs stored "onImage"/"corner" before the 7-spot picker existed;
   // map them to the equivalent explicit spots so old storefronts still parse.
@@ -361,6 +376,22 @@ const placementFields = {
   y: z.number().int().min(0).max(CANVAS_ROWS_MAX - 1),
   w: z.number().int().min(1).max(CANVAS_COLUMNS_MAX),
   h: z.number().int().min(1).max(CANVAS_ROWS_MAX),
+  // Tilt. Bounded int like every other numeric that reaches a style attribute,
+  // and optional because level is the absence of the key rather than a zero —
+  // which is what keeps an untilted block identical to one saved before this
+  // existed. The canvas invariants below deliberately ignore it: rotation is
+  // visual, and the cells a block occupies are the ones x/y/w/h name.
+  rotation: z.number().int().min(ROTATION_MIN).max(ROTATION_MAX).optional(),
+  // Paint order, bounded by the board's own block cap so one block can never
+  // claim a depth the board has no room for. Optional for the same reason as
+  // rotation: an unlayered board carries no z at all and renders in reading
+  // order, exactly as it did before layering existed.
+  //
+  // Deliberately NO config-level refinement over duplicates or gaps: layerOrder
+  // breaks both with the reading index, so such a board still has a well-defined
+  // paint order, and refusing to save it would be an error the seller has no
+  // way to act on.
+  z: z.number().int().min(0).max(MAX_BLOCKS - 1).optional(),
 };
 
 // Per-tile card styling: the SAME closed enums and bounded integers as the
@@ -378,6 +409,7 @@ const cardStyleOverridesSchema = z.preprocess((value) => {
   showTitle: z.boolean().optional(),
   titleStyle: z.enum(TITLE_STYLES).optional(),
   titleDisplay: z.enum(TITLE_DISPLAYS).optional(),
+  ...titlePlacementFields,
   priceDisplay: z.enum(PRICE_DISPLAYS).optional(),
   priceTagPosition: z.enum(PRICE_TAG_POSITIONS).optional(),
   ...priceTagAppearanceFields,
@@ -526,6 +558,19 @@ const configObjectSchema = z
   // every block sits inside the board, and no two cover the same cell. These
   // are REJECTED rather than repaired — silently moving a block would scramble
   // a layout the seller can see.
+  // One geometric rule survives: a block is placed on the board.
+  //
+  // Blocks may SHARE cells. Stacking is a design move (a word over a shape, a
+  // chip over a photo) and `z` is what settles which one paints on top, so
+  // there is nothing left for a validator to arbitrate. The check that used to
+  // live here would now reject boards the editor is built to produce.
+  //
+  // The STORED rect is what is checked, not the painted footprint of a tilted
+  // block. A rotated corner reaching past the edge is a visual matter the
+  // editor already keeps in hand (see clampRotatedBox), and it is not worth a
+  // save the seller cannot complete: at the extreme, a block wider than the
+  // board has no placement that hides its overhang, and refusing that save
+  // would strand the design rather than protect it.
   .superRefine((config, ctx) => {
     const { columns, rows } = config.theme;
     config.blocks.forEach((block, index) => {
@@ -535,16 +580,6 @@ const configObjectSchema = z
           path: ["blocks", index],
           message: "A block sits outside the canvas.",
         });
-      }
-      for (let other = index + 1; other < config.blocks.length; other += 1) {
-        if (placementsOverlap(block, config.blocks[other])) {
-          ctx.addIssue({
-            code: "custom",
-            path: ["blocks", other],
-            message: "Blocks cannot overlap.",
-          });
-          return;
-        }
       }
     });
   });

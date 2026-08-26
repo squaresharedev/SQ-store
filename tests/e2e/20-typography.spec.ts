@@ -79,7 +79,7 @@ test.describe("storefront typography", () => {
 
     // A new storefront starts with the header shown and filled in: no toggle
     // to find, and something on the canvas to click.
-    const name = page.getByRole("button", { name: /style the store name/i });
+    const name = page.getByRole("button", { name: /edit the store name/i });
     await expect(name).toBeVisible();
 
     await openSection(page, "Header");
@@ -88,7 +88,7 @@ test.describe("storefront typography", () => {
 
     // Clicking the bio on the canvas aims the LEFT panel at it. Colour and
     // size are both there; nothing about the line is styled from the right.
-    await page.getByRole("button", { name: /style the store bio/i }).click();
+    await page.getByRole("button", { name: /edit the store bio/i }).click();
     const panel = page.getByRole("heading", { name: "Bio" });
     await expect(panel).toBeVisible();
 
@@ -123,7 +123,7 @@ test.describe("storefront typography", () => {
 
     // Back to the theme: the override is dropped, not stored as a colour that
     // happens to match.
-    await page.getByRole("button", { name: /style the store bio/i }).click();
+    await page.getByRole("button", { name: /edit the store bio/i }).click();
     await page.getByRole("button", { name: /use theme color/i }).click();
     await expect
       .poll(async () => saved.evaluate((node) => getComputedStyle(node).color))

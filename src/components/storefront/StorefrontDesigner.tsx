@@ -2,19 +2,22 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, ChevronLeft, ChevronRight, Search, X } from "lucide-react";
+import { ArrowLeft, Search } from "lucide-react";
 import type { Product } from "@/types/product";
 import {
+  CANVAS_COLUMNS_MAX,
   CANVAS_COLUMNS_MIN,
   CANVAS_ROWS_MAX,
   CANVAS_ROWS_MIN,
   EMPTY_STOREFRONT_HEADER,
   HEADER_BASE_PX,
+  blockFootprint,
   blockKey,
   headerStyleValue,
   mergeCardStyleOverrides,
   readingOrder,
   setHeaderStyle,
+  withRotation,
   type BlockPlacement,
   type CardStyleOverrides,
   type HeaderLine,
@@ -31,10 +34,12 @@ import {
   type TextBlock,
   type TextSpan,
 } from "@/types/storefront";
+import { LAYER_OPS, type LayerOp } from "@/lib/storefront/layers";
 import { applyFormatToRange } from "@/lib/storefront/text-spans";
 import { isDefaultPlacement } from "@/lib/images/placement";
 import { UploadError, uploadToR2 } from "@/lib/products/upload";
 import {
+  clampToCanvas,
   findFreeCell,
   packFirstFit,
   placementIsFree,
@@ -45,7 +50,6 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/Toast";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
-import { CollapsibleSection } from "@/components/ui/CollapsibleSection";
 import {
   helpTextClass,
   iconButtonClass,
@@ -67,6 +71,14 @@ import type {
   TextRange,
 } from "./InlineTextEditor";
 import { LibraryPanel, type LibraryTab } from "./LibraryPanel";
+import { SettingTargetProvider } from "@/lib/storefront/setting-context";
+import {
+  isPerTileSetting,
+  settingById,
+  settingIdFromHref,
+  type SettingRef,
+} from "@/lib/storefront/setting-ref";
+import type { SpotDrop, SpotToken } from "./TileSpotDragLayer";
 import type { StorefrontUpload } from "./UploadsPanel";
 
 /**
@@ -79,15 +91,20 @@ type LeftPanelState =
   | { kind: "library"; tab: LibraryTab }
   | null;
 import { ControlsPanel } from "./ControlsPanel";
+import { DesignPanel } from "./DesignPanel";
+import { SHEET_ON_MOBILE_CLASS } from "./panel-chrome";
 import { DesignerCanvas } from "./DesignerCanvas";
 import { EditorToolbar } from "./EditorToolbar";
 import { ImageBlockEditor } from "./ImageBlockEditor";
 import { MultiBlockEditor } from "./MultiBlockEditor";
+import { PlacementSection } from "./PlacementSection";
 import { ProductPicker } from "./ProductPicker";
 import { ProductBlockEditor } from "./ProductBlockEditor";
 import { ShapeBlockEditor, type ShapeBlockPatch } from "./ShapeBlockEditor";
 import { TextBlockEditor, type TextBlockPatch } from "./TextBlockEditor";
 import { useCanvasViewport } from "./useCanvasViewport";
+import { CANVAS_PANEL_ATTR, useCanvasAnchor } from "./useCanvasAnchor";
+import { safeSpan } from "./canvas-geometry";
 import { useEditorHistory } from "./useEditorHistory";
 import { useUnsavedChangesGuard } from "@/lib/hooks/useUnsavedChangesGuard";
 import { SearchProvider, useSearch } from "@/components/search/SearchProvider";
@@ -115,12 +132,6 @@ function changedField<T extends object>(prev: T, next: T): string {
   return "unchanged";
 }
 
-const INSPECTOR_CLOSE_CLASS =
-  "inline-flex size-7 items-center justify-center rounded-none text-muted-foreground transition-colors duration-base ease-standard hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none";
-
-/** Mobile emergency-edit layout: panels become slide-up bottom sheets over the
- *  canvas (scrollable, padded to clear the floating toolbar); on lg+ the same
- *  element renders as a plain block in the right column. */
 /** Canvas zoom bounds. A view preference only: never saved, never seen by
  *  buyers, and deliberately NOT affecting layout width, so zooming out never
  *  trips the grid's small-screen reflow. */
@@ -181,18 +192,6 @@ const PANEL_DEFAULT_WIDTH = 320;
 /** How far one arrow-key press nudges the panel edge. */
 const PANEL_RESIZE_STEP = 16;
 
-/** The little tab that collapses / reopens the panel: a chip clipped to the
- *  panel's left edge (desktop only — mobile uses bottom sheets).
- *
- *  No shadow: the tab has no right border (it butts up against the panel), so
- *  a box-shadow spills out of that open edge and paints a seam down the join.
- *  The border on the other three sides is the whole affordance. */
-const PANEL_TAB_CLASS =
-  "absolute top-1/2 z-30 hidden h-12 w-5 -translate-y-1/2 items-center justify-center rounded-l-md border border-r-0 border-border bg-background text-muted-foreground transition-colors duration-base ease-standard hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none lg:flex";
-
-const SHEET_ON_MOBILE_CLASS =
-  "fixed inset-x-0 bottom-0 z-40 max-h-[70vh] overflow-y-auto rounded-t-lg border-t border-border bg-background p-4 pb-24 shadow-lg lg:static lg:z-auto lg:max-h-none lg:overflow-visible lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0 lg:pb-0 lg:shadow-none";
-
 /**
  * Page-level composition + state owner for the storefront designer. Content is
  * inserted from the bottom toolbar. The RIGHT panel holds the selected block's
@@ -211,6 +210,7 @@ export function StorefrontDesigner({
   initialBackgroundImageUrl = null,
   initialCustomFontUrl = null,
   initialElementUrls = {},
+  initialSetting = null,
   role = null,
   accountId = null,
 }: {
@@ -225,6 +225,9 @@ export function StorefrontDesigner({
   /** Signed display URL per image block, keyed by blockKey. Blocks whose
    *  signing failed are simply absent and render their placeholder. */
   initialElementUrls?: Record<string, string>;
+  /** A setting named in the URL, from a search result picked outside the
+   *  editor. Opened once on arrival and never read again. */
+  initialSetting?: string | null;
   /** Active account role, for universal search's action gating. */
   role?: TeamRole | null;
   /** Active account id, for universal search's snapshot cache. */
@@ -392,6 +395,19 @@ export function StorefrontDesigner({
   const typingRef = useRef<string | null>(null);
   const [typingRange, setTypingRange] = useState<TextRange | null>(null);
 
+  /**
+   * The same thing for the MASTHEAD: double-clicking the store name or the bio
+   * types it where it reads, instead of sending the seller to the panel's
+   * fields for the words and back to the canvas for how they look.
+   *
+   * `range` is the selection the click left behind — the word a double-click
+   * landed on — so the first keystroke replaces exactly what was aimed at.
+   */
+  const [headerEdit, setHeaderEdit] = useState<{
+    line: HeaderLine;
+    range: TextRange | null;
+  } | null>(null);
+
   /** The selected block, when it is a text block with live selected words —
    *  i.e. when a colour would land on part of the text rather than all of it. */
   const textRangeTarget =
@@ -420,6 +436,11 @@ export function StorefrontDesigner({
               range: textRangeTarget.range,
             }
           : null,
+        // A line emptied while it is being typed in is still on the board, as
+        // a field with a caret in it. Without this the panel would close under
+        // the seller the moment they cleared the words to retype them — and
+        // the panel's target is what keeps the field open.
+        headerEdit?.line ?? null,
       )
     : null;
 
@@ -436,6 +457,13 @@ export function StorefrontDesigner({
       : activeColorTarget?.kind === "header-bio"
         ? "bio"
         : null;
+
+  /** Which line is taking keystrokes. Derived against the panel's target the
+   *  same way, so anything that aims the panel elsewhere — clicking a tile,
+   *  an undo that takes the masthead away — ends the edit on its own rather
+   *  than leaving a caret in a line nothing is pointing at. */
+  const editingHeaderLine: HeaderLine | null =
+    headerEdit && headerEdit.line === activeHeaderLine ? headerEdit.line : null;
 
   // The panel is open when it has something to show. A color ref that has
   // stopped resolving counts as nothing, which is what closes the panel on
@@ -556,18 +584,27 @@ export function StorefrontDesigner({
     return () => area.removeEventListener("wheel", onWheel);
   }, [viewport]);
 
-  // A shrinking window (or the design panel widening) can leave the board
-  // outside the new limits, so re-clamp whenever the workspace resizes. An
-  // identity set is enough: the clamp runs on every write.
-  useEffect(() => {
-    const area = canvasViewportRef.current;
-    if (!area) return;
-    const observer = new ResizeObserver(() => {
-      viewport.set((current) => current);
-    });
-    observer.observe(area);
-    return () => observer.disconnect();
-  }, [viewport]);
+  /**
+   * PANELS MOVE, THE BOARD DOES NOT.
+   *
+   * Opening the colour column used to shove the whole design 280px sideways,
+   * because the pan is measured from the workspace's top-left corner and a
+   * docked panel moves that corner. This holds the board on the same pixels of
+   * the screen through any panel opening, closing, resizing or turning into a
+   * bottom sheet, and moves it ONLY when a panel is genuinely standing on it,
+   * by the least amount that gets it back out. It also re-clamps on a window
+   * resize, which is what this used to be on its own.
+   *
+   * Selected blocks come along as the thing most worth keeping in view: on a
+   * phone a sheet can take 70% of the screen, where revealing the whole board
+   * is impossible but revealing the one tile being edited is not.
+   */
+  useCanvasAnchor({
+    viewport,
+    workspaceRef: canvasViewportRef,
+    enabled: previewMode === "desktop",
+    anchorKeys: selectedKeys,
+  });
 
   // Space = hold-to-pan. Ignored while typing, and while a button has focus
   // (there space is that button's activation key).
@@ -700,6 +737,63 @@ export function StorefrontDesigner({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
+  /**
+   * Ctrl/Cmd + [ and ] walk the selection through the stack, with Shift
+   * sending it the whole way. These are the Figma and Illustrator bindings, so
+   * they are what a seller who has used either reaches for first.
+   *
+   * preventDefault is REQUIRED rather than tidy: on macOS Cmd+[ and Cmd+] are
+   * Back and Forward, and an editor that navigated away here would take the
+   * unsaved board with it.
+   *
+   * Same subscribe-once + ref shape and the same guards as every other
+   * shortcut in this file, the Select guard included: its trigger is a button
+   * rather than an input, so the "am I typing" test alone does not catch it.
+   */
+  const layerShortcut = useRef<{ selectedKeys: readonly string[] }>({
+    selectedKeys: [],
+  });
+  useEffect(() => {
+    layerShortcut.current.selectedKeys = selectedKeys;
+  });
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if (!(event.ctrlKey || event.metaKey) || event.altKey) return;
+      // Shift changes the CHARACTER these keys produce (] becomes }), so the
+      // jump-to-the-end half of the binding would never fire if this matched
+      // on `key` alone. `code` names the physical key, which is what a
+      // shortcut borrowed from Figma is really about.
+      const forward =
+        event.code === "BracketRight" || event.key === "]" || event.key === "}";
+      const backward =
+        event.code === "BracketLeft" || event.key === "[" || event.key === "{";
+      if (!forward && !backward) return;
+      const target = event.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable ||
+          target.closest('[role="combobox"][aria-expanded="true"]') !== null)
+      ) {
+        return;
+      }
+      const keys = layerShortcut.current.selectedKeys;
+      if (keys.length === 0) return;
+      event.preventDefault();
+      const op: LayerOp = forward
+        ? event.shiftKey
+          ? "front"
+          : "forward"
+        : event.shiftKey
+          ? "back"
+          : "backward";
+      canvasActions.current.reorderLayers(keys, op);
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
+
   // Cmd/Ctrl +/-/0, the shortcuts every canvas tool shares.
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -815,6 +909,29 @@ export function StorefrontDesigner({
     openColorTarget(line === "name" ? { kind: "header-name" } : { kind: "header-bio" });
   }
 
+  /**
+   * Double-clicking a masthead line (or clicking the one the panel is already
+   * on) puts the caret in it. The panel comes along, aimed at the same line:
+   * the words and the way they look are the one thing being edited, and the
+   * panel's target is also what keeps this mode alive (see editingHeaderLine).
+   */
+  function beginHeaderEdit(line: HeaderLine, range: TextRange | null) {
+    if (typingRef.current !== null) endTyping();
+    selectHeaderLine(line);
+    setHeaderEdit({ line, range });
+  }
+
+  function endHeaderEdit() {
+    setHeaderEdit(null);
+  }
+
+  /** A keystroke in the masthead. Coalesced into one undo step per line by the
+   *  key updateHeader derives, exactly like typing on a text tile. */
+  function setHeaderLineText(line: HeaderLine, value: string) {
+    if (header[line] === value) return;
+    updateHeader({ ...header, [line]: value });
+  }
+
   /** Clicking a free cell opens the picker; whatever is added next lands in
    *  that cell rather than the first free one. */
   function insertAt(x: number, y: number) {
@@ -833,46 +950,65 @@ export function StorefrontDesigner({
     return hint;
   }
 
-  /** The viewport window and the board's UNSCALED size (offsetWidth/Height
-   *  ignore transforms, so these are the natural dimensions). */
+  /** The board's UNSCALED size (offsetWidth/Height ignore transforms, so these
+   *  are the natural dimensions). Where it should GO is safeWindow's answer. */
   function measureView() {
-    const area = canvasViewportRef.current;
     const stage = viewport.stage();
-    if (!area || !stage || stage.offsetWidth <= 0) return null;
-    return { area, width: stage.offsetWidth, height: stage.offsetHeight };
+    if (!stage || stage.offsetWidth <= 0) return null;
+    return { width: stage.offsetWidth, height: stage.offsetHeight };
+  }
+
+  /**
+   * The part of the workspace no panel is standing on, in workspace
+   * coordinates (which is what the pan is measured in).
+   *
+   * Everything that PLACES the board rather than nudging it reads this instead
+   * of the raw box: centring a board in a window whose bottom 60% is a sheet
+   * would centre it under the sheet, and fitting it to that window would size
+   * it for room it does not have. On desktop the docked panels are laid out
+   * beside the workspace, so this is simply the whole box.
+   */
+  function safeWindow() {
+    const area = canvasViewportRef.current;
+    if (!area) return null;
+    const insets = viewport.insets();
+    const [minX, maxX] = safeSpan(area.clientWidth, insets.left, insets.right);
+    const [minY, maxY] = safeSpan(area.clientHeight, insets.top, insets.bottom);
+    return {
+      minX,
+      minY,
+      width: maxX - minX,
+      height: maxY - minY,
+      midX: (minX + maxX) / 2,
+      midY: (minY + maxY) / 2,
+    };
   }
 
   /** Drop the board in the middle of the workspace at the given scale. */
   function centerCanvas(atZoom: number) {
     const view = measureView();
-    if (!view) return;
+    const room = safeWindow();
+    if (!view || !room) return;
     viewport.set({
       zoom: atZoom,
       pan: {
-        x: (view.area.clientWidth - view.width * atZoom) / 2,
-        y: Math.max(
-          CANVAS_MARGIN,
-          (view.area.clientHeight - view.height * atZoom) / 2,
-        ),
+        x: room.minX + (room.width - view.width * atZoom) / 2,
+        y:
+          room.minY +
+          Math.max(CANVAS_MARGIN, (room.height - view.height * atZoom) / 2),
       },
     });
   }
 
   /** Toolbar zoom: about the middle of the window, not the corner. */
   function zoomBy(delta: number) {
-    const area = canvasViewportRef.current;
+    const room = safeWindow();
     viewport.set((current) => {
       const zoom = clampZoom(current.zoom + delta);
-      if (!area) return { ...current, zoom };
+      if (!room) return { ...current, zoom };
       return {
         zoom,
-        pan: panAfterZoom(
-          current.pan,
-          current.zoom,
-          zoom,
-          area.clientWidth / 2,
-          area.clientHeight / 2,
-        ),
+        pan: panAfterZoom(current.pan, current.zoom, zoom, room.midX, room.midY),
       };
     });
   }
@@ -895,6 +1031,8 @@ export function StorefrontDesigner({
   const canvasActions = useRef({
     moveBlock,
     resizeBlock,
+    rotateBlocks,
+    reorderLayers,
     removeBlock,
     removeBlocks,
     insertAt,
@@ -910,11 +1048,16 @@ export function StorefrontDesigner({
     toggleHeaderFormat,
     endTyping,
     selectHeaderLine,
+    beginHeaderEdit,
+    setHeaderLineText,
+    endHeaderEdit,
   });
   useEffect(() => {
     canvasActions.current = {
       moveBlock,
       resizeBlock,
+      rotateBlocks,
+      reorderLayers,
       removeBlock,
       removeBlocks,
       insertAt,
@@ -930,6 +1073,9 @@ export function StorefrontDesigner({
       toggleHeaderFormat,
       endTyping,
       selectHeaderLine,
+      beginHeaderEdit,
+      setHeaderLineText,
+      endHeaderEdit,
     };
   });
   const onMoveBlock = useCallback((key: string, x: number, y: number) => {
@@ -937,6 +1083,11 @@ export function StorefrontDesigner({
   }, []);
   const onResizeBlock = useCallback((key: string, placement: BlockPlacement) => {
     canvasActions.current.resizeBlock(key, placement);
+  }, []);
+  const onRotateBlock = useCallback((key: string, rotation: number) => {
+    // The handle turns ONE tile, even when several are selected: the tile the
+    // hand is on is the one it means.
+    canvasActions.current.rotateBlocks([key], rotation);
   }, []);
   const onRemoveBlock = useCallback((key: string) => {
     canvasActions.current.removeBlock(key);
@@ -952,6 +1103,24 @@ export function StorefrontDesigner({
   }, []);
   const onSelectHeaderLine = useCallback((line: HeaderLine) => {
     canvasActions.current.selectHeaderLine(line);
+  }, []);
+  const onEditHeaderLine = useCallback(
+    (line: HeaderLine, range: TextRange | null) => {
+      canvasActions.current.beginHeaderEdit(line, range);
+    },
+    [],
+  );
+  const onHeaderTextChange = useCallback((line: HeaderLine, value: string) => {
+    canvasActions.current.setHeaderLineText(line, value);
+  }, []);
+  const onToggleHeaderFormat = useCallback(
+    (line: HeaderLine, format: "bold" | "italic" | "underline") => {
+      canvasActions.current.toggleHeaderFormat(line, format);
+    },
+    [],
+  );
+  const onHeaderEditEnd = useCallback(() => {
+    canvasActions.current.endHeaderEdit();
   }, []);
   const onFrameBlock = useCallback((key: string) => {
     canvasActions.current.frameBlock(key);
@@ -993,24 +1162,25 @@ export function StorefrontDesigner({
    */
   function fitOnFirstPaint() {
     const view = measureView();
-    if (!view) return;
+    const room = safeWindow();
+    if (!view || !room) return;
     const zoom = clampZoom(
       Math.min(
-        (view.area.clientWidth - CANVAS_MARGIN * 2) / view.width,
-        (view.area.clientHeight - CANVAS_MARGIN * 2) / view.height,
+        (room.width - CANVAS_MARGIN * 2) / view.width,
+        (room.height - CANVAS_MARGIN * 2) / view.height,
       ),
     );
     viewport.set({
       zoom,
       pan: {
-        x: (view.area.clientWidth - view.width * zoom) / 2,
+        x: room.minX + (room.width - view.width * zoom) / 2,
         // Top-aligned, NOT vertically centred. A fitted board is short relative
         // to the window (on a phone it lands around half the height), and
         // centring it left a dead band across the top of the screen with the
         // content stranded in the middle. Starting at the top puts the board
         // where the eye lands and leaves the free space at the bottom, where
         // the sheets and toolbar live anyway.
-        y: CANVAS_MARGIN,
+        y: room.minY + CANVAS_MARGIN,
       },
     });
   }
@@ -1180,12 +1350,13 @@ export function StorefrontDesigner({
     // The stage may not have laid out on the very first tick.
     function place(attempt: number) {
       const view = measureView();
-      if (!view) {
+      const room = safeWindow();
+      if (!view || !room) {
         if (attempt < 5) frame = requestAnimationFrame(() => place(attempt + 1));
         return;
       }
       placedInitialView.current = true;
-      if (view.width + CANVAS_MARGIN * 2 > view.area.clientWidth) fitOnFirstPaint();
+      if (view.width + CANVAS_MARGIN * 2 > room.width) fitOnFirstPaint();
       else centerCanvas(1);
     }
     place(0);
@@ -1215,7 +1386,9 @@ export function StorefrontDesigner({
     }
   }
 
-  /** The blocks as the grid's placement helpers want them. */
+  /** The blocks as the grid's placement helpers want them. Tilt included, so
+   *  the search for somewhere free measures a turned block by the cells it
+   *  PAINTS on rather than the ones it is placed in. */
   function canvasBlocks() {
     return blocks.map((block) => ({
       key: blockKey(block),
@@ -1223,20 +1396,26 @@ export function StorefrontDesigner({
       y: block.y,
       w: block.w,
       h: block.h,
+      rotation: block.rotation,
       data: null,
     }));
   }
 
   /**
    * Where a new w x h block should land: the cell the seller pointed at when
-   * it is free, otherwise the first free spot, otherwise a freshly grown row.
-   * Null when the board is full at its maximum height.
+   * it is free, otherwise the first free spot, otherwise a freshly grown row,
+   * otherwise ON TOP of what is already there.
+   *
+   * Never null. Empty space is a PREFERENCE, not a requirement: blocks may be
+   * stacked, so a board with no room left is not a board that can refuse a
+   * block. The seller asked for it; the worst case is that it arrives on top
+   * of something and they move it or send it back.
    */
   function findSpot(
     w: number,
     h: number,
     at?: { x: number; y: number },
-  ): (BlockPlacement & { growRows?: number }) | null {
+  ): BlockPlacement & { growRows?: number } {
     const existing = canvasBlocks();
     const { columns, rows } = theme;
     if (
@@ -1248,17 +1427,26 @@ export function StorefrontDesigner({
     const free = findFreeCell(existing, w, h, columns, rows);
     if (free) return { ...free, w, h };
 
-    // Board full: grow it rather than refusing the block.
+    // Nothing free: grow the board first, since a new row is a tidier answer
+    // than a stack the seller did not ask for.
     const grown = Math.min(CANVAS_ROWS_MAX, rows + h);
     if (grown > rows) {
       const spot = findFreeCell(existing, w, h, columns, grown);
       if (spot) return { ...spot, w, h, growRows: grown };
     }
-    return null;
+    // Full board at its maximum height. Land on the pointed cell, or the top
+    // left, and let paint order sort it out.
+    return clampToCanvas({ ...(at ?? { x: 0, y: 0 }), w, h }, columns, rows);
   }
 
-  /** Commit a new block at a found spot, growing the canvas if that's what
-   *  the spot needed. */
+  /**
+   * Commit a new block at a found spot, growing the canvas if that's what the
+   * spot needed.
+   *
+   * The block cap is the ONLY reason this can now come back empty: findSpot
+   * always has an answer, so "there is no room" has stopped being a way to
+   * fail. The callers that report it to the seller keep doing so.
+   */
   function insertBlock(
     build: (placement: BlockPlacement) => StorefrontBlock,
     w: number,
@@ -1267,7 +1455,6 @@ export function StorefrontDesigner({
   ): StorefrontBlock | null {
     if (blocks.length >= MAX_BLOCKS) return null;
     const spot = findSpot(w, h, at);
-    if (!spot) return null;
     recordChange();
     if (spot.growRows) setTheme({ ...theme, rows: spot.growRows });
     const block = build({ x: spot.x, y: spot.y, w: spot.w, h: spot.h });
@@ -1480,14 +1667,35 @@ export function StorefrontDesigner({
           }
         }
       }
-      if (!spot) break;
+      // Nowhere free on a full board at its full height: the copy lands on
+      // top of its source rather than being dropped on the floor. Paste is a
+      // deliberate act and has to produce something every time.
+      if (!spot) {
+        spot = clampToCanvas({ x: source.x, y: source.y, w, h }, columns, rows);
+      }
+      // Placement field by field rather than spread: the copy keeps the
+      // source's tilt and depth, and a spot that ever carried either of them
+      // would silently overwrite the copy's.
       const copy: StorefrontBlock = {
         ...structuredClone(source),
         id: crypto.randomUUID(),
-        ...spot,
+        x: spot.x,
+        y: spot.y,
+        w: spot.w,
+        h: spot.h,
       };
       added.push(copy);
-      working.push({ key: blockKey(copy), ...spot, data: null });
+      working.push({
+        key: blockKey(copy),
+        x: copy.x,
+        y: copy.y,
+        w: copy.w,
+        h: copy.h,
+        // A copy of a turned block occupies its turned footprint, so the next
+        // copy in the same paste looks for room around the right shape.
+        rotation: copy.rotation,
+        data: null,
+      });
     }
 
     if (added.length === 0) return;
@@ -1596,40 +1804,115 @@ export function StorefrontDesigner({
     );
   }
 
-  /** Pack every block toward the top-left in reading order — the old
-   *  auto-flow layout, available on demand for sellers who don't want to
-   *  place things by hand. */
+  /**
+   * Tilt every block in `keys`, as ONE undo step.
+   *
+   * Each block turns about its OWN centre rather than the selection's, which
+   * keeps the operation independent of how the blocks happen to be arranged.
+   * Turning a group as a rigid body needs sub-cell coordinates to land on, so
+   * it belongs with free placement rather than here.
+   *
+   * withRotation is the writer, so levelling a block drops the field instead
+   * of storing a zero, and a drag that ends where it started returns the same
+   * block objects and never marks the editor dirty.
+   *
+   * Nothing else changes: not x, not y, not w, not h. A turned block covers
+   * the same cells the other way round (see blockFootprint), so there is
+   * nothing to make room for, and if its corners now reach past the board's
+   * edge that is a thing the seller can see and drag back. Moving the block
+   * for them would make a rotate control that also repositions, which is
+   * exactly the surprise it must not be.
+   */
+  function rotateBlocks(keys: readonly string[], degrees: number) {
+    const targets = new Set(keys);
+    // Coalesced on the SELECTION, so a slider drag or a spin of the handle is
+    // one entry, and rotating a different block afterwards is its own.
+    recordChange(`rotate:${[...targets].sort().join(",")}`);
+    setBlocks((current) =>
+      current.map((b) =>
+        targets.has(blockKey(b)) ? withRotation(b, degrees) : b,
+      ),
+    );
+  }
+
+  /**
+   * Move the selection through the board's paint order.
+   *
+   * The layers module owns the rules (dense z, the selection travelling as a
+   * run) and answers a no-op by handing back the SAME array, which is what
+   * lets a press at the end of the stack cost nothing at all: no history
+   * entry, no dirty flag, no re-render.
+   *
+   * No coalesce key, unlike a slider drag: two presses of "bring forward" are
+   * two separate intentions, and undo has to walk back through them one at a
+   * time.
+   */
+  function reorderLayers(keys: readonly string[], op: LayerOp) {
+    const next = LAYER_OPS[op](blocks, keys);
+    if (next === blocks) return;
+    recordChange();
+    setBlocks(next);
+  }
+
+  /**
+   * Pack every block toward the top-left in reading order — the old auto-flow
+   * layout, available on demand for sellers who don't want to place things by
+   * hand.
+   *
+   * The one control that deliberately UNDOES a stack: tidy means "lay this out
+   * as a grid", and a grid has one thing per cell. Blocks are packed by their
+   * FOOTPRINT so a tilted block is given room for the cells it really covers,
+   * then centred in the space it was given, which keeps its angle without
+   * letting it cross into its neighbour.
+   */
   function tidyBlocks() {
     recordChange();
     setBlocks((current) => {
       const ordered = readingOrder(current);
       const packed = packFirstFit(
-        ordered.map((block) => ({ w: block.w, h: block.h })),
+        ordered.map((block) => {
+          const covered = blockFootprint(block);
+          return { w: covered.w, h: covered.h };
+        }),
         theme.columns,
       );
-      return ordered.map((block, index) => ({
-        ...block,
-        x: packed[index].x,
-        y: packed[index].y,
-      }));
+      return ordered.map((block, index) => {
+        const covered = blockFootprint(block);
+        const spot = packed[index];
+        // The block sits in the middle of the room its footprint asked for,
+        // so a tilted block's corners land inside that room rather than the
+        // block's own rect landing on the corner of it.
+        return {
+          ...block,
+          x: spot.x + Math.round((covered.w - block.w) / 2),
+          y: spot.y + Math.round((covered.h - block.h) / 2),
+        };
+      });
     });
   }
 
-  /** Resize the canvas itself. Shrinking never cuts a block off: the minimum
-   *  is whatever the current content extends to. */
+  /**
+   * Resize the canvas itself. Shrinking never cuts a block off: the minimum is
+   * whatever the content PAINTS out to, tilted corners included.
+   *
+   * Capped at the schema's own maximums, which a footprint can exceed where a
+   * placement cannot: a block turned at the far edge paints past it by design,
+   * and letting that push the board to 13 columns would produce a canvas the
+   * seller could no longer save.
+   */
   function updateCanvas(columns: number, rows: number) {
-    const minColumns = blocks.reduce(
-      (max, block) => Math.max(max, block.x + block.w),
-      CANVAS_COLUMNS_MIN,
-    );
-    const minRows = blocks.reduce(
-      (max, block) => Math.max(max, block.y + block.h),
-      CANVAS_ROWS_MIN,
-    );
+    const minColumns = blocks.reduce((max, block) => {
+      const covered = blockFootprint(block);
+      return Math.max(max, covered.x + covered.w);
+    }, CANVAS_COLUMNS_MIN);
+    const minRows = blocks.reduce((max, block) => {
+      const covered = blockFootprint(block);
+      return Math.max(max, covered.y + covered.h);
+    }, CANVAS_ROWS_MIN);
     updateTheme({
       ...theme,
-      columns: Math.max(columns, minColumns),
-      rows: Math.max(rows, minRows),
+      columns: Math.min(CANVAS_COLUMNS_MAX, Math.max(columns, minColumns)),
+      rows: Math.min(CANVAS_ROWS_MAX, Math.max(rows, minRows)),
     });
   }
 
@@ -1675,6 +1958,24 @@ export function StorefrontDesigner({
         }
         return { ...b, style };
       }),
+    );
+  }
+
+  /**
+   * The title or the price, dropped somewhere new on its own tile.
+   *
+   * Writes through the SAME per-tile override mutator the panel's controls use,
+   * so a drag and a click on the board produce the same document, land in the
+   * same undo step (the coalesce key is per field, and a whole drag only ever
+   * touches one), and behave identically on a tile that was following the theme
+   * until now.
+   */
+  function placeTileSpot(key: string, token: SpotToken, drop: SpotDrop) {
+    updateProductBlocksStyle(
+      [key],
+      token === "title"
+        ? { titlePosition: drop === "below" ? undefined : drop }
+        : { priceTagPosition: drop },
     );
   }
 
@@ -2071,6 +2372,44 @@ export function StorefrontDesigner({
     setSettingsOpen(false);
   }
 
+  /**
+   * OPENING A SETTING BY NAME, from universal search or the panel's own filter.
+   *
+   * The ref only says WHICH setting. Which of its two copies to show is decided
+   * here, against the live selection, because that is the only place that knows
+   * it: a per-tile setting with a product tile selected means the seller is
+   * asking about THAT tile, and the same words with nothing selected mean the
+   * storefront. A non-product tile has no card style at all, so it falls back
+   * to the storefront's copy rather than opening an inspector that cannot
+   * answer.
+   *
+   * The ref is cleared shortly after. It is an instruction, not a mode: leaving
+   * it set would re-open the group every time the panel re-rendered, and would
+   * fight the seller the moment they navigated somewhere else.
+   */
+  const [settingTarget, setSettingTarget] = useState<SettingRef | null>(
+    // A cold arrival from a search result picked elsewhere. Seeded rather than
+    // opened in an effect, so the panel is already on the right group when the
+    // editor first paints.
+    () => settingById(initialSetting ?? "")?.ref ?? null,
+  );
+  useEffect(() => {
+    if (!settingTarget) return;
+    const timer = setTimeout(() => setSettingTarget(null), 1200);
+    return () => clearTimeout(timer);
+  }, [settingTarget]);
+
+  function openSetting(ref: SettingRef) {
+    const onProductTile =
+      selectedBlocks.length === 1 && selectedBlocks[0]?.type === "product";
+    // A per-tile setting reaches the inspector only when there is a tile that
+    // HAS it; everything else belongs to the storefront panel.
+    if (!(isPerTileSetting(ref) && onProductTile)) setInspector(null);
+    setSettingTarget(ref);
+    setSettingsOpen(false);
+    setPanelOpen(true);
+  }
+
   function updateTheme(next: StorefrontTheme) {
     recordChange(`theme:${changedField(theme, next)}`);
     setTheme(next);
@@ -2226,7 +2565,12 @@ export function StorefrontDesigner({
           ? "Product"
           : selectedBlock?.type === "shape"
             ? "Shape"
-            : "Text block";
+            : // Named per type rather than falling through to the last one: an
+              // image block used to be titled "Text block", because the chain
+              // ended in text and nothing tested the image case.
+              selectedBlock?.type === "image"
+              ? "Image"
+              : "Text block";
   const showInspector =
     inspector?.kind === "picker" || selectedBlocks.length > 0;
 
@@ -2250,10 +2594,29 @@ export function StorefrontDesigner({
         close: () => setColorTarget(null),
       }}
     >
+    <SettingTargetProvider
+      value={{
+        activeRef: settingTarget,
+        open: openSetting,
+        close: () => setSettingTarget(null),
+      }}
+    >
     <SearchProvider
       role={role}
       accountId={accountId}
-      navigate={leaveGuard.requestLeave}
+      // A search result naming a setting in THIS storefront is not a
+      // navigation: intercept it and open the panel in place, so the editor
+      // never reloads (and the unsaved-changes guard never has to ask) for
+      // something that was only ever a request to look at a control.
+      navigate={(href) => {
+        const id = settingIdFromHref(href);
+        const entry = id ? settingById(id) : null;
+        if (entry) {
+          openSetting(entry.ref);
+          return;
+        }
+        leaveGuard.requestLeave(href);
+      }}
     >
       {/* Fixed-height workspace: the PAGE never scrolls. The canvas column and
           the design panel each scroll on their own, so a tall storefront moves
@@ -2345,6 +2708,9 @@ export function StorefrontDesigner({
                 inner dir="ltr" undoes it for the actual content/text. */}
             <div
               dir="rtl"
+              // Measured by the canvas: docked beside the board on lg+, lying
+              // over it as a sheet on a phone. See useCanvasAnchor.
+              {...{ [CANVAS_PANEL_ATTR]: "" }}
               className={cn(SHEET_ON_MOBILE_CLASS, "lg:h-full lg:overflow-y-auto")}
             >
               <div dir="ltr">
@@ -2422,6 +2788,7 @@ export function StorefrontDesigner({
             viewport={viewport}
             onMoveBlock={onMoveBlock}
             onResizeBlock={onResizeBlock}
+            onRotateBlock={onRotateBlock}
             onRemove={onRemoveBlock}
             onEmptyCellClick={onInsertAt}
             selectedKeys={selectedKeys}
@@ -2429,6 +2796,12 @@ export function StorefrontDesigner({
             onSelectMany={onSelectMany}
             activeHeaderLine={activeHeaderLine}
             onSelectHeaderLine={onSelectHeaderLine}
+            editingHeaderLine={editingHeaderLine}
+            editingHeaderRange={headerEdit?.range ?? null}
+            onEditHeaderLine={onEditHeaderLine}
+            onHeaderTextChange={onHeaderTextChange}
+            onToggleHeaderFormat={onToggleHeaderFormat}
+            onHeaderEditEnd={onHeaderEditEnd}
             framingKey={framingKey}
             onFrameBlock={onFrameBlock}
             onFramePlacement={onFramePlacement}
@@ -2440,95 +2813,82 @@ export function StorefrontDesigner({
             onToggleBlockFormat={onToggleBlockFormat}
             onTextRangeChange={setTypingRange}
             onTypeEnd={onTypeEnd}
+            onSpotChange={placeTileSpot}
             // Space is the hold-to-pan tool; while held, a drag on the frame
             // pans the workspace instead of drawing a marquee.
             disableMarquee={spaceHeld}
           />
         </main>
 
-        {/* Reopen tab, pinned to the screen edge while the panel is away. */}
-        {!panelOpen && (
-          <button
-            type="button"
-            onClick={() => setPanelOpen(true)}
-            aria-label="Show design panel"
-            title="Show design panel"
-            className={cn(PANEL_TAB_CLASS, "fixed right-0")}
-          >
-            <ChevronLeft className="size-4" strokeWidth={2} aria-hidden="true" />
-          </button>
-        )}
-
-        {/* RIGHT: the design panel, docked to the page edge on desktop
-            (selected element's card on top, global settings below), scrolling
-            on its own. Its left edge carries the collapse tab and doubles as
-            a drag handle for resizing. On mobile both render as bottom
-            sheets, one at a time. */}
-        <div
-          // Same as the colour panel: pressing in here does not end an
-          // in-place text edit, so the selected words survive the trip.
-          data-design-panel=""
-          // Width only binds on lg+; on mobile the children are fixed sheets.
-          style={{ "--panel-w": `${panelWidth}px` } as React.CSSProperties}
-          className={cn(
-            "relative shrink-0 lg:w-[var(--panel-w)] lg:border-l lg:border-border",
-            !panelOpen && "lg:hidden",
-          )}
-        >
-          {/* Drag handle straddling the border. Focusable + arrow-key
-              resizable, per the ARIA separator pattern. */}
-          <div
-            role="separator"
-            aria-orientation="vertical"
-            aria-label="Resize design panel"
-            aria-valuenow={panelWidth}
-            aria-valuemin={PANEL_MIN_WIDTH}
-            aria-valuemax={PANEL_MAX_WIDTH}
-            tabIndex={0}
-            onPointerDown={startPanelResize}
-            onKeyDown={onPanelResizeKey}
-            className="absolute inset-y-0 -left-1 z-20 hidden w-2 cursor-col-resize focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:block"
-          />
-
-          {/* Collapse tab, clipped to the panel's own left edge. */}
-          <button
-            type="button"
-            onClick={() => setPanelOpen(false)}
-            aria-label="Hide design panel"
-            title="Hide design panel"
-            className={cn(PANEL_TAB_CLASS, "left-0 -translate-x-full")}
-          >
-            <ChevronRight className="size-4" strokeWidth={2} aria-hidden="true" />
-          </button>
-
-          {/* No padding here: each section pads itself so the dividers can
-              run the full width of the panel. */}
-          <div className="contents lg:block lg:h-full lg:overflow-y-auto">
-            {showInspector && (
-              <div
-                className={cn(
-                  SHEET_ON_MOBILE_CLASS,
-                  // On mobile every panel is the SAME bottom slot, and selecting
-                  // a shape opens both this and the color sheet — which would
-                  // stack one on top of the other. The color sheet wins while it
-                  // is open; closing it brings this back. On lg+ they are two
-                  // docked columns and both stay visible.
-                  activeColorTarget && "hidden lg:block",
-                )}
-              >
-                <CollapsibleSection
-                  title={inspectorTitle}
-                  headerAction={
-                    <button
-                      type="button"
-                      onClick={() => setInspector(null)}
-                      aria-label={`Close ${inspectorTitle.toLowerCase()} panel`}
-                      className={INSPECTOR_CLOSE_CLASS}
-                    >
-                      <X className="size-4" strokeWidth={2} aria-hidden="true" />
-                    </button>
-                  }
-                >
+        {/* RIGHT: the design panel, docked to the page edge on desktop, with
+            the selected element and the global settings as two tabbed scopes.
+            See DesignPanel for why they are tabs rather than one column. */}
+        <DesignPanel
+          panelOpen={panelOpen}
+          onPanelOpenChange={setPanelOpen}
+          panelWidth={panelWidth}
+          minWidth={PANEL_MIN_WIDTH}
+          maxWidth={PANEL_MAX_WIDTH}
+          onResizePointerDown={startPanelResize}
+          onResizeKeyDown={onPanelResizeKey}
+          selectionKey={
+            inspector?.kind === "picker"
+              ? "picker"
+              : selectedKeys.join(",")
+          }
+          showInspector={showInspector}
+          inspectorTitle={inspectorTitle}
+          onCloseInspector={() => setInspector(null)}
+          // On mobile every panel is the SAME bottom slot, and selecting a
+          // shape opens both this and the color sheet — which would stack one
+          // on top of the other. The color sheet wins while it is open;
+          // closing it brings this back. On lg+ they are separate columns.
+          //
+          // The library sheet (left panel) is the same conflict from the other
+          // side: inserting a block from it selects that block, which would
+          // pop this sheet up over the still-open library, hiding the very
+          // shapes the seller was choosing from. The library wins for the same
+          // reason the color sheet does.
+          inspectorHiddenOnMobile={
+            activeColorTarget !== null || leftPanel?.kind === "library"
+          }
+          settingsOpen={settingsOpen}
+          onCloseSettings={() => setSettingsOpen(false)}
+          controls={
+            <ControlsPanel
+              theme={theme}
+              header={header}
+              onThemeChange={updateTheme}
+              onHeaderChange={updateHeader}
+              backgroundImageUrl={backgroundImageUrl}
+              onBackgroundImageChange={setBackgroundImageUrl}
+              customFontUrl={customFontUrl}
+              onCustomFontUrlChange={setCustomFontUrl}
+              showGrid={showGrid}
+              onShowGridChange={setShowGrid}
+              onCanvasChange={updateCanvas}
+            />
+          }
+          inspector={
+            <>
+                  {/* How the selection SITS, above what it is made of: the
+                      block editors end in Duplicate and Remove, and a control
+                      that only tilts things has no business below a delete
+                      button. Shown for every kind, including a mixed
+                      selection, since placement is the one thing they all
+                      share. */}
+                  {inspector?.kind !== "picker" && selectedBlocks.length > 0 && (
+                    <div className="mb-4 border-b border-border pb-4">
+                      <PlacementSection
+                        blocks={selectedBlocks}
+                        board={blocks}
+                        onRotate={(degrees) =>
+                          rotateBlocks(selectedKeys, degrees)
+                        }
+                        onReorder={(op) => reorderLayers(selectedKeys, op)}
+                      />
+                    </div>
+                  )}
                   {inspector?.kind === "picker" ? (
                     <ProductPicker
                       products={catalog}
@@ -2629,46 +2989,9 @@ export function StorefrontDesigner({
                       onRemove={() => removeBlock(blockKey(selectedBlock))}
                     />
                   ) : null}
-                </CollapsibleSection>
-              </div>
-            )}
-
-            {/* Global settings: always visible on lg+; on mobile hidden behind
-                the toolbar's Design button (emergency-edit sheet). */}
-            <div
-              className={cn(
-                settingsOpen ? SHEET_ON_MOBILE_CLASS : "hidden lg:block",
-              )}
-            >
-              <div className="mb-4 flex items-center justify-between lg:hidden">
-                <h2 className="text-sm font-semibold text-foreground">
-                  Design
-                </h2>
-                <button
-                  type="button"
-                  onClick={() => setSettingsOpen(false)}
-                  aria-label="Close design settings"
-                  className={INSPECTOR_CLOSE_CLASS}
-                >
-                  <X className="size-4" strokeWidth={2} aria-hidden="true" />
-                </button>
-              </div>
-              <ControlsPanel
-                theme={theme}
-                header={header}
-                onThemeChange={updateTheme}
-                onHeaderChange={updateHeader}
-                backgroundImageUrl={backgroundImageUrl}
-                onBackgroundImageChange={setBackgroundImageUrl}
-                customFontUrl={customFontUrl}
-                onCustomFontUrlChange={setCustomFontUrl}
-                showGrid={showGrid}
-                onShowGridChange={setShowGrid}
-                onCanvasChange={updateCanvas}
-              />
-            </div>
-          </div>
-        </div>
+            </>
+          }
+        />
       </div>
 
       <EditorToolbar
@@ -2732,6 +3055,7 @@ export function StorefrontDesigner({
       </Modal>
       </div>
     </SearchProvider>
+    </SettingTargetProvider>
     </ColorTargetProvider>
   );
 }

@@ -1,46 +1,49 @@
 import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
+import { ErrorScreen } from "@/components/error/ErrorScreen";
 import { buttonClassName } from "@/components/ui/button";
 
 /**
- * App-styled 404 for every notFound() call (bad product id, bad storefront id,
- * unknown route). Without this file Next.js renders its own unstyled default,
- * which has no navigation back into the app, so a mistyped or stale URL left
- * the user with nothing but the browser Back button.
+ * The 404 for every notFound() call (bad product id, bad storefront id) and for
+ * any unmatched URL on the dashboard. Without this file Next.js renders its own
+ * unstyled default, which has no way back into the app.
  *
- * Mirrors error.tsx's layout so the two failure surfaces read as one family.
+ * One CTA on purpose. A 404 is a dead end, and offering three destinations asks
+ * the person who just got lost to make another choice; /dashboard is the one
+ * route that is right whatever they were looking for.
  */
 export default function NotFound() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-muted px-6 py-5">
-      <div className="w-full max-w-md border border-border bg-background px-6 py-7 shadow-lg sm:px-7">
-        <h1 className="font-display text-lg font-black tracking-tight text-foreground">
-          Page not found
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          This page doesn&apos;t exist, or the thing it pointed at was deleted.
-          The link may be stale, but your account and data are fine.
-        </p>
-        <nav className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2">
-          <Link
-            href="/dashboard"
-            className={buttonClassName("primary", "py-2")}
-          >
-            Back to dashboard
-          </Link>
-          <Link
-            href="/products"
-            className="text-sm font-medium text-foreground underline decoration-border underline-offset-4 transition-colors duration-base ease-standard hover:decoration-foreground motion-reduce:transition-none"
-          >
-            Products
-          </Link>
-          <Link
-            href="/storefront"
-            className="text-sm font-medium text-foreground underline decoration-border underline-offset-4 transition-colors duration-base ease-standard hover:decoration-foreground motion-reduce:transition-none"
-          >
-            Storefronts
-          </Link>
-        </nav>
-      </div>
-    </main>
+    <ErrorScreen
+      code="404"
+      readout="err_not_found"
+      title="Page not found"
+      description="This page doesn't exist, or the thing it pointed at was deleted. The link may be stale, but your account and data are fine."
+      action={
+        /* Inverted rather than `primary`. In the dark palette primary is the
+           same purple the ring is wearing, so a primary button would put a
+           second purple object on a page whose whole point is one.
+           Foreground-on-background is neutral in both themes, keeps the light
+           and dark versions symmetrical, and leaves the ring as the only colour
+           on the screen — which is what makes it read as the subject. */
+        <Link
+          href="/dashboard"
+          className={buttonClassName(
+            "primary",
+            "bg-foreground text-background hover:bg-foreground/90",
+          )}
+        >
+          Back to dashboard
+          {/* Leans along its own diagonal on hover (.cta-arrow in globals.css).
+              Decorative: "Back to dashboard" already says where it goes. */}
+          <ArrowUpRight
+            size={16}
+            strokeWidth={2}
+            aria-hidden
+            className="cta-arrow shrink-0"
+          />
+        </Link>
+      }
+    />
   );
 }

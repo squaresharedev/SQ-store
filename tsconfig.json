@@ -41,7 +41,9 @@
     ".next-prodcheck/types/**/*.ts",
     ".next-prodcheck/dev/types/**/*.ts",
     ".next-verify/types/**/*.ts",
-    ".next-verify/dev/types/**/*.ts"
+    ".next-verify/dev/types/**/*.ts",
+    ".next-title/types/**/*.ts",
+    ".next-title/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",

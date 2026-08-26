@@ -1,15 +1,28 @@
 "use client";
 
-import { memo, useRef } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import { Crop, Type, X } from "lucide-react";
 import type { Product } from "@/types/product";
 import {
   DEFAULT_IMAGE_PLACEMENT,
+  resolveCardStyle,
+  resolvePriceTagPosition,
+  resolveTitlePosition,
+  spotRow,
+  titleOverlaysImage,
   type ImagePlacement,
   type StorefrontBlock,
   type StorefrontTheme,
   type TextSpan,
+  type TileSpot,
 } from "@/types/storefront";
+import {
+  nearestTileSpot,
+  priceSpots,
+  spotAfterArrow,
+  titleSpots,
+  type SpotArrow,
+} from "@/lib/storefront/tile-spots";
 import { cn } from "@/lib/utils";
 import { BlockFace } from "./BlockFace";
 import type {
@@ -18,6 +31,12 @@ import type {
   TextRange,
 } from "./InlineTextEditor";
 import { TileImageFramer, TileImageGhost } from "./TileImageFramer";
+import {
+  TileSpotDragLayer,
+  type SpotDrop,
+  type SpotToken,
+  type TileSpotDrag,
+} from "./TileSpotDragLayer";
 
 /** Small square control button used in tile chrome (also by CarouselStrip's
  *  move buttons, so all tile controls look identical). */
@@ -77,6 +96,7 @@ export const BlockTile = memo(function BlockTile({
   onToggleBlockFormat,
   onTextRangeChange,
   onTypeEnd,
+  onSpotChange,
 }: {
   /** Identity handed back to the callbacks, so they can stay stable. */
   blockKey: string;
@@ -116,6 +136,9 @@ export const BlockTile = memo(function BlockTile({
   /** The live selection inside the editor, for the panel's colour picker. */
   onTextRangeChange?: (range: TextRange | null) => void;
   onTypeEnd?: () => void;
+  /** Product blocks: the seller dragged (or arrowed) the title or the price to
+   *  a new home. `below` only ever arrives for the price. */
+  onSpotChange?: (key: string, token: SpotToken, drop: SpotDrop) => void;
 }) {
   // Include the text content so several text blocks stay distinguishable to
   // screen readers.
@@ -170,6 +193,236 @@ export const BlockTile = memo(function BlockTile({
   const pointerDownAt = useRef<{ x: number; y: number } | null>(null);
   // The framed picture itself, so the framer can read its intrinsic size.
   const imageRef = useRef<HTMLImageElement | null>(null);
+  // The tile's own box, which is what a spot drag measures against.
+  const tileRef = useRef<HTMLDivElement | null>(null);
+
+  // ── Placing the title and the price by dragging them ──────────────────
+  //
+  // Armed only while this tile is the SOLE selection and nothing else has the
+  // tile (framing and typing each own every gesture on the surface). A rotated
+  // tile is excluded because getBoundingClientRect returns the axis-aligned
+  // box of a rotated element, so the pointer-to-spot mapping would lie; revisit
+  // when rotation lands and toLocalPoint can un-rotate the pointer first.
+  const placeable =
+    editable &&
+    block.type === "product" &&
+    isSoleSelection &&
+    !isFraming &&
+    !isTyping &&
+    onSpotChange !== undefined &&
+    !block.rotation;
+
+  const card = placeable
+    ? resolveCardStyle(theme, block.type === "product" ? block.style : undefined)
+    : null;
+
+  // Where the two tokens sit right now, resolved exactly as the face resolves
+  // them, so a drag starts from what the seller can see.
+  const titleAt = card
+    ? resolveTitlePosition(card.titlePosition, {
+        titleStyle: card.titleStyle,
+        cornerRadius: card.cornerRadius,
+      })
+    : null;
+  const bandRow =
+    card && titleAt && titleOverlaysImage(card.titleStyle) ? spotRow(titleAt) : null;
+  const priceAt =
+    card &&
+    resolvePriceTagPosition(card.priceTagPosition, {
+      cornerRadius: card.cornerRadius,
+      titleOverlaysImage: titleOverlaysImage(card.titleStyle),
+      titleRow: titleAt ? spotRow(titleAt) : undefined,
+    });
+
+  type Flight = {
+    token: SpotToken;
+    drop: SpotDrop;
+    available: readonly TileSpot[];
+    /** True once the press has actually moved the token, so the click that
+     *  ends a drag can be swallowed while a plain tap still reaches the tile. */
+    moved: boolean;
+  };
+  // The flight is held in a REF and mirrored into state. The ref is the
+  // authority because the drop has to read it from an event handler and then
+  // call the parent's mutator: doing that inside a setState updater runs it in
+  // the render phase, where React discards the parent's update and the drag
+  // silently commits nothing. State exists only so the tile repaints.
+  const flyingRef = useRef<Flight | null>(null);
+  const [flying, setFlying] = useState<Flight | null>(null);
+  // Outlives the flight by one event: the click arrives after pointerup, when
+  // the flight itself has already been cleared.
+  const movedRef = useRef(false);
+  // Tears down the window listeners a grab installed. Held in a ref so an
+  // unmount mid-drag cannot leave them behind.
+  const untrackRef = useRef<(() => void) | null>(null);
+  useEffect(() => () => untrackRef.current?.(), []);
+
+  function setFlight(next: Flight | null) {
+    flyingRef.current = next;
+    setFlying(next);
+  }
+
+  function spotsFor(token: SpotToken): readonly TileSpot[] {
+    if (!card) return [];
+    return token === "title"
+      ? titleSpots(card.titleStyle, card.cornerRadius)
+      : priceSpots(card.cornerRadius, bandRow);
+  }
+
+  /** Where a pointer at this position wants to put the token. The band is the
+   *  price's one home that is not a spot, so it is hit-tested first. */
+  function dropAt(token: SpotToken, clientX: number, clientY: number): SpotDrop {
+    const tile = tileRef.current;
+    if (!tile) return flyingRef.current?.drop ?? "middle-center";
+    if (token === "price") {
+      const band = tile
+        .querySelector("[data-title-band]")
+        ?.getBoundingClientRect();
+      if (
+        band &&
+        clientX >= band.left &&
+        clientX <= band.right &&
+        clientY >= band.top &&
+        clientY <= band.bottom
+      ) {
+        return "below";
+      }
+    }
+    return nearestTileSpot(
+      clientX,
+      clientY,
+      tile.getBoundingClientRect(),
+      spotsFor(token),
+    );
+  }
+
+  // WHERE THE CONTROL CHIP SITS. It used to be nailed to the top right, which
+  // was fine while nothing else could be there. Now a title band can hold the
+  // top row and a price can float into that very corner, and the chip is above
+  // both (z-20 over the face), so it silently ate the press that was meant to
+  // grab them. It takes the first corner nothing else has claimed instead.
+  const chipCorner = (() => {
+    const taken = new Set<string>();
+    if (card) {
+      // The band spans the full width, so it claims both corners of its row.
+      const row = spotRow(titleAt ?? "bottom-left");
+      if (card.showTitle || card.priceTagPosition === "below") {
+        taken.add(`${row}-left`);
+        taken.add(`${row}-right`);
+      }
+      if (priceAt && priceAt !== "below" && priceAt !== "hidden") {
+        taken.add(priceAt);
+      }
+    }
+    // The sold-out badge has its own rule and gets first refusal.
+    if (block.type === "product" && block.soldOut && theme.soldOutBadge) {
+      taken.add(
+        card && titleOverlaysImage(card.titleStyle) && spotRow(titleAt ?? "bottom-left") === "top"
+          ? "bottom-left"
+          : "top-left",
+      );
+    }
+    const order = ["top-right", "bottom-right", "top-left", "bottom-left"] as const;
+    const free = order.find((corner) => !taken.has(corner)) ?? "top-right";
+    return {
+      "top-right": "right-1 top-1",
+      "bottom-right": "bottom-1 right-1",
+      "top-left": "left-1 top-1",
+      "bottom-left": "bottom-1 left-1",
+    }[free];
+  })();
+
+  const spotDrag: TileSpotDrag | undefined = placeable
+    ? {
+        title: card!.showTitle,
+        price: card!.priceTagPosition !== "hidden",
+        active: flying ? { token: flying.token, drop: flying.drop } : null,
+        onGrab: (token) => {
+          const from: SpotDrop =
+            token === "title"
+              ? (titleAt ?? "middle-center")
+              : priceAt === "below" || priceAt === "hidden"
+                ? "below"
+                : (priceAt ?? "middle-center");
+          setFlight({
+            token,
+            drop: from,
+            available: spotsFor(token),
+            moved: false,
+          });
+
+          // Tracking on the WINDOW, not on the token: the token moves as it is
+          // dragged, and a listener bound to it dies with the node.
+          const onPointerMove = (event: PointerEvent) => {
+            const current = flyingRef.current;
+            if (!current) return;
+            const drop = dropAt(current.token, event.clientX, event.clientY);
+            if (drop !== current.drop) setFlight({ ...current, drop, moved: true });
+          };
+          const finish = (commit: boolean) => {
+            untrackRef.current?.();
+            const current = flyingRef.current;
+            setFlight(null);
+            movedRef.current = commit && (current?.moved ?? false);
+            if (commit && current?.moved) {
+              onSpotChange?.(blockKey, current.token, current.drop);
+            }
+          };
+          const onPointerUp = () => finish(true);
+          const onPointerCancel = () => finish(false);
+          // Escape belongs on the WINDOW, not on the token: a pointer drag
+          // never focuses the thing it is dragging (the press is
+          // preventDefault-ed so the tile does not scroll), so a key handler
+          // on the token would never see it.
+          const onKeyDown = (event: KeyboardEvent) => {
+            if (event.key !== "Escape") return;
+            event.preventDefault();
+            finish(false);
+          };
+
+          window.addEventListener("pointermove", onPointerMove);
+          window.addEventListener("pointerup", onPointerUp);
+          window.addEventListener("pointercancel", onPointerCancel);
+          window.addEventListener("keydown", onKeyDown, true);
+          untrackRef.current = () => {
+            window.removeEventListener("pointermove", onPointerMove);
+            window.removeEventListener("pointerup", onPointerUp);
+            window.removeEventListener("pointercancel", onPointerCancel);
+            window.removeEventListener("keydown", onKeyDown, true);
+            untrackRef.current = null;
+          };
+        },
+        onCancel: () => {
+          untrackRef.current?.();
+          setFlight(null);
+          movedRef.current = false;
+        },
+        onArrow: (token, key: SpotArrow) => {
+          // Each press commits, exactly like arrowing a block around the board.
+          // There is no pending state to confirm, so there is nothing to lose
+          // by looking away.
+          const available = spotsFor(token);
+          if (available.length === 0) return;
+          // A price sitting in the band is not on the board yet, so its first
+          // arrow LIFTS it onto the board rather than moving it across one.
+          const lifting =
+            token === "price" && (priceAt === "below" || priceAt === "hidden");
+          const from =
+            token === "title" ? (titleAt ?? available[0]) : lifting
+              ? available[0]
+              : ((priceAt as TileSpot | null) ?? available[0]);
+          const next = lifting ? from : spotAfterArrow(from, key, available);
+          // Nothing to write when the token is already against that edge.
+          if (lifting || next !== from) onSpotChange?.(blockKey, token, next);
+        },
+        // A press that moved the token is not also a click on the tile. One
+        // that never moved is, so tapping a label still selects as before.
+        onTokenClick: (event) => {
+          if (movedRef.current) event.stopPropagation();
+          movedRef.current = false;
+        },
+      }
+    : undefined;
 
   function handleClick(event: React.MouseEvent<HTMLDivElement>) {
     // Presses on the tile's own controls (remove, carousel arrows) keep their
@@ -229,6 +482,7 @@ export const BlockTile = memo(function BlockTile({
 
   return (
     <div
+      ref={tileRef}
       // How the in-place text editor finds the tile again: Escape puts the
       // focus back here, so the canvas keys (arrows, Delete) resume.
       data-block-tile=""
@@ -310,7 +564,7 @@ export const BlockTile = memo(function BlockTile({
         <div
           className={cn(
             TILE_CONTROL_CHIP_CLASS,
-            "right-1 top-1",
+            chipCorner,
             isEditing && "pointer-fine:opacity-100",
           )}
         >
@@ -371,6 +625,16 @@ export const BlockTile = memo(function BlockTile({
           no longer clips), so the controls above stay visible in the square
           corner of a circle/pill tile. contain:paint keeps the per-cell paint
           isolation the grid used to provide. */}
+      {/* Where the token can land, drawn only while one is in flight. It sits
+          above the face and takes no pointer events: the token itself holds
+          the capture for the whole gesture. */}
+      {flying && (
+        <TileSpotDragLayer
+          available={flying.available}
+          candidate={flying.drop === "below" ? null : flying.drop}
+        />
+      )}
+
       <div className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-[inherit] [contain:paint]">
         <BlockFace
           block={block}
@@ -378,6 +642,7 @@ export const BlockTile = memo(function BlockTile({
           theme={theme}
           imageUrl={imageUrl}
           imageRef={isFraming ? imageRef : undefined}
+          spotDrag={spotDrag}
           textEditing={typable && isTyping}
           textSelectAll={typingSelectAll}
           onTextChange={

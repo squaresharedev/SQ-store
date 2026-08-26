@@ -12,6 +12,12 @@ import {
   segmentText,
   toggleFormatPatch,
 } from "@/lib/storefront/text-spans";
+import {
+  insertPlainText,
+  readSelection,
+  setSelection,
+  type TextRange,
+} from "@/lib/storefront/text-selection";
 import { cn } from "@/lib/utils";
 
 /**
@@ -49,7 +55,9 @@ const RUN_STYLE_KEYS = ["color", "bold", "italic", "underline"] as const;
  *  and the browser has stopped painting it. */
 const PENDING_CLASS = "rounded-[2px] bg-ring/30";
 
-export type TextRange = { start: number; end: number };
+/** Re-exported so the canvas and the designer keep importing the range type
+ *  from the editor that produces it. */
+export type { TextRange };
 export type InlineFormatKey = "bold" | "italic" | "underline";
 
 /** What produced a change, so the designer can give each kind its own undo
@@ -464,61 +472,9 @@ function sameSpans(a: readonly TextSpan[], b: readonly TextSpan[]): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
 }
 
-/* ------------------------------------------------------------------- selection */
-
-/** The selection as character offsets into the editor's plain text. */
-function readSelection(node: HTMLElement): TextRange | null {
-  const selection = window.getSelection();
-  if (!selection || selection.rangeCount === 0) return null;
-  const live = selection.getRangeAt(0);
-  if (!node.contains(live.startContainer) || !node.contains(live.endContainer)) {
-    return null;
-  }
-  const before = document.createRange();
-  before.selectNodeContents(node);
-  before.setEnd(live.startContainer, live.startOffset);
-  const start = before.toString().length;
-  return { start, end: start + live.toString().length };
-}
-
-function setSelection(node: HTMLElement, start: number, end: number): void {
-  const from = positionAt(node, start);
-  const to = positionAt(node, end);
-  const live = document.createRange();
-  live.setStart(from.node, from.offset);
-  live.setEnd(to.node, to.offset);
-  const selection = window.getSelection();
-  selection?.removeAllRanges();
-  selection?.addRange(live);
-}
-
-/** The DOM position a character offset names. */
-function positionAt(
-  node: HTMLElement,
-  offset: number,
-): { node: Node; offset: number } {
-  let remaining = Math.max(0, offset);
-  let last: Text | null = null;
-  const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT);
-  while (walker.nextNode()) {
-    const text = walker.currentNode as Text;
-    if (remaining <= text.data.length) return { node: text, offset: remaining };
-    remaining -= text.data.length;
-    last = text;
-  }
-  return last ? { node: last, offset: last.data.length } : { node, offset: 0 };
-}
-
-/** Insert plain text at the caret, replacing whatever is selected. */
-function insertPlainText(value: string): void {
-  const selection = window.getSelection();
-  if (!selection || selection.rangeCount === 0) return;
-  const live = selection.getRangeAt(0);
-  live.deleteContents();
-  const inserted = document.createTextNode(value);
-  live.insertNode(inserted);
-  live.setStartAfter(inserted);
-  live.collapse(true);
-  selection.removeAllRanges();
-  selection.addRange(live);
-}
+/* -------------------------------------------------------------------- selection
+ *
+ * The caret helpers live in lib/storefront/text-selection, shared with the
+ * masthead's in-place editor: both hold their text imperatively, and both have
+ * to agree on where character 7 is.
+ */

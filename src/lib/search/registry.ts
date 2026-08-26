@@ -5,6 +5,12 @@ import {
   SETTINGS_NAV,
 } from "@/lib/search/nav-constants";
 import type { SearchGroup, SearchResult } from "@/lib/search/types";
+import {
+  GROUP_LABELS,
+  STOREFRONT_SETTINGS,
+  settingGroup,
+  settingHref,
+} from "@/lib/storefront/setting-ref";
 import { can, type TeamAction, type TeamRole } from "@/lib/team/permissions";
 
 /**
@@ -194,11 +200,37 @@ const ACTIONS: LocalEntry[] = [
   ),
 ];
 
+/**
+ * Every setting inside the storefront designer, derived from the ONE catalogue
+ * (lib/storefront/setting-ref) that the designer's own filter field also reads.
+ * Adding a storefront setting in one place makes it findable in both.
+ *
+ * The href carries no storefront id, because a static module cannot know one.
+ * Inside the editor that never matters: the designer intercepts its own
+ * `?setting=` links and opens the panel in place without navigating. From
+ * anywhere else the link lands on the storefront list, which is the right
+ * destination for a seller who has not opened one yet.
+ */
+const STOREFRONT_DESIGN_SETTINGS: LocalEntry[] = STOREFRONT_SETTINGS.map((setting) =>
+  entry(
+    `storefront-setting:${setting.id}`,
+    {
+      type: "settings",
+      title: setting.label,
+      subtitle: `Storefront / ${GROUP_LABELS[settingGroup(setting.ref)]}`,
+      href: settingHref(setting.id),
+    },
+    [...setting.keywords],
+    "storefront.write",
+  ),
+);
+
 const ALL_ENTRIES: LocalEntry[] = [
   ...PAGES,
   ...ACTIONS,
   ...SETTINGS_SECTIONS,
   ...SETTINGS_FIELDS,
+  ...STOREFRONT_DESIGN_SETTINGS,
 ];
 
 /** Exported for the registry test, which asserts every nav route is indexed. */

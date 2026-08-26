@@ -10,14 +10,19 @@
 import { describe, expect, it } from "vitest";
 import {
   BUYER_POOL_SIZE,
+  CATALOG_PRODUCTS,
+  PRODUCT_THEMES,
   STORE_CURRENCY,
   buyerEmailForIndex,
   createRng,
+  findCatalogProduct,
   generateOrders,
   generateProducts,
   pickBuyerEmail,
   pickSecondOfDay,
   popularityWeights,
+  THEME_KEYS,
+  themeByKey,
   weightedIndex,
   type SeededProduct,
 } from "../../scripts/lib/fake-data.ts";
@@ -147,6 +152,137 @@ describe("generateProducts", () => {
       expect(Number.isInteger(product.price_cents)).toBe(true);
       expect(product.price_cents).toBeGreaterThan(0);
     }
+  });
+
+  it("draws the whole catalogue from a single theme, never mixing categories", () => {
+    // The bug this replaced: picking a product independently per slot could
+    // land a store selling drum kits next to Lightroom presets, which reads as
+    // obviously fake on any real storefront.
+    for (const theme of PRODUCT_THEMES) {
+      const titles = new Set(theme.products.map((p) => p.title));
+      for (const product of generateProducts(createRng(21), SELLER, 40, theme)) {
+        expect(titles.has(product.title)).toBe(true);
+      }
+    }
+  });
+
+  it("gives every product its own real photo", () => {
+    // The generator used to fetch a photo by keyword, which returned whatever
+    // loosely matched the tag: a "lamp" was paper sculpture, a "lounge chair"
+    // was a family portrait, and every "drone" was a landscape shot FROM a
+    // drone. Each product now carries the photograph of that exact product.
+    for (const theme of PRODUCT_THEMES) {
+      for (const product of generateProducts(createRng(8), SELLER, 40, theme)) {
+        const entry = findCatalogProduct(product.title)!;
+        expect(entry).toBeDefined();
+        expect(product.image_key).toBe(entry.imageUrl);
+        expect(product.image_key).toMatch(/^https:\/\//);
+      }
+    }
+  });
+
+  it("serves every catalogue photo from our own storage", () => {
+    // Hotlinked third-party hosts are outside the app's CSP img-src allowlist
+    // (next.config.ts) and Wikimedia rate-limits bursts with 429. The Supabase
+    // origin is allowlisted and ours, so mirrored copies survive the CSP being
+    // switched from Report-Only to enforcing. See pnpm mirror-catalog-images.
+    for (const product of CATALOG_PRODUCTS) {
+      expect(product.imageUrl).toContain("/seed-assets/");
+      expect(product.imageUrl).not.toContain("dummyjson.com");
+      expect(product.imageUrl).not.toContain("wikimedia.org");
+    }
+  });
+
+  it("never lists the same product twice, even when asked for more than it has", () => {
+    for (const theme of PRODUCT_THEMES) {
+      // Deliberately over-ask: sampling is without replacement, so the result
+      // is capped at the theme size rather than padded with duplicates.
+      const products = generateProducts(createRng(4), SELLER, theme.products.length + 25, theme);
+      expect(products.length).toBe(theme.products.length);
+      expect(new Set(products.map((p) => p.title)).size).toBe(products.length);
+    }
+  });
+
+  it("describes each product as the physical good it is", () => {
+    for (const theme of PRODUCT_THEMES) {
+      for (const product of generateProducts(createRng(77), SELLER, 40, theme)) {
+        // These themes ship boxes, so the old digital-goods copy would be a lie.
+        expect(product.description).not.toMatch(/download|instant delivery/i);
+        expect(product.description.length).toBeGreaterThan(20);
+      }
+    }
+  });
+
+  it("prices each theme in a band that suits what it sells", () => {
+    // A camera drone and a t-shirt must not share a price range, or the
+    // revenue tiles read as one undifferentiated blob.
+    const drones = themeByKey("drones")!;
+    const fashion = themeByKey("fashion")!;
+    const medianOf = (theme: typeof drones): number => {
+      const sorted = theme.products.map((p) => p.priceCents).sort((a, b) => a - b);
+      return sorted[Math.floor(sorted.length / 2)]!;
+    };
+    expect(medianOf(drones)).toBeGreaterThan(medianOf(fashion) * 5);
+  });
+
+  it("gives every collection its own design language", () => {
+    const aesthetics = new Set<string>();
+    for (const theme of PRODUCT_THEMES) {
+      const { name, aesthetic, prompt } = theme.photoStyle;
+      expect(name.length).toBeGreaterThan(0);
+      expect(aesthetic.length).toBeGreaterThan(0);
+      // The prompt is what keeps a later addition matching the existing set;
+      // without it the collection drifts the moment someone extends it.
+      expect(prompt.length).toBeGreaterThan(40);
+      aesthetics.add(aesthetic);
+    }
+    // Material palettes must be distinct — that is what makes a store read as
+    // one shop. Backdrops deliberately are NOT required to be unique: the
+    // brutalist and cozy furniture collections are both shot on white, and
+    // that is the point, since they differ in what they sell rather than in
+    // how it is lit.
+    expect(aesthetics.size).toBe(PRODUCT_THEMES.length);
+  });
+
+  it("renders every catalogue photo at the current style version", () => {
+    // A stale version segment means a product still points at an image shot in
+    // the previous look, which is exactly the inconsistency styles exist to
+    // prevent. Bumping STYLE_VERSION also busts Supabase's CDN cache.
+    for (const product of CATALOG_PRODUCTS) {
+      expect(product.imageUrl).toMatch(/\/seed-assets\/[a-z]\d+\//);
+    }
+    const versions = new Set(
+      CATALOG_PRODUCTS.map((p) => p.imageUrl.match(/\/seed-assets\/([a-z]\d+)\//)?.[1]),
+    );
+    expect(versions.size).toBe(1);
+  });
+
+  it("carries a usable number of real products in every category", () => {
+    // The seed asks for 8-15 products; a theme thinner than that would ship a
+    // near-empty store.
+    for (const theme of PRODUCT_THEMES) {
+      expect(theme.products.length).toBeGreaterThanOrEqual(8);
+      for (const product of theme.products) {
+        expect(product.title.trim().length).toBeGreaterThan(0);
+        expect(Number.isInteger(product.priceCents)).toBe(true);
+        expect(product.priceCents).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it("keeps every catalogue title unique across the whole catalogue", () => {
+    // findCatalogProduct() resolves by exact title, so a duplicate would make
+    // update-product-images.ts restore the wrong photo.
+    const titles = CATALOG_PRODUCTS.map((p) => p.title);
+    expect(new Set(titles).size).toBe(titles.length);
+  });
+
+  it("exposes exactly the expected collections", () => {
+    expect([...THEME_KEYS].sort()).toEqual(
+      ["drones", "fashion", "furniture-brutalist", "furniture-cozy", "tech"].sort(),
+    );
+    for (const key of THEME_KEYS) expect(themeByKey(key)?.key).toBe(key);
+    expect(themeByKey("nope")).toBeUndefined();
   });
 });
 

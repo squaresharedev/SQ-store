@@ -7,6 +7,7 @@ import {
   helpTextClass,
   transitionClass,
 } from "@/components/ui/control-styles";
+import { PanelTabs, panelProps } from "@/components/ui/PanelTabs";
 import type { ShapeKind } from "@/types/storefront";
 import { ShapesPanel } from "./ShapesPanel";
 import { UploadsPanel, type StorefrontUpload } from "./UploadsPanel";
@@ -15,15 +16,10 @@ import { UploadsPanel, type StorefrontUpload } from "./UploadsPanel";
 export const LIBRARY_TABS = ["uploads", "shapes"] as const;
 export type LibraryTab = (typeof LIBRARY_TABS)[number];
 
-const TAB_LABEL: Record<LibraryTab, string> = {
-  uploads: "Uploads",
-  shapes: "Shapes",
-};
-
-const TAB_CLASS =
-  `flex-1 rounded-none px-2 py-1.5 text-xs font-medium ` +
-  `text-muted-foreground hover:bg-accent hover:text-foreground ` +
-  `${transitionClass} ${focusRingClass}`;
+const TAB_OPTIONS: readonly { value: LibraryTab; label: string }[] = [
+  { value: "uploads", label: "Uploads" },
+  { value: "shapes", label: "Shapes" },
+];
 
 /**
  * "Things you can put on the canvas", as the left panel's second mode.
@@ -96,36 +92,15 @@ export function LibraryPanel({
         </button>
       </div>
 
-      <div
-        role="tablist"
-        aria-label="Library"
-        className="flex border-b border-border lg:px-4"
-      >
-        {LIBRARY_TABS.map((option) => (
-          <button
-            key={option}
-            type="button"
-            role="tab"
-            id={`library-tab-${option}`}
-            aria-selected={tab === option}
-            aria-controls={`library-panel-${option}`}
-            onClick={() => onTabChange(option)}
-            className={cn(
-              TAB_CLASS,
-              tab === option &&
-                "border-b-2 border-foreground text-foreground",
-            )}
-          >
-            {TAB_LABEL[option]}
-          </button>
-        ))}
-      </div>
+      <PanelTabs
+        id="library"
+        value={tab}
+        options={TAB_OPTIONS}
+        onChange={onTabChange}
+        ariaLabel="Library"
+      />
 
-      <div
-        role="tabpanel"
-        id={`library-panel-${tab}`}
-        aria-labelledby={`library-tab-${tab}`}
-      >
+      <div {...panelProps("library", tab)}>
         {tab === "uploads" ? (
           <UploadsPanel
             uploads={uploads}

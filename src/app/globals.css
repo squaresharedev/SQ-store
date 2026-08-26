@@ -1,11 +1,21 @@
 @import "tailwindcss";
 
-/* Dark-mode variant, driven by a `.dark` class on <html>.
-   NOTE: nothing sets that class today — layout.tsx renders the dashboard in
-   LIGHT mode. The .dark token block below is kept ready so a future toggle is
-   a one-line change, and components spend semantic tokens (not fixed
-   neutrals) so they will follow it when it lands. */
+/* Dark-mode variant, driven by a `.dark` class on an ancestor.
+   NOTE: nothing sets that class today. The live mechanism is `data-theme` on
+   <html> (lib/theme-mode.ts) plus a `.theme-surface` opt-in — see the palette
+   block below — which is what lets the error screens go dark while the
+   dashboard, designed and reviewed only in light, stays as it is. Both
+   selectors share ONE token block, so this variant keeps working unchanged if
+   the class is ever preferred. */
 @custom-variant dark (&:is(.dark *));
+
+/* A viewport with no vertical room to spare: a phone held sideways, a short
+   browser window, an in-app webview with chrome top and bottom. Anything that
+   stacks a hero above its copy has to become a row here or the thing the user
+   actually needs — the button — ends up below the fold. Used by the error
+   screens; `min-width` as well, so a genuinely tiny square viewport does not
+   get a two-column layout it has no width for. */
+@custom-variant short (@media (max-height: 34rem) and (min-width: 30rem));
 
 /* ============================================================
    SQUARE SHARE — BRAND TOKENS
@@ -20,9 +30,6 @@
   --color-surface-dark: #000000;
   --color-surface-light: #f9f9f9;
   --color-card-base: #0a0a0c;
-
-  /* Signature glow */
-  --shadow-btn-glow: 0 0 30px rgba(168, 85, 247, 0.3);
 
   /* Feedback (styles.md §2.1) */
   --color-success: #15803d; /* green-700: AA contrast for small text on white/neutral-100 */
@@ -70,6 +77,9 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  /* Runtime var, not a static @theme colour, precisely because it has to
+     change with the palette (see --acid-ink in :root / .dark below). */
+  --color-acid-ink: var(--acid-ink);
 
   /* Product-UI radius scale (styles.md §3). The auth/marketing surfaces keep
      their square identity via --radius (0) + rounded-none; product components
@@ -174,6 +184,31 @@
      hue only ever appears when it means something. */
   --chart-accent: #2a78d6;
 
+  /* The acid, stepped so it stays LEGIBLE as small text on the current
+     surface. --color-acid itself is a decoration colour: at 12px it manages
+     3.96:1 on white, under the 4.5:1 WCAG AA needs, while clearing it
+     comfortably on black. This is the one to reach for when the accent has to
+     be read rather than seen (the error screens' status readout); the raw
+     token stays correct for anything purely decorative, like a lit pixel. */
+  --acid-ink: #9333ea; /* 5.38:1 on white */
+
+  /* The error screens' hero (components/error/ErrorCode). Two roles, and both
+     have to be re-stepped per palette because they are defined by their
+     distance from the SURFACE, not by a fixed hue:
+
+     --code-dim   the un-accented digits. Barely separated from the page on
+                  purpose — the number is scenery, the sentence above it is the
+                  message. One step off the background in either direction.
+     --code-accent the ring drawn in place of a 0, and the only colour on the
+                  page. The brand accent, at the same two steps --acid-ink
+                  takes: the open purple on black, a darker one on white where
+                  it would otherwise go weak. Kept as its OWN token rather than
+                  pointing at --acid-ink, because a custom property that
+                  substitutes another resolves once where it is declared and
+                  would not re-resolve per palette. */
+  --code-dim: #e5e5e5; /* neutral-200 on white */
+  --code-accent: #9333ea; /* = --acid-ink, the purple that holds up on white */
+
   /* Giant decorative background arrows (auth + settings). Low enough that
      text drawn over them keeps full contrast. */
   --decor-opacity: 0.05;
@@ -186,7 +221,21 @@
   --duration-countup: 900ms;
 }
 
-.dark {
+/* Two selectors, one palette.
+
+   `.dark` is the class variant the whole codebase already spells.
+   `[data-theme="dark"] .theme-surface` is the resolved theme (a saved
+   preference, else the OS — see lib/theme-mode.ts) reaching a subtree that has opted
+   in. The `.theme-surface` half is the safety catch: data-theme lands on <html>
+   for every page, but only surfaces designed and reviewed in dark actually take
+   the palette. Today that is the error screens. Delete `.theme-surface` from
+   this selector and the entire product goes dark — deliberately one edit, and
+   deliberately not yet.
+
+   Listed as one selector rather than repeated under a `prefers-color-scheme`
+   media query, which is what keeps a single copy of every token below. */
+.dark,
+[data-theme="dark"] .theme-surface {
   /* Square Share brand: pure-black surfaces, electric-purple primary. */
   --background: oklch(0 0 0);
   --foreground: oklch(1 0 0);
@@ -207,6 +256,16 @@
   --border: oklch(1 0 0 / 12%);
   --input: oklch(1 0 0 / 15%);
   --ring: #a855f7;
+
+  /* On black the raw acid already clears AA (5.31:1), so readable and
+     decorative are the same colour here. */
+  --acid-ink: #a855f7;
+
+  /* Error hero, dark: the digits sink one step OUT of black instead of into
+     white, and the ring opens up to the full brand purple, which needs a dark
+     surface to sit on. */
+  --code-dim: #262626; /* neutral-800 on black */
+  --code-accent: #a855f7; /* = --color-acid */
 
   /* Chart ramp, dark: acid accent first, then quieter light neutrals. */
   --chart-1: var(--primary);
@@ -293,6 +352,24 @@ html {
   }
 }
 
+/* A themed surface paints a full-viewport panel, but the page CANVAS takes its
+   colour from <body>, which the base layer above paints with the LIGHT
+   --background. Left alone, a dark error screen shows a white gutter the moment
+   you overscroll it on iOS, and a light scrollbar beside it.
+
+   `:has(.theme-surface)` is doing the scoping: a page that has not opted in
+   (every dashboard screen today) keeps its light chrome even for a visitor
+   whose resolved theme is dark. */
+[data-theme="dark"]:has(.theme-surface) {
+  color-scheme: dark;
+}
+[data-theme="dark"]:has(.theme-surface) body {
+  background-color: var(--color-surface-dark);
+}
+[data-theme="light"]:has(.theme-surface) {
+  color-scheme: light;
+}
+
 /* iOS zoom guard: force 16px on text inputs so focus never zooms the viewport. */
 input[type="email"],
 input[type="password"],
@@ -369,6 +446,86 @@ textarea {
     #000 6%,
     transparent 78%
   );
+}
+
+/* ============================================================
+   ERROR CODE  (components/error/ErrorCode.tsx)
+   The 404/500 hero: oversized digits with every 0 drawn as a ring.
+   ============================================================ */
+.error-code {
+  /* One number drives the whole lockup, and it is bounded on BOTH viewport
+     axes: the code runs to about three quarters of the width and just under
+     half the height, which is the proportion the design is drawn at, and
+     whichever runs out first wins. */
+  --code-size: min(41vw, 64vh, 36rem);
+  /* Trim the line box down to the ink. Digits are cap-height and carry no
+     descender, so a line box leaves dead space above and below that reads as a
+     gap the design does not have — and it scales WITH the code, so it cannot be
+     absorbed by a fixed margin on the neighbours. In em, so it tracks
+     --code-size at every size. Measured against Geist's metrics. */
+  margin-block: -0.13em -0.15em;
+  display: flex;
+  /* BASELINE, not centre. The digits' ink sits on the text baseline with
+     descender space below it, so centring the ring against their full line box
+     would float it high. A flex item with no text baselines on its bottom
+     edge, which is exactly where the digits' feet are. */
+  align-items: baseline;
+  justify-content: center;
+  /* Glyphs carry their own side bearings, a drawn box carries none, so the
+     lockup cannot rely on the type to space itself. One gap on the container
+     handles every adjacency — digit to ring, and the pair of rings in 500 —
+     which is why there is no special case for the latter. */
+  gap: 0.06em;
+  font-size: var(--code-size);
+  /* Medium. At this size the weight is doing nothing but adding mass: the
+     digits are scenery, sunk almost into the page, and the lighter they are the
+     more the ring reads as the subject rather than as one of three equals. */
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--code-dim);
+  /* Scenery, not content: dragging a selection across the page should not
+     highlight a number nobody is going to copy. */
+  user-select: none;
+}
+
+/* Every measurement is in em, so the ring tracks the digits beside it at any
+   size and the whole lockup scales from --code-size alone. 0.72em is Geist's
+   cap height, which is what makes the ring exactly as tall as the digits.
+
+   The border deliberately does NOT track the digits' weight down. Matching
+   stems would be right if the three glyphs were equals, but they are not: the
+   ring is the only colour on the page and the only thing carrying it, so it
+   keeps a stroke the lightened digits no longer have. */
+.error-code-ring {
+  box-sizing: border-box;
+  width: 0.58em;
+  height: 0.72em;
+  border: 0.112em solid var(--code-accent);
+}
+
+/* A phone held sideways has a few hundred pixels to share between the whole
+   lockup and the button. The code gives up the height first: same composition,
+   smaller hero, and the way out still on screen. Same query as the `short`
+   variant the layout uses, so the two can never disagree. */
+@media (max-height: 34rem) and (min-width: 30rem) {
+  .error-code {
+    --code-size: min(41vw, 34vh, 36rem);
+  }
+}
+
+/* CTA arrow: leans a couple of pixels ALONG its own diagonal on hover, so the
+   button reads as "go there" before you commit to it. Deliberately tiny — the
+   point is that it answers the cursor, not that it performs. Scoped to
+   `group/btn`, the marker every shared button already carries, exactly like the
+   upload arrow below. Transform only, and it glides home on the way out rather
+   than snapping. */
+.cta-arrow {
+  transition: transform var(--transition-duration-base) var(--ease-standard);
+}
+.group\/btn:hover .cta-arrow,
+.group\/btn:focus-visible .cta-arrow {
+  transform: translate(2px, -2px);
 }
 
 /* ============================================================
@@ -785,6 +942,14 @@ textarea {
   .group\/bell:hover .bell-icon,
   .group\/bell:focus-visible .bell-icon {
     animation: none;
+    transform: none;
+  }
+  /* The arrow stays put; the button's own hover state carries the feedback. */
+  .cta-arrow {
+    transition: none;
+  }
+  .group\/btn:hover .cta-arrow,
+  .group\/btn:focus-visible .cta-arrow {
     transform: none;
   }
   .chart-tip-enter {

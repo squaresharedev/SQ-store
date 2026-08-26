@@ -69,15 +69,27 @@ test.describe("products CRUD", () => {
     await expect(page).toHaveURL(/\/products\/new/);
   });
 
-  test("draft vs active status shows on the product card", async ({ page }) => {
+  test("only draft status shows an indicator on the product card", async ({ page }) => {
     const user = freshUser("prodstatus");
     await signUp(page, user);
+
+    // Active is the default and expected state, so it gets no badge at all.
+    await page.goto("/products/new");
+    await page.getByLabel("Title").fill("Active thing");
+    await page.getByLabel(/price/i).fill("5");
+    await page.getByRole("button", { name: /save product/i }).click();
+    await page.waitForURL(/\/products$/);
+    await expect(page.getByRole("heading", { name: "Active thing" })).toBeVisible();
+    await expect(page.getByTitle("Active")).toHaveCount(0);
+
+    // Draft is the exception worth flagging, so it alone gets the dot.
     await page.goto("/products/new");
     await page.getByLabel("Title").fill("Draft thing");
     await page.getByLabel(/price/i).fill("5");
-    // Leave default status; read what the card shows after save.
+    await page.getByRole("button", { name: "Draft" }).click();
     await page.getByRole("button", { name: /save product/i }).click();
     await page.waitForURL(/\/products$/);
-    await expect(page.getByText(/draft|active/i).first()).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Draft thing" })).toBeVisible();
+    await expect(page.getByTitle("Draft")).toBeVisible();
   });
 });

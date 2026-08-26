@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { ToastProvider } from "@/components/ui/Toast";
+import { THEME_BOOTSTRAP } from "@/lib/theme-mode";
 import { cn } from "@/lib/utils";
 
 // Self-hosted (downloaded from Google Fonts into ./fonts) so they build and
@@ -86,9 +87,14 @@ export default function RootLayout({
       // globals.css sets scroll-behavior: smooth; Next 16 wants it declared
       // here too so it can disable smooth scrolling during route transitions.
       data-scroll-behavior="smooth"
+      // The theme script below stamps data-theme here before hydration, which
+      // is a server/client difference React would otherwise flag. Scoped to
+      // this element's own attributes, so nothing in the tree is masked.
+      suppressHydrationWarning
       className={cn(
-        // Dashboard runs in light mode. (The .dark tokens remain in globals.css
-        // so a future dark toggle can re-add the "dark" class here.)
+        // Dashboard runs in light mode: it never opts into the resolved palette
+        // (see `.theme-surface` in globals.css), so data-theme below has no
+        // visual effect here.
         spaceGrotesk.variable,
         geist.variable,
         jetbrainsMono.variable,
@@ -98,6 +104,32 @@ export default function RootLayout({
         "font-sans",
       )}
     >
+      <head>
+        {/* Resolves light/dark before first paint (lib/theme-mode.ts). It sets an
+            attribute the dashboard deliberately ignores today; see lib/theme-mode.ts
+            for what actually opts in.
+
+            A plain <script> in <head>, NOT next/script: `beforeInteractive`
+            emits it as a direct child of <html>, which React rejects outright
+            ("cannot render a sync or defer script outside the main document").
+
+            React does log one dev-only notice about this element on a route
+            that CLIENT-renders its shell, which today means the error boundary.
+            That is accepted rather than worked around: an inline script cannot
+            execute on a client render whatever wrapper it wears, so the fix is
+            not a different tag but a backstop — components/error/ThemeSync,
+            which re-resolves the theme for exactly that case.
+
+            The body is passed as a string CHILD rather than through a raw-HTML
+            prop. <script> is a raw-text element so React emits it verbatim
+            either way, and this keeps the codebase's "no HTML-injection sink
+            anywhere" rule intact (tests/unit/search-input-hardening.test.ts).
+            That rule is load-bearing here: the CSP in next.config.ts is
+            report-only and cannot carry a nonce on this stack, so the absence
+            of sinks IS the defence, and it only stays enforceable while it
+            stays absolute. */}
+        <script>{THEME_BOOTSTRAP}</script>
+      </head>
       {/* Toasts are mounted at the ROOT, not per route group. Every surface
           that reports an outcome gets them — settings and the storefront
           editor live outside (dashboard), and a provider per group meant a

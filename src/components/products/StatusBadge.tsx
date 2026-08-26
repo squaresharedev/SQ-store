@@ -7,12 +7,9 @@ const LABELS: Record<ProductStatus, string> = {
 };
 
 /**
- * Status is a footnote on a product card, not a headline, so it gets a single
- * dot rather than a labelled pill: filled reads as live, hollow as draft. The
- * distinction is shape, not hue, so the chrome stays greyscale (styles.md §1).
- *
- * The label is still there for anyone who needs it — a tooltip on hover, and
- * text for screen readers — since a dot on its own says nothing out loud.
+ * Active is the default, expected state, so it gets no chrome at all. Draft
+ * is the exception worth flagging, so it alone gets a hollow dot on an
+ * opaque disc (a bare dot dies on a dark photo).
  */
 export function StatusBadge({
   status,
@@ -21,12 +18,9 @@ export function StatusBadge({
   status: ProductStatus;
   className?: string;
 }) {
-  const isActive = status === "active";
+  if (status === "active") return null;
+
   return (
-    // The dot rides on an opaque disc rather than straight on the photo. A
-    // bare dot with only a halo dies on a dark image: the filled one sinks
-    // into the picture and reads as the hollow one, which is the single
-    // distinction this badge makes.
     <span
       title={LABELS[status]}
       className={cn(
@@ -37,10 +31,7 @@ export function StatusBadge({
       <span className="sr-only">{LABELS[status]}</span>
       <span
         aria-hidden="true"
-        className={cn(
-          "size-2 rounded-full",
-          isActive ? "bg-foreground" : "border border-muted-foreground",
-        )}
+        className="size-2 rounded-full border border-muted-foreground"
       />
     </span>
   );

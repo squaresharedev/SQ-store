@@ -103,11 +103,17 @@ describe("MultiBlockEditor", () => {
       productBlock(0, { cornerRadius: 100 }),
       productBlock(1),
     ]);
+    // Show title shapes the label rather than placing it, so it lives in the
+    // fine-tuning drawer now.
+    await user.click(screen.getByRole("button", { name: /Fine tuning/ }));
     await user.click(screen.getByRole("switch", { name: "Show title" }));
     expect(callbacks.onProductStyleChange).toHaveBeenCalledWith({
       showTitle: false,
     });
-    // The price tag panel is here too, on the same overrides.
+    // The price tag panel is here too, on the same overrides, one group over.
+    // It starts collapsed: a dozen tag settings ahead of the four that shape
+    // the tile is what the grouping exists to stop.
+    await user.click(screen.getByRole("button", { name: "Price tag" }));
     await user.click(screen.getByRole("button", { name: "Mono" }));
     expect(callbacks.onProductStyleChange).toHaveBeenCalledWith({
       priceTagFont: "mono",

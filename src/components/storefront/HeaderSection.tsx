@@ -6,6 +6,7 @@ import {
   HEADER_NAME_MAX,
   type StorefrontHeader,
 } from "@/types/storefront";
+import { sanitizeHeaderText } from "@/lib/storefront/header-text";
 import { Switch } from "@/components/ui/switch";
 import {
   fieldBaseClass,
@@ -14,25 +15,16 @@ import {
   labelClass,
 } from "@/components/ui/control-styles";
 
-/** Strip control characters as the seller types (newline survives in the bio),
- *  mirroring the server schema so a paste never produces an un-saveable value. */
-function sanitize(value: string, allowNewlines: boolean): string {
-  const cleaned = allowNewlines
-    ? value.replace(/[\p{Cc}]/gu, (char) => (char === "\n" ? char : ""))
-    : value.replace(/[\p{Cc}]/gu, "");
-  return cleaned;
-}
-
 /**
  * Store header controls: a show toggle plus the plain text of the two lines
  * rendered as a masthead above the grid. Client caps are UX only — the save
  * path re-validates with the header schema (lengths + control-character rules).
  *
- * The WORDS live here; how they LOOK does not. Font, size, colour, formatting
- * and alignment are set by clicking the line itself on the canvas, which opens
- * the left-hand panel on it — the same place every other colour in the
- * storefront is chosen, and the same gesture that selects anything else on the
- * board.
+ * The words can also be typed on the canvas itself (double-click a line), and
+ * how they LOOK is only set there: font, size, colour, formatting and
+ * alignment come from clicking the line, which opens the left-hand panel on
+ * it — the same place every other colour in the storefront is chosen, and the
+ * same gesture that selects anything else on the board.
  */
 export function HeaderSection({
   header,
@@ -68,7 +60,10 @@ export function HeaderSection({
           placeholder="Store name shown to buyers"
           spellCheck={false}
           onChange={(event) =>
-            onChange({ ...header, name: sanitize(event.target.value, false) })
+            onChange({
+              ...header,
+              name: sanitizeHeaderText(event.target.value, false),
+            })
           }
           className={fieldBaseClass}
         />
@@ -85,7 +80,10 @@ export function HeaderSection({
           rows={2}
           placeholder="A short line about your shop"
           onChange={(event) =>
-            onChange({ ...header, bio: sanitize(event.target.value, true) })
+            onChange({
+              ...header,
+              bio: sanitizeHeaderText(event.target.value, true),
+            })
           }
           className={fieldBaseClass}
         />
@@ -95,8 +93,9 @@ export function HeaderSection({
       </div>
 
       <p className={infoTextClass}>
-        Click the name or bio on the canvas to change its font, size, colour,
-        formatting and alignment.
+        Double-click the name or bio on the canvas to type it there. A single
+        click aims this panel at that line, where its font, size, colour,
+        formatting and alignment are set.
       </p>
     </div>
   );

@@ -17,6 +17,7 @@ import {
   TILE_CONTROL_CHIP_CLASS,
   TILE_CONTROL_CLASS,
 } from "./BlockTile";
+import { tileClipStyle } from "./config-maps";
 import type {
   InlineFormatKey,
   TextEditSource,
@@ -46,6 +47,12 @@ const NAV_BUTTON_CLASS =
  * of the strip — so the off-screen content announces itself. Each arrow
  * disappears at its end of the track, so the presence of an arrow always
  * means "there is more this way".
+ *
+ * A block's TILT is ignored here, deliberately and for the same reason its
+ * coordinates are: this mode abandons the board and reads the blocks as a
+ * line, and a row of uniform tiles is the shape it renders them in. Its LAYER
+ * is ignored for a stronger reason still: a strip has no depth. Tiles sit side
+ * by side and never overlap, so there is nothing for a paint order to decide.
  */
 export function CarouselStrip({
   blocks,
@@ -189,7 +196,7 @@ export function CarouselStrip({
             <li
               key={key}
               // Product tiles may override the theme's roundness (block.style).
-              style={{ borderRadius: blockCornerRadius(theme, block) }}
+              style={tileClipStyle(blockCornerRadius(theme, block))}
               className={cn(
                 // No overflow clip: BlockTile's face wrapper clips content to
                 // the radius, so the tile controls survive round corners.
