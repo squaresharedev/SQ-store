@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { Code, Trash2 } from "lucide-react";
+import { motion } from "motion/react";
+import { Trash2 } from "lucide-react";
 import { cardClass } from "@/components/ui/surface-styles";
 import { cn } from "@/lib/utils";
+import { EmbedCodeIcon, useIconHoverProps } from "@/components/ui/action-icons";
 import {
   focusRingClass,
   hoverLiftClass,
@@ -135,6 +137,11 @@ export function StorefrontCard({
 }) {
   const { id, name, blockCount, updatedAt, config } = storefront;
 
+  // The embed button is the animation trigger for the icon inside it: the whole
+  // 36px target drives the glyph, not just the 16px of artwork. Delete is
+  // deliberately static — its icon stays plain lucide.
+  const iconHover = useIconHoverProps();
+
   // A storefront with something to sell is previewed exactly as designed,
   // words and all — the text is part of how that shop looks. One with no
   // product tiles is previewed without them: with nothing else in the box, its
@@ -196,14 +203,15 @@ export function StorefrontCard({
 
       {canWrite && (
         <div className="absolute right-3 top-3 z-20 flex gap-1.5">
-          <button
+          <motion.button
             type="button"
             onClick={onEmbed}
             aria-label={`Embed ${name}`}
             className={cn(CARD_ACTION_CLASS, "hover:text-foreground")}
+            {...iconHover}
           >
-            <Code className="size-4" strokeWidth={2} aria-hidden="true" />
-          </button>
+            <EmbedCodeIcon />
+          </motion.button>
           <button
             type="button"
             onClick={onDelete}

@@ -34,7 +34,7 @@ import {
   type TextBlock,
   type TextSpan,
 } from "@/types/storefront";
-import { LAYER_OPS, type LayerOp } from "@/lib/storefront/layers";
+import { LAYER_OPS, moveLayerTo, type LayerOp } from "@/lib/storefront/layers";
 import { applyFormatToRange } from "@/lib/storefront/text-spans";
 import { isDefaultPlacement } from "@/lib/images/placement";
 import { UploadError, uploadToR2 } from "@/lib/products/upload";
@@ -90,6 +90,7 @@ type LeftPanelState =
   | { kind: "color"; ref: ColorTargetRef }
   | { kind: "library"; tab: LibraryTab }
   | null;
+import { editorEntries, type EditorJump } from "./editor-search";
 import { ControlsPanel } from "./ControlsPanel";
 import { DesignPanel } from "./DesignPanel";
 import { SHEET_ON_MOBILE_CLASS } from "./panel-chrome";
@@ -98,6 +99,7 @@ import { EditorToolbar } from "./EditorToolbar";
 import { ImageBlockEditor } from "./ImageBlockEditor";
 import { MultiBlockEditor } from "./MultiBlockEditor";
 import { PlacementSection } from "./PlacementSection";
+import { LayersPanel } from "./LayersPanel";
 import { ProductPicker } from "./ProductPicker";
 import { ProductBlockEditor } from "./ProductBlockEditor";
 import { ShapeBlockEditor, type ShapeBlockPatch } from "./ShapeBlockEditor";
@@ -281,6 +283,11 @@ export function StorefrontDesigner({
   // Mobile only: whether the global-settings bottom sheet is open (on lg+ the
   // settings panel is always visible, so this is ignored there).
   const [settingsOpen, setSettingsOpen] = useState(false);
+  // Whether the design panel is showing the whole stack instead of its usual
+  // two scopes. A view state, so it never reaches undo or the saved document —
+  // and deliberately NOT cleared when the selection changes: picking blocks off
+  // the list is the point of having it open.
+  const [layersOpen, setLayersOpen] = useState(false);
   // Desktop only: whether the edge-docked design panel is shown. Collapsing
   // it gives the canvas the full viewport width.
   const [panelOpen, setPanelOpen] = useState(true);
@@ -337,6 +344,14 @@ export function StorefrontDesigner({
   const productsById = useMemo(
     () => new Map(catalog.map((product) => [product.id, product])),
     [catalog],
+  );
+
+  // What the design panel's search field can find. Rebuilt when the board or
+  // the catalogue changes, because half of this index IS the board: the
+  // objects on it are searchable by the same names the layers list shows.
+  const editorSearchEntries = useMemo(
+    () => editorEntries(blocks, productsById),
+    [blocks, productsById],
   );
   const usedProductIds = useMemo(
     () =>
@@ -1373,6 +1388,9 @@ export function StorefrontDesigner({
     // phone they are the same bottom slot — leaving the colour sheet up would
     // hide the picker behind it.
     setColorTarget(null);
+    // Same again for the stack, which takes the whole panel body: the picker
+    // would open behind it and the button would look dead.
+    setLayersOpen(false);
   }
 
   function toggleSettings() {
@@ -1383,6 +1401,7 @@ export function StorefrontDesigner({
     if (next) {
       setInspector(null);
       setColorTarget(null);
+      setLayersOpen(false);
     }
   }
 
@@ -1852,6 +1871,81 @@ export function StorefrontDesigner({
     if (next === blocks) return;
     recordChange();
     setBlocks(next);
+  }
+
+  /**
+   * Drop one block at an explicit depth — the layers list's drag, which lands
+   * where it was let go rather than one step per press.
+   *
+   * One undo step per DROP, not per row crossed: a drag is a single intention
+   * however far it travelled, and the same no-op bail as above means a row
+   * dropped back where it started costs nothing.
+   */
+  function moveLayer(key: string, index: number) {
+    const next = moveLayerTo(blocks, [key], index);
+    if (next === blocks) return;
+    recordChange();
+    setBlocks(next);
+  }
+
+  /**
+   * Selecting from the layers list.
+   *
+   * Deliberately NOT selectBlock: that one opens the colour panel on the
+   * block's leading colour, which on a phone is a second bottom sheet landing
+   * over the very list being picked from — and on desktop swaps the left
+   * column on every row you touch. This is the marquee's channel instead
+   * (see selectMany), which leaves the colour panel alone.
+   *
+   * A plain press always SELECTS rather than toggling: on the canvas, clicking
+   * the one selected block again deselects it, because there the click also
+   * means "nothing here". In a list a row is only ever the block it names.
+   */
+  /**
+   * Act on a row from the design panel's search field.
+   *
+   * Settings never reach here (ControlsPanel opens those itself, through the
+   * same opener universal search uses). What is left is everything the field
+   * can find that only the editor knows how to reach: an object on the board,
+   * and the drawers. Each case is the SAME call the toolbar or the layers list
+   * already makes, so a search hit and a click land in identical state.
+   */
+  function jumpTo(target: EditorJump) {
+    if (target.kind === "block") {
+      selectFromLayers(target.key, false);
+      return;
+    }
+    switch (target.panel) {
+      case "layers":
+        setLayersOpen(true);
+        break;
+      case "products":
+        // Not `togglePicker`: a search hit is a request to OPEN, and toggling
+        // would close the picker for anyone who searched while it was up.
+        setInspector({ kind: "picker" });
+        setSettingsOpen(false);
+        setColorTarget(null);
+        setLayersOpen(false);
+        break;
+      case "shapes":
+      case "uploads":
+        setLeftPanel({ kind: "library", tab: target.panel });
+        break;
+    }
+  }
+
+  function selectFromLayers(key: string, additive: boolean) {
+    if (!additive) {
+      selectMany([key]);
+      return;
+    }
+    setInspector((current) => {
+      const keys = current?.kind === "blocks" ? current.keys : [];
+      const next = keys.includes(key)
+        ? keys.filter((k) => k !== key)
+        : [...keys, key];
+      return next.length > 0 ? { kind: "blocks", keys: next } : null;
+    });
   }
 
   /**
@@ -2685,31 +2779,55 @@ export function StorefrontDesigner({
         </div>
       </header>
 
-      {/* Full-width workspace: the canvas takes all remaining room next to
-          the edge-docked panel. */}
-      <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
-        {/* LEFT: the color panel, docked opposite the design panel and present
-            only while a color is being edited, so the canvas keeps the full
-            width the rest of the time. Mirrors the right panel's chrome with
-            the border flipped; sections pad themselves (lg:px-4) so the
-            dividers run edge to edge, exactly as over there.
+      {/* Full-width workspace. `relative` positions the floating left layer;
+          the design column on the right is a real flex item beside it. */}
+      <div className="relative flex min-h-0 flex-1 flex-col lg:flex-row">
+        {/* LEFT: the colour / library panel. A FLOATING LAYER over the canvas,
+            not a column beside it, and that is a deliberate split from the
+            design panel opposite.
 
-            On mobile it is a bottom sheet like the other two, and the same
-            one-at-a-time rule applies: opening it closes them. */}
+            TRANSIENT PANELS FLOAT, PERSISTENT PANELS DOCK. This one comes and
+            goes constantly (every block selected opens it, every deselect shuts
+            it), and while it was docked each of those was a LAYOUT change: the
+            workspace narrowed, its top-left corner moved, and the board's pan
+            is measured from that corner. The canvas then had to be corrected
+            by the panel's own width just to appear stationary, which is a
+            correction you can see. As a layer it changes no layout at all, so
+            there is nothing to correct and nothing to see. The design panel is
+            open more or less permanently, so docking it costs one reflow a
+            session and buys the canvas its own uncovered width.
+
+            The board still gets out from under it when it lands on something:
+            useCanvasAnchor measures this element (data-canvas-panel) and the
+            canvas treats the covered strip as unavailable.
+
+            On mobile it was already a bottom sheet over the canvas, which is
+            the same arrangement; the one-at-a-time rule there is unchanged. */}
         {leftPanelOpen && (
           <div
             // Reaching in here is still part of an in-place text edit: the
             // editor keeps the words selected (and drawn) instead of ending
             // the edit, so a colour picked here lands on them.
             data-design-panel=""
-            className="relative shrink-0 lg:w-[17.5rem] lg:border-r lg:border-border"
+            // Same chrome as the right-hand design column — full height, flush
+            // to the edge, a plain border, no radius or shadow — so the two
+            // read as one matched pair. The difference is `absolute` in place
+            // of a flex item: this one is a LAYER stacked over the canvas
+            // rather than a column beside it, which is what keeps opening and
+            // closing it from resizing the workspace (see the note above).
+            // The floating toolbar (z-40) stays above it, so the two can
+            // overlap at a narrow desktop width without either becoming
+            // unreachable.
+            className="relative lg:absolute lg:inset-y-0 lg:left-0 lg:z-30 lg:w-[17.5rem] lg:border-r lg:border-border lg:bg-background"
           >
             {/* dir flip puts the scrollbar on the LEFT edge (requested); the
                 inner dir="ltr" undoes it for the actual content/text. */}
             <div
               dir="rtl"
-              // Measured by the canvas: docked beside the board on lg+, lying
-              // over it as a sheet on a phone. See useCanvasAnchor.
+              // The canvas measures the element that actually PAINTS: this one
+              // fills the layer on lg+ and is the fixed sheet on a phone, while
+              // the wrapper above collapses to nothing on a phone and would
+              // measure as no cover at all.
               {...{ [CANVAS_PANEL_ATTR]: "" }}
               className={cn(SHEET_ON_MOBILE_CLASS, "lg:h-full lg:overflow-y-auto")}
             >
@@ -2854,6 +2972,19 @@ export function StorefrontDesigner({
           }
           settingsOpen={settingsOpen}
           onCloseSettings={() => setSettingsOpen(false)}
+          layersOpen={layersOpen}
+          layers={
+            <LayersPanel
+              blocks={blocks}
+              productsById={productsById}
+              elementUrls={elementUrls}
+              selectedKeys={selectedKeys}
+              onSelect={selectFromLayers}
+              onReorder={(key, op) => reorderLayers([key], op)}
+              onMoveTo={moveLayer}
+              onBack={() => setLayersOpen(false)}
+            />
+          }
           controls={
             <ControlsPanel
               theme={theme}
@@ -2867,6 +2998,10 @@ export function StorefrontDesigner({
               showGrid={showGrid}
               onShowGridChange={setShowGrid}
               onCanvasChange={updateCanvas}
+              blockCount={blocks.length}
+              onOpenLayers={() => setLayersOpen(true)}
+              searchEntries={editorSearchEntries}
+              onJump={jumpTo}
             />
           }
           inspector={
@@ -2886,6 +3021,7 @@ export function StorefrontDesigner({
                           rotateBlocks(selectedKeys, degrees)
                         }
                         onReorder={(op) => reorderLayers(selectedKeys, op)}
+                        onOpenLayers={() => setLayersOpen(true)}
                       />
                     </div>
                   )}

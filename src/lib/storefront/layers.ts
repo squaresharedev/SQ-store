@@ -143,6 +143,51 @@ export function sendBackward(
   });
 }
 
+/**
+ * Drop the selection at an EXPLICIT depth, the way a dragged row in the layers
+ * list lands where it was let go rather than one step at a time.
+ *
+ * `index` counts in the blocks that are NOT moving: 0 puts the run behind all
+ * of them, `rest.length` puts it in front of all of them. Counted that way
+ * because it is the only reading that survives the removal — an index into the
+ * full order would mean two different things depending on whether the run
+ * started above or below the target, which is exactly the off-by-one every
+ * hand-rolled reorder gets wrong.
+ *
+ * Out-of-range values clamp to the ends: a drag can leave the list, and a drop
+ * past the top is a request for the front, not an error.
+ */
+export function moveLayerTo(
+  blocks: StorefrontBlock[],
+  keys: readonly string[],
+  index: number,
+): StorefrontBlock[] {
+  if (!Number.isFinite(index)) return blocks;
+  return reorder(blocks, keys, (ordered, selected) => {
+    const rest = ordered.filter((block) => !selected(block));
+    const run = ordered.filter(selected);
+    const at = Math.max(0, Math.min(rest.length, Math.round(index)));
+    return [...rest.slice(0, at), ...run, ...rest.slice(at)];
+  });
+}
+
+/**
+ * The one place the two ways of counting a stack meet.
+ *
+ * A layers LIST is drawn front first, the way every layers list a seller has
+ * used is drawn; z counts from the back. Given a row dropped at front-counted
+ * position `to` on a board of `total` blocks, this is the index
+ * {@link moveLayerTo} wants — and since exactly one row is moving, the other
+ * `total - 1` keep their order, so landing with `to` of them in front is
+ * landing with `total - 1 - to` behind.
+ *
+ * Kept here rather than in the panel so the arithmetic is unit-testable
+ * without a DOM, like every other rule in this file.
+ */
+export function dropIndex(to: number, total: number): number {
+  return total - 1 - to;
+}
+
 /** The four operations behind one name, so callers (the panel, the keyboard,
  *  the designer's mutator) route an op string rather than each holding their
  *  own switch over the same four functions. */

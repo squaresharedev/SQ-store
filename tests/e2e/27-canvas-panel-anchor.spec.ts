@@ -185,12 +185,10 @@ test.describe("canvas holds still when a panel opens (desktop)", () => {
     await closeShapeLibrary();
   });
 
-  test("selecting a tile under the colour column brings the tile out", async () => {
-    // Clicking a block opens the colour column, which is exactly the move that
-    // used to throw the board sideways. With a block selected the anchor is
-    // that BLOCK rather than the whole board: a seller who reached for a tile
-    // is asking about the tile, and showing it is possible on screens where
-    // showing the board is not.
+  test("selecting a tile under the colour layer brings the board out", async () => {
+    // Clicking a block opens the colour layer, which is exactly the move that
+    // used to throw the board sideways. Now the board simply steps out from
+    // under it, by the least it can.
     //
     // A shape rather than the text block: clicking a selected TEXT tile means
     // "let me type", which is a different gesture from the one under test.
@@ -201,7 +199,7 @@ test.describe("canvas holds still when a panel opens (desktop)", () => {
     await deselect();
     await settle();
 
-    // Park the shape inside the strip the column is about to take.
+    // Park the shape inside the strip the layer is about to cover.
     const board = await stageBox();
     const offset = (await shape.boundingBox())!.x - board.x;
     await panBoardTo(40 - offset);
@@ -209,21 +207,81 @@ test.describe("canvas holds still when a panel opens (desktop)", () => {
 
     await shape.click();
     await settle();
-    // The colour column is the first panel in the document; the design column
+    // The colour layer is the first panel in the document; the design column
     // is docked on the other side.
-    const column = page.locator("[data-canvas-panel]").first();
-    const columnBox = (await column.boundingBox())!;
-    expect(columnBox.x, "the colour column docks at the left edge").toBeLessThan(10);
-    const columnRight = columnBox.x + columnBox.width;
+    const layer = page.locator("[data-canvas-panel]").first();
+    const layerBox = (await layer.boundingBox())!;
+    expect(layerBox.x, "the colour layer floats at the left").toBeLessThan(24);
+    const layerRight = layerBox.x + layerBox.width;
     expect(
-      columnRight - tileBefore.x,
-      "precondition: the column must land on the tile",
+      layerRight - tileBefore.x,
+      "precondition: the layer must land on the tile",
     ).toBeGreaterThan(4);
 
     const tileAfter = (await shape.boundingBox())!;
-    expect(tileAfter.x).toBeGreaterThanOrEqual(columnRight - 1);
+    expect(tileAfter.x).toBeGreaterThanOrEqual(layerRight - 1);
+    // The whole board clears it, not just the one tile: a board that FITS in
+    // the room left over should be shown entirely rather than left with its
+    // own edge tucked under the layer.
+    expect((await stageBox()).x).toBeGreaterThanOrEqual(layerRight - 1);
 
     await deselect();
+  });
+
+  test("the floating layer changes no layout, and matches the design column", async () => {
+    // The colour/library panel is a LAYER over the canvas, not a column beside
+    // it, so opening it must leave the workspace box exactly as it was: that is
+    // what makes holding the board still a no-op rather than a correction you
+    // can watch happen.
+    const workspaceBefore = (await page.locator("main").first().boundingBox())!;
+    await openShapeLibrary();
+    const workspaceAfter = (await page.locator("main").first().boundingBox())!;
+    expect(workspaceAfter.x).toBeCloseTo(workspaceBefore.x, 0);
+    expect(workspaceAfter.width).toBeCloseTo(workspaceBefore.width, 0);
+
+    // Same chrome as the docked design column on the right: full height, top
+    // to bottom of the workspace. The one difference is HOW it gets there —
+    // a layer stacked over the canvas, not a column that resizes it — which is
+    // invisible in the box it reports.
+    const panel = (await libraryPanel().boundingBox())!;
+    const designColumn = (await page
+      .locator('[data-design-panel][class*="border-l"]')
+      .boundingBox())!;
+    expect(panel.y).toBeCloseTo(designColumn.y, 0);
+    expect(panel.height).toBeCloseTo(designColumn.height, 0);
+    await closeShapeLibrary();
+  });
+
+  test("the floating toolbar stays usable where a full-height layer runs under it", async () => {
+    // Full height means the layer CAN sit under the toolbar at a narrow
+    // desktop width — the toolbar is centred on the page, not on the gap
+    // between the two panels. It stays reachable because it paints above the
+    // layer (z-40 over the layer's z-30), not by the layer stopping short of
+    // it, so this checks the toolbar still works with the layer open, rather
+    // than checking their boxes never touch.
+    await page.setViewportSize({ width: 1024, height: 900 });
+    await settle();
+    await openShapeLibrary();
+    const panel = (await libraryPanel().boundingBox())!;
+    const toolbar = (await page
+      .getByRole("toolbar", { name: "Editor tools" })
+      .boundingBox())!;
+    const overlaps =
+      panel.x < toolbar.x + toolbar.width &&
+      toolbar.x < panel.x + panel.width &&
+      panel.y < toolbar.y + toolbar.height &&
+      toolbar.y < panel.y + panel.height;
+    expect(overlaps, "precondition: this width must produce the overlap").toBe(
+      true,
+    );
+
+    const before = await tiles().count();
+    await page.getByRole("button", { name: "Add text", exact: true }).click();
+    await expect(tiles()).toHaveCount(before + 1);
+
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await settle();
+    await closeShapeLibrary();
   });
 
   test("closing a panel leaves the board where the seller left it", async () => {

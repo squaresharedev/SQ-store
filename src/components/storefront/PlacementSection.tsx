@@ -3,7 +3,9 @@
 import {
   BringToFront,
   ChevronDown,
+  ChevronRight,
   ChevronUp,
+  Layers,
   SendToBack,
 } from "lucide-react";
 import {
@@ -90,8 +92,12 @@ function layerState(
 }
 
 /** The four moves, back to front left to right, so the row reads like the
- *  stack it edits. `end` names which end of that stack disables the control. */
-const LAYER_CONTROLS = [
+ *  stack it edits. `end` names which end of that stack disables the control.
+ *
+ *  Exported because the layers list wears the same four controls per row: two
+ *  copies of this table is how the panel and the list end up disagreeing about
+ *  what "backward" is called. */
+export const LAYER_CONTROLS = [
   { op: "back", label: "Send to back", icon: SendToBack, end: "back" },
   { op: "backward", label: "Send backward", icon: ChevronDown, end: "back" },
   { op: "forward", label: "Bring forward", icon: ChevronUp, end: "front" },
@@ -104,11 +110,23 @@ const LAYER_CONTROLS = [
 }[];
 
 /** Icon-row chrome, matching the format/alignment toggles this panel already
- *  wears (TextFormatControls). */
-const LAYER_BUTTON_CLASS = cn(
+ *  wears (TextFormatControls). Shared with the layers list for the same reason
+ *  {@link LAYER_CONTROLS} is. */
+export const LAYER_BUTTON_CLASS = cn(
   "inline-flex size-8 items-center justify-center rounded-none border border-border",
   "bg-background text-muted-foreground hover:bg-accent hover:text-foreground",
   "disabled:pointer-events-none disabled:opacity-50",
+  transitionClass,
+  focusRingClass,
+);
+
+/** The way through to the whole stack. A full-width row rather than a fifth
+ *  icon: it navigates instead of moving anything, and putting it in the icon
+ *  row would make one of five buttons behave unlike the other four. */
+const SEE_LAYERS_CLASS = cn(
+  "flex min-h-9 w-full items-center justify-between gap-2 rounded-none border border-border",
+  "bg-background px-2.5 py-1.5 font-inter text-sm text-foreground",
+  "hover:bg-accent",
   transitionClass,
   focusRingClass,
 );
@@ -127,6 +145,7 @@ export function PlacementSection({
   board,
   onRotate,
   onReorder,
+  onOpenLayers,
 }: {
   /** The current selection, in selection order (length >= 1). */
   blocks: readonly StorefrontBlock[];
@@ -139,6 +158,9 @@ export function PlacementSection({
   /** Moves the WHOLE selection through the stack, keeping its own relative
    *  order, as one undo step per press. */
   onReorder: (op: LayerOp) => void;
+  /** Swaps this panel over to the full stack. Omitted where there is no panel
+   *  to swap (the dev gallery), and the row simply does not render. */
+  onOpenLayers?: () => void;
 }) {
   const shared = sharedRotation(blocks);
   const multiple = blocks.length > 1;
@@ -222,6 +244,27 @@ export function PlacementSection({
             </button>
           ))}
         </div>
+        {/* Four buttons answer "move this one"; they cannot answer "what else
+            is under here". That is the whole stack, and it opens IN the panel
+            rather than over the canvas — a floating layers window would cover
+            the very board it describes. */}
+        {onOpenLayers && (
+          <button
+            type="button"
+            onClick={onOpenLayers}
+            className={SEE_LAYERS_CLASS}
+          >
+            <span className="flex items-center gap-2">
+              <Layers className="size-4" strokeWidth={2} aria-hidden="true" />
+              See all layers
+            </span>
+            <ChevronRight
+              className="size-4 shrink-0 text-muted-foreground"
+              strokeWidth={2}
+              aria-hidden="true"
+            />
+          </button>
+        )}
         {multiple && (
           <p className={infoTextClass}>
             The selection keeps its own order within the stack.

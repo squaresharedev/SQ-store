@@ -15,7 +15,13 @@ import { DesignPanel } from "@/components/storefront/DesignPanel";
 
 afterEach(cleanup);
 
-function Harness({ initialSelection = "" }: { initialSelection?: string }) {
+function Harness({
+  initialSelection = "",
+  layersOpen = false,
+}: {
+  initialSelection?: string;
+  layersOpen?: boolean;
+}) {
   const [selectionKey, setSelectionKey] = useState(initialSelection);
   return (
     <>
@@ -39,6 +45,8 @@ function Harness({ initialSelection = "" }: { initialSelection?: string }) {
         settingsOpen={false}
         onCloseSettings={vi.fn()}
         controls={<p>global settings</p>}
+        layersOpen={layersOpen}
+        layers={<p>layer stack</p>}
       />
     </>
   );
@@ -84,5 +92,17 @@ describe("DesignPanel", () => {
       "aria-selected",
       "true",
     );
+  });
+
+  it("gives the whole body to the stack, keeping the scopes mounted", () => {
+    render(<Harness initialSelection="block-1" layersOpen />);
+
+    expect(screen.getByText("layer stack")).toBeInTheDocument();
+    // No tab strip while the stack is up: it is a detour off a scope, not a
+    // third scope to choose between.
+    expect(screen.queryByRole("tablist")).not.toBeInTheDocument();
+    // The scopes are hidden by class, never unmounted — the block editors hold
+    // drafts a trip through the layers list must not discard.
+    expect(screen.getByText("inspector body")).toBeInTheDocument();
   });
 });

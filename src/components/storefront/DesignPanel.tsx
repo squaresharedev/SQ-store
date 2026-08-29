@@ -62,6 +62,8 @@ export function DesignPanel({
   settingsOpen,
   onCloseSettings,
   controls,
+  layersOpen,
+  layers,
 }: {
   panelOpen: boolean;
   onPanelOpenChange: (open: boolean) => void;
@@ -84,6 +86,11 @@ export function DesignPanel({
   settingsOpen: boolean;
   onCloseSettings: () => void;
   controls: React.ReactNode;
+  /** The stack, opened from either scope. It takes the WHOLE panel body rather
+   *  than becoming a third tab: it is a detour off whichever scope you were in,
+   *  and it comes back to it. A tab would make it a place you can sit. */
+  layersOpen: boolean;
+  layers: React.ReactNode;
 }) {
   const [tab, setTab] = useState<PanelTab>("selection");
 
@@ -116,7 +123,7 @@ export function DesignPanel({
 
   // With nothing selected there is no Selection tab to be on, so the Design
   // side is simply what the panel is.
-  const showTabs = showInspector;
+  const showTabs = showInspector && !layersOpen;
   const onSelection = showTabs && tab === "selection";
 
   return (
@@ -178,7 +185,21 @@ export function DesignPanel({
         {/* No padding here: each section pads itself so the dividers can run
             the full width of the panel. */}
         <div className="contents lg:block lg:h-full lg:overflow-y-auto">
-          {showTabs && (
+          {/* The stack takes the whole body while it is open. On mobile it is
+              the same bottom sheet as everything else here, and it is the LAST
+              sheet in the tree, so it lands on top of the library or colour
+              sheet rather than under one — it was opened deliberately, from a
+              panel, and it wins. */}
+          {layersOpen && (
+            <div
+              {...{ [CANVAS_PANEL_ATTR]: "" }}
+              className={SHEET_ON_MOBILE_CLASS}
+            >
+              {layers}
+            </div>
+          )}
+
+          {!layersOpen && showTabs && (
             <PanelTabs
               id="design-panel"
               value={tab}
@@ -201,6 +222,10 @@ export function DesignPanel({
                 SHEET_ON_MOBILE_CLASS,
                 inspectorHiddenOnMobile && "hidden lg:block",
                 !onSelection && "lg:hidden",
+                // HIDDEN, not unmounted, for the trip through the stack: the
+                // block editors hold drafts (a half-typed product name) that
+                // a detour to the layers list has no business discarding.
+                layersOpen && "hidden lg:hidden",
               )}
             >
               <CollapsibleSection
@@ -229,6 +254,7 @@ export function DesignPanel({
             className={cn(
               settingsOpen ? SHEET_ON_MOBILE_CLASS : "hidden lg:block",
               onSelection && "lg:hidden",
+              layersOpen && "hidden lg:hidden",
             )}
           >
             <div className="mb-4 flex items-center justify-between lg:hidden">

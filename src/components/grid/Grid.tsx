@@ -3,19 +3,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MoveDiagonal2, RotateCw } from "lucide-react";
 import { cn } from "@/lib/utils";
-import {
-  orientedSpan,
-  placementForFootprint,
-  rotatedFootprint,
-} from "@/lib/geometry/rotated-box";
+import { rotatedFootprint } from "@/lib/geometry/rotated-box";
 import {
   ROTATION_SNAP_STEP,
   angleFromCenter,
   normalizeAngle,
   snapAngle,
+  toLocalPoint,
+  type Point,
 } from "./rotationMath";
 import {
-  EDGE_GRAB_PX,
   GESTURE_Z,
   GRID_CELL_RADIUS_CLASS,
   GRID_COLUMNS_DEFAULT,
@@ -23,14 +20,16 @@ import {
   GRID_ROOT_CLASS,
   GRID_ROWS_DEFAULT,
   blockFootprint,
+  boardInLocalFrame,
   clampToCanvas,
   columnsThatFit,
   edgeCursor,
   edgesUnderPointer,
   layerZIndex,
+  placementFromLocalBox,
   placementIsFree,
   reflowBlocks,
-  resizeByEdges,
+  resizeLocalBox,
   type GridBlock,
   type GridPlacement,
   type RenderGridBlock,
@@ -163,41 +162,84 @@ function cellBox(
   };
 }
 
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(max, Math.max(min, value));
+/** Cell pitch, gaps and zoom, as read off the live grid. */
+type Strides = {
+  rect: DOMRect;
+  gapX: number;
+  gapY: number;
+  scale: number;
+  strideX: number;
+  strideY: number;
+};
+
+/**
+ * The imperative box to give a cell so that it PAINTS on `box`.
+ *
+ * `box` is a placement in CELLS and may be fractional, since a live drag is
+ * not on a cell boundary yet. The element keeps its committed grid area in the
+ * layout, so the difference between the two is written as a translate and the
+ * span as an explicit width and height.
+ *
+ * Nothing here touches the tilt: the element is turned about its own centre by
+ * CSS, and a box placed where this says paints turned exactly where the
+ * gesture worked out it should.
+ *
+ * Unscaled px out, because the element sits inside a stage the canvas may have
+ * zoomed while the strides are measured on screen.
+ */
+function previewBox(
+  box: { x: number; y: number; w: number; h: number },
+  origin: GridPlacement,
+  strides: Strides,
+): { offset: { x: number; y: number }; size: { w: number; h: number } } {
+  const cellW = strides.strideX - strides.gapX;
+  const cellH = strides.strideY - strides.gapY;
+  return {
+    offset: {
+      x: ((box.x - origin.x) * strides.strideX) / strides.scale,
+      y: ((box.y - origin.y) * strides.strideY) / strides.scale,
+    },
+    size: {
+      w: (box.w * cellW + (box.w - 1) * strides.gapX) / strides.scale,
+      h: (box.h * cellH + (box.h - 1) * strides.gapY) / strides.scale,
+    },
+  };
+}
+
+/** A continuous placement rounded onto the board's whole cells. */
+function roundPlacement(box: {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}): GridPlacement {
+  return {
+    x: Math.round(box.x),
+    y: Math.round(box.y),
+    w: Math.round(box.w),
+    h: Math.round(box.h),
+  };
 }
 
 /**
- * The imperative box to give a cell so that it PAINTS on `painted`.
+ * The pointer in a block's OWN frame, in cells: un-rotated about the block's
+ * centre, then divided by the cell pitch.
  *
- * A gesture works in the space the seller sees, and for a turned block that is
- * not the space the element lives in: a cell stood on its end paints its
- * height across. So the element is sized the other way round and centred on
- * the painted box's centre, which is the point CSS turns it about, and the
- * turn puts it exactly where the hand is.
- *
- * Unscaled px out, because the element sits inside a stage the canvas may have
- * zoomed while `painted` is measured on screen.
+ * The half gap is what puts the boundary between two cells in the MIDDLE of
+ * the gutter rather than at the far edge of the cell before it, so rounding to
+ * the nearest grid line means what the hand thinks it means.
  */
-function previewBox(
-  painted: { left: number; top: number; right: number; bottom: number },
-  cell: { left: number; top: number },
+function localPointerCell(
+  strides: Strides,
+  center: Point,
   degrees: number,
-  scale: number,
-): { offset: { x: number; y: number }; size: { w: number; h: number } } {
-  const element = orientedSpan(
-    painted.right - painted.left,
-    painted.bottom - painted.top,
-    degrees,
-  );
-  const centerX = (painted.left + painted.right) / 2;
-  const centerY = (painted.top + painted.bottom) / 2;
+  clientX: number,
+  clientY: number,
+): Point {
+  const local = toLocalPoint(center, degrees, { x: clientX, y: clientY });
   return {
-    offset: {
-      x: (centerX - element.w / 2 - cell.left) / scale,
-      y: (centerY - element.h / 2 - cell.top) / scale,
-    },
-    size: { w: element.w / scale, h: element.h / scale },
+    x: (local.x - strides.rect.left + strides.gapX / 2) / strides.strideX,
+    y: (local.y - strides.rect.top + strides.gapY / 2) / strides.strideY,
   };
 }
 
@@ -327,6 +369,17 @@ export function Grid<TData>(props: GridProps<TData>) {
   // window listeners instead of leaking them.
   const cleanupRef = useRef<(() => void) | null>(null);
   useEffect(() => () => cleanupRef.current?.(), []);
+  /**
+   * The angle the tile has to be left painting at once its gesture ends.
+   *
+   * React writes only the style properties that CHANGED between two renders,
+   * so an inline `rotate` this component blanks imperatively is never put back
+   * by the next render if the block's angle did not change — which is every
+   * move and every resize. Blanking it therefore STRAIGHTENED a tilted tile
+   * the first time it was dragged, and left it straight. Handing the angle
+   * back here is what keeps a tilt through a drag.
+   */
+  const settledRotationRef = useRef(0);
 
   /** Write the live preview: the tile floats/stretches/spins, the ghost marks
    *  the cells it will snap to. One rAF per frame, however fast events arrive.
@@ -401,9 +454,12 @@ export function Grid<TData>(props: GridProps<TData>) {
     const cell = gesture ? cellNodes.current.get(gesture.key) : null;
     if (cell) {
       cell.style.translate = "";
-      // The committed tilt comes back through React's own cell style; clearing
-      // the imperative one is what lets it.
-      cell.style.rotate = "";
+      // NOT blanked: put the settled angle back. See settledRotationRef —
+      // React will not restore an angle that did not change, so clearing this
+      // is how a tilted tile used to straighten the moment it was moved.
+      cell.style.rotate = settledRotationRef.current
+        ? `${settledRotationRef.current}deg`
+        : "";
       cell.style.width = "";
       cell.style.height = "";
       delete cell.dataset.valid;
@@ -459,7 +515,7 @@ export function Grid<TData>(props: GridProps<TData>) {
 
   /** Cell pitch in SCREEN px. Both the grid rect and the pointer deltas are
    *  post-transform, so a zoomed canvas needs no extra compensation. */
-  const readStrides = useCallback(() => {
+  const readStrides = useCallback((): Strides | null => {
     const grid = gridRef.current;
     if (!grid) return null;
     const rect = grid.getBoundingClientRect();
@@ -481,6 +537,32 @@ export function Grid<TData>(props: GridProps<TData>) {
       strideY: cellH + gapY,
     };
   }, [renderColumns, view.rows]);
+
+  /**
+   * The edges of a block under a pointer, or null for the inner surface.
+   *
+   * ONE implementation for the hover cursor and for the press that starts a
+   * resize, so the strip that shows a resize cursor is exactly the strip that
+   * resizes. Both work in the block's own frame: its unrotated box, with the
+   * pointer turned back into that frame first.
+   */
+  const edgeGrab = useCallback(
+    (
+      strides: Strides,
+      block: GridBlock<TData>,
+      clientX: number,
+      clientY: number,
+    ): ResizeEdges | null => {
+      const box = cellBox(strides, block);
+      const local = toLocalPoint(
+        { x: box.centerX, y: box.centerY },
+        block.rotation ?? 0,
+        { x: clientX, y: clientY },
+      );
+      return edgesUnderPointer(box, local.x, local.y);
+    },
+    [],
+  );
 
   /** Shared teardown for both gestures. */
   const endGesture = useCallback(
@@ -514,17 +596,14 @@ export function Grid<TData>(props: GridProps<TData>) {
     // tile the finger meant to drag.
     const strides = readStrides();
     if (!strides) return;
+    settledRotationRef.current = block.rotation ?? 0;
 
     if (event.pointerType !== "touch") {
-      // The box the seller sees: a turned block's footprint, a level one's own
-      // cell. Derived from the grid's pitch rather than measured, because a
-      // turned cell reports its axis-aligned envelope and the grab zones would
-      // drift further from the real edges the more it was turned.
-      const edges = edgesUnderPointer(
-        cellBox(strides, blockFootprint(block)),
-        event.clientX,
-        event.clientY,
-      );
+      // The block's OWN box, with the pointer un-rotated into the same frame,
+      // so the strip under the hand is the tilted border the seller can see.
+      // Derived from the grid's pitch rather than measured, because a turned
+      // cell reports its axis-aligned envelope rather than its box.
+      const edges = edgeGrab(strides, block, event.clientX, event.clientY);
       if (edges) {
         startEdgeResize(event, block, edges);
         return;
@@ -594,17 +673,17 @@ export function Grid<TData>(props: GridProps<TData>) {
   }
 
   /**
-   * Resize by dragging the border of the box the seller can SEE: the grabbed
-   * side(s) follow the cursor, the opposite sides stay pinned (resizeByEdges
-   * owns that math). A press that never travels DRAG_THRESHOLD stays a click,
-   * so selecting a tile by its edge still works. Preview painting reuses the
-   * same gestureRef pipeline as the corner handle.
+   * Resize by dragging one of the block's own borders: the grabbed side
+   * follows the hand, the opposite side stays where it is. A press that never
+   * travels DRAG_THRESHOLD stays a click, so selecting a tile by its edge
+   * still works. Preview painting reuses the same gestureRef pipeline as the
+   * corner handle.
    *
-   * The whole gesture runs in BOARD space, on the footprint. For a turned
-   * block that is not the same box as its placement, so the result is
-   * converted back at the end (see placementForFootprint). Reading the drag in
-   * the block's own turned space instead is what made a half-turned tile grow
-   * downwards when its top edge was dragged up.
+   * The gesture runs in the BLOCK'S OWN frame (resizeLocalBox owns the
+   * arithmetic, placementFromLocalBox puts the answer back on the board). The
+   * edge the seller grabbed is the tilted border they can see, dragging it
+   * outwards grows the tile along that same tilted axis, and the far corner is
+   * pinned in screen space so the tile stretches instead of sliding.
    */
   function startEdgeResize(
     event: React.PointerEvent<HTMLLIElement>,
@@ -614,14 +693,14 @@ export function Grid<TData>(props: GridProps<TData>) {
     const strides = readStrides();
     if (!strides) return;
 
-    // The committed boxes, DERIVED from the grid rect and the pitch rather
-    // than measured: the gesture mutates this element (and a turned one never
+    // The committed box, DERIVED from the grid rect and the pitch rather than
+    // measured: the gesture mutates this element (and a turned one never
     // reported its real box in the first place), so measuring it would be the
     // preview measuring itself.
     const angle = block.rotation ?? 0;
-    const originFootprint = blockFootprint(block);
-    const seen = cellBox(strides, originFootprint);
+    settledRotationRef.current = angle;
     const rect = cellBox(strides, block);
+    const center = { x: rect.centerX, y: rect.centerY };
     const startX = event.clientX;
     const startY = event.clientY;
     const origin: GridPlacement = {
@@ -633,13 +712,8 @@ export function Grid<TData>(props: GridProps<TData>) {
     let dragging = false;
     let latest = origin;
     let latestValid = true;
-
-    const cellW = strides.strideX - strides.gapX;
-    const cellH = strides.strideY - strides.gapY;
-    const boardLeft = strides.rect.left;
-    const boardTop = strides.rect.top;
-    const boardRight = boardLeft + columns * cellW + (columns - 1) * strides.gapX;
-    const boardBottom = boardTop + rows * cellH + (rows - 1) * strides.gapY;
+    // How far the drag may reach, in the block's own frame.
+    const bounds = boardInLocalFrame(origin, angle, columns, rows);
 
     const handleMove = (moveEvent: PointerEvent) => {
       const dx = moveEvent.clientX - startX;
@@ -652,76 +726,50 @@ export function Grid<TData>(props: GridProps<TData>) {
         setActive({ key: block.key, mode: "resize" });
       }
 
-      const col = clamp(
-        Math.floor((moveEvent.clientX - boardLeft) / strides.strideX),
-        0,
-        columns - 1,
-      );
-      const row = clamp(
-        Math.floor((moveEvent.clientY - boardTop) / strides.strideY),
-        0,
-        rows - 1,
-      );
-      const wanted = resizeByEdges(
-        originFootprint,
+      const { live, snapped, anchor } = resizeLocalBox(
+        origin,
         edges,
-        col,
-        row,
-        columns,
-        rows,
+        localPointerCell(
+          strides,
+          center,
+          angle,
+          moveEvent.clientX,
+          moveEvent.clientY,
+        ),
+        bounds,
+        "edge",
       );
-      // Back into a placement, then held to the board: the STORED rect is what
-      // has to stay on the canvas, and for a turned block it is the footprint
-      // stood on its end.
+      // Whole cells, then held to the board: the STORED rect is what has to
+      // stay on the canvas. Rounding is where a tilted resize gives up a
+      // little accuracy — a turn can put the pinned corner half a cell off a
+      // grid line, and half a cell is not storable while placements are whole
+      // ones. It lands exactly with free placement.
       const candidate = clampToCanvas(
-        placementForFootprint(wanted, angle),
+        roundPlacement(placementFromLocalBox(origin, angle, snapped, anchor)),
         columns,
         rows,
       );
       latest = candidate;
       latestValid = dropIsLegal(block, candidate, blocks);
-      // Re-derived rather than reusing `wanted`, so the ghost promises the
-      // cells the block will really cover once it lands.
-      const landing = rotatedFootprint(candidate, angle);
-
-      // The live box follows the cursor in the space the seller is dragging
-      // in: pinned sides keep their committed edge, dragged sides track the
-      // pointer (clamped to one cell and to the board).
-      const left = edges.w
-        ? clamp(moveEvent.clientX, boardLeft, seen.right - cellW)
-        : seen.left;
-      const right = edges.e
-        ? clamp(moveEvent.clientX, seen.left + cellW, boardRight)
-        : seen.right;
-      const top = edges.n
-        ? clamp(moveEvent.clientY, boardTop, seen.bottom - cellH)
-        : seen.top;
-      const bottom = edges.s
-        ? clamp(moveEvent.clientY, seen.top + cellH, boardBottom)
-        : seen.bottom;
       gestureRef.current = {
         key: block.key,
         mode: "resize",
         placement: candidate,
-        footprint: landing,
+        // Re-derived from the candidate, so the ghost promises the cells the
+        // block will really cover once it lands.
+        footprint: rotatedFootprint(candidate, angle),
         valid: latestValid,
+        // The LIVE box, not the snapped one: the border stays under the hand
+        // while the ghost underneath shows where it will settle.
         ...previewBox(
-          { left, top, right, bottom },
-          rect,
-          angle,
-          strides.scale,
+          placementFromLocalBox(origin, angle, live, anchor),
+          origin,
+          strides,
         ),
       };
       scheduleGesturePaint();
     };
 
-    // KNOWN LIMITATION on a tilted tile. The stretch now follows the tile's
-    // own axes (see the local point above), but the tilt still turns about the
-    // block's CENTRE, and growing the box moves that centre — so the edge
-    // opposite the one being dragged drifts a little instead of staying
-    // pinned. Correcting it means nudging x/y by the difference, which is a
-    // fraction of a cell and therefore unstorable while placements are whole
-    // cells. It lands with free placement, where fractions become legal.
     const handleUp = () => {
       endGesture(handleMove, handleUp);
       if (!dragging || !latestValid) return;
@@ -752,97 +800,71 @@ export function Grid<TData>(props: GridProps<TData>) {
     const strides = readStrides();
     if (!strides) return;
 
-    // The committed boxes, DERIVED rather than measured, for the same two
+    // The committed box, DERIVED rather than measured, for the same two
     // reasons as startEdgeResize: the gesture mutates this element, and a
-    // turned cell's bounding rect was never its box to begin with. `seen` is
-    // what the seller is dragging, `rect` is what the painter writes to.
+    // turned cell's bounding rect was never its box to begin with.
     const angle = block.rotation ?? 0;
-    const anchor = blockFootprint(block);
-    const seen = cellBox(strides, anchor);
+    settledRotationRef.current = angle;
     const rect = cellBox(strides, block);
-    let latest: GridPlacement = { x: block.x, y: block.y, w: block.w, h: block.h };
+    const center = { x: rect.centerX, y: rect.centerY };
+    const origin: GridPlacement = {
+      x: block.x,
+      y: block.y,
+      w: block.w,
+      h: block.h,
+    };
+    let latest: GridPlacement = origin;
     let latestValid = true;
     setDragCursorLock(true);
     // One render, up front: mounts the ghost and lifts the tile.
     setActive({ key: block.key, mode: "resize" });
 
     /**
-     * The top-left CELL of the box on screen is the anchor and always stays
-     * part of the result; the block spans from it to whichever cell the cursor
-     * is over. Drag right/down and that is the familiar grow. Drag past the
-     * anchor and the span simply lands on the other side of it, so one handle
-     * stretches up and left without a second control to aim for.
+     * The handle sits in the tile's own bottom-right corner and turns with it,
+     * so that is the corner it drags: the block's top-left CELL is the anchor
+     * and always stays part of the result, and the span reaches from there to
+     * wherever the hand is. Drag out and that is the familiar grow. Drag past
+     * the anchor and the span lands on the other side of it, so one handle
+     * stretches every way without a second control to aim for.
      *
-     * Everything here is SCREEN px (strides already are), converted to
-     * unscaled px only when handed to the painter.
+     * All of it in the block's own frame, which is what makes a tilted tile
+     * grow along the axis the hand is actually pulling.
      */
-    const cellW = strides.strideX - strides.gapX;
-    const cellH = strides.strideY - strides.gapY;
-    const boardLeft = strides.rect.left;
-    const boardTop = strides.rect.top;
-    const anchorCellRight = seen.left + cellW;
-    const anchorCellBottom = seen.top + cellH;
-    const spanPxX = (n: number) => n * cellW + (n - 1) * strides.gapX;
-    const spanPxY = (n: number) => n * cellH + (n - 1) * strides.gapY;
+    const cornerEdges: ResizeEdges = { n: false, e: true, s: true, w: false };
+    const bounds = boardInLocalFrame(origin, angle, columns, rows);
 
     const handleMove = (moveEvent: PointerEvent) => {
-      // Which cell is under the cursor, in board coordinates. Read straight
-      // from the pointer: the handle is dragged in the space the block is
-      // SEEN in, and the turn is undone once at the end rather than being
-      // carried through the whole gesture.
-      const col = clamp(
-        Math.floor((moveEvent.clientX - boardLeft) / strides.strideX),
-        0,
-        columns - 1,
-      );
-      const row = clamp(
-        Math.floor((moveEvent.clientY - boardTop) / strides.strideY),
-        0,
-        rows - 1,
+      const { live, snapped, anchor } = resizeLocalBox(
+        origin,
+        cornerEdges,
+        localPointerCell(
+          strides,
+          center,
+          angle,
+          moveEvent.clientX,
+          moveEvent.clientY,
+        ),
+        bounds,
+        "corner",
       );
       const candidate = clampToCanvas(
-        placementForFootprint(
-          {
-            x: Math.min(anchor.x, col),
-            y: Math.min(anchor.y, row),
-            w: Math.abs(col - anchor.x) + 1,
-            h: Math.abs(row - anchor.y) + 1,
-          },
-          angle,
-        ),
+        roundPlacement(placementFromLocalBox(origin, angle, snapped, anchor)),
         columns,
         rows,
       );
       latest = candidate;
       latestValid = dropIsLegal(block, candidate, blocks);
-
-      // The box follows the cursor; the ghost shows where it will snap. Once
-      // flipped, the anchor CELL's far edge is what stays still.
-      const flippedX = col < anchor.x;
-      const flippedY = row < anchor.y;
-      const sizeW = clamp(
-        flippedX ? anchorCellRight - moveEvent.clientX : moveEvent.clientX - seen.left,
-        cellW,
-        spanPxX(flippedX ? anchor.x + 1 : columns - anchor.x),
-      );
-      const sizeH = clamp(
-        flippedY ? anchorCellBottom - moveEvent.clientY : moveEvent.clientY - seen.top,
-        cellH,
-        spanPxY(flippedY ? anchor.y + 1 : rows - anchor.y),
-      );
-      const left = flippedX ? anchorCellRight - sizeW : seen.left;
-      const top = flippedY ? anchorCellBottom - sizeH : seen.top;
       gestureRef.current = {
         key: block.key,
         mode: "resize",
         placement: candidate,
         footprint: rotatedFootprint(candidate, angle),
         valid: latestValid,
+        // The box follows the hand; the ghost shows where it will snap.
         ...previewBox(
-          { left, top, right: left + sizeW, bottom: top + sizeH },
-          rect,
-          angle,
-          strides.scale,
+          placementFromLocalBox(origin, angle, live, anchor),
+          origin,
+          strides,
         ),
       };
       scheduleGesturePaint();
@@ -898,6 +920,7 @@ export function Grid<TData>(props: GridProps<TData>) {
     const box = cellBox(strides, block);
     const center = { x: box.centerX, y: box.centerY };
     const origin = block.rotation ?? 0;
+    settledRotationRef.current = origin;
     const grabbedAt = angleFromCenter(center, {
       x: event.clientX,
       y: event.clientY,
@@ -921,6 +944,9 @@ export function Grid<TData>(props: GridProps<TData>) {
       latest = normalizeAngle(
         moveEvent.shiftKey ? snapAngle(swept, ROTATION_SNAP_STEP) : swept,
       );
+      // Where the tile has to be left painting when the spin ends, so the
+      // teardown hands the angle back rather than blanking it.
+      settledRotationRef.current = latest;
       gestureRef.current = {
         key: block.key,
         mode: "rotate",
@@ -967,15 +993,11 @@ export function Grid<TData>(props: GridProps<TData>) {
     }
     const strides = readStrides();
     if (!strides) return;
-    // The box the seller sees, and so the edge they think they are on. The
-    // cursor needs no turning of its own: an up-down arrow on the top edge of
-    // that box is exactly what dragging it does.
-    const edges = edgesUnderPointer(
-      cellBox(strides, blockFootprint(block)),
-      event.clientX,
-      event.clientY,
-    );
-    const next = edges ? edgeCursor(edges) : "";
+    // The block's own border, so the strip that shows a resize cursor is the
+    // one that resizes. The cursor arrow is then turned to face the way that
+    // border does, since a tilted tile's top edge does not point up the screen.
+    const edges = edgeGrab(strides, block, event.clientX, event.clientY);
+    const next = edges ? edgeCursor(edges, block.rotation ?? 0) : "";
     if (cell.style.cursor !== next) cell.style.cursor = next;
   }
 

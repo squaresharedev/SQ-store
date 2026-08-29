@@ -69,3 +69,30 @@ export function toLocalPoint(center: Point, degrees: number, point: Point): Poin
     y: center.y + dx * sin + dy * cos,
   };
 }
+
+/**
+ * A point turned CLOCKWISE about a centre — the exact inverse of
+ * {@link toLocalPoint}.
+ *
+ * The pair is what a resize on a tilted block is made of: un-rotate the pointer
+ * to ask which of the block's own edges the hand is on, then re-rotate a corner
+ * of the answer to ask where on screen that corner has to stay.
+ */
+export function rotatePoint(center: Point, degrees: number, point: Point): Point {
+  if (degrees === 0) return point;
+  const radians = degrees / DEG;
+  const cos = Math.cos(radians);
+  const sin = Math.sin(radians);
+  const dx = point.x - center.x;
+  const dy = point.y - center.y;
+  return {
+    x: center.x + dx * cos - dy * sin,
+    y: center.y + dx * sin + dy * cos,
+  };
+}
+
+/** A DIRECTION turned clockwise: the same arithmetic with nothing to turn
+ *  about, for offsets rather than positions. */
+export function rotateVector(vector: Point, degrees: number): Point {
+  return rotatePoint({ x: 0, y: 0 }, degrees, vector);
+}

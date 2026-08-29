@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { StorefrontHeader, StorefrontTheme } from "@/types/storefront";
 import {
   CONTROLS_GROUPS,
@@ -14,6 +14,7 @@ import { useSettingTarget } from "@/lib/storefront/setting-context";
 import { CollapsibleSection } from "@/components/ui/CollapsibleSection";
 import { PanelBackRow, PanelMenu, PanelMenuItem } from "@/components/ui/PanelMenu";
 import { PanelSearchField } from "./PanelSearchField";
+import type { EditorJump, EditorSearchEntry } from "./editor-search";
 import { FONT_LABELS } from "./config-maps";
 import { ThemePanel } from "./ThemePanel";
 import { HeaderSection } from "./HeaderSection";
@@ -62,6 +63,10 @@ export function ControlsPanel({
   showGrid,
   onShowGridChange,
   onCanvasChange,
+  blockCount,
+  onOpenLayers,
+  searchEntries,
+  onJump,
 }: {
   theme: StorefrontTheme;
   header: StorefrontHeader;
@@ -78,6 +83,21 @@ export function ControlsPanel({
   /** Editor-only view preference, not part of the saved config. */
   showGrid: boolean;
   onShowGridChange: (show: boolean) => void;
+  /** How many blocks the stack holds, shown as this row's hint. */
+  blockCount?: number;
+  /** Opens the stack over the whole panel. Absent (the dev gallery) drops the
+   *  row rather than rendering a dead one. */
+  onOpenLayers?: () => void;
+  /** Everything the search field can find: the settings, plus whatever the
+   *  owner is prepared to act on (see editorEntries). Built by the owner
+   *  because half of it is the live board. */
+  searchEntries: readonly EditorSearchEntry[];
+  /**
+   * Acts on a search hit this panel cannot serve itself: selecting a block,
+   * opening a drawer. Absent (the dev gallery) narrows the index to settings
+   * rather than offering rows that would do nothing.
+   */
+  onJump?: (target: EditorJump) => void;
 }) {
   // View state, deliberately local: which group is open is not part of the
   // design, so it never reaches the undo history or the saved document.
@@ -101,6 +121,16 @@ export function ControlsPanel({
   /** Which half of Product cards a summons is pointing at, if any. */
   const summoned = activeRef?.kind === "cards" ? activeRef.section : null;
 
+  // Never offer a row that would do nothing. Without an owner to jump for it,
+  // this panel can only open a settings group, so that is all it indexes.
+  const searchable = useMemo(
+    () =>
+      onJump
+        ? searchEntries
+        : searchEntries.filter((item) => item.payload.kind === "setting"),
+    [searchEntries, onJump],
+  );
+
   if (group === null) {
     return (
       <PanelMenu>
@@ -109,9 +139,14 @@ export function ControlsPanel({
             Without one (the dev gallery, a test) the panel still navigates
             itself, because a filter field that did nothing would be worse. */}
         <PanelSearchField
-          onPick={(ref) => {
-            if (setting) setting.open(ref);
-            else setGroup(settingGroup(ref));
+          entries={searchable}
+          onPick={(target) => {
+            if (target.kind !== "setting") {
+              onJump?.(target);
+              return;
+            }
+            if (setting) setting.open(target.ref);
+            else setGroup(settingGroup(target.ref));
           }}
         />
         {GROUPS.map((id) => (
@@ -131,6 +166,23 @@ export function ControlsPanel({
             onClick={() => setGroup(id)}
           />
         ))}
+        {/* Not one of the GROUPS: those are settings that live on the theme,
+            and this one opens a view of the board. Reachable from here as well
+            as from a selected block because its best use is finding the block
+            you CANNOT click — the one buried under something else. */}
+        {onOpenLayers && (
+          <PanelMenuItem
+            label="Layers"
+            hint={
+              blockCount === undefined
+                ? undefined
+                : blockCount === 1
+                  ? "1 object"
+                  : `${blockCount} objects`
+            }
+            onClick={onOpenLayers}
+          />
+        )}
       </PanelMenu>
     );
   }

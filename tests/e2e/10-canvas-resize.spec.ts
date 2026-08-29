@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import {
+  canvasStill,
   createStorefrontViaUI,
   expectToast,
   freshUser,
@@ -84,6 +85,10 @@ async function stride() {
 
 /** Drag the one resize handle by a screen-px delta. */
 async function dragHandle(dx: number, dy: number, index = 0) {
+  // Selecting a block opens the colour layer over the canvas, and a board that
+  // layer lands on eases out from under it. Measure the handle only once that
+  // has finished, or the press lands where the handle used to be.
+  await canvasStill(page);
   const button = page
     .locator("li[data-grid-cell]")
     .nth(index)
@@ -176,6 +181,7 @@ test.describe("storefront canvas resize", () => {
 
   test("dragging the handle past the tile stretches it up", async () => {
     // Move the tile down a row so there is space above it.
+    await canvasStill(page);
     const tile = tiles().first();
     const box = (await tile.boundingBox())!;
     const step = await stride();

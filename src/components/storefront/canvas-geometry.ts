@@ -250,6 +250,25 @@ function recover(
   return move;
 }
 
+/**
+ * Which box has to be kept visible along one axis, given the room there is.
+ *
+ * The WHOLE BOARD whenever it fits, because showing all of it is strictly
+ * better than showing one tile of it: a board left tucked a few px under a
+ * panel it could have cleared completely reads as a bug rather than as
+ * restraint. The SELECTION takes over only on the axis where the board cannot
+ * fit, which is exactly where "show everything" was never on offer. On a phone
+ * with a sheet up that is usually the vertical axis and not the horizontal one,
+ * so the two answers can differ per axis, and should.
+ */
+function keepVisible(
+  [min, max]: [number, number],
+  board: { start: number; size: number },
+  selection: { start: number; size: number },
+): { start: number; size: number } {
+  return board.size <= max - min ? board : selection;
+}
+
 /** Compare the visible stretch before and after ON SCREEN: the workspace's own
  *  corner may have moved between the two, so its local coordinates cannot be
  *  compared directly. */
@@ -269,11 +288,18 @@ function takenFrom(
  * The pan the board should have after the workspace's box or its panel cover
  * changed: rule 1 then rule 2, in that order.
  *
- * `anchor` is what has to stay visible, in the board's own UNSCALED
- * coordinates. Normally the whole board; the selected tiles when there are any,
- * because a seller who opens a panel from a block is asking about THAT block,
- * and on a phone (where a sheet can take 70% of the screen) revealing the whole
- * board is impossible while revealing the one tile usually is not.
+ * The two come back SEPARATELY because they are played at different speeds.
+ * `hold` is a correction, not a move: the board is already meant to be there,
+ * and easing into it would draw the very slide the correction exists to hide.
+ * `pan` is where the board should end up once it has also got out from under a
+ * panel standing on it, and THAT is a move, so it eases.
+ *
+ * `board` and `anchor` are both in the board's own UNSCALED coordinates, and
+ * `keepVisible` picks between them per axis: the board wherever it still fits,
+ * the selected tiles wherever it does not. A seller who opens a panel from a
+ * block is asking about THAT block, and on a phone (where a sheet can take 70%
+ * of the screen) revealing the whole board is impossible while revealing the
+ * one tile usually is not.
  */
 export function reanchorPan({
   pan,
@@ -282,6 +308,7 @@ export function reanchorPan({
   previousInsets,
   workspace,
   insets,
+  board,
   anchor,
 }: {
   pan: { x: number; y: number };
@@ -293,15 +320,23 @@ export function reanchorPan({
   /** The workspace as it is now. */
   workspace: Box;
   insets: Insets;
+  /** The board's full extent, preferred wherever it still fits. */
+  board: Box;
+  /** The blocks being worked on, used on any axis the board cannot fit. */
   anchor: Box;
-}): { x: number; y: number } {
+}): { hold: { x: number; y: number }; pan: { x: number; y: number } } {
   // 1. HOLD STILL. The pan is measured from the workspace's top-left corner,
   //    so undoing that corner's move is exactly what keeps the board on the
   //    same pixels of the screen. A panel that only resized the workspace (the
-  //    right-hand column, every bottom sheet) moves the corner by nothing and
-  //    lands here as a no-op, which is the correct answer for it too.
-  let x = pan.x + (previous.left - workspace.left);
-  let y = pan.y + (previous.top - workspace.top);
+  //    right-hand column) moves the corner by nothing and lands here as a
+  //    no-op, and a panel that floats OVER the canvas (the colour layer, every
+  //    bottom sheet) never touches the box at all, so it does too.
+  const hold = {
+    x: pan.x + (previous.left - workspace.left),
+    y: pan.y + (previous.top - workspace.top),
+  };
+  let x = hold.x;
+  let y = hold.y;
 
   // 2. RECOVER. Now, with the board back where the seller left it, ask whether
   //    the panel is actually standing on it.
@@ -309,17 +344,27 @@ export function reanchorPan({
   const wasY = safeSpan(previous.height, previousInsets.top, previousInsets.bottom);
   const nowX = safeSpan(workspace.width, insets.left, insets.right);
   const nowY = safeSpan(workspace.height, insets.top, insets.bottom);
+  const keepX = keepVisible(
+    nowX,
+    { start: board.left * zoom, size: board.width * zoom },
+    { start: anchor.left * zoom, size: anchor.width * zoom },
+  );
+  const keepY = keepVisible(
+    nowY,
+    { start: board.top * zoom, size: board.height * zoom },
+    { start: anchor.top * zoom, size: anchor.height * zoom },
+  );
   x += recover(
-    x + anchor.left * zoom,
-    anchor.width * zoom,
+    x + keepX.start,
+    keepX.size,
     takenFrom(previous.left, wasX, workspace.left, nowX),
     nowX,
   );
   y += recover(
-    y + anchor.top * zoom,
-    anchor.height * zoom,
+    y + keepY.start,
+    keepY.size,
     takenFrom(previous.top, wasY, workspace.top, nowY),
     nowY,
   );
-  return { x, y };
+  return { hold, pan: { x, y } };
 }

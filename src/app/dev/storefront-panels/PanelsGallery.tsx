@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { helpTextClass } from "@/components/ui/control-styles";
 import { ToastProvider } from "@/components/ui/Toast";
 import type { Product } from "@/types/product";
 import { ControlsPanel } from "@/components/storefront/ControlsPanel";
+import { editorEntries } from "@/components/storefront/editor-search";
 import { ImageBlockEditor } from "@/components/storefront/ImageBlockEditor";
 import { MultiBlockEditor } from "@/components/storefront/MultiBlockEditor";
 import { SettingTargetProvider } from "@/lib/storefront/setting-context";
@@ -95,6 +96,9 @@ const PRODUCT: Product = {
   lowStockThreshold: 3,
 };
 
+/** The catalogue the product tile resolves its name through. */
+const PRODUCTS_BY_ID = new Map([[PRODUCT.id, PRODUCT]]);
+
 /** The panel column at its real docked width, so wrapping and truncation show
  *  up here exactly as they do in the editor. */
 function Panel({
@@ -129,6 +133,18 @@ export function PanelsGallery() {
   const [shape, setShape] = useState(SHAPE_BLOCK);
   const [text, setText] = useState(TEXT_BLOCK);
   const [image, setImage] = useState(IMAGE_BLOCK);
+
+  // The editor's search index over the SAME fixtures the inspectors below use,
+  // so the field can be exercised on all three of the things it finds:
+  // settings, objects on the board, and the drawers. The designer holds live
+  // state here; the gallery holds four blocks that never move.
+  const searchEntries = useMemo(
+    () => editorEntries([PRODUCT_BLOCK, text, shape, image], PRODUCTS_BY_ID),
+    [text, shape, image],
+  );
+  // Standing in for the editor, which selects the block or opens the drawer.
+  // Shown rather than performed: there is no canvas here to select on.
+  const [jumped, setJumped] = useState<string | null>(null);
 
   return (
     <ToastProvider>
@@ -170,8 +186,21 @@ export function PanelsGallery() {
             onCustomFontUrlChange={() => {}}
             showGrid={showGrid}
             onShowGridChange={setShowGrid}
+            searchEntries={searchEntries}
+            onJump={(target) =>
+              setJumped(
+                target.kind === "block"
+                  ? `select block ${target.key}`
+                  : `open the ${target.panel} panel`,
+              )
+            }
           />
         </Panel>
+        {jumped && (
+          <p className={helpTextClass} role="status">
+            The editor would: {jumped}
+          </p>
+        )}
 
         <Panel
           title="Product inspector"

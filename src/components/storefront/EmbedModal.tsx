@@ -1,7 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { motion } from "motion/react";
 import { useToast } from "@/components/ui/Toast";
+import {
+  RotateArrowIcon,
+  useIconHoverProps,
+} from "@/components/ui/action-icons";
 import { CopyButton } from "@/components/ui/CopyButton";
 import { Modal } from "@/components/ui/modal";
 import { Switch } from "@/components/ui/switch";
@@ -73,6 +78,9 @@ export function EmbedModal({
   onSaved: (id: string, embed: EmbedSettings) => void;
 }) {
   const toast = useToast();
+  // The rotate buttons drive their own icon: hovering anywhere on the button
+  // turns the key.
+  const iconHover = useIconHoverProps();
   const [enabled, setEnabled] = useState(false);
   const [domainsText, setDomainsText] = useState("");
   const [saving, setSaving] = useState(false);
@@ -188,13 +196,15 @@ export function EmbedModal({
                   you&apos;ll need to paste the new snippet everywhere.
                 </p>
                 <div className="flex flex-wrap items-center gap-2 pt-1">
-                  <button
+                  <motion.button
                     type="button"
                     onClick={handleRotate}
                     className={`${destructiveButtonClass} px-3 py-1.5 text-xs`}
+                    {...iconHover}
                   >
+                    <RotateArrowIcon />
                     Rotate key
-                  </button>
+                  </motion.button>
                   <button
                     type="button"
                     onClick={() => setRotateState({ status: "idle" })}
@@ -211,16 +221,23 @@ export function EmbedModal({
                   revoke every existing snippet.
                 </p>
                 <div className="flex flex-wrap items-center gap-3 pt-1">
-                  <button
+                  <motion.button
                     type="button"
                     onClick={() => setRotateState({ status: "confirming" })}
                     disabled={rotateState.status === "rotating"}
                     className={`${secondaryButtonClass} px-3 py-1.5 text-xs`}
+                    {...iconHover}
                   >
+                    {/* In flight the ring keeps turning on its own: this button
+                        is pointer-events-none while disabled, so the hover
+                        story could never carry the waiting state. */}
+                    <RotateArrowIcon
+                      spinning={rotateState.status === "rotating"}
+                    />
                     {rotateState.status === "rotating"
                       ? "Rotating…"
                       : "Rotate key"}
-                  </button>
+                  </motion.button>
                 </div>
               </>
             )}

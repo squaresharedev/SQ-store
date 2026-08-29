@@ -66,8 +66,21 @@ export type SettingEntry = {
   /** Stable id, and the value carried in `?setting=`. */
   id: string;
   label: string;
-  /** What else a seller might call it. Ranked by the shared search ranker, so
-   *  these only have to be plausible words, not an exhaustive thesaurus. */
+  /**
+   * What else a seller might call it.
+   *
+   * The ranker handles spelling, typos and abbreviations on its own (see
+   * lib/search/vocabulary), so there is no point listing "colour" next to
+   * "color" or "bg" next to "background". What DOES belong here is the
+   * vocabulary no rule could derive: the words for the thing that are not the
+   * word we chose ("wallpaper", "gutter", "roundness"), and the way someone
+   * describes it when they do not know its name at all ("behind the tiles",
+   * "space between products").
+   *
+   * Matching is per word, so a multi-word keyword is not a phrase that has to
+   * be typed whole. It contributes each of its words, and pays out in full
+   * when the whole thing is typed.
+   */
   keywords: readonly string[];
   ref: SettingRef;
 };
@@ -82,59 +95,179 @@ export const GROUP_LABELS: Record<ControlsGroup, string> = {
   soldOut: "Sold out",
 };
 
+/**
+ * How a setting is DESCRIBED to any search index, in one place.
+ *
+ * This is the contract that keeps the two search surfaces honest. Both build
+ * their own entry around this (they carry different payloads and render
+ * differently), but the strings a query is matched against come from here, so
+ * a setting cannot rank one way in the palette and another way in the editor.
+ *
+ * The subtitle says "Storefront" even inside the editor, where that is
+ * obvious. It is deliberate: it is a searchable term as much as a caption, and
+ * it is what lets "store bg colour" find the Background setting rather than
+ * getting two words out of three. The editor shows the group name instead of
+ * this line, which is a presentation choice and costs the matching nothing.
+ */
+export function settingIndexFields(setting: SettingEntry): {
+  title: string;
+  subtitle: string;
+  keywords: readonly string[];
+} {
+  return {
+    title: setting.label,
+    subtitle: `Storefront / ${GROUP_LABELS[settingGroup(setting.ref)]}`,
+    keywords: setting.keywords,
+  };
+}
+
 export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
   {
     id: "looks",
     label: "Storefront look",
-    keywords: ["preset", "theme preset", "vibe", "style", "restyle", "minimal", "bold", "luxe"],
+    keywords: [
+      "preset",
+      "theme preset",
+      "vibe",
+      "style",
+      "restyle",
+      "minimal",
+      "bold",
+      "luxe",
+      "appearance",
+      "design",
+      "template",
+      "skin",
+      "whole store look",
+    ],
     ref: { kind: "group", group: "theme" },
   },
   {
     id: "background",
     label: "Background",
-    keywords: ["canvas background", "gradient", "wallpaper", "backdrop", "background image"],
+    keywords: [
+      "background colour",
+      "store background colour",
+      "storefront background",
+      "canvas background",
+      "page colour",
+      "board colour",
+      "gradient",
+      "wallpaper",
+      "backdrop",
+      "background image",
+      "behind the tiles",
+      "behind the products",
+    ],
     ref: { kind: "group", group: "theme" },
   },
   {
     id: "accent",
     label: "Accent colour",
-    keywords: ["brand colour", "primary colour", "highlight", "accent color"],
+    keywords: [
+      "brand colour",
+      "primary colour",
+      "highlight colour",
+      "button colour",
+      "link colour",
+      "accent",
+    ],
     ref: { kind: "group", group: "theme" },
   },
   {
     id: "header",
     label: "Store name and bio",
-    keywords: ["masthead", "heading", "store title", "tagline", "about", "show header"],
+    keywords: [
+      "masthead",
+      "heading",
+      "store title",
+      "storefront name",
+      "shop name",
+      "tagline",
+      "about",
+      "bio",
+      "show header",
+      "hide header",
+      "intro text",
+    ],
     ref: { kind: "group", group: "header" },
   },
   {
     id: "font",
     label: "Font",
-    keywords: ["typeface", "typography", "custom font", "upload font", "lettering"],
+    keywords: [
+      "typeface",
+      "typography",
+      "custom font",
+      "upload font",
+      "lettering",
+      "text style",
+      "letters",
+      "words look",
+    ],
     ref: { kind: "group", group: "typography" },
   },
   {
     id: "canvas-size",
     label: "Canvas size",
-    keywords: ["columns", "rows", "board size", "grid size", "bigger canvas"],
+    keywords: [
+      "columns",
+      "rows",
+      "board size",
+      "grid size",
+      "bigger canvas",
+      "wider",
+      "taller",
+      "more room",
+      "resize the board",
+      "how many products fit",
+    ],
     ref: { kind: "group", group: "canvas" },
   },
   {
     id: "grid-gap",
     label: "Grid spacing",
-    keywords: ["gap", "gutter", "density", "tile spacing", "tighter", "looser"],
+    keywords: [
+      "gap",
+      "gutter",
+      "density",
+      "tile spacing",
+      "space between tiles",
+      "space between products",
+      "tighter",
+      "looser",
+      "crowded",
+    ],
     ref: { kind: "group", group: "canvas" },
   },
   {
     id: "display-mode",
     label: "Grid or carousel",
-    keywords: ["carousel", "slider", "layout mode", "scroll row"],
+    keywords: [
+      "carousel",
+      "slider",
+      "layout mode",
+      "scroll row",
+      "swipe",
+      "one row",
+      "grid instead",
+    ],
     ref: { kind: "group", group: "canvas" },
   },
   {
     id: "tile-layout",
     label: "Tile layout",
-    keywords: ["preset layout", "standard", "caption", "gallery", "bare", "arrangement"],
+    keywords: [
+      "preset layout",
+      "standard",
+      "caption",
+      "gallery",
+      "bare",
+      "arrangement",
+      "card layout",
+      "tile style",
+      "product card",
+    ],
     ref: { kind: "cards", section: "cardStyle" },
   },
   {
@@ -146,25 +279,51 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
       "product name position",
       "title placement",
       "title spot",
+      "name under the image",
+      "hide the title",
     ],
     ref: { kind: "cards", section: "cardStyle" },
   },
   {
     id: "title-style",
     label: "Title style",
-    keywords: ["bar", "overlay", "shadow", "caption style", "name style"],
+    keywords: [
+      "bar",
+      "overlay",
+      "shadow",
+      "caption style",
+      "name style",
+      "title colour",
+      "product name colour",
+      "title size",
+    ],
     ref: { kind: "cards", section: "cardStyle" },
   },
   {
     id: "corner-radius",
     label: "Corner roundness",
-    keywords: ["rounded corners", "circle tiles", "square tiles", "radius", "card shape"],
+    keywords: [
+      "rounded corners",
+      "circle tiles",
+      "square tiles",
+      "sharp corners",
+      "radius",
+      "card shape",
+      "pill",
+    ],
     ref: { kind: "cards", section: "cardStyle" },
   },
   {
     id: "title-inset",
     label: "Title edge spacing",
-    keywords: ["padding", "breathing room", "inset", "title margin"],
+    keywords: [
+      "padding",
+      "breathing room",
+      "inset",
+      "title margin",
+      "title padding",
+      "text too close to the edge",
+    ],
     ref: { kind: "cards", section: "cardStyle" },
   },
   {
@@ -176,6 +335,7 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
       "price placement",
       "hide the price",
       "price spot",
+      "show the price",
     ],
     ref: { kind: "cards", section: "priceTag" },
   },
@@ -184,7 +344,7 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
     label: "Price tag style",
     keywords: [
       "price colour",
-      "price tag color",
+      "price tag colour",
       "price font",
       "price size",
       "chip",
@@ -195,7 +355,14 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
   {
     id: "sold-out",
     label: "Sold out products",
-    keywords: ["out of stock", "hide sold out", "sold out badge", "unavailable"],
+    keywords: [
+      "out of stock",
+      "hide sold out",
+      "sold out badge",
+      "unavailable",
+      "stock",
+      "inventory",
+    ],
     ref: { kind: "group", group: "soldOut" },
   },
 ];

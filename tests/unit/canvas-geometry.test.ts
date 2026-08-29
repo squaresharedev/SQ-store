@@ -21,11 +21,9 @@ function box(left: number, top: number, width: number, height: number): Box {
 
 describe("panelInset", () => {
   it("charges nothing for a panel docked BESIDE the workspace", () => {
-    // Desktop: the columns are laid out next to the canvas, so the workspace
-    // box has already paid for them.
-    const leftColumn = box(-280, 60, 280, 800);
+    // The design column on the right is laid out next to the canvas, so the
+    // workspace box has already paid for it.
     const rightColumn = box(1200, 60, 320, 800);
-    expect(panelInset(WORKSPACE, leftColumn)).toEqual(NO_INSETS);
     expect(panelInset(WORKSPACE, rightColumn)).toEqual(NO_INSETS);
   });
 
@@ -34,6 +32,13 @@ describe("panelInset", () => {
     // rule is "cheapest edge to clear" rather than "edge it touches".
     const sheet = box(0, 560, 1200, 400);
     expect(panelInset(WORKSPACE, sheet)).toEqual({ ...NO_INSETS, bottom: 300 });
+  });
+
+  it("reads a floating layer as an inset on the edge it hugs", () => {
+    // The colour palette: inset a little from the workspace's top-left corner
+    // and stopping short of the toolbar, so it is flush with no edge at all.
+    const layer = box(12, 72, 280, 680);
+    expect(panelInset(WORKSPACE, layer)).toEqual({ ...NO_INSETS, left: 292 });
   });
 
   it("reads drawers from every side, at any size", () => {
@@ -97,22 +102,24 @@ describe("slideIntoView", () => {
 });
 
 describe("reanchorPan", () => {
+  /** A board comfortably smaller than the workspace. */
   const board: Box = { left: 0, top: 0, width: 600, height: 500 };
   const wide = box(0, 60, 1200, 800);
-  /** The same workspace with the 280px colour column open beside it. */
+  /** The same workspace with a 280px column DOCKED beside it. */
   const narrowed = box(280, 60, 920, 800);
 
   it("holds the board still when a docked panel moves the workspace corner", () => {
-    // The left column opened: the workspace starts 280px further right, so the
-    // pan has to come back by the same 280 to stay on the same screen pixels.
-    // The board sat clear of that strip, so nothing else happens.
-    const pan = reanchorPan({
+    // The workspace starts 280px further right, so the pan has to come back by
+    // the same 280 to stay on the same screen pixels. The board sat clear of
+    // that strip, so nothing else happens.
+    const { pan } = reanchorPan({
       pan: { x: 500, y: 100 },
       zoom: 1,
       previous: wide,
       previousInsets: NO_INSETS,
       workspace: narrowed,
       insets: NO_INSETS,
+      board,
       anchor: board,
     });
     expect(pan).toEqual({ x: 220, y: 100 });
@@ -121,28 +128,66 @@ describe("reanchorPan", () => {
   it("slides out from under a docked panel that lands on the board", () => {
     // Same panel, but the board was parked at the left edge: holding it still
     // would put its first 180px behind the column, so it steps clear.
-    const pan = reanchorPan({
+    const { pan } = reanchorPan({
       pan: { x: 100, y: 100 },
       zoom: 1,
       previous: wide,
       previousInsets: NO_INSETS,
       workspace: narrowed,
       insets: NO_INSETS,
+      board,
       anchor: board,
     });
     // Held still at -180, then the least move that clears the panel.
     expect(pan).toEqual({ x: 0, y: 100 });
   });
 
+  it("separates the correction from the move", () => {
+    // `hold` is where the board already was on screen and is applied in the
+    // same frame; only the difference between it and `pan` is a real move that
+    // may be eased. Easing the correction would draw the very slide it exists
+    // to hide.
+    const { hold, pan } = reanchorPan({
+      pan: { x: 100, y: 100 },
+      zoom: 1,
+      previous: wide,
+      previousInsets: NO_INSETS,
+      workspace: narrowed,
+      insets: NO_INSETS,
+      board,
+      anchor: board,
+    });
+    expect(hold).toEqual({ x: -180, y: 100 });
+    expect(pan).toEqual({ x: 0, y: 100 });
+  });
+
+  it("needs no correction at all for a panel that FLOATS over the canvas", () => {
+    // The colour layer and every bottom sheet: the workspace box is untouched,
+    // so there is nothing to hold, only cover to get out from under.
+    const { hold, pan } = reanchorPan({
+      pan: { x: 40, y: 100 },
+      zoom: 1,
+      previous: wide,
+      previousInsets: NO_INSETS,
+      workspace: wide,
+      insets: { ...NO_INSETS, left: 280 },
+      board,
+      anchor: board,
+    });
+    expect(hold).toEqual({ x: 40, y: 100 });
+    expect(pan).toEqual({ x: 280, y: 100 });
+  });
+
   it("does nothing when a panel only narrows the workspace clear of the board", () => {
     // The right-hand column: same corner, smaller box, board untouched.
-    const pan = reanchorPan({
+    const { pan } = reanchorPan({
       pan: { x: 40, y: 100 },
       zoom: 1,
       previous: wide,
       previousInsets: NO_INSETS,
       workspace: box(0, 60, 880, 800),
       insets: NO_INSETS,
+      board,
       anchor: board,
     });
     expect(pan).toEqual({ x: 40, y: 100 });
@@ -152,13 +197,14 @@ describe("reanchorPan", () => {
     // Closing the column gives 280px back. The board's right end was already
     // past the workspace before that, by the seller's own hand, and freeing
     // room is not permission to undo their pan.
-    const pan = reanchorPan({
+    const { pan } = reanchorPan({
       pan: { x: 700, y: 100 },
       zoom: 1,
       previous: narrowed,
       previousInsets: NO_INSETS,
       workspace: wide,
       insets: NO_INSETS,
+      board,
       anchor: board,
     });
     // Held still (980 in the old box, 1280 in the new one): same screen pixels.
@@ -167,13 +213,14 @@ describe("reanchorPan", () => {
 
   it("lifts the board off a bottom sheet, which never moves the corner", () => {
     const workspace = box(0, 60, 390, 700);
-    const pan = reanchorPan({
+    const { pan } = reanchorPan({
       pan: { x: 20, y: 400 },
       zoom: 0.5,
       previous: workspace,
       previousInsets: NO_INSETS,
       workspace,
       insets: { ...NO_INSETS, bottom: 420 },
+      board,
       anchor: board,
     });
     // 250px of board (500 * 0.5) starting at 400, with only [0, 280] visible.
@@ -182,13 +229,14 @@ describe("reanchorPan", () => {
 
   it("puts the board back down when that sheet closes again", () => {
     const workspace = box(0, 60, 390, 700);
-    const pan = reanchorPan({
+    const { pan } = reanchorPan({
       pan: { x: 20, y: 30 },
       zoom: 0.5,
       previous: workspace,
       previousInsets: { ...NO_INSETS, bottom: 420 },
       workspace,
       insets: NO_INSETS,
+      board,
       anchor: board,
     });
     // Nothing moved the corner and nothing is covering the board any more, so
@@ -196,35 +244,57 @@ describe("reanchorPan", () => {
     expect(pan).toEqual({ x: 20, y: 30 });
   });
 
-  it("keeps a SELECTED tile clear of a sheet even when the board cannot fit", () => {
+  it("prefers the WHOLE BOARD over the selection while the board still fits", () => {
+    // A board that can be shown entirely should be: clearing the panel by just
+    // enough to reveal the selected tile would leave the board's own edge
+    // tucked under it, which reads as a bug rather than as restraint.
+    const tile: Box = { left: 200, top: 40, width: 96, height: 96 };
+    const { pan } = reanchorPan({
+      pan: { x: 40, y: 100 },
+      zoom: 1,
+      previous: wide,
+      previousInsets: NO_INSETS,
+      workspace: wide,
+      insets: { ...NO_INSETS, left: 280 },
+      board,
+      anchor: tile,
+    });
+    // The tile alone would have needed 40 to clear; the board needs 240.
+    expect(pan).toEqual({ x: 280, y: 100 });
+  });
+
+  it("keeps a SELECTED tile clear of a sheet once the board cannot fit", () => {
     const workspace = box(0, 60, 390, 700);
     const tile: Box = { left: 100, top: 380, width: 96, height: 96 };
-    const pan = reanchorPan({
+    const { pan } = reanchorPan({
       pan: { x: 0, y: 0 },
       zoom: 1,
       previous: workspace,
       previousInsets: NO_INSETS,
       workspace,
       insets: { ...NO_INSETS, bottom: 420 },
+      board,
       anchor: tile,
     });
     // The tile ran from 380 to 476 with only [0, 280] left: it comes up by 196.
     expect(pan).toEqual({ x: 0, y: -196 });
   });
 
-  it("scales the anchor by the zoom", () => {
+  it("scales both boxes by the zoom", () => {
     const workspace = box(0, 60, 1000, 800);
     const tile: Box = { left: 400, top: 0, width: 100, height: 100 };
-    const pan = reanchorPan({
+    const { pan } = reanchorPan({
       pan: { x: 0, y: 0 },
       zoom: 2,
       previous: workspace,
       previousInsets: NO_INSETS,
       workspace,
       insets: { ...NO_INSETS, left: 300 },
+      board,
       anchor: tile,
     });
-    // The tile paints at 800..1000 already inside [300, 1000]: nothing to do.
+    // At 2x the board is 1200 wide against 700 of room, so the tile answers:
+    // it paints at 800..1000, already inside [300, 1000]. Nothing to do.
     expect(pan.x).toBe(0);
   });
 });

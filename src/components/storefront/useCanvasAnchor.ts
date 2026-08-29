@@ -72,25 +72,32 @@ function coverOf(workspace: Box, panels: HTMLElement[]): Insets {
   return insets;
 }
 
-/**
- * What has to stay visible, in the board's own UNSCALED coordinates.
- *
- * The selected tiles when there are any: a seller who opened a panel from a
- * block is asking about that block, and on a phone, where a sheet can take 70%
- * of the screen, revealing the whole board is impossible while revealing the
- * one tile usually is not. The whole board otherwise.
- *
- * Read off the live DOM rather than from block coordinates so a tilted tile
- * counts by the room it actually takes, and so a masthead or a carousel (which
- * have no grid cell of their own) simply fall back to the board.
- */
-function anchorBox(stage: HTMLElement, keys: readonly string[]): Box {
-  const board: Box = {
+/** The board's full extent, in its own UNSCALED coordinates. */
+function boardBox(stage: HTMLElement): Box {
+  return {
     left: 0,
     top: 0,
     width: stage.offsetWidth,
     height: stage.offsetHeight,
   };
+}
+
+/**
+ * The selected tiles, in the board's own UNSCALED coordinates, falling back to
+ * the whole board when there is no selection to speak of.
+ *
+ * This is the fallback anchor, used on whichever axis the board itself no
+ * longer fits (see keepVisible): a seller who opened a panel from a block is
+ * asking about that block, and on a phone, where a sheet can take 70% of the
+ * screen, revealing the whole board is impossible while revealing the one tile
+ * usually is not.
+ *
+ * Read off the live DOM rather than from block coordinates so a tilted tile
+ * counts by the room it actually takes, and so a masthead or a carousel (which
+ * have no grid cell of their own) simply fall back to the board.
+ */
+function selectionBox(stage: HTMLElement, keys: readonly string[]): Box {
+  const board = boardBox(stage);
   if (keys.length === 0) return board;
 
   const stageRect = stage.getBoundingClientRect();
@@ -194,32 +201,46 @@ export function useCanvasAnchor({
     const previousInsets = lastInsets.current;
     lastBox.current = box;
     lastInsets.current = insets;
-    viewport.setInsets(insets);
 
-    // First measurement: there is no "before" to hold the board against.
-    if (!previousBox) return;
-    if (boxesEqual(previousBox, box) && insetsEqual(previousInsets, insets)) {
+    const stage = viewport.stage();
+    const changed =
+      previousBox !== null &&
+      !(boxesEqual(previousBox, box) && insetsEqual(previousInsets, insets));
+    // Nothing to answer for: the first measurement (no "before" to hold the
+    // board against), an unchanged layout, or a board that has not laid out.
+    if (!changed || !stage || stage.offsetWidth <= 0) {
+      viewport.setInsets(insets);
       return;
     }
 
-    const stage = viewport.stage();
-    if (!stage || stage.offsetWidth <= 0) return;
-    const anchor = anchorBox(stage, keys);
-    viewport.set(
-      (current) => ({
-        zoom: current.zoom,
-        pan: reanchorPan({
-          pan: current.pan,
-          zoom: current.zoom,
-          previous: previousBox,
-          previousInsets,
-          workspace: box,
-          insets,
-          anchor,
-        }),
-      }),
-      { animate: true },
-    );
+    const view = viewport.get();
+    const { hold, pan } = reanchorPan({
+      pan: view.pan,
+      zoom: view.zoom,
+      previous: previousBox,
+      previousInsets,
+      workspace: box,
+      insets,
+      board: boardBox(stage),
+      anchor: selectionBox(stage, keys),
+    });
+
+    // THE TWO RULES, AT THEIR TWO SPEEDS.
+    //
+    // Holding still is a CORRECTION, and it lands in the same frame the layout
+    // changed: the board is already meant to be on those pixels, so easing
+    // into the position would draw the very slide the correction exists to
+    // prevent. Written while the OLD cover is still in force, or the
+    // keep-visible clamp would read the new panel and do half the recovery
+    // here, instantly, on its own. (A floating panel moves no corner, so this
+    // is a no-op for it, which is the whole reason the colour layer floats.)
+    viewport.set(() => ({ zoom: view.zoom, pan: hold }));
+
+    // Getting out from under a panel is a real MOVE, so it eases. Absolute,
+    // not a delta: the clamp below now knows about the new cover, and it has
+    // to be applied to the destination exactly once.
+    viewport.setInsets(insets);
+    viewport.set(() => ({ zoom: view.zoom, pan }), { animate: true });
   }, [viewport, workspaceRef, watch]);
 
   // One observer for the hook's whole life; `watch` keeps its subject list

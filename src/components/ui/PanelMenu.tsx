@@ -85,6 +85,7 @@ export function PanelMenuItem({
 export function PanelBackRow({
   title,
   path,
+  ariaLabel,
   onBack,
 }: {
   title: string;
@@ -92,6 +93,11 @@ export function PanelBackRow({
    *  arrived here from search rather than by walking the menu has no other way
    *  to know where they are. */
   path?: string;
+  /** Overrides the spoken label for a row that is NOT backing out to the
+   *  settings menu (the layers list backs out to the selected block). The
+   *  default names the settings menu, and saying that anywhere else would send
+   *  a screen reader user somewhere the button does not go. */
+  ariaLabel?: string;
   onBack: () => void;
 }) {
   return (
@@ -99,7 +105,7 @@ export function PanelBackRow({
       <button
         type="button"
         onClick={onBack}
-        aria-label={`Back to all settings, leaving ${title}`}
+        aria-label={ariaLabel ?? `Back to all settings, leaving ${title}`}
         className={cn(
           "flex min-h-11 w-full items-center gap-1.5 rounded-none py-3 text-left lg:px-4",
           transitionClass,

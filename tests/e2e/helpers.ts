@@ -39,6 +39,33 @@ export async function expectToast(
   await expect(toast(page, text)).toBeVisible({ timeout });
 }
 
+/**
+ * Wait until the designer's board has stopped moving.
+ *
+ * The canvas EASES into place when a panel opens over it (see useCanvasAnchor:
+ * a floating panel that lands on the board makes the board step out from under
+ * it), so a spec that measures a tile and then presses on it has to let that
+ * finish, or the press lands where the tile used to be. A person opening a
+ * panel and then reaching for the canvas takes far longer than this; a spec
+ * does it in tens of milliseconds.
+ */
+export async function canvasStill(page: Page, timeout = 3_000) {
+  const read = () =>
+    page.evaluate(
+      () =>
+        (document.querySelector("[data-canvas-stage]") as HTMLElement | null)
+          ?.style.transform ?? "",
+    );
+  const deadline = Date.now() + timeout;
+  let last = await read();
+  while (Date.now() < deadline) {
+    await page.waitForTimeout(80);
+    const now = await read();
+    if (now === last) return;
+    last = now;
+  }
+}
+
 /** Fill an input and verify the value stuck (guards against hydration wipes). */
 export async function fillStable(page: Page, label: string | RegExp, value: string) {
   await expect(async () => {

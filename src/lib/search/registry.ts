@@ -1,4 +1,9 @@
-import { rankEntries } from "@/lib/search/rank";
+import {
+  allowedFor,
+  searchCatalog,
+  type SearchEntry,
+  type SectionSpec,
+} from "@/lib/search/catalog";
 import {
   MAIN_NAV,
   SETTINGS_LINK,
@@ -6,12 +11,11 @@ import {
 } from "@/lib/search/nav-constants";
 import type { SearchGroup, SearchResult } from "@/lib/search/types";
 import {
-  GROUP_LABELS,
   STOREFRONT_SETTINGS,
-  settingGroup,
   settingHref,
+  settingIndexFields,
 } from "@/lib/storefront/setting-ref";
-import { can, type TeamAction, type TeamRole } from "@/lib/team/permissions";
+import type { TeamAction, TeamRole } from "@/lib/team/permissions";
 
 /**
  * THE LOCAL INDEX — every page, settings section, settings FIELD and quick
@@ -29,17 +33,21 @@ import { can, type TeamAction, type TeamRole } from "@/lib/team/permissions";
  *
  * SYNONYMS are the point, not decoration. People search for what they want to
  * do ("log out", "vat", "add product"), not for the label we happened to pick.
+ *
+ * They no longer have to be exhaustive, though. The ranker matches per WORD
+ * and forgives spelling, typos and abbreviations on its own (lib/search/rank
+ * and lib/search/vocabulary), so "bg", "colour" and "passwrod" need no entry
+ * anywhere. What still has to be written down is the vocabulary a rule could
+ * never derive: other names for the same thing, and the phrasing someone
+ * reaches for when they do not know its name.
  */
 
-type LocalEntry = {
-  id: string;
-  /** Title first, then every synonym worth matching. */
-  terms: string[];
-  /** Hidden entirely when the active role lacks this. Cosmetic — the route
-   *  and the server action re-check regardless. */
-  permission?: TeamAction;
-  result: SearchResult;
-};
+/**
+ * A palette row: a shared catalogue entry whose payload is the SearchResult
+ * the UI renders and navigates to. The section is the result's own type, so
+ * "Pages", "Actions" and "Settings" need no second classification.
+ */
+type LocalEntry = SearchEntry<SearchResult>;
 
 function entry(
   id: string,
@@ -49,9 +57,12 @@ function entry(
 ): LocalEntry {
   return {
     id,
-    terms: [result.title, ...(result.subtitle ? [result.subtitle] : []), ...synonyms],
+    title: result.title,
+    subtitle: result.subtitle,
+    keywords: synonyms,
+    section: result.type,
     permission,
-    result: { id, ...result },
+    payload: { id, ...result },
   };
 }
 
@@ -109,17 +120,24 @@ const SETTINGS_FIELDS: LocalEntry[] = [
   entry(
     "field:avatar",
     { type: "settings", title: "Profile photo", subtitle: "Settings › Account", href: "/settings/account#avatar" },
-    ["avatar", "picture", "image", "headshot", "logo"],
+    ["avatar", "profile picture", "image", "headshot", "logo", "store logo"],
   ),
   entry(
     "field:email",
     { type: "settings", title: "Email address", subtitle: "Settings › Account", href: "/settings/account#email" },
-    ["change email", "mail", "address"],
+    ["change email", "mail", "address", "contact email"],
   ),
   entry(
     "field:password",
     { type: "settings", title: "Password", subtitle: "Settings › Account", href: "/settings/account#password" },
-    ["change password", "reset password", "security", "credentials"],
+    [
+      "change password",
+      "reset password",
+      "forgot password",
+      "passphrase",
+      "security",
+      "credentials",
+    ],
   ),
   entry(
     "field:sign-out",
@@ -211,18 +229,16 @@ const ACTIONS: LocalEntry[] = [
  * anywhere else the link lands on the storefront list, which is the right
  * destination for a seller who has not opened one yet.
  */
-const STOREFRONT_DESIGN_SETTINGS: LocalEntry[] = STOREFRONT_SETTINGS.map((setting) =>
-  entry(
-    `storefront-setting:${setting.id}`,
-    {
-      type: "settings",
-      title: setting.label,
-      subtitle: `Storefront / ${GROUP_LABELS[settingGroup(setting.ref)]}`,
-      href: settingHref(setting.id),
-    },
-    [...setting.keywords],
-    "storefront.write",
-  ),
+const STOREFRONT_DESIGN_SETTINGS: LocalEntry[] = STOREFRONT_SETTINGS.map(
+  (setting) => {
+    const { title, subtitle, keywords } = settingIndexFields(setting);
+    return entry(
+      `storefront-setting:${setting.id}`,
+      { type: "settings", title, subtitle, href: settingHref(setting.id) },
+      [...keywords],
+      "storefront.write",
+    );
+  },
 );
 
 const ALL_ENTRIES: LocalEntry[] = [
@@ -233,13 +249,13 @@ const ALL_ENTRIES: LocalEntry[] = [
   ...STOREFRONT_DESIGN_SETTINGS,
 ];
 
-/** Exported for the registry test, which asserts every nav route is indexed. */
-export const LOCAL_ENTRY_COUNT = ALL_ENTRIES.length;
-
-const GROUP_ORDER: { type: SearchResult["type"]; label: string }[] = [
-  { type: "page", label: "Pages" },
-  { type: "action", label: "Actions" },
-  { type: "settings", label: "Settings" },
+/** The palette's sections. Keys ARE result types, so an entry classifies
+ *  itself and a fourth local type would need no second list. The order is only
+ *  the tiebreak; searchCatalog leads with whatever answered best. */
+const SECTIONS: SectionSpec[] = [
+  { key: "page", label: "Pages" },
+  { key: "action", label: "Actions" },
+  { key: "settings", label: "Settings" },
 ];
 
 /**
@@ -281,24 +297,14 @@ const EMPTY_STATE_GROUPS: {
 
 const DEFAULT_LIMIT = 12;
 
-/** Permission gate: a viewer must not be offered "New product" only to be
- *  refused by the page they land on. Null role fails closed. */
-function allowedFor(
-  entries: LocalEntry[],
-  role: TeamRole | null | undefined,
-): LocalEntry[] {
-  return entries.filter(
-    (item) => !item.permission || (role ? can(role, item.permission) : false),
-  );
-}
-
 /**
  * Match the local index. Synchronous by design: it runs inside the same render
  * as the keystroke, so results never lag the caret.
  *
- * An EMPTY query is not an empty result — it returns curated suggestions
- * (actions and common settings intents; never pages), so opening the palette
- * offers the things search exists to make reachable rather than a void.
+ * The matching, the permission gate and the grouping all live in
+ * lib/search/catalog, which the storefront editor's own field also uses. This
+ * function is only the palette's half: its entries, and the curation an empty
+ * query gets instead of a void.
  */
 export function searchLocalRegistry(
   query: string,
@@ -312,22 +318,16 @@ export function searchLocalRegistry(
     return EMPTY_STATE_GROUPS.map(({ type, label, source }) => ({
       type,
       label,
-      results: allowedFor(source, role).map((item) => item.result),
+      results: allowedFor(source, role).map((item) => item.payload),
     })).filter((group) => group.results.length > 0);
   }
 
-  const matched = rankEntries(
-    allowedFor(ALL_ENTRIES, role),
-    term,
-    (item) => item.terms,
-    limit,
-  );
-
-  return GROUP_ORDER.map(({ type, label }) => ({
-    type,
-    label,
-    results: matched
-      .filter((item) => item.result.type === type)
-      .map((item) => item.result),
-  })).filter((group) => group.results.length > 0);
+  return searchCatalog(ALL_ENTRIES, term, { sections: SECTIONS, limit, role })
+    .map((section) => ({
+      // The section key IS the result type; the cast is the one place that
+      // knowledge is spent, and SECTIONS is built from those types above.
+      type: section.key as SearchResult["type"],
+      label: section.label,
+      results: section.hits.map((hit) => hit.entry.payload),
+    }));
 }

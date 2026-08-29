@@ -87,6 +87,72 @@ describe("local search registry — matching by intent", () => {
   });
 });
 
+describe("local search registry — searching the way people type", () => {
+  /** The FIRST row, which is also the one Enter activates. */
+  function top(query: string): string | undefined {
+    return rows(searchLocalRegistry(query, AS_OWNER))[0]?.href;
+  }
+
+  const cases: [query: string, expectedHref: string][] = [
+    // A DESCRIPTION rather than a name. None of these strings appears in any
+    // label; each is assembled out of a label, a subtitle and a synonym.
+    ["store bg color", "/storefront?setting=background"],
+    ["storefront background colour", "/storefront?setting=background"],
+    ["i want to change the colour of my shop background", "/storefront?setting=background"],
+    ["space between products", "/storefront?setting=grid-gap"],
+    ["how many columns", "/storefront?setting=canvas-size"],
+    ["where is the price", "/storefront?setting=price-position"],
+    ["make my store name bigger", "/storefront?setting=header"],
+    ["how do i change my password", "/settings/account#password"],
+    ["download my data", "/settings/danger#export"],
+
+    // MISSPELLED, in the label, in a synonym, and across a whole sentence.
+    ["bacground", "/storefront?setting=background"],
+    ["passwrod", "/settings/account#password"],
+    ["carosel", "/storefront?setting=display-mode"],
+    ["notifcations", "/settings/notifications"],
+    ["stroefront", "/storefront"],
+    ["chnage the bacground colur of my stor", "/storefront?setting=background"],
+
+    // ABBREVIATED and shortened.
+    ["bg", "/storefront?setting=background"],
+    ["profile pic", "/settings/account#avatar"],
+    ["delete my acct", "/settings/danger#delete"],
+    ["cs", "/storefront?setting=canvas-size"],
+
+    // SPELLED the other way round from the label.
+    ["accent color", "/storefront?setting=accent"],
+    ["corner roundness", "/storefront?setting=corner-radius"],
+  ];
+
+  for (const [query, expectedHref] of cases) {
+    it(`"${query}" leads with ${expectedHref}`, () => {
+      expect(top(query)).toBe(expectedHref);
+    });
+  }
+
+  it("orders the GROUPS by what answered, not by a fixed shelf order", () => {
+    // Pages-then-actions-then-settings is right for the resting palette and
+    // wrong for a query: it put the Orders page above Corner roundness for
+    // "corners", and the first row is what Enter activates.
+    expect(top("make the corners rounder")).toBe(
+      "/storefront?setting=corner-radius",
+    );
+    expect(top("upload a font")).toBe("/storefront?setting=font");
+  });
+
+  it("still leads with the page when the page IS the answer", () => {
+    expect(top("analytics")).toBe("/analytics");
+    expect(top("orders")).toBe("/orders");
+  });
+
+  it("does not invent matches for a query nothing knows", () => {
+    for (const query of ["zzzzqqqq", "qwertyuiop", "xylophone"]) {
+      expect(rows(searchLocalRegistry(query, AS_OWNER)), query).toHaveLength(0);
+    }
+  });
+});
+
 describe("local search registry — empty query", () => {
   it("suggests actions and curated settings — and NO pages", () => {
     const groups = searchLocalRegistry("", AS_OWNER);

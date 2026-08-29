@@ -51,13 +51,10 @@ export function orientedSpan(
 }
 
 // A block whose width and height differ in parity (a 1x2, say) has its centre
-// on a half cell once it is stood on its end, so neither conversion below can
-// land on a whole cell honestly. They round in OPPOSITE directions for that
-// reason: down going one way, up coming back, which makes them exact inverses.
-// Rounding both the same way instead leaves a half cell of drift that rounds
-// into a whole one, and a block resized twice walks across the board.
+// on a half cell once it is stood on its end, so the conversion below cannot
+// land on a whole cell honestly and rounds down.
 
-/** -0 is what these hand back for a small negative, and it compares unequal to
+/** -0 is what this hands back for a small negative, and it compares unequal to
  *  0 under Object.is. A coordinate has one zero. */
 function zeroless(value: number): number {
   return value === 0 ? 0 : value;
@@ -65,10 +62,6 @@ function zeroless(value: number): number {
 
 function floorCell(value: number): number {
   return zeroless(Math.floor(value));
-}
-
-function ceilCell(value: number): number {
-  return zeroless(Math.ceil(value));
 }
 
 /**
@@ -84,29 +77,6 @@ export function rotatedFootprint(box: Box, degrees = 0): Box {
   return {
     x: floorCell(box.x + box.w / 2 - span.w / 2),
     y: floorCell(box.y + box.h / 2 - span.h / 2),
-    w: span.w,
-    h: span.h,
-  };
-}
-
-/**
- * The inverse: the placement a block needs in order to COVER these cells once
- * it is turned.
- *
- * What a gesture works in. The seller drags the edges of the box they can see,
- * which is the footprint; this is how that lands back in the x/y/w/h actually
- * stored. An exact inverse of {@link rotatedFootprint}, so a block dragged to
- * cover a set of cells covers exactly those cells, and dragging it twice does
- * not walk it across the board.
- */
-export function placementForFootprint(footprint: Box, degrees = 0): Box {
-  if (!isTransposed(degrees)) {
-    return { x: footprint.x, y: footprint.y, w: footprint.w, h: footprint.h };
-  }
-  const span = orientedSpan(footprint.w, footprint.h, degrees);
-  return {
-    x: ceilCell(footprint.x + footprint.w / 2 - span.w / 2),
-    y: ceilCell(footprint.y + footprint.h / 2 - span.h / 2),
     w: span.w,
     h: span.h,
   };

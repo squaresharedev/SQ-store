@@ -1,5 +1,11 @@
 import type { ReactNode } from "react";
 import { rotatedFootprint } from "@/lib/geometry/rotated-box";
+import {
+  rotatePoint,
+  rotateVector,
+  toLocalPoint,
+  type Point,
+} from "./rotationMath";
 
 // Shared, presentation-agnostic constants + placement math for the canvas
 // grid. Reused by BOTH the storefront builder and (later) the marketplace.
@@ -299,12 +305,17 @@ export function reflowBlocks<TData>(
 // The hit-test and the placement math live here, pure, so the gesture wiring
 // in Grid.tsx stays thin and this part stays unit-testable.
 //
-// Everything below works on the box the seller can SEE, which for a turned
-// block is its footprint rather than its stored rect. That is what makes a
-// resize behave: the edge under the hand is the edge that moves, and it moves
-// the way the hand does. Reading the pointer in the block's own turned space
-// instead looks right at zero degrees and inverts at half a turn, where
-// dragging the top edge upwards would grow the block downwards.
+// EVERYTHING BELOW WORKS IN THE BLOCK'S OWN FRAME. The pointer is un-rotated
+// about the block's centre first (see toLocalPoint), so "the north edge" means
+// the edge the seller can see along the top of the tilted tile, wherever that
+// happens to point on screen. Then the corner OPPOSITE the one being dragged
+// is pinned in SCREEN space, so the box grows out from under the hand and the
+// far side stays where it was.
+//
+// Reading the drag in board space instead is what made a tilted tile resize
+// along the wrong axis: at a quarter turn the tile's height is drawn across
+// the screen, so pulling its corner up shortened it by making the stored rect
+// narrower, and every angle in between had no honest answer at all.
 
 /** Which sides of a block a gesture is dragging. */
 export interface ResizeEdges {
@@ -323,9 +334,9 @@ export const EDGE_GRAB_PX = 10;
  * cell per axis, so a small or zoomed-out tile always keeps an inner area to
  * drag from instead of becoming all edge.
  *
- * `rect` is the box the seller sees: the FOOTPRINT's box for a turned block,
- * the cell's own for a level one. Both are axis aligned, so north here is
- * north on screen, and the edge that comes back is the edge under the hand.
+ * `rect` is the block's OWN unrotated box and the point is the pointer
+ * un-rotated into that same frame, so the comparison stays a plain box test
+ * however far the tile has been turned.
  */
 export function edgesUnderPointer(
   rect: { left: number; top: number; width: number; height: number },
@@ -345,54 +356,210 @@ export function edgesUnderPointer(
   return edges.n || edges.e || edges.s || edges.w ? edges : null;
 }
 
-/**
- * The placement after dragging the given edges to the cell under the cursor.
- * Dragged sides follow the cursor; the opposite sides stay pinned, and the
- * span never collapses below one cell or leaves the board.
- */
-export function resizeByEdges(
-  origin: GridPlacement,
-  edges: ResizeEdges,
-  col: number,
-  row: number,
-  columns: number,
-  rows: number,
-): GridPlacement {
-  const right = origin.x + origin.w;
-  const bottom = origin.y + origin.h;
-  const cursorCol = Math.min(Math.max(col, 0), columns - 1);
-  const cursorRow = Math.min(Math.max(row, 0), rows - 1);
-  let { x, y, w, h } = origin;
-  if (edges.w) {
-    x = Math.min(cursorCol, right - 1);
-    w = right - x;
-  } else if (edges.e) {
-    w = Math.max(1, cursorCol - origin.x + 1);
-  }
-  if (edges.n) {
-    y = Math.min(cursorRow, bottom - 1);
-    h = bottom - y;
-  } else if (edges.s) {
-    h = Math.max(1, cursorRow - origin.y + 1);
-  }
-  return { x, y, w, h };
+function clampSpan(value: number, min: number, max: number): number {
+  return Math.min(Math.max(value, min), Math.max(min, max));
 }
 
 /**
- * The standard resize cursor for a set of grabbed edges.
+ * A box in the block's OWN unrotated frame, stated as grid LINES rather than
+ * cell indices: it spans [l, r] across and [t, b] down. Lines, because a
+ * resize names edges and an edge sits between two cells; indices would need an
+ * off-by-one at every use and one of them would eventually be wrong.
  *
- * No rotation to account for: the edges come from the footprint, which is
- * axis aligned, so an edge that faces up on screen is the one that grows
- * upwards when it is dragged.
+ * Continuous, so a live drag can describe a box a third of the way into a cell
+ * and the same math can hand back the whole-cell one it will land on.
  */
-export function edgeCursor(edges: ResizeEdges): string {
-  const vertical = edges.n || edges.s;
-  const horizontal = edges.e || edges.w;
-  if (vertical && horizontal) {
-    const falling = (edges.n && edges.w) || (edges.s && edges.e);
-    return falling ? "nwse-resize" : "nesw-resize";
+export interface LocalBox {
+  l: number;
+  t: number;
+  r: number;
+  b: number;
+}
+
+/**
+ * The board, mapped into a block's own frame: the axis-aligned box that
+ * contains it.
+ *
+ * A resize has to stop at the board's edge, and the drag it is stopping is
+ * expressed in the block's frame, so the limit has to be too. EXACT for a
+ * quarter turn, where the board is still a rectangle once turned; a safe outer
+ * bound for the angles in between, which is all a span cap needs — the
+ * placement itself is held to the board separately, by clampToCanvas.
+ */
+export function boardInLocalFrame(
+  origin: GridPlacement,
+  degrees: number,
+  columns: number,
+  rows: number,
+): LocalBox {
+  const center = {
+    x: origin.x + origin.w / 2,
+    y: origin.y + origin.h / 2,
+  };
+  const corners = [
+    { x: 0, y: 0 },
+    { x: columns, y: 0 },
+    { x: columns, y: rows },
+    { x: 0, y: rows },
+  ].map((corner) => toLocalPoint(center, degrees, corner));
+  const xs = corners.map((corner) => corner.x);
+  const ys = corners.map((corner) => corner.y);
+  return {
+    l: Math.min(...xs),
+    r: Math.max(...xs),
+    t: Math.min(...ys),
+    b: Math.max(...ys),
+  };
+}
+
+/**
+ * The box a resize drag lands on, worked out in the block's own frame.
+ *
+ * `local` is the pointer un-rotated about the block's centre and expressed in
+ * CELLS, so this is plain one-dimensional arithmetic per axis: the dragged
+ * edge goes where the hand is, the opposite one does not move, and the span
+ * never collapses below a cell or reaches past `bounds` (the board, in this
+ * same frame — see boardInLocalFrame).
+ *
+ * Two boxes come back for one drag. `live` follows the pointer exactly and is
+ * what the tile paints, so the edge stays under the hand; `snapped` is the
+ * whole-cell box it will commit to, and is what the ghost promises. Deriving
+ * both here rather than snapping afterwards keeps them from ever disagreeing
+ * about which side is pinned.
+ *
+ * `anchor` is the corner that must not move, in the same local frame. Which
+ * corner that is depends on the gesture, which is why it is returned rather
+ * than re-derived by the caller.
+ */
+export function resizeLocalBox(
+  origin: GridPlacement,
+  edges: ResizeEdges,
+  local: Point,
+  bounds: LocalBox,
+  mode: "edge" | "corner" = "edge",
+): { live: LocalBox; snapped: LocalBox; anchor: Point } {
+  const l0 = origin.x;
+  const r0 = origin.x + origin.w;
+  const t0 = origin.y;
+  const b0 = origin.y + origin.h;
+
+  if (mode === "corner") {
+    // The handle names a CELL to span to, not a line to put a border on: the
+    // block reaches from its anchor cell to whichever cell the hand is over,
+    // that cell included. It has to be cells here, because the handle sits
+    // INSIDE the corner it drags — line rounding would leave the hand a
+    // fraction of a cell short and a drag of exactly one cell would do nothing.
+    //
+    // Drag past the anchor cell and the span simply lands on the other side of
+    // it, so a single control stretches every way. All in the tile's own
+    // frame, so it follows the hand when the tile is turned too.
+    const cellX = Math.floor(local.x);
+    const cellY = Math.floor(local.y);
+    const flippedX = cellX < l0;
+    const flippedY = cellY < t0;
+    const build = (snap: boolean): LocalBox => ({
+      l: flippedX
+        ? clampSpan(snap ? cellX : local.x, bounds.l, l0)
+        : l0,
+      r: flippedX
+        ? l0 + 1
+        : clampSpan(snap ? cellX + 1 : local.x, l0 + 1, bounds.r),
+      t: flippedY
+        ? clampSpan(snap ? cellY : local.y, bounds.t, t0)
+        : t0,
+      b: flippedY
+        ? t0 + 1
+        : clampSpan(snap ? cellY + 1 : local.y, t0 + 1, bounds.b),
+    });
+    return {
+      live: build(false),
+      snapped: build(true),
+      // Flipped, the anchor cell's FAR side is what stays still.
+      anchor: { x: flippedX ? l0 + 1 : l0, y: flippedY ? t0 + 1 : t0 },
+    };
   }
-  return vertical ? "ns-resize" : "ew-resize";
+
+  // An edge drag names a LINE, not a cell: the hand is already on the border,
+  // so the border goes to the nearest grid line it is pushed to.
+  const build = (snap: boolean): LocalBox => {
+    const px = snap ? Math.round(local.x) : local.x;
+    const py = snap ? Math.round(local.y) : local.y;
+    let l = l0;
+    let r = r0;
+    let t = t0;
+    let b = b0;
+    if (edges.w) l = clampSpan(px, bounds.l, r0 - 1);
+    else if (edges.e) r = clampSpan(px, l0 + 1, bounds.r);
+    if (edges.n) t = clampSpan(py, bounds.t, b0 - 1);
+    else if (edges.s) b = clampSpan(py, t0 + 1, bounds.b);
+    return { l, t, r, b };
+  };
+  return {
+    live: build(false),
+    snapped: build(true),
+    anchor: { x: edges.w ? r0 : l0, y: edges.n ? b0 : t0 },
+  };
+}
+
+/**
+ * The placement a resized box needs so that its anchor corner has not moved on
+ * screen. Continuous: the caller rounds it to whole cells to commit, and uses
+ * it as it is to paint the live preview.
+ *
+ * A block is drawn turned about its own CENTRE, and changing its size moves
+ * that centre — which is why a resize cannot just write the new width and
+ * height and leave x/y alone. That is exactly what used to make the far side
+ * of a tilted tile drift away while the near side was being dragged. So: find
+ * where the pinned corner is on screen now, work out where the same corner of
+ * the NEW box sits relative to its centre once turned, and place the box so
+ * the two coincide.
+ */
+export function placementFromLocalBox(
+  origin: GridPlacement,
+  degrees: number,
+  box: LocalBox,
+  anchor: Point,
+): { x: number; y: number; w: number; h: number } {
+  const w = box.r - box.l;
+  const h = box.b - box.t;
+  const center = {
+    x: origin.x + origin.w / 2,
+    y: origin.y + origin.h / 2,
+  };
+  const pinned = rotatePoint(center, degrees, anchor);
+  const fromCenter = rotateVector(
+    { x: anchor.x - (box.l + w / 2), y: anchor.y - (box.t + h / 2) },
+    degrees,
+  );
+  return {
+    x: pinned.x - fromCenter.x - w / 2,
+    y: pinned.y - fromCenter.y - h / 2,
+    w,
+    h,
+  };
+}
+
+/**
+ * The standard resize cursor for a set of grabbed edges, turned to face the
+ * way the tile does.
+ *
+ * The edges are named in the BLOCK'S frame, so a tilted tile's north edge does
+ * not point north on screen. The cursor arrow has to, or the hand is told the
+ * wrong direction. Cursors come in four fixed directions, so the turned edge
+ * normal is folded onto the nearest of them; a resize cursor is double-headed,
+ * which is why the bearing folds to half a turn rather than a whole one.
+ */
+export function edgeCursor(edges: ResizeEdges, degrees = 0): string {
+  const dx = (edges.e ? 1 : 0) - (edges.w ? 1 : 0);
+  const dy = (edges.s ? 1 : 0) - (edges.n ? 1 : 0);
+  if (dx === 0 && dy === 0) return "";
+  const facing = rotateVector({ x: dx, y: dy }, degrees);
+  const bearing =
+    (((Math.atan2(facing.y, facing.x) * 180) / Math.PI + 180) % 180 + 180) % 180;
+  if (bearing < 22.5 || bearing >= 157.5) return "ew-resize";
+  if (bearing < 67.5) return "nwse-resize";
+  if (bearing < 112.5) return "ns-resize";
+  return "nesw-resize";
 }
 
 /** Per-render state the grid hands to `renderBlock`, for content-level styling. */

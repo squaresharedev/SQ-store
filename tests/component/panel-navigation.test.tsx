@@ -7,6 +7,7 @@ import { ToastProvider } from "@/components/ui/Toast";
 import { PanelTabs, panelProps } from "@/components/ui/PanelTabs";
 import { PanelBackRow, PanelMenu, PanelMenuItem } from "@/components/ui/PanelMenu";
 import { ControlsPanel } from "@/components/storefront/ControlsPanel";
+import { editorEntries } from "@/components/storefront/editor-search";
 
 /**
  * The two primitives the side panels navigate with, and the design panel that
@@ -101,6 +102,7 @@ describe("ControlsPanel grouping", () => {
       onCustomFontUrlChange={vi.fn()}
         showGrid={false}
         onShowGridChange={vi.fn()}
+        searchEntries={editorEntries([], new Map())}
       />
     </ToastProvider>
   );

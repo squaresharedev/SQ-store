@@ -1,13 +1,10 @@
 /**
- * The JS mirror of the motion tokens in globals.css. Choreography needs
- * per-keyframe timing that CSS transitions cannot express, so the curves are
- * restated here instead of consumed as Tailwind utilities. Keep these in sync
- * with --ease-standard / --ease-entrance.
+ * Re-export of the shared motion tokens. The values themselves live in
+ * @/components/ui/motion-tokens, which the in-page action icons animate
+ * against too; this file stays so the nav icons keep importing locally.
  */
-export const EASE_STANDARD: [number, number, number, number] = [0.4, 0, 0.2, 1];
-export const EASE_ENTRANCE: [number, number, number, number] = [
-  0.16, 1, 0.3, 1,
-];
-
-/** Return-to-idle when the cursor leaves mid-story: quick and quiet. */
-export const SETTLE = { duration: 0.18, ease: EASE_STANDARD };
+export {
+  EASE_STANDARD,
+  EASE_ENTRANCE,
+  SETTLE,
+} from "@/components/ui/motion-tokens";

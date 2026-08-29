@@ -9,6 +9,8 @@ import {
 import {
   bringForward,
   bringToFront,
+  dropIndex,
+  moveLayerTo,
   normalizeLayers,
   sendBackward,
   sendToBack,
@@ -219,5 +221,78 @@ describe("moving a selection through the stack", () => {
       op(blocks, keys("bc"));
       expect(blocks).toEqual(snapshot);
     }
+  });
+});
+
+/**
+ * Dropping a row where it was let go, which is what a drag in the layers list
+ * asks for. The trap this pins is the off-by-one: `index` counts in the blocks
+ * that are NOT moving, so it means the same thing whether the row travelled up
+ * or down. An index into the full order would not.
+ */
+describe("moveLayerTo", () => {
+  const keys = (spec: string) => [...spec].map((name) => `s_${name}`);
+  const moved = (spec: string, sel: string, index: number) =>
+    names(layerOrder(moveLayerTo(row(spec), keys(sel), index)));
+
+  it("drops a block behind everything at zero and in front at the end", () => {
+    expect(moved("abcd", "c", 0)).toBe("cabd");
+    expect(moved("abcd", "c", 3)).toBe("abdc");
+  });
+
+  it("counts the same whether the block travelled forward or back", () => {
+    // The off-by-one this exists to avoid. `index` counts the blocks LEFT
+    // BEHIND, so it means one thing wherever the block started: at 2, both of
+    // these land third from the back. An index into the full order would mean
+    // two different things depending on the direction of travel.
+    expect(moved("abcd", "b", 2)).toBe("acbd");
+    expect(moved("abcd", "d", 2)).toBe("abdc");
+  });
+
+  it("keeps a multi-selection's own order when the run lands", () => {
+    expect(moved("abcd", "db", 1)).toBe("abdc");
+  });
+
+  it("clamps a drop that left the list rather than dropping the block", () => {
+    expect(moved("abcd", "a", -5)).toBe("abcd");
+    expect(moved("abcd", "a", 99)).toBe("bcda");
+  });
+
+  it("returns the SAME array for a drop that changes nothing", () => {
+    const blocks = row("abcd");
+    // Where it already is, an empty selection, and a nonsense index.
+    expect(moveLayerTo(blocks, keys("b"), 1)).toBe(blocks);
+    expect(moveLayerTo(blocks, [], 2)).toBe(blocks);
+    expect(moveLayerTo(blocks, keys("b"), Number.NaN)).toBe(blocks);
+  });
+
+  it("never mutates its input", () => {
+    const blocks = row("abcd", [0, 1, 2, 3]);
+    const snapshot = structuredClone(blocks);
+    moveLayerTo(blocks, keys("bc"), 0);
+    expect(blocks).toEqual(snapshot);
+  });
+});
+
+describe("dropIndex", () => {
+  it("turns a front-counted row into a back-counted insert position", () => {
+    // Top row of four = in front of the other three.
+    expect(dropIndex(0, 4)).toBe(3);
+    // Bottom row = behind all three.
+    expect(dropIndex(3, 4)).toBe(0);
+  });
+
+  it("round-trips every row of a stack", () => {
+    // What the list draws at row `to` is what a drop at row `to` produces:
+    // the two directions of the same conversion have to agree, or a drag lands
+    // one place off in one direction only.
+    const blocks = row("abcde");
+    const front = () => names(layerOrder(blocks)).split("").reverse().join("");
+    for (let to = 0; to < 5; to += 1) {
+      const next = moveLayerTo(blocks, ["s_c"], dropIndex(to, 5));
+      const rows = names(layerOrder(next)).split("").reverse();
+      expect(rows[to]).toBe("c");
+    }
+    expect(front()).toBe("edcba");
   });
 });

@@ -2,7 +2,6 @@ import { describe, it, expect } from "vitest";
 import {
   isTransposed,
   orientedSpan,
-  placementForFootprint,
   rotatedFootprint,
 } from "@/lib/geometry/rotated-box";
 
@@ -94,49 +93,10 @@ describe("rotatedFootprint", () => {
     rotatedFootprint(original, 90);
     expect(original).toEqual(box(2, 1, 1, 3));
   });
-});
-
-describe("placementForFootprint", () => {
-  it("undoes the turn: the rect that COVERS these cells", () => {
-    expect(placementForFootprint(box(1, 2, 3, 1), 90)).toEqual(box(2, 1, 1, 3));
-    expect(placementForFootprint(box(1, 2, 3, 1), 0)).toEqual(box(1, 2, 3, 1));
-  });
-
-  it("round-trips EXACTLY, both ways, at every span and parity", () => {
-    // What stops a resize walking the block across the board: drag its edges
-    // to cover a set of cells and it covers exactly those cells, so the next
-    // drag starts from where the last one finished.
-    for (const angle of [0, 90, 180, 270, -90]) {
-      for (const w of [1, 2, 3]) {
-        for (const h of [1, 2, 3]) {
-          const placement = box(2, 1, w, h);
-          const covered = rotatedFootprint(placement, angle);
-          expect(placementForFootprint(covered, angle)).toEqual(placement);
-
-          const wanted = box(1, 2, w, h);
-          const drawn = rotatedFootprint(
-            placementForFootprint(wanted, angle),
-            angle,
-          );
-          expect(drawn).toEqual(wanted);
-        }
-      }
-    }
-  });
-
-  it("keeps the span whatever the parity", () => {
-    // A 2x1 stood on its end has its centre on a half cell, so it cannot land
-    // dead on the grid. It must still be a 1x2 and never a 1x3.
-    const placement = placementForFootprint(box(0, 0, 2, 1), 90);
-    expect(placement.w).toBe(1);
-    expect(placement.h).toBe(2);
-  });
 
   it("never returns a negative zero", () => {
     // JSON writes it as 0 either way, but Object.is and toEqual do not, and a
     // coordinate has one zero.
-    const placement = placementForFootprint(box(0, 0, 2, 1), 90);
-    expect(Object.is(placement.y, -0)).toBe(false);
     expect(Object.is(rotatedFootprint(box(0, 0, 1, 2), 90).y, -0)).toBe(false);
   });
 });
