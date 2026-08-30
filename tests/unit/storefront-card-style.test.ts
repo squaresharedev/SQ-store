@@ -3,6 +3,7 @@ import {
   CORNER_SPOT_LIMIT,
   DEFAULT_STOREFRONT_CONFIG,
   DEFAULT_TITLE_POSITION,
+  HOVER_TRANSITION_MS_DEFAULT,
   PRICE_TAG_POSITIONS,
   PRICE_TAG_RADIUS_DEFAULT,
   PRICE_TAG_SIZE_DEFAULT,
@@ -55,16 +56,21 @@ describe("resolveCardStyle", () => {
       // and its spacing follows the tile's roundness rather than a number.
       titlePosition: DEFAULT_TITLE_POSITION,
       titleInset: undefined,
+      // Absent everywhere resolves to the design system's own speed.
+      titleHoverMs: HOVER_TRANSITION_MS_DEFAULT,
       priceDisplay: t.priceDisplay,
       priceTagPosition: t.priceTagPosition,
       priceTagFont: "inter",
       priceTagSize: PRICE_TAG_SIZE_DEFAULT,
       priceTagBorderWidth: 0,
       priceTagRadius: PRICE_TAG_RADIUS_DEFAULT,
+      // Auto, same as titleInset: scaled by the tile's roundness, not a number.
+      priceTagInset: undefined,
       // The three colors stay absent: "unset" is a state, not a hex.
       priceTagColor: undefined,
       priceTagTextColor: undefined,
       priceTagBorderColor: undefined,
+      priceHoverMs: HOVER_TRANSITION_MS_DEFAULT,
     });
   });
 

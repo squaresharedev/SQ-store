@@ -15,8 +15,8 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/Toast";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { ColorPicker } from "@/components/ui/ColorPicker";
-import { Slider } from "@/components/ui/slider";
-import { helpTextClass, infoTextClass, labelClass, secondaryButtonClass } from "@/components/ui/control-styles";
+import { SliderField } from "@/components/ui/SliderField";
+import { infoTextClass, labelClass, secondaryButtonClass } from "@/components/ui/control-styles";
 import { resolveBackgroundStyle } from "./background-presets";
 
 type Kind = StorefrontBackground["kind"];
@@ -225,11 +225,9 @@ export function BackgroundEditor({
               <p className={infoTextClass}>
                 Drag the preview to reposition. Zoom to resize.
               </p>
-              <div className="flex items-center justify-between">
-                <span className={labelClass}>Zoom</span>
-                <span className={infoTextClass}>{value.scale}%</span>
-              </div>
-              <Slider
+              <SliderField
+                id={`${fieldId}-zoom`}
+                label="Zoom"
                 min={BACKGROUND_IMAGE_SCALE_MIN}
                 max={BACKGROUND_IMAGE_SCALE_MAX}
                 step={5}
@@ -237,6 +235,7 @@ export function BackgroundEditor({
                 onChange={(scale) => onChange({ ...value, scale })}
                 ariaLabel="Background image zoom"
                 valueText={`${value.scale} percent`}
+                unit="%"
               />
             </div>
           )}
@@ -296,23 +295,18 @@ export function BackgroundEditor({
             onChange={(to) => onChange({ ...value, to })}
             target={{ kind: "theme-background-to" }}
           />
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <span className={labelClass}>Angle</span>
-              <span className={helpTextClass}>
-                {value.angle}°
-              </span>
-            </div>
-            <Slider
-              min={0}
-              max={360}
-              step={5}
-              value={value.angle}
-              onChange={(angle) => onChange({ ...value, angle })}
-              ariaLabel="Gradient angle"
-              valueText={`${value.angle} degrees`}
-            />
-          </div>
+          <SliderField
+            id={`${fieldId}-angle`}
+            label="Angle"
+            min={0}
+            max={360}
+            step={5}
+            value={value.angle}
+            onChange={(angle) => onChange({ ...value, angle })}
+            ariaLabel="Gradient angle"
+            valueText={`${value.angle} degrees`}
+            unit="°"
+          />
         </div>
       )}
 

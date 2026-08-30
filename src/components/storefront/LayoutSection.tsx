@@ -11,7 +11,7 @@ import {
 } from "@/types/storefront";
 import { useId } from "react";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
-import { Slider } from "@/components/ui/slider";
+import { SliderField } from "@/components/ui/SliderField";
 import { Switch } from "@/components/ui/switch";
 import {
   helpTextClass,
@@ -54,33 +54,29 @@ export function LayoutSection({
 
   return (
     <div className="space-y-4">
-      <div className="space-y-1.5">
-        <div className="flex items-center justify-between">
-          <span className={labelClass}>Canvas width</span>
-          <span className={helpTextClass}>{theme.columns} blocks</span>
-        </div>
-        <Slider
-          min={CANVAS_COLUMNS_MIN}
-          max={CANVAS_COLUMNS_MAX}
-          value={theme.columns}
-          onChange={(columns) => onCanvasChange(columns, theme.rows)}
-          ariaLabel="Canvas width in blocks"
-          valueText={`${theme.columns} blocks wide`}
-        />
-      </div>
+      <SliderField
+        id={`${fieldId}-columns`}
+        label="Canvas width"
+        min={CANVAS_COLUMNS_MIN}
+        max={CANVAS_COLUMNS_MAX}
+        value={theme.columns}
+        onChange={(columns) => onCanvasChange(columns, theme.rows)}
+        ariaLabel="Canvas width in blocks"
+        valueText={`${theme.columns} blocks wide`}
+        unit="blocks"
+      />
 
       <div className="space-y-1.5">
-        <div className="flex items-center justify-between">
-          <span className={labelClass}>Canvas height</span>
-          <span className={helpTextClass}>{theme.rows} blocks</span>
-        </div>
-        <Slider
+        <SliderField
+          id={`${fieldId}-rows`}
+          label="Canvas height"
           min={CANVAS_ROWS_MIN}
           max={CANVAS_ROWS_MAX}
           value={theme.rows}
           onChange={(rows) => onCanvasChange(theme.columns, rows)}
           ariaLabel="Canvas height in blocks"
           valueText={`${theme.rows} blocks tall`}
+          unit="blocks"
         />
         <p className={helpTextClass}>
           The board can&rsquo;t shrink below the blocks already on it.
@@ -102,23 +98,19 @@ export function LayoutSection({
         )}
       </div>
 
-      <div className="space-y-1.5">
-        <div className="flex items-center justify-between">
-          <span className={labelClass}>Grid density</span>
-          <span className={helpTextClass}>
-            {theme.gridGap === 0 ? "No gap" : `${theme.gridGap}px gap`}
-          </span>
-        </div>
-        <Slider
-          min={0}
-          max={GRID_GAP_MAX}
-          step={2}
-          value={theme.gridGap}
-          onChange={(gridGap) => onChange({ ...theme, gridGap })}
-          ariaLabel="Grid density"
-          valueText={`${theme.gridGap} pixel gap`}
-        />
-      </div>
+      <SliderField
+        id={`${fieldId}-grid-gap`}
+        label="Grid density"
+        min={0}
+        max={GRID_GAP_MAX}
+        step={2}
+        value={theme.gridGap}
+        onChange={(gridGap) => onChange({ ...theme, gridGap })}
+        ariaLabel="Grid density"
+        valueText={`${theme.gridGap} pixel gap`}
+        unit="px"
+        statusText={theme.gridGap === 0 ? "No gap" : undefined}
+      />
 
       {/* Editor guide only: buyers never see the empty slots. */}
       <div className="space-y-1.5">

@@ -63,6 +63,7 @@ function renderTile(opts: {
       theme={theme()}
       overrides={opts.overrides}
       spotDrag={opts.drag}
+      placement={{ w: 1, h: 1 }}
     />,
   );
 }
@@ -91,7 +92,12 @@ describe("grabbing a token", () => {
       // The grid cell's own handler, standing in for the one that starts a
       // block drag. A press on the title must never reach it.
       <div onPointerDown={onCellPointerDown}>
-        <ProductTileContent product={PRODUCT} theme={theme()} spotDrag={drag} />
+        <ProductTileContent
+          product={PRODUCT}
+          theme={theme()}
+          spotDrag={drag}
+          placement={{ w: 1, h: 1 }}
+        />
       </div>,
     );
 
@@ -114,7 +120,12 @@ describe("grabbing a token", () => {
       // Arrows move the BLOCK on the board, so a focused token has to borrow
       // them or moving a title would shove the tile across the canvas.
       <div onKeyDown={onCellKeyDown}>
-        <ProductTileContent product={PRODUCT} theme={theme()} spotDrag={drag} />
+        <ProductTileContent
+          product={PRODUCT}
+          theme={theme()}
+          spotDrag={drag}
+          placement={{ w: 1, h: 1 }}
+        />
       </div>,
     );
 
@@ -150,7 +161,9 @@ describe("a token in flight", () => {
     });
     const price = screen.getByText("€12.50");
     expect(price).toHaveClass("absolute");
-    expect(price).toHaveClass("top-2");
+    // The fixed "top-2" offset is now the scalable --tag-inset var (see
+    // priceTagInsetStyle); an 8px fallback keeps it byte-identical here.
+    expect(price).toHaveClass("top-[var(--tag-inset,8px)]");
   });
 
   it("brings the price back into the band, which lights up to say so", () => {

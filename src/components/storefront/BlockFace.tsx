@@ -106,6 +106,7 @@ export function BlockFace({
         imagePlacement={block.imagePlacement}
         imageRef={imageRef}
         spotDrag={spotDrag}
+        placement={{ w: block.w, h: block.h }}
       />
     );
   }

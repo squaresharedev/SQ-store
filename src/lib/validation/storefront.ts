@@ -25,11 +25,14 @@ import {
   EMBED_MAX_DOMAINS,
   HEADER_BIO_MAX,
   HEADER_NAME_MAX,
+  HOVER_TRANSITION_MS_MAX,
+  HOVER_TRANSITION_MS_MIN,
   IMAGE_ALT_MAX,
   IMAGE_FITS,
   PRICE_DISPLAYS,
   PRICE_TAG_BORDER_WIDTH_MAX,
   PRICE_TAG_FONTS,
+  PRICE_TAG_INSET_MAX,
   PRICE_TAG_POSITIONS,
   PRICE_TAG_RADIUS_MAX,
   PRICE_TAG_SIZE_MAX,
@@ -174,6 +177,28 @@ const priceTagAppearanceFields = {
     .max(PRICE_TAG_BORDER_WIDTH_MAX)
     .optional(),
   priceTagRadius: z.number().int().min(0).max(PRICE_TAG_RADIUS_MAX).optional(),
+  priceTagInset: z.number().int().min(0).max(PRICE_TAG_INSET_MAX).optional(),
+};
+
+/**
+ * Hover-reveal transition speed for the title band and the price tag —
+ * identical on the theme and on a per-tile override, spread into both so the
+ * two can never drift. Absent = HOVER_TRANSITION_MS_DEFAULT, the design
+ * system's own fade/slide speed.
+ */
+const hoverTimingFields = {
+  titleHoverMs: z
+    .number()
+    .int()
+    .min(HOVER_TRANSITION_MS_MIN)
+    .max(HOVER_TRANSITION_MS_MAX)
+    .optional(),
+  priceHoverMs: z
+    .number()
+    .int()
+    .min(HOVER_TRANSITION_MS_MIN)
+    .max(HOVER_TRANSITION_MS_MAX)
+    .optional(),
 };
 
 /** Legacy chip size enum -> px, matching the text sizes each one rendered at
@@ -233,6 +258,7 @@ const themeObjectSchema = z.strictObject({
     z.enum(PRICE_TAG_POSITIONS),
   ),
   ...priceTagAppearanceFields,
+  ...hoverTimingFields,
   showTitle: z.boolean(),
   displayMode: z.enum(DISPLAY_MODES),
   gridGap: z.number().int().min(0).max(GRID_GAP_MAX),
@@ -413,6 +439,7 @@ const cardStyleOverridesSchema = z.preprocess((value) => {
   priceDisplay: z.enum(PRICE_DISPLAYS).optional(),
   priceTagPosition: z.enum(PRICE_TAG_POSITIONS).optional(),
   ...priceTagAppearanceFields,
+  ...hoverTimingFields,
 }));
 
 /** Focal point + zoom for an image inside a frame. The same bounded ints the

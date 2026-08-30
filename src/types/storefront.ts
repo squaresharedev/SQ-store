@@ -233,6 +233,15 @@ export type TitleDisplay = (typeof TITLE_DISPLAYS)[number];
 export const PRICE_DISPLAYS = ["always", "hover"] as const;
 export type PriceDisplay = (typeof PRICE_DISPLAYS)[number];
 
+/** How long the title band's / price tag's hover-only reveal takes to fade
+ *  (and, for an overlay title, slide) in, in milliseconds. Absent on either
+ *  = HOVER_TRANSITION_MS_DEFAULT, the design system's own transition speed —
+ *  which is what every storefront rendered before this was independently
+ *  adjustable, so nothing changes for a config that never sets it. */
+export const HOVER_TRANSITION_MS_MIN = 0;
+export const HOVER_TRANSITION_MS_MAX = 1000;
+export const HOVER_TRANSITION_MS_DEFAULT = 180;
+
 /**
  * The seven spots something can take on a product tile: the 4 corners plus the
  * center vertical axis (top, middle, bottom). Circle tiles clip their corners
@@ -423,6 +432,13 @@ export const PRICE_TAG_BORDER_WIDTH_MAX = 8;
  *  retired `pill` style preset was. */
 export const PRICE_TAG_RADIUS_MAX = 24;
 export const PRICE_TAG_RADIUS_DEFAULT = 2;
+
+/** Corner/edge offset cap for the floated price tag, in px. Absent = auto,
+ *  using the same roundness-scaled formula as {@link TITLE_INSET_AUTO}: a
+ *  heavily rounded big tile pushes the chip in from the arc instead of
+ *  leaving it to sit in the clipped-away corner. Read through
+ *  priceTagInsetStyle. */
+export const PRICE_TAG_INSET_MAX = 40;
 
 /** What the chip paints with no color of its own. Real hex rather than a CSS
  *  token, so the renderer, the picker's inherit dot and anything reading the
@@ -748,6 +764,9 @@ export type StorefrontTheme = {
    *  auto, derived from the tile's corner radius so the words never run into
    *  a rounded corner. */
   titleInset?: number;
+  /** Hover-reveal transition speed in ms, HOVER_TRANSITION_MS_MIN..MAX.
+   *  Absent = HOVER_TRANSITION_MS_DEFAULT. */
+  titleHoverMs?: number;
   priceDisplay: PriceDisplay;
   priceTagPosition: PriceTagPosition;
   /**
@@ -767,6 +786,14 @@ export type StorefrontTheme = {
   priceTagBorderColor?: string;
   priceTagBorderWidth?: number;
   priceTagRadius?: number;
+  /** Corner/edge offset for a floated tag, in px, 0..PRICE_TAG_INSET_MAX.
+   *  Absent = auto, scaled by the tile's own clip radius (see
+   *  priceTagInsetStyle) so a heavily rounded big tile keeps the chip clear
+   *  of its clipped-away corner. */
+  priceTagInset?: number;
+  /** Hover-reveal transition speed in ms, HOVER_TRANSITION_MS_MIN..MAX.
+   *  Absent = HOVER_TRANSITION_MS_DEFAULT. */
+  priceHoverMs?: number;
   showTitle: boolean;
   displayMode: DisplayMode;
   /** Grid gutter in px, 0..GRID_GAP_MAX (smaller = denser). */
@@ -795,12 +822,20 @@ export type CardStyle = {
    *  "auto" is a state a seller can choose, and the control has to be able to
    *  show it. Renderers read it through titleBandStyle. */
   titleInset?: number;
+  /** Always resolves to a concrete value (HOVER_TRANSITION_MS_DEFAULT when
+   *  nobody set one), unlike titleInset: there is no CSS-native "auto" for a
+   *  transition speed worth preserving as its own state. */
+  titleHoverMs: number;
   priceDisplay: PriceDisplay;
   priceTagPosition: PriceTagPosition;
   priceTagFont: PriceTagFont;
   priceTagSize: number;
   priceTagBorderWidth: number;
   priceTagRadius: number;
+  /** Stays OPTIONAL after resolution, same reason as titleInset: "auto"
+   *  (scaled by the tile's own roundness) is a real state, read through
+   *  priceTagInsetStyle rather than resolved to one number here. */
+  priceTagInset?: number;
   /**
    * The three colors stay OPTIONAL even here, where everything else resolves
    * to a value: "absent" is a state the seller can choose (follow the card,
@@ -811,6 +846,8 @@ export type CardStyle = {
   priceTagColor?: string;
   priceTagTextColor?: string;
   priceTagBorderColor?: string;
+  /** Always resolves to a concrete value, same reasoning as titleHoverMs. */
+  priceHoverMs: number;
 };
 
 /** Per-block card styling: an absent field means "follow the theme", so a
@@ -832,6 +869,8 @@ export function resolveCardStyle(
     titlePosition:
       overrides?.titlePosition ?? theme.titlePosition ?? DEFAULT_TITLE_POSITION,
     titleInset: overrides?.titleInset ?? theme.titleInset,
+    titleHoverMs:
+      overrides?.titleHoverMs ?? theme.titleHoverMs ?? HOVER_TRANSITION_MS_DEFAULT,
     priceDisplay: overrides?.priceDisplay ?? theme.priceDisplay,
     priceTagPosition: overrides?.priceTagPosition ?? theme.priceTagPosition,
     priceTagFont: overrides?.priceTagFont ?? theme.priceTagFont ?? "inter",
@@ -841,10 +880,13 @@ export function resolveCardStyle(
       overrides?.priceTagBorderWidth ?? theme.priceTagBorderWidth ?? 0,
     priceTagRadius:
       overrides?.priceTagRadius ?? theme.priceTagRadius ?? PRICE_TAG_RADIUS_DEFAULT,
+    priceTagInset: overrides?.priceTagInset ?? theme.priceTagInset,
     priceTagColor: overrides?.priceTagColor ?? theme.priceTagColor,
     priceTagTextColor: overrides?.priceTagTextColor ?? theme.priceTagTextColor,
     priceTagBorderColor:
       overrides?.priceTagBorderColor ?? theme.priceTagBorderColor,
+    priceHoverMs:
+      overrides?.priceHoverMs ?? theme.priceHoverMs ?? HOVER_TRANSITION_MS_DEFAULT,
   };
 }
 

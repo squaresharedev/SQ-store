@@ -25,6 +25,7 @@ import {
 } from "@/lib/storefront/tile-spots";
 import { cn } from "@/lib/utils";
 import { BlockFace } from "./BlockFace";
+import { effectiveTilePlacement, scaledCornerRadius } from "./config-maps";
 import type {
   InlineFormatKey,
   TextEditSource,
@@ -216,12 +217,21 @@ export const BlockTile = memo(function BlockTile({
     ? resolveCardStyle(theme, block.type === "product" ? block.style : undefined)
     : null;
 
+  // The radius this tile actually clips at — same reasoning as
+  // ProductTileContent's clipRadius, and deliberately computed the same way,
+  // so a spot the seller can drag to here is never one the face then coerces
+  // away on render. A raw, unscaled radius under-reported how round a big
+  // multi-cell tile really is.
+  const clipRadius = card
+    ? scaledCornerRadius(card.cornerRadius, effectiveTilePlacement(theme.displayMode, block))
+    : 0;
+
   // Where the two tokens sit right now, resolved exactly as the face resolves
   // them, so a drag starts from what the seller can see.
   const titleAt = card
     ? resolveTitlePosition(card.titlePosition, {
         titleStyle: card.titleStyle,
-        cornerRadius: card.cornerRadius,
+        cornerRadius: clipRadius,
       })
     : null;
   const bandRow =
@@ -229,7 +239,7 @@ export const BlockTile = memo(function BlockTile({
   const priceAt =
     card &&
     resolvePriceTagPosition(card.priceTagPosition, {
-      cornerRadius: card.cornerRadius,
+      cornerRadius: clipRadius,
       titleOverlaysImage: titleOverlaysImage(card.titleStyle),
       titleRow: titleAt ? spotRow(titleAt) : undefined,
     });
@@ -265,8 +275,8 @@ export const BlockTile = memo(function BlockTile({
   function spotsFor(token: SpotToken): readonly TileSpot[] {
     if (!card) return [];
     return token === "title"
-      ? titleSpots(card.titleStyle, card.cornerRadius)
-      : priceSpots(card.cornerRadius, bandRow);
+      ? titleSpots(card.titleStyle, clipRadius)
+      : priceSpots(clipRadius, bandRow);
   }
 
   /** Where a pointer at this position wants to put the token. The band is the

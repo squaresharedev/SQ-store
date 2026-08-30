@@ -17,13 +17,12 @@ import { cn } from "@/lib/utils";
 import {
   destructiveButtonClass,
   focusRingClass,
-  infoTextClass,
   labelClass,
   secondaryButtonClass,
   transitionClass,
 } from "@/components/ui/control-styles";
 import { ColorPicker } from "@/components/ui/ColorPicker";
-import { Slider } from "@/components/ui/slider";
+import { SliderField } from "@/components/ui/SliderField";
 import { ShapeKindGlyph } from "./ShapeTileContent";
 import { SHAPE_SPECS } from "./shape-specs";
 import {
@@ -121,42 +120,34 @@ export function ShapeBlockEditor({
 
       {/* Point count, on the star-family kinds only. */}
       {supportsPoints(block.kind) && (
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between">
-            <span className={labelClass}>Points</span>
-            <span className={infoTextClass}>{points}</span>
-          </div>
-          <Slider
-            min={SHAPE_POINTS_MIN}
-            max={SHAPE_POINTS_MAX}
-            value={points}
-            onChange={(next) => onUpdate({ points: next })}
-            ariaLabel="Star points"
-            valueText={`${points} points`}
-          />
-        </div>
+        <SliderField
+          id={`${fieldId}-points`}
+          label="Points"
+          min={SHAPE_POINTS_MIN}
+          max={SHAPE_POINTS_MAX}
+          value={points}
+          onChange={(next) => onUpdate({ points: next })}
+          ariaLabel="Star points"
+          valueText={`${points} points`}
+        />
       )}
 
       {/* Corner roundness, on the kinds whose corners are not already fixed
           by construction (circle, pill, ... stay as they are). */}
       {supportsRoundness(block.kind) && (
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between">
-            <span className={labelClass}>Corner roundness</span>
-            <span className={infoTextClass}>
-              {roundness === 0 ? "Sharp" : roundness}
-            </span>
-          </div>
-          <Slider
-            min={0}
-            max={SHAPE_ROUNDNESS_MAX}
-            step={2}
-            value={roundness}
-            onChange={(next) => onUpdate({ roundness: next })}
-            ariaLabel="Corner roundness"
-            valueText={`${roundness} percent`}
-          />
-        </div>
+        <SliderField
+          id={`${fieldId}-roundness`}
+          label="Corner roundness"
+          min={0}
+          max={SHAPE_ROUNDNESS_MAX}
+          step={2}
+          value={roundness}
+          onChange={(next) => onUpdate({ roundness: next })}
+          ariaLabel="Corner roundness"
+          valueText={`${roundness} percent`}
+          statusText={roundness === 0 ? "Sharp" : undefined}
+          unit="%"
+        />
       )}
 
       <ColorPicker
@@ -168,24 +159,18 @@ export function ShapeBlockEditor({
       />
 
       {/* Outline: on a ring this is the ring's own thickness. */}
-      <div className="space-y-1.5">
-        <div className="flex items-center justify-between">
-          <span className={labelClass}>
-            {isRing ? "Ring thickness" : "Border thickness"}
-          </span>
-          <span className={infoTextClass}>
-            {borderWidth === 0 ? "None" : `${borderWidth}px`}
-          </span>
-        </div>
-        <Slider
-          min={isRing ? 1 : 0}
-          max={SHAPE_BORDER_WIDTH_MAX}
-          value={borderWidth}
-          onChange={setBorderWidth}
-          ariaLabel={isRing ? "Ring thickness" : "Border thickness"}
-          valueText={`${borderWidth} pixels`}
-        />
-      </div>
+      <SliderField
+        id={`${fieldId}-border-width`}
+        label={isRing ? "Ring thickness" : "Border thickness"}
+        min={isRing ? 1 : 0}
+        max={SHAPE_BORDER_WIDTH_MAX}
+        value={borderWidth}
+        onChange={setBorderWidth}
+        ariaLabel={isRing ? "Ring thickness" : "Border thickness"}
+        valueText={`${borderWidth} pixels`}
+        statusText={!isRing && borderWidth === 0 ? "None" : undefined}
+        unit="px"
+      />
 
       {/* Border color only matters on the filled kinds with an outline on. */}
       {!isRing && borderWidth > 0 && (
@@ -198,21 +183,18 @@ export function ShapeBlockEditor({
         />
       )}
 
-      <div className="space-y-1.5">
-        <div className="flex items-center justify-between">
-          <span className={labelClass}>Opacity</span>
-          <span className={infoTextClass}>{opacity}%</span>
-        </div>
-        <Slider
-          min={0}
-          max={100}
-          step={5}
-          value={opacity}
-          onChange={(next) => onUpdate({ opacity: next })}
-          ariaLabel="Shape opacity"
-          valueText={`${opacity} percent`}
-        />
-      </div>
+      <SliderField
+        id={`${fieldId}-opacity`}
+        label="Opacity"
+        min={0}
+        max={100}
+        step={5}
+        value={opacity}
+        onChange={(next) => onUpdate({ opacity: next })}
+        ariaLabel="Shape opacity"
+        valueText={`${opacity} percent`}
+        unit="%"
+      />
 
       {/* Copy/paste without a keyboard: one press inserts the copy beside
           this block (Ctrl+C / Ctrl+V do the same from the canvas). */}

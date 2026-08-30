@@ -1,7 +1,8 @@
 "use client";
 
-import type { RefObject } from "react";
+import type { CSSProperties, RefObject } from "react";
 import { Image as ImageIcon } from "lucide-react";
+import type { GridPlacement } from "@/components/grid/gridConstants";
 import type { Product } from "@/types/product";
 import {
   defaultPriceTagFill,
@@ -27,7 +28,10 @@ import {
   TILE_SPOT_CLASSES,
   TITLE_BAND_ROW_CLASSES,
   TITLE_BAND_SHADOW_CLASSES,
+  effectiveTilePlacement,
   priceTagChipStyle,
+  priceTagInsetStyle,
+  scaledCornerRadius,
   titleBandStyle,
 } from "./config-maps";
 import {
@@ -51,6 +55,14 @@ const HOVER_RISE_CLASSES: Record<SpotRow, string> = {
   bottom:
     "translate-y-full opacity-0 transition-[transform,opacity] duration-base ease-standard group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100 motion-reduce:transition-none",
 };
+
+/** Duration override for the hover reveal, as an inline style: the resolved
+ *  ms value (theme.titleHoverMs / priceHoverMs, per-tile overridable) wins
+ *  over the `duration-base` utility baked into HOVER_REVEAL_CLASS /
+ *  HOVER_RISE_CLASSES, without needing a Tailwind class per possible value. */
+function hoverDurationStyle(ms: number): CSSProperties {
+  return { transitionDuration: `${ms}ms` };
+}
 
 /**
  * The product face of a grid tile. Card appearance comes from ONE resolved
@@ -91,6 +103,7 @@ export function ProductTileContent({
   imagePlacement,
   imageRef,
   spotDrag,
+  placement,
 }: {
   product: Product;
   theme: StorefrontTheme;
@@ -107,8 +120,24 @@ export function ProductTileContent({
    *  every read-only path (preview, card thumbnail, the buyer's page), which
    *  then renders with no handlers, no tab stops and no affordance. */
   spotDrag?: TileSpotDrag;
+  /** The block's own stored span. Scales the corner radius (see
+   *  scaledCornerRadius) before deciding which title/price spots this tile
+   *  can still offer — a raw, unscaled radius let a big multi-cell tile claim
+   *  a corner its own clip had already rounded away. */
+  placement: Pick<GridPlacement, "w" | "h">;
 }) {
   const card = resolveCardStyle(theme, overrides);
+
+  // The radius that actually clips this tile: cornerRadius is the seller's
+  // BASE setting, but a multi-cell tile renders it scaled by its own span
+  // (see scaledCornerRadius) — resolving spots off the raw base value let a
+  // big tile's title/price land in a corner the clip had already rounded
+  // away, which is what made them read as "still there" on a big element
+  // instead of stepping to the center spot a small tile would have gotten.
+  const clipRadius = scaledCornerRadius(
+    card.cornerRadius,
+    effectiveTilePlacement(theme.displayMode, placement),
+  );
 
   // A token in flight is drawn where it is GOING, not where it is stored: the
   // whole point of dragging the thing is watching it move. Nothing is written
@@ -134,7 +163,7 @@ export function ProductTileContent({
   // same way and shows the spot that renders.
   const titleSpot = resolveTitlePosition(draggedTitle ?? card.titlePosition, {
     titleStyle: card.titleStyle,
-    cornerRadius: card.cornerRadius,
+    cornerRadius: clipRadius,
   });
   const titleRow = spotRow(titleSpot);
 
@@ -143,7 +172,7 @@ export function ProductTileContent({
   // row of the image — the same box a floated tag sits in, so a tag sharing
   // that row moves to the opposite one rather than landing on the name.
   const tagPosition = resolvePriceTagPosition(pricePosition, {
-    cornerRadius: card.cornerRadius,
+    cornerRadius: clipRadius,
     titleOverlaysImage: overlaid,
     titleRow,
   });
@@ -183,7 +212,11 @@ export function ProductTileContent({
           card.priceDisplay === "hover" && HOVER_REVEAL_CLASS,
           priceToken?.className,
         )}
-        style={chipStyle}
+        style={{
+          ...chipStyle,
+          ...priceTagInsetStyle(card.priceTagInset),
+          ...hoverDurationStyle(card.priceHoverMs),
+        }}
       >
         {formatPrice(product.price, product.currency)}
       </span>
@@ -200,7 +233,7 @@ export function ProductTileContent({
           card.priceDisplay === "hover" && HOVER_REVEAL_CLASS,
           priceToken?.className,
         )}
-        style={chipStyle}
+        style={{ ...chipStyle, ...hoverDurationStyle(card.priceHoverMs) }}
       >
         {formatPrice(product.price, product.currency)}
       </span>
@@ -220,7 +253,10 @@ export function ProductTileContent({
       data-title-band=""
       // Horizontal padding is the one part of the band that is not a class:
       // on auto it reads the tile's own clip radius (see titleBandStyle).
-      style={titleBandStyle(card.titleInset)}
+      style={{
+        ...titleBandStyle(card.titleInset),
+        ...hoverDurationStyle(card.titleHoverMs),
+      }}
       className={cn(
         "flex items-baseline justify-between gap-2 py-1.5",
         // A bar is a real row in the tile's column, so it needs no pinning.

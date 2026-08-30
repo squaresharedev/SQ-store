@@ -4,114 +4,103 @@ import { EASE_ENTRANCE, SETTLE } from "./motion-tokens";
 import type { NavIconProps } from "./types";
 
 /**
- * Products: the lid opens and a few items peek out from inside.
+ * Products: the single box shrinks into the first slot of a 2x2 stack, its
+ * crease lines fading as it goes, then three more box silhouettes slide in
+ * from off-canvas to fill the rest — inventory arriving, not a lid trick.
  *
- * Only the two long lids (hinged on the front-left and back-right rim edges)
- * move; they're the pair whose closed shape traces lucide's own crease lines,
- * so the resting glyph is unchanged. A lid turning out of that plane keeps
- * its free edge parallel to its hinge, so the offset from hinge to free edge
- * is cos(angle) across the lid plus sin(angle) straight up.
+ * The three arrivals are silhouette-only, the hexagon with no crease lines:
+ * at quarter size a full three-path glyph turns to mush, but a clean outline
+ * still reads as "a box" at that scale.
  *
- * The swing is a 3-keyframe arc (closed, near-vertical peak, open), not a
- * straight tween between the two end shapes: Motion interpolates the `d`
- * string point-by-point, so two keyframes cut the hinge's arc into a
- * straight-line morph. A keyframe at the midpoint angle traces the curve a
- * real lid actually swings through.
+ * Every copy shares the same pivot, (12, 12), the hexagon's own natural
+ * center, via an explicit pixel transform-origin rather than the group's
+ * bounding-box center. The vertical spine path (12,12 to 12,22) pulls that
+ * bbox down and off-center, so scaling around it would throw off every slot
+ * position computed relative to (12, 12).
  */
-const ALONG_SEAM = { x: 4.355, y: -2.5 };
-const RISE = 5;
-const PEAK_ANGLE = 82;
-const OPEN_ANGLE = 148;
+const HEXAGON_D =
+  "M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z";
 
-type Point = { x: number; y: number };
-type Lid = { hinge: [Point, Point]; side: 1 | -1 };
-const P = (x: number, y: number): Point => ({ x, y });
+const CENTER = 12;
+// getBBox() on the hexagon path measures 18 wide (x: 3-21) by 20 tall
+// (y: 2-22): far taller than it looks at a glance, since the top and bottom
+// corners come to a point past the crease lines that dominate the
+// silhouette. Slot spacing is sized off that measured footprint, not the
+// visual impression of it — an earlier pass eyeballed the height from the
+// path string and got it wrong by nearly 2x, which put opposite rows
+// overlapping instead of gapped.
+const SLOT_SCALE = 0.45;
+const HALF_W = (18 * SLOT_SCALE) / 2;
+const HALF_H = (20 * SLOT_SCALE) / 2;
+const GAP = 1.5;
+const SLOTS = {
+  topLeft: { x: CENTER - (HALF_W + GAP / 2), y: CENTER - (HALF_H + GAP / 2) },
+  topRight: { x: CENTER + (HALF_W + GAP / 2), y: CENTER - (HALF_H + GAP / 2) },
+  bottomLeft: { x: CENTER - (HALF_W + GAP / 2), y: CENTER + (HALF_H + GAP / 2) },
+  bottomRight: { x: CENTER + (HALF_W + GAP / 2), y: CENTER + (HALF_H + GAP / 2) },
+};
 
-const LIDS: Lid[] = [
-  { hinge: [P(12, 12), P(3.29, 7)], side: 1 }, // front-left
-  { hinge: [P(12, 2), P(20.71, 7)], side: -1 }, // back-right
-];
+const ARRIVE = { duration: 0.32, ease: EASE_ENTRANCE };
+const PIVOT = { transformOrigin: "12px 12px" };
 
-function lidPath({ hinge, side }: Lid, degrees: number): string {
-  const [a, b] = hinge;
-  const radians = (degrees * Math.PI) / 180;
-  const offset = {
-    x: Math.cos(radians) * ALONG_SEAM.x * side,
-    y: Math.cos(radians) * ALONG_SEAM.y * side - Math.sin(radians) * RISE,
-  };
-  const corner = (p: Point) =>
-    `${(p.x + offset.x).toFixed(2)} ${(p.y + offset.y).toFixed(2)}`;
-  return `M${a.x} ${a.y}L${b.x} ${b.y}L${corner(b)}L${corner(a)}Z`;
-}
+const slotTransform = (slot: { x: number; y: number }, scale: number) => ({
+  x: slot.x - CENTER,
+  y: slot.y - CENTER,
+  scale,
+});
 
-const SWING = { duration: 0.46, times: [0, 0.45, 1], ease: EASE_ENTRANCE };
+const MAIN_GROUP: Variants = {
+  idle: { x: 0, y: 0, scale: 1, transition: SETTLE },
+  hover: { ...slotTransform(SLOTS.topLeft, SLOT_SCALE), transition: ARRIVE },
+};
 
-const LID_VARIANTS: Variants[] = LIDS.map((lid) => ({
-  idle: { d: lidPath(lid, 0), transition: SETTLE },
-  hover: {
-    d: [lidPath(lid, 0), lidPath(lid, PEAK_ANGLE), lidPath(lid, OPEN_ANGLE)],
-    transition: SWING,
-  },
-}));
+/** Just the crease lines, faded out as the main box shrinks into the stack. */
+const MAIN_DETAIL: Variants = {
+  idle: { opacity: 1, transition: SETTLE },
+  hover: { opacity: 0, transition: { duration: 0.15 } },
+};
 
-/**
- * Items peeking out: two solid dots sitting inside the box, hidden below the
- * rim, one under each face. At the icon's real render size (a nav row is
- * ~20px), anything smaller than this reads as noise or vanishes outright —
- * a dot has to be a meaningful fraction of the glyph itself to survive
- * antialiasing at that size, which is why these look large relative to the
- * box in an enlarged inspector view. Sized and judged at native size, not
- * the zoomed preview.
- *
- * Each rises and fades in once the lid has started to part, staggered so
- * they don't both surface at once, with a small overshoot on the way up so
- * the stop reads as landing rather than just stopping.
- */
-type Item = { cx: number; cy: number; r: number; rise: number; delay: number };
-
-const ITEMS: Item[] = [
-  { cx: 7.8, cy: 16.25, r: 3.4, rise: 4.25, delay: 0.06 },
-  { cx: 16.2, cy: 16.25, r: 3.4, rise: 4.25, delay: 0.14 },
-];
-
-function itemVariants(rise: number, delay: number): Variants {
+function clone(
+  from: { x: number; y: number },
+  slot: { x: number; y: number },
+  delay: number,
+): Variants {
   return {
-    idle: { y: 0, opacity: 0, scale: 0.5, transition: SETTLE },
+    idle: { ...slotTransform(from, 0), opacity: 0, transition: { duration: 0.1 } },
     hover: {
-      y: [0, -rise * 1.08, -rise],
-      opacity: [0, 1, 1],
-      scale: [0.5, 1.05, 1],
-      transition: {
-        duration: 0.42,
-        times: [0, 0.7, 1],
-        delay,
-        ease: EASE_ENTRANCE,
-      },
+      ...slotTransform(slot, SLOT_SCALE),
+      opacity: 1,
+      transition: { ...ARRIVE, delay },
     },
   };
 }
 
+// Off-canvas starting points, one per side the box arrives from.
+const OFF_RIGHT = { x: 34, y: SLOTS.topRight.y };
+const OFF_BOTTOM = { x: SLOTS.bottomLeft.x, y: 34 };
+const OFF_CORNER = { x: 34, y: 34 };
+
+const CLONES: Variants[] = [
+  clone(OFF_RIGHT, SLOTS.topRight, 0.16),
+  clone(OFF_BOTTOM, SLOTS.bottomLeft, 0.26),
+  clone(OFF_CORNER, SLOTS.bottomRight, 0.36),
+];
+
 export function ProductsIcon({ className }: NavIconProps) {
   return (
     <IconSvg className={className}>
-      <path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z" />
-      <path d="M12 22V12" />
-      <polyline points="3.29 7 12 12 20.71 7" />
+      <motion.g variants={MAIN_GROUP} style={PIVOT}>
+        <path d={HEXAGON_D} />
+        <motion.g variants={MAIN_DETAIL}>
+          <path d="m3.3 7 8.7 5 8.7-5" />
+          <path d="M12 22V12" />
+        </motion.g>
+      </motion.g>
 
-      {LIDS.map((lid, i) => (
-        <motion.path key={i} variants={LID_VARIANTS[i]} d={lidPath(lid, 0)} />
-      ))}
-
-      {ITEMS.map(({ cx, cy, r, rise, delay }, i) => (
-        <motion.circle
-          key={i}
-          variants={itemVariants(rise, delay)}
-          cx={cx}
-          cy={cy}
-          r={r}
-          fill="currentColor"
-          stroke="none"
-        />
+      {CLONES.map((variants, i) => (
+        <motion.g key={i} variants={variants} style={PIVOT}>
+          <path d={HEXAGON_D} />
+        </motion.g>
       ))}
     </IconSvg>
   );

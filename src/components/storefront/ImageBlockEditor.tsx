@@ -14,12 +14,11 @@ import {
   fieldBaseClass,
   focusRingClass,
   helpTextClass,
-  infoTextClass,
   labelClass,
   secondaryButtonClass,
   transitionClass,
 } from "@/components/ui/control-styles";
-import { Slider } from "@/components/ui/slider";
+import { SliderField } from "@/components/ui/SliderField";
 
 export type ImageBlockPatch = Partial<
   Pick<ImageBlock, "alt" | "fit" | "opacity">
@@ -107,21 +106,18 @@ export function ImageBlockEditor({
         </button>
       )}
 
-      <div className="space-y-1.5">
-        <div className="flex items-center justify-between">
-          <span className={labelClass}>Opacity</span>
-          <span className={infoTextClass}>{opacity}%</span>
-        </div>
-        <Slider
-          min={0}
-          max={100}
-          step={5}
-          value={opacity}
-          onChange={(next) => onUpdate({ opacity: next })}
-          ariaLabel="Image opacity"
-          valueText={`${opacity} percent`}
-        />
-      </div>
+      <SliderField
+        id={`${fieldId}-opacity`}
+        label="Opacity"
+        min={0}
+        max={100}
+        step={5}
+        value={opacity}
+        onChange={(next) => onUpdate({ opacity: next })}
+        ariaLabel="Image opacity"
+        valueText={`${opacity} percent`}
+        unit="%"
+      />
 
       {/* Alt text. Optional on purpose: most elements are decoration, and an
           empty alt is the correct markup for that — inventing a description

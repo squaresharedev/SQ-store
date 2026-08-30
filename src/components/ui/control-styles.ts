@@ -112,6 +112,16 @@ export const stepperFieldClass = `h-9 w-20 shrink-0 rounded-none border-y border
  *  border to the destructive token; an inline message is always shown too. */
 export const fieldBaseClass = `w-full rounded-sm border border-input bg-background px-3 py-2.5 text-base text-foreground placeholder:text-muted-foreground disabled:opacity-50 aria-[invalid=true]:border-destructive ${TRANSITION} ${FOCUS_RING}`;
 
+/** The exact-value number field beside a slider (SliderField, FontSizeField).
+ *  Narrow — three or four digits, never prose — so defined on its own rather
+ *  than composed onto fieldBaseClass: that class's `w-full` can't be beaten by
+ *  appending `w-12` as plain text (no twMerge in play here to drop the
+ *  conflict), so the field would silently stay full width. The native
+ *  up/down spinner is hidden too: the slider (and the track's own arrow-key
+ *  support) already steps the value, so a second, tinier stepper glued to the
+ *  field only ate the width back. */
+export const sliderNumberFieldClass = `w-12 shrink-0 rounded-sm border border-input bg-background px-1 py-2.5 text-center text-sm text-foreground disabled:opacity-50 aria-[invalid=true]:border-destructive [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none ${TRANSITION} ${FOCUS_RING}`;
+
 /** Form field label: Inter, small, medium weight (styles.md §5). */
 export const labelClass = "font-inter text-sm font-medium text-foreground";
 

@@ -18,7 +18,7 @@ import {
   matchLayoutPreset,
 } from "@/lib/storefront/layout-presets";
 import { cn } from "@/lib/utils";
-import { Slider } from "@/components/ui/slider";
+import { SliderField } from "@/components/ui/SliderField";
 import { Switch } from "@/components/ui/switch";
 import {
   ghostButtonClass,
@@ -104,27 +104,26 @@ export function CardStyleControls({
         </p>
       </div>
 
-      <div className="space-y-1.5">
-        <div className="flex items-center justify-between">
-          <span className={strongLabelClass}>Corner roundness</span>
-          <span className={infoTextClass}>
-            {value.cornerRadius === 0
-              ? "Sharp"
-              : value.cornerRadius >= CORNER_RADIUS_MAX
-                ? "Circle"
-                : value.cornerRadius}
-          </span>
-        </div>
-        <Slider
-          min={0}
-          max={CORNER_RADIUS_MAX}
-          step={2}
-          value={value.cornerRadius}
-          onChange={(cornerRadius) => onChange({ cornerRadius })}
-          ariaLabel="Corner roundness"
-          valueText={`${value.cornerRadius} pixels`}
-        />
-      </div>
+      <SliderField
+        id={`${fieldId}-corner-radius`}
+        label="Corner roundness"
+        min={0}
+        max={CORNER_RADIUS_MAX}
+        step={2}
+        value={value.cornerRadius}
+        onChange={(cornerRadius) => onChange({ cornerRadius })}
+        ariaLabel="Corner roundness"
+        valueText={`${value.cornerRadius} pixels`}
+        labelClassName={strongLabelClass}
+        unit="px"
+        statusText={
+          value.cornerRadius === 0
+            ? "Sharp"
+            : value.cornerRadius >= CORNER_RADIUS_MAX
+              ? "Circle"
+              : undefined
+        }
+      />
 
       <CollapsibleSection title="Fine tuning" collapsible defaultOpen={false}>
         <div className="space-y-4">
@@ -152,11 +151,20 @@ export function CardStyleControls({
               {/* Auto is a real state, not a number: the words are held off the
                   tile's rounded corners by the roundness itself, so a seller
                   only reaches for this to want more or less air than that. */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between gap-2">
-                  <span className={strongLabelClass}>Edge spacing</span>
-                  {inset === undefined ? (
-                    <span className={infoTextClass}>Auto (follows roundness)</span>
+              <SliderField
+                id={`${fieldId}-title-inset`}
+                label="Edge spacing"
+                min={0}
+                max={TITLE_INSET_MAX}
+                value={inset ?? autoTitleInset(value.cornerRadius)}
+                onChange={(titleInset) => onChange({ titleInset })}
+                ariaLabel="Title edge spacing"
+                valueText={`${inset ?? autoTitleInset(value.cornerRadius)} pixels`}
+                labelClassName={strongLabelClass}
+                unit="px"
+                headerAction={
+                  inset === undefined ? (
+                    <span className={infoTextClass}>Auto</span>
                   ) : (
                     <button
                       type="button"
@@ -170,17 +178,9 @@ export function CardStyleControls({
                       />
                       Auto
                     </button>
-                  )}
-                </div>
-                <Slider
-                  min={0}
-                  max={TITLE_INSET_MAX}
-                  value={inset ?? autoTitleInset(value.cornerRadius)}
-                  onChange={(titleInset) => onChange({ titleInset })}
-                  ariaLabel="Title edge spacing"
-                  valueText={`${inset ?? autoTitleInset(value.cornerRadius)} pixels`}
-                />
-              </div>
+                  )
+                }
+              />
 
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between gap-3">

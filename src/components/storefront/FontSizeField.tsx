@@ -10,10 +10,10 @@ import {
 import { cn } from "@/lib/utils";
 import { Slider } from "@/components/ui/slider";
 import {
-  fieldBaseClass,
   ghostButtonClass,
   infoTextClass,
   labelClass,
+  sliderNumberFieldClass,
 } from "@/components/ui/control-styles";
 
 /**
@@ -117,7 +117,7 @@ export function FontSizeField({
               setDraft(null);
             }
           }}
-          className={cn(fieldBaseClass, "w-16 shrink-0 text-center text-sm")}
+          className={sliderNumberFieldClass}
         />
       </div>
     </div>

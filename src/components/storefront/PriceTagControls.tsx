@@ -23,7 +23,7 @@ import {
   priceTagColorField,
   type PriceTagPart,
 } from "@/lib/theme/color-target";
-import { Slider } from "@/components/ui/slider";
+import { SliderField } from "@/components/ui/SliderField";
 import { Switch } from "@/components/ui/switch";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { ColorPicker } from "@/components/ui/ColorPicker";
@@ -179,62 +179,56 @@ export function PriceTagControls({
 
       {/* One size for the whole tag: the chip's padding scales with the type,
           so this never needs a padding control beside it. */}
-      <div className="space-y-1.5">
-        <div className="flex items-center justify-between">
-          <span className={strongLabelClass}>Size</span>
-          <span className={infoTextClass}>{value.priceTagSize}px</span>
-        </div>
-        <Slider
-          min={PRICE_TAG_SIZE_MIN}
-          max={PRICE_TAG_SIZE_MAX}
-          value={value.priceTagSize}
-          onChange={(priceTagSize) => onChange({ priceTagSize })}
-          ariaLabel="Price tag size"
-          valueText={`${value.priceTagSize} pixels`}
-        />
-      </div>
+      <SliderField
+        id={`${fieldId}-price-size`}
+        label="Size"
+        min={PRICE_TAG_SIZE_MIN}
+        max={PRICE_TAG_SIZE_MAX}
+        value={value.priceTagSize}
+        onChange={(priceTagSize) => onChange({ priceTagSize })}
+        ariaLabel="Price tag size"
+        valueText={`${value.priceTagSize} pixels`}
+        labelClassName={strongLabelClass}
+        unit="px"
+      />
 
       {colorField("fill")}
       {colorField("text")}
       {colorField("border")}
 
-      <div className="space-y-1.5">
-        <div className="flex items-center justify-between">
-          <span className={strongLabelClass}>Border thickness</span>
-          <span className={infoTextClass}>
-            {value.priceTagBorderWidth === 0 ? "None" : `${value.priceTagBorderWidth}px`}
-          </span>
-        </div>
-        <Slider
-          min={0}
-          max={PRICE_TAG_BORDER_WIDTH_MAX}
-          value={value.priceTagBorderWidth}
-          onChange={(priceTagBorderWidth) => onChange({ priceTagBorderWidth })}
-          ariaLabel="Price tag border thickness"
-          valueText={`${value.priceTagBorderWidth} pixels`}
-        />
-      </div>
+      <SliderField
+        id={`${fieldId}-price-border-width`}
+        label="Border thickness"
+        min={0}
+        max={PRICE_TAG_BORDER_WIDTH_MAX}
+        value={value.priceTagBorderWidth}
+        onChange={(priceTagBorderWidth) => onChange({ priceTagBorderWidth })}
+        ariaLabel="Price tag border thickness"
+        valueText={`${value.priceTagBorderWidth} pixels`}
+        labelClassName={strongLabelClass}
+        unit="px"
+        statusText={value.priceTagBorderWidth === 0 ? "None" : undefined}
+      />
 
-      <div className="space-y-1.5">
-        <div className="flex items-center justify-between">
-          <span className={strongLabelClass}>Corner roundness</span>
-          <span className={infoTextClass}>
-            {value.priceTagRadius === 0
-              ? "Sharp"
-              : value.priceTagRadius >= PRICE_TAG_RADIUS_MAX
-                ? "Pill"
-                : value.priceTagRadius}
-          </span>
-        </div>
-        <Slider
-          min={0}
-          max={PRICE_TAG_RADIUS_MAX}
-          value={value.priceTagRadius}
-          onChange={(priceTagRadius) => onChange({ priceTagRadius })}
-          ariaLabel="Price tag corner roundness"
-          valueText={`${value.priceTagRadius} pixels`}
-        />
-      </div>
+      <SliderField
+        id={`${fieldId}-price-radius`}
+        label="Corner roundness"
+        min={0}
+        max={PRICE_TAG_RADIUS_MAX}
+        value={value.priceTagRadius}
+        onChange={(priceTagRadius) => onChange({ priceTagRadius })}
+        ariaLabel="Price tag corner roundness"
+        valueText={`${value.priceTagRadius} pixels`}
+        labelClassName={strongLabelClass}
+        unit="px"
+        statusText={
+          value.priceTagRadius === 0
+            ? "Sharp"
+            : value.priceTagRadius >= PRICE_TAG_RADIUS_MAX
+              ? "Pill"
+              : undefined
+        }
+      />
     </div>
   );
 }

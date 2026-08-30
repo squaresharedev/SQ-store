@@ -3,6 +3,7 @@ import type { GridPlacement } from "@/components/grid/gridConstants";
 import {
   PRICE_TAG_DEFAULT_BORDER,
   TITLE_INSET_AUTO,
+  type DisplayMode,
   type PriceTagFont,
   type SpotRow,
   type StorefrontFont,
@@ -59,6 +60,21 @@ export function scaledCornerRadius(
 }
 
 /**
+ * The tile's span for corner-radius scaling purposes — NOT always its stored
+ * w/h. CarouselStrip renders every tile as a fixed 1x1 square regardless of
+ * what the block's placement says (a board saved in grid mode can carry
+ * multi-cell spans that a switch to carousel display never clears), so
+ * scaling by the stored span there would compute a radius for a shape the
+ * tile never actually takes. Grid tiles use their real span.
+ */
+export function effectiveTilePlacement(
+  displayMode: DisplayMode,
+  placement: Pick<GridPlacement, "w" | "h">,
+): Pick<GridPlacement, "w" | "h"> {
+  return displayMode === "carousel" ? { w: 1, h: 1 } : placement;
+}
+
+/**
  * The clip one tile wears, applied by whoever owns the tile's box (the grid
  * cell, the carousel item). It PUBLISHES the radius as `--tile-radius` as well
  * as applying it, because the tile's own contents have to know how much of
@@ -73,15 +89,20 @@ export function tileClipStyle(radius: number): CSSProperties {
 }
 
 // Tile spot -> absolute placement over the image area. Center spots translate
-// back by half their own size so they sit on the exact axis.
+// back by half their own size so they sit on the exact axis. Edge offsets
+// read the --tag-inset var (see priceTagInsetStyle) with an 8px fallback —
+// the exact value every one of these rendered before the var existed — so
+// the picker, the layout board and the drag layer (none of which set the
+// var; they preview an abstract tile, not a real sized one) keep rendering
+// exactly as they always have.
 export const TILE_SPOT_CLASSES: Record<TileSpot, string> = {
-  "top-left": "left-2 top-2",
-  "top-center": "left-1/2 top-2 -translate-x-1/2",
-  "top-right": "right-2 top-2",
+  "top-left": "left-[var(--tag-inset,8px)] top-[var(--tag-inset,8px)]",
+  "top-center": "top-[var(--tag-inset,8px)] left-1/2 -translate-x-1/2",
+  "top-right": "right-[var(--tag-inset,8px)] top-[var(--tag-inset,8px)]",
   "middle-center": "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
-  "bottom-left": "bottom-2 left-2",
-  "bottom-center": "bottom-2 left-1/2 -translate-x-1/2",
-  "bottom-right": "bottom-2 right-2",
+  "bottom-left": "bottom-[var(--tag-inset,8px)] left-[var(--tag-inset,8px)]",
+  "bottom-center": "bottom-[var(--tag-inset,8px)] left-1/2 -translate-x-1/2",
+  "bottom-right": "bottom-[var(--tag-inset,8px)] right-[var(--tag-inset,8px)]",
 };
 
 /**
@@ -115,6 +136,25 @@ export function titleBandStyle(inset: number | undefined): CSSProperties {
         ? `clamp(${min}px, calc(min(var(--tile-radius, 0px), 50cqmin) * ${ratio}), ${max}px)`
         : `${inset}px`,
   };
+}
+
+/**
+ * The floated price tag's corner/edge offset — the same auto-scaling rule as
+ * {@link titleBandStyle}, applied through the --tag-inset var TILE_SPOT_CLASSES
+ * reads. Absent is auto: a heavily rounded big tile pushes the chip in from
+ * the arc instead of leaving it to sit in the corner the clip already ate.
+ * Set only on the real, sized product tile (see ProductTileContent) — the
+ * picker/board/drag-layer previews never set the var, so they keep using
+ * TILE_SPOT_CLASSES's own 8px fallback.
+ */
+export function priceTagInsetStyle(inset: number | undefined): CSSProperties {
+  const { min, max, ratio } = TITLE_INSET_AUTO;
+  return {
+    "--tag-inset":
+      inset === undefined
+        ? `clamp(${min}px, calc(min(var(--tile-radius, 0px), 50cqmin) * ${ratio}), ${max}px)`
+        : `${inset}px`,
+  } as CSSProperties;
 }
 
 /** Where an overlaid title band is pinned, per row. The middle band centers

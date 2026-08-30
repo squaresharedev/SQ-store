@@ -1,5 +1,6 @@
 "use client";
 
+import { useId } from "react";
 import {
   BringToFront,
   ChevronDown,
@@ -25,7 +26,7 @@ import {
   transitionClass,
   focusRingClass,
 } from "@/components/ui/control-styles";
-import { Slider } from "@/components/ui/slider";
+import { SliderField } from "@/components/ui/SliderField";
 
 /**
  * How the selected block(s) SIT on the canvas, as opposed to what they are
@@ -162,6 +163,7 @@ export function PlacementSection({
    *  to swap (the dev gallery), and the row simply does not render. */
   onOpenLayers?: () => void;
 }) {
+  const fieldId = useId();
   const shared = sharedRotation(blocks);
   const multiple = blocks.length > 1;
   const layer = layerState(board, blocks);
@@ -169,13 +171,9 @@ export function PlacementSection({
   return (
     <div className="space-y-4">
       <div className="space-y-1.5">
-        <div className="flex items-center justify-between">
-          <span className={labelClass}>Rotation</span>
-          <span className={helpTextClass}>
-            {shared === null ? "Mixed" : `${shared}°`}
-          </span>
-        </div>
-        <Slider
+        <SliderField
+          id={`${fieldId}-rotation`}
+          label="Rotation"
           min={ROTATION_MIN}
           max={ROTATION_MAX}
           // Zero is a real position on this track, so a slider that has never
@@ -188,6 +186,8 @@ export function PlacementSection({
               ? "Mixed angles"
               : `${shared} degrees`
           }
+          statusText={shared === null ? "Mixed" : undefined}
+          unit="°"
         />
         <div className="flex gap-1.5">
           {QUICK_ANGLES.map((angle) => (
