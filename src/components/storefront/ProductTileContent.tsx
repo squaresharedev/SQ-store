@@ -2,7 +2,6 @@
 
 import type { CSSProperties, RefObject } from "react";
 import { Image as ImageIcon } from "lucide-react";
-import type { GridPlacement } from "@/components/grid/gridConstants";
 import type { Product } from "@/types/product";
 import {
   defaultPriceTagFill,
@@ -28,10 +27,8 @@ import {
   TILE_SPOT_CLASSES,
   TITLE_BAND_ROW_CLASSES,
   TITLE_BAND_SHADOW_CLASSES,
-  effectiveTilePlacement,
   priceTagChipStyle,
   priceTagInsetStyle,
-  scaledCornerRadius,
   titleBandStyle,
 } from "./config-maps";
 import {
@@ -103,7 +100,6 @@ export function ProductTileContent({
   imagePlacement,
   imageRef,
   spotDrag,
-  placement,
 }: {
   product: Product;
   theme: StorefrontTheme;
@@ -120,24 +116,8 @@ export function ProductTileContent({
    *  every read-only path (preview, card thumbnail, the buyer's page), which
    *  then renders with no handlers, no tab stops and no affordance. */
   spotDrag?: TileSpotDrag;
-  /** The block's own stored span. Scales the corner radius (see
-   *  scaledCornerRadius) before deciding which title/price spots this tile
-   *  can still offer — a raw, unscaled radius let a big multi-cell tile claim
-   *  a corner its own clip had already rounded away. */
-  placement: Pick<GridPlacement, "w" | "h">;
 }) {
   const card = resolveCardStyle(theme, overrides);
-
-  // The radius that actually clips this tile: cornerRadius is the seller's
-  // BASE setting, but a multi-cell tile renders it scaled by its own span
-  // (see scaledCornerRadius) — resolving spots off the raw base value let a
-  // big tile's title/price land in a corner the clip had already rounded
-  // away, which is what made them read as "still there" on a big element
-  // instead of stepping to the center spot a small tile would have gotten.
-  const clipRadius = scaledCornerRadius(
-    card.cornerRadius,
-    effectiveTilePlacement(theme.displayMode, placement),
-  );
 
   // A token in flight is drawn where it is GOING, not where it is stored: the
   // whole point of dragging the thing is watching it move. Nothing is written
@@ -163,7 +143,7 @@ export function ProductTileContent({
   // same way and shows the spot that renders.
   const titleSpot = resolveTitlePosition(draggedTitle ?? card.titlePosition, {
     titleStyle: card.titleStyle,
-    cornerRadius: clipRadius,
+    cornerRadius: card.cornerRadius,
   });
   const titleRow = spotRow(titleSpot);
 
@@ -172,7 +152,7 @@ export function ProductTileContent({
   // row of the image — the same box a floated tag sits in, so a tag sharing
   // that row moves to the opposite one rather than landing on the name.
   const tagPosition = resolvePriceTagPosition(pricePosition, {
-    cornerRadius: clipRadius,
+    cornerRadius: card.cornerRadius,
     titleOverlaysImage: overlaid,
     titleRow,
   });

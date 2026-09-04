@@ -261,8 +261,27 @@ export async function seedProducts(
      * validates it against OBJECT_KEY_PATTERN.
      */
     image_key?: string;
+    description?: string;
+    /** Product page facts. Same https:// passthrough applies to gallery keys. */
+    gallery?: Array<{ key: string; alt: string; optionId?: string }>;
+    option_groups?: Array<{
+      id: string;
+      name: string;
+      display: "swatch" | "chip" | "select";
+      options: Array<{ id: string; name: string; swatch?: string; available: boolean }>;
+    }>;
+    details?: Record<string, unknown>;
+    documents?: Array<{ key: string; label: string }>;
+    purchase_url?: string;
+    digital_file_key?: string;
+    /** Which of the storefront config's shippingProfiles this ships under.
+     *  Absent = the store's default terms, which is the common case. */
+    shipping_profile_id?: string;
   }>,
 ) {
+  // Every row carries the SAME keys: PostgREST refuses a bulk insert whose
+  // objects differ ("All object keys must match"), so optional columns are
+  // written as their defaults rather than left out.
   await serviceRest(`/products`, {
     method: "POST",
     body: products.map((p) => ({
@@ -271,7 +290,15 @@ export async function seedProducts(
       price_cents: p.price_cents ?? 1000,
       currency: "EUR",
       status: p.status ?? "active",
-      ...(p.image_key ? { image_key: p.image_key } : {}),
+      image_key: p.image_key ?? null,
+      description: p.description ?? null,
+      gallery: p.gallery ?? [],
+      option_groups: p.option_groups ?? [],
+      details: p.details ?? {},
+      documents: p.documents ?? [],
+      purchase_url: p.purchase_url ?? null,
+      digital_file_key: p.digital_file_key ?? null,
+      shipping_profile_id: p.shipping_profile_id ?? null,
     })),
   });
 }
@@ -285,6 +312,45 @@ export async function seedStorefronts(
   await serviceRest(`/storefronts`, {
     method: "POST",
     body: storefronts.map((s) => ({ owner_id: ownerId, name: s.name })),
+  });
+}
+
+/**
+ * Seed analytics signals for a seller (service-written, like the ingest route).
+ *
+ * `daysAgo` places a row in the past so a spec can exercise the 30-day window
+ * and the trend series rather than a single spike on today. Everything else
+ * mirrors what recordSignal writes.
+ */
+export async function seedSignals(
+  accountId: string,
+  signals: Array<{
+    kind: "storefront_view" | "product_click" | "email_signup" | "booking";
+    storefrontId?: string;
+    channel?: "embed" | "marketplace" | "direct";
+    visitorHash?: string;
+    valueCents?: number;
+    daysAgo?: number;
+  }>,
+) {
+  const dayMs = 24 * 60 * 60 * 1000;
+  await serviceRest(`/storefront_signals`, {
+    method: "POST",
+    body: signals.map((signal, index) => ({
+      account_id: accountId,
+      kind: signal.kind,
+      channel: signal.channel ?? "embed",
+      ...(signal.storefrontId ? { storefront_id: signal.storefrontId } : {}),
+      // 64 hex chars, matching the column's CHECK on a real digest.
+      visitor_hash:
+        signal.visitorHash ?? String(index % 5).repeat(64).slice(0, 64),
+      ...(signal.valueCents !== undefined
+        ? { value_cents: signal.valueCents, currency: "EUR" }
+        : {}),
+      occurred_at: new Date(
+        Date.now() - (signal.daysAgo ?? 1) * dayMs,
+      ).toISOString(),
+    })),
   });
 }
 

@@ -24,6 +24,11 @@
     "NEXT_PUBLIC_SUPABASE_URL": "https://vnyfndqpdllwhvhinjoi.supabase.co",
     "NEXT_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZueWZuZHFwZGxsd2h2aGluam9pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzMDExNTYsImV4cCI6MjA5ODg3NzE1Nn0.y_SUEDhSU6fmx2HU8r-DHe4XolwAo7JevqBTLtn6ebI",
     "NEXT_PUBLIC_APP_URL": "https://dashboard.squareshare.eu"
+    // NEXT_PUBLIC_TURNSTILE_SITE_KEY: intentionally NOT set here yet. Add it
+    // (plus `wrangler secret put TURNSTILE_SECRET_KEY`) once a Turnstile
+    // widget exists in the Cloudflare dashboard for this zone — see
+    // lib/turnstile.ts. Until then the sign-up bot check is off in
+    // production, same as it is in local dev.
   },
   // Workers AI, used by lib/moderation to classify product images before they
   // reach R2. Binding it costs nothing on its own: the code only calls the

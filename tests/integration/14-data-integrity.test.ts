@@ -186,6 +186,36 @@ describe("currency + money constraints", () => {
     }
   });
 
+  it("products.shipping_profile_id accepts null and an id, and refuses anything else", async () => {
+    // Zod is the boundary for every application write, but a service-role
+    // write is not parsed by it — and this column is DEREFERENCED by the
+    // public product page against a storefront config. The CHECK is what
+    // stands between that and an arbitrary string.
+    await asService((q) =>
+      q.query(
+        `insert into public.products (owner_id, title, price_cents, shipping_profile_id)
+         values ($1, 'default terms', 100, null), ($1, 'named profile', 100, $2)`,
+        [seller.id, "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1"],
+      ),
+    );
+
+    for (const bad of ["", "not a profile id", "x".repeat(65), "id;drop"]) {
+      let failed = false;
+      try {
+        await asService((q) =>
+          q.query(
+            `insert into public.products (owner_id, title, price_cents, shipping_profile_id)
+             values ($1, 'x', 100, $2)`,
+            [seller.id, bad],
+          ),
+        );
+      } catch {
+        failed = true;
+      }
+      expect(failed, JSON.stringify(bad)).toBe(true);
+    }
+  });
+
   it("orders reject an out-of-set channel and status", async () => {
     for (const [channel, status] of [
       ["telepathy", "paid"],

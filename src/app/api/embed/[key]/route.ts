@@ -1,10 +1,13 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { RATE_LIMITS, clientKey, rateLimitKey } from "@/lib/rate-limit";
+import { recordSignal, viewDedupeKey, visitorHash } from "@/lib/analytics/record";
 import { decideEmbedAccess, embedCorsHeaders } from "@/lib/storefront/embed";
 import { parseStoredStorefrontConfig } from "@/lib/validation/storefront";
 import { uuidField } from "@/lib/validation/inputs";
-import { readingOrder, type StorefrontBlock } from "@/types/storefront";
+import { readingOrder, type StorefrontConfig } from "@/types/storefront";
 import { presignGetUrl } from "@/lib/r2";
+import { resolveProductPage } from "@/lib/storefront/product-page";
+import { productPageUrl } from "@/lib/storefront/product-page-url";
 
 /**
  * GET /api/embed/[key] — the PUBLIC storefront payload for the embed widget.
@@ -53,12 +56,20 @@ export async function GET(
     );
   }
 
-  let row: { id: string; name: string; config: unknown } | null = null;
+  let row: {
+    id: string;
+    name: string;
+    owner_id: string;
+    config: unknown;
+  } | null = null;
   try {
     const admin = createAdminClient();
     const result = await admin
       .from("storefronts")
-      .select("id, name, config")
+      // owner_id is read for ATTRIBUTION only (which seller's view counter this
+      // request belongs to) and never leaves in the response. See the built,
+      // not-passed-through payload below.
+      .select("id, name, owner_id, config")
       .eq("embed_key", key)
       .maybeSingle();
     if (result.error) {
@@ -93,6 +104,33 @@ export async function GET(
       : Response.json({ error: "This storefront is not embeddable here." }, { status: 403 });
   }
 
+  // A serve to a real, allowed visitor is a storefront view. Recorded here and
+  // nowhere earlier on purpose: a request that failed the key check, the rate
+  // limit or the origin allowlist is not a view, and counting refusals would
+  // let anyone inflate a seller's numbers by hammering a wrong origin.
+  //
+  // Deduped to one per visitor per storefront per hour (viewDedupeKey), so a
+  // widget re-render or a tab left open counts once. Never awaited for its
+  // result beyond the write itself, and recordSignal cannot throw: a counter
+  // must not be able to fail a buyer's page load.
+  //
+  // KNOWN UNDERCOUNT: the response below is CDN-cacheable for five minutes, so
+  // a cached hit never reaches this line. That is the right trade (the cache is
+  // what keeps a popular embed cheap) and it biases the figure low, which is
+  // the safe direction for a number a seller makes decisions on.
+  const hash = await visitorHash(row.owner_id, [
+    await clientKey(request.headers),
+    request.headers.get("user-agent"),
+  ]);
+  await recordSignal({
+    accountId: row.owner_id,
+    kind: "storefront_view",
+    storefrontId: row.id,
+    channel: "embed",
+    visitorHash: hash,
+    dedupeKey: await viewDedupeKey(row.id, hash),
+  });
+
   const headers = {
     ...embedCorsHeaders(decision.origin),
     // Public, identical for every allowed viewer, and cheap to regenerate.
@@ -112,7 +150,7 @@ export async function GET(
       // artwork is the block, so it ships as a signed, expiring URL.)
       theme: config.theme,
       header: config.header ?? null,
-      blocks: await publicBlocks(config.blocks),
+      blocks: await publicBlocks(config, row.id),
     },
     { headers },
   );
@@ -154,9 +192,13 @@ export async function OPTIONS(
  * not learn inventory from a public embed), and a field added to the block
  * types later stays out until someone adds it here on purpose.
  */
-async function publicBlocks(blocks: StorefrontBlock[]) {
+async function publicBlocks(config: StorefrontConfig, storefrontId: string) {
+  // Where a tap on a product tile goes. Absent when the seller has switched
+  // product pages off, so the widget renders an inert tile rather than a link
+  // to a 404.
+  const productPagesOn = resolveProductPage(config).enabled;
   return Promise.all(
-    readingOrder(blocks).map(async (block) => {
+    readingOrder(config.blocks).map(async (block) => {
       // Tilt travels with the placement for the same reason a product tile's
       // framing does: it is a visual choice the seller made about a block the
       // buyer can already see, and an embed that dropped it would quietly
@@ -188,6 +230,11 @@ async function publicBlocks(blocks: StorefrontBlock[]) {
           // and derived from a picture the embed already serves, so none of
           // the reasons this list is an allowlist apply.
           imagePlacement: block.imagePlacement,
+          // The hosted product page for this tile: an absolute URL on the
+          // app's own origin, built from two UUIDs the buyer can already see.
+          ...(productPagesOn
+            ? { productUrl: productPageUrl(storefrontId, block.productId) }
+            : {}),
         };
       }
       if (block.type === "shape") {

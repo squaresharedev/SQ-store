@@ -6,11 +6,11 @@ import { Switch } from "@/components/ui/switch";
 import {
   errorTextClass,
   fieldBaseClass,
-  helpTextClass,
   labelClass,
   stepperButtonClass,
   stepperFieldClass,
 } from "@/components/ui/control-styles";
+import { InfoTip } from "@/components/ui/InfoTip";
 import { STOCK_QUANTITY_MAX } from "@/lib/validation/product";
 
 export interface StockFieldValues {
@@ -41,7 +41,6 @@ export function StockFields({ values, errors, onChange }: Props) {
   const stockQtyErrorId = `${fieldId}-stock-qty-error`;
   const thresholdId = `${fieldId}-threshold`;
   const thresholdErrorId = `${fieldId}-threshold-error`;
-  const thresholdHintId = `${fieldId}-threshold-hint`;
 
   // The typed value as a number. A field mid-edit can hold "" or junk, which
   // is not an error yet — it reads as 0 for stepping and for the bounds.
@@ -60,19 +59,23 @@ export function StockFields({ values, errors, onChange }: Props) {
     <div className="space-y-4">
       {/* Track stock toggle */}
       <div className="flex items-center justify-between gap-3">
-        <label htmlFor={switchId} className={labelClass}>
-          Track stock
-        </label>
+        <div className="flex items-center gap-1.5">
+          <label htmlFor={switchId} className={labelClass}>
+            Track stock
+          </label>
+          <InfoTip label="What tracking stock does">
+            Off, this product is unlimited. On, buyers see sold-out and
+            low-stock badges and cannot order more than you have.
+          </InfoTip>
+        </div>
         <Switch
           id={switchId}
           checked={values.trackStock}
           onCheckedChange={(checked) => onChange("trackStock", checked)}
+          data-product-field="trackStock"
+          data-product-value={values.trackStock ? "true" : "false"}
         />
       </div>
-      <p className={helpTextClass}>
-        Off = unlimited. Turn on to show sold-out and low-stock badges and stop
-        overselling.
-      </p>
 
       {/* Quantity fields — only rendered when tracking is on */}
       {values.trackStock && (
@@ -112,6 +115,9 @@ export function StockFields({ values, errors, onChange }: Props) {
                 aria-describedby={
                   errors.stockQuantity ? stockQtyErrorId : undefined
                 }
+                data-product-field="stockQuantity"
+                data-product-value={values.stockQuantity.trim() || undefined}
+                data-product-unit="count"
                 className={stepperFieldClass}
               />
               <button
@@ -133,12 +139,15 @@ export function StockFields({ values, errors, onChange }: Props) {
 
           {/* Low-stock threshold */}
           <div className="space-y-1.5 sm:max-w-xs">
-            <label htmlFor={thresholdId} className={labelClass}>
-              Low-stock alert at{" "}
-              <span className="font-normal text-muted-foreground">
-                (optional)
-              </span>
-            </label>
+            <div className="flex items-center gap-1.5">
+              <label htmlFor={thresholdId} className={labelClass}>
+                Low-stock alert at
+              </label>
+              <InfoTip label="What the low-stock alert does">
+                At or below this number the product page shows
+                &quot;Only N left&quot;. Leave it blank for no badge.
+              </InfoTip>
+            </div>
             <input
               id={thresholdId}
               type="text"
@@ -149,16 +158,12 @@ export function StockFields({ values, errors, onChange }: Props) {
               }
               placeholder="5"
               aria-invalid={errors.lowStockThreshold ? true : undefined}
-              aria-describedby={
-                errors.lowStockThreshold
-                  ? `${thresholdErrorId} ${thresholdHintId}`
-                  : thresholdHintId
-              }
+              aria-describedby={errors.lowStockThreshold ? thresholdErrorId : undefined}
+              data-product-field="lowStockThreshold"
+              data-product-value={values.lowStockThreshold.trim() || undefined}
+              data-product-unit="count"
               className={fieldBaseClass}
             />
-            <p id={thresholdHintId} className={helpTextClass}>
-              Shows &quot;Only N left&quot; at or below this number.
-            </p>
             {errors.lowStockThreshold && (
               <p id={thresholdErrorId} className={errorTextClass}>
                 {errors.lowStockThreshold}

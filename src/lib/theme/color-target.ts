@@ -47,6 +47,8 @@ export type ColorTargetRef =
   // the theme AND on a tile's overrides, and the same panel edits either. No
   // blockKey means the theme.
   | { kind: "price-tag"; part: PriceTagPart; blockKey?: string };
+// A "product-page-text" ref lived here. The product page's ink is derived from
+// the storefront background's lightness now, so there is no colour to pick.
 
 /** Which of the price tag's three colors a ref names. */
 export type PriceTagPart = "fill" | "text" | "border";

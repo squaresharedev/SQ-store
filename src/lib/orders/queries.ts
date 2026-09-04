@@ -21,6 +21,14 @@ import type {
 //     title: `New order: ${productTitle}`, data: { href: "/orders" } });
 // (from "@/lib/notifications/create"). Not wired: orders are seed-only for now.
 //
+// TODO(checkout) / NOT MERCHANT OF RECORD: that same future writer must create
+// the Stripe charge ON the seller's connected account (Direct Charge, or
+// Destination Charge with `on_behalf_of`) and record OUR cut in
+// platform_fee_cents as the resulting `application_fee_amount` — never route
+// the full amount through a Squareshare-owned account first. See
+// lib/payments/types.ts and components/product-page/ProductCta.tsx for the
+// same guardrail on the other two sides of this seam.
+//
 // The generated Database types don't include `orders` (owned by the concurrent
 // seed work), so reads go through an untyped client cast against the agreed
 // column contract below. Column contract (do not rename):

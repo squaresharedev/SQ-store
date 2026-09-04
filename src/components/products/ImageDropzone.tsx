@@ -100,6 +100,7 @@ export function ImageDropzone({
           <input
             ref={inputRef}
             id={inputId}
+            data-product-field="coverImage"
             type="file"
             accept={ACCEPTED_TYPES.join(",")}
             aria-describedby={describedById}

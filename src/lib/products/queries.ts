@@ -7,10 +7,17 @@ import { toCurrency } from "@/lib/format/money";
 import type { Tables } from "@/types";
 import type {
   Product,
+  ProductDetail,
   ProductFilters,
   ProductSales,
   ProductSalesSummary,
 } from "@/types/product";
+import {
+  parseDetails,
+  parseDocuments,
+  parseGallery,
+  parseOptionGroups,
+} from "@/lib/products/detail";
 import type { Paginated } from "@/types/pagination";
 import {
   isMetricSort,
@@ -52,6 +59,24 @@ const PRODUCT_LIST_COLUMNS =
   "id, title, description, price_cents, currency, status, image_key, digital_file_key, track_stock, stock_quantity, low_stock_threshold";
 
 /**
+ * The list columns plus the product-page jsonb. Only the single-product read
+ * (the edit form) selects these: a gallery costs a presign per photo, and the
+ * list has no use for a specification table.
+ */
+type ProductDetailRow = ProductListRow &
+  Pick<
+    ProductRow,
+    | "gallery"
+    | "option_groups"
+    | "details"
+    | "documents"
+    | "purchase_url"
+    | "shipping_profile_id"
+  >;
+
+const PRODUCT_DETAIL_COLUMNS = `${PRODUCT_LIST_COLUMNS}, gallery, option_groups, details, documents, purchase_url, shipping_profile_id`;
+
+/**
  * Safety bound, not pagination. Every row costs an R2 presign (an HMAC) on top
  * of the transfer, so an unbounded list is the one query here that can degrade
  * pathologically. Set far above any realistic catalogue; real pagination is
@@ -87,6 +112,33 @@ async function rowToProduct(row: ProductListRow): Promise<Product> {
     trackStock: row.track_stock,
     stockQuantity: row.stock_quantity,
     lowStockThreshold: row.low_stock_threshold,
+  };
+}
+
+/** The owner-side full product: the tile fields plus the page facts, with
+ *  every gallery key signed for display in the form. */
+async function rowToProductDetail(row: ProductDetailRow): Promise<ProductDetail> {
+  const base = await rowToProduct(row);
+  const gallery = await Promise.all(
+    parseGallery(row.gallery).map(async (image) => ({
+      ...image,
+      url: await presignGetUrl(image.key),
+    })),
+  );
+  const documents = await Promise.all(
+    parseDocuments(row.documents).map(async (document) => ({
+      ...document,
+      url: await presignGetUrl(document.key),
+    })),
+  );
+  return {
+    ...base,
+    gallery,
+    optionGroups: parseOptionGroups(row.option_groups),
+    details: parseDetails(row.details),
+    documents,
+    purchaseUrl: row.purchase_url,
+    shippingProfileId: row.shipping_profile_id,
   };
 }
 
@@ -309,7 +361,7 @@ export async function getProductSales(): Promise<ProductSalesSummary> {
   return { byProduct, bestsellerId: payload.bestseller_id };
 }
 
-export async function getProduct(id: string): Promise<Product | null> {
+export async function getProduct(id: string): Promise<ProductDetail | null> {
   // Guard before querying so a garbage URL param 404s instead of erroring.
   if (!productIdSchema.safeParse(id).success) return null;
   const account = await getActiveAccount();
@@ -317,10 +369,10 @@ export async function getProduct(id: string): Promise<Product | null> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("products")
-    .select("*")
+    .select(PRODUCT_DETAIL_COLUMNS)
     .eq("id", id)
     .eq("owner_id", account.accountId)
     .maybeSingle();
   if (error) throw new Error(`Failed to load product: ${error.message}`);
-  return data ? await rowToProduct(data) : null;
+  return data ? await rowToProductDetail(data as ProductDetailRow) : null;
 }

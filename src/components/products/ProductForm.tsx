@@ -5,21 +5,44 @@ import { useRouter } from "next/navigation";
 import {
   Boxes,
   Eye,
+  FileText,
   ImageIcon,
+  Images,
+  Layers,
   Package,
+  Ruler,
+  ShieldCheck,
+  Truck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type {
-  Product,
-  ProductFormValues,
-  ProductStatus,
+import {
+  OPTIONS_PER_GROUP_MAX,
+  type Product,
+  type ProductDetail,
+  type ProductFormValues,
+  type ProductOptionGroup,
+  type ProductStatus,
 } from "@/types/product";
+import { GalleryField } from "./GalleryField";
+import { OptionsField } from "./OptionsField";
+import { DetailsFields } from "./DetailsFields";
+import { SafetyFields } from "./SafetyFields";
+import { DocumentsField } from "./DocumentsField";
+import {
+  detailsToInput,
+  initialDetailsValues,
+  validateDetails,
+  type DetailsFieldErrors,
+  type DetailsFormValues,
+  type DocumentFormValue,
+  type GalleryFormImage,
+} from "./form-values";
 import { unexpectedError, type ActionError } from "@/lib/errors";
 import { createProduct, updateProduct } from "@/lib/products/actions";
 import { UploadError, uploadToR2 } from "@/lib/products/upload";
 import { SaveButton, type SaveResult } from "@/components/ui/SaveButton";
 import { useToast } from "@/components/ui/Toast";
-import type { ProductWriteInput } from "@/lib/validation/product";
+import { collectOptionIds, type ProductWriteInput } from "@/lib/validation/product";
 import { ActionErrorNotice } from "@/components/ui/ActionErrorNotice";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { Modal } from "@/components/ui/modal";
@@ -34,11 +57,29 @@ import {
   primaryButtonClass,
   secondaryButtonClass,
 } from "@/components/ui/control-styles";
+import { InfoTip } from "@/components/ui/InfoTip";
 import { FormSection } from "./FormSection";
+import { FormSectionNav } from "./FormSectionNav";
+import { ProductFormSnapshotScript } from "./ProductFormSnapshotScript";
+import {
+  PRODUCT_FORM_SECTIONS,
+  buildProductFormSnapshot,
+  type ProductFormSectionId,
+} from "@/lib/products/form-datapoints";
 import { PriceField } from "./PriceField";
 import { ImageDropzone } from "./ImageDropzone";
 import { FileDropzone } from "./FileDropzone";
 import { StockFields } from "./StockFields";
+import { ShippingField } from "./ShippingField";
+import type { ShippingChoices } from "@/lib/storefront/queries";
+
+/** A seller with no storefront yet has nothing to inherit and nothing to
+ *  pick, and the section says so rather than showing an empty picker. */
+const NO_SHIPPING_CHOICES: ShippingChoices = {
+  profiles: [],
+  defaults: [],
+  editHref: null,
+};
 
 const STATUS_OPTIONS: readonly { value: ProductStatus; label: string }[] = [
   // Active first: it is the default for new products — a seller adding a
@@ -47,17 +88,51 @@ const STATUS_OPTIONS: readonly { value: ProductStatus; label: string }[] = [
   { value: "draft", label: "Draft" },
 ];
 
-const STATUS_HINTS: Record<ProductStatus, string> = {
-  active: "Live. Buyers can see and purchase it right away.",
-  draft: "Hidden from buyers until you switch it to Active.",
-};
-
 /** Long enough to read the green check before the list replaces the form. */
 const SAVED_HOLD_MS = 1100;
 
 type FieldErrors = Partial<
-  Record<"title" | "price" | "stockQuantity" | "lowStockThreshold", string>
+  Record<
+    "title" | "price" | "stockQuantity" | "lowStockThreshold" | "purchaseUrl" | "optionGroups",
+    string
+  >
 >;
+
+/** The edit route hands over the full detail row; tests and the create route
+ *  may pass a bare Product, so the page-detail members are optional here. */
+type FormProduct = Product &
+  Partial<
+    Pick<
+      ProductDetail,
+      | "gallery"
+      | "optionGroups"
+      | "details"
+      | "documents"
+      | "purchaseUrl"
+      | "shippingProfileId"
+    >
+  >;
+
+function initialGallery(product?: FormProduct): GalleryFormImage[] {
+  return (product?.gallery ?? []).map((image) => ({
+    localId: image.key,
+    key: image.key,
+    file: null,
+    previewUrl: image.url,
+    alt: image.alt,
+    ...(image.optionId ? { optionId: image.optionId } : {}),
+  }));
+}
+
+function initialDocuments(product?: FormProduct): DocumentFormValue[] {
+  return (product?.documents ?? []).map((document) => ({
+    localId: document.key,
+    key: document.key,
+    file: null,
+    fileName: null,
+    label: document.label,
+  }));
+}
 
 function initialValues(product?: Product): ProductFormValues {
   return {
@@ -121,7 +196,80 @@ function validate(values: ProductFormValues): FieldErrors {
   return errors;
 }
 
-export function ProductForm({ product }: { product?: Product }) {
+/** The page-detail fields' own UX checks; the server re-parses with Zod. */
+function validatePage(purchaseUrl: string, optionGroups: ProductOptionGroup[]): FieldErrors {
+  const errors: FieldErrors = {};
+  const link = purchaseUrl.trim();
+  if (link && !/^https:\/\/[^\s/$.?#].[^\s]*$/i.test(link)) {
+    errors.purchaseUrl = "The purchase link must be a full https:// address.";
+  }
+  // Each message names the ONE thing to fix, in the order a seller would hit
+  // them: an unnamed axis, an axis with nothing to pick, then an unnamed
+  // choice. The schema refuses all three, but a rejected save that only says
+  // "didn't pass validation" is not a fix.
+  if (optionGroups.some((group) => !group.name.trim())) {
+    errors.optionGroups = "Say what each option group varies, or remove it.";
+  } else if (optionGroups.some((group) => group.options.length === 0)) {
+    const empty = optionGroups.find((group) => group.options.length === 0)!;
+    errors.optionGroups = `Add at least one ${empty.name.trim().toLowerCase()} option, or remove the group.`;
+  } else if (optionGroups.some((group) => group.options.some((option) => !option.name.trim()))) {
+    errors.optionGroups = "Give every option a name, or remove the empty row.";
+  } else if (optionGroups.some((group) => group.options.length > OPTIONS_PER_GROUP_MAX)) {
+    errors.optionGroups = `An option group can have up to ${OPTIONS_PER_GROUP_MAX} options.`;
+  }
+  return errors;
+}
+
+/**
+ * Which SECTION each field's error belongs to.
+ *
+ * The index rail and the section headers report a problem where the seller has
+ * to go to fix it, which means an error on a field has to name its section.
+ * Spelled out rather than derived from the field id, because the two lists are
+ * genuinely independent: `purchaseUrl` lives under Media and delivery, and
+ * nothing about its name says so.
+ */
+const FIELD_SECTIONS: Record<string, ProductFormSectionId> = {
+  title: "basics",
+  price: "basics",
+  // Nothing here can be invalid — the shipping section is a choice from a
+  // closed list, and its default answer is always available.
+  stockQuantity: "stock",
+  lowStockThreshold: "stock",
+  purchaseUrl: "media",
+  optionGroups: "options",
+  length: "specs",
+  width: "specs",
+  height: "specs",
+  weight: "specs",
+  specs: "specs",
+  manufacturerName: "safety",
+  manufacturerAddress: "safety",
+  manufacturerEmail: "safety",
+  responsibleEmail: "safety",
+};
+
+/** The sections currently carrying at least one validation message. */
+function sectionsWithErrors(
+  errors: FieldErrors,
+  detailsErrors: DetailsFieldErrors,
+): ProductFormSectionId[] {
+  const found = new Set<ProductFormSectionId>();
+  for (const [field, message] of Object.entries({ ...errors, ...detailsErrors })) {
+    const section = message ? FIELD_SECTIONS[field] : undefined;
+    if (section) found.add(section);
+  }
+  return [...found];
+}
+
+export function ProductForm({
+  product,
+  shippingChoices = NO_SHIPPING_CHOICES,
+}: {
+  product?: FormProduct;
+  /** The store's shipping terms and named profiles, read on the server. */
+  shippingChoices?: ShippingChoices;
+}) {
   const router = useRouter();
   const fieldId = useId();
   const toast = useToast();
@@ -129,6 +277,26 @@ export function ProductForm({ product }: { product?: Product }) {
   const [values, setValues] = useState<ProductFormValues>(() =>
     initialValues(product),
   );
+  // The product page's facts, held apart from `values`: the gallery carries
+  // Files, and the details are their own tree of in-progress strings.
+  const [gallery, setGallery] = useState<GalleryFormImage[]>(() => initialGallery(product));
+  const [documents, setDocuments] = useState<DocumentFormValue[]>(() => initialDocuments(product));
+  const [optionGroups, setOptionGroups] = useState<ProductOptionGroup[]>(() =>
+    (product?.optionGroups ?? []).map((group) => ({
+      ...group,
+      options: group.options.map((option) => ({ ...option })),
+    })),
+  );
+  const [details, setDetails] = useState<DetailsFormValues>(() =>
+    initialDetailsValues(product?.details),
+  );
+  const [purchaseUrl, setPurchaseUrl] = useState(product?.purchaseUrl ?? "");
+  // Null = the store's default shipping terms, which is what nearly every
+  // product uses and what a new one starts on.
+  const [shippingProfileId, setShippingProfileId] = useState<string | null>(
+    product?.shippingProfileId ?? null,
+  );
+  const [detailsErrors, setDetailsErrors] = useState<DetailsFieldErrors>({});
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [digitalFile, setDigitalFile] = useState<File | null>(null);
   // Whether the seller interacted with the digital-file picker at all. Needed
@@ -140,7 +308,7 @@ export function ProductForm({ product }: { product?: Product }) {
   // far end — for an image that is the server sniffing, moderating and
   // storing it, which is not instant and must not read as a stalled 100%.
   const [upload, setUpload] = useState<{
-    what: "image" | "file";
+    what: "image" | "file" | "photo" | "document";
     fraction: number | null;
   } | null>(null);
   const [submitError, setSubmitError] = useState<ActionError | null>(null);
@@ -178,10 +346,66 @@ export function ProductForm({ product }: { product?: Product }) {
     () => JSON.stringify(initialValues(product)),
     [product],
   );
+  const pristinePage = useMemo(
+    () =>
+      JSON.stringify({
+        gallery: initialGallery(product).map(({ key, alt, optionId }) => ({ key, alt, optionId })),
+        documents: initialDocuments(product).map(({ key, label }) => ({ key, label })),
+        optionGroups: product?.optionGroups ?? [],
+        details: initialDetailsValues(product?.details),
+        purchaseUrl: product?.purchaseUrl ?? "",
+        shippingProfileId: product?.shippingProfileId ?? null,
+      }),
+    [product],
+  );
+  const pageState = JSON.stringify({
+    gallery: gallery.map(({ key, alt, optionId }) => ({ key, alt, optionId })),
+    documents: documents.map(({ key, label }) => ({ key, label })),
+    optionGroups,
+    details,
+    purchaseUrl,
+    shippingProfileId,
+  });
   const dirty =
     !saved &&
-    (JSON.stringify(values) !== pristine || imageFile !== null || digitalTouched);
+    (JSON.stringify(values) !== pristine ||
+      pageState !== pristinePage ||
+      imageFile !== null ||
+      digitalTouched);
   const leaveGuard = useUnsavedChangesGuard(dirty, "/products");
+
+  // A download has no shipping and no product-safety block: those sections
+  // hide, and their values are dropped on save rather than stored unseen.
+  const isDigital =
+    digitalFile !== null || (Boolean(product?.digitalFileName) && !digitalTouched);
+
+  // THE FORM AS ONE OBJECT, built from the state above and used twice: by the
+  // section headers and the index rail a seller scans, and by the JSON island
+  // an assistant reads. One computation, so the two cannot disagree about
+  // what this product has (see lib/products/form-datapoints.ts).
+  const invalidSections = sectionsWithErrors(errors, detailsErrors);
+  const snapshot = buildProductFormSnapshot({
+    mode: product ? "edit" : "create",
+    productId: product?.id ?? null,
+    values,
+    optionGroups,
+    gallery,
+    documents,
+    details,
+    purchaseUrl,
+    shippingProfileId,
+    shippingProfileName:
+      shippingChoices.profiles.find((profile) => profile.id === shippingProfileId)?.name ?? null,
+    hasCoverImage: imageFile !== null || Boolean(product?.imageUrl),
+    hasDigitalFile: isDigital,
+    isDigital,
+    dirty,
+    invalidSections,
+  });
+  /** The section entries by id, so each card can be handed its own summary. */
+  const sectionInfo = Object.fromEntries(
+    snapshot.sections.map((section) => [section.id, section]),
+  ) as Record<ProductFormSectionId, (typeof snapshot.sections)[number] | undefined>;
 
   function updateField<Key extends keyof ProductFormValues>(
     key: Key,
@@ -189,9 +413,26 @@ export function ProductForm({ product }: { product?: Product }) {
   ) {
     setValues((previous) => {
       const next = { ...previous, [key]: value };
-      if (submitAttempted) setErrors(validate(next));
+      if (submitAttempted) {
+        setErrors({ ...validate(next), ...validatePage(purchaseUrl, optionGroups) });
+      }
       return next;
     });
+  }
+
+  function updateOptionGroups(next: ProductOptionGroup[]) {
+    setOptionGroups(next);
+    if (submitAttempted) setErrors({ ...validate(values), ...validatePage(purchaseUrl, next) });
+  }
+
+  function updatePurchaseUrl(next: string) {
+    setPurchaseUrl(next);
+    if (submitAttempted) setErrors({ ...validate(values), ...validatePage(next, optionGroups) });
+  }
+
+  function updateDetails(next: DetailsFormValues) {
+    setDetails(next);
+    if (submitAttempted) setDetailsErrors(validateDetails(next, isDigital));
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -208,9 +449,11 @@ export function ProductForm({ product }: { product?: Product }) {
     setSubmitError(null);
     setSaveResult(null);
 
-    const foundErrors = validate(values);
+    const foundErrors = { ...validate(values), ...validatePage(purchaseUrl, optionGroups) };
     setErrors(foundErrors);
-    const problems = Object.values(foundErrors);
+    const foundDetailErrors = validateDetails(details, isDigital);
+    setDetailsErrors(foundDetailErrors);
+    const problems = [...Object.values(foundErrors), ...Object.values(foundDetailErrors)];
     if (problems.length > 0) {
       // The fields carry their own messages, but on a form this long the
       // offending one is usually off-screen when Save is pressed — without
@@ -243,9 +486,63 @@ export function ProductForm({ product }: { product?: Product }) {
         : digitalTouched
           ? null
           : undefined;
+
+      // Extra photos: stored ones keep their key, picked ones upload now, one
+      // at a time so the progress bar means something.
+      const galleryInput: NonNullable<ProductWriteInput["gallery"]> = [];
+      // A tie to an option that has since been deleted is dropped rather than
+      // sent: the action refuses the whole save over a stale one, and losing a
+      // photo's grouping beats losing the save.
+      const optionIds = collectOptionIds(optionGroups);
+      for (const image of gallery) {
+        const key =
+          image.key ??
+          (image.file
+            ? await uploadToR2(image.file, "image", (fraction) =>
+                setUpload({ what: "photo", fraction }),
+              )
+            : null);
+        if (!key) continue;
+        galleryInput.push({
+          key,
+          alt: image.alt.trim(),
+          ...(image.optionId && optionIds.has(image.optionId)
+            ? { optionId: image.optionId }
+            : {}),
+        });
+      }
+
+      // Documents: same pattern, but their own upload kind. A manual is public
+      // the moment it is saved, so it goes through the stricter route (PDF
+      // only, 20 MB, its own budget) rather than the paid download's.
+      const documentsInput: NonNullable<ProductWriteInput["documents"]> = [];
+      for (const document of documents) {
+        const key =
+          document.key ??
+          (document.file
+            ? await uploadToR2(document.file, "document", (fraction) =>
+                setUpload({ what: "document", fraction }),
+              )
+            : null);
+        if (!key) continue;
+        documentsInput.push({ key, label: document.label.trim() || "Document" });
+      }
       setUpload(null);
 
       const input: ProductWriteInput = {
+        gallery: galleryInput,
+        documents: documentsInput,
+        optionGroups: optionGroups.map((group) => ({
+          ...group,
+          name: group.name.trim(),
+          options: group.options.map((option) => ({ ...option, name: option.name.trim() })),
+        })),
+        details: detailsToInput(details, isDigital),
+        purchaseUrl: purchaseUrl.trim() || null,
+        // A download has no shipping, so a profile chosen before the file was
+        // added is dropped rather than stored where nothing will read it —
+        // the same rule the safety block follows.
+        shippingProfileId: isDigital ? null : shippingProfileId,
         title: values.title.trim(),
         description: values.description.trim(),
         // The form shows decimal major units; the DB stores integer cents.
@@ -331,22 +628,53 @@ export function ProductForm({ product }: { product?: Product }) {
 
   const titleErrorId = `${fieldId}-title-error`;
   const priceErrorId = `${fieldId}-price-error`;
-  const imageHintId = `${fieldId}-image-hint`;
-  const fileHintId = `${fieldId}-file-hint`;
-  const statusHintId = `${fieldId}-status-hint`;
+  const purchaseErrorId = `${fieldId}-purchase-error`;
+  const uploadNoun =
+    upload?.what === "image"
+      ? "image"
+      : upload?.what === "photo"
+        ? "photo"
+        : upload?.what === "document"
+          ? "document"
+          : "file";
+
+  /** Every section card gets its id, its live summary and its state from the
+   *  one snapshot, so a header and the rail can never say different things. */
+  const section = (id: ProductFormSectionId) => {
+    const entry = PRODUCT_FORM_SECTIONS.find((candidate) => candidate.id === id)!;
+    return {
+      id,
+      // One copy of the description, in the registry the snapshot reads from,
+      // so the "?" and the machine-readable section can never disagree.
+      description: entry.description,
+      state: sectionInfo[id]?.state ?? ("empty" as const),
+      summary: sectionInfo[id]?.summary,
+      required: sectionInfo[id]?.required,
+    };
+  };
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="space-y-5">
-      {/* No summary banner here any more. It said only "fix the highlighted
+    <div
+      className="lg:grid lg:grid-cols-[minmax(0,1fr)_12.5rem] lg:items-start lg:gap-8"
+      data-product-form={product ? "edit" : "create"}
+      data-product-id={product?.id}
+      data-product-form-dirty={dirty ? "1" : "0"}
+    >
+      <form onSubmit={handleSubmit} noValidate className="space-y-5">
+        {/* No summary banner here any more. It said only "fix the highlighted
           fields", sat at the top of a long form, and was the thing a seller
           had to scroll up to find. The toast raised on a blocked save names
           every problem, announces itself, and appears where the Save button
           is; the fields still carry their own inline messages. */}
 
       <FormSection
+        {...section("basics")}
         icon={Package}
-        title="Details"
-        description="What you are selling, in your words — and what it costs."
+        // "Basics", not "Details" — the specifications section below was also
+        // called Details, so the form had two identically named headings and
+        // two sections with the same accessible name. On a page you scan by
+        // heading, that is the worst possible collision.
+        title="Basics"
       >
         <div className="space-y-5">
           <div className="space-y-1.5">
@@ -360,8 +688,10 @@ export function ProductForm({ product }: { product?: Product }) {
               value={values.title}
               onChange={(event) => updateField("title", event.target.value)}
               placeholder="e.g. Ambient Loops Vol. 1"
+              required
               aria-invalid={errors.title ? true : undefined}
               aria-describedby={errors.title ? titleErrorId : undefined}
+              data-product-field="title"
               className={cn(fieldBaseClass, "py-3 text-lg font-medium")}
             />
             {errors.title && (
@@ -384,6 +714,7 @@ export function ProductForm({ product }: { product?: Product }) {
               onChange={(event) => updateField("description", event.target.value)}
               rows={4}
               placeholder="What is it, and what does the buyer get?"
+              data-product-field="description"
               className={cn(fieldBaseClass, "resize-y")}
             />
           </div>
@@ -403,17 +734,14 @@ export function ProductForm({ product }: { product?: Product }) {
               onPriceChange={(price) => updateField("price", price)}
               onCurrencyChange={(currency) => updateField("currency", currency)}
             />
-            <p className={helpTextClass}>
-              What buyers pay. You keep this minus the platform cut.
-            </p>
           </div>
         </div>
       </FormSection>
 
       <FormSection
+        {...section("stock")}
         icon={Boxes}
         title="Stock"
-        description="Unlimited by default. Track it to prevent overselling."
       >
         <StockFields
           values={{
@@ -432,36 +760,39 @@ export function ProductForm({ product }: { product?: Product }) {
       </FormSection>
 
       <FormSection
+        {...section("media")}
         icon={ImageIcon}
         title="Media and delivery"
-        description="How it looks in the grid, and what the buyer receives."
       >
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <label htmlFor={`${fieldId}-image`} className={labelClass}>
-              Display image
-            </label>
-            <p id={imageHintId} className={helpTextClass}>
-              Shown on your storefront and embeds.
-            </p>
+            <div className="flex items-center gap-1.5">
+              <label htmlFor={`${fieldId}-image`} className={labelClass}>
+                Display image
+              </label>
+              <InfoTip label="Where the display image is used">
+                Shown on your storefront and embeds.
+              </InfoTip>
+            </div>
             <ImageDropzone
               inputId={`${fieldId}-image`}
-              describedById={imageHintId}
               initialPreviewUrl={product?.imageUrl ?? null}
               onFileChange={setImageFile}
             />
           </div>
 
           <div className="space-y-1.5">
-            <label htmlFor={`${fieldId}-file`} className={labelClass}>
-              Digital file
-            </label>
-            <p id={fileHintId} className={helpTextClass}>
-              The file your buyer downloads after purchase.
-            </p>
+            <div className="flex items-center gap-1.5">
+              <label htmlFor={`${fieldId}-file`} className={labelClass}>
+                Digital file
+              </label>
+              <InfoTip label="What the digital file is">
+                The file your buyer downloads after purchase. Adding one makes
+                this a download, so shipping and product-safety stop applying.
+              </InfoTip>
+            </div>
             <FileDropzone
               inputId={`${fieldId}-file`}
-              describedById={fileHintId}
               initialFileName={product?.digitalFileName ?? null}
               onFileChange={(file) => {
                 setDigitalFile(file);
@@ -470,23 +801,152 @@ export function ProductForm({ product }: { product?: Product }) {
             />
           </div>
         </div>
+
+        {/* Where the product page's buy button goes. There is no in-house
+            checkout yet, so this is the one way a page can sell: the seller's
+            own checkout, payment link or marketplace listing. https only; the
+            page prints the destination host beside the button. */}
+        <div className="mt-6 space-y-1.5">
+          <div className="flex items-center gap-1.5">
+            <label htmlFor={`${fieldId}-purchase`} className={labelClass}>
+              Purchase link
+            </label>
+            <InfoTip label="Where the buy button sends buyers">
+              The product page&apos;s buy button follows this link. Without one, it
+              emails your store&apos;s contact address instead.
+            </InfoTip>
+          </div>
+          <input
+            id={`${fieldId}-purchase`}
+            type="url"
+            inputMode="url"
+            value={purchaseUrl}
+            onChange={(event) => updatePurchaseUrl(event.target.value)}
+            placeholder="https://your-shop.example/checkout/this-product"
+            spellCheck={false}
+            aria-invalid={errors.purchaseUrl ? true : undefined}
+            aria-describedby={errors.purchaseUrl ? purchaseErrorId : undefined}
+            data-product-field="purchaseUrl"
+            className={fieldBaseClass}
+          />
+          {errors.purchaseUrl && (
+            <p id={purchaseErrorId} className={errorTextClass}>
+              {errors.purchaseUrl}
+            </p>
+          )}
+        </div>
+      </FormSection>
+
+      {/* SHIPPING IS A CHOICE, NOT A TEXT BOX, and it sits right after
+          delivery because that is what it is the other half of: the section
+          above says what a buyer receives, this one says how it reaches them.
+          Hidden for downloads, which nobody posts. */}
+      {!isDigital && (
+        <FormSection
+          {...section("shipping")}
+          icon={Truck}
+          title="Shipping"
+        >
+          <ShippingField
+            inputId={`${fieldId}-shipping`}
+            value={shippingProfileId}
+            choices={shippingChoices}
+            onChange={setShippingProfileId}
+          />
+        </FormSection>
+      )}
+
+      {/* OPTIONS BEFORE PHOTOS, deliberately. The photo buckets below are one
+          per option, so a seller who meets Photos first has nowhere to drop a
+          colour's shots and has to come back. Naming what varies first makes
+          the next section already know about it. */}
+      <FormSection
+        {...section("options")}
+        icon={Layers}
+        title="Options"
+      >
+        <OptionsField
+          inputId={`${fieldId}-options`}
+          groups={optionGroups}
+          onChange={updateOptionGroups}
+          error={errors.optionGroups}
+        />
       </FormSection>
 
       <FormSection
+        {...section("photos")}
+        icon={Images}
+        title="Photos"
+      >
+        <GalleryField
+          inputId={`${fieldId}-gallery`}
+          images={gallery}
+          optionGroups={optionGroups}
+          onChange={setGallery}
+        />
+      </FormSection>
+
+      <FormSection
+        {...section("specs")}
+        icon={Ruler}
+        title="Specifications"
+      >
+        <DetailsFields
+          inputId={`${fieldId}-details`}
+          values={details}
+          errors={detailsErrors}
+          onChange={updateDetails}
+        />
+      </FormSection>
+
+      <FormSection
+        {...section("documents")}
+        icon={FileText}
+        title="Documents"
+      >
+        <DocumentsField
+          inputId={`${fieldId}-documents`}
+          documents={documents}
+          onChange={setDocuments}
+        />
+      </FormSection>
+
+      {!isDigital && (
+        <FormSection
+          {...section("safety")}
+          icon={ShieldCheck}
+          title="Safety and compliance"
+        >
+          <SafetyFields
+            inputId={`${fieldId}-safety`}
+            values={details.safety}
+            errors={detailsErrors}
+            onChange={(safety) => updateDetails({ ...details, safety })}
+          />
+        </FormSection>
+      )}
+
+      <FormSection
+        {...section("visibility")}
         icon={Eye}
         title="Visibility"
-        description="Whether buyers can see this product."
       >
-        <div className="space-y-2 sm:max-w-xs">
+        {/* The datapoint sits on the WRAPPER, not on SegmentedControl:
+            that component takes a closed set of props and spreads nothing
+            onto the DOM, so an attribute handed to it would be dropped
+            silently — and a datapoint that is quietly absent is worse than
+            one that was never claimed. */}
+        <div
+          className="space-y-2 sm:max-w-xs"
+          data-product-field="status"
+          data-product-value={values.status}
+        >
           <SegmentedControl
             value={values.status}
             options={STATUS_OPTIONS}
             onChange={(status) => updateField("status", status)}
             ariaLabel="Product status"
           />
-          <p id={statusHintId} className={helpTextClass} aria-live="polite">
-            {STATUS_HINTS[values.status]}
-          </p>
         </div>
       </FormSection>
 
@@ -502,8 +962,8 @@ export function ProductForm({ product }: { product?: Product }) {
             <div className="flex items-center justify-between gap-3">
               <span className={helpTextClass}>
                 {upload.fraction === null
-                  ? `Processing ${upload.what === "image" ? "image" : "file"}…`
-                  : `Uploading ${upload.what === "image" ? "image" : "file"}…`}
+                  ? `Processing ${uploadNoun}…`
+                  : `Uploading ${uploadNoun}…`}
               </span>
               {upload.fraction !== null && (
                 <span className="font-mono text-xs tabular-nums text-muted-foreground">
@@ -515,8 +975,8 @@ export function ProductForm({ product }: { product?: Product }) {
               value={upload.fraction}
               label={
                 upload.fraction === null
-                  ? `Processing ${upload.what === "image" ? "image" : "file"}`
-                  : `Uploading ${upload.what === "image" ? "image" : "file"}`
+                  ? `Processing ${uploadNoun}`
+                  : `Uploading ${uploadNoun}`
               }
             />
           </div>
@@ -588,6 +1048,19 @@ export function ProductForm({ product }: { product?: Product }) {
           </button>
         </div>
       </Modal>
-    </form>
+      </form>
+
+      {/* The index, in the margin. Sticky so it stays with the reader on a
+          form several screens tall, and hidden below `lg` where there is no
+          margin to put it in — the section headers carry the same summaries,
+          so nothing lives only here. */}
+      <FormSectionNav
+        sections={snapshot.sections}
+        // Below the sticky TopBar (h-14), not under it.
+        className="sticky top-20 hidden lg:block"
+      />
+
+      <ProductFormSnapshotScript snapshot={snapshot} />
+    </div>
   );
 }

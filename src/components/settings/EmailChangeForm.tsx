@@ -8,11 +8,12 @@ import { SettingsCard } from "@/components/settings/SettingsCard";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
-import { helpTextClass, iconNudgeRightClass, infoTextClass } from "@/components/ui/control-styles";
+import { helpTextClass, iconNudgeRightClass } from "@/components/ui/control-styles";
 import {
   requestEmailChange,
   type SettingsActionState,
 } from "@/lib/settings/actions";
+import { InfoTip } from "@/components/ui/InfoTip";
 
 const INITIAL: SettingsActionState = {};
 
@@ -58,7 +59,14 @@ export function EmailChangeForm({
         </div>
         {hasPassword && (
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="email_current_password">Current password</Label>
+            <span className="flex items-center gap-1.5">
+              <Label htmlFor="email_current_password">Current password</Label>
+              <InfoTip label="Why your password is needed here">
+                Whoever controls your email address can reset your password, so
+                changing it is a change to how you get back into the account.
+                Your password confirms the change is really you.
+              </InfoTip>
+            </span>
             <PasswordInput
               id="email_current_password"
               name="current_password"
@@ -66,10 +74,6 @@ export function EmailChangeForm({
               placeholder="••••••••"
               required
             />
-            <p className={infoTextClass}>
-              Whoever controls your email address can reset your password, so
-              this change needs your password to confirm it&apos;s you.
-            </p>
           </div>
         )}
         <div>

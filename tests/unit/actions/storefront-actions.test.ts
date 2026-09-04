@@ -350,6 +350,49 @@ describe("saveStorefront - embed pass-through", () => {
   });
 });
 
+describe("saveStorefront - shipping profiles", () => {
+  const PROFILE = {
+    id: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1",
+    name: "Bulky items",
+    dispatch: "Allow 3 weeks",
+    body: "Pallet courier, ground floor only.",
+  };
+
+  it("persists the profiles the client sent", async () => {
+    // The config is REBUILT field by field here rather than passed through, so
+    // a member that is not named is silently dropped. That is the whole point
+    // of the pattern, and it is why this test exists: products point at these
+    // profiles by id, so losing the member would not merely lose text — every
+    // product using one would fall back to the store's default terms.
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+    dbFn.mockResolvedValueOnce({ data: { id: STOREFRONT_ID }, error: null });
+
+    await saveStorefront(STOREFRONT_ID, {
+      name: "My Store",
+      config: { ...VALID_CONFIG, shippingProfiles: [PROFILE] },
+    });
+
+    const updateArg = db.update.mock.calls[0][0] as {
+      config: { shippingProfiles: unknown };
+    };
+    expect(updateArg.config.shippingProfiles).toEqual([PROFILE]);
+  });
+
+  it("stores no member at all for a store with no exceptions", async () => {
+    // Byte-identical to a config saved before profiles existed.
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+    dbFn.mockResolvedValueOnce({ data: { id: STOREFRONT_ID }, error: null });
+
+    await saveStorefront(STOREFRONT_ID, {
+      name: "My Store",
+      config: { ...VALID_CONFIG, shippingProfiles: [] },
+    });
+
+    const updateArg = db.update.mock.calls[0][0] as { config: Record<string, unknown> };
+    expect(updateArg.config).not.toHaveProperty("shippingProfiles");
+  });
+});
+
 describe("saveStorefront - 0-row update", () => {
   it("returns 'Storefront not found.' when update matches no rows", async () => {
     getActiveAccountMock.mockResolvedValue(ownerAccount());

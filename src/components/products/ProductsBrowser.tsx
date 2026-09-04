@@ -14,6 +14,7 @@ import {
   Plus,
   ShoppingBag,
   SlidersHorizontal,
+  Upload,
 } from "lucide-react";
 import type {
   Product,
@@ -210,10 +211,22 @@ export function ProductsBrowser({
             </button>
           )}
           {canWrite && (
-            <Link href="/products/new" className={`${primaryButtonClass} h-10 shrink-0`}>
-              <Plus className="size-4" strokeWidth={2} aria-hidden="true" />
-              Add product
-            </Link>
+            <>
+              {/* Beside "Add product", not buried in a menu: someone arriving
+                  with a catalogue elsewhere is deciding whether this is worth
+                  the typing, and that is exactly when they need to find it. */}
+              <Link
+                href="/products/import"
+                className={cn(secondaryButtonClass, "h-10 shrink-0 px-3 py-2 text-sm")}
+              >
+                <Upload className="size-4" strokeWidth={2} aria-hidden="true" />
+                Import
+              </Link>
+              <Link href="/products/new" className={`${primaryButtonClass} h-10 shrink-0`}>
+                <Plus className="size-4" strokeWidth={2} aria-hidden="true" />
+                Add product
+              </Link>
+            </>
           )}
         </div>
       </div>

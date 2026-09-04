@@ -17,7 +17,7 @@ import {
   CHART,
   CHART_ANIMATION,
   MARK,
-  TOOLTIP_GLIDE,
+  TOOLTIP,
   dimmableClass,
   dimmedClass,
 } from "@/components/charts/theme";
@@ -115,9 +115,8 @@ export function LineChart({
       />
       <Tooltip
         cursor={{ stroke: CHART.gridStroke }}
-        isAnimationActive={!reducedMotion}
-        animationDuration={TOOLTIP_GLIDE.duration}
-        animationEasing={TOOLTIP_GLIDE.easing}
+        isAnimationActive={TOOLTIP.animated}
+        wrapperStyle={TOOLTIP.wrapperStyle}
         content={({ active, payload, label }) => (
           <ChartTooltipContent
             active={active}

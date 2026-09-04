@@ -1,6 +1,7 @@
-// Dev reset: delete ALL orders and products belonging to the TEST seller, via
-// the service_role key. Scoped strictly to TEST_SELLER_ID and gated behind an
-// explicit --yes so it can never wipe data by accident.
+// Dev reset: delete ALL orders, products AND storefront signals belonging to
+// the TEST seller, via the service_role key. Scoped strictly to
+// TEST_SELLER_ID and gated behind an explicit --yes so it can never wipe data
+// by accident.
 //
 //   pnpm reset-seed --yes
 //
@@ -8,23 +9,35 @@
 // to run unless SEED_ENV=dev.
 //
 // INTERACTION WITH THE SALES SIMULATOR. If the pg_cron simulator is enabled for
-// this seller (supabase/migrations/20260801_demo_sales_sim.sql), it keeps
-// inserting orders every 20 minutes. A reset does not stop it, and it does not
-// need to: with the products deleted the simulator finds an empty catalogue and
-// inserts nothing, then picks straight back up once `pnpm seed` recreates them.
-// The only visible effect is that a tick landing mid-reset can leave a handful
-// of orders behind, which is what the "some rows remain" line below is about.
-// To silence it entirely for the duration of a reset:
+// this seller (supabase/migrations/20260801_demo_sales_sim.sql, extended by
+// 20260830_demo_sales_sim_signals.sql), it keeps inserting orders, views and
+// clicks every 20 minutes. A reset does not stop it, and it does not need to:
+// with the products deleted the simulator finds an empty catalogue and inserts
+// nothing for orders; views/clicks still trickle in if a storefront survives
+// the reset (storefronts are NOT deleted here — see below), picking straight
+// back up at full volume once `pnpm seed` recreates the products. The only
+// visible effect is that a tick landing mid-reset can leave a handful of rows
+// behind, which is what the "some rows remain" line below is about. To
+// silence it entirely for the duration of a reset:
 //
 //   update demo.sales_sim set enabled = false where id;   -- then true again
+//
+// Storefronts themselves are intentionally NOT deleted by this script (only
+// `pnpm seed` products and orders, plus the signals attributed to them) — a
+// storefront is something you built in the designer, not seed output, and
+// wiping it on every reset would be a surprising amount of collateral damage
+// for a command whose job is "give me a fresh catalogue".
 
 import { parseArgs } from "node:util";
 import { createServiceClient, fail, requireDevConfig } from "./lib/env.ts";
 
+type SeedTable = "orders" | "products" | "storefront_signals";
+type OwnerColumn = "seller_id" | "owner_id" | "account_id";
+
 async function deleteAllFor(
   supabase: ReturnType<typeof createServiceClient>,
-  table: "orders" | "products",
-  column: "seller_id" | "owner_id",
+  table: SeedTable,
+  column: OwnerColumn,
   testSellerId: string,
 ): Promise<number> {
   const { data, error } = await supabase
@@ -38,8 +51,8 @@ async function deleteAllFor(
 
 async function countFor(
   supabase: ReturnType<typeof createServiceClient>,
-  table: "orders" | "products",
-  column: "seller_id" | "owner_id",
+  table: SeedTable,
+  column: OwnerColumn,
   testSellerId: string,
 ): Promise<number> {
   const { count, error } = await supabase
@@ -63,8 +76,16 @@ async function main(): Promise<void> {
   const config = requireDevConfig();
   const supabase = createServiceClient(config);
 
-  // Orders first (they reference products), then the products themselves.
+  // Orders and signals first (orders reference products; signals reference
+  // nothing being deleted here but are seed output all the same), then the
+  // products themselves.
   const ordersDeleted = await deleteAllFor(supabase, "orders", "seller_id", config.testSellerId);
+  const signalsDeleted = await deleteAllFor(
+    supabase,
+    "storefront_signals",
+    "account_id",
+    config.testSellerId,
+  );
   const productsDeleted = await deleteAllFor(
     supabase,
     "products",
@@ -74,15 +95,23 @@ async function main(): Promise<void> {
 
   // Confirm the test account is clean.
   const ordersLeft = await countFor(supabase, "orders", "seller_id", config.testSellerId);
+  const signalsLeft = await countFor(
+    supabase,
+    "storefront_signals",
+    "account_id",
+    config.testSellerId,
+  );
   const productsLeft = await countFor(supabase, "products", "owner_id", config.testSellerId);
 
   console.log("\n✔ Reset complete");
   console.log(`  Test seller           ${config.testSellerId}`);
   console.log(`  Orders deleted        ${ordersDeleted}`);
+  console.log(`  Signals deleted       ${signalsDeleted}`);
   console.log(`  Products deleted      ${productsDeleted}`);
   console.log(`  Remaining (orders)    ${ordersLeft}`);
+  console.log(`  Remaining (signals)   ${signalsLeft}`);
   console.log(`  Remaining (products)  ${productsLeft}`);
-  if (ordersLeft === 0 && productsLeft === 0) {
+  if (ordersLeft === 0 && signalsLeft === 0 && productsLeft === 0) {
     console.log("  ✓ Test account is clean.\n");
   } else {
     console.log(

@@ -119,12 +119,18 @@ export type Database = {
           created_at: string
           currency: string
           description: string | null
+          details: Json
           digital_file_key: string | null
+          documents: Json
+          gallery: Json
           id: string
           image_key: string | null
           low_stock_threshold: number
+          option_groups: Json
           owner_id: string
           price_cents: number
+          purchase_url: string | null
+          shipping_profile_id: string | null
           status: string
           stock_quantity: number | null
           title: string
@@ -135,12 +141,18 @@ export type Database = {
           created_at?: string
           currency?: string
           description?: string | null
+          details?: Json
           digital_file_key?: string | null
+          documents?: Json
+          gallery?: Json
           id?: string
           image_key?: string | null
           low_stock_threshold?: number
+          option_groups?: Json
           owner_id: string
           price_cents: number
+          purchase_url?: string | null
+          shipping_profile_id?: string | null
           status?: string
           stock_quantity?: number | null
           title: string
@@ -151,12 +163,18 @@ export type Database = {
           created_at?: string
           currency?: string
           description?: string | null
+          details?: Json
           digital_file_key?: string | null
+          documents?: Json
+          gallery?: Json
           id?: string
           image_key?: string | null
           low_stock_threshold?: number
+          option_groups?: Json
           owner_id?: string
           price_cents?: number
+          purchase_url?: string | null
+          shipping_profile_id?: string | null
           status?: string
           stock_quantity?: number | null
           title?: string
@@ -248,6 +266,64 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      storefront_signals: {
+        Row: {
+          account_id: string
+          block_id: string | null
+          channel: string
+          currency: string | null
+          dedupe_key: string | null
+          id: number
+          kind: string
+          metadata: Json
+          occurred_at: string
+          storefront_id: string | null
+          value_cents: number | null
+          visitor_hash: string | null
+        }
+        Insert: {
+          account_id: string
+          block_id?: string | null
+          channel?: string
+          currency?: string | null
+          dedupe_key?: string | null
+          kind: string
+          metadata?: Json
+          occurred_at?: string
+          storefront_id?: string | null
+          value_cents?: number | null
+          visitor_hash?: string | null
+        }
+        Update: {
+          account_id?: string
+          block_id?: string | null
+          channel?: string
+          currency?: string | null
+          dedupe_key?: string | null
+          kind?: string
+          metadata?: Json
+          occurred_at?: string
+          storefront_id?: string | null
+          value_cents?: number | null
+          visitor_hash?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "storefront_signals_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "storefront_signals_storefront_id_fkey"
+            columns: ["storefront_id"]
+            isOneToOne: false
+            referencedRelation: "storefronts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       storefronts: {
         Row: {
@@ -368,6 +444,10 @@ export type Database = {
         Returns: boolean
       }
       rl_gc_keys: { Args: never; Returns: number }
+      storefront_signals_aggregate: {
+        Args: { p_account_id: string; p_from?: string; p_to?: string }
+        Returns: Json
+      }
       team_accept_invite: { Args: { p_invite_id: string }; Returns: boolean }
       team_actor_role: {
         Args: { account: string }

@@ -12,7 +12,9 @@
  * and the storefront-wide one when nothing is.
  */
 
-/** The design panel's six groups, mirrored from ControlsPanel. */
+import type { ProductPageSectionId } from "@/types/storefront";
+
+/** The design panel's seven groups, mirrored from ControlsPanel. */
 export const CONTROLS_GROUPS = [
   "theme",
   "header",
@@ -20,22 +22,92 @@ export const CONTROLS_GROUPS = [
   "canvas",
   "cards",
   "soldOut",
+  "productPage",
 ] as const;
 export type ControlsGroup = (typeof CONTROLS_GROUPS)[number];
 
 /** The two halves of the Product cards group. */
 export type CardsSectionId = "cardStyle" | "priceTag";
 
+/** The five sections of the Product page group. ("Panel" so it cannot be
+ *  confused with the page's own on-screen sections, ProductPageSectionId.) */
+export type ProductPagePanelSection = "layout" | "cta" | "sections" | "policies" | "seller";
+
 export type SettingRef =
   /** A whole group of the design panel. */
   | { kind: "group"; group: ControlsGroup }
   /** A control that exists at BOTH scopes: the theme's copy under Product
    *  cards, and the selected tile's copy in its inspector. */
-  | { kind: "cards"; section: CardsSectionId };
+  | { kind: "cards"; section: CardsSectionId }
+  /** One section of the Product page group. Opening any of these also turns
+   *  the canvas to the product page, so the seller sees what they edit. */
+  | { kind: "productPage"; section: ProductPagePanelSection };
+
+/**
+ * CLICKING THE PAGE ITSELF opens the setting behind what was clicked.
+ *
+ * The product page artboard is a picture of the thing being designed, so the
+ * shortest path from "this is wrong" to the control that fixes it is to point
+ * at it. Every region of the page carries `data-setting-hotspot` naming one of
+ * these keys, and the artboard resolves the nearest one on click (see
+ * ProductPageArtboard). The attribute is inert markup on the public page,
+ * where nothing listens for it.
+ *
+ * Keys, not refs, in the markup: the page renders on the SERVER for buyers, so
+ * what it writes has to be a plain string, and the mapping to a setting stays
+ * here with the settings rather than being spelled out in the view.
+ *
+ * Two of these leave the Product page group entirely. That is the point: the
+ * store's name bar and the page's background really are storefront-wide
+ * settings, and sending a seller to the group that owns them beats opening a
+ * product-page section that cannot change what they clicked.
+ */
+export const PRODUCT_PAGE_HOTSPOTS = {
+  /** The page's backdrop, which is the storefront's own background. */
+  background: { kind: "group", group: "theme" },
+  /** The store's name bar across the top. */
+  header: { kind: "group", group: "header" },
+  /** Photos: gallery style, image fit, and which side they sit on. */
+  layout: { kind: "productPage", section: "layout" },
+  /** The button, its wording, and the notes printed with the price. */
+  cta: { kind: "productPage", section: "cta" },
+  /** What the page shows and in what order: title byline, description,
+   *  availability, and the reference sections below. */
+  sections: { kind: "productPage", section: "sections" },
+  /** Shipping and returns text, wherever it surfaces. */
+  policies: { kind: "productPage", section: "policies" },
+  /** The trader identity block. */
+  seller: { kind: "productPage", section: "seller" },
+} as const satisfies Record<string, SettingRef>;
+
+export type ProductPageHotspot = keyof typeof PRODUCT_PAGE_HOTSPOTS;
+
+export function isProductPageHotspot(value: string): value is ProductPageHotspot {
+  return Object.hasOwn(PRODUCT_PAGE_HOTSPOTS, value);
+}
+
+/**
+ * Which hotspot each of the page's own collapsible sections answers to.
+ *
+ * Shipping and returns are the seller's POLICY TEXT, and the seller block is
+ * the trader identity, so those three lead to the panels that hold the words
+ * rather than to the list that only toggles them. The rest are shown or hidden
+ * from the Sections panel, so that is where they lead.
+ */
+export const SECTION_SETTING: Record<ProductPageSectionId, ProductPageHotspot> = {
+  description: "sections",
+  specs: "sections",
+  documents: "sections",
+  shipping: "policies",
+  returns: "policies",
+  safety: "sections",
+  seller: "seller",
+};
 
 /** Which group of the design panel a ref lands in. */
 export function settingGroup(ref: SettingRef): ControlsGroup {
-  return ref.kind === "group" ? ref.group : "cards";
+  if (ref.kind === "group") return ref.group;
+  return ref.kind === "cards" ? "cards" : "productPage";
 }
 
 /** Field-by-field, because refs are minted fresh at every call site and `===`
@@ -48,6 +120,9 @@ export function isSameSettingRef(
   if (a.kind !== b.kind) return false;
   if (a.kind === "group" && b.kind === "group") return a.group === b.group;
   if (a.kind === "cards" && b.kind === "cards") return a.section === b.section;
+  if (a.kind === "productPage" && b.kind === "productPage") {
+    return a.section === b.section;
+  }
   return false;
 }
 
@@ -93,6 +168,7 @@ export const GROUP_LABELS: Record<ControlsGroup, string> = {
   canvas: "Canvas",
   cards: "Product cards",
   soldOut: "Sold out",
+  productPage: "Product page",
 };
 
 /**
@@ -364,6 +440,114 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
       "inventory",
     ],
     ref: { kind: "group", group: "soldOut" },
+  },
+  {
+    id: "product-page-layout",
+    label: "Product page layout",
+    keywords: [
+      "product page",
+      "detail page",
+      "buy page",
+      "product detail",
+      "image left",
+      "image right",
+      "stacked gallery",
+      "thumbnails",
+      "photo layout",
+      "turn off product page",
+      "hide product page",
+      "search engines",
+      "google",
+      "index",
+      "page font",
+      "text colour",
+    ],
+    ref: { kind: "productPage", section: "layout" },
+  },
+  {
+    id: "buy-button",
+    label: "Buy button",
+    keywords: [
+      "cta",
+      "call to action",
+      "buy now",
+      "button text",
+      "button label",
+      "button style",
+      "checkout button",
+      "purchase button",
+      "incl vat",
+      "excl vat",
+      "tax note",
+      "plus shipping",
+      "free shipping",
+      "price note",
+    ],
+    ref: { kind: "productPage", section: "cta" },
+  },
+  {
+    id: "product-page-sections",
+    label: "Product page sections",
+    keywords: [
+      "description",
+      "specifications",
+      "specs",
+      "shipping info",
+      "returns info",
+      "safety",
+      "reorder sections",
+      "hide description",
+      "show stock",
+      "availability",
+      "seller name",
+      "sold by",
+    ],
+    ref: { kind: "productPage", section: "sections" },
+  },
+  {
+    id: "shipping-returns",
+    label: "Shipping and returns policy",
+    keywords: [
+      "shipping policy",
+      "returns policy",
+      "refund",
+      "refunds",
+      "delivery",
+      "postage",
+      "return window",
+      "withdrawal",
+      "legal text",
+      "terms",
+      // The profiles live in this panel, and "shipping profile" is the name
+      // Shopify and Etsy taught sellers to search for.
+      "shipping profile",
+      "shipping profiles",
+      "dispatch time",
+      "processing time",
+      "handling time",
+      "ships within",
+    ],
+    ref: { kind: "productPage", section: "policies" },
+  },
+  {
+    id: "seller-details",
+    label: "Seller details",
+    keywords: [
+      "business name",
+      "company name",
+      "address",
+      "vat id",
+      "vat number",
+      "tax id",
+      "impressum",
+      "imprint",
+      "legal notice",
+      "contact email",
+      "phone",
+      "country",
+      "who is selling",
+    ],
+    ref: { kind: "productPage", section: "seller" },
   },
 ];
 

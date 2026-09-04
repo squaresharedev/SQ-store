@@ -99,12 +99,23 @@ describe("PlacementSection rotation", () => {
     expect(onRotate).toHaveBeenCalledWith(0);
   });
 
-  it("warns that a group turns block by block, only when there IS a group", () => {
+  it("warns that a group turns block by block, only when there IS a group", async () => {
+    // The guidance moved from a standing paragraph into the "?" beside the
+    // label, but it is still CONDITIONAL: what the tip says depends on the
+    // selection, exactly as the paragraph's presence used to.
+    const user = userEvent.setup();
     const { unmount } = renderSection([shape(), shape(0)]);
-    expect(screen.getByText("Each block turns about its own centre.")).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "About Rotation" }));
+    expect(screen.getByRole("tooltip").textContent).toContain(
+      "Each block turns about its own centre",
+    );
     unmount();
+
     renderSection([shape()]);
-    expect(screen.queryByText("Each block turns about its own centre.")).toBeNull();
+    await user.click(screen.getByRole("button", { name: "About Rotation" }));
+    expect(screen.getByRole("tooltip").textContent).not.toContain(
+      "Each block turns about its own centre",
+    );
   });
 });
 
@@ -166,17 +177,20 @@ describe("PlacementSection layering", () => {
     expect(button("Bring forward")).not.toBeDisabled();
   });
 
-  it("points at Alt-click only once something is actually stacked", () => {
-    const hint = "Alt-click a stack to reach the block underneath.";
+  it("points at Alt-click only once something is actually stacked", async () => {
+    const user = userEvent.setup();
+    const hint = "Alt-click a stack on the canvas to reach the block underneath";
     // Three blocks side by side: depth exists, but nothing is hidden by it.
     renderSection([board[0]], board);
-    expect(screen.queryByText(hint)).toBeNull();
+    await user.click(screen.getByRole("button", { name: "How layering works" }));
+    expect(screen.getByRole("tooltip").textContent).not.toContain(hint);
     cleanup();
 
     // Now one lies on another, and reaching the lower one needs the shortcut.
     const stack = [shapeAt(0), { ...shapeAt(0), id: "second" } as ShapeBlock];
     renderSection([stack[1]], stack);
-    expect(screen.getByText(hint)).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "How layering works" }));
+    expect(screen.getByRole("tooltip").textContent).toContain(hint);
   });
 
   it("disables everything when the whole board is selected", () => {

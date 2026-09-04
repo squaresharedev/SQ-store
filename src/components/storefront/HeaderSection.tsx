@@ -11,9 +11,9 @@ import { Switch } from "@/components/ui/switch";
 import {
   fieldBaseClass,
   helpTextClass,
-  infoTextClass,
   labelClass,
 } from "@/components/ui/control-styles";
+import { InfoTip } from "@/components/ui/InfoTip";
 
 /**
  * Store header controls: a show toggle plus the plain text of the two lines
@@ -49,9 +49,16 @@ export function HeaderSection({
       </div>
 
       <div className="space-y-1.5">
-        <label htmlFor={`${fieldId}-name`} className={labelClass}>
-          Store name
-        </label>
+        <span className="flex items-center gap-1.5">
+          <label htmlFor={`${fieldId}-name`} className={labelClass}>
+            Store name
+          </label>
+          <InfoTip label="Other ways to edit the header">
+            Double-click the name or bio on the canvas to type it there. A
+            single click aims this panel at that line, where its font, size,
+            colour, formatting and alignment are set.
+          </InfoTip>
+        </span>
         <input
           id={`${fieldId}-name`}
           type="text"
@@ -92,11 +99,6 @@ export function HeaderSection({
         </p>
       </div>
 
-      <p className={infoTextClass}>
-        Double-click the name or bio on the canvas to type it there. A single
-        click aims this panel at that line, where its font, size, colour,
-        formatting and alignment are set.
-      </p>
     </div>
   );
 }

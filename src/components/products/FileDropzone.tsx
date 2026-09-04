@@ -71,6 +71,7 @@ export function FileDropzone({
         <input
           ref={inputRef}
           id={inputId}
+          data-product-field="digitalFile"
           type="file"
           aria-describedby={describedById}
           className="sr-only"

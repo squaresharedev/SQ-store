@@ -78,7 +78,11 @@ describe("images have exactly one route into storage", () => {
     // Each kind's destination is a path on this origin, not a bucket URL.
     expect(client).toMatch(/"\/api\/uploads\/image"/);
     expect(client).toMatch(/"\/api\/uploads\/font"/);
-    expect(client).toMatch(/uploadFileViaServer\(file, onProgress\)/);
+    expect(client).toMatch(/"\/api\/uploads\/element"/);
+    expect(client).toMatch(/"\/api\/uploads\/file"/);
+    // Documents post to their own route, not the digital file's: it is the
+    // one that enforces PDF-only, 20 MB and the document rate-limit budget.
+    expect(client).toMatch(/"\/api\/uploads\/document"/);
     // No bucket host anywhere in the client: a cross-origin PUT is what made
     // uploads depend on the bucket's CORS allowlist naming every origin.
     expect(client).not.toMatch(/r2\.cloudflarestorage\.com/);
@@ -100,5 +104,27 @@ describe("images have exactly one route into storage", () => {
     // `[^)]*` already crosses newlines, so no dotAll flag is needed (and the
     // repo's TS target predates it).
     expect(route).toMatch(/putObject\([^)]*sniffed\.mime/);
+  });
+
+  it("the document route gates a PUBLIC download harder than the paid one", () => {
+    const route = repoFile("src", "app", "api", "uploads", "document", "route.ts");
+    // Signed in, permitted to write products, and inside its OWN budget: a
+    // document may not spend the digital-file allowance, and vice versa.
+    expect(route).toMatch(/getActiveAccount\(\)/);
+    expect(route).toMatch(/can\(account\.role, "products\.write"\)/);
+    expect(route).toMatch(/RATE_LIMITS\.documentUpload/);
+    expect(route).not.toMatch(/RATE_LIMITS\.fileUpload/);
+    // Bounded before a byte is streamed, and against the document cap.
+    expect(route).toMatch(/DOCUMENT_MAX_BYTES/);
+    expect(route).not.toMatch(/DIGITAL_FILE_MAX_BYTES/);
+    // POSITIVE identification: the bytes must BE a PDF. The file route can
+    // only ask whether the claim is a provable lie (text has no signature);
+    // here the single accepted type has a magic number, so anything else is
+    // refused rather than stored under a type nothing will scrutinise.
+    expect(route).toMatch(/sniffFile\(head\) !== "pdf"/);
+    // Its own prefix, so a public manual and a paywalled download can never
+    // be the same key, which is what lets the save-time HEAD apply the
+    // document caps to one and the file caps to the other.
+    expect(route).toMatch(/buildObjectKey\("document"/);
   });
 });

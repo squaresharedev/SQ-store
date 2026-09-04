@@ -27,6 +27,7 @@ import {
   focusRingClass,
 } from "@/components/ui/control-styles";
 import { SliderField } from "@/components/ui/SliderField";
+import { InfoTip } from "@/components/ui/InfoTip";
 
 /**
  * How the selected block(s) SIT on the canvas, as opposed to what they are
@@ -174,6 +175,11 @@ export function PlacementSection({
         <SliderField
           id={`${fieldId}-rotation`}
           label="Rotation"
+          tip={
+            multiple
+              ? "Whole degrees, either way from level. Each block turns about its own centre, so a row of blocks stays a row."
+              : "Whole degrees, either way from level. The block turns about its own centre and keeps the cells it occupies."
+          }
           min={ROTATION_MIN}
           max={ROTATION_MAX}
           // Zero is a real position on this track, so a slider that has never
@@ -205,18 +211,21 @@ export function PlacementSection({
             </button>
           ))}
         </div>
-        {multiple && (
-          <p className={infoTextClass}>
-            Each block turns about its own centre.
-          </p>
-        )}
       </div>
 
       {/* Depth. Purely which block paints on top: the reading order buyers and
           screen readers get is untouched by every one of these. */}
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
-          <span className={labelClass}>Layer</span>
+          <span className="flex items-center gap-1.5">
+            <span className={labelClass}>Layer</span>
+            <InfoTip label="How layering works">
+              Layers decide only what paints on top where blocks overlap; the
+              reading order a screen reader follows never changes.
+              {multiple && " This selection keeps its own order within the stack as it moves."}
+              {layer.stacked && " Alt-click a stack on the canvas to reach the block underneath."}
+            </InfoTip>
+          </span>
           <span className={helpTextClass}>
             {multiple
               ? `${blocks.length} blocks selected`
@@ -264,16 +273,6 @@ export function PlacementSection({
               aria-hidden="true"
             />
           </button>
-        )}
-        {multiple && (
-          <p className={infoTextClass}>
-            The selection keeps its own order within the stack.
-          </p>
-        )}
-        {layer.stacked && (
-          <p className={infoTextClass}>
-            Alt-click a stack to reach the block underneath.
-          </p>
         )}
       </div>
     </div>

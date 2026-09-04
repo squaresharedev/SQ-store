@@ -3,7 +3,8 @@
 import { useId } from "react";
 import type { StorefrontTheme } from "@/types/storefront";
 import { Switch } from "@/components/ui/switch";
-import { infoTextClass, labelClass } from "@/components/ui/control-styles";
+import { labelClass } from "@/components/ui/control-styles";
+import { InfoTip } from "@/components/ui/InfoTip";
 
 /**
  * What happens to a product once the seller marks it sold out.
@@ -32,26 +33,36 @@ export function SoldOutSection({
     <div className="space-y-4">
       <div className="space-y-1.5">
         <div className="flex items-center justify-between gap-3">
-          <label htmlFor={`${fieldId}-hide`} className={labelClass}>
-            Hide from buyers
-          </label>
+          <span className="flex items-center gap-1.5">
+            <label htmlFor={`${fieldId}-hide`} className={labelClass}>
+              Hide from buyers
+            </label>
+            <InfoTip label="What hiding sold-out products does">
+              Products you marked sold out disappear from the storefront
+              entirely. They stay on the canvas here, dimmed, so you can still
+              move them and put them back on sale.
+            </InfoTip>
+          </span>
           <Switch
             id={`${fieldId}-hide`}
             checked={theme.hideSoldOut}
             onCheckedChange={(hideSoldOut) => onChange({ ...theme, hideSoldOut })}
           />
         </div>
-        <p className={infoTextClass}>
-          Buyers won&apos;t see products you marked sold out. In the editor they
-          stay visible but dimmed.
-        </p>
       </div>
 
       <div className="space-y-1.5">
         <div className="flex items-center justify-between gap-3">
-          <label htmlFor={`${fieldId}-badge`} className={labelClass}>
-            Show badge
-          </label>
+          <span className="flex items-center gap-1.5">
+            <label htmlFor={`${fieldId}-badge`} className={labelClass}>
+              Show badge
+            </label>
+            <InfoTip label="When the sold-out badge appears">
+              {theme.hideSoldOut
+                ? "Nothing to mark while sold-out products are hidden. Turn Hide from buyers off and this badge labels them instead."
+                : "Marks a sold-out product on the storefront, so a buyer learns it exists and is gone rather than wondering."}
+            </InfoTip>
+          </span>
           <Switch
             id={`${fieldId}-badge`}
             checked={theme.soldOutBadge}
@@ -60,11 +71,6 @@ export function SoldOutSection({
             }
           />
         </div>
-        <p className={infoTextClass}>
-          {theme.hideSoldOut
-            ? "Only applies while sold-out products are shown."
-            : "Marks sold-out products on the storefront."}
-        </p>
       </div>
     </div>
   );

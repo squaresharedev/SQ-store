@@ -13,6 +13,7 @@ import type { SettingRef } from "@/lib/storefront/setting-ref";
 import { ProductBlockEditor } from "@/components/storefront/ProductBlockEditor";
 import { ShapeBlockEditor } from "@/components/storefront/ShapeBlockEditor";
 import { TextBlockEditor } from "@/components/storefront/TextBlockEditor";
+import { DEFAULT_PRODUCT_PAGE_CONFIG as PRODUCT_PAGE_DEFAULTS } from "@/types/storefront";
 import {
   DEFAULT_STOREFRONT_CONFIG,
   type ImageBlock,
@@ -186,6 +187,14 @@ export function PanelsGallery() {
             onCustomFontUrlChange={() => {}}
             showGrid={showGrid}
             onShowGridChange={setShowGrid}
+            productPage={PRODUCT_PAGE_DEFAULTS}
+            onProductPageChange={() => {}}
+            policies={{}}
+            onPoliciesChange={() => {}}
+            shippingProfiles={[]}
+            onShippingProfilesChange={() => {}}
+            seller={{}}
+            onSellerChange={() => {}}
             searchEntries={searchEntries}
             onJump={(target) =>
               setJumped(

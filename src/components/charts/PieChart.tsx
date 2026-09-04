@@ -9,6 +9,7 @@ import {
   CHART,
   CHART_ANIMATION,
   MARK,
+  TOOLTIP,
   dimmableClass,
   dimmedClass,
   tooltipLabelClass,
@@ -75,7 +76,7 @@ function SliceTooltip({
   const slice = payload?.[0]?.payload as ChartSlice | undefined;
   if (!active || !slice) return null;
   return (
-    <div className={cn(tooltipWrapperClass, "chart-tip-enter")}>
+    <div className={tooltipWrapperClass}>
       <p className={tooltipLabelClass}>{slice.label}</p>
       <p className={tooltipValueClass}>
         {valueFormatter(slice.value)}
@@ -120,6 +121,8 @@ export function PieChart({
       <div className="relative shrink-0" style={{ width: size, height: size }}>
         <RPieChart width={size} height={size}>
           <Tooltip
+            isAnimationActive={TOOLTIP.animated}
+            wrapperStyle={TOOLTIP.wrapperStyle}
             content={({ active, payload }) => (
               <SliceTooltip
                 active={active}

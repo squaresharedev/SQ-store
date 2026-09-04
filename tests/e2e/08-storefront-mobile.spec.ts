@@ -211,13 +211,57 @@ test.describe("storefront designer on a phone", () => {
     for (const name of ["Redo", "Tidy up", "Reset zoom"]) {
       await expect(menu.getByRole("menuitem", { name })).toBeVisible();
     }
-    for (const name of ["Desktop preview", "Mobile preview"]) {
-      await expect(menu.getByRole("menuitemradio", { name })).toBeVisible();
-    }
     // Tapping the canvas dismisses it. A `fixed inset-0` backdrop cannot do
     // this from inside the translated toolbar, so this guards the real fix.
     await page.mouse.click(195, 220);
     await expect(menu).toBeHidden();
+
+    // --- the desktop/mobile switch is reachable without opening any menu at
+    //     all, on its own now — it is the ONLY route to preview mode on a
+    //     phone. It rides whatever it controls rather than floating fixed
+    //     over the editor: above the board in design view, above the fluid
+    //     column in mobile preview — same chrome as the product page
+    //     artboard's own buttons in both cases, not held to a touch minimum
+    //     any more than those are. ---
+    const desktopPreview = page.getByRole("button", { name: "Desktop preview" });
+    const mobilePreview = page.getByRole("button", { name: "Mobile preview" });
+    await expect(desktopPreview).toBeVisible();
+    await expect(mobilePreview).toBeVisible();
+    await expect(desktopPreview).toHaveAttribute("aria-pressed", "true");
+
+    await mobilePreview.click();
+    await expect
+      .poll(() =>
+        page.evaluate(() => document.querySelector("main")?.className.includes("overflow-auto") ?? false),
+      )
+      .toBe(true);
+
+    const desktopPreview2 = page.getByRole("button", { name: "Desktop preview" });
+    const mobilePreview2 = page.getByRole("button", { name: "Mobile preview" });
+    await expect(mobilePreview2).toBeVisible();
+    await expect(mobilePreview2).toHaveAttribute("aria-pressed", "true");
+    // Chrome ON the mobile-width column, not fixed near the settings panel:
+    // its right edge lines up with the column's, not the viewport's.
+    const columnBox = await page.locator("main > div.mx-auto").boundingBox();
+    const switchBox = await mobilePreview2.boundingBox();
+    expect(columnBox).not.toBeNull();
+    expect(switchBox).not.toBeNull();
+    expect(
+      Math.abs(switchBox!.x + switchBox!.width - (columnBox!.x + columnBox!.width)),
+    ).toBeLessThan(5);
+
+    // --- and back to design view, where the board (and the switch riding
+    //     it) return ---
+    await desktopPreview2.click();
+    await expect
+      .poll(() =>
+        page.evaluate(() => document.querySelector("main")?.className.includes("touch-none") ?? false),
+      )
+      .toBe(true);
+    await expect(page.getByRole("button", { name: "Desktop preview" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
   });
 
   test("blocks can be inserted and the design saved from a phone", async ({

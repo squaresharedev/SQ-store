@@ -2828,3 +2828,363 @@ drop function if exists public.profile_is_public(uuid);
 
 alter table public.storefronts
   add column if not exists brief jsonb not null default '{}'::jsonb;
+
+-- ===== 20260830 storefront_signals ===========================================
+-- The non-order analytics stream (views, clicks, email signups, bookings) and
+-- its aggregate. Mirrors supabase/migrations/20260830_storefront_signals.sql
+-- verbatim: the whole point of this table is its authorization shape (readable
+-- by owner + team, writable by NOBODY client-facing), so a replica that got
+-- that wrong would let a test pass against a boundary production does not have.
+
+create table if not exists public.storefront_signals (
+  id            bigint generated always as identity primary key,
+  account_id    uuid not null references public.profiles(id) on delete cascade,
+  storefront_id uuid references public.storefronts(id) on delete set null,
+  kind          text not null
+    check (kind in ('storefront_view','product_click','email_signup','booking')),
+  channel       text not null default 'embed'
+    check (channel in ('embed','marketplace','direct')),
+  block_id      text check (block_id is null or char_length(block_id) <= 64),
+  visitor_hash  text check (visitor_hash is null or char_length(visitor_hash) = 64),
+  value_cents   integer check (value_cents is null or value_cents >= 0),
+  currency      text check (currency is null or char_length(currency) = 3),
+  dedupe_key    text check (dedupe_key is null or char_length(dedupe_key) <= 128),
+  occurred_at   timestamptz not null default now(),
+  metadata      jsonb not null default '{}'
+    check (pg_column_size(metadata) <= 2048)
+);
+
+create index if not exists storefront_signals_account_kind_occurred_idx
+  on public.storefront_signals (account_id, kind, occurred_at);
+create index if not exists storefront_signals_account_occurred_idx
+  on public.storefront_signals (account_id, occurred_at desc);
+create unique index if not exists storefront_signals_dedupe_idx
+  on public.storefront_signals (account_id, dedupe_key)
+  where dedupe_key is not null;
+
+alter table public.storefront_signals enable row level security;
+
+drop policy if exists storefront_signals_select_member on public.storefront_signals;
+create policy storefront_signals_select_member
+  on public.storefront_signals
+  for select
+  to authenticated
+  using (
+    account_id = (select auth.uid())
+    or public.team_role_can(public.team_actor_role(account_id), 'store.read')
+  );
+
+revoke insert, update, delete, truncate on table public.storefront_signals
+  from anon, authenticated;
+revoke all on table public.storefront_signals from anon;
+revoke all on sequence public.storefront_signals_id_seq from anon, authenticated;
+grant select on table public.storefront_signals to authenticated;
+
+create or replace function public.storefront_signals_aggregate(
+  p_account_id uuid,
+  p_from date default null,
+  p_to   date default null
+)
+returns jsonb
+language sql
+stable
+security invoker
+set search_path = ''
+as $$
+with bounds as (
+  select
+    coalesce(p_from::timestamp at time zone 'UTC', '-infinity'::timestamptz) as from_ts,
+    coalesce((p_to + 1)::timestamp at time zone 'UTC', 'infinity'::timestamptz) as to_ts
+),
+in_range as (
+  select s.*
+  from public.storefront_signals s, bounds b
+  where s.account_id = p_account_id
+    and s.occurred_at >= b.from_ts
+    and s.occurred_at < b.to_ts
+)
+select jsonb_build_object(
+  'first_signal_date',
+    (select ((min(occurred_at) at time zone 'UTC')::date)::text from in_range),
+  'totals', coalesce((
+    select jsonb_agg(jsonb_build_object(
+      'kind', kind, 'count', n, 'value_cents', value_cents,
+      'unique_visitors', unique_visitors
+    ) order by kind)
+    from (
+      select kind, count(*) as n,
+             coalesce(sum(value_cents), 0) as value_cents,
+             count(distinct visitor_hash) as unique_visitors
+      from in_range group by kind
+    ) t
+  ), '[]'::jsonb),
+  'series_days', coalesce((
+    select jsonb_agg(jsonb_build_object(
+      'date', day, 'kind', kind, 'count', n, 'value_cents', value_cents
+    ) order by day, kind)
+    from (
+      select ((occurred_at at time zone 'UTC')::date)::text as day, kind,
+             count(*) as n, coalesce(sum(value_cents), 0) as value_cents
+      from in_range group by 1, 2
+    ) d
+  ), '[]'::jsonb),
+  'channels', coalesce((
+    select jsonb_agg(jsonb_build_object('kind', kind, 'channel', channel, 'count', n))
+    from (select kind, channel, count(*) as n from in_range group by 1, 2) c
+  ), '[]'::jsonb),
+  'weekdays', coalesce((
+    select jsonb_agg(jsonb_build_object('kind', kind, 'isodow', isodow, 'count', n))
+    from (
+      select kind, extract(isodow from occurred_at at time zone 'UTC')::int as isodow,
+             count(*) as n
+      from in_range group by 1, 2
+    ) w
+  ), '[]'::jsonb),
+  'storefronts', coalesce((
+    select jsonb_agg(jsonb_build_object(
+      'kind', kind, 'storefront_id', storefront_id, 'name', name, 'count', n
+    ) order by n desc, name asc nulls last)
+    from (
+      select r.kind, r.storefront_id::text as storefront_id, sf.name as name,
+             count(*) as n
+      from in_range r
+      left join public.storefronts sf on sf.id = r.storefront_id
+      group by 1, 2, 3
+      order by 4 desc
+      limit 40
+    ) s
+  ), '[]'::jsonb)
+)
+$$;
+
+revoke execute on function public.storefront_signals_aggregate(uuid, date, date)
+  from public, anon;
+grant execute on function public.storefront_signals_aggregate(uuid, date, date)
+  to authenticated, service_role;
+
+-- ===== 20260830 signal_relevance =============================================
+-- Adds all_time_kinds + active_block_types to the signals aggregate, which is
+-- what lets the page hide a source the seller does not run. Replayed because
+-- the visibility rule is the behaviour under test: a replica on the older
+-- function reports no history and no blocks, so every optional source would
+-- vanish and the specs would pass for the wrong reason.
+-- Mirrors supabase/migrations/20260830_signal_relevance.sql.
+
+create or replace function public.storefront_signals_aggregate(
+  p_account_id uuid,
+  p_from date default null,
+  p_to   date default null
+)
+returns jsonb
+language sql
+stable
+security invoker
+set search_path = ''
+as $$
+with bounds as (
+  select
+    coalesce(p_from::timestamp at time zone 'UTC', '-infinity'::timestamptz) as from_ts,
+    coalesce((p_to + 1)::timestamp at time zone 'UTC', 'infinity'::timestamptz) as to_ts
+),
+in_range as (
+  select s.*
+  from public.storefront_signals s, bounds b
+  where s.account_id = p_account_id
+    and s.occurred_at >= b.from_ts
+    and s.occurred_at < b.to_ts
+)
+select jsonb_build_object(
+  'first_signal_date',
+    (select ((min(occurred_at) at time zone 'UTC')::date)::text from in_range),
+  'all_time_kinds', coalesce((
+    select jsonb_agg(distinct kind)
+    from public.storefront_signals
+    where account_id = p_account_id
+  ), '[]'::jsonb),
+  'active_block_types', coalesce((
+    select jsonb_agg(distinct b->>'type')
+    from public.storefronts s,
+         lateral jsonb_array_elements(s.config->'blocks') b
+    where s.owner_id = p_account_id
+      and jsonb_typeof(s.config->'blocks') = 'array'
+      and b->>'type' is not null
+  ), '[]'::jsonb),
+  'totals', coalesce((
+    select jsonb_agg(jsonb_build_object(
+      'kind', kind, 'count', n, 'value_cents', value_cents,
+      'unique_visitors', unique_visitors
+    ) order by kind)
+    from (
+      select kind, count(*) as n,
+             coalesce(sum(value_cents), 0) as value_cents,
+             count(distinct visitor_hash) as unique_visitors
+      from in_range group by kind
+    ) t
+  ), '[]'::jsonb),
+  'series_days', coalesce((
+    select jsonb_agg(jsonb_build_object(
+      'date', day, 'kind', kind, 'count', n, 'value_cents', value_cents
+    ) order by day, kind)
+    from (
+      select ((occurred_at at time zone 'UTC')::date)::text as day, kind,
+             count(*) as n, coalesce(sum(value_cents), 0) as value_cents
+      from in_range group by 1, 2
+    ) d
+  ), '[]'::jsonb),
+  'channels', coalesce((
+    select jsonb_agg(jsonb_build_object('kind', kind, 'channel', channel, 'count', n))
+    from (select kind, channel, count(*) as n from in_range group by 1, 2) c
+  ), '[]'::jsonb),
+  'weekdays', coalesce((
+    select jsonb_agg(jsonb_build_object('kind', kind, 'isodow', isodow, 'count', n))
+    from (
+      select kind, extract(isodow from occurred_at at time zone 'UTC')::int as isodow,
+             count(*) as n
+      from in_range group by 1, 2
+    ) w
+  ), '[]'::jsonb),
+  'storefronts', coalesce((
+    select jsonb_agg(jsonb_build_object(
+      'kind', kind, 'storefront_id', storefront_id, 'name', name, 'count', n
+    ) order by n desc, name asc nulls last)
+    from (
+      select r.kind, r.storefront_id::text as storefront_id, sf.name as name,
+             count(*) as n
+      from in_range r
+      left join public.storefronts sf on sf.id = r.storefront_id
+      group by 1, 2, 3
+      order by 4 desc
+      limit 40
+    ) s
+  ), '[]'::jsonb)
+)
+$$;
+
+revoke execute on function public.storefront_signals_aggregate(uuid, date, date)
+  from public, anon;
+grant execute on function public.storefront_signals_aggregate(uuid, date, date)
+  to authenticated, service_role;
+
+
+-- ============================================================================
+-- 20260902_product_page
+-- ============================================================================
+
+alter table public.products
+  add column gallery      jsonb not null default '[]'::jsonb,
+  add column variants     jsonb not null default '[]'::jsonb,
+  add column details      jsonb not null default '{}'::jsonb,
+  add column purchase_url text;
+
+alter table public.products
+  add constraint products_gallery_is_array
+    check (jsonb_typeof(gallery) = 'array'),
+  add constraint products_variants_is_array
+    check (jsonb_typeof(variants) = 'array'),
+  add constraint products_details_is_object
+    check (jsonb_typeof(details) = 'object'),
+  add constraint products_gallery_size
+    check (pg_column_size(gallery) <= 8192),
+  add constraint products_variants_size
+    check (pg_column_size(variants) <= 4096),
+  add constraint products_details_size
+    check (pg_column_size(details) <= 16384),
+  add constraint products_purchase_url_shape
+    check (
+      purchase_url is null
+      or (char_length(purchase_url) <= 2048 and purchase_url ~ '^https://')
+    );
+
+alter table public.storefront_signals
+  drop constraint storefront_signals_kind_check;
+alter table public.storefront_signals
+  add constraint storefront_signals_kind_check
+    check (kind in ('storefront_view','product_click','email_signup','booking','product_view'));
+
+
+-- ============================================================================
+-- 20260903_product_documents
+-- ============================================================================
+
+alter table public.products
+  add column documents jsonb not null default '[]'::jsonb;
+
+alter table public.products
+  add constraint products_documents_is_array
+    check (jsonb_typeof(documents) = 'array'),
+  add constraint products_documents_size
+    check (pg_column_size(documents) <= 8192);
+
+
+-- ============================================================================
+-- 20260903_product_options
+-- ============================================================================
+
+alter table public.products
+  add column option_groups jsonb not null default '[]'::jsonb;
+
+update public.products
+set option_groups = jsonb_build_array(
+      jsonb_build_object(
+        'id', gen_random_uuid()::text,
+        'name', 'Colour',
+        'display', 'swatch',
+        'options', variants
+      )
+    )
+where jsonb_typeof(variants) = 'array'
+  and jsonb_array_length(variants) > 0;
+
+update public.products
+set gallery = (
+      select coalesce(jsonb_agg(
+               case
+                 when entry ? 'variantId'
+                   then (entry - 'variantId') || jsonb_build_object('optionId', entry -> 'variantId')
+                 else entry
+               end
+               order by ordinality
+             ), '[]'::jsonb)
+      from jsonb_array_elements(gallery) with ordinality as t(entry, ordinality)
+    )
+where jsonb_typeof(gallery) = 'array'
+  and gallery::text like '%"variantId"%';
+
+alter table public.products
+  drop constraint products_variants_is_array,
+  drop constraint products_variants_size,
+  drop column variants;
+
+alter table public.products
+  add constraint products_option_groups_is_array
+    check (jsonb_typeof(option_groups) = 'array'),
+  add constraint products_option_groups_size
+    check (pg_column_size(option_groups) <= 16384);
+
+alter table public.products
+  drop constraint products_gallery_size,
+  add constraint products_gallery_size
+    check (pg_column_size(gallery) <= 32768);
+
+-- 20260904_product_shipping_profile
+-- Which of the storefront config's shippingProfiles a product ships under.
+-- Null = the store's default terms (config.policies.shipping), which is what
+-- every existing row correctly already says. The CHECK is the point: Zod is
+-- the boundary for application writes, but a service-role write is not parsed
+-- by it, and this column is dereferenced by the public product page.
+alter table public.products
+  add column shipping_profile_id text;
+
+alter table public.products
+  add constraint products_shipping_profile_id_shape
+    check (
+      shipping_profile_id is null
+      or (
+        char_length(shipping_profile_id) between 1 and 64
+        and shipping_profile_id ~ '^[A-Za-z0-9_-]+$'
+      )
+    );
+
+create index products_shipping_profile_id_idx
+  on public.products (shipping_profile_id)
+  where shipping_profile_id is not null;

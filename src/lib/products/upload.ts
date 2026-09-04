@@ -1,5 +1,6 @@
 import {
   DIGITAL_FILE_CONTENT_TYPES,
+  DOCUMENT_CONTENT_TYPES,
   ELEMENT_CONTENT_TYPES,
   FONT_CONTENT_TYPES,
   IMAGE_CONTENT_TYPES,
@@ -28,6 +29,7 @@ const TYPE_FIX: Record<UploadKind, string> = {
   file: "Use a ZIP, PDF, EPUB, MP3, WAV, MP4, JPEG, PNG, WebP, or TXT file.",
   font: "Use a WOFF2, WOFF, TTF, or OTF font file.",
   element: "Use an SVG, PNG, WebP, JPEG, GIF, or AVIF image.",
+  document: "Export the manual or certificate as a PDF, then upload it.",
 };
 
 /** What each kind is CALLED in the messages a seller reads. */
@@ -36,6 +38,7 @@ const UPLOAD_NOUN: Record<UploadKind, string> = {
   file: "file",
   font: "font",
   element: "element",
+  document: "document",
 };
 
 function allowedTypes(kind: UploadKind): readonly string[] {
@@ -48,6 +51,8 @@ function allowedTypes(kind: UploadKind): readonly string[] {
       return ELEMENT_CONTENT_TYPES;
     case "file":
       return DIGITAL_FILE_CONTENT_TYPES;
+    case "document":
+      return DOCUMENT_CONTENT_TYPES;
   }
 }
 
@@ -162,12 +167,18 @@ function keyFromResponse(
 }
 
 /**
- * Stream a digital file THROUGH our server. The body is the file itself (not
+ * Stream a file THROUGH our server. The body is the file itself (not
  * multipart) so the server can pipe it straight into storage without ever
- * holding 200 MB in memory; the filename and type ride in the query string.
+ * holding it in memory; the filename and type ride in the query string.
+ *
+ * Shared by the digital download and by product documents, which differ only
+ * in which route they post to, and the routes themselves are what differ:
+ * see /api/uploads/document for why a public manual is not a digital file.
  */
-async function uploadFileViaServer(
+async function uploadStreamViaServer(
   file: File,
+  route: string,
+  noun: string,
   onProgress?: (fraction: number | null) => void,
 ): Promise<string> {
   const query = new URLSearchParams({
@@ -176,12 +187,12 @@ async function uploadFileViaServer(
   });
   const outcome = await sendWithProgress(
     "POST",
-    `/api/uploads/file?${query}`,
+    `${route}?${query}`,
     file,
     onProgress,
     file.type,
   );
-  return keyFromResponse(outcome, "file");
+  return keyFromResponse(outcome, noun);
 }
 
 /** Multipart POST to one of our own upload routes, under the field name that
@@ -273,6 +284,8 @@ export async function uploadToR2(
     case "element":
       return uploadFormViaServer(file, "/api/uploads/element", "element", onProgress);
     case "file":
-      return uploadFileViaServer(file, onProgress);
+      return uploadStreamViaServer(file, "/api/uploads/file", "file", onProgress);
+    case "document":
+      return uploadStreamViaServer(file, "/api/uploads/document", "document", onProgress);
   }
 }

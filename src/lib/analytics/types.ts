@@ -5,6 +5,7 @@
 // RLS) and strictly READ-ONLY against orders — no schema changes.
 
 import type { OrderChannel, OrderStatus } from "@/types/order-view";
+import type { SignalChannel, SignalKind } from "@/lib/analytics/signals";
 
 /** Inclusive ISO "YYYY-MM-DD" bounds; null = unbounded (all-time). Mirrors
  *  the DatePicker `DateRangeValue` shape. */
@@ -97,3 +98,106 @@ export type AnalyticsData = {
 };
 
 export const TOP_PRODUCTS_LIMIT = 5;
+
+// ---------------------------------------------------------------------------
+// SIGNALS, everything the page measures that is NOT a sale.
+//
+// Same discipline as the order types above: counts are integers, money is
+// integer cents, series are zero-filled and bucketed by the SAME rules as the
+// revenue trend so two charts on one screen never disagree about what a
+// bucket is. Shapes are per-KIND rather than per-feature, which is what lets
+// one section component render views, signups and bookings alike.
+// ---------------------------------------------------------------------------
+
+/** One time bucket of a signal kind. `valueCents` is 0 for kinds that carry
+ *  no money (a view is not worth anything on its own). */
+export type SignalPoint = {
+  /** Bucket start as ISO "YYYY-MM-DD". */
+  date: string;
+  count: number;
+  valueCents: number;
+};
+
+/** Headline figures for one signal kind over the range. */
+export type SignalTotals = {
+  count: number;
+  /** Sum of value_cents, integer cents. 0 for kinds that carry no money. */
+  valueCents: number;
+  /** Distinct visitor digests seen. 0 when the producer sends none. */
+  uniqueVisitors: number;
+};
+
+/** Signals of one kind attributed to one channel. */
+export type SignalChannelSlice = { channel: SignalChannel; count: number };
+
+/** Signals of one kind bucketed by day of week (Mon..Sun, always 7 entries). */
+export type SignalWeekdaySlice = { weekday: string; count: number };
+
+/** Signals of one kind attributed to one storefront. `name` is null when the
+ *  storefront has since been deleted, the count is still true, so it is
+ *  reported rather than dropped. */
+export type SignalStorefrontSlice = {
+  storefrontId: string | null;
+  name: string | null;
+  count: number;
+};
+
+/** Everything one source's section renders. Always present for every kind,
+ *  zero-filled: an empty section and a missing section are different states,
+ *  and only one of them is honest. */
+export type SignalBreakdown = {
+  kind: SignalKind;
+  totals: SignalTotals;
+  /** Time-ordered buckets (oldest first), empty buckets included as 0. */
+  series: SignalPoint[];
+  /** Always all three channels, fixed order, zeros included. */
+  channels: SignalChannelSlice[];
+  /** Always 7 entries, Mon..Sun, zeros included. */
+  weekdays: SignalWeekdaySlice[];
+  /** Descending by count, capped at TOP_STOREFRONTS_LIMIT. */
+  storefronts: SignalStorefrontSlice[];
+};
+
+/** Every signal kind's breakdown, from one owner-scoped read. */
+export type SignalsData = {
+  /** False when the read failed or there is no active account. Sections render
+   *  calm zero states, never an error page. */
+  available: boolean;
+  byKind: Record<SignalKind, SignalBreakdown>;
+  /**
+   * Kinds this account has EVER recorded, ignoring the range. Drives whether a
+   * source is shown at all, which must not flicker as the reader changes the
+   * date window: an empty range is a reason to show zeros, never a reason to
+   * hide a source the seller genuinely runs.
+   */
+  everRecorded: SignalKind[];
+  /**
+   * Block types present on this account's storefronts (`StorefrontBlock["type"]`
+   * values). The real "do I have that embed" test, and the one that lets a
+   * newly placed block get its section before it has produced any data.
+   */
+  activeBlockTypes: string[];
+};
+
+export const TOP_STOREFRONTS_LIMIT = 5;
+
+/**
+ * THE PAGE'S WHOLE PAYLOAD, in one object.
+ *
+ * This is also the machine-readable contract: it is serialised verbatim into
+ * the page as `<script type="application/json" id="analytics-snapshot">`, so
+ * an agent reading the dashboard gets exactly what the charts were drawn from
+ * rather than scraping rendered text. See docs/analytics-datapoints.md.
+ */
+export type AnalyticsSnapshot = {
+  /** Contract version. Bump on any breaking shape change. */
+  version: 1;
+  /** The range the figures cover, resolved (never the raw URL params). */
+  range: { from: string | null; to: string | null; preset: RangePreset };
+  /** Currency every *Cents field in this payload is expressed in. */
+  currency: string;
+  sales: AnalyticsData;
+  signals: SignalsData;
+  /** When the payload was generated, ISO 8601. */
+  generatedAt: string;
+};

@@ -4,7 +4,8 @@ import { VIBE_PRESETS, themeForVibe } from "@/lib/storefront/presets";
 import { STOREFRONT_VIBES, type StorefrontVibe } from "@/types/storefront-brief";
 import type { StorefrontTheme } from "@/types/storefront";
 import { cn } from "@/lib/utils";
-import { infoTextClass, strongLabelClass } from "@/components/ui/control-styles";
+import { strongLabelClass } from "@/components/ui/control-styles";
+import { InfoTip } from "@/components/ui/InfoTip";
 
 /**
  * The six starting looks, brought inside the editor.
@@ -40,7 +41,14 @@ export function LooksSection({
 }) {
   return (
     <div className="space-y-1.5">
-      <span className={strongLabelClass}>Looks</span>
+      <span className="flex items-center gap-1.5">
+        <span className={strongLabelClass}>Looks</span>
+        <InfoTip label="What picking a look changes">
+          A look sets the whole storefront&apos;s colours, font, corners and
+          spacing in one go. Your layout, your products and any tile you
+          styled by hand are left exactly as they are.
+        </InfoTip>
+      </span>
       <div role="group" aria-label="Storefront look" className="grid grid-cols-3 gap-2">
         {STOREFRONT_VIBES.map((vibe) => {
           const preset = VIBE_PRESETS[vibe];
@@ -102,10 +110,6 @@ export function LooksSection({
           );
         })}
       </div>
-      <p className={infoTextClass}>
-        Restyles the whole storefront. Your layout, products and any tile you
-        styled by hand are left alone.
-      </p>
     </div>
   );
 }

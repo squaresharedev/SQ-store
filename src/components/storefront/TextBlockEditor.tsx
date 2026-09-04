@@ -22,6 +22,7 @@ import {
 import { FONT_LABELS, TEXT_VARIANT_LABELS } from "./config-maps";
 import { FontSizeField } from "./FontSizeField";
 import { AlignmentToggles, FormatToggles } from "./TextFormatControls";
+import { InfoTip } from "@/components/ui/InfoTip";
 
 export type TextBlockPatch = Partial<
   Pick<
@@ -126,7 +127,13 @@ export function TextBlockEditor({
     <div className="space-y-3">
       {!multi && onEditText && (
         <div className="space-y-1.5">
-          <span className={labelClass}>Text</span>
+          <span className="flex items-center gap-1.5">
+            <span className={labelClass}>Text</span>
+            <InfoTip label="Other ways to edit this text">
+              You can also click the block again on the canvas and type
+              straight onto it, which is quicker for a small change.
+            </InfoTip>
+          </span>
           <button
             type="button"
             onClick={onEditText}
@@ -135,9 +142,6 @@ export function TextBlockEditor({
             <Type className="size-4" strokeWidth={2} aria-hidden="true" />
             Edit text on the canvas
           </button>
-          <p className={helpTextClass}>
-            Or click the block again on the canvas and type straight on it.
-          </p>
         </div>
       )}
 

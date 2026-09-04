@@ -77,7 +77,69 @@ async function main(): Promise<void> {
     .in("id", ids);
   if (productErr) fail(`Failed to delete products: ${productErr.message}`);
 
-  console.log(`\n✔ Deleted ${productCount ?? 0} product(s) and ${orderCount ?? 0} order(s).\n`);
+  const prunedTiles = await pruneStorefrontTiles(supabase, config.testSellerId, new Set(ids));
+
+  console.log(
+    `\n✔ Deleted ${productCount ?? 0} product(s) and ${orderCount ?? 0} order(s)` +
+      (prunedTiles > 0 ? `, and removed ${prunedTiles} storefront tile(s).` : ".") +
+      "\n",
+  );
+}
+
+/**
+ * Take the deleted products' tiles off every storefront.
+ *
+ * Without this a reset leaves the seller's board pointing at rows that no
+ * longer exist. Nothing crashes (the editor drops a tile whose product it
+ * cannot find, and the public storefront skips it), but the board silently
+ * carries dead cells, the next seed sees a NON-empty board and so declines to
+ * lay out the new catalogue, and the store ends up looking broken for a reason
+ * that is invisible in the UI.
+ *
+ * Only PRODUCT blocks naming a deleted id are removed. Text, shapes and images
+ * are the seller's own work and are left exactly where they are, as is any
+ * product tile pointing at a product this reset kept.
+ */
+async function pruneStorefrontTiles(
+  supabase: ReturnType<typeof createServiceClient>,
+  ownerId: string,
+  deleted: ReadonlySet<string>,
+): Promise<number> {
+  const { data: storefronts, error } = await supabase
+    .from("storefronts")
+    .select("id, config")
+    .eq("owner_id", ownerId);
+  if (error) {
+    console.warn(`  ! Could not read storefronts to prune tiles: ${error.message}`);
+    return 0;
+  }
+
+  let removed = 0;
+  for (const storefront of storefronts ?? []) {
+    const config = storefront.config;
+    if (typeof config !== "object" || config === null) continue;
+    const blocks = (config as { blocks?: unknown }).blocks;
+    if (!Array.isArray(blocks)) continue;
+
+    const kept = blocks.filter((block) => {
+      if (typeof block !== "object" || block === null) return true;
+      const candidate = block as { type?: unknown; productId?: unknown };
+      if (candidate.type !== "product") return true;
+      return !deleted.has(String(candidate.productId));
+    });
+    if (kept.length === blocks.length) continue;
+
+    const { error: updateError } = await supabase
+      .from("storefronts")
+      .update({ config: { ...(config as object), blocks: kept } })
+      .eq("id", storefront.id);
+    if (updateError) {
+      console.warn(`  ! Could not prune tiles on ${storefront.id}: ${updateError.message}`);
+      continue;
+    }
+    removed += blocks.length - kept.length;
+  }
+  return removed;
 }
 
 main().catch((error: unknown) => {

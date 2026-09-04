@@ -3,7 +3,6 @@ import type { GridPlacement } from "@/components/grid/gridConstants";
 import {
   PRICE_TAG_DEFAULT_BORDER,
   TITLE_INSET_AUTO,
-  type DisplayMode,
   type PriceTagFont,
   type SpotRow,
   type StorefrontFont,
@@ -57,21 +56,6 @@ export function scaledCornerRadius(
   placement: Pick<GridPlacement, "w" | "h">,
 ): number {
   return cornerRadius * Math.min(placement.w, placement.h);
-}
-
-/**
- * The tile's span for corner-radius scaling purposes — NOT always its stored
- * w/h. CarouselStrip renders every tile as a fixed 1x1 square regardless of
- * what the block's placement says (a board saved in grid mode can carry
- * multi-cell spans that a switch to carousel display never clears), so
- * scaling by the stored span there would compute a radius for a shape the
- * tile never actually takes. Grid tiles use their real span.
- */
-export function effectiveTilePlacement(
-  displayMode: DisplayMode,
-  placement: Pick<GridPlacement, "w" | "h">,
-): Pick<GridPlacement, "w" | "h"> {
-  return displayMode === "carousel" ? { w: 1, h: 1 } : placement;
 }
 
 /**

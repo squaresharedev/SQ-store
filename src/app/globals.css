@@ -272,7 +272,12 @@
   --chart-2: oklch(0.708 0 0);
   --chart-3: oklch(0.556 0 0);
   --chart-4: oklch(0.37 0 0);
-  --chart-positive: var(--color-success);
+  /* Green re-stepped for dark, like every other colour in this block and for
+     the same reason the toast mark needs --color-success-dark: green-700 is
+     chosen for contrast on WHITE and sinks into a near-black card. It carries
+     revenue and the paid state on the analytics page, so it has to survive the
+     theme. --destructive is already re-stepped above, so red does not. */
+  --chart-positive: var(--color-success-dark);
   --chart-negative: var(--destructive);
 
   /* Chart accent, dark: the same blue re-stepped for dark card surfaces. */
@@ -706,22 +711,12 @@ textarea {
   transition-delay: 90ms;
 }
 
-/* Chart tooltips: appear with a quiet fade-and-rise, then glide between data
-   points (recharts animates position; this only plays on first mount of a
-   hover session). Kept fast — tooltips are high-frequency UI. */
-@keyframes chart-tip-in {
-  from {
-    opacity: 0;
-    transform: translateY(3px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-.chart-tip-enter {
-  animation: chart-tip-in 140ms cubic-bezier(0.16, 1, 0.3, 1) both;
-}
+/* Chart tooltips have NO entrance animation, deliberately, so there is nothing
+   to declare here. They used to fade and rise on first hover while recharts
+   separately tweened their POSITION, which together launched a card from the
+   chart's top-left corner and flew it to the cursor. A readout that is still
+   arriving is a readout you cannot read: it appears at the pointer, instantly.
+   See TOOLTIP in components/charts/theme.ts. */
 
 /* Composition-bar sections grow from zero into their share on mount. A
    from-only keyframe animates to each section's own inline width, so one
@@ -951,9 +946,6 @@ textarea {
   .group\/btn:hover .cta-arrow,
   .group\/btn:focus-visible .cta-arrow {
     transform: none;
-  }
-  .chart-tip-enter {
-    animation: none;
   }
   .chart-seg-enter {
     animation: none;

@@ -64,6 +64,10 @@ const REGISTRY: Record<string, Classification> = {
   "lib/products/actions.ts::createProduct": limited(),
   "lib/products/actions.ts::updateProduct": limited(),
   "lib/products/actions.ts::deleteProduct": limited(),
+  // Its own budget, not productWrite's: one call parses a file and inserts up
+  // to IMPORT_ROWS_MAX rows, so pricing it as a single product write would let
+  // a script drive thousands of inserts through the cheapest budget there is.
+  "lib/products/import-actions.ts::importProducts": limited(),
   "lib/stock/actions.ts::updateStockSettings": limited(),
   "lib/storefront/actions.ts::createStorefront": limited(),
   "lib/storefront/actions.ts::saveStorefront": limited(),
@@ -97,6 +101,9 @@ const REGISTRY: Record<string, Classification> = {
   // access — it is cost. Each call presigns up to 50 R2 objects, and a server
   // action is callable in a loop by any session, so it takes from a budget.
   "lib/products/picker-actions.ts::searchCatalogProducts": limited(),
+  // The editor's product-page preview: active-account scoped read, store.read,
+  // rate limited, returns the same buyer-safe shape as the public route.
+  "lib/products/preview-actions.ts::getProductPagePreviewData": limited(),
 
   "lib/notifications/actions.ts::fetchNotificationSnapshot": read(),
   "lib/notifications/actions.ts::fetchUnreadCount": read(),

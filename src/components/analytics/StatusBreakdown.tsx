@@ -1,13 +1,21 @@
 "use client";
 
+import { CompositionBar, formatNumber } from "@/components/charts";
 import type { StatusSlice } from "@/lib/analytics/types";
-import { CHART } from "@/components/analytics/chart-theme";
+import { CHART_HEIGHT } from "@/components/analytics/chart-layout";
+import { TONE } from "@/components/analytics/palette";
 
-// Order mix by status — one proportional distribution bar plus a legend, the
-// crispest way to read a 4-part split. Token-styled divs (no Recharts): the
-// sharp segments match the brand's square identity. Presentational only: the
-// parent fetches via getAnalytics and always passes all four statuses in a
-// fixed order, zeros included.
+// The order mix as one divided total bar, the chart kit's CompositionBar
+// (/dev/charts), which is the h-subtype built for exactly this: a handful of
+// parts of one whole, where the reader wants the shares in words rather than
+// to compare angles.
+//
+// Colours are PINNED per status rather than taken in order, so meaning never
+// moves: refunds stay red whether they are the second segment or the last, and
+// a range with no disputes does not promote "disputed" into the ink slot.
+//
+// Presentational only: the parent always passes all four statuses in a fixed
+// order, zeros included.
 
 const STATUS_LABELS: Record<StatusSlice["status"], string> = {
   paid: "Paid",
@@ -16,57 +24,34 @@ const STATUS_LABELS: Record<StatusSlice["status"], string> = {
   pending: "Pending",
 };
 
-/** Segment colours: healthy accent for paid, semantic red for refunds,
- *  quieter neutrals for the in-limbo states — all from the chart ramp. */
-const STATUS_COLORS: Record<StatusSlice["status"], string> = {
-  paid: CHART.series1,
-  refunded: CHART.negative,
-  disputed: CHART.series3,
-  pending: CHART.series4,
+/** The one chart where all three tones appear at once, which is why the mix is
+ *  worth reading as a picture: green is money that landed, red is money that
+ *  went back, and the two states still in flight stay neutral because neither
+ *  is good or bad yet. */
+const STATUS_COLOR_INDEX: Record<StatusSlice["status"], number> = {
+  paid: TONE.money,
+  refunded: TONE.loss,
+  disputed: TONE.quiet,
+  pending: TONE.faint,
 };
 
 export function StatusBreakdown({ statuses }: { statuses: StatusSlice[] }) {
-  const total = statuses.reduce((sum, slice) => sum + slice.count, 0);
-  const present = statuses.filter((slice) => slice.count > 0);
+  const items = statuses.map((slice) => ({
+    label: STATUS_LABELS[slice.status],
+    value: slice.count,
+    colorIndex: STATUS_COLOR_INDEX[slice.status],
+  }));
 
   return (
-    <div className="flex h-64 flex-col justify-center gap-6">
-      {/* The distribution bar — widths are data-proportional, colours tokens. */}
-      <div className="flex h-3 w-full gap-px overflow-hidden bg-muted">
-        {present.map((slice) => (
-          <div
-            key={slice.status}
-            className="h-full"
-            style={{
-              width: `${(slice.count / total) * 100}%`,
-              backgroundColor: STATUS_COLORS[slice.status],
-            }}
-          />
-        ))}
-      </div>
-
-      <ul className="grid grid-cols-2 gap-x-6 gap-y-3">
-        {statuses.map((slice) => {
-          const share = total > 0 ? Math.round((slice.count / total) * 100) : 0;
-          return (
-            <li key={slice.status} className="flex items-center gap-3">
-              <span
-                aria-hidden
-                className="size-2 shrink-0 rounded-full"
-                style={{ backgroundColor: STATUS_COLORS[slice.status] }}
-              />
-              <div className="flex min-w-0 flex-1 items-baseline justify-between gap-2 font-inter text-sm">
-                <span className="text-foreground">
-                  {STATUS_LABELS[slice.status]}
-                </span>
-                <span className="text-muted-foreground">
-                  {slice.count} · {share}%
-                </span>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
+    <div
+      className="flex flex-col justify-center"
+      style={{ minHeight: CHART_HEIGHT }}
+    >
+      <CompositionBar
+        items={items}
+        valueFormatter={formatNumber}
+        ariaLabel="Order status mix"
+      />
     </div>
   );
 }

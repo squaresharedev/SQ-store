@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { pageShellClass } from "@/components/ui/surface-styles";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { cn } from "@/lib/utils";
-import { getAnalytics } from "@/lib/analytics/queries";
+import { getAnalyticsSnapshot } from "@/lib/analytics/queries";
 import type { AnalyticsRange, RangePreset } from "@/lib/analytics/types";
 import { AnalyticsPage } from "@/components/analytics/AnalyticsPage";
 
@@ -68,15 +68,17 @@ export default async function AnalyticsRoutePage({
   searchParams: Promise<SearchParams>;
 }) {
   const { preset, custom, effective } = parseParams(await searchParams);
-  const data = await getAnalytics(effective);
+  // One payload for the whole page: the charts render it and the page also
+  // publishes it verbatim as machine-readable JSON, so the two cannot drift.
+  const snapshot = await getAnalyticsSnapshot(effective, preset);
 
   return (
     <main className={cn(pageShellClass, "space-y-6")}>
       <PageHeader
         title="Analytics"
-        subtitle="How your store is performing across the embed and the marketplace."
+        subtitle="Sales, storefront views and everything else your store is doing."
       />
-      <AnalyticsPage data={data} preset={preset} range={custom} />
+      <AnalyticsPage snapshot={snapshot} custom={custom} />
     </main>
   );
 }

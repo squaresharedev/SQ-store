@@ -34,10 +34,11 @@ function Harness(props: Partial<Parameters<typeof EditorToolbar>[0]> = {}) {
       onZoomReset={vi.fn()}
       onTidy={vi.fn()}
       canTidy
-      previewMode="desktop"
-      onPreviewModeChange={vi.fn()}
       settingsOpen={false}
       onToggleSettings={vi.fn()}
+      pagesOpen={false}
+      canOpenPage
+      onTogglePages={vi.fn()}
       {...props}
     />
   );
@@ -62,23 +63,6 @@ describe("EditorToolbar overflow menu", () => {
     for (const name of ["Redo", "Tidy up", "Reset zoom"]) {
       expect(within(menu).getByRole("menuitem", { name })).toBeInTheDocument();
     }
-    // Preview mode is one mutually-exclusive choice, so radios, not items.
-    for (const name of ["Desktop preview", "Mobile preview"]) {
-      expect(within(menu).getByRole("menuitemradio", { name })).toBeInTheDocument();
-    }
-  });
-
-  it("marks the active preview mode as checked", async () => {
-    const user = userEvent.setup();
-    render(<Harness previewMode="mobile" />);
-    await user.click(screen.getByRole("button", { name: "More tools" }));
-    const menu = moreMenu()!;
-    expect(
-      within(menu).getByRole("menuitemradio", { name: "Mobile preview" }),
-    ).toHaveAttribute("aria-checked", "true");
-    expect(
-      within(menu).getByRole("menuitemradio", { name: "Desktop preview" }),
-    ).toHaveAttribute("aria-checked", "false");
   });
 
   it("each item fires its action and closes the menu", async () => {

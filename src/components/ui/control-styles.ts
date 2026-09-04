@@ -76,6 +76,18 @@ export const overlayItemClass = `flex w-full min-h-11 items-center gap-2.5 round
 /** Icon-only dismiss control on an overlay (a modal header, a sheet). */
 export const overlayCloseButtonClass = `flex size-9 shrink-0 items-center justify-center rounded-none text-muted-foreground hover:bg-accent hover:text-foreground ${TRANSITION} ${focusRingInsetClass}`;
 
+/* --- Toolbar tip: a compact label above an icon-only control ------------
+   Pure CSS, no portal — every caller today lives in a bar pinned to the
+   viewport bottom, so "pops upward, centred" is the only placement any of
+   them need. The trigger carries `group/tip relative` (baked into INSERT_BTN
+   / ICON_BTN / MENU_ROW_BTN below); this is the label rendered as its last
+   child. Named `/tip` rather than reusing `/btn` so it stays independent of
+   the icon-pop microinteraction sharing the same trigger. */
+export const toolbarTipClass =
+  `${overlaySurfaceClass} pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 -translate-x-1/2 whitespace-nowrap px-2 py-1 text-xs font-medium ` +
+  `opacity-0 invisible transition-opacity duration-base ease-standard motion-reduce:transition-none ` +
+  `group-hover/tip:visible group-hover/tip:opacity-100 group-focus-visible/tip:visible group-focus-visible/tip:opacity-100`;
+
 /* --- Info tip: the one "?" in the product -------------------------------
    Explanatory prose that only some people need is not a paragraph under the
    control; it is a "?" beside its label that reveals the sentence on hover,

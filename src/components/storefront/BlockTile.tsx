@@ -1,7 +1,7 @@
 "use client";
 
 import { memo, useEffect, useRef, useState } from "react";
-import { Crop, Type, X } from "lucide-react";
+import { Crop, FileText, Type, X } from "lucide-react";
 import type { Product } from "@/types/product";
 import {
   DEFAULT_IMAGE_PLACEMENT,
@@ -25,7 +25,6 @@ import {
 } from "@/lib/storefront/tile-spots";
 import { cn } from "@/lib/utils";
 import { BlockFace } from "./BlockFace";
-import { effectiveTilePlacement, scaledCornerRadius } from "./config-maps";
 import type {
   InlineFormatKey,
   TextEditSource,
@@ -89,6 +88,8 @@ export const BlockTile = memo(function BlockTile({
   typingSelectAll = false,
   onToggleEdit,
   onRemove,
+  onOpenPage,
+  pageOpen = false,
   onFrame,
   onFramePlacement,
   onFrameExit,
@@ -116,6 +117,11 @@ export const BlockTile = memo(function BlockTile({
   isSoleSelection?: boolean;
   /** True when this text tile's words are being typed on the tile. */
   isTyping?: boolean;
+  /** Product tiles only: open this product's page as an artboard beside the
+   *  board. Absent on every read-only path, which then draws no node. */
+  onOpenPage?: (productId: string) => void;
+  /** True when that page is already out, so the node reads as connected. */
+  pageOpen?: boolean;
   /** Open the editor with everything selected (a block whose text is still
    *  the placeholder it was inserted with). */
   typingSelectAll?: boolean;
@@ -217,21 +223,12 @@ export const BlockTile = memo(function BlockTile({
     ? resolveCardStyle(theme, block.type === "product" ? block.style : undefined)
     : null;
 
-  // The radius this tile actually clips at — same reasoning as
-  // ProductTileContent's clipRadius, and deliberately computed the same way,
-  // so a spot the seller can drag to here is never one the face then coerces
-  // away on render. A raw, unscaled radius under-reported how round a big
-  // multi-cell tile really is.
-  const clipRadius = card
-    ? scaledCornerRadius(card.cornerRadius, effectiveTilePlacement(theme.displayMode, block))
-    : 0;
-
   // Where the two tokens sit right now, resolved exactly as the face resolves
   // them, so a drag starts from what the seller can see.
   const titleAt = card
     ? resolveTitlePosition(card.titlePosition, {
         titleStyle: card.titleStyle,
-        cornerRadius: clipRadius,
+        cornerRadius: card.cornerRadius,
       })
     : null;
   const bandRow =
@@ -239,7 +236,7 @@ export const BlockTile = memo(function BlockTile({
   const priceAt =
     card &&
     resolvePriceTagPosition(card.priceTagPosition, {
-      cornerRadius: clipRadius,
+      cornerRadius: card.cornerRadius,
       titleOverlaysImage: titleOverlaysImage(card.titleStyle),
       titleRow: titleAt ? spotRow(titleAt) : undefined,
     });
@@ -275,8 +272,8 @@ export const BlockTile = memo(function BlockTile({
   function spotsFor(token: SpotToken): readonly TileSpot[] {
     if (!card) return [];
     return token === "title"
-      ? titleSpots(card.titleStyle, clipRadius)
-      : priceSpots(clipRadius, bandRow);
+      ? titleSpots(card.titleStyle, card.cornerRadius)
+      : priceSpots(card.cornerRadius, bandRow);
   }
 
   /** Where a pointer at this position wants to put the token. The band is the
@@ -614,6 +611,49 @@ export const BlockTile = memo(function BlockTile({
           )}
         </div>
       )}
+
+      {/* THE PAGE NODE. A product tile is a door: this is the handle on it.
+          Clicking it puts that product's page on the canvas beside the board,
+          joined to this tile by a line, so the thing a buyer taps and the
+          thing they land on are visible at the same time.
+
+          Only on the sole selection: a node on every tile at once would turn
+          the board into a diagram, and the seller has already said which
+          product they mean by clicking it. */}
+      {editable &&
+        !isFraming &&
+        !isTyping &&
+        block.type === "product" &&
+        onOpenPage &&
+        isSoleSelection && (
+          <button
+            type="button"
+            data-page-node={pageOpen ? "open" : "closed"}
+            // The grid starts a move on pointerdown; the node is not a drag.
+            onPointerDown={(event) => event.stopPropagation()}
+            onClick={(event) => {
+              event.stopPropagation();
+              onOpenPage(block.productId);
+            }}
+            aria-pressed={pageOpen}
+            aria-label={
+              pageOpen
+                ? `Close the product page for ${label}`
+                : `Open the product page for ${label}`
+            }
+            title="Product page"
+            className={cn(
+              "absolute -right-4 top-1/2 z-20 flex size-8 -translate-y-1/2 items-center justify-center rounded-full border shadow-sm",
+              "transition-colors duration-base ease-standard",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+              pageOpen
+                ? "border-foreground bg-foreground text-background"
+                : "border-border bg-background text-muted-foreground hover:border-foreground hover:text-foreground",
+            )}
+          >
+            <FileText className="size-4" strokeWidth={2} aria-hidden="true" />
+          </button>
+        )}
 
       {/* The framing surface sits ABOVE the face and owns every gesture that
           lands on it, which is what keeps a drag here from moving the block. */}

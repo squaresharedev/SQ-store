@@ -1,12 +1,24 @@
 "use client";
 
+import { HBarChart } from "@/components/charts";
 import type { TopProduct } from "@/lib/analytics/types";
-import { formatCents } from "@/lib/format/money";
+import { moneyCompact, moneyExact } from "@/components/analytics/chart-format";
+import { TONE } from "@/components/analytics/palette";
 
-// Top products by paid revenue — token-styled proportional bars rather than a
-// Recharts BarChart: crisper for a top-5 ranking, and the sharp rectangular
-// bars match the brand's square identity. Presentational only: the parent
-// fetches via getAnalytics and guarantees a non-empty, revenue-descending list.
+// Top products by paid revenue, horizontal bars from the shared chart kit
+// (/dev/charts). Horizontal because the category is a product TITLE: titles
+// are long, and a vertical bar chart would either rotate them 45 degrees or
+// truncate them to three characters.
+//
+// No fixed height: HBarChart derives one from the row count, so a store with
+// two products does not get a card padded with four rows of nothing.
+//
+// Presentational only: the parent guarantees a non-empty, revenue-descending
+// list. Titles are the order's product_title snapshot, so a renamed or deleted
+// product still reports the revenue it actually earned.
+
+/** Titles are user content and can be long; the axis column is finite. */
+const MAX_LABEL = 22;
 
 export function TopProductsChart({
   products,
@@ -15,34 +27,18 @@ export function TopProductsChart({
   products: TopProduct[];
   currency: string;
 }) {
-  // Descending input, so the first row is the max the others scale against.
-  const maxCents = Math.max(...products.map((product) => product.revenueCents), 1);
   return (
-    <ul className="flex flex-col gap-4">
-      {products.map((product) => (
-        <li key={product.title} className="flex flex-col gap-1.5">
-          <div className="flex items-baseline justify-between gap-4">
-            <span className="truncate text-sm font-medium text-foreground">
-              {product.title}
-            </span>
-            <span className="shrink-0 text-sm font-semibold text-foreground">
-              {formatCents(product.revenueCents, currency)}
-            </span>
-          </div>
-          <div className="flex items-center gap-3">
-            {/* Track + fill: widths are data-proportional, colours are tokens. */}
-            <div className="h-2 flex-1 bg-muted">
-              <div
-                className="h-full bg-primary"
-                style={{ width: `${(product.revenueCents / maxCents) * 100}%` }}
-              />
-            </div>
-            <span className="font-inter w-16 shrink-0 text-right text-xs text-muted-foreground">
-              {product.sales} {product.sales === 1 ? "sale" : "sales"}
-            </span>
-          </div>
-        </li>
-      ))}
-    </ul>
+    <HBarChart
+      data={products}
+      xKey="title"
+      series={[{ key: "revenueCents", label: "Revenue", colorIndex: TONE.money }]}
+      categoryWidth={116}
+      categoryFormatter={(title) =>
+        title.length > MAX_LABEL ? `${title.slice(0, MAX_LABEL - 1)}…` : title
+      }
+      valueFormatter={moneyExact(currency)}
+      axisValueFormatter={moneyCompact(currency)}
+      ariaLabel="Top products by paid revenue"
+    />
   );
 }

@@ -4,6 +4,7 @@ import { getProduct } from "@/lib/products/queries";
 import { ProductFormView } from "@/components/products/ProductFormView";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
+import { getShippingChoices } from "@/lib/storefront/queries";
 
 export const metadata: Metadata = {
   title: "Edit product",
@@ -22,9 +23,10 @@ export default async function EditProductPage({
   // the product read because getProduct scopes itself to the active account
   // (and RLS backs that up) — the role check gates EDITING, not reading, and
   // nothing is rendered before it is applied below.
-  const [account, product] = await Promise.all([
+  const [account, product, shippingChoices] = await Promise.all([
     getActiveAccount(),
     getProduct(id),
+    getShippingChoices(),
   ]);
   if (!can(account?.role, "products.write")) redirect("/products");
   if (!product) notFound();
@@ -34,6 +36,7 @@ export default async function EditProductPage({
       title="Edit product"
       subtitle="Update the details, image, or file for this product."
       product={product}
+      shippingChoices={shippingChoices}
     />
   );
 }

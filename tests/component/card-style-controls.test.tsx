@@ -246,7 +246,8 @@ describe("SoldOutSection", () => {
     expect(onChange).toHaveBeenCalledWith({ ...theme, hideSoldOut: true });
   });
 
-  it("says the badge is moot while sold-out products are hidden", () => {
+  it("says the badge is moot while sold-out products are hidden", async () => {
+    const user = userEvent.setup();
     render(
       <SoldOutSection
         theme={{ ...themed(), hideSoldOut: true }}
@@ -254,8 +255,13 @@ describe("SoldOutSection", () => {
       />,
     );
 
-    expect(
-      screen.getByText("Only applies while sold-out products are shown."),
-    ).toBeInTheDocument();
+    // The answer moved behind the "?", but it still depends on the other
+    // switch: with sold-out products hidden there is nothing left to badge.
+    await user.click(
+      screen.getByRole("button", { name: "When the sold-out badge appears" }),
+    );
+    expect(screen.getByRole("tooltip").textContent).toContain(
+      "Nothing to mark while sold-out products are hidden",
+    );
   });
 });

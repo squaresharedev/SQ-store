@@ -640,6 +640,186 @@ export const DEFAULT_EMBED_SETTINGS: EmbedSettings = {
   domains: [],
 };
 
+// ── Product page ────────────────────────────────────────────────────────
+//
+// The hosted page a buyer lands on from a product tile. Every option is a
+// closed enum, a boolean, a strict hex or capped plain text, so the config can
+// hold nothing that renders as markup, a URL or CSS. The page INHERITS the
+// storefront theme (background, accent, font, corner radius); these fields
+// only decide what the page adds on top.
+
+// WHAT IS DELIBERATELY NOT HERE, and why. Every option below earns its place
+// by changing something a seller would otherwise be stuck with. These four did
+// not, and each one cost a seller a decision every time they opened the panel:
+//
+// - layout (photos left / right / stacked): "photos right" is the same page
+//   mirrored, and "stacked" is what a narrow screen already does on its own.
+//   Three ways to say one thing.
+// - gallery (thumbnails / one after another): thumbnails read any number of
+//   photos; the alternative was just a longer scroll.
+// - ctaStyle (accent / ink / outline): the theme's accent IS the seller's
+//   brand colour, so the button has one right answer already.
+// - textColor: derived from the background's lightness, which is correct
+//   wherever the page is legible at all. The override could only make text
+//   harder to read than the automatic choice.
+//
+// A stored config that still carries them parses fine: productPageSchema
+// strips retired keys (see RETIRED_PRODUCT_PAGE_FIELDS).
+
+/** How the price is qualified. EU consumer prices must be shown tax-inclusive,
+ *  so "incl-vat" is the default; "excl-vat" exists for markets that add tax at
+ *  checkout; "none" for sellers who show nothing beside the number. */
+export const PRODUCT_PAGE_PRICE_NOTES = ["incl-vat", "excl-vat", "none"] as const;
+export type ProductPagePriceNote = (typeof PRODUCT_PAGE_PRICE_NOTES)[number];
+
+export const PRODUCT_PAGE_SHIPPING_NOTES = ["plus-shipping", "free-shipping", "none"] as const;
+export type ProductPageShippingNote = (typeof PRODUCT_PAGE_SHIPPING_NOTES)[number];
+
+/** The collapsible sections below the fold, in their default order. The seller
+ *  reorders and hides them; the set itself is fixed. New ids are appended, not
+ *  inserted, and the schema (lib/validation/storefront.ts) accepts a stored
+ *  list SHORTER than this — a config saved before "documents" existed has no
+ *  entry for it, and `normalizeSections` appends it (hidden) rather than the
+ *  parse rejecting the whole product page. */
+export const PRODUCT_PAGE_SECTION_IDS = [
+  "description",
+  "specs",
+  "documents",
+  "shipping",
+  "returns",
+  "safety",
+  "seller",
+] as const;
+export type ProductPageSectionId = (typeof PRODUCT_PAGE_SECTION_IDS)[number];
+export type ProductPageSectionEntry = { id: ProductPageSectionId; show: boolean };
+
+export const PRODUCT_PAGE_CTA_MAX = 24;
+export const POLICY_TEXT_MAX = 2000;
+export const SELLER_FIELD_MAX = {
+  businessName: 120,
+  address: 300,
+  vatId: 32,
+  phone: 32,
+} as const;
+
+export type ProductPageConfig = {
+  /** Off = product tiles have no page to open and the route 404s. */
+  enabled: boolean;
+  /** Whether photos are fitted whole or cropped to fill. The one photo choice
+   *  that survives, because getting it wrong crops the product out of frame. */
+  imageFit: ImageFit;
+  /**
+   * The page's typeface. ABSENT = the storefront's own font, which is the
+   * default and the right answer for almost every store: a product page is
+   * part of the shop, not a separate publication. Set it only to give the page
+   * a reading face of its own (a long description in a serif under a display
+   * masthead, say). "custom" resolves to the storefront's uploaded face, the
+   * only one there is.
+   */
+  font?: StorefrontFont;
+  /** The buy button's text. Not the binding "order" step, so free wording. */
+  ctaLabel: string;
+  priceNote: ProductPagePriceNote;
+  shippingNote: ProductPageShippingNote;
+  showStock: boolean;
+  /** "Sold by {business}" beside the title. The legal block is the `seller`
+   *  SECTION; this is only the byline. */
+  showSeller: boolean;
+  /** Search engines are refused by default: a seller who only ever embedded on
+   *  their own site should not find a copy of their store indexed unasked. */
+  allowIndexing: boolean;
+  /**
+   * Which sections the fold below shows. Each id at most once; may be shorter
+   * than PRODUCT_PAGE_SECTION_IDS (see its comment), and resolveProductPage
+   * fills in whatever is missing.
+   *
+   * SHOW AND HIDE ONLY. The stored order is no longer read: the page renders
+   * these in the fixed order of PRODUCT_PAGE_SECTION_IDS, which runs from what
+   * a buyer wants first (the specs) to what they want last (the trader's
+   * address). Reordering was fourteen arrow buttons paying for a decision that
+   * has one sensible answer. The array shape is kept as it was so no stored
+   * config has to be rewritten.
+   */
+  sections: ProductPageSectionEntry[];
+};
+
+/** Store-level policy text, rendered as plain paragraphs on the product page.
+ *
+ *  `shipping` is the store's DEFAULT shipping terms: what every product uses
+ *  unless it names one of `shippingProfiles` instead. `dispatch` is the one
+ *  line that belongs beside the button rather than in the fold below ("Ships
+ *  within 1-3 business days"), which is why it is its own field and not the
+ *  first sentence of the paragraph. */
+export type StorefrontPolicies = {
+  shipping?: string;
+  dispatch?: string;
+  returns?: string;
+};
+
+/**
+ * A NAMED SET OF SHIPPING TERMS, reusable across products.
+ *
+ * The problem this solves is the one every catalogue has: shipping reads the
+ * same for almost everything a seller lists, and the handful of exceptions
+ * (the bulky one, the made-to-order one, the one that ships from a different
+ * warehouse) are exceptions, not per-product prose. Shopify answers it with
+ * shipping profiles — a general profile everything falls into, plus custom
+ * profiles products are moved to — and Etsy with the same idea under the same
+ * name. This is that, in the only currency this app deals in yet: words, not
+ * rates.
+ *
+ * So `policies.shipping` IS the general profile, and these are the exceptions.
+ * A product carries at most a profile id (`shipping_profile_id`); one that
+ * carries none, which is nearly all of them, inherits the store's default and
+ * changes when the store's default does. Nothing is ever copied onto a
+ * product, so editing terms in one place edits them everywhere they are used.
+ */
+export type ShippingProfile = {
+  id: string;
+  /** What the seller calls it: "Bulky items", "Made to order", "Ships from EU". */
+  name: string;
+  /** This profile's own dispatch line. Absent = say nothing (a profile
+   *  replaces the default wholesale, so it does not inherit its dispatch). */
+  dispatch?: string;
+  /** The terms themselves, plain paragraphs like the default's. */
+  body: string;
+};
+
+/** A store keeps a short list of exceptions, not a rate table. Past a handful
+ *  the seller is modelling something this shape cannot express, and the
+ *  product form's picker stops being scannable. */
+export const SHIPPING_PROFILES_MAX = 8;
+export const SHIPPING_PROFILE_NAME_MAX = 60;
+/** One short line. Long enough for "Ships within 1-3 business days from Berlin". */
+export const SHIPPING_DISPATCH_MAX = 120;
+
+/**
+ * The trader identity EU distance-selling law requires next to an offer. Kept
+ * on the storefront (not the profile) so team editors can complete it and each
+ * store carries its own. `country` is an EU code or "" for "not in the EU";
+ * the statutory withdrawal and conformity lines render only for EU sellers.
+ */
+export type StorefrontSeller = {
+  businessName?: string;
+  address?: string;
+  email?: string;
+  vatId?: string;
+  country?: string;
+  phone?: string;
+};
+
+export const DEFAULT_PRODUCT_PAGE_CONFIG: ProductPageConfig = {
+  enabled: true,
+  imageFit: "contain",
+  ctaLabel: "Buy now",
+  priceNote: "incl-vat",
+  shippingNote: "plus-shipping",
+  showStock: true,
+  showSeller: true,
+  allowIndexing: false,
+  sections: PRODUCT_PAGE_SECTION_IDS.map((id) => ({ id, show: true })),
+};
+
 /**
  * Decorative shape blocks — a fixed allowlist of kinds, each mapping to
  * code-defined markup in ShapeTileContent. A legacy `spacer` kind existed
@@ -1187,6 +1367,15 @@ export type StorefrontConfig = {
   /** Optional for the same reason. NON-VISUAL — stripped from the public
    *  embed payload; edited only via updateEmbedSettings, never the designer. */
   embed?: EmbedSettings;
+  /** The hosted product page's own options. Absent = DEFAULT_PRODUCT_PAGE_CONFIG. */
+  productPage?: ProductPageConfig;
+  /** Shipping and returns text shown on every product page of this store. */
+  policies?: StorefrontPolicies;
+  /** Named shipping exceptions a product can opt into by id. Absent = every
+   *  product uses `policies.shipping`, which is the common case. */
+  shippingProfiles?: ShippingProfile[];
+  /** Trader identity shown on every product page of this store. */
+  seller?: StorefrontSeller;
 };
 
 /** Starting point for sellers who have not saved a storefront yet. */

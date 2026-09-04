@@ -9,10 +9,10 @@
 //     remaining count when low_stock, nothing else). Raw stock_quantity and
 //     low_stock_threshold never leave the server for non-owners.
 //
-// TODO(public-api): the embed/marketplace payload builder will call
-// toPublicStockBadge here when constructing the public product shape. Attach
-// the returned badge (or null) to the payload; do not forward any raw stock
-// numbers.
+// The hosted product page is the first consumer: lib/products/public.ts
+// selects PUBLIC_STOCK_SELECT and attaches toPublicStockBadge's result (or
+// null) to the buyer payload. Any future embed/marketplace product payload
+// must do the same; do not forward any raw stock numbers.
 
 import { deriveStockBadge } from "@/lib/stock/badge";
 import type { StockBadge } from "@/types/stock";

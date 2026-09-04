@@ -44,6 +44,7 @@ describe("embedded supabase replica", () => {
       "rate_limits",
       "reports",
       "security_events",
+      "storefront_signals",
       "storefronts",
       "team_members",
       "waitlist_signups",

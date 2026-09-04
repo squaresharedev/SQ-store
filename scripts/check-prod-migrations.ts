@@ -119,6 +119,34 @@ const TRIAGE: Record<string, Disposition> = {
   // Folded into the replica's analytics_sql_aggregates section: it only
   // recreates dashboard_orders_aggregate, which is defined there.
   "20260808104219": { kind: "replayed", marker: "recent_orders_id" },
+  // The non-order analytics stream. Replayed in full, deliberately: the table's
+  // whole point is its authorization shape (owner + team read, no client write
+  // path at all), so a replica missing it would let the REST-security spec pass
+  // against a boundary production does not have.
+  "20260830164701": { kind: "replayed", marker: "20260830 storefront_signals" },
+  // Adds all_time_kinds + active_block_types to the signals aggregate. Replayed
+  // because the visibility rule is the behaviour under test: on the older
+  // function a replica reports no history and no blocks, so every optional
+  // source would vanish and the specs would pass for the wrong reason.
+  "20260830182538": { kind: "replayed", marker: "20260830 signal_relevance" },
+  "20260830194414": {
+    kind: "excluded",
+    reason:
+      "demo_sales_sim_signals — extends the demo schema's simulator, which is excluded for the same pg_cron reason as 20260801140113/20260801140742. Not exposed over PostgREST and gates no security invariant.",
+  },
+  // The hosted product page: jsonb gallery/variants/details + purchase_url on
+  // products (with their CHECKs) and the product_view signal kind. Replayed in
+  // full so the db suite proves the CHECKs and the e2e stack can seed pages.
+  "20260902191527": { kind: "replayed", marker: "20260902_product_page" },
+  "20260903091604": { kind: "replayed", marker: "20260903_product_documents" },
+  // Seller-defined option groups replace the fixed colour list: drops
+  // products.variants for option_groups, moves gallery ties to optionId.
+  "20260903173836": { kind: "replayed", marker: "20260903_product_options" },
+  // products.shipping_profile_id: which of the storefront config's shipping
+  // profiles a product ships under. Replayed for its CHECK, which is the only
+  // thing standing between a service-role write and an arbitrary string in a
+  // column the product page dereferences.
+  "20260904104752": { kind: "replayed", marker: "20260904_product_shipping_profile" },
 };
 
 async function main(): Promise<void> {

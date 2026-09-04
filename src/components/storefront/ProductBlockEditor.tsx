@@ -56,6 +56,8 @@ export function ProductBlockEditor({
   onStyleReset,
   onRemove,
   onProductSaved,
+  onDesignPage,
+  pageOpen = false,
 }: {
   block: ProductBlock;
   theme: StorefrontTheme;
@@ -67,6 +69,12 @@ export function ProductBlockEditor({
   onStyleReset: () => void;
   onRemove: () => void;
   onProductSaved: (product: Product) => void;
+  /** Put this product's page on the canvas beside the board (or take it away
+   *  again). Absent (the dev gallery, a test) drops the row rather than a
+   *  dead one. */
+  onDesignPage?: () => void;
+  /** True while that page is already out. */
+  pageOpen?: boolean;
 }) {
   const fieldId = useId();
   const [draftTitle, setDraftTitle] = useState(product?.title ?? "");
@@ -287,6 +295,32 @@ export function ProductBlockEditor({
       {/* Inventory hint (display-only, only when stock tracking is on) */}
       {stockLine !== null && (
         <p className={infoTextClass}>{stockLine}</p>
+      )}
+
+      {/* Where a tap on this tile lands. The page is designed once for the
+          whole storefront, so this row only turns the editor towards it with
+          this product in the preview. */}
+      {onDesignPage && (
+        <div className="flex items-center justify-between gap-3" data-product-page-row="">
+          <div className="min-w-0">
+            <span className="flex items-center gap-1.5">
+              <span className={labelClass}>Opens the product page</span>
+              <InfoTip label="What tapping this tile does">
+                Buyers who tap this tile land on its product page. The page is
+                designed once for the whole storefront, so opening it here
+                just brings it up beside the board with this product in it.
+              </InfoTip>
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={onDesignPage}
+            aria-pressed={pageOpen}
+            className={cn(secondaryButtonClass, "shrink-0 px-3 py-1.5 text-xs")}
+          >
+            {pageOpen ? "Hide page" : "Open page"}
+          </button>
+        </div>
       )}
 
       {/* Per-tile style and the price tag, as collapsible groups rather than

@@ -5,6 +5,7 @@ import {
   storefrontIdSchema,
 } from "@/lib/validation/storefront";
 import { parseStorefrontBrief } from "@/lib/validation/storefront-brief";
+import { settingHref } from "@/lib/storefront/setting-ref";
 import {
   DEFAULT_STOREFRONT_CONFIG,
   type StorefrontConfig,
@@ -100,6 +101,88 @@ export async function listStorefronts(offset = 0): Promise<StorefrontsPage> {
     };
   });
   return { rows, total: count ?? rows.length };
+}
+
+/**
+ * THE SHIPPING CHOICES A PRODUCT HAS, gathered for the product form.
+ *
+ * Shipping terms belong to the store doing the shipping, so they live in each
+ * storefront's config: `policies.shipping` (+ `policies.dispatch`) is that
+ * store's DEFAULT, and `shippingProfiles` are its named exceptions. A product,
+ * meanwhile, can sit on more than one storefront, so the form offers every
+ * profile the seller has anywhere and labels each with the store it came from
+ * when there is more than one store to confuse it with.
+ *
+ * What the seller picks is only ever a profile id. A store that does not have
+ * that profile prints its own default instead, which is the same graceful
+ * answer a deleted profile gets (see resolveProductShipping) — and it is the
+ * right one, because a store can only ship on the terms it offers.
+ *
+ * Bounded by the same STOREFRONT_LIST_LIMIT the list page uses, and it selects
+ * only `id, name, config`: the same per-row Zod parse, without the brief.
+ */
+export type ShippingChoices = {
+  /** Every profile the seller has, across their storefronts. */
+  profiles: {
+    id: string;
+    name: string;
+    dispatch: string;
+    body: string;
+    /** The store that defines it, for the picker's second line. */
+    storefrontName: string;
+  }[];
+  /** What "the store's default terms" actually says, per storefront, so the
+   *  form can show the seller the words rather than the promise of them. */
+  defaults: { storefrontId: string; storefrontName: string; dispatch: string; body: string }[];
+  /** Where to go to write any of it. Null when the seller has no storefront
+   *  yet, in which case there is nothing to link to. */
+  editHref: string | null;
+};
+
+export async function getShippingChoices(): Promise<ShippingChoices> {
+  const empty: ShippingChoices = { profiles: [], defaults: [], editHref: null };
+  const account = await getActiveAccount();
+  if (!account) return empty;
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("storefronts")
+    .select("id, name, config")
+    .eq("owner_id", account.accountId)
+    .order("updated_at", { ascending: false })
+    .order("id", { ascending: true })
+    .limit(STOREFRONT_LIST_LIMIT);
+  // A form that cannot list shipping profiles still has to load: the picker
+  // degrades to "the store's default terms", which is what it would have
+  // shown anyway for nearly every product.
+  if (error) {
+    console.error("[storefront] shipping choices read failed", error);
+    return empty;
+  }
+
+  const profiles: ShippingChoices["profiles"] = [];
+  const defaults: ShippingChoices["defaults"] = [];
+  let editHref: string | null = null;
+  for (const row of data ?? []) {
+    const config = parseStoredStorefrontConfig(row.config);
+    if (!config) continue;
+    editHref ??= settingHref("shipping-returns", row.id);
+    defaults.push({
+      storefrontId: row.id,
+      storefrontName: row.name,
+      dispatch: config.policies?.dispatch ?? "",
+      body: config.policies?.shipping ?? "",
+    });
+    for (const profile of config.shippingProfiles ?? []) {
+      profiles.push({
+        id: profile.id,
+        name: profile.name,
+        dispatch: profile.dispatch ?? "",
+        body: profile.body,
+        storefrontName: row.name,
+      });
+    }
+  }
+  return { profiles, defaults, editHref };
 }
 
 /**

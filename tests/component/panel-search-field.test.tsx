@@ -202,7 +202,10 @@ describe("PanelSearchField — a narrowed index", () => {
   it("offers nothing but settings when that is all it was given", async () => {
     // The dev gallery has no board and no owner to jump for it.
     const { input } = setup(SETTINGS_ONLY);
-    await userEvent.type(input, "summer sale");
+    // Words no setting is described by. ("summer sale" used to serve here,
+    // until the Seller details setting arrived and its vocabulary sat within
+    // the ranker's typo tolerance of "sale".)
+    await userEvent.type(input, "winter jacket");
     expect(screen.queryAllByRole("option")).toHaveLength(0);
   });
 

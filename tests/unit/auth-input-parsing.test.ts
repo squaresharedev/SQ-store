@@ -107,4 +107,24 @@ describe("no type assertions remain on wire input", () => {
     expect(firstBudgetAt).toBeGreaterThan(-1);
     expect(guardAt).toBeLessThan(firstBudgetAt);
   });
+
+  it("checks for a disposable domain and a solved bot challenge before the signup rate-limit spend", () => {
+    // Cheapest-first, same reasoning as the email format check above: a
+    // throwaway domain (free, local, no network) and a failed bot check
+    // (network, but stops a scripted loop cold) should both be settled before
+    // a real signup attempt draws down the per-address/per-client budgets
+    // meant for people, not before-the-fact for a request already doomed.
+    const source = read("src/lib/auth/actions.ts");
+    const disposableAt = source.indexOf("isDisposableEmailDomain(email)");
+    const turnstileAt = source.indexOf("verifyTurnstile(turnstileToken");
+    // `allowAuthEmail(email)` is called from three branches (magic, reset,
+    // signup); the one that matters here is the signup branch's, which is the
+    // first occurrence AT OR AFTER the turnstile check.
+    const budgetAt = source.indexOf("allowAuthEmail(email)", turnstileAt);
+    expect(disposableAt).toBeGreaterThan(-1);
+    expect(turnstileAt).toBeGreaterThan(-1);
+    expect(budgetAt).toBeGreaterThan(-1);
+    expect(disposableAt).toBeLessThan(turnstileAt);
+    expect(turnstileAt).toBeLessThan(budgetAt);
+  });
 });

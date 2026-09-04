@@ -12,19 +12,26 @@ import {
   BUYER_POOL_SIZE,
   CATALOG_PRODUCTS,
   PRODUCT_THEMES,
+  RETURNING_VISITOR_RATE,
   STORE_CURRENCY,
+  VISITOR_POOL_SIZE,
   buyerEmailForIndex,
   createRng,
+  documentAssets,
   findCatalogProduct,
   generateOrders,
   generateProducts,
+  generateSignals,
   pickBuyerEmail,
   pickSecondOfDay,
+  pickVisitorHash,
   popularityWeights,
+  storeFactsFor,
   THEME_KEYS,
   themeByKey,
   weightedIndex,
   type SeededProduct,
+  type SignalInsert,
 } from "../../scripts/lib/fake-data.ts";
 
 const SELLER = "11111111-1111-4111-8111-111111111111";
@@ -126,6 +133,87 @@ describe("product popularity", () => {
     expect(Math.min(...hits)).toBeGreaterThan(0);
     // ...but the top item must not swallow the store.
     expect(hits[0]! / 6000).toBeLessThan(0.35);
+  });
+});
+
+describe("seeded product pages", () => {
+  // The point of seeding page facts is that a demo page looks like one a real
+  // seller filled in. An empty section is the thing nobody reviews, so these
+  // assert that none of them CAN be empty.
+
+  it("gives every product its documents, options and compliance block", () => {
+    const products = generateProducts(createRng(3), SELLER, 30, undefined, "https://demo.test");
+    for (const product of products) {
+      expect(product.documents.length, product.title).toBeGreaterThan(0);
+      expect(product.option_groups.length, product.title).toBeGreaterThan(0);
+      expect(product.details).toHaveProperty("safety");
+      expect(product.details).toHaveProperty("specs");
+      // The document key is a full URL because only a service_role seed can
+      // write one; the app's own writes are gated to R2 object keys.
+      for (const document of product.documents) {
+        expect(document.key.startsWith("https://demo.test/"), document.key).toBe(true);
+        expect(document.key.endsWith(".pdf"), document.key).toBe(true);
+        expect(document.label.length).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it("shows every availability state somewhere in the catalogue", () => {
+    // Rolling each product independently missed a state about one run in six,
+    // which left the low-stock and sold-out treatments invisible on the demo
+    // store. The scarce states are dealt, not rolled — so this holds for every
+    // seed and every theme rather than usually.
+    for (const theme of PRODUCT_THEMES) {
+      for (let seed = 0; seed < 40; seed += 1) {
+        const products = generateProducts(createRng(seed), SELLER, 30, theme);
+        if (products.length < 4) continue;
+        const states = new Set(
+          products.map((product) =>
+            !product.track_stock
+              ? "untracked"
+              : product.stock_quantity === 0
+                ? "out"
+                : product.stock_quantity! <= product.low_stock_threshold
+                  ? "low"
+                  : "healthy",
+          ),
+        );
+        expect(states, `${theme.key} @ seed ${seed}`).toEqual(
+          new Set(["untracked", "out", "low", "healthy"]),
+        );
+      }
+    }
+  });
+
+  it("never counts stock it is not tracking", () => {
+    // The DB constraint mirrors this: tracking without a quantity is invalid,
+    // and a quantity without tracking is a number nothing reads.
+    const products = generateProducts(createRng(11), SELLER, 30);
+    for (const product of products) {
+      if (product.track_stock) expect(typeof product.stock_quantity).toBe("number");
+      else expect(product.stock_quantity).toBeNull();
+    }
+  });
+
+  it("writes store-level policies and an EU trader identity", () => {
+    // These live on the storefront, not the product, and were the reason a
+    // seeded page still said "the seller has not added shipping details yet".
+    for (const theme of PRODUCT_THEMES) {
+      const facts = storeFactsFor(theme.key);
+      expect(facts.policies.shipping.length).toBeGreaterThan(80);
+      expect(facts.policies.returns.length).toBeGreaterThan(80);
+      expect(facts.seller.businessName.length).toBeGreaterThan(0);
+      // An EU country on purpose: the statutory withdrawal and guarantee lines
+      // render only for one, and they are a real part of the page.
+      expect(facts.seller.country).toBe("IE");
+    }
+  });
+
+  it("names one asset per document, with no two sharing a path", () => {
+    const assets = documentAssets();
+    expect(assets.length).toBeGreaterThan(0);
+    expect(new Set(assets.map((asset) => asset.path)).size).toBe(assets.length);
+    for (const asset of assets) expect(asset.path.endsWith(".pdf")).toBe(true);
   });
 });
 
@@ -360,6 +448,160 @@ describe("generateOrders", () => {
       targetTotal: 400,
     });
     expect(orders.some((o) => o.product_id === "draft-1")).toBe(false);
+  });
+
+  it("is reproducible for a given seed", () => {
+    expect(generate(1234)).toEqual(generate(1234));
+  });
+});
+
+describe("visitor identities", () => {
+  it("produces a stable-shaped 64-hex digest", () => {
+    const rng = createRng(1);
+    expect(pickVisitorHash(rng)).toMatch(/^[0-9a-f]{64}$/);
+  });
+
+  it("produces both first-time and repeat visitors", () => {
+    const rng = createRng(42);
+    const counts = new Map<string, number>();
+    for (let i = 0; i < 4000; i += 1) {
+      const hash = pickVisitorHash(rng);
+      counts.set(hash, (counts.get(hash) ?? 0) + 1);
+    }
+    const repeat = [...counts.values()].filter((n) => n >= 2).length;
+
+    // Same two failure modes RETURNING_BUYER_RATE exists to avoid: fresh-hash-
+    // per-view gives repeat === 0 (uniqueVisitors === count forever); a
+    // pool-only draw makes unique <= VISITOR_POOL_SIZE (every visitor a repeat).
+    expect(repeat).toBeGreaterThan(0);
+    expect(counts.size).toBeGreaterThan(VISITOR_POOL_SIZE);
+
+    // And no single visitor dominates the traffic.
+    const topShare = Math.max(...counts.values()) / 4000;
+    expect(topShare).toBeLessThan(0.05);
+  });
+
+  it("keeps the returning-visitor rate inside a sane, non-degenerate band", () => {
+    // Not 0 (every visitor would be a first-timer, repeatBuyers-style figure
+    // pinned to 0) and not 1 (no first-timers, store never appears to acquire
+    // anyone) — the same two degenerate ends RETURNING_BUYER_RATE avoids.
+    expect(RETURNING_VISITOR_RATE).toBeGreaterThan(0.1);
+    expect(RETURNING_VISITOR_RATE).toBeLessThan(0.6);
+  });
+});
+
+describe("generateSignals", () => {
+  const now = new Date("2026-08-01T12:00:00.000Z");
+  const products = Array.from({ length: 10 }, (_, i) => ({
+    id: `product-${i}`,
+    title: `Product ${i}`,
+    price_cents: 1000 + i * 100,
+    currency: STORE_CURRENCY,
+    status: "active",
+  })) satisfies SeededProduct[];
+  const STOREFRONT = "22222222-2222-4222-8222-222222222222";
+  const ACCOUNT = "11111111-1111-4111-8111-111111111111";
+
+  function generate(seed: number, embedOrderCount = 60) {
+    return generateSignals(createRng(seed), {
+      accountId: ACCOUNT,
+      storefrontId: STOREFRONT,
+      products,
+      now,
+      days: 90,
+      embedOrderCount,
+    });
+  }
+
+  it("seeds nothing without a storefront", () => {
+    const signals = generateSignals(createRng(1), {
+      accountId: ACCOUNT,
+      storefrontId: null,
+      products,
+      now,
+      days: 90,
+      embedOrderCount: 100,
+    });
+    expect(signals).toEqual([]);
+  });
+
+  it("builds a real funnel: more views than clicks, more clicks than embed orders", () => {
+    const embedOrderCount = 60;
+    const signals = generate(3, embedOrderCount);
+    const views = signals.filter((s) => s.kind === "storefront_view").length;
+    const clicks = signals.filter((s) => s.kind === "product_click").length;
+
+    expect(views).toBeGreaterThan(clicks);
+    expect(clicks).toBeGreaterThanOrEqual(embedOrderCount);
+  });
+
+  it("still seeds some traffic for a store with zero embed orders", () => {
+    const signals = generate(4, 0);
+    const views = signals.filter((s) => s.kind === "storefront_view").length;
+    const clicks = signals.filter((s) => s.kind === "product_click").length;
+    // People look at a storefront before it has sold anything too.
+    expect(views).toBeGreaterThan(0);
+    expect(clicks).toBeGreaterThan(0);
+  });
+
+  it("never dates a signal in the future", () => {
+    for (const signal of generate(5)) {
+      expect(Date.parse(signal.occurred_at)).toBeLessThanOrEqual(now.getTime());
+    }
+  });
+
+  it("attributes every signal to the given storefront and account, on the embed channel", () => {
+    for (const signal of generate(6)) {
+      expect(signal.account_id).toBe(ACCOUNT);
+      expect(signal.storefront_id).toBe(STOREFRONT);
+      expect(signal.channel).toBe("embed");
+      expect(signal.block_id).toBeNull();
+    }
+  });
+
+  it("carries a 64-hex-char visitor_hash on every row", () => {
+    for (const signal of generate(7)) {
+      expect(signal.visitor_hash).toMatch(/^[0-9a-f]{64}$/);
+    }
+  });
+
+  it("attaches a real product id to at least some clicks, and never to views", () => {
+    const signals = generate(8, 200);
+    const clicks = signals.filter(
+      (s): s is SignalInsert & { metadata: { product_id: string } } =>
+        s.kind === "product_click" && "product_id" in s.metadata,
+    );
+    expect(clicks.length).toBeGreaterThan(0);
+    const productIds = new Set(products.map((p) => p.id));
+    for (const click of clicks) {
+      expect(productIds.has(click.metadata.product_id)).toBe(true);
+    }
+    // metadata is ALWAYS present (never a missing key — see SignalInsert),
+    // but a view never carries a product.
+    for (const signal of signals) {
+      if (signal.kind === "storefront_view") {
+        expect(signal.metadata).toEqual({});
+      }
+    }
+  });
+
+  it("produces repeat visitors, not a fresh one per row", () => {
+    const signals = generate(9, 400);
+    const counts = new Map<string, number>();
+    for (const signal of signals) {
+      counts.set(signal.visitor_hash, (counts.get(signal.visitor_hash) ?? 0) + 1);
+    }
+    expect([...counts.values()].filter((n) => n >= 2).length).toBeGreaterThan(0);
+  });
+
+  it("sells less traffic at the weekend, like orders do", () => {
+    const byDow = new Array<number>(7).fill(0);
+    for (const signal of generate(10, 900)) {
+      byDow[new Date(signal.occurred_at).getUTCDay()]! += 1;
+    }
+    const weekend = byDow[0]! + byDow[6]!;
+    const weekdays = byDow[1]! + byDow[2]! + byDow[3]! + byDow[4]! + byDow[5]!;
+    expect(weekend / 2).toBeLessThan(weekdays / 5);
   });
 
   it("is reproducible for a given seed", () => {

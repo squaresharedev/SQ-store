@@ -161,6 +161,7 @@ export function ColorPicker({
   onChange,
   inherit,
   target,
+  compact = false,
 }: {
   id?: string;
   label?: string;
@@ -173,6 +174,20 @@ export function ColorPicker({
    * where there is no provider — the popover opens exactly as it always did.
    */
   target?: ColorTargetRef;
+  /**
+   * ONE DOT INSTEAD OF SEVEN.
+   *
+   * The full row (wheel, eyedropper, inherit, custom, three presets) is right
+   * for a settings panel, where a colour IS the subject of the line. It is
+   * wrong where a colour is one small attribute of something else that has a
+   * name — a product option, say — because seven circles per row, repeated
+   * down a list, drown the names the list is actually about.
+   *
+   * Compact renders the CURRENT colour as a single swatch that opens the same
+   * popover, which already carries the area, the hex field and the eyedropper.
+   * Nothing is unreachable; the presets and the inherit option move inside.
+   */
+  compact?: boolean;
 }) {
   const hexId = useId();
   const errorId = `${hexId}-error`;
@@ -316,6 +331,174 @@ export function ColorPicker({
     (showCustomDot ? 1 : 0) +
     COLOR_PRESETS.length;
 
+  /**
+   * Everything the popover offers: the area, the hex field, the eyedropper —
+   * and, in compact mode, the preset dots and the inherit option that the
+   * inline row would otherwise have carried. Extracted so both layouts hand
+   * the Popover the same children rather than keeping two copies in step.
+   */
+  const pickerBody = (
+    <div className="space-y-3">
+      {/* Compact has no dot row outside, so the shortcuts live in here: the
+          fixed presets, and "no swatch" where the field allows one. */}
+      {compact && (
+        <div className="flex items-center gap-1.5">
+          {inherit && (
+            <button
+              type="button"
+              onClick={() => {
+                inherit.onSelect();
+                handleOpenChange(false);
+              }}
+              aria-pressed={inheriting}
+              className={cn(
+                "h-8 rounded-sm px-2.5 font-inter text-xs font-medium",
+                transitionClass,
+                focusRingClass,
+                inheriting
+                  ? "bg-primary text-primary-foreground"
+                  : "border border-border bg-background text-muted-foreground hover:bg-accent hover:text-foreground",
+              )}
+            >
+              {inherit.label}
+            </button>
+          )}
+          <div className="flex flex-1 items-center gap-1.5">
+            {COLOR_PRESETS.map((preset) => (
+              <button
+                key={preset.value}
+                type="button"
+                onClick={() => commitHex(preset.value)}
+                aria-label={`${preset.name} (${preset.value})`}
+                title={preset.name}
+                style={{ backgroundColor: preset.value }}
+                className={cn(
+                  "size-8 rounded-full ring-1 ring-inset ring-black/10",
+                  transitionClass,
+                  focusRingClass,
+                  !inheriting && current === preset.value &&
+                    "ring-2 ring-ring ring-offset-2 ring-offset-background",
+                )}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+      <ColorArea hsv={hsv} onChange={handleArea} />
+
+      <div className="space-y-1">
+        <div className="flex items-center gap-1.5">
+          {hasEyeDropper && (
+            <button
+              type="button"
+              onClick={pickFromScreen}
+              aria-label="Pick a color from the screen"
+              title="Pick from screen"
+              className={cn(
+                "inline-flex size-10 shrink-0 items-center justify-center rounded-none border border-input",
+                "bg-background text-muted-foreground hover:bg-accent hover:text-foreground",
+                transitionClass,
+                focusRingClass,
+              )}
+            >
+              <Pipette className="size-4" strokeWidth={2} aria-hidden="true" />
+            </button>
+          )}
+          <label htmlFor={hexId} className="sr-only">
+            Hex color
+          </label>
+          <input
+            id={hexId}
+            type="text"
+            value={text}
+            onChange={(event) => handleText(event.target.value)}
+            onBlur={() => {
+              // Snap back to the last valid value instead of leaving junk.
+              if (invalid) {
+                setText(value);
+                setInvalid(false);
+              }
+            }}
+            spellCheck={false}
+            autoComplete="off"
+            aria-invalid={invalid ? true : undefined}
+            aria-describedby={invalid ? errorId : undefined}
+            placeholder="#a855f7"
+            className={cn(fieldBaseClass, "h-10 rounded-none py-0 font-mono text-sm")}
+          />
+          <button
+            type="button"
+            onClick={copyHex}
+            aria-label={copied ? "Hex copied" : "Copy hex"}
+            title={copied ? "Copied" : "Copy hex"}
+            className={cn(
+              "inline-flex size-10 shrink-0 items-center justify-center rounded-none border border-input",
+              "bg-background hover:bg-accent hover:text-foreground",
+              copied ? "text-foreground" : "text-muted-foreground",
+              transitionClass,
+              focusRingClass,
+            )}
+          >
+            {copied ? (
+              <Check className="size-4" strokeWidth={2.5} aria-hidden="true" />
+            ) : (
+              <Copy className="size-4" strokeWidth={2} aria-hidden="true" />
+            )}
+          </button>
+        </div>
+        {invalid && (
+          <p id={errorId} className={errorTextClass}>
+            Use a 6-digit hex color like #a855f7.
+          </p>
+        )}
+      </div>
+    </div>
+  );
+
+
+  if (compact) {
+    return (
+      <Popover
+        open={open && !panelHandlesThis}
+        onOpenChange={handleOpenChange}
+        label={label ? `${label} color picker` : "Color picker"}
+        panelClassName="sm:w-[17rem]"
+        // Popover's root is `w-full` — right for a settings panel where it owns
+        // the line, wrong here: it would take the whole row and squeeze the
+        // option's name field to nothing. Compact is one dot beside other
+        // things, so it takes only the dot's width.
+        rootClassName="w-auto shrink-0"
+        trigger={
+          <button
+            id={id}
+            type="button"
+            aria-haspopup={panelHandlesThis ? undefined : "dialog"}
+            aria-expanded={panelHandlesThis ? panelIsOnThisField : open}
+            aria-label={label ?? "Colour"}
+            title={inheriting && inherit ? inherit.label : current}
+            data-testid="color-picker-trigger"
+            onClick={handleWheel}
+            className={cn(
+              "size-7 shrink-0 rounded-full",
+              "transition-[transform,box-shadow] duration-base ease-standard motion-reduce:transition-none",
+              focusRingClass,
+              "hover:scale-110 motion-reduce:hover:scale-100",
+              // A hairline so a white or very pale swatch still has an edge,
+              // and a dashed one when nothing is set — an empty slot should
+              // look empty rather than look like a pale colour someone chose.
+              inheriting
+                ? "border border-dashed border-muted-foreground/60 bg-transparent"
+                : "ring-1 ring-inset ring-black/15",
+            )}
+            style={inheriting ? undefined : { backgroundColor: current }}
+          />
+        }
+      >
+        {pickerBody}
+      </Popover>
+    );
+  }
+
   return (
     <div className="flex w-full flex-col gap-1.5">
       {label &&
@@ -367,76 +550,7 @@ export function ColorPicker({
             </button>
           }
         >
-          <div className="space-y-3">
-            <ColorArea hsv={hsv} onChange={handleArea} />
-
-            <div className="space-y-1">
-              <div className="flex items-center gap-1.5">
-                {hasEyeDropper && (
-                  <button
-                    type="button"
-                    onClick={pickFromScreen}
-                    aria-label="Pick a color from the screen"
-                    title="Pick from screen"
-                    className={cn(
-                      "inline-flex size-10 shrink-0 items-center justify-center rounded-none border border-input",
-                      "bg-background text-muted-foreground hover:bg-accent hover:text-foreground",
-                      transitionClass,
-                      focusRingClass,
-                    )}
-                  >
-                    <Pipette className="size-4" strokeWidth={2} aria-hidden="true" />
-                  </button>
-                )}
-                <label htmlFor={hexId} className="sr-only">
-                  Hex color
-                </label>
-                <input
-                  id={hexId}
-                  type="text"
-                  value={text}
-                  onChange={(event) => handleText(event.target.value)}
-                  onBlur={() => {
-                    // Snap back to the last valid value instead of leaving junk.
-                    if (invalid) {
-                      setText(value);
-                      setInvalid(false);
-                    }
-                  }}
-                  spellCheck={false}
-                  autoComplete="off"
-                  aria-invalid={invalid ? true : undefined}
-                  aria-describedby={invalid ? errorId : undefined}
-                  placeholder="#a855f7"
-                  className={cn(fieldBaseClass, "h-10 rounded-none py-0 font-mono text-sm")}
-                />
-                <button
-                  type="button"
-                  onClick={copyHex}
-                  aria-label={copied ? "Hex copied" : "Copy hex"}
-                  title={copied ? "Copied" : "Copy hex"}
-                  className={cn(
-                    "inline-flex size-10 shrink-0 items-center justify-center rounded-none border border-input",
-                    "bg-background hover:bg-accent hover:text-foreground",
-                    copied ? "text-foreground" : "text-muted-foreground",
-                    transitionClass,
-                    focusRingClass,
-                  )}
-                >
-                  {copied ? (
-                    <Check className="size-4" strokeWidth={2.5} aria-hidden="true" />
-                  ) : (
-                    <Copy className="size-4" strokeWidth={2} aria-hidden="true" />
-                  )}
-                </button>
-              </div>
-              {invalid && (
-                <p id={errorId} className={errorTextClass}>
-                  Use a 6-digit hex color like #a855f7.
-                </p>
-              )}
-            </div>
-          </div>
+          {pickerBody}
         </Popover>
 
         {hasEyeDropper && (

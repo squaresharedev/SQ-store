@@ -20,6 +20,7 @@ import {
   labelClass,
   secondaryButtonClass,
 } from "@/components/ui/control-styles";
+import { InfoTip } from "@/components/ui/InfoTip";
 import { FONT_LABELS } from "./config-maps";
 
 /** Extra words for the two presets whose names alone do not say what they are. */
@@ -143,7 +144,14 @@ export function TypographySection({
       </div>
 
       <div className="space-y-1.5">
-        <span className={labelClass}>Your own font</span>
+        <span className="flex items-center gap-1.5">
+          <span className={labelClass}>Your own font</span>
+          <InfoTip label="Which font files work">
+            WOFF2, WOFF, TTF or OTF, up to 2 MB. WOFF2 is the one to use:
+            it is the smallest, so it is the fastest for a buyer to load, and
+            every browser reads it.
+          </InfoTip>
+        </span>
         <input
           ref={fileInputRef}
           type="file"
@@ -201,9 +209,6 @@ export function TypographySection({
           </div>
         )}
 
-        <p className={infoTextClass}>
-          WOFF2, WOFF, TTF, or OTF, up to 2 MB. WOFF2 loads fastest for buyers.
-        </p>
       </div>
     </div>
   );

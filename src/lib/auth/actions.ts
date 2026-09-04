@@ -13,6 +13,8 @@ import { alertSecurityEvent } from "@/lib/security/events";
 import { safeInternalPath } from "@/lib/utils/safe-path";
 import { authIntentSchema, looksLikeEmail, usernameSchema } from "@/lib/validation/auth";
 import { emailAddress } from "@/lib/validation/inputs";
+import { isDisposableEmailDomain } from "@/lib/validation/disposable-email";
+import { verifyTurnstile } from "@/lib/turnstile";
 import { RATE_LIMITS, clientKey, rateLimitKey } from "@/lib/rate-limit";
 
 export type { AuthIntent } from "@/lib/validation/auth";
@@ -346,6 +348,19 @@ export async function authenticate(
     // neither has been spent on a network call yet.
     const weak = passwordProblem(password, { email, username });
     if (weak) return { error: weak };
+    // Free, local, and worth refusing before anything else costs a cycle: a
+    // throwaway address is never a legitimate signup on this product.
+    if (isDisposableEmailDomain(email)) {
+      return { error: "Please sign up with a permanent email address." };
+    }
+    // Bot check BEFORE the rate-limit budget is spent, so a scripted signup
+    // loop is refused here rather than grinding through (and eventually
+    // exhausting) the per-address/per-client budgets meant for real people.
+    const turnstileToken = String(formData.get("cf_turnstile_token") ?? "");
+    const clientIp = (await headers()).get("cf-connecting-ip") ?? undefined;
+    if (!(await verifyTurnstile(turnstileToken, clientIp))) {
+      return { error: "Verification failed. Please try again." };
+    }
     // Sign-up also sends a confirmation email, so it needs the per-address gate
     // as well as a cap on how many accounts one client can spin up.
     if (!(await allowAuthEmail(email))) return { error: TOO_MANY };

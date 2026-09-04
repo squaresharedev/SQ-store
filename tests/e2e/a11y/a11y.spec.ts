@@ -40,6 +40,16 @@ test.describe("accessibility", () => {
   });
 
   test("signed-in core pages", async ({ page }) => {
+    // Thirteen pages, each compiled on demand by the dev server and then
+    // scanned by axe, in ONE test. That is deliberate (they share a signed-in
+    // account and a seeded catalogue, and re-doing that setup per page would
+    // cost far more than it saves), but it also means the wall clock is a
+    // function of how much the app renders rather than of anything under test.
+    // /analytics alone now draws five sections of charts. The suite's 60s
+    // default was landing right on the boundary, so a slow compile failed a
+    // test that had found no violations at all.
+    test.setTimeout(180_000);
+
     const user = freshUser("a11y");
     await signUp(page, user);
     const sellerId = await userIdByEmail(user.email);

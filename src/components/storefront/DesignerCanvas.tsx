@@ -1,7 +1,7 @@
 "use client";
 
-import { memo, useCallback, useEffect, useMemo, useRef } from "react";
-import { LayoutGrid } from "lucide-react";
+import { memo, useCallback, useEffect, useMemo, useRef, type ReactNode } from "react";
+import { ShoppingBag } from "lucide-react";
 import type { Product } from "@/types/product";
 import {
   blockCornerRadius,
@@ -11,11 +11,18 @@ import {
   readingOrder,
   type HeaderLine,
   type ImagePlacement,
+  type ProductPageConfig,
   type StorefrontBlock,
   type StorefrontHeader,
+  type ShippingProfile,
+  type StorefrontPolicies,
+  type StorefrontSeller,
   type StorefrontTheme,
   type TextSpan,
 } from "@/types/storefront";
+import { ProductPageArtboard } from "./ProductPageArtboard";
+import { PageConnectors, type PageLink } from "./PageConnectors";
+import { DeviceSizeSwitch, type PreviewDevice } from "./DeviceSizeSwitch";
 import { cn } from "@/lib/utils";
 import {
   customFontVars,
@@ -41,6 +48,7 @@ import { StorefrontMasthead } from "./StorefrontMasthead";
 import { resolveBackgroundStyle } from "./background-presets";
 import { gridGapStyle, scaledCornerRadius, tileClipStyle } from "./config-maps";
 import type { CanvasViewport } from "./useCanvasViewport";
+import { iconPopClass, primaryButtonClass } from "@/components/ui/control-styles";
 
 /** Accessible label for a block's drag/resize handles. */
 function blockLabel(block: StorefrontBlock, product: Product | null): string {
@@ -75,12 +83,18 @@ const DESIGN_CELL_PX = 96;
  *  border-box sizing folds into the width we set. */
 const DESIGN_FRAME_CHROME_PX = 16 * 2 + 2;
 
+/** Mobile preview's board width — matches the fluid column's own `max-w-sm`,
+ *  just spelled as a number so a product page artboard can be handed the
+ *  exact same width rather than picking one of its own. */
+const MOBILE_PREVIEW_WIDTH = 384;
+
 export const DesignerCanvas = memo(function DesignerCanvas({
   blocks,
   productsById,
   theme,
   header,
   previewMode,
+  onPreviewModeChange,
   backgroundImageUrl = null,
   customFontUrl = null,
   elementUrls,
@@ -91,6 +105,7 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   onRotateBlock,
   onRemove,
   onEmptyCellClick,
+  onAddProduct,
   selectedKeys,
   onSelectBlock,
   onSelectMany,
@@ -115,15 +130,30 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   onTypeEnd,
   onSpotChange,
   disableMarquee = false,
+  openPages = [],
+  onOpenPage,
+  onClosePage,
+  storefrontId = "",
+  storefrontName = "",
+  productPage,
+  policies = {},
+  shippingProfiles = [],
+  seller = {},
 }: {
   blocks: StorefrontBlock[];
   productsById: Map<string, Product>;
   theme: StorefrontTheme;
   /** Optional masthead (name + bio) rendered above the grid when shown. */
   header: StorefrontHeader;
-  /** Desktop designs at natural size + zoom; mobile previews fluid, so the
-   *  seller sees the real small-screen reflow. */
-  previewMode: "desktop" | "mobile";
+  /** Desktop designs at natural size + zoom. Mobile previews fluid UNTIL a
+   *  product page opens, at which point there is a "beside the board" to
+   *  put it, so the board switches to the same pannable canvas desktop
+   *  uses — just sized for a phone. */
+  previewMode: PreviewDevice;
+  /** Flips the mode. Owns the device switch's placement too: anchored above
+   *  the board (pans/zooms with it) whenever the canvas is showing, since
+   *  there is no board to anchor to once the mobile column has taken over. */
+  onPreviewModeChange: (mode: PreviewDevice) => void;
   /** Display URL for an image background (signed server-side, or a local
    *  object URL right after an upload). Null renders the neutral base. */
   backgroundImageUrl?: string | null;
@@ -137,7 +167,8 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   /** Draw the free cells (editor guide only, never for buyers). */
   showGrid?: boolean;
   /** Owns the live pan + zoom and writes them to the stage imperatively.
-   *  Desktop preview only. */
+   *  Only reaches a stage to write to while the canvas is showing (design
+   *  view, or mobile preview with a page open). */
   viewport?: CanvasViewport;
   /** All callbacks are keyed by blockKey(block). */
   onMoveBlock: (key: string, x: number, y: number) => void;
@@ -147,6 +178,9 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   onRemove: (key: string) => void;
   /** Clicking a free cell inserts there. */
   onEmptyCellClick: (x: number, y: number) => void;
+  /** Opens the product picker. Drives the empty state's CTA; omitted in
+   *  read-only renders, where there is nothing to add. */
+  onAddProduct?: () => void;
   /** Keys of the blocks currently open in the inspector panel. */
   selectedKeys: readonly string[];
   /** Click selection; `additive` = shift-click (add/remove, not replace). */
@@ -191,6 +225,22 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   onSpotChange?: (key: string, token: SpotToken, drop: SpotDrop) => void;
   /** True while a pan tool owns frame drags (space held). */
   disableMarquee?: boolean;
+  /**
+   * Product ids whose page is open as an artboard beside the board, in the
+   * order they were opened. A VIEW state of the editor: which pages the seller
+   * has out is not part of the design and is never saved.
+   */
+  openPages?: readonly string[];
+  /** The node on a selected product tile opens its page. */
+  onOpenPage?: (productId: string) => void;
+  onClosePage?: (productId: string) => void;
+  storefrontId?: string;
+  storefrontName?: string;
+  /** The page's own design. Absent leaves the artboards unrendered. */
+  productPage?: ProductPageConfig;
+  policies?: StorefrontPolicies;
+  shippingProfiles?: ShippingProfile[];
+  seller?: StorefrontSeller;
 }) {
   const productFor = useCallback(
     (block: StorefrontBlock): Product | null =>
@@ -206,6 +256,7 @@ export const DesignerCanvas = memo(function DesignerCanvas({
     onSelectBlock,
     onSelectMany,
     onRemove,
+    onOpenPage,
     onFrameBlock,
     onFramePlacement,
     onFrameExit,
@@ -227,6 +278,7 @@ export const DesignerCanvas = memo(function DesignerCanvas({
       onSelectBlock,
       onSelectMany,
       onRemove,
+      onOpenPage,
       onFrameBlock,
       onFramePlacement,
       onFrameExit,
@@ -251,6 +303,9 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   }, []);
   const removeByKey = useCallback((key: string) => {
     handlers.current.onRemove(key);
+  }, []);
+  const openPageFor = useCallback((productId: string) => {
+    handlers.current.onOpenPage?.(productId);
   }, []);
   const frameByKey = useCallback((key: string) => {
     handlers.current.onFrameBlock?.(key);
@@ -551,18 +606,86 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   }
 
   // The design canvas renders at its natural size and is scaled; the mobile
-  // preview stays fluid so the seller sees the real reflow.
+  // preview simulates a real phone's width instead — fixed, not fluid, once
+  // a page is open (see showCanvas below), so a seller comparing tile to
+  // page sees them at the same believable scale rather than one shrinking to
+  // fit whatever room is left.
   const isDesign = previewMode === "desktop";
-  const naturalWidth = isDesign
+  const boardWidth = isDesign
     ? theme.columns * DESIGN_CELL_PX +
       (theme.columns - 1) * theme.gridGap +
       DESIGN_FRAME_CHROME_PX
-    : undefined;
+    : MOBILE_PREVIEW_WIDTH;
 
   // The canvas font. An uploaded face is declared here as a custom property
   // and applied through it, so text blocks that opt into the same face inherit
   // it without every tile having to be handed a font URL.
   const canvasFont = fontPresentation(theme.font);
+
+  // THE PAGES THE SELLER HAS OUT, as artboards beside the board — in design
+  // view AND in mobile preview, the same way. A page whose product has left
+  // the catalogue simply drops out, the same way a selection of a deleted
+  // block does.
+  const openProductIds = useMemo(
+    () => (productPage ? openPages.filter((id) => productsById.has(id)) : []),
+    [productPage, openPages, productsById],
+  );
+
+  // The tile's manual sold-out flag is live in the editor, so the page has to
+  // read it from the board rather than from the snapshot it loaded.
+  const soldOutProducts = useMemo(() => {
+    const ids = new Set<string>();
+    for (const block of blocks) {
+      if (block.type === "product" && block.soldOut) ids.add(block.productId);
+    }
+    return ids;
+  }, [blocks]);
+
+  const artboards = productPage
+    ? openProductIds.flatMap((id) => {
+        const product = productsById.get(id);
+        if (!product) return [];
+        return [
+          <ProductPageArtboard
+            key={id}
+            width={boardWidth}
+            product={product}
+            soldOut={soldOutProducts.has(id)}
+            storefrontId={storefrontId}
+            storefrontName={storefrontName}
+            theme={theme}
+            header={header}
+            productPage={productPage}
+            policies={policies}
+            shippingProfiles={shippingProfiles}
+            seller={seller}
+            backgroundImageUrl={backgroundImageUrl}
+            customFontUrl={customFontUrl}
+            onClose={() => onClosePage?.(id)}
+          />,
+        ];
+      })
+    : [];
+
+  const pageLinks = useMemo<PageLink[]>(
+    () => openProductIds.map((id) => ({ fromKey: `p_${id}`, toId: id })),
+    [openProductIds],
+  );
+
+  // What can move either end of a line without the connectors hearing about
+  // it: which pages are out, and where the tiles sit on the board.
+  const connectorRevision = useMemo(
+    () =>
+      [
+        openProductIds.join(","),
+        theme.columns,
+        theme.rows,
+        theme.gridGap,
+        theme.displayMode,
+        blocks.map((block) => `${block.x},${block.y},${block.w},${block.h}`).join("|"),
+      ].join("~"),
+    [openProductIds, theme.columns, theme.rows, theme.gridGap, theme.displayMode, blocks],
+  );
 
   const canvas = (
     <div
@@ -624,7 +747,7 @@ export const DesignerCanvas = memo(function DesignerCanvas({
         {blocks.length === 0 ? (
           <div className="flex min-h-64 flex-col items-center justify-center rounded-sm border border-dashed border-border bg-background/60 p-6 text-center">
             <div className="mb-4 flex size-12 items-center justify-center rounded-full border border-border bg-background shadow-xs">
-              <LayoutGrid
+              <ShoppingBag
                 className="size-5 text-muted-foreground"
                 strokeWidth={2}
                 aria-hidden="true"
@@ -634,9 +757,23 @@ export const DesignerCanvas = memo(function DesignerCanvas({
               Your grid is empty
             </p>
             <p className="mt-1 max-w-xs font-inter text-sm text-muted-foreground">
-              Add products, text, or shapes from the toolbar below to start
-              arranging your storefront.
+              Add a product to start arranging your storefront. Text and
+              shapes are on the toolbar below.
             </p>
+            {onAddProduct && (
+              <button
+                type="button"
+                onClick={onAddProduct}
+                className={`mt-4 ${primaryButtonClass}`}
+              >
+                <ShoppingBag
+                  className={`size-4 ${iconPopClass}`}
+                  strokeWidth={2}
+                  aria-hidden="true"
+                />
+                Add product
+              </button>
+            )}
           </div>
         ) : theme.displayMode === "carousel" ? (
           <>
@@ -726,6 +863,11 @@ export const DesignerCanvas = memo(function DesignerCanvas({
                 // when its OWN data or selection changes.
                 onToggleEdit={toggleSelection}
                 onRemove={removeByKey}
+                onOpenPage={onOpenPage ? openPageFor : undefined}
+                pageOpen={
+                  gridBlock.data.type === "product" &&
+                  openPages.includes(gridBlock.data.productId)
+                }
                 onFrame={frameByKey}
                 onFramePlacement={placeFrame}
                 onFrameExit={exitFrame}
@@ -742,30 +884,123 @@ export const DesignerCanvas = memo(function DesignerCanvas({
     </div>
   );
 
-  // Mobile preview: a phone-width column, fluid, so the grid reflows exactly
-  // as it will on a real device.
-  if (!isDesign) {
-    return <div className="mx-auto w-full max-w-sm">{canvas}</div>;
+  // A page open beside the board needs somewhere to actually go, which the
+  // plain scrolling column mobile preview otherwise doesn't have — so
+  // opening one switches mobile preview onto the very same pannable canvas
+  // design view already uses, sized for a phone instead of a desktop. With
+  // nothing open, mobile preview stays the fluid single column that reflows
+  // exactly as a real phone would.
+  const showCanvas = isDesign || artboards.length > 0;
+
+  // Mobile preview, nothing open: a phone-width column, fluid, so the grid
+  // reflows exactly as it will on a real device. No stage here to ride along
+  // with (nothing pans or zooms in this mode), but the switch still belongs
+  // to the column itself, not to the app chrome around it — same treatment
+  // as the canvas's own switch (see Stage below): a row above the frame,
+  // scrolling with it rather than floating fixed over the editor.
+  if (!showCanvas) {
+    return (
+      <div className="mx-auto flex w-full max-w-sm flex-col gap-2">
+        <div className="flex items-center justify-end">
+          <DeviceSizeSwitch
+            device={previewMode}
+            onChange={onPreviewModeChange}
+            labels={{ desktop: "Desktop preview", mobile: "Mobile preview" }}
+          />
+        </div>
+        {canvas}
+      </div>
+    );
   }
 
-  // Design view: the board floats on an endless workspace at its natural
-  // size. The transform is NOT rendered here — the viewport writes it
-  // straight to this element every frame (see useCanvasViewport), so panning
-  // and zooming never re-render the canvas.
+  return (
+    <Stage
+      viewport={viewport}
+      boardWidth={boardWidth}
+      canvas={canvas}
+      artboards={artboards}
+      pageLinks={pageLinks}
+      connectorRevision={connectorRevision}
+      previewMode={previewMode}
+      onPreviewModeChange={onPreviewModeChange}
+    />
+  );
+});
+
+/**
+ * The workspace the board floats on, and everything else that floats with it.
+ *
+ * Its own component because it owns the stage NODE: the viewport writes the
+ * pan/zoom transform straight to that element every frame (see
+ * useCanvasViewport), so panning never re-renders the canvas, and the
+ * connectors need the same element to measure both ends of a line against.
+ *
+ * Content-sized, not board-sized: a page opening beside the board grows the
+ * stage, and measureView (which centres and fits the view) reads that growth
+ * for free.
+ */
+function Stage({
+  viewport,
+  boardWidth,
+  canvas,
+  artboards,
+  pageLinks,
+  connectorRevision,
+  previewMode,
+  onPreviewModeChange,
+}: {
+  viewport?: CanvasViewport;
+  /** The board's current width — its natural design-view size, or the fixed
+   *  phone width mobile preview simulates. Every open page gets handed this
+   *  same number, so a page never renders at a different scale than the
+   *  board it belongs to. */
+  boardWidth: number;
+  canvas: ReactNode;
+  artboards: ReactNode[];
+  pageLinks: readonly PageLink[];
+  connectorRevision: string;
+  previewMode: PreviewDevice;
+  onPreviewModeChange: (mode: PreviewDevice) => void;
+}) {
+  const stageRef = useRef<HTMLDivElement | null>(null);
+  const registerStage = useCallback(
+    (node: HTMLDivElement | null) => {
+      stageRef.current = node;
+      viewport?.registerStage(node);
+    },
+    [viewport],
+  );
+
   return (
     <div
-      ref={viewport?.registerStage}
+      ref={registerStage}
       data-canvas-stage=""
       style={{
-        width: naturalWidth,
+        width: "max-content",
         transformOrigin: "0 0",
         // Promote the stage to its own compositor layer up front, so a pan is
         // a GPU transform rather than a repaint of every tile.
         willChange: "transform",
       }}
-      className="absolute left-0 top-0"
+      className="absolute left-0 top-0 flex items-start gap-24"
     >
-      {canvas}
+      {/* First child, so the lines paint UNDER the board and the pages. */}
+      <PageConnectors stageRef={stageRef} links={pageLinks} revision={connectorRevision} />
+      <div className="flex flex-col gap-2" style={{ width: boardWidth }}>
+        {/* Same chrome as the product page artboard's own frame label (see
+            ProductPageArtboard): a row OUTSIDE the board, riding the same
+            transform, so the switch pans and zooms with it instead of
+            floating apart from the thing it controls. */}
+        <div className="flex items-center justify-end">
+          <DeviceSizeSwitch
+            device={previewMode}
+            onChange={onPreviewModeChange}
+            labels={{ desktop: "Desktop preview", mobile: "Mobile preview" }}
+          />
+        </div>
+        {canvas}
+      </div>
+      {artboards.length > 0 && <div className="flex flex-col gap-16">{artboards}</div>}
     </div>
   );
-});
+}

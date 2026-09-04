@@ -12,6 +12,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { GoogleButton } from "@/components/auth/GoogleButton";
 import { LastUsedBadge } from "@/components/auth/LastUsedBadge";
 import { PasswordResetModal } from "@/components/auth/PasswordResetModal";
+import { Turnstile } from "@/components/auth/Turnstile";
 import type { SignInMethod } from "@/lib/auth/last-method";
 import { USERNAME_MAX_LENGTH, looksLikeEmail } from "@/lib/validation/auth";
 import { cn } from "@/lib/utils";
@@ -19,6 +20,14 @@ import { cn } from "@/lib/utils";
 type Mode = "signin" | "signup" | "magic";
 
 const INITIAL: AuthState = {};
+
+/**
+ * Public by design (it identifies the widget, not a secret) and inlined at
+ * build time like every other NEXT_PUBLIC_* var. Unset in local dev and in
+ * the e2e stack, so the widget below simply doesn't render there — the same
+ * "off unless configured" shape as the server-side check in lib/turnstile.ts.
+ */
+const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
 /**
  * `lastUsed` comes from a cookie read on the server (see lib/auth/last-method),
@@ -39,12 +48,25 @@ export function LoginForm({
   const formRef = React.useRef<HTMLFormElement>(null);
   const [resetOpen, setResetOpen] = React.useState(false);
   const [resetEmail, setResetEmail] = React.useState("");
+  const [turnstileToken, setTurnstileToken] = React.useState("");
+  const clearTurnstileToken = React.useCallback(() => setTurnstileToken(""), []);
 
   React.useEffect(() => {
     if (state.error) {
       console.error("[LoginForm] Auth error:", state.error);
     }
   }, [state.error]);
+
+  /**
+   * The only way `mode` should change. A token solved in one mode must not
+   * silently authorize a submit made after switching away and back — the
+   * widget itself is torn down and re-rendered on remount, so the token it
+   * produces should be too.
+   */
+  function changeMode(next: Mode | ((current: Mode) => Mode)) {
+    setTurnstileToken("");
+    setMode(next);
+  }
 
   const isMagic = mode === "magic";
   // The clicked submit button carries the intent, so exactly one is submitted.
@@ -115,7 +137,7 @@ export function LoginForm({
               <button
                 key={m}
                 type="button"
-                onClick={() => setMode(m)}
+                onClick={() => changeMode(m)}
                 suppressHydrationWarning
                 className={cn(
                   "flex min-w-0 items-center justify-center px-2 py-2.5 font-inter text-sm font-medium transition-colors",
@@ -238,6 +260,20 @@ export function LoginForm({
           </div>
         )}
 
+        {/* Bot check (sign-up only, and only where a site key is configured —
+            see the constant above). The token rides along as a plain hidden
+            field the server action reads by name. */}
+        {mode === "signup" && TURNSTILE_SITE_KEY && (
+          <div className="flex flex-col gap-2">
+            <input type="hidden" name="cf_turnstile_token" value={turnstileToken} />
+            <Turnstile
+              siteKey={TURNSTILE_SITE_KEY}
+              onVerify={setTurnstileToken}
+              onExpire={clearTurnstileToken}
+            />
+          </div>
+        )}
+
         {/* Status: error (red) or confirmation (neutral) */}
         {(state.error || state.message) && (
           <div aria-live="polite">
@@ -254,12 +290,18 @@ export function LoginForm({
           </div>
         )}
 
-        {/* Primary CTA — the only submit button, so Enter always lands here. */}
+        {/* Primary CTA — the only submit button, so Enter always lands here.
+            Client-side gating on the Turnstile token is a courtesy (it saves
+            an obviously-doomed round trip); the real gate is the server
+            re-checking the token in lib/turnstile.ts. */}
         <Button
           type="submit"
           name="intent"
           value={primaryIntent}
-          disabled={isPending}
+          disabled={
+            isPending ||
+            (mode === "signup" && Boolean(TURNSTILE_SITE_KEY) && !turnstileToken)
+          }
           suppressHydrationWarning
           data-testid="login-submit"
           className="mt-2 w-full px-8 py-3.5 text-base"
@@ -278,7 +320,7 @@ export function LoginForm({
         <div className="flex justify-center">
           <button
             type="button"
-            onClick={() => setMode((m) => (m === "magic" ? "signin" : "magic"))}
+            onClick={() => changeMode((m) => (m === "magic" ? "signin" : "magic"))}
             suppressHydrationWarning
             className="inline-flex max-w-full items-center gap-1.5 rounded-md px-3 py-1.5 font-inter text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
           >

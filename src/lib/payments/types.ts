@@ -5,6 +5,17 @@
 //
 // SECURITY: these types can never carry full account/card numbers. The only
 // identifying field anywhere is `last4`; everything else is status metadata.
+//
+// NOT MERCHANT OF RECORD, by construction: `AccountStatus.accountId` is the
+// SELLER's own connected Stripe account (chargesEnabled/payoutsEnabled live on
+// IT, per docs/context.md's "Stripe Connect" model). When real charges are
+// wired, they must be created ON that connected account — Direct Charges, or
+// Destination Charges with `on_behalf_of` — with our cut taken as an
+// `application_fee_amount`, never a charge on Squareshare's own platform
+// account. That is what keeps the seller (not Squareshare) as the merchant of
+// record: their name on the statement descriptor, their liability for VAT/
+// sales tax and chargebacks. See the matching note in
+// components/product-page/ProductCta.tsx, the buyer-facing half of this.
 
 /** One money bucket. Integer cents ALWAYS — never floats (see lib/format/money). */
 export type MoneyAmount = {

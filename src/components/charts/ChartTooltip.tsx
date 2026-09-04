@@ -50,7 +50,7 @@ export function ChartTooltipContent({
         ? labelFormatter(String(label))
         : String(label);
   return (
-    <div className={`${tooltipWrapperClass} chart-tip-enter`}>
+    <div className={tooltipWrapperClass}>
       {heading !== null && <p className={tooltipLabelClass}>{heading}</p>}
       <ul className="mt-0.5 flex flex-col gap-0.5">
         {payload.map((entry, i) => {

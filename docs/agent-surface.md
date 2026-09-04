@@ -5,9 +5,27 @@ an MCP server expose it to an assistant that helps a creator **set up** and
 **run** their shop?
 
 Scope note: there is no MCP server for Store today. The only HTTP surface is
-`/api/embed/[key]` (public, buyer-facing), `/api/uploads/presign`, and
+`/api/embed/[key]` (public, buyer-facing), `/api/embed/[key]/signal` (public,
+analytics ingest), `/api/uploads/presign`, and
 `/api/settings/display-name-available`. This document is the catalogue and the
 contract that server has to satisfy — not a description of something shipped.
+
+Update 2026-08-30: the analytics rows below are the first ones with a real
+machine-readable shape behind them. `getAnalyticsSnapshot` returns the entire
+page as one versioned object, and the page publishes that object verbatim.
+See [analytics-datapoints.md](./analytics-datapoints.md). None of that removes
+B1/B2 (it is still cookie-scoped and browser-only), but it does mean the
+analytics tool has a payload to return rather than one to invent.
+
+Update 2026-09-03: the product create/edit form is the second, and the first on
+the WRITE side. Every control carries a `data-product-field`, every section a
+state and a summary, and the whole form publishes a versioned
+`ProductFormSnapshot` — including `requiredMissing`, which answers "why will
+this not save" without submitting anything. See
+[product-form-datapoints.md](./product-form-datapoints.md). It observes B3
+(integer cents, never the typed decimal) and B6 (no object key of any kind) at
+the boundary, so the product-write tool below has a settled input shape to
+derive from rather than one to invent. B1/B2 still apply unchanged.
 
 ---
 
@@ -138,11 +156,28 @@ explicit columns, never `select("*")`, and documents the exclusions:
   because it is a secret.
 - **`digital_file_key`** — the R2 path of the paid product file. This *is* the
   paywall.
-- **`image_key`** — infrastructure addressing.
+- **`image_key`** — infrastructure addressing. The product page's `gallery`
+  column holds more of the same (one key per extra photo) and is covered by the
+  same rule.
 
 Agent payloads must be **built, not passed through**, for the same reason the
 embed route builds its response: a column added later cannot then leak by
-default.
+default. The hosted product page (`/s/[storefrontId]/p/[productId]`) is the
+second live example: `lib/products/public.ts` builds a `ProductPageProduct`
+field by field (signed image URLs, a stock *badge*, the download's format but
+never its key), and the editor's preview action returns the very same shape, so
+what a buyer may see of a product is decided in exactly one function. A future
+agent read of a product should reuse that builder rather than write a third.
+
+The embed payload's product blocks now also carry `productUrl` (the hosted
+page's absolute URL, absent when the seller has switched product pages off).
+The storefront config gained three members for that page: `productPage`
+(bounded layout and button options), `policies` (shipping and returns text) and
+`seller` (trader identity). **None of these are mirrored into
+`@squaresharedev/schemas` yet**: the package was already well behind Store when
+they landed, and mirroring one new field into a stale module would make the
+contract look current when it is not. Reconcile the whole storefront module in
+one pass (see section 3.0), then carry these three across.
 
 ### B7 — The generated database types are stale
 
@@ -154,6 +189,7 @@ be generated from. It is behind the migrations:
 | `collections` table | `20260711_curation_foundation.sql` |
 | `artifacts` table | `20260711_curation_foundation.sql` |
 | `interaction_events` table | `20260720_interaction_events.sql` |
+| ~~`storefront_signals` table + `storefront_signals_aggregate`~~, DONE, hand-added alongside `20260830_storefront_signals.sql` | (the discipline this section asks for) |
 | `profiles.username`, `profiles.is_public` | `20260711_curation_foundation.sql` |
 | `analytics_aggregate`, `dashboard_orders_aggregate`, `product_sales_aggregate`, `products_ranked_by_metric` | `20260802_analytics_sql_aggregates.sql` |
 | `profile_is_public` | `20260711_curation_foundation.sql` |
@@ -224,7 +260,8 @@ Verdicts:
 | Tax details: business name, VAT id, country | `profiles` | R + W (`saveTaxInfo`) | Ready |
 | Legal acceptance + version | `profiles` | R + W (`acceptLegal`) | Ready — an agent should be able to *report* what is outstanding; accepting terms on a user's behalf is a decision for the product, not the transport |
 | Notification preferences | `profiles` | R + W (`saveNotifications`) | Ready |
-| Products: create / update / delete | `products` | R + W | **Adapt** — cents not float (B3); no `image_key` / `digital_file_key` (B6) |
+| Products: create / update / delete | `products` | R + W | **Adapt** — cents not float (B3); no `image_key` / `digital_file_key` (B6). The input shape is settled: `ProductFormSnapshot` ([product-form-datapoints.md](./product-form-datapoints.md)) is what the form itself publishes, already in cents and already key-free, and `requiredMissing` names what blocks a save |
+| Product options (the axes a product varies along) | `products.option_groups` | R + W | Ready. `[{id, name, display, options:[{id, name, swatch?, available}]}]`, validated by `optionGroupSchema`. Seller-defined: the group's NAME is the axis ("Colour", "Power output"), so nothing hard-codes colour. Ids are unique across the WHOLE tree, groups included, because a photo tie and the page's `?o=` name an option id with no group beside it. Presentation only — there is deliberately no per-option price or stock, so an agent must never report one |
 | Product status draft → active | `products.status` | R + W | Ready — the single highest-value "go live" lever |
 | Stock: `track_stock`, quantity, low-stock threshold | `products` | R + W (`updateStockSettings`) | Ready for the **owner**. Public/buyer-facing consumers must go through `PUBLIC_STOCK_SELECT` + `toPublicStockBadge` ([stock/public.ts](../src/lib/stock/public.ts)) — raw counts never leave the server for non-owners |
 | Image / digital file upload | `/api/uploads/presign` | W | **Adapt** — a Route Handler, but still cookie-authenticated via `getActiveAccount()`, so B1/B2 apply to it too. It returns an object key; an agent flow needs presign → upload → attach without the key crossing the boundary (B6) |
@@ -248,6 +285,9 @@ Verdicts:
 | Order detail: amount, platform fee, currency, channel, status, buyer email, timestamp | `orders` | R | Ready. Buyer email is personal data — a read-only assistant should have it only if the seller granted that scope |
 | Dashboard metrics: revenue / sales / AOV windows, trends, refunded + disputed counts | `getDashboardOrders` | R | Ready |
 | Analytics totals: revenue, sales, AOV, fees, net, unique + repeat buyers, refunds, range days | `getAnalytics` | R | Ready — the richest single datapoint for "how is my business doing" |
+| The WHOLE analytics page in one object (sales + signals + resolved range + currency) | `getAnalyticsSnapshot` | R | **Ready, and the one to build the agent tool on.** Already the exact payload the page renders and publishes as JSON (see [analytics-datapoints.md](./analytics-datapoints.md)), so an agent and a person cannot be told different numbers |
+| Storefront views / product clicks / email signups / bookings, per kind: totals, distinct visitors, trend, channel mix, weekday mix, per-storefront ranking | `getSignals` | R | Ready. Note the `available` flag and the per-source `awaiting` state: a kind with no producer yet must be reported as NOT MEASURED, never as zero. Conflating those tells a seller their signup form is broken when it was never built |
+| Non-order event stream (raw rows) | `storefront_signals` |, | **Withhold.** Aggregates only, like `interaction_events`. The table holds a salted visitor digest whose whole justification is that it never leaves as a row; there is no agent question that the aggregate above cannot answer |
 | Revenue trend over time | `getAnalytics` | R | Ready |
 | Channel mix (embed vs marketplace) | `getAnalytics` | R | Ready |
 | Top products by revenue | `getAnalytics` | R | Ready — uses the order's `product_title` snapshot, so it survives renames and deletes |

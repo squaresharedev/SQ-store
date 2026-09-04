@@ -4,6 +4,7 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Slider } from "./slider";
 import { infoTextClass, labelClass, sliderNumberFieldClass } from "./control-styles";
+import { InfoTip } from "./InfoTip";
 
 /**
  * A slider paired with an editable number — the pattern FontSizeField
@@ -16,6 +17,12 @@ import { infoTextClass, labelClass, sliderNumberFieldClass } from "./control-sty
  * values that read better as a word than a digit ("Sharp", "None", "Mixed").
  * `headerAction` replaces it entirely for a control that also carries a reset
  * (see CardStyleControls' edge spacing, which resets to "Auto").
+ *
+ * `tip` is the caveat that used to be a paragraph under the slider. It sits
+ * beside the label as a "?" instead, because the panels are dense and a
+ * sentence explaining a control is read once and then in the way forever.
+ * Separate from `headerAction` on purpose: that slot is already spoken for by
+ * statusText and a reset, and a control can want both.
  */
 export function SliderField({
   id,
@@ -29,6 +36,7 @@ export function SliderField({
   valueText,
   statusText,
   headerAction,
+  tip,
   unit,
   labelClassName = labelClass,
   disabled,
@@ -48,6 +56,8 @@ export function SliderField({
   statusText?: string;
   /** Overrides statusText for a header that also carries a reset action. */
   headerAction?: React.ReactNode;
+  /** A sentence of explanation, revealed by a "?" beside the label. */
+  tip?: React.ReactNode;
   /** Static unit shown after the number field, e.g. "px", "%", "°". */
   unit?: string;
   labelClassName?: string;
@@ -65,7 +75,10 @@ export function SliderField({
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between gap-2">
-        <span className={labelClassName}>{label}</span>
+        <span className="flex min-w-0 items-center gap-1.5">
+          <span className={labelClassName}>{label}</span>
+          {tip && <InfoTip label={`About ${label}`}>{tip}</InfoTip>}
+        </span>
         {headerAction ?? (statusText && <span className={infoTextClass}>{statusText}</span>)}
       </div>
       <div className="flex items-center gap-2">

@@ -1,52 +1,33 @@
 "use client";
 
-import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
-import { infoTextClass } from "@/components/ui/control-styles";
+import { PieChart } from "@/components/charts";
 import type { ChannelSlice } from "@/lib/analytics/types";
-import { formatCents } from "@/lib/format/money";
-import {
-  CHART,
-  tooltipLabelClass,
-  tooltipValueClass,
-  tooltipWrapperClass,
-} from "@/components/analytics/chart-theme";
+import { moneyExact } from "@/components/analytics/chart-format";
+import { CHART_HEIGHT } from "@/components/analytics/chart-layout";
+import { TONE } from "@/components/analytics/palette";
 
-// Embed vs marketplace revenue donut (paid orders). Presentational only: the
-// parent fetches via getAnalytics and always passes both channels (embed
-// first, zeros included). Total revenue sits in the donut's centre.
+// Where the money comes from, a donut from the shared chart kit
+// (/dev/charts). The hole carries the total, so the card answers "how much"
+// and "from where" in one read.
+//
+// Zero-revenue channels are dropped rather than passed through as empty
+// slices: a legend row reading "Marketplace 0%" next to a ring it contributes
+// nothing to is noise, and the card's empty state already covers the case
+// where there is no revenue at all.
 
 const CHANNEL_LABELS: Record<ChannelSlice["channel"], string> = {
   embed: "Embed",
   marketplace: "Marketplace",
 };
 
-/** Slice colours by channel — the accent goes to embed, marketplace stays muted. */
-const CHANNEL_COLORS: Record<ChannelSlice["channel"], string> = {
-  embed: CHART.seriesPrimary,
-  marketplace: CHART.seriesMuted,
+/** Colour is PINNED per channel rather than taken in slice order, so a channel
+ *  keeps its identity when the other one is empty and the ring re-sorts. Both
+ *  are money, but neither is better than the other, so this is a neutral pair
+ *  plus the accent rather than green against something. */
+const CHANNEL_COLOR_INDEX: Record<ChannelSlice["channel"], number> = {
+  embed: TONE.neutral,
+  marketplace: TONE.traffic,
 };
-
-// Structural subset of recharts' tooltip content props — typing only what the
-// tooltip reads keeps it compatible with the wide ValueType/NameType generics.
-type SliceTooltipProps = {
-  active?: boolean;
-  payload?: ReadonlyArray<{ payload?: unknown }>;
-  currency: string;
-};
-
-function SliceTooltip({ active, payload, currency }: SliceTooltipProps) {
-  const slice = payload?.[0]?.payload as ChannelSlice | undefined;
-  if (!active || !slice) return null;
-  return (
-    <div className={tooltipWrapperClass}>
-      <p className={tooltipLabelClass}>{CHANNEL_LABELS[slice.channel]}</p>
-      <p className={tooltipValueClass}>{formatCents(slice.revenueCents, currency)}</p>
-      <p className={tooltipLabelClass}>
-        {slice.sales} {slice.sales === 1 ? "sale" : "sales"}
-      </p>
-    </div>
-  );
-}
 
 export function ChannelSplitChart({
   channels,
@@ -55,60 +36,22 @@ export function ChannelSplitChart({
   channels: ChannelSlice[];
   currency: string;
 }) {
-  const totalCents = channels.reduce((sum, slice) => sum + slice.revenueCents, 0);
+  const items = channels
+    .filter((slice) => slice.revenueCents > 0)
+    .map((slice) => ({
+      label: CHANNEL_LABELS[slice.channel],
+      value: slice.revenueCents,
+      colorIndex: CHANNEL_COLOR_INDEX[slice.channel],
+    }));
+
   return (
-    <div className="flex flex-col items-center gap-6 sm:flex-row sm:justify-center">
-      <div className="relative h-64 w-64 shrink-0">
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Tooltip
-              content={({ active, payload }) => (
-                <SliceTooltip active={active} payload={payload} currency={currency} />
-              )}
-            />
-            <Pie
-              data={channels}
-              dataKey="revenueCents"
-              nameKey="channel"
-              innerRadius="60%"
-              outerRadius="80%"
-              strokeWidth={0}
-              isAnimationActive={false}
-            >
-              {channels.map((slice) => (
-                <Cell key={slice.channel} fill={CHANNEL_COLORS[slice.channel]} />
-              ))}
-            </Pie>
-          </PieChart>
-        </ResponsiveContainer>
-        {/* Centred total — the donut's headline number. */}
-        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-          <span className={infoTextClass}>Total</span>
-          <span className="text-lg font-semibold text-foreground">
-            {formatCents(totalCents, currency)}
-          </span>
-        </div>
-      </div>
-      <ul className="flex flex-col gap-3">
-        {channels.map((slice) => (
-          <li key={slice.channel} className="flex items-center gap-3">
-            <span
-              aria-hidden
-              className="size-2 shrink-0 rounded-full"
-              style={{ backgroundColor: CHANNEL_COLORS[slice.channel] }}
-            />
-            <div className="font-inter text-sm">
-              <span className="text-foreground">{CHANNEL_LABELS[slice.channel]}</span>
-              <span className="ml-2 font-semibold text-foreground">
-                {formatCents(slice.revenueCents, currency)}
-              </span>
-              <span className="ml-2 text-muted-foreground">
-                {slice.sales} {slice.sales === 1 ? "sale" : "sales"}
-              </span>
-            </div>
-          </li>
-        ))}
-      </ul>
+    <div className="flex items-center" style={{ minHeight: CHART_HEIGHT }}>
+      <PieChart
+        items={items}
+        valueFormatter={moneyExact(currency)}
+        ariaLabel="Paid revenue by channel"
+        className="w-full"
+      />
     </div>
   );
 }

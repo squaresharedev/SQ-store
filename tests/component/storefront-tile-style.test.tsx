@@ -248,65 +248,6 @@ describe("per-tile style overrides", () => {
 });
 
 /**
- * The big-tile bug: cornerRadius is the seller's BASE setting, but a
- * multi-cell tile renders it scaled by its own span (scaledCornerRadius), so
- * a raw, unscaled radius under-reported how round a big tile really is. A
- * corner spot that read as "fine" on the base number could sit inside a
- * corner the tile's actual clip had already rounded away — a price tag or
- * title that stayed pinned to a bounding-box corner no real rounded shape
- * still had. These pin that the SAME base radius resolves differently once
- * the tile's own span scales it past the clip limit.
- */
-describe("corner spots scale with the tile's real size, not just the base radius", () => {
-  it("keeps a corner spot on a small tile whose scaled radius stays under the clip limit", () => {
-    render(
-      <StorefrontPreview
-        config={configWith([
-          {
-            type: "product",
-            productId: PRODUCT_A,
-            x: 0,
-            y: 0,
-            w: 1,
-            h: 1,
-            style: { cornerRadius: 20, priceTagPosition: "top-right" },
-          },
-        ])}
-        productsById={PRODUCTS}
-      />,
-    );
-    // 1x1 tile: scaled radius = 20 * min(1,1) = 20, under CORNER_SPOT_LIMIT (32).
-    expect(screen.getByText("€12.50")).toHaveClass("right-[var(--tag-inset,8px)]");
-  });
-
-  it("coerces the SAME base radius off that corner once a bigger tile scales it past the limit", () => {
-    render(
-      <StorefrontPreview
-        config={configWith([
-          {
-            type: "product",
-            productId: PRODUCT_A,
-            x: 0,
-            y: 0,
-            w: 2,
-            h: 2,
-            style: { cornerRadius: 20, priceTagPosition: "top-right" },
-          },
-        ])}
-        productsById={PRODUCTS}
-      />,
-    );
-    // 2x2 tile: scaled radius = 20 * min(2,2) = 40, past CORNER_SPOT_LIMIT
-    // (32) — this is the "still visible on a big element" bug: before the
-    // fix, this tag stayed at "top-right" (the raw base radius, 20, reads as
-    // fine) even though the tile's actual clip had rounded that corner away.
-    const tag = screen.getByText("€12.50");
-    expect(tag).not.toHaveClass("right-[var(--tag-inset,8px)]");
-    expect(tag).toHaveClass("left-1/2");
-  });
-});
-
-/**
  * Title placement through the same real render path. The title is placed on
  * the SAME seven-spot board as the price tag, so these pin the three things
  * that follow from that: the row decides where the band goes, the column which

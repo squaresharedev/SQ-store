@@ -1,7 +1,6 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { infoTextClass } from "@/components/ui/control-styles";
 import { useActionToast } from "@/components/ui/Toast";
 import { SaveButton } from "@/components/ui/SaveButton";
 import { SettingsCard } from "@/components/settings/SettingsCard";
@@ -10,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, type SelectOption } from "@/components/ui/select";
 import { saveTaxInfo, type SettingsActionState } from "@/lib/settings/actions";
 import { EU_COUNTRIES } from "@/lib/settings/constants";
+import { InfoTip } from "@/components/ui/InfoTip";
 
 const INITIAL: SettingsActionState = {};
 
@@ -54,7 +54,14 @@ export function TaxSection({
         noValidate
       >
         <div id="business-name" className="flex flex-col gap-1.5">
-          <Label htmlFor="tax_business_name">Business name</Label>
+          <span className="flex items-center gap-1.5">
+            <Label htmlFor="tax_business_name">Business name</Label>
+            <InfoTip label="When to fill in a business name">
+              Only if you sell through a registered business. Selling as
+              yourself is fine: leave it empty and your own name is used on
+              invoices and buyer-facing trader details.
+            </InfoTip>
+          </span>
           <Input
             id="tax_business_name"
             name="tax_business_name"
@@ -63,9 +70,6 @@ export function TaxSection({
             maxLength={200}
             autoComplete="organization"
           />
-          <p className={infoTextClass}>
-            Selling as yourself? Leave it empty.
-          </p>
         </div>
         <div id="vat" className="flex flex-col gap-1.5">
           <Label htmlFor="tax_vat_id">VAT ID</Label>

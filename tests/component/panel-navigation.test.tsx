@@ -2,7 +2,7 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, cleanup, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
-import { DEFAULT_STOREFRONT_CONFIG } from "@/types/storefront";
+import { DEFAULT_PRODUCT_PAGE_CONFIG, DEFAULT_STOREFRONT_CONFIG } from "@/types/storefront";
 import { ToastProvider } from "@/components/ui/Toast";
 import { PanelTabs, panelProps } from "@/components/ui/PanelTabs";
 import { PanelBackRow, PanelMenu, PanelMenuItem } from "@/components/ui/PanelMenu";
@@ -102,6 +102,14 @@ describe("ControlsPanel grouping", () => {
       onCustomFontUrlChange={vi.fn()}
         showGrid={false}
         onShowGridChange={vi.fn()}
+        productPage={DEFAULT_PRODUCT_PAGE_CONFIG}
+        onProductPageChange={vi.fn()}
+        policies={{}}
+        onPoliciesChange={vi.fn()}
+        shippingProfiles={[]}
+        onShippingProfilesChange={vi.fn()}
+        seller={{}}
+        onSellerChange={vi.fn()}
         searchEntries={editorEntries([], new Map())}
       />
     </ToastProvider>
@@ -111,7 +119,7 @@ describe("ControlsPanel grouping", () => {
     render(controls());
 
     const menu = screen.getByRole("list");
-    expect(within(menu).getAllByRole("listitem")).toHaveLength(6);
+    expect(within(menu).getAllByRole("listitem")).toHaveLength(7);
     // Nothing editable until a group is chosen: that IS the fix.
     expect(screen.queryByRole("slider")).not.toBeInTheDocument();
     expect(screen.queryByRole("switch")).not.toBeInTheDocument();

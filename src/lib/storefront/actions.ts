@@ -206,6 +206,17 @@ export async function saveStorefront(
     // Embed settings ride along validated so a designer save can't wipe what
     // updateEmbedSettings stored (the designer passes its loaded value through).
     ...(parsed.data.embed ? { embed: parsed.data.embed } : {}),
+    // The product page's options, policies and seller identity: plain data the
+    // schema has already bounded, persisted only when the client sent them.
+    ...(parsed.data.productPage ? { productPage: parsed.data.productPage } : {}),
+    ...(parsed.data.policies ? { policies: parsed.data.policies } : {}),
+    // Named shipping profiles. Products point at these BY ID, so dropping the
+    // member here would not merely lose text: every product using a profile
+    // would silently fall back to the store's default terms.
+    ...(parsed.data.shippingProfiles?.length
+      ? { shippingProfiles: parsed.data.shippingProfiles }
+      : {}),
+    ...(parsed.data.seller ? { seller: parsed.data.seller } : {}),
   };
 
   // Uploaded assets (image background, custom font): the config stores only the

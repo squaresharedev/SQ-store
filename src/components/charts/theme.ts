@@ -59,9 +59,28 @@ export const CHART_ANIMATION = {
   easing: "ease-out",
 } as const;
 
-/** Tooltip position glide between data points — fast enough to feel attached
- *  to the pointer, smooth enough to read as one object moving. */
-export const TOOLTIP_GLIDE = { duration: 100, easing: "ease-out" } as const;
+/**
+ * Tooltip presentation. It does NOT animate, and that is the whole point.
+ *
+ * Recharts' position animation tweens the readout from the container's own
+ * origin to the pointer, so the first hover of a session visibly launches a
+ * card from the chart's top-left corner and flies it to the cursor. There is
+ * no reading of that which is correct: a tooltip belongs at the pointer the
+ * instant the pointer is somewhere, and a 100ms flight across the card is time
+ * spent looking at travel instead of at the number. `isAnimationActive={false}`
+ * on every Tooltip, and no entrance keyframe on the body either.
+ *
+ * `wrapperStyle` carries the stacking. Recharts renders the readout as a
+ * positioned sibling of the plot, so without a z-index it competes with
+ * neighbouring cards on DOM order alone and slides UNDER the next chart down
+ * the page. z-40 is the dropdown tier (the same one popovers and menus use):
+ * above page content, deliberately below modals (z-50), the search overlay
+ * (z-[60]) and toasts (z-[70]), none of which a hover readout should cover.
+ */
+export const TOOLTIP = {
+  animated: false,
+  wrapperStyle: { zIndex: 40, outline: "none" },
+} as const;
 
 /** Tailwind classes for the hover dim: the highlighted series stays at full
  *  strength while siblings recede, as a smooth interruptible fade. */

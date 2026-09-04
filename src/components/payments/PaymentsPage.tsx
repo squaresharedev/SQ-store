@@ -1,8 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { helpTextClass } from "@/components/ui/control-styles";
-import { cn } from "@/lib/utils";
 import { BackgroundArrow } from "@/components/ui/BackgroundArrow";
 import type {
   BalanceTransaction,
@@ -46,9 +44,6 @@ export function PaymentsPage({ overview }: { overview: PaymentsOverview }) {
           <h1 className="text-2xl font-semibold text-foreground md:text-3xl">
             Payments
           </h1>
-          <p className={cn(helpTextClass, "mt-1")}>
-            Your balance, payouts and Stripe connection.
-          </p>
         </div>
 
         <ConnectionStatusCard

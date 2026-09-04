@@ -63,7 +63,6 @@ function renderTile(opts: {
       theme={theme()}
       overrides={opts.overrides}
       spotDrag={opts.drag}
-      placement={{ w: 1, h: 1 }}
     />,
   );
 }
@@ -92,12 +91,7 @@ describe("grabbing a token", () => {
       // The grid cell's own handler, standing in for the one that starts a
       // block drag. A press on the title must never reach it.
       <div onPointerDown={onCellPointerDown}>
-        <ProductTileContent
-          product={PRODUCT}
-          theme={theme()}
-          spotDrag={drag}
-          placement={{ w: 1, h: 1 }}
-        />
+        <ProductTileContent product={PRODUCT} theme={theme()} spotDrag={drag} />
       </div>,
     );
 
@@ -120,12 +114,7 @@ describe("grabbing a token", () => {
       // Arrows move the BLOCK on the board, so a focused token has to borrow
       // them or moving a title would shove the tile across the canvas.
       <div onKeyDown={onCellKeyDown}>
-        <ProductTileContent
-          product={PRODUCT}
-          theme={theme()}
-          spotDrag={drag}
-          placement={{ w: 1, h: 1 }}
-        />
+        <ProductTileContent product={PRODUCT} theme={theme()} spotDrag={drag} />
       </div>,
     );
 

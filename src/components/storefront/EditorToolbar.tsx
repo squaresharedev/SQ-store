@@ -2,7 +2,9 @@
 
 /**
  * Figma-style floating toolbar fixed at the bottom-center of the storefront
- * designer: insert tools, history, zoom, preview mode.
+ * designer: insert tools, history, zoom. The desktop/mobile preview switch
+ * lives separately, floating above the canvas (see DeviceSizeSwitch) — it is
+ * reachable at every viewport width, so it has no seat in this bar at all.
  *
  * PHONES GET A DIFFERENT BAR. The full set is ~570px wide, so below `sm` it
  * used to overflow a 390px screen and silently clip everything past the zoom
@@ -13,7 +15,7 @@
  *   phone : insert · undo · Design · More
  *   sm+   : the full bar
  *
- * "More" holds what a thumb rarely needs mid-edit — redo, tidy, preview mode.
+ * "More" holds what a thumb rarely needs mid-edit — redo and tidy.
  * Zoom buttons are desktop-only: pinch handles it on touch, far better than
  * a pair of 36px targets.
  *
@@ -24,15 +26,14 @@
 import { useEffect, useRef, useState } from "react";
 import {
   Ellipsis,
+  FileText,
   LoaderCircle,
   Minus,
-  Monitor,
   Plus,
   Redo2,
   Shapes,
   ShoppingBag,
   SlidersHorizontal,
-  Smartphone,
   Type,
   Undo2,
   Upload,
@@ -45,6 +46,7 @@ import {
   iconPopClass,
   overlayItemClass,
   overlaySurfaceClass,
+  toolbarTipClass,
   transitionClass as TRANSITION,
 } from "@/components/ui/control-styles";
 import { ShapeKindGlyph } from "./ShapeTileContent";
@@ -66,9 +68,10 @@ function ZoomReadout({ viewport }: { viewport: CanvasViewport }) {
 }
 
 /** Labelled insert-tool button: icon + text label (label hidden on mobile).
- *  `group/btn` lets the icon pop on hover/focus (see iconPopClass below). */
+ *  `group/btn` lets the icon pop on hover/focus (see iconPopClass below);
+ *  `group/tip relative` hosts a <ToolbarTip> child. */
 const INSERT_BTN =
-  `group/btn inline-flex h-11 shrink-0 items-center gap-1.5 rounded-none px-2.5 text-xs font-medium sm:h-9 ` +
+  `group/btn group/tip relative inline-flex h-11 shrink-0 items-center gap-1.5 rounded-none px-2.5 text-xs font-medium sm:h-9 ` +
   `text-muted-foreground hover:bg-accent hover:text-foreground ` +
   `disabled:pointer-events-none disabled:opacity-50 ${TRANSITION} ${FOCUS_RING}`;
 
@@ -78,7 +81,7 @@ const INSERT_ICON = `size-4 ${iconPopClass}`;
 /** Icon-only square button. 44px on touch (the Apple/Material minimum), 36px
  *  from `sm` up where a pointer makes the smaller target fine. */
 const ICON_BTN =
-  `inline-flex size-11 shrink-0 items-center justify-center rounded-none sm:size-9 ` +
+  `group/tip relative inline-flex size-11 shrink-0 items-center justify-center rounded-none sm:size-9 ` +
   `text-muted-foreground hover:bg-accent hover:text-foreground ` +
   `disabled:pointer-events-none disabled:opacity-50 ${TRANSITION} ${FOCUS_RING}`;
 
@@ -89,9 +92,21 @@ const MORE_ITEM = cn(overlayItemClass, "gap-3 py-2.5 font-medium");
  *  own insert buttons rather than the "More" sheet's rows, because it sits in
  *  a horizontal bar, not a vertical list. */
 const MENU_ROW_BTN =
-  `inline-flex h-9 shrink-0 items-center gap-1.5 rounded-none px-2.5 text-xs font-medium ` +
+  `group/tip relative inline-flex h-9 shrink-0 items-center gap-1.5 rounded-none px-2.5 text-xs font-medium ` +
   `text-muted-foreground hover:bg-accent hover:text-foreground ` +
   `disabled:pointer-events-none disabled:opacity-50 ${TRANSITION} ${FOCUS_RING}`;
+
+/** Hover/focus label popped above an icon-only (or icon+hidden-label)
+ *  toolbar control. Its host button supplies the `group/tip` this reacts to
+ *  — see toolbarTipClass. Visual only: the trigger's own `aria-label` is
+ *  already the accessible name, so this stays out of the a11y tree. */
+function ToolbarTip({ children }: { children: string }) {
+  return (
+    <span aria-hidden="true" className={toolbarTipClass}>
+      {children}
+    </span>
+  );
+}
 
 /** Active state for the preview-mode pair. */
 const PREVIEW_ACTIVE = "bg-primary text-primary-foreground";
@@ -127,11 +142,18 @@ export function EditorToolbar({
   onZoomReset,
   onTidy,
   canTidy,
-  previewMode,
-  onPreviewModeChange,
   settingsOpen,
   onToggleSettings,
+  pagesOpen,
+  canOpenPage,
+  onTogglePages,
 }: {
+  /** True while at least one product page is out on the canvas. */
+  pagesOpen: boolean;
+  /** False when the board holds no product, so there is no page to show. */
+  canOpenPage: boolean;
+  /** Show the page for the selected (or first) product, or put them all away. */
+  onTogglePages: () => void;
   onAddProduct: () => void;   // opens the product picker card (does not insert directly)
   onAddText: () => void;
   /** Insert a shape of the given kind (chosen from the hover menu). */
@@ -157,8 +179,6 @@ export function EditorToolbar({
   /** Pack every block toward the top-left, in reading order. */
   onTidy: () => void;
   canTidy: boolean;
-  previewMode: "desktop" | "mobile";
-  onPreviewModeChange: (mode: "desktop" | "mobile") => void;
   /** Mobile only: the Design bottom sheet (global settings) toggle. */
   settingsOpen: boolean;
   onToggleSettings: () => void;
@@ -221,10 +241,10 @@ export function EditorToolbar({
         onClick={onAddProduct}
         disabled={!canAddBlocks}
         aria-label="Add product"
-        title="Add product"
       >
         <ShoppingBag className={INSERT_ICON} strokeWidth={2} aria-hidden="true" />
         <span className="hidden sm:inline">Product</span>
+        <ToolbarTip>Add product</ToolbarTip>
       </button>
 
       <button
@@ -233,10 +253,10 @@ export function EditorToolbar({
         onClick={onAddText}
         disabled={!canAddBlocks}
         aria-label="Add text"
-        title="Add text"
       >
         <Type className={INSERT_ICON} strokeWidth={2} aria-hidden="true" />
         <span className="hidden sm:inline">Text</span>
+        <ToolbarTip>Add text</ToolbarTip>
       </button>
 
       {/* Element tool: hovering (or clicking, on touch) reveals the menu —
@@ -255,10 +275,10 @@ export function EditorToolbar({
           aria-label="Add element"
           aria-haspopup="true"
           aria-expanded={shapeMenuOpen}
-          title="Add element: your own image, or a shape"
         >
           <Shapes className={INSERT_ICON} strokeWidth={2} aria-hidden="true" />
           <span className="hidden sm:inline">Element</span>
+          <ToolbarTip>Add element</ToolbarTip>
         </button>
 
         {/* pb-1.5 (not a margin) bridges the visual gap between button and
@@ -301,11 +321,6 @@ export function EditorToolbar({
               disabled={!canAddBlocks || uploadingElement}
               aria-label={uploadingElement ? "Uploading…" : "Upload"}
               aria-busy={uploadingElement}
-              title={
-                uploadingElement
-                  ? "Uploading…"
-                  : "Upload an image: SVG, PNG or JPEG, up to 2 MB"
-              }
               className={cn(ICON_BTN, "shrink-0")}
             >
               {/* The one place the row still needs words is progress, and an
@@ -319,6 +334,9 @@ export function EditorToolbar({
               ) : (
                 <Upload className="size-4" strokeWidth={2} aria-hidden="true" />
               )}
+              <ToolbarTip>
+                {uploadingElement ? "Uploading…" : "Upload image"}
+              </ToolbarTip>
             </button>
 
             <button
@@ -348,10 +366,10 @@ export function EditorToolbar({
                 }}
                 disabled={!canAddBlocks}
                 aria-label={`Add ${SHAPE_SPECS[kind].label.toLowerCase()}`}
-                title={SHAPE_SPECS[kind].label}
                 className={cn(ICON_BTN, "shrink-0")}
               >
                 <ShapeKindGlyph kind={kind} />
+                <ToolbarTip>{SHAPE_SPECS[kind].label}</ToolbarTip>
               </button>
             ))}
           </div>
@@ -378,6 +396,23 @@ export function EditorToolbar({
         />
       </div>
 
+      {/* -- The PRODUCT PAGE node. Sits with the insert tools because that is
+            what it does: it puts another thing on the canvas. The tiles have
+            their own node (see BlockTile); this is the route in when nothing
+            is selected. -- */}
+      <button
+        type="button"
+        className={`${INSERT_BTN} ${pagesOpen ? PREVIEW_ACTIVE : PREVIEW_IDLE}`}
+        onClick={onTogglePages}
+        disabled={!canOpenPage && !pagesOpen}
+        aria-pressed={pagesOpen}
+        aria-label={pagesOpen ? "Close the product pages" : "Show the product page"}
+      >
+        <FileText className={INSERT_ICON} strokeWidth={2} aria-hidden="true" />
+        <span className="hidden sm:inline">Page</span>
+        <ToolbarTip>{pagesOpen ? "Close product page" : "Show product page"}</ToolbarTip>
+      </button>
+
       <Divider />
 
       {/* -- Group 2: HISTORY -- */}
@@ -387,9 +422,9 @@ export function EditorToolbar({
         onClick={onUndo}
         disabled={!canUndo}
         aria-label="Undo"
-        title="Undo (Ctrl+Z)"
       >
         <Undo2 className="size-4" strokeWidth={2} aria-hidden="true" />
+        <ToolbarTip>Undo (Ctrl+Z)</ToolbarTip>
       </button>
 
       {/* Redo and Tidy move into "More" on a phone — a thumb mid-edit reaches
@@ -405,9 +440,9 @@ export function EditorToolbar({
           onClick={onRedo}
           disabled={!canRedo}
           aria-label="Redo"
-          title="Redo (Ctrl+Shift+Z)"
         >
           <Redo2 className="size-4" strokeWidth={2} aria-hidden="true" />
+          <ToolbarTip>Redo (Ctrl+Shift+Z)</ToolbarTip>
         </button>
 
         <button
@@ -416,9 +451,9 @@ export function EditorToolbar({
           onClick={onTidy}
           disabled={!canTidy}
           aria-label="Tidy the canvas"
-          title="Tidy: pack blocks to the top-left"
         >
           <WandSparkles className="size-4" strokeWidth={2} aria-hidden="true" />
+          <ToolbarTip>Tidy up</ToolbarTip>
         </button>
       </div>
 
@@ -431,53 +466,27 @@ export function EditorToolbar({
           className={ICON_BTN}
           onClick={onZoomOut}
           aria-label="Zoom out"
-          title="Zoom out (Ctrl -)"
         >
           <Minus className="size-4" strokeWidth={2} aria-hidden="true" />
+          <ToolbarTip>Zoom out (Ctrl -)</ToolbarTip>
         </button>
         <button
           type="button"
           onClick={onZoomReset}
           aria-label="Reset zoom to 100%"
-          title="Reset zoom (Ctrl 0)"
           className={`${INSERT_BTN} min-w-14 justify-center tabular-nums`}
         >
           <ZoomReadout viewport={viewport} />
+          <ToolbarTip>Reset zoom (Ctrl 0)</ToolbarTip>
         </button>
         <button
           type="button"
           className={ICON_BTN}
           onClick={onZoomIn}
           aria-label="Zoom in"
-          title="Zoom in (Ctrl +)"
         >
           <Plus className="size-4" strokeWidth={2} aria-hidden="true" />
-        </button>
-      </div>
-
-      {/* -- Group 4: PREVIEW mode -- */}
-      <div className="hidden items-center gap-1 sm:flex">
-        <Divider />
-        <button
-          type="button"
-          className={`${ICON_BTN} ${previewMode === "desktop" ? PREVIEW_ACTIVE : PREVIEW_IDLE}`}
-          onClick={() => onPreviewModeChange("desktop")}
-          aria-pressed={previewMode === "desktop"}
-          aria-label="Desktop preview"
-          title="Desktop preview"
-        >
-          <Monitor className="size-4" strokeWidth={2} aria-hidden="true" />
-        </button>
-
-        <button
-          type="button"
-          className={`${ICON_BTN} ${previewMode === "mobile" ? PREVIEW_ACTIVE : PREVIEW_IDLE}`}
-          onClick={() => onPreviewModeChange("mobile")}
-          aria-pressed={previewMode === "mobile"}
-          aria-label="Mobile preview"
-          title="Mobile preview"
-        >
-          <Smartphone className="size-4" strokeWidth={2} aria-hidden="true" />
+          <ToolbarTip>Zoom in (Ctrl +)</ToolbarTip>
         </button>
       </div>
 
@@ -492,13 +501,13 @@ export function EditorToolbar({
           onClick={onToggleSettings}
           aria-pressed={settingsOpen}
           aria-label="Design settings"
-          title="Design settings"
         >
           <SlidersHorizontal
             className="size-4"
             strokeWidth={2}
             aria-hidden="true"
           />
+          <ToolbarTip>Design settings</ToolbarTip>
         </button>
       </div>
 
@@ -511,9 +520,9 @@ export function EditorToolbar({
           aria-haspopup="menu"
           aria-expanded={moreOpen}
           aria-label="More tools"
-          title="More tools"
         >
           <Ellipsis className="size-4" strokeWidth={2} aria-hidden="true" />
+          <ToolbarTip>More tools</ToolbarTip>
         </button>
 
         {moreOpen && (
@@ -577,38 +586,6 @@ export function EditorToolbar({
               >
                 <Shapes className="size-4" strokeWidth={2} aria-hidden="true" />
                 All shapes
-              </button>
-
-              <div aria-hidden="true" className="my-1 h-px bg-border" />
-
-              {/* menuitemradio, not menuitem: the two preview modes are one
-                  mutually-exclusive choice, and `menuitem` does not support a
-                  selected state at all. */}
-              <button
-                type="button"
-                role="menuitemradio"
-                aria-checked={previewMode === "desktop"}
-                className={cn(MORE_ITEM, previewMode === "desktop" && "bg-accent")}
-                onClick={() => {
-                  onPreviewModeChange("desktop");
-                  setMoreOpen(false);
-                }}
-              >
-                <Monitor className="size-4" strokeWidth={2} aria-hidden="true" />
-                Desktop preview
-              </button>
-              <button
-                type="button"
-                role="menuitemradio"
-                aria-checked={previewMode === "mobile"}
-                className={cn(MORE_ITEM, previewMode === "mobile" && "bg-accent")}
-                onClick={() => {
-                  onPreviewModeChange("mobile");
-                  setMoreOpen(false);
-                }}
-              >
-                <Smartphone className="size-4" strokeWidth={2} aria-hidden="true" />
-                Mobile preview
               </button>
           </div>
         )}

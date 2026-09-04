@@ -1,8 +1,7 @@
-import { helpTextClass } from "@/components/ui/control-styles";
-import { cn } from "@/lib/utils";
 import { MemberRow, usernameFor } from "@/components/settings/team/MemberRow";
 import type { TeamRole } from "@/lib/team/permissions";
 import type { TeamMemberRow } from "@/lib/team/queries";
+import { InfoTip } from "@/components/ui/InfoTip";
 
 /** Owner first, then editors, then viewers; alphabetical inside each rank. */
 const ROLE_ORDER: Record<TeamRole, number> = { owner: 0, editor: 1, viewer: 2 };
@@ -68,13 +67,16 @@ export function MemberList({
 
       {invited.length > 0 && (
         <div className="pt-6">
-          <h3 className="font-inter text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Invited
-          </h3>
-          <p className={cn(helpTextClass, "mt-1")}>
-            No access yet — an invite takes effect the first time they sign in
-            with that email address.
-          </p>
+          <span className="flex items-center gap-1.5">
+            <h3 className="font-inter text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Invited
+            </h3>
+            <InfoTip label="What an invited member can do">
+              Nothing yet. An invite takes effect the first time that person
+              signs in with the email address it was sent to, and only then do
+              they appear as a member with the role you chose.
+            </InfoTip>
+          </span>
           <ul className="mt-1 divide-y divide-border border-b border-border">
             {invited.map((member) => (
               <li key={member.id}>

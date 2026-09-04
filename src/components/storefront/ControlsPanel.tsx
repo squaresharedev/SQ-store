@@ -1,7 +1,15 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { StorefrontHeader, StorefrontTheme } from "@/types/storefront";
+import type {
+  ProductPageConfig,
+  StorefrontHeader,
+  ShippingProfile,
+  StorefrontPolicies,
+  StorefrontSeller,
+  StorefrontTheme,
+} from "@/types/storefront";
+import { resolveInk } from "@/components/product-page/product-page-maps";
 import {
   CONTROLS_GROUPS,
   GROUP_LABELS,
@@ -23,6 +31,7 @@ import { PriceTagSection } from "./PriceTagSection";
 import { LayoutSection } from "./LayoutSection";
 import { TypographySection } from "./TypographySection";
 import { SoldOutSection } from "./SoldOutSection";
+import { ProductPageSection } from "./ProductPageSection";
 
 /**
  * GLOBAL design settings, as a menu of named groups rather than one column of
@@ -67,11 +76,30 @@ export function ControlsPanel({
   onOpenLayers,
   searchEntries,
   onJump,
+  productPage,
+  onProductPageChange,
+  policies,
+  onPoliciesChange,
+  shippingProfiles,
+  onShippingProfilesChange,
+  seller,
+  onSellerChange,
 }: {
   theme: StorefrontTheme;
   header: StorefrontHeader;
   onThemeChange: (theme: StorefrontTheme) => void;
   onHeaderChange: (header: StorefrontHeader) => void;
+  /** The product page's options, policies and seller identity. */
+  productPage: ProductPageConfig;
+  onProductPageChange: (next: ProductPageConfig) => void;
+  policies: StorefrontPolicies;
+  onPoliciesChange: (next: StorefrontPolicies) => void;
+  shippingProfiles: ShippingProfile[];
+  /** The coalesce key groups rapid edits to the same profile field into one
+   *  undo step, the way every other text control in this panel behaves. */
+  onShippingProfilesChange: (next: ShippingProfile[], coalesceKey?: string) => void;
+  seller: StorefrontSeller;
+  onSellerChange: (next: StorefrontSeller) => void;
   /** Canvas resize, guarded against cutting off placed blocks. */
   onCanvasChange: (columns: number, rows: number) => void;
   /** Display URL for an image background (signed or local object URL). */
@@ -120,6 +148,8 @@ export function ControlsPanel({
 
   /** Which half of Product cards a summons is pointing at, if any. */
   const summoned = activeRef?.kind === "cards" ? activeRef.section : null;
+  /** Which section of Product page a summons is pointing at, if any. */
+  const summonedPage = activeRef?.kind === "productPage" ? activeRef.section : null;
 
   // Never offer a row that would do nothing. Without an owner to jump for it,
   // this panel can only open a settings group, so that is all it indexes.
@@ -161,9 +191,19 @@ export function ControlsPanel({
                 ? theme.customFont && theme.font === "custom"
                   ? theme.customFont.name
                   : FONT_LABELS[theme.font]
-                : undefined
+                : id === "productPage" && !productPage.enabled
+                  ? "Off"
+                  : undefined
             }
-            onClick={() => setGroup(id)}
+            // The product page group turns the canvas to the page it edits, so
+            // it opens through the setting opener (the designer owns that
+            // switch), exactly as a search hit would. Without a provider it
+            // simply opens the group.
+            onClick={() =>
+              id === "productPage" && setting
+                ? setting.open({ kind: "productPage", section: "layout" })
+                : setGroup(id)
+            }
           />
         ))}
         {/* Not one of the GROUPS: those are settings that live on the theme,
@@ -217,6 +257,22 @@ export function ControlsPanel({
             <PriceTagSection theme={theme} onChange={onThemeChange} />
           </CollapsibleSection>
         </>
+      ) : group === "productPage" ? (
+        /* Same treatment as Cards: five full-width sections drawing their own
+           dividers, any of which a search hit can summon. */
+        <ProductPageSection
+          productPage={productPage}
+          onProductPageChange={onProductPageChange}
+          policies={policies}
+          onPoliciesChange={onPoliciesChange}
+          shippingProfiles={shippingProfiles}
+          onShippingProfilesChange={onShippingProfilesChange}
+          seller={seller}
+          onSellerChange={onSellerChange}
+          storefrontFont={theme.font}
+          customFontName={theme.customFont?.name}
+          summoned={summonedPage}
+        />
       ) : (
         /* No section chrome around a single group's controls: the back row
            already names them, so a heading here would say it twice. */

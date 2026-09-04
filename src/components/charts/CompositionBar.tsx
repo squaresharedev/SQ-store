@@ -71,11 +71,11 @@ export function CompositionBar({
         {/* Floating readout anchored over the hovered/focused segment. */}
         {activeSegment && (
           <div
-            className="pointer-events-none absolute bottom-full z-10 mb-2 -translate-x-1/2 whitespace-nowrap"
+            className="pointer-events-none absolute bottom-full z-40 mb-2 -translate-x-1/2 whitespace-nowrap"
             style={{ left: `${activeSegment.center}%` }}
             role="status"
           >
-            <div className={cn(tooltipWrapperClass, "chart-tip-enter")}>
+            <div className={tooltipWrapperClass}>
               <p className={tooltipLabelClass}>{activeSegment.item.label}</p>
               <p className={tooltipValueClass}>
                 {valueFormatter(activeSegment.item.value)}

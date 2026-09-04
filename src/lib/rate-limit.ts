@@ -52,6 +52,14 @@ export const RATE_LIMITS = {
   /** Upload URL minting — each one authorises bytes into R2. */
   uploadPresign: { max: 60, windowSeconds: 60 * 60 },
   /**
+   * The hosted product page, per client IP. Two service-role reads and a few
+   * HMAC signatures per hit; the budget is sized for a person browsing a
+   * catalogue, not a crawler walking one. Fails closed like the embed routes.
+   */
+  productPage: { max: 600, windowSeconds: 60 * 60 },
+  /** The editor's product-page preview data, per signed-in user. */
+  productPreview: { max: 300, windowSeconds: 60 * 60 },
+  /**
    * Digital-file uploads specifically, which are capped at 200 MB EACH — an
    * order of magnitude larger than an image.
    *
@@ -68,6 +76,23 @@ export const RATE_LIMITS = {
    * lifecycle rule is for.
    */
   fileUpload: { max: 12, windowSeconds: 60 * 60 },
+  /**
+   * Product DOCUMENT uploads (manuals, certificates, spec sheets): PDF only,
+   * 20 MB each, so the byte ceiling here is 600 MB an hour per seller.
+   *
+   * Split from fileUpload in both directions. Documents are attached in
+   * batches: a product may carry DOCUMENTS_MAX of them, and a seller listing
+   * two regulated products in one sitting would otherwise exhaust the
+   * twelve-call digital-file budget and be locked out of the upload their
+   * PRODUCT needs. And going the other way, a document is a public,
+   * unauthenticated download once saved, so it should never be able to spend
+   * the budget that guards the paid one.
+   *
+   * 30 is a shade under four full products' worth an hour: comfortably past
+   * any real afternoon of listing, and nowhere near enough to matter as a
+   * storage or egress vector.
+   */
+  documentUpload: { max: 30, windowSeconds: 60 * 60 },
   /** Handle probing from the settings field. An enumeration brake, and the
    *  handle is half a credential, so the answer is worth something to an
    *  attacker even though the field is public. */
@@ -79,6 +104,20 @@ export const RATE_LIMITS = {
    * brake, not an access control. The origin allowlist is the access control.
    */
   embedFetch: { max: 600, windowSeconds: 60 * 60 },
+  /**
+   * Analytics signals reported by the embed widget, keyed on the CLIENT.
+   *
+   * Its own budget rather than sharing embedFetch's, in both directions: a
+   * visitor clicking around one storefront legitimately sends several of these
+   * per payload fetch, so sharing would let interaction lock out rendering;
+   * and this one causes a WRITE, so it should never be spendable by a read.
+   *
+   * Sized as a rough ceiling on real interaction (a click every couple of
+   * seconds, sustained for an hour) rather than on abuse: the row that lands
+   * is already deduped, origin-gated and limited to one non-conversion kind,
+   * so what this bounds is database writes, not the honesty of the figure.
+   */
+  embedSignal: { max: 1200, windowSeconds: 60 * 60 },
   /** Avatar uploads (pre-existing budget, unchanged). */
   avatarUpload: { max: 5, windowSeconds: 60 * 60 },
   /**
@@ -144,6 +183,18 @@ export const RATE_LIMITS = {
   passwordReauth: { max: 10, windowSeconds: 15 * 60 },
   /** Product create/update/delete: each can head or evict an R2 object. */
   productWrite: { max: 120, windowSeconds: 60 * 60 },
+  /**
+   * CSV product imports. Its own budget rather than productWrite's, because
+   * the two are not the same size: one call here parses a file and inserts up
+   * to IMPORT_ROWS_MAX rows in a batch, so pricing it as a single product
+   * write would let a script drive thousands of inserts through the cheapest
+   * budget in this list.
+   *
+   * Deliberately small. Moving a catalogue is something a seller does once,
+   * then a few more times while they get the columns right; anything past a
+   * dozen attempts in an hour is a loop, not a person.
+   */
+  productImport: { max: 12, windowSeconds: 60 * 60 },
   /** Storefront saves: the heaviest write path (multi-query + R2 verify). */
   storefrontWrite: { max: 240, windowSeconds: 60 * 60 },
   /** Stock edits: a single UPDATE, but trivially scriptable. */

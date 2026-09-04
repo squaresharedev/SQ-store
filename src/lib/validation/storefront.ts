@@ -1,13 +1,16 @@
 import { z } from "zod";
 import {
+  emailAddress,
   hexColor,
   hostname,
   isStrictHexColor,
   multiLineText,
+  referenceCode,
   singleLineText,
   uniqueList,
   uuidField,
 } from "@/lib/validation/inputs";
+import { EU_COUNTRY_CODES } from "@/lib/settings/constants";
 import {
   BACKGROUND_IMAGE_SCALE_MAX,
   BACKGROUND_IMAGE_SCALE_MIN,
@@ -29,6 +32,15 @@ import {
   HOVER_TRANSITION_MS_MIN,
   IMAGE_ALT_MAX,
   IMAGE_FITS,
+  POLICY_TEXT_MAX,
+  PRODUCT_PAGE_CTA_MAX,
+  PRODUCT_PAGE_PRICE_NOTES,
+  PRODUCT_PAGE_SECTION_IDS,
+  PRODUCT_PAGE_SHIPPING_NOTES,
+  SELLER_FIELD_MAX,
+  SHIPPING_DISPATCH_MAX,
+  SHIPPING_PROFILES_MAX,
+  SHIPPING_PROFILE_NAME_MAX,
   PRICE_DISPLAYS,
   PRICE_TAG_BORDER_WIDTH_MAX,
   PRICE_TAG_FONTS,
@@ -394,6 +406,154 @@ export const embedSettingsSchema = z.strictObject({
   domains: uniqueList(hostname(), { label: "domains", max: EMBED_MAX_DOMAINS }),
 });
 
+// ── Product page ────────────────────────────────────────────────────────
+// The hosted product page's options (types/storefront.ts). Enums, booleans,
+// one strict hex and one capped label: the page can be arranged, never
+// scripted. `sections` must name each section AT MOST once (never duplicated),
+// but need not name every one: PRODUCT_PAGE_SECTION_IDS has grown before (it
+// will again), and a config saved under an older, shorter list must keep
+// parsing rather than the whole product page silently reverting to defaults.
+// normalizeSections (lib/storefront/product-page.ts) is what fills in any
+// section the stored list is missing, always hidden by default.
+
+const productPageSectionSchema = z.strictObject({
+  id: z.enum(PRODUCT_PAGE_SECTION_IDS),
+  show: z.boolean(),
+});
+
+/**
+ * Fields the product page USED to store, dropped on parse rather than
+ * rejected.
+ *
+ * strictObject is what keeps anything unexpected out of the saved jsonb, and
+ * that same strictness would reject a config written before a field was
+ * retired: the whole product page would fail to parse and silently revert to
+ * the coded defaults, losing the seller's arrangement. So a retired key is
+ * stripped here, exactly as themeSchema migrates its own renamed fields.
+ *
+ * - `surface` ("card" | "plain"): the page no longer floats on a white card.
+ *   It sits on the storefront background and inherits the shop's own look, so
+ *   there is nothing left to choose between.
+ * - `descriptionPlacement` ("info" | "details"): the description reads under
+ *   the title, full stop. An option that moved it into the fold below only
+ *   offered sellers a worse page.
+ * - `layout`, `gallery`, `ctaStyle`, `textColor`: four decisions with one
+ *   sensible answer each, charged to the seller every time they opened the
+ *   panel. See the note above ProductPageConfig for what each one was and why
+ *   it went.
+ */
+const RETIRED_PRODUCT_PAGE_FIELDS = [
+  "surface",
+  "descriptionPlacement",
+  "layout",
+  "gallery",
+  "ctaStyle",
+  "textColor",
+] as const;
+
+export const productPageSchema = z.preprocess(
+  (value) => {
+    if (typeof value !== "object" || value === null) return value;
+    const config = value as Record<string, unknown>;
+    if (!RETIRED_PRODUCT_PAGE_FIELDS.some((field) => field in config)) return value;
+    const next = { ...config };
+    for (const field of RETIRED_PRODUCT_PAGE_FIELDS) delete next[field];
+    return next;
+  },
+  z.strictObject({
+    enabled: z.boolean(),
+    imageFit: z.enum(IMAGE_FITS),
+    // Absent = the storefront's own font, which is the default.
+    font: z.enum(STOREFRONT_FONTS).optional(),
+    ctaLabel: singleLineText({ label: "The buy button label", max: PRODUCT_PAGE_CTA_MAX }),
+    priceNote: z.enum(PRODUCT_PAGE_PRICE_NOTES),
+    shippingNote: z.enum(PRODUCT_PAGE_SHIPPING_NOTES),
+    showStock: z.boolean(),
+    showSeller: z.boolean(),
+    allowIndexing: z.boolean(),
+    sections: z
+      .array(productPageSectionSchema)
+      .max(PRODUCT_PAGE_SECTION_IDS.length, {
+        error: "The product page must list every section once.",
+      })
+      // The stored ORDER is no longer read (the page renders the fixed one),
+      // but the array keeps its shape so no saved config has to be rewritten.
+      .refine(
+        (sections) => new Set(sections.map((section) => section.id)).size === sections.length,
+        { error: "The product page can't list the same section twice." },
+      ),
+  }),
+);
+
+/** Store policies: plain paragraphs, each capped, each optional. Editors drop
+ *  an emptied field's key rather than storing "" (see compactText).
+ *
+ *  `shipping` is also the DEFAULT shipping profile — what a product ships
+ *  under when it names none, which is nearly all of them. */
+export const policiesSchema = z.strictObject({
+  shipping: multiLineText({ label: "The shipping policy", max: POLICY_TEXT_MAX, min: 1 }).optional(),
+  dispatch: singleLineText({
+    label: "The dispatch time",
+    max: SHIPPING_DISPATCH_MAX,
+  }).optional(),
+  returns: multiLineText({ label: "The returns policy", max: POLICY_TEXT_MAX, min: 1 }).optional(),
+});
+
+/**
+ * A named shipping exception. `id` is a uuid the editor mints and a product's
+ * `shipping_profile_id` points at; the DB CHECK on that column accepts the
+ * same shape.
+ *
+ * `body` is required with min 1: a profile whose terms are blank says less
+ * than the store default it replaced, so it is not a thing to save. `dispatch`
+ * on its own is not enough for the same reason — a seller who only wants to
+ * change the dispatch line for one product still owes the buyer the terms.
+ */
+export const shippingProfileSchema = z.strictObject({
+  id: uuidField("That shipping profile"),
+  name: singleLineText({ label: "A shipping profile name", max: SHIPPING_PROFILE_NAME_MAX }),
+  dispatch: singleLineText({
+    label: "The dispatch time",
+    max: SHIPPING_DISPATCH_MAX,
+  }).optional(),
+  body: multiLineText({ label: "The shipping terms", max: POLICY_TEXT_MAX, min: 1 }),
+});
+
+export const shippingProfilesSchema = z
+  .array(shippingProfileSchema)
+  .max(SHIPPING_PROFILES_MAX, {
+    error: `A store can keep up to ${SHIPPING_PROFILES_MAX} shipping profiles.`,
+  })
+  // Ids are what products point at, so a duplicate would make "which terms"
+  // unanswerable — exactly the rule the product option tree lives by.
+  .refine((profiles) => new Set(profiles.map((profile) => profile.id)).size === profiles.length, {
+    error: "Each shipping profile can only be listed once.",
+  });
+
+/** Trader identity. The email is the one field here that is not prose, and it
+ *  goes through the same address gate every other email in the app does; it is
+ *  rendered as a mailto only after parsing. `country` follows the tax
+ *  settings' rule: an EU code, or "" for "not in the EU". */
+export const sellerSchema = z.strictObject({
+  businessName: singleLineText({
+    label: "The business name",
+    max: SELLER_FIELD_MAX.businessName,
+  }).optional(),
+  address: multiLineText({
+    label: "The business address",
+    max: SELLER_FIELD_MAX.address,
+    min: 1,
+  }).optional(),
+  email: emailAddress("The contact email").optional(),
+  vatId: referenceCode({ label: "A VAT ID", min: 2, max: SELLER_FIELD_MAX.vatId }).optional(),
+  country: z
+    .enum(["", ...EU_COUNTRY_CODES] as [string, ...string[]], {
+      error: "Pick a country from the list.",
+    })
+    .optional(),
+  phone: singleLineText({ label: "The phone number", max: SELLER_FIELD_MAX.phone }).optional(),
+});
+
 // Free placement: every block carries its own cell coordinates and span. The
 // per-field caps here are absolute (canvas maximums); the config-level refine
 // below enforces the tighter, per-storefront bounds and non-overlap.
@@ -580,6 +740,10 @@ const configObjectSchema = z
     // Optional so configs saved before these features still parse directly.
     header: headerSchema.optional(),
     embed: embedSettingsSchema.optional(),
+    productPage: productPageSchema.optional(),
+    policies: policiesSchema.optional(),
+    shippingProfiles: shippingProfilesSchema.optional(),
+    seller: sellerSchema.optional(),
   })
   // The canvas invariants, checked here because they span theme + blocks:
   // every block sits inside the board, and no two cover the same cell. These
@@ -767,6 +931,10 @@ export function parseStoredStorefrontConfig(
     blocks?: unknown;
     header?: unknown;
     embed?: unknown;
+    productPage?: unknown;
+    policies?: unknown;
+    shippingProfiles?: unknown;
+    seller?: unknown;
   };
   const rawTheme =
     typeof candidate.theme === "object" && candidate.theme !== null
@@ -793,6 +961,18 @@ export function parseStoredStorefrontConfig(
       : {}),
     ...(embedSettingsSchema.safeParse(candidate.embed).success
       ? { embed: candidate.embed }
+      : {}),
+    ...(productPageSchema.safeParse(candidate.productPage).success
+      ? { productPage: candidate.productPage }
+      : {}),
+    ...(policiesSchema.safeParse(candidate.policies).success
+      ? { policies: candidate.policies }
+      : {}),
+    ...(shippingProfilesSchema.safeParse(candidate.shippingProfiles).success
+      ? { shippingProfiles: candidate.shippingProfiles }
+      : {}),
+    ...(sellerSchema.safeParse(candidate.seller).success
+      ? { seller: candidate.seller }
       : {}),
   };
   const retry = storefrontConfigSchema.safeParse(upgraded);

@@ -117,3 +117,22 @@ export function embedCorsHeaders(origin: string): Record<string, string> {
     "Access-Control-Max-Age": "600",
   };
 }
+
+/**
+ * CORS headers for the analytics SIGNAL route, which takes a JSON POST.
+ *
+ * Separate from embedCorsHeaders rather than widening it: the read route
+ * should keep advertising GET only, or every embed preflight would start
+ * telling the world that POST is available on a path where it is not. Same
+ * echoed origin and same `Vary` for the same reasons; `Content-Type` has to be
+ * allowed explicitly because a JSON body makes the request non-simple.
+ */
+export function embedSignalCorsHeaders(origin: string): Record<string, string> {
+  return {
+    "Access-Control-Allow-Origin": origin,
+    Vary: "Origin",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Max-Age": "600",
+  };
+}

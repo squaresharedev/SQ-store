@@ -14,7 +14,7 @@ import {
   CHART,
   CHART_ANIMATION,
   MARK,
-  TOOLTIP_GLIDE,
+  TOOLTIP,
   dimmableClass,
   dimmedClass,
 } from "@/components/charts/theme";
@@ -106,9 +106,8 @@ export function BarChart({
       />
       <Tooltip
         cursor={{ fill: "var(--muted)" }}
-        isAnimationActive={!reducedMotion}
-        animationDuration={TOOLTIP_GLIDE.duration}
-        animationEasing={TOOLTIP_GLIDE.easing}
+        isAnimationActive={TOOLTIP.animated}
+        wrapperStyle={TOOLTIP.wrapperStyle}
         content={({ active, payload, label }) => (
           <ChartTooltipContent
             active={active}

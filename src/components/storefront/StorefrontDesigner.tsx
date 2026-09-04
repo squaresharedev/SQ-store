@@ -33,8 +33,15 @@ import {
   type StorefrontTheme,
   type TextBlock,
   type TextSpan,
+  DEFAULT_PRODUCT_PAGE_CONFIG,
+  type ProductPageConfig,
+  type ShippingProfile,
+  type StorefrontPolicies,
+  type StorefrontSeller,
 } from "@/types/storefront";
 import { LAYER_OPS, moveLayerTo, type LayerOp } from "@/lib/storefront/layers";
+import { compactText, isDefaultProductPage } from "@/lib/storefront/product-page";
+import { compactShippingProfiles } from "@/lib/storefront/shipping";
 import { applyFormatToRange } from "@/lib/storefront/text-spans";
 import { isDefaultPlacement } from "@/lib/images/placement";
 import { UploadError, uploadToR2 } from "@/lib/products/upload";
@@ -123,6 +130,10 @@ type EditorSnapshot = {
   theme: StorefrontTheme;
   header: StorefrontHeader;
   blocks: StorefrontBlock[];
+  productPage: ProductPageConfig;
+  policies: StorefrontPolicies;
+  shippingProfiles: ShippingProfile[];
+  seller: StorefrontSeller;
 };
 
 /** First shallowly-changed field, used as the history coalesce key so rapid
@@ -273,6 +284,25 @@ export function StorefrontDesigner({
   );
   // Placement is explicit, so the array is just a bag of blocks.
   const [blocks, setBlocks] = useState<StorefrontBlock[]>(initialConfig.blocks);
+  // The product page's options, policies and seller identity: ordinary config
+  // members, so they ride the same undo history and the same save.
+  const [productPage, setProductPage] = useState<ProductPageConfig>(
+    initialConfig.productPage ?? DEFAULT_PRODUCT_PAGE_CONFIG,
+  );
+  const [policies, setPolicies] = useState<StorefrontPolicies>(
+    initialConfig.policies ?? {},
+  );
+  // Named shipping exceptions. Empty for nearly every store: `policies.shipping`
+  // is the default every product uses unless it points at one of these.
+  const [shippingProfiles, setShippingProfiles] = useState<ShippingProfile[]>(
+    initialConfig.shippingProfiles ?? [],
+  );
+  const [seller, setSeller] = useState<StorefrontSeller>(initialConfig.seller ?? {});
+  // WHICH PRODUCT PAGES ARE OUT, in the order they were opened. Each one is an
+  // artboard on the canvas beside the board, joined to its tile by a line. A
+  // VIEW state: which pages the seller has open is not part of the design, so
+  // it is never saved and never enters the undo history.
+  const [openPages, setOpenPages] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   // Unsaved-edits flag. The header shows exactly one thing — whether there is
   // work not yet written — while the OUTCOME of a save (done / dropped blocks
@@ -332,10 +362,22 @@ export function StorefrontDesigner({
   const [spaceHeld, setSpaceHeld] = useState(false);
   // The window the board moves behind: owns wheel pan/zoom and fit.
   const canvasViewportRef = useRef<HTMLElement>(null);
-  // Preview device for the canvas frame — toolbar-owned, never persisted.
+  // Preview device for the canvas frame — switched from DesignerCanvas's own
+  // device switch, anchored above whatever it is currently showing, never
+  // persisted.
   const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">(
     "desktop",
   );
+  /**
+   * The pannable canvas is showing — design view, or mobile preview with a
+   * product page open beside the board. A page has nowhere to go "beside"
+   * the plain scrolling column mobile preview is otherwise, so opening one
+   * switches the workspace into the same canvas desktop already uses: same
+   * artboard, same connector line, same pan/zoom, just sized for the device
+   * currently selected. Closing the last open page (or none ever being
+   * opened) drops mobile preview straight back to the fluid column.
+   */
+  const designView = previewMode === "desktop" || openPages.length > 0;
   const history = useEditorHistory<EditorSnapshot>();
   // Prompt to save/discard when leaving with unsaved edits (Back link, browser
   // Back button, refresh/close). `dirty` alone drives whether it's armed.
@@ -378,6 +420,18 @@ export function StorefrontDesigner({
   );
   /** The single selection, when exactly one block is selected. */
   const selectedBlock = selectedBlocks.length === 1 ? selectedBlocks[0] : null;
+
+  // Which product a "show me the page" request means when it does not name
+  // one: the selected tile, else the first product on the board. Null when the
+  // board holds no products, which is when there is no page to show.
+  const defaultPageProductId = useMemo<string | null>(() => {
+    const selected = selectedBlocks.find((block) => block.type === "product");
+    if (selected?.type === "product") return selected.productId;
+    const first = readingOrder(blocks).find(
+      (block) => block.type === "product" && productsById.has(block.productId),
+    );
+    return first?.type === "product" ? first.productId : null;
+  }, [selectedBlocks, blocks, productsById]);
 
   // The colors already on the canvas, for the left panel's "In this design".
   const colorsInDesign = useMemo(
@@ -512,26 +566,41 @@ export function StorefrontDesigner({
     setDirty(true);
   }
 
+  /** The undoable state as it stands right now. */
+  const snapshot = (): EditorSnapshot => ({
+    theme,
+    header,
+    blocks,
+    productPage,
+    policies,
+    shippingProfiles,
+    seller,
+  });
+
   /** Every undoable mutation calls this FIRST with an optional coalesce key. */
   function recordChange(coalesceKey?: string) {
-    history.record({ theme, header, blocks }, coalesceKey);
+    history.record(snapshot(), coalesceKey);
     markDirty();
   }
 
-  function applySnapshot(snapshot: EditorSnapshot) {
-    setTheme(snapshot.theme);
-    setHeader(snapshot.header);
-    setBlocks(snapshot.blocks);
+  function applySnapshot(next: EditorSnapshot) {
+    setTheme(next.theme);
+    setHeader(next.header);
+    setBlocks(next.blocks);
+    setProductPage(next.productPage);
+    setPolicies(next.policies);
+    setShippingProfiles(next.shippingProfiles);
+    setSeller(next.seller);
     markDirty();
   }
 
   function undo() {
-    const previous = history.undo({ theme, header, blocks });
+    const previous = history.undo(snapshot());
     if (previous) applySnapshot(previous);
   }
 
   function redo() {
-    const next = history.redo({ theme, header, blocks });
+    const next = history.redo(snapshot());
     if (next) applySnapshot(next);
   }
 
@@ -617,7 +686,7 @@ export function StorefrontDesigner({
   useCanvasAnchor({
     viewport,
     workspaceRef: canvasViewportRef,
-    enabled: previewMode === "desktop",
+    enabled: designView,
     anchorKeys: selectedKeys,
   });
 
@@ -1357,10 +1426,12 @@ export function StorefrontDesigner({
 
   // Place the board sensibly on first paint: centred, or scaled down first
   // when it is wider than the window. Runs once — after that the view is the
-  // seller's to move.
+  // seller's to move. Waits for the canvas to actually exist, which on a
+  // fresh mobile-preview load with no page open yet is never — that is fine,
+  // the effect just fires (once) whenever a page later brings the canvas up.
   const placedInitialView = useRef(false);
   useEffect(() => {
-    if (placedInitialView.current || previewMode !== "desktop") return;
+    if (placedInitialView.current || !designView) return;
     let frame = 0;
     // The stage may not have laid out on the very first tick.
     function place(attempt: number) {
@@ -1377,7 +1448,7 @@ export function StorefrontDesigner({
     place(0);
     return () => cancelAnimationFrame(frame);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- one-shot placement
-  }, [previewMode]);
+  }, [designView]);
 
   function togglePicker() {
     setInspector((current) =>
@@ -2494,6 +2565,18 @@ export function StorefrontDesigner({
   }, [settingTarget]);
 
   function openSetting(ref: SettingRef) {
+    // A product page setting is edited while LOOKING at the page, so opening
+    // one puts a page on the canvas if none is out yet. The mobile settings
+    // sheet is left standing on purpose: it navigates in place.
+    if (ref.kind === "productPage") {
+      if (openPages.length === 0 && defaultPageProductId) {
+        openProductPage(defaultPageProductId, ref);
+      } else {
+        setSettingTarget(ref);
+        setPanelOpen(true);
+      }
+      return;
+    }
     const onProductTile =
       selectedBlocks.length === 1 && selectedBlocks[0]?.type === "product";
     // A per-tile setting reaches the inspector only when there is a tile that
@@ -2504,6 +2587,96 @@ export function StorefrontDesigner({
     setPanelOpen(true);
   }
 
+  /**
+   * Put a product's page on the canvas beside the board, and aim the design
+   * panel at the page's settings.
+   *
+   * The board stays exactly where it is. That is the whole point of the
+   * artboard model: a page is not a screen the editor switches to, it is
+   * another thing on the same workspace, joined to the tile that opens it.
+   */
+  function openProductPage(
+    productId: string,
+    ref: SettingRef = { kind: "productPage", section: "layout" },
+  ) {
+    setOpenPages((current) =>
+      current.includes(productId) ? current : [...current, productId],
+    );
+    setSettingTarget(ref);
+    setPanelOpen(true);
+    revealArtboard();
+  }
+
+  function closeProductPage(productId: string) {
+    setOpenPages((current) => current.filter((id) => id !== productId));
+  }
+
+  /** The node on a tile is a toggle: pressing it again puts the page away. */
+  function togglePageForProduct(productId: string) {
+    if (openPages.includes(productId)) closeProductPage(productId);
+    else openProductPage(productId);
+  }
+
+  /** The toolbar's button: show the page for whatever the seller is on, or
+   *  put every open page away. */
+  function toggleProductPages() {
+    if (openPages.length > 0) {
+      setOpenPages([]);
+      return;
+    }
+    if (defaultPageProductId) openProductPage(defaultPageProductId);
+  }
+
+  /**
+   * Pan (and, if it no longer fits, zoom) the workspace so a page that has
+   * just opened is actually on screen — ALONGSIDE the board, not instead of
+   * it. Without this, opening a page 700px to the right of the board looks
+   * like nothing happened.
+   *
+   * This used to aim at the one artboard that just opened, which for a wide
+   * board plus a wide page routinely panned the board itself off the left
+   * edge — defeating the whole point of the artboard model (seeing a tile
+   * and its page at once) and, now that the device switch lives on the
+   * board, making that switch unreachable right when a seller most wants it.
+   * Fitting the WHOLE stage instead keeps the board in view with everything
+   * open beside it, the same way the first-paint placement does — the
+   * current zoom is kept if it still fits, so opening a second page doesn't
+   * reset a zoom level the seller just set.
+   *
+   * Deferred a frame so the newly opened artboard has actually laid out;
+   * measured rather than computed, because how wide the stage now is
+   * depends on the board width, the gap and whatever else is already out.
+   */
+  function revealArtboard() {
+    requestAnimationFrame(() => {
+      const view = measureView();
+      const room = safeWindow();
+      if (!view || !room) return;
+      const { zoom: currentZoom } = viewport.get();
+      const fits =
+        view.width * currentZoom + CANVAS_MARGIN * 2 <= room.width &&
+        view.height * currentZoom + CANVAS_MARGIN * 2 <= room.height;
+      const zoom = fits
+        ? currentZoom
+        : clampZoom(
+            Math.min(
+              (room.width - CANVAS_MARGIN * 2) / view.width,
+              (room.height - CANVAS_MARGIN * 2) / view.height,
+            ),
+          );
+      viewport.set(
+        {
+          zoom,
+          pan: {
+            x: room.minX + (room.width - view.width * zoom) / 2,
+            y: room.minY + CANVAS_MARGIN,
+          },
+        },
+        { animate: true },
+      );
+    });
+  }
+
   function updateTheme(next: StorefrontTheme) {
     recordChange(`theme:${changedField(theme, next)}`);
     setTheme(next);
@@ -2512,6 +2685,29 @@ export function StorefrontDesigner({
   function updateHeader(next: StorefrontHeader) {
     recordChange(`header:${changedField(header, next)}`);
     setHeader(next);
+  }
+
+  function updateProductPage(next: ProductPageConfig) {
+    recordChange(`productPage:${changedField(productPage, next)}`);
+    setProductPage(next);
+  }
+
+  function updatePolicies(next: StorefrontPolicies) {
+    recordChange(`policies:${changedField(policies, next)}`);
+    setPolicies(next);
+  }
+
+  /** One coalesce key per profile FIELD, so typing into a profile's terms
+   *  undoes as one step the way every other text field here does — and adding
+   *  or removing a profile is always its own step. */
+  function updateShippingProfiles(next: ShippingProfile[], coalesceKey?: string) {
+    recordChange(coalesceKey ? `shippingProfiles:${coalesceKey}` : undefined);
+    setShippingProfiles(next);
+  }
+
+  function updateSeller(next: StorefrontSeller) {
+    recordChange(`seller:${changedField(seller, next)}`);
+    setSeller(next);
   }
 
   function updateName(next: string) {
@@ -2600,6 +2796,14 @@ export function StorefrontDesigner({
    *  branch on it without re-reading async state. */
   async function handleSave(): Promise<boolean> {
     setSaving(true);
+    // Policies and seller details travel trimmed and without empty fields;
+    // nothing at all when every field is blank. The product page's options are
+    // written once they differ from the defaults (or were already stored), so
+    // a storefront nobody turned towards its product page saves byte-identical
+    // to the one it was before the page existed.
+    const compactPolicies = compactText(policies);
+    const compactSeller = compactText(seller);
+    const cleanProfiles = compactShippingProfiles(shippingProfiles);
     const config: StorefrontConfig = {
       theme,
       // Blocks carry their own coordinates, so array order is irrelevant.
@@ -2608,6 +2812,15 @@ export function StorefrontDesigner({
       // Embed settings are edited in the list-page modal, not here — pass the
       // loaded value through so a designer save never wipes them.
       ...(initialConfig.embed ? { embed: initialConfig.embed } : {}),
+      ...(initialConfig.productPage || !isDefaultProductPage(productPage)
+        ? { productPage }
+        : {}),
+      ...(compactPolicies ? { policies: compactPolicies } : {}),
+      // Trimmed, and a profile with no terms left in it is dropped rather than
+      // saved as a name pointing at nothing. A store with no exceptions carries
+      // no member at all, exactly as before profiles existed.
+      ...(cleanProfiles.length > 0 ? { shippingProfiles: cleanProfiles } : {}),
+      ...(compactSeller ? { seller: compactSeller } : {}),
     };
     const result = await saveStorefront(storefrontId, { name, config });
     setSaving(false);
@@ -2646,9 +2859,6 @@ export function StorefrontDesigner({
     if (await handleSave()) leaveGuard.leave();
     else leaveGuard.cancel();
   }
-
-  /** The pannable design view, as opposed to the phone-width preview. */
-  const designView = previewMode === "desktop";
 
   const inspectorTitle =
     inspector?.kind === "picker"
@@ -2868,9 +3078,10 @@ export function StorefrontDesigner({
           </div>
         )}
 
-        {/* The workspace window. In design view the board floats inside it and
-            can be panned anywhere; the mobile preview stays a plain scrolling
-            column. pb clears the floating toolbar. */}
+        {/* The workspace window. Whenever `designView` is showing (desktop, or
+            mobile preview with a page open) the board floats inside it and can
+            be panned anywhere; otherwise mobile preview stays a plain
+            scrolling column. pb clears the floating toolbar. */}
         <main
           ref={canvasViewportRef}
           onPointerDown={designView ? onCanvasPointerDown : undefined}
@@ -2899,6 +3110,7 @@ export function StorefrontDesigner({
             theme={theme}
             header={header}
             previewMode={previewMode}
+            onPreviewModeChange={setPreviewMode}
             backgroundImageUrl={backgroundImageUrl}
             customFontUrl={customFontUrl}
             elementUrls={elementUrls}
@@ -2909,6 +3121,7 @@ export function StorefrontDesigner({
             onRotateBlock={onRotateBlock}
             onRemove={onRemoveBlock}
             onEmptyCellClick={onInsertAt}
+            onAddProduct={togglePicker}
             selectedKeys={selectedKeys}
             onSelectBlock={onSelectBlock}
             onSelectMany={onSelectMany}
@@ -2935,6 +3148,16 @@ export function StorefrontDesigner({
             // Space is the hold-to-pan tool; while held, a drag on the frame
             // pans the workspace instead of drawing a marquee.
             disableMarquee={spaceHeld}
+            // The product pages the seller has out, beside the board.
+            openPages={openPages}
+            onOpenPage={togglePageForProduct}
+            onClosePage={closeProductPage}
+            storefrontId={storefrontId}
+            storefrontName={name}
+            productPage={productPage}
+            policies={policies}
+            shippingProfiles={shippingProfiles}
+            seller={seller}
           />
         </main>
 
@@ -3002,6 +3225,14 @@ export function StorefrontDesigner({
               onOpenLayers={() => setLayersOpen(true)}
               searchEntries={editorSearchEntries}
               onJump={jumpTo}
+              productPage={productPage}
+              onProductPageChange={updateProductPage}
+              policies={policies}
+              onPoliciesChange={updatePolicies}
+              shippingProfiles={shippingProfiles}
+              onShippingProfilesChange={updateShippingProfiles}
+              seller={seller}
+              onSellerChange={updateSeller}
             />
           }
           inspector={
@@ -3070,6 +3301,8 @@ export function StorefrontDesigner({
                       }
                       onRemove={() => removeBlock(blockKey(selectedBlock))}
                       onProductSaved={applyProductUpdate}
+                      pageOpen={openPages.includes(selectedBlock.productId)}
+                      onDesignPage={() => togglePageForProduct(selectedBlock.productId)}
                     />
                   ) : selectedBlock?.type === "shape" ? (
                     <ShapeBlockEditor
@@ -3151,10 +3384,11 @@ export function StorefrontDesigner({
         canRedo={history.canRedo}
         onUndo={undo}
         onRedo={redo}
-        previewMode={previewMode}
-        onPreviewModeChange={setPreviewMode}
         settingsOpen={settingsOpen}
         onToggleSettings={toggleSettings}
+        pagesOpen={openPages.length > 0}
+        canOpenPage={defaultPageProductId !== null}
+        onTogglePages={toggleProductPages}
       />
 
       <Modal
