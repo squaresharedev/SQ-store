@@ -1,8 +1,6 @@
-import {
-  SHIPPING_PROFILES_MAX,
-  type ShippingProfile,
-  type StorefrontPolicies,
-} from "@/types/storefront";
+import { SHIPPING_PROFILES_MAX, type ShippingProfile } from "@/types/storefront";
+import { buildShippingProse } from "@/lib/shipping/policy-prose";
+import type { SellerShippingPolicy } from "@/types/shipping-policy";
 
 /**
  * WHICH SHIPPING TERMS A PRODUCT IS SOLD UNDER — decided here and nowhere
@@ -10,15 +8,20 @@ import {
  * product form's own "this is what buyers will read" panel all call this, so
  * the three can never disagree about what a product says.
  *
- * The rule, in one sentence: a product uses the store's default terms unless
- * it names a profile the store still has.
+ * The rule, in one sentence: a product uses the account's default terms unless
+ * it names a profile the account still has.
  *
- * That "still has" is doing real work. A profile id can fail to resolve two
- * honest ways — the seller deleted the profile, or the product is placed on a
- * SECOND storefront that never had it — and both get the same answer rather
- * than an error or a blank: the store whose page is being rendered falls back
- * to its own default. Shipping terms really are a property of the store doing
- * the shipping, so a store's default is always a correct thing to print.
+ * THE ACCOUNT'S, not the storefront's — since
+ * 20260905_shipping_policy_on_profile. This file used to say "shipping terms
+ * really are a property of the store doing the shipping", and then read them
+ * off a STOREFRONT, which is a presentation of one catalogue rather than a
+ * business. That gap is what made the second of the two resolution failures
+ * below possible at all: a product placed on a second storefront could name a
+ * profile that storefront had never heard of. With one policy per account,
+ * that case no longer exists, and the only way a profile id fails to resolve
+ * is the honest one: the seller deleted it. It still falls back to the default
+ * rather than erroring or blanking, because the default is always a correct
+ * thing to print.
  *
  * A profile REPLACES the default, it does not layer over it: picking "Made to
  * order, allow 3 weeks" must not leave "Ships within 1-3 business days" from
@@ -46,20 +49,44 @@ export function findShippingProfile(
 }
 
 /**
- * The terms to print for one product on one storefront, or null when the
- * seller has written nothing at all — in which case the page has no shipping
- * section rather than an empty one.
+ * The terms to print for one product, or null when the seller has written
+ * nothing at all — in which case the page has no shipping section rather than
+ * an empty one.
+ *
+ * A PROFILE IS PROSE, THE DEFAULT IS GENERATED, and that asymmetry is
+ * deliberate. The account default comes from structured answers run through
+ * `buildShippingProse` (or the seller's own override, which that function
+ * already prefers); a profile is one sentence about one exception, which is
+ * not worth five fields to say. Both arrive here as the same `body` string, so
+ * nothing downstream has to know which it got.
  */
 export function resolveProductShipping(
   shippingProfileId: string | null | undefined,
-  profiles: readonly ShippingProfile[] | undefined,
-  policies: StorefrontPolicies,
+  policy: SellerShippingPolicy | null | undefined,
 ): ResolvedShipping | null {
-  const profile = findShippingProfile(profiles, shippingProfileId);
+  const profile = findShippingProfile(policy?.profiles, shippingProfileId);
   const resolved: ResolvedShipping = profile
     ? { name: profile.name, body: profile.body, dispatch: profile.dispatch ?? "" }
-    : { name: null, body: policies.shipping ?? "", dispatch: policies.dispatch ?? "" };
+    : {
+        name: null,
+        body: buildShippingProse(policy).shipping,
+        dispatch: policy?.dispatch ?? "",
+      };
   return resolved.body.trim() === "" && resolved.dispatch.trim() === "" ? null : resolved;
+}
+
+/**
+ * The returns paragraph, or "" when there is none to print.
+ *
+ * Its own function beside the shipping one rather than a second member of
+ * `ResolvedShipping`: returns do NOT vary by product. A shipping profile
+ * replaces how one product gets to the buyer; it has never had anything to say
+ * about how it comes back, and giving it a returns field would invite sellers
+ * to write a per-product returns policy that the statutory rights below it
+ * would then contradict.
+ */
+export function resolveReturns(policy: SellerShippingPolicy | null | undefined): string {
+  return buildShippingProse(policy).returns;
 }
 
 /**

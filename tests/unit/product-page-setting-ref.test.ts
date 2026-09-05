@@ -5,6 +5,7 @@ import {
   PRODUCT_PAGE_HOTSPOTS,
   SECTION_SETTING,
   STOREFRONT_SETTINGS,
+  freshSettingRef,
   isPerTileSetting,
   isProductPageHotspot,
   isSameSettingRef,
@@ -15,9 +16,7 @@ import {
 import { resolveInk } from "@/components/product-page/product-page-maps";
 import { collectStorefrontColors } from "@/lib/theme/palette";
 import {
-  DEFAULT_PRODUCT_PAGE_CONFIG,
   DEFAULT_STOREFRONT_CONFIG,
-  EMPTY_STOREFRONT_HEADER,
   PRODUCT_PAGE_SECTION_IDS,
 } from "@/types/storefront";
 
@@ -60,6 +59,22 @@ describe("product page settings catalogue", () => {
   it("finds seller details for the words a seller would use", () => {
     const entry = settingById("seller-details")!;
     expect(entry.keywords).toEqual(expect.arrayContaining(["vat id", "imprint", "contact email"]));
+  });
+
+  it("clones a ref so a repeat open of the SAME hotspot is never a no-op", () => {
+    // PRODUCT_PAGE_HOTSPOTS and STOREFRONT_SETTINGS are module-level
+    // constants: every click on the same hotspot hands back the identical
+    // object. Feeding that straight to useState would make a second click
+    // indistinguishable from the first at the React level (Object.is bails
+    // out), which would swallow a seller's click if they had navigated the
+    // panel elsewhere by hand in between. Cloning defeats that, while
+    // isSameSettingRef (which compares by value, deliberately) still calls
+    // it the same setting.
+    const ref = PRODUCT_PAGE_HOTSPOTS.cta;
+    const clone = freshSettingRef(ref);
+    expect(clone).not.toBe(ref);
+    expect(clone).toEqual(ref);
+    expect(isSameSettingRef(clone, ref)).toBe(true);
   });
 });
 

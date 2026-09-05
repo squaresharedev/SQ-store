@@ -2,7 +2,6 @@
 
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
-import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { getUser, revokeOtherSessions } from "@/lib/auth/session";
 import { LEGAL_VERSION } from "@/lib/settings/constants";
@@ -61,6 +60,21 @@ async function safeAlert(
       err instanceof Error ? err.message : String(err),
     );
   }
+}
+
+/**
+ * A native `<textarea>` posted through a real `<form>` (as opposed to a
+ * React-controlled field synced on every keystroke) has its line breaks
+ * normalised to CRLF by the browser's own form-data-set algorithm before this
+ * action ever sees them. `multiLineText` (lib/validation/inputs.ts) rejects a
+ * bare CR on purpose — it is the header-injection defence for text that might
+ * end up in an email — so a real textarea's own newlines would otherwise fail
+ * that gate for a reason that has nothing to do with what the seller typed.
+ * Collapse back to LF-only right where the value is read, before it reaches
+ * any schema.
+ */
+function normalizeTextareaValue(raw: string): string {
+  return raw.replace(/\r\n?/g, "\n");
 }
 
 /**
@@ -394,10 +408,13 @@ export async function acceptLegal(
   return { success: "Accepted. Thanks for reading the fine print." };
 }
 
-// --- Tax -------------------------------------------------------------------
+// --- Tax & seller details ---------------------------------------------------
 
-// Collected for upcoming EU VAT/invoicing work. Nothing downstream consumes
-// these fields yet.
+// The account's trader identity: read by every hosted product page this
+// account sells on (lib/settings/seller-identity.ts), set once here rather
+// than per storefront. `tax_business_name` / `tax_vat_id` / `tax_country`
+// started as VAT/invoicing fields; `seller_address` / `seller_email` /
+// `seller_phone` fill in what distance-selling law also asks for.
 export async function saveTaxInfo(
   _prev: SettingsActionState,
   formData: FormData,
@@ -406,15 +423,21 @@ export async function saveTaxInfo(
   if (!user) return SIGNED_OUT;
   const rejected = unknownFieldError(formData, [
     "tax_business_name",
+    "seller_address",
+    "seller_email",
     "tax_vat_id",
     "tax_country",
+    "seller_phone",
   ]);
   if (rejected) return rejected;
 
   const parsed = taxSchema.safeParse({
     tax_business_name: String(formData.get("tax_business_name") ?? ""),
+    seller_address: normalizeTextareaValue(String(formData.get("seller_address") ?? "")),
+    seller_email: String(formData.get("seller_email") ?? ""),
     tax_vat_id: String(formData.get("tax_vat_id") ?? ""),
     tax_country: String(formData.get("tax_country") ?? ""),
+    seller_phone: String(formData.get("seller_phone") ?? ""),
   });
   if (!parsed.success) return firstIssue(parsed.error);
 
@@ -424,7 +447,7 @@ export async function saveTaxInfo(
 
   if (!(await updateOwnProfile(user.id, parsed.data))) return SAVE_FAILED;
   revalidatePath("/settings/tax");
-  return { success: "Tax details saved." };
+  return { success: "Business & seller details saved." };
 }
 
 // --- Notifications ---------------------------------------------------------

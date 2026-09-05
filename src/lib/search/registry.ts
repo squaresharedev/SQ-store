@@ -160,6 +160,21 @@ const SETTINGS_FIELDS: LocalEntry[] = [
     ["country", "eu", "residence", "jurisdiction"],
   ),
   entry(
+    "field:seller-address",
+    { type: "settings", title: "Business address", subtitle: "Settings › Tax", href: "/settings/tax#address" },
+    ["seller address", "postal address", "trader address", "who is selling"],
+  ),
+  entry(
+    "field:seller-email",
+    { type: "settings", title: "Contact email", subtitle: "Settings › Tax", href: "/settings/tax#contact-email" },
+    ["seller email", "buyer contact", "support email"],
+  ),
+  entry(
+    "field:seller-phone",
+    { type: "settings", title: "Seller phone", subtitle: "Settings › Tax", href: "/settings/tax#phone" },
+    ["phone number", "contact number", "seller phone"],
+  ),
+  entry(
     "field:notify-sales",
     { type: "settings", title: "Sales emails", subtitle: "Settings › Notifications", href: "/settings/notifications#preferences" },
     ["email me when something sells", "order emails", "sale alerts"],

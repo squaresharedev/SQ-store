@@ -13,7 +13,9 @@ import {
 } from "@/lib/validation/storefront";
 import { parseStorefrontBrief } from "@/lib/validation/storefront-brief";
 import {
+  DEFAULT_PRODUCT_PAGE_CONFIG,
   DEFAULT_STOREFRONT_CONFIG,
+  DEFAULT_STOREFRONT_HEADER,
   type StorefrontConfig,
 } from "@/types/storefront";
 import type { StorefrontBrief } from "@/types/storefront-brief";
@@ -102,7 +104,7 @@ export async function createStorefront(
   // Name is optional at creation; fall back to a sensible default the seller
   // can rename in the editor.
   const parsedName = storefrontNameSchema.safeParse(payload.name);
-  const finalName = parsedName.success ? parsedName.data : "Untitled storefront";
+  const baseName = parsedName.success ? parsedName.data : "Untitled storefront";
 
   // Same forgiveness for the brief: it is a hint for a recommender, never
   // load-bearing, so a malformed one degrades to empty rather than costing the
@@ -110,12 +112,58 @@ export async function createStorefront(
   const brief = parseStorefrontBrief(payload.brief);
 
   const supabase = await createClient();
+
+  // SF-03: Deduplicate storefront names within the same account. If "Foo"
+  // already exists we create "Foo 2", then "Foo 3", etc. The SELECT is cheap
+  // (names are short) and the LIKE is against a bounded owner_id set.
+  const { data: existingNames } = await supabase
+    .from("storefronts")
+    .select("name")
+    .eq("owner_id", account.accountId)
+    .like("name", `${baseName}%`);
+
+  const takenNames = new Set((existingNames ?? []).map((r) => r.name));
+  let finalName = baseName;
+  if (takenNames.has(baseName)) {
+    let n = 2;
+    while (takenNames.has(`${baseName} ${n}`)) n++;
+    finalName = `${baseName} ${n}`;
+  }
+
+  // SF-03: Seed the buyer-facing header name from the wizard name so the two
+  // are in sync from the moment the storefront is created.
+  const initialHeader: typeof DEFAULT_STOREFRONT_HEADER = {
+    ...DEFAULT_STOREFRONT_HEADER,
+    name: finalName,
+  };
+
+  // SF-04: New storefronts allow indexing by default. The constant
+  // DEFAULT_PRODUCT_PAGE_CONFIG keeps allowIndexing:false so that existing
+  // storefronts loaded without a persisted productPage stay noindexed (no
+  // silent flip). Only rows created here get the true default.
+  //
+  // SF-06: A digital fulfilment storefront sells downloads -- no physical
+  // shipment, so pre-set the shipping note accordingly rather than surfacing
+  // a "plus shipping" line that would mislead buyers.
+  const initialProductPage = {
+    ...DEFAULT_PRODUCT_PAGE_CONFIG,
+    allowIndexing: true,
+    ...(brief.fulfilment === "digital"
+      ? { shippingNote: "free-shipping" as const }
+      : {}),
+  };
+
   const { data: row, error } = await supabase
     .from("storefronts")
     .insert({
       owner_id: account.accountId,
       name: finalName,
-      config: { ...DEFAULT_STOREFRONT_CONFIG, theme: themeForVibe(brief.vibe) },
+      config: {
+        ...DEFAULT_STOREFRONT_CONFIG,
+        theme: themeForVibe(brief.vibe),
+        header: initialHeader,
+        productPage: initialProductPage,
+      },
       brief,
     })
     .select("id")
@@ -206,17 +254,15 @@ export async function saveStorefront(
     // Embed settings ride along validated so a designer save can't wipe what
     // updateEmbedSettings stored (the designer passes its loaded value through).
     ...(parsed.data.embed ? { embed: parsed.data.embed } : {}),
-    // The product page's options, policies and seller identity: plain data the
-    // schema has already bounded, persisted only when the client sent them.
+    // The product page's options: plain data the schema has already bounded,
+    // persisted only when the client sent it. No `seller`, `policies` or
+    // `shippingProfiles` here — trader identity and the shipping/returns terms
+    // (including the named profiles products point at by id) are both
+    // account-level now, written by Settings and never by a designer save
+    // (lib/settings/seller-identity.ts, lib/settings/shipping-actions.ts).
+    // That separation is the point: a storefront save can no longer touch the
+    // terms every OTHER storefront is also selling under.
     ...(parsed.data.productPage ? { productPage: parsed.data.productPage } : {}),
-    ...(parsed.data.policies ? { policies: parsed.data.policies } : {}),
-    // Named shipping profiles. Products point at these BY ID, so dropping the
-    // member here would not merely lose text: every product using a profile
-    // would silently fall back to the store's default terms.
-    ...(parsed.data.shippingProfiles?.length
-      ? { shippingProfiles: parsed.data.shippingProfiles }
-      : {}),
-    ...(parsed.data.seller ? { seller: parsed.data.seller } : {}),
   };
 
   // Uploaded assets (image background, custom font): the config stores only the

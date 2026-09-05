@@ -5,6 +5,8 @@ import { getStorefront } from "@/lib/storefront/queries";
 import { StorefrontDesigner } from "@/components/storefront/StorefrontDesigner";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
+import { getSellerIdentity } from "@/lib/settings/seller-identity";
+import { getShippingPolicy } from "@/lib/settings/shipping-policy";
 import { presignGetUrl } from "@/lib/r2";
 import { blockKey, type StorefrontConfig } from "@/types/storefront";
 
@@ -57,9 +59,15 @@ export default async function StorefrontEditorPage({
   const account = await getActiveAccount();
   if (!can(account?.role, "storefront.write")) redirect("/storefront");
 
-  const [storefront, products] = await Promise.all([
+  // Seller identity is the ACCOUNT's, not this storefront's: read-only here,
+  // scoped to whichever account is active (the store being edited, which for
+  // a team member is not necessarily their own). See
+  // lib/settings/seller-identity.ts for why this is a service-role read.
+  const [storefront, products, sellerIdentity, shippingPolicy] = await Promise.all([
     getStorefront(id),
     listAllProducts(),
+    account ? getSellerIdentity(account.accountId) : Promise.resolve({}),
+    account ? getShippingPolicy(account.accountId) : Promise.resolve({}),
   ]);
   if (!storefront) notFound();
 
@@ -82,6 +90,8 @@ export default async function StorefrontEditorPage({
       initialCustomFontUrl={customFontUrl}
       initialElementUrls={elementUrls}
       initialSetting={initialSetting ?? null}
+      sellerIdentity={sellerIdentity}
+      shippingPolicy={shippingPolicy}
       // The designer renders its own universal-search provider (it is outside
       // the dashboard shell), so it needs the role the shell would have given.
       role={account?.role ?? null}

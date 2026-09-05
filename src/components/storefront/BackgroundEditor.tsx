@@ -17,6 +17,7 @@ import { ProgressBar } from "@/components/ui/ProgressBar";
 import { ColorPicker } from "@/components/ui/ColorPicker";
 import { SliderField } from "@/components/ui/SliderField";
 import { infoTextClass, labelClass, secondaryButtonClass } from "@/components/ui/control-styles";
+import { themeAccentPresets } from "@/lib/theme/theme-color-presets";
 import { resolveBackgroundStyle } from "./background-presets";
 
 type Kind = StorefrontBackground["kind"];
@@ -66,6 +67,7 @@ export function BackgroundEditor({
   onChange,
   imageUrl,
   onImageChange,
+  accent,
 }: {
   value: StorefrontBackground;
   onChange: (background: StorefrontBackground) => void;
@@ -73,6 +75,9 @@ export function BackgroundEditor({
   imageUrl: string | null;
   /** Reports a new local preview URL after an upload (null on remove). */
   onImageChange: (url: string | null) => void;
+  /** The theme's own accent, for the solid color field's quick picks — four
+   *  tints and shades of THIS storefront's brand color, not generic neutrals. */
+  accent: string;
 }) {
   // "Image" tab can be open before any upload exists; the stored background
   // only becomes {kind:"image"} once an upload succeeds.
@@ -240,11 +245,15 @@ export function BackgroundEditor({
             </div>
           )}
 
+          {/* Out of the AT tree: the visible button below is the labelled
+              affordance and clicks this programmatically. */}
           <input
             ref={fileInputRef}
             type="file"
             accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
             className="sr-only"
+            aria-hidden="true"
+            tabIndex={-1}
             onChange={(event) => handleFile(event.target.files?.[0])}
           />
           <button
@@ -276,6 +285,7 @@ export function BackgroundEditor({
           value={value.color}
           onChange={(color) => onChange({ kind: "solid", color })}
           target={{ kind: "theme-background-solid" }}
+          presets={themeAccentPresets(accent)}
         />
       )}
 

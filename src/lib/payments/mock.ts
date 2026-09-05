@@ -8,6 +8,13 @@
 // - Connecting / editing a payout account happens exclusively on Stripe's
 //   HOSTED onboarding + Express dashboard, reached by redirect. This app never
 //   renders a form that collects financial data.
+//
+// MOCK FLAG. Set PAYMENTS_MOCK_DATA=true in the environment to enable the
+// sample account, balance and payout history below. Off by default so a real
+// seller never sees fabricated financial figures as if they were their own.
+// The /payments page and the overview's Needs-attention module both read from
+// getAccountStatus(), so the two can never disagree about whether Stripe is
+// connected.
 
 import type {
   AccountStatus,
@@ -19,17 +26,14 @@ import type {
   UpcomingPayout,
 } from "./types";
 
-/** Flip to false to preview the not-connected onboarding state. */
-const MOCK_CONNECTED = true;
-
-const MOCK_ACCOUNT: AccountStatus = {
-  connected: MOCK_CONNECTED,
-  accountId: MOCK_CONNECTED ? "acct_demo_2K9fLpQ" : null,
-  chargesEnabled: MOCK_CONNECTED,
-  payoutsEnabled: MOCK_CONNECTED,
-  detailsSubmitted: MOCK_CONNECTED,
-  requirementsDue: [],
-};
+/**
+ * Reads the flag at call time (not at import time) so tests can stub
+ * `process.env.PAYMENTS_MOCK_DATA` with `vi.stubEnv()` without needing to
+ * reset and re-import the module. Off by default.
+ */
+function isMockEnabled(): boolean {
+  return process.env.PAYMENTS_MOCK_DATA === "true";
+}
 
 const MOCK_BALANCE: Balance = {
   available: [{ amountCents: 48250, currency: "EUR" }],
@@ -152,22 +156,30 @@ const MOCK_TRANSACTIONS: BalanceTransaction[] = [
 
 /** TODO(stripe): replace with `stripe.accounts.retrieve(...)` for the seller. */
 export async function getAccountStatus(): Promise<AccountStatus> {
-  return MOCK_ACCOUNT;
+  const connected = isMockEnabled();
+  return {
+    connected,
+    accountId: connected ? "acct_demo_2K9fLpQ" : null,
+    chargesEnabled: connected,
+    payoutsEnabled: connected,
+    detailsSubmitted: connected,
+    requirementsDue: [],
+  };
 }
 
 /** TODO(stripe): replace with `stripe.balance.retrieve(...)` on the connected account. */
 export async function getBalance(): Promise<Balance> {
-  return MOCK_CONNECTED ? MOCK_BALANCE : { available: [], pending: [] };
+  return isMockEnabled() ? MOCK_BALANCE : { available: [], pending: [] };
 }
 
 /** TODO(stripe): derive from `stripe.payouts.list({ status: "pending" })` + schedule. */
 export async function getUpcomingPayout(): Promise<UpcomingPayout> {
-  return MOCK_CONNECTED ? MOCK_UPCOMING : null;
+  return isMockEnabled() ? MOCK_UPCOMING : null;
 }
 
 /** TODO(stripe): replace with `stripe.accounts.listExternalAccounts(...)`. */
 export async function getPayoutMethod(): Promise<PayoutMethod | null> {
-  return MOCK_CONNECTED ? MOCK_METHOD : null;
+  return isMockEnabled() ? MOCK_METHOD : null;
 }
 
 /** TODO(stripe): replace with `stripe.payouts.list(...)` on the connected account. */
@@ -179,12 +191,12 @@ export async function listPayouts(): Promise<Payout[]> {
   //     title: "A payout failed", body: "Your bank rejected a payout. Check your details.",
   //     data: { href: "/payments" } });
   // (from "@/lib/notifications/create"). Not wired: payouts are still mock data.
-  return MOCK_CONNECTED ? MOCK_PAYOUTS : [];
+  return isMockEnabled() ? MOCK_PAYOUTS : [];
 }
 
 /** TODO(stripe): replace with `stripe.balanceTransactions.list(...)`. */
 export async function listBalanceTransactions(): Promise<BalanceTransaction[]> {
-  return MOCK_CONNECTED ? MOCK_TRANSACTIONS : [];
+  return isMockEnabled() ? MOCK_TRANSACTIONS : [];
 }
 
 /** One fetch for the whole page. Swapping the functions above swaps this too. */

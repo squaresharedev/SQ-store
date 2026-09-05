@@ -7,6 +7,7 @@ import {
   freshUser,
   gotoApp,
   seedProducts,
+  seedSellerIdentity,
   seedStorefronts,
   serviceRest,
   signUp,
@@ -139,6 +140,14 @@ async function seed(page: Page, tag: string): Promise<Seeded> {
     unplaced: byTitle("Never placed"),
   };
 
+  // Trader identity is account-level now (lib/settings/seller-identity.ts):
+  // seeded on the profile, not in the storefront config.
+  await seedSellerIdentity(sellerId, {
+    businessName: "Lamp Studio Ltd",
+    email: "hi@lamp.example",
+    country: "IE",
+  });
+
   await serviceRest(`/storefronts?id=eq.${storefrontId}`, {
     method: "PATCH",
     body: {
@@ -150,13 +159,22 @@ async function seed(page: Page, tag: string): Promise<Seeded> {
           { type: "product", productId: seeded.plain, x: 0, y: 2, w: 2, h: 2 },
           { type: "product", productId: seeded.draft, x: 2, y: 0, w: 2, h: 2 },
         ],
-        seller: { businessName: "Lamp Studio Ltd", email: "hi@lamp.example", country: "IE" },
-        policies: {
-          shipping: "Ships in 3 days.",
-          dispatch: "Ships within 24 hours",
-          returns: "30 days, no questions.",
-        },
-        shippingProfiles: [
+      },
+    },
+  });
+
+  // SHIPPING AND RETURNS LIVE ON THE ACCOUNT, not on this storefront
+  // (20260905_shipping_policy_on_profile). `shippingText`/`returnsText` are
+  // the seller's own words, which the prose generator uses as-is — the same
+  // strings this suite has always asserted on.
+  await serviceRest(`/profiles?id=eq.${sellerId}`, {
+    method: "PATCH",
+    body: {
+      shipping_policy: {
+        shippingText: "Ships in 3 days.",
+        dispatch: "Ships within 24 hours",
+        returnsText: "30 days, no questions.",
+        profiles: [
           {
             id: BULKY_PROFILE,
             name: "Bulky items",
@@ -317,8 +335,8 @@ test.describe("hosted product page", () => {
     await expect(section.getByText("Ships within 24 hours")).toBeVisible();
     await expect(section.getByRole("link", { name: /edit your shipping terms/i })).toBeVisible();
 
-    // The rail and the header summarise it as a real answer, not as "Empty".
-    await expect(page.getByRole("link", { name: /^Shipping/ }).first()).toContainText("Store terms");
+    // The header summarises it as a real answer, not as "Empty".
+    await expect(section.getByText("Store terms")).toBeVisible();
 
     // Switching this product onto the named profile is one pick, and it sticks
     // across a save.
@@ -525,17 +543,15 @@ test.describe("hosted product page", () => {
     await expect(page.locator("[data-product-description]")).toBeVisible();
   });
 
-  test("a shipping profile is written once in the designer and used by name", async ({ page }) => {
+  test("a shipping profile is written once in Settings and used by name", async ({ page }) => {
     const s = await seed(page, "pdp-profiles");
-    await gotoApp(page, `/storefront/${s.storefrontId}`);
 
-    // Open the page's settings the way a seller does: the tile's node.
-    await page.getByRole("button", { name: /edit oak lamp/i }).click();
-    await canvasStill(page);
-    await page.getByRole("button", { name: /^open the product page for oak lamp$/i }).click();
-    await page.getByRole("button", { name: /^shipping and returns$/i }).click();
+    // IN SETTINGS, not the designer. Profiles are account-level, so they are
+    // written once for every storefront rather than per store, and the
+    // designer has no control that writes them at all.
+    await gotoApp(page, "/settings/shipping");
 
-    // The store's default terms and its dispatch line, both already written.
+    // The account's default dispatch line, already written by the seed.
     await expect(page.getByLabel("Dispatch time").first()).toHaveValue("Ships within 24 hours");
 
     // A second profile, added here rather than on any product.
@@ -543,16 +559,16 @@ test.describe("hosted product page", () => {
     const added = page.locator("[data-shipping-profile]").last();
     await added.getByLabel("Name", { exact: true }).fill("Fragile glass");
     await added.getByLabel("Dispatch time").fill("Packed by hand, 2-4 days");
-    await added.getByLabel("Shipping", { exact: true }).fill("Double-boxed and signed for.");
+    await added.locator("textarea").fill("Double-boxed and signed for.");
 
     await page.getByRole("button", { name: /^save$/i }).click();
-    await expectToast(page, /storefront saved/i, 15_000);
+    await expectToast(page, /shipping & returns saved/i, 15_000);
 
-    // It is stored on the storefront, once, with an id a product can name.
+    // Stored on the ACCOUNT, once, with an id a product can name.
     const [row] = (await serviceRest(
-      `/storefronts?id=eq.${s.storefrontId}&select=config`,
-    )) as { config: { shippingProfiles?: { id: string; name: string }[] } }[];
-    const profiles = row!.config.shippingProfiles ?? [];
+      `/profiles?id=eq.${s.sellerId}&select=shipping_policy`,
+    )) as { shipping_policy: { profiles?: { id: string; name: string }[] } }[];
+    const profiles = row!.shipping_policy.profiles ?? [];
     expect(profiles.map((profile) => profile.name).sort()).toEqual([
       "Bulky items",
       "Fragile glass",
@@ -569,6 +585,36 @@ test.describe("hosted product page", () => {
       "data-product-value",
       fragile.id,
     );
+  });
+
+  test("editing seller identity in Settings reaches the buyer page without a storefront save", async ({
+    page,
+  }) => {
+    const s = await seed(page, "pdp-seller-settings");
+
+    // Through the REAL form, not the seed API — proves the write path, not
+    // just the read path the other seller/shipping tests exercise.
+    await gotoApp(page, "/settings/tax");
+    await page.getByLabel("Business name", { exact: true }).fill("Lamp Studio Renamed");
+    await page
+      .getByLabel("Address", { exact: true })
+      .fill("12 Market Street\nDublin, D02 X285");
+    await page.getByLabel("Contact email", { exact: true }).fill("support@lamp.example");
+    await page.getByLabel("Phone", { exact: true }).fill("+353 1 234 5678");
+    await page.getByRole("button", { name: /^save$/i }).click();
+    await expectToast(page, /saved/i);
+
+    // No storefront save happens here at all — the buyer page still picks up
+    // the new details, because they were never the storefront's to carry.
+    await page.context().clearCookies();
+    await page.goto(pagePath(s, s.active));
+    const sellerBlock = page.locator("[data-product-section='seller']");
+    await expect(sellerBlock.getByText("Lamp Studio Renamed")).toBeVisible();
+    await expect(sellerBlock.getByText("12 Market Street")).toBeVisible();
+    await expect(
+      sellerBlock.getByRole("link", { name: "support@lamp.example" }),
+    ).toBeVisible();
+    await expect(sellerBlock.getByText("+353 1 234 5678")).toBeVisible();
   });
 
   test("gives the page its own face, or follows the storefront's", async ({ page }) => {
@@ -623,7 +669,9 @@ test.describe("hosted product page", () => {
     // A section in the fold below leads to the panel holding its words, not
     // to the list that merely toggles it.
     await artboard.locator("[data-product-section='returns'] summary").click();
-    await expect(page.getByLabel("Returns")).toBeVisible();
+    // The panel SHOWS the terms and links out; it no longer edits them, so
+    // what proves the hotspot landed is the link, not a textarea.
+    await expect(page.getByRole("link", { name: /edit in settings/i })).toBeVisible();
 
     // The title block leads to Sections, which is where "Sold by" and the
     // description are switched on and off.

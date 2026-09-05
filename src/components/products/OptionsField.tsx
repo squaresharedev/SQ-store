@@ -7,7 +7,7 @@ import {
   type KeyboardEvent,
   type ReactNode,
 } from "react";
-import { ChevronDown, ChevronUp, Plus, X } from "lucide-react";
+import { AlertTriangle, ChevronDown, ChevronUp, Plus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   fieldBaseClass,
@@ -137,6 +137,15 @@ export function OptionsField({
         />
       ))}
 
+      {/* One-line note so sellers know the limitation before they add sizes and
+          expect to price them differently. Shown once there is at least one
+          group, when the question is live, not before anything is added. */}
+      {groups.length > 0 && (
+        <p className={infoTextClass}>
+          All versions share one price and one stock level.
+        </p>
+      )}
+
       {roomForGroup ? (
         <div className="space-y-2">
           <p className={cn(labelClass, "text-xs")}>
@@ -261,6 +270,33 @@ function OptionGroupEditor({
   // do, renaming it keeps re-deriving one, so typing "Colour" over "Style"
   // gets swatches without a second decision.
   const displayTouched = useRef(group.options.length > 0);
+
+  // SWATCH CONFLICT DETECTION.
+  //
+  // When a group displays as swatches and two options share the same first
+  // letter without either having a colour, the buyer page renders them both as
+  // the same initial (indistinguishable squares). A Colour group of Brass and
+  // Black both show as "B". Warn as soon as the conflict exists so the seller
+  // can fix it before the buyer ever sees it.
+  //
+  // The conflict only matters for the swatch display (chip/select show the full
+  // name). An option with a colour set is not in conflict: the swatch draws, not
+  // the letter. The warning names the options so the seller knows which to fix.
+  const swatchConflicts: Set<string> = (() => {
+    if (group.display !== "swatch") return new Set<string>();
+    const byInitial: Record<string, string[]> = {};
+    for (const option of group.options) {
+      if (option.swatch !== undefined) continue;
+      const initial = option.name.trim().charAt(0).toUpperCase();
+      if (!initial) continue;
+      (byInitial[initial] ??= []).push(option.id);
+    }
+    const conflicting = new Set<string>();
+    for (const ids of Object.values(byInitial)) {
+      if (ids.length > 1) ids.forEach((id) => conflicting.add(id));
+    }
+    return conflicting;
+  })();
   const heading = group.name.trim() || `Option group ${position + 1}`;
   const preset = OPTION_GROUP_PRESETS.find(
     (candidate) => candidate.name.toLowerCase() === group.name.trim().toLowerCase(),
@@ -415,7 +451,21 @@ function OptionGroupEditor({
           repeated, with the one thing you actually scan for (the NAME) given
           no more weight than any of them. Now: hairline-separated rows in a
           single frame, the name leading, and every repeated label carried by
-          the column instead of by each row. */}
+          the column instead of by each row.
+          SWATCH COLUMN HEADER: the compact dot is easy to overlook as
+          decoration. A column label "Colour" before the list makes clear that
+          each dot is a button the seller can interact with. */}
+      {group.display === "swatch" && group.options.length > 0 && (
+        <div
+          aria-hidden="true"
+          className="flex items-center gap-2.5 px-2.5"
+        >
+          <span className={cn(infoTextClass, "w-7 shrink-0 text-center")}>
+            Colour
+          </span>
+          <span className={cn(infoTextClass, "flex-1")}>Name</span>
+        </div>
+      )}
       {group.options.length > 0 && (
         <ul
           // NOT `overflow-hidden`, however tempting for the rounded corners:
@@ -446,30 +496,40 @@ function OptionGroupEditor({
               >
                 {/* Only where it means something. A swatch on a "Power output"
                     row is a control the page will never draw. One dot, not a
-                    row of seven — see ColorPicker's `compact`. */}
+                    row of seven — see ColorPicker's `compact`. The conflict
+                    ring gives conflicting options a visible call to action so
+                    the seller knows exactly which dot to click. */}
                 {group.display === "swatch" && (
-                  <ColorPicker
-                    compact
-                    id={`${inputId}-swatch-${option.id}`}
-                    label={`Colour for ${optionName}`}
-                    value={option.swatch ?? NO_SWATCH}
-                    onChange={(hex) => updateOption(option.id, { swatch: hex })}
-                    inherit={{
-                      label: "No swatch",
-                      value: NO_SWATCH,
-                      active: option.swatch === undefined,
-                      onSelect: () => {
-                        const { swatch, ...rest } = option;
-                        void swatch;
-                        onChange({
-                          ...group,
-                          options: group.options.map((candidate) =>
-                            candidate.id === option.id ? rest : candidate,
-                          ),
-                        });
-                      },
-                    }}
-                  />
+                  <span
+                    className={cn(
+                      "flex shrink-0 items-center",
+                      swatchConflicts.has(option.id) &&
+                        "rounded-full ring-2 ring-destructive ring-offset-1 ring-offset-background",
+                    )}
+                  >
+                    <ColorPicker
+                      compact
+                      id={`${inputId}-swatch-${option.id}`}
+                      label={`Colour for ${optionName}`}
+                      value={option.swatch ?? NO_SWATCH}
+                      onChange={(hex) => updateOption(option.id, { swatch: hex })}
+                      inherit={{
+                        label: "No swatch",
+                        value: NO_SWATCH,
+                        active: option.swatch === undefined,
+                        onSelect: () => {
+                          const { swatch, ...rest } = option;
+                          void swatch;
+                          onChange({
+                            ...group,
+                            options: group.options.map((candidate) =>
+                              candidate.id === option.id ? rest : candidate,
+                            ),
+                          });
+                        },
+                      }}
+                    />
+                  </span>
                 )}
 
                 {/* The name is the row. Borderless until you touch it, so a
@@ -534,6 +594,29 @@ function OptionGroupEditor({
             );
           })}
         </ul>
+      )}
+
+      {/* SWATCH CONFLICT WARNING. Shown when two or more options share a first
+          letter and neither has a colour set (the buyer sees identical squares
+          and cannot tell them apart). Listed below the options so it is visible
+          immediately after the conflicting rows, not hidden inside an info tip. */}
+      {swatchConflicts.size > 0 && (
+        <div className="flex items-start gap-1.5 rounded-sm border border-border bg-accent/30 px-2.5 py-2">
+          <AlertTriangle
+            className="mt-0.5 size-3.5 shrink-0 text-foreground"
+            strokeWidth={2}
+            aria-hidden="true"
+          />
+          <p className={cn(infoTextClass, "text-foreground")}>
+            {(() => {
+              const names = group.options
+                .filter((o) => swatchConflicts.has(o.id))
+                .map((o) => o.name.trim() || "Unnamed")
+                .join(" and ");
+              return `${names} share a first letter and neither has a colour. Buyers will see identical squares. Give each one a colour.`;
+            })()}
+          </p>
+        </div>
       )}
 
       {/* ONE BOX, ANY NUMBER OF VALUES. Type one and press Enter, or paste the

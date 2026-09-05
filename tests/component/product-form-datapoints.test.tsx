@@ -242,6 +242,7 @@ describe("product form — the machine-readable contract", () => {
       gallery: [],
       documents: [],
       details: initialDetailsValues(),
+      optionDetails: {},
       purchaseUrl: "",
       shippingProfileId: null,
       shippingProfileName: null,

@@ -26,7 +26,11 @@ function themeWith(over: Partial<StorefrontTheme> = {}): StorefrontTheme {
 }
 
 function headerWith(over: Partial<StorefrontHeader> = {}): StorefrontHeader {
-  return { ...DEFAULT_STOREFRONT_HEADER, show: true, ...over };
+  // name and bio must be non-empty for the resolver to return a result —
+  // DEFAULT_STOREFRONT_HEADER now seeds them as "" (SF-02) so the buyer page
+  // shows nothing until the seller fills them in, but these tests need visible
+  // lines to exercise the colour-resolution logic.
+  return { ...DEFAULT_STOREFRONT_HEADER, show: true, name: "Shop", bio: "Hello", ...over };
 }
 
 /** The header is only interesting to the two masthead targets, so the rest of

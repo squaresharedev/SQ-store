@@ -3188,3 +3188,79 @@ alter table public.products
 create index products_shipping_profile_id_idx
   on public.products (shipping_profile_id)
   where shipping_profile_id is not null;
+
+-- 20260905_seller_identity_on_profile
+-- Seller identity moves to the account: three more profile columns beside
+-- tax_business_name/tax_vat_id/tax_country (20260706081724), covering what
+-- distance-selling law asks for that tax info alone does not (a postal
+-- address, a way to reach the seller). storefronts.config.seller is retired;
+-- see lib/settings/seller-identity.ts for the one place that reads all six
+-- columns into the buyer-facing shape.
+alter table public.profiles
+  add column seller_address text,
+  add column seller_email text,
+  add column seller_phone text;
+
+alter table public.profiles
+  add constraint profiles_seller_address_shape
+    check (seller_address is null or char_length(seller_address) between 1 and 300),
+  add constraint profiles_seller_email_shape
+    check (
+      seller_email is null
+      or (char_length(seller_email) <= 254 and seller_email ~ '^[^@[:space:]]+@[^@[:space:]]+\.[^@[:space:]]+$')
+    ),
+  add constraint profiles_seller_phone_shape
+    check (seller_phone is null or char_length(seller_phone) between 1 and 32);
+
+-- 20260905_shipping_policy_on_profile
+-- Shipping and returns terms move to the account: one jsonb column holding the
+-- structured answers (ships from, destinations, returns window, who pays the
+-- postage back) plus the named shipping profiles products point at by
+-- products.shipping_profile_id. storefronts.config.policies and
+-- .shippingProfiles are retired; see lib/settings/shipping-policy.ts for the
+-- one place that reads this column into the shape every reader uses, and
+-- lib/validation/shipping-policy.ts for the real write boundary.
+--
+-- The backfill and the config strip from the production migration are omitted
+-- here for the same reason every other data step is: the replica starts empty,
+-- so there is nothing to carry over. What the tests need is the COLUMN and its
+-- CHECK, which is what they get.
+alter table public.profiles
+  add column shipping_policy jsonb;
+
+alter table public.profiles
+  add constraint profiles_shipping_policy_shape
+    check (
+      shipping_policy is null
+      or (
+        jsonb_typeof(shipping_policy) = 'object'
+        and pg_column_size(shipping_policy) <= 16384
+      )
+    );
+
+-- 20260905_option_specifications
+-- Per-version specifications: an option may carry the dimensions, weight and
+-- short spec rows that version changes, and the product page shows those in
+-- place of the product's own (see lib/products/option-details.ts). Still no
+-- price and no stock per option: this is the same presentation column, now
+-- carrying the measurements the page prints. The size cap goes up with it,
+-- because the schema's worst case (48 fully measured options) is near 48 KB.
+alter table public.products
+  drop constraint products_option_groups_size,
+  add constraint products_option_groups_size
+    check (pg_column_size(option_groups) <= 65536);
+
+-- 20260905_order_selected_options
+-- What version the buyer bought, on the order: [{label, value}] snapshotted in
+-- the seller's own words ("Size": "Six seater"), never option ids, so renaming
+-- or deleting an option cannot rewrite what a past order says was sold. Empty
+-- for a product sold in one version. Written server-side only, like every other
+-- column on this table.
+alter table public.orders
+  add column selected_options jsonb not null default '[]'::jsonb;
+
+alter table public.orders
+  add constraint orders_selected_options_is_array
+    check (jsonb_typeof(selected_options) = 'array'),
+  add constraint orders_selected_options_size
+    check (pg_column_size(selected_options) <= 2048);

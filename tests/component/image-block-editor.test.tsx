@@ -122,13 +122,15 @@ describe("ImageBlockEditor — alt text", () => {
 
 describe("ImageBlockEditor — opacity and block actions", () => {
   it("reports the stored opacity", () => {
+    // The number and the % unit are separate elements (number in an editable
+    // input, unit in a sibling <span>), so getByText("40%") no longer works.
     renderEditor(imageBlock({ opacity: 40 }));
-    expect(screen.getByText("40%")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("40")).toBeInTheDocument();
   });
 
   it("treats an absent opacity as fully opaque", () => {
     renderEditor();
-    expect(screen.getByText("100%")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("100")).toBeInTheDocument();
   });
 
   it("duplicates and removes through their own callbacks", async () => {

@@ -162,19 +162,37 @@ export function AnalyticsPage({
           for further down their own page. isSourceRelevant owns that test; the
           section reappears on its own the moment the block is placed. */}
       {signals.available &&
-        SIGNAL_SOURCES.filter((source) =>
-          isSourceRelevant(source, {
+        (() => {
+          const relevantContext = {
             everRecorded: signals.everRecorded,
             activeBlockTypes: signals.activeBlockTypes,
-          }),
-        ).map((source) => (
-          <SignalSection
-            key={source.id}
-            source={source}
-            breakdown={signals.byKind[source.id]}
-            currency={currency}
-          />
-        ))}
+          };
+          const relevantSources = SIGNAL_SOURCES.filter((source) =>
+            isSourceRelevant(source, relevantContext),
+          );
+          const hiddenSources = SIGNAL_SOURCES.filter(
+            (source) => !isSourceRelevant(source, relevantContext),
+          );
+          return (
+            <>
+              {relevantSources.map((source) => (
+                <SignalSection
+                  key={source.id}
+                  source={source}
+                  breakdown={signals.byKind[source.id]}
+                  currency={currency}
+                />
+              ))}
+              {hiddenSources.length > 0 && (
+                <p className="text-sm text-muted-foreground">
+                  {hiddenSources.length === 1
+                    ? `${hiddenSources[0].label} metrics are available once you add the corresponding block to a storefront.`
+                    : `${hiddenSources.map((s) => s.label).join(", ")} metrics are available once you add the corresponding blocks to a storefront.`}
+                </p>
+              )}
+            </>
+          );
+        })()}
     </div>
   );
 }

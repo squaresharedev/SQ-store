@@ -57,16 +57,53 @@ test.describe("products CRUD", () => {
     await page.getByLabel(/price/i).fill("0");
     await page.getByRole("button", { name: /save product/i }).click();
 
-    // A blocked save is said in BOTH places, and that is the point rather than
-    // an accident: the field says which one is wrong, and the toast says it
-    // again where the Save button is — on a form this long the offending field
-    // is usually scrolled off screen, so the click otherwise reads as a no-op.
+    // A blocked save is still said in BOTH places, and that is still the
+    // point: the field says which one is wrong, and the action bar says how
+    // many there are. What changed is WHERE the second half lives. It used to
+    // be a toast, which on this form rendered on top of the Save button the
+    // seller had just pressed; it is now the summary inside the sticky action
+    // bar, which is next to Save rather than over it and cannot be dismissed
+    // by accident. `role="alert"` keeps it announced, which is what the toast's
+    // live region used to do.
     await expect(
       page.locator("form").getByText(/price must be a number greater than zero/i),
     ).toBeVisible();
-    await expectToast(page, /price must be a number greater than zero/i);
-    // Still on the form — nothing was saved.
+    await expect(
+      page.getByRole("alert").getByText(/thing(s)? to fix before saving/i),
+    ).toBeVisible();
+    // Still on the form: nothing was saved.
     await expect(page).toHaveURL(/\/products\/new/);
+  });
+
+  test("required fields carry a red star, and the blocked-save summary jumps to the first one", async ({
+    page,
+  }) => {
+    const user = freshUser("reqstar");
+    await signUp(page, user);
+    await page.goto("/products/new");
+
+    // Title and Price are the two fields a product can never be saved
+    // without, and the star sits on each of them, not on the section they
+    // share — nothing else on a fresh form is required yet.
+    const stars = page.locator('form span[aria-hidden="true"]').filter({ hasText: /^\*$/ });
+    await expect(stars).toHaveCount(2);
+    // The label itself must stay exactly "Title" — the star lives beside it,
+    // not inside it, so the field's accessible name is unaffected.
+    await expect(page.getByLabel("Title", { exact: true })).toBeVisible();
+
+    // Leave everything empty and try to save: both fields are wrong, so the
+    // summary should count both and offer a route to whichever comes first.
+    await page.getByRole("button", { name: /save product/i }).click();
+
+    const summary = page.getByRole("alert");
+    await expect(summary.getByText(/2 things to fix before saving/i)).toBeVisible();
+    await summary.getByRole("button", { name: /jump to first/i }).click();
+
+    // The jump scrolls first and focuses a beat later, so the field is
+    // deliberately not focused on the same tick as the click.
+    await expect(page.getByLabel("Title", { exact: true })).toBeFocused({
+      timeout: 5_000,
+    });
   });
 
   test("only draft status shows an indicator on the product card", async ({ page }) => {

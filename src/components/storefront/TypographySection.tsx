@@ -152,11 +152,15 @@ export function TypographySection({
             every browser reads it.
           </InfoTip>
         </span>
+        {/* Out of the AT tree: the visible button below is the labelled
+            affordance and clicks this programmatically. */}
         <input
           ref={fileInputRef}
           type="file"
           accept={FONT_ACCEPT}
           className="sr-only"
+          aria-hidden="true"
+          tabIndex={-1}
           onChange={(event) => handleFile(event.target.files?.[0])}
         />
         <button

@@ -35,13 +35,11 @@ import {
   type TextSpan,
   DEFAULT_PRODUCT_PAGE_CONFIG,
   type ProductPageConfig,
-  type ShippingProfile,
-  type StorefrontPolicies,
   type StorefrontSeller,
 } from "@/types/storefront";
 import { LAYER_OPS, moveLayerTo, type LayerOp } from "@/lib/storefront/layers";
-import { compactText, isDefaultProductPage } from "@/lib/storefront/product-page";
-import { compactShippingProfiles } from "@/lib/storefront/shipping";
+import { isDefaultProductPage } from "@/lib/storefront/product-page";
+import type { SellerShippingPolicy } from "@/types/shipping-policy";
 import { applyFormatToRange } from "@/lib/storefront/text-spans";
 import { isDefaultPlacement } from "@/lib/images/placement";
 import { UploadError, uploadToR2 } from "@/lib/products/upload";
@@ -80,6 +78,7 @@ import type {
 import { LibraryPanel, type LibraryTab } from "./LibraryPanel";
 import { SettingTargetProvider } from "@/lib/storefront/setting-context";
 import {
+  freshSettingRef,
   isPerTileSetting,
   settingById,
   settingIdFromHref,
@@ -131,9 +130,12 @@ type EditorSnapshot = {
   header: StorefrontHeader;
   blocks: StorefrontBlock[];
   productPage: ProductPageConfig;
-  policies: StorefrontPolicies;
-  shippingProfiles: ShippingProfile[];
-  seller: StorefrontSeller;
+  // NO `policies` OR `shippingProfiles` HERE either, for the same reason as
+  // `seller`: shipping and returns terms are account-level and read-only in
+  // this editor, so there is nothing about them to undo.
+  // NO `seller` HERE. Trader identity is account-level and read-only in this
+  // editor (see the `sellerIdentity` prop below) — it has no undo history of
+  // its own because there is nothing here to undo.
 };
 
 /** First shallowly-changed field, used as the history coalesce key so rapid
@@ -226,11 +228,23 @@ export function StorefrontDesigner({
   initialSetting = null,
   role = null,
   accountId = null,
+  sellerIdentity = {},
+  shippingPolicy = {},
 }: {
   storefrontId: string;
   initialName: string;
   initialConfig: StorefrontConfig;
   products: Product[];
+  /** The active account's trader identity (Settings › Business & seller
+   *  details), read-only here — see lib/settings/seller-identity.ts. Shown on
+   *  every product page of this storefront; this editor has no control that
+   *  edits it, only a link to where it is. */
+  sellerIdentity?: StorefrontSeller;
+  /** The active account's shipping and returns terms (Settings › Shipping &
+   *  returns), read-only here — see lib/settings/shipping-policy.ts. Every
+   *  product page of this storefront sells under them; this editor has no
+   *  control that edits them, only a link to where it is. */
+  shippingPolicy?: SellerShippingPolicy;
   /** Signed display URL for a stored image background (null when none). */
   initialBackgroundImageUrl?: string | null;
   /** Signed display URL for a stored uploaded font (null when none). */
@@ -284,20 +298,11 @@ export function StorefrontDesigner({
   );
   // Placement is explicit, so the array is just a bag of blocks.
   const [blocks, setBlocks] = useState<StorefrontBlock[]>(initialConfig.blocks);
-  // The product page's options, policies and seller identity: ordinary config
-  // members, so they ride the same undo history and the same save.
+  // The product page's own options: an ordinary config member, so it rides
+  // ride the same undo history and the same save.
   const [productPage, setProductPage] = useState<ProductPageConfig>(
     initialConfig.productPage ?? DEFAULT_PRODUCT_PAGE_CONFIG,
   );
-  const [policies, setPolicies] = useState<StorefrontPolicies>(
-    initialConfig.policies ?? {},
-  );
-  // Named shipping exceptions. Empty for nearly every store: `policies.shipping`
-  // is the default every product uses unless it points at one of these.
-  const [shippingProfiles, setShippingProfiles] = useState<ShippingProfile[]>(
-    initialConfig.shippingProfiles ?? [],
-  );
-  const [seller, setSeller] = useState<StorefrontSeller>(initialConfig.seller ?? {});
   // WHICH PRODUCT PAGES ARE OUT, in the order they were opened. Each one is an
   // artboard on the canvas beside the board, joined to its tile by a line. A
   // VIEW state: which pages the seller has open is not part of the design, so
@@ -572,9 +577,6 @@ export function StorefrontDesigner({
     header,
     blocks,
     productPage,
-    policies,
-    shippingProfiles,
-    seller,
   });
 
   /** Every undoable mutation calls this FIRST with an optional coalesce key. */
@@ -588,9 +590,6 @@ export function StorefrontDesigner({
     setHeader(next.header);
     setBlocks(next.blocks);
     setProductPage(next.productPage);
-    setPolicies(next.policies);
-    setShippingProfiles(next.shippingProfiles);
-    setSeller(next.seller);
     markDirty();
   }
 
@@ -2572,7 +2571,7 @@ export function StorefrontDesigner({
       if (openPages.length === 0 && defaultPageProductId) {
         openProductPage(defaultPageProductId, ref);
       } else {
-        setSettingTarget(ref);
+        setSettingTarget(freshSettingRef(ref));
         setPanelOpen(true);
       }
       return;
@@ -2582,7 +2581,7 @@ export function StorefrontDesigner({
     // A per-tile setting reaches the inspector only when there is a tile that
     // HAS it; everything else belongs to the storefront panel.
     if (!(isPerTileSetting(ref) && onProductTile)) setInspector(null);
-    setSettingTarget(ref);
+    setSettingTarget(freshSettingRef(ref));
     setSettingsOpen(false);
     setPanelOpen(true);
   }
@@ -2602,7 +2601,7 @@ export function StorefrontDesigner({
     setOpenPages((current) =>
       current.includes(productId) ? current : [...current, productId],
     );
-    setSettingTarget(ref);
+    setSettingTarget(freshSettingRef(ref));
     setPanelOpen(true);
     revealArtboard();
   }
@@ -2692,23 +2691,6 @@ export function StorefrontDesigner({
     setProductPage(next);
   }
 
-  function updatePolicies(next: StorefrontPolicies) {
-    recordChange(`policies:${changedField(policies, next)}`);
-    setPolicies(next);
-  }
-
-  /** One coalesce key per profile FIELD, so typing into a profile's terms
-   *  undoes as one step the way every other text field here does — and adding
-   *  or removing a profile is always its own step. */
-  function updateShippingProfiles(next: ShippingProfile[], coalesceKey?: string) {
-    recordChange(coalesceKey ? `shippingProfiles:${coalesceKey}` : undefined);
-    setShippingProfiles(next);
-  }
-
-  function updateSeller(next: StorefrontSeller) {
-    recordChange(`seller:${changedField(seller, next)}`);
-    setSeller(next);
-  }
 
   function updateName(next: string) {
     markDirty();
@@ -2796,14 +2778,18 @@ export function StorefrontDesigner({
    *  branch on it without re-reading async state. */
   async function handleSave(): Promise<boolean> {
     setSaving(true);
-    // Policies and seller details travel trimmed and without empty fields;
-    // nothing at all when every field is blank. The product page's options are
-    // written once they differ from the defaults (or were already stored), so
-    // a storefront nobody turned towards its product page saves byte-identical
-    // to the one it was before the page existed.
-    const compactPolicies = compactText(policies);
-    const compactSeller = compactText(seller);
-    const cleanProfiles = compactShippingProfiles(shippingProfiles);
+    // Policies travel trimmed and without empty fields; nothing at all when
+    // every field is blank. The product page's options are written once they
+    // differ from the defaults (or were already stored), so a storefront
+    // nobody turned towards its product page saves byte-identical to the one
+    // it was before the page existed.
+    //
+    // NOTHING TO COMPACT for the seller, the policies or the shipping
+    // profiles: all three are account-level and this editor never writes
+    // them (lib/settings/seller-identity.ts,
+    // lib/settings/shipping-actions.ts). That is the point of the move — a
+    // save here cannot reach the terms every OTHER storefront is also
+    // selling under.
     const config: StorefrontConfig = {
       theme,
       // Blocks carry their own coordinates, so array order is irrelevant.
@@ -2815,13 +2801,18 @@ export function StorefrontDesigner({
       ...(initialConfig.productPage || !isDefaultProductPage(productPage)
         ? { productPage }
         : {}),
-      ...(compactPolicies ? { policies: compactPolicies } : {}),
-      // Trimmed, and a profile with no terms left in it is dropped rather than
-      // saved as a name pointing at nothing. A store with no exceptions carries
-      // no member at all, exactly as before profiles existed.
-      ...(cleanProfiles.length > 0 ? { shippingProfiles: cleanProfiles } : {}),
-      ...(compactSeller ? { seller: compactSeller } : {}),
     };
+    // SF-01: Warn when any block in the grid points at a draft product.
+    // Draft products are hidden from buyers, so a grid tile that points at one
+    // would lead buyers to a dead link. The save still succeeds (the seller
+    // may be about to publish the product), but they hear about it.
+    const draftBlockTitles = blocks
+      .flatMap((b) => {
+        if (b.type !== "product") return [];
+        const p = productsById.get(b.productId);
+        return p?.status === "draft" ? [p.title] : [];
+      });
+
     const result = await saveStorefront(storefrontId, { name, config });
     setSaving(false);
     if (!result.ok) {
@@ -2837,19 +2828,30 @@ export function StorefrontDesigner({
       );
     }
     setDirty(false);
-    // Blocks silently vanishing from the canvas needs saying out loud —
+    // Blocks silently vanishing from the canvas needs saying out loud --
     // otherwise a save that quietly removed tiles reads as a save that broke
     // the design.
-    toast.success("Storefront saved.", {
-      lines:
-        result.droppedBlocks > 0
-          ? [
-              result.droppedBlocks === 1
-                ? "1 block pointed at a deleted product and was removed."
-                : `${result.droppedBlocks} blocks pointed at deleted products and were removed.`,
-            ]
-          : undefined,
-    });
+    if (draftBlockTitles.length > 0) {
+      const names = draftBlockTitles.slice(0, 3).join(", ");
+      const more = draftBlockTitles.length > 3 ? ` and ${draftBlockTitles.length - 3} more` : "";
+      toast.info("Saved, but some products are still drafts.", {
+        lines: [
+          `${names}${more} ${draftBlockTitles.length === 1 ? "is a draft" : "are drafts"} and buyers cannot reach ${draftBlockTitles.length === 1 ? "it" : "them"} yet.`,
+          "Publish those products when ready.",
+        ],
+      });
+    } else {
+      toast.success("Storefront saved.", {
+        lines:
+          result.droppedBlocks > 0
+            ? [
+                result.droppedBlocks === 1
+                  ? "1 block pointed at a deleted product and was removed."
+                  : `${result.droppedBlocks} blocks pointed at deleted products and were removed.`,
+              ]
+            : undefined,
+      });
+    }
     return true;
   }
 
@@ -2988,6 +2990,16 @@ export function StorefrontDesigner({
           </div>
         </div>
       </header>
+
+      {/* SF-09: Mobile editing notice. The designer is functional on a phone
+          but 55px cells and 24px control chips make precise editing hard.
+          This banner only appears below the lg breakpoint where full layout
+          is not available, and links to the storefront list rather than
+          implying features that are not there. */}
+      <div className="shrink-0 border-b border-amber-200 bg-amber-50 px-4 py-2 font-inter text-xs text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300 lg:hidden">
+        For the best editing experience, open this designer on a desktop or
+        tablet. Reordering blocks and editing the header work on any device.
+      </div>
 
       {/* Full-width workspace. `relative` positions the floating left layer;
           the design column on the right is a real flex item beside it. */}
@@ -3155,9 +3167,8 @@ export function StorefrontDesigner({
             storefrontId={storefrontId}
             storefrontName={name}
             productPage={productPage}
-            policies={policies}
-            shippingProfiles={shippingProfiles}
-            seller={seller}
+            shippingPolicy={shippingPolicy}
+            seller={sellerIdentity}
           />
         </main>
 
@@ -3227,12 +3238,8 @@ export function StorefrontDesigner({
               onJump={jumpTo}
               productPage={productPage}
               onProductPageChange={updateProductPage}
-              policies={policies}
-              onPoliciesChange={updatePolicies}
-              shippingProfiles={shippingProfiles}
-              onShippingProfilesChange={updateShippingProfiles}
-              seller={seller}
-              onSellerChange={updateSeller}
+              shippingPolicy={shippingPolicy}
+              sellerIdentity={sellerIdentity}
             />
           }
           inspector={

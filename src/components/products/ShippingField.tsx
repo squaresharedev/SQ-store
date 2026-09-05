@@ -12,9 +12,10 @@ import { helpTextClass, labelClass } from "@/components/ui/control-styles";
  *
  * The whole point of this section is that it does NOT ask a seller to write
  * shipping terms. Shipping reads the same for nearly every product in a
- * catalogue, so the terms live once on the storefront and every product
- * inherits them; this field's default answer, and its answer for nearly every
- * product, is "the ones you already wrote". Shopify and Etsy both landed on
+ * catalogue, so the terms live once on the ACCOUNT (Settings › Shipping &
+ * returns) and every product inherits them; this field's default answer, and
+ * its answer for nearly every product, is "the ones you already wrote".
+ * Shopify and Etsy both landed on
  * the same shape — a general profile everything falls into, plus named
  * profiles for the exceptions — and for the same reason: fifty free-text
  * shipping boxes become fifty answers that drift apart.
@@ -40,16 +41,16 @@ export function ShippingField({
   choices: ShippingChoices;
   onChange: (next: string | null) => void;
 }) {
-  const { profiles, defaults, editHref } = choices;
-  // Labels carry the store's name only when there is more than one store to
-  // tell apart. With one storefront, which is most sellers, saying it on every
-  // row is noise on the only answer there is.
-  const manyStores = defaults.length > 1;
+  const { profiles, fallback, editHref } = choices;
+  // No store name on any row any more: there is ONE set of terms for the
+  // account, so there is no second store to tell a profile apart from.
 
   const chosen = profiles.find((profile) => profile.id === value) ?? null;
-  // A stored id that matches nothing: the profile was deleted, or the product
-  // came from a storefront that no longer exists. The product page already
-  // falls back to the store default, so this row is only telling the seller
+  // A stored id that matches nothing, which now has exactly one cause: the
+  // seller deleted the profile. (It used to have a second — a product placed
+  // on a storefront that never had that profile — which the move to
+  // account-level terms removed outright.) The product page already
+  // falls back to the default, so this row is only telling the seller
   // what is ALREADY true — and it keeps the stored value untouched, so simply
   // opening the form does not count as an edit.
   const orphaned = value !== null && chosen === null;
@@ -57,8 +58,8 @@ export function ShippingField({
   const options: SelectOption<string>[] = [
     {
       value: DEFAULT_VALUE,
-      label: "Your store's shipping terms",
-      description: "Set once for the whole store. What almost every product wants.",
+      label: "Your usual shipping terms",
+      description: "Set once for your account. What almost every product wants.",
     },
     ...(orphaned
       ? [
@@ -72,12 +73,11 @@ export function ShippingField({
     ...profiles.map((profile) => ({
       value: profile.id,
       label: profile.name || "Untitled profile",
-      description: manyStores ? profile.storefrontName : firstLine(profile.body),
+      description: firstLine(profile.body),
     })),
   ];
 
-  const hasAnyTerms =
-    profiles.length > 0 || defaults.some((entry) => entry.body || entry.dispatch);
+  const hasAnyTerms = profiles.length > 0 || Boolean(fallback.body || fallback.dispatch);
 
   return (
     <div
@@ -99,8 +99,8 @@ export function ShippingField({
         </div>
       ) : (
         <p className={helpTextClass}>
-          Shipping terms are written once for your whole store, not per product, so this product
-          uses them automatically.
+          Shipping terms are written once for your whole account, not per product, so this
+          product uses them automatically.
         </p>
       )}
 
@@ -118,22 +118,11 @@ export function ShippingField({
           {chosen ? (
             <Terms dispatch={chosen.dispatch} body={chosen.body} />
           ) : (
-            <div className="space-y-3">
-              {defaults.map((entry) => (
-                <div key={entry.storefrontId} className="space-y-1">
-                  {manyStores && (
-                    <p className="text-xs font-medium text-muted-foreground">
-                      {entry.storefrontName}
-                    </p>
-                  )}
-                  <Terms
-                    dispatch={entry.dispatch}
-                    body={entry.body}
-                    empty="No shipping terms written yet."
-                  />
-                </div>
-              ))}
-            </div>
+            <Terms
+              dispatch={fallback.dispatch}
+              body={fallback.body}
+              empty="No shipping terms written yet."
+            />
           )}
         </div>
       ) : (
@@ -142,7 +131,6 @@ export function ShippingField({
         </p>
       )}
 
-      {editHref && (
         <p className={helpTextClass}>
           <Link
             href={editHref}
@@ -154,7 +142,6 @@ export function ShippingField({
             ? "— changes apply to every product using them."
             : "— or add a profile there for products that ship differently."}
         </p>
-      )}
     </div>
   );
 }

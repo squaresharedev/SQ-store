@@ -95,7 +95,10 @@ const soldOutProduct: StorefrontBlock = {
   h: 1,
 };
 
-const EMPTY_LABEL = "No products yet";
+// "This grid is empty" rather than "No products yet": the old copy read as
+// "you have no products at all" to a seller who had four — the grid just
+// had none on it.
+const EMPTY_LABEL = "This grid is empty";
 
 describe("StorefrontCard empty preview", () => {
   it("explains the blank box when the storefront has no blocks", () => {

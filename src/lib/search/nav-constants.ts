@@ -13,6 +13,7 @@ import {
   Receipt,
   ScrollText,
   TriangleAlert,
+  Truck,
   User,
   Users,
   type LucideIcon,
@@ -68,7 +69,11 @@ export const SETTINGS_LINK: NavEntry = {
 export const SETTINGS_NAV: SettingsNavEntry[] = [
   { href: "/settings/account", label: "Account", icon: User },
   { href: "/settings/legal", label: "Legal", icon: ScrollText },
-  { href: "/settings/tax", label: "Tax", icon: Receipt },
+  { href: "/settings/tax", label: "Business & seller details", icon: Receipt },
+  // Beside Tax, not off in the storefront designer where these terms used to
+  // be written: both are account-level facts about the business that every
+  // storefront and every product reads (20260905_shipping_policy_on_profile).
+  { href: "/settings/shipping", label: "Shipping & returns", icon: Truck },
   { href: "/settings/notifications", label: "Notifications", icon: Bell },
   { href: "/settings/team", label: "Team & access", icon: Users },
   {

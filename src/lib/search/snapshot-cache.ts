@@ -25,7 +25,11 @@ import type { SearchSnapshot, SearchSnapshotResponse } from "@/lib/search/types"
  * degrades to registry + live search, never throws.
  */
 
-const SNAPSHOT_TTL_MS = 60_000;
+// 5 minutes: long enough that a single tab refreshing every few minutes does
+// not exhaust the 600/hour rate limit ceiling, short enough that a catalogue
+// change shows up quickly in search. The previous 60 s TTL meant 60 refreshes
+// per hour per tab, which hit the old 120/hour ceiling during normal use.
+const SNAPSHOT_TTL_MS = 300_000;
 const MAX_CACHED_ACCOUNTS = 3;
 
 type CacheEntry = { snapshot: SearchSnapshot; fetchedAt: number };

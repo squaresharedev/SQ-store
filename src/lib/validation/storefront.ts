@@ -1,16 +1,13 @@
 import { z } from "zod";
 import {
-  emailAddress,
   hexColor,
   hostname,
   isStrictHexColor,
   multiLineText,
-  referenceCode,
   singleLineText,
   uniqueList,
   uuidField,
 } from "@/lib/validation/inputs";
-import { EU_COUNTRY_CODES } from "@/lib/settings/constants";
 import {
   BACKGROUND_IMAGE_SCALE_MAX,
   BACKGROUND_IMAGE_SCALE_MIN,
@@ -37,7 +34,6 @@ import {
   PRODUCT_PAGE_PRICE_NOTES,
   PRODUCT_PAGE_SECTION_IDS,
   PRODUCT_PAGE_SHIPPING_NOTES,
-  SELLER_FIELD_MAX,
   SHIPPING_DISPATCH_MAX,
   SHIPPING_PROFILES_MAX,
   SHIPPING_PROFILE_NAME_MAX,
@@ -485,19 +481,11 @@ export const productPageSchema = z.preprocess(
   }),
 );
 
-/** Store policies: plain paragraphs, each capped, each optional. Editors drop
- *  an emptied field's key rather than storing "" (see compactText).
- *
- *  `shipping` is also the DEFAULT shipping profile — what a product ships
- *  under when it names none, which is nearly all of them. */
-export const policiesSchema = z.strictObject({
-  shipping: multiLineText({ label: "The shipping policy", max: POLICY_TEXT_MAX, min: 1 }).optional(),
-  dispatch: singleLineText({
-    label: "The dispatch time",
-    max: SHIPPING_DISPATCH_MAX,
-  }).optional(),
-  returns: multiLineText({ label: "The returns policy", max: POLICY_TEXT_MAX, min: 1 }).optional(),
-});
+// `policiesSchema` lived here. Shipping and returns terms are account-level
+// now (Settings › Shipping & returns, lib/validation/shipping-policy.ts) — a
+// storefront is a presentation of one catalogue rather than a business, so it
+// has no policies of its own to validate. The stored member is stripped rather
+// than rejected; see RETIRED_TOP_LEVEL_FIELDS below.
 
 /**
  * A named shipping exception. `id` is a uuid the editor mints and a product's
@@ -530,29 +518,10 @@ export const shippingProfilesSchema = z
     error: "Each shipping profile can only be listed once.",
   });
 
-/** Trader identity. The email is the one field here that is not prose, and it
- *  goes through the same address gate every other email in the app does; it is
- *  rendered as a mailto only after parsing. `country` follows the tax
- *  settings' rule: an EU code, or "" for "not in the EU". */
-export const sellerSchema = z.strictObject({
-  businessName: singleLineText({
-    label: "The business name",
-    max: SELLER_FIELD_MAX.businessName,
-  }).optional(),
-  address: multiLineText({
-    label: "The business address",
-    max: SELLER_FIELD_MAX.address,
-    min: 1,
-  }).optional(),
-  email: emailAddress("The contact email").optional(),
-  vatId: referenceCode({ label: "A VAT ID", min: 2, max: SELLER_FIELD_MAX.vatId }).optional(),
-  country: z
-    .enum(["", ...EU_COUNTRY_CODES] as [string, ...string[]], {
-      error: "Pick a country from the list.",
-    })
-    .optional(),
-  phone: singleLineText({ label: "The phone number", max: SELLER_FIELD_MAX.phone }).optional(),
-});
+// `sellerSchema` lived here. Trader identity is account-level now (Settings ›
+// Business & seller details, lib/validation/settings.ts) — a storefront has
+// no `seller` member left to validate. See RETIRED_TOP_LEVEL_FIELDS below for
+// how an old stored/posted config carrying one degrades instead of failing.
 
 // Free placement: every block carries its own cell coordinates and span. The
 // per-field caps here are absolute (canvas maximums); the config-level refine
@@ -741,9 +710,9 @@ const configObjectSchema = z
     header: headerSchema.optional(),
     embed: embedSettingsSchema.optional(),
     productPage: productPageSchema.optional(),
-    policies: policiesSchema.optional(),
-    shippingProfiles: shippingProfilesSchema.optional(),
-    seller: sellerSchema.optional(),
+    // No `policies` or `shippingProfiles` member: shipping and returns terms
+    // are account-level now (profiles.shipping_policy, bounded by
+    // lib/validation/shipping-policy.ts). See RETIRED_TOP_LEVEL_FIELDS.
   })
   // The canvas invariants, checked here because they span theme + blocks:
   // every block sits inside the board, and no two cover the same cell. These
@@ -843,7 +812,27 @@ function migrateLegacyBlocks(
 }
 
 /**
+ * Top-level config members that used to be real and no longer are. A config
+ * carrying one must still parse — `configObjectSchema` is a `strictObject`,
+ * so an unknown key would otherwise fail the WHOLE config, degrading every
+ * other member to the coded defaults right along with the retired one. See
+ * RETIRED_PRODUCT_PAGE_FIELDS just below for the same pattern one level down.
+ *
+ * `seller`: trader identity moved to the account (Settings › Business &
+ * seller details) — see the StorefrontSeller doc comment in types/storefront.ts.
+ *
+ * `policies` / `shippingProfiles`: shipping and returns terms moved to the
+ * account the same way, and for the same reason a storefront never had a
+ * second answer to give — see types/shipping-policy.ts and
+ * 20260905_shipping_policy_on_profile. The migration strips both from every
+ * stored config; this is what keeps a config posted by an older client (or
+ * restored from a backup) parsing instead of failing whole.
+ */
+const RETIRED_TOP_LEVEL_FIELDS = ["seller", "policies", "shippingProfiles"] as const;
+
+/**
  * Config-level migrations, applied before the strict parse:
+ * - retired top-level members (see above) are dropped;
  * - legacy `spacer` shape blocks (invisible whitespace) are dropped;
  * - legacy auto-flow blocks (`order` + `size`) gain explicit coordinates,
  *   and the canvas gains the row count that layout needed.
@@ -851,6 +840,7 @@ function migrateLegacyBlocks(
 export const storefrontConfigSchema = z.preprocess((value) => {
   if (typeof value !== "object" || value === null) return value;
   const config = { ...(value as Record<string, unknown>) };
+  for (const field of RETIRED_TOP_LEVEL_FIELDS) delete config[field];
   if (!Array.isArray(config.blocks)) return config;
 
   const live = config.blocks.filter(
@@ -934,7 +924,6 @@ export function parseStoredStorefrontConfig(
     productPage?: unknown;
     policies?: unknown;
     shippingProfiles?: unknown;
-    seller?: unknown;
   };
   const rawTheme =
     typeof candidate.theme === "object" && candidate.theme !== null
@@ -965,15 +954,8 @@ export function parseStoredStorefrontConfig(
     ...(productPageSchema.safeParse(candidate.productPage).success
       ? { productPage: candidate.productPage }
       : {}),
-    ...(policiesSchema.safeParse(candidate.policies).success
-      ? { policies: candidate.policies }
-      : {}),
-    ...(shippingProfilesSchema.safeParse(candidate.shippingProfiles).success
-      ? { shippingProfiles: candidate.shippingProfiles }
-      : {}),
-    ...(sellerSchema.safeParse(candidate.seller).success
-      ? { seller: candidate.seller }
-      : {}),
+    // Nothing to carry for policies or shipping profiles: they are not config
+    // members any more, and the preprocess above has already dropped them.
   };
   const retry = storefrontConfigSchema.safeParse(upgraded);
   return retry.success ? retry.data : null;

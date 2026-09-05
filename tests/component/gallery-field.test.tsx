@@ -7,6 +7,11 @@ import { GALLERY_MAX, type ProductOptionGroup } from "@/types/product";
 
 afterEach(cleanup);
 
+// The move-to control is the app's own Select, which keeps the active option
+// in view when its list opens. jsdom has no scrollIntoView; the stub is the
+// whole of what these tests need.
+Element.prototype.scrollIntoView = vi.fn();
+
 const COLOUR = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
 const RED = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const BLUE = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
@@ -109,8 +114,10 @@ describe("GalleryField — grouping and upload", () => {
       />,
     );
 
-    const select = screen.getByLabelText(/which version this photo is shown for/i);
-    await user.selectOptions(select, BLUE);
+    // The app's own Select, not a native one: a listbox opened from a
+    // combobox, so the move is a click on the target's row.
+    await user.click(screen.getByRole("combobox", { name: /which version this photo is shown for/i }));
+    await user.click(screen.getByRole("option", { name: "Move to: Colour: Blue" }));
     expect(onChange).toHaveBeenLastCalledWith([{ ...image, optionId: BLUE }]);
   });
 

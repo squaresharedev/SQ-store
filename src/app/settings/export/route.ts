@@ -34,6 +34,7 @@ const PROFILE_COLUMNS =
   "username, avatar_url, created_at, updated_at, " +
   "notify_sales, notify_product_updates, notify_marketing, " +
   "tax_business_name, tax_vat_id, tax_country, " +
+  "seller_address, seller_email, seller_phone, " +
   "legal_accepted_at, legal_accepted_version, deletion_requested_at";
 
 const PRODUCT_COLUMNS =

@@ -1,7 +1,7 @@
 "use client";
 
 import { useId } from "react";
-import { ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { EU_COUNTRIES } from "@/lib/settings/constants";
 import { sanitizeHeaderText } from "@/lib/storefront/header-text";
@@ -9,28 +9,19 @@ import {
   PRODUCT_PAGE_SECTION_LABELS,
   normalizeSections,
 } from "@/lib/storefront/product-page";
-import {
-  canAddShippingProfile,
-  newShippingProfileId,
-} from "@/lib/storefront/shipping";
+import { buildShippingProse, hasShippingPolicy } from "@/lib/shipping/policy-prose";
+import { hasSellerDetails } from "@/components/product-page/SellerBlock";
 import type { ProductPagePanelSection } from "@/lib/storefront/setting-ref";
+import type { SellerShippingPolicy } from "@/types/shipping-policy";
 import {
-  POLICY_TEXT_MAX,
   PRODUCT_PAGE_CTA_MAX,
-  SELLER_FIELD_MAX,
-  SHIPPING_DISPATCH_MAX,
-  SHIPPING_PROFILES_MAX,
-  SHIPPING_PROFILE_NAME_MAX,
   STOREFRONT_FONTS,
   type ProductPageConfig,
-  type ShippingProfile,
   type StorefrontFont,
-  type StorefrontPolicies,
   type StorefrontSeller,
 } from "@/types/storefront";
 import { FONT_LABELS } from "./config-maps";
 import { CollapsibleSection } from "@/components/ui/CollapsibleSection";
-import { ColorPicker } from "@/components/ui/ColorPicker";
 import { InfoTip } from "@/components/ui/InfoTip";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { Select, type SelectOption } from "@/components/ui/select";
@@ -38,7 +29,6 @@ import { Switch } from "@/components/ui/switch";
 import {
   fieldBaseClass,
   helpTextClass,
-  iconButtonClass,
   labelClass,
   secondaryButtonClass,
 } from "@/components/ui/control-styles";
@@ -47,17 +37,17 @@ import {
  * The Product page group of the design panel: five sections, each a
  * CollapsibleSection so a search hit can summon exactly one.
  *
- * Every control writes `{ ...current, field }` through the designer's
- * mutators, so undo coalesces per field and the saved jsonb only ever holds
- * what the schema admits. Text fields drop their key when emptied (rather than
- * storing ""), which is what lets the email gate stay strict and lets an
- * untouched store carry no `policies` or `seller` member at all.
+ * Every EDITABLE control here writes `{ ...current, field }` through the
+ * designer's mutators, so undo coalesces per field and the saved jsonb only
+ * ever holds what the schema admits. Text fields drop their key when emptied
+ * rather than storing "".
+ *
+ * TWO SECTIONS ARE NOT EDITABLE HERE. "Shipping and returns" and "Seller
+ * details" both show ACCOUNT-level facts read-only, with a link to the
+ * Settings page that owns them. Neither is a property of a storefront, and a
+ * storefront save must not be able to reach terms every other storefront is
+ * also selling under. See each section's own comment for the full reasoning.
  */
-
-const COUNTRY_OPTIONS = [
-  { value: "", label: "Not in the EU" },
-  ...EU_COUNTRIES.map((country) => ({ value: country.code, label: country.name })),
-] as const;
 
 /**
  * The "no choice made" value for the font select.
@@ -73,24 +63,21 @@ const INHERIT_FONT = "";
 export function ProductPageSection({
   productPage,
   onProductPageChange,
-  policies,
-  onPoliciesChange,
-  shippingProfiles,
-  onShippingProfilesChange,
-  seller,
-  onSellerChange,
+  shippingPolicy,
+  sellerIdentity,
   storefrontFont,
   customFontName,
   summoned,
 }: {
   productPage: ProductPageConfig;
   onProductPageChange: (next: ProductPageConfig) => void;
-  policies: StorefrontPolicies;
-  onPoliciesChange: (next: StorefrontPolicies) => void;
-  shippingProfiles: ShippingProfile[];
-  onShippingProfilesChange: (next: ShippingProfile[], coalesceKey?: string) => void;
-  seller: StorefrontSeller;
-  onSellerChange: (next: StorefrontSeller) => void;
+  /** The account's shipping and returns terms (Settings › Shipping & returns),
+   *  read-only — this panel shows what they produce and links to where they
+   *  are set. */
+  shippingPolicy: SellerShippingPolicy;
+  /** The account's trader identity (Settings › Business & seller details),
+   *  read-only — this panel shows it and links to where it is edited. */
+  sellerIdentity: StorefrontSeller;
   /** The storefront's own font, named in the inherit option so the seller can
    *  see what following it currently gets them. */
   storefrontFont: StorefrontFont;
@@ -126,47 +113,22 @@ export function ProductPageSection({
   // of its own; the description sits at the head, which is where it reads.
   const rows = normalizeSections(productPage.sections);
 
-  /** `allowNewlines` false for the dispatch line: it is one line by contract
-   *  (the schema's singleLineText refuses more), and a pasted paragraph must
-   *  be flattened here rather than rejected at save. */
-  function setPolicy(key: keyof StorefrontPolicies, raw: string, allowNewlines = true) {
-    const value = sanitizeHeaderText(raw, allowNewlines);
-    const next = { ...policies };
-    if (value === "") delete next[key];
-    else next[key] = value;
-    onPoliciesChange(next);
-  }
+  // The account's shipping and returns terms, read-only in this panel — see
+  // the "Shipping and returns" section below for why. Built by the same
+  // generator the live page uses, so this summary and what a buyer reads can
+  // never be different text.
+  const shippingProse = buildShippingProse(shippingPolicy);
+  const shippingIsSet = hasShippingPolicy(shippingPolicy);
+  const profileCount = shippingPolicy.profiles?.length ?? 0;
 
-  /** One field of one profile. The coalesce key names the profile AND the
-   *  field, so typing into two profiles is two undo steps, not one. */
-  function setProfile(index: number, patch: Partial<ShippingProfile>) {
-    const current = shippingProfiles[index];
-    if (!current) return;
-    const next = shippingProfiles.map((profile, position) =>
-      position === index ? { ...profile, ...patch } : profile,
-    );
-    onShippingProfilesChange(next, `${current.id}:${Object.keys(patch)[0] ?? "field"}`);
-  }
-
-  function addProfile() {
-    if (!canAddShippingProfile(shippingProfiles)) return;
-    onShippingProfilesChange([
-      ...shippingProfiles,
-      { id: newShippingProfileId(), name: "", body: "" },
-    ]);
-  }
-
-  function removeProfile(index: number) {
-    onShippingProfilesChange(shippingProfiles.filter((_, position) => position !== index));
-  }
-
-  function setSeller(key: keyof StorefrontSeller, raw: string, allowNewlines = false) {
-    const value = sanitizeHeaderText(raw, allowNewlines);
-    const next = { ...seller };
-    if (value === "") delete next[key];
-    else next[key] = value;
-    onSellerChange(next);
-  }
+  // The account's trader identity, read-only in this panel — see the
+  // "Seller details" section below for why. `sellerCountryName` mirrors the
+  // exact lookup SellerBlock uses on the live page, so the summary here reads
+  // the same as what a buyer sees.
+  const sellerCountryName = EU_COUNTRIES.find(
+    (entry) => entry.code === sellerIdentity.country,
+  )?.name;
+  const sellerIsSet = hasSellerDetails(sellerIdentity);
 
   return (
     <>
@@ -396,307 +358,144 @@ export function ProductPageSection({
         </div>
       </CollapsibleSection>
 
+      {/* READ-ONLY, deliberately, and this is the bigger of the two moves on
+          this panel. Shipping and returns used to be edited HERE: three
+          textareas plus up to eight profile cards of three fields each, which
+          made it comfortably the largest thing in the design panel. Two things
+          were wrong with that. A storefront is a presentation of one catalogue
+          rather than a business, so a seller with two of them retyped the same
+          returns policy into both with no second answer to give; and a design
+          surface is the wrong place to be writing legal text at all, which is
+          why Shopify, Etsy and Squarespace all keep it in settings. So the
+          terms are set once for the account and this panel's job is only to
+          prove it: what a buyer will read, and where to change it. What stays
+          editable on this page is the DISPLAY decision, up in Sections. */}
       <CollapsibleSection
         title="Shipping and returns"
         collapsible
         defaultOpen={false}
         summon={summoned === "policies"}
         headerAction={
-          <InfoTip label="Where this text appears, and what EU sellers add">
-            Shown on every product page of this storefront. For EU sellers the page also states
-            the 14-day cancellation right and the 2-year guarantee.
+          <InfoTip label="Why this lives in Settings, not here">
+            Set once for your whole account, so every storefront and every product sells under
+            the same terms. For EU sellers the page also states the 14-day cancellation right
+            and the 2-year guarantee, whatever you write.
           </InfoTip>
         }
       >
-        <div className="space-y-4">
-          <div className="space-y-1.5">
-            <label htmlFor={`${fieldId}-shipping`} className={labelClass}>
-              Shipping
-            </label>
-            <textarea
-              id={`${fieldId}-shipping`}
-              value={policies.shipping ?? ""}
-              maxLength={POLICY_TEXT_MAX}
-              rows={4}
-              placeholder="Where you ship, how long it takes, what it costs"
-              onChange={(event) => setPolicy("shipping", event.target.value)}
-              className={fieldBaseClass}
-            />
-            <p className={helpTextClass}>
-              Every product uses this unless it points at a profile below.
-            </p>
-          </div>
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-1.5">
-              <label htmlFor={`${fieldId}-dispatch`} className={labelClass}>
-                Dispatch time
-              </label>
-              <InfoTip label="Why this is its own field">
-                One line, printed beside the buy button. &ldquo;When does it leave?&rdquo; is the
-                first thing buyers ask, and it should not need reading a paragraph to answer.
-              </InfoTip>
+        <div className="space-y-3">
+          {shippingIsSet ? (
+            <div className="space-y-3 rounded-md border border-border bg-muted/40 p-3 text-sm">
+              {shippingPolicy.dispatch && (
+                <p className="font-medium text-foreground">{shippingPolicy.dispatch}</p>
+              )}
+              {shippingProse.shipping && (
+                <div>
+                  <p className={helpTextClass}>Shipping</p>
+                  <p className="whitespace-pre-line text-muted-foreground">
+                    {shippingProse.shipping}
+                  </p>
+                </div>
+              )}
+              {shippingProse.returns && (
+                <div>
+                  <p className={helpTextClass}>Returns</p>
+                  <p className="whitespace-pre-line text-muted-foreground">
+                    {shippingProse.returns}
+                  </p>
+                </div>
+              )}
+              {/* The exceptions are named rather than spelled out: which
+                  products use which profile is the product form's question,
+                  and repeating eight bodies of terms here would put the panel
+                  straight back to the size this change removed. */}
+              {profileCount > 0 && (
+                <p className={helpTextClass}>
+                  {profileCount === 1
+                    ? "1 shipping profile for products that ship differently."
+                    : `${profileCount} shipping profiles for products that ship differently.`}
+                </p>
+              )}
             </div>
-            <input
-              id={`${fieldId}-dispatch`}
-              type="text"
-              value={policies.dispatch ?? ""}
-              maxLength={SHIPPING_DISPATCH_MAX}
-              placeholder="Ships within 1-3 business days"
-              onChange={(event) => setPolicy("dispatch", event.target.value, false)}
-              className={fieldBaseClass}
-            />
-          </div>
-          <div className="space-y-1.5">
-            <label htmlFor={`${fieldId}-returns`} className={labelClass}>
-              Returns
-            </label>
-            <textarea
-              id={`${fieldId}-returns`}
-              value={policies.returns ?? ""}
-              maxLength={POLICY_TEXT_MAX}
-              rows={4}
-              placeholder="How returns work, who pays for them, any exceptions"
-              onChange={(event) => setPolicy("returns", event.target.value)}
-              className={fieldBaseClass}
-            />
+          ) : (
             <p className={helpTextClass}>
-              {POLICY_TEXT_MAX - (policies.returns?.length ?? 0)} characters left
+              Nothing set yet. Until you add your terms, product pages say the seller has not
+              added shipping details.
             </p>
-          </div>
-
-          {/* THE EXCEPTIONS, and only the exceptions.
-              Shipping reads the same for nearly everything a seller lists, so
-              the terms above are the answer for nearly every product and no
-              product form should ask again. What a catalogue does need is
-              somewhere to put the handful that ship differently — the bulky
-              one, the made-to-order one — and that is a NAMED set of terms a
-              product points at, never prose retyped on the product. It is what
-              Shopify and Etsy both call a shipping profile, and it is why
-              editing one here changes every product using it. */}
-          <div className="space-y-3 border-t border-border pt-4">
-            <div className="flex items-center gap-1.5">
-              <span className={labelClass}>Shipping profiles</span>
-              <InfoTip label="What a shipping profile is for">
-                For the few products that ship differently from the terms above. Pick one on the
-                product itself, under Shipping. Editing a profile changes every product using it;
-                removing one sends those products back to your default terms.
-              </InfoTip>
-            </div>
-
-            {shippingProfiles.length === 0 ? (
-              <p className={helpTextClass}>
-                None yet. Add one only if some products ship differently.
-              </p>
-            ) : (
-              <ul className="space-y-3">
-                {shippingProfiles.map((profile, index) => (
-                  <li
-                    key={profile.id}
-                    className="space-y-2 rounded-md border border-border p-3"
-                    data-shipping-profile={profile.id}
-                  >
-                    <div className="flex items-start gap-2">
-                      <div className="min-w-0 flex-1 space-y-1.5">
-                        <label
-                          htmlFor={`${fieldId}-profile-name-${profile.id}`}
-                          className={labelClass}
-                        >
-                          Name
-                        </label>
-                        <input
-                          id={`${fieldId}-profile-name-${profile.id}`}
-                          type="text"
-                          value={profile.name}
-                          maxLength={SHIPPING_PROFILE_NAME_MAX}
-                          placeholder="Bulky items"
-                          onChange={(event) =>
-                            setProfile(index, {
-                              name: sanitizeHeaderText(event.target.value, false),
-                            })
-                          }
-                          className={fieldBaseClass}
-                        />
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => removeProfile(index)}
-                        aria-label={
-                          profile.name.trim()
-                            ? `Remove the ${profile.name.trim()} shipping profile`
-                            : "Remove this shipping profile"
-                        }
-                        title="Remove this profile"
-                        className={cn(iconButtonClass, "mt-6 shrink-0")}
-                      >
-                        <Trash2 className="size-4" aria-hidden="true" />
-                      </button>
-                    </div>
-                    <div className="space-y-1.5">
-                      <label
-                        htmlFor={`${fieldId}-profile-dispatch-${profile.id}`}
-                        className={labelClass}
-                      >
-                        Dispatch time
-                      </label>
-                      <input
-                        id={`${fieldId}-profile-dispatch-${profile.id}`}
-                        type="text"
-                        value={profile.dispatch ?? ""}
-                        maxLength={SHIPPING_DISPATCH_MAX}
-                        placeholder="Made to order, allow 3 weeks"
-                        onChange={(event) =>
-                          setProfile(index, {
-                            dispatch: sanitizeHeaderText(event.target.value, false),
-                          })
-                        }
-                        className={fieldBaseClass}
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label
-                        htmlFor={`${fieldId}-profile-body-${profile.id}`}
-                        className={labelClass}
-                      >
-                        Shipping
-                      </label>
-                      <textarea
-                        id={`${fieldId}-profile-body-${profile.id}`}
-                        value={profile.body}
-                        maxLength={POLICY_TEXT_MAX}
-                        rows={4}
-                        placeholder="How these products ship, and what it costs"
-                        onChange={(event) =>
-                          setProfile(index, {
-                            body: sanitizeHeaderText(event.target.value, true),
-                          })
-                        }
-                        className={fieldBaseClass}
-                      />
-                      {/* A profile with no terms is dropped on save rather
-                          than stored as a name pointing at nothing, so this
-                          says so before the seller finds out by saving. */}
-                      {profile.body.trim() === "" && (
-                        <p className={helpTextClass}>
-                          Add terms, or this profile is dropped when you save.
-                        </p>
-                      )}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-
-            {canAddShippingProfile(shippingProfiles) ? (
-              <button type="button" onClick={addProfile} className={secondaryButtonClass}>
-                <Plus className="size-4" aria-hidden="true" />
-                Add a profile
-              </button>
-            ) : (
-              <p className={helpTextClass}>
-                That is all {SHIPPING_PROFILES_MAX} profiles. Remove one to add another.
-              </p>
-            )}
-          </div>
+          )}
+          {/* New tab, not routed through the leave guard like a real exit from
+              the editor: this is a quick side errand, not "I'm done here",
+              and it must not risk (or ask about) unsaved storefront work. */}
+          <Link
+            href="/settings/shipping"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={cn(secondaryButtonClass, "w-full justify-center")}
+          >
+            {shippingIsSet ? "Edit in Settings" : "Add your shipping terms"}
+          </Link>
         </div>
       </CollapsibleSection>
 
+      {/* READ-ONLY, deliberately. Trader identity used to be edited here, per
+          storefront — a seller with two storefronts typed the same business
+          name twice, and a hired team member (Settings is scoped to the
+          signed-in user, never the active account) could not complete it at
+          all. It is one fact about the BUSINESS, so it is set once in
+          Settings and every storefront just shows it. This panel's job is
+          only to prove that: what a buyer will see, and where to change it. */}
       <CollapsibleSection
         title="Seller details"
         collapsible
         defaultOpen={false}
         summon={summoned === "seller"}
         headerAction={
-          <InfoTip label="Why this section exists">
+          <InfoTip label="Why this lives in Settings, not here">
             Distance-selling law asks for the seller&apos;s name, address and a way to get in
-            touch next to every offer. Shown in the page&apos;s Seller section.
+            touch next to every offer. Set once for your whole account — every storefront and
+            every product shows the same details, so there is nothing to repeat per store.
           </InfoTip>
         }
       >
-        <div className="space-y-4">
-          <div className="space-y-1.5">
-            <label htmlFor={`${fieldId}-business`} className={labelClass}>
-              Business name
-            </label>
-            <input
-              id={`${fieldId}-business`}
-              type="text"
-              value={seller.businessName ?? ""}
-              maxLength={SELLER_FIELD_MAX.businessName}
-              onChange={(event) => setSeller("businessName", event.target.value)}
-              className={fieldBaseClass}
-            />
-          </div>
-          <div className="space-y-1.5">
-            <label htmlFor={`${fieldId}-address`} className={labelClass}>
-              Address
-            </label>
-            <textarea
-              id={`${fieldId}-address`}
-              value={seller.address ?? ""}
-              maxLength={SELLER_FIELD_MAX.address}
-              rows={3}
-              onChange={(event) => setSeller("address", event.target.value, true)}
-              className={fieldBaseClass}
-            />
-          </div>
-          <div className="space-y-1.5">
-            <label htmlFor={`${fieldId}-country`} className={labelClass}>
-              Country
-            </label>
-            <Select
-              id={`${fieldId}-country`}
-              value={seller.country ?? ""}
-              options={COUNTRY_OPTIONS}
-              onChange={(country) => {
-                const next = { ...seller };
-                if (country === "") delete next.country;
-                else next.country = country;
-                onSellerChange(next);
-              }}
-            />
-          </div>
-          <div className="space-y-1.5">
-            <label htmlFor={`${fieldId}-email`} className={labelClass}>
-              Contact email
-            </label>
-            <input
-              id={`${fieldId}-email`}
-              type="email"
-              value={seller.email ?? ""}
-              maxLength={254}
-              autoComplete="email"
-              onChange={(event) => setSeller("email", event.target.value)}
-              className={fieldBaseClass}
-            />
-          </div>
-          <div className="space-y-1.5">
-            <label htmlFor={`${fieldId}-phone`} className={labelClass}>
-              Phone
-            </label>
-            <input
-              id={`${fieldId}-phone`}
-              type="tel"
-              value={seller.phone ?? ""}
-              maxLength={SELLER_FIELD_MAX.phone}
-              autoComplete="tel"
-              onChange={(event) => setSeller("phone", event.target.value)}
-              className={fieldBaseClass}
-            />
-          </div>
-          <div className="space-y-1.5">
-            <label htmlFor={`${fieldId}-vat`} className={labelClass}>
-              VAT ID
-            </label>
-            <input
-              id={`${fieldId}-vat`}
-              type="text"
-              value={seller.vatId ?? ""}
-              maxLength={SELLER_FIELD_MAX.vatId}
-              spellCheck={false}
-              onChange={(event) => setSeller("vatId", event.target.value)}
-              className={fieldBaseClass}
-            />
-          </div>
+        <div className="space-y-3">
+          {sellerIsSet ? (
+            <address className="space-y-1 rounded-md border border-border bg-muted/40 p-3 text-sm not-italic">
+              {sellerIdentity.businessName && (
+                <p className="font-medium text-foreground">{sellerIdentity.businessName}</p>
+              )}
+              {sellerIdentity.address && (
+                <p className="whitespace-pre-line text-muted-foreground">
+                  {sellerIdentity.address}
+                </p>
+              )}
+              {sellerCountryName && <p className="text-muted-foreground">{sellerCountryName}</p>}
+              {sellerIdentity.email && (
+                <p className="text-muted-foreground">{sellerIdentity.email}</p>
+              )}
+              {sellerIdentity.phone && (
+                <p className="text-muted-foreground">{sellerIdentity.phone}</p>
+              )}
+              {sellerIdentity.vatId && (
+                <p className="text-muted-foreground opacity-70">VAT ID {sellerIdentity.vatId}</p>
+              )}
+            </address>
+          ) : (
+            <p className={helpTextClass}>
+              Nothing set yet. Until you add your business details, buyers only see the
+              &ldquo;Sold by&rdquo; line under the title.
+            </p>
+          )}
+          {/* New tab, not routed through the leave guard like a real exit from
+              the editor: this is a quick side errand, not "I'm done here",
+              and it must not risk (or ask about) unsaved storefront work. */}
+          <Link
+            href="/settings/tax"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={cn(secondaryButtonClass, "w-full justify-center")}
+          >
+            {sellerIsSet ? "Edit in Settings" : "Add your business details"}
+          </Link>
         </div>
       </CollapsibleSection>
     </>

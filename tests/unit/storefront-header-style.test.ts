@@ -77,10 +77,13 @@ describe("setHeaderStyle", () => {
 });
 
 describe("header defaults", () => {
-  it("a new storefront gets a shown, filled masthead", () => {
-    expect(DEFAULT_STOREFRONT_HEADER).toMatchObject({ show: true });
-    expect(DEFAULT_STOREFRONT_HEADER.name.trim()).not.toBe("");
-    expect(DEFAULT_STOREFRONT_HEADER.bio.trim()).not.toBe("");
+  it("a new storefront starts shown but with empty lines — the editor shows placeholders, buyers see nothing", () => {
+    // SF-02: name and bio default to "", not placeholder copy. Seeding real
+    // text here made those strings appear on the buyer-facing page (the
+    // masthead, og:site_name) before the seller had typed anything.
+    // The wizard seeds name from the storefront display name, so a
+    // wizard-created store may never be empty in practice.
+    expect(DEFAULT_STOREFRONT_HEADER).toMatchObject({ show: true, name: "", bio: "" });
     expect(DEFAULT_STOREFRONT_CONFIG.header).toEqual(DEFAULT_STOREFRONT_HEADER);
     expect(
       storefrontConfigSchema.safeParse(DEFAULT_STOREFRONT_CONFIG).success,

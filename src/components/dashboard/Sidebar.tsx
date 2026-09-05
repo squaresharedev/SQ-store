@@ -6,8 +6,7 @@ import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { MotionConfig, motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
-import { focusRingClass, infoTextClass, overlayScrimClass, transitionClass } from "@/components/ui/control-styles";
-import { DiscoverIcon } from "@/components/dashboard/nav-icons";
+import { focusRingClass, overlayScrimClass, transitionClass } from "@/components/ui/control-styles";
 import {
   MAIN_NAV,
   SETTINGS_LINK,
@@ -95,33 +94,6 @@ function NavLinkItem({
   );
 }
 
-// Disabled "coming soon" row. Still animates on hover: the compass needle
-// searching for a bearing is the tease for a page that isn't here yet.
-function DiscoverRow() {
-  const animationProps = useNavAnimationProps();
-  return (
-    <motion.div
-      aria-disabled="true"
-      // Explicit so motion's tap gesture doesn't inject tabindex="0" on the
-      // client only (hydration mismatch), and a disabled row shouldn't be
-      // focusable anyway.
-      tabIndex={-1}
-      {...animationProps}
-      className={cn(
-        NAV_ITEM_CLASSES,
-        "cursor-not-allowed justify-between text-muted-foreground opacity-50",
-      )}
-    >
-      <span className="flex items-center gap-2">
-        <DiscoverIcon />
-        Discover
-      </span>
-      <span className={infoTextClass}>
-        Coming soon
-      </span>
-    </motion.div>
-  );
-}
 
 export function Sidebar({
   topBarSlot,
@@ -274,8 +246,6 @@ export function Sidebar({
             pathname={pathname}
             onNavigate={closeDrawer}
           />
-
-          <DiscoverRow />
         </div>
       </nav>
     </MotionConfig>

@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { OrderStatusBadge } from "./OrderStatusBadge";
 import { formatCents } from "@/lib/format/money";
 import { formatOrderDate } from "@/lib/format/date";
+import { formatOrderSelection } from "@/lib/orders/selection";
 
 export function OrderRow({
   order,
@@ -66,9 +67,23 @@ export function OrderRow({
         highlighted && "bg-accent ring-2 ring-inset ring-ring",
       )}
     >
-      {/* product */}
-      <td className="py-2.5 px-3 max-w-xs truncate text-sm font-medium text-foreground">
-        {order.productTitle}
+      {/* product, and WHICH VERSION OF IT. The version reads under the title
+          rather than in a column of its own: it is part of naming the thing
+          sold ("the six seater one"), it is empty for most products, and a
+          column that is blank on nine rows in ten is a column that earns
+          nothing. */}
+      <td className="py-2.5 px-3 max-w-xs text-sm">
+        <span className="block truncate font-medium text-foreground">
+          {order.productTitle}
+        </span>
+        {order.selection.length > 0 && (
+          <span
+            className="block truncate font-inter text-xs text-muted-foreground"
+            data-order-selection=""
+          >
+            {formatOrderSelection(order.selection)}
+          </span>
+        )}
       </td>
 
       {/* amount */}

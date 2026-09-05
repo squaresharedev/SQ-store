@@ -57,6 +57,13 @@ export const RATE_LIMITS = {
    * catalogue, not a crawler walking one. Fails closed like the embed routes.
    */
   productPage: { max: 600, windowSeconds: 60 * 60 },
+  /**
+   * The stable og-image redirect (api/og/p/[productId]): one service-role
+   * lookup and one presign per hit. Social crawlers re-scrape cards repeatedly,
+   * so the ceiling matches productPage; what it stops is a scanner walking
+   * every product id on the platform to enumerate which are active.
+   */
+  ogImage: { max: 600, windowSeconds: 60 * 60 },
   /** The editor's product-page preview data, per signed-in user. */
   productPreview: { max: 300, windowSeconds: 60 * 60 },
   /**
@@ -136,7 +143,7 @@ export const RATE_LIMITS = {
    *-group hops, account switches) each spend one; 120/hour clears any human
    * pattern while staying 5x tighter than the per-keystroke budget above.
    */
-  searchSnapshot: { max: 120, windowSeconds: 60 * 60 },
+  searchSnapshot: { max: 600, windowSeconds: 60 * 60 },
   /**
    * The storefront designer's PRODUCT PICKER search — also per-keystroke (250ms
    * debounce), but on its own budget rather than sharing searchQuery, because

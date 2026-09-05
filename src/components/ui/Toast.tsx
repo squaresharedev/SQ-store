@@ -8,12 +8,14 @@ import {
   useMemo,
   useRef,
   useState,
+  type KeyboardEvent,
   type ReactNode,
 } from "react";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ToastToneIcon } from "@/components/ui/toast-icons";
 import {
+  focusRingInsetClass,
   overlayCloseButtonClass,
   overlaySurfaceClass,
 } from "@/components/ui/control-styles";
@@ -49,6 +51,14 @@ export type ToastOptions = {
    * missed, since a toast nobody closes is a toast that crowds out the next.
    */
   duration?: number;
+  /**
+   * Makes the toast itself a control: the message and its lines become a
+   * button that runs this and then dismisses, for the rare case where the
+   * outcome the toast reports has one obvious next step (a blocked save ->
+   * the field that's blocking it). Leave unset for a toast that is purely
+   * informational — most are.
+   */
+  onClick?: () => void;
 };
 
 export type ToastInput = ToastOptions & {
@@ -169,6 +179,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       title: input.title,
       lines: input.lines,
       duration: input.duration ?? DISMISS_MS[tone],
+      onClick: input.onClick,
     };
 
     setToasts((current) => {
@@ -339,9 +350,17 @@ function ToastCard({
 
   const onClose = useCallback(() => close(toast.id), [close, toast.id]);
 
+  // Runs the caller's handler, then dismisses — the click did what the toast
+  // was for, so there is nothing left for it to say.
+  const onActivate = useCallback(() => {
+    toast.onClick?.();
+    close(toast.id);
+  }, [toast, close]);
+
   const lifetime = toast.duration ?? DISMISS_MS[toast.tone];
   const timed = Number.isFinite(lifetime);
   const hasLines = Boolean(toast.lines && toast.lines.length > 0);
+  const clickable = Boolean(toast.onClick);
 
   // Time LEFT, not time elapsed: each pause banks the remainder, so a toast
   // hovered three times still gets its full reading time and no more. Only
@@ -400,8 +419,34 @@ function ToastCard({
         <span className="flex h-5 shrink-0 items-center">
           <ToastToneIcon key={toast.id} tone={toast.tone} className={tone.accent} />
         </span>
-        <div className="min-w-0 flex-1">
-          <p className="font-inter text-sm font-medium break-words text-foreground">
+        <div
+          className={cn(
+            "min-w-0 flex-1",
+            clickable && ["group/toast cursor-pointer rounded-sm", focusRingInsetClass],
+          )}
+          // A toast with an onClick IS a control, not just a message — this is
+          // what lets "click the error to jump to what's wrong" work without
+          // fighting the surrounding li's own alert/status role.
+          {...(clickable
+            ? {
+                role: "button",
+                tabIndex: 0,
+                onClick: onActivate,
+                onKeyDown: (event: KeyboardEvent) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    onActivate();
+                  }
+                },
+              }
+            : {})}
+        >
+          <p
+            className={cn(
+              "font-inter text-sm font-medium break-words text-foreground",
+              clickable && "group-hover/toast:underline",
+            )}
+          >
             {toast.title}
           </p>
           {hasLines && (

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type MouseEvent } from "react";
 import { X } from "lucide-react";
+import { DeviceSizeSwitch, type PreviewDevice } from "./DeviceSizeSwitch";
 import { ProductPageView } from "@/components/product-page/ProductPageView";
 import { deriveStockBadge } from "@/lib/stock/badge";
 import { getProductPagePreviewData } from "@/lib/products/preview-actions";
@@ -12,11 +13,10 @@ import {
 } from "@/lib/storefront/setting-ref";
 import type { Product, ProductPageProduct } from "@/types/product";
 import type { ProductPageData } from "@/types/product-page";
+import type { SellerShippingPolicy } from "@/types/shipping-policy";
 import type {
   ProductPageConfig,
   StorefrontHeader,
-  ShippingProfile,
-  StorefrontPolicies,
   StorefrontSeller,
   StorefrontTheme,
 } from "@/types/storefront";
@@ -31,12 +31,16 @@ import type {
  * switches into: a product page is not a different place, it is what a tile
  * leads to.
  *
- * SAME WIDTH AS THE BOARD, always — a real buyer reads the page in the exact
- * same browser window they read the storefront in, so the two are designed at
- * one shared scale (the caller hands down `width`) rather than the page
- * choosing an arbitrary "desktop" size of its own that has no relationship to
- * how big the storefront next to it looks. Height is natural, not a fixed
- * frame: a real page is exactly as tall as its content.
+ * WIDTH is a REALISTIC PHONE OR DESKTOP BROWSER WIDTH, at whichever device
+ * this page's own switch is on — a product page is a real route a buyer's
+ * browser renders on its own, not a panel scaled to whatever the seller's
+ * board happens to measure (a 6-column board's natural design-view width is
+ * under 700px, nowhere near enough for this page's own image-left/details-
+ * right breakpoint). Independent of the board's own device, too: a seller
+ * previewing the storefront on mobile can still switch just this page to its
+ * desktop version to work on it, the same way they could switch the whole
+ * canvas if the board were the only thing open. Height is natural, not a
+ * fixed frame: a real page is exactly as tall as its content.
  */
 export function ProductPageArtboard({
   product,
@@ -46,13 +50,13 @@ export function ProductPageArtboard({
   theme,
   header,
   productPage,
-  policies,
-  shippingProfiles,
+  shippingPolicy,
   seller,
   backgroundImageUrl,
   customFontUrl,
   onClose,
-  width,
+  widths,
+  initialDevice,
 }: {
   /** The product this page is for; from the editor's catalogue snapshot. */
   product: Product;
@@ -63,16 +67,20 @@ export function ProductPageArtboard({
   theme: StorefrontTheme;
   header: StorefrontHeader;
   productPage: ProductPageConfig;
-  policies: StorefrontPolicies;
-  shippingProfiles: ShippingProfile[];
+  shippingPolicy: SellerShippingPolicy;
   seller: StorefrontSeller;
   backgroundImageUrl: string | null;
   customFontUrl: string | null;
   onClose: () => void;
-  /** The board's current width (design-view natural size, or mobile
-   *  preview's simulated phone width) — this page renders at the same one. */
-  width: number;
+  /** This page's own two widths — a realistic phone width and a realistic
+   *  desktop browser width — that its switch picks between. */
+  widths: Record<PreviewDevice, number>;
+  /** What the board is showing right now, so a freshly opened page starts in
+   *  step with it — this page's own switch takes over from there. */
+  initialDevice: PreviewDevice;
 }) {
+  const [device, setDevice] = useState<PreviewDevice>(initialDevice);
+  const width = widths[device];
   // Null outside the designer (the dev gallery, a component test), which
   // simply means clicking the page opens nothing.
   const setting = useSettingTarget();
@@ -130,8 +138,7 @@ export function ProductPageArtboard({
       theme,
       header,
       productPage,
-      policies,
-      shippingProfiles,
+      shippingPolicy,
       seller,
       backgroundImageUrl,
       customFontUrl,
@@ -153,15 +160,22 @@ export function ProductPageArtboard({
           {product.title}
           <span className="text-muted-foreground"> · Product page</span>
         </p>
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label={`Close the product page for ${product.title}`}
-          title={`Close the product page for ${product.title}`}
-          className="flex size-7 shrink-0 items-center justify-center rounded-sm border border-border bg-background text-muted-foreground transition-colors duration-base ease-standard hover:text-foreground"
-        >
-          <X className="size-3.5" strokeWidth={2} aria-hidden="true" />
-        </button>
+        <div className="flex shrink-0 items-center gap-1">
+          <DeviceSizeSwitch
+            device={device}
+            onChange={setDevice}
+            labels={{ desktop: "Desktop size", mobile: "Mobile size" }}
+          />
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label={`Close the product page for ${product.title}`}
+            title={`Close the product page for ${product.title}`}
+            className="flex size-7 shrink-0 items-center justify-center rounded-sm border border-border bg-background text-muted-foreground transition-colors duration-base ease-standard hover:text-foreground"
+          >
+            <X className="size-3.5" strokeWidth={2} aria-hidden="true" />
+          </button>
+        </div>
       </div>
 
       {/* CLICK THE PAGE, GET THE SETTING. One delegated listener rather than a

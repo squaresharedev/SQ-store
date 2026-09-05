@@ -5,6 +5,7 @@ import { BackgroundArrow } from "@/components/ui/BackgroundArrow";
 import type { DashboardOrdersData, ProductsSummary } from "@/lib/dashboard/queries";
 import {
   buildAttentionItems,
+  type ProfileAttentionData,
   type StorefrontAttentionInfo,
 } from "@/lib/dashboard/attention";
 import { formatMoney } from "@/lib/dashboard/format";
@@ -21,10 +22,15 @@ export function DashboardHome({
   orders,
   products,
   storefronts,
+  profile,
+  stripeConnected,
 }: {
   orders: DashboardOrdersData;
   products: ProductsSummary;
   storefronts: StorefrontAttentionInfo;
+  /** Null when the profile read failed softly; profile attention rows are hidden. */
+  profile: ProfileAttentionData | null;
+  stripeConnected: boolean;
 }) {
   const { last30d } = orders;
 
@@ -84,7 +90,13 @@ export function DashboardHome({
         {/* Status modules. */}
         <div className="space-y-4">
           <NeedsAttention
-            items={buildAttentionItems({ orders, products, storefronts })}
+            items={buildAttentionItems({
+              orders,
+              products,
+              storefronts,
+              profile,
+              stripeConnected,
+            })}
           />
           <RecentOrders orders={orders.recentOrders} id={RECENT_ORDERS_ID} />
         </div>

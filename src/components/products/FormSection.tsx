@@ -37,18 +37,17 @@ export function FormSection({
   description,
   state = "empty",
   summary,
-  required = false,
   children,
 }: {
   id: ProductFormSectionId;
   icon: LucideIcon;
   title: string;
+  /** Revealed by the "?" beside the heading. Empty for a section whose own
+   *  fields already explain it, which then shows no "?" at all. */
   description: string;
   state?: ProductFormSectionState;
   /** What this section currently holds, e.g. "3 photos". */
   summary?: string;
-  /** The product cannot be saved without it. */
-  required?: boolean;
   children: ReactNode;
 }) {
   return (
@@ -78,16 +77,12 @@ export function FormSection({
               one is for — read once, on the first visit ever, and in the way
               on every visit after. The summary beside the title is what a
               returning seller actually wants from a header, so it gets the
-              space; the explanation stays one keystroke or hover away. */}
-          <InfoTip label={`What ${title} is for`}>{description}</InfoTip>
-          {required && (
-            <span
-              className="rounded-full bg-secondary px-1.5 py-px font-inter text-[0.6875rem] font-medium leading-tight text-foreground"
-              data-product-section-required=""
-            >
-              Required
-            </span>
-          )}
+              space; the explanation stays one keystroke or hover away.
+
+              And a section whose fields carry their own "?" gets none here: an
+              empty description means no button, rather than a fourth info
+              button on a card that already has three. */}
+          {description && <InfoTip label={`What ${title} is for`}>{description}</InfoTip>}
           {summary && (
             <span
               className={cn(

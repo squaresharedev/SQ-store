@@ -69,8 +69,12 @@ function renderTile(
 }
 
 const framer = () => screen.queryByTestId("tile-image-framer");
-/** The tile itself, not the Frame button that shares its product's name. */
-const tile = () => screen.getByRole("button", { name: /^Edit Framed Print$/i });
+// PLT-02: the outer container is a plain focusable div (no role="button"), so
+// getByRole("button") no longer finds it. getByLabelText reaches it via
+// aria-label. The pattern anchors to "Framed Print" at the start to skip the
+// chip's "Select Framed Print" and "Frame the image for Framed Print" buttons
+// whose labels also contain the product name.
+const tile = () => screen.getByLabelText(/^Framed Print/);
 
 // Vitest runs without globals here, so RTL's auto-cleanup never registers —
 // the repo's component specs unmount explicitly (see storefront-tile-style).
@@ -126,10 +130,10 @@ describe("entering frame mode", () => {
   });
 
   it("stays shut for a block whose product was deleted", () => {
+    // PLT-02: same selector strategy as `tile()` above — the container is a
+    // plain focusable div whose aria-label starts with the product label.
     const { onFrame } = renderTile({ product: null });
-    fireEvent.dblClick(
-      screen.getByRole("button", { name: /^Edit Removed product$/i }),
-    );
+    fireEvent.dblClick(screen.getByLabelText(/^Removed product/));
     expect(onFrame).not.toHaveBeenCalled();
   });
 });

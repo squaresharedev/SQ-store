@@ -112,7 +112,7 @@ function EmptyPreviewHint({ accent }: { accent: string }) {
       </svg>
 
       <span className="relative rounded-full border border-border bg-background px-2.5 py-1 font-inter text-xs font-medium text-foreground shadow-xs">
-        No products yet
+        This grid is empty
       </span>
     </div>
   );

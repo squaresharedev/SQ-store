@@ -378,11 +378,18 @@ export function EditorToolbar({
         {/* Outside the menu on purpose: the menu unmounts its hover state as
             soon as the file dialog takes focus, and an input inside it would
             go with it before `change` ever fired. */}
+        {/* aria-hidden keeps it out of the AT tree: the visible menu item is
+            the labelled affordance, and this input is the implementation
+            detail that item programmatically clicks. Same treatment as the
+            other three hidden pickers (UploadsPanel, TypographySection,
+            BackgroundEditor); an unlabelled file input is an axe failure. */}
         <input
           ref={fileInputRef}
           type="file"
           accept={ELEMENT_ACCEPT}
           className="sr-only"
+          aria-hidden="true"
+          tabIndex={-1}
           onChange={(event) => {
             const file = event.target.files?.[0];
             // Clear first: picking the SAME file twice fires no `change` at

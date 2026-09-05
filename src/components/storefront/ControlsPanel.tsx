@@ -4,16 +4,13 @@ import { useMemo, useState } from "react";
 import type {
   ProductPageConfig,
   StorefrontHeader,
-  ShippingProfile,
-  StorefrontPolicies,
   StorefrontSeller,
   StorefrontTheme,
 } from "@/types/storefront";
-import { resolveInk } from "@/components/product-page/product-page-maps";
+import type { SellerShippingPolicy } from "@/types/shipping-policy";
 import {
   CONTROLS_GROUPS,
   GROUP_LABELS,
-  isSameSettingRef,
   settingGroup,
   type ControlsGroup,
   type SettingRef,
@@ -78,28 +75,25 @@ export function ControlsPanel({
   onJump,
   productPage,
   onProductPageChange,
-  policies,
-  onPoliciesChange,
-  shippingProfiles,
-  onShippingProfilesChange,
-  seller,
-  onSellerChange,
+  shippingPolicy,
+  sellerIdentity,
 }: {
   theme: StorefrontTheme;
   header: StorefrontHeader;
   onThemeChange: (theme: StorefrontTheme) => void;
   onHeaderChange: (header: StorefrontHeader) => void;
-  /** The product page's options, policies and seller identity. */
+  /** The product page's own options. */
   productPage: ProductPageConfig;
   onProductPageChange: (next: ProductPageConfig) => void;
-  policies: StorefrontPolicies;
-  onPoliciesChange: (next: StorefrontPolicies) => void;
-  shippingProfiles: ShippingProfile[];
-  /** The coalesce key groups rapid edits to the same profile field into one
-   *  undo step, the way every other text control in this panel behaves. */
-  onShippingProfilesChange: (next: ShippingProfile[], coalesceKey?: string) => void;
-  seller: StorefrontSeller;
-  onSellerChange: (next: StorefrontSeller) => void;
+  /** The account's shipping and returns terms, read-only here — see
+   *  lib/settings/shipping-policy.ts. No `onChange`: they are set in
+   *  Settings, not in this panel, so a storefront save cannot touch the terms
+   *  every other storefront is also selling under. */
+  shippingPolicy: SellerShippingPolicy;
+  /** The account's trader identity, read-only here — see
+   *  lib/settings/seller-identity.ts. No `onChange`: it is edited in
+   *  Settings, not in this panel. */
+  sellerIdentity: StorefrontSeller;
   /** Canvas resize, guarded against cutting off placed blocks. */
   onCanvasChange: (columns: number, rows: number) => void;
   /** Display URL for an image background (signed or local object URL). */
@@ -140,8 +134,18 @@ export function ControlsPanel({
   const activeRef = setting?.activeRef ?? null;
   // Seeded null so a panel that MOUNTS with a request already standing (the
   // editor opened straight from a search result elsewhere) still navigates.
+  //
+  // Compared by REFERENCE, not by isSameSettingRef's field-by-field equality:
+  // the opener (StorefrontDesigner's openSetting/openProductPage) mints a
+  // fresh object per explicit open() call, so identity is exactly "have we
+  // already reacted to this specific request" — an ordinary re-render for
+  // any other reason hands back the SAME object and changes nothing here,
+  // while a seller clicking the SAME hotspot again after navigating away by
+  // hand produces a NEW object that must re-navigate even though it names
+  // the same section. Comparing by value would treat that repeat click as
+  // already handled and silently drop it.
   const [lastRef, setLastRef] = useState<SettingRef | null>(null);
-  if (!isSameSettingRef(activeRef, lastRef)) {
+  if (activeRef !== lastRef) {
     setLastRef(activeRef);
     if (activeRef) setGroup(settingGroup(activeRef));
   }
@@ -263,12 +267,8 @@ export function ControlsPanel({
         <ProductPageSection
           productPage={productPage}
           onProductPageChange={onProductPageChange}
-          policies={policies}
-          onPoliciesChange={onPoliciesChange}
-          shippingProfiles={shippingProfiles}
-          onShippingProfilesChange={onShippingProfilesChange}
-          seller={seller}
-          onSellerChange={onSellerChange}
+          shippingPolicy={shippingPolicy}
+          sellerIdentity={sellerIdentity}
           storefrontFont={theme.font}
           customFontName={theme.customFont?.name}
           summoned={summonedPage}

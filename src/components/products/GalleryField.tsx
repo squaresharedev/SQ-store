@@ -18,6 +18,7 @@ import {
   labelClass,
 } from "@/components/ui/control-styles";
 import { InfoTip } from "@/components/ui/InfoTip";
+import { Select } from "@/components/ui/select";
 import { IMAGE_CONTENT_TYPES, IMAGE_MAX_BYTES } from "@/lib/validation/product";
 import {
   GALLERY_ALT_MAX,
@@ -175,6 +176,14 @@ export function GalleryField({
         // could go — with no options yet this collapses to the one list.
         if (bucket.id !== GENERAL && photos.length === 0 && room <= 0) return null;
 
+        // Which target reads as "current" (this bucket) vs "Move to: ..." is
+        // the same for every photo in the bucket, so it's built once here
+        // rather than inside the per-photo map below.
+        const moveOptions = moveTargets.map((target) => ({
+          value: target.value,
+          label: target.value === bucket.id ? target.label : `Move to: ${target.label}`,
+        }));
+
         const heading = (
           <>
             {bucket.swatch && (
@@ -271,22 +280,22 @@ export function GalleryField({
                       className={cn(fieldBaseClass, "py-1 text-xs")}
                     />
                     {optionGroups.length > 0 && (
-                      <select
-                        aria-label="Which version this photo is shown for"
-                        value={image.optionId ?? GENERAL}
-                        onChange={(event) =>
-                          update(image.localId, {
-                            optionId: event.target.value === GENERAL ? undefined : event.target.value,
-                          })
-                        }
-                        className={cn(fieldBaseClass, "py-1 text-xs")}
-                      >
-                        {moveTargets.map((target) => (
-                          <option key={target.value || "general"} value={target.value}>
-                            {target.value === bucket.id ? target.label : `Move to: ${target.label}`}
-                          </option>
-                        ))}
-                      </select>
+                      <>
+                        <label htmlFor={`${inputId}-move-${image.localId}`} className="sr-only">
+                          Which version this photo is shown for
+                        </label>
+                        <Select
+                          id={`${inputId}-move-${image.localId}`}
+                          value={image.optionId ?? GENERAL}
+                          options={moveOptions}
+                          onChange={(value) =>
+                            update(image.localId, {
+                              optionId: value === GENERAL ? undefined : value,
+                            })
+                          }
+                          triggerClassName="py-1 text-xs"
+                        />
+                      </>
                     )}
                   </div>
                 );

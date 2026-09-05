@@ -2,7 +2,8 @@
 
 import { ArrowUpRight, Mail } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { CtaTarget } from "./cta-target";
+import { optionSummaryRows } from "@/lib/products/option-details";
+import { mailtoHref, type CtaTarget } from "./cta-target";
 import { ctaStyle } from "./product-page-maps";
 import { useOptionSelection } from "./OptionContext";
 
@@ -52,7 +53,7 @@ export function ProductCta({
   preview: boolean;
   className?: string;
 }) {
-  const { unavailableIn } = useOptionSelection();
+  const { unavailableIn, groups, selection } = useOptionSelection();
 
   // NO DESTINATION SET. On a live page there is nothing honest to render: a
   // button that goes nowhere is worse than no button. In the editor it is the
@@ -85,8 +86,15 @@ export function ProductCta({
   // the page, a buyer has to know whether it is the colour or the size they
   // need to change. The group's own name is what the picker prints above it,
   // so the two read as the same thing.
-  const unavailable = soldOut || unavailableIn !== null;
-  const text = soldOut
+  //
+  // BUY-06: a mail CTA is a contact link, not a purchase button, so "sold out"
+  // is not a reason to disable it. A buyer who cannot buy may still want to
+  // ask the seller about restocking. Only LINK CTAs (external purchase URLs)
+  // are meaningless when sold out; mail CTAs remain active so the buyer still
+  // has a path to the seller.
+  const mailSoldOut = soldOut && target.kind !== "mail";
+  const unavailable = mailSoldOut || unavailableIn !== null;
+  const text = mailSoldOut
     ? "Sold out"
     : unavailableIn
       ? `Unavailable in this ${unavailableIn.name.toLowerCase()}`
@@ -94,6 +102,15 @@ export function ProductCta({
         ? "Ask about this product"
         : label;
   const Icon = target.kind === "mail" ? Mail : ArrowUpRight;
+
+  // THE ENQUIRY CARRIES THE VERSION. Only the client knows which one is on
+  // screen, so the mail href is rebuilt here from the same rows the specs
+  // table prints — a seller must never be told a different version than the
+  // buyer was looking at.
+  const href =
+    target.kind === "mail"
+      ? mailtoHref(target.email, target.productTitle, optionSummaryRows(groups, selection))
+      : target.href;
 
   const button = (
     <span
@@ -116,7 +133,7 @@ export function ProductCta({
         </span>
       ) : (
         <a
-          href={target.href}
+          href={href}
           target={target.kind === "link" ? "_blank" : undefined}
           rel={target.kind === "link" ? "noopener noreferrer nofollow" : undefined}
           className="block focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"

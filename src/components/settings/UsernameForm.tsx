@@ -35,6 +35,11 @@ type CheckStatus = CheckResult | "checking" | "mine";
  * Typing is normalized as it goes, so the field always shows the value that
  * will be stored rather than accepting "BuilderBoy" and quietly saving
  * something else.
+ *
+ * INLINE VALIDATION. usernameSchema runs on every keystroke so the failing
+ * rule appears inline rather than only after a failed save. The reserved-word
+ * list is static, so it is checked client-side too. The server remains the
+ * real boundary; the availability round trip stays debounced.
  */
 export function UsernameForm({ username }: { username: string }) {
   const [state, formAction, isPending] = useActionState(updateUsername, INITIAL);
@@ -45,7 +50,20 @@ export function UsernameForm({ username }: { username: string }) {
 
   const trimmed = normalizeUsername(value);
   const isMine = trimmed !== "" && trimmed === normalizeUsername(username);
-  const isValidFormat = usernameSchema.safeParse({ username: trimmed }).success;
+
+  // Parse on every render so the message is always current. usernameSchema
+  // is a shared, pure Zod schema with no async work, so the call is cheap.
+  const parseResult = usernameSchema.safeParse({ username: trimmed });
+  const isValidFormat = parseResult.success;
+
+  // Show the failing rule inline when the user has typed something that does
+  // not pass: too short, spaces, hyphens, reserved words. Stays null when
+  // the field is blank or when it already holds their own saved handle.
+  const validationHint =
+    !isValidFormat && trimmed !== "" && !isMine
+      ? (parseResult.error.issues[0]?.message ?? null)
+      : null;
+
   const shouldCheck = isValidFormat && !isMine;
 
   // Derived from render-time state first, so a stale in-flight result can never
@@ -145,17 +163,30 @@ export function UsernameForm({ username }: { username: string }) {
               className="shrink-0"
             />
           </div>
+          {/* The inline validation hint fires as soon as the typed value
+              fails the schema: too short, disallowed characters (spaces,
+              hyphens), or a reserved word. This is the same rule the server
+              runs, so there are no surprises at save time. The server check
+              remains the real boundary. */}
+          {validationHint && (
+            <p
+              aria-live="polite"
+              className="font-inter text-xs text-destructive"
+            >
+              {validationHint}
+            </p>
+          )}
           {/* "mine" deliberately says nothing. Telling someone the handle
               already in their own field is theirs is a line of text for a
               non-event; the tick in the field is all the confirmation that
               state needs. */}
-          {status !== "idle" && status !== "mine" && (
+          {!validationHint && status !== "idle" && status !== "mine" && (
             <p
               aria-live="polite"
               className={cn(
                 "font-inter text-xs",
                 status === "taken"
-                  ? "text-danger-strong"
+                  ? "text-destructive"
                   : "text-muted-foreground",
               )}
             >

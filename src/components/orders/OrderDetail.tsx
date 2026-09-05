@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { CopyButton } from "@/components/ui/CopyButton";
 import { formatOrderDateTime } from "@/lib/format/date";
 import { formatCents } from "@/lib/format/money";
+import { formatOrderSelection } from "@/lib/orders/selection";
 import type { OrderView } from "@/types/order-view";
 import { OrderStatusBadge } from "./OrderStatusBadge";
 import { OrderActions } from "./OrderActions";
@@ -67,6 +68,26 @@ export function OrderDetail({
 
       {/* Body */}
       <div className="flex flex-col gap-4 overflow-y-auto p-4">
+        {/* WHAT TO PACK, first and copyable. This panel is what a seller has
+            open while making the parcel up, so the version the buyer chose
+            leads it: the money below is for the books, this is for the box.
+            Absent entirely for a product sold in one version. */}
+        {order.selection.length > 0 && (
+          <Row label="Version">
+            <div className="flex items-start gap-1">
+              <dl className="min-w-0 flex-1 text-sm text-foreground" data-order-selection="">
+                {order.selection.map((entry) => (
+                  <div key={entry.label} className="flex flex-wrap gap-x-1.5">
+                    <dt className="text-muted-foreground">{entry.label}:</dt>
+                    <dd className="min-w-0 break-words font-medium">{entry.value}</dd>
+                  </div>
+                ))}
+              </dl>
+              <CopyButton value={formatOrderSelection(order.selection)} label="version" />
+            </div>
+          </Row>
+        )}
+
         <Row label="Amount">
           <span className="text-sm text-foreground">
             {formatCents(order.amountCents, order.currency)}

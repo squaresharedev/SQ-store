@@ -279,7 +279,9 @@ async function main(): Promise<void> {
   const { data: insertedProducts, error: productError } = await supabase
     .from("products")
     .insert(productDrafts)
-    .select("id, title, price_cents, currency, status");
+    // option_groups comes back too: an order records which version was bought,
+    // and this is where the seed learns what there was to pick from.
+    .select("id, title, price_cents, currency, status, option_groups");
   if (productError) fail(`Failed to insert products: ${productError.message}`);
   const products = (insertedProducts ?? []) as SeededProduct[];
 

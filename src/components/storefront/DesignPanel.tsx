@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { CollapsibleSection } from "@/components/ui/CollapsibleSection";
 import { PanelTabs, panelProps } from "@/components/ui/PanelTabs";
 import { useSettingTarget } from "@/lib/storefront/setting-context";
-import { isSameSettingRef, type SettingRef } from "@/lib/storefront/setting-ref";
+import type { SettingRef } from "@/lib/storefront/setting-ref";
 import {
   INSPECTOR_CLOSE_CLASS,
   PANEL_TAB_CLASS,
@@ -111,8 +111,17 @@ export function DesignPanel({
   const settingRef = useSettingTarget()?.activeRef ?? null;
   // Null, for the same reason ControlsPanel seeds null: a request can already
   // be standing on the very first render.
+  //
+  // Compared by REFERENCE — see the matching comment in ControlsPanel. The
+  // opener mints a fresh object per explicit open() call, so identity (not
+  // isSameSettingRef's field-by-field equality) is what tells "a new request
+  // just arrived" apart from "the same standing one, re-rendering for an
+  // unrelated reason." A seller who flips to Selection by hand while a
+  // "cards" setting is still standing, then opens that exact setting again,
+  // needs the second request to move the tab even though it names the same
+  // section — comparing by value would read it as already handled.
   const [lastRef, setLastRef] = useState<SettingRef | null>(null);
-  if (!isSameSettingRef(settingRef, lastRef)) {
+  if (settingRef !== lastRef) {
     setLastRef(settingRef);
     if (settingRef) {
       setTab(

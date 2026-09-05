@@ -42,6 +42,7 @@ export function ThemePanel({
         onChange={updateBackground}
         imageUrl={backgroundImageUrl}
         onImageChange={onBackgroundImageChange}
+        accent={theme.accent}
       />
       <ColorPicker
         id={`${fieldId}-accent`}

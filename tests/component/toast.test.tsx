@@ -179,6 +179,61 @@ describe("Toast: the message", () => {
   });
 });
 
+describe("Toast: a message with somewhere to go", () => {
+  it("stays a plain status when no onClick is given", () => {
+    renderToaster((toast) => toast.success("Profile photo updated."));
+    raise();
+
+    expect(screen.queryByRole("button", { name: /profile photo updated/i })).toBeNull();
+  });
+
+  it("turns the message into a control when onClick is given", () => {
+    const onClick = vi.fn();
+    renderToaster((toast) =>
+      toast.error("This product can't be saved yet", { onClick }),
+    );
+    raise();
+
+    const control = screen.getByRole("button", {
+      name: /this product can't be saved yet/i,
+    });
+    fireEvent.click(control);
+    expect(onClick).toHaveBeenCalledOnce();
+  });
+
+  it("runs onClick on Enter and Space too, not just a pointer click", () => {
+    const onClick = vi.fn();
+    renderToaster((toast) => toast.error("Blocked", { onClick }));
+    raise();
+
+    const control = screen.getByRole("button", { name: /blocked/i });
+    fireEvent.keyDown(control, { key: "Enter" });
+    fireEvent.keyDown(control, { key: " " });
+    expect(onClick).toHaveBeenCalledTimes(2);
+  });
+
+  it("dismisses itself once its onClick has run", () => {
+    const onClick = vi.fn();
+    renderToaster((toast) => toast.error("Blocked", { onClick }));
+    raise();
+
+    fireEvent.click(screen.getByRole("button", { name: /blocked/i }));
+    // The click did what the toast was for — nothing is left for it to say,
+    // once its exit animation (the same one Dismiss plays) finishes.
+    elapse(LEAVE_MS + 10);
+    expect(screen.queryByText("Blocked")).toBeNull();
+  });
+
+  it("leaves the dismiss button as its own target, not swallowed by onClick", () => {
+    const onClick = vi.fn();
+    renderToaster((toast) => toast.error("Blocked", { onClick }));
+    raise();
+
+    fireEvent.click(screen.getByRole("button", { name: "Dismiss" }));
+    expect(onClick).not.toHaveBeenCalled();
+  });
+});
+
 // ---------------------------------------------------------------------------
 // Lifetime
 // ---------------------------------------------------------------------------

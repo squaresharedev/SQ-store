@@ -23,6 +23,8 @@ import {
   DOCUMENTS_MAX,
   GALLERY_MAX,
   OPTION_GROUPS_MAX,
+  OPTION_SPEC_VALUE_MAX,
+  OPTION_SPECS_MAX,
   OPTIONS_PER_GROUP_MAX,
   OPTIONS_TOTAL_MAX,
 } from "@/types/product";
@@ -408,5 +410,91 @@ describe("read-side parsers", () => {
     );
     expect(gallery[1]).toEqual({ key: key(2), alt: "b" });
     expect(gallery[0]?.optionId).toBe(optionId(1));
+  });
+});
+
+describe("per-version specifications", () => {
+  const withDetails = (details: unknown) => ({
+    ...baseWrite,
+    optionGroups: [
+      {
+        id: groupId(1),
+        name: "Size",
+        display: "chip",
+        options: [{ id: optionId(1), name: "Large", available: true, details }],
+      },
+    ],
+  });
+
+  it("accepts the measurements a version changes", () => {
+    expect(
+      productWriteSchema.safeParse(
+        withDetails({
+          dimensions: { length: 180, width: 90, height: 75, unit: "cm" },
+          weight: { value: 26, unit: "kg" },
+          specs: [{ label: "Seats", value: "6" }],
+        }),
+      ).success,
+    ).toBe(true);
+    // Absent is the common case and stays valid: most versions change nothing.
+    expect(productWriteSchema.safeParse(withDetails(undefined)).success).toBe(true);
+  });
+
+  it("refuses more than OPTION_SPECS_MAX rows on one version", () => {
+    const specs = Array.from({ length: OPTION_SPECS_MAX + 1 }, (_, i) => ({
+      label: `Spec ${i}`,
+      value: String(i),
+    }));
+    expect(productWriteSchema.safeParse(withDetails({ specs })).success).toBe(false);
+    expect(
+      productWriteSchema.safeParse(withDetails({ specs: specs.slice(0, OPTION_SPECS_MAX) })).success,
+    ).toBe(true);
+  });
+
+  it("holds a version's spec value to a shorter cap than the product's", () => {
+    // A per-version value is "6" or "24 kg", never a paragraph: 48 options
+    // carrying one each is what the column has to hold.
+    const long = "x".repeat(OPTION_SPEC_VALUE_MAX + 1);
+    expect(
+      productWriteSchema.safeParse(withDetails({ specs: [{ label: "Seats", value: long }] })).success,
+    ).toBe(false);
+    expect(
+      productWriteSchema.safeParse({
+        ...baseWrite,
+        details: { specs: [{ label: "Seats", value: long }] },
+      }).success,
+    ).toBe(true);
+  });
+
+  it("refuses anything the version has no business carrying", () => {
+    // strictObject: no price, no stock, no smuggled members. The column is
+    // still presentation, and this is the fence that keeps it that way.
+    expect(productWriteSchema.safeParse(withDetails({ priceCents: 100 })).success).toBe(false);
+    expect(productWriteSchema.safeParse(withDetails({ materials: "Oak" })).success).toBe(false);
+    expect(
+      productWriteSchema.safeParse(withDetails({ weight: { value: -1, unit: "kg" } })).success,
+    ).toBe(false);
+    expect(
+      productWriteSchema.safeParse(withDetails({ dimensions: { length: 1, unit: "furlong" } })).success,
+    ).toBe(false);
+  });
+
+  it("reads a version's measurements back off the row", () => {
+    const groups = parseOptionGroups([
+      {
+        id: groupId(1),
+        name: "Size",
+        display: "chip",
+        options: [
+          {
+            id: optionId(1),
+            name: "Large",
+            available: true,
+            details: { weight: { value: 26, unit: "kg" } },
+          },
+        ],
+      },
+    ]);
+    expect(groups[0]?.options[0]?.details?.weight).toEqual({ value: 26, unit: "kg" });
   });
 });

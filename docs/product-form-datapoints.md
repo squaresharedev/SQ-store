@@ -59,7 +59,10 @@ JSON.parse(document.getElementById("product-form-snapshot").textContent)
   "documentCount": 1,
   "specs":  { "hasDimensions": true, "hasWeight": false, "hasMaterials": true,
               "hasCare": false, "includedCount": 3, "specCount": 2,
-              "hasOrigin": true },
+              "hasOrigin": true,
+              // versions measuring something of their own, which the product
+              // page shows in place of the product's when that one is picked
+              "versionsWithOwnSpecs": 2 },
   "safety": { "started": true, "complete": false,
               "hasResponsiblePerson": false, "hasWarnings": true },
   "sections": [
@@ -113,7 +116,9 @@ For readers that want one control rather than the whole payload.
 The registry entry carries the section's `description`, and that string is what
 the "?" beside the heading reveals — the form does not print it. One copy, so
 the explanation a person is shown and the one a reader gets from
-`PRODUCT_FORM_SECTIONS` cannot drift.
+`PRODUCT_FORM_SECTIONS` cannot drift. An **empty** `description` means the
+section shows no "?" at all, for one whose own fields already explain it
+(`media`).
 
 | State | Means |
 |---|---|
@@ -182,8 +187,10 @@ The option and gallery editors were already addressable and stay so:
 ### The index rail
 
 `[data-product-form-nav]`, with one `[data-product-form-nav-item="<id>"]` per
-section carrying the same `data-product-section-state`. Wide screens only; the
-section headers carry the same summaries, so nothing is reachable only here.
+section carrying the same `data-product-section-state`. Wide screens only, and
+it prints the section NAME only: the summaries live in the section headers
+(`[data-product-section-summary]`) and in the snapshot, so nothing is
+reachable only here.
 
 ---
 

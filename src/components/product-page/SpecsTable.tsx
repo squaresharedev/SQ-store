@@ -1,4 +1,5 @@
-import type { ProductDetails } from "@/types/product";
+import { hasOptionDetails } from "@/lib/products/option-details";
+import type { ProductDetails, ProductOptionGroup } from "@/types/product";
 
 /** Trim a measure for display: 2 decimals at most, no trailing zeros. */
 function measure(value: number): string {
@@ -34,16 +35,41 @@ export function specRows(details: ProductDetails): { label: string; value: strin
   return rows;
 }
 
-export function hasSpecs(details: ProductDetails): boolean {
-  return specRows(details).length > 0 || Boolean(details.care) || (details.included?.length ?? 0) > 0;
+/**
+ * Whether the section has anything to print, for the SERVER that decides
+ * whether it exists at all. The option groups count: a product whose
+ * measurements live entirely on its versions (a table sold in two sizes, with
+ * nothing stated for the product itself) still has a specs table, it just
+ * arrives with the pick.
+ */
+export function hasSpecs(
+  details: ProductDetails,
+  optionGroups: readonly ProductOptionGroup[] = [],
+): boolean {
+  return (
+    specRows(details).length > 0 ||
+    Boolean(details.care) ||
+    (details.included?.length ?? 0) > 0 ||
+    hasOptionDetails([...optionGroups])
+  );
 }
 
-export function SpecsTable({ details, ruleColor }: { details: ProductDetails; ruleColor: string }) {
-  const rows = specRows(details);
+export function SpecsTable({
+  details,
+  ruleColor,
+  leadingRows = [],
+}: {
+  details: ProductDetails;
+  ruleColor: string;
+  /** Printed above the measurements, and today that means which version they
+   *  describe (see optionSummaryRows). */
+  leadingRows?: { label: string; value: string }[];
+}) {
+  const rows = [...leadingRows, ...specRows(details)];
   return (
     <div className="flex flex-col gap-4">
       {rows.length > 0 && (
-        <dl className="grid grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-x-4 text-sm">
+        <dl className="grid grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-x-4 text-sm" data-product-specs="">
           {rows.map((row, index) => (
             <div
               key={`${row.label}-${index}`}

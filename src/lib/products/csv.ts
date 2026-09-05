@@ -1,4 +1,9 @@
 import { CURRENCIES, type Currency, type ProductStatus } from "@/types/product";
+// Imported for use within this file AND re-exported so existing callers
+// (import-actions.ts, tests) keep the same import path while the canonical
+// implementation lives in price.ts.
+import { parsePriceCents } from "./price";
+export { parsePriceCents };
 
 /**
  * Reading a product catalogue out of a CSV, so a seller moving from Shopify (or
@@ -244,43 +249,8 @@ export function htmlToText(html: string): string {
   );
 }
 
-/**
- * A price cell to integer cents, or null when it is not a number.
- *
- * Handles what spreadsheets actually contain: a currency symbol, thousands
- * separators, and either decimal convention ("1,299.00" and "1.299,00" both
- * mean the same money). The rule for telling them apart is the LAST separator
- * present: whichever of "." or "," appears last is the decimal point, because
- * a thousands separator can never be the final one.
- */
-export function parsePriceCents(raw: string): number | null {
-  const trimmed = raw.trim();
-  if (!trimmed) return null;
-  // Keep digits and separators; drop currency symbols, spaces, and the rest.
-  const cleaned = trimmed.replace(/[^\d.,-]/g, "");
-  if (!cleaned || !/\d/.test(cleaned)) return null;
-
-  const lastDot = cleaned.lastIndexOf(".");
-  const lastComma = cleaned.lastIndexOf(",");
-  let normalised: string;
-  if (lastDot === -1 && lastComma === -1) {
-    normalised = cleaned;
-  } else {
-    const decimalAt = Math.max(lastDot, lastComma);
-    const whole = cleaned.slice(0, decimalAt).replace(/[.,]/g, "");
-    const fraction = cleaned.slice(decimalAt + 1).replace(/[.,]/g, "");
-    // A group of exactly three digits after the last separator with no other
-    // separator before it is a thousands group, not cents: "1,200" is 1200.
-    normalised =
-      fraction.length === 3 && !/[.,]/.test(cleaned.slice(0, decimalAt))
-        ? `${whole}${fraction}`
-        : `${whole}.${fraction}`;
-  }
-
-  const value = Number(normalised);
-  if (!Number.isFinite(value) || value < 0) return null;
-  return Math.round(value * 100);
-}
+// parsePriceCents is re-exported at the top of this file from ./price.ts.
+// The implementation lives there so the form and importer share one algorithm.
 
 /** One row as it will be written, or the reason it cannot be. */
 export type ImportRow = {

@@ -1,11 +1,13 @@
 import { createClient } from "@/lib/supabase/server";
 import { getActiveAccount } from "@/lib/team/account-context";
+import { getShippingPolicy } from "@/lib/settings/shipping-policy";
+import { buildShippingProse } from "@/lib/shipping/policy-prose";
+import { SHIPPING_SETTINGS_HREF } from "@/types/shipping-policy";
 import {
   parseStoredStorefrontConfig,
   storefrontIdSchema,
 } from "@/lib/validation/storefront";
 import { parseStorefrontBrief } from "@/lib/validation/storefront-brief";
-import { settingHref } from "@/lib/storefront/setting-ref";
 import {
   DEFAULT_STOREFRONT_CONFIG,
   type StorefrontConfig,
@@ -106,83 +108,61 @@ export async function listStorefronts(offset = 0): Promise<StorefrontsPage> {
 /**
  * THE SHIPPING CHOICES A PRODUCT HAS, gathered for the product form.
  *
- * Shipping terms belong to the store doing the shipping, so they live in each
- * storefront's config: `policies.shipping` (+ `policies.dispatch`) is that
- * store's DEFAULT, and `shippingProfiles` are its named exceptions. A product,
- * meanwhile, can sit on more than one storefront, so the form offers every
- * profile the seller has anywhere and labels each with the store it came from
- * when there is more than one store to confuse it with.
+ * ONE ACCOUNT, ONE ANSWER — since 20260905_shipping_policy_on_profile. This
+ * function used to page through every storefront the seller owned, collecting
+ * a default and a profile list from each config, because that is where the
+ * terms lived. It had to: a product can sit on several storefronts, so the
+ * form offered every profile found anywhere and labelled each with the store
+ * it came from, and the "default terms" the form previewed were really N
+ * different defaults the seller had to pick between in their head.
  *
- * What the seller picks is only ever a profile id. A store that does not have
- * that profile prints its own default instead, which is the same graceful
- * answer a deleted profile gets (see resolveProductShipping) — and it is the
- * right one, because a store can only ship on the terms it offers.
+ * None of that was ever a real choice. Shipping terms belong to the business
+ * doing the shipping, and now they are stored that way, so the answer is one
+ * policy read from one row. The storefront query is gone entirely.
  *
- * Bounded by the same STOREFRONT_LIST_LIMIT the list page uses, and it selects
- * only `id, name, config`: the same per-row Zod parse, without the brief.
+ * Read for the ACTIVE ACCOUNT, not the signed-in user: a team member editing
+ * the owner's catalogue must see the owner's terms. That read goes through the
+ * service role (Settings is scoped to the signed-in user and `profiles` RLS
+ * with it), gated by the active-account check above it — the same pattern the
+ * trader identity uses.
  */
 export type ShippingChoices = {
-  /** Every profile the seller has, across their storefronts. */
-  profiles: {
-    id: string;
-    name: string;
-    dispatch: string;
-    body: string;
-    /** The store that defines it, for the picker's second line. */
-    storefrontName: string;
-  }[];
-  /** What "the store's default terms" actually says, per storefront, so the
-   *  form can show the seller the words rather than the promise of them. */
-  defaults: { storefrontId: string; storefrontName: string; dispatch: string; body: string }[];
-  /** Where to go to write any of it. Null when the seller has no storefront
-   *  yet, in which case there is nothing to link to. */
-  editHref: string | null;
+  /** The account's named exceptions, in the order the seller keeps them. */
+  profiles: { id: string; name: string; dispatch: string; body: string }[];
+  /** What "your usual terms" actually says, so the form can show the seller
+   *  the words rather than the promise of them. Both parts may be "" for a
+   *  seller who has written nothing yet. */
+  fallback: { dispatch: string; body: string };
+  /** Where to go to write any of it. Always the same page now, and never null:
+   *  it exists whether or not the seller has a storefront yet. */
+  editHref: string;
 };
 
 export async function getShippingChoices(): Promise<ShippingChoices> {
-  const empty: ShippingChoices = { profiles: [], defaults: [], editHref: null };
+  const empty: ShippingChoices = {
+    profiles: [],
+    fallback: { dispatch: "", body: "" },
+    editHref: SHIPPING_SETTINGS_HREF,
+  };
   const account = await getActiveAccount();
   if (!account) return empty;
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("storefronts")
-    .select("id, name, config")
-    .eq("owner_id", account.accountId)
-    .order("updated_at", { ascending: false })
-    .order("id", { ascending: true })
-    .limit(STOREFRONT_LIST_LIMIT);
-  // A form that cannot list shipping profiles still has to load: the picker
-  // degrades to "the store's default terms", which is what it would have
-  // shown anyway for nearly every product.
-  if (error) {
-    console.error("[storefront] shipping choices read failed", error);
-    return empty;
-  }
 
-  const profiles: ShippingChoices["profiles"] = [];
-  const defaults: ShippingChoices["defaults"] = [];
-  let editHref: string | null = null;
-  for (const row of data ?? []) {
-    const config = parseStoredStorefrontConfig(row.config);
-    if (!config) continue;
-    editHref ??= settingHref("shipping-returns", row.id);
-    defaults.push({
-      storefrontId: row.id,
-      storefrontName: row.name,
-      dispatch: config.policies?.dispatch ?? "",
-      body: config.policies?.shipping ?? "",
-    });
-    for (const profile of config.shippingProfiles ?? []) {
-      profiles.push({
-        id: profile.id,
-        name: profile.name,
-        dispatch: profile.dispatch ?? "",
-        body: profile.body,
-        storefrontName: row.name,
-      });
-    }
-  }
-  return { profiles, defaults, editHref };
+  const policy = await getShippingPolicy(account.accountId);
+  return {
+    profiles: (policy.profiles ?? []).map((profile) => ({
+      id: profile.id,
+      name: profile.name,
+      dispatch: profile.dispatch ?? "",
+      body: profile.body,
+    })),
+    // The same generator the product page runs, so the preview in the form is
+    // the text a buyer gets and not a second rendering of the same answers.
+    fallback: {
+      dispatch: policy.dispatch ?? "",
+      body: buildShippingProse(policy).shipping,
+    },
+    editHref: SHIPPING_SETTINGS_HREF,
+  };
 }
 
 /**

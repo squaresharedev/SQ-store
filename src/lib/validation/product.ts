@@ -19,6 +19,8 @@ import {
   OPTION_GROUP_NAME_MAX,
   OPTION_GROUPS_MAX,
   OPTION_NAME_MAX,
+  OPTION_SPEC_VALUE_MAX,
+  OPTION_SPECS_MAX,
   OPTIONS_PER_GROUP_MAX,
   OPTIONS_TOTAL_MAX,
   PRODUCT_STATUSES,
@@ -222,11 +224,53 @@ export const galleryImageSchema = z.strictObject({
   optionId: uuidField("That option").optional(),
 });
 
+/** A physical measure: non-negative, sane upper bound, no NaN or infinities
+ *  (Zod 4's number already refuses those). */
+const measure = z.number().min(0).max(100_000);
+
+/** Shared by the product's own details and by an option's overrides, so the
+ *  two can never disagree about what a measurement is. */
+export const dimensionsSchema = z.strictObject({
+  length: measure.optional(),
+  width: measure.optional(),
+  height: measure.optional(),
+  unit: z.enum(DIMENSION_UNITS),
+});
+
+export const weightSchema = z.strictObject({
+  value: measure,
+  unit: z.enum(WEIGHT_UNITS),
+});
+
+/** One free spec row. `max` differs between the product's own rows and an
+ *  option's (see OPTION_SPEC_VALUE_MAX), so the value cap is a parameter. */
+function specSchema(valueMax: number) {
+  return z.strictObject({
+    label: singleLineText({ label: "A specification name", max: 40 }),
+    value: singleLineText({ label: "A specification value", max: valueMax }),
+  });
+}
+
+/**
+ * What ONE option changes about the product's facts. Every member optional:
+ * absent means the product's own value applies, which is what makes this an
+ * override rather than a second spec sheet the seller has to keep in step.
+ */
+export const productOptionDetailsSchema = z.strictObject({
+  dimensions: dimensionsSchema.optional(),
+  weight: weightSchema.optional(),
+  specs: z
+    .array(specSchema(OPTION_SPEC_VALUE_MAX))
+    .max(OPTION_SPECS_MAX, `A version can have up to ${OPTION_SPECS_MAX} of its own specifications.`)
+    .optional(),
+});
+
 export const productOptionSchema = z.strictObject({
   id: uuidField("That option"),
   name: singleLineText({ label: "An option name", max: OPTION_NAME_MAX }),
   swatch: hexColor("Swatch colours").optional(),
   available: z.boolean(),
+  details: productOptionDetailsSchema.optional(),
 });
 
 /**
@@ -283,22 +327,9 @@ export const documentSchema = z.strictObject({
   label: singleLineText({ label: "A document name", max: DOCUMENT_LABEL_MAX }),
 });
 
-/** A physical measure: non-negative, sane upper bound, no NaN or infinities
- *  (Zod 4's number already refuses those). */
-const measure = z.number().min(0).max(100_000);
-
 export const productDetailsSchema = z.strictObject({
-  dimensions: z
-    .strictObject({
-      length: measure.optional(),
-      width: measure.optional(),
-      height: measure.optional(),
-      unit: z.enum(DIMENSION_UNITS),
-    })
-    .optional(),
-  weight: z
-    .strictObject({ value: measure, unit: z.enum(WEIGHT_UNITS) })
-    .optional(),
+  dimensions: dimensionsSchema.optional(),
+  weight: weightSchema.optional(),
   materials: multiLineText({ label: "Materials", max: 300 }).optional(),
   care: multiLineText({ label: "Care instructions", max: 1000 }).optional(),
   included: z
@@ -306,12 +337,7 @@ export const productDetailsSchema = z.strictObject({
     .max(INCLUDED_MAX, `List up to ${INCLUDED_MAX} included items.`)
     .optional(),
   specs: z
-    .array(
-      z.strictObject({
-        label: singleLineText({ label: "A specification name", max: 40 }),
-        value: singleLineText({ label: "A specification value", max: 200 }),
-      }),
-    )
+    .array(specSchema(200))
     .max(SPECS_MAX, `List up to ${SPECS_MAX} specifications.`)
     .optional(),
   origin: singleLineText({ label: "Country of origin", max: 60 }).optional(),

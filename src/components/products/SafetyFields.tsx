@@ -7,6 +7,8 @@ import {
   labelClass,
 } from "@/components/ui/control-styles";
 import { InfoTip } from "@/components/ui/InfoTip";
+import { RequiredMark } from "@/components/ui/RequiredMark";
+import { safetyStarted } from "./form-values";
 import type { DetailsFieldErrors, SafetyFormValues } from "./form-values";
 
 /**
@@ -26,16 +28,28 @@ export function SafetyFields({
   errors: DetailsFieldErrors;
   onChange: (next: SafetyFormValues) => void;
 }) {
+  // The three manufacturer fields only turn required once the block is
+  // touched — before that the star would flag fields nothing is asking for.
+  const started = safetyStarted(values);
+
   const field = (
     key: keyof SafetyFormValues,
     label: string,
-    options: { multiline?: boolean; type?: string; max: number; error?: string; hint?: string },
+    options: {
+      multiline?: boolean;
+      type?: string;
+      max: number;
+      error?: string;
+      hint?: string;
+      required?: boolean;
+    },
   ) => (
     <div className="space-y-1.5">
       <div className="flex items-center gap-1.5">
         <label htmlFor={`${inputId}-${key}`} className={labelClass}>
           {label}
         </label>
+        {options.required && <RequiredMark />}
         {options.hint && <InfoTip label={`About ${label}`}>{options.hint}</InfoTip>}
       </div>
       {options.multiline ? (
@@ -44,6 +58,7 @@ export function SafetyFields({
           value={values[key]}
           maxLength={options.max}
           rows={2}
+          required={options.required}
           aria-invalid={options.error ? true : undefined}
           onChange={(event) => onChange({ ...values, [key]: event.target.value })}
           data-product-field={`safety.${key}`}
@@ -55,6 +70,7 @@ export function SafetyFields({
           type={options.type ?? "text"}
           value={values[key]}
           maxLength={options.max}
+          required={options.required}
           aria-invalid={options.error ? true : undefined}
           onChange={(event) => onChange({ ...values, [key]: event.target.value })}
           data-product-field={`safety.${key}`}
@@ -68,17 +84,23 @@ export function SafetyFields({
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-        {field("manufacturerName", "Manufacturer", { max: 120, error: errors.manufacturerName })}
+        {field("manufacturerName", "Manufacturer", {
+          max: 120,
+          error: errors.manufacturerName,
+          required: started,
+        })}
         {field("manufacturerEmail", "Manufacturer email", {
           type: "email",
           max: 254,
           error: errors.manufacturerEmail,
+          required: started,
         })}
       </div>
       {field("manufacturerAddress", "Manufacturer address", {
         multiline: true,
         max: 300,
         error: errors.manufacturerAddress,
+        required: started,
       })}
       <div className={cn("grid grid-cols-1 gap-5 sm:grid-cols-2")}>
         {field("responsibleName", "EU responsible person", {

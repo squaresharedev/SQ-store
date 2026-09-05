@@ -2,6 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { escapeIlike } from "@/lib/supabase/ilike";
 import { getActiveAccount } from "@/lib/team/account-context";
+import { parseOrderSelection } from "@/lib/orders/selection";
 import type {
   OrderView,
   OrderFilters,
@@ -34,7 +35,13 @@ import type {
 // column contract below. Column contract (do not rename):
 //   id, seller_id, product_id, storefront_id, channel, status, amount_cents,
 //   platform_fee_cents, currency, buyer_email, product_title,
-//   product_price_cents, created_at
+//   product_price_cents, selected_options, created_at
+//
+// TODO(checkout): `selected_options` is the version the buyer bought, snapshot
+// label/value pairs (see types/order-view.ts). The future writer must fill it
+// from the buyer's own choice at the moment of sale, never by looking the
+// product's options up afterwards: an order records what WAS sold, and the
+// product's options are free to change after it.
 
 export const DEFAULT_PAGE_SIZE = 20;
 const MAX_PAGE_SIZE = 100;
@@ -60,6 +67,7 @@ function toOrderView(row: Record<string, unknown>): OrderView {
   return {
     id: String(row.id),
     productTitle: String(row.product_title ?? ""),
+    selection: parseOrderSelection(row.selected_options),
     amountCents: Number(row.amount_cents ?? 0),
     platformFeeCents: Number(row.platform_fee_cents ?? 0),
     currency: String(row.currency ?? ""),
@@ -72,7 +80,7 @@ function toOrderView(row: Record<string, unknown>): OrderView {
 
 /** The column list every order read selects — one contract, one place. */
 const ORDER_COLUMNS =
-  "id, product_title, amount_cents, platform_fee_cents, currency, channel, status, buyer_email, created_at";
+  "id, product_title, selected_options, amount_cents, platform_fee_cents, currency, channel, status, buyer_email, created_at";
 
 /** Postgres would error on a malformed uuid, so a bad id is filtered out here
  *  rather than surfaced as "orders are unavailable". */

@@ -1,6 +1,7 @@
 "use client";
 
 import { memo, useCallback, useEffect, useMemo, useRef, type ReactNode } from "react";
+import type { SellerShippingPolicy } from "@/types/shipping-policy";
 import { ShoppingBag } from "lucide-react";
 import type { Product } from "@/types/product";
 import {
@@ -14,8 +15,6 @@ import {
   type ProductPageConfig,
   type StorefrontBlock,
   type StorefrontHeader,
-  type ShippingProfile,
-  type StorefrontPolicies,
   type StorefrontSeller,
   type StorefrontTheme,
   type TextSpan,
@@ -88,6 +87,21 @@ const DESIGN_FRAME_CHROME_PX = 16 * 2 + 2;
  *  exact same width rather than picking one of its own. */
 const MOBILE_PREVIEW_WIDTH = 384;
 
+/**
+ * A product page's own "desktop" width, when its switch is on that setting.
+ *
+ * NOT the board's natural design-view width: that is `columns * cell size`,
+ * a number that describes the SELLER'S GRID, not a browser. A 6-column board
+ * (the default) is only ~634px wide, under the page's own @3xl container
+ * breakpoint (768px, see ProductPageView.tsx) for the image-left/details-
+ * right layout — so the page never left its single-column, mobile-style
+ * stack no matter how "desktop" the seller's board was, just scaled up. This
+ * is comfortably past that breakpoint AND past the page's own capped content
+ * width (max-w-[76rem] = 1216px), so the preview shows the page exactly as
+ * matured/centred as it will ever get on a real desktop browser.
+ */
+const PRODUCT_PAGE_DESKTOP_WIDTH = 1280;
+
 export const DesignerCanvas = memo(function DesignerCanvas({
   blocks,
   productsById,
@@ -136,8 +150,7 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   storefrontId = "",
   storefrontName = "",
   productPage,
-  policies = {},
-  shippingProfiles = [],
+  shippingPolicy = {},
   seller = {},
 }: {
   blocks: StorefrontBlock[];
@@ -238,8 +251,9 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   storefrontName?: string;
   /** The page's own design. Absent leaves the artboards unrendered. */
   productPage?: ProductPageConfig;
-  policies?: StorefrontPolicies;
-  shippingProfiles?: ShippingProfile[];
+  /** The account's shipping and returns terms, read-only — the preview
+   *  renders what they produce. See lib/settings/shipping-policy.ts. */
+  shippingPolicy?: SellerShippingPolicy;
   seller?: StorefrontSeller;
 }) {
   const productFor = useCallback(
@@ -611,11 +625,22 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   // page sees them at the same believable scale rather than one shrinking to
   // fit whatever room is left.
   const isDesign = previewMode === "desktop";
-  const boardWidth = isDesign
-    ? theme.columns * DESIGN_CELL_PX +
-      (theme.columns - 1) * theme.gridGap +
-      DESIGN_FRAME_CHROME_PX
-    : MOBILE_PREVIEW_WIDTH;
+  const desktopBoardWidth =
+    theme.columns * DESIGN_CELL_PX +
+    (theme.columns - 1) * theme.gridGap +
+    DESIGN_FRAME_CHROME_PX;
+  const boardWidth = isDesign ? desktopBoardWidth : MOBILE_PREVIEW_WIDTH;
+  // What each open page's OWN desktop/mobile switch can choose between. NOT
+  // the board's own two widths: a product page is a real, separate route a
+  // buyer's browser renders on its own, not a panel scaled to match however
+  // many grid columns the seller picked — mobile still borrows the board's
+  // phone-width simulation (a real phone is a real phone either way), but
+  // desktop needs its own realistic browser width so the page can actually
+  // reach its image-left/details-right layout (see PRODUCT_PAGE_DESKTOP_WIDTH).
+  const pageWidths: Record<PreviewDevice, number> = {
+    desktop: PRODUCT_PAGE_DESKTOP_WIDTH,
+    mobile: MOBILE_PREVIEW_WIDTH,
+  };
 
   // The canvas font. An uploaded face is declared here as a custom property
   // and applied through it, so text blocks that opt into the same face inherit
@@ -648,7 +673,8 @@ export const DesignerCanvas = memo(function DesignerCanvas({
         return [
           <ProductPageArtboard
             key={id}
-            width={boardWidth}
+            widths={pageWidths}
+            initialDevice={previewMode}
             product={product}
             soldOut={soldOutProducts.has(id)}
             storefrontId={storefrontId}
@@ -656,8 +682,7 @@ export const DesignerCanvas = memo(function DesignerCanvas({
             theme={theme}
             header={header}
             productPage={productPage}
-            policies={policies}
-            shippingProfiles={shippingProfiles}
+            shippingPolicy={shippingPolicy}
             seller={seller}
             backgroundImageUrl={backgroundImageUrl}
             customFontUrl={customFontUrl}
@@ -703,7 +728,10 @@ export const DesignerCanvas = memo(function DesignerCanvas({
       onClickCapture={suppressSyntheticClick}
       className={cn(
         // Relative: the marquee rubber band positions against this frame.
-        "relative rounded-md border border-border p-4",
+        // shadow-lg lifts the board off the workspace the same way
+        // ProductPageArtboard's own frame does, so the two kinds of artboard
+        // on this canvas read as the same sort of object.
+        "relative rounded-md border border-border p-4 shadow-lg",
         canvasFont.className,
       )}
       // Schema-constrained: hex is re-gated by the strict regex, the gap is

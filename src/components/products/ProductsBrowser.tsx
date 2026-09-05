@@ -22,6 +22,7 @@ import type {
   ProductSalesSummary,
   ProductStatus,
 } from "@/types/product";
+import type { StorefrontPlacement } from "@/lib/products/queries";
 import type { Paginated } from "@/types/pagination";
 import { PRODUCT_SORTS, type ProductSort } from "@/lib/products/sort";
 import { FilterMenu } from "@/components/ui/FilterMenu";
@@ -84,6 +85,7 @@ export function ProductsBrowser({
   sort,
   canWrite,
   sales,
+  placements = {},
   heading,
 }: {
   data: Paginated<Product>;
@@ -94,6 +96,12 @@ export function ProductsBrowser({
   canWrite: boolean;
   /** Per-product paid-order rollup + bestseller, fetched server-side. */
   sales: ProductSalesSummary;
+  /**
+   * Storefronts each product appears on, keyed by product id. Optional so
+   * callers can omit it while the query is wired up; the delete dialog and
+   * link affordances degrade gracefully to count 0 in that case.
+   */
+  placements?: Record<string, StorefrontPlacement[]>;
   /** Server-rendered page title block, kept out of this client boundary. */
   heading: React.ReactNode;
 }) {
@@ -253,6 +261,7 @@ export function ProductsBrowser({
           products={data.rows}
           canWrite={canWrite}
           sales={sales}
+          placements={placements}
           filtered={filtered}
           onClearFilters={handleClear}
         />

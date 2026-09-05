@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, cleanup, within } from "@testing-library/react";
+import { describe, it, expect, vi, afterEach, beforeAll } from "vitest";
+import { render, screen, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { DEFAULT_PRODUCT_PAGE_CONFIG, DEFAULT_STOREFRONT_CONFIG } from "@/types/storefront";
@@ -8,6 +8,12 @@ import { PanelTabs, panelProps } from "@/components/ui/PanelTabs";
 import { PanelBackRow, PanelMenu, PanelMenuItem } from "@/components/ui/PanelMenu";
 import { ControlsPanel } from "@/components/storefront/ControlsPanel";
 import { editorEntries } from "@/components/storefront/editor-search";
+import { SettingTargetProvider } from "@/lib/storefront/setting-context";
+import {
+  PRODUCT_PAGE_HOTSPOTS,
+  freshSettingRef,
+  type SettingRef,
+} from "@/lib/storefront/setting-ref";
 
 /**
  * The two primitives the side panels navigate with, and the design panel that
@@ -19,6 +25,12 @@ import { editorEntries } from "@/components/storefront/editor-search";
  */
 
 afterEach(cleanup);
+
+// A summoned section scrolls itself into view; jsdom has no layout, so it has
+// no scrollIntoView either. The stub is the whole of what the tests need.
+beforeAll(() => {
+  Element.prototype.scrollIntoView = vi.fn();
+});
 
 const themed = () => structuredClone(DEFAULT_STOREFRONT_CONFIG.theme);
 
@@ -104,12 +116,8 @@ describe("ControlsPanel grouping", () => {
         onShowGridChange={vi.fn()}
         productPage={DEFAULT_PRODUCT_PAGE_CONFIG}
         onProductPageChange={vi.fn()}
-        policies={{}}
-        onPoliciesChange={vi.fn()}
-        shippingProfiles={[]}
-        onShippingProfilesChange={vi.fn()}
-        seller={{}}
-        onSellerChange={vi.fn()}
+        shippingPolicy={{}}
+        sellerIdentity={{}}
         searchEntries={editorEntries([], new Map())}
       />
     </ToastProvider>
@@ -118,8 +126,11 @@ describe("ControlsPanel grouping", () => {
   it("opens on a menu of groups, not on a wall of controls", () => {
     render(controls());
 
-    const menu = screen.getByRole("list");
-    expect(within(menu).getAllByRole("listitem")).toHaveLength(7);
+    // PLT-02: role="list" was removed from PanelMenu (mixed content with the
+    // search field violated axe). Use the data attribute instead.
+    const menu = document.querySelector("[data-panel-menu]")!;
+    expect(menu).not.toBeNull();
+    expect(menu.querySelectorAll("[data-panel-menu-item]")).toHaveLength(7);
     // Nothing editable until a group is chosen: that IS the fix.
     expect(screen.queryByRole("slider")).not.toBeInTheDocument();
     expect(screen.queryByRole("switch")).not.toBeInTheDocument();
@@ -154,5 +165,74 @@ describe("ControlsPanel grouping", () => {
 
     expect(cardStyle).toHaveAttribute("aria-expanded", "true");
     expect(priceTag).toHaveAttribute("aria-expanded", "true");
+  });
+});
+
+describe("ControlsPanel reopening a setting by name", () => {
+  /**
+   * A stand-in for StorefrontDesigner's own SettingTargetProvider: `open`
+   * mirrors what openSetting/openProductPage actually do (clone the ref
+   * before storing it), and the button simulates a seller clicking a product
+   * page hotspot — which, on the real canvas, hands back the exact same
+   * PRODUCT_PAGE_HOTSPOTS object every single time.
+   */
+  function Harness() {
+    const [activeRef, setActiveRef] = useState<SettingRef | null>(null);
+    const open = (ref: SettingRef) => setActiveRef(freshSettingRef(ref));
+    return (
+      <ToastProvider>
+        <SettingTargetProvider
+          value={{ activeRef, open, close: () => setActiveRef(null) }}
+        >
+          <button
+            type="button"
+            aria-label="Click the buy-button hotspot"
+            onClick={() => open(PRODUCT_PAGE_HOTSPOTS.cta)}
+          />
+          <ControlsPanel
+            theme={themed()}
+            header={{ show: true, name: "", bio: "" }}
+            onThemeChange={vi.fn()}
+            onHeaderChange={vi.fn()}
+            onCanvasChange={vi.fn()}
+            backgroundImageUrl={null}
+            onBackgroundImageChange={vi.fn()}
+            customFontUrl={null}
+            onCustomFontUrlChange={vi.fn()}
+            showGrid={false}
+            onShowGridChange={vi.fn()}
+            productPage={DEFAULT_PRODUCT_PAGE_CONFIG}
+            onProductPageChange={vi.fn()}
+            shippingPolicy={{}}
+            sellerIdentity={{}}
+            searchEntries={editorEntries([], new Map())}
+          />
+        </SettingTargetProvider>
+      </ToastProvider>
+    );
+  }
+
+  it("brings the panel back after the seller navigated away by hand", async () => {
+    const user = userEvent.setup();
+    render(<Harness />);
+
+    await user.click(screen.getByRole("button", { name: "Click the buy-button hotspot" }));
+    expect(screen.getByRole("button", { name: "Buy button" })).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
+
+    // The seller leaves it by hand: back to the menu, into an unrelated group.
+    await user.click(screen.getByRole("button", { name: /back/i }));
+    await user.click(screen.getByRole("button", { name: /^Theme/ }));
+    expect(screen.queryByRole("button", { name: "Buy button" })).not.toBeInTheDocument();
+
+    // Clicking the SAME hotspot again must still bring the panel back — not
+    // get silently swallowed because the request looks unchanged.
+    await user.click(screen.getByRole("button", { name: "Click the buy-button hotspot" }));
+    expect(await screen.findByRole("button", { name: "Buy button" })).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
   });
 });

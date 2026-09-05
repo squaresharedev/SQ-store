@@ -196,6 +196,10 @@ export type Database = {
           notify_marketing: boolean
           notify_product_updates: boolean
           notify_sales: boolean
+          seller_address: string | null
+          seller_email: string | null
+          seller_phone: string | null
+          shipping_policy: Json | null
           tax_business_name: string | null
           tax_country: string | null
           tax_vat_id: string | null
@@ -214,6 +218,10 @@ export type Database = {
           notify_marketing?: boolean
           notify_product_updates?: boolean
           notify_sales?: boolean
+          seller_address?: string | null
+          seller_email?: string | null
+          seller_phone?: string | null
+          shipping_policy?: Json | null
           tax_business_name?: string | null
           tax_country?: string | null
           tax_vat_id?: string | null
@@ -232,6 +240,10 @@ export type Database = {
           notify_marketing?: boolean
           notify_product_updates?: boolean
           notify_sales?: boolean
+          seller_address?: string | null
+          seller_email?: string | null
+          seller_phone?: string | null
+          shipping_policy?: Json | null
           tax_business_name?: string | null
           tax_country?: string | null
           tax_vat_id?: string | null

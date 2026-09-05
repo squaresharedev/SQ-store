@@ -60,6 +60,44 @@ test.describe("orders + analytics (seeded)", () => {
     await expect(detail).not.toBeVisible();
   });
 
+  test("an order says which version was bought, in the list and in the detail", async ({
+    page,
+  }) => {
+    // The fact fulfilment cannot proceed without: a table sold in two sizes is
+    // two different parcels, and "Oak dining table, €899.00" says nothing about
+    // which one to build.
+    const user = freshUser("orderversion");
+    await signUp(page, user);
+    const sellerId = await userIdByEmail(user.email);
+    await seedOrders(sellerId, [
+      {
+        amount_cents: 89900,
+        product_title: "Oak dining table",
+        buyer_email: "buyer@table.com",
+        selected_options: [
+          { label: "Size", value: "Six seater" },
+          { label: "Finish", value: "Walnut" },
+        ],
+      },
+      // Sold in one version: nothing to say, and nothing said.
+      { amount_cents: 4900, product_title: "Plain shelf", buyer_email: "buyer@shelf.com" },
+    ]);
+
+    await page.goto("/orders");
+    const versioned = page.locator("tr", { hasText: "Oak dining table" });
+    await expect(versioned.locator("[data-order-selection]")).toHaveText(
+      "Size: Six seater · Finish: Walnut",
+    );
+    const plain = page.locator("tr", { hasText: "Plain shelf" });
+    await expect(plain.locator("[data-order-selection]")).toHaveCount(0);
+
+    await page.getByText("Oak dining table").click();
+    const detail = page.getByRole("dialog", { name: /order details/i });
+    await expect(detail).toBeVisible();
+    await expect(detail.locator("[data-order-selection]")).toContainText("Six seater");
+    await expect(detail.locator("[data-order-selection]")).toContainText("Walnut");
+  });
+
   test("overview's Recent orders rows open that order's detail", async ({ page }) => {
     const user = freshUser("recentorders");
     await signUp(page, user);

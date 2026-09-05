@@ -225,6 +225,86 @@ describe("saveTaxInfo - happy path", () => {
     const eqCalls = db.eq.mock.calls as [string, string][];
     expect(eqCalls.some(([col, val]) => col === "id" && val === USER_ID)).toBe(true);
   });
+
+  it("writes the seller-identity fields alongside the tax ones", async () => {
+    // These three are what lib/settings/seller-identity.ts reads into the
+    // buyer-facing trader identity — the write path this test guards.
+    getUserMock.mockResolvedValue(USER);
+    const fd = new FormData();
+    fd.append("tax_business_name", "ACME Corp");
+    fd.append("seller_address", "12 Market Street\nDublin, D02 X285");
+    fd.append("seller_email", "hello@acme.example");
+    fd.append("tax_vat_id", "DE123456789");
+    fd.append("tax_country", "DE");
+    fd.append("seller_phone", "+353 1 234 5678");
+
+    const result = await saveTaxInfo(PREV, fd);
+
+    expect(result.success).toBeTruthy();
+    const updatePayload = db.update.mock.calls[0][0] as Record<string, unknown>;
+    expect(updatePayload.seller_address).toBe("12 Market Street\nDublin, D02 X285");
+    expect(updatePayload.seller_email).toBe("hello@acme.example");
+    expect(updatePayload.seller_phone).toBe("+353 1 234 5678");
+  });
+
+  it("accepts a real <textarea>'s CRLF line breaks instead of rejecting them as header injection", async () => {
+    // A browser's own form-data-set algorithm normalises a textarea's
+    // newlines to CRLF before this action ever sees them (unlike every OTHER
+    // multiline field in the app, which is React-controlled and never goes
+    // through a native form submission). multiLineText rejects a bare CR on
+    // purpose elsewhere — this proves that defence does not also swallow an
+    // address typed into this one real textarea.
+    getUserMock.mockResolvedValue(USER);
+    const fd = new FormData();
+    fd.append("tax_business_name", "");
+    fd.append("seller_address", "12 Market Street\r\nDublin, D02 X285");
+    fd.append("seller_email", "");
+    fd.append("tax_vat_id", "");
+    fd.append("tax_country", "");
+    fd.append("seller_phone", "");
+
+    const result = await saveTaxInfo(PREV, fd);
+
+    expect(result.success).toBeTruthy();
+    const updatePayload = db.update.mock.calls[0][0] as Record<string, unknown>;
+    // Normalised to LF-only on the way in, same as every other stored value.
+    expect(updatePayload.seller_address).toBe("12 Market Street\nDublin, D02 X285");
+  });
+
+  it("blank optional fields clear to null rather than storing empty strings", async () => {
+    getUserMock.mockResolvedValue(USER);
+    const fd = new FormData();
+    fd.append("tax_business_name", "");
+    fd.append("seller_address", "");
+    fd.append("seller_email", "");
+    fd.append("tax_vat_id", "");
+    fd.append("tax_country", "");
+    fd.append("seller_phone", "");
+
+    const result = await saveTaxInfo(PREV, fd);
+
+    expect(result.success).toBeTruthy();
+    const updatePayload = db.update.mock.calls[0][0] as Record<string, unknown>;
+    for (const field of ["seller_address", "seller_email", "seller_phone"]) {
+      expect(updatePayload[field]).toBeNull();
+    }
+  });
+
+  it("rejects a contact email that doesn't look like one", async () => {
+    getUserMock.mockResolvedValue(USER);
+    const fd = new FormData();
+    fd.append("tax_business_name", "");
+    fd.append("seller_address", "");
+    fd.append("seller_email", "not-an-email");
+    fd.append("tax_vat_id", "");
+    fd.append("tax_country", "");
+    fd.append("seller_phone", "");
+
+    const result = await saveTaxInfo(PREV, fd);
+
+    expect(result.error).toMatch(/email/i);
+    expect(db.update).not.toHaveBeenCalled();
+  });
 });
 
 // ==========================================================================

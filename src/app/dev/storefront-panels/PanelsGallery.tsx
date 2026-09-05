@@ -189,12 +189,8 @@ export function PanelsGallery() {
             onShowGridChange={setShowGrid}
             productPage={PRODUCT_PAGE_DEFAULTS}
             onProductPageChange={() => {}}
-            policies={{}}
-            onPoliciesChange={() => {}}
-            shippingProfiles={[]}
-            onShippingProfilesChange={() => {}}
-            seller={{}}
-            onSellerChange={() => {}}
+            shippingPolicy={{}}
+            sellerIdentity={{}}
             searchEntries={searchEntries}
             onJump={(target) =>
               setJumped(

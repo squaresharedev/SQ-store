@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { Check } from "lucide-react";
+import { Check, ChevronDown } from "lucide-react";
 import { infoTextClass } from "@/components/ui/control-styles";
 import { useActionToast } from "@/components/ui/Toast";
 import { SaveButton } from "@/components/ui/SaveButton";
@@ -55,11 +55,25 @@ export function LegalSection({
       description="The current drafts, in plain language, because nobody reads legalese for fun. Real legal copy is on its way; accepting now covers this draft version."
     >
       <div className="flex flex-col gap-4">
+        {/* NOTE ON LEGAL EFFECT: acceptance is recorded (version + timestamp)
+            but not yet checked anywhere in the app. Under GDPR and consumer
+            law a gating flow you never enforce is worse than none, because it
+            creates a record of consent without any real checkpoint behind it.
+            Do not add gating logic here until the real legal copy lands and the
+            product decides what accepting actually unlocks. */}
         <div className="flex flex-col divide-y divide-border border border-border">
           {DOCS.map((doc) => (
-            <details key={doc.title} className="group">
-              <summary className="cursor-pointer list-none px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-accent group-open:bg-accent">
+            <details key={doc.title} className="group/doc">
+              {/* The chevron rotates open/closed via group-open/doc, giving the
+                  <details> a visible and recognisable disclosure affordance.
+                  list-none removes the browser's own triangle so we can control
+                  its placement and style. */}
+              <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-sm font-medium text-foreground transition-colors duration-base ease-standard hover:bg-accent group-open/doc:bg-accent motion-reduce:transition-none">
                 {doc.title}
+                <ChevronDown
+                  aria-hidden
+                  className="size-4 shrink-0 text-muted-foreground transition-transform duration-base ease-standard group-open/doc:rotate-180 motion-reduce:transition-none"
+                />
               </summary>
               <p className="px-4 pb-4 font-inter text-sm leading-relaxed text-muted-foreground">
                 {doc.body}

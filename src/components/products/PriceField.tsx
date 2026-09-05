@@ -7,7 +7,8 @@ import {
   fieldBaseClass,
   labelClass,
 } from "@/components/ui/control-styles";
-import { InfoTip } from "@/components/ui/InfoTip";
+import { RequiredMark } from "@/components/ui/RequiredMark";
+import { parseFormPriceCents } from "@/lib/products/price";
 
 const CURRENCY_SYMBOLS: Record<Currency, string> = { EUR: "€", USD: "$" };
 
@@ -16,6 +17,10 @@ const CURRENCY_SYMBOLS: Record<Currency, string> = { EUR: "€", USD: "$" };
  * the field (updates with the selection) and the EUR/USD toggle sits inline on
  * the right, so "price" reads as a single thing instead of two disconnected
  * fields. EUR (primary market) is the default upstream.
+ *
+ * On blur the field normalises to two decimal places so what the seller reads
+ * before saving is exactly what gets stored. "129" becomes "129.00", "1,50"
+ * becomes "1.50" — no silent truncation or rounding on Save.
  */
 export function PriceField({
   id,
@@ -35,23 +40,31 @@ export function PriceField({
   onCurrencyChange: (value: Currency) => void;
 }) {
   // Integer cents for the datapoint below, or undefined while the field is
-  // blank or mid-edit. Deliberately the same rounding the save path uses.
-  const parsed = Number(price.trim());
-  const priceCents =
-    price.trim() && Number.isFinite(parsed) && parsed > 0 ? Math.round(parsed * 100) : null;
+  // blank or mid-edit. Deliberately the same parser the save path uses, so
+  // the attribute and the DB write can never disagree.
+  const parseResult = parseFormPriceCents(price);
+  const priceCents = parseResult.ok ? parseResult.cents : null;
+
+  function handleBlur() {
+    // Normalise to two decimal places on blur so the seller sees the stored
+    // representation before pressing Save. "129" -> "129.00", "1,50" ->
+    // "1.50". Only runs when the field holds a valid price; an invalid value
+    // is left alone so the error message is still accurate.
+    if (priceCents !== null) {
+      onPriceChange((priceCents / 100).toFixed(2));
+    }
+  }
 
   return (
     <div className="space-y-1.5">
-      <div className="flex items-center gap-1.5">
+      {/* No "?" here. Everyone selling something knows what a price is, and an
+          info button beside the one field that needs no explanation is what
+          teaches a seller to stop reading the ones that do. */}
+      <div className="flex items-center">
         <label htmlFor={id} className={labelClass}>
           Price
         </label>
-        {/* The accessible name deliberately avoids the word "price": it would
-            otherwise be a second match for every getByLabel(/price/i) in the
-            suite, and an info button is not the field. */}
-        <InfoTip label="What you keep">
-          What buyers pay. You keep this minus the platform cut.
-        </InfoTip>
+        <RequiredMark />
       </div>
       <div className="relative">
         <span
@@ -66,6 +79,7 @@ export function PriceField({
           inputMode="decimal"
           value={price}
           onChange={(event) => onPriceChange(event.target.value)}
+          onBlur={handleBlur}
           placeholder="9.00"
           required
           aria-invalid={error ? true : undefined}

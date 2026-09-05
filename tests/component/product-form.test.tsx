@@ -2,9 +2,14 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render as rtlRender, screen, waitFor, cleanup, within } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { ToastProvider } from "@/components/ui/Toast";
+import { NavigationBlockerProvider } from "@/lib/hooks/useNavigationBlocker";
 import userEvent from "@testing-library/user-event";
 
 afterEach(cleanup);
+
+// jsdom implements neither scrollIntoView nor a real layout, and the toast's
+// click-to-fix handler calls it on the field it jumps to.
+Element.prototype.scrollIntoView = vi.fn();
 
 // ---------------------------------------------------------------------------
 // Mocks (must be declared before any imports that use them)
@@ -76,23 +81,18 @@ async function fillRequiredFields(
 // Tests
 // ---------------------------------------------------------------------------
 
-/** The form raises toasts, and useToast refuses to no-op outside a provider —
- *  deliberately, so a lost message is a loud failure. Render through it. */
+/** The form raises toasts and registers with the navigation blocker; both
+ *  contexts must be present. Render through both providers. */
 function render(ui: ReactElement) {
-  return rtlRender(<ToastProvider>{ui}</ToastProvider>);
+  return rtlRender(
+    <ToastProvider>
+      <NavigationBlockerProvider>{ui}</NavigationBlockerProvider>
+    </ToastProvider>,
+  );
 }
 
 /** The inline, field-level messages. */
 const inForm = () => within(document.querySelector("form") as HTMLElement);
-
-/** The toast that fires at the point of action. */
-async function toastAlert(): Promise<HTMLElement> {
-  const alerts = await screen.findAllByRole("alert");
-  const form = document.querySelector("form");
-  const outside = alerts.find((el) => !form?.contains(el));
-  if (!outside) throw new Error("expected a toast outside the form");
-  return outside;
-}
 
 describe("ProductForm", () => {
   beforeEach(() => {
@@ -151,6 +151,23 @@ describe("ProductForm", () => {
     expect(titleInput).not.toHaveAttribute("aria-invalid");
   });
 
+  it("clicking 'Jump to first' in the action bar scrolls to the first invalid field", async () => {
+    const user = userEvent.setup();
+    render(<ProductForm />);
+
+    // Title and price are both empty — title comes first in the form, so
+    // "Jump to first" should scroll to that input.
+    await user.click(screen.getByRole("button", { name: /save product/i }));
+
+    // The "Jump to first" button lives in the sticky action bar inside the form.
+    const jumpBtn = await screen.findByRole("button", { name: /jump to first/i });
+    await user.click(jumpBtn);
+
+    const titleInput = screen.getByPlaceholderText(/ambient loops/i);
+    expect(Element.prototype.scrollIntoView).toHaveBeenCalled();
+    await waitFor(() => expect(titleInput).toHaveFocus());
+  });
+
   // --- Price validation ---
 
   it("empty price shows 'Set a price' error", async () => {
@@ -195,22 +212,29 @@ describe("ProductForm", () => {
 
   // --- Stock quantity validation ---
 
-  it("trackStock checked without quantity shows stockQuantity error", async () => {
+  it("trackStock checked then cleared shows stockQuantity error", async () => {
+    // Toggling on seeds the quantity field to "1" so a new tracking-on state
+    // does not immediately fail validation. The seller has to clear the field
+    // to reproduce the "Enter how many units" error.
     const user = userEvent.setup();
     render(<ProductForm />);
 
     await fillRequiredFields(user);
 
-    // Enable track stock.
     const trackSwitch = screen.getByRole("switch", { name: /track stock/i });
     await user.click(trackSwitch);
 
-    // Leave stock quantity empty and submit.
+    // The toggle seeds "1" — clear it to get the empty-quantity error.
+    const qtyInput = screen.getByLabelText(/^in stock/i);
+    await user.clear(qtyInput);
+
     await user.click(screen.getByRole("button", { name: /save product/i }));
     expect(inForm().getByText(/how many units are in stock/i)).toBeInTheDocument();
   });
 
-  it("trackStock with valid quantity has no stockQuantity error", async () => {
+  it("trackStock toggle seeds quantity so there is no stockQuantity error on submit", async () => {
+    // Toggling on seeds quantity to "1", so the seller does not immediately hit
+    // a validation error for a field they just revealed.
     const user = userEvent.setup();
     render(<ProductForm />);
 
@@ -219,9 +243,7 @@ describe("ProductForm", () => {
     const trackSwitch = screen.getByRole("switch", { name: /track stock/i });
     await user.click(trackSwitch);
 
-    const qtyInput = screen.getByPlaceholderText("0");
-    await user.type(qtyInput, "50");
-
+    // No manual entry needed: the seeded "1" is already a valid stock level.
     await user.click(screen.getByRole("button", { name: /save product/i }));
     expect(inForm().queryByText(/how many units are in stock/i)).not.toBeInTheDocument();
   });
@@ -318,18 +340,21 @@ describe("ProductForm", () => {
     ).toBe(true);
   });
 
-  it("names every problem in the toast when a save is blocked", async () => {
-    // The specifics matter: "can't be saved" alone sends the seller hunting
-    // up a long form for whatever is wrong.
+  it("shows the problem count in the sticky action bar when a save is blocked", async () => {
+    // The inline bar replaces the validation toast: it lives where the seller's
+    // eyes already are when Save is pressed and stays visible as they fix fields.
     const user = userEvent.setup();
     render(<ProductForm />);
 
     await user.click(screen.getByRole("button", { name: /save product/i }));
 
-    const toast = await toastAlert();
-    expect(toast).toHaveTextContent(/2 things to fix/i);
-    expect(toast).toHaveTextContent(/give your product a title/i);
-    expect(toast).toHaveTextContent(/set a price before saving/i);
+    // Count shown in the sticky bar (inside the form).
+    await waitFor(() => {
+      expect(inForm().getByText(/2 things to fix before saving/i)).toBeInTheDocument();
+    });
+    // Field-level messages are also visible (inline under each field).
+    expect(inForm().getByText(/give your product a title/i)).toBeInTheDocument();
+    expect(inForm().getByText(/set a price before saving/i)).toBeInTheDocument();
     // createProduct is never reached — this is a client-side block.
     expect(mockCreateProduct).not.toHaveBeenCalled();
   });
@@ -436,6 +461,128 @@ describe("ProductForm - unsaved changes", () => {
     await waitFor(() => expect(mockPush).toHaveBeenCalledWith("/products"), {
       timeout: 15000,
     });
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Price field: locale flexibility and strict form validation
+// ---------------------------------------------------------------------------
+
+describe("ProductForm - price field validation", () => {
+  beforeEach(() => {
+    mockCreateProduct.mockClear();
+    mockCreateProduct.mockResolvedValue({ ok: true, id: "prod-123" });
+    mockPush.mockClear();
+  });
+
+  it("accepts comma-decimal prices (European locale)", async () => {
+    const user = userEvent.setup();
+    render(<ProductForm />);
+
+    await user.type(screen.getByPlaceholderText(/ambient loops/i), "Product");
+    await user.type(screen.getByLabelText(/price/i), "1,50");
+    await user.click(screen.getByRole("button", { name: /save product/i }));
+
+    await waitFor(() => {
+      expect(mockCreateProduct).toHaveBeenCalledWith(
+        expect.objectContaining({ priceCents: 150 }),
+      );
+    });
+  });
+
+  it("rejects 3+ fractional digits with a specific error", async () => {
+    const user = userEvent.setup();
+    render(<ProductForm />);
+
+    await user.type(screen.getByPlaceholderText(/ambient loops/i), "Product");
+    await user.type(screen.getByLabelText(/price/i), "9.999");
+    await user.click(screen.getByRole("button", { name: /save product/i }));
+
+    expect(inForm().getByText(/at most two decimal places/i)).toBeInTheDocument();
+    expect(mockCreateProduct).not.toHaveBeenCalled();
+  });
+
+  it("rejects scientific notation", async () => {
+    const user = userEvent.setup();
+    render(<ProductForm />);
+
+    await user.type(screen.getByPlaceholderText(/ambient loops/i), "Product");
+    await user.type(screen.getByLabelText(/price/i), "1e5");
+    await user.click(screen.getByRole("button", { name: /save product/i }));
+
+    // Scientific notation is not a valid price format; any price error is shown.
+    expect(
+      inForm().queryByText(/at most two decimal places|greater than zero|set a price/i),
+    ).toBeInTheDocument();
+    expect(mockCreateProduct).not.toHaveBeenCalled();
+  });
+
+  it("normalises price to two decimals on blur", async () => {
+    const user = userEvent.setup();
+    render(<ProductForm />);
+
+    const priceInput = screen.getByLabelText(/price/i);
+    await user.click(priceInput);
+    await user.type(priceInput, "129");
+    // Blur the field (click somewhere else).
+    await user.click(screen.getByPlaceholderText(/ambient loops/i));
+
+    expect(priceInput).toHaveValue("129.00");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Navigation blocker: in-app anchor clicks while dirty
+// ---------------------------------------------------------------------------
+
+describe("ProductForm - navigation blocker", () => {
+  beforeEach(() => {
+    mockPush.mockClear();
+    mockCreateProduct.mockClear();
+    mockCreateProduct.mockResolvedValue({ ok: true, id: "prod-123" });
+  });
+
+  it("intercepts an internal anchor click while the form is dirty", async () => {
+    const user = userEvent.setup();
+    // Render a same-page internal link alongside the form; the capture-phase
+    // listener from NavigationBlockerProvider (included in `render`) intercepts
+    // clicks on it when the form has unsaved edits.
+    rtlRender(
+      <ToastProvider>
+        <NavigationBlockerProvider>
+          <a href="/products">Back to Products</a>
+          <ProductForm />
+        </NavigationBlockerProvider>
+      </ToastProvider>,
+    );
+
+    // Make the form dirty.
+    await user.type(screen.getByPlaceholderText(/ambient loops/i), "Draft title");
+
+    // Click the internal link — the blocker should intercept it.
+    await user.click(screen.getByRole("link", { name: /back to products/i }));
+
+    // The unsaved-changes modal should have appeared.
+    expect(await screen.findByRole("dialog")).toBeInTheDocument();
+    // The router was NOT called directly.
+    expect(mockPush).not.toHaveBeenCalled();
+  });
+
+  it("does NOT intercept the anchor while the form is clean", async () => {
+    const user = userEvent.setup();
+    rtlRender(
+      <ToastProvider>
+        <NavigationBlockerProvider>
+          <a href="/products">Back to Products</a>
+          <ProductForm />
+        </NavigationBlockerProvider>
+      </ToastProvider>,
+    );
+
+    // Form is clean — click should go straight through (no modal).
+    await user.click(screen.getByRole("link", { name: /back to products/i }));
+
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 });

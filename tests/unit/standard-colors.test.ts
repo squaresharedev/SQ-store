@@ -5,6 +5,7 @@ import {
 } from "@/lib/theme/standard-colors";
 import { COLOR_PALETTES } from "@/lib/theme/color-palettes";
 import { COLOR_PRESETS } from "@/lib/theme/color-presets";
+import { themeAccentPresets } from "@/lib/theme/theme-color-presets";
 
 const STRICT_HEX = /^#[0-9a-f]{6}$/;
 
@@ -104,6 +105,35 @@ describe("color palettes", () => {
   it("palette names are unique", () => {
     const names = COLOR_PALETTES.map((p) => p.name);
     expect(new Set(names).size).toBe(names.length);
+  });
+});
+
+describe("theme accent presets", () => {
+  it("is four swatches, light to dark, ending on pure black at the extreme", () => {
+    const presets = themeAccentPresets("#a855f7");
+    expect(presets).toHaveLength(4);
+    const lums = presets.map((s) => luminance(s.value));
+    for (let i = 1; i < lums.length; i++) {
+      expect(lums[i]).toBeLessThan(lums[i - 1]);
+    }
+  });
+
+  it("the third swatch is the accent itself, unmixed", () => {
+    const accent = "#a855f7";
+    expect(themeAccentPresets(accent)[2]).toEqual({ name: "Accent", value: accent });
+  });
+
+  it("follows a different accent to a different row", () => {
+    const purple = themeAccentPresets("#a855f7").map((s) => s.value);
+    const green = themeAccentPresets("#16a34a").map((s) => s.value);
+    expect(purple).not.toEqual(green);
+  });
+
+  it("every swatch is strict lowercase hex and named", () => {
+    for (const swatch of themeAccentPresets("#2563eb")) {
+      expect(swatch.value).toMatch(STRICT_HEX);
+      expect(swatch.name.trim().length).toBeGreaterThan(0);
+    }
   });
 });
 

@@ -17,6 +17,16 @@
 import { cache } from "react";
 import { headers } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
+import {
+  SELLER_IDENTITY_SELECT,
+  buildSellerIdentity,
+  type SellerIdentityRow,
+} from "@/lib/settings/seller-identity";
+import {
+  SHIPPING_POLICY_SELECT,
+  buildShippingPolicy,
+  type ShippingPolicyRow,
+} from "@/lib/settings/shipping-policy";
 import { presignGetUrl } from "@/lib/r2";
 import { RATE_LIMITS, clientKey, rateLimitKey } from "@/lib/rate-limit";
 import { uuidField } from "@/lib/validation/inputs";
@@ -150,6 +160,22 @@ export async function buildProductPageProduct(
 /** Everything the page renders. No owner id, no embed settings, no keys. */
 export type PublicProductPage = ProductPageData;
 
+/**
+ * The store name a buyer should see in metadata and share cards.
+ *
+ * Precedence: legal business name > buyer-facing header name > internal row
+ * name. Matches the order `SellerBlock` uses for its own heading, so the
+ * metadata and the on-page identity can never disagree about whose name this
+ * is. The function is a named export so it can be tested independently of the
+ * full page load.
+ */
+export function resolveDisplayName(page: PublicProductPage): string {
+  const { storefront } = page;
+  if (storefront.seller.businessName) return storefront.seller.businessName;
+  if (storefront.header?.show && storefront.header.name) return storefront.header.name;
+  return storefront.name;
+}
+
 export type PublicProductPageResult = {
   page: PublicProductPage;
   /** For the view signal only. Never placed on `page`. */
@@ -203,18 +229,40 @@ export const getPublicProductPage = cache(
     );
     if (!block || block.type !== "product") return null;
 
-    const { data: row, error: productError } = await admin
-      .from("products")
-      .select(PUBLIC_PRODUCT_SELECT)
-      .eq("id", productId)
-      .eq("owner_id", storefront.owner_id)
-      .eq("status", "active")
-      .maybeSingle();
+    // Product and seller identity both depend only on the owner id already in
+    // hand, so they run together rather than one after the other.
+    const [
+      { data: row, error: productError },
+      { data: sellerRow, error: sellerError },
+    ] = await Promise.all([
+      admin
+        .from("products")
+        .select(PUBLIC_PRODUCT_SELECT)
+        .eq("id", productId)
+        .eq("owner_id", storefront.owner_id)
+        .eq("status", "active")
+        .maybeSingle(),
+      admin
+        .from("profiles")
+        // Trader identity AND shipping terms, in ONE select: both are
+        // account-level facts read off the same row, and asking for that row
+        // twice on the public page's hot path would be two round trips for
+        // one read.
+        .select(`${SELLER_IDENTITY_SELECT}, ${SHIPPING_POLICY_SELECT}`)
+        .eq("id", storefront.owner_id)
+        .maybeSingle(),
+    ]);
     if (productError) {
       console.error("[product-page] product read failed", productError);
       return null;
     }
     if (!row) return null;
+    // A seller-identity read failure is NOT a reason to 404 the page: the
+    // block degrades to "nothing set", same as an owner who never filled it
+    // in — see buildSellerIdentity(null).
+    if (sellerError) {
+      console.error("[product-page] seller identity read failed", sellerError);
+    }
 
     const product = await buildProductPageProduct(row as PublicProductRow, {
       soldOutFlag: block.soldOut,
@@ -233,9 +281,10 @@ export const getPublicProductPage = cache(
           theme,
           ...(config.header ? { header: config.header } : {}),
           productPage,
-          policies: config.policies ?? {},
-          shippingProfiles: config.shippingProfiles ?? [],
-          seller: config.seller ?? {},
+          shippingPolicy: buildShippingPolicy(
+            sellerError ? null : (sellerRow as ShippingPolicyRow | null),
+          ),
+          seller: buildSellerIdentity(sellerError ? null : (sellerRow as SellerIdentityRow | null)),
           backgroundImageUrl,
           customFontUrl,
         },

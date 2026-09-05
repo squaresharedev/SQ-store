@@ -73,7 +73,7 @@ describe("snapshot cache — basics", () => {
 describe("snapshot cache — SWR semantics", () => {
   it("a fresh entry answers without a new request", async () => {
     await fetchSnapshot("a1");
-    vi.advanceTimersByTime(30_000); // still inside the 60s TTL
+    vi.advanceTimersByTime(30_000); // still inside the 300s TTL
     const again = await fetchSnapshot("a1");
     expect(again?.products[0]?.title).toBe("Lamp");
     expect(fetchMock).toHaveBeenCalledTimes(1);
@@ -82,7 +82,7 @@ describe("snapshot cache — SWR semantics", () => {
   it("a stale entry answers immediately AND refreshes behind", async () => {
     await fetchSnapshot("a1");
     fetchMock.mockResolvedValue(ok(snapshotNamed("Newer lamp")));
-    vi.advanceTimersByTime(61_000); // past the TTL
+    vi.advanceTimersByTime(301_000); // past the 300s TTL
 
     // The stale answer comes back without waiting for the refresh...
     const stale = await fetchSnapshot("a1");
@@ -96,7 +96,7 @@ describe("snapshot cache — SWR semantics", () => {
   it("a failed background refresh keeps the stale data", async () => {
     await fetchSnapshot("a1");
     fetchMock.mockRejectedValue(new TypeError("offline"));
-    vi.advanceTimersByTime(61_000);
+    vi.advanceTimersByTime(301_000); // past the 300s TTL
     await fetchSnapshot("a1");
     await vi.runAllTimersAsync();
     // Stale beats gone: the old snapshot is still served.

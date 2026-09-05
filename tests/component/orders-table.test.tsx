@@ -32,6 +32,7 @@ function order(overrides: Partial<OrderView> = {}): OrderView {
   return {
     id: "aaaaaaaa-1111-4111-8111-111111111111",
     productTitle: "Lamp",
+    selection: [],
     amountCents: 2500,
     platformFeeCents: 250,
     currency: "EUR",
@@ -109,5 +110,35 @@ describe("OrdersTable — the highlighted row", () => {
 
     await user.click(rowFor("Lamp"));
     expect(onSelect).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("OrdersTable — which version was bought", () => {
+  it("names the version under the product, so a seller knows what to pack", () => {
+    render(
+      <OrdersTable
+        orders={[
+          order({
+            productTitle: "Oak dining table",
+            selection: [
+              { label: "Size", value: "Six seater" },
+              { label: "Finish", value: "Walnut" },
+            ],
+          }),
+        ]}
+        onSelect={vi.fn()}
+      />,
+    );
+    const row = screen.getByText("Oak dining table").closest("tr")!;
+    expect(row.querySelector("[data-order-selection]")).toHaveTextContent(
+      "Size: Six seater · Finish: Walnut",
+    );
+  });
+
+  it("says nothing at all for a product sold in one version", () => {
+    render(<OrdersTable orders={[order({ selection: [] })]} onSelect={vi.fn()} />);
+    // Not a dash, not an empty line: most products have no versions, and a
+    // placeholder on every row is noise on the surface a seller scans.
+    expect(document.querySelector("[data-order-selection]")).toBeNull();
   });
 });

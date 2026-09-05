@@ -45,11 +45,24 @@ function navItemClasses(active: boolean, danger?: boolean) {
  * The strip is driven by the FINGER, not by a scrollbar: `.swipe-x` hides the
  * bar (see globals.css) and a fade at each end that still has tabs behind it
  * carries the "there's more this way" signal instead.
+ *
+ * HEADING HIERARCHY. The section name is the `<h1>` for this page; "Settings"
+ * appears as a small eyebrow above it on desktop (the sidebar label) and in
+ * the content column on md+ (hidden on mobile where the tab strip provides
+ * enough context). Each SettingsCard hangs its title off an `<h2>`, which
+ * makes the full tree: h1 (section) -> h2 (card) -> form content.
  */
 export function SettingsShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const navRef = React.useRef<HTMLElement>(null);
   const [overflows, setOverflows] = React.useState({ start: false, end: false });
+
+  // The active section label becomes the page h1. Falls back to "Settings"
+  // for any path not in the nav map (there should not be any in practice).
+  const activeEntry = SETTINGS_NAV.find((entry) =>
+    pathname.startsWith(entry.href),
+  );
+  const sectionLabel = activeEntry?.label ?? "Settings";
 
   /** Which ends of the strip still have tabs hidden past them. */
   const syncEdges = React.useCallback(() => {
@@ -107,15 +120,15 @@ export function SettingsShell({ children }: { children: React.ReactNode }) {
       {/* Sticks BELOW the shell's h-14 top bar (not at top-0), so the rail's
           heading can't slide under the bar's translucent backdrop. */}
       <aside className="lg:sticky lg:top-14 lg:h-[calc(100vh-3.5rem)] lg:w-60 lg:shrink-0 lg:overflow-y-auto lg:border-r lg:border-border">
-        {/* Below md the top bar already says "Settings" in full, so the rail
-            heading is only announced, never drawn — repeating it cost a screen
-            of height for a word already on screen. It stays in the document so
-            the cards' h2s still hang off a page-level h1. Padding tracks
-            whatever it sits above: the content column below md, the rail at lg. */}
+        {/* The sidebar label is a styled <p>, not an <h1>. The h1 lives in
+            the content column so screen readers announce the actual page
+            topic rather than the section group name. Below md the top bar
+            already says "Settings" in full, so this label is hidden
+            there entirely. */}
         <div className="md:px-10 md:pt-8 lg:px-4">
-          <h1 className="sr-only text-lg font-semibold tracking-tight text-foreground md:not-sr-only">
+          <p className="hidden text-lg font-semibold tracking-tight text-foreground md:block">
             Settings
-          </h1>
+          </p>
         </div>
         <div className="mt-4 lg:mt-6">
           {/* The fades are scoped to the strip itself so they can't paint over
@@ -155,10 +168,23 @@ export function SettingsShell({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
 
-      {/* Content column. */}
-      <div className="min-w-0 flex-1 px-6 py-8 md:px-10 md:py-12">
-        <div className="mx-auto w-full max-w-2xl">{children}</div>
-      </div>
+      {/* Content column. <main> provides the landmark screen readers need to
+          jump past the navigation rails. The section name is the h1 for the
+          page; "Settings" appears as a small eyebrow above it on md and up
+          (hidden on mobile where the tab strip makes the context clear). */}
+      <main className="min-w-0 flex-1 px-6 py-8 md:px-10 md:py-12">
+        <div className="mx-auto w-full max-w-2xl">
+          <div className="mb-6">
+            <p className="hidden font-inter text-xs font-semibold uppercase tracking-wide text-muted-foreground md:block">
+              Settings
+            </p>
+            <h1 className="text-xl font-semibold tracking-tight text-foreground">
+              {sectionLabel}
+            </h1>
+          </div>
+          {children}
+        </div>
+      </main>
     </div>
   );
 }

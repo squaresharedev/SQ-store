@@ -184,7 +184,11 @@ export function isSourceRelevant(
   source: AnalyticsSource,
   context: { everRecorded: readonly string[]; activeBlockTypes: readonly string[] },
 ): boolean {
-  if (!source.awaiting) return true;
+  // A source with no awaiting AND no blockType is platform-wide (e.g.
+  // storefront_view). Always show it: a zero there is a real answer.
+  // A source with no awaiting but WITH a blockType (e.g. product_view) is
+  // only relevant for sellers who use that block or have already recorded it.
+  if (!source.awaiting && !source.blockType) return true;
   if (context.everRecorded.includes(source.id)) return true;
   return source.blockType
     ? context.activeBlockTypes.includes(source.blockType)

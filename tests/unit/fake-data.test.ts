@@ -608,3 +608,68 @@ describe("generateSignals", () => {
     expect(generate(1234)).toEqual(generate(1234));
   });
 });
+
+describe("seeded orders record which version was bought", () => {
+  const VERSIONED: SeededProduct[] = [
+    {
+      id: "product-versioned",
+      title: "Oak dining table",
+      price_cents: 89900,
+      currency: STORE_CURRENCY,
+      status: "active",
+      option_groups: [
+        {
+          id: "group-size",
+          name: "Size",
+          display: "chip",
+          options: [
+            { id: "opt-small", name: "Four seater", available: true },
+            { id: "opt-large", name: "Six seater", available: true },
+          ],
+        },
+        {
+          id: "group-finish",
+          name: "Finish",
+          display: "swatch",
+          options: [{ id: "opt-oak", name: "Oak", swatch: "#c8a878", available: true }],
+        },
+      ],
+    },
+  ];
+
+  it("picks exactly one option per group, by name", () => {
+    const orders = generateOrders(createRng(7), {
+      sellerId: SELLER,
+      storefrontId: STOREFRONT,
+      products: VERSIONED,
+      now: new Date("2026-09-01T12:00:00.000Z"),
+      days: 30,
+      targetTotal: 40,
+    });
+    expect(orders.length).toBeGreaterThan(0);
+    for (const order of orders) {
+      expect(order.selected_options.map((entry) => entry.label)).toEqual(["Size", "Finish"]);
+      // The NAMES are stored, never the ids: an order says what was sold, and
+      // the product's options are free to change after it.
+      expect(["Four seater", "Six seater"]).toContain(order.selected_options[0]!.value);
+      expect(order.selected_options[1]!.value).toBe("Oak");
+    }
+    // Both sizes actually occur, so the seeded store shows the column working
+    // rather than one value repeated.
+    const sizes = new Set(orders.map((order) => order.selected_options[0]!.value));
+    expect(sizes.size).toBe(2);
+  });
+
+  it("records nothing for a product sold in one version", () => {
+    const orders = generateOrders(createRng(3), {
+      sellerId: SELLER,
+      storefrontId: STOREFRONT,
+      products: productsFixture(2),
+      now: new Date("2026-09-01T12:00:00.000Z"),
+      days: 30,
+      targetTotal: 20,
+    });
+    expect(orders.length).toBeGreaterThan(0);
+    for (const order of orders) expect(order.selected_options).toEqual([]);
+  });
+});

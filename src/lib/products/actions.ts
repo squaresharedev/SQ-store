@@ -54,9 +54,18 @@ export type ProductActionResult =
 
 /**
  * Parse + authorize a write payload. Returns the validated input or an error
- * result. Object keys must be well-formed and live under the UPLOADER's own R2
- * prefix (an editor legitimately uploads under their own id, then references it
- * on the owner's product).
+ * result. `imageKey`/`digitalFileKey` are three-state (see productWriteSchema),
+ * so a string here is always a KEY THIS CALL JUST UPLOADED — it must live under
+ * the UPLOADER's own R2 prefix (an editor legitimately uploads under their own
+ * id, then references it on the owner's product).
+ *
+ * `gallery`/`documents` are NOT checked here, on purpose: those lists replace
+ * whole, so every save resends every photo/document the product already has,
+ * not just new ones. Ownership only means something for a key THIS request
+ * introduces — an older one may have been uploaded by a different team member
+ * on the same account, which is a legitimate product to still have, not a
+ * forged reference. See {@link verifyNewKeys}, which checks ownership for the
+ * keys the row doesn't already hold.
  */
 function parseWrite(
   uploaderId: string,
@@ -88,30 +97,6 @@ function parseWrite(
       ),
     };
   }
-  // Gallery photos are images too: same prefix, same uploader-ownership rule.
-  const foreignPhoto = parsed.data.gallery?.find(
-    (image) => !isOwnedObjectKey(image.key, "image", uploaderId),
-  );
-  if (foreignPhoto) {
-    return {
-      error: invalidInput(
-        "One of the photos can't be used with this product.",
-        "Remove it, upload it again, then save.",
-      ),
-    };
-  }
-  // Documents are their own kind, under their own prefix, with their own caps.
-  const foreignDocument = parsed.data.documents?.find(
-    (document) => documentKeyKind(document.key, uploaderId) === null,
-  );
-  if (foreignDocument) {
-    return {
-      error: invalidInput(
-        "One of the documents can't be used with this product.",
-        "Remove it, upload it again, then save.",
-      ),
-    };
-  }
   return { data: parsed.data };
 }
 
@@ -133,8 +118,8 @@ function documentKeyKind(key: string, uploaderId: string): UploadKind | null {
 }
 
 /** The kind an already-accepted document key must be verified as. Prefix
- *  alone, because parseWrite has already proved the key is one of the two and
- *  that it is the caller's. */
+ *  alone, because verifyNewKeys has already proved the key is one of the two
+ *  and that it is the uploader's. */
 function storedDocumentKind(key: string): UploadKind {
   return key.startsWith(`${objectKeyPrefix("document")}/`) ? "document" : "file";
 }
@@ -212,11 +197,21 @@ async function verifyUploadedObject(
 /**
  * Verify every newly-set object key on a write (skips keep/clear states).
  * `storedGalleryKeys`/`storedDocumentKeys` are the ones already on the row:
- * those were verified when they were first saved, so only keys the row has
- * never held are HEADed, and a save may introduce at most
+ * those were vetted (ownership AND size/type) when they were first saved, so
+ * only keys the row has never held are checked here — both for OWNERSHIP
+ * (against `uploaderId`, the caller making THIS request) and, once that
+ * passes, HEADed to verify their real size/type. A save may introduce at most
  * NEW_GALLERY_KEYS_PER_SAVE_MAX / NEW_DOCUMENT_KEYS_PER_SAVE_MAX of each.
+ *
+ * Ownership is deliberately NOT re-checked on already-stored keys: gallery and
+ * documents replace whole, so every save resends every photo/document the
+ * product already has, and an older one may have been uploaded by a different
+ * team member on the same account (see parseWrite). Re-validating those
+ * against the CURRENT caller's id would make a save fail forever once two
+ * different people had ever added photos or documents to the same product.
  */
 async function verifyNewKeys(
+  uploaderId: string,
   data: ProductWriteInput,
   storedGalleryKeys: ReadonlySet<string>,
   storedDocumentKeys: ReadonlySet<string>,
@@ -245,6 +240,16 @@ async function verifyNewKeys(
       ),
     };
   }
+  // Gallery photos are images too: same prefix, same uploader-ownership rule.
+  if (newGalleryKeys.some((key) => !isOwnedObjectKey(key, "image", uploaderId))) {
+    return {
+      ok: false,
+      error: invalidInput(
+        "One of the photos can't be used with this product.",
+        "Remove it, upload it again, then save.",
+      ),
+    };
+  }
   for (const key of newGalleryKeys) {
     checks.push(verifyUploadedObject(key, "image"));
   }
@@ -264,12 +269,22 @@ async function verifyNewKeys(
       ),
     };
   }
+  // Documents are their own kind, under their own prefix, with their own caps.
+  if (newDocumentKeys.some((key) => documentKeyKind(key, uploaderId) === null)) {
+    return {
+      ok: false,
+      error: invalidInput(
+        "One of the documents can't be used with this product.",
+        "Remove it, upload it again, then save.",
+      ),
+    };
+  }
   for (const key of newDocumentKeys) {
-    // Verified against the caps of the prefix it was actually stored under:
-    // a `documents/` key must be a PDF under 20 MB, a legacy `files/` one
-    // keeps the digital-file caps it was uploaded with. parseWrite has already
+    // Verified against the caps of the prefix it was actually stored under: a
+    // `documents/` key must be a PDF under 20 MB, a legacy `files/` one keeps
+    // the digital-file caps it was uploaded with. The check above has already
     // refused every key that is under neither, and refused both when the
-    // prefix is not the caller's own.
+    // prefix is not this uploader's own.
     checks.push(verifyUploadedObject(key, storedDocumentKind(key)));
   }
   const failure = (await Promise.all(checks)).find((result) => !result.ok);
@@ -314,7 +329,7 @@ export async function createProduct(
   // A new row has no stored photos, documents or options: every key is new,
   // and a tied photo must name an option in this same payload.
   if (!galleryMatchesOptions(data, new Set())) return failure(STALE_OPTION_ERROR);
-  const verified = await verifyNewKeys(data, new Set(), new Set());
+  const verified = await verifyNewKeys(account.userId, data, new Set(), new Set());
   if (!verified.ok) return failure(verified.error);
 
   const supabase = await createClient();
@@ -415,7 +430,7 @@ export async function updateProduct(
   );
 
   if (!galleryMatchesOptions(data, storedOptionIds)) return failure(STALE_OPTION_ERROR);
-  const verified = await verifyNewKeys(data, storedGalleryKeys, storedDocumentKeys);
+  const verified = await verifyNewKeys(account.userId, data, storedGalleryKeys, storedDocumentKeys);
   if (!verified.ok) return failure(verified.error);
 
   const update: TablesUpdate<"products"> = {

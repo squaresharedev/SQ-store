@@ -216,6 +216,47 @@ describe("currency + money constraints", () => {
     }
   });
 
+  it("profiles.seller_* accept null and a reasonable value, and refuse an oversized one", async () => {
+    // Zod (taxSchema) is the boundary for the authenticated settings write,
+    // but these CHECKs are the backstop against a service-role write that
+    // never went through it — the same reasoning every other profile text
+    // column here carries one for. This is the account-level trader identity
+    // every hosted product page reads (lib/settings/seller-identity.ts).
+    await asUser(seller, (q) =>
+      q.query(
+        `update public.profiles
+         set seller_address = $2, seller_email = $3, seller_phone = $4
+         where id = $1`,
+        [seller.id, "12 Market Street\nDublin, D02 X285", "hi@studio.example", "+353 1 234 5678"],
+      ),
+    );
+    await asUser(seller, (q) =>
+      q.query(
+        `update public.profiles
+         set seller_address = null, seller_email = null, seller_phone = null
+         where id = $1`,
+        [seller.id],
+      ),
+    );
+
+    for (const [column, bad] of [
+      ["seller_address", "x".repeat(301)],
+      ["seller_email", "x".repeat(255)],
+      ["seller_email", "not-an-email"],
+      ["seller_phone", "x".repeat(33)],
+    ] as const) {
+      let failed = false;
+      try {
+        await asUser(seller, (q) =>
+          q.query(`update public.profiles set ${column} = $2 where id = $1`, [seller.id, bad]),
+        );
+      } catch {
+        failed = true;
+      }
+      expect(failed, `${column} = ${JSON.stringify(bad)}`).toBe(true);
+    }
+  });
+
   it("orders reject an out-of-set channel and status", async () => {
     for (const [channel, status] of [
       ["telepathy", "paid"],

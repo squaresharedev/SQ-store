@@ -30,9 +30,12 @@ function product(id: string, title: string): Product {
 
 const NO_SALES: ProductSalesSummary = { byProduct: {}, bestsellerId: null };
 
-function renderList(products = [product("p1", "Blue Hoodie")]) {
+function renderList(
+  products = [product("p1", "Blue Hoodie")],
+  placements: Record<string, Array<{ id: string; name: string }>> = {},
+) {
   return render(
-    <ProductList products={products} canWrite sales={NO_SALES} />,
+    <ProductList products={products} canWrite sales={NO_SALES} placements={placements} />,
   );
 }
 
@@ -66,6 +69,41 @@ describe("product delete confirmation", () => {
 
     expect(dialog()).toHaveTextContent("Blue Hoodie");
     expect(dialog()).toHaveTextContent(/permanently removed/i);
+  });
+
+  it("mentions the storefront when the product is on one", async () => {
+    const user = userEvent.setup();
+    renderList(
+      [product("p1", "Blue Hoodie")],
+      { p1: [{ id: "sf1", name: "My Store" }] },
+    );
+
+    await user.click(screen.getByRole("button", { name: /delete blue hoodie/i }));
+
+    expect(dialog()).toHaveTextContent(/1 storefront/i);
+    expect(dialog()).toHaveTextContent(/block stays/i);
+  });
+
+  it("mentions the count when the product is on multiple storefronts", async () => {
+    const user = userEvent.setup();
+    renderList(
+      [product("p1", "Blue Hoodie")],
+      { p1: [{ id: "sf1", name: "Store A" }, { id: "sf2", name: "Store B" }] },
+    );
+
+    await user.click(screen.getByRole("button", { name: /delete blue hoodie/i }));
+
+    expect(dialog()).toHaveTextContent(/2 storefronts/i);
+    expect(dialog()).toHaveTextContent(/blocks stay/i);
+  });
+
+  it("does not mention storefronts when the product is not placed anywhere", async () => {
+    const user = userEvent.setup();
+    renderList();
+
+    await user.click(screen.getByRole("button", { name: /delete blue hoodie/i }));
+
+    expect(dialog()).not.toHaveTextContent(/storefront/i);
   });
 
   it("cancelling closes the dialog and keeps the product", async () => {

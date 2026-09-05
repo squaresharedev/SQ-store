@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { useActionToast } from "@/components/ui/Toast";
 import { SaveButton } from "@/components/ui/SaveButton";
@@ -20,6 +20,15 @@ const INITIAL: SettingsActionState = {};
 /**
  * Email changes never touch the DB directly: Supabase sends a confirmation
  * link and the address only switches once it's clicked.
+ *
+ * WHY new_email IS CONTROLLED. React 19 resets an uncontrolled form after
+ * any form action completes, success or failure. Clearing the new address on
+ * a failed save (e.g. wrong password) forced the seller to retype an address
+ * that was not the problem. `new_email` is controlled and never cleared
+ * automatically: on success the toast already says "check your inbox" and
+ * the field shows which address the link was sent to, which is useful context.
+ * The password field is intentionally uncontrolled, so React 19's reset clears
+ * it after every action — it should always be re-entered.
  */
 export function EmailChangeForm({
   email,
@@ -34,6 +43,8 @@ export function EmailChangeForm({
     INITIAL,
   );
   useActionToast(state);
+
+  const [newEmail, setNewEmail] = useState("");
 
   return (
     <SettingsCard
@@ -54,6 +65,8 @@ export function EmailChangeForm({
             inputMode="email"
             autoComplete="email"
             placeholder="you@studio.com"
+            value={newEmail}
+            onChange={(e) => setNewEmail(e.target.value)}
             required
           />
         </div>
@@ -67,6 +80,9 @@ export function EmailChangeForm({
                 Your password confirms the change is really you.
               </InfoTip>
             </span>
+            {/* The password field is intentionally uncontrolled: it should
+                always be re-entered after any action, success or failure,
+                and the React 19 reset gives us that for free. */}
             <PasswordInput
               id="email_current_password"
               name="current_password"

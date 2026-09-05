@@ -361,6 +361,56 @@ export async function getProductSales(): Promise<ProductSalesSummary> {
   return { byProduct, bestsellerId: payload.bestseller_id };
 }
 
+/** A single storefront a product is placed on. */
+export type StorefrontPlacement = { id: string; name: string };
+
+/**
+ * Every storefront (by id and name) that each product appears in, for the
+ * ACTIVE account, from a single query over storefront configs.
+ *
+ * Read alongside the products list (one round trip total) so the delete dialog
+ * can name the storefront a product will be orphaned from, and the card can
+ * offer copy-link / open affordances tied to the right URL.
+ *
+ * Deduplicates: a product in two blocks on the same storefront still appears
+ * once, so the seller is never told the same storefront name twice.
+ *
+ * Fails soft: returns {} on any error so product cards render fine without it.
+ */
+export async function getProductPlacements(): Promise<Record<string, StorefrontPlacement[]>> {
+  const account = await getActiveAccount();
+  if (!account) return {};
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("storefronts")
+    .select("id, name, config")
+    .eq("owner_id", account.accountId);
+  if (error) return {};
+
+  const result: Record<string, StorefrontPlacement[]> = {};
+  for (const sf of data ?? []) {
+    const config = sf.config as Record<string, unknown>;
+    const blocks = Array.isArray(config?.blocks) ? config.blocks : [];
+    for (const block of blocks) {
+      if (
+        typeof block !== "object" ||
+        block === null ||
+        (block as Record<string, unknown>).type !== "product" ||
+        typeof (block as Record<string, unknown>).productId !== "string"
+      ) {
+        continue;
+      }
+      const productId = (block as Record<string, unknown>).productId as string;
+      const list = result[productId] ?? [];
+      if (!list.some((s) => s.id === sf.id)) {
+        list.push({ id: sf.id, name: sf.name });
+      }
+      result[productId] = list;
+    }
+  }
+  return result;
+}
+
 export async function getProduct(id: string): Promise<ProductDetail | null> {
   // Guard before querying so a garbage URL param 404s instead of erroring.
   if (!productIdSchema.safeParse(id).success) return null;

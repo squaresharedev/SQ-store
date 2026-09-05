@@ -53,8 +53,11 @@ function renderSection(blocks: StorefrontBlock[], board = blocks) {
 
 describe("PlacementSection rotation", () => {
   it("shows an untilted block as level, with the slider at zero", () => {
+    // The degree value and the ° unit are in separate elements — the number
+    // is in an editable input, the unit in a sibling <span>. Check them
+    // individually rather than as one combined text node.
     renderSection([shape()]);
-    expect(screen.getByText("0°")).toBeTruthy();
+    expect(screen.getByDisplayValue("0")).toBeInTheDocument();
     const slider = screen.getByRole("slider", { name: "Block rotation" });
     expect(slider.getAttribute("aria-valuenow")).toBe("0");
     expect(slider.getAttribute("aria-valuetext")).toBe("0 degrees");
@@ -62,7 +65,7 @@ describe("PlacementSection rotation", () => {
 
   it("reflects an existing angle", () => {
     renderSection([shape(45)]);
-    expect(screen.getByText("45°")).toBeTruthy();
+    expect(screen.getByDisplayValue("45")).toBeInTheDocument();
     expect(
       screen.getByRole("slider", { name: "Block rotation" }).getAttribute("aria-valuenow"),
     ).toBe("45");
@@ -79,7 +82,9 @@ describe("PlacementSection rotation", () => {
   it("treats an absent rotation and an explicit zero as the same angle", () => {
     renderSection([shape(), shape(0)]);
     expect(screen.queryByText("Mixed")).toBeNull();
-    expect(screen.getByText("0°")).toBeTruthy();
+    // Same split-element rule as the tests above: the number is in the input,
+    // the ° unit in a separate <span>.
+    expect(screen.getByDisplayValue("0")).toBeInTheDocument();
   });
 
   it("reports the quick angles", async () => {

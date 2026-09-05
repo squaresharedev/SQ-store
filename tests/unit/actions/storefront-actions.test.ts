@@ -15,7 +15,8 @@ vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 //   const { data, error } = await supabase.from("products").select("id").eq(...).in(...)
 const dbFn = vi.fn();
 const db: any = {};
-for (const m of ["from", "select", "insert", "update", "delete", "eq", "neq", "in"]) {
+// SF-03: added "like" for the name-deduplication query inside createStorefront.
+for (const m of ["from", "select", "insert", "update", "delete", "eq", "neq", "in", "like"]) {
   db[m] = vi.fn(() => db);
 }
 db.single = vi.fn(() => dbFn());
@@ -94,7 +95,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   rateLimitMock.mockResolvedValue(true);
   dbFn.mockResolvedValue({ data: null, error: null });
-  for (const m of ["from", "select", "insert", "update", "delete", "eq", "neq", "in"]) {
+  for (const m of ["from", "select", "insert", "update", "delete", "eq", "neq", "in", "like"]) {
     db[m].mockReturnValue(db);
   }
   db.single.mockImplementation(() => dbFn());
@@ -125,7 +126,9 @@ describe("createStorefront - auth gates", () => {
 describe("createStorefront - happy path", () => {
   it("inserts with owner_id = accountId and returns the new id", async () => {
     getActiveAccountMock.mockResolvedValue(ownerAccount());
-    dbFn.mockResolvedValueOnce({ data: { id: STOREFRONT_ID }, error: null });
+    // SF-03: first dbFn call is the name-dedup SELECT (db.then); second is insert .single().
+    dbFn.mockResolvedValueOnce({ data: [], error: null }); // name check: no duplicates
+    dbFn.mockResolvedValueOnce({ data: { id: STOREFRONT_ID }, error: null }); // insert
 
     const result = await createStorefront({ name: "My Store" });
 
@@ -137,7 +140,9 @@ describe("createStorefront - happy path", () => {
 
   it("falls back to 'Untitled storefront' when no input is given", async () => {
     getActiveAccountMock.mockResolvedValue(ownerAccount());
-    dbFn.mockResolvedValueOnce({ data: { id: STOREFRONT_ID }, error: null });
+    // SF-03: name dedup check returns no duplicates, then insert succeeds.
+    dbFn.mockResolvedValueOnce({ data: [], error: null }); // name check
+    dbFn.mockResolvedValueOnce({ data: { id: STOREFRONT_ID }, error: null }); // insert
 
     await createStorefront(undefined);
 
@@ -145,14 +150,81 @@ describe("createStorefront - happy path", () => {
     expect(insertPayload.name).toBe("Untitled storefront");
     // Skipping the setup flow is a first-class outcome, not an error.
     expect(insertPayload.brief).toEqual({});
-    expect(insertPayload.config).toEqual(DEFAULT_STOREFRONT_CONFIG);
+    // SF-02/SF-03/SF-04: The initial config differs from DEFAULT_STOREFRONT_CONFIG:
+    // it carries the wizard name in header.name and allowIndexing:true.
+    const config = insertPayload.config as Record<string, unknown>;
+    expect(config.theme).toMatchObject(DEFAULT_STOREFRONT_CONFIG.theme);
+    expect((config.header as Record<string, unknown>).show).toBe(true);
+    expect((config.productPage as Record<string, unknown>).allowIndexing).toBe(true);
+  });
+
+  it("SF-03: auto-suffixes name when a duplicate already exists", async () => {
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+    // Name check returns one match with the same name.
+    dbFn.mockResolvedValueOnce({ data: [{ name: "My Store" }], error: null });
+    dbFn.mockResolvedValueOnce({ data: { id: STOREFRONT_ID }, error: null });
+
+    await createStorefront({ name: "My Store" });
+
+    const insertPayload = db.insert.mock.calls[0][0] as Record<string, unknown>;
+    expect(insertPayload.name).toBe("My Store 2");
+  });
+
+  it("SF-03: seeds header.name from the wizard name", async () => {
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+    dbFn.mockResolvedValueOnce({ data: [], error: null });
+    dbFn.mockResolvedValueOnce({ data: { id: STOREFRONT_ID }, error: null });
+
+    await createStorefront({ name: "Craft Goods" });
+
+    const insertPayload = db.insert.mock.calls[0][0] as Record<string, unknown>;
+    const header = insertPayload.config as { header: { name: string } };
+    expect(header.header.name).toBe("Craft Goods");
+  });
+
+  it("SF-04: new storefronts have allowIndexing:true", async () => {
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+    dbFn.mockResolvedValueOnce({ data: [], error: null });
+    dbFn.mockResolvedValueOnce({ data: { id: STOREFRONT_ID }, error: null });
+
+    await createStorefront({ name: "My Store" });
+
+    const insertPayload = db.insert.mock.calls[0][0] as Record<string, unknown>;
+    const config = insertPayload.config as { productPage: { allowIndexing: boolean } };
+    expect(config.productPage.allowIndexing).toBe(true);
+  });
+
+  it("SF-06: digital fulfilment sets shippingNote to free-shipping", async () => {
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+    dbFn.mockResolvedValueOnce({ data: [], error: null });
+    dbFn.mockResolvedValueOnce({ data: { id: STOREFRONT_ID }, error: null });
+
+    await createStorefront({ name: "My Store", brief: { fulfilment: "digital" } });
+
+    const insertPayload = db.insert.mock.calls[0][0] as Record<string, unknown>;
+    const config = insertPayload.config as { productPage: { shippingNote: string } };
+    expect(config.productPage.shippingNote).toBe("free-shipping");
+  });
+
+  it("SF-06: physical fulfilment keeps default shippingNote", async () => {
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+    dbFn.mockResolvedValueOnce({ data: [], error: null });
+    dbFn.mockResolvedValueOnce({ data: { id: STOREFRONT_ID }, error: null });
+
+    await createStorefront({ name: "My Store", brief: { fulfilment: "physical" } });
+
+    const insertPayload = db.insert.mock.calls[0][0] as Record<string, unknown>;
+    const config = insertPayload.config as { productPage: { shippingNote: string } };
+    // Physical = shipping costs money; keep the default so buyers are not misled.
+    expect(config.productPage.shippingNote).not.toBe("free-shipping");
   });
 });
 
 describe("createStorefront - the setup brief", () => {
   it("stores the answers and starts the storefront on the chosen vibe's theme", async () => {
     getActiveAccountMock.mockResolvedValue(ownerAccount());
-    dbFn.mockResolvedValueOnce({ data: { id: STOREFRONT_ID }, error: null });
+    dbFn.mockResolvedValueOnce({ data: [], error: null }); // name check
+    dbFn.mockResolvedValueOnce({ data: { id: STOREFRONT_ID }, error: null }); // insert
 
     await createStorefront({
       name: "Bold Store",
@@ -173,7 +245,8 @@ describe("createStorefront - the setup brief", () => {
 
   it("keeps otherCategory only alongside category 'other'", async () => {
     getActiveAccountMock.mockResolvedValue(ownerAccount());
-    dbFn.mockResolvedValueOnce({ data: { id: STOREFRONT_ID }, error: null });
+    dbFn.mockResolvedValueOnce({ data: [], error: null }); // name check
+    dbFn.mockResolvedValueOnce({ data: { id: STOREFRONT_ID }, error: null }); // insert
 
     await createStorefront({
       brief: { category: "art", otherCategory: "model kits" },
@@ -185,7 +258,8 @@ describe("createStorefront - the setup brief", () => {
 
   it("degrades a tampered brief to empty rather than failing the create", async () => {
     getActiveAccountMock.mockResolvedValue(ownerAccount());
-    dbFn.mockResolvedValueOnce({ data: { id: STOREFRONT_ID }, error: null });
+    dbFn.mockResolvedValueOnce({ data: [], error: null }); // name check
+    dbFn.mockResolvedValueOnce({ data: { id: STOREFRONT_ID }, error: null }); // insert
 
     const result = await createStorefront({
       brief: { vibe: "NOT_A_VIBE", category: "<script>" },
@@ -194,12 +268,16 @@ describe("createStorefront - the setup brief", () => {
     expect(result).toEqual({ ok: true, id: STOREFRONT_ID });
     const insertPayload = db.insert.mock.calls[0][0] as Record<string, unknown>;
     expect(insertPayload.brief).toEqual({});
-    expect(insertPayload.config).toEqual(DEFAULT_STOREFRONT_CONFIG);
+    // Config now carries header + productPage even with an empty brief.
+    const config = insertPayload.config as Record<string, unknown>;
+    expect(config.theme).toMatchObject(DEFAULT_STOREFRONT_CONFIG.theme);
+    expect((config.productPage as Record<string, unknown>).allowIndexing).toBe(true);
   });
 
   it("ignores a non-object input instead of throwing", async () => {
     getActiveAccountMock.mockResolvedValue(ownerAccount());
-    dbFn.mockResolvedValueOnce({ data: { id: STOREFRONT_ID }, error: null });
+    dbFn.mockResolvedValueOnce({ data: [], error: null }); // name check
+    dbFn.mockResolvedValueOnce({ data: { id: STOREFRONT_ID }, error: null }); // insert
 
     const result = await createStorefront("My Store");
 
@@ -358,38 +436,55 @@ describe("saveStorefront - shipping profiles", () => {
     body: "Pallet courier, ground floor only.",
   };
 
-  it("persists the profiles the client sent", async () => {
-    // The config is REBUILT field by field here rather than passed through, so
-    // a member that is not named is silently dropped. That is the whole point
-    // of the pattern, and it is why this test exists: products point at these
-    // profiles by id, so losing the member would not merely lose text — every
-    // product using one would fall back to the store's default terms.
+  it("REFUSES to persist profiles or policies, whatever the client sends", async () => {
+    // The inverse of what this test used to assert, and the point of moving
+    // the terms to the account. They are read by every storefront, so a save
+    // from ONE designer must not be able to rewrite them: a stale client, or
+    // a second tab open on another storefront, would otherwise clobber terms
+    // it was never editing. The config is rebuilt field by field here, so an
+    // unnamed member is dropped — and these two are deliberately unnamed.
     getActiveAccountMock.mockResolvedValue(ownerAccount());
     dbFn.mockResolvedValueOnce({ data: { id: STOREFRONT_ID }, error: null });
 
     await saveStorefront(STOREFRONT_ID, {
       name: "My Store",
-      config: { ...VALID_CONFIG, shippingProfiles: [PROFILE] },
-    });
-
-    const updateArg = db.update.mock.calls[0][0] as {
-      config: { shippingProfiles: unknown };
-    };
-    expect(updateArg.config.shippingProfiles).toEqual([PROFILE]);
-  });
-
-  it("stores no member at all for a store with no exceptions", async () => {
-    // Byte-identical to a config saved before profiles existed.
-    getActiveAccountMock.mockResolvedValue(ownerAccount());
-    dbFn.mockResolvedValueOnce({ data: { id: STOREFRONT_ID }, error: null });
-
-    await saveStorefront(STOREFRONT_ID, {
-      name: "My Store",
-      config: { ...VALID_CONFIG, shippingProfiles: [] },
+      config: {
+        ...VALID_CONFIG,
+        shippingProfiles: [PROFILE],
+        policies: { shipping: "Ships in 3 days." },
+      } as typeof VALID_CONFIG,
     });
 
     const updateArg = db.update.mock.calls[0][0] as { config: Record<string, unknown> };
     expect(updateArg.config).not.toHaveProperty("shippingProfiles");
+    expect(updateArg.config).not.toHaveProperty("policies");
+    // ...and the save still SUCCEEDS rather than rejecting the whole config:
+    // a retired member is stripped, never a reason to fail a seller's save.
+    expect(updateArg.config).toHaveProperty("theme");
+  });
+});
+
+describe("saveStorefront - retired `seller` field", () => {
+  it("strips a client-sent `seller` rather than persisting or rejecting it", async () => {
+    // Trader identity moved to the account (lib/settings/seller-identity.ts).
+    // A stale client (or a config saved before the move) may still send
+    // `config.seller` — it must not end up in the write, and it must not
+    // fail the save either.
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+    // Two reads in sequence: the pre-save existence/upload-ownership check,
+    // then the update itself — see the sibling "shipping profiles" tests'
+    // own comment on this shape.
+    dbFn.mockResolvedValueOnce({ data: { config: VALID_CONFIG }, error: null });
+    dbFn.mockResolvedValueOnce({ data: { id: STOREFRONT_ID }, error: null });
+
+    const result = await saveStorefront(STOREFRONT_ID, {
+      name: "My Store",
+      config: { ...VALID_CONFIG, seller: { businessName: "Old Co" } },
+    });
+
+    expect(result.ok).toBe(true);
+    const updateArg = db.update.mock.calls[0][0] as { config: Record<string, unknown> };
+    expect(updateArg.config).not.toHaveProperty("seller");
   });
 });
 

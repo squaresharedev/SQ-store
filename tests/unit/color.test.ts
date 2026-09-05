@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { clamp, hexToHsv, hsvToHex, isLightColor } from "@/lib/format/color";
+import { clamp, hexToHsv, hsvToHex, isLightColor, mixHex } from "@/lib/format/color";
 import { isStrictHexColor } from "@/lib/validation/storefront";
 
 const STRICT_HEX = /^#[0-9a-f]{6}$/;
@@ -91,6 +91,35 @@ describe("hexToHsv", () => {
       const hsv = hexToHsv(hex);
       expect(hsv).not.toBeNull();
       expect(hsvToHex(hsv!)).toBe(hex);
+    }
+  });
+});
+
+describe("mixHex", () => {
+  it("amount 0 returns the first color, amount 1 the second", () => {
+    expect(mixHex("#a855f7", "#ffffff", 0)).toBe("#a855f7");
+    expect(mixHex("#a855f7", "#ffffff", 1)).toBe("#ffffff");
+  });
+
+  it("blends channel by channel at the midpoint", () => {
+    expect(mixHex("#000000", "#ffffff", 0.5)).toBe("#808080");
+    expect(mixHex("#ff0000", "#0000ff", 0.5)).toBe("#800080");
+  });
+
+  it("clamps an out-of-range amount instead of extrapolating", () => {
+    expect(mixHex("#000000", "#ffffff", 2)).toBe("#ffffff");
+    expect(mixHex("#000000", "#ffffff", -1)).toBe("#000000");
+  });
+
+  it("an invalid hex on either side returns the first argument unchanged", () => {
+    expect(mixHex("#ff0000", "not-a-color", 0.5)).toBe("#ff0000");
+    expect(mixHex("nope", "#ffffff", 0.5)).toBe("nope");
+  });
+
+  it("ALWAYS emits strict lowercase 6-digit hex (storefront security contract)", () => {
+    for (const amount of [0, 0.25, 0.5, 0.75, 1]) {
+      expect(mixHex("#a855f7", "#ffffff", amount)).toMatch(STRICT_HEX);
+      expect(mixHex("#a855f7", "#000000", amount)).toMatch(STRICT_HEX);
     }
   });
 });

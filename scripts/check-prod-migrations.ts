@@ -147,6 +147,15 @@ const TRIAGE: Record<string, Disposition> = {
   // thing standing between a service-role write and an arbitrary string in a
   // column the product page dereferences.
   "20260904104752": { kind: "replayed", marker: "20260904_product_shipping_profile" },
+  // Three more profile columns for the seller's account-level trader identity
+  // (address, contact email, phone), beside the existing tax_business_name/
+  // tax_vat_id/tax_country. Replayed for the CHECKs the same reason every
+  // other profile field carries one.
+  "20260904163708": { kind: "replayed", marker: "20260905_seller_identity_on_profile" },
+  // The account-level shipping and returns terms: one jsonb column beside the
+  // trader identity, replacing storefronts.config.policies/.shippingProfiles.
+  // Replayed for the CHECK, the same reason every profile field carries one.
+  "20260905083541": { kind: "replayed", marker: "20260905_shipping_policy_on_profile" },
 };
 
 async function main(): Promise<void> {

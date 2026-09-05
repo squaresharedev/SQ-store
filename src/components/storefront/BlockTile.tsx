@@ -1,7 +1,7 @@
 "use client";
 
 import { memo, useEffect, useRef, useState } from "react";
-import { Crop, FileText, Type, X } from "lucide-react";
+import { Crop, FileText, Pencil, Type, X } from "lucide-react";
 import type { Product } from "@/types/product";
 import {
   DEFAULT_IMAGE_PLACEMENT,
@@ -493,20 +493,19 @@ export const BlockTile = memo(function BlockTile({
       // How the in-place text editor finds the tile again: Escape puts the
       // focus back here, so the canvas keys (arrows, Delete) resume.
       data-block-tile=""
-      // The tile itself is the select control: click (or Enter/Space) opens
-      // the block's editor card in the inspector panel.
-      role={selectable ? "button" : undefined}
-      // Out of the tab order while it is a text field, but still a focus
-      // TARGET, which is what lets Escape land the caret back on the tile.
+      // PLT-02: Plain focusable container, NOT role="button", so nested
+      // buttons (Remove, Frame, Type, page node) are not interactive-in-
+      // interactive. Keyboard users press Enter/Space on this div to toggle
+      // the selection; the chip's explicit Edit button is the pointer path.
+      // tabIndex without a role is valid and keeps the focus ring.
       tabIndex={selectable ? 0 : isTyping ? -1 : undefined}
       aria-label={
         selectable
           ? isEditing
-            ? `Close ${label} settings`
-            : `Edit ${label}`
+            ? `Selected: ${label}. Press Enter to deselect.`
+            : `${label}. Press Enter to select and edit.`
           : undefined
       }
-      aria-pressed={selectable ? isEditing : undefined}
       onPointerDown={
         selectable
           ? (event) => {
@@ -566,8 +565,11 @@ export const BlockTile = memo(function BlockTile({
       {/* Tile controls. Revealed on hover/focus for fine pointers (the grid
           cell is the `group`); always visible on coarse pointers. Hidden
           while framing: the tile is a single-purpose surface then, and a
-          Remove button under a dragging finger is a trap. */}
-      {editable && !isFraming && !isTyping && (onRemove || framable || typable) && (
+          Remove button under a dragging finger is a trap.
+          PLT-02: Outer div is no longer role="button", so these buttons are
+          no longer nested-interactive. The chip now carries an explicit Edit
+          button so pointer users have a named control for selecting the tile. */}
+      {editable && !isFraming && !isTyping && (onRemove || framable || typable || selectable) && (
         <div
           className={cn(
             TILE_CONTROL_CHIP_CLASS,
@@ -575,6 +577,23 @@ export const BlockTile = memo(function BlockTile({
             isEditing && "pointer-fine:opacity-100",
           )}
         >
+          {/* PLT-02: Explicit Edit button replaces role="button" on the tile
+              container. Pointer users click this; keyboard users press
+              Enter/Space on the container div (which still fires onKeyDown). */}
+          {selectable && (
+            <button
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation();
+                onToggleEdit?.(blockKey, event.shiftKey);
+              }}
+              aria-label={isEditing ? `Close ${label} settings` : `Select ${label}`}
+              aria-pressed={isEditing}
+              className={cn(TILE_CONTROL_CLASS, isEditing && "bg-accent text-foreground")}
+            >
+              <Pencil className="size-3.5" strokeWidth={2} aria-hidden="true" />
+            </button>
+          )}
           {/* Type. Same reasoning as Frame below: double-tap is not a gesture
               to hand a text field to on touch. */}
           {typable && (
@@ -587,7 +606,7 @@ export const BlockTile = memo(function BlockTile({
               <Type className="size-3.5" strokeWidth={2} aria-hidden="true" />
             </button>
           )}
-          {/* Frame. The only route in on touch that is worth trusting —
+          {/* Frame. The only route in on touch that is worth trusting --
               double-tap is unreliable on iOS, where the browser claims it. */}
           {framable && (
             <button
@@ -708,6 +727,19 @@ export const BlockTile = memo(function BlockTile({
           onTextRangeChange={typable ? onTextRangeChange : undefined}
           onTextEditEnd={typable ? onTypeEnd : undefined}
         />
+        {/* SF-01: Draft product badge in the editor only. Buyers never see this
+            tile at all (the block is in the grid, but the product link is dead),
+            so the seller needs a clear signal that publishing this grid sends
+            buyers to a 404. The badge is inside contain:paint so it stays
+            within the tile's bounds on any corner radius. */}
+        {editable && block.type === "product" && product?.status === "draft" && (
+          <span
+            aria-label="Draft product -- buyers cannot reach this link"
+            className="absolute bottom-1.5 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-sm bg-amber-100 px-1.5 py-0.5 font-inter text-[10px] font-semibold leading-none text-amber-800 shadow-sm dark:bg-amber-900/50 dark:text-amber-300"
+          >
+            Draft
+          </span>
+        )}
       </div>
     </div>
   );

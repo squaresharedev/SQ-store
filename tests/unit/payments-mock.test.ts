@@ -94,9 +94,15 @@ describe("mock layer performs zero network calls", () => {
   });
   afterEach(() => {
     vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
   });
 
   it("every mock function resolves without touching the network", async () => {
+    // Enable the mock so we can verify the demo-data shapes as well as
+    // confirming zero network calls. isMockEnabled() reads process.env at call
+    // time, so vi.stubEnv takes effect without a module reset.
+    vi.stubEnv("PAYMENTS_MOCK_DATA", "true");
+
     const [status, balance, upcoming, method, payouts, txns, overview] =
       await Promise.all([
         getAccountStatus(),
@@ -117,6 +123,14 @@ describe("mock layer performs zero network calls", () => {
     expect(txns.every((t) => t.id.startsWith("txn_demo_"))).toBe(true);
     expect(upcoming === null || typeof upcoming.amountCents === "number").toBe(true);
     expect(overview.account.accountId).toMatch(/^acct_demo_/);
+  });
+
+  it("returns a disconnected account when the flag is off", async () => {
+    // PAYMENTS_MOCK_DATA is not set: the default is disconnected.
+    const status = await getAccountStatus();
+    expect(fetch).not.toHaveBeenCalled();
+    expect(status.connected).toBe(false);
+    expect(status.accountId).toBeNull();
   });
 
   it("payout method exposes at most last4 — never a full account number", () => {

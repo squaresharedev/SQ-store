@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
+import { render, screen, cleanup, within } from "@testing-library/react";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import {
   AnalyticsIcon,
@@ -130,17 +130,20 @@ describe("Sidebar with animated icons", () => {
       expect(link).toHaveAttribute("href", href);
       expect(link.querySelector("svg")).not.toBeNull();
     }
-    expect(nav.textContent).toContain("Discover");
+    // Those seven and nothing else. The rail used to carry a permanently
+    // disabled "Discover / Coming soon" row: a roadmap entry occupying a slot
+    // in navigation a seller uses dozens of times a day. Asserting the exact
+    // set, rather than just the rows we want, is what stops the next one.
+    expect(within(nav).getAllByRole("link")).toHaveLength(7);
   });
 
-  it("marks the active route and keeps the disabled Discover row unfocusable", () => {
+  it("marks the active route, and carries no dead rows", () => {
     render(<Sidebar />);
     expect(screen.getByRole("link", { name: "Overview" })).toHaveAttribute(
       "aria-current",
       "page",
     );
-    const discover = screen.getByText("Discover").closest("[aria-disabled]");
-    expect(discover).not.toBeNull();
-    expect(discover).toHaveAttribute("tabindex", "-1");
+    const nav = screen.getByRole("navigation", { name: "Dashboard" });
+    expect(nav.querySelector("[aria-disabled]")).toBeNull();
   });
 });

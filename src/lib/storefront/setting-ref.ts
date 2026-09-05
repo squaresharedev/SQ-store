@@ -133,6 +133,24 @@ export function isPerTileSetting(ref: SettingRef): boolean {
 }
 
 /**
+ * A copy of `ref`, safe to hand to `useState`'s setter.
+ *
+ * `isSameSettingRef` above exists because most refs ARE minted fresh at their
+ * call site — but the hotspot table (PRODUCT_PAGE_HOTSPOTS) and the settings
+ * catalogue (STOREFRONT_SETTINGS) are both module-level constants, so every
+ * click on the same hotspot hands back the exact same object. Setting state
+ * to a value it already holds by reference is a no-op React quietly bails
+ * out of, which would swallow a seller's second click on the same hotspot if
+ * they had navigated the panel elsewhere by hand in between — the request
+ * would never reach the components that decide, BY VALUE via
+ * isSameSettingRef, whether opening it again is already the current state.
+ * Cloning keeps that decision where it belongs.
+ */
+export function freshSettingRef(ref: SettingRef): SettingRef {
+  return { ...ref };
+}
+
+/**
  * One searchable setting. The SAME entries feed universal search and the
  * panel's own filter field, so a setting is added in exactly one place and can
  * never be findable in one and missing from the other.

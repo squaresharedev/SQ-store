@@ -155,16 +155,19 @@ describe("StorefrontMasthead: selecting a line", () => {
 });
 
 describe("header defaults", () => {
-  it("a new storefront starts with the masthead shown and filled in", () => {
-    expect(DEFAULT_STOREFRONT_HEADER.show).toBe(true);
-    expect(DEFAULT_STOREFRONT_HEADER.name.trim().length).toBeGreaterThan(0);
-    expect(DEFAULT_STOREFRONT_HEADER.bio.trim().length).toBeGreaterThan(0);
+  it("a new storefront starts shown but with empty lines — buyers see nothing until the seller types", () => {
+    // SF-02: name and bio default to "". The masthead is shown (show:true) so
+    // the seller discovers the affordance in the editor; on the buyer-facing
+    // page (no onSelectLine) the component returns null when both lines are
+    // blank, so no placeholder copy reaches the live storefront or og:site_name.
+    expect(DEFAULT_STOREFRONT_HEADER).toMatchObject({ show: true, name: "", bio: "" });
     expect(DEFAULT_STOREFRONT_CONFIG.header).toEqual(DEFAULT_STOREFRONT_HEADER);
 
-    render(
+    const { container } = render(
       <StorefrontMasthead header={DEFAULT_STOREFRONT_HEADER} theme={themeWith()} />,
     );
-    expect(screen.getByText(DEFAULT_STOREFRONT_HEADER.name)).toBeInTheDocument();
+    // Non-editor render (no onSelectLine) with empty lines renders nothing.
+    expect(container).toBeEmptyDOMElement();
   });
 
   it("a config that never had a header stays blank, not filled with placeholders", () => {

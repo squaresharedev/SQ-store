@@ -1,9 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   parseStoredStorefrontConfig,
-  policiesSchema,
   productPageSchema,
-  sellerSchema,
   storefrontConfigSchema,
 } from "@/lib/validation/storefront";
 import {
@@ -20,6 +18,20 @@ import {
   type ProductPageConfig,
 } from "@/types/storefront";
 
+// Mocks required for importing from lib/products/public (server-only module).
+vi.mock("@/lib/supabase/admin", () => ({ createAdminClient: vi.fn() }));
+vi.mock("@/lib/r2", () => ({ presignGetUrl: vi.fn() }));
+vi.mock("@/lib/rate-limit", () => ({
+  RATE_LIMITS: { productPage: {}, ogImage: {} },
+  clientKey: vi.fn(),
+  rateLimitKey: vi.fn(),
+}));
+vi.mock("next/headers", () => ({ headers: vi.fn() }));
+vi.mock("react", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("react")>();
+  return { ...actual, cache: (fn: unknown) => fn };
+});
+
 const base = { theme: DEFAULT_STOREFRONT_CONFIG.theme, blocks: [] };
 
 describe("product page config schema", () => {
@@ -32,8 +44,29 @@ describe("product page config schema", () => {
     expect(parsed.success).toBe(true);
     if (parsed.success) {
       expect(parsed.data.productPage).toBeUndefined();
-      expect(parsed.data.policies).toBeUndefined();
-      expect(parsed.data.seller).toBeUndefined();
+    }
+  });
+
+  it("strips every retired top-level member instead of rejecting the whole config", () => {
+    // Trader identity AND the shipping/returns terms moved to the account
+    // (lib/settings/seller-identity.ts, lib/settings/shipping-policy.ts), so
+    // `seller`, `policies` and `shippingProfiles` are all retired. A config
+    // still carrying them (a stale client, or a row saved before the move)
+    // must still parse, with every OTHER member intact — the same promise
+    // RETIRED_PRODUCT_PAGE_FIELDS makes one level down.
+    const parsed = storefrontConfigSchema.safeParse({
+      ...base,
+      policies: { shipping: "Ships in 3 days." },
+      shippingProfiles: [{ id: "x", name: "Bulky", body: "By pallet." }],
+      seller: { businessName: "Old Co", email: "old@example.com" },
+    });
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data).not.toHaveProperty("seller");
+      expect(parsed.data).not.toHaveProperty("policies");
+      expect(parsed.data).not.toHaveProperty("shippingProfiles");
+      // The rest of the config survives, which is the whole point.
+      expect(parsed.data.theme).toBeDefined();
     }
   });
 
@@ -125,20 +158,13 @@ describe("product page config schema", () => {
     ).toBe(true); // plain text; rendered as a text node, never markup
   });
 
-  it("gates the seller's email and country, and refuses empty strings", () => {
-    expect(sellerSchema.safeParse({ email: "" }).success).toBe(false);
-    expect(sellerSchema.safeParse({ email: "not-an-email" }).success).toBe(false);
-    expect(sellerSchema.safeParse({ email: "shop@example.com", country: "IE" }).success).toBe(true);
-    expect(sellerSchema.safeParse({ country: "US" }).success).toBe(false);
-    expect(sellerSchema.safeParse({ country: "" }).success).toBe(true);
-    expect(sellerSchema.safeParse({ website: "https://x.com" }).success).toBe(false);
-  });
+  // The seller's email/address/phone/VAT/country are no longer validated
+  // here at all — that gate is taxSchema now (lib/validation/settings.ts),
+  // covered in tests/unit/validation-settings-team-notifications.test.ts.
 
-  it("caps policy text and refuses control characters", () => {
-    expect(policiesSchema.safeParse({ shipping: "x".repeat(2001) }).success).toBe(false);
-    expect(policiesSchema.safeParse({ returns: "line one\nline two" }).success).toBe(true);
-    expect(policiesSchema.safeParse({ returns: "badbell" }).success).toBe(false);
-  });
+  // Policy text is bounded by shippingPolicySchema now (the terms are
+  // account-level), so there is nothing for the storefront config schema to
+  // check here any more.
 
   it("carries the members through the upgrade retry only when they validate", () => {
     const config = parseStoredStorefrontConfig({
@@ -146,12 +172,15 @@ describe("product page config schema", () => {
       blocks: [],
       productPage: DEFAULT_PRODUCT_PAGE_CONFIG,
       policies: { shipping: "Ships in 3 days." },
-      seller: { email: "" }, // malformed: degrades to absent, never loses the config
+      // A retired member, carried along with the legacy background: the
+      // strip happens up front (before the blocks check even runs), so it
+      // never reaches the retry path this test exercises at all.
+      seller: { businessName: "Old Co" },
     });
     expect(config).not.toBeNull();
     expect(config?.productPage).toEqual(DEFAULT_PRODUCT_PAGE_CONFIG);
-    expect(config?.policies).toEqual({ shipping: "Ships in 3 days." });
-    expect(config?.seller).toBeUndefined();
+    expect(config).not.toHaveProperty("seller");
+    expect(config).not.toHaveProperty("policies");
   });
 });
 
@@ -215,5 +244,88 @@ describe("product page helpers", () => {
     expect(isEuSeller({ country: "DE" })).toBe(true);
     expect(isEuSeller({ country: "" })).toBe(false);
     expect(isEuSeller(undefined)).toBe(false);
+  });
+});
+
+// BUY-05: the store name a buyer sees in metadata must match what the page
+// prints as the store's identity. resolveDisplayName establishes the precedence
+// that both generateMetadata and SellerBlock agree on.
+describe("resolveDisplayName (metadata name precedence)", () => {
+  // Build a minimal ProductPageData — only the storefront.seller,
+  // storefront.header and storefront.name fields matter for this function.
+  function page(parts: {
+    name: string;
+    seller?: { businessName?: string };
+    header?: { show: boolean; name: string };
+  }): import("@/types/product-page").ProductPageData {
+    return {
+      storefront: {
+        id: "x",
+        name: parts.name,
+        seller: parts.seller ?? {},
+        ...(parts.header
+          ? { header: { ...parts.header, bio: "" } }
+          : {}),
+        theme: DEFAULT_STOREFRONT_CONFIG.theme,
+        productPage: DEFAULT_PRODUCT_PAGE_CONFIG,
+        shippingPolicy: {},
+        backgroundImageUrl: null,
+        customFontUrl: null,
+      },
+      // product is not read by resolveDisplayName; an empty cast satisfies TS.
+      product: {} as import("@/types/product-page").ProductPageData["product"],
+      productUrl: "",
+    };
+  }
+
+  it("prefers the legal business name over everything else", async () => {
+    const { resolveDisplayName } = await import("@/lib/products/public");
+    expect(
+      resolveDisplayName(
+        page({
+          name: "Studio",
+          seller: { businessName: "Root Labs Studio" },
+          header: { show: true, name: "The Shop" },
+        }),
+      ),
+    ).toBe("Root Labs Studio");
+  });
+
+  it("falls back to the buyer-facing header name when there is no business name", async () => {
+    const { resolveDisplayName } = await import("@/lib/products/public");
+    expect(
+      resolveDisplayName(
+        page({
+          name: "internal-row-name",
+          seller: {},
+          header: { show: true, name: "Buyer-Facing Name" },
+        }),
+      ),
+    ).toBe("Buyer-Facing Name");
+  });
+
+  it("ignores a header that is not shown, falling through to the row name", async () => {
+    const { resolveDisplayName } = await import("@/lib/products/public");
+    expect(
+      resolveDisplayName(
+        page({
+          name: "Row Name",
+          seller: {},
+          header: { show: false, name: "Hidden Header" },
+        }),
+      ),
+    ).toBe("Row Name");
+  });
+
+  it("uses the row name when there is no business name and no header at all", async () => {
+    const { resolveDisplayName } = await import("@/lib/products/public");
+    expect(
+      resolveDisplayName(
+        page({
+          name: "Studio",
+          seller: {},
+        }),
+      ),
+    ).toBe("Studio");
   });
 });

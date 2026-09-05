@@ -117,11 +117,16 @@ export function UploadsPanel({
             : "The canvas is full. Remove a block to add another."}
         </p>
 
+        {/* PLT-02: aria-hidden removes this from the AT tree. The visible
+            "Upload image" button is the labeled affordance; the input is an
+            implementation detail that the button programmatically clicks. */}
         <input
           ref={inputRef}
           type="file"
           accept={ELEMENT_ACCEPT}
           className="sr-only"
+          aria-hidden="true"
+          tabIndex={-1}
           onChange={(event) => {
             const { files } = event.target;
             // Clear first: picking the SAME file twice fires no `change` at

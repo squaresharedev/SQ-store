@@ -49,6 +49,10 @@ const REGISTRY: Record<string, Classification> = {
   "lib/settings/actions.ts::changePassword": limited(),
   "lib/settings/actions.ts::sendPasswordReset": limited(),
   "lib/settings/actions.ts::saveTaxInfo": limited(),
+  // Its own module because it writes a jsonb document rather than columns, but
+  // the same budget as every other settings write: a signed-in seller editing
+  // their own row.
+  "lib/settings/shipping-actions.ts::saveShippingPolicy": limited(),
   "lib/settings/actions.ts::saveNotifications": limited(),
   "lib/settings/actions.ts::requestAccountDeletion": limited(),
   "lib/settings/actions.ts::cancelAccountDeletion": unlimited(

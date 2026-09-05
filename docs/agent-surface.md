@@ -171,13 +171,21 @@ agent read of a product should reuse that builder rather than write a third.
 
 The embed payload's product blocks now also carry `productUrl` (the hosted
 page's absolute URL, absent when the seller has switched product pages off).
-The storefront config gained three members for that page: `productPage`
-(bounded layout and button options), `policies` (shipping and returns text) and
-`seller` (trader identity). **None of these are mirrored into
-`@squaresharedev/schemas` yet**: the package was already well behind Store when
-they landed, and mirroring one new field into a stale module would make the
-contract look current when it is not. Reconcile the whole storefront module in
-one pass (see section 3.0), then carry these three across.
+The storefront config gained members for that page: `productPage` (bounded
+layout and button options), `policies` (shipping and returns text, including
+named shipping profiles) and `shippingProfiles`. **None of these are mirrored
+into `@squaresharedev/schemas` yet**: the package was already well behind
+Store when they landed, and mirroring one new field into a stale module would
+make the contract look current when it is not. Reconcile the whole storefront
+module in one pass (see section 3.0), then carry these across.
+
+Trader identity (`seller`: business name, address, contact email, VAT id,
+country, phone) is NOT a storefront member — it moved to the account
+(`profiles.tax_business_name` / `seller_address` / `seller_email` /
+`tax_vat_id` / `tax_country` / `seller_phone`, read by
+`lib/settings/seller-identity.ts`), set once in Settings › Business & seller
+details and shown on every product page the account sells on. A future agent
+read/write of it belongs on the profile, not on any one storefront's config.
 
 ### B7 — The generated database types are stale
 
@@ -257,11 +265,12 @@ Verdicts:
 |---|---|---|---|
 | Profile: display name, avatar, `is_seller` | `profiles` | R + W (`updateDisplayName`) | Ready |
 | Display-name availability | `is_display_name_available` RPC | R | Ready — already a route, already rate limited |
-| Tax details: business name, VAT id, country | `profiles` | R + W (`saveTaxInfo`) | Ready |
+| Business & seller details: business name, address, contact email, VAT id, country, phone | `profiles` | R + W (`saveTaxInfo`) | Ready. This is also the trader identity every hosted product page shows (`lib/settings/seller-identity.ts`) — set once here, not per storefront |
 | Legal acceptance + version | `profiles` | R + W (`acceptLegal`) | Ready — an agent should be able to *report* what is outstanding; accepting terms on a user's behalf is a decision for the product, not the transport |
 | Notification preferences | `profiles` | R + W (`saveNotifications`) | Ready |
 | Products: create / update / delete | `products` | R + W | **Adapt** — cents not float (B3); no `image_key` / `digital_file_key` (B6). The input shape is settled: `ProductFormSnapshot` ([product-form-datapoints.md](./product-form-datapoints.md)) is what the form itself publishes, already in cents and already key-free, and `requiredMissing` names what blocks a save |
-| Product options (the axes a product varies along) | `products.option_groups` | R + W | Ready. `[{id, name, display, options:[{id, name, swatch?, available}]}]`, validated by `optionGroupSchema`. Seller-defined: the group's NAME is the axis ("Colour", "Power output"), so nothing hard-codes colour. Ids are unique across the WHOLE tree, groups included, because a photo tie and the page's `?o=` name an option id with no group beside it. Presentation only — there is deliberately no per-option price or stock, so an agent must never report one |
+| Product options (the axes a product varies along) | `products.option_groups` | R + W | Ready. `[{id, name, display, options:[{id, name, swatch?, available, details?}]}]`, validated by `optionGroupSchema`. Seller-defined: the group's NAME is the axis ("Colour", "Power output"), so nothing hard-codes colour. Ids are unique across the WHOLE tree, groups included, because a photo tie and the page's `?o=` name an option id with no group beside it. Presentation only — there is deliberately no per-option price or stock, so an agent must never report one |
+| What one version measures | `products.option_groups[].options[].details` | R + W | Ready. `{dimensions?, weight?, specs?}`, the facts THAT version changes; absent means it inherits the product's. Never report a version's measurement as the product's, or the other way round: `resolveDetailsForSelection` ([option-details.ts](../src/lib/products/option-details.ts)) is the one place that folds the two together, and a spec row named the same as one on the product REPLACES it for that version. Still no price and no stock here |
 | Product status draft → active | `products.status` | R + W | Ready — the single highest-value "go live" lever |
 | Stock: `track_stock`, quantity, low-stock threshold | `products` | R + W (`updateStockSettings`) | Ready for the **owner**. Public/buyer-facing consumers must go through `PUBLIC_STOCK_SELECT` + `toPublicStockBadge` ([stock/public.ts](../src/lib/stock/public.ts)) — raw counts never leave the server for non-owners |
 | Image / digital file upload | `/api/uploads/presign` | W | **Adapt** — a Route Handler, but still cookie-authenticated via `getActiveAccount()`, so B1/B2 apply to it too. It returns an object key; an agent flow needs presign → upload → attach without the key crossing the boundary (B6) |
@@ -283,6 +292,7 @@ Verdicts:
 |---|---|---|---|
 | Orders list: filter by status / channel / date, search buyer, sort, paginate | `listOrders` | R | Ready — cents throughout, typed enums, offset pagination |
 | Order detail: amount, platform fee, currency, channel, status, buyer email, timestamp | `orders` | R | Ready. Buyer email is personal data — a read-only assistant should have it only if the seller granted that scope |
+| Which version an order was for | `orders.selected_options` | R | Ready. `[{label, value}]` in words ("Size": "Six seater"), snapshotted at the sale like `product_title`. Report it VERBATIM and never resolve it against the product's current options: an option renamed or deleted since the sale would make an agent describe the wrong parcel. Empty means the product was sold in one version, which is not the same as "unknown" |
 | Dashboard metrics: revenue / sales / AOV windows, trends, refunded + disputed counts | `getDashboardOrders` | R | Ready |
 | Analytics totals: revenue, sales, AOV, fees, net, unique + repeat buyers, refunds, range days | `getAnalytics` | R | Ready — the richest single datapoint for "how is my business doing" |
 | The WHOLE analytics page in one object (sales + signals + resolved range + currency) | `getAnalyticsSnapshot` | R | **Ready, and the one to build the agent tool on.** Already the exact payload the page renders and publishes as JSON (see [analytics-datapoints.md](./analytics-datapoints.md)), so an agent and a person cannot be told different numbers |

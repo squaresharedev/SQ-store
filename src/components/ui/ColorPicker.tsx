@@ -12,7 +12,7 @@ import {
 } from "./control-styles";
 import { isStrictHexColor } from "@/lib/validation/storefront";
 import { hexToHsv, hsvToHex, isLightColor, type Hsv } from "@/lib/format/color";
-import { COLOR_PRESETS } from "@/lib/theme/color-presets";
+import { COLOR_PRESETS, type ColorPreset } from "@/lib/theme/color-presets";
 import { isSameColorTarget, useColorTarget } from "@/lib/theme/color-context";
 import type { ColorTargetRef } from "@/lib/theme/color-target";
 import { recordRecentColor } from "@/lib/theme/recent-colors";
@@ -161,6 +161,7 @@ export function ColorPicker({
   onChange,
   inherit,
   target,
+  presets = COLOR_PRESETS,
   compact = false,
 }: {
   id?: string;
@@ -174,6 +175,13 @@ export function ColorPicker({
    * where there is no provider — the popover opens exactly as it always did.
    */
   target?: ColorTargetRef;
+  /**
+   * The fixed dots every field shows, unless this one has something more
+   * specific to offer — a background field pulling its four quick picks from
+   * the theme's own accent, say. Defaults to the three shared neutrals, so an
+   * ordinary field needs no opinion here at all.
+   */
+  presets?: readonly ColorPreset[];
   /**
    * ONE DOT INSTEAD OF SEVEN.
    *
@@ -318,7 +326,7 @@ export function ColorPicker({
   }
 
   const current = value.toLowerCase();
-  const isPreset = COLOR_PRESETS.some((preset) => preset.value === current);
+  const isPreset = presets.some((preset) => preset.value === current);
   // A custom color earns its own dot so the row always shows what is selected.
   // Presets already have one, and an inherited field has no override to show.
   const showCustomDot = !inheriting && !isPreset && isStrictHexColor(current);
@@ -329,7 +337,7 @@ export function ColorPicker({
     (hasEyeDropper ? 1 : 0) +
     (inherit ? 1 : 0) +
     (showCustomDot ? 1 : 0) +
-    COLOR_PRESETS.length;
+    presets.length;
 
   /**
    * Everything the popover offers: the area, the hex field, the eyedropper —
@@ -364,7 +372,7 @@ export function ColorPicker({
             </button>
           )}
           <div className="flex flex-1 items-center gap-1.5">
-            {COLOR_PRESETS.map((preset) => (
+            {presets.map((preset) => (
               <button
                 key={preset.value}
                 type="button"
@@ -589,7 +597,7 @@ export function ColorPicker({
           />
         )}
 
-        {COLOR_PRESETS.map((preset) => (
+        {presets.map((preset) => (
           <ColorDot
             key={preset.value}
             color={preset.value}

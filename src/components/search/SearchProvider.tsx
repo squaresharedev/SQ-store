@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { SearchOverlay } from "@/components/search/SearchOverlay";
+import { useNavigationBlocker } from "@/lib/hooks/useNavigationBlocker";
 import {
   fetchSnapshot,
   getCachedSnapshot,
@@ -147,12 +148,23 @@ export function SearchProvider({
   React.useEffect(() => {
     navigateRef.current = navigate;
   });
+  // The navigation blocker is null outside the dashboard layout, and is a
+  // no-op when no editor has registered a blocker, so this falls through to
+  // router.push in all non-editor contexts.
+  const navBlocker = useNavigationBlocker();
   const go = React.useCallback(
     (href: string) => {
-      if (navigateRef.current) navigateRef.current(href);
-      else router.push(href);
+      if (navigateRef.current) {
+        // The storefront designer passes its own navigate prop, which already
+        // routes through its canvas unsaved-changes guard.
+        navigateRef.current(href);
+      } else if (navBlocker) {
+        navBlocker.request(href, (h) => router.push(h));
+      } else {
+        router.push(href);
+      }
     },
-    [router],
+    [router, navBlocker],
   );
 
   const nested = existing !== null;

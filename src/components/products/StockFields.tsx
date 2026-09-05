@@ -10,7 +10,7 @@ import {
   stepperButtonClass,
   stepperFieldClass,
 } from "@/components/ui/control-styles";
-import { InfoTip } from "@/components/ui/InfoTip";
+import { RequiredMark } from "@/components/ui/RequiredMark";
 import { STOCK_QUANTITY_MAX } from "@/lib/validation/product";
 
 export interface StockFieldValues {
@@ -59,15 +59,14 @@ export function StockFields({ values, errors, onChange }: Props) {
     <div className="space-y-4">
       {/* Track stock toggle */}
       <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-1.5">
-          <label htmlFor={switchId} className={labelClass}>
-            Track stock
-          </label>
-          <InfoTip label="What tracking stock does">
-            Off, this product is unlimited. On, buyers see sold-out and
-            low-stock badges and cannot order more than you have.
-          </InfoTip>
-        </div>
+        {/* NO "?" ANYWHERE IN THIS SECTION'S FIELDS. The toggle and the alert
+            each had one, and between them they said what the Stock heading's
+            own "?" already says: three info buttons on a card with two
+            controls. The heading keeps the single explanation (it now names
+            the alert too); see PRODUCT_FORM_SECTIONS. */}
+        <label htmlFor={switchId} className={labelClass}>
+          Track stock
+        </label>
         <Switch
           id={switchId}
           checked={values.trackStock}
@@ -82,9 +81,12 @@ export function StockFields({ values, errors, onChange }: Props) {
         <div className="space-y-4 pt-1">
           {/* In stock */}
           <div className="space-y-1.5">
-            <label htmlFor={stockQtyId} className={labelClass}>
-              In stock
-            </label>
+            <div className="flex items-center">
+              <label htmlFor={stockQtyId} className={labelClass}>
+                In stock
+              </label>
+              <RequiredMark />
+            </div>
             {/* One control, three parts: the buttons and the field share a
                 height and sit flush, with no gap to break them apart.
                 `w-fit` rather than `inline-flex` — a <label> is inline, so an
@@ -110,7 +112,7 @@ export function StockFields({ values, errors, onChange }: Props) {
                 onChange={(event) =>
                   onChange("stockQuantity", event.target.value)
                 }
-                placeholder="0"
+                required
                 aria-invalid={errors.stockQuantity ? true : undefined}
                 aria-describedby={
                   errors.stockQuantity ? stockQtyErrorId : undefined
@@ -139,15 +141,9 @@ export function StockFields({ values, errors, onChange }: Props) {
 
           {/* Low-stock threshold */}
           <div className="space-y-1.5 sm:max-w-xs">
-            <div className="flex items-center gap-1.5">
-              <label htmlFor={thresholdId} className={labelClass}>
-                Low-stock alert at
-              </label>
-              <InfoTip label="What the low-stock alert does">
-                At or below this number the product page shows
-                &quot;Only N left&quot;. Leave it blank for no badge.
-              </InfoTip>
-            </div>
+            <label htmlFor={thresholdId} className={labelClass}>
+              Low-stock alert at
+            </label>
             <input
               id={thresholdId}
               type="text"
@@ -156,7 +152,6 @@ export function StockFields({ values, errors, onChange }: Props) {
               onChange={(event) =>
                 onChange("lowStockThreshold", event.target.value)
               }
-              placeholder="5"
               aria-invalid={errors.lowStockThreshold ? true : undefined}
               aria-describedby={errors.lowStockThreshold ? thresholdErrorId : undefined}
               data-product-field="lowStockThreshold"

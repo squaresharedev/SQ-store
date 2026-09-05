@@ -4,9 +4,11 @@ import { existsSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import {
   buildAttentionItems,
+  type ProfileAttentionData,
   type StorefrontAttentionInfo,
 } from "@/lib/dashboard/attention";
 import type { DashboardOrdersData, ProductsSummary } from "@/lib/dashboard/queries";
+import { LEGAL_VERSION } from "@/lib/settings/constants";
 
 /**
  * The "Needs attention" module is a list of DESTINATIONS. A row that describes
@@ -62,47 +64,124 @@ const NO_ORDERS: DashboardOrdersData = {
   disputedCount: 0,
 };
 
-const NO_PRODUCTS: ProductsSummary = { total: 0, missingImage: [] };
-const NO_STOREFRONTS: StorefrontAttentionInfo = { total: 0, rows: [] };
+const NO_PRODUCTS: ProductsSummary = {
+  total: 0,
+  missingImage: [],
+  noBuyPathCount: 0,
+  hasPhysicalProducts: false,
+  activeProductIds: [],
+};
+
+const NO_STOREFRONTS: StorefrontAttentionInfo = {
+  total: 0,
+  rows: [],
+  noindexProductPageCount: 0,
+  deadBlockCount: 0,
+  firstNoindexStorefrontId: null,
+};
+
+const HEALTHY_PROFILE: ProfileAttentionData = {
+  taxBusinessName: "Acme Prints",
+  sellerEmail: "acme@example.com",
+  shippingPolicySet: true,
+  legalAcceptedVersion: LEGAL_VERSION,
+};
 
 function build(overrides: {
   orders?: Partial<DashboardOrdersData>;
-  products?: ProductsSummary;
-  storefronts?: StorefrontAttentionInfo;
+  products?: Partial<ProductsSummary>;
+  storefronts?: Partial<StorefrontAttentionInfo>;
+  profile?: ProfileAttentionData | null;
+  stripeConnected?: boolean;
 } = {}) {
   const items = buildAttentionItems({
     orders: { ...NO_ORDERS, ...overrides.orders },
-    products: overrides.products ?? NO_PRODUCTS,
-    storefronts: overrides.storefronts ?? NO_STOREFRONTS,
+    products: { ...NO_PRODUCTS, ...overrides.products },
+    storefronts: { ...NO_STOREFRONTS, ...overrides.storefronts },
+    profile: overrides.profile !== undefined ? overrides.profile : HEALTHY_PROFILE,
+    stripeConnected: overrides.stripeConnected ?? true,
   });
   return new Map(items.map((item) => [item.key, item]));
 }
 
 /** Every branch of the builder, so the route check below covers them all. */
 const ALL_BRANCHES = [
-  build(),
-  build({ storefronts: { total: 1, rows: [{ id: "sf-1", blockCount: 0 }] } }),
+  // Stripe not connected
+  build({ stripeConnected: false }),
+  // No seller identity
+  build({ profile: { ...HEALTHY_PROFILE, taxBusinessName: null } }),
+  // Legal not accepted
+  build({ profile: { ...HEALTHY_PROFILE, legalAcceptedVersion: null } }),
+  build({ profile: { ...HEALTHY_PROFILE, legalAcceptedVersion: "2025-01-old" } }),
+  // No buy path
   build({
-    products: { total: 1, missingImage: [{ id: "p-1", title: "Only one" }] },
+    products: { noBuyPathCount: 2 },
+    profile: { ...HEALTHY_PROFILE, sellerEmail: null },
   }),
   build({
+    products: { noBuyPathCount: 1 },
+    profile: { ...HEALTHY_PROFILE, sellerEmail: null },
+  }),
+  // No shipping
+  build({
+    products: { hasPhysicalProducts: true },
+    profile: { ...HEALTHY_PROFILE, shippingPolicySet: false },
+  }),
+  // Storefront: none saved
+  build(),
+  // Storefront: saved but empty
+  build({ storefronts: { total: 1, rows: [{ id: "sf-1", blockCount: 0 }] } }),
+  // Missing images: one product
+  build({ products: { missingImage: [{ id: "p-1", title: "Only one" }] } }),
+  // Missing images: multiple products
+  build({
     products: {
-      total: 2,
       missingImage: [
         { id: "p-1", title: "One" },
         { id: "p-2", title: "Two" },
       ],
     },
   }),
+  // Flagged orders: disputed only
   build({ orders: { disputedCount: 2, refundedCount: 0 } }),
+  // Flagged orders: refunded only
   build({ orders: { disputedCount: 0, refundedCount: 3 } }),
+  // Flagged orders: both
   build({ orders: { disputedCount: 1, refundedCount: 1 } }),
+  // Noindex product pages: one storefront
+  build({
+    storefronts: {
+      total: 1,
+      rows: [{ id: "sf-1", blockCount: 4 }],
+      noindexProductPageCount: 1,
+      firstNoindexStorefrontId: "sf-1",
+    },
+  }),
+  // Noindex product pages: multiple storefronts
+  build({
+    storefronts: {
+      total: 2,
+      rows: [
+        { id: "sf-1", blockCount: 4 },
+        { id: "sf-2", blockCount: 4 },
+      ],
+      noindexProductPageCount: 2,
+      firstNoindexStorefrontId: "sf-1",
+    },
+  }),
+  // Dead blocks
+  build({ storefronts: { deadBlockCount: 1 } }),
+  build({ storefronts: { deadBlockCount: 3 } }),
 ];
 
 describe("needs-attention destinations", () => {
   it("sends the Stripe row to /payments, where the connection lives", () => {
     // Not /settings: nothing on the account settings tabs connects Stripe.
-    expect(build().get("stripe")?.href).toBe("/payments");
+    expect(build({ stripeConnected: false }).get("stripe")?.href).toBe("/payments");
+  });
+
+  it("hides the Stripe row when already connected", () => {
+    expect(build({ stripeConnected: true }).get("stripe")).toBeUndefined();
   });
 
   it("opens the storefront list when none is saved yet", () => {
@@ -134,7 +213,7 @@ describe("needs-attention destinations", () => {
 
   it("opens the product editor when a single product lacks an image", () => {
     const item = build({
-      products: { total: 1, missingImage: [{ id: "p-1", title: "Only one" }] },
+      products: { missingImage: [{ id: "p-1", title: "Only one" }] },
     }).get("images");
     expect(item?.href).toBe("/products/p-1/edit");
   });
@@ -142,7 +221,6 @@ describe("needs-attention destinations", () => {
   it("falls back to the product list when several lack images", () => {
     const item = build({
       products: {
-        total: 2,
         missingImage: [
           { id: "p-1", title: "One" },
           { id: "p-2", title: "Two" },
@@ -153,19 +231,19 @@ describe("needs-attention destinations", () => {
   });
 
   it("filters the orders list by the one flagged status", () => {
-    expect(build({ orders: { disputedCount: 2 } }).get("flagged-orders")?.href).toBe(
-      "/orders?status=disputed",
-    );
-    expect(build({ orders: { refundedCount: 3 } }).get("flagged-orders")?.href).toBe(
-      "/orders?status=refunded",
-    );
+    expect(
+      build({ orders: { disputedCount: 2 } }).get("flagged-orders")?.href,
+    ).toBe("/orders?status=disputed");
+    expect(
+      build({ orders: { refundedCount: 3 } }).get("flagged-orders")?.href,
+    ).toBe("/orders?status=refunded");
   });
 
   it("leaves the orders list unfiltered when both statuses are flagged", () => {
     // Filtering on one would hide orders the row just counted.
-    const item = build({ orders: { disputedCount: 1, refundedCount: 1 } }).get(
-      "flagged-orders",
-    );
+    const item = build({
+      orders: { disputedCount: 1, refundedCount: 1 },
+    }).get("flagged-orders");
     expect(item?.href).toBe("/orders");
     expect(item?.description).toBe("1 disputed, 1 refunded.");
   });
@@ -176,14 +254,164 @@ describe("needs-attention destinations", () => {
     expect(item?.description).toBe("2 refunded.");
   });
 
+  // --- New rows -------------------------------------------------------
+
+  it("adds the no-seller-identity row when business name is missing", () => {
+    const item = build({
+      profile: { ...HEALTHY_PROFILE, taxBusinessName: null },
+    }).get("no-seller-identity");
+    expect(item?.href).toBe("/settings/tax");
+    expect(item?.actionLabel).toBe("Add name");
+  });
+
+  it("hides the no-seller-identity row when business name is set", () => {
+    expect(
+      build({ profile: { ...HEALTHY_PROFILE, taxBusinessName: "Acme" } }).get(
+        "no-seller-identity",
+      ),
+    ).toBeUndefined();
+  });
+
+  it("hides all profile rows when profile is null (soft-fail read)", () => {
+    const keys = [...build({ profile: null }).keys()];
+    expect(keys).not.toContain("no-seller-identity");
+    expect(keys).not.toContain("no-legal");
+    expect(keys).not.toContain("no-buy-path");
+    expect(keys).not.toContain("no-shipping");
+  });
+
+  it("adds the no-legal row when legal has never been accepted", () => {
+    const item = build({
+      profile: { ...HEALTHY_PROFILE, legalAcceptedVersion: null },
+    }).get("no-legal");
+    expect(item?.href).toBe("/settings/legal");
+  });
+
+  it("adds the no-legal row when an older legal version was accepted", () => {
+    const item = build({
+      profile: { ...HEALTHY_PROFILE, legalAcceptedVersion: "2025-01-old" },
+    }).get("no-legal");
+    expect(item).toBeDefined();
+  });
+
+  it("hides the no-legal row when the current version is accepted", () => {
+    const item = build({
+      profile: { ...HEALTHY_PROFILE, legalAcceptedVersion: LEGAL_VERSION },
+    }).get("no-legal");
+    expect(item).toBeUndefined();
+  });
+
+  it("adds the no-buy-path row when active products have no buy link and no email", () => {
+    const item = build({
+      products: { noBuyPathCount: 3 },
+      profile: { ...HEALTHY_PROFILE, sellerEmail: null },
+    }).get("no-buy-path");
+    expect(item?.href).toBe("/products");
+    expect(item?.label).toContain("3 products");
+  });
+
+  it("hides the no-buy-path row when the account has a contact email", () => {
+    const item = build({
+      products: { noBuyPathCount: 3 },
+      profile: { ...HEALTHY_PROFILE, sellerEmail: "seller@example.com" },
+    }).get("no-buy-path");
+    expect(item).toBeUndefined();
+  });
+
+  it("hides the no-buy-path row when all products have a purchase_url", () => {
+    const item = build({
+      products: { noBuyPathCount: 0 },
+      profile: { ...HEALTHY_PROFILE, sellerEmail: null },
+    }).get("no-buy-path");
+    expect(item).toBeUndefined();
+  });
+
+  it("adds the no-shipping row for physical products without shipping terms", () => {
+    const item = build({
+      products: { hasPhysicalProducts: true },
+      profile: { ...HEALTHY_PROFILE, shippingPolicySet: false },
+    }).get("no-shipping");
+    expect(item?.href).toBe("/settings/shipping");
+  });
+
+  it("hides the no-shipping row when shipping terms are set", () => {
+    const item = build({
+      products: { hasPhysicalProducts: true },
+      profile: { ...HEALTHY_PROFILE, shippingPolicySet: true },
+    }).get("no-shipping");
+    expect(item).toBeUndefined();
+  });
+
+  it("hides the no-shipping row when there are no physical products", () => {
+    const item = build({
+      products: { hasPhysicalProducts: false },
+      profile: { ...HEALTHY_PROFILE, shippingPolicySet: false },
+    }).get("no-shipping");
+    expect(item).toBeUndefined();
+  });
+
+  it("adds the noindex row and links to the storefront designer", () => {
+    const item = build({
+      storefronts: {
+        total: 1,
+        rows: [{ id: "sf-1", blockCount: 4 }],
+        noindexProductPageCount: 1,
+        firstNoindexStorefrontId: "sf-1",
+      },
+    }).get("noindex-product-pages");
+    expect(item?.href).toBe("/storefront/sf-1");
+    expect(item?.actionLabel).toBe("Open designer");
+  });
+
+  it("falls back to the storefront list for the noindex row when no specific id", () => {
+    const item = build({
+      storefronts: {
+        noindexProductPageCount: 2,
+        firstNoindexStorefrontId: null,
+      },
+    }).get("noindex-product-pages");
+    expect(item?.href).toBe("/storefront");
+  });
+
+  it("hides the noindex row when all product pages are indexed", () => {
+    expect(
+      build({ storefronts: { noindexProductPageCount: 0 } }).get(
+        "noindex-product-pages",
+      ),
+    ).toBeUndefined();
+  });
+
+  it("adds the dead-blocks row with a count in the label", () => {
+    const item = build({ storefronts: { deadBlockCount: 3 } }).get("dead-blocks");
+    expect(item?.href).toBe("/storefront");
+    expect(item?.label).toContain("3 storefront blocks");
+  });
+
+  it("uses the singular label for a single dead block", () => {
+    const item = build({ storefronts: { deadBlockCount: 1 } }).get("dead-blocks");
+    expect(item?.label).toContain("1 storefront block");
+    expect(item?.label).not.toContain("blocks");
+  });
+
+  it("hides the dead-blocks row when there are no dead blocks", () => {
+    expect(build({ storefronts: { deadBlockCount: 0 } }).get("dead-blocks")).toBeUndefined();
+  });
+
   it("says nothing at all when there is nothing to say", () => {
-    // Only the permanent Stripe row survives an otherwise healthy store.
+    // With Stripe connected and a healthy profile, an otherwise clean store
+    // should produce an empty list.
     const items = buildAttentionItems({
       orders: NO_ORDERS,
-      products: { total: 3, missingImage: [] },
-      storefronts: { total: 1, rows: [{ id: "sf-1", blockCount: 6 }] },
+      products: { ...NO_PRODUCTS, total: 3 },
+      storefronts: {
+        ...NO_STOREFRONTS,
+        total: 1,
+        rows: [{ id: "sf-1", blockCount: 6 }],
+      },
+      profile: HEALTHY_PROFILE,
+      stripeConnected: true,
     });
-    expect(items.map((item) => item.key)).toEqual(["stripe"]);
+    expect(items).toHaveLength(0);
   });
 
   it("only ever links to routes that exist", () => {
@@ -221,6 +449,9 @@ describe("route resolver", () => {
     expect(routeExists("/orders?status=disputed")).toBe(true);
     expect(routeExists("/products/anything/edit")).toBe(true); // [id]
     expect(routeExists("/storefront/anything")).toBe(true);
+    expect(routeExists("/settings/tax")).toBe(true);
+    expect(routeExists("/settings/shipping")).toBe(true);
+    expect(routeExists("/settings/legal")).toBe(true);
   });
 
   it("rejects paths with no page", () => {

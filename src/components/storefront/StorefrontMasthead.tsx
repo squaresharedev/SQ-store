@@ -182,7 +182,12 @@ export function StorefrontMasthead({
   // the caret has to have somewhere to sit, or the first Backspace that
   // clears the words would also take the field away.
   const editing = (line: HeaderLine) => Boolean(onEditLine) && editingLine === line;
-  if (!header.show || (!name && !bio && !editingLine)) return null;
+  // SF-02: In the editor (editable=true) we keep the masthead visible even
+  // when both fields are empty so the seller can discover and click them.
+  // On the buyer-facing page (editable=false) we respect the existing rule:
+  // no content means no masthead rendered at all.
+  const editorVisible = editable && header.show;
+  if (!header.show || (!name && !bio && !editingLine && !editorVisible)) return null;
 
   // Every color is re-gated on the way out: a config is parsed from a jsonb
   // column and these land in a style attribute.
@@ -336,7 +341,7 @@ export function StorefrontMasthead({
           onDone={() => onEditDone?.()}
         />
       ) : (
-        name && (
+        (name || editorVisible) && (
           <h2
             {...selectable("name")}
             // Arms the double-press above, reading the word this press is on
@@ -351,7 +356,16 @@ export function StorefrontMasthead({
             className={cn(nameClass, selectableClass("name"))}
             style={styleOf("name", nameColor)}
           >
-            {header.name}
+            {name ? (
+              header.name
+            ) : (
+              // SF-02: Placeholder copy is shown only in the editor. Buyers
+              // never see this text: the masthead returns null when the buyer
+              // page renders with an empty name. Click to type replaces it.
+              <span className="text-muted-foreground opacity-50 select-none">
+                Your store name
+              </span>
+            )}
           </h2>
         )
       )}
@@ -367,7 +381,7 @@ export function StorefrontMasthead({
           onDone={() => onEditDone?.()}
         />
       ) : (
-        bio && (
+        (bio || editorVisible) && (
           <p
             {...selectable("bio")}
             onPointerDown={
@@ -380,7 +394,14 @@ export function StorefrontMasthead({
             className={cn(bioClass, selectableClass("bio"))}
             style={styleOf("bio", bioColor)}
           >
-            {header.bio}
+            {bio ? (
+              header.bio
+            ) : (
+              // SF-02: Placeholder, editor only.
+              <span className="text-muted-foreground opacity-50 select-none">
+                A short line about your shop
+              </span>
+            )}
           </p>
         )
       )}

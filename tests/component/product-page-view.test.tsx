@@ -68,8 +68,7 @@ function data(overrides: {
   productPage?: Partial<ProductPageData["storefront"]["productPage"]>;
   theme?: Partial<ProductPageData["storefront"]["theme"]>;
   seller?: ProductPageData["storefront"]["seller"];
-  policies?: ProductPageData["storefront"]["policies"];
-  shippingProfiles?: ProductPageData["storefront"]["shippingProfiles"];
+  shippingPolicy?: ProductPageData["storefront"]["shippingPolicy"];
 } = {}): ProductPageData {
   return {
     storefront: {
@@ -77,9 +76,14 @@ function data(overrides: {
       name: "Studio",
       theme: { ...DEFAULT_STOREFRONT_CONFIG.theme, ...overrides.theme },
       productPage: { ...DEFAULT_PRODUCT_PAGE_CONFIG, ...overrides.productPage },
-      policies: overrides.policies ?? { shipping: "Ships in 3 days. Tracked.", returns: "30 days." },
-      shippingProfiles: overrides.shippingProfiles ?? [],
-      seller: overrides.seller ?? { businessName: "Studio Ltd", email: "hi@studio.example", country: "IE" },
+      shippingPolicy: overrides.shippingPolicy ?? {
+        shippingText: "Ships in 3 days. Tracked.",
+        returnsText: "30 days.",
+      },
+      // vatId included so the default fixture triggers the EU VAT gate in
+      // ProductPageView. Tests that want to verify the no-VAT-note path must
+      // supply an explicit seller override without vatId.
+      seller: overrides.seller ?? { businessName: "Studio Ltd", email: "hi@studio.example", country: "IE", vatId: "IE1234567T" },
       backgroundImageUrl: null,
       customFontUrl: null,
     },
@@ -152,8 +156,8 @@ describe("ProductPageView", () => {
       },
     ];
 
-    it("prints the store's default terms for a product that names no profile", () => {
-      render(<ProductPageView page={data({ shippingProfiles: profiles })} mode="public" />);
+    it("prints the account's default terms for a product that names no profile", () => {
+      render(<ProductPageView page={data({ shippingPolicy: { shippingText: "Ships in 3 days. Tracked.", returnsText: "30 days.", profiles } })} mode="public" />);
       const shipping = document.querySelector("[data-product-section='shipping']")!;
       expect(within(shipping as HTMLElement).getByText(/Ships in 3 days/)).toBeInTheDocument();
       expect(within(shipping as HTMLElement).queryByText(/pallet courier/)).toBeNull();
@@ -162,7 +166,7 @@ describe("ProductPageView", () => {
     it("prints the named profile INSTEAD of the default, never on top of it", () => {
       render(
         <ProductPageView
-          page={data({ shippingProfiles: profiles, product: { shippingProfileId: BULKY } })}
+          page={data({ shippingPolicy: { shippingText: "Ships in 3 days. Tracked.", returnsText: "30 days.", profiles }, product: { shippingProfileId: BULKY } })}
           mode="public"
         />,
       );
@@ -179,13 +183,14 @@ describe("ProductPageView", () => {
       expect(within(trust as HTMLElement).queryByText("Ships in 3 days.")).toBeNull();
     });
 
-    it("falls back to the store default when the id names a profile this store lacks", () => {
-      // A deleted profile, or a product placed on a second storefront that
-      // never had it. Both get the terms the store DOES offer, because that
-      // is the only thing it can honestly promise.
+    it("falls back to the account default when the id names a profile that is gone", () => {
+      // A deleted profile. (Before terms moved to the account there was a
+      // second cause — a product placed on a storefront that never had it —
+      // which the move removed outright.) It gets the terms the seller DOES
+      // offer, because that is the only thing they can honestly promise.
       render(
         <ProductPageView
-          page={data({ shippingProfiles: [], product: { shippingProfileId: BULKY } })}
+          page={data({ shippingPolicy: { shippingText: "Ships in 3 days. Tracked.", returnsText: "30 days." }, product: { shippingProfileId: BULKY } })}
           mode="public"
         />,
       );
@@ -193,11 +198,14 @@ describe("ProductPageView", () => {
       expect(within(shipping as HTMLElement).getByText(/Ships in 3 days/)).toBeInTheDocument();
     });
 
-    it("puts the store's dispatch line at the head of the trust list", () => {
+    it("puts the account's dispatch line at the head of the trust list", () => {
       render(
         <ProductPageView
           page={data({
-            policies: { shipping: "Ships in 3 days. Tracked.", dispatch: "Ships within 24 hours" },
+            shippingPolicy: {
+              shippingText: "Ships in 3 days. Tracked.",
+              dispatch: "Ships within 24 hours",
+            },
           })}
           mode="public"
         />,
@@ -347,6 +355,94 @@ describe("ProductPageView", () => {
     expect(blue).toHaveAttribute("aria-checked", "true");
   });
 
+  it("swaps the measurements with the version, and says which version they describe", async () => {
+    const user = userEvent.setup();
+    render(
+      <ProductPageView
+        page={data({
+          product: {
+            optionGroups: [
+              {
+                id: COLOUR_GROUP,
+                name: "Size",
+                display: "chip",
+                options: [
+                  {
+                    id: RED,
+                    name: "Small",
+                    available: true,
+                    details: {
+                      dimensions: { length: 120, width: 80, height: 75, unit: "cm" },
+                      specs: [{ label: "Seats", value: "4" }],
+                    },
+                  },
+                  {
+                    id: BLUE,
+                    name: "Large",
+                    available: true,
+                    details: {
+                      dimensions: { length: 180, width: 90, height: 75, unit: "cm" },
+                      specs: [{ label: "Seats", value: "6" }],
+                    },
+                  },
+                ],
+              },
+            ],
+            details: { materials: "Oak", specs: [{ label: "Seats", value: "2" }] },
+          },
+        })}
+        mode="public"
+      />,
+    );
+    const specs = () => document.querySelector<HTMLElement>("[data-product-specs]")!;
+
+    // The table names the version it is describing, then measures it.
+    expect(within(specs()).getByText("Small")).toBeInTheDocument();
+    expect(within(specs()).getByText("120 × 80 × 75 cm")).toBeInTheDocument();
+    // The version's row replaces the product's own of the same name.
+    expect(within(specs()).getByText("4")).toBeInTheDocument();
+    expect(within(specs()).queryByText("2")).toBeNull();
+    // What does not vary is still the product's.
+    expect(within(specs()).getByText("Oak")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("radio", { name: "Large" }));
+    expect(within(specs()).getByText("180 × 90 × 75 cm")).toBeInTheDocument();
+    expect(within(specs()).getByText("6")).toBeInTheDocument();
+    expect(within(specs()).queryByText("120 × 80 × 75 cm")).toBeNull();
+  });
+
+  it("keeps a specs section for a product whose measurements live only on its versions", () => {
+    render(
+      <ProductPageView
+        page={data({
+          product: {
+            optionGroups: [
+              {
+                id: COLOUR_GROUP,
+                name: "Size",
+                display: "chip",
+                options: [
+                  {
+                    id: RED,
+                    name: "Small",
+                    available: true,
+                    details: { weight: { value: 18, unit: "kg" } },
+                  },
+                ],
+              },
+            ],
+            // Nothing stated for the product itself: without the versions this
+            // section would not exist at all.
+            details: {},
+          },
+        })}
+        mode="public"
+      />,
+    );
+    const specs = document.querySelector<HTMLElement>("[data-product-specs]")!;
+    expect(within(specs).getByText("18 kg")).toBeInTheDocument();
+  });
+
   it("picks in every group independently, and photos follow whichever axis has them", async () => {
     const user = userEvent.setup();
     render(
@@ -427,7 +523,11 @@ describe("ProductPageView", () => {
       "aria-checked",
       "true",
     );
-    expect(screen.getByText("Red")).toBeInTheDocument();
+    // The chosen name is printed beside the group's own label. Scoped to that
+    // label because the specs table now names the version too (see
+    // optionSummaryRows), so "Red" is on the page more than once.
+    const label = document.querySelector<HTMLElement>("[data-option-group-label]")!;
+    expect(within(label).getByText("Red")).toBeInTheDocument();
   });
 
   it("attributes the page to Squareshare without implying it is the seller", () => {
@@ -479,6 +579,27 @@ describe("ProductPageView", () => {
     expect(document.querySelector("[data-product-sticky-cta]")).toBeNull();
   });
 
+  it("tells the seller which version the buyer was looking at when they wrote", async () => {
+    // Until checkout ships this is the ONLY route from a buyer to a seller
+    // that we control, so it is the only place the choice can be handed over.
+    const user = userEvent.setup();
+    render(<ProductPageView page={data({ product: { purchaseUrl: null } })} mode="public" />);
+    const mail = () => screen.getAllByRole("link", { name: /ask about this product/i })[0]!;
+
+    const body = () => {
+      const href = mail().getAttribute("href") ?? "";
+      return decodeURIComponent(new URL(href).searchParams.get("body") ?? "");
+    };
+    expect(body()).toContain("Oak lamp");
+    expect(body()).toContain("Colour: Red");
+
+    // And it follows the picker, so the seller is never told a different
+    // version than the buyer had on screen.
+    await user.click(screen.getByRole("radio", { name: "Blue" }));
+    expect(body()).toContain("Colour: Blue");
+    expect(body()).not.toContain("Colour: Red");
+  });
+
   it("lists public documents, and hides the section when there are none", () => {
     render(
       <ProductPageView
@@ -518,6 +639,128 @@ describe("ProductPageView", () => {
     render(<ProductPageView page={data()} mode="preview" />);
     expect(screen.queryAllByRole("link", { name: /buy now/i })).toHaveLength(0);
     expect(document.querySelector("[data-product-page='preview']")).not.toBeNull();
+  });
+
+  // BUY-06: a mail CTA is a contact link, not a purchase button. Sold out
+  // means the product can't be bought, not that the seller can't be reached.
+  it("keeps a mail CTA live when the product is sold out, only disabling link CTAs", () => {
+    // Link CTA + sold out: button is disabled, text says "Sold out".
+    render(<ProductPageView page={data({ product: { soldOut: true } })} mode="public" />);
+    expect(screen.getAllByText("Sold out").length).toBeGreaterThan(0);
+    expect(screen.queryAllByRole("link", { name: /buy now/i })).toHaveLength(0);
+    cleanup();
+
+    // Mail CTA + sold out: button is STILL active as a mailto link.
+    render(
+      <ProductPageView
+        page={data({ product: { purchaseUrl: null, soldOut: true } })}
+        mode="public"
+      />,
+    );
+    // "Ask about this product" is the mail label, and it must be a live link.
+    const mailLinks = screen.getAllByRole("link", { name: /ask about this product/i });
+    expect(mailLinks.length).toBeGreaterThan(0);
+    // The mail link must not be aria-disabled.
+    for (const link of mailLinks) {
+      expect(link.closest("[aria-disabled='true']")).toBeNull();
+    }
+    // The CTA element itself must NOT show "Sold out" as its text — that would
+    // mean the button is disabled. "Sold out" may still appear in StockLine
+    // (the stock badge), which is correct and separate from the CTA.
+    const ctaEls = document.querySelectorAll("[data-product-cta='mail']");
+    expect(ctaEls.length).toBeGreaterThan(0);
+    for (const cta of ctaEls) {
+      expect(cta.textContent).not.toContain("Sold out");
+    }
+  });
+
+  // BUY-02: VAT and shipping notes derived from the seller's actual facts.
+  describe("VAT and shipping note derivation", () => {
+    // combination 1: EU seller with VAT + physical product with shipping terms
+    // → both notes shown ("incl. VAT, plus shipping")
+    it("shows both notes for a VAT-registered EU seller with a physical product and shipping terms", () => {
+      render(
+        <ProductPageView
+          page={data({
+            seller: { businessName: "Studio Ltd", email: "hi@studio.example", country: "IE", vatId: "IE1234567T" },
+            shippingPolicy: { shippingText: "Ships in 3 days." },
+            product: { isDigital: false },
+          })}
+          mode="public"
+        />,
+      );
+      // Twice: once in the main buy box, once in the sticky footer bar.
+      expect(screen.getAllByText("incl. VAT, plus shipping")).toHaveLength(2);
+    });
+
+    // combination 2: EU seller with VAT + digital product
+    // → VAT note shown, shipping note suppressed (digital is not shipped)
+    it("shows only the VAT note for a digital product, never a shipping note", () => {
+      render(
+        <ProductPageView
+          page={data({
+            seller: { businessName: "Studio Ltd", email: "hi@studio.example", country: "IE", vatId: "IE1234567T" },
+            product: { isDigital: true, digitalFormat: "PDF" },
+          })}
+          mode="public"
+        />,
+      );
+      expect(screen.getAllByText("incl. VAT").length).toBeGreaterThan(0);
+      expect(screen.queryByText(/plus shipping/)).toBeNull();
+    });
+
+    // combination 3: EU seller WITHOUT a VAT id + physical product with shipping terms
+    // → no VAT note, shipping note still shown
+    it("suppresses the VAT note for an EU seller with no VAT id, but keeps the shipping note", () => {
+      render(
+        <ProductPageView
+          page={data({
+            seller: { businessName: "Small Studio", email: "hi@small.example", country: "IE" },
+            shippingPolicy: { shippingText: "Ships in 3 days." },
+            product: { isDigital: false },
+          })}
+          mode="public"
+        />,
+      );
+      expect(screen.queryByText(/incl\. VAT/)).toBeNull();
+      expect(screen.getAllByText("plus shipping")).toHaveLength(2);
+    });
+
+    // combination 4: non-EU seller (no VAT relevance) + physical product with shipping terms
+    // → no VAT note, shipping note still shown
+    it("suppresses the VAT note for a non-EU seller regardless of VAT id", () => {
+      render(
+        <ProductPageView
+          page={data({
+            seller: { businessName: "US Store", email: "hi@us.example", country: "US", vatId: "123456789" },
+            shippingPolicy: { shippingText: "Ships in 5 days." },
+            product: { isDigital: false },
+          })}
+          mode="public"
+        />,
+      );
+      expect(screen.queryByText(/incl\. VAT/)).toBeNull();
+      expect(screen.getAllByText("plus shipping")).toHaveLength(2);
+    });
+
+    // BUY-03: when the seller has no shipping terms, the shipping section is
+    // absent rather than showing an apology message.
+    it("omits the shipping section entirely when the seller has written no shipping terms", () => {
+      render(
+        <ProductPageView
+          page={data({
+            shippingPolicy: {},
+            product: { isDigital: false },
+          })}
+          mode="public"
+        />,
+      );
+      // No section, no apology.
+      expect(document.querySelector("[data-product-section='shipping']")).toBeNull();
+      expect(screen.queryByText(/seller has not added shipping/)).toBeNull();
+      // Shipping note is also suppressed when there are no terms.
+      expect(screen.queryByText(/plus shipping/)).toBeNull();
+    });
   });
 
   it("treats a download as not shipped: no shipping note, no shipping section, a format line", () => {

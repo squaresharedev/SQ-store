@@ -76,13 +76,17 @@ describe("EmbedModal - snippet", () => {
     expect(dialog).not.toHaveTextContent(STOREFRONT_ID);
   });
 
-  it("offers to copy the snippet", () => {
+  it("shows a copy control that is disabled until embedding is configured", () => {
+    // SELL-03: Copy is only meaningful once embedding is live — enabled AND at
+    // least one domain set. Handing someone the snippet before that makes it
+    // look ready when it cannot load anywhere. The button is always rendered so
+    // the seller can see it exists; its accessible label says it cannot be used yet.
     renderModal();
-    expect(
-      within(screen.getByRole("dialog")).getByRole("button", {
-        name: /copy embed snippet/i,
-      }),
-    ).toBeInTheDocument();
+    const btn = within(screen.getByRole("dialog")).getByRole("button", {
+      name: /embed snippet/i,
+    });
+    expect(btn).toBeInTheDocument();
+    expect(btn).toBeDisabled();
   });
 });
 

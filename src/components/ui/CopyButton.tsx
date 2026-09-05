@@ -34,6 +34,7 @@ export function CopyButton({
   value,
   label,
   variant = "icon",
+  disabled = false,
   className,
 }: {
   /** Text placed on the clipboard. */
@@ -41,6 +42,8 @@ export function CopyButton({
   /** What is being copied, e.g. "order ID". Used for the accessible name. */
   label: string;
   variant?: "icon" | "labelled";
+  /** Prevent copying until prerequisites are met (e.g. embed settings saved). */
+  disabled?: boolean;
   className?: string;
 }) {
   const [copied, setCopied] = React.useState(0);
@@ -76,12 +79,15 @@ export function CopyButton({
     <button
       type="button"
       onClick={handleCopy}
+      disabled={disabled}
       aria-label={
-        failed
-          ? `Couldn't copy ${label}. Select and copy it manually.`
-          : isCopied
-            ? `Copied ${label}`
-            : `Copy ${label}`
+        disabled
+          ? `${label} cannot be copied yet`
+          : failed
+            ? `Couldn't copy ${label}. Select and copy it manually.`
+            : isCopied
+              ? `Copied ${label}`
+              : `Copy ${label}`
       }
       className={cn(
         variant === "labelled"
@@ -94,6 +100,7 @@ export function CopyButton({
             ),
         isCopied && "text-success hover:text-success",
         failed && "text-destructive hover:text-destructive",
+        disabled && "pointer-events-none opacity-40",
         className,
       )}
     >

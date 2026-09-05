@@ -316,6 +316,36 @@ export async function seedStorefronts(
 }
 
 /**
+ * Seed an account's trader identity straight onto its profile row — the
+ * account-level fields the hosted product page's Seller section (and every
+ * storefront's product pages) now read (lib/settings/seller-identity.ts).
+ * The signup trigger already created the row; this only patches it.
+ */
+export async function seedSellerIdentity(
+  ownerId: string,
+  seller: {
+    businessName?: string;
+    address?: string;
+    email?: string;
+    vatId?: string;
+    country?: string;
+    phone?: string;
+  },
+) {
+  await serviceRest(`/profiles?id=eq.${ownerId}`, {
+    method: "PATCH",
+    body: {
+      tax_business_name: seller.businessName ?? null,
+      seller_address: seller.address ?? null,
+      seller_email: seller.email ?? null,
+      tax_vat_id: seller.vatId ?? null,
+      tax_country: seller.country ?? null,
+      seller_phone: seller.phone ?? null,
+    },
+  });
+}
+
+/**
  * Seed analytics signals for a seller (service-written, like the ingest route).
  *
  * `daysAgo` places a row in the past so a spec can exercise the 30-day window
@@ -363,6 +393,9 @@ export async function seedOrders(
     status?: "paid" | "refunded" | "disputed" | "pending";
     buyer_email?: string;
     product_title?: string;
+    /** Which version was bought, snapshotted in words the way the real column
+     *  stores it: [{ label: "Size", value: "Six seater" }]. */
+    selected_options?: { label: string; value: string }[];
     created_at?: string;
   }>,
 ) {
@@ -378,6 +411,9 @@ export async function seedOrders(
       buyer_email: o.buyer_email ?? "buyer@example.com",
       product_title: o.product_title ?? "Seeded product",
       product_price_cents: o.amount_cents,
+      // Always present, never conditional: PostgREST refuses a bulk insert
+      // whose objects do not share their keys.
+      selected_options: o.selected_options ?? [],
       ...(o.created_at ? { created_at: o.created_at } : {}),
     })),
   });

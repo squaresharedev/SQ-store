@@ -17,8 +17,10 @@ export const LEGAL_VERSION = "2026-07-draft.1";
 export const DELETE_CONFIRM_PHRASE = "delete my account";
 
 /**
- * EU member states for the tax section (ISO 3166-1 alpha-2). Collected for
- * upcoming VAT/invoicing work, nothing downstream consumes these yet.
+ * EU member states for the tax section (ISO 3166-1 alpha-2). Also the
+ * trader-identity country list: an EU country here is what makes
+ * `isEuSeller` (lib/storefront/product-page.ts) add the statutory
+ * withdrawal/conformity lines to a product page.
  */
 export const EU_COUNTRIES = [
   { code: "AT", name: "Austria" },
@@ -51,3 +53,12 @@ export const EU_COUNTRIES = [
 ] as const;
 
 export const EU_COUNTRY_CODES = EU_COUNTRIES.map((c) => c.code);
+
+/** Field caps for the account-level seller/trader identity (business name
+ *  lives on `tax_business_name`, capped separately at 200 — see taxSchema).
+ *  Mirrors what the DB CHECKs on profiles.seller_address/seller_phone allow;
+ *  keep the two in step. */
+export const SELLER_FIELD_MAX = {
+  address: 300,
+  phone: 32,
+} as const;

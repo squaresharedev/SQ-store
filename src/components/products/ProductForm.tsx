@@ -11,7 +11,9 @@ import {
   Layers,
   Package,
   Ruler,
+  Save,
   ShieldCheck,
+  Trash2,
   Truck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -25,29 +27,36 @@ import {
 } from "@/types/product";
 import { GalleryField } from "./GalleryField";
 import { OptionsField } from "./OptionsField";
+import { OptionSpecsField } from "./OptionSpecsField";
 import { DetailsFields } from "./DetailsFields";
 import { SafetyFields } from "./SafetyFields";
 import { DocumentsField } from "./DocumentsField";
 import {
   detailsToInput,
   initialDetailsValues,
+  initialOptionDetails,
+  optionDetailsToInput,
   validateDetails,
+  validateOptionDetails,
   type DetailsFieldErrors,
   type DetailsFormValues,
   type DocumentFormValue,
   type GalleryFormImage,
+  type OptionDetailsFormValues,
 } from "./form-values";
 import { unexpectedError, type ActionError } from "@/lib/errors";
 import { createProduct, updateProduct } from "@/lib/products/actions";
 import { UploadError, uploadToR2 } from "@/lib/products/upload";
 import { SaveButton, type SaveResult } from "@/components/ui/SaveButton";
 import { useToast } from "@/components/ui/Toast";
-import { collectOptionIds, type ProductWriteInput } from "@/lib/validation/product";
+import { collectOptionIds, type ProductWriteInput, PRICE_CENTS_MAX } from "@/lib/validation/product";
 import { ActionErrorNotice } from "@/components/ui/ActionErrorNotice";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { Modal } from "@/components/ui/modal";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { useUnsavedChangesGuard } from "@/lib/hooks/useUnsavedChangesGuard";
+import { useNavigationBlocker } from "@/lib/hooks/useNavigationBlocker";
+import { parseFormPriceCents, priceErrorMessage } from "@/lib/products/price";
 import {
   destructiveButtonClass,
   errorTextClass,
@@ -58,6 +67,7 @@ import {
   secondaryButtonClass,
 } from "@/components/ui/control-styles";
 import { InfoTip } from "@/components/ui/InfoTip";
+import { RequiredMark } from "@/components/ui/RequiredMark";
 import { FormSection } from "./FormSection";
 import { FormSectionNav } from "./FormSectionNav";
 import { ProductFormSnapshotScript } from "./ProductFormSnapshotScript";
@@ -72,13 +82,16 @@ import { FileDropzone } from "./FileDropzone";
 import { StockFields } from "./StockFields";
 import { ShippingField } from "./ShippingField";
 import type { ShippingChoices } from "@/lib/storefront/queries";
+import { SHIPPING_SETTINGS_HREF } from "@/types/shipping-policy";
 
-/** A seller with no storefront yet has nothing to inherit and nothing to
- *  pick, and the section says so rather than showing an empty picker. */
+/** A seller who has written no terms yet has nothing to inherit and nothing
+ *  to pick, and the section says so rather than showing an empty picker.
+ *  `editHref` is never null: Settings › Shipping & returns exists whether or
+ *  not the seller has a storefront. */
 const NO_SHIPPING_CHOICES: ShippingChoices = {
   profiles: [],
-  defaults: [],
-  editHref: null,
+  fallback: { dispatch: "", body: "" },
+  editHref: SHIPPING_SETTINGS_HREF,
 };
 
 const STATUS_OPTIONS: readonly { value: ProductStatus; label: string }[] = [
@@ -138,7 +151,7 @@ function initialValues(product?: Product): ProductFormValues {
   return {
     title: product?.title ?? "",
     description: product?.description ?? "",
-    price: product ? String(product.price) : "",
+    price: product ? product.price.toFixed(2) : "",
     currency: product?.currency ?? "EUR",
     // Common-answer default: new products go live on save. Existing products
     // keep whatever the seller chose.
@@ -160,12 +173,9 @@ function validate(values: ProductFormValues): FieldErrors {
     errors.title = "Give your product a title — buyers see it first.";
   }
 
-  const trimmedPrice = values.price.trim();
-  const priceNumber = Number(trimmedPrice);
-  if (!trimmedPrice) {
-    errors.price = "Set a price before saving.";
-  } else if (!Number.isFinite(priceNumber) || priceNumber <= 0) {
-    errors.price = "Price must be a number greater than zero.";
+  const priceResult = parseFormPriceCents(values.price);
+  if (!priceResult.ok) {
+    errors.price = priceErrorMessage(priceResult.error, values.currency, PRICE_CENTS_MAX);
   }
 
   if (values.trackStock) {
@@ -243,6 +253,7 @@ const FIELD_SECTIONS: Record<string, ProductFormSectionId> = {
   height: "specs",
   weight: "specs",
   specs: "specs",
+  optionDetails: "specs",
   manufacturerName: "safety",
   manufacturerAddress: "safety",
   manufacturerEmail: "safety",
@@ -260,6 +271,81 @@ function sectionsWithErrors(
     if (section) found.add(section);
   }
   return [...found];
+}
+
+/** The first field (in form order) actually carrying an error right now —
+ *  what a click on the "can't be saved" toast jumps to. `FIELD_SECTIONS`'s
+ *  own key order already matches the form's, since it was written top to
+ *  bottom alongside the sections it names. */
+function firstErroredField(
+  errors: FieldErrors,
+  detailsErrors: DetailsFieldErrors,
+): string | undefined {
+  const merged: Record<string, string | undefined> = { ...errors, ...detailsErrors };
+  return Object.keys(FIELD_SECTIONS).find((field) => merged[field]);
+}
+
+/** Where a field's own control lives, for the fields whose `data-product-field`
+ *  doesn't match its error key verbatim — the safety block's inputs carry a
+ *  `safety.` prefix that the (unprefixed) validation errors don't. */
+const FIELD_SELECTOR_OVERRIDES: Record<string, string> = {
+  manufacturerName: "safety.manufacturerName",
+  manufacturerAddress: "safety.manufacturerAddress",
+  manufacturerEmail: "safety.manufacturerEmail",
+  responsibleEmail: "safety.responsibleEmail",
+};
+
+/** The container itself if it's already a control, else the first control
+ *  inside it — a field's `data-product-field` sometimes marks a wrapper div
+ *  (a currency toggle, a unit picker) rather than the input itself. */
+function focusableWithin(container: Element | null): HTMLElement | null {
+  if (!container) return null;
+  if (container.matches("input, textarea, select, button")) {
+    return container as HTMLElement;
+  }
+  return container.querySelector<HTMLElement>("input, textarea, select, button");
+}
+
+/** Scrolls to and focuses the control for one problem field, so clicking the
+ *  save-blocked toast takes the seller straight to what needs fixing instead
+ *  of leaving them to hunt a forty-field, nine-section form for it. */
+function focusProductField(field: string) {
+  let target: HTMLElement | null = null;
+
+  if (field === "specs") {
+    // No single row owns this message — walk to the first one missing a
+    // value, which is the only way `validateDetails` flags `specs` at all.
+    for (const row of document.querySelectorAll<HTMLElement>("[data-product-spec-row]")) {
+      const label = row.querySelector<HTMLInputElement>('[data-product-field$=".label"]');
+      const value = row.querySelector<HTMLInputElement>('[data-product-field$=".value"]');
+      if (label?.value.trim() && !value?.value.trim()) {
+        target = value;
+        break;
+      }
+    }
+  } else if (field === "optionGroups") {
+    const wrapper = document.querySelector<HTMLElement>('[data-product-field="optionGroups"]');
+    if (wrapper) {
+      for (const input of wrapper.querySelectorAll<HTMLInputElement>("input[type='text']")) {
+        if (!input.value.trim()) {
+          target = input;
+          break;
+        }
+      }
+      target ??= wrapper;
+    }
+  } else {
+    const selector = FIELD_SELECTOR_OVERRIDES[field] ?? field;
+    target = focusableWithin(document.querySelector(`[data-product-field="${selector}"]`));
+  }
+
+  if (!target) return;
+  const control = target;
+  control.scrollIntoView({ behavior: "smooth", block: "center" });
+  // Focus after the scroll starts rather than instantly: an immediate focus
+  // triggers the browser's OWN scroll-into-view too, which fights the smooth
+  // one above and jump-cuts straight to the field.
+  window.setTimeout(() => control.focus({ preventScroll: true }), 300);
 }
 
 export function ProductForm({
@@ -290,6 +376,12 @@ export function ProductForm({
   const [details, setDetails] = useState<DetailsFormValues>(() =>
     initialDetailsValues(product?.details),
   );
+  // What each VERSION measures, keyed by option id. Kept beside the options
+  // rather than on them so a half-typed number survives being typed (see
+  // form-values.ts); an entry whose option is gone is simply never read.
+  const [optionDetails, setOptionDetails] = useState<Record<string, OptionDetailsFormValues>>(
+    () => initialOptionDetails(product?.optionGroups ?? []),
+  );
   const [purchaseUrl, setPurchaseUrl] = useState(product?.purchaseUrl ?? "");
   // Null = the store's default shipping terms, which is what nearly every
   // product uses and what a new one starts on.
@@ -297,6 +389,8 @@ export function ProductForm({
     product?.shippingProfileId ?? null,
   );
   const [detailsErrors, setDetailsErrors] = useState<DetailsFieldErrors>({});
+  /** One message per option id, shown on the version that carries it. */
+  const [optionDetailErrors, setOptionDetailErrors] = useState<Record<string, string>>({});
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [digitalFile, setDigitalFile] = useState<File | null>(null);
   // Whether the seller interacted with the digital-file picker at all. Needed
@@ -353,6 +447,7 @@ export function ProductForm({
         documents: initialDocuments(product).map(({ key, label }) => ({ key, label })),
         optionGroups: product?.optionGroups ?? [],
         details: initialDetailsValues(product?.details),
+        optionDetails: initialOptionDetails(product?.optionGroups ?? []),
         purchaseUrl: product?.purchaseUrl ?? "",
         shippingProfileId: product?.shippingProfileId ?? null,
       }),
@@ -363,6 +458,7 @@ export function ProductForm({
     documents: documents.map(({ key, label }) => ({ key, label })),
     optionGroups,
     details,
+    optionDetails,
     purchaseUrl,
     shippingProfileId,
   });
@@ -373,6 +469,19 @@ export function ProductForm({
       imageFile !== null ||
       digitalTouched);
   const leaveGuard = useUnsavedChangesGuard(dirty, "/products");
+  const navBlocker = useNavigationBlocker();
+  // Destructure so the dependency array tracks the stable useCallback identity
+  // rather than the leaveGuard object reference (which changes each render).
+  const { requestLeave } = leaveGuard;
+
+  // Register with the dashboard-level navigation blocker whenever the form is
+  // dirty, so sidebar links, the back link in ProductFormView, and the Ctrl-K
+  // palette all hit the same guard as the Cancel button and browser Back.
+  // The effect returns the unregister function directly as its cleanup.
+  useEffect(() => {
+    if (!dirty || !navBlocker) return;
+    return navBlocker.register((href) => requestLeave(href));
+  }, [dirty, navBlocker, requestLeave]);
 
   // A download has no shipping and no product-safety block: those sections
   // hide, and their values are dropped on save rather than stored unseen.
@@ -392,6 +501,7 @@ export function ProductForm({
     gallery,
     documents,
     details,
+    optionDetails,
     purchaseUrl,
     shippingProfileId,
     shippingProfileName:
@@ -432,7 +542,39 @@ export function ProductForm({
 
   function updateDetails(next: DetailsFormValues) {
     setDetails(next);
-    if (submitAttempted) setDetailsErrors(validateDetails(next, isDigital));
+    if (submitAttempted) setDetailsErrors(detailErrorsFor(next, optionDetails).flat);
+  }
+
+  function updateOptionDetails(next: Record<string, OptionDetailsFormValues>) {
+    setOptionDetails(next);
+    if (!submitAttempted) return;
+    const found = detailErrorsFor(details, next);
+    setDetailsErrors(found.flat);
+    setOptionDetailErrors(found.byOption);
+  }
+
+  /**
+   * The product's own detail errors and the versions', found together.
+   *
+   * They share a section, so they share the section's badge and the
+   * save-blocked toast: `optionDetails` is one flat message standing for
+   * however many versions carry a problem, while `byOption` is what each
+   * version prints under itself.
+   */
+  function detailErrorsFor(
+    nextDetails: DetailsFormValues,
+    nextByOption: Record<string, OptionDetailsFormValues>,
+  ): { flat: DetailsFieldErrors; byOption: Record<string, string> } {
+    const byOption = validateOptionDetails(nextByOption, collectOptionIds(optionGroups));
+    const flat = validateDetails(nextDetails, isDigital);
+    const count = Object.keys(byOption).length;
+    if (count > 0) {
+      flat.optionDetails =
+        count === 1
+          ? "One version's own specifications need fixing."
+          : `${count} versions' own specifications need fixing.`;
+    }
+    return { flat, byOption };
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -451,19 +593,17 @@ export function ProductForm({
 
     const foundErrors = { ...validate(values), ...validatePage(purchaseUrl, optionGroups) };
     setErrors(foundErrors);
-    const foundDetailErrors = validateDetails(details, isDigital);
+    const found = detailErrorsFor(details, optionDetails);
+    const foundDetailErrors = found.flat;
     setDetailsErrors(foundDetailErrors);
+    setOptionDetailErrors(found.byOption);
     const problems = [...Object.values(foundErrors), ...Object.values(foundDetailErrors)];
     if (problems.length > 0) {
-      // The fields carry their own messages, but on a form this long the
-      // offending one is usually off-screen when Save is pressed — without
-      // this the click reads as "nothing happened".
-      toast.error(
-        problems.length === 1
-          ? "This product can't be saved yet"
-          : `This product can't be saved yet, ${problems.length} things to fix`,
-        { lines: problems },
-      );
+      // The sticky action bar shows the count and a "Jump to first" button.
+      // Auto-scroll to the first problem on submit so the seller lands on it
+      // without needing to click; the bar stays visible for subsequent jumps.
+      const firstField = firstErroredField(foundErrors, foundDetailErrors);
+      if (firstField) focusProductField(firstField);
       return false;
     }
 
@@ -535,7 +675,21 @@ export function ProductForm({
         optionGroups: optionGroups.map((group) => ({
           ...group,
           name: group.name.trim(),
-          options: group.options.map((option) => ({ ...option, name: option.name.trim() })),
+          // The stored override is REPLACED, never merged: what the form holds
+          // is the whole answer for that version, so clearing its numbers has
+          // to clear them on the row too.
+          options: group.options.map(({ details: stored, ...option }) => {
+            void stored;
+            const own = optionDetailsToInput(optionDetails[option.id], {
+              dimensionUnit: details.dimensionUnit,
+              weightUnit: details.weightUnit,
+            });
+            return {
+              ...option,
+              name: option.name.trim(),
+              ...(own ? { details: own } : {}),
+            };
+          }),
         })),
         details: detailsToInput(details, isDigital),
         purchaseUrl: purchaseUrl.trim() || null,
@@ -546,7 +700,12 @@ export function ProductForm({
         title: values.title.trim(),
         description: values.description.trim(),
         // The form shows decimal major units; the DB stores integer cents.
-        priceCents: Math.round(Number(values.price) * 100),
+        // validate() ensures parseFormPriceCents succeeds before we get here;
+        // re-parsing avoids threading the result through the early return.
+        priceCents: (() => {
+          const r = parseFormPriceCents(values.price);
+          return r.ok ? r.cents : 0;
+        })(),
         currency: values.currency,
         status: values.status,
         imageKey,
@@ -638,6 +797,15 @@ export function ProductForm({
           ? "document"
           : "file";
 
+  // Problems to show in the sticky action bar. Computed from the live error
+  // state so the bar updates as the seller fixes fields without a re-save.
+  const allProblems = submitAttempted
+    ? (Object.values({ ...errors, ...detailsErrors }).filter(Boolean) as string[])
+    : [];
+  const firstErrField = submitAttempted
+    ? firstErroredField(errors, detailsErrors)
+    : undefined;
+
   /** Every section card gets its id, its live summary and its state from the
    *  one snapshot, so a header and the rail can never say different things. */
   const section = (id: ProductFormSectionId) => {
@@ -649,7 +817,6 @@ export function ProductForm({
       description: entry.description,
       state: sectionInfo[id]?.state ?? ("empty" as const),
       summary: sectionInfo[id]?.summary,
-      required: sectionInfo[id]?.required,
     };
   };
 
@@ -663,9 +830,10 @@ export function ProductForm({
       <form onSubmit={handleSubmit} noValidate className="space-y-5">
         {/* No summary banner here any more. It said only "fix the highlighted
           fields", sat at the top of a long form, and was the thing a seller
-          had to scroll up to find. The toast raised on a blocked save names
-          every problem, announces itself, and appears where the Save button
-          is; the fields still carry their own inline messages. */}
+          had to scroll up to find. The sticky action bar at the bottom names
+          every problem inline, stays visible while the seller scrolls, and
+          has a "Jump to first" button; the fields still carry their own
+          inline messages. */}
 
       <FormSection
         {...section("basics")}
@@ -678,9 +846,12 @@ export function ProductForm({
       >
         <div className="space-y-5">
           <div className="space-y-1.5">
-            <label htmlFor={`${fieldId}-title`} className={labelClass}>
-              Title
-            </label>
+            <div className="flex items-center">
+              <label htmlFor={`${fieldId}-title`} className={labelClass}>
+                Title
+              </label>
+              <RequiredMark />
+            </div>
             {/* The one field every product needs — visually the biggest. */}
             <input
               id={`${fieldId}-title`}
@@ -722,8 +893,7 @@ export function ProductForm({
           {/* Price lives here rather than in a section of its own: title,
               description and price are the three things every product needs
               before it can be saved, and splitting them put one field behind
-              its own heading. The platform-cut note moved with it, onto the
-              field it actually describes. */}
+              its own heading. */}
           <div className="space-y-1.5 sm:max-w-sm">
             <PriceField
               id={`${fieldId}-price`}
@@ -753,9 +923,34 @@ export function ProductForm({
             stockQuantity: errors.stockQuantity,
             lowStockThreshold: errors.lowStockThreshold,
           }}
-          onChange={(key, value) =>
-            updateField(key as keyof ProductFormValues, value)
-          }
+          onChange={(key, value) => {
+            if (key === "trackStock") {
+              // Seed stockQuantity in the same render so toggling on does
+              // not immediately fire "Enter how many units are in stock".
+              const checked = value as boolean;
+              setValues((previous) => {
+                const stockQuantityUpdate =
+                  checked && !previous.stockQuantity.trim()
+                    ? {
+                        stockQuantity:
+                          product?.stockQuantity != null
+                            ? String(product.stockQuantity)
+                            : "1",
+                      }
+                    : {};
+                const next = { ...previous, trackStock: checked, ...stockQuantityUpdate };
+                if (submitAttempted) {
+                  setErrors({
+                    ...validate(next),
+                    ...validatePage(purchaseUrl, optionGroups),
+                  });
+                }
+                return next;
+              });
+            } else {
+              updateField(key as keyof ProductFormValues, value);
+            }
+          }}
         />
       </FormSection>
 
@@ -897,6 +1092,18 @@ export function ProductForm({
           errors={detailsErrors}
           onChange={updateDetails}
         />
+        {optionGroups.length > 0 && (
+          <div className="mt-6 border-t border-border pt-5">
+            <OptionSpecsField
+              inputId={`${fieldId}-option-details`}
+              optionGroups={optionGroups}
+              byOption={optionDetails}
+              units={{ dimensionUnit: details.dimensionUnit, weightUnit: details.weightUnit }}
+              errors={optionDetailErrors}
+              onChange={updateOptionDetails}
+            />
+          </div>
+        )}
       </FormSection>
 
       <FormSection
@@ -950,8 +1157,41 @@ export function ProductForm({
         </div>
       </FormSection>
 
-      {/* Actions */}
-      <div className="border-t border-border pt-6">
+      {/* Actions — sticky so Save is always reachable without scrolling */}
+      <div className="sticky bottom-0 z-10 bg-background border-t border-border py-4">
+        {/* Inline error summary: appears where the seller's eyes already are
+            when Save is pressed. Replaces the validation toast (which used to
+            render at sm:bottom-6 and overlap this bar). The "Jump to first"
+            button scrolls to the first invalid field for sellers who want to
+            start there; the sticky bar stays visible while they scroll. */}
+        {allProblems.length > 0 && (
+          // role="alert" because this replaced a toast, and the toast was in a
+          // live region: a blocked save has to be ANNOUNCED, not just drawn.
+          // Without it a screen-reader user presses Save, nothing is spoken,
+          // and the only evidence is a count they have to go looking for.
+          <div
+            role="alert"
+            className="mb-4 rounded-md bg-destructive/10 px-4 py-3 text-sm text-destructive"
+          >
+            <div className="flex items-center justify-between gap-3">
+              <span>
+                {allProblems.length === 1
+                  ? "1 thing to fix before saving"
+                  : `${allProblems.length} things to fix before saving`}
+              </span>
+              {firstErrField && (
+                <button
+                  type="button"
+                  onClick={() => focusProductField(firstErrField)}
+                  className="shrink-0 font-medium underline underline-offset-2 hover:no-underline"
+                >
+                  Jump to first
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Upload progress. Two honest phases: a real percentage while bytes
             move, then an indeterminate bar once they are all sent and the
             server is sniffing, moderating and storing the file. Reporting a
@@ -996,7 +1236,7 @@ export function ProductForm({
               half-written work isn't dropped on a stray click. */}
           <button
             type="button"
-            onClick={() => leaveGuard.requestLeave("/products")}
+            onClick={() => requestLeave("/products")}
             className={secondaryButtonClass}
           >
             Cancel
@@ -1021,12 +1261,16 @@ export function ProductForm({
             : "This product hasn't been saved yet, so nothing will be kept."
         }
       >
-        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+        {/* `flex-wrap` is the escape valve: three buttons plus icons don't
+            always fit the modal's fixed width on one line, and letting the
+            row wrap keeps each button's own label on a single line instead
+            of the label itself wrapping mid-word. */}
+        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:flex-wrap sm:justify-end">
           <button
             type="button"
             onClick={leaveGuard.cancel}
             disabled={submitting}
-            className={secondaryButtonClass}
+            className={cn(secondaryButtonClass, "whitespace-nowrap")}
           >
             Keep editing
           </button>
@@ -1034,17 +1278,25 @@ export function ProductForm({
             type="button"
             onClick={leaveGuard.leave}
             disabled={submitting}
-            className={destructiveButtonClass}
+            className={cn(destructiveButtonClass, "whitespace-nowrap")}
           >
+            <Trash2 className="size-4" strokeWidth={2} aria-hidden="true" />
             Discard changes
           </button>
           <button
             type="button"
             onClick={handleSaveAndLeave}
             disabled={submitting}
-            className={primaryButtonClass}
+            className={cn(primaryButtonClass, "whitespace-nowrap")}
           >
-            {submitting ? "Saving…" : "Save and leave"}
+            {submitting ? (
+              "Saving…"
+            ) : (
+              <>
+                <Save className="size-4" strokeWidth={2} aria-hidden="true" />
+                Save and leave
+              </>
+            )}
           </button>
         </div>
       </Modal>

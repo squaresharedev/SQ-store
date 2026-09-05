@@ -150,9 +150,18 @@ export function SignalStorefrontsChart({
       xKey="name"
       series={[{ key: "count", label, colorIndex: tone }]}
       categoryWidth={116}
-      categoryFormatter={(name) =>
-        name.length > MAX_LABEL ? `${name.slice(0, MAX_LABEL - 1)}…` : name
-      }
+      categoryFormatter={(name) => {
+        // Recharts 3.x SVG text nodes lose regular spaces when the browser
+        // renders them: "Untitled storefront" becomes "Untitledstorefront".
+        // Replace spaces with non-breaking spaces ( ) so SVG preserves
+        // them. Applied AFTER the truncation so the ellipsis stays a single
+        // visible character.
+        const truncated =
+          name.length > MAX_LABEL
+            ? `${name.slice(0, MAX_LABEL - 1)}…`
+            : name;
+        return truncated.replace(/ /g, " ");
+      }}
       valueFormatter={countWithNoun(noun.one, noun.many)}
       ariaLabel={`${label} by storefront`}
     />

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { pageShellClass } from "@/components/ui/surface-styles";
 import {
   PRODUCTS_DEFAULT_PAGE_SIZE,
+  getProductPlacements,
   getProductSales,
   listProducts,
 } from "@/lib/products/queries";
@@ -58,10 +59,14 @@ export default async function ProductsPage({
 }) {
   const { filters, sort, page } = parseParams(await searchParams);
 
-  const [data, account, sales] = await Promise.all([
+  // Placements ride along in the same round trip as the list itself: the card
+  // needs them for the copy-link action, and the delete dialog needs them to
+  // say which storefronts still carry a block for the product being removed.
+  const [data, account, sales, placements] = await Promise.all([
     listProducts({ filters, sort, page, pageSize: PRODUCTS_DEFAULT_PAGE_SIZE }),
     getActiveAccount(),
     getProductSales(),
+    getProductPlacements(),
   ]);
   const canWrite = can(account?.role, "products.write");
 
@@ -75,6 +80,7 @@ export default async function ProductsPage({
         sort={sort}
         canWrite={canWrite}
         sales={sales}
+        placements={placements}
         heading={
           <div>
             <h1 className="text-3xl font-semibold text-foreground md:text-4xl">

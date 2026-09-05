@@ -1,10 +1,32 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 import { Check, CircleAlert } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { sectionAnchorId } from "./FormSection";
 import type { ProductFormSectionSnapshot } from "@/lib/products/form-datapoints";
+
+/**
+ * A plain `href="#id"` click is a same-document navigation, and Chrome,
+ * Safari and Firefox all fire a `popstate` event for it (not just
+ * `hashchange`) even though nothing was actually traversed. The product
+ * form's unsaved-changes guard listens for `popstate` to catch the browser
+ * Back button, so left unhandled, every click here while the form is dirty
+ * was mistaken for a Back press and popped the "Discard your changes?"
+ * prompt. Scrolling by hand and updating the URL with `replaceState`
+ * (which never fires `popstate`) keeps the same jump-to-section behaviour
+ * without feeding the guard a false signal.
+ */
+function handleNavClick(event: MouseEvent<HTMLAnchorElement>, id: string) {
+  // Leave modified/non-primary clicks (open in new tab, etc.) to the browser.
+  if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+    return;
+  }
+  event.preventDefault();
+  const anchorId = sectionAnchorId(id);
+  document.getElementById(anchorId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  window.history.replaceState(null, "", `#${anchorId}`);
+}
 
 /**
  * WHERE AM I, AND WHAT IS LEFT.
@@ -47,6 +69,7 @@ export function FormSectionNav({
             <li key={section.id}>
               <a
                 href={`#${sectionAnchorId(section.id)}`}
+                onClick={(event) => handleNavClick(event, section.id)}
                 aria-current={current ? "true" : undefined}
                 data-product-form-nav-item={section.id}
                 data-product-section-state={section.state}

@@ -3,6 +3,8 @@ import {
   WEIGHT_UNITS,
   type DimensionUnit,
   type ProductDetails,
+  type ProductOptionDetails,
+  type ProductOptionGroup,
   type ProductSafety,
   type WeightUnit,
 } from "@/types/product";
@@ -47,6 +49,7 @@ export type DetailsFieldErrors = Partial<
     | "height"
     | "weight"
     | "specs"
+    | "optionDetails"
     | "manufacturerName"
     | "manufacturerAddress"
     | "manufacturerEmail"
@@ -54,6 +57,28 @@ export type DetailsFieldErrors = Partial<
     string
   >
 >;
+
+/**
+ * ONE VERSION'S OWN FACTS, as the strings the form holds while they are being
+ * typed. Numbers only: the units are the product's (there is one set of unit
+ * pickers, above), because a table measured in cm in one size and inches in
+ * another is a mistake rather than a feature.
+ */
+export interface OptionDetailsFormValues {
+  length: string;
+  width: string;
+  height: string;
+  weight: string;
+  specs: { label: string; value: string }[];
+}
+
+export const EMPTY_OPTION_DETAILS: OptionDetailsFormValues = {
+  length: "",
+  width: "",
+  height: "",
+  weight: "",
+  specs: [],
+};
 
 const EMPTY_SAFETY: SafetyFormValues = {
   manufacturerName: "",
@@ -193,6 +218,114 @@ export function detailsToInput(values: DetailsFormValues, isDigital: boolean): P
   }
 
   return details;
+}
+
+// ── Per-version facts ───────────────────────────────────────────────────
+//
+// Held by the form as a map keyed by OPTION ID rather than on the options
+// themselves, for the same reason the product's own details are strings: a
+// half-typed "3." has to survive until the seller types the "5". The map is
+// read back by option id on save, so an option deleted meanwhile simply takes
+// its entry out of play, with nothing to reconcile.
+
+/** Stored overrides to the form's strings, keyed by option id. Options with
+ *  nothing of their own get no entry at all. */
+export function initialOptionDetails(
+  groups: readonly ProductOptionGroup[],
+): Record<string, OptionDetailsFormValues> {
+  const byOption: Record<string, OptionDetailsFormValues> = {};
+  for (const group of groups) {
+    for (const option of group.options) {
+      const own = option.details;
+      if (!own) continue;
+      byOption[option.id] = {
+        length: numberToField(own.dimensions?.length),
+        width: numberToField(own.dimensions?.width),
+        height: numberToField(own.dimensions?.height),
+        weight: numberToField(own.weight?.value),
+        specs: (own.specs ?? []).map((spec) => ({ ...spec })),
+      };
+    }
+  }
+  return byOption;
+}
+
+/** Nothing typed in. Kept out of the map entirely, so opening a version and
+ *  closing it again cannot make the form think there are unsaved changes. */
+export function optionDetailsEmpty(values: OptionDetailsFormValues): boolean {
+  return (
+    !values.length.trim() &&
+    !values.width.trim() &&
+    !values.height.trim() &&
+    !values.weight.trim() &&
+    values.specs.every((spec) => !spec.label.trim() && !spec.value.trim())
+  );
+}
+
+/**
+ * UX-only checks, one message per version (the server re-parses).
+ *
+ * Only options the product STILL has are judged: an entry left behind by a
+ * deleted option is never saved either (see optionDetailsToInput's caller), and
+ * a message about a row that is no longer on the page is a save the seller
+ * cannot unblock.
+ */
+export function validateOptionDetails(
+  byOption: Record<string, OptionDetailsFormValues>,
+  liveOptionIds: ReadonlySet<string>,
+): Record<string, string> {
+  const errors: Record<string, string> = {};
+  for (const [optionId, values] of Object.entries(byOption)) {
+    if (!liveOptionIds.has(optionId)) continue;
+    const badMeasure = (["length", "width", "height", "weight"] as const).some(
+      (key) => parseMeasure(values[key]) === "invalid",
+    );
+    if (badMeasure) {
+      errors[optionId] = "Use a number, like 12 or 3.5.";
+    } else if (values.specs.some((spec) => spec.label.trim() && !spec.value.trim())) {
+      errors[optionId] = "Every specification needs a value.";
+    }
+  }
+  return errors;
+}
+
+/**
+ * One version's strings to the stored shape, or `undefined` when it says
+ * nothing of its own, so an option that overrides nothing stays byte-identical
+ * to one that never could.
+ *
+ * `units` are the product's own pickers: the override carries them so the
+ * stored value is a complete measurement wherever it is read, but the seller
+ * never chooses them twice.
+ */
+export function optionDetailsToInput(
+  values: OptionDetailsFormValues | undefined,
+  units: { dimensionUnit: DimensionUnit; weightUnit: WeightUnit },
+): ProductOptionDetails | undefined {
+  if (!values) return undefined;
+  const details: ProductOptionDetails = {};
+
+  const length = parseMeasure(values.length);
+  const width = parseMeasure(values.width);
+  const height = parseMeasure(values.height);
+  if ([length, width, height].some((value) => typeof value === "number")) {
+    details.dimensions = {
+      ...(typeof length === "number" ? { length } : {}),
+      ...(typeof width === "number" ? { width } : {}),
+      ...(typeof height === "number" ? { height } : {}),
+      unit: units.dimensionUnit,
+    };
+  }
+
+  const weight = parseMeasure(values.weight);
+  if (typeof weight === "number") details.weight = { value: weight, unit: units.weightUnit };
+
+  const specs = values.specs
+    .map((spec) => ({ label: spec.label.trim(), value: spec.value.trim() }))
+    .filter((spec) => spec.label && spec.value);
+  if (specs.length > 0) details.specs = specs;
+
+  return Object.keys(details).length > 0 ? details : undefined;
 }
 
 /** A photo in the form: either already stored (has a key) or freshly picked

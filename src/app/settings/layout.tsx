@@ -4,7 +4,14 @@ import { SettingsShell } from "@/components/settings/SettingsShell";
 import { getProfile, requireUser } from "@/lib/auth/session";
 
 export const metadata: Metadata = {
-  title: "Settings",
+  // The template applies to every child page's `title` field, so a page
+  // that exports title: "Business & seller details" gets the full tab title
+  // "Business & seller details | Square Share". The default covers the
+  // (unreachable, since / redirects) root URL.
+  title: {
+    template: "%s | Square Share",
+    default: "Settings | Square Share",
+  },
 };
 
 // force-dynamic: see (dashboard)/layout.tsx — requireUser()'s cookies() call

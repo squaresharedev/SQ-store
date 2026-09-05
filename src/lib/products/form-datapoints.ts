@@ -8,8 +8,10 @@ import type {
   DetailsFormValues,
   DocumentFormValue,
   GalleryFormImage,
+  OptionDetailsFormValues,
 } from "@/components/products/form-values";
-import { safetyStarted } from "@/components/products/form-values";
+import { optionDetailsEmpty, safetyStarted } from "@/components/products/form-values";
+import { parseFormPriceCents } from "@/lib/products/price";
 
 /**
  * THE PRODUCT FORM, AS DATA.
@@ -65,15 +67,23 @@ export const PRODUCT_FORM_SECTIONS = [
   {
     id: "stock",
     label: "Stock",
+    // THE SECTION'S ONLY EXPLANATION, which is why it also covers the alert.
+    // Track stock and the low-stock alert had a "?" each, saying between them
+    // what this one sentence says: three buttons on a card with two controls,
+    // opening three windows onto the same idea. One section, one explanation.
     description:
-      "Unlimited by default. Track it to show sold-out and low-stock badges and stop overselling.",
+      "Unlimited by default. Track it to stop overselling and show buyers sold-out and “Only N left” badges. The alert number is when that second badge appears.",
     required: false,
   },
   {
     id: "media",
     label: "Media and delivery",
-    description:
-      "How it looks in the grid, what the buyer receives, and where the buy button sends them.",
+    // NO DESCRIPTION, so this section shows no "?" beside its heading. Its
+    // three fields — display image, digital file, purchase link — each carry
+    // their own, and a fourth info button restating them in the header made a
+    // card of four "?"s where the header's was the one you could skip. Empty
+    // is the opt-out; see FormSection.
+    description: "",
     required: false,
   },
   {
@@ -209,6 +219,9 @@ export type ProductFormSnapshot = {
     includedCount: number;
     specCount: number;
     hasOrigin: boolean;
+    /** Options stating measurements of their own, which the product page shows
+     *  instead of the product's when that version is picked. */
+    versionsWithOwnSpecs: number;
   };
   safety: {
     /** The seller has begun the block, so its three required fields apply. */
@@ -236,6 +249,9 @@ export type ProductFormStateInput = {
   gallery: GalleryFormImage[];
   documents: DocumentFormValue[];
   details: DetailsFormValues;
+  /** Per-version measurements, keyed by option id. Entries whose option is
+   *  gone are ignored, exactly as the save path ignores them. */
+  optionDetails: Record<string, OptionDetailsFormValues>;
   purchaseUrl: string;
   shippingProfileId: string | null;
   /** The chosen profile's name, resolved by the form against the store's
@@ -250,12 +266,12 @@ export type ProductFormStateInput = {
 };
 
 /** A decimal the seller typed to the integer cents the database stores, or
- *  null when it is blank or not a number yet. */
+ *  null when it is blank or not a valid price yet. Uses the same strict parser
+ *  as the form's own validate() so the snapshot and validation never disagree
+ *  about whether the price is present. */
 function toPriceCents(price: string): number | null {
-  const trimmed = price.trim();
-  if (!trimmed) return null;
-  const value = Number(trimmed);
-  return Number.isFinite(value) && value > 0 ? Math.round(value * 100) : null;
+  const result = parseFormPriceCents(price);
+  return result.ok ? result.cents : null;
 }
 
 function toCount(raw: string): number | null {
@@ -268,10 +284,23 @@ function toCount(raw: string): number | null {
 const plural = (count: number, one: string, many = `${one}s`) =>
   `${count} ${count === 1 ? one : many}`;
 
+/** Versions stating measurements of their own. Only options the product still
+ *  has count, because only those are saved. */
+function versionsWithOwnSpecs(input: ProductFormStateInput): number {
+  const live = new Set<string>();
+  for (const group of input.optionGroups) {
+    for (const option of group.options) live.add(option.id);
+  }
+  return Object.entries(input.optionDetails).filter(
+    ([optionId, values]) => live.has(optionId) && !optionDetailsEmpty(values),
+  ).length;
+}
+
 /** The section summaries, which are also what the headers and the rail print. */
 function summarize(input: ProductFormStateInput): Record<ProductFormSectionId, string> {
   const { values, details } = input;
   const optionCount = input.optionGroups.reduce((total, g) => total + g.options.length, 0);
+  const ownSpecs = versionsWithOwnSpecs(input);
   // EVERY field in the section, not a sample of them. A summary that ignores
   // some of what it summarises is worse than none: filling "Made in" and
   // being told the section is still Empty teaches a seller not to trust it.
@@ -287,12 +316,21 @@ function summarize(input: ProductFormStateInput): Record<ProductFormSectionId, s
     details.included.trim() ? "Contents" : "",
     details.specs.filter((spec) => spec.label.trim()).length > 0 ? "Specs" : "",
     details.origin.trim() ? "Made in" : "",
+    // Named the way the seller thinks of it: "2 versions" is the count of
+    // versions measuring something of their own, not a field they filled in.
+    ownSpecs > 0 ? plural(ownSpecs, "version") : "",
   ].filter(Boolean);
 
   return {
     basics: values.title.trim() || "",
     stock: values.trackStock
-      ? `Tracking ${values.stockQuantity.trim() || "0"}`
+      ? // Show the actual quantity rather than a misleading "0": an empty
+        // field means the seller hasn't answered yet, not that they have zero
+        // units. The toggle flip now seeds a real value, so this branch reads
+        // as unanswered only in the edge case where seeding hasn't run.
+        values.stockQuantity.trim()
+        ? `Tracking ${values.stockQuantity.trim()}`
+        : "Set quantity"
       : "Unlimited",
     media: [
       input.hasCoverImage ? "Image" : "",
@@ -403,6 +441,7 @@ export function buildProductFormSnapshot(
       includedCount: included.length,
       specCount: details.specs.filter((spec) => spec.label.trim()).length,
       hasOrigin: details.origin.trim() !== "",
+      versionsWithOwnSpecs: versionsWithOwnSpecs(input),
     },
     safety: {
       started: safetyStarted(safety),

@@ -8,7 +8,7 @@ import {
   recordSignal,
   visitorHash,
 } from "@/lib/analytics/record";
-import { getPublicProductPage } from "@/lib/products/public";
+import { getPublicProductPage, resolveDisplayName } from "@/lib/products/public";
 import { clientKey } from "@/lib/rate-limit";
 import {
   LEGACY_VARIANT_QUERY_PARAM,
@@ -85,10 +85,26 @@ export async function generateMetadata({
   const { page } = result;
   const { product, storefront } = page;
   const allow = storefront.productPage.allowIndexing;
-  const description = summary(product.description, `${product.title} from ${storefront.name}.`);
-  const hero = product.images[0]?.url;
+
+  // BUY-05: the buyer-facing store name — business name beats the header's
+  // display name, which in turn beats the internal row name. Matches what
+  // SellerBlock prints on the page so the tab title and the on-page identity
+  // agree on whose store this is.
+  const displayName = resolveDisplayName(page);
+  const description = summary(product.description, `${product.title} from ${displayName}.`);
+
+  // BUY-01: the og:image points at a STABLE route that 302-redirects to a
+  // freshly signed R2 URL on every scrape. The presigned URL the product row
+  // carries expires in ~2 h, so it is fine for the page itself but breaks
+  // every social card the moment the network re-scrapes it. The stable route
+  // never expires; only the redirect destination does, and that is fetched
+  // fresh each time.
+  const hasImage = product.images.length > 0;
+  const origin = new URL(page.productUrl).origin;
+  const ogImageUrl = `${origin}/api/og/p/${product.id}`;
+
   return {
-    title: { absolute: `${product.title} | ${storefront.name}` },
+    title: { absolute: `${product.title} | ${displayName}` },
     description,
     robots: { index: allow, follow: allow },
     ...(allow ? { alternates: { canonical: page.productUrl } } : {}),
@@ -96,17 +112,17 @@ export async function generateMetadata({
       type: "website",
       title: product.title,
       description,
-      siteName: storefront.name,
+      siteName: displayName,
       url: page.productUrl,
-      // The signed hero URL is good for at least an hour at share time, which
-      // is when the card scraper fetches it.
-      ...(hero ? { images: [{ url: hero, alt: product.images[0]?.alt ?? product.title }] } : {}),
+      ...(hasImage
+        ? { images: [{ url: ogImageUrl, alt: product.images[0]?.alt ?? product.title }] }
+        : {}),
     },
     twitter: {
-      card: hero ? "summary_large_image" : "summary",
+      card: hasImage ? "summary_large_image" : "summary",
       title: product.title,
       description,
-      ...(hero ? { images: [hero] } : {}),
+      ...(hasImage ? { images: [ogImageUrl] } : {}),
     },
   };
 }
@@ -143,13 +159,58 @@ export default async function ProductPage({
     });
   });
 
+  // BUY-07: Product + Offer JSON-LD, emitted from the same data that fills the
+  // meta tags above so the two can never disagree. Only claim availability and
+  // price that the page itself is showing.
+  //
+  // WHY THE `<` IS PRE-ESCAPED. A script's text child is emitted raw, so a
+  // seller who puts a closing script tag in a product title would otherwise
+  // break out of the block. React does defend against that on the server (it
+  // rewrites the sequence to unicode escapes), but it does NOT produce the same
+  // text on the client, so the two disagree and React discards and re-renders
+  // the whole tree on every product page load. Escaping `<` ourselves is the
+  // fix for both at once: `<` is valid JSON, it cannot close the element,
+  // and server and client now emit identical text.
+  const displayName = resolveDisplayName(page);
+  const origin = new URL(page.productUrl).origin;
+  const ogImageUrl = `${origin}/api/og/p/${page.product.id}`;
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: page.product.title,
+    ...(page.product.description
+      ? { description: page.product.description.replace(/\s+/g, " ").trim().slice(0, 500) }
+      : {}),
+    ...(page.product.images.length > 0 ? { image: ogImageUrl } : {}),
+    offers: {
+      "@type": "Offer",
+      price: (page.product.priceCents / 100).toFixed(2),
+      priceCurrency: page.product.currency,
+      availability: page.product.soldOut
+        ? "https://schema.org/OutOfStock"
+        : page.product.stock?.state === "low_stock"
+          ? "https://schema.org/LimitedAvailability"
+          : "https://schema.org/InStock",
+      url: page.productUrl,
+      seller: {
+        "@type": "Organization",
+        name: displayName,
+      },
+    },
+  };
+
   return (
-    <main>
-      <ProductPageView
-        page={page}
-        mode="public"
-        initialOptionIds={requestedOptions(query, collectOptionIds(page.product.optionGroups))}
-      />
-    </main>
+    <>
+      <script type="application/ld+json" id="product-jsonld">
+        {JSON.stringify(jsonLd).replace(/</g, "\\u003c")}
+      </script>
+      <main>
+        <ProductPageView
+          page={page}
+          mode="public"
+          initialOptionIds={requestedOptions(query, collectOptionIds(page.product.optionGroups))}
+        />
+      </main>
+    </>
   );
 }

@@ -796,6 +796,10 @@ export interface SeededProduct {
   price_cents: number;
   currency: string;
   status: string;
+  /** Read back so an order can record WHICH version was bought. A store whose
+   *  every order is version-less makes the orders page look like the feature
+   *  does not exist. */
+  option_groups?: SeedOptionGroup[];
 }
 
 /** Insert shape for public.orders. created_at is backdated across the window. */
@@ -811,6 +815,9 @@ export interface OrderInsert {
   buyer_email: string;
   product_title: string;
   product_price_cents: number;
+  /** What the buyer picked, snapshotted in words: [{label, value}]. Empty for
+   *  a product sold in one version. */
+  selected_options: { label: string; value: string }[];
   created_at: string;
 }
 
@@ -964,8 +971,33 @@ function makeOrder(
     buyer_email: pickBuyerEmail(rng),
     product_title: product.title,
     product_price_cents: product.price_cents,
+    selected_options: pickSelection(rng, product),
     created_at: new Date(at).toISOString(),
   };
+}
+
+/**
+ * One option per group, the way a buyer has to pick: a product sold in a size
+ * and a colour was bought in exactly one of each.
+ *
+ * The NAMES are stored, not the ids, matching what the column is for (see
+ * 20260905_order_selected_options): an order says what was sold, and the
+ * product's options are free to change afterwards. Sold-out options are
+ * skipped where there is anything else to pick, because a seeded order is a
+ * sale that went through.
+ */
+function pickSelection(
+  rng: Rng,
+  product: SeededProduct,
+): { label: string; value: string }[] {
+  const selection: { label: string; value: string }[] = [];
+  for (const group of product.option_groups ?? []) {
+    const choosable = group.options.filter((option) => option.available);
+    const option = pick(rng, choosable.length > 0 ? choosable : group.options);
+    if (!group.name.trim() || !option?.name.trim()) continue;
+    selection.push({ label: group.name.trim(), value: option.name.trim() });
+  }
+  return selection;
 }
 
 /**

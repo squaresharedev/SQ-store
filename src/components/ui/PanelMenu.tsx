@@ -34,7 +34,11 @@ import {
 } from "@/components/ui/control-styles";
 
 export function PanelMenu({ children }: { children: React.ReactNode }) {
-  return <div role="list">{children}</div>;
+  // PLT-02: no role="list" — the children are not exclusively role="listitem"
+  // (the search field is mixed in), so the ARIA roles would misrepresent the
+  // structure. The visual hierarchy is clear without the role.
+  // data-panel-menu allows test queries without relying on an ARIA role.
+  return <div data-panel-menu="">{children}</div>;
 }
 
 export function PanelMenuItem({
@@ -48,7 +52,8 @@ export function PanelMenuItem({
   onClick: () => void;
 }) {
   return (
-    <div role="listitem" className="border-b border-border">
+    // PLT-02: plain div; role="listitem" removed to match the parent's fix.
+    <div data-panel-menu-item="" className="border-b border-border">
       <button
         type="button"
         onClick={onClick}

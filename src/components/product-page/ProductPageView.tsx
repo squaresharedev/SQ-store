@@ -5,7 +5,7 @@ import { resolveBackgroundStyle } from "@/components/storefront/background-prese
 import { CustomFontFace } from "@/components/storefront/CustomFontFace";
 import { customFontVars, fontPresentation } from "@/lib/theme/storefront-fonts";
 import { isEuSeller, PRODUCT_PAGE_SECTION_LABELS } from "@/lib/storefront/product-page";
-import { resolveProductShipping } from "@/lib/storefront/shipping";
+import { resolveProductShipping, resolveReturns } from "@/lib/storefront/shipping";
 import { SECTION_SETTING } from "@/lib/storefront/setting-ref";
 import type { ProductPageData } from "@/types/product-page";
 import type { ProductPageSectionId } from "@/types/storefront";
@@ -17,7 +17,8 @@ import { ProductGallery } from "./ProductGallery";
 import { ProductPrice } from "./ProductPrice";
 import { PoweredByFooter } from "./PoweredByFooter";
 import { SellerBlock, hasSellerDetails } from "./SellerBlock";
-import { SpecsTable, hasSpecs } from "./SpecsTable";
+import { SpecsSection } from "./SpecsSection";
+import { hasSpecs } from "./SpecsTable";
 import { StatutoryNotes } from "./StatutoryNotes";
 import { StockLine } from "./StockLine";
 import { OptionProvider } from "./OptionContext";
@@ -56,17 +57,38 @@ export function ProductPageView({
   initialOptionIds?: readonly string[];
 }) {
   const { storefront, product } = page;
-  const { theme, productPage, policies, seller } = storefront;
+  const { theme, productPage, shippingPolicy, seller } = storefront;
   const preview = mode === "preview";
 
-  // WHICH SHIPPING TERMS THIS PRODUCT IS SOLD UNDER. Almost always the store's
-  // default; a product that names one of the store's shipping profiles gets
-  // that instead. Resolved once here and used in both places the page talks
-  // about shipping — the line beside the button and the section below — so
-  // the two can never quote different terms.
+  // WHICH SHIPPING TERMS THIS PRODUCT IS SOLD UNDER. Almost always the
+  // account's default; a product that names one of the account's shipping
+  // profiles gets that instead. Resolved once here and used in both places the
+  // page talks about shipping — the line beside the button and the section
+  // below — so the two can never quote different terms.
   const shipping = product.isDigital
     ? null
-    : resolveProductShipping(product.shippingProfileId, storefront.shippingProfiles, policies);
+    : resolveProductShipping(product.shippingProfileId, shippingPolicy);
+  // Returns do not vary by product, so this is the account's answer, full
+  // stop. Generated from the structured settings (or the seller's own words,
+  // which the generator prefers) rather than read from a stored paragraph.
+  const returnsText = resolveReturns(shippingPolicy);
+
+  // BUY-02: Derive the price and shipping notes from the seller's actual facts
+  // rather than blindly forwarding the stored config defaults.
+  //
+  // `incl. VAT` is only truthful for a VAT-registered EU seller; a sole trader
+  // below the registration threshold, or any seller outside the EU, must not
+  // claim their price is inclusive of VAT they do not collect.
+  //
+  // `plus shipping` is only meaningful for a physical product whose seller has
+  // configured shipping terms. A digital download is not shipped (ProductPrice
+  // already suppresses the shipping note for isDigital, but the effective note
+  // should be "none" at the source so the logic is not split across two files).
+  // A physical product with no terms configured has nothing to say about
+  // shipping cost, so we suppress it rather than printing a note that may be
+  // wrong.
+  const effectivePriceNote = seller.vatId && isEuSeller(seller) ? productPage.priceNote : "none" as const;
+  const effectiveShippingNote = !product.isDigital && shipping !== null ? productPage.shippingNote : "none" as const;
 
   const ink = resolveInk(theme, productPage);
   const rule = ruleColor(ink);
@@ -107,7 +129,7 @@ export function ProductPageView({
   if (shippingLine) {
     trust.push({ icon: product.isDigital ? PackageCheck : Truck, text: shippingLine });
   }
-  const returnsLine = firstSentence(policies.returns);
+  const returnsLine = firstSentence(returnsText);
   if (returnsLine) trust.push({ icon: RotateCcw, text: returnsLine });
   if (isEu) {
     trust.push({ icon: ShieldCheck, text: "14 days to change your mind, and a 2-year guarantee." });
@@ -151,8 +173,8 @@ export function ProductPageView({
       case "seller":
         return null;
       case "specs":
-        return hasSpecs(product.details) ? (
-          <SpecsTable details={product.details} ruleColor={rule} />
+        return hasSpecs(product.details, product.optionGroups) ? (
+          <SpecsSection details={product.details} ruleColor={rule} />
         ) : null;
       case "documents":
         return product.documents.length > 0 ? (
@@ -160,30 +182,33 @@ export function ProductPageView({
         ) : null;
       case "shipping":
         if (product.isDigital) return null;
+        // BUY-03: when the seller has written nothing about shipping yet,
+        // omit the section entirely rather than printing an apology. A
+        // heading with "The seller has not added shipping details yet"
+        // under it tells a buyer less than nothing and signals an
+        // incomplete storefront. The section reappears the moment the
+        // seller adds their terms.
+        if (!shipping) return null;
         return (
           <div className="flex flex-col gap-3 text-sm leading-relaxed">
             {/* The dispatch line repeats up beside the button, deliberately:
                 there it is a glance, here it is the first sentence of the
                 terms, and a buyer reading the section should not have to
                 scroll back for it. */}
-            {shipping?.dispatch && <p className="font-medium">{shipping.dispatch}</p>}
-            {shipping?.body ? (
-              paragraphs(shipping.body).map((text, index) => (
-                <p key={index} className="whitespace-pre-line">
-                  {text}
-                </p>
-              ))
-            ) : shipping ? null : (
-              <p className="opacity-70">The seller has not added shipping details yet.</p>
-            )}
+            {shipping.dispatch && <p className="font-medium">{shipping.dispatch}</p>}
+            {paragraphs(shipping.body).map((text, index) => (
+              <p key={index} className="whitespace-pre-line">
+                {text}
+              </p>
+            ))}
           </div>
         );
       case "returns":
-        if (!policies.returns && !isEu) return null;
+        if (!returnsText && !isEu) return null;
         return (
           <div className="flex flex-col gap-3 text-sm leading-relaxed">
-            {policies.returns &&
-              paragraphs(policies.returns).map((text, index) => (
+            {returnsText &&
+              paragraphs(returnsText).map((text, index) => (
                 <p key={index} className="whitespace-pre-line">
                   {text}
                 </p>
@@ -314,8 +339,8 @@ export function ProductPageView({
                   <ProductPrice
                     priceCents={product.priceCents}
                     currency={product.currency}
-                    priceNote={productPage.priceNote}
-                    shippingNote={productPage.shippingNote}
+                    priceNote={effectivePriceNote}
+                    shippingNote={effectiveShippingNote}
                     isDigital={product.isDigital}
                   />
                 </div>
@@ -442,8 +467,8 @@ export function ProductPageView({
               <ProductPrice
                 priceCents={product.priceCents}
                 currency={product.currency}
-                priceNote={productPage.priceNote}
-                shippingNote={productPage.shippingNote}
+                priceNote={effectivePriceNote}
+                shippingNote={effectiveShippingNote}
                 isDigital={product.isDigital}
                 size="sm"
               />

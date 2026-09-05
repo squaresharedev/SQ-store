@@ -177,7 +177,7 @@ describe("StorefrontCard preview - a storefront with no products", () => {
 
   it("calls a board of nothing but words empty, since it draws nothing", () => {
     renderCard(withMasthead([textBlock]));
-    expect(screen.getByText("No products yet")).toBeInTheDocument();
+    expect(screen.getByText("This grid is empty")).toBeInTheDocument();
   });
 
   // A product tile the preview cannot draw is not a product: the block is
@@ -204,6 +204,6 @@ describe("StorefrontCard preview - a storefront with no products", () => {
       theme: { ...DEFAULT_STOREFRONT_CONFIG.theme, hideSoldOut: true },
     });
     expect(screen.queryByText(textBlock.text)).not.toBeInTheDocument();
-    expect(screen.getByText("No products yet")).toBeInTheDocument();
+    expect(screen.getByText("This grid is empty")).toBeInTheDocument();
   });
 });

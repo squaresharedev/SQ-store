@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { getProfile, requireUser } from "@/lib/auth/session";
+import { NavigationBlockerProvider } from "@/lib/hooks/useNavigationBlocker";
 
 /**
  * PROTECTED — single auth gate for the whole route group. Layouts persist
@@ -29,5 +30,16 @@ export default async function DashboardLayout({
 
   // Toasts come from the ROOT layout (app/layout.tsx), not from here: they
   // have to outlive a navigation out of this route group.
-  return <DashboardShell username={username}>{children}</DashboardShell>;
+  //
+  // NavigationBlockerProvider sits above DashboardShell so it is an ancestor
+  // of both SearchProvider (which calls request() for programmatic navigations)
+  // and ProductForm (which calls register() while it has unsaved edits). The
+  // provider installs one capture-phase click listener on document, so every
+  // internal link in the chrome — sidebar, back links, breadcrumbs — goes
+  // through the active blocker when a dirty editor is mounted.
+  return (
+    <NavigationBlockerProvider>
+      <DashboardShell username={username}>{children}</DashboardShell>
+    </NavigationBlockerProvider>
+  );
 }

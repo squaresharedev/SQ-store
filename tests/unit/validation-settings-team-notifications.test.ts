@@ -102,13 +102,23 @@ describe("passwordChangeSchema", () => {
   });
 });
 
+const BLANK_SELLER = { seller_address: "", seller_email: "", seller_phone: "" };
+
 describe("taxSchema", () => {
   it("empty strings store as null", () => {
-    const r = taxSchema.safeParse({ tax_business_name: "", tax_vat_id: "", tax_country: "" });
+    const r = taxSchema.safeParse({
+      tax_business_name: "",
+      tax_vat_id: "",
+      tax_country: "",
+      ...BLANK_SELLER,
+    });
     expect(r.success && r.data).toEqual({
       tax_business_name: null,
+      seller_address: null,
+      seller_email: null,
       tax_vat_id: null,
       tax_country: null,
+      seller_phone: null,
     });
   });
   it("uppercases the VAT id", () => {
@@ -116,27 +126,107 @@ describe("taxSchema", () => {
       tax_business_name: "Studio",
       tax_vat_id: "ie1234567t",
       tax_country: "IE",
+      ...BLANK_SELLER,
     });
     expect(r.success && r.data.tax_vat_id).toBe("IE1234567T");
   });
   it("rejects VAT ids with hostile characters", () => {
     for (const vat of ["<script>", "a", "x".repeat(33), "DE!123"]) {
       expect(
-        taxSchema.safeParse({ tax_business_name: "", tax_vat_id: vat, tax_country: "" }).success,
+        taxSchema.safeParse({
+          tax_business_name: "",
+          tax_vat_id: vat,
+          tax_country: "",
+          ...BLANK_SELLER,
+        }).success,
         vat,
       ).toBe(false);
     }
   });
   it("country must be an EU code from the list", () => {
     expect(
-      taxSchema.safeParse({ tax_business_name: "", tax_vat_id: "", tax_country: "US" }).success,
+      taxSchema.safeParse({
+        tax_business_name: "",
+        tax_vat_id: "",
+        tax_country: "US",
+        ...BLANK_SELLER,
+      }).success,
     ).toBe(false);
     expect(
-      taxSchema.safeParse({ tax_business_name: "", tax_vat_id: "", tax_country: "ie" }).success,
+      taxSchema.safeParse({
+        tax_business_name: "",
+        tax_vat_id: "",
+        tax_country: "ie",
+        ...BLANK_SELLER,
+      }).success,
     ).toBe(false);
     expect(
-      taxSchema.safeParse({ tax_business_name: "", tax_vat_id: "", tax_country: "IE" }).success,
+      taxSchema.safeParse({
+        tax_business_name: "",
+        tax_vat_id: "",
+        tax_country: "IE",
+        ...BLANK_SELLER,
+      }).success,
     ).toBe(true);
+  });
+
+  // The seller-identity fields: address, contact email, phone. Read by every
+  // hosted product page this account sells on (lib/settings/seller-identity.ts).
+  it("keeps newlines in the address, unlike the single-line fields", () => {
+    const r = taxSchema.safeParse({
+      tax_business_name: "",
+      tax_vat_id: "",
+      tax_country: "",
+      seller_address: "12 Market Street\nDublin, D02 X285",
+      seller_email: "",
+      seller_phone: "",
+    });
+    expect(r.success && r.data.seller_address).toBe("12 Market Street\nDublin, D02 X285");
+  });
+  it("caps the address at the same length the DB CHECK allows", () => {
+    expect(
+      taxSchema.safeParse({
+        tax_business_name: "",
+        tax_vat_id: "",
+        tax_country: "",
+        seller_address: "x".repeat(301),
+        seller_email: "",
+        seller_phone: "",
+      }).success,
+    ).toBe(false);
+  });
+  it("gates the contact email's format but lets an empty value clear it", () => {
+    expect(
+      taxSchema.safeParse({
+        tax_business_name: "",
+        tax_vat_id: "",
+        tax_country: "",
+        seller_address: "",
+        seller_email: "not-an-email",
+        seller_phone: "",
+      }).success,
+    ).toBe(false);
+    const r = taxSchema.safeParse({
+      tax_business_name: "",
+      tax_vat_id: "",
+      tax_country: "",
+      seller_address: "",
+      seller_email: "hi@studio.example",
+      seller_phone: "",
+    });
+    expect(r.success && r.data.seller_email).toBe("hi@studio.example");
+  });
+  it("rejects a phone number over the length cap", () => {
+    expect(
+      taxSchema.safeParse({
+        tax_business_name: "",
+        tax_vat_id: "",
+        tax_country: "",
+        seller_address: "",
+        seller_email: "",
+        seller_phone: "x".repeat(33),
+      }).success,
+    ).toBe(false);
   });
 });
 

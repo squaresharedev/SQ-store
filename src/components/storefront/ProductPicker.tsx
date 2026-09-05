@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Image as ImageIcon, Plus, Search } from "lucide-react";
+import { Check, Image as ImageIcon, Plus, Search } from "lucide-react";
 import type { Product } from "@/types/product";
 import { formatPrice } from "@/lib/format";
 import { searchCatalogProducts } from "@/lib/products/picker-actions";
@@ -20,7 +20,6 @@ const ADD_BUTTON_CLASS = cn(
   "size-8 shrink-0 disabled:pointer-events-none disabled:opacity-40",
 );
 
-
 /**
  * Pick from the seller's existing products; each can be in the grid once.
  *
@@ -30,6 +29,9 @@ const ADD_BUTTON_CLASS = cn(
  * placeable. Products found that way are handed to `onFound` so the designer
  * can merge them into its catalogue state BEFORE a block referencing them
  * renders; without that merge the block would be dropped as unknown.
+ *
+ * SF-01: Draft products are badged so the seller knows buyers cannot reach them.
+ * SF-07: Multi-select lets the seller add several products at once.
  */
 export function ProductPicker({
   products,
@@ -51,6 +53,9 @@ export function ProductPicker({
   }>({ results: null, searching: false, failed: false });
   // Monotonic token so a slow stale response can never overwrite a newer one.
   const requestSeq = React.useRef(0);
+
+  // SF-07: Track which available products are selected for batch-add.
+  const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
 
   const term = search.trim().toLowerCase();
 
@@ -116,6 +121,40 @@ export function ProductPicker({
   const selected = merged.filter((product) => usedProductIds.has(product.id));
   const available = merged.filter((product) => !usedProductIds.has(product.id));
 
+  // SF-07: "Add all" is shown only when the grid is completely empty.
+  const gridIsEmpty = usedProductIds.size === 0;
+
+  function toggleSelect(productId: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(productId)) {
+        next.delete(productId);
+      } else {
+        next.add(productId);
+      }
+      return next;
+    });
+  }
+
+  function addSelected() {
+    for (const id of selectedIds) {
+      onAdd(id);
+    }
+    setSelectedIds(new Set());
+  }
+
+  function addAll() {
+    for (const p of available) {
+      onAdd(p.id);
+    }
+    setSelectedIds(new Set());
+  }
+
+  // Clean up selectedIds that have since been added or no longer appear.
+  const availableIds = new Set(available.map((p) => p.id));
+  const pendingSelected = [...selectedIds].filter((id) => availableIds.has(id));
+  const pendingCount = pendingSelected.length;
+
   return (
     <div className="space-y-3">
       <div className="relative">
@@ -127,7 +166,7 @@ export function ProductPicker({
         <input
           type="search"
           // Titles cap at 200 characters, so a longer term cannot match a
-          // product that exists. The action clamps to the same constant — this
+          // product that exists. The action clamps to the same constant -- this
           // is the affordance, not the gate.
           maxLength={PICKER_SEARCH_MAX_LENGTH}
           value={search}
@@ -142,7 +181,7 @@ export function ProductPicker({
 
       {term && searching && merged.length === 0 && (
         <p className={helpTextClass} role="status">
-          Searching…
+          Searching...
         </p>
       )}
       {term && !searching && merged.length === 0 && !searchFailed && (
@@ -161,7 +200,14 @@ export function ProductPicker({
           <p className="font-inter text-xs font-medium text-muted-foreground">
             In grid
           </p>
-          <ProductList products={selected} usedProductIds={usedProductIds} onAdd={onAdd} />
+          <ProductList
+            products={selected}
+            usedProductIds={usedProductIds}
+            selectedIds={selectedIds}
+            onAdd={onAdd}
+            onToggleSelect={toggleSelect}
+            selectable={false}
+          />
         </div>
       )}
       {available.length > 0 && (
@@ -171,7 +217,35 @@ export function ProductPicker({
               Available
             </p>
           )}
-          <ProductList products={available} usedProductIds={usedProductIds} onAdd={onAdd} />
+          <ProductList
+            products={available}
+            usedProductIds={usedProductIds}
+            selectedIds={selectedIds}
+            onAdd={onAdd}
+            onToggleSelect={toggleSelect}
+            selectable={true}
+          />
+          {/* SF-07: batch-add controls */}
+          <div className="flex items-center gap-2 pt-1">
+            {pendingCount > 0 && (
+              <button
+                type="button"
+                onClick={addSelected}
+                className="flex-1 rounded-md bg-foreground px-3 py-1.5 font-inter text-xs font-medium text-background transition-opacity duration-base ease-standard hover:opacity-80 motion-reduce:transition-none"
+              >
+                Add {pendingCount} selected
+              </button>
+            )}
+            {gridIsEmpty && pendingCount === 0 && available.length > 1 && (
+              <button
+                type="button"
+                onClick={addAll}
+                className="flex-1 rounded-md border border-border px-3 py-1.5 font-inter text-xs font-medium text-foreground transition-colors duration-base ease-standard hover:bg-muted motion-reduce:transition-none"
+              >
+                Add all ({available.length})
+              </button>
+            )}
+          </div>
         </div>
       )}
     </div>
@@ -181,18 +255,46 @@ export function ProductPicker({
 function ProductList({
   products,
   usedProductIds,
+  selectedIds,
   onAdd,
+  onToggleSelect,
+  selectable,
 }: {
   products: Product[];
   usedProductIds: ReadonlySet<string>;
+  selectedIds: Set<string>;
   onAdd: (productId: string) => void;
+  onToggleSelect: (productId: string) => void;
+  /** Whether checkboxes are shown (only for the "available" group). */
+  selectable: boolean;
 }) {
   return (
     <ul className="space-y-1">
       {products.map((product) => {
         const used = usedProductIds.has(product.id);
+        const isChecked = selectable && selectedIds.has(product.id);
+        const isDraft = product.status === "draft";
+
         return (
           <li key={product.id} className="flex items-center gap-2">
+            {selectable && (
+              <button
+                type="button"
+                onClick={() => onToggleSelect(product.id)}
+                aria-pressed={isChecked}
+                aria-label={`${isChecked ? "Deselect" : "Select"} ${product.title}`}
+                className={cn(
+                  "flex size-5 shrink-0 items-center justify-center rounded border transition-colors duration-base ease-standard motion-reduce:transition-none",
+                  isChecked
+                    ? "border-foreground bg-foreground text-background"
+                    : "border-border bg-transparent hover:border-foreground",
+                )}
+              >
+                {isChecked && (
+                  <Check className="size-3" strokeWidth={2.5} aria-hidden />
+                )}
+              </button>
+            )}
             <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-sm bg-muted">
               {product.imageUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element -- signed R2 URL; plain img for a thumbnail.
@@ -211,24 +313,39 @@ function ProductList({
               )}
             </span>
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-sm font-medium text-foreground">
-                {product.title}
+              <span className="flex items-center gap-1.5">
+                <span className="block truncate text-sm font-medium text-foreground">
+                  {product.title}
+                </span>
+                {/* SF-01: badge draft products so sellers know buyers hit a dead link */}
+                {isDraft && (
+                  <span
+                    aria-label="Draft product -- not visible to buyers"
+                    className="shrink-0 rounded-sm bg-amber-100 px-1 py-0.5 font-inter text-[10px] font-medium leading-none text-amber-800 dark:bg-amber-900/40 dark:text-amber-300"
+                  >
+                    Draft
+                  </span>
+                )}
               </span>
               <span className="block font-inter text-xs text-muted-foreground">
                 {formatPrice(product.price, product.currency)}
               </span>
             </span>
-            <button
-              type="button"
-              onClick={() => onAdd(product.id)}
-              disabled={used}
-              aria-label={
-                used ? `${product.title} is in the grid` : `Add ${product.title} to grid`
-              }
-              className={cn(ADD_BUTTON_CLASS)}
-            >
-              <Plus className="size-4" strokeWidth={2} aria-hidden="true" />
-            </button>
+            {!selectable || !selectedIds.size ? (
+              <button
+                type="button"
+                onClick={() => onAdd(product.id)}
+                disabled={used}
+                aria-label={
+                  used
+                    ? `${product.title} is in the grid`
+                    : `Add ${product.title} to grid`
+                }
+                className={cn(ADD_BUTTON_CLASS)}
+              >
+                <Plus className="size-4" strokeWidth={2} aria-hidden="true" />
+              </button>
+            ) : null}
           </li>
         );
       })}

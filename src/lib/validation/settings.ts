@@ -3,9 +3,11 @@ import {
   DELETE_CONFIRM_PHRASE,
   EU_COUNTRY_CODES,
   LEGAL_VERSION,
+  SELLER_FIELD_MAX,
 } from "@/lib/settings/constants";
 import {
   emailAddress,
+  multiLineText,
   optionalSingleLineText,
   referenceCode,
 } from "@/lib/validation/inputs";
@@ -61,8 +63,33 @@ export const passwordChangeSchema = z
 const optionalTrimmed = (max: number, label: string) =>
   optionalSingleLineText({ label, max }).transform((v) => (v === "" ? null : v));
 
+/** Same as above but newlines survive — for the postal address. */
+const optionalMultiLine = (max: number, label: string) =>
+  multiLineText({ label, max, min: 0 }).transform((v) => (v === "" ? null : v));
+
+/** Empty clears the field; anything else must actually look like an email.
+ *  Reuses `emailAddress`'s own format + control-character gate rather than a
+ *  second copy of it, so the two can never disagree about what's valid. */
+const optionalEmail = (label: string) =>
+  z
+    .string()
+    .trim()
+    .transform((v) => (v === "" ? null : v))
+    .refine((v) => v === null || emailAddress(label).safeParse(v).success, {
+      message: `${label} doesn't look like an email address.`,
+    });
+
+/**
+ * Business & seller details: the trader identity distance-selling law asks
+ * for, plus the VAT/invoicing fields it started as. Read by every product
+ * page this account sells on (lib/settings/seller-identity.ts) — set ONCE
+ * here rather than per storefront, which is the whole point of it living on
+ * the profile instead of a storefront's own config.
+ */
 export const taxSchema = z.strictObject({
   tax_business_name: optionalTrimmed(200, "Business name"),
+  seller_address: optionalMultiLine(SELLER_FIELD_MAX.address, "The business address"),
+  seller_email: optionalEmail("The contact email"),
   tax_vat_id: referenceCode({ label: "A VAT ID", min: 2, max: 32 }).transform(
     (v) => (v === "" ? null : v.toUpperCase()),
   ),
@@ -72,6 +99,7 @@ export const taxSchema = z.strictObject({
       message: "Pick a country from the list.",
     })
     .transform((v) => (v === "" ? null : v)),
+  seller_phone: optionalTrimmed(SELLER_FIELD_MAX.phone, "The phone number"),
 });
 
 export const notificationsSchema = z.strictObject({

@@ -528,13 +528,24 @@ export type StorefrontHeader = {
   bioFont?: StorefrontFont;
 };
 
-/** The masthead a NEW storefront starts with: shown, and carrying text the
- *  seller edits rather than an empty bar they have to discover and switch on.
- *  Not the same thing as {@link EMPTY_STOREFRONT_HEADER} — see there. */
+/**
+ * The masthead a NEW storefront starts with. The seller has not yet typed a
+ * name or bio, so both are empty strings and the buyer-facing page suppresses
+ * the header until at least one field is filled in. The editor shows placeholder
+ * text (via the input's `placeholder` attribute), not this value. Seeding real
+ * copy here made placeholder text go live on the buyer-facing page (SF-02).
+ *
+ * Not the same thing as {@link EMPTY_STOREFRONT_HEADER} (which has show:false).
+ * New storefronts are "shown but empty" so the seller can discover the field in
+ * the editor; legacy configs with no header at all use the empty-show-false form.
+ *
+ * The wizard seeds `name` from the storefront's display name (SF-03), so a new
+ * storefront created via the wizard may never be empty here in practice.
+ */
 export const DEFAULT_STOREFRONT_HEADER: StorefrontHeader = {
   show: true,
-  name: "Your store name",
-  bio: "A short line about your shop",
+  name: "",
+  bio: "",
 };
 
 /** Where each line's optional style lives on the header. */
@@ -695,12 +706,6 @@ export type ProductPageSectionEntry = { id: ProductPageSectionId; show: boolean 
 
 export const PRODUCT_PAGE_CTA_MAX = 24;
 export const POLICY_TEXT_MAX = 2000;
-export const SELLER_FIELD_MAX = {
-  businessName: 120,
-  address: 300,
-  vatId: 32,
-  phone: 32,
-} as const;
 
 export type ProductPageConfig = {
   /** Off = product tiles have no page to open and the route 404s. */
@@ -794,10 +799,17 @@ export const SHIPPING_PROFILE_NAME_MAX = 60;
 export const SHIPPING_DISPATCH_MAX = 120;
 
 /**
- * The trader identity EU distance-selling law requires next to an offer. Kept
- * on the storefront (not the profile) so team editors can complete it and each
- * store carries its own. `country` is an EU code or "" for "not in the EU";
- * the statutory withdrawal and conformity lines render only for EU sellers.
+ * The trader identity EU distance-selling law requires next to an offer.
+ *
+ * NOT a config member (see `StorefrontConfig` below) — this shape is what a
+ * PROFILE ROW becomes once built by `lib/settings/seller-identity.ts`. It is
+ * account-level and set ONCE in Settings › Business & seller details, the
+ * same place `tax_business_name`/`tax_vat_id`/`tax_country` already live,
+ * because it is the same real-world fact: who is legally selling. Every
+ * storefront and every product this account has reads the one value, rather
+ * than each storefront carrying (and needing) its own copy. `country` is an
+ * EU code or "" for "not in the EU"; the statutory withdrawal and conformity
+ * lines render only for EU sellers.
  */
 export type StorefrontSeller = {
   businessName?: string;
@@ -1369,13 +1381,14 @@ export type StorefrontConfig = {
   embed?: EmbedSettings;
   /** The hosted product page's own options. Absent = DEFAULT_PRODUCT_PAGE_CONFIG. */
   productPage?: ProductPageConfig;
-  /** Shipping and returns text shown on every product page of this store. */
-  policies?: StorefrontPolicies;
-  /** Named shipping exceptions a product can opt into by id. Absent = every
-   *  product uses `policies.shipping`, which is the common case. */
-  shippingProfiles?: ShippingProfile[];
-  /** Trader identity shown on every product page of this store. */
-  seller?: StorefrontSeller;
+  // NO `seller`, `policies` OR `shippingProfiles` MEMBER. Trader identity (see
+  // the StorefrontSeller doc comment above) and shipping/returns terms (see
+  // SellerShippingPolicy in types/shipping-policy.ts) are both account-level
+  // now: a storefront is a presentation of one catalogue, not a business, so
+  // it has no copy of its own to carry and a seller with two of them has one
+  // answer rather than two. Stray members in a stored or posted config are
+  // stripped rather than rejected; see RETIRED_TOP_LEVEL_FIELDS in
+  // lib/validation/storefront.ts.
 };
 
 /** Starting point for sellers who have not saved a storefront yet. */

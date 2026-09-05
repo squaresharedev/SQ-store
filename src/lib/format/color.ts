@@ -62,6 +62,29 @@ export function isLightColor(hex: string): boolean {
   return luminance > INK_FLIP_LUMINANCE;
 }
 
+/**
+ * Blend two strict hex colors channel by channel in sRGB space. `amount` 0
+ * returns `a`, 1 returns `b`. Used to build a tint (`b = "#ffffff"`) or a
+ * shade (`b = "#000000"`) of a color without leaving hex. Either input
+ * failing the strict pattern returns `a` unchanged rather than throwing —
+ * callers only ever pass strict hex, but a guard here is cheaper than one at
+ * every call site.
+ */
+export function mixHex(a: string, b: string, amount: number): string {
+  const ma = HEX.exec(a);
+  const mb = HEX.exec(b);
+  if (!ma || !mb) return a;
+  const ia = parseInt(ma[1], 16);
+  const ib = parseInt(mb[1], 16);
+  const t = clamp(amount, 0, 1);
+  function channel(shift: number): number {
+    const ca = (ia >> shift) & 255;
+    const cb = (ib >> shift) & 255;
+    return ca + (cb - ca) * t;
+  }
+  return `#${toHex2(channel(16))}${toHex2(channel(8))}${toHex2(channel(0))}`;
+}
+
 /** Strict "#rrggbb" → HSV, or null if the string is not 6-digit hex. */
 export function hexToHsv(hex: string): Hsv | null {
   const match = HEX.exec(hex);

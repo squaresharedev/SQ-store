@@ -18,19 +18,12 @@ beforeAll(() => {
 
 function mount(props: Partial<Parameters<typeof ProductPageSection>[0]> = {}) {
   const onProductPageChange = vi.fn();
-  const onPoliciesChange = vi.fn();
-  const onShippingProfilesChange = vi.fn();
-  const onSellerChange = vi.fn();
   render(
     <ProductPageSection
       productPage={DEFAULT_PRODUCT_PAGE_CONFIG}
       onProductPageChange={onProductPageChange}
-      policies={{}}
-      onPoliciesChange={onPoliciesChange}
-      shippingProfiles={[]}
-      onShippingProfilesChange={onShippingProfilesChange}
-      seller={{}}
-      onSellerChange={onSellerChange}
+      shippingPolicy={{}}
+      sellerIdentity={{}}
       storefrontFont="sans"
       customFontName={undefined}
       summoned={null}
@@ -39,9 +32,6 @@ function mount(props: Partial<Parameters<typeof ProductPageSection>[0]> = {}) {
   );
   return {
     onProductPageChange,
-    onPoliciesChange,
-    onShippingProfilesChange,
-    onSellerChange,
   };
 }
 
@@ -159,26 +149,84 @@ describe("ProductPageSection", () => {
     });
   });
 
-  it("drops an emptied seller field instead of storing an empty string", async () => {
-    const user = userEvent.setup();
-    const { onSellerChange } = mount({
-      seller: { email: "hi@studio.example", businessName: "Studio" },
+  it("shows the account's seller identity read-only, with no field to edit", () => {
+    mount({
+      sellerIdentity: {
+        businessName: "Studio",
+        email: "hi@studio.example",
+        country: "IE",
+      },
       summoned: "seller",
     });
-    await user.clear(screen.getByLabelText("Contact email"));
-    expect(onSellerChange).toHaveBeenLastCalledWith({ businessName: "Studio" });
+    // The values are on screen...
+    expect(screen.getByText("Studio")).toBeInTheDocument();
+    expect(screen.getByText("hi@studio.example")).toBeInTheDocument();
+    expect(screen.getByText("Ireland")).toBeInTheDocument();
+    // ...but nothing here can change them: this panel used to have a
+    // business-name input, an address textarea and a country Select, and
+    // none of that survives — only the link to where it is now edited.
+    expect(screen.queryByLabelText("Business name")).toBeNull();
+    expect(screen.queryByLabelText("Contact email")).toBeNull();
+    expect(screen.queryByLabelText("Country")).toBeNull();
+    expect(
+      screen.getByRole("link", { name: "Edit in Settings" }),
+    ).toHaveAttribute("href", "/settings/tax");
   });
 
-  it("writes policy text and drops it again when cleared", async () => {
-    const user = userEvent.setup();
-    const { onPoliciesChange } = mount({ summoned: "policies" });
-    // The value is controlled by a mock that never writes back, so each
-    // keystroke reports one character; the first is enough to see the write.
-    await user.type(screen.getByLabelText("Shipping"), "S");
-    expect(onPoliciesChange).toHaveBeenLastCalledWith({ shipping: "S" });
-    cleanup();
-    const second = mount({ policies: { shipping: "x" }, summoned: "policies" });
-    await user.clear(screen.getByLabelText("Shipping"));
-    expect(second.onPoliciesChange).toHaveBeenLastCalledWith({});
+  it("nudges towards Settings when nothing is set yet", () => {
+    mount({ sellerIdentity: {}, summoned: "seller" });
+    expect(screen.getByText(/nothing set yet/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Add your business details" }),
+    ).toHaveAttribute("href", "/settings/tax");
+  });
+
+  it("shows shipping terms but offers no way to edit them here", () => {
+    // The point of the move: this panel proves what a buyer will read and
+    // sends the seller to Settings to change it. A textarea here would be a
+    // second writer for terms every OTHER storefront also sells under.
+    mount({
+      summoned: "policies",
+      shippingPolicy: {
+        dispatch: "Ships within 1-3 business days",
+        shipsFrom: "IE",
+        returnsWindowDays: 30,
+        returnsPaidBy: "buyer",
+      },
+    });
+    expect(screen.queryByLabelText("Shipping")).toBeNull();
+    expect(screen.getByText("Ships within 1-3 business days")).toBeInTheDocument();
+    expect(screen.getByText(/Ships from Ireland/)).toBeInTheDocument();
+    expect(screen.getByText(/within 30 days of delivery/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Edit in Settings" })).toHaveAttribute(
+      "href",
+      "/settings/shipping",
+    );
+  });
+
+  it("names the exceptions without reprinting them", () => {
+    // Eight profile bodies here would put the panel straight back to the size
+    // this change removed; which product uses which is the product form's
+    // question, not this one's.
+    mount({
+      summoned: "policies",
+      shippingPolicy: {
+        dispatch: "Ships Fridays",
+        profiles: [
+          { id: "a", name: "Bulky items", body: "Pallet courier." },
+          { id: "b", name: "Made to order", body: "Allow 3 weeks." },
+        ],
+      },
+    });
+    expect(screen.getByText(/2 shipping profiles/)).toBeInTheDocument();
+    expect(screen.queryByText(/Pallet courier/)).toBeNull();
+  });
+
+  it("says so, and links out, when no terms are written at all", () => {
+    mount({ summoned: "policies" });
+    expect(screen.getByText(/until you add your terms/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Add your shipping terms" }),
+    ).toHaveAttribute("href", "/settings/shipping");
   });
 });

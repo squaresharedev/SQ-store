@@ -153,6 +153,12 @@ export function EmbedModal({
     });
   }
 
+  // SELL-03: Copy is only meaningful once embedding is actually live (enabled
+  // AND at least one domain configured). Handing someone a snippet before those
+  // conditions are met would make it look ready when it cannot work.
+  const domains = parseDomains(domainsText);
+  const canCopy = enabled && domains.length > 0;
+
   return (
     <Modal
       open={storefront !== null}
@@ -166,6 +172,54 @@ export function EmbedModal({
     >
       {storefront && (
         <div className="space-y-5">
+          {/* SELL-03: in-development notice is the headline, not a footnote. */}
+          <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 font-inter text-xs font-medium text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
+            The embed widget is in development and not yet rendering on
+            external sites. Configure your settings below so you are ready
+            to paste the snippet the moment it ships.
+          </p>
+
+          {/* SELL-03: switches appear ABOVE the snippet so settings
+              are visible before the seller decides whether to copy. */}
+          <div className="flex items-center justify-between gap-3">
+            <label htmlFor="embed-enabled" className={labelClass}>
+              Embed enabled
+            </label>
+            <Switch
+              id="embed-enabled"
+              checked={enabled}
+              onCheckedChange={setEnabled}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label htmlFor="embed-domains" className={labelClass}>
+              Allowed domains
+            </label>
+            <input
+              id="embed-domains"
+              type="text"
+              value={domainsText}
+              onChange={(event) => setDomainsText(event.target.value)}
+              placeholder="yoursite.com, blog.yoursite.com"
+              spellCheck={false}
+              className={fieldBaseClass}
+            />
+            <p className={helpTextClass}>
+              Up to {EMBED_MAX_DOMAINS}, comma-separated. Paste a URL and
+              we&apos;ll trim it to the domain.
+            </p>
+            {/* Deny-by-default: an empty list serves nowhere. Said plainly
+                here, because "enabled but blank" otherwise looks like it
+                should work and silently doesn't. */}
+            {enabled && domains.length === 0 && (
+              <p role="status" className={errorTextClass}>
+                Add at least one domain. While this is empty the storefront
+                won&apos;t load anywhere, even though embedding is on.
+              </p>
+            )}
+          </div>
+
           <div className="space-y-1.5">
             <span className={labelClass}>Snippet</span>
             <pre className="overflow-x-auto rounded-none border border-border bg-muted p-3 font-mono text-xs text-foreground">
@@ -173,13 +227,16 @@ export function EmbedModal({
             </pre>
             <div className="flex items-center justify-between gap-3">
               <p className={helpTextClass}>
-                The embed widget is in development. Your snippet is ready and
-                will start rendering the moment it ships.
+                {canCopy
+                  ? "Paste this snippet into your site's HTML."
+                  : "Enable embedding and add at least one domain to unlock the Copy button."}
               </p>
+              {/* SELL-03: Copy is disabled until both conditions are met. */}
               <CopyButton
                 value={embedSnippet(embedKey)}
                 label="embed snippet"
                 variant="labelled"
+                disabled={!canCopy}
               />
             </div>
           </div>
@@ -192,7 +249,7 @@ export function EmbedModal({
               <>
                 <p className={helpTextClass}>
                   Rotating issues a new key. Every copy of the old snippet stops
-                  working immediately, including ones on sites you still want —
+                  working immediately, including ones on sites you still want --
                   you&apos;ll need to paste the new snippet everywhere.
                 </p>
                 <div className="flex flex-wrap items-center gap-2 pt-1">
@@ -235,50 +292,11 @@ export function EmbedModal({
                       spinning={rotateState.status === "rotating"}
                     />
                     {rotateState.status === "rotating"
-                      ? "Rotating…"
+                      ? "Rotating..."
                       : "Rotate key"}
                   </motion.button>
                 </div>
               </>
-            )}
-          </div>
-
-          <div className="flex items-center justify-between gap-3">
-            <label htmlFor="embed-enabled" className={labelClass}>
-              Embed enabled
-            </label>
-            <Switch
-              id="embed-enabled"
-              checked={enabled}
-              onCheckedChange={setEnabled}
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label htmlFor="embed-domains" className={labelClass}>
-              Allowed domains
-            </label>
-            <input
-              id="embed-domains"
-              type="text"
-              value={domainsText}
-              onChange={(event) => setDomainsText(event.target.value)}
-              placeholder="yoursite.com, blog.yoursite.com"
-              spellCheck={false}
-              className={fieldBaseClass}
-            />
-            <p className={helpTextClass}>
-              Up to {EMBED_MAX_DOMAINS}, comma-separated. Paste a URL and
-              we&apos;ll trim it to the domain.
-            </p>
-            {/* Deny-by-default: an empty list serves nowhere. Said plainly
-                here, because "enabled but blank" otherwise looks like it
-                should work and silently doesn't. */}
-            {enabled && parseDomains(domainsText).length === 0 && (
-              <p role="status" className={errorTextClass}>
-                Add at least one domain. While this is empty the storefront
-                won&apos;t load anywhere, even though embedding is on.
-              </p>
             )}
           </div>
 
@@ -289,7 +307,7 @@ export function EmbedModal({
               disabled={saving}
               className={primaryButtonClass}
             >
-              {saving ? "Saving…" : "Save settings"}
+              {saving ? "Saving..." : "Save settings"}
             </button>
           </div>
         </div>

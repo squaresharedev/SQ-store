@@ -87,6 +87,43 @@ export const OPTION_NAME_MAX = 40;
 export const OPTION_DISPLAYS = ["swatch", "chip", "select"] as const;
 export type OptionDisplay = (typeof OPTION_DISPLAYS)[number];
 
+/** How many spec rows ONE option may carry of its own. Deliberately far below
+ *  SPECS_MAX: this is the handful of numbers that change with the version
+ *  ("Seats: 6"), not a second spec sheet, and every option pays for it in the
+ *  bytes of one jsonb column. */
+export const OPTION_SPECS_MAX = 4;
+/** Tighter than a product-level spec value, for the same reason: a per-version
+ *  value is "6", "24 kg", "Solid walnut", never a paragraph. */
+export const OPTION_SPEC_VALUE_MAX = 120;
+
+/**
+ * WHAT ONE OPTION CHANGES ABOUT THE PRODUCT'S FACTS.
+ *
+ * A table sold in two sizes is two sets of dimensions and two weights, and
+ * without this the seller has one spec table that is wrong for at least one of
+ * them. So an option may carry its own measurements, and the product page shows
+ * the chosen version's numbers instead of the product's.
+ *
+ * INHERITANCE, NOT REPLACEMENT: every member is optional and absent means "the
+ * product's own value", so a seller states only what actually differs. The
+ * shared facts (materials, care, what's included, origin, safety) stay on the
+ * product, because they are the same whichever version is picked, and asking
+ * for them per option would be asking for the same answer up to 48 times.
+ *
+ * ONE OPTION, NOT A COMBINATION, exactly like a photo's tie (see GalleryImage):
+ * the axis that changes the dimensions (size, length) is not the axis that does
+ * not (colour), so "Large is 180 x 90 x 75" holds in every colour Large is sold
+ * in. A per-combination fact needs real rows, and this column is still not a
+ * SKU table.
+ */
+export interface ProductOptionDetails {
+  dimensions?: ProductDimensions;
+  weight?: ProductWeight;
+  /** Free rows, replacing a product-level row of the same name and adding any
+   *  the product does not have. Capped at OPTION_SPECS_MAX. */
+  specs?: ProductSpec[];
+}
+
 /** One choice within a group: "Midnight blue", "XL", "750 W". Ids are
  *  client-minted uuids, unique across the WHOLE product, because a photo tie
  *  and the `?o=` parameter name an option and nothing else. */
@@ -97,6 +134,9 @@ export interface ProductOption {
    *  Only drawn when the group displays as swatches. */
   swatch?: string;
   available: boolean;
+  /** The facts this version changes. Absent = it changes none of them, which
+   *  is the common case and costs the column nothing. */
+  details?: ProductOptionDetails;
 }
 
 /** One axis a product varies along, with the choices along it. */

@@ -21,7 +21,6 @@ import type { LayerOp } from "@/lib/storefront/layers";
 import { cn } from "@/lib/utils";
 import {
   helpTextClass,
-  infoTextClass,
   labelClass,
   transitionClass,
   focusRingClass,
