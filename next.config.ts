@@ -171,5 +171,17 @@ const nextConfig: NextConfig = {
 export default nextConfig;
 
 // Make Cloudflare bindings/env available during `next dev` so local development
-// mirrors the Workers runtime. No-op for production builds.
-initOpenNextCloudflareForDev();
+// mirrors the Workers runtime.
+//
+// MUST be gated on `isDev`: the library's own de-dupe (`shouldContextInitializationRun`)
+// only checks for `AsyncLocalStorage` on globalThis, which is present during `next build`
+// too, so without this guard it also runs during a production build and tries to open a
+// live Cloudflare remote-dev-proxy session. That throws ("Could not start remote dev
+// session... environment is non-interactive") whenever CLOUDFLARE_API_TOKEN isn't set at
+// build time, which is exactly the case in CI: the Build step runs before Deploy, which is
+// the only step that carries that token. Confirmed via CI logs (2026-09-06) as the reason
+// every deploy since this call was added failed at `next build`, silently leaving
+// production stuck on an older commit.
+if (isDev) {
+  initOpenNextCloudflareForDev();
+}
