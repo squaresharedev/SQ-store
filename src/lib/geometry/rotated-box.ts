@@ -65,6 +65,23 @@ function floorCell(value: number): number {
 }
 
 /**
+ * Where a turned box PAINTS, before any rounding: its span the other way
+ * round, centred on the point it turns about.
+ *
+ * Fractional by nature, and that is the whole point of naming it. Turning a
+ * box about its own centre moves its corners by (w - h) / 2, so a box whose
+ * two dimensions differ in parity lands on a half cell — which is exactly the
+ * gap {@link footprintOffset} closes.
+ */
+function paintedOrigin(box: Box, degrees: number): { x: number; y: number } {
+  const span = orientedSpan(box.w, box.h, degrees);
+  return {
+    x: box.x + box.w / 2 - span.w / 2,
+    y: box.y + box.h / 2 - span.h / 2,
+  };
+}
+
+/**
  * The cells a turned block covers: its span the other way round, about the
  * point it turns on.
  *
@@ -74,10 +91,53 @@ function floorCell(value: number): number {
 export function rotatedFootprint(box: Box, degrees = 0): Box {
   if (!isTransposed(degrees)) return { x: box.x, y: box.y, w: box.w, h: box.h };
   const span = orientedSpan(box.w, box.h, degrees);
+  const painted = paintedOrigin(box, degrees);
   return {
-    x: floorCell(box.x + box.w / 2 - span.w / 2),
-    y: floorCell(box.y + box.h / 2 - span.h / 2),
+    x: floorCell(painted.x),
+    y: floorCell(painted.y),
     w: span.w,
     h: span.h,
+  };
+}
+
+/**
+ * HOW FAR A TURNED BOX MISSES THE CELLS IT CLAIMS, in cells, and therefore how
+ * far it has to be nudged to sit on them.
+ *
+ * A block is drawn turned about its own centre, so standing it on its side puts
+ * its corners at `x + (w - h) / 2`. When `w - h` is odd that is a HALF cell,
+ * and the block paints straddling the board's lines: not on the cells its own
+ * footprint claims, and visibly offset from every level tile beside it. Growing
+ * a square block by one cell is enough to fall into it, which is why "rotate
+ * it, then resize it" is the way anyone finds this.
+ *
+ * No integer placement can fix it — the half cell is in the ROTATION, not in
+ * the rect — so the correction is a paint-time nudge, and this is the number.
+ * It closes onto {@link rotatedFootprint}, so a nudged block paints on exactly
+ * the cells the board already believes it occupies: 0 or -0.5 per axis, never
+ * more.
+ *
+ * WHEREVER THE FOOTPRINT IS TRANSPOSED, not only at an exact quarter turn. The
+ * two have to agree across the whole range or they disagree by half a cell
+ * everywhere except at 90 itself — which is worse than not correcting at all,
+ * because it puts a half-cell jump at 89-to-90, the one angle a seller is
+ * actually working at. There is exactly ONE discontinuity to spend, and
+ * {@link isTransposed} has already spent it at 45 degrees, where the cells the
+ * board reserves flip from one span to the other. Putting the paint's step on
+ * that same line means the tile and the guides under it move together, and
+ * nothing moves at 90.
+ *
+ * A tilt nearer level than to a quarter turn transposes nothing and is left
+ * exactly where it is.
+ */
+export function footprintOffset(
+  box: Box,
+  degrees = 0,
+): { x: number; y: number } {
+  if (!isTransposed(degrees)) return { x: 0, y: 0 };
+  const painted = paintedOrigin(box, degrees);
+  return {
+    x: zeroless(floorCell(painted.x) - painted.x),
+    y: zeroless(floorCell(painted.y) - painted.y),
   };
 }

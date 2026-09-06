@@ -20,7 +20,6 @@ import {
   CORNER_RADIUS_MAX,
   CUSTOM_FONT_NAME_MAX,
   DEFAULT_STOREFRONT_CONFIG,
-  DISPLAY_MODES,
   GRID_GAP_MAX,
   EMBED_MAX_DOMAINS,
   HEADER_BIO_MAX,
@@ -268,7 +267,6 @@ const themeObjectSchema = z.strictObject({
   ...priceTagAppearanceFields,
   ...hoverTimingFields,
   showTitle: z.boolean(),
-  displayMode: z.enum(DISPLAY_MODES),
   gridGap: z.number().int().min(0).max(GRID_GAP_MAX),
   soldOutBadge: z.boolean(),
   hideSoldOut: z.boolean(),
@@ -349,6 +347,10 @@ const themeSchema = z.preprocess((value) => {
   // priceTagPosition picker. Drop it so any config that carries one still
   // parses (strictObject would otherwise reject the unknown key).
   delete theme.priceTagCorner;
+  // Carousel display mode is pulled for the MVP (grid only); drop the key so
+  // a config saved with either "grid" or "carousel" still parses rather than
+  // strictObject rejecting the unknown field.
+  delete theme.displayMode;
   migrateLegacyPriceTag(theme);
   if ("density" in theme) {
     if (theme.gridGap === undefined) {

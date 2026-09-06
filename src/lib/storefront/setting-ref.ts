@@ -335,20 +335,6 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
     ref: { kind: "group", group: "canvas" },
   },
   {
-    id: "display-mode",
-    label: "Grid or carousel",
-    keywords: [
-      "carousel",
-      "slider",
-      "layout mode",
-      "scroll row",
-      "swipe",
-      "one row",
-      "grid instead",
-    ],
-    ref: { kind: "group", group: "canvas" },
-  },
-  {
     id: "tile-layout",
     label: "Tile layout",
     keywords: [
@@ -459,26 +445,83 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
     ],
     ref: { kind: "group", group: "soldOut" },
   },
+  // ---------------------------------------------------------------------
+  // THE PRODUCT PAGE, at the same grain as everything above it.
+  //
+  // These used to be five entries, one per panel section, while the
+  // storefront's own settings were listed control by control — so "roundness"
+  // found its own row and "photo fit" found a row called "Product page
+  // layout". A seller searching the page they are looking at deserves the same
+  // answer as one searching the board, so every control that decides something
+  // about the page has a row, and several rows lead to the same section
+  // exactly as the four Card style entries already do.
+  //
+  // Inside the editor these are gated on a page actually being open (see
+  // editor-search): a setting you cannot see the effect of is not worth
+  // opening, so with no page out the whole group collapses to one row that
+  // puts a page on the canvas first.
+  // ---------------------------------------------------------------------
   {
     id: "product-page-layout",
-    label: "Product page layout",
+    label: "Product page",
     keywords: [
       "product page",
       "detail page",
       "buy page",
       "product detail",
+      "show a product page",
+      "turn off product page",
+      "hide product page",
+      "page for each product",
+      "what a tile opens",
+    ],
+    ref: { kind: "productPage", section: "layout" },
+  },
+  {
+    id: "product-page-photos",
+    label: "Product page photos",
+    keywords: [
+      "photo fit",
+      "image fit",
+      "fill",
+      "crop the photo",
+      "letterbox",
       "image left",
       "image right",
       "stacked gallery",
       "thumbnails",
       "photo layout",
-      "turn off product page",
-      "hide product page",
+      "picture size",
+    ],
+    ref: { kind: "productPage", section: "layout" },
+  },
+  {
+    id: "product-page-font",
+    label: "Product page font",
+    keywords: [
+      "page font",
+      "page typeface",
+      "different font on the page",
+      "same as storefront",
+      "inherit the font",
+      "page lettering",
+      "text colour",
+    ],
+    ref: { kind: "productPage", section: "layout" },
+  },
+  {
+    id: "product-page-indexing",
+    label: "Search engine listing",
+    keywords: [
       "search engines",
       "google",
       "index",
-      "page font",
-      "text colour",
+      "indexing",
+      "noindex",
+      "seo",
+      "keep it out of search",
+      "findable on the web",
+      "crawl",
     ],
     ref: { kind: "productPage", section: "layout" },
   },
@@ -491,15 +534,38 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
       "buy now",
       "button text",
       "button label",
-      "button style",
       "checkout button",
       "purchase button",
+      "order button",
+      "what the button says",
+    ],
+    ref: { kind: "productPage", section: "cta" },
+  },
+  {
+    id: "price-note",
+    label: "Price note",
+    keywords: [
       "incl vat",
       "excl vat",
       "tax note",
+      "vat note",
+      "including tax",
+      "excluding tax",
+      "under the price",
+      "price caption",
+    ],
+    ref: { kind: "productPage", section: "cta" },
+  },
+  {
+    id: "shipping-note",
+    label: "Shipping note",
+    keywords: [
       "plus shipping",
       "free shipping",
-      "price note",
+      "postage note",
+      "delivery note",
+      "shipping line",
+      "next to the price",
     ],
     ref: { kind: "productPage", section: "cta" },
   },
@@ -510,15 +576,40 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
       "description",
       "specifications",
       "specs",
-      "shipping info",
-      "returns info",
+      "documents",
       "safety",
-      "reorder sections",
+      "shipping section",
+      "returns section",
       "hide description",
+      "what the page shows",
+      "show or hide sections",
+      "page content",
+    ],
+    ref: { kind: "productPage", section: "sections" },
+  },
+  {
+    id: "product-page-availability",
+    label: "Availability on the page",
+    keywords: [
       "show stock",
+      "stock level",
+      "how many left",
+      "in stock",
+      "quantity remaining",
       "availability",
-      "seller name",
+    ],
+    ref: { kind: "productPage", section: "sections" },
+  },
+  {
+    id: "product-page-byline",
+    label: "Sold by byline",
+    keywords: [
       "sold by",
+      "seller name",
+      "byline",
+      "who is selling this",
+      "credit under the title",
+      "maker name",
     ],
     ref: { kind: "productPage", section: "sections" },
   },
@@ -568,6 +659,21 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
     ref: { kind: "productPage", section: "seller" },
   },
 ];
+
+/**
+ * The product page's own settings, in catalogue order.
+ *
+ * DERIVED rather than written out a second time: the editor treats these as
+ * one gated block (they are only offered while a page is actually on the
+ * canvas — see editor-search), and a hand-kept second list would quietly
+ * ungate whichever entry someone forgot to add to it.
+ */
+export const PRODUCT_PAGE_SETTINGS: readonly SettingEntry[] =
+  STOREFRONT_SETTINGS.filter((entry) => entry.ref.kind === "productPage");
+
+/** Everything that is NOT the product page's: findable at all times. */
+export const STOREFRONT_ONLY_SETTINGS: readonly SettingEntry[] =
+  STOREFRONT_SETTINGS.filter((entry) => entry.ref.kind !== "productPage");
 
 const BY_ID = new Map(STOREFRONT_SETTINGS.map((entry) => [entry.id, entry]));
 

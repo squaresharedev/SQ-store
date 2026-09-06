@@ -100,7 +100,7 @@ export function CardStyleControls({
         <p className={infoTextClass}>
           {value.cornerRadius >= CORNER_SPOT_LIMIT
             ? "Rounded cards keep both labels on the center axis."
-            : "Drag either label here, or on the tile itself."}
+            : "Click a spot to place the label, or drag it here or on the tile."}
         </p>
       </div>
 

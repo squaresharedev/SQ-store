@@ -39,7 +39,6 @@ const THEME = {
   priceDisplay: "always",
   priceTagPosition: "below",
   showTitle: true,
-  displayMode: "grid",
   gridGap: 8,
   soldOutBadge: true,
   hideSoldOut: false,
@@ -319,6 +318,92 @@ test.describe("hosted product page", () => {
     ).toHaveCount(0);
   });
 
+  test("the footer names the seller as the trader and links our policies as ours", async ({
+    page,
+  }) => {
+    const s = await seed(page, "pdp-footer");
+    await page.context().clearCookies();
+
+    await page.goto(pagePath(s, s.active));
+
+    const footer = page.locator("[data-product-page-footer]");
+    await expect(footer).toBeVisible();
+
+    // WHO THE BUYER IS CONTRACTING WITH. The seller is named as the party
+    // responsible for the goods and the refunds, and Squareshare is disclaimed
+    // out of the sale in the same sentence. This is what keeps us an
+    // intermediary rather than the merchant of record.
+    const disclosure = footer.locator("[data-product-sale-disclosure]");
+    await expect(disclosure).toContainText("Lamp Studio Ltd");
+    await expect(disclosure).toContainText("is the seller for this order");
+    await expect(disclosure).toContainText("returns or refunds");
+    await expect(disclosure).toContainText("not a party to the sale");
+
+    // OUR policies, and unmistakably ours: the visible word is short, the
+    // accessible name says whose they are, so a screen reader never hears
+    // "Terms" in a shop footer and takes them for the shop's.
+    const privacy = footer.getByRole("link", { name: "Squareshare Privacy Policy" });
+    await expect(privacy).toHaveAttribute("href", "https://squareshare.eu/legal/privacy-policy/");
+    const terms = footer.getByRole("link", { name: "Squareshare Terms of Use" });
+    // Trailing slash: the marketing site is trailingSlash:true, so the
+    // slashless form is a 308 and would cost a buyer an extra round trip.
+    await expect(terms).toHaveAttribute("href", "https://squareshare.eu/terms/");
+    for (const link of [privacy, terms]) {
+      await expect(link).toHaveAttribute("target", "_blank");
+      await expect(link).toHaveAttribute("rel", /noopener/);
+      await expect(link).toHaveAttribute("rel", /noreferrer/);
+    }
+
+    // The attribution keeps its own words as its name, and stays the only
+    // claim Squareshare makes on this page.
+    await expect(footer.getByRole("link", { name: /powered by squareshare/i })).toHaveAttribute(
+      "href",
+      "https://squareshare.eu",
+    );
+
+    // REALLY CLICKABLE, not merely present. The fixed mobile CTA bar sits over
+    // the bottom of the viewport, so "the anchor is in the DOM" is not the
+    // same as "a buyer can reach it": hit-test the centre of each link and
+    // check the topmost element there is the link itself.
+    for (const width of [1280, 390]) {
+      await page.setViewportSize({ width, height: 844 });
+      // Scrolled to the BOTTOM, which is how anyone reaches a footer. The
+      // phone layout reserves pb-24 under the footer precisely so the fixed
+      // CTA bar comes to rest below it rather than on top of it; mid-scroll
+      // the bar does overlay the page, which is what a fixed bar is for.
+      await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+      await page.waitForFunction(() => {
+        const max = document.documentElement.scrollHeight - window.innerHeight;
+        return Math.abs(window.scrollY - max) < 2;
+      });
+      for (const name of ["Squareshare Privacy Policy", "Squareshare Terms of Use"]) {
+        const link = footer.getByRole("link", { name });
+        await expect(link).toBeVisible();
+        const hit = await link.evaluate((node) => {
+          const box = node.getBoundingClientRect();
+          const top = document.elementFromPoint(
+            box.left + box.width / 2,
+            box.top + box.height / 2,
+          );
+          return {
+            ok: top !== null && (node.contains(top) || node === top),
+            covered: top ? `${top.tagName}#${top.id}.${top.className}` : "nothing",
+          };
+        });
+        expect(hit.ok, `${name} covered at ${width}px by ${hit.covered}`).toBe(true);
+      }
+    }
+
+    // Contrast at the footer's opacity is exactly where a small-print audit
+    // bites, so the real rendered colours are checked rather than assumed.
+    await canvasStill(page);
+    const scan = await new AxeBuilder({ page })
+      .include("[data-product-page-footer]")
+      .withTags(["wcag2a", "wcag2aa"])
+      .analyze();
+    expect(scan.violations).toEqual([]);
+  });
+
   test("the product form inherits shipping terms instead of asking for them again", async ({
     page,
   }) => {
@@ -493,6 +578,32 @@ test.describe("hosted product page", () => {
     await expect(root).toBeVisible();
     await expect(page.getByRole("button", { name: "Photos right" })).toHaveCount(0);
     await expect(page.getByRole("button", { name: "One after another" })).toHaveCount(0);
+
+    // THE WHOLE FOOTER IS REAL EVEN HERE, unlike every other link on this
+    // artboard. The artboard's own click handler (ProductPageArtboard.tsx)
+    // neutralises every OTHER link so a click stays inside the editor and
+    // opens settings instead; the attribution and both policies are the
+    // deliberate exception (data-setting-skip), because none of them is a
+    // seller's design choice, so clicking one must actually leave for the
+    // real page rather than open a panel.
+    const editorFooter = artboard.locator("[data-product-page-footer]");
+    for (const [name, href] of [
+      [/^powered by squareshare$/i, "https://squareshare.eu"],
+      ["Squareshare Privacy Policy", "https://squareshare.eu/legal/privacy-policy/"],
+      ["Squareshare Terms of Use", "https://squareshare.eu/terms/"],
+    ] as const) {
+      const [popup] = await Promise.all([
+        page.waitForEvent("popup"),
+        editorFooter.getByRole("link", { name }).click(),
+      ]);
+      await popup.waitForLoadState("domcontentloaded");
+      expect(popup.url()).toBe(href);
+      await popup.close();
+    }
+    // The board is still exactly where it was: every click opened a new tab,
+    // never a settings panel, and never touched the canvas underneath it.
+    await expect(artboard).toBeVisible();
+    await expect(page.getByRole("switch", { name: "Show a product page" })).toBeVisible();
 
     // A change that IS offered shows on the artboard at once, and undoes.
     await page.getByRole("button", { name: "Fill", exact: true }).click();

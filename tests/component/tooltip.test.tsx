@@ -1,0 +1,129 @@
+import { afterEach, describe, expect, it } from "vitest";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { Tooltip } from "@/components/ui/Tooltip";
+import { InfoTip } from "@/components/ui/InfoTip";
+
+afterEach(cleanup);
+
+/**
+ * The hover label for icon-only controls (the layer moves, the device switch,
+ * the panel tabs). What is pinned here is the DIVISION between it and the "?"
+ * InfoTip, because the two look alike and behave deliberately differently:
+ *
+ *   - a Tooltip repeats the control's own accessible name, so it is decorative
+ *     and must NOT be announced a second time;
+ *   - an InfoTip carries something the control does not say, so it IS in the
+ *     a11y tree and opens on tap.
+ *
+ * A Tooltip that ever gains role="tooltip" would be a screen reader reading
+ * "Send to back, Send to back", and every `getByRole("tooltip")` in the suite
+ * would suddenly find two.
+ */
+function renderTip(label = "Send to back") {
+  return render(
+    <Tooltip label={label}>
+      <button type="button" aria-label={label}>
+        icon
+      </button>
+    </Tooltip>,
+  );
+}
+
+const trigger = (name = "Send to back") =>
+  screen.getByRole("button", { name });
+
+describe("Tooltip", () => {
+  it("shows nothing at rest", () => {
+    renderTip();
+    expect(screen.queryByText("Send to back", { selector: "[data-tooltip]" }))
+      .toBeNull();
+  });
+
+  it("reveals the label on a mouse hover and hides it on leave", async () => {
+    const user = userEvent.setup();
+    renderTip();
+    await user.hover(trigger());
+    expect(document.querySelector("[data-tooltip]")).toHaveTextContent(
+      "Send to back",
+    );
+    await user.unhover(trigger());
+    expect(document.querySelector("[data-tooltip]")).toBeNull();
+  });
+
+  it("reveals it on keyboard focus and hides it on blur", () => {
+    renderTip();
+    fireEvent.focus(trigger());
+    expect(document.querySelector("[data-tooltip]")).not.toBeNull();
+    fireEvent.blur(trigger());
+    expect(document.querySelector("[data-tooltip]")).toBeNull();
+  });
+
+  it("Escape dismisses it", () => {
+    renderTip();
+    fireEvent.focus(trigger());
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(document.querySelector("[data-tooltip]")).toBeNull();
+  });
+
+  it("stays out of the a11y tree: the trigger's aria-label is the one name", async () => {
+    const user = userEvent.setup();
+    renderTip();
+    await user.hover(trigger());
+    // NOT role="tooltip" — that is the InfoTip's, and a second one would make
+    // every getByRole("tooltip") in the suite ambiguous.
+    expect(screen.queryByRole("tooltip")).toBeNull();
+    expect(document.querySelector("[data-tooltip]")).toHaveAttribute(
+      "aria-hidden",
+      "true",
+    );
+    expect(trigger()).not.toHaveAttribute("aria-describedby");
+  });
+
+  it("does not open on touch — the tap belongs to the button", () => {
+    renderTip();
+    fireEvent.pointerEnter(trigger(), { pointerType: "touch" });
+    expect(document.querySelector("[data-tooltip]")).toBeNull();
+    fireEvent.click(trigger());
+    expect(document.querySelector("[data-tooltip]")).toBeNull();
+  });
+
+  it("renders in a portal on <body>, so a scrolling panel cannot clip it", async () => {
+    const user = userEvent.setup();
+    renderTip();
+    await user.hover(trigger());
+    const bubble = document.querySelector("[data-tooltip]")!;
+    expect(bubble.parentElement).toBe(document.body);
+    expect(bubble.className).toContain("fixed");
+  });
+
+  it("wears the same bubble as the '?' — rounded-sm, never a pill", async () => {
+    const user = userEvent.setup();
+    render(
+      <div>
+        <Tooltip label="Send to back">
+          <button type="button" aria-label="Send to back">
+            icon
+          </button>
+        </Tooltip>
+        <InfoTip label="How layering works">
+          Layers decide only what paints on top.
+        </InfoTip>
+      </div>,
+    );
+
+    await user.hover(trigger());
+    expect(document.querySelector("[data-tooltip]")!.className).toContain(
+      "rounded-sm",
+    );
+    await user.unhover(trigger());
+
+    await user.hover(screen.getByRole("button", { name: "How layering works" }));
+    const info = screen.getByRole("tooltip");
+    expect(info.className).toContain("rounded-sm");
+    // Both carry the point: one decorative span each, rotated 45°.
+    expect(info.querySelector("span[aria-hidden='true']")?.className).toContain(
+      "rotate-45",
+    );
+  });
+});

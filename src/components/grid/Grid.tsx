@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MoveDiagonal2, RotateCw } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { rotatedFootprint } from "@/lib/geometry/rotated-box";
+import { footprintOffset, rotatedFootprint } from "@/lib/geometry/rotated-box";
 import {
   ROTATION_SNAP_STEP,
   angleFromCenter,
@@ -25,7 +25,10 @@ import {
   columnsThatFit,
   edgeCursor,
   edgesUnderPointer,
+  EMPTY_CELL_Z,
+  keyboardResizeStep,
   layerZIndex,
+  liftableChromeKeys,
   placementFromLocalBox,
   placementIsFree,
   reflowBlocks,
@@ -61,15 +64,74 @@ import {
 const DRAG_THRESHOLD = 4;
 
 /** Handle chrome — token-only. Hidden until hover/focus on fine pointers,
- *  always visible on coarse (touch) pointers, which have no hover. */
+ *  always visible on coarse (touch) pointers, which have no hover, and always
+ *  visible while the consumer has marked the block SELECTED.
+ *
+ *  OUTSIDE THE TILE, hanging just under its bottom edge (see HANDLE_ROW). A
+ *  handle drawn on the tile is drawn on the SELLER'S WORK: the rotate control
+ *  sat exactly where a price tag or a title band goes, so the thing being
+ *  designed was hidden by the thing designing it. Out here they hang off the
+ *  tile without ever covering it, and they still turn with it — they are
+ *  children of the cell, so a tilted tile carries its controls round with it.
+ *
+ *  SEAMLESS, not floating and not merely touching: a handle is meant to read
+ *  as a tab growing out of the tile, not a separate pill parked near it.
+ *  Three things make that read correctly rather than as a glitch:
+ *
+ *    - FLUSH, with a hairline of overlap (`-mt-px`) rather than sitting
+ *      exactly at the edge. A subpixel gap is possible wherever a zoomed
+ *      stage rounds two elements' coordinates a fraction of a pixel apart,
+ *      and that sliver is dead space for the pointer — it belongs to neither
+ *      this handle nor the tile, so crossing it drops `:hover` off the cell
+ *      and fades the handle out from under the hand reaching for it.
+ *    - NO BORDER on the edge that overlaps (`border-t-0`). A handle with a
+ *      full border sitting a pixel into the tile draws TWO border lines on
+ *      top of each other there — the handle's own top edge and the tile's
+ *      bottom edge — which is what actually reads as an overlap: a visibly
+ *      doubled, slightly misaligned line. Dropping the handle's own top
+ *      border leaves only the tile's line showing through, so the seam
+ *      disappears instead of doubling.
+ *    - ROUNDED ONLY ON THE BOTTOM. The touching (top) corners stay square so
+ *      the handle's silhouette continues the tile's own bottom edge instead
+ *      of notching into it.
+ *
+ *  `data-block-selected` (set by the consumer on anything inside the cell) is
+ *  what keeps them out once a block is being worked on. Hover alone was not
+ *  enough for chrome that lives outside the tile: it is reached by leaving the
+ *  tile, and a handle that starts fading the moment the hand sets off for it
+ *  is a handle you chase.
+ *
+ *  Hidden handles take NO PRESSES. An `opacity: 0` button still hit-tests, and
+ *  these hang over the neighbouring cell, which on an editable board is a free
+ *  cell that inserts a block when clicked. Drawn nothing, doing nothing.
+ *
+ *  Gone entirely while the block has put an editing surface over itself
+ *  (`data-block-overlay`, e.g. framing a photo). Such a surface covers the
+ *  whole cell above these, so they were already unpressable — drawn but dead,
+ *  and now drawn under that surface's own corner controls. A handle you can
+ *  see and cannot use is worse than no handle. */
 const HANDLE_CLASS = cn(
-  "absolute z-20 inline-flex size-6 items-center justify-center rounded-sm border border-border",
-  "bg-background/95 text-muted-foreground shadow-xs transition-opacity duration-base ease-standard",
+  "absolute z-20 inline-flex size-6 items-center justify-center",
+  "rounded-b-sm rounded-t-none border border-t-0 border-border",
+  "bg-background/95 text-muted-foreground transition-opacity duration-base ease-standard",
+  // Same colour as the ring around the tile they belong to, so a selected
+  // block and its controls read as one object rather than three.
+  "group-has-[[data-block-selected]]:border-ring",
   "hover:text-foreground focus-visible:opacity-100 focus-visible:outline-none",
   "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background",
   "motion-reduce:transition-none",
-  "pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100 pointer-fine:group-focus-within:opacity-100",
+  "pointer-fine:pointer-events-none pointer-fine:opacity-0",
+  "pointer-fine:group-hover:pointer-events-auto pointer-fine:group-hover:opacity-100",
+  "pointer-fine:group-focus-within:pointer-events-auto pointer-fine:group-focus-within:opacity-100",
+  "pointer-fine:group-has-[[data-block-selected]]:pointer-events-auto",
+  "pointer-fine:group-has-[[data-block-selected]]:opacity-100",
+  "group-has-[[data-block-overlay]]:hidden",
 );
+
+/** The strip the handles live in: hanging off the tile's bottom edge, flush
+ *  with it (a hairline of overlap, `-mt-px`, rather than a gap — see
+ *  HANDLE_CLASS for why). */
+const HANDLE_ROW = "top-full -mt-px";
 
 /** Suppress text selection for the duration of a drag. Module scope so the
  *  DOM write happens outside component/render scope. */
@@ -81,6 +143,41 @@ function placementStyle(placement: GridPlacement): React.CSSProperties {
   return {
     gridColumn: `${placement.x + 1} / span ${placement.w}`,
     gridRow: `${placement.y + 1} / span ${placement.h}`,
+  };
+}
+
+/**
+ * THE HALF-CELL NUDGE THAT PUTS A TURNED TILE BACK ON THE CELLS IT CLAIMS.
+ *
+ * See footprintOffset: a block stood on its side is drawn about its own centre,
+ * so one whose width and height differ in parity paints straddling the grid's
+ * lines instead of on them. No placement can express the correction — x and y
+ * are whole cells and the miss is half of one — so it is applied here, to the
+ * paint. It follows the FOOTPRINT rather than the exact angle, so 85 and 91
+ * degrees sit where 90 does and the tile never steps sideways as it is turned
+ * through the right angle.
+ *
+ * As `left`/`top` rather than a translate, for two reasons. The gesture painter
+ * OWNS `translate` (and blanks it when a drag ends), so a nudge written there
+ * would be wiped by the first drag. And a relative offset is layout-space, i.e.
+ * BEFORE the tilt — which is the space the miss is measured in; folded into
+ * `transform` it would be applied inside the rotation and point the wrong way.
+ *
+ * Stated in the element's OWN size so nothing has to be measured: `left`'s
+ * percentage resolves against the block's grid area, which is
+ * `w` cells + `w - 1` gaps, so `(100% + gap) / w` is exactly one cell pitch
+ * however wide the board is drawn. Same on the other axis with `h`.
+ */
+function snapToGridStyle(
+  placement: GridPlacement,
+  rotation: number,
+): React.CSSProperties {
+  const offset = footprintOffset(placement, rotation);
+  const pitch = (cells: number, span: number) =>
+    `calc((100% + var(--grid-gap, 0px)) * ${cells / span})`;
+  return {
+    ...(offset.x ? { left: pitch(offset.x, placement.w) } : {}),
+    ...(offset.y ? { top: pitch(offset.y, placement.h) } : {}),
   };
 }
 
@@ -191,13 +288,17 @@ function previewBox(
   box: { x: number; y: number; w: number; h: number },
   origin: GridPlacement,
   strides: Strides,
+  /** The snap nudge the element is ALREADY carrying (see snapToGridStyle), in
+   *  cells. Subtracted so the live box paints exactly where the gesture says,
+   *  rather than half a cell out from under the hand that is dragging it. */
+  snap: Point = { x: 0, y: 0 },
 ): { offset: { x: number; y: number }; size: { w: number; h: number } } {
   const cellW = strides.strideX - strides.gapX;
   const cellH = strides.strideY - strides.gapY;
   return {
     offset: {
-      x: ((box.x - origin.x) * strides.strideX) / strides.scale,
-      y: ((box.y - origin.y) * strides.strideY) / strides.scale,
+      x: ((box.x - origin.x - snap.x) * strides.strideX) / strides.scale,
+      y: ((box.y - origin.y - snap.y) * strides.strideY) / strides.scale,
     },
     size: {
       w: (box.w * cellW + (box.w - 1) * strides.gapX) / strides.scale,
@@ -235,12 +336,34 @@ function localPointerCell(
   degrees: number,
   clientX: number,
   clientY: number,
+  /** The snap nudge the tile is painted with, in SCREEN px. Taken off the
+   *  pointer first, so the hand's position is read in the same frame the
+   *  block's stored rect lives in (see blockPointer). */
+  snap: Point = { x: 0, y: 0 },
 ): Point {
-  const local = toLocalPoint(center, degrees, { x: clientX, y: clientY });
+  const local = toLocalPoint(center, degrees, {
+    x: clientX - snap.x,
+    y: clientY - snap.y,
+  });
   return {
     x: (local.x - strides.rect.left + strides.gapX / 2) / strides.strideX,
     y: (local.y - strides.rect.top + strides.gapY / 2) / strides.strideY,
   };
+}
+
+/**
+ * The nudge a block is painted with, in SCREEN pixels.
+ *
+ * Everything the gestures compute — the block's box, the pointer un-rotated
+ * into its frame, the placement a resize lands on — works in the STORED rect's
+ * space, which is where the placement maths has to end up. The tile the hand is
+ * actually on is that box shifted by this. So the pointer is brought back into
+ * stored space by subtracting it (see localPointerCell and edgeGrab), and
+ * nothing downstream has to know the nudge exists.
+ */
+function snapShift(strides: Strides, block: GridBlock<unknown>): Point {
+  const offset = footprintOffset(block, block.rotation ?? 0);
+  return { x: offset.x * strides.strideX, y: offset.y * strides.strideY };
 }
 
 interface GridCommonProps<TData> {
@@ -554,10 +677,15 @@ export function Grid<TData>(props: GridProps<TData>) {
       clientY: number,
     ): ResizeEdges | null => {
       const box = cellBox(strides, block);
+      // The pointer, brought back out of the painted tile's frame into the
+      // stored rect's — a quarter-turned block may be drawn half a cell off it
+      // (see snapShift), and half a cell is far wider than the grab strip, so
+      // without this the edge under the hand is not the edge that resizes.
+      const shift = snapShift(strides, block);
       const local = toLocalPoint(
         { x: box.centerX, y: box.centerY },
         block.rotation ?? 0,
-        { x: clientX, y: clientY },
+        { x: clientX - shift.x, y: clientY - shift.y },
       );
       return edgesUnderPointer(box, local.x, local.y);
     },
@@ -701,6 +829,10 @@ export function Grid<TData>(props: GridProps<TData>) {
     settledRotationRef.current = angle;
     const rect = cellBox(strides, block);
     const center = { x: rect.centerX, y: rect.centerY };
+    // What the tile is painted off by, so the pointer can be read in the
+    // stored rect's own frame and the live preview drawn where the hand is.
+    const shift = snapShift(strides, block);
+    const snapCells = footprintOffset(block, angle);
     const startX = event.clientX;
     const startY = event.clientY;
     const origin: GridPlacement = {
@@ -735,6 +867,7 @@ export function Grid<TData>(props: GridProps<TData>) {
           angle,
           moveEvent.clientX,
           moveEvent.clientY,
+          shift,
         ),
         bounds,
         "edge",
@@ -765,6 +898,7 @@ export function Grid<TData>(props: GridProps<TData>) {
           placementFromLocalBox(origin, angle, live, anchor),
           origin,
           strides,
+          snapCells,
         ),
       };
       scheduleGesturePaint();
@@ -807,6 +941,11 @@ export function Grid<TData>(props: GridProps<TData>) {
     settledRotationRef.current = angle;
     const rect = cellBox(strides, block);
     const center = { x: rect.centerX, y: rect.centerY };
+    // Same two as the edge drag: the pointer is read in the stored rect's
+    // frame, and the preview is drawn where the gesture says rather than where
+    // the tile's own snap nudge has it sitting.
+    const shift = snapShift(strides, block);
+    const snapCells = footprintOffset(block, angle);
     const origin: GridPlacement = {
       x: block.x,
       y: block.y,
@@ -833,17 +972,47 @@ export function Grid<TData>(props: GridProps<TData>) {
     const cornerEdges: ResizeEdges = { n: false, e: true, s: true, w: false };
     const bounds = boardInLocalFrame(origin, angle, columns, rows);
 
+    /**
+     * WHERE THE HAND GRABBED, relative to the cell the handle speaks for.
+     *
+     * The corner gesture names a CELL — "reach to whichever cell I am over" —
+     * which was exact while the handle sat inside the corner it drags. It does
+     * not any more: the handle hangs outside the tile (it was covering the
+     * seller's own price tag and title in there), so at rest the hand is
+     * already over the NEXT cell along, and a drag of one cell grew the block
+     * by two.
+     *
+     * Taking the grab offset off every reading puts that right for good: the
+     * press is read as though it had landed in the middle of the block's own
+     * far corner cell, so the gesture means exactly what it always did and
+     * stops depending on where the handle happens to be drawn.
+     */
+    const grabbedAtCell = localPointerCell(
+      strides,
+      center,
+      angle,
+      event.clientX,
+      event.clientY,
+      shift,
+    );
+    const grabOffset = {
+      x: grabbedAtCell.x - (origin.x + origin.w - 0.5),
+      y: grabbedAtCell.y - (origin.y + origin.h - 0.5),
+    };
+
     const handleMove = (moveEvent: PointerEvent) => {
+      const pointer = localPointerCell(
+        strides,
+        center,
+        angle,
+        moveEvent.clientX,
+        moveEvent.clientY,
+        shift,
+      );
       const { live, snapped, anchor } = resizeLocalBox(
         origin,
         cornerEdges,
-        localPointerCell(
-          strides,
-          center,
-          angle,
-          moveEvent.clientX,
-          moveEvent.clientY,
-        ),
+        { x: pointer.x - grabOffset.x, y: pointer.y - grabOffset.y },
         bounds,
         "corner",
       );
@@ -865,6 +1034,7 @@ export function Grid<TData>(props: GridProps<TData>) {
           placementFromLocalBox(origin, angle, live, anchor),
           origin,
           strides,
+          snapCells,
         ),
       };
       scheduleGesturePaint();
@@ -918,7 +1088,12 @@ export function Grid<TData>(props: GridProps<TData>) {
     if (!strides) return;
 
     const box = cellBox(strides, block);
-    const center = { x: box.centerX, y: box.centerY };
+    // The PAINTED centre: the handle orbits the tile the seller can see, and a
+    // quarter-turned tile may be nudged half a cell off its stored box (see
+    // snapShift). Every other gesture takes that nudge off the pointer; a spin
+    // is the one that wants the pivot moved onto it instead.
+    const shift = snapShift(strides, block);
+    const center = { x: box.centerX + shift.x, y: box.centerY + shift.y };
     const origin = block.rotation ?? 0;
     settledRotationRef.current = origin;
     const grabbedAt = angleFromCenter(center, {
@@ -1050,12 +1225,7 @@ export function Grid<TData>(props: GridProps<TData>) {
 
     const candidate = clampToCanvas(
       event.shiftKey
-        ? {
-            x: block.x,
-            y: block.y,
-            w: Math.max(1, block.w + delta[0]),
-            h: Math.max(1, block.h + delta[1]),
-          }
+        ? keyboardResizeStep(block, delta)
         : {
             x: block.x + delta[0],
             y: block.y + delta[1],
@@ -1106,6 +1276,14 @@ export function Grid<TData>(props: GridProps<TData>) {
     }
     return cells;
   }, [showEmptyCells, editable, view.blocks, view.rows, renderColumns]);
+
+  /** Which cells may rise for their own chrome without reordering the board
+   *  under the seller. The rule itself is pure and lives with the rest of the
+   *  paint-band math; see liftableChromeKeys. */
+  const liftableKeys = useMemo(
+    () => liftableChromeKeys(view.blocks),
+    [view.blocks],
+  );
 
   return (
     <div ref={containerRef} className={cn(GRID_CONTAINER_CLASS, className)}>
@@ -1165,6 +1343,11 @@ export function Grid<TData>(props: GridProps<TData>) {
               // For consumers that hit-test cells from the DOM (the
               // designer's marquee selection reads these back into keys).
               data-grid-key={block.key}
+              // Whether this cell may rise for its own chrome. Present when
+              // doing so is invisible (nothing in front of it overlaps it);
+              // absent when it would reorder the board under the seller. The
+              // lift rules in globals.css require it — see `liftableKeys`.
+              data-chrome-lift={liftableKeys.has(block.key) ? "" : undefined}
               onPointerDown={
                 interactive ? (event) => startMove(event, block) : undefined
               }
@@ -1188,9 +1371,18 @@ export function Grid<TData>(props: GridProps<TData>) {
                 // so every renderer of this grid stacks identically: cells are
                 // siblings in one stacking context, and a consumer painting
                 // depth into half of them would leave the rest at auto.
-                ...(block.z !== undefined
-                  ? { zIndex: layerZIndex(block.z) }
-                  : {}),
+                // ALWAYS set, even for a block with no depth of its own. The
+                // free-cell guides are rendered after the blocks (so they come
+                // after them in the tab order, where they belong), and a grid
+                // item at `z-index: auto` paints in document order — which put
+                // every guide ON TOP of every tile. Invisible while the tile's
+                // chrome lived inside it; the moment a handle hangs off the
+                // edge, the guide underneath swallows the press meant for it.
+                // A floor of one puts blocks above the guides (see EMPTY_CELL_Z)
+                // without changing how they stack against EACH OTHER: with no
+                // depth stated they all land on the same level and paint in
+                // document order, exactly as they always have.
+                zIndex: layerZIndex(block.z ?? 0),
                 ...cellStyle?.(placement, block),
                 // The tilt, as the standalone `rotate` property rather than
                 // inside `transform`: the gesture painter owns `translate`,
@@ -1201,6 +1393,11 @@ export function Grid<TData>(props: GridProps<TData>) {
                 // every renderer of this grid tilts identically and none of
                 // them can forget to.
                 ...(block.rotation ? { rotate: `${block.rotation}deg` } : {}),
+                // ...and the half-cell nudge that keeps that tilt on the cells
+                // the board reserved for it. Beside the tilt because it is part
+                // of it: standing a block on its side is the only thing that
+                // can knock it off, and this is what puts it back.
+                ...snapToGridStyle(placement, block.rotation ?? 0),
                 // The offset / size / angle of a tile under gesture is written
                 // imperatively, so it is deliberately absent here. The hint
                 // names `translate` and `rotate` because those are the
@@ -1247,11 +1444,13 @@ export function Grid<TData>(props: GridProps<TData>) {
               {interactive && (
                 <button
                   type="button"
+                  data-tile-chrome=""
                   aria-label={label ? `Resize ${label}` : "Resize block"}
                   onPointerDown={(event) => startResize(event, block)}
                   className={cn(
                     HANDLE_CLASS,
-                    "bottom-1 right-1 cursor-nwse-resize touch-none select-none",
+                    HANDLE_ROW,
+                    "right-0 cursor-nwse-resize touch-none select-none",
                   )}
                 >
                   <MoveDiagonal2
@@ -1273,6 +1472,7 @@ export function Grid<TData>(props: GridProps<TData>) {
               {interactive && onRotate && (
                 <button
                   type="button"
+                  data-tile-chrome=""
                   role="slider"
                   aria-label={label ? `Rotate ${label}` : "Rotate block"}
                   aria-valuemin={-180}
@@ -1288,7 +1488,8 @@ export function Grid<TData>(props: GridProps<TData>) {
                   }}
                   className={cn(
                     HANDLE_CLASS,
-                    "bottom-1 left-1 cursor-grab touch-none select-none active:cursor-grabbing",
+                    HANDLE_ROW,
+                    "left-0 cursor-grab touch-none select-none active:cursor-grabbing",
                   )}
                 >
                   <RotateCw
@@ -1306,7 +1507,9 @@ export function Grid<TData>(props: GridProps<TData>) {
                 <span
                   ref={readoutRef}
                   aria-hidden="true"
-                  className="pointer-events-none absolute -bottom-7 left-1 z-20 rounded-sm border border-border bg-background/95 px-1.5 py-0.5 font-inter text-xs text-foreground shadow-xs"
+                  // Below the handle row, not in it: the handles moved out of
+                  // the tile and now hold the strip this used to sit in.
+                  className="pointer-events-none absolute left-0 top-full z-20 mt-8 rounded-sm border border-border bg-background/95 px-1.5 py-0.5 font-inter text-xs text-foreground shadow-xs"
                 >
                   {/* Seeded with the angle the spin STARTED at, so a press
                       that has not travelled yet shows a number rather than an
@@ -1318,10 +1521,19 @@ export function Grid<TData>(props: GridProps<TData>) {
           );
         })}
 
-        {/* Free cells. Clickable when the consumer wants insert-here. */}
+        {/* Free cells. Clickable when the consumer wants insert-here.
+            EMPTY_CELL_Z puts them under every block: they are drawn last so
+            they land after the tiles in the tab order, and document order is
+            what decides paint among grid items that state no depth. */}
         {emptyCells.map((cell) =>
           onEmptyCellClick && interactive ? (
-            <li key={`empty-${cell.x}-${cell.y}`} style={placementStyle({ ...cell, w: 1, h: 1 })}>
+            <li
+              key={`empty-${cell.x}-${cell.y}`}
+              style={{
+                ...placementStyle({ ...cell, w: 1, h: 1 }),
+                zIndex: EMPTY_CELL_Z,
+              }}
+            >
               <button
                 type="button"
                 // Marks a FREE-cell control: a consumer's drag gesture (the
@@ -1343,6 +1555,7 @@ export function Grid<TData>(props: GridProps<TData>) {
               aria-hidden="true"
               style={{
                 ...placementStyle({ ...cell, w: 1, h: 1 }),
+                zIndex: EMPTY_CELL_Z,
                 ...cellStyle?.({ ...cell, w: 1, h: 1 }),
               }}
               className={cn(

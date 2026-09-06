@@ -393,12 +393,20 @@ export function StorefrontDesigner({
     [catalog],
   );
 
+  /** Whether any product page is out on the canvas. */
+  const pageOpen = openPages.length > 0;
+
   // What the design panel's search field can find. Rebuilt when the board or
   // the catalogue changes, because half of this index IS the board: the
   // objects on it are searchable by the same names the layers list shows.
+  //
+  // It also tracks whether a page is out. The product page's settings are only
+  // offered while the page they describe is on screen; with none out they
+  // collapse to a single row that opens one, so the same words still answer
+  // and what they answer with is the step that has to come first anyway.
   const editorSearchEntries = useMemo(
-    () => editorEntries(blocks, productsById),
-    [blocks, productsById],
+    () => editorEntries(blocks, productsById, { pageOpen }),
+    [blocks, productsById, pageOpen],
   );
   const usedProductIds = useMemo(
     () =>
@@ -1373,12 +1381,40 @@ export function StorefrontDesigner({
   }, []);
 
   /**
+   * Is this press on empty workspace, as opposed to on something?
+   *
+   * The obvious test (did the press land on the workspace element itself) is
+   * not enough, because the stage is a FLEX ROW: the gap it leaves between
+   * the board and the pages beside it, and the band above them the connectors
+   * run through, are all inside the stage's own box, so a press there hits the
+   * stage rather than the workspace behind it. It is still empty space, and
+   * grabbing empty space is how the seller drags the whole workspace around,
+   * a rule that got noticeably worse to live with once pages could sit beside
+   * the board, since that gap is exactly where the hand reaches for.
+   *
+   * So: anywhere inside the stage that is neither the board, nor a page, nor
+   * a control on the chrome around them (the device switches and the close
+   * buttons ride the stage too, and a press on one belongs to that button).
+   */
+  function isWorkspaceBackground(event: React.PointerEvent<HTMLElement>): boolean {
+    if (event.target === event.currentTarget) return true;
+    const target = event.target instanceof Element ? event.target : null;
+    if (!target || !target.closest("[data-canvas-stage]")) return false;
+    if (target.closest("[data-canvas-board], [data-artboard-id]")) return false;
+    return (
+      target.closest(
+        "button, a, input, select, textarea, [contenteditable='true'], [role='button'], [role='switch']",
+      ) === null
+    );
+  }
+
+  /**
    * Pan gestures: the middle button, space held, or a left-press that landed
    * on the workspace BACKGROUND (dragging beside the board moves it, while a
    * press on a tile still drags that tile).
    */
   function startPan(event: React.PointerEvent<HTMLElement>) {
-    const onBackground = event.target === event.currentTarget;
+    const onBackground = isWorkspaceBackground(event);
     const wanted =
       event.button === 1 || (event.button === 0 && (spaceHeld || onBackground));
     if (!wanted) return;
@@ -2078,17 +2114,6 @@ export function StorefrontDesigner({
       columns: Math.min(CANVAS_COLUMNS_MAX, Math.max(columns, minColumns)),
       rows: Math.min(CANVAS_ROWS_MAX, Math.max(rows, minRows)),
     });
-  }
-
-  function toggleSoldOut(key: string) {
-    recordChange();
-    setBlocks((current) =>
-      current.map((b) =>
-        b.type === "product" && blockKey(b) === key
-          ? { ...b, soldOut: !b.soldOut }
-          : b,
-      ),
-    );
   }
 
   // The block update functions all take a KEY LIST: the single-block editors
@@ -3297,9 +3322,6 @@ export function StorefrontDesigner({
                       block={selectedBlock}
                       theme={theme}
                       product={productsById.get(selectedBlock.productId) ?? null}
-                      onToggleSoldOut={() =>
-                        toggleSoldOut(blockKey(selectedBlock))
-                      }
                       onStyleChange={(patch) =>
                         updateProductBlocksStyle([blockKey(selectedBlock)], patch)
                       }

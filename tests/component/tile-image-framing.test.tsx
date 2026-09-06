@@ -72,8 +72,8 @@ const framer = () => screen.queryByTestId("tile-image-framer");
 // PLT-02: the outer container is a plain focusable div (no role="button"), so
 // getByRole("button") no longer finds it. getByLabelText reaches it via
 // aria-label. The pattern anchors to "Framed Print" at the start to skip the
-// chip's "Select Framed Print" and "Frame the image for Framed Print" buttons
-// whose labels also contain the product name.
+// chip's "Frame the image for Framed Print" button, whose label also
+// contains the product name.
 const tile = () => screen.getByLabelText(/^Framed Print/);
 
 // Vitest runs without globals here, so RTL's auto-cleanup never registers —
@@ -139,6 +139,22 @@ describe("entering frame mode", () => {
 });
 
 describe("while framing", () => {
+  it("marks the box the picture is really cropped to", () => {
+    // The tile is NOT that box: a `bar` title takes a row of the tile's own
+    // column, so the picture's frame is shorter. Both the framing surface and
+    // the dimmed copy of the rest of the picture measure this marker; without
+    // it they fall back to the tile, and the overflow is drawn several percent
+    // too big. jsdom cannot see the sizes, but it can see the marker go
+    // missing, which is the only way this gets broken.
+    renderTile({ isFraming: true });
+    const frame = document.querySelector("[data-image-frame]");
+    expect(frame).not.toBeNull();
+    expect(frame!.querySelector("img")).not.toBeNull();
+    // And it is the picture's own box, not the whole face: the title band is
+    // a sibling of it, never inside it.
+    expect(frame!.querySelector("[data-title-band]")).toBeNull();
+  });
+
   it("puts a framing surface over the tile, and names what it frames", () => {
     renderTile({ isFraming: true });
     const surface = framer()!;
@@ -293,6 +309,71 @@ describe("while framing", () => {
     box.mockRestore();
   });
 
+  it("offers corner handles, because a picture that fits has nothing to drag", () => {
+    // The gap this closes: at scale 100 the picture exactly covers the tile,
+    // so there is no overhang to pan and the surface reads as inert. Every
+    // route to a bigger picture (wheel, pinch, +/-) was something you had to
+    // already know about.
+    renderTile({ isFraming: true });
+    for (const corner of ["top-left", "top-right", "bottom-left", "bottom-right"]) {
+      expect(screen.getByTestId(`tile-zoom-handle-${corner}`)).toBeInTheDocument();
+    }
+  });
+
+  it("zooms one step on a tap of a corner", () => {
+    // The whole gesture on a phone: no wheel, no keyboard, and pinching a tile
+    // the size of a thumbnail is awkward.
+    const { onFramePlacement } = renderTile({ isFraming: true });
+    const handle = screen.getByTestId("tile-zoom-handle-bottom-right");
+    fireEvent.pointerDown(handle, { pointerId: 1, clientX: 190, clientY: 190 });
+    fireEvent.pointerUp(handle, { pointerId: 1, clientX: 190, clientY: 190 });
+
+    const [, placement] = onFramePlacement.mock.calls.at(-1)!;
+    expect((placement as { scale: number }).scale).toBeGreaterThan(100);
+  });
+
+  it("grows the picture as a corner is pulled away from the middle", () => {
+    const box = vi
+      .spyOn(HTMLElement.prototype, "getBoundingClientRect")
+      .mockReturnValue({ width: 200, height: 200, x: 0, y: 0, left: 0, top: 0 } as DOMRect);
+
+    const { onFramePlacement } = renderTile({ isFraming: true });
+    const handle = screen.getByTestId("tile-zoom-handle-bottom-right");
+    // The corner starts 100√2 from the centre and is pulled to 200√2: twice
+    // the reach, so twice the scale.
+    fireEvent.pointerDown(handle, { pointerId: 1, clientX: 200, clientY: 200 });
+    fireEvent.pointerMove(handle, { pointerId: 1, clientX: 300, clientY: 300 });
+
+    const [, placement] = onFramePlacement.mock.calls.at(-1)!;
+    expect((placement as { scale: number }).scale).toBe(200);
+
+    // ...and pushing it back in shrinks it again, down to the cover floor.
+    fireEvent.pointerMove(handle, { pointerId: 1, clientX: 150, clientY: 150 });
+    const [, shrunk] = onFramePlacement.mock.calls.at(-1)!;
+    expect((shrunk as { scale: number }).scale).toBe(100);
+    box.mockRestore();
+  });
+
+  it("does not also pan the picture while a corner is being pulled", () => {
+    // The surface underneath pans on the very same events. Without the
+    // handle owning them outright, zooming would drag the picture sideways.
+    const box = vi
+      .spyOn(HTMLElement.prototype, "getBoundingClientRect")
+      .mockReturnValue({ width: 200, height: 200, x: 0, y: 0, left: 0, top: 0 } as DOMRect);
+
+    const { onFramePlacement } = renderTile({ isFraming: true });
+    const handle = screen.getByTestId("tile-zoom-handle-top-left");
+    fireEvent.pointerDown(handle, { pointerId: 1, clientX: 0, clientY: 0 });
+    fireEvent.pointerMove(handle, { pointerId: 1, clientX: -60, clientY: -60 });
+    fireEvent.pointerUp(handle, { pointerId: 1, clientX: -60, clientY: -60 });
+
+    for (const [, placement] of onFramePlacement.mock.calls) {
+      const at = placement as { x: number; y: number };
+      expect([at.x, at.y]).toEqual([50, 50]);
+    }
+    box.mockRestore();
+  });
+
   it("leaves on Escape", () => {
     const { onFrameExit } = renderTile({ isFraming: true });
     fireEvent.keyDown(framer()!, { key: "Escape" });
@@ -346,10 +427,12 @@ describe("the rest of the picture, while framing", () => {
 
   it("lands the dimmed copy exactly where the frame crops it", () => {
     // jsdom measures everything as zero, so the frame and the picture are
-    // given real sizes here: a 200x200 tile cropping a 400x200 photo. Cover
+    // given real sizes here: a 200x200 frame cropping a 400x200 photo. Cover
     // renders that at 400x200, centred, so the copy must start 100px to the
-    // LEFT of the tile and run twice its width — which is precisely the
-    // overhang the frame is hiding.
+    // LEFT of the frame and run twice its width — which is precisely the
+    // overhang the frame is hiding. (Every box reports 200x200 at the origin
+    // under this mock, so the frame and the tile coincide; that they do NOT
+    // coincide in a real layout is what the browser spec covers.)
     const box = vi
       .spyOn(HTMLElement.prototype, "getBoundingClientRect")
       .mockReturnValue({ width: 200, height: 200, x: 0, y: 0 } as DOMRect);

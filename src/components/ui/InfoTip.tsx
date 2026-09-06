@@ -8,6 +8,11 @@ import {
   infoTipBubbleClass,
   infoTipTriggerClass,
 } from "@/components/ui/control-styles";
+import {
+  TipArrow,
+  tipBubbleStyle,
+  useTipPlacement,
+} from "@/components/ui/tip-placement";
 
 /**
  * The ONE info tip in the product: a "?" beside a label that reveals a
@@ -22,15 +27,14 @@ import {
  *   - TOUCH: tap. There is no hover on a phone, so the tap is the only way
  *     in — hence the pointerType guard below and the outside-press close.
  *
- * The bubble is `position: fixed` in a portal on <body>, placed from the
- * trigger's rect. An absolutely-positioned tip is clipped the moment it is
- * used inside anything that scrolls (the storefront designer's side panel,
- * a table), and this component is meant to be safe everywhere.
+ * Placement, the bubble shape and the point back at the trigger are all
+ * shared with the hover-label Tooltip (see ui/tip-placement and the tooltip
+ * tokens in control-styles), so the product has ONE tooltip, in two lengths.
+ *
+ * SIBLING, NOT A REPLACEMENT, for <Tooltip>: this one names something the
+ * control does not say for itself and is worth reading, so it waits behind a
+ * deliberate press and stays up. A Tooltip only repeats an icon's own label.
  */
-
-/** Gap between trigger and bubble, and the room kept against the viewport. */
-const GAP = 8;
-const EDGE = 8;
 
 export function InfoTip({
   label,
@@ -56,44 +60,7 @@ export function InfoTip({
   const [pinned, setPinned] = React.useState(false);
   const open = hovered || focused || pinned;
 
-  const [pos, setPos] = React.useState<{ top: number; left: number } | null>(
-    null,
-  );
-  // Bumped on scroll/resize so the placement below re-runs and the bubble
-  // stays glued to its trigger instead of drifting off it.
-  const [reflow, setReflow] = React.useState(0);
-
-  // Placement runs AFTER the bubble is in the DOM: its measured size decides
-  // the horizontal clamp and whether it flips above the trigger.
-  React.useLayoutEffect(() => {
-    if (!open) return;
-    const trigger = triggerRef.current;
-    const bubble = bubbleRef.current;
-    if (!trigger || !bubble) return;
-
-    const rect = trigger.getBoundingClientRect();
-    const width = bubble.offsetWidth;
-    const height = bubble.offsetHeight;
-
-    const left = Math.max(
-      EDGE,
-      Math.min(
-        rect.left + rect.width / 2 - width / 2,
-        window.innerWidth - width - EDGE,
-      ),
-    );
-    const below = rect.bottom + GAP;
-    const flip =
-      below + height > window.innerHeight - EDGE &&
-      rect.top - GAP - height >= EDGE;
-    const top = flip ? rect.top - GAP - height : below;
-
-    // Bail when nothing moved. `children` is a fresh ReactNode every render,
-    // so this effect must never be the thing that causes the next render.
-    setPos((prev) =>
-      prev && prev.top === top && prev.left === left ? prev : { top, left },
-    );
-  }, [open, reflow]);
+  const placement = useTipPlacement(open, triggerRef, bubbleRef);
 
   React.useEffect(() => {
     if (!open) return;
@@ -108,22 +75,15 @@ export function InfoTip({
       if (triggerRef.current?.contains(event.target as Node)) return;
       setPinned(false);
     }
-    function onReflow() {
-      setReflow((n) => n + 1);
-    }
 
     document.addEventListener("keydown", onKeyDown);
     // CAPTURE phase, same reason as Popover: the designer canvas stops
     // pointerdown propagation, and a bubble-phase listener would never see
     // the press that should dismiss this.
     document.addEventListener("pointerdown", onPointerDown, true);
-    window.addEventListener("scroll", onReflow, true);
-    window.addEventListener("resize", onReflow);
     return () => {
       document.removeEventListener("keydown", onKeyDown);
       document.removeEventListener("pointerdown", onPointerDown, true);
-      window.removeEventListener("scroll", onReflow, true);
-      window.removeEventListener("resize", onReflow);
     };
   }, [open]);
 
@@ -164,19 +124,11 @@ export function InfoTip({
             ref={bubbleRef}
             id={tipId}
             role="tooltip"
-            // The very first open is a measuring pass: rendered off in the
-            // corner and hidden, then placed by the layout effect before the
-            // browser paints, so it never appears in the wrong spot. Later
-            // opens reuse the last placement for that one pre-paint frame,
-            // which is why `pos` is not cleared on close.
-            style={
-              pos
-                ? { top: pos.top, left: pos.left }
-                : { top: 0, left: 0, visibility: "hidden" }
-            }
+            style={tipBubbleStyle(placement)}
             className={infoTipBubbleClass}
           >
             {children}
+            <TipArrow placement={placement} />
           </div>,
           document.body,
         )}

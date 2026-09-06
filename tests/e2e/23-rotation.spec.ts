@@ -290,6 +290,72 @@ test.describe("tilting a block", () => {
     expect(await placement(page)).toBe("2 / span 2|3 / span 2");
   });
 
+  test("an odd-dimensioned tile at -90 still lands on whole cells when a resize is clamped to the board edge", async ({
+    page,
+  }) => {
+    // A wiring sanity check for the bug report that led to the fix in
+    // boardInLocalFrame: a bar turned -90 and then expanded with the corner
+    // handle landed offset from the grid instead of filling it (root cause —
+    // and the exact geometry, including the half-cell drift this exercises —
+    // is pinned in tests/unit/grid-edge-resize.test.ts, "an odd-dimensioned
+    // origin at a quarter turn..."). clampToCanvas's own guarantee (whole
+    // cells, inside the board) holds either way, so THIS test cannot fail on
+    // the half-cell-vs-whole-cell drift itself — only on something worse
+    // (a crash, a NaN, a placement the board cannot actually hold, or the
+    // empty-cell guides disagreeing with what the tile now covers). It is
+    // here to prove the fixed function is really wired into the live corner
+    // drag, not standing in for the unit test above.
+    await setUpBoardWithShape(page, "rotoddedge");
+    const cell = page.locator("li[data-grid-cell]").first();
+    await cell.locator("[data-block-tile]").focus();
+    await page.keyboard.press("ArrowDown");
+    expect(await placement(page)).toBe("1 / span 1|2 / span 1");
+    // Grow it into a 2x1 bar WHILE STILL LEVEL.
+    await page.keyboard.press("Shift+ArrowRight");
+    expect(await placement(page)).toBe("1 / span 2|2 / span 1");
+
+    await page.getByRole("button", { name: "Rotate to -90 degrees" }).click();
+    expect(await tilt(page)).toBe("-90deg");
+    // Rotation alone never moves or resizes a block.
+    expect(await placement(page)).toBe("1 / span 2|2 / span 1");
+
+    const box = (await cell.boundingBox())!;
+    const handle = cell.getByRole("button", { name: /resize/i });
+    const handleBox = (await handle.boundingBox())!;
+    await page.mouse.move(
+      handleBox.x + handleBox.width / 2,
+      handleBox.y + handleBox.height / 2,
+    );
+    await page.mouse.down();
+    // Far past the board's own edge in every direction, so the clamp this
+    // bug lived in is what actually gets exercised, not the ordinary
+    // in-bounds path the other tests in this file already cover.
+    await page.mouse.move(box.x + box.width * 6, box.y + box.height * 6, {
+      steps: 12,
+    });
+    await page.mouse.up();
+    await page.waitForTimeout(150);
+
+    // Whole cells, inside the board, and — the part a half-cell drift broke —
+    // the board's OWN bookkeeping (the empty-cell guides, which read the
+    // tile's footprint) agrees that exactly this rect is what is covered:
+    // 36 cells less however many the tile's area now claims.
+    const match = /^(\d+) \/ span (\d+)\|(\d+) \/ span (\d+)$/.exec(
+      await placement(page),
+    )!;
+    const [x1, w, y1, h] = match.slice(1).map(Number);
+    expect(Number.isInteger(x1)).toBe(true);
+    expect(Number.isInteger(w)).toBe(true);
+    expect(Number.isInteger(y1)).toBe(true);
+    expect(Number.isInteger(h)).toBe(true);
+    expect(x1 - 1 + w).toBeLessThanOrEqual(6);
+    expect(y1 - 1 + h).toBeLessThanOrEqual(6);
+    const freeCells = await page
+      .locator("button[data-grid-empty]")
+      .count();
+    expect(freeCells).toBe(36 - w * h);
+  });
+
   test("grabbing a turned tile's edge resizes the side under the hand", async ({
     page,
   }) => {

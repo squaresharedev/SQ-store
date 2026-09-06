@@ -4,12 +4,14 @@ import {
   boardInLocalFrame,
   edgeCursor,
   edgesUnderPointer,
+  keyboardResizeStep,
   placementFromLocalBox,
   resizeLocalBox,
+  type GridBlock,
   type GridPlacement,
   type ResizeEdges,
 } from "@/components/grid/gridConstants";
-import { rotatePoint } from "@/components/grid/rotationMath";
+import { rotatePoint, rotateVector, toLocalPoint, type Point } from "@/components/grid/rotationMath";
 
 /**
  * Edge-grab resize contract: a press near a cell border resizes from that
@@ -215,6 +217,162 @@ describe("placementFromLocalBox", () => {
   });
 });
 
+describe("boardInLocalFrame", () => {
+  it("always lands on whole cells, even about an off-grid centre", () => {
+    // A block's own centre sits on a grid line only when BOTH its width and
+    // height are even. A 2x1 bar's centre is half a cell down — turning the
+    // board's corners about that centre by a quarter turn lands them on a
+    // half-cell line too, even though the board itself is still an ordinary
+    // rectangle. A resize that gets dragged past the edge clamps to this
+    // bound, so a fractional bound is what used to hand the rest of the
+    // gesture a box it could not round onto the board cleanly.
+    const oddOrigins: GridPlacement[] = [
+      { x: 2, y: 2, w: 2, h: 1 },
+      { x: 2, y: 2, w: 1, h: 2 },
+      { x: 2, y: 2, w: 3, h: 4 },
+      { x: 2, y: 2, w: 1, h: 1 },
+    ];
+    for (const origin of oddOrigins) {
+      for (const angle of [90, -90, 270, -270]) {
+        const bounds = boardInLocalFrame(origin, angle, 6, 6);
+        for (const value of [bounds.l, bounds.r, bounds.t, bounds.b]) {
+          expect(Number.isInteger(value), `origin=${JSON.stringify(origin)} angle=${angle}`).toBe(true);
+        }
+      }
+    }
+  });
+
+  it("still fully contains the board — a drag can reach every cell a level one could", () => {
+    // Rounding OUTWARD (not to the nearest cell) is what makes this safe: the
+    // bound must never cut into the true board, or a resize could refuse to
+    // reach a cell that is genuinely still on it.
+    const origin: GridPlacement = { x: 2, y: 2, w: 2, h: 1 };
+    for (const angle of [90, -90]) {
+      const bounds = boardInLocalFrame(origin, angle, 6, 6);
+      const center = { x: origin.x + origin.w / 2, y: origin.y + origin.h / 2 };
+      for (let bx = 0; bx <= 6; bx += 1) {
+        for (let by = 0; by <= 6; by += 1) {
+          const local = toLocalPoint(center, angle, { x: bx, y: by });
+          expect(local.x).toBeGreaterThanOrEqual(bounds.l - 1e-9);
+          expect(local.x).toBeLessThanOrEqual(bounds.r + 1e-9);
+          expect(local.y).toBeGreaterThanOrEqual(bounds.t - 1e-9);
+          expect(local.y).toBeLessThanOrEqual(bounds.b + 1e-9);
+        }
+      }
+    }
+  });
+});
+
+/**
+ * The full corner-drag gesture, ODD-dimensioned origin included, checked
+ * AFTER rounding — which is exactly what "leaves the pinned corner exactly
+ * where it was, at ANY angle" above deliberately checks BEFORE. A block whose
+ * width and height differ in parity has its own centre on a half cell once it
+ * stands on its side (see lib/geometry/rotated-box.ts), so SOME imprecision
+ * here is inherent and accepted elsewhere in the codebase — rotatedFootprint
+ * documents the identical half-cell tradeoff. What is not acceptable is the
+ * full-cell drift a fractional boardInLocalFrame bound used to produce
+ * whenever the drag reached past the board's edge: independently rounding
+ * x, y, w and h from a box clamped to a half-cell bound could round two of
+ * those the same direction and lose a whole cell, not half of one.
+ */
+describe("a resized odd-dimensioned tile at a quarter turn, after rounding", () => {
+  function resizeAndRound(
+    origin: GridPlacement,
+    angle: number,
+    local: Point,
+    columns: number,
+    rows: number,
+  ) {
+    const bounds = boardInLocalFrame(origin, angle, columns, rows);
+    const { snapped, anchor } = resizeLocalBox(
+      origin,
+      { n: false, e: true, s: true, w: false },
+      local,
+      bounds,
+      "corner",
+    );
+    const next = placementFromLocalBox(origin, angle, snapped, anchor);
+    const rounded: GridPlacement = {
+      x: Math.round(next.x),
+      y: Math.round(next.y),
+      w: Math.round(next.w),
+      h: Math.round(next.h),
+    };
+    return { snapped, anchor, rounded };
+  }
+
+  /** How far the anchor corner drifted on screen once the result is rounded
+   *  onto whole cells, in cells. */
+  function anchorDrift(
+    origin: GridPlacement,
+    angle: number,
+    snapped: { l: number; t: number },
+    anchor: Point,
+    rounded: GridPlacement,
+  ) {
+    const was = rotatePoint(
+      { x: origin.x + origin.w / 2, y: origin.y + origin.h / 2 },
+      angle,
+      anchor,
+    );
+    const now = rotatePoint(
+      { x: rounded.x + rounded.w / 2, y: rounded.y + rounded.h / 2 },
+      angle,
+      {
+        x: anchor.x - snapped.l + rounded.x,
+        y: anchor.y - snapped.t + rounded.y,
+      },
+    );
+    return Math.max(Math.abs(now.x - was.x), Math.abs(now.y - was.y));
+  }
+
+  it("never drifts more than half a cell, including drags clamped past the board edge", () => {
+    const origin: GridPlacement = { x: 2, y: 2, w: 2, h: 1 };
+    let maxDrift = 0;
+    for (const angle of [90, -90]) {
+      // A wide sweep, well past the board on every side, so the clamp this
+      // bug lived in is exercised as often as the ordinary in-bounds case.
+      for (let lx = -5; lx <= 11; lx += 1) {
+        for (let ly = -5; ly <= 11; ly += 1) {
+          const { snapped, anchor, rounded } = resizeAndRound(
+            origin,
+            angle,
+            { x: lx, y: ly },
+            6,
+            6,
+          );
+          maxDrift = Math.max(
+            maxDrift,
+            anchorDrift(origin, angle, snapped, anchor, rounded),
+          );
+        }
+      }
+    }
+    // Before the boardInLocalFrame fix this reached a full cell (1.0) at
+    // several points in the sweep; 0.5 is the same inherent tradeoff
+    // rotatedFootprint already documents and accepts for an odd dimension.
+    expect(maxDrift).toBeLessThanOrEqual(0.5 + 1e-9);
+  });
+
+  it("the exact drag from the bug report: past the board edge, corner still whole", () => {
+    // A 2x1 bar at the board's near edge, turned -90, then the corner handle
+    // dragged well past the far edge — the everyday shape of "rotate it,
+    // then expand it" that produced a tile sitting offset from the grid.
+    const origin: GridPlacement = { x: 0, y: 0, w: 2, h: 1 };
+    const { snapped, anchor, rounded } = resizeAndRound(
+      origin,
+      -90,
+      { x: 8, y: 8 },
+      6,
+      6,
+    );
+    expect(Number.isInteger(rounded.x)).toBe(true);
+    expect(Number.isInteger(rounded.y)).toBe(true);
+    expect(anchorDrift(origin, -90, snapped, anchor, rounded)).toBeLessThanOrEqual(0.5 + 1e-9);
+  });
+});
+
 describe("edgeCursor", () => {
   it("maps sides and corners to the standard resize cursors", () => {
     expect(edgeCursor(edge({ e: true }))).toBe("ew-resize");
@@ -237,5 +395,177 @@ describe("edgeCursor", () => {
     // And it folds onto the nearest of the four cursors in between.
     expect(edgeCursor(edge({ e: true }), 45)).toBe("nwse-resize");
     expect(edgeCursor(edge({ e: true }), -45)).toBe("nesw-resize");
+  });
+});
+
+/**
+ * Shift+Arrow, for a block that may be turned.
+ *
+ * The bug this pins: the keyboard step used to add straight to `w` on
+ * Left/Right and `h` on Up/Down with no regard for rotation, while the mouse
+ * resize handle (resizeLocalBox / placementFromLocalBox, above) already
+ * un-rotates the pointer to find the block's own edge. A block turned a
+ * quarter turn grew SIDEWAYS on screen when Down was pressed — the one
+ * keyboard path that disagreed with every other resize gesture in the file.
+ */
+describe("keyboardResizeStep", () => {
+  const RIGHT: [number, number] = [1, 0];
+  const LEFT: [number, number] = [-1, 0];
+  const UP: [number, number] = [0, -1];
+  const DOWN: [number, number] = [0, 1];
+
+  function tile(over: Partial<GridBlock<unknown>> = {}): GridBlock<unknown> {
+    return { key: "b", data: null, x: 2, y: 2, w: 2, h: 3, ...over };
+  }
+
+  describe("level (0 degrees) — unchanged from before rotation existed", () => {
+    it("Right grows width, Left shrinks it, from the same top-left anchor", () => {
+      const block = tile();
+      expect(keyboardResizeStep(block, RIGHT)).toEqual({ x: 2, y: 2, w: 3, h: 3 });
+      expect(keyboardResizeStep(block, LEFT)).toEqual({ x: 2, y: 2, w: 1, h: 3 });
+    });
+
+    it("Down grows height, Up shrinks it, from the same top-left anchor", () => {
+      const block = tile();
+      expect(keyboardResizeStep(block, DOWN)).toEqual({ x: 2, y: 2, w: 2, h: 4 });
+      expect(keyboardResizeStep(block, UP)).toEqual({ x: 2, y: 2, w: 2, h: 2 });
+    });
+
+    it("never drops below one cell on either axis", () => {
+      const thin = tile({ w: 1, h: 1 });
+      expect(keyboardResizeStep(thin, LEFT).w).toBe(1);
+      expect(keyboardResizeStep(thin, UP).h).toBe(1);
+    });
+
+    it("x and y are never touched", () => {
+      for (const delta of [RIGHT, LEFT, UP, DOWN]) {
+        const step = keyboardResizeStep(tile(), delta);
+        expect(step.x).toBe(2);
+        expect(step.y).toBe(2);
+      }
+    });
+  });
+
+  describe("turned a quarter turn — the screen direction still wins", () => {
+    it("at 90: Left/Right now grow or shrink HEIGHT, not width", () => {
+      const block = tile({ rotation: 90 });
+      expect(keyboardResizeStep(block, RIGHT)).toEqual({ x: 2, y: 2, w: 2, h: 2 });
+      expect(keyboardResizeStep(block, LEFT)).toEqual({ x: 2, y: 2, w: 2, h: 4 });
+    });
+
+    it("at 90: Up/Down now grow or shrink WIDTH, not height", () => {
+      const block = tile({ rotation: 90 });
+      expect(keyboardResizeStep(block, DOWN)).toEqual({ x: 2, y: 2, w: 3, h: 3 });
+      expect(keyboardResizeStep(block, UP)).toEqual({ x: 2, y: 2, w: 1, h: 3 });
+    });
+
+    it("at -90: the axis swap is the same, but every sign is mirrored from +90", () => {
+      const plus = tile({ rotation: 90 });
+      const minus = tile({ rotation: -90 });
+      for (const delta of [RIGHT, LEFT, UP, DOWN]) {
+        const a = keyboardResizeStep(plus, delta);
+        const b = keyboardResizeStep(minus, delta);
+        // Same axis moves at both angles (a quarter turn either way stands
+        // the block on its side)...
+        expect(a.w === plus.w).toBe(b.w === minus.w);
+        // ...but +90 and -90 are mirror images, so whichever way it moved
+        // grows at one angle is the way it shrinks at the other.
+        if (a.w !== plus.w) expect(a.w - plus.w).toBe(-(b.w - minus.w));
+        if (a.h !== plus.h) expect(a.h - plus.h).toBe(-(b.h - minus.h));
+      }
+    });
+
+    it("at 180: Left/Right and Up/Down keep their axis but flip which key grows", () => {
+      // Upside down, screen-right is the block's own WEST — still the width
+      // axis, but now the shrinking direction.
+      const block = tile({ rotation: 180 });
+      expect(keyboardResizeStep(block, RIGHT)).toEqual({ x: 2, y: 2, w: 1, h: 3 });
+      expect(keyboardResizeStep(block, LEFT)).toEqual({ x: 2, y: 2, w: 3, h: 3 });
+      expect(keyboardResizeStep(block, DOWN)).toEqual({ x: 2, y: 2, w: 2, h: 2 });
+      expect(keyboardResizeStep(block, UP)).toEqual({ x: 2, y: 2, w: 2, h: 4 });
+    });
+
+    it("270 behaves exactly like -90, the same angle the other way round", () => {
+      for (const delta of [RIGHT, LEFT, UP, DOWN]) {
+        expect(keyboardResizeStep(tile({ rotation: 270 }), delta)).toEqual(
+          keyboardResizeStep(tile({ rotation: -90 }), delta),
+        );
+      }
+    });
+  });
+
+  describe("every angle — the invariants that must hold whatever the tilt", () => {
+    const ANGLES = [0, 1, 15, 30, 44, 45, 46, 60, 89, 90, 91, 135, 137, 180, 250, 269, 270, 315, -1, -45, -90, -137, -179];
+
+    it("touches exactly one axis per press, by exactly one cell", () => {
+      for (const angle of ANGLES) {
+        for (const delta of [RIGHT, LEFT, UP, DOWN]) {
+          const block = tile({ rotation: angle });
+          const step = keyboardResizeStep(block, delta);
+          const dw = step.w - block.w;
+          const dh = step.h - block.h;
+          expect(Math.abs(dw) + Math.abs(dh), `angle=${angle} delta=${delta}`).toBe(1);
+        }
+      }
+    });
+
+    it("never moves the anchor — x and y are always the block's own", () => {
+      for (const angle of ANGLES) {
+        for (const delta of [RIGHT, LEFT, UP, DOWN]) {
+          const block = tile({ rotation: angle });
+          const step = keyboardResizeStep(block, delta);
+          expect(step.x).toBe(block.x);
+          expect(step.y).toBe(block.y);
+        }
+      }
+    });
+
+    it("opposite keys are exact inverses, so Right then Left is the identity", () => {
+      for (const angle of ANGLES) {
+        for (const [a, b] of [
+          [RIGHT, LEFT],
+          [UP, DOWN],
+        ] as const) {
+          const block = tile({ rotation: angle, w: 3, h: 3 });
+          const there = keyboardResizeStep(block, a);
+          const back = keyboardResizeStep({ ...block, w: there.w, h: there.h }, b);
+          expect(back.w).toBe(block.w);
+          expect(back.h).toBe(block.h);
+        }
+      }
+    });
+
+    it("agrees with which axis rotateVector says the arrow points along", () => {
+      // The independent check: un-rotate the SAME delta by hand and confirm
+      // the function moved whichever axis actually has the larger component.
+      for (const angle of ANGLES) {
+        for (const delta of [RIGHT, LEFT, UP, DOWN]) {
+          const block = tile({ rotation: angle });
+          const step = keyboardResizeStep(block, delta);
+          const local = rotateVector({ x: delta[0], y: delta[1] }, -angle);
+          const expectWidth = Math.abs(local.x) >= Math.abs(local.y);
+          expect(step.w !== block.w, `angle=${angle} delta=${delta}`).toBe(expectWidth);
+          expect(step.h !== block.h, `angle=${angle} delta=${delta}`).toBe(!expectWidth);
+        }
+      }
+    });
+
+    it("a level result is always a whole number of cells", () => {
+      for (const angle of ANGLES) {
+        for (const delta of [RIGHT, LEFT, UP, DOWN]) {
+          const step = keyboardResizeStep(tile({ rotation: angle }), delta);
+          expect(Number.isInteger(step.w)).toBe(true);
+          expect(Number.isInteger(step.h)).toBe(true);
+        }
+      }
+    });
+  });
+
+  it("an absent rotation behaves exactly like an explicit 0", () => {
+    for (const delta of [RIGHT, LEFT, UP, DOWN]) {
+      expect(keyboardResizeStep(tile({ rotation: undefined }), delta)).toEqual(
+        keyboardResizeStep(tile({ rotation: 0 }), delta),
+      );
+    }
   });
 });

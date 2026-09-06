@@ -3,6 +3,7 @@
 import { useEffect, useState, type MouseEvent } from "react";
 import { X } from "lucide-react";
 import { DeviceSizeSwitch, type PreviewDevice } from "./DeviceSizeSwitch";
+import { useNaturalSize } from "./useNaturalSize";
 import { ProductPageView } from "@/components/product-page/ProductPageView";
 import { deriveStockBadge } from "@/lib/stock/badge";
 import { getProductPagePreviewData } from "@/lib/products/preview-actions";
@@ -20,6 +21,22 @@ import type {
   StorefrontSeller,
   StorefrontTheme,
 } from "@/types/storefront";
+
+/**
+ * How much smaller a page's own card renders on the canvas than the width
+ * its device switch actually asks for.
+ *
+ * A CSS transform, not a smaller `width` handed to ProductPageView: the page
+ * still LAYS OUT at its full realistic width (see the width prop's own doc
+ * below) and is only shrunk in paint, so it keeps the exact desktop or mobile
+ * layout a buyer's browser would give it (the image-left/details-right
+ * breakpoint, the same line wraps, the same everything), just smaller,
+ * rather than a genuinely narrower render reflowing into a different shape.
+ * The real, hosted page a buyer visits never passes through this component
+ * at all (see the public route), so it always renders full size regardless
+ * of whatever the seller's canvas is showing.
+ */
+const PRODUCT_PAGE_SCALE = 0.75;
 
 /**
  * ONE PRODUCT'S PAGE, as an artboard on the storefront canvas.
@@ -81,6 +98,13 @@ export function ProductPageArtboard({
 }) {
   const [device, setDevice] = useState<PreviewDevice>(initialDevice);
   const width = widths[device];
+  // The card's rendered footprint on the canvas: the actual page beneath it
+  // still measures itself at the full `width`, this is only how much room it
+  // is given to show through (see PRODUCT_PAGE_SCALE).
+  const scaledWidth = width * PRODUCT_PAGE_SCALE;
+  // The page's own natural height, measured at full size so the wrapper below
+  // can be shrunk to match: see useNaturalSize.
+  const { ref: contentRef, size: naturalSize } = useNaturalSize<HTMLDivElement>();
   // Null outside the designer (the dev gallery, a component test), which
   // simply means clicking the page opens nothing.
   const setting = useSettingTarget();
@@ -151,10 +175,13 @@ export function ProductPageArtboard({
     <div
       data-artboard-id={product.id}
       className="flex shrink-0 flex-col gap-2"
-      style={{ width }}
+      style={{ width: scaledWidth }}
     >
       {/* The frame's label, outside the page itself: this chrome belongs to
-          the editor, never to the design. */}
+          the editor, never to the design. At the CARD's width, not the page's
+          full width (the title simply truncates sooner if it has to), so the
+          controls stay full, comfortable size rather than shrinking along
+          with the page and becoming fiddlier to hit for the space saved. */}
       <div className="flex items-center gap-2">
         <p className="min-w-0 flex-1 truncate font-inter text-sm font-medium text-foreground">
           {product.title}
@@ -178,18 +205,44 @@ export function ProductPageArtboard({
         </div>
       </div>
 
-      {/* CLICK THE PAGE, GET THE SETTING. One delegated listener rather than a
-          control wrapped around each region: the page is full of real
-          interactive elements (the option radios, the section disclosures, the
-          document links) and nesting them inside buttons would be both invalid
-          markup and a worse page to read with a screen reader. Capture phase
-          so the setting opens even when the thing clicked handles the event
-          itself. */}
+      {/* THE CARD. Sized to the shrunk footprint and clipping to it
+          (overflow-hidden), while the frame itself (border, radius, shadow)
+          stays crisp at full strength rather than thinning out along with a
+          scaled-down page, the same reason StorefrontPreview keeps its own
+          background on the unscaled box. Height comes from the page's own
+          measured natural height (see useNaturalSize): before that lands,
+          it is simply unset and the box sizes to the (still full-height,
+          pre-scale) content underneath, which is the same "assume it fits"
+          fallback useFitToBox uses while its own first measurement is
+          pending. */}
       <div
+        data-artboard-card=""
         className="overflow-hidden rounded-md border border-border bg-background shadow-lg"
-        onClickCapture={openSettingForTarget}
+        style={{
+          width: scaledWidth,
+          height: naturalSize.height > 0 ? naturalSize.height * PRODUCT_PAGE_SCALE : undefined,
+        }}
       >
-        <ProductPageView page={page} mode="preview" />
+        {/* CLICK THE PAGE, GET THE SETTING. One delegated listener rather
+            than a control wrapped around each region: the page is full of
+            real interactive elements (the option radios, the section
+            disclosures, the document links) and nesting them inside buttons
+            would be both invalid markup and a worse page to read with a
+            screen reader. Capture phase so the setting opens even when the
+            thing clicked handles the event itself, unaffected by the scale
+            below since a browser hit-tests and reports click coordinates
+            against what is actually on screen, transform included.
+            Rendered at the REAL width and scaled down in paint only (see
+            PRODUCT_PAGE_SCALE), so the page inside lays out exactly as a
+            buyer's browser would lay it out, just smaller: never a
+            narrower render reflowing into a different shape. */}
+        <div
+          ref={contentRef}
+          onClickCapture={openSettingForTarget}
+          style={{ width, transform: `scale(${PRODUCT_PAGE_SCALE})`, transformOrigin: "top left" }}
+        >
+          <ProductPageView page={page} mode="preview" />
+        </div>
       </div>
     </div>
   );

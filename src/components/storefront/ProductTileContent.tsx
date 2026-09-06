@@ -10,6 +10,7 @@ import {
   resolveTitlePosition,
   spotColumn,
   spotRow,
+  titleBandRow,
   titleOverlaysImage,
   type CardStyleOverrides,
   type ImagePlacement,
@@ -150,11 +151,13 @@ export function ProductTileContent({
   // The two structural rules that can take a tag spot away: a heavy corner
   // radius clips the corners off, and an overlay/shadow title band occupies a
   // row of the image — the same box a floated tag sits in, so a tag sharing
-  // that row moves to the opposite one rather than landing on the name.
+  // that row moves to the opposite one rather than landing on the name. A band
+  // the tile does not draw (showTitle off) reserves nothing, which titleBandRow
+  // is what answers.
+  const bandRow = titleBandRow({ ...card, titlePosition: titleSpot });
   const tagPosition = resolvePriceTagPosition(pricePosition, {
     cornerRadius: card.cornerRadius,
-    titleOverlaysImage: overlaid,
-    titleRow,
+    titleBand: bandRow,
   });
 
   // What the chip paints where the seller chose nothing: the fill follows the
@@ -283,8 +286,8 @@ export function ProductTileContent({
   const barAbove = !overlaid && titleRow === "top";
 
   return (
-    // Corner clipping comes from the grid cell / carousel tile (border-radius
-    // + overflow-hidden per the resolved cornerRadius); the face needs no
+    // Corner clipping comes from the grid cell (border-radius +
+    // overflow-hidden per the resolved cornerRadius); the face needs no
     // clip of its own. It IS the size container the title band measures the
     // clip against, though (see titleBandStyle): the browser clamps a radius
     // at half the tile's side, and cq units are the only way to say "half the
@@ -292,7 +295,18 @@ export function ProductTileContent({
     // costs it nothing.
     <div className="relative flex min-h-0 flex-1 flex-col [container-type:size]">
       {barAbove && titleArea}
-      <div className="relative min-h-0 flex-1 bg-muted">
+      <div
+        // THE BOX THE PHOTO IS ACTUALLY CROPPED TO, and the reason it is
+        // marked rather than inferred. A `bar` title is a row of the tile's
+        // own column, so the picture's frame is SHORTER than the tile by
+        // exactly that band — and everything that reasons about the crop from
+        // outside the face (the framing surface, the dimmed copy of the rest
+        // of the picture) has to measure this box, not the tile, or it draws
+        // the overflow at the wrong scale. See frameElement in
+        // TileImageFramer.
+        data-image-frame=""
+        className="relative min-h-0 flex-1 bg-muted"
+      >
         {product.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element -- signed R2 URL with query params; next/image adds no value here.
           <img

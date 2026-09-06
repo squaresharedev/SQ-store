@@ -98,6 +98,12 @@ export function SliderField({
           <input
             id={`${id}-number`}
             type="number"
+            // The visible label belongs to the SLIDER, so this box has none of
+            // its own — axe reads that as an unlabelled form field, and a
+            // screen reader lands on a number with nothing to say what it is.
+            // Named for the value it types rather than repeating the slider's
+            // name verbatim, so tabbing between the two says which is which.
+            aria-label={`${ariaLabel}, as a number`}
             inputMode={min < 0 ? "decimal" : "numeric"}
             min={min}
             max={max}

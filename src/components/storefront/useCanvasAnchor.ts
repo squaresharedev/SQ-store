@@ -93,8 +93,8 @@ function boardBox(stage: HTMLElement): Box {
  * usually is not.
  *
  * Read off the live DOM rather than from block coordinates so a tilted tile
- * counts by the room it actually takes, and so a masthead or a carousel (which
- * have no grid cell of their own) simply fall back to the board.
+ * counts by the room it actually takes, and so a masthead (which has no grid
+ * cell of its own) simply falls back to the board.
  */
 function selectionBox(stage: HTMLElement, keys: readonly string[]): Box {
   const board = boardBox(stage);

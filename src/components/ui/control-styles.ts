@@ -76,15 +76,55 @@ export const overlayItemClass = `flex w-full min-h-11 items-center gap-2.5 round
 /** Icon-only dismiss control on an overlay (a modal header, a sheet). */
 export const overlayCloseButtonClass = `flex size-9 shrink-0 items-center justify-center rounded-none text-muted-foreground hover:bg-accent hover:text-foreground ${TRANSITION} ${focusRingInsetClass}`;
 
+/* --- Tooltips: ONE bubble shape, everywhere ----------------------------
+   A tooltip is the one floating surface that is NOT a panel: it belongs to
+   the control under it rather than to the page, so it is the one exception
+   to the sharp-corner brand rule. It gets a slight radius (rounded-sm) and a
+   small point aimed back at its trigger, which is what says "this label is
+   about THAT button" without an arrow the size of the bubble.
+
+   NOT a pill. A point needs a flat edge to grow out of, and a fully rounded
+   bubble has none — it also reads as a chat message rather than a label.
+
+   Spelled once here and composed by all three tooltip surfaces: the "?"
+   InfoTip, the hover-label Tooltip (components/ui/Tooltip.tsx), and the
+   toolbar's pure-CSS tip below. Never re-roll a fourth bubble. */
+
+/** The card itself: the overlay surface, softened by one radius step. */
+export const tooltipSurfaceClass =
+  "rounded-sm border border-border bg-popover text-popover-foreground shadow-lg";
+
+/** The point: an 8px square turned 45°, half of it sunk into the bubble so
+ *  its opaque fill hides the border line it straddles. The two visible
+ *  borders are chosen by the direction classes below. */
+export const tooltipArrowClass =
+  "pointer-events-none absolute size-2 rotate-45 bg-popover";
+
+/** Point on the bubble's TOP edge — the bubble sits below its trigger. */
+export const tooltipArrowUpClass = "border-l border-t border-border";
+
+/** Point on the bubble's BOTTOM edge — the bubble flipped above its trigger. */
+export const tooltipArrowDownClass = "border-b border-r border-border";
+
+/** The hover/focus label bubble: compact, one line, never in the way of the
+ *  pointer. Positioned `fixed` and placed from JS (see Tooltip), so it is
+ *  never clipped by a scrolling side panel. */
+export const tooltipBubbleClass = `${tooltipSurfaceClass} pointer-events-none fixed z-50 max-w-[calc(100vw-1rem)] px-2 py-1 font-inter text-xs font-medium leading-snug`;
+
 /* --- Toolbar tip: a compact label above an icon-only control ------------
-   Pure CSS, no portal — every caller today lives in a bar pinned to the
-   viewport bottom, so "pops upward, centred" is the only placement any of
-   them need. The trigger carries `group/tip relative` (baked into INSERT_BTN
-   / ICON_BTN / MENU_ROW_BTN below); this is the label rendered as its last
-   child. Named `/tip` rather than reusing `/btn` so it stays independent of
-   the icon-pop microinteraction sharing the same trigger. */
+   The same bubble, done in pure CSS with no portal — every caller today lives
+   in a bar pinned to the viewport bottom, so "pops upward, centred" is the
+   only placement any of them need, and the point is always underneath. The
+   trigger carries `group/tip relative` (baked into INSERT_BTN / ICON_BTN /
+   MENU_ROW_BTN below); this is the label rendered as its last child. Named
+   `/tip` rather than reusing `/btn` so it stays independent of the icon-pop
+   microinteraction sharing the same trigger. */
 export const toolbarTipClass =
-  `${overlaySurfaceClass} pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 -translate-x-1/2 whitespace-nowrap px-2 py-1 text-xs font-medium ` +
+  `${tooltipSurfaceClass} pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 -translate-x-1/2 whitespace-nowrap px-2 py-1 text-xs font-medium ` +
+  // The point, as a pseudo-element: same 8px rotated square as tooltipArrowClass,
+  // centred on the bottom edge. Spelled with `after:` rather than a child span
+  // so callers keep passing a plain string.
+  `after:absolute after:left-1/2 after:top-full after:size-2 after:-translate-x-1/2 after:-translate-y-1/2 after:rotate-45 after:border-b after:border-r after:border-border after:bg-popover after:content-[''] ` +
   `opacity-0 invisible transition-opacity duration-base ease-standard motion-reduce:transition-none ` +
   `group-hover/tip:visible group-hover/tip:opacity-100 group-focus-visible/tip:visible group-focus-visible/tip:opacity-100`;
 
@@ -100,10 +140,11 @@ export const toolbarTipClass =
  *  still riding alongside a label rather than competing with it. */
 export const infoTipTriggerClass = `inline-flex size-6 shrink-0 items-center justify-center rounded-none text-muted-foreground hover:text-foreground ${TRANSITION} ${FOCUS_RING}`;
 
-/** The bubble it reveals: the same floating panel as every other overlay,
- *  capped to one column of readable text. Positioned `fixed` and placed from
- *  JS, so it is never clipped by a scrolling side panel or a table cell. */
-export const infoTipBubbleClass = `${overlaySurfaceClass} fixed z-50 w-64 max-w-[calc(100vw-1rem)] px-3 py-2 font-inter text-sm leading-snug`;
+/** The bubble it reveals: the shared tooltip card, widened to one column of
+ *  readable prose (this one holds sentences, not a label). Positioned `fixed`
+ *  and placed from JS, so it is never clipped by a scrolling side panel or a
+ *  table cell — and its text is selectable, hence no pointer-events-none. */
+export const infoTipBubbleClass = `${tooltipSurfaceClass} fixed z-50 w-64 max-w-[calc(100vw-1rem)] px-3 py-2 font-inter text-sm leading-snug`;
 
 /* --- Numeric stepper: [−][ 12 ][+] -------------------------------------
    The three parts are one control, so they share a height and sit flush. The

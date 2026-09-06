@@ -130,8 +130,8 @@ export type BlockPlacement = {
    * every board rendered before overlap was possible.
    *
    * VISUAL ONLY. DOM order stays reading order (see {@link readingOrder}), so
-   * screen readers, the embed payload and the carousel are all unaffected by
-   * which block is in front. A seller who sends a shape behind a product tile
+   * screen readers and the embed payload are unaffected by which block is in
+   * front. A seller who sends a shape behind a product tile
    * has said something about paint order, not about which one a blind buyer
    * should hear about first.
    *
@@ -332,26 +332,29 @@ export function coercePriceTagPosition(
  * config, and moving the price when a tile sells out would shift the layout
  * under the buyer. And `middle-center` can sit within a tall `shadow`
  * gradient, which is a contrast question that gradient exists to answer.
+ *
+ * The band is asked for as ONE value — the row it holds, or null for no band —
+ * rather than as a style flag plus a row. A flag spelled `titleOverlaysImage`
+ * invites every caller to pass `titleOverlaysImage(card.titleStyle)` and forget
+ * that a band nobody draws collides with nothing: that is exactly how the
+ * `bare` layout (an overlay title with `showTitle` off) ended up refusing to
+ * put a price anywhere along the bottom. {@link titleBandRow} is the one place
+ * that question is answered, and {@link priceSpots} already speaks this
+ * vocabulary, so the resolver and the spot list cannot drift.
  */
 export function resolvePriceTagPosition(
   position: PriceTagPosition,
   opts: {
     cornerRadius: number;
-    titleOverlaysImage: boolean;
-    /** Which row the overlaid title holds. Absent = the bottom, which is
-     *  where the title sat before it became placeable. */
-    titleRow?: SpotRow;
+    /** The row an overlaid title band actually occupies, or null when no band
+     *  is drawn over the image at all. See {@link titleBandRow}. */
+    titleBand: SpotRow | null;
   },
 ): PriceTagPosition {
   let lifted = position;
-  if (
-    opts.titleOverlaysImage &&
-    position !== "below" &&
-    position !== "hidden"
-  ) {
-    const titleRow = opts.titleRow ?? "bottom";
-    if (spotRow(position) === titleRow) {
-      const away: SpotRow = titleRow === "bottom" ? "top" : "bottom";
+  if (opts.titleBand && position !== "below" && position !== "hidden") {
+    if (spotRow(position) === opts.titleBand) {
+      const away: SpotRow = opts.titleBand === "bottom" ? "top" : "bottom";
       lifted = `${away}-${spotColumn(position)}` as TileSpot;
     }
   }
@@ -412,6 +415,35 @@ export function resolveTitlePosition(
   return coerceCornerSpot(spot, opts.cornerRadius);
 }
 
+/**
+ * The row a title band takes OUT OF THE IMAGE, or null when it takes none.
+ *
+ * Three things have to be true at once for a floating price to have to move
+ * aside, and this is the only place they are asked together: the title is
+ * shown, its style draws it over the picture rather than as a row of its own,
+ * and it lands on that row once the structural rules have had their say.
+ *
+ * `showTitle` is the one that kept being dropped. An `overlay` title with the
+ * title switched off — which is precisely the `bare` layout — paints nothing
+ * over the image, so it reserves nothing, and a price belongs wherever the
+ * seller put it. Both {@link resolvePriceTagPosition} and the spot lists take
+ * their band from here so that can never be answered two ways again.
+ */
+export function titleBandRow(card: {
+  titleStyle: TitleStyle;
+  titlePosition: TileSpot;
+  showTitle: boolean;
+  cornerRadius: number;
+}): SpotRow | null {
+  if (!card.showTitle || !titleOverlaysImage(card.titleStyle)) return null;
+  return spotRow(
+    resolveTitlePosition(card.titlePosition, {
+      titleStyle: card.titleStyle,
+      cornerRadius: card.cornerRadius,
+    }),
+  );
+}
+
 /** The three faces a price tag may take. Deliberately its own list rather
  *  than a slice of STOREFRONT_FONTS: a chip is read at 10px, where display
  *  and handwritten faces stop being legible. */
@@ -462,11 +494,6 @@ export function defaultPriceTagFill(position: PriceTagPosition): string {
 /** What the price paints on a `shadow` title area with no color of its own:
  *  the gradient is dark by construction, so the accent would sink into it. */
 export const PRICE_TAG_SHADOW_TEXT = "#ffffff";
-
-/** How the storefront lays out blocks: the bento grid, or a horizontal
- *  scroll-snap carousel (rendered by CarouselStrip in designer + previews). */
-export const DISPLAY_MODES = ["grid", "carousel"] as const;
-export type DisplayMode = (typeof DISPLAY_MODES)[number];
 
 /** Grid gutter cap, in px. The value drives the shared --grid-gap token that
  *  .ss-grid's gap AND square-cell row math consume. Legacy configs stored a
@@ -987,7 +1014,6 @@ export type StorefrontTheme = {
    *  Absent = HOVER_TRANSITION_MS_DEFAULT. */
   priceHoverMs?: number;
   showTitle: boolean;
-  displayMode: DisplayMode;
   /** Grid gutter in px, 0..GRID_GAP_MAX (smaller = denser). */
   gridGap: number;
   /** Show a badge on blocks the seller marked sold out. */
@@ -1115,9 +1141,11 @@ export type ProductBlock = BlockPlacement & {
   type: "product";
   /** References the seller's own products; ownership re-checked on save. */
   productId: string;
-  /** Seller-controlled sold-out mark (products have no inventory yet; real
-   *  stock tracking can drive this same flag later). Optional so configs
-   *  saved before the flag existed still parse. */
+  /** Sold-out mark for THIS tile. No longer set from the designer: whether a
+   *  product can be bought is a fact about the product, not about one tile on
+   *  one storefront, so it is edited in Products (Stock) and read back here.
+   *  Still honoured wherever a stored config carries it — dropping it would
+   *  silently put an old sold-out tile back on sale. */
   soldOut?: boolean;
   /** Per-tile look, overriding the theme's card settings field by field.
    *  Optional (and dropped when emptied) so untouched tiles keep tracking
@@ -1254,8 +1282,8 @@ export type StorefrontBlock =
 
 /**
  * Reading order for anything that needs a LINE rather than a board: the
- * small-screen reflow, the carousel display mode, screen readers. Top-to-
- * bottom, then left-to-right, exactly how the eye crosses the canvas.
+ * small-screen reflow, screen readers. Top-to-bottom, then left-to-right,
+ * exactly how the eye crosses the canvas.
  */
 export function readingOrder<T extends BlockPlacement>(blocks: T[]): T[] {
   return [...blocks].sort((a, b) => a.y - b.y || a.x - b.x);
@@ -1409,7 +1437,6 @@ export const DEFAULT_STOREFRONT_CONFIG: StorefrontConfig = {
     // defaults through resolveCardStyle, so a fresh storefront and one saved
     // before they existed are the same config.
     showTitle: true,
-    displayMode: "grid",
     gridGap: 8,
     soldOutBadge: true,
     hideSoldOut: false,

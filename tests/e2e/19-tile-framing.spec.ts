@@ -66,11 +66,19 @@ async function setUpStorefrontWithPhoto(page: Page, tag: string) {
   await createStorefrontViaUI(page);
   const storefrontId = page.url().match(/\/storefront\/([0-9a-f-]{36})/)![1];
 
-  await page.getByRole("button", { name: "Add product", exact: true }).click();
+  // Two of these once the board has settled: the empty state's own call to
+  // action and the toolbar's. Either opens the same picker, which is a
+  // multi-select — arming a product, then confirming, puts it on the board.
+  await page
+    .getByRole("button", { name: "Add product", exact: true })
+    .first()
+    .click();
   await page
     .getByRole("button", { name: /add framed print|framed print/i })
     .first()
     .click();
+  const confirm = page.getByRole("button", { name: /^Add \d+ selected/ });
+  if (await confirm.isVisible().catch(() => false)) await confirm.click();
   await expect(page.locator("li[data-grid-cell] img")).toBeVisible();
   return { storefrontId, user };
 }
@@ -115,6 +123,44 @@ test.describe("framing a product image in its tile", () => {
     // ...and the BLOCK did not. This is the whole risk of putting a drag
     // surface on a tile the grid already drags.
     expect(await placement(page)).toBe(before);
+  });
+
+  test("selecting the tile does not shift the picture inside it", async ({
+    page,
+  }) => {
+    await setUpStorefrontWithPhoto(page, "framesel");
+
+    // The photo's offset INSIDE its own tile, which is the invariant: opening
+    // the inspector may step the whole board out from under the panel, so the
+    // picture's absolute position is allowed to change and its place in the
+    // tile is not.
+    const inset = () =>
+      page.evaluate(() => {
+        const img = [
+          ...document.querySelectorAll<HTMLImageElement>(
+            "li[data-grid-cell] img",
+          ),
+        ].find((i) => !i.closest('[data-testid="tile-image-ghost"]'))!;
+        const tile = img.closest<HTMLElement>("[data-block-tile]")!;
+        const a = img.getBoundingClientRect();
+        const b = tile.getBoundingClientRect();
+        return {
+          top: Math.round(a.top - b.top),
+          // How far the picture's bottom edge falls short of the tile's. A
+          // positive number here is the picture hanging out of the tile.
+          spill: Math.round(a.bottom - b.bottom),
+        };
+      });
+
+    const before = await inset();
+    const tile = await productTile(page);
+    await tile.click();
+    // Selecting draws the page node on the tile. Chrome left in the tile's own
+    // flow gives it a line box, and everything after it — the face, and the
+    // photo with it — slides down and out of the bottom.
+    await expect(page.locator("[data-page-node]")).toBeVisible();
+
+    expect(await inset()).toEqual(before);
   });
 
   test("Escape leaves the mode, and the framing stays", async ({ page }) => {

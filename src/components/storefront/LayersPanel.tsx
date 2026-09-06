@@ -18,6 +18,7 @@ import {
   transitionClass,
 } from "@/components/ui/control-styles";
 import { PanelBackRow } from "@/components/ui/PanelMenu";
+import { Tooltip } from "@/components/ui/Tooltip";
 import { BLOCK_KIND_LABELS, blockLabel } from "./block-label";
 import { ShapeKindGlyph } from "./ShapeTileContent";
 import { LAYER_BUTTON_CLASS, LAYER_CONTROLS } from "./PlacementSection";
@@ -398,23 +399,28 @@ export function LayersPanel({
                         aria-label={`Move ${label}`}
                         className="flex gap-1"
                       >
+                        {/* Same four glyphs as the placement panel, so they
+                            carry the same hover label — the tooltip names the
+                            action alone, since the row it is sitting in has
+                            already said which block. */}
                         {LAYER_CONTROLS.map(({ op, label: action, icon: Icon, end }) => (
-                          <button
-                            key={op}
-                            type="button"
-                            onClick={() => onReorder(key, op)}
-                            aria-label={`${action}: ${label}`}
-                            disabled={
-                              end === "front" ? index === 0 : index === total - 1
-                            }
-                            className={LAYER_BUTTON_CLASS}
-                          >
-                            <Icon
-                              className="size-4"
-                              strokeWidth={2}
-                              aria-hidden="true"
-                            />
-                          </button>
+                          <Tooltip key={op} label={action}>
+                            <button
+                              type="button"
+                              onClick={() => onReorder(key, op)}
+                              aria-label={`${action}: ${label}`}
+                              disabled={
+                                end === "front" ? index === 0 : index === total - 1
+                              }
+                              className={LAYER_BUTTON_CLASS}
+                            >
+                              <Icon
+                                className="size-4"
+                                strokeWidth={2}
+                                aria-hidden="true"
+                              />
+                            </button>
+                          </Tooltip>
                         ))}
                       </div>
                     </div>

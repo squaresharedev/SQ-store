@@ -10,9 +10,7 @@ import {
   PRICE_TAG_SIZE_MIN,
   resolveCardStyle,
   resolvePriceTagPosition,
-  resolveTitlePosition,
-  spotRow,
-  titleOverlaysImage,
+  titleBandRow,
   type CardStyle,
   type CardStyleOverrides,
   type PriceTagFont,
@@ -77,20 +75,12 @@ export function PriceTagControls({
         ? "hidden"
         : "float";
 
-  const overlaid = titleOverlaysImage(value.titleStyle);
   // Which row the title band holds, when it holds one at all: the row the tag
-  // is not allowed to use. Resolved exactly as the tile resolves it — showTitle
-  // deliberately not consulted, because the tile reserves the row either way
-  // (an untitled band still carries a `below` price), so the strip in the
-  // picker explains every move the tag makes.
-  const titleBand = overlaid
-    ? spotRow(
-        resolveTitlePosition(value.titlePosition, {
-          titleStyle: value.titleStyle,
-          cornerRadius: value.cornerRadius,
-        }),
-      )
-    : null;
+  // is not allowed to use. Resolved exactly as the tile resolves it, showTitle
+  // included — an overlay title that is switched off paints nothing over the
+  // picture, so it takes no row away and a tag turned back on belongs at the
+  // bottom-left it asks for.
+  const titleBand = titleBandRow(value);
   function setTagMode(mode: PriceTagMode) {
     if (mode === tagMode) return;
     onChange({
@@ -98,8 +88,7 @@ export function PriceTagControls({
         mode === "float"
           ? resolvePriceTagPosition("bottom-left", {
               cornerRadius: value.cornerRadius,
-              titleOverlaysImage: overlaid,
-              titleRow: titleBand ?? undefined,
+              titleBand,
             })
           : mode,
     });

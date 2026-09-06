@@ -6,11 +6,9 @@ import {
   CANVAS_ROWS_MAX,
   CANVAS_ROWS_MIN,
   GRID_GAP_MAX,
-  type DisplayMode,
   type StorefrontTheme,
 } from "@/types/storefront";
 import { useId } from "react";
-import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { SliderField } from "@/components/ui/SliderField";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -18,14 +16,9 @@ import {
 } from "@/components/ui/control-styles";
 import { InfoTip } from "@/components/ui/InfoTip";
 
-const DISPLAY_MODE_OPTIONS: readonly { value: DisplayMode; label: string }[] = [
-  { value: "grid", label: "Grid" },
-  { value: "carousel", label: "Carousel" },
-];
-
 /**
- * The canvas group: board size, display mode, the grid gap, and the designer's
- * own grid guides.
+ * The canvas group: board size, the grid gap, and the designer's own grid
+ * guides.
  *
  * The guides are an editor view preference rather than a saved theme field, and
  * they sit here BECAUSE of that: under "Theme", beside colours the buyer sees,
@@ -77,23 +70,6 @@ export function LayoutSection({
           ariaLabel="Canvas height in blocks"
           valueText={`${theme.rows} blocks tall`}
           unit="blocks"
-        />
-      </div>
-
-      <div className="space-y-1.5">
-        <span className="flex items-center gap-1.5">
-          <span className={labelClass}>Display mode</span>
-          <InfoTip label="What the display modes do">
-            Grid lays blocks out on the board exactly as you place them.
-            Carousel shows them as one swipeable row instead, which suits a
-            narrow embed; block sizes only apply in grid.
-          </InfoTip>
-        </span>
-        <SegmentedControl
-          value={theme.displayMode}
-          options={DISPLAY_MODE_OPTIONS}
-          onChange={(displayMode) => onChange({ ...theme, displayMode })}
-          ariaLabel="Display mode"
         />
       </div>
 

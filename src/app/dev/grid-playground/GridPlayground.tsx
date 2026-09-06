@@ -39,6 +39,29 @@ function shape(
   return { type: "shape", id, kind, color, ...placement };
 }
 
+/**
+ * The product's photo, inline so the harness needs no network and no R2.
+ *
+ * DELIBERATELY 2:1 and covered in numbered bands: framing maths only misbehaves
+ * where the picture and the frame disagree about their proportions, and a
+ * banded picture makes the dimmed copy's alignment with the bright one
+ * readable at a glance rather than only in a measurement.
+ */
+const PHOTO = `data:image/svg+xml;utf8,${encodeURIComponent(
+  `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200">
+    <rect width="400" height="200" fill="#1e293b"/>
+    ${[0, 1, 2, 3]
+      .map(
+        (i) =>
+          `<rect x="${i * 100}" y="0" width="100" height="200" fill="${
+            ["#ef4444", "#f59e0b", "#22c55e", "#3b82f6"][i]
+          }"/><text x="${i * 100 + 50}" y="110" font-size="48" fill="#fff" text-anchor="middle" font-family="sans-serif">${i + 1}</text>`,
+      )
+      .join("")}
+    <rect x="2" y="2" width="396" height="196" fill="none" stroke="#fff" stroke-width="4"/>
+  </svg>`,
+)}`;
+
 /** One real product, so the tile that carries a title and a price is the same
  *  component the designer renders rather than a stand-in. */
 const PRODUCT: Product = {
@@ -48,7 +71,7 @@ const PRODUCT: Product = {
   price: 12.5,
   currency: "EUR",
   status: "active",
-  imageUrl: null,
+  imageUrl: PHOTO,
   digitalFileName: null,
   trackStock: false,
   stockQuantity: null,
@@ -90,6 +113,13 @@ export function GridPlayground() {
   const [blocks, setBlocks] = useState(INITIAL_BLOCKS);
   const [round, setRound] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
+  /** The tile whose photo is being framed, if any — the harness's stand-in for
+   *  the designer's own frame mode, so the crop surface can be driven here. */
+  const [framing, setFraming] = useState<string | null>(null);
+  /** The designer draws a page node on the sole selection. It is here because
+   *  it is CHROME ON THE TILE: it has to be rendered for the board to prove
+   *  that selecting a product does not shift the tile's own contents. */
+  const [pageOpen, setPageOpen] = useState(false);
 
   const theme = {
     ...DEFAULT_STOREFRONT_CONFIG.theme,
@@ -129,7 +159,10 @@ export function GridPlayground() {
         Drag a tile&apos;s inner surface to move it. Grab any side or corner to
         resize from that edge. Toggle roundness to confirm the controls stay
         visible on circle tiles. Select the product tile, then drag its title or
-        its price to move that label to another spot.
+        its price to move that label to another spot. Double-click the product
+        tile (or press F on it) to frame its photo: the rest of the picture
+        shows dimmed around the tile, and it must stay in register with the
+        bright part at every zoom.
       </p>
 
       <button
@@ -153,6 +186,7 @@ export function GridPlayground() {
             y: b.y,
             w: b.w,
             h: b.h,
+            rotation: b.rotation,
             data: b,
           }))}
           ariaLabel="Playground grid"
@@ -164,6 +198,13 @@ export function GridPlayground() {
           getBlockLabel={(gridBlock) => `${gridBlock.data.type} ${gridBlock.key}`}
           onMove={(key, x, y) => patchBlock(key, { x, y })}
           onResize={(key, placement) => patchBlock(key, placement)}
+          onRotate={(key, rotation) =>
+            setBlocks((current) =>
+              current.map((b) =>
+                blockKey(b) === key ? { ...b, rotation } : b,
+              ),
+            )
+          }
           renderBlock={(gridBlock, state) => (
             <BlockTile
               blockKey={gridBlock.key}
@@ -177,9 +218,21 @@ export function GridPlayground() {
               // A spot drag is armed by SOLE selection, so the harness has to
               // say which tile that is or the tokens never appear.
               isSoleSelection={selected === gridBlock.key}
+              isFraming={framing === gridBlock.key}
               onToggleEdit={(key) =>
                 setSelected((current) => (current === key ? null : key))
               }
+              onOpenPage={() => setPageOpen((open) => !open)}
+              pageOpen={pageOpen}
+              onFrame={(key) => setFraming(key)}
+              onFramePlacement={(key, placement) =>
+                setBlocks((current) =>
+                  current.map((b) =>
+                    blockKey(b) === key ? { ...b, imagePlacement: placement } : b,
+                  ),
+                )
+              }
+              onFrameExit={() => setFraming(null)}
               onRemove={(key) =>
                 setBlocks((current) =>
                   current.filter((b) => blockKey(b) !== key),
@@ -214,6 +267,14 @@ export function GridPlayground() {
                 h: b.h,
                 // Where a spot drag landed, for the browser tests to read back.
                 ...(b.type === "product" && b.style ? { style: b.style } : {}),
+                // Likewise for a crop, which is the other thing a gesture on
+                // the tile itself writes.
+                ...(b.type === "product" && b.imagePlacement
+                  ? { imagePlacement: b.imagePlacement }
+                  : {}),
+                // A tilt, so a spec can prove that resizing a TURNED block
+                // still lands it on the board's own lines.
+                ...(b.rotation ? { rotation: b.rotation } : {}),
               },
             ]),
           ),

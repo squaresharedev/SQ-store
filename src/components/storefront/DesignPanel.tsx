@@ -5,10 +5,12 @@ import { ChevronRight, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CollapsibleSection } from "@/components/ui/CollapsibleSection";
 import { PanelTabs, panelProps } from "@/components/ui/PanelTabs";
+import { Tooltip } from "@/components/ui/Tooltip";
 import { useSettingTarget } from "@/lib/storefront/setting-context";
 import type { SettingRef } from "@/lib/storefront/setting-ref";
 import {
   INSPECTOR_CLOSE_CLASS,
+  PANEL_TAB_ANCHOR_CLASS,
   PANEL_TAB_CLASS,
   SHEET_ON_MOBILE_CLASS,
 } from "./panel-chrome";
@@ -139,19 +141,23 @@ export function DesignPanel({
     <>
       {/* Reopen tab, pinned to the screen edge while the panel is away. */}
       {!panelOpen && (
-        <button
-          type="button"
-          onClick={() => onPanelOpenChange(true)}
-          aria-label="Show design panel"
-          title="Show design panel"
-          className={cn(PANEL_TAB_CLASS, "fixed right-0")}
+        <Tooltip
+          label="Show design panel"
+          className={cn(PANEL_TAB_ANCHOR_CLASS, "fixed right-0")}
         >
-          <ChevronRight
-            className="size-4 rotate-180"
-            strokeWidth={2}
-            aria-hidden="true"
-          />
-        </button>
+          <button
+            type="button"
+            onClick={() => onPanelOpenChange(true)}
+            aria-label="Show design panel"
+            className={PANEL_TAB_CLASS}
+          >
+            <ChevronRight
+              className="size-4 rotate-180"
+              strokeWidth={2}
+              aria-hidden="true"
+            />
+          </button>
+        </Tooltip>
       )}
 
       <div
@@ -181,15 +187,19 @@ export function DesignPanel({
         />
 
         {/* Collapse tab, clipped to the panel's own left edge. */}
-        <button
-          type="button"
-          onClick={() => onPanelOpenChange(false)}
-          aria-label="Hide design panel"
-          title="Hide design panel"
-          className={cn(PANEL_TAB_CLASS, "left-0 -translate-x-full")}
+        <Tooltip
+          label="Hide design panel"
+          className={cn(PANEL_TAB_ANCHOR_CLASS, "absolute left-0 -translate-x-full")}
         >
-          <ChevronRight className="size-4" strokeWidth={2} aria-hidden="true" />
-        </button>
+          <button
+            type="button"
+            onClick={() => onPanelOpenChange(false)}
+            aria-label="Hide design panel"
+            className={PANEL_TAB_CLASS}
+          >
+            <ChevronRight className="size-4" strokeWidth={2} aria-hidden="true" />
+          </button>
+        </Tooltip>
 
         {/* No padding here: each section pads itself so the dividers can run
             the full width of the panel. */}

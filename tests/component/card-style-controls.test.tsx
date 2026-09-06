@@ -150,6 +150,94 @@ describe("CardStyleControls", () => {
     ).toBe("middle-center");
   });
 
+  it("places a label by CLICKING the spot, not only by dragging to it", async () => {
+    // Dragging a token across a 128px board is a fiddly gesture on a trackpad
+    // and a hard one on a phone. Pressing the place you want it is what a
+    // seller reaches for first, so it has to be a real route in.
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <CardStyleControls
+        value={resolveCardStyle(themed(), {
+          titleStyle: "overlay",
+          titlePosition: "bottom-left",
+          showTitle: true,
+          priceTagPosition: "top-right",
+        })}
+        onChange={onChange}
+      />,
+    );
+
+    const board = screen.getByRole("group", { name: "Label positions" });
+    // Both labels are on the tile, so the board has to be told which one a
+    // spot means. It opens aimed at the title.
+    await user.click(within(board).getByRole("button", { name: /^Move the title to the top center/ }));
+    expect(onChange).toHaveBeenLastCalledWith({ titlePosition: "top-center" });
+
+    await user.click(
+      screen.getByRole("button", { name: "Price", pressed: false }),
+    );
+    await user.click(within(board).getByRole("button", { name: /^Move the price to the middle/ }));
+    expect(onChange).toHaveBeenLastCalledWith({ priceTagPosition: "middle-center" });
+  });
+
+  it("offers no switch when only one label is on the tile", async () => {
+    // Nothing to disambiguate: every spot on the board can only mean the price.
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <CardStyleControls
+        value={resolveCardStyle(themed(), LAYOUT_PRESET_VALUES.bare)}
+        onChange={onChange}
+      />,
+    );
+    expect(screen.queryByRole("group", { name: "Label to place" })).toBeNull();
+
+    const board = screen.getByRole("group", { name: "Label positions" });
+    await user.click(within(board).getByRole("button", { name: /^Move the price to the top left/ }));
+    expect(onChange).toHaveBeenLastCalledWith({ priceTagPosition: "top-left" });
+  });
+
+  it("lets the bare layout put its price along the bottom", async () => {
+    // The reported bug. `bare` is an overlay title with the title switched
+    // OFF, so the tile paints nothing over the picture — but the collision
+    // rule was reading the STYLE rather than what is drawn, and bounced every
+    // bottom spot up to the top row. The board offered them and then showed
+    // the tag somewhere else, which reads as the drag refusing to land.
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    const { rerender } = render(
+      <CardStyleControls
+        value={resolveCardStyle(themed(), LAYOUT_PRESET_VALUES.bare)}
+        onChange={onChange}
+      />,
+    );
+    const board = () => screen.getByRole("group", { name: "Label positions" });
+
+    for (const spot of ["bottom-left", "bottom-center", "bottom-right"] as const) {
+      const label = spot.replace("-", " ");
+      await user.click(
+        within(board()).getByRole("button", { name: new RegExp(`^Move the price to the ${label}`) }),
+      );
+      expect(onChange).toHaveBeenLastCalledWith({ priceTagPosition: spot });
+
+      // And the board then shows the token THERE, rather than lifting it to
+      // the opposite row the moment the value comes back in.
+      rerender(
+        <CardStyleControls
+          value={resolveCardStyle(themed(), {
+            ...LAYOUT_PRESET_VALUES.bare,
+            priceTagPosition: spot,
+          })}
+          onChange={onChange}
+        />,
+      );
+      expect(
+        within(board()).getByRole("button", { name: new RegExp(`^Price at ${label}`) }),
+      ).toBeInTheDocument();
+    }
+  });
+
   it("shows no price token at all when the price is hidden", () => {
     render(
       <CardStyleControls

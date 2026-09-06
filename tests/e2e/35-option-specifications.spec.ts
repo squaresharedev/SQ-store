@@ -33,7 +33,6 @@ const THEME = {
   priceDisplay: "always",
   priceTagPosition: "below",
   showTitle: true,
-  displayMode: "grid",
   gridGap: 8,
   soldOutBadge: true,
   hideSoldOut: false,

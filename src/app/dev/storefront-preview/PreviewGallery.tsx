@@ -286,11 +286,6 @@ const CASES: { title: string; note: string; config: StorefrontConfig }[] = [
     ),
   },
   {
-    title: "Carousel mode",
-    note: "Different layout path entirely — a horizontal strip, not the grid.",
-    config: config({ displayMode: "carousel" }, fill(6, 1)),
-  },
-  {
     title: "Max gap (32) — 6 x 12",
     note: "Gaps add to height; the fit must include them.",
     config: config({ columns: 6, rows: 12, gridGap: 32 }, fill(6, 12)),
@@ -491,7 +486,7 @@ const CASES: { title: string; note: string; config: StorefrontConfig }[] = [
   },
   {
     title: "Layered against reading order",
-    note: "The same four bars with the stack INVERTED (z 3 down to 0), so the last block in reading order paints furthest back. The two cards prove depth is independent of the order the blocks are read in: nothing about the DOM, the embed payload or the carousel differs between them.",
+    note: "The same four bars with the stack INVERTED (z 3 down to 0), so the last block in reading order paints furthest back. The two cards prove depth is independent of the order the blocks are read in: nothing about the DOM or the embed payload differs between them.",
     config: config({ columns: 4, rows: 4, cornerRadius: 4 }, [
       shapeOf("bar", "#171717", 0, 0, 4, 1, { rotation: 12, z: 3 }),
       shapeOf("bar", "#2563eb", 0, 1, 4, 1, { rotation: -10, z: 2 }),

@@ -41,8 +41,8 @@ export const FONT_LABELS: Record<StorefrontFont, string> = {
 };
 
 // Corner roundness is numeric (theme.cornerRadius, px) and applied as an
-// inline border-radius style on grid cells / carousel tiles, so there is no
-// enum -> class map for it: CSS clamps oversized radii into circles/pills.
+// inline border-radius style on grid cells, so there is no enum -> class map
+// for it: CSS clamps oversized radii into circles/pills.
 
 /**
  * Radius for one tile: the theme's base roundness scaled by the tile's
@@ -60,10 +60,10 @@ export function scaledCornerRadius(
 
 /**
  * The clip one tile wears, applied by whoever owns the tile's box (the grid
- * cell, the carousel item). It PUBLISHES the radius as `--tile-radius` as well
- * as applying it, because the tile's own contents have to know how much of
- * their corners the clip has eaten — see {@link titleBandStyle}. Descendants
- * inherit the variable, so no renderer has to be handed the tile's span.
+ * cell). It PUBLISHES the radius as `--tile-radius` as well as applying it,
+ * because the tile's own contents have to know how much of their corners the
+ * clip has eaten — see {@link titleBandStyle}. Descendants inherit the
+ * variable, so no renderer has to be handed the tile's span.
  */
 export function tileClipStyle(radius: number): CSSProperties {
   return {

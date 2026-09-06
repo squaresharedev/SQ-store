@@ -5,7 +5,7 @@ import {
   resolvePriceTagPosition,
   resolveTitlePosition,
   spotRow,
-  titleOverlaysImage,
+  titleBandRow,
   type PriceTagPosition,
   type SpotRow,
   type TileSpot,
@@ -20,6 +20,7 @@ import {
   type SpotArrow,
 } from "@/lib/storefront/tile-spots";
 import { cn } from "@/lib/utils";
+import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { TILE_SPOT_CLASSES } from "./config-maps";
 
 /**
@@ -32,9 +33,17 @@ import { TILE_SPOT_CLASSES } from "./config-maps";
  * board rather than something either board could show. Here the title's row is
  * simply missing from the price's choices, so the rule is visible.
  *
- * Both tokens drag, using the same nearestTileSpot maths as the canvas, and
- * both take arrow keys. Nothing here decides anything: the spots on offer and
- * the spots shown as taken come from the same resolvers the renderer uses.
+ * THREE ways to place, all landing on the same commit. Drag a token, click the
+ * spot you want it in, or arrow it there. Dragging alone was the gap sellers
+ * fell into: a drag on a 128px board is a fiddly gesture on a trackpad and a
+ * genuinely hard one on a phone, and the thing a seller reaches for first is
+ * pressing the place they want. The click needs to know WHICH label it is
+ * placing, which is what the two-segment switch above the board answers — and
+ * with only one label on the tile it does not render at all, because there is
+ * nothing to disambiguate.
+ *
+ * Nothing here decides anything: the spots on offer and the spots shown as
+ * taken come from the same resolvers the renderer uses.
  */
 
 const ROW_CLASSES: Record<SpotRow, string> = {
@@ -44,6 +53,8 @@ const ROW_CLASSES: Record<SpotRow, string> = {
 };
 
 type Token = "title" | "price";
+
+const TOKEN_LABELS: Record<Token, string> = { title: "Title", price: "Price" };
 
 export function TileLayoutBoard({
   titleStyle,
@@ -65,20 +76,42 @@ export function TileLayoutBoard({
   onPriceChange: (spot: TileSpot) => void;
 }) {
   const [dragging, setDragging] = useState<Token | null>(null);
+  // Which token a click on a spot places. Held as a PREFERENCE rather than as
+  // the answer, because the tile can take either token away underneath it: a
+  // seller who was moving the price and then hides it must not leave the board
+  // aimed at something that is no longer on it.
+  const [preferred, setPreferred] = useState<Token>("title");
 
   // Resolved, so the board shows what the tile will really draw.
   const titleAt = resolveTitlePosition(titlePosition, { titleStyle, cornerRadius });
-  const overlaid = titleOverlaysImage(titleStyle);
-  const bandRow = showTitle && overlaid ? spotRow(titleAt) : null;
+  // The row the band takes out of the image — NONE when the title is switched
+  // off, whatever its style would have drawn. That is the whole of the `bare`
+  // layout, where an unseen overlay title used to keep the price off the
+  // bottom of its own tile.
+  const bandRow = titleBandRow({
+    titleStyle,
+    titlePosition: titleAt,
+    showTitle,
+    cornerRadius,
+  });
   const priceAt = resolvePriceTagPosition(priceTagPosition, {
     cornerRadius,
-    titleOverlaysImage: overlaid,
-    titleRow: showTitle ? spotRow(titleAt) : undefined,
+    titleBand: bandRow,
   });
 
   const titleOptions = titleSpots(titleStyle, cornerRadius);
   const priceOptions = priceSpots(cornerRadius, bandRow);
   const floating = priceAt !== "below" && priceAt !== "hidden";
+
+  // The tokens actually on this tile, in the order they read on it.
+  const present: Token[] = [
+    ...(showTitle ? (["title"] as const) : []),
+    ...(floating ? (["price"] as const) : []),
+  ];
+  const active: Token | null = present.includes(preferred)
+    ? preferred
+    : (present[0] ?? null);
+  const activeAt = active === "title" ? titleAt : (priceAt as TileSpot);
 
   function optionsFor(token: Token) {
     return token === "title" ? titleOptions : priceOptions;
@@ -105,15 +138,19 @@ export function TileLayoutBoard({
     if (spot !== at) commit(token, spot);
   }
 
-  /** A token: the title's strip or the price's dot, draggable and arrowable. */
+  /** A token: the title's strip or the price's dot, draggable and arrowable.
+   *  Pressing one also AIMS the board at it, so reaching for the label you
+   *  meant to move is the same gesture whether you then drag it or click where
+   *  it should go. */
   function tokenProps(token: Token, at: TileSpot) {
     return {
       role: "button" as const,
       tabIndex: 0,
-      "aria-label": `${token === "title" ? "Title" : "Price"} at ${spotLabel(at)}. Drag, or use the arrow keys, to move it.`,
+      "aria-label": `${TOKEN_LABELS[token]} at ${spotLabel(at)}. Drag, click a spot, or use the arrow keys, to move it.`,
       onPointerDown: (event: React.PointerEvent<HTMLElement>) => {
         if (event.button !== 0) return;
         event.preventDefault();
+        setPreferred(token);
         setDragging(token);
         if (typeof event.currentTarget.setPointerCapture === "function") {
           try {
@@ -130,6 +167,7 @@ export function TileLayoutBoard({
       },
       onPointerUp: () => setDragging(null),
       onPointerCancel: () => setDragging(null),
+      onFocus: () => setPreferred(token),
       onKeyDown: (event: React.KeyboardEvent<HTMLElement>) => {
         if (!event.key.startsWith("Arrow")) return;
         event.preventDefault();
@@ -140,67 +178,110 @@ export function TileLayoutBoard({
   }
 
   return (
-    <div
-      data-tile-layout-board=""
-      role="group"
-      aria-label="Label positions"
-      style={{ borderRadius: cornerRadius }}
-      className="relative h-28 w-28 touch-none overflow-hidden border border-border bg-muted"
-    >
-      {/* The spots each token could still take, so the board reads as a set of
-          places rather than as two floating objects. */}
-      {titleOptions.map((spot) => (
-        <span
-          key={`t-${spot}`}
-          aria-hidden="true"
-          className={cn(
-            "absolute size-1 rounded-full bg-foreground/20",
-            TILE_SPOT_CLASSES[spot],
-          )}
+    <div className="space-y-1.5">
+      {/* Only where there is a genuine ambiguity to settle. One label on the
+          tile means every spot on the board can only mean that label. */}
+      {present.length > 1 && active && (
+        <SegmentedControl
+          value={active}
+          options={present.map((token) => ({
+            value: token,
+            label: TOKEN_LABELS[token],
+          }))}
+          onChange={setPreferred}
+          ariaLabel="Label to place"
         />
-      ))}
-
-      {/* The title: a strip, because that is what it is on the tile. */}
-      {showTitle && (
-        <span
-          {...tokenProps("title", titleAt)}
-          className={cn(
-            "absolute inset-x-0 flex h-4 cursor-grab items-center bg-foreground/25 px-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
-            ROW_CLASSES[spotRow(titleAt)],
-            dragging === "title" && "bg-primary/30",
-          )}
-        >
-          <span
-            aria-hidden="true"
-            className={cn(
-              "h-1 w-6 rounded-full bg-foreground/70",
-              spotRow(titleAt) === "middle" && "mx-auto",
-              titleAt.endsWith("-center") && "mx-auto",
-              titleAt.endsWith("-right") && "ml-auto",
-            )}
-          />
-        </span>
       )}
 
-      {/* The price: a dot, because that is what it is on the tile. When it sits
-          in the band there is no dot to draw, and the band shows it instead. */}
-      {floating && (
-        <span
-          {...tokenProps("price", priceAt as TileSpot)}
-          className={cn(
-            "absolute flex size-5 cursor-grab items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-            TILE_SPOT_CLASSES[priceAt as TileSpot],
-          )}
-        >
+      <div
+        data-tile-layout-board=""
+        role="group"
+        aria-label="Label positions"
+        style={{ borderRadius: cornerRadius }}
+        className="relative size-32 touch-none overflow-hidden border border-border bg-muted"
+      >
+        {/* The title: a strip, because that is what it is on the tile. */}
+        {showTitle && (
           <span
-            aria-hidden="true"
+            {...tokenProps("title", titleAt)}
             className={cn(
-              "size-3 rounded-full bg-primary",
-              dragging === "price" && "ring-2 ring-primary/40",
+              "absolute inset-x-0 z-10 flex h-4 cursor-grab items-center px-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
+              ROW_CLASSES[spotRow(titleAt)],
+              dragging === "title" ? "bg-primary/30" : "bg-foreground/25",
+              active === "title" && "ring-1 ring-inset ring-primary/50",
             )}
-          />
-        </span>
-      )}
+          >
+            <span
+              aria-hidden="true"
+              className={cn(
+                "h-1 w-6 rounded-full bg-foreground/70",
+                spotRow(titleAt) === "middle" && "mx-auto",
+                titleAt.endsWith("-center") && "mx-auto",
+                titleAt.endsWith("-right") && "ml-auto",
+              )}
+            />
+          </span>
+        )}
+
+        {/* The price: a dot, because that is what it is on the tile. When it
+            sits in the band there is no dot to draw, and the band shows it. */}
+        {floating && (
+          <span
+            {...tokenProps("price", priceAt as TileSpot)}
+            className={cn(
+              "absolute z-10 flex size-7 cursor-grab items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              TILE_SPOT_CLASSES[priceAt as TileSpot],
+              active === "price" && "ring-1 ring-primary/50",
+            )}
+          >
+            <span
+              aria-hidden="true"
+              className={cn(
+                "size-3 rounded-full bg-primary",
+                dragging === "price" && "ring-2 ring-primary/40",
+              )}
+            />
+          </span>
+        )}
+
+        {/* The spots the ACTIVE token can still take, as real buttons.
+            Rendered last, and above the tokens, for the one case that would
+            otherwise be unreachable: the title's strip spans its whole row, so
+            the two other columns of that row sit underneath it.
+
+            A spot either token already holds is skipped. Its own spot has to
+            be, or the strip and the dot would not be grabbable where they
+            actually are — and the OTHER token's has to be too, or a button
+            would paint over the very thing it is meant to be placed against,
+            leaving the board showing one label where there are two. Pressing
+            that token aims the board at it instead, which is the move a seller
+            wanted anyway. */}
+        {active &&
+          optionsFor(active)
+            .filter(
+              (spot) =>
+                spot !== activeAt &&
+                !(showTitle && spot === titleAt) &&
+                !(floating && spot === priceAt),
+            )
+            .map((spot) => (
+              <button
+                key={spot}
+                type="button"
+                onClick={() => commit(active, spot)}
+                aria-label={`Move the ${active} to the ${spotLabel(spot)}`}
+                className={cn(
+                  "group absolute z-20 flex size-7 items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                  TILE_SPOT_CLASSES[spot],
+                )}
+              >
+                <span
+                  aria-hidden="true"
+                  className="size-2 rounded-full border border-muted-foreground bg-background transition-transform duration-base ease-standard group-hover:scale-150 motion-reduce:transition-none"
+                />
+              </button>
+            ))}
+      </div>
     </div>
   );
 }

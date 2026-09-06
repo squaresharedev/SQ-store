@@ -42,7 +42,7 @@ const OPEN_ANGLE_FRONT = 198;
 
 /** Stagger: the long lids swing first, the side lids follow. */
 const OPEN_DELAY_FIRST = 0;
-const OPEN_DELAY_SECOND = 0.1;
+const OPEN_DELAY_SECOND = 0.03;
 
 type Point = { x: number; y: number };
 type Lid = {
@@ -122,7 +122,7 @@ function lidPath({ hinge, axis, side }: Lid, degrees: number | null): string {
 const PEAK_ANGLE = 80;
 const SWING_TIMES = [0, 0.45, 1];
 
-const SWING_DURATION = 0.52;
+const SWING_DURATION = 0.18;
 
 const LID_VARIANTS: Variants[] = LIDS.map((lid) => {
   const closedDegrees = lid.closed === "flat" ? 0 : null;

@@ -1,21 +1,22 @@
 import { transitionClass } from "@/components/ui/control-styles";
+import { LEGAL_LINKS } from "@/lib/legal/links";
 
 /**
  * Company-wide footer for the error surfaces: the same legal, social and
  * attribution links the marketing site (Home) carries, trimmed to what is
  * useful when someone has landed somewhere broken.
  *
- * The legal pages live on the MARKETING origin, not this one — the dashboard
- * is a subdomain and has no /terms of its own — so those hrefs are absolute
- * and plain <a>, never next/link.
+ * The hrefs come from lib/legal/links.ts (absolute, and plain <a> rather than
+ * next/link, because the legal pages live on the MARKETING origin and this app
+ * is a subdomain with no /terms of its own). All four belong here: this is a
+ * Squareshare-branded surface on a Squareshare origin, so unlike the buyer's
+ * product footer there is no seller for them to be confused with.
  */
-const SITE = "https://squareshare.eu";
-
 const LEGAL = [
-  { label: "Privacy", href: `${SITE}/legal/privacy-policy/` },
-  { label: "Cookies", href: `${SITE}/legal/cookie-policy/` },
-  { label: "Terms", href: `${SITE}/terms` },
-  { label: "Accessibility", href: `${SITE}/accessibility` },
+  LEGAL_LINKS.privacy,
+  LEGAL_LINKS.cookies,
+  LEGAL_LINKS.terms,
+  LEGAL_LINKS.accessibility,
 ];
 
 // Brand glyphs as raw simple-icons paths: lucide dropped brand marks for

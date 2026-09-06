@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/control-styles";
 import { SliderField } from "@/components/ui/SliderField";
 import { InfoTip } from "@/components/ui/InfoTip";
+import { Tooltip } from "@/components/ui/Tooltip";
 
 /**
  * How the selected block(s) SIT on the canvas, as opposed to what they are
@@ -234,22 +235,28 @@ export function PlacementSection({
           </span>
         </div>
         <div role="group" aria-label="Block layer" className="flex gap-1">
+          {/* Four arrows that all point up or down: which one is a step and
+              which is the whole way is not readable off the glyphs, and this
+              is the row a seller reaches for least often, so it is the one
+              they have relearned every time. The tooltip says the action —
+              the same words the screen reader already gets. */}
           {LAYER_CONTROLS.map(({ op, label, icon: Icon, end }) => (
-            <button
-              key={op}
-              type="button"
-              onClick={() => onReorder(op)}
-              // Named for the ACTION, never the arrow: "chevron up" tells a
-              // screen reader nothing about what it does to the stack.
-              aria-label={label}
-              // A control that does nothing is worse than one that says it
-              // cannot: both ends disable together, since a selection already
-              // at the front has neither a step nor a jump left to make.
-              disabled={end === "front" ? layer.atFront : layer.atBack}
-              className={LAYER_BUTTON_CLASS}
-            >
-              <Icon className="size-4" strokeWidth={2} aria-hidden="true" />
-            </button>
+            <Tooltip key={op} label={label}>
+              <button
+                type="button"
+                onClick={() => onReorder(op)}
+                // Named for the ACTION, never the arrow: "chevron up" tells a
+                // screen reader nothing about what it does to the stack.
+                aria-label={label}
+                // A control that does nothing is worse than one that says it
+                // cannot: both ends disable together, since a selection already
+                // at the front has neither a step nor a jump left to make.
+                disabled={end === "front" ? layer.atFront : layer.atBack}
+                className={LAYER_BUTTON_CLASS}
+              >
+                <Icon className="size-4" strokeWidth={2} aria-hidden="true" />
+              </button>
+            </Tooltip>
           ))}
         </div>
         {/* Four buttons answer "move this one"; they cannot answer "what else

@@ -319,6 +319,74 @@
 .ss-grid > * {
   contain: layout style;
 }
+/* A CELL LIFTS WHILE ITS CONTROLS ARE SHOWING.
+
+   The resize and rotate handles, and the tile's own control chip, hang OUTSIDE
+   the tile now (they used to sit on it, covering the price tag and the title
+   the seller was placing). Outside means over whatever is drawn next to the
+   tile — and `contain: layout` above makes every cell its own stacking
+   context, so a handle can never paint above a neighbouring cell on its own,
+   however high its z-index is INSIDE that context. Without this rule the
+   handles of any tile with a block below it are drawn under it and cannot be
+   pressed at all.
+
+   `!important` because the depth a block paints at is an inline style computed
+   from its layer (see layerZIndex), and nothing else in a stylesheet can
+   outrank one. 550 is CHROME_Z in components/grid/gridConstants.ts, which owns
+   the bands and is where any change to this number belongs: above every
+   content layer (ceiling 500) and below the gesture lift (600).
+
+   ONLY a cell holding a block ([data-grid-cell]). The free-cell guides are
+   `.ss-grid` children too, and lifting the one under the pointer put it over
+   the very handle the pointer was reaching for — the guide swallowed the
+   press. They have a level of their own, under every block (EMPTY_CELL_Z).
+
+   ONLY a cell the grid has marked liftable ([data-chrome-lift]). The lift
+   carries the cell's CONTENT with it, so on a board where something in front
+   overlaps this block it would drag the block out of its own layer and in
+   front of the thing covering it — which is how a shape sent to the back used
+   to jump forward the instant it was hovered or selected, contradicting the
+   layers list. Grid.tsx works out where raising a cell is invisible (nothing
+   in front of it overlaps it) and marks only those; see `liftableKeys` there
+   for why that test is exact rather than a heuristic.
+
+   NOT while a gesture owns the cell — a drag lifts it higher still, and marks
+   it with data-valid while it does. */
+.ss-grid
+  > [data-grid-cell][data-chrome-lift]:not([data-valid]):is(
+    :hover,
+    :focus-within
+  ):not(:has([data-block-selected])) {
+  z-index: 550 !important;
+}
+/* A SELECTED CELL LIFTS TOO, AND HIGHER: 560, SELECTED_CHROME_Z.
+
+   Two bugs, one rule. A selected tile keeps its chip out whether or not the
+   pointer is on it, so its lift cannot wait for hover: reaching for a chip
+   drawn under a neighbour hovers the NEIGHBOUR, which is the one thing that
+   can never raise the chip, and the controls of that tile stay visible and
+   permanently unpressable. And the lift has to OUTRANK hover rather than tie
+   with it: a block sitting directly below a selected tile covers the strip its
+   resize and rotate handles hang in, so crossing that block on the way to a
+   handle hovers it up to the same level, where document order hands it the
+   press instead. Ten levels of daylight settles both.
+
+   Selection is a state the consumer already knows, so it says so on the tile
+   ([data-block-selected] in BlockTile) and the cell reads it here. Still under
+   the gesture lift (600): a tile being dragged is above everything, selected
+   or not.
+
+   [data-chrome-lift] gates this one for the same reason it gates the hover
+   rule above, and selection is where it mattered most: clicking a block is
+   how a seller ASKS which one they are looking at, and answering by throwing
+   it in front of everything is the one reply that makes the board look
+   broken. */
+.ss-grid
+  > [data-grid-cell][data-chrome-lift]:not([data-valid]):has(
+    [data-block-selected]
+  ) {
+  z-index: 560 !important;
+}
 .ss-grid {
   display: grid;
   grid-template-columns: repeat(var(--ss-cols, 6), minmax(0, 1fr));

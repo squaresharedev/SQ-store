@@ -448,7 +448,13 @@ export function ProductPageView({
           </article>
         </div>
 
-        <PoweredByFooter ruleColor={rule} preview={preview} />
+        {/* `soldBy`, NOT gated on `showSeller`: the switch hides the "Sold by"
+            line beside the price, which is presentation, but the footer's
+            disclosure of who the buyer is contracting with is not the seller's
+            to turn off. See PoweredByFooter's header comment. No `preview`
+            prop: unlike everything else on this page, the footer's links are
+            identically live in both modes (see PoweredByFooter itself). */}
+        <PoweredByFooter ruleColor={rule} sellerName={soldBy} />
 
         {hasCta && (
           <div

@@ -89,10 +89,17 @@ async function dragHandle(dx: number, dy: number, index = 0) {
   // layer lands on eases out from under it. Measure the handle only once that
   // has finished, or the press lands where the handle used to be.
   await canvasStill(page);
-  const button = page
-    .locator("li[data-grid-cell]")
-    .nth(index)
-    .getByRole("button", { name: /resize/i });
+  const cell = page.locator("li[data-grid-cell]").nth(index);
+  // Address the tile first, the way a hand does. The handle hangs OUTSIDE the
+  // tile and is hidden until the tile is hovered, focused or selected, and
+  // hidden chrome takes no presses at all: it is drawn over the neighbouring
+  // cell, which on this board is a free cell whose whole job is to be clicked.
+  // A press that lands straight on an unrevealed handle therefore reaches the
+  // board underneath, and the drag never starts. Hovering the tile reveals it,
+  // and it is welded to the tile's edge, so the pointer cannot lose the cell on
+  // the way over.
+  await cell.locator("[data-block-tile]").hover();
+  const button = cell.getByRole("button", { name: /resize/i });
   const box = await button.boundingBox();
   if (!box) throw new Error("no resize handle");
   const cx = box.x + box.width / 2;

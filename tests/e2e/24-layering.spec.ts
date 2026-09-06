@@ -17,11 +17,21 @@ import {
  */
 
 /** The depth every cell paints at, in DOM order. DOM order is reading order
- *  and never changes, so a change here is a change to paint order alone. */
+ *  and never changes, so a change here is a change to paint order alone.
+ *
+ *  The block's OWN depth, off the inline style the grid writes from its layer,
+ *  rather than the computed one. A cell whose controls are showing is lifted
+ *  clear of its neighbours for as long as they are — the handles hang outside
+ *  the tile, so they would otherwise be drawn under whatever sits next to it
+ *  (see the `.ss-grid > [data-grid-cell]` lift rules in globals.css, which fire
+ *  on hover, on focus, and while the cell holds the SELECTED block; that last
+ *  one is why reading the computed depth here would report the selection
+ *  rather than the layer). The lift is deliberate, and it is not the layer
+ *  order this asks about. */
 async function depths(page: Page): Promise<number[]> {
   return page.evaluate(() =>
     [...document.querySelectorAll<HTMLElement>("li[data-grid-cell]")].map(
-      (cell) => Number(getComputedStyle(cell).zIndex),
+      (cell) => Number(cell.style.zIndex),
     ),
   );
 }
@@ -66,6 +76,67 @@ test.describe("stacking blocks", () => {
     await setUpOverlappingBoard(page, "layerbase");
     const [first, second] = await depths(page);
     expect(second).toBeGreaterThan(first);
+  });
+
+  test("touching a block never moves it in front of what covers it", async ({
+    page,
+  }) => {
+    // THE COMPUTED depth, not the inline one every other test here reads: the
+    // question is precisely whether the chrome lift is overriding the layer.
+    const painted = () =>
+      page.evaluate(() =>
+        [...document.querySelectorAll<HTMLElement>("li[data-grid-cell]")].map(
+          (cell) => Number(getComputedStyle(cell).zIndex),
+        ),
+      );
+
+    await setUpOverlappingBoard(page, "layerlift");
+    // STACKED ON THE SAME CELLS, not merely tilted into each other: a tilt
+    // spills PAINT past the cells a block covers, and coverage here is the
+    // footprint every other rule on this board reads. Dropping one on the
+    // other is what makes one block genuinely cover the other.
+    const [first, second] = await page.locator("li[data-grid-cell]").all();
+    const target = (await first.boundingBox())!;
+    const source = (await second.boundingBox())!;
+    await page.mouse.move(
+      source.x + source.width / 2,
+      source.y + source.height / 2,
+    );
+    await page.mouse.down();
+    await page.mouse.move(
+      target.x + target.width / 2,
+      target.y + target.height / 2,
+      { steps: 12 },
+    );
+    await page.mouse.up();
+    await page.waitForTimeout(200);
+
+    // Exactly one of them may rise for its chrome: the one on top, which has
+    // nothing to be painted over. The buried one may not, or touching it
+    // would drag it out in front of the very block covering it.
+    await expect(first).not.toHaveAttribute("data-chrome-lift");
+    await expect(second).toHaveAttribute("data-chrome-lift", "");
+
+    // The dragged block is on top AND already the selection, so this is the
+    // lift still doing its job where it is free (the handles hanging off a
+    // selected tile stay pressable — see 41-tile-chrome-outside.spec.ts).
+    const [, topZ] = await painted();
+    expect(topZ).toBeGreaterThan(500);
+
+    // ALT-CLICK REACHES THE ONE UNDERNEATH, and selecting it is a question,
+    // not a layer move. This used to throw it to the top of the board
+    // (SELECTED_CHROME_Z carries the cell's CONTENT with it), so the canvas
+    // contradicted the layers list the moment a seller pointed at anything.
+    const box = (await first.boundingBox())!;
+    await page.keyboard.down("Alt");
+    await page.mouse.click(box.x + box.width / 2 + 6, box.y + box.height / 2);
+    await page.keyboard.up("Alt");
+    await expect(first.locator("[data-block-tile]")).toHaveAttribute(
+      "data-block-selected",
+      "",
+    );
+    const [buriedZ, coverZ] = await painted();
+    expect(buriedZ).toBeLessThan(coverZ);
   });
 
   test("sending a block back changes what paints on top", async ({ page }) => {

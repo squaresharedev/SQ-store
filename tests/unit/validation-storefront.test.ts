@@ -726,6 +726,18 @@ describe("parseStoredStorefrontConfig — v1 upgrades", () => {
     expect(parsed!.theme.cornerRadius).toBe(0);
   });
 
+  it("drops the retired carousel display mode key, whichever value it held", () => {
+    for (const legacy of ["grid", "carousel"] as const) {
+      const stored = {
+        ...validConfig(),
+        theme: { ...validConfig().theme, displayMode: legacy },
+      };
+      const parsed = parseStoredStorefrontConfig(stored);
+      expect(parsed, legacy).not.toBeNull();
+      expect(parsed!.theme).not.toHaveProperty("displayMode");
+    }
+  });
+
   it("migrates legacy price tag positions and drops the short-lived corner key", () => {
     for (const [legacy, expected] of [
       ["onImage", "bottom-left"],

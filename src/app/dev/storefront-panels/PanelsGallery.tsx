@@ -7,7 +7,9 @@ import type { Product } from "@/types/product";
 import { ControlsPanel } from "@/components/storefront/ControlsPanel";
 import { editorEntries } from "@/components/storefront/editor-search";
 import { ImageBlockEditor } from "@/components/storefront/ImageBlockEditor";
+import { LayersPanel } from "@/components/storefront/LayersPanel";
 import { MultiBlockEditor } from "@/components/storefront/MultiBlockEditor";
+import { PlacementSection } from "@/components/storefront/PlacementSection";
 import { SettingTargetProvider } from "@/lib/storefront/setting-context";
 import type { SettingRef } from "@/lib/storefront/setting-ref";
 import { ProductBlockEditor } from "@/components/storefront/ProductBlockEditor";
@@ -83,6 +85,21 @@ const IMAGE_BLOCK: ImageBlock = {
   h: 1,
 };
 
+/** A second shape, so the placement section has a stack to reason about:
+ *  with one block on the board every layer control is correctly disabled, and
+ *  a row of four dead buttons proves nothing. */
+const SHAPE_BEHIND: ShapeBlock = {
+  type: "shape",
+  id: "00000000-0000-4000-8000-0000000000c2",
+  kind: "square",
+  color: "#0ea5e9",
+  x: 1,
+  y: 0,
+  w: 1,
+  h: 1,
+  z: 0,
+};
+
 const PRODUCT: Product = {
   id: PRODUCT_BLOCK.productId,
   title: "Fixture product",
@@ -135,13 +152,22 @@ export function PanelsGallery() {
   const [text, setText] = useState(TEXT_BLOCK);
   const [image, setImage] = useState(IMAGE_BLOCK);
 
+  // Whether the index is built as if a product page were out on the canvas.
+  // There is no canvas here, so this stands in for one: the product page's
+  // settings are gated on the page being on screen, and both halves of that
+  // gate have to be readable side by side to be worth anything.
+  const [pageOpen, setPageOpen] = useState(false);
+
   // The editor's search index over the SAME fixtures the inspectors below use,
   // so the field can be exercised on all three of the things it finds:
   // settings, objects on the board, and the drawers. The designer holds live
   // state here; the gallery holds four blocks that never move.
   const searchEntries = useMemo(
-    () => editorEntries([PRODUCT_BLOCK, text, shape, image], PRODUCTS_BY_ID),
-    [text, shape, image],
+    () =>
+      editorEntries([PRODUCT_BLOCK, text, shape, image], PRODUCTS_BY_ID, {
+        pageOpen,
+      }),
+    [text, shape, image, pageOpen],
   );
   // Standing in for the editor, which selects the block or opens the drawer.
   // Shown rather than performed: there is no canvas here to select on.
@@ -173,6 +199,20 @@ export function PanelsGallery() {
           title="Design panel"
           note="Global settings. Six groups, one level deep."
         >
+          {/* The gate, switchable, because the search field answers a product
+              page query two different ways depending on it: control by control
+              with a page out, and with a single "Open the product page" row
+              without one. Try "photo fit" either side of this. */}
+          <label className="mb-3 flex items-center gap-2 lg:px-4">
+            <input
+              type="checkbox"
+              checked={pageOpen}
+              onChange={(event) => setPageOpen(event.target.checked)}
+            />
+            <span className={helpTextClass}>
+              A product page is open on the canvas
+            </span>
+          </label>
           <ControlsPanel
             theme={theme}
             header={header}
@@ -216,13 +256,47 @@ export function PanelsGallery() {
               block={PRODUCT_BLOCK}
               theme={theme}
               product={PRODUCT}
-              onToggleSoldOut={() => {}}
               onStyleChange={() => {}}
               onStyleReset={() => {}}
               onRemove={() => {}}
               onProductSaved={() => {}}
+              pageOpen={pageOpen}
+              onDesignPage={() => setPageOpen((open) => !open)}
             />
           </div>
+        </Panel>
+
+        <Panel
+          title="Placement"
+          note="Every kind of block has an angle and a place in the stack, so this section is shared by all four inspectors. The four layer moves are icons, and their hover labels are the shared tooltip."
+        >
+          <div className="p-4">
+            <PlacementSection
+              blocks={[shape]}
+              board={[shape, SHAPE_BEHIND]}
+              onRotate={(degrees) =>
+                setShape((current) => ({ ...current, rotation: degrees }))
+              }
+              onReorder={(op) => setJumped(`reorder the selection: ${op}`)}
+              onOpenLayers={() => setJumped("open the layers list")}
+            />
+          </div>
+        </Panel>
+
+        <Panel
+          title="Layers"
+          note="The whole stack, front at the top. Each row expands onto the same four moves, wearing the same tooltips."
+        >
+          <LayersPanel
+            blocks={[PRODUCT_BLOCK, text, shape, image]}
+            productsById={PRODUCTS_BY_ID}
+            elementUrls={{}}
+            selectedKeys={[]}
+            onSelect={(key) => setJumped(`select block ${key}`)}
+            onReorder={(key, op) => setJumped(`reorder ${key}: ${op}`)}
+            onMoveTo={(key, index) => setJumped(`move ${key} to ${index}`)}
+            onBack={() => setJumped("leave the layers list")}
+          />
         </Panel>
 
         <Panel

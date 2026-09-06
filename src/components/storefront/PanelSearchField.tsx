@@ -104,7 +104,7 @@ export function PanelSearchField({
   const open = query.trim() !== "";
 
   return (
-    <div className="border-b border-border py-3 lg:px-4">
+    <div className="border-b border-border pt-2 pb-3 lg:px-4">
       <div className="relative">
         <Search
           className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"

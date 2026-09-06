@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { rotatedFootprint } from "@/lib/geometry/rotated-box";
+import { orientedSpan, rotatedFootprint } from "@/lib/geometry/rotated-box";
 import {
   rotatePoint,
   rotateVector,
@@ -75,10 +75,58 @@ export interface GridBlock<TData = unknown> extends GridPlacement {
 // board can never stack a block over the editor's own affordances however many
 // blocks it holds.
 
-/** Where a block's depth starts. Block z 0..n-1 maps onto this. */
+/**
+ * The free-cell guides, UNDER every block.
+ *
+ * They are drawn after the blocks so that they come after them in the tab
+ * order, and a grid item left at `z-index: auto` paints in document order — so
+ * without a level of their own the guides paint over every tile, and over any
+ * chrome a tile hangs outside its own edges.
+ */
+export const EMPTY_CELL_Z = 0;
+/** Where a block's depth starts — above EMPTY_CELL_Z, always. */
 export const LAYER_Z_BASE = 1;
 /** Nothing content-driven paints above this, whatever a board's block count. */
 export const LAYER_Z_CEILING = 500;
+/**
+ * A cell whose controls are showing, lifted clear of its neighbours.
+ *
+ * The handles and the control chip hang OUTSIDE the tile, so they are drawn
+ * over whatever sits beside it; every cell is its own stacking context, so the
+ * cell itself has to rise for its chrome to be seen and pressed.
+ *
+ * A cell counts as "showing its controls" while it is hovered or focused, and
+ * while it holds something the consumer has marked `data-block-selected`. That
+ * second case is not a nicety: a selected tile keeps its chip out with the
+ * pointer nowhere near it, and chrome drawn under a neighbour can never be
+ * hovered into view by the very pointer it is refusing.
+ *
+ * ONLY WHERE THE LIFT IS INVISIBLE. It carries the cell's content with it, so
+ * a block with something in front of it overlapping would be dragged out of
+ * its own layer and painted over the very thing covering it. Grid marks the
+ * cells this cannot happen to with `data-chrome-lift`, and the CSS requires
+ * it; see `liftableKeys` in Grid.tsx.
+ *
+ * MIRRORED IN globals.css (the `.ss-grid > [data-grid-cell]` lift rules),
+ * which is where it has to be applied: hover is not a thing this component can
+ * know without re-rendering the whole board on every pointer crossing. Change
+ * both.
+ */
+export const CHROME_Z = 550;
+/**
+ * A cell whose block is SELECTED, above a merely hovered one.
+ *
+ * Two bands rather than one, because a tie is a deadlock. A block sitting
+ * directly below a selected tile covers the strip its resize and rotate
+ * handles hang in; reaching for a handle across that block hovers it, and a
+ * hovered neighbour level with the selected cell paints over the handle, so
+ * the press lands on the neighbour and the handle can never be taken. Ten
+ * levels of daylight is the whole fix: the block being worked on always wins
+ * over the one the pointer merely crossed.
+ *
+ * MIRRORED IN globals.css alongside CHROME_Z. Change both.
+ */
+export const SELECTED_CHROME_Z = 560;
 /** A tile lifted off the board by a drag or a resize. */
 export const GESTURE_Z = 600;
 /** A tile whose image is being framed, spilling past its own cell. */
@@ -89,6 +137,67 @@ export const OVERLAY_Z = 700;
 /** A block's depth as a real z-index, clamped into the content band. */
 export function layerZIndex(z: number): number {
   return Math.min(LAYER_Z_CEILING, LAYER_Z_BASE + Math.max(0, z));
+}
+
+/**
+ * The blocks whose chrome lift (CHROME_Z / SELECTED_CHROME_Z) costs the board
+ * nothing, keyed by block key.
+ *
+ * WHY THIS EXISTS. The lift raises a whole CELL so the handles and chip that
+ * hang outside it can be seen and pressed. That carries the block's own
+ * surface with it, so a block sent to the back used to jump in front of
+ * everything the moment it was hovered or selected — the board flatly
+ * contradicting the layers list beside it, which is the one place a seller
+ * goes to check what they just did.
+ *
+ * THE TEST IS EXACT, not a guess. Raising A above B is invisible unless the
+ * two overlap, so the lift changes nothing a seller can see precisely when no
+ * block IN FRONT of A overlaps it. Ordinary boards — blocks side by side, the
+ * chrome merely hanging into the gap — are entirely liftable, so the case the
+ * lift was written for is untouched.
+ *
+ * When something in front does overlap, the lift is withheld and that block
+ * covers the chrome instead. That is the honest answer rather than a
+ * compromise: something really is in front, and a seller who put it there is
+ * owed a board that says so. The block stays selectable by its visible part,
+ * by a marquee, and by the layers list, and still moves and resizes from the
+ * keyboard.
+ *
+ * ORDER MATCHES PAINT. Depth first, then position in the array, because that
+ * is what the browser does: cells that state the same z (an unlayered board,
+ * where every one lands on the same level) fall back to document order.
+ *
+ * COVERAGE IS THE FOOTPRINT, the same answer `placementIsFree`, the free-cell
+ * guides and the reflow all read, so every rule on this board agrees about
+ * what covers what. The known cost: a block tilted off a quarter turn paints
+ * PAST the cells it covers (see rotatedFootprint, which only transposes at
+ * right angles), so its spilled corners can lie over a neighbour this call
+ * still considers clear, and the lift is allowed. Deliberate — a rotation-
+ * exact test here would disagree with every other coverage question in this
+ * file, and would call a cell taken that the guides still draw as free.
+ */
+export function liftableChromeKeys(
+  blocks: readonly GridBlock<unknown>[],
+): Set<string> {
+  const entries = blocks.map((block, index) => ({
+    key: block.key,
+    index,
+    depth: block.z ?? 0,
+    footprint: blockFootprint(block),
+  }));
+  const safe = new Set<string>();
+  for (const entry of entries) {
+    const buried = entries.some(
+      (other) =>
+        other.key !== entry.key &&
+        (other.depth !== entry.depth
+          ? other.depth > entry.depth
+          : other.index > entry.index) &&
+        placementsOverlap(other.footprint, entry.footprint),
+    );
+    if (!buried) safe.add(entry.key);
+  }
+  return safe;
 }
 
 /** Default board size when a consumer does not state one. */
@@ -272,6 +381,24 @@ export function columnsThatFit(
  * column ratio so relative size survives, and they repack. A 12-column board
  * with deliberate holes becomes a tight 3-column stack in the order the eye
  * would have crossed it.
+ *
+ * Scaled and packed by FOOTPRINT, not the stored rect — the same reason
+ * `tidyBlocks` (StorefrontDesigner) packs by footprint rather than by the
+ * rect a tilted block would otherwise claim too little (or too much) room
+ * for: a block turned a quarter turn stands on its side, and reserving space
+ * for its own w/h packs its NEIGHBOUR too close, since that neighbour is
+ * placed against the cells the tile actually paints on, not the cells its
+ * stored rect names. Rotation itself survives the reflow untouched — only
+ * the packed rect changes — so a tilted tile is still tilted on a phone.
+ *
+ * The STORED rect is then CENTRED in the room its footprint was packed
+ * into, again matching `tidyBlocks` — not simply placed at the packed
+ * corner. blockFootprint centres a rotated rect on its own middle and floors
+ * the result, so a block whose width and height differ in parity has a
+ * footprint whose origin does not coincide with its stored rect's origin.
+ * Handing the packed corner straight to the stored rect ignored that offset
+ * and could leave the footprint sitting a cell away from the room actually
+ * reserved for it — right on top of whatever was packed next.
  */
 export function reflowBlocks<TData>(
   blocks: readonly GridBlock<TData>[],
@@ -280,21 +407,31 @@ export function reflowBlocks<TData>(
 ): { blocks: GridBlock<TData>[]; rows: number } {
   const ratio = renderColumns / designColumns;
   const ordered = [...blocks].sort((a, b) => a.y - b.y || a.x - b.x);
-  const scaled = ordered.map((block) => ({
-    w: Math.min(renderColumns, Math.max(1, Math.round(block.w * ratio))),
-    h: Math.max(1, Math.round(block.h * ratio)),
-  }));
+  const scaled = ordered.map((block) => {
+    const covered = blockFootprint(block);
+    return {
+      w: Math.min(renderColumns, Math.max(1, Math.round(covered.w * ratio))),
+      h: Math.max(1, Math.round(covered.h * ratio)),
+    };
+  });
 
   const packed = packFirstFit(scaled, renderColumns);
   let rows = 0;
   const placed = ordered.map((block, index) => {
     rows = Math.max(rows, packed[index].rows);
+    const room = scaled[index];
+    const spot = packed[index];
+    // Back to the STORED rect the footprint came from — the same relation
+    // blockFootprint itself is built on (rotatedFootprint / orientedSpan),
+    // run the other way round. The identity for a level block, since its
+    // footprint already IS its stored rect.
+    const stored = orientedSpan(room.w, room.h, block.rotation ?? 0);
     return {
       ...block,
-      x: packed[index].x,
-      y: packed[index].y,
-      w: scaled[index].w,
-      h: scaled[index].h,
+      x: spot.x + Math.round((room.w - stored.w) / 2),
+      y: spot.y + Math.round((room.h - stored.h) / 2),
+      w: stored.w,
+      h: stored.h,
     };
   });
   return { blocks: placed, rows };
@@ -356,6 +493,38 @@ export function edgesUnderPointer(
   return edges.n || edges.e || edges.s || edges.w ? edges : null;
 }
 
+/**
+ * Shift+Arrow's resize step, for a block that may be turned.
+ *
+ * `delta` is the arrow's SCREEN-space direction (Right is [1, 0], Down is
+ * [0, 1]). Un-rotating it into the block's own frame — the same question the
+ * resize handle answers by un-rotating the pointer — says which STORED axis
+ * (w or h) that screen direction actually grows. Without this, Right always
+ * added to `w` and Down always added to `h` regardless of tilt: right on
+ * screen for a level block IS the block's own width axis, but at 90 degrees
+ * screen-right is the block's own HEIGHT axis instead, so pressing Down on a
+ * turned block grew it sideways rather than the way it looked like it should.
+ *
+ * The anchor stays the block's own top-left corner either way — x and y are
+ * untouched — matching the level case: an arrow only ever moves the far
+ * edge, never the near one. Corner and edge dragging are where the other
+ * anchors live.
+ */
+export function keyboardResizeStep(
+  block: GridBlock<unknown>,
+  delta: readonly [number, number],
+): GridPlacement {
+  const angle = block.rotation ?? 0;
+  const local = rotateVector({ x: delta[0], y: delta[1] }, -angle);
+  const alongWidth = Math.abs(local.x) >= Math.abs(local.y);
+  return {
+    x: block.x,
+    y: block.y,
+    w: Math.max(1, block.w + (alongWidth ? Math.sign(local.x) : 0)),
+    h: Math.max(1, block.h + (alongWidth ? 0 : Math.sign(local.y))),
+  };
+}
+
 function clampSpan(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), Math.max(min, max));
 }
@@ -381,10 +550,20 @@ export interface LocalBox {
  * contains it.
  *
  * A resize has to stop at the board's edge, and the drag it is stopping is
- * expressed in the block's frame, so the limit has to be too. EXACT for a
- * quarter turn, where the board is still a rectangle once turned; a safe outer
- * bound for the angles in between, which is all a span cap needs — the
- * placement itself is held to the board separately, by clampToCanvas.
+ * expressed in the block's frame, so the limit has to be too. Landing on a
+ * whole cell is exact for a quarter turn ONLY when the block's own centre
+ * already sits on a grid line — which fails the moment its width or height is
+ * odd (a 2x1 bar's centre is half a cell down). Turning the board's corners
+ * about that off-grid centre then lands them on a half-cell line too, and
+ * clamping a drag to a fractional bound is what used to hand
+ * placementFromLocalBox a box that could not round onto the board cleanly, so
+ * a resize past the edge on an odd-dimensioned tile at +/-90 could drift a
+ * whole cell off the corner the hand was pinning. Rounding OUTWARD here — so
+ * the bound still fully contains the true (possibly fractional) board rather
+ * than cutting into it — is what keeps a clamped drag landing on a cell the
+ * board actually has. For the angles in between this was already only a safe
+ * outer bound, which is all a span cap needs — the placement itself is held
+ * to the board separately, by clampToCanvas.
  */
 export function boardInLocalFrame(
   origin: GridPlacement,
@@ -405,10 +584,10 @@ export function boardInLocalFrame(
   const xs = corners.map((corner) => corner.x);
   const ys = corners.map((corner) => corner.y);
   return {
-    l: Math.min(...xs),
-    r: Math.max(...xs),
-    t: Math.min(...ys),
-    b: Math.max(...ys),
+    l: Math.floor(Math.min(...xs)),
+    r: Math.ceil(Math.max(...xs)),
+    t: Math.floor(Math.min(...ys)),
+    b: Math.ceil(Math.max(...ys)),
   };
 }
 

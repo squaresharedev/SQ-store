@@ -63,8 +63,11 @@ const PRODUCT_BLOCK = {
 const BLOCKS = [TEXT_BLOCK, SHAPE_BLOCK, PRODUCT_BLOCK];
 const PRODUCTS = new Map([["p1", PRODUCT]]);
 
-/** The whole editor index, exactly as the designer builds it. */
-const ENTRIES = editorEntries(BLOCKS, PRODUCTS);
+/** The whole editor index, exactly as the designer builds it, with a product
+ *  page out on the canvas. */
+const ENTRIES = editorEntries(BLOCKS, PRODUCTS, { pageOpen: true });
+/** The same index with no page out: the product page's settings are gated. */
+const NO_PAGE = editorEntries(BLOCKS, PRODUCTS);
 /** What the dev gallery gets: no board, and nothing to jump to. */
 const SETTINGS_ONLY = ENTRIES.filter((e) => e.payload.kind === "setting");
 
@@ -195,6 +198,100 @@ describe("PanelSearchField — finding the editor's own drawers", () => {
     const { onPick, input } = setup();
     await userEvent.type(input, "svg{Enter}");
     expect(onPick).toHaveBeenCalledWith({ kind: "panel", panel: "uploads" });
+  });
+});
+
+describe("PanelSearchField — the product page, once it is open", () => {
+  it("answers a control on the page by its own name", async () => {
+    // Not "Product page layout": the seller asked about the photos, and the
+    // section they live in is not what they typed.
+    const { input } = setup();
+    await userEvent.type(input, "photo fit");
+    expect(optionTitles()[0]).toBe("Product page photos");
+  });
+
+  it("sends each control to the section that holds it", async () => {
+    const { onPick, input } = setup();
+    await userEvent.type(input, "sold by{Enter}");
+    expect(onPick).toHaveBeenCalledWith({
+      kind: "setting",
+      ref: { kind: "productPage", section: "sections" },
+    });
+  });
+
+  it("separates the price note from the buy button it sits under", async () => {
+    const { input } = setup();
+    await userEvent.type(input, "incl vat");
+    expect(optionTitles()[0]).toBe("Price note");
+  });
+
+  it("finds the search engine switch by what turning it off does", async () => {
+    const { onPick, input } = setup();
+    await userEvent.type(input, "keep it out of google{Enter}");
+    expect(onPick).toHaveBeenCalledWith({
+      kind: "setting",
+      ref: { kind: "productPage", section: "layout" },
+    });
+  });
+});
+
+describe("PanelSearchField — the product page, while none is open", () => {
+  it("offers no setting for a page that is not on the canvas", async () => {
+    // A setting whose effect the seller cannot see is not worth opening.
+    const { input } = setup(NO_PAGE);
+    await userEvent.type(input, "photo fit");
+    expect(optionTitles()).not.toContain("Product page photos");
+  });
+
+  it("offers the way in instead, rather than nothing at all", async () => {
+    const { input } = setup(NO_PAGE);
+    await userEvent.type(input, "buy button");
+    expect(optionTitles()[0]).toBe("Open the product page");
+  });
+
+  it("still answers every word that would have found a gated setting", async () => {
+    // The row's vocabulary is the union of the gated rows', so gating them
+    // costs the seller no query — only the extra step of opening the page.
+    for (const query of ["sold by", "incl vat", "photo fit", "specifications"]) {
+      cleanup();
+      const { input } = setup(NO_PAGE);
+      await userEvent.type(input, query);
+      expect(optionTitles(), query).toContain("Open the product page");
+    }
+  });
+
+  it("says which word it recognised, so the row is not a non sequitur", async () => {
+    const { input } = setup(NO_PAGE);
+    await userEvent.type(input, "incl vat");
+    const first = screen.getAllByRole("option")[0]!;
+    expect(within(first).getByText("Open the product page")).toBeTruthy();
+    expect(within(first).getByText("incl vat")).toBeTruthy();
+  });
+
+  it("asks for the page the designer's own opener already knows how to open", async () => {
+    // A plain layout ref, not a target of its own: openSetting puts a page on
+    // the canvas when none is out, so this needs no second handler anywhere.
+    const { onPick, input } = setup(NO_PAGE);
+    await userEvent.type(input, "buy button{Enter}");
+    expect(onPick).toHaveBeenCalledWith({
+      kind: "setting",
+      ref: { kind: "productPage", section: "layout" },
+    });
+  });
+
+  it("collapses to exactly one row, however many words match", async () => {
+    const { input } = setup(NO_PAGE);
+    await userEvent.type(input, "product page");
+    const productPageRows = optionTitles().filter((title) =>
+      title.toLowerCase().includes("product page"),
+    );
+    expect(productPageRows).toEqual(["Open the product page"]);
+  });
+
+  it("leaves the storefront's own settings alone", async () => {
+    const { input } = setup(NO_PAGE);
+    await userEvent.type(input, "corner rondness");
+    expect(optionTitles()[0]).toBe("Corner roundness");
   });
 });
 

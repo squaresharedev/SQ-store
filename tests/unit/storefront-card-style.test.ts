@@ -4,6 +4,7 @@ import {
   DEFAULT_STOREFRONT_CONFIG,
   DEFAULT_TITLE_POSITION,
   HOVER_TRANSITION_MS_DEFAULT,
+  PRICE_TAG_FLOAT_POSITIONS,
   PRICE_TAG_POSITIONS,
   PRICE_TAG_RADIUS_DEFAULT,
   PRICE_TAG_SIZE_DEFAULT,
@@ -16,6 +17,7 @@ import {
   resolveCardStyle,
   resolvePriceTagPosition,
   resolveTitlePosition,
+  titleBandRow,
   titleOverlaysImage,
   type PriceTagPosition,
   type ProductBlock,
@@ -24,12 +26,14 @@ import {
   type StorefrontTheme,
   type TextBlock,
 } from "@/types/storefront";
+import { LAYOUT_PRESET_VALUES } from "@/lib/storefront/layout-presets";
+import { priceSpots } from "@/lib/storefront/tile-spots";
 
 /**
  * The per-tile style contract: resolveCardStyle is the ONE place theme card
  * defaults and a block's overrides merge, and blockCornerRadius is the one
  * place a renderer asks "how round is this cell". Every renderer (canvas,
- * preview, carousel, tile face) goes through these, so pinning them pins the
+ * preview, tile face) goes through these, so pinning them pins the
  * feature's semantics: absent override = follow the theme, present override =
  * that field only.
  */
@@ -186,15 +190,15 @@ describe("resolvePriceTagPosition", () => {
   it.each(Object.entries(TABLE))(
     "%s resolves per the table",
     (stored, [plain, round, overlaid, both]) => {
-      const at = (cornerRadius: number, overlay: boolean) =>
+      const at = (cornerRadius: number, band: SpotRow | null) =>
         resolvePriceTagPosition(stored as never, {
           cornerRadius,
-          titleOverlaysImage: overlay,
+          titleBand: band,
         });
-      expect(at(0, false)).toBe(plain);
-      expect(at(ROUND, false)).toBe(round);
-      expect(at(0, true)).toBe(overlaid);
-      expect(at(ROUND, true)).toBe(both);
+      expect(at(0, null)).toBe(plain);
+      expect(at(ROUND, null)).toBe(round);
+      expect(at(0, "bottom")).toBe(overlaid);
+      expect(at(ROUND, "bottom")).toBe(both);
     },
   );
 
@@ -202,7 +206,7 @@ describe("resolvePriceTagPosition", () => {
     for (const position of PRICE_TAG_POSITIONS) {
       const resolved = resolvePriceTagPosition(position, {
         cornerRadius: 0,
-        titleOverlaysImage: true,
+        titleBand: "bottom",
       });
       expect(resolved.startsWith("bottom-")).toBe(false);
     }
@@ -212,22 +216,18 @@ describe("resolvePriceTagPosition", () => {
     // Coercion is a render-time rule; nothing is written back to the config.
     const stored = "bottom-right" as const;
     expect(
-      resolvePriceTagPosition(stored, { cornerRadius: 0, titleOverlaysImage: true }),
+      resolvePriceTagPosition(stored, { cornerRadius: 0, titleBand: "bottom" }),
     ).toBe("top-right");
     expect(
-      resolvePriceTagPosition(stored, { cornerRadius: 0, titleOverlaysImage: false }),
+      resolvePriceTagPosition(stored, { cornerRadius: 0, titleBand: null }),
     ).toBe("bottom-right");
   });
 
   // The title can now hold any row, so "get out of the title's way" has to
   // mean the row the title actually holds — not the bottom by assumption.
   it("moves the tag off whichever row the title band holds", () => {
-    const at = (position: PriceTagPosition, titleRow: SpotRow) =>
-      resolvePriceTagPosition(position, {
-        cornerRadius: 0,
-        titleOverlaysImage: true,
-        titleRow,
-      });
+    const at = (position: PriceTagPosition, titleBand: SpotRow) =>
+      resolvePriceTagPosition(position, { cornerRadius: 0, titleBand });
     expect(at("top-left", "top")).toBe("bottom-left");
     expect(at("bottom-left", "top")).toBe("bottom-left");
     expect(at("middle-center", "middle")).toBe("bottom-center");
@@ -237,14 +237,80 @@ describe("resolvePriceTagPosition", () => {
     expect(at("bottom-center", "top")).toBe("bottom-center");
   });
 
-  it("assumes the bottom when no title row is given", () => {
-    // Every caller written before the title could move keeps its meaning.
+  it("leaves every spot alone when no band is drawn", () => {
+    // A null band is the whole point of the single-field shape: nothing is
+    // over the picture, so nothing has to move out of the way.
     for (const position of PRICE_TAG_POSITIONS) {
-      const opts = { cornerRadius: 0, titleOverlaysImage: true };
-      expect(resolvePriceTagPosition(position, opts)).toBe(
-        resolvePriceTagPosition(position, { ...opts, titleRow: "bottom" }),
-      );
+      expect(
+        resolvePriceTagPosition(position, { cornerRadius: 0, titleBand: null }),
+      ).toBe(position);
     }
+  });
+});
+
+/**
+ * WHICH row a band actually takes, which is the question the tag's resolver
+ * used to be asked in two pieces and answered wrong.
+ *
+ * The bug this pins: the `bare` layout is an `overlay` title with `showTitle`
+ * off, so the tile paints nothing over the picture — and yet every caller was
+ * passing `titleOverlaysImage(titleStyle)`, which said "the bottom is taken"
+ * and bounced a price tag off the bottom three spots of its own tile.
+ */
+describe("titleBandRow", () => {
+  const card = {
+    titleStyle: "overlay" as const,
+    titlePosition: "bottom-left" as const,
+    showTitle: true,
+    cornerRadius: 0,
+  };
+
+  it("names the row an overlaid title holds", () => {
+    expect(titleBandRow(card)).toBe("bottom");
+    expect(titleBandRow({ ...card, titlePosition: "top-right" })).toBe("top");
+    expect(titleBandRow({ ...card, titlePosition: "middle-center" })).toBe(
+      "middle",
+    );
+  });
+
+  it("is null for a bar title, which is a row of its own", () => {
+    expect(titleBandRow({ ...card, titleStyle: "bar" })).toBeNull();
+  });
+
+  it("is null when the title is not shown at all", () => {
+    // The `bare` layout, exactly: nothing is drawn, so nothing is reserved.
+    expect(titleBandRow({ ...card, showTitle: false })).toBeNull();
+    expect(
+      titleBandRow({ ...card, titleStyle: "shadow", showTitle: false }),
+    ).toBeNull();
+  });
+
+  it("resolves the position first, so it names the row that renders", () => {
+    // A stored corner on a round tile renders on the center axis; the ROW is
+    // unchanged by that, which is what makes reading it here safe.
+    expect(
+      titleBandRow({ ...card, cornerRadius: CORNER_SPOT_LIMIT }),
+    ).toBe("bottom");
+  });
+});
+
+/**
+ * The `bare` layout end to end: the preset a seller picks, run through the two
+ * resolvers a tile actually uses. Every floating spot must survive, because
+ * the tile draws nothing but the picture and the chip.
+ */
+describe("the bare layout's price tag", () => {
+  it("keeps all seven spots, the bottom three included", () => {
+    const bare = LAYOUT_PRESET_VALUES.bare;
+    const band = titleBandRow({ ...bare, cornerRadius: 0 });
+    expect(band).toBeNull();
+    for (const spot of PRICE_TAG_FLOAT_POSITIONS) {
+      expect(
+        resolvePriceTagPosition(spot, { cornerRadius: 0, titleBand: band }),
+      ).toBe(spot);
+    }
+    // And the spot list the pickers offer agrees with the resolver.
+    expect(priceSpots(0, band)).toEqual([...PRICE_TAG_FLOAT_POSITIONS]);
   });
 });
 

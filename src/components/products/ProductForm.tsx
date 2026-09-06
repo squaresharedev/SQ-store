@@ -1261,18 +1261,14 @@ export function ProductForm({
             : "This product hasn't been saved yet, so nothing will be kept."
         }
       >
-        {/* `flex-wrap` is the escape valve: three buttons plus icons don't
-            always fit the modal's fixed width on one line, and letting the
-            row wrap keeps each button's own label on a single line instead
-            of the label itself wrapping mid-word. */}
-        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:flex-wrap sm:justify-end">
+        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
           <button
             type="button"
             onClick={leaveGuard.cancel}
             disabled={submitting}
             className={cn(secondaryButtonClass, "whitespace-nowrap")}
           >
-            Keep editing
+            Cancel
           </button>
           <button
             type="button"
@@ -1281,7 +1277,7 @@ export function ProductForm({
             className={cn(destructiveButtonClass, "whitespace-nowrap")}
           >
             <Trash2 className="size-4" strokeWidth={2} aria-hidden="true" />
-            Discard changes
+            Discard
           </button>
           <button
             type="button"
@@ -1294,7 +1290,7 @@ export function ProductForm({
             ) : (
               <>
                 <Save className="size-4" strokeWidth={2} aria-hidden="true" />
-                Save and leave
+                Save
               </>
             )}
           </button>

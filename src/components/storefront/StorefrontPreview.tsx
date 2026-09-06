@@ -23,7 +23,6 @@ import {
 import { Grid } from "@/components/grid/Grid";
 import type { GridBlock } from "@/components/grid/gridConstants";
 import { BlockTile } from "./BlockTile";
-import { CarouselStrip } from "./CarouselStrip";
 import { CustomFontFace } from "./CustomFontFace";
 import { StorefrontMasthead } from "./StorefrontMasthead";
 import { resolveBackgroundStyle } from "./background-presets";
@@ -265,46 +264,38 @@ export function StorefrontPreview({
             compact
           />
         )}
-        {visibleBlocks.length > 0 &&
-          (theme.displayMode === "carousel" ? (
-            <CarouselStrip
-              blocks={visibleBlocks}
-              getProduct={getProduct}
-              theme={tileTheme}
-              compact
-            />
-          ) : (
-            <Grid
-              blocks={gridBlocks}
-              ariaLabel="Storefront preview"
-              columns={theme.columns}
-              rows={theme.rows}
-              // Never reflow: the preview is scaled down as a whole, so the
-              // board keeps the exact column count and coordinates the seller
-              // designed. Reflowing would show a layout the storefront doesn't
-              // have — the one thing a preview must not do.
-              responsive={false}
-              cellStyle={(placement, gridBlock) =>
-                tileClipStyle(
-                  scaledCornerRadius(
-                    gridBlock
-                      ? blockCornerRadius(tileTheme, gridBlock.data)
-                      : tileTheme.cornerRadius,
-                    placement,
-                  ),
-                )
-              }
-              renderBlock={(gridBlock) => (
-                <BlockTile
-                  blockKey={gridBlock.key}
-                  block={gridBlock.data}
-                  product={getProduct(gridBlock.data)}
-                  theme={tileTheme}
-                  editable={false}
-                />
-              )}
-            />
-          ))}
+        {visibleBlocks.length > 0 && (
+          <Grid
+            blocks={gridBlocks}
+            ariaLabel="Storefront preview"
+            columns={theme.columns}
+            rows={theme.rows}
+            // Never reflow: the preview is scaled down as a whole, so the
+            // board keeps the exact column count and coordinates the seller
+            // designed. Reflowing would show a layout the storefront doesn't
+            // have — the one thing a preview must not do.
+            responsive={false}
+            cellStyle={(placement, gridBlock) =>
+              tileClipStyle(
+                scaledCornerRadius(
+                  gridBlock
+                    ? blockCornerRadius(tileTheme, gridBlock.data)
+                    : tileTheme.cornerRadius,
+                  placement,
+                ),
+              )
+            }
+            renderBlock={(gridBlock) => (
+              <BlockTile
+                blockKey={gridBlock.key}
+                block={gridBlock.data}
+                product={getProduct(gridBlock.data)}
+                theme={tileTheme}
+                editable={false}
+              />
+            )}
+          />
+        )}
       </div>
     </div>
   );

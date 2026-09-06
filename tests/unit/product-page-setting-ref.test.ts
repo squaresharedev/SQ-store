@@ -3,7 +3,9 @@ import {
   CONTROLS_GROUPS,
   GROUP_LABELS,
   PRODUCT_PAGE_HOTSPOTS,
+  PRODUCT_PAGE_SETTINGS,
   SECTION_SETTING,
+  STOREFRONT_ONLY_SETTINGS,
   STOREFRONT_SETTINGS,
   freshSettingRef,
   isPerTileSetting,
@@ -26,7 +28,9 @@ describe("product page settings catalogue", () => {
     expect(GROUP_LABELS.productPage).toBe("Product page");
   });
 
-  it("lists five sections, each findable by id and filed under the group", () => {
+  it("files every entry under the group, whatever section it opens", () => {
+    // The ids that ?setting= links and the hotspot table have always named.
+    // They must keep resolving even though the catalogue around them grew.
     const ids = ["product-page-layout", "buy-button", "product-page-sections", "shipping-returns", "seller-details"];
     for (const id of ids) {
       const entry = settingById(id);
@@ -35,7 +39,43 @@ describe("product page settings catalogue", () => {
       expect(isPerTileSetting(entry!.ref)).toBe(false);
       expect(settingIndexFields(entry!).subtitle).toBe("Storefront / Product page");
     }
-    expect(STOREFRONT_SETTINGS.filter((s) => s.ref.kind === "productPage")).toHaveLength(5);
+  });
+
+  it("reaches every section of the panel, so none is unfindable by name", () => {
+    // Counting entries would only pin today's number. What has to hold is that
+    // no section of the panel is a place search cannot send a seller.
+    const sections = new Set(
+      PRODUCT_PAGE_SETTINGS.map((entry) =>
+        entry.ref.kind === "productPage" ? entry.ref.section : null,
+      ),
+    );
+    for (const section of ["layout", "cta", "sections", "policies", "seller"]) {
+      expect(sections, section).toContain(section);
+    }
+  });
+
+  it("describes the page control by control, not section by section", () => {
+    // The point of the expansion: "photo fit" and "sold by" are their own
+    // rows, so they answer with their own name rather than with the name of
+    // the section they happen to live in.
+    expect(PRODUCT_PAGE_SETTINGS.length).toBeGreaterThan(
+      new Set(
+        PRODUCT_PAGE_SETTINGS.map((entry) =>
+          entry.ref.kind === "productPage" ? entry.ref.section : "",
+        ),
+      ).size,
+    );
+    expect(PRODUCT_PAGE_SETTINGS.every((entry) => entry.ref.kind === "productPage")).toBe(true);
+    expect(PRODUCT_PAGE_SETTINGS).toEqual(
+      STOREFRONT_SETTINGS.filter((entry) => entry.ref.kind === "productPage"),
+    );
+  });
+
+  it("keeps the two halves of the catalogue disjoint and complete", () => {
+    expect([...STOREFRONT_ONLY_SETTINGS, ...PRODUCT_PAGE_SETTINGS]).toHaveLength(
+      STOREFRONT_SETTINGS.length,
+    );
+    expect(STOREFRONT_ONLY_SETTINGS.some((entry) => entry.ref.kind === "productPage")).toBe(false);
   });
 
   it("compares product page refs by section", () => {

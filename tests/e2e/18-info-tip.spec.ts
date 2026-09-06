@@ -65,7 +65,6 @@ test.describe("info tip", () => {
   test("the hint paragraphs are gone from the panel", async () => {
     for (const gone of [
       /Name and price belong to the product/i,
-      /The sold-out badge follows the Cards section setting/i,
       /Style this tile on its own/i,
       /The price stays hidden until a buyer hovers/i,
     ]) {
@@ -75,7 +74,6 @@ test.describe("info tip", () => {
 
   test("every hint that survived is behind a ? button", async () => {
     await expect(tip("Where a name or price change lands")).toBeVisible();
-    await expect(tip("How the sold-out badge is styled")).toBeVisible();
     await expect(tip("How this tile's style relates to the theme")).toBeVisible();
     await expect(bubble()).toHaveCount(0);
   });
@@ -92,7 +90,7 @@ test.describe("info tip", () => {
   });
 
   test("the bubble is placed against its trigger, inside the viewport", async () => {
-    const trigger = tip("How the sold-out badge is styled");
+    const trigger = tip("How this tile's style relates to the theme");
     await trigger.hover();
     await expect(bubble()).toBeVisible();
 

@@ -9,7 +9,6 @@ import {
   blockKey,
   isFreelyArranged,
   layerOrder,
-  readingOrder,
   type HeaderLine,
   type ImagePlacement,
   type ProductPageConfig,
@@ -20,7 +19,7 @@ import {
   type TextSpan,
 } from "@/types/storefront";
 import { ProductPageArtboard } from "./ProductPageArtboard";
-import { PageConnectors, type PageLink } from "./PageConnectors";
+import { PageConnectors } from "./PageConnectors";
 import { DeviceSizeSwitch, type PreviewDevice } from "./DeviceSizeSwitch";
 import { cn } from "@/lib/utils";
 import {
@@ -41,7 +40,6 @@ import type {
 } from "./InlineTextEditor";
 import { BlockTile } from "./BlockTile";
 import type { SpotDrop, SpotToken } from "./TileSpotDragLayer";
-import { CarouselStrip } from "./CarouselStrip";
 import { CustomFontFace } from "./CustomFontFace";
 import { StorefrontMasthead } from "./StorefrontMasthead";
 import { resolveBackgroundStyle } from "./background-presets";
@@ -101,6 +99,28 @@ const MOBILE_PREVIEW_WIDTH = 384;
  * matured/centred as it will ever get on a real desktop browser.
  */
 const PRODUCT_PAGE_DESKTOP_WIDTH = 1280;
+
+/**
+ * Empty band above the whole stage row (the board AND the pages beside it),
+ * in px.
+ *
+ * Each connector (see PageConnectors) leaves the board's own top-right corner
+ * heading straight up, arcs over, and comes straight down into a page's
+ * top-centre: an arch, which needs headroom above both ends to rise into.
+ * Reserving that headroom here, above the row rather than only above the
+ * pages, is also what keeps a page's own top level with the board's: the two
+ * start the same distance below this band, so a page reads as belonging to
+ * the storefront it opened from rather than hanging lower on the workspace.
+ * And reserving it as real layout space (padding on the stage, not a margin
+ * that only the connectors know about) is what keeps an arc's peak inside the
+ * box Fit measures, so fitting the canvas never crops one off the top.
+ *
+ * Comfortably above the tallest arc a connector ever draws (see ARC_LIFT_MAX
+ * in PageConnectors): every arch rises to some position-dependent height at
+ * or below that ceiling, so reserving the ceiling itself plus a margin covers
+ * all of them regardless of how many pages are open.
+ */
+const CONNECTOR_ARC_BAND_PX = 240;
 
 export const DesignerCanvas = memo(function DesignerCanvas({
   blocks,
@@ -607,18 +627,6 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   // the blocks, since one drag onto a neighbour is what changes the answer.
   const freelyArranged = useMemo(() => isFreelyArranged(blocks), [blocks]);
 
-  // Carousel mode has no coordinates: it reads the board top-to-bottom,
-  // left-to-right and swaps neighbours in that sequence.
-  function shiftInCarousel(key: string, direction: -1 | 1) {
-    const ordered = readingOrder(blocks);
-    const index = ordered.findIndex((block) => blockKey(block) === key);
-    const neighbor = ordered[index + direction];
-    if (index < 0 || !neighbor) return;
-    const moved = ordered[index];
-    onMoveBlock(key, neighbor.x, neighbor.y);
-    onMoveBlock(blockKey(neighbor), moved.x, moved.y);
-  }
-
   // The design canvas renders at its natural size and is scaled; the mobile
   // preview simulates a real phone's width instead — fixed, not fluid, once
   // a page is open (see showCanvas below), so a seller comparing tile to
@@ -692,11 +700,6 @@ export const DesignerCanvas = memo(function DesignerCanvas({
       })
     : [];
 
-  const pageLinks = useMemo<PageLink[]>(
-    () => openProductIds.map((id) => ({ fromKey: `p_${id}`, toId: id })),
-    [openProductIds],
-  );
-
   // What can move either end of a line without the connectors hearing about
   // it: which pages are out, and where the tiles sit on the board.
   const connectorRevision = useMemo(
@@ -706,15 +709,18 @@ export const DesignerCanvas = memo(function DesignerCanvas({
         theme.columns,
         theme.rows,
         theme.gridGap,
-        theme.displayMode,
         blocks.map((block) => `${block.x},${block.y},${block.w},${block.h}`).join("|"),
       ].join("~"),
-    [openProductIds, theme.columns, theme.rows, theme.gridGap, theme.displayMode, blocks],
+    [openProductIds, theme.columns, theme.rows, theme.gridGap, blocks],
   );
 
   const canvas = (
     <div
       ref={frameRef}
+      // The storefront itself, as opposed to the chrome around it. Both the
+      // connectors (which leave from its right-hand edge) and the workspace's
+      // pan gesture (which must NOT start on it) ask for it by this name.
+      data-canvas-board=""
       // Capture, so an Alt+press is claimed before the tile under it can turn
       // it into a drag or a selection of its own. noteTouchStart only
       // records; it never claims the press, so a touch drag still starts
@@ -736,7 +742,7 @@ export const DesignerCanvas = memo(function DesignerCanvas({
       )}
       // Schema-constrained: hex is re-gated by the strict regex, the gap is
       // a bounded integer. gridGapStyle sets the --grid-gap token the
-      // .ss-grid rule (and the carousel strip) inherit.
+      // .ss-grid rule inherits.
       style={{
         ...resolveBackgroundStyle(theme.background, backgroundImageUrl),
         ...gridGapStyle(theme.gridGap),
@@ -803,30 +809,6 @@ export const DesignerCanvas = memo(function DesignerCanvas({
               </button>
             )}
           </div>
-        ) : theme.displayMode === "carousel" ? (
-          <>
-            <CarouselStrip
-              blocks={blocks}
-              getProduct={productFor}
-              theme={theme}
-              editable
-              editingKeys={selectedKeys}
-              typingKey={typingKey}
-              typingSelectAll={typingSelectAll}
-              onSelect={onSelectBlock}
-              onRemove={onRemove}
-              onMove={shiftInCarousel}
-              onTypeStart={startTyping}
-              onTextChange={changeText}
-              onToggleBlockFormat={toggleBlockFormat}
-              onTextRangeChange={changeTextRange}
-              onTypeEnd={endTyping}
-            />
-            <p className="mt-2 font-inter text-xs text-muted-foreground">
-              Buyers swipe through this row, or tap the arrows at its edges. Use
-              the arrows on a tile to reorder; placement applies in grid mode.
-            </p>
-          </>
         ) : (
           <Grid
             editable
@@ -947,7 +929,7 @@ export const DesignerCanvas = memo(function DesignerCanvas({
       boardWidth={boardWidth}
       canvas={canvas}
       artboards={artboards}
-      pageLinks={pageLinks}
+      pageLinks={openProductIds}
       connectorRevision={connectorRevision}
       previewMode={previewMode}
       onPreviewModeChange={onPreviewModeChange}
@@ -985,7 +967,8 @@ function Stage({
   boardWidth: number;
   canvas: ReactNode;
   artboards: ReactNode[];
-  pageLinks: readonly PageLink[];
+  /** Product ids of the open pages, in artboard order. */
+  pageLinks: readonly string[];
   connectorRevision: string;
   previewMode: PreviewDevice;
   onPreviewModeChange: (mode: PreviewDevice) => void;
@@ -1009,6 +992,14 @@ function Stage({
         // Promote the stage to its own compositor layer up front, so a pan is
         // a GPU transform rather than a repaint of every tile.
         willChange: "transform",
+        // Reserved above BOTH the board and the pages, not just the pages, so
+        // the two start level with each other: a page reads as belonging to
+        // the storefront it opened from, not as a separate thing hanging
+        // lower on the workspace. It's also the room each connector's arc
+        // gets to rise into (see CONNECTOR_ARC_BAND_PX): reserving it here,
+        // as real layout space, is what keeps the arc inside the box Fit
+        // measures, so fitting the canvas never crops one off the top.
+        paddingTop: CONNECTOR_ARC_BAND_PX,
       }}
       className="absolute left-0 top-0 flex items-start gap-24"
     >
@@ -1028,7 +1019,13 @@ function Stage({
         </div>
         {canvas}
       </div>
-      {artboards.length > 0 && <div className="flex flex-col gap-16">{artboards}</div>}
+      {/* PAGES SIDE BY SIDE, never stacked. Two pages under one another put
+          the second one a whole page-height down the workspace, where nothing
+          about the board is on screen any more; in a row they stay at the
+          board's own eye level, and panning right walks through them. */}
+      {artboards.length > 0 && (
+        <div className="flex items-start gap-24">{artboards}</div>
+      )}
     </div>
   );
 }

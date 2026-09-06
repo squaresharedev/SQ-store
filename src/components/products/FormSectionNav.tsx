@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type MouseEvent } from "react";
-import { Check, CircleAlert } from "lucide-react";
+import { CircleCheck, CircleX } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { sectionAnchorId } from "./FormSection";
 import type { ProductFormSectionSnapshot } from "@/lib/products/form-datapoints";
@@ -36,17 +36,17 @@ function handleNavClick(event: MouseEvent<HTMLAnchorElement>, id: string) {
  * thing has to scroll and read headings to find it, and a seller filling one
  * in has no idea how much is left or which two fields are actually stopping
  * the save. Both are scanning problems, and a standing index is the answer to
- * both: every section named in one place, each with what it currently holds.
+ * both: every section named in one place.
  *
  * It carries STATE, not just names — that is what makes it worth the space.
- * "Photos · 3 photos" and "Photos · Empty" answer the question the seller
- * actually has without going there, and a section with a problem is the one
- * thing here painted in the destructive tone.
+ * A green check is a section that is filled in and fine; a red cross is one
+ * with a problem the seller needs to go fix. The section's own header carries
+ * the longer summary ("3 photos"), so the index stays a plain list of names
+ * plus that one signal rather than a second place to read the same detail.
  *
  * Wide screens only. On a narrow one there is no margin to put it in, and a
  * horizontal strip of nine chips above a form is a second thing to scroll
- * past rather than a way through it. The section headers carry the same
- * summaries, so nothing is only available here.
+ * past rather than a way through it.
  */
 export function FormSectionNav({
   sections,
@@ -74,45 +74,29 @@ export function FormSectionNav({
                 data-product-form-nav-item={section.id}
                 data-product-section-state={section.state}
                 className={cn(
-                  "flex flex-col gap-0.5 rounded-sm px-3 py-1.5 font-inter text-sm transition-colors duration-base ease-standard motion-reduce:transition-none",
+                  "flex items-center gap-1.5 rounded-sm px-3 py-1.5 font-inter text-sm transition-colors duration-base ease-standard motion-reduce:transition-none",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
                   current
                     ? "bg-accent font-medium text-foreground"
                     : "text-muted-foreground hover:bg-accent hover:text-foreground",
                 )}
               >
-                <span className="flex items-center gap-1.5">
-                  {/* Only two things earn an icon: a problem, and a required
-                      section that is done. Ticking every filled section would
-                      make the two that matter invisible among nine. */}
-                  {section.state === "invalid" ? (
-                    <CircleAlert
-                      className="size-3.5 shrink-0 text-destructive"
-                      strokeWidth={2}
-                      aria-hidden="true"
-                    />
-                  ) : section.required && section.state === "filled" ? (
-                    <Check
-                      className="size-3.5 shrink-0 text-muted-foreground"
-                      strokeWidth={2.5}
-                      aria-hidden="true"
-                    />
-                  ) : null}
-                  <span className="min-w-0 truncate">{section.label}</span>
-                </span>
-                {/* The summary is the payload of this rail. Muted and small,
-                    because it is the second line of an answer whose first
-                    line is the section name. */}
-                <span
-                  className={cn(
-                    "truncate pl-0 font-inter text-xs",
-                    section.state === "invalid" ? "text-destructive" : "text-muted-foreground",
-                  )}
-                >
-                  {section.state === "invalid"
-                    ? "Needs attention"
-                    : section.summary || (section.required ? "Required" : "Empty")}
-                </span>
+                {section.state === "invalid" ? (
+                  <CircleX
+                    className="size-3.5 shrink-0 text-destructive"
+                    strokeWidth={2}
+                    aria-hidden="true"
+                  />
+                ) : section.state === "filled" ? (
+                  <CircleCheck
+                    className="size-3.5 shrink-0 text-success"
+                    strokeWidth={2}
+                    aria-hidden="true"
+                  />
+                ) : (
+                  <span className="size-3.5 shrink-0" aria-hidden="true" />
+                )}
+                <span className="min-w-0 truncate">{section.label}</span>
               </a>
             </li>
           );

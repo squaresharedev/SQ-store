@@ -39,7 +39,7 @@ async function openTip(name: string | RegExp): Promise<string> {
 }
 
 describe("explanatory copy lives behind the info button", () => {
-  it("Layout: the display modes and the grid overlay both explain themselves", async () => {
+  it("Layout: the grid overlay tip explains itself", async () => {
     render(
       <LayoutSection
         theme={theme()}
@@ -52,11 +52,10 @@ describe("explanatory copy lives behind the info button", () => {
 
     expect(screen.queryByText(/Empty slots while you design/)).toBeNull();
 
-    // Names BOTH modes, rather than only the one the seller has not picked —
-    // which is what the old conditional paragraph did.
-    const modes = await openTip("What the display modes do");
-    expect(modes).toMatch(/grid/i);
-    expect(modes).toMatch(/carousel/i);
+    // Carousel is pulled for the MVP: grid is the only layout, so there is no
+    // mode to pick and no control for it.
+    expect(screen.queryByText("Display mode")).toBeNull();
+    expect(screen.queryByRole("radiogroup", { name: "Display mode" })).toBeNull();
 
     expect(await openTip("Who sees the grid")).toMatch(/buyers never see it/i);
   });

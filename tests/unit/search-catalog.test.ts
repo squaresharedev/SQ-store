@@ -177,8 +177,12 @@ describe("the two surfaces agree about a setting", () => {
   // promising they could never disagree.
 
   it("indexes every setting on identical terms in both", () => {
+    // With a page out, which is the state where the editor lists everything:
+    // the product page's settings are gated on the page being on the canvas
+    // (see editor-search), and that is a question of WHEN a row is offered,
+    // never of what its terms are once it is.
     const editorBySetting = new Map(
-      editorEntries([], new Map())
+      editorEntries([], new Map(), { pageOpen: true })
         .filter((entry) => entry.payload.kind === "setting")
         .map((entry) => [entry.title, entryTerms(entry)]),
     );
@@ -190,6 +194,31 @@ describe("the two surfaces agree about a setting", () => {
         subtitle,
         ...keywords,
       ]);
+    }
+  });
+
+  it("hands the gated settings' whole vocabulary to the row standing in", () => {
+    // The gate must cost the seller no query. Every term that would have found
+    // a product page setting still has to find the row that opens the page.
+    const closed = editorEntries([], new Map());
+    const standIn = closed.find((entry) => entry.title === "Open the product page");
+    expect(standIn).toBeDefined();
+    const terms = new Set(entryTerms(standIn!));
+
+    const open = editorEntries([], new Map(), { pageOpen: true });
+    const gated = open.filter(
+      (entry) =>
+        entry.payload.kind === "setting" &&
+        entry.payload.ref.kind === "productPage",
+    );
+    expect(gated.length).toBeGreaterThan(0);
+    for (const entry of gated) {
+      // Gone while the page is closed...
+      expect(closed.some((row) => row.title === entry.title), entry.title).toBe(false);
+      // ...but every word it answered to is still answered.
+      for (const term of entryTerms(entry)) {
+        expect(terms, `${entry.title}: ${term}`).toContain(term);
+      }
     }
   });
 

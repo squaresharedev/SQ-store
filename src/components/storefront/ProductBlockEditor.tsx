@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
-import { Image as ImageIcon, Trash2 } from "lucide-react";
+import { ArrowRight, Image as ImageIcon, Trash2 } from "lucide-react";
 import type { Product } from "@/types/product";
 import {
   blockKey,
@@ -23,7 +23,6 @@ import { CollapsibleSection } from "@/components/ui/CollapsibleSection";
 import { useSettingTarget } from "@/lib/storefront/setting-context";
 import { InfoTip } from "@/components/ui/InfoTip";
 import { Modal } from "@/components/ui/modal";
-import { Switch } from "@/components/ui/switch";
 import { CardStyleControls } from "./CardStyleControls";
 import { PriceTagControls } from "./PriceTagControls";
 
@@ -38,7 +37,7 @@ function centsOf(input: string): number | null {
 
 /**
  * Inspector card body for a PRODUCT block in the side panel. Block-level
- * settings (sold-out, tile style, remove) patch immediately like the other
+ * settings (tile style, remove) patch immediately like the other
  * block editors. The tile-style controls are the same CardStyleControls the
  * theme's Cards section uses, working on this block's overrides: they show
  * the RESOLVED style (theme + overrides) and each edit stores only the field
@@ -51,7 +50,6 @@ export function ProductBlockEditor({
   block,
   theme,
   product,
-  onToggleSoldOut,
   onStyleChange,
   onStyleReset,
   onRemove,
@@ -62,7 +60,6 @@ export function ProductBlockEditor({
   block: ProductBlock;
   theme: StorefrontTheme;
   product: Product | null;
-  onToggleSoldOut: () => void;
   /** Merge a card-style patch into this block's overrides. */
   onStyleChange: (patch: CardStyleOverrides) => void;
   /** Drop every override so the tile follows the theme again. */
@@ -177,7 +174,8 @@ export function ProductBlockEditor({
     toast.success(`"${trimmedTitle}" was updated everywhere it appears.`);
   }
 
-  // Stock status line: display-only, independent from the manual sold-out flag.
+  // Stock status line: display-only. The designer REPORTS availability and
+  // never sets it — that lives on the product, in Products > Stock.
   let stockLine: string | null = null;
   if (product.trackStock) {
     if (product.stockQuantity === 0) {
@@ -275,52 +273,29 @@ export function ProductBlockEditor({
         </button>
       )}
 
-      {/* Sold-out toggle */}
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-1.5">
-          <label htmlFor={`${fieldId}-soldout`} className={labelClass}>
-            Mark as sold out
-          </label>
-          <InfoTip label="How the sold-out badge is styled">
-            The sold-out badge follows the Cards section setting.
-          </InfoTip>
-        </div>
-        <Switch
-          id={`${fieldId}-soldout`}
-          checked={block.soldOut === true}
-          onCheckedChange={onToggleSoldOut}
-        />
-      </div>
-
-      {/* Inventory hint (display-only, only when stock tracking is on) */}
+      {/* Availability, read-only. The switch that used to sit here belonged to
+          the TILE, which made "is this sold out" a question with a different
+          answer on every storefront the product appears in. Availability is a
+          fact about the product, so it is edited once in Products (Stock), and
+          the designer only reports it. */}
       {stockLine !== null && (
         <p className={infoTextClass}>{stockLine}</p>
       )}
 
       {/* Where a tap on this tile lands. The page is designed once for the
-          whole storefront, so this row only turns the editor towards it with
-          this product in the preview. */}
+          whole storefront, so this only turns the editor towards it with this
+          product in the preview. */}
       {onDesignPage && (
-        <div className="flex items-center justify-between gap-3" data-product-page-row="">
-          <div className="min-w-0">
-            <span className="flex items-center gap-1.5">
-              <span className={labelClass}>Opens the product page</span>
-              <InfoTip label="What tapping this tile does">
-                Buyers who tap this tile land on its product page. The page is
-                designed once for the whole storefront, so opening it here
-                just brings it up beside the board with this product in it.
-              </InfoTip>
-            </span>
-          </div>
-          <button
-            type="button"
-            onClick={onDesignPage}
-            aria-pressed={pageOpen}
-            className={cn(secondaryButtonClass, "shrink-0 px-3 py-1.5 text-xs")}
-          >
-            {pageOpen ? "Hide page" : "Open page"}
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={onDesignPage}
+          aria-pressed={pageOpen}
+          data-product-page-row=""
+          className={cn(primaryButtonClass, "w-full")}
+        >
+          {pageOpen ? "Hide product page" : "Open product page"}
+          <ArrowRight className="size-4" strokeWidth={2} aria-hidden="true" />
+        </button>
       )}
 
       {/* Per-tile style and the price tag, as collapsible groups rather than

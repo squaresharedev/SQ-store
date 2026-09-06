@@ -181,6 +181,12 @@ export default function GlobalError({
             gap: "1.5rem",
           }}
         >
+          {/* Hard-coded ON PURPOSE, unlike every other surface, which imports
+              them from lib/legal/links.ts. This boundary renders when the root
+              layout itself has failed, so it must not depend on a module that
+              could be part of what failed. The cost is that these two hrefs
+              have to be updated alongside that file. They are the only copies
+              left, and nothing else may add a third. */}
           <a style={linkStyle} href="https://squareshare.eu/legal/privacy-policy/">
             Privacy
           </a>

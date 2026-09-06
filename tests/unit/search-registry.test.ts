@@ -109,7 +109,7 @@ describe("local search registry — searching the way people type", () => {
     // MISSPELLED, in the label, in a synonym, and across a whole sentence.
     ["bacground", "/storefront?setting=background"],
     ["passwrod", "/settings/account#password"],
-    ["carosel", "/storefront?setting=display-mode"],
+    ["rondness", "/storefront?setting=corner-radius"],
     ["notifcations", "/settings/notifications"],
     ["stroefront", "/storefront"],
     ["chnage the bacground colur of my stor", "/storefront?setting=background"],

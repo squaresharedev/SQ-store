@@ -544,11 +544,100 @@ describe("ProductPageView", () => {
     expect(screen.queryByText(/guarantee/i, { selector: "[data-product-page-footer] *" })).toBeNull();
   });
 
-  it("never turns the Squareshare attribution into a live link inside the editor preview", () => {
+  it("keeps the attribution and both policy links live inside the editor preview, unlike everything else on the artboard", () => {
     render(<ProductPageView page={data()} mode="preview" />);
-    const footer = document.querySelector("[data-product-page-footer]")!;
-    expect(within(footer as HTMLElement).queryByRole("link")).toBeNull();
-    expect(within(footer as HTMLElement).getByText("Squareshare")).toBeInTheDocument();
+    const footer = document.querySelector("[data-product-page-footer]")! as HTMLElement;
+    // This footer is the ONE region where preview does not neutralise links:
+    // none of it is design chrome a seller is composing, so there is nothing
+    // here for a click to open a setting for.
+    const attribution = within(footer).getByRole("link", { name: /powered by squareshare/i });
+    expect(attribution).toHaveAttribute("href", "https://squareshare.eu");
+    expect(attribution).toHaveAttribute("target", "_blank");
+    const privacy = within(footer).getByRole("link", { name: "Squareshare Privacy Policy" });
+    expect(privacy).toHaveAttribute("href", "https://squareshare.eu/legal/privacy-policy/");
+    expect(privacy).toHaveAttribute("target", "_blank");
+    const terms = within(footer).getByRole("link", { name: "Squareshare Terms of Use" });
+    expect(terms).toHaveAttribute("href", "https://squareshare.eu/terms/");
+    expect(terms).toHaveAttribute("target", "_blank");
+    // The escape hatch that makes them reachable at all inside the editor:
+    // without it, ProductPageArtboard's delegated click handler would
+    // preventDefault() the click and reroute it to a settings panel instead
+    // of letting the browser follow the link (see PoweredByFooter.tsx). One
+    // row, one skip: all three links share it.
+    expect(attribution.closest("[data-setting-skip]")).not.toBeNull();
+    expect(privacy.closest("[data-setting-skip]")).toBe(attribution.closest("[data-setting-skip]"));
+  });
+
+  it("names the seller, not Squareshare, as the party responsible for the sale", () => {
+    render(<ProductPageView page={data()} mode="public" />);
+    const disclosure = document.querySelector("[data-product-sale-disclosure]")! as HTMLElement;
+    // The trader is named, and named FIRST, because a buyer must be able to
+    // read who they are contracting with without parsing the whole sentence.
+    expect(within(disclosure).getByText("Studio Ltd")).toBeInTheDocument();
+    expect(disclosure.textContent).toMatch(/is the seller for this order/i);
+    expect(disclosure.textContent).toMatch(/returns or refunds/i);
+    // ...and Squareshare is disclaimed out of the sale in the same breath.
+    expect(disclosure.textContent).toMatch(/not a party to the sale/i);
+  });
+
+  it("falls back to the store's name in the disclosure when there is no business name", () => {
+    // A hobbyist seller with no registered business still has to be named as
+    // the trader; an empty disclosure would be worse than none.
+    render(<ProductPageView page={data({ seller: {} })} mode="public" />);
+    const disclosure = document.querySelector("[data-product-sale-disclosure]")! as HTMLElement;
+    expect(within(disclosure).getByText("Studio")).toBeInTheDocument();
+  });
+
+  it("keeps the sale disclosure when the seller hides the 'Sold by' line", () => {
+    // showSeller is presentation. Who the buyer is contracting with is not the
+    // seller's to switch off, so the footer must survive it.
+    render(<ProductPageView page={data({ productPage: { showSeller: false } })} mode="public" />);
+    expect(screen.queryByText(/^Sold by/)).toBeNull();
+    const disclosure = document.querySelector("[data-product-sale-disclosure]")! as HTMLElement;
+    expect(disclosure.textContent).toMatch(/not a party to the sale/i);
+    expect(within(disclosure).getByText("Studio Ltd")).toBeInTheDocument();
+  });
+
+  it("survives every section and switch a seller can turn off, because none of them is wired to it", () => {
+    // There is no config field for this footer to read, so the most hostile
+    // config a seller could save (every section off, seller and stock both
+    // hidden) is the regression test: if a future edit ever threads a
+    // `productPage` value into PoweredByFooter, this is what would catch it.
+    const allOff = DEFAULT_PRODUCT_PAGE_CONFIG.sections.map((entry) => ({ ...entry, show: false }));
+    render(
+      <ProductPageView
+        page={data({ productPage: { sections: allOff, showSeller: false, showStock: false } })}
+        mode="public"
+      />,
+    );
+    expect(document.querySelector("[data-product-sections]")).toBeNull();
+    expect(document.querySelector("[data-product-section='seller']")).toBeNull();
+    const footer = document.querySelector("[data-product-page-footer]")! as HTMLElement;
+    expect(within(footer).getByText(/not a party to the sale/i)).toBeInTheDocument();
+    expect(within(footer).getByRole("link", { name: /powered by squareshare/i })).toBeInTheDocument();
+    expect(within(footer).getByRole("link", { name: "Squareshare Privacy Policy" })).toBeInTheDocument();
+    expect(within(footer).getByRole("link", { name: "Squareshare Terms of Use" })).toBeInTheDocument();
+  });
+
+  it("links Squareshare's privacy and terms, labelled so they cannot read as the seller's", () => {
+    render(<ProductPageView page={data()} mode="public" />);
+    const footer = document.querySelector("[data-product-page-footer]")! as HTMLElement;
+    // The accessible name carries "Squareshare" even though the visible text
+    // is one word: an unqualified "Terms" in a shop footer reads as the shop's.
+    const privacy = within(footer).getByRole("link", { name: "Squareshare Privacy Policy" });
+    expect(privacy).toHaveAttribute("href", "https://squareshare.eu/legal/privacy-policy/");
+    const terms = within(footer).getByRole("link", { name: "Squareshare Terms of Use" });
+    // Trailing slash on both: the marketing site is trailingSlash:true, so the
+    // slashless form is a 308 and would cost a buyer an extra round trip.
+    expect(terms).toHaveAttribute("href", "https://squareshare.eu/terms/");
+    for (const link of [privacy, terms]) {
+      expect(link).toHaveAttribute("target", "_blank");
+      expect(link.getAttribute("rel")).toContain("noopener");
+      expect(link.getAttribute("rel")).toContain("noreferrer");
+    }
+    // No cookie link: this page stores nothing on the buyer's device. It only
+    // appears if checkout ever loads something that does.
+    expect(within(footer).queryByRole("link", { name: /cookie/i })).toBeNull();
   });
 
   it("links the buy button to the purchase link and names the destination", () => {

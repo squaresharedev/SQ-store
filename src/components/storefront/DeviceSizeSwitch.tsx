@@ -2,6 +2,7 @@
 
 import { Monitor, Smartphone } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Tooltip } from "@/components/ui/Tooltip";
 
 export type PreviewDevice = "desktop" | "mobile";
 
@@ -32,23 +33,27 @@ export function DeviceSizeSwitch({
       {(["desktop", "mobile"] as const).map((id) => {
         const Icon = id === "desktop" ? Monitor : Smartphone;
         return (
-          <button
-            key={id}
-            type="button"
-            onClick={() => onChange(id)}
-            aria-pressed={device === id}
-            aria-label={labels[id]}
-            title={labels[id]}
-            className={cn(
-              "flex items-center justify-center rounded-sm border transition-colors duration-base ease-standard",
-              buttonSizeClass,
-              device === id
-                ? "border-foreground bg-foreground text-background"
-                : "border-border bg-background text-muted-foreground hover:text-foreground",
-            )}
-          >
-            <Icon className={iconSizeClass} strokeWidth={2} aria-hidden="true" />
-          </button>
+          // The product's own tooltip rather than `title=""`: this pair floats
+          // over the canvas beside the toolbar's tips, and an OS tooltip
+          // arriving a second late in a different typeface reads as a
+          // different application.
+          <Tooltip key={id} label={labels[id]}>
+            <button
+              type="button"
+              onClick={() => onChange(id)}
+              aria-pressed={device === id}
+              aria-label={labels[id]}
+              className={cn(
+                "flex items-center justify-center rounded-sm border transition-colors duration-base ease-standard",
+                buttonSizeClass,
+                device === id
+                  ? "border-foreground bg-foreground text-background"
+                  : "border-border bg-background text-muted-foreground hover:text-foreground",
+              )}
+            >
+              <Icon className={iconSizeClass} strokeWidth={2} aria-hidden="true" />
+            </button>
+          </Tooltip>
         );
       })}
     </div>
