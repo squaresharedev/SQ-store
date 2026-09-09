@@ -7,10 +7,12 @@ import { ProfileMenu } from "@/components/layout/ProfileMenu";
 import { NotificationsProvider } from "@/components/notifications/NotificationsProvider";
 import { SearchProvider } from "@/components/search/SearchProvider";
 import { SearchMobileTrigger } from "@/components/search/SearchMobileTrigger";
+import { SellerDetailsBanner } from "@/components/settings/SellerDetailsNotice";
 import {
   getAccessibleAccounts,
   getActiveAccount,
 } from "@/lib/team/account-context";
+import { getTraderIdentityStatus } from "@/lib/settings/seller-identity";
 import { getProfile, getUser } from "@/lib/auth/session";
 
 /**
@@ -45,6 +47,16 @@ export async function DashboardShell({
     ? accounts.find((a) => a.accountId === viewingOther.accountId)?.storeName ??
       "another store"
     : null;
+
+  // The publish gate, stated once in the chrome so it is visible from whatever
+  // page the seller is on rather than only from the one they happen to be
+  // blocked by. Scoped to the ACTIVE account: a team member working on someone
+  // else's store sees that store's gap, because it is that store's listings the
+  // gap is holding back. A read failure shows nothing — the write paths still
+  // refuse, and a banner that appears because a query blipped is worse than no
+  // banner at all.
+  const identity = account ? await getTraderIdentityStatus(account.accountId) : null;
+  const missingTraderDetails = identity?.ok ? identity.missing : [];
 
   // Mobile: search + bell + profile menu ride in the Sidebar's mobile header.
   const mobileControls = (
@@ -86,6 +98,10 @@ export async function DashboardShell({
                 ownAccountId={viewingOther.userId}
               />
             )}
+            {/* Under the "viewing another store" banner, because which store
+                this is about has to be read first for the warning to mean
+                anything. */}
+            <SellerDetailsBanner missing={missingTraderDetails} />
             {children}
           </div>
         </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useId } from "react";
-import { Copy, Crop, Trash2 } from "lucide-react";
+import { Crop } from "lucide-react";
 import {
   IMAGE_ALT_MAX,
   IMAGE_FITS,
@@ -10,7 +10,6 @@ import {
 } from "@/types/storefront";
 import { cn } from "@/lib/utils";
 import {
-  destructiveButtonClass,
   fieldBaseClass,
   focusRingClass,
   helpTextClass,
@@ -19,6 +18,8 @@ import {
   transitionClass,
 } from "@/components/ui/control-styles";
 import { SliderField } from "@/components/ui/SliderField";
+import { BlockActions } from "./BlockActions";
+import { SummonedField, type BlockFieldSummons } from "./SummonedField";
 
 export type ImageBlockPatch = Partial<
   Pick<ImageBlock, "alt" | "fit" | "opacity">
@@ -49,6 +50,7 @@ export function ImageBlockEditor({
   onFrame,
   onDuplicate,
   onRemove,
+  summons = null,
 }: {
   block: ImageBlock;
   /** False when there is no artwork loaded to frame yet. */
@@ -59,6 +61,9 @@ export function ImageBlockEditor({
   /** Insert a copy of this block (the no-keyboard copy/paste path). */
   onDuplicate: () => void;
   onRemove: () => void;
+  /** A control the selection toolbar has pointed at, scrolled to and marked
+   *  here rather than duplicated in a popover over the block itself. */
+  summons?: BlockFieldSummons;
 }) {
   const fieldId = useId();
   const fit = block.fit ?? "cover";
@@ -106,18 +111,23 @@ export function ImageBlockEditor({
         </button>
       )}
 
-      <SliderField
-        id={`${fieldId}-opacity`}
-        label="Opacity"
-        min={0}
-        max={100}
-        step={5}
-        value={opacity}
-        onChange={(next) => onUpdate({ opacity: next })}
-        ariaLabel="Image opacity"
-        valueText={`${opacity} percent`}
-        unit="%"
-      />
+      <SummonedField field="opacity" summons={summons} variant="slider">
+        {(highlighted) => (
+          <SliderField
+            id={`${fieldId}-opacity`}
+            label="Opacity"
+            min={0}
+            max={100}
+            step={5}
+            value={opacity}
+            onChange={(next) => onUpdate({ opacity: next })}
+            ariaLabel="Image opacity"
+            valueText={`${opacity} percent`}
+            unit="%"
+            highlighted={highlighted}
+          />
+        )}
+      </SummonedField>
 
       {/* Alt text. Optional on purpose: most elements are decoration, and an
           empty alt is the correct markup for that — inventing a description
@@ -141,25 +151,7 @@ export function ImageBlockEditor({
         </p>
       </div>
 
-      {/* Copy/paste without a keyboard: one press inserts the copy beside
-          this block (Ctrl+C / Ctrl+V do the same from the canvas). */}
-      <button
-        type="button"
-        onClick={onDuplicate}
-        className={secondaryButtonClass + " w-full"}
-      >
-        <Copy className="size-4" strokeWidth={2} aria-hidden="true" />
-        Duplicate
-      </button>
-
-      <button
-        type="button"
-        onClick={onRemove}
-        className={destructiveButtonClass + " w-full"}
-      >
-        <Trash2 className="size-4" strokeWidth={2} aria-hidden="true" />
-        Remove from grid
-      </button>
+      <BlockActions onDuplicate={onDuplicate} onRemove={onRemove} />
     </div>
   );
 }

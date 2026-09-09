@@ -306,6 +306,13 @@ export type ProfileSummary = {
    */
   sellerEmail: string | null;
   /**
+   * Null = no postal address set. Required, alongside the trader name and the
+   * contact email, before anything of this account's may be published or sold
+   * (lib/settings/trader-identity.ts).
+   * Fixed at Settings › Business & seller details.
+   */
+  sellerAddress: string | null;
+  /**
    * True when the account has written any shipping and returns terms.
    * An account that has never opened the shipping page stores null; one that
    * opened it and saved something stores a non-null object. Physical sellers
@@ -358,7 +365,9 @@ export async function getProfileSummary(): Promise<ProfileSummary | null> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("profiles")
-    .select("tax_business_name, seller_email, shipping_policy, legal_accepted_version")
+    .select(
+      "tax_business_name, seller_email, seller_address, shipping_policy, legal_accepted_version",
+    )
     .eq("id", account.accountId)
     .maybeSingle();
   if (error) {
@@ -371,6 +380,7 @@ export async function getProfileSummary(): Promise<ProfileSummary | null> {
   return {
     taxBusinessName: data.tax_business_name ?? null,
     sellerEmail: data.seller_email ?? null,
+    sellerAddress: data.seller_address ?? null,
     shippingPolicySet: data.shipping_policy !== null,
     legalAcceptedVersion: data.legal_accepted_version ?? null,
   };

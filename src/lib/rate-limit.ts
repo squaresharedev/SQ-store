@@ -204,6 +204,17 @@ export const RATE_LIMITS = {
   productImport: { max: 12, windowSeconds: 60 * 60 },
   /** Storefront saves: the heaviest write path (multi-query + R2 verify). */
   storefrontWrite: { max: 240, windowSeconds: 60 * 60 },
+  /**
+   * Reading one storefront's product page settings
+   * (api/storefronts/[id]/product-page). A single indexed row, so the ceiling
+   * is about a loop rather than about load; its WRITE spends storefrontWrite,
+   * since it touches the same column by the same rules as a designer save.
+   *
+   * Budgeted on its own because this is the first route shaped for something
+   * other than a browser to call (see the route's own header), and a caller
+   * polling it must not be able to spend the seller's search budget.
+   */
+  productPageRead: { max: 600, windowSeconds: 60 * 60 },
   /** Stock edits: a single UPDATE, but trivially scriptable. */
   stockWrite: { max: 240, windowSeconds: 60 * 60 },
   /** Profile / tax / notification-preference writes. */

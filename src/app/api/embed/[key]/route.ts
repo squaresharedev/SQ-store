@@ -1,4 +1,9 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import {
+  SELLER_IDENTITY_SELECT,
+  buildSellerIdentity,
+} from "@/lib/settings/seller-identity";
+import { isTraderIdentityComplete } from "@/lib/settings/trader-identity";
 import { RATE_LIMITS, clientKey, rateLimitKey } from "@/lib/rate-limit";
 import { recordSignal, viewDedupeKey, visitorHash } from "@/lib/analytics/record";
 import { decideEmbedAccess, embedCorsHeaders } from "@/lib/storefront/embed";
@@ -32,6 +37,36 @@ import { productPageUrl } from "@/lib/storefront/product-page-url";
 /** A miss and a refusal look identical from outside where that matters. */
 function notFound() {
   return Response.json({ error: "Not found." }, { status: 404 });
+}
+
+/**
+ * May this account's storefront be served to the public right now?
+ *
+ * Its own read rather than a join on the storefront select above, because it
+ * runs only after the key, the rate limit and the origin allowlist have all
+ * passed — a probe never gets far enough to cost this query. `false` on a read
+ * failure: see the call site.
+ */
+async function canPublish(ownerId: string): Promise<boolean> {
+  try {
+    const admin = createAdminClient();
+    const { data, error } = await admin
+      .from("profiles")
+      .select(SELLER_IDENTITY_SELECT)
+      .eq("id", ownerId)
+      .maybeSingle();
+    if (error) {
+      console.error("[embed] seller identity read failed", error.message);
+      return false;
+    }
+    return isTraderIdentityComplete(buildSellerIdentity(data));
+  } catch (err) {
+    console.error(
+      "[embed] seller identity client unavailable:",
+      err instanceof Error ? err.message : String(err),
+    );
+    return false;
+  }
 }
 
 export async function GET(
@@ -102,6 +137,21 @@ export async function GET(
     return decision.status === 404
       ? notFound()
       : Response.json({ error: "This storefront is not embeddable here." }, { status: 403 });
+  }
+
+  // THE READ SIDE OF THE PUBLISH GATE. Switching embedding on already requires
+  // the seller's trader details (lib/storefront/actions.ts), but a storefront
+  // embedded a year ago is being published afresh on every request, so the
+  // check belongs here too: details cleared after the fact must take the shelf
+  // down, not leave it standing on the strength of an old decision.
+  //
+  // 404 rather than 403, matching "not embeddable": which storefronts exist is
+  // not something this endpoint discloses, and it is not the embedding site's
+  // problem to diagnose. Fail-closed on a read error for the same reason the
+  // product page does — an identity we cannot read is one we cannot show.
+  if (!(await canPublish(row.owner_id))) {
+    console.warn("[embed] denied", row.id, "seller trader details incomplete");
+    return notFound();
   }
 
   // A serve to a real, allowed visitor is a storefront view. Recorded here and

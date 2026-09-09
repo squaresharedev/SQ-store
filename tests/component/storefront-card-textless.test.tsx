@@ -60,6 +60,7 @@ function product(): Product {
     trackStock: false,
     stockQuantity: null,
     lowStockThreshold: 0,
+    maxPerOrder: 10,
   };
 }
 

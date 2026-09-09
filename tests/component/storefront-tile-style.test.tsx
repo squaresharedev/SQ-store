@@ -3,6 +3,7 @@ import { render, screen, cleanup, within } from "@testing-library/react";
 import type { Product } from "@/types/product";
 import {
   DEFAULT_STOREFRONT_CONFIG,
+  TILE_LABEL_AUTO_SCALE,
   type ProductBlock,
   type StorefrontConfig,
 } from "@/types/storefront";
@@ -63,6 +64,7 @@ function product(id: string, title: string): Product {
     trackStock: false,
     stockQuantity: null,
     lowStockThreshold: 3,
+    maxPerOrder: 10,
   };
 }
 
@@ -187,14 +189,56 @@ describe("per-tile style overrides", () => {
     );
     const tag = screen.getByText("€12.50");
     expect(tag).toHaveClass("font-mono");
-    expect(tag.style.fontSize).toBe("14px");
     expect(tag.style.backgroundColor).toBe("rgb(251, 191, 36)");
     expect(tag.style.color).toBe("rgb(28, 25, 23)");
     expect(tag.style.borderColor).toBe("rgb(217, 119, 6)");
     expect(tag.style.borderWidth).toBe("2px");
     expect(tag.style.borderRadius).toBe("4px");
-    // Padding scales with the type, so one slider sizes the whole chip.
-    expect(tag.style.paddingInline).toBe("7px");
+    // The tag is sized against the tile rather than pinned to the px: 14 is
+    // what it renders at on a reference-width cell, bounded by the seller's
+    // own number so the slider still means something either side. The size
+    // lands on one custom property and the padding reads it back, so the chip
+    // keeps its proportions at whatever the browser resolves.
+    expect(tag.style.fontSize).toBe("var(--tag-font-size)");
+    expect(tag.style.getPropertyValue("--tag-font-size")).toBe(
+      `clamp(${14 * TILE_LABEL_AUTO_SCALE.min}px, ${
+        Math.round(((14 * 100) / TILE_LABEL_AUTO_SCALE.referencePx) * 100) / 100
+      }cqmin, ${14 * TILE_LABEL_AUTO_SCALE.max}px)`,
+    );
+    expect(tag.style.paddingInline).toBe(
+      "max(2px, calc(var(--tag-font-size) * 0.5))",
+    );
+  });
+
+  it("scales a price in the title band too, and the name beside it with it", () => {
+    render(
+      <StorefrontPreview
+        config={configWith([
+          {
+            type: "product",
+            productId: PRODUCT_A,
+            x: 0,
+            y: 0,
+            w: 1,
+            h: 1,
+            style: { priceTagPosition: "below", priceTagSize: 14 },
+          },
+        ])}
+        productsById={PRODUCTS}
+      />,
+    );
+    // THE DEFAULT PLACEMENT IS THIS ONE, so a band that opted out of scaling
+    // meant a freshly added product — the whole case the feature exists for —
+    // never scaled at all.
+    const tag = screen.getByText("€12.50");
+    expect(tag.style.getPropertyValue("--tag-font-size")).toContain("cqmin");
+
+    // And the band carries the size, so the product name scales by the same
+    // rule: a price growing with the block while the name stayed at a flat
+    // 12px would tower over the thing it is pricing.
+    const band = tag.closest("[data-title-band]") as HTMLElement;
+    expect(band.style.getPropertyValue("--band-font-size")).toContain("cqmin");
+    expect(screen.getByText("Plain tile")).not.toHaveClass("text-xs");
   });
 
   it("draws no border at all at thickness 0, even with a border color stored", () => {

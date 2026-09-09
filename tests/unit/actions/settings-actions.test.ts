@@ -54,6 +54,15 @@ vi.mock("@/lib/supabase/server", () => ({
   createClient: async () => clientWrapper,
 }));
 
+// The contact email's DOMAIN check talks to a public DNS resolver over HTTPS.
+// Faked here so these specs never depend on the network; "unknown" is the
+// real thing's own answer whenever the resolver does not reply, and it is the
+// answer that accepts. One case below flips it to "no".
+const mailExchangerMock = vi.fn(async () => "unknown" as string);
+vi.mock("@/lib/validation/email-domain", () => ({
+  hasMailExchanger: (...args: unknown[]) => mailExchangerMock(...(args as [])),
+}));
+
 
 // Rate limiting is exercised by its own tests; here it defaults to ALLOWED so
 // these specs assert the action logic. Each file also has one case that flips
@@ -110,6 +119,7 @@ beforeEach(() => {
   rateLimitMock.mockResolvedValue(true);
   rateLimitKeyMock.mockResolvedValue(true);
   hasPasswordMock.mockResolvedValue(true);
+  mailExchangerMock.mockResolvedValue("unknown");
   alertMock.mockResolvedValue(undefined);
   dbFn.mockResolvedValue({ error: null });
   for (const m of ["from", "select", "insert", "update", "delete", "eq", "neq", "in"]) {
@@ -233,7 +243,7 @@ describe("saveTaxInfo - happy path", () => {
     const fd = new FormData();
     fd.append("tax_business_name", "ACME Corp");
     fd.append("seller_address", "12 Market Street\nDublin, D02 X285");
-    fd.append("seller_email", "hello@acme.example");
+    fd.append("seller_email", "hello@acme-prints.de");
     fd.append("tax_vat_id", "DE123456789");
     fd.append("tax_country", "DE");
     fd.append("seller_phone", "+353 1 234 5678");
@@ -243,7 +253,7 @@ describe("saveTaxInfo - happy path", () => {
     expect(result.success).toBeTruthy();
     const updatePayload = db.update.mock.calls[0][0] as Record<string, unknown>;
     expect(updatePayload.seller_address).toBe("12 Market Street\nDublin, D02 X285");
-    expect(updatePayload.seller_email).toBe("hello@acme.example");
+    expect(updatePayload.seller_email).toBe("hello@acme-prints.de");
     expect(updatePayload.seller_phone).toBe("+353 1 234 5678");
   });
 
@@ -304,6 +314,62 @@ describe("saveTaxInfo - happy path", () => {
 
     expect(result.error).toMatch(/email/i);
     expect(db.update).not.toHaveBeenCalled();
+  });
+
+  // The address published to buyers is checked for being REACHABLE, not just
+  // well-formed: it is what someone writes to about their order.
+  function taxForm(seller_email: string) {
+    const fd = new FormData();
+    fd.append("tax_business_name", "ACME Corp");
+    fd.append("seller_address", "12 Market Street");
+    fd.append("seller_email", seller_email);
+    fd.append("tax_vat_id", "");
+    fd.append("tax_country", "");
+    fd.append("seller_phone", "");
+    return fd;
+  }
+
+  it("rejects a contact email at a placeholder or throwaway domain", async () => {
+    getUserMock.mockResolvedValue(USER);
+
+    for (const address of ["hello@example.com", "someone@mailinator.com", "test@acme-prints.de"]) {
+      db.update.mockClear();
+      const result = await saveTaxInfo(PREV, taxForm(address));
+      expect(result.error, address).toBeTruthy();
+      expect(db.update, address).not.toHaveBeenCalled();
+    }
+    // All three were settled without asking a resolver anything.
+    expect(mailExchangerMock).not.toHaveBeenCalled();
+  });
+
+  it("rejects a contact email whose domain answers that it takes no mail", async () => {
+    getUserMock.mockResolvedValue(USER);
+    mailExchangerMock.mockResolvedValue("no");
+
+    const result = await saveTaxInfo(PREV, taxForm("hello@acme-prints.de"));
+
+    expect(result.error).toMatch(/doesn't accept mail/i);
+    expect(db.update).not.toHaveBeenCalled();
+  });
+
+  it("saves when the resolver cannot answer — the DNS check fails open", async () => {
+    // The one part of this gate that depends on a third party being
+    // reachable, so a timeout must not block a seller's real address.
+    getUserMock.mockResolvedValue(USER);
+    mailExchangerMock.mockResolvedValue("unknown");
+
+    const result = await saveTaxInfo(PREV, taxForm("hello@acme-prints.de"));
+
+    expect(result.success).toBeTruthy();
+    expect(db.update).toHaveBeenCalled();
+  });
+
+  it("does not ask a resolver about an email that is being cleared", async () => {
+    getUserMock.mockResolvedValue(USER);
+
+    await saveTaxInfo(PREV, taxForm(""));
+
+    expect(mailExchangerMock).not.toHaveBeenCalled();
   });
 });
 

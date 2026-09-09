@@ -56,6 +56,7 @@ export function PanelMenuItem({
     <div data-panel-menu-item="" className="border-b border-border">
       <button
         type="button"
+        suppressHydrationWarning
         onClick={onClick}
         className={cn(
           "flex min-h-11 w-full items-center justify-between gap-2 rounded-none py-3 text-left lg:px-4",
@@ -109,6 +110,7 @@ export function PanelBackRow({
     <div className="sticky top-0 z-10 border-b border-border bg-background">
       <button
         type="button"
+        suppressHydrationWarning
         onClick={onBack}
         aria-label={ariaLabel ?? `Back to all settings, leaving ${title}`}
         className={cn(

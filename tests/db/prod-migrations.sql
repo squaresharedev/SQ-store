@@ -3264,3 +3264,45 @@ alter table public.orders
     check (jsonb_typeof(selected_options) = 'array'),
   add constraint orders_selected_options_size
     check (pg_column_size(selected_options) <= 2048);
+
+-- 20260908_product_max_per_order
+-- How many of ONE product a buyer may take in a single order. Seller-set,
+-- bounded 1-100 by the CHECK, defaulted to 10 so every row (including every
+-- existing one) has a concrete ceiling rather than a fallback each layer has to
+-- remember. Replayed for the CHECK and for the decrement's new limit clause:
+-- both are the fences a service-role write cannot climb, which is exactly what
+-- the db suite exists to prove.
+alter table public.products
+  add column max_per_order integer not null default 10;
+
+alter table public.products
+  add constraint products_max_per_order_range
+    check (max_per_order >= 1 and max_per_order <= 100);
+
+-- The atomic decrement now refuses an over-limit quantity too, in the same
+-- single UPDATE, so the stock check and the per-order cap cannot be raced past
+-- each other. The revoke/grant lines are repeated because `create or replace`
+-- re-runs PostgREST's auto-grant and would otherwise publish this RPC to anon.
+create or replace function public.decrement_stock(
+  p_product_id uuid,
+  p_quantity integer
+) returns boolean
+language sql
+security invoker
+set search_path = ''
+as $$
+  update public.products
+     set stock_quantity = stock_quantity - p_quantity,
+         updated_at = now()
+   where id = p_product_id
+     and track_stock
+     and p_quantity > 0
+     and p_quantity <= max_per_order
+     and stock_quantity >= p_quantity
+  returning true;
+$$;
+
+revoke execute on function public.decrement_stock(uuid, integer) from public;
+revoke execute on function public.decrement_stock(uuid, integer) from anon;
+revoke execute on function public.decrement_stock(uuid, integer) from authenticated;
+grant execute on function public.decrement_stock(uuid, integer) to service_role;

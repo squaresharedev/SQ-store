@@ -6,6 +6,7 @@ import {
   expectToast,
   freshUser,
   gotoApp,
+  PUBLISHABLE_SELLER,
   seedProducts,
   seedSellerIdentity,
   seedStorefronts,
@@ -141,11 +142,9 @@ async function seed(page: Page, tag: string): Promise<Seeded> {
 
   // Trader identity is account-level now (lib/settings/seller-identity.ts):
   // seeded on the profile, not in the storefront config.
-  await seedSellerIdentity(sellerId, {
-    businessName: "Lamp Studio Ltd",
-    email: "hi@lamp.example",
-    country: "IE",
-  });
+  // All three required trader details: without them the publish gate 404s
+  // every product page this seller has. See PUBLISHABLE_SELLER in helpers.
+  await seedSellerIdentity(sellerId, PUBLISHABLE_SELLER);
 
   await serviceRest(`/storefronts?id=eq.${storefrontId}`, {
     method: "PATCH",
@@ -555,7 +554,9 @@ test.describe("hosted product page", () => {
     await expect(page.getByRole("button", { name: "Add product", exact: true })).toBeVisible();
 
     // Click the product: that is what brings its node within reach.
-    await page.getByRole("button", { name: /edit oak lamp/i }).click();
+    // The tile is a focusable container, not a button (its own controls hang
+    // off it), so it answers to its label rather than to a role.
+    await page.getByLabel(/^oak lamp\. press enter/i).click();
     await canvasStill(page);
     const node = page.getByRole("button", { name: /^open the product page for oak lamp$/i });
     await expect(node).toBeVisible();
@@ -615,10 +616,13 @@ test.describe("hosted product page", () => {
       /object-contain/,
     );
 
-    // The Buy button section is collapsed until opened, and offers no fill to
-    // choose: the theme accent is the seller's brand colour already.
+    // The Buy button section is collapsed until opened. The retired three-way
+    // "Button style" preset (accent / ink / outline) is still gone; what it
+    // was replaced by is the button's actual paint, covered by
+    // 46-buy-button-style.spec.ts.
     await page.getByRole("button", { name: /^buy button$/i }).click();
     await expect(page.getByRole("group", { name: "Button style" })).toHaveCount(0);
+    await expect(page.getByRole("group", { name: "Button color swatches" })).toBeVisible();
 
     // The description reads under the title and nowhere else, and its switch
     // is what hides it.
@@ -706,11 +710,13 @@ test.describe("hosted product page", () => {
     // Through the REAL form, not the seed API — proves the write path, not
     // just the read path the other seller/shipping tests exercise.
     await gotoApp(page, "/settings/tax");
-    await page.getByLabel("Business name", { exact: true }).fill("Lamp Studio Renamed");
-    await page
-      .getByLabel("Address", { exact: true })
-      .fill("12 Market Street\nDublin, D02 X285");
-    await page.getByLabel("Contact email", { exact: true }).fill("support@lamp.example");
+    // Substring matches: the three fields the publish gate requires carry a
+    // RequiredMark asterisk inside their label.
+    await page.getByLabel(/Trader name/).fill("Lamp Studio Renamed");
+    await page.getByLabel(/^Address/).fill("12 Market Street\nDublin, D02 X285");
+    // A real, resolvable domain: the save refuses a placeholder or a reserved
+    // TLD, and asks a public resolver whether the domain takes mail at all.
+    await page.getByLabel(/Contact email/).fill("support@squareshare.eu");
     await page.getByLabel("Phone", { exact: true }).fill("+353 1 234 5678");
     await page.getByRole("button", { name: /^save$/i }).click();
     await expectToast(page, /saved/i);
@@ -723,7 +729,7 @@ test.describe("hosted product page", () => {
     await expect(sellerBlock.getByText("Lamp Studio Renamed")).toBeVisible();
     await expect(sellerBlock.getByText("12 Market Street")).toBeVisible();
     await expect(
-      sellerBlock.getByRole("link", { name: "support@lamp.example" }),
+      sellerBlock.getByRole("link", { name: "support@squareshare.eu" }),
     ).toBeVisible();
     await expect(sellerBlock.getByText("+353 1 234 5678")).toBeVisible();
   });
@@ -731,7 +737,9 @@ test.describe("hosted product page", () => {
   test("gives the page its own face, or follows the storefront's", async ({ page }) => {
     const s = await seed(page, "pdp-font");
     await gotoApp(page, `/storefront/${s.storefrontId}`);
-    await page.getByRole("button", { name: /edit oak lamp/i }).click();
+    // The tile is a focusable container, not a button (its own controls hang
+    // off it), so it answers to its label rather than to a role.
+    await page.getByLabel(/^oak lamp\. press enter/i).click();
     await canvasStill(page);
     await page.getByRole("button", { name: /^open the product page for oak lamp$/i }).click();
     const root = page.locator(`[data-artboard-id="${s.active}"] [data-product-page]`);
@@ -762,7 +770,9 @@ test.describe("hosted product page", () => {
   test("clicking a part of the page opens the setting behind it", async ({ page }) => {
     const s = await seed(page, "pdp-hotspot");
     await gotoApp(page, `/storefront/${s.storefrontId}`);
-    await page.getByRole("button", { name: /edit oak lamp/i }).click();
+    // The tile is a focusable container, not a button (its own controls hang
+    // off it), so it answers to its label rather than to a role.
+    await page.getByLabel(/^oak lamp\. press enter/i).click();
     await canvasStill(page);
     await page.getByRole("button", { name: /^open the product page for oak lamp$/i }).click();
     const artboard = page.locator(`[data-artboard-id="${s.active}"]`);

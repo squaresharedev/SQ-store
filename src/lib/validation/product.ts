@@ -206,6 +206,28 @@ export const PRICE_CENTS_MAX = 100_000_000;
 // Inventory cap — far below int4 max; nobody hand-tracks more units than this.
 export const STOCK_QUANTITY_MAX = 1_000_000;
 
+/**
+ * THE PLATFORM CEILING on how many units one buyer may take in one order, and
+ * the ONLY number in this file a buyer's request is measured against.
+ *
+ * A seller sets their own `maxPerOrder` inside this range; nothing — not a
+ * form, not an import, not a service-role write — may store a higher one, and
+ * the products_max_per_order_range CHECK repeats it at the database. It is the
+ * bound that keeps `priceCents * quantity` (100_000_000 * 100) an exact integer
+ * well inside what the money path has to hold, and it is what makes the
+ * quantity picker a closed list rather than a number field.
+ */
+export const PURCHASE_QUANTITY_MAX = 100;
+
+/**
+ * What a product's per-order ceiling is when the seller has not said. Ten is a
+ * real answer rather than "unlimited": a buyer who genuinely wants more than
+ * ten of one thing is having a conversation with the seller, not clicking a
+ * dropdown. Mirrors the column's DB default so a row written by either side
+ * says the same number.
+ */
+export const MAX_PER_ORDER_DEFAULT = 10;
+
 // ── Product page detail (gallery, options, details, purchase link) ─────
 //
 // Stored as jsonb on the row. Every object is `strictObject` so nothing rides
@@ -417,6 +439,16 @@ export const productWriteSchema = z
     trackStock: z.boolean().optional(),
     stockQuantity: z.number().int().min(0).max(STOCK_QUANTITY_MAX).nullish(),
     lowStockThreshold: z.number().int().min(0).max(STOCK_QUANTITY_MAX).optional(),
+    // How many units one buyer may take at once. NOT part of stock tracking:
+    // an untracked product still has a ceiling, because the ceiling is about
+    // what the seller is willing to sell in one go, not about what is on the
+    // shelf. Absent leaves the stored value alone (MAX_PER_ORDER_DEFAULT on a
+    // new row, from the column default).
+    maxPerOrder: boundedInt({
+      label: "The maximum per order",
+      min: 1,
+      max: PURCHASE_QUANTITY_MAX,
+    }).optional(),
     // Product page detail. Lists are replaced whole (there is no per-item
     // patch), so an empty array clears; absent leaves the stored value alone.
     gallery: z

@@ -6,11 +6,13 @@ import {
   clampToCanvas,
   columnsThatFit,
   findFreeCell,
+  invertReflowResize,
   liftableChromeKeys,
   packFirstFit,
   placementIsFree,
   placementsOverlap,
   reflowBlocks,
+  reflowHasRoom,
   withinCanvas,
   type GridBlock,
   type GridPlacement,
@@ -417,5 +419,73 @@ describe("liftableChromeKeys", () => {
 
   it("says nothing about an empty board", () => {
     expect(liftableChromeKeys([])).toEqual(new Set());
+  });
+});
+
+describe("reflowHasRoom", () => {
+  it("is true when width has slack", () => {
+    expect(reflowHasRoom({ w: 1, h: 4 }, 4, 4)).toBe(true);
+  });
+
+  it("is true when height has slack, even at full width", () => {
+    expect(reflowHasRoom({ w: 4, h: 1 }, 4, 4)).toBe(true);
+  });
+
+  it("is false only once BOTH dimensions already fill the repacked board", () => {
+    expect(reflowHasRoom({ w: 4, h: 4 }, 4, 4)).toBe(false);
+  });
+});
+
+describe("invertReflowResize", () => {
+  // A 6-column design reflowed to 4 columns for a phone-width preview — the
+  // same numbers 43-mobile-tile-chrome.spec.ts drives end to end.
+  const ratio = 4 / 6;
+
+  it("scales a grow by reflow's own ratio, not 1:1", () => {
+    // Grew by one shown cell (1 -> 2) on the repacked board; the stored
+    // block is twice as wide in real columns as it is on the phone, so the
+    // same one-cell tug is worth two stored columns.
+    const origin = at(0, 0, 1, 1);
+    const derived = at(0, 0, 2, 1);
+    const real = at(0, 0, 2, 1);
+    expect(invertReflowResize(origin, derived, real, ratio, 6, 3)).toEqual(
+      at(0, 0, 4, 1),
+    );
+  });
+
+  it("leaves the placement untouched when the gesture never moved", () => {
+    const origin = at(1, 0, 2, 1);
+    const real = at(1, 0, 3, 1);
+    expect(invertReflowResize(origin, origin, real, ratio, 6, 3)).toEqual(real);
+  });
+
+  it("never shrinks a dimension below one cell", () => {
+    // Shrunk from 2 to 1 on the repacked board (a whole shown cell), but the
+    // stored width is already at its floor.
+    const origin = at(0, 0, 2, 1);
+    const derived = at(0, 0, 1, 1);
+    const real = at(0, 0, 1, 1);
+    expect(invertReflowResize(origin, derived, real, ratio, 6, 3).w).toBe(1);
+  });
+
+  it("clamps the result to the STORED board, not the repacked one", () => {
+    // A huge shown-cell grow would overflow a 6-column design; the inverted
+    // result still has to fit on it.
+    const origin = at(0, 0, 1, 1);
+    const derived = at(0, 0, 4, 1);
+    const real = at(0, 0, 1, 1);
+    const result = invertReflowResize(origin, derived, real, ratio, 6, 3);
+    expect(result.w).toBeLessThanOrEqual(6);
+    expect(result.x + result.w).toBeLessThanOrEqual(6);
+  });
+
+  it("carries a shift in x/y through the same scale (the flip-past-anchor case)", () => {
+    const origin = at(2, 0, 2, 1);
+    const derived = at(1, 0, 3, 1); // grew left by one shown cell
+    const real = at(3, 0, 3, 1);
+    const result = invertReflowResize(origin, derived, real, ratio, 6, 3);
+    // One shown cell of leftward growth is ~1.5 stored columns, rounded to 2.
+    expect(result.x).toBe(1);
+    expect(result.w).toBe(5);
   });
 });

@@ -11,6 +11,7 @@ import {
   optionalSingleLineText,
   referenceCode,
 } from "@/lib/validation/inputs";
+import { emailQualityProblem } from "@/lib/validation/email-quality";
 
 /**
  * Settings validation schemas, shared by the client (UX hints) and the server
@@ -80,6 +81,34 @@ const optionalEmail = (label: string) =>
     });
 
 /**
+ * The seller's PUBLISHED contact address, held to a higher bar than a
+ * well-formed string: it is printed on every product page as the way a buyer
+ * reaches this trader, so a placeholder or a throwaway inbox there defeats the
+ * only reason the field is required at all.
+ *
+ * Two refines rather than one, and the format check first, because a refine
+ * runs even after an earlier one on the same field has failed — a malformed
+ * string reaching the quality filter would report "looks like a placeholder"
+ * about something that is not an address yet. The empty case (null, meaning
+ * "clear the field") skips both; whether the field may be empty is the publish
+ * gate's question, not this schema's.
+ *
+ * The DOMAIN check (does it accept mail at all) is async and lives in the
+ * action — Zod's sync parse cannot make a network call, and the action is
+ * where a rate limit already bounds how often one can be provoked.
+ */
+const publishedContactEmail = (label: string) =>
+  optionalEmail(label).superRefine((value, ctx) => {
+    // A refinement still runs after an earlier one on the same field has
+    // failed, so the format is re-established here rather than assumed:
+    // without this, "not an address" would be reported as "looks like a
+    // placeholder", which is advice about the wrong problem.
+    if (value === null || !emailAddress(label).safeParse(value).success) return;
+    const problem = emailQualityProblem(value, label);
+    if (problem) ctx.addIssue({ code: "custom", message: problem });
+  });
+
+/**
  * Business & seller details: the trader identity distance-selling law asks
  * for, plus the VAT/invoicing fields it started as. Read by every product
  * page this account sells on (lib/settings/seller-identity.ts) — set ONCE
@@ -89,7 +118,7 @@ const optionalEmail = (label: string) =>
 export const taxSchema = z.strictObject({
   tax_business_name: optionalTrimmed(200, "Business name"),
   seller_address: optionalMultiLine(SELLER_FIELD_MAX.address, "The business address"),
-  seller_email: optionalEmail("The contact email"),
+  seller_email: publishedContactEmail("The contact email"),
   tax_vat_id: referenceCode({ label: "A VAT ID", min: 2, max: 32 }).transform(
     (v) => (v === "" ? null : v.toUpperCase()),
   ),

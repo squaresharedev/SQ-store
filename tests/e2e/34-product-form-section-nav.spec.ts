@@ -74,4 +74,64 @@ test.describe("product form section nav vs. the unsaved-changes guard", () => {
     await keepEditing.click();
     await expect(dialog).toBeHidden();
   });
+
+  /**
+   * Regression for the highlight tracking a band near the TOP of the
+   * viewport rather than its vertical CENTRE. The old `rootMargin`
+   * ("-80px 0px -70% 0px") lit up whichever section had just reached the
+   * top, which for a short section (Stock: three fields) meant it stayed
+   * "current" long after it had scrolled mostly off-screen and a taller
+   * section already occupied the middle of the reader's view.
+   *
+   * Scrolls Stock's own top edge to the viewport's top edge — reproducing
+   * "the section at the top of the screen" exactly — and asserts the
+   * highlighted item is whichever section the viewport's vertical centre
+   * actually falls in, computed from the live layout rather than assumed,
+   * so the test stays correct if a section's height changes later.
+   */
+  test("the highlight follows the section at the viewport's vertical centre, not its top", async ({
+    page,
+  }) => {
+    const user = freshUser("sectioncentre");
+    await signUp(page, user);
+    await gotoApp(page, "/products/new");
+
+    const nav = page.getByRole("navigation", { name: "Form sections" });
+    await expect(nav).toBeVisible();
+
+    await page.locator('[data-product-section="stock"]').scrollIntoViewIfNeeded();
+    await page.evaluate(() => {
+      document
+        .querySelector('[data-product-section="stock"]')
+        ?.scrollIntoView({ block: "start" });
+    });
+
+    const expectedId = await page.evaluate(() => {
+      const centre = window.innerHeight / 2;
+      const sections = Array.from(
+        document.querySelectorAll<HTMLElement>("[data-product-section]"),
+      );
+      const hit = sections.find((section) => {
+        const rect = section.getBoundingClientRect();
+        return rect.top <= centre && rect.bottom >= centre;
+      });
+      return hit?.dataset.productSection ?? null;
+    });
+    expect(expectedId, "a section spans the viewport's centre").not.toBeNull();
+
+    // Stock itself is not the section the test is confirming (a form field
+    // group is far shorter than half a 720px-tall viewport), which is what
+    // makes this exercise the bug: the OLD logic would have shown Stock as
+    // current here regardless of what the computed answer says.
+    expect(expectedId).not.toBe("stock");
+
+    await expect(nav.locator(`[data-product-form-nav-item="${expectedId}"]`)).toHaveAttribute(
+      "aria-current",
+      "true",
+    );
+    await expect(nav.locator('[data-product-form-nav-item="stock"]')).not.toHaveAttribute(
+      "aria-current",
+      "true",
+    );
+  });
 });

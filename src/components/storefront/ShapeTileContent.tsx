@@ -110,33 +110,60 @@ export function ShapeTileContent({ block }: { block: ShapeBlock }) {
       />
     );
   } else {
-    shape = (
-      <div
-        aria-hidden="true"
-        className={cn(
-          spec.className,
-          validColor ? "" : "bg-muted",
-          borderWidth > 0 && !validBorderColor && "border-foreground",
-        )}
-        style={{
-          ...(validColor ? { backgroundColor: validColor } : {}),
-          // Adjustable corner roundness for the box kinds that support it,
-          // in cqmin so corners stay uniform on stretched tiles. The fully
-          // round kinds (circle, pill, ...) carry their radius in classes.
-          ...(roundness > 0 && supportsRoundness(block.kind)
-            ? { borderRadius: `${roundness}cqmin` }
-            : {}),
-          ...(borderWidth > 0
-            ? {
-                borderStyle: "solid",
-                borderWidth,
-                ...(validBorderColor ? { borderColor: validBorderColor } : {}),
-              }
-            : {}),
-          ...opacityStyle,
-        }}
-      />
-    );
+    // Adjustable corner roundness for the box kinds that support it, in cqmin
+    // so corners stay uniform on stretched tiles. The fully round kinds
+    // (circle, pill, ...) carry their radius in classes.
+    const radiusStyle: CSSProperties =
+      roundness > 0 && supportsRoundness(block.kind)
+        ? { borderRadius: `${roundness}cqmin` }
+        : {};
+
+    shape =
+      borderWidth > 0 ? (
+        /**
+         * TWO BOXES, NOT ONE BORDER, and the corners are the whole reason.
+         *
+         * A CSS border derives its INNER radius by subtracting its own width
+         * from the outer one and clamping at zero — so a 12px outline on a
+         * gently rounded square came out rounded on the outside and dead sharp
+         * on the inside, which is not a stroke anyone draws on purpose. Here
+         * the outline is a plate in the border colour and the fill is a second
+         * box inset by its width, taking the SAME radius through `inherit`.
+         * Both edges are then curved by exactly what the seller set.
+         */
+        <div
+          aria-hidden="true"
+          className={cn(spec.className, validBorderColor ? "" : "bg-foreground")}
+          style={{
+            ...(validBorderColor
+              ? { backgroundColor: validBorderColor }
+              : {}),
+            ...radiusStyle,
+            ...opacityStyle,
+            position: "relative",
+          }}
+        >
+          <span
+            aria-hidden="true"
+            className={cn("absolute", validColor ? "" : "bg-muted")}
+            style={{
+              inset: borderWidth,
+              borderRadius: "inherit",
+              ...(validColor ? { backgroundColor: validColor } : {}),
+            }}
+          />
+        </div>
+      ) : (
+        <div
+          aria-hidden="true"
+          className={cn(spec.className, validColor ? "" : "bg-muted")}
+          style={{
+            ...(validColor ? { backgroundColor: validColor } : {}),
+            ...radiusStyle,
+            ...opacityStyle,
+          }}
+        />
+      );
   }
 
   return (

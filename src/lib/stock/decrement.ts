@@ -13,6 +13,14 @@ import { STOCK_QUANTITY_MAX } from "@/lib/validation/product";
 // lands. Nothing in the app invokes this yet — the caller context must supply
 // a service-role SupabaseClient (dependency injection; we never construct it
 // here so the caller is explicit about its privilege level).
+//
+// THE DB FUNCTION ALSO ENFORCES products.max_per_order, as a second fence
+// behind resolveOrderQuantity (lib/products/order-quantity.ts). It reads the
+// ceiling AS IT IS NOW, so a seller who lowers the cap between a payment
+// landing and this call turns an already-paid order into `insufficient_stock`.
+// That is the right way for a fence to fail — refusing is recoverable, an
+// unchecked decrement is not — but it means the checkout caller has to treat
+// this result as a real outcome to reconcile, never as a formality.
 
 /** Validated parameter constraints — mirror the DB function signature. */
 const decrementArgsSchema = z.object({

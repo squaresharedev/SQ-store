@@ -1,7 +1,7 @@
 "use client";
 
 import { useId } from "react";
-import { Copy, Type } from "lucide-react";
+import { Type } from "lucide-react";
 import {
   STOREFRONT_FONTS,
   TEXT_VARIANT_BASE_PX,
@@ -19,6 +19,7 @@ import {
   labelClass,
   secondaryButtonClass,
 } from "@/components/ui/control-styles";
+import { BlockActions } from "./BlockActions";
 import { FONT_LABELS, TEXT_VARIANT_LABELS } from "./config-maps";
 import { FontSizeField } from "./FontSizeField";
 import { AlignmentToggles, FormatToggles } from "./TextFormatControls";
@@ -77,6 +78,8 @@ export function TextBlockEditor({
   hasCustomFont = false,
   onUpdate,
   onDuplicate,
+  onRemove,
+  removeLabel,
   onEditText,
   selectedRange = null,
   onColorChange,
@@ -90,6 +93,12 @@ export function TextBlockEditor({
   onUpdate: (patch: TextBlockPatch) => void;
   /** Insert a copy of this block (the no-keyboard copy/paste path). */
   onDuplicate: () => void;
+  /** Take the block off the board. Sits beside Duplicate as the pair of
+   *  whole-block actions every inspector ends on. */
+  onRemove?: () => void;
+  /** Overridden when this editor is driving a whole multi-selection, where the
+   *  honest word is "Remove 3 blocks". */
+  removeLabel?: string;
   /** Put the caret in the block on the canvas. Absent while group-editing. */
   onEditText?: () => void;
   /** Words selected in the in-place editor right now, if any. A colour picked
@@ -232,16 +241,11 @@ export function TextBlockEditor({
         onChange={(align) => onUpdate({ align })}
       />
 
-      {/* Copy/paste without a keyboard: one press inserts the copy beside
-          this block (Ctrl+C / Ctrl+V do the same from the canvas). */}
-      <button
-        type="button"
-        onClick={onDuplicate}
-        className={secondaryButtonClass + " w-full"}
-      >
-        <Copy className="size-4" strokeWidth={2} aria-hidden="true" />
-        Duplicate
-      </button>
+      <BlockActions
+        onDuplicate={onDuplicate}
+        onRemove={onRemove}
+        removeLabel={removeLabel}
+      />
     </div>
   );
 }

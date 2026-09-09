@@ -16,6 +16,7 @@ import {
   passwordChangeSchema,
   taxSchema,
 } from "@/lib/validation/settings";
+import { hasMailExchanger } from "@/lib/validation/email-domain";
 import { passwordProblem } from "@/lib/auth/password";
 import { usernameSchema } from "@/lib/validation/auth";
 import type { TablesUpdate } from "@/types";
@@ -443,6 +444,24 @@ export async function saveTaxInfo(
 
   if (!(await rateLimit("settings_write", RATE_LIMITS.settingsWrite))) {
     return TOO_MANY;
+  }
+
+  // The one check that needs the network, so it sits AFTER the budget: the
+  // sync filters (format, placeholder, throwaway provider) have already thrown
+  // out everything that can be settled for free, and a resolver query is only
+  // spent on an address that has passed them all.
+  //
+  // Only a definitive "this domain takes no mail" refuses the save; a resolver
+  // that did not answer means the address is accepted. See
+  // lib/validation/email-domain.ts for why this end fails open while the rest
+  // of the gate does not.
+  if (parsed.data.seller_email) {
+    if ((await hasMailExchanger(parsed.data.seller_email)) === "no") {
+      return {
+        error:
+          "That contact email's domain doesn't accept mail. Check the spelling, or use an address buyers can actually reach.",
+      };
+    }
   }
 
   if (!(await updateOwnProfile(user.id, parsed.data))) return SAVE_FAILED;

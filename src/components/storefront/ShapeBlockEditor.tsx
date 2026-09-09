@@ -1,7 +1,6 @@
 "use client";
 
 import { useId } from "react";
-import { Copy, Trash2 } from "lucide-react";
 import {
   RING_DEFAULT_WIDTH,
   SHAPE_BORDER_WIDTH_MAX,
@@ -15,14 +14,14 @@ import {
 import { DEFAULT_SHAPE_BORDER_COLOR } from "@/lib/theme/color-target";
 import { cn } from "@/lib/utils";
 import {
-  destructiveButtonClass,
   focusRingClass,
   labelClass,
-  secondaryButtonClass,
   transitionClass,
 } from "@/components/ui/control-styles";
 import { ColorPicker } from "@/components/ui/ColorPicker";
 import { SliderField } from "@/components/ui/SliderField";
+import { BlockActions } from "./BlockActions";
+import { SummonedField, type BlockFieldSummons } from "./SummonedField";
 import { ShapeKindGlyph } from "./ShapeTileContent";
 import { SHAPE_SPECS } from "./shape-specs";
 import {
@@ -63,12 +62,20 @@ export function ShapeBlockEditor({
   onUpdate,
   onDuplicate,
   onRemove,
+  removeLabel,
+  summons = null,
 }: {
   block: ShapeBlock;
   onUpdate: (patch: ShapeBlockPatch) => void;
   /** Insert a copy of this block (the no-keyboard copy/paste path). */
   onDuplicate: () => void;
   onRemove: () => void;
+  /** Overridden when this editor is driving a whole multi-selection, where the
+   *  honest word is "Remove 3 blocks". */
+  removeLabel?: string;
+  /** A control the selection toolbar has pointed at: scrolled to and marked
+   *  here rather than duplicated in a popover over the block itself. */
+  summons?: BlockFieldSummons;
 }) {
   const fieldId = useId();
   const isRing = block.kind === "ring";
@@ -135,87 +142,96 @@ export function ShapeBlockEditor({
       {/* Corner roundness, on the kinds whose corners are not already fixed
           by construction (circle, pill, ... stay as they are). */}
       {supportsRoundness(block.kind) && (
-        <SliderField
-          id={`${fieldId}-roundness`}
-          label="Corner roundness"
-          min={0}
-          max={SHAPE_ROUNDNESS_MAX}
-          step={2}
-          value={roundness}
-          onChange={(next) => onUpdate({ roundness: next })}
-          ariaLabel="Corner roundness"
-          valueText={`${roundness} percent`}
-          statusText={roundness === 0 ? "Sharp" : undefined}
-          unit="%"
-        />
+        <SummonedField field="corners" summons={summons} variant="slider">
+          {(highlighted) => (
+            <SliderField
+              id={`${fieldId}-roundness`}
+              label="Corner roundness"
+              min={0}
+              max={SHAPE_ROUNDNESS_MAX}
+              step={2}
+              value={roundness}
+              onChange={(next) => onUpdate({ roundness: next })}
+              ariaLabel="Corner roundness"
+              valueText={`${roundness} percent`}
+              statusText={roundness === 0 ? "Sharp" : undefined}
+              unit="%"
+              highlighted={highlighted}
+            />
+          )}
+        </SummonedField>
       )}
 
-      <ColorPicker
-        id={`${fieldId}-fill`}
-        label={isRing ? "Color" : "Fill"}
-        value={block.color}
-        onChange={(color) => onUpdate({ color })}
-        target={{ kind: "shape-fill", blockKey: blockKey(block) }}
-      />
-
-      {/* Outline: on a ring this is the ring's own thickness. */}
-      <SliderField
-        id={`${fieldId}-border-width`}
-        label={isRing ? "Ring thickness" : "Border thickness"}
-        min={isRing ? 1 : 0}
-        max={SHAPE_BORDER_WIDTH_MAX}
-        value={borderWidth}
-        onChange={setBorderWidth}
-        ariaLabel={isRing ? "Ring thickness" : "Border thickness"}
-        valueText={`${borderWidth} pixels`}
-        statusText={!isRing && borderWidth === 0 ? "None" : undefined}
-        unit="px"
-      />
-
-      {/* Border color only matters on the filled kinds with an outline on. */}
-      {!isRing && borderWidth > 0 && (
+      <SummonedField field="fill" summons={summons}>
         <ColorPicker
-          id={`${fieldId}-border-color`}
-          label="Border color"
-          value={block.borderColor ?? DEFAULT_BORDER_COLOR}
-          onChange={(borderColor) => onUpdate({ borderColor })}
-          target={{ kind: "shape-border", blockKey: blockKey(block) }}
+          id={`${fieldId}-fill`}
+          label={isRing ? "Color" : "Fill"}
+          value={block.color}
+          onChange={(color) => onUpdate({ color })}
+          target={{ kind: "shape-fill", blockKey: blockKey(block) }}
         />
-      )}
+      </SummonedField>
 
-      <SliderField
-        id={`${fieldId}-opacity`}
-        label="Opacity"
-        min={0}
-        max={100}
-        step={5}
-        value={opacity}
-        onChange={(next) => onUpdate({ opacity: next })}
-        ariaLabel="Shape opacity"
-        valueText={`${opacity} percent`}
-        unit="%"
+      {/* Outline: on a ring this is the ring's own thickness. Width and colour
+          are ONE summons: they describe a single edge, and a seller who asked
+          for "stroke" wants both in view — but only the width slider lights
+          up, the colour swatch below it is scrolled into view unmarked. */}
+      <SummonedField field="stroke" summons={summons} variant="slider">
+        {(highlighted) => (
+          <>
+            <SliderField
+              id={`${fieldId}-border-width`}
+              label={isRing ? "Ring thickness" : "Border thickness"}
+              min={isRing ? 1 : 0}
+              max={SHAPE_BORDER_WIDTH_MAX}
+              value={borderWidth}
+              onChange={setBorderWidth}
+              ariaLabel={isRing ? "Ring thickness" : "Border thickness"}
+              valueText={`${borderWidth} pixels`}
+              statusText={!isRing && borderWidth === 0 ? "None" : undefined}
+              unit="px"
+              highlighted={highlighted}
+            />
+
+            {/* Border color only matters on the filled kinds with an outline on. */}
+            {!isRing && borderWidth > 0 && (
+              <div className="mt-4">
+                <ColorPicker
+                  id={`${fieldId}-border-color`}
+                  label="Border color"
+                  value={block.borderColor ?? DEFAULT_BORDER_COLOR}
+                  onChange={(borderColor) => onUpdate({ borderColor })}
+                  target={{ kind: "shape-border", blockKey: blockKey(block) }}
+                />
+              </div>
+            )}
+          </>
+        )}
+      </SummonedField>
+
+      <SummonedField field="opacity" summons={summons} variant="slider">
+        {(highlighted) => (
+          <SliderField
+            id={`${fieldId}-opacity`}
+            label="Opacity"
+            min={0}
+            max={100}
+            step={5}
+            value={opacity}
+            onChange={(next) => onUpdate({ opacity: next })}
+            ariaLabel="Shape opacity"
+            valueText={`${opacity} percent`}
+            unit="%"
+            highlighted={highlighted}
+          />
+        )}
+      </SummonedField>
+
+      <BlockActions
+        onDuplicate={onDuplicate}
+        onRemove={onRemove}
+        removeLabel={removeLabel}
       />
-
-      {/* Copy/paste without a keyboard: one press inserts the copy beside
-          this block (Ctrl+C / Ctrl+V do the same from the canvas). */}
-      <button
-        type="button"
-        onClick={onDuplicate}
-        className={secondaryButtonClass + " w-full"}
-      >
-        <Copy className="size-4" strokeWidth={2} aria-hidden="true" />
-        Duplicate
-      </button>
-
-      {/* Remove action */}
-      <button
-        type="button"
-        onClick={onRemove}
-        className={destructiveButtonClass + " w-full"}
-      >
-        <Trash2 className="size-4" strokeWidth={2} aria-hidden="true" />
-        Remove from grid
-      </button>
     </div>
   );
 }

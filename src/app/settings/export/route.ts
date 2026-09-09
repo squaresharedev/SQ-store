@@ -39,7 +39,7 @@ const PROFILE_COLUMNS =
 
 const PRODUCT_COLUMNS =
   "id, title, description, price_cents, currency, status, " +
-  "track_stock, stock_quantity, low_stock_threshold, created_at, updated_at";
+  "track_stock, stock_quantity, low_stock_threshold, max_per_order, created_at, updated_at";
 
 // `brief` is the seller's own answers from the creation flow, so it belongs in
 // their export. `embed_key` still does not: see the note above.

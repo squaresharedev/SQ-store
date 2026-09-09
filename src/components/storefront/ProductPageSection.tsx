@@ -2,33 +2,48 @@
 
 import { useId } from "react";
 import Link from "next/link";
+import { RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { EU_COUNTRIES } from "@/lib/settings/constants";
 import { sanitizeHeaderText } from "@/lib/storefront/header-text";
 import {
+  MANDATORY_PRODUCT_PAGE_SECTION_IDS,
   PRODUCT_PAGE_SECTION_LABELS,
   normalizeSections,
 } from "@/lib/storefront/product-page";
 import { buildShippingProse, hasShippingPolicy } from "@/lib/shipping/policy-prose";
 import { hasSellerDetails } from "@/components/product-page/SellerBlock";
+import { SellerDetailsNotice } from "@/components/settings/SellerDetailsNotice";
+import { missingTraderIdentity } from "@/lib/settings/trader-identity";
 import type { ProductPagePanelSection } from "@/lib/storefront/setting-ref";
 import type { SellerShippingPolicy } from "@/types/shipping-policy";
 import {
+  PRODUCT_PAGE_CTA_BORDER_WIDTH_MAX,
   PRODUCT_PAGE_CTA_MAX,
+  PRODUCT_PAGE_CTA_RADIUS_MAX,
   STOREFRONT_FONTS,
   type ProductPageConfig,
+  type StorefrontBackground,
   type StorefrontFont,
   type StorefrontSeller,
 } from "@/types/storefront";
+import {
+  resolveCta,
+  storefrontBackdropHex,
+} from "@/components/product-page/product-page-maps";
 import { FONT_LABELS } from "./config-maps";
 import { CollapsibleSection } from "@/components/ui/CollapsibleSection";
+import { ColorPicker } from "@/components/ui/ColorPicker";
 import { InfoTip } from "@/components/ui/InfoTip";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { Select, type SelectOption } from "@/components/ui/select";
+import { SliderField } from "@/components/ui/SliderField";
 import { Switch } from "@/components/ui/switch";
 import {
   fieldBaseClass,
+  ghostButtonClass,
   helpTextClass,
+  infoTextClass,
   labelClass,
   secondaryButtonClass,
 } from "@/components/ui/control-styles";
@@ -60,6 +75,24 @@ import {
  */
 const INHERIT_FONT = "";
 
+/**
+ * The config without one optional field, so "back to following the storefront"
+ * DELETES the key rather than storing a value that means "inherit".
+ *
+ * The font picker already does this inline; four more optional fields on this
+ * panel is where it earns a name. An untouched page has to stay absent from
+ * the saved jsonb (isDefaultProductPage compares against the defaults field
+ * for field), so a stored `undefined` would be a byte the store never had.
+ */
+function withoutKey(
+  config: ProductPageConfig,
+  key: "backgroundColor" | "ctaColor" | "ctaRadius" | "ctaBorderWidth" | "ctaBorderColor",
+): ProductPageConfig {
+  const next = { ...config };
+  delete next[key];
+  return next;
+}
+
 export function ProductPageSection({
   productPage,
   onProductPageChange,
@@ -67,6 +100,9 @@ export function ProductPageSection({
   sellerIdentity,
   storefrontFont,
   customFontName,
+  background,
+  accent,
+  cornerRadius,
   summoned,
 }: {
   productPage: ProductPageConfig;
@@ -84,10 +120,27 @@ export function ProductPageSection({
   /** The uploaded face's name, when there is one. Without an upload there is
    *  nothing for "custom" to resolve to, so it is not offered. */
   customFontName: string | undefined;
+  /** The storefront's own background, so the page's colour control can show
+   *  what following it currently gets. Structured rather than a hex because
+   *  only `storefrontBackdropHex` should be deciding what a gradient or an
+   *  image looks like as one swatch. */
+  background: StorefrontBackground;
+  /** The storefront's accent and tile roundness — what the buy button follows
+   *  while it has no colour or roundness of its own. Taken as these values
+   *  rather than the whole theme: this panel edits the page, and these are the
+   *  only things about the board it needs to be able to name. */
+  accent: string;
+  cornerRadius: number;
   /** Which section a search hit named, if any. */
   summoned: ProductPagePanelSection | null;
 }) {
   const fieldId = useId();
+
+  // Exactly what the page paints, resolved by the same functions the buyer's
+  // page calls — so a slider's number, an inherit dot's colour and what the
+  // artboard beside it shows can never disagree.
+  const cta = resolveCta(productPage, { accent, cornerRadius });
+  const storefrontBackdrop = storefrontBackdropHex({ background });
 
   const fontOptions: SelectOption<string>[] = [
     {
@@ -151,6 +204,27 @@ export function ProductPageSection({
               onCheckedChange={(enabled) => onProductPageChange({ ...productPage, enabled })}
             />
           </div>
+
+          {/* THE PAGE'S BACKDROP. A colour, not the storefront's three-kind
+              background: a page is read rather than looked at, so what a
+              seller wants here is a surface their specifications table is
+              legible on. The inherit dot is how they get the store's own
+              backdrop back, and it shows what following currently gets them
+              (an image backdrop reads as dark, which is the ink decision the
+              page has always made about photos). */}
+          <ColorPicker
+            label="Page color"
+            value={productPage.backgroundColor ?? storefrontBackdrop}
+            onChange={(backgroundColor) =>
+              onProductPageChange({ ...productPage, backgroundColor })
+            }
+            inherit={{
+              label: "Storefront background",
+              value: storefrontBackdrop,
+              active: productPage.backgroundColor === undefined,
+              onSelect: () => onProductPageChange(withoutKey(productPage, "backgroundColor")),
+            }}
+          />
 
           <div className="space-y-1.5">
             <span className={labelClass}>Photo fit</span>
@@ -249,6 +323,94 @@ export function ProductPageSection({
             </p>
           </div>
 
+          {/* THE BUTTON'S OWN PAINT. Four controls, every one of them
+              optional: the inherit dot and the "Auto" reset are how a seller
+              gets back to following the storefront, so trying a colour is
+              never a one-way door. What is deliberately NOT here is the
+              label's ink — it is derived from the fill (see resolveCta), so
+              there is no way to end up with a button nobody can read. */}
+          <ColorPicker
+            label="Button color"
+            value={cta.fill}
+            onChange={(ctaColor) => onProductPageChange({ ...productPage, ctaColor })}
+            inherit={{
+              label: "Storefront accent",
+              value: accent,
+              active: productPage.ctaColor === undefined,
+              onSelect: () => onProductPageChange(withoutKey(productPage, "ctaColor")),
+            }}
+          />
+
+          <SliderField
+            id={`${fieldId}-cta-radius`}
+            label="Corner roundness"
+            min={0}
+            max={PRODUCT_PAGE_CTA_RADIUS_MAX}
+            value={cta.radius}
+            onChange={(ctaRadius) => onProductPageChange({ ...productPage, ctaRadius })}
+            ariaLabel="Buy button corner roundness"
+            valueText={`${cta.radius} pixels`}
+            unit="px"
+            // Auto is a real state, not a number: with nothing chosen the
+            // button takes the storefront's own tile roundness, so the page
+            // and the board it opened from match without anyone setting this.
+            headerAction={
+              productPage.ctaRadius === undefined ? (
+                <span className={infoTextClass}>Auto</span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => onProductPageChange(withoutKey(productPage, "ctaRadius"))}
+                  className={cn(ghostButtonClass, "px-2 py-1 text-xs")}
+                >
+                  <RotateCcw className="size-3" strokeWidth={2} aria-hidden="true" />
+                  Auto
+                </button>
+              )
+            }
+          />
+
+          <SliderField
+            id={`${fieldId}-cta-border-width`}
+            label="Border thickness"
+            min={0}
+            max={PRODUCT_PAGE_CTA_BORDER_WIDTH_MAX}
+            value={cta.borderWidth}
+            onChange={(width) =>
+              // Zero is "no border", which is the absence of the field rather
+              // than a value: dropping the key keeps an untouched page out of
+              // the saved jsonb entirely (isDefaultProductPage).
+              onProductPageChange(
+                width === 0
+                  ? withoutKey(productPage, "ctaBorderWidth")
+                  : { ...productPage, ctaBorderWidth: width },
+              )
+            }
+            ariaLabel="Buy button border thickness"
+            valueText={`${cta.borderWidth} pixels`}
+            unit="px"
+            statusText={cta.borderWidth === 0 ? "None" : undefined}
+          />
+
+          {/* Only once there is a border to colour. A colour picker for an
+              invisible outline is a control that appears to do nothing. */}
+          {cta.borderWidth > 0 && (
+            <ColorPicker
+              label="Border color"
+              value={cta.borderColor}
+              onChange={(ctaBorderColor) =>
+                onProductPageChange({ ...productPage, ctaBorderColor })
+              }
+              inherit={{
+                label: "Button text color",
+                value: cta.text,
+                active: productPage.ctaBorderColor === undefined,
+                onSelect: () =>
+                  onProductPageChange(withoutKey(productPage, "ctaBorderColor")),
+              }}
+            />
+          )}
+
           <div className="space-y-1.5">
             <span className={labelClass}>Price note</span>
             <SegmentedControl
@@ -287,7 +449,8 @@ export function ProductPageSection({
         headerAction={
           <InfoTip label="When a section stays hidden">
             A section with nothing to show stays hidden even when it is on. Shipping and safety
-            never show for downloads.
+            never show for downloads. Safety and compliance and Seller are legal disclosures and
+            cannot be turned off.
           </InfoTip>
         }
       >
@@ -302,6 +465,12 @@ export function ProductPageSection({
           <ul className="space-y-2" aria-label="What the page shows">
             {rows.map((entry) => {
               const rowId = `${fieldId}-section-${entry.id}`;
+              // Safety and seller are legal disclosures, not a design choice —
+              // see MANDATORY_PRODUCT_PAGE_SECTION_IDS. normalizeSections
+              // already forces `show` true for them regardless of what a
+              // seller flips here, so the switch is locked ON rather than
+              // left to imply a control that would not actually do anything.
+              const mandatory = MANDATORY_PRODUCT_PAGE_SECTION_IDS.includes(entry.id);
               return (
                 <li key={entry.id} className="flex items-center justify-between gap-2">
                   {/* The hint sits OUTSIDE the label: inside it, it would
@@ -317,10 +486,16 @@ export function ProductPageSection({
                         under the title
                       </span>
                     )}
+                    {mandatory && (
+                      <span className={cn(helpTextClass, "truncate")} aria-hidden="true">
+                        required by law
+                      </span>
+                    )}
                   </span>
                   <Switch
                     id={rowId}
                     checked={entry.show}
+                    disabled={mandatory}
                     onCheckedChange={(show) =>
                       onProductPageChange({
                         ...productPage,
@@ -458,6 +633,16 @@ export function ProductPageSection({
         }
       >
         <div className="space-y-3">
+          {/* The publish gate, said where the seller can see exactly which of
+              these lines is blank. Derived from the identity this panel was
+              already handed, so nothing extra is read to show it. */}
+          <SellerDetailsNotice
+            missing={missingTraderIdentity(sellerIdentity)}
+            blocks="publish this storefront or sell from it"
+            detailed={false}
+            // Unsaved canvas work sits behind this panel.
+            newTab
+          />
           {sellerIsSet ? (
             <address className="space-y-1 rounded-md border border-border bg-muted/40 p-3 text-sm not-italic">
               {sellerIdentity.businessName && (

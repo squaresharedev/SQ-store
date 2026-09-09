@@ -5,15 +5,19 @@ import {
   storefrontConfigSchema,
 } from "@/lib/validation/storefront";
 import {
+  MANDATORY_PRODUCT_PAGE_SECTION_IDS,
   compactText,
   isDefaultProductPage,
   isEuSeller,
   normalizeSections,
   resolveProductPage,
 } from "@/lib/storefront/product-page";
+import { resolveCta } from "@/components/product-page/product-page-maps";
 import {
   DEFAULT_PRODUCT_PAGE_CONFIG,
   DEFAULT_STOREFRONT_CONFIG,
+  PRODUCT_PAGE_CTA_BORDER_WIDTH_MAX,
+  PRODUCT_PAGE_CTA_RADIUS_MAX,
   PRODUCT_PAGE_SECTION_IDS,
   type ProductPageConfig,
 } from "@/types/storefront";
@@ -158,6 +162,74 @@ describe("product page config schema", () => {
     ).toBe(true); // plain text; rendered as a text node, never markup
   });
 
+  it("takes a page background colour, or none at all", () => {
+    // Absent is the shipped state: the page follows the storefront's own
+    // background, whatever kind that is.
+    expect(DEFAULT_PRODUCT_PAGE_CONFIG).not.toHaveProperty("backgroundColor");
+    expect(
+      productPageSchema.safeParse({
+        ...DEFAULT_PRODUCT_PAGE_CONFIG,
+        backgroundColor: "#0b3d2e",
+      }).success,
+    ).toBe(true);
+    // A COLOUR only: the storefront's structured three-kind background has no
+    // place on a page that is read rather than looked at, so nothing that
+    // could carry a gradient, a URL or an object key gets through.
+    for (const bad of [
+      "#fff",
+      "white",
+      "linear-gradient(90deg, #fff, #000)",
+      "url(https://x/y.jpg)",
+      { kind: "solid", color: "#ffffff" },
+    ]) {
+      expect(
+        productPageSchema.safeParse({ ...DEFAULT_PRODUCT_PAGE_CONFIG, backgroundColor: bad })
+          .success,
+        JSON.stringify(bad),
+      ).toBe(false);
+    }
+  });
+
+  it("bounds every part of the buy button, and lets all four stay absent", () => {
+    // Absent is the shipped state: the button follows the storefront, and the
+    // defaults must keep parsing without any of these keys.
+    expect(productPageSchema.safeParse(DEFAULT_PRODUCT_PAGE_CONFIG).success).toBe(true);
+
+    const styled = {
+      ...DEFAULT_PRODUCT_PAGE_CONFIG,
+      ctaColor: "#1d4ed8",
+      ctaRadius: PRODUCT_PAGE_CTA_RADIUS_MAX,
+      ctaBorderWidth: PRODUCT_PAGE_CTA_BORDER_WIDTH_MAX,
+      ctaBorderColor: "#ffffff",
+    };
+    expect(productPageSchema.safeParse(styled).success).toBe(true);
+
+    // Colours are strict `#rrggbb` like every other colour in the config: no
+    // shorthand, no named colours, and nothing that could carry CSS.
+    for (const bad of ["#fff", "red", "rgb(0,0,0)", "#12345g", "url(x)"]) {
+      expect(productPageSchema.safeParse({ ...styled, ctaColor: bad }).success, bad).toBe(false);
+      expect(
+        productPageSchema.safeParse({ ...styled, ctaBorderColor: bad }).success,
+        bad,
+      ).toBe(false);
+    }
+
+    // Numbers are bounded whole pixels: they go straight into a style
+    // attribute, so a float or an out-of-range value is not a rounding
+    // problem, it is the input being unbounded.
+    for (const bad of [-1, PRODUCT_PAGE_CTA_RADIUS_MAX + 1, 4.5]) {
+      expect(productPageSchema.safeParse({ ...styled, ctaRadius: bad }).success, `${bad}`).toBe(
+        false,
+      );
+    }
+    for (const bad of [-1, PRODUCT_PAGE_CTA_BORDER_WIDTH_MAX + 1, 1.5]) {
+      expect(
+        productPageSchema.safeParse({ ...styled, ctaBorderWidth: bad }).success,
+        `${bad}`,
+      ).toBe(false);
+    }
+  });
+
   // The seller's email/address/phone/VAT/country are no longer validated
   // here at all — that gate is taxSchema now (lib/validation/settings.ts),
   // covered in tests/unit/validation-settings-team-notifications.test.ts.
@@ -202,12 +274,43 @@ describe("resolveProductPage", () => {
       id: "description",
       show: true,
     });
-    // Everything the stored list never named comes back hidden.
+    // Everything the stored list never named comes back hidden — except
+    // `safety`, mandatory alongside `seller` (see the dedicated test below).
     expect(
       sections
-        .filter((s) => s.id !== "seller" && s.id !== "description")
+        .filter((s) => s.id !== "seller" && s.id !== "description" && s.id !== "safety")
         .every((s) => s.show === false),
     ).toBe(true);
+    expect(sections.find((s) => s.id === "safety")?.show).toBe(true);
+  });
+
+  // Safety and compliance and Seller are legal disclosures (GPSR, and the
+  // trader identity distance-selling law requires), not a design choice a
+  // storefront offers — so unlike every other section, they cannot come back
+  // hidden, whatever a stored config says. This is the single choke point
+  // every reader of a product page goes through, so it is the one place that
+  // has to hold for the guarantee to be real.
+  it("never hides safety or seller, whatever the stored config says", () => {
+    expect(MANDATORY_PRODUCT_PAGE_SECTION_IDS).toEqual(
+      expect.arrayContaining(["safety", "seller"]),
+    );
+
+    // Explicitly turned off.
+    const explicitlyOff = normalizeSections([
+      { id: "safety", show: false },
+      { id: "seller", show: false },
+    ]);
+    expect(explicitlyOff.find((s) => s.id === "safety")?.show).toBe(true);
+    expect(explicitlyOff.find((s) => s.id === "seller")?.show).toBe(true);
+
+    // Never named at all, which every OTHER section comes back hidden for.
+    const neverNamed = normalizeSections([{ id: "description", show: true }]);
+    expect(neverNamed.find((s) => s.id === "safety")?.show).toBe(true);
+    expect(neverNamed.find((s) => s.id === "seller")?.show).toBe(true);
+
+    // No stored sections at all.
+    expect(normalizeSections(undefined).find((s) => s.id === "safety")?.show).toBe(true);
+    expect(normalizeSections(undefined).find((s) => s.id === "seller")?.show).toBe(true);
   });
 });
 
@@ -244,6 +347,59 @@ describe("product page helpers", () => {
     expect(isEuSeller({ country: "DE" })).toBe(true);
     expect(isEuSeller({ country: "" })).toBe(false);
     expect(isEuSeller(undefined)).toBe(false);
+  });
+});
+
+describe("resolveCta", () => {
+  const theme = { accent: "#1d4ed8", cornerRadius: 8 };
+
+  it("follows the storefront while the page says nothing", () => {
+    expect(resolveCta(DEFAULT_PRODUCT_PAGE_CONFIG, theme)).toEqual({
+      fill: "#1d4ed8",
+      // Derived from the fill, never stored: a dark accent takes light words.
+      text: "#ffffff",
+      radius: 8,
+      borderWidth: 0,
+      // Resolved even with no border to draw, so the panel's inherit dot has
+      // a colour to show before the seller turns one on.
+      borderColor: "#ffffff",
+    });
+  });
+
+  it("takes each stored value over the storefront's, one at a time", () => {
+    const styled = resolveCta(
+      {
+        ctaColor: "#fef08a",
+        ctaRadius: 0,
+        ctaBorderWidth: 2,
+        ctaBorderColor: "#171717",
+      },
+      theme,
+    );
+    // A pale fill flips the label's ink on its own; that is not a seller
+    // decision and there is no field for it.
+    expect(styled).toEqual({
+      fill: "#fef08a",
+      text: "#171717",
+      radius: 0,
+      borderWidth: 2,
+      borderColor: "#171717",
+    });
+
+    // A chosen 0 is a real answer ("sharp"), not the absence of one: it must
+    // not fall back to the storefront's roundness.
+    expect(resolveCta({ ctaRadius: 0 }, theme).radius).toBe(0);
+  });
+
+  it("clamps an inherited roundness a button has no shape for, but keeps a chosen one", () => {
+    // Tile roundness runs to 100 (a circle). A button inherits through
+    // controlRadius, which tops out at 16.
+    expect(resolveCta({}, { accent: "#171717", cornerRadius: 100 }).radius).toBe(16);
+    // A number the seller chose is theirs, up to the slider's own ceiling —
+    // that is what makes a pill reachable at all.
+    expect(
+      resolveCta({ ctaRadius: PRODUCT_PAGE_CTA_RADIUS_MAX }, theme).radius,
+    ).toBe(PRODUCT_PAGE_CTA_RADIUS_MAX);
   });
 });
 

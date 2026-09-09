@@ -49,7 +49,13 @@ import { createProduct, updateProduct } from "@/lib/products/actions";
 import { UploadError, uploadToR2 } from "@/lib/products/upload";
 import { SaveButton, type SaveResult } from "@/components/ui/SaveButton";
 import { useToast } from "@/components/ui/Toast";
-import { collectOptionIds, type ProductWriteInput, PRICE_CENTS_MAX } from "@/lib/validation/product";
+import {
+  collectOptionIds,
+  type ProductWriteInput,
+  MAX_PER_ORDER_DEFAULT,
+  PRICE_CENTS_MAX,
+  PURCHASE_QUANTITY_MAX,
+} from "@/lib/validation/product";
 import { ActionErrorNotice } from "@/components/ui/ActionErrorNotice";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { Modal } from "@/components/ui/modal";
@@ -68,6 +74,8 @@ import {
 } from "@/components/ui/control-styles";
 import { InfoTip } from "@/components/ui/InfoTip";
 import { RequiredMark } from "@/components/ui/RequiredMark";
+import { SellerDetailsNotice } from "@/components/settings/SellerDetailsNotice";
+import type { TraderIdentityField } from "@/lib/settings/trader-identity";
 import { FormSection } from "./FormSection";
 import { FormSectionNav } from "./FormSectionNav";
 import { ProductFormSnapshotScript } from "./ProductFormSnapshotScript";
@@ -106,7 +114,13 @@ const SAVED_HOLD_MS = 1100;
 
 type FieldErrors = Partial<
   Record<
-    "title" | "price" | "stockQuantity" | "lowStockThreshold" | "purchaseUrl" | "optionGroups",
+    | "title"
+    | "price"
+    | "stockQuantity"
+    | "lowStockThreshold"
+    | "maxPerOrder"
+    | "purchaseUrl"
+    | "optionGroups",
     string
   >
 >;
@@ -147,19 +161,23 @@ function initialDocuments(product?: FormProduct): DocumentFormValue[] {
   }));
 }
 
-function initialValues(product?: Product): ProductFormValues {
+function initialValues(product?: Product, canPublish = true): ProductFormValues {
   return {
     title: product?.title ?? "",
     description: product?.description ?? "",
     price: product ? product.price.toFixed(2) : "",
     currency: product?.currency ?? "EUR",
     // Common-answer default: new products go live on save. Existing products
-    // keep whatever the seller chose.
-    status: product?.status ?? "active",
+    // keep whatever the seller chose — INCLUDING `active` for one that went
+    // live before the store's trader details were cleared, because showing it
+    // as a draft would misreport what is stored. The status control explains
+    // why saving it will not go through until the details are back.
+    status: product?.status ?? (canPublish ? "active" : "draft"),
     trackStock: product?.trackStock ?? false,
     stockQuantity:
       product?.stockQuantity != null ? String(product.stockQuantity) : "",
     lowStockThreshold: String(product?.lowStockThreshold ?? 5),
+    maxPerOrder: String(product?.maxPerOrder ?? MAX_PER_ORDER_DEFAULT),
   };
 }
 
@@ -201,6 +219,20 @@ function validate(values: ProductFormValues): FieldErrors {
       errors.lowStockThreshold =
         "The low-stock alert must be a whole number of 0 or more.";
     }
+  }
+
+  // Required, unlike the alert threshold: this field always holds a number
+  // (the form seeds it, and every product has one), so a blank is a seller
+  // having cleared it rather than a seller who has not answered yet.
+  const trimmedMax = values.maxPerOrder.trim();
+  if (!trimmedMax) {
+    errors.maxPerOrder = `Enter how many one buyer can order — 1 to ${PURCHASE_QUANTITY_MAX}.`;
+  } else if (
+    !Number.isInteger(Number(trimmedMax)) ||
+    Number(trimmedMax) < 1 ||
+    Number(trimmedMax) > PURCHASE_QUANTITY_MAX
+  ) {
+    errors.maxPerOrder = `The maximum per order must be a whole number from 1 to ${PURCHASE_QUANTITY_MAX}.`;
   }
 
   return errors;
@@ -246,6 +278,7 @@ const FIELD_SECTIONS: Record<string, ProductFormSectionId> = {
   // closed list, and its default answer is always available.
   stockQuantity: "stock",
   lowStockThreshold: "stock",
+  maxPerOrder: "stock",
   purchaseUrl: "media",
   optionGroups: "options",
   length: "specs",
@@ -351,17 +384,24 @@ function focusProductField(field: string) {
 export function ProductForm({
   product,
   shippingChoices = NO_SHIPPING_CHOICES,
+  missingTraderDetails = [],
 }: {
   product?: FormProduct;
   /** The store's shipping terms and named profiles, read on the server. */
   shippingChoices?: ShippingChoices;
+  /** Trader details this store still owes buyers, from the server. Non-empty
+   *  means an `active` product would be refused on save, so the form does not
+   *  offer that status. UX only: lib/products/actions.ts is the real gate. */
+  missingTraderDetails?: readonly TraderIdentityField[];
 }) {
   const router = useRouter();
   const fieldId = useId();
   const toast = useToast();
 
+  const canPublish = missingTraderDetails.length === 0;
+
   const [values, setValues] = useState<ProductFormValues>(() =>
-    initialValues(product),
+    initialValues(product, canPublish),
   );
   // The product page's facts, held apart from `values`: the gallery carries
   // Files, and the details are their own tree of in-progress strings.
@@ -436,9 +476,13 @@ export function ProductForm({
   // leaving by accident can cost real effort. Compared against the pristine
   // values rather than a mutation flag, so editing a field and undoing it
   // correctly counts as clean.
+  // `canPublish` belongs here as well as in the initial state: it decides what
+  // a NEW product's status starts as, so a pristine form built without it
+  // reads as already-edited for a store that may not publish yet — and the
+  // leave guard then challenges someone who has typed nothing.
   const pristine = useMemo(
-    () => JSON.stringify(initialValues(product)),
-    [product],
+    () => JSON.stringify(initialValues(product, canPublish)),
+    [product, canPublish],
   );
   const pristinePage = useMemo(
     () =>
@@ -717,6 +761,11 @@ export function ProductForm({
         lowStockThreshold: values.lowStockThreshold.trim()
           ? Number(values.lowStockThreshold)
           : undefined,
+        // validate() has already refused a blank or out-of-range value, so this
+        // is always a legal integer by the time it is sent. The server parses
+        // it again against the same bound (PURCHASE_QUANTITY_MAX) and the
+        // column's CHECK is behind that: this line is convenience, not consent.
+        maxPerOrder: Number(values.maxPerOrder.trim()),
       };
 
       const result = product
@@ -918,10 +967,12 @@ export function ProductForm({
             trackStock: values.trackStock,
             stockQuantity: values.stockQuantity,
             lowStockThreshold: values.lowStockThreshold,
+            maxPerOrder: values.maxPerOrder,
           }}
           errors={{
             stockQuantity: errors.stockQuantity,
             lowStockThreshold: errors.lowStockThreshold,
+            maxPerOrder: errors.maxPerOrder,
           }}
           onChange={(key, value) => {
             if (key === "trackStock") {
@@ -1143,16 +1194,36 @@ export function ProductForm({
             onto the DOM, so an attribute handed to it would be dropped
             silently — and a datapoint that is quietly absent is worse than
             one that was never claimed. */}
-        <div
-          className="space-y-2 sm:max-w-xs"
-          data-product-field="status"
-          data-product-value={values.status}
-        >
-          <SegmentedControl
-            value={values.status}
-            options={STATUS_OPTIONS}
-            onChange={(status) => updateField("status", status)}
-            ariaLabel="Product status"
+        <div className="space-y-3">
+          <div
+            className="space-y-2 sm:max-w-xs"
+            data-product-field="status"
+            data-product-value={values.status}
+          >
+            {/* Only ACTIVE is barred, never the whole control. Draft has to
+                stay reachable: a product that went live before the store's
+                details lapsed is one the seller may well want to take down,
+                and that is the single remedial move available to them here.
+                The segment stays visible rather than disappearing, so the
+                choice is seen to exist and the notice below can explain it. */}
+            <SegmentedControl
+              value={values.status}
+              options={STATUS_OPTIONS.map((option) =>
+                option.value === "active" && !canPublish
+                  ? { ...option, disabled: true }
+                  : option,
+              )}
+              onChange={(status) => updateField("status", status)}
+              ariaLabel="Product status"
+            />
+          </div>
+          {/* Not `detailed`: the banner in the chrome has already made the
+              case, and this one is here to explain why the control above is
+              dead. The button still goes to the field that revives it. */}
+          <SellerDetailsNotice
+            missing={missingTraderDetails}
+            blocks="put this product on sale"
+            detailed={false}
           />
         </div>
       </FormSection>

@@ -277,6 +277,14 @@ export async function seedProducts(
     /** Which of the storefront config's shippingProfiles this ships under.
      *  Absent = the store's default terms, which is the common case. */
     shipping_profile_id?: string;
+    /** Stock tracking. Both or neither: the DB refuses tracking with no
+     *  quantity (products_tracked_stock_has_quantity). */
+    track_stock?: boolean;
+    stock_quantity?: number | null;
+    low_stock_threshold?: number;
+    /** How many one buyer may take at once, 1-100. Absent = the column's own
+     *  default of 10. */
+    max_per_order?: number;
   }>,
 ) {
   // Every row carries the SAME keys: PostgREST refuses a bulk insert whose
@@ -299,6 +307,10 @@ export async function seedProducts(
       purchase_url: p.purchase_url ?? null,
       digital_file_key: p.digital_file_key ?? null,
       shipping_profile_id: p.shipping_profile_id ?? null,
+      track_stock: p.track_stock ?? false,
+      stock_quantity: p.track_stock ? (p.stock_quantity ?? 0) : null,
+      low_stock_threshold: p.low_stock_threshold ?? 5,
+      max_per_order: p.max_per_order ?? 10,
     })),
   });
 }
@@ -321,6 +333,23 @@ export async function seedStorefronts(
  * storefront's product pages) now read (lib/settings/seller-identity.ts).
  * The signup trigger already created the row; this only patches it.
  */
+/**
+ * The trader details a seller MUST have on file before anything of theirs is
+ * published or sold (src/lib/settings/trader-identity.ts): a trader name, a
+ * postal address and a contact email. Without all three the write paths refuse
+ * an `active` product and the hosted product page 404s, so any spec that wants
+ * a buyer-visible page seeds these first.
+ *
+ * Spread it to vary a field, or drop one to exercise the gate:
+ *   seedSellerIdentity(id, { ...PUBLISHABLE_SELLER, address: undefined })
+ */
+export const PUBLISHABLE_SELLER = {
+  businessName: "Lamp Studio Ltd",
+  address: "12 Market Street\nDublin, D02 X285\nIreland",
+  email: "hi@lamp.example",
+  country: "IE",
+} as const;
+
 export async function seedSellerIdentity(
   ownerId: string,
   seller: {

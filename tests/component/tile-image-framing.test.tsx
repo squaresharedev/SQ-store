@@ -59,7 +59,6 @@ function renderTile(
       editable
       isFraming={overrides.isFraming ?? false}
       onToggleEdit={onToggleEdit}
-      onRemove={vi.fn()}
       onFrame={onFrame}
       onFramePlacement={onFramePlacement}
       onFrameExit={onFrameExit}
@@ -71,9 +70,7 @@ function renderTile(
 const framer = () => screen.queryByTestId("tile-image-framer");
 // PLT-02: the outer container is a plain focusable div (no role="button"), so
 // getByRole("button") no longer finds it. getByLabelText reaches it via
-// aria-label. The pattern anchors to "Framed Print" at the start to skip the
-// chip's "Frame the image for Framed Print" button, whose label also
-// contains the product name.
+// aria-label, anchored at the start of the name.
 const tile = () => screen.getByLabelText(/^Framed Print/);
 
 // Vitest runs without globals here, so RTL's auto-cleanup never registers —
@@ -111,11 +108,12 @@ describe("entering frame mode", () => {
     expect(onFrame).toHaveBeenCalledWith("block-1");
   });
 
-  it("offers a button, because double-tap is not dependable on touch", () => {
+  it("draws no button of its own for it", () => {
+    // There IS a button — double-tap is not dependable on touch, and iOS
+    // claims it outright — but it belongs to the selection's island now, not
+    // to the tile. See tests/component/selection-toolbar.test.tsx.
     renderTile();
-    expect(
-      screen.getByRole("button", { name: /frame the image for framed print/i }),
-    ).toBeInTheDocument();
+    expect(screen.queryAllByRole("button")).toHaveLength(0);
   });
 
   it("stays shut for a product with no picture to frame", () => {
@@ -163,12 +161,14 @@ describe("while framing", () => {
     expect(surface.getAttribute("aria-label")).toMatch(/framed print/i);
   });
 
-  it("takes the tile's controls away", () => {
-    // A Remove button under a dragging finger is a trap.
+  it("takes the tile's chrome away", () => {
+    // Framing is a single-purpose mode: the only thing on the tile should be
+    // the picture being positioned. The footprint outline is all the tile
+    // draws for itself now, and it goes too.
     renderTile({ isFraming: true });
     expect(
-      screen.queryByRole("button", { name: /remove .* from grid/i }),
-    ).not.toBeInTheDocument();
+      document.querySelector("[data-tile-footprint]"),
+    ).toBeNull();
   });
 
   it("nudges the picture with the arrow keys", () => {

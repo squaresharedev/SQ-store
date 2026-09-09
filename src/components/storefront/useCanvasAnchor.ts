@@ -9,6 +9,7 @@ import {
   mergeInsets,
   panelInset,
   reanchorPan,
+  revealPan,
   type Box,
   type Insets,
 } from "./canvas-geometry";
@@ -27,10 +28,18 @@ import type { CanvasViewport } from "./useCanvasViewport";
  * simply marks itself with `data-canvas-panel` and gets measured, so a new
  * panel, on a new edge, at a new size, is covered the day it is written.
  *
- * WHAT COUNTS AS A CHANGE. Only the workspace's own box and the panel cover
- * over it. Selecting a block, typing, saving: none of those move the board,
- * because none of them change either. The selection is read only at the moment
- * a panel DOES change, as the thing most worth keeping in view.
+ * WHAT COUNTS AS A CHANGE. The workspace's own box, the panel cover over it,
+ * and which blocks are selected. Typing and saving move nothing, because they
+ * change none of the three.
+ *
+ * The first two are the panel rules in canvas-geometry, and they read the
+ * selection only as the thing worth keeping in view while a panel moves. The
+ * third is a separate, quieter rule (revealPan) that exists because the cover
+ * can stay exactly the same size while what is under it changes — inserting
+ * from a sheet, or swapping one full-width sheet for another of the same
+ * height — and in those moments the seller has just said which block they mean.
+ * It slides by the least that puts that block in the open, and by nothing at
+ * all when it is already there, which is every selection on a desktop.
  */
 
 /**
@@ -62,6 +71,12 @@ function panelElements(): HTMLElement[] {
   return found;
 }
 
+/** Same blocks, in the same order. Order counts because the array comes
+ *  straight from the designer's own selection state, which keeps it stable. */
+function sameKeys(a: readonly string[], b: readonly string[]): boolean {
+  return a.length === b.length && a.every((key, index) => key === b[index]);
+}
+
 function coverOf(workspace: Box, panels: HTMLElement[]): Insets {
   let insets = NO_INSETS;
   for (const panel of panels) {
@@ -88,17 +103,31 @@ function boardBox(stage: HTMLElement): Box {
  *
  * This is the fallback anchor, used on whichever axis the board itself no
  * longer fits (see keepVisible): a seller who opened a panel from a block is
- * asking about that block, and on a phone, where a sheet can take 70% of the
+ * asking about that block, and on a phone, where a sheet can take most of the
  * screen, revealing the whole board is impossible while revealing the one tile
  * usually is not.
+ *
+ * TWO BOXES, NOT ONE. `withChrome` is the tile PLUS the controls that hang
+ * outside it — the chip welded above its top edge, the resize and rotate
+ * handles welded under its bottom edge (see TILE_CONTROL_CHIP_CLASS and
+ * HANDLE_CLASS). Anchoring on the bare cell revealed the tile flush against
+ * the sheet's top edge and left both bottom handles buried underneath it, on
+ * the one form factor where they are always drawn and are the only route to
+ * resizing or rotating a block. `cell` stays as the fallback for a strip too
+ * short to hold both the tile and its chrome, where insisting on the padded
+ * box would fit nothing and move the board not at all.
  *
  * Read off the live DOM rather than from block coordinates so a tilted tile
  * counts by the room it actually takes, and so a masthead (which has no grid
  * cell of its own) simply falls back to the board.
  */
-function selectionBox(stage: HTMLElement, keys: readonly string[]): Box {
+function selectionBoxes(
+  stage: HTMLElement,
+  keys: readonly string[],
+): { cell: Box; withChrome: Box } {
   const board = boardBox(stage);
-  if (keys.length === 0) return board;
+  const both = { cell: board, withChrome: board };
+  if (keys.length === 0) return both;
 
   const stageRect = stage.getBoundingClientRect();
   // The stage is scaled, so its client rect is post-transform. Dividing by the
@@ -106,24 +135,45 @@ function selectionBox(stage: HTMLElement, keys: readonly string[]): Box {
   // relative to the stage means the answer does not depend on the pan (which
   // is exactly what is about to change).
   const scale = stage.offsetWidth > 0 ? stageRect.width / stage.offsetWidth : 1;
-  if (!(scale > 0)) return board;
+  if (!(scale > 0)) return both;
 
   const wanted = new Set(keys);
-  let left = Infinity;
-  let top = Infinity;
-  let right = -Infinity;
-  let bottom = -Infinity;
+  const bare = { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity };
+  const padded = { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity };
+  const swallow = (
+    into: typeof bare,
+    rect: { left: number; top: number; right: number; bottom: number },
+  ) => {
+    into.left = Math.min(into.left, (rect.left - stageRect.left) / scale);
+    into.top = Math.min(into.top, (rect.top - stageRect.top) / scale);
+    into.right = Math.max(into.right, (rect.right - stageRect.left) / scale);
+    into.bottom = Math.max(into.bottom, (rect.bottom - stageRect.top) / scale);
+  };
+
   stage.querySelectorAll<HTMLElement>("[data-grid-key]").forEach((cell) => {
     if (!wanted.has(cell.dataset.gridKey ?? "")) return;
     const rect = cell.getBoundingClientRect();
     if (rect.width <= 0 || rect.height <= 0) return;
-    left = Math.min(left, (rect.left - stageRect.left) / scale);
-    top = Math.min(top, (rect.top - stageRect.top) / scale);
-    right = Math.max(right, (rect.right - stageRect.left) / scale);
-    bottom = Math.max(bottom, (rect.bottom - stageRect.top) / scale);
+    swallow(bare, rect);
+    swallow(padded, rect);
+    // Chrome that is drawn but takes no room in the cell's own box: the cell
+    // is `contain: layout`, so anything hanging outside it is invisible to
+    // that rect and has to be measured for itself. A control the block has
+    // hidden (a handle behind a framing overlay) measures zero and drops out.
+    cell.querySelectorAll<HTMLElement>("[data-tile-chrome]").forEach((control) => {
+      const box = control.getBoundingClientRect();
+      if (box.width <= 0 || box.height <= 0) return;
+      swallow(padded, box);
+    });
   });
-  if (!Number.isFinite(left)) return board;
-  return { left, top, width: right - left, height: bottom - top };
+  if (!Number.isFinite(bare.left)) return both;
+  const toBoxOf = (edges: typeof bare): Box => ({
+    left: edges.left,
+    top: edges.top,
+    width: edges.right - edges.left,
+    height: edges.bottom - edges.top,
+  });
+  return { cell: toBoxOf(bare), withChrome: toBoxOf(padded) };
 }
 
 export function useCanvasAnchor({
@@ -144,6 +194,9 @@ export function useCanvasAnchor({
 }): void {
   const lastBox = useRef<Box | null>(null);
   const lastInsets = useRef<Insets>(NO_INSETS);
+  /** The selection as it was last measured, so a change in it can be told
+   *  apart from the many renders that leave it alone. */
+  const lastKeys = useRef<readonly string[]>([]);
   const observerRef = useRef<ResizeObserver | null>(null);
   const observedRef = useRef(new Set<Element>());
 
@@ -181,6 +234,7 @@ export function useCanvasAnchor({
       // existing several layouts ago.
       lastBox.current = null;
       lastInsets.current = NO_INSETS;
+      lastKeys.current = keys;
       viewport.setInsets(NO_INSETS);
       return;
     }
@@ -199,8 +253,10 @@ export function useCanvasAnchor({
 
     const previousBox = lastBox.current;
     const previousInsets = lastInsets.current;
+    const previousKeys = lastKeys.current;
     lastBox.current = box;
     lastInsets.current = insets;
+    lastKeys.current = keys;
 
     const stage = viewport.stage();
     const changed =
@@ -210,10 +266,37 @@ export function useCanvasAnchor({
     // board against), an unchanged layout, or a board that has not laid out.
     if (!changed || !stage || stage.offsetWidth <= 0) {
       viewport.setInsets(insets);
+      // The layout held still, but the SELECTION may not have. A block chosen
+      // while a sheet is already up — inserted from the library, picked out of
+      // the layers list — can be sitting straight under it, and no panel rule
+      // will ever fire for it because no panel moved. Nothing to reveal when
+      // the selection was merely CLEARED: there is no block being asked about
+      // then, and sliding the bare board around would undo a board the seller
+      // parked where they wanted it.
+      const laidOut = stage !== null && stage.offsetWidth > 0;
+      if (laidOut && keys.length > 0 && !sameKeys(previousKeys, keys)) {
+        const view = viewport.get();
+        const anchors = selectionBoxes(stage, keys);
+        viewport.set(
+          () => ({
+            zoom: view.zoom,
+            pan: revealPan({
+              pan: view.pan,
+              zoom: view.zoom,
+              workspace: box,
+              insets,
+              anchor: anchors.withChrome,
+              anchorFallback: anchors.cell,
+            }),
+          }),
+          { animate: true },
+        );
+      }
       return;
     }
 
     const view = viewport.get();
+    const anchors = selectionBoxes(stage, keys);
     const { hold, pan } = reanchorPan({
       pan: view.pan,
       zoom: view.zoom,
@@ -222,7 +305,8 @@ export function useCanvasAnchor({
       workspace: box,
       insets,
       board: boardBox(stage),
-      anchor: selectionBox(stage, keys),
+      anchor: anchors.withChrome,
+      anchorFallback: anchors.cell,
     });
 
     // THE TWO RULES, AT THEIR TWO SPEEDS.

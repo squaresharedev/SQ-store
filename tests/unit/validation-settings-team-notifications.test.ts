@@ -211,10 +211,50 @@ describe("taxSchema", () => {
       tax_vat_id: "",
       tax_country: "",
       seller_address: "",
-      seller_email: "hi@studio.example",
+      seller_email: "hi@studio-builderboy.at",
       seller_phone: "",
     });
-    expect(r.success && r.data.seller_email).toBe("hi@studio.example");
+    expect(r.success && r.data.seller_email).toBe("hi@studio-builderboy.at");
+  });
+
+  // The published contact address is held to more than the format: it is what
+  // a buyer writes to about their order, so an address nobody reads defeats
+  // the reason the field is required at all.
+  it.each([
+    ["a reserved documentation TLD", "hi@studio.example"],
+    ["example.com", "hello@example.com"],
+    ["a placeholder local part", "test@studio-builderboy.at"],
+    ["a no-reply address", "no-reply@studio-builderboy.at"],
+    ["a temp-mail provider", "someone@mailinator.com"],
+  ])("rejects the contact email at %s", (_label, seller_email) => {
+    expect(
+      taxSchema.safeParse({
+        tax_business_name: "",
+        tax_vat_id: "",
+        tax_country: "",
+        seller_address: "",
+        seller_email,
+        seller_phone: "",
+      }).success,
+    ).toBe(false);
+  });
+
+  it("reports a malformed contact email as malformed, not as a placeholder", () => {
+    // A refinement still runs after an earlier one on the same field failed,
+    // so without the re-check inside it "not-an-email" would be answered with
+    // advice about placeholders.
+    const r = taxSchema.safeParse({
+      tax_business_name: "",
+      tax_vat_id: "",
+      tax_country: "",
+      seller_address: "",
+      seller_email: "not-an-email",
+      seller_phone: "",
+    });
+    expect(r.success).toBe(false);
+    const messages = r.success ? [] : r.error.issues.map((issue) => issue.message);
+    expect(messages.some((m) => m.includes("doesn't look like an email"))).toBe(true);
+    expect(messages.some((m) => m.includes("placeholder"))).toBe(false);
   });
   it("rejects a phone number over the length cap", () => {
     expect(

@@ -112,6 +112,7 @@ const PRODUCT: Product = {
   trackStock: false,
   stockQuantity: null,
   lowStockThreshold: 3,
+  maxPerOrder: 10,
 };
 
 /** The catalogue the product tile resolves its name through. */

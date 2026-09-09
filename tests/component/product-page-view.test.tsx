@@ -59,6 +59,7 @@ function product(overrides: Partial<ProductPageProduct> = {}): ProductPageProduc
     digitalFormat: null,
     stock: { state: "low_stock", remaining: 2 },
     soldOut: false,
+    maxQuantity: 2,
     ...overrides,
   };
 }
@@ -219,12 +220,39 @@ describe("ProductPageView", () => {
     });
   });
 
-  it("hides the seller entirely when its switch is off", () => {
+  it("keeps the seller shown even with its switch off: it is a legal disclosure, not a design choice", () => {
     const sections = DEFAULT_PRODUCT_PAGE_CONFIG.sections.map((entry) =>
       entry.id === "seller" ? { ...entry, show: false } : entry,
     );
     render(<ProductPageView page={data({ productPage: { sections } })} mode="public" />);
-    expect(document.querySelector("[data-product-section='seller']")).toBeNull();
+    expect(document.querySelector("[data-product-section='seller']")).not.toBeNull();
+  });
+
+  it("keeps safety and compliance shown even with its switch off, when there is data to disclose", () => {
+    const sections = DEFAULT_PRODUCT_PAGE_CONFIG.sections.map((entry) =>
+      entry.id === "safety" ? { ...entry, show: false } : entry,
+    );
+    render(
+      <ProductPageView
+        page={data({
+          productPage: { sections },
+          product: {
+            details: {
+              materials: "Oak",
+              safety: {
+                manufacturerName: "Studio Ltd",
+                manufacturerAddress: "1 Quay St, Cork",
+                manufacturerEmail: "safety@studio.example",
+              },
+            },
+          },
+        })}
+        mode="public"
+      />,
+    );
+    const block = document.querySelector("[data-product-section='safety']");
+    expect(block).not.toBeNull();
+    expect(within(block as HTMLElement).getByText("Studio Ltd")).toBeInTheDocument();
   });
 
   it("reads the description under the title, and only there", () => {
@@ -611,7 +639,9 @@ describe("ProductPageView", () => {
       />,
     );
     expect(document.querySelector("[data-product-sections]")).toBeNull();
-    expect(document.querySelector("[data-product-section='seller']")).toBeNull();
+    // Seller is mandatory and the fixture has business details, so it stands
+    // regardless of the "off" the hostile config asked for.
+    expect(document.querySelector("[data-product-section='seller']")).not.toBeNull();
     const footer = document.querySelector("[data-product-page-footer]")! as HTMLElement;
     expect(within(footer).getByText(/not a party to the sale/i)).toBeInTheDocument();
     expect(within(footer).getByRole("link", { name: /powered by squareshare/i })).toBeInTheDocument();

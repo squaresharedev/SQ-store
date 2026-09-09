@@ -46,6 +46,15 @@ vi.mock('@/lib/rate-limit', async (importOriginal) => ({
   rateLimit: (...args: unknown[]) => rateLimitMock(...args),
 }));
 
+// The publish gate reads the owner's profile with the SERVICE ROLE, which has
+// no env here. Defaults to "this store may publish"; the embed cases below
+// flip it to assert the gate.
+const publishBlockedMock = vi.fn(async () => null as unknown);
+vi.mock("@/lib/settings/seller-identity", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/settings/seller-identity")>()),
+  publishBlockedError: (...args: unknown[]) => publishBlockedMock(...(args as [])),
+}));
+
 // ---- imports -------------------------------------------------------------
 
 import {
@@ -94,6 +103,7 @@ function validSaveInput(overrides: Record<string, unknown> = {}) {
 beforeEach(() => {
   vi.clearAllMocks();
   rateLimitMock.mockResolvedValue(true);
+  publishBlockedMock.mockResolvedValue(null);
   dbFn.mockResolvedValue({ data: null, error: null });
   for (const m of ["from", "select", "insert", "update", "delete", "eq", "neq", "in", "like"]) {
     db[m].mockReturnValue(db);
@@ -558,6 +568,50 @@ describe("updateEmbedSettings - read-modify-write", () => {
 
     expect(result).toMatchObject({ ok: false, error: { code: "not_found" } });
     expect(db.update).not.toHaveBeenCalled();
+  });
+
+  // Switching embedding on publishes a storefront onto the open web, so it
+  // needs the same trader details a live product does. Switching it OFF never
+  // does — a seller must always be able to pull a storefront back.
+  it("refuses to switch embedding ON for a store that may not publish", async () => {
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+    publishBlockedMock.mockResolvedValue({
+      code: "trader_identity_required",
+      message: "You can't publish or sell until your seller details are complete.",
+      fix: "Add your business address in Settings › Business & seller details, then publish.",
+      action: { href: "/settings/tax#address", label: "Add seller details" },
+    });
+
+    const result = await updateEmbedSettings(STOREFRONT_ID, {
+      enabled: true,
+      domains: ["example.com"],
+    });
+
+    expect(result).toMatchObject({
+      ok: false,
+      error: { code: "trader_identity_required" },
+    });
+    // Refused before the read-modify-write.
+    expect(db.update).not.toHaveBeenCalled();
+  });
+
+  it("still allows switching embedding OFF for the same store", async () => {
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+    publishBlockedMock.mockResolvedValue({
+      code: "trader_identity_required",
+      message: "blocked",
+      fix: "blocked",
+    });
+    dbFn.mockResolvedValueOnce({ data: { config: DEFAULT_STOREFRONT_CONFIG }, error: null });
+    dbFn.mockResolvedValueOnce({ data: { id: STOREFRONT_ID }, error: null });
+
+    const result = await updateEmbedSettings(STOREFRONT_ID, {
+      enabled: false,
+      domains: [],
+    });
+
+    expect(result).toEqual({ ok: true });
+    expect(publishBlockedMock).not.toHaveBeenCalled();
   });
 });
 

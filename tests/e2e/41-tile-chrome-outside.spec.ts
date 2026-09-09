@@ -13,29 +13,32 @@ import {
  * THE CONTROLS FOR A SELECTED TILE DO NOT SIT ON IT, AND ARE STILL PRESSABLE.
  *
  * They used to sit on it: the rotate handle in the bottom-left corner, the
- * resize handle in the bottom-right, and the control chip in whichever corner
- * it could find free. All three are painted OVER the face, which is where the
+ * resize handle in the bottom-right, and a control chip in whichever corner it
+ * could find free. All three were painted OVER the face, which is where the
  * seller has just put a price tag, a product title, or a sold-out badge, so
  * the work kept disappearing under the tools for doing it, and a press meant
  * for a price chip landed on a handle instead.
  *
- * Now every one of them hangs outside the tile, seamlessly: welded to its
- * edge, flush rather than floating apart from it or doubling its border. That
- * move is only an improvement if the controls stay REACHABLE, and chrome
- * outside a tile is drawn over its neighbours in a board where every cell is
- * its own stacking context. Reaching it therefore takes a deliberate lift, and
- * the lift cannot be the pointer's arrival, because the pointer arriving on
- * covered chrome lands on the cover instead.
+ * The BUTTONS have since left the board altogether, into the selection's own
+ * island above the canvas (SelectionToolbar, covered by its own component
+ * spec). What is still drawn per tile, and what this file is about, are the
+ * two HANDLES — resize and rotate — because they are direct manipulation and
+ * have to be on the thing they manipulate. They hang outside the tile,
+ * welded to its bottom edge, flush rather than floating apart from it or
+ * doubling its border. That move is only an improvement if they stay
+ * REACHABLE, and chrome outside a tile is drawn over its neighbours in a board
+ * where every cell is its own stacking context. Reaching it therefore takes a
+ * deliberate lift, and the lift cannot be the pointer's arrival, because the
+ * pointer arriving on covered chrome lands on the cover instead.
  *
  * FLUSH is not the same as TOUCHING EXACTLY. A hairline of overlap
- * (`[data-tile-chrome]`'s `-mb-px` / `-mt-px`) closes any subpixel gap a
- * zoomed stage could round open between two elements measured a fraction of a
- * pixel apart — dead space that belongs to neither the chrome nor the tile,
- * and is exactly where the pointer used to fall through to the free-cell
- * guide behind it. The overlap itself is invisible: the touching edge's own
- * border is dropped (`border-b-0` / `border-t-0`), so it never draws a second
- * line on top of the tile's, which is what an overlap with a border on both
- * sides actually looks like.
+ * (`[data-tile-chrome]`'s `-mt-px`) closes any subpixel gap a zoomed stage
+ * could round open between two elements measured a fraction of a pixel apart —
+ * dead space that belongs to neither the chrome nor the tile, and is exactly
+ * where the pointer used to fall through to the free-cell guide behind it. The
+ * overlap itself is invisible: the touching edge's own border is dropped
+ * (`border-t-0`), so it never draws a second line on top of the tile's, which
+ * is what an overlap with a border on both sides actually looks like.
  *
  * What is checked here, all in the real designer:
  *   - nothing overlaps the tile's face by more than that hairline;
@@ -77,7 +80,7 @@ async function setUpBoardWithProduct(page: Page, tag: string) {
  * Every control drawn for a tile: where it sits relative to the tile's own box,
  * and whether a press there would actually reach it.
  *
- * `[data-tile-chrome]` marks the control itself (the chip, or a bare handle) —
+ * `[data-tile-chrome]` marks the control itself (today, a bare handle) —
  * there is no separate wrapper any more, so `closest(...)` normally just
  * returns the element back to itself. Kept as a lookup rather than read
  * directly in case a future control ever needs one layer of indirection.
@@ -236,10 +239,10 @@ test.describe("a selected tile's controls stay off its face", () => {
     ).toBeVisible();
 
     const rows = await chrome(page);
-    // The four the grid and the tile draw between them: edit, remove, resize,
-    // rotate — plus the product page node. A board that suddenly draws none is
-    // not a pass.
-    expect(rows.length).toBeGreaterThanOrEqual(4);
+    // The two the grid draws: resize and rotate. The buttons live in the
+    // selection island now, off the board entirely. A board that suddenly
+    // draws neither handle is not a pass.
+    expect(rows.length).toBeGreaterThanOrEqual(2);
     for (const row of rows) {
       expect(row.overlapsFace, `${row.label} overlaps the tile`).toBe(false);
       expect(row.reachable, `${row.label} is not pressable`).toBe(true);
@@ -278,19 +281,16 @@ test.describe("a selected tile's controls stay off its face", () => {
   }) => {
     // The hairline overlap that keeps the pointer from ever finding a dead
     // strip (see `chrome()`) is only invisible if the touching edge draws NO
-    // border of its own: a chip or handle with a full border sitting a pixel
-    // into the tile stacks two border lines on top of each other there, and
-    // that doubled, slightly misaligned line is exactly what reads as a
-    // visible overlap glitch rather than a seamless weld.
+    // border of its own: a handle with a full border sitting a pixel into the
+    // tile stacks two border lines on top of each other there, and that
+    // doubled, slightly misaligned line is exactly what reads as a visible
+    // overlap glitch rather than a seamless weld.
     await setUpBoardWithProduct(page, "chromeborder");
     const tile = page.locator("li[data-grid-cell] [data-block-tile]");
     await tile.hover();
 
     const borders = await page.evaluate(() => {
       const cell = document.querySelector<HTMLElement>("li[data-grid-cell]")!;
-      const chip = cell.querySelector<HTMLElement>(
-        'button[aria-label="Remove Enamel Mug from grid"]',
-      )!.closest<HTMLElement>("[data-tile-chrome]")!;
       const resize = cell.querySelector<HTMLElement>(
         'button[aria-label^="Resize"]',
       )!;
@@ -298,15 +298,11 @@ test.describe("a selected tile's controls stay off its face", () => {
         'button[aria-label^="Rotate"]',
       )!;
       return {
-        // The chip sits ABOVE the tile: its BOTTOM edge is the one that
-        // overlaps, so that is the border that must be gone.
-        chipBottom: getComputedStyle(chip).borderBottomWidth,
         // The handles sit BELOW the tile: their TOP edge overlaps.
         resizeTop: getComputedStyle(resize).borderTopWidth,
         rotateTop: getComputedStyle(rotate).borderTopWidth,
       };
     });
-    expect(borders.chipBottom).toBe("0px");
     expect(borders.resizeTop).toBe("0px");
     expect(borders.rotateTop).toBe("0px");
   });
@@ -314,7 +310,7 @@ test.describe("a selected tile's controls stay off its face", () => {
   test("the controls are welded flush to the tile, with no dead strip to lose the pointer in", async ({
     page,
   }) => {
-    // A gap between chip and tile belongs to nobody: crossing it on the way
+    // A gap between handle and tile belongs to nobody: crossing it on the way
     // to a button put the pointer on the free-cell guide underneath, which
     // took `:hover` off the cell, faded the button out, dropped the cell out
     // of the chrome band mid-reach, and lit the guide up as if IT were the
@@ -354,7 +350,7 @@ test.describe("a selected tile's controls stay off its face", () => {
     await tile.hover();
 
     const rows = await chrome(page);
-    expect(rows.length).toBeGreaterThanOrEqual(4);
+    expect(rows.length).toBeGreaterThanOrEqual(2);
     for (const row of rows) {
       expect(row.gap, `${row.label} is not welded flush to the tile`).toBeLessThanOrEqual(0);
     }
@@ -406,29 +402,31 @@ test.describe("a selected tile's controls stay off its face", () => {
   test("a selected tile's controls are pressable with the pointer nowhere near it", async ({
     page,
   }) => {
-    // Selection is a state, not a moment: the chip stays out once a block is
-    // being worked on, so it has to stay PRESSABLE without being hovered back
-    // into reach first.
+    // Selection is a state, not a moment: the handles stay out once a block is
+    // being worked on, so they have to stay PRESSABLE without being hovered
+    // back into reach first.
     await setUpBoardWithProduct(page, "chromeselected");
     const tile = page.locator("li[data-grid-cell] [data-block-tile]");
     await selectAndLeave(page, tile);
 
     const rows = await chrome(page);
-    expect(rows.length).toBeGreaterThanOrEqual(4);
+    expect(rows.length).toBeGreaterThanOrEqual(2);
     for (const row of rows) {
       expect(row.opacity, `${row.label} is invisible while selected`).toBe(1);
       expect(row.reachable, `${row.label} is not pressable`).toBe(true);
     }
 
     // And a real press, through Playwright's own hit-testing: it refuses to
-    // click an element another one would receive the event for.
+    // click an element another one would receive the event for. The page node
+    // is in the selection island now, which is exactly the point — nothing on
+    // the board can be painted over it there.
     await page
-      .locator('li[data-grid-cell] button[data-page-node="closed"]')
+      .locator('[data-selection-toolbar] button[data-page-node="closed"]')
       .click({ timeout: 5_000 });
     // The node itself reports the page is out; the artboard beside the board
     // is 30-product-page's business, not this spec's.
     await expect(
-      page.locator('li[data-grid-cell] button[data-page-node="open"]'),
+      page.locator('[data-selection-toolbar] button[data-page-node="open"]'),
     ).toBeVisible();
   });
 

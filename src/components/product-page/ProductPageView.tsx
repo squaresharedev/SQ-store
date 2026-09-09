@@ -4,7 +4,11 @@ import { cn } from "@/lib/utils";
 import { resolveBackgroundStyle } from "@/components/storefront/background-presets";
 import { CustomFontFace } from "@/components/storefront/CustomFontFace";
 import { customFontVars, fontPresentation } from "@/lib/theme/storefront-fonts";
-import { isEuSeller, PRODUCT_PAGE_SECTION_LABELS } from "@/lib/storefront/product-page";
+import {
+  isEuSeller,
+  MANDATORY_PRODUCT_PAGE_SECTION_IDS,
+  PRODUCT_PAGE_SECTION_LABELS,
+} from "@/lib/storefront/product-page";
 import { resolveProductShipping, resolveReturns } from "@/lib/storefront/shipping";
 import { SECTION_SETTING } from "@/lib/storefront/setting-ref";
 import type { ProductPageData } from "@/types/product-page";
@@ -23,10 +27,13 @@ import { StatutoryNotes } from "./StatutoryNotes";
 import { StockLine } from "./StockLine";
 import { OptionProvider } from "./OptionContext";
 import { OptionPicker } from "./OptionPicker";
+import { QuantityProvider } from "./QuantityContext";
+import { QuantityPicker } from "./QuantityPicker";
 import {
   DARK_INK,
   firstSentence,
   paragraphs,
+  resolveCta,
   resolveInk,
   ruleColor,
   surfaceRadius,
@@ -50,11 +57,15 @@ export function ProductPageView({
   page,
   mode,
   initialOptionIds = NO_OPTIONS,
+  initialQuantity = 1,
 }: {
   page: ProductPageData;
   mode: "public" | "preview";
   /** Preselected options from the URL, already checked against the product. */
   initialOptionIds?: readonly string[];
+  /** From `?q=`, already clamped against this product's own limit by the
+   *  server. The provider re-clamps anyway; neither is what authorizes a sale. */
+  initialQuantity?: number;
 }) {
   const { storefront, product } = page;
   const { theme, productPage, shippingPolicy, seller } = storefront;
@@ -91,6 +102,9 @@ export function ProductPageView({
   const effectiveShippingNote = !product.isDigital && shipping !== null ? productPage.shippingNote : "none" as const;
 
   const ink = resolveInk(theme, productPage);
+  // The buy button's fill, roundness and outline, resolved ONCE for both the
+  // button in the buy box and the one in the sticky bar below it.
+  const cta = resolveCta(productPage, theme);
   const rule = ruleColor(ink);
   const radius = surfaceRadius(theme.cornerRadius);
   // The page's own font falls back to the storefront's, which is what almost
@@ -107,7 +121,14 @@ export function ProductPageView({
   const hasCta = target.kind !== "none" || preview;
 
   const rootStyle: CSSProperties = {
-    ...resolveBackgroundStyle(theme.background, storefront.backgroundImageUrl),
+    // The page's own backdrop when it has one, otherwise the storefront's
+    // whole background — gradient, image and all. Not merged: a page colour
+    // REPLACES the store's background rather than tinting it, so a store on a
+    // photograph does not end up with the photograph showing through the
+    // colour a seller picked to read against.
+    ...(productPage.backgroundColor
+      ? { backgroundColor: productPage.backgroundColor }
+      : resolveBackgroundStyle(theme.background, storefront.backgroundImageUrl)),
     ...customFontVars(theme.customFont, storefront.customFontUrl),
     color: ink,
     ...font.style,
@@ -148,15 +169,19 @@ export function ProductPageView({
   // page a buyer must be able to read without asking for it — the trader
   // identity distance-selling law puts next to the offer — and a shut
   // <details> is exactly asking for it. So it leaves the accordion and stands
-  // open at the foot of the page. Its switch in the Sections panel still
-  // decides whether it appears at all.
-  const sellerShown =
-    (productPage.sections.find((entry) => entry.id === "seller")?.show ?? false) &&
-    (hasSellerDetails(seller) || productPage.showSeller);
+  // open at the foot of the page. Its switch in the Sections panel cannot
+  // turn it off (see MANDATORY_PRODUCT_PAGE_SECTION_IDS); this reads only
+  // whether there is anything to disclose, never the stored show flag, so a
+  // stale or hand-built config gets no more say over it than the panel does.
+  const sellerShown = hasSellerDetails(seller) || productPage.showSeller;
 
-  // Which sections have anything to say, in the seller's order.
+  // Which sections have anything to say, in the seller's order. `safety` is
+  // also mandatory (GPSR), so it is let through here whatever its stored show
+  // flag says; its own case below is what decides whether there is anything
+  // to actually disclose (no data yet, or a digital product GPSR does not
+  // reach, both print nothing, same as always).
   const sections = productPage.sections
-    .filter((entry) => entry.show)
+    .filter((entry) => entry.show || MANDATORY_PRODUCT_PAGE_SECTION_IDS.includes(entry.id))
     .filter((entry) => entry.id !== "description" && entry.id !== "seller")
     .map((entry) => ({ id: entry.id, body: sectionBody(entry.id) }))
     .filter((entry): entry is { id: ProductPageSectionId; body: ReactNode } => entry.body !== null);
@@ -271,227 +296,259 @@ export function ProductPageView({
       initialOptionIds={initialOptionIds}
       syncUrl={!preview}
     >
-      <CustomFontFace customFont={theme.customFont} url={storefront.customFontUrl} />
-      <div
-        className={cn(
-          "@container w-full",
-          font.className,
-          preview ? "min-h-full" : "min-h-screen",
-          hasCta && "pb-24 @3xl:pb-0",
-        )}
-        style={rootStyle}
-        data-product-page={mode}
-        // Outermost hotspot, so it is what a click on the page's own backdrop
-        // finds. Every region inside names its own and wins by being nearer.
-        data-setting-hotspot="background"
+      <QuantityProvider
+        limit={product.maxQuantity}
+        initialQuantity={initialQuantity}
+        syncUrl={!preview}
       >
-        {/* The store's own line above the page. A full-width bar rather than a
-            caption: it is the one piece of chrome that says whose shop this
-            is, and on a full screen it belongs at the top edge. */}
-        <header
-          className="w-full border-b"
-          style={{ borderColor: rule }}
-          data-product-page-header=""
-          data-setting-hotspot="header"
+        <CustomFontFace customFont={theme.customFont} url={storefront.customFontUrl} />
+        <div
+          className={cn(
+            "@container w-full",
+            font.className,
+            preview ? "min-h-full" : "min-h-screen",
+            hasCta && "pb-24 @3xl:pb-0",
+          )}
+          style={rootStyle}
+          data-product-page={mode}
+          // The backdrop as DATA, alongside the button's (see ProductCta): the
+          // resolved colour, and whether it is the page's own or the
+          // storefront's. A reader must never have to parse a style attribute
+          // and re-derive the inheritance to answer "what colour is this page".
+          data-page-background={productPage.backgroundColor ?? "storefront"}
+          data-page-ink={ink}
+          // Outermost hotspot, so it is what a click on the page's own backdrop
+          // finds. Every region inside names its own and wins by being nearer.
+          data-setting-hotspot="background"
         >
-          <div className="mx-auto w-full max-w-[76rem] px-4 py-3 @md:px-6 @3xl:px-10">
-            <p className="truncate text-sm font-medium">{storeName}</p>
-          </div>
-        </header>
+          {/* The store's own line above the page. A full-width bar rather than a
+              caption: it is the one piece of chrome that says whose shop this
+              is, and on a full screen it belongs at the top edge. */}
+          <header
+            className="w-full border-b"
+            style={{ borderColor: rule }}
+            data-product-page-header=""
+            data-setting-hotspot="header"
+          >
+            <div className="mx-auto w-full max-w-[76rem] px-4 py-3 @md:px-6 @3xl:px-10">
+              <p className="truncate text-sm font-medium">{storeName}</p>
+            </div>
+          </header>
 
-        <div className="mx-auto w-full max-w-[76rem] px-4 py-8 @md:px-6 @3xl:px-10 @3xl:py-12">
-          <article aria-labelledby="product-title">
-            {/* ONE arrangement: photos on the left, the buy box on the right,
-                stacking on a narrow container. The mirrored and stacked
-                variants were three ways of saying the same thing, and a narrow
-                screen already stacks on its own. */}
-            <div className="grid items-start gap-8 @3xl:grid-cols-[minmax(0,11fr)_minmax(0,9fr)] @3xl:gap-14">
-              <div data-setting-hotspot="layout">
-                <ProductGallery
-                  images={product.images}
-                  title={product.title}
-                  fit={productPage.imageFit}
-                  radius={radius}
-                  ink={ink}
-                />
-              </div>
-              {/* Sticky beside a tall gallery: scrolling the photos must not
-                  scroll the price and the button off the screen. */}
-              <div className="flex flex-col gap-5 @3xl:sticky @3xl:top-10">
-                <div className="flex flex-col gap-1" data-setting-hotspot="sections">
-                  <h1 id="product-title" className="text-2xl font-semibold leading-tight @md:text-3xl">
-                    {product.title}
-                  </h1>
-                  {productPage.showSeller && (
-                    <p className="text-sm opacity-70" data-product-sold-by="">
-                      Sold by {soldBy}
-                    </p>
-                  )}
-                </div>
-                {descriptionInInfo && (
-                  <div data-setting-hotspot="sections">
-                    <ProductDescription text={product.description} />
-                  </div>
-                )}
-                {/* The price NOTES ("incl. VAT, plus shipping") are set beside
-                    the button's own wording, so the number leads there too. */}
-                <div data-setting-hotspot="cta">
-                  <ProductPrice
-                    priceCents={product.priceCents}
-                    currency={product.currency}
-                    priceNote={effectivePriceNote}
-                    shippingNote={effectiveShippingNote}
-                    isDigital={product.isDigital}
+          <div className="mx-auto w-full max-w-[76rem] px-4 py-8 @md:px-6 @3xl:px-10 @3xl:py-12">
+            <article aria-labelledby="product-title">
+              {/* ONE arrangement: photos on the left, the buy box on the right,
+                  stacking on a narrow container. The mirrored and stacked
+                  variants were three ways of saying the same thing, and a narrow
+                  screen already stacks on its own. */}
+              <div className="grid items-start gap-8 @3xl:grid-cols-[minmax(0,11fr)_minmax(0,9fr)] @3xl:gap-14">
+                <div data-setting-hotspot="layout">
+                  <ProductGallery
+                    images={product.images}
+                    title={product.title}
+                    fit={productPage.imageFit}
+                    radius={radius}
+                    ink={ink}
                   />
                 </div>
-                {productPage.showStock && (
-                  <div data-setting-hotspot="sections">
-                    <StockLine
-                      stock={product.stock}
-                      soldOut={product.soldOut}
+                {/* Sticky beside a tall gallery: scrolling the photos must not
+                    scroll the price and the button off the screen. */}
+                <div className="flex flex-col gap-5 @3xl:sticky @3xl:top-10">
+                  <div className="flex flex-col gap-1" data-setting-hotspot="sections">
+                    <h1 id="product-title" className="text-2xl font-semibold leading-tight @md:text-3xl">
+                      {product.title}
+                    </h1>
+                    {productPage.showSeller && (
+                      <p className="text-sm opacity-70" data-product-sold-by="">
+                        Sold by {soldBy}
+                      </p>
+                    )}
+                  </div>
+                  {descriptionInInfo && (
+                    <div data-setting-hotspot="sections">
+                      <ProductDescription text={product.description} />
+                    </div>
+                  )}
+                  {/* The price NOTES ("incl. VAT, plus shipping") are set beside
+                      the button's own wording, so the number leads there too. */}
+                  <div data-setting-hotspot="cta">
+                    <ProductPrice
+                      priceCents={product.priceCents}
+                      currency={product.currency}
+                      priceNote={effectivePriceNote}
+                      shippingNote={effectiveShippingNote}
                       isDigital={product.isDigital}
-                      digitalFormat={product.digitalFormat}
                     />
                   </div>
-                )}
-                {/* Opted OUT of the hotspots: the options are the PRODUCT's,
-                    not the page's, so a click here has no page setting to
-                    open and must stay nothing but a version choice. */}
-                <div data-setting-skip="">
-                  <OptionPicker radius={radius} ink={ink} />
-                </div>
-                <div data-setting-hotspot="cta">
-                  <ProductCta
-                    target={target}
-                    label={productPage.ctaLabel}
-                    accent={theme.accent}
-                    ink={ink}
-                    cornerRadius={theme.cornerRadius}
-                    soldOut={product.soldOut}
-                    preview={preview}
-                  />
-                </div>
-                {trust.length > 0 && (
-                  <ul
-                    className="flex flex-col gap-2 border-t pt-4 text-xs"
-                    style={{ borderColor: rule }}
-                    data-product-trust=""
-                    // Every line here is the first sentence of a policy the
-                    // seller wrote, so the policies are what a click wants.
-                    data-setting-hotspot="policies"
-                  >
-                    {trust.map(({ icon: Icon, text }) => (
-                      <li key={text} className="flex items-start gap-2">
-                        <Icon
-                          className="mt-px size-3.5 shrink-0 opacity-60"
-                          strokeWidth={2}
-                          aria-hidden="true"
-                        />
-                        <span className="opacity-80">{text}</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            </div>
-
-            {sections.length > 0 && (
-              <div className="mt-10 flex flex-col" data-product-sections={sections.map((s) => s.id).join(" ")}>
-                {/* A named region, not loose bars. The description reads up
-                    beside the photos, so everything down here is reference
-                    material a buyer consults, and it deserves to be announced
-                    as one thing rather than to trail off the buy box. */}
-                <h2 className="pb-3 text-lg font-semibold" data-product-details-heading="">
-                  More details
-                </h2>
-                {sections.map((section, index) => (
-                  <details
-                    key={section.id}
-                    open={index === 0}
-                    className="group border-t py-4 last:border-b"
-                    style={{ borderColor: rule }}
-                    data-product-section={section.id}
-                    data-setting-hotspot={SECTION_SETTING[section.id]}
-                  >
-                    <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-left [&::-webkit-details-marker]:hidden">
-                      <h3 className="text-base font-semibold">
-                        {PRODUCT_PAGE_SECTION_LABELS[section.id]}
-                      </h3>
-                      <ChevronDown
-                        aria-hidden="true"
-                        className="size-4 shrink-0 opacity-60 transition-transform duration-base ease-standard group-open:rotate-180"
-                        strokeWidth={2}
+                  {productPage.showStock && (
+                    <div data-setting-hotspot="sections">
+                      <StockLine
+                        stock={product.stock}
+                        soldOut={product.soldOut}
+                        isDigital={product.isDigital}
+                        digitalFormat={product.digitalFormat}
                       />
-                    </summary>
-                    <div className="pt-3">{section.body}</div>
-                  </details>
-                ))}
+                    </div>
+                  )}
+                  {/* Opted OUT of the hotspots: the options are the PRODUCT's,
+                      not the page's, so a click here has no page setting to
+                      open and must stay nothing but a version choice. */}
+                  <div data-setting-skip="">
+                    <OptionPicker radius={radius} ink={ink} />
+                  </div>
+                  {/* Opted out of the hotspots for the same reason the version
+                      picker is: how many a buyer wants is the ORDER's business,
+                      not a page setting the seller could open and change. The
+                      ceiling behind it is a product field, set on the product
+                      form beside the stock it relates to.
+                      Gone entirely when the product is sold out — the button
+                      already says so, and asking how many of nothing is a
+                      question with no answer. */}
+                  {!product.soldOut && (
+                    <div data-setting-skip="">
+                      <QuantityPicker
+                        priceCents={product.priceCents}
+                        currency={product.currency}
+                        radius={radius}
+                        ink={ink}
+                      />
+                    </div>
+                  )}
+                  <div data-setting-hotspot="cta">
+                    <ProductCta
+                      target={target}
+                      label={productPage.ctaLabel}
+                      cta={cta}
+                      ink={ink}
+                      soldOut={product.soldOut}
+                      preview={preview}
+                    />
+                  </div>
+                  {trust.length > 0 && (
+                    <ul
+                      className="flex flex-col gap-2 border-t pt-4 text-xs"
+                      style={{ borderColor: rule }}
+                      data-product-trust=""
+                      // Every line here is the first sentence of a policy the
+                      // seller wrote, so the policies are what a click wants.
+                      data-setting-hotspot="policies"
+                    >
+                      {trust.map(({ icon: Icon, text }) => (
+                        <li key={text} className="flex items-start gap-2">
+                          <Icon
+                            className="mt-px size-3.5 shrink-0 opacity-60"
+                            strokeWidth={2}
+                            aria-hidden="true"
+                          />
+                          <span className="opacity-80">{text}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
               </div>
-            )}
 
-            {/* THE FOOT OF THE PAGE, open. Not a section in the accordion
-                above: who you are buying from is the last thing a page should
-                make someone click for. */}
-            {sellerShown && (
-              <section
-                className="mt-10 border-t pt-6"
-                style={{ borderColor: rule }}
-                data-product-section="seller"
-                data-setting-hotspot="seller"
-              >
-                <h2 className="pb-3 text-lg font-semibold">
-                  {PRODUCT_PAGE_SECTION_LABELS.seller}
-                </h2>
-                <SellerBlock seller={seller} fallbackName={storefront.name} />
-              </section>
-            )}
-          </article>
-        </div>
+              {sections.length > 0 && (
+                <div className="mt-10 flex flex-col" data-product-sections={sections.map((s) => s.id).join(" ")}>
+                  {/* A named region, not loose bars. The description reads up
+                      beside the photos, so everything down here is reference
+                      material a buyer consults, and it deserves to be announced
+                      as one thing rather than to trail off the buy box. */}
+                  <h2 className="pb-3 text-lg font-semibold" data-product-details-heading="">
+                    More details
+                  </h2>
+                  {sections.map((section, index) => (
+                    <details
+                      key={section.id}
+                      open={index === 0}
+                      className="group border-t py-4 last:border-b"
+                      style={{ borderColor: rule }}
+                      data-product-section={section.id}
+                      data-setting-hotspot={SECTION_SETTING[section.id]}
+                    >
+                      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-left [&::-webkit-details-marker]:hidden">
+                        <h3 className="text-base font-semibold">
+                          {PRODUCT_PAGE_SECTION_LABELS[section.id]}
+                        </h3>
+                        <ChevronDown
+                          aria-hidden="true"
+                          className="size-4 shrink-0 opacity-60 transition-transform duration-base ease-standard group-open:rotate-180"
+                          strokeWidth={2}
+                        />
+                      </summary>
+                      <div className="pt-3">{section.body}</div>
+                    </details>
+                  ))}
+                </div>
+              )}
 
-        {/* `soldBy`, NOT gated on `showSeller`: the switch hides the "Sold by"
-            line beside the price, which is presentation, but the footer's
-            disclosure of who the buyer is contracting with is not the seller's
-            to turn off. See PoweredByFooter's header comment. No `preview`
-            prop: unlike everything else on this page, the footer's links are
-            identically live in both modes (see PoweredByFooter itself). */}
-        <PoweredByFooter ruleColor={rule} sellerName={soldBy} />
+              {/* THE FOOT OF THE PAGE, open. Not a section in the accordion
+                  above: who you are buying from is the last thing a page should
+                  make someone click for. */}
+              {sellerShown && (
+                <section
+                  className="mt-10 border-t pt-6"
+                  style={{ borderColor: rule }}
+                  data-product-section="seller"
+                  data-setting-hotspot="seller"
+                >
+                  <h2 className="pb-3 text-lg font-semibold">
+                    {PRODUCT_PAGE_SECTION_LABELS.seller}
+                  </h2>
+                  <SellerBlock seller={seller} fallbackName={storefront.name} />
+                </section>
+              )}
+            </article>
+          </div>
 
-        {hasCta && (
-          <div
-            className={cn(
-              "inset-x-0 bottom-0 z-20 flex items-center gap-4 border-t bg-white px-4 py-3 @3xl:hidden",
-              preview ? "sticky" : "fixed",
-            )}
-            // Seller-themed surface, not the dashboard's: fixed white bar with
-            // dark ink whatever the storefront background is.
-            style={{ color: DARK_INK, borderColor: "rgba(23,23,23,0.12)" }}
-            data-product-sticky-cta=""
-            data-setting-hotspot="cta"
-          >
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-xs opacity-70">{product.title}</p>
-              <ProductPrice
-                priceCents={product.priceCents}
-                currency={product.currency}
-                priceNote={effectivePriceNote}
-                shippingNote={effectiveShippingNote}
-                isDigital={product.isDigital}
-                size="sm"
+          {/* `soldBy`, NOT gated on `showSeller`: the switch hides the "Sold by"
+              line beside the price, which is presentation, but the footer's
+              disclosure of who the buyer is contracting with is not the seller's
+              to turn off. See PoweredByFooter's header comment. No `preview`
+              prop: unlike everything else on this page, the footer's links are
+              identically live in both modes (see PoweredByFooter itself). */}
+          <PoweredByFooter ruleColor={rule} sellerName={soldBy} />
+
+          {hasCta && (
+            <div
+              className={cn(
+                "inset-x-0 bottom-0 z-20 flex items-center gap-4 border-t bg-white px-4 py-3 @3xl:hidden",
+                preview ? "sticky" : "fixed",
+              )}
+              // Seller-themed surface, not the dashboard's: fixed white bar with
+              // dark ink whatever the storefront background is.
+              style={{ color: DARK_INK, borderColor: "rgba(23,23,23,0.12)" }}
+              data-product-sticky-cta=""
+              data-setting-hotspot="cta"
+            >
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-xs opacity-70">{product.title}</p>
+                <ProductPrice
+                  priceCents={product.priceCents}
+                  currency={product.currency}
+                  priceNote={effectivePriceNote}
+                  shippingNote={effectiveShippingNote}
+                  isDigital={product.isDigital}
+                  size="sm"
+                />
+              </div>
+              {/* The SAME resolved appearance as the button above it: the sticky
+                  bar is a second place to press the one button, not a second
+                  button. Only `ink` differs, because that belongs to the white
+                  bar this one sits on rather than to the button. */}
+              <ProductCta
+                target={target}
+                label={productPage.ctaLabel}
+                cta={cta}
+                ink={DARK_INK}
+                soldOut={product.soldOut}
+                preview={preview}
+                className="w-44 shrink-0"
               />
             </div>
-            <ProductCta
-              target={target}
-              label={productPage.ctaLabel}
-              accent={theme.accent}
-              ink={DARK_INK}
-              cornerRadius={theme.cornerRadius}
-              soldOut={product.soldOut}
-              preview={preview}
-              className="w-44 shrink-0"
-            />
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      </QuantityProvider>
     </OptionProvider>
   );
 }

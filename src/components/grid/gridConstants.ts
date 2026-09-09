@@ -437,6 +437,63 @@ export function reflowBlocks<TData>(
   return { blocks: placed, rows };
 }
 
+/**
+ * Whether a reflowed block still has somewhere to grow on the board it is
+ * actually drawn on right now.
+ *
+ * A repacked board cannot honour a resize's stored coordinates in general
+ * (see Grid's `interactive`), but that is an argument for translating the
+ * result back through the same scale reflow used to shrink it, not for
+ * refusing every tile on the board a corner handle. Only a block already
+ * pressed against the FULL width and the FULL height of the repacked layout
+ * has nowhere left to go — one of the two still open is room enough for the
+ * handle to mean something.
+ */
+export function reflowHasRoom(
+  block: { w: number; h: number },
+  renderColumns: number,
+  renderRows: number,
+): boolean {
+  return block.w < renderColumns || block.h < renderRows;
+}
+
+/**
+ * Turns a corner-resize made on a REPACKED board back into the STORED
+ * design's own column count.
+ *
+ * `origin`/`derived` are the block's box before and after the gesture, both
+ * read off the repacked board the seller was actually dragging on; `real` is
+ * that same block's STORED box, at the design's true column count. The
+ * result is `real` shifted by the SAME delta the gesture made, run through
+ * reflow's own scale (`ratio = renderColumns / designColumns`) and rounded —
+ * "grew by one shown cell" becomes the right number of stored cells,
+ * whichever corner moved and whatever this tile's real column count is.
+ *
+ * A delta survives the column count changing under it; an absolute
+ * coordinate does not, which is the whole reason this exists instead of
+ * simply writing `derived` back as `real`.
+ */
+export function invertReflowResize(
+  origin: GridPlacement,
+  derived: GridPlacement,
+  real: GridPlacement,
+  ratio: number,
+  columns: number,
+  rows: number,
+): GridPlacement {
+  const invert = (delta: number) => Math.round(delta / ratio);
+  return clampToCanvas(
+    {
+      x: real.x + invert(derived.x - origin.x),
+      y: real.y + invert(derived.y - origin.y),
+      w: Math.max(1, real.w + invert(derived.w - origin.w)),
+      h: Math.max(1, real.h + invert(derived.h - origin.h)),
+    },
+    columns,
+    rows,
+  );
+}
+
 // EDGE-GRAB RESIZE. A press near a cell's border resizes from that side
 // (corners combine two sides); a press on the inner surface stays a move.
 // The hit-test and the placement math live here, pure, so the gesture wiring
@@ -636,19 +693,31 @@ export function resizeLocalBox(
     const cellY = Math.floor(local.y);
     const flippedX = cellX < l0;
     const flippedY = cellY < t0;
+    // `local` is read at the CENTRE of whichever cell the hand is over (see
+    // the caller's grab offset), so that the snap below stays put across the
+    // whole cell rather than flipping the moment the hand crosses a line.
+    // The live edge, though, has to track the true grid line: uncorrected, it
+    // sits half a cell short of it the instant the drag starts (the centre of
+    // the anchor's own far cell, not that cell's far edge), which is what
+    // made a fresh grab paint the tile shrinking before the hand had moved at
+    // all. Re-centring it here — the one continuous reading, used on both
+    // sides of a flip so the two halves still meet without a seam — is what
+    // makes a stationary hand paint no change.
+    const liveX = local.x + 0.5;
+    const liveY = local.y + 0.5;
     const build = (snap: boolean): LocalBox => ({
       l: flippedX
-        ? clampSpan(snap ? cellX : local.x, bounds.l, l0)
+        ? clampSpan(snap ? cellX : liveX, bounds.l, l0)
         : l0,
       r: flippedX
         ? l0 + 1
-        : clampSpan(snap ? cellX + 1 : local.x, l0 + 1, bounds.r),
+        : clampSpan(snap ? cellX + 1 : liveX, l0 + 1, bounds.r),
       t: flippedY
-        ? clampSpan(snap ? cellY : local.y, bounds.t, t0)
+        ? clampSpan(snap ? cellY : liveY, bounds.t, t0)
         : t0,
       b: flippedY
         ? t0 + 1
-        : clampSpan(snap ? cellY + 1 : local.y, t0 + 1, bounds.b),
+        : clampSpan(snap ? cellY + 1 : liveY, t0 + 1, bounds.b),
     });
     return {
       live: build(false),

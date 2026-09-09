@@ -243,9 +243,16 @@ test.describe("stacking blocks", () => {
     );
     expect(cells[0]).toBe(cells[1]);
 
-    // And the panel now offers the way back to the one underneath.
+    // And the panel now offers the way back to the one underneath. The hint
+    // lives inside the Layer info tip rather than as standing panel copy (see
+    // PlacementSection), so it has to be opened before it can be read — and
+    // the sentence is matched loosely, since a hint that says the same thing
+    // in more words is not a regression.
+    await page.getByRole("button", { name: "How layering works" }).click();
     await expect(
-      page.getByText("Alt-click a stack to reach the block underneath."),
+      page
+        .getByRole("tooltip")
+        .getByText(/Alt-click a stack.*to reach the block underneath\./),
     ).toBeVisible();
   });
 

@@ -18,10 +18,19 @@ export function SegmentedControl<T extends string>({
   disabled,
 }: {
   value: T;
-  options: readonly { value: T; label: string }[];
+  /**
+   * A segment may be `disabled` on its own, for a choice that exists but is
+   * not available to this user right now — the product form's "Active" for a
+   * seller who has not completed the trader details publishing requires. The
+   * option stays visible on purpose: removing it would hide that the choice
+   * exists at all, and the surface around the control is where the reason
+   * belongs.
+   */
+  options: readonly { value: T; label: string; disabled?: boolean }[];
   onChange: (value: T) => void;
   ariaLabel: string;
   id?: string;
+  /** Disables every segment. Prefer a per-option flag when only one is barred. */
   disabled?: boolean;
 }) {
   return (
@@ -38,7 +47,7 @@ export function SegmentedControl<T extends string>({
             key={option.value}
             type="button"
             aria-pressed={active}
-            disabled={disabled}
+            disabled={disabled || option.disabled}
             onClick={() => onChange(option.value)}
             className={cn(
               "flex-1 border border-border px-3 py-1.5 font-inter text-xs font-medium",

@@ -33,6 +33,7 @@ import {
   type ActionFailure,
 } from "@/lib/errors";
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
+import { publishBlockedError } from "@/lib/settings/seller-identity";
 import {
   listStorefronts,
   type StorefrontsPage,
@@ -544,6 +545,16 @@ export async function updateEmbedSettings(
         "Check the domain list (comma-separated hostnames like example.com) and save again.",
       ),
     );
+  }
+
+  // Switching embedding ON is the act of publishing a storefront onto the open
+  // web, so it needs the same trader details a live product does. Turning it
+  // OFF, or editing the domain allowlist while it is already off, is not
+  // publishing and is never blocked — a seller must always be able to pull a
+  // storefront back, whatever state their settings are in.
+  if (parsed.data.enabled) {
+    const blocked = await publishBlockedError(account.accountId);
+    if (blocked) return failure(blocked);
   }
 
   const supabase = await createClient();

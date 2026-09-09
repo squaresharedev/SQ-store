@@ -19,6 +19,7 @@ import {
   uploadFailed,
   type ActionError,
 } from "@/lib/errors";
+import { publishBlockedError } from "@/lib/settings/seller-identity";
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
 import {
   NEW_DOCUMENT_KEYS_PER_SAVE_MAX,
@@ -308,6 +309,27 @@ const STALE_OPTION_ERROR = invalidInput(
   "Reassign or untag that photo, then save again.",
 );
 
+/**
+ * The publish gate for a product write.
+ *
+ * `active` is the status that puts a product in front of buyers, so it is the
+ * status that needs the seller's trader details disclosed alongside it.
+ * Returns `null` when the write may proceed.
+ *
+ * DRAFTS ARE NEVER BLOCKED. A seller must be able to build their catalogue
+ * before they have filled in their business address — the gate is about
+ * offering, not about authoring. That is also what makes the refusal
+ * actionable: a blocked save always has "save it as a draft" as its other way
+ * out, so nobody loses work they typed.
+ */
+async function publishGate(
+  accountId: string,
+  status: ProductWriteInput["status"],
+): Promise<ActionError | null> {
+  if (status !== "active") return null;
+  return publishBlockedError(accountId);
+}
+
 export async function createProduct(
   input: unknown,
 ): Promise<ProductActionResult> {
@@ -325,6 +347,11 @@ export async function createProduct(
   const parsed = parseWrite(account.userId, input);
   if ("error" in parsed) return failure(parsed.error);
   const { data } = parsed;
+
+  // Before any upload verification or write: a product that would go straight
+  // on sale needs the seller's trader details on file.
+  const blocked = await publishGate(account.accountId, data.status);
+  if (blocked) return failure(blocked);
 
   // A new row has no stored photos, documents or options: every key is new,
   // and a tied photo must name an option in this same payload.
@@ -349,6 +376,10 @@ export async function createProduct(
       stock_quantity:
         (data.trackStock ?? false) ? (data.stockQuantity ?? null) : null,
       low_stock_threshold: data.lowStockThreshold ?? 5,
+      // Absent leaves the column's own default (MAX_PER_ORDER_DEFAULT), so a
+      // payload from an older client or the CSV import still lands on a
+      // concrete, bounded ceiling rather than on "no limit".
+      ...(data.maxPerOrder !== undefined ? { max_per_order: data.maxPerOrder } : {}),
       gallery: toJson(data.gallery ?? []),
       option_groups: toJson(data.optionGroups ?? []),
       details: toJson(data.details ?? {}),
@@ -386,6 +417,14 @@ export async function updateProduct(
   const parsed = parseWrite(account.userId, input);
   if ("error" in parsed) return failure(parsed.error);
   const { data } = parsed;
+
+  // Same gate as create, and it applies to a product that is ALREADY active:
+  // an existing listing whose seller has since cleared their contact email is
+  // not grandfathered in. The refusal is deliberately a refusal rather than a
+  // silent demotion to draft — quietly unpublishing someone's shop from under
+  // them is a worse answer than telling them why the save did not go through.
+  const blocked = await publishGate(account.accountId, data.status);
+  if (blocked) return failure(blocked);
 
   const supabase = await createClient();
 
@@ -466,6 +505,12 @@ export async function updateProduct(
   }
   if (data.lowStockThreshold !== undefined) {
     update.low_stock_threshold = data.lowStockThreshold;
+  }
+  // Not tied to trackStock: the per-order ceiling applies to unlimited products
+  // too, so it is written whenever the payload states it and left alone when it
+  // does not.
+  if (data.maxPerOrder !== undefined) {
+    update.max_per_order = data.maxPerOrder;
   }
 
   const { data: row, error } = await supabase

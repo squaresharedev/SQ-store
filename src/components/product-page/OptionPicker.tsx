@@ -1,11 +1,12 @@
 "use client";
 
 import { useRef, type CSSProperties, type KeyboardEvent } from "react";
-import { Check, ChevronDown } from "lucide-react";
+import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { isStrictHexColor } from "@/lib/validation/inputs";
 import type { ProductOption, ProductOptionGroup } from "@/types/product";
-import { controlRadius, readableOn } from "./product-page-maps";
+import { controlRadius, readableOn, subtleFill } from "./product-page-maps";
+import { PageSelect } from "./PageSelect";
 import { useOptionSelection } from "./OptionContext";
 
 /**
@@ -79,38 +80,22 @@ function OptionGroupControl({
     return (
       <div className="flex flex-col gap-2" data-product-option-group={group.id}>
         {label}
-        {/* The native arrow goes with `appearance-none` (needed to paint the
-            control in the seller's ink rather than the OS chrome), so one is
-            drawn back on: a box with no arrow does not read as a dropdown.
-            `pointer-events-none` keeps the click on the select underneath. */}
-        <div className="relative w-full max-w-xs">
-          <select
-            aria-label={group.name}
-            value={chosen?.id ?? ""}
-            onChange={(event) => select(group.id, event.target.value)}
-            className="w-full appearance-none bg-transparent py-2 pl-3 pr-9 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-            style={{
-              borderRadius: `${controlRadius(radius)}px`,
-              boxShadow: hairlineStrong(ink),
-              color: ink,
-              outlineColor: ink,
-            }}
-          >
-            {group.options.map((option) => (
-              // Kept in the list so the name is still readable, but disabled
-              // so it cannot be chosen — the same bargain the swatches and
-              // chips strike visually.
-              <option key={option.id} value={option.id} disabled={!option.available}>
-                {option.available ? option.name : `${option.name} — unavailable`}
-              </option>
-            ))}
-          </select>
-          <ChevronDown
-            aria-hidden="true"
-            className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 opacity-60"
-            strokeWidth={2}
-          />
-        </div>
+        <PageSelect
+          label={group.name}
+          value={chosen?.id ?? ""}
+          onChange={(optionId) => select(group.id, optionId)}
+          radius={radius}
+          ink={ink}
+          className="w-full max-w-xs"
+          options={group.options.map((option) => ({
+            value: option.id,
+            // Kept in the list so the name is still readable, but disabled so
+            // it cannot be chosen — the same bargain the swatches and chips
+            // strike visually.
+            label: option.available ? option.name : `${option.name} — unavailable`,
+            disabled: !option.available,
+          }))}
+        />
       </div>
     );
   }
@@ -189,7 +174,7 @@ function SwatchOption(props: OptionButtonProps) {
       )}
       style={{
         borderRadius: `${Math.min(radius, 999)}px`,
-        backgroundColor: swatch ?? neutralFill(ink),
+        backgroundColor: swatch ?? subtleFill(ink),
         color: swatch ? readableOn(swatch) : ink,
         boxShadow: checked ? checkedRing(ink) : hairline(ink),
         outlineColor: ink,
@@ -223,7 +208,7 @@ function ChipOption(props: OptionButtonProps) {
       )}
       style={{
         borderRadius: `${controlRadius(radius)}px`,
-        backgroundColor: checked ? neutralFill(ink) : "transparent",
+        backgroundColor: checked ? subtleFill(ink) : "transparent",
         color: ink,
         boxShadow: checked ? checkedRing(ink) : hairline(ink),
         outlineColor: ink,
@@ -248,11 +233,6 @@ function StrikeThrough({ color, className }: { color: string; className?: string
   );
 }
 
-/** A fill that reads on either ink, for a swatch-less chip. */
-function neutralFill(ink: string): string {
-  return ink === "#ffffff" ? "rgba(255,255,255,0.14)" : "rgba(23,23,23,0.06)";
-}
-
 /** The double ring on the chosen option: a gap in the page's own ground, then
  *  the ink, so it reads on a swatch of any colour. */
 function checkedRing(ink: string): CSSProperties["boxShadow"] {
@@ -262,10 +242,4 @@ function checkedRing(ink: string): CSSProperties["boxShadow"] {
 
 function hairline(ink: string): CSSProperties["boxShadow"] {
   return `inset 0 0 0 1px ${ink === "#ffffff" ? "rgba(255,255,255,0.35)" : "rgba(23,23,23,0.15)"}`;
-}
-
-/** The dropdown's border. A shade stronger than a chip's, because a select is
- *  a box the viewer has to find rather than one of a row of buttons. */
-function hairlineStrong(ink: string): CSSProperties["boxShadow"] {
-  return `inset 0 0 0 1px ${ink === "#ffffff" ? "rgba(255,255,255,0.35)" : "rgba(23,23,23,0.25)"}`;
 }

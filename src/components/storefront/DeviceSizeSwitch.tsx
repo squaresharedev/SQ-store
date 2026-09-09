@@ -40,6 +40,7 @@ export function DeviceSizeSwitch({
           <Tooltip key={id} label={labels[id]}>
             <button
               type="button"
+              suppressHydrationWarning
               onClick={() => onChange(id)}
               aria-pressed={device === id}
               aria-label={labels[id]}

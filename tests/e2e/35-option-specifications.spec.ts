@@ -4,6 +4,7 @@ import {
   freshUser,
   gotoApp,
   seedProducts,
+  PUBLISHABLE_SELLER,
   seedSellerIdentity,
   seedStorefronts,
   serviceRest,
@@ -99,10 +100,11 @@ test("a version states its own measurements, and the page shows them", async ({ 
   )) as { id: string; title: string }[];
   const productId = products[0]!.id;
 
+  // The address is required too, or the publish gate 404s the page below.
   await seedSellerIdentity(sellerId, {
+    ...PUBLISHABLE_SELLER,
     businessName: "Table Studio Ltd",
     email: "hi@table.example",
-    country: "IE",
   });
   await serviceRest(`/storefronts?id=eq.${storefrontId}`, {
     method: "PATCH",

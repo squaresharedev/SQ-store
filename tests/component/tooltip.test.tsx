@@ -126,4 +126,59 @@ describe("Tooltip", () => {
       "rotate-45",
     );
   });
+
+  /**
+   * The storefront canvas pans by writing a CSS transform straight to the
+   * stage element every animation frame (useCanvasViewport) — no scroll or
+   * resize event fires for that. A trigger riding along used to leave its
+   * tooltip behind, stuck at the screen position it opened at. Placement now
+   * re-measures every animation frame instead of waiting for scroll/resize,
+   * so this drives that directly: move the trigger (jsdom has no layout
+   * engine, so "moving" it means stubbing its own getBoundingClientRect,
+   * exactly what a real CSS transform would change) and confirm the bubble's
+   * position is recomputed without any scroll or resize event at all.
+   */
+  it("keeps following its trigger across animation frames, with no scroll or resize event", async () => {
+    renderTip();
+    fireEvent.focus(trigger());
+    const bubble = () => document.querySelector("[data-tooltip]") as HTMLElement;
+    expect(bubble()).not.toBeNull();
+
+    const anchor = trigger().parentElement!;
+    anchor.getBoundingClientRect = () =>
+      ({
+        top: 100,
+        left: 100,
+        bottom: 130,
+        right: 150,
+        width: 50,
+        height: 30,
+        x: 100,
+        y: 100,
+        toJSON() {},
+      }) as DOMRect;
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    const before = { top: bubble().style.top, left: bubble().style.left };
+
+    anchor.getBoundingClientRect = () =>
+      ({
+        top: 300,
+        left: 300,
+        bottom: 330,
+        right: 350,
+        width: 50,
+        height: 30,
+        x: 300,
+        y: 300,
+        toJSON() {},
+      }) as DOMRect;
+    // No scroll, no resize — just letting the rAF loop tick.
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+
+    expect(bubble().style.top).not.toBe(before.top);
+    expect(bubble().style.left).not.toBe(before.left);
+    expect(bubble().style.top).toBe("338px");
+    expect(bubble().style.left).toBe("325px");
+  });
 });

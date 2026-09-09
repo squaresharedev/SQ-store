@@ -83,6 +83,9 @@ const NO_STOREFRONTS: StorefrontAttentionInfo = {
 const HEALTHY_PROFILE: ProfileAttentionData = {
   taxBusinessName: "Acme Prints",
   sellerEmail: "acme@example.com",
+  // All three trader fields set: this profile can publish, so the gate's
+  // attention row stays out of every test that does not ask for it.
+  sellerAddress: "12 Market Street, Dublin",
   shippingPolicySet: true,
   legalAcceptedVersion: LEGAL_VERSION,
 };
@@ -260,11 +263,34 @@ describe("needs-attention destinations", () => {
     const item = build({
       profile: { ...HEALTHY_PROFILE, taxBusinessName: null },
     }).get("no-seller-identity");
-    expect(item?.href).toBe("/settings/tax");
-    expect(item?.actionLabel).toBe("Add name");
+    // Deep-links to the field that is actually blank, not to the page's top.
+    expect(item?.href).toBe("/settings/tax#business-name");
+    expect(item?.actionLabel).toBe("Add seller details");
+    expect(item?.label).toBe("You can't publish or sell yet");
   });
 
-  it("hides the no-seller-identity row when business name is set", () => {
+  it("adds the no-seller-identity row for a missing address or contact email", () => {
+    // Each required trader field blocks publishing on its own; the row names
+    // whichever ones are missing and points at the first of them.
+    const noAddress = build({
+      profile: { ...HEALTHY_PROFILE, sellerAddress: null },
+    }).get("no-seller-identity");
+    expect(noAddress?.href).toBe("/settings/tax#address");
+    expect(noAddress?.description).toContain("business address");
+
+    const noEmail = build({
+      profile: { ...HEALTHY_PROFILE, sellerEmail: null },
+    }).get("no-seller-identity");
+    expect(noEmail?.href).toBe("/settings/tax#contact-email");
+    expect(noEmail?.description).toContain("contact email");
+
+    const neither = build({
+      profile: { ...HEALTHY_PROFILE, sellerAddress: null, sellerEmail: null },
+    }).get("no-seller-identity");
+    expect(neither?.description).toContain("business address and contact email");
+  });
+
+  it("hides the no-seller-identity row when every required trader field is set", () => {
     expect(
       build({ profile: { ...HEALTHY_PROFILE, taxBusinessName: "Acme" } }).get(
         "no-seller-identity",

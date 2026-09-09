@@ -1,7 +1,6 @@
 "use client";
 
 import { memo, useEffect, useRef, useState } from "react";
-import { Crop, FileText, Type, X } from "lucide-react";
 import type { Product } from "@/types/product";
 import {
   DEFAULT_IMAGE_PLACEMENT,
@@ -23,7 +22,6 @@ import {
   type SpotArrow,
 } from "@/lib/storefront/tile-spots";
 import { cn } from "@/lib/utils";
-import { Tooltip } from "@/components/ui/Tooltip";
 import { BlockFace } from "./BlockFace";
 import type {
   InlineFormatKey,
@@ -38,64 +36,35 @@ import {
   type TileSpotDrag,
 } from "./TileSpotDragLayer";
 
-/** Small square control button used in tile chrome. */
-export const TILE_CONTROL_CLASS =
-  "inline-flex size-6 items-center justify-center rounded-none text-muted-foreground transition-colors duration-base ease-standard hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none disabled:pointer-events-none disabled:opacity-40";
-
 /**
- * The chip that holds tile controls, revealed on hover/focus for fine pointers
- * (the surrounding grid cell is the `group`) and kept out for as long as the
- * tile is selected.
+ * THE FOOTPRINT: the room the block actually takes on the board, outlined
+ * faintly while the tile is hovered, focused or selected.
  *
- * ABOVE the tile, outside it. It used to sit in whichever corner nothing else
- * had claimed, which was a losing game: a title band spans a whole row, a price
- * tag can float to any of seven spots, and the chip is painted over both — so
- * the seller's own work kept disappearing under the controls for editing it.
- * Out here there is no corner to compete for, and the tile's face is never
- * covered by its own chrome. The grid's resize and rotate handles hang out of
- * the opposite edge for the same reason.
+ * A tile's painted face need not reach its own box. Turn the corner radius up
+ * and a product card becomes a circle inside a square cell — and the block
+ * still occupies the square, which is what the grid packs against, what the
+ * resize and rotate handles hang off, and what a neighbour is pushed away
+ * from. Without this outline none of that is visible: the seller sees a circle
+ * and has to guess where it really ends.
  *
- * SEAMLESS, not floating and not merely touching: the chip is meant to read as
- * a tab growing out of the tile, one continuous shape, not a separate pill
- * parked near it. Three things make that read correctly rather than as a
- * glitch:
- *
- *   - FLUSH, with a hairline of overlap (`-mb-px`) rather than sitting exactly
- *     at the edge. A subpixel gap is possible wherever a zoomed stage rounds
- *     two elements' coordinates a fraction of a pixel apart, and that sliver
- *     is dead space for the pointer — it belongs to neither this chip nor the
- *     tile, so crossing it drops `:hover` off the cell and fades the chip out
- *     from under the hand reaching for it.
- *   - NO BORDER on the edge that overlaps (`border-b-0`). A chip with a full
- *     border sitting a pixel into the tile draws TWO border lines on top of
- *     each other there — the chip's own bottom edge and the tile's top edge —
- *     which is what actually reads as an overlap: a visibly doubled, slightly
- *     misaligned line. Dropping the chip's own bottom border leaves only the
- *     tile's line showing through, so the seam disappears instead of doubling.
- *   - ROUNDED ONLY ON TOP. The touching corners stay square so the chip's
- *     silhouette continues the tile's own top edge instead of notching into
- *     it; the far corners are rounded, which is what still reads it as a
- *     control and not a permanent extension of the tile itself.
- *
- * Hidden chrome takes no presses either (`pointer-events-none` while
- * transparent). An invisible chip still hit-tests, and this one hangs over the
- * cell above, which on this board is a free cell whose whole job is to be
- * clicked.
+ * `-inset-px` is exact rather than approximate: it puts this border in the
+ * SAME 1px ring as the tile's own, so on a square-cornered card the two
+ * coincide and no line is drawn twice; on a rounded one the tile's border
+ * curves inward and only this one still passes through the corners, which is
+ * where the outline is needed and nowhere else. Faint, and never coloured by
+ * selection: it is a hint about space, not a second selection ring on top of
+ * the one the tile already draws.
  */
-export const TILE_CONTROL_CHIP_CLASS = cn(
-  "absolute bottom-full right-0 z-20 -mb-px flex items-center gap-0.5 p-0.5",
-  "rounded-t-sm rounded-b-none border border-b-0 border-border bg-background/95",
-  // Selected chrome takes the selection's own colour, so the chip reads as an
-  // edge of the tile that is ringed rather than as a widget parked on it.
-  "group-has-[[data-block-selected]]:border-ring",
+const TILE_FOOTPRINT_CLASS = cn(
+  // Square on purpose: the tile root inherits the cell's radius, this does not.
+  "pointer-events-none absolute -inset-px border border-border/60",
   "transition-opacity duration-base ease-standard motion-reduce:transition-none",
-  "pointer-fine:pointer-events-none pointer-fine:opacity-0",
-  "pointer-fine:group-hover:pointer-events-auto pointer-fine:group-hover:opacity-100",
-  "pointer-fine:group-focus-within:pointer-events-auto pointer-fine:group-focus-within:opacity-100",
-  // Selected is a state, not a moment: the controls for the block being worked
-  // on stay out and stay pressable whether or not the pointer is on it.
-  "pointer-fine:group-has-[[data-block-selected]]:pointer-events-auto",
-  "pointer-fine:group-has-[[data-block-selected]]:opacity-100",
+  // The same three states the grid's own handles answer to, so the outline and
+  // the handles that hang off it always arrive together.
+  "opacity-0",
+  "group-hover:opacity-100",
+  "group-focus-within:opacity-100",
+  "group-has-[[data-block-selected]]:opacity-100",
 );
 
 /**
@@ -134,9 +103,6 @@ export const BlockTile = memo(function BlockTile({
   isTyping = false,
   typingSelectAll = false,
   onToggleEdit,
-  onRemove,
-  onOpenPage,
-  pageOpen = false,
   onFrame,
   onFramePlacement,
   onFrameExit,
@@ -146,6 +112,7 @@ export const BlockTile = memo(function BlockTile({
   onTextRangeChange,
   onTypeEnd,
   onSpotChange,
+  onOpenSpotSetting,
 }: {
   /** Identity handed back to the callbacks, so they can stay stable. */
   blockKey: string;
@@ -164,11 +131,6 @@ export const BlockTile = memo(function BlockTile({
   isSoleSelection?: boolean;
   /** True when this text tile's words are being typed on the tile. */
   isTyping?: boolean;
-  /** Product tiles only: open this product's page as an artboard beside the
-   *  board. Absent on every read-only path, which then draws no node. */
-  onOpenPage?: (productId: string) => void;
-  /** True when that page is already out, so the node reads as connected. */
-  pageOpen?: boolean;
   /** Open the editor with everything selected (a block whose text is still
    *  the placeholder it was inserted with). */
   typingSelectAll?: boolean;
@@ -176,7 +138,6 @@ export const BlockTile = memo(function BlockTile({
    *  omit them). `additive` is true for shift-clicks: add to / remove from
    *  the selection instead of replacing it. */
   onToggleEdit?: (key: string, additive?: boolean) => void;
-  onRemove?: (key: string) => void;
   /** Enter frame mode on this tile. */
   onFrame?: (key: string) => void;
   onFramePlacement?: (key: string, placement: ImagePlacement) => void;
@@ -193,6 +154,9 @@ export const BlockTile = memo(function BlockTile({
   /** Product blocks: the seller dragged (or arrowed) the title or the price to
    *  a new home. `below` only ever arrives for the price. */
   onSpotChange?: (key: string, token: SpotToken, drop: SpotDrop) => void;
+  /** Product blocks: the seller PRESSED one of the two labels without moving
+   *  it, which asks for the controls that shape it. */
+  onOpenSpotSetting?: (key: string, token: SpotToken) => void;
 }) {
   // Include the text content so several text blocks stay distinguishable to
   // screen readers.
@@ -441,11 +405,18 @@ export const BlockTile = memo(function BlockTile({
           // Nothing to write when the token is already against that edge.
           if (lifting || next !== from) onSpotChange?.(blockKey, token, next);
         },
-        // A press that moved the token is not also a click on the tile. One
-        // that never moved is, so tapping a label still selects as before.
-        onTokenClick: (event) => {
-          if (movedRef.current) event.stopPropagation();
+        // A press on a token is the TOKEN's press, never the tile's, so it
+        // stops here either way. What it means depends on whether it moved:
+        // a drag has already written the new spot, and a press that did not
+        // move is a seller pointing at the thing they want to change, which
+        // opens that label's own settings. Pointing at it beats hunting for
+        // the section that owns it, and it is the only route in that does not
+        // require knowing the panel's layout first.
+        onTokenClick: (token, event) => {
+          event.stopPropagation();
+          const dragged = movedRef.current;
           movedRef.current = false;
+          if (!dragged) onOpenSpotSetting?.(blockKey, token);
         },
       }
     : undefined;
@@ -591,97 +562,20 @@ export const BlockTile = memo(function BlockTile({
         />
       )}
 
-      {/* Tile controls. Revealed on hover/focus for fine pointers (the grid
-          cell is the `group`); always visible on coarse pointers, and kept
-          out for as long as the tile is selected (TILE_CONTROL_CHIP_CLASS's
-          own `group-has-[[data-block-selected]]` variants answer that, so
-          nothing here has to). Hidden while framing: the tile is a
-          single-purpose surface then, and a Remove button under a dragging
-          finger is a trap.
-          PLT-02: Outer div is no longer role="button", so these buttons are
-          no longer nested-interactive; selecting the tile is a plain click
-          on it (or Enter/Space when focused), so there is no "Select" button
-          here to do that job. The one control unique to a PRODUCT tile, its
-          page node, leads the chip instead, in the spot Select used to hold. */}
-      {editable &&
-        !isFraming &&
-        !isTyping &&
-        (onRemove ||
-          framable ||
-          typable ||
-          (block.type === "product" && onOpenPage && isSoleSelection)) && (
-          <div data-tile-chrome="" className={TILE_CONTROL_CHIP_CLASS}>
-            {/* THE PAGE NODE. A product tile is a door: this is the handle on
-                it. Clicking it puts that product's page on the canvas beside
-                the board, joined to this tile by a line, so the thing a buyer
-                taps and the thing they land on are visible at the same time.
-
-                Only on the sole selection: a node on every tile at once would
-                turn the board into a diagram, and the seller has already said
-                which product they mean by clicking it. Leads the chip, where
-                the tile's own Select control used to sit: a product tile has
-                nothing left to put there now that selecting is a plain click
-                on the tile, and this is the one action every other tile kind
-                lacks. */}
-            {block.type === "product" && onOpenPage && isSoleSelection && (
-              <Tooltip label={pageOpen ? "Hide product page" : "Open product page"}>
-                <button
-                  type="button"
-                  data-page-node={pageOpen ? "open" : "closed"}
-                  // The grid starts a move on pointerdown; the node is not a drag.
-                  onPointerDown={(event) => event.stopPropagation()}
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    onOpenPage(block.productId);
-                  }}
-                  aria-pressed={pageOpen}
-                  aria-label={
-                    pageOpen
-                      ? `Close the product page for ${label}`
-                      : `Open the product page for ${label}`
-                  }
-                  className={cn(TILE_CONTROL_CLASS, pageOpen && "bg-accent text-foreground")}
-                >
-                  <FileText className="size-3.5" strokeWidth={2} aria-hidden="true" />
-                </button>
-              </Tooltip>
-            )}
-            {/* Type. Same reasoning as Frame below: double-tap is not a gesture
-                to hand a text field to on touch. */}
-            {typable && (
-              <button
-                type="button"
-                onClick={() => onTypeStart?.(blockKey)}
-                aria-label={`Edit the text of ${label}`}
-                className={TILE_CONTROL_CLASS}
-              >
-                <Type className="size-3.5" strokeWidth={2} aria-hidden="true" />
-              </button>
-            )}
-            {/* Frame. The only route in on touch that is worth trusting --
-                double-tap is unreliable on iOS, where the browser claims it. */}
-            {framable && (
-              <button
-                type="button"
-                onClick={() => onFrame?.(blockKey)}
-                aria-label={`Frame the image for ${label}`}
-                className={TILE_CONTROL_CLASS}
-              >
-                <Crop className="size-3.5" strokeWidth={2} aria-hidden="true" />
-              </button>
-            )}
-            {onRemove && (
-              <button
-                type="button"
-                onClick={() => onRemove(blockKey)}
-                aria-label={`Remove ${label} from grid`}
-                className={cn(TILE_CONTROL_CLASS, "hover:text-destructive")}
-              >
-                <X className="size-3.5" strokeWidth={2} aria-hidden="true" />
-              </button>
-            )}
-          </div>
-        )}
+      {/* The room this block takes on the board. It is all that is left of the
+          tile's own chrome: the buttons moved off the artwork entirely, into
+          the selection's island above the canvas (see SelectionToolbar), and
+          what remains here is the one thing that has to be drawn ON the board
+          because it is about the board — where this block's edges actually
+          run, which a rounded or circular face no longer shows. Hidden while
+          framing or typing, when the tile is a single-purpose surface. */}
+      {editable && !isFraming && !isTyping && (
+        <div
+          aria-hidden="true"
+          data-tile-footprint=""
+          className={TILE_FOOTPRINT_CLASS}
+        />
+      )}
 
       {/* The framing surface sits ABOVE the face and owns every gesture that
           lands on it, which is what keeps a drag here from moving the block. */}

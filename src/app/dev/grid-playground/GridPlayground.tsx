@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { pageShellClass } from "@/components/ui/surface-styles";
 import { secondaryButtonClass } from "@/components/ui/control-styles";
 import {
@@ -16,7 +16,12 @@ import type { Product } from "@/types/product";
 import type { GridPlacement } from "@/components/grid/gridConstants";
 import { Grid } from "@/components/grid/Grid";
 import { BlockTile } from "@/components/storefront/BlockTile";
+import { SelectionToolbar } from "@/components/storefront/SelectionToolbar";
 import { gridGapStyle, scaledCornerRadius } from "@/components/storefront/config-maps";
+import {
+  useCanvasViewport,
+  useZoomValue,
+} from "@/components/storefront/useCanvasViewport";
 
 /**
  * Live editable-grid harness. Renders the same Grid + BlockTile pair the
@@ -76,7 +81,11 @@ const PRODUCT: Product = {
   trackStock: false,
   stockQuantity: null,
   lowStockThreshold: 3,
+  maxPerOrder: 10,
 };
+
+/** The catalogue, as the toolbar wants it: one product, by id. */
+const PRODUCTS_BY_ID = new Map([[PRODUCT.id, PRODUCT]]);
 
 const PRODUCT_BLOCK: ProductBlock = {
   type: "product",
@@ -107,12 +116,40 @@ const INITIAL_BLOCKS: StorefrontBlock[] = [
     w: 2,
     h: 1,
   }),
+  // A ROUNDED SQUARE WITH A THICK OUTLINE, which is the one combination that
+  // used to render wrong: a CSS border subtracts its own width from the outer
+  // radius, so the inside of the stroke came out dead sharp against a rounded
+  // outside. Both edges should curve by the same amount now.
+  {
+    ...shape("00000000-0000-4000-8000-000000000004", "square", "#f59e0b", {
+      x: 0,
+      y: 4,
+      w: 2,
+      h: 2,
+    }),
+    roundness: 24,
+    borderWidth: 12,
+    borderColor: "#171717",
+  } as StorefrontBlock,
 ];
 
 export function GridPlayground() {
   const [blocks, setBlocks] = useState(INITIAL_BLOCKS);
   const [round, setRound] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
+  /** Pan + zoom, wired the same way the real designer's stage is — so the
+   *  quick bar's "does it stay a fixed size while the board zooms" behaviour
+   *  can actually be exercised here instead of only argued about from the
+   *  source. */
+  const viewport = useCanvasViewport({ zoom: 1, pan: { x: 0, y: 0 } });
+  const zoomPct = Math.round(useZoomValue(viewport) * 100);
+  const registerStage = useCallback(
+    (node: HTMLDivElement | null) => viewport.registerStage(node),
+    [viewport],
+  );
+  function setZoom(zoom: number) {
+    viewport.set((current) => ({ ...current, zoom }));
+  }
   /** The tile whose photo is being framed, if any — the harness's stand-in for
    *  the designer's own frame mode, so the crop surface can be driven here. */
   const [framing, setFraming] = useState<string | null>(null);
@@ -120,6 +157,9 @@ export function GridPlayground() {
    *  it is CHROME ON THE TILE: it has to be rendered for the board to prove
    *  that selecting a product does not shift the tile's own contents. */
   const [pageOpen, setPageOpen] = useState(false);
+  /** The last panel the selection toolbar asked for, echoed below the board:
+   *  the harness has no colour panel or inspector to open. */
+  const [lastPanel, setLastPanel] = useState<string | null>(null);
 
   const theme = {
     ...DEFAULT_STOREFRONT_CONFIG.theme,
@@ -165,91 +205,160 @@ export function GridPlayground() {
         bright part at every zoom.
       </p>
 
-      <button
-        type="button"
-        onClick={() => setRound((r) => !r)}
-        className={secondaryButtonClass + " mt-4"}
-      >
-        {round ? "Sharp corners" : "Round corners (circle)"}
-      </button>
+      <div className="mt-4 flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setRound((r) => !r)}
+          className={secondaryButtonClass}
+        >
+          {round ? "Sharp corners" : "Round corners (circle)"}
+        </button>
+        {/* Real pan/zoom, wired the same way as the designer's own stage —
+            see viewport above — so the quick bar's fixed-size claim can
+            actually be checked at a zoom other than 100%. */}
+        <button
+          type="button"
+          onClick={() => setZoom(Math.max(0.25, viewport.get().zoom / 1.25))}
+          className={secondaryButtonClass}
+        >
+          Zoom out
+        </button>
+        <span className="min-w-12 text-center font-mono text-sm tabular-nums">
+          {zoomPct}%
+        </span>
+        <button
+          type="button"
+          onClick={() => setZoom(Math.min(4, viewport.get().zoom * 1.25))}
+          className={secondaryButtonClass}
+        >
+          Zoom in
+        </button>
+        <button
+          type="button"
+          onClick={() => setZoom(1)}
+          className={secondaryButtonClass}
+        >
+          Reset zoom
+        </button>
+      </div>
 
-      <div
-        className="mt-4 max-w-2xl rounded-md border border-border p-4"
-        style={gridGapStyle(theme.gridGap)}
-      >
-        <Grid
-          editable
-          showEmptyCells
-          blocks={blocks.map((b) => ({
-            key: blockKey(b),
-            x: b.x,
-            y: b.y,
-            w: b.w,
-            h: b.h,
-            rotation: b.rotation,
-            data: b,
-          }))}
-          ariaLabel="Playground grid"
-          columns={COLUMNS}
-          rows={ROWS}
-          cellStyle={(placement) => ({
-            borderRadius: scaledCornerRadius(theme.cornerRadius, placement),
-          })}
-          getBlockLabel={(gridBlock) => `${gridBlock.data.type} ${gridBlock.key}`}
-          onMove={(key, x, y) => patchBlock(key, { x, y })}
-          onResize={(key, placement) => patchBlock(key, placement)}
-          onRotate={(key, rotation) =>
-            setBlocks((current) =>
-              current.map((b) =>
-                blockKey(b) === key ? { ...b, rotation } : b,
-              ),
-            )
-          }
-          renderBlock={(gridBlock, state) => (
-            <BlockTile
-              blockKey={gridBlock.key}
-              block={gridBlock.data}
-              product={
-                gridBlock.data.type === "product" ? PRODUCT : null
-              }
-              theme={theme}
-              editable={state.editable}
-              isEditing={selected === gridBlock.key}
-              // A spot drag is armed by SOLE selection, so the harness has to
-              // say which tile that is or the tokens never appear.
-              isSoleSelection={selected === gridBlock.key}
-              isFraming={framing === gridBlock.key}
-              onToggleEdit={(key) =>
-                setSelected((current) => (current === key ? null : key))
-              }
-              onOpenPage={() => setPageOpen((open) => !open)}
-              pageOpen={pageOpen}
-              onFrame={(key) => setFraming(key)}
-              onFramePlacement={(key, placement) =>
+      {/* `relative`, because the selection toolbar docks to the top of this
+          box the way it docks to the top of the designer's canvas window —
+          and, like `<main>` in StorefrontDesigner, it sits OUTSIDE the
+          transformed stage below, so the toolbar's own size never rides the
+          zoom transform meant for the board. */}
+      <div className="relative mt-4 max-w-2xl">
+        <div
+          ref={registerStage}
+          style={{ transformOrigin: "0 0", width: "max-content" }}
+        >
+          {/* `data-canvas-board` names the storefront itself, which is what
+              the toolbar measures its position against. */}
+          <div
+            data-canvas-board=""
+            className="rounded-md border border-border p-4"
+            style={gridGapStyle(theme.gridGap)}
+          >
+            <Grid
+              editable
+              showEmptyCells
+              blocks={blocks.map((b) => ({
+                key: blockKey(b),
+                x: b.x,
+                y: b.y,
+                w: b.w,
+                h: b.h,
+                rotation: b.rotation,
+                data: b,
+              }))}
+              ariaLabel="Playground grid"
+              columns={COLUMNS}
+              rows={ROWS}
+              cellStyle={(placement) => ({
+                borderRadius: scaledCornerRadius(theme.cornerRadius, placement),
+              })}
+              getBlockLabel={(gridBlock) => `${gridBlock.data.type} ${gridBlock.key}`}
+              onMove={(key, x, y) => patchBlock(key, { x, y })}
+              onResize={(key, placement) => patchBlock(key, placement)}
+              onRotate={(key, rotation) =>
                 setBlocks((current) =>
                   current.map((b) =>
-                    blockKey(b) === key ? { ...b, imagePlacement: placement } : b,
+                    blockKey(b) === key ? { ...b, rotation } : b,
                   ),
                 )
               }
-              onFrameExit={() => setFraming(null)}
-              onRemove={(key) =>
-                setBlocks((current) =>
-                  current.filter((b) => blockKey(b) !== key),
-                )
-              }
-              onSpotChange={(key, token, drop) =>
-                patchStyle(
-                  key,
-                  token === "title"
-                    ? { titlePosition: drop === "below" ? undefined : drop }
-                    : { priceTagPosition: drop },
-                )
-              }
+              renderBlock={(gridBlock, state) => (
+                <BlockTile
+                  blockKey={gridBlock.key}
+                  block={gridBlock.data}
+                  product={
+                    gridBlock.data.type === "product" ? PRODUCT : null
+                  }
+                  theme={theme}
+                  editable={state.editable}
+                  isEditing={selected === gridBlock.key}
+                  // A spot drag is armed by SOLE selection, so the harness has
+                  // to say which tile that is or the tokens never appear.
+                  isSoleSelection={selected === gridBlock.key}
+                  isFraming={framing === gridBlock.key}
+                  onToggleEdit={(key) =>
+                    setSelected((current) => (current === key ? null : key))
+                  }
+                  onFrame={(key) => setFraming(key)}
+                  onFramePlacement={(key, placement) =>
+                    setBlocks((current) =>
+                      current.map((b) =>
+                        blockKey(b) === key
+                          ? { ...b, imagePlacement: placement }
+                          : b,
+                      ),
+                    )
+                  }
+                  onFrameExit={() => setFraming(null)}
+                  onSpotChange={(key, token, drop) =>
+                    patchStyle(
+                      key,
+                      token === "title"
+                        ? { titlePosition: drop === "below" ? undefined : drop }
+                        : { priceTagPosition: drop },
+                    )
+                  }
+                />
+              )}
             />
-          )}
-        />
+          </div>
+        </div>
+
+        {/* The real selection island, driven by this harness's own state. The
+            buttons that used to sit on each tile live here now, so this is
+            where they are exercised without a storefront or a sign-in. */}
+        {framing === null && (
+          <SelectionToolbar
+            blocks={blocks.filter((b) => blockKey(b) === selected)}
+            productsById={PRODUCTS_BY_ID}
+            openPages={pageOpen ? [PRODUCT.id] : []}
+            viewport={viewport}
+            onOpenPage={() => setPageOpen((open) => !open)}
+            onType={() => {}}
+            onFrame={(key) => setFraming(key)}
+            // The designer sends this to its colour panel; the harness has
+            // none, so it records the request and the browser tests read it
+            // back.
+            onOpenColor={(key, part) => setLastPanel(`color:${part}:${key}`)}
+            onOpenSetting={(key, field) => setLastPanel(`${field}:${key}`)}
+            onDuplicate={(keys) => setLastPanel(`duplicate:${keys.join(",")}`)}
+            onRemove={(keys) =>
+              setBlocks((current) =>
+                current.filter((b) => !keys.includes(blockKey(b))),
+              )
+            }
+          />
+        )}
       </div>
+
+      <p data-testid="panel-request" className="mt-2 font-mono text-xs text-muted-foreground">
+        {lastPanel ?? "no panel requested"}
+      </p>
 
       {/* Machine-readable state for the browser tests: key -> placement. */}
       <pre

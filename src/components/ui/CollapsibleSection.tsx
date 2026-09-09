@@ -16,6 +16,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { scrollIntoPanelCenter } from "@/lib/utils/scroll-into-panel";
 
 export function CollapsibleSection({
   title,
@@ -65,9 +66,12 @@ export function CollapsibleSection({
     }
   }
 
-  // Scrolling is a real DOM side effect, which is what an effect is for.
+  // Scrolling is a real DOM side effect, which is what an effect is for. It
+  // aims for the MIDDLE of the panel rather than the nearest edge: a section
+  // dragged the minimum distance arrives flush against the bottom of the
+  // scroller with none of its own content in sight.
   useEffect(() => {
-    if (summon) sectionRef.current?.scrollIntoView({ block: "nearest" });
+    if (summon) scrollIntoPanelCenter(sectionRef.current);
   }, [summon]);
 
   // And the mark fades on its own, so it never sticks to a section the seller

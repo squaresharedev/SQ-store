@@ -9,6 +9,7 @@ import {
   visitorHash,
 } from "@/lib/analytics/record";
 import { getPublicProductPage, resolveDisplayName } from "@/lib/products/public";
+import { QUANTITY_QUERY_PARAM, requestedQuantity } from "@/lib/products/quantity";
 import { clientKey } from "@/lib/rate-limit";
 import {
   LEGACY_VARIANT_QUERY_PARAM,
@@ -33,6 +34,11 @@ import { OPTIONS_TOTAL_MAX } from "@/types/product";
  * landing on the version they named. Every id is checked against the
  * product's OWN options and anything else is dropped, so the URL can never
  * name a version the product does not have.
+ *
+ * `?q=<n>` preselects the quantity, under the same rule: it is measured against
+ * the product's own per-order limit here, on the server, and anything outside
+ * it falls back to one. That is a rule about what gets RENDERED — the number is
+ * display state, and lib/products/order-quantity.ts is what a sale has to pass.
  */
 
 type Params = { storefrontId: string; productId: string };
@@ -209,6 +215,16 @@ export default async function ProductPage({
           page={page}
           mode="public"
           initialOptionIds={requestedOptions(query, collectOptionIds(page.product.optionGroups))}
+          // `?q=` is read exactly the way `?o=` above is: whatever the address
+          // bar says, measured against what THIS product allows, with anything
+          // else falling back to one. The number that lands here has already
+          // been through the product's own limit, so a hand-edited link opens
+          // on a legal page rather than an error — and, since it decides only
+          // what is drawn, a forged one buys nothing (see order-quantity.ts).
+          initialQuantity={requestedQuantity(
+            query[QUANTITY_QUERY_PARAM],
+            page.product.maxQuantity,
+          )}
         />
       </main>
     </>

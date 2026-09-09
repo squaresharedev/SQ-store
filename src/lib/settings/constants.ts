@@ -7,7 +7,7 @@
  *
  * NOTE: the current docs are placeholder drafts; real legal copy is pending.
  */
-export const LEGAL_VERSION = "2026-07-draft.1";
+export const LEGAL_VERSION = "2026-09-draft.2";
 
 // The account's name bounds live with the rest of the handle rules, in
 // lib/validation/auth.ts (USERNAME_MIN_LENGTH / USERNAME_MAX_LENGTH). They are

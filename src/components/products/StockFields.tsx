@@ -11,17 +11,19 @@ import {
   stepperFieldClass,
 } from "@/components/ui/control-styles";
 import { RequiredMark } from "@/components/ui/RequiredMark";
-import { STOCK_QUANTITY_MAX } from "@/lib/validation/product";
+import { PURCHASE_QUANTITY_MAX, STOCK_QUANTITY_MAX } from "@/lib/validation/product";
 
 export interface StockFieldValues {
   trackStock: boolean;
   stockQuantity: string;
   lowStockThreshold: string;
+  maxPerOrder: string;
 }
 
 export interface StockFieldErrors {
   stockQuantity?: string;
   lowStockThreshold?: string;
+  maxPerOrder?: string;
 }
 
 interface Props {
@@ -41,6 +43,8 @@ export function StockFields({ values, errors, onChange }: Props) {
   const stockQtyErrorId = `${fieldId}-stock-qty-error`;
   const thresholdId = `${fieldId}-threshold`;
   const thresholdErrorId = `${fieldId}-threshold-error`;
+  const maxPerOrderId = `${fieldId}-max-per-order`;
+  const maxPerOrderErrorId = `${fieldId}-max-per-order-error`;
 
   // The typed value as a number. A field mid-edit can hold "" or junk, which
   // is not an error yet — it reads as 0 for stepping and for the bounds.
@@ -167,6 +171,43 @@ export function StockFields({ values, errors, onChange }: Props) {
           </div>
         </div>
       )}
+
+      {/* OUTSIDE the tracking block, deliberately. A per-order limit is not a
+          fact about the shelf: an unlimited, made-to-order or digital product
+          still has a number of them a seller is willing to sell in one go, and
+          hiding this behind Track stock would mean the only way to cap an
+          order is to start counting inventory you do not count. */}
+      <div className="space-y-1.5 border-t border-border pt-4 sm:max-w-xs">
+        <label htmlFor={maxPerOrderId} className={labelClass}>
+          Maximum per order
+        </label>
+        <input
+          id={maxPerOrderId}
+          type="text"
+          inputMode="numeric"
+          value={values.maxPerOrder}
+          onChange={(event) => onChange("maxPerOrder", event.target.value)}
+          aria-invalid={errors.maxPerOrder ? true : undefined}
+          aria-describedby={
+            errors.maxPerOrder ? maxPerOrderErrorId : `${maxPerOrderId}-hint`
+          }
+          data-product-field="maxPerOrder"
+          data-product-value={values.maxPerOrder.trim() || undefined}
+          data-product-unit="count"
+          className={fieldBaseClass}
+        />
+        {errors.maxPerOrder ? (
+          <p id={maxPerOrderErrorId} className={errorTextClass}>
+            {errors.maxPerOrder}
+          </p>
+        ) : (
+          <p id={`${maxPerOrderId}-hint`} className="font-inter text-xs text-muted-foreground">
+            How many one buyer can take at once. Buyers pick from a list that
+            stops here, and the limit is checked again when they order. Up to{" "}
+            {PURCHASE_QUANTITY_MAX}; 1 sells them one at a time.
+          </p>
+        )}
+      </div>
     </div>
   );
 }

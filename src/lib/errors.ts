@@ -1,4 +1,10 @@
 import { ROLE_LABELS, type TeamRole } from "@/lib/team/permissions";
+import {
+  TRADER_IDENTITY_HEADLINE,
+  traderIdentityFix,
+  traderIdentityHref,
+  type TraderIdentityField,
+} from "@/lib/settings/trader-identity";
 
 /**
  * ACTION ERRORS: the ONE user-facing failure shape for server actions.
@@ -25,6 +31,7 @@ export type ActionErrorCode =
   | "upload_failed"
   | "rate_limited"
   | "server_error"
+  | "trader_identity_required"
   | "unexpected";
 
 export interface ActionError {
@@ -34,6 +41,15 @@ export interface ActionError {
   message: string;
   /** What the user can do next. Always present; never leave them guessing. */
   fix: string;
+  /**
+   * An in-app destination that RESOLVES this error, when one exists.
+   *
+   * Only set by errors whose fix is "go to this other page and fill something
+   * in" — a message telling someone to open Settings is worth less than a
+   * button that opens it. `ActionErrorNotice` renders it as that button; no
+   * consumer has to know which codes carry one.
+   */
+  action?: { href: string; label: string };
 }
 
 /** The failure half of an action result. */
@@ -102,6 +118,25 @@ export function rateLimited(what: string): ActionError {
     code: "rate_limited",
     message: `Too many attempts to ${what} in a short time.`,
     fix: "Wait a few minutes and try again. If nothing is retrying in the background, reload the page first.",
+  };
+}
+
+/**
+ * The publish gate refused: this account has not disclosed the trader details
+ * a buyer is entitled to before contracting (lib/settings/trader-identity.ts).
+ *
+ * Carries an `action` so every surface that renders it — the product form, the
+ * embed modal, a toast — offers the same one-click route to the page that
+ * fixes it, rather than each one re-deciding where to send the seller.
+ */
+export function traderIdentityRequired(
+  missing: readonly TraderIdentityField[],
+): ActionError {
+  return {
+    code: "trader_identity_required",
+    message: TRADER_IDENTITY_HEADLINE,
+    fix: traderIdentityFix(missing),
+    action: { href: traderIdentityHref(missing), label: "Add seller details" },
   };
 }
 

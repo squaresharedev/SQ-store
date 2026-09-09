@@ -1,8 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import Link from "next/link";
-import { ArrowLeft, Search } from "lucide-react";
+import { ArrowLeft, Search, X } from "lucide-react";
 import type { Product } from "@/types/product";
 import {
   CANVAS_COLUMNS_MAX,
@@ -99,9 +106,18 @@ type LeftPanelState =
 import { editorEntries, type EditorJump } from "./editor-search";
 import { ControlsPanel } from "./ControlsPanel";
 import { DesignPanel } from "./DesignPanel";
-import { SHEET_ON_MOBILE_CLASS } from "./panel-chrome";
+import { SHEET_ON_MOBILE_CLASS, activeMobileSheet } from "./panel-chrome";
+import { useEditorSurface } from "./useEditorSurface";
 import { DesignerCanvas } from "./DesignerCanvas";
 import { EditorToolbar } from "./EditorToolbar";
+import { SelectionToolbar } from "./SelectionToolbar";
+import {
+  SUMMON_FLASH_CLASS,
+  SUMMON_LIT_CLASS,
+  useSummonFlash,
+  type BlockField,
+  type BlockFieldSummons,
+} from "./SummonedField";
 import { ImageBlockEditor } from "./ImageBlockEditor";
 import { MultiBlockEditor } from "./MultiBlockEditor";
 import { PlacementSection } from "./PlacementSection";
@@ -206,6 +222,55 @@ const PANEL_MAX_WIDTH = 560;
 const PANEL_DEFAULT_WIDTH = 320;
 /** How far one arrow-key press nudges the panel edge. */
 const PANEL_RESIZE_STEP = 16;
+
+/**
+ * WHETHER THE SMALL-SCREEN EDITING NOTICE HAS BEEN WAVED AWAY, as a tiny
+ * external store rather than component state.
+ *
+ * The answer lives in localStorage, which the server does not have, so it
+ * cannot simply seed `useState`: the markup would differ between the two
+ * renders. `useSyncExternalStore` is the shape React provides for exactly this:
+ * the server (and the hydrating client) get `false`, and the real answer
+ * arrives on the first render after hydration, with no effect and no setState
+ * chasing it.
+ *
+ * The cached snapshot is not an optimisation but a requirement: getSnapshot is
+ * called on every render and must return the SAME value until something has
+ * actually changed, so reading localStorage afresh each time would be a new
+ * answer to compare on every pass.
+ */
+const MOBILE_NOTICE_KEY = "sq.storefront.mobile-notice-dismissed";
+const noticeListeners = new Set<() => void>();
+let noticeSnapshot: boolean | null = null;
+
+function subscribeNotice(onChange: () => void) {
+  noticeListeners.add(onChange);
+  return () => {
+    noticeListeners.delete(onChange);
+  };
+}
+
+function noticeIsDismissed(): boolean {
+  if (noticeSnapshot === null) {
+    try {
+      noticeSnapshot = localStorage.getItem(MOBILE_NOTICE_KEY) === "1";
+    } catch {
+      // Private mode / storage disabled: the notice simply keeps showing.
+      noticeSnapshot = false;
+    }
+  }
+  return noticeSnapshot;
+}
+
+function dismissMobileNotice() {
+  noticeSnapshot = true;
+  try {
+    localStorage.setItem(MOBILE_NOTICE_KEY, "1");
+  } catch {
+    // Dismissed for this visit either way; only the memory is lost.
+  }
+  for (const listener of noticeListeners) listener();
+}
 
 /**
  * Page-level composition + state owner for the storefront designer. Content is
@@ -326,6 +391,36 @@ export function StorefrontDesigner({
   // Desktop only: whether the edge-docked design panel is shown. Collapsing
   // it gives the canvas the full viewport width.
   const [panelOpen, setPanelOpen] = useState(true);
+  /** Which control of the selected block's inspector the toolbar last asked
+   *  for, if any. Handed to the block editors, which scroll to it and mark it. */
+  const [blockField, setBlockField] = useState<BlockFieldSummons>(null);
+  const blockFieldNonce = useRef(1);
+  /**
+   * The colour panel's own summons, minted when the toolbar's colour button
+   * opens it. The whole panel is the answer there — it has no one field to
+   * point at — so the whole panel is what lights up.
+   *
+   * Only from the TOOLBAR. Selecting a shape opens this panel by itself, and a
+   * panel that flashed every time a block was clicked would be a tic rather
+   * than an answer.
+   */
+  const [colorSummons, setColorSummons] = useState<number | null>(null);
+  const colorSummonsNonce = useRef(1);
+  // Whether the "open this on a desktop" notice has been waved away. On a phone
+  // the editor has roughly 300px of workspace to begin with and this banner
+  // spends two lines of it, so a seller who has read it once and has no desktop
+  // to move to needs to be able to take it back. Remembered per browser rather
+  // than per visit for the same reason: an advisory that returns on every load
+  // is not advice, it is a toll. See the store above it for why it is not state.
+  const noticeDismissed = useSyncExternalStore(
+    subscribeNotice,
+    noticeIsDismissed,
+    () => false,
+  );
+  // Where the panels are columns beside the canvas ("regular") and where they
+  // are sheets stacked over it ("compact"). Only BEHAVIOUR reads this; layout
+  // stays on `lg:` classes. See useEditorSurface.
+  const surface = useEditorSurface();
   // Dashed empty-slot guides on the canvas. A VIEW preference: buyers never
   // see them, so it stays out of the saved config (and out of undo history).
   const [showGrid, setShowGrid] = useState(true);
@@ -970,11 +1065,23 @@ export function StorefrontDesigner({
     // it would swap the left panel to that shape's fill — closing the very
     // library the seller was picking from, one shape in. The panel stays;
     // reaching for a colour deliberately (an inspector picker) still opens it.
+    //
+    // AND NOT ON A PHONE AT ALL. On a compact surface the colour panel is not a
+    // column beside the board but a sheet over it, taking 55vh of a screen that
+    // had about 300px of workspace to begin with: touching a block to move it
+    // buried the board under a picker nobody asked for, and the way back was to
+    // shut a panel first. So a selection there opens nothing, and colour is
+    // reached the way every other tile action is, by pressing for it in the
+    // selection toolbar. It still CLOSES one: leaving a sheet open on the block
+    // that was selected a moment ago would be a picker pointed at the wrong
+    // thing.
     if (!additive && leftPanel?.kind !== "library") {
       const block = wasSole
         ? null
         : (justInserted ?? blocks.find((b) => blockKey(b) === key));
-      setColorTarget(block ? primaryColorTarget(block) : null);
+      setColorTarget(
+        block && surface === "regular" ? primaryColorTarget(block) : null,
+      );
     }
     setSettingsOpen(false);
   }
@@ -1179,9 +1286,6 @@ export function StorefrontDesigner({
     // The handle turns ONE tile, even when several are selected: the tile the
     // hand is on is the one it means.
     canvasActions.current.rotateBlocks([key], rotation);
-  }, []);
-  const onRemoveBlock = useCallback((key: string) => {
-    canvasActions.current.removeBlock(key);
   }, []);
   const onInsertAt = useCallback((x: number, y: number) => {
     canvasActions.current.insertAt(x, y);
@@ -1409,16 +1513,60 @@ export function StorefrontDesigner({
   }
 
   /**
-   * Pan gestures: the middle button, space held, or a left-press that landed
-   * on the workspace BACKGROUND (dragging beside the board moves it, while a
-   * press on a tile still drags that tile).
+   * MAY A ONE-FINGER DRAG STARTING HERE MOVE THE WHOLE WORKSPACE?
+   *
+   * A pointer has three ways to pan: the middle button, space held, and a press
+   * on the bare workspace. Touch has none of the first two, and on a phone it
+   * effectively has none of the third either. The board is fitted to a ~300px
+   * strip, so it IS the workspace, and the bare margin a desktop drags by is a
+   * few pixels down each side. Panning was therefore reachable on a phone in
+   * theory and not in practice, which matters more here than on a desktop: with
+   * no room to zoom out, moving the board is the only way to reach the parts of
+   * it currently off screen.
+   *
+   * So on touch the whole surface pans, minus the things that already own a
+   * drag of their own:
+   *
+   * - TILES drag themselves (Grid's startMove), and the resize/rotate handles
+   *   stop propagation before this ever sees them.
+   * - TEXT keeps its caret and its selection drag.
+   *
+   * Buttons are deliberately NOT excluded, and the empty grid cells are the
+   * reason: they are buttons covering nearly all the open board, so excluding
+   * them would leave the gesture with nothing to start on again. What protects
+   * their click is that this pan does not commit on contact: it stays dormant
+   * until the finger has travelled, and only a press that never travels is
+   * still a tap. Same bargain the marquee makes on a desktop.
+   */
+  function isTouchPanTarget(event: React.PointerEvent<HTMLElement>): boolean {
+    if (event.pointerType !== "touch") return false;
+    const target = event.target instanceof Element ? event.target : null;
+    if (!target || !target.closest("[data-canvas-stage]")) return false;
+    if (target.closest("[data-grid-key]")) return false;
+    return (
+      target.closest("input, select, textarea, [contenteditable='true']") === null
+    );
+  }
+
+  /**
+   * Pan gestures: the middle button, space held, a left-press that landed on
+   * the workspace BACKGROUND (dragging beside the board moves it, while a press
+   * on a tile still drags that tile), or a one-finger touch drag anywhere the
+   * rule above allows.
    */
   function startPan(event: React.PointerEvent<HTMLElement>) {
     const onBackground = isWorkspaceBackground(event);
+    // Only where the background rule has already declined: a press on real
+    // empty space is the existing gesture and keeps its existing behaviour
+    // (committing at once, and clearing the selection when it goes nowhere).
+    const deferred = !onBackground && isTouchPanTarget(event);
     const wanted =
-      event.button === 1 || (event.button === 0 && (spaceHeld || onBackground));
+      event.button === 1 ||
+      (event.button === 0 && (spaceHeld || onBackground || deferred));
     if (!wanted) return;
-    event.preventDefault();
+    // A deferred pan may still turn out to be a tap on whatever is under the
+    // finger, so nothing is claimed from it yet.
+    if (!deferred) event.preventDefault();
 
     const startX = event.clientX;
     const startY = event.clientY;
@@ -1429,14 +1577,18 @@ export function StorefrontDesigner({
     // just a pan that went nowhere.
     const clearsSelection = onBackground && !spaceHeld && event.button === 0;
     let travelled = false;
-    setPanning(true);
+    if (!deferred) setPanning(true);
 
     function onMove(moveEvent: PointerEvent) {
       if (
+        !travelled &&
         Math.hypot(moveEvent.clientX - startX, moveEvent.clientY - startY) > 4
       ) {
         travelled = true;
+        if (deferred) setPanning(true);
       }
+      // Dormant until it travels; see isTouchPanTarget.
+      if (deferred && !travelled) return;
       viewport.set((current) => ({
         zoom: current.zoom,
         pan: {
@@ -1450,13 +1602,60 @@ export function StorefrontDesigner({
       window.removeEventListener("pointerup", stop);
       window.removeEventListener("pointercancel", stop);
       setPanning(false);
+      // The press was spent on the pan, so the click the browser synthesises
+      // after it is not a tap on anything: let it through and the empty cell
+      // the finger LIFTED over would insert a block. Same swallow the canvas
+      // does after a marquee drag, from out here because the press may have
+      // begun on a control the canvas never sees.
+      if (deferred && travelled) swallowNextClick();
       // selectBlock(null) also ends frame mode, so one click on the empty
       // workspace backs out of everything at once.
-      if (clearsSelection && !travelled) selectBlock(null);
+      if (clearsSelection && !travelled) {
+        selectBlock(null);
+        dismissPanels();
+      }
     }
     window.addEventListener("pointermove", onMove);
     window.addEventListener("pointerup", stop);
     window.addEventListener("pointercancel", stop);
+  }
+
+  /**
+   * PUT THE PANELS AWAY. What a press on bare canvas that went nowhere means:
+   * the seller pointed at nothing, so nothing should be on screen.
+   *
+   * On a phone that is every panel, because every panel is a sheet lying over
+   * the board, and a sheet nobody can dismiss by looking away from it is a
+   * sheet you have to hunt for a close button to escape. On `lg` and up the
+   * right-hand column is furniture rather than cover, and the stack is a place
+   * a seller sits and works from, so neither is swept away by a deselect. The
+   * floating left layer goes on both: it opened FOR the thing that was just
+   * deselected, so it has nothing left to be about.
+   */
+  function dismissPanels() {
+    setLeftPanel(null);
+    if (surface !== "compact") return;
+    setInspector(null);
+    setSettingsOpen(false);
+    setLayersOpen(false);
+  }
+
+  /** Eat the one click a finished drag leaves behind. Self-removing on the
+   *  first click, with a timeout in case none arrives at all: a gesture that
+   *  ended outside any clickable element produces no click, and a listener left
+   *  armed would eat the seller's next real tap. */
+  function swallowNextClick() {
+    function eat(event: MouseEvent) {
+      event.preventDefault();
+      event.stopPropagation();
+      done();
+    }
+    function done() {
+      window.clearTimeout(timer);
+      window.removeEventListener("click", eat, true);
+    }
+    const timer = window.setTimeout(done, 400);
+    window.addEventListener("click", eat, true);
   }
 
   // Place the board sensibly on first paint: centred, or scaled down first
@@ -2169,6 +2368,33 @@ export function StorefrontDesigner({
   }
 
   /**
+   * PRESSING A LABEL ON A TILE OPENS THE CONTROLS THAT SHAPE IT.
+   *
+   * The same bargain the product page artboard already makes (see
+   * PRODUCT_PAGE_HOTSPOTS): what a seller can see, they can point at, and the
+   * shortest route from "this price is wrong" to the panel that fixes it is
+   * the price itself. Dragging a label moves it; pressing it opens what it
+   * looks like.
+   *
+   * The tile is asserted as the selection rather than assumed. A token is only
+   * armed on a sole selection, so this is normally a no-op — but openSetting
+   * decides between the tile's inspector and the storefront's panel by reading
+   * that selection, and it would read a stale one inside the very event that
+   * changed it.
+   */
+  function openTileLabelSetting(key: string, token: SpotToken) {
+    setInspector({ kind: "blocks", keys: [key] });
+    setSettingTarget(
+      freshSettingRef({
+        kind: "cards",
+        section: token === "price" ? "priceTag" : "cardStyle",
+      }),
+    );
+    setSettingsOpen(false);
+    setPanelOpen(true);
+  }
+
+  /**
    * FRAME MODE: positioning one product's photo inside its own tile.
    *
    * Held apart from the inspector selection because they answer different
@@ -2562,6 +2788,23 @@ export function StorefrontDesigner({
   }
 
   /**
+   * The selection toolbar asking for one control of the selected block's
+   * inspector: open the panel and mark the field (see SummonedField).
+   *
+   * A fresh nonce every time, so pressing the same button twice flashes the
+   * same field twice. The request is an instruction, not a mode — nothing
+   * clears it, because nothing needs to: the mark fades on its own and the
+   * next press mints a new one.
+   */
+  function openBlockField(field: BlockField) {
+    setBlockField({ field, nonce: blockFieldNonce.current++ });
+    setPanelOpen(true);
+    // On a phone all three panels share one bottom slot, and only one can own
+    // it — the same rule openColorTarget applies just above.
+    setSettingsOpen(false);
+  }
+
+  /**
    * OPENING A SETTING BY NAME, from universal search or the panel's own filter.
    *
    * The ref only says WHICH setting. Which of its two copies to show is decided
@@ -2905,6 +3148,21 @@ export function StorefrontDesigner({
   const showInspector =
     inspector?.kind === "picker" || selectedBlocks.length > 0;
 
+  // WHICH PANEL HAS THE PHONE'S ONE BOTTOM SLOT (null on lg+, where they are
+  // columns and share nothing). Everything that has to agree about the sheets
+  // reads this one answer: which one is drawn, and whether the floating toolbar
+  // stands down. See activeMobileSheet for the order and why it is that order.
+  /** Whether the colour panel is showing its "here I am" mark right now. */
+  const colorPanelFlash = useSummonFlash(colorSummons);
+
+  const mobileSheet = activeMobileSheet({
+    layers: layersOpen,
+    settings: settingsOpen,
+    library: leftPanel?.kind === "library",
+    color: activeColorTarget !== null,
+    inspector: showInspector,
+  });
+
   return (
     // Universal search, mounted here rather than inherited: the editor renders
     // full-screen OUTSIDE the dashboard shell (see storefront/layout.tsx), so
@@ -2981,6 +3239,7 @@ export function StorefrontDesigner({
             </label>
             <input
               id="storefront-name"
+              suppressHydrationWarning
               value={name}
               onChange={(event) => updateName(event.target.value)}
               placeholder="Untitled storefront"
@@ -2998,18 +3257,27 @@ export function StorefrontDesigner({
                 `hidden sm:inline`, so tapping Save on a 390px screen confirmed
                 nothing at all. */}
             {dirty && !saving && (
-              <span role="status" className={`shrink-0 ${helpTextClass}`}>
-                <span className="hidden sm:inline">Unsaved changes</span>
-                {/* No room for the phrase beside the Save button on a phone,
-                    so a phone gets the familiar unsaved dot — announced in
-                    full for anyone who cannot see it. */}
-                <span aria-hidden="true" className="sm:hidden" title="Unsaved changes">
-                  ●
-                </span>
-                <span className="sr-only sm:hidden">Unsaved changes</span>
+              // A PHONE GETS THE WORDS OR NOTHING, never a bare dot. There was
+              // one, between the search button and Save, and a lone ● in a row
+              // of two framed controls reads as a third control with its label
+              // missing rather than as a state. The phrase itself has no room
+              // there, so on a phone this is announced and not drawn.
+              //
+              // `max-sm:sr-only` rather than a second element: sr-only is
+              // absolutely positioned, so it stops being a flex item too, and
+              // the row closes up instead of keeping the gap the dot sat in.
+              <span
+                role="status"
+                className={`shrink-0 max-sm:sr-only ${helpTextClass}`}
+              >
+                Unsaved changes
               </span>
             )}
-            <Button onClick={handleSave} disabled={saving}>
+            {/* h-9 py-0 pairs it with the search button beside it: the default
+                button is 40px tall (py-2.5 + text-sm) against that button's
+                36px, and two controls of different heights sitting side by side
+                in the same bar look like a mistake rather than a hierarchy. */}
+            <Button onClick={handleSave} disabled={saving} className="h-9 py-0">
               {saving ? "Saving…" : "Save"}
             </Button>
           </div>
@@ -3020,11 +3288,33 @@ export function StorefrontDesigner({
           but 55px cells and 24px control chips make precise editing hard.
           This banner only appears below the lg breakpoint where full layout
           is not available, and links to the storefront list rather than
-          implying features that are not there. */}
-      <div className="shrink-0 border-b border-amber-200 bg-amber-50 px-4 py-2 font-inter text-xs text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300 lg:hidden">
-        For the best editing experience, open this designer on a desktop or
-        tablet. Reordering blocks and editing the header work on any device.
-      </div>
+          implying features that are not there.
+
+          IT CLOSES. It used to be permanent furniture, which is fine advice
+          for someone who can act on it and a two-line tax on the workspace for
+          everyone who cannot. A seller running the shop from a phone reads it
+          once and then owns it forever. See noticeDismissed for why the answer
+          is remembered rather than asked again on the next load. */}
+      {!noticeDismissed && (
+        <div className="flex shrink-0 items-start gap-2 border-b border-amber-200 bg-amber-50 px-4 py-2 font-inter text-xs text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300 lg:hidden">
+          <p className="min-w-0 flex-1">
+            For the best editing experience, open this designer on a desktop or
+            tablet. Reordering blocks and editing the header work on any device.
+          </p>
+          {/* -my-1 keeps a 44px touch target from making the banner taller than
+              the text needs: the button overflows into the row's own padding
+              rather than pushing the canvas further down the screen. */}
+          <button
+            type="button"
+            suppressHydrationWarning
+            onClick={dismissMobileNotice}
+            aria-label="Dismiss the small-screen editing notice"
+            className="-my-1 -mr-2 inline-flex size-9 shrink-0 items-center justify-center rounded-sm text-amber-800 transition-colors duration-base ease-standard hover:bg-amber-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:text-amber-300 dark:hover:bg-amber-900/40 motion-reduce:transition-none"
+          >
+            <X className="size-4" strokeWidth={2} aria-hidden="true" />
+          </button>
+        </div>
+      )}
 
       {/* Full-width workspace. `relative` positions the floating left layer;
           the design column on the right is a real flex item beside it. */}
@@ -3076,7 +3366,23 @@ export function StorefrontDesigner({
               // the wrapper above collapses to nothing on a phone and would
               // measure as no cover at all.
               {...{ [CANVAS_PANEL_ATTR]: "" }}
-              className={cn(SHEET_ON_MOBILE_CLASS, "lg:h-full lg:overflow-y-auto")}
+              data-summoned={colorPanelFlash ? "" : undefined}
+              className={cn(
+                SHEET_ON_MOBILE_CLASS,
+                "lg:h-full lg:overflow-y-auto",
+                // Lit as a whole when the toolbar's colour button opened it:
+                // there is no single field to point at here, the panel IS the
+                // answer. Inside the scroll container, so the mark travels with
+                // the content rather than sitting over it.
+                SUMMON_FLASH_CLASS,
+                colorPanelFlash && SUMMON_LIT_CLASS,
+                // The wash again, at the DESKTOP width. This element already
+                // carries `lg:bg-transparent` from the sheet classes (on a
+                // desktop the background belongs to the layer around it), and
+                // the plain `bg-accent` above loses to it at exactly the width
+                // where the panel is a column and the tint would show.
+                colorPanelFlash && "lg:bg-accent",
+              )}
             >
               <div dir="ltr">
               {resolvedColorTarget && activeColorTarget ? (
@@ -3156,7 +3462,6 @@ export function StorefrontDesigner({
             onMoveBlock={onMoveBlock}
             onResizeBlock={onResizeBlock}
             onRotateBlock={onRotateBlock}
-            onRemove={onRemoveBlock}
             onEmptyCellClick={onInsertAt}
             onAddProduct={togglePicker}
             selectedKeys={selectedKeys}
@@ -3182,12 +3487,12 @@ export function StorefrontDesigner({
             onTextRangeChange={setTypingRange}
             onTypeEnd={onTypeEnd}
             onSpotChange={placeTileSpot}
+            onOpenSpotSetting={openTileLabelSetting}
             // Space is the hold-to-pan tool; while held, a drag on the frame
             // pans the workspace instead of drawing a marquee.
             disableMarquee={spaceHeld}
             // The product pages the seller has out, beside the board.
             openPages={openPages}
-            onOpenPage={togglePageForProduct}
             onClosePage={closeProductPage}
             storefrontId={storefrontId}
             storefrontName={name}
@@ -3195,6 +3500,41 @@ export function StorefrontDesigner({
             shippingPolicy={shippingPolicy}
             seller={sellerIdentity}
           />
+
+          {/* The selected block's tools, floating over the top of the canvas
+              rather than on the tile itself. Inside <main> (which is
+              `relative`) but outside the stage, so it holds its place and its
+              size while the board pans and zooms under it. Not while framing
+              or typing: the tile owns every gesture then, and this bar's
+              buttons all mean "leave that mode and do something else". */}
+          {designView && framingKey === null && typing === null && (
+            <SelectionToolbar
+              blocks={selectedBlocks}
+              productsById={productsById}
+              elementUrls={elementUrls}
+              openPages={openPages}
+              // So the bar can follow its block through a pan and a zoom.
+              viewport={viewport}
+              onOpenPage={togglePageForProduct}
+              onType={onTypeStart}
+              onFrame={onFrameBlock}
+              onOpenColor={(key, part) => {
+                openColorTarget({
+                  kind: part === "fill" ? "shape-fill" : "shape-border",
+                  blockKey: key,
+                });
+                setColorSummons(colorSummonsNonce.current++);
+              }}
+              // Stroke, corners and opacity point at the inspector's own copy
+              // of the control rather than opening one over the block: the bar
+              // sits ON the block, so a popover under it covers the very shape
+              // whose number is being dragged. The panel is docked beside the
+              // canvas and covers nothing.
+              onOpenSetting={(_key, field) => openBlockField(field)}
+              onDuplicate={duplicateBlocks}
+              onRemove={removeBlocks}
+            />
+          )}
         </main>
 
         {/* RIGHT: the design panel, docked to the page edge on desktop, with
@@ -3226,9 +3566,10 @@ export function StorefrontDesigner({
           // pop this sheet up over the still-open library, hiding the very
           // shapes the seller was choosing from. The library wins for the same
           // reason the color sheet does.
-          inspectorHiddenOnMobile={
-            activeColorTarget !== null || leftPanel?.kind === "library"
-          }
+          //
+          // Both of those are now one question asked in one place, so this is
+          // simply "the slot went to somebody else".
+          inspectorHiddenOnMobile={mobileSheet !== "inspector"}
           settingsOpen={settingsOpen}
           onCloseSettings={() => setSettingsOpen(false)}
           layersOpen={layersOpen}
@@ -3336,6 +3677,7 @@ export function StorefrontDesigner({
                   ) : selectedBlock?.type === "shape" ? (
                     <ShapeBlockEditor
                       block={selectedBlock}
+                      summons={blockField}
                       onUpdate={(patch) =>
                         updateShapeBlocks([blockKey(selectedBlock)], patch)
                       }
@@ -3355,6 +3697,11 @@ export function StorefrontDesigner({
                       onDuplicate={() =>
                         duplicateBlocks([blockKey(selectedBlock)])
                       }
+                      // Text had no remove button of its own here, alone among
+                      // the kinds: the pair belongs together, and the canvas
+                      // route to it (select, then the island's bin) is not one
+                      // a seller looking at the inspector can see.
+                      onRemove={() => removeBlock(blockKey(selectedBlock))}
                       onEditText={() => beginTyping(blockKey(selectedBlock))}
                       // Colour follows the caret: with words selected on the
                       // canvas it paints them, otherwise the whole block.
@@ -3366,6 +3713,7 @@ export function StorefrontDesigner({
                   ) : selectedBlock?.type === "image" ? (
                     <ImageBlockEditor
                       block={selectedBlock}
+                      summons={blockField}
                       canFrame={
                         elementUrls[blockKey(selectedBlock)] !== undefined
                       }
@@ -3415,6 +3763,7 @@ export function StorefrontDesigner({
         onRedo={redo}
         settingsOpen={settingsOpen}
         onToggleSettings={toggleSettings}
+        sheetOpen={mobileSheet !== null}
         pagesOpen={openPages.length > 0}
         canOpenPage={defaultPageProductId !== null}
         onTogglePages={toggleProductPages}
@@ -3478,6 +3827,7 @@ function DesignerSearchButton() {
     <button
       ref={buttonRef}
       type="button"
+      suppressHydrationWarning
       onClick={search.open}
       aria-label="Search"
       aria-haspopup="dialog"

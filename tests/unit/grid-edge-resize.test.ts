@@ -150,6 +150,27 @@ describe("resizeLocalBox", () => {
       x: 0, y: 0, w: 3, h: 3,
     });
   });
+
+  it("a corner grab that has not moved yet paints no change", () => {
+    // Grid's startResize reads the initial press at the CENTRE of the
+    // anchor's own far cell (origin.x + origin.w - 0.5, same for y), the same
+    // convention `local` is documented to use above. A stationary hand right
+    // after grabbing the handle must not paint the tile any smaller than it
+    // already was — that half-cell jump was the bug.
+    const { live } = resizeLocalBox(
+      origin,
+      edge(),
+      { x: origin.x + origin.w - 0.5, y: origin.y + origin.h - 0.5 },
+      BOUNDS,
+      "corner",
+    );
+    expect(live).toEqual({
+      l: origin.x,
+      t: origin.y,
+      r: origin.x + origin.w,
+      b: origin.y + origin.h,
+    });
+  });
 });
 
 describe("placementFromLocalBox", () => {

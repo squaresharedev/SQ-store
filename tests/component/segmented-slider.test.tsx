@@ -226,6 +226,68 @@ describe("Slider", () => {
     expect(onChange).not.toHaveBeenCalled();
   });
 
+  /**
+   * THE LIT STATE'S ONE MOVING PART. Focus is CSS (see the .ss-slider block
+   * in globals.css) and has nothing to assert here; the drag is not, because
+   * the pointer leaves a 6px track on essentially every drag and the control
+   * has to stay lit anyway. That is what this attribute is for, and a slider
+   * that goes dark under its own thumb mid-gesture is the regression it
+   * guards.
+   */
+  it("marks itself as dragging for as long as the gesture lasts", () => {
+    render(
+      <Slider value={50} min={0} max={100} onChange={vi.fn()} ariaLabel="Volume" />,
+    );
+    const slider = screen.getByRole("slider");
+    expect(slider).not.toHaveAttribute("data-dragging");
+
+    fireEvent.pointerDown(slider, { button: 0 });
+    expect(slider).toHaveAttribute("data-dragging");
+
+    // Released anywhere, not just over the track — the listener is on window
+    // precisely because the pointer is usually somewhere else by then.
+    fireEvent.pointerUp(window);
+    expect(slider).not.toHaveAttribute("data-dragging");
+  });
+
+  it("never starts a drag it cannot finish", () => {
+    // Disabled, and the secondary button: neither moves the value, so neither
+    // should light the control as though it were being dragged.
+    render(
+      <Slider value={50} min={0} max={100} onChange={vi.fn()} ariaLabel="Volume" disabled />,
+    );
+    const slider = screen.getByRole("slider");
+    fireEvent.pointerDown(slider, { button: 0 });
+    expect(slider).not.toHaveAttribute("data-dragging");
+    cleanup();
+
+    render(
+      <Slider value={50} min={0} max={100} onChange={vi.fn()} ariaLabel="Volume" />,
+    );
+    fireEvent.pointerDown(screen.getByRole("slider"), { button: 2 });
+    expect(screen.getByRole("slider")).not.toHaveAttribute("data-dragging");
+  });
+
+  it("highlighted prop marks itself as highlighted, not hover, for the lit state", () => {
+    const { rerender } = render(
+      <Slider value={50} min={0} max={100} onChange={vi.fn()} ariaLabel="Volume" />,
+    );
+    const slider = screen.getByRole("slider");
+    expect(slider).not.toHaveAttribute("data-highlighted");
+
+    rerender(
+      <Slider
+        value={50}
+        min={0}
+        max={100}
+        onChange={vi.fn()}
+        ariaLabel="Volume"
+        highlighted
+      />,
+    );
+    expect(screen.getByRole("slider")).toHaveAttribute("data-highlighted");
+  });
+
   it("valueText is exposed as aria-valuetext", () => {
     render(
       <Slider

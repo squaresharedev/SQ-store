@@ -138,7 +138,9 @@ describe("MultiBlockEditor", () => {
     ]);
     expect(screen.getByText(/different types/i)).toBeInTheDocument();
     const duplicate = screen.getByRole("button", { name: /duplicate 2 blocks/i });
-    expect(duplicate.textContent).toMatch(/not products/i);
+    // The caveat moved off the button when Duplicate and Remove became one
+    // row: half a row is not the place for a parenthetical.
+    expect(screen.getByText(/products are not duplicated/i)).toBeInTheDocument();
     await user.click(duplicate);
     expect(callbacks.onDuplicate).toHaveBeenCalledTimes(1);
     await user.click(screen.getByRole("button", { name: /remove 3 blocks/i }));

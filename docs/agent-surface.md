@@ -6,8 +6,9 @@ an MCP server expose it to an assistant that helps a creator **set up** and
 
 Scope note: there is no MCP server for Store today. The only HTTP surface is
 `/api/embed/[key]` (public, buyer-facing), `/api/embed/[key]/signal` (public,
-analytics ingest), `/api/uploads/presign`, and
-`/api/settings/display-name-available`. This document is the catalogue and the
+analytics ingest), `/api/uploads/*`, `/api/search` + `/api/search/snapshot`,
+`/api/settings/username-available`, and — new, see the 2026-09-08 update below —
+`/api/storefronts/[id]/product-page`. This document is the catalogue and the
 contract that server has to satisfy — not a description of something shipped.
 
 Update 2026-08-30: the analytics rows below are the first ones with a real
@@ -26,6 +27,21 @@ this not save" without submitting anything. See
 (integer cents, never the typed decimal) and B6 (no object key of any kind) at
 the boundary, so the product-write tool below has a settled input shape to
 derive from rather than one to invent. B1/B2 still apply unchanged.
+
+Update 2026-09-08: the product page's options are the FIRST datapoint with a
+route of its own — `GET`/`PATCH /api/storefronts/[id]/product-page`, shipped
+alongside the buy button becoming stylable (fill, roundness, border) and the
+page taking a backdrop colour of its own. It is
+still session-authenticated, so it is not the agent surface: what it settles is
+the *contract*, so that B1/B2 become a change of authentication rather than a
+new payload to design. It already observes the rules below — the error envelope
+is `ActionError` verbatim, the write validates through the same
+`productPageSchema` the designer's save uses, the read pins the active account
+explicitly, and the response carries `buyButton` and `background` objects
+resolved by the same functions the buyer's page renders from, so "absent means
+follow the storefront" is never a caller's problem to work out. Reads spend their own `productPageRead`
+budget; writes spend `storefrontWrite`, since they touch the same column by the
+same rules as a designer save.
 
 ---
 
@@ -237,7 +253,19 @@ Both are already in good shape and should be reused rather than reinvented:
   `invalid_input`, `rate_limited`, …) plus a human `message` and a required
   `fix`. It is pure data, importable from anywhere, and carries no secrets.
   **Use it verbatim as the MCP error envelope.** The `fix` field is unusually
-  valuable to an agent: it is a machine-readable next step.
+  valuable to an agent: it is a machine-readable next step. An error may also
+  carry an optional `action` (`{href, label}`) — the in-app destination that
+  resolves it, for the errors whose fix lives on another page.
+- **The publish gate** — `trader_identity_required` (HTTP **409**) is the one
+  error an agent cannot retry its way past and must not paper over. It means
+  the ACCOUNT has not disclosed the trader details EU consumer law requires
+  next to an offer (trader name, postal address, contact email — see
+  [trader-identity.ts](../src/lib/settings/trader-identity.ts)), so nothing of
+  theirs may go on sale: setting a product `active`, importing live rows, or
+  switching a storefront's embed on all refuse, and the hosted product page and
+  the embed endpoint serve 404 while it holds. Drafts are never blocked, so the
+  correct agent behaviour is to keep working in `draft` and surface the error's
+  `action` to the person, never to retry or to look for another route in.
 - **Input validation** — the Zod schemas in `lib/validation/` are the single
   source of truth for what a valid write looks like. Agent tool input schemas
   must be derived from them, not hand-written alongside them, or the two will
@@ -279,7 +307,10 @@ Verdicts:
 | Block rotation | each block's `rotation` on `storefronts.config.blocks[]` | R + W (`saveStorefront`) | Ready. Whole degrees, `ROTATION_MIN`–`ROTATION_MAX` (-180..180), optional: absent = level, and a block turned back to level DROPS the key (write it through `withRotation`, never assign a `0`). `x/y/w/h` stay the UNROTATED rect; the cells a turned block covers are its **footprint** (`blockFootprint`), derived and never stored: the same rect TRANSPOSED about the same centre when the angle is nearer a quarter turn than to level, so a quarter-turned 1x3 bar covers 3x1. A turn never changes how many cells a block takes and never moves it, at any angle, so turning it back restores the original block exactly. Ask `blockFootprint` for "where is it" and `x/y/w/h` for "how big is it". The schema checks the stored rect against the canvas; a turned block's footprint may hang past the edge and that is left alone |
 | Blocks sharing cells | `storefronts.config.blocks[]` | R + W (`saveStorefront`) | Ready, and a CHANGE: blocks may now overlap. Stacking is a design move (a word over a shape, a chip over a photo) and `z` settles which paints on top, so the old "blocks cannot overlap" refinement is gone from the schema. An agent may place blocks on the same cells deliberately; `blocksOverlap` answers whether two do (footprints, so a tilted block counts where it paints), and `isFreelyArranged` answers whether a board has any tilt or stack on it, which is what tells a renderer not to repack it for a narrow screen |
 | Block layering | each block's `z` on `storefronts.config.blocks[]` | R + W (`saveStorefront`) | Ready. Paint order, 0 (furthest back) to `MAX_BLOCKS - 1`, optional: absent = the block has never been layered and paints in reading order. VISUAL ONLY, and specifically NOT reading order: DOM order and the embed array's order both stay `readingOrder`, so stacking never changes what a screen reader hears first. Write it through `lib/storefront/layers.ts` (`normalizeLayers` is the one writer): every operation rewrites `z` on the WHOLE board so it stays dense, since a half-layered board has no total order. Duplicate or gapped values still parse and still have a defined order (`layerOrder` breaks ties on reading index), so an agent never has to repair one |
-| Price tag appearance | `storefronts.config.theme.priceTag*` + each product block's `style` | R + W (`saveStorefront`) | Ready. Seven addressable fields rather than presets: `priceTagFont` (`PRICE_TAG_FONTS`), `priceTagSize` / `priceTagBorderWidth` / `priceTagRadius` (bounded ints, see `PRICE_TAG_SIZE_MIN`–`MAX`, `PRICE_TAG_BORDER_WIDTH_MAX`, `PRICE_TAG_RADIUS_MAX`), and `priceTagColor` / `priceTagTextColor` / `priceTagBorderColor` (strict `#rrggbb`). All optional at both levels: absent = the coded default (`PRICE_TAG_*_DEFAULT`, `defaultPriceTagFill`) on the theme and "follow the theme" on a tile. The retired `priceTagStyle` (plain/pill) and enum `priceTagSize` (sm/md/lg) are migrated on parse, so an agent never has to write them |
+| Price tag appearance | `storefronts.config.theme.priceTag*` + each product block's `style` | R + W (`saveStorefront`) | Ready. Seven addressable fields rather than presets: `priceTagFont` (`PRICE_TAG_FONTS`), `priceTagSize` / `priceTagBorderWidth` / `priceTagRadius` (bounded ints, see `PRICE_TAG_SIZE_MIN`–`MAX`, `PRICE_TAG_BORDER_WIDTH_MAX`, `PRICE_TAG_RADIUS_MAX`), and `priceTagColor` / `priceTagTextColor` / `priceTagBorderColor` (strict `#rrggbb`). All optional at both levels: absent = the coded default (`PRICE_TAG_*_DEFAULT`, `defaultPriceTagFill`) on the theme and "follow the theme" on a tile. `priceTagSize` is the size on a REFERENCE tile of about one cell, not a fixed px: the tag is scaled by the tile's own short side wherever it sits (`TILE_LABEL_AUTO_SCALE`, applied in CSS by `priceTagChipStyle`), so writing one number sizes the chip proportionally on a 1x1 and on a 3x3 alike. The product name in the title band scales by the same rule, so the two keep their relationship. The chip's INK is not purely what is stored: a text colour that would be unreadable against the tag's own fill (or, for an unfilled tag, the band under it) is replaced with one that reads, so a reported `priceTagTextColor` is not always what a buyer sees. The retired `priceTagStyle` (plain/pill) and enum `priceTagSize` (sm/md/lg) are migrated on parse, so an agent never has to write them |
+| Product page options (page on/off, photo fit, font, price + shipping notes, which sections show, indexing) | `storefronts.config.productPage` | R + W | **Ready, and already routed**: `GET`/`PATCH /api/storefronts/[id]/product-page`. PATCH takes a partial config; `null` clears an optional field back to inheriting, which a plain merge cannot express. Session-authenticated for now (B1/B2 still apply), but the payload and the error envelope are the contract |
+| Product page backdrop | `storefronts.config.productPage.backgroundColor` | R + W | Ready, through the route above. Optional strict `#rrggbb`; absent = the page follows the STOREFRONT's background, which may be a solid, a gradient or an image, so there is no single hex to report and the route answers `background.color: null` with `followsStorefront: true`. A colour only, deliberately: no gradient, no upload, no object key on a page that is read rather than looked at. The page's `ink` is derived from whichever backdrop wins (`resolveInk`) and is never stored, so an agent must report it from the route rather than infer one |
+| Buy button appearance (label, fill, corner roundness, border thickness + colour) | `storefronts.config.productPage.ctaLabel` / `ctaColor` / `ctaRadius` / `ctaBorderWidth` / `ctaBorderColor` | R + W | Ready, through the route above. All four style fields OPTIONAL, and absent means "follow the storefront" (the theme's accent, the tiles' roundness, no border) — so never report a stored value as what the button looks like. The route's `buyButton` object is the resolved answer, from the same `resolveCta` the page paints with. Colours are strict `#rrggbb`, the two numbers are bounded whole pixels (`PRODUCT_PAGE_CTA_RADIUS_MAX`, `PRODUCT_PAGE_CTA_BORDER_WIDTH_MAX`), and the label's INK is derived from the fill rather than stored: there is deliberately no way to write a button nobody can read |
 | Embed enabled + domain allowlist | `storefronts` | R + W (`updateEmbedSettings`) | Ready |
 | Embed snippet / `embed_key` | `storefronts.embed_key` | R + W (`rotateEmbedKey`) | **Withhold the key** (B6). Expose "embedding is on/off", the allowlist, and the ability to *rotate*; never the value |
 | Team roster, roles, pending invites | `team_roster`, `team_my_pending_invites` RPCs | R | Ready |

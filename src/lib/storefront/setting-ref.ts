@@ -57,14 +57,22 @@ export type SettingRef =
  * what it writes has to be a plain string, and the mapping to a setting stays
  * here with the settings rather than being spelled out in the view.
  *
- * Two of these leave the Product page group entirely. That is the point: the
- * store's name bar and the page's background really are storefront-wide
- * settings, and sending a seller to the group that owns them beats opening a
- * product-page section that cannot change what they clicked.
+ * ONE of these leaves the Product page group entirely, and that is the point:
+ * the store's name bar really is a storefront-wide setting, so sending a
+ * seller to the group that owns it beats opening a product-page section that
+ * cannot change what they clicked. (The backdrop used to be the second such
+ * case; see its entry below for why it no longer is.)
  */
 export const PRODUCT_PAGE_HOTSPOTS = {
-  /** The page's backdrop, which is the storefront's own background. */
-  background: { kind: "group", group: "theme" },
+  /**
+   * The page's backdrop. This USED to send a seller to the storefront's
+   * Theme group, because the page had no backdrop of its own to change.
+   * It has one now (`productPage.backgroundColor`), so a click on the page's
+   * own background belongs to the control that owns it — including while that
+   * control is set to follow the storefront, since "follow" is one of its
+   * states rather than the absence of the setting.
+   */
+  background: { kind: "productPage", section: "layout" },
   /** The store's name bar across the top. */
   header: { kind: "group", group: "header" },
   /** Photos: gallery style, image fit, and which side they sit on. */
@@ -478,6 +486,22 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
     ref: { kind: "productPage", section: "layout" },
   },
   {
+    id: "product-page-background",
+    label: "Product page background",
+    keywords: [
+      "page background",
+      "page colour",
+      "background colour",
+      "backdrop",
+      "white page",
+      "dark page",
+      "behind the product page",
+      "different background on the page",
+      "same as storefront background",
+    ],
+    ref: { kind: "productPage", section: "layout" },
+  },
+  {
     id: "product-page-photos",
     label: "Product page photos",
     keywords: [
@@ -538,6 +562,48 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
       "purchase button",
       "order button",
       "what the button says",
+    ],
+    ref: { kind: "productPage", section: "cta" },
+  },
+  {
+    id: "buy-button-colour",
+    label: "Buy button colour",
+    keywords: [
+      "button colour",
+      "buy button colour",
+      "cta colour",
+      "button fill",
+      "make the button stand out",
+      "button background",
+      "checkout button colour",
+    ],
+    ref: { kind: "productPage", section: "cta" },
+  },
+  {
+    id: "buy-button-roundness",
+    label: "Buy button roundness",
+    keywords: [
+      "rounded button",
+      "button corners",
+      "square button",
+      "sharp button",
+      "pill button",
+      "button radius",
+      "button shape",
+    ],
+    ref: { kind: "productPage", section: "cta" },
+  },
+  {
+    id: "buy-button-border",
+    label: "Buy button border",
+    keywords: [
+      "button border",
+      "button outline",
+      "border thickness",
+      "border colour",
+      "outlined button",
+      "ghost button",
+      "stroke around the button",
     ],
     ref: { kind: "productPage", section: "cta" },
   },

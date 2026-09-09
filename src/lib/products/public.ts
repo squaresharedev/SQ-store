@@ -22,6 +22,7 @@ import {
   buildSellerIdentity,
   type SellerIdentityRow,
 } from "@/lib/settings/seller-identity";
+import { isTraderIdentityComplete } from "@/lib/settings/trader-identity";
 import {
   SHIPPING_POLICY_SELECT,
   buildShippingPolicy,
@@ -33,6 +34,7 @@ import { uuidField } from "@/lib/validation/inputs";
 import { purchaseUrlSchema } from "@/lib/validation/product";
 import { parseStoredStorefrontConfig } from "@/lib/validation/storefront";
 import { PUBLIC_STOCK_SELECT, toPublicStockBadge } from "@/lib/stock/public";
+import { publicQuantityLimit } from "@/lib/products/quantity";
 import {
   parseDetails,
   parseDocuments,
@@ -57,7 +59,7 @@ import type { ProductPageData } from "@/types/product-page";
  * onto a column that seam has not admitted.
  */
 export const PUBLIC_PRODUCT_SELECT =
-  `id, title, description, price_cents, currency, image_key, digital_file_key, gallery, option_groups, details, documents, purchase_url, shipping_profile_id, ${PUBLIC_STOCK_SELECT}` as const;
+  `id, title, description, price_cents, currency, image_key, digital_file_key, gallery, option_groups, details, documents, purchase_url, shipping_profile_id, max_per_order, ${PUBLIC_STOCK_SELECT}` as const;
 
 export type PublicProductRow = {
   id: string;
@@ -73,6 +75,7 @@ export type PublicProductRow = {
   documents: unknown;
   purchase_url: string | null;
   shipping_profile_id: string | null;
+  max_per_order: number | null;
   track_stock: boolean;
   stock_quantity: number | null;
   low_stock_threshold: number;
@@ -95,7 +98,14 @@ function formatFromKey(key: string | null): string | null {
  */
 export async function buildProductPageProduct(
   row: PublicProductRow,
-  options: { soldOutFlag?: boolean } = {},
+  options: {
+    soldOutFlag?: boolean;
+    /** The storefront's productPage.showStock. Only the quantity ceiling reads
+     *  it, and only to avoid disclosing a count the page itself is hiding —
+     *  see publicQuantityLimit. Absent means "not shown", which is the safe
+     *  answer for a caller that has not thought about it. */
+    showStock?: boolean;
+  } = {},
 ): Promise<ProductPageProduct> {
   const optionGroups = parseOptionGroups(row.option_groups);
   const gallery = reconcileGalleryOptions(parseGallery(row.gallery), optionGroups);
@@ -134,6 +144,7 @@ export async function buildProductPageProduct(
   }
 
   const stock = toPublicStockBadge(row);
+  const soldOut = Boolean(options.soldOutFlag) || stock?.state === "sold_out";
 
   return {
     id: row.id,
@@ -153,7 +164,25 @@ export async function buildProductPageProduct(
     isDigital: row.digital_file_key !== null,
     digitalFormat: formatFromKey(row.digital_file_key),
     stock,
-    soldOut: Boolean(options.soldOutFlag) || stock?.state === "sold_out",
+    soldOut,
+    // A CEILING, not an inventory count. publicQuantityLimit narrows to the
+    // shelf only where the badge above already published the number, so this
+    // field cannot say more about stock than `stock` itself does.
+    //
+    // The tile's manual sold-out flag is deliberately NOT folded in: this is a
+    // fact about the PRODUCT, and `soldOut` beside it is the fact about this
+    // placement. The page hides the picker on `soldOut`, which keeps the two
+    // separable — the editor's sold-out switch is live, and a ceiling zeroed
+    // here could not be recovered when a seller switches it back.
+    maxQuantity: publicQuantityLimit(
+      {
+        maxPerOrder: row.max_per_order,
+        trackStock: row.track_stock,
+        stockQuantity: row.stock_quantity,
+        lowStockThreshold: row.low_stock_threshold,
+      },
+      { stockShown: options.showStock === true },
+    ),
   };
 }
 
@@ -257,15 +286,29 @@ export const getPublicProductPage = cache(
       return null;
     }
     if (!row) return null;
-    // A seller-identity read failure is NOT a reason to 404 the page: the
-    // block degrades to "nothing set", same as an owner who never filled it
-    // in — see buildSellerIdentity(null).
     if (sellerError) {
       console.error("[product-page] seller identity read failed", sellerError);
     }
 
+    // THE READ SIDE OF THE PUBLISH GATE, and the reason there is no way around
+    // it: the write side stops a product going `active` without the seller's
+    // trader details, and this stops one that went active before those details
+    // were cleared (or before the gate existed) from still being sold. A buyer
+    // may not be shown an offer without being told who is making it and how to
+    // reach them, so a page that cannot say those things is not shown at all.
+    //
+    // 404, the same answer as every other refusal here, so an incomplete
+    // seller's catalogue is not enumerable by the shape of the response. And
+    // fail-closed on a read error: an identity we could not read is one we
+    // cannot display, which is the same problem as one that is not there.
+    const seller = buildSellerIdentity(
+      sellerError ? null : (sellerRow as SellerIdentityRow | null),
+    );
+    if (!isTraderIdentityComplete(seller)) return null;
+
     const product = await buildProductPageProduct(row as PublicProductRow, {
       soldOutFlag: block.soldOut,
+      showStock: productPage.showStock,
     });
 
     const theme = config.theme;
@@ -284,7 +327,7 @@ export const getPublicProductPage = cache(
           shippingPolicy: buildShippingPolicy(
             sellerError ? null : (sellerRow as ShippingPolicyRow | null),
           ),
-          seller: buildSellerIdentity(sellerError ? null : (sellerRow as SellerIdentityRow | null)),
+          seller,
           backgroundImageUrl,
           customFontUrl,
         },

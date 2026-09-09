@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { ProductFormView } from "@/components/products/ProductFormView";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
+import { getTraderIdentityStatus } from "@/lib/settings/seller-identity";
 import { getShippingChoices } from "@/lib/storefront/queries";
 
 export const metadata: Metadata = {
@@ -21,11 +22,20 @@ export default async function NewProductPage() {
   ]);
   if (!can(account?.role, "products.write")) redirect("/products");
 
+  // What the form needs to know before it offers "Active": the server refuses
+  // that status without the store's trader details (lib/products/actions.ts),
+  // so the control says so up front rather than letting a seller fill in a
+  // whole product and find out at Save.
+  const identity = account
+    ? await getTraderIdentityStatus(account.accountId)
+    : { ok: true as const, missing: [] };
+
   return (
     <ProductFormView
       title="New product"
       subtitle="Add a product to sell through your store and embeds."
       shippingChoices={shippingChoices}
+      missingTraderDetails={identity.ok ? identity.missing : []}
     />
   );
 }

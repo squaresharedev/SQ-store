@@ -29,7 +29,9 @@ import {
   IMAGE_ALT_MAX,
   IMAGE_FITS,
   POLICY_TEXT_MAX,
+  PRODUCT_PAGE_CTA_BORDER_WIDTH_MAX,
   PRODUCT_PAGE_CTA_MAX,
+  PRODUCT_PAGE_CTA_RADIUS_MAX,
   PRODUCT_PAGE_PRICE_NOTES,
   PRODUCT_PAGE_SECTION_IDS,
   PRODUCT_PAGE_SHIPPING_NOTES,
@@ -460,10 +462,25 @@ export const productPageSchema = z.preprocess(
   },
   z.strictObject({
     enabled: z.boolean(),
+    // The page's own backdrop; absent = the storefront's background. Strict
+    // hex like every other colour here, and a colour only: see the type.
+    backgroundColor: hexColorSchema.optional(),
     imageFit: z.enum(IMAGE_FITS),
     // Absent = the storefront's own font, which is the default.
     font: z.enum(STOREFRONT_FONTS).optional(),
     ctaLabel: singleLineText({ label: "The buy button label", max: PRODUCT_PAGE_CTA_MAX }),
+    // The button's paint. Every one optional and absent = follow the
+    // storefront (see ProductPageConfig), so a page saved before these existed
+    // parses unchanged and an untouched one never grows a key.
+    ctaColor: hexColorSchema.optional(),
+    ctaRadius: z.number().int().min(0).max(PRODUCT_PAGE_CTA_RADIUS_MAX).optional(),
+    ctaBorderWidth: z
+      .number()
+      .int()
+      .min(0)
+      .max(PRODUCT_PAGE_CTA_BORDER_WIDTH_MAX)
+      .optional(),
+    ctaBorderColor: hexColorSchema.optional(),
     priceNote: z.enum(PRODUCT_PAGE_PRICE_NOTES),
     shippingNote: z.enum(PRODUCT_PAGE_SHIPPING_NOTES),
     showStock: z.boolean(),

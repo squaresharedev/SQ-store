@@ -137,7 +137,6 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   onMoveBlock,
   onResizeBlock,
   onRotateBlock,
-  onRemove,
   onEmptyCellClick,
   onAddProduct,
   selectedKeys,
@@ -163,9 +162,9 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   onTextRangeChange,
   onTypeEnd,
   onSpotChange,
+  onOpenSpotSetting,
   disableMarquee = false,
   openPages = [],
-  onOpenPage,
   onClosePage,
   storefrontId = "",
   storefrontName = "",
@@ -208,7 +207,6 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   onResizeBlock: (key: string, placement: GridPlacement) => void;
   /** Tilt, in degrees. The block keeps the cells it had. */
   onRotateBlock: (key: string, rotation: number) => void;
-  onRemove: (key: string) => void;
   /** Clicking a free cell inserts there. */
   onEmptyCellClick: (x: number, y: number) => void;
   /** Opens the product picker. Drives the empty state's CTA; omitted in
@@ -256,6 +254,9 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   /** Product tiles: the seller dragged (or arrowed) the title or the price to
    *  a new home. */
   onSpotChange?: (key: string, token: SpotToken, drop: SpotDrop) => void;
+  /** Product tiles: the seller pressed the title or the price without moving
+   *  it, which asks for the controls that shape it. */
+  onOpenSpotSetting?: (key: string, token: SpotToken) => void;
   /** True while a pan tool owns frame drags (space held). */
   disableMarquee?: boolean;
   /**
@@ -264,8 +265,8 @@ export const DesignerCanvas = memo(function DesignerCanvas({
    * has out is not part of the design and is never saved.
    */
   openPages?: readonly string[];
-  /** The node on a selected product tile opens its page. */
-  onOpenPage?: (productId: string) => void;
+  /** Dismiss one page's artboard from its own close control. Opening one is
+   *  the selection toolbar's business, not the canvas's. */
   onClosePage?: (productId: string) => void;
   storefrontId?: string;
   storefrontName?: string;
@@ -289,8 +290,6 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   const handlers = useRef({
     onSelectBlock,
     onSelectMany,
-    onRemove,
-    onOpenPage,
     onFrameBlock,
     onFramePlacement,
     onFrameExit,
@@ -300,6 +299,7 @@ export const DesignerCanvas = memo(function DesignerCanvas({
     onTextRangeChange,
     onTypeEnd,
     onSpotChange,
+    onOpenSpotSetting,
     onSelectHeaderLine,
     onEditHeaderLine,
     onHeaderTextChange,
@@ -311,8 +311,6 @@ export const DesignerCanvas = memo(function DesignerCanvas({
     handlers.current = {
       onSelectBlock,
       onSelectMany,
-      onRemove,
-      onOpenPage,
       onFrameBlock,
       onFramePlacement,
       onFrameExit,
@@ -322,6 +320,7 @@ export const DesignerCanvas = memo(function DesignerCanvas({
       onTextRangeChange,
       onTypeEnd,
       onSpotChange,
+      onOpenSpotSetting,
       onSelectHeaderLine,
       onEditHeaderLine,
       onHeaderTextChange,
@@ -334,12 +333,6 @@ export const DesignerCanvas = memo(function DesignerCanvas({
     // Toggle semantics (deselect on re-click, add on shift) live with the
     // selection's owner, StorefrontDesigner.
     handlers.current.onSelectBlock(key, additive);
-  }, []);
-  const removeByKey = useCallback((key: string) => {
-    handlers.current.onRemove(key);
-  }, []);
-  const openPageFor = useCallback((productId: string) => {
-    handlers.current.onOpenPage?.(productId);
   }, []);
   const frameByKey = useCallback((key: string) => {
     handlers.current.onFrameBlock?.(key);
@@ -398,6 +391,9 @@ export const DesignerCanvas = memo(function DesignerCanvas({
     },
     [],
   );
+  const openSpotSetting = useCallback((key: string, token: SpotToken) => {
+    handlers.current.onOpenSpotSetting?.(key, token);
+  }, []);
 
   // MARQUEE SELECTION. A drag that starts on the shop frame itself (the
   // board's background, a gap between cells, or a free cell — never a tile
@@ -797,6 +793,7 @@ export const DesignerCanvas = memo(function DesignerCanvas({
             {onAddProduct && (
               <button
                 type="button"
+                suppressHydrationWarning
                 onClick={onAddProduct}
                 className={`mt-4 ${primaryButtonClass}`}
               >
@@ -872,12 +869,6 @@ export const DesignerCanvas = memo(function DesignerCanvas({
                 // Stable across renders, so a memoised tile only re-renders
                 // when its OWN data or selection changes.
                 onToggleEdit={toggleSelection}
-                onRemove={removeByKey}
-                onOpenPage={onOpenPage ? openPageFor : undefined}
-                pageOpen={
-                  gridBlock.data.type === "product" &&
-                  openPages.includes(gridBlock.data.productId)
-                }
                 onFrame={frameByKey}
                 onFramePlacement={placeFrame}
                 onFrameExit={exitFrame}
@@ -887,6 +878,7 @@ export const DesignerCanvas = memo(function DesignerCanvas({
                 onTextRangeChange={changeTextRange}
                 onTypeEnd={endTyping}
                 onSpotChange={changeSpot}
+                onOpenSpotSetting={openSpotSetting}
               />
             )}
           />

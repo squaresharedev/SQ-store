@@ -55,14 +55,22 @@ describe("EditorToolbar overflow menu", () => {
     expect(moreMenu()).toBeInTheDocument();
   });
 
-  it("holds exactly what the phone bar gave up", async () => {
+  it("holds exactly what the phone bar gave up, and nothing else", async () => {
     const user = userEvent.setup();
     render(<Harness />);
     await user.click(screen.getByRole("button", { name: "More tools" }));
-    const menu = moreMenu()!;
-    for (const name of ["Redo", "Tidy up", "Reset zoom"]) {
-      expect(within(menu).getByRole("menuitem", { name })).toBeInTheDocument();
-    }
+    // The EXACT list, not just a presence check. This menu exists because the
+    // bar has no room, so every row in it is a row the seller has to open a
+    // menu to reach; it earned a fourth ("All shapes") on the argument that
+    // hover cannot be done with a thumb, and lost it again when the Element
+    // button turned out to take a press as well. Asserting the whole list is
+    // what stops that argument being re-made one row at a time.
+    const items = within(moreMenu()!).getAllByRole("menuitem");
+    expect(items.map((item) => item.textContent?.trim())).toEqual([
+      "Redo",
+      "Tidy up",
+      "Reset zoom",
+    ]);
   });
 
   it("each item fires its action and closes the menu", async () => {
@@ -246,14 +254,30 @@ describe("EditorToolbar element tool", () => {
     expect(elementMenuOpen()).toBe(false);
   });
 
-  it("offers the library from the phone menu too, where hover means nothing", async () => {
-    const onOpenShapesPanel = vi.fn();
+  it("is the ONLY route to the library, with none duplicated in More", async () => {
     const user = userEvent.setup();
-    render(<Harness onOpenShapesPanel={onOpenShapesPanel} />);
+    render(<Harness />);
+    // The overflow menu carried a second "All shapes" because this menu opened
+    // on HOVER, which a thumb does not do. It takes a press too, so the second
+    // route was a row in the phone's scarcest menu leading somewhere the bar
+    // beside it already went.
     await user.click(screen.getByRole("button", { name: "More tools" }));
-    await user.click(within(moreMenu()!).getByRole("menuitem", { name: "All shapes" }));
-    expect(onOpenShapesPanel).toHaveBeenCalledTimes(1);
-    expect(moreMenu()).toBeNull();
+    expect(
+      within(moreMenu()!).queryByRole("menuitem", { name: "All shapes" }),
+    ).toBeNull();
+  });
+
+  it("shows no tooltip of its own, which its menu would cover anyway", () => {
+    render(<Harness />);
+    // Tips pop ABOVE the bar, and so does this button's menu: bigger, on the
+    // same hover, and painted on top. Every other insert tool keeps its tip.
+    const tip = (name: string) =>
+      screen
+        .getByRole("button", { name })
+        .querySelector("span[aria-hidden='true']");
+    expect(tip("Add element")).toBeNull();
+    expect(tip("Add text")).not.toBeNull();
+    expect(tip("Add product")).not.toBeNull();
   });
 
   it("hands the picked file straight to the designer", async () => {
@@ -286,13 +310,16 @@ describe("EditorToolbar element tool", () => {
   });
 
   it("disables inserting at the block cap", async () => {
-    const user = userEvent.setup();
     render(<Harness canAddBlocks={false} />);
     expect(screen.getByRole("button", { name: "Add element" })).toBeDisabled();
-    await user.click(screen.getByRole("button", { name: "More tools" }));
-    // The panel route stays open: browsing the library is not an insert.
+    // The panel route stays open: browsing the library is not an insert. The
+    // menu is always mounted (it reveals on hover), so this reads it without
+    // opening the trigger, which the line above just disabled.
     expect(
-      within(moreMenu()!).getByRole("menuitem", { name: "All shapes" }),
+      within(elementMenu()!).getByRole("menuitem", { name: "All shapes" }),
     ).toBeEnabled();
+    expect(
+      within(elementMenu()!).getByRole("menuitem", { name: "Add square" }),
+    ).toBeDisabled();
   });
 });

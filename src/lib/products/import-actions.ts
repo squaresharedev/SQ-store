@@ -14,6 +14,7 @@ import {
   type ActionError,
 } from "@/lib/errors";
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
+import { publishBlockedError } from "@/lib/settings/seller-identity";
 import { productWriteSchema } from "@/lib/validation/product";
 import { CURRENCIES, PRODUCT_STATUSES, type Currency, type ProductStatus } from "@/types/product";
 import {
@@ -134,6 +135,14 @@ export async function importProducts(input: unknown): Promise<ImportResult> {
         "Choose one, then import again.",
       ),
     );
+  }
+
+  // The same publish gate a typed product passes: importing is a faster route
+  // to a live listing, not a way around the trader details one needs. Checked
+  // before the file is parsed, since the answer does not depend on its rows.
+  if (status === "active") {
+    const blocked = await publishBlockedError(account.accountId);
+    if (blocked) return failure(blocked);
   }
 
   const plan = buildImportPlan(parseCsv(csv), safeColumns(columns), {

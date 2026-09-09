@@ -15,6 +15,8 @@ import { invalidInput } from "@/lib/errors";
 import { embedSettingsSchema } from "@/lib/validation/storefront";
 import { normalizeHostname } from "@/lib/validation/inputs";
 import { rotateEmbedKey, updateEmbedSettings } from "@/lib/storefront/actions";
+import { SellerDetailsNotice } from "@/components/settings/SellerDetailsNotice";
+import type { TraderIdentityField } from "@/lib/settings/trader-identity";
 import type { StorefrontSummary } from "@/lib/storefront/queries";
 import {
   DEFAULT_EMBED_SETTINGS,
@@ -70,12 +72,17 @@ export function EmbedModal({
   storefront,
   onClose,
   onSaved,
+  missingTraderDetails = [],
 }: {
   /** The storefront being embedded, or null when the modal is closed. */
   storefront: StorefrontSummary | null;
   onClose: () => void;
   /** Mirrors a successful save into the caller's local list state. */
   onSaved: (id: string, embed: EmbedSettings) => void;
+  /** Trader details this store still owes buyers. Non-empty means the action
+   *  will refuse to switch embedding ON (lib/storefront/actions.ts), so the
+   *  switch is not offered. Turning it OFF is never blocked, here or there. */
+  missingTraderDetails?: readonly TraderIdentityField[];
 }) {
   const toast = useToast();
   // The rotate buttons drive their own icon: hovering anywhere on the button
@@ -157,7 +164,10 @@ export function EmbedModal({
   // AND at least one domain configured). Handing someone a snippet before those
   // conditions are met would make it look ready when it cannot work.
   const domains = parseDomains(domainsText);
-  const canCopy = enabled && domains.length > 0;
+  // A store that may not publish can neither turn embedding on nor be handed a
+  // snippet: the endpoint the snippet calls refuses it too (api/embed/[key]).
+  const canPublish = missingTraderDetails.length === 0;
+  const canCopy = enabled && domains.length > 0 && canPublish;
 
   return (
     <Modal
@@ -179,6 +189,13 @@ export function EmbedModal({
             to paste the snippet the moment it ships.
           </p>
 
+          {/* Above the switch it disables, so the reason arrives before the
+              dead control rather than after it. */}
+          <SellerDetailsNotice
+            missing={missingTraderDetails}
+            blocks="embed this storefront"
+          />
+
           {/* SELL-03: switches appear ABOVE the snippet so settings
               are visible before the seller decides whether to copy. */}
           <div className="flex items-center justify-between gap-3">
@@ -188,6 +205,10 @@ export function EmbedModal({
             <Switch
               id="embed-enabled"
               checked={enabled}
+              // Only the turn-ON is gated. A seller whose details lapsed while
+              // embedding was live must still be able to switch it off, so an
+              // already-on switch stays operable.
+              disabled={!canPublish && !enabled}
               onCheckedChange={setEnabled}
             />
           </div>

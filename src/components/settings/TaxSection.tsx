@@ -11,6 +11,8 @@ import { Select, type SelectOption } from "@/components/ui/select";
 import { saveTaxInfo, type SettingsActionState } from "@/lib/settings/actions";
 import { EU_COUNTRIES, SELLER_FIELD_MAX } from "@/lib/settings/constants";
 import { InfoTip } from "@/components/ui/InfoTip";
+import { RequiredMark } from "@/components/ui/RequiredMark";
+import { LEGAL_LINKS } from "@/lib/legal/links";
 import { helpTextClass } from "@/components/ui/control-styles";
 
 const INITIAL: SettingsActionState = {};
@@ -128,6 +130,38 @@ export function TaxSection({
       title="Business & seller details"
       description="Set once for your whole account. Shown to buyers on every product page you sell on, and used for invoices and VAT."
     >
+      {/* THE GATE, STATED WHERE IT IS RESOLVED. The three starred fields are
+          what lib/settings/trader-identity.ts requires before anything of this
+          account's may go on sale; a seller who arrived here from a blocked
+          save needs to see which ones those are without going back. The second
+          sentence is the promise the privacy policy makes on our behalf, said
+          at the point of collection — a seller handing over a phone number and
+          a home address is owed that before they type, not in a policy they
+          would have to go and find. */}
+      <div className="mb-4 rounded-md border border-border bg-muted/40 px-4 py-3">
+        <p className="font-inter text-sm text-foreground">
+          <span className="font-medium">
+            Your trader name, address and contact email are required before you
+            can publish or sell anything.
+          </span>{" "}
+          Buyers have to be able to see who they are buying from and how to
+          reach you before they order.
+        </p>
+        <p className={`${helpTextClass} mt-1`}>
+          These details appear publicly on your product pages for that reason
+          alone. We never use them for marketing, and never sell or share them.
+          See the{" "}
+          <a
+            href={LEGAL_LINKS.privacy.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline underline-offset-2 hover:no-underline"
+          >
+            {LEGAL_LINKS.privacy.name}
+          </a>
+          .
+        </p>
+      </div>
       {/* The ids on each field wrapper are universal search's landing points
           (/settings/tax#vat and friends); scroll-mt clears the sticky top bar
           so the anchor doesn't land under it. */}
@@ -138,11 +172,15 @@ export function TaxSection({
       >
         <div id="business-name" className="flex flex-col gap-1.5">
           <span className="flex items-center gap-1.5">
-            <Label htmlFor="tax_business_name">Business name</Label>
-            <InfoTip label="When to fill in a business name">
-              Only if you sell through a registered business. Selling as
-              yourself is fine: leave it empty and your storefront&apos;s own
-              name is shown instead.
+            <Label htmlFor="tax_business_name">
+              Trader name
+              <RequiredMark />
+            </Label>
+            <InfoTip label="What to put here">
+              The name buyers are contracting with. Your registered business
+              name if you sell through one; your own full name if you sell as
+              an individual. Your storefront&apos;s name is a shop name, which
+              is not the same thing and cannot stand in for this.
             </InfoTip>
           </span>
           <Input
@@ -153,12 +191,16 @@ export function TaxSection({
             placeholder="Studio Builderboy e.U."
             maxLength={200}
             autoComplete="organization"
+            aria-required="true"
             disabled={isPending}
           />
         </div>
         <div id="address" className="flex flex-col gap-1.5">
           <span className="flex items-center gap-1.5">
-            <Label htmlFor="seller_address">Address</Label>
+            <Label htmlFor="seller_address">
+              Address
+              <RequiredMark />
+            </Label>
             <InfoTip label="Why buyers see this">
               Distance-selling law asks for a postal address next to every offer.
               Shown in the Seller section of your product pages.
@@ -172,17 +214,23 @@ export function TaxSection({
             placeholder={"12 Market Street\nDublin, D02 X285\nIreland"}
             maxLength={SELLER_FIELD_MAX.address}
             rows={3}
+            aria-required="true"
             disabled={isPending}
           />
         </div>
         <div id="contact-email" className="flex flex-col gap-1.5">
           <span className="flex items-center gap-1.5">
-            <Label htmlFor="seller_email">Contact email</Label>
+            <Label htmlFor="seller_email">
+              Contact email
+              <RequiredMark />
+            </Label>
             <InfoTip label="How this differs from your sign-in email">
               Shown to buyers as a mailto link, and used as the buy button&apos;s
               fallback when a product has no purchase link. Kept separate from
               your sign-in email on purpose: use whichever address you want
-              buyers writing to.
+              buyers writing to. It has to be an address you actually read —
+              placeholders, temp-mail providers and no-reply addresses are
+              refused, and so is a domain that takes no mail.
             </InfoTip>
           </span>
           <Input
@@ -194,6 +242,7 @@ export function TaxSection({
             placeholder="hello@yourshop.example"
             maxLength={254}
             autoComplete="email"
+            aria-required="true"
             disabled={isPending}
           />
         </div>

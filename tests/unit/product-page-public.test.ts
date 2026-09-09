@@ -82,6 +82,7 @@ const productRow = {
   track_stock: true,
   stock_quantity: 3,
   low_stock_threshold: 5,
+  max_per_order: 4,
   owner_id: OWNER_ID,
 };
 
@@ -98,8 +99,25 @@ function storefrontRow(overrides: Partial<Record<string, unknown>> = {}) {
   };
 }
 
+/** A seller who has disclosed everything the publish gate asks for. Without
+ *  all three the page is refused outright, so it is part of the baseline
+ *  fixture rather than something individual tests opt into. */
+const profileRow = {
+  tax_business_name: "Studio Builderboy e.U.",
+  tax_vat_id: "ATU12345678",
+  tax_country: "AT",
+  seller_address: "12 Market Street\nVienna\nAustria",
+  seller_email: "hello@studio-builderboy.at",
+  seller_phone: "+43 1 234567",
+  shipping_policy: null,
+};
+
 beforeEach(() => {
-  state.rows = { storefronts: storefrontRow(), products: productRow };
+  state.rows = {
+    storefronts: storefrontRow(),
+    products: productRow,
+    profiles: profileRow,
+  };
   state.filters = {};
   from.mockClear();
   rateLimitKey.mockClear();
@@ -220,5 +238,40 @@ describe("getPublicProductPage gates", () => {
     });
     const result = await getPublicProductPage(STOREFRONT_ID, PRODUCT_ID);
     expect(result?.page.product.soldOut).toBe(true);
+  });
+
+  // THE PUBLISH GATE, on the read side. An `active` product on an enabled
+  // page still does not sell if the seller has not said who they are: each of
+  // the three required fields refuses the page on its own, and the answer is
+  // the same null every other refusal here gives, so an incomplete seller's
+  // catalogue is not enumerable.
+  it.each([
+    ["trader name", "tax_business_name"],
+    ["address", "seller_address"],
+    ["contact email", "seller_email"],
+  ])("refuses the page when the seller has no %s", async (_label, column) => {
+    state.rows.profiles = { ...profileRow, [column]: null };
+    expect(await getPublicProductPage(STOREFRONT_ID, PRODUCT_ID)).toBeNull();
+  });
+
+  it("refuses the page when the seller identity cannot be read at all", async () => {
+    // A profile row that is missing entirely (deleted account, replication
+    // lag) is the same problem as one that was never filled in.
+    state.rows.profiles = null;
+    expect(await getPublicProductPage(STOREFRONT_ID, PRODUCT_ID)).toBeNull();
+  });
+
+  it("still serves the page when only the optional trader fields are blank", async () => {
+    // Phone, VAT ID and country are shown when set and required by nothing:
+    // a seller without a business line must still be able to sell.
+    state.rows.profiles = {
+      ...profileRow,
+      seller_phone: null,
+      tax_vat_id: null,
+      tax_country: null,
+    };
+    const result = await getPublicProductPage(STOREFRONT_ID, PRODUCT_ID);
+    expect(result).not.toBeNull();
+    expect(result?.page.storefront.seller.phone).toBeUndefined();
   });
 });

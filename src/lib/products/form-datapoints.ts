@@ -72,7 +72,7 @@ export const PRODUCT_FORM_SECTIONS = [
     // what this one sentence says: three buttons on a card with two controls,
     // opening three windows onto the same idea. One section, one explanation.
     description:
-      "Unlimited by default. Track it to stop overselling and show buyers sold-out and “Only N left” badges. The alert number is when that second badge appears.",
+      "Unlimited by default. Track it to stop overselling and show buyers sold-out and “Only N left” badges. The alert number is when that second badge appears. The order limit is separate: it caps how many one buyer can take at once, tracked or not.",
     required: false,
   },
   {
@@ -189,6 +189,9 @@ export type ProductFormSnapshot = {
   /** Units on hand when tracking, else null. */
   stockQuantity: number | null;
   lowStockThreshold: number | null;
+  /** How many one buyer may take in a single order, 1..PURCHASE_QUANTITY_MAX.
+   *  Independent of tracking; null only while the field is mid-edit. */
+  maxPerOrder: number | null;
   /** A download rather than a physical good: shipping and safety do not apply. */
   isDigital: boolean;
   hasCoverImage: boolean;
@@ -323,15 +326,25 @@ function summarize(input: ProductFormStateInput): Record<ProductFormSectionId, s
 
   return {
     basics: values.title.trim() || "",
-    stock: values.trackStock
-      ? // Show the actual quantity rather than a misleading "0": an empty
-        // field means the seller hasn't answered yet, not that they have zero
-        // units. The toggle flip now seeds a real value, so this branch reads
-        // as unanswered only in the edge case where seeding hasn't run.
-        values.stockQuantity.trim()
-        ? `Tracking ${values.stockQuantity.trim()}`
-        : "Set quantity"
-      : "Unlimited",
+    // BOTH answers, because the section now holds two independent ones and a
+    // summary that reported only the shelf would call a product with a limit
+    // of 1 "Unlimited". The order limit is always stated, default or not: the
+    // rule in this file is every field in the section, and a seller who cannot
+    // see the number cannot tell it is the one they meant.
+    stock: [
+      values.trackStock
+        ? // Show the actual quantity rather than a misleading "0": an empty
+          // field means the seller hasn't answered yet, not that they have zero
+          // units. The toggle flip now seeds a real value, so this branch reads
+          // as unanswered only in the edge case where seeding hasn't run.
+          values.stockQuantity.trim()
+          ? `Tracking ${values.stockQuantity.trim()}`
+          : "Set quantity"
+        : "Unlimited",
+      values.maxPerOrder.trim() ? `Max ${values.maxPerOrder.trim()} per order` : "",
+    ]
+      .filter(Boolean)
+      .join(" · "),
     media: [
       input.hasCoverImage ? "Image" : "",
       input.hasDigitalFile ? "Download" : "",
@@ -393,6 +406,11 @@ export function buildProductFormSnapshot(
   if (values.trackStock && toCount(values.stockQuantity) === null) {
     requiredMissing.push("stockQuantity");
   }
+  // Every product has an order limit, so a blank one is a cleared field rather
+  // than an unanswered question, and the form will not submit on it. Zero is
+  // not a limit either: it would mean a product nobody may buy.
+  const maxPerOrder = toCount(values.maxPerOrder);
+  if (maxPerOrder === null || maxPerOrder < 1) requiredMissing.push("maxPerOrder");
 
   const safety = details.safety;
   const included = details.included
@@ -413,6 +431,7 @@ export function buildProductFormSnapshot(
     trackStock: values.trackStock,
     stockQuantity: values.trackStock ? toCount(values.stockQuantity) : null,
     lowStockThreshold: toCount(values.lowStockThreshold),
+    maxPerOrder: toCount(values.maxPerOrder),
     isDigital: input.isDigital,
     hasCoverImage: input.hasCoverImage,
     hasDigitalFile: input.hasDigitalFile,

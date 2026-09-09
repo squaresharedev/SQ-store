@@ -4,21 +4,26 @@ import { DEFAULT_STOREFRONT_CONFIG, type ShapeBlock } from "@/types/storefront";
 import { BlockTile } from "@/components/storefront/BlockTile";
 
 /**
- * THE ONE THING A SELECTED TILE HAS TO SAY OUT LOUD.
+ * WHAT A TILE STILL DRAWS FOR ITSELF, now that its buttons have left.
  *
- * The tile's controls hang OUTSIDE it, so they are drawn over the cells beside
- * it, and every grid cell is its own stacking context: a cell whose controls
- * are out has to be lifted clear of its neighbours or they cannot be pressed
- * at all. Hover cannot be what does the lifting for a SELECTED tile: its chip
- * stays out with the pointer nowhere near it, and chrome drawn under a
- * neighbour can never be hovered into reach, because the pointer arriving on it
- * lands on the neighbour instead.
+ * The controls used to be a chip welded to the tile's top edge. They live in
+ * the selection's own island above the canvas instead (SelectionToolbar), so
+ * the two things this file guards are what remains:
  *
- * `data-block-selected` is how the tile tells the cell. Three separate things
- * read it and none of them are in this file (the lift in globals.css, the
- * handles' visibility in components/grid/Grid.tsx, and the chip's own
- * variants), so the attribute going missing breaks all three silently. Hence a
- * test on the attribute itself.
+ *   - NO BUTTONS ON THE ARTWORK. A button drawn here is a button drawn over
+ *     the seller's own work, and it brings back every problem that made the
+ *     chip worth removing: chrome hanging into the neighbouring cell, a cell
+ *     that has to be lifted before it can be pressed, and a target that
+ *     shrinks with the board's zoom. This assertion is what keeps one from
+ *     quietly reappearing.
+ *   - `data-block-selected`, which is how the tile tells the CELL around it
+ *     that its chrome is out. The grid's resize and rotate handles still hang
+ *     outside the cell, and every cell is its own stacking context, so a cell
+ *     whose handles are showing has to be lifted clear of its neighbours or
+ *     they cannot be pressed at all. Three separate things read this attribute
+ *     and none of them are in this file (the lift in globals.css, the handles'
+ *     visibility in components/grid/Grid.tsx, and the footprint's own
+ *     variants), so it going missing breaks all three silently.
  */
 
 afterEach(cleanup);
@@ -34,7 +39,7 @@ const block: ShapeBlock = {
   h: 1,
 };
 
-function renderTile(props: { isEditing?: boolean } = {}) {
+function renderTile(props: { isEditing?: boolean; isFraming?: boolean } = {}) {
   return render(
     <BlockTile
       blockKey="s_1"
@@ -43,7 +48,6 @@ function renderTile(props: { isEditing?: boolean } = {}) {
       theme={DEFAULT_STOREFRONT_CONFIG.theme}
       editable
       onToggleEdit={vi.fn()}
-      onRemove={vi.fn()}
       {...props}
     />,
   );
@@ -60,30 +64,38 @@ describe("BlockTile selection chrome", () => {
     expect(container.querySelector("[data-block-selected]")).toBeNull();
   });
 
-  it("welds the chip to the tile's edge, seamless rather than floating or doubled", () => {
+  it("draws no buttons of its own, selected or not", () => {
     renderTile({ isEditing: true });
-    const chip = screen
-      .getByRole("button", { name: /remove/i })
-      .closest("[data-tile-chrome]");
-    expect(chip).not.toBeNull();
-    // FLUSH with a hairline of overlap: `bottom-full` puts it outside the
-    // tile, `-mb-px` closes any subpixel gap a zoomed stage could otherwise
-    // round open — dead space the pointer could fall into.
-    expect(chip!.className).toContain("bottom-full");
-    expect(chip!.className).toContain("-mb-px");
-    // NO border on the overlapping edge: a full border there would draw two
-    // lines on top of each other (the chip's own and the tile's), which is
-    // what actually reads as a visible overlap glitch rather than a seam.
-    expect(chip!.className).toContain("border-b-0");
-    // Rounded only on the far corners; the touching ones stay square so the
-    // chip continues the tile's own edge instead of notching into it.
-    expect(chip!.className).toContain("rounded-t-sm");
-    expect(chip!.className).toContain("rounded-b-none");
-    // Invisible chrome takes no presses: it hangs over the cell above, which
-    // on an editable board is a free cell that inserts a block when clicked.
-    expect(chip!.className).toContain("pointer-fine:pointer-events-none");
-    expect(chip!.className).toContain(
-      "pointer-fine:group-has-[[data-block-selected]]:pointer-events-auto",
+    expect(screen.queryAllByRole("button")).toHaveLength(0);
+  });
+
+  it("outlines the room the block takes while its chrome is out", () => {
+    const { container } = renderTile({ isEditing: true });
+    const footprint = container.querySelector("[data-tile-footprint]");
+    expect(footprint).not.toBeNull();
+    // In the tile's own 1px border ring, and square where the tile is not: on
+    // a circular tile this is the only thing showing where the block's edges
+    // actually run, and the handles hang off those edges.
+    expect(footprint!.className).toContain("-inset-px");
+    // Never in the way of a press on the face beneath it.
+    expect(footprint!.className).toContain("pointer-events-none");
+    // Revealed by selection on every pointer type. These used to be
+    // `pointer-fine:` variants, with chrome drawn unconditionally for a finger
+    // on the grounds that touch has no hover — but the lift that raises a
+    // cell's chrome above its neighbours is spent on hover, focus or
+    // selection, so on a phone an unselected tile's chrome was drawn into the
+    // next tile's face. `group-hover` carries its own `hover: hover` query, so
+    // a mouse keeps its hover reveal and a finger simply never matches it.
+    expect(footprint!.className).toContain(
+      "group-has-[[data-block-selected]]:opacity-100",
     );
+    expect(footprint!.className).not.toContain("pointer-fine:");
+  });
+
+  it("drops the outline while the tile is being framed", () => {
+    // Framing turns the tile into a single-purpose surface; chrome that is not
+    // part of the crop is noise around the picture being positioned.
+    const { container } = renderTile({ isFraming: true });
+    expect(container.querySelector("[data-tile-footprint]")).toBeNull();
   });
 });

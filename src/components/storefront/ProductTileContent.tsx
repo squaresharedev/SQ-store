@@ -12,9 +12,11 @@ import {
   spotRow,
   titleBandRow,
   titleOverlaysImage,
+  type CardStyle,
   type CardStyleOverrides,
   type ImagePlacement,
   type PriceTagFloatPosition,
+  type PriceTagPosition,
   type SpotRow,
   type StorefrontTheme,
 } from "@/types/storefront";
@@ -30,6 +32,7 @@ import {
   TITLE_BAND_SHADOW_CLASSES,
   priceTagChipStyle,
   priceTagInsetStyle,
+  titleBandFontStyle,
   titleBandStyle,
 } from "./config-maps";
 import {
@@ -62,6 +65,34 @@ function hoverDurationStyle(ms: number): CSSProperties {
   return { transitionDuration: `${ms}ms` };
 }
 
+/** What a `shadow` title band puts behind the price: a gradient, dark by
+ *  construction, standing in for the legibility check as the darkest thing
+ *  the price could be printed on there. */
+const SHADOW_BAND_BACKDROP = "#3d3d3d";
+/** The info bar's own surface (`bg-card`), which is what an unfilled chip in
+ *  a `bar` or `overlay` band is actually read against. */
+const CARD_SURFACE = "#ffffff";
+
+/**
+ * What the price is READ AGAINST, which is not always its own fill.
+ *
+ * A floated tag wears a backing, so the answer is that backing. A tag in the
+ * title band has no fill by default and sits directly on whatever the band
+ * is: the card's surface for a bar or an overlay, the dark gradient for a
+ * `shadow`. Handing that to the chip is what lets the legibility floor apply
+ * to an unfilled price as well as a filled one.
+ *
+ * A tag floated over a PHOTO is the one case nobody can answer, since the
+ * picture underneath is the seller's. It never needs answering: a floated tag
+ * always has a fill (see defaultPriceTagFill), which is exactly why it has
+ * one.
+ */
+function priceBackdrop(card: CardStyle, position: PriceTagPosition): string {
+  const fill = card.priceTagColor ?? defaultPriceTagFill(position);
+  if (fill !== "transparent") return fill;
+  return card.titleStyle === "shadow" ? SHADOW_BAND_BACKDROP : CARD_SURFACE;
+}
+
 /**
  * The product face of a grid tile. Card appearance comes from ONE resolved
  * CardStyle (the theme's card settings with the block's own overrides laid on
@@ -88,10 +119,19 @@ function hoverDurationStyle(ms: number): CSSProperties {
  * off whichever row an overlay/shadow title holds, so the price and the
  * product name can never share the same corner. The chip's own appearance
  * (font, size, fill, text, border, roundness) is a set of bounded fields
- * rendered by priceTagChipStyle. A block the seller marked sold out dims its
- * image and (per theme.soldOutBadge) wears a corner badge, which steps to the
- * opposite edge rather than hiding under an overlaid title. Accent and the
- * sold-out badge stay theme-wide by design.
+ * rendered by priceTagChipStyle, whose one absolute rule is that the price
+ * stays READABLE: ink that would vanish into what it is printed on is
+ * replaced, wherever that pairing came from.
+ *
+ * BOTH LABELS ARE SIZED BY THE TILE (TILE_LABEL_AUTO_SCALE). This face is the
+ * size container that scaling is measured against, so a 1x1 block wears a chip
+ * and a name proportional to one cell, and a 3x3 hero wears ones proportional
+ * to nine, from the same single setting.
+ *
+ * A block the seller marked sold out dims its image and (per
+ * theme.soldOutBadge) wears a corner badge, which steps to the opposite edge
+ * rather than hiding under an overlaid title. Accent and the sold-out badge
+ * stay theme-wide by design.
  */
 export function ProductTileContent({
   product,
@@ -165,10 +205,24 @@ export function ProductTileContent({
   // accent. Both resolvers are shared with the pickers, so the panel's "Auto"
   // dot always shows what the tile is really doing. An explicit color wins
   // over either, inside priceTagChipStyle.
-  const chipStyle = priceTagChipStyle(card, {
-    fill: defaultPriceTagFill(pricePosition),
-    text: priceTagAutoTextColor(card, theme.accent),
-  });
+  //
+  // BOTH read the LIVE placement, `pricePosition`, not the stored one. They
+  // are two halves of one decision — a backing appears precisely because the
+  // tag has moved onto the picture — and resolving them from different
+  // placements is what painted a blank chip mid-drag: a tag being lifted out
+  // of a `shadow` title band still claimed the white ink that band needs while
+  // already wearing the white backing a floated tag gets.
+  const chipStyle = priceTagChipStyle(
+    card,
+    {
+      fill: defaultPriceTagFill(pricePosition),
+      text: priceTagAutoTextColor(
+        { ...card, priceTagPosition: pricePosition },
+        theme.accent,
+      ),
+    },
+    priceBackdrop(card, pricePosition),
+  );
   const chipFontClass = PRICE_TAG_FONT_CLASSES[card.priceTagFont];
 
   // The token props are the only thing separating an editable tile from a
@@ -236,8 +290,13 @@ export function ProductTileContent({
       data-title-band=""
       // Horizontal padding is the one part of the band that is not a class:
       // on auto it reads the tile's own clip radius (see titleBandStyle).
+      // The band's TYPE is not a class either, for the same reason the chip's
+      // is not: it scales with the tile (see titleBandFontStyle), so the whole
+      // band stays proportional to the block rather than sitting at a flat
+      // 12px on a tile of any span.
       style={{
         ...titleBandStyle(card.titleInset),
+        ...titleBandFontStyle(),
         ...hoverDurationStyle(card.titleHoverMs),
       }}
       className={cn(
@@ -268,7 +327,9 @@ export function ProductTileContent({
             // title yields to the price rather than pushing it out of the row.
             // With the price shrink-0 beside it, the two cannot overlap; flex-1
             // is what lets the spot's column steer the words inside that space.
-            "min-w-0 flex-1 truncate text-xs font-medium",
+            // No text-xs: the size is inherited from the band, which scales it
+            // with the tile (titleBandFontStyle).
+            "min-w-0 flex-1 truncate font-medium",
             TEXT_ALIGN_CLASSES[spotColumn(titleSpot)],
             shadowArea ? "text-white drop-shadow-sm" : "text-foreground",
             titleToken?.className,

@@ -25,6 +25,7 @@ function product(id: string, title: string): Product {
     trackStock: false,
     stockQuantity: null,
     lowStockThreshold: 5,
+    maxPerOrder: 10,
   };
 }
 

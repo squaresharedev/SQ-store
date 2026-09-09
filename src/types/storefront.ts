@@ -450,11 +450,52 @@ export function titleBandRow(card: {
 export const PRICE_TAG_FONTS = ["inter", "serif", "mono"] as const;
 export type PriceTagFont = (typeof PRICE_TAG_FONTS)[number];
 
-/** Price tag type size in px. The chip's padding is derived from it (see
- *  priceTagChipStyle), so this one number scales the whole tag. */
+/** Price tag type size in px, on a REFERENCE tile: the tag grows and shrinks
+ *  with the tile it sits on, see TILE_LABEL_AUTO_SCALE. The chip's padding is
+ *  derived from it (see priceTagChipStyle), so this one number scales the
+ *  whole tag. */
 export const PRICE_TAG_SIZE_MIN = 8;
 export const PRICE_TAG_SIZE_MAX = 32;
-export const PRICE_TAG_SIZE_DEFAULT = 12;
+/** Deliberately modest: a fresh product block is 1x1, the smallest tile there
+ *  is, and a chip sized for a 3x3 hero swallows a single cell's picture. A
+ *  seller who wants a bolder price says so with the Size slider, and the
+ *  auto-scale below carries that choice up to the bigger tiles for them. */
+export const PRICE_TAG_SIZE_DEFAULT = 10;
+
+/**
+ * How a tile's LABELS (the price tag and the product name beside it) follow
+ * the size of the tile they are drawn on.
+ *
+ * `priceTagSize` is the size on a tile roughly `referencePx` across, one
+ * ordinary 1x1 cell. Blocks are not one size, though: a 3x3 hero is three
+ * times that, and a chip pinned to a fixed px there reads as a sticker nobody
+ * remembered to scale, while the same chip on a phone-width 1x1 cell covers
+ * the very picture it is priced against. So the rendered size is the authored
+ * one times the tile's own short side over the reference, held between
+ * `min` and `max` of what the seller asked for (and never under the label's
+ * own floor) so their number still means something at either end.
+ *
+ * BOTH LABELS, not just the price. They sit side by side in the title band,
+ * so scaling one and not the other would have the price towering over the
+ * product name on a big block. One rule for the pair keeps the band itself
+ * proportional to the tile, which is the whole point.
+ *
+ * Applied as a CSS expression against the tile face's container-query units
+ * rather than computed in JS, for the same reason {@link TITLE_INSET_AUTO} is:
+ * only the browser knows how wide a cell actually came out, which moves with
+ * the viewport and with the small-screen reflow. See tileLabelSize.
+ */
+export const TILE_LABEL_AUTO_SCALE = {
+  referencePx: 180,
+  min: 0.75,
+  max: 2.5,
+} as const;
+
+/** The product name's size on that same reference tile, and the floor it may
+ *  not scale below. Was a flat `text-xs`, which is where the 12 comes from:
+ *  a tile nobody has resized renders exactly as it always did. */
+export const TILE_TITLE_SIZE = 12;
+export const TILE_TITLE_SIZE_MIN = 9;
 
 /** Outline thickness in px; 0 (the default) draws no border at all. */
 export const PRICE_TAG_BORDER_WIDTH_MAX = 8;
@@ -734,9 +775,46 @@ export type ProductPageSectionEntry = { id: ProductPageSectionId; show: boolean 
 export const PRODUCT_PAGE_CTA_MAX = 24;
 export const POLICY_TEXT_MAX = 2000;
 
+/**
+ * Buy button roundness in px. Absent = the storefront's own tile roundness,
+ * run through {@link controlRadius}, so a page nobody has styled still matches
+ * the board it was opened from.
+ *
+ * The top of the range is past half the height of the button (a 14px label
+ * with 12px of padding above and below), where CSS clamps the corners into a
+ * pill — which is the shape a seller reaching for the end of this slider is
+ * asking for.
+ */
+export const PRODUCT_PAGE_CTA_RADIUS_MAX = 24;
+
+/** Buy button outline thickness in px; absent (or 0) draws no outline at all.
+ *  Same ceiling as the price tag's, for the same reason: past this it stops
+ *  being an outline and starts being the button. */
+export const PRODUCT_PAGE_CTA_BORDER_WIDTH_MAX = 8;
+
 export type ProductPageConfig = {
   /** Off = product tiles have no page to open and the route 404s. */
   enabled: boolean;
+  /**
+   * The page's own backdrop. ABSENT = the storefront's background, whatever
+   * kind it is (a solid, a gradient, or an uploaded image), which is the
+   * default and stays right for almost every store: the page is part of the
+   * shop, not a separate publication.
+   *
+   * A SOLID COLOUR ONLY, deliberately. The storefront's background is a
+   * structured three-kind value because a board is the thing a shopper looks
+   * AT; a product page is a thing they READ, and a photograph or a gradient
+   * behind a specification table is a legibility problem rather than a design
+   * option. What a seller actually reaches for here is "white, not the store's
+   * deep green" — one colour — and keeping it to one means no upload, no
+   * object key and no eviction path riding along with a page setting.
+   *
+   * The page's INK is not stored beside it: it stays derived from whatever the
+   * page ends up on (see resolveInk), so choosing a dark backdrop flips the
+   * words to light on its own and there is no way to end up with a page that
+   * cannot be read.
+   */
+  backgroundColor?: string;
   /** Whether photos are fitted whole or cropped to fill. The one photo choice
    *  that survives, because getting it wrong crops the product out of frame. */
   imageFit: ImageFit;
@@ -751,6 +829,36 @@ export type ProductPageConfig = {
   font?: StorefrontFont;
   /** The buy button's text. Not the binding "order" step, so free wording. */
   ctaLabel: string;
+  /**
+   * THE BUTTON'S OWN PAINT — fill, roundness, outline. All four optional, and
+   * absent means "follow the storefront", so a page nobody has styled saves
+   * byte-identical to one from before these existed and keeps looking like the
+   * board it was opened from.
+   *
+   * This is not the retired `ctaStyle` coming back (see the note above the
+   * price notes). That was three canned presets asking a seller to pick
+   * between accent, ink and outline every time they opened the panel, with the
+   * accent right nearly always. These are the page's one action being
+   * addressable: the accent runs through the whole storefront, and a seller
+   * whose brand colour is a pale sand needs the button that closes the sale to
+   * be something else — a decision no preset list could hold.
+   *
+   * The label's ink stays DERIVED from the fill (readableOn), like the page's
+   * text colour is derived from the background: an override there could only
+   * ever make the one thing a buyer must be able to read harder to read.
+   */
+  /** Button fill. Absent = the theme's accent. */
+  ctaColor?: string;
+  /** Corner roundness in px, 0..PRODUCT_PAGE_CTA_RADIUS_MAX. Absent = the
+   *  storefront's tile roundness. */
+  ctaRadius?: number;
+  /** Outline thickness in px, 0..PRODUCT_PAGE_CTA_BORDER_WIDTH_MAX. Absent =
+   *  no outline. Drawn INSIDE the button (an inset shadow, like the price
+   *  tag's) so switching it on never changes the button's size. */
+  ctaBorderWidth?: number;
+  /** Outline colour. Absent = whichever ink reads on the fill, which is the
+   *  same ink the label is already drawn in. */
+  ctaBorderColor?: string;
   priceNote: ProductPagePriceNote;
   shippingNote: ProductPageShippingNote;
   showStock: boolean;

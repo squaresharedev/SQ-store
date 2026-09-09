@@ -126,6 +126,7 @@ export type Database = {
           id: string
           image_key: string | null
           low_stock_threshold: number
+          max_per_order: number
           option_groups: Json
           owner_id: string
           price_cents: number
@@ -148,6 +149,7 @@ export type Database = {
           id?: string
           image_key?: string | null
           low_stock_threshold?: number
+          max_per_order?: number
           option_groups?: Json
           owner_id: string
           price_cents: number
@@ -170,6 +172,7 @@ export type Database = {
           id?: string
           image_key?: string | null
           low_stock_threshold?: number
+          max_per_order?: number
           option_groups?: Json
           owner_id?: string
           price_cents?: number

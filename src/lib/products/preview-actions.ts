@@ -41,6 +41,9 @@ export async function getProductPagePreviewData(
   productId: string,
   /** The tile's manual sold-out flag on the storefront being edited. */
   soldOutFlag = false,
+  /** The storefront's productPage.showStock, so the preview's quantity ceiling
+   *  discloses exactly what a buyer's would — see publicQuantityLimit. */
+  showStock = false,
 ): Promise<ProductPagePreviewResult> {
   const account = await getActiveAccount();
   if (!account) return failure(sessionExpired());
@@ -71,6 +74,7 @@ export async function getProductPagePreviewData(
     ok: true,
     product: await buildProductPageProduct(data as PublicProductRow, {
       soldOutFlag: soldOutFlag === true,
+      showStock: showStock === true,
     }),
   };
 }

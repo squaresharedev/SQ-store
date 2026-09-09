@@ -1,6 +1,6 @@
 "use client";
 
-import { Copy, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import {
   resolveCardStyle,
   type CardStyleOverrides,
@@ -15,9 +15,9 @@ import {
   destructiveButtonClass,
   ghostButtonClass,
   helpTextClass,
-  secondaryButtonClass,
 } from "@/components/ui/control-styles";
 import { CollapsibleSection } from "@/components/ui/CollapsibleSection";
+import { BlockActions } from "./BlockActions";
 import { CardStyleControls } from "./CardStyleControls";
 import { PriceTagControls } from "./PriceTagControls";
 import { ShapeBlockEditor, type ShapeBlockPatch } from "./ShapeBlockEditor";
@@ -59,6 +59,7 @@ export function MultiBlockEditor({
   const texts = blocks.filter((b): b is TextBlock => b.type === "text");
   const copyableCount = shapes.length + texts.length;
 
+  const removeLabel = `Remove ${blocks.length} blocks`;
   const removeAll = (
     <button
       type="button"
@@ -66,7 +67,7 @@ export function MultiBlockEditor({
       className={destructiveButtonClass + " w-full"}
     >
       <Trash2 className="size-4" strokeWidth={2} aria-hidden="true" />
-      Remove {blocks.length} blocks
+      {removeLabel}
     </button>
   );
 
@@ -83,6 +84,7 @@ export function MultiBlockEditor({
           onUpdate={onShapeChange}
           onDuplicate={onDuplicate}
           onRemove={onRemove}
+          removeLabel={removeLabel}
         />
       </div>
     );
@@ -96,6 +98,10 @@ export function MultiBlockEditor({
           the first selected block; every change applies to all of them. Each
           block keeps its own text.
         </p>
+        {/* Duplicate and Remove ride together at the foot of the editor, as
+            they do for every other kind — the group's own remove button used
+            to be stacked underneath it, which is the second row this pair no
+            longer spends. */}
         <TextBlockEditor
           block={texts[0]}
           accent={theme.accent}
@@ -103,8 +109,9 @@ export function MultiBlockEditor({
           multi
           onUpdate={onTextChange}
           onDuplicate={onDuplicate}
+          onRemove={onRemove}
+          removeLabel={removeLabel}
         />
-        {removeAll}
       </div>
     );
   }
@@ -166,18 +173,19 @@ export function MultiBlockEditor({
         {blocks.length} blocks of different types are selected. Select blocks
         of one type to edit their settings together.
       </p>
-      {copyableCount > 0 && (
-        <button
-          type="button"
-          onClick={onDuplicate}
-          className={secondaryButtonClass + " w-full"}
-        >
-          <Copy className="size-4" strokeWidth={2} aria-hidden="true" />
-          Duplicate {copyableCount === 1 ? "1 block" : `${copyableCount} blocks`}
-          {products.length > 0 && " (not products)"}
-        </button>
+      <BlockActions
+        onDuplicate={copyableCount > 0 ? onDuplicate : undefined}
+        onRemove={onRemove}
+        duplicateLabel={
+          copyableCount === 1 ? "Duplicate 1 block" : `Duplicate ${copyableCount} blocks`
+        }
+        removeLabel={removeLabel}
+      />
+      {/* The caveat the button no longer has room to carry: a product tile is
+          one per product by design, so a mixed selection copies the rest. */}
+      {copyableCount > 0 && products.length > 0 && (
+        <p className={helpTextClass}>Products are not duplicated.</p>
       )}
-      {removeAll}
     </div>
   );
 }

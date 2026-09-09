@@ -274,4 +274,47 @@ describe("EmbedModal - key rotation", () => {
     // The old key is still shown: nothing was rotated.
     expect(screen.getByRole("dialog")).toHaveTextContent(EMBED_KEY);
   });
+
+  // Switching embedding on publishes a storefront onto the open web, so the
+  // publish gate applies. The action refuses it too (lib/storefront/actions.ts);
+  // this is the half that keeps the seller from finding out at Save.
+  describe("the publish gate", () => {
+    it("bars the enable switch, and the snippet, while trader details are missing", () => {
+      render(
+        <EmbedModal
+          storefront={storefront({ enabled: false, domains: ["shop.example.com"] })}
+          onClose={vi.fn()}
+          onSaved={vi.fn()}
+          missingTraderDetails={["address", "email"]}
+        />,
+      );
+      expect(
+        screen.getByText(/can't embed this storefront until your seller details/i),
+      ).toBeInTheDocument();
+      expect(screen.getByRole("switch", { name: /embed enabled/i })).toBeDisabled();
+      // The snippet would call an endpoint that refuses it, so it is not
+      // offered either — even though a domain is configured.
+      expect(screen.queryByRole("button", { name: /copy/i })).toBeNull();
+    });
+
+    it("still lets a seller switch embedding OFF when it is already on", () => {
+      // The one move that remains available: a storefront whose details lapsed
+      // must be pullable back, or the seller is stuck published and blocked.
+      render(
+        <EmbedModal
+          storefront={storefront({ enabled: true, domains: ["shop.example.com"] })}
+          onClose={vi.fn()}
+          onSaved={vi.fn()}
+          missingTraderDetails={["email"]}
+        />,
+      );
+      expect(screen.getByRole("switch", { name: /embed enabled/i })).toBeEnabled();
+    });
+
+    it("says nothing when the store may publish", () => {
+      renderModal(storefront({ enabled: true, domains: ["shop.example.com"] }));
+      expect(screen.queryByText(/until your seller details/i)).toBeNull();
+      expect(screen.getByRole("switch", { name: /embed enabled/i })).toBeEnabled();
+    });
+  });
 });

@@ -34,6 +34,7 @@ function makeProduct(overrides: Partial<Product> = {}): Product {
     trackStock: false,
     stockQuantity: null,
     lowStockThreshold: 5,
+    maxPerOrder: 10,
     ...overrides,
   };
 }

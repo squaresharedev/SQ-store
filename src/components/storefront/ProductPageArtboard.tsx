@@ -6,6 +6,7 @@ import { DeviceSizeSwitch, type PreviewDevice } from "./DeviceSizeSwitch";
 import { useNaturalSize } from "./useNaturalSize";
 import { ProductPageView } from "@/components/product-page/ProductPageView";
 import { deriveStockBadge } from "@/lib/stock/badge";
+import { publicQuantityLimit } from "@/lib/products/quantity";
 import { getProductPagePreviewData } from "@/lib/products/preview-actions";
 import { useSettingTarget } from "@/lib/storefront/setting-context";
 import {
@@ -108,6 +109,9 @@ export function ProductPageArtboard({
   // Null outside the designer (the dev gallery, a component test), which
   // simply means clicking the page opens nothing.
   const setting = useSettingTarget();
+  // Read once: both the preview load and the first frame derive the quantity
+  // ceiling from it, and the two must not disagree.
+  const showStock = productPage.showStock;
 
   // The page facts (gallery, options, details, purchase link) come from the
   // same builder the public route uses, so the artboard cannot show the seller
@@ -119,7 +123,11 @@ export function ProductPageArtboard({
   const [loaded, setLoaded] = useState<ProductPageProduct | null>(null);
   useEffect(() => {
     let cancelled = false;
-    getProductPagePreviewData(product.id)
+    // The sold-out flag is re-applied live below (withLiveSoldOut), so it is
+    // not sent; showStock IS, because the quantity ceiling is derived from it
+    // and a preview that disclosed a stock count the buyer's page hides would
+    // be showing the seller the wrong page.
+    getProductPagePreviewData(product.id, false, showStock)
       .then((result) => {
         if (!cancelled && result.ok) setLoaded(result.product);
       })
@@ -127,7 +135,7 @@ export function ProductPageArtboard({
     return () => {
       cancelled = true;
     };
-  }, [product.id]);
+  }, [product.id, showStock]);
 
   /**
    * Resolve a click inside the page to the setting behind what was clicked.
@@ -167,7 +175,7 @@ export function ProductPageArtboard({
       backgroundImageUrl,
       customFontUrl,
     },
-    product: withLiveSoldOut(loaded ?? fromCatalogRow(product), soldOut),
+    product: withLiveSoldOut(loaded ?? fromCatalogRow(product, showStock), soldOut),
     productUrl: "",
   };
 
@@ -250,7 +258,7 @@ export function ProductPageArtboard({
 
 /** A faithful first frame from the catalogue row alone: no gallery, no
  *  options, no details and no purchase link until the action answers. */
-function fromCatalogRow(product: Product): ProductPageProduct {
+function fromCatalogRow(product: Product, showStock: boolean): ProductPageProduct {
   const stock = deriveStockBadge(product);
   return {
     id: product.id,
@@ -270,6 +278,19 @@ function fromCatalogRow(product: Product): ProductPageProduct {
     digitalFormat: null,
     stock,
     soldOut: stock?.state === "sold_out",
+    // Derived by the same function the public builder uses, from the catalogue
+    // row's own numbers, so the first frame cannot offer a quantity the real
+    // page would not. The tile's sold-out SWITCH is not folded in here: it is
+    // live in the editor, and the page hides the picker on `soldOut` anyway.
+    maxQuantity: publicQuantityLimit(
+      {
+        maxPerOrder: product.maxPerOrder,
+        trackStock: product.trackStock,
+        stockQuantity: product.stockQuantity,
+        lowStockThreshold: product.lowStockThreshold,
+      },
+      { stockShown: showStock },
+    ),
   };
 }
 

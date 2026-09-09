@@ -24,6 +24,22 @@ export const PRODUCT_PAGE_SECTION_LABELS: Record<ProductPageSectionId, string> =
 };
 
 /**
+ * Sections a seller cannot hide, whatever the stored config says.
+ *
+ * `safety` is the manufacturer/importer identity and warnings GPSR requires a
+ * buyer be able to read before ordering; `seller` is the trader identity
+ * distance-selling law puts next to the offer. Both are disclosures the LAW
+ * makes, not a preference the storefront design offers a seller — so unlike
+ * every other section here, "off" is not a legal state for either of them to
+ * be in, whether that came from this panel, a stale stored config, or a
+ * request built by hand.
+ */
+export const MANDATORY_PRODUCT_PAGE_SECTION_IDS: readonly ProductPageSectionId[] = [
+  "safety",
+  "seller",
+];
+
+/**
  * Every section exactly once, in the FIXED order of PRODUCT_PAGE_SECTION_IDS.
  *
  * The stored order is deliberately ignored. That list runs from what a buyer
@@ -36,6 +52,13 @@ export const PRODUCT_PAGE_SECTION_LABELS: Record<ProductPageSectionId, string> =
  * Unknown ids are dropped, duplicates keep their first appearance, and a
  * section the stored list lacks comes back HIDDEN, so a config saved before a
  * section existed does not suddenly grow a block the seller never chose.
+ *
+ * MANDATORY_PRODUCT_PAGE_SECTION_IDS is the one exception: those always come
+ * back shown, regardless of what (or whether anything) was stored for them.
+ * This is the single choke point every reader of a product page's sections
+ * goes through (the editor panel, the public loader, the embed route), so
+ * forcing it here is what actually keeps the disclosure up rather than just
+ * hiding the switch that used to turn it off.
  */
 export function normalizeSections(
   sections: readonly ProductPageSectionEntry[] | undefined,
@@ -46,7 +69,10 @@ export function normalizeSections(
     if (shown.has(entry.id)) continue;
     shown.set(entry.id, entry.show);
   }
-  return PRODUCT_PAGE_SECTION_IDS.map((id) => ({ id, show: shown.get(id) ?? false }));
+  return PRODUCT_PAGE_SECTION_IDS.map((id) => ({
+    id,
+    show: MANDATORY_PRODUCT_PAGE_SECTION_IDS.includes(id) ? true : (shown.get(id) ?? false),
+  }));
 }
 
 /** The effective product page options for a config: stored values over the

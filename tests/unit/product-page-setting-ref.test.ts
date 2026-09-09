@@ -15,7 +15,10 @@ import {
   settingGroup,
   settingIndexFields,
 } from "@/lib/storefront/setting-ref";
-import { resolveInk } from "@/components/product-page/product-page-maps";
+import {
+  resolveInk,
+  storefrontBackdropHex,
+} from "@/components/product-page/product-page-maps";
 import { collectStorefrontColors } from "@/lib/theme/palette";
 import {
   DEFAULT_STOREFRONT_CONFIG,
@@ -125,12 +128,14 @@ describe("product page hotspots", () => {
       // A group the panel actually has, so a click can never aim at nothing.
       expect(CONTROLS_GROUPS, name).toContain(settingGroup(ref));
     }
-    // Two deliberately leave the Product page group: the store's name bar and
-    // the page's backdrop are storefront-wide settings, and sending a seller
-    // to the group that owns them beats opening a section that cannot change
-    // what they clicked.
+    // ONE deliberately leaves the Product page group: the store's name bar is
+    // a storefront-wide setting, and sending a seller to the group that owns
+    // it beats opening a section that cannot change what they clicked.
     expect(settingGroup(PRODUCT_PAGE_HOTSPOTS.header)).toBe("header");
-    expect(settingGroup(PRODUCT_PAGE_HOTSPOTS.background)).toBe("theme");
+    // The backdrop used to be the second such case. The page has a background
+    // colour of its own now, so a click on it opens the control that owns it —
+    // including while that control is set to follow the storefront.
+    expect(settingGroup(PRODUCT_PAGE_HOTSPOTS.background)).toBe("productPage");
   });
 
   it("rejects a name that is not a hotspot", () => {
@@ -172,9 +177,39 @@ describe("product page ink", () => {
     ).toBe("#ffffff");
   });
 
+  it("follows the PAGE's own backdrop when it has one, and still picks the ink itself", () => {
+    // The page may set its own background colour now. The ink is what makes
+    // that safe to offer: it reads off whatever the page actually sits on, so
+    // a dark page turns its words light with nobody choosing it.
+    const dark = { ...theme, background: { kind: "solid", color: "#101010" } } as const;
+    expect(resolveInk(dark, { backgroundColor: "#ffffff" })).toBe("#171717");
+    expect(resolveInk(theme, { backgroundColor: "#101010" })).toBe("#ffffff");
+    // Absent = follow the storefront, which is the shipped state.
+    expect(resolveInk(dark, {})).toBe("#ffffff");
+  });
+
+  it("names one hex for any storefront backdrop, so 'follow the storefront' can be shown", () => {
+    expect(storefrontBackdropHex(theme)).toBe("#ffffff");
+    expect(
+      storefrontBackdropHex({
+        background: { kind: "gradient", from: "#ff0000", to: "#0000ff", angle: 90 },
+      }),
+    ).toBe("#ff0000");
+    // A photograph averages to nothing a swatch can honestly show, so it
+    // answers dark, which is the light ink it has always been given.
+    expect(
+      storefrontBackdropHex({
+        background: { kind: "image", key: "images/x/y-z.jpg", x: 50, y: 50, scale: 100 },
+      }),
+    ).toBe("#171717");
+  });
+
   it("contributes nothing to the design's palette", () => {
-    // Nothing on the product page holds a colour of its own any more, so the
-    // palette is exactly what the theme and the blocks wear.
+    // The palette is what the BOARD wears: the theme, the masthead and the
+    // blocks. The product page's own colours (its backdrop, its button) are
+    // deliberately not in it — they are set from the page's own panel, where
+    // each field carries its inherit dot, and adding them would reorder the
+    // swatch row under the cursor of someone editing the board.
     expect(collectStorefrontColors(theme, [], undefined)).toEqual(
       collectStorefrontColors(theme, []),
     );

@@ -50,6 +50,7 @@ const PRODUCT: Product = {
   trackStock: true,
   stockQuantity: 4,
   lowStockThreshold: 5,
+  maxPerOrder: 10,
 };
 
 function snapshot(): ProductFormSnapshot {
@@ -237,6 +238,7 @@ describe("product form — the machine-readable contract", () => {
         trackStock: false,
         stockQuantity: "",
         lowStockThreshold: "5",
+        maxPerOrder: "10",
       },
       optionGroups: [],
       gallery: [],

@@ -40,6 +40,7 @@ export function SliderField({
   unit,
   labelClassName = labelClass,
   disabled,
+  highlighted,
 }: {
   id: string;
   label: string;
@@ -62,6 +63,9 @@ export function SliderField({
   unit?: string;
   labelClassName?: string;
   disabled?: boolean;
+  /** Forwarded to the Slider: lit in the accent because a summoned field
+   *  pointed at it, not because a pointer is on it. */
+  highlighted?: boolean;
 }) {
   // Local draft so a half-typed number ("1" on the way to "18") is not
   // clamped to the minimum under the seller's fingers.
@@ -92,6 +96,7 @@ export function SliderField({
             ariaLabel={ariaLabel}
             valueText={valueText}
             disabled={disabled}
+            highlighted={highlighted}
           />
         </div>
         <div className="flex shrink-0 items-center gap-1">

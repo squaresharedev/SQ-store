@@ -1,5 +1,6 @@
 import { devices, expect, test, type Locator, type Page } from "@playwright/test";
 import {
+  canvasStill,
   createProductViaUI,
   createStorefrontViaUI,
   expectToast,
@@ -164,8 +165,20 @@ test.describe("storefront designer on a phone", () => {
           ? [group as HTMLElement]
           : [...group.querySelectorAll<HTMLElement>(":scope > button")],
       );
+      const bar = toolbar.getBoundingClientRect();
       return {
-        overflows: toolbar.scrollWidth > toolbar.clientWidth,
+        // DOES THE ROW FIT INSIDE THE BAR, measured on the controls rather
+        // than on `scrollWidth`. The bar deliberately does not clip (the
+        // Element menu pops out above it, and every button carries a tooltip
+        // that is wider than the button), so `scrollWidth > clientWidth` is
+        // permanently true and says nothing about whether the row itself fits.
+        // What matters is that no CONTROL is pushed outside the pill it is
+        // drawn in, which is what a row too wide for its budget actually does.
+        overflows: buttons.some((b) => {
+          const r = b.getBoundingClientRect();
+          if (r.width === 0) return false;
+          return r.left < bar.left - 0.5 || r.right > bar.right + 0.5;
+        }),
         controls: buttons
           .map((b) => {
             const r = b.getBoundingClientRect();
@@ -275,6 +288,12 @@ test.describe("storefront designer on a phone", () => {
     await page.getByRole("button", { name: "Add text", exact: true }).click();
     await expect(page.getByText("Your text here").first()).toBeVisible();
 
+    // Inserting selects the new block, which raises its inspector as a sheet,
+    // and the toolbar stands down while any sheet is open since it floats over
+    // the same strip (see 47-mobile-editor-usability). Closing it is how the
+    // seller gets back to the insert tools.
+    await page.getByRole("button", { name: /close text block panel/i }).click();
+
     await page.getByRole("button", { name: "Add product", exact: true }).click();
     await page.getByRole("button", { name: /blue mug/i }).first().click();
 
@@ -354,26 +373,61 @@ test.describe("storefront designer on a phone", () => {
     await expect(page.locator("li[data-grid-cell]")).toHaveCount(2);
     const closeLib = page.getByRole("button", { name: "Close library panel" });
     if (await closeLib.count()) await closeLib.click();
+    // Closing the sheet uncovers the canvas, and the board EASES back into the
+    // room it just got (see useCanvasAnchor). Measuring a block for the drag
+    // below before that settles reads a position it is on its way out of, so
+    // the press lands on bare canvas and pans the board instead of picking the
+    // block up — which is a board off-screen and no stack at all.
+    await canvasStill(page);
 
     // Full overlap: touch has no Alt key, so Alt+click's stack walk (covered
     // by 24-layering.spec.ts) is unreachable on a phone. Repeatedly tapping
     // the block already on top is the only gesture free for it.
     const cells = page.locator("li[data-grid-cell]");
-    const topBox = await cells.nth(0).boundingBox();
     await dragOnto(page, cells.nth(1), cells.nth(0));
-    if (!topBox) throw new Error("no box for the first cell");
-    const point = { x: topBox.x + topBox.width / 2, y: topBox.y + topBox.height / 2 };
+    await canvasStill(page);
+    // The two really are on top of one another. Asserted rather than assumed:
+    // a drag that landed a cell short would leave the taps below hitting one
+    // block, and the cycle they are here to prove would have nothing to walk.
+    const stacked = await page.evaluate(() => {
+      const boxes = [...document.querySelectorAll("li[data-grid-cell]")].map((c) =>
+        c.getBoundingClientRect(),
+      );
+      return boxes.length === 2
+        ? Math.abs(boxes[0].x - boxes[1].x) < 2 && Math.abs(boxes[0].y - boxes[1].y) < 2
+        : false;
+    });
+    expect(stacked, "the drag stacked one block onto the other").toBe(true);
+
+    // `data-block-selected`, not `aria-pressed`: the tile is a plain focusable
+    // container rather than a button (nested buttons inside one would be
+    // interactive-in-interactive), so the attribute the grid and the CSS both
+    // read is the only thing that still says which block is selected.
     const selected = () =>
       page.evaluate(() =>
-        [...document.querySelectorAll("[data-block-tile]")]
-          .find((el) => el.getAttribute("aria-pressed") === "true")
+        document
+          .querySelector("[data-block-selected]")
           ?.closest("[data-grid-key]")
           ?.getAttribute("data-grid-key"),
       );
+    const centre = async () => {
+      const box = (await cells.nth(0).boundingBox())!;
+      return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+    };
 
-    await touchTap(page, point.x, point.y);
+    const opening = await centre();
+    await touchTap(page, opening.x, opening.y);
     const first = await selected();
     expect(first).not.toBeUndefined();
+
+    // RE-MEASURED after that first tap, and only here. Selecting a block opens
+    // the inspector, which on a phone is a sheet over the canvas, and the board
+    // steps out from under it (see useCanvasAnchor) — so the pixel that was
+    // over the stack before the tap is not over it after. The taps that follow
+    // land on one another because the sheet is already open by then and the
+    // cover stops changing, which is what makes them a repeat of the same tap.
+    await canvasStill(page);
+    const point = await centre();
 
     // A second tap at the exact same point must reach the OTHER block, not
     // toggle the same one off (the pre-existing single-block behaviour) and

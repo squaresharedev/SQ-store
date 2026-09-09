@@ -26,6 +26,10 @@ const DOCS = [
     title: "Privacy Policy",
     body: "We store what you give us (profile, products, storefront), never sell it, and delete it when you leave. Payments run through Stripe, so your card details stay with them, not us. This is a draft placeholder; the real policy is on its way.",
   },
+  {
+    title: "Your seller details, and where they go",
+    body: "Your trader name, address and contact email are shown to buyers on your product pages, and are required before you can publish or sell anything. That is the only thing we do with them: EU consumer law says a buyer has to be able to see who they are buying from and reach them before they order. We do not use them for marketing, do not add them to any list, and never sell or share them. Your phone number and VAT ID are optional and are shown only if you fill them in.",
+  },
 ] as const;
 
 function formatDate(iso: string) {

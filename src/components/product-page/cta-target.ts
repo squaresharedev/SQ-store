@@ -30,12 +30,18 @@ export function mailtoHref(
   email: string,
   productTitle: string,
   selection: readonly { label: string; value: string }[] = [],
+  /** How many the buyer had chosen. Stated only when it is more than one: an
+   *  enquiry about a single item does not need a line saying so, and a seller
+   *  reading "Quantity: 1" on every message stops reading the line at all. */
+  quantity = 1,
 ): string {
   const subject = encodeURIComponent(`Question about ${productTitle}`);
-  if (selection.length === 0) return `mailto:${email}?subject=${subject}`;
-  const body = encodeURIComponent(
-    [productTitle, ...selection.map((entry) => `${entry.label}: ${entry.value}`), "", ""].join("\n"),
-  );
+  const facts = [
+    ...selection.map((entry) => `${entry.label}: ${entry.value}`),
+    ...(quantity > 1 ? [`Quantity: ${quantity}`] : []),
+  ];
+  if (facts.length === 0) return `mailto:${email}?subject=${subject}`;
+  const body = encodeURIComponent([productTitle, ...facts, "", ""].join("\n"));
   return `mailto:${email}?subject=${subject}&body=${body}`;
 }
 

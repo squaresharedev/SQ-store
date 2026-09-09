@@ -99,9 +99,11 @@ test.describe("frame mode geometry", () => {
     const box = (await tile.boundingBox())!;
     await page.mouse.click(box.x + box.width / 2, box.y + box.height * 0.35);
 
-    // Selection draws chrome ON the tile — the page node among it. Chrome that
-    // is not taken out of the flow leaves an inline box behind, and the face
-    // after it slides down and out of the bottom of the tile.
+    // Waiting on the selection to land: the page node appearing in the
+    // selection island is the signal that the click registered. It used to be
+    // drawn ON the tile, where chrome not taken out of the flow left an inline
+    // box behind and pushed the face down out of the bottom — which is the
+    // regression the geometry below still guards.
     await expect(page.locator("[data-page-node]")).toBeVisible();
     const after = (await geometry(page))!;
     expect(after.frame).toEqual(before.frame);

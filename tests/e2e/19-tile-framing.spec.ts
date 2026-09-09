@@ -155,9 +155,11 @@ test.describe("framing a product image in its tile", () => {
     const before = await inset();
     const tile = await productTile(page);
     await tile.click();
-    // Selecting draws the page node on the tile. Chrome left in the tile's own
-    // flow gives it a line box, and everything after it — the face, and the
-    // photo with it — slides down and out of the bottom.
+    // Waiting on the selection to land: the page node appearing in the
+    // selection island is the signal that the click registered. It used to be
+    // drawn on the tile, where chrome left in the tile's own flow gave it a
+    // line box and pushed everything after it — the face, and the photo with
+    // it — down and out of the bottom.
     await expect(page.locator("[data-page-node]")).toBeVisible();
 
     expect(await inset()).toEqual(before);

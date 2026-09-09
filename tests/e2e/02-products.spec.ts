@@ -1,5 +1,13 @@
 import { expect, test } from "@playwright/test";
-import { expectToast, freshUser, signUp } from "./helpers";
+import {
+  expectToast,
+  freshUser,
+  gotoApp,
+  PUBLISHABLE_SELLER,
+  seedSellerIdentity,
+  signUp,
+  userIdByEmail,
+} from "./helpers";
 
 test.describe("products CRUD", () => {
   test("add → list → edit → delete a product", async ({ page }) => {
@@ -7,7 +15,11 @@ test.describe("products CRUD", () => {
     await signUp(page, user);
 
     // --- create ---
-    await page.goto("/products");
+    // gotoApp, not a bare goto: a click that lands before hydration is
+    // swallowed by React's event replay rather than following the href, so the
+    // navigation simply never happens and the failure looks like a broken
+    // link. Same reason every form page in this suite uses it.
+    await gotoApp(page, "/products");
     await page.getByRole("link", { name: /add product/i }).first().click();
     await page.waitForURL(/\/products\/new/);
 
@@ -109,24 +121,35 @@ test.describe("products CRUD", () => {
   test("only draft status shows an indicator on the product card", async ({ page }) => {
     const user = freshUser("prodstatus");
     await signUp(page, user);
+    // This test is about the BADGE, so the seller has to be one who may
+    // publish: without the trader details the publish gate defaults a new
+    // product to draft and bars Active outright, and every card would carry
+    // the dot. (The gate itself is 50-publish-gate.spec.ts.)
+    await seedSellerIdentity(await userIdByEmail(user.email), PUBLISHABLE_SELLER);
 
     // Active is the default and expected state, so it gets no badge at all.
-    await page.goto("/products/new");
+    await gotoApp(page, "/products/new");
     await page.getByLabel("Title").fill("Active thing");
     await page.getByLabel(/price/i).fill("5");
     await page.getByRole("button", { name: /save product/i }).click();
     await page.waitForURL(/\/products$/);
     await expect(page.getByRole("heading", { name: "Active thing" })).toBeVisible();
-    await expect(page.getByTitle("Active")).toHaveCount(0);
+    // The badge is the WORD, not a dot with a title attribute (StatusBadge.tsx
+    // stopped being a hollow circle: a grey dot needed prior knowledge, the
+    // word does not). Exact text, so the card's own heading "Draft thing" and
+    // the toast quoting it are not mistaken for the badge.
+    await expect(page.getByText("Active", { exact: true })).toHaveCount(0);
 
     // Draft is the exception worth flagging, so it alone gets the dot.
-    await page.goto("/products/new");
+    await gotoApp(page, "/products/new");
     await page.getByLabel("Title").fill("Draft thing");
     await page.getByLabel(/price/i).fill("5");
     await page.getByRole("button", { name: "Draft" }).click();
     await page.getByRole("button", { name: /save product/i }).click();
     await page.waitForURL(/\/products$/);
     await expect(page.getByRole("heading", { name: "Draft thing" })).toBeVisible();
-    await expect(page.getByTitle("Draft")).toBeVisible();
+    // Exactly one badge: the draft card's. The active card still has none.
+    await expect(page.getByText("Draft", { exact: true })).toHaveCount(1);
+    await expect(page.getByText("Draft", { exact: true })).toBeVisible();
   });
 });

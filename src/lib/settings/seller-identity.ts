@@ -26,7 +26,13 @@
 // (lib/products/public.ts), or `can(account.role, "storefront.write")` behind
 // an active-account check (app/storefront/[id]/page.tsx).
 
+import { cache } from "react";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { serverError, traderIdentityRequired, type ActionError } from "@/lib/errors";
+import {
+  missingTraderIdentity,
+  type TraderIdentityField,
+} from "@/lib/settings/trader-identity";
 import type { StorefrontSeller } from "@/types/storefront";
 
 /** Exactly the profile columns a trader identity is built from. */
@@ -82,4 +88,78 @@ export async function getSellerIdentity(ownerId: string): Promise<StorefrontSell
     return {};
   }
   return buildSellerIdentity(data);
+}
+
+/**
+ * Whether this account may publish or sell, and what it is still missing.
+ *
+ * The WRITE-SIDE half of the publish gate (lib/settings/trader-identity.ts owns
+ * the rule itself). Every action that puts something on sale asks this before
+ * it writes: creating or editing an `active` product, switching a storefront's
+ * embed on. The public READ side does not call this — the buyer-facing paths
+ * already hold the profile row and apply `missingTraderIdentity` to it
+ * directly, so a page render never pays for a second query.
+ *
+ * `{ ok: false }` is a read failure, kept distinct from "nothing filled in":
+ * a seller whose details are complete must not be told to go and add them
+ * because a query blipped, and equally must not be waved through. Callers turn
+ * it into a plain server error and the write is refused either way — a legal
+ * disclosure gate is the wrong place to fail open.
+ *
+ * Deduped per render (some pages check this and also render the warning).
+ */
+export const getTraderIdentityStatus = cache(
+  async (
+    ownerId: string,
+  ): Promise<{ ok: true; missing: TraderIdentityField[] } | { ok: false }> => {
+    try {
+      const admin = createAdminClient();
+      const { data, error } = await admin
+        .from("profiles")
+        .select(SELLER_IDENTITY_SELECT)
+        .eq("id", ownerId)
+        .maybeSingle();
+      if (error) {
+        console.error("[seller-identity] publish-gate read failed", error);
+        return { ok: false };
+      }
+      return { ok: true, missing: missingTraderIdentity(buildSellerIdentity(data)) };
+    } catch (err) {
+      // createAdminClient THROWS when the service-role env is missing or
+      // wrong, and this gate now sits in front of a save the seller pressed.
+      // An unhandled throw there is a crashed action with no message; a caught
+      // one is a refusal that says something. (This is not hypothetical: a bad
+      // prod SUPABASE_SERVICE_ROLE_KEY has taken buyer-facing paths down here
+      // before.)
+      console.error(
+        "[seller-identity] publish-gate client unavailable:",
+        err instanceof Error ? err.message : String(err),
+      );
+      return { ok: false };
+    }
+  },
+);
+
+/**
+ * The publish gate as one call, for every server action that puts something in
+ * front of buyers: `null` to proceed, an `ActionError` to refuse with.
+ *
+ * Lives here rather than in any one action file because three unrelated write
+ * paths need it (a product going `active`, a CSV import landing live rows, a
+ * storefront's embed being switched on) and a gate that each of them
+ * re-implements is a gate that eventually disagrees with itself.
+ *
+ * Always pass the ACCOUNT id, never the signed-in user's: the details a buyer
+ * needs belong to the trader whose store this is, and a team member cannot
+ * stand in for them.
+ */
+export async function publishBlockedError(
+  accountId: string,
+): Promise<ActionError | null> {
+  const identity = await getTraderIdentityStatus(accountId);
+  // A read failure refuses rather than waving the publish through: see
+  // getTraderIdentityStatus for why this end fails closed.
+  if (!identity.ok) return serverError("check your seller details");
+  if (identity.missing.length === 0) return null;
+  return traderIdentityRequired(identity.missing);
 }

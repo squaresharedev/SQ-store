@@ -156,6 +156,15 @@ const TRIAGE: Record<string, Disposition> = {
   // trader identity, replacing storefronts.config.policies/.shippingProfiles.
   // Replayed for the CHECK, the same reason every profile field carries one.
   "20260905083541": { kind: "replayed", marker: "20260905_shipping_policy_on_profile" },
+  // Per-version measurements on an option, and what version an order was for.
+  // (Applied on 2026-09-07; the local migration files are dated 20260905.)
+  "20260907174042": { kind: "replayed", marker: "20260905_option_specifications" },
+  "20260907174055": { kind: "replayed", marker: "20260905_order_selected_options" },
+  // products.max_per_order plus the per-order cap inside decrement_stock.
+  // Replayed in full: the CHECK and the decrement's limit clause are the two
+  // fences a service-role write cannot climb, which is the whole reason the db
+  // suite builds a real database rather than mocking one.
+  "20260908155233": { kind: "replayed", marker: "20260908_product_max_per_order" },
 };
 
 async function main(): Promise<void> {

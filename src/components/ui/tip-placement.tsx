@@ -55,9 +55,24 @@ export function useTipPlacement(
   bubbleRef: React.RefObject<HTMLElement | null>,
 ): TipPlacement | null {
   const [placement, setPlacement] = React.useState<TipPlacement | null>(null);
-  // Bumped on scroll/resize so the placement below re-runs and the bubble
-  // stays glued to its trigger instead of drifting off it.
+  // Bumped every animation frame while open, so the placement below re-runs
+  // and the bubble stays glued to its trigger. Scroll and resize events alone
+  // are not enough: the storefront canvas pans and zooms by writing a CSS
+  // transform straight to the stage element every frame (see
+  // useCanvasViewport), with no scroll or resize event at all — a trigger
+  // riding that transform would otherwise leave its tooltip stranded at the
+  // spot it opened at. Re-measuring every frame catches that transform along
+  // with anything else that moves a trigger without dispatching either event.
   const [reflow, setReflow] = React.useState(0);
+
+  React.useEffect(() => {
+    if (!open) return;
+    let frame = requestAnimationFrame(function tick() {
+      setReflow((n) => n + 1);
+      frame = requestAnimationFrame(tick);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [open]);
 
   React.useLayoutEffect(() => {
     if (!open) return;
@@ -105,19 +120,6 @@ export function useTipPlacement(
         : { top, left, side, arrowLeft },
     );
   }, [open, reflow, triggerRef, bubbleRef]);
-
-  React.useEffect(() => {
-    if (!open) return;
-    function onReflow() {
-      setReflow((n) => n + 1);
-    }
-    window.addEventListener("scroll", onReflow, true);
-    window.addEventListener("resize", onReflow);
-    return () => {
-      window.removeEventListener("scroll", onReflow, true);
-      window.removeEventListener("resize", onReflow);
-    };
-  }, [open]);
 
   return placement;
 }

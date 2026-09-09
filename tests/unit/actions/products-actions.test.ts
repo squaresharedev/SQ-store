@@ -56,6 +56,15 @@ vi.mock('@/lib/rate-limit', async (importOriginal) => ({
   rateLimit: (...args: unknown[]) => rateLimitMock(...args),
 }));
 
+// The publish gate reads the owner's profile with the SERVICE ROLE, which has
+// no env here. Defaults to "this store may publish" so these specs stay about
+// the product write; the cases below flip it to assert the gate itself.
+const publishBlockedMock = vi.fn(async () => null as unknown);
+vi.mock("@/lib/settings/seller-identity", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/settings/seller-identity")>()),
+  publishBlockedError: (...args: unknown[]) => publishBlockedMock(...(args as [])),
+}));
+
 // ---- imports -------------------------------------------------------------
 
 import { createProduct, updateProduct, deleteProduct } from "@/lib/products/actions";
@@ -94,6 +103,7 @@ function validInput(overrides: Record<string, unknown> = {}) {
 beforeEach(() => {
   vi.clearAllMocks();
   rateLimitMock.mockResolvedValue(true);
+  publishBlockedMock.mockResolvedValue(null);
   dbFn.mockResolvedValue({ data: null, error: null });
   deleteObjectMock.mockResolvedValue(undefined);
   headObjectMock.mockResolvedValue({ size: 512, contentType: "image/png" });
@@ -232,6 +242,69 @@ describe("createProduct - happy path", () => {
     const insertPayload = db.insert.mock.calls[0][0] as Record<string, unknown>;
     expect(insertPayload.track_stock).toBe(true);
     expect(insertPayload.stock_quantity).toBe(42);
+  });
+});
+
+// ==========================================================================
+// The publish gate
+// ==========================================================================
+
+describe("the publish gate", () => {
+  const BLOCKED = {
+    code: "trader_identity_required",
+    message: "You can't publish or sell until your seller details are complete.",
+    fix: "Add your contact email in Settings › Business & seller details, then publish.",
+    action: { href: "/settings/tax#contact-email", label: "Add seller details" },
+  };
+
+  it("refuses to create an ACTIVE product for a store that may not publish", async () => {
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+    publishBlockedMock.mockResolvedValue(BLOCKED);
+
+    const result = await createProduct(validInput({ status: "active" }));
+
+    expect(result).toEqual({ ok: false, error: BLOCKED });
+    // Refused before anything was written or verified.
+    expect(db.insert).not.toHaveBeenCalled();
+    expect(headObjectMock).not.toHaveBeenCalled();
+  });
+
+  it("refuses to update a product TO active for the same store", async () => {
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+    publishBlockedMock.mockResolvedValue(BLOCKED);
+
+    const result = await updateProduct(PRODUCT_ID, validInput({ status: "active" }));
+
+    expect(result).toEqual({ ok: false, error: BLOCKED });
+    expect(db.update).not.toHaveBeenCalled();
+  });
+
+  it("lets a DRAFT through untouched — the gate is about offering, not authoring", async () => {
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+    publishBlockedMock.mockResolvedValue(BLOCKED);
+    dbFn.mockResolvedValueOnce({ data: { id: PRODUCT_ID }, error: null });
+
+    const result = await createProduct(validInput({ status: "draft" }));
+
+    expect(result).toEqual({ ok: true, id: PRODUCT_ID });
+    // Never even asked: a draft is not a publish.
+    expect(publishBlockedMock).not.toHaveBeenCalled();
+  });
+
+  it("checks the ACCOUNT that owns the store, not the team member typing", async () => {
+    // An editor working on someone else's store: their own details cannot
+    // satisfy a gate about the trader the buyer contracts with.
+    getActiveAccountMock.mockResolvedValue({
+      accountId: OWNER_ID,
+      userId: EDITOR_ID,
+      role: "editor" as const,
+      isOwner: false,
+    });
+    dbFn.mockResolvedValueOnce({ data: { id: PRODUCT_ID }, error: null });
+
+    await createProduct(validInput({ status: "active" }));
+
+    expect(publishBlockedMock).toHaveBeenCalledWith(OWNER_ID);
   });
 });
 

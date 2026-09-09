@@ -14,10 +14,20 @@ import type { ColorPreset } from "./color-presets";
  * deep one, without checking each swatch's name.
  */
 export function themeAccentPresets(accent: string): readonly ColorPreset[] {
-  return [
+  const presets = [
     { name: "Pale accent", value: mixHex(accent, "#ffffff", 0.85) },
     { name: "Soft accent", value: mixHex(accent, "#ffffff", 0.45) },
     { name: "Accent", value: accent },
     { name: "Deep accent", value: mixHex(accent, "#000000", 0.45) },
   ];
+  // An accent at or near the ends of the lightness range (white, black) mixes
+  // toward one side to the same hex, e.g. mixHex("#ffffff", "#ffffff", t) is
+  // always "#ffffff" — collapsing entries would otherwise render duplicate,
+  // identically-colored swatches with the same value used as their React key.
+  const seen = new Set<string>();
+  return presets.filter((preset) => {
+    if (seen.has(preset.value)) return false;
+    seen.add(preset.value);
+    return true;
+  });
 }

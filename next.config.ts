@@ -121,7 +121,18 @@ const nextConfig: NextConfig = {
   // Out of the toast stack's corner (bottom-right): the badge sat directly on
   // top of every confirmation in development, hiding the exact thing being
   // worked on. Dev-only; production never renders it.
-  devIndicators: { position: "bottom-left" },
+  //
+  // OFF ENTIRELY UNDER THE E2E STACK, which runs `next dev` and is therefore
+  // the one place the badge shows up in a test. Bottom-left is the storefront
+  // designer's own corner on a phone: the badge lands squarely on the editor
+  // toolbar's first button, and Playwright then refuses to click a control a
+  // dev overlay is covering — a failure about the harness, in a suite whose
+  // whole subject is whether a phone can reach these controls. Production
+  // never renders either branch.
+  devIndicators:
+    process.env.NEXT_DIST_DIR === ".next-e2e"
+      ? false
+      : { position: "bottom-left" },
 
   // Baseline security headers on every response. The dashboard is a private,
   // session-cookie-authenticated app with no legitimate reason to be framed,

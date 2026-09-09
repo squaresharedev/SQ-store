@@ -21,13 +21,14 @@ async function makeProduct(opts: {
   track?: boolean;
   qty?: number | null;
   threshold?: number;
+  maxPerOrder?: number;
 }): Promise<string> {
-  const { track = true, qty = 10, threshold = 5 } = opts;
+  const { track = true, qty = 10, threshold = 5, maxPerOrder = 10 } = opts;
   const { rows } = await asService((q) =>
     q.query(
-      `insert into public.products (owner_id, title, price_cents, track_stock, stock_quantity, low_stock_threshold)
-       values ($1, 'Stocked', 1000, $2, $3, $4) returning id`,
-      [seller.id, track, qty, threshold],
+      `insert into public.products (owner_id, title, price_cents, track_stock, stock_quantity, low_stock_threshold, max_per_order)
+       values ($1, 'Stocked', 1000, $2, $3, $4, $5) returning id`,
+      [seller.id, track, qty, threshold, maxPerOrder],
     ),
   );
   return rows[0].id;
@@ -117,6 +118,72 @@ describe("decrement_stock semantics", () => {
       q.query(`select public.decrement_stock('00000000-0000-4000-8000-000000000000', 1) as ok`),
     );
     expect(rows[0].ok).toBeNull();
+  });
+});
+
+/**
+ * THE LAST FENCE. resolveOrderQuantity is the boundary a checkout is supposed
+ * to pass, and it refuses an over-limit quantity itself. These tests are about
+ * what happens when something DOESN'T pass it: a bug, a hand-run script, a
+ * worker holding the service role. The per-order cap has to hold at the
+ * database or it only holds where somebody remembered it.
+ */
+describe("decrement_stock enforces the per-order limit", () => {
+  it("declines a quantity above the product's max_per_order, even with stock to spare", async () => {
+    const productId = await makeProduct({ qty: 100, maxPerOrder: 3 });
+    const { rows } = await asService((q) =>
+      q.query(`select public.decrement_stock($1, 4) as ok`, [productId]),
+    );
+    expect(rows[0].ok).toBeNull();
+    expect(await quantityOf(productId)).toBe(100);
+  });
+
+  it("allows exactly the limit", async () => {
+    const productId = await makeProduct({ qty: 100, maxPerOrder: 3 });
+    const { rows } = await asService((q) =>
+      q.query(`select public.decrement_stock($1, 3) as ok`, [productId]),
+    );
+    expect(rows[0].ok).toBe(true);
+    expect(await quantityOf(productId)).toBe(97);
+  });
+
+  it("cannot be widened by repeating the call — each one is capped on its own", async () => {
+    const productId = await makeProduct({ qty: 10, maxPerOrder: 1 });
+    for (const qty of [2, 5, 10]) {
+      const { rows } = await asService((q) =>
+        q.query(`select public.decrement_stock($1, $2) as ok`, [productId, qty]),
+      );
+      expect(rows[0].ok, String(qty)).toBeNull();
+    }
+    expect(await quantityOf(productId)).toBe(10);
+  });
+});
+
+describe("products.max_per_order constraint", () => {
+  it("refuses a ceiling outside 1..100, even from the service role", async () => {
+    for (const value of [0, -1, 101, 100000]) {
+      const message = await expectDbError(
+        asService((q) =>
+          q.query(
+            `insert into public.products (owner_id, title, price_cents, max_per_order)
+             values ($1, 'Bad limit', 1000, $2)`,
+            [seller.id, value],
+          ),
+        ),
+      );
+      expect(message, String(value)).toMatch(/products_max_per_order_range/);
+    }
+  });
+
+  it("defaults to 10 when a write does not state one", async () => {
+    const { rows } = await asService((q) =>
+      q.query(
+        `insert into public.products (owner_id, title, price_cents)
+         values ($1, 'No limit stated', 1000) returning max_per_order`,
+        [seller.id],
+      ),
+    );
+    expect(rows[0].max_per_order).toBe(10);
   });
 });
 

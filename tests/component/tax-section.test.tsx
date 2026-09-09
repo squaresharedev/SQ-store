@@ -43,11 +43,13 @@ describe("TaxSection — initial state", () => {
   it("seeds every text field from the saved props", () => {
     render(<TaxSection {...SAVED} />);
 
-    expect(screen.getByLabelText("Business name")).toHaveValue(
+    expect(screen.getByLabelText(/Trader name/)).toHaveValue(
       "Root Labs Studio",
     );
     expect(screen.getByLabelText("Phone")).toHaveValue("+353 1 234 5678");
-    expect(screen.getByLabelText("Contact email")).toHaveValue(
+    // Substring match: the three required fields carry a RequiredMark
+    // asterisk inside their label, which lands in the label's text content.
+    expect(screen.getByLabelText(/Contact email/)).toHaveValue(
       "hello@rootlabs.example",
     );
   });
@@ -65,7 +67,7 @@ describe("TaxSection — SET-01: field retention after a failed save", () => {
     render(<TaxSection {...SAVED} />);
 
     // Type a new business name (perfectly valid, but the whole save fails).
-    const bizField = screen.getByLabelText("Business name");
+    const bizField = screen.getByLabelText(/Trader name/);
     await user.clear(bizField);
     await user.type(bizField, "SHOULD SURVIVE Ltd");
 
@@ -97,7 +99,7 @@ describe("TaxSection — SET-01: field retention after a failed save", () => {
     const user = userEvent.setup();
     render(<TaxSection {...SAVED} />);
 
-    const bizField = screen.getByLabelText("Business name");
+    const bizField = screen.getByLabelText(/Trader name/);
     await user.clear(bizField);
     await user.type(bizField, "SHOULD SURVIVE Ltd");
 
@@ -124,7 +126,7 @@ describe("TaxSection — SET-01: field state after a successful save", () => {
     const user = userEvent.setup();
     render(<TaxSection {...SAVED} />);
 
-    const bizField = screen.getByLabelText("Business name");
+    const bizField = screen.getByLabelText(/Trader name/);
     await user.clear(bizField);
     await user.type(bizField, "ACME Corp Ltd");
 

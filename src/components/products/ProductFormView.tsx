@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import type { Product, ProductDetail } from "@/types/product";
 import type { ShippingChoices } from "@/lib/storefront/queries";
+import type { TraderIdentityField } from "@/lib/settings/trader-identity";
 import { iconNudgeLeftClass } from "@/components/ui/control-styles";
 import { ProductForm } from "./ProductForm";
 
@@ -12,6 +13,7 @@ export function ProductFormView({
   subtitle,
   product,
   shippingChoices,
+  missingTraderDetails = [],
 }: {
   title: string;
   subtitle: string;
@@ -20,6 +22,10 @@ export function ProductFormView({
   /** The store's shipping terms and profiles, so the form can show what this
    *  product inherits instead of asking the seller to write it again. */
   shippingChoices?: ShippingChoices;
+  /** Trader details this store still owes buyers. Non-empty means the server
+   *  will refuse an `active` product, so the form does not offer one. Defaults
+   *  to none, which is what tests and any caller that has not asked want. */
+  missingTraderDetails?: readonly TraderIdentityField[];
 }) {
   return (
     // Widens only at `lg`, and only by exactly the room the section index in
@@ -50,7 +56,11 @@ export function ProductFormView({
         {title}
       </h1>
 
-      <ProductForm product={product} shippingChoices={shippingChoices} />
+      <ProductForm
+        product={product}
+        shippingChoices={shippingChoices}
+        missingTraderDetails={missingTraderDetails}
+      />
     </main>
   );
 }

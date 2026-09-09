@@ -24,6 +24,7 @@ import {
   type MetricSort,
   type ProductSort,
 } from "@/lib/products/sort";
+import { productQuantityCap } from "@/lib/products/quantity";
 import { productIdSchema } from "@/lib/validation/product";
 
 // Server-side reads for the ACTIVE account's products (your own store, or one
@@ -53,10 +54,11 @@ type ProductListRow = Pick<
   | "track_stock"
   | "stock_quantity"
   | "low_stock_threshold"
+  | "max_per_order"
 >;
 
 const PRODUCT_LIST_COLUMNS =
-  "id, title, description, price_cents, currency, status, image_key, digital_file_key, track_stock, stock_quantity, low_stock_threshold";
+  "id, title, description, price_cents, currency, status, image_key, digital_file_key, track_stock, stock_quantity, low_stock_threshold, max_per_order";
 
 /**
  * The list columns plus the product-page jsonb. Only the single-product read
@@ -112,6 +114,9 @@ async function rowToProduct(row: ProductListRow): Promise<Product> {
     trackStock: row.track_stock,
     stockQuantity: row.stock_quantity,
     lowStockThreshold: row.low_stock_threshold,
+    // Corrected into the legal range on the way out, so the form's field and
+    // the buyer's picker are bounded by the same function (see quantity.ts).
+    maxPerOrder: productQuantityCap(row.max_per_order),
   };
 }
 

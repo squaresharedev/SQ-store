@@ -1,7 +1,16 @@
 import type { CSSProperties } from "react";
 import type { GridPlacement } from "@/components/grid/gridConstants";
 import {
+  contrastRatio,
+  MIN_LEGIBLE_CONTRAST,
+  readableInkOn,
+} from "@/lib/format/color";
+import {
   PRICE_TAG_DEFAULT_BORDER,
+  PRICE_TAG_SIZE_MIN,
+  TILE_LABEL_AUTO_SCALE,
+  TILE_TITLE_SIZE,
+  TILE_TITLE_SIZE_MIN,
   TITLE_INSET_AUTO,
   type PriceTagFont,
   type SpotRow,
@@ -222,32 +231,95 @@ type PriceTagChip = {
   priceTagBorderColor?: string;
 };
 
+/** Rounded to hundredths: these numbers go straight into a CSS expression, and
+ *  a full float there is noise in the inspector for a difference under a
+ *  hundredth of a pixel. */
+function roundForCss(value: number): string {
+  return String(Math.round(value * 100) / 100);
+}
+
+/**
+ * The type size a tile label renders at: its authored size scaled by how big
+ * this tile actually came out. See {@link TILE_LABEL_AUTO_SCALE} for why the
+ * labels follow the tile at all.
+ *
+ * `cqmin` is the tile face's SHORTER side (ProductTileContent is the size
+ * container), the same axis scaledCornerRadius scales roundness by, so a 3x1
+ * bar is treated as the one-cell-tall thing it is rather than a wide tile. The
+ * bounds are on the authored number rather than absolute, so raising Size
+ * raises the whole range and the slider never stops doing anything; only the
+ * floor is also absolute, because under `floorPx` type stops being readable.
+ *
+ * No container in scope (nothing renders a label outside a real tile today,
+ * but cq units fall back to the viewport rather than failing) is why the clamp
+ * matters here as well: the worst case is a label at `max` times its size, not
+ * one sized off the whole window.
+ */
+export function tileLabelSize(size: number, floorPx: number): string {
+  const { referencePx, min, max } = TILE_LABEL_AUTO_SCALE;
+  const floor = Math.max(floorPx, size * min);
+  return `clamp(${roundForCss(floor)}px, ${roundForCss(
+    (size * 100) / referencePx,
+  )}cqmin, ${roundForCss(size * max)}px)`;
+}
+
+/**
+ * The title band's own type size, scaled by the tile exactly as the price is.
+ *
+ * The band holds the two labels SIDE BY SIDE, so they cannot scale by
+ * different rules: a price that grew with the block while the product's name
+ * stayed at a flat 12px would tower over the thing it is priced against. One
+ * scale for the band keeps their relationship fixed and lets the whole band
+ * be proportional to the tile, which is the point.
+ */
+export function titleBandFontStyle(): CSSProperties {
+  // Through a custom property, like the chip's own size, so the value is
+  // readable back off the element: `font-size` is a property browsers (and
+  // jsdom) VALIDATE, and a bare clamp() of container units is dropped whole by
+  // anything that does not know the function, taking the scaling with it.
+  return {
+    "--band-font-size": tileLabelSize(TILE_TITLE_SIZE, TILE_TITLE_SIZE_MIN),
+    fontSize: "var(--band-font-size)",
+    lineHeight: 1.35,
+  } as CSSProperties;
+}
+
 /**
  * Every pixel of the price tag chip, from the resolved card style. All of it
  * is inline rather than classes because each value is a schema-bounded number
  * or a strict hex, and because "what colour is the tag" then has ONE answer a
  * renderer, a picker and an agent can all read.
  *
- * Padding is derived from the size (half of it horizontally, a quarter
- * vertically, floored so an 8px tag still has a chip) rather than being its
- * own control: one slider scales the whole tag.
+ * The resolved size lands on `--tag-font-size` and everything else reads it
+ * from there, so the padding (half the type horizontally, a quarter of it
+ * vertically) still scales with the type when the type is itself a CSS
+ * expression the browser resolves: one slider sizes the whole tag, on a tile
+ * of any span.
  */
 export function priceTagChipStyle(
   card: PriceTagChip,
   /** What the chip paints where the seller set nothing — see
    *  defaultPriceTagFill and the accent/shadow rule in ProductTileContent. */
   fallback: { fill: string; text: string },
+  /**
+   * The colour the price is actually read AGAINST, for the legibility floor
+   * below. Usually the chip's own fill; the caller passes it separately
+   * because a chip with no fill of its own is read against whatever it is
+   * sitting on, which only the tile knows (see ProductTileContent).
+   */
+  backdrop: string,
 ): CSSProperties {
   const size = card.priceTagSize;
   const border = card.priceTagBorderWidth;
   return {
-    fontSize: `${size}px`,
+    "--tag-font-size": tileLabelSize(size, PRICE_TAG_SIZE_MIN),
+    fontSize: "var(--tag-font-size)",
     lineHeight: 1.25,
-    paddingInline: `${Math.max(2, Math.round(size * 0.5))}px`,
-    paddingBlock: `${Math.max(1, Math.round(size * 0.25))}px`,
+    paddingInline: "max(2px, calc(var(--tag-font-size) * 0.5))",
+    paddingBlock: "max(1px, calc(var(--tag-font-size) * 0.25))",
     borderRadius: `${card.priceTagRadius}px`,
     backgroundColor: card.priceTagColor ?? fallback.fill,
-    color: card.priceTagTextColor ?? fallback.text,
+    color: legiblePriceInk(card.priceTagTextColor ?? fallback.text, backdrop),
     // A zero-width border must emit NO border properties at all, or the chip
     // still reserves the style's layout box.
     ...(border > 0
@@ -257,7 +329,32 @@ export function priceTagChipStyle(
           borderColor: card.priceTagBorderColor ?? PRICE_TAG_DEFAULT_BORDER,
         }
       : {}),
-  };
+  } as CSSProperties;
+}
+
+/**
+ * THE PRICE IS NEVER ALLOWED TO DISAPPEAR.
+ *
+ * A buyer who cannot see what something costs cannot buy it, so this is the
+ * one thing on a tile that is not left to the sum of a seller's choices. Ink
+ * that does not carry against what it is printed on is replaced with ink that
+ * does, and everything else about the chip is left exactly as asked for.
+ *
+ * The floor is WCAG's large-text bar and no stricter (see
+ * MIN_LEGIBLE_CONTRAST), so a deliberate low-contrast look survives untouched
+ * and only a genuinely unreadable pairing is overridden. Those arise from more
+ * than a bad colour pick: the tag's automatic ink and its automatic fill are
+ * each resolved from the tag's PLACEMENT, so a tag in mid-air between two
+ * placements — which is exactly what a drag is — could resolve white text onto
+ * the white backing a floated tag wears and paint a blank chip over the
+ * picture. That particular pairing is fixed at the source too (the tile
+ * resolves both from the live placement now), but a rule this important should
+ * not rest on every future caller getting the same thing right.
+ */
+function legiblePriceInk(ink: string, backdrop: string): string {
+  return contrastRatio(ink, backdrop) >= MIN_LEGIBLE_CONTRAST
+    ? ink
+    : readableInkOn(backdrop);
 }
 
 export const TEXT_VARIANT_LABELS: Record<TextVariant, string> = {

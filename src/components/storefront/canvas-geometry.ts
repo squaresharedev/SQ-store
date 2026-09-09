@@ -251,22 +251,36 @@ function recover(
 }
 
 /**
- * Which box has to be kept visible along one axis, given the room there is.
+ * Which box has to be kept visible along one axis, given the room there is:
+ * the first candidate that FITS, in the order they are wanted.
  *
- * The WHOLE BOARD whenever it fits, because showing all of it is strictly
+ * The candidates run from most to least generous, and the order is the whole
+ * argument. The WHOLE BOARD first, because showing all of it is strictly
  * better than showing one tile of it: a board left tucked a few px under a
  * panel it could have cleared completely reads as a bug rather than as
- * restraint. The SELECTION takes over only on the axis where the board cannot
- * fit, which is exactly where "show everything" was never on offer. On a phone
- * with a sheet up that is usually the vertical axis and not the horizontal one,
- * so the two answers can differ per axis, and should.
+ * restraint. Then the selection WITH ITS CHROME, because a tile revealed with
+ * its own resize and rotate handles still buried under the panel has not
+ * really been revealed — on a phone those handles are always drawn and are the
+ * only route to either gesture. Then the bare selection, for a strip too short
+ * to hold even that.
+ *
+ * The last candidate is used when none fits, and it has to be the smallest:
+ * `slideIntoView` refuses to move anything bigger than the room it has (no
+ * position shows all of it, so sliding would only swap which edge is hidden),
+ * so naming a box that cannot fit is the same as asking for no move at all.
+ *
+ * Per axis, so the answers can differ: on a phone with a sheet up the board
+ * usually still fits across and cannot fit down, and both of those are right.
  */
 function keepVisible(
   [min, max]: [number, number],
-  board: { start: number; size: number },
-  selection: { start: number; size: number },
+  ...candidates: { start: number; size: number }[]
 ): { start: number; size: number } {
-  return board.size <= max - min ? board : selection;
+  const room = max - min;
+  return (
+    candidates.find((candidate) => candidate.size <= room) ??
+    candidates[candidates.length - 1]
+  );
 }
 
 /** Compare the visible stretch before and after ON SCREEN: the workspace's own
@@ -294,11 +308,12 @@ function takenFrom(
  * `pan` is where the board should end up once it has also got out from under a
  * panel standing on it, and THAT is a move, so it eases.
  *
- * `board` and `anchor` are both in the board's own UNSCALED coordinates, and
- * `keepVisible` picks between them per axis: the board wherever it still fits,
- * the selected tiles wherever it does not. A seller who opens a panel from a
- * block is asking about THAT block, and on a phone (where a sheet can take 70%
- * of the screen) revealing the whole board is impossible while revealing the
+ * `board`, `anchor` and `anchorFallback` are all in the board's own UNSCALED
+ * coordinates, and `keepVisible` picks the first of the three that fits, per
+ * axis: the board wherever it still fits, otherwise the selected tiles with
+ * their chrome, otherwise the tiles alone. A seller who opens a panel from a
+ * block is asking about THAT block, and on a phone (where a sheet takes over
+ * half the screen) revealing the whole board is impossible while revealing the
  * one tile usually is not.
  */
 export function reanchorPan({
@@ -310,6 +325,7 @@ export function reanchorPan({
   insets,
   board,
   anchor,
+  anchorFallback,
 }: {
   pan: { x: number; y: number };
   zoom: number;
@@ -322,8 +338,12 @@ export function reanchorPan({
   insets: Insets;
   /** The board's full extent, preferred wherever it still fits. */
   board: Box;
-  /** The blocks being worked on, used on any axis the board cannot fit. */
+  /** The blocks being worked on AND the controls hanging off them, used on any
+   *  axis the board cannot fit. */
   anchor: Box;
+  /** The same blocks without that chrome, for a strip too short to hold it.
+   *  Defaults to `anchor`, so a caller with only one box states only one. */
+  anchorFallback?: Box;
 }): { hold: { x: number; y: number }; pan: { x: number; y: number } } {
   // 1. HOLD STILL. The pan is measured from the workspace's top-left corner,
   //    so undoing that corner's move is exactly what keeps the board on the
@@ -344,15 +364,18 @@ export function reanchorPan({
   const wasY = safeSpan(previous.height, previousInsets.top, previousInsets.bottom);
   const nowX = safeSpan(workspace.width, insets.left, insets.right);
   const nowY = safeSpan(workspace.height, insets.top, insets.bottom);
+  const bare = anchorFallback ?? anchor;
   const keepX = keepVisible(
     nowX,
     { start: board.left * zoom, size: board.width * zoom },
     { start: anchor.left * zoom, size: anchor.width * zoom },
+    { start: bare.left * zoom, size: bare.width * zoom },
   );
   const keepY = keepVisible(
     nowY,
     { start: board.top * zoom, size: board.height * zoom },
     { start: anchor.top * zoom, size: anchor.height * zoom },
+    { start: bare.top * zoom, size: bare.height * zoom },
   );
   x += recover(
     x + keepX.start,
@@ -367,4 +390,70 @@ export function reanchorPan({
     nowY,
   );
   return { hold, pan: { x, y } };
+}
+
+/**
+ * The pan that brings the blocks a seller has just SELECTED into the open.
+ *
+ * The rules above are about panels: they fire when the workspace box or the
+ * cover over it changes, and they deliberately ignore the selection in its own
+ * right, because a board that jumped every time a block was clicked would be
+ * unusable. That leaves one gap, and on a phone it is a wide one — the cover
+ * can stay exactly the same size while what is UNDER it changes completely:
+ *
+ *   - inserting from the library sheet selects the new block, which lands
+ *     wherever the board had room, routinely under the sheet the seller is
+ *     still holding open;
+ *   - closing one full-width sheet and opening another of the same height
+ *     (library out, inspector in) swaps the cover for an identical one, so
+ *     `insetsEqual` sees no change at all and nothing re-anchors.
+ *
+ * In both cases the seller has just said which block they mean and the board
+ * answers by not showing it.
+ *
+ * MINIMAL, AND ONLY WHEN IT HAS TO. `slideIntoView` returns zero for a
+ * selection already inside the uncovered strip, so selecting something you can
+ * already see moves nothing, which is every selection on a desktop. There is
+ * no `taken` guard here and there should not be: that guard exists to stop a
+ * panel merely resizing from undoing a board the seller deliberately parked
+ * half off-screen, and a selection is not an accident of layout — it is the
+ * seller pointing at something and asking to see it.
+ *
+ * Same two candidates as the recover rule, for the same reason: with the
+ * chrome if the strip can hold it, without if it cannot (see keepVisible).
+ */
+export function revealPan({
+  pan,
+  zoom,
+  workspace,
+  insets,
+  anchor,
+  anchorFallback,
+}: {
+  pan: { x: number; y: number };
+  zoom: number;
+  workspace: Box;
+  insets: Insets;
+  /** The selected blocks and the controls hanging off them. */
+  anchor: Box;
+  /** The same blocks without that chrome. Defaults to `anchor`. */
+  anchorFallback?: Box;
+}): { x: number; y: number } {
+  const bare = anchorFallback ?? anchor;
+  const spanX = safeSpan(workspace.width, insets.left, insets.right);
+  const spanY = safeSpan(workspace.height, insets.top, insets.bottom);
+  const keepX = keepVisible(
+    spanX,
+    { start: anchor.left * zoom, size: anchor.width * zoom },
+    { start: bare.left * zoom, size: bare.width * zoom },
+  );
+  const keepY = keepVisible(
+    spanY,
+    { start: anchor.top * zoom, size: anchor.height * zoom },
+    { start: bare.top * zoom, size: bare.height * zoom },
+  );
+  return {
+    x: pan.x + slideIntoView(pan.x + keepX.start, keepX.size, ...spanX),
+    y: pan.y + slideIntoView(pan.y + keepY.start, keepY.size, ...spanY),
+  };
 }

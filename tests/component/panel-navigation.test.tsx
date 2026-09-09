@@ -223,7 +223,10 @@ describe("ControlsPanel reopening a setting by name", () => {
     );
 
     // The seller leaves it by hand: back to the menu, into an unrelated group.
-    await user.click(screen.getByRole("button", { name: /back/i }));
+    // Anchored, not a bare /back/: the Product page group is open here, and
+    // its background control offers a "Use Storefront background" dot that a
+    // loose match would find first.
+    await user.click(screen.getByRole("button", { name: /^back to /i }));
     await user.click(screen.getByRole("button", { name: /^Theme/ }));
     expect(screen.queryByRole("button", { name: "Buy button" })).not.toBeInTheDocument();
 

@@ -48,6 +48,7 @@ const PRODUCT: Product = {
   trackStock: false,
   stockQuantity: null,
   lowStockThreshold: 3,
+  maxPerOrder: 10,
 };
 
 const PRODUCT_BLOCK = {

@@ -14,6 +14,7 @@ import { safeInternalPath } from "@/lib/utils/safe-path";
 import { authIntentSchema, looksLikeEmail, usernameSchema } from "@/lib/validation/auth";
 import { emailAddress } from "@/lib/validation/inputs";
 import { isDisposableEmailDomain } from "@/lib/validation/disposable-email";
+import { isPlaceholderEmail } from "@/lib/validation/email-quality";
 import { verifyTurnstile } from "@/lib/turnstile";
 import { RATE_LIMITS, clientKey, rateLimitKey } from "@/lib/rate-limit";
 
@@ -349,8 +350,10 @@ export async function authenticate(
     const weak = passwordProblem(password, { email, username });
     if (weak) return { error: weak };
     // Free, local, and worth refusing before anything else costs a cycle: a
-    // throwaway address is never a legitimate signup on this product.
-    if (isDisposableEmailDomain(email)) {
+    // throwaway address is never a legitimate signup on this product, and
+    // neither is a placeholder — the confirmation mail has nowhere to go, so
+    // the account could never be used anyway.
+    if (isDisposableEmailDomain(email) || isPlaceholderEmail(email)) {
       return { error: "Please sign up with a permanent email address." };
     }
     // Bot check BEFORE the rate-limit budget is spent, so a scripted signup

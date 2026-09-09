@@ -43,6 +43,18 @@ export function hsvToHex({ h, s, v }: Hsv): string {
  */
 const INK_FLIP_LUMINANCE = Math.sqrt(0.05 * 1.05) - 0.05;
 
+/** WCAG relative luminance, or null for anything that is not strict hex. */
+function luminance(hex: string): number | null {
+  const match = HEX.exec(hex);
+  if (!match) return null;
+  const int = parseInt(match[1], 16);
+  const channels = [(int >> 16) & 255, (int >> 8) & 255, int & 255].map((c) => {
+    const s = c / 255;
+    return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
+}
+
 /**
  * True when a color is light enough that dark ink reads better on top of it.
  * Uses the WCAG relative-luminance formula, so the check mark drawn over a
@@ -50,16 +62,39 @@ const INK_FLIP_LUMINANCE = Math.sqrt(0.05 * 1.05) - 0.05;
  * anything that is not strict 6-digit hex.
  */
 export function isLightColor(hex: string): boolean {
-  const match = HEX.exec(hex);
-  if (!match) return false;
-  const int = parseInt(match[1], 16);
-  const channels = [(int >> 16) & 255, (int >> 8) & 255, int & 255].map((c) => {
-    const s = c / 255;
-    return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
-  });
-  const luminance =
-    0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
-  return luminance > INK_FLIP_LUMINANCE;
+  const value = luminance(hex);
+  return value !== null && value > INK_FLIP_LUMINANCE;
+}
+
+/**
+ * WCAG contrast between two strict hex colors, 1 (identical) to 21 (black on
+ * white). Anything that is not strict hex answers 21, the "no problem here"
+ * end: this exists to catch a pairing that is definitely unreadable, and a
+ * value it cannot measure is not evidence of one.
+ */
+export function contrastRatio(a: string, b: string): number {
+  const la = luminance(a);
+  const lb = luminance(b);
+  if (la === null || lb === null) return 21;
+  const [hi, lo] = la > lb ? [la, lb] : [lb, la];
+  return (hi + 0.05) / (lo + 0.05);
+}
+
+/**
+ * The floor below which two colors are not "low contrast", they are the same
+ * color and one of them has vanished.
+ *
+ * WCAG's own bar for large text is 3:1, and this is deliberately no stricter.
+ * The point is not to police a seller's taste, it is to guarantee that what
+ * they chose is still THERE — so the check has to stay quiet for every pairing
+ * a person could plausibly have meant, and speak only for the ones nobody
+ * could read.
+ */
+export const MIN_LEGIBLE_CONTRAST = 3;
+
+/** The ink that reads on a fill: dark on light, light on dark. */
+export function readableInkOn(hex: string): string {
+  return isLightColor(hex) ? "#171717" : "#ffffff";
 }
 
 /**

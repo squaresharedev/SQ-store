@@ -3,8 +3,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 /**
  * Tests for the og-image redirect route: api/og/p/[productId].
  *
- * Covers the gate order (UUID check → rate limit → product lookup → presign)
- * and verifies the 302 redirect carries a Cache-Control: no-store header.
+ * Covers the gate order (UUID check → rate limit → product lookup → publish
+ * gate → presign) and verifies the 302 redirect carries a Cache-Control:
+ * no-store header.
  */
 
 // --- module mocks (must be declared before any dynamic import) ---------------
@@ -13,21 +14,38 @@ const presignGetUrl = vi.fn(async () => null as string | null);
 const rateLimitKey = vi.fn(async () => true);
 const clientKey = vi.fn(async () => "127.0.0.1");
 
-/** Mutable row the admin mock returns for the products query. */
-const state: { row: { image_key: string } | null } = { row: null };
+/** Mutable rows the admin mock answers with, per table. */
+const state: {
+  row: { image_key: string; owner_id: string } | null;
+  profile: Record<string, string | null> | null;
+  profileError: { message: string } | null;
+} = { row: null, profile: null, profileError: null };
 
-function builder() {
+/** A seller who has disclosed everything the publish gate asks for. */
+const COMPLETE_PROFILE = {
+  tax_business_name: "Lamp Studio Ltd",
+  tax_vat_id: null,
+  tax_country: null,
+  seller_address: "12 Market Street",
+  seller_email: "hi@lamp-studio.ie",
+  seller_phone: null,
+};
+
+function builder(table: string) {
   const chain = {
     select: () => chain,
     eq: () => chain,
     not: () => chain,
-    maybeSingle: async () => ({ data: state.row, error: null }),
+    maybeSingle: async () =>
+      table === "profiles"
+        ? { data: state.profile, error: state.profileError }
+        : { data: state.row, error: null },
   };
   return chain;
 }
 
 vi.mock("@/lib/supabase/admin", () => ({
-  createAdminClient: () => ({ from: () => builder() }),
+  createAdminClient: () => ({ from: (table: string) => builder(table) }),
 }));
 
 vi.mock("@/lib/r2", () => ({ presignGetUrl }));
@@ -45,6 +63,7 @@ vi.mock("next/headers", () => ({
 // ---------------------------------------------------------------------------
 
 const VALID_UUID = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+const OWNER_ID = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
 
 function makeContext(productId: string) {
   return { params: Promise.resolve({ productId }) };
@@ -59,7 +78,9 @@ describe("/api/og/p/[productId]", () => {
     rateLimitKey.mockResolvedValue(true);
     clientKey.mockResolvedValue("127.0.0.1");
     presignGetUrl.mockResolvedValue("https://r2.test/signed-image.jpg");
-    state.row = { image_key: "products/hero.jpg" };
+    state.row = { image_key: "products/hero.jpg", owner_id: OWNER_ID };
+    state.profile = { ...COMPLETE_PROFILE };
+    state.profileError = null;
   });
 
   it("returns 404 for a non-UUID productId — no database work done", async () => {
@@ -78,6 +99,23 @@ describe("/api/og/p/[productId]", () => {
 
   it("returns 404 when the product is not found or inactive (no row returned)", async () => {
     state.row = null;
+    const res = await GET(new Request("http://localhost"), makeContext(VALID_UUID));
+    expect(res.status).toBe(404);
+    expect(presignGetUrl).not.toHaveBeenCalled();
+  });
+
+  // A share card is only ever the face of a product page, and that page 404s
+  // for a seller who has not identified themselves. This arm keeps the two in
+  // step so no public artefact of a blocked store is left dangling.
+  it("returns 404 when the seller has not completed their trader details", async () => {
+    state.profile = { ...COMPLETE_PROFILE, seller_email: null };
+    const res = await GET(new Request("http://localhost"), makeContext(VALID_UUID));
+    expect(res.status).toBe(404);
+    expect(presignGetUrl).not.toHaveBeenCalled();
+  });
+
+  it("fails closed when the seller identity cannot be read", async () => {
+    state.profileError = { message: "boom" };
     const res = await GET(new Request("http://localhost"), makeContext(VALID_UUID));
     expect(res.status).toBe(404);
     expect(presignGetUrl).not.toHaveBeenCalled();

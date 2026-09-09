@@ -4,14 +4,24 @@ import { ArrowUpRight, Mail } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { optionSummaryRows } from "@/lib/products/option-details";
 import { mailtoHref, type CtaTarget } from "./cta-target";
-import { ctaStyle } from "./product-page-maps";
+import { ctaGhostStyle, ctaStyle, type CtaAppearance } from "./product-page-maps";
 import { useOptionSelection } from "./OptionContext";
+import { useQuantity } from "./QuantityContext";
 
 // TODO(checkout): when in-house checkout ships, add a "checkout" mode here
 // that posts to the order route (and calls decrementStock with the service
 // role). The label, style and disabled logic below are already the seam; the
 // purchase link stays as the fallback for sellers who sell elsewhere.
 // Where the button goes is decided in ./cta-target.ts (server-callable).
+//
+// THE QUANTITY THAT MODE POSTS IS A REQUEST, NOT A PRICE. `quantity` below is
+// client state: it decides what this button says and what an enquiry email
+// carries, and it decides nothing else. The order route MUST pass it through
+// resolveOrderQuantity (lib/products/order-quantity.ts), which re-reads the
+// product's own ceiling, price and stock and refuses anything that does not
+// fit, and MUST build the charge from the `totalCents` that comes back rather
+// than from anything this component sent. A checkout that multiplies a price
+// by a number the browser supplied is a checkout with a price field in it.
 //
 // NOT MERCHANT OF RECORD — this is load-bearing, not a style note. Squareshare
 // is the software/platform; each SELLER is who the buyer contracts with, pays,
@@ -34,26 +44,28 @@ import { useOptionSelection } from "./OptionContext";
 export function ProductCta({
   target,
   label,
-  accent,
+  cta,
   ink,
-  cornerRadius,
   soldOut,
   preview,
   className,
 }: {
   target: CtaTarget;
   label: string;
-  /** The theme's accent, which the button is always filled with: it is the
-   *  seller's brand colour, so there was never a second right answer. */
-  accent: string;
+  /** Fill, ink, roundness and outline, already resolved against the theme by
+   *  `resolveCta` — this component paints what it is handed and decides none
+   *  of it, so the artboard and the buyer's page cannot diverge. */
+  cta: CtaAppearance;
+  /** The PAGE's ink, not the button's: the focus ring and the unwired ghost
+   *  belong to the surface the button sits on. */
   ink: string;
-  cornerRadius: number;
   soldOut: boolean;
   /** Editor preview: the button paints but never navigates. */
   preview: boolean;
   className?: string;
 }) {
   const { unavailableIn, groups, selection } = useOptionSelection();
+  const { quantity } = useQuantity();
 
   // NO DESTINATION SET. On a live page there is nothing honest to render: a
   // button that goes nowhere is worse than no button. In the editor it is the
@@ -66,11 +78,7 @@ export function ProductCta({
       <div className={cn("flex flex-col gap-1.5", className)} data-product-cta="unset">
         <span
           className="inline-flex w-full items-center justify-center px-5 py-3 text-sm font-semibold opacity-55"
-          style={{
-            ...ctaStyle("outline", accent, ink, cornerRadius),
-            boxShadow: `inset 0 0 0 2px ${ink}`,
-            opacity: 0.45,
-          }}
+          style={{ ...ctaGhostStyle(cta, ink), opacity: 0.45 }}
         >
           {label}
         </span>
@@ -107,9 +115,19 @@ export function ProductCta({
   // screen, so the mail href is rebuilt here from the same rows the specs
   // table prints — a seller must never be told a different version than the
   // buyer was looking at.
+  // THE ENQUIRY ALSO CARRIES HOW MANY, for the same reason it carries the
+  // version: the buyer chose a number on this page, and a seller quoting for
+  // one when six were wanted is the same avoidable mistake in a different
+  // field. Nothing is appended to a seller's own purchase LINK — see
+  // resolveCtaTarget on why a guessed parameter is worse than none.
   const href =
     target.kind === "mail"
-      ? mailtoHref(target.email, target.productTitle, optionSummaryRows(groups, selection))
+      ? mailtoHref(
+          target.email,
+          target.productTitle,
+          optionSummaryRows(groups, selection),
+          quantity,
+        )
       : target.href;
 
   const button = (
@@ -118,7 +136,7 @@ export function ProductCta({
         "inline-flex w-full items-center justify-center gap-2 px-5 py-3 text-sm font-semibold transition-opacity duration-base ease-standard",
         unavailable ? "opacity-50" : "hover:opacity-90",
       )}
-      style={ctaStyle("accent", accent, ink, cornerRadius)}
+      style={ctaStyle(cta)}
     >
       {text}
       {!unavailable && <Icon className="size-4" strokeWidth={2.25} aria-hidden="true" />}
@@ -126,7 +144,19 @@ export function ProductCta({
   );
 
   return (
-    <div className={cn("flex flex-col gap-1.5", className)} data-product-cta={target.kind}>
+    <div
+      className={cn("flex flex-col gap-1.5", className)}
+      data-product-cta={target.kind}
+      // WHAT THE BUTTON PAINTS, as data rather than as parsed CSS. Same
+      // discipline as the product form's `data-product-field` and the
+      // analytics page's snapshot: a test, and one day an agent asked "what
+      // does my buy button look like", reads the resolved values instead of
+      // scraping a style attribute and re-deriving the inheritance itself.
+      data-cta-fill={cta.fill}
+      data-cta-radius={cta.radius}
+      data-cta-border-width={cta.borderWidth}
+      data-cta-border-color={cta.borderColor}
+    >
       {unavailable || preview ? (
         <span aria-disabled="true" className="block cursor-default select-none">
           {button}

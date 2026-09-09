@@ -31,7 +31,9 @@ import {
   liftableChromeKeys,
   placementFromLocalBox,
   placementIsFree,
+  invertReflowResize,
   reflowBlocks,
+  reflowHasRoom,
   resizeLocalBox,
   type GridBlock,
   type GridPlacement,
@@ -63,9 +65,21 @@ import {
  *  click. Matches the threshold the tile's own click guard uses. */
 const DRAG_THRESHOLD = 4;
 
-/** Handle chrome — token-only. Hidden until hover/focus on fine pointers,
- *  always visible on coarse (touch) pointers, which have no hover, and always
- *  visible while the consumer has marked the block SELECTED.
+/** Handle chrome — token-only. Hidden until the cell is hovered or focused, and
+ *  kept out for as long as the consumer has marked the block SELECTED.
+ *
+ *  SELECTION IS THE WHOLE STORY ON A TOUCHSCREEN. These used to be drawn
+ *  unconditionally there, on the grounds that a finger has no hover to reveal
+ *  them with — but revealed is not the same as reachable. The lift that puts a
+ *  cell's chrome above its neighbours (see globals.css) is spent on hover,
+ *  focus, or selection, and a finger has none of the first two, so on a phone
+ *  every unselected tile with a block under it drew a resize and a rotate
+ *  handle straight into that block's face: visible, permanently dead, and on
+ *  the very form factor where they are the ONLY route to either gesture.
+ *
+ *  Tap-to-select-then-act costs one tap and is what a touchscreen expects
+ *  anyway. `group-hover` carries its own `hover: hover` media query, so a
+ *  pointer keeps its hover reveal and a finger simply never matches it.
  *
  *  OUTSIDE THE TILE, hanging just under its bottom edge (see HANDLE_ROW). A
  *  handle drawn on the tile is drawn on the SELLER'S WORK: the rotate control
@@ -110,28 +124,58 @@ const DRAG_THRESHOLD = 4;
  *  whole cell above these, so they were already unpressable — drawn but dead,
  *  and now drawn under that surface's own corner controls. A handle you can
  *  see and cannot use is worse than no handle. */
+/**
+ * FLOATING, not welded.
+ *
+ * These used to be drawn as tabs growing out of the tile's bottom edge: flush
+ * against it, sharing its border, square where they touched. They are separate
+ * round-cornered buttons hanging under it now, with clear air between — the
+ * same treatment the selection toolbar gets, so everything the seller can
+ * press reads as a tool held over the design rather than as part of it.
+ *
+ * THE GAP IS PAINT ONLY. `HANDLE_ROW` keeps the BUTTON's box welded to the
+ * tile and spends the gap as transparent padding inside it (`pt-1.5`), while
+ * the chrome — border, background, rounding — is worn by the span inside (see
+ * HANDLE_FACE). So the pointer still crosses one continuous surface on its way
+ * from the tile to the control, which is what keeps `:hover` on the cell and
+ * the handle from fading out from under the hand reaching for it. A real gap
+ * here is a strip of board belonging to neither, and it cost this editor that
+ * exact bug once already (see 41-tile-chrome-outside).
+ */
 const HANDLE_CLASS = cn(
-  "absolute z-20 inline-flex size-6 items-center justify-center",
-  "rounded-b-sm rounded-t-none border border-t-0 border-border",
-  "bg-background/95 text-muted-foreground transition-opacity duration-base ease-standard",
-  // Same colour as the ring around the tile they belong to, so a selected
-  // block and its controls read as one object rather than three.
-  "group-has-[[data-block-selected]]:border-ring",
-  "hover:text-foreground focus-visible:opacity-100 focus-visible:outline-none",
+  "absolute z-20 inline-flex w-6 items-start justify-center",
+  "text-muted-foreground transition-opacity duration-base ease-standard",
+  "focus-visible:opacity-100 focus-visible:outline-none",
   "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background",
   "motion-reduce:transition-none",
-  "pointer-fine:pointer-events-none pointer-fine:opacity-0",
-  "pointer-fine:group-hover:pointer-events-auto pointer-fine:group-hover:opacity-100",
-  "pointer-fine:group-focus-within:pointer-events-auto pointer-fine:group-focus-within:opacity-100",
-  "pointer-fine:group-has-[[data-block-selected]]:pointer-events-auto",
-  "pointer-fine:group-has-[[data-block-selected]]:opacity-100",
+  "pointer-events-none opacity-0",
+  "group-hover:pointer-events-auto group-hover:opacity-100",
+  "group-focus-within:pointer-events-auto group-focus-within:opacity-100",
+  "group-has-[[data-block-selected]]:pointer-events-auto",
+  "group-has-[[data-block-selected]]:opacity-100",
   "group-has-[[data-block-overlay]]:hidden",
 );
 
 /** The strip the handles live in: hanging off the tile's bottom edge, flush
  *  with it (a hairline of overlap, `-mt-px`, rather than a gap — see
  *  HANDLE_CLASS for why). */
-const HANDLE_ROW = "top-full -mt-px";
+/** Welded box, floating paint: the hairline of overlap keeps the pointer on a
+ *  continuous surface, and the padding is the air under the tile. */
+const HANDLE_ROW = "top-full -mt-px pt-1.5";
+
+/**
+ * The part of a handle that is actually painted: a small square button in its
+ * own right, bordered and rounded on every side.
+ */
+const HANDLE_FACE = cn(
+  "inline-flex size-6 items-center justify-center rounded-sm",
+  "border border-border bg-background shadow-xs",
+  // Same colour as the ring around the tile they belong to, so a selected
+  // block and its controls read as one object rather than three.
+  "group-has-[[data-block-selected]]:border-ring",
+  "transition-colors duration-base ease-standard motion-reduce:transition-none",
+  "group-hover/handle:text-foreground",
+);
 
 /** Suppress text selection for the duration of a drag. Module scope so the
  *  DOM write happens outside component/render scope. */
@@ -629,7 +673,46 @@ export function Grid<TData>(props: GridProps<TData>) {
     };
   }, [blocks, columns, rows, renderColumns]);
 
+  /**
+   * COORDINATES ARE HONOURED, so a gesture that writes them is meaningful.
+   * False on a reflowed board, where what is on screen was repacked and no
+   * longer corresponds to what is stored: a move or a resize there would
+   * write the derived layout back as the design, silently rearranging a board
+   * the seller cannot see the real shape of.
+   */
   const interactive = editable && !view.reflowed;
+
+  /**
+   * ROTATION IS NOT A COORDINATE, and this is why it has a flag of its own.
+   *
+   * It used to ride on `interactive`, which meant a reflowed board — every
+   * board in the storefront designer's mobile preview, which repacks to fit a
+   * phone's width — lost its rotate handle along with its resize handle. But
+   * the two are not alike: a resize writes a placement, which a reflowed board
+   * cannot honestly express, while a rotate writes an ANGLE on the block. It
+   * is stored as-is, means the same thing at every column count, and is
+   * already editable from the inspector's own Rotation slider while the board
+   * is reflowed. Withholding only the on-canvas handle made the seller hunt
+   * for a control the panel beside them was still offering.
+   */
+  const rotatable = editable;
+
+  /**
+   * RESIZE, PER BLOCK, is a narrower ask than "interactive": a repacked board
+   * cannot honour coordinates in general, but a corner drag that only GROWS a
+   * tile is a delta, not an absolute placement, and a delta survives a change
+   * of column count by scaling through the same ratio reflow used to shrink
+   * it (see the reflow branch inside startResize). What it cannot survive is
+   * having nowhere left to grow — a tile already spanning the full width and
+   * the full height of the repacked layout truly has no room, on this board,
+   * in any direction, and that (not "the board happens to be reflowed") is
+   * the one thing worth disabling the handle for.
+   */
+  const resizableBlock = useCallback(
+    (block: { w: number; h: number }) =>
+      editable && (!view.reflowed || reflowHasRoom(block, renderColumns, view.rows)),
+    [editable, view.reflowed, renderColumns, view.rows],
+  );
 
   const rootStyle: GridVars = {
     "--ss-cols": renderColumns,
@@ -927,7 +1010,7 @@ export function Grid<TData>(props: GridProps<TData>) {
     event: React.PointerEvent<HTMLButtonElement>,
     block: GridBlock<TData>,
   ) {
-    if (!interactive || event.button !== 0) return;
+    if (!resizableBlock(block) || event.button !== 0) return;
     // Never let a resize also start a move.
     event.preventDefault();
     event.stopPropagation();
@@ -959,6 +1042,26 @@ export function Grid<TData>(props: GridProps<TData>) {
     setActive({ key: block.key, mode: "resize" });
 
     /**
+     * REFLOWED: `block` (and so `origin`) is the repacked box drawn on
+     * screen, not the stored one — exactly what the ghost and the strides
+     * need to track the hand correctly. The drag stays inside THAT board
+     * (`boundsColumns`/`boundsRows`, `siblingsForLegality`) for the same
+     * reason: those are the cells actually free on the layout the seller is
+     * looking at. `ratio` is reflow's own scale, run backwards on the
+     * DELTA at commit time (see handleUp) to turn "grew by one shown cell"
+     * into the right number of stored ones, whatever this tile's real
+     * column count happens to be.
+     */
+    const reflowed = view.reflowed;
+    const boundsColumns = reflowed ? renderColumns : columns;
+    const boundsRows = reflowed ? view.rows : rows;
+    const siblingsForLegality = reflowed ? view.blocks : blocks;
+    const ratio = reflowed ? renderColumns / columns : 1;
+    const realOrigin = reflowed
+      ? (blocks.find((sibling) => sibling.key === block.key) ?? block)
+      : block;
+
+    /**
      * The handle sits in the tile's own bottom-right corner and turns with it,
      * so that is the corner it drags: the block's top-left CELL is the anchor
      * and always stays part of the result, and the span reaches from there to
@@ -970,7 +1073,7 @@ export function Grid<TData>(props: GridProps<TData>) {
      * grow along the axis the hand is actually pulling.
      */
     const cornerEdges: ResizeEdges = { n: false, e: true, s: true, w: false };
-    const bounds = boardInLocalFrame(origin, angle, columns, rows);
+    const bounds = boardInLocalFrame(origin, angle, boundsColumns, boundsRows);
 
     /**
      * WHERE THE HAND GRABBED, relative to the cell the handle speaks for.
@@ -1018,11 +1121,11 @@ export function Grid<TData>(props: GridProps<TData>) {
       );
       const candidate = clampToCanvas(
         roundPlacement(placementFromLocalBox(origin, angle, snapped, anchor)),
-        columns,
-        rows,
+        boundsColumns,
+        boundsRows,
       );
       latest = candidate;
-      latestValid = dropIsLegal(block, candidate, blocks);
+      latestValid = dropIsLegal(block, candidate, siblingsForLegality);
       gestureRef.current = {
         key: block.key,
         mode: "resize",
@@ -1044,12 +1147,25 @@ export function Grid<TData>(props: GridProps<TData>) {
       endGesture(handleMove, handleUp);
       if (!latestValid) return;
       if (
-        latest.x !== block.x ||
-        latest.y !== block.y ||
-        latest.w !== block.w ||
-        latest.h !== block.h
+        latest.x === origin.x &&
+        latest.y === origin.y &&
+        latest.w === origin.w &&
+        latest.h === origin.h
       ) {
+        return;
+      }
+      if (!reflowed) {
         onResize?.(block.key, latest);
+        return;
+      }
+      const real = invertReflowResize(origin, latest, realOrigin, ratio, columns, rows);
+      if (
+        real.x !== realOrigin.x ||
+        real.y !== realOrigin.y ||
+        real.w !== realOrigin.w ||
+        real.h !== realOrigin.h
+      ) {
+        onResize?.(block.key, real);
       }
     };
 
@@ -1080,7 +1196,7 @@ export function Grid<TData>(props: GridProps<TData>) {
     event: React.PointerEvent<HTMLButtonElement>,
     block: GridBlock<TData>,
   ) {
-    if (!interactive || !onRotate || event.button !== 0) return;
+    if (!rotatable || !onRotate || event.button !== 0) return;
     // Never let a rotate also start a move.
     event.preventDefault();
     event.stopPropagation();
@@ -1441,23 +1557,50 @@ export function Grid<TData>(props: GridProps<TData>) {
                   top-left it flips and the tile grows up / left instead.
                   Arrows (with Shift, on the tile) do the same from the
                   keyboard. */}
-              {interactive && (
+
+              {/* DRAWN EVEN WHERE IT CANNOT WORK, and saying so. A reflowed
+                  board repacked its blocks to fit the width it was given, so
+                  a resize on it has to land back on the STORED design rather
+                  than the repacked one (see the reflow branch inside
+                  startResize) — every tile still gets a working handle as
+                  long as it has somewhere left to grow on the repacked board,
+                  and only one already spanning that board's full width and
+                  full height is truly out of room. The handle no longer
+                  simply VANISHES there either: a control that disappears
+                  without a word reads as a broken editor, and on a phone
+                  (where the storefront's mobile preview is often reflowed) it
+                  was the second of the two handles to go missing with no
+                  explanation. It sits in its usual place, plainly inert, and
+                  its accessible name carries the reason. */}
+              {editable && (
                 <button
                   type="button"
                   data-tile-chrome=""
-                  aria-label={label ? `Resize ${label}` : "Resize block"}
+                  aria-disabled={!resizableBlock(block)}
+                  aria-label={
+                    resizableBlock(block)
+                      ? label
+                        ? `Resize ${label}`
+                        : "Resize block"
+                      : `Resizing is unavailable: this block already fills all the room the stacked layout has${label ? `: ${label}` : ""}`
+                  }
                   onPointerDown={(event) => startResize(event, block)}
                   className={cn(
                     HANDLE_CLASS,
                     HANDLE_ROW,
-                    "right-0 cursor-nwse-resize touch-none select-none",
+                    "group/handle right-0 touch-none select-none",
+                    resizableBlock(block)
+                      ? "cursor-nwse-resize"
+                      : "cursor-not-allowed text-muted-foreground/40",
                   )}
                 >
-                  <MoveDiagonal2
-                    className="size-3.5"
-                    strokeWidth={2}
-                    aria-hidden="true"
-                  />
+                  <span className={HANDLE_FACE}>
+                    <MoveDiagonal2
+                      className="size-3.5"
+                      strokeWidth={2}
+                      aria-hidden="true"
+                    />
+                  </span>
                 </button>
               )}
 
@@ -1469,7 +1612,7 @@ export function Grid<TData>(props: GridProps<TData>) {
                   role=slider carries the angle to assistive tech, which is the
                   accessible pattern for a draggable handle holding a value;
                   Alt+Arrows on the tile itself is the keyboard route. */}
-              {interactive && onRotate && (
+              {rotatable && onRotate && (
                 <button
                   type="button"
                   data-tile-chrome=""
@@ -1489,14 +1632,16 @@ export function Grid<TData>(props: GridProps<TData>) {
                   className={cn(
                     HANDLE_CLASS,
                     HANDLE_ROW,
-                    "left-0 cursor-grab touch-none select-none active:cursor-grabbing",
+                    "group/handle left-0 cursor-grab touch-none select-none active:cursor-grabbing",
                   )}
                 >
-                  <RotateCw
-                    className="size-3.5"
-                    strokeWidth={2}
-                    aria-hidden="true"
-                  />
+                  <span className={HANDLE_FACE}>
+                    <RotateCw
+                      className="size-3.5"
+                      strokeWidth={2}
+                      aria-hidden="true"
+                    />
+                  </span>
                 </button>
               )}
 
@@ -1509,7 +1654,7 @@ export function Grid<TData>(props: GridProps<TData>) {
                   aria-hidden="true"
                   // Below the handle row, not in it: the handles moved out of
                   // the tile and now hold the strip this used to sit in.
-                  className="pointer-events-none absolute left-0 top-full z-20 mt-8 rounded-sm border border-border bg-background/95 px-1.5 py-0.5 font-inter text-xs text-foreground shadow-xs"
+                  className="pointer-events-none absolute left-0 top-full z-20 mt-9 rounded-sm border border-border bg-background/95 px-1.5 py-0.5 font-inter text-xs text-foreground shadow-xs"
                 >
                   {/* Seeded with the angle the spin STARTED at, so a press
                       that has not travelled yet shows a number rather than an

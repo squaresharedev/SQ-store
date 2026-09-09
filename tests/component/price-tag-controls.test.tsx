@@ -164,6 +164,23 @@ describe("PriceTagControls", () => {
     renderControls({ priceTagPosition: "hidden" });
     expect(screen.queryByRole("switch", { name: "Show on hover" })).toBeNull();
   });
+
+  it("says the size is per-tile, in every placement that has a tile", () => {
+    // The tag is sized against the block it sits on, so the number is a size
+    // on ONE tile rather than a fixed px, and the slider has to say so or a
+    // seller reads a 3x3's chip as the panel disagreeing with the canvas.
+    // BOTH placements, because the title band scales too: gating this on the
+    // floating one left the default placement — the one a freshly added
+    // product actually has — explaining nothing.
+    for (const priceTagPosition of ["top-right", "below"] as const) {
+      cleanup();
+      renderControls({ priceTagPosition });
+      expect(
+        screen.getByRole("button", { name: "About Size" }),
+        `${priceTagPosition} does not explain what Size means`,
+      ).toBeInTheDocument();
+    }
+  });
 });
 
 describe("PriceTagControls (tile scope)", () => {

@@ -239,7 +239,14 @@ export function DesignPanel({
               {...{ [CANVAS_PANEL_ATTR]: "" }}
               className={cn(
                 SHEET_ON_MOBILE_CLASS,
-                inspectorHiddenOnMobile && "hidden lg:block",
+                // `max-lg:hidden`, not `hidden lg:block`. This clause is about
+                // the phone's one bottom slot and has no opinion at all above
+                // lg, but `lg:block` is an opinion, and it lands in the same
+                // display bucket as the `lg:hidden` two lines down, where the
+                // winner is settled by stylesheet order rather than by which
+                // rule meant more. Saying nothing above lg leaves those two
+                // clauses to decide on their own, which is what they are for.
+                inspectorHiddenOnMobile && "max-lg:hidden",
                 !onSelection && "lg:hidden",
                 // HIDDEN, not unmounted, for the trip through the stack: the
                 // block editors hold drafts (a half-typed product name) that

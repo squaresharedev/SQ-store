@@ -113,6 +113,7 @@ const FIXTURE_PRODUCTS: Product[] = ["Mug", "Print", "Tote", "Candle"].map(
     trackStock: false,
     stockQuantity: null,
     lowStockThreshold: 3,
+    maxPerOrder: 10,
   }),
 );
 
@@ -496,6 +497,35 @@ const CASES: { title: string; note: string; config: StorefrontConfig }[] = [
   },
 ];
 
+/**
+ * Price tag auto-scaling, which needs a box the size of a real storefront
+ * rather than a 300px card: the whole point is that the chip is proportional
+ * to the tile, and in a thumbnail every tile is at the clamp floor and they
+ * all look alike. See PRICE_TAG_AUTO_SCALE.
+ */
+const SCALE_CASES: { title: string; note: string; config: StorefrontConfig }[] = [
+  {
+    title: "One tag setting, four tile spans",
+    note: "Identical price tags (nothing per-tile, all four following the theme) on a 1x1, a 2x2, a 3x3 and a 3x1 bar. Each chip is proportional to the tile it sits on, so the small tile is not swallowed and the hero does not wear a sticker. The bar scales by its SHORT side, the same axis roundness scales by, so it matches the 1x1 rather than the 3x3.",
+    config: config({ columns: 7, rows: 4, cornerRadius: 0, priceTagPosition: "top-right" }, [
+      productBlock(0, 0, 0, 1, 1),
+      productBlock(1, 1, 0, 2, 2),
+      productBlock(2, 3, 0, 3, 3),
+      productBlock(3, 0, 2, 3, 1),
+    ]),
+  },
+  {
+    title: "The same board with the tag in the title bar",
+    note: "priceTagPosition \"below\", which is where a freshly added product's price starts. The band scales as one: the price and the product name beside it follow the same rule, so the whole bar is proportional to the block rather than the price growing away from the name it prices.",
+    config: config({ columns: 7, rows: 4, cornerRadius: 0, priceTagPosition: "below" }, [
+      productBlock(0, 0, 0, 1, 1),
+      productBlock(1, 1, 0, 2, 2),
+      productBlock(2, 3, 0, 3, 3),
+      productBlock(3, 0, 2, 3, 1),
+    ]),
+  },
+];
+
 /** Renders one case in exactly the box the real storefront card uses. */
 function Case({
   title,
@@ -554,6 +584,21 @@ export function PreviewGallery() {
       <ul className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">
         {CASES.map((entry) => (
           <Case key={entry.title} {...entry} width={160} />
+        ))}
+      </ul>
+
+      <h2 className="mt-10 text-lg font-semibold text-foreground">
+        Price tag scaling, at storefront width (~760px)
+      </h2>
+      <p className={cn(helpTextClass, "mt-1")}>
+        A floated price tag is sized against the tile it sits on, not pinned to
+        a px, so one setting reads the same on a single cell and on a hero. The
+        boxes below are wide enough for the tiles to render at the sizes a real
+        storefront gives them, which a 300px thumbnail is not.
+      </p>
+      <ul className="mt-3 grid grid-cols-1 gap-3">
+        {SCALE_CASES.map((entry) => (
+          <Case key={entry.title} {...entry} width={760} />
         ))}
       </ul>
     </main>

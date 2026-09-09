@@ -109,10 +109,15 @@ export function FormSectionNav({
 /**
  * Which section the reader is looking at.
  *
- * `rootMargin` pulls the observation band up to a strip near the top of the
- * viewport, so the highlighted entry is the section whose heading you have
- * just reached rather than whichever one happens to be tallest on screen —
- * the latter jumps around on a form whose sections differ in height by 10x.
+ * `rootMargin` collapses the observed root to a single line at 50% top and
+ * 50% bottom, i.e. exactly the viewport's vertical centre, so the highlighted
+ * entry is whichever section that centre line is currently crossing. Sections
+ * are stacked and non-overlapping, so at most one can ever cross that line at
+ * once — no band-width tie-break to get wrong, and no jumping to whichever
+ * section happens to be tallest on screen (the earlier "strip near the top"
+ * band did neither: it lit up the section that had JUST reached the top,
+ * which reads as the previous section still being "current" for most of the
+ * scroll through the next one).
  */
 function useActiveSection(ids: string[]): string | null {
   const [active, setActive] = useState<string | null>(null);
@@ -132,12 +137,14 @@ function useActiveSection(ids: string[]): string | null {
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) seen.set(entry.target.id, entry.isIntersecting);
-        // The FIRST section in the band, so scrolling down moves the highlight
-        // forward one section at a time rather than skipping to the last one.
+        // Normally exactly one element is intersecting the centre line; the
+        // FIRST match is a tie-break for the instant the line sits exactly on
+        // a boundary between two sections (both can report `isIntersecting`
+        // that one frame), favouring the section being scrolled INTO.
         const current = elements.find((element) => seen.get(element.id));
         if (current) setActive(current.dataset.productSection ?? null);
       },
-      { rootMargin: "-80px 0px -70% 0px", threshold: 0 },
+      { rootMargin: "-50% 0px -50% 0px", threshold: 0 },
     );
     for (const element of elements) observer.observe(element);
     return () => observer.disconnect();

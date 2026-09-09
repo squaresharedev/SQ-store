@@ -80,6 +80,10 @@
   /* Runtime var, not a static @theme colour, precisely because it has to
      change with the palette (see --acid-ink in :root / .dark below). */
   --color-acid-ink: var(--acid-ink);
+  /* "This control is live under your hand" (components/ui/slider.tsx). Mapped
+     as a utility colour as well as a raw var so anything else that grows a
+     dragged state spells the same token instead of picking its own purple. */
+  --color-slider-active: var(--slider-active);
 
   /* Product-UI radius scale (styles.md §3). The auth/marketing surfaces keep
      their square identity via --radius (0) + rounded-none; product components
@@ -192,6 +196,26 @@
      token stays correct for anything purely decorative, like a lit pixel. */
   --acid-ink: #9333ea; /* 5.38:1 on white */
 
+  /* SLIDER, LIT (components/ui/slider.tsx + the .ss-slider block below).
+     Three roles, because a slider has three surfaces and lighting only one of
+     them leaves the control half-awake — and because a slider sitting at its
+     minimum has NO fill to colour, which is exactly the case (a border
+     thickness of 0) where the seller most needs to see which bar they are
+     about to drag.
+
+     --slider-active       the fill and the thumb's edge: the accent, at the
+                           step that stays legible on this surface (= acid-ink
+                           here, for the same reason).
+     --slider-active-rail  a wash through the EMPTY half of the track, so the
+                           whole bar reads as lit rather than just the part
+                           already filled in.
+     --slider-active-halo  the soft disc under the thumb. Translucent so it
+                           sits on any panel background without a second token
+                           per surface. */
+  --slider-active: #9333ea;
+  --slider-active-rail: #f3e8ff; /* purple-100 */
+  --slider-active-halo: rgb(147 51 234 / 0.16);
+
   /* The error screens' hero (components/error/ErrorCode). Two roles, and both
      have to be re-stepped per palette because they are defined by their
      distance from the SURFACE, not by a fixed hue:
@@ -260,6 +284,14 @@
   /* On black the raw acid already clears AA (5.31:1), so readable and
      decorative are the same colour here. */
   --acid-ink: #a855f7;
+
+  /* Slider, lit — and it has to go the OTHER WAY here. In dark the resting
+     fill is already `--primary`, which IS the acid, so lighting it with the
+     same purple would change nothing at all. One step brighter separates the
+     two, the way the light palette's step darker does. */
+  --slider-active: #c084fc; /* purple-400 */
+  --slider-active-rail: #3b0764; /* purple-950 */
+  --slider-active-halo: rgb(192 132 252 / 0.22);
 
   /* Error hero, dark: the digits sink one step OUT of black instead of into
      white, and the ring opens up to the full brand purple, which needs a dark
@@ -463,21 +495,92 @@ textarea {
   color: var(--color-surface-dark);
 }
 
+/* A HAIRLINE, AND NOTHING ELSE. The bar used to be a 6px grey channel with a
+   square block sliding in it and (on Windows, where the platform scrollbar has
+   them) a stepper button at each end. Beside a bottom sheet on a phone that is
+   three pieces of chrome doing the job of one, and the two at the ends are
+   1990s furniture nobody presses.
+
+   What is left is the thumb: a 4px rounded capsule on nothing. The track is
+   transparent so the surface behind simply carries on, and the gutter is 8px
+   with the extra 4 spent as a transparent border. `background-clip: content-box`
+   keeps the paint inside it, which is what buys the capsule breathing room on
+   both sides without making the thumb itself harder to grab than 4px.
+
+   `::-webkit-scrollbar-button` must be given a size of zero explicitly: once a
+   ::-webkit-scrollbar rule exists at all the browser stops drawing the native
+   scrollbar and starts drawing this one, and the buttons come back as unstyled
+   blank squares unless they are told not to.
+
+   AND THE STANDARD PROPERTIES ARE NOW BEHIND A GUARD, which is the part that
+   actually made the arrows go away. `scrollbar-width` / `scrollbar-color` are
+   not a Firefox-only fallback any more: Chrome has shipped them since 121, and
+   there they OUTRANK the pseudo-elements, so a plain `* { scrollbar-width: thin }`
+   silently threw away every rule below it. That is why this block had no
+   visible effect for years, and why the bar kept the stepper buttons Windows
+   draws on its own thin scrollbar. The guard hands each engine the vocabulary
+   it actually has: `selector()` is false in Firefox (which has no
+   ::-webkit-scrollbar to match), so only Firefox reads the two lines, and
+   Chrome and Safari are left with the pseudo-elements above. */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
+  height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #f4f4f5;
+  background: transparent;
+}
+::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
   background: #d4d4d8;
+  border: 2px solid transparent;
+  background-clip: content-box;
+  border-radius: 999px;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-acid);
+  background-clip: content-box;
 }
-* {
-  scrollbar-width: thin;
-  scrollbar-color: #d4d4d8 #f4f4f5;
+/* Firefox has no thumb geometry to set: `thin` and a transparent track are the
+   whole vocabulary, and they land in the same place (its thin scrollbar is a
+   bare rounded thumb with no buttons). */
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #d4d4d8 transparent;
+  }
+}
+
+/* Storefront dropdown scrollbar: the seller's own tokens, never the acid
+   accent above. A buyer's shop is white/grey/black by rule (see
+   product-page-maps.ts, storefrontOverlayVars) and a purple thumb on hover
+   would be the one piece of Squareshare branding leaking into it.
+   `--muted-foreground` and `--foreground` are already set on the panel by
+   storefrontOverlayVars — the same secondary-text grey and full ink the rest
+   of the dropdown is drawn in — so this reads no new colour, only repoints
+   the two spots the rule above hardcodes. (`--border`, the panel's hairline,
+   is deliberately NOT used here: it is tuned to sit almost invisibly behind a
+   1px divider, which makes a poor thumb on a dark page — a scrollbar has to
+   read as a thing to grab, not a seam.)
+   `.storefront-scrollbar::-webkit-scrollbar-thumb` outranks the bare
+   `::-webkit-scrollbar-thumb` above by specificity (a class beats none), so
+   this wins regardless of source order. */
+.storefront-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--muted-foreground);
+}
+.storefront-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--foreground);
+}
+@supports not selector(::-webkit-scrollbar) {
+  .storefront-scrollbar {
+    scrollbar-color: var(--muted-foreground) transparent;
+  }
 }
 
 /* Swipe strips: a scroller the finger drives, with no scrollbar drawn.
@@ -879,6 +982,117 @@ textarea {
 .group\/bell:hover .bell-icon:not(.animate-bell-ring),
 .group\/bell:focus-visible .bell-icon:not(.animate-bell-ring) {
   animation: bell-nudge 600ms cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+/* ============================================================
+   SLIDER, LIT  (components/ui/slider.tsx)
+
+   THE ONE UNDER YOUR HAND CHANGES COLOUR. The design panel stacks five or six
+   of these in a column and every one is the same near-black bar on the same
+   grey rail, so "which am I about to drag" was answered by the cursor position
+   alone — and the cursor is the one thing a seller is not looking at while
+   they aim. Focus, the drag itself, and being pointed at from elsewhere in the
+   panel (a toolbar button, a summoned field — see SummonedField's "slider"
+   variant) put the control in the accent.
+
+   NOT HOVER. A slider that lit up under a passing cursor read as noise in a
+   column of five or six — every idle mouse movement across the panel set one
+   flashing for no reason. The lit states below are all ones the seller asked
+   for: they have their hands on the control, or something in the UI is
+   pointing at it on their behalf.
+
+   ALL THREE SURFACES, not just the fill. A slider at its minimum has no fill
+   to colour (border thickness 0 is the common case, and the one where the
+   value is hardest to read), so the empty rail takes a wash and the thumb
+   takes a soft disc as well. Lighting only the fill would leave exactly the
+   sliders that need it most looking untouched.
+
+   ONE RULE, THREE STATES. :focus-visible, [data-dragging] and
+   [data-highlighted] set the same variables, so the lit look cannot drift
+   between a keyboard, an in-progress drag, and a summons — and the drag keeps
+   it lit after the pointer has left the track, which it does constantly,
+   since dragging a 6px bar means leaving it.
+
+   WHY HERE AND NOT IN THE COMPONENT'S CLASS LIST: any one state on the ROOT
+   has to repaint three descendants. As utilities that is `group-*:` × 3 ×
+   (focus, dragging, highlighted) = nine variants restating the same intent,
+   and a tenth the day a fourth state appears. One variable, set once, is the
+   same thing said once. Colour never appears here as a literal — see
+   --slider-active in the palette above, re-stepped for dark like every other
+   token.
+   ============================================================ */
+.ss-slider {
+  --slider-ink: var(--primary);
+  --slider-rail: var(--muted);
+  --slider-halo: 0 0 0 0 transparent;
+}
+.ss-slider:focus-visible,
+.ss-slider[data-dragging],
+.ss-slider[data-highlighted] {
+  --slider-ink: var(--slider-active);
+  --slider-rail: var(--slider-active-rail);
+  --slider-halo: 0 0 0 0.3125rem var(--slider-active-halo);
+}
+/* The disc rides on box-shadow — and so, here alone, does the FOCUS RING.
+   Tailwind draws `ring-*` as a box-shadow too, so a `ring-2` utility on this
+   element and the halo are the same property fighting over one value: the
+   unlayered rule below wins and the focus ring silently disappears. Both are
+   spelled here instead, in one chain, at exactly the weight focusRingClass
+   uses everywhere else (2px of --ring). The opaque layer between them is what
+   a ring-offset does elsewhere: without it the grey ring shows THROUGH the
+   translucent halo and both come out muddy. */
+.ss-slider-thumb {
+  box-shadow: var(--slider-halo), var(--shadow-sm);
+  transition:
+    box-shadow var(--transition-duration-base) var(--ease-standard),
+    border-color var(--transition-duration-base) var(--ease-standard),
+    scale var(--transition-duration-base) var(--ease-standard);
+}
+.ss-slider:focus-visible .ss-slider-thumb {
+  box-shadow:
+    var(--slider-halo),
+    0 0 0 0.3125rem var(--background),
+    0 0 0 0.4375rem var(--ring),
+    var(--shadow-sm);
+}
+/* `scale`, the standalone property, NOT a transform: the thumb is positioned
+   by Tailwind's own `-translate-x-1/2`, and a `transform` here would replace
+   that translation rather than compose with it, dropping the thumb half its
+   own width off the value it points at. */
+.ss-slider:focus-visible .ss-slider-thumb,
+.ss-slider[data-dragging] .ss-slider-thumb,
+.ss-slider[data-highlighted] .ss-slider-thumb {
+  scale: 1.15;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ss-slider-thumb {
+    transition: none;
+  }
+  .ss-slider:focus-visible .ss-slider-thumb,
+  .ss-slider[data-dragging] .ss-slider-thumb,
+  .ss-slider[data-highlighted] .ss-slider-thumb {
+    scale: 1;
+  }
+}
+
+/* The selection toolbar, pinned over the top of the design canvas. Same rule
+   as the toasts below: it arrives from the edge it is pinned to, so the motion
+   says where the thing lives. Entrance only — it is unmounted the moment the
+   selection clears, and a toolbar for a block that is no longer selected has
+   nothing to say while it fades. */
+@keyframes island-in {
+  from {
+    opacity: 0;
+    transform: translateY(-0.5rem);
+  }
+}
+.island-enter {
+  animation: island-in var(--transition-duration-base) var(--ease-entrance) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .island-enter {
+    animation: none;
+  }
 }
 
 /* Toasts. They arrive from the edge they are pinned to (the bottom) and leave

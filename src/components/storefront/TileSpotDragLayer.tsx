@@ -48,10 +48,15 @@ export type TileSpotDrag = {
   onGrab: (token: SpotToken, event: React.PointerEvent) => void;
   onCancel: () => void;
   onArrow: (token: SpotToken, key: SpotArrow) => void;
-  /** Swallows the click that ends a drag, so releasing a token does not also
-   *  toggle the tile's selection. A press that never became a drag is let
-   *  through, so tapping the title still behaves like tapping the tile. */
-  onTokenClick: (event: React.MouseEvent) => void;
+  /**
+   * A press on a token that ENDED on it. The tile decides what that means: a
+   * press that dragged the token has already done its work, and one that did
+   * not is a request to edit the thing that was pressed.
+   *
+   * Either way it is the token's click, never the tile's, so the handler stops
+   * it reaching the surface underneath.
+   */
+  onTokenClick: (token: SpotToken, event: React.MouseEvent) => void;
 };
 
 const ARROWS: readonly string[] = [
@@ -107,7 +112,8 @@ export function tileSpotTokenProps(
       event.preventDefault();
       drag.onGrab(token, event);
     },
-    onClick: drag.onTokenClick,
+    onClick: (event: React.MouseEvent<HTMLElement>) =>
+      drag.onTokenClick(token, event),
     onKeyDown: (event: React.KeyboardEvent<HTMLElement>) => {
       if (event.key === "Escape") {
         drag.onCancel();
@@ -121,11 +127,14 @@ export function tileSpotTokenProps(
   };
 }
 
-/** What a token's aria-label says: what it is, where it is, and how to move it. */
+/** What a token's aria-label says: what it is, where it is, and the two things
+ *  pressing it can do. Both are worth naming — moving it is the gesture the
+ *  token was built for, and opening its settings is the one a seller reaches
+ *  for when the thing they want to change is not its position. */
 export function tileSpotTokenLabel(token: SpotToken, drop: SpotDrop): string {
   const what = token === "title" ? "Title" : "Price";
   const where = drop === "below" ? "in the title bar" : `at ${spotLabel(drop)}`;
-  return `${what} ${where}. Drag, or use the arrow keys, to move it.`;
+  return `${what} ${where}. Press to open its settings, or drag (or use the arrow keys) to move it.`;
 }
 
 /**

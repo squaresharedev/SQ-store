@@ -37,6 +37,13 @@ export interface Product {
   stockQuantity: number | null;
   /** At or below this remaining count the public badge shows "Only N left". */
   lowStockThreshold: number;
+  /**
+   * How many units one buyer may take in a single order, 1..
+   * PURCHASE_QUANTITY_MAX. Independent of `trackStock`: an unlimited product
+   * still has a per-order ceiling, because the ceiling is what the seller will
+   * sell in one go rather than what is on the shelf.
+   */
+  maxPerOrder: number;
 }
 
 // ── Product page detail ─────────────────────────────────────────────────
@@ -296,6 +303,17 @@ export interface ProductPageProduct {
   stock: StockBadge | null;
   /** The tile's manual flag OR a sold-out badge. */
   soldOut: boolean;
+  /**
+   * The largest quantity the picker may offer, derived server-side by
+   * `publicQuantityLimit`. `0` when there is nothing to pick (sold out), `1`
+   * when the seller sells one at a time.
+   *
+   * NOT the stock count and never derived into one: it narrows to the shelf
+   * only where the badge has already published the number. It is a display
+   * bound, not an authorization — `resolveOrderQuantity` is what decides
+   * whether a quantity may actually be sold.
+   */
+  maxQuantity: number;
 }
 
 /**
@@ -347,6 +365,7 @@ export interface ProductFormValues {
   /** In-progress input strings, parsed + validated on submit like `price`. */
   stockQuantity: string;
   lowStockThreshold: string;
+  maxPerOrder: string;
 }
 
 // The write payload lives in lib/validation/product.ts as `ProductWriteInput`

@@ -167,7 +167,13 @@ export function PriceTagControls({
       </div>
 
       {/* One size for the whole tag: the chip's padding scales with the type,
-          so this never needs a padding control beside it. */}
+          so this never needs a padding control beside it.
+
+          The number is the size on an ordinary single tile, not a fixed px:
+          the chip grows and shrinks with the block it sits on, wherever it
+          sits (TILE_LABEL_AUTO_SCALE). That is a caveat, not a control, so it
+          goes in the tip rather than as a paragraph the seller reads once and
+          then scrolls past forever. A hidden tag has no size to explain. */}
       <SliderField
         id={`${fieldId}-price-size`}
         label="Size"
@@ -179,6 +185,7 @@ export function PriceTagControls({
         valueText={`${value.priceTagSize} pixels`}
         labelClassName={strongLabelClass}
         unit="px"
+        tip="The size on a single tile. The tag scales with the tile it sits on, so a bigger block wears a bigger price without you setting one."
       />
 
       {colorField("fill")}

@@ -42,6 +42,7 @@ JSON.parse(document.getElementById("product-form-snapshot").textContent)
   "trackStock": true,
   "stockQuantity": 4,              // null when not tracking
   "lowStockThreshold": 5,
+  "maxPerOrder": 3,               // units one buyer may take in one order, 1-100
   "isDigital": false,
   "hasCoverImage": true,
   "hasDigitalFile": false,
@@ -150,7 +151,7 @@ the rendered text.**
 
 ```
 title              description        price (+value in cents)   currency
-trackStock         stockQuantity      lowStockThreshold
+trackStock         stockQuantity      lowStockThreshold      maxPerOrder
 coverImage         digitalFile        purchaseUrl
 shippingProfile (+value: a profile id, or "default" for the store's terms)
 optionGroups       gallery            documents

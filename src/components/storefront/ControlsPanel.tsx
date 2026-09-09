@@ -271,6 +271,9 @@ export function ControlsPanel({
           sellerIdentity={sellerIdentity}
           storefrontFont={theme.font}
           customFontName={theme.customFont?.name}
+          background={theme.background}
+          accent={theme.accent}
+          cornerRadius={theme.cornerRadius}
           summoned={summonedPage}
         />
       ) : (

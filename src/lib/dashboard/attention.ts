@@ -1,4 +1,9 @@
 import { LEGAL_VERSION } from "@/lib/settings/constants";
+import {
+  missingTraderIdentity,
+  traderIdentityFix,
+  traderIdentityHref,
+} from "@/lib/settings/trader-identity";
 import type { DashboardOrdersData, ProductsSummary, ProfileSummary } from "./queries";
 
 /** One row of the overview's "Needs attention" module. */
@@ -19,7 +24,11 @@ export type AttentionItem = {
  */
 export type ProfileAttentionData = Pick<
   ProfileSummary,
-  "taxBusinessName" | "sellerEmail" | "shippingPolicySet" | "legalAcceptedVersion"
+  | "taxBusinessName"
+  | "sellerEmail"
+  | "sellerAddress"
+  | "shippingPolicySet"
+  | "legalAcceptedVersion"
 >;
 
 /** What the module needs from the storefront list. */
@@ -96,15 +105,28 @@ export function buildAttentionItems({
 
   // --- Seller identity / legal ----------------------------------------
 
-  // Business name: buyers see "Sold by Untitled storefront" until this is set.
-  // Gated on profile being readable; a soft-fail read leaves this row hidden.
-  if (profile && !profile.taxBusinessName) {
+  // THE PUBLISH GATE, as an attention row. Not a nice-to-have like the rest of
+  // this list: while these are missing the account cannot put a product on sale
+  // or embed a storefront at all (lib/settings/trader-identity.ts), so it leads
+  // with what is blocked rather than with what buyers would see.
+  //
+  // Reuses the gate's own predicate so this row cannot drift from what the
+  // server actually enforces. Gated on profile being readable; a soft-fail read
+  // leaves this row hidden.
+  const missingTrader = profile
+    ? missingTraderIdentity({
+        ...(profile.taxBusinessName ? { businessName: profile.taxBusinessName } : {}),
+        ...(profile.sellerAddress ? { address: profile.sellerAddress } : {}),
+        ...(profile.sellerEmail ? { email: profile.sellerEmail } : {}),
+      })
+    : [];
+  if (missingTrader.length > 0) {
     items.push({
       key: "no-seller-identity",
-      label: "Add your business name",
-      description: 'Buyers see "Sold by Untitled storefront" until you set one.',
-      href: "/settings/tax",
-      actionLabel: "Add name",
+      label: "You can't publish or sell yet",
+      description: traderIdentityFix(missingTrader),
+      href: traderIdentityHref(missingTrader),
+      actionLabel: "Add seller details",
     });
   }
 
