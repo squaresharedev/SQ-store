@@ -157,8 +157,30 @@ export async function putObject(
     body: bytes,
   });
   if (!res.ok) {
-    throw new Error(`R2 PUT ${key} failed: ${res.status}`);
+    throw new Error(`R2 PUT ${key} failed: ${res.status}${await r2ErrorCode(res)}`);
   }
+}
+
+/**
+ * R2's own error code (e.g. `InvalidAccessKeyId`, `SignatureDoesNotMatch`)
+ * from an S3 error body, for logs. The status alone cannot tell a revoked
+ * credential from a signing fault, and those need opposite fixes. The body
+ * carries no secrets, but only the code is kept.
+ */
+async function r2ErrorCode(res: Response): Promise<string> {
+  try {
+    const code = /<Code>([^<]{1,80})<\/Code>/.exec(await res.text())?.[1];
+    return code ? ` ${code}` : "";
+  } catch {
+    return "";
+  }
+}
+
+/** An upload failure as one log-safe line. The Error OBJECT must not be
+ *  logged whole: Workers observability keeps only its stack, which drops the
+ *  message, so the R2 status never reached the logs. */
+export function r2FailureMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
 }
 
 /** Real size (bytes) and stored Content-Type of an object, or null if absent. */

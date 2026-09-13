@@ -1,6 +1,11 @@
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
-import { buildObjectKey, hasR2Credentials, putObject } from "@/lib/r2";
+import {
+  buildObjectKey,
+  hasR2Credentials,
+  putObject,
+  r2FailureMessage,
+} from "@/lib/r2";
 import { IMAGE_CONTENT_TYPES, IMAGE_MAX_BYTES } from "@/lib/validation/product";
 import { sniffImage } from "@/lib/uploads/sniff";
 import { moderateUpload, QUARANTINE_PREFIX } from "@/lib/moderation";
@@ -136,7 +141,7 @@ export async function POST(request: Request) {
     try {
       await putObject(`${QUARANTINE_PREFIX}/${key}`, bytes, sniffed.mime);
     } catch (error) {
-      console.error("[uploads] quarantine store failed", error);
+      console.error("[uploads] quarantine store failed:", r2FailureMessage(error));
     }
     // 202 Accepted: we took the file, but it yields no key, so the caller
     // cannot attach it to anything. The client treats "2xx without a key" as
@@ -151,7 +156,7 @@ export async function POST(request: Request) {
   try {
     await putObject(key, bytes, sniffed.mime);
   } catch (error) {
-    console.error("[uploads] store failed", error);
+    console.error("[uploads] store failed:", r2FailureMessage(error));
     return bad(502, "The image could not be stored.", "Try again in a moment.");
   }
 
