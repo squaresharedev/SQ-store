@@ -486,6 +486,16 @@ const CASES: { title: string; note: string; config: StorefrontConfig }[] = [
     ]),
   },
   {
+    title: "Turned blocks against every edge",
+    note: "Each turned block lies wholly on the board while its STORED rect reaches past it: a 1x3 bar across the top row (stored y = -1), another across the bottom row (its rect runs a row below the board), a 2x1 standing in the last column, and a 3x1 standing in the first (stored x = -1). Every one must paint flush against its edge, on whole cells, with the board still exactly 5 x 5: a stored rect off the board is laid out on the board's own lines, never dropped into auto-placement.",
+    config: config({ columns: 5, rows: 5, cornerRadius: 2 }, [
+      shapeOf("bar", "#171717", 2, -1, 1, 3, { rotation: 90 }),
+      shapeOf("bar", "#2563eb", 2, 3, 1, 3, { rotation: 90 }),
+      shapeOf("bar", "#a855f7", 4, 2, 2, 1, { rotation: 90 }),
+      shapeOf("bar", "#16a34a", -1, 2, 3, 1, { rotation: -90 }),
+    ]),
+  },
+  {
     title: "Layered against reading order",
     note: "The same four bars with the stack INVERTED (z 3 down to 0), so the last block in reading order paints furthest back. The two cards prove depth is independent of the order the blocks are read in: nothing about the DOM or the embed payload differs between them.",
     config: config({ columns: 4, rows: 4, cornerRadius: 4 }, [
@@ -522,6 +532,30 @@ const SCALE_CASES: { title: string; note: string; config: StorefrontConfig }[] =
       productBlock(1, 1, 0, 2, 2),
       productBlock(2, 3, 0, 3, 3),
       productBlock(3, 0, 2, 3, 1),
+    ]),
+  },
+  {
+    title: "Sharp square under a product, theme square",
+    note: "A black square on each tile's exact cells, layered BEHIND the product. Nothing of it may show: not a hairline along the edges, and not the corners when the product rounds itself (24, then a full circle).",
+    config: config({ columns: 6, rows: 2, cornerRadius: 0 }, [
+      shapeOf("square", "#000000", 0, 0, 2, 2, { z: 0 }),
+      { ...productBlock(0, 0, 0, 2, 2), z: 1 },
+      shapeOf("square", "#000000", 2, 0, 2, 2, { z: 0 }),
+      { ...productBlock(1, 2, 0, 2, 2, { cornerRadius: 24 }), z: 1 },
+      shapeOf("square", "#000000", 4, 0, 2, 2, { z: 0 }),
+      { ...productBlock(2, 4, 0, 2, 2, { cornerRadius: 100 }), z: 1 },
+    ]),
+  },
+  {
+    title: "Sharp square under a product, theme rounded",
+    note: "The same stack on a board rounded at 16: the product following the theme, then squared off (0), then rounder than the theme (40). The square must stay hidden wherever the product covers it.",
+    config: config({ columns: 6, rows: 2, cornerRadius: 16 }, [
+      shapeOf("square", "#000000", 0, 0, 2, 2, { z: 0 }),
+      { ...productBlock(0, 0, 0, 2, 2), z: 1 },
+      shapeOf("square", "#000000", 2, 0, 2, 2, { z: 0 }),
+      { ...productBlock(1, 2, 0, 2, 2, { cornerRadius: 0 }), z: 1 },
+      shapeOf("square", "#000000", 4, 0, 2, 2, { z: 0 }),
+      { ...productBlock(2, 4, 0, 2, 2, { cornerRadius: 40 }), z: 1 },
     ]),
   },
 ];

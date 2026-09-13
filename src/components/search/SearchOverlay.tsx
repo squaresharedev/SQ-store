@@ -7,14 +7,18 @@ import {
   LayoutGrid,
   Plus,
   Receipt,
-  Search as SearchIcon,
   Settings as SettingsIcon,
   Store,
   Users,
-  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { infoTextClass, overlayCloseButtonClass, overlaySurfaceClass, transitionClass } from "@/components/ui/control-styles";
+import { infoTextClass, overlaySurfaceClass } from "@/components/ui/control-styles";
+import {
+  SearchBar,
+  SearchGroupHeading,
+  SearchOption,
+  useActiveOption,
+} from "@/components/search/SearchBar";
 import { useIsMacPlatform } from "@/lib/hooks/useIsMacPlatform";
 import { TYPING_DEBOUNCE_MS } from "@/lib/typing-debounce";
 import { searchLocalRegistry } from "@/lib/search/registry";
@@ -23,7 +27,6 @@ import {
   buildSnapshotGroups,
 } from "@/lib/search/snapshot-groups";
 import {
-  MAX_QUERY_LENGTH,
   MIN_REMOTE_QUERY_LENGTH,
   type SearchApiResponse,
   type SearchGroup,
@@ -158,8 +161,6 @@ export function SearchOverlay({
   const [query, setQuery] = React.useState("");
   const [remoteGroups, setRemoteGroups] = React.useState<SearchGroup[]>([]);
   const [remoteStatus, setRemoteStatus] = React.useState<RemoteStatus>("idle");
-  /** The row the user arrowed or hovered onto. See `activeId` below. */
-  const [chosenId, setChosenId] = React.useState<string | null>(null);
   // Same hook the trigger uses, so its ⌘K/Ctrl K chip and this one never
   // disagree about which platform they're on.
   const isMac = useIsMacPlatform();
@@ -212,6 +213,17 @@ export function SearchOverlay({
     () => groups.flatMap((group) => group.results),
     [groups],
   );
+
+  // The highlighted row: derived against the live list rather than stored, so
+  // results changing on every keystroke (and again when the remote half lands)
+  // can never leave aria-activedescendant naming a row that is gone. Shared
+  // with the storefront editor's field; see useActiveOption.
+  const ids = React.useMemo(() => flat.map((result) => result.id), [flat]);
+  const {
+    activeId,
+    choose: setChosenId,
+    move: moveActive,
+  } = useActiveOption(ids, optionId);
 
   // ---- remote half ------------------------------------------------------
 
@@ -398,38 +410,6 @@ export function SearchOverlay({
     return () => window.removeEventListener("resize", update);
   }, [open, anchorsRef]);
 
-  // ---- active option ----------------------------------------------------
-
-  // The highlight is DERIVED, not stored: state holds only what the user
-  // chose with the arrow keys, and the row actually highlighted is that choice
-  // if it still exists, else the first result.
-  //
-  // Storing it directly and reconciling in an effect is the obvious version and
-  // the wrong one — results change on every keystroke and again when the remote
-  // half lands, so there is always a frame where aria-activedescendant points
-  // at a row that is no longer rendered, which is a dangling reference for a
-  // screen reader. Deriving makes that state unrepresentable.
-  const activeId =
-    chosenId && flat.some((result) => result.id === chosenId)
-      ? chosenId
-      : (flat[0]?.id ?? null);
-
-  const moveActive = React.useCallback(
-    (delta: 1 | -1) => {
-      if (flat.length === 0) return;
-      const index = flat.findIndex((result) => result.id === activeId);
-      const next = flat[(index + delta + flat.length) % flat.length];
-      if (!next) return;
-      setChosenId(next.id);
-      // getElementById rather than a selector: ids here embed a useId value and
-      // a row id, and neither is guaranteed to be a valid CSS identifier.
-      document
-        .getElementById(optionId(next.id))
-        ?.scrollIntoView({ block: "nearest" });
-    },
-    [activeId, flat, optionId],
-  );
-
   const activate = React.useCallback(
     (result: SearchResult) => {
       if (!result.href) return;
@@ -579,114 +559,51 @@ export function SearchOverlay({
             h-9, same border, same padding, same text size — so covering it is
             invisible and the expansion reads as that bar getting wider, never
             as a new control appearing. Sheet/fallback: the roomier row. */}
-        <div
-          className={
-            anchored
-              ? "flex h-9 shrink-0 items-center gap-2 rounded-none border border-input bg-background px-3"
-              : "flex shrink-0 items-center gap-2 border-b border-border px-4 py-3"
-          }
-        >
-          <SearchIcon
-            className="size-4 shrink-0 text-muted-foreground"
-            aria-hidden
-          />
-          <input
-            ref={inputRef}
-            type="text"
-            role="combobox"
-            aria-label="Search"
-            aria-autocomplete="list"
-            aria-expanded={count > 0}
-            // Only while the listbox actually exists — see the results block.
-            aria-controls={count > 0 ? listboxId : undefined}
-            aria-activedescendant={activeId ? optionId(activeId) : undefined}
-            autoComplete="off"
-            autoCorrect="off"
-            autoCapitalize="off"
-            spellCheck={false}
-            placeholder="Search products, orders, settings…"
-            // THE CHARACTER LIMIT, in both forms on purpose.
-            //
-            // `maxLength` is the affordance: the browser refuses the 101st
-            // character and clamps a paste, so the field behaves like a bounded
-            // field rather than accepting text that will be rejected later.
-            // The slice is the ENFORCEMENT, because maxLength is not applied to
-            // every path that can set a value (an IME composition commits past
-            // it in some browsers) and this is the value the request is built
-            // from.
-            //
-            // It matters beyond tidiness. The server rejects anything over
-            // MAX_QUERY_LENGTH with a 400, which the fetch below maps to
-            // `error` — so without a client bound, a long paste reported "Can't
-            // reach the server" for a query that reached it fine. It also
-            // bounds the per-keystroke local work: the registry and snapshot
-            // matchers NFD-normalise the term against every cached entity name
-            // in the same render as the keystroke, which a pasted megabyte
-            // turns into a frozen tab.
-            maxLength={MAX_QUERY_LENGTH}
-            value={query}
-            onChange={(event) =>
-              setQuery(event.target.value.slice(0, MAX_QUERY_LENGTH))
-            }
-            onKeyDown={onKeyDown}
-            // Sheet: text-base, NOT text-sm — anything under 16px makes iOS
-            // Safari zoom the page on focus. Anchored (desktop-only): text-sm,
-            // matching the trigger this bar impersonates.
-            className={cn(
-              "min-w-0 flex-1 bg-transparent text-foreground outline-none placeholder:text-muted-foreground",
-              anchored ? "text-sm" : "text-base",
-            )}
-          />
-          {/* ONE X, with Escape's exact semantics: clears while there is
-              text, closes once there isn't. Two side-by-side X buttons (a
-              field-clear and a sheet-close) read as a coin toss on mobile —
-              this way every press of the only X does the obvious next step,
-              and keyboard (Esc) and touch behave identically. On desktop it
-              exists only while there is text, purely as the field-clear
-              (closing is Esc / a click outside). */}
-          <button
-            type="button"
-            aria-label={query ? "Clear search" : "Close search"}
-            // Keep focus in the input: a blur here would collapse the combobox.
-            onMouseDown={(event) => event.preventDefault()}
-            onClick={() => {
+        <SearchBar
+          variant={anchored ? "bar" : "sheet"}
+          inputRef={inputRef}
+          value={query}
+          onValueChange={setQuery}
+          onKeyDown={onKeyDown}
+          label="Search"
+          placeholder="Search products, orders, settings…"
+          listboxId={listboxId}
+          expanded={count > 0}
+          activeDescendant={activeId ? optionId(activeId) : undefined}
+          // ONE X, with Escape's exact semantics: clears while there is text,
+          // closes once there isn't. Two side-by-side X buttons (a field-clear
+          // and a sheet-close) read as a coin toss on mobile, so every press of
+          // the only X does the obvious next step, and keyboard (Esc) and touch
+          // behave identically. On desktop it exists only while there is text,
+          // purely as the field-clear (closing is Esc / a click outside).
+          clear={{
+            label: query ? "Clear search" : "Close search",
+            onPress: () => {
               if (query) {
                 setQuery("");
                 inputRef.current?.focus();
               } else {
                 onClose();
               }
-            }}
-            className={cn(
-              overlayCloseButtonClass,
-              // The shared size-9 X in the roomy sheet row; a size-8 inside
-              // the anchored h-9 bar so it sits inset like a field affordance
-              // rather than flush to the borders.
-              anchored && "size-8",
-              // Empty + desktop = nothing to clear and Esc closes: hidden.
-              query ? "flex" : "flex sm:hidden",
-            )}
-          >
-            <X className={anchored ? "size-4" : "size-5"} aria-hidden />
-          </button>
-          {/* The trigger's own ⌘K/Ctrl K chip, carried into the bar it became
-              — Ctrl+K still closes from here (the provider's listener is on
-              `document`, capture phase, so it fires whether or not this input
-              has focus), and the chip is the reminder of that. It disappears
-              the moment there is something to type instead of a shortcut to
-              reach for, and never existed for touch (no keyboard, no reason
-              for the hint). `hidden sm:flex`, like the input's own text-sm
-              step, applies whether the panel actually anchored or fell back
-              to the centred desktop layout. */}
-          {!query && isMac !== null && (
-            <kbd
-              aria-hidden
-              className="hidden shrink-0 rounded-none border border-border bg-muted px-1.5 py-0.5 font-inter text-[0.6875rem] leading-none text-muted-foreground sm:flex"
-            >
-              {isMac ? "⌘K" : "Ctrl K"}
-            </kbd>
-          )}
-        </div>
+            },
+            className: query ? "flex" : "flex sm:hidden",
+          }}
+          // The trigger's own ⌘K/Ctrl K chip, carried into the bar it became:
+          // Ctrl+K still closes from here (the provider's listener is on
+          // `document`, capture phase), and the chip is the reminder of that.
+          // It disappears the moment there is something to type instead, and
+          // never existed for touch (no keyboard, no reason for the hint).
+          trailing={
+            !query && isMac !== null ? (
+              <kbd
+                aria-hidden
+                className="hidden shrink-0 rounded-none border border-border bg-muted px-1.5 py-0.5 font-inter text-[0.6875rem] leading-none text-muted-foreground sm:flex"
+              >
+                {isMac ? "⌘K" : "Ctrl K"}
+              </kbd>
+            ) : null
+          }
+        />
 
         {/* Results. `overflow-y-auto` + `flex-1` gives the scrolling body.
 
@@ -815,64 +732,26 @@ function SearchResultGroup({
   const headingId = React.useId();
   return (
     <div role="group" aria-labelledby={headingId}>
-      <p
-        id={headingId}
-        className="px-4 pb-1 pt-3 font-inter text-xs font-medium uppercase tracking-wide text-muted-foreground"
-      >
-        {group.label}
-      </p>
-      {group.results.map((result) => {
-        const Icon = ICONS[result.type];
-        const active = result.id === activeId;
-        return (
-          <div
-            key={result.id}
-            id={optionId(result.id)}
-            role="option"
-            aria-selected={active}
-            // Keep focus in the input when clicking a row, or the combobox
-            // collapses before the click lands.
-            //
-            // MOUSE ONLY, and that is not a detail: preventing the default on a
-            // TOUCH pointerdown also suppresses the synthesized click, so every
-            // tap on a phone silently did nothing. Guarding on pointerType
-            // keeps the desktop behaviour and gives touch its click back.
-            onPointerDown={(event) => {
-              if (event.pointerType === "mouse") event.preventDefault();
-            }}
-            onClick={() => onActivate(result)}
-            onMouseMove={() => onHover(result.id)}
-            className={cn(
-              // min-h-11 keeps every row at a 44px touch target on mobile.
-              "flex min-h-11 cursor-pointer items-center gap-3 px-4 py-2",
-              transitionClass,
-              active ? "bg-accent" : "hover:bg-accent/50",
-            )}
-          >
-            <Icon
-              className={cn(
-                "size-4 shrink-0",
-                active ? "text-foreground" : "text-muted-foreground",
-              )}
-            />
-            <span className="min-w-0 flex-1">
-              <span className="block truncate text-sm text-foreground">
-                {result.title}
-              </span>
-              {result.subtitle && (
-                <span className="block truncate font-inter text-xs text-muted-foreground">
-                  {result.subtitle}
-                </span>
-              )}
-            </span>
-            {result.badge && (
+      <SearchGroupHeading id={headingId} label={group.label} />
+      {group.results.map((result) => (
+        <SearchOption
+          key={result.id}
+          id={optionId(result.id)}
+          active={result.id === activeId}
+          icon={ICONS[result.type]}
+          title={result.title}
+          subtitle={result.subtitle}
+          trailing={
+            result.badge ? (
               <span className="shrink-0 rounded-full border border-border bg-muted px-1.5 py-px font-inter text-[0.6875rem] font-medium capitalize text-muted-foreground">
                 {result.badge}
               </span>
-            )}
-          </div>
-        );
-      })}
+            ) : null
+          }
+          onPick={() => onActivate(result)}
+          onHover={() => onHover(result.id)}
+        />
+      ))}
     </div>
   );
 }

@@ -30,7 +30,8 @@ const CARD_ACTION_CLASS = iconButtonClass;
  * Applied once to the whole SVG rather than per shape, so the group flattens to
  * a single tint instead of the shapes showing through each other where they
  * overlap. Tuned so a saturated accent lands as a soft wash on white and still
- * carries on the near-black "Luxe" canvas.
+ * carries on a near-black canvas, which a seller can pick even though no
+ * starting look ships one.
  */
 const SHAPE_OPACITY = 0.3;
 
@@ -38,9 +39,9 @@ const SHAPE_OPACITY = 0.3;
  * What a card shows when its storefront would render nothing.
  *
  * It sits OVER the preview rather than replacing it, so the storefront's own
- * canvas still comes through: an empty storefront that picked the dark "Luxe"
- * look should still read as dark here, and a blank grey box would throw away
- * the one thing an empty storefront has already decided.
+ * canvas still comes through: an empty storefront painted dark should still
+ * read as dark here, and a blank grey box would throw away the one thing an
+ * empty storefront has already decided.
  *
  * The decoration is drawn in the storefront's OWN accent, so an empty card
  * still shows something of the seller's taste rather than a stock placeholder,

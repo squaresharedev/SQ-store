@@ -37,6 +37,21 @@ import {
 } from "./TileSpotDragLayer";
 
 /**
+ * How long a finger has to rest on a tile before the press means "add this one
+ * to the selection" rather than "select this one". Long enough that a tap
+ * never trips it and a drag has always started moving first (the grid begins a
+ * move after 4px of travel, which a hand covers in far less than this), short
+ * enough to feel like a gesture rather than a wait — the same 450ms window a
+ * phone's own long-press uses.
+ */
+const HOLD_TO_ADD_MS = 450;
+/** How far a finger may wander during that hold and still be holding. Larger
+ *  than the grid's own 4px drag threshold on purpose: a finger resting on a
+ *  tile is never perfectly still, and cancelling on the first pixel of tremor
+ *  would make the gesture feel broken rather than precise. */
+const HOLD_SLOP_PX = 10;
+
+/**
  * THE FOOTPRINT: the room the block actually takes on the board, outlined
  * faintly while the tile is hovered, focused or selected.
  *
@@ -209,6 +224,41 @@ export const BlockTile = memo(function BlockTile({
   // tile is not mistaken for a select click (the grid starts drags after 4px
   // of travel; a click that traveled further was a drag).
   const pointerDownAt = useRef<{ x: number; y: number } | null>(null);
+  /**
+   * PRESS AND HOLD, WHICH IS HOW A FINGER BUILDS A SELECTION.
+   *
+   * Shift-click is the desktop gesture and a phone has no Shift; the marquee
+   * is mouse and pen only (a touch drag on the board is a pan, see
+   * DesignerCanvas), and the layers list wants a modifier too. So until this,
+   * every multi-selection tool — the group's colour, its stroke, its corners,
+   * its opacity, moving it as one — was simply unreachable on a touchscreen,
+   * however well it worked with a mouse.
+   *
+   * A hold is the idiom every phone already uses for "and this one too"
+   * (Photos, Files, Mail), and it composes with what is already here: the hold
+   * ADDS the tile while the finger is still down, so carrying on into a drag
+   * moves the whole selection in the same gesture. Lifting without moving
+   * leaves the selection standing.
+   *
+   * It costs nothing it was doing before. A tap is a tap (the timer is cleared
+   * on release), a drag is a drag (cleared on the first real travel, so the
+   * hold never fires under a finger that is already moving a tile), and a
+   * mouse press is untouched.
+   */
+  const holdTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** Set when a hold has fired, so the click that follows the finger lifting
+   *  does not toggle the very block the hold just added back out. */
+  const heldRef = useRef(false);
+
+  function cancelHold() {
+    if (holdTimer.current === null) return;
+    clearTimeout(holdTimer.current);
+    holdTimer.current = null;
+  }
+
+  // A tile can unmount mid-press (an undo, a delete from elsewhere); the timer
+  // must not outlive it and toggle a selection for a block that is gone.
+  useEffect(() => cancelHold, []);
   // The framed picture itself, so the framer can read its intrinsic size.
   const imageRef = useRef<HTMLImageElement | null>(null);
   // The tile's own box, which is what a spot drag measures against.
@@ -425,6 +475,13 @@ export const BlockTile = memo(function BlockTile({
     // Presses on the tile's own controls (remove, etc.) keep their own
     // click behavior.
     if ((event.target as HTMLElement).closest("button")) return;
+    // A hold has already said what this press meant. Letting the click that
+    // follows the finger lifting through would toggle the tile straight back
+    // out of the selection the hold just put it in.
+    if (heldRef.current) {
+      heldRef.current = false;
+      return;
+    }
     // The second click of a double-click carries detail 2. Letting it through
     // would toggle the selection straight back off under the dblclick that is
     // about to open frame mode.
@@ -484,12 +541,12 @@ export const BlockTile = memo(function BlockTile({
       // focus back here, so the canvas keys (arrows, Delete) resume.
       data-block-tile=""
       // THE ONE THING THE GRID NEEDS TO KNOW about selection, and the reason
-      // it is an attribute rather than a prop: a cell whose controls are out
-      // has to be lifted clear of its neighbours (CHROME_Z), and the controls
-      // hang outside the cell, so the lift belongs to the cell rather than to
-      // anything React renders inside it. `:has()` in globals.css reads this,
-      // and so do the handles' own `group-has-` variants, so there is no
-      // plumbing and the grid stays presentation-agnostic.
+      // it is an attribute rather than a prop: a selected tile keeps its
+      // resize and rotate handles out, and those are drawn in the cell's chrome
+      // layer (a sibling of the cell, see Grid), so what reveals them has to
+      // be CSS rather than anything React renders inside this tile. `:has()`
+      // in globals.css reads this, so there is no plumbing and the grid stays
+      // presentation-agnostic.
       data-block-selected={isEditing ? "" : undefined}
       // PLT-02: Plain focusable container, NOT role="button", so nested
       // buttons (Remove, Frame, Type, page node) are not interactive-in-
@@ -510,9 +567,37 @@ export const BlockTile = memo(function BlockTile({
         selectable
           ? (event) => {
               pointerDownAt.current = { x: event.clientX, y: event.clientY };
+              heldRef.current = false;
+              cancelHold();
+              // Touch only. A mouse has Shift, and a slow mouse press that
+              // silently changed the selection would be a trap.
+              if (event.pointerType !== "touch") return;
+              holdTimer.current = setTimeout(() => {
+                holdTimer.current = null;
+                heldRef.current = true;
+                onToggleEdit?.(blockKey, true);
+              }, HOLD_TO_ADD_MS);
             }
           : undefined
       }
+      // The two ways a hold stops being a hold: the finger moved (this is a
+      // drag, and the tile is already following it), or it left.
+      onPointerMove={
+        selectable
+          ? (event) => {
+              const down = pointerDownAt.current;
+              if (!down || holdTimer.current === null) return;
+              if (
+                Math.hypot(event.clientX - down.x, event.clientY - down.y) >
+                HOLD_SLOP_PX
+              ) {
+                cancelHold();
+              }
+            }
+          : undefined
+      }
+      onPointerUp={selectable ? cancelHold : undefined}
+      onPointerCancel={selectable ? cancelHold : undefined}
       onClick={selectable ? handleClick : undefined}
       onDoubleClick={framable || (typable && !isTyping) ? handleDoubleClick : undefined}
       onKeyDown={selectable ? handleKeyDown : undefined}
@@ -607,7 +692,11 @@ export const BlockTile = memo(function BlockTile({
         />
       )}
 
-      <div className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-[inherit] [contain:paint]">
+      {/* The clip-path is set only on a block that sits UNDER a product on
+          the same cells (see blockTileClipStyle): it pulls this face in just
+          past the product's antialiased edge, so no rim of it shows. The
+          variable is unset everywhere else, which leaves no clip-path at all. */}
+      <div className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-[inherit] [contain:paint] [clip-path:var(--tile-cover-clip,none)]">
         <BlockFace
           block={block}
           product={product}

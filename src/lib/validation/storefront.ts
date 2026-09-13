@@ -8,6 +8,7 @@ import {
   uniqueList,
   uuidField,
 } from "@/lib/validation/inputs";
+import { isOnBoard } from "@/lib/geometry/rotated-box";
 import {
   BACKGROUND_IMAGE_SCALE_MAX,
   BACKGROUND_IMAGE_SCALE_MIN,
@@ -17,6 +18,8 @@ import {
   CANVAS_COLUMNS_MIN,
   CANVAS_ROWS_MAX,
   CANVAS_ROWS_MIN,
+  PLACEMENT_X_MIN,
+  PLACEMENT_Y_MIN,
   CORNER_RADIUS_MAX,
   CUSTOM_FONT_NAME_MAX,
   DEFAULT_STOREFRONT_CONFIG,
@@ -160,6 +163,9 @@ const customFontSchema = z.strictObject({
 const titlePlacementFields = {
   titlePosition: z.enum(TILE_SPOTS).optional(),
   titleInset: z.number().int().min(0).max(TITLE_INSET_MAX).optional(),
+  // The `shadow` style's gradient tint. Lives with the band's placement so
+  // it is spread into the theme and the override from the same place.
+  titleShadowColor: hexColorSchema.optional(),
 };
 
 /**
@@ -546,8 +552,11 @@ export const shippingProfilesSchema = z
 // per-field caps here are absolute (canvas maximums); the config-level refine
 // below enforces the tighter, per-storefront bounds and non-overlap.
 const placementFields = {
-  x: z.number().int().min(0).max(CANVAS_COLUMNS_MAX - 1),
-  y: z.number().int().min(0).max(CANVAS_ROWS_MAX - 1),
+  // Negative only for a turned block lying against the top or left edge: its
+  // stored rect starts off the board while what it paints is on it (see
+  // PLACEMENT_X_MIN). The config-level refine below is the exact rule.
+  x: z.number().int().min(PLACEMENT_X_MIN).max(CANVAS_COLUMNS_MAX - 1),
+  y: z.number().int().min(PLACEMENT_Y_MIN).max(CANVAS_ROWS_MAX - 1),
   w: z.number().int().min(1).max(CANVAS_COLUMNS_MAX),
   h: z.number().int().min(1).max(CANVAS_ROWS_MAX),
   // Tilt. Bounded int like every other numeric that reaches a style attribute,
@@ -744,16 +753,19 @@ const configObjectSchema = z
   // there is nothing left for a validator to arbitrate. The check that used to
   // live here would now reject boards the editor is built to produce.
   //
-  // The STORED rect is what is checked, not the painted footprint of a tilted
-  // block. A rotated corner reaching past the edge is a visual matter the
-  // editor already keeps in hand (see clampRotatedBox), and it is not worth a
-  // save the seller cannot complete: at the extreme, a block wider than the
-  // board has no placement that hides its overhang, and refusing that save
-  // would strand the design rather than protect it.
+  // ON THE BOARD is asked per axis, and either rect will do (isOnBoard). The
+  // FOOTPRINT has to count: it is what the seller sees and where a drag lands
+  // a turned block, and a turned bar dragged across the top row stores a rect
+  // that starts above the board, so a stored-rect-only check would refuse a
+  // board the editor is built to produce. The STORED rect has to count too: a
+  // turn never moves a block, so one turned against an edge hangs its corners
+  // past it and must still save. At the extreme, a block longer than the board
+  // has no placement that hides its overhang, and refusing that save would
+  // strand the design rather than protect it.
   .superRefine((config, ctx) => {
     const { columns, rows } = config.theme;
     config.blocks.forEach((block, index) => {
-      if (block.x + block.w > columns || block.y + block.h > rows) {
+      if (!isOnBoard(block, block.rotation ?? 0, columns, rows)) {
         ctx.addIssue({
           code: "custom",
           path: ["blocks", index],

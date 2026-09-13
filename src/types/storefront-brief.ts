@@ -53,16 +53,36 @@ export type StorefrontFulfilment = (typeof STOREFRONT_FULFILMENTS)[number];
  * each vibe maps to a real starting theme in lib/storefront/presets.ts, applied
  * to the config at creation, so the seller lands in a designer that already
  * looks like the tile they picked.
+ *
+ * THREE, not six. The six that came before were six colour schemes: they
+ * differed in canvas, accent and roundness, and every one of them showed the
+ * same tile — name and price printed under the picture, always. Picking between
+ * them was picking a palette, which is a thing the seller can change in two
+ * clicks anyway. These three differ in what a tile SHOWS, which is the decision
+ * a storefront is actually built around and the one that is tedious to arrive
+ * at by hand: a gallery wall that stays out of the way until you point at it, a
+ * shop that labels everything, and a catalogue that always shows the price.
  */
-export const STOREFRONT_VIBES = [
-  "minimal",
-  "warm",
-  "bold",
-  "playful",
-  "luxe",
-  "classic",
-] as const;
+export const STOREFRONT_VIBES = ["minimal", "classic", "bold"] as const;
 export type StorefrontVibe = (typeof STOREFRONT_VIBES)[number];
+
+/**
+ * The looks that existed before the set was cut to three, and the survivor each
+ * one now stands for.
+ *
+ * A brief is stored jsonb, so rows carrying a retired answer outlive the answer
+ * itself. Mapping them (rather than letting the enum reject them) keeps the
+ * rest of an old brief — the category and fulfilment, which are the two the
+ * recommender actually leans on — instead of degrading the whole thing to
+ * nothing over a question we retired. The map is by closest surviving look:
+ * warm and luxe were both soft, serif-ish and fully labelled; playful was the
+ * loud one.
+ */
+export const RETIRED_STOREFRONT_VIBES: Record<string, StorefrontVibe> = {
+  warm: "classic",
+  luxe: "classic",
+  playful: "bold",
+};
 
 /**
  * The stored shape. Note what is NOT here: catalogue size. It is a real

@@ -467,6 +467,27 @@ describe("color target helpers", () => {
     expect(colorTargetBlockKey({ kind: "theme-accent" })).toBeNull();
   });
 
+  /**
+   * A SHAPE REF NAMES ONE BLOCK, on purpose: the one whose colour the panel is
+   * showing. With a whole selection of shapes out, a pick lands on all of them
+   * — but that is read off the live selection where the ref becomes a mutation
+   * (shapeColorKeys in StorefrontDesigner), never written down here, because a
+   * ref outlives the selection that created it.
+   */
+  it("a shape ref stays about the block whose colour is shown", () => {
+    expect(colorTargetBlockKey({ kind: "shape-fill", blockKey: "s_1" })).toBe(
+      "s_1",
+    );
+    expect(colorTargetKey({ kind: "shape-fill", blockKey: "s_1" })).toBe(
+      "shape-fill::s_1",
+    );
+    // Two shapes are two different fields, so the panel remounts moving
+    // between them and its working HSV starts from the right colour.
+    expect(colorTargetKey({ kind: "shape-fill", blockKey: "s_1" })).not.toBe(
+      colorTargetKey({ kind: "shape-fill", blockKey: "s_2" }),
+    );
+  });
+
   it("a shape opens on its fill and a text block on its color", () => {
     const s = shape();
     const t = text();

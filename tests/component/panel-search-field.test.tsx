@@ -315,6 +315,43 @@ describe("PanelSearchField — a narrowed index", () => {
   });
 });
 
+describe("PanelSearchField — scoped to the designer", () => {
+  it("indexes only the storefront, its product page, the canvas and its drawers", () => {
+    // It shares the palette's look and machinery, never its index: orders,
+    // analytics, account settings and pages belong to the top bar.
+    for (const entry of ENTRIES) {
+      expect(["setting", "block", "panel"], entry.id).toContain(entry.payload.kind);
+      if (entry.payload.kind === "setting") {
+        expect(entry.subtitle, entry.id).toMatch(/^Storefront \//);
+      }
+    }
+  });
+
+  it("finds nothing that lives outside the editor", async () => {
+    for (const query of ["orders", "analytics", "password", "invite teammate"]) {
+      cleanup();
+      const { input } = setup();
+      await userEvent.type(input, query);
+      const titles = screen.queryAllByRole("option").map((row) => row.textContent ?? "");
+      expect(titles.join(" | "), query).not.toMatch(/Orders|Analytics|Password|Invite/);
+    }
+  });
+
+  it("clears with its own icon button, not the browser's search glyph", async () => {
+    const { input } = setup();
+    expect(input.getAttribute("type")).toBe("text");
+    expect(screen.queryByRole("button", { name: "Clear search" })).toBeNull();
+
+    await userEvent.type(input, "colour");
+    const clear = screen.getByRole("button", { name: "Clear search" });
+    expect(clear.querySelector("svg")).toBeTruthy();
+    await userEvent.click(clear);
+    expect((input as HTMLInputElement).value).toBe("");
+    expect(screen.queryAllByRole("option")).toHaveLength(0);
+    expect(document.activeElement).toBe(input);
+  });
+});
+
 describe("PanelSearchField — driving it from the keyboard", () => {
   it("opens the first match on Enter without ever leaving the input", async () => {
     // Before this the rows were reachable by Tab alone, so typing a query and

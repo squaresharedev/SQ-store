@@ -3,20 +3,28 @@ import type { GridPlacement } from "@/components/grid/gridConstants";
 import {
   contrastRatio,
   MIN_LEGIBLE_CONTRAST,
+  mixHex,
   readableInkOn,
 } from "@/lib/format/color";
+import { isStrictHexColor } from "@/lib/validation/storefront";
 import {
   PRICE_TAG_DEFAULT_BORDER,
+  TITLE_SHADOW_DEFAULT_COLOR,
   PRICE_TAG_SIZE_MIN,
   TILE_LABEL_AUTO_SCALE,
   TILE_TITLE_SIZE,
   TILE_TITLE_SIZE_MIN,
   TITLE_INSET_AUTO,
+  blockCornerRadius,
+  blockKey,
   type PriceTagFont,
   type SpotRow,
+  type StorefrontBlock,
   type StorefrontFont,
+  type StorefrontTheme,
   type TextAlign,
   type TextVariant,
+  type TileCover,
   type TileSpot,
 } from "@/types/storefront";
 
@@ -74,11 +82,67 @@ export function scaledCornerRadius(
  * clip has eaten — see {@link titleBandStyle}. Descendants inherit the
  * variable, so no renderer has to be handed the tile's span.
  */
-export function tileClipStyle(radius: number): CSSProperties {
+export function tileClipStyle(radius: number, coverInset = 0): CSSProperties {
   return {
     borderRadius: `${radius}px`,
     "--tile-radius": `${radius}px`,
+    // Read by BlockTile's face. Inset rounds by the radius LESS the inset, the
+    // curve that runs parallel to the tile's own, and CSS clamps an oversized
+    // one the same way it clamps the border-radius above.
+    ...(coverInset > 0
+      ? {
+          "--tile-cover-clip": `inset(${coverInset}px round ${Math.max(0, radius - coverInset)}px)`,
+        }
+      : {}),
   } as CSSProperties;
+}
+
+/**
+ * How far a covered block's face pulls in from the edge it shares with the
+ * product on top of it, in px.
+ *
+ * An antialiased edge is about one device pixel wide, and the face only stays
+ * hidden if its own soft edge lies wholly inside the product's solid one. Two
+ * rather than one because the designer's zoom is a transform: at 50% a CSS px
+ * is half a device pixel. Invisible either way while the product is on top,
+ * and the inset is dropped the moment it is not (see blockTileClipStyle).
+ */
+export const TILE_COVER_INSET_PX = 2;
+
+/**
+ * The clip one block's cell wears, including what it borrows from a product
+ * stacked on top of it (see tileCovers).
+ *
+ * A covered block is rounded at least as much as the ROUNDEST-cornered cover
+ * would still hide, which is the least round of them: a sharp square under a
+ * card rounded past the theme no longer shows its corners. It never gets
+ * sharper than its own setting. Its face is also pulled in by
+ * TILE_COVER_INSET_PX, which is what hides the rim matching corners leak.
+ *
+ * `gestureKeys` keeps that honest mid-gesture. Placements stay committed while
+ * a tile is dragged, resized or turned, so a cover that is on its way
+ * somewhere else is ignored until it lands; a cover moving WITH the block (one
+ * group move carrying both) still covers it.
+ */
+export function blockTileClipStyle(
+  theme: StorefrontTheme,
+  block: StorefrontBlock,
+  placement: Pick<GridPlacement, "w" | "h">,
+  covers: readonly TileCover[] | undefined,
+  gestureKeys?: ReadonlySet<string>,
+): CSSProperties {
+  const own = blockCornerRadius(theme, block);
+  const moving = gestureKeys?.has(blockKey(block)) ?? false;
+  let cover: number | null = null;
+  for (const entry of covers ?? []) {
+    if ((gestureKeys?.has(entry.key) ?? false) !== moving) continue;
+    cover = cover === null ? entry.cornerRadius : Math.min(cover, entry.cornerRadius);
+  }
+  if (cover === null) return tileClipStyle(scaledCornerRadius(own, placement));
+  return tileClipStyle(
+    scaledCornerRadius(Math.max(own, cover), placement),
+    TILE_COVER_INSET_PX,
+  );
 }
 
 // Tile spot -> absolute placement over the image area. Center spots translate
@@ -160,15 +224,58 @@ export const TITLE_BAND_ROW_CLASSES: Record<SpotRow, string> = {
 };
 
 /**
- * The `shadow` style's gradient, per row: it always fades AWAY from the edge
- * the words sit against, so the type keeps its dark backing wherever the band
- * is. The middle band has no edge to lean on, so it fades out both ways.
+ * The `shadow` style's room to fade, per row: the gradient needs space beyond
+ * the words to reach transparent. The gradient itself is inline (see
+ * titleShadowStyle), because its color is the seller's.
  */
 export const TITLE_BAND_SHADOW_CLASSES: Record<SpotRow, string> = {
-  top: "bg-gradient-to-b from-black/70 via-black/35 to-transparent pb-8",
-  middle: "bg-gradient-to-b from-transparent via-black/55 to-transparent py-4",
-  bottom: "bg-gradient-to-t from-black/70 via-black/35 to-transparent pt-8",
+  top: "pb-8",
+  middle: "py-4",
+  bottom: "pt-8",
 };
+
+/** The stored shade, gated on the way out: it lands in a style attribute. */
+function titleShadowColor(color: string | undefined): string {
+  const lower = (color ?? "").toLowerCase();
+  return isStrictHexColor(lower) ? lower : TITLE_SHADOW_DEFAULT_COLOR;
+}
+
+/**
+ * The `shadow` style's gradient, per row, tinted with the seller's color: it
+ * always fades AWAY from the edge the words sit against, so the type keeps its
+ * backing wherever the band is. The middle band has no edge to lean on, so it
+ * fades out both ways. The alphas (70%, 35%, 55%) are the ones the black
+ * gradient always used, so an unset color renders exactly as before.
+ */
+export function titleShadowStyle(
+  row: SpotRow,
+  color: string | undefined,
+): CSSProperties {
+  const hex = titleShadowColor(color);
+  const clear = `${hex}00`;
+  return {
+    backgroundImage:
+      row === "middle"
+        ? `linear-gradient(to bottom, ${clear}, ${hex}8c, ${clear})`
+        : `linear-gradient(to ${row === "top" ? "bottom" : "top"}, ${hex}b3, ${hex}59, ${clear})`,
+  };
+}
+
+/** What the words on a `shadow` band print in: white on a dark shade, dark on
+ *  a light one, so a seller picking a pale fade never loses the name in it. */
+export function titleShadowInk(color: string | undefined): string {
+  return readableInkOn(titleShadowColor(color));
+}
+
+/**
+ * What a `shadow` band puts behind an unfilled price, for the legibility
+ * floor: the shade lifted toward grey, since the gradient is only 70% opaque
+ * over a photo. For the default black this is #3d3d3d, the value the check
+ * always used.
+ */
+export function titleShadowBackdrop(color: string | undefined): string {
+  return mixHex(titleShadowColor(color), "#cccccc", 0.3);
+}
 
 /**
  * Inline style driving the shared --grid-gap token (see .ss-grid in
@@ -181,14 +288,10 @@ export function gridGapStyle(gridGap: number): CSSProperties {
 }
 
 
-export const TEXT_VARIANT_CLASSES: Record<TextVariant, string> = {
-  heading: "text-xl font-semibold sm:text-2xl",
-  subheading: "text-base font-medium",
-  body: "text-sm",
-};
-
-// Split variant treatment for blocks with an explicit fontSize: the override
-// replaces the variant's SIZE while the variant keeps supplying its weight.
+// A block's size is always an explicit px value now (see textSizeStyle and
+// TextTileContent's auto-fit sizing), so this only ever supplies the WEIGHT —
+// a text-* class alongside it would fight the inline value it can't measure
+// against.
 export const TEXT_VARIANT_WEIGHT_CLASSES: Record<TextVariant, string> = {
   heading: "font-semibold",
   subheading: "font-medium",

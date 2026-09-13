@@ -1,13 +1,22 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
+  CHROME_Z,
+  EMPTY_CELL_Z,
+  FRAME_Z,
+  GESTURE_Z,
+  LAYER_Z_CEILING,
   MIN_CELL_PX,
   MIN_REFLOW_COLUMNS,
+  OVERLAY_Z,
+  SELECTED_CHROME_Z,
   blockFootprint,
   clampToCanvas,
   columnsThatFit,
   findFreeCell,
   invertReflowResize,
-  liftableChromeKeys,
+  layerZIndex,
   packFirstFit,
   placementIsFree,
   placementsOverlap,
@@ -344,81 +353,35 @@ describe("reflowBlocks", () => {
   });
 });
 
-describe("liftableChromeKeys", () => {
-  /** A block at a depth: `z` is the paint order the designer resolves. */
-  const layered = (
-    key: string,
-    z: number,
-    x: number,
-    y: number,
-    w = 1,
-    h = 1,
-  ): GridBlock<null> => ({ key, data: null, x, y, w, h, z });
-
-  it("lifts everything on a board where nothing overlaps", () => {
-    // The case the lift was written for: tiles side by side, chrome hanging
-    // into the gap. Raising any of them is invisible, so all of them may.
-    const blocks = [
-      layered("a", 0, 0, 0, 2, 2),
-      layered("b", 1, 2, 0, 2, 2),
-      layered("c", 2, 0, 2, 2, 2),
-    ];
-    expect(liftableChromeKeys(blocks)).toEqual(new Set(["a", "b", "c"]));
+describe("paint bands", () => {
+  it("draws a tile's chrome above everything a block can paint at", () => {
+    // The whole contract of the chrome layer: however deep a board is stacked,
+    // whatever is being dragged or framed, the handles are drawn over it.
+    expect(layerZIndex(Number.MAX_SAFE_INTEGER)).toBe(LAYER_Z_CEILING);
+    expect(CHROME_Z).toBeGreaterThan(LAYER_Z_CEILING);
+    expect(CHROME_Z).toBeGreaterThan(GESTURE_Z);
+    expect(CHROME_Z).toBeGreaterThan(FRAME_Z);
+    expect(EMPTY_CELL_Z).toBeLessThan(layerZIndex(0));
   });
 
-  it("withholds the lift from a block something in front overlaps", () => {
-    // The reported bug: a shape at the back under two products. Lifting it
-    // would paint it over the very tiles covering it.
-    const blocks = [
-      layered("shape", 0, 0, 1, 5, 3),
-      layered("lamp", 1, 0, 0, 2, 2),
-      layered("stool", 2, 3, 0, 2, 2),
-    ];
-    expect(liftableChromeKeys(blocks)).toEqual(new Set(["lamp", "stool"]));
+  it("puts the selection's chrome over a merely hovered tile's", () => {
+    // Two blocks stacked on the same cells hang their handles in the same
+    // place; the one being worked on has to be the one that takes the press.
+    expect(SELECTED_CHROME_Z).toBeGreaterThan(CHROME_Z);
+    // Still under the editor overlays (the marquee band, snap guides).
+    expect(OVERLAY_Z).toBeGreaterThan(SELECTED_CHROME_Z);
   });
 
-  it("still lifts a block that overlaps only things BEHIND it", () => {
-    // Nothing it could be painted over: it is already in front of the block
-    // it covers, so raising it changes nothing on screen.
-    const blocks = [
-      layered("back", 0, 0, 0, 3, 3),
-      layered("front", 1, 1, 1, 2, 2),
-    ];
-    expect(liftableChromeKeys(blocks)).toEqual(new Set(["front"]));
-  });
-
-  it("touching edges is not overlapping, so both still lift", () => {
-    const blocks = [layered("a", 0, 0, 0, 2, 2), layered("b", 1, 2, 0, 2, 2)];
-    expect(liftableChromeKeys(blocks)).toEqual(new Set(["a", "b"]));
-  });
-
-  it("falls back to array order when no block states a depth", () => {
-    // An unlayered board paints in document order, so the LATER block is the
-    // one in front and the earlier one must not lift over it.
-    const blocks = [block("first", 0, 0, 2, 2), block("second", 1, 1, 2, 2)];
-    expect(liftableChromeKeys(blocks)).toEqual(new Set(["second"]));
-  });
-
-  it("reads a turned block where it PAINTS, not where it is placed", () => {
-    // A quarter-turned 1x3 bar lies across 3x1. It reaches the tile beside it
-    // even though their stored rects never meet, so the one behind it is
-    // buried by it in fact as well as on screen.
-    const bar: GridBlock<null> = {
-      key: "bar",
-      data: null,
-      x: 2,
-      y: 0,
-      w: 1,
-      h: 3,
-      z: 1,
-      rotation: 90,
-    };
-    const under = layered("under", 0, 0, 1, 2, 1);
-    expect(liftableChromeKeys([under, bar])).toEqual(new Set(["bar"]));
-  });
-
-  it("says nothing about an empty board", () => {
-    expect(liftableChromeKeys([])).toEqual(new Set());
+  it("is mirrored exactly in globals.css", () => {
+    // The chrome rules have to live in CSS (hover and selection are states the
+    // grid never re-renders for), so the numbers are written twice.
+    const css = readFileSync(resolve(process.cwd(), "src/app/globals.css"), "utf8");
+    const base = css.match(/\.ss-grid\s*>\s*\[data-grid-chrome\]\s*\{[^}]*z-index:\s*(\d+)/);
+    const selected = css.match(
+      /\[data-block-selected\]\s*\)\s*\+\s*\[data-grid-chrome\]\s*\{[^}]*z-index:\s*(\d+)/,
+    );
+    expect(Number(base?.[1])).toBe(CHROME_Z);
+    expect(Number(selected?.[1])).toBe(SELECTED_CHROME_Z);
   });
 });
 

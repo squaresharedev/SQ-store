@@ -1,6 +1,10 @@
 import { expect, type Page } from "@playwright/test";
 import { ANON_KEY, GATEWAY_URL, SERVICE_KEY } from "./stack/keys.mjs";
 
+/** The app under test. Mirrors playwright.config.ts's baseURL, for the few
+ *  helpers that fetch it directly rather than through a page. */
+const APP_URL = "http://localhost:3100";
+
 let counter = 0;
 
 /**
@@ -359,19 +363,61 @@ export async function seedSellerIdentity(
     vatId?: string;
     country?: string;
     phone?: string;
+    /**
+     * Whether the contact address counts as PROVEN. Defaults to true whenever
+     * an address is seeded: a spec that seeds a seller is describing one who
+     * has finished onboarding, and the confirmation round trip itself is
+     * 50-publish-gate.spec.ts's subject, not a tax every other spec pays.
+     * Pass false to seed a seller who has typed an address but not clicked
+     * the link.
+     */
+    emailVerified?: boolean;
   },
 ) {
+  const verified = seller.email ? (seller.emailVerified ?? true) : false;
   await serviceRest(`/profiles?id=eq.${ownerId}`, {
     method: "PATCH",
     body: {
       tax_business_name: seller.businessName ?? null,
       seller_address: seller.address ?? null,
       seller_email: seller.email ?? null,
+      seller_email_verified_at: verified ? new Date().toISOString() : null,
       tax_vat_id: seller.vatId ?? null,
       tax_country: seller.country ?? null,
       seller_phone: seller.phone ?? null,
     },
   });
+}
+
+/** The dev outbox (app/dev/emails): what the app would have emailed. */
+export async function devEmails(to: string): Promise<
+  { to: string; subject: string; text: string; at: string }[]
+> {
+  const res = await fetch(`${APP_URL}/dev/emails?to=${encodeURIComponent(to)}`, {
+    headers: { "cache-control": "no-cache" },
+  });
+  expect(res.ok, `/dev/emails -> ${res.status}`).toBe(true);
+  const body = (await res.json()) as {
+    emails: { to: string; subject: string; text: string; at: string }[];
+  };
+  return body.emails;
+}
+
+/**
+ * The confirmation link the app just "sent" to `to`, as a path.
+ *
+ * Polls, because the send happens inside the server action that the click
+ * returned from and the spec can reach the outbox before the action finishes
+ * writing to it.
+ */
+export async function verificationLink(to: string): Promise<string> {
+  let link: string | undefined;
+  await expect(async () => {
+    const [latest] = await devEmails(to);
+    link = latest?.text.match(/https?:\/\/\S*\/settings\/verify-seller-email\?token=[0-9a-f]{64}/)?.[0];
+    expect(link, `no confirmation email for ${to}`).toBeTruthy();
+  }).toPass({ timeout: 15_000 });
+  return new URL(link!).pathname + new URL(link!).search;
 }
 
 /**

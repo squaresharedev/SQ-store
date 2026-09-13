@@ -34,6 +34,9 @@ import {
   priceTagInsetStyle,
   titleBandFontStyle,
   titleBandStyle,
+  titleShadowBackdrop,
+  titleShadowInk,
+  titleShadowStyle,
 } from "./config-maps";
 import {
   tileSpotTokenLabel,
@@ -65,10 +68,6 @@ function hoverDurationStyle(ms: number): CSSProperties {
   return { transitionDuration: `${ms}ms` };
 }
 
-/** What a `shadow` title band puts behind the price: a gradient, dark by
- *  construction, standing in for the legibility check as the darkest thing
- *  the price could be printed on there. */
-const SHADOW_BAND_BACKDROP = "#3d3d3d";
 /** The info bar's own surface (`bg-card`), which is what an unfilled chip in
  *  a `bar` or `overlay` band is actually read against. */
 const CARD_SURFACE = "#ffffff";
@@ -90,7 +89,9 @@ const CARD_SURFACE = "#ffffff";
 function priceBackdrop(card: CardStyle, position: PriceTagPosition): string {
   const fill = card.priceTagColor ?? defaultPriceTagFill(position);
   if (fill !== "transparent") return fill;
-  return card.titleStyle === "shadow" ? SHADOW_BAND_BACKDROP : CARD_SURFACE;
+  return card.titleStyle === "shadow"
+    ? titleShadowBackdrop(card.titleShadowColor)
+    : CARD_SURFACE;
 }
 
 /**
@@ -172,6 +173,7 @@ export function ProductTileContent({
   // own, above or below it.
   const overlaid = titleOverlaysImage(card.titleStyle);
   const shadowArea = card.titleStyle === "shadow";
+  const shadowInk = titleShadowInk(card.titleShadowColor);
   const titleHover = card.titleDisplay === "hover";
 
   // "hidden" position is the single hide switch (legacy priceDisplay "never"
@@ -298,6 +300,7 @@ export function ProductTileContent({
         ...titleBandStyle(card.titleInset),
         ...titleBandFontStyle(),
         ...hoverDurationStyle(card.titleHoverMs),
+        ...(shadowArea && titleShadowStyle(titleRow, card.titleShadowColor)),
       }}
       className={cn(
         "flex items-baseline justify-between gap-2 py-1.5",
@@ -331,9 +334,15 @@ export function ProductTileContent({
             // with the tile (titleBandFontStyle).
             "min-w-0 flex-1 truncate font-medium",
             TEXT_ALIGN_CLASSES[spotColumn(titleSpot)],
-            shadowArea ? "text-white drop-shadow-sm" : "text-foreground",
+            // On a shadow the ink follows the shade's lightness (inline, since
+            // the shade is a seller hex that no theme token tracks); the drop
+            // shadow only helps white words, and muddies dark ones.
+            shadowArea
+              ? shadowInk === "#ffffff" && "drop-shadow-sm"
+              : "text-foreground",
             titleToken?.className,
           )}
+          style={shadowArea ? { color: shadowInk } : undefined}
         >
           {product.title}
         </span>

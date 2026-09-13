@@ -49,6 +49,12 @@ const REGISTRY: Record<string, Classification> = {
   "lib/settings/actions.ts::changePassword": limited(),
   "lib/settings/actions.ts::sendPasswordReset": limited(),
   "lib/settings/actions.ts::saveTaxInfo": limited(),
+  // Its OWN budget, tighter than settingsWrite (sellerEmailVerifySend): this
+  // is the one control in Settings that makes the platform send mail on
+  // demand. The recipient is read from the stored profile, never from the
+  // request, so it cannot be aimed — but an unbounded resend would still be a
+  // way to hammer one address.
+  "lib/settings/actions.ts::resendSellerEmailVerification": limited(),
   // Its own module because it writes a jsonb document rather than columns, but
   // the same budget as every other settings write: a signed-in seller editing
   // their own row.

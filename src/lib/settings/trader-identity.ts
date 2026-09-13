@@ -32,7 +32,23 @@
 import type { StorefrontSeller } from "@/types/storefront";
 
 /** The fields that block publishing while they are empty. */
-export type TraderIdentityField = "businessName" | "address" | "email";
+export type TraderIdentityField =
+  | "businessName"
+  | "address"
+  | "email"
+  | "emailVerified";
+
+/**
+ * What the gate is asked about: the buyer-facing identity, plus whether the
+ * contact address has actually been proven.
+ *
+ * `emailVerified` is separate from the identity itself because it is NOT
+ * something a buyer sees — it is a fact about the account, and letting it into
+ * `StorefrontSeller` would put it one careless spread away from a product page.
+ */
+export type TraderIdentityInput = StorefrontSeller & {
+  emailVerified?: boolean;
+};
 
 /** Where a seller fills these in. Every warning links here. */
 export const TRADER_IDENTITY_HREF = "/settings/tax";
@@ -67,6 +83,12 @@ export const TRADER_IDENTITY_FIELDS: readonly {
     anchor: "contact-email",
     why: "The address buyers write to about an order. It is also the buy button's fallback when a product has no purchase link.",
   },
+  {
+    key: "emailVerified",
+    label: "Confirmed contact email",
+    anchor: "contact-email",
+    why: "We send a link to that address and you click it. Nothing else proves a buyer's message would actually reach someone.",
+  },
 ] as const;
 
 /** Deep link to the first thing a seller still has to fill in. */
@@ -84,16 +106,42 @@ export function traderIdentityHref(missing: readonly TraderIdentityField[]): str
  * because this decides whether something may go on sale.
  */
 export function missingTraderIdentity(
-  seller: StorefrontSeller,
+  seller: TraderIdentityInput,
+  options: {
+    /**
+     * Also require the contact address to have been PROVEN by a clicked link.
+     * The caller decides, because a deployment that cannot send mail must not
+     * demand one — see lib/settings/seller-email-verification.ts.
+     */
+    requireVerifiedEmail?: boolean;
+  } = {},
 ): TraderIdentityField[] {
-  return TRADER_IDENTITY_FIELDS.filter(
-    (field) => !(seller[field.key] ?? "").trim(),
-  ).map((field) => field.key);
+  const missing: TraderIdentityField[] = [];
+  for (const field of TRADER_IDENTITY_FIELDS) {
+    if (field.key === "emailVerified") {
+      // Only worth saying when there IS an address to confirm: telling a
+      // seller with no contact email that it is also unconfirmed is two
+      // complaints about one blank field.
+      if (
+        options.requireVerifiedEmail &&
+        (seller.email ?? "").trim() &&
+        !seller.emailVerified
+      ) {
+        missing.push(field.key);
+      }
+      continue;
+    }
+    if (!(seller[field.key] ?? "").trim()) missing.push(field.key);
+  }
+  return missing;
 }
 
 /** True when this seller may publish and sell. */
-export function isTraderIdentityComplete(seller: StorefrontSeller): boolean {
-  return missingTraderIdentity(seller).length === 0;
+export function isTraderIdentityComplete(
+  seller: TraderIdentityInput,
+  options: { requireVerifiedEmail?: boolean } = {},
+): boolean {
+  return missingTraderIdentity(seller, options).length === 0;
 }
 
 /** "your trader name and contact email" — for use inside a sentence. */
@@ -116,9 +164,24 @@ export function listMissingTraderFields(
 export const TRADER_IDENTITY_HEADLINE =
   "You can't publish or sell until your seller details are complete.";
 
-/** The follow-up line, naming what is actually missing. */
+/**
+ * The follow-up line, naming what is actually missing.
+ *
+ * An unconfirmed address gets its own sentence: "add your confirmed contact
+ * email" would be advice to type something, and the thing to do is click a
+ * link that has already been sent.
+ */
 export function traderIdentityFix(missing: readonly TraderIdentityField[]): string {
-  const list = listMissingTraderFields(missing);
+  const typed = missing.filter((field) => field !== "emailVerified");
+  const confirm = missing.includes("emailVerified");
+  const list = listMissingTraderFields(typed);
+
+  if (list && confirm) {
+    return `Add your ${list} in Settings › Business & seller details, and confirm your contact email from the link we sent you.`;
+  }
+  if (confirm) {
+    return "Open the confirmation link we emailed to your contact address. You can send a new one from Settings › Business & seller details.";
+  }
   return list
     ? `Add your ${list} in Settings › Business & seller details, then publish.`
     : "Complete Settings › Business & seller details, then publish.";

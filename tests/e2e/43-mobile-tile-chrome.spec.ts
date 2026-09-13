@@ -77,8 +77,14 @@ async function controls(page: Page) {
       return {
         key: el.dataset.gridKey ?? "",
         selected: !!el.querySelector("[data-block-selected]"),
+        // The handles live in the cell's chrome layer, the sibling drawn above
+        // every block, not inside the cell itself.
         controls: Array.from(
-          el.querySelectorAll<HTMLElement>("button[aria-label]"),
+          document
+            .querySelector(
+              `li[data-grid-chrome="${CSS.escape(el.dataset.gridKey ?? "")}"]`,
+            )
+            ?.querySelectorAll<HTMLElement>("button[aria-label]") ?? [],
         ).map((control) => {
           // What decides whether a control is DRAWN is the chrome element
           // around it; a bare handle is its own chrome and comes back as
@@ -217,6 +223,25 @@ test("a phone shows a tile's controls only when it is selected, and then all of 
   await expect(sheet.first()).toBeVisible();
 });
 
+/**
+ * Put the advisory banner away.
+ *
+ * It costs 72px off the top of a 664px phone, and the device switch it pushes
+ * against is drawn INSIDE the stage, so it rides the board's own pan. Selecting
+ * a block now centres that block in the strip a sheet leaves (see
+ * canvas-geometry's revealIntoView), which on a screen this short can carry the
+ * switch up behind the banner — the same bargain the floating toolbar already
+ * makes by standing down entirely while a sheet is up. Dismissing the banner is
+ * both what a real seller does with it and what these two specs need, since
+ * neither is about the banner.
+ */
+async function dismissNotice(page: Page) {
+  const dismiss = page.getByRole("button", {
+    name: "Dismiss the small-screen editing notice",
+  });
+  if (await dismiss.count()) await dismiss.click();
+}
+
 /** A touch drag from one point to another, fired as raw PointerEvents on
  *  whatever element sits under the start point — the same recipe the
  *  rotation gesture below uses, since these handles are `touch-none` and a
@@ -269,6 +294,7 @@ test("mobile preview: a lone tile resizes for real, and rotation stays live", as
   await gotoApp(page, "/storefront");
   await createStorefrontViaUI(page);
   await page.waitForLoadState("networkidle").catch(() => {});
+  await dismissNotice(page);
   await page.getByRole("button", { name: "Add text" }).click();
   await expect(page.locator("li[data-grid-cell]")).toHaveCount(1);
   await page.waitForTimeout(800);
@@ -375,6 +401,7 @@ test("mobile preview: a tile already filling the repacked board stays inert", as
   await gotoApp(page, "/storefront");
   await createStorefrontViaUI(page);
   await page.waitForLoadState("networkidle").catch(() => {});
+  await dismissNotice(page);
   await page.getByRole("button", { name: "Add text" }).click();
   await expect(page.locator("li[data-grid-cell]")).toHaveCount(1);
   await page.waitForTimeout(800);

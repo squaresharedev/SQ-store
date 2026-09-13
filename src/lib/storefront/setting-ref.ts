@@ -14,12 +14,11 @@
 
 import type { ProductPageSectionId } from "@/types/storefront";
 
-/** The design panel's seven groups, mirrored from ControlsPanel. */
+/** The design panel's six groups, mirrored from ControlsPanel. */
 export const CONTROLS_GROUPS = [
   "theme",
   "header",
   "typography",
-  "canvas",
   "cards",
   "soldOut",
   "productPage",
@@ -28,6 +27,13 @@ export type ControlsGroup = (typeof CONTROLS_GROUPS)[number];
 
 /** The two halves of the Product cards group. */
 export type CardsSectionId = "cardStyle" | "priceTag";
+
+/** The two halves of the Theme group: the published look, and the board
+ *  itself (size, grid gap, and the seller-only grid guide). Merged into one
+ *  top-of-menu entry because both are "how the whole storefront is shaped",
+ *  and splitting them cost a seller a trip back to the top of the menu to
+ *  get from one to the other. */
+export type ThemeSectionId = "look" | "canvas";
 
 /** The five sections of the Product page group. ("Panel" so it cannot be
  *  confused with the page's own on-screen sections, ProductPageSectionId.) */
@@ -39,6 +45,8 @@ export type SettingRef =
   /** A control that exists at BOTH scopes: the theme's copy under Product
    *  cards, and the selected tile's copy in its inspector. */
   | { kind: "cards"; section: CardsSectionId }
+  /** One half of the Theme group: see ThemeSectionId. */
+  | { kind: "theme"; section: ThemeSectionId }
   /** One section of the Product page group. Opening any of these also turns
    *  the canvas to the product page, so the seller sees what they edit. */
   | { kind: "productPage"; section: ProductPagePanelSection };
@@ -115,7 +123,9 @@ export const SECTION_SETTING: Record<ProductPageSectionId, ProductPageHotspot> =
 /** Which group of the design panel a ref lands in. */
 export function settingGroup(ref: SettingRef): ControlsGroup {
   if (ref.kind === "group") return ref.group;
-  return ref.kind === "cards" ? "cards" : "productPage";
+  if (ref.kind === "cards") return "cards";
+  if (ref.kind === "theme") return "theme";
+  return "productPage";
 }
 
 /** Field-by-field, because refs are minted fresh at every call site and `===`
@@ -128,6 +138,7 @@ export function isSameSettingRef(
   if (a.kind !== b.kind) return false;
   if (a.kind === "group" && b.kind === "group") return a.group === b.group;
   if (a.kind === "cards" && b.kind === "cards") return a.section === b.section;
+  if (a.kind === "theme" && b.kind === "theme") return a.section === b.section;
   if (a.kind === "productPage" && b.kind === "productPage") {
     return a.section === b.section;
   }
@@ -191,7 +202,6 @@ export const GROUP_LABELS: Record<ControlsGroup, string> = {
   theme: "Theme",
   header: "Header",
   typography: "Typography",
-  canvas: "Canvas",
   cards: "Product cards",
   soldOut: "Sold out",
   productPage: "Product page",
@@ -234,15 +244,16 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
       "style",
       "restyle",
       "minimal",
+      "classic",
       "bold",
-      "luxe",
+      "gallery",
       "appearance",
       "design",
       "template",
       "skin",
       "whole store look",
     ],
-    ref: { kind: "group", group: "theme" },
+    ref: { kind: "theme", section: "look" },
   },
   {
     id: "background",
@@ -261,7 +272,7 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
       "behind the tiles",
       "behind the products",
     ],
-    ref: { kind: "group", group: "theme" },
+    ref: { kind: "theme", section: "look" },
   },
   {
     id: "accent",
@@ -274,7 +285,7 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
       "link colour",
       "accent",
     ],
-    ref: { kind: "group", group: "theme" },
+    ref: { kind: "theme", section: "look" },
   },
   {
     id: "header",
@@ -324,7 +335,7 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
       "resize the board",
       "how many products fit",
     ],
-    ref: { kind: "group", group: "canvas" },
+    ref: { kind: "theme", section: "canvas" },
   },
   {
     id: "grid-gap",
@@ -340,7 +351,7 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
       "looser",
       "crowded",
     ],
-    ref: { kind: "group", group: "canvas" },
+    ref: { kind: "theme", section: "canvas" },
   },
   {
     id: "tile-layout",
@@ -379,6 +390,9 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
       "bar",
       "overlay",
       "shadow",
+      "shadow colour",
+      "fade colour",
+      "gradient colour",
       "caption style",
       "name style",
       "title colour",

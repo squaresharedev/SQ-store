@@ -389,6 +389,12 @@ const next = spawn(
       NEXT_PUBLIC_SUPABASE_URL: `http://127.0.0.1:${GATEWAY_PORT}`,
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ANON_KEY,
       SUPABASE_SERVICE_ROLE_KEY: SERVICE_KEY,
+      // Contact-address confirmation ON, which is what makes the publish gate
+      // demand a CLICKED link rather than just a typed address. There is no
+      // Cloudflare binding here, so under NODE_ENV=development the message
+      // goes to the in-memory dev outbox instead of a mail server, and specs
+      // read the link back from /dev/emails. Nothing leaves the machine.
+      TRANSACTIONAL_EMAIL_FROM: "no-reply@e2e.squareshare.to",
       // R2 deliberately unset by default, so a normal run stays hermetic and
       // the presign route's "not configured" path (503 -> graceful degrade) is
       // what gets exercised. E2E_REAL_R2=1 passes the configured bucket

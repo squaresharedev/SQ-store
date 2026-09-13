@@ -52,8 +52,9 @@ const ALL_SOURCES = walk(SRC).map((file) => ({
 
 /** The files that own a search input, and the constant each one bounds by. */
 const SEARCH_INPUTS = [
+  // The input both the palette and the storefront editor's field render.
   {
-    path: "components/search/SearchOverlay.tsx",
+    path: "components/search/SearchBar.tsx",
     limit: "MAX_QUERY_LENGTH",
   },
   {
@@ -95,9 +96,11 @@ describe("search inputs — the character limit", () => {
     const max = Number(types.match(/MAX_QUERY_LENGTH = (\d+)/)?.[1]);
     expect(max).toBeGreaterThan(0);
     // Same constant, imported — not a second literal that happens to agree.
-    expect(read("components/search/SearchOverlay.tsx")).toMatch(
+    expect(read("components/search/SearchBar.tsx")).toMatch(
       /import \{[\s\S]*?MAX_QUERY_LENGTH[\s\S]*?\} from "@\/lib\/search\/types"/,
     );
+    // And the palette really does draw that input rather than one of its own.
+    expect(read("components/search/SearchOverlay.tsx")).toContain("<SearchBar");
     expect(read("lib/validation/search.ts")).toContain("MAX_QUERY_LENGTH");
   });
 

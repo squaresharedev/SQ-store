@@ -123,12 +123,16 @@ describe("TextTileContent: size", () => {
     expect(paragraph.className).not.toContain("text-xl");
   });
 
-  it("leaves sizing to the variant's classes when there is no override", () => {
+  it("with no override, auto-fits to the variant's own base size", () => {
+    // jsdom has no layout (every measurement reads 0), so the auto-fit search
+    // always finds its own ceiling fits — this pins that ceiling is the
+    // variant's base px, applied the same inline way an explicit size is.
     const { container } = render(
       <TextTileContent block={block()} theme={THEME} />,
     );
     const paragraph = within(container).getByText("Hello");
-    expect(paragraph.style.fontSize).toBe("");
-    expect(paragraph.className).toContain("text-xl");
+    expect(paragraph).toHaveStyle({ fontSize: `${TEXT_VARIANT_BASE_PX.heading}px` });
+    expect(paragraph.className).toContain("font-semibold");
+    expect(paragraph.className).not.toContain("text-xl");
   });
 });

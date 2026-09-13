@@ -13,6 +13,13 @@ import { SelectionToolbar } from "@/components/storefront/SelectionToolbar";
  * made from the selection instead, and getting them wrong shows up as a button
  * that does nothing (Frame on a shape) or a missing route into a mode (no
  * Edit on text). Hence a test per rule.
+ *
+ * A SELECTION IS NOT A LESSER BLOCK. Six shapes have a colour, a stroke,
+ * corners and an opacity exactly as one shape does, and the inspector has
+ * always edited them together — so the second half of these tests is the same
+ * rules asked of a group, plus the two that only a group can get wrong: a test
+ * that reads the FIRST selected block instead of all of them, and a divider
+ * drawn beside nothing.
  */
 
 afterEach(cleanup);
@@ -92,7 +99,7 @@ function renderToolbar(
   blocks: StorefrontBlock[],
   overrides: { openPages?: string[] } = {},
 ) {
-  const onOpenPage = vi.fn();
+  const onOpenPages = vi.fn();
   const onType = vi.fn();
   const onFrame = vi.fn();
   const onOpenColor = vi.fn();
@@ -105,7 +112,7 @@ function renderToolbar(
       productsById={productsById}
       elementUrls={elementUrls}
       openPages={overrides.openPages ?? []}
-      onOpenPage={onOpenPage}
+      onOpenPages={onOpenPages}
       onType={onType}
       onFrame={onFrame}
       onOpenColor={onOpenColor}
@@ -116,7 +123,7 @@ function renderToolbar(
   );
   return {
     ...view,
-    onOpenPage,
+    onOpenPages,
     onType,
     onFrame,
     onOpenColor,
@@ -205,7 +212,7 @@ describe("SelectionToolbar", () => {
   it("sends a colour request naming which colour it means", () => {
     const { onOpenColor } = renderToolbar([shapeBlock]);
     fireEvent.click(button(/change the colour/i)!);
-    expect(onOpenColor).toHaveBeenCalledWith(blockKey(shapeBlock), "fill");
+    expect(onOpenColor).toHaveBeenCalledWith([blockKey(shapeBlock)], "fill");
   });
 
   it("points at the inspector's control rather than opening one over the block", () => {
@@ -214,14 +221,15 @@ describe("SelectionToolbar", () => {
     // the canvas, covering nothing — to show and mark the field instead.
     const { onOpenSetting } = renderToolbar([shapeBlock]);
 
+    const keys = [blockKey(shapeBlock)];
     fireEvent.click(button(/edit the stroke/i)!);
-    expect(onOpenSetting).toHaveBeenLastCalledWith(blockKey(shapeBlock), "stroke");
+    expect(onOpenSetting).toHaveBeenLastCalledWith(keys, "stroke");
 
     fireEvent.click(button(/corner roundness/i)!);
-    expect(onOpenSetting).toHaveBeenLastCalledWith(blockKey(shapeBlock), "corners");
+    expect(onOpenSetting).toHaveBeenLastCalledWith(keys, "corners");
 
     fireEvent.click(button(/edit the opacity/i)!);
-    expect(onOpenSetting).toHaveBeenLastCalledWith(blockKey(shapeBlock), "opacity");
+    expect(onOpenSetting).toHaveBeenLastCalledWith(keys, "opacity");
 
     // And nothing is drawn over the board to do it with.
     expect(screen.queryByRole("slider")).toBeNull();
@@ -231,7 +239,7 @@ describe("SelectionToolbar", () => {
   it("sends an image's opacity to the same place", () => {
     const { onOpenSetting } = renderToolbar([imageBlock]);
     fireEvent.click(button(/edit the opacity/i)!);
-    expect(onOpenSetting).toHaveBeenCalledWith(blockKey(imageBlock), "opacity");
+    expect(onOpenSetting).toHaveBeenCalledWith([blockKey(imageBlock)], "opacity");
   });
 
   it("draws icons only, and keeps the words for assistive tech", () => {
@@ -272,14 +280,15 @@ describe("SelectionToolbar", () => {
     expect(page).toHaveAttribute("aria-pressed", "true");
   });
 
-  it("falls back to the shared action for a multiple selection", () => {
-    // Everything but Remove acts on one block, so with several selected the
-    // only honest offer is the one that takes them all.
+  it("keeps the one-block gestures to one block", () => {
+    // Typing puts a caret in a block's own words and framing positions one
+    // picture inside one tile. Neither has a group meaning, so neither is
+    // offered to a group — unlike colour, stroke, corners and opacity, which
+    // are settings the inspector has always edited together.
     renderToolbar([productBlock, textBlock, shapeBlock]);
     expect(button(/remove 3 elements from grid/i)).not.toBeNull();
     expect(button(/frame the image/i)).toBeNull();
     expect(button(/edit the text/i)).toBeNull();
-    expect(button(/product page/i)).toBeNull();
   });
 
   it("removes the whole selection in one act", () => {
@@ -338,8 +347,166 @@ describe("SelectionToolbar", () => {
     fireEvent.click(button(/open the product page/i)!);
     // The page is opened by PRODUCT, not by block key: one page per product,
     // however many tiles point at it.
-    expect(product.onOpenPage).toHaveBeenCalledWith(PRODUCT.id);
+    expect(product.onOpenPages).toHaveBeenCalledWith([PRODUCT.id]);
     fireEvent.click(button(/frame the image/i)!);
     expect(product.onFrame).toHaveBeenCalledTimes(1);
+  });
+
+  /**
+   * THE SEAM IS A STATEMENT ABOUT TWO GROUPS, so it needs both of them. It
+   * used to be drawn unconditionally, which put a divider at the very head of
+   * the bar for the two selections whose block tools are all inapplicable.
+   */
+  describe("the divider", () => {
+    const dividers = () =>
+      screen.getByRole("toolbar").querySelectorAll("div[aria-hidden='true']")
+        .length;
+
+    it("is not drawn when nothing stands to the left of it", () => {
+      // A text block and a shape share no setting at all and neither is a
+      // product, so the bar is Duplicate and Delete and nothing else — the
+      // selection that leaves the left-hand group genuinely empty.
+      renderToolbar([textBlock, shapeBlock]);
+      expect(button(/change the colour/i)).toBeNull();
+      expect(button(/edit the opacity/i)).toBeNull();
+      expect(dividers()).toBe(0);
+    });
+
+    it("is drawn as soon as there is something to separate", () => {
+      renderToolbar([shapeBlock, { ...shapeBlock, id: "dddddddd-dddd-4ddd-8ddd-dddddddddddd" }]);
+      expect(button(/change the colour/i)).not.toBeNull();
+      expect(dividers()).toBe(1);
+    });
+  });
+
+  /**
+   * A GROUP GETS WHAT ITS MEMBERS SHARE. The inspector has always edited a
+   * same-type selection through the very editor a single block uses; the bar
+   * is the route to those controls, so withholding them from a selection made
+   * the bar disagree with the panel it points at.
+   */
+  describe("a multiple selection", () => {
+    const secondShape: StorefrontBlock = {
+      ...shapeBlock,
+      id: "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
+      x: 1,
+    };
+    const circle: StorefrontBlock = {
+      ...shapeBlock,
+      id: "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee",
+      kind: "circle",
+      x: 2,
+    };
+    const secondProduct: StorefrontBlock = {
+      ...productBlock,
+      productId: PHOTOLESS.id,
+      x: 2,
+    };
+
+    it("gives a selection of shapes the same four one shape gets", () => {
+      renderToolbar([shapeBlock, secondShape]);
+      const bar = screen.getByRole("toolbar");
+      const offered = [...bar.querySelectorAll("button")]
+        .map((el) => el.getAttribute("aria-label") ?? "")
+        .filter((name) => !/remove|duplicate/i.test(name));
+      expect(offered).toEqual([
+        "Change the colour of 2 elements",
+        "Edit the stroke of 2 elements",
+        "Edit the corner roundness of 2 elements",
+        "Edit the opacity of 2 elements",
+      ]);
+    });
+
+    it("aims each of them at every selected shape, not just the first", () => {
+      // The bug this guards: reading `blocks[0]` and sending one key, so a
+      // colour picked with six shapes selected painted one of them.
+      const { onOpenColor, onOpenSetting } = renderToolbar([
+        shapeBlock,
+        secondShape,
+      ]);
+      const keys = [blockKey(shapeBlock), blockKey(secondShape)];
+
+      fireEvent.click(button(/change the colour/i)!);
+      expect(onOpenColor).toHaveBeenCalledWith(keys, "fill");
+
+      fireEvent.click(button(/edit the stroke/i)!);
+      expect(onOpenSetting).toHaveBeenLastCalledWith(keys, "stroke");
+
+      fireEvent.click(button(/edit the opacity/i)!);
+      expect(onOpenSetting).toHaveBeenLastCalledWith(keys, "opacity");
+    });
+
+    it("tests the WHOLE selection, never just its first block", () => {
+      // A square first and a circle second: the square has corners, the group
+      // does not, and offering the control would leave it doing nothing to
+      // half the selection.
+      renderToolbar([shapeBlock, circle]);
+      expect(button(/corner roundness/i)).toBeNull();
+      expect(button(/change the colour/i)).not.toBeNull();
+      expect(button(/edit the opacity/i)).not.toBeNull();
+      cleanup();
+
+      // One text block among the shapes and the shape group is gone entirely.
+      renderToolbar([shapeBlock, secondShape, textBlock]);
+      expect(button(/change the colour/i)).toBeNull();
+      expect(button(/edit the stroke/i)).toBeNull();
+      expect(button(/edit the opacity/i)).toBeNull();
+    });
+
+    it("gives opacity to any mixture of shapes and elements", () => {
+      // Both carry an opacity of their own, so the one thing they share is
+      // offered even though nothing else about them is.
+      renderToolbar([shapeBlock, imageBlock]);
+      expect(button(/edit the opacity/i)).not.toBeNull();
+      // ...and nothing that only a shape has.
+      expect(button(/change the colour/i)).toBeNull();
+    });
+
+    it("opens every selected product's page in one press", () => {
+      const { onOpenPages } = renderToolbar([productBlock, secondProduct]);
+      const open = button(/open the product pages for 2 products/i)!;
+      expect(open).not.toBeNull();
+      fireEvent.click(open);
+      expect(onOpenPages).toHaveBeenCalledWith([PRODUCT.id, PHOTOLESS.id]);
+    });
+
+    it("counts one page per product, not one per tile", () => {
+      // Two tiles of the same mug are one door: opening it twice would put two
+      // copies of one page on the canvas.
+      const { onOpenPages } = renderToolbar([
+        productBlock,
+        { ...productBlock, x: 4 },
+      ]);
+      fireEvent.click(button(/open the product page for enamel mug/i)!);
+      expect(onOpenPages).toHaveBeenCalledWith([PRODUCT.id]);
+    });
+
+    it("reads as pressed only once every page is out", () => {
+      renderToolbar([productBlock, secondProduct], {
+        openPages: [PRODUCT.id],
+      });
+      // One of two out is not "open": the press has more to do.
+      expect(button(/open the product pages/i)).toHaveAttribute(
+        "aria-pressed",
+        "false",
+      );
+      cleanup();
+
+      renderToolbar([productBlock, secondProduct], {
+        openPages: [PRODUCT.id, PHOTOLESS.id],
+      });
+      expect(button(/close the product pages/i)).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+    });
+
+    it("keeps the page door on the products of a mixed selection", () => {
+      // The same rule Duplicate follows: act on the part of the selection that
+      // can answer, rather than on none of it.
+      const { onOpenPages } = renderToolbar([productBlock, shapeBlock]);
+      fireEvent.click(button(/open the product page/i)!);
+      expect(onOpenPages).toHaveBeenCalledWith([PRODUCT.id]);
+    });
   });
 });

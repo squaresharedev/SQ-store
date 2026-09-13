@@ -8,14 +8,16 @@ import {
 } from "./helpers";
 
 /**
- * The masthead's WORDS, typed where they read: double-clicking the store name
- * or the bio on the canvas puts a caret in the line instead of sending the
- * seller to the panel's fields.
+ * The masthead's WORDS, typed where they read: clicking the store name or the
+ * bio on the canvas both aims the left-hand panel at it AND puts a caret in
+ * it, in one motion, instead of sending the seller to the panel's fields for
+ * the words and back to the canvas for how they look.
  *
- * The gesture itself is the thing under test. Selecting a line opens the left
- * panel, which is docked, so the board moves between the two presses of a
- * double-click — these run against a storefront whose panel starts closed,
- * which is the case that gesture has to survive.
+ * ONE press is the whole gesture now — there used to be a second one (a
+ * double-click, or a click on the line the panel was already on), needed only
+ * because the first press opened the docked panel, which slid the board
+ * sideways before a second press could land. Collapsing to one press removes
+ * that problem rather than surviving it: there is nothing left to survive.
  *
  * ONE account, ONE page, shared across the file (sign-ups are rate limited);
  * serial because the page is shared. Every test reloads to a clean masthead.
@@ -26,7 +28,9 @@ test.describe.configure({ mode: "serial" });
 let page: Page;
 let storefrontUrl: string;
 
-const DEFAULT_NAME = "Your store name";
+// What a freshly created (setup skipped) storefront's header seeds to: the
+// row's own default name (see baseName in lib/storefront/actions.ts).
+const DEFAULT_NAME = "Untitled storefront";
 
 /** The static lines, before anything is being typed in them. */
 const nameLine = () => page.getByRole("button", { name: "Edit the store name" });
@@ -76,75 +80,39 @@ test.afterAll(async () => {
 });
 
 test.describe("typing the masthead on the canvas", () => {
-  test("the FIRST double-click both aims the panel and starts typing", async () => {
-    // The whole point of the gesture. The first press opens the docked panel,
-    // which slides the board sideways before the second press lands — so the
-    // second press is matched by point and time rather than by element, and
-    // one double-click has to produce BOTH results, not just the panel.
-    await nameLine().dblclick();
+  test("the first click both aims the panel and starts typing", async () => {
+    // The whole point of the gesture: one press, both results.
+    await nameLine().click();
     await expect(nameField()).toBeVisible();
     await expect(page.getByRole("button", { name: "Bold" })).toBeVisible();
 
-    // Ready to type or delete straight away: the double-clicked word is the
-    // selection, so one keystroke replaces it.
-    const selected = await liveSelection();
-    expect(selected.length).toBeGreaterThan(0);
-    expect(DEFAULT_NAME).toContain(selected);
+    // An ordinary click drops a collapsed caret rather than selecting a word
+    // — that is reserved for a genuine double/triple click, which by the time
+    // it would land is already inside the field, where the browser's own
+    // double-click-selects-a-word takes over.
+    expect(await liveSelection()).toBe("");
 
+    await page.keyboard.press("ControlOrMeta+a");
     await page.keyboard.press("Backspace");
-    await expect
-      .poll(() => nameField().textContent())
-      .not.toBe(DEFAULT_NAME);
+    await expect.poll(() => nameField().textContent()).toBe("");
   });
 
-  test("the double-click survives the line moving between the presses", async () => {
-    // What actually goes wrong in the app: the first press aims the panel, the
-    // panel opens, the board re-clamps, and the second press lands somewhere
-    // else — so the browser never fires dblclick. Reproduced here by moving the
-    // line the moment it becomes the selected one, which is the same cause.
-    const shift = await page.addStyleTag({
-      content: `h2[aria-label="Edit the store name"][aria-pressed="true"]
-                { transform: translateX(420px); }`,
-    });
-    const box = (await nameLine().boundingBox())!;
-    const x = box.x + 30;
-    const y = box.y + box.height / 2;
-
-    // Back to back: the two presses have to fall inside the double-click
-    // window, so nothing may be awaited between them.
-    await page.mouse.move(x, y);
-    await page.mouse.down();
-    await page.mouse.up();
-    await page.mouse.down();
-    await page.mouse.up();
-
-    await expect(nameField()).toBeVisible();
-    expect(await liveSelection()).not.toBe("");
-    // Take the rule back out. Every test in this file shares one page, so a
-    // style left behind goes on jerking the name line 420px sideways under
-    // every later double-click.
-    await shift.evaluate((node) => node.parentNode?.removeChild(node));
-    await page.keyboard.press("Escape");
-  });
-
-  test("a second double-click goes straight back to typing", async () => {
-    await nameLine().dblclick();
+  test("clicking again after Escape goes straight back to typing", async () => {
+    await nameLine().click();
     await expect(nameField()).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(nameField()).toHaveCount(0);
 
     // The panel never left the line, so this one has nothing to open: it only
-    // puts the caret back, on the word it was aimed at.
+    // puts the caret back.
     await expect(panelHeading("Store name")).toBeVisible();
-    await nameLine().dblclick();
+    await nameLine().click();
     await expect(nameField()).toBeVisible();
     await expect(panelHeading("Store name")).toBeVisible();
-    expect(DEFAULT_NAME).toContain(await liveSelection());
-    expect(await liveSelection()).not.toBe("");
   });
 
   test("what is typed on the canvas is what the panel holds", async () => {
-    await nameLine().dblclick();
+    await nameLine().click();
     await expect(nameField()).toBeVisible();
     await page.keyboard.press("ControlOrMeta+a");
     await page.keyboard.type("Bloom Coffee");
@@ -158,7 +126,7 @@ test.describe("typing the masthead on the canvas", () => {
   });
 
   test("a line emptied by hand keeps its caret", async () => {
-    await nameLine().dblclick();
+    await nameLine().click();
     await page.keyboard.press("ControlOrMeta+a");
     await page.keyboard.press("Backspace");
 
@@ -171,7 +139,7 @@ test.describe("typing the masthead on the canvas", () => {
   });
 
   test("Escape ends the edit, and one undo takes the whole burst back", async () => {
-    await nameLine().dblclick();
+    await nameLine().click();
     await page.keyboard.press("ControlOrMeta+a");
     await page.keyboard.type("Bloom Coffee");
     await page.keyboard.press("Escape");
@@ -186,7 +154,7 @@ test.describe("typing the masthead on the canvas", () => {
   });
 
   test("the bio takes real line breaks, and they survive a save", async () => {
-    await bioLine().dblclick();
+    await bioLine().click();
     await expect(bioField()).toBeVisible();
     await page.keyboard.press("ControlOrMeta+a");
     await page.keyboard.type("Roasted weekly");
@@ -205,21 +173,5 @@ test.describe("typing the masthead on the canvas", () => {
     expect(await bioLine().evaluate((node) => node.textContent)).toBe(
       "Roasted weekly\nShipped Fridays",
     );
-  });
-
-  test("a click on the line the panel is already on starts typing", async () => {
-    // The single-click route, which is also what makes the gesture reliable
-    // while the panel is opening: the first click aims the panel, the second
-    // puts the caret in the words.
-    await nameLine().click();
-    await expect(page.getByRole("button", { name: "Bold" })).toBeVisible();
-    await nameLine().click();
-    await expect(nameField()).toBeVisible();
-
-    // Styling still reaches the line while the caret is in it.
-    await page.keyboard.press("ControlOrMeta+b");
-    await expect
-      .poll(() => nameField().evaluate((node) => getComputedStyle(node).fontWeight))
-      .toBe("700");
   });
 });

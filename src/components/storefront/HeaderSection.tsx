@@ -20,11 +20,10 @@ import { InfoTip } from "@/components/ui/InfoTip";
  * rendered as a masthead above the grid. Client caps are UX only — the save
  * path re-validates with the header schema (lengths + control-character rules).
  *
- * The words can also be typed on the canvas itself (double-click a line), and
- * how they LOOK is only set there: font, size, colour, formatting and
- * alignment come from clicking the line, which opens the left-hand panel on
- * it — the same place every other colour in the storefront is chosen, and the
- * same gesture that selects anything else on the board.
+ * The words can also be typed on the canvas itself (click a line), and how
+ * they LOOK is only set there: font, size, colour, formatting and alignment
+ * come from that same click, which opens this panel on it — the same place
+ * every other colour in the storefront is chosen.
  */
 export function HeaderSection({
   header,
@@ -54,8 +53,8 @@ export function HeaderSection({
             Store name
           </label>
           <InfoTip label="Other ways to edit the header">
-            Double-click the name or bio on the canvas to type it there. A
-            single click aims this panel at that line, where its font, size,
+            Click the name or bio on the canvas to type it there. This panel
+            opens on that line at the same time, where its font, size,
             colour, formatting and alignment are set.
           </InfoTip>
         </span>

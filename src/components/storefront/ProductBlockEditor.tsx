@@ -18,7 +18,7 @@ import {
 } from "@/lib/validation/product";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/Toast";
-import { destructiveButtonClass, errorTextClass, fieldBaseClass, ghostButtonClass, infoTextClass, labelClass, primaryButtonClass, secondaryButtonClass } from "@/components/ui/control-styles";
+import { destructiveButtonClass, errorTextClass, fieldBaseClass, ghostButtonClass, infoTextClass, primaryButtonClass, secondaryButtonClass } from "@/components/ui/control-styles";
 import { CollapsibleSection } from "@/components/ui/CollapsibleSection";
 import { useSettingTarget } from "@/lib/storefront/setting-context";
 import { InfoTip } from "@/components/ui/InfoTip";
@@ -33,6 +33,27 @@ function centsOf(input: string): number | null {
   const value = Number(trimmed);
   if (!Number.isFinite(value)) return null;
   return Math.round(value * 100);
+}
+
+/** The panel's short field: two of these stacked are the height of the
+ *  thumbnail beside them. */
+const COMPACT_FIELD_CLASS = "h-8 px-2 py-0 text-sm";
+
+/** "€" for EUR, falling back to the code where there is no narrow sign. */
+function currencySignOf(currency: string): string {
+  try {
+    return (
+      new Intl.NumberFormat("en-IE", {
+        style: "currency",
+        currency,
+        currencyDisplay: "narrowSymbol",
+      })
+        .formatToParts(0)
+        .find((part) => part.type === "currency")?.value ?? currency
+    );
+  } catch {
+    return currency;
+  }
 }
 
 /**
@@ -109,6 +130,7 @@ export function ProductBlockEditor({
     );
   }
 
+  const currencySign = currencySignOf(product.currency);
   const trimmedTitle = draftTitle.trim();
   const draftCents = centsOf(draftPrice);
   const titleChanged = trimmedTitle !== product.title;
@@ -192,95 +214,100 @@ export function ProductBlockEditor({
 
   return (
     <div className="space-y-4">
-      {/* Summary row: thumbnail + the stored (saved) title and price */}
-      <div className="flex items-center gap-3">
-        <div className="size-12 shrink-0 overflow-hidden rounded-sm bg-muted">
-          {product.imageUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element -- signed R2 URL with query params; next/image adds no value here.
-            <img
-              src={product.imageUrl}
-              alt=""
-              draggable={false}
-              className="size-full object-cover"
-            />
-          ) : (
-            <div className="flex size-full items-center justify-center">
-              <ImageIcon
-                className="size-4 text-muted-foreground"
-                strokeWidth={2}
-                aria-hidden="true"
+      {/* The product's own facts in one block: the thumbnail beside the two
+          fields, which ARE the summary, so the name and price are not shown
+          once as text and again as inputs below it. Both edit the product
+          itself (saved through a confirmation), not just this tile. */}
+      <div className="space-y-1.5">
+        <div className="flex items-start gap-2.5">
+          {/* Two h-8 fields plus their gap-1.5, so the photo lines up with both. */}
+          <div className="size-[4.375rem] shrink-0 overflow-hidden rounded-sm bg-muted">
+            {product.imageUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element -- signed R2 URL with query params; next/image adds no value here.
+              <img
+                src={product.imageUrl}
+                alt=""
+                draggable={false}
+                className="size-full object-cover"
               />
+            ) : (
+              <div className="flex size-full items-center justify-center">
+                <ImageIcon
+                  className="size-4 text-muted-foreground"
+                  strokeWidth={2}
+                  aria-hidden="true"
+                />
+              </div>
+            )}
+          </div>
+          <div className="min-w-0 flex-1 space-y-1.5">
+            {/* Labels are for assistive tech only: the placeholder, the
+                currency sign and the values themselves say which is which. */}
+            <label htmlFor={`${fieldId}-title`} className="sr-only">
+              Name
+            </label>
+            <input
+              id={`${fieldId}-title`}
+              value={draftTitle}
+              maxLength={200}
+              disabled={saving}
+              placeholder="Product name"
+              aria-invalid={errors.title ? true : undefined}
+              onChange={(event) => editField("title", event.target.value)}
+              className={cn(fieldBaseClass, COMPACT_FIELD_CLASS)}
+            />
+            <div className="flex items-center gap-1.5">
+              <div className="relative min-w-0 flex-1">
+                <label htmlFor={`${fieldId}-price`} className="sr-only">
+                  Price ({product.currency})
+                </label>
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 font-inter text-sm text-muted-foreground"
+                >
+                  {currencySign}
+                </span>
+                <input
+                  id={`${fieldId}-price`}
+                  value={draftPrice}
+                  inputMode="decimal"
+                  disabled={saving}
+                  aria-invalid={errors.price ? true : undefined}
+                  onChange={(event) => editField("price", event.target.value)}
+                  // Clears the sign whatever its width ("€" or "CHF").
+                  style={{ paddingLeft: `calc(${currencySign.length}ch + 0.875rem)` }}
+                  className={cn(fieldBaseClass, COMPACT_FIELD_CLASS)}
+                />
+              </div>
+              {dirty && (
+                <button
+                  type="button"
+                  onClick={handleSaveClick}
+                  disabled={saving}
+                  className={cn(primaryButtonClass, "h-8 shrink-0 px-3 py-0")}
+                >
+                  {saving ? "Updating…" : "Save…"}
+                </button>
+              )}
+              <InfoTip label="Where a name or price change lands">
+                Name and price belong to the product, so saving updates them
+                everywhere it appears, not just this storefront.
+              </InfoTip>
             </div>
-          )}
+          </div>
         </div>
-        <div className="min-w-0">
-          <p className="truncate text-sm font-medium text-foreground">
-            {product.title}
-          </p>
-          <p className={infoTextClass}>
-            {formatPrice(product.price, product.currency)}
-          </p>
-        </div>
-      </div>
-
-      {/* Catalog facts: edit the product itself (saved via confirmation) */}
-      <div className="space-y-1.5">
-        <div className="flex items-center gap-1.5">
-          <label htmlFor={`${fieldId}-title`} className={labelClass}>
-            Name
-          </label>
-          <InfoTip label="Where a name or price change lands">
-            Name and price belong to the product, so saving updates them
-            everywhere it appears, not just this storefront.
-          </InfoTip>
-        </div>
-        <input
-          id={`${fieldId}-title`}
-          value={draftTitle}
-          maxLength={200}
-          disabled={saving}
-          aria-invalid={errors.title ? true : undefined}
-          onChange={(event) => editField("title", event.target.value)}
-          className={cn(fieldBaseClass, "text-sm")}
-        />
         {errors.title && <p className={errorTextClass}>{errors.title}</p>}
-      </div>
-
-      <div className="space-y-1.5">
-        <label htmlFor={`${fieldId}-price`} className={labelClass}>
-          Price ({product.currency})
-        </label>
-        <input
-          id={`${fieldId}-price`}
-          value={draftPrice}
-          inputMode="decimal"
-          disabled={saving}
-          aria-invalid={errors.price ? true : undefined}
-          onChange={(event) => editField("price", event.target.value)}
-          className={cn(fieldBaseClass, "text-sm")}
-        />
         {errors.price && <p className={errorTextClass}>{errors.price}</p>}
+
+        {/* Availability, read-only. The switch that used to sit here belonged
+            to the TILE, which made "is this sold out" a question with a
+            different answer on every storefront the product appears in.
+            Availability is a fact about the product, so it is edited once in
+            Products (Stock), and the designer only reports it. */}
+        {stockLine !== null && (
+          <p className={infoTextClass}>{stockLine}</p>
+        )}
       </div>
-
-      {dirty && (
-        <button
-          type="button"
-          onClick={handleSaveClick}
-          disabled={saving}
-          className={primaryButtonClass + " w-full"}
-        >
-          {saving ? "Updating…" : "Save product…"}
-        </button>
-      )}
-
-      {/* Availability, read-only. The switch that used to sit here belonged to
-          the TILE, which made "is this sold out" a question with a different
-          answer on every storefront the product appears in. Availability is a
-          fact about the product, so it is edited once in Products (Stock), and
-          the designer only reports it. */}
-      {stockLine !== null && (
-        <p className={infoTextClass}>{stockLine}</p>
-      )}
 
       {/* Where a tap on this tile lands. The page is designed once for the
           whole storefront, so this only turns the editor towards it with this
@@ -337,6 +364,11 @@ export function ProductBlockEditor({
           <CardStyleControls
             value={resolveCardStyle(theme, block.style)}
             onChange={onStyleChange}
+            colorScope={{
+              theme,
+              overrides: block.style ?? {},
+              scope: { blockKey: blockKey(block) },
+            }}
           />
         </CollapsibleSection>
 

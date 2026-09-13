@@ -220,6 +220,23 @@ export const RATE_LIMITS = {
   /** Profile / tax / notification-preference writes. */
   settingsWrite: { max: 60, windowSeconds: 60 * 60 },
   /**
+   * Confirmation emails for the seller's buyer-facing contact address.
+   *
+   * Tight on purpose, and keyed on the SESSION: this is the one action in
+   * Settings that makes us send mail to an address of the caller's choosing,
+   * so an unbounded resend button is a mail cannon pointed at whoever the
+   * seller names. Five an hour is more than a real person needs to find an
+   * email that already arrived.
+   */
+  sellerEmailVerifySend: { max: 5, windowSeconds: 60 * 60 },
+  /**
+   * Clicks on a confirmation link, keyed on the CLIENT because the route has
+   * no session by design (it is opened from an inbox). Without it, the route
+   * is an oracle for guessing a 64-hex token; with it, a guesser gets 20
+   * attempts an hour against a 2^256 space.
+   */
+  sellerEmailVerify: { max: 20, windowSeconds: 60 * 60 },
+  /**
    * GDPR data export. Reads the caller's ENTIRE account (profile + every
    * product + every storefront config) in three parallel queries and streams
    * it back as a file. A human exports rarely; anything faster than this is a

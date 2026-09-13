@@ -2,6 +2,7 @@ import { z } from "zod";
 import { optionalSingleLineText } from "@/lib/validation/inputs";
 import {
   BRIEF_OTHER_CATEGORY_MAX,
+  RETIRED_STOREFRONT_VIBES,
   STOREFRONT_CATEGORIES,
   STOREFRONT_FULFILMENTS,
   STOREFRONT_VIBES,
@@ -31,7 +32,19 @@ export const storefrontBriefSchema = z.object({
     max: BRIEF_OTHER_CATEGORY_MAX,
   }).optional(),
   fulfilment: z.enum(STOREFRONT_FULFILMENTS).optional(),
-  vibe: z.enum(STOREFRONT_VIBES).optional(),
+  // A retired look becomes the survivor it maps to, before the enum sees it
+  // (see RETIRED_STOREFRONT_VIBES). Anything else is passed through untouched
+  // and rejected, exactly as an unknown category is: a value nobody ever
+  // offered is junk, not history.
+  vibe: z
+    .preprocess(
+      (value) =>
+        typeof value === "string"
+          ? (RETIRED_STOREFRONT_VIBES[value] ?? value)
+          : value,
+      z.enum(STOREFRONT_VIBES),
+    )
+    .optional(),
 });
 
 /**

@@ -65,7 +65,11 @@ async function setUpBoardWithShape(page: Page, tag: string) {
 /** Spin the handle to roughly `degrees`, holding Shift when asked. */
 async function dragHandle(page: Page, degrees: number, shift = false) {
   const cell = page.locator("li[data-grid-cell]").first();
-  const handle = cell.getByRole("slider", { name: /rotate/i });
+  // The handle is drawn in the cell's chrome layer, its sibling.
+  const handle = page
+    .locator("li[data-grid-chrome]")
+    .first()
+    .getByRole("slider", { name: /rotate/i });
   await handle.hover();
   const box = (await cell.boundingBox())!;
   const cx = box.x + box.width / 2;
@@ -231,7 +235,10 @@ test.describe("tilting a block", () => {
 
     // And through a resize, which straightened it for the same reason.
     const moved = (await cell.boundingBox())!;
-    const handle = cell.getByRole("button", { name: /resize/i });
+    const handle = page
+      .locator("li[data-grid-chrome]")
+      .first()
+      .getByRole("button", { name: /resize/i });
     const handleBox = (await handle.boundingBox())!;
     await page.mouse.move(
       handleBox.x + handleBox.width / 2,
@@ -270,7 +277,10 @@ test.describe("tilting a block", () => {
     expect(await tilt(page)).toBe("90deg");
 
     const box = (await cell.boundingBox())!;
-    const handle = cell.getByRole("button", { name: /resize/i });
+    const handle = page
+      .locator("li[data-grid-chrome]")
+      .first()
+      .getByRole("button", { name: /resize/i });
     const handleBox = (await handle.boundingBox())!;
     await page.mouse.move(
       handleBox.x + handleBox.width / 2,
@@ -320,7 +330,10 @@ test.describe("tilting a block", () => {
     expect(await placement(page)).toBe("1 / span 2|2 / span 1");
 
     const box = (await cell.boundingBox())!;
-    const handle = cell.getByRole("button", { name: /resize/i });
+    const handle = page
+      .locator("li[data-grid-chrome]")
+      .first()
+      .getByRole("button", { name: /resize/i });
     const handleBox = (await handle.boundingBox())!;
     await page.mouse.move(
       handleBox.x + handleBox.width / 2,

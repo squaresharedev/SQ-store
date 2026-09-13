@@ -71,13 +71,19 @@ describe("isSameSettingRef", () => {
       isSameSettingRef({ kind: "group", group: "theme" }, { kind: "group", group: "theme" }),
     ).toBe(true);
     expect(
-      isSameSettingRef({ kind: "group", group: "theme" }, { kind: "group", group: "canvas" }),
+      isSameSettingRef({ kind: "group", group: "theme" }, { kind: "theme", section: "canvas" }),
     ).toBe(false);
     expect(
       isSameSettingRef({ kind: "cards", section: "priceTag" }, { kind: "cards", section: "priceTag" }),
     ).toBe(true);
     expect(
       isSameSettingRef({ kind: "cards", section: "priceTag" }, { kind: "cards", section: "cardStyle" }),
+    ).toBe(false);
+    expect(
+      isSameSettingRef({ kind: "theme", section: "look" }, { kind: "theme", section: "look" }),
+    ).toBe(true);
+    expect(
+      isSameSettingRef({ kind: "theme", section: "look" }, { kind: "theme", section: "canvas" }),
     ).toBe(false);
     expect(isSameSettingRef(null, null)).toBe(true);
     expect(isSameSettingRef(null, { kind: "group", group: "theme" })).toBe(false);

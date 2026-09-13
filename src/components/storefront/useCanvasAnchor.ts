@@ -121,13 +121,70 @@ function boardBox(stage: HTMLElement): Box {
  * counts by the room it actually takes, and so a masthead (which has no grid
  * cell of its own) simply falls back to the board.
  */
+type Edges = { left: number; top: number; right: number; bottom: number };
+
+function edgesToBox(edges: Edges): Box {
+  return {
+    left: edges.left,
+    top: edges.top,
+    width: edges.right - edges.left,
+    height: edges.bottom - edges.top,
+  };
+}
+
+/**
+ * The selected cells, measured in CLIENT coordinates: the bare cells, and the
+ * same cells plus everything hanging outside them. Null when none of the keys
+ * is on screen (a masthead line, a board that has not laid out).
+ *
+ * Split out from the two callers below because the two surfaces this editor
+ * has — the pan/zoom design canvas and the plain scrolling mobile preview —
+ * ask the same DOM question and then map the answer into different frames.
+ */
+function measureSelection(
+  root: ParentNode,
+  keys: readonly string[],
+): { cell: Edges; padded: Edges } | null {
+  if (keys.length === 0) return null;
+  const wanted = new Set(keys);
+  const bare: Edges = { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity };
+  const padded: Edges = { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity };
+  const swallow = (into: Edges, rect: Edges) => {
+    into.left = Math.min(into.left, rect.left);
+    into.top = Math.min(into.top, rect.top);
+    into.right = Math.max(into.right, rect.right);
+    into.bottom = Math.max(into.bottom, rect.bottom);
+  };
+
+  root.querySelectorAll<HTMLElement>("[data-grid-key]").forEach((cell) => {
+    if (!wanted.has(cell.dataset.gridKey ?? "")) return;
+    const rect = cell.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) return;
+    swallow(bare, rect);
+    swallow(padded, rect);
+    // Chrome that is drawn but takes no room in the cell's own box: it hangs
+    // outside the tile, in the cell's chrome layer (the sibling right after
+    // it, see Grid), so it has to be measured for itself. A control the block
+    // has hidden (a handle behind a framing overlay) measures zero and drops
+    // out.
+    const layer = cell.nextElementSibling;
+    if (!(layer instanceof HTMLElement)) return;
+    if (layer.dataset.gridChrome !== cell.dataset.gridKey) return;
+    layer.querySelectorAll<HTMLElement>("[data-tile-chrome]").forEach((control) => {
+      const box = control.getBoundingClientRect();
+      if (box.width <= 0 || box.height <= 0) return;
+      swallow(padded, box);
+    });
+  });
+  return Number.isFinite(bare.left) ? { cell: bare, padded } : null;
+}
+
 function selectionBoxes(
   stage: HTMLElement,
   keys: readonly string[],
 ): { cell: Box; withChrome: Box } {
   const board = boardBox(stage);
   const both = { cell: board, withChrome: board };
-  if (keys.length === 0) return both;
 
   const stageRect = stage.getBoundingClientRect();
   // The stage is scaled, so its client rect is post-transform. Dividing by the
@@ -137,43 +194,16 @@ function selectionBoxes(
   const scale = stage.offsetWidth > 0 ? stageRect.width / stage.offsetWidth : 1;
   if (!(scale > 0)) return both;
 
-  const wanted = new Set(keys);
-  const bare = { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity };
-  const padded = { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity };
-  const swallow = (
-    into: typeof bare,
-    rect: { left: number; top: number; right: number; bottom: number },
-  ) => {
-    into.left = Math.min(into.left, (rect.left - stageRect.left) / scale);
-    into.top = Math.min(into.top, (rect.top - stageRect.top) / scale);
-    into.right = Math.max(into.right, (rect.right - stageRect.left) / scale);
-    into.bottom = Math.max(into.bottom, (rect.bottom - stageRect.top) / scale);
-  };
-
-  stage.querySelectorAll<HTMLElement>("[data-grid-key]").forEach((cell) => {
-    if (!wanted.has(cell.dataset.gridKey ?? "")) return;
-    const rect = cell.getBoundingClientRect();
-    if (rect.width <= 0 || rect.height <= 0) return;
-    swallow(bare, rect);
-    swallow(padded, rect);
-    // Chrome that is drawn but takes no room in the cell's own box: the cell
-    // is `contain: layout`, so anything hanging outside it is invisible to
-    // that rect and has to be measured for itself. A control the block has
-    // hidden (a handle behind a framing overlay) measures zero and drops out.
-    cell.querySelectorAll<HTMLElement>("[data-tile-chrome]").forEach((control) => {
-      const box = control.getBoundingClientRect();
-      if (box.width <= 0 || box.height <= 0) return;
-      swallow(padded, box);
+  const found = measureSelection(stage, keys);
+  if (!found) return both;
+  const intoBoard = (edges: Edges): Box =>
+    edgesToBox({
+      left: (edges.left - stageRect.left) / scale,
+      top: (edges.top - stageRect.top) / scale,
+      right: (edges.right - stageRect.left) / scale,
+      bottom: (edges.bottom - stageRect.top) / scale,
     });
-  });
-  if (!Number.isFinite(bare.left)) return both;
-  const toBoxOf = (edges: typeof bare): Box => ({
-    left: edges.left,
-    top: edges.top,
-    width: edges.right - edges.left,
-    height: edges.bottom - edges.top,
-  });
-  return { cell: toBoxOf(bare), withChrome: toBoxOf(padded) };
+  return { cell: intoBoard(found.cell), withChrome: intoBoard(found.padded) };
 }
 
 export function useCanvasAnchor({
@@ -287,6 +317,7 @@ export function useCanvasAnchor({
               insets,
               anchor: anchors.withChrome,
               anchorFallback: anchors.cell,
+              board: boardBox(stage),
             }),
           }),
           { animate: true },
@@ -346,5 +377,110 @@ export function useCanvasAnchor({
   // panel, and an unchanged layout leaves after the comparison above.
   useIsomorphicLayoutEffect(() => {
     sync();
+  });
+}
+
+/**
+ * THE SAME PROMISE ON THE SURFACE THAT HAS NO PAN: the mobile preview.
+ *
+ * `useCanvasAnchor` above is switched off there, and rightly — the preview is a
+ * plain scrolling column with no viewport of its own, so there is no pan to
+ * hold still. But the seller does not care which surface they are on. They tap
+ * a block, a bottom sheet opens over the lower half of the screen, and the
+ * block they just pointed at can be squarely underneath it, with no gesture
+ * that brings it back other than scrolling by hand while the sheet is in the
+ * way.
+ *
+ * So the column scrolls instead, to exactly the same rule and through exactly
+ * the same arithmetic: nothing at all while the selection is already in the
+ * open, and otherwise the scroll that CENTRES it in the strip the sheets have
+ * left (see revealPan). Scroll position is a pan by another name, which is what
+ * lets one rule serve both — `-scrollTop` IS the pan, and the answer comes back
+ * as the scrollTop to write.
+ *
+ * Fires on a selection change and on the cover changing, and on nothing else: a
+ * column that re-scrolled itself while the seller was reading it would be worse
+ * than the problem.
+ */
+export function useScrollReveal({
+  scrollerRef,
+  enabled,
+  anchorKeys,
+}: {
+  /** The scrolling column the preview is drawn in. */
+  scrollerRef: React.RefObject<HTMLElement | null>;
+  /** Preview only. The design view has a real viewport; see useCanvasAnchor. */
+  enabled: boolean;
+  anchorKeys: readonly string[];
+}): void {
+  const lastKeys = useRef<readonly string[]>([]);
+  const lastInsets = useRef<Insets>(NO_INSETS);
+
+  const latest = useRef({ enabled, anchorKeys });
+  useIsomorphicLayoutEffect(() => {
+    latest.current = { enabled, anchorKeys };
+  });
+
+  useIsomorphicLayoutEffect(() => {
+    const area = scrollerRef.current;
+    const { enabled: on, anchorKeys: keys } = latest.current;
+    if (!area || !on) {
+      lastKeys.current = keys;
+      lastInsets.current = NO_INSETS;
+      return;
+    }
+
+    const rect = area.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) return;
+    const workspace = toBox(rect);
+    const insets = coverOf(workspace, panelElements());
+
+    const previousKeys = lastKeys.current;
+    const previousInsets = lastInsets.current;
+    lastKeys.current = keys;
+    lastInsets.current = insets;
+
+    if (keys.length === 0) return;
+    const moved =
+      !sameKeys(previousKeys, keys) || !insetsEqual(previousInsets, insets);
+    if (!moved) return;
+
+    const found = measureSelection(area, keys);
+    if (!found) return;
+    // Into the scroll content's own frame, which is where a scrollTop is
+    // measured from: client top, minus the column's own top, plus how far it
+    // has already been scrolled.
+    const intoContent = (edges: Edges): Box =>
+      edgesToBox({
+        left: edges.left - rect.left,
+        right: edges.right - rect.left,
+        top: edges.top - rect.top + area.scrollTop,
+        bottom: edges.bottom - rect.top + area.scrollTop,
+      });
+
+    const target = revealPan({
+      // Scroll position as a pan: the board's content starts `scrollTop` above
+      // the column's top edge.
+      pan: { x: 0, y: -area.scrollTop },
+      zoom: 1,
+      workspace,
+      insets,
+      anchor: intoContent(found.padded),
+      anchorFallback: intoContent(found.cell),
+    });
+
+    const top = Math.max(
+      0,
+      Math.min(-target.y, area.scrollHeight - area.clientHeight),
+    );
+    if (Math.abs(top - area.scrollTop) < 1) return;
+    area.scrollTo({
+      top,
+      behavior:
+        typeof window !== "undefined" &&
+        window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+          ? "auto"
+          : "smooth",
+    });
   });
 }

@@ -18,10 +18,13 @@ import { cache } from "react";
 import { headers } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
-  SELLER_IDENTITY_SELECT,
+  TRADER_GATE_SELECT,
   buildSellerIdentity,
+  buildTraderIdentityInput,
   type SellerIdentityRow,
+  type TraderGateRow,
 } from "@/lib/settings/seller-identity";
+import { sellerEmailVerificationRequired } from "@/lib/settings/seller-email-verification";
 import { isTraderIdentityComplete } from "@/lib/settings/trader-identity";
 import {
   SHIPPING_POLICY_SELECT,
@@ -277,7 +280,7 @@ export const getPublicProductPage = cache(
         // account-level facts read off the same row, and asking for that row
         // twice on the public page's hot path would be two round trips for
         // one read.
-        .select(`${SELLER_IDENTITY_SELECT}, ${SHIPPING_POLICY_SELECT}`)
+        .select(`${TRADER_GATE_SELECT}, ${SHIPPING_POLICY_SELECT}`)
         .eq("id", storefront.owner_id)
         .maybeSingle(),
     ]);
@@ -301,10 +304,19 @@ export const getPublicProductPage = cache(
     // seller's catalogue is not enumerable by the shape of the response. And
     // fail-closed on a read error: an identity we could not read is one we
     // cannot display, which is the same problem as one that is not there.
-    const seller = buildSellerIdentity(
-      sellerError ? null : (sellerRow as SellerIdentityRow | null),
-    );
-    if (!isTraderIdentityComplete(seller)) return null;
+    //
+    // `seller` is what the page SHOWS (six columns, built field by field, so
+    // the verification flag cannot ride along onto a buyer's page); the gate
+    // asks a wider question of the same row.
+    const gateRow = sellerError ? null : (sellerRow as TraderGateRow | null);
+    const seller = buildSellerIdentity(gateRow as SellerIdentityRow | null);
+    if (
+      !isTraderIdentityComplete(buildTraderIdentityInput(gateRow), {
+        requireVerifiedEmail: sellerEmailVerificationRequired(),
+      })
+    ) {
+      return null;
+    }
 
     const product = await buildProductPageProduct(row as PublicProductRow, {
       soldOutFlag: block.soldOut,

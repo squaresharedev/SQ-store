@@ -19,8 +19,10 @@ afterEach(cleanup);
 
 // Mock the server action — the component imports it from this path.
 const mockSaveTaxInfo = vi.hoisted(() => vi.fn().mockResolvedValue({}));
+const mockResend = vi.hoisted(() => vi.fn().mockResolvedValue({}));
 vi.mock("@/lib/settings/actions", () => ({
   saveTaxInfo: mockSaveTaxInfo,
+  resendSellerEmailVerification: mockResend,
 }));
 
 const { TaxSection } = await import("@/components/settings/TaxSection");

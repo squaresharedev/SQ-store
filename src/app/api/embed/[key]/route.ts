@@ -1,8 +1,10 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
-  SELLER_IDENTITY_SELECT,
-  buildSellerIdentity,
+  TRADER_GATE_SELECT,
+  buildTraderIdentityInput,
+  type TraderGateRow,
 } from "@/lib/settings/seller-identity";
+import { sellerEmailVerificationRequired } from "@/lib/settings/seller-email-verification";
 import { isTraderIdentityComplete } from "@/lib/settings/trader-identity";
 import { RATE_LIMITS, clientKey, rateLimitKey } from "@/lib/rate-limit";
 import { recordSignal, viewDedupeKey, visitorHash } from "@/lib/analytics/record";
@@ -52,14 +54,17 @@ async function canPublish(ownerId: string): Promise<boolean> {
     const admin = createAdminClient();
     const { data, error } = await admin
       .from("profiles")
-      .select(SELLER_IDENTITY_SELECT)
+      .select(TRADER_GATE_SELECT)
       .eq("id", ownerId)
       .maybeSingle();
     if (error) {
       console.error("[embed] seller identity read failed", error.message);
       return false;
     }
-    return isTraderIdentityComplete(buildSellerIdentity(data));
+    return isTraderIdentityComplete(
+      buildTraderIdentityInput(data as TraderGateRow | null),
+      { requireVerifiedEmail: sellerEmailVerificationRequired() },
+    );
   } catch (err) {
     console.error(
       "[embed] seller identity client unavailable:",

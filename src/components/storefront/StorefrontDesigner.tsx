@@ -56,6 +56,7 @@ import {
   packFirstFit,
   placementIsFree,
 } from "@/components/grid/gridConstants";
+import { clampOntoBoard } from "@/lib/geometry/rotated-box";
 import { MAX_BLOCKS, STOREFRONT_NAME_MAX } from "@/lib/validation/storefront";
 import { saveStorefront } from "@/lib/storefront/actions";
 import { cn } from "@/lib/utils";
@@ -83,6 +84,10 @@ import type {
   TextRange,
 } from "./InlineTextEditor";
 import { LibraryPanel, type LibraryTab } from "./LibraryPanel";
+import {
+  AutoFitRegistryProvider,
+  createAutoFitRegistry,
+} from "./text-autofit-registry";
 import { SettingTargetProvider } from "@/lib/storefront/setting-context";
 import {
   freshSettingRef,
@@ -106,7 +111,11 @@ type LeftPanelState =
 import { editorEntries, type EditorJump } from "./editor-search";
 import { ControlsPanel } from "./ControlsPanel";
 import { DesignPanel } from "./DesignPanel";
-import { SHEET_ON_MOBILE_CLASS, activeMobileSheet } from "./panel-chrome";
+import {
+  SHEET_ON_MOBILE_CLASS,
+  SHEET_SCROLL_ROOM_CLASS,
+  activeMobileSheet,
+} from "./panel-chrome";
 import { useEditorSurface } from "./useEditorSurface";
 import { DesignerCanvas } from "./DesignerCanvas";
 import { EditorToolbar } from "./EditorToolbar";
@@ -127,7 +136,11 @@ import { ProductBlockEditor } from "./ProductBlockEditor";
 import { ShapeBlockEditor, type ShapeBlockPatch } from "./ShapeBlockEditor";
 import { TextBlockEditor, type TextBlockPatch } from "./TextBlockEditor";
 import { useCanvasViewport } from "./useCanvasViewport";
-import { CANVAS_PANEL_ATTR, useCanvasAnchor } from "./useCanvasAnchor";
+import {
+  CANVAS_PANEL_ATTR,
+  useCanvasAnchor,
+  useScrollReveal,
+} from "./useCanvasAnchor";
 import { safeSpan } from "./canvas-geometry";
 import { useEditorHistory } from "./useEditorHistory";
 import { useUnsavedChangesGuard } from "@/lib/hooks/useUnsavedChangesGuard";
@@ -170,9 +183,30 @@ const ZOOM_MIN = 0.25;
 const ZOOM_MAX = 2;
 const ZOOM_STEP = 0.1;
 
+/**
+ * Held inside the bounds, and NOT rounded. A trackpad pinch arrives as dozens
+ * of ctrl+wheel events a second, each worth a fraction of a percent, and
+ * rounding every step to the nearest 1% threw every one of them away: a slow
+ * pinch at 100% did nothing at all. Only the toolbar's stepped zoom rounds
+ * (see zoomBy), because only there does a neat readout matter.
+ */
 function clampZoom(value: number): number {
-  return Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, Math.round(value * 100) / 100));
+  return Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, value));
 }
+
+/**
+ * How much zoom one wheel pixel is worth. Chromium turns a trackpad pinch into
+ * ctrl+wheel deltas of `-100 * ln(scale)`, so 100 makes the board track the
+ * fingers exactly, one to one.
+ */
+const WHEEL_ZOOM_PX = 100;
+/**
+ * The most any single wheel event may zoom. A mouse wheel notch is ~100px, and
+ * at the pinch rate that would be a 63% jump per click; capped, a notch is a
+ * ~22% step (the size design tools use) while a pinch, which never comes near
+ * the cap, stays one to one.
+ */
+const WHEEL_ZOOM_STEP_PX = 25;
 
 /** Breathing room left around the board when it is centred or fitted. */
 const CANVAS_MARGIN = 24;
@@ -573,12 +607,13 @@ export function StorefrontDesigner({
   const [typingRange, setTypingRange] = useState<TextRange | null>(null);
 
   /**
-   * The same thing for the MASTHEAD: double-clicking the store name or the bio
-   * types it where it reads, instead of sending the seller to the panel's
-   * fields for the words and back to the canvas for how they look.
+   * The same thing for the MASTHEAD: clicking the store name or the bio types
+   * it where it reads, instead of sending the seller to the panel's fields for
+   * the words and back to the canvas for how they look.
    *
-   * `range` is the selection the click left behind — the word a double-click
-   * landed on — so the first keystroke replaces exactly what was aimed at.
+   * `range` is the selection the click left behind — the caret's position, or
+   * the word under a genuine double/triple click — so the first keystroke
+   * replaces exactly what was aimed at.
    */
   const [headerEdit, setHeaderEdit] = useState<{
     line: HeaderLine;
@@ -594,6 +629,17 @@ export function StorefrontDesigner({
     typingRange.start !== typingRange.end
       ? { block: selectedBlock, range: typingRange }
       : null;
+
+  /** The header line `colorTarget` itself names, before resolution. Read
+   *  straight off the raw target rather than `activeHeaderLine` (which is
+   *  DERIVED from the resolution this feeds) — using that here would be
+   *  circular. */
+  const selectedHeaderLine: HeaderLine | null =
+    colorTarget?.kind === "header-name"
+      ? "name"
+      : colorTarget?.kind === "header-bio"
+        ? "bio"
+        : null;
 
   /**
    * The panel's target against LIVE state. Null when it no longer names
@@ -613,11 +659,17 @@ export function StorefrontDesigner({
               range: textRangeTarget.range,
             }
           : null,
-        // A line emptied while it is being typed in is still on the board, as
-        // a field with a caret in it. Without this the panel would close under
-        // the seller the moment they cleared the words to retype them — and
-        // the panel's target is what keeps the field open.
-        headerEdit?.line ?? null,
+        // A line the panel is AIMED AT is on the board even with nothing in
+        // it — selected counts, not only mid-typing. Without this, a click on
+        // an empty line (the masthead's own default: a fresh storefront's bio
+        // starts blank) opens the panel, but the panel closes itself the
+        // instant that click's own edit blurs for a style control before a
+        // single character has been typed, taking the very button the seller
+        // meant to press down with it. `headerEdit?.line` alone used to be
+        // enough, back when selecting and editing were two separate presses;
+        // now a click does both in one motion, so the selection has to carry
+        // the same weight the caret did.
+        headerEdit?.line ?? selectedHeaderLine,
       )
     : null;
 
@@ -737,8 +789,19 @@ export function StorefrontDesigner({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
+  // Read by the native listeners below, which subscribe once and so cannot
+  // close over a render's value.
+  const designViewRef = useRef(designView);
+  useEffect(() => {
+    designViewRef.current = designView;
+  });
+  // The zoom a Safari trackpad pinch started from, while one is under way.
+  // Shared with the wheel listener, which stands down for the length of it.
+  const gestureZoomFrom = useRef<number | null>(null);
+
   // The wheel drives the workspace: Ctrl/Cmd (or a trackpad pinch, which
-  // arrives as the same event) zooms about the pointer; a plain scroll pans.
+  // Chromium and Firefox deliver as the same event) zooms about the pointer;
+  // a plain two-finger scroll pans.
   // Every event mutates the viewport ref SYNCHRONOUSLY, so a burst of events
   // accumulates instead of each one recomputing from a stale origin.
   // Registered non-passively so the browser's own scroll/zoom is preventable.
@@ -746,14 +809,26 @@ export function StorefrontDesigner({
     const area = canvasViewportRef.current;
     if (!area) return;
     function onWheel(event: WheelEvent) {
+      // The mobile preview is a plain scrolling column with no stage to move,
+      // and swallowing its wheel left it unscrollable by anything but a
+      // scrollbar. A pinch there is still kept from zooming the whole app.
+      if (!designViewRef.current) {
+        if (event.ctrlKey) event.preventDefault();
+        return;
+      }
       event.preventDefault();
+      if (gestureZoomFrom.current !== null) return;
       const { x: deltaX, y: deltaY } = normalizeWheel(event);
       if (event.ctrlKey || event.metaKey) {
         const rect = area!.getBoundingClientRect();
         const anchorX = event.clientX - rect.left;
         const anchorY = event.clientY - rect.top;
+        const step = Math.max(
+          -WHEEL_ZOOM_STEP_PX,
+          Math.min(WHEEL_ZOOM_STEP_PX, deltaY),
+        );
         viewport.set((current) => {
-          const zoom = clampZoom(current.zoom * Math.exp(-deltaY / 300));
+          const zoom = clampZoom(current.zoom * Math.exp(-step / WHEEL_ZOOM_PX));
           return {
             zoom,
             pan: panAfterZoom(current.pan, current.zoom, zoom, anchorX, anchorY),
@@ -789,6 +864,21 @@ export function StorefrontDesigner({
     viewport,
     workspaceRef: canvasViewportRef,
     enabled: designView,
+    anchorKeys: selectedKeys,
+  });
+
+  /**
+   * ...AND THE SAME PROMISE IN MOBILE PREVIEW, WHICH HAS NO PAN.
+   *
+   * The preview is a plain scrolling column, so the anchor above is switched
+   * off for it — and a block selected in there sat wherever it sat, routinely
+   * straight under the sheet that the very act of selecting it had just opened.
+   * The column scrolls the selection into the middle of what the sheets leave,
+   * by the same rule and the same arithmetic (see useScrollReveal).
+   */
+  useScrollReveal({
+    scrollerRef: canvasViewportRef,
+    enabled: !designView,
     anchorKeys: selectedKeys,
   });
 
@@ -1097,10 +1187,13 @@ export function StorefrontDesigner({
   }
 
   /**
-   * Clicking the store name or bio on the canvas aims the left-hand panel at
-   * that line, which is where its colour and size are set. The masthead is not
-   * a block, so it takes no part in the block selection: a click here clears
-   * that instead, exactly as clicking anything else on the board would.
+   * Aims the left-hand panel at a masthead line, which is where its colour and
+   * size are set. Space on the canvas line calls this alone (aim the panel,
+   * leave the words alone); a click calls `beginHeaderEdit` below, which uses
+   * this to bring the panel along as part of opening the field. The masthead
+   * is not a block, so it takes no part in the block selection: aiming the
+   * panel here clears that instead, exactly as clicking anything else on the
+   * board would.
    */
   function selectHeaderLine(line: HeaderLine) {
     setInspector((current) => (current?.kind === "blocks" ? null : current));
@@ -1108,10 +1201,10 @@ export function StorefrontDesigner({
   }
 
   /**
-   * Double-clicking a masthead line (or clicking the one the panel is already
-   * on) puts the caret in it. The panel comes along, aimed at the same line:
-   * the words and the way they look are the one thing being edited, and the
-   * panel's target is also what keeps this mode alive (see editingHeaderLine).
+   * A click (or Enter) on a masthead line puts the caret in it, in one motion:
+   * the panel comes along, aimed at the same line, since the words and the way
+   * they look are the one thing being edited — and the panel's target is also
+   * what keeps this mode alive (see editingHeaderLine).
    */
   function beginHeaderEdit(line: HeaderLine, range: TextRange | null) {
     if (typingRef.current !== null) endTyping();
@@ -1202,7 +1295,9 @@ export function StorefrontDesigner({
   function zoomBy(delta: number) {
     const room = safeWindow();
     viewport.set((current) => {
-      const zoom = clampZoom(current.zoom + delta);
+      // Rounded HERE, not in clampZoom: after a pinch left the board at 83.7%,
+      // the buttons step it back onto whole percentages.
+      const zoom = clampZoom(Math.round((current.zoom + delta) * 100) / 100);
       if (!room) return { ...current, zoom };
       return {
         zoom,
@@ -1228,6 +1323,7 @@ export function StorefrontDesigner({
   // every tile, measured at 46ms per keystroke on a full board.
   const canvasActions = useRef({
     moveBlock,
+    moveBlocks,
     resizeBlock,
     rotateBlocks,
     reorderLayers,
@@ -1253,6 +1349,7 @@ export function StorefrontDesigner({
   useEffect(() => {
     canvasActions.current = {
       moveBlock,
+      moveBlocks,
       resizeBlock,
       rotateBlocks,
       reorderLayers,
@@ -1279,6 +1376,12 @@ export function StorefrontDesigner({
   const onMoveBlock = useCallback((key: string, x: number, y: number) => {
     canvasActions.current.moveBlock(key, x, y);
   }, []);
+  const onMoveBlocks = useCallback(
+    (moves: readonly { key: string; x: number; y: number }[]) => {
+      canvasActions.current.moveBlocks(moves);
+    },
+    [],
+  );
   const onResizeBlock = useCallback((key: string, placement: BlockPlacement) => {
     canvasActions.current.resizeBlock(key, placement);
   }, []);
@@ -1407,32 +1510,52 @@ export function StorefrontDesigner({
     };
   }
 
+  /**
+   * Fingers are counted in the CAPTURE phase, on the way down to whatever they
+   * landed on. Counted on the way back up, a finger on anything that keeps its
+   * press to itself (a resize or rotate handle, the text editor, a masthead
+   * line) was never seen, and a pinch with one finger on the selected tile's
+   * handles, which is where a thumb naturally rests, did nothing at all.
+   *
+   * A photo being framed is the exception: it runs its own pinch, on the
+   * picture, and a board pinching behind it would move both at once.
+   */
+  function onCanvasPointerDownCapture(event: React.PointerEvent<HTMLElement>) {
+    if (event.pointerType !== "touch") return;
+    const target = event.target instanceof Element ? event.target : null;
+    if (target?.closest("[data-block-overlay]")) return;
+    touchPoints.current.set(event.pointerId, {
+      x: event.clientX,
+      y: event.clientY,
+    });
+    if (touchPoints.current.size < 2) return;
+    // The second finger (and any after it) belongs to the pinch, never to the
+    // tile under it, which would otherwise start a drag of its own.
+    event.stopPropagation();
+    event.preventDefault();
+    if (touchPoints.current.size !== 2) return;
+    const { distance, midX, midY } = pinchGeometry();
+    pinchStart.current = {
+      distance,
+      zoom: viewport.get().zoom,
+      midX,
+      midY,
+      pan: { ...viewport.get().pan },
+    };
+    // A finger may already be dragging a tile or panning. Both of those end on
+    // pointercancel, so this hands the gesture over cleanly instead of letting
+    // a tile follow one finger through the pinch. pointerId -1 is the id the
+    // spec reserves for events no real pointer made, so pruning it below can
+    // never drop a finger that is still down.
+    window.dispatchEvent(new PointerEvent("pointercancel", { pointerId: -1 }));
+  }
+
   function onCanvasPointerDown(event: React.PointerEvent<HTMLElement>) {
-    if (event.pointerType === "touch") {
-      touchPoints.current.set(event.pointerId, {
-        x: event.clientX,
-        y: event.clientY,
-      });
-      if (touchPoints.current.size === 2) {
-        const { distance, midX, midY } = pinchGeometry();
-        pinchStart.current = {
-          distance,
-          zoom: viewport.get().zoom,
-          midX,
-          midY,
-          pan: { ...viewport.get().pan },
-        };
-        // A finger may already be dragging a tile or panning. Both of those
-        // end on pointercancel, so this hands the gesture over cleanly instead
-        // of letting a tile follow one finger through the pinch.
-        window.dispatchEvent(new PointerEvent("pointercancel"));
-        return;
-      }
-    }
+    if (pinchStart.current) return;
     startPan(event);
   }
 
-  function onCanvasPointerMove(event: React.PointerEvent<HTMLElement>) {
+  function onCanvasPointerMoveCapture(event: React.PointerEvent<HTMLElement>) {
     if (event.pointerType !== "touch") return;
     if (!touchPoints.current.has(event.pointerId)) return;
     touchPoints.current.set(event.pointerId, {
@@ -1443,6 +1566,7 @@ export function StorefrontDesigner({
     const start = pinchStart.current;
     if (!start || touchPoints.current.size !== 2) return;
     event.preventDefault();
+    event.stopPropagation();
 
     const { distance, midX, midY } = pinchGeometry();
     if (start.distance === 0) return;
@@ -1483,6 +1607,63 @@ export function StorefrontDesigner({
       window.removeEventListener("pointercancel", prune);
     };
   }, []);
+
+  /**
+   * SAFARI'S TRACKPAD PINCH. Chromium and Firefox turn a pinch into ctrl+wheel,
+   * which the wheel listener above already handles; Safari never does. It
+   * raises its own GestureEvent instead, carrying the scale since the fingers
+   * went down, and left alone that zooms the whole page around the editor.
+   *
+   * iOS raises the same events for a two-finger touch, which the pointer pinch
+   * above already owns, so there they are only kept from the page: zooming
+   * from both would double every pinch.
+   */
+  useEffect(() => {
+    const area = canvasViewportRef.current;
+    if (!area) return;
+    type SafariGesture = UIEvent & {
+      scale: number;
+      clientX: number;
+      clientY: number;
+    };
+    function onGestureStart(event: Event) {
+      if (!designViewRef.current) return;
+      event.preventDefault();
+      gestureZoomFrom.current =
+        touchPoints.current.size > 0 ? null : viewport.get().zoom;
+    }
+    function onGestureChange(event: Event) {
+      if (!designViewRef.current) return;
+      event.preventDefault();
+      const from = gestureZoomFrom.current;
+      const { scale, clientX, clientY } = event as SafariGesture;
+      if (from === null || !(scale > 0)) return;
+      const rect = area!.getBoundingClientRect();
+      const zoom = clampZoom(from * scale);
+      viewport.set((current) => ({
+        zoom,
+        pan: panAfterZoom(
+          current.pan,
+          current.zoom,
+          zoom,
+          clientX - rect.left,
+          clientY - rect.top,
+        ),
+      }));
+    }
+    function onGestureEnd(event: Event) {
+      if (designViewRef.current) event.preventDefault();
+      gestureZoomFrom.current = null;
+    }
+    area.addEventListener("gesturestart", onGestureStart, { passive: false });
+    area.addEventListener("gesturechange", onGestureChange, { passive: false });
+    area.addEventListener("gestureend", onGestureEnd, { passive: false });
+    return () => {
+      area.removeEventListener("gesturestart", onGestureStart);
+      area.removeEventListener("gesturechange", onGestureChange);
+      area.removeEventListener("gestureend", onGestureEnd);
+    };
+  }, [viewport]);
 
   /**
    * Is this press on empty workspace, as opposed to on something?
@@ -1542,7 +1723,9 @@ export function StorefrontDesigner({
     if (event.pointerType !== "touch") return false;
     const target = event.target instanceof Element ? event.target : null;
     if (!target || !target.closest("[data-canvas-stage]")) return false;
-    if (target.closest("[data-grid-key]")) return false;
+    // A tile, or the chrome layer drawn beside it: an inert resize handle does
+    // not claim its press, and a finger on it still must not pan the board.
+    if (target.closest("[data-grid-key], [data-grid-chrome]")) return false;
     return (
       target.closest("input, select, textarea, [contenteditable='true']") === null
     );
@@ -1710,11 +1893,30 @@ export function StorefrontDesigner({
     }
   }
 
+  /**
+   * Blocks inserted since the last render, which `blocks` does not know about
+   * yet.
+   *
+   * The picker adds a whole batch in one tick ("Add 3 selected" calls addProduct
+   * three times before React re-renders), and every one of those calls looked
+   * for somewhere free on the SAME board — so all three landed in the same
+   * cell, stacked on top of each other. A ref is what carries the first two
+   * into the third's search; it is cleared on every render, by which point the
+   * state itself holds them.
+   */
+  const pendingInserts = useRef<StorefrontBlock[]>([]);
+  /** ...and the row count they grew the board to, for the same reason. */
+  const pendingRows = useRef(0);
+  useEffect(() => {
+    pendingInserts.current = [];
+    pendingRows.current = 0;
+  });
+
   /** The blocks as the grid's placement helpers want them. Tilt included, so
    *  the search for somewhere free measures a turned block by the cells it
    *  PAINTS on rather than the ones it is placed in. */
   function canvasBlocks() {
-    return blocks.map((block) => ({
+    return [...blocks, ...pendingInserts.current].map((block) => ({
       key: blockKey(block),
       x: block.x,
       y: block.y,
@@ -1741,7 +1943,10 @@ export function StorefrontDesigner({
     at?: { x: number; y: number },
   ): BlockPlacement & { growRows?: number } {
     const existing = canvasBlocks();
-    const { columns, rows } = theme;
+    const { columns } = theme;
+    // The board a batch's earlier inserts already grew, which `theme` will not
+    // report until the next render (see pendingInserts).
+    const rows = Math.max(theme.rows, pendingRows.current);
     if (
       at &&
       placementIsFree(existing, { ...at, w, h }, null, columns, rows)
@@ -1777,11 +1982,25 @@ export function StorefrontDesigner({
     h: number,
     at?: { x: number; y: number },
   ): StorefrontBlock | null {
-    if (blocks.length >= MAX_BLOCKS) return null;
+    // Counted against what is going ON the board, not only what is on it: a
+    // batch add must not be able to slip past the cap between renders.
+    if (blocks.length + pendingInserts.current.length >= MAX_BLOCKS) return null;
     const spot = findSpot(w, h, at);
     recordChange();
-    if (spot.growRows) setTheme({ ...theme, rows: spot.growRows });
+    if (spot.growRows) {
+      // Functional, and remembered: two inserts in one tick would otherwise
+      // each write the row count they computed from the pre-batch board, and
+      // the second would undo the first's growth.
+      const grown = spot.growRows;
+      pendingRows.current = Math.max(pendingRows.current, grown);
+      setTheme((current) =>
+        current.rows >= grown ? current : { ...current, rows: grown },
+      );
+    }
     const block = build({ x: spot.x, y: spot.y, w: spot.w, h: spot.h });
+    // Recorded before the state write, so the next insert IN THIS TICK looks
+    // for a spot on a board that already has this one on it.
+    pendingInserts.current = [...pendingInserts.current, block];
     setBlocks((current) => [...current, block]);
     return block;
   }
@@ -1965,6 +2184,10 @@ export function StorefrontDesigner({
     for (const source of sources) {
       if (blocks.length + added.length >= MAX_BLOCKS) break;
       const { w, h } = source;
+      // The copy keeps its source's tilt, so every search below looks for room
+      // for the cells the copy will really cover, and may land it wherever
+      // those fit (a turned bar in the top row stores a rect above it).
+      const rotation = source.rotation ?? 0;
       const preferred = added.length === 0 && hint
         ? hint
         : { x: source.x + source.w, y: source.y };
@@ -1974,17 +2197,18 @@ export function StorefrontDesigner({
         null,
         columns,
         rows,
+        rotation,
       )
         ? { ...preferred, w, h }
         : null;
       if (!spot) {
-        const free = findFreeCell(working, w, h, columns, rows);
+        const free = findFreeCell(working, w, h, columns, rows, rotation);
         if (free) spot = { ...free, w, h };
       }
       if (!spot) {
         const grown = Math.min(CANVAS_ROWS_MAX, rows + h);
         if (grown > rows) {
-          const free = findFreeCell(working, w, h, columns, grown);
+          const free = findFreeCell(working, w, h, columns, grown, rotation);
           if (free) {
             spot = { ...free, w, h };
             rows = grown;
@@ -1995,7 +2219,12 @@ export function StorefrontDesigner({
       // top of its source rather than being dropped on the floor. Paste is a
       // deliberate act and has to produce something every time.
       if (!spot) {
-        spot = clampToCanvas({ x: source.x, y: source.y, w, h }, columns, rows);
+        spot = clampOntoBoard(
+          { x: source.x, y: source.y, w, h },
+          rotation,
+          columns,
+          rows,
+        );
       }
       // Placement field by field rather than spread: the copy keeps the
       // source's tilt and depth, and a spot that ever carried either of them
@@ -2116,6 +2345,27 @@ export function StorefrontDesigner({
     recordChange(`move:${key}`);
     setBlocks((current) =>
       current.map((b) => (blockKey(b) === key ? { ...b, x, y } : b)),
+    );
+  }
+
+  /**
+   * Where a whole selection landed, as ONE act.
+   *
+   * Dragging six tiles is one thing the seller did and one entry in the
+   * history, not six — the same rule removal and rotation already follow. The
+   * coalesce key names the group (sorted, so it does not depend on selection
+   * order), which is what lets a drag that crosses several cells collapse into
+   * a single undo while a later drag of a different group is its own.
+   */
+  function moveBlocks(moves: readonly { key: string; x: number; y: number }[]) {
+    if (moves.length === 0) return;
+    recordChange(`move:${moves.map((m) => m.key).sort().join(",")}`);
+    const landing = new Map(moves.map((m) => [m.key, m]));
+    setBlocks((current) =>
+      current.map((b) => {
+        const at = landing.get(blockKey(b));
+        return at ? { ...b, x: at.x, y: at.y } : b;
+      }),
     );
   }
 
@@ -2629,6 +2879,33 @@ export function StorefrontDesigner({
     );
   }
 
+  /**
+   * WHICH SHAPES A COLOUR LANDS ON.
+   *
+   * The panel shows ONE shape's colour — the first selected, the same block
+   * the multi inspector reads its values from — but with a whole selection of
+   * shapes out on the board, a pick belongs to all of them: that is what the
+   * inspector's own fields beside it already do, and a toolbar that offered
+   * Colour to a group and then painted one of them would be lying.
+   *
+   * DERIVED FROM THE LIVE SELECTION rather than written into the ref when the
+   * panel opens. The ref outlives the selection that created it — a plain click
+   * opens the panel on that one shape, and shift-clicking three more does not
+   * go anywhere near the panel — so a stored list would be stale exactly when
+   * it mattered. Reading it here means there is nothing to keep in step.
+   *
+   * A selection that is not all shapes, or that does not contain the shape the
+   * panel is showing, paints that shape alone: the panel is pointing at it, and
+   * a colour has to land where the seller can see it land.
+   */
+  function shapeColorKeys(key: string): readonly string[] {
+    const group =
+      selectedKeys.length > 1 &&
+      selectedKeys.includes(key) &&
+      selectedBlocks.every((block) => block.type === "shape");
+    return group ? selectedKeys : [key];
+  }
+
   function updateShapeBlocks(keys: readonly string[], patch: ShapeBlockPatch) {
     const wanted = new Set(keys);
     recordChange(`shape:${keys.join("+")}`);
@@ -2668,11 +2945,14 @@ export function StorefrontDesigner({
       case "header-bio":
         updateHeaderStyle("bio", "color", hex);
         return;
+      // Both land on the whole selection when the ref points into it: a colour
+      // picked with six shapes selected paints six shapes, in one undo step
+      // (see updateShapeBlocks and shapeColorKeys).
       case "shape-fill":
-        updateShapeBlocks([ref.blockKey], { color: hex });
+        updateShapeBlocks(shapeColorKeys(ref.blockKey), { color: hex });
         return;
       case "shape-border":
-        updateShapeBlocks([ref.blockKey], { borderColor: hex });
+        updateShapeBlocks(shapeColorKeys(ref.blockKey), { borderColor: hex });
         return;
       case "text-color":
         setTextColor(ref.blockKey, hex);
@@ -2680,7 +2960,25 @@ export function StorefrontDesigner({
       case "price-tag":
         setPriceTagColor(ref, hex);
         return;
+      case "title-shadow":
+        setTitleShadowColor(ref, hex);
+        return;
     }
+  }
+
+  /** Write (or clear) the `shadow` title area's tint, on a tile's override
+   *  or the theme, exactly as setPriceTagColor does. */
+  function setTitleShadowColor(
+    ref: Extract<ColorTargetRef, { kind: "title-shadow" }>,
+    hex: string | undefined,
+  ) {
+    if (ref.blockKey) {
+      updateProductBlocksStyle([ref.blockKey], { titleShadowColor: hex });
+      return;
+    }
+    const next: StorefrontTheme = { ...theme, titleShadowColor: hex };
+    if (hex === undefined) delete next.titleShadowColor;
+    updateTheme(next);
   }
 
   /**
@@ -2772,6 +3070,10 @@ export function StorefrontDesigner({
       setPriceTagColor(ref, undefined);
       return;
     }
+    if (ref.kind === "title-shadow") {
+      setTitleShadowColor(ref, undefined);
+      return;
+    }
     if (ref.kind === "header-name" || ref.kind === "header-bio") {
       updateHeaderStyle(ref.kind === "header-name" ? "name" : "bio", "color", undefined);
     }
@@ -2819,6 +3121,11 @@ export function StorefrontDesigner({
    * it set would re-open the group every time the panel re-rendered, and would
    * fight the seller the moment they navigated somewhere else.
    */
+  // One registry for the whole editor's lifetime: text tiles on the canvas
+  // publish their live auto-fit size into it, and the inspector's size field
+  // reads it back for whichever block is open. See text-autofit-registry.
+  const [autoFitRegistry] = useState(createAutoFitRegistry);
+
   const [settingTarget, setSettingTarget] = useState<SettingRef | null>(
     // A cold arrival from a search result picked elsewhere. Seeded rather than
     // opened in an effect, so the panel is already on the right group when the
@@ -2882,6 +3189,37 @@ export function StorefrontDesigner({
   function togglePageForProduct(productId: string) {
     if (openPages.includes(productId)) closeProductPage(productId);
     else openProductPage(productId);
+  }
+
+  /**
+   * The same toggle for a SELECTION of product tiles: out with all of their
+   * pages, or away with all of them.
+   *
+   * ALL OR NOTHING, decided once from what is already out. Toggling each id
+   * independently would open the closed ones and close the open ones in the
+   * same press, which is not a state anybody asked for and cannot be predicted
+   * from the icon.
+   *
+   * The pages themselves never land on top of each other: the canvas lays every
+   * open artboard out in one row beside the board (see DesignerCanvas), and
+   * revealArtboard fits the whole stage rather than aiming at one page, so
+   * opening six leaves the board and all six in view.
+   */
+  function togglePagesForProducts(productIds: readonly string[]) {
+    if (productIds.length === 0) return;
+    if (productIds.every((id) => openPages.includes(id))) {
+      setOpenPages((current) => current.filter((id) => !productIds.includes(id)));
+      return;
+    }
+    // One state write for the whole group, so the canvas lays the new row out
+    // in a single pass and revealArtboard fits what is actually open.
+    setOpenPages((current) => [
+      ...current,
+      ...productIds.filter((id) => !current.includes(id)),
+    ]);
+    setSettingTarget(freshSettingRef({ kind: "productPage", section: "layout" }));
+    setPanelOpen(true);
+    revealArtboard();
   }
 
   /** The toolbar's button: show the page for whatever the seller is on, or
@@ -3176,6 +3514,7 @@ export function StorefrontDesigner({
     // and the block colors in the inspector — hand itself to the left-hand
     // ColorPanel. Only the OPENER travels through context; the panel's data
     // comes down as props from here.
+    <AutoFitRegistryProvider value={autoFitRegistry}>
     <ColorTargetProvider
       value={{
         activeRef: activeColorTarget,
@@ -3427,15 +3766,42 @@ export function StorefrontDesigner({
             scrolling column. pb clears the floating toolbar. */}
         <main
           ref={canvasViewportRef}
+          onPointerDownCapture={designView ? onCanvasPointerDownCapture : undefined}
           onPointerDown={designView ? onCanvasPointerDown : undefined}
-          onPointerMove={designView ? onCanvasPointerMove : undefined}
-          onPointerUp={designView ? onCanvasPointerUp : undefined}
-          onPointerCancel={designView ? onCanvasPointerUp : undefined}
+          onPointerMoveCapture={designView ? onCanvasPointerMoveCapture : undefined}
+          onPointerUpCapture={designView ? onCanvasPointerUp : undefined}
+          onPointerCancelCapture={designView ? onCanvasPointerUp : undefined}
           className={cn(
-            "relative min-w-0 flex-1",
+            // `isolate`: the workspace is a SEALED stacking context, and every
+            // level the board paints at is spent inside it.
+            //
+            // The board's own bands run to 700 (see gridConstants), and a
+            // selected tile's handles paint at 660 so they clear every block on
+            // the board. On the design canvas the pan/zoom stage is
+            // already a stacking context and traps all of that. The MOBILE
+            // PREVIEW has no stage — it is a plain scrolling column — so those
+            // numbers used to be compared against the bottom sheets directly,
+            // and beat them: selecting a tile in preview painted the tile, its
+            // ring and its handles straight over the sheet describing it.
+            // Isolating here fixes it at the root rather than by out-numbering
+            // the board, so a future band, at any height, stays under the
+            // sheets without anyone having to remember this.
+            "relative isolate min-w-0 flex-1",
             designView
               ? "touch-none overflow-hidden"
-              : "space-y-6 overflow-auto px-4 py-6 pb-24 sm:px-6",
+              : cn(
+                  "space-y-6 overflow-auto px-4 py-6 sm:px-6",
+                  // Enough room under the content to scroll ANY block out from
+                  // under an open sheet. A column can only scroll as far as its
+                  // content, so a short storefront had no position at all where
+                  // its last block cleared the sheet, and the reveal below had
+                  // nothing to reveal it into. Exclusive with the usual gutter
+                  // rather than layered over it, so no stylesheet order decides
+                  // which wins.
+                  surface === "compact" && mobileSheet !== null
+                    ? SHEET_SCROLL_ROOM_CLASS
+                    : "pb-24",
+                ),
             panning
               ? "cursor-grabbing"
               : spaceHeld && designView
@@ -3460,6 +3826,7 @@ export function StorefrontDesigner({
             showGrid={showGrid}
             viewport={viewport}
             onMoveBlock={onMoveBlock}
+            onMoveBlocks={onMoveBlocks}
             onResizeBlock={onResizeBlock}
             onRotateBlock={onRotateBlock}
             onEmptyCellClick={onInsertAt}
@@ -3515,13 +3882,17 @@ export function StorefrontDesigner({
               openPages={openPages}
               // So the bar can follow its block through a pan and a zoom.
               viewport={viewport}
-              onOpenPage={togglePageForProduct}
+              onOpenPages={togglePagesForProducts}
               onType={onTypeStart}
               onFrame={onFrameBlock}
-              onOpenColor={(key, part) => {
+              // The panel opens on the FIRST selected shape's colour, which is
+              // the block the multi inspector shows its values from too. Where
+              // a pick lands is decided from the live selection rather than
+              // from this ref — see shapeColorKeys.
+              onOpenColor={(blockKeys, part) => {
                 openColorTarget({
                   kind: part === "fill" ? "shape-fill" : "shape-border",
-                  blockKey: key,
+                  blockKey: blockKeys[0],
                 });
                 setColorSummons(colorSummonsNonce.current++);
               }}
@@ -3529,8 +3900,9 @@ export function StorefrontDesigner({
               // of the control rather than opening one over the block: the bar
               // sits ON the block, so a popover under it covers the very shape
               // whose number is being dragged. The panel is docked beside the
-              // canvas and covers nothing.
-              onOpenSetting={(_key, field) => openBlockField(field)}
+              // canvas and covers nothing. It needs no keys — the inspector is
+              // already pointed at the selection, one block or six.
+              onOpenSetting={(_keys, field) => openBlockField(field)}
               onDuplicate={duplicateBlocks}
               onRemove={removeBlocks}
             />
@@ -3640,6 +4012,10 @@ export function StorefrontDesigner({
                     <MultiBlockEditor
                       blocks={selectedBlocks}
                       theme={theme}
+                      // The selection toolbar points at a control rather than
+                      // opening one over the board, and with several blocks
+                      // selected that control is in HERE.
+                      summons={blockField}
                       onProductStyleChange={(patch) =>
                         updateProductBlocksStyle(selectedKeys, patch)
                       }
@@ -3651,6 +4027,18 @@ export function StorefrontDesigner({
                       }
                       onTextChange={(patch) =>
                         updateTextBlocks(selectedKeys, patch)
+                      }
+                      onImageChange={(patch) =>
+                        updateImageBlocks(
+                          selectedKeys,
+                          patch,
+                          // One undo step for the whole opacity drag, keyed on
+                          // the selection so a later drag on a different one is
+                          // its own (the single-block editor does the same).
+                          patch.opacity !== undefined
+                            ? `image:${selectedKeys.join("+")}`
+                            : undefined,
+                        )
                       }
                       onDuplicate={() => duplicateBlocks(selectedKeys)}
                       onRemove={() => removeBlocks(selectedKeys)}
@@ -3805,6 +4193,7 @@ export function StorefrontDesigner({
     </SearchProvider>
     </SettingTargetProvider>
     </ColorTargetProvider>
+    </AutoFitRegistryProvider>
   );
 }
 

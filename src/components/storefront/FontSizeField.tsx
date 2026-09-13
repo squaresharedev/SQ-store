@@ -25,9 +25,12 @@ import {
  * of taste rather than of what is reachable.
  *
  * AUTO IS A REAL STATE, not the bottom of the range: a block with no size of
- * its own follows its style (heading/subheading/body), and going back to that
- * is one press rather than hunting for the number it used to be. Touching
- * either control leaves Auto, starting from what Auto was rendering.
+ * its own follows its style (heading/subheading/body), shrinking below it only
+ * as far as it needs to fit its box, and going back to that is one press
+ * rather than hunting for the number it used to be. Touching either control
+ * leaves Auto, starting from what Auto was ACTUALLY rendering — `autoSize` is
+ * the tile's own live report, not the style's flat number, so taking control
+ * never jumps the size out from under a block that had shrunk to fit.
  */
 export function FontSizeField({
   id,

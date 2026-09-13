@@ -201,6 +201,7 @@ export type Database = {
           notify_sales: boolean
           seller_address: string | null
           seller_email: string | null
+          seller_email_verified_at: string | null
           seller_phone: string | null
           shipping_policy: Json | null
           tax_business_name: string | null
@@ -223,6 +224,7 @@ export type Database = {
           notify_sales?: boolean
           seller_address?: string | null
           seller_email?: string | null
+          seller_email_verified_at?: string | null
           seller_phone?: string | null
           shipping_policy?: Json | null
           tax_business_name?: string | null
@@ -245,6 +247,7 @@ export type Database = {
           notify_sales?: boolean
           seller_address?: string | null
           seller_email?: string | null
+          seller_email_verified_at?: string | null
           seller_phone?: string | null
           shipping_policy?: Json | null
           tax_business_name?: string | null
@@ -252,6 +255,36 @@ export type Database = {
           tax_vat_id?: string | null
           updated_at?: string
           username?: string | null
+        }
+        Relationships: []
+      }
+      seller_email_verifications: {
+        Row: {
+          consumed_at: string | null
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          owner_id: string
+          token_hash: string
+        }
+        Insert: {
+          consumed_at?: string | null
+          created_at?: string
+          email: string
+          expires_at: string
+          id?: string
+          owner_id: string
+          token_hash: string
+        }
+        Update: {
+          consumed_at?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          owner_id?: string
+          token_hash?: string
         }
         Relationships: []
       }

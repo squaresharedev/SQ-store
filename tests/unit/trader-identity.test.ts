@@ -52,6 +52,35 @@ describe("missingTraderIdentity", () => {
     ).toBe(true);
   });
 
+  // The contact address must be PROVEN, not merely typed — but only where the
+  // platform can actually send the link. A deployment with no mail must not
+  // demand a click nobody can deliver.
+  it("ignores verification unless the caller asks for it", () => {
+    expect(missingTraderIdentity({ ...COMPLETE, emailVerified: false })).toEqual([]);
+    expect(
+      missingTraderIdentity(
+        { ...COMPLETE, emailVerified: false },
+        { requireVerifiedEmail: true },
+      ),
+    ).toEqual(["emailVerified"]);
+    expect(
+      missingTraderIdentity(
+        { ...COMPLETE, emailVerified: true },
+        { requireVerifiedEmail: true },
+      ),
+    ).toEqual([]);
+  });
+
+  it("does not complain that a missing email is also unconfirmed", () => {
+    // Two complaints about one blank field is worse advice than one.
+    expect(
+      missingTraderIdentity(
+        { ...COMPLETE, email: undefined },
+        { requireVerifiedEmail: true },
+      ),
+    ).toEqual(["email"]);
+  });
+
   it("agrees with what buildSellerIdentity makes of a raw profile row", () => {
     // The read side applies this predicate to a built identity, so a column
     // that is null must arrive as a missing field rather than as an empty one.
@@ -82,12 +111,26 @@ describe("the copy the gate hands every surface", () => {
 
   it("every field's anchor exists on the settings page", () => {
     // The hrefs are only worth anything if they land on the field. These ids
-    // are on TaxSection's field wrappers.
+    // are on TaxSection's field wrappers; confirmation shares the contact
+    // email's, because that is where its status line and resend button live.
     expect(TRADER_IDENTITY_FIELDS.map((field) => field.anchor)).toEqual([
       "business-name",
       "address",
       "contact-email",
+      "contact-email",
     ]);
+  });
+
+  it("tells an unconfirmed seller to click a link, not to type something", () => {
+    // "Add your confirmed contact email" would be advice to fill in a field
+    // that is already filled in.
+    const fix = traderIdentityFix(["emailVerified"]);
+    expect(fix).toMatch(/confirmation link/i);
+    expect(fix).not.toMatch(/^Add your/);
+    // With typed fields missing too, both asks are made, once each.
+    const both = traderIdentityFix(["address", "emailVerified"]);
+    expect(both).toContain("business address");
+    expect(both).toMatch(/confirm your contact email/i);
   });
 
   it("lists missing fields as a readable phrase", () => {

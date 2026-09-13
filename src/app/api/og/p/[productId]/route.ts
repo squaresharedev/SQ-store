@@ -2,9 +2,11 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
-  SELLER_IDENTITY_SELECT,
-  buildSellerIdentity,
+  TRADER_GATE_SELECT,
+  buildTraderIdentityInput,
+  type TraderGateRow,
 } from "@/lib/settings/seller-identity";
+import { sellerEmailVerificationRequired } from "@/lib/settings/seller-email-verification";
 import { isTraderIdentityComplete } from "@/lib/settings/trader-identity";
 import { presignGetUrl } from "@/lib/r2";
 import { RATE_LIMITS, clientKey, rateLimitKey } from "@/lib/rate-limit";
@@ -69,7 +71,7 @@ export async function GET(
 
   const { data: sellerRow, error: sellerError } = await admin
     .from("profiles")
-    .select(SELLER_IDENTITY_SELECT)
+    .select(TRADER_GATE_SELECT)
     .eq("id", row.owner_id)
     .maybeSingle();
   // Fail closed, like every other arm of this gate: an identity we could not
@@ -78,7 +80,12 @@ export async function GET(
     console.error("[og] seller identity read failed", sellerError.message);
     return new Response(null, { status: 404 });
   }
-  if (!isTraderIdentityComplete(buildSellerIdentity(sellerRow))) {
+  if (
+    !isTraderIdentityComplete(
+      buildTraderIdentityInput(sellerRow as TraderGateRow | null),
+      { requireVerifiedEmail: sellerEmailVerificationRequired() },
+    )
+  ) {
     return new Response(null, { status: 404 });
   }
 

@@ -12,7 +12,10 @@ import {
   type CardStyle,
   type CardStyleOverrides,
   type SpotRow,
+  type StorefrontTheme,
 } from "@/types/storefront";
+import { titleShadowColorField } from "@/lib/theme/color-target";
+import { ColorPicker } from "@/components/ui/ColorPicker";
 import {
   layoutPresetPatch,
   matchLayoutPreset,
@@ -39,6 +42,36 @@ const REVEAL_HINTS: Record<SpotRow, string> = {
   bottom: "The bar slides up from the bottom when a buyer hovers.",
 };
 
+/** The shadow's tint: an inherit dot that clears the override, and a target so
+ *  the wheel opens the docked panel. Resolved by color-target, the same call
+ *  the panel makes, so the two cannot disagree. */
+function TitleShadowColorField({
+  theme,
+  overrides,
+  scope,
+  onChange,
+}: NonNullable<Parameters<typeof CardStyleControls>[0]["colorScope"]> & {
+  onChange: (patch: CardStyleOverrides) => void;
+}) {
+  const field = titleShadowColorField(theme, overrides);
+  return (
+    <ColorPicker
+      label={field.label}
+      value={field.value}
+      onChange={(titleShadowColor) => onChange({ titleShadowColor })}
+      inherit={{
+        ...field.inherit!,
+        onSelect: () => onChange({ titleShadowColor: undefined }),
+      }}
+      target={
+        scope === "many"
+          ? undefined
+          : { kind: "title-shadow", ...(scope === "theme" ? {} : scope) }
+      }
+    />
+  );
+}
+
 /**
  * How a product tile is laid out, shared by the theme's Cards section and each
  * product tile's inspector. Fully controlled: `value` is a RESOLVED CardStyle
@@ -57,9 +90,22 @@ const REVEAL_HINTS: Record<SpotRow, string> = {
 export function CardStyleControls({
   value,
   onChange,
+  colorScope,
 }: {
   value: CardStyle;
   onChange: (patch: CardStyleOverrides) => void;
+  /**
+   * The layers behind `value`, for the one optional color here (the shadow
+   * tint): its inherit dot has to know whether THIS layer sets it, which the
+   * merged style cannot say. Same shape as PriceTagControls' props. Absent =
+   * no color field.
+   */
+  colorScope?: {
+    theme: StorefrontTheme;
+    /** The tile override being edited. Absent = editing the theme itself. */
+    overrides?: CardStyleOverrides;
+    scope: "theme" | "many" | { blockKey: string };
+  };
 }) {
   const fieldId = useId();
 
@@ -124,6 +170,13 @@ export function CardStyleControls({
               : undefined
         }
       />
+
+      {/* Out of Fine tuning on purpose: a seller who picks Gallery sees the
+          fade straight away and should find its color without digging. Shown
+          only while a shadow is actually drawn. */}
+      {colorScope && value.showTitle && value.titleStyle === "shadow" && (
+        <TitleShadowColorField {...colorScope} onChange={onChange} />
+      )}
 
       <CollapsibleSection title="Fine tuning" collapsible defaultOpen={false}>
         <div className="space-y-4">

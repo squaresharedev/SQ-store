@@ -15,9 +15,13 @@
  *
  *   1. HOLD STILL. The board is pinned to the SCREEN, not to the workspace. A
  *      panel that opens over space the board was not using changes nothing.
- *   2. RECOVER, MINIMALLY. Only when the panel actually stands on the board
- *      does the board move, and then by the least amount that gets it back out
- *      from under it.
+ *   2. RECOVER ONLY WHEN COVERED. Only when the panel actually stands on the
+ *      board does the board move. How far is a question of what is being
+ *      recovered: the board as a whole steps out by the least amount that
+ *      clears the panel, while a SELECTION — the block the seller is pointing
+ *      at — is centred in the room that is left, because a tile shoved just
+ *      past a bottom sheet's edge puts the handles welded under it straight
+ *      back underneath (see revealIntoView).
  *
  * Everything here is pure and measured in CSS pixels, which is what lets one
  * pair of rules cover a docked column (it shrinks the workspace box) and a
@@ -222,6 +226,89 @@ export function slideIntoView(
   return 0;
 }
 
+/**
+ * The move that puts a run of `size` in the MIDDLE of `[min, max]`, rather than
+ * just barely inside it.
+ *
+ * Zero under exactly the same conditions as `slideIntoView` (no room, or
+ * content bigger than the room it has), so the two can be swapped for each
+ * other without a caller having to re-check either.
+ */
+export function centerIntoView(
+  pos: number,
+  size: number,
+  min: number,
+  max: number,
+): number {
+  const room = max - min;
+  if (room <= 0) return 0;
+  if (size >= room) return 0;
+  return min + (room - size) / 2 - pos;
+}
+
+/**
+ * SHOW IT, AND SHOW IT PROPERLY: nothing at all if it is already in the open,
+ * otherwise the move that CENTRES it in the room there is.
+ *
+ * The two halves are deliberately different rules. A box already in the open is
+ * left exactly where it is — a board that re-centred itself every time a panel
+ * twitched, or every time a block was clicked, would be unusable. But once a
+ * move is happening anyway, the least possible one is the wrong amount: sliding
+ * a tile until its bottom edge is level with a bottom sheet's top edge is
+ * technically "revealed" and practically useless, since the resize and rotate
+ * handles welded under that edge land straight back under the sheet, and the
+ * seller is left working in the last few pixels of the screen. Centring costs
+ * the same gesture and puts the thing being worked on where it can be seen.
+ *
+ * `center` is off for the WHOLE BOARD (see keepVisible): a board that is merely
+ * tucked under a panel's edge should step out from under it, not re-centre
+ * itself in the workspace, which is a much bigger move than anything the panel
+ * asked for. It is on for a selection, which is the seller pointing at
+ * something.
+ *
+ * `bounds` is what the selection lives INSIDE — the whole board, in the same
+ * frame — and it caps the EXTRA half of that move, never the reveal itself.
+ * Centring one tile costs the board around it, and on a phone the board's
+ * leading edge carries the masthead and the mobile/desktop preview switch:
+ * sliding those off the strip to put a 48px tile in the middle of it trades a
+ * control the seller can no longer reach for a few pixels of symmetry. So the
+ * cap applies exactly when the reveal leaves room for it — where the minimal
+ * move would have kept that edge in view, so does the centred one. Where even
+ * the minimal move pushes the edge out (a tile far enough down the board that
+ * no pan shows both), the edge is already spent and the cap steps aside rather
+ * than holding back a move that would buy nothing.
+ *
+ * The centring move always has the same SIGN as the minimal one, which is what
+ * lets the recover rule keep its "only towards an edge that just closed in"
+ * guard while handing back the larger number.
+ */
+function revealIntoView(
+  pos: number,
+  size: number,
+  [min, max]: [number, number],
+  center: boolean,
+  bounds?: { pos: number; size: number },
+): number {
+  const minimal = slideIntoView(pos, size, min, max);
+  if (minimal === 0 || !center) return minimal;
+  let move = centerIntoView(pos, size, min, max);
+  if (bounds) {
+    // The furthest this way the board may travel with its own leading (or
+    // trailing) edge still inside the strip. Applied only when the REVEAL
+    // itself leaves room for it: a selection that cannot be shown at all
+    // without pushing that edge out has already spent it, and holding the
+    // remaining half of the move back would buy nothing.
+    if (move < 0) {
+      const limit = min - bounds.pos;
+      if (limit <= minimal) move = Math.max(move, limit);
+    } else {
+      const limit = max - (bounds.pos + bounds.size);
+      if (limit >= minimal) move = Math.min(move, limit);
+    }
+  }
+  return move;
+}
+
 /** Which ends of an axis the change TOOK workspace from, as opposed to gave
  *  back. Only a side that lost room can ask the board to move. */
 type Taken = { leading: boolean; trailing: boolean };
@@ -242,9 +329,11 @@ function recover(
   pos: number,
   size: number,
   taken: Taken,
-  [min, max]: [number, number],
+  span: [number, number],
+  center: boolean,
+  bounds: { pos: number; size: number },
 ): number {
-  const move = slideIntoView(pos, size, min, max);
+  const move = revealIntoView(pos, size, span, center, bounds);
   if (move > 0 && !taken.leading) return 0;
   if (move < 0 && !taken.trailing) return 0;
   return move;
@@ -271,11 +360,17 @@ function recover(
  *
  * Per axis, so the answers can differ: on a phone with a sheet up the board
  * usually still fits across and cannot fit down, and both of those are right.
+ *
+ * Each candidate also says whether it may be CENTRED once a move is needed (see
+ * revealIntoView). The board says no — stepping out from under a panel is the
+ * whole of what it was asked for — and the selection says yes, because a tile
+ * revealed flush against the panel that was covering it is revealed in name
+ * only.
  */
 function keepVisible(
   [min, max]: [number, number],
-  ...candidates: { start: number; size: number }[]
-): { start: number; size: number } {
+  ...candidates: { start: number; size: number; center: boolean }[]
+): { start: number; size: number; center: boolean } {
   const room = max - min;
   return (
     candidates.find((candidate) => candidate.size <= room) ??
@@ -367,27 +462,31 @@ export function reanchorPan({
   const bare = anchorFallback ?? anchor;
   const keepX = keepVisible(
     nowX,
-    { start: board.left * zoom, size: board.width * zoom },
-    { start: anchor.left * zoom, size: anchor.width * zoom },
-    { start: bare.left * zoom, size: bare.width * zoom },
+    { start: board.left * zoom, size: board.width * zoom, center: false },
+    { start: anchor.left * zoom, size: anchor.width * zoom, center: true },
+    { start: bare.left * zoom, size: bare.width * zoom, center: true },
   );
   const keepY = keepVisible(
     nowY,
-    { start: board.top * zoom, size: board.height * zoom },
-    { start: anchor.top * zoom, size: anchor.height * zoom },
-    { start: bare.top * zoom, size: bare.height * zoom },
+    { start: board.top * zoom, size: board.height * zoom, center: false },
+    { start: anchor.top * zoom, size: anchor.height * zoom, center: true },
+    { start: bare.top * zoom, size: bare.height * zoom, center: true },
   );
   x += recover(
     x + keepX.start,
     keepX.size,
     takenFrom(previous.left, wasX, workspace.left, nowX),
     nowX,
+    keepX.center,
+    { pos: x + board.left * zoom, size: board.width * zoom },
   );
   y += recover(
     y + keepY.start,
     keepY.size,
     takenFrom(previous.top, wasY, workspace.top, nowY),
     nowY,
+    keepY.center,
+    { pos: y + board.top * zoom, size: board.height * zoom },
   );
   return { hold, pan: { x, y } };
 }
@@ -411,13 +510,15 @@ export function reanchorPan({
  * In both cases the seller has just said which block they mean and the board
  * answers by not showing it.
  *
- * MINIMAL, AND ONLY WHEN IT HAS TO. `slideIntoView` returns zero for a
- * selection already inside the uncovered strip, so selecting something you can
- * already see moves nothing, which is every selection on a desktop. There is
- * no `taken` guard here and there should not be: that guard exists to stop a
- * panel merely resizing from undoing a board the seller deliberately parked
- * half off-screen, and a selection is not an accident of layout — it is the
- * seller pointing at something and asking to see it.
+ * ONLY WHEN IT HAS TO, AND THEN PROPERLY. A selection already inside the
+ * uncovered strip moves nothing, so selecting something you can already see is
+ * free — which is every selection on a desktop. When it is NOT in the open, the
+ * board centres it in the strip rather than sliding it just barely into view:
+ * see revealIntoView for why the minimal answer is the wrong one here. There is
+ * no `taken` guard and there should not be: that guard exists to stop a panel
+ * merely resizing from undoing a board the seller deliberately parked half
+ * off-screen, and a selection is not an accident of layout — it is the seller
+ * pointing at something and asking to see it.
  *
  * Same two candidates as the recover rule, for the same reason: with the
  * chrome if the strip can hold it, without if it cannot (see keepVisible).
@@ -429,6 +530,7 @@ export function revealPan({
   insets,
   anchor,
   anchorFallback,
+  board,
 }: {
   pan: { x: number; y: number };
   zoom: number;
@@ -438,22 +540,43 @@ export function revealPan({
   anchor: Box;
   /** The same blocks without that chrome. Defaults to `anchor`. */
   anchorFallback?: Box;
+  /** What the selection sits inside, if the caller has it: the board's own
+   *  edges are not evicted from the strip merely to centre a tile (see
+   *  revealIntoView). A scrolling column passes nothing — pushing content off
+   *  the top is what scrolling IS. */
+  board?: Box;
 }): { x: number; y: number } {
   const bare = anchorFallback ?? anchor;
   const spanX = safeSpan(workspace.width, insets.left, insets.right);
   const spanY = safeSpan(workspace.height, insets.top, insets.bottom);
   const keepX = keepVisible(
     spanX,
-    { start: anchor.left * zoom, size: anchor.width * zoom },
-    { start: bare.left * zoom, size: bare.width * zoom },
+    { start: anchor.left * zoom, size: anchor.width * zoom, center: true },
+    { start: bare.left * zoom, size: bare.width * zoom, center: true },
   );
   const keepY = keepVisible(
     spanY,
-    { start: anchor.top * zoom, size: anchor.height * zoom },
-    { start: bare.top * zoom, size: bare.height * zoom },
+    { start: anchor.top * zoom, size: anchor.height * zoom, center: true },
+    { start: bare.top * zoom, size: bare.height * zoom, center: true },
   );
   return {
-    x: pan.x + slideIntoView(pan.x + keepX.start, keepX.size, ...spanX),
-    y: pan.y + slideIntoView(pan.y + keepY.start, keepY.size, ...spanY),
+    x:
+      pan.x +
+      revealIntoView(
+        pan.x + keepX.start,
+        keepX.size,
+        spanX,
+        true,
+        board && { pos: pan.x + board.left * zoom, size: board.width * zoom },
+      ),
+    y:
+      pan.y +
+      revealIntoView(
+        pan.y + keepY.start,
+        keepY.size,
+        spanY,
+        true,
+        board && { pos: pan.y + board.top * zoom, size: board.height * zoom },
+      ),
   };
 }

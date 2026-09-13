@@ -4,11 +4,11 @@ import { useMemo } from "react";
 import type { Product } from "@/types/product";
 import {
   EMPTY_STOREFRONT_HEADER,
-  blockCornerRadius,
   blockKey,
   buyerVisibleBlocks,
   layerOrder,
   readingOrder,
+  tileCovers,
   type CardStyleOverrides,
   type ProductBlock,
   type StorefrontBlock,
@@ -27,7 +27,12 @@ import { CustomFontFace } from "./CustomFontFace";
 import { StorefrontMasthead } from "./StorefrontMasthead";
 import { resolveBackgroundStyle } from "./background-presets";
 import { useFitToBox } from "./useFitToBox";
-import { gridGapStyle, scaledCornerRadius, tileClipStyle } from "./config-maps";
+import {
+  blockTileClipStyle,
+  gridGapStyle,
+  scaledCornerRadius,
+  tileClipStyle,
+} from "./config-maps";
 
 /**
  * Read-only miniature of a storefront (list cards, and later anywhere a
@@ -220,6 +225,13 @@ export function StorefrontPreview({
     });
   }, [visibleBlocks]);
 
+  // Over the blocks this preview DRAWS, like the depths: a hidden sold-out
+  // product covers nothing.
+  const covers = useMemo(
+    () => tileCovers(tileTheme, visibleBlocks),
+    [tileTheme, visibleBlocks],
+  );
+
   const getProduct = (block: StorefrontBlock): Product | null =>
     block.type === "product"
       ? (productsById.get(block.productId) ?? null)
@@ -275,15 +287,20 @@ export function StorefrontPreview({
             // designed. Reflowing would show a layout the storefront doesn't
             // have — the one thing a preview must not do.
             responsive={false}
+            // A block under a product on the same cells takes that card's
+            // corners, exactly as it does on the canvas (see
+            // blockTileClipStyle).
             cellStyle={(placement, gridBlock) =>
-              tileClipStyle(
-                scaledCornerRadius(
-                  gridBlock
-                    ? blockCornerRadius(tileTheme, gridBlock.data)
-                    : tileTheme.cornerRadius,
-                  placement,
-                ),
-              )
+              gridBlock
+                ? blockTileClipStyle(
+                    tileTheme,
+                    gridBlock.data,
+                    placement,
+                    covers.get(gridBlock.key),
+                  )
+                : tileClipStyle(
+                    scaledCornerRadius(tileTheme.cornerRadius, placement),
+                  )
             }
             renderBlock={(gridBlock) => (
               <BlockTile

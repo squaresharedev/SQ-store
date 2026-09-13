@@ -29,9 +29,11 @@
 import { cache } from "react";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { serverError, traderIdentityRequired, type ActionError } from "@/lib/errors";
+import { sellerEmailVerificationRequired } from "@/lib/settings/seller-email-verification";
 import {
   missingTraderIdentity,
   type TraderIdentityField,
+  type TraderIdentityInput,
 } from "@/lib/settings/trader-identity";
 import type { StorefrontSeller } from "@/types/storefront";
 
@@ -47,6 +49,36 @@ export type SellerIdentityRow = {
   seller_email: string | null;
   seller_phone: string | null;
 };
+
+/**
+ * The identity columns PLUS the one the publish gate needs and a buyer must
+ * never see: whether the contact address has been proven
+ * (20260909_seller_email_verification).
+ *
+ * Kept as a separate constant rather than widened into
+ * {@link SELLER_IDENTITY_SELECT} so the buyer-facing read stays exactly the
+ * six columns a buyer is shown. Anything selecting this must build the page's
+ * seller block with `buildSellerIdentity` (which copies field by field and
+ * therefore cannot carry the extra column) and the gate's input with
+ * {@link buildTraderIdentityInput}.
+ */
+export const TRADER_GATE_SELECT =
+  `${SELLER_IDENTITY_SELECT}, seller_email_verified_at` as const;
+
+export type TraderGateRow = SellerIdentityRow & {
+  seller_email_verified_at: string | null;
+};
+
+/** A row -> what the publish gate asks about. Verification is a boolean here;
+ *  when it was proven is nobody's business but the audit trail's. */
+export function buildTraderIdentityInput(
+  row: TraderGateRow | null,
+): TraderIdentityInput {
+  return {
+    ...buildSellerIdentity(row),
+    emailVerified: Boolean(row?.seller_email_verified_at),
+  };
+}
 
 /**
  * A profile row -> the shape the product page renders. Built field by field
@@ -84,7 +116,7 @@ export async function getSellerIdentity(ownerId: string): Promise<StorefrontSell
     .eq("id", ownerId)
     .maybeSingle();
   if (error) {
-    console.error("[seller-identity] read failed", error);
+    console.error("[seller-identity] read failed:", error.code, error.message);
     return {};
   }
   return buildSellerIdentity(data);
@@ -116,14 +148,27 @@ export const getTraderIdentityStatus = cache(
       const admin = createAdminClient();
       const { data, error } = await admin
         .from("profiles")
-        .select(SELLER_IDENTITY_SELECT)
+        .select(TRADER_GATE_SELECT)
         .eq("id", ownerId)
         .maybeSingle();
       if (error) {
-        console.error("[seller-identity] publish-gate read failed", error);
+        // Fields spelled out: a PostgrestError logged whole prints as `{}` in
+        // the dev overlay, which hides the one thing worth reading (a missing
+        // column is how an unapplied migration shows up here).
+        console.error(
+          "[seller-identity] publish-gate read failed:",
+          error.code,
+          error.message,
+        );
         return { ok: false };
       }
-      return { ok: true, missing: missingTraderIdentity(buildSellerIdentity(data)) };
+      return {
+        ok: true,
+        missing: missingTraderIdentity(
+          buildTraderIdentityInput(data as TraderGateRow | null),
+          { requireVerifiedEmail: sellerEmailVerificationRequired() },
+        ),
+      };
     } catch (err) {
       // createAdminClient THROWS when the service-role env is missing or
       // wrong, and this gate now sits in front of a save the seller pressed.

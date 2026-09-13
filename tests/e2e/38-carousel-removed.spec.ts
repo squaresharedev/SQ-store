@@ -67,9 +67,10 @@ test("the storefront canvas renders as a grid with no carousel toggle", async ({
   // No carousel strip anywhere.
   await expect(page.getByRole("list", { name: "Storefront carousel" })).toHaveCount(0);
 
-  // Open the Canvas group of the design panel and confirm there is no
+  // Open the Theme group of the design panel — Canvas is folded into it and
+  // shown directly, with nothing to expand — and confirm there is no
   // "Display mode" control left.
-  await page.getByText("Canvas", { exact: true }).first().click();
+  await page.getByText("Theme", { exact: true }).first().click();
   await expect(page.getByText("Display mode", { exact: true })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Carousel", exact: true })).toHaveCount(0);
   // The rest of the Canvas group is still there.

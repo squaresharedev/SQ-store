@@ -44,6 +44,9 @@ describe("embedded supabase replica", () => {
       "rate_limits",
       "reports",
       "security_events",
+      // Pending confirmation tokens for a seller's contact address
+      // (20260909_seller_email_verification). Service-role only.
+      "seller_email_verifications",
       "storefront_signals",
       "storefronts",
       "team_members",

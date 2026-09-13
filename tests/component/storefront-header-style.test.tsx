@@ -154,6 +154,70 @@ describe("StorefrontMasthead: selecting a line", () => {
   });
 });
 
+describe("StorefrontMasthead: editing a line directly", () => {
+  it("a click starts typing on the FIRST press, not the second", async () => {
+    const user = userEvent.setup();
+    const onSelectLine = vi.fn();
+    const onEditLine = vi.fn();
+    render(
+      <StorefrontMasthead
+        header={header()}
+        theme={themeWith()}
+        onSelectLine={onSelectLine}
+        onEditLine={onEditLine}
+      />,
+    );
+    await user.click(screen.getByRole("button", { name: /store name/i }));
+    // jsdom has no real text layout, so the offset-from-click-point range
+    // (see offsetAtPoint) always comes back null here; which line got the
+    // caret is what this asserts, not where in it.
+    expect(onEditLine).toHaveBeenCalledWith("name", null);
+    // Aiming the panel is folded into onEditLine's own handler upstream
+    // (StorefrontDesigner's beginHeaderEdit calls selectHeaderLine itself),
+    // so a click that can edit never ALSO calls onSelectLine directly.
+    expect(onSelectLine).not.toHaveBeenCalled();
+  });
+
+  it("Enter starts typing too; Space stays a pure select", async () => {
+    const user = userEvent.setup();
+    const onSelectLine = vi.fn();
+    const onEditLine = vi.fn();
+    render(
+      <StorefrontMasthead
+        header={header()}
+        theme={themeWith()}
+        onSelectLine={onSelectLine}
+        onEditLine={onEditLine}
+      />,
+    );
+    screen.getByRole("button", { name: /store name/i }).focus();
+    await user.keyboard("{Enter}");
+    expect(onEditLine).toHaveBeenCalledWith("name", null);
+    expect(onSelectLine).not.toHaveBeenCalled();
+
+    onEditLine.mockClear();
+    await user.keyboard(" ");
+    expect(onSelectLine).toHaveBeenCalledWith("name");
+    expect(onEditLine).not.toHaveBeenCalled();
+  });
+
+  it("without onEditLine, a click still only selects", async () => {
+    // The fallback for a caller that offers selection but no in-place editor
+    // (there is none today, but the component has to degrade sanely).
+    const user = userEvent.setup();
+    const onSelectLine = vi.fn();
+    render(
+      <StorefrontMasthead
+        header={header()}
+        theme={themeWith()}
+        onSelectLine={onSelectLine}
+      />,
+    );
+    await user.click(screen.getByRole("button", { name: /store name/i }));
+    expect(onSelectLine).toHaveBeenCalledWith("name");
+  });
+});
+
 describe("header defaults", () => {
   it("a new storefront starts shown but with empty lines — buyers see nothing until the seller types", () => {
     // SF-02: name and bio default to "". The masthead is shown (show:true) so

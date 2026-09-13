@@ -3,12 +3,14 @@ import { render, screen, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {
   DEFAULT_STOREFRONT_CONFIG,
+  type ImageBlock,
   type ProductBlock,
   type ShapeBlock,
   type StorefrontBlock,
   type TextBlock,
 } from "@/types/storefront";
 import { MultiBlockEditor } from "@/components/storefront/MultiBlockEditor";
+import type { BlockFieldSummons } from "@/components/storefront/SummonedField";
 
 /**
  * The group editor's contract: same-type selections get their full settings
@@ -53,23 +55,53 @@ function productBlock(x: number, style?: ProductBlock["style"]): ProductBlock {
   };
 }
 
+function imageBlock(x: number): ImageBlock {
+  return {
+    type: "image",
+    id: uid(),
+    key: `elements/${x}.png`,
+    alt: "",
+    fit: "cover",
+    x,
+    y: 3,
+    w: 1,
+    h: 1,
+  };
+}
+
 function renderMulti(blocks: StorefrontBlock[]) {
   const callbacks = {
     onProductStyleChange: vi.fn(),
     onProductStyleReset: vi.fn(),
     onShapeChange: vi.fn(),
     onTextChange: vi.fn(),
+    onImageChange: vi.fn(),
     onDuplicate: vi.fn(),
     onRemove: vi.fn(),
   };
-  render(
+  const view = render(
     <MultiBlockEditor
       blocks={blocks}
       theme={DEFAULT_STOREFRONT_CONFIG.theme}
       {...callbacks}
     />,
   );
-  return callbacks;
+  return {
+    ...callbacks,
+    /** Press a toolbar button, in effect: the panel is already open on the
+     *  selection when the summons arrives, which is the only way it ever
+     *  arrives (the nonce IS the event — see useSummonFlash). */
+    summon(summons: BlockFieldSummons) {
+      view.rerender(
+        <MultiBlockEditor
+          blocks={blocks}
+          theme={DEFAULT_STOREFRONT_CONFIG.theme}
+          summons={summons}
+          {...callbacks}
+        />,
+      );
+    },
+  };
 }
 
 describe("MultiBlockEditor", () => {
@@ -145,5 +177,58 @@ describe("MultiBlockEditor", () => {
     expect(callbacks.onDuplicate).toHaveBeenCalledTimes(1);
     await user.click(screen.getByRole("button", { name: /remove 3 blocks/i }));
     expect(callbacks.onRemove).toHaveBeenCalledTimes(1);
+  });
+
+  it("all elements: the group settings, without the two that belong to one picture", async () => {
+    const user = userEvent.setup();
+    const callbacks = renderMulti([imageBlock(0), imageBlock(1)]);
+    // Fit and opacity are group settings and land on the whole selection.
+    await user.click(screen.getByRole("button", { name: "Fit" }));
+    expect(callbacks.onImageChange).toHaveBeenCalledWith({ fit: "contain" });
+    // Framing positions THIS artwork inside THIS block, and a description
+    // describes one picture — writing either across six would be wrong for
+    // five of them.
+    expect(
+      screen.queryByRole("button", { name: /reposition image/i }),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /remove 2 blocks/i }),
+    ).toBeInTheDocument();
+  });
+
+  /**
+   * THE BAR POINTS AT A CONTROL, IT DOES NOT DUPLICATE ONE. The selection
+   * toolbar rides over the block, so a slider dropped under it would cover the
+   * very shape whose number is being dragged — it asks the panel to show and
+   * mark the field instead. With several blocks selected the panel showing it
+   * is THIS one, so the summons has to reach the editors inside it. Without
+   * the pass-through, every group press scrolled to nothing.
+   */
+  it("takes the toolbar's summons through to the editor it opens", () => {
+    const lit = (field: string) =>
+      document.querySelector(
+        `[data-block-field='${field}'] [role='slider'][data-highlighted]`,
+      );
+    const group = renderMulti([shapeBlock("square", 0), shapeBlock("square", 1)]);
+    expect(lit("corners")).toBeNull();
+
+    group.summon({ field: "corners", nonce: 1 });
+    expect(lit("corners")).not.toBeNull();
+    // And only the one asked for.
+    expect(lit("opacity")).toBeNull();
+
+    group.summon({ field: "opacity", nonce: 2 });
+    expect(lit("opacity")).not.toBeNull();
+  });
+
+  it("takes it through for a selection of elements too", () => {
+    const group = renderMulti([imageBlock(0), imageBlock(1)]);
+    group.summon({ field: "opacity", nonce: 1 });
+    expect(
+      document.querySelector(
+        "[data-block-field='opacity'] [role='slider'][data-highlighted]",
+      ),
+    ).not.toBeNull();
   });
 });

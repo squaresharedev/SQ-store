@@ -92,11 +92,17 @@ const FULFILMENT_META: Record<
 
 const VIBE_LABELS: Record<StorefrontVibe, string> = {
   minimal: "Minimal",
-  warm: "Warm",
-  bold: "Bold",
-  playful: "Playful",
-  luxe: "Luxe",
   classic: "Classic",
+  bold: "Bold",
+};
+
+/** What the look does to a tile, which is what actually separates the three.
+ *  Kept in the same words the editor's Looks row uses (LooksSection), so the
+ *  seller meets one description of each look rather than two. */
+const VIBE_HINTS: Record<StorefrontVibe, string> = {
+  minimal: "Name and price on hover",
+  classic: "Name and price always shown",
+  bold: "Price always, name on hover",
 };
 
 /**
@@ -270,7 +276,9 @@ export function VibeGrid({
     <div
       role="group"
       aria-label="The look you want"
-      className="grid grid-cols-2 gap-2 sm:grid-cols-3"
+      // One per row on a phone: with three looks the old two-across grid left
+      // a widow, and the hint under each name needs the width to stay one line.
+      className="grid grid-cols-1 gap-2 sm:grid-cols-3"
     >
       {STOREFRONT_VIBES.map((vibe) => (
         <ChoiceTile
@@ -278,6 +286,7 @@ export function VibeGrid({
           selected={value === vibe}
           onSelect={() => onChange(vibe)}
           label={VIBE_LABELS[vibe]}
+          hint={VIBE_HINTS[vibe]}
           // Set in its own typeface, so the label doubles as a specimen.
           labelClassName={FONT_CLASSES[VIBE_PRESETS[vibe].font]}
         >

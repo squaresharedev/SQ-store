@@ -42,6 +42,15 @@
  * is a door to a page and a photo to crop; a shape is a colour and an outline;
  * a text block is words to type. Offering the union of those to everything
  * would mean most of the bar being inert most of the time.
+ *
+ * AND A SELECTION IS NOT A LESSER BLOCK. Six shapes have a colour, a stroke,
+ * corners and an opacity in exactly the way one shape does — the inspector has
+ * always edited them together (see MultiBlockEditor) — so the bar offers the
+ * same four whenever every selected block can answer for them. The tests are
+ * over the WHOLE selection, never over its first member: one text block among
+ * five shapes has no fill, so the group has no fill either. Products keep their
+ * page for the same reason, on the subset that has one, exactly as Duplicate
+ * has always acted on the copyable subset of a mixed selection.
  */
 
 import { useRef } from "react";
@@ -56,7 +65,7 @@ import {
   Type,
 } from "lucide-react";
 import type { Product } from "@/types/product";
-import type { StorefrontBlock } from "@/types/storefront";
+import type { ShapeBlock, StorefrontBlock } from "@/types/storefront";
 import { blockKey } from "@/types/storefront";
 import { useIsomorphicLayoutEffect } from "@/lib/hooks/useIsomorphicLayoutEffect";
 import { cn } from "@/lib/utils";
@@ -119,7 +128,12 @@ const ACTION_ICON = `size-3.5 ${iconPopClass}`;
 /** Thin vertical divider between toolbar groups, and the only air on the bar:
  *  the buttons themselves sit flush (see the row's `gap-0`), so this seam is
  *  what says "different kind of action" rather than a gap repeated between
- *  every pair of icons. */
+ *  every pair of icons.
+ *
+ *  Drawn ONLY WITH SOMETHING ON BOTH SIDES of it. A seam is a statement about
+ *  two groups, and a selection whose block tools are all inapplicable (several
+ *  products, whose only shared act is Delete) left it standing at the head of
+ *  the bar, drawing a line beside nothing. */
 function Divider() {
   return <div aria-hidden="true" className="mx-1 h-4 w-px shrink-0 bg-border" />;
 }
@@ -444,7 +458,7 @@ export function SelectionToolbar({
   elementUrls,
   openPages,
   viewport,
-  onOpenPage,
+  onOpenPages,
   onType,
   onFrame,
   onOpenColor,
@@ -462,16 +476,20 @@ export function SelectionToolbar({
   /** The board's pan and zoom, so the bar can follow a block through both.
    *  Absent in harnesses whose board does neither. */
   viewport?: CanvasViewport;
-  onOpenPage: (productId: string) => void;
+  /** Every product in the selection, deduplicated: one page per product,
+   *  however many tiles point at it. Out with all of them, or away with all of
+   *  them — the caller decides which from what is already open. */
+  onOpenPages: (productIds: readonly string[]) => void;
   onType: (key: string) => void;
   onFrame: (key: string) => void;
-  /** Shapes: put this block's fill or its outline in the colour panel, which
-   *  is where every colour in this editor is chosen. */
-  onOpenColor: (key: string, part: "fill" | "border") => void;
-  /** Point the inspector at one of this block's controls: open the panel,
+  /** Shapes: put these blocks' fill or outline in the colour panel, which is
+   *  where every colour in this editor is chosen. Takes the whole selection,
+   *  so one pick paints all of it. */
+  onOpenColor: (keys: readonly string[], part: "fill" | "border") => void;
+  /** Point the inspector at one of the selection's controls: open the panel,
    *  scroll that field into view, mark it. The bar does not edit these
    *  numbers itself — see the note on the shape group below. */
-  onOpenSetting: (key: string, field: BlockField) => void;
+  onOpenSetting: (keys: readonly string[], field: BlockField) => void;
   /** Copy the given blocks and drop the copies beside them, in one act. Takes
    *  the COPYABLE keys only — a product tile is one per product by design, so
    *  it is filtered out here rather than silently ignored downstream. */
@@ -487,13 +505,31 @@ export function SelectionToolbar({
 
   if (blocks.length === 0) return null;
 
-  // Everything but Remove acts on ONE block, so it is offered for one block.
-  // With several selected the shared action is the only honest one.
+  // The block a control names when there is exactly one. Type and Frame stay
+  // its business alone: a text block's words are its own, and a crop is a
+  // gesture on one picture.
   const only = blocks.length === 1 ? blocks[0] : null;
   const onlyKey = only ? blockKey(only) : null;
 
-  const pageProductId = only?.type === "product" ? only.productId : null;
-  const pageIsOpen = pageProductId !== null && openPages.includes(pageProductId);
+  /**
+   * THE PAGES THIS SELECTION HAS, deduplicated. One page per PRODUCT however
+   * many tiles point at it, so two tiles of the same mug are one door — and a
+   * mixed selection offers the doors it does have rather than none, exactly as
+   * Duplicate offers the copies it has.
+   */
+  const pageProductIds = [
+    ...new Set(
+      blocks.flatMap((block) =>
+        block.type === "product" ? [block.productId] : [],
+      ),
+    ),
+  ];
+  // A toggle, and with several pages it is all or nothing: pressing it with
+  // some out puts the rest out, pressing it again puts them all away. A button
+  // whose meaning flipped per product would be unpredictable from its icon.
+  const pagesAreOpen =
+    pageProductIds.length > 0 &&
+    pageProductIds.every((id) => openPages.includes(id));
   const framable =
     only !== null && framedSrcOf(only, productsById, elementUrls) !== null;
 
@@ -504,6 +540,12 @@ export function SelectionToolbar({
    * space is worth more than the label.
    */
   const name = only ? blockLabel(only, productsById) : `${blocks.length} elements`;
+  /** What the page control names, which is not always what the SELECTION is:
+   *  one product picked out of a mixed selection is still that product's page. */
+  const pageName =
+    pageProductIds.length === 1
+      ? (productsById.get(pageProductIds[0])?.title ?? name)
+      : `${pageProductIds.length} products`;
 
   /**
    * WHAT DUPLICATE MEANS HERE. A product tile is one per product by design —
@@ -516,10 +558,43 @@ export function SelectionToolbar({
     .filter((block) => block.type !== "product")
     .map(blockKey);
 
-  const shape = only?.type === "shape" ? only : null;
-  /** Opacity belongs to whole objects: a shape and an image element both. */
-  const opacityBlock =
-    only?.type === "shape" || only?.type === "image" ? only : null;
+  /**
+   * THE SHAPE GROUP, offered to a selection made ENTIRELY of shapes — one or
+   * six, the same four controls. The inspector has always edited a same-type
+   * selection through the very editor a single block uses (MultiBlockEditor),
+   * so the bar's job is only to point at it.
+   *
+   * `shapes[0]` is what the colour swatch WEARS, matching the panel's own rule
+   * that a multi-selection shows the first selected block's values. Corners
+   * need every shape to have some: a circle among the squares would leave a
+   * control that does nothing to part of the selection.
+   */
+  const shapes = blocks.filter((b): b is ShapeBlock => b.type === "shape");
+  const shapeKeys = shapes.length === blocks.length ? shapes.map(blockKey) : [];
+  const shape = shapeKeys.length > 0 ? shapes[0] : null;
+  const roundable =
+    shape !== null && shapes.every((s) => supportsRoundness(s.kind));
+
+  /** Opacity belongs to whole objects: a shape and an image element both, and
+   *  a selection of any mixture of the two. */
+  const opacityKeys = blocks.every(
+    (block) => block.type === "shape" || block.type === "image",
+  )
+    ? keys
+    : [];
+
+  /**
+   * Whether the seam before Duplicate/Delete has anything to separate. It is a
+   * statement about two groups of controls, so with the left-hand group empty
+   * — several products, whose one shared act is Delete — it drew a line beside
+   * nothing at all.
+   */
+  const hasBlockTools =
+    pageProductIds.length > 0 ||
+    only?.type === "text" ||
+    shape !== null ||
+    opacityKeys.length > 0 ||
+    framable;
 
   return (
     // The frame spans the canvas window and takes no pointer events, so the
@@ -537,8 +612,10 @@ export function SelectionToolbar({
         // canvas's live zoom — left/top stay at zero so that transform is the
         // only thing that ever moves or resizes it. `origin-top-left` matches
         // the translate-then-scale order, so the box grows from the corner it
-        // was placed at rather than from its centre.
-        className="absolute left-0 top-0 origin-top-left will-change-transform"
+        // was placed at rather than from its centre. No `will-change`: it
+        // holds on to the bitmap drawn at the old zoom and stretches it, so at
+        // 200% the bar's icons went as soft as the canvas handles did.
+        className="absolute left-0 top-0 origin-top-left"
       >
         <div
           role="toolbar"
@@ -566,19 +643,29 @@ export function SelectionToolbar({
             "bg-background/95 p-1 backdrop-blur",
           )}
         >
-          {/* The product page, as a door on the canvas beside the board. Only
-              ever for one product: a node per tile turns the board into a
-              diagram, and the seller has already said which they mean. */}
-          {pageProductId !== null && (
+          {/* The product page, as a door on the canvas beside the board. One
+              per PRODUCT, so two tiles of the same mug open one page — and a
+              selection of six products opens six, laid out side by side beside
+              the board rather than stacked in one spot (see DesignerCanvas's
+              artboard row). */}
+          {pageProductIds.length > 0 && (
             <ToolButton
-              tip={pageIsOpen ? "Hide page" : "Open page"}
-              pressed={pageIsOpen}
-              pageNode={pageIsOpen ? "open" : "closed"}
-              onClick={() => onOpenPage(pageProductId)}
+              tip={
+                pagesAreOpen
+                  ? pageProductIds.length > 1
+                    ? "Hide pages"
+                    : "Hide page"
+                  : pageProductIds.length > 1
+                    ? "Open pages"
+                    : "Open page"
+              }
+              pressed={pagesAreOpen}
+              pageNode={pagesAreOpen ? "open" : "closed"}
+              onClick={() => onOpenPages(pageProductIds)}
               label={
-                pageIsOpen
-                  ? `Close the product page for ${name}`
-                  : `Open the product page for ${name}`
+                pagesAreOpen
+                  ? `Close the product ${pageProductIds.length > 1 ? "pages" : "page"} for ${pageName}`
+                  : `Open the product ${pageProductIds.length > 1 ? "pages" : "page"} for ${pageName}`
               }
             >
               <FileText className={ACTION_ICON} strokeWidth={2} aria-hidden="true" />
@@ -603,11 +690,11 @@ export function SelectionToolbar({
               popover on the bar: this bar rides over the block, so anything
               it opens downward covers the very shape whose number is being
               dragged. */}
-          {shape !== null && onlyKey !== null && (
+          {shape !== null && (
             <>
               <ToolButton
                 tip="Color"
-                onClick={() => onOpenColor(onlyKey, "fill")}
+                onClick={() => onOpenColor(shapeKeys, "fill")}
                 label={`Change the colour of ${name}`}
               >
                 <ColorSwatch color={shape.color} />
@@ -615,18 +702,19 @@ export function SelectionToolbar({
 
               <ToolButton
                 tip="Stroke"
-                onClick={() => onOpenSetting(onlyKey, "stroke")}
+                onClick={() => onOpenSetting(shapeKeys, "stroke")}
                 label={`Edit the stroke of ${name}`}
               >
                 <Equal className={ACTION_ICON} strokeWidth={2} aria-hidden="true" />
               </ToolButton>
 
               {/* Only the kinds whose corners are not already fixed by
-                  construction: a circle has no corner to round. */}
-              {supportsRoundness(shape.kind) && (
+                  construction: a circle has no corner to round, and one circle
+                  among the squares is enough to withhold it from the group. */}
+              {roundable && (
                 <ToolButton
                   tip="Corners"
-                  onClick={() => onOpenSetting(onlyKey, "corners")}
+                  onClick={() => onOpenSetting(shapeKeys, "corners")}
                   label={`Edit the corner roundness of ${name}`}
                 >
                   <Spline className={ACTION_ICON} strokeWidth={2} aria-hidden="true" />
@@ -637,10 +725,10 @@ export function SelectionToolbar({
 
           {/* Opacity belongs to whole objects, so a shape and an image element
               both get it, and it is last of the four for both. */}
-          {opacityBlock !== null && onlyKey !== null && (
+          {opacityKeys.length > 0 && (
             <ToolButton
               tip="Opacity"
-              onClick={() => onOpenSetting(onlyKey, "opacity")}
+              onClick={() => onOpenSetting(opacityKeys, "opacity")}
               label={`Edit the opacity of ${name}`}
             >
               <Blend className={ACTION_ICON} strokeWidth={2} aria-hidden="true" />
@@ -657,7 +745,7 @@ export function SelectionToolbar({
             </ToolButton>
           )}
 
-          <Divider />
+          {hasBlockTools && <Divider />}
 
           {/* The two that act on the block AS A WHOLE, in the order the
               inspector ends on: copy it, or be rid of it. */}

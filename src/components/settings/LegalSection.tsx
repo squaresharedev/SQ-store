@@ -28,7 +28,7 @@ const DOCS = [
   },
   {
     title: "Your seller details, and where they go",
-    body: "Your trader name, address and contact email are shown to buyers on your product pages, and are required before you can publish or sell anything. That is the only thing we do with them: EU consumer law says a buyer has to be able to see who they are buying from and reach them before they order. We do not use them for marketing, do not add them to any list, and never sell or share them. Your phone number and VAT ID are optional and are shown only if you fill them in.",
+    body: "Your trader name, address and contact email are shown to buyers on your product pages, and are required before you can publish or sell anything. That is the only thing we do with them: EU consumer law says a buyer has to be able to see who they are buying from and reach them before they order. We send one link to your contact address so you can confirm it works, and that is the only email we send there on our own initiative — no list, no marketing, and we never sell or share any of it. Your phone number and VAT ID are optional and are shown only if you fill them in.",
   },
 ] as const;
 

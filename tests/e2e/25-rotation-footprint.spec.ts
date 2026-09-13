@@ -170,4 +170,91 @@ test.describe("a turned block covers different cells", () => {
     await expect.poll(() => areas(page)).toEqual(["2 / span 1|1 / span 3"]);
     await expect(unsaved).toBeVisible();
   });
+
+  test("a turned bar moves onto the top row, saves, and is still there after a reload", async ({
+    page,
+  }) => {
+    // THE REPORT, end to end on the real designer: a turned block refused
+    // cells it plainly fit in. A quarter-turned 1x3 bar lying across the top
+    // row stores a rect that starts a row ABOVE the board, so the arrow used to
+    // stop a row short, and the schema refused the position if anything else
+    // put it there. Now the arrow takes it the whole way, the save goes
+    // through, and the reloaded board paints it on the top row.
+    await setUpBar(page, "foottop");
+    const tile = page.locator("li[data-grid-cell]").first();
+    await tile.locator("[data-block-tile]").focus();
+    await page.keyboard.press("ArrowRight");
+    await expect.poll(() => areas(page)).toEqual(["2 / span 1|1 / span 3"]);
+
+    await page.getByRole("button", { name: "Rotate to 90 degrees" }).click();
+    // Lying across row 2, columns 1..3.
+    await expect
+      .poll(() => guidesInRow(page, 2))
+      .toEqual([false, false, false, true, true, true]);
+
+    await tile.locator("[data-block-tile]").focus();
+    await page.keyboard.press("ArrowUp");
+    await expect
+      .poll(() => guidesInRow(page, 1))
+      .toEqual([false, false, false, true, true, true]);
+    expect(await guidesInRow(page, 2)).toEqual([true, true, true, true, true, true]);
+    await expect.poll(() => paintedCells(page)).toEqual({ x: 0, y: 0, w: 3, h: 1 });
+
+    const unsaved = page.locator('[role="status"]', {
+      hasText: "Unsaved changes",
+    });
+    await expect(unsaved).toBeVisible();
+    await page.getByRole("button", { name: "Save" }).click();
+    await expect(unsaved).toBeHidden();
+
+    await page.reload();
+    await page.waitForLoadState("networkidle");
+    await expect(page.locator("li[data-grid-cell]")).toHaveCount(1);
+    await expect
+      .poll(() => guidesInRow(page, 1))
+      .toEqual([false, false, false, true, true, true]);
+    // Painted there too, not merely recorded there: a stored rect off the
+    // board must still be laid out on the board's own lines.
+    await expect.poll(() => paintedCells(page)).toEqual({ x: 0, y: 0, w: 3, h: 1 });
+  });
 });
+
+/** Which of a row's six cells still show a free-cell guide. */
+async function guidesInRow(page: Page, row: number): Promise<boolean[]> {
+  return page.evaluate((line) => {
+    const drawn = new Set(
+      [...document.querySelectorAll<HTMLElement>("button[data-grid-empty]")].map(
+        (button) => button.getAttribute("aria-label"),
+      ),
+    );
+    return [1, 2, 3, 4, 5, 6].map((column) =>
+      drawn.has(`Add a block at column ${column}, row ${line}`),
+    );
+  }, row);
+}
+
+/** Where the (only) tile PAINTS, in board cells, to a tenth of a cell. */
+async function paintedCells(page: Page) {
+  return page.evaluate(() => {
+    const grid = document.querySelector<HTMLElement>(
+      'ul[aria-label="Storefront canvas"]',
+    )!;
+    const g = grid.getBoundingClientRect();
+    const style = getComputedStyle(grid);
+    // The canvas is zoomed: the rect is on screen, the gap is in layout px.
+    const scale = grid.offsetWidth > 0 ? g.width / grid.offsetWidth : 1;
+    const gap = (Number.parseFloat(style.columnGap) || 0) * scale;
+    const columns = Number.parseInt(style.getPropertyValue("--ss-cols"), 10);
+    const stride = (g.width - (columns - 1) * gap) / columns + gap;
+    const r = document
+      .querySelector<HTMLElement>("li[data-grid-cell]")!
+      .getBoundingClientRect();
+    const tenth = (n: number) => Math.round(n * 10) / 10 + 0;
+    return {
+      x: tenth((r.left - g.left) / stride),
+      y: tenth((r.top - g.top) / stride),
+      w: tenth((r.width + gap) / stride),
+      h: tenth((r.height + gap) / stride),
+    };
+  });
+}

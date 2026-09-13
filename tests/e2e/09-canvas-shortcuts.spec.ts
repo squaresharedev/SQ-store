@@ -145,7 +145,14 @@ test.describe("storefront canvas shortcuts", () => {
     await expect(tile).toBeVisible();
 
     // Leave the canvas empty for the next test.
+    //
+    // Escape between the click and the Delete: this block is still the sole
+    // selection, and clicking a text tile that already is puts the CARET in it
+    // (click to select, click again to edit — the very behaviour the next case
+    // is about). Without stepping back out of the caret first, Delete edits the
+    // words instead of removing the block.
     await tile.click();
+    await page.keyboard.press("Escape");
     await page.keyboard.press("Delete");
     await expect(tile).toBeHidden();
   });

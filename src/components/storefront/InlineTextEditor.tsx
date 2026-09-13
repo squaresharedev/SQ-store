@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef, type RefObject } from "react";
 import {
   TEXT_MAX_LENGTH,
   type TextBlock,
@@ -70,6 +70,7 @@ export function InlineTextEditor({
   className,
   style,
   selectAll,
+  nodeRef,
   onChange,
   onToggleBlockFormat,
   onRangeChange,
@@ -81,6 +82,10 @@ export function InlineTextEditor({
   /** Start with everything selected, so the first keystroke replaces the
    *  placeholder a freshly inserted block was given. */
   selectAll: boolean;
+  /** Handed the same node this editor manages imperatively, so a caller
+   *  outside it (the auto-fit sizing in TextTileContent) can measure it
+   *  directly rather than needing its own copy of the DOM. */
+  nodeRef?: RefObject<HTMLParagraphElement | null>;
   /** Text and/or runs changed. Both travel together: a keystroke can move the
    *  runs, and a run can only be read against the text it applies to. */
   onChange: (text: string, spans: TextSpan[], source: TextEditSource) => void;
@@ -297,7 +302,10 @@ export function InlineTextEditor({
 
   return (
     <p
-      ref={ref}
+      ref={(node) => {
+        ref.current = node;
+        if (nodeRef) nodeRef.current = node;
+      }}
       // React renders NO children into this element on purpose (see above).
       contentEditable
       suppressContentEditableWarning

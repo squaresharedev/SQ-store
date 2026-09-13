@@ -5,10 +5,10 @@ import type { SellerShippingPolicy } from "@/types/shipping-policy";
 import { ShoppingBag } from "lucide-react";
 import type { Product } from "@/types/product";
 import {
-  blockCornerRadius,
   blockKey,
   isFreelyArranged,
   layerOrder,
+  tileCovers,
   type HeaderLine,
   type ImagePlacement,
   type ProductPageConfig,
@@ -43,7 +43,12 @@ import type { SpotDrop, SpotToken } from "./TileSpotDragLayer";
 import { CustomFontFace } from "./CustomFontFace";
 import { StorefrontMasthead } from "./StorefrontMasthead";
 import { resolveBackgroundStyle } from "./background-presets";
-import { gridGapStyle, scaledCornerRadius, tileClipStyle } from "./config-maps";
+import {
+  blockTileClipStyle,
+  gridGapStyle,
+  scaledCornerRadius,
+  tileClipStyle,
+} from "./config-maps";
 import type { CanvasViewport } from "./useCanvasViewport";
 import { iconPopClass, primaryButtonClass } from "@/components/ui/control-styles";
 
@@ -135,6 +140,7 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   showGrid = true,
   viewport,
   onMoveBlock,
+  onMoveBlocks,
   onResizeBlock,
   onRotateBlock,
   onEmptyCellClick,
@@ -204,6 +210,10 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   viewport?: CanvasViewport;
   /** All callbacks are keyed by blockKey(block). */
   onMoveBlock: (key: string, x: number, y: number) => void;
+  /** Where a whole SELECTION landed, in one call: dragging (or nudging) any
+   *  one of several selected tiles carries all of them, and six tiles arriving
+   *  somewhere new is one act and one entry in the history. */
+  onMoveBlocks: (moves: readonly { key: string; x: number; y: number }[]) => void;
   onResizeBlock: (key: string, placement: GridPlacement) => void;
   /** Tilt, in degrees. The block keeps the cells it had. */
   onRotateBlock: (key: string, rotation: number) => void;
@@ -220,13 +230,18 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   onSelectMany: (keys: string[]) => void;
   /** The masthead line the style panel is on, if any. */
   activeHeaderLine?: HeaderLine | null;
-  /** Clicking a masthead line aims the left-hand panel at it. Omitted in
-   *  read-only renders, where the masthead is not selectable at all. */
+  /** Aims the left-hand panel at a masthead line, without opening the field —
+   *  Space's path (see onEditHeaderLine for the click/Enter one, which brings
+   *  the panel along too). Omitted in read-only renders, where the masthead is
+   *  not selectable at all. */
   onSelectHeaderLine?: (line: HeaderLine) => void;
   /** The masthead line whose words are being typed in place, if any. */
   editingHeaderLine?: HeaderLine | null;
-  /** Where the caret goes when that editor opens (the double-clicked word). */
+  /** Where the caret goes when that editor opens (where the click landed, or
+   *  the word under a genuine double/triple click). */
   editingHeaderRange?: TextRange | null;
+  /** A click (or Enter) on a masthead line: aims the panel at it AND drops a
+   *  caret in it, in one motion. */
   onEditHeaderLine?: (line: HeaderLine, range: TextRange | null) => void;
   onHeaderTextChange?: (line: HeaderLine, value: string) => void;
   onToggleHeaderFormat?: (
@@ -618,6 +633,10 @@ export const DesignerCanvas = memo(function DesignerCanvas({
     });
   }, [blocks]);
 
+  // Which blocks sit under a product on the same cells, and so take its
+  // corners. Once per board like the depths above, not once per cell.
+  const covers = useMemo(() => tileCovers(theme, blocks), [theme, blocks]);
+
   // Whether this board is arranged in a way a straight line cannot express.
   // Cheap enough to run per render on a 120-block board, and it has to follow
   // the blocks, since one drag onto a neighbour is what changes the answer.
@@ -826,16 +845,25 @@ export const DesignerCanvas = memo(function DesignerCanvas({
             // Corner roundness drives the cell clip (style beats the grid's
             // default rounded-sm class); tiles inherit it, no clip of their
             // own. Scaled per tile size so big tiles round like small ones.
-            // Per block: a product tile may override the theme's roundness.
-            cellStyle={(placement, gridBlock) => ({
-              ...tileClipStyle(
-                scaledCornerRadius(
-                  gridBlock
-                    ? blockCornerRadius(theme, gridBlock.data)
-                    : theme.cornerRadius,
-                  placement,
-                ),
-              ),
+            // Per block: a product tile may override the theme's roundness,
+            // and a block under a product on the same cells takes that card's
+            // corners so none of it shows past them (see blockTileClipStyle).
+            cellStyle={(placement, gridBlock, gestureKeys) => ({
+              ...(gridBlock
+                ? blockTileClipStyle(
+                    theme,
+                    gridBlock.data,
+                    placement,
+                    // A tile being framed is lifted clear of the whole stack,
+                    // so nothing is on top of it any more.
+                    framingKey === gridBlock.key
+                      ? undefined
+                      : covers.get(gridBlock.key),
+                    gestureKeys,
+                  )
+                : tileClipStyle(
+                    scaledCornerRadius(theme.cornerRadius, placement),
+                  )),
               // A tile being framed draws the rest of its picture OUTSIDE
               // itself, and any block in front would paint straight over it.
               // Lifting the cell clear of the whole content band is what keeps
@@ -850,6 +878,12 @@ export const DesignerCanvas = memo(function DesignerCanvas({
             onMove={onMoveBlock}
             onResize={onResizeBlock}
             onRotate={onRotateBlock}
+            // THE SELECTION TRAVELS TOGETHER. A drag or an arrow on any one of
+            // several selected tiles carries all of them, as one rigid body and
+            // one undo step; the grid stays selection-agnostic and is simply
+            // told which keys move as a group (see `groupKeys` in Grid).
+            groupKeys={selectedKeys}
+            onMoveMany={onMoveBlocks}
             onEmptyCellClick={onEmptyCellClick}
             renderBlock={(gridBlock, state) => (
               <BlockTile
@@ -981,9 +1015,11 @@ function Stage({
       style={{
         width: "max-content",
         transformOrigin: "0 0",
-        // Promote the stage to its own compositor layer up front, so a pan is
-        // a GPU transform rather than a repaint of every tile.
-        willChange: "transform",
+        // No `willChange` here: the viewport promotes the stage only while the
+        // view is moving, because a permanent one kept the 100% bitmap and
+        // stretched it, blurring every handle at 200% (see useCanvasViewport).
+        // The transform it always carries still makes this the stacking
+        // context the grid's paint bands rely on.
         // Reserved above BOTH the board and the pages, not just the pages, so
         // the two start level with each other: a page reads as belonging to
         // the storefront it opened from, not as a separate thing hanging

@@ -1,9 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MoveDiagonal2, RotateCw } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { footprintOffset, rotatedFootprint } from "@/lib/geometry/rotated-box";
+import {
+  clampOntoBoard,
+  clampStep,
+  footprintOffset,
+  moveReach,
+  rotatedFootprint,
+} from "@/lib/geometry/rotated-box";
 import {
   ROTATION_SNAP_STEP,
   angleFromCenter,
@@ -21,14 +27,12 @@ import {
   GRID_ROWS_DEFAULT,
   blockFootprint,
   boardInLocalFrame,
-  clampToCanvas,
   columnsThatFit,
   edgeCursor,
   edgesUnderPointer,
   EMPTY_CELL_Z,
   keyboardResizeStep,
   layerZIndex,
-  liftableChromeKeys,
   placementFromLocalBox,
   placementIsFree,
   invertReflowResize,
@@ -70,12 +74,9 @@ const DRAG_THRESHOLD = 4;
  *
  *  SELECTION IS THE WHOLE STORY ON A TOUCHSCREEN. These used to be drawn
  *  unconditionally there, on the grounds that a finger has no hover to reveal
- *  them with — but revealed is not the same as reachable. The lift that puts a
- *  cell's chrome above its neighbours (see globals.css) is spent on hover,
- *  focus, or selection, and a finger has none of the first two, so on a phone
- *  every unselected tile with a block under it drew a resize and a rotate
- *  handle straight into that block's face: visible, permanently dead, and on
- *  the very form factor where they are the ONLY route to either gesture.
+ *  them with, but drawn for every tile they hung straight into the face of
+ *  whatever block sat under each one, which on a phone read as clutter on the
+ *  very form factor where they are the ONLY route to either gesture.
  *
  *  Tap-to-select-then-act costs one tap and is what a touchscreen expects
  *  anyway. `group-hover` carries its own `hover: hover` media query, so a
@@ -85,8 +86,14 @@ const DRAG_THRESHOLD = 4;
  *  handle drawn on the tile is drawn on the SELLER'S WORK: the rotate control
  *  sat exactly where a price tag or a title band goes, so the thing being
  *  designed was hidden by the thing designing it. Out here they hang off the
- *  tile without ever covering it, and they still turn with it — they are
- *  children of the cell, so a tilted tile carries its controls round with it.
+ *  tile without ever covering it, and they still turn with it: they are drawn
+ *  in the cell's chrome layer, which wears the cell's own tilt, so a tilted
+ *  tile carries its controls round with it.
+ *
+ *  ABOVE EVERY BLOCK ON THE BOARD, always. That chrome layer is a sibling of
+ *  the cell rather than part of it (see `chromeItem` in the render below), so
+ *  the handles paint over any block, one stacked in front of this tile or one
+ *  being dragged across them included, while the tile itself keeps its layer.
  *
  *  SEAMLESS, not floating and not merely touching: a handle is meant to read
  *  as a tab growing out of the tile, not a separate pill parked near it.
@@ -148,12 +155,11 @@ const HANDLE_CLASS = cn(
   "focus-visible:opacity-100 focus-visible:outline-none",
   "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background",
   "motion-reduce:transition-none",
+  // Hidden and inert until globals.css reveals them (the `[data-grid-chrome]`
+  // rules). What reveals them is the tile hovered, focused or selected, and
+  // those are states of the CELL, which is this layer's sibling rather than
+  // its ancestor, so no `group-*` variant can reach them from here.
   "pointer-events-none opacity-0",
-  "group-hover:pointer-events-auto group-hover:opacity-100",
-  "group-focus-within:pointer-events-auto group-focus-within:opacity-100",
-  "group-has-[[data-block-selected]]:pointer-events-auto",
-  "group-has-[[data-block-selected]]:opacity-100",
-  "group-has-[[data-block-overlay]]:hidden",
 );
 
 /** The strip the handles live in: hanging off the tile's bottom edge, flush
@@ -170,9 +176,9 @@ const HANDLE_ROW = "top-full -mt-px pt-1.5";
 const HANDLE_FACE = cn(
   "inline-flex size-6 items-center justify-center rounded-sm",
   "border border-border bg-background shadow-xs",
-  // Same colour as the ring around the tile they belong to, so a selected
-  // block and its controls read as one object rather than three.
-  "group-has-[[data-block-selected]]:border-ring",
+  // The border takes the ring colour while the block is selected (globals.css,
+  // beside the reveal), so a selected block and its controls read as one
+  // object rather than three.
   "transition-colors duration-base ease-standard motion-reduce:transition-none",
   "group-hover/handle:text-foreground",
 );
@@ -183,10 +189,29 @@ function setDragCursorLock(locked: boolean): void {
   document.body.style.userSelect = locked ? "none" : "";
 }
 
-function placementStyle(placement: GridPlacement): React.CSSProperties {
+/**
+ * The grid line a block's stored rect is laid out from, held to the board.
+ *
+ * A turned block may legitimately STORE a rect that reaches past the board
+ * (see isOnBoard: the cells it covers are what have to be on it), and a grid
+ * line off the board does not exist. The browser does not clamp
+ * `grid-row: 0 / span 3`, it DROPS it, and the tile falls into auto-placement
+ * wherever the grid happens to find room. So the rect is laid out from the
+ * nearest line that still holds its whole span, and snapToGridStyle paints the
+ * difference back in whole cells.
+ */
+function boardLine(start: number, span: number, size: number): number {
+  return Math.min(Math.max(0, start), Math.max(0, size - span));
+}
+
+function placementStyle(
+  placement: GridPlacement,
+  columns: number,
+  rows: number,
+): React.CSSProperties {
   return {
-    gridColumn: `${placement.x + 1} / span ${placement.w}`,
-    gridRow: `${placement.y + 1} / span ${placement.h}`,
+    gridColumn: `${boardLine(placement.x, placement.w, columns) + 1} / span ${placement.w}`,
+    gridRow: `${boardLine(placement.y, placement.h, rows) + 1} / span ${placement.h}`,
   };
 }
 
@@ -215,13 +240,24 @@ function placementStyle(placement: GridPlacement): React.CSSProperties {
 function snapToGridStyle(
   placement: GridPlacement,
   rotation: number,
+  /** The board the cell is laid out on. placementStyle holds a stored rect
+   *  that reaches past it onto its lines; the whole cells that cost are
+   *  painted back here, through the same property as the half-cell nudge, so
+   *  the two simply add. A turned bar lying across the top row stores y = -1,
+   *  is laid out from line 1, and is painted a cell up from there. */
+  columns: number,
+  rows: number,
 ): React.CSSProperties {
   const offset = footprintOffset(placement, rotation);
+  const shiftX =
+    placement.x - boardLine(placement.x, placement.w, columns) + offset.x;
+  const shiftY =
+    placement.y - boardLine(placement.y, placement.h, rows) + offset.y;
   const pitch = (cells: number, span: number) =>
-    `calc((100% + var(--grid-gap, 0px)) * ${cells / span})`;
+    `calc((100% + var(--grid-gap, 0px)) * ${cells} / ${span})`;
   return {
-    ...(offset.x ? { left: pitch(offset.x, placement.w) } : {}),
-    ...(offset.y ? { top: pitch(offset.y, placement.h) } : {}),
+    ...(shiftX ? { left: pitch(shiftX, placement.w) } : {}),
+    ...(shiftY ? { top: pitch(shiftY, placement.h) } : {}),
   };
 }
 
@@ -245,6 +281,13 @@ type GridVars = React.CSSProperties & {
 type ActiveGesture = {
   key: string;
   mode: "move" | "resize" | "rotate";
+  /**
+   * A GROUP MOVE'S whole cast, `key` included, when the block being dragged
+   * belongs to a selection that travels with it. Absent for every other
+   * gesture: a resize and a rotate are always about the one block the hand is
+   * on (see `groupKeys` on the props).
+   */
+  keys?: readonly string[];
 };
 
 /**
@@ -263,6 +306,13 @@ type GesturePreview = ActiveGesture & {
   size?: { w: number; h: number };
   /** Rotate mode only: the angle the tile is being spun to. */
   rotation?: number;
+  /**
+   * A group move's OTHER blocks — everything but `key`, which keeps the fields
+   * above so a group of one paints exactly as a lone drag always has. They all
+   * share the pointer's offset (the group travels as a rigid body), so only the
+   * per-block landing is carried here.
+   */
+  others?: readonly { key: string; footprint: GridPlacement }[];
 };
 
 /**
@@ -430,10 +480,18 @@ interface GridCommonProps<TData> {
   /** Inline styles per cell, for values classes can't express (e.g. a numeric
    *  border-radius that scales with the block's span). Occupied cells also
    *  receive their block, so a consumer can style cells per block (empty
-   *  cells and the drag ghost call it with the placement alone). */
+   *  cells and the drag ghost call it with the placement alone).
+   *
+   *  Occupied cells get the keys of every block under a gesture right now as
+   *  well (empty when none is). A placement stays the COMMITTED one for the
+   *  whole gesture, so a style that depends on where another block sits (a
+   *  shape borrowing the corners of the product on top of it) reads this to
+   *  know that block is on its way somewhere else. Only changes when a
+   *  gesture starts or ends. */
   cellStyle?: (
     placement: GridPlacement,
     block?: GridBlock<TData>,
+    gestureKeys?: ReadonlySet<string>,
   ) => React.CSSProperties;
   /** Draw the free cells, so the board reads as a board. Editable only. */
   showEmptyCells?: boolean;
@@ -457,6 +515,22 @@ interface GridCommonProps<TData> {
    * It never relaxes the OTHER rule: a block stays on the board either way.
    */
   allowOverlap?: boolean;
+  /**
+   * BLOCKS THAT TRAVEL TOGETHER — the consumer's current selection.
+   *
+   * The grid still knows nothing about selection: it is handed a list of keys
+   * and the one rule that a drag (or an arrow) starting on ANY of them carries
+   * ALL of them, as one rigid body, by one whole-cell delta. That is the only
+   * honest reading of "move these three": a group whose members each clamped
+   * themselves to the board separately would arrive in a different arrangement
+   * than it left in.
+   *
+   * So the delta is clamped against the group's OWN bounding box, and the whole
+   * move is refused rather than deformed when it cannot land. Resize and rotate
+   * stay per-block on purpose (the tile the hand is on is the one it means —
+   * see onRotate's note in the storefront designer).
+   */
+  groupKeys?: readonly string[];
 }
 
 /**
@@ -469,6 +543,7 @@ export type GridProps<TData> =
       editable?: false;
       onMove?: undefined;
       onResize?: undefined;
+      onMoveMany?: undefined;
     })
   | (GridCommonProps<TData> & {
       editable: true;
@@ -476,6 +551,16 @@ export type GridProps<TData> =
       /** The WHOLE placement: dragging a west/north corner moves the origin as
        *  well as the extent, so w/h alone cannot describe the result. */
       onResize: (key: string, placement: GridPlacement) => void;
+      /**
+       * Where a whole group landed, in ONE call — so moving six tiles is one
+       * act and one entry in the consumer's history, not six.
+       *
+       * OPTIONAL even in editable mode, unlike move and resize: `groupKeys` is
+       * opt-in, and a consumer that never sends one never needs this. Without
+       * it a drag on a selected block simply moves that block, exactly as it
+       * always did.
+       */
+      onMoveMany?: (moves: readonly { key: string; x: number; y: number }[]) => void;
     });
 
 export function Grid<TData>(props: GridProps<TData>) {
@@ -488,6 +573,7 @@ export function Grid<TData>(props: GridProps<TData>) {
     responsive = true,
     onMove,
     onResize,
+    onMoveMany,
     ariaLabel = "Grid",
     getBlockLabel,
     className,
@@ -497,6 +583,7 @@ export function Grid<TData>(props: GridProps<TData>) {
     onEmptyCellClick,
     onRotate,
     allowOverlap = false,
+    groupKeys,
   } = props;
 
   /**
@@ -512,8 +599,109 @@ export function Grid<TData>(props: GridProps<TData>) {
    */
   const dropIsLegal = useCallback(
     (block: GridBlock<TData>, candidate: GridPlacement, all: GridBlock<TData>[]) =>
-      allowOverlap || placementIsFree(all, candidate, block.key, columns, rows),
+      allowOverlap ||
+      placementIsFree(all, candidate, block.key, columns, rows, block.rotation ?? 0),
     [allowOverlap, columns, rows],
+  );
+
+  /** The board and the selection as of the last render, for the gestures to
+   *  read when they need the CURRENT answer rather than the one that was true
+   *  when the press landed. */
+  const groupState = useRef({
+    blocks,
+    groupKeys,
+    canMoveMany: onMoveMany !== undefined,
+  });
+  useEffect(() => {
+    groupState.current = {
+      blocks,
+      groupKeys,
+      canMoveMany: onMoveMany !== undefined,
+    };
+  });
+
+  /**
+   * The blocks a move on `key` carries: the consumer's selection when this
+   * block is part of one, otherwise nothing (and the caller moves the block
+   * alone, exactly as it always has).
+   *
+   * Resolved against the LIVE blocks rather than trusting the key list, so a
+   * selection holding a key that has since left the board simply carries one
+   * fewer block instead of moving a ghost.
+   */
+  const groupFor = useCallback((key: string): GridBlock<TData>[] | null => {
+    // READ THROUGH A REF, not from this render's closure. A gesture asks this
+    // question when the drag actually begins, which can be a moment after the
+    // press that started it — a touch hold adds a tile to the selection with
+    // the finger still down (see BlockTile) — and a closure captured at
+    // pointerdown would carry the selection from before that.
+    const { blocks: live, groupKeys: keys, canMoveMany } = groupState.current;
+    if (!canMoveMany || !keys || keys.length < 2) return null;
+    if (!keys.includes(key)) return null;
+    const wanted = new Set(keys);
+    const members = live.filter((block) => wanted.has(block.key));
+    return members.length > 1 ? members : null;
+  }, []);
+
+  /**
+   * The step a group can actually take, in whole cells.
+   *
+   * CLAMPED AS ONE BODY. Clamping each block separately would let the ones
+   * with room keep going while the ones against the edge stopped, and the
+   * group would arrive in a different arrangement than it left in — which is
+   * the one thing "move these together" promises not to do.
+   *
+   * So each member states how far IT may travel and the group takes the
+   * intersection. Tilt included (see moveReach): a turned member is held by
+   * the cells it covers, not by a stored rect that can legitimately reach past
+   * the board, which is what used to keep a selection holding a turned bar out
+   * of the top and bottom rows. Every member's range includes standing still,
+   * so the intersection does too, and a group already partly off the board
+   * (undo and a column count change can both leave one there) simply cannot
+   * go further off, rather than being forced anywhere.
+   */
+  const clampGroupStep = useCallback(
+    (members: readonly GridBlock<TData>[], stepX: number, stepY: number) => {
+      const reachX = { min: -Infinity, max: Infinity };
+      const reachY = { min: -Infinity, max: Infinity };
+      for (const block of members) {
+        const reach = moveReach(block, block.rotation ?? 0, columns, rows);
+        reachX.min = Math.max(reachX.min, reach.x.min);
+        reachX.max = Math.min(reachX.max, reach.x.max);
+        reachY.min = Math.max(reachY.min, reach.y.min);
+        reachY.max = Math.min(reachY.max, reach.y.max);
+      }
+      return { x: clampStep(stepX, reachX), y: clampStep(stepY, reachY) };
+    },
+    [columns, rows],
+  );
+
+  /**
+   * Whether the whole group may land on that step. ALL OR NOTHING: a group is
+   * one object here, so one member with nowhere to go springs the whole move
+   * back rather than leaving the selection half-moved.
+   *
+   * Members are measured against the blocks OUTSIDE the group only — they are
+   * all travelling by the same delta, so a group whose own blocks touch stays
+   * exactly as legal as it was before the drag.
+   */
+  const groupDropIsLegal = useCallback(
+    (members: readonly GridBlock<TData>[], step: { x: number; y: number }) => {
+      if (allowOverlap) return true;
+      const wanted = new Set(members.map((block) => block.key));
+      const outsiders = blocks.filter((block) => !wanted.has(block.key));
+      return members.every((block) =>
+        placementIsFree(
+          outsiders,
+          { x: block.x + step.x, y: block.y + step.y, w: block.w, h: block.h },
+          block.key,
+          columns,
+          rows,
+          block.rotation ?? 0,
+        ),
+      );
+    },
+    [allowOverlap, blocks, columns, rows],
   );
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -526,7 +714,14 @@ export function Grid<TData>(props: GridProps<TData>) {
   const [active, setActive] = useState<ActiveGesture | null>(null);
   const gestureRef = useRef<GesturePreview | null>(null);
   const cellNodes = useRef(new Map<string, HTMLLIElement>());
+  /** Each cell's chrome layer (the sibling `li[data-grid-chrome]`), by key. A
+   *  gesture moves, stretches and turns the cell imperatively, and the handles
+   *  have to go with it, so every such write lands on both. */
+  const chromeNodes = useRef(new Map<string, HTMLLIElement>());
   const ghostRef = useRef<HTMLLIElement | null>(null);
+  /** The ghosts for a group move's OTHER blocks, by key. The dragged block's
+   *  own ghost stays on `ghostRef`, so a lone drag is unchanged. */
+  const ghostNodes = useRef(new Map<string, HTMLLIElement>());
   const readoutRef = useRef<HTMLSpanElement | null>(null);
   // What a settled gesture announces. Written on COMMIT only: announcing every
   // frame of a spin is worse than announcing nothing.
@@ -547,6 +742,13 @@ export function Grid<TData>(props: GridProps<TData>) {
    * back here is what keeps a tilt through a drag.
    */
   const settledRotationRef = useRef(0);
+  /**
+   * The same angle, per block, for a GROUP move — where "the tile" is several
+   * tiles, each with a tilt of its own. Empty for every other gesture, which is
+   * what leaves the single-block path reading `settledRotationRef` exactly as
+   * it always has.
+   */
+  const groupRotationsRef = useRef(new Map<string, number>());
 
   /** Write the live preview: the tile floats/stretches/spins, the ghost marks
    *  the cells it will snap to. One rAF per frame, however fast events arrive.
@@ -564,18 +766,42 @@ export function Grid<TData>(props: GridProps<TData>) {
     const gesture = gestureRef.current;
     if (!gesture) return;
     const cell = cellNodes.current.get(gesture.key);
+    // The cell AND its chrome layer, so the handles ride every frame of the
+    // gesture exactly where the tile is drawn. Validity stays the cell's
+    // alone: it is what colours the ring.
+    const boxes = (key: string) =>
+      [cellNodes.current.get(key), chromeNodes.current.get(key)].filter(
+        (node): node is HTMLLIElement => node !== undefined,
+      );
     if (cell) {
       if (gesture.mode === "move") {
-        cell.style.translate = `${gesture.offset.x}px ${gesture.offset.y}px`;
+        for (const node of boxes(gesture.key)) {
+          node.style.translate = `${gesture.offset.x}px ${gesture.offset.y}px`;
+        }
+        // THE REST OF THE GROUP, by the SAME offset. The selection travels as
+        // a rigid body, so there is one offset for all of it and the blocks
+        // keep their spacing all the way across the board.
+        for (const other of gesture.others ?? []) {
+          const node = cellNodes.current.get(other.key);
+          if (!node) continue;
+          for (const box of boxes(other.key)) {
+            box.style.translate = `${gesture.offset.x}px ${gesture.offset.y}px`;
+          }
+          node.dataset.valid = String(gesture.valid);
+        }
       } else if (gesture.mode === "rotate") {
-        cell.style.rotate = `${gesture.rotation ?? 0}deg`;
+        for (const node of boxes(gesture.key)) {
+          node.style.rotate = `${gesture.rotation ?? 0}deg`;
+        }
       } else if (gesture.size) {
         // Resizing translates as well as stretches: a tile keeps its committed
         // cell in the layout, so growing west/north has to be drawn as "same
         // box, shifted back" or the pinned edge would visibly drift.
-        cell.style.translate = `${gesture.offset.x}px ${gesture.offset.y}px`;
-        cell.style.width = `${gesture.size.w}px`;
-        cell.style.height = `${gesture.size.h}px`;
+        for (const node of boxes(gesture.key)) {
+          node.style.translate = `${gesture.offset.x}px ${gesture.offset.y}px`;
+          node.style.width = `${gesture.size.w}px`;
+          node.style.height = `${gesture.size.h}px`;
+        }
       }
       cell.dataset.valid = String(gesture.valid);
     }
@@ -595,14 +821,20 @@ export function Grid<TData>(props: GridProps<TData>) {
     // Clamped to the board only for DRAWING: a footprint may legitimately
     // start at -1 (the block itself is on the board, its corner reaches past
     // it), and a negative grid line would put the ghost in a phantom column.
-    const ghost = ghostRef.current;
-    if (ghost) {
-      const covered = gesture.footprint;
+    //
+    // ONE PER BLOCK for a group move, so a selection being carried shows every
+    // landing spot rather than one block's and a shrug about the other five.
+    function paintGhost(node: HTMLLIElement | null, covered: GridPlacement) {
+      if (!node) return;
       const left = Math.max(0, covered.x);
       const top = Math.max(0, covered.y);
-      ghost.style.gridColumn = `${left + 1} / span ${Math.max(1, covered.x + covered.w - left)}`;
-      ghost.style.gridRow = `${top + 1} / span ${Math.max(1, covered.y + covered.h - top)}`;
-      ghost.dataset.valid = String(gesture.valid);
+      node.style.gridColumn = `${left + 1} / span ${Math.max(1, covered.x + covered.w - left)}`;
+      node.style.gridRow = `${top + 1} / span ${Math.max(1, covered.y + covered.h - top)}`;
+      node.dataset.valid = String(gesture!.valid);
+    }
+    paintGhost(ghostRef.current, gesture.footprint);
+    for (const other of gesture.others ?? []) {
+      paintGhost(ghostNodes.current.get(other.key) ?? null, other.footprint);
     }
   }, []);
 
@@ -618,20 +850,28 @@ export function Grid<TData>(props: GridProps<TData>) {
       frameRef.current = 0;
     }
     const gesture = gestureRef.current;
-    const cell = gesture ? cellNodes.current.get(gesture.key) : null;
-    if (cell) {
-      cell.style.translate = "";
+    // Every cell the gesture touched, which for a group move is all of them.
+    for (const key of gesture ? (gesture.keys ?? [gesture.key]) : []) {
+      const cell = cellNodes.current.get(key);
+      if (!cell) continue;
       // NOT blanked: put the settled angle back. See settledRotationRef —
       // React will not restore an angle that did not change, so clearing this
-      // is how a tilted tile used to straighten the moment it was moved.
-      cell.style.rotate = settledRotationRef.current
-        ? `${settledRotationRef.current}deg`
-        : "";
-      cell.style.width = "";
-      cell.style.height = "";
+      // is how a tilted tile used to straighten the moment it was moved. Each
+      // member of a group carries its own tilt, hence the map.
+      const angle =
+        groupRotationsRef.current.get(key) ?? settledRotationRef.current;
+      // The chrome layer is handed back with its cell, for the same reasons.
+      const chrome = chromeNodes.current.get(key);
+      for (const node of chrome ? [cell, chrome] : [cell]) {
+        node.style.translate = "";
+        node.style.rotate = angle ? `${angle}deg` : "";
+        node.style.width = "";
+        node.style.height = "";
+      }
       delete cell.dataset.valid;
     }
     gestureRef.current = null;
+    groupRotationsRef.current.clear();
   }, []);
 
   // Measure LAYOUT width (clientWidth ignores any zoom transform on an
@@ -718,6 +958,16 @@ export function Grid<TData>(props: GridProps<TData>) {
     "--ss-cols": renderColumns,
     "--ss-rows": view.rows,
   };
+
+  /** What a landing spot looks like. One class, because a group move draws
+   *  several of them and they have to be the same mark. */
+  const GHOST_CLASS = cn(
+    "pointer-events-none border-2 border-dashed",
+    "data-[valid=true]:border-ring data-[valid=true]:bg-accent/40",
+    "data-[valid=false]:border-destructive data-[valid=false]:bg-destructive/10",
+    GRID_CELL_RADIUS_CLASS,
+    cellClassName,
+  );
 
   /** Cell pitch in SCREEN px. Both the grid rect and the pointer deltas are
    *  post-transform, so a zoomed canvas needs no extra compensation. */
@@ -829,8 +1079,31 @@ export function Grid<TData>(props: GridProps<TData>) {
       w: block.w,
       h: block.h,
     };
+
+    /**
+     * WHO TRAVELS. A press on a block the consumer has marked as part of a
+     * selection carries the whole selection; anything else carries itself.
+     *
+     * Settled when the DRAG STARTS, not when the press lands, and then never
+     * again — a touch hold adds the pressed tile to the selection with the
+     * finger still down (see BlockTile), so a cast taken at pointerdown would
+     * carry the block on its own and leave the group it had just joined
+     * behind; and a cast re-taken every frame could drop half a group mid-way
+     * across the board.
+     */
+    let group: GridBlock<TData>[] | null = null;
+    let groupKeyList: string[] | undefined;
+    let origins: {
+      key: string;
+      x: number;
+      y: number;
+      w: number;
+      h: number;
+      rotation: number;
+    }[] = [];
+
     let dragging = false;
-    let latest = origin;
+    let latestStep = { x: 0, y: 0 };
     let latestValid = true;
 
     const handleMove = (moveEvent: PointerEvent) => {
@@ -840,30 +1113,75 @@ export function Grid<TData>(props: GridProps<TData>) {
       if (!dragging && Math.hypot(dx, dy) < DRAG_THRESHOLD) return;
       if (!dragging) {
         dragging = true;
+        group = groupFor(block.key);
+        groupKeyList = group?.map((member) => member.key);
+        origins = (group ?? [block]).map((member) => ({
+          key: member.key,
+          x: member.x,
+          y: member.y,
+          w: member.w,
+          h: member.h,
+          rotation: member.rotation ?? 0,
+        }));
+        // Each member's own tilt, so ending the drag hands every one of them
+        // back the angle it was painting at (see clearGestureStyles).
+        groupRotationsRef.current.clear();
+        if (group) {
+          for (const member of group) {
+            groupRotationsRef.current.set(member.key, member.rotation ?? 0);
+          }
+        }
         setDragCursorLock(true);
-        // The only render this gesture causes: it mounts the ghost and marks
-        // the tile as lifted.
-        setActive({ key: block.key, mode: "move" });
+        // The only render this gesture causes: it mounts the ghost(s) and marks
+        // the tile — or the whole group — as lifted.
+        setActive({ key: block.key, mode: "move", keys: groupKeyList });
       }
-      const candidate = clampToCanvas(
-        {
-          ...origin,
-          x: origin.x + Math.round(dx / strides.strideX),
-          y: origin.y + Math.round(dy / strides.strideY),
-        },
-        columns,
-        rows,
-      );
-      latest = candidate;
-      latestValid = dropIsLegal(block, candidate, blocks);
+      const rawX = Math.round(dx / strides.strideX);
+      const rawY = Math.round(dy / strides.strideY);
+      // One clamp for the group (as one body, so it keeps its arrangement);
+      // the block's own for a lone drag. Both hold a block to the board by
+      // the cells it COVERS, so a turned block reaches every row and column it
+      // visibly fits in, instead of stopping wherever its stored rect would
+      // reach past an edge (see moveReach).
+      if (group) {
+        latestStep = clampGroupStep(group, rawX, rawY);
+      } else {
+        const reach = moveReach(origin, block.rotation ?? 0, columns, rows);
+        latestStep = { x: clampStep(rawX, reach.x), y: clampStep(rawY, reach.y) };
+      }
+      const candidate: GridPlacement = {
+        ...origin,
+        x: origin.x + latestStep.x,
+        y: origin.y + latestStep.y,
+      };
+      latestValid = group
+        ? groupDropIsLegal(group, latestStep)
+        : dropIsLegal(block, candidate, blocks);
       gestureRef.current = {
         key: block.key,
         mode: "move",
+        keys: groupKeyList,
         placement: candidate,
         footprint: rotatedFootprint(candidate, block.rotation ?? 0),
         valid: latestValid,
         // Unscaled, so the tile tracks the cursor 1:1 at any zoom.
         offset: { x: dx / strides.scale, y: dy / strides.scale },
+        others: group
+          ? origins
+              .filter((member) => member.key !== block.key)
+              .map((member) => ({
+                key: member.key,
+                footprint: rotatedFootprint(
+                  {
+                    x: member.x + latestStep.x,
+                    y: member.y + latestStep.y,
+                    w: member.w,
+                    h: member.h,
+                  },
+                  member.rotation,
+                ),
+              }))
+          : undefined,
       };
       scheduleGesturePaint();
     };
@@ -872,9 +1190,20 @@ export function Grid<TData>(props: GridProps<TData>) {
       endGesture(handleMove, handleUp);
       // An invalid drop springs back: committing would overlap a neighbour.
       if (!dragging || !latestValid) return;
-      if (latest.x !== origin.x || latest.y !== origin.y) {
-        onMove?.(block.key, latest.x, latest.y);
+      if (latestStep.x === 0 && latestStep.y === 0) return;
+      // A group lands in ONE call, so carrying six tiles is one act and one
+      // entry in the consumer's history rather than six.
+      if (group && onMoveMany) {
+        onMoveMany(
+          origins.map((member) => ({
+            key: member.key,
+            x: member.x + latestStep.x,
+            y: member.y + latestStep.y,
+          })),
+        );
+        return;
       }
+      onMove?.(block.key, origin.x + latestStep.x, origin.y + latestStep.y);
     };
 
     window.addEventListener("pointermove", handleMove);
@@ -955,13 +1284,17 @@ export function Grid<TData>(props: GridProps<TData>) {
         bounds,
         "edge",
       );
-      // Whole cells, then held to the board: the STORED rect is what has to
-      // stay on the canvas. Rounding is where a tilted resize gives up a
-      // little accuracy — a turn can put the pinned corner half a cell off a
-      // grid line, and half a cell is not storable while placements are whole
-      // ones. It lands exactly with free placement.
-      const candidate = clampToCanvas(
+      // Whole cells, then held to the board by the same per-axis rule a saved
+      // block is (see clampOntoBoard): left where it is when either its
+      // footprint or its stored rect is on the board, so resizing a turned
+      // bar lying across the top row never shoves it down a row. Rounding is
+      // where a tilted resize gives up a little accuracy — a turn can put the
+      // pinned corner half a cell off a grid line, and half a cell is not
+      // storable while placements are whole ones. It lands exactly with free
+      // placement.
+      const candidate = clampOntoBoard(
         roundPlacement(placementFromLocalBox(origin, angle, snapped, anchor)),
+        angle,
         columns,
         rows,
       );
@@ -1119,8 +1452,11 @@ export function Grid<TData>(props: GridProps<TData>) {
         bounds,
         "corner",
       );
-      const candidate = clampToCanvas(
+      // Held to the board the way the edge drag is (see clampOntoBoard), so a
+      // turned block against an edge is never shoved off the row it lies in.
+      const candidate = clampOntoBoard(
         roundPlacement(placementFromLocalBox(origin, angle, snapped, anchor)),
+        angle,
         boundsColumns,
         boundsRows,
       );
@@ -1339,18 +1675,42 @@ export function Grid<TData>(props: GridProps<TData>) {
     if (!delta) return;
     event.preventDefault();
 
-    const candidate = clampToCanvas(
-      event.shiftKey
-        ? keyboardResizeStep(block, delta)
-        : {
-            x: block.x + delta[0],
-            y: block.y + delta[1],
-            w: block.w,
-            h: block.h,
-          },
-      columns,
-      rows,
-    );
+    // AN ARROW MOVES WHAT A DRAG MOVES. A nudge on a block that is part of the
+    // consumer's selection carries the whole selection, by the same clamped
+    // step, as one act — otherwise the keyboard and the pointer would disagree
+    // about what "move this" means. Shift is a resize, which stays per block.
+    const group = event.shiftKey ? null : groupFor(block.key);
+    if (group && onMoveMany) {
+      const step = clampGroupStep(group, delta[0], delta[1]);
+      // Into the board's edge: nothing to report, and reporting it would push
+      // an undo step for a key press that did nothing.
+      if (step.x === 0 && step.y === 0) return;
+      if (!groupDropIsLegal(group, step)) return;
+      onMoveMany(
+        group.map((member) => ({
+          key: member.key,
+          x: member.x + step.x,
+          y: member.y + step.y,
+        })),
+      );
+      setAnnouncement(`${group.length} blocks moved`);
+      return;
+    }
+
+    // Held to the board by the cells the block COVERS, exactly as a drag is,
+    // so arrows walk a turned block into every row and column it fits in. A
+    // resize has no origin to measure a step from, so it is only put back on
+    // the board when the new span pushed it off (see clampOntoBoard).
+    const angle = block.rotation ?? 0;
+    const reach = moveReach(block, angle, columns, rows);
+    const candidate: GridPlacement = event.shiftKey
+      ? clampOntoBoard(keyboardResizeStep(block, delta), angle, columns, rows)
+      : {
+          x: block.x + clampStep(delta[0], reach.x),
+          y: block.y + clampStep(delta[1], reach.y),
+          w: block.w,
+          h: block.h,
+        };
     if (!dropIsLegal(block, candidate, blocks)) return;
     // An arrow into the board's edge leaves the placement exactly as it was.
     // Reporting that would mark the editor dirty and push an undo step for a
@@ -1393,12 +1753,11 @@ export function Grid<TData>(props: GridProps<TData>) {
     return cells;
   }, [showEmptyCells, editable, view.blocks, view.rows, renderColumns]);
 
-  /** Which cells may rise for their own chrome without reordering the board
-   *  under the seller. The rule itself is pure and lives with the rest of the
-   *  paint-band math; see liftableChromeKeys. */
-  const liftableKeys = useMemo(
-    () => liftableChromeKeys(view.blocks),
-    [view.blocks],
+  /** Every block under a gesture, for cellStyle. Follows `active`, which is
+   *  set once when a gesture starts and cleared when it ends. */
+  const gestureKeys = useMemo<ReadonlySet<string>>(
+    () => new Set(active ? (active.keys ?? [active.key]) : []),
+    [active],
   );
 
   return (
@@ -1423,18 +1782,38 @@ export function Grid<TData>(props: GridProps<TData>) {
             aria-hidden="true"
             data-valid="true"
             style={cellStyle?.({ x: 0, y: 0, w: 1, h: 1 })}
-            className={cn(
-              "pointer-events-none border-2 border-dashed",
-              "data-[valid=true]:border-ring data-[valid=true]:bg-accent/40",
-              "data-[valid=false]:border-destructive data-[valid=false]:bg-destructive/10",
-              GRID_CELL_RADIUS_CLASS,
-              cellClassName,
-            )}
+            className={GHOST_CLASS}
           />
         )}
 
+        {/* One more per block for a group move: a selection being carried
+            shows every landing spot, not just the dragged tile's. */}
+        {active?.keys
+          ?.filter((key) => key !== active.key)
+          .map((key) => (
+            <li
+              key={`ghost-${key}`}
+              ref={(node) => {
+                if (node) ghostNodes.current.set(key, node);
+                else ghostNodes.current.delete(key);
+              }}
+              aria-hidden="true"
+              data-valid="true"
+              style={cellStyle?.({ x: 0, y: 0, w: 1, h: 1 })}
+              className={GHOST_CLASS}
+            />
+          ))}
+
         {view.blocks.map((block) => {
-          const gesture = active?.key === block.key ? active : null;
+          // A group move lifts every block it is carrying, so each of them
+          // gets the shadow, the ring and the depth the dragged tile gets.
+          const gesture =
+            active &&
+            (active.keys
+              ? active.keys.includes(block.key)
+              : active.key === block.key)
+              ? active
+              : null;
           const moving = gesture?.mode === "move";
           const resizing = gesture?.mode === "resize";
           const rotating = gesture?.mode === "rotate";
@@ -1447,9 +1826,8 @@ export function Grid<TData>(props: GridProps<TData>) {
             h: block.h,
           };
           const label = getBlockLabel?.(block);
-          return (
+          const cellItem = (
             <li
-              key={block.key}
               ref={(node) => {
                 // The gesture painter writes straight to these nodes.
                 if (node) cellNodes.current.set(block.key, node);
@@ -1459,11 +1837,6 @@ export function Grid<TData>(props: GridProps<TData>) {
               // For consumers that hit-test cells from the DOM (the
               // designer's marquee selection reads these back into keys).
               data-grid-key={block.key}
-              // Whether this cell may rise for its own chrome. Present when
-              // doing so is invisible (nothing in front of it overlaps it);
-              // absent when it would reorder the board under the seller. The
-              // lift rules in globals.css require it — see `liftableKeys`.
-              data-chrome-lift={liftableKeys.has(block.key) ? "" : undefined}
               onPointerDown={
                 interactive ? (event) => startMove(event, block) : undefined
               }
@@ -1480,7 +1853,7 @@ export function Grid<TData>(props: GridProps<TData>) {
               // hijack the pointer drag and show a not-allowed cursor.
               onDragStart={(event) => event.preventDefault()}
               style={{
-                ...placementStyle(placement),
+                ...placementStyle(placement, renderColumns, view.rows),
                 // Depth, before the consumer's own cell style so a consumer
                 // that needs one cell lifted for its own reasons (a tile being
                 // framed) can still say so. Applied HERE, like the tilt below,
@@ -1499,7 +1872,7 @@ export function Grid<TData>(props: GridProps<TData>) {
                 // depth stated they all land on the same level and paint in
                 // document order, exactly as they always have.
                 zIndex: layerZIndex(block.z ?? 0),
-                ...cellStyle?.(placement, block),
+                ...cellStyle?.(placement, block, gestureKeys),
                 // The tilt, as the standalone `rotate` property rather than
                 // inside `transform`: the gesture painter owns `translate`,
                 // and the two compose as translate-then-rotate so a drag
@@ -1513,7 +1886,7 @@ export function Grid<TData>(props: GridProps<TData>) {
                 // the board reserved for it. Beside the tilt because it is part
                 // of it: standing a block on its side is the only thing that
                 // can knock it off, and this is what puts it back.
-                ...snapToGridStyle(placement, block.rotation ?? 0),
+                ...snapToGridStyle(placement, block.rotation ?? 0, renderColumns, view.rows),
                 // The offset / size / angle of a tile under gesture is written
                 // imperatively, so it is deliberately absent here. The hint
                 // names `translate` and `rotate` because those are the
@@ -1552,7 +1925,48 @@ export function Grid<TData>(props: GridProps<TData>) {
                 isResizing: gesture?.mode === "resize",
                 placement,
               })}
+            </li>
+          );
 
+          // THE TILE'S CHROME, IN A LAYER OF ITS OWN: the sibling right after
+          // the cell, on the same grid area, turned and nudged the same way,
+          // and moved with it by the gesture painter (see chromeNodes).
+          //
+          // A cell is its own stacking context, so a handle inside it could
+          // only clear the blocks around it by lifting the whole cell,
+          // content and all, and a block with something in front of it
+          // cannot be lifted without jumping out of its layer, which left
+          // exactly those handles buried under the block in front. Out here
+          // the cell keeps the depth its layer gives it, and the handles sit
+          // above every block on the board, a dragged or framed one included.
+          //
+          // When they show, and at what level, is globals.css's business (the
+          // `[data-grid-chrome]` rules): hover, focus and selection are states
+          // of the CELL, and CSS can reach a sibling where React would have to
+          // re-render the board on every pointer crossing.
+          const chromeItem = editable ? (
+            <li
+              ref={(node) => {
+                if (node) chromeNodes.current.set(block.key, node);
+                else chromeNodes.current.delete(block.key);
+              }}
+              data-grid-chrome={block.key}
+              // Keys on a focused handle mean what they mean on the tile, as
+              // they did while the handles lived inside the cell.
+              onKeyDown={
+                interactive ? (event) => onCellKeyDown(event, block) : undefined
+              }
+              style={{
+                // The cell's own box, tilt and half-cell nudge, so the handles
+                // hang exactly where the tile is drawn. Never the cell's
+                // depth: the band this layer paints at is the point of it.
+                ...placementStyle(placement, renderColumns, view.rows),
+                ...(block.rotation ? { rotate: `${block.rotation}deg` } : {}),
+                ...snapToGridStyle(placement, block.rotation ?? 0, renderColumns, view.rows),
+                ...(gesture ? { willChange: "translate, rotate" } : {}),
+              }}
+              className="relative"
+            >
               {/* One resize handle. Drag it ANY direction: past the tile's own
                   top-left it flips and the tile grows up / left instead.
                   Arrows (with Shift, on the tile) do the same from the
@@ -1663,6 +2077,13 @@ export function Grid<TData>(props: GridProps<TData>) {
                 </span>
               )}
             </li>
+          ) : null;
+
+          return (
+            <Fragment key={block.key}>
+              {cellItem}
+              {chromeItem}
+            </Fragment>
           );
         })}
 
@@ -1675,7 +2096,7 @@ export function Grid<TData>(props: GridProps<TData>) {
             <li
               key={`empty-${cell.x}-${cell.y}`}
               style={{
-                ...placementStyle({ ...cell, w: 1, h: 1 }),
+                ...placementStyle({ ...cell, w: 1, h: 1 }, renderColumns, view.rows),
                 zIndex: EMPTY_CELL_Z,
               }}
             >
@@ -1699,7 +2120,7 @@ export function Grid<TData>(props: GridProps<TData>) {
               key={`empty-${cell.x}-${cell.y}`}
               aria-hidden="true"
               style={{
-                ...placementStyle({ ...cell, w: 1, h: 1 }),
+                ...placementStyle({ ...cell, w: 1, h: 1 }, renderColumns, view.rows),
                 zIndex: EMPTY_CELL_Z,
                 ...cellStyle?.({ ...cell, w: 1, h: 1 }),
               }}

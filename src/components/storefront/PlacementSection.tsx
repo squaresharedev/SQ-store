@@ -4,7 +4,6 @@ import { useId } from "react";
 import {
   BringToFront,
   ChevronDown,
-  ChevronRight,
   ChevronUp,
   Layers,
   SendToBack,
@@ -122,12 +121,12 @@ export const LAYER_BUTTON_CLASS = cn(
   focusRingClass,
 );
 
-/** The way through to the whole stack. A full-width row rather than a fifth
- *  icon: it navigates instead of moving anything, and putting it in the icon
- *  row would make one of five buttons behave unlike the other four. */
+/** The way through to the whole stack. It shares the icon row but not the
+ *  icon shape: it navigates instead of moving anything, so it wears words and
+ *  takes the rest of the row, which keeps it from reading as a fifth move. */
 const SEE_LAYERS_CLASS = cn(
-  "flex min-h-9 w-full items-center justify-between gap-2 rounded-none border border-border",
-  "bg-background px-2.5 py-1.5 font-inter text-sm text-foreground",
+  "inline-flex h-8 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-none border border-border",
+  "bg-background px-2 font-inter text-sm whitespace-nowrap text-foreground",
   "hover:bg-accent",
   transitionClass,
   focusRingClass,
@@ -234,52 +233,48 @@ export function PlacementSection({
                 : `Layer ${layer.index + 1} of ${layer.total}`}
           </span>
         </div>
-        <div role="group" aria-label="Block layer" className="flex gap-1">
-          {/* Four arrows that all point up or down: which one is a step and
-              which is the whole way is not readable off the glyphs, and this
-              is the row a seller reaches for least often, so it is the one
-              they have relearned every time. The tooltip says the action —
-              the same words the screen reader already gets. */}
-          {LAYER_CONTROLS.map(({ op, label, icon: Icon, end }) => (
-            <Tooltip key={op} label={label}>
-              <button
-                type="button"
-                onClick={() => onReorder(op)}
-                // Named for the ACTION, never the arrow: "chevron up" tells a
-                // screen reader nothing about what it does to the stack.
-                aria-label={label}
-                // A control that does nothing is worse than one that says it
-                // cannot: both ends disable together, since a selection already
-                // at the front has neither a step nor a jump left to make.
-                disabled={end === "front" ? layer.atFront : layer.atBack}
-                className={LAYER_BUTTON_CLASS}
-              >
-                <Icon className="size-4" strokeWidth={2} aria-hidden="true" />
-              </button>
-            </Tooltip>
-          ))}
+        <div className="flex gap-1">
+          <div role="group" aria-label="Block layer" className="flex gap-1">
+            {/* Four arrows that all point up or down: which one is a step and
+                which is the whole way is not readable off the glyphs, and this
+                is the row a seller reaches for least often, so it is the one
+                they have relearned every time. The tooltip says the action,
+                the same words the screen reader already gets. */}
+            {LAYER_CONTROLS.map(({ op, label, icon: Icon, end }) => (
+              <Tooltip key={op} label={label}>
+                <button
+                  type="button"
+                  onClick={() => onReorder(op)}
+                  // Named for the ACTION, never the arrow: "chevron up" tells a
+                  // screen reader nothing about what it does to the stack.
+                  aria-label={label}
+                  // A control that does nothing is worse than one that says it
+                  // cannot: both ends disable together, since a selection already
+                  // at the front has neither a step nor a jump left to make.
+                  disabled={end === "front" ? layer.atFront : layer.atBack}
+                  className={LAYER_BUTTON_CLASS}
+                >
+                  <Icon className="size-4" strokeWidth={2} aria-hidden="true" />
+                </button>
+              </Tooltip>
+            ))}
+          </div>
+          {/* Four buttons answer "move this one"; they cannot answer "what else
+              is under here". That is the whole stack, and it opens IN the panel
+              rather than over the canvas: a floating layers window would cover
+              the very board it describes. Outside the group above, because it
+              is not one of the moves the group is named for. */}
+          {onOpenLayers && (
+            <button
+              type="button"
+              onClick={onOpenLayers}
+              className={SEE_LAYERS_CLASS}
+            >
+              <Layers className="size-4 shrink-0" strokeWidth={2} aria-hidden="true" />
+              <span className="truncate">See all layers</span>
+            </button>
+          )}
         </div>
-        {/* Four buttons answer "move this one"; they cannot answer "what else
-            is under here". That is the whole stack, and it opens IN the panel
-            rather than over the canvas — a floating layers window would cover
-            the very board it describes. */}
-        {onOpenLayers && (
-          <button
-            type="button"
-            onClick={onOpenLayers}
-            className={SEE_LAYERS_CLASS}
-          >
-            <span className="flex items-center gap-2">
-              <Layers className="size-4" strokeWidth={2} aria-hidden="true" />
-              See all layers
-            </span>
-            <ChevronRight
-              className="size-4 shrink-0 text-muted-foreground"
-              strokeWidth={2}
-              aria-hidden="true"
-            />
-          </button>
-        )}
       </div>
     </div>
   );

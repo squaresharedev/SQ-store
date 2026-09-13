@@ -15,9 +15,9 @@ import {
 import { cn } from "@/lib/utils";
 
 /**
- * A masthead line, typed where it reads: double-clicking the store name or the
- * bio on the canvas turns that line into this, with the caret already in the
- * words the seller aimed at.
+ * A masthead line, typed where it reads: clicking the store name or the bio on
+ * the canvas turns that line into this, with the caret already in the words
+ * the seller aimed at.
  *
  * Same contract as InlineTextEditor, minus the runs — a header line is a plain
  * string, so the DOM holds text and nothing else. REACT STILL DOES NOT OWN
@@ -43,8 +43,8 @@ export function MastheadLineEditor({
   /** The stored line. Written to the DOM on mount, and again whenever it
    *  arrives differing from what this editor last wrote. */
   value: string;
-  /** Where the caret (or the double-clicked word) was in the line that was
-   *  clicked. Null puts the caret at the end. */
+  /** Where the caret (or the double/triple-clicked word) was in the line that
+   *  was clicked. Null puts the caret at the end. */
   initialRange?: TextRange | null;
   className: string;
   style: CSSProperties;
@@ -208,8 +208,10 @@ export function MastheadLineEditor({
     className: cn(
       className,
       // pre-wrap, not the masthead's pre-line: runs of spaces have to survive
-      // being typed, or the caret lands behind the text.
-      "cursor-text select-text whitespace-pre-wrap rounded-sm outline-none ring-2 ring-ring ring-offset-1",
+      // being typed, or the caret lands behind the text. No ring: the line
+      // reads the same editing as it did selected (see StorefrontMasthead's
+      // selectableClass) — the caret is what says a line is live.
+      "cursor-text select-text whitespace-pre-wrap rounded-sm outline-none",
       // The caret needs somewhere to sit in a line that has been emptied, and
       // the line needs to say what it is while it has no words of its own.
       line === "name"

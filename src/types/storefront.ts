@@ -90,8 +90,15 @@ export const CORNER_SPOT_LIMIT = 32;
 // make a rotate control that also repositions, and the overhang is something
 // the seller can see and drag back.
 //
-// The one rule left is that the STORED rect stays on the board, which is what
-// the schema checks and what a seller can act on.
+// The one rule left is that a block is ON THE BOARD, asked per axis, where
+// either rect will do (see isOnBoard in lib/geometry/rotated-box): its
+// footprint, which is what a seller sees and what a drag aims for, or its
+// stored rect, which is what a turn leaves alone. Its span always fits.
+//
+// So a turned block lying against the top or left edge STORES a rect that
+// starts off the board: a quarter-turned 1x3 bar across the top row is stored
+// at y = -1. Holding the stored rect to the board instead is what used to stop
+// a turned bar reaching the first and last rows while it visibly fit in them.
 
 export const CANVAS_COLUMNS_MIN = 3;
 export const CANVAS_COLUMNS_MAX = 12;
@@ -99,6 +106,21 @@ export const CANVAS_ROWS_MIN = 2;
 // Generous headroom: a board this tall is only reachable by scrolling, but the
 // cap has to clear whatever the tallest legacy auto-flow layout packs into.
 export const CANVAS_ROWS_MAX = 60;
+
+/**
+ * The lowest a STORED x or y can be while the block is still on the board.
+ *
+ * Below zero only for a turned block (see the canvas model above). Turning a
+ * box about its centre puts its footprint `floor((w - h) / 2)` cells right of
+ * its stored rect, so a stored rect wider than it is tall can start that far
+ * left of the board. Its width is capped by the columns, which gives x's floor;
+ * its HEIGHT by the rows, and a quarter-turned 1x60 bar lying across the top
+ * row really is stored 29 rows up, which gives y's.
+ *
+ * A bound on the field only. isOnBoard is the exact rule, per block.
+ */
+export const PLACEMENT_X_MIN = -Math.floor((CANVAS_COLUMNS_MAX - 1) / 2);
+export const PLACEMENT_Y_MIN = -Math.floor((CANVAS_ROWS_MAX - 1) / 2);
 
 /** Tilt bounds, in whole degrees. Centred on 0 rather than running 0..359 so
  *  "no tilt" is the middle of the control's range and a small nudge either way
@@ -535,6 +557,11 @@ export function defaultPriceTagFill(position: PriceTagPosition): string {
 /** What the price paints on a `shadow` title area with no color of its own:
  *  the gradient is dark by construction, so the accent would sink into it. */
 export const PRICE_TAG_SHADOW_TEXT = "#ffffff";
+
+/** What a `shadow` title area's gradient is tinted with when the seller has
+ *  chosen no color: black, which is what every shadow rendered before the
+ *  color was adjustable. Read through titleShadowStyle and titleShadowInk. */
+export const TITLE_SHADOW_DEFAULT_COLOR = "#000000";
 
 /** Grid gutter cap, in px. The value drives the shared --grid-gap token that
  *  .ss-grid's gap AND square-cell row math consume. Legacy configs stored a
@@ -1002,8 +1029,9 @@ export const TEXT_VARIANTS = ["heading", "subheading", "body"] as const;
 export type TextVariant = (typeof TEXT_VARIANTS)[number];
 
 /**
- * Optional per-block size override, in PIXELS. Absent = the variant's own
- * scale (TEXT_VARIANT_CLASSES), which is what a fresh block uses.
+ * Optional per-block size override, in PIXELS. Absent = Auto: the block
+ * shrinks itself, if it needs to, to fit the box it's in (see
+ * TextTileContent's auto-fit sizing) rather than the fixed number below.
  *
  * Replaces the five-preset enum (sm/md/lg/xl/2xl): sellers kept landing between
  * two presets. The schema migrates the old values to their rendered px on
@@ -1014,12 +1042,13 @@ export const TEXT_SIZE_MIN = 8;
 export const TEXT_SIZE_MAX = 200;
 
 /**
- * What each variant renders at when a block carries NO size override: the
- * number the editor shows beside "Auto", and where the slider starts when a
- * seller first takes control of the size.
+ * What each variant renders at when a block carries NO size override AND has
+ * room enough not to shrink: the CEILING auto-fit sizes down from, and where
+ * the slider starts when a seller first takes control of the size.
  *
- * Mirrors TEXT_VARIANT_CLASSES: heading is text-xl/sm:text-2xl (24 at the
- * width the canvas designs at), subheading text-base, body text-sm.
+ * heading 24 (text-xl/sm:text-2xl at the width the canvas designs at),
+ * subheading 16 (text-base), body 14 (text-sm) — the numbers those classes
+ * used to supply directly, before sizing became free-form.
  */
 export const TEXT_VARIANT_BASE_PX: Record<TextVariant, number> = {
   heading: 24,
@@ -1091,6 +1120,9 @@ export type StorefrontTheme = {
    *  auto, derived from the tile's corner radius so the words never run into
    *  a rounded corner. */
   titleInset?: number;
+  /** The `shadow` title style's gradient tint, strict #rrggbb. Absent =
+   *  TITLE_SHADOW_DEFAULT_COLOR. Unused by the other title styles. */
+  titleShadowColor?: string;
   /** Hover-reveal transition speed in ms, HOVER_TRANSITION_MS_MIN..MAX.
    *  Absent = HOVER_TRANSITION_MS_DEFAULT. */
   titleHoverMs?: number;
@@ -1148,6 +1180,9 @@ export type CardStyle = {
    *  "auto" is a state a seller can choose, and the control has to be able to
    *  show it. Renderers read it through titleBandStyle. */
   titleInset?: number;
+  /** Stays OPTIONAL after resolution, like the price tag's colors: "default"
+   *  is a state the picker's inherit dot has to be able to show. */
+  titleShadowColor?: string;
   /** Always resolves to a concrete value (HOVER_TRANSITION_MS_DEFAULT when
    *  nobody set one), unlike titleInset: there is no CSS-native "auto" for a
    *  transition speed worth preserving as its own state. */
@@ -1195,6 +1230,7 @@ export function resolveCardStyle(
     titlePosition:
       overrides?.titlePosition ?? theme.titlePosition ?? DEFAULT_TITLE_POSITION,
     titleInset: overrides?.titleInset ?? theme.titleInset,
+    titleShadowColor: overrides?.titleShadowColor ?? theme.titleShadowColor,
     titleHoverMs:
       overrides?.titleHoverMs ?? theme.titleHoverMs ?? HOVER_TRANSITION_MS_DEFAULT,
     priceDisplay: overrides?.priceDisplay ?? theme.priceDisplay,
@@ -1243,6 +1279,56 @@ export function blockCornerRadius(
   return block.type === "product"
     ? (block.style?.cornerRadius ?? theme.cornerRadius)
     : theme.cornerRadius;
+}
+
+/** One product tile painted over a block on exactly the same footprint. */
+export type TileCover = {
+  /** The covering product's block key. */
+  key: string;
+  /** Its effective roundness, unscaled (see {@link blockCornerRadius}). */
+  cornerRadius: number;
+};
+
+/**
+ * THE PRODUCT TILES STACKED ON TOP OF EACH BLOCK, keyed by the covered block.
+ *
+ * A seller who puts a shape on a product's own cells and sends it behind has
+ * made the shape part of that tile, so nothing of it should show past the
+ * card. Two things used to let it through. Each block is clipped to its OWN
+ * roundness, so a sharp square under a product rounded past the theme kept
+ * its corners. And even at matching corners, two identical antialiased edges
+ * stacked leak a faint rim of whatever is underneath, since each partly
+ * covered pixel lets the lower colour through twice over. The renderer answers
+ * both from this (see blockTileClipStyle); this only says who covers whom.
+ *
+ * Products only, because a product card is the one face that is opaque across
+ * its whole clip by construction. Same footprint means same cells AND same
+ * tilt: two blocks turned by different angles do not share an outline.
+ */
+export function tileCovers(
+  theme: StorefrontTheme,
+  blocks: readonly StorefrontBlock[],
+): ReadonlyMap<string, readonly TileCover[]> {
+  const covers = new Map<string, TileCover[]>();
+  const productsAbove = new Map<string, TileCover[]>();
+  const painted = layerOrder([...blocks]);
+  // Front to back, so every product has been recorded before anything it
+  // sits on asks about it.
+  for (let index = painted.length - 1; index >= 0; index -= 1) {
+    const block = painted[index];
+    const footprint = `${block.x},${block.y},${block.w},${block.h},${block.rotation ?? 0}`;
+    const above = productsAbove.get(footprint);
+    if (above) covers.set(blockKey(block), [...above]);
+    if (block.type === "product") {
+      const cover = {
+        key: blockKey(block),
+        cornerRadius: blockCornerRadius(theme, block),
+      };
+      if (above) above.push(cover);
+      else productsAbove.set(footprint, [cover]);
+    }
+  }
+  return covers;
 }
 
 export type ProductBlock = BlockPlacement & {

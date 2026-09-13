@@ -10,6 +10,7 @@ import {
   serviceRest,
   signUp,
   userIdByEmail,
+  verificationLink,
 } from "./helpers";
 
 /**
@@ -101,9 +102,48 @@ test.describe("the publish gate", () => {
     // domain takes mail at all and a made-up one would be refused. (That check
     // fails OPEN when the resolver cannot be reached, so this still passes on
     // a machine with no network.)
-    await page.getByLabel(/Contact email/).fill("hello@squareshare.eu");
+    const contact = "hello@squareshare.eu";
+    await page.getByLabel(/Contact email/).fill(contact);
     await page.getByRole("button", { name: "Save" }).click();
-    await expectToast(page, /Business & seller details saved/i);
+    await expectToast(page, /Check .* for a link to confirm/i);
+
+    // --- TYPED IS NOT PROVEN: the gate is still down ---
+    // Every required field is filled in, and the seller still cannot publish,
+    // because the address has not been confirmed. This is the whole point of
+    // the confirmation step: an address nobody reads is not a contact.
+    await gotoApp(page, "/products/new");
+    await expect(
+      page.locator('[data-product-field="status"]').getByRole("button", { name: "Active" }),
+    ).toBeDisabled();
+    await gotoApp(page, "/settings/tax");
+    await expect(page.getByText(/Not confirmed yet/i)).toBeVisible();
+
+    // --- the recovery path: ask for the link again ---
+    // A seller whose first mail went astray must not be stuck, and the resend
+    // must INVALIDATE what it replaces, or every lost email would leave
+    // another live credential lying around.
+    const firstLink = await verificationLink(contact);
+    await page.getByRole("button", { name: /resend confirmation email/i }).click();
+    await expectToast(page, new RegExp(`Sent\\. Check ${contact}`, "i"));
+    const secondLink = await verificationLink(contact);
+    expect(secondLink).not.toBe(firstLink);
+
+    await page.goto(firstLink);
+    await page.waitForURL(/\/settings\/tax/, { timeout: 30_000 });
+    await expectToast(page, /not valid, or has already been used/i);
+
+    // --- open the live link (the dev outbox stands in for mail) ---
+    const link = secondLink;
+    await page.goto(link);
+    await page.waitForURL(/\/settings\/tax/, { timeout: 30_000 });
+    await expectToast(page, /Contact email confirmed/i);
+    await expect(page.getByText(/Confirmed — buyers can reach you here/i)).toBeVisible();
+
+    // Single use: opening the SAME link again is refused rather than silently
+    // re-run, which is what stops a forwarded mail from being a standing key.
+    await page.goto(link);
+    await page.waitForURL(/\/settings\/tax/, { timeout: 30_000 });
+    await expectToast(page, /not valid, or has already been used/i);
 
     // --- the warning is gone and "Active" is back on offer ---
     await gotoApp(page, "/products/new");
@@ -180,9 +220,11 @@ test.describe("the publish gate", () => {
     await save.click();
     await expectToast(page, /placeholder/i);
 
-    // And a real one goes through.
+    // And a real one goes through — and is only ASSERTED at this point, not
+    // proven: the save says a confirmation link is on its way, which is a
+    // different (and weaker) claim than "confirmed".
     await email.fill("hello@squareshare.eu");
     await save.click();
-    await expectToast(page, /Business & seller details saved/i);
+    await expectToast(page, /Check hello@squareshare\.eu for a link to confirm/i);
   });
 });

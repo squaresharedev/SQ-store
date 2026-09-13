@@ -141,3 +141,179 @@ export function footprintOffset(
     y: zeroless(floorCell(painted.y) - painted.y),
   };
 }
+
+// ON THE BOARD.
+//
+// A turned block's stored rect and its footprint share a centre, so whenever
+// its two spans differ the stored rect sits off the footprint by up to half
+// the difference. Against an edge, only one of them can be on the board: a 1x3
+// bar lying across the TOP row stores a rect that starts a row above the board.
+//
+// Every gesture used to hold the STORED rect to the board, and that is exactly
+// what stopped a turned bar reaching the top and bottom rows (and a turned 2x1
+// the last column) while the ghost under the hand showed plainly that it fit.
+//
+// So the board is asked about PER AXIS, and along each one either rect will do:
+//
+//   - the FOOTPRINT on the board is what a seller sees and what a move aims
+//     for, so every row and column a turned block visibly fits in is reachable;
+//   - the STORED rect on the board keeps every board that was valid before
+//     valid now, including a block turned against an edge with its corners
+//     hanging past it (turning never moves a block; see rotatedFootprint).
+//
+// The SPAN always fits (w <= columns, h <= rows). A renderer lays the stored
+// rect out on the board's own grid lines, and a span longer than the board has
+// no lines to be laid out on.
+//
+// Whole cells only. For a whole-cell origin the footprint sits a fixed number
+// of cells from the stored rect, which is what lets one pair of numbers
+// describe every position along an axis.
+
+/** A closed run of whole-cell values, `min` to `max` inclusive. */
+export interface Reach {
+  min: number;
+  max: number;
+}
+
+function inside(start: number, span: number, size: number): boolean {
+  return start >= 0 && start + span <= size;
+}
+
+function clampNumber(value: number, min: number, max: number): number {
+  return Math.min(Math.max(value, min), max);
+}
+
+/** One axis of {@link boardLanding}: by the footprint wherever its span fits,
+ *  by the stored rect only where the footprint is longer than the board. */
+function axisLanding(
+  start: number,
+  span: number,
+  coveredStart: number,
+  coveredSpan: number,
+  size: number,
+): Reach {
+  if (coveredSpan <= size) {
+    const offset = coveredStart - start;
+    return { min: zeroless(-offset), max: size - coveredSpan - offset };
+  }
+  return { min: 0, max: Math.max(0, size - span) };
+}
+
+/**
+ * Every STORED origin at which a box lies on a `columns` x `rows` board, per
+ * axis: where its footprint is wholly on the board, or, along an axis the
+ * footprint is too long for, where its stored rect is.
+ *
+ * The positions a move aims for. For a level block (or any tilt nearer level)
+ * the footprint IS the stored rect, so this is the familiar `0..columns - w`.
+ */
+export function boardLanding(
+  box: Box,
+  degrees: number,
+  columns: number,
+  rows: number,
+): { x: Reach; y: Reach } {
+  const covered = rotatedFootprint(box, degrees);
+  return {
+    x: axisLanding(box.x, box.w, covered.x, covered.w, columns),
+    y: axisLanding(box.y, box.h, covered.y, covered.h, rows),
+  };
+}
+
+/**
+ * Is this box on a `columns` x `rows` board, tilt included?
+ *
+ * Its span fits, and along each axis its footprint or its stored rect lies
+ * wholly inside. The rule a saved block is held to, and the one every
+ * gesture's clamp lands on.
+ */
+export function isOnBoard(
+  box: Box,
+  degrees: number,
+  columns: number,
+  rows: number,
+): boolean {
+  if (box.w > columns || box.h > rows) return false;
+  const covered = rotatedFootprint(box, degrees);
+  return (
+    (inside(box.x, box.w, columns) || inside(covered.x, covered.w, columns)) &&
+    (inside(box.y, box.h, rows) || inside(covered.y, covered.h, rows))
+  );
+}
+
+/**
+ * How far a MOVE may carry a box, as a step from where it is now, per axis.
+ *
+ * The landing (see boardLanding), widened to include standing still. That
+ * widening is the whole of a move's manners: a block already hanging past an
+ * edge (one turned against it) is never shoved back against the hand dragging
+ * it, never pulled along an axis the move did not travel, and still lands
+ * wholly on the board the moment the hand brings it there.
+ *
+ * A STEP range rather than a position, so a group can intersect its members'
+ * ranges and travel as one rigid body. Each range contains zero, so the
+ * intersection always does too: a group can always at least stay put.
+ */
+export function moveReach(
+  box: Box,
+  degrees: number,
+  columns: number,
+  rows: number,
+): { x: Reach; y: Reach } {
+  const landing = boardLanding(box, degrees, columns, rows);
+  const widen = (reach: Reach, start: number): Reach => ({
+    min: zeroless(Math.min(0, reach.min - start)),
+    max: zeroless(Math.max(0, reach.max - start)),
+  });
+  return { x: widen(landing.x, box.x), y: widen(landing.y, box.y) };
+}
+
+/** A step held inside a {@link moveReach} range. */
+export function clampStep(step: number, reach: Reach): number {
+  return zeroless(clampNumber(step, reach.min, reach.max));
+}
+
+/**
+ * A box put on the board with no move to measure against: a resize's result,
+ * or a block dropped at a spot that may not fit.
+ *
+ * The span is capped to the board first. Then each axis is left EXACTLY where
+ * it is when either rect is already on the board along it (see isOnBoard), so
+ * a resize never nudges a block that was fine; otherwise it goes to the
+ * nearest position where one of them is, preferring the footprint on a tie,
+ * since that is the one the seller can see.
+ */
+export function clampOntoBoard(
+  box: Box,
+  degrees: number,
+  columns: number,
+  rows: number,
+): Box {
+  const w = Math.min(box.w, columns);
+  const h = Math.min(box.h, rows);
+  const covered = rotatedFootprint({ x: box.x, y: box.y, w, h }, degrees);
+  const axis = (
+    start: number,
+    span: number,
+    coveredStart: number,
+    coveredSpan: number,
+    size: number,
+  ): number => {
+    if (inside(start, span, size) || inside(coveredStart, coveredSpan, size)) {
+      return start;
+    }
+    const byStored = clampNumber(start, 0, size - span);
+    if (coveredSpan > size) return byStored;
+    const offset = coveredStart - start;
+    const byFootprint = clampNumber(start, -offset, size - coveredSpan - offset);
+    return Math.abs(byFootprint - start) <= Math.abs(byStored - start)
+      ? byFootprint
+      : byStored;
+  };
+  return {
+    x: zeroless(axis(box.x, w, covered.x, covered.w, columns)),
+    y: zeroless(axis(box.y, h, covered.y, covered.h, rows)),
+    w,
+    h,
+  };
+}

@@ -1,12 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import type {
-  CSSProperties,
-  KeyboardEvent,
-  MouseEvent,
-  PointerEvent as ReactPointerEvent,
-} from "react";
+import type { CSSProperties, KeyboardEvent, MouseEvent } from "react";
 import {
   headerStyleValue,
   type HeaderLine,
@@ -34,47 +28,12 @@ import { MastheadLineEditor } from "./MastheadLineEditor";
  * the default ink. Renders nothing when hidden or empty. `compact` scales it
  * down for small previews.
  *
- * In the DESIGNER (and only there) each line is also a target: `onSelectLine`
- * makes it clickable, which is how the left-hand panel is aimed at it, and
- * `onEditLine` turns it into a field the WORDS are typed in. Without those
+ * In the DESIGNER (and only there) each line is also a target: a click both
+ * aims the left-hand panel at it (`onSelectLine`'s job) and drops a caret in
+ * it (`onEditLine`'s), in one motion — see `selectable` below. Without those
  * props this is inert markup, so the buyer-facing previews stay exactly what
  * they always were.
  */
-/** How close together, in ms and px, two presses have to be to be one
- *  double-click. 500ms is the platform default on Windows and macOS alike. */
-const DOUBLE_PRESS_MS = 500;
-const DOUBLE_PRESS_SLOP_PX = 6;
-
-/** What a press on a masthead line is worth remembering: which line, where on
- *  screen, and which character it was over while the line was still there. */
-function pressRecord(
-  line: HeaderLine,
-  event: ReactPointerEvent<HTMLElement>,
-): { line: HeaderLine; x: number; y: number; offset: number | null; at: number } | null {
-  if (event.button !== 0) return null;
-  return {
-    line,
-    x: event.clientX,
-    y: event.clientY,
-    offset: offsetAtPoint(event.currentTarget, event.clientX, event.clientY),
-    at: event.timeStamp,
-  };
-}
-
-/** Eat the click the swallowed press is about to produce — by then the pointer
- *  may be over a tile, and that tile must not select itself. Dropped again
- *  shortly after in case the press never becomes a click at all. */
-function swallowNextClick() {
-  const swallow = (event: Event) => {
-    event.preventDefault();
-    event.stopPropagation();
-  };
-  document.addEventListener("click", swallow, { capture: true, once: true });
-  window.setTimeout(
-    () => document.removeEventListener("click", swallow, true),
-    DOUBLE_PRESS_MS,
-  );
-}
 
 export function StorefrontMasthead({
   header,
@@ -98,11 +57,12 @@ export function StorefrontMasthead({
   onSelectLine?: (line: HeaderLine) => void;
   /** The line whose words are being typed in place, if any. */
   editingLine?: HeaderLine | null;
-  /** Where the caret goes when that editor opens: the word the double-click
-   *  landed on, or null for the end of the line. */
+  /** Where the caret goes when that editor opens: where the click landed (or
+   *  the word under it, for a genuine double/triple click), or null for the
+   *  end of the line. */
   editingRange?: TextRange | null;
-  /** Double-click (or a second click on the line already open in the panel):
-   *  start typing, carrying whatever the click selected. */
+  /** The first click on a line starts typing there directly, carrying
+   *  whatever the click landed on. */
   onEditLine?: (line: HeaderLine, range: TextRange | null) => void;
   onLineTextChange?: (line: HeaderLine, value: string) => void;
   onToggleLineFormat?: (
@@ -111,70 +71,8 @@ export function StorefrontMasthead({
   ) => void;
   onEditDone?: () => void;
 }) {
-  /**
-   * DOUBLE-CLICK, MADE PROOF AGAINST THE BOARD MOVING UNDER IT.
-   *
-   * The first press selects the line, which opens the docked left panel; the
-   * workspace narrows, the canvas re-clamps its pan, and the line slides
-   * sideways before the second press lands. That press can miss it entirely,
-   * and then the browser never fires `dblclick` — the seller gets the panel and
-   * no caret, and has to click again.
-   *
-   * So the pair is matched by POINT AND TIME at the document level instead of
-   * by element: a second press in the same spot, in the same breath, is the
-   * double-click it was meant to be wherever the line has got to by then. The
-   * word is the one worked out under the FIRST press, before anything moved.
-   *
-   * Once the line is a field, this steps aside entirely: presses inside it are
-   * the caret's, and the browser's own double-click-selects-a-word applies.
-   */
-  const press = useRef<{
-    line: HeaderLine;
-    x: number;
-    y: number;
-    offset: number | null;
-    at: number;
-  } | null>(null);
-  const live = useRef({ header, editingLine, onEditLine });
-  useEffect(() => {
-    live.current = { header, editingLine, onEditLine };
-  });
-  // Editor only: a buyer-facing render has no lines to type in and takes no
-  // listener at all.
+  // Editor only: a buyer-facing render has no lines to type in.
   const editable = Boolean(onEditLine);
-  useEffect(() => {
-    if (!editable) return;
-    function onPointerDown(event: PointerEvent) {
-      const previous = press.current;
-      press.current = null;
-      const { header, editingLine, onEditLine } = live.current;
-      if (!onEditLine || editingLine || !previous) return;
-      if (event.button !== 0) return;
-      if (event.timeStamp - previous.at > DOUBLE_PRESS_MS) return;
-      if (
-        Math.hypot(event.clientX - previous.x, event.clientY - previous.y) >
-        DOUBLE_PRESS_SLOP_PX
-      ) {
-        return;
-      }
-      // This press has been spent on the second half of a double-click, so
-      // nothing under the pointer may also act on it: no marquee, no tile
-      // selection, and no click behind it either.
-      event.preventDefault();
-      event.stopPropagation();
-      swallowNextClick();
-      onEditLine(
-        previous.line,
-        previous.offset === null
-          ? null
-          : wordRangeAt(header[previous.line], previous.offset),
-      );
-    }
-    // Capture on the document, which is ABOVE React's own root listener: that
-    // is what lets the press be claimed before anything else sees it.
-    document.addEventListener("pointerdown", onPointerDown, true);
-    return () => document.removeEventListener("pointerdown", onPointerDown, true);
-  }, [editable]);
 
   const name = header.name.trim();
   const bio = header.bio.trim();
@@ -241,11 +139,11 @@ export function StorefrontMasthead({
     );
 
   /**
-   * Start typing in a line, aimed at what the press was aimed at: a
-   * double-click takes the word under the pointer, a single click a caret
-   * where it landed. Worked out from the point rather than read off the
-   * browser's selection, which the canvas suppresses so that a drag across the
-   * board rubber-bands instead of selecting text.
+   * Start typing in a line, aimed at what the click was aimed at: a genuine
+   * double/triple click (event.detail > 1) takes the word under the pointer,
+   * an ordinary click a caret where it landed. Worked out from the point
+   * rather than read off the browser's selection, which the canvas suppresses
+   * so that a drag across the board rubber-bands instead of selecting text.
    */
   const beginEdit = (line: HeaderLine, event: MouseEvent<HTMLElement> | null) => {
     const node = event?.currentTarget ?? null;
@@ -261,8 +159,18 @@ export function StorefrontMasthead({
     onEditLine?.(line, range);
   };
 
-  /** Editor-only: the hit area, its keyboard equivalent, and the ring that
-   *  says which line the style panel is on. Empty outside the designer. */
+  /** Editor-only: the hit area and its keyboard equivalent — which line the
+   *  style panel is on is left to the panel itself (its heading names the
+   *  line it opened on), not to a mark on the canvas. Empty outside the
+   *  designer.
+   *
+   *  ONE press does the whole job: a click (or Enter) both aims the panel at
+   *  the line AND drops a caret in it — `beginEdit` calls `onEditLine`, whose
+   *  handler (StorefrontDesigner's `beginHeaderEdit`) already aims the panel
+   *  as part of arming the edit, so there is nothing left for a separate
+   *  select-then-edit step to do. Space is kept as the one way to aim the
+   *  panel WITHOUT opening the field, for a keyboard seller who wants the
+   *  style controls without a caret in the words. */
   const selectable = (line: HeaderLine) =>
     onSelectLine
       ? {
@@ -271,46 +179,38 @@ export function StorefrontMasthead({
           "aria-label": `Edit the store ${line}`,
           "aria-pressed": activeLine === line,
           onClick: (event: MouseEvent<HTMLElement>) => {
-            // A click on the line the panel is ALREADY on means "let me type",
-            // the same click-to-select, click-to-edit a text tile has. It is
-            // also the reliable half of the double-click below: selecting a
-            // line opens the left panel, which slides the board sideways
-            // between the two presses.
-            if (activeLine === line && onEditLine) {
+            if (onEditLine) {
               beginEdit(line, event);
               return;
             }
             onSelectLine(line);
           },
-          onDoubleClick: (event: MouseEvent<HTMLElement>) => {
-            event.preventDefault();
-            event.stopPropagation();
-            beginEdit(line, event);
-          },
           onKeyDown: (event: KeyboardEvent<HTMLElement>) => {
-            // Enter on the line the panel is on starts typing (the keyboard's
-            // double-click); Space stays pure selection, so there is always a
-            // key that only aims the panel.
-            if (event.key === "Enter" && activeLine === line && onEditLine) {
+            if (event.key === "Enter") {
               event.preventDefault();
-              beginEdit(line, null);
+              if (onEditLine) {
+                beginEdit(line, null);
+              } else {
+                onSelectLine(line);
+              }
               return;
             }
-            if (event.key !== "Enter" && event.key !== " ") return;
+            if (event.key !== " ") return;
             event.preventDefault();
             onSelectLine(line);
           },
         }
       : {};
 
-  const selectableClass = (line: HeaderLine) =>
+  // No ring on hover or on selection: the line reads exactly as it does on the
+  // buyer's page right up until the seller is actually typing in it, and even
+  // then MastheadLineEditor draws no box of its own (see there) — the caret is
+  // the only sign a line is live. `focus-visible` still lights up for keyboard
+  // navigation, which has no caret to fall back on. Same for both lines, so
+  // this is one value rather than a per-line function.
+  const selectableClass =
     onSelectLine &&
-    cn(
-      "cursor-pointer rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-      activeLine === line
-        ? "ring-2 ring-ring ring-offset-1"
-        : "hover:ring-1 hover:ring-border",
-    );
+    cn("cursor-pointer rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring");
 
   /** The look of a line, shared by the static node and the editor that
    *  replaces it, so entering edit mode changes nothing but the caret. */
@@ -344,16 +244,7 @@ export function StorefrontMasthead({
         (name || editorVisible) && (
           <h2
             {...selectable("name")}
-            // Arms the double-press above, reading the word this press is on
-            // while the line is still where the seller aimed it.
-            onPointerDown={
-              onEditLine
-                ? (event) => {
-                    press.current = pressRecord("name", event);
-                  }
-                : undefined
-            }
-            className={cn(nameClass, selectableClass("name"))}
+            className={cn(nameClass, selectableClass)}
             style={styleOf("name", nameColor)}
           >
             {name ? (
@@ -384,14 +275,7 @@ export function StorefrontMasthead({
         (bio || editorVisible) && (
           <p
             {...selectable("bio")}
-            onPointerDown={
-              onEditLine
-                ? (event) => {
-                    press.current = pressRecord("bio", event);
-                  }
-                : undefined
-            }
-            className={cn(bioClass, selectableClass("bio"))}
+            className={cn(bioClass, selectableClass)}
             style={styleOf("bio", bioColor)}
           >
             {bio ? (

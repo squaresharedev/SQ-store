@@ -53,10 +53,11 @@ test.describe("storefront setup flow", () => {
     await step(page, /I ship it/).click();
     await step(page, "Next").click();
 
-    // 3 of 4: the look. "Luxe" is the one preset on a dark canvas, so it is
-    // the cheapest to verify actually reached the designer.
+    // 3 of 4: the look. "Classic" is the one preset that does not paint the
+    // canvas white, so it is the cheapest to verify actually reached the
+    // designer.
     await expect(wizard(page)).toContainText("Step 3 of 4");
-    await step(page, "Luxe").click();
+    await step(page, "Classic").click();
     await step(page, "Next").click();
 
     // 4 of 4: the name.
@@ -70,14 +71,14 @@ test.describe("storefront setup flow", () => {
     // The name went in.
     await expect(page.locator("#storefront-name")).toHaveValue("Gilt & Grain");
 
-    // And so did the look: the luxe preset paints the canvas #111111, where
-    // every other preset (and the plain default) is light.
+    // And so did the look: the classic preset paints the canvas #f5f3ef, where
+    // the other two presets (and the plain default) leave it white.
     await expect
       .poll(
         () =>
           page.evaluate(() =>
             Array.from(document.querySelectorAll<HTMLElement>("[style]")).some(
-              (element) => element.style.backgroundColor === "rgb(17, 17, 17)",
+              (element) => element.style.backgroundColor === "rgb(245, 243, 239)",
             ),
           ),
         { timeout: 10_000 },

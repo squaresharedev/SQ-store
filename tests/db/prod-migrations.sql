@@ -3306,3 +3306,43 @@ revoke execute on function public.decrement_stock(uuid, integer) from public;
 revoke execute on function public.decrement_stock(uuid, integer) from anon;
 revoke execute on function public.decrement_stock(uuid, integer) from authenticated;
 grant execute on function public.decrement_stock(uuid, integer) to service_role;
+
+-- 20260909_seller_email_verification
+-- Double opt-in for the buyer-facing contact address. Replayed for the token
+-- store's fences, which are the whole security story: RLS on with NO POLICY
+-- (total deny for anon/authenticated), explicit revokes against PostgREST's
+-- auto-grant, and a CHECK that refuses anything but a 64-char hex digest in
+-- token_hash — the fence that would catch a plaintext token reaching the
+-- column. The db suite exists to prove exactly these.
+alter table public.profiles
+  add column seller_email_verified_at timestamptz;
+
+create table if not exists public.seller_email_verifications (
+  id           uuid primary key default gen_random_uuid(),
+  owner_id     uuid        not null references auth.users (id) on delete cascade,
+  email        text        not null,
+  token_hash   text        not null unique,
+  created_at   timestamptz not null default now(),
+  expires_at   timestamptz not null,
+  consumed_at  timestamptz
+);
+
+alter table public.seller_email_verifications
+  add constraint seller_email_verifications_email_shape
+    check (
+      char_length(email) <= 254
+      and email ~ '^[^@[:space:]]+@[^@[:space:]]+\.[^@[:space:]]+$'
+    ),
+  add constraint seller_email_verifications_token_hash_shape
+    check (token_hash ~ '^[0-9a-f]{64}$'),
+  add constraint seller_email_verifications_expiry_after_issue
+    check (expires_at > created_at);
+
+create index if not exists seller_email_verifications_owner_idx
+  on public.seller_email_verifications (owner_id);
+
+alter table public.seller_email_verifications enable row level security;
+
+revoke all on public.seller_email_verifications from anon;
+revoke all on public.seller_email_verifications from authenticated;
+grant all on public.seller_email_verifications to service_role;

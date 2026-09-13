@@ -46,6 +46,23 @@ const FOLLOW_TAU_MS = 55;
 const SETTLED_PX = 0.25;
 /** Below this a move is not worth animating; snap and be done. */
 const ANIMATE_MIN_PX = 1;
+/**
+ * How long the view must hold still before the stage stops being a promoted
+ * layer. `will-change: transform` is what makes a pan or pinch a cheap GPU
+ * move, but it also tells Chrome to keep the bitmap it rasterised at the OLD
+ * zoom and stretch it: left on permanently, zooming to 200% blew the board up
+ * from a 100% picture and every hairline (the handles' 1px borders, their
+ * icons, small text) went soft. Dropped once the view settles, the stage is
+ * redrawn once at the zoom it actually shows.
+ */
+const RASTER_SETTLE_MS = 150;
+
+function writeTransform(stage: HTMLElement, { zoom, pan }: CanvasView) {
+  // 2D on purpose: translate3d forces a composited layer of its own, the same
+  // stretched bitmap this avoids. The pan comes first so it stays in screen
+  // px rather than being multiplied by the zoom.
+  stage.style.transform = `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`;
+}
 
 function clampNumber(value: number, min: number, max: number): number {
   // min can exceed max for a board smaller than the keep-visible margin; the
@@ -142,16 +159,24 @@ export function useCanvasViewport(initial: CanvasView): CanvasViewport {
   const followRef = useRef(0);
   const followStampRef = useRef(0);
   const listenersRef = useRef(new Set<() => void>());
+  const settleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const paint = useCallback(() => {
     frameRef.current = 0;
     const stage = stageRef.current;
     if (stage) {
-      const { zoom, pan } = viewRef.current;
-      // translate3d keeps the stage on its own compositor layer; translate
-      // before scale so the pan stays in screen px rather than being
-      // multiplied by the zoom.
-      stage.style.transform = `translate3d(${pan.x}px, ${pan.y}px, 0) scale(${zoom})`;
+      // Promoted for as long as the view keeps moving (every paint pushes the
+      // release back), then released so the board re-rasterises sharp at the
+      // zoom it landed on. See RASTER_SETTLE_MS.
+      if (stage.style.willChange !== "transform") {
+        stage.style.willChange = "transform";
+      }
+      if (settleTimerRef.current) clearTimeout(settleTimerRef.current);
+      settleTimerRef.current = setTimeout(() => {
+        settleTimerRef.current = null;
+        if (stageRef.current) stageRef.current.style.willChange = "";
+      }, RASTER_SETTLE_MS);
+      writeTransform(stage, viewRef.current);
     }
     // Subscribers (the zoom readout) are notified at most once a frame.
     for (const listener of listenersRef.current) listener();
@@ -241,10 +266,7 @@ export function useCanvasViewport(initial: CanvasView): CanvasViewport {
       stageRef.current = node;
       // Paint immediately so a freshly mounted stage is not left at the
       // origin for a frame.
-      if (node) {
-        const { zoom, pan } = viewRef.current;
-        node.style.transform = `translate3d(${pan.x}px, ${pan.y}px, 0) scale(${zoom})`;
-      }
+      if (node) writeTransform(node, viewRef.current);
     },
     stage: () => stageRef.current,
     insets: () => insetsRef.current,

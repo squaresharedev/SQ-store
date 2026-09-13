@@ -140,11 +140,13 @@ test.describe("a quarter-turned block stays on the grid", () => {
 
   test("dragging the corner handle lands it on the lines", async ({ page }) => {
     await turn(page, SQUARE, 1);
-    const cell = page.locator(`li[data-grid-key="${SQUARE}"]`);
     const grid = await page.locator("ul.ss-grid").boundingBox();
     const stride = grid!.width / COLUMNS;
 
-    const handle = cell.getByRole("button", { name: /^Resize/ });
+    // The handle is drawn in the block's chrome layer, beside its cell.
+    const handle = page
+      .locator(`li[data-grid-chrome="${SQUARE}"]`)
+      .getByRole("button", { name: /^Resize/ });
     const box = (await handle.boundingBox())!;
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
     await page.mouse.down();

@@ -168,6 +168,10 @@ export function ShapeBlockEditor({
           label={isRing ? "Color" : "Fill"}
           value={block.color}
           onChange={(color) => onUpdate({ color })}
+          // Names the block whose colour is SHOWN. Driving a whole selection,
+          // a pick still paints all of it: the designer reads that off the
+          // live selection (see shapeColorKeys), so this editor does not have
+          // to carry the group around with it.
           target={{ kind: "shape-fill", blockKey: blockKey(block) }}
         />
       </SummonedField>

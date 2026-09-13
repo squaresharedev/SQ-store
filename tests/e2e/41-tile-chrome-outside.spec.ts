@@ -26,10 +26,10 @@ import {
  * have to be on the thing they manipulate. They hang outside the tile,
  * welded to its bottom edge, flush rather than floating apart from it or
  * doubling its border. That move is only an improvement if they stay
- * REACHABLE, and chrome outside a tile is drawn over its neighbours in a board
- * where every cell is its own stacking context. Reaching it therefore takes a
- * deliberate lift, and the lift cannot be the pointer's arrival, because the
- * pointer arriving on covered chrome lands on the cover instead.
+ * REACHABLE, and chrome outside a tile hangs over its neighbours. Every cell
+ * is its own stacking context, so the handles are not drawn inside the cell at
+ * all: each cell's chrome is a sibling layer (`li[data-grid-chrome]`) painted
+ * above every block on the board (see 56-tooling-above-canvas).
  *
  * FLUSH is not the same as TOUCHING EXACTLY. A hairline of overlap
  * (`[data-tile-chrome]`'s `-mt-px`) closes any subpixel gap a zoomed stage
@@ -96,8 +96,13 @@ async function chrome(page: Page, index = 0) {
     // a gap) is not one CSS pixel on screen. Derived, not guessed.
     const scale = tile.offsetWidth > 0 ? face.width / tile.offsetWidth : 1;
     const flush = 1.5 * scale;
+    // The handles are drawn in the cell's own chrome layer, the sibling right
+    // after it, so they can paint above every block on the board.
+    const layer = document.querySelector<HTMLElement>(
+      `li[data-grid-chrome="${CSS.escape(cell.dataset.gridKey ?? "")}"]`,
+    );
     const controls = [
-      ...cell.querySelectorAll<HTMLElement>("button[aria-label]"),
+      ...(layer?.querySelectorAll<HTMLElement>("button[aria-label]") ?? []),
     ];
     return controls
       .map((el) => {
@@ -177,7 +182,9 @@ async function selectAndLeave(page: Page, tile: Locator) {
 /** Wait out every transition running inside the board's cells. */
 async function settleChrome(page: Page) {
   await page.evaluate(async () => {
-    const cells = [...document.querySelectorAll("li[data-grid-cell]")];
+    const cells = [
+      ...document.querySelectorAll("li[data-grid-cell], li[data-grid-chrome]"),
+    ];
     await Promise.all(
       cells
         .flatMap((cell) => cell.getAnimations({ subtree: true }))
@@ -258,7 +265,8 @@ test.describe("a selected tile's controls stay off its face", () => {
 
     const overlap = await page.evaluate(() => {
       const cell = document.querySelector<HTMLElement>("li[data-grid-cell]")!;
-      const rotate = cell.querySelector<HTMLElement>(
+      const layer = document.querySelector<HTMLElement>("li[data-grid-chrome]")!;
+      const rotate = layer.querySelector<HTMLElement>(
         'button[aria-label^="Rotate"]',
       )!;
       // The price tag rides in the tile's title band by default, which is the
@@ -290,11 +298,11 @@ test.describe("a selected tile's controls stay off its face", () => {
     await tile.hover();
 
     const borders = await page.evaluate(() => {
-      const cell = document.querySelector<HTMLElement>("li[data-grid-cell]")!;
-      const resize = cell.querySelector<HTMLElement>(
+      const layer = document.querySelector<HTMLElement>("li[data-grid-chrome]")!;
+      const resize = layer.querySelector<HTMLElement>(
         'button[aria-label^="Resize"]',
       )!;
-      const rotate = cell.querySelector<HTMLElement>(
+      const rotate = layer.querySelector<HTMLElement>(
         'button[aria-label^="Rotate"]',
       )!;
       return {
@@ -331,19 +339,20 @@ test.describe("a selected tile's controls stay off its face", () => {
     await settleChrome(page);
     const ownerOfStrip = await page.evaluate(() => {
       const cell = document.querySelector<HTMLElement>("li[data-grid-cell]")!;
-      const handle = cell.querySelector<HTMLElement>(
+      const layer = document.querySelector<HTMLElement>("li[data-grid-chrome]")!;
+      const handle = layer.querySelector<HTMLElement>(
         'button[aria-label^="Resize"]',
       )!;
       const r = handle.getBoundingClientRect();
       const hit = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
       return {
         handleOpacity: getComputedStyle(handle).opacity,
-        insideCell: !!hit && cell.contains(hit),
+        ownedByTile: !!hit && (cell.contains(hit) || layer.contains(hit)),
       };
     });
     expect(ownerOfStrip.handleOpacity).toBe("0");
     expect(
-      ownerOfStrip.insideCell,
+      ownerOfStrip.ownedByTile,
       "a hidden handle is still swallowing the cell it hangs over",
     ).toBe(false);
 
@@ -360,10 +369,13 @@ test.describe("a selected tile's controls stay off its face", () => {
     // is one dropped hover.
     const strays = await page.evaluate(() => {
       const cell = document.querySelector<HTMLElement>("li[data-grid-cell]")!;
+      // The tile and its chrome layer are one surface to the pointer: stepping
+      // from one onto the other keeps the controls out.
+      const layer = document.querySelector<HTMLElement>("li[data-grid-chrome]")!;
       const tileEl = cell.querySelector<HTMLElement>("[data-block-tile]")!;
       const face = tileEl.getBoundingClientRect();
       const off: string[] = [];
-      for (const control of cell.querySelectorAll<HTMLElement>(
+      for (const control of layer.querySelectorAll<HTMLElement>(
         "button[aria-label]",
       )) {
         const r = control.getBoundingClientRect();
@@ -382,7 +394,7 @@ test.describe("a selected tile's controls stay off its face", () => {
         for (let step = 0; step <= steps; step += 1) {
           const y = fromY + ((toY - fromY) * step) / steps;
           const hit = document.elementFromPoint(x, y);
-          if (!hit || !cell.contains(hit)) {
+          if (!hit || !(cell.contains(hit) || layer.contains(hit))) {
             off.push(
               `${control.getAttribute("aria-label")} @${Math.round(x)},${Math.round(y)} -> ${
                 hit ? `${hit.tagName}.${hit.className}` : "nothing"
@@ -463,7 +475,10 @@ test.describe("a selected tile's controls stay off its face", () => {
     // neighbour lights up under the pointer and stays in front of the handle.
     // Located by attribute, not by role: the rotate handle carries
     // role="slider" so assistive tech hears the angle it holds.
-    const handle = first.locator('button[aria-label^="Rotate"]');
+    const handle = page
+      .locator("li[data-grid-chrome]")
+      .first()
+      .locator('button[aria-label^="Rotate"]');
     const box = (await handle.boundingBox())!;
     await page.mouse.move(box.x + box.width / 2, box.y + box.height * 3);
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, {

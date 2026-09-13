@@ -30,6 +30,10 @@ export function CardsSection({
   }
 
   return (
-    <CardStyleControls value={resolveCardStyle(theme)} onChange={applyPatch} />
+    <CardStyleControls
+      value={resolveCardStyle(theme)}
+      onChange={applyPatch}
+      colorScope={{ theme, scope: "theme" }}
+    />
   );
 }

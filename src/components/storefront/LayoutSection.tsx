@@ -17,13 +17,14 @@ import {
 import { InfoTip } from "@/components/ui/InfoTip";
 
 /**
- * The canvas group: board size, the grid gap, and the designer's own grid
- * guides.
+ * The Canvas section of the Theme group: board size, the grid gap, and the
+ * designer's own grid guides.
  *
  * The guides are an editor view preference rather than a saved theme field, and
- * they sit here BECAUSE of that: under "Theme", beside colours the buyer sees,
- * a switch that only ever affects the seller's own screen read as one more
- * thing being published.
+ * they sit in this section BECAUSE of that: beside colours the buyer sees, a
+ * switch that only ever affects the seller's own screen read as one more thing
+ * being published, so it stays in its own labelled sibling rather than folded
+ * into the same list.
  */
 export function LayoutSection({
   theme,

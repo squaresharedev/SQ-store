@@ -130,7 +130,7 @@ describe("ControlsPanel grouping", () => {
     // search field violated axe). Use the data attribute instead.
     const menu = document.querySelector("[data-panel-menu]")!;
     expect(menu).not.toBeNull();
-    expect(menu.querySelectorAll("[data-panel-menu-item]")).toHaveLength(7);
+    expect(menu.querySelectorAll("[data-panel-menu-item]")).toHaveLength(6);
     // Nothing editable until a group is chosen: that IS the fix.
     expect(screen.queryByRole("slider")).not.toBeInTheDocument();
     expect(screen.queryByRole("switch")).not.toBeInTheDocument();
@@ -138,15 +138,17 @@ describe("ControlsPanel grouping", () => {
     expect(screen.queryByText("Advanced")).not.toBeInTheDocument();
   });
 
-  it("keeps the grid guide with the canvas, not with the saved theme", async () => {
+  it("shows the canvas controls directly under Theme, with nothing to expand", async () => {
     const user = userEvent.setup();
     render(controls());
 
+    // Theme and Canvas are merged under one top-level entry, and neither
+    // half is a collapsible submenu: opening Theme shows the board's own
+    // guide right away, with no second click to find it.
     await user.click(screen.getByRole("button", { name: /^Theme/ }));
-    expect(screen.queryByRole("switch", { name: "Show grid" })).toBeNull();
 
-    await user.click(screen.getByRole("button", { name: /back/i }));
-    await user.click(screen.getByRole("button", { name: /^Canvas/ }));
+    expect(screen.getByText("Canvas width")).toBeVisible();
+    expect(screen.getByText("Grid density")).toBeVisible();
     expect(screen.getByRole("switch", { name: "Show grid" })).toBeVisible();
   });
 

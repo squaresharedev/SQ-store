@@ -17,6 +17,10 @@ import {
   taxSchema,
 } from "@/lib/validation/settings";
 import { hasMailExchanger } from "@/lib/validation/email-domain";
+import {
+  sellerEmailVerificationRequired,
+  startSellerEmailVerification,
+} from "@/lib/settings/seller-email-verification";
 import { passwordProblem } from "@/lib/auth/password";
 import { usernameSchema } from "@/lib/validation/auth";
 import type { TablesUpdate } from "@/types";
@@ -464,9 +468,101 @@ export async function saveTaxInfo(
     }
   }
 
-  if (!(await updateOwnProfile(user.id, parsed.data))) return SAVE_FAILED;
+  // Whether the buyer-facing address CHANGED decides two things: the stored
+  // proof must be dropped (it was proof of a different address), and a fresh
+  // confirmation link has to go out. Read before the write, since the write is
+  // what makes the answer unknowable.
+  const supabase = await createClient();
+  const { data: current } = await supabase
+    .from("profiles")
+    .select("seller_email")
+    .eq("id", user.id)
+    .maybeSingle();
+  const emailChanged = (current?.seller_email ?? null) !== parsed.data.seller_email;
+
+  const update: TablesUpdate<"profiles"> = { ...parsed.data };
+  // Clearing the flag is unconditional on a change, and happens whether or not
+  // verification is switched on: a stored `verified_at` must never outlive the
+  // address it was granted for, or turning the feature on later would
+  // grandfather in an address nobody ever confirmed.
+  if (emailChanged) update.seller_email_verified_at = null;
+
+  if (!(await updateOwnProfile(user.id, update))) return SAVE_FAILED;
   revalidatePath("/settings/tax");
+
+  if (emailChanged && parsed.data.seller_email && sellerEmailVerificationRequired()) {
+    const started = await startSellerEmailVerification(
+      user.id,
+      parsed.data.seller_email,
+      await siteOrigin(),
+    );
+    // The DETAILS ARE SAVED either way — reporting a failed send as a failed
+    // save would be a lie, and would leave the seller re-typing an address
+    // that is already stored. The resend button is the recovery.
+    if (!started.ok) {
+      return {
+        error: `Saved, but the confirmation email didn't go out. ${started.reason} Try "Resend" below.`,
+      };
+    }
+    return {
+      success: `Saved. Check ${parsed.data.seller_email} for a link to confirm the address.`,
+    };
+  }
+
   return { success: "Business & seller details saved." };
+}
+
+/**
+ * Send the confirmation link again.
+ *
+ * Its own action rather than a re-save, because the two are different asks: a
+ * save may legitimately change nothing, and a seller who never received the
+ * first mail should not have to re-submit a whole form (and re-run the DNS
+ * check) to get another one.
+ *
+ * Nothing here is user-supplied: the address comes from the stored profile, so
+ * this cannot be turned into a way to send mail to an arbitrary recipient.
+ */
+export async function resendSellerEmailVerification(
+  _prev: SettingsActionState,
+  formData: FormData,
+): Promise<SettingsActionState> {
+  const user = await getUser();
+  if (!user) return SIGNED_OUT;
+  const rejected = unknownFieldError(formData, []);
+  if (rejected) return rejected;
+
+  if (!sellerEmailVerificationRequired()) {
+    return { error: "Email confirmation is not available right now." };
+  }
+  // Its own budget, tighter than settingsWrite: this is the one control in
+  // Settings that makes us send mail on demand.
+  if (!(await rateLimit("seller_email_verify_send", RATE_LIMITS.sellerEmailVerifySend))) {
+    return {
+      error: "That's a lot of confirmation emails. Wait a while before asking for another.",
+    };
+  }
+
+  const supabase = await createClient();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("seller_email, seller_email_verified_at")
+    .eq("id", user.id)
+    .maybeSingle();
+  if (!profile?.seller_email) {
+    return { error: "Add a contact email first, then we can confirm it." };
+  }
+  if (profile.seller_email_verified_at) {
+    return { success: "That address is already confirmed." };
+  }
+
+  const started = await startSellerEmailVerification(
+    user.id,
+    profile.seller_email,
+    await siteOrigin(),
+  );
+  if (!started.ok) return { error: started.reason };
+  return { success: `Sent. Check ${profile.seller_email} for the link.` };
 }
 
 // --- Notifications ---------------------------------------------------------

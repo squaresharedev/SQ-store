@@ -11,11 +11,17 @@ import {
  * font, size, colour, bold/italic/underline and alignment.
  *
  * Neither line has a tile or an inspector card, so clicking it on the canvas
- * aims the LEFT-hand panel at it and that panel is the whole of its styling.
- * What these cover is that the two lines stay independent, that the controls
- * write to the thing the panel says they are on, and that "off" is stored as
- * nothing rather than as a value (the storage side is unit-tested in
- * tests/unit/header-style.test.ts).
+ * both aims the LEFT-hand panel at it and drops a caret in it — that panel is
+ * the whole of its styling. What these cover is that the two lines stay
+ * independent, that the controls write to the thing the panel says they are
+ * on, and that "off" is stored as nothing rather than as a value (the storage
+ * side is unit-tested in tests/unit/header-style.test.ts).
+ *
+ * A click into the panel BLURS the canvas field (moving focus off it ends the
+ * in-place edit — see StorefrontMasthead), so most of a test reads styles off
+ * the static line (`name()`/`bio()`) once a panel control has been clicked.
+ * Only the moment right after the click itself, before anything in the panel
+ * has been touched, needs the still-editing field (`nameField()`).
  *
  * ONE account, ONE page, shared across the file (sign-ups are rate limited);
  * serial because the page is shared. Every test reloads to a clean masthead.
@@ -28,6 +34,9 @@ let storefrontUrl: string;
 
 const name = () => page.getByRole("button", { name: "Edit the store name" });
 const bio = () => page.getByRole("button", { name: "Edit the store bio" });
+/** The name line while it is still the field a click just opened — gone the
+ *  instant focus leaves it for a panel control. See the note above. */
+const nameField = () => page.locator('h2[role="textbox"][aria-label="Store name"]');
 
 /** One rendered CSS property of a masthead line. */
 function css(line: Locator, property: string) {
@@ -68,8 +77,10 @@ test.describe("masthead line styling", () => {
     // The panel is on the line, and carries type controls as well as colour.
     await expect(page.getByRole("button", { name: "Bold" })).toBeVisible();
 
-    // The masthead's own semibold (600) gives way to a real bold.
-    expect(await css(name(), "font-weight")).toBe("600");
+    // The masthead's own semibold (600) gives way to a real bold. Read off
+    // the field, not the static line: the click that opened the panel also
+    // put the caret here, and it hasn't blurred yet.
+    expect(await css(nameField(), "font-weight")).toBe("600");
     await page.getByRole("button", { name: "Bold" }).click();
     await expect.poll(() => css(name(), "font-weight")).toBe("700");
     await expect(page.getByRole("button", { name: "Bold" })).toHaveAttribute(
@@ -129,10 +140,13 @@ test.describe("masthead line styling", () => {
 
   test("Ctrl+B formats the line the panel is on", async () => {
     await name().click();
+    // No panel control is clicked here, so nothing blurs the field the click
+    // opened: Ctrl+B is caught by the field's own handler (MastheadLineEditor)
+    // without moving focus, and the line stays the still-editing one.
     await page.keyboard.press("ControlOrMeta+b");
-    await expect.poll(() => css(name(), "font-weight")).toBe("700");
+    await expect.poll(() => css(nameField(), "font-weight")).toBe("700");
     await page.keyboard.press("ControlOrMeta+b");
-    await expect.poll(() => css(name(), "font-weight")).toBe("600");
+    await expect.poll(() => css(nameField(), "font-weight")).toBe("600");
   });
 
   test("masthead styling goes through undo, and survives a save", async () => {

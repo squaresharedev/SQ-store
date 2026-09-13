@@ -9,9 +9,13 @@ import {
   storefrontNameSchema,
 } from "@/lib/validation/storefront";
 import {
+  CANVAS_COLUMNS_MAX,
+  CANVAS_ROWS_MAX,
   DEFAULT_STOREFRONT_CONFIG,
   EMBED_MAX_DOMAINS,
   IMAGE_ALT_MAX,
+  PLACEMENT_X_MIN,
+  PLACEMENT_Y_MIN,
   TEXT_MAX_LENGTH,
   type StorefrontConfig,
 } from "@/types/storefront";
@@ -549,19 +553,52 @@ describe("block rotation", () => {
     expect(JSON.stringify(parsed.data)).toBe(JSON.stringify(cfg));
   });
 
-  it("checks the STORED rect, not the painted corners of a tilt", () => {
-    // A turned block covers different cells (see blockFootprint), and near an
-    // edge its corners can reach past the board. That is the editor's business
-    // to keep in hand, not the schema's: at the extreme, a block wider than
-    // the board has no placement that hides its overhang, and refusing the
-    // save would strand a design the seller cannot repair.
+  it("holds a turned block to the board by its footprint OR its stored rect", () => {
+    // Per axis, either rect will do (see isOnBoard). The footprint is what a
+    // seller sees and where a drag lands, so a turned block has to save
+    // wherever it visibly fits; the stored rect is what a turn leaves alone,
+    // so a block turned against an edge, corners past it, still saves too.
     const cfg = validConfig();
-    Object.assign(cfg.blocks[1], { x: 4, y: 0, w: 2, h: 1, rotation: 90 });
-    expect(storefrontConfigSchema.safeParse(cfg).success).toBe(true);
+    const accepts = (placement: Record<string, number>) => {
+      Object.assign(cfg.blocks[1], placement);
+      return storefrontConfigSchema.safeParse(cfg).success;
+    };
 
-    // The stored rect is still held to the board.
-    Object.assign(cfg.blocks[1], { x: 5, y: 0, w: 2, h: 1, rotation: 90 });
-    expect(storefrontConfigSchema.safeParse(cfg).success).toBe(false);
+    // Stored rect on the 6x6 board, footprint hanging over the top edge.
+    expect(accepts({ x: 4, y: 0, w: 2, h: 1, rotation: 90 })).toBe(true);
+
+    // THE BUG: a turned 1x3 bar lying across the top row stores y = -1, and
+    // lying across the bottom row runs its stored rect a row past the board.
+    expect(accepts({ x: 2, y: -1, w: 1, h: 3, rotation: 90 })).toBe(true);
+    expect(accepts({ x: 2, y: 4, w: 1, h: 3, rotation: 90 })).toBe(true);
+    // A turned 2x1 standing in the last column, stored rect past the right
+    // edge; a turned 3x1 standing in the first, stored at x = -1.
+    expect(accepts({ x: 5, y: 1, w: 2, h: 1, rotation: 90 })).toBe(true);
+    expect(accepts({ x: -1, y: 1, w: 3, h: 1, rotation: -90 })).toBe(true);
+
+    // Off the board by BOTH rects along an axis is still off the board.
+    expect(accepts({ x: 2, y: -2, w: 1, h: 3, rotation: 90 })).toBe(false);
+    expect(accepts({ x: 6, y: 1, w: 2, h: 1, rotation: 90 })).toBe(false);
+    // A level block has one rect, and that one has to be on the board.
+    expect(accepts({ x: 2, y: -1, w: 1, h: 3, rotation: 0 })).toBe(false);
+  });
+
+  it("reaches the placement floors exactly, and not a cell past them", () => {
+    // The longest turned bars a board can hold, lying against its top and
+    // left edges: what the field floors were derived from.
+    const cfg = validConfig();
+    cfg.theme = { ...cfg.theme, columns: CANVAS_COLUMNS_MAX, rows: CANVAS_ROWS_MAX };
+    const accepts = (placement: Record<string, number>) => {
+      Object.assign(cfg.blocks[1], placement);
+      return storefrontConfigSchema.safeParse(cfg).success;
+    };
+    const tall = { x: 0, w: 1, h: CANVAS_ROWS_MAX, rotation: 90 };
+    const wide = { y: 0, w: CANVAS_COLUMNS_MAX, h: 1, rotation: 90 };
+
+    expect(accepts({ ...tall, y: PLACEMENT_Y_MIN })).toBe(true);
+    expect(accepts({ ...wide, x: PLACEMENT_X_MIN })).toBe(true);
+    expect(accepts({ ...tall, y: PLACEMENT_Y_MIN - 1 })).toBe(false);
+    expect(accepts({ ...wide, x: PLACEMENT_X_MIN - 1 })).toBe(false);
   });
 });
 

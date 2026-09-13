@@ -1,16 +1,26 @@
 "use client";
 
-import type { StorefrontTheme, TextBlock, TextSpan, TextStyle } from "@/types/storefront";
+import { useEffect, useRef } from "react";
+import {
+  TEXT_SIZE_MIN,
+  TEXT_VARIANT_BASE_PX,
+  blockKey,
+  type StorefrontTheme,
+  type TextBlock,
+  type TextSpan,
+  type TextStyle,
+} from "@/types/storefront";
 import { isStrictHexColor } from "@/lib/validation/storefront";
 import { segmentText } from "@/lib/storefront/text-spans";
 import { fontPresentation } from "@/lib/theme/storefront-fonts";
 import { cn } from "@/lib/utils";
 import {
   TEXT_ALIGN_CLASSES,
-  TEXT_VARIANT_CLASSES,
   TEXT_VARIANT_WEIGHT_CLASSES,
   textSizeStyle,
 } from "./config-maps";
+import { useAutoFitRegistry } from "./text-autofit-registry";
+import { useAutoFitTextSize } from "./useAutoFitTextSize";
 import {
   InlineTextEditor,
   type InlineFormatKey,
@@ -69,26 +79,70 @@ export function TextTileContent({
   // resolve) leaves the block inheriting the canvas font.
   const font = fontPresentation(block.font);
 
+  // The box the words have to fit inside, and the words themselves — two refs
+  // rather than one because which element holds the words depends on editing
+  // mode (the static paragraph, or InlineTextEditor's own node).
+  const containerRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLParagraphElement>(null);
+
+  // An explicit size is the seller's own choice, cropped or not, and is never
+  // shrunk out from under them; only Auto (no stored size) fits itself to the
+  // box.
+  const autoFit = block.fontSize === undefined;
+  const autoFitSize = useAutoFitTextSize({
+    containerRef,
+    textRef,
+    ceiling: TEXT_VARIANT_BASE_PX[block.variant],
+    floor: TEXT_SIZE_MIN,
+    enabled: autoFit,
+    deps: [
+      block.text,
+      block.spans,
+      block.bold,
+      block.italic,
+      block.underline,
+      block.font,
+      block.variant,
+      block.align,
+      editing,
+    ],
+  });
+  const resolvedSize = block.fontSize ?? autoFitSize;
+
+  // Published so the inspector's "Auto (NN px)" — and the slider's own
+  // starting point — describe what this block is ACTUALLY rendering at, not
+  // the flat number its style would use in an infinite box. See
+  // text-autofit-registry for why this is a registry rather than a prop.
+  const registry = useAutoFitRegistry();
+  const key = blockKey(block);
+  useEffect(() => {
+    if (!registry) return;
+    if (!autoFit) {
+      registry.clear(key);
+      return;
+    }
+    registry.report(key, autoFitSize);
+  }, [registry, key, autoFit, autoFitSize]);
+
   // Shared by the static paragraph and the editable one, so entering and
-  // leaving edit mode does not move a single pixel of the text.
+  // leaving edit mode does not move a single pixel of the text. Sizing is
+  // always this inline px (never the variant's own text-* class): a size
+  // that only ever applied above some breakpoint could not be measured
+  // against the box it has to fit, which auto-fit needs unconditionally.
   const bodyClass = cn(
-    // An explicit size replaces the variant's scale (applied as an inline
-    // px value — sizing is free-form now, not five presets); the variant
-    // keeps supplying the weight so heading/subheading/body stay distinct.
-    block.fontSize
-      ? TEXT_VARIANT_WEIGHT_CLASSES[block.variant]
-      : TEXT_VARIANT_CLASSES[block.variant],
+    TEXT_VARIANT_WEIGHT_CLASSES[block.variant],
     block.bold && "font-bold",
     block.italic && "italic",
     block.underline && "underline",
   );
   const bodyStyle = {
-    ...(block.fontSize ? textSizeStyle(block.fontSize) : undefined),
+    ...textSizeStyle(resolvedSize),
     ...(color ? { color } : undefined),
   };
 
   return (
     <div
+      ref={containerRef}
       className={cn(
         "flex min-h-0 flex-1 flex-col justify-center overflow-hidden whitespace-pre-line p-3",
         TEXT_ALIGN_CLASSES[block.align],
@@ -106,13 +160,14 @@ export function TextTileContent({
           selectAll={selectAllOnEdit}
           className={bodyClass}
           style={bodyStyle}
+          nodeRef={textRef}
           onChange={onTextChange}
           onToggleBlockFormat={onToggleBlockFormat}
           onRangeChange={onRangeChange}
           onDone={onEditEnd}
         />
       ) : (
-        <p key="static" className={bodyClass} style={bodyStyle}>
+        <p key="static" ref={textRef} className={bodyClass} style={bodyStyle}>
           {block.text ? (
             renderRuns(block.text, block.spans)
           ) : (

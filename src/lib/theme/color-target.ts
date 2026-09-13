@@ -1,6 +1,7 @@
 import {
   PRICE_TAG_DEFAULT_BORDER,
   PRICE_TAG_SHADOW_TEXT,
+  TITLE_SHADOW_DEFAULT_COLOR,
   blockKey,
   defaultPriceTagFill,
   resolveCardStyle,
@@ -14,6 +15,7 @@ import {
 } from "@/types/storefront";
 import { isStrictHexColor } from "@/lib/validation/storefront";
 import { rangeColor } from "@/lib/storefront/text-spans";
+import { readableInkOn } from "@/lib/format/color";
 
 /**
  * WHICH color the left-hand ColorPanel is editing.
@@ -40,13 +42,20 @@ export type ColorTargetRef =
   | { kind: "theme-background-to" }
   | { kind: "header-name" }
   | { kind: "header-bio" }
+  // A shape ref names ONE block: the one whose colour the panel is showing.
+  // With several shapes selected a pick lands on all of them, but that is not
+  // written down here — the designer reads it off the live selection when it
+  // turns the ref into a mutation, so the two can never drift apart (see
+  // shapeColorKeys in StorefrontDesigner).
   | { kind: "shape-fill"; blockKey: string }
   | { kind: "shape-border"; blockKey: string }
   | { kind: "text-color"; blockKey: string }
   // The one ref that spans both scopes: the price tag's three colors live on
   // the theme AND on a tile's overrides, and the same panel edits either. No
   // blockKey means the theme.
-  | { kind: "price-tag"; part: PriceTagPart; blockKey?: string };
+  | { kind: "price-tag"; part: PriceTagPart; blockKey?: string }
+  // The `shadow` title style's tint, on the same two scopes as the price tag.
+  | { kind: "title-shadow"; blockKey?: string };
 // A "product-page-text" ref lived here. The product page's ink is derived from
 // the storefront background's lightness now, so there is no colour to pick.
 
@@ -122,9 +131,37 @@ const PRICE_TAG_COLOR_LABELS: Record<PriceTagPart, string> = {
  * both pickers so none of them can disagree about what "Auto" looks like.
  */
 export function priceTagAutoTextColor(card: CardStyle, accent: string): string {
-  return card.priceTagPosition === "below" && card.titleStyle === "shadow"
+  if (card.priceTagPosition !== "below" || card.titleStyle !== "shadow") {
+    return gate(accent, DEFAULT_TEXT_COLOR);
+  }
+  // A seller-tinted shade can be light, and then white would sink into it.
+  return card.titleShadowColor === undefined
     ? PRICE_TAG_SHADOW_TEXT
-    : gate(accent, DEFAULT_TEXT_COLOR);
+    : readableInkOn(gate(card.titleShadowColor, TITLE_SHADOW_DEFAULT_COLOR));
+}
+
+/**
+ * The `shadow` title area's tint, resolved for a picker. Same layering rule
+ * as priceTagColorField: `overrides` present means a tile, where "unset"
+ * follows the theme; absent means the theme, where it follows the black
+ * default.
+ */
+export function titleShadowColorField(
+  theme: StorefrontTheme,
+  overrides: CardStyleOverrides | undefined,
+): ResolvedColorTarget {
+  const stored = (overrides ?? theme).titleShadowColor;
+  const inherit = overrides
+    ? {
+        label: "Theme color",
+        value: gate(theme.titleShadowColor, TITLE_SHADOW_DEFAULT_COLOR),
+      }
+    : { label: "Default", value: TITLE_SHADOW_DEFAULT_COLOR };
+  return {
+    label: "Shadow color",
+    value: gate(stored, inherit.value),
+    inherit: { ...inherit, active: stored === undefined },
+  };
 }
 
 /**
@@ -355,6 +392,13 @@ export function resolveColorTarget(
       // `?? {}` not `block.style`: a tile with no overrides yet is still the
       // TILE scope, and passing undefined would read it as the theme.
       return priceTagColorField(theme, block.style ?? {}, ref.part);
+    }
+
+    case "title-shadow": {
+      if (!ref.blockKey) return titleShadowColorField(theme, undefined);
+      const block = find(blocks, ref.blockKey);
+      if (block?.type !== "product") return null;
+      return titleShadowColorField(theme, block.style ?? {});
     }
   }
 }

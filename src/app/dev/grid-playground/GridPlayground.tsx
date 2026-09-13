@@ -13,6 +13,10 @@ import {
   type StorefrontBlock,
 } from "@/types/storefront";
 import type { Product } from "@/types/product";
+import { cn } from "@/lib/utils";
+import { fontPresentation } from "@/lib/theme/storefront-fonts";
+import { themeForVibe } from "@/lib/storefront/presets";
+import { STOREFRONT_VIBES, type StorefrontVibe } from "@/types/storefront-brief";
 import type { GridPlacement } from "@/components/grid/gridConstants";
 import { Grid } from "@/components/grid/Grid";
 import { BlockTile } from "@/components/storefront/BlockTile";
@@ -34,6 +38,11 @@ import {
 
 const COLUMNS = 6;
 const ROWS = 6;
+/** The designer's own design-view cell size, so a board here is the size a
+ *  board there is (DESIGN_CELL_PX in DesignerCanvas). */
+const CELL_PX = 96;
+/** The board frame's `p-4` either side, plus its 1px border. */
+const FRAME_CHROME_PX = 16 * 2 + 2;
 
 function shape(
   id: string,
@@ -136,7 +145,14 @@ const INITIAL_BLOCKS: StorefrontBlock[] = [
 export function GridPlayground() {
   const [blocks, setBlocks] = useState(INITIAL_BLOCKS);
   const [round, setRound] = useState(false);
-  const [selected, setSelected] = useState<string | null>(null);
+  /** Whether blocks may share cells, as the designer's own board allows. Off by
+   *  default (the grid's own default), so both of the grid's drop rules can be
+   *  driven here: the stacking one the designer uses, and the packed one. */
+  const [stacking, setStacking] = useState(false);
+  /** The selection, plural — shift-click adds to it, exactly as the designer's
+   *  board does. The toolbar's group controls and the grid's group move both
+   *  need more than one selected block to have anything to work on. */
+  const [selected, setSelected] = useState<readonly string[]>([]);
   /** Pan + zoom, wired the same way the real designer's stage is — so the
    *  quick bar's "does it stay a fixed size while the board zooms" behaviour
    *  can actually be exercised here instead of only argued about from the
@@ -160,13 +176,26 @@ export function GridPlayground() {
   /** The last panel the selection toolbar asked for, echoed below the board:
    *  the harness has no colour panel or inspector to open. */
   const [lastPanel, setLastPanel] = useState<string | null>(null);
+  /** Which starting look the board is wearing, or null for the plain default. */
+  const [look, setLook] = useState<StorefrontVibe | null>(null);
 
+  // The starting looks, on a real tile. They are the one part of the theme
+  // that cannot be judged from the panel that sets them: each one decides what
+  // a tile shows and WHEN, so seeing the difference means hovering a product
+  // tile, which is exactly what this harness has and no auth-free surface
+  // otherwise offers.
+  const base = look ? themeForVibe(look) : DEFAULT_STOREFRONT_CONFIG.theme;
   const theme = {
-    ...DEFAULT_STOREFRONT_CONFIG.theme,
-    cornerRadius: round ? 100 : 0,
+    ...base,
+    // The roundness toggle still wins: it is testing the circle clip, not the
+    // look. Off, the look's own radius applies (sharp, or Classic's 8).
+    cornerRadius: round ? 100 : base.cornerRadius,
     columns: COLUMNS,
     rows: ROWS,
   };
+  const canvas =
+    theme.background.kind === "solid" ? theme.background.color : undefined;
+  const canvasFont = fontPresentation(theme.font);
 
   function patchBlock(key: string, patch: Partial<GridPlacement>) {
     setBlocks((current) =>
@@ -213,6 +242,14 @@ export function GridPlayground() {
         >
           {round ? "Sharp corners" : "Round corners (circle)"}
         </button>
+        <button
+          type="button"
+          onClick={() => setStacking((on) => !on)}
+          aria-pressed={stacking}
+          className={secondaryButtonClass}
+        >
+          Allow stacking
+        </button>
         {/* Real pan/zoom, wired the same way as the designer's own stage —
             see viewport above — so the quick bar's fixed-size claim can
             actually be checked at a zoom other than 100%. */}
@@ -242,26 +279,78 @@ export function GridPlayground() {
         </button>
       </div>
 
+      <div className="mt-2 flex items-center gap-2">
+        <span className="font-inter text-sm text-muted-foreground">Look:</span>
+        <button
+          type="button"
+          onClick={() => setLook(null)}
+          aria-pressed={look === null}
+          className={secondaryButtonClass}
+        >
+          Default
+        </button>
+        {STOREFRONT_VIBES.map((vibe) => (
+          <button
+            key={vibe}
+            type="button"
+            onClick={() => setLook(vibe)}
+            aria-pressed={look === vibe}
+            className={secondaryButtonClass}
+          >
+            {vibe}
+          </button>
+        ))}
+        <span
+          data-look=""
+          className="font-mono text-xs tabular-nums text-muted-foreground"
+        >
+          {look ?? "default"} · title {theme.titleDisplay} · price{" "}
+          {theme.priceDisplay} @ {theme.priceTagPosition}
+        </span>
+      </div>
+
       {/* `relative`, because the selection toolbar docks to the top of this
           box the way it docks to the top of the designer's canvas window —
           and, like `<main>` in StorefrontDesigner, it sits OUTSIDE the
           transformed stage below, so the toolbar's own size never rides the
           zoom transform meant for the board. */}
-      <div className="relative mt-4 max-w-2xl">
+      <div className="relative mt-4">
         <div
           ref={registerStage}
           style={{ transformOrigin: "0 0", width: "max-content" }}
         >
           {/* `data-canvas-board` names the storefront itself, which is what
-              the toolbar measures its position against. */}
+              the toolbar measures its position against.
+
+              AN EXPLICIT WIDTH, exactly as DesignerCanvas gives its own board
+              (columns x cell + gaps + the frame's own padding). The cells are
+              sized off the container in container-query units, and the stage
+              above is `max-content` so the zoom transform has a natural size
+              to scale — which left the two resolving each other in a circle
+              and collapsing the whole board to a few pixels a side. Every
+              geometry test that runs here reads real pixels, so a board with
+              no size is a harness that proves nothing. */}
           <div
             data-canvas-board=""
-            className="rounded-md border border-border p-4"
-            style={gridGapStyle(theme.gridGap)}
+            // The theme's typeface, applied where DesignerCanvas applies it:
+            // the title band inherits the canvas font, so a look wearing a
+            // serif has to be judged with one. `sans` (the default board, and
+            // every existing test here) resolves to what the page already uses.
+            className={cn("rounded-md border border-border p-4", canvasFont.className)}
+            style={{
+              ...canvasFont.style,
+              ...gridGapStyle(theme.gridGap),
+              // The look's own canvas, so a tile is judged against the colour
+              // it will really sit on rather than the page's white.
+              backgroundColor: canvas,
+              width:
+                COLUMNS * CELL_PX + (COLUMNS - 1) * theme.gridGap + FRAME_CHROME_PX,
+            }}
           >
             <Grid
               editable
               showEmptyCells
+              allowOverlap={stacking}
               blocks={blocks.map((b) => ({
                 key: blockKey(b),
                 x: b.x,
@@ -279,6 +368,17 @@ export function GridPlayground() {
               })}
               getBlockLabel={(gridBlock) => `${gridBlock.data.type} ${gridBlock.key}`}
               onMove={(key, x, y) => patchBlock(key, { x, y })}
+              // The selection travels together, the same way the designer's
+              // board wires it. Exercised here without a sign-in.
+              groupKeys={selected}
+              onMoveMany={(moves) =>
+                setBlocks((current) =>
+                  current.map((b) => {
+                    const at = moves.find((m) => m.key === blockKey(b));
+                    return at ? { ...b, x: at.x, y: at.y } : b;
+                  }),
+                )
+              }
               onResize={(key, placement) => patchBlock(key, placement)}
               onRotate={(key, rotation) =>
                 setBlocks((current) =>
@@ -296,13 +396,24 @@ export function GridPlayground() {
                   }
                   theme={theme}
                   editable={state.editable}
-                  isEditing={selected === gridBlock.key}
+                  isEditing={selected.includes(gridBlock.key)}
                   // A spot drag is armed by SOLE selection, so the harness has
                   // to say which tile that is or the tokens never appear.
-                  isSoleSelection={selected === gridBlock.key}
+                  isSoleSelection={
+                    selected.length === 1 && selected[0] === gridBlock.key
+                  }
                   isFraming={framing === gridBlock.key}
-                  onToggleEdit={(key) =>
-                    setSelected((current) => (current === key ? null : key))
+                  onToggleEdit={(key, additive) =>
+                    setSelected((current) => {
+                      if (additive) {
+                        return current.includes(key)
+                          ? current.filter((k) => k !== key)
+                          : [...current, key];
+                      }
+                      return current.length === 1 && current[0] === key
+                        ? []
+                        : [key];
+                    })
                   }
                   onFrame={(key) => setFraming(key)}
                   onFramePlacement={(key, placement) =>
@@ -334,18 +445,22 @@ export function GridPlayground() {
             where they are exercised without a storefront or a sign-in. */}
         {framing === null && (
           <SelectionToolbar
-            blocks={blocks.filter((b) => blockKey(b) === selected)}
+            blocks={blocks.filter((b) => selected.includes(blockKey(b)))}
             productsById={PRODUCTS_BY_ID}
             openPages={pageOpen ? [PRODUCT.id] : []}
             viewport={viewport}
-            onOpenPage={() => setPageOpen((open) => !open)}
+            onOpenPages={() => setPageOpen((open) => !open)}
             onType={() => {}}
             onFrame={(key) => setFraming(key)}
             // The designer sends this to its colour panel; the harness has
             // none, so it records the request and the browser tests read it
-            // back.
-            onOpenColor={(key, part) => setLastPanel(`color:${part}:${key}`)}
-            onOpenSetting={(key, field) => setLastPanel(`${field}:${key}`)}
+            // back. Every key, so a group request is visibly a group request.
+            onOpenColor={(keys, part) =>
+              setLastPanel(`color:${part}:${keys.join(",")}`)
+            }
+            onOpenSetting={(keys, field) =>
+              setLastPanel(`${field}:${keys.join(",")}`)
+            }
             onDuplicate={(keys) => setLastPanel(`duplicate:${keys.join(",")}`)}
             onRemove={(keys) =>
               setBlocks((current) =>

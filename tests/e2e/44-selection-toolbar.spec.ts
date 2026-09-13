@@ -59,9 +59,16 @@ async function geometry(page: Page) {
     if (!bar || !cell) return null;
     const b = bar.getBoundingClientRect();
     const c = cell.getBoundingClientRect();
+    // The handles are drawn in the cell's chrome layer, its sibling. Read
+    // from the cell itself this list comes back empty and `onHandle` passes
+    // without checking anything.
+    const layer = cell.nextElementSibling;
     const handles = [
-      ...cell.querySelectorAll<HTMLElement>("button[aria-label]"),
+      ...(layer?.matches("[data-grid-chrome]")
+        ? layer.querySelectorAll<HTMLElement>("button[aria-label]")
+        : []),
     ].map((el) => el.getBoundingClientRect());
+    if (handles.length === 0) return null;
     return {
       centredOn: Math.round(b.left + b.width / 2 - (c.left + c.width / 2)),
       above: b.bottom <= c.top + 1,

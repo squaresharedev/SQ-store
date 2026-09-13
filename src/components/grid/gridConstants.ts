@@ -1,5 +1,10 @@
 import type { ReactNode } from "react";
-import { orientedSpan, rotatedFootprint } from "@/lib/geometry/rotated-box";
+import {
+  boardLanding,
+  isOnBoard,
+  orientedSpan,
+  rotatedFootprint,
+} from "@/lib/geometry/rotated-box";
 import {
   rotatePoint,
   rotateVector,
@@ -67,7 +72,7 @@ export interface GridBlock<TData = unknown> extends GridPlacement {
 // PAINT ORDER BANDS. In ONE place because everything below shares a single
 // stacking context: grid cells are siblings, so their z-indexes are compared
 // against each other in the nearest stacking-context ancestor (the designer's
-// stage, which makes one with `willChange: transform`). A cell's own CONTENTS
+// stage, which makes one with its pan/zoom `transform`). A cell's own CONTENTS
 // are already isolated by `contain: layout` on `.ss-grid > *` (globals.css),
 // so a tile's chip, badges and framer need none of this.
 //
@@ -88,116 +93,48 @@ export const EMPTY_CELL_Z = 0;
 export const LAYER_Z_BASE = 1;
 /** Nothing content-driven paints above this, whatever a board's block count. */
 export const LAYER_Z_CEILING = 500;
-/**
- * A cell whose controls are showing, lifted clear of its neighbours.
- *
- * The handles and the control chip hang OUTSIDE the tile, so they are drawn
- * over whatever sits beside it; every cell is its own stacking context, so the
- * cell itself has to rise for its chrome to be seen and pressed.
- *
- * A cell counts as "showing its controls" while it is hovered or focused, and
- * while it holds something the consumer has marked `data-block-selected`. That
- * second case is not a nicety: a selected tile keeps its chip out with the
- * pointer nowhere near it, and chrome drawn under a neighbour can never be
- * hovered into view by the very pointer it is refusing.
- *
- * ONLY WHERE THE LIFT IS INVISIBLE. It carries the cell's content with it, so
- * a block with something in front of it overlapping would be dragged out of
- * its own layer and painted over the very thing covering it. Grid marks the
- * cells this cannot happen to with `data-chrome-lift`, and the CSS requires
- * it; see `liftableKeys` in Grid.tsx.
- *
- * MIRRORED IN globals.css (the `.ss-grid > [data-grid-cell]` lift rules),
- * which is where it has to be applied: hover is not a thing this component can
- * know without re-rendering the whole board on every pointer crossing. Change
- * both.
- */
-export const CHROME_Z = 550;
-/**
- * A cell whose block is SELECTED, above a merely hovered one.
- *
- * Two bands rather than one, because a tie is a deadlock. A block sitting
- * directly below a selected tile covers the strip its resize and rotate
- * handles hang in; reaching for a handle across that block hovers it, and a
- * hovered neighbour level with the selected cell paints over the handle, so
- * the press lands on the neighbour and the handle can never be taken. Ten
- * levels of daylight is the whole fix: the block being worked on always wins
- * over the one the pointer merely crossed.
- *
- * MIRRORED IN globals.css alongside CHROME_Z. Change both.
- */
-export const SELECTED_CHROME_Z = 560;
 /** A tile lifted off the board by a drag or a resize. */
 export const GESTURE_Z = 600;
 /** A tile whose image is being framed, spilling past its own cell. */
 export const FRAME_Z = 600;
+/**
+ * A tile's CHROME: its resize and rotate handles, drawn in a layer of their
+ * own (`li[data-grid-chrome]`, the sibling right after the cell) so that they
+ * paint above every block on the board, always.
+ *
+ * Above the content ceiling, so no stack of blocks can bury them, and above
+ * GESTURE_Z and FRAME_Z, so neither a block dragged across them nor a picture
+ * being framed beside them can either. Under OVERLAY_Z, which is the editor's
+ * own drawing over the whole board.
+ *
+ * The CELL never rises for its handles. It used to (a handle inside a cell
+ * cannot out-paint the cell's neighbours, since every cell is its own stacking
+ * context), and that lift carried the block's content out of its layer, so it
+ * had to be withheld from any block with something in front of it, which left
+ * exactly those handles buried. A separate layer needs no such exception.
+ *
+ * MIRRORED IN globals.css (the `.ss-grid > [data-grid-chrome]` rules), which is
+ * where it has to be applied: whether the handles show follows hover, focus
+ * and selection, which are CSS states of the cell that this component cannot
+ * know without re-rendering the board on every pointer crossing. Change both.
+ */
+export const CHROME_Z = 650;
+/**
+ * A SELECTED tile's chrome, above a merely hovered tile's.
+ *
+ * Two blocks stacked on the same cells hang their handles in the same place,
+ * and at a tie document order hands the press to whichever comes later. The
+ * block being worked on is the one that has to take it.
+ *
+ * MIRRORED IN globals.css alongside CHROME_Z. Change both.
+ */
+export const SELECTED_CHROME_Z = 660;
 /** Editor overlays drawn over the whole board: the marquee band, snap guides. */
 export const OVERLAY_Z = 700;
 
 /** A block's depth as a real z-index, clamped into the content band. */
 export function layerZIndex(z: number): number {
   return Math.min(LAYER_Z_CEILING, LAYER_Z_BASE + Math.max(0, z));
-}
-
-/**
- * The blocks whose chrome lift (CHROME_Z / SELECTED_CHROME_Z) costs the board
- * nothing, keyed by block key.
- *
- * WHY THIS EXISTS. The lift raises a whole CELL so the handles and chip that
- * hang outside it can be seen and pressed. That carries the block's own
- * surface with it, so a block sent to the back used to jump in front of
- * everything the moment it was hovered or selected — the board flatly
- * contradicting the layers list beside it, which is the one place a seller
- * goes to check what they just did.
- *
- * THE TEST IS EXACT, not a guess. Raising A above B is invisible unless the
- * two overlap, so the lift changes nothing a seller can see precisely when no
- * block IN FRONT of A overlaps it. Ordinary boards — blocks side by side, the
- * chrome merely hanging into the gap — are entirely liftable, so the case the
- * lift was written for is untouched.
- *
- * When something in front does overlap, the lift is withheld and that block
- * covers the chrome instead. That is the honest answer rather than a
- * compromise: something really is in front, and a seller who put it there is
- * owed a board that says so. The block stays selectable by its visible part,
- * by a marquee, and by the layers list, and still moves and resizes from the
- * keyboard.
- *
- * ORDER MATCHES PAINT. Depth first, then position in the array, because that
- * is what the browser does: cells that state the same z (an unlayered board,
- * where every one lands on the same level) fall back to document order.
- *
- * COVERAGE IS THE FOOTPRINT, the same answer `placementIsFree`, the free-cell
- * guides and the reflow all read, so every rule on this board agrees about
- * what covers what. The known cost: a block tilted off a quarter turn paints
- * PAST the cells it covers (see rotatedFootprint, which only transposes at
- * right angles), so its spilled corners can lie over a neighbour this call
- * still considers clear, and the lift is allowed. Deliberate — a rotation-
- * exact test here would disagree with every other coverage question in this
- * file, and would call a cell taken that the guides still draw as free.
- */
-export function liftableChromeKeys(
-  blocks: readonly GridBlock<unknown>[],
-): Set<string> {
-  const entries = blocks.map((block, index) => ({
-    key: block.key,
-    index,
-    depth: block.z ?? 0,
-    footprint: blockFootprint(block),
-  }));
-  const safe = new Set<string>();
-  for (const entry of entries) {
-    const buried = entries.some(
-      (other) =>
-        other.key !== entry.key &&
-        (other.depth !== entry.depth
-          ? other.depth > entry.depth
-          : other.index > entry.index) &&
-        placementsOverlap(other.footprint, entry.footprint),
-    );
-    if (!buried) safe.add(entry.key);
-  }
-  return safe;
 }
 
 /** Default board size when a consumer does not state one. */
@@ -265,12 +202,15 @@ export function blockFootprint(block: GridBlock<unknown>): GridPlacement {
 }
 
 /**
- * Can `candidate` go here — inside the board, and clear of every other block?
+ * Can `candidate` go here — on the board, and clear of every other block?
  *
- * Every OTHER block is measured by its footprint, so a tilted neighbour is
- * considered where it paints rather than where it is placed. Somewhere a
- * turned bar visibly covers is not somewhere empty, whatever its stored rect
- * says.
+ * Tilt counts on BOTH sides of the question. Every other block is measured by
+ * its footprint, so a tilted neighbour is considered where it paints rather
+ * than where it is placed. And the candidate, turned by `rotation`, is measured
+ * by its own footprint too, held to the board by the same per-axis rule a
+ * saved block is (see isOnBoard): a turned bar is refused only where it really
+ * does not fit, never merely because its stored rect reaches past an edge.
+ * `rotation` defaults to level, which is every block nobody turned.
  *
  * On a board that allows stacking this is not a rule any more, only the
  * question "is this spot empty" that an auto-placer asks before it falls back
@@ -282,26 +222,36 @@ export function placementIsFree(
   ignoreKey: string | null,
   columns: number,
   rows: number,
+  rotation = 0,
 ): boolean {
-  if (!withinCanvas(candidate, columns, rows)) return false;
+  if (!isOnBoard(candidate, rotation, columns, rows)) return false;
+  const covered = rotatedFootprint(candidate, rotation);
   return !blocks.some(
     (block) =>
       block.key !== ignoreKey &&
-      placementsOverlap(blockFootprint(block), candidate),
+      placementsOverlap(blockFootprint(block), covered),
   );
 }
 
-/** First free spot for a w x h block, scanning row by row. Null when full. */
+/**
+ * First free spot for a w x h block, scanning row by row. Null when full.
+ *
+ * `rotation` is the tilt the block will land with (a paste keeps its source's),
+ * so the scan walks every position where that block is on the board — a
+ * turned bar can land in the top row — and asks about the cells it will cover.
+ */
 export function findFreeCell(
   blocks: readonly GridBlock<unknown>[],
   w: number,
   h: number,
   columns: number,
   rows: number,
+  rotation = 0,
 ): { x: number; y: number } | null {
-  for (let y = 0; y + h <= rows; y += 1) {
-    for (let x = 0; x + w <= columns; x += 1) {
-      if (placementIsFree(blocks, { x, y, w, h }, null, columns, rows)) {
+  const landing = boardLanding({ x: 0, y: 0, w, h }, rotation, columns, rows);
+  for (let y = landing.y.min; y <= landing.y.max; y += 1) {
+    for (let x = landing.x.min; x <= landing.x.max; x += 1) {
+      if (placementIsFree(blocks, { x, y, w, h }, null, columns, rows, rotation)) {
         return { x, y };
       }
     }

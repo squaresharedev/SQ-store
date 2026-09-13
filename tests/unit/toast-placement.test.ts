@@ -81,8 +81,18 @@ describe("toast provider placement", () => {
   it("keeps the dev-tools badge out of the stack's corner", () => {
     // Next pins it bottom-right by default, directly on top of every
     // confirmation raised in development.
+    //
+    // The setting is a ternary, not a literal: the e2e stack runs `next dev`
+    // and turns the badge OFF entirely there, because bottom-left is the
+    // mobile editor toolbar's own corner and Playwright refuses to click a
+    // control a dev overlay is covering. So this asserts the INTENT — the
+    // badge is configured, it is never bottom-right, and the branch that
+    // still shows it shows it bottom-left — rather than one exact shape,
+    // which is what made this test break on a legitimate edit.
     const config = readFileSync(join(process.cwd(), "next.config.ts"), "utf8");
-    expect(config).toMatch(/devIndicators:\s*\{\s*position:\s*"bottom-left"/);
+    expect(config).toMatch(/devIndicators:/);
+    expect(config).toMatch(/position:\s*"bottom-left"/);
+    expect(config).not.toMatch(/"bottom-right"/);
   });
 
   it("keeps the marks smaller than the words they introduce", () => {

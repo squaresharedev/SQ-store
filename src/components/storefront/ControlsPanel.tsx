@@ -34,17 +34,20 @@ import { ProductPageSection } from "./ProductPageSection";
  * GLOBAL design settings, as a menu of named groups rather than one column of
  * everything.
  *
- * WHY A MENU. Seven sections stacked open-able in a 320px column meant the
- * settings that shape the whole storefront were a scroll away from each other
- * and from the block editor sitting above them. Six rows fit on screen at once,
- * so the question "where does that live" is answered by looking rather than by
+ * WHY A MENU. Sections stacked open-able in a 320px column meant the settings
+ * that shape the whole storefront were a scroll away from each other and from
+ * the block editor sitting above them. Six rows fit on screen at once, so the
+ * question "where does that live" is answered by looking rather than by
  * scrolling.
  *
  * WHY ONE LEVEL. Groups whose controls constrain each other stay in the SAME
- * submenu — card roundness decides where the price tag is allowed to sit, so
- * Card style and Price tag are siblings under "Product cards", each a
- * CollapsibleSection so both can be open together. A submenu per control would
- * have made that pair four navigation steps apart.
+ * submenu rather than get a submenu of their own — card roundness decides
+ * where the price tag is allowed to sit, so Card style and Price tag are
+ * siblings under "Product cards", each a CollapsibleSection so both can be
+ * open together, and the published look and the board itself are the same
+ * call under "Theme". Theme's two halves go a step further and never
+ * collapse at all: nothing under a merged entry should read as its own
+ * hidden submenu, so both are visible the moment the group opens.
  *
  * The rows are spelled out here rather than driven from a table: at six entries
  * a table only adds a hop between an id and the branch that renders it.
@@ -152,6 +155,8 @@ export function ControlsPanel({
 
   /** Which half of Product cards a summons is pointing at, if any. */
   const summoned = activeRef?.kind === "cards" ? activeRef.section : null;
+  /** Which half of Theme a summons is pointing at, if any. */
+  const summonedTheme = activeRef?.kind === "theme" ? activeRef.section : null;
   /** Which section of Product page a summons is pointing at, if any. */
   const summonedPage = activeRef?.kind === "productPage" ? activeRef.section : null;
 
@@ -276,19 +281,37 @@ export function ControlsPanel({
           cornerRadius={theme.cornerRadius}
           summoned={summonedPage}
         />
-      ) : (
-        /* No section chrome around a single group's controls: the back row
-           already names them, so a heading here would say it twice. */
-        <div className="py-4 lg:px-4">
-          {group === "theme" && (
+      ) : group === "theme" ? (
+        /* The published look and the board itself are the same call under
+           one menu entry, but unlike Cards neither half collapses: a seller
+           who opens Theme should see the whole thing at once, not find
+           Canvas tucked behind a second click. CollapsibleSection still
+           draws the label and divider, and still answers a search summons
+           with a scroll-into-view and a flash, but `collapsible` is left at
+           its default false so there is nothing to expand. */
+        <>
+          <CollapsibleSection title="Theme" summon={summonedTheme === "look"}>
             <ThemePanel
               theme={theme}
               onChange={onThemeChange}
               backgroundImageUrl={backgroundImageUrl}
               onBackgroundImageChange={onBackgroundImageChange}
             />
-          )}
-
+          </CollapsibleSection>
+          <CollapsibleSection title="Canvas" summon={summonedTheme === "canvas"}>
+            <LayoutSection
+              theme={theme}
+              onChange={onThemeChange}
+              onCanvasChange={onCanvasChange}
+              showGrid={showGrid}
+              onShowGridChange={onShowGridChange}
+            />
+          </CollapsibleSection>
+        </>
+      ) : (
+        /* No section chrome around a single group's controls: the back row
+           already names them, so a heading here would say it twice. */
+        <div className="py-4 lg:px-4">
           {group === "header" && (
             <HeaderSection header={header} onChange={onHeaderChange} />
           )}
@@ -299,16 +322,6 @@ export function ControlsPanel({
               onChange={onThemeChange}
               fontUrl={customFontUrl}
               onFontUrlChange={onCustomFontUrlChange}
-            />
-          )}
-
-          {group === "canvas" && (
-            <LayoutSection
-              theme={theme}
-              onChange={onThemeChange}
-              onCanvasChange={onCanvasChange}
-              showGrid={showGrid}
-              onShowGridChange={onShowGridChange}
             />
           )}
 

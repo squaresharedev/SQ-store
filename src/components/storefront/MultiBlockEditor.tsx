@@ -2,8 +2,10 @@
 
 import { Trash2 } from "lucide-react";
 import {
+  blockKey,
   resolveCardStyle,
   type CardStyleOverrides,
+  type ImageBlock,
   type ProductBlock,
   type ShapeBlock,
   type StorefrontBlock,
@@ -19,8 +21,10 @@ import {
 import { CollapsibleSection } from "@/components/ui/CollapsibleSection";
 import { BlockActions } from "./BlockActions";
 import { CardStyleControls } from "./CardStyleControls";
+import { ImageBlockEditor, type ImageBlockPatch } from "./ImageBlockEditor";
 import { PriceTagControls } from "./PriceTagControls";
 import { ShapeBlockEditor, type ShapeBlockPatch } from "./ShapeBlockEditor";
+import type { BlockFieldSummons } from "./SummonedField";
 import { TextBlockEditor, type TextBlockPatch } from "./TextBlockEditor";
 
 /**
@@ -31,24 +35,35 @@ import { TextBlockEditor, type TextBlockPatch } from "./TextBlockEditor";
  * key list). Mixed-type selections share no settings, so they get the group
  * actions only. Duplicate covers the text/shape blocks; products are
  * excluded from copying by design (one block per product).
+ *
+ * This is also where the selection toolbar's Stroke, Corners and Opacity land:
+ * the bar points at a control rather than opening one over the board, and with
+ * several blocks selected the control it points at is the one here. So the
+ * summons has to reach the same editors — a bar button that scrolled to
+ * nothing would be worse than one that was never drawn.
  */
 export function MultiBlockEditor({
   blocks,
   theme,
+  summons = null,
   onProductStyleChange,
   onProductStyleReset,
   onShapeChange,
   onTextChange,
+  onImageChange,
   onDuplicate,
   onRemove,
 }: {
   /** The selection, in selection order (length >= 2). */
   blocks: readonly StorefrontBlock[];
   theme: StorefrontTheme;
+  /** A control the selection toolbar has pointed at (see SummonedField). */
+  summons?: BlockFieldSummons;
   onProductStyleChange: (patch: CardStyleOverrides) => void;
   onProductStyleReset: () => void;
   onShapeChange: (patch: ShapeBlockPatch) => void;
   onTextChange: (patch: TextBlockPatch) => void;
+  onImageChange: (patch: ImageBlockPatch) => void;
   /** Duplicate the selection's text/shape blocks. */
   onDuplicate: () => void;
   /** Remove the whole selection. */
@@ -57,7 +72,8 @@ export function MultiBlockEditor({
   const products = blocks.filter((b): b is ProductBlock => b.type === "product");
   const shapes = blocks.filter((b): b is ShapeBlock => b.type === "shape");
   const texts = blocks.filter((b): b is TextBlock => b.type === "text");
-  const copyableCount = shapes.length + texts.length;
+  const images = blocks.filter((b): b is ImageBlock => b.type === "image");
+  const copyableCount = shapes.length + texts.length + images.length;
 
   const removeLabel = `Remove ${blocks.length} blocks`;
   const removeAll = (
@@ -81,6 +97,7 @@ export function MultiBlockEditor({
         </p>
         <ShapeBlockEditor
           block={shapes[0]}
+          summons={summons}
           onUpdate={onShapeChange}
           onDuplicate={onDuplicate}
           onRemove={onRemove}
@@ -108,6 +125,32 @@ export function MultiBlockEditor({
           hasCustomFont={theme.customFont !== undefined}
           multi
           onUpdate={onTextChange}
+          onDuplicate={onDuplicate}
+          onRemove={onRemove}
+          removeLabel={removeLabel}
+        />
+      </div>
+    );
+  }
+
+  if (images.length === blocks.length) {
+    return (
+      <div className="space-y-4">
+        <p className={helpTextClass}>
+          Editing {blocks.length} elements together. Values shown come from the
+          first selected element; every change applies to all of them. Each
+          keeps its own picture.
+        </p>
+        {/* No frame button: framing is a gesture on ONE picture, positioning
+            that artwork inside that block, and there is no group answer to
+            where six different photos should sit. */}
+        <ImageBlockEditor
+          block={images[0]}
+          canFrame={false}
+          multi
+          summons={summons}
+          onUpdate={onImageChange}
+          onFrame={() => {}}
           onDuplicate={onDuplicate}
           onRemove={onRemove}
           removeLabel={removeLabel}
@@ -148,6 +191,11 @@ export function MultiBlockEditor({
             <CardStyleControls
               value={resolveCardStyle(theme, products[0].style)}
               onChange={onProductStyleChange}
+              colorScope={{
+                theme,
+                overrides: products[0].style ?? {},
+                scope: "many",
+              }}
             />
           </CollapsibleSection>
 

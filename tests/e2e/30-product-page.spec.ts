@@ -13,6 +13,7 @@ import {
   serviceRest,
   signUp,
   userIdByEmail,
+  verificationLink,
 } from "./helpers";
 
 // The hosted product page, end to end: what a buyer gets, what they must NOT
@@ -77,7 +78,17 @@ type Seeded = {
   plain: string;
 };
 
-async function seed(page: Page, tag: string): Promise<Seeded> {
+async function seed(
+  page: Page,
+  tag: string,
+  /**
+   * The seller's trader identity. Defaults to the minimum the publish gate
+   * requires — name, address, contact email — which is deliberately NOT a
+   * VAT-registered seller: `incl. VAT` is only truthful for one, so a test
+   * that wants that note has to ask for the VAT ID.
+   */
+  seller: Parameters<typeof seedSellerIdentity>[1] = PUBLISHABLE_SELLER,
+): Promise<Seeded> {
   const user = freshUser(tag);
   await signUp(page, user);
   const sellerId = await userIdByEmail(user.email);
@@ -144,7 +155,7 @@ async function seed(page: Page, tag: string): Promise<Seeded> {
   // seeded on the profile, not in the storefront config.
   // All three required trader details: without them the publish gate 404s
   // every product page this seller has. See PUBLISHABLE_SELLER in helpers.
-  await seedSellerIdentity(sellerId, PUBLISHABLE_SELLER);
+  await seedSellerIdentity(sellerId, seller);
 
   await serviceRest(`/storefronts?id=eq.${storefrontId}`, {
     method: "PATCH",
@@ -208,7 +219,14 @@ test.describe("hosted product page", () => {
   test("a buyer gets the page: title, price, options that swap the photo, and the buy link", async ({
     page,
   }) => {
-    const s = await seed(page, "pdp-buyer");
+    // A VAT-REGISTERED EU seller, because this test asserts the "incl. VAT"
+    // note. The page only prints that claim for a seller who actually
+    // collects VAT (ProductPageView's effectivePriceNote); the seller who
+    // does not is the test below.
+    const s = await seed(page, "pdp-buyer", {
+      ...PUBLISHABLE_SELLER,
+      vatId: "IE1234567A",
+    });
     // A buyer has no session. Drop the seller's cookies to be sure.
     await page.context().clearCookies();
 
@@ -277,6 +295,24 @@ test.describe("hosted product page", () => {
       (violation) => violation.impact === "serious" || violation.impact === "critical",
     );
     expect(blocking, JSON.stringify(blocking, null, 2)).toEqual([]);
+  });
+
+  // The other half of the rule above, and the one that matters legally: a
+  // seller below the VAT registration threshold, or outside the EU, must not
+  // be made to claim a price is inclusive of VAT they never collect. The page
+  // derives the note from the seller's actual facts rather than forwarding
+  // the storefront's stored default (ProductPageView's effectivePriceNote),
+  // so the stored `priceNote: "incl-vat"` is deliberately ignored here.
+  test("never claims 'incl. VAT' for a seller who is not VAT-registered", async ({ page }) => {
+    const s = await seed(page, "pdp-novat", PUBLISHABLE_SELLER);
+    await page.context().clearCookies();
+    await page.goto(pagePath(s, s.active));
+
+    await expect(page.getByText("€129.00").first()).toBeVisible();
+    await expect(page.getByText(/incl\. VAT/)).toHaveCount(0);
+    // The shipping half of the note is unaffected: it depends on the seller
+    // having written terms, which they have.
+    await expect(page.getByText("plus shipping").first()).toBeVisible();
   });
 
   test("the seller stands open at the foot of the page, and shipping follows the profile", async ({
@@ -720,6 +756,13 @@ test.describe("hosted product page", () => {
     await page.getByLabel("Phone", { exact: true }).fill("+353 1 234 5678");
     await page.getByRole("button", { name: /^save$/i }).click();
     await expectToast(page, /saved/i);
+
+    // A CHANGED contact address is unconfirmed again, and an unconfirmed one
+    // takes the page down — which is the point of the confirmation step, and
+    // is why this test has to complete it rather than skip past it.
+    expect((await page.goto(pagePath(s, s.active)))?.status()).toBe(404);
+    await page.goto(await verificationLink("support@squareshare.eu"));
+    await page.waitForURL(/\/settings\/tax/, { timeout: 30_000 });
 
     // No storefront save happens here at all — the buyer page still picks up
     // the new details, because they were never the storefront's to carry.

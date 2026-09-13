@@ -363,6 +363,7 @@ export function PanelsGallery() {
               onProductStyleReset={() => {}}
               onShapeChange={() => {}}
               onTextChange={() => {}}
+              onImageChange={() => {}}
               onDuplicate={() => {}}
               onRemove={() => {}}
             />

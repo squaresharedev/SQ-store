@@ -50,7 +50,11 @@ test("a corner-resize grab does not shrink the tile before the hand moves", asyn
 
   const before = (await tile.boundingBox())!;
 
-  const handle = tile.getByRole("button", { name: /^resize/i });
+  // The handles are drawn in the tile's chrome layer, the sibling right after
+  // its cell, so they can paint above every block on the board.
+  const handle = page
+    .locator("li[data-grid-cell]:has(img) + li[data-grid-chrome]")
+    .getByRole("button", { name: /^resize/i });
   await expect(handle).toBeVisible();
   await handle.scrollIntoViewIfNeeded();
   const handleBox = (await handle.boundingBox())!;

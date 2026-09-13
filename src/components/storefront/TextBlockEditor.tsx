@@ -22,6 +22,7 @@ import {
 import { BlockActions } from "./BlockActions";
 import { FONT_LABELS, TEXT_VARIANT_LABELS } from "./config-maps";
 import { FontSizeField } from "./FontSizeField";
+import { useReportedAutoFitSize } from "./text-autofit-registry";
 import { AlignmentToggles, FormatToggles } from "./TextFormatControls";
 import { InfoTip } from "@/components/ui/InfoTip";
 
@@ -115,6 +116,14 @@ export function TextBlockEditor({
 }) {
   const fieldId = useId();
 
+  // The tile's OWN report of what Auto currently renders at, which may be
+  // smaller than the style's flat base once the block has had to shrink to
+  // fit its box. Falls back to that flat base before the canvas has measured
+  // (or outside the designer entirely — see text-autofit-registry), which is
+  // exactly the old, unshrinking number this used to always show.
+  const autoFitSize =
+    useReportedAutoFitSize(blockKey(block)) ?? TEXT_VARIANT_BASE_PX[block.variant];
+
   // What the tile renders with when no override is stored, and what the
   // picker's "Theme color" option points at. Shared with the ColorPanel so the
   // two cannot answer "what does inheriting look like" differently.
@@ -183,7 +192,7 @@ export function TextBlockEditor({
       <FontSizeField
         id={`${fieldId}-size`}
         value={block.fontSize}
-        autoSize={TEXT_VARIANT_BASE_PX[block.variant]}
+        autoSize={autoFitSize}
         onChange={(fontSize) => onUpdate({ fontSize })}
       />
 

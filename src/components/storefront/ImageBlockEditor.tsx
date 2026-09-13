@@ -46,21 +46,36 @@ const FIT_BUTTON_CLASS = `inline-flex flex-1 items-center justify-center rounded
 export function ImageBlockEditor({
   block,
   canFrame,
+  multi = false,
   onUpdate,
   onFrame,
   onDuplicate,
   onRemove,
+  removeLabel,
   summons = null,
 }: {
   block: ImageBlock;
   /** False when there is no artwork loaded to frame yet. */
   canFrame: boolean;
+  /**
+   * Driving a whole selection of elements rather than one.
+   *
+   * Drops the two controls that belong to ONE picture: framing positions this
+   * artwork inside this block (there is no group answer to where six different
+   * photos should sit), and a description describes what is in the picture, so
+   * writing one across six of them would put the same sentence on all six.
+   * Fit and opacity are group settings, and stay.
+   */
+  multi?: boolean;
   onUpdate: (patch: ImageBlockPatch) => void;
   /** Enter frame mode on this block's tile. */
   onFrame: () => void;
   /** Insert a copy of this block (the no-keyboard copy/paste path). */
   onDuplicate: () => void;
   onRemove: () => void;
+  /** Overridden when this editor is driving a whole multi-selection, where the
+   *  honest word is "Remove 3 blocks". */
+  removeLabel?: string;
   /** A control the selection toolbar has pointed at, scrolled to and marked
    *  here rather than duplicated in a popover over the block itself. */
   summons?: BlockFieldSummons;
@@ -99,7 +114,7 @@ export function ImageBlockEditor({
       </div>
 
       {/* Framing only means something when there IS overflow to position. */}
-      {fit === "cover" && (
+      {fit === "cover" && !multi && (
         <button
           type="button"
           onClick={onFrame}
@@ -132,6 +147,7 @@ export function ImageBlockEditor({
       {/* Alt text. Optional on purpose: most elements are decoration, and an
           empty alt is the correct markup for that — inventing a description
           for a divider swoosh makes a screen reader worse, not better. */}
+      {!multi && (
       <div className="space-y-1.5">
         <label htmlFor={`${fieldId}-alt`} className={labelClass}>
           Description
@@ -150,8 +166,13 @@ export function ImageBlockEditor({
           decorative.
         </p>
       </div>
+      )}
 
-      <BlockActions onDuplicate={onDuplicate} onRemove={onRemove} />
+      <BlockActions
+        onDuplicate={onDuplicate}
+        onRemove={onRemove}
+        removeLabel={removeLabel}
+      />
     </div>
   );
 }

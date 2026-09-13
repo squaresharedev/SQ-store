@@ -9,9 +9,10 @@ import { LooksSection } from "./LooksSection";
 /**
  * Theme essentials: background (color / gradient / uploaded image) and accent.
  * Corner roundness lives with the other card controls in CardsSection, and the
- * designer's grid guides moved to the Canvas group — they are an editor view
- * preference, never a saved theme value, and sitting here implied otherwise.
- * Every control is bound to the schema's enums / strict hex rule.
+ * designer's grid guides live in the sibling "Canvas" section of this same
+ * Theme group (see ControlsPanel) — they are an editor view preference, never
+ * a saved theme value, and sitting here implied otherwise. Every control is
+ * bound to the schema's enums / strict hex rule.
  */
 /** Looks come FIRST: a whole-storefront starting point is the cheapest way out
  *  of a design that has gone wrong, and it belongs above the two controls it

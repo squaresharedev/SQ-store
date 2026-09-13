@@ -99,7 +99,11 @@ async function dragHandle(dx: number, dy: number, index = 0) {
   // and it is welded to the tile's edge, so the pointer cannot lose the cell on
   // the way over.
   await cell.locator("[data-block-tile]").hover();
-  const button = cell.getByRole("button", { name: /resize/i });
+  // In the tile's chrome layer, the sibling drawn above every block.
+  const button = page
+    .locator("li[data-grid-chrome]")
+    .nth(index)
+    .getByRole("button", { name: /resize/i });
   const box = await button.boundingBox();
   if (!box) throw new Error("no resize handle");
   const cx = box.x + box.width / 2;
@@ -134,7 +138,7 @@ test.describe("storefront canvas resize", () => {
     await page.getByRole("button", { name: "Add text", exact: true }).click();
     await expect(tiles()).toHaveCount(1);
     await expect(
-      tiles().first().getByRole("button", { name: /resize/i }),
+      page.locator("li[data-grid-chrome]").first().getByRole("button", { name: /resize/i }),
     ).toHaveCount(1);
   });
 

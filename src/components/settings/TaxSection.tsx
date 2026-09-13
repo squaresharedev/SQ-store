@@ -1,14 +1,19 @@
 "use client";
 
-import { useActionState, useState } from "react";
-import { useActionToast } from "@/components/ui/Toast";
+import { useActionState, useEffect, useRef, useState } from "react";
+import { Check } from "lucide-react";
+import { useActionToast, useToast } from "@/components/ui/Toast";
 import { SaveButton } from "@/components/ui/SaveButton";
 import { SettingsCard } from "@/components/settings/SettingsCard";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, type SelectOption } from "@/components/ui/select";
-import { saveTaxInfo, type SettingsActionState } from "@/lib/settings/actions";
+import {
+  resendSellerEmailVerification,
+  saveTaxInfo,
+  type SettingsActionState,
+} from "@/lib/settings/actions";
 import { EU_COUNTRIES, SELLER_FIELD_MAX } from "@/lib/settings/constants";
 import { InfoTip } from "@/components/ui/InfoTip";
 import { RequiredMark } from "@/components/ui/RequiredMark";
@@ -16,6 +21,46 @@ import { LEGAL_LINKS } from "@/lib/legal/links";
 import { helpTextClass } from "@/components/ui/control-styles";
 
 const INITIAL: SettingsActionState = {};
+
+/**
+ * What each `?verified=` outcome means to a seller, and what to do about it.
+ * Every branch names a next step, because arriving here from a mail client
+ * with "expired" and nothing else is a dead end.
+ */
+const VERIFY_OUTCOMES: Record<string, { tone: "success" | "error"; message: string }> = {
+  verified: { tone: "success", message: "Contact email confirmed. You can publish now." },
+  expired: {
+    tone: "error",
+    message: "That confirmation link has expired. Send yourself a new one below.",
+  },
+  stale: {
+    tone: "error",
+    message:
+      "That link was for a different address than the one saved here. Send a new one below.",
+  },
+  invalid: {
+    tone: "error",
+    message: "That confirmation link is not valid, or has already been used.",
+  },
+  throttled: {
+    tone: "error",
+    message: "Too many confirmation attempts. Wait a while, then open the link again.",
+  },
+};
+
+/** Report a `?verified=` outcome once per arrival. */
+function useVerifyOutcomeToast(outcome: string | undefined) {
+  const toast = useToast();
+  const announced = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    if (!outcome || announced.current === outcome) return;
+    announced.current = outcome;
+    const entry = VERIFY_OUTCOMES[outcome];
+    if (!entry) return;
+    if (entry.tone === "success") toast.success(entry.message);
+    else toast.error(entry.message);
+  }, [outcome, toast]);
+}
 
 /** "" is a real choice (non-EU / declined), so it leads the list. */
 const COUNTRY_OPTIONS: readonly SelectOption<string>[] = [
@@ -101,6 +146,9 @@ export function TaxSection({
   vatId: savedVatId,
   country: savedCountry,
   phone: savedPhone,
+  emailVerified = false,
+  verificationOn = false,
+  verifyOutcome,
 }: {
   businessName: string;
   address: string;
@@ -108,6 +156,12 @@ export function TaxSection({
   vatId: string;
   country: string;
   phone: string;
+  /** Has the stored contact address been proven by a clicked link? */
+  emailVerified?: boolean;
+  /** Can this deployment send the link at all? False hides the whole panel. */
+  verificationOn?: boolean;
+  /** `?verified=…` from the confirmation route, reported once as a toast. */
+  verifyOutcome?: string;
 }) {
   const [state, formAction, isPending] = useActionState(saveTaxInfo, INITIAL);
   useActionToast(state);
@@ -124,6 +178,22 @@ export function TaxSection({
   const [phone, setPhone] = useState(savedPhone);
 
   const vatWarning = vatAdvisory(vatId, countryCode);
+
+  // What came back from a clicked confirmation link, said once. The route
+  // redirects here with an outcome rather than rendering its own page, so
+  // this is the single place that turns each outcome into words.
+  const [resendState, resendAction, resendPending] = useActionState(
+    resendSellerEmailVerification,
+    INITIAL,
+  );
+  useActionToast(resendState);
+  useVerifyOutcomeToast(verifyOutcome);
+
+  // The saved address is what a link would confirm; an edit in progress is
+  // not confirmed by anything yet, and saying "confirmed" beside it would be
+  // wrong the moment the seller types.
+  const emailDirty = email.trim() !== savedEmail.trim();
+  const showVerification = verificationOn && savedEmail.trim() !== "";
 
   return (
     <SettingsCard
@@ -150,7 +220,8 @@ export function TaxSection({
         <p className={`${helpTextClass} mt-1`}>
           These details appear publicly on your product pages for that reason
           alone. We never use them for marketing, and never sell or share them.
-          See the{" "}
+          The one email we send to your contact address is the link that
+          confirms it. See the{" "}
           <a
             href={LEGAL_LINKS.privacy.href}
             target="_blank"
@@ -243,9 +314,36 @@ export function TaxSection({
             maxLength={254}
             autoComplete="email"
             aria-required="true"
+            aria-describedby={showVerification ? "contact-email-status" : undefined}
             disabled={isPending}
           />
+          {/* THE PROOF, or the lack of it. Only the SAVED address can be
+              confirmed, so an unsaved edit says so rather than claiming a
+              state that belongs to a different string. */}
+          {showVerification && (
+            <p
+              id="contact-email-status"
+              className={helpTextClass}
+              // Not a live region: this is a standing fact about the field,
+              // and the outcomes that DO need announcing arrive as toasts.
+            >
+              {emailDirty ? (
+                <>
+                  Save to send a confirmation link to the new address. Buyers
+                  see it only once it is confirmed.
+                </>
+              ) : emailVerified ? (
+                <span className="inline-flex items-center gap-1 text-foreground">
+                  <Check aria-hidden className="size-3.5" strokeWidth={2.5} />
+                  Confirmed — buyers can reach you here.
+                </span>
+              ) : (
+                <>Not confirmed yet. Open the link we emailed to this address.</>
+              )}
+            </p>
+          )}
         </div>
+
         <div id="vat" className="flex flex-col gap-1.5">
           <Label htmlFor="tax_vat_id">VAT ID</Label>
           <Input
@@ -295,6 +393,26 @@ export function TaxSection({
           <SaveButton pending={isPending} state={state} />
         </div>
       </form>
+
+      {/* A SIBLING of the save form, never nested inside it: a resend is a
+          different request, and a form inside a form is invalid HTML that
+          browsers resolve by dropping one of them. Shown only when there is
+          something to confirm — not while the field holds an unsaved edit,
+          because the link would go to the address that is stored, not the one
+          on screen, which is exactly the confusion this avoids. */}
+      {showVerification && !emailVerified && !emailDirty && (
+        <form action={resendAction} className="mt-4">
+          <SaveButton
+            pending={resendPending}
+            state={resendState}
+            pendingLabel="Sending…"
+            savedLabel="Sent"
+            variant="secondary"
+          >
+            Resend confirmation email
+          </SaveButton>
+        </form>
+      )}
     </SettingsCard>
   );
 }

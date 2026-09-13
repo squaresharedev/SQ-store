@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   NO_INSETS,
+  centerIntoView,
   panelInset,
   reanchorPan,
+  revealPan,
   safeSpan,
   slideIntoView,
   type Box,
@@ -98,6 +100,122 @@ describe("slideIntoView", () => {
     // cropped, out from under the seller's cursor.
     expect(slideIntoView(-200, 1400, 0, 1000)).toBe(0);
     expect(slideIntoView(50, 1400, 0, 1000)).toBe(0);
+  });
+});
+
+describe("centerIntoView", () => {
+  it("puts the run in the middle of the room", () => {
+    expect(centerIntoView(0, 300, 0, 1000)).toBe(350);
+    expect(centerIntoView(800, 300, 0, 1000)).toBe(-450);
+  });
+
+  it("agrees with slideIntoView about which WAY to move", () => {
+    // The recover rule guards on the sign of the minimal move and then hands
+    // back the centring one, so the two must never disagree about direction.
+    for (const pos of [-400, -40, 0, 700, 800, 1200]) {
+      const minimal = slideIntoView(pos, 300, 0, 1000);
+      if (minimal === 0) continue;
+      expect(Math.sign(centerIntoView(pos, 300, 0, 1000))).toBe(
+        Math.sign(minimal),
+      );
+    }
+  });
+
+  it("gives up on exactly the same cases slideIntoView does", () => {
+    expect(centerIntoView(-200, 1400, 0, 1000)).toBe(0);
+    expect(centerIntoView(50, 300, 400, 400)).toBe(0);
+  });
+});
+
+describe("revealPan", () => {
+  const workspace: Box = { left: 0, top: 60, width: 390, height: 700 };
+
+  it("leaves a selection that is already in the open exactly where it is", () => {
+    // Every selection on a desktop, and the reason clicking around the board
+    // does not send it sliding about.
+    const tile: Box = { left: 40, top: 40, width: 96, height: 96 };
+    expect(
+      revealPan({
+        pan: { x: 0, y: 0 },
+        zoom: 1,
+        workspace,
+        insets: { ...NO_INSETS, bottom: 420 },
+        anchor: tile,
+      }),
+    ).toEqual({ x: 0, y: 0 });
+  });
+
+  it("centres a selection the sheet is sitting on", () => {
+    // 100..196 across and 380..476 down, with [0, 390] and [0, 280] to work
+    // with: across it is already fine, down it comes to 92..188.
+    const tile: Box = { left: 100, top: 380, width: 96, height: 96 };
+    expect(
+      revealPan({
+        pan: { x: 0, y: 0 },
+        zoom: 1,
+        workspace,
+        insets: { ...NO_INSETS, bottom: 420 },
+        anchor: tile,
+      }),
+    ).toEqual({ x: 0, y: -288 });
+  });
+
+  it("does not evict the board's own edge from the strip to centre a tile", () => {
+    // The board's top carries the masthead and the preview switch, and on a
+    // phone they ride the same pan. This tile can be revealed with the board's
+    // top still inside the strip, so the extra half of the centring move is
+    // given up rather than spent pushing that top out of view.
+    const board: Box = { left: 0, top: 0, width: 340, height: 300 };
+    const tile: Box = { left: 100, top: 250, width: 60, height: 40 };
+    const pan = { x: 0, y: 20 };
+    const { y } = revealPan({
+      pan,
+      zoom: 1,
+      workspace,
+      insets: { ...NO_INSETS, bottom: 400 },
+      anchor: tile,
+      board,
+    });
+    // Room is [0, 300]. The tile paints at 270..310, so it needs 10 to come
+    // in and 140 to centre — but the board's top is only 20 clear, so 20 is as
+    // far as it goes. Still revealed, just not perfectly centred.
+    expect(y).toBe(0);
+  });
+
+  it("centres anyway once the reveal has already spent that edge", () => {
+    // Same board, a tile far enough down that no pan showing it can keep the
+    // board's top in the strip. The edge is gone either way, so holding back
+    // the rest of the move would buy nothing.
+    const board: Box = { left: 0, top: 0, width: 340, height: 900 };
+    const tile: Box = { left: 100, top: 700, width: 60, height: 40 };
+    const { y } = revealPan({
+      pan: { x: 0, y: 0 },
+      zoom: 1,
+      workspace,
+      insets: { ...NO_INSETS, bottom: 500 },
+      anchor: tile,
+      board,
+    });
+    // Room is [0, 200]; centred puts the tile at 80..120, i.e. up by 620.
+    expect(y).toBe(-620);
+  });
+
+  it("falls back to the bare tile when the strip cannot hold its chrome", () => {
+    // withChrome is 96 + 60 of handles = taller than the 120px strip, so it
+    // could never fit and asking for it would move nothing at all. The bare
+    // cell fits, and centres.
+    const tile: Box = { left: 100, top: 380, width: 96, height: 96 };
+    const withChrome: Box = { left: 100, top: 380, width: 96, height: 156 };
+    expect(
+      revealPan({
+        pan: { x: 0, y: 0 },
+        zoom: 1,
+        workspace,
+        insets: { ...NO_INSETS, bottom: 580 },
+        anchor: withChrome,
+        anchorFallback: tile,
+      }),
+    ).toEqual({ x: 0, y: -368 });
   });
 });
 
@@ -263,7 +381,7 @@ describe("reanchorPan", () => {
     expect(pan).toEqual({ x: 280, y: 100 });
   });
 
-  it("keeps a SELECTED tile clear of a sheet once the board cannot fit", () => {
+  it("CENTRES a selected tile in the strip a sheet leaves behind", () => {
     const workspace = box(0, 60, 390, 700);
     const tile: Box = { left: 100, top: 380, width: 96, height: 96 };
     const { pan } = reanchorPan({
@@ -276,8 +394,32 @@ describe("reanchorPan", () => {
       board,
       anchor: tile,
     });
-    // The tile ran from 380 to 476 with only [0, 280] left: it comes up by 196.
-    expect(pan).toEqual({ x: 0, y: -196 });
+    // The tile ran from 380 to 476 with only [0, 280] left. Coming up by the
+    // least it could (196) would land it at 184..280 — flush with the sheet's
+    // own top edge, which is where its resize and rotate handles hang, so they
+    // would be buried by the very panel it was just revealed from under. It
+    // centres in the strip instead: 92..188, i.e. up by 288.
+    expect(pan).toEqual({ x: 0, y: -288 });
+  });
+
+  it("still clears the WHOLE BOARD by the least it can, never centring it", () => {
+    // Centring is for a selection, which is the seller pointing at something.
+    // The board merely being tucked under a panel's edge asks for exactly one
+    // thing — get out from under it — and re-centring it in the workspace is a
+    // far bigger move than anything the panel justified.
+    const workspace = box(0, 60, 1200, 800);
+    const { pan } = reanchorPan({
+      pan: { x: 100, y: 100 },
+      zoom: 1,
+      previous: workspace,
+      previousInsets: NO_INSETS,
+      workspace,
+      insets: { ...NO_INSETS, left: 280 },
+      board,
+      anchor: board,
+    });
+    // Flush with the panel's inner edge; centred it would have been at 460.
+    expect(pan).toEqual({ x: 280, y: 100 });
   });
 
   it("scales both boxes by the zoom", () => {
