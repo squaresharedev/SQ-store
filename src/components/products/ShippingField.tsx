@@ -1,11 +1,13 @@
 "use client";
 
-import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Truck } from "lucide-react";
-import { cn } from "@/lib/utils";
 import type { ShippingChoices } from "@/lib/storefront/queries";
+import type { SellerShippingPolicy } from "@/types/shipping-policy";
 import { Select, type SelectOption } from "@/components/ui/select";
-import { helpTextClass, labelClass } from "@/components/ui/control-styles";
+import { labelClass } from "@/components/ui/control-styles";
+import { ShippingTermsModal } from "./ShippingTermsModal";
 
 /**
  * WHICH SHIPPING TERMS THIS PRODUCT SHIPS UNDER — a choice, never a text box.
@@ -15,15 +17,15 @@ import { helpTextClass, labelClass } from "@/components/ui/control-styles";
  * catalogue, so the terms live once on the ACCOUNT (Settings › Shipping &
  * returns) and every product inherits them; this field's default answer, and
  * its answer for nearly every product, is "the ones you already wrote".
- * Shopify and Etsy both landed on
- * the same shape — a general profile everything falls into, plus named
- * profiles for the exceptions — and for the same reason: fifty free-text
- * shipping boxes become fifty answers that drift apart.
+ * Shopify and Etsy both landed on the same shape — a general profile
+ * everything falls into, plus named profiles for the exceptions — and for the
+ * same reason: fifty free-text shipping boxes become fifty answers that
+ * drift apart.
  *
- * So the seller's job here is at most to pick from a list, and usually to read
- * the panel below it and move on. That panel is the other half of the point:
- * it shows the inherited terms in full, so "uses your store's terms" is
- * something you can check rather than something you have to trust.
+ * So the seller's job here is at most to pick from a list, then glance at one
+ * line to confirm what buyers will actually see. Editing those terms happens
+ * in `ShippingTermsModal` — the same account-level form Settings › Shipping
+ * uses, opened on top of this one rather than navigating away from it.
  */
 
 /** The select's value for "no profile", which is what the store default is. */
@@ -33,15 +35,20 @@ export function ShippingField({
   inputId,
   value,
   choices,
+  policy,
   onChange,
 }: {
   inputId: string;
   /** The chosen profile id, or null for the store's default terms. */
   value: string | null;
   choices: ShippingChoices;
+  /** The full, editable policy document — only used to seed the modal. */
+  policy: SellerShippingPolicy;
   onChange: (next: string | null) => void;
 }) {
-  const { profiles, fallback, editHref } = choices;
+  const router = useRouter();
+  const [editing, setEditing] = useState(false);
+  const { profiles, fallback } = choices;
   // No store name on any row any more: there is ONE set of terms for the
   // account, so there is no second store to tell a profile apart from.
 
@@ -77,15 +84,20 @@ export function ShippingField({
     })),
   ];
 
-  const hasAnyTerms = profiles.length > 0 || Boolean(fallback.body || fallback.dispatch);
+  // ONE LINE, not a paragraph: dispatch time first (the fact a buyer scans
+  // for), falling back to the opening of the free-text terms, falling back to
+  // an honest "nothing written yet" rather than silence.
+  const summary = chosen
+    ? chosen.dispatch || firstLine(chosen.body) || "No terms written for this profile yet."
+    : fallback.dispatch || firstLine(fallback.body) || "No shipping terms written yet.";
 
   return (
     <div
-      className="space-y-4"
+      className="space-y-3"
       data-product-field="shippingProfile"
       data-product-value={value ?? "default"}
     >
-      {profiles.length > 0 || orphaned ? (
+      {(profiles.length > 0 || orphaned) && (
         <div className="space-y-1.5 sm:max-w-sm">
           <label htmlFor={inputId} className={labelClass}>
             Shipping profile
@@ -97,72 +109,35 @@ export function ShippingField({
             onChange={(next) => onChange(next === DEFAULT_VALUE ? null : next)}
           />
         </div>
-      ) : (
-        <p className={helpTextClass}>
-          Shipping terms are written once for your whole account, not per product, so this
-          product uses them automatically.
-        </p>
       )}
 
-      {/* WHAT BUYERS WILL ACTUALLY READ. The words, not a promise of them:
-          "uses your store's terms" is only reassuring if you can see which
-          terms those are without leaving the form. */}
-      {hasAnyTerms ? (
-        <div className="rounded-md border border-border bg-muted/40 p-3">
-          <div className="flex items-center gap-1.5 pb-2">
-            <Truck className="size-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
-            <p className="text-xs font-medium text-foreground">
-              {chosen ? `On the product page: ${chosen.name}` : "On the product page"}
-            </p>
-          </div>
-          {chosen ? (
-            <Terms dispatch={chosen.dispatch} body={chosen.body} />
-          ) : (
-            <Terms
-              dispatch={fallback.dispatch}
-              body={fallback.body}
-              empty="No shipping terms written yet."
-            />
-          )}
+      {/* THE ONE LINE A SELLER ACTUALLY SCANS FOR: what buyers will read,
+          without leaving the form to find out. Full terms — and editing them
+          — are one click away in the modal, not repeated here. */}
+      <div className="flex items-center justify-between gap-3 rounded-md border border-border bg-muted/40 px-3 py-2.5">
+        <div className="flex min-w-0 items-center gap-2">
+          <Truck className="size-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
+          <p className="truncate text-xs text-foreground">{summary}</p>
         </div>
-      ) : (
-        <p className={helpTextClass}>
-          You have not written any shipping terms yet. Buyers see a note saying so.
-        </p>
-      )}
+        <button
+          type="button"
+          onClick={() => setEditing(true)}
+          className="shrink-0 font-inter text-xs font-medium text-muted-foreground underline underline-offset-2 transition-colors duration-base ease-standard hover:text-foreground motion-reduce:transition-none"
+        >
+          Edit
+        </button>
+      </div>
 
-        <p className={helpTextClass}>
-          <Link
-            href={editHref}
-            className="underline underline-offset-2 transition-colors duration-base ease-standard hover:text-foreground"
-          >
-            Edit your shipping terms
-          </Link>{" "}
-          {profiles.length > 0
-            ? "— changes apply to every product using them."
-            : "— or add a profile there for products that ship differently."}
-        </p>
-    </div>
-  );
-}
-
-/** One set of terms, read-only. Paragraphs, exactly as the page prints them. */
-function Terms({
-  dispatch,
-  body,
-  empty,
-}: {
-  dispatch: string;
-  body: string;
-  empty?: string;
-}) {
-  if (!dispatch && !body) {
-    return empty ? <p className={cn(helpTextClass, "italic")}>{empty}</p> : null;
-  }
-  return (
-    <div className="space-y-1.5 text-xs leading-relaxed text-muted-foreground">
-      {dispatch && <p className="font-medium text-foreground">{dispatch}</p>}
-      {body && <p className="line-clamp-6 whitespace-pre-line">{body}</p>}
+      <ShippingTermsModal
+        open={editing}
+        onClose={() => {
+          setEditing(false);
+          // Picks up whatever was just saved (or not) without disturbing the
+          // rest of this form's in-memory state — see ShippingTermsModal.
+          router.refresh();
+        }}
+        policy={policy}
+      />
     </div>
   );
 }

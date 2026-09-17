@@ -34,13 +34,7 @@ export function PasswordCard({
           : "You sign in with Google. Add a password to sign in with your email or username too."
       }
     >
-      <Button
-        type="button"
-        // Primary when there is no password yet: that is a setup step the
-        // account genuinely needs, not a routine tweak.
-        variant={hasPassword ? "secondary" : "primary"}
-        onClick={() => setOpen(true)}
-      >
+      <Button type="button" variant="primary" onClick={() => setOpen(true)}>
         {hasPassword ? "Change password" : "Set a password"}
       </Button>
 

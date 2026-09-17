@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { stubBadgeClass } from "@/components/ui/control-styles";
+import { STRIPE_CONNECT_AVAILABLE } from "@/lib/payments/availability";
 import { CardSwipe } from "./CardSwipe";
 
 const POINTS = [
@@ -42,7 +43,9 @@ export function ConnectStripeModal({
   // an Account Link (stripe.accountLinks.create, type "account_onboarding")
   // and redirects to the returned Stripe-hosted URL. No financial data is
   // ever collected in-app. Until then the CTA is DISABLED: a clickable button
-  // that does nothing reads as broken, not as "coming soon".
+  // that does nothing reads as broken, not as "coming soon". The switch is the
+  // app-wide one (lib/payments/availability.ts), so the dashboard stops asking
+  // for a connection on the same day this button starts making one.
 
   return (
     <Modal
@@ -73,10 +76,13 @@ export function ConnectStripeModal({
         <Button variant="ghost" onClick={onClose}>
           Not now
         </Button>
-        <Button disabled title="Stripe payouts are coming soon.">
+        <Button
+          disabled={!STRIPE_CONNECT_AVAILABLE}
+          title={STRIPE_CONNECT_AVAILABLE ? undefined : "Stripe payouts are coming soon."}
+        >
           Continue to Stripe
           <ArrowUpRight className="size-4" strokeWidth={2} aria-hidden />
-          <span className={stubBadgeClass}>Soon</span>
+          {!STRIPE_CONNECT_AVAILABLE && <span className={stubBadgeClass}>Soon</span>}
         </Button>
       </div>
     </Modal>

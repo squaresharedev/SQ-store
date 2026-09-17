@@ -3346,3 +3346,46 @@ alter table public.seller_email_verifications enable row level security;
 revoke all on public.seller_email_verifications from anon;
 revoke all on public.seller_email_verifications from authenticated;
 grant all on public.seller_email_verifications to service_role;
+
+-- 20260914_onboarding_state
+-- Whether this person has been through the dashboard welcome flow. Replayed so
+-- the e2e stack can drive the flow end to end: a replica without the column
+-- would never open the dialog (the app treats only an explicit null as
+-- pending), and every onboarding spec would pass against a flow that never
+-- ran. The backfill is left out on purpose: the replica starts empty, so there
+-- is no established seller to mark done.
+alter table public.profiles
+  add column onboarding_completed_at timestamptz;
+
+-- 20260916_seller_bio
+-- The optional one-line seller bio. Replayed in full for its CHECK (length and
+-- no control characters), the backstop behind taxSchema for any write that
+-- never went through the settings form.
+alter table public.profiles
+  add column seller_bio text;
+
+alter table public.profiles
+  add constraint profiles_seller_bio_shape
+    check (
+      seller_bio is null
+      or (char_length(seller_bio) between 1 and 100 and seller_bio !~ '[\x01-\x1f\x7f]')
+    );
+
+-- 20260916_setup_celebrated
+-- When this person was first shown their finished setup card. Replayed so the
+-- e2e stack can prove the card shows once: the app treats only an explicit null
+-- as pending, so a replica without the column would never render the card, and
+-- a "shown once" spec would pass against a card that never appeared at all.
+alter table public.profiles
+  add column setup_celebrated_at timestamptz;
+
+-- 20260917_sample_storefront
+-- Two onboarding flags for the sample storefront (which is code, never a
+-- storefronts row): whether the seller hid it from their list, and when the
+-- designer tour first started for them. Replayed so the e2e stack can prove the
+-- hide sticks across reloads and the tour starts once: the app treats only an
+-- explicit null as "not yet", so a replica without the columns would show no
+-- sample and start no tour at all.
+alter table public.profiles
+  add column sample_storefront_hidden_at timestamptz,
+  add column editor_tour_seen_at timestamptz;

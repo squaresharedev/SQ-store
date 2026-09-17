@@ -153,7 +153,7 @@ export function ProductList({
             No products match these filters
           </p>
           <p className="mt-1 max-w-xs font-inter text-sm text-muted-foreground">
-            Try a different search term, or clear the filters to see everything
+            Pick a different status, or clear the filters to see everything
             again.
           </p>
           {onClearFilters && (

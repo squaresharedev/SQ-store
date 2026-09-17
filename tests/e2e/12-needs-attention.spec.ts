@@ -32,17 +32,16 @@ test.describe("needs attention links", () => {
     await gotoApp(page, "/dashboard");
     await expect(page.getByText("Needs attention")).toBeVisible();
 
-    // --- Stripe -> /payments (where the connection actually lives) ---
-    let url = await followAction(page, /open payments/i, /\/payments/);
-    expect(url.pathname).toBe("/payments");
-    // The row promises somewhere to connect Stripe: the connection card is here.
-    await expect(
-      page.getByRole("region", { name: /stripe connection/i }),
-    ).toBeVisible();
+    // --- no Stripe row while connecting is impossible ---
+    // /payments has nothing to connect until Stripe Connect ships, and a row
+    // whose one action lands on a disabled button would be the first dead end
+    // a new seller meets (lib/payments/availability.ts).
+    await expect(page.getByRole("link", { name: /open payments/i })).toHaveCount(0);
 
     // --- no storefront yet -> the list, where the create action lives ---
-    await gotoApp(page, "/dashboard");
-    url = await followAction(page, /create storefront/i, /\/storefront$/);
+    // While setup is unfinished this is a step in the "Get set up" checklist
+    // rather than a Needs attention row; the destination is the same.
+    let url = await followAction(page, /create storefront/i, /\/storefront$/);
     expect(url.pathname).toBe("/storefront");
 
     // Create one and leave its grid empty.
@@ -51,7 +50,9 @@ test.describe("needs attention links", () => {
 
     // --- empty storefront -> the designer for THAT storefront ---
     await gotoApp(page, "/dashboard");
-    await expect(page.getByText(/your storefront is empty/i)).toBeVisible();
+    await expect(page.locator('[data-setup-step="storefront"]')).toContainText(
+      /open your storefront/i,
+    );
     url = await followAction(
       page,
       /open designer/i,

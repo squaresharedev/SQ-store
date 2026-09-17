@@ -4,6 +4,8 @@ import { ArrowUpRight, BadgeCheck } from "lucide-react";
 import { cardClass } from "@/components/ui/surface-styles";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { stubBadgeClass } from "@/components/ui/control-styles";
+import { STRIPE_CONNECT_AVAILABLE } from "@/lib/payments/availability";
 import type { AccountStatus } from "@/lib/payments/types";
 import { CardSwipe } from "./CardSwipe";
 
@@ -34,6 +36,30 @@ export function ConnectionStatusCard({
   account: AccountStatus;
   onConnect: () => void;
 }) {
+  // Until Stripe Connect ships, a "Connect with Stripe" button only opens a
+  // modal whose continue button is disabled. Say what is true instead, and how
+  // buyers pay in the meantime (lib/payments/availability.ts).
+  if (!account.connected && !STRIPE_CONNECT_AVAILABLE) {
+    return (
+      <section
+        aria-label="Stripe connection"
+        className={cn(cardClass, "overflow-hidden")}
+      >
+        <CardSwipe className="rounded-none border-x-0 border-t-0" />
+        <div className="p-6">
+          <h2 className="flex flex-wrap items-center text-base font-semibold text-foreground">
+            Getting paid through Stripe is coming soon
+            <span className={stubBadgeClass}>Soon</span>
+          </h2>
+          <p className="mt-1 max-w-md font-inter text-sm text-muted-foreground">
+            Until then, buyers pay you through your product&apos;s buy link, or
+            by emailing you.
+          </p>
+        </div>
+      </section>
+    );
+  }
+
   if (!account.connected) {
     return (
       <section

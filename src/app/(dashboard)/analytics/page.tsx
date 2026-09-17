@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { getAnalyticsSnapshot } from "@/lib/analytics/queries";
 import type { AnalyticsRange, RangePreset } from "@/lib/analytics/types";
 import { AnalyticsPage } from "@/components/analytics/AnalyticsPage";
+import { getAccountActivity } from "@/lib/onboarding/queries";
 
 export const metadata: Metadata = {
   title: "Analytics",
@@ -70,7 +71,21 @@ export default async function AnalyticsRoutePage({
   const { preset, custom, effective } = parseParams(await searchParams);
   // One payload for the whole page: the charts render it and the page also
   // publishes it verbatim as machine-readable JSON, so the two cannot drift.
-  const snapshot = await getAnalyticsSnapshot(effective, preset);
+  const [snapshot, activity] = await Promise.all([
+    getAnalyticsSnapshot(effective, preset),
+    getAccountActivity(),
+  ]);
+  // A store that has not started: no order ever, no storefront, and no signal
+  // ever recorded. Its page is one honest empty state rather than a wall of
+  // zero tiles and blank charts. A storefront alone is enough to show the real
+  // sections, since its views are measured from the day it exists.
+  const firstRun = Boolean(
+    activity &&
+      !activity.hasOrders &&
+      !activity.hasStorefront &&
+      snapshot.signals.available &&
+      snapshot.signals.everRecorded.length === 0,
+  );
 
   return (
     <main className={cn(pageShellClass, "space-y-6")}>
@@ -78,7 +93,7 @@ export default async function AnalyticsRoutePage({
         title="Analytics"
         subtitle="Sales, storefront views and everything else your store is doing."
       />
-      <AnalyticsPage snapshot={snapshot} custom={custom} />
+      <AnalyticsPage snapshot={snapshot} custom={custom} firstRun={firstRun} />
     </main>
   );
 }

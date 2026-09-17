@@ -15,8 +15,9 @@ const LABEL_CLASS = "opacity-70";
  * "Czechia" on its own line reads as nothing in particular — a buyer has to
  * guess whether that is where the seller is based, where the item ships
  * from, or something else. Every field below except the name itself (which
- * IS the answer to "who", right under the "Seller" heading) says what it is
- * before it says what it holds, the same way the VAT line already did.
+ * IS the answer to "who", right under the "Seller" heading) and the bio
+ * (prose that describes itself) says what it is before it says what it holds,
+ * the same way the VAT line already did.
  *
  * Every value is still a plain React text node; the email becomes a mailto
  * only because it parsed as one.
@@ -33,6 +34,10 @@ export function SellerBlock({
   return (
     <address className="flex flex-col gap-2 text-sm not-italic">
       <p className="font-medium">{seller.businessName || fallbackName}</p>
+
+      {/* Prose about the seller, not a disclosure, so it sits under the name
+          unlabelled. A text node like everything else here. */}
+      {seller.bio && <p className="opacity-80">{seller.bio}</p>}
 
       {seller.address && (
         <p className="flex items-start gap-2">
@@ -88,6 +93,11 @@ export function SellerBlock({
 
 export function hasSellerDetails(seller: StorefrontSeller): boolean {
   return Boolean(
-    seller.businessName || seller.address || seller.email || seller.phone || seller.vatId,
+    seller.businessName ||
+      seller.address ||
+      seller.email ||
+      seller.phone ||
+      seller.vatId ||
+      seller.bio,
   );
 }

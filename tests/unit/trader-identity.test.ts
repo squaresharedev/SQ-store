@@ -27,6 +27,11 @@ describe("missingTraderIdentity", () => {
     expect(isTraderIdentityComplete(COMPLETE)).toBe(true);
   });
 
+  it("never asks for a bio", () => {
+    expect(COMPLETE).not.toHaveProperty("bio");
+    expect(isTraderIdentityComplete({ ...COMPLETE, bio: "" })).toBe(true);
+  });
+
   it("names each required field that is absent", () => {
     expect(missingTraderIdentity({})).toEqual(["businessName", "address", "email"]);
     expect(missingTraderIdentity({ ...COMPLETE, email: undefined })).toEqual(["email"]);
@@ -91,6 +96,7 @@ describe("missingTraderIdentity", () => {
       seller_address: null,
       seller_email: "hello@studio-builderboy.at",
       seller_phone: null,
+      seller_bio: null,
     });
     expect(missingTraderIdentity(seller)).toEqual(["address"]);
     expect(missingTraderIdentity(buildSellerIdentity(null))).toEqual([

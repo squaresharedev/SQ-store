@@ -164,7 +164,7 @@ export function StorefrontCard({
     <div
       className={cn(
         cardClass,
-        "relative flex flex-col p-4 shadow-sm",
+        "relative flex flex-col shadow-sm",
         hoverLiftClass,
       )}
     >
@@ -178,11 +178,13 @@ export function StorefrontCard({
 
       <div className="pointer-events-none relative z-0">
         {/* Live miniature of the actual storefront: the WHOLE board, scaled
-            down to fit this box rather than cropped to it. Wordless only when
-            there is no product behind the words (see above). */}
+            down to fit this box rather than cropped to it. Flush against the
+            card's top/left/right edges (no nested container) — only the top
+            corners need their own radius, to follow the card's curve. Wordless
+            only when there is no product behind the words (see above). */}
         <div
           aria-hidden="true"
-          className="relative aspect-[4/3] w-full overflow-hidden rounded-sm border border-border"
+          className="relative aspect-[4/3] w-full overflow-hidden rounded-t-md"
         >
           <StorefrontPreview
             config={config}
@@ -191,7 +193,7 @@ export function StorefrontCard({
           />
           {isEmpty && <EmptyPreviewHint accent={config.theme.accent} />}
         </div>
-        <div className="mt-3 pr-9">
+        <div className="mt-3 px-4 pb-4 pr-9">
           <h3 className="truncate text-base font-semibold text-foreground">
             {name}
           </h3>

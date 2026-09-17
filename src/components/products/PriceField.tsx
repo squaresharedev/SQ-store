@@ -80,7 +80,7 @@ export function PriceField({
           value={price}
           onChange={(event) => onPriceChange(event.target.value)}
           onBlur={handleBlur}
-          placeholder="9.00"
+          placeholder="e.g. 9.00"
           required
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? errorId : undefined}

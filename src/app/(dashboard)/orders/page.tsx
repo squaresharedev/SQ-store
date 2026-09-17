@@ -107,7 +107,7 @@ export default async function OrdersRoutePage({
     <main className={cn(pageShellClass, "space-y-6")}>
       <PageHeader
         title="Orders"
-        subtitle="Every sale across your embed and the marketplace."
+        subtitle="Every order placed through Square Share."
       />
       <OrdersPage
         data={data}

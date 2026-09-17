@@ -1,38 +1,39 @@
 import { motion, type Variants } from "motion/react";
 import { IconSvg } from "./IconSvg";
-import { EASE_ENTRANCE, SETTLE } from "./motion-tokens";
+import { EASE_ENTRANCE, EASE_STANDARD, SETTLE } from "./motion-tokens";
 import type { NavIconProps } from "./types";
 
 /**
- * Analytics: the bars collapse and re-grow from the baseline, left to right,
- * each overshooting its mark like fresh data landing.
+ * Analytics: lucide's "trending-up" glyph, lifted verbatim — the shaft runs
+ * northeast, dips southeast, then runs northeast again into the arrowhead.
+ *
+ * On hover the shaft traces itself from the tail up to the tip, and the
+ * arrowhead pops in once the line arrives. The shaft's `d` lists its points
+ * tail-first (the reverse of lucide's own top-to-bottom order) because
+ * `pathLength` always draws in the direction the path data is written; the
+ * geometry itself is untouched.
  */
-function barVariants(delay: number): Variants {
-  return {
-    idle: { scaleY: 1, transition: SETTLE },
-    hover: {
-      scaleY: [0, 1.15, 1],
-      transition: {
-        delay,
-        duration: 0.3,
-        times: [0, 0.7, 1],
-        ease: EASE_ENTRANCE,
-      },
-    },
-  };
-}
+const SHAFT: Variants = {
+  idle: { pathLength: 1, transition: SETTLE },
+  hover: {
+    pathLength: [0, 1],
+    transition: { duration: 0.45, ease: EASE_STANDARD },
+  },
+};
 
-const BAR_SHORT = barVariants(0);
-const BAR_TALL = barVariants(0.07);
-const BAR_MID = barVariants(0.14);
+const HEAD: Variants = {
+  idle: { opacity: 1, transition: SETTLE },
+  hover: {
+    opacity: [0, 1],
+    transition: { delay: 0.36, duration: 0.14, ease: EASE_ENTRANCE },
+  },
+};
 
 export function AnalyticsIcon({ className }: NavIconProps) {
   return (
     <IconSvg className={className}>
-      <path d="M3 3v16a2 2 0 0 0 2 2h16" />
-      <motion.path variants={BAR_SHORT} style={{ originY: 1 }} d="M8 17v-3" />
-      <motion.path variants={BAR_TALL} style={{ originY: 1 }} d="M13 17V5" />
-      <motion.path variants={BAR_MID} style={{ originY: 1 }} d="M18 17V9" />
+      <motion.path variants={SHAFT} d="M2 17 8.5 10.5 13.5 15.5 22 7" />
+      <motion.path variants={HEAD} d="M16 7h6v6" />
     </IconSvg>
   );
 }

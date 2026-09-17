@@ -1,7 +1,8 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState } from "react";
-import { Check } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, Check } from "lucide-react";
 import { useActionToast, useToast } from "@/components/ui/Toast";
 import { SaveButton } from "@/components/ui/SaveButton";
 import { SettingsCard } from "@/components/settings/SettingsCard";
@@ -18,7 +19,12 @@ import { EU_COUNTRIES, SELLER_FIELD_MAX } from "@/lib/settings/constants";
 import { InfoTip } from "@/components/ui/InfoTip";
 import { RequiredMark } from "@/components/ui/RequiredMark";
 import { LEGAL_LINKS } from "@/lib/legal/links";
-import { helpTextClass } from "@/components/ui/control-styles";
+import {
+  helpTextClass,
+  iconNudgeRightClass,
+  secondaryButtonClass,
+} from "@/components/ui/control-styles";
+import { cn } from "@/lib/utils";
 
 const INITIAL: SettingsActionState = {};
 
@@ -149,6 +155,7 @@ export function TaxSection({
   emailVerified = false,
   verificationOn = false,
   verifyOutcome,
+  continueHref,
 }: {
   businessName: string;
   address: string;
@@ -162,6 +169,8 @@ export function TaxSection({
   verificationOn?: boolean;
   /** `?verified=…` from the confirmation route, reported once as a toast. */
   verifyOutcome?: string;
+  /** Where "Continue to your storefront" goes once these details are saved. */
+  continueHref: string;
 }) {
   const [state, formAction, isPending] = useActionState(saveTaxInfo, INITIAL);
   useActionToast(state);
@@ -178,6 +187,12 @@ export function TaxSection({
   const [phone, setPhone] = useState(savedPhone);
 
   const vatWarning = vatAdvisory(vatId, countryCode);
+
+  // Shown once a save lands, not just while SaveButton's own green flash is up
+  // (that fades after a couple of seconds; the seller still needs a next
+  // step after it does). Clears on the next submit's pending tick, and comes
+  // back if that submit also succeeds.
+  const justSaved = !isPending && Boolean(state.success);
 
   // What came back from a clicked confirmation link, said once. The route
   // redirects here with an outcome rather than rendering its own page, so
@@ -259,7 +274,7 @@ export function TaxSection({
             name="tax_business_name"
             value={businessName}
             onChange={(e) => setBusinessName(e.target.value)}
-            placeholder="Studio Builderboy e.U."
+            placeholder="e.g. Studio Builderboy e.U."
             maxLength={200}
             autoComplete="organization"
             aria-required="true"
@@ -282,7 +297,7 @@ export function TaxSection({
             name="seller_address"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
-            placeholder={"12 Market Street\nDublin, D02 X285\nIreland"}
+            placeholder={"e.g. 12 Market Street\nDublin, D02 X285\nIreland"}
             maxLength={SELLER_FIELD_MAX.address}
             rows={3}
             aria-required="true"
@@ -310,7 +325,7 @@ export function TaxSection({
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="hello@yourshop.example"
+            placeholder="e.g. hello@yourshop.example"
             maxLength={254}
             autoComplete="email"
             aria-required="true"
@@ -351,7 +366,7 @@ export function TaxSection({
             name="tax_vat_id"
             value={vatId}
             onChange={(e) => setVatId(e.target.value)}
-            placeholder="ATU12345678"
+            placeholder="e.g. ATU12345678"
             maxLength={32}
             disabled={isPending}
           />
@@ -389,8 +404,23 @@ export function TaxSection({
             disabled={isPending}
           />
         </div>
-        <div>
+        <div className="flex flex-wrap items-center gap-3">
           <SaveButton pending={isPending} state={state} />
+          {/* THE NEXT STEP, not just the confirmation. SaveButton already says
+              "saved"; a seller who came here to clear the publish gate still
+              needs to be told where to go next rather than left on a settings
+              page wondering. Persists past SaveButton's own flash so the
+              answer doesn't vanish before it's used. */}
+          {justSaved && (
+            <Link href={continueHref} className={cn(secondaryButtonClass, "w-fit")}>
+              Continue to your storefront
+              <ArrowRight
+                className={cn("size-4", iconNudgeRightClass)}
+                strokeWidth={2}
+                aria-hidden
+              />
+            </Link>
+          )}
         </div>
       </form>
 

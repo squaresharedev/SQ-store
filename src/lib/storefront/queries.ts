@@ -106,6 +106,27 @@ export async function listStorefronts(offset = 0): Promise<StorefrontsPage> {
 }
 
 /**
+ * The one storefront to send a seller onward to after finishing something
+ * elsewhere (business/seller details, shipping terms): the one they most
+ * recently worked on, if they have one at all. Unlike `listStorefronts`,
+ * nothing here needs the full config, so the row is just an id.
+ */
+export async function getPrimaryStorefrontId(): Promise<string | null> {
+  const account = await getActiveAccount();
+  if (!account) return null;
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("storefronts")
+    .select("id")
+    .eq("owner_id", account.accountId)
+    .order("updated_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) throw new Error(`Failed to load storefront: ${error.message}`);
+  return data?.id ?? null;
+}
+
+/**
  * THE SHIPPING CHOICES A PRODUCT HAS, gathered for the product form.
  *
  * ONE ACCOUNT, ONE ANSWER — since 20260905_shipping_policy_on_profile. This

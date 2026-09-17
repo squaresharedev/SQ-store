@@ -11,6 +11,8 @@ import {
 import { unexpectedError } from "@/lib/errors";
 import { panPlacement } from "@/lib/images/placement";
 import { UploadError, uploadToR2 } from "@/lib/products/upload";
+import { sampleObjectKey } from "@/lib/storefront/sample";
+import { useSampleMode } from "@/lib/storefront/sample-mode";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/Toast";
 import { ProgressBar } from "@/components/ui/ProgressBar";
@@ -89,6 +91,7 @@ export function BackgroundEditor({
   // moderate, store) — an indeterminate bar, not a stalled 100%.
   const [progress, setProgress] = useState<number | null>(0);
   const toast = useToast();
+  const sample = useSampleMode();
   const fileInputRef = useRef<HTMLInputElement>(null);
   // Drag-to-position bookkeeping: pointer + position at drag start.
   const panStart = useRef<{
@@ -124,7 +127,10 @@ export function BackgroundEditor({
       // so every failure arrives as a structured UploadError with a reason.
       // Background images are full-bleed art and routinely the largest upload
       // in the app, so the byte progress matters more here than anywhere.
-      const key = await uploadToR2(file, "image", setProgress);
+      // The sample storefront never uploads: the seller's own copy stands in.
+      const key = sample
+        ? sampleObjectKey("images", file)
+        : await uploadToR2(file, "image", setProgress);
       onChange({ kind: "image", key, ...DEFAULT_BACKGROUND_IMAGE_PLACEMENT });
       onImageChange(URL.createObjectURL(file));
     } catch (error) {

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  bioSchema,
   deleteConfirmSchema,
   emailChangeSchema,
   legalAcceptSchema,
@@ -102,7 +103,11 @@ describe("passwordChangeSchema", () => {
   });
 });
 
-const BLANK_SELLER = { seller_address: "", seller_email: "", seller_phone: "" };
+const BLANK_SELLER = {
+  seller_address: "",
+  seller_email: "",
+  seller_phone: "",
+};
 
 describe("taxSchema", () => {
   it("empty strings store as null", () => {
@@ -267,6 +272,36 @@ describe("taxSchema", () => {
         seller_phone: "x".repeat(33),
       }).success,
     ).toBe(false);
+  });
+});
+
+// bioSchema is separate from taxSchema on purpose: the bio carries no legal
+// weight, is edited in Settings › Account (updateBio), and never blocks the
+// publish gate. See lib/validation/settings.ts for why the split exists.
+describe("bioSchema", () => {
+  it("empty string stores as null", () => {
+    const r = bioSchema.safeParse({ seller_bio: "" });
+    expect(r.success && r.data.seller_bio).toBeNull();
+  });
+  it("accepts a bio of exactly 100 characters and refuses 101", () => {
+    const exact = bioSchema.safeParse({ seller_bio: "x".repeat(100) });
+    expect(exact.success && exact.data.seller_bio).toBe("x".repeat(100));
+    expect(bioSchema.safeParse({ seller_bio: "x".repeat(101) }).success).toBe(false);
+  });
+  it("refuses control characters in a bio, newlines included", () => {
+    // Built from char codes so the file itself stays free of raw control bytes.
+    const controls = [10, 9, 0, 127].map((code) => `a${String.fromCharCode(code)}b`);
+    for (const seller_bio of controls) {
+      expect(bioSchema.safeParse({ seller_bio }).success).toBe(false);
+    }
+  });
+  it("keeps markup and SQL-looking text in a bio as literal text (rendering is what escapes it)", () => {
+    const r = bioSchema.safeParse({
+      seller_bio: "  <img src=x onerror=alert(1)> '; drop table profiles; --  ",
+    });
+    expect(r.success && r.data.seller_bio).toBe(
+      "<img src=x onerror=alert(1)> '; drop table profiles; --",
+    );
   });
 });
 

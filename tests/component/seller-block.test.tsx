@@ -58,5 +58,18 @@ describe("SellerBlock", () => {
     expect(hasSellerDetails({})).toBe(false);
     expect(hasSellerDetails({ phone: "+420 123 456 789" })).toBe(true);
     expect(hasSellerDetails({ vatId: "CZ1" })).toBe(true);
+    expect(hasSellerDetails({ bio: "Flat-pack since 1943" })).toBe(true);
+  });
+
+  it("shows the bio under the name as prose, without a label", () => {
+    render(<SellerBlock seller={{ ...FULL, bio: "Flat-pack since 1943" }} fallbackName="x" />);
+    expect(screen.getByText("Flat-pack since 1943")).toBeInTheDocument();
+  });
+
+  it("renders markup in a bio as literal text, never as elements", () => {
+    const bio = '<img src=x onerror="alert(1)"><script>alert(2)</script>';
+    const { container } = render(<SellerBlock seller={{ bio }} fallbackName="x" />);
+    expect(screen.getByText(bio)).toBeInTheDocument();
+    expect(container.querySelector("img, script")).toBeNull();
   });
 });

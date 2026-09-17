@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600">
+  <rect width="600" height="600" fill="#c9d3c0"/>
+  <circle cx="120" cy="120" r="70" fill="#d3dccb"/>
+  <ellipse cx="300" cy="470" rx="160" ry="20" fill="#3f4a36" opacity="0.14"/>
+  <defs>
+    <clipPath id="bowl">
+      <path d="M140 290h320c0 96-72 166-160 166S140 386 140 290z"/>
+    </clipPath>
+  </defs>
+  <rect x="256" y="440" width="88" height="22" rx="6" fill="#dcd1c0"/>
+  <g clip-path="url(#bowl)">
+    <rect x="130" y="280" width="340" height="190" fill="#f4efe6"/>
+    <path d="M130 360c56 16 112-12 170 0s110 16 170 0v110H130z" fill="#a4b494"/>
+    <rect x="400" y="280" width="70" height="190" fill="#000" opacity="0.05"/>
+    <g fill="#8a8f7e" opacity="0.5">
+      <circle cx="196" cy="318" r="2.5"/><circle cx="244" cy="340" r="2"/><circle cx="302" cy="322" r="3"/>
+      <circle cx="356" cy="344" r="2"/><circle cx="410" cy="316" r="2.5"/>
+    </g>
+  </g>
+  <ellipse cx="300" cy="290" rx="160" ry="30" fill="#ebe3d6"/>
+  <ellipse cx="300" cy="292" rx="144" ry="22" fill="#7c8c6e"/>
+  <ellipse cx="270" cy="286" rx="34" ry="9" fill="#e7d38a"/>
+  <ellipse cx="330" cy="294" rx="30" ry="8" fill="#d98b5f"/>
+  <ellipse cx="302" cy="282" rx="22" ry="6" fill="#f1ead7"/>
+</svg>

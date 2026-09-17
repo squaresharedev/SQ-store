@@ -14,7 +14,6 @@ import {
   Plus,
   ShoppingBag,
   SlidersHorizontal,
-  Upload,
 } from "lucide-react";
 import type {
   Product,
@@ -29,7 +28,13 @@ import { FilterMenu } from "@/components/ui/FilterMenu";
 import type { FilterOption } from "@/components/ui/FilterOptionList";
 import { SortSlidersIcon } from "@/components/ui/SortSlidersIcon";
 import { Spinner } from "@/components/ui/spinner";
-import { helpTextClass, infoTextClass, primaryButtonClass, secondaryButtonClass } from "@/components/ui/control-styles";
+import { UploadIcon } from "@/components/ui/UploadIcon";
+import {
+  helpTextClass,
+  infoTextClass,
+  primaryButtonClass,
+  secondaryButtonClass,
+} from "@/components/ui/control-styles";
 import { cn } from "@/lib/utils";
 import { ProductList } from "./ProductList";
 
@@ -227,7 +232,7 @@ export function ProductsBrowser({
                 href="/products/import"
                 className={cn(secondaryButtonClass, "h-10 shrink-0 px-3 py-2 text-sm")}
               >
-                <Upload className="size-4" strokeWidth={2} aria-hidden="true" />
+                <UploadIcon className="size-4" />
                 Import
               </Link>
               <Link href="/products/new" className={`${primaryButtonClass} h-10 shrink-0`}>

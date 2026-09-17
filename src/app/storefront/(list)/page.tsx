@@ -3,6 +3,7 @@ import { pageShellClass } from "@/components/ui/surface-styles";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { listAllProducts } from "@/lib/products/queries";
 import { listStorefronts } from "@/lib/storefront/queries";
+import { getSampleStorefrontFlags } from "@/lib/onboarding/queries";
 import { StorefrontsList } from "@/components/storefront/StorefrontsList";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
@@ -18,10 +19,12 @@ export const metadata: Metadata = {
 // this group and stays full-screen.
 export default async function StorefrontsPage() {
   // Products feed the cards' live grid previews (image tiles).
-  const [storefronts, products, account] = await Promise.all([
+  const [storefronts, products, account, sampleFlags] = await Promise.all([
     listStorefronts(),
     listAllProducts(),
     getActiveAccount(),
+    // The person's own flag, not the store's: see getSampleStorefrontFlags.
+    getSampleStorefrontFlags(),
   ]);
   const canWrite = can(account?.role, "storefront.write");
   const { rows: storefrontRows, total: storefrontTotal } = storefronts;
@@ -46,6 +49,10 @@ export default async function StorefrontsPage() {
         products={products}
         canWrite={canWrite}
         missingTraderDetails={identity.ok ? identity.missing : []}
+        // Offered to anyone who can build a storefront, and only on a flag we
+        // could actually read: no answer means no sample, not a sample that
+        // cannot be hidden.
+        sample={!canWrite || !sampleFlags ? null : sampleFlags.hidden ? "hidden" : "shown"}
       />
     </main>
   );

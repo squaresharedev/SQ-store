@@ -6,6 +6,8 @@ import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
 import { getTraderIdentityStatus } from "@/lib/settings/seller-identity";
 import { getShippingChoices } from "@/lib/storefront/queries";
+import { getShippingPolicy } from "@/lib/settings/shipping-policy";
+import { EMPTY_SHIPPING_POLICY } from "@/types/shipping-policy";
 
 export const metadata: Metadata = {
   title: "Edit product",
@@ -38,12 +40,20 @@ export default async function EditProductPage({
     ? await getTraderIdentityStatus(account.accountId)
     : { ok: true as const, missing: [] };
 
+  // Scoped to the SIGNED-IN user (`account.userId`), not the active account:
+  // that is what `saveShippingPolicy` writes to, same as Settings › Shipping
+  // itself. The shipping-terms modal edits this document directly.
+  const shippingPolicy = account
+    ? await getShippingPolicy(account.userId)
+    : EMPTY_SHIPPING_POLICY;
+
   return (
     <ProductFormView
       title="Edit product"
       subtitle="Update the details, image, or file for this product."
       product={product}
       shippingChoices={shippingChoices}
+      shippingPolicy={shippingPolicy}
       missingTraderDetails={identity.ok ? identity.missing : []}
     />
   );

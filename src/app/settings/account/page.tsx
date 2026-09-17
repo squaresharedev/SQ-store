@@ -20,6 +20,7 @@ export default async function AccountSettingsPage() {
   return (
     <AccountSection
       username={profile?.username ?? ""}
+      bio={profile?.seller_bio ?? ""}
       email={user.email ?? ""}
       avatarUrl={profile?.avatar_url ?? null}
       // From the password HASH, not from `identities`: setting a password on an

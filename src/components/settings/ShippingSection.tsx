@@ -1,7 +1,8 @@
 "use client";
 
 import { useActionState, useMemo, useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, Plus, Trash2 } from "lucide-react";
 import { useActionToast } from "@/components/ui/Toast";
 import { SaveButton } from "@/components/ui/SaveButton";
 import { SettingsCard } from "@/components/settings/SettingsCard";
@@ -14,6 +15,7 @@ import { cn } from "@/lib/utils";
 import {
   helpTextClass,
   iconButtonClass,
+  iconNudgeRightClass,
   secondaryButtonClass,
 } from "@/components/ui/control-styles";
 import { saveShippingPolicy } from "@/lib/settings/shipping-actions";
@@ -93,9 +95,25 @@ const PAID_BY_OPTIONS: readonly SelectOption<string>[] = [
  * repeatable rows never have to survive a round trip through indexed field
  * names.
  */
-export function ShippingSection({ policy }: { policy: SellerShippingPolicy }) {
+export function ShippingSection({
+  policy,
+  continueHref,
+}: {
+  policy: SellerShippingPolicy;
+  /** Where "Continue to your storefront" goes once terms are saved. Omitted
+   *  when this form is embedded somewhere that isn't the settings page (e.g.
+   *  the product form's shipping modal) — there is nowhere sensible for that
+   *  link to go, so it is left out entirely rather than shown and disabled. */
+  continueHref?: string;
+}) {
   const [state, formAction, isPending] = useActionState(saveShippingPolicy, INITIAL);
   useActionToast(state);
+
+  // Shown once a save lands, not just while SaveButton's own green flash is up
+  // (that fades after a couple of seconds; the seller still needs a next step
+  // after it does). Clears on the next submit's pending tick, and comes back
+  // if that submit also succeeds.
+  const justSaved = !isPending && Boolean(state.success);
 
   const [shipsFrom, setShipsFrom] = useState(policy.shipsFrom ?? "");
   const [dispatch, setDispatch] = useState(policy.dispatch ?? "");
@@ -220,7 +238,7 @@ export function ShippingSection({ policy }: { policy: SellerShippingPolicy }) {
               id="dispatch"
               value={dispatch}
               onChange={(event) => setDispatch(event.target.value)}
-              placeholder="Ships within 1-3 business days"
+              placeholder="e.g. Ships within 1-3 business days"
               maxLength={SHIPPING_DISPATCH_MAX}
             />
           </div>
@@ -253,21 +271,21 @@ export function ShippingSection({ policy }: { policy: SellerShippingPolicy }) {
                         aria-label={`Destination ${index + 1}`}
                         value={row.area}
                         onChange={(event) => setDestination(index, { area: event.target.value })}
-                        placeholder="Rest of EU"
+                        placeholder="e.g. Rest of EU"
                         maxLength={DESTINATION_AREA_MAX}
                       />
                       <Input
                         aria-label={`Delivery time ${index + 1}`}
                         value={row.time}
                         onChange={(event) => setDestination(index, { time: event.target.value })}
-                        placeholder="5-7 business days"
+                        placeholder="e.g. 5-7 business days"
                         maxLength={DESTINATION_TIME_MAX}
                       />
                       <Input
                         aria-label={`Shipping cost ${index + 1}`}
                         value={row.cost ?? ""}
                         onChange={(event) => setDestination(index, { cost: event.target.value })}
-                        placeholder="€9.00"
+                        placeholder="e.g. €9.00"
                         maxLength={DESTINATION_COST_MAX}
                       />
                     </div>
@@ -316,7 +334,7 @@ export function ShippingSection({ policy }: { policy: SellerShippingPolicy }) {
               value={shippingNotes}
               onChange={(event) => setShippingNotes(event.target.value)}
               rows={3}
-              placeholder="Tracked as standard. We do not ship to PO boxes."
+              placeholder="e.g. Tracked as standard. We do not ship to PO boxes."
               maxLength={POLICY_TEXT_MAX}
             />
           </div>
@@ -354,7 +372,11 @@ export function ShippingSection({ policy }: { policy: SellerShippingPolicy }) {
                   inputMode="numeric"
                   placeholder="60"
                   maxLength={String(RETURNS_WINDOW_MAX_DAYS).length}
-                  className="flex-1"
+                  // Extra-faint on top of the field's own placeholder colour:
+                  // "60" is too plausible a default to read as a real value at
+                  // normal placeholder contrast (a seller mistook a similarly
+                  // styled example price for a real one elsewhere in the app).
+                  className="flex-1 placeholder:text-muted-foreground/50"
                 />
                 <span className="text-sm text-muted-foreground">days</span>
               </div>
@@ -390,7 +412,7 @@ export function ShippingSection({ policy }: { policy: SellerShippingPolicy }) {
               value={returnsNotes}
               onChange={(event) => setReturnsNotes(event.target.value)}
               rows={3}
-              placeholder="Made-to-order pieces cannot be returned unless faulty."
+              placeholder="e.g. Made-to-order pieces cannot be returned unless faulty."
               maxLength={POLICY_TEXT_MAX}
             />
           </div>
@@ -506,7 +528,7 @@ export function ShippingSection({ policy }: { policy: SellerShippingPolicy }) {
                         id={`profile-name-${profile.id}`}
                         value={profile.name}
                         onChange={(event) => setProfile(index, { name: event.target.value })}
-                        placeholder="Bulky items"
+                        placeholder="e.g. Bulky items"
                         maxLength={SHIPPING_PROFILE_NAME_MAX}
                       />
                     </div>
@@ -533,7 +555,7 @@ export function ShippingSection({ policy }: { policy: SellerShippingPolicy }) {
                       id={`profile-dispatch-${profile.id}`}
                       value={profile.dispatch ?? ""}
                       onChange={(event) => setProfile(index, { dispatch: event.target.value })}
-                      placeholder="Made to order, allow 3 weeks"
+                      placeholder="e.g. Made to order, allow 3 weeks"
                       maxLength={SHIPPING_DISPATCH_MAX}
                     />
                   </div>
@@ -582,8 +604,23 @@ export function ShippingSection({ policy }: { policy: SellerShippingPolicy }) {
         </div>
       </SettingsCard>
 
-      <div>
+      <div className="flex flex-wrap items-center gap-3">
         <SaveButton pending={isPending} state={state} />
+        {/* THE NEXT STEP, not just the confirmation. SaveButton already says
+            "saved"; a seller who came here to set shipping terms still needs
+            to be told where to go next rather than left on a settings page
+            wondering. Persists past SaveButton's own flash so the answer
+            doesn't vanish before it's used. */}
+        {justSaved && continueHref && (
+          <Link href={continueHref} className={cn(secondaryButtonClass, "w-fit")}>
+            Continue to your storefront
+            <ArrowRight
+              className={cn("size-4", iconNudgeRightClass)}
+              strokeWidth={2}
+              aria-hidden
+            />
+          </Link>
+        )}
       </div>
     </form>
   );

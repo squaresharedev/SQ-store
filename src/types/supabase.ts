@@ -191,6 +191,7 @@ export type Database = {
           avatar_url: string | null
           created_at: string
           deletion_requested_at: string | null
+          editor_tour_seen_at: string | null
           id: string
           is_public: boolean
           is_seller: boolean
@@ -199,10 +200,14 @@ export type Database = {
           notify_marketing: boolean
           notify_product_updates: boolean
           notify_sales: boolean
+          onboarding_completed_at: string | null
+          sample_storefront_hidden_at: string | null
           seller_address: string | null
+          seller_bio: string | null
           seller_email: string | null
           seller_email_verified_at: string | null
           seller_phone: string | null
+          setup_celebrated_at: string | null
           shipping_policy: Json | null
           tax_business_name: string | null
           tax_country: string | null
@@ -214,6 +219,7 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           deletion_requested_at?: string | null
+          editor_tour_seen_at?: string | null
           id: string
           is_public?: boolean
           is_seller?: boolean
@@ -222,10 +228,14 @@ export type Database = {
           notify_marketing?: boolean
           notify_product_updates?: boolean
           notify_sales?: boolean
+          onboarding_completed_at?: string | null
+          sample_storefront_hidden_at?: string | null
           seller_address?: string | null
+          seller_bio?: string | null
           seller_email?: string | null
           seller_email_verified_at?: string | null
           seller_phone?: string | null
+          setup_celebrated_at?: string | null
           shipping_policy?: Json | null
           tax_business_name?: string | null
           tax_country?: string | null
@@ -237,6 +247,7 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           deletion_requested_at?: string | null
+          editor_tour_seen_at?: string | null
           id?: string
           is_public?: boolean
           is_seller?: boolean
@@ -245,10 +256,14 @@ export type Database = {
           notify_marketing?: boolean
           notify_product_updates?: boolean
           notify_sales?: boolean
+          onboarding_completed_at?: string | null
+          sample_storefront_hidden_at?: string | null
           seller_address?: string | null
+          seller_bio?: string | null
           seller_email?: string | null
           seller_email_verified_at?: string | null
           seller_phone?: string | null
+          setup_celebrated_at?: string | null
           shipping_policy?: Json | null
           tax_business_name?: string | null
           tax_country?: string | null

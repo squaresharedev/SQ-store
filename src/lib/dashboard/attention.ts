@@ -1,9 +1,5 @@
 import { LEGAL_VERSION } from "@/lib/settings/constants";
-import {
-  missingTraderIdentity,
-  traderIdentityFix,
-  traderIdentityHref,
-} from "@/lib/settings/trader-identity";
+import { STRIPE_CONNECT_AVAILABLE } from "@/lib/payments/availability";
 import type { DashboardOrdersData, ProductsSummary, ProfileSummary } from "./queries";
 
 /** One row of the overview's "Needs attention" module. */
@@ -73,6 +69,8 @@ export function buildAttentionItems({
   storefronts,
   profile,
   stripeConnected,
+  stripeConnectAvailable = STRIPE_CONNECT_AVAILABLE,
+  setupVisible = false,
 }: {
   orders: DashboardOrdersData;
   products: ProductsSummary;
@@ -85,15 +83,29 @@ export function buildAttentionItems({
    * and can never disagree.
    */
   stripeConnected: boolean;
+  /**
+   * Whether a Stripe connection can actually be made yet. Defaults to the one
+   * app-wide answer (lib/payments/availability.ts); a parameter so the row's
+   * destination can still be asserted for the day it flips.
+   */
+  stripeConnectAvailable?: boolean;
+  /**
+   * The setup checklist is on screen above this module (lib/onboarding/
+   * steps.ts). Rows it already states as steps stand down, so a new seller is
+   * not told the same thing twice in two different voices.
+   */
+  setupVisible?: boolean;
 }): AttentionItem[] {
   const items: AttentionItem[] = [];
 
   // --- Payments -------------------------------------------------------
 
-  // Stripe Connect row: present only until the account is connected.
-  // /payments is where the connection lives; settings has nothing to say about
-  // payouts.
-  if (!stripeConnected) {
+  // Stripe Connect row: present only while a connection can actually be made
+  // and has not been. /payments is where the connection lives; settings has
+  // nothing to say about payouts. Until Connect ships there is nothing there to
+  // press, and a row whose one action lands on a disabled button is worse than
+  // no row at all.
+  if (stripeConnectAvailable && !stripeConnected) {
     items.push({
       key: "stripe",
       label: "Connect Stripe to get paid",
@@ -103,41 +115,26 @@ export function buildAttentionItems({
     });
   }
 
-  // --- Seller identity / legal ----------------------------------------
+  // --- Legal ----------------------------------------------------------
 
-  // THE PUBLISH GATE, as an attention row. Not a nice-to-have like the rest of
-  // this list: while these are missing the account cannot put a product on sale
-  // or embed a storefront at all (lib/settings/trader-identity.ts), so it leads
-  // with what is blocked rather than with what buyers would see.
-  //
-  // Reuses the gate's own predicate so this row cannot drift from what the
-  // server actually enforces. Gated on profile being readable; a soft-fail read
-  // leaves this row hidden.
-  const missingTrader = profile
-    ? missingTraderIdentity({
-        ...(profile.taxBusinessName ? { businessName: profile.taxBusinessName } : {}),
-        ...(profile.sellerAddress ? { address: profile.sellerAddress } : {}),
-        ...(profile.sellerEmail ? { email: profile.sellerEmail } : {}),
-      })
-    : [];
-  if (missingTrader.length > 0) {
-    items.push({
-      key: "no-seller-identity",
-      label: "You can't publish or sell yet",
-      description: traderIdentityFix(missingTrader),
-      href: traderIdentityHref(missingTrader),
-      actionLabel: "Add seller details",
-    });
-  }
+  // NO SELLER-IDENTITY ROW HERE. The publish gate is stated by the setup
+  // checklist above this module (lib/onboarding/steps.ts), which is on screen
+  // for an owner whenever this row would have fired, and by the chrome's banner
+  // on every other page. A member viewing someone else's store never got it
+  // either: getProfileSummary reads under own-row RLS and returns null for them.
 
-  // Legal: seller must accept the current legal version before publishing.
-  // Gated on profile being readable; also skipped when profile.legalAcceptedVersion
-  // matches the current LEGAL_VERSION (no change needed).
+  // Legal: nothing enforces acceptance yet (see LegalSection), so the row asks
+  // rather than warns, and only says "updated" to someone who accepted an older
+  // version. Gated on profile being readable; skipped when the current
+  // LEGAL_VERSION is already accepted.
   if (profile && profile.legalAcceptedVersion !== LEGAL_VERSION) {
+    const updated = profile.legalAcceptedVersion !== null;
     items.push({
       key: "no-legal",
-      label: "Accept the updated legal terms",
-      description: "Review and accept the latest terms to keep your account active.",
+      label: updated ? "Accept the updated seller terms" : "Accept the seller terms",
+      description: updated
+        ? "The terms changed since you accepted them. Read and accept the current version."
+        : "Read the Seller Agreement, Terms and Privacy drafts and accept them.",
       href: "/settings/legal",
       actionLabel: "Review terms",
     });
@@ -179,23 +176,25 @@ export function buildAttentionItems({
 
   // --- Storefront -----------------------------------------------------
 
-  // Empty or uncreated storefront.
+  // Empty or uncreated storefront. Stands down while the setup checklist is
+  // showing: putting a product on a storefront is one of its steps, with the
+  // same destination.
   const saved = storefronts.total > 0;
   const blockCount = storefronts.rows.reduce(
     (total, storefront) => total + storefront.blockCount,
     0,
   );
-  if (!saved || blockCount === 0) {
+  if (!setupVisible && (!saved || blockCount === 0)) {
     // With one saved but empty, open THAT storefront's designer rather than the
     // list; with none, the list is where the create action lives.
     const empty =
       storefronts.rows.find((row) => row.blockCount === 0) ?? storefronts.rows[0];
     items.push({
       key: "storefront",
-      label: saved ? "Your storefront is empty" : "Save your storefront",
+      label: saved ? "Your storefront is empty" : "Create your storefront",
       description: saved
-        ? "Add products to your grid so buyers have something to see."
-        : "Arrange your grid and save it to go live.",
+        ? "Add a product to its grid to give it a page you can share."
+        : "Pick a look, then add your products to its grid.",
       href: saved && empty ? `/storefront/${empty.id}` : "/storefront",
       actionLabel: saved && empty ? "Open designer" : "Create storefront",
     });

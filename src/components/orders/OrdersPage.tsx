@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { helpTextClass, infoTextClass, overlayScrimClass, secondaryButtonClass } from "@/components/ui/control-styles";
 import { Spinner } from "@/components/ui/spinner";
+import { useTourReveal } from "@/lib/onboarding/tour-store";
 import { cn } from "@/lib/utils";
 import { TYPING_DEBOUNCE_MS } from "@/lib/typing-debounce";
 import type {
@@ -174,15 +175,27 @@ export function OrdersPage({
 
   const totalPages = Math.max(1, Math.ceil(data.total / data.pageSize));
   const filtered = hasAnyFilter(draft);
+  // An account that has never had an order has nothing to filter, and a full
+  // toolbar over an empty list is chrome for data that does not exist (the
+  // products list hides its toolbar the same way). Judged on the SERVER's
+  // filters rather than the draft, so a filter being typed into never makes
+  // the toolbar vanish under the cursor.
+  const accountEmpty = data.total === 0 && !hasAnyFilter(filters);
+  // Except while the guided tour is pointing at it: a new seller has no orders,
+  // and a tour stop about search and filters needs the real ones on screen
+  // (lib/onboarding/tour-steps.ts). It hides again when the tour moves on.
+  const tourShowsToolbar = useTourReveal("orders-toolbar");
 
   return (
     <div className="space-y-4">
-      <OrdersToolbar
-        filters={draft}
-        onChange={handleFilters}
-        sort={sort}
-        onSortChange={handleSort}
-      />
+      {(!accountEmpty || tourShowsToolbar) && (
+        <OrdersToolbar
+          filters={draft}
+          onChange={handleFilters}
+          sort={sort}
+          onSortChange={handleSort}
+        />
+      )}
 
       {/* Results region. While a re-query is in flight the current rows stay
           put (no layout jump, nothing to re-read) but dim and stop taking

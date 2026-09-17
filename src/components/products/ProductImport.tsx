@@ -29,6 +29,8 @@ import {
   type ImportPlan,
 } from "@/lib/products/csv";
 import { CURRENCIES, PRODUCT_STATUSES, type Currency, type ProductStatus } from "@/types/product";
+import { SellerDetailsNotice } from "@/components/settings/SellerDetailsNotice";
+import type { TraderIdentityField } from "@/lib/settings/trader-identity";
 
 /**
  * Moving a catalogue in from somewhere else.
@@ -70,7 +72,13 @@ const PREVIEW_ROWS = 8;
 
 type Loaded = { name: string; size: number; text: string };
 
-export function ProductImport() {
+export function ProductImport({
+  missingTraderDetails = [],
+}: {
+  /** Trader details the store still owes buyers. Non-empty means the server
+   *  refuses a live import, so only drafts are offered. */
+  missingTraderDetails?: readonly TraderIdentityField[];
+} = {}) {
   const router = useRouter();
   const toast = useToast();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -82,13 +90,16 @@ export function ProductImport() {
   // live is a mistake buyers can see. The seller publishes when they have
   // looked at what arrived.
   const [status, setStatus] = useState<ProductStatus>("draft");
+  // A store that cannot publish imports drafts, whatever was picked.
+  const canImportLive = missingTraderDetails.length === 0;
+  const importStatus: ProductStatus = canImportLive ? status : "draft";
   const [error, setError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const [busy, setBusy] = useState(false);
   const [saveResult, setSaveResult] = useState<SaveResult | null>(null);
 
   const plan: ImportPlan | null = file
-    ? buildImportPlan(parseCsv(file.text), overrides, { status })
+    ? buildImportPlan(parseCsv(file.text), overrides, { status: importStatus })
     : null;
   const ready = plan ? importableRows(plan) : [];
   const failing = plan ? plan.rows.filter((row) => row.problem !== null) : [];
@@ -137,7 +148,7 @@ export function ProductImport() {
         csv: file.text,
         columns: plan?.columns ?? {},
         currency,
-        status,
+        status: importStatus,
       });
       if (!result.ok) {
         setError(result.error.message);
@@ -261,23 +272,40 @@ export function ProductImport() {
               <p className={helpTextClass}>Every imported product is priced in this.</p>
             </div>
             <div className="space-y-1.5">
-              <label htmlFor="import-status" className={labelClass}>
-                Import as
-              </label>
-              <Select
-                id="import-status"
-                value={status}
-                options={PRODUCT_STATUSES.map((value) => ({
-                  value,
-                  label: value === "draft" ? "Drafts" : "Live products",
-                }))}
-                onChange={(value) => setStatus(value)}
-              />
-              <p className={helpTextClass}>
-                {status === "draft"
-                  ? "Nothing goes live until you publish it."
-                  : "These appear in your store straight away."}
-              </p>
+              {canImportLive ? (
+                <>
+                  <label htmlFor="import-status" className={labelClass}>
+                    Import as
+                  </label>
+                  <Select
+                    id="import-status"
+                    value={status}
+                    options={PRODUCT_STATUSES.map((value) => ({
+                      value,
+                      label: value === "draft" ? "Drafts" : "Live products",
+                    }))}
+                    onChange={(value) => setStatus(value)}
+                  />
+                  <p className={helpTextClass}>
+                    {status === "draft"
+                      ? "Nothing goes live until you publish it."
+                      : "These appear in your store straight away."}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className={labelClass}>Import as</p>
+                  <p className="font-inter text-sm text-foreground">Drafts</p>
+                  {/* A new tab: following the link here must not throw away
+                      the file and the column mapping already done. */}
+                  <SellerDetailsNotice
+                    missing={missingTraderDetails}
+                    blocks="import live products"
+                    detailed={false}
+                    newTab
+                  />
+                </>
+              )}
             </div>
           </div>
 

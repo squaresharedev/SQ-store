@@ -305,7 +305,7 @@ export const getPublicProductPage = cache(
     // fail-closed on a read error: an identity we could not read is one we
     // cannot display, which is the same problem as one that is not there.
     //
-    // `seller` is what the page SHOWS (six columns, built field by field, so
+    // `seller` is what the page SHOWS (the identity columns, built field by field, so
     // the verification flag cannot ride along onto a buyer's page); the gate
     // asks a wider question of the same row.
     const gateRow = sellerError ? null : (sellerRow as TraderGateRow | null);

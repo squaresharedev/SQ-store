@@ -12,7 +12,7 @@ import { formatMoney } from "@/lib/dashboard/format";
 import { MetricTile } from "./MetricTile";
 import { MobileRevenueHero } from "./MobileRevenueHero";
 import { NeedsAttention } from "./NeedsAttention";
-import { OnboardingSlot } from "./OnboardingSlot";
+import { OnboardingSlot, type OnboardingData } from "./OnboardingSlot";
 import { RecentOrders } from "./RecentOrders";
 
 const RECENT_ORDERS_ID = "recent-orders";
@@ -24,6 +24,7 @@ export function DashboardHome({
   storefronts,
   profile,
   stripeConnected,
+  onboarding,
 }: {
   orders: DashboardOrdersData;
   products: ProductsSummary;
@@ -31,8 +32,11 @@ export function DashboardHome({
   /** Null when the profile read failed softly; profile attention rows are hidden. */
   profile: ProfileAttentionData | null;
   stripeConnected: boolean;
+  /** The setup checklist and welcome flow's data; null renders neither. */
+  onboarding: OnboardingData | null;
 }) {
   const { last30d } = orders;
+  const setupVisible = Boolean(onboarding?.setup && !onboarding.setup.complete);
 
   return (
     <div className="relative overflow-hidden">
@@ -63,7 +67,7 @@ export function DashboardHome({
             rounded top that overlaps the glow (same radius family as the
             Modal bottom sheet). From md up the wrapper is invisible. */}
         <div className="relative -mx-6 -mt-14 space-y-6 rounded-t-lg bg-background px-6 pt-6 md:mx-0 md:mt-0 md:rounded-none md:bg-transparent md:p-0">
-        <OnboardingSlot />
+        <OnboardingSlot onboarding={onboarding} />
 
         {/* Headline metrics: last 30 days only — all-time and per-channel/click trends live in Analytics. */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -96,6 +100,7 @@ export function DashboardHome({
               storefronts,
               profile,
               stripeConnected,
+              setupVisible,
             })}
           />
           <RecentOrders orders={orders.recentOrders} id={RECENT_ORDERS_ID} />

@@ -3,6 +3,7 @@
 import { cardClass } from "@/components/ui/surface-styles";
 import { formatCents } from "@/lib/format/money";
 import { formatOrderDate } from "@/lib/format/date";
+import { STRIPE_CONNECT_AVAILABLE } from "@/lib/payments/availability";
 import type { Payout } from "@/lib/payments/types";
 import { PayoutStatusBadge } from "./PayoutStatusBadge";
 
@@ -32,8 +33,10 @@ export function PayoutHistory({
 
       {payouts.length === 0 ? (
         <p className="px-4 py-8 text-center font-inter text-sm text-muted-foreground">
-          No payouts yet. Once you make sales, Stripe sends your balance to your
-          bank automatically.
+          {/* The automatic-payout promise only once Stripe is connectable. */}
+          {STRIPE_CONNECT_AVAILABLE
+            ? "No payouts yet. Once you make sales, Stripe sends your balance to your bank automatically."
+            : "No payouts yet."}
         </p>
       ) : (
         <div className="overflow-x-auto">

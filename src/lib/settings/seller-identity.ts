@@ -8,11 +8,15 @@
 // lived on `profiles`, collected ahead of VAT/invoicing work. Distance-selling
 // law also asks for a postal address and a way to reach the seller, which tax
 // info alone does not cover — `seller_address` / `seller_email` /
-// `seller_phone` (20260905_seller_identity_on_profile) fill that gap. All six
+// `seller_phone` (20260905_seller_identity_on_profile) fill that gap. Those six
 // columns together are the seller's trader identity, set ONCE in Settings ›
 // Business & seller details and read by every storefront and every product
 // this account has — never duplicated per storefront the way it briefly was
-// (storefronts.config.seller, retired the same day this landed).
+// (storefronts.config.seller, retired the same day this landed). `seller_bio`
+// (20260916_seller_bio) is read alongside them because it is shown in the same
+// Seller section, but it is edited from Settings › Account (next to the
+// username — see updateBio in lib/settings/actions.ts), not from this page,
+// and it is optional and not part of the publish gate.
 //
 // SECURITY MODEL. `profiles` RLS is select-your-own-row-only (it holds tax
 // data and must never carry a broader policy — see 20260706081542 and
@@ -39,7 +43,7 @@ import type { StorefrontSeller } from "@/types/storefront";
 
 /** Exactly the profile columns a trader identity is built from. */
 export const SELLER_IDENTITY_SELECT =
-  "tax_business_name, tax_vat_id, tax_country, seller_address, seller_email, seller_phone" as const;
+  "tax_business_name, tax_vat_id, tax_country, seller_address, seller_email, seller_phone, seller_bio" as const;
 
 export type SellerIdentityRow = {
   tax_business_name: string | null;
@@ -48,6 +52,7 @@ export type SellerIdentityRow = {
   seller_address: string | null;
   seller_email: string | null;
   seller_phone: string | null;
+  seller_bio: string | null;
 };
 
 /**
@@ -57,7 +62,7 @@ export type SellerIdentityRow = {
  *
  * Kept as a separate constant rather than widened into
  * {@link SELLER_IDENTITY_SELECT} so the buyer-facing read stays exactly the
- * six columns a buyer is shown. Anything selecting this must build the page's
+ * columns a buyer is shown. Anything selecting this must build the page's
  * seller block with `buildSellerIdentity` (which copies field by field and
  * therefore cannot carry the extra column) and the gate's input with
  * {@link buildTraderIdentityInput}.
@@ -97,6 +102,7 @@ export function buildSellerIdentity(row: SellerIdentityRow | null): StorefrontSe
     ...(row.tax_vat_id ? { vatId: row.tax_vat_id } : {}),
     ...(row.tax_country ? { country: row.tax_country } : {}),
     ...(row.seller_phone ? { phone: row.seller_phone } : {}),
+    ...(row.seller_bio ? { bio: row.seller_bio } : {}),
   };
 }
 

@@ -97,6 +97,7 @@ vi.mock("@/lib/security/events", () => ({
 
 import {
   updateUsername,
+  updateBio,
   saveTaxInfo,
   saveNotifications,
   acceptLegal,
@@ -198,6 +199,75 @@ describe("updateUsername - happy path", () => {
     // Verify the update was scoped to the session user id
     const eqCalls = db.eq.mock.calls as [string, string][];
     expect(eqCalls.some(([col, val]) => col === "id" && val === USER_ID)).toBe(true);
+  });
+});
+
+// ==========================================================================
+// updateBio — separate from saveTaxInfo/TAX_FIELDS on purpose: the bio is set
+// in Settings › Account next to the username, not with the trader identity.
+// ==========================================================================
+
+describe("updateBio - field whitelist", () => {
+  it("injected 'is_seller' field is rejected, no DB write", async () => {
+    getUserMock.mockResolvedValue(USER);
+    const fd = new FormData();
+    fd.append("seller_bio", "Screen prints from a garage in Leipzig");
+    fd.append("is_seller", "true");
+
+    const result = await updateBio(PREV, fd);
+
+    expect(result.error).toMatch(/is_seller/);
+    expect(db.update).not.toHaveBeenCalled();
+  });
+});
+
+describe("updateBio - auth", () => {
+  it("signed out returns session expired error", async () => {
+    getUserMock.mockResolvedValue(null);
+    const fd = new FormData();
+    fd.append("seller_bio", "Screen prints from a garage in Leipzig");
+    const result = await updateBio(PREV, fd);
+    expect(result.error).toMatch(/session/i);
+    expect(db.update).not.toHaveBeenCalled();
+  });
+});
+
+describe("updateBio - validation", () => {
+  it("saves a bio and scopes the update to the session user id", async () => {
+    getUserMock.mockResolvedValue(USER);
+    const fd = new FormData();
+    fd.append("seller_bio", "Screen prints from a garage in Leipzig");
+
+    const result = await updateBio(PREV, fd);
+
+    expect(result.success).toBeTruthy();
+    const updatePayload = db.update.mock.calls[0][0] as Record<string, unknown>;
+    expect(updatePayload.seller_bio).toBe("Screen prints from a garage in Leipzig");
+    const eqCalls = db.eq.mock.calls as [string, string][];
+    expect(eqCalls.some(([col, val]) => col === "id" && val === USER_ID)).toBe(true);
+  });
+
+  it("refuses a bio over 100 characters without writing anything", async () => {
+    getUserMock.mockResolvedValue(USER);
+    const fd = new FormData();
+    fd.append("seller_bio", "x".repeat(101));
+
+    const result = await updateBio(PREV, fd);
+
+    expect(result.error).toMatch(/100 characters/);
+    expect(db.update).not.toHaveBeenCalled();
+  });
+
+  it("blank clears to null rather than storing an empty string", async () => {
+    getUserMock.mockResolvedValue(USER);
+    const fd = new FormData();
+    fd.append("seller_bio", "");
+
+    const result = await updateBio(PREV, fd);
+
+    expect(result.success).toBeTruthy();
+    const updatePayload = db.update.mock.calls[0][0] as Record<string, unknown>;
+    expect(updatePayload.seller_bio).toBeNull();
   });
 });
 
@@ -370,6 +440,54 @@ describe("saveTaxInfo - happy path", () => {
     await saveTaxInfo(PREV, taxForm(""));
 
     expect(mailExchangerMock).not.toHaveBeenCalled();
+  });
+});
+
+// The dashboard welcome flow posts only the three fields the publish gate
+// needs. A field it never showed must survive its save untouched.
+describe("saveTaxInfo - partial writes", () => {
+  it("writes only the fields it was sent, so a partial form never blanks the rest", async () => {
+    getUserMock.mockResolvedValue(USER);
+    const fd = new FormData();
+    fd.append("tax_business_name", "ACME Corp");
+    fd.append("seller_address", "12 Market Street");
+    fd.append("seller_email", "hello@acme-prints.de");
+
+    const result = await saveTaxInfo(PREV, fd);
+
+    expect(result.success).toBeTruthy();
+    const payload = db.update.mock.calls[0][0] as Record<string, unknown>;
+    expect(payload.tax_business_name).toBe("ACME Corp");
+    expect(payload.seller_address).toBe("12 Market Street");
+    expect(payload.seller_email).toBe("hello@acme-prints.de");
+    for (const untouched of ["tax_vat_id", "tax_country", "seller_phone"]) {
+      expect(payload, untouched).not.toHaveProperty(untouched);
+    }
+  });
+
+  it("leaves the contact email and its confirmation alone when the email is not sent", async () => {
+    getUserMock.mockResolvedValue(USER);
+    const fd = new FormData();
+    fd.append("tax_vat_id", "DE123456789");
+
+    const result = await saveTaxInfo(PREV, fd);
+
+    expect(result.success).toBeTruthy();
+    const payload = db.update.mock.calls[0][0] as Record<string, unknown>;
+    expect(payload).not.toHaveProperty("seller_email");
+    // Dropping the stored proof is only right when the address itself changed.
+    expect(payload).not.toHaveProperty("seller_email_verified_at");
+    expect(db.maybeSingle).not.toHaveBeenCalled();
+    expect(mailExchangerMock).not.toHaveBeenCalled();
+  });
+
+  it("refuses a submission that carries none of its fields, without writing", async () => {
+    getUserMock.mockResolvedValue(USER);
+
+    const result = await saveTaxInfo(PREV, new FormData());
+
+    expect(result.error).toBeTruthy();
+    expect(db.update).not.toHaveBeenCalled();
   });
 });
 

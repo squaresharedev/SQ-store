@@ -9,6 +9,7 @@ import { deriveStockBadge } from "@/lib/stock/badge";
 import { publicQuantityLimit } from "@/lib/products/quantity";
 import { getProductPagePreviewData } from "@/lib/products/preview-actions";
 import { useSettingTarget } from "@/lib/storefront/setting-context";
+import { useSampleMode } from "@/lib/storefront/sample-mode";
 import {
   PRODUCT_PAGE_HOTSPOTS,
   isProductPageHotspot,
@@ -121,7 +122,11 @@ export function ProductPageArtboard({
   // No reset when the id changes: an artboard is keyed by its product, so a
   // different product is a different instance with its own empty state.
   const [loaded, setLoaded] = useState<ProductPageProduct | null>(null);
+  // The sample storefront's products exist only in code, so there is nothing to
+  // load: the catalogue row IS the page.
+  const sample = useSampleMode();
   useEffect(() => {
+    if (sample) return;
     let cancelled = false;
     // The sold-out flag is re-applied live below (withLiveSoldOut), so it is
     // not sent; showStock IS, because the quantity ceiling is derived from it
@@ -135,7 +140,7 @@ export function ProductPageArtboard({
     return () => {
       cancelled = true;
     };
-  }, [product.id, showStock]);
+  }, [product.id, showStock, sample]);
 
   /**
    * Resolve a click inside the page to the setting behind what was clicked.

@@ -173,5 +173,7 @@ test.describe("orders + analytics (seeded)", () => {
     await expect(
       page.getByText(/no orders|nothing here|empty|first sale/i).first(),
     ).toBeVisible({ timeout: 15_000 });
+    // Nothing to filter: no toolbar is drawn over an account with no orders.
+    await expect(page.getByRole("search", { name: "order filters" })).toHaveCount(0);
   });
 });

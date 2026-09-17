@@ -1,3 +1,8 @@
+import Link from "next/link";
+import { TrendingUp } from "lucide-react";
+import { secondaryButtonClass } from "@/components/ui/control-styles";
+import { emptyStateClass } from "@/components/ui/surface-styles";
+import { cn } from "@/lib/utils";
 import {
   SIGNAL_SOURCES,
   SALES_SOURCE,
@@ -36,6 +41,7 @@ import { WeekdayChart } from "./WeekdayChart";
 export function AnalyticsPage({
   snapshot,
   custom,
+  firstRun = false,
 }: {
   snapshot: AnalyticsSnapshot;
   /**
@@ -48,19 +54,53 @@ export function AnalyticsPage({
    * moment the page rendered.
    */
   custom: AnalyticsRange;
+  /**
+   * The store has never had an order, a storefront or a signal. The page is
+   * then one empty state in place of the range control and every section,
+   * while still publishing its root attributes and the snapshot, so a reader
+   * that is not a person gets the same (empty) figures either way.
+   */
+  firstRun?: boolean;
 }) {
   const { sales, signals, range, currency } = snapshot;
   const hasSales = sales.totals.sales > 0;
   const hasOrders = sales.statuses.some((slice) => slice.count > 0);
 
+  const rootData = {
+    "data-analytics-range-from": range.from ?? "",
+    "data-analytics-range-to": range.to ?? "",
+    "data-analytics-range-preset": range.preset,
+    "data-analytics-currency": currency,
+  };
+
+  if (firstRun) {
+    return (
+      <div className="space-y-10" {...rootData} data-analytics-first-run="1">
+        <AnalyticsSnapshotScript snapshot={snapshot} />
+        <div className={cn(emptyStateClass, "bg-background")}>
+          <div className="flex size-12 items-center justify-center rounded-full bg-muted">
+            <TrendingUp
+              className="size-6 text-muted-foreground"
+              strokeWidth={1.5}
+              aria-hidden="true"
+            />
+          </div>
+          <h2 className="mt-4 text-lg font-semibold text-foreground">
+            Nothing to measure yet
+          </h2>
+          <p className="mt-1 max-w-sm font-inter text-sm text-muted-foreground">
+            Visits to your product pages show up here once one is live.
+          </p>
+          <Link href="/dashboard" className={cn(secondaryButtonClass, "mt-5")}>
+            Back to setup
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div
-      className="space-y-10"
-      data-analytics-range-from={range.from ?? ""}
-      data-analytics-range-to={range.to ?? ""}
-      data-analytics-range-preset={range.preset}
-      data-analytics-currency={currency}
-    >
+    <div className="space-y-10" {...rootData}>
       {/* The payload the charts were drawn from, for readers that are not
           people. Rendered first so it is in the document before any chart
           hydrates. */}
@@ -170,8 +210,16 @@ export function AnalyticsPage({
           const relevantSources = SIGNAL_SOURCES.filter((source) =>
             isSourceRelevant(source, relevantContext),
           );
-          const hiddenSources = SIGNAL_SOURCES.filter(
-            (source) => !isSourceRelevant(source, relevantContext),
+          // Only a source that CAN appear is worth naming. One still waiting
+          // on its producer (a block or a report that does not exist yet) is
+          // a promise the seller cannot act on, so it stays unsaid.
+          const upcomingSources = SIGNAL_SOURCES.filter(
+            (source) =>
+              !source.awaiting && !isSourceRelevant(source, relevantContext),
+          );
+          const upcomingLabels = upcomingSources.map((source) => source.label).join(", ");
+          const upcomingNeedProducts = upcomingSources.every(
+            (source) => source.blockType === "product",
           );
           return (
             <>
@@ -183,11 +231,11 @@ export function AnalyticsPage({
                   currency={currency}
                 />
               ))}
-              {hiddenSources.length > 0 && (
+              {upcomingSources.length > 0 && (
                 <p className="text-sm text-muted-foreground">
-                  {hiddenSources.length === 1
-                    ? `${hiddenSources[0].label} metrics are available once you add the corresponding block to a storefront.`
-                    : `${hiddenSources.map((s) => s.label).join(", ")} metrics are available once you add the corresponding blocks to a storefront.`}
+                  {upcomingNeedProducts
+                    ? `${upcomingLabels} appear here once a product is on one of your storefronts.`
+                    : `${upcomingLabels} appear here once their block is on one of your storefronts.`}
                 </p>
               )}
             </>

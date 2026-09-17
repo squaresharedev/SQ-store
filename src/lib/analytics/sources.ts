@@ -138,7 +138,7 @@ export const SIGNAL_SOURCES: AnalyticsSource[] = [
 export const SALES_SOURCE = {
   id: "sales" as const,
   label: "Sales",
-  description: "Paid orders across your embed and the marketplace.",
+  description: "Paid orders placed through Square Share checkout.",
   icon: Receipt,
 };
 

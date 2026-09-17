@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import type { Product, ProductDetail } from "@/types/product";
 import type { ShippingChoices } from "@/lib/storefront/queries";
+import type { SellerShippingPolicy } from "@/types/shipping-policy";
 import type { TraderIdentityField } from "@/lib/settings/trader-identity";
 import { iconNudgeLeftClass } from "@/components/ui/control-styles";
 import { ProductForm } from "./ProductForm";
@@ -13,7 +14,9 @@ export function ProductFormView({
   subtitle,
   product,
   shippingChoices,
+  shippingPolicy,
   missingTraderDetails = [],
+  returnTo = null,
 }: {
   title: string;
   subtitle: string;
@@ -22,10 +25,15 @@ export function ProductFormView({
   /** The store's shipping terms and profiles, so the form can show what this
    *  product inherits instead of asking the seller to write it again. */
   shippingChoices?: ShippingChoices;
+  /** The full policy document, only used to seed the shipping-terms modal. */
+  shippingPolicy?: SellerShippingPolicy;
   /** Trader details this store still owes buyers. Non-empty means the server
    *  will refuse an `active` product, so the form does not offer one. Defaults
    *  to none, which is what tests and any caller that has not asked want. */
   missingTraderDetails?: readonly TraderIdentityField[];
+  /** A storefront designer to return to after creating (already validated by
+   *  lib/products/return-path.ts). Null keeps the products list. */
+  returnTo?: string | null;
 }) {
   return (
     // Widens only at `lg`, and only by exactly the room the section index in
@@ -34,7 +42,7 @@ export function ProductFormView({
     // better one.
     <main className="mx-auto max-w-3xl px-6 py-8 lg:max-w-5xl">
       <Link
-        href="/products"
+        href={returnTo ?? "/products"}
         className="group/btn inline-flex items-center gap-1.5 font-inter text-sm text-muted-foreground transition-colors duration-base ease-standard hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none"
       >
         <ArrowLeft
@@ -42,7 +50,7 @@ export function ProductFormView({
           strokeWidth={2}
           aria-hidden="true"
         />
-        Products
+        {returnTo ? "Storefront" : "Products"}
       </Link>
 
       {/* The subtitle is gone. "Add a product to sell through your store and
@@ -59,7 +67,9 @@ export function ProductFormView({
       <ProductForm
         product={product}
         shippingChoices={shippingChoices}
+        shippingPolicy={shippingPolicy}
         missingTraderDetails={missingTraderDetails}
+        returnTo={returnTo}
       />
     </main>
   );

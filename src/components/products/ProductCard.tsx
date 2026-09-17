@@ -1,8 +1,15 @@
+import { useState } from "react";
 import Link from "next/link";
-import { ExternalLink, Image as ImageIcon, Link2, Pencil, Trash2, TrendingUp } from "lucide-react";
+import { Copy, ExternalLink, Image as ImageIcon, MoreVertical, Pencil, Trash2, TrendingUp } from "lucide-react";
 import type { Product, ProductSales } from "@/types/product";
 import { cn } from "@/lib/utils";
-import { hoverLiftClass, iconButtonClass, infoTextClass } from "@/components/ui/control-styles";
+import {
+  hoverLiftClass,
+  iconButtonClass,
+  infoTextClass,
+  overlayItemClass,
+} from "@/components/ui/control-styles";
+import { Popover } from "@/components/ui/Popover";
 import { formatPrice } from "@/lib/format";
 import { formatCents } from "@/lib/format/money";
 import { StockBadge } from "@/components/ui/StockBadge";
@@ -46,6 +53,7 @@ export function ProductCard({
 }) {
   const { id, title, price, currency, status, imageUrl, trackStock, stockQuantity, lowStockThreshold } = product;
   const stockBadge = deriveStockBadge({ trackStock, stockQuantity, lowStockThreshold });
+  const [menuOpen, setMenuOpen] = useState(false);
 
   // Footer stock: the count in plain prose, colour-coded by urgency. Only
   // shown when the seller is tracking stock on this product. Untracked
@@ -126,55 +134,81 @@ export function ProductCard({
           )}
         </div>
 
-        {/* Action buttons. Copy-link and open are available regardless of role:
-            viewing the product page is not a write operation. Edit and delete
-            are write-only and hidden for read-only members. */}
+        {/* Edit is write-only and hidden for read-only members. Copy-link, open,
+            and delete all live behind the menu button next to it — copy/open
+            stay available regardless of role (viewing the product page is not
+            a write operation); delete only appears there for writers. */}
         <div className="flex shrink-0 items-center gap-1">
-          <button
-            type="button"
-            onClick={onCopyLink}
-            aria-label={`Copy link for ${title}`}
-            title={linkTitle}
-            className={cn(
-              iconButtonClass,
-              "size-8",
-              storefrontCount === 0 && "opacity-40",
-            )}
-          >
-            <Link2 className="size-3.5" strokeWidth={2} aria-hidden="true" />
-          </button>
-          <button
-            type="button"
-            onClick={onOpenPage}
-            aria-label={`Open ${title} page`}
-            title={storefrontCount === 0 ? "Not on a storefront yet" : "Open product page"}
-            className={cn(
-              iconButtonClass,
-              "size-8",
-              storefrontCount === 0 && "opacity-40",
-            )}
-          >
-            <ExternalLink className="size-3.5" strokeWidth={2} aria-hidden="true" />
-          </button>
           {canWrite && (
-            <>
-              <Link
-                href={`/products/${id}/edit`}
-                aria-label={`Edit ${title}`}
-                className={cn(iconButtonClass, "size-8")}
-              >
-                <Pencil className="size-3.5" strokeWidth={2} aria-hidden="true" />
-              </Link>
+            <Link
+              href={`/products/${id}/edit`}
+              aria-label={`Edit ${title}`}
+              className={cn(iconButtonClass, "size-8")}
+            >
+              <Pencil className="size-3.5" strokeWidth={2} aria-hidden="true" />
+            </Link>
+          )}
+          <Popover
+            open={menuOpen}
+            onOpenChange={setMenuOpen}
+            variant="anchored"
+            placement="above"
+            label={`${title} actions`}
+            rootClassName="w-auto shrink-0"
+            panelClassName="w-56 p-1"
+            trigger={
               <button
                 type="button"
-                onClick={onDelete}
-                aria-label={`Delete ${title}`}
-                className={cn(iconButtonClass, "size-8 hover:text-destructive")}
+                aria-label={`More actions for ${title}`}
+                aria-haspopup="dialog"
+                aria-expanded={menuOpen}
+                onClick={() => setMenuOpen((open) => !open)}
+                className={cn(iconButtonClass, "size-8")}
               >
-                <Trash2 className="size-3.5" strokeWidth={2} aria-hidden="true" />
+                <MoreVertical className="size-3.5" strokeWidth={2} aria-hidden="true" />
               </button>
-            </>
-          )}
+            }
+          >
+            <div className="py-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuOpen(false);
+                  onCopyLink();
+                }}
+                title={linkTitle}
+                className={cn(overlayItemClass, storefrontCount === 0 && "opacity-40")}
+              >
+                <Copy className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                Copy product link
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuOpen(false);
+                  onOpenPage();
+                }}
+                title={storefrontCount === 0 ? "Not on a storefront yet" : "Open product page"}
+                className={cn(overlayItemClass, storefrontCount === 0 && "opacity-40")}
+              >
+                <ExternalLink className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                Open product page
+              </button>
+              {canWrite && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    onDelete();
+                  }}
+                  className={cn(overlayItemClass, "hover:text-destructive")}
+                >
+                  <Trash2 className="size-4 shrink-0" aria-hidden="true" />
+                  Delete
+                </button>
+              )}
+            </div>
+          </Popover>
         </div>
       </div>
 

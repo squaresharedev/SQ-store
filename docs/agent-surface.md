@@ -200,8 +200,12 @@ country, phone) is NOT a storefront member — it moved to the account
 (`profiles.tax_business_name` / `seller_address` / `seller_email` /
 `tax_vat_id` / `tax_country` / `seller_phone`, read by
 `lib/settings/seller-identity.ts`), set once in Settings › Business & seller
-details and shown on every product page the account sells on. A future agent
-read/write of it belongs on the profile, not on any one storefront's config.
+details and shown on every product page the account sells on. The optional
+one-line seller bio (`seller.bio`, `profiles.seller_bio`, max 100 characters)
+rides along for display in the same Seller section, but is set in Settings ›
+Account next to the username (`updateBio`, not `saveTaxInfo`) and is not part
+of the publish gate. A future agent read/write of either belongs on the
+profile, not on any one storefront's config.
 
 ### B7 — The generated database types are stale
 
@@ -296,6 +300,7 @@ Verdicts:
 |---|---|---|---|
 | Profile: display name, avatar, `is_seller` | `profiles` | R + W (`updateDisplayName`) | Ready |
 | Display-name availability | `is_display_name_available` RPC | R | Ready — already a route, already rate limited |
+| Seller bio (one line, max 100 chars) | `profiles.seller_bio` | R + W (`updateBio`) | Ready. Set in Settings › Account next to the username, not with the trader identity below; shown in the same Seller section but never part of the publish gate |
 | Business & seller details: business name, address, contact email, VAT id, country, phone | `profiles` | R + W (`saveTaxInfo`) | Ready. This is also the trader identity every hosted product page shows (`lib/settings/seller-identity.ts`) — set once here, not per storefront |
 | Legal acceptance + version | `profiles` | R + W (`acceptLegal`) | Ready — an agent should be able to *report* what is outstanding; accepting terms on a user's behalf is a decision for the product, not the transport |
 | Notification preferences | `profiles` | R + W (`saveNotifications`) | Ready |
@@ -319,6 +324,9 @@ Verdicts:
 | Team roster, roles, pending invites | `team_roster`, `team_my_pending_invites` RPCs | R | Ready |
 | Invite / change role / revoke | `team_members` | W | Ready — already rate limited (`teamInvite`, `teamMembership`) and role-gated |
 | Accessible accounts (which stores I can act on) | `team_my_accounts` RPC | R | **Required** — this is how an agent discovers valid `account_id` values for B2 |
+| Setup progress: seller details, first product, placed on a storefront, page live | derived on read by `buildSetupSteps` ([steps.ts](../src/lib/onboarding/steps.ts)); published on Overview as `data-setup-checklist`, `data-setup-done`, `data-setup-total`, `data-setup-complete`, `data-setup-live-path`, and per row `data-setup-step` + `data-setup-state` (done, todo) | R | Ready (added 2026-09-14). Never stored: every step is recomputed from the trader identity, the products and the storefront blocks, and "live" uses the public product page's own gate, so an agent that reports a page as live cannot be handing over a link that 404s. The welcome flow's only state is `profiles.onboarding_completed_at`; its open step is published as `data-welcome-step` (`welcome`, `seller`, `seller-confirm`). Once complete, the "You're set up" card is shown ONCE per person (2026-09-16): its first render records `profiles.setup_celebrated_at`, after which a complete setup publishes no checklist at all, so an absent `data-setup-checklist` on a finished store is expected, not a failed read |
+| Guided tour position (where the dashboard's walkthrough is) | per-tab UI state in sessionStorage (`sq.dashboard.tour`, [tour-store.ts](../src/lib/onboarding/tour-store.ts)); published while running as `data-tour-step`, `data-tour-state` (navigating, locating, anchored, fallback), `data-tour-index`, `data-tour-total` | R | Ready (added 2026-09-16). UI state only, never setup progress and never stored on the server: do not report a finished tour as anything done. Started by the welcome flow, from Settings > Account, or `/dashboard?tour=1`. The storefront designer runs its own, separate tour (see the next row). The stops and their selectors are data in [tour-steps.ts](../src/lib/onboarding/tour-steps.ts) |
+| Sample storefront (shown or hidden) and the designer tour | `profiles.sample_storefront_hidden_at`, `profiles.editor_tour_seen_at`; the sample itself is code ([sample.ts](../src/lib/storefront/sample.ts)), published on the list as `li[data-storefront-sample]` and in the designer at `/storefront/sample` with `data-sample-notice` and `data-sample-create`. The designer tour publishes the same `data-tour-*` attributes while running (sessionStorage `sq.editor.tour`) | R | Ready (added 2026-09-17). **Never a storefront**: it has no `storefronts` row, no embed key and no public page, so it must not be counted, listed, embedded or reported as live, and nothing an agent does in it is saved. Both flags are about the PERSON, not the store. Hiding is a toggle (`setSampleStorefrontHidden`); the tour flag is first-write-wins and set when the tour first starts, not when it is finished |
 
 ### Running the business
 

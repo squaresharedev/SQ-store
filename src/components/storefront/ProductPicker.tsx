@@ -13,6 +13,8 @@ import {
   fieldBaseClass,
   helpTextClass,
   iconButtonClass,
+  iconPopClass,
+  secondaryButtonClass,
 } from "@/components/ui/control-styles";
 
 const ADD_BUTTON_CLASS = cn(
@@ -38,12 +40,24 @@ export function ProductPicker({
   usedProductIds,
   onAdd,
   onFound,
+  onCreateProduct,
+  searchCatalog = true,
 }: {
   products: Product[];
   usedProductIds: ReadonlySet<string>;
   onAdd: (productId: string) => void;
   /** Merge server-found products into the designer's catalogue. */
   onFound?: (found: Product[]) => void;
+  /** Whether typing also searches the seller's catalogue on the server. Off
+   *  in the sample storefront, whose products exist only in code: the search
+   *  box then narrows the list it was given and nothing else. */
+  searchCatalog?: boolean;
+  /**
+   * Leave to create a first product and come BACK. The designer supplies it,
+   * routed through its unsaved-changes guard and carrying a return path, so a
+   * seller with nothing to place is never stranded on another page.
+   */
+  onCreateProduct?: () => void;
 }) {
   const [search, setSearch] = React.useState("");
   const [remoteState, setRemoteState] = React.useState<{
@@ -63,7 +77,7 @@ export function ProductPicker({
     // Every state write lives inside the debounce callback (async), so this
     // effect never sets state synchronously; the empty-term case is handled
     // by DERIVING display values from `term` below, not by resetting state.
-    if (!term) return;
+    if (!term || !searchCatalog) return;
     const seq = ++requestSeq.current;
     const timer = setTimeout(async () => {
       setRemoteState((s) => ({ ...s, searching: true }));
@@ -85,25 +99,44 @@ export function ProductPicker({
     };
     // `onFound` is a stable designer callback; term drives the effect.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [term]);
+  }, [term, searchCatalog]);
 
   // With no term the remote machinery is inert regardless of stale state.
-  const remote = term ? remoteState.results : null;
-  const searching = term ? remoteState.searching : false;
-  const searchFailed = term ? remoteState.failed : false;
+  const remote = term && searchCatalog ? remoteState.results : null;
+  const searching = term && searchCatalog ? remoteState.searching : false;
+  const searchFailed = term && searchCatalog ? remoteState.failed : false;
 
   if (products.length === 0 && !term) {
+    // Nothing to place yet. The way out has to lead BACK here: this panel is
+    // opened from inside the designer, and the plain link to the products list
+    // it used to offer left the seller on a page with no road back to the
+    // storefront they were building (skipping the unsaved-changes guard too).
+    const label = (
+      <>
+        <Plus className={cn("size-4", iconPopClass)} strokeWidth={2} aria-hidden="true" />
+        Add your first product
+      </>
+    );
     return (
-      <p className={helpTextClass}>
-        You have no products yet.{" "}
-        <Link
-          href="/products"
-          className="font-medium text-foreground underline decoration-border underline-offset-4 transition-colors duration-base ease-standard hover:decoration-foreground motion-reduce:transition-none"
-        >
-          Add a product
-        </Link>{" "}
-        first, then arrange it here.
-      </p>
+      <div className="space-y-3">
+        <p className={helpTextClass}>
+          You have no products yet. Add one and you&apos;ll come straight back
+          here to place it.
+        </p>
+        {onCreateProduct ? (
+          <button
+            type="button"
+            onClick={onCreateProduct}
+            className={cn(secondaryButtonClass, "w-full")}
+          >
+            {label}
+          </button>
+        ) : (
+          <Link href="/products/new" className={cn(secondaryButtonClass, "w-full")}>
+            {label}
+          </Link>
+        )}
+      </div>
     );
   }
 

@@ -1,25 +1,34 @@
+import { TourReplayCard } from "@/components/onboarding/TourReplayCard";
 import { AvatarUpload } from "@/components/settings/AvatarUpload";
+import { BioForm } from "@/components/settings/BioForm";
 import { EmailChangeForm } from "@/components/settings/EmailChangeForm";
 import { PasswordCard } from "@/components/settings/PasswordCard";
 import { SignOutSection } from "@/components/settings/SignOutSection";
 import { UsernameForm } from "@/components/settings/UsernameForm";
 
 /**
- * Account section: profile photo, username, email (Supabase re-verification
- * flow) and password.
+ * Account section: profile photo, username, bio, email (Supabase
+ * re-verification flow) and password.
  *
  * ONE name. The username is both what buyers see and what you sign in with;
  * there is no separate display name, so the two can never disagree and "is this
- * taken?" is a single question.
+ * taken?" is a single question. The bio sits right under it: both are public
+ * facts about this account with no legal weight, unlike the trader identity in
+ * Settings › Business & seller details (name, address, contact email) that the
+ * publish gate actually requires.
  */
 export function AccountSection({
   username,
+  bio,
   email,
   avatarUrl,
   hasPassword,
 }: {
   /** The account's only identifier, or "" if it has not claimed one yet. */
   username: string;
+  /** The account's public bio, or "" if unset. See BioForm for why it lives
+   *  here rather than in Business & seller details. */
+  bio: string;
   email: string;
   avatarUrl: string | null;
   /** Whether the account has a password HASH, resolved server-side rather than
@@ -43,6 +52,8 @@ export function AccountSection({
       <div>
         <UsernameForm username={username} />
       </div>
+      {/* No wrapper id either: BioForm's SettingsCard carries id="bio" itself. */}
+      <BioForm bio={bio} />
       <div id="email">
         <EmailChangeForm email={email} hasPassword={hasPassword} />
       </div>
@@ -50,6 +61,11 @@ export function AccountSection({
           than one that has it, since it is the only way to get one. */}
       <div id="password">
         <PasswordCard hasPassword={hasPassword} email={email} />
+      </div>
+      {/* Also the guided tour's last stop, which points here so a seller knows
+          where to find it again. */}
+      <div id="tour">
+        <TourReplayCard />
       </div>
       <div id="sign-out">
         <SignOutSection />

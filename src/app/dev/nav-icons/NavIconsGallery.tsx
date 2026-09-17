@@ -46,8 +46,7 @@ const ICONS: Array<{
   },
   {
     name: "Analytics",
-    story:
-      "The bars collapse and re-grow left to right, overshooting like fresh data.",
+    story: "The line traces itself from the tail up, and the arrowhead pops in at the tip.",
     icon: AnalyticsIcon,
   },
   {

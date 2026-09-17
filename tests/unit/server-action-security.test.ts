@@ -67,6 +67,22 @@ const REGISTRY: Record<string, Classification> = {
   "lib/settings/actions.ts::acceptLegal": unlimited(
     "Idempotent write of a fixed version constant. Repeating it changes nothing and costs one indexed update.",
   ),
+  // The dashboard welcome flow's "seen it" flag, on the caller's own profile.
+  "lib/onboarding/actions.ts::completeOnboarding": unlimited(
+    "First-write-wins timestamp on the caller's own row: once set, the update matches no row, so repeating it changes nothing and costs one indexed no-op.",
+  ),
+  // The finished setup card's "shown once" flag, on the caller's own profile.
+  "lib/onboarding/actions.ts::markSetupCelebrated": unlimited(
+    "First-write-wins timestamp on the caller's own row: once set, the update matches no row, so repeating it changes nothing and costs one indexed no-op.",
+  ),
+  // The sample storefront's "hidden from my list" toggle, on the caller's own profile.
+  "lib/onboarding/actions.ts::setSampleStorefrontHidden": unlimited(
+    "Boolean toggle of one nullable timestamp on the caller's own row: no fan-out, no new rows, and the last write simply wins, so repetition costs one indexed update.",
+  ),
+  // The storefront designer tour's "started once" flag, on the caller's own profile.
+  "lib/onboarding/actions.ts::markEditorTourSeen": unlimited(
+    "First-write-wins timestamp on the caller's own row: once set, the update matches no row, so repeating it changes nothing and costs one indexed no-op.",
+  ),
   "lib/settings/avatar.ts::uploadAvatar": limited(),
   "lib/settings/avatar.ts::removeAvatar": limited(),
 

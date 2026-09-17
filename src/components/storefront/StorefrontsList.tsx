@@ -2,9 +2,10 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Store } from "lucide-react";
+import { Eye, Plus, Store } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { errorTextClass, helpTextClass, iconPopClass, primaryButtonClass } from "@/components/ui/control-styles";
+import { errorTextClass, focusRingClass, helpTextClass, iconPopClass, primaryButtonClass } from "@/components/ui/control-styles";
+import { setSampleStorefrontHidden } from "@/lib/onboarding/actions";
 import { emptyStateClass } from "@/components/ui/surface-styles";
 import { useToast } from "@/components/ui/Toast";
 import { Button } from "@/components/ui/button";
@@ -19,12 +20,20 @@ import type { Product } from "@/types/product";
 import { StorefrontCard } from "./StorefrontCard";
 import { CreateStorefrontWizard } from "./CreateStorefrontWizard";
 import { EmbedModal } from "./EmbedModal";
+import { SampleEmbedModal, SampleStorefrontCard } from "./SampleStorefrontCard";
 
 /**
  * Client wrapper owning the visible storefront set. Create opens the setup
  * flow, which inserts the row itself and hands back an id to navigate to;
  * delete confirms, then removes the card optimistically and restores it if the
  * server rejects. `products` feeds the cards' live grid previews.
+ *
+ * THE SAMPLE STOREFRONT (lib/storefront/sample.ts) is a card after the
+ * seller's own, never counted among them. Hiding it is a flag on the person's
+ * profile, flipped optimistically, with a quiet way back at the foot of the
+ * list. With no storefront of their own, a create card sits beside the sample
+ * instead of the full empty state, so the first thing a new seller sees is what
+ * a storefront looks like and where theirs will go.
  */
 export function StorefrontsList({
   storefronts: initial,
@@ -32,7 +41,14 @@ export function StorefrontsList({
   products,
   canWrite,
   missingTraderDetails = [],
+  sample = null,
 }: {
+  /**
+   * Whether the sample storefront shows ("shown"), was hidden by this person
+   * ("hidden"), or is not offered at all (null: a read-only role, or the flag
+   * could not be read).
+   */
+  sample?: "shown" | "hidden" | null;
   storefronts: StorefrontSummary[];
   /** Exact count of ALL storefronts; more exist than `storefronts` when the
    *  first page is truncated, and the list must say so. */
@@ -48,6 +64,11 @@ export function StorefrontsList({
   const toast = useToast();
   const [storefronts, setStorefronts] = useState(initial);
   const [wizardOpen, setWizardOpen] = useState(false);
+  const [sampleShown, setSampleShown] = useState(sample === "shown");
+  const [sampleBusy, setSampleBusy] = useState(false);
+  const [sampleEmbedOpen, setSampleEmbedOpen] = useState(false);
+  const sampleOffered = sample !== null && canWrite;
+  const sampleVisible = sampleOffered && sampleShown;
   // Stays true from the moment the wizard hands back an id until the route
   // change lands, so the create buttons can't fire a second time behind it.
   const [creating, setCreating] = useState(false);
@@ -96,6 +117,26 @@ export function StorefrontsList({
     setStorefronts(initial);
     setRemoved(0);
   }
+  const [prevSample, setPrevSample] = useState(sample);
+  if (sample !== prevSample) {
+    setPrevSample(sample);
+    setSampleShown(sample === "shown");
+  }
+
+  async function changeSample(show: boolean) {
+    if (sampleBusy) return;
+    setSampleBusy(true);
+    setSampleShown(show);
+    const result = await setSampleStorefrontHidden(!show).catch(() => ({ ok: false }));
+    setSampleBusy(false);
+    if (!result.ok) {
+      setSampleShown(!show);
+      toast.error(
+        show ? "Couldn't bring back the sample storefront." : "Couldn't hide the sample storefront.",
+        { lines: ["Try again in a moment."] },
+      );
+    }
+  }
 
   function handleCreated(id: string) {
     // Leave `creating` true: we're navigating away to the new editor.
@@ -126,10 +167,18 @@ export function StorefrontsList({
         <p className={helpTextClass}>
           {hasMore
             ? `Showing ${storefronts.length} of ${knownTotal} storefronts`
-            : `${storefronts.length} storefront${storefronts.length === 1 ? "" : "s"}`}
+            : storefronts.length === 0 && sampleVisible
+              ? // The sample is on screen and is not theirs: "0 storefronts"
+                // beside a storefront card would read as a miscount.
+                "No storefronts yet"
+              : `${storefronts.length} storefront${storefronts.length === 1 ? "" : "s"}`}
         </p>
         {canWrite && (
-          <Button onClick={() => setWizardOpen(true)} disabled={creating}>
+          <Button
+            data-tour="storefront-create"
+            onClick={() => setWizardOpen(true)}
+            disabled={creating}
+          >
             <Plus
               className={`size-4 ${iconPopClass}`}
               strokeWidth={2}
@@ -140,7 +189,7 @@ export function StorefrontsList({
         )}
       </div>
 
-      {storefronts.length === 0 ? (
+      {storefronts.length === 0 && !sampleVisible ? (
         <div className={cn(emptyStateClass, "bg-background")}>
           <div className="flex size-12 items-center justify-center rounded-full bg-muted">
             <Store
@@ -154,12 +203,13 @@ export function StorefrontsList({
           </h2>
           <p className="mt-1 max-w-sm font-inter text-sm text-muted-foreground">
             {canWrite
-              ? "Create your first storefront to arrange products into a grid buyers can browse and buy from."
+              ? "Create your first storefront, then add products to its grid. Each product on it gets a page you can share."
               : "This store has no storefronts yet."}
           </p>
           {canWrite && (
             <button
               type="button"
+              data-tour="storefront-create"
               onClick={() => setWizardOpen(true)}
               disabled={creating}
               className={`${primaryButtonClass} mt-5`}
@@ -186,6 +236,41 @@ export function StorefrontsList({
               />
             </li>
           ))}
+          {sampleVisible && (
+            // After the seller's own cards, so "the first card" is always
+            // theirs (and the guided tour's embed stop, which takes the first
+            // embed button, points at their storefront when they have one).
+            <li data-storefront-sample="">
+              <SampleStorefrontCard
+                onEmbed={() => setSampleEmbedOpen(true)}
+                onHide={() => changeSample(false)}
+                hiding={sampleBusy}
+              />
+            </li>
+          )}
+          {sampleVisible && storefronts.length === 0 && (
+            <li>
+              <button
+                type="button"
+                onClick={() => setWizardOpen(true)}
+                disabled={creating}
+                className={cn(
+                  "flex size-full min-h-56 flex-col items-center justify-center gap-3 rounded-md border border-dashed border-border bg-background p-6 text-center transition-colors duration-base ease-standard hover:bg-muted disabled:pointer-events-none motion-reduce:transition-none",
+                  focusRingClass,
+                )}
+              >
+                <span className="flex size-12 items-center justify-center rounded-full bg-muted">
+                  <Plus className="size-6 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
+                </span>
+                <span className="text-base font-semibold text-foreground">
+                  {creating ? "Creating…" : "Create your first storefront"}
+                </span>
+                <span className="max-w-xs font-inter text-sm text-muted-foreground">
+                  Add your products to its grid. Each one gets a page you can share.
+                </span>
+              </button>
+            </li>
+          )}
         </ul>
       )}
 
@@ -210,6 +295,30 @@ export function StorefrontsList({
           </Button>
         </div>
       )}
+
+      {sampleOffered && !sampleShown && (
+        <div className="mt-8 flex justify-center">
+          <Button
+            variant="ghost"
+            className="px-2 py-1.5 text-xs"
+            onClick={() => changeSample(true)}
+            disabled={sampleBusy}
+          >
+            <Eye className="size-3.5" strokeWidth={2} aria-hidden="true" />
+            Show the sample storefront
+          </Button>
+        </div>
+      )}
+
+      <SampleEmbedModal
+        open={sampleEmbedOpen}
+        onClose={() => setSampleEmbedOpen(false)}
+        canCreate={canWrite}
+        onCreate={() => {
+          setSampleEmbedOpen(false);
+          setWizardOpen(true);
+        }}
+      />
 
       <CreateStorefrontWizard
         open={wizardOpen}

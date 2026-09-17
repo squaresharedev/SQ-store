@@ -34,6 +34,7 @@ const SAVED = {
   vatId: "",
   country: "",
   phone: "+353 1 234 5678",
+  continueHref: "/storefront",
 } as const;
 
 beforeEach(() => {

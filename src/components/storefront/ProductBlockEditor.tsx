@@ -21,6 +21,7 @@ import { useToast } from "@/components/ui/Toast";
 import { destructiveButtonClass, errorTextClass, fieldBaseClass, ghostButtonClass, infoTextClass, primaryButtonClass, secondaryButtonClass } from "@/components/ui/control-styles";
 import { CollapsibleSection } from "@/components/ui/CollapsibleSection";
 import { useSettingTarget } from "@/lib/storefront/setting-context";
+import { useSampleMode } from "@/lib/storefront/sample-mode";
 import { InfoTip } from "@/components/ui/InfoTip";
 import { Modal } from "@/components/ui/modal";
 import { CardStyleControls } from "./CardStyleControls";
@@ -103,6 +104,7 @@ export function ProductBlockEditor({
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const toast = useToast();
+  const sample = useSampleMode();
 
   // A setting opened by name lands HERE rather than on the theme's copy when a
   // tile is selected, because the seller asking about "price position" with a
@@ -162,6 +164,15 @@ export function ProductBlockEditor({
     }
     setErrors(nextErrors);
     if (nextErrors.title || nextErrors.price) return;
+    if (sample && product !== null && draftCents !== null) {
+      // The sample's products exist only in code: no "everywhere" to confirm
+      // and nothing to write, so the change lands on this board and nowhere else.
+      const price = draftCents / 100;
+      setDraftTitle(trimmedTitle);
+      setDraftPrice(String(price));
+      onProductSaved({ ...product, title: trimmedTitle, price });
+      return;
+    }
     setConfirmOpen(true);
   }
 

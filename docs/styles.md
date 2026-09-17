@@ -343,6 +343,11 @@ Toasts sit above EVERYTHING, universal search included. Modals raise them (the
 invite modal, the password modal, every delete confirm), and a confirmation
 rendered behind the surface that triggered it is not a confirmation.
 
+The guided tour's layer (components/onboarding/TourOverlay.tsx) sits at 65:
+over search and every modal and sheet, because it has to dim them, and still
+under toasts, for the same reason as above. Opening search ends the tour rather
+than being covered by it.
+
 ---
 
 ## 7. Layout shell

@@ -66,18 +66,21 @@ export function BalanceSummary({
 }) {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {/* A hint explains a figure. Under a zero state it contradicts it
+          ("Nothing to pay out yet" over "Ready for your next payout"), so it
+          only appears when there is a figure to explain. */}
       <Tile
         label="Available"
         value={formatBuckets(balance.available)}
         zeroText="Nothing to pay out yet"
-        hint="Ready for your next payout"
+        hint={balance.available.length > 0 ? "Ready for your next payout" : undefined}
         emphasis
       />
       <Tile
         label="Pending"
         value={formatBuckets(balance.pending)}
         zeroText="No pending sales"
-        hint="Clearing from recent sales"
+        hint={balance.pending.length > 0 ? "Clearing from recent sales" : undefined}
       />
       <Tile
         label="Next payout"

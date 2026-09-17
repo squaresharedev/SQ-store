@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { helpTextClass, overlayCloseButtonClass, overlayScrimClass, overlaySurfaceClass } from "@/components/ui/control-styles";
@@ -32,6 +33,15 @@ export function Modal({
   const panelRef = React.useRef<HTMLDivElement>(null);
   const titleId = React.useId();
   const descId = React.useId();
+
+  // `document` exists on the client's very first (hydration) render, not just
+  // after mount, so branching on it directly would make that render disagree
+  // with the server's (which always sees `document === undefined`) whenever
+  // `open` starts `true` — a hydration mismatch. Gating on a state flag that
+  // only flips in an effect keeps the hydration render's output (null)
+  // identical on both sides; the portal appears a tick later, post-mount.
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => setMounted(true), []);
 
   React.useEffect(() => {
     if (!open) return;
@@ -76,9 +86,15 @@ export function Modal({
     };
   }, [open, onClose]);
 
-  if (!open) return null;
+  if (!open || !mounted) return null;
 
-  return (
+  // Portalled to `document.body` rather than rendered in place: a caller
+  // opened from inside another `<form>` (the product form's shipping modal
+  // is the first case) would otherwise nest this modal's own `<form>` inside
+  // it, which is invalid HTML and breaks both forms' submit handling. The
+  // overlay was always positioned `fixed` relative to the viewport, never to
+  // its DOM parent, so moving it has no visual effect for any existing caller.
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4">
       <div aria-hidden onClick={onClose} className={overlayScrimClass} />
       <div
@@ -87,6 +103,14 @@ export function Modal({
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={description ? descId : undefined}
+        // React bubbles a portalled child's synthetic events through the REACT
+        // tree, not the DOM tree it actually rendered into — so a `<form>`
+        // inside this panel would otherwise still reach an ancestor form's
+        // own `onSubmit` (which typically calls `preventDefault()` for ITS
+        // OWN submission), silently swallowing this one before its `action`
+        // ever runs. Stopping it here makes every modal a self-contained
+        // event boundary, regardless of where it happens to be opened from.
+        onSubmit={(event) => event.stopPropagation()}
         className={cn(
           overlaySurfaceClass,
           "relative z-10 max-h-[90vh] w-full overflow-y-auto p-6 sm:max-w-md",
@@ -121,6 +145,7 @@ export function Modal({
         </div>
         {children}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

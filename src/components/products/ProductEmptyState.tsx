@@ -25,7 +25,7 @@ export function ProductEmptyState({ canWrite = true }: { canWrite?: boolean }) {
         </h2>
         <p className="mt-1 max-w-sm font-inter text-sm text-muted-foreground">
           {canWrite
-            ? "Add your first product to start selling through your store and embeds. You can save it as a draft and publish when you are ready."
+            ? "Add your first product. It can stay a draft until you're ready to give it a page."
             : "This store has no products yet."}
         </p>
         {canWrite && (

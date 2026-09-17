@@ -64,6 +64,7 @@ the page is addressable without matching on a heading string.
 | `data-analytics-range-to` | ISO date |
 | `data-analytics-range-preset` | `30d` \| `all` \| `custom` |
 | `data-analytics-currency` | ISO currency of every cents figure |
+| `data-analytics-first-run` | `1` when the store has never had an order, a storefront or a signal: the page then shows one empty state instead of the range control and its sections, and the snapshot below still describes it. Absent otherwise (added 2026-09-14) |
 
 ### Sections
 

@@ -62,3 +62,9 @@ export const SELLER_FIELD_MAX = {
   address: 300,
   phone: 32,
 } as const;
+
+/** Cap for the account's public bio (Settings › Account, `profiles.seller_bio`
+ *  despite the name — see updateBio in lib/settings/actions.ts for why the
+ *  column name and the setting's home have drifted apart). Mirrors the DB
+ *  CHECK on profiles.seller_bio; keep the two in step. */
+export const BIO_MAX = 100;

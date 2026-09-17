@@ -201,6 +201,7 @@ export default async function ProductPage({
       seller: {
         "@type": "Organization",
         name: displayName,
+        ...(page.storefront.seller.bio ? { description: page.storefront.seller.bio } : {}),
       },
     },
   };

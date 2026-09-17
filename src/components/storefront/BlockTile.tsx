@@ -548,13 +548,15 @@ export const BlockTile = memo(function BlockTile({
       // in globals.css reads this, so there is no plumbing and the grid stays
       // presentation-agnostic.
       data-block-selected={isEditing ? "" : undefined}
-      // PLT-02: Plain focusable container, NOT role="button", so nested
-      // buttons (Remove, Frame, Type, page node) are not interactive-in-
-      // interactive. Keyboard users press Enter/Space on this div to toggle
-      // the selection; a pointer user does the same by clicking the tile
-      // itself, which is also why there is no separate "Select" button in
-      // the chip below.
-      // tabIndex without a role is valid and keeps the focus ring.
+      // PLT-02: a focusable GROUP, NOT role="button", so nested buttons
+      // (Remove, Frame, Type, page node) are not interactive-in-interactive.
+      // Keyboard users press Enter/Space on this div to toggle the selection;
+      // a pointer user does the same by clicking the tile itself, which is
+      // also why there is no separate "Select" button in the chip below.
+      // The role is what makes the label below legal: a plain div may not
+      // carry aria-label, and axe fails it outright on a tile with no text of
+      // its own (a shape), which the first board with shapes on it showed.
+      role={selectable ? "group" : undefined}
       tabIndex={selectable ? 0 : isTyping ? -1 : undefined}
       aria-label={
         selectable

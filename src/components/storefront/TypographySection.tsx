@@ -11,6 +11,8 @@ import {
 import { unexpectedError } from "@/lib/errors";
 import { customFontFamily } from "@/lib/theme/storefront-fonts";
 import { UploadError, uploadToR2 } from "@/lib/products/upload";
+import { sampleObjectKey } from "@/lib/storefront/sample";
+import { useSampleMode } from "@/lib/storefront/sample-mode";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/Toast";
 import { ProgressBar } from "@/components/ui/ProgressBar";
@@ -62,6 +64,7 @@ export function TypographySection({
 }) {
   const fieldId = useId();
   const toast = useToast();
+  const sample = useSampleMode();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   // null once the bytes are sent and the server is still working (sniff,
@@ -91,7 +94,10 @@ export function TypographySection({
     try {
       // Type/size are checked inside uploadToR2 before any network call, so
       // every failure arrives as a structured UploadError with a reason.
-      const key = await uploadToR2(file, "font", setProgress);
+      // The sample storefront never uploads: the seller's own copy stands in.
+      const key = sample
+        ? sampleObjectKey("fonts", file)
+        : await uploadToR2(file, "font", setProgress);
       onChange({
         ...theme,
         customFont: { key, name: file.name.slice(0, CUSTOM_FONT_NAME_MAX) },

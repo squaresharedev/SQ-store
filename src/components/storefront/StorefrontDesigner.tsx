@@ -9,7 +9,8 @@ import {
   useSyncExternalStore,
 } from "react";
 import Link from "next/link";
-import { ArrowLeft, Search, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ArrowLeft, ArrowRight, Search, Sparkles, X } from "lucide-react";
 import type { Product } from "@/types/product";
 import {
   CANVAS_COLUMNS_MAX,
@@ -59,14 +60,21 @@ import {
 import { clampOntoBoard } from "@/lib/geometry/rotated-box";
 import { MAX_BLOCKS, STOREFRONT_NAME_MAX } from "@/lib/validation/storefront";
 import { saveStorefront } from "@/lib/storefront/actions";
+import { sampleObjectKey } from "@/lib/storefront/sample";
+import { SampleModeProvider } from "@/lib/storefront/sample-mode";
+import { EditorTour, startEditorTour } from "@/components/onboarding/EditorTour";
+import { CreateStorefrontWizard } from "./CreateStorefrontWizard";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/Toast";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import {
+  ghostButtonClass,
   helpTextClass,
   iconButtonClass,
   iconNudgeLeftClass,
+  iconNudgeRightClass,
+  primaryButtonClass,
 } from "@/components/ui/control-styles";
 import { ColorTargetProvider } from "@/lib/theme/color-context";
 import {
@@ -329,7 +337,16 @@ export function StorefrontDesigner({
   accountId = null,
   sellerIdentity = {},
   shippingPolicy = {},
+  sample = null,
 }: {
+  /**
+   * Set when this is the SAMPLE storefront (lib/storefront/sample.ts), never a
+   * row: nothing saves, nothing uploads, no product is edited, the header offers
+   * "Create your own" instead of Save, and the designer tour runs here.
+   * `autoStartTour` is the person's `editor_tour_seen_at` still being null;
+   * `productCount` is the real store's, for the setup flow's hint.
+   */
+  sample?: { autoStartTour: boolean; productCount: number } | null;
   storefrontId: string;
   initialName: string;
   initialConfig: StorefrontConfig;
@@ -360,6 +377,12 @@ export function StorefrontDesigner({
   accountId?: string | null;
 }) {
   const toast = useToast();
+  const router = useRouter();
+  const isSample = sample !== null;
+  // The sample's "Create your own" opens the storefront setup flow right here,
+  // and a finished one goes straight to the new storefront's designer.
+  const [createOpen, setCreateOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
   const [name, setName] = useState(initialName);
   // Display URL for the image background: server-signed at load; replaced by
   // a local object URL right after an in-session upload. NOT part of the
@@ -515,7 +538,9 @@ export function StorefrontDesigner({
   const history = useEditorHistory<EditorSnapshot>();
   // Prompt to save/discard when leaving with unsaved edits (Back link, browser
   // Back button, refresh/close). `dirty` alone drives whether it's armed.
-  const leaveGuard = useUnsavedChangesGuard(dirty, "/storefront");
+  // Never armed in the sample: there is nothing to save, so leaving loses
+  // nothing the seller was promised.
+  const leaveGuard = useUnsavedChangesGuard(dirty && !isSample, "/storefront");
 
   const productsById = useMemo(
     () => new Map(catalog.map((product) => [product.id, product])),
@@ -2076,6 +2101,12 @@ export function StorefrontDesigner({
     }
 
     let key: string;
+    if (isSample) {
+      // The sample never uploads: the artwork shows from the seller's own copy
+      // under a stand-in key, and is gone when they leave.
+      placeImageBlock(sampleObjectKey("elements", file), "", URL.createObjectURL(file));
+      return;
+    }
     setUploadingElement(true);
     setUploadProgress(0);
     try {
@@ -3383,6 +3414,8 @@ export function StorefrontDesigner({
   /** Returns whether the save succeeded, so callers (e.g. save-then-leave) can
    *  branch on it without re-reading async state. */
   async function handleSave(): Promise<boolean> {
+    // The sample has no Save button, and nothing else may write it either.
+    if (isSample) return false;
     setSaving(true);
     // Policies travel trimmed and without empty fields; nothing at all when
     // every field is blank. The product page's options are written once they
@@ -3514,6 +3547,7 @@ export function StorefrontDesigner({
     // and the block colors in the inspector — hand itself to the left-hand
     // ColorPanel. Only the OPENER travels through context; the panel's data
     // comes down as props from here.
+    <SampleModeProvider value={isSample}>
     <AutoFitRegistryProvider value={autoFitRegistry}>
     <ColorTargetProvider
       value={{
@@ -3588,6 +3622,26 @@ export function StorefrontDesigner({
             />
           </div>
 
+          {isSample ? (
+            <div className="flex items-center gap-3">
+              <DesignerSearchButton />
+              {/* In place of Save, the way out of the sample and into a real
+                  storefront: the same setup flow the list opens, over this
+                  page, so the seller never has to go and find it. */}
+              <button
+                type="button"
+                data-sample-create=""
+                aria-label="Create your own storefront"
+                onClick={() => setCreateOpen(true)}
+                disabled={creating}
+                className={cn(primaryButtonClass, "group/btn h-9 shrink-0 py-0")}
+              >
+                <span className="sm:hidden">Create</span>
+                <span className="hidden sm:inline">Create your own</span>
+                <ArrowRight className={cn("size-4", iconNudgeRightClass)} aria-hidden="true" />
+              </button>
+            </div>
+          ) : (
           <div className="flex items-center gap-3">
             <DesignerSearchButton />
             {/* The one thing the header says is whether there is work not yet
@@ -3620,8 +3674,32 @@ export function StorefrontDesigner({
               {saving ? "Saving…" : "Save"}
             </Button>
           </div>
+          )}
         </div>
       </header>
+
+      {/* The sample says what it is, once, where the phone notice would be. It
+          replaces that notice rather than stacking under it: two strips would
+          spend a phone's workspace on advice before the seller has touched
+          anything. */}
+      {isSample && (
+        <div
+          data-sample-notice=""
+          className="flex shrink-0 items-center gap-2 border-b border-border bg-muted px-4 py-1.5 font-inter text-xs text-foreground sm:px-6"
+        >
+          <Sparkles className="size-3.5 shrink-0" strokeWidth={2} aria-hidden="true" />
+          <p className="min-w-0 flex-1">
+            This is a sample storefront. Try anything: nothing here is saved.
+          </p>
+          <button
+            type="button"
+            onClick={startEditorTour}
+            className={cn(ghostButtonClass, "-my-1 shrink-0 px-2 py-1 text-xs text-foreground")}
+          >
+            Take the tour
+          </button>
+        </div>
+      )}
 
       {/* SF-09: Mobile editing notice. The designer is functional on a phone
           but 55px cells and 24px control chips make precise editing hard.
@@ -3634,7 +3712,7 @@ export function StorefrontDesigner({
           everyone who cannot. A seller running the shop from a phone reads it
           once and then owns it forever. See noticeDismissed for why the answer
           is remembered rather than asked again on the next load. */}
-      {!noticeDismissed && (
+      {!noticeDismissed && !isSample && (
         <div className="flex shrink-0 items-start gap-2 border-b border-amber-200 bg-amber-50 px-4 py-2 font-inter text-xs text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300 lg:hidden">
           <p className="min-w-0 flex-1">
             For the best editing experience, open this designer on a desktop or
@@ -4007,6 +4085,18 @@ export function StorefrontDesigner({
                       usedProductIds={usedProductIds}
                       onAdd={addProduct}
                       onFound={mergeFoundProducts}
+                      // The sample's catalogue is its own six products, and a
+                      // real one found by search could not be kept anyway.
+                      searchCatalog={!isSample}
+                      // A first product, then straight back to this board: the
+                      // new-product form honours `next` for designer routes
+                      // (lib/products/return-path.ts), and the guard asks
+                      // about unsaved edits before anything is left behind.
+                      onCreateProduct={() =>
+                        leaveGuard.requestLeave(
+                          `/products/new?next=${encodeURIComponent(`/storefront/${storefrontId}`)}`,
+                        )
+                      }
                     />
                   ) : selectedBlocks.length > 1 ? (
                     <MultiBlockEditor
@@ -4189,11 +4279,27 @@ export function StorefrontDesigner({
           </Button>
         </div>
       </Modal>
+      {/* Inside the search provider on purpose: opening search ends the tour. */}
+      {sample && <EditorTour autoStart={sample.autoStartTour} />}
+      {sample && (
+        <CreateStorefrontWizard
+          open={createOpen}
+          onClose={() => setCreateOpen(false)}
+          onCreated={(id) => {
+            // Left set: the page is on its way to the new storefront.
+            setCreating(true);
+            setCreateOpen(false);
+            router.push(`/storefront/${id}`);
+          }}
+          productCount={sample.productCount}
+        />
+      )}
       </div>
     </SearchProvider>
     </SettingTargetProvider>
     </ColorTargetProvider>
     </AutoFitRegistryProvider>
+    </SampleModeProvider>
   );
 }
 

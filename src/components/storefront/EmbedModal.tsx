@@ -15,6 +15,7 @@ import { invalidInput } from "@/lib/errors";
 import { embedSettingsSchema } from "@/lib/validation/storefront";
 import { normalizeHostname } from "@/lib/validation/inputs";
 import { rotateEmbedKey, updateEmbedSettings } from "@/lib/storefront/actions";
+import { embedSnippet } from "@/lib/storefront/embed-snippet";
 import { SellerDetailsNotice } from "@/components/settings/SellerDetailsNotice";
 import type { TraderIdentityField } from "@/lib/settings/trader-identity";
 import type { StorefrontSummary } from "@/lib/storefront/queries";
@@ -23,22 +24,6 @@ import {
   EMBED_MAX_DOMAINS,
   type EmbedSettings,
 } from "@/types/storefront";
-
-/**
- * The snippet sellers paste into their own site.
- *
- * Keyed by the storefront's EMBED KEY, not its row id: this string ends up in
- * someone else's HTML permanently, so it has to be revocable. Rotating the key
- * invalidates every pasted copy without touching the storefront itself.
- *
- * The key is a server-issued uuid rendered as text, never user-controlled markup.
- */
-function embedSnippet(embedKey: string): string {
-  return [
-    `<div data-squareshare-storefront="${embedKey}"></div>`,
-    `<script async src="https://embed.squareshare.to/widget.js"></script>`,
-  ].join("\n");
-}
 
 /** Comma-separated input → normalized hostname list, deduped. Normalization is
  *  paste-friendliness only; the shared hostname primitive still decides what is

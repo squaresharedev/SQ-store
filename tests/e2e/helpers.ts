@@ -1,4 +1,4 @@
-import { expect, type Page } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
 import { ANON_KEY, GATEWAY_URL, SERVICE_KEY } from "./stack/keys.mjs";
 
 /** The app under test. Mirrors playwright.config.ts's baseURL, for the few
@@ -156,8 +156,26 @@ export async function clearAuthRateLimits() {
   await serviceRest("/rate_limit_keys?key=not.is.null", { method: "DELETE" });
 }
 
-/** Sign up through the real UI; lands on the dashboard. */
-export async function signUp(page: Page, user: TestUser) {
+/** The welcome flow's dialog, as named by its first step's title. */
+export const WELCOME_DIALOG = "Welcome to Square Share";
+
+/**
+ * Sign up through the real UI; lands on the dashboard.
+ *
+ * A brand-new account meets the welcome flow on its first Overview: a dialog
+ * that traps focus and locks scroll, which every spec that is NOT about
+ * onboarding would otherwise have to fight. So by default it is put out of the
+ * way deterministically: the "seen it" flag is written through the service key,
+ * so no later page opens it again, and the dialog already on screen is closed
+ * with Escape. No reload, which matters across a hundred-odd call sites.
+ *
+ * Pass `{ welcome: "keep" }` to land with the dialog still open.
+ */
+export async function signUp(
+  page: Page,
+  user: TestUser,
+  options: { welcome?: "skip" | "keep" } = {},
+) {
   await clearAuthRateLimits();
   await page.goto("/login");
   // The mode tabs are client state: a click that lands before hydration leaves
@@ -179,6 +197,90 @@ export async function signUp(page: Page, user: TestUser) {
   await page.locator('input[name="confirm_password"]').fill(user.password);
   await page.locator('button[name="intent"]').click();
   await page.waitForURL(/\/dashboard/, { timeout: 30_000 });
+  if (options.welcome === "keep") return;
+
+  const id = await userIdByEmail(user.email);
+  await serviceRest(`/profiles?id=eq.${id}`, {
+    method: "PATCH",
+    body: { onboarding_completed_at: new Date().toISOString() },
+  });
+  const dialog = page.getByRole("dialog", { name: WELCOME_DIALOG });
+  await expect(dialog).toBeVisible({ timeout: 20_000 });
+  // Retried: an Escape pressed before hydration has no listener to reach.
+  await expect(async () => {
+    await page.keyboard.press("Escape");
+    await expect(dialog).toBeHidden({ timeout: 1_000 });
+  }).toPass({ timeout: 20_000 });
+  // Escape means "skip onboarding", which must never leave the guided tour's
+  // layer over every page the spec goes on to click.
+  await expect(page.locator(TOUR_LAYER)).toHaveCount(0);
+}
+
+/** The guided tour's layer (components/onboarding/TourOverlay.tsx). */
+export const TOUR_LAYER = "[data-tour-step]";
+
+/**
+ * Wait for the guided tour to be showing `stepId` with its card up: anchored on
+ * its control, or centred with the fallback copy when the control is not on the
+ * page. Generous timeouts, because a step on another page waits for that page to
+ * compile in dev.
+ */
+export async function expectTourStep(
+  page: Page,
+  stepId: string,
+  state: "anchored" | "fallback" = "anchored",
+) {
+  const layer = page.locator(TOUR_LAYER);
+  await expect(layer).toHaveAttribute("data-tour-step", stepId, { timeout: 45_000 });
+  await expect(layer).toHaveAttribute("data-tour-state", state, { timeout: 30_000 });
+  await expect(layer.getByRole("dialog")).toBeVisible();
+}
+
+/** Press a button on the tour's card (Next, Back, Skip tour, Done). */
+export async function tourButton(page: Page, name: string) {
+  await page.locator(TOUR_LAYER).getByRole("dialog").getByRole("button", { name }).click();
+}
+
+/**
+ * The tour's spotlight sits over `target`, with 6px of room (clipped at the
+ * viewport's edges for a control that does not scroll). Measured on the
+ * spotlight box's real on-screen position, whichever coordinate space it was
+ * placed in. Polled, because the page may still be scrolling the control into
+ * view.
+ */
+export async function expectSpotlightOn(page: Page, target: Locator) {
+  await expect
+    .poll(
+      async () => {
+        const [spot, box] = await Promise.all([
+          page.locator(`${TOUR_LAYER} [data-tour-spotlight]`).evaluate((el) => {
+            const r = el.getBoundingClientRect();
+            return { x: r.x, y: r.y, empty: el.getAttribute("data-empty") === "true" };
+          }),
+          target.boundingBox(),
+        ]);
+        if (!box || spot.empty) return `spot ${JSON.stringify(spot)}, target ${JSON.stringify(box)}`;
+        const onIt =
+          Math.abs(spot.x - Math.max(0, box.x - 6)) <= 8 &&
+          Math.abs(spot.y - Math.max(0, box.y - 6)) <= 8;
+        return onIt ? "on target" : `spot ${spot.x},${spot.y} vs target ${box.x},${box.y}`;
+      },
+      { timeout: 15_000 },
+    )
+    .toBe("on target");
+}
+
+/** The welcome's slides up to its seller details form: Next, then Get started.
+ *  Retried, because a click that lands before hydration does nothing. */
+export async function openSellerStep(page: Page) {
+  const welcome = page.getByRole("dialog", { name: WELCOME_DIALOG });
+  const path = page.getByRole("dialog", { name: "Four steps to your first page" });
+  await expect(async () => {
+    if (await welcome.isVisible()) await welcome.getByRole("button", { name: "Next" }).click();
+    await expect(path).toBeVisible({ timeout: 2_000 });
+  }).toPass({ timeout: 20_000 });
+  await path.getByRole("button", { name: "Get started" }).click();
+  await expect(page.getByRole("dialog", { name: "Add your seller details" })).toBeVisible();
 }
 
 /** Sign in through the real UI. */
@@ -363,6 +465,7 @@ export async function seedSellerIdentity(
     vatId?: string;
     country?: string;
     phone?: string;
+    bio?: string;
     /**
      * Whether the contact address counts as PROVEN. Defaults to true whenever
      * an address is seeded: a spec that seeds a seller is describing one who
@@ -385,6 +488,7 @@ export async function seedSellerIdentity(
       tax_vat_id: seller.vatId ?? null,
       tax_country: seller.country ?? null,
       seller_phone: seller.phone ?? null,
+      seller_bio: seller.bio ?? null,
     },
   });
 }

@@ -90,7 +90,11 @@ import { FileDropzone } from "./FileDropzone";
 import { StockFields } from "./StockFields";
 import { ShippingField } from "./ShippingField";
 import type { ShippingChoices } from "@/lib/storefront/queries";
-import { SHIPPING_SETTINGS_HREF } from "@/types/shipping-policy";
+import {
+  EMPTY_SHIPPING_POLICY,
+  SHIPPING_SETTINGS_HREF,
+  type SellerShippingPolicy,
+} from "@/types/shipping-policy";
 
 /** A seller who has written no terms yet has nothing to inherit and nothing
  *  to pick, and the section says so rather than showing an empty picker.
@@ -384,15 +388,23 @@ function focusProductField(field: string) {
 export function ProductForm({
   product,
   shippingChoices = NO_SHIPPING_CHOICES,
+  shippingPolicy = EMPTY_SHIPPING_POLICY,
   missingTraderDetails = [],
+  returnTo = null,
 }: {
   product?: FormProduct;
   /** The store's shipping terms and named profiles, read on the server. */
   shippingChoices?: ShippingChoices;
+  /** The full policy document, only used to seed the shipping-terms modal. */
+  shippingPolicy?: SellerShippingPolicy;
   /** Trader details this store still owes buyers, from the server. Non-empty
    *  means an `active` product would be refused on save, so the form does not
    *  offer that status. UX only: lib/products/actions.ts is the real gate. */
   missingTraderDetails?: readonly TraderIdentityField[];
+  /** Where a CREATE lands, and where Cancel goes, when the seller came from a
+   *  storefront designer (validated by lib/products/return-path.ts). Null keeps
+   *  the products list. Edits always return to the list. */
+  returnTo?: string | null;
 }) {
   const router = useRouter();
   const fieldId = useId();
@@ -801,7 +813,7 @@ export function ProductForm({
         // revalidatePath("/products"), and firing a refresh in the same tick
         // as the push raced it — on the create route the push lost, leaving
         // the seller on a form whose product HAD in fact been created.
-        router.push("/products");
+        router.push(!product && returnTo ? returnTo : "/products");
       }, SAVED_HOLD_MS);
       return true;
     } catch (error) {
@@ -1068,7 +1080,7 @@ export function ProductForm({
             inputMode="url"
             value={purchaseUrl}
             onChange={(event) => updatePurchaseUrl(event.target.value)}
-            placeholder="https://your-shop.example/checkout/this-product"
+            placeholder="e.g. https://your-shop.example/checkout/this-product"
             spellCheck={false}
             aria-invalid={errors.purchaseUrl ? true : undefined}
             aria-describedby={errors.purchaseUrl ? purchaseErrorId : undefined}
@@ -1097,6 +1109,7 @@ export function ProductForm({
             inputId={`${fieldId}-shipping`}
             value={shippingProfileId}
             choices={shippingChoices}
+            policy={shippingPolicy}
             onChange={setShippingProfileId}
           />
         </FormSection>
@@ -1307,7 +1320,7 @@ export function ProductForm({
               half-written work isn't dropped on a stray click. */}
           <button
             type="button"
-            onClick={() => requestLeave("/products")}
+            onClick={() => requestLeave(!product && returnTo ? returnTo : "/products")}
             className={secondaryButtonClass}
           >
             Cancel

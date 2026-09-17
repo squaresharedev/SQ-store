@@ -34,6 +34,7 @@ export function Popover({
   rootClassName,
   panelClassName,
   variant = "sheet",
+  placement = "below",
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -50,6 +51,13 @@ export function Popover({
   /** Extra panel classes, e.g. a width (`sm:w-[19rem]`) or `right-0` anchor. */
   panelClassName?: string;
   variant?: "sheet" | "anchored";
+  /** Which side of the trigger the panel opens toward. Only affects the
+   *  "anchored" variant — a "sheet" panel is either a mobile bottom sheet or
+   *  anchored below the trigger on desktop, by design. Use "above" for a
+   *  trigger near the bottom of its container (a card near the end of a grid
+   *  row), where opening downward would run the panel off-screen or under
+   *  the next row. */
+  placement?: "below" | "above";
 }) {
   const rootRef = React.useRef<HTMLDivElement>(null);
   const panelRef = React.useRef<HTMLDivElement>(null);
@@ -157,8 +165,13 @@ export function Popover({
                   "fixed inset-x-0 bottom-0 w-full p-4 sm:absolute sm:inset-x-auto sm:bottom-auto sm:left-0 sm:top-full sm:mt-2 sm:w-auto sm:p-3"
                 : // Dropdown that never becomes a sheet. Mobile: pinned to the
                   // top-right of the viewport (below the h-14 header), capped to
-                  // fit. Desktop: anchored under the trigger, right-aligned.
-                  "fixed right-2 top-[3.75rem] max-w-[calc(100vw-1rem)] sm:absolute sm:right-0 sm:top-full sm:mt-2 sm:max-w-none",
+                  // fit. Desktop: anchored under (or over) the trigger, right-aligned.
+                  cn(
+                    "fixed right-2 top-[3.75rem] max-w-[calc(100vw-1rem)] sm:absolute sm:right-0 sm:max-w-none",
+                    placement === "above"
+                      ? "sm:bottom-full sm:top-auto sm:mb-2"
+                      : "sm:top-full sm:mt-2",
+                  ),
               panelClassName,
             )}
           >

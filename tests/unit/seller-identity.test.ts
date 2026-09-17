@@ -9,6 +9,7 @@ function row(overrides: Partial<SellerIdentityRow> = {}): SellerIdentityRow {
     seller_address: null,
     seller_email: null,
     seller_phone: null,
+    seller_bio: null,
     ...overrides,
   };
 }
@@ -35,6 +36,7 @@ describe("buildSellerIdentity", () => {
           tax_vat_id: "IE1234567T",
           tax_country: "IE",
           seller_phone: "+353 1 234 5678",
+          seller_bio: "Hand-thrown stoneware from Dublin",
         }),
       ),
     ).toEqual({
@@ -44,6 +46,7 @@ describe("buildSellerIdentity", () => {
       vatId: "IE1234567T",
       country: "IE",
       phone: "+353 1 234 5678",
+      bio: "Hand-thrown stoneware from Dublin",
     });
   });
 
@@ -57,6 +60,7 @@ describe("buildSellerIdentity", () => {
     expect(built).not.toHaveProperty("vatId");
     expect(built).not.toHaveProperty("country");
     expect(built).not.toHaveProperty("phone");
+    expect(built).not.toHaveProperty("bio");
   });
 
   it("handles a partial identity (some fields set, some not)", () => {

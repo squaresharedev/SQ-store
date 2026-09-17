@@ -69,7 +69,7 @@ export const TRADER_IDENTITY_FIELDS: readonly {
     key: "businessName",
     label: "Trader name",
     anchor: "business-name",
-    why: "Buyers have to know who they are buying from — your business name, or your own full name if you sell as an individual.",
+    why: "Buyers have to know who they are buying from: your business name, or your own full name if you sell as an individual.",
   },
   {
     key: "address",

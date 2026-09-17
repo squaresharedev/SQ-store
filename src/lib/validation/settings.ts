@@ -1,5 +1,6 @@
 import { z } from "zod";
 import {
+  BIO_MAX,
   DELETE_CONFIRM_PHRASE,
   EU_COUNTRY_CODES,
   LEGAL_VERSION,
@@ -129,6 +130,20 @@ export const taxSchema = z.strictObject({
     })
     .transform((v) => (v === "" ? null : v)),
   seller_phone: optionalTrimmed(SELLER_FIELD_MAX.phone, "The phone number"),
+});
+
+/**
+ * The account's public bio (Settings › Account, right under the username it
+ * shares a card-stack position with). NOT trader identity — it carries no
+ * legal weight and the publish gate never asks for it — so it lives in its
+ * own schema rather than inside {@link taxSchema}, even though the column it
+ * writes (`seller_bio`) predates this split and still shows up in the same
+ * Seller section of a product page (lib/settings/seller-identity.ts). Plain
+ * text: rendered only as a React text node, so markup in it is shown
+ * literally, never interpreted.
+ */
+export const bioSchema = z.strictObject({
+  seller_bio: optionalTrimmed(BIO_MAX, "Your bio"),
 });
 
 export const notificationsSchema = z.strictObject({

@@ -2,9 +2,11 @@ import type { ReactNode } from "react";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
 import { ViewingBanner } from "@/components/layout/ViewingBanner";
+import { HiddenOnPaths } from "@/components/layout/HiddenOnPaths";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { ProfileMenu } from "@/components/layout/ProfileMenu";
 import { NotificationsProvider } from "@/components/notifications/NotificationsProvider";
+import { TourOverlay } from "@/components/onboarding/TourOverlay";
 import { SearchProvider } from "@/components/search/SearchProvider";
 import { SearchMobileTrigger } from "@/components/search/SearchMobileTrigger";
 import { SellerDetailsBanner } from "@/components/settings/SellerDetailsNotice";
@@ -14,6 +16,10 @@ import {
 } from "@/lib/team/account-context";
 import { getTraderIdentityStatus } from "@/lib/settings/seller-identity";
 import { getProfile, getUser } from "@/lib/auth/session";
+
+/** Where the seller-details banner stands down for owners: the setup checklist
+ *  on Overview states the same gap as a step. */
+const BANNER_HIDDEN_PATHS = ["/dashboard"] as const;
 
 /**
  * The dashboard chrome: fixed left Sidebar + content offset by the rail width,
@@ -52,11 +58,22 @@ export async function DashboardShell({
   // page the seller is on rather than only from the one they happen to be
   // blocked by. Scoped to the ACTIVE account: a team member working on someone
   // else's store sees that store's gap, because it is that store's listings the
-  // gap is holding back. A read failure shows nothing — the write paths still
-  // refuse, and a banner that appears because a query blipped is worse than no
-  // banner at all.
+  // gap is holding back, but in words that do not send them to fix it (their
+  // Settings edits their own profile, never the owner's).
+  //
+  // Owners do not get it on Overview: the setup checklist there states the same
+  // gap as a step to take (lib/onboarding/steps.ts), and a red strip above a
+  // welcome is exactly the first impression that checklist replaced. A read
+  // failure shows nothing: the write paths still refuse, and a banner that
+  // appears because a query blipped is worse than no banner at all.
   const identity = account ? await getTraderIdentityStatus(account.accountId) : null;
   const missingTraderDetails = identity?.ok ? identity.missing : [];
+  const sellerDetailsBanner = (
+    <SellerDetailsBanner
+      missing={missingTraderDetails}
+      audience={viewingOther ? "member" : "owner"}
+    />
+  );
 
   // Mobile: search + bell + profile menu ride in the Sidebar's mobile header.
   const mobileControls = (
@@ -101,10 +118,20 @@ export async function DashboardShell({
             {/* Under the "viewing another store" banner, because which store
                 this is about has to be read first for the warning to mean
                 anything. */}
-            <SellerDetailsBanner missing={missingTraderDetails} />
+            {viewingOther ? (
+              sellerDetailsBanner
+            ) : (
+              <HiddenOnPaths paths={BANNER_HIDDEN_PATHS}>
+                {sellerDetailsBanner}
+              </HiddenOnPaths>
+            )}
             {children}
           </div>
         </div>
+        {/* The guided tour's layer. Inside SearchProvider so opening search can
+            end it; rendered by every shell, so it is present on each page the
+            tour walks through. */}
+        <TourOverlay role={account?.role ?? null} />
       </SearchProvider>
     </NotificationsProvider>
   );

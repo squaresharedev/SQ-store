@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ShieldAlert } from "lucide-react";
+import { ArrowRight, ShieldAlert } from "lucide-react";
+import { iconNudgeRightClass } from "@/components/ui/control-styles";
 import {
   TRADER_IDENTITY_FIELDS,
   TRADER_IDENTITY_HEADLINE,
@@ -14,11 +15,11 @@ import { cn } from "@/lib/utils";
  * and a button that goes straight to the field that fixes it.
  *
  * Two shapes, one message. `SellerDetailsBanner` is the strip the dashboard
- * shell hangs under the top bar on every page, so the state is impossible to
- * miss wherever the seller happens to be working; `SellerDetailsNotice` is the
- * boxed version that sits inside the surface actually being blocked (the
- * product form's Visibility section, the embed modal), where it can afford to
- * spell out why each field is needed.
+ * shell hangs under the top bar, so the state is hard to miss wherever the
+ * seller happens to be working; `SellerDetailsNotice` is the boxed version that
+ * sits inside the surface actually being blocked (the product form's
+ * Visibility section, the embed modal), where it can afford to spell out why
+ * each field is needed.
  *
  * Server components — no state, one link — so they cost nothing to render on
  * the pages that already know the answer.
@@ -30,10 +31,20 @@ import { cn } from "@/lib/utils";
 /** The full-width strip in the dashboard chrome. */
 export function SellerDetailsBanner({
   missing,
+  audience = "owner",
 }: {
   missing: readonly TraderIdentityField[];
+  /**
+   * Who is reading. A team member working on someone else's store can see that
+   * store's gap but cannot close it: their Settings edits their OWN profile,
+   * never the owner's. So they get the fact without the link, rather than a
+   * button into a form that would save details to the wrong account and leave
+   * this banner exactly where it was.
+   */
+  audience?: "owner" | "member";
 }) {
   if (missing.length === 0) return null;
+  const member = audience === "member";
   return (
     <div
       // A standing condition the seller has to act on, not a live announcement:
@@ -41,7 +52,9 @@ export function SellerDetailsBanner({
       // is most of them.
       role="note"
       aria-label="Seller details required"
-      className="flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-destructive/40 bg-destructive/5 px-4 py-2 text-sm md:px-6"
+      // No rule underneath: the tint alone separates it from the page, and a
+      // red line under a red strip read as a second, louder warning.
+      className="flex flex-wrap items-center gap-x-2 gap-y-1 bg-destructive/5 px-4 py-2 text-sm md:px-6"
     >
       <ShieldAlert
         className="size-4 shrink-0 text-destructive"
@@ -49,17 +62,31 @@ export function SellerDetailsBanner({
         aria-hidden
       />
       <p className="min-w-0 flex-1 text-foreground">
-        <span className="font-semibold">{TRADER_IDENTITY_HEADLINE}</span>{" "}
+        <span className="font-semibold">
+          {member ? "This store can't publish or sell yet." : TRADER_IDENTITY_HEADLINE}
+        </span>{" "}
         <span className="font-inter text-muted-foreground">
-          {traderIdentityFix(missing)}
+          {member
+            ? "Its owner has to add their seller details in their own settings."
+            : traderIdentityFix(missing)}
         </span>
       </p>
-      <Link
-        href={traderIdentityHref(missing)}
-        className="shrink-0 rounded-sm border border-destructive/40 px-2 py-1 font-inter text-xs font-medium text-destructive transition-colors duration-base ease-standard hover:bg-destructive hover:text-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none"
-      >
-        Add seller details
-      </Link>
+      {!member && (
+        <Link
+          href={traderIdentityHref(missing)}
+          // Sharp, like every other CTA (control-styles' brand rule), with the
+          // "go" arrow the product's other forward links carry. Neutral grey
+          // instead of destructive red to signal this is a helpful action, not risky.
+          className="group/btn inline-flex shrink-0 items-center gap-1 rounded-none border border-border px-2 py-1 font-inter text-xs font-medium text-muted-foreground transition-colors duration-base ease-standard hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none"
+        >
+          Add seller details
+          <ArrowRight
+            className={cn("size-3.5", iconNudgeRightClass)}
+            strokeWidth={2}
+            aria-hidden
+          />
+        </Link>
+      )}
     </div>
   );
 }
@@ -108,7 +135,12 @@ export function SellerDetailsNotice({
           <p className="font-inter text-sm font-medium text-destructive">
             You can&apos;t {blocks} until your seller details are complete.
           </p>
-          <p className="font-inter text-sm text-destructive/80">
+          {/* Full destructive, not /80: faded over this bg-destructive/5 panel
+              it lands at 4.04:1, under the 4.5:1 AA minimum (axe flagged it on
+              /products/new, while the line above, same colour at full strength
+              on the same background, passes). The weight difference carries the
+              hierarchy instead of the tint. */}
+          <p className="font-inter text-sm text-destructive">
             Buyers have to be able to see who they are buying from and how to
             reach you before they order. These are shown on your product pages
             for that reason only, never used for marketing.
@@ -120,8 +152,8 @@ export function SellerDetailsNotice({
               <li key={field.key}>
                 <span className="font-medium text-foreground">
                   {field.label}
-                </span>{" "}
-                — {field.why}
+                </span>
+                : {field.why}
               </li>
             ))}
           </ul>
@@ -131,9 +163,10 @@ export function SellerDetailsNotice({
           {...(newTab ? { target: "_blank", rel: "noopener noreferrer" } : {})}
           // Outlined, not a solid fill: this dashboard's only solid buttons are
           // its black primaries, and a solid red one reads as "delete" rather
-          // than "go and fix it". Same treatment as the chrome's banner, so
-          // the two say the same thing in the same voice.
-          className="inline-flex items-center rounded-sm border border-destructive/40 px-3 py-1.5 font-inter text-xs font-medium text-destructive transition-colors duration-base ease-standard hover:bg-destructive hover:text-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none"
+          // than "go and fix it". Neutral grey instead of destructive red to
+          // signal this is a helpful action. Same treatment as the chrome's
+          // banner, so the two say the same thing in the same voice.
+          className="inline-flex items-center rounded-sm border border-border px-3 py-1.5 font-inter text-xs font-medium text-muted-foreground transition-colors duration-base ease-standard hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none"
         >
           Add seller details
           {newTab && <span className="sr-only"> (opens in a new tab)</span>}

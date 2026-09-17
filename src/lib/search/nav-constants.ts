@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 
 /**
- * THE APP'S NAVIGATION MAP — declared once, consumed three times.
+ * THE APP'S NAVIGATION MAP: declared once, consumed three times.
  *
  * The dashboard rail (`Sidebar`), the settings rail (`SettingsShell`) and the
  * universal search registry (`@/lib/search/registry`) all read from here. They

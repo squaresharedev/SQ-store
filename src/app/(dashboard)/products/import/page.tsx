@@ -5,6 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
 import { ProductImport } from "@/components/products/ProductImport";
+import { getTraderIdentityStatus } from "@/lib/settings/seller-identity";
 import { ghostButtonClass } from "@/components/ui/control-styles";
 
 export const metadata: Metadata = {
@@ -17,6 +18,14 @@ export const metadata: Metadata = {
 export default async function ImportProductsPage() {
   const account = await getActiveAccount();
   if (!can(account?.role, "products.write")) redirect("/products");
+
+  // The same up-front answer the new-product form gets: the server refuses a
+  // LIVE import without the store's trader details (lib/products/
+  // import-actions.ts), so the choice is not offered, rather than refused after
+  // the seller has mapped every column.
+  const identity = account
+    ? await getTraderIdentityStatus(account.accountId)
+    : { ok: true as const, missing: [] };
 
   return (
     <div className="@container mx-auto w-full max-w-3xl space-y-6 p-4 @md:p-6">
@@ -33,7 +42,7 @@ export default async function ImportProductsPage() {
           </p>
         </div>
       </div>
-      <ProductImport />
+      <ProductImport missingTraderDetails={identity.ok ? identity.missing : []} />
     </div>
   );
 }

@@ -154,8 +154,9 @@ export function OrdersToolbar({
         </div>
       </div>
 
-      {/* Search */}
-      <div className="flex flex-col gap-1.5">
+      {/* Search. The tour anchor is on the wrapper so the spotlight includes
+          the field's label, not just the input. */}
+      <div data-tour="orders-search" className="flex flex-col gap-1.5">
         <label htmlFor="orders-search" className={fieldLabelClass}>
           buyer email
         </label>

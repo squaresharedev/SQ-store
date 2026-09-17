@@ -145,33 +145,42 @@ const SETTINGS_FIELDS: LocalEntry[] = [
     ["log out", "logout", "leave", "exit"],
   ),
   entry(
+    "field:seller-bio",
+    { type: "settings", title: "Bio", subtitle: "Settings › Account", href: "/settings/account#bio" },
+    ["seller bio", "about me", "about", "description", "who i am"],
+  ),
+  // The page and its fields carry the names the page itself uses ("Business &
+  // seller details", "Trader name"), so a result never reads like a different
+  // screen from the one it opens. The old names stay as synonyms: people still
+  // type "tax" and "business name".
+  entry(
     "field:vat",
-    { type: "settings", title: "VAT ID", subtitle: "Settings › Tax", href: "/settings/tax#vat" },
+    { type: "settings", title: "VAT ID", subtitle: "Settings › Business & seller details", href: "/settings/tax#vat" },
     ["tax number", "vat number", "tax id", "eu vat"],
   ),
   entry(
     "field:business-name",
-    { type: "settings", title: "Business name", subtitle: "Settings › Tax", href: "/settings/tax#business-name" },
-    ["company name", "legal name", "trading name"],
+    { type: "settings", title: "Trader name", subtitle: "Settings › Business & seller details", href: "/settings/tax#business-name" },
+    ["business name", "company name", "legal name", "trading name", "seller details", "tax"],
   ),
   entry(
     "field:tax-country",
-    { type: "settings", title: "Tax country", subtitle: "Settings › Tax", href: "/settings/tax#country" },
-    ["country", "eu", "residence", "jurisdiction"],
+    { type: "settings", title: "Country", subtitle: "Settings › Business & seller details", href: "/settings/tax#country" },
+    ["tax country", "eu", "residence", "jurisdiction"],
   ),
   entry(
     "field:seller-address",
-    { type: "settings", title: "Business address", subtitle: "Settings › Tax", href: "/settings/tax#address" },
+    { type: "settings", title: "Business address", subtitle: "Settings › Business & seller details", href: "/settings/tax#address" },
     ["seller address", "postal address", "trader address", "who is selling"],
   ),
   entry(
     "field:seller-email",
-    { type: "settings", title: "Contact email", subtitle: "Settings › Tax", href: "/settings/tax#contact-email" },
+    { type: "settings", title: "Contact email", subtitle: "Settings › Business & seller details", href: "/settings/tax#contact-email" },
     ["seller email", "buyer contact", "support email"],
   ),
   entry(
     "field:seller-phone",
-    { type: "settings", title: "Seller phone", subtitle: "Settings › Tax", href: "/settings/tax#phone" },
+    { type: "settings", title: "Phone", subtitle: "Settings › Business & seller details", href: "/settings/tax#phone" },
     ["phone number", "contact number", "seller phone"],
   ),
   entry(
@@ -230,6 +239,13 @@ const ACTIONS: LocalEntry[] = [
     "action:notifications",
     { type: "action", title: "Notification history", href: "/notifications" },
     ["alerts", "inbox", "unread", "bell"],
+  ),
+  // The welcome flow's map, on demand. Last on purpose: the empty state shows
+  // the first three actions, and this one is for someone who goes looking.
+  entry(
+    "action:show-me-around",
+    { type: "action", title: "Show me around", href: "/dashboard?tour=1" },
+    ["tour", "help", "where is", "onboarding", "getting started", "guide", "how does this work"],
   ),
 ];
 

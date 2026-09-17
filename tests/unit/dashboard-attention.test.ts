@@ -8,6 +8,7 @@ import {
   type StorefrontAttentionInfo,
 } from "@/lib/dashboard/attention";
 import type { DashboardOrdersData, ProductsSummary } from "@/lib/dashboard/queries";
+import { STRIPE_CONNECT_AVAILABLE } from "@/lib/payments/availability";
 import { LEGAL_VERSION } from "@/lib/settings/constants";
 
 /**
@@ -83,8 +84,9 @@ const NO_STOREFRONTS: StorefrontAttentionInfo = {
 const HEALTHY_PROFILE: ProfileAttentionData = {
   taxBusinessName: "Acme Prints",
   sellerEmail: "acme@example.com",
-  // All three trader fields set: this profile can publish, so the gate's
-  // attention row stays out of every test that does not ask for it.
+  // A complete, realistic profile, so the rows that DO read these fields (the
+  // buy path reads the contact email) stay out of every test that does not
+  // ask for them.
   sellerAddress: "12 Market Street, Dublin",
   shippingPolicySet: true,
   legalAcceptedVersion: LEGAL_VERSION,
@@ -96,6 +98,8 @@ function build(overrides: {
   storefronts?: Partial<StorefrontAttentionInfo>;
   profile?: ProfileAttentionData | null;
   stripeConnected?: boolean;
+  stripeConnectAvailable?: boolean;
+  setupVisible?: boolean;
 } = {}) {
   const items = buildAttentionItems({
     orders: { ...NO_ORDERS, ...overrides.orders },
@@ -103,16 +107,16 @@ function build(overrides: {
     storefronts: { ...NO_STOREFRONTS, ...overrides.storefronts },
     profile: overrides.profile !== undefined ? overrides.profile : HEALTHY_PROFILE,
     stripeConnected: overrides.stripeConnected ?? true,
+    stripeConnectAvailable: overrides.stripeConnectAvailable,
+    setupVisible: overrides.setupVisible,
   });
   return new Map(items.map((item) => [item.key, item]));
 }
 
 /** Every branch of the builder, so the route check below covers them all. */
 const ALL_BRANCHES = [
-  // Stripe not connected
-  build({ stripeConnected: false }),
-  // No seller identity
-  build({ profile: { ...HEALTHY_PROFILE, taxBusinessName: null } }),
+  // Stripe not connected, on the day connecting is possible
+  build({ stripeConnected: false, stripeConnectAvailable: true }),
   // Legal not accepted
   build({ profile: { ...HEALTHY_PROFILE, legalAcceptedVersion: null } }),
   build({ profile: { ...HEALTHY_PROFILE, legalAcceptedVersion: "2025-01-old" } }),
@@ -180,16 +184,36 @@ const ALL_BRANCHES = [
 describe("needs-attention destinations", () => {
   it("sends the Stripe row to /payments, where the connection lives", () => {
     // Not /settings: nothing on the account settings tabs connects Stripe.
-    expect(build({ stripeConnected: false }).get("stripe")?.href).toBe("/payments");
+    expect(
+      build({ stripeConnected: false, stripeConnectAvailable: true }).get("stripe")
+        ?.href,
+    ).toBe("/payments");
+  });
+
+  it("never asks for a Stripe connection that cannot be made yet", () => {
+    // /payments has only a disabled "Soon" button until Connect ships, so a
+    // row pointing there would be the dashboard's first dead end.
+    expect(
+      build({ stripeConnected: false, stripeConnectAvailable: false }).get("stripe"),
+    ).toBeUndefined();
+  });
+
+  it("follows the app-wide Stripe availability switch by default", () => {
+    expect(build({ stripeConnected: false }).has("stripe")).toBe(
+      STRIPE_CONNECT_AVAILABLE,
+    );
   });
 
   it("hides the Stripe row when already connected", () => {
-    expect(build({ stripeConnected: true }).get("stripe")).toBeUndefined();
+    expect(
+      build({ stripeConnected: true, stripeConnectAvailable: true }).get("stripe"),
+    ).toBeUndefined();
   });
 
   it("opens the storefront list when none is saved yet", () => {
     const item = build().get("storefront");
     expect(item?.href).toBe("/storefront");
+    expect(item?.label).toBe("Create your storefront");
     expect(item?.actionLabel).toBe("Create storefront");
   });
 
@@ -212,6 +236,18 @@ describe("needs-attention destinations", () => {
     }).get("storefront");
     expect(single?.href).toBe("/storefront/sf-1");
     expect(single?.actionLabel).toBe("Open designer");
+  });
+
+  it("leaves the storefront row to the setup checklist while it is showing", () => {
+    // "Put a product on a storefront" is a checklist step with the same
+    // destination; two rows saying it in two voices is noise.
+    expect(build({ setupVisible: true }).get("storefront")).toBeUndefined();
+    expect(
+      build({
+        setupVisible: true,
+        storefronts: { total: 1, rows: [{ id: "sf-1", blockCount: 0 }] },
+      }).get("storefront"),
+    ).toBeUndefined();
   });
 
   it("opens the product editor when a single product lacks an image", () => {
@@ -257,67 +293,45 @@ describe("needs-attention destinations", () => {
     expect(item?.description).toBe("2 refunded.");
   });
 
-  // --- New rows -------------------------------------------------------
+  // --- Profile rows ---------------------------------------------------
 
-  it("adds the no-seller-identity row when business name is missing", () => {
-    const item = build({
-      profile: { ...HEALTHY_PROFILE, taxBusinessName: null },
-    }).get("no-seller-identity");
-    // Deep-links to the field that is actually blank, not to the page's top.
-    expect(item?.href).toBe("/settings/tax#business-name");
-    expect(item?.actionLabel).toBe("Add seller details");
-    expect(item?.label).toBe("You can't publish or sell yet");
-  });
-
-  it("adds the no-seller-identity row for a missing address or contact email", () => {
-    // Each required trader field blocks publishing on its own; the row names
-    // whichever ones are missing and points at the first of them.
-    const noAddress = build({
-      profile: { ...HEALTHY_PROFILE, sellerAddress: null },
-    }).get("no-seller-identity");
-    expect(noAddress?.href).toBe("/settings/tax#address");
-    expect(noAddress?.description).toContain("business address");
-
-    const noEmail = build({
-      profile: { ...HEALTHY_PROFILE, sellerEmail: null },
-    }).get("no-seller-identity");
-    expect(noEmail?.href).toBe("/settings/tax#contact-email");
-    expect(noEmail?.description).toContain("contact email");
-
-    const neither = build({
-      profile: { ...HEALTHY_PROFILE, sellerAddress: null, sellerEmail: null },
-    }).get("no-seller-identity");
-    expect(neither?.description).toContain("business address and contact email");
-  });
-
-  it("hides the no-seller-identity row when every required trader field is set", () => {
-    expect(
-      build({ profile: { ...HEALTHY_PROFILE, taxBusinessName: "Acme" } }).get(
-        "no-seller-identity",
-      ),
-    ).toBeUndefined();
+  it("never adds a seller-identity row: the checklist and the banner own the gate", () => {
+    const keys = [
+      ...build({
+        profile: {
+          ...HEALTHY_PROFILE,
+          taxBusinessName: null,
+          sellerAddress: null,
+          sellerEmail: null,
+        },
+      }).keys(),
+    ];
+    expect(keys).not.toContain("no-seller-identity");
   });
 
   it("hides all profile rows when profile is null (soft-fail read)", () => {
     const keys = [...build({ profile: null }).keys()];
-    expect(keys).not.toContain("no-seller-identity");
     expect(keys).not.toContain("no-legal");
     expect(keys).not.toContain("no-buy-path");
     expect(keys).not.toContain("no-shipping");
   });
 
-  it("adds the no-legal row when legal has never been accepted", () => {
+  it("asks a seller who never accepted the terms to accept them, without calling them updated", () => {
     const item = build({
       profile: { ...HEALTHY_PROFILE, legalAcceptedVersion: null },
     }).get("no-legal");
     expect(item?.href).toBe("/settings/legal");
+    expect(item?.label).toBe("Accept the seller terms");
+    // Acceptance gates nothing today, so the row must not threaten anything.
+    expect(item?.description).not.toMatch(/account active/i);
   });
 
-  it("adds the no-legal row when an older legal version was accepted", () => {
+  it("calls the terms updated only for someone who accepted an older version", () => {
     const item = build({
       profile: { ...HEALTHY_PROFILE, legalAcceptedVersion: "2025-01-old" },
     }).get("no-legal");
-    expect(item).toBeDefined();
+    expect(item?.label).toBe("Accept the updated seller terms");
+    expect(item?.description).not.toMatch(/account active/i);
   });
 
   it("hides the no-legal row when the current version is accepted", () => {

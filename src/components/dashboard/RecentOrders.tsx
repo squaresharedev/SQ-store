@@ -51,8 +51,8 @@ export function RecentOrders({
     <ModuleCard title="Recent orders" id={id}>
       {orders.length === 0 ? (
         <ModuleEmptyText>
-          No orders yet. They will show up here as soon as you make your first
-          sale.
+          No orders yet. Sales through your own buy link or by email
+          won&apos;t show here.
         </ModuleEmptyText>
       ) : (
         <ul className="divide-y divide-border">

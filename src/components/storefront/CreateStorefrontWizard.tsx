@@ -65,7 +65,7 @@ const STEP_COPY: Record<Step, { title: string; description: string }> = {
   },
   fulfilment: {
     title: "How do buyers get it?",
-    description: "It decides what your storefront needs to handle at checkout.",
+    description: "It shapes what your product pages say about delivery.",
   },
   vibe: {
     title: "Pick a look",

@@ -971,7 +971,10 @@ export const SHIPPING_DISPATCH_MAX = 120;
  * storefront and every product this account has reads the one value, rather
  * than each storefront carrying (and needing) its own copy. `country` is an
  * EU code or "" for "not in the EU"; the statutory withdrawal and conformity
- * lines render only for EU sellers.
+ * lines render only for EU sellers. `bio` rides along for display only: it is
+ * shown in the same Seller section but is set in Settings › Account (next to
+ * the username, not the trader identity below), is not a legal disclosure,
+ * and the publish gate never asks for it.
  */
 export type StorefrontSeller = {
   businessName?: string;
@@ -980,6 +983,7 @@ export type StorefrontSeller = {
   vatId?: string;
   country?: string;
   phone?: string;
+  bio?: string;
 };
 
 export const DEFAULT_PRODUCT_PAGE_CONFIG: ProductPageConfig = {

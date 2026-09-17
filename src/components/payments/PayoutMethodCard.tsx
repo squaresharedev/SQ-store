@@ -5,6 +5,7 @@ import { infoTextClass } from "@/components/ui/control-styles";
 import { cn } from "@/lib/utils";
 import { cardClass, iconTileClass } from "@/components/ui/surface-styles";
 import { Button } from "@/components/ui/button";
+import { STRIPE_CONNECT_AVAILABLE } from "@/lib/payments/availability";
 import type { PayoutMethod } from "@/lib/payments/types";
 
 /**
@@ -50,8 +51,10 @@ export function PayoutMethodCard({
         </div>
       ) : (
         <p className="mt-3 font-inter text-sm text-muted-foreground">
-          No payout method yet. Connect Stripe and add your bank there, it shows
-          up here automatically.
+          {/* "Connect Stripe" is only advice once connecting is possible. */}
+          {STRIPE_CONNECT_AVAILABLE
+            ? "No payout method yet. Connect Stripe and add your bank there, it shows up here automatically."
+            : "No payout method yet."}
         </p>
       )}
     </section>

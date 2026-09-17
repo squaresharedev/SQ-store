@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600">
+  <rect width="600" height="600" fill="#cbd5dd"/>
+  <rect x="96" y="112" width="408" height="10" rx="5" fill="#9aa9b5"/>
+  <circle cx="300" cy="117" r="12" fill="#7d8e9b"/>
+  <ellipse cx="300" cy="492" rx="140" ry="14" fill="#2f4050" opacity="0.1"/>
+  <path d="M300 128c-18 0-26 10-26 24" fill="none" stroke="#e7e1d6" stroke-width="6" stroke-linecap="round"/>
+  <rect x="176" y="150" width="248" height="330" rx="6" fill="#f3efe7"/>
+  <rect x="176" y="150" width="248" height="60" rx="6" fill="#e8e2d7"/>
+  <rect x="176" y="236" width="248" height="16" fill="#3f5a73"/>
+  <rect x="176" y="262" width="248" height="6" fill="#3f5a73"/>
+  <rect x="176" y="404" width="248" height="6" fill="#3f5a73"/>
+  <rect x="176" y="420" width="248" height="16" fill="#3f5a73"/>
+  <rect x="376" y="150" width="48" height="330" fill="#000" opacity="0.04"/>
+  <g stroke="#d9d1c3" stroke-width="2">
+    <path d="M200 480v14M220 480v14M240 480v14M260 480v14M280 480v14M300 480v14M320 480v14M340 480v14M360 480v14M380 480v14M400 480v14"/>
+  </g>
+  <g fill="#c9bfae" opacity="0.6">
+    <rect x="206" y="300" width="188" height="3"/>
+    <rect x="206" y="330" width="188" height="3"/>
+    <rect x="206" y="360" width="188" height="3"/>
+  </g>
+</svg>

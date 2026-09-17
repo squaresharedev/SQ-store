@@ -55,8 +55,19 @@ test.describe("the publish gate", () => {
   }) => {
     await signUp(page, freshUser("gate-warn"));
 
-    // --- the warning is in the chrome, on whatever page they are on ---
+    // --- Overview states it as the first setup step, not as a red strip ---
+    // The welcome flow and the "Get set up" checklist carry the gate there, so
+    // a new seller's first screen is a step to take rather than an error.
     await gotoApp(page, "/dashboard");
+    await expect(
+      page.locator('[data-setup-step="seller-details"]'),
+    ).toHaveAttribute("data-setup-state", "todo");
+    await expect(
+      page.getByRole("note", { name: /seller details required/i }),
+    ).toHaveCount(0);
+
+    // --- everywhere else, the warning is in the chrome ---
+    await gotoApp(page, "/products");
     const banner = page.getByRole("note", { name: /seller details required/i });
     await expect(banner).toBeVisible();
     await expect(banner).toContainText(/can't publish or sell/i);
@@ -65,9 +76,9 @@ test.describe("the publish gate", () => {
     await expect(banner).toContainText(/business address/i);
     await expect(banner).toContainText(/contact email/i);
 
-    // Still there two navigations later: it is a standing condition, not a
-    // one-off notice on the overview.
-    await gotoApp(page, "/products");
+    // Still there on the next page: it is a standing condition, not a one-off
+    // notice.
+    await gotoApp(page, "/orders");
     await expect(
       page.getByRole("note", { name: /seller details required/i }),
     ).toBeVisible();

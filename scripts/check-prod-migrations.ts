@@ -165,6 +165,40 @@ const TRIAGE: Record<string, Disposition> = {
   // fences a service-role write cannot climb, which is the whole reason the db
   // suite builds a real database rather than mocking one.
   "20260908155233": { kind: "replayed", marker: "20260908_product_max_per_order" },
+  // Admin push notifications, applied from the SQ-admin repo: staff device
+  // subscriptions, per-event preferences, the scanner watermark and the tick
+  // that scans for events.
+  "20260913114041": {
+    kind: "excluded",
+    reason:
+      "admin_notifications (SQ-admin): staff push subscriptions and notification prefs, plus a scan tick that reads Vault secrets. Admin panel only; no seller-facing table, policy or function depends on it, and the replica has no Vault.",
+  },
+  // Double opt-in for the buyer-facing contact email: the column that records
+  // the click, plus the service-role-only token store. Replayed for the token
+  // table's fences (RLS with no policy, explicit revokes, the hash-shape CHECK),
+  // which are the whole security story. (Applied on 2026-09-13; the local file
+  // is dated 20260909.)
+  "20260913163041": { kind: "replayed", marker: "20260909_seller_email_verification" },
+  // profiles.onboarding_completed_at: whether the dashboard welcome flow has
+  // been seen. Replayed so the e2e stack can drive the flow; the backfill is
+  // not, because the replica has no established sellers to mark done.
+  "20260914193316": { kind: "replayed", marker: "20260914_onboarding_state" },
+  // profiles.seller_bio: the optional one-line bio in the product page's Seller
+  // section. Replayed for its CHECK (length + no control characters).
+  // (Applied on 2026-09-16.)
+  "20260916135059": { kind: "replayed", marker: "20260916_seller_bio" },
+  // profiles.setup_celebrated_at: whether the finished setup card ("You're set
+  // up") has been shown. Replayed so the e2e stack can prove it shows once: the
+  // app treats only an explicit null as pending, so without the column the
+  // card would never render and a "shown once" spec would pass vacuously.
+  // (Applied on 2026-09-16.)
+  "20260916172040": { kind: "replayed", marker: "20260916_setup_celebrated" },
+  // The sample storefront's two person-level flags (hidden from the list, the
+  // designer tour started). Replayed: the app shows no sample and starts no
+  // tour unless the columns read back as an explicit null, so a replica without
+  // them would let the sample-storefront spec pass on a page with no sample.
+  // (Applied on 2026-09-17.)
+  "20260917122500": { kind: "replayed", marker: "20260917_sample_storefront" },
 };
 
 async function main(): Promise<void> {

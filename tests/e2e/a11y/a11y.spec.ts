@@ -3,11 +3,15 @@ import { expect, test, type Page } from "@playwright/test";
 import {
   createProductViaUI,
   createStorefrontViaUI,
+  expectTourStep,
   freshUser,
   gotoApp,
   seedOrders,
   signUp,
+  TOUR_LAYER,
+  tourButton,
   userIdByEmail,
+  WELCOME_DIALOG,
 } from "../helpers";
 
 /**
@@ -146,6 +150,130 @@ test.describe("accessibility", () => {
     await expect(dialog).toContainText("Step 3 of 4");
     await settled();
     await expectNoSeriousViolations(page, "setup flow (looks)");
+  });
+
+  test("welcome flow and guided tour", async ({ page }) => {
+    // The first thing a new seller meets, so each part is scanned: the welcome
+    // (icon tiles), the seller details form, then the tour it hands over to at
+    // an anchored stop, a stop on another page, and a fallback stop.
+    test.setTimeout(180_000);
+    await signUp(page, freshUser("a11y-welcome"), { welcome: "keep" });
+    await expect(page.getByRole("dialog", { name: WELCOME_DIALOG })).toBeVisible({
+      timeout: 20_000,
+    });
+    const dialog = page.getByRole("dialog");
+
+    /** Same reason as the setup flow's settle: axe reads text at whatever
+     *  opacity it has reached. The slides' pictures animate in after the slide
+     *  itself, so wait until every piece of text INSIDE THE SLIDE, and
+     *  everything around it, is fully opaque.
+     *
+     * Scoped to `[data-welcome-step]`, not the whole dialog: the footer's
+     * "Save and continue" is legitimately `opacity-50` while the form is
+     * empty (disabled:opacity-50, control-styles.ts), which is a real state
+     * to scan, not an animation to wait out. Walking the dialog's full text
+     * would wait on that forever. */
+    async function settled() {
+      const step = dialog.locator("[data-welcome-step]");
+      await expect
+        .poll(() =>
+          step.evaluate((root) => {
+            const texts = [...root.querySelectorAll("*")].filter((el) =>
+              [...el.childNodes].some(
+                (node) => node.nodeType === Node.TEXT_NODE && node.textContent?.trim(),
+              ),
+            );
+            return [root, ...texts].every((el) => {
+              for (let node: Element | null = el; node; node = node.parentElement) {
+                if (getComputedStyle(node).opacity !== "1") return false;
+                if (node === root) break;
+              }
+              return true;
+            });
+          }),
+        )
+        .toBe(true);
+    }
+
+    await settled();
+    await expectNoSeriousViolations(page, "welcome flow (welcome picture)");
+
+    // Retried: a click that lands before hydration does nothing.
+    const pathSlide = page.getByRole("dialog", { name: "Four steps to your first page" });
+    await expect(async () => {
+      if (!(await pathSlide.isVisible())) {
+        await dialog.getByRole("button", { name: "Next" }).click();
+      }
+      await expect(pathSlide).toBeVisible({ timeout: 2_000 });
+    }).toPass({ timeout: 20_000 });
+    await settled();
+    await expectNoSeriousViolations(page, "welcome flow (four-step timeline)");
+
+    await pathSlide.getByRole("button", { name: "Get started" }).click();
+    await expect(page.getByRole("dialog", { name: "Add your seller details" })).toBeVisible();
+    await settled();
+    await expectNoSeriousViolations(page, "welcome flow (seller details)");
+
+    await dialog.getByRole("button", { name: "Skip for now" }).click();
+
+    /** The tour's card fades in once placed; scan it at full opacity. */
+    async function tourSettled() {
+      const card = page.locator(TOUR_LAYER).getByRole("dialog");
+      await expect
+        .poll(() =>
+          card.evaluate((el) => {
+            const inner = el.firstElementChild;
+            return `${getComputedStyle(el).opacity}/${inner ? getComputedStyle(inner).opacity : "1"}`;
+          }),
+        )
+        .toBe("1/1");
+    }
+
+    await expectTourStep(page, "overview-nav");
+    await tourSettled();
+    await expectNoSeriousViolations(page, "guided tour (first stop)");
+
+    await tourButton(page, "Next");
+    await expectTourStep(page, "search");
+    await tourButton(page, "Next");
+    await expectTourStep(page, "products-add");
+    await tourSettled();
+    await expectNoSeriousViolations(page, "guided tour (a stop on another page)");
+
+    await tourButton(page, "Next");
+    await expectTourStep(page, "products-import");
+    await tourButton(page, "Next");
+    await expectTourStep(page, "storefront-create");
+    await tourButton(page, "Next");
+    await expectTourStep(page, "storefront-sample");
+    await tourSettled();
+    await expectNoSeriousViolations(page, "guided tour (the sample storefront's card)");
+    await tourButton(page, "Next");
+    await expectTourStep(page, "storefront-embed");
+    await tourSettled();
+    await expectNoSeriousViolations(page, "guided tour (embed, with snippet)");
+  });
+
+  test("sample storefront and its designer tour", async ({ page }) => {
+    test.setTimeout(150_000);
+    await signUp(page, freshUser("a11y-sample"));
+    await gotoApp(page, "/storefront/sample");
+    await expectTourStep(page, "editor-add");
+    const card = page.locator(TOUR_LAYER).getByRole("dialog");
+    await expect
+      .poll(() =>
+        card.evaluate((el) => {
+          const inner = el.firstElementChild;
+          return `${getComputedStyle(el).opacity}/${inner ? getComputedStyle(inner).opacity : "1"}`;
+        }),
+      )
+      .toBe("1/1");
+    await expectNoSeriousViolations(page, "sample storefront designer (tour first stop)");
+
+    await page.keyboard.press("Escape");
+    await expect(page.locator(TOUR_LAYER)).toHaveCount(0);
+    await page.waitForLoadState("networkidle").catch(() => {});
+    await expectNoSeriousViolations(page, "sample storefront designer");
   });
 
   test("storefront designer incl. pickers", async ({ page }) => {

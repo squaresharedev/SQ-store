@@ -844,13 +844,13 @@ textarea {
     transform: translateY(0);
   }
   28% {
-    transform: translateY(3px);
+    transform: translateY(-3px);
   }
   55% {
     transform: translateY(0);
   }
   74% {
-    transform: translateY(1.2px);
+    transform: translateY(-1.2px);
   }
   100% {
     transform: translateY(0);
@@ -858,9 +858,7 @@ textarea {
 }
 .group\/btn:hover .upload-arrow,
 .group\/btn:focus-visible .upload-arrow {
-  /* DOWN first, then back up. Every offset is >= 0 and the easing has no
-     overshoot, so the arrow can never ride up into the picture frame it sits
-     under — travelling up first read as the two glyphs colliding. */
+  /* UP only. Negative offsets move the arrow upward. */
   animation: upload-arrow-bounce 620ms cubic-bezier(0.4, 0, 0.2, 1) 1;
 }
 

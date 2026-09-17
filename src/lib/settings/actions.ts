@@ -9,6 +9,7 @@ import { RATE_LIMITS, clientKey, rateLimit, rateLimitKey } from "@/lib/rate-limi
 import { alertSecurityEvent } from "@/lib/security/events";
 import { accountHasPassword } from "@/lib/auth/has-password";
 import {
+  bioSchema,
   deleteConfirmSchema,
   emailChangeSchema,
   legalAcceptSchema,
@@ -184,6 +185,43 @@ export async function updateUsername(
   }
   revalidatePath("/settings/account");
   return { success: "Username saved." };
+}
+
+/**
+ * The account's public bio: a short line shown in the Seller section of every
+ * hosted product page this account sells on (lib/settings/seller-identity.ts
+ * reads it into `StorefrontSeller.bio` alongside the trader-identity fields,
+ * because it is shown in the same place — but it carries no legal weight and
+ * the publish gate never asks for it, which is why it lives here, next to the
+ * account's other public-identity fact, rather than in saveTaxInfo below).
+ *
+ * Writes the SAME `seller_bio` column that field started on before this split;
+ * only the settings page that edits it, and the schema that gates the write,
+ * moved.
+ */
+export async function updateBio(
+  _prev: SettingsActionState,
+  formData: FormData,
+): Promise<SettingsActionState> {
+  const user = await getUser();
+  if (!user) return SIGNED_OUT;
+  const rejected = unknownFieldError(formData, ["seller_bio"]);
+  if (rejected) return rejected;
+
+  const parsed = bioSchema.safeParse({
+    seller_bio: String(formData.get("seller_bio") ?? ""),
+  });
+  if (!parsed.success) return firstIssue(parsed.error);
+
+  if (!(await rateLimit("settings_write", RATE_LIMITS.settingsWrite))) {
+    return TOO_MANY;
+  }
+
+  if (!(await updateOwnProfile(user.id, { seller_bio: parsed.data.seller_bio }))) {
+    return SAVE_FAILED;
+  }
+  revalidatePath("/settings/account");
+  return { success: "Bio saved." };
 }
 
 /**
@@ -419,31 +457,46 @@ export async function acceptLegal(
 // account sells on (lib/settings/seller-identity.ts), set once here rather
 // than per storefront. `tax_business_name` / `tax_vat_id` / `tax_country`
 // started as VAT/invoicing fields; `seller_address` / `seller_email` /
-// `seller_phone` fill in what distance-selling law also asks for.
+// `seller_phone` fill in what distance-selling law also asks for. The bio
+// (`seller_bio`) is edited from Settings › Account instead (see updateBio
+// above) — it carries no legal weight, so it is not one of these fields.
+/** The columns saveTaxInfo may write, in the order the settings form asks for
+ *  them. The field whitelist and the partial-write rule both read this list,
+ *  so they cannot disagree about what counts as a tax field. */
+const TAX_FIELDS = [
+  "tax_business_name",
+  "seller_address",
+  "seller_email",
+  "tax_vat_id",
+  "tax_country",
+  "seller_phone",
+] as const;
+type TaxField = (typeof TAX_FIELDS)[number];
+
 export async function saveTaxInfo(
   _prev: SettingsActionState,
   formData: FormData,
 ): Promise<SettingsActionState> {
   const user = await getUser();
   if (!user) return SIGNED_OUT;
-  const rejected = unknownFieldError(formData, [
-    "tax_business_name",
-    "seller_address",
-    "seller_email",
-    "tax_vat_id",
-    "tax_country",
-    "seller_phone",
-  ]);
+  const rejected = unknownFieldError(formData, TAX_FIELDS);
   if (rejected) return rejected;
 
-  const parsed = taxSchema.safeParse({
-    tax_business_name: String(formData.get("tax_business_name") ?? ""),
-    seller_address: normalizeTextareaValue(String(formData.get("seller_address") ?? "")),
-    seller_email: String(formData.get("seller_email") ?? ""),
-    tax_vat_id: String(formData.get("tax_vat_id") ?? ""),
-    tax_country: String(formData.get("tax_country") ?? ""),
-    seller_phone: String(formData.get("seller_phone") ?? ""),
-  });
+  // ONLY WHAT WAS SENT IS WRITTEN. The settings form posts every field, so
+  // for it nothing changes. The dashboard welcome flow posts just the three
+  // the publish gate needs, and must not blank a VAT ID, a country or a phone
+  // number it never showed. A key that is ABSENT leaves its column alone; a
+  // key sent EMPTY still clears it, which is how the settings form removes a
+  // value on purpose.
+  const present = TAX_FIELDS.filter((field) => formData.has(field));
+  if (present.length === 0) return { error: "Check the form and try again." };
+
+  const input: Partial<Record<TaxField, string>> = {};
+  for (const field of present) {
+    const raw = String(formData.get(field) ?? "");
+    input[field] = field === "seller_address" ? normalizeTextareaValue(raw) : raw;
+  }
+  const parsed = taxSchema.partial().safeParse(input);
   if (!parsed.success) return firstIssue(parsed.error);
 
   if (!(await rateLimit("settings_write", RATE_LIMITS.settingsWrite))) {
@@ -472,13 +525,21 @@ export async function saveTaxInfo(
   // proof must be dropped (it was proof of a different address), and a fresh
   // confirmation link has to go out. Read before the write, since the write is
   // what makes the answer unknowable.
-  const supabase = await createClient();
-  const { data: current } = await supabase
-    .from("profiles")
-    .select("seller_email")
-    .eq("id", user.id)
-    .maybeSingle();
-  const emailChanged = (current?.seller_email ?? null) !== parsed.data.seller_email;
+  //
+  // Only asked when the address was sent at all: a submission that leaves the
+  // contact email out cannot have changed it, so it must neither drop the
+  // stored proof nor send a link.
+  let emailChanged = false;
+  if (present.includes("seller_email")) {
+    const supabase = await createClient();
+    const { data: current } = await supabase
+      .from("profiles")
+      .select("seller_email")
+      .eq("id", user.id)
+      .maybeSingle();
+    emailChanged =
+      (current?.seller_email ?? null) !== (parsed.data.seller_email ?? null);
+  }
 
   const update: TablesUpdate<"profiles"> = { ...parsed.data };
   // Clearing the flag is unconditional on a change, and happens whether or not

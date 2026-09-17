@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { TaxSection } from "@/components/settings/TaxSection";
 import { requireProfile, requireUser } from "@/lib/auth/session";
 import { sellerEmailVerificationRequired } from "@/lib/settings/seller-email-verification";
+import { getPrimaryStorefrontId } from "@/lib/storefront/queries";
 
 export const metadata: Metadata = {
   // The nav label, the page h1 and this title all say the same thing so a
@@ -20,7 +21,11 @@ export default async function TaxSettingsPage({
   searchParams: Promise<{ verified?: string | string[] }>;
 }) {
   await requireUser("/settings/tax");
-  const [profile, params] = await Promise.all([requireProfile(), searchParams]);
+  const [profile, params, storefrontId] = await Promise.all([
+    requireProfile(),
+    searchParams,
+    getPrimaryStorefrontId(),
+  ]);
   const verified = Array.isArray(params.verified)
     ? params.verified[0]
     : params.verified;
@@ -38,6 +43,9 @@ export default async function TaxSettingsPage({
       // address" panel with no way to send the link would be a dead end.
       verificationOn={sellerEmailVerificationRequired()}
       verifyOutcome={verified}
+      // Where "Continue to your storefront" goes after a successful save: the
+      // storefront the seller last worked on, or the list if they have none.
+      continueHref={storefrontId ? `/storefront/${storefrontId}` : "/storefront"}
     />
   );
 }
