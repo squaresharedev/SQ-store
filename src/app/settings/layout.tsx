@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { SettingsShell } from "@/components/settings/SettingsShell";
-import { getProfile, requireUser } from "@/lib/auth/session";
+import { StepUpProvider } from "@/components/auth/StepUp";
+import { stepUpFreshUntil } from "@/lib/auth/assurance";
+import { getAssurance, getProfile, requireUser } from "@/lib/auth/session";
 
 export const metadata: Metadata = {
   // The template applies to every child page's `title` field, so a page
@@ -36,13 +38,25 @@ export default async function SettingsLayout({
   children: React.ReactNode;
 }) {
   const user = await requireUser("/settings");
-  const profile = await getProfile();
+  const [profile, assurance] = await Promise.all([getProfile(), getAssurance()]);
   const username =
     profile?.username || user.email?.split("@")[0] || "Account";
 
+  // Every sensitive settings form asks for a two-factor code once the
+  // session's last one is more than a few minutes old. The provider tells
+  // those forms when that is, so the code box is on screen BEFORE they submit
+  // (see components/auth/StepUp.tsx for why that matters).
   return (
     <DashboardShell username={username}>
-      <SettingsShell>{children}</SettingsShell>
+      <StepUpProvider
+        enrolled={assurance?.enrolled ?? false}
+        freshUntil={stepUpFreshUntil(assurance)}
+        factors={(assurance?.factors ?? []).map(({ id, name }) => ({ id, name }))}
+      >
+        <SettingsShell securityRecommended={assurance ? !assurance.enrolled : false}>
+          {children}
+        </SettingsShell>
+      </StepUpProvider>
     </DashboardShell>
   );
 }

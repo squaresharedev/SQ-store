@@ -4,6 +4,7 @@ import { BioForm } from "@/components/settings/BioForm";
 import { EmailChangeForm } from "@/components/settings/EmailChangeForm";
 import { PasswordCard } from "@/components/settings/PasswordCard";
 import { SignOutSection } from "@/components/settings/SignOutSection";
+import { TwoFactorPrompt } from "@/components/settings/TwoFactorPrompt";
 import { UsernameForm } from "@/components/settings/UsernameForm";
 
 /**
@@ -23,6 +24,7 @@ export function AccountSection({
   email,
   avatarUrl,
   hasPassword,
+  twoFactorEnabled = true,
 }: {
   /** The account's only identifier, or "" if it has not claimed one yet. */
   username: string;
@@ -35,6 +37,8 @@ export function AccountSection({
    *  guessed from `identities`. Drives whether the email change asks for
    *  re-authentication and which way the password card reads. */
   hasPassword: boolean;
+  /** Whether 2FA is on; off shows the prompt to turn it on. */
+  twoFactorEnabled?: boolean;
 }) {
   const name = username || email.split("@")[0] || "Account";
   // The ids are universal search's landing points: the registry maps "handle",
@@ -62,6 +66,9 @@ export function AccountSection({
       <div id="password">
         <PasswordCard hasPassword={hasPassword} email={email} />
       </div>
+      {/* Right under the password, where people are already thinking about
+          how they sign in. Gone once 2FA is on. */}
+      <TwoFactorPrompt enabled={twoFactorEnabled} />
       {/* Also the guided tour's last stop, which points here so a seller knows
           where to find it again. */}
       <div id="tour">

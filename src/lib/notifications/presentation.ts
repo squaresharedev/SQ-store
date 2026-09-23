@@ -17,6 +17,10 @@ export const TYPE_DOT: Record<NotificationType, string> = {
   // Destructive, like a stock warning: "your password changed" is the one row
   // in this feed a person must not scroll past.
   security: "bg-destructive",
+  // Destructive for the same reason: something of theirs came down, and the
+  // row carries the reason they are entitled to. Scrolling past it is the one
+  // outcome this notification exists to prevent.
+  policy: "bg-destructive",
 };
 
 export const TYPE_LABEL: Record<NotificationType, string> = {
@@ -26,6 +30,7 @@ export const TYPE_LABEL: Record<NotificationType, string> = {
   stock: "Stock",
   system: "System",
   security: "Security",
+  policy: "Policy",
 };
 
 const ABSOLUTE_DATE = new Intl.DateTimeFormat("en-IE", {

@@ -10,6 +10,17 @@ vi.mock("@/lib/auth/session", () => ({
   getProfile: () => getProfileMock(),
 }));
 
+/**
+ * The two-factor step-up. Its rules have their own suite; here it defaults to
+ * "go ahead", and the step-up cases below flip it to a refusal to prove each
+ * membership change returns it untouched and writes nothing.
+ */
+const requireStepUpMock = vi.fn(async (): Promise<unknown> => null);
+vi.mock("@/lib/auth/mfa", () => ({
+  STEP_UP_FIELDS: ["mfa_code", "mfa_factor_id"],
+  requireStepUp: (...args: unknown[]) => requireStepUpMock(...(args as [])),
+}));
+
 const getActorRoleMock = vi.fn();
 vi.mock("@/lib/team/queries", () => ({
   getActorRole: (accountId: string) => getActorRoleMock(accountId),
@@ -138,6 +149,7 @@ beforeEach(() => {
   getProfileMock.mockResolvedValue(null);
   cookiesMockFn.mockResolvedValue({ set: cookiesSetMock, get: vi.fn() });
   rateLimitMock.mockResolvedValue(true);
+  requireStepUpMock.mockResolvedValue(null);
 });
 
 // ==========================================================================
@@ -445,5 +457,76 @@ describe("setActiveAccount", () => {
 
     expect(result).toEqual({ ok: false });
     expect(cookiesSetMock).not.toHaveBeenCalled();
+  });
+});
+
+// ==========================================================================
+// Two-factor step-up
+// ==========================================================================
+
+describe("membership changes - two-factor step-up", () => {
+  const REFUSAL = {
+    error: "Enter the 6-digit code from your authenticator app to confirm it's you.",
+    stepUp: true,
+  };
+
+  it("inviteMember returns the refusal and inserts nothing", async () => {
+    getUserMock.mockResolvedValue(OWNER_USER);
+    getActorRoleMock.mockResolvedValue("owner");
+    requireStepUpMock.mockResolvedValue(REFUSAL);
+
+    const result = await inviteMember(PREV, makeInviteForm());
+
+    expect(result).toEqual(REFUSAL);
+    expect(db.insert).not.toHaveBeenCalled();
+    // Checked after the rights check, before the budget is spent.
+    expect(rateLimitMock).not.toHaveBeenCalled();
+  });
+
+  it("inviteMember never asks for a code from someone without invite rights", async () => {
+    getUserMock.mockResolvedValue(OWNER_USER);
+    getActorRoleMock.mockResolvedValue("viewer");
+
+    const result = await inviteMember(PREV, makeInviteForm());
+
+    expect(result.error).toMatch(/permission/i);
+    expect(requireStepUpMock).not.toHaveBeenCalled();
+  });
+
+  it("inviteMember lets the step-up fields through its whitelist", async () => {
+    getUserMock.mockResolvedValue(OWNER_USER);
+    getActorRoleMock.mockResolvedValue("owner");
+    const fd = makeInviteForm({ mfa_code: "123456" });
+
+    const result = await inviteMember(PREV, fd);
+
+    expect(result.error ?? "").not.toMatch(/unexpected field/i);
+    expect(requireStepUpMock).toHaveBeenCalledWith(fd);
+  });
+
+  it("changeMemberRole returns the refusal and updates nothing", async () => {
+    getUserMock.mockResolvedValue(OWNER_USER);
+    getActorRoleMock.mockResolvedValue("owner");
+    requireStepUpMock.mockResolvedValue(REFUSAL);
+
+    const result = await changeMemberRole(PREV, makeChangeRoleForm());
+
+    expect(result).toEqual(REFUSAL);
+    expect(db.update).not.toHaveBeenCalled();
+  });
+
+  it("revokeMemberAccess returns the refusal and revokes nobody", async () => {
+    getUserMock.mockResolvedValue(OWNER_USER);
+    getActorRoleMock.mockResolvedValue("owner");
+    dbFn.mockResolvedValueOnce({
+      data: { id: MEMBER_ID, member_user_id: EDITOR_ID },
+      error: null,
+    });
+    requireStepUpMock.mockResolvedValue(REFUSAL);
+
+    const result = await revokeMemberAccess(PREV, makeRevokeForm());
+
+    expect(result).toEqual(REFUSAL);
+    expect(db.update).not.toHaveBeenCalled();
   });
 });

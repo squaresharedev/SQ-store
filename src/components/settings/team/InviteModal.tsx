@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import type { SelectOption } from "@/components/ui/select";
+import { StepUpField } from "@/components/auth/StepUp";
 import {
   canGrant,
   ASSIGNABLE_ROLES,
@@ -120,6 +121,8 @@ export function InviteModal({
           Email notifications aren&apos;t wired up yet — the invite takes effect
           when they sign in. You may want to let them know directly.
         </p>
+
+        <StepUpField id="invite-step-up" state={state} />
 
         <div>
           <SaveButton

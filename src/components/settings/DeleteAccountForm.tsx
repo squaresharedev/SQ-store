@@ -5,6 +5,7 @@ import { useActionState } from "react";
 import { useActionToast } from "@/components/ui/Toast";
 import { SaveButton } from "@/components/ui/SaveButton";
 import { SettingsCard } from "@/components/settings/SettingsCard";
+import { StepUpField } from "@/components/auth/StepUp";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -102,6 +103,7 @@ export function DeleteAccountForm({
               required
             />
           </div>
+          <StepUpField id="delete-account" state={deleteState} />
           <div className="flex flex-wrap items-center gap-3">
             <SaveButton
               variant="destructive"

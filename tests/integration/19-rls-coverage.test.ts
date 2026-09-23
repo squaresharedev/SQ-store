@@ -39,6 +39,11 @@ const POLICY_FREE_BY_DESIGN = new Set([
   // credential it would otherwise have to fetch from the inbox — which is the
   // one thing the confirmation proves.
   "seller_email_verifications",
+  // Hashed 2FA recovery codes (20260923_two_factor_auth). Written and spent
+  // only through the service role (lib/auth/mfa.ts). Not even the owner may
+  // read them: a hijacked session that could count or see the hashes of its
+  // own codes would learn something about the one way back past 2FA.
+  "mfa_recovery_codes",
 ]);
 
 afterAll(async () => {

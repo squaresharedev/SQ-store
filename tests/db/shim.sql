@@ -95,6 +95,50 @@ grant execute on function auth.uid(), auth.role(), auth.email(), auth.jwt()
   to anon, authenticated, service_role;
 grant select on auth.users to service_role;
 
+-- ---- MFA factors ------------------------------------------------------------
+-- The shape GoTrue keeps its second factors in. public.mfa_session_ok() reads
+-- it, and the e2e stack's mock GoTrue writes it (enroll / verify / unenroll),
+-- so the restrictive "Require two-factor when enrolled" policies see exactly
+-- what they would see in production. Like hosted Supabase, no client role has
+-- a grant on it: only the SECURITY DEFINER check can look inside.
+do $$
+begin
+  if not exists (
+    select 1 from pg_type t join pg_namespace n on n.oid = t.typnamespace
+    where n.nspname = 'auth' and t.typname = 'factor_type'
+  ) then
+    create type auth.factor_type as enum ('totp', 'webauthn', 'phone');
+  end if;
+  if not exists (
+    select 1 from pg_type t join pg_namespace n on n.oid = t.typnamespace
+    where n.nspname = 'auth' and t.typname = 'factor_status'
+  ) then
+    create type auth.factor_status as enum ('unverified', 'verified');
+  end if;
+end
+$$;
+
+create table if not exists auth.mfa_factors (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users (id) on delete cascade,
+  friendly_name text,
+  factor_type auth.factor_type not null,
+  status auth.factor_status not null,
+  secret text,
+  phone text,
+  last_challenged_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+-- GoTrue refuses two factors with the same name on one account.
+create unique index if not exists mfa_factors_user_friendly_name_unique
+  on auth.mfa_factors (friendly_name, user_id)
+  where trim(friendly_name) <> '';
+create index if not exists mfa_factors_user_id_idx on auth.mfa_factors (user_id);
+
+grant select, insert, update, delete on auth.mfa_factors to service_role;
+
 -- ---- storage schema ---------------------------------------------------------
 create schema if not exists storage;
 

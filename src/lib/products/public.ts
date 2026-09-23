@@ -32,6 +32,10 @@ import {
   type ShippingPolicyRow,
 } from "@/lib/settings/shipping-policy";
 import { presignGetUrl } from "@/lib/r2";
+import {
+  MODERATION_GATE_SELECT,
+  isContentVisible,
+} from "@/lib/moderation/removal";
 import { RATE_LIMITS, clientKey, rateLimitKey } from "@/lib/rate-limit";
 import { uuidField } from "@/lib/validation/inputs";
 import { purchaseUrlSchema } from "@/lib/validation/product";
@@ -62,7 +66,7 @@ import type { ProductPageData } from "@/types/product-page";
  * onto a column that seam has not admitted.
  */
 export const PUBLIC_PRODUCT_SELECT =
-  `id, title, description, price_cents, currency, image_key, digital_file_key, gallery, option_groups, details, documents, purchase_url, shipping_profile_id, max_per_order, ${PUBLIC_STOCK_SELECT}` as const;
+  `id, title, description, price_cents, currency, image_key, digital_file_key, gallery, option_groups, details, documents, purchase_url, shipping_profile_id, max_per_order, ${MODERATION_GATE_SELECT}, ${PUBLIC_STOCK_SELECT}` as const;
 
 export type PublicProductRow = {
   id: string;
@@ -79,6 +83,9 @@ export type PublicProductRow = {
   purchase_url: string | null;
   shipping_profile_id: string | null;
   max_per_order: number | null;
+  /** Takedown state. Read by the gate below, never by the payload builder:
+   *  nothing about a removal is buyer-facing. */
+  moderation_status: string | null;
   track_stock: boolean;
   stock_quantity: number | null;
   low_stock_threshold: number;
@@ -239,7 +246,7 @@ export const getPublicProductPage = cache(
     const admin = createAdminClient();
     const { data: storefront, error: storefrontError } = await admin
       .from("storefronts")
-      .select("id, name, owner_id, config")
+      .select(`id, name, owner_id, config, ${MODERATION_GATE_SELECT}`)
       .eq("id", storefrontId)
       .maybeSingle();
     if (storefrontError) {
@@ -247,6 +254,11 @@ export const getPublicProductPage = cache(
       return null;
     }
     if (!storefront) return null;
+
+    // A removed STOREFRONT takes every page hanging off it, before the product
+    // is even read: taking down a shop and leaving its product pages reachable
+    // by direct link would be a takedown in name only.
+    if (!isContentVisible(storefront.moderation_status)) return null;
 
     const config = parseStoredStorefrontConfig(storefront.config);
     if (!config) return null;
@@ -289,6 +301,15 @@ export const getPublicProductPage = cache(
       return null;
     }
     if (!row) return null;
+
+    // THE REMOVAL GATE. Same 404 as every other refusal in this function, so a
+    // takedown is indistinguishable from a product that never existed: a page
+    // that said "removed" would tell a scanner exactly which listings were
+    // worth looking at on an archive, and would put the platform's finding in
+    // front of buyers who were never the audience for it. The seller is told
+    // directly instead (a policy notification and a banner in the dashboard).
+    if (!isContentVisible((row as PublicProductRow).moderation_status)) return null;
+
     if (sellerError) {
       console.error("[product-page] seller identity read failed", sellerError);
     }

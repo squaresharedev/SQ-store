@@ -69,6 +69,23 @@ export function asUser<T>(user: TestUser, fn: Runner<T>): Promise<T> {
   );
 }
 
+/**
+ * Run queries as a signed-in user whose token carries extra claims, such as
+ * `aal` (the two-factor assurance level) and `amr`. `asUser` sends none, which
+ * GoTrue's rules read as aal1.
+ */
+export function asUserWithClaims<T>(
+  user: TestUser,
+  claims: Record<string, unknown>,
+  fn: Runner<T>,
+): Promise<T> {
+  return inRole(
+    "authenticated",
+    { sub: user.id, email: user.email, role: "authenticated", ...claims },
+    fn,
+  );
+}
+
 /** Run queries as the anonymous (signed-out) API role. */
 export function asAnon<T>(fn: Runner<T>): Promise<T> {
   return inRole("anon", { role: "anon" }, fn);

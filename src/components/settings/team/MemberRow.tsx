@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import type { SelectOption } from "@/components/ui/select";
 import { iconButtonClass } from "@/components/ui/control-styles";
+import { StepUpField } from "@/components/auth/StepUp";
 import {
   can,
   ASSIGNABLE_ROLES,
@@ -207,6 +208,7 @@ export function MemberRow({
               {ROLE_DESCRIPTIONS[pendingRole]}
             </span>
           </p>
+          <StepUpField id={`role-step-up-${member.id}`} state={roleState} />
           <div className="flex items-center gap-2">
             <SaveButton
               type="submit"
@@ -243,6 +245,7 @@ export function MemberRow({
               <>Remove {name}? They lose access immediately.</>
             )}
           </p>
+          <StepUpField id={`revoke-step-up-${member.id}`} state={revokeState} />
           <div className="flex items-center gap-2">
             <SaveButton
               type="submit"

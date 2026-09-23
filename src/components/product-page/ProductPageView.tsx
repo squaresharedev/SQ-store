@@ -507,7 +507,12 @@ export function ProductPageView({
               to turn off. See PoweredByFooter's header comment. No `preview`
               prop: unlike everything else on this page, the footer's links are
               identically live in both modes (see PoweredByFooter itself). */}
-          <PoweredByFooter ruleColor={rule} sellerName={soldBy} />
+          <PoweredByFooter
+            ruleColor={rule}
+            sellerName={soldBy}
+            productId={product.id}
+            preview={preview}
+          />
 
           {hasCta && (
             <div

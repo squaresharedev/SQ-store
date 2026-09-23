@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { hasVerifiedFactor } from "@/lib/auth/assurance";
+import { twoFactorChallengePath } from "@/lib/auth/session";
 import {
   LAST_SIGN_IN_COOKIE,
   parseSignInMethod,
@@ -30,9 +32,16 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = await createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      const response = NextResponse.redirect(`${origin}${next}`);
+      // Google, a magic link and a password-recovery link are all FIRST
+      // factors. For an account with 2FA on, the session they produce is aal1
+      // and still owes its code, recovery links included: an inbox is not a
+      // second factor, so a reset link must never skip the challenge.
+      const destination = hasVerifiedFactor(data.user)
+        ? twoFactorChallengePath(next)
+        : next;
+      const response = NextResponse.redirect(`${origin}${destination}`);
       // Set on the response rather than through `cookies()`: this handler
       // returns a redirect it built itself, and that is the response the
       // browser actually receives.

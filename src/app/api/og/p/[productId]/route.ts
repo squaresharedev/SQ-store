@@ -9,6 +9,10 @@ import {
 import { sellerEmailVerificationRequired } from "@/lib/settings/seller-email-verification";
 import { isTraderIdentityComplete } from "@/lib/settings/trader-identity";
 import { presignGetUrl } from "@/lib/r2";
+import {
+  MODERATION_GATE_SELECT,
+  isContentVisible,
+} from "@/lib/moderation/removal";
 import { RATE_LIMITS, clientKey, rateLimitKey } from "@/lib/rate-limit";
 import { uuidField } from "@/lib/validation/inputs";
 
@@ -62,12 +66,20 @@ export async function GET(
   const { data: row } = await admin
     .from("products")
     // owner_id is read only to check the publish gate below; it never leaves.
-    .select("image_key, owner_id")
+    .select(`image_key, owner_id, ${MODERATION_GATE_SELECT}`)
     .eq("id", productId)
     .eq("status", "active")
     .not("image_key", "is", null)
     .maybeSingle();
   if (!row?.image_key) return new Response(null, { status: 404 });
+
+  // THE REMOVAL GATE. A share card is the longest-lived public artefact a
+  // product has: the link is already pasted into other people's timelines and
+  // chat apps, and they re-scrape it. Leaving this open would keep serving the
+  // picture of a removed listing long after the page itself was gone.
+  if (!isContentVisible(row.moderation_status)) {
+    return new Response(null, { status: 404 });
+  }
 
   const { data: sellerRow, error: sellerError } = await admin
     .from("profiles")

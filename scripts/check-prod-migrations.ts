@@ -199,6 +199,18 @@ const TRIAGE: Record<string, Disposition> = {
   // them would let the sample-storefront spec pass on a page with no sample.
   // (Applied on 2026-09-17.)
   "20260917122500": { kind: "replayed", marker: "20260917_sample_storefront" },
+  // moderation_* columns on products/storefronts/artifacts, the
+  // guard_moderation_columns trigger, and notifications type += 'policy'.
+  // Applied via Supabase MCP (apply_migration), not a supabase CLI push, which
+  // is why the prod version string's time component doesn't match the local
+  // migration filename's date-only name — same content either way.
+  // (Applied on 2026-09-18.)
+  "20260918154030": { kind: "replayed", marker: "20260918_content_moderation" },
+  // Widens the shared `reports` table (SQ-admin's 0007_content_reports.sql):
+  // target types, reason vocabulary, staff resolution columns, dedupe
+  // indexes, and the content_report_scores rollup view. Applied immediately
+  // after the migration above, same session. (Applied on 2026-09-18.)
+  "20260918154058": { kind: "replayed", marker: "0007_content_reports" },
 };
 
 async function main(): Promise<void> {

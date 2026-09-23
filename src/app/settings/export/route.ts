@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { getSessionState } from "@/lib/auth/session";
+import { STEP_UP_WINDOW_SECONDS, secondFactorIsFresh } from "@/lib/auth/assurance";
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
 
 /**
@@ -47,14 +49,32 @@ const PRODUCT_COLUMNS =
 const STOREFRONT_COLUMNS = "id, name, config, brief, created_at, updated_at";
 
 export async function GET() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
-  if (error || !user) {
+  // Through the shared session gate, not a bare auth.getUser(): a session that
+  // still owes its second factor reads as signed out here like everywhere else.
+  const session = await getSessionState();
+  if (session.kind === "unreachable") {
+    return NextResponse.json(
+      { error: "Couldn't reach the sign-in service. Try again in a minute." },
+      { status: 503 },
+    );
+  }
+  if (session.kind !== "signed_in") {
     return NextResponse.json({ error: "Not signed in." }, { status: 401 });
   }
+  const { user, assurance } = session;
+
+  // The whole account in one file is the most valuable thing a hijacked
+  // session could walk off with. With 2FA on, it needs a code from the last
+  // few minutes; the Danger zone's button asks for one first (confirmIdentity)
+  // and then comes here.
+  if (assurance.enrolled && !secondFactorIsFresh(assurance, STEP_UP_WINDOW_SECONDS)) {
+    return NextResponse.json(
+      { error: "Confirm it's you with a two-factor code, then download again." },
+      { status: 403 },
+    );
+  }
+
+  const supabase = await createClient();
 
   if (!(await rateLimit("dataExport", RATE_LIMITS.dataExport))) {
     return NextResponse.json(

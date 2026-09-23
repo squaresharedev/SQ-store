@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { AccountSection } from "@/components/settings/AccountSection";
 import { accountHasPassword } from "@/lib/auth/has-password";
-import { requireProfile, requireUser } from "@/lib/auth/session";
+import { getAssurance, requireProfile, requireUser } from "@/lib/auth/session";
 
 export const metadata: Metadata = {
   title: "Account settings",
@@ -15,7 +15,10 @@ export default async function AccountSettingsPage() {
     requireUser("/settings/account"),
     requireProfile(),
   ]);
-  const hasPassword = await accountHasPassword(user.id);
+  const [hasPassword, assurance] = await Promise.all([
+    accountHasPassword(user.id),
+    getAssurance(),
+  ]);
 
   return (
     <AccountSection
@@ -28,6 +31,8 @@ export default async function AccountSettingsPage() {
       // the old check reported "no password" for accounts that had one. See
       // lib/auth/has-password.ts for what that broke.
       hasPassword={hasPassword}
+      // Null (a failed read) counts as "on": never nag on a guess.
+      twoFactorEnabled={assurance ? assurance.enrolled : true}
     />
   );
 }

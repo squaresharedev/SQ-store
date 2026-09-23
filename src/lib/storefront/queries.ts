@@ -13,6 +13,8 @@ import {
   type StorefrontConfig,
 } from "@/types/storefront";
 import type { StorefrontBrief } from "@/types/storefront-brief";
+import { takedownFromRow } from "@/lib/moderation/removal";
+import type { ProductRemoval } from "@/types/product";
 
 // Server Components / Route Handlers only (cookies() is Node-only — never
 // middleware). RLS now permits reading any store you're a member of, so reads
@@ -44,6 +46,10 @@ export type StorefrontSummary = {
    *  Carried so the NEXT storefront's flow can arrive pre-answered instead of
    *  asking the same seller the same questions again. */
   brief: StorefrontBrief;
+  /** Set ONLY when staff have taken this storefront down, so its presence
+   *  is the whole test. Carries the statement of reasons the seller is
+   *  entitled to; the card renders it in place of the usual actions. */
+  removal?: ProductRemoval;
 };
 
 /**
@@ -52,6 +58,17 @@ export type StorefrontSummary = {
  * number of storefronts per seller.
  */
 const STOREFRONT_LIST_LIMIT = 100;
+
+/**
+ * The list columns, including the moderation facts.
+ *
+ * Named rather than inline because the takedown state has to travel with the
+ * LIST and not only with the one storefront a seller happens to open. A
+ * removal nobody sees until they click into the right card is a removal they
+ * find out about from a buyer.
+ */
+const MODERATION_LIST_SELECT =
+  "id, name, config, updated_at, embed_key, brief, moderation_status, moderation_ground, moderation_note, moderated_at, moderation_review_requested_at";
 
 /** The list page's read: one bounded page of summaries plus the EXACT total,
  *  so truncation is visible instead of silent. */
@@ -79,7 +96,7 @@ export async function listStorefronts(offset = 0): Promise<StorefrontsPage> {
   const from = Math.max(0, Math.trunc(offset));
   const { data, error, count } = await supabase
     .from("storefronts")
-    .select("id, name, config, updated_at, embed_key, brief", {
+    .select(MODERATION_LIST_SELECT, {
       count: "exact",
     })
     .eq("owner_id", account.accountId)
@@ -92,6 +109,7 @@ export async function listStorefronts(offset = 0): Promise<StorefrontsPage> {
   const rows = (data ?? []).map((row) => {
     const config =
       parseStoredStorefrontConfig(row.config) ?? DEFAULT_STOREFRONT_CONFIG;
+    const takedown = takedownFromRow(row);
     return {
       id: row.id,
       name: row.name,
@@ -100,6 +118,7 @@ export async function listStorefronts(offset = 0): Promise<StorefrontsPage> {
       config,
       embedKey: row.embed_key,
       brief: parseStorefrontBrief(row.brief),
+      ...(takedown ? { removal: takedown } : {}),
     };
   });
   return { rows, total: count ?? rows.length };

@@ -2,6 +2,11 @@ import { cache } from "react";
 import { redirect, unstable_rethrow } from "next/navigation";
 import { isAuthRetryableFetchError, type User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import {
+  assuranceFrom,
+  needsSecondFactor,
+  type SessionAssurance,
+} from "@/lib/auth/assurance";
 import type { Profile } from "@/types";
 
 /**
@@ -106,12 +111,44 @@ async function withTimeout<T>(promise: Promise<T>, timeoutValue: T): Promise<T> 
 const TIMED_OUT = Symbol("auth-timeout");
 
 /**
+ * The access token `getUser()` just validated, or null if it cannot be read.
+ *
+ * Only `access_token` is touched: reading `session.user` off getSession() is
+ * the insecure pattern auth-js warns about, and the validated user is already
+ * in hand. A null here FAILS CLOSED for exactly the accounts it matters to: no
+ * token means no `aal2` claim, so an account with 2FA on reads as still owing
+ * its code, while an account without 2FA is unaffected.
+ */
+async function validatedAccessToken(supabase: {
+  auth: { getSession?: () => Promise<{ data: { session: { access_token?: string } | null } }> };
+}): Promise<string | null> {
+  try {
+    const result = await supabase.auth.getSession?.();
+    return result?.data.session?.access_token ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * The raw session read: did we get an answer, and what was it? Cached so the
  * repeated calls within one render share a single round-trip (and a single
  * verdict — a blip must not make one call succeed and the next redirect).
+ *
+ * `assurance` is how strongly the session has proven itself (see
+ * lib/auth/assurance.ts). It is read from the SAME client, straight after
+ * `getUser()` has had GoTrue validate the token, so the claims it decodes are
+ * the ones GoTrue just accepted: @supabase/ssr's server storage serves a token
+ * refreshed during `getUser()` back from memory even where the cookie write
+ * itself was refused (a Server Component render), so this never triggers a
+ * second refresh.
  */
 const loadUser = cache(
-  async (): Promise<{ user: User | null; unreachable: unknown }> => {
+  async (): Promise<{
+    user: User | null;
+    unreachable: unknown;
+    assurance: SessionAssurance | null;
+  }> => {
     try {
       const supabase = await createClient();
       const result = await withTimeout<
@@ -124,6 +161,7 @@ const loadUser = cache(
           unreachable: new Error(
             `Supabase Auth did not respond within ${AUTH_TIMEOUT_MS}ms.`,
           ),
+          assurance: null,
         };
       }
 
@@ -140,25 +178,83 @@ const loadUser = cache(
         return {
           user: null,
           unreachable: isAuthRetryableFetchError(error) ? error : null,
+          assurance: null,
         };
       }
-      return { user, unreachable: null };
+      if (!user) return { user: null, unreachable: null, assurance: null };
+
+      return {
+        user,
+        unreachable: null,
+        assurance: assuranceFrom(user, await validatedAccessToken(supabase)),
+      };
     } catch (error) {
       unstable_rethrow(error);
-      return { user: null, unreachable: error };
+      return { user: null, unreachable: error, assurance: null };
     }
   },
 );
+
+/**
+ * Where a signed-in session stands, for the few places that must tell "signed
+ * out" apart from "signed in but still owes a second factor": the sign-in and
+ * challenge pages, the recovery-link landing, and the challenge's own actions.
+ *
+ *   signed_out   no session, or GoTrue rejected it
+ *   needs_mfa    2FA is on for this account and this session has not passed
+ *                it. Everything else in the app treats this as signed out.
+ *   signed_in    a session that may use the app
+ *
+ * `unreachable` is its own state for the same reason it is in requireUser: a
+ * network blip must never be read as a sign-out.
+ */
+export type SessionState =
+  | { kind: "signed_out" }
+  | { kind: "unreachable" }
+  | { kind: "needs_mfa"; user: User; assurance: SessionAssurance }
+  | { kind: "signed_in"; user: User; assurance: SessionAssurance };
+
+export const getSessionState = cache(async (): Promise<SessionState> => {
+  const { user, unreachable, assurance } = await loadUser();
+  if (unreachable) return { kind: "unreachable" };
+  if (!user || !assurance) return { kind: "signed_out" };
+  if (needsSecondFactor(assurance)) return { kind: "needs_mfa", user, assurance };
+  return { kind: "signed_in", user, assurance };
+});
+
+/**
+ * The current session's assurance, or null when it is not a fully signed-in
+ * session. Read by step-up checks and by pages that show 2FA state.
+ */
+export const getAssurance = cache(async (): Promise<SessionAssurance | null> => {
+  const state = await getSessionState();
+  return state.kind === "signed_in" ? state.assurance : null;
+});
+
+/**
+ * Where to send a session that still owes its second factor. `next` is where
+ * it was going; the challenge page sanitises it again before using it.
+ */
+export function twoFactorChallengePath(nextPath?: string): string {
+  const query = nextPath ? `?next=${encodeURIComponent(nextPath)}` : "";
+  return `/login/two-factor${query}`;
+}
 
 /**
  * The current user, or null when signed out. A network failure also reads as
  * null here, which is correct for OPTIONAL checks (the login page rendering
  * its form, a nav bar hiding an avatar). Routes that gate access on the answer
  * must use `requireUser`, which refuses to guess.
+ *
+ * NULL FOR A SESSION THAT STILL OWES ITS SECOND FACTOR. That is the whole app
+ * gate for 2FA: every action, route and page that asks "who is this?" through
+ * here gets "nobody" until the code is entered, so a stolen password alone
+ * opens nothing. Fail-closed by construction rather than by remembering to
+ * add a check at each of the ~40 call sites.
  */
 export const getUser = cache(async (): Promise<User | null> => {
-  const { user } = await loadUser();
-  return user;
+  const state = await getSessionState();
+  return state.kind === "signed_in" ? state.user : null;
 });
 
 /**
@@ -174,8 +270,12 @@ export async function actionUser(): Promise<{
   user: User | null;
   unreachable: boolean;
 }> {
-  const { user, unreachable } = await loadUser();
-  return { user, unreachable: unreachable != null };
+  const state = await getSessionState();
+  return {
+    // Null for a session that still owes its second factor, like getUser.
+    user: state.kind === "signed_in" ? state.user : null,
+    unreachable: state.kind === "unreachable",
+  };
 }
 
 /**
@@ -237,7 +337,11 @@ export async function requireUser(nextPath?: string): Promise<User> {
   // the render to the nearest error boundary, which offers a retry and keeps
   // the session cookie intact.
   if (unreachable) throw new AuthUnreachableError(unreachable);
-  if (!user) {
+  const state = await getSessionState();
+  // Signed in, second factor still owed: the challenge, not the sign-in form.
+  // Sending them back to /login would ask for a password they just gave.
+  if (state.kind === "needs_mfa") redirect(twoFactorChallengePath(nextPath));
+  if (!user || state.kind !== "signed_in") {
     const query = nextPath ? `?next=${encodeURIComponent(nextPath)}` : "";
     redirect(`/login${query}`);
   }

@@ -83,6 +83,9 @@ const productRow = {
   stock_quantity: 3,
   low_stock_threshold: 5,
   max_per_order: 4,
+  // The gate's column. Visible by default here so the existing cases keep
+  // testing what they were written to test; the removal cases override it.
+  moderation_status: "ok",
   owner_id: OWNER_ID,
 };
 

@@ -1,4 +1,5 @@
 import { LEGAL_LINKS, SQUARESHARE_SITE } from "@/lib/legal/links";
+import { ReportDialog } from "./ReportDialog";
 
 // The foot of the buyer's page: who they are actually buying from, and the two
 // policies that are OURS rather than the seller's.
@@ -72,9 +73,16 @@ export function PoweredByFooter({
   /** The trader, as named beside the price: the business name, or the store's
    *  name when no business name was given. Never empty. */
   sellerName,
+  /** This page's product, so a report names what it is about. */
+  productId,
+  /** Editor preview: the report link renders but does nothing. See
+   *  ReportDialog for why it is shown rather than hidden. */
+  preview = false,
 }: {
   ruleColor: string;
   sellerName: string;
+  productId: string;
+  preview?: boolean;
 }) {
   return (
     <footer className="w-full border-t" style={{ borderColor: ruleColor }} data-product-page-footer="">
@@ -153,6 +161,12 @@ export function PoweredByFooter({
               </span>
             ))}
           </nav>
+          {/* Deliberately after the policies and at the same muted weight: a
+              report link has to be findable by someone looking for it and
+              unremarkable to everyone else. Making it louder would print a
+              standing accusation under every honest listing. */}
+          <Dot />
+          <ReportDialog targetType="product" targetId={productId} preview={preview} />
         </div>
       </div>
     </footer>

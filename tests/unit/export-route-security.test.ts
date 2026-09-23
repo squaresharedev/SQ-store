@@ -62,7 +62,15 @@ describe("export route security invariants", () => {
 
   it("still authenticates before doing any work", () => {
     expect(ROUTE).toMatch(/status:\s*401/);
-    expect(ROUTE).toContain("auth.getUser()");
+    // Through the shared session gate, which also treats a session that still
+    // owes its second factor as signed out. A bare auth.getUser() would not.
+    expect(ROUTE).toContain("getSessionState()");
+    expect(ROUTE).not.toContain("auth.getUser()");
+  });
+
+  it("demands a recent two-factor code from an account with 2FA on", () => {
+    expect(ROUTE).toMatch(/secondFactorIsFresh\(\s*assurance,\s*STEP_UP_WINDOW_SECONDS\s*\)/);
+    expect(ROUTE).toMatch(/status:\s*403/);
   });
 });
 

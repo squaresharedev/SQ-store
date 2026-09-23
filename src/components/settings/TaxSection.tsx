@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight, Check } from "lucide-react";
 import { useActionToast, useToast } from "@/components/ui/Toast";
 import { SaveButton } from "@/components/ui/SaveButton";
+import { StepUpField } from "@/components/auth/StepUp";
 import { SettingsCard } from "@/components/settings/SettingsCard";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -404,6 +405,7 @@ export function TaxSection({
             disabled={isPending}
           />
         </div>
+        <StepUpField id="business-details" state={state} />
         <div className="flex flex-wrap items-center gap-3">
           <SaveButton pending={isPending} state={state} />
           {/* THE NEXT STEP, not just the confirmation. SaveButton already says

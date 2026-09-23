@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { BackgroundArrow } from "@/components/ui/BackgroundArrow";
 import { readSignInMethod } from "@/lib/auth/last-method";
-import { getUser } from "@/lib/auth/session";
+import { getSessionState, twoFactorChallengePath } from "@/lib/auth/session";
 import { MARKETPLACE_URL } from "@/lib/site";
 import { safeInternalPath } from "@/lib/utils/safe-path";
 
@@ -34,11 +34,14 @@ export default async function LoginPage({
 }: {
   searchParams: Promise<{ error?: string; next?: string }>;
 }) {
-  // Already signed in? Skip the form.
-  const user = await getUser();
+  // Already signed in? Skip the form. Half signed in (password done, 2FA code
+  // still owed)? Straight to the challenge rather than asking for the
+  // password again.
+  const session = await getSessionState();
   const sp = await searchParams;
   const next = sanitizeNext(sp.next);
-  if (user) redirect(next);
+  if (session.kind === "signed_in") redirect(next);
+  if (session.kind === "needs_mfa") redirect(twoFactorChallengePath(next));
 
   const linkError = sp.error ? (ERROR_MESSAGES[sp.error] ?? null) : null;
 

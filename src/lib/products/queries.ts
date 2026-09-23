@@ -25,6 +25,7 @@ import {
   type ProductSort,
 } from "@/lib/products/sort";
 import { productQuantityCap } from "@/lib/products/quantity";
+import { takedownFromRow } from "@/lib/moderation/removal";
 import { productIdSchema } from "@/lib/validation/product";
 
 // Server-side reads for the ACTIVE account's products (your own store, or one
@@ -55,10 +56,18 @@ type ProductListRow = Pick<
   | "stock_quantity"
   | "low_stock_threshold"
   | "max_per_order"
+  // Moderation travels with EVERY seller-side read, list included. A takedown
+  // a seller only discovers by opening the one product it happened to is not
+  // a notification, it is a trap: the list is where they look first.
+  | "moderation_status"
+  | "moderation_ground"
+  | "moderation_note"
+  | "moderated_at"
+  | "moderation_review_requested_at"
 >;
 
 const PRODUCT_LIST_COLUMNS =
-  "id, title, description, price_cents, currency, status, image_key, digital_file_key, track_stock, stock_quantity, low_stock_threshold, max_per_order";
+  "id, title, description, price_cents, currency, status, image_key, digital_file_key, track_stock, stock_quantity, low_stock_threshold, max_per_order, moderation_status, moderation_ground, moderation_note, moderated_at, moderation_review_requested_at";
 
 /**
  * The list columns plus the product-page jsonb. Only the single-product read
@@ -99,6 +108,7 @@ function fileNameFromKey(key: string | null): string | null {
 
 /** Map a DB row (integer cents, R2 keys) to the UI contract (decimal, names). */
 async function rowToProduct(row: ProductListRow): Promise<Product> {
+  const takedown = takedownFromRow(row);
   return {
     id: row.id,
     title: row.title,
@@ -117,6 +127,10 @@ async function rowToProduct(row: ProductListRow): Promise<Product> {
     // Corrected into the legal range on the way out, so the form's field and
     // the buyer's picker are bounded by the same function (see quantity.ts).
     maxPerOrder: productQuantityCap(row.max_per_order),
+    // Spread, so a product nobody has touched produces the byte-identical
+    // object it always has and no surface has to check a flag before deciding
+    // whether the removal fields mean anything.
+    ...(takedown ? { removal: takedown } : {}),
   };
 }
 

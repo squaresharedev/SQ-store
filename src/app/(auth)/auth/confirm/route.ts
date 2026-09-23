@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { hasVerifiedFactor } from "@/lib/auth/assurance";
+import { twoFactorChallengePath } from "@/lib/auth/session";
 import { emailOtpTypeSchema } from "@/lib/validation/auth";
 import { safeInternalPath } from "@/lib/utils/safe-path";
 
@@ -19,12 +21,17 @@ export async function GET(request: Request) {
 
   if (tokenHash && type.success) {
     const supabase = await createClient();
-    const { error } = await supabase.auth.verifyOtp({
+    const { data, error } = await supabase.auth.verifyOtp({
       type: type.data,
       token_hash: tokenHash,
     });
     if (!error) {
-      return NextResponse.redirect(`${origin}${next}`);
+      // Same rule as /auth/callback: an emailed link is a first factor, so an
+      // account with 2FA on still owes its code before going anywhere.
+      const destination = hasVerifiedFactor(data.user)
+        ? twoFactorChallengePath(next)
+        : next;
+      return NextResponse.redirect(`${origin}${destination}`);
     }
     console.warn("[auth] otp verification failed", error.code, error.message);
   }

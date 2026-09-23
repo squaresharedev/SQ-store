@@ -21,6 +21,7 @@ import { StorefrontCard } from "./StorefrontCard";
 import { CreateStorefrontWizard } from "./CreateStorefrontWizard";
 import { EmbedModal } from "./EmbedModal";
 import { SampleEmbedModal, SampleStorefrontCard } from "./SampleStorefrontCard";
+import { RemovalNotice } from "@/components/products/RemovalNotice";
 
 /**
  * Client wrapper owning the visible storefront set. Create opens the setup
@@ -188,6 +189,25 @@ export function StorefrontsList({
           </Button>
         )}
       </div>
+
+      {/* A paused or removed storefront's statement of reasons, in full, above
+          the grid. Not inside its card: a card has room for a state, and the
+          pause needs a sentence and a button. Above the grid rather than on
+          the editor, because the editor is a full-screen canvas and this is
+          the page a seller lands on from the notification. */}
+      {storefronts.map((storefront) =>
+        storefront.removal ? (
+          <RemovalNotice
+            key={`takedown-${storefront.id}`}
+            removal={storefront.removal}
+            kind="storefront"
+            id={storefront.id}
+            title={storefront.name}
+            canRequestReview={canWrite}
+            className="mb-4"
+          />
+        ) : null,
+      )}
 
       {storefronts.length === 0 && !sampleVisible ? (
         <div className={cn(emptyStateClass, "bg-background")}>

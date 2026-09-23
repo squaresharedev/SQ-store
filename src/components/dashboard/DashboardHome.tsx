@@ -25,6 +25,7 @@ export function DashboardHome({
   profile,
   stripeConnected,
   onboarding,
+  twoFactorEnabled = true,
 }: {
   orders: DashboardOrdersData;
   products: ProductsSummary;
@@ -34,6 +35,8 @@ export function DashboardHome({
   stripeConnected: boolean;
   /** The setup checklist and welcome flow's data; null renders neither. */
   onboarding: OnboardingData | null;
+  /** Whether the signed-in person has 2FA on; off adds the nudge row. */
+  twoFactorEnabled?: boolean;
 }) {
   const { last30d } = orders;
   const setupVisible = Boolean(onboarding?.setup && !onboarding.setup.complete);
@@ -101,6 +104,7 @@ export function DashboardHome({
               profile,
               stripeConnected,
               setupVisible,
+              twoFactorEnabled,
             })}
           />
           <RecentOrders orders={orders.recentOrders} id={RECENT_ORDERS_ID} />

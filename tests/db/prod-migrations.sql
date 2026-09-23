@@ -3389,3 +3389,457 @@ alter table public.profiles
 alter table public.profiles
   add column sample_storefront_hidden_at timestamptz,
   add column editor_tour_seen_at timestamptz;
+
+-- 20260918_content_moderation (SQ-store)
+-- Takedown state on products, storefronts and artifacts, the trigger that makes
+-- it staff-only, and the 'policy' notification type that tells a seller.
+-- Replayed because the integration suite has to prove three things that exist
+-- only in the database: that a seller cannot write moderation_* through their
+-- own RLS-permitted UPDATE, that the columns default to visible, and that a
+-- 'policy' notification inserts (the type CHECK and NOTIFICATION_TYPES are two
+-- lists, and a mismatch fails silently).
+alter table public.products
+  add column moderation_status text not null default 'ok',
+  add column moderation_ground text,
+  add column moderation_note   text,
+  add column moderated_at      timestamptz,
+  add column moderated_by      uuid references public.admin_users (id) on delete set null;
+
+alter table public.storefronts
+  add column moderation_status text not null default 'ok',
+  add column moderation_ground text,
+  add column moderation_note   text,
+  add column moderated_at      timestamptz,
+  add column moderated_by      uuid references public.admin_users (id) on delete set null;
+
+alter table public.artifacts
+  add column moderation_status text not null default 'ok',
+  add column moderation_ground text,
+  add column moderation_note   text,
+  add column moderated_at      timestamptz,
+  add column moderated_by      uuid references public.admin_users (id) on delete set null;
+
+do $guard$
+declare
+  target text;
+begin
+  foreach target in array array['products', 'storefronts', 'artifacts'] loop
+    execute format(
+      'alter table public.%I add constraint %I check (moderation_status in (''ok'', ''removed''))',
+      target, target || '_moderation_status_check'
+    );
+    execute format(
+      'alter table public.%I add constraint %I check (moderation_note is null or char_length(moderation_note) <= 500)',
+      target, target || '_moderation_note_check'
+    );
+  end loop;
+end
+$guard$;
+
+create index products_moderation_removed_idx
+  on public.products (moderated_at desc) where moderation_status <> 'ok';
+create index storefronts_moderation_removed_idx
+  on public.storefronts (moderated_at desc) where moderation_status <> 'ok';
+create index artifacts_moderation_removed_idx
+  on public.artifacts (moderated_at desc) where moderation_status <> 'ok';
+
+create or replace function public.guard_moderation_columns()
+returns trigger
+language plpgsql
+set search_path = ''
+as $fn$
+declare
+  guarded    text;
+  before_row jsonb := to_jsonb(old);
+  after_row  jsonb := to_jsonb(new);
+begin
+  if current_user in ('service_role', 'postgres', 'supabase_admin') then
+    return new;
+  end if;
+
+  foreach guarded in array array[
+    'moderation_status', 'moderation_ground', 'moderation_note',
+    'moderated_at', 'moderated_by'
+  ] loop
+    if (before_row -> guarded) is distinct from (after_row -> guarded) then
+      raise exception
+        'Moderation state is set by SquareShare staff and cannot be changed here (column %).', guarded
+        using errcode = '42501';
+    end if;
+  end loop;
+
+  return new;
+end;
+$fn$;
+
+create trigger products_guard_moderation
+  before update on public.products
+  for each row execute function public.guard_moderation_columns();
+
+create trigger storefronts_guard_moderation
+  before update on public.storefronts
+  for each row execute function public.guard_moderation_columns();
+
+create trigger artifacts_guard_moderation
+  before update on public.artifacts
+  for each row execute function public.guard_moderation_columns();
+
+alter table public.notifications
+  drop constraint if exists notifications_type_check;
+
+alter table public.notifications
+  add constraint notifications_type_check
+  check (type = any (array['team','payment','stock','order','system','security','policy']));
+
+-- 0007_content_reports (SQ-admin)
+-- Widens the shared `reports` table into one notice surface for all three apps,
+-- adds the staff resolution columns, and adds the per-target rollup view.
+-- Replayed because the RLS suite must keep proving reports stay staff-only
+-- after the change, and because the dedupe indexes are the only thing stopping
+-- one angry person from counting as a crowd.
+alter table public.reports drop constraint if exists reports_target_type_check;
+alter table public.reports
+  add constraint reports_target_type_check
+  check (target_type in ('product', 'storefront', 'artifact', 'profile'));
+
+alter table public.reports drop constraint if exists reports_reason_check;
+alter table public.reports
+  add constraint reports_reason_check
+  check (reason in (
+    'illegal', 'sexual', 'violence', 'hate',
+    'counterfeit', 'scam', 'spam', 'other'
+  ));
+
+alter table public.reports drop constraint if exists reports_status_check;
+alter table public.reports
+  add constraint reports_status_check
+  check (status in ('open', 'reviewed', 'actioned', 'dismissed'));
+
+alter table public.reports
+  add column reporter_hash   text,
+  add column reporter_email  text,
+  add column resolved_at     timestamptz,
+  add column resolved_by     uuid references public.admin_users (id) on delete set null,
+  add column resolution_note text;
+
+alter table public.reports
+  add constraint reports_reporter_email_check
+  check (reporter_email is null or char_length(reporter_email) <= 320);
+
+alter table public.reports
+  add constraint reports_resolution_note_check
+  check (resolution_note is null or char_length(resolution_note) <= 500);
+
+create unique index reports_open_dedupe_hash_idx
+  on public.reports (target_type, target_id, reporter_hash)
+  where status in ('open', 'reviewed') and reporter_hash is not null;
+
+create unique index reports_open_dedupe_user_idx
+  on public.reports (target_type, target_id, reporter_id)
+  where status in ('open', 'reviewed') and reporter_id is not null;
+
+create index reports_open_created_idx
+  on public.reports (created_at) where status in ('open', 'reviewed');
+
+create view public.content_report_scores as
+  select
+    r.target_type,
+    r.target_id,
+    (count(*) filter (where r.status in ('open', 'reviewed')))::int             as open_reports,
+    (count(*))::int                                                             as total_reports,
+    max(r.created_at) filter (where r.status in ('open', 'reviewed'))           as newest_open_at,
+    min(r.created_at) filter (where r.status in ('open', 'reviewed'))           as oldest_open_at,
+    max(r.created_at)                                                           as newest_report_at,
+    mode() within group (order by r.reason)                                     as top_reason,
+    coalesce(p.title, s.name, a.title, pr.username)                             as target_title,
+    coalesce(p.owner_id, s.owner_id, a.owner_id, pr.id)                         as target_owner_id,
+    coalesce(p.moderation_status, s.moderation_status, a.moderation_status)     as moderation_status,
+    coalesce(p.moderated_at, s.moderated_at, a.moderated_at)                    as moderated_at
+  from public.reports r
+  left join public.products    p  on r.target_type = 'product'    and p.id  = r.target_id
+  left join public.storefronts s  on r.target_type = 'storefront' and s.id  = r.target_id
+  left join public.artifacts   a  on r.target_type = 'artifact'   and a.id  = r.target_id
+  left join public.profiles    pr on r.target_type = 'profile'    and pr.id = r.target_id
+  group by
+    r.target_type, r.target_id,
+    p.title, s.name, a.title, pr.username,
+    p.owner_id, s.owner_id, a.owner_id, pr.id,
+    p.moderation_status, s.moderation_status, a.moderation_status,
+    p.moderated_at, s.moderated_at, a.moderated_at;
+
+revoke all on public.content_report_scores from anon, authenticated;
+grant select on public.content_report_scores to service_role;
+
+-- =============================================================================
+-- ===== (pending) moderation_pause ============================================
+-- supabase/migrations/20260923_moderation_pause.sql, replayed. NOT YET APPLIED
+-- TO PROD at the time of writing: when it is, add its prod version to TRIAGE in
+-- scripts/check-prod-migrations.ts with marker "moderation_pause".
+-- Replayed because the integration suite has to prove a seller cannot set
+-- moderation_review_requested_at through their own UPDATE (it is what puts a
+-- decision back in front of staff), and the e2e stack drives the whole
+-- pause -> fix -> ask -> approve loop against these columns.
+-- =============================================================================
+do $pause$
+declare
+  target text;
+begin
+  foreach target in array array['products', 'storefronts'] loop
+    execute format(
+      'alter table public.%I drop constraint if exists %I',
+      target, target || '_moderation_status_check'
+    );
+    execute format(
+      'alter table public.%I add constraint %I check (moderation_status in (''ok'', ''paused'', ''removed''))',
+      target, target || '_moderation_status_check'
+    );
+  end loop;
+end
+$pause$;
+
+alter table public.products
+  add column moderation_review_requested_at timestamptz;
+alter table public.storefronts
+  add column moderation_review_requested_at timestamptz;
+
+create index products_moderation_review_idx
+  on public.products (moderation_review_requested_at)
+  where moderation_review_requested_at is not null;
+create index storefronts_moderation_review_idx
+  on public.storefronts (moderation_review_requested_at)
+  where moderation_review_requested_at is not null;
+
+create or replace function public.guard_moderation_columns()
+returns trigger
+language plpgsql
+set search_path = ''
+as $fn$
+declare
+  guarded    text;
+  before_row jsonb := to_jsonb(old);
+  after_row  jsonb := to_jsonb(new);
+begin
+  if current_user in ('service_role', 'postgres', 'supabase_admin') then
+    return new;
+  end if;
+
+  foreach guarded in array array[
+    'moderation_status', 'moderation_ground', 'moderation_note',
+    'moderated_at', 'moderated_by', 'moderation_review_requested_at'
+  ] loop
+    if (before_row -> guarded) is distinct from (after_row -> guarded) then
+      raise exception
+        'Moderation state is set by SquareShare staff and cannot be changed here (column %).', guarded
+        using errcode = '42501';
+    end if;
+  end loop;
+
+  return new;
+end;
+$fn$;
+
+-- =============================================================================
+-- ===== (pending) two_factor_auth =============================================
+-- supabase/migrations/20260923_two_factor_auth.sql, replayed verbatim. NOT YET
+-- APPLIED TO PROD at the time of writing: when it is, add its prod version to
+-- TRIAGE in scripts/check-prod-migrations.ts with marker "two_factor_auth".
+-- =============================================================================
+
+-- ====================================================================
+-- TWO-FACTOR AUTHENTICATION: database-level enforcement + recovery codes.
+--
+-- WHAT THIS IS FOR. Two-factor sign-in itself is Supabase Auth's native TOTP
+-- MFA: once a person verifies an authenticator app, every session they start
+-- is `aal1` (password, Google or magic link only) until they enter a code, at
+-- which point GoTrue re-issues it as `aal2`. The app refuses to serve an `aal1`
+-- session for an enrolled account (lib/auth/session.ts), but that is only half
+-- of it. The publishable anon key ships to every browser, so someone who has
+-- phished a password can ask GoTrue for an `aal1` token directly and talk to
+-- PostgREST without ever loading a page of this app. Without the policies
+-- below, that token reads the victim's address, VAT number, orders and buyer
+-- emails, and can rewrite their catalogue.
+--
+-- HOW. `mfa_session_ok()` answers one question about the CALLER's own
+-- session: "is this token good enough for this account?" True at `aal2`, and
+-- true at `aal1` only when the account has no verified factor (2FA is optional,
+-- so everyone who has not opted in keeps working exactly as before). A
+-- RESTRICTIVE policy built on it is ANDed with every permissive policy on the
+-- table, so it cannot widen access anywhere; it can only take it away from a
+-- session that skipped its second factor.
+--
+-- WHICH TABLES. Everything the Store and the marketplace (SQ-app) read or
+-- write with a user's JWT. Sessions for both are minted by this app's sign-in
+-- page (SQ-app has no login of its own and shares the .squareshare.eu cookie),
+-- so an `aal1` session for an enrolled account only ever exists while its
+-- owner is on the 2FA challenge screen. The admin panel's own tables are left
+-- alone on purpose: it signs staff in itself, and reads the shared tables
+-- below with the service role, which RLS never applies to.
+--
+-- Apply via Supabase MCP (apply_migration) or the SQL editor.
+-- ====================================================================
+
+-- ---- 1. Is this session good enough for this account? ---------------------
+-- SECURITY DEFINER because `authenticated` has no read grant on auth.* tables.
+-- No argument on purpose: the only account it can answer about is the one in
+-- the caller's own JWT, so granting EXECUTE to `authenticated` discloses
+-- nothing beyond "you have 2FA on", which the caller already knows.
+--
+-- A missing `aal` claim reads as aal1, matching GoTrue's own rule.
+create or replace function public.mfa_session_ok()
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select coalesce(auth.jwt() ->> 'aal', 'aal1') = 'aal2'
+      or not exists (
+        select 1
+        from auth.mfa_factors f
+        where f.user_id = auth.uid()
+          and f.status = 'verified'
+      )
+$$;
+
+-- Every function in this schema is auto-granted to anon and authenticated
+-- (the PostgREST auto-grant trap), so the grant is set explicitly both ways.
+revoke execute on function public.mfa_session_ok() from public, anon;
+grant execute on function public.mfa_session_ok() to authenticated, service_role;
+
+comment on function public.mfa_session_ok() is
+  'True when the caller''s session satisfies their own 2FA setting: an aal2 token, or an aal1 token for an account with no verified MFA factor. Used by the restrictive "Require two-factor when enrolled" policies.';
+
+-- ---- 2. The restrictive policies ------------------------------------------
+-- One identical policy per table, created in a loop so the list is the only
+-- thing to review. `(select ...)` makes Postgres evaluate the function ONCE per
+-- statement (an initplan) rather than once per row.
+--
+-- Tables that do not exist are skipped rather than failing the migration: the
+-- replica in tests/db and prod are both expected to carry every one of these,
+-- and a missing one should be noticed by the RLS coverage test, not by a
+-- half-applied migration.
+do $$
+declare
+  t text;
+  tables text[] := array[
+    -- Store
+    'profiles',
+    'products',
+    'storefronts',
+    'orders',
+    'team_members',
+    'notifications',
+    'security_events',
+    'storefront_signals',
+    -- Marketplace (SQ-app), written with the same user JWT
+    'collections',
+    'artifacts',
+    'follows',
+    'artifact_likes',
+    'reports'
+  ];
+begin
+  foreach t in array tables loop
+    if to_regclass('public.' || t) is null then
+      raise notice 'two_factor_auth: skipping missing table public.%', t;
+      continue;
+    end if;
+    execute format(
+      'drop policy if exists "Require two-factor when enrolled" on public.%I', t);
+    execute format(
+      'create policy "Require two-factor when enrolled" on public.%I '
+      'as restrictive for all to authenticated '
+      'using ((select public.mfa_session_ok())) '
+      'with check ((select public.mfa_session_ok()))', t);
+  end loop;
+end
+$$;
+
+-- ---- 3. Recovery codes ------------------------------------------------------
+-- Supabase Auth has no recovery codes, so they live here. Only a salted
+-- SHA-256 of each code is stored: the codes are 80 bits of CSPRNG output, so a
+-- slow password hash buys nothing (there is no dictionary to slow down), and
+-- the per-user salt (the user id, folded into the digest in
+-- lib/auth/recovery-codes.ts) stops one precomputed table serving every
+-- account. Single-use: `used_at` is set atomically by the consume function.
+create table if not exists public.mfa_recovery_codes (
+  id         uuid primary key default gen_random_uuid(),
+  user_id    uuid not null references auth.users (id) on delete cascade,
+  code_hash  text not null check (code_hash ~ '^[0-9a-f]{64}$'),
+  used_at    timestamptz,
+  created_at timestamptz not null default now(),
+  unique (user_id, code_hash)
+);
+
+comment on table public.mfa_recovery_codes is
+  'Single-use 2FA recovery codes, stored as sha256(user_id:code). Service role only: no client role can read, write or even count them.';
+
+create index if not exists mfa_recovery_codes_unused_idx
+  on public.mfa_recovery_codes (user_id)
+  where used_at is null;
+
+-- RLS on with ZERO policies = deny-all for every client role. The revoke is
+-- what actually matters (new tables are auto-granted to anon and
+-- authenticated here), the RLS is the second lock on the same door.
+alter table public.mfa_recovery_codes enable row level security;
+revoke all on public.mfa_recovery_codes from anon, authenticated;
+grant all on public.mfa_recovery_codes to service_role;
+
+-- Replace a user's whole set in one transaction, so a failure part-way can
+-- never leave them with half the codes they were just shown.
+create or replace function public.mfa_replace_recovery_codes(
+  p_user_id uuid,
+  p_hashes  text[]
+)
+returns integer
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if p_user_id is null
+     or p_hashes is null
+     or cardinality(p_hashes) = 0
+     or cardinality(p_hashes) > 20 then
+    raise exception 'invalid recovery code batch';
+  end if;
+
+  delete from public.mfa_recovery_codes where user_id = p_user_id;
+
+  insert into public.mfa_recovery_codes (user_id, code_hash)
+  select p_user_id, h
+  from unnest(p_hashes) as h;
+
+  return cardinality(p_hashes);
+end
+$$;
+
+-- Spend one code. A single UPDATE, so two requests racing on the same code
+-- cannot both succeed: the second finds `used_at` already set.
+create or replace function public.mfa_consume_recovery_code(
+  p_user_id uuid,
+  p_hash    text
+)
+returns boolean
+language sql
+volatile
+security definer
+set search_path = ''
+as $$
+  with spent as (
+    update public.mfa_recovery_codes
+       set used_at = now()
+     where user_id = p_user_id
+       and code_hash = p_hash
+       and used_at is null
+    returning 1
+  )
+  select exists (select 1 from spent)
+$$;
+
+revoke execute on function public.mfa_replace_recovery_codes(uuid, text[]) from public, anon, authenticated;
+revoke execute on function public.mfa_consume_recovery_code(uuid, text) from public, anon, authenticated;
+grant execute on function public.mfa_replace_recovery_codes(uuid, text[]) to service_role;
+grant execute on function public.mfa_consume_recovery_code(uuid, text) to service_role;
+
+notify pgrst, 'reload schema';

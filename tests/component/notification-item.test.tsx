@@ -46,8 +46,9 @@ describe("NotificationItem", () => {
     );
     // The literal string must appear as text content...
     expect(screen.getByText(xssTitle)).toBeInTheDocument();
-    // ...and no <img> element should have been injected.
-    expect(document.querySelector("img")).toBeNull();
+    // ...and no <img> element should have been injected (the brand logo is
+    // the only image the row renders).
+    expect(document.querySelector("img:not([src='/img/logo.png'])")).toBeNull();
   });
 
   it("renders body as plain text when present", () => {

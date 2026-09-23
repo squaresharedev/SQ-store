@@ -3,7 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
-import { getUser, revokeOtherSessions } from "@/lib/auth/session";
+import { getAssurance, getUser, revokeOtherSessions } from "@/lib/auth/session";
+import { STEP_UP_FIELDS, requireStepUp } from "@/lib/auth/mfa";
+import { checkPassword } from "@/lib/auth/reauth";
 import { LEGAL_VERSION } from "@/lib/settings/constants";
 import { RATE_LIMITS, clientKey, rateLimit, rateLimitKey } from "@/lib/rate-limit";
 import { alertSecurityEvent } from "@/lib/security/events";
@@ -30,6 +32,11 @@ import type { z } from "zod";
 export type SettingsActionState = {
   error?: string;
   success?: string;
+  /**
+   * The action needs a fresh two-factor code before it will run (see
+   * requireStepUp). The form shows its StepUpField and the person resubmits.
+   */
+  stepUp?: true;
 };
 
 const SIGNED_OUT: SettingsActionState = {
@@ -238,7 +245,11 @@ export async function requestEmailChange(
 ): Promise<SettingsActionState> {
   const user = await getUser();
   if (!user) return SIGNED_OUT;
-  const rejected = unknownFieldError(formData, ["new_email", "current_password"]);
+  const rejected = unknownFieldError(formData, [
+    "new_email",
+    "current_password",
+    ...STEP_UP_FIELDS,
+  ]);
   if (rejected) return rejected;
 
   const parsed = emailChangeSchema.safeParse({
@@ -261,8 +272,14 @@ export async function requestEmailChange(
     };
   }
 
+  // With 2FA on, the address is a second-factor-grade change too: a fresh code
+  // (or one inside the last few minutes) on top of the password below.
+  const stepUp = await requireStepUp(formData);
+  if (stepUp) return stepUp;
+
   const origin = await siteOrigin();
   const supabase = await createClient();
+  const twoFactor = (await getAssurance())?.enrolled === true;
 
   // Accounts created through an OAuth provider and never given a password have
   // none to verify, so requiring one would lock them out of a field they can
@@ -273,11 +290,21 @@ export async function requestEmailChange(
     if (!parsed.data.current_password) {
       return { error: "Enter your current password to change your email." };
     }
-    const { error: reauthError } = await supabase.auth.signInWithPassword({
-      email: user.email!,
-      password: parsed.data.current_password,
-    });
-    if (reauthError) return { error: "Current password is incorrect." };
+    if (twoFactor) {
+      // Checked on a throwaway client: signing in on THIS one would swap the
+      // two-factor session for a password-only one mid-task.
+      const check = await checkPassword(user.email ?? "", parsed.data.current_password);
+      if (check === "unavailable") {
+        return { error: "Could not check your password right now. Try again." };
+      }
+      if (check === "incorrect") return { error: "Current password is incorrect." };
+    } else {
+      const { error: reauthError } = await supabase.auth.signInWithPassword({
+        email: user.email!,
+        password: parsed.data.current_password,
+      });
+      if (reauthError) return { error: "Current password is incorrect." };
+    }
   }
 
   const { error } = await supabase.auth.updateUser(
@@ -289,6 +316,8 @@ export async function requestEmailChange(
   await safeAlert(user.id, "email.change_requested", {
     title: "Email change requested",
     body: "Someone asked to move this account to a new email address. It only takes effect once the link in that inbox is confirmed. If this wasn't you, change your password now.",
+    // To the CURRENT address: the one an intruder is trying to take away.
+    emailTo: user.email,
   });
 
   return {
@@ -307,6 +336,7 @@ export async function changePassword(
     "current_password",
     "new_password",
     "confirm_password",
+    ...STEP_UP_FIELDS,
   ]);
   if (rejected) return rejected;
 
@@ -339,22 +369,47 @@ export async function changePassword(
     };
   }
 
+  const stepUp = await requireStepUp(formData);
+  if (stepUp) return stepUp;
+
   const supabase = await createClient();
   // Re-authenticate before allowing the change: a stolen open session must
   // not be enough to take over the account.
-  const { error: reauthError } = await supabase.auth.signInWithPassword({
-    email: user.email,
-    password: parsed.data.current_password,
-  });
-  if (reauthError) return { error: "Current password is incorrect." };
+  //
+  // Two ways, because they do different things to THIS session. Without 2FA,
+  // signing in again on the request client is the proof and also hands the
+  // update below a brand-new session. With 2FA, that new session would be
+  // password-only (aal1), which GoTrue refuses to change a password from and
+  // which would bounce the person to the challenge mid-change; so the password
+  // is checked on a throwaway client and the update runs on the current,
+  // two-factor session.
+  if ((await getAssurance())?.enrolled) {
+    const check = await checkPassword(user.email, parsed.data.current_password);
+    if (check === "unavailable") {
+      return { error: "Could not check your password right now. Try again." };
+    }
+    if (check === "incorrect") return { error: "Current password is incorrect." };
+  } else {
+    const { error: reauthError } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: parsed.data.current_password,
+    });
+    if (reauthError) return { error: "Current password is incorrect." };
+  }
 
   const { error } = await supabase.auth.updateUser({
     password: parsed.data.new_password,
   });
   if (error) {
-    return error.code === "same_password"
-      ? { error: "That's already your password." }
-      : { error: "Could not update the password. Try again." };
+    if (error.code === "same_password") return { error: "That's already your password." };
+    // GoTrue's "secure password change" setting wants a recent sign-in, and a
+    // long-lived two-factor session is not one. Say what fixes it.
+    if (error.code === "reauthentication_needed") {
+      return {
+        error: "For your security, sign out and back in, then change your password.",
+      };
+    }
+    return { error: "Could not update the password. Try again." };
   }
 
   // Changing a password must not leave the OLD credential's sessions alive.
@@ -366,6 +421,7 @@ export async function changePassword(
   await safeAlert(user.id, "password.changed", {
     title: "Your password was changed",
     body: "The password on this account was just changed and other devices were signed out. If this wasn't you, reset your password immediately.",
+    emailTo: user.email,
   });
 
   return { success: "Password updated. Other devices have been signed out." };
@@ -479,7 +535,7 @@ export async function saveTaxInfo(
 ): Promise<SettingsActionState> {
   const user = await getUser();
   if (!user) return SIGNED_OUT;
-  const rejected = unknownFieldError(formData, TAX_FIELDS);
+  const rejected = unknownFieldError(formData, [...TAX_FIELDS, ...STEP_UP_FIELDS]);
   if (rejected) return rejected;
 
   // ONLY WHAT WAS SENT IS WRITTEN. The settings form posts every field, so
@@ -498,6 +554,12 @@ export async function saveTaxInfo(
   }
   const parsed = taxSchema.partial().safeParse(input);
   if (!parsed.success) return firstIssue(parsed.error);
+
+  // The legal identity buyers see and the address their questions go to: an
+  // intruder rewriting these redirects a seller's customers, so with 2FA on it
+  // takes a recent code.
+  const stepUp = await requireStepUp(formData);
+  if (stepUp) return stepUp;
 
   if (!(await rateLimit("settings_write", RATE_LIMITS.settingsWrite))) {
     return TOO_MANY;
@@ -672,13 +734,16 @@ export async function requestAccountDeletion(
 ): Promise<SettingsActionState> {
   const user = await getUser();
   if (!user) return SIGNED_OUT;
-  const rejected = unknownFieldError(formData, ["confirm"]);
+  const rejected = unknownFieldError(formData, ["confirm", ...STEP_UP_FIELDS]);
   if (rejected) return rejected;
 
   const parsed = deleteConfirmSchema.safeParse({
     confirm: String(formData.get("confirm") ?? ""),
   });
   if (!parsed.success) return firstIssue(parsed.error);
+
+  const stepUp = await requireStepUp(formData);
+  if (stepUp) return stepUp;
 
   if (!(await rateLimit("settings_write", RATE_LIMITS.settingsWrite))) {
     return TOO_MANY;

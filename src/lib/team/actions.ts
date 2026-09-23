@@ -22,6 +22,7 @@ import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { getProfile, getUser } from "@/lib/auth/session";
+import { STEP_UP_FIELDS, requireStepUp } from "@/lib/auth/mfa";
 import { createNotification, resolveUserIdByEmail } from "@/lib/notifications/create";
 import { can, canGrant, ROLE_LABELS } from "@/lib/team/permissions";
 import {
@@ -42,6 +43,8 @@ import { z } from "zod";
 export type TeamActionState = {
   error?: string;
   success?: string;
+  /** A fresh two-factor code is needed first (see requireStepUp). */
+  stepUp?: true;
 };
 
 // ---------------------------------------------------------------------------
@@ -97,6 +100,7 @@ export async function inviteMember(
     "account_owner_id",
     "invited_email",
     "role",
+    ...STEP_UP_FIELDS,
   ]);
   if (rejected) return rejected;
 
@@ -122,6 +126,13 @@ export async function inviteMember(
   if (user.email && invited_email === user.email.toLowerCase()) {
     return { error: "You're already here." };
   }
+
+  // Granting someone access to the store is how an intruder keeps a way in
+  // after the owner changes their password, so with 2FA on it takes a recent
+  // code. After the permission checks: nobody without invite rights ever
+  // spends a second-factor attempt here.
+  const stepUp = await requireStepUp(formData);
+  if (stepUp) return stepUp;
 
   // An invite notifies (and will email) an arbitrary address of the inviter's
   // choosing, so it is the main in-app path for spamming a stranger. Keyed on
@@ -300,6 +311,7 @@ export async function changeMemberRole(
     "account_owner_id",
     "member_id",
     "role",
+    ...STEP_UP_FIELDS,
   ]);
   if (rejected) return rejected;
 
@@ -322,6 +334,9 @@ export async function changeMemberRole(
   if (!canGrant(actorRole, role)) {
     return { error: "You can't assign a role higher than your own." };
   }
+
+  const stepUp = await requireStepUp(formData);
+  if (stepUp) return stepUp;
 
   const supabase = await createClient();
   const { data: updated, error } = await supabase
@@ -361,7 +376,11 @@ export async function revokeMemberAccess(
   const user = await getUser();
   if (!user) return SIGNED_OUT;
 
-  const rejected = unknownFieldError(formData, ["account_owner_id", "member_id"]);
+  const rejected = unknownFieldError(formData, [
+    "account_owner_id",
+    "member_id",
+    ...STEP_UP_FIELDS,
+  ]);
   if (rejected) return rejected;
 
   const parsed = teamRevokeSchema.safeParse({
@@ -395,6 +414,9 @@ export async function revokeMemberAccess(
   if (target.member_user_id === user.id) {
     return { error: "You can't remove yourself." };
   }
+
+  const stepUp = await requireStepUp(formData);
+  if (stepUp) return stepUp;
 
   const { data: updated, error } = await supabase
     .from("team_members")

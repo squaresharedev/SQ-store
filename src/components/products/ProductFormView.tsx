@@ -6,6 +6,7 @@ import type { SellerShippingPolicy } from "@/types/shipping-policy";
 import type { TraderIdentityField } from "@/lib/settings/trader-identity";
 import { iconNudgeLeftClass } from "@/components/ui/control-styles";
 import { ProductForm } from "./ProductForm";
+import { RemovalNotice } from "./RemovalNotice";
 
 // Shared page shell for the create and edit routes: back link, heading, and the
 // form. Presentational and server-safe; only ProductForm is a client component.
@@ -63,6 +64,19 @@ export function ProductFormView({
       >
         {title}
       </h1>
+
+      {/* ABOVE the form, not inside it. The seller opened this page to edit a
+          product; the first thing they have to know is that it is not being
+          shown to anyone and why, before they spend time on fields. */}
+      {product?.removal && (
+        <RemovalNotice
+          removal={product.removal}
+          kind="product"
+          id={product.id}
+          title={product.title}
+          className="mb-8"
+        />
+      )}
 
       <ProductForm
         product={product}

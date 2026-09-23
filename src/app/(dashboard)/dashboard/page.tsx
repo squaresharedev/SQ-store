@@ -8,7 +8,7 @@ import {
 import { listStorefronts } from "@/lib/storefront/queries";
 import { getAccountStatus } from "@/lib/payments/mock";
 import { getActiveAccount } from "@/lib/team/account-context";
-import { getProfile } from "@/lib/auth/session";
+import { getAssurance, getProfile } from "@/lib/auth/session";
 import { getTraderIdentityStatus } from "@/lib/settings/seller-identity";
 import { sellerEmailVerificationRequired } from "@/lib/settings/seller-email-verification";
 import { buildSetupSteps } from "@/lib/onboarding/steps";
@@ -28,7 +28,7 @@ export default async function DashboardOverviewPage({
 }: {
   searchParams: Promise<{ tour?: string | string[] }>;
 }) {
-  const [orders, products, storefronts, profile, payments, account, ownProfile, params] =
+  const [orders, products, storefronts, profile, payments, account, ownProfile, params, assurance] =
     await Promise.all([
       getDashboardOrders(),
       getProductsSummary(),
@@ -40,6 +40,9 @@ export default async function DashboardOverviewPage({
       // welcome flow is about them, not about the store they are viewing.
       getProfile(),
       searchParams,
+      // The signed-in PERSON's 2FA state (the layout's gate already read it,
+      // so this is the cached answer, not another round trip).
+      getAssurance(),
     ]);
 
   // Collect all product IDs referenced by storefront blocks so we can detect
@@ -148,6 +151,8 @@ export default async function DashboardOverviewPage({
         profile={profile}
         stripeConnected={payments.connected}
         onboarding={onboarding}
+        // A failed read (null) counts as "on": never nag on a guess.
+        twoFactorEnabled={assurance ? assurance.enrolled : true}
       />
     </main>
   );

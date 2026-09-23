@@ -71,6 +71,7 @@ export function buildAttentionItems({
   stripeConnected,
   stripeConnectAvailable = STRIPE_CONNECT_AVAILABLE,
   setupVisible = false,
+  twoFactorEnabled = true,
 }: {
   orders: DashboardOrdersData;
   products: ProductsSummary;
@@ -95,8 +96,30 @@ export function buildAttentionItems({
    * not told the same thing twice in two different voices.
    */
   setupVisible?: boolean;
+  /**
+   * Whether the SIGNED-IN person has two-factor authentication on. About the
+   * person, not the store being viewed, so it applies to members too.
+   * Defaults to true (no row) so a caller that cannot tell never nags.
+   */
+  twoFactorEnabled?: boolean;
 }): AttentionItem[] {
   const items: AttentionItem[] = [];
+
+  // --- Account security -----------------------------------------------
+
+  // 2FA is optional, but this is where we push for it: first in the list,
+  // and it stays until it's done. Not stood down by the setup checklist
+  // either: a brand-new store is exactly when a password is the only lock.
+  if (!twoFactorEnabled) {
+    items.push({
+      key: "two-factor",
+      label: "Turn on two-factor authentication",
+      description:
+        "A code from your phone at sign-in, so a stolen password alone can't get into your store.",
+      href: "/settings/security#two-factor",
+      actionLabel: "Turn on",
+    });
+  }
 
   // --- Payments -------------------------------------------------------
 

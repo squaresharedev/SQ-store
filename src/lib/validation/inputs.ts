@@ -186,6 +186,24 @@ export function referenceCode(options: {
     );
 }
 
+/**
+ * A six-digit one-time code from an authenticator app. Spaces anywhere are
+ * dropped first ("123 456" is how most apps display it, and how people type
+ * it back), then exactly six ASCII digits are required: never a longer string
+ * that happens to start with six, and never a non-ASCII digit that a lax
+ * `\d` could let through.
+ */
+export function oneTimeCode(label = "The code") {
+  return z
+    .string()
+    .transform((value) => value.replace(/\s+/g, ""))
+    .pipe(
+      z.string().regex(/^[0-9]{6}$/, {
+        error: `${label} is the 6 digits shown in your authenticator app.`,
+      }),
+    );
+}
+
 // ── Values ──────────────────────────────────────────────────────────────
 
 /** Strict 6-digit hex. Gates every colour before it reaches a style attribute. */

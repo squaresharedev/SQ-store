@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
   focusRingClass,
+  lastUsedBadgeClass,
   transitionClass,
 } from "@/components/ui/control-styles";
 // The settings map itself lives in @/lib/search/nav-constants so the universal
@@ -52,7 +53,14 @@ function navItemClasses(active: boolean, danger?: boolean) {
  * enough context). Each SettingsCard hangs its title off an `<h2>`, which
  * makes the full tree: h1 (section) -> h2 (card) -> form content.
  */
-export function SettingsShell({ children }: { children: React.ReactNode }) {
+export function SettingsShell({
+  children,
+  securityRecommended = false,
+}: {
+  children: React.ReactNode;
+  /** 2FA is off for this account: badge the Security entry until it isn't. */
+  securityRecommended?: boolean;
+}) {
   const pathname = usePathname();
   const navRef = React.useRef<HTMLElement>(null);
   const [overflows, setOverflows] = React.useState({ start: false, end: false });
@@ -109,6 +117,13 @@ export function SettingsShell({ children }: { children: React.ReactNode }) {
       >
         <Icon aria-hidden className="size-4" />
         {item.label}
+        {securityRecommended && item.href === "/settings/security" && (
+          // Words, not just a dot: a coloured dot says "something is wrong"
+          // without saying what, and a screen reader would say nothing at all.
+          // Same quiet pill as the sign-in page's "Last used", for the same
+          // contrast reason: the accent colour misses AA at this size.
+          <span className={cn(lastUsedBadgeClass, "ml-auto")}>Recommended</span>
+        )}
       </Link>
     );
   });

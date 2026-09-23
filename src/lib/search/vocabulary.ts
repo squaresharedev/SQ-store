@@ -118,8 +118,12 @@ const ALIASES: Record<string, readonly string[]> = {
   signin: ["login"],
   signout: ["logout"],
   logout: ["signout"],
-  mfa: ["password", "security"],
-  "2fa": ["password", "security"],
+  // Two-factor has a home of its own now (Settings › Security), so the short
+  // forms reach it first and the password card second.
+  mfa: ["authenticator", "security", "password"],
+  "2fa": ["authenticator", "security", "password"],
+  otp: ["authenticator"],
+  totp: ["authenticator"],
 
   // The store itself. "store" already reaches "storefront" by prefix; "shop"
   // and "site" do not, and are what half of everyone calls it.

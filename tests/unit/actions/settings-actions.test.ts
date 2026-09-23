@@ -4,12 +4,52 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 // ---- mocks ---------------------------------------------------------------
 
 const getUserMock = vi.fn();
-// Only getUser is faked. revokeOtherSessions stays REAL so these specs assert
-// the actual revocation call the action makes, not a stub of it.
+const getAssuranceMock = vi.fn();
+// getUser and getAssurance are faked. revokeOtherSessions stays REAL so these
+// specs assert the actual revocation call the action makes, not a stub of it.
 vi.mock("@/lib/auth/session", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/lib/auth/session")>()),
   getUser: () => getUserMock(),
+  getAssurance: () => getAssuranceMock(),
 }));
+
+/**
+ * The step-up gate has its own suite (tests/unit/mfa-step-up.test.ts). Here it
+ * defaults to "go ahead", and the cases that matter flip it to a refusal to
+ * prove each action returns it untouched and does nothing else.
+ */
+const requireStepUpMock = vi.fn();
+vi.mock("@/lib/auth/mfa", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/auth/mfa")>()),
+  requireStepUp: (...args: unknown[]) => requireStepUpMock(...args),
+}));
+
+/** The throwaway-client password check used for 2FA accounts. */
+const checkPasswordMock = vi.fn();
+vi.mock("@/lib/auth/reauth", () => ({
+  checkPassword: (...args: unknown[]) => checkPasswordMock(...args),
+}));
+
+/** An account without 2FA: the default, and the legacy re-auth path. */
+const NO_TWO_FACTOR = {
+  enrolled: false,
+  level: "aal1",
+  secondFactorAt: null,
+  signedInAt: Math.floor(Date.now() / 1000),
+  factors: [],
+};
+/** An account with 2FA, on a session that passed it. */
+const TWO_FACTOR = {
+  enrolled: true,
+  level: "aal2",
+  secondFactorAt: Math.floor(Date.now() / 1000),
+  signedInAt: Math.floor(Date.now() / 1000),
+  factors: [{ id: "f0000000-0000-4000-8000-000000000001", name: "Phone", type: "totp", createdAt: "2026-09-01T00:00:00Z" }],
+};
+const STEP_UP_REFUSAL = {
+  error: "Enter the 6-digit code from your authenticator app to confirm it's you.",
+  stepUp: true,
+};
 
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 
@@ -117,6 +157,9 @@ const PREV: { error?: string; success?: string } = {};
 
 beforeEach(() => {
   vi.clearAllMocks();
+  getAssuranceMock.mockResolvedValue(NO_TWO_FACTOR);
+  requireStepUpMock.mockResolvedValue(null);
+  checkPasswordMock.mockResolvedValue("correct");
   rateLimitMock.mockResolvedValue(true);
   rateLimitKeyMock.mockResolvedValue(true);
   hasPasswordMock.mockResolvedValue(true);
@@ -1072,5 +1115,153 @@ describe("changePassword - audit", () => {
     await expect(changePassword(PREV, fd)).resolves.toEqual(
       expect.objectContaining({ success: expect.any(String) }),
     );
+  });
+});
+
+// ---- two-factor ----------------------------------------------------------
+
+describe("sensitive settings actions - two-factor step-up", () => {
+  function passwordForm() {
+    const fd = new FormData();
+    fd.append("current_password", "old-pass-word-1");
+    fd.append("new_password", "Kettle-Boat-99");
+    fd.append("confirm_password", "Kettle-Boat-99");
+    return fd;
+  }
+
+  it("changePassword returns the step-up refusal and touches nothing", async () => {
+    getUserMock.mockResolvedValue(USER);
+    requireStepUpMock.mockResolvedValue(STEP_UP_REFUSAL);
+
+    const result = await changePassword(PREV, passwordForm());
+
+    expect(result).toEqual(STEP_UP_REFUSAL);
+    expect(db.auth.signInWithPassword).not.toHaveBeenCalled();
+    expect(checkPasswordMock).not.toHaveBeenCalled();
+    expect(db.auth.updateUser).not.toHaveBeenCalled();
+  });
+
+  it("changePassword accepts the step-up fields through its whitelist", async () => {
+    getUserMock.mockResolvedValue(USER);
+    db.auth.signInWithPassword.mockResolvedValue({ error: null });
+    db.auth.updateUser.mockResolvedValue({ error: null });
+    db.auth.signOut.mockResolvedValue({ error: null });
+    const fd = passwordForm();
+    fd.append("mfa_code", "123456");
+    fd.append("mfa_factor_id", TWO_FACTOR.factors[0].id);
+
+    const result = await changePassword(PREV, fd);
+
+    expect(result.error).toBeUndefined();
+    expect(requireStepUpMock).toHaveBeenCalledWith(fd);
+  });
+
+  it("changePassword on a 2FA account checks the password on a throwaway client, never the live session", async () => {
+    // signInWithPassword on the request client would swap the aal2 session
+    // for an aal1 one mid-change.
+    getUserMock.mockResolvedValue(USER);
+    getAssuranceMock.mockResolvedValue(TWO_FACTOR);
+    db.auth.updateUser.mockResolvedValue({ error: null });
+    db.auth.signOut.mockResolvedValue({ error: null });
+
+    const result = await changePassword(PREV, passwordForm());
+
+    expect(result.success).toBeTruthy();
+    expect(checkPasswordMock).toHaveBeenCalledWith(USER.email, "old-pass-word-1");
+    expect(db.auth.signInWithPassword).not.toHaveBeenCalled();
+    expect(db.auth.updateUser).toHaveBeenCalledWith({ password: "Kettle-Boat-99" });
+    expect(db.auth.signOut).toHaveBeenCalledWith({ scope: "others" });
+  });
+
+  it("changePassword on a 2FA account refuses a wrong password without updating", async () => {
+    getUserMock.mockResolvedValue(USER);
+    getAssuranceMock.mockResolvedValue(TWO_FACTOR);
+    checkPasswordMock.mockResolvedValue("incorrect");
+
+    const result = await changePassword(PREV, passwordForm());
+
+    expect(result.error).toMatch(/current password is incorrect/i);
+    expect(db.auth.updateUser).not.toHaveBeenCalled();
+  });
+
+  it("changePassword on a 2FA account does not call an unreachable check a wrong password", async () => {
+    getUserMock.mockResolvedValue(USER);
+    getAssuranceMock.mockResolvedValue(TWO_FACTOR);
+    checkPasswordMock.mockResolvedValue("unavailable");
+
+    const result = await changePassword(PREV, passwordForm());
+
+    expect(result.error).toMatch(/could not check/i);
+    expect(result.error).not.toMatch(/incorrect/i);
+    expect(db.auth.updateUser).not.toHaveBeenCalled();
+  });
+
+  it("changePassword explains GoTrue's reauthentication_needed instead of a generic failure", async () => {
+    getUserMock.mockResolvedValue(USER);
+    getAssuranceMock.mockResolvedValue(TWO_FACTOR);
+    db.auth.updateUser.mockResolvedValue({ error: { code: "reauthentication_needed" } });
+
+    const result = await changePassword(PREV, passwordForm());
+
+    expect(result.error).toMatch(/sign out and back in/i);
+  });
+
+  it("requestEmailChange on a 2FA account uses the throwaway check and still sends the change", async () => {
+    getUserMock.mockResolvedValue(USER);
+    getAssuranceMock.mockResolvedValue(TWO_FACTOR);
+    db.auth.updateUser.mockResolvedValue({ error: null });
+    const fd = new FormData();
+    fd.append("new_email", "new@example.com");
+    fd.append("current_password", "old-pass-word-1");
+
+    const result = await requestEmailChange(PREV, fd);
+
+    expect(result.success).toBeTruthy();
+    expect(checkPasswordMock).toHaveBeenCalledWith(USER.email, "old-pass-word-1");
+    expect(db.auth.signInWithPassword).not.toHaveBeenCalled();
+    // The alert goes to the CURRENT address, the one being taken away.
+    expect(alertMock).toHaveBeenCalledWith(
+      USER_ID,
+      "email.change_requested",
+      expect.objectContaining({ emailTo: USER.email }),
+    );
+  });
+
+  it("requestEmailChange returns the step-up refusal before any re-auth or send", async () => {
+    getUserMock.mockResolvedValue(USER);
+    requireStepUpMock.mockResolvedValue(STEP_UP_REFUSAL);
+    const fd = new FormData();
+    fd.append("new_email", "new@example.com");
+    fd.append("current_password", "old-pass-word-1");
+
+    const result = await requestEmailChange(PREV, fd);
+
+    expect(result).toEqual(STEP_UP_REFUSAL);
+    expect(db.auth.updateUser).not.toHaveBeenCalled();
+    expect(db.auth.signInWithPassword).not.toHaveBeenCalled();
+  });
+
+  it("saveTaxInfo returns the step-up refusal and writes nothing", async () => {
+    getUserMock.mockResolvedValue(USER);
+    requireStepUpMock.mockResolvedValue(STEP_UP_REFUSAL);
+    const fd = new FormData();
+    fd.append("tax_business_name", "Lamp Studio Ltd");
+
+    const result = await saveTaxInfo(PREV, fd);
+
+    expect(result).toEqual(STEP_UP_REFUSAL);
+    expect(db.update).not.toHaveBeenCalled();
+  });
+
+  it("requestAccountDeletion returns the step-up refusal and flags nothing", async () => {
+    getUserMock.mockResolvedValue(USER);
+    requireStepUpMock.mockResolvedValue(STEP_UP_REFUSAL);
+    const fd = new FormData();
+    fd.append("confirm", "delete my account");
+
+    const result = await requestAccountDeletion(PREV, fd);
+
+    expect(result).toEqual(STEP_UP_REFUSAL);
+    expect(db.update).not.toHaveBeenCalled();
   });
 });

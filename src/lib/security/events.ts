@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createNotification } from "@/lib/notifications/create";
+import { sendEmail } from "@/lib/email/send";
 import { clientKey } from "@/lib/rate-limit";
 import type { Json } from "@/types";
 
@@ -30,9 +31,51 @@ export const SECURITY_EVENTS = [
   "password.reset_requested",
   /** A move to a new address was requested (not yet confirmed). */
   "email.change_requested",
+  /** Two-factor authentication turned on (first authenticator verified). */
+  "mfa.enabled",
+  /** Two-factor authentication turned off (last authenticator removed). */
+  "mfa.disabled",
+  /** Another authenticator added while 2FA was already on. */
+  "mfa.factor_added",
+  /** One authenticator removed while others remain. */
+  "mfa.factor_removed",
+  /** A fresh set of recovery codes replaced the old one. */
+  "mfa.recovery_codes_regenerated",
+  /** A recovery code was spent to sign in, which also turns 2FA off. */
+  "mfa.recovery_code_used",
+  /** A wrong code at the sign-in challenge: the password was RIGHT. */
+  "mfa.challenge_failed",
+  /** Too many wrong codes; further attempts refused for a while. */
+  "mfa.locked_out",
 ] as const;
 
 export type SecurityEvent = (typeof SECURITY_EVENTS)[number];
+
+/**
+ * How each event reads in the account's own activity list (Settings ›
+ * Security). Past tense, plain language, no jargon beyond "two-factor".
+ */
+export const SECURITY_EVENT_LABELS: Record<SecurityEvent, string> = {
+  "password.changed": "Password changed",
+  "password.set": "Password set",
+  "password.reset_requested": "Password reset link requested",
+  "email.change_requested": "Email change requested",
+  "mfa.enabled": "Two-factor authentication turned on",
+  "mfa.disabled": "Two-factor authentication turned off",
+  "mfa.factor_added": "Authenticator app added",
+  "mfa.factor_removed": "Authenticator app removed",
+  "mfa.recovery_codes_regenerated": "New recovery codes generated",
+  "mfa.recovery_code_used": "Recovery code used to sign in",
+  "mfa.challenge_failed": "Wrong two-factor code entered at sign-in",
+  "mfa.locked_out": "Two-factor sign-in paused after repeated wrong codes",
+};
+
+export function isSecurityEvent(value: unknown): value is SecurityEvent {
+  return (
+    typeof value === "string" &&
+    (SECURITY_EVENTS as readonly string[]).includes(value)
+  );
+}
 
 /**
  * SHA-256 of the caller's IP. Hashed rather than stored, for the same reason
@@ -99,16 +142,30 @@ export async function recordSecurityEvent(input: {
  * into an error the user might retry. `allSettled` so one failing does not
  * take the other with it.
  *
- * Honest about what this is: the notification is IN-APP ONLY, because no
- * transactional email provider is wired up yet. Someone who changes a password
- * and revokes sessions locks the owner out before they can read it. Where it
- * earns its keep is the reset-requested case (nobody is signed out, so the
- * owner can act) and as a record to review after regaining access.
+ * The bell alone is a weak channel for a credential alert: someone who changes
+ * a password and revokes sessions locks the owner out before they can read it.
+ * Pass `emailTo` for the events where that matters (the 2FA ones do); the
+ * email goes through the transactional mailer, which is off in production
+ * until Cloudflare Email Service is configured, so until then the bell and the
+ * activity log are what the owner has.
  */
 export async function alertSecurityEvent(
   userId: string,
   event: SecurityEvent,
-  notify: { title: string; body: string },
+  notify: {
+    title: string;
+    body: string;
+    /** Where the bell entry links. Defaults to the password card. */
+    href?: string;
+    /**
+     * Also email this to the account's address. For the events where the
+     * in-app bell is the WRONG channel: if an intruder just turned 2FA off,
+     * the owner may never see the dashboard again, but they will see their
+     * inbox. Goes through lib/email/send.ts, so it is off until Cloudflare
+     * Email Service is configured, and lands in the dev outbox locally.
+     */
+    emailTo?: string | null;
+  },
 ): Promise<void> {
   try {
     await Promise.allSettled([
@@ -118,8 +175,9 @@ export async function alertSecurityEvent(
         type: "security",
         title: notify.title,
         body: notify.body,
-        data: { href: "/settings/account#password" },
+        data: { href: notify.href ?? "/settings/account#password" },
       }),
+      notify.emailTo ? emailSecurityNotice(notify.emailTo, notify) : Promise.resolve(),
     ]);
   } catch (err) {
     // allSettled already absorbs rejections from the two calls; this catches
@@ -127,6 +185,49 @@ export async function alertSecurityEvent(
     // client construction). The guarantee is what call sites rely on.
     console.error(
       "[security] alertSecurityEvent threw:",
+      err instanceof Error ? err.message : String(err),
+    );
+  }
+}
+
+/**
+ * The out-of-band half of an alert. Plain text only: this is the message a
+ * person reads when something may be wrong with their account, and it must
+ * work in any mail client. The link is built from NEXT_PUBLIC_APP_URL rather
+ * than the request's Host header, so a forged Host cannot point it elsewhere.
+ * Never throws (sendEmail only throws on a deployment misconfiguration, which
+ * is caught here so the credential change that triggered it still stands).
+ */
+async function emailSecurityNotice(
+  to: string,
+  notice: { title: string; body: string; href?: string },
+): Promise<void> {
+  try {
+    const origin = (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").replace(
+      /\/+$/,
+      "",
+    );
+    const link = `${origin}${notice.href ?? "/settings/security"}`;
+    const result = await sendEmail({
+      to,
+      subject: `Security alert: ${notice.title}`,
+      text: [
+        notice.body,
+        "",
+        `Review your account security: ${link}`,
+        "",
+        "If this was you, there is nothing else to do.",
+        "If it wasn't, change your password straight away and turn on two-factor authentication.",
+        "",
+        "Square Share",
+      ].join("\n"),
+    });
+    if (!result.sent && result.reason === "failed") {
+      console.error("[security] alert email failed:", result.detail);
+    }
+  } catch (err) {
+    console.error(
+      "[security] alert email threw:",
       err instanceof Error ? err.message : String(err),
     );
   }

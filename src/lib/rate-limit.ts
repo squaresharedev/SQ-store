@@ -67,6 +67,19 @@ export const RATE_LIMITS = {
   /** The editor's product-page preview data, per signed-in user. */
   productPreview: { max: 300, windowSeconds: 60 * 60 },
   /**
+   * Content reports from a buyer, per client IP. The only unauthenticated
+   * WRITE in the app, so it is the tightest budget here.
+   *
+   * Ten an hour, which is generous for the honest case and useless for the
+   * dishonest one. Reporting is rare: a person who has found something wrong
+   * reports it once and leaves. The abuse this bounds is not volume for its
+   * own sake, it is someone trying to manufacture the report count that
+   * demotes a competitor, and the per-reporter dedupe index in the database is
+   * the other half of that defence (one open report per reporter per target,
+   * so ten calls cannot become ten reports on one listing).
+   */
+  contentReport: { max: 10, windowSeconds: 60 * 60 },
+  /**
    * Digital-file uploads specifically, which are capped at 200 MB EACH — an
    * order of magnitude larger than an image.
    *
@@ -243,6 +256,46 @@ export const RATE_LIMITS = {
    * scripted loop hammering the most expensive read in the app.
    */
   dataExport: { max: 5, windowSeconds: 60 * 60 },
+
+  // --- Two-factor authentication ------------------------------------------
+  // Every budget below is keyed on the ACCOUNT (plus one on the client), and
+  // is only reachable by a session that has already passed the password or
+  // Google step. So nobody can burn a stranger's budget to lock them out
+  // without first holding their password, and anyone who does hold it has
+  // bigger news coming: the lockout itself emails the owner.
+
+  /**
+   * Second-factor attempts (authenticator codes AND recovery codes, one shared
+   * budget) per account, short window. A six-digit code checked with GoTrue's
+   * one-step skew accepts 3 of 10^6 values, so each guess is a 3-in-a-million
+   * shot; six per ten minutes lets a person fumble twice and still get in.
+   */
+  mfaVerifyPerUser: { max: 6, windowSeconds: 10 * 60 },
+  /**
+   * The same attempts over a day, so waiting out the short window cannot be
+   * scripted into a steady grind: 30 guesses a day is roughly a 1-in-10,000
+   * chance per day for someone who already has the password, and the lockout
+   * alert tells the owner to change that password long before it adds up.
+   */
+  mfaVerifyPerUserDaily: { max: 30, windowSeconds: 24 * 60 * 60 },
+  /** All second-factor attempts from one client, across every account. Caps an
+   *  attacker working through many stolen passwords from one address. */
+  mfaVerifyPerClient: { max: 30, windowSeconds: 15 * 60 },
+  /**
+   * The replay guard, not a budget: a key per (account, code) that may be taken
+   * ONCE per window. GoTrue accepts a code for about 90 seconds and does not
+   * remember having accepted it, so without this a code read over someone's
+   * shoulder stays usable after its owner has already typed it. Three minutes
+   * outlives the whole acceptance window.
+   */
+  mfaCodeReplay: { max: 1, windowSeconds: 3 * 60 },
+  /** At most one "someone is guessing your 2FA codes" alert per account per
+   *  hour, however long the guessing goes on. */
+  mfaLockoutAlert: { max: 1, windowSeconds: 60 * 60 },
+  /** Starting 2FA setup (each start creates a pending factor at GoTrue). */
+  mfaEnroll: { max: 10, windowSeconds: 60 * 60 },
+  /** Removing authenticators and regenerating recovery codes. */
+  mfaManage: { max: 20, windowSeconds: 60 * 60 },
 } as const;
 
 export type RateLimitBudget = { max: number; windowSeconds: number };

@@ -136,7 +136,7 @@ export function StorefrontCard({
   onEmbed: () => void;
   onDelete: () => void;
 }) {
-  const { id, name, blockCount, updatedAt, config } = storefront;
+  const { id, name, blockCount, updatedAt, config, removal } = storefront;
 
   // The embed button is the animation trigger for the icon inside it: the whole
   // 36px target drives the glyph, not just the 16px of artwork. Delete is
@@ -201,6 +201,27 @@ export function StorefrontCard({
             {blockCount} block{blockCount === 1 ? "" : "s"} · updated{" "}
             {formatOrderDate(updatedAt)}
           </p>
+          {/* One line, in place of the reason. A card has room for a state, not
+              an explanation; the full statement of reasons sits above the
+              list (StorefrontsList), with the review button when it is a
+              pause. Under the metadata rather than over the preview because a
+              paused storefront is still the seller's design and blanking it
+              would hide what they are being asked to fix. */}
+          {removal && (
+            <p
+              className={cn(
+                "mt-1.5 font-inter text-sm font-medium",
+                removal.kind === "paused" ? "text-foreground" : "text-destructive",
+              )}
+              data-storefront-removed={removal.kind}
+            >
+              {removal.kind === "paused"
+                ? removal.reviewRequestedAt
+                  ? "Paused · with SquareShare for review"
+                  : "Paused by SquareShare · needs changes"
+                : "Removed by SquareShare"}
+            </p>
+          )}
         </div>
       </div>
 

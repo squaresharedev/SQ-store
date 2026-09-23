@@ -7,6 +7,7 @@ import { ArrowLeft, ArrowRight, MailCheck } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { SaveButton } from "@/components/ui/SaveButton";
+import { StepUpField } from "@/components/auth/StepUp";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -363,6 +364,10 @@ export function WelcomeFlow({
                     Where buyers write to you. It can differ from your sign-in email.
                   </p>
                 </div>
+                {/* Only ever appears for someone who turned 2FA on before
+                    finishing setup and whose last code has gone stale: the
+                    same action guards these details in Settings. */}
+                <StepUpField id={`${fieldId}-step-up`} state={saveState} />
               </form>
             )}
 

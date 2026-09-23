@@ -4,7 +4,12 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import type { AuthError } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
-import { revokeOtherSessions } from "@/lib/auth/session";
+import {
+  actionUser,
+  revokeOtherSessions,
+  twoFactorChallengePath,
+} from "@/lib/auth/session";
+import { hasVerifiedFactor } from "@/lib/auth/assurance";
 import { rememberSignInMethod } from "@/lib/auth/last-method";
 import { emailForUsername, isUsernameTaken } from "@/lib/auth/handles";
 import { passwordProblem } from "@/lib/auth/password";
@@ -472,6 +477,10 @@ export async function authenticate(
   // Only now, with the sign-in actually through: a failed attempt must not
   // relabel the option this browser last used successfully.
   await rememberSignInMethod("password");
+  // The password was right, but for an account with 2FA on that is only half
+  // of signing in: the session just created is aal1, and every page would
+  // bounce it to the challenge anyway. Going there directly saves the hop.
+  if (hasVerifiedFactor(result.data.user)) redirect(twoFactorChallengePath(next));
   redirect(next);
 }
 
@@ -510,12 +519,18 @@ export async function resetPassword(
 
   // Confirm the recovery session actually took — an expired/invalid link
   // leaves no session, and we must not silently no-op.
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  //
+  // Through actionUser, not supabase.auth.getUser(): for an account with 2FA
+  // the recovery link alone is NOT enough to set a password. Whoever controls
+  // the inbox would otherwise own the account outright, which is the exact
+  // takeover 2FA is there to stop. The page sends such a session through the
+  // challenge first; this refuses one that skipped it.
+  const { user, unreachable } = await actionUser();
   if (!user) {
     return {
-      error: "Your reset link has expired. Request a new one from the sign-in page.",
+      error: unreachable
+        ? "Could not connect. Please try again."
+        : "Your reset link has expired. Request a new one from the sign-in page.",
     };
   }
 
@@ -563,6 +578,7 @@ export async function resetPassword(
     body: hadPassword
       ? "A reset link was used to set a new password, and other devices were signed out. If this wasn't you, reset it again immediately."
       : "This account can now sign in with a password as well as Google. If this wasn't you, reset it immediately.",
+    emailTo: user.email,
   });
 
   // The session is valid, so drop them straight into the app.

@@ -43,8 +43,27 @@ const REGISTRY: Record<string, Classification> = {
   "lib/auth/actions.ts::signOut": read(),
   "lib/auth/actions.ts::signOutEverywhere": read(),
 
+  // --- two-factor ---------------------------------------------------------
+  // Every code check (authenticator OR recovery code) spends the shared
+  // per-account and per-client second-factor budgets inside
+  // takeSecondFactorAttempt / verifySecondFactor (see SECOND_FACTOR_LIMITERS).
+  "lib/auth/mfa-actions.ts::verifyTwoFactorSignIn": limited(),
+  "lib/auth/mfa-actions.ts::signInWithRecoveryCode": limited(),
+  "lib/auth/mfa-actions.ts::beginTwoFactorSetup": limited(),
+  "lib/auth/mfa-actions.ts::confirmTwoFactorSetup": limited(),
+  "lib/auth/mfa-actions.ts::removeAuthenticator": limited(),
+  "lib/auth/mfa-actions.ts::regenerateRecoveryCodes": limited(),
+  "lib/auth/mfa-actions.ts::cancelTwoFactorSetup": unlimited(
+    "Only removes an UNVERIFIED factor that the caller's own setup created. It creates nothing, and beginTwoFactorSetup (limited) bounds how many can ever exist.",
+  ),
+  "lib/auth/mfa-actions.ts::confirmIdentity": unlimited(
+    "Writes nothing of its own. Without 2FA it returns at once; with 2FA every code it checks goes through requireStepUp, which spends the second-factor budgets.",
+  ),
+  "lib/auth/mfa-actions.ts::signOutToReauthenticate": read(),
+
   // --- settings -----------------------------------------------------------
   "lib/settings/actions.ts::updateUsername": limited(),
+  "lib/settings/actions.ts::updateBio": limited(),
   "lib/settings/actions.ts::requestEmailChange": limited(),
   "lib/settings/actions.ts::changePassword": limited(),
   "lib/settings/actions.ts::sendPasswordReset": limited(),
@@ -94,6 +113,9 @@ const REGISTRY: Record<string, Classification> = {
   // to IMPORT_ROWS_MAX rows, so pricing it as a single product write would let
   // a script drive thousands of inserts through the cheapest budget there is.
   "lib/products/import-actions.ts::importProducts": limited(),
+  // A seller sending a paused item back to staff. Limited because each call
+  // that lands pings the admin panel and can reach staff phones.
+  "lib/moderation/review-request.ts::requestModerationReview": limited(),
   "lib/stock/actions.ts::updateStockSettings": limited(),
   "lib/storefront/actions.ts::createStorefront": limited(),
   "lib/storefront/actions.ts::saveStorefront": limited(),
@@ -189,10 +211,38 @@ function serverActions(): { key: string; body: string }[] {
 
 const ACTIONS = serverActions();
 
+/**
+ * Helpers that ARE a budget: each takes from the second-factor limits
+ * (mfaVerifyPerUser, mfaVerifyPerUserDaily, mfaVerifyPerClient) before doing
+ * anything else. Named here, rather than accepted by pattern, so a new wrapper
+ * has to be added on purpose.
+ */
+const SECOND_FACTOR_LIMITERS = ["takeSecondFactorAttempt", "verifySecondFactor"];
+
 /** Does this body take from a rate-limit budget? */
 function isRateLimited(body: string): boolean {
-  return /\brateLimit(?:Key)?\s*\(/.test(body);
+  if (/\brateLimit(?:Key)?\s*\(/.test(body)) return true;
+  return SECOND_FACTOR_LIMITERS.some((name) => new RegExp(`\\b${name}\\s*\\(`).test(body));
 }
+
+describe("second-factor limiters", () => {
+  // The registry trusts these two names as budgets, so pin that they are.
+  const source = readFileSync(join(process.cwd(), "src", "lib", "auth", "mfa.ts"), "utf8");
+
+  it("takeSecondFactorAttempt spends the per-account and per-client budgets", () => {
+    expect(source).toMatch(/RATE_LIMITS\.mfaVerifyPerUser\b/);
+    expect(source).toMatch(/RATE_LIMITS\.mfaVerifyPerUserDaily\b/);
+    expect(source).toMatch(/RATE_LIMITS\.mfaVerifyPerClient\b/);
+  });
+
+  it("verifySecondFactor takes an attempt before asking GoTrue anything", () => {
+    const body = source.slice(source.indexOf("export async function verifySecondFactor"));
+    const attempt = body.indexOf("takeSecondFactorAttempt(");
+    const challenge = body.indexOf("mfa.challenge(");
+    expect(attempt).toBeGreaterThan(-1);
+    expect(challenge).toBeGreaterThan(attempt);
+  });
+});
 
 describe("server action registry", () => {
   it("discovers the action surface (guards against a broken parser)", () => {
@@ -330,5 +380,69 @@ describe("rate-limit budget hygiene", () => {
       ),
     );
     expect([...used].filter((name) => !declared.has(name))).toEqual([]);
+  });
+});
+
+describe("two-factor step-up invariants", () => {
+  /**
+   * The actions that, for an account with 2FA on, must see a recent second
+   * factor before they run: credential changes, the account's legal identity,
+   * who has access to the store, deleting the account, and the 2FA controls
+   * themselves. A session hijacked AFTER the owner signed in must not be able
+   * to do any of these on its own.
+   */
+  const STEP_UP_REQUIRED = [
+    "lib/settings/actions.ts::changePassword",
+    "lib/settings/actions.ts::requestEmailChange",
+    "lib/settings/actions.ts::saveTaxInfo",
+    "lib/settings/actions.ts::requestAccountDeletion",
+    "lib/team/actions.ts::inviteMember",
+    "lib/team/actions.ts::changeMemberRole",
+    "lib/team/actions.ts::revokeMemberAccess",
+    "lib/auth/mfa-actions.ts::removeAuthenticator",
+    "lib/auth/mfa-actions.ts::regenerateRecoveryCodes",
+    "lib/auth/mfa-actions.ts::confirmIdentity",
+  ];
+
+  it("every sensitive action calls requireStepUp", () => {
+    const missing = STEP_UP_REQUIRED.filter((key) => {
+      const action = ACTIONS.find((a) => a.key === key);
+      return !action || !/requireStepUp\s*\(/.test(action.body);
+    });
+    expect(missing).toEqual([]);
+  });
+
+  it("turning 2FA off or replacing recovery codes demands a code in THIS request", () => {
+    for (const key of [
+      "lib/auth/mfa-actions.ts::removeAuthenticator",
+      "lib/auth/mfa-actions.ts::regenerateRecoveryCodes",
+    ]) {
+      const action = ACTIONS.find((a) => a.key === key);
+      expect(action?.body, key).toMatch(/requireStepUp\([^)]*maxAgeSeconds:\s*0/);
+    }
+  });
+
+  it("every action that accepts the step-up fields actually checks them", () => {
+    // Allowing mfa_code through a field whitelist without calling
+    // requireStepUp would be a form that LOOKS protected and is not.
+    const accepting = ACTIONS.filter(({ body }) => /STEP_UP_FIELDS/.test(body));
+    expect(accepting.length).toBeGreaterThan(5);
+    const unchecked = accepting
+      .filter(({ body }) => !/requireStepUp\s*\(/.test(body))
+      .map((a) => a.key);
+    expect(unchecked).toEqual([]);
+  });
+
+  it("no action re-signs-in on the request client for a 2FA account", () => {
+    // signInWithPassword on the live client swaps an aal2 session for an aal1
+    // one. Where an action re-checks a password for a 2FA account it must use
+    // checkPassword (a throwaway client) instead.
+    for (const key of [
+      "lib/settings/actions.ts::changePassword",
+      "lib/settings/actions.ts::requestEmailChange",
+    ]) {
+      const action = ACTIONS.find((a) => a.key === key);
+      expect(action?.body, key).toMatch(/checkPassword\(/);
+    }
   });
 });

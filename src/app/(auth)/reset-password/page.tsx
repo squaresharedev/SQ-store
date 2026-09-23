@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { ResetPasswordForm } from "@/components/auth/ResetPasswordForm";
 import { BackgroundArrow } from "@/components/ui/BackgroundArrow";
-import { getUser } from "@/lib/auth/session";
+import { getSessionState, twoFactorChallengePath } from "@/lib/auth/session";
 
 export const metadata: Metadata = {
   title: "Set a new password",
@@ -20,8 +20,13 @@ export const dynamic = "force-dynamic";
  * the sign-in page.
  */
 export default async function ResetPasswordPage() {
-  const user = await getUser();
-  if (!user) redirect("/login?error=reset_expired");
+  const session = await getSessionState();
+  // A recovery link is a first factor only. For an account with 2FA on, the
+  // code comes BEFORE the new password, never after, so owning the inbox is
+  // not enough to take the account.
+  if (session.kind === "needs_mfa") redirect(twoFactorChallengePath("/reset-password"));
+  if (session.kind !== "signed_in") redirect("/login?error=reset_expired");
+  const { user } = session;
 
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-muted px-6 py-5">

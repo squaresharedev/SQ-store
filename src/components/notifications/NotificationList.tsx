@@ -43,7 +43,14 @@ export function NotificationList({
   return (
     <div className="flex max-h-[75vh] w-full flex-col sm:max-h-[26rem]">
       <div className="flex items-center justify-between gap-2 border-b border-border px-3 py-2.5">
-        <h2 className="text-sm font-semibold text-foreground">
+        <h2 className="flex items-center text-sm font-semibold text-foreground">
+          {/* eslint-disable-next-line @next/next/no-img-element -- static public asset; next/image adds no value here. */}
+          <img
+            src="/img/logo.png"
+            alt=""
+            aria-hidden
+            className="mr-2 size-5 shrink-0 rounded-sm object-contain"
+          />
           Notifications
           {unreadCount > 0 && (
             <span className="ml-1.5 font-inter text-xs font-normal text-muted-foreground">

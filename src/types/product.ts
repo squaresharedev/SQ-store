@@ -44,6 +44,35 @@ export interface Product {
    * sell in one go rather than what is on the shelf.
    */
   maxPerOrder: number;
+  /**
+   * Set only when staff have TAKEN THIS DOWN, so its presence is the whole
+   * test and a product nobody has touched carries nothing.
+   *
+   * Seller-facing, and only ever seller-facing: it exists so the dashboard can
+   * say what happened and why, which is what the seller is entitled to (EU
+   * Digital Services Act, Art. 17). It is not on any buyer payload, and the
+   * public builder in lib/products/public.ts reads the raw column for its gate
+   * rather than this, so there is no route by which the statement of reasons
+   * could reach a buyer.
+   */
+  removal?: ProductRemoval;
+}
+
+/** What a seller is told about their own paused or removed content. */
+export interface ProductRemoval {
+  /** `paused`: hidden until the seller fixes it and staff approve. `removed`:
+   *  hidden for good. See takedownKind in lib/moderation/removal.ts. */
+  kind: "paused" | "removed";
+  /** When the seller asked staff to look again at a paused item. Null when
+   *  nothing is waiting, and always null for a removal. ISO 8601. */
+  reviewRequestedAt: string | null;
+  /** The platform's finding. A RemovalGround (lib/moderation/removal.ts); kept
+   *  as a plain string here so this type stays free of that import. */
+  ground: string | null;
+  /** The staff note, shown verbatim beneath the ground's explanation. */
+  note: string | null;
+  /** When it came down. ISO 8601. */
+  at: string | null;
 }
 
 // ── Product page detail ─────────────────────────────────────────────────

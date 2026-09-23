@@ -12,6 +12,7 @@ import {
   Bell,
   Receipt,
   ScrollText,
+  ShieldCheck,
   TriangleAlert,
   Truck,
   User,
@@ -68,6 +69,9 @@ export const SETTINGS_LINK: NavEntry = {
 
 export const SETTINGS_NAV: SettingsNavEntry[] = [
   { href: "/settings/account", label: "Account", icon: User },
+  // Straight after Account: two-factor, recovery codes and the security
+  // activity log. The rail marks it "Recommended" while 2FA is off.
+  { href: "/settings/security", label: "Security", icon: ShieldCheck },
   { href: "/settings/legal", label: "Legal", icon: ScrollText },
   { href: "/settings/tax", label: "Business & seller details", icon: Receipt },
   // Beside Tax, not off in the storefront designer where these terms used to

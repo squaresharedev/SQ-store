@@ -9,6 +9,7 @@ import { Modal } from "@/components/ui/modal";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Spinner } from "@/components/ui/spinner";
 import { useActionToast } from "@/components/ui/Toast";
+import { StepUpField } from "@/components/auth/StepUp";
 import {
   changePassword,
   sendPasswordReset,
@@ -145,6 +146,8 @@ function ChangeView({
           required
         />
       </div>
+
+      <StepUpField id="password-change" state={state} />
 
       <p className={infoTextClass}>
         Every other device will be signed out.

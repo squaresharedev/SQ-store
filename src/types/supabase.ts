@@ -18,6 +18,441 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_audit_log: {
+        Row: {
+          action: string
+          admin_user_id: string
+          created_at: string
+          id: string
+          meta: Json
+          target: string | null
+        }
+        Insert: {
+          action: string
+          admin_user_id: string
+          created_at?: string
+          id?: string
+          meta?: Json
+          target?: string | null
+        }
+        Update: {
+          action?: string
+          admin_user_id?: string
+          created_at?: string
+          id?: string
+          meta?: Json
+          target?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_audit_log_admin_user_id_fkey"
+            columns: ["admin_user_id"]
+            isOneToOne: false
+            referencedRelation: "admin_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      admin_notification_cursor: {
+        Row: {
+          last_value: number | null
+          seen_through: string | null
+          source: string
+          updated_at: string
+        }
+        Insert: {
+          last_value?: number | null
+          seen_through?: string | null
+          source: string
+          updated_at?: string
+        }
+        Update: {
+          last_value?: number | null
+          seen_through?: string | null
+          source?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      admin_notification_prefs: {
+        Row: {
+          admin_user_id: string
+          enabled: boolean
+          pref_key: string
+          updated_at: string
+        }
+        Insert: {
+          admin_user_id: string
+          enabled: boolean
+          pref_key: string
+          updated_at?: string
+        }
+        Update: {
+          admin_user_id?: string
+          enabled?: boolean
+          pref_key?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_notification_prefs_admin_user_id_fkey"
+            columns: ["admin_user_id"]
+            isOneToOne: false
+            referencedRelation: "admin_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      admin_push_subscriptions: {
+        Row: {
+          admin_user_id: string
+          auth: string
+          created_at: string
+          device_label: string | null
+          endpoint: string
+          failure_count: number
+          id: string
+          last_success_at: string | null
+          p256dh: string
+        }
+        Insert: {
+          admin_user_id: string
+          auth: string
+          created_at?: string
+          device_label?: string | null
+          endpoint: string
+          failure_count?: number
+          id?: string
+          last_success_at?: string | null
+          p256dh: string
+        }
+        Update: {
+          admin_user_id?: string
+          auth?: string
+          created_at?: string
+          device_label?: string | null
+          endpoint?: string
+          failure_count?: number
+          id?: string
+          last_success_at?: string | null
+          p256dh?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_push_subscriptions_admin_user_id_fkey"
+            columns: ["admin_user_id"]
+            isOneToOne: false
+            referencedRelation: "admin_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      admin_user_moderation: {
+        Row: {
+          banned_by: string
+          banned_until: string | null
+          created_at: string
+          duration_label: string
+          reason: string
+          user_id: string
+        }
+        Insert: {
+          banned_by: string
+          banned_until?: string | null
+          created_at?: string
+          duration_label: string
+          reason: string
+          user_id: string
+        }
+        Update: {
+          banned_by?: string
+          banned_until?: string | null
+          created_at?: string
+          duration_label?: string
+          reason?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_user_moderation_banned_by_fkey"
+            columns: ["banned_by"]
+            isOneToOne: false
+            referencedRelation: "admin_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_user_moderation_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "admin_user_directory"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      admin_users: {
+        Row: {
+          created_at: string
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_users_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "admin_user_directory"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      artifact_likes: {
+        Row: {
+          artifact_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          artifact_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          artifact_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "artifact_likes_artifact_id_fkey"
+            columns: ["artifact_id"]
+            isOneToOne: false
+            referencedRelation: "artifacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "artifact_likes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "admin_user_directory"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      artifacts: {
+        Row: {
+          collection_id: string | null
+          created_at: string
+          description: string
+          grid_x: number
+          grid_y: number
+          id: string
+          image_key: string
+          img_offset_x: number
+          img_offset_y: number
+          moderated_at: string | null
+          moderated_by: string | null
+          moderation_ground: string | null
+          moderation_note: string | null
+          moderation_status: string
+          owner_id: string
+          product_id: string | null
+          sort_order: number
+          span_h: number
+          span_w: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          collection_id?: string | null
+          created_at?: string
+          description?: string
+          grid_x: number
+          grid_y: number
+          id?: string
+          image_key: string
+          img_offset_x?: number
+          img_offset_y?: number
+          moderated_at?: string | null
+          moderated_by?: string | null
+          moderation_ground?: string | null
+          moderation_note?: string | null
+          moderation_status?: string
+          owner_id: string
+          product_id?: string | null
+          sort_order?: number
+          span_h: number
+          span_w: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          collection_id?: string | null
+          created_at?: string
+          description?: string
+          grid_x?: number
+          grid_y?: number
+          id?: string
+          image_key?: string
+          img_offset_x?: number
+          img_offset_y?: number
+          moderated_at?: string | null
+          moderated_by?: string | null
+          moderation_ground?: string | null
+          moderation_note?: string | null
+          moderation_status?: string
+          owner_id?: string
+          product_id?: string | null
+          sort_order?: number
+          span_h?: number
+          span_w?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "artifacts_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "artifacts_moderated_by_fkey"
+            columns: ["moderated_by"]
+            isOneToOne: false
+            referencedRelation: "admin_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "artifacts_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "admin_user_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "artifacts_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      collections: {
+        Row: {
+          created_at: string
+          id: string
+          is_public: boolean
+          name: string
+          owner_id: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_public?: boolean
+          name: string
+          owner_id: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_public?: boolean
+          name?: string
+          owner_id?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collections_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "admin_user_directory"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      follows: {
+        Row: {
+          created_at: string
+          followee_id: string
+          follower_id: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          followee_id: string
+          follower_id: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          followee_id?: string
+          follower_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "follows_followee_id_fkey"
+            columns: ["followee_id"]
+            isOneToOne: false
+            referencedRelation: "admin_user_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "follows_follower_id_fkey"
+            columns: ["follower_id"]
+            isOneToOne: false
+            referencedRelation: "admin_user_directory"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mfa_recovery_codes: {
+        Row: {
+          code_hash: string
+          created_at: string
+          id: string
+          used_at: string | null
+          user_id: string
+        }
+        Insert: {
+          code_hash: string
+          created_at?: string
+          id?: string
+          used_at?: string | null
+          user_id: string
+        }
+        Update: {
+          code_hash?: string
+          created_at?: string
+          id?: string
+          used_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           body: string | null
@@ -49,7 +484,15 @@ export type Database = {
           type?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "admin_user_directory"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       orders: {
         Row: {
@@ -63,6 +506,7 @@ export type Database = {
           product_id: string | null
           product_price_cents: number
           product_title: string
+          selected_options: Json
           seller_id: string
           status: string
           storefront_id: string | null
@@ -78,6 +522,7 @@ export type Database = {
           product_id?: string | null
           product_price_cents: number
           product_title: string
+          selected_options?: Json
           seller_id: string
           status?: string
           storefront_id?: string | null
@@ -93,6 +538,7 @@ export type Database = {
           product_id?: string | null
           product_price_cents?: number
           product_title?: string
+          selected_options?: Json
           seller_id?: string
           status?: string
           storefront_id?: string | null
@@ -103,6 +549,13 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "admin_user_directory"
             referencedColumns: ["id"]
           },
           {
@@ -127,6 +580,12 @@ export type Database = {
           image_key: string | null
           low_stock_threshold: number
           max_per_order: number
+          moderated_at: string | null
+          moderated_by: string | null
+          moderation_ground: string | null
+          moderation_note: string | null
+          moderation_review_requested_at: string | null
+          moderation_status: string
           option_groups: Json
           owner_id: string
           price_cents: number
@@ -150,6 +609,12 @@ export type Database = {
           image_key?: string | null
           low_stock_threshold?: number
           max_per_order?: number
+          moderated_at?: string | null
+          moderated_by?: string | null
+          moderation_ground?: string | null
+          moderation_note?: string | null
+          moderation_review_requested_at?: string | null
+          moderation_status?: string
           option_groups?: Json
           owner_id: string
           price_cents: number
@@ -173,6 +638,12 @@ export type Database = {
           image_key?: string | null
           low_stock_threshold?: number
           max_per_order?: number
+          moderated_at?: string | null
+          moderated_by?: string | null
+          moderation_ground?: string | null
+          moderation_note?: string | null
+          moderation_review_requested_at?: string | null
+          moderation_status?: string
           option_groups?: Json
           owner_id?: string
           price_cents?: number
@@ -184,7 +655,22 @@ export type Database = {
           track_stock?: boolean
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "products_moderated_by_fkey"
+            columns: ["moderated_by"]
+            isOneToOne: false
+            referencedRelation: "admin_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "admin_user_directory"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -271,7 +757,160 @@ export type Database = {
           updated_at?: string
           username?: string | null
         }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "admin_user_directory"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rate_limit_keys: {
+        Row: {
+          action: string
+          hits: string[]
+          key: string
+          updated_at: string
+        }
+        Insert: {
+          action: string
+          hits?: string[]
+          key: string
+          updated_at?: string
+        }
+        Update: {
+          action?: string
+          hits?: string[]
+          key?: string
+          updated_at?: string
+        }
         Relationships: []
+      }
+      rate_limits: {
+        Row: {
+          action: string
+          hits: string[]
+          user_id: string
+        }
+        Insert: {
+          action: string
+          hits?: string[]
+          user_id: string
+        }
+        Update: {
+          action?: string
+          hits?: string[]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rate_limits_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "admin_user_directory"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reports: {
+        Row: {
+          created_at: string
+          details: string
+          id: string
+          reason: string
+          reporter_email: string | null
+          reporter_hash: string | null
+          reporter_id: string | null
+          resolution_note: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+          target_id: string
+          target_type: string
+        }
+        Insert: {
+          created_at?: string
+          details?: string
+          id?: string
+          reason: string
+          reporter_email?: string | null
+          reporter_hash?: string | null
+          reporter_id?: string | null
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          target_id: string
+          target_type: string
+        }
+        Update: {
+          created_at?: string
+          details?: string
+          id?: string
+          reason?: string
+          reporter_email?: string | null
+          reporter_hash?: string | null
+          reporter_id?: string | null
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          target_id?: string
+          target_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reports_reporter_id_fkey"
+            columns: ["reporter_id"]
+            isOneToOne: false
+            referencedRelation: "admin_user_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reports_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "admin_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      security_events: {
+        Row: {
+          created_at: string
+          event: string
+          id: string
+          ip_hash: string | null
+          meta: Json
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event: string
+          id?: string
+          ip_hash?: string | null
+          meta?: Json
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event?: string
+          id?: string
+          ip_hash?: string | null
+          meta?: Json
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "security_events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "admin_user_directory"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       seller_email_verifications: {
         Row: {
@@ -301,34 +940,15 @@ export type Database = {
           owner_id?: string
           token_hash?: string
         }
-        Relationships: []
-      }
-      security_events: {
-        Row: {
-          created_at: string
-          event: string
-          id: string
-          ip_hash: string | null
-          meta: Json
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          event: string
-          id?: string
-          ip_hash?: string | null
-          meta?: Json
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          event?: string
-          id?: string
-          ip_hash?: string | null
-          meta?: Json
-          user_id?: string
-        }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "seller_email_verifications_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "admin_user_directory"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       storefront_signals: {
         Row: {
@@ -351,6 +971,7 @@ export type Database = {
           channel?: string
           currency?: string | null
           dedupe_key?: string | null
+          id?: never
           kind: string
           metadata?: Json
           occurred_at?: string
@@ -364,6 +985,7 @@ export type Database = {
           channel?: string
           currency?: string | null
           dedupe_key?: string | null
+          id?: never
           kind?: string
           metadata?: Json
           occurred_at?: string
@@ -377,6 +999,13 @@ export type Database = {
             columns: ["account_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "storefront_signals_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
             referencedColumns: ["id"]
           },
           {
@@ -395,6 +1024,12 @@ export type Database = {
           created_at: string
           embed_key: string
           id: string
+          moderated_at: string | null
+          moderated_by: string | null
+          moderation_ground: string | null
+          moderation_note: string | null
+          moderation_review_requested_at: string | null
+          moderation_status: string
           name: string
           owner_id: string
           updated_at: string
@@ -405,6 +1040,12 @@ export type Database = {
           created_at?: string
           embed_key?: string
           id?: string
+          moderated_at?: string | null
+          moderated_by?: string | null
+          moderation_ground?: string | null
+          moderation_note?: string | null
+          moderation_review_requested_at?: string | null
+          moderation_status?: string
           name?: string
           owner_id: string
           updated_at?: string
@@ -415,11 +1056,32 @@ export type Database = {
           created_at?: string
           embed_key?: string
           id?: string
+          moderated_at?: string | null
+          moderated_by?: string | null
+          moderation_ground?: string | null
+          moderation_note?: string | null
+          moderation_review_requested_at?: string | null
+          moderation_status?: string
           name?: string
           owner_id?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "storefronts_moderated_by_fkey"
+            columns: ["moderated_by"]
+            isOneToOne: false
+            referencedRelation: "admin_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "storefronts_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "admin_user_directory"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       team_members: {
         Row: {
@@ -464,49 +1126,180 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "team_members_account_owner_id_fkey"
+            columns: ["account_owner_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "team_members_member_user_id_fkey"
             columns: ["member_user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "team_members_member_user_id_fkey"
+            columns: ["member_user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      waitlist_signups: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          list_id: string | null
+          owner_id: string | null
+          source: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          list_id?: string | null
+          owner_id?: string | null
+          source?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          list_id?: string | null
+          owner_id?: string | null
+          source?: string | null
+        }
+        Relationships: []
       }
     }
     Views: {
-      [_ in never]: never
+      admin_user_directory: {
+        Row: {
+          avatar_url: string | null
+          banned_until: string | null
+          created_at: string | null
+          email: string | null
+          email_confirmed_at: string | null
+          id: string | null
+          is_seller: boolean | null
+          last_sign_in_at: string | null
+          username: string | null
+        }
+        Relationships: []
+      }
+      content_report_scores: {
+        Row: {
+          moderated_at: string | null
+          moderation_status: string | null
+          newest_open_at: string | null
+          newest_report_at: string | null
+          oldest_open_at: string | null
+          open_reports: number | null
+          target_id: string | null
+          target_owner_id: string | null
+          target_title: string | null
+          target_type: string | null
+          top_reason: string | null
+          total_reports: number | null
+        }
+        Relationships: []
+      }
+      public_profiles: {
+        Row: {
+          avatar_url: string | null
+          id: string | null
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          id?: string | null
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          id?: string | null
+          username?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "admin_user_directory"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
+      admin_notification_scan_tick: { Args: never; Returns: undefined }
+      admin_revoke_user_sessions: {
+        Args: { target_user_id: string }
+        Returns: number
+      }
+      admin_user_activity: {
+        Args: { target_user_id: string }
+        Returns: {
+          active_sessions: number
+          last_seen: string
+        }[]
+      }
+      analytics_aggregate: {
+        Args: { p_from?: string; p_seller_id: string; p_to?: string }
+        Returns: Json
+      }
+      current_admin_user_id: { Args: never; Returns: string }
+      dashboard_orders_aggregate: {
+        Args: { p_now?: string; p_seller_id: string }
+        Returns: Json
+      }
       decrement_stock: {
         Args: { p_product_id: string; p_quantity: number }
         Returns: boolean
       }
-      email_by_username: {
-        Args: { p_username: string }
-        Returns: string
+      email_by_username: { Args: { p_username: string }; Returns: string }
+      is_squareshare_staff: { Args: never; Returns: boolean }
+      mfa_consume_recovery_code: {
+        Args: { p_hash: string; p_user_id: string }
+        Returns: boolean
       }
+      mfa_replace_recovery_codes: {
+        Args: { p_hashes: string[]; p_user_id: string }
+        Returns: number
+      }
+      mfa_session_ok: { Args: never; Returns: boolean }
+      product_sales_aggregate: { Args: { p_seller_id: string }; Returns: Json }
+      products_ranked_by_metric: {
+        Args: {
+          p_limit?: number
+          p_metric: string
+          p_offset?: number
+          p_search?: string
+          p_seller_id: string
+          p_status?: string
+        }
+        Returns: Json
+      }
+      rl_gc_keys: { Args: never; Returns: number }
       rl_take: {
         Args: { p_action: string; p_max: number; p_window_seconds: number }
         Returns: boolean
       }
-      user_has_password: {
-        Args: { p_user_id: string }
-        Returns: boolean
-      }
-      username_taken: {
-        Args: { p_username: string; p_except?: string }
-        Returns: boolean
-      }
       rl_take_key: {
         Args: {
-          p_key: string
           p_action: string
+          p_key: string
           p_max: number
           p_window_seconds: number
         }
         Returns: boolean
       }
-      rl_gc_keys: { Args: never; Returns: number }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
       storefront_signals_aggregate: {
         Args: { p_account_id: string; p_from?: string; p_to?: string }
         Returns: Json
@@ -521,9 +1314,9 @@ export type Database = {
         Args: never
         Returns: {
           account_owner_id: string
+          is_self: boolean
           role: Database["public"]["Enums"]["team_role"]
           store_name: string
-          is_self: boolean
         }[]
       }
       team_my_pending_invites: {
@@ -548,6 +1341,7 @@ export type Database = {
         Args: { account: string; page_limit?: number; page_offset?: number }
         Returns: {
           accepted_at: string
+          avatar_url: string
           id: string
           invited_at: string
           invited_email: string
@@ -557,7 +1351,12 @@ export type Database = {
           username: string
         }[]
       }
+      user_has_password: { Args: { p_user_id: string }; Returns: boolean }
       user_id_by_email: { Args: { p_email: string }; Returns: string }
+      username_taken: {
+        Args: { p_except?: string; p_username: string }
+        Returns: boolean
+      }
     }
     Enums: {
       team_member_status: "invited" | "active" | "revoked"
@@ -577,12 +1376,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -606,11 +1405,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -631,11 +1430,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -656,11 +1455,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -673,11 +1472,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }

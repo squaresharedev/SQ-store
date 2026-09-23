@@ -4,7 +4,10 @@
  *   1. embedded PostgreSQL 17 (fresh temp dir, prod schema replayed)
  *   2. PostgREST (tools/postgrest/postgrest.exe) — the real /rest/v1 engine
  *   3. a gateway HTTP server that mimics the Supabase API surface:
- *        /auth/v1/*  → minimal mock GoTrue (password signup/signin/user/logout)
+ *        /auth/v1/*  → mock GoTrue: password signup/signin, refresh, user,
+ *                      scoped logout, PKCE password recovery, and TOTP MFA
+ *                      (enroll / challenge / verify / unenroll, the admin
+ *                      factor API, and aal/amr/session_id claims)
  *        /rest/v1/*  → proxied to PostgREST
  *        everything else → 404
  *   4. `next dev` on :3100 pointed at the gateway
@@ -18,7 +21,7 @@
  */
 import { createServer } from "node:http";
 import { createRequire } from "node:module";
-import { createHmac, randomUUID } from "node:crypto";
+import { createHash, createHmac, randomUUID } from "node:crypto";
 import { existsSync, mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
@@ -31,6 +34,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO = join(__dirname, "..", "..", "..");
 
 import { ANON_KEY, JWT_SECRET, SERVICE_KEY, signJwt } from "./keys.mjs";
+import { newSecret, totpValid } from "./totp.mjs";
 
 const PG_PORT = 54322;
 const POSTGREST_PORT = 3111;
@@ -137,17 +141,72 @@ console.log("[stack] postgrest ready");
 // ---------------------------------------------------------------------------
 // 3. Gateway: mock GoTrue + REST proxy
 // ---------------------------------------------------------------------------
-const refreshTokens = new Map(); // refresh_token -> user id
+// ---- Sessions ---------------------------------------------------------------
+// Real GoTrue keeps a row per session and stamps every access token with its
+// `session_id`, its assurance level (`aal`) and how it was proven (`amr`, each
+// method with the time it was used). The mock does the same in memory, because
+// two-factor authentication is built on exactly those three facts: a session
+// that has not passed its second factor is aal1, verifying a code makes it aal2
+// and adds a fresh `totp` entry, and signing out (or enabling 2FA) revokes
+// other sessions so their tokens stop working at /user.
+const sessions = new Map(); // session_id -> { userId, aal, amr: Map<method, unix s>, revoked }
+const refreshTokens = new Map(); // refresh_token -> session_id
+const challenges = new Map(); // challenge_id -> { factorId, userId, sessionId, expiresAt }
+const recoveries = new Map(); // auth_code -> { userId, email, challenge, method, redirectTo }
+const lastRecoveryByEmail = new Map(); // email -> { auth_code, redirect_to }
+
+const nowSeconds = () => Math.floor(Date.now() / 1000);
+
+function newSession(userId, method) {
+  const id = randomUUID();
+  sessions.set(id, {
+    userId,
+    aal: "aal1",
+    amr: new Map([[method, nowSeconds()]]),
+    revoked: false,
+  });
+  return id;
+}
+
+function revokeSessions(userId, { except } = {}) {
+  for (const [id, session] of sessions) {
+    if (session.userId === userId && id !== except) session.revoked = true;
+  }
+}
 
 async function loadUser(id) {
   const { rows } = await pool.query(
-    `select id, email, raw_user_meta_data, created_at, updated_at from auth.users where id = $1`,
+    `select id, email, encrypted_password, raw_user_meta_data, created_at, updated_at from auth.users where id = $1`,
     [id],
   );
   return rows[0] ?? null;
 }
 
-function userJson(row) {
+async function loadFactors(userId) {
+  const { rows } = await pool.query(
+    `select id, friendly_name, factor_type::text as factor_type, status::text as status,
+            secret, created_at, updated_at, last_challenged_at
+       from auth.mfa_factors where user_id = $1 order by created_at`,
+    [userId],
+  );
+  return rows;
+}
+
+/** A factor as GoTrue serialises it: never with its secret. */
+function factorJson(row) {
+  return {
+    id: row.id,
+    friendly_name: row.friendly_name ?? "",
+    factor_type: row.factor_type,
+    status: row.status,
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+    ...(row.last_challenged_at ? { last_challenged_at: row.last_challenged_at } : {}),
+  };
+}
+
+async function userJson(row) {
+  const factors = await loadFactors(row.id);
   return {
     id: row.id,
     aud: "authenticated",
@@ -159,35 +218,45 @@ function userJson(row) {
     app_metadata: { provider: "email", providers: ["email"] },
     user_metadata: row.raw_user_meta_data ?? {},
     identities: [],
+    // GoTrue leaves `factors` out entirely when there are none.
+    ...(factors.length ? { factors: factors.map(factorJson) } : {}),
     created_at: row.created_at,
     updated_at: row.updated_at,
     is_anonymous: false,
   };
 }
 
-function sessionJson(row) {
+async function sessionResponse(sessionId) {
+  const session = sessions.get(sessionId);
+  const row = await loadUser(session.userId);
   const expiresIn = 3600;
+  const iat = nowSeconds();
+  const amr = [...session.amr]
+    .map(([method, timestamp]) => ({ method, timestamp }))
+    .sort((a, b) => b.timestamp - a.timestamp);
   const accessToken = signJwt({
     sub: row.id,
     email: row.email,
     role: "authenticated",
     aud: "authenticated",
-    session_id: randomUUID(),
+    session_id: sessionId,
+    aal: session.aal,
+    amr,
     is_anonymous: false,
     app_metadata: { provider: "email" },
     user_metadata: row.raw_user_meta_data ?? {},
-    iat: Math.floor(Date.now() / 1000),
-    exp: Math.floor(Date.now() / 1000) + expiresIn,
+    iat,
+    exp: iat + expiresIn,
   });
   const refreshToken = randomUUID();
-  refreshTokens.set(refreshToken, row.id);
+  refreshTokens.set(refreshToken, sessionId);
   return {
     access_token: accessToken,
     token_type: "bearer",
     expires_in: expiresIn,
-    expires_at: Math.floor(Date.now() / 1000) + expiresIn,
+    expires_at: iat + expiresIn,
     refresh_token: refreshToken,
-    user: userJson(row),
+    user: await userJson(row),
   };
 }
 
@@ -200,6 +269,10 @@ function json(res, status, body) {
     "Access-Control-Allow-Methods": "*",
   });
   res.end(text);
+}
+
+function fail(res, status, code, msg) {
+  return json(res, status, { error_code: code, code: status, msg, error_description: msg });
 }
 
 function readBody(req) {
@@ -216,18 +289,64 @@ function readBody(req) {
   });
 }
 
+function bearer(req) {
+  return (req.headers.authorization ?? "").replace(/^Bearer\s+/i, "");
+}
+
+/**
+ * The caller's session, the way GoTrue resolves it: a valid signature, then a
+ * `session_id` that still exists. A token from a revoked session is refused
+ * with `session_not_found`, which auth-js turns into "signed out".
+ */
+function requireSession(req, res) {
+  const claims = verifyJwt(bearer(req));
+  if (!claims || claims.role !== "authenticated") {
+    fail(res, 401, "no_authorization", "invalid claim: missing sub claim");
+    return null;
+  }
+  const session = sessions.get(claims.session_id);
+  if (!session || session.revoked || session.userId !== claims.sub) {
+    fail(res, 403, "session_not_found", "Session from session_id claim in JWT does not exist");
+    return null;
+  }
+  return { claims, session, sessionId: claims.session_id };
+}
+
+function requireServiceRole(req, res) {
+  const claims = verifyJwt(bearer(req));
+  if (!claims || claims.role !== "service_role") {
+    fail(res, 401, "no_authorization", "service role required");
+    return false;
+  }
+  return true;
+}
+
+const hasVerifiedFactor = (factors) => factors.some((f) => f.status === "verified");
+
+/** A small SVG standing in for GoTrue's QR code. It carries a `#` on purpose:
+ *  GoTrue's own SVG does, and the app must re-encode it before using it in a
+ *  data: URL (an unescaped `#` would cut the URL short). */
+function fakeQrSvg(uri) {
+  return (
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 21 21" width="168" height="168">` +
+    `<rect width="21" height="21" fill="#ffffff"/>` +
+    `<path d="M0 0h7v7H0zM14 0h7v7h-7zM0 14h7v7H0z" fill="#000000"/>` +
+    `<desc>${uri.replace(/[<&>]/g, "")}</desc></svg>`
+  );
+}
+
 async function handleAuth(req, res, url) {
   const path = url.pathname.replace(/^\/auth\/v1/, "") || "/";
 
   if (req.method === "POST" && path === "/signup") {
     const body = await readBody(req);
     if (!body.email || !body.password) {
-      return json(res, 400, { error_code: "validation_failed", msg: "email and password required" });
+      return fail(res, 400, "validation_failed", "email and password required");
     }
     const email = String(body.email).toLowerCase();
     const existing = await pool.query(`select id from auth.users where lower(email) = $1`, [email]);
     if (existing.rows.length > 0) {
-      return json(res, 422, { error_code: "user_already_exists", code: 422, msg: "User already registered" });
+      return fail(res, 422, "user_already_exists", "User already registered");
     }
     const id = randomUUID();
     await pool.query(
@@ -235,8 +354,7 @@ async function handleAuth(req, res, url) {
        values ($1, $2, $3, $4, now())`,
       [id, email, `plain:${body.password}`, JSON.stringify(body.data ?? {})],
     );
-    const row = await loadUser(id);
-    return json(res, 200, sessionJson(row));
+    return json(res, 200, await sessionResponse(newSession(id, "password")));
   }
 
   if (req.method === "POST" && path === "/token") {
@@ -250,60 +368,242 @@ async function handleAuth(req, res, url) {
       );
       const row = rows[0];
       if (!row || row.encrypted_password !== `plain:${body.password}`) {
-        return json(res, 400, {
-          error_code: "invalid_credentials",
-          code: 400,
-          msg: "Invalid login credentials",
-          error_description: "Invalid login credentials",
-        });
+        return fail(res, 400, "invalid_credentials", "Invalid login credentials");
       }
-      return json(res, 200, sessionJson(await loadUser(row.id)));
+      return json(res, 200, await sessionResponse(newSession(row.id, "password")));
     }
     if (grant === "refresh_token") {
-      const userId = refreshTokens.get(body.refresh_token);
-      if (!userId) {
-        return json(res, 400, { error_code: "refresh_token_not_found", msg: "Invalid Refresh Token" });
+      const sessionId = refreshTokens.get(body.refresh_token);
+      const session = sessionId ? sessions.get(sessionId) : null;
+      if (!session || session.revoked) {
+        return fail(res, 400, "refresh_token_not_found", "Invalid Refresh Token: Refresh Token Not Found");
       }
       refreshTokens.delete(body.refresh_token);
-      return json(res, 200, sessionJson(await loadUser(userId)));
+      return json(res, 200, await sessionResponse(sessionId));
     }
-    return json(res, 400, { error_code: "unsupported_grant_type", msg: `grant ${grant} not supported in e2e stack` });
+    if (grant === "pkce") {
+      // The second half of an emailed link (here: password recovery). The
+      // browser that asked for the link holds the verifier; only it can
+      // redeem the code.
+      const entry = recoveries.get(body.auth_code);
+      if (!entry) return fail(res, 404, "flow_state_not_found", "invalid flow state, no valid flow state found");
+      const verifier = String(body.code_verifier ?? "");
+      const expected =
+        entry.method === "s256"
+          ? createHash("sha256").update(verifier).digest("base64url")
+          : verifier;
+      if (!verifier || expected !== entry.challenge) {
+        return fail(res, 403, "bad_code_verifier", "code challenge does not match previously saved code verifier");
+      }
+      recoveries.delete(body.auth_code);
+      return json(res, 200, await sessionResponse(newSession(entry.userId, "recovery")));
+    }
+    return fail(res, 400, "unsupported_grant_type", `grant ${grant} not supported in e2e stack`);
+  }
+
+  if (req.method === "POST" && path === "/recover") {
+    // resetPasswordForEmail. Nothing is mailed: the link's code is parked for
+    // the spec to fetch from /__e2e/last-recovery, which is the only way a
+    // test can "open the email". Unknown addresses get the same 200.
+    const body = await readBody(req);
+    const email = String(body.email ?? "").toLowerCase();
+    const { rows } = await pool.query(`select id from auth.users where lower(email) = $1`, [email]);
+    if (rows[0]) {
+      const authCode = randomUUID();
+      recoveries.set(authCode, {
+        userId: rows[0].id,
+        challenge: body.code_challenge,
+        method: body.code_challenge_method,
+      });
+      lastRecoveryByEmail.set(email, {
+        auth_code: authCode,
+        redirect_to: url.searchParams.get("redirect_to"),
+      });
+    }
+    return json(res, 200, {});
   }
 
   if (req.method === "GET" && path === "/user") {
-    const token = (req.headers.authorization ?? "").replace(/^Bearer\s+/i, "");
-    const claims = verifyJwt(token);
-    if (!claims || claims.role !== "authenticated") {
-      return json(res, 401, { error_code: "no_authorization", msg: "invalid claim: missing sub claim" });
-    }
-    const row = await loadUser(claims.sub);
-    if (!row) return json(res, 401, { error_code: "user_not_found", msg: "User not found" });
-    return json(res, 200, userJson(row));
+    const auth = requireSession(req, res);
+    if (!auth) return;
+    const row = await loadUser(auth.claims.sub);
+    if (!row) return fail(res, 401, "user_not_found", "User not found");
+    return json(res, 200, await userJson(row));
   }
 
   if (req.method === "PUT" && path === "/user") {
-    // updateUser (password change / metadata) — accept and echo.
-    const token = (req.headers.authorization ?? "").replace(/^Bearer\s+/i, "");
-    const claims = verifyJwt(token);
-    if (!claims) return json(res, 401, { msg: "unauthorized" });
+    const auth = requireSession(req, res);
+    if (!auth) return;
     const body = await readBody(req);
+    // GoTrue's rule: with a verified factor on the account, the password and
+    // the email may only be changed from an aal2 session.
+    if ((body.password || body.email) && auth.session.aal !== "aal2") {
+      if (hasVerifiedFactor(await loadFactors(auth.claims.sub))) {
+        return fail(res, 403, "insufficient_aal", "AAL2 session is required to update email or password when MFA is enabled.");
+      }
+    }
     if (body.password) {
+      const current = await loadUser(auth.claims.sub);
+      if (current?.encrypted_password === `plain:${body.password}`) {
+        return fail(res, 422, "same_password", "New password should be different from the old password.");
+      }
       await pool.query(`update auth.users set encrypted_password = $2 where id = $1`, [
-        claims.sub,
+        auth.claims.sub,
         `plain:${body.password}`,
       ]);
     }
-    return json(res, 200, userJson(await loadUser(claims.sub)));
+    return json(res, 200, await userJson(await loadUser(auth.claims.sub)));
   }
 
   if (req.method === "POST" && path === "/logout") {
+    const claims = verifyJwt(bearer(req));
+    const session = claims ? sessions.get(claims.session_id) : null;
+    if (claims && session && !session.revoked) {
+      const scope = url.searchParams.get("scope") ?? "global";
+      if (scope === "local") session.revoked = true;
+      else if (scope === "others") revokeSessions(session.userId, { except: claims.session_id });
+      else revokeSessions(session.userId);
+    }
     res.writeHead(204, { "Access-Control-Allow-Origin": "*" });
     return res.end();
   }
 
+  // ---- MFA (the user API) --------------------------------------------------
+
+  if (req.method === "POST" && path === "/factors") {
+    const auth = requireSession(req, res);
+    if (!auth) return;
+    const userId = auth.claims.sub;
+    const body = await readBody(req);
+    if (body.factor_type !== "totp") {
+      return fail(res, 422, "mfa_factor_type_unsupported", "only totp in the e2e stack");
+    }
+    const factors = await loadFactors(userId);
+    if (hasVerifiedFactor(factors) && auth.session.aal !== "aal2") {
+      return fail(res, 403, "insufficient_aal", "AAL2 required to enroll a new factor");
+    }
+    if (factors.length >= 10) {
+      return fail(res, 422, "too_many_enrolled_mfa_factors", "Maximum number of verified factors reached, unenroll to continue");
+    }
+    const friendlyName = String(body.friendly_name ?? "");
+    if (friendlyName && factors.some((f) => f.friendly_name === friendlyName)) {
+      return fail(res, 422, "mfa_factor_name_conflict", `A factor with the friendly name "${friendlyName}" for this user already exists`);
+    }
+    const row = await loadUser(userId);
+    const secret = newSecret();
+    const issuer = String(body.issuer ?? "localhost");
+    const uri = `otpauth://totp/${encodeURIComponent(issuer)}:${encodeURIComponent(row.email)}?algorithm=SHA1&digits=6&issuer=${encodeURIComponent(issuer)}&period=30&secret=${secret}`;
+    const id = randomUUID();
+    await pool.query(
+      `insert into auth.mfa_factors (id, user_id, friendly_name, factor_type, status, secret)
+       values ($1, $2, $3, 'totp', 'unverified', $4)`,
+      [id, userId, friendlyName, secret],
+    );
+    return json(res, 200, {
+      id,
+      type: "totp",
+      friendly_name: friendlyName,
+      totp: { qr_code: fakeQrSvg(uri), secret, uri },
+    });
+  }
+
+  const challengeMatch = path.match(/^\/factors\/([0-9a-f-]{36})\/challenge$/);
+  if (req.method === "POST" && challengeMatch) {
+    const auth = requireSession(req, res);
+    if (!auth) return;
+    const factor = (await loadFactors(auth.claims.sub)).find((f) => f.id === challengeMatch[1]);
+    if (!factor) return fail(res, 404, "mfa_factor_not_found", "Factor not found");
+    const id = randomUUID();
+    const expiresAt = nowSeconds() + 300;
+    challenges.set(id, {
+      factorId: factor.id,
+      userId: auth.claims.sub,
+      sessionId: auth.sessionId,
+      expiresAt,
+    });
+    await pool.query(`update auth.mfa_factors set last_challenged_at = now() where id = $1`, [factor.id]);
+    return json(res, 200, { id, type: "totp", expires_at: expiresAt });
+  }
+
+  const verifyMatch = path.match(/^\/factors\/([0-9a-f-]{36})\/verify$/);
+  if (req.method === "POST" && verifyMatch) {
+    const auth = requireSession(req, res);
+    if (!auth) return;
+    const body = await readBody(req);
+    const challenge = challenges.get(body.challenge_id);
+    if (
+      !challenge ||
+      challenge.factorId !== verifyMatch[1] ||
+      challenge.userId !== auth.claims.sub
+    ) {
+      return fail(res, 404, "mfa_challenge_expired", "MFA factor with the provided challenge ID not found");
+    }
+    // Single use, whatever the outcome.
+    challenges.delete(body.challenge_id);
+    if (challenge.expiresAt < nowSeconds()) {
+      return fail(res, 422, "mfa_challenge_expired", "MFA challenge has expired, verify against another challenge or create a new challenge.");
+    }
+    const factor = (await loadFactors(auth.claims.sub)).find((f) => f.id === verifyMatch[1]);
+    if (!factor) return fail(res, 404, "mfa_factor_not_found", "Factor not found");
+    if (!totpValid(factor.secret, String(body.code ?? ""))) {
+      return fail(res, 422, "mfa_verification_failed", "Invalid TOTP code entered");
+    }
+    if (factor.status !== "verified") {
+      await pool.query(
+        `update auth.mfa_factors set status = 'verified', updated_at = now() where id = $1`,
+        [factor.id],
+      );
+      // As GoTrue does: verifying a NEW factor signs out every other session.
+      revokeSessions(auth.claims.sub, { except: auth.sessionId });
+    }
+    auth.session.aal = "aal2";
+    auth.session.amr.set("totp", nowSeconds());
+    return json(res, 200, await sessionResponse(auth.sessionId));
+  }
+
+  const unenrollMatch = path.match(/^\/factors\/([0-9a-f-]{36})$/);
+  if (req.method === "DELETE" && unenrollMatch) {
+    const auth = requireSession(req, res);
+    if (!auth) return;
+    const factor = (await loadFactors(auth.claims.sub)).find((f) => f.id === unenrollMatch[1]);
+    if (!factor) return fail(res, 404, "mfa_factor_not_found", "Factor not found");
+    if (factor.status === "verified" && auth.session.aal !== "aal2") {
+      return fail(res, 403, "insufficient_aal", "AAL2 required to unenroll verified factor");
+    }
+    await pool.query(`delete from auth.mfa_factors where id = $1`, [factor.id]);
+    return json(res, 200, { id: factor.id });
+  }
+
+  // ---- MFA (the admin API, service role only) --------------------------------
+
+  const adminFactors = path.match(/^\/admin\/users\/([0-9a-f-]{36})\/factors$/);
+  if (req.method === "GET" && adminFactors) {
+    if (!requireServiceRole(req, res)) return;
+    return json(res, 200, (await loadFactors(adminFactors[1])).map(factorJson));
+  }
+  const adminFactor = path.match(/^\/admin\/users\/([0-9a-f-]{36})\/factors\/([0-9a-f-]{36})$/);
+  if (req.method === "DELETE" && adminFactor) {
+    if (!requireServiceRole(req, res)) return;
+    const { rows } = await pool.query(
+      `delete from auth.mfa_factors where id = $1 and user_id = $2
+       returning id, friendly_name, factor_type::text as factor_type, status::text as status, created_at, updated_at`,
+      [adminFactor[2], adminFactor[1]],
+    );
+    if (!rows[0]) return fail(res, 404, "mfa_factor_not_found", "Factor not found");
+    return json(res, 200, factorJson(rows[0]));
+  }
+
+  // ---- Test-only hooks (never part of GoTrue) --------------------------------
+
+  if (req.method === "GET" && path === "/__e2e/last-recovery") {
+    const email = String(url.searchParams.get("email") ?? "").toLowerCase();
+    const entry = lastRecoveryByEmail.get(email);
+    return entry ? json(res, 200, entry) : fail(res, 404, "not_found", "no recovery link for that address");
+  }
+
   if (path === "/health") return json(res, 200, { description: "e2e mock gotrue", version: "test" });
 
-  return json(res, 404, { msg: `mock gotrue: no route for ${req.method} ${path}` });
+  return fail(res, 404, "not_found", `mock gotrue: no route for ${req.method} ${path}`);
 }
 
 const gateway = createServer(async (req, res) => {

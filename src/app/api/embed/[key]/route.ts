@@ -8,6 +8,10 @@ import { sellerEmailVerificationRequired } from "@/lib/settings/seller-email-ver
 import { isTraderIdentityComplete } from "@/lib/settings/trader-identity";
 import { RATE_LIMITS, clientKey, rateLimitKey } from "@/lib/rate-limit";
 import { recordSignal, viewDedupeKey, visitorHash } from "@/lib/analytics/record";
+import {
+  MODERATION_GATE_SELECT,
+  isContentVisible,
+} from "@/lib/moderation/removal";
 import { decideEmbedAccess, embedCorsHeaders } from "@/lib/storefront/embed";
 import { parseStoredStorefrontConfig } from "@/lib/validation/storefront";
 import { uuidField } from "@/lib/validation/inputs";
@@ -101,6 +105,7 @@ export async function GET(
     name: string;
     owner_id: string;
     config: unknown;
+    moderation_status: string | null;
   } | null = null;
   try {
     const admin = createAdminClient();
@@ -109,7 +114,7 @@ export async function GET(
       // owner_id is read for ATTRIBUTION only (which seller's view counter this
       // request belongs to) and never leaves in the response. See the built,
       // not-passed-through payload below.
-      .select("id, name, owner_id, config")
+      .select(`id, name, owner_id, config, ${MODERATION_GATE_SELECT}`)
       .eq("embed_key", key)
       .maybeSingle();
     if (result.error) {
@@ -126,6 +131,16 @@ export async function GET(
   }
 
   if (!row) return notFound();
+
+  // THE REMOVAL GATE, storefront half. Before the origin allowlist and before
+  // the publish gate, because a removed storefront is not a configuration
+  // question: there is no origin it may be served to and no seller detail that
+  // would bring it back. 404, the same answer as a wrong key, so a takedown is
+  // not something an embedding page can distinguish or report on.
+  if (!isContentVisible(row.moderation_status)) {
+    console.warn("[embed] denied", row.id, "storefront removed by moderation");
+    return notFound();
+  }
 
   const config = parseStoredStorefrontConfig(row.config);
   if (!config) {
@@ -205,7 +220,7 @@ export async function GET(
       // artwork is the block, so it ships as a signed, expiring URL.)
       theme: config.theme,
       header: config.header ?? null,
-      blocks: await publicBlocks(config, row.id),
+      blocks: await publicBlocks(config, row.id, await removedProductIds(config)),
     },
     { headers },
   );
@@ -240,20 +255,78 @@ export async function OPTIONS(
 }
 
 /**
+ * Which of this board's products have been taken down.
+ *
+ * THE REMOVAL GATE, product half. The embed payload has never read the
+ * products table (a tile carries an id and a link, not a catalogue row), so
+ * rather than start, this asks the one question that matters and asks it about
+ * the ids already in hand. Almost always zero rows, and it rides the partial
+ * index on moderation_status, so the cost on the hot path is a single indexed
+ * lookup that usually returns nothing.
+ *
+ * FAILS CLOSED: a read that errors hides every product on the board rather
+ * than serving all of them. A storefront missing its tiles for a few minutes
+ * is recoverable; a removed product back on someone's site is not.
+ */
+async function removedProductIds(config: StorefrontConfig): Promise<Set<string>> {
+  const ids = [
+    ...new Set(
+      config.blocks
+        .filter((block) => block.type === "product")
+        .map((block) => (block as { productId: string }).productId),
+    ),
+  ];
+  if (ids.length === 0) return new Set();
+
+  try {
+    const admin = createAdminClient();
+    const { data, error } = await admin
+      .from("products")
+      .select("id, moderation_status")
+      .in("id", ids)
+      .neq("moderation_status", "ok");
+    if (error) {
+      console.error("[embed] moderation read failed", error.message);
+      return new Set(ids);
+    }
+    return new Set((data ?? []).map((product) => product.id as string));
+  } catch (err) {
+    console.error(
+      "[embed] moderation read threw:",
+      err instanceof Error ? err.message : String(err),
+    );
+    return new Set(ids);
+  }
+}
+
+/**
  * The buyer-facing view of the blocks.
  *
  * Built field by field rather than spread, so nothing seller-private can ride
  * along: stock counts and thresholds are the live example (a competitor should
  * not learn inventory from a public embed), and a field added to the block
  * types later stays out until someone adds it here on purpose.
+ *
+ * `removedProducts` drops the tiles for products staff have taken down. The
+ * tile is omitted entirely rather than blanked: the widget lays out what it is
+ * given, and a placeholder would leave a hole on the seller's site labelled
+ * "something was here", which is neither the buyer's business nor a thing the
+ * embedding site can fix.
  */
-async function publicBlocks(config: StorefrontConfig, storefrontId: string) {
+async function publicBlocks(
+  config: StorefrontConfig,
+  storefrontId: string,
+  removedProducts: ReadonlySet<string>,
+) {
   // Where a tap on a product tile goes. Absent when the seller has switched
   // product pages off, so the widget renders an inert tile rather than a link
   // to a 404.
   const productPagesOn = resolveProductPage(config).enabled;
+  const visible = readingOrder(config.blocks).filter(
+    (block) => block.type !== "product" || !removedProducts.has(block.productId),
+  );
   return Promise.all(
-    readingOrder(config.blocks).map(async (block) => {
+    visible.map(async (block) => {
       // Tilt travels with the placement for the same reason a product tile's
       // framing does: it is a visual choice the seller made about a block the
       // buyer can already see, and an embed that dropped it would quietly

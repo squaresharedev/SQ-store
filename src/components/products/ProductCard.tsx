@@ -15,6 +15,7 @@ import { formatCents } from "@/lib/format/money";
 import { StockBadge } from "@/components/ui/StockBadge";
 import { deriveStockBadge } from "@/lib/stock/badge";
 import { StatusBadge } from "./StatusBadge";
+import { RemovalBadge } from "./RemovalNotice";
 
 // Presentational card (styles.md §8.7). Interactive handlers come from the
 // parent list, which owns product state; edit is a plain route link.
@@ -51,7 +52,7 @@ export function ProductCard({
   /** Called when the seller asks to open the product's hosted page. */
   onOpenPage: () => void;
 }) {
-  const { id, title, price, currency, status, imageUrl, trackStock, stockQuantity, lowStockThreshold } = product;
+  const { id, title, price, currency, status, imageUrl, trackStock, stockQuantity, lowStockThreshold, removal } = product;
   const stockBadge = deriveStockBadge({ trackStock, stockQuantity, lowStockThreshold });
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -108,7 +109,14 @@ export function ProductCard({
             />
           </div>
         )}
-        <StatusBadge status={status} className="absolute left-2 top-2" />
+        {/* Removed outranks Draft in the one badge slot: a seller looking at a
+            removed product does not also need to be told it is a draft, and
+            the two stacked would compete for the same corner. */}
+        {removal ? (
+          <RemovalBadge kind={removal.kind} className="absolute left-2 top-2" />
+        ) : (
+          <StatusBadge status={status} className="absolute left-2 top-2" />
+        )}
         {isBestseller && (
           // Inverted chip so it reads as an accolade against the image without
           // introducing a hue — chrome stays greyscale (styles.md §1).

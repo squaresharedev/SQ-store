@@ -36,6 +36,9 @@ describe("embedded supabase replica", () => {
       "artifacts",
       "collections",
       "follows",
+      // Hashed single-use 2FA recovery codes (20260923_two_factor_auth).
+      // Service-role only.
+      "mfa_recovery_codes",
       "notifications",
       "orders",
       "products",

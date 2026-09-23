@@ -16,6 +16,12 @@ export const NOTIFICATION_TYPES = [
    *  Separate from "system" so it can be styled to actually catch the eye,
    *  which is the entire point of telling someone their password changed. */
   "security",
+  /** A moderation decision about this seller's own content: a product or
+   *  storefront removed, or restored. Its own type rather than "system"
+   *  because it is the one notification a seller is ENTITLED to receive (EU
+   *  Digital Services Act, Art. 17 requires a statement of reasons), so it has
+   *  to be findable by type later, not buried in a general feed. */
+  "policy",
 ] as const;
 
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number];

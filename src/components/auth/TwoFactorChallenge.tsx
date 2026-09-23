@@ -1,0 +1,237 @@
+"use client";
+
+import * as React from "react";
+import { useActionState } from "react";
+import Link from "next/link";
+import { KeyRound, Smartphone } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Spinner } from "@/components/ui/spinner";
+import { helpTextClass, infoTextClass } from "@/components/ui/control-styles";
+import { FactorPicker, type FactorChoice } from "@/components/auth/FactorPicker";
+import { OneTimeCodeInput } from "@/components/auth/OneTimeCodeInput";
+import { signOut } from "@/lib/auth/actions";
+import {
+  signInWithRecoveryCode,
+  verifyTwoFactorSignIn,
+  type ChallengeState,
+} from "@/lib/auth/mfa-actions";
+
+const INITIAL: ChallengeState = {};
+
+/**
+ * The sign-in challenge: a code from the authenticator app, or (for someone
+ * whose phone is gone) one of their recovery codes. Two forms, one on screen
+ * at a time, each with its own action so a recovery code can never be sent to
+ * the code check or the other way round.
+ */
+export function TwoFactorChallenge({
+  next,
+  email,
+  factors,
+}: {
+  next: string;
+  email: string;
+  factors: FactorChoice[];
+}) {
+  const [mode, setMode] = React.useState<"code" | "recovery">("code");
+
+  return (
+    <div className="flex flex-col gap-5">
+      {mode === "code" ? (
+        <CodeForm next={next} email={email} factors={factors} />
+      ) : (
+        <RecoveryForm next={next} />
+      )}
+
+      <div className="flex flex-col items-center gap-2 border-t border-border pt-4">
+        <button
+          type="button"
+          onClick={() => setMode((m) => (m === "code" ? "recovery" : "code"))}
+          suppressHydrationWarning
+          className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 font-inter text-sm text-muted-foreground transition-colors duration-base ease-standard hover:bg-accent hover:text-foreground motion-reduce:transition-none"
+        >
+          {mode === "code" ? (
+            <>
+              <KeyRound aria-hidden className="size-4" />
+              Use a recovery code instead
+            </>
+          ) : (
+            <>
+              <Smartphone aria-hidden className="size-4" />
+              Use your authenticator app instead
+            </>
+          )}
+        </button>
+        {/* A way out of the half-signed-in state on a shared computer, or for
+            the wrong account. Ends only this session. */}
+        <form action={signOut}>
+          <button
+            type="submit"
+            className="font-inter text-xs text-muted-foreground underline decoration-border underline-offset-4 transition-colors duration-base ease-standard hover:text-foreground hover:decoration-foreground motion-reduce:transition-none"
+          >
+            Not you? Sign out
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+function Status({ state, next }: { state: ChallengeState; next: string }) {
+  if (!state.error) return null;
+  return (
+    <div aria-live="polite" className="flex flex-col gap-1">
+      <p role="alert" className="text-sm font-medium text-destructive">
+        {state.error}
+      </p>
+      {state.expired && (
+        <Link
+          href={`/login?next=${encodeURIComponent(next)}`}
+          className="font-inter text-sm font-medium text-foreground underline underline-offset-4"
+        >
+          Sign in again
+        </Link>
+      )}
+    </div>
+  );
+}
+
+function CodeForm({
+  next,
+  email,
+  factors,
+}: {
+  next: string;
+  email: string;
+  factors: FactorChoice[];
+}) {
+  const [state, formAction, isPending] = useActionState(verifyTwoFactorSignIn, INITIAL);
+  const single = factors.length < 2 ? factors[0] : null;
+
+  return (
+    <form action={formAction} className="flex flex-col gap-5" noValidate>
+      <input type="hidden" name="next" value={next} />
+      <div>
+        <h1 className="text-xl font-semibold tracking-tight text-foreground">
+          Two-factor authentication
+        </h1>
+        <p className={`${helpTextClass} mt-1`}>
+          Enter the 6-digit code from your authenticator app
+          {single ? (
+            <>
+              {" "}
+              (<span className="font-medium text-foreground">{single.name}</span>)
+            </>
+          ) : null}
+          {email ? (
+            <>
+              {" "}
+              to finish signing in as{" "}
+              <span className="font-medium text-foreground">{email}</span>.
+            </>
+          ) : (
+            "."
+          )}
+        </p>
+      </div>
+
+      <FactorPicker factors={factors} name="factor_id" id="challenge-factor" />
+
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="code">Authentication code</Label>
+        <OneTimeCodeInput
+          id="code"
+          name="code"
+          autoFocus
+          required
+          submitOnComplete
+          // readOnly, not disabled: a disabled field is left out of the form
+          // data, which would post an empty code if a re-render landed first.
+          readOnly={isPending}
+          aria-invalid={state.error ? true : undefined}
+        />
+      </div>
+
+      <Status state={state} next={next} />
+
+      <Button
+        type="submit"
+        disabled={isPending}
+        suppressHydrationWarning
+        className="w-full px-8 py-3.5 text-base"
+      >
+        {isPending ? (
+          <>
+            <Spinner />
+            Verifying…
+          </>
+        ) : (
+          "Verify"
+        )}
+      </Button>
+    </form>
+  );
+}
+
+function RecoveryForm({ next }: { next: string }) {
+  const [state, formAction, isPending] = useActionState(signInWithRecoveryCode, INITIAL);
+
+  return (
+    <form action={formAction} className="flex flex-col gap-5" noValidate>
+      <input type="hidden" name="next" value={next} />
+      <div>
+        <h1 className="text-xl font-semibold tracking-tight text-foreground">
+          Use a recovery code
+        </h1>
+        <p className={`${helpTextClass} mt-1`}>
+          Enter one of the codes you saved when you turned on two-factor
+          authentication.
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="recovery_code">Recovery code</Label>
+        <Input
+          id="recovery_code"
+          name="recovery_code"
+          type="text"
+          autoComplete="off"
+          autoCapitalize="off"
+          spellCheck={false}
+          placeholder="xxxx-xxxx-xxxx-xxxx"
+          maxLength={64}
+          autoFocus
+          required
+          className="font-mono"
+        />
+        {/* Said BEFORE they press the button: this is not a quiet way round
+            2FA, it switches it off. */}
+        <p className={infoTextClass}>
+          Each code works once. Using one turns two-factor authentication off
+          and signs out your other devices, so you can set it up again on your
+          new phone.
+        </p>
+      </div>
+
+      <Status state={state} next={next} />
+
+      <Button
+        type="submit"
+        disabled={isPending}
+        suppressHydrationWarning
+        className="w-full px-8 py-3.5 text-base"
+      >
+        {isPending ? (
+          <>
+            <Spinner />
+            Checking…
+          </>
+        ) : (
+          "Continue"
+        )}
+      </Button>
+    </form>
+  );
+}

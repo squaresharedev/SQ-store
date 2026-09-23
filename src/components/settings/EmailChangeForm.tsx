@@ -14,6 +14,7 @@ import {
   type SettingsActionState,
 } from "@/lib/settings/actions";
 import { InfoTip } from "@/components/ui/InfoTip";
+import { StepUpField } from "@/components/auth/StepUp";
 
 const INITIAL: SettingsActionState = {};
 
@@ -92,6 +93,7 @@ export function EmailChangeForm({
             />
           </div>
         )}
+        <StepUpField id="email-change" state={state} />
         <div>
           <SaveButton
             pending={isPending}

@@ -140,6 +140,48 @@ const SETTINGS_FIELDS: LocalEntry[] = [
     ],
   ),
   entry(
+    "field:two-factor",
+    {
+      type: "settings",
+      title: "Two-factor authentication",
+      subtitle: "Settings › Security",
+      href: "/settings/security#two-factor",
+    },
+    [
+      "2fa",
+      "mfa",
+      "two factor",
+      "two-step",
+      "2 step verification",
+      "authenticator",
+      "authenticator app",
+      "google authenticator",
+      "totp",
+      "one time code",
+      "security",
+    ],
+  ),
+  entry(
+    "field:recovery-codes",
+    {
+      type: "settings",
+      title: "Recovery codes",
+      subtitle: "Settings › Security",
+      href: "/settings/security#recovery-codes",
+    },
+    ["backup codes", "lost phone", "2fa recovery", "account recovery"],
+  ),
+  entry(
+    "field:security-activity",
+    {
+      type: "settings",
+      title: "Security activity",
+      subtitle: "Settings › Security",
+      href: "/settings/security#activity",
+    },
+    ["security log", "login history", "audit log", "recent activity"],
+  ),
+  entry(
     "field:sign-out",
     { type: "settings", title: "Sign out", subtitle: "Settings › Account", href: "/settings/account#sign-out" },
     ["log out", "logout", "leave", "exit"],
