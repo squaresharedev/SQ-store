@@ -127,6 +127,7 @@ export function StepUpField({
   state,
   id,
   always = false,
+  requireFresh = false,
   description = "This is a sensitive change. Enter the current code from your authenticator app to confirm it's you.",
 }: {
   /** The form's action state, whose `stepUp` flag forces the field on. */
@@ -134,11 +135,18 @@ export function StepUpField({
   /** Unique per form on a page: several step-up forms can be mounted at once. */
   id: string;
   always?: boolean;
+  /**
+   * For an action whose server side demands a code in the request itself
+   * (maxAgeSeconds: 0) whenever the account has 2FA, e.g. a Google-only
+   * account's email change: shown for every enrolled account, never for one
+   * without 2FA.
+   */
+  requireFresh?: boolean;
   description?: string;
 }) {
-  const { factors, markFresh } = React.useContext(StepUpContext);
+  const { enrolled, factors, markFresh } = React.useContext(StepUpContext);
   const required = useStepUpRequired();
-  const show = always || required || Boolean(state?.stepUp);
+  const show = always || (requireFresh && enrolled) || required || Boolean(state?.stepUp);
 
   // A submit that went through WITH a code reopened the server's window, so
   // the next sensitive form on the page need not ask again.

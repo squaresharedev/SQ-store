@@ -42,6 +42,9 @@ describe("embedded supabase replica", () => {
       "notifications",
       "orders",
       "products",
+      // The public part of opted-in profiles, behind the public_profiles view
+      // (20260924_public_profiles_invoker). Trigger-written, client read-only.
+      "profile_directory",
       "profiles",
       "rate_limit_keys",
       "rate_limits",

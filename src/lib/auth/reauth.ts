@@ -44,13 +44,19 @@ export async function checkPassword(email: string, password: string): Promise<Pa
   try {
     const { data, error } = await probe.auth.signInWithPassword({ email, password });
     if (error) {
-      // A network failure is not a wrong password, and must not be reported
-      // as one: the person would start doubting a password that is fine.
-      // GoTrue's own throttle (429) is not an answer about the password either.
-      if (isAuthRetryableFetchError(error) || error.status === 429) {
-        return "unavailable";
-      }
-      return "incorrect";
+      // ONLY a credentials mismatch is "incorrect". Everything else (a network
+      // failure, GoTrue's own throttle, an unconfirmed email, a CAPTCHA
+      // requirement switched on in the dashboard) is not an answer about the
+      // password, and reporting it as one sends the person doubting a password
+      // that is fine. The code is logged (never the password) so the real
+      // reason is in the server log rather than guessed at.
+      if (error.code === "invalid_credentials") return "incorrect";
+      console.warn(
+        "[auth] password check refused:",
+        isAuthRetryableFetchError(error) ? "network" : (error.code ?? "no code"),
+        error.status,
+      );
+      return "unavailable";
     }
     if (data.session) {
       await probe.auth.signOut({ scope: "local" }).catch(() => {});

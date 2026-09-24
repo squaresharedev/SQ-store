@@ -2,7 +2,15 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import { clearAuthRateLimits, devEmails, freshUser, serviceRest, signUp, userIdByEmail } from "./helpers";
 import { SERVICE_KEY } from "./stack/keys.mjs";
-import { accessToken, claimsOf, enableTwoFactor, nextCode, authenticator } from "./two-factor";
+import {
+  accessToken,
+  ageSession,
+  authenticator,
+  claimsOf,
+  enableTwoFactor,
+  markSignsInWithGoogle,
+  nextCode,
+} from "./two-factor";
 
 /**
  * Turning two-factor authentication on, end to end: the nudges that push a
@@ -55,6 +63,9 @@ test.describe("two-factor setup", () => {
   test("setup refuses a wrong password and a wrong code, then turns 2FA on", async ({ page }) => {
     const user = freshUser("setup");
     await signUp(page, user);
+    // Signed in a while ago, so setup asks for the password (a fresh sign-in
+    // would count as proof on its own; see the fresh-sign-in test below).
+    await ageSession(page.context(), 11 * 60);
     await clearAuthRateLimits();
     await page.goto("/settings/security");
     await page.waitForLoadState("networkidle").catch(() => {});
@@ -142,9 +153,78 @@ test.describe("two-factor setup", () => {
     await expect(page.getByRole("heading", { name: "Your password is the only lock on this account" })).toHaveCount(0);
   });
 
+  test("a sign-in moments ago is proof enough: no password asked", async ({ page }) => {
+    const user = freshUser("fresh2fa");
+    await signUp(page, user);
+    await page.goto("/settings/security");
+    await page.waitForLoadState("networkidle").catch(() => {});
+    await page.getByRole("button", { name: "Set up two-factor authentication" }).click();
+    const dialog = page.getByRole("dialog");
+    await expect(dialog.getByText(/signed in a moment ago/i)).toBeVisible();
+    await expect(dialog.getByLabel(/password/i)).toHaveCount(0);
+    await dialog.getByRole("button", { name: "Continue" }).click();
+    await expect(dialog.getByLabel("Setup key", { exact: true })).toBeVisible({ timeout: 20_000 });
+  });
+
+  test("a Google account with an old password on file is offered Google, and told which password is meant", async ({
+    page,
+  }) => {
+    // The reported bug: a Google-signed-in account that also has a password
+    // hash was asked for "Current password", and the password its owner knows
+    // (their Google one) was refused as "incorrect" with no way forward.
+    const user = freshUser("googlepw");
+    await signUp(page, user);
+    await markSignsInWithGoogle(user.email, { keepPassword: true });
+    await ageSession(page.context(), 11 * 60);
+    await clearAuthRateLimits();
+    await page.goto("/settings/security");
+    await page.waitForLoadState("networkidle").catch(() => {});
+    await page.getByRole("button", { name: "Set up two-factor authentication" }).click();
+    const dialog = page.getByRole("dialog");
+
+    // The prompt says which password, and offers the way they really sign in.
+    await expect(dialog.getByLabel("Square Share password")).toBeVisible();
+    await expect(dialog.getByText(/not your Google password/i)).toBeVisible();
+    const google = dialog.getByRole("button", { name: "Confirm with Google" });
+    await expect(google).toBeVisible();
+    // It comes straight back to setup.
+    await expect(
+      dialog.locator('form:has(button:text("Confirm with Google")) input[name="next"]'),
+    ).toHaveValue("/settings/security?setup=1");
+
+    // Their Google password is refused, pointing them at Google, not a dead end.
+    await dialog.getByLabel("Square Share password").fill("my-google-password");
+    await dialog.getByRole("button", { name: "Continue" }).click();
+    await expect(dialog.getByRole("alert")).toHaveText(/Confirm with Google/);
+
+    // The Square Share password still works.
+    await dialog.getByLabel("Square Share password").fill(user.password);
+    await dialog.getByRole("button", { name: "Continue" }).click();
+    await expect(dialog.getByLabel("Setup key", { exact: true })).toBeVisible({ timeout: 20_000 });
+  });
+
+  test("a Google-only account signed in long ago confirms with Google, no password field at all", async ({
+    page,
+  }) => {
+    const user = freshUser("googleonly");
+    await signUp(page, user);
+    await markSignsInWithGoogle(user.email, { keepPassword: false });
+    await ageSession(page.context(), 11 * 60);
+    await page.goto("/settings/security");
+    await page.waitForLoadState("networkidle").catch(() => {});
+    await page.getByRole("button", { name: "Set up two-factor authentication" }).click();
+    const dialog = page.getByRole("dialog");
+    await expect(dialog.getByRole("button", { name: "Confirm with Google" })).toBeVisible();
+    await expect(dialog.getByLabel(/password/i)).toHaveCount(0);
+    await expect(dialog.getByRole("button", { name: "Continue" })).toHaveCount(0);
+  });
+
   test("closing setup halfway leaves no half-made factor behind", async ({ page }) => {
     const user = freshUser("abandon");
     await signUp(page, user);
+    // Signed in a while ago, so setup asks for the password (a fresh sign-in
+    // would count as proof on its own; see the fresh-sign-in test below).
+    await ageSession(page.context(), 11 * 60);
     await page.goto("/settings/security");
     await page.waitForLoadState("networkidle").catch(() => {});
     await page.getByRole("button", { name: "Set up two-factor authentication" }).click();
@@ -202,6 +282,9 @@ test.describe("two-factor setup", () => {
     const page = await context.newPage();
     const user = freshUser("a11ysec");
     await signUp(page, user);
+    // Signed in a while ago, so setup asks for the password (a fresh sign-in
+    // would count as proof on its own; see the fresh-sign-in test below).
+    await ageSession(page.context(), 11 * 60);
     await page.goto("/settings/security");
     await page.waitForLoadState("networkidle").catch(() => {});
     await expectNoSeriousViolations(page);
@@ -225,6 +308,9 @@ test.describe("two-factor setup on a phone", () => {
   test("the setup fits the screen and offers a tap-to-open link", async ({ page }) => {
     const user = freshUser("mobile2fa");
     await signUp(page, user);
+    // Signed in a while ago, so setup asks for the password (a fresh sign-in
+    // would count as proof on its own; see the fresh-sign-in test below).
+    await ageSession(page.context(), 11 * 60);
     await page.goto("/settings/security");
     await page.waitForLoadState("networkidle").catch(() => {});
 

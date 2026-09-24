@@ -54,9 +54,16 @@ export default async function SecuritySettingsPage({
         createdAt,
       }))}
       hasPassword={hasPassword}
-      // Only matters to an account with no password: whether it may start
-      // setup straight away or has to sign in again first.
+      // A sign-in in the last few minutes is proof on its own: setup then asks
+      // for no password (and a Google-only account need not sign in again).
       signedInRecently={signedInRecently(assurance, RECENT_SIGN_IN_SECONDS)}
+      // From GoTrue's record of the account, so a Google account is offered
+      // "Confirm with Google" instead of a password it may never use.
+      signsInWithGoogle={
+        (user.identities ?? []).some((identity) => identity.provider === "google") ||
+        (Array.isArray(user.app_metadata?.providers) &&
+          user.app_metadata.providers.includes("google"))
+      }
       recoveryCodesRemaining={remaining}
       activity={
         activity.error

@@ -12,6 +12,7 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { Spinner } from "@/components/ui/spinner";
 import { useToast } from "@/components/ui/Toast";
 import { helpTextClass, infoTextClass } from "@/components/ui/control-styles";
+import { GoogleButton } from "@/components/auth/GoogleButton";
 import { OneTimeCodeInput } from "@/components/auth/OneTimeCodeInput";
 import { StepUpField } from "@/components/auth/StepUp";
 import { RecoveryCodesDisplay } from "@/components/settings/security/RecoveryCodesDisplay";
@@ -27,6 +28,9 @@ import { FACTOR_NAME_MAX } from "@/lib/validation/mfa";
 
 const BEGIN_INITIAL: BeginSetupState = {};
 const CONFIRM_INITIAL: ConfirmSetupState = {};
+
+/** Where "Confirm with Google" comes back to: this page, with setup open. */
+const SETUP_RETURN = "/settings/security?setup=1";
 
 /** "Authenticator app", or the first numbered variant nobody has used yet. */
 function suggestedName(taken: string[]): string {
@@ -62,6 +66,7 @@ export function TwoFactorSetupModal({
   adding,
   hasPassword,
   signedInRecently,
+  signsInWithGoogle,
   existingNames,
 }: {
   open: boolean;
@@ -69,7 +74,10 @@ export function TwoFactorSetupModal({
   /** 2FA is already on and this adds another authenticator. */
   adding: boolean;
   hasPassword: boolean;
+  /** Signed in within the last 10 minutes: that alone proves ownership. */
   signedInRecently: boolean;
+  /** The account has a Google identity, so "Confirm with Google" is offered. */
+  signsInWithGoogle: boolean;
   existingNames: string[];
 }) {
   const toast = useToast();
@@ -119,7 +127,16 @@ export function TwoFactorSetupModal({
         ? "Scan the code with your authenticator app, then enter the 6 digits it shows."
         : "Two-factor authentication is on.";
 
+  // How this person proves it's them before a new phone can be enrolled.
+  // A sign-in in the last 10 minutes is proof enough on its own. Otherwise a
+  // password, if the account has one; and for a Google account, Google itself
+  // ("Confirm with Google" signs in again and comes straight back here), which
+  // is the way such a person actually signs in and may be the only one they
+  // remember.
   const needsFreshSignIn = mode === "enable" && !hasPassword && !signedInRecently;
+  const askPassword = mode === "enable" && hasPassword && !signedInRecently;
+  const offerGoogle =
+    mode === "enable" && !signedInRecently && (signsInWithGoogle || Boolean(begin.reauth));
 
   return (
     <Modal
@@ -131,19 +148,25 @@ export function TwoFactorSetupModal({
       className="rounded-none sm:rounded-none"
     >
       {step === "start" && needsFreshSignIn && (
-        <form action={signOutToReauthenticate} className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4">
           <p className={helpTextClass}>
-            Your account signs in with Google, so there&rsquo;s no password to
-            confirm it&rsquo;s you. Sign in again, and you&rsquo;ll come
-            straight back here to finish.
+            {signsInWithGoogle
+              ? "Confirm it's you with Google first. You'll come straight back here to finish."
+              : "For your security, sign in again first. You'll come straight back here to finish."}
           </p>
-          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-            <Button type="button" variant="ghost" onClick={close}>
-              Cancel
-            </Button>
-            <Button type="submit">Sign in again</Button>
-          </div>
-        </form>
+          {signsInWithGoogle ? (
+            <GoogleButton next={SETUP_RETURN} label="Confirm with Google" />
+          ) : (
+            <form action={signOutToReauthenticate}>
+              <Button type="submit" className="w-full">
+                Sign in again
+              </Button>
+            </form>
+          )}
+          <Button type="button" variant="ghost" onClick={close}>
+            Cancel
+          </Button>
+        </div>
       )}
 
       {step === "start" && !needsFreshSignIn && (
@@ -170,9 +193,11 @@ export function TwoFactorSetupModal({
               always
               description="Enter a code from an authenticator you already use, to confirm it's you."
             />
-          ) : hasPassword ? (
+          ) : askPassword ? (
             <div className="flex flex-col gap-2">
-              <Label htmlFor="setup-password">Current password</Label>
+              <Label htmlFor="setup-password">
+                {signsInWithGoogle ? "Square Share password" : "Current password"}
+              </Label>
               <PasswordInput
                 id="setup-password"
                 name="current_password"
@@ -181,10 +206,15 @@ export function TwoFactorSetupModal({
                 required
               />
               <p className={infoTextClass}>
-                So nobody who finds your laptop signed in can lock you out with
-                their own phone.
+                {signsInWithGoogle
+                  ? "Not your Google password. Don't know it? Confirm with Google below instead."
+                  : "So nobody who finds your laptop signed in can lock you out with their own phone."}
               </p>
             </div>
+          ) : mode === "enable" ? (
+            <p className={infoTextClass}>
+              You signed in a moment ago, so there&rsquo;s nothing else to confirm.
+            </p>
           ) : null}
 
           {begin.error && (
@@ -209,6 +239,19 @@ export function TwoFactorSetupModal({
             </Button>
           </div>
         </form>
+      )}
+
+      {/* Its own form, after the one above rather than inside it: forms
+          cannot nest, and this one leaves the page for Google. */}
+      {step === "start" && !needsFreshSignIn && offerGoogle && (
+        <div className="mt-5 flex flex-col gap-3">
+          <div className="flex items-center gap-4">
+            <span className="h-px flex-1 bg-border" />
+            <span className={infoTextClass}>or</span>
+            <span className="h-px flex-1 bg-border" />
+          </div>
+          <GoogleButton next={SETUP_RETURN} label="Confirm with Google" />
+        </div>
       )}
 
       {step === "scan" && enrollment && (

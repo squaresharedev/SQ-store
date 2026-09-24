@@ -59,13 +59,15 @@ export const STEP_UP_WINDOW_SECONDS = 10 * 60;
 export const STEP_UP_HINT_COOKIE = "ss_step_up_until";
 
 /**
- * How recent a first-factor sign-in must be before an account WITHOUT a
- * password may turn 2FA on. A Google-only account has no password to
- * re-enter, so "you signed in within the last 15 minutes" is the proof that
- * the person at the keyboard is the owner and not someone holding a stolen
- * session, who could otherwise enrol their OWN phone and lock the owner out.
+ * How recent a first-factor sign-in must be to count, on its own, as proof of
+ * ownership when turning 2FA on (instead of re-typing a password). Someone
+ * holding a stolen session could otherwise enrol their OWN phone and lock the
+ * owner out, so "you signed in within the last 10 minutes" is the bar: the
+ * same length as the step-up window, and short enough that a session left
+ * open, or lifted, an hour ago does not qualify. "Confirm with Google" and
+ * "Sign in again" both work by resetting this clock.
  */
-export const RECENT_SIGN_IN_SECONDS = 15 * 60;
+export const RECENT_SIGN_IN_SECONDS = 10 * 60;
 
 /**
  * AMR methods that are a SECOND factor. GoTrue names TOTP "totp" (older

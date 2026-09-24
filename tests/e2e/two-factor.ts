@@ -1,5 +1,6 @@
 import { expect, type BrowserContext, type Page } from "@playwright/test";
-import { ANON_KEY, GATEWAY_URL, signJwt } from "./stack/keys.mjs";
+import pg from "pg";
+import { ANON_KEY, DB_URL, GATEWAY_URL, signJwt } from "./stack/keys.mjs";
 import { STEP_SECONDS, stepAt, totp } from "./stack/totp.mjs";
 import { clearAuthRateLimits } from "./helpers";
 
@@ -87,7 +88,10 @@ export async function enableTwoFactor(
   }).toPass({ timeout: 20_000 });
 
   if (options.name) await dialog.getByLabel("Name this authenticator").fill(options.name);
-  await dialog.getByLabel("Current password").fill(password);
+  // Asked for only when the sign-in is not recent (a fresh sign-up is recent,
+  // and counts as proof on its own). ageSession() forces the prompt.
+  const passwordBox = dialog.getByLabel(/^(Current|Square Share) password$/);
+  if (await passwordBox.count()) await passwordBox.fill(password);
   await dialog.getByRole("button", { name: "Continue" }).click();
 
   const key = dialog.getByLabel("Setup key", { exact: true });
@@ -185,9 +189,15 @@ export function claimsOf(token: string): Record<string, unknown> {
   return JSON.parse(Buffer.from(token.split(".")[1], "base64url").toString("utf8"));
 }
 
+/** Every sign-in timestamp in the session, first factor included, `seconds`
+ *  older: "signed in a while ago". The same operation as ageSecondFactor. */
+export async function ageSession(context: BrowserContext, seconds: number) {
+  await ageSecondFactor(context, seconds);
+}
+
 /**
  * Make the session's second factor look `seconds` older than it is, by
- * re-signing its access token with earlier `amr` timestamps. The mock GoTrue
+ * re-signing its access token with earlier `amr` timestamps (all of them). The mock GoTrue
  * still recognises the session (same session_id, valid signature), so this is
  * exactly "the person verified a code a while ago", without making a spec
  * wait out a ten-minute window.
@@ -296,4 +306,30 @@ export async function recoveryLinkFor(email: string): Promise<string> {
   const target = new URL(body!.redirect_to);
   target.searchParams.set("code", body!.auth_code);
   return target.pathname + target.search;
+}
+
+/**
+ * Straight to the stack's Postgres as its superuser, for the few facts a spec
+ * needs that GoTrue owns (auth.users) and PostgREST cannot reach. Test stack
+ * only: DB_URL points at the embedded replica.
+ */
+export async function sql(query: string, params: unknown[] = []) {
+  const client = new pg.Client({ connectionString: DB_URL });
+  await client.connect();
+  try {
+    return (await client.query(query, params)).rows;
+  } finally {
+    await client.end();
+  }
+}
+
+/** Make an account look the way a Google sign-up does in GoTrue's record. */
+export async function markSignsInWithGoogle(email: string, options: { keepPassword: boolean }) {
+  await sql(
+    `update auth.users
+        set raw_app_meta_data = '{"provider":"google","providers":["google"]}'::jsonb,
+            encrypted_password = case when $2 then encrypted_password else '' end
+      where lower(email) = lower($1)`,
+    [email, options.keepPassword],
+  );
 }

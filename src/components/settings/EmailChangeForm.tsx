@@ -93,7 +93,9 @@ export function EmailChangeForm({
             />
           </div>
         )}
-        <StepUpField id="email-change" state={state} />
+        {/* No password on the account means the code is the only proof, so
+            the server wants one in every request (not just a recent one). */}
+        <StepUpField id="email-change" state={state} requireFresh={!hasPassword} />
         <div>
           <SaveButton
             pending={isPending}

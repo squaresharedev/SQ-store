@@ -672,6 +672,32 @@ export type Database = {
           },
         ]
       }
+      profile_directory: {
+        Row: {
+          avatar_url: string | null
+          id: string
+          username: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          id: string
+          username: string
+        }
+        Update: {
+          avatar_url?: string | null
+          id?: string
+          username?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_directory_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null

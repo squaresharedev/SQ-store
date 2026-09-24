@@ -8,17 +8,25 @@ Supabase project: **SQ-store**, ref `vnyfndqpdllwhvhinjoi`.
 
 ## Before deploying
 
-Do these in this order. The code degrades safely without them, but not fully:
-without the migration there are no recovery codes and no database-level
-enforcement.
+Do these in this order. Without the migration the code refuses to turn 2FA on
+("Two-factor setup isn't available right now"), because 2FA without recovery
+codes would turn a lost phone into a locked account; and there is no
+database-level enforcement.
 
 1. **Apply the migration** `supabase/migrations/20260923_two_factor_auth.sql`
-   (Supabase MCP `apply_migration`, or the SQL editor). It adds
+   (Supabase MCP `apply_migration`, or the SQL editor). **Done on 2026-09-24**
+   through the SQL editor (verified over REST: `mfa_session_ok` answers, the
+   recovery-code table exists and refuses anon). The SQL editor records no
+   migration version, so there is nothing to add to `TRIAGE`. It adds
    `mfa_session_ok()`, the restrictive "Require two-factor when enrolled"
-   policies, and the `mfa_recovery_codes` table and its two functions. Then add
-   its prod version to `TRIAGE` in `scripts/check-prod-migrations.ts` with
-   marker `two_factor_auth`, and regenerate `src/types/supabase.ts` (the
-   entries for the new table and functions were added by hand).
+   policies, the `mfa_recovery_codes` table and its two functions, and the
+   2FA guard inside the five SECURITY DEFINER functions clients can call
+   (section 4). **Before applying section 4**, compare each function body with
+   `pg_get_functiondef` on production: the bodies come from the replayed
+   history, and prod has been ahead of this repo before. Then add its prod
+   version to `TRIAGE` in `scripts/check-prod-migrations.ts` with marker
+   `two_factor_auth`, and regenerate `src/types/supabase.ts` (the entries for
+   the new table and functions were added by hand).
 2. **Check Dashboard → Authentication → Multi-Factor.** "App Authenticator
    (TOTP)" must have both enrollment and verification **enabled** (the
    default). Leave phone MFA off: it is not used, and SMS is the weakest
@@ -35,9 +43,11 @@ enforcement.
 ## What the person sees
 
 - **Setup**: Settings › Security › "Set up two-factor authentication". Prove
-  it's you (password, or a sign-in in the last 15 minutes for Google-only
-  accounts), scan the QR code or type the key, enter the first code, save ten
-  recovery codes. Every other session is signed out when it turns on.
+  it's you: a sign-in in the last 10 minutes counts on its own; otherwise the
+  account's password, or "Confirm with Google" for an account that signs in
+  with Google (it signs in again and comes straight back). Then scan the QR
+  code or type the key, enter the first code, save ten recovery codes. Every
+  other session is signed out when it turns on.
 - **Sign-in**: password (or Google, or a magic link), then
   `/login/two-factor` for the code. "Use a recovery code instead" is there for
   a lost phone.
@@ -66,12 +76,57 @@ Three layers. Any one of them missing would leave a way round.
    password can buy an `aal1` token straight from GoTrue and talk to
    PostgREST without ever loading the app. Restrictive policies on every Store
    and marketplace table the user's JWT can reach make that token see and
-   change nothing for an account with 2FA on. Accounts without 2FA are
-   unaffected. The service role (all server-only admin paths, and the admin
-   panel) is never affected.
+   change nothing for an account with 2FA on. RLS does not reach inside
+   SECURITY DEFINER functions, so every definer function a client may call
+   was audited: `team_actor_role` (and through it `team_roster`),
+   `team_my_accounts`, `team_my_pending_invites`, `team_accept_invite` and
+   `rl_take` carry the same check; `is_squareshare_staff` and
+   `mfa_session_ok` only answer about the caller. A DB test fails if a new
+   callable definer function appears. Accounts without 2FA are unaffected. The
+   service role (all server-only admin paths, and the admin panel) is never
+   affected.
 3. **Step-up** (`requireStepUp` in `src/lib/auth/mfa.ts`). A session hijacked
    after its owner signed in still cannot do the dangerous things without the
-   phone.
+   phone. An account with no password (Google-only) needs a code in the same
+   request to change its email, since the code is its only proof.
+
+## Verified against production GoTrue
+
+Checked on 2026-09-24 with a throwaway account created through the admin API
+and deleted in the same run (no emails sent):
+
+| Behaviour | Result |
+| --- | --- |
+| Password sign-in token | `aal1`, `amr: [{method: "password", timestamp}]` |
+| After verifying a code | `aal2`, `amr` gains `{method: "totp", timestamp}` (what the step-up window reads) |
+| Other sessions when 2FA is turned on | Signed out |
+| Same code verified twice (new challenge) | **Accepted**: GoTrue has no replay protection, so the app's replay guard is required |
+| `aal1` session enrols another factor | Refused, `insufficient_aal` |
+| `aal1` session removes a factor | Refused, `insufficient_aal` |
+| `aal1` session changes password or email via the API | Refused, `insufficient_aal` |
+
+## Security review
+
+An adversarial review of the whole system (2026-09-24) reported:
+
+- **Critical, confirmed**: the migration was not applied to production, so
+  the database layer was absent there. Resolution: applied on 2026-09-24.
+  Until then setup refused to start, so nobody could end up with 2FA but no
+  recovery codes.
+- **Critical, Supabase advisor (pre-existing, not from 2FA)**:
+  `public_profiles` was a SECURITY DEFINER view over `profiles`. Resolution:
+  `20260924_public_profiles_invoker.sql` makes it read a trigger-maintained
+  `profile_directory` table (id, username, avatar_url of opted-in profiles
+  only) as the caller.
+- **High, suspected**: an `aal1` session enrolling its own phone directly
+  through GoTrue. Resolution: not possible; GoTrue refuses it (table above).
+- **High, suspected**: a Google-only account's email changed by a stolen
+  session inside the 10-minute window, with no code. Resolution: fixed; such
+  accounts need a code in the same request.
+
+Everything else it examined (the app gate, attempt limits and replay guard,
+2FA controls needing a code every time, password-reset and magic-link paths,
+recovery-code storage and spending, redirect sanitising) held.
 
 Also:
 
@@ -106,6 +161,14 @@ Also:
 - **"Secure password change"** (Dashboard → Auth → Providers → Email): if it is
   on, a 2FA user whose session is over 24 hours old is told to sign out and
   back in before changing their password.
+- **"Secure email change"** (same page) should stay ON: it makes an email
+  change need a click in BOTH inboxes, so a stolen session alone can never
+  move the address.
+- **"Current password is incorrect" with a password the person is sure of**:
+  only GoTrue's `invalid_credentials` is reported that way; every other
+  refusal is logged as `[auth] password check refused: <code>` and shown as
+  "couldn't check your password". A Google account that also has an old
+  password on file is told to use "Confirm with Google".
 
 ## Follow-ups outside this repo
 
@@ -125,8 +188,8 @@ Also:
 
 - Unit: `tests/unit/mfa-assurance.test.ts`, `mfa-recovery-codes.test.ts`,
   `mfa-step-up.test.ts`, `auth-session-mfa-gate.test.ts`,
-  `actions/mfa-actions.test.ts`, plus the step-up invariants in
-  `server-action-security.test.ts`.
+  `auth-reauth.test.ts`, `actions/mfa-actions.test.ts`, plus the step-up
+  invariants in `server-action-security.test.ts`.
 - Database: `tests/integration/22-two-factor-rls.test.ts`.
 - End to end: `tests/e2e/67` to `71` (`*-two-factor-*`). The e2e stack's mock
   GoTrue (`tests/e2e/stack/server.mjs`) implements factors, challenges, TOTP

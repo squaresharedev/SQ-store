@@ -17,6 +17,7 @@ export function SecuritySection({
   factors,
   hasPassword,
   signedInRecently,
+  signsInWithGoogle,
   recoveryCodesRemaining,
   activity,
   recovered,
@@ -26,6 +27,7 @@ export function SecuritySection({
   factors: SecurityFactor[];
   hasPassword: boolean;
   signedInRecently: boolean;
+  signsInWithGoogle: boolean;
   /** Unused recovery codes, or null when 2FA is off or the count failed. */
   recoveryCodesRemaining: number | null;
   /** Null when the log could not be read (shown as such, never as "empty"). */
@@ -56,6 +58,7 @@ export function SecuritySection({
         factors={factors}
         hasPassword={hasPassword}
         signedInRecently={signedInRecently}
+        signsInWithGoogle={signsInWithGoogle}
         openSetup={openSetup && !enrolled}
       />
 

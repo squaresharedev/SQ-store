@@ -272,9 +272,15 @@ export async function requestEmailChange(
     };
   }
 
-  // With 2FA on, the address is a second-factor-grade change too: a fresh code
-  // (or one inside the last few minutes) on top of the password below.
-  const stepUp = await requireStepUp(formData);
+  const hasPassword = await accountHasPassword(user.id);
+
+  // With 2FA on, the address is a second-factor-grade change too. With a
+  // password as well, a code from the last few minutes will do (the password
+  // below is the other half). WITHOUT a password (a Google-only account) the
+  // code is the ONLY proof, so it must come with this very request: otherwise
+  // a session cookie lifted within ten minutes of its owner's sign-in could
+  // move the address with no proof at all, and then reset its way in.
+  const stepUp = await requireStepUp(formData, hasPassword ? {} : { maxAgeSeconds: 0 });
   if (stepUp) return stepUp;
 
   const origin = await siteOrigin();
@@ -286,7 +292,7 @@ export async function requestEmailChange(
   // still legitimately change. Everyone else must prove they hold it: this is
   // a takeover-grade action, since whoever controls the address can reset the
   // password to it.
-  if (await accountHasPassword(user.id)) {
+  if (hasPassword) {
     if (!parsed.data.current_password) {
       return { error: "Enter your current password to change your email." };
     }
@@ -379,8 +385,8 @@ export async function changePassword(
   // Two ways, because they do different things to THIS session. Without 2FA,
   // signing in again on the request client is the proof and also hands the
   // update below a brand-new session. With 2FA, that new session would be
-  // password-only (aal1), which GoTrue refuses to change a password from and
-  // which would bounce the person to the challenge mid-change; so the password
+  // password-only (aal1), which the app treats as signed out and so would
+  // bounce the person to the challenge mid-change; so the password
   // is checked on a throwaway client and the update runs on the current,
   // two-factor session.
   if ((await getAssurance())?.enrolled) {

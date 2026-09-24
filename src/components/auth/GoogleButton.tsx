@@ -5,7 +5,7 @@ import { signInWithGoogle } from "@/lib/auth/actions";
 import { LastUsedBadge } from "@/components/auth/LastUsedBadge";
 import { Spinner } from "@/components/ui/spinner";
 
-function GoogleButtonInner({ lastUsed }: { lastUsed: boolean }) {
+function GoogleButtonInner({ lastUsed, label }: { lastUsed: boolean; label: string }) {
   const { pending } = useFormStatus();
   return (
     <button
@@ -15,7 +15,7 @@ function GoogleButtonInner({ lastUsed }: { lastUsed: boolean }) {
       className="inline-flex w-full items-center justify-center gap-2.5 border-2 border-input bg-background px-4 py-2.5 text-sm font-bold text-foreground transition-colors hover:border-ring hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50"
     >
       {pending ? <Spinner className="text-muted-foreground" /> : <GoogleLogo />}
-      Continue with Google
+      {label}
       {/* In FLOW, not absolutely positioned. An overlaid badge sits on top of
           whatever is under it, which on a narrow viewport is the label itself;
           as a flex sibling it can only ever push, never cover. The label group
@@ -29,15 +29,18 @@ function GoogleButtonInner({ lastUsed }: { lastUsed: boolean }) {
 export function GoogleButton({
   next = "/",
   lastUsed = false,
+  label = "Continue with Google",
 }: {
   next?: string;
   /** Whether this browser last signed in with Google. */
   lastUsed?: boolean;
+  /** "Confirm with Google" where it re-verifies someone already signed in. */
+  label?: string;
 }) {
   return (
     <form action={signInWithGoogle}>
       <input type="hidden" name="next" value={next} />
-      <GoogleButtonInner lastUsed={lastUsed} />
+      <GoogleButtonInner lastUsed={lastUsed} label={label} />
     </form>
   );
 }

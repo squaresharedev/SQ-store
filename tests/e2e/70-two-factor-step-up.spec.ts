@@ -5,6 +5,7 @@ import {
   authenticator,
   enableTwoFactor,
   enterChallengeCode,
+  markSignsInWithGoogle,
   nextCode,
   signInToChallenge,
   signInWithTwoFactor,
@@ -274,6 +275,34 @@ test.describe("two-factor step-up", () => {
     // And the first phone still signs in.
     await context.clearCookies();
     await signInWithTwoFactor(page, user, app);
+    await context.close();
+  });
+
+  test("a Google-only account's email change always takes a code, even minutes after signing in", async ({ browser }) => {
+    // No password to check, so the code is the only proof: a cookie lifted
+    // just after sign-in must not be able to move the address on its own.
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    const user = freshUser("googlemail");
+    await signUp(page, user);
+    await markSignsInWithGoogle(user.email, { keepPassword: false });
+    const { app } = await enableTwoFactor(page, user.password);
+
+    await page.goto("/settings/account");
+    await page.waitForLoadState("networkidle").catch(() => {});
+    const emailCard = page.locator("#email");
+    // Asked for up front, although the session verified a code seconds ago.
+    const code = emailCard.getByLabel("Authenticator code");
+    await expect(code).toBeVisible();
+    await expect(emailCard.getByLabel("Current password")).toHaveCount(0);
+
+    await emailCard.getByLabel("New email").fill(`moved-${Date.now()}@e2e.squareshare.to`);
+    await emailCard.getByRole("button", { name: /send confirmation link/i }).click();
+    await expectToast(page, /6-digit code/i);
+
+    await emailCard.getByLabel("Authenticator code").fill(await nextCode(app));
+    await emailCard.getByRole("button", { name: /send confirmation link/i }).click();
+    await expectToast(page, /check your inbox/i);
     await context.close();
   });
 });

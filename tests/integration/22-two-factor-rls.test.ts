@@ -272,6 +272,94 @@ describe("restrictive policies (alice has 2FA on from here)", () => {
   });
 });
 
+describe("SECURITY DEFINER functions (RLS does not reach inside them)", () => {
+  // alice has 2FA on from the tests above; bob never does.
+  const rpc = <T>(user: TestUser, claims: Record<string, unknown>, sql: string, params: unknown[] = []) =>
+    asUserWithClaims(user, claims, async (q) => (await q.query(sql, params)).rows as T[]);
+
+  it("the only definer functions a client can call are the audited ones", async () => {
+    const callable = await asSuper(async (q) =>
+      (
+        await q.query(
+          `select p.proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+            where n.nspname = 'public' and p.prosecdef
+              and has_function_privilege('authenticated', p.oid, 'execute')
+            order by 1`,
+        )
+      ).rows.map((r) => r.proname),
+    );
+    // A NEW entry here must either answer only about the caller, or carry
+    // the mfa_session_ok() guard (see migration 20260923 section 4).
+    expect(callable).toEqual([
+      "is_squareshare_staff",
+      "mfa_session_ok",
+      "rl_take",
+      "team_accept_invite",
+      "team_actor_role",
+      "team_my_accounts",
+      "team_my_pending_invites",
+      "team_roster",
+    ]);
+  });
+
+  it("team_roster: nothing (no member emails) for a password-only token", async () => {
+    expect(await rpc(alice, AAL1, `select * from public.team_roster($1)`, [alice.id])).toEqual([]);
+    expect((await rpc(alice, AAL2, `select * from public.team_roster($1)`, [alice.id])).length).toBeGreaterThan(0);
+    expect((await rpc(bob, AAL1, `select * from public.team_roster($1)`, [bob.id])).length).toBeGreaterThan(0);
+  });
+
+  it("team_actor_role and team_my_accounts: nothing for a password-only token", async () => {
+    const role = (claims: Record<string, unknown>) =>
+      rpc<{ role: string | null }>(alice, claims, `select public.team_actor_role($1) as role`, [alice.id]);
+    expect((await role(AAL1))[0].role).toBeNull();
+    expect((await role(AAL2))[0].role).toBe("owner");
+    expect(await rpc(alice, AAL1, `select * from public.team_my_accounts()`)).toEqual([]);
+    expect((await rpc(alice, AAL2, `select * from public.team_my_accounts()`)).length).toBeGreaterThan(0);
+  });
+
+  it("invites: a password-only token can neither see nor accept one", async () => {
+    const inviteId = await asService(async (q) =>
+      (
+        await q.query(
+          `insert into public.team_members (account_owner_id, invited_email, role, status)
+           values ($1, $2, 'viewer', 'invited') returning id`,
+          [bob.id, alice.email],
+        )
+      ).rows[0].id,
+    );
+    expect(await rpc(alice, AAL1, `select * from public.team_my_pending_invites()`)).toEqual([]);
+    const refused = await rpc<{ ok: boolean }>(alice, AAL1, `select public.team_accept_invite($1) as ok`, [inviteId]);
+    expect(refused[0].ok).toBe(false);
+    const stillInvited = await asService(async (q) =>
+      (await q.query(`select status from public.team_members where id = $1`, [inviteId])).rows[0].status,
+    );
+    expect(stillInvited).toBe("invited");
+
+    // With the second factor, both work.
+    expect((await rpc(alice, AAL2, `select * from public.team_my_pending_invites()`)).length).toBe(1);
+    const accepted = await rpc<{ ok: boolean }>(alice, AAL2, `select public.team_accept_invite($1) as ok`, [inviteId]);
+    expect(accepted[0].ok).toBe(true);
+  });
+
+  it("rl_take: a password-only token cannot spend (or drain) the account's budgets", async () => {
+    const take = (user: TestUser, claims: Record<string, unknown>) =>
+      rpc<{ ok: boolean }>(user, claims, `select public.rl_take('password_reauth', 1, 900) as ok`);
+    expect((await take(alice, AAL1))[0].ok).toBe(false);
+    const recorded = await asService(async (q) =>
+      (
+        await q.query(`select hits from public.rate_limits where user_id = $1 and action = 'password_reauth'`, [
+          alice.id,
+        ])
+      ).rows,
+    );
+    expect(recorded.every((r) => (r.hits ?? []).length === 0)).toBe(true);
+    // The owner's own budget is intact.
+    expect((await take(alice, AAL2))[0].ok).toBe(true);
+    // Accounts without 2FA are unaffected.
+    expect((await take(bob, AAL1))[0].ok).toBe(true);
+  });
+});
+
 describe("recovery codes: unreachable for every client role", () => {
   const hash = (seed: string) => seed.repeat(64).slice(0, 64);
 

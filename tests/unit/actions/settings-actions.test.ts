@@ -1265,3 +1265,28 @@ describe("sensitive settings actions - two-factor step-up", () => {
     expect(db.update).not.toHaveBeenCalled();
   });
 });
+
+describe("requestEmailChange - a Google-only account's code is its only proof", () => {
+  it("demands the code in THIS request when the account has no password", async () => {
+    getUserMock.mockResolvedValue(USER);
+    hasPasswordMock.mockResolvedValue(false);
+    const fd = new FormData();
+    fd.append("new_email", "new@example.com");
+
+    await requestEmailChange(PREV, fd);
+
+    expect(requireStepUpMock).toHaveBeenCalledWith(fd, { maxAgeSeconds: 0 });
+  });
+
+  it("accepts a recent code when there is a password to check as well", async () => {
+    getUserMock.mockResolvedValue(USER);
+    hasPasswordMock.mockResolvedValue(true);
+    const fd = new FormData();
+    fd.append("new_email", "new@example.com");
+    fd.append("current_password", "old-pass-word-1");
+
+    await requestEmailChange(PREV, fd);
+
+    expect(requireStepUpMock).toHaveBeenCalledWith(fd, {});
+  });
+});

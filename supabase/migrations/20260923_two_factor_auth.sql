@@ -195,4 +195,208 @@ revoke execute on function public.mfa_consume_recovery_code(uuid, text) from pub
 grant execute on function public.mfa_replace_recovery_codes(uuid, text[]) to service_role;
 grant execute on function public.mfa_consume_recovery_code(uuid, text) to service_role;
 
+-- ---- 4. SECURITY DEFINER functions a client can call ---------------------
+-- The policies above do not reach inside a SECURITY DEFINER function: it
+-- runs as its owner, which bypasses RLS. So every definer function that
+-- `authenticated` may EXECUTE was audited, and each one that reads or writes
+-- the caller's private data gets the same check at its own door. Found by an
+-- adversarial pass over this migration: without it, a password-only token
+-- could still read the team roster (member emails) straight off
+-- /rest/v1/rpc/team_roster, accept invites, and spend the account's own
+-- rate-limit budgets (for instance `password_reauth`, locking the owner out
+-- of the password change they would make on seeing the lockout alert).
+--
+-- Bodies are the current definitions (pg_get_functiondef on the replayed
+-- history) with one guard added each, nothing else changed. CREATE OR REPLACE
+-- keeps the OID (RLS policies that call team_actor_role stay bound) and the
+-- existing grants; the grants are restated anyway so the result does not
+-- depend on what they were before (the auto-grant trap).
+--
+-- Left alone on purpose: is_squareshare_staff() and mfa_session_ok(), which
+-- only answer a yes/no about the caller themselves.
+--
+-- BEFORE APPLYING TO PROD, compare each body with pg_get_functiondef on the
+-- live database: these are Store-owned functions, but prod has been ahead of
+-- this repo before.
+
+-- The caller's role in `account`. Also the gate inside team_roster and inside
+-- the team RLS policies, so guarding it here closes the roster too.
+create or replace function public.team_actor_role(account uuid)
+returns public.team_role
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select tm.role
+  from public.team_members tm
+  where tm.account_owner_id = account
+    and tm.member_user_id = (select auth.uid())
+    and tm.status = 'active'
+    and (select public.mfa_session_ok())
+  limit 1
+$$;
+
+create or replace function public.team_my_accounts()
+returns table(account_owner_id uuid, role public.team_role, store_name text, is_self boolean)
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select
+    tm.account_owner_id,
+    tm.role,
+    coalesce(nullif(btrim(p.username), ''), 'A SquareShare store') as store_name,
+    (tm.account_owner_id = (select auth.uid())) as is_self
+  from public.team_members tm
+  left join public.profiles p on p.id = tm.account_owner_id
+  where tm.member_user_id = (select auth.uid())
+    and tm.status = 'active'
+    and (select public.mfa_session_ok())
+  order by (tm.account_owner_id = (select auth.uid())) desc, store_name asc
+$$;
+
+create or replace function public.team_my_pending_invites()
+returns table(id uuid, account_owner_id uuid, role public.team_role, invited_at timestamptz, store_name text)
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select tm.id, tm.account_owner_id, tm.role, tm.invited_at,
+         coalesce(p.username, 'A SquareShare store')
+  from public.team_members tm
+  left join public.profiles p on p.id = tm.account_owner_id
+  where tm.status = 'invited'
+    and lower(tm.invited_email) = (select public.team_jwt_email())
+    and (select public.mfa_session_ok())
+  order by tm.invited_at desc
+  limit 50
+$$;
+
+create or replace function public.team_accept_invite(p_invite_id uuid)
+returns boolean
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_email text := public.team_jwt_email();
+  v_uid uuid := (select auth.uid());
+  v_updated uuid;
+begin
+  if v_uid is null or v_email is null then
+    return false; -- unauthenticated or no verified email
+  end if;
+
+  -- Joining a store is an account change: not from a session that still
+  -- owes its second factor.
+  if not public.mfa_session_ok() then
+    return false;
+  end if;
+
+  update public.team_members
+     set status = 'active',
+         member_user_id = v_uid,
+         accepted_at = now()
+   where id = p_invite_id
+     and status = 'invited'
+     and lower(invited_email) = v_email  -- identity: this invite is addressed to me
+     and role <> 'owner'
+   returning id into v_updated;
+
+  return v_updated is not null;
+end
+$$;
+
+create or replace function public.rl_take(p_action text, p_max integer, p_window_seconds integer)
+returns boolean
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  uid    uuid := (select auth.uid());
+  cutoff timestamptz;
+  kept   timestamptz[];
+  allowed boolean;
+begin
+  -- Anonymous callers get nothing: this limiter is identity-scoped by design.
+  -- Unauthenticated surfaces must use rl_take_key() instead.
+  if uid is null then
+    return false;
+  end if;
+
+  -- Nor does a session that still owes its second factor. Otherwise someone
+  -- holding only the password could drain the account's budgets (and deny
+  -- the owner the very actions they reach for when they see the alert).
+  if not public.mfa_session_ok() then
+    return false;
+  end if;
+
+  -- Reject nonsense budgets rather than failing open.
+  if p_max is null or p_max < 1 then
+    return false;
+  end if;
+  if p_window_seconds is null or p_window_seconds < 1 then
+    return false;
+  end if;
+
+  cutoff := now() - make_interval(secs => p_window_seconds);
+
+  -- Ensure a row exists so the lock below always has one to take.
+  insert into public.rate_limits (user_id, action)
+  values (uid, p_action)
+  on conflict (user_id, action) do nothing;
+
+  -- Serialize concurrent takes for this (user, action) so two requests can
+  -- never both read "4 hits" and both append a 5th.
+  perform 1
+  from public.rate_limits
+  where user_id = uid and action = p_action
+  for update;
+
+  -- Prune to the trailing window, then decide.
+  select coalesce(
+           array(
+             select t
+             from unnest(r.hits) as t
+             where t > cutoff
+             order by t
+           ),
+           '{}'::timestamptz[]
+         )
+  into kept
+  from public.rate_limits r
+  where r.user_id = uid and r.action = p_action;
+
+  allowed := coalesce(array_length(kept, 1), 0) < p_max;
+
+  -- Only an ALLOWED take is recorded. Denied attempts must not extend the
+  -- window, or a caller hammering the endpoint could lock themselves out
+  -- indefinitely (and grow the array without bound).
+  if allowed then
+    kept := kept || now();
+  end if;
+
+  update public.rate_limits
+  set hits = kept
+  where user_id = uid and action = p_action;
+
+  return allowed;
+end
+$$;
+
+revoke execute on function public.team_actor_role(uuid) from public, anon;
+revoke execute on function public.team_my_accounts() from public, anon;
+revoke execute on function public.team_my_pending_invites() from public, anon;
+revoke execute on function public.team_accept_invite(uuid) from public, anon;
+revoke execute on function public.rl_take(text, integer, integer) from public, anon;
+grant execute on function public.team_actor_role(uuid) to authenticated, service_role;
+grant execute on function public.team_my_accounts() to authenticated, service_role;
+grant execute on function public.team_my_pending_invites() to authenticated, service_role;
+grant execute on function public.team_accept_invite(uuid) to authenticated, service_role;
+grant execute on function public.rl_take(text, integer, integer) to authenticated, service_role;
+
 notify pgrst, 'reload schema';

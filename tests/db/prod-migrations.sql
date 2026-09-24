@@ -3639,10 +3639,12 @@ end;
 $fn$;
 
 -- =============================================================================
--- ===== (pending) two_factor_auth =============================================
--- supabase/migrations/20260923_two_factor_auth.sql, replayed verbatim. NOT YET
--- APPLIED TO PROD at the time of writing: when it is, add its prod version to
--- TRIAGE in scripts/check-prod-migrations.ts with marker "two_factor_auth".
+-- ===== two_factor_auth =======================================================
+-- supabase/migrations/20260923_two_factor_auth.sql, replayed verbatim. Applied
+-- to prod on 2026-09-24 through the SQL editor, which records no row in
+-- supabase_migrations.schema_migrations, so check:migrations has no version to
+-- triage. If it is ever re-applied with apply_migration or db push, add that
+-- version to TRIAGE in scripts/check-prod-migrations.ts with this marker.
 -- =============================================================================
 
 -- ====================================================================
@@ -3841,5 +3843,385 @@ revoke execute on function public.mfa_replace_recovery_codes(uuid, text[]) from 
 revoke execute on function public.mfa_consume_recovery_code(uuid, text) from public, anon, authenticated;
 grant execute on function public.mfa_replace_recovery_codes(uuid, text[]) to service_role;
 grant execute on function public.mfa_consume_recovery_code(uuid, text) to service_role;
+
+-- ---- 4. SECURITY DEFINER functions a client can call ---------------------
+-- The policies above do not reach inside a SECURITY DEFINER function: it
+-- runs as its owner, which bypasses RLS. So every definer function that
+-- `authenticated` may EXECUTE was audited, and each one that reads or writes
+-- the caller's private data gets the same check at its own door. Found by an
+-- adversarial pass over this migration: without it, a password-only token
+-- could still read the team roster (member emails) straight off
+-- /rest/v1/rpc/team_roster, accept invites, and spend the account's own
+-- rate-limit budgets (for instance `password_reauth`, locking the owner out
+-- of the password change they would make on seeing the lockout alert).
+--
+-- Bodies are the current definitions (pg_get_functiondef on the replayed
+-- history) with one guard added each, nothing else changed. CREATE OR REPLACE
+-- keeps the OID (RLS policies that call team_actor_role stay bound) and the
+-- existing grants; the grants are restated anyway so the result does not
+-- depend on what they were before (the auto-grant trap).
+--
+-- Left alone on purpose: is_squareshare_staff() and mfa_session_ok(), which
+-- only answer a yes/no about the caller themselves.
+--
+-- BEFORE APPLYING TO PROD, compare each body with pg_get_functiondef on the
+-- live database: these are Store-owned functions, but prod has been ahead of
+-- this repo before.
+
+-- The caller's role in `account`. Also the gate inside team_roster and inside
+-- the team RLS policies, so guarding it here closes the roster too.
+create or replace function public.team_actor_role(account uuid)
+returns public.team_role
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select tm.role
+  from public.team_members tm
+  where tm.account_owner_id = account
+    and tm.member_user_id = (select auth.uid())
+    and tm.status = 'active'
+    and (select public.mfa_session_ok())
+  limit 1
+$$;
+
+create or replace function public.team_my_accounts()
+returns table(account_owner_id uuid, role public.team_role, store_name text, is_self boolean)
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select
+    tm.account_owner_id,
+    tm.role,
+    coalesce(nullif(btrim(p.username), ''), 'A SquareShare store') as store_name,
+    (tm.account_owner_id = (select auth.uid())) as is_self
+  from public.team_members tm
+  left join public.profiles p on p.id = tm.account_owner_id
+  where tm.member_user_id = (select auth.uid())
+    and tm.status = 'active'
+    and (select public.mfa_session_ok())
+  order by (tm.account_owner_id = (select auth.uid())) desc, store_name asc
+$$;
+
+create or replace function public.team_my_pending_invites()
+returns table(id uuid, account_owner_id uuid, role public.team_role, invited_at timestamptz, store_name text)
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select tm.id, tm.account_owner_id, tm.role, tm.invited_at,
+         coalesce(p.username, 'A SquareShare store')
+  from public.team_members tm
+  left join public.profiles p on p.id = tm.account_owner_id
+  where tm.status = 'invited'
+    and lower(tm.invited_email) = (select public.team_jwt_email())
+    and (select public.mfa_session_ok())
+  order by tm.invited_at desc
+  limit 50
+$$;
+
+create or replace function public.team_accept_invite(p_invite_id uuid)
+returns boolean
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_email text := public.team_jwt_email();
+  v_uid uuid := (select auth.uid());
+  v_updated uuid;
+begin
+  if v_uid is null or v_email is null then
+    return false; -- unauthenticated or no verified email
+  end if;
+
+  -- Joining a store is an account change: not from a session that still
+  -- owes its second factor.
+  if not public.mfa_session_ok() then
+    return false;
+  end if;
+
+  update public.team_members
+     set status = 'active',
+         member_user_id = v_uid,
+         accepted_at = now()
+   where id = p_invite_id
+     and status = 'invited'
+     and lower(invited_email) = v_email  -- identity: this invite is addressed to me
+     and role <> 'owner'
+   returning id into v_updated;
+
+  return v_updated is not null;
+end
+$$;
+
+create or replace function public.rl_take(p_action text, p_max integer, p_window_seconds integer)
+returns boolean
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  uid    uuid := (select auth.uid());
+  cutoff timestamptz;
+  kept   timestamptz[];
+  allowed boolean;
+begin
+  -- Anonymous callers get nothing: this limiter is identity-scoped by design.
+  -- Unauthenticated surfaces must use rl_take_key() instead.
+  if uid is null then
+    return false;
+  end if;
+
+  -- Nor does a session that still owes its second factor. Otherwise someone
+  -- holding only the password could drain the account's budgets (and deny
+  -- the owner the very actions they reach for when they see the alert).
+  if not public.mfa_session_ok() then
+    return false;
+  end if;
+
+  -- Reject nonsense budgets rather than failing open.
+  if p_max is null or p_max < 1 then
+    return false;
+  end if;
+  if p_window_seconds is null or p_window_seconds < 1 then
+    return false;
+  end if;
+
+  cutoff := now() - make_interval(secs => p_window_seconds);
+
+  -- Ensure a row exists so the lock below always has one to take.
+  insert into public.rate_limits (user_id, action)
+  values (uid, p_action)
+  on conflict (user_id, action) do nothing;
+
+  -- Serialize concurrent takes for this (user, action) so two requests can
+  -- never both read "4 hits" and both append a 5th.
+  perform 1
+  from public.rate_limits
+  where user_id = uid and action = p_action
+  for update;
+
+  -- Prune to the trailing window, then decide.
+  select coalesce(
+           array(
+             select t
+             from unnest(r.hits) as t
+             where t > cutoff
+             order by t
+           ),
+           '{}'::timestamptz[]
+         )
+  into kept
+  from public.rate_limits r
+  where r.user_id = uid and r.action = p_action;
+
+  allowed := coalesce(array_length(kept, 1), 0) < p_max;
+
+  -- Only an ALLOWED take is recorded. Denied attempts must not extend the
+  -- window, or a caller hammering the endpoint could lock themselves out
+  -- indefinitely (and grow the array without bound).
+  if allowed then
+    kept := kept || now();
+  end if;
+
+  update public.rate_limits
+  set hits = kept
+  where user_id = uid and action = p_action;
+
+  return allowed;
+end
+$$;
+
+revoke execute on function public.team_actor_role(uuid) from public, anon;
+revoke execute on function public.team_my_accounts() from public, anon;
+revoke execute on function public.team_my_pending_invites() from public, anon;
+revoke execute on function public.team_accept_invite(uuid) from public, anon;
+revoke execute on function public.rl_take(text, integer, integer) from public, anon;
+grant execute on function public.team_actor_role(uuid) to authenticated, service_role;
+grant execute on function public.team_my_accounts() to authenticated, service_role;
+grant execute on function public.team_my_pending_invites() to authenticated, service_role;
+grant execute on function public.team_accept_invite(uuid) to authenticated, service_role;
+grant execute on function public.rl_take(text, integer, integer) to authenticated, service_role;
+
+notify pgrst, 'reload schema';
+
+-- =============================================================================
+-- ===== (pending) public_profiles_invoker =====================================
+-- supabase/migrations/20260924_public_profiles_invoker.sql, replayed verbatim.
+-- NOT YET APPLIED TO PROD at the time of writing. Applied through the SQL
+-- editor it records no migration version; through apply_migration, add that
+-- version to TRIAGE in scripts/check-prod-migrations.ts with this marker.
+-- =============================================================================
+
+-- =============================================================================
+-- public_profiles: no longer a SECURITY DEFINER view
+-- =============================================================================
+-- WHAT THE ADVISOR SAID. Supabase's linter reports public.public_profiles as
+-- CRITICAL (0010_security_definer_view): a view that runs with its owner's
+-- rights, readable by anon, over public.profiles.
+--
+-- WHY IT WAS DEFINER. 20260807_db_hygiene section 4 kept it that way on
+-- purpose, and the reasoning held: an invoker view reads `profiles` as the
+-- caller, `profiles` has no anon select policy, and adding one would publish
+-- tax_vat_id, the trader address and the rest of that row to the internet.
+--
+-- WHAT THIS DOES INSTEAD. The public surface stops reading `profiles` at all.
+--
+--   * public.profile_directory is a table holding exactly the public part:
+--     id, username, avatar_url, and only for profiles that opted in
+--     (is_public and a username). No other column exists on it to leak.
+--   * A trigger on profiles keeps it in step, in the same transaction as the
+--     change, so it can never show a profile that has gone private.
+--   * The view keeps its name, columns and OID (CREATE OR REPLACE), and now
+--     reads the directory as the CALLER (security_invoker = true). SQ-app's
+--     .from("public_profiles") and the two policies that consult the view
+--     (artifacts_public_read, follows_visible_read) are unchanged, because a
+--     policy references the view by OID, not by name.
+--
+-- This is safer than before, not just quieter: widening the view can no
+-- longer expose a profiles column (the "standing footgun" in SQ-app's
+-- RISKS.md section 3), and nothing a client can reach runs with definer rights
+-- over profiles any more.
+--
+-- Run it in one go: the SQL editor runs a script as a single transaction, and
+-- step 0 aborts the whole thing, changing nothing, if production's view is not
+-- the one this was written against.
+
+-- ---- 0. Refuse to run against a view that has drifted ------------------------
+-- The directory copies what the view exposes. If production's view has another
+-- column or another filter, copying the replica's version would silently change
+-- who is public, so stop and show what is there instead. Already migrated
+-- (reads profile_directory) is accepted, so a re-run is harmless.
+do $preflight$
+declare
+  cols text;
+  shape text;
+begin
+  select string_agg(a.attname, ',' order by a.attnum)
+    into cols
+    from pg_attribute a
+   where a.attrelid = 'public.public_profiles'::regclass
+     and a.attnum > 0
+     and not a.attisdropped;
+
+  -- pg_get_viewdef qualifies names differently across Postgres versions and
+  -- search_paths, so compare on a normalised form: lower case, no whitespace,
+  -- brackets, semicolons or schema/table qualifiers.
+  shape := lower(pg_get_viewdef('public.public_profiles'::regclass));
+  shape := regexp_replace(shape, '[\s();]', '', 'g');
+  shape := replace(shape, 'public.', '');
+  shape := replace(shape, 'profile_directory.', '');
+  shape := replace(shape, 'profiles.', '');
+
+  if cols is distinct from 'id,username,avatar_url'
+     or shape not in (
+       'selectid,username,avatar_urlfromprofileswhereis_public=trueandusernameisnotnull',
+       'selectid,username,avatar_urlfromprofile_directory'
+     ) then
+    raise exception
+      'public_profiles is not the view this migration was written for. Nothing was changed. Columns: %. Definition: %',
+      cols, pg_get_viewdef('public.public_profiles'::regclass);
+  end if;
+end
+$preflight$;
+
+-- ---- 1. The directory ---------------------------------------------------------
+create table if not exists public.profile_directory (
+  id uuid primary key references public.profiles (id) on delete cascade,
+  username text not null,
+  avatar_url text
+);
+
+comment on table public.profile_directory is
+  'The public part of opted-in profiles (is_public and a username): id, username, avatar_url, nothing else. Written only by the sync_profile_directory trigger on profiles; read through the public_profiles view. Never add a column here that is not meant for the whole internet.';
+
+-- RLS on (the rls_auto_enable event trigger would do it too, but a table's
+-- security should not depend on an event trigger someone might drop). Readable
+-- by everyone, because that is its whole job; writable by no client role at
+-- all. The explicit revokes undo the schema's default grants, which hand every
+-- new table to anon and authenticated with INSERT/UPDATE/DELETE included.
+alter table public.profile_directory enable row level security;
+
+revoke all on public.profile_directory from public, anon, authenticated, service_role;
+grant select on public.profile_directory to anon, authenticated, service_role;
+
+drop policy if exists "Public directory is readable by everyone" on public.profile_directory;
+create policy "Public directory is readable by everyone"
+  on public.profile_directory
+  for select to anon, authenticated
+  using (true);
+
+-- ---- 2. Keep it in step with profiles ----------------------------------------
+-- SECURITY DEFINER because the person changing their own profile has no write
+-- grant on the directory, and must not. It writes only the row of the profile
+-- that fired it, with values taken from that row. Nobody can call it directly:
+-- it returns `trigger`, and execute is revoked below regardless.
+create or replace function public.sync_profile_directory()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if new.is_public is true and new.username is not null then
+    insert into public.profile_directory (id, username, avatar_url)
+    values (new.id, new.username, new.avatar_url)
+    on conflict (id) do update
+      set username = excluded.username,
+          avatar_url = excluded.avatar_url;
+  else
+    delete from public.profile_directory where id = new.id;
+  end if;
+  return null;
+end;
+$$;
+
+revoke execute on function public.sync_profile_directory() from public, anon, authenticated;
+
+-- AFTER, so it sees the final values from any BEFORE trigger. A deleted
+-- profile needs no branch: the foreign key cascades.
+drop trigger if exists profiles_sync_directory on public.profiles;
+create trigger profiles_sync_directory
+  after insert or update of is_public, username, avatar_url on public.profiles
+  for each row execute function public.sync_profile_directory();
+
+-- ---- 3. Backfill (and prune, so a re-run converges) ---------------------------
+insert into public.profile_directory (id, username, avatar_url)
+select p.id, p.username, p.avatar_url
+  from public.profiles p
+ where p.is_public = true
+   and p.username is not null
+on conflict (id) do update
+  set username = excluded.username,
+      avatar_url = excluded.avatar_url;
+
+delete from public.profile_directory d
+ where not exists (
+   select 1 from public.profiles p
+    where p.id = d.id
+      and p.is_public = true
+      and p.username is not null
+ );
+
+-- ---- 4. The view reads the directory, as the caller -----------------------------
+create or replace view public.public_profiles
+with (security_invoker = true) as
+  select id, username, avatar_url
+  from public.profile_directory;
+
+-- Stated again rather than trusted to CREATE OR REPLACE: the options, and
+-- the grants (SELECT only; the view is auto-updatable, and although the
+-- directory refuses client writes anyway, the view should not offer them).
+alter view public.public_profiles set (security_invoker = true);
+revoke all on public.public_profiles from public, anon, authenticated;
+grant select on public.public_profiles to anon, authenticated, service_role;
+
+comment on view public.public_profiles is
+  'Opt-in public directory: id, username, avatar_url for is_public profiles. Reads public.profile_directory as the caller (security_invoker); it no longer touches profiles, which holds tax data and must never carry an anon select policy.';
 
 notify pgrst, 'reload schema';

@@ -46,12 +46,14 @@ export function TwoFactorCard({
   factors,
   hasPassword,
   signedInRecently,
+  signsInWithGoogle,
   openSetup,
 }: {
   enrolled: boolean;
   factors: SecurityFactor[];
   hasPassword: boolean;
   signedInRecently: boolean;
+  signsInWithGoogle: boolean;
   openSetup: boolean;
 }) {
   const [setupOpen, setSetupOpen] = React.useState(openSetup);
@@ -150,6 +152,7 @@ export function TwoFactorCard({
         adding={enrolled}
         hasPassword={hasPassword}
         signedInRecently={signedInRecently}
+        signsInWithGoogle={signsInWithGoogle}
         existingNames={factors.map((factor) => factor.name)}
       />
       <RemoveAuthenticatorModal
