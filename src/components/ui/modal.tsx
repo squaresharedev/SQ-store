@@ -23,6 +23,7 @@ export function Modal({
   children,
   className,
   initialFocus = "first-control",
+  dismissible = true,
 }: {
   open: boolean;
   onClose: () => void;
@@ -30,6 +31,12 @@ export function Modal({
   description?: string;
   children: React.ReactNode;
   className?: string;
+  /**
+   * False while the dialog is asking for something that must not be walked
+   * past (the welcome flow's terms step): no close button, and neither Esc nor
+   * the backdrop closes it. The dialog's own controls are the only way on.
+   */
+  dismissible?: boolean;
   /**
    * Where focus lands on open. `first-control` (the default) is the first
    * thing in the dialog that is not the close button: right for a form whose
@@ -54,8 +61,11 @@ export function Modal({
   // into the dialog, so a person typing lost the field after one character:
   // the rest of what they typed (and every Space) went to the page behind.
   const onCloseRef = React.useRef(onClose);
+  // Same reasoning: whether Escape may close is read when it is pressed.
+  const dismissibleRef = React.useRef(dismissible);
   React.useEffect(() => {
     onCloseRef.current = onClose;
+    dismissibleRef.current = dismissible;
   });
 
   // `document` exists on the client's very first (hydration) render, not just
@@ -65,6 +75,9 @@ export function Modal({
   // only flips in an effect keeps the hydration render's output (null)
   // identical on both sides; the portal appears a tick later, post-mount.
   const [mounted, setMounted] = React.useState(false);
+  // The one deliberate setState-in-effect: flipping this after mount IS the
+  // point (see above), and it runs once, so there is no cascade to avoid.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   React.useEffect(() => setMounted(true), []);
 
   React.useEffect(() => {
@@ -102,7 +115,7 @@ export function Modal({
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
         event.preventDefault();
-        onCloseRef.current();
+        if (dismissibleRef.current) onCloseRef.current();
         return;
       }
       if (event.key !== "Tab" || !panel) return;
@@ -144,7 +157,11 @@ export function Modal({
   // its DOM parent, so moving it has no visual effect for any existing caller.
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4">
-      <div aria-hidden onClick={onClose} className={overlayScrimClass} />
+      <div
+        aria-hidden
+        onClick={dismissible ? onClose : undefined}
+        className={overlayScrimClass}
+      />
       <div
         ref={panelRef}
         role="dialog"
@@ -186,15 +203,17 @@ export function Modal({
               </p>
             )}
           </div>
-          <button
-            ref={closeButtonRef}
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            className={cn(overlayCloseButtonClass, "-mr-1.5 -mt-1.5")}
-          >
-            <X className="size-5" aria-hidden />
-          </button>
+          {dismissible && (
+            <button
+              ref={closeButtonRef}
+              type="button"
+              onClick={onClose}
+              aria-label="Close"
+              className={cn(overlayCloseButtonClass, "-mr-1.5 -mt-1.5")}
+            >
+              <X className="size-5" aria-hidden />
+            </button>
+          )}
         </div>
         {children}
       </div>

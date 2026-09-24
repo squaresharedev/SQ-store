@@ -5,7 +5,7 @@
  *   PRD-08 — Tracked stock count appears in the card footer.
  *   SELL-04 — Copy-link and open affordances route through the placement data.
  */
-import { describe, it, expect, vi, afterEach } from "vitest";
+import { describe, it, expect, vi, afterEach, beforeAll } from "vitest";
 import { render, screen, cleanup, waitFor } from "../setup/render";
 import userEvent from "@testing-library/user-event";
 
@@ -18,6 +18,24 @@ import { ProductList } from "@/components/products/ProductList";
 import type { Product, ProductSalesSummary } from "@/types/product";
 
 afterEach(cleanup);
+
+// jsdom does not implement window.matchMedia; the card's actions menu is a
+// Popover, which reads it to decide whether to lock scroll for the mobile sheet.
+beforeAll(() => {
+  Object.defineProperty(window, "matchMedia", {
+    writable: true,
+    value: vi.fn().mockImplementation((query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })),
+  });
+});
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
@@ -115,18 +133,31 @@ describe("stock count in card footer (PRD-08)", () => {
 
 // ── SELL-04: Copy-link placement logic ───────────────────────────────────────
 
+/** Copy link and open page live in the card's actions menu. */
+async function openActions(user: ReturnType<typeof userEvent.setup>, title = "Test Product") {
+  await user.click(screen.getByRole("button", { name: `More actions for ${title}` }));
+}
+
+/** Open the menu, then choose "Copy product link". */
+async function copyLink(user: ReturnType<typeof userEvent.setup>) {
+  await openActions(user);
+  await user.click(screen.getByRole("button", { name: /copy product link/i }));
+}
+
 describe("copy-link placement (SELL-04)", () => {
-  it("shows copy-link and open buttons for every product", () => {
+  it("shows copy-link and open actions for every product", async () => {
+    const user = userEvent.setup();
     renderList([makeProduct()]);
-    expect(screen.getByRole("button", { name: /copy link for test product/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /open test product page/i })).toBeInTheDocument();
+    await openActions(user);
+    expect(screen.getByRole("button", { name: /copy product link/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /open product page/i })).toBeInTheDocument();
   });
 
   it("shows a toast when the product is not on any storefront", async () => {
     const user = userEvent.setup();
     renderList([makeProduct()], {});
 
-    await user.click(screen.getByRole("button", { name: /copy link for test product/i }));
+    await copyLink(user);
 
     await waitFor(() =>
       expect(screen.getByRole("region", { name: /notifications/i })).toHaveTextContent(
@@ -140,7 +171,7 @@ describe("copy-link placement (SELL-04)", () => {
     const writeText = stubClipboard();
     renderList([makeProduct()], { p1: [{ id: "sf1", name: "My Store" }] });
 
-    await user.click(screen.getByRole("button", { name: /copy link for test product/i }));
+    await copyLink(user);
 
     await waitFor(() => expect(writeText).toHaveBeenCalled());
     await waitFor(() =>
@@ -159,7 +190,7 @@ describe("copy-link placement (SELL-04)", () => {
       ],
     });
 
-    await user.click(screen.getByRole("button", { name: /copy link for test product/i }));
+    await copyLink(user);
 
     await waitFor(() =>
       expect(screen.getByRole("dialog")).toHaveTextContent(/store a/i),
@@ -177,7 +208,7 @@ describe("copy-link placement (SELL-04)", () => {
       ],
     });
 
-    await user.click(screen.getByRole("button", { name: /copy link for test product/i }));
+    await copyLink(user);
     await waitFor(() => screen.getByRole("dialog"));
     await user.click(screen.getByRole("button", { name: "Store A" }));
 

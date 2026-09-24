@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
+import { describe, it, expect, vi, afterEach, beforeAll, beforeEach } from "vitest";
 import { render, screen, cleanup, waitFor, within } from "../setup/render";
 import userEvent from "@testing-library/user-event";
 
@@ -11,6 +11,24 @@ import { ProductList } from "@/components/products/ProductList";
 import type { Product, ProductSalesSummary } from "@/types/product";
 
 afterEach(cleanup);
+
+// jsdom does not implement window.matchMedia; the card's actions menu is a
+// Popover, which reads it to decide whether to lock scroll for the mobile sheet.
+beforeAll(() => {
+  Object.defineProperty(window, "matchMedia", {
+    writable: true,
+    value: vi.fn().mockImplementation((query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })),
+  });
+});
 
 function product(id: string, title: string): Product {
   return {
@@ -40,6 +58,15 @@ function renderList(
   );
 }
 
+/**
+ * Delete lives in the card's actions menu (with copy link and open page), so
+ * choosing it is two clicks: the menu button, then Delete.
+ */
+async function chooseDelete(user: ReturnType<typeof userEvent.setup>, title: string) {
+  await user.click(screen.getByRole("button", { name: `More actions for ${title}` }));
+  await user.click(screen.getByRole("button", { name: /^delete$/i }));
+}
+
 /** The confirm dialog, once open. */
 function dialog() {
   return screen.getByRole("dialog");
@@ -54,7 +81,7 @@ describe("product delete confirmation", () => {
     const user = userEvent.setup();
     renderList();
 
-    await user.click(screen.getByRole("button", { name: /delete blue hoodie/i }));
+    await chooseDelete(user, "Blue Hoodie");
 
     expect(deleteProductMock).not.toHaveBeenCalled();
     expect(dialog()).toBeInTheDocument();
@@ -66,7 +93,7 @@ describe("product delete confirmation", () => {
     const user = userEvent.setup();
     renderList();
 
-    await user.click(screen.getByRole("button", { name: /delete blue hoodie/i }));
+    await chooseDelete(user, "Blue Hoodie");
 
     expect(dialog()).toHaveTextContent("Blue Hoodie");
     expect(dialog()).toHaveTextContent(/permanently removed/i);
@@ -79,7 +106,7 @@ describe("product delete confirmation", () => {
       { p1: [{ id: "sf1", name: "My Store" }] },
     );
 
-    await user.click(screen.getByRole("button", { name: /delete blue hoodie/i }));
+    await chooseDelete(user, "Blue Hoodie");
 
     expect(dialog()).toHaveTextContent(/1 storefront/i);
     expect(dialog()).toHaveTextContent(/block stays/i);
@@ -92,7 +119,7 @@ describe("product delete confirmation", () => {
       { p1: [{ id: "sf1", name: "Store A" }, { id: "sf2", name: "Store B" }] },
     );
 
-    await user.click(screen.getByRole("button", { name: /delete blue hoodie/i }));
+    await chooseDelete(user, "Blue Hoodie");
 
     expect(dialog()).toHaveTextContent(/2 storefronts/i);
     expect(dialog()).toHaveTextContent(/blocks stay/i);
@@ -102,7 +129,7 @@ describe("product delete confirmation", () => {
     const user = userEvent.setup();
     renderList();
 
-    await user.click(screen.getByRole("button", { name: /delete blue hoodie/i }));
+    await chooseDelete(user, "Blue Hoodie");
 
     expect(dialog()).not.toHaveTextContent(/storefront/i);
   });
@@ -111,7 +138,7 @@ describe("product delete confirmation", () => {
     const user = userEvent.setup();
     renderList();
 
-    await user.click(screen.getByRole("button", { name: /delete blue hoodie/i }));
+    await chooseDelete(user, "Blue Hoodie");
     await user.click(within(dialog()).getByRole("button", { name: /^cancel$/i }));
 
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
@@ -123,7 +150,7 @@ describe("product delete confirmation", () => {
     const user = userEvent.setup();
     renderList([product("p1", "Blue Hoodie"), product("p2", "Red Cap")]);
 
-    await user.click(screen.getByRole("button", { name: /delete red cap/i }));
+    await chooseDelete(user, "Red Cap");
     await user.click(within(dialog()).getByRole("button", { name: /delete product/i }));
 
     await waitFor(() => expect(deleteProductMock).toHaveBeenCalledWith("p2"));
@@ -143,7 +170,7 @@ describe("product delete confirmation", () => {
     const user = userEvent.setup();
     renderList();
 
-    await user.click(screen.getByRole("button", { name: /delete blue hoodie/i }));
+    await chooseDelete(user, "Blue Hoodie");
     await user.click(within(dialog()).getByRole("button", { name: /delete product/i }));
 
     await waitFor(() =>
@@ -153,7 +180,8 @@ describe("product delete confirmation", () => {
     expect(screen.getByText("Blue Hoodie")).toBeInTheDocument();
   });
 
-  it("hides the delete control entirely for a read-only role", () => {
+  it("hides the delete control entirely for a read-only role", async () => {
+    const user = userEvent.setup();
     render(
       <ProductList
         products={[product("p1", "Blue Hoodie")]}
@@ -161,9 +189,11 @@ describe("product delete confirmation", () => {
         sales={NO_SALES}
       />,
     );
-    expect(
-      screen.queryByRole("button", { name: /delete blue hoodie/i }),
-    ).not.toBeInTheDocument();
+    // The menu still opens (copy link and open page are not writes); Delete
+    // is simply not in it.
+    await user.click(screen.getByRole("button", { name: "More actions for Blue Hoodie" }));
+    expect(screen.getByRole("button", { name: /copy product link/i })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /^delete$/i })).not.toBeInTheDocument();
   });
 });
 
