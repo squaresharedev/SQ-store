@@ -1,0 +1,252 @@
+{
+  "steps": {
+    "seller": {
+      "label": "Ajoutez vos informations vendeur",
+      "detail": "Votre raison sociale, votre adresse et votre e-mail de contact figurent sur chaque page produit.",
+      "detailDone": "Les acheteurs peuvent voir à qui ils achètent.",
+      "detailUnconfirmed": "Ouvrez le lien que nous vous avons envoyé pour confirmer votre e-mail de contact.",
+      "action": "Ajouter les informations",
+      "actionUnconfirmed": "Confirmer l’e-mail",
+      "cta": "Ajoutez vos informations vendeur",
+      "ctaUnconfirmed": "Confirmez votre e-mail"
+    },
+    "product": {
+      "label": "Ajoutez un produit",
+      "detail": "Un titre et un prix suffisent. Il peut rester en brouillon pour l’instant.",
+      "detailDone": "{count, plural, one {Vous avez {count} produit.} many {Vous avez {count} produits.} other {Vous avez {count} produits.}}",
+      "action": "Ajouter un produit",
+      "cta": "Ajoutez votre premier produit"
+    },
+    "storefront": {
+      "label": "Placez un produit sur une vitrine",
+      "detailDone": "Un produit est sur votre vitrine.",
+      "detailNone": "Créez une vitrine, puis ajoutez-y un produit dans sa grille.",
+      "detailEmpty": "Ouvrez votre vitrine et choisissez Ajouter un produit dans la barre d’outils.",
+      "actionCreate": "Créer une vitrine",
+      "actionOpen": "Ouvrir l’éditeur",
+      "cta": "Ouvrez votre vitrine",
+      "ctaCreate": "Créez une vitrine"
+    },
+    "publish": {
+      "label": "Publiez sa page",
+      "detailDone": "Votre page produit est en ligne.",
+      "detailNeedsSeller": "Terminez vos informations vendeur, votre page pourra alors passer en ligne.",
+      "detailNeedsStorefront": "Une fois un produit sur une vitrine, sa page peut passer en ligne.",
+      "detailNeedsActive": "Passez ce produit en Actif pour que sa page soit en ligne.",
+      "detailPagesOff": "Les pages produit sont désactivées sur cette vitrine. Activez-les dans l’éditeur.",
+      "actionEdit": "Modifier le produit",
+      "actionOpen": "Ouvrir l’éditeur",
+      "cta": "Publiez votre produit",
+      "ctaPagesOff": "Activer les pages produit"
+    }
+  },
+  "checklist": {
+    "titleDone": "Vous êtes prêt",
+    "title": "Mise en route",
+    "showMeAround": "Faire une visite guidée",
+    "showSteps": "Afficher les étapes",
+    "hideSteps": "Masquer les étapes",
+    "liveHint": "Votre première page produit est en ligne. Partagez le lien où vous voulez.",
+    "copyLink": {
+      "copy": "Copier le lien de la page produit",
+      "copied": "Lien de la page produit copié",
+      "failed": "Impossible de copier le lien de la page produit. Sélectionnez-le et copiez-le manuellement."
+    },
+    "openPage": "Ouvrir la page",
+    "opensInNewTab": " (ouvre un nouvel onglet)",
+    "hide": "Masquer",
+    "progressLabel": "Progression de la configuration",
+    "progress": "{total, plural, one {{done} sur {total} terminée} many {{done} sur {total} terminées} other {{done} sur {total} terminées}}",
+    "stepDone": " (terminé)",
+    "stepToDo": " (à faire)"
+  },
+  "welcome": {
+    "steps": {
+      "welcome": {
+        "title": "Bienvenue sur Square Share",
+        "description": "Quatre étapes vers une page produit que vous pourrez partager."
+      },
+      "path": {
+        "title": "Quatre étapes jusqu’à votre première page"
+      },
+      "seller": {
+        "title": "Ajoutez vos informations vendeur",
+        "description": "Les acheteurs les voient sur vos pages produit, et la loi les exige avant que vous puissiez vendre. Nous ne les utilisons jamais pour le marketing.",
+        "lawNote": "Les acheteurs les voient sur vos pages produit, comme la loi l’exige. Jamais utilisées à des fins commerciales."
+      },
+      "tour": {
+        "title": "Où tout se trouve",
+        "description": "Tout se trouve dans la barre latérale. Voici à quoi sert chaque partie."
+      },
+      "terms": {
+        "title": "Nos Conditions d’utilisation",
+        "description": "Lisez la version courte ou les Conditions complètes, puis acceptez-les pour continuer."
+      }
+    },
+    "progress": "{total, plural, one {Étape {step} sur {total}} many {Étape {step} sur {total}} other {Étape {step} sur {total}}}",
+    "intro": "Chaque produit que vous vendez peut avoir sa propre page, mise en forme par une vitrine que vous concevez.",
+    "tagline": "Donnez à chaque produit sa propre page, et partagez-la où vous voulez.",
+    "path": {
+      "seller": {
+        "title": "Ajoutez vos informations vendeur",
+        "body": "Les acheteurs doivent savoir à qui ils achètent."
+      },
+      "product": {
+        "title": "Ajoutez un produit",
+        "body": "Un titre, un prix et une photo si vous en avez une."
+      },
+      "storefront": {
+        "title": "Placez-le sur une vitrine",
+        "body": "Choisissez un aspect, puis placez le produit sur la grille."
+      },
+      "share": {
+        "title": "Partagez sa page",
+        "body": "Collez le lien dans votre bio, un message ou votre propre site."
+      }
+    },
+    "seller": {
+      "namePlaceholder": "p. ex. Studio Builderboy e.U.",
+      "nameHelp": "Votre raison sociale, ou votre nom complet si vous vendez en votre nom propre.",
+      "nameAlternative": "Ou votre nom complet, si vous vendez en votre nom propre.",
+      "addressPlaceholder": "p. ex. 12 rue du Marché\n75001 Paris\nFrance",
+      "emailPlaceholder": "p. ex. bonjour@votreboutique.example",
+      "emailHelp": "L’adresse à laquelle les acheteurs vous écrivent. Elle peut différer de votre e-mail de connexion."
+    },
+    "confirm": {
+      "check": "Consultez {email} pour un lien de confirmation.",
+      "goLive": "Vos pages produit passent en ligne dès que vous l’ouvrez.",
+      "sendNewLink": "Envoyer un nouveau lien"
+    },
+    "tour": {
+      "mobileMenu": "Sur votre téléphone, ouvrez le menu en haut à gauche.",
+      "searchShortcut": "Vous cherchez quelque chose ? Appuyez sur <kbd>{shortcut}</kbd> pour tout rechercher.",
+      "searchNoShortcut": "Vous cherchez quelque chose ? La recherche trouve n’importe quelle page ou paramètre.",
+      "searchMobile": "Vous cherchez quelque chose ? Appuyez sur Rechercher en haut."
+    },
+    "nav": {
+      "skipOnboarding": "Passer la prise en main",
+      "next": "Suivant",
+      "showMeAround": "Faites-moi visiter",
+      "skipIntro": "Passer l’introduction",
+      "getStarted": "Commencer",
+      "skipForNow": "Passer pour l’instant",
+      "saveAndContinue": "Enregistrer et continuer",
+      "changeDetails": "Modifier les informations",
+      "continue": "Continuer",
+      "exploreOnMyOwn": "Explorer par moi-même",
+      "notNow": "Pas maintenant"
+    },
+    "hero": {
+      "buyNow": "Acheter",
+      "live": "En ligne",
+      "linkCopied": "Lien copié"
+    },
+    "setupPath": {
+      "details": "Ajoutez vos informations",
+      "product": "Ajoutez un produit",
+      "storefront": "Concevez une vitrine",
+      "share": "Partagez sa page"
+    },
+    "terms": {
+      "agreed": "Vous avez accepté ces Conditions. Merci de les avoir lues.",
+      "agreeNote": "En les acceptant, la date et cette version des Conditions sont enregistrées sur votre compte."
+    }
+  },
+  "tourOverlay": {
+    "dialogLabel": "Visite guidée",
+    "progress": "{total, plural, one {{current} sur {total}} many {{current} sur {total}} other {{current} sur {total}}}",
+    "shortcut": "Raccourci : <kbd>{shortcut}</kbd>",
+    "skipTour": "Quitter la visite",
+    "next": "Suivant",
+    "openingPage": "{page, select, overview {Ouverture de la vue d’ensemble…} products {Ouverture des produits…} storefront {Ouverture de la vitrine…} orders {Ouverture des commandes…} analytics {Ouverture des statistiques…} payments {Ouverture des paiements…} settings {Ouverture des paramètres…} sampleStorefront {Ouverture de la vitrine d’exemple…} other {Ouverture…}}"
+  },
+  "tourReplay": {
+    "title": "Visite guidée",
+    "description": "Un court parcours de l’action principale de chaque page, étape par étape.",
+    "start": "Lancer la visite"
+  },
+  "guidedTour": {
+    "steps": {
+      "overviewNav": {
+        "title": "Repérez-vous",
+        "body": "Tout ce qui concerne votre boutique est à un clic du menu. Cette visite s’arrête sur l’action principale de chaque page.",
+        "bodySidebar": "Tout ce qui concerne votre boutique est à un clic dans cette barre latérale. Cette visite s’arrête sur l’action principale de chaque page.",
+        "bodyMenu": "Tout ce qui concerne votre boutique se trouve derrière ce menu. Cette visite s’arrête sur l’action principale de chaque page."
+      },
+      "search": {
+        "title": "Recherchez n’importe quoi",
+        "body": "La recherche vous mène directement à n’importe quelle page, produit, commande ou paramètre.",
+        "bodyTopBar": "Accédez directement à n’importe quelle page, produit, commande ou paramètre.",
+        "bodyPhone": "Touchez ici pour accéder directement à n’importe quelle page, produit, commande ou paramètre."
+      },
+      "productsAdd": {
+        "title": "Ajoutez un produit",
+        "body": "Un titre et un prix suffisent pour commencer. Il peut rester en brouillon jusqu’à ce que vous soyez prêt."
+      },
+      "productsImport": {
+        "title": "Ou importez votre catalogue",
+        "body": "Vous vendez déjà ailleurs ? Importez un fichier CSV. Un export Shopify fonctionne tel quel."
+      },
+      "storefrontCreate": {
+        "title": "Créez une vitrine",
+        "body": "Une vitrine est une grille que vous concevez. Chaque produit que vous y placez obtient une page à partager."
+      },
+      "storefrontSample": {
+        "title": "Voyez comment faire",
+        "body": "Cet exemple montre une vitrine terminée. Ouvrez-le pour essayer l’éditeur. Rien de ce que vous y modifiez n’est enregistré.",
+        "fallbackBody": "Ouvrez une vitrine pour la concevoir."
+      },
+      "storefrontEmbed": {
+        "title": "Intégrez une vitrine à votre site",
+        "body": "Chaque vitrine a un bouton d’intégration qui vous donne un code comme celui-ci. Le widget est encore en développement et ne s’affiche pas encore sur d’autres sites.",
+        "bodyButton": "Ce bouton vous donne un code comme celui ci-dessous, à coller dans votre site. Le widget est encore en développement et ne s’affiche pas encore sur d’autres sites.",
+        "fallbackBody": "Une fois que vous avez une vitrine, le bouton d’intégration de sa carte vous donne un code comme celui-ci. Le widget est encore en développement et ne s’affiche pas encore sur d’autres sites."
+      },
+      "ordersSearch": {
+        "title": "Retrouvez une commande",
+        "body": "Recherchez par e-mail de l’acheteur. Les commandes arriveront ici dès l’ouverture du paiement Square Share."
+      },
+      "ordersFilters": {
+        "title": "Filtrez et triez",
+        "body": "Affinez les commandes par canal, statut ou date, et choisissez leur tri."
+      },
+      "analytics": {
+        "title": "Suivez vos résultats",
+        "body": "Les ventes et les visites de vos pages produit, sur les dates de votre choix.",
+        "bodyRange": "Les ventes et les visites de vos pages produit, sur les dates que vous choisissez ici.",
+        "bodyFirstRun": "Les ventes et les visites de vos pages produit apparaîtront ici dès que l’une d’elles sera en ligne."
+      },
+      "payments": {
+        "title": "Être payé",
+        "bodyConnect": "Connectez Stripe ici pour que vos virements arrivent directement sur votre compte bancaire.",
+        "bodyComingSoon": "Le paiement via Stripe arrive bientôt. D’ici là, les acheteurs vous paient via le lien d’achat de votre produit ou par e-mail."
+      },
+      "finish": {
+        "title": "Rejouez la visite à tout moment",
+        "body": "La visite est terminée. Vous pouvez la relancer d’ici quand vous voulez."
+      }
+    }
+  },
+  "editorTour": {
+    "steps": {
+      "editorAdd": {
+        "title": "Ajoutez à votre grille",
+        "body": "Ajoutez des produits, du texte et des formes depuis cette barre. Faites glisser un élément de la grille pour le déplacer, et tirez sur un coin pour le redimensionner."
+      },
+      "editorDesign": {
+        "title": "Définissez l’apparence",
+        "body": "Les couleurs, les polices, l’en-tête et l’aspect des vignettes produit se règlent une fois pour toute la vitrine.",
+        "bodyPanel": "Les couleurs, les polices, l’en-tête et l’aspect des vignettes produit se règlent ici, une fois pour toute la vitrine.",
+        "bodyButton": "Touchez ici pour régler les couleurs, les polices, l’en-tête et l’aspect des vignettes produit, une fois pour toute la vitrine."
+      },
+      "editorPage": {
+        "title": "Chaque produit a sa page",
+        "body": "Chaque produit de la grille a sa propre page à partager. Ouvrez-en une ici pour la voir et la personnaliser."
+      },
+      "editorFinish": {
+        "title": "Faites-en la vôtre",
+        "body": "L’exemple n’est jamais enregistré : essayez ce que vous voulez. Quand vous êtes prêt, créez votre propre vitrine."
+      }
+    }
+  }
+}

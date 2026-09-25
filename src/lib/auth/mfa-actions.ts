@@ -8,7 +8,7 @@ import { RECENT_SIGN_IN_SECONDS, signedInRecently } from "@/lib/auth/assurance";
 import { accountHasPassword } from "@/lib/auth/has-password";
 import { checkPassword } from "@/lib/auth/reauth";
 import {
-  SECOND_FACTOR_MESSAGES,
+  SECOND_FACTOR_ERRORS,
   STEP_UP_FIELDS,
   alertTwoFactorChange,
   clearRecoveryCodes,
@@ -17,7 +17,7 @@ import {
   issueRecoveryCodes,
   pickFactor,
   remainingRecoveryCodes,
-  requireStepUp,
+  requireStepUpState,
   restoreRecoveryCode,
   spendRecoveryCode,
   takeSecondFactorAttempt,
@@ -26,12 +26,24 @@ import {
 import { recordSecurityEvent } from "@/lib/security/events";
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
 import { safeInternalPath } from "@/lib/utils/safe-path";
+import { readLocaleCookieValue, writeLocaleCookie } from "@/i18n/cookie";
+import { localeForSignedInBrowser } from "@/i18n/sign-in";
 import {
   RECOVERY_CODE_INPUT_MAX,
   factorIdSchema,
   factorNameSchema,
   totpCodeSchema,
 } from "@/lib/validation/mfa";
+import { firstIssue } from "@/lib/validation/messages";
+import {
+  actionError,
+  failed,
+  invalidInput,
+  succeeded,
+  type ActionState,
+} from "@/lib/errors";
+import { msg } from "@/i18n/types";
+import type { z } from "zod";
 
 /**
  * Two-factor actions: the sign-in challenge, recovery-code sign-in, and the
@@ -42,19 +54,38 @@ import {
  * the challenge actions only run for a session that still owes its second
  * factor, and the settings actions only for a fully signed-in one. Neither
  * trusts anything the form says about who is asking.
+ *
+ * Every state is the shared ActionState (lib/errors.ts): errors and successes
+ * are message keys, resolved in the reader's language where they render.
  */
 
 // ---------------------------------------------------------------------------
 // Shared
 // ---------------------------------------------------------------------------
 
-const SESSION_EXPIRED = "Your sign-in expired. Sign in again.";
-const UNREACHABLE = "We couldn't reach the sign-in service. Check your connection and try again.";
+const SESSION_EXPIRED: ActionState = failed(
+  actionError("session_expired", msg("Errors.mfa.signInExpired")),
+);
+const UNREACHABLE: ActionState = failed(actionError("server_error", msg("Errors.mfa.unreachable")));
+const FACTOR_UNKNOWN: ActionState = failed(invalidInput(msg("Errors.stepUp.factorUnknown")));
+const TOO_MANY_CHANGES: ActionState = failed(
+  actionError("rate_limited", msg("Errors.form.tooManyChanges")),
+);
+/** Deliberately the same words for a wrong code and for one too long to be a
+ *  code at all: neither says anything about what the account holds. */
+const RECOVERY_CODE_INVALID: ActionState = failed(
+  invalidInput(msg("Errors.mfa.recoveryCodeInvalid")),
+);
+const FACTOR_NAME_TAKEN: ActionState = failed(invalidInput(msg("Errors.mfa.factorNameTaken")));
+const SETUP_FAILED: ActionState = failed(actionError("server_error", msg("Errors.mfa.setupFailed")));
+const SETUP_EXPIRED: ActionState = failed(invalidInput(msg("Errors.mfa.setupExpired")));
 
-function unknownField(formData: FormData, allowed: readonly string[]): string | null {
+function unknownField(formData: FormData, allowed: readonly string[]): ActionState | null {
   for (const key of formData.keys()) {
     if (key.startsWith("$ACTION")) continue;
-    if (!allowed.includes(key)) return `Unexpected field "${key}" was rejected.`;
+    if (!allowed.includes(key)) {
+      return failed(invalidInput(msg("Errors.form.unexpectedField", { field: key })));
+    }
   }
   return null;
 }
@@ -70,6 +101,34 @@ function signsInWithGoogle(user: {
   return Array.isArray(providers) && providers.includes("google");
 }
 
+/** A code that did not parse as six digits, in the schema's own words. */
+function malformedCode(error: z.ZodError): ActionState {
+  return failed(invalidInput(firstIssue(error, msg("Errors.mfa.enterCode"))));
+}
+
+/**
+ * Copy the account's saved language onto a browser that has none, once the
+ * challenge completes a sign-in. Best-effort: never fails the sign-in.
+ */
+async function syncAccountLocale(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+): Promise<void> {
+  try {
+    const accountLocale = await localeForSignedInBrowser(
+      supabase,
+      userId,
+      await readLocaleCookieValue(),
+    );
+    if (accountLocale) await writeLocaleCookie(accountLocale);
+  } catch (err) {
+    console.warn(
+      "[locale] challenge sync failed",
+      err instanceof Error ? err.message : String(err),
+    );
+  }
+}
+
 /**
  * Where to go after the challenge. Never back to a sign-in page (a loop), and
  * never off-site (safeInternalPath resolves the value the way a browser would).
@@ -83,11 +142,15 @@ function afterChallenge(raw: FormDataEntryValue | null): string {
 // Sign-in challenge
 // ---------------------------------------------------------------------------
 
-export type ChallengeState = {
-  error?: string;
+export type ChallengeState = ActionState & {
   /** The half-signed-in session is gone; the page offers "sign in again". */
   expired?: boolean;
 };
+
+/** The half-signed-in session is gone: say so, and offer "sign in again". */
+function challengeExpired(): ChallengeState {
+  return { ...SESSION_EXPIRED, expired: true };
+}
 
 /**
  * The second half of signing in: a code from the authenticator app. Only for a
@@ -98,21 +161,19 @@ export async function verifyTwoFactorSignIn(
   formData: FormData,
 ): Promise<ChallengeState> {
   const rejected = unknownField(formData, ["code", "factor_id", "next"]);
-  if (rejected) return { error: rejected };
+  if (rejected) return rejected;
   const next = afterChallenge(formData.get("next"));
 
   const state = await getSessionState();
-  if (state.kind === "unreachable") return { error: UNREACHABLE };
-  if (state.kind === "signed_out") return { error: SESSION_EXPIRED, expired: true };
+  if (state.kind === "unreachable") return UNREACHABLE;
+  if (state.kind === "signed_out") return challengeExpired();
   // Already through (a second tab finished first): nothing to verify.
   if (state.kind === "signed_in") redirect(next);
 
   const code = totpCodeSchema.safeParse(String(formData.get("code") ?? ""));
-  if (!code.success) {
-    return { error: code.error.issues[0]?.message ?? "Enter the 6-digit code." };
-  }
+  if (!code.success) return malformedCode(code.error);
   const factorId = pickFactor(state.assurance, formData.get("factor_id"));
-  if (!factorId) return { error: "Pick one of your authenticator apps." };
+  if (!factorId) return FACTOR_UNKNOWN;
 
   const supabase = await createClient();
   const result = await verifySecondFactor({
@@ -123,7 +184,12 @@ export async function verifyTwoFactorSignIn(
     code: code.data,
     context: "sign_in",
   });
-  if (!result.ok) return { error: SECOND_FACTOR_MESSAGES[result.reason] };
+  if (!result.ok) return failed(SECOND_FACTOR_ERRORS[result.reason]);
+
+  // Sign-in is complete only now, so this is where a browser with no language
+  // of its own picks up the account's (the first-factor step skipped it: that
+  // aal1 session could not read the profile).
+  await syncAccountLocale(supabase, state.user.id);
 
   // Outside every try/catch: redirect() works by throwing.
   redirect(next);
@@ -144,37 +210,35 @@ export async function signInWithRecoveryCode(
   formData: FormData,
 ): Promise<ChallengeState> {
   const rejected = unknownField(formData, ["recovery_code", "next"]);
-  if (rejected) return { error: rejected };
+  if (rejected) return rejected;
 
   const state = await getSessionState();
-  if (state.kind === "unreachable") return { error: UNREACHABLE };
-  if (state.kind === "signed_out") return { error: SESSION_EXPIRED, expired: true };
+  if (state.kind === "unreachable") return UNREACHABLE;
+  if (state.kind === "signed_out") return challengeExpired();
   if (state.kind === "signed_in") redirect(afterChallenge(formData.get("next")));
 
   const raw = String(formData.get("recovery_code") ?? "");
-  if (!raw.trim()) return { error: "Enter one of your recovery codes." };
-  if (raw.length > RECOVERY_CODE_INPUT_MAX) {
-    return { error: "That recovery code didn't work. Check it and try again." };
-  }
+  if (!raw.trim()) return failed(invalidInput(msg("Errors.mfa.recoveryCodeRequired")));
+  if (raw.length > RECOVERY_CODE_INPUT_MAX) return RECOVERY_CODE_INVALID;
 
   const { user } = state;
   // The SAME budget as authenticator codes. A recovery code is a second
   // factor too, so it must not be a way around the limit on guessing one.
   if (!(await takeSecondFactorAttempt(user.id, user.email, "sign_in"))) {
-    return { error: SECOND_FACTOR_MESSAGES.rate_limited };
+    return failed(SECOND_FACTOR_ERRORS.rate_limited);
   }
 
   const spent = await spendRecoveryCode(user.id, raw);
   if (!spent) {
     await recordSecurityEvent({ userId: user.id, event: "mfa.challenge_failed" });
-    return { error: "That recovery code didn't work. Check it and try again." };
+    return RECOVERY_CODE_INVALID;
   }
 
   // The code is spent, so from here a failure hands it back rather than leave
   // the person locked out AND a code poorer.
   if (!(await deleteAllFactors(user.id))) {
     await restoreRecoveryCode(user.id, spent);
-    return { error: "We couldn't finish signing you in. Try the same code again in a moment." };
+    return failed(actionError("server_error", msg("Errors.mfa.recoveryIncomplete")));
   }
   await clearRecoveryCodes(user.id);
 
@@ -183,9 +247,13 @@ export async function signInWithRecoveryCode(
   await revokeOtherSessions(supabase);
 
   await recordSecurityEvent({ userId: user.id, event: "mfa.disabled" });
+  // Signed in now, as in verifyTwoFactorSignIn. With every factor gone, this
+  // session may read the profile.
+  await syncAccountLocale(supabase, user.id);
+
   await alertTwoFactorChange(user, "mfa.recovery_code_used", {
-    title: "A recovery code was used to sign in",
-    body: "Someone signed in to your account with a recovery code. That turns two-factor authentication off and signs out every other device. If this was you, set up two-factor again in Settings › Security. If it wasn't, change your password now.",
+    title: { key: "Notifications.messages.security.recoveryCodeUsed.title" },
+    body: { key: "Notifications.messages.security.recoveryCodeUsed.body" },
   });
 
   redirect("/settings/security?recovered=1");
@@ -195,12 +263,11 @@ export async function signInWithRecoveryCode(
 // Setup
 // ---------------------------------------------------------------------------
 
-export type BeginSetupState = {
-  error?: string;
+/** `stepUp` (from ActionState): adding a SECOND authenticator needs a code
+ *  from an existing one. */
+export type BeginSetupState = ActionState & {
   /** The account has no password and signed in too long ago: sign in again. */
   reauth?: boolean;
-  /** Adding a SECOND authenticator needs a code from an existing one. */
-  stepUp?: true;
   enrollment?: {
     factorId: string;
     /** An <img>-safe data: URL of the QR code. */
@@ -250,22 +317,22 @@ export async function beginTwoFactorSetup(
   formData: FormData,
 ): Promise<BeginSetupState> {
   const rejected = unknownField(formData, ["name", "current_password", ...STEP_UP_FIELDS]);
-  if (rejected) return { error: rejected };
+  if (rejected) return rejected;
 
   const state = await getSessionState();
-  if (state.kind !== "signed_in") return { error: SESSION_EXPIRED };
+  if (state.kind !== "signed_in") return SESSION_EXPIRED;
   const { user, assurance } = state;
 
   const name = factorNameSchema.safeParse(String(formData.get("name") ?? ""));
   if (!name.success) {
-    return { error: name.error.issues[0]?.message ?? "Give this authenticator a name." };
+    return failed(invalidInput(firstIssue(name.error, msg("Errors.mfa.factorNameRequired"))));
   }
   if (assurance.factors.some((f) => f.name.toLowerCase() === name.data.toLowerCase())) {
-    return { error: "You already have an authenticator with that name. Pick another." };
+    return FACTOR_NAME_TAKEN;
   }
 
   if (assurance.enrolled) {
-    const refused = await requireStepUp(formData, { maxAgeSeconds: 0 });
+    const refused = await requireStepUpState(formData, { maxAgeSeconds: 0 });
     if (refused) return refused;
   } else if (signedInRecently(assurance, RECENT_SIGN_IN_SECONDS)) {
     // Signed in (by whatever method this account uses) moments ago: that IS
@@ -276,21 +343,18 @@ export async function beginTwoFactorSetup(
     const usesGoogle = signsInWithGoogle(user);
     const password = String(formData.get("current_password") ?? "");
     if (!password) {
-      return {
-        error: usesGoogle
-          ? "Enter your Square Share password, or use “Confirm with Google” instead."
-          : "Enter your current password to continue.",
-        reauth: usesGoogle || undefined,
-      };
+      return usesGoogle
+        ? { ...failed(invalidInput(msg("Errors.mfa.passwordRequiredGoogle"))), reauth: true }
+        : failed(invalidInput(msg("Errors.mfa.passwordRequired")));
     }
-    if (password.length > 72) return { error: "Current password is incorrect." };
+    if (password.length > 72) return failed(invalidInput(msg("Errors.settings.wrongPassword")));
     // A password oracle, so it spends the same budget as every other re-auth.
     if (!(await rateLimit("password_reauth", RATE_LIMITS.passwordReauth))) {
-      return { error: "Too many attempts. Wait a few minutes before trying again." };
+      return failed(actionError("rate_limited", msg("Errors.settings.passwordReauthRateLimited")));
     }
     const check = await checkPassword(user.email ?? "", password);
     if (check === "unavailable") {
-      return { error: "We couldn't check your password just now. Try again in a moment." };
+      return failed(actionError("server_error", msg("Errors.mfa.passwordCheckUnavailable")));
     }
     if (check === "incorrect") {
       // The case that actually happened: an account that signs in with
@@ -298,22 +362,18 @@ export async function beginTwoFactorSetup(
       // one they know (often their Google password). Point them at the way
       // they really sign in rather than at a password they never use.
       return usesGoogle
-        ? {
-            error:
-              "That isn't this account's Square Share password. You sign in with Google, so use “Confirm with Google” instead.",
-            reauth: true,
-          }
-        : { error: "Current password is incorrect." };
+        ? { ...failed(invalidInput(msg("Errors.mfa.wrongPasswordGoogle"))), reauth: true }
+        : failed(invalidInput(msg("Errors.settings.wrongPassword")));
     }
   } else {
     return {
-      error: "For your security, sign in again before turning on two-factor authentication.",
+      ...failed(actionError("session_expired", msg("Errors.mfa.reauthRequired"))),
       reauth: true,
     };
   }
 
   if (!(await rateLimit("mfa_enroll", RATE_LIMITS.mfaEnroll))) {
-    return { error: "That's a lot of setup attempts. Try again a bit later." };
+    return failed(actionError("rate_limited", msg("Errors.mfa.setupRateLimited")));
   }
 
   // Turning 2FA ON must never succeed without recovery codes to go with it:
@@ -323,7 +383,7 @@ export async function beginTwoFactorSetup(
   // authenticator keeps the existing codes, so it does not need this.
   if (!assurance.enrolled && (await remainingRecoveryCodes(user.id)) === null) {
     console.error("[mfa] recovery code store unreachable; refusing to start setup");
-    return { error: "Two-factor setup isn't available right now. Try again later." };
+    return failed(actionError("server_error", msg("Errors.mfa.setupUnavailable")));
   }
 
   const supabase = await createClient();
@@ -335,20 +395,18 @@ export async function beginTwoFactorSetup(
     issuer: "Square Share",
   });
   if (error || !data || data.type !== "totp") {
-    if (error?.code === "mfa_factor_name_conflict") {
-      return { error: "You already have an authenticator with that name. Pick another." };
-    }
+    if (error?.code === "mfa_factor_name_conflict") return FACTOR_NAME_TAKEN;
     if (error?.code === "too_many_enrolled_mfa_factors") {
-      return { error: "This account has as many authenticators as it can hold. Remove one first." };
+      return failed(invalidInput(msg("Errors.mfa.tooManyFactors")));
     }
     console.warn("[mfa] enroll failed:", error?.code, error?.message);
-    return { error: "We couldn't start setup just now. Try again in a moment." };
+    return SETUP_FAILED;
   }
 
   const qrCode = qrDataUrl(data.totp.qr_code);
   if (!qrCode || !data.totp.secret) {
     await supabase.auth.mfa.unenroll({ factorId: data.id }).catch(() => undefined);
-    return { error: "We couldn't start setup just now. Try again in a moment." };
+    return SETUP_FAILED;
   }
 
   return {
@@ -361,8 +419,7 @@ export async function beginTwoFactorSetup(
   };
 }
 
-export type ConfirmSetupState = {
-  error?: string;
+export type ConfirmSetupState = ActionState & {
   done?: boolean;
   /** Set when this turned 2FA ON: the recovery codes, shown once. Null if
    *  they could not be created (2FA is still on; the page offers a retry). */
@@ -378,26 +435,24 @@ export async function confirmTwoFactorSetup(
   formData: FormData,
 ): Promise<ConfirmSetupState> {
   const rejected = unknownField(formData, ["factor_id", "code"]);
-  if (rejected) return { error: rejected };
+  if (rejected) return rejected;
 
   const state = await getSessionState();
-  if (state.kind !== "signed_in") return { error: SESSION_EXPIRED };
+  if (state.kind !== "signed_in") return SESSION_EXPIRED;
   const { user, assurance } = state;
 
   const factorId = factorIdSchema.safeParse(String(formData.get("factor_id") ?? ""));
-  if (!factorId.success) return { error: "Setup expired. Start again." };
+  if (!factorId.success) return SETUP_EXPIRED;
   // Must be THIS account's pending factor: never a verified one (that would
   // make "confirm setup" a way to exercise someone's existing factor) and
   // never someone else's.
   const pending = (user.factors ?? []).find(
     (f) => f.id === factorId.data && f.status !== "verified",
   );
-  if (!pending) return { error: "Setup expired. Start again." };
+  if (!pending) return SETUP_EXPIRED;
 
   const code = totpCodeSchema.safeParse(String(formData.get("code") ?? ""));
-  if (!code.success) {
-    return { error: code.error.issues[0]?.message ?? "Enter the 6-digit code." };
-  }
+  if (!code.success) return malformedCode(code.error);
 
   const firstFactor = !assurance.enrolled;
   const supabase = await createClient();
@@ -410,12 +465,11 @@ export async function confirmTwoFactorSetup(
     context: "setup",
   });
   if (!result.ok) {
-    return {
-      error:
-        result.reason === "invalid"
-          ? "That code didn't match. Make sure your app shows Square Share, then enter the newest code."
-          : SECOND_FACTOR_MESSAGES[result.reason],
-    };
+    return failed(
+      result.reason === "invalid"
+        ? invalidInput(msg("Errors.mfa.setupCodeMismatch"))
+        : SECOND_FACTOR_ERRORS[result.reason],
+    );
   }
 
   // The session in the cookies is now aal2. Every OTHER session is not, and
@@ -428,13 +482,18 @@ export async function confirmTwoFactorSetup(
   if (firstFactor) {
     codes = await issueRecoveryCodes(user.id);
     await alertTwoFactorChange(user, "mfa.enabled", {
-      title: "Two-factor authentication is on",
-      body: "Signing in to your account now needs a code from your authenticator app, and every other device was signed out. If this wasn't you, change your password and contact support.",
+      title: { key: "Notifications.messages.security.twoFactorEnabled.title" },
+      body: { key: "Notifications.messages.security.twoFactorEnabled.body" },
     });
   } else {
     await alertTwoFactorChange(user, "mfa.factor_added", {
-      title: "An authenticator app was added",
-      body: `"${pending.friendly_name ?? "Authenticator app"}" can now be used to sign in to your account. If this wasn't you, remove it in Settings › Security and change your password.`,
+      title: { key: "Notifications.messages.security.factorAdded.title" },
+      body: pending.friendly_name != null
+        ? {
+            key: "Notifications.messages.security.factorAdded.body",
+            values: { name: pending.friendly_name },
+          }
+        : { key: "Notifications.messages.security.factorAdded.bodyUnnamed" },
     });
   }
 
@@ -476,10 +535,7 @@ export async function cancelTwoFactorSetup(factorId: string): Promise<void> {
 // Managing it
 // ---------------------------------------------------------------------------
 
-export type ManageState = {
-  error?: string;
-  success?: string;
-  stepUp?: true;
+export type ManageState = ActionState & {
   /** Fresh recovery codes, shown once. */
   codes?: string[];
 };
@@ -493,54 +549,55 @@ export async function removeAuthenticator(
   formData: FormData,
 ): Promise<ManageState> {
   const rejected = unknownField(formData, ["factor_id", ...STEP_UP_FIELDS]);
-  if (rejected) return { error: rejected };
+  if (rejected) return rejected;
 
   const state = await getSessionState();
-  if (state.kind !== "signed_in") return { error: SESSION_EXPIRED };
+  if (state.kind !== "signed_in") return SESSION_EXPIRED;
   const { user, assurance } = state;
 
   const factorId = factorIdSchema.safeParse(String(formData.get("factor_id") ?? ""));
   const target = factorId.success
     ? assurance.factors.find((f) => f.id === factorId.data)
     : undefined;
-  if (!target) return { error: "That authenticator isn't on your account." };
+  if (!target) return failed(actionError("not_found", msg("Errors.mfa.factorNotOnAccount")));
 
-  const refused = await requireStepUp(formData, { maxAgeSeconds: 0 });
+  const refused = await requireStepUpState(formData, { maxAgeSeconds: 0 });
   if (refused) return refused;
 
-  if (!(await rateLimit("mfa_manage", RATE_LIMITS.mfaManage))) {
-    return { error: "That's a lot of changes in a short time. Try again a bit later." };
-  }
+  if (!(await rateLimit("mfa_manage", RATE_LIMITS.mfaManage))) return TOO_MANY_CHANGES;
 
   const supabase = await createClient();
   const { error } = await supabase.auth.mfa.unenroll({ factorId: target.id });
   if (error) {
     console.warn("[mfa] unenroll failed:", error.code, error.message);
-    return { error: "We couldn't remove that authenticator. Try again." };
+    return failed(actionError("server_error", msg("Errors.mfa.removeFailed")));
   }
 
   const wasLast = assurance.factors.length === 1;
   if (wasLast) {
     await clearRecoveryCodes(user.id);
     await alertTwoFactorChange(user, "mfa.disabled", {
-      title: "Two-factor authentication is off",
-      body: "Your last authenticator app was removed, so signing in now needs only your password. If this wasn't you, change your password and turn two-factor back on.",
+      title: { key: "Notifications.messages.security.twoFactorDisabled.title" },
+      body: { key: "Notifications.messages.security.twoFactorDisabled.body" },
     });
   } else {
     await alertTwoFactorChange(user, "mfa.factor_removed", {
-      title: "An authenticator app was removed",
-      body: `"${target.name}" can no longer be used to sign in to your account. If this wasn't you, change your password now.`,
+      title: { key: "Notifications.messages.security.factorRemoved.title" },
+      body: {
+        key: "Notifications.messages.security.factorRemoved.body",
+        values: { name: target.name },
+      },
     });
   }
 
   // The whole settings layout, not just this page: it carries the 2FA state
   // every sensitive form reads (StepUpProvider) and the rail's badge.
   revalidatePath("/settings", "layout");
-  return {
-    success: wasLast
-      ? "Two-factor authentication is off."
-      : `Removed "${target.name}".`,
-  };
+  return succeeded(
+    wasLast
+      ? msg("Settings.security.success.twoFactorOff")
+      : msg("Settings.security.success.factorRemoved", { name: target.name }),
+  );
 }
 
 /** Replace the recovery codes with a new set. Always needs a code. */
@@ -549,32 +606,30 @@ export async function regenerateRecoveryCodes(
   formData: FormData,
 ): Promise<ManageState> {
   const rejected = unknownField(formData, [...STEP_UP_FIELDS]);
-  if (rejected) return { error: rejected };
+  if (rejected) return rejected;
 
   const state = await getSessionState();
-  if (state.kind !== "signed_in") return { error: SESSION_EXPIRED };
+  if (state.kind !== "signed_in") return SESSION_EXPIRED;
   const { user, assurance } = state;
-  if (!assurance.enrolled) return { error: "Turn on two-factor authentication first." };
+  if (!assurance.enrolled) return failed(invalidInput(msg("Errors.mfa.notEnrolled")));
 
-  const refused = await requireStepUp(formData, { maxAgeSeconds: 0 });
+  const refused = await requireStepUpState(formData, { maxAgeSeconds: 0 });
   if (refused) return refused;
 
-  if (!(await rateLimit("mfa_manage", RATE_LIMITS.mfaManage))) {
-    return { error: "That's a lot of changes in a short time. Try again a bit later." };
-  }
+  if (!(await rateLimit("mfa_manage", RATE_LIMITS.mfaManage))) return TOO_MANY_CHANGES;
 
   const codes = await issueRecoveryCodes(user.id);
-  if (!codes) return { error: "We couldn't create new codes. Your old ones still work." };
+  if (!codes) return failed(actionError("server_error", msg("Errors.mfa.codesNotCreated")));
 
   await alertTwoFactorChange(user, "mfa.recovery_codes_regenerated", {
-    title: "New recovery codes were generated",
-    body: "Your old recovery codes no longer work. If this wasn't you, change your password now.",
+    title: { key: "Notifications.messages.security.recoveryCodesRegenerated.title" },
+    body: { key: "Notifications.messages.security.recoveryCodesRegenerated.body" },
   });
 
   // The whole settings layout, not just this page: it carries the 2FA state
   // every sensitive form reads (StepUpProvider) and the rail's badge.
   revalidatePath("/settings", "layout");
-  return { success: "New recovery codes ready. Your old ones no longer work.", codes };
+  return { ...succeeded(msg("Settings.security.success.codesRegenerated")), codes };
 }
 
 /**
@@ -586,8 +641,8 @@ export async function confirmIdentity(
   formData: FormData,
 ): Promise<ManageState> {
   const rejected = unknownField(formData, [...STEP_UP_FIELDS]);
-  if (rejected) return { error: rejected };
-  const refused = await requireStepUp(formData);
+  if (rejected) return rejected;
+  const refused = await requireStepUpState(formData);
   if (refused) return refused;
-  return { success: "Confirmed." };
+  return succeeded(msg("Settings.security.success.confirmed"));
 }

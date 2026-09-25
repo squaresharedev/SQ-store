@@ -1,5 +1,6 @@
 "use client";
 
+import { useLocale, useTranslations } from "next-intl";
 import { CompositionBar, formatNumber } from "@/components/charts";
 import type { StatusSlice } from "@/lib/analytics/types";
 import { CHART_HEIGHT } from "@/components/analytics/chart-layout";
@@ -17,12 +18,6 @@ import { TONE } from "@/components/analytics/palette";
 // Presentational only: the parent always passes all four statuses in a fixed
 // order, zeros included.
 
-const STATUS_LABELS: Record<StatusSlice["status"], string> = {
-  paid: "Paid",
-  refunded: "Refunded",
-  disputed: "Disputed",
-  pending: "Pending",
-};
 
 /** The one chart where all three tones appear at once, which is why the mix is
  *  worth reading as a picture: green is money that landed, red is money that
@@ -36,8 +31,10 @@ const STATUS_COLOR_INDEX: Record<StatusSlice["status"], number> = {
 };
 
 export function StatusBreakdown({ statuses }: { statuses: StatusSlice[] }) {
+  const t = useTranslations();
+  const locale = useLocale();
   const items = statuses.map((slice) => ({
-    label: STATUS_LABELS[slice.status],
+    label: t(`Orders.status.${slice.status}`),
     value: slice.count,
     colorIndex: STATUS_COLOR_INDEX[slice.status],
   }));
@@ -49,8 +46,8 @@ export function StatusBreakdown({ statuses }: { statuses: StatusSlice[] }) {
     >
       <CompositionBar
         items={items}
-        valueFormatter={formatNumber}
-        ariaLabel="Order status mix"
+        valueFormatter={(value) => formatNumber(value, locale)}
+        ariaLabel={t("Analytics.sales.orderStatus.ariaLabel")}
       />
     </div>
   );

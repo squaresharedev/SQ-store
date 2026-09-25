@@ -1,0 +1,526 @@
+{
+  "metadata": {
+    "list": {
+      "title": "Productos"
+    },
+    "new": {
+      "title": "Nuevo producto"
+    },
+    "edit": {
+      "title": "Editar producto"
+    },
+    "import": {
+      "title": "Importar productos"
+    }
+  },
+  "page": {
+    "heading": "Productos",
+    "loading": "cargando productos",
+    "back": "Productos",
+    "backToStorefront": "Escaparate",
+    "new": {
+      "title": "Nuevo producto",
+      "subtitle": "Añade un producto y luego colócalo en un escaparate para darle una página."
+    },
+    "edit": {
+      "title": "Editar producto",
+      "subtitle": "Actualiza los detalles, la imagen o el archivo de este producto."
+    },
+    "import": {
+      "heading": "Importar productos",
+      "description": "Trae un catálogo desde Shopify, o desde cualquier herramienta que exporte un CSV. Verás exactamente lo que va a entrar antes de guardar nada."
+    },
+    "formLoading": "Cargando el formulario del producto"
+  },
+  "emptyState": {
+    "title": "Todavía no hay productos",
+    "descriptionWriter": "Añade tu primer producto. Puede quedarse como borrador hasta que quieras darle una página.",
+    "descriptionReadOnly": "Esta tienda todavía no tiene productos.",
+    "add": "Añadir producto"
+  },
+  "status": {
+    "active": "Activo",
+    "draft": "Borrador"
+  },
+  "browser": {
+    "sort": {
+      "default": "Más recientes primero",
+      "unitsSold": "Unidades vendidas",
+      "revenue": "Valor total vendido",
+      "priceHigh": "Precio: de mayor a menor",
+      "priceLow": "Precio: de menor a mayor",
+      "title": "Nombre: A–Z"
+    },
+    "allStatuses": "Todos los estados",
+    "filterLabel": "Ordenar y filtrar productos",
+    "sortResting": "Ordenar",
+    "statusSection": "Estado",
+    "sortSection": "Ordenar por",
+    "clear": "Borrar",
+    "import": "Importar",
+    "add": "Añadir producto",
+    "updating": "Actualizando…",
+    "pagination": "{total, plural, one {{total} producto · página {page} de {pages}} many {{total} productos · página {page} de {pages}} other {{total} productos · página {page} de {pages}}}"
+  },
+  "list": {
+    "noMatch": {
+      "title": "Ningún producto coincide con estos filtros",
+      "body": "Elige un estado distinto o borra los filtros para volver a ver todo.",
+      "clear": "Borrar filtros"
+    },
+    "deleted": "«{title}» se ha eliminado.",
+    "linkCopied": "Enlace copiado.",
+    "copyFailed": "No se ha podido copiar.",
+    "copyFailedUrl": "La URL es: {url}",
+    "notOnStorefront": "Este producto todavía no está en ningún escaparate.",
+    "deleteDialog": {
+      "title": "¿Eliminar este producto?",
+      "description": "{storefronts, plural, =0 {«{title}» y su imagen y archivo subidos se eliminarán permanentemente. Los pedidos existentes conservan su registro de la venta.} one {«{title}» y su imagen y archivo subidos se eliminarán permanentemente. Los pedidos existentes conservan su registro de la venta. Está en {storefronts} escaparate. El bloque se queda ahí hasta que lo quites.} many {«{title}» y su imagen y archivo subidos se eliminarán permanentemente. Los pedidos existentes conservan su registro de la venta. Está en {storefronts} escaparates. Los bloques se quedan ahí hasta que los quites.} other {«{title}» y su imagen y archivo subidos se eliminarán permanentemente. Los pedidos existentes conservan su registro de la venta. Está en {storefronts} escaparates. Los bloques se quedan ahí hasta que los quites.}}",
+      "confirm": "Eliminar producto"
+    },
+    "chooser": {
+      "openTitle": "¿En qué escaparate abrirlo?",
+      "copyTitle": "¿De qué escaparate copiar el enlace?",
+      "description": "{count, plural, one {«{title}» está en {count} escaparate. Elige uno.} many {«{title}» está en {count} escaparates. Elige uno.} other {«{title}» está en {count} escaparates. Elige uno.}}",
+      "hint": "O cancela y usa el editor del escaparate para elegir uno predeterminado."
+    }
+  },
+  "card": {
+    "inStock": "{count, plural, one {{count} en stock} many {{count} en stock} other {{count} en stock}}",
+    "bestseller": "Más vendido",
+    "edit": "Editar {title}",
+    "actions": "Acciones de {title}",
+    "moreActions": "Más acciones para {title}",
+    "notPlaced": "Todavía no está en un escaparate",
+    "copyLinkTitle": "Copiar enlace de la página de producto",
+    "chooseStorefront": "{count, plural, one {En {count} escaparate, haz clic para elegir} many {En {count} escaparates, haz clic para elegir} other {En {count} escaparates, haz clic para elegir}}",
+    "copyLink": "Copiar enlace del producto",
+    "openPage": "Abrir página de producto",
+    "unitsSold": "{count, plural, one {{count} vendido} many {{count} vendidos} other {{count} vendidos}}",
+    "noSales": "Todavía sin ventas"
+  },
+  "removal": {
+    "badge": "Retirado",
+    "badgePaused": "En pausa",
+    "title": "{kind, select, product {SquareShare ha retirado este producto} other {SquareShare ha retirado este escaparate}}",
+    "titlePaused": "{kind, select, product {Este producto está en pausa hasta que lo cambies} other {Este escaparate está en pausa hasta que lo cambies}}",
+    "hidden": "Ya no lo ven los compradores en ningún sitio: ni en su página, ni en una incorporación, ni en un enlace compartido.",
+    "hiddenPaused": "Los compradores no pueden verlo ahora mismo: ni en su página, ni en un embed, ni en un enlace compartido. No se ha eliminado nada, y volverá a estar visible cuando una persona haya revisado tus cambios.",
+    "hiddenRemoved": "Ya no es visible para los compradores en ningún sitio: ni en su página, ni en un embed, ni en un enlace compartido. Es definitivo, así que editarlo no lo hará volver.",
+    "reason": "Motivo",
+    "whatNeedsToChange": "Qué hay que cambiar",
+    "when": "Cuándo",
+    "pausedOn": "En pausa desde el",
+    "statement": "{ground, select, illegal {Bienes o actividades ilegales. Ofrecía algo que no se puede vender legalmente, o usaba el anuncio para gestionarlo.} sexual {Contenido sexual. Contenía material sexual explícito.} violence {Violencia o contenido gráfico. Contenía violencia explícita.} hate {Odio o acoso. Atacaba a una persona o a un grupo, o incluía simbología de odio.} counterfeit {Falsificación o robo. Parecía ofrecer productos falsificados, o una obra que pertenece a otra persona.} scam {Estafa o fraude. Parecía diseñado para cobrar sin entregar lo prometido.} spam {Spam. Era repetitivo o engañoso, y no un anuncio genuino.} other {Otro motivo. Incumplía las normas de la plataforma.}}{noted, select, yes { {note}} other {}}",
+    "statementUnlabelled": "Incumplía las normas de la plataforma.{noted, select, yes { {note}} other {}}",
+    "fixHint": "{kind, select, product {Edita el producto más abajo para corregirlo, guárdalo y vuelve a enviárnoslo.} other {Abre el escaparate para corregirlo, vuelve aquí y envíanoslo.}}",
+    "readOnlyHint": "{kind, select, product {Una persona que pueda editar este producto tiene que hacer el cambio y enviarlo a revisión.} other {Una persona que pueda editar este escaparate tiene que hacer el cambio y enviarlo a revisión.}}",
+    "appeal": "{kind, select, product {Todavía puedes editar este producto. Editarlo no lo restablece: <link>pídenos que lo revisemos de nuevo</link> si crees que fue un error.} other {Todavía puedes editar este escaparate. Editarlo no lo restablece: <link>pídenos que lo revisemos de nuevo</link> si crees que fue un error.}}",
+    "appealPaused": "¿Crees que es un error? <link>Escríbenos</link>.",
+    "appealFinal": "Si crees que nos hemos equivocado, <link>pídenos que lo revisemos de nuevo</link>.",
+    "appealSubject": "{kind, select, product {Apelación: retirada de producto ({title})} other {Apelación: retirada de escaparate ({title})}}",
+    "appealBody": "{kind, select, product {Quiero que se revise de nuevo este producto.\n\nID del producto: {id}\nNombre: {title}\n\nPor qué creo que fue un error:\n} other {Quiero que se revise de nuevo este escaparate.\n\nID del escaparate: {id}\nNombre: {title}\n\nPor qué creo que fue un error:\n}}",
+    "reviewRequest": {
+      "button": "He hecho los cambios, revisadlo",
+      "sent": "Enviado a revisión el <time>{date}</time>. Una persona revisará tus cambios y recibirás la respuesta aquí y por correo.",
+      "failed": "No se ha podido enviar.",
+      "failedFix": "Inténtalo de nuevo en unos instantes."
+    }
+  },
+  "import": {
+    "fields": {
+      "title": "Título",
+      "description": "Descripción",
+      "price": "Precio",
+      "sku": "SKU",
+      "stock": "Stock"
+    },
+    "fileTooLarge": "Ese archivo pesa {size}. Los archivos de importación pueden pesar hasta {max}.",
+    "fileEmpty": "Ese archivo está vacío.",
+    "imported": "{count, plural, one {Se ha importado {count} producto.} many {Se han importado {count} productos.} other {Se han importado {count} productos.}}",
+    "skippedRows": "{count, plural, one {Se ha omitido {count} fila.} many {Se han omitido {count} filas.} other {Se han omitido {count} filas.}}",
+    "dropPrompt": "Suelta un CSV o haz clic para elegir uno",
+    "fileMeta": "{size} · elige otro para empezar de nuevo",
+    "rowsLimit": "{max, plural, one {Hasta {max} producto por archivo} many {Hasta {max} productos por archivo} other {Hasta {max} productos por archivo}}",
+    "summary": "{shopify, select, yes {{ready, plural, one {Exportación de Shopify. <count>{ready}</count> producto listo} many {Exportación de Shopify. <count>{ready}</count> productos listos} other {Exportación de Shopify. <count>{ready}</count> productos listos}}} other {{ready, plural, one {<count>{ready}</count> producto listo} many {<count>{ready}</count> productos listos} other {<count>{ready}</count> productos listos}}}}{skipped, plural, =0 {.} one {, {skipped} omitido.} many {, {skipped} omitidos.} other {, {skipped} omitidos.}}",
+    "foldedVariants": "{count, plural, one {{count} fila de variante se plegó en el producto de arriba. Añade tallas y colores después de importar.} many {{count} filas de variantes se plegaron en los productos de arriba. Añade tallas y colores después de importar.} other {{count} filas de variantes se plegaron en los productos de arriba. Añade tallas y colores después de importar.}}",
+    "droppedRows": "{count, plural, one {{count} fila supera el límite de {max} productos y no se importará. Divide el archivo para incluirla.} many {{count} filas superan el límite de {max} productos y no se importarán. Divide el archivo para incluirlas.} other {{count} filas superan el límite de {max} productos y no se importarán. Divide el archivo para incluirlas.}}",
+    "photosNotImported": "Las fotos no se importan. Los precios, el stock y las descripciones sí se traen; añade las imágenes en cuanto los productos estén aquí.",
+    "currency": "Moneda",
+    "currencyHelp": "Todos los productos importados se valoran en esta moneda.",
+    "importAs": "Importar como",
+    "asDrafts": "Borradores",
+    "asLive": "Productos activos",
+    "draftsHint": "Nada se publica hasta que lo publiques tú.",
+    "liveHint": "Estos aparecen en tu tienda de inmediato.",
+    "columns": "Columnas",
+    "needed": "(obligatoria)",
+    "notSet": "Sin configurar",
+    "skip": "Omitir",
+    "columnFallback": "Columna {number}",
+    "previewHeading": "Qué se va a importar",
+    "previewTitle": "Título",
+    "previewPrice": "Precio",
+    "previewStock": "Stock",
+    "notTracked": "Sin seguimiento",
+    "andMore": "{count, plural, one {y {count} más.} many {y {count} más.} other {y {count} más.}}",
+    "skippedHeading": "Filas que se van a omitir",
+    "skippedRow": "{titled, select, yes {Línea {line} ({title}): {problem}} other {Línea {line}: {problem}}}",
+    "importing": "Importando…",
+    "importedLabel": "Importado",
+    "run": "{count, plural, one {Importar {count} producto} many {Importar {count} productos} other {Importar {count} productos}}",
+    "clear": "Borrar"
+  },
+  "form": {
+    "sections": {
+      "basics": {
+        "label": "Datos básicos",
+        "description": "Qué vendes, con tus propias palabras, y cuánto cuesta.",
+        "about": "Para qué sirve Datos básicos"
+      },
+      "stock": {
+        "label": "Stock",
+        "description": "Ilimitado de forma predeterminada. Actívalo para evitar la sobreventa y mostrar a los compradores las insignias de agotado y «Solo quedan N». El número de alerta es cuándo aparece esa segunda insignia. El límite por pedido es independiente: limita cuántas unidades puede llevarse un comprador de una vez, se controle el stock o no.",
+        "about": "Para qué sirve Stock"
+      },
+      "media": {
+        "label": "Multimedia y entrega"
+      },
+      "shipping": {
+        "label": "Envío",
+        "description": "Se escribe una vez para toda tu tienda, no por producto. Elige un perfil solo si este producto se envía de otra forma.",
+        "about": "Para qué sirve Envío"
+      },
+      "options": {
+        "label": "Opciones",
+        "description": "Colores, tallas, potencias: como varíe este producto. Los compradores eligen una de cada.",
+        "about": "Para qué sirven las Opciones"
+      },
+      "photos": {
+        "label": "Fotos",
+        "description": "Más ángulos para la página de producto. Suelta fotos sobre una opción para mostrarlas solo en ella.",
+        "about": "Para qué sirven las Fotos"
+      },
+      "specs": {
+        "label": "Especificaciones",
+        "description": "Dimensiones, materiales y especificaciones para la página de producto.",
+        "about": "Para qué sirven las Especificaciones"
+      },
+      "documents": {
+        "label": "Documentos",
+        "description": "Certificados, manuales o fichas técnicas que compradores y organismos reguladores pueden consultar antes de comprar.",
+        "about": "Para qué sirven los Documentos"
+      },
+      "safety": {
+        "label": "Seguridad y cumplimiento",
+        "description": "Quién lo fabricó y cómo contactarle. La normativa europea de seguridad de los productos lo exige para bienes físicos.",
+        "about": "Para qué sirve Seguridad y cumplimiento"
+      },
+      "visibility": {
+        "label": "Visibilidad",
+        "description": "Activo está publicado: los compradores pueden verlo y comprarlo al momento. Borrador queda oculto para los compradores hasta que lo cambies.",
+        "about": "Para qué sirve Visibilidad"
+      }
+    },
+    "summary": {
+      "dimensions": "Dimensiones",
+      "weight": "Peso",
+      "materials": "Materiales",
+      "care": "Cuidados",
+      "contents": "Contenido",
+      "specs": "Especificaciones",
+      "madeIn": "Fabricado en",
+      "versions": "{count, plural, one {{count} variante} many {{count} variantes} other {{count} variantes}}",
+      "tracking": "Con seguimiento {quantity}",
+      "setQuantity": "Definir cantidad",
+      "unlimited": "Ilimitado",
+      "maxPerOrder": "Máx. {max} por pedido",
+      "image": "Imagen",
+      "download": "Descarga",
+      "buyLink": "Enlace de compra",
+      "removedProfile": "Perfil eliminado",
+      "storeTerms": "Condiciones de la tienda",
+      "options": "{groups, plural, one {{groups} grupo} many {{groups} grupos} other {{groups} grupos}}, {options, plural, one {{options} opción} many {{options} opciones} other {{options} opciones}}",
+      "photos": "{count, plural, one {{count} foto} many {{count} fotos} other {{count} fotos}}",
+      "documents": "{count, plural, one {{count} documento} many {{count} documentos} other {{count} documentos}}",
+      "started": "Empezado",
+      "active": "Activo",
+      "draft": "Borrador"
+    },
+    "errors": {
+      "titleRequired": "Ponle un título a tu producto: es lo primero que ven los compradores.",
+      "stockRequired": "Indica cuántas unidades hay en stock, o desactiva Controlar stock para dejarlo ilimitado.",
+      "stockWhole": "El stock debe ser un número entero: 0 o más, sin decimales.",
+      "lowStockWhole": "La alerta de stock bajo debe ser un número entero de 0 o más.",
+      "maxPerOrderRequired": "Indica cuántas unidades puede pedir un comprador: de 1 a {max}.",
+      "maxPerOrderRange": "El máximo por pedido debe ser un número entero de 1 a {max}.",
+      "purchaseUrl": "El enlace de compra debe ser una dirección https:// completa.",
+      "optionGroupUnnamed": "Indica qué varía en cada grupo de opciones, o elimínalo.",
+      "optionGroupEmpty": "Añade al menos una opción de {group}, o elimina el grupo.",
+      "optionUnnamed": "Ponle un nombre a cada opción, o elimina la fila vacía.",
+      "optionGroupFull": "Un grupo de opciones puede tener hasta {max} opciones.",
+      "versionSpecs": "{count, plural, one {Hay que corregir las especificaciones propias de una variante.} many {Hay que corregir las especificaciones propias de {count} variantes.} other {Hay que corregir las especificaciones propias de {count} variantes.}}",
+      "measure": "Usa un número, como 12 o 3,5.",
+      "specValue": "Cada especificación necesita un valor.",
+      "manufacturerName": "Indica el nombre del fabricante.",
+      "manufacturerAddress": "Añade la dirección postal del fabricante.",
+      "manufacturerEmail": "Añade un correo de contacto del fabricante.",
+      "responsibleEmail": "Eso no parece una dirección de correo.",
+      "price": {
+        "empty": "Indica un precio antes de guardar.",
+        "notPositive": "El precio debe ser un número mayor que cero.",
+        "tooManyDecimals": "Los precios pueden tener como máximo dos decimales.",
+        "tooHigh": "El precio no puede superar {currency} {max}."
+      }
+    },
+    "title": "Título",
+    "titlePlaceholder": "p. ej. Ambient Loops Vol. 1",
+    "description": "Descripción",
+    "optional": "(opcional)",
+    "descriptionPlaceholder": "¿Qué es, y qué recibe el comprador?",
+    "displayImage": "Imagen principal",
+    "displayImageAbout": "Dónde se usa la imagen principal",
+    "displayImageHelp": "Se muestra en tu escaparate y en las incorporaciones.",
+    "digitalFile": "Archivo digital",
+    "digitalFileAbout": "Qué es el archivo digital",
+    "digitalFileHelp": "El archivo que descarga el comprador tras la compra. Añadir uno convierte esto en una descarga, así que dejan de aplicarse el envío y la seguridad del producto.",
+    "purchaseLink": "Enlace de compra",
+    "purchaseLinkAbout": "Adónde lleva el botón de compra",
+    "purchaseLinkHelp": "El botón de compra de la página de producto sigue este enlace. Si no hay ninguno, escribe en su lugar a la dirección de contacto de tu tienda.",
+    "purchaseLinkPlaceholder": "p. ej. https://tu-tienda.example/checkout/este-producto",
+    "statusLabel": "Estado del producto",
+    "problems": "{count, plural, one {{count} cosa por corregir antes de guardar} many {{count} cosas por corregir antes de guardar} other {{count} cosas por corregir antes de guardar}}",
+    "jumpToFirst": "Ir a la primera",
+    "uploading": "{what, select, image {Subiendo imagen…} photo {Subiendo foto…} document {Subiendo documento…} other {Subiendo archivo…}}",
+    "processing": "{what, select, image {Procesando imagen…} photo {Procesando foto…} document {Procesando documento…} other {Procesando archivo…}}",
+    "uploadingLabel": "{what, select, image {Subiendo imagen} photo {Subiendo foto} document {Subiendo documento} other {Subiendo archivo}}",
+    "processingLabel": "{what, select, image {Procesando imagen} photo {Procesando foto} document {Procesando documento} other {Procesando archivo}}",
+    "saveChanges": "Guardar cambios",
+    "saveProduct": "Guardar producto",
+    "savedToast": "«{title}» se ha guardado.",
+    "addedToast": "«{title}» se ha añadido a tus productos.",
+    "documentFallbackLabel": "Documento",
+    "discard": {
+      "title": "¿Descartar tus cambios?",
+      "editDescription": "Los cambios que has hecho en este producto todavía no se han guardado.",
+      "newDescription": "Este producto todavía no se ha guardado, así que no se conservará nada.",
+      "discard": "Descartar"
+    },
+    "nav": {
+      "label": "Secciones del formulario",
+      "heading": "En esta página"
+    }
+  },
+  "stockFields": {
+    "trackStock": "Controlar stock",
+    "inStock": "En stock",
+    "decrease": "Reducir stock",
+    "increase": "Aumentar stock",
+    "lowStockAlert": "Alerta de stock bajo en",
+    "maxPerOrder": "Máximo por pedido",
+    "maxPerOrderHint": "Cuántas unidades puede llevarse un comprador de una vez. Los compradores eligen de una lista que se detiene aquí, y el límite se vuelve a comprobar al pedir. Hasta {max}; con 1 se venden de una en una."
+  },
+  "priceField": {
+    "label": "Precio",
+    "placeholder": "p. ej. 9,00",
+    "currency": "Moneda"
+  },
+  "shippingField": {
+    "usual": "Tus condiciones de envío habituales",
+    "usualDescription": "Se configura una vez para tu cuenta. Lo que quiere casi cualquier producto.",
+    "removed": "Perfil eliminado",
+    "removedDescription": "Este perfil ya no existe, así que los compradores ven tus condiciones predeterminadas.",
+    "untitled": "Perfil sin nombre",
+    "profileNoTerms": "Todavía no se han escrito condiciones para este perfil.",
+    "noTerms": "Todavía no se han escrito condiciones de envío.",
+    "profile": "Perfil de envío",
+    "edit": "Editar",
+    "modalTitle": "Envíos y devoluciones"
+  },
+  "optionsField": {
+    "display": {
+      "swatch": "Muestras de color",
+      "chip": "Chips",
+      "select": "Desplegable"
+    },
+    "displayHint": {
+      "swatch": "Círculos de color. Dale una muestra a cada opción, o los compradores verán su primera letra.",
+      "chip": "Botones de texto, para valores que los compradores leen: tallas, potencias, longitudes.",
+      "select": "Un desplegable. Mejor cuando hay más valores de los que caben como botones."
+    },
+    "presets": {
+      "colour": {
+        "name": "Color",
+        "placeholder": "Azul medianoche"
+      },
+      "size": {
+        "name": "Talla",
+        "placeholder": "Mediana"
+      },
+      "material": {
+        "name": "Material",
+        "placeholder": "Roble macizo"
+      },
+      "capacity": {
+        "name": "Capacidad",
+        "placeholder": "500 ml"
+      },
+      "powerOutput": {
+        "name": "Potencia",
+        "placeholder": "750 W"
+      },
+      "length": {
+        "name": "Longitud",
+        "placeholder": "2 m"
+      },
+      "style": {
+        "name": "Estilo",
+        "placeholder": "Ajuste ancho"
+      },
+      "finish": {
+        "name": "Acabado",
+        "placeholder": "Latón cepillado"
+      }
+    },
+    "sharedPriceNote": "Todas las variantes comparten un mismo precio y nivel de stock.",
+    "addFirst": "¿Se vende en más de una variante?",
+    "addAnother": "Añadir otra forma en que varía",
+    "somethingElse": "Otra cosa",
+    "groupsFull": "{max, plural, one {Ese es el límite: {max} grupo de opciones.} many {Ese es el límite: {max} grupos de opciones.} other {Ese es el límite: {max} grupos de opciones.}}",
+    "optionsFull": "{max, plural, one {Ese es el límite: {max} opción.} many {Ese es el límite: {max} opciones.} other {Ese es el límite: {max} opciones.}}",
+    "whatVaries": "Qué varía",
+    "whatVariesPlaceholder": "¿Qué varía? p. ej. Potencia",
+    "optionCount": "{count, plural, one {{count} opción} many {{count} opciones} other {{count} opciones}}",
+    "moveGroupEarlier": "{named, select, yes {Mover {name} antes} other {Mover el grupo de opciones {position} antes}}",
+    "moveGroupLater": "{named, select, yes {Mover {name} después} other {Mover el grupo de opciones {position} después}}",
+    "removeGroup": "{named, select, yes {Eliminar {name}} other {Eliminar el grupo de opciones {position}}}",
+    "howBuyersPick": "{named, select, yes {Cómo eligen los compradores {name}} other {Cómo eligen los compradores el grupo de opciones {position}}}",
+    "howBuyersPickAbout": "Cómo lo eligen los compradores",
+    "swatchColumn": "Color",
+    "nameColumn": "Nombre",
+    "groupOptionsList": "{named, select, yes {Opciones de {name}} other {Opciones del grupo de opciones {position}}}",
+    "swatchFor": "{named, select, yes {Color de {name}} other {Color de la opción {position}}}",
+    "noSwatch": "Sin muestra",
+    "optionLabel": "{named, select, yes {{name}, opción {position}} other {Grupo de opciones {groupPosition}, opción {position}}}",
+    "optionPlaceholder": "Opción {position}",
+    "available": "{named, select, yes {{name} está disponible} other {la opción {position} está disponible}}",
+    "moveOptionEarlier": "{named, select, yes {Mover {name} antes} other {Mover la opción {position} antes}}",
+    "moveOptionLater": "{named, select, yes {Mover {name} después} other {Mover la opción {position} después}}",
+    "removeOption": "{named, select, yes {Eliminar {name}} other {Eliminar la opción {position}}}",
+    "swatchConflict": "{names} comparten la primera letra y ninguna tiene color. Los compradores verán cuadros idénticos. Dale un color a cada una.",
+    "addOptions": "Añadir opciones",
+    "addOptionsAbout": "Cómo añadir varias opciones a la vez",
+    "addOptionsHelp": "Pulsa Intro después de cada una, o pega una lista (por ejemplo «S, M, L, XL», o una columna copiada de una hoja de cálculo) para añadirlas todas a la vez.",
+    "noRoom": "No hay sitio para más opciones",
+    "draftPlaceholder": "{preset, select, yes {{example}, o pega una lista} other {Primera opción, o pega una lista}}",
+    "add": "Añadir",
+    "useNoSwatch": "Usar Sin muestra"
+  },
+  "galleryField": {
+    "tooMany": "Un producto puede tener hasta {max} fotos adicionales.",
+    "wrongType": "Usa imágenes PNG, JPG, WEBP, GIF o AVIF.",
+    "tooLarge": "Cada foto debe pesar menos de {max} MB.",
+    "roomLeft": "{count, plural, one {Solo cabe {count} foto más.} many {Solo caben {count} fotos más.} other {Solo caben {count} fotos más.}}",
+    "everyVersion": "Todas las variantes",
+    "photos": "Fotos",
+    "unnamedOption": "Opción sin nombre",
+    "options": "Opciones",
+    "target": "{groupNamed, select, yes {{optionNamed, select, yes {{group}: {option}} other {{group}: opción sin nombre}}} other {{optionNamed, select, yes {Opciones: {option}} other {Opciones: opción sin nombre}}}}",
+    "moveToEveryVersion": "Mover a: Todas las variantes",
+    "moveToOption": "{groupNamed, select, yes {{optionNamed, select, yes {Mover a: {group}: {option}} other {Mover a: {group}: opción sin nombre}}} other {{optionNamed, select, yes {Mover a: Opciones: {option}} other {Mover a: Opciones: opción sin nombre}}}}",
+    "photoCount": "{count, plural, one {{count} foto} many {{count} fotos} other {{count} fotos}}",
+    "removePhoto": "Quitar foto",
+    "movePhotoEarlier": "Mover foto antes",
+    "movePhotoLater": "Mover foto después",
+    "altPlaceholder": "Texto alternativo",
+    "altLabel": "Describe esta foto, para quien no pueda verla",
+    "versionLabel": "Para qué variante se muestra esta foto",
+    "tally": "{max, plural, one {{count} de {max} foto} many {{count} de {max} fotos} other {{count} de {max} fotos}}",
+    "orderAbout": "Cómo se ordenan estas fotos",
+    "orderHelp": "La imagen principal de Multimedia y entrega siempre va primero. Después, las fotos se muestran en el orden en que aparecen aquí.",
+    "limitReached": "Límite alcanzado",
+    "dropOrClick": "Suelta o haz clic"
+  },
+  "optionSpecsField": {
+    "heading": "Distinto para cada variante",
+    "about": "Cómo funcionan las especificaciones por variante",
+    "help": "Aquí van las tallas y pesos que cambian según la variante. Lo que dejes en blanco usa lo que rellenaste arriba, así que indica solo lo que realmente cambia. Los compradores ven los valores de la variante que han elegido.",
+    "unnamedOption": "Opción sin nombre",
+    "options": "Opciones",
+    "sameAsAbove": "Igual que arriba",
+    "length": "Longitud",
+    "width": "Anchura",
+    "height": "Altura",
+    "weight": "Peso",
+    "specsList": "{named, select, yes {Especificaciones de {option}} other {Especificaciones de la opción sin nombre}}",
+    "specName": "Nombre, p. ej. Asientos",
+    "specValue": "Valor, p. ej. 6",
+    "specNameLabel": "{named, select, yes {Nombre de la especificación {number} de {option}} other {Nombre de la especificación {number} de la opción sin nombre}}",
+    "specValueLabel": "{named, select, yes {Valor de la especificación {number} de {option}} other {Valor de la especificación {number} de la opción sin nombre}}",
+    "removeSpec": "{named, select, yes {Eliminar la especificación {number} de {option}} other {Eliminar la especificación {number} de la opción sin nombre}}",
+    "addSpec": "Especificación para esta variante",
+    "replacesNote": "Una especificación con el mismo nombre que una de arriba la sustituye para esa variante."
+  },
+  "detailsFields": {
+    "dimensions": "Dimensiones",
+    "length": "Longitud",
+    "width": "Anchura",
+    "height": "Altura",
+    "unit": "Unidad",
+    "weight": "Peso",
+    "materials": "Materiales",
+    "materialsPlaceholder": "p. ej. Roble macizo, herrajes de latón",
+    "madeIn": "Fabricado en",
+    "madeInPlaceholder": "País de origen",
+    "care": "Instrucciones de cuidado",
+    "included": "Qué incluye",
+    "includedPlaceholder": "Un artículo por línea\np. ej. 1 × lámpara\n1 × cable de 2 m",
+    "specifications": "Especificaciones",
+    "specName": "Nombre, p. ej. Potencia",
+    "specValue": "Valor, p. ej. 40 W",
+    "specNameLabel": "Nombre de la especificación {number}",
+    "specValueLabel": "Valor de la especificación {number}",
+    "removeSpec": "Eliminar especificación {number}",
+    "addSpec": "Añadir especificación"
+  },
+  "safetyFields": {
+    "manufacturer": "Fabricante",
+    "manufacturerEmail": "Correo del fabricante",
+    "manufacturerAddress": "Dirección del fabricante",
+    "responsibleName": "Persona responsable en la UE",
+    "responsibleNameAbout": "Sobre la persona responsable en la UE",
+    "responsibleNameHint": "Solo cuando el fabricante está fuera de la UE.",
+    "responsibleEmail": "Correo de la persona responsable",
+    "responsibleAddress": "Dirección de la persona responsable",
+    "identifier": "Tipo, lote o número de serie",
+    "warnings": "Advertencias e información de seguridad"
+  },
+  "documentsField": {
+    "tooMany": "Un producto puede tener hasta {max} documentos.",
+    "wrongType": "Usa un PDF para certificados, manuales y otros documentos.",
+    "tooLarge": "«{name}» es demasiado grande. Los documentos deben pesar menos de {max} MB.",
+    "roomLeft": "{count, plural, one {Solo cabe {count} documento más.} many {Solo caben {count} documentos más.} other {Solo caben {count} documentos más.}}",
+    "fallbackLabel": "Documento",
+    "list": "Documentos",
+    "nameLabel": "Nombre del documento, mostrado a los compradores",
+    "namePlaceholder": "p. ej. Ficha de datos de seguridad",
+    "remove": "{named, select, yes {Eliminar {name}} other {Eliminar documento}}",
+    "limitReached": "Límite alcanzado",
+    "dropPrompt": "Suelta PDF o haz clic para subir",
+    "tally": "{max, plural, one {{count} de {max} documento · PDF, hasta {maxMb} MB cada uno} many {{count} de {max} documentos · PDF, hasta {maxMb} MB cada uno} other {{count} de {max} documentos · PDF, hasta {maxMb} MB cada uno}}"
+  },
+  "imageDropzone": {
+    "wrongType": "Usa una imagen PNG, JPG, WEBP, GIF o AVIF.",
+    "tooLarge": "La imagen debe pesar menos de {max} MB.",
+    "previewAlt": "Vista previa de la imagen principal",
+    "dropPrompt": "Suelta una imagen o haz clic para subir",
+    "hint": "PNG, JPG, WEBP, GIF o AVIF, hasta {max} MB",
+    "remove": "Quitar imagen principal"
+  },
+  "fileDropzone": {
+    "currentFile": "Archivo actual",
+    "dropPrompt": "Suelta un archivo o haz clic para subir",
+    "hint": "ZIP, PDF y similares, hasta {max} MB",
+    "remove": "Quitar archivo digital"
+  }
+}

@@ -2,6 +2,8 @@
 
 import { useEffect, useId, useMemo, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
+import type { Locale } from "@/i18n/locales";
 import {
   Boxes,
   Eye,
@@ -43,12 +45,14 @@ import {
   type DocumentFormValue,
   type GalleryFormImage,
   type OptionDetailsFormValues,
+  type ProductsTranslator,
 } from "./form-values";
 import { unexpectedError, type ActionError } from "@/lib/errors";
 import { createProduct, updateProduct } from "@/lib/products/actions";
 import { UploadError, uploadToR2 } from "@/lib/products/upload";
 import { SaveButton, type SaveResult } from "@/components/ui/SaveButton";
 import { useToast } from "@/components/ui/Toast";
+import type { MessageRef } from "@/i18n/types";
 import {
   collectOptionIds,
   type ProductWriteInput,
@@ -56,13 +60,18 @@ import {
   PRICE_CENTS_MAX,
   PURCHASE_QUANTITY_MAX,
 } from "@/lib/validation/product";
-import { ActionErrorNotice } from "@/components/ui/ActionErrorNotice";
+import {
+  ActionErrorNotice,
+  useActionErrorToast,
+  useResolveMessage,
+} from "@/components/ui/ActionErrorNotice";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { Modal } from "@/components/ui/modal";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { useUnsavedChangesGuard } from "@/lib/hooks/useUnsavedChangesGuard";
 import { useNavigationBlocker } from "@/lib/hooks/useNavigationBlocker";
 import { parseFormPriceCents, priceErrorMessage } from "@/lib/products/price";
+import { formatPercent } from "@/lib/format/intl";
 import {
   destructiveButtonClass,
   errorTextClass,
@@ -80,9 +89,12 @@ import { FormSection } from "./FormSection";
 import { FormSectionNav } from "./FormSectionNav";
 import { ProductFormSnapshotScript } from "./ProductFormSnapshotScript";
 import {
-  PRODUCT_FORM_SECTIONS,
   buildProductFormSnapshot,
+  sectionLabel,
+  sectionSummaries,
+  summaryText,
   type ProductFormSectionId,
+  type ProductFormStateInput,
 } from "@/lib/products/form-datapoints";
 import { PriceField } from "./PriceField";
 import { ImageDropzone } from "./ImageDropzone";
@@ -106,12 +118,9 @@ const NO_SHIPPING_CHOICES: ShippingChoices = {
   editHref: SHIPPING_SETTINGS_HREF,
 };
 
-const STATUS_OPTIONS: readonly { value: ProductStatus; label: string }[] = [
-  // Active first: it is the default for new products — a seller adding a
-  // product almost always wants it on sale immediately.
-  { value: "active", label: "Active" },
-  { value: "draft", label: "Draft" },
-];
+// Active first: it is the default for new products — a seller adding a
+// product almost always wants it on sale immediately.
+const STATUS_ORDER: readonly ProductStatus[] = ["active", "draft"];
 
 /** Long enough to read the green check before the list replaces the form. */
 const SAVED_HOLD_MS = 1100;
@@ -188,29 +197,34 @@ function initialValues(product?: Product, canPublish = true): ProductFormValues 
 // Client-side validation is for UX feedback only. It is NOT a security
 // boundary: the server actions re-validate everything with Zod
 // (lib/validation/product.ts) before any write.
-function validate(values: ProductFormValues): FieldErrors {
+function validate(
+  values: ProductFormValues,
+  t: ProductsTranslator,
+  resolve: (ref: MessageRef) => string,
+  locale: Locale,
+): FieldErrors {
   const errors: FieldErrors = {};
 
   if (!values.title.trim()) {
-    errors.title = "Give your product a title — buyers see it first.";
+    errors.title = t("form.errors.titleRequired");
   }
 
   const priceResult = parseFormPriceCents(values.price);
   if (!priceResult.ok) {
-    errors.price = priceErrorMessage(priceResult.error, values.currency, PRICE_CENTS_MAX);
+    errors.price = resolve(
+      priceErrorMessage(priceResult.error, values.currency, PRICE_CENTS_MAX, locale),
+    );
   }
 
   if (values.trackStock) {
     const trimmedQty = values.stockQuantity.trim();
     if (!trimmedQty) {
-      errors.stockQuantity =
-        "Enter how many units are in stock, or turn Track stock off for unlimited.";
+      errors.stockQuantity = t("form.errors.stockRequired");
     } else if (
       !Number.isInteger(Number(trimmedQty)) ||
       Number(trimmedQty) < 0
     ) {
-      errors.stockQuantity =
-        "Stock must be a whole number — 0 or more, with no decimals.";
+      errors.stockQuantity = t("form.errors.stockWhole");
     }
   }
 
@@ -220,8 +234,7 @@ function validate(values: ProductFormValues): FieldErrors {
       !Number.isInteger(Number(trimmedThreshold)) ||
       Number(trimmedThreshold) < 0
     ) {
-      errors.lowStockThreshold =
-        "The low-stock alert must be a whole number of 0 or more.";
+      errors.lowStockThreshold = t("form.errors.lowStockWhole");
     }
   }
 
@@ -230,38 +243,44 @@ function validate(values: ProductFormValues): FieldErrors {
   // having cleared it rather than a seller who has not answered yet.
   const trimmedMax = values.maxPerOrder.trim();
   if (!trimmedMax) {
-    errors.maxPerOrder = `Enter how many one buyer can order — 1 to ${PURCHASE_QUANTITY_MAX}.`;
+    errors.maxPerOrder = t("form.errors.maxPerOrderRequired", { max: PURCHASE_QUANTITY_MAX });
   } else if (
     !Number.isInteger(Number(trimmedMax)) ||
     Number(trimmedMax) < 1 ||
     Number(trimmedMax) > PURCHASE_QUANTITY_MAX
   ) {
-    errors.maxPerOrder = `The maximum per order must be a whole number from 1 to ${PURCHASE_QUANTITY_MAX}.`;
+    errors.maxPerOrder = t("form.errors.maxPerOrderRange", { max: PURCHASE_QUANTITY_MAX });
   }
 
   return errors;
 }
 
 /** The page-detail fields' own UX checks; the server re-parses with Zod. */
-function validatePage(purchaseUrl: string, optionGroups: ProductOptionGroup[]): FieldErrors {
+function validatePage(
+  purchaseUrl: string,
+  optionGroups: ProductOptionGroup[],
+  t: ProductsTranslator,
+): FieldErrors {
   const errors: FieldErrors = {};
   const link = purchaseUrl.trim();
   if (link && !/^https:\/\/[^\s/$.?#].[^\s]*$/i.test(link)) {
-    errors.purchaseUrl = "The purchase link must be a full https:// address.";
+    errors.purchaseUrl = t("form.errors.purchaseUrl");
   }
   // Each message names the ONE thing to fix, in the order a seller would hit
   // them: an unnamed axis, an axis with nothing to pick, then an unnamed
   // choice. The schema refuses all three, but a rejected save that only says
   // "didn't pass validation" is not a fix.
   if (optionGroups.some((group) => !group.name.trim())) {
-    errors.optionGroups = "Say what each option group varies, or remove it.";
+    errors.optionGroups = t("form.errors.optionGroupUnnamed");
   } else if (optionGroups.some((group) => group.options.length === 0)) {
     const empty = optionGroups.find((group) => group.options.length === 0)!;
-    errors.optionGroups = `Add at least one ${empty.name.trim().toLowerCase()} option, or remove the group.`;
+    errors.optionGroups = t("form.errors.optionGroupEmpty", {
+      group: empty.name.trim().toLowerCase(),
+    });
   } else if (optionGroups.some((group) => group.options.some((option) => !option.name.trim()))) {
-    errors.optionGroups = "Give every option a name, or remove the empty row.";
+    errors.optionGroups = t("form.errors.optionUnnamed");
   } else if (optionGroups.some((group) => group.options.length > OPTIONS_PER_GROUP_MAX)) {
-    errors.optionGroups = `An option group can have up to ${OPTIONS_PER_GROUP_MAX} options.`;
+    errors.optionGroups = t("form.errors.optionGroupFull", { max: OPTIONS_PER_GROUP_MAX });
   }
   return errors;
 }
@@ -407,8 +426,13 @@ export function ProductForm({
   returnTo?: string | null;
 }) {
   const router = useRouter();
+  const t = useTranslations("Products");
+  const locale = useLocale();
+  const tCommon = useTranslations("Common.actions");
   const fieldId = useId();
   const toast = useToast();
+  const showActionError = useActionErrorToast();
+  const resolveMessage = useResolveMessage();
 
   const canPublish = missingTraderDetails.length === 0;
 
@@ -549,7 +573,7 @@ export function ProductForm({
   // an assistant reads. One computation, so the two cannot disagree about
   // what this product has (see lib/products/form-datapoints.ts).
   const invalidSections = sectionsWithErrors(errors, detailsErrors);
-  const snapshot = buildProductFormSnapshot({
+  const formState: ProductFormStateInput = {
     mode: product ? "edit" : "create",
     productId: product?.id ?? null,
     values,
@@ -567,7 +591,11 @@ export function ProductForm({
     isDigital,
     dirty,
     invalidSections,
-  });
+  };
+  const snapshot = buildProductFormSnapshot(formState);
+  // The same summary parts the snapshot states in English, for the seller in
+  // their own language.
+  const summaries = sectionSummaries(formState);
   /** The section entries by id, so each card can be handed its own summary. */
   const sectionInfo = Object.fromEntries(
     snapshot.sections.map((section) => [section.id, section]),
@@ -580,7 +608,10 @@ export function ProductForm({
     setValues((previous) => {
       const next = { ...previous, [key]: value };
       if (submitAttempted) {
-        setErrors({ ...validate(next), ...validatePage(purchaseUrl, optionGroups) });
+        setErrors({
+          ...validate(next, t, resolveMessage, locale),
+          ...validatePage(purchaseUrl, optionGroups, t),
+        });
       }
       return next;
     });
@@ -588,12 +619,16 @@ export function ProductForm({
 
   function updateOptionGroups(next: ProductOptionGroup[]) {
     setOptionGroups(next);
-    if (submitAttempted) setErrors({ ...validate(values), ...validatePage(purchaseUrl, next) });
+    if (submitAttempted) {
+      setErrors({ ...validate(values, t, resolveMessage, locale), ...validatePage(purchaseUrl, next, t) });
+    }
   }
 
   function updatePurchaseUrl(next: string) {
     setPurchaseUrl(next);
-    if (submitAttempted) setErrors({ ...validate(values), ...validatePage(next, optionGroups) });
+    if (submitAttempted) {
+      setErrors({ ...validate(values, t, resolveMessage, locale), ...validatePage(next, optionGroups, t) });
+    }
   }
 
   function updateDetails(next: DetailsFormValues) {
@@ -621,14 +656,11 @@ export function ProductForm({
     nextDetails: DetailsFormValues,
     nextByOption: Record<string, OptionDetailsFormValues>,
   ): { flat: DetailsFieldErrors; byOption: Record<string, string> } {
-    const byOption = validateOptionDetails(nextByOption, collectOptionIds(optionGroups));
-    const flat = validateDetails(nextDetails, isDigital);
+    const byOption = validateOptionDetails(nextByOption, collectOptionIds(optionGroups), t);
+    const flat = validateDetails(nextDetails, isDigital, t);
     const count = Object.keys(byOption).length;
     if (count > 0) {
-      flat.optionDetails =
-        count === 1
-          ? "One version's own specifications need fixing."
-          : `${count} versions' own specifications need fixing.`;
+      flat.optionDetails = t("form.errors.versionSpecs", { count });
     }
     return { flat, byOption };
   }
@@ -647,7 +679,10 @@ export function ProductForm({
     setSubmitError(null);
     setSaveResult(null);
 
-    const foundErrors = { ...validate(values), ...validatePage(purchaseUrl, optionGroups) };
+    const foundErrors = {
+      ...validate(values, t, resolveMessage, locale),
+      ...validatePage(purchaseUrl, optionGroups, t),
+    };
     setErrors(foundErrors);
     const found = detailErrorsFor(details, optionDetails);
     const foundDetailErrors = found.flat;
@@ -721,7 +756,10 @@ export function ProductForm({
               )
             : null);
         if (!key) continue;
-        documentsInput.push({ key, label: document.label.trim() || "Document" });
+        documentsInput.push({
+          key,
+          label: document.label.trim() || t("form.documentFallbackLabel"),
+        });
       }
       setUpload(null);
 
@@ -785,10 +823,8 @@ export function ProductForm({
         : await createProduct(input);
       if (!result.ok) {
         setSubmitError(result.error);
-        setSaveResult({ error: result.error.message });
-        toast.error(result.error.message, {
-          lines: result.error.fix ? [result.error.fix] : undefined,
-        });
+        setSaveResult({ error: resolveMessage(result.error.message) });
+        showActionError(result.error);
         return false;
       }
 
@@ -799,14 +835,14 @@ export function ProductForm({
       // meant the only evidence a save had worked was the list happening to
       // change — nothing ever said "saved", which is indistinguishable from a
       // no-op when the thing you were checking (an image) is easy to miss.
-      setSaveResult({ success: "Saved" });
+      setSaveResult({ success: tCommon("saved") });
       // Raised BEFORE the redirect on purpose: the toast provider lives at the
       // root layout, so this survives the navigation and lands on the product
       // list — where the seller can see the row it is talking about.
       toast.success(
         product
-          ? `"${input.title}" was saved.`
-          : `"${input.title}" was added to your products.`,
+          ? t("form.savedToast", { title: input.title })
+          : t("form.addedToast", { title: input.title }),
       );
       redirectTimer.current = window.setTimeout(() => {
         // No router.refresh() alongside this: both server actions already
@@ -822,10 +858,8 @@ export function ProductForm({
           ? error.info
           : unexpectedError(error instanceof Error ? error.message : undefined);
       setSubmitError(info);
-      setSaveResult({ error: info.message });
-      toast.error(info.message, {
-        lines: info.fix ? [info.fix] : undefined,
-      });
+      setSaveResult({ error: resolveMessage(info.message) });
+      showActionError(info);
       return false;
     } finally {
       setSubmitting(false);
@@ -869,17 +903,16 @@ export function ProductForm({
 
   /** Every section card gets its id, its live summary and its state from the
    *  one snapshot, so a header and the rail can never say different things. */
-  const section = (id: ProductFormSectionId) => {
-    const entry = PRODUCT_FORM_SECTIONS.find((candidate) => candidate.id === id)!;
-    return {
-      id,
-      // One copy of the description, in the registry the snapshot reads from,
-      // so the "?" and the machine-readable section can never disagree.
-      description: entry.description,
-      state: sectionInfo[id]?.state ?? ("empty" as const),
-      summary: sectionInfo[id]?.summary,
-    };
-  };
+  const section = (id: ProductFormSectionId) => ({
+    id,
+    title: resolveMessage(sectionLabel(id)),
+    // Media has no description, and so no "?": its three fields each carry
+    // their own, and a fourth restating them in the header is noise.
+    description: id === "media" ? "" : t(`form.sections.${id}.description`),
+    about: id === "media" ? "" : t(`form.sections.${id}.about`),
+    state: sectionInfo[id]?.state ?? ("empty" as const),
+    summary: sectionInfo[id] ? summaryText(summaries[id], resolveMessage) : undefined,
+  });
 
   return (
     <div
@@ -903,13 +936,12 @@ export function ProductForm({
         // called Details, so the form had two identically named headings and
         // two sections with the same accessible name. On a page you scan by
         // heading, that is the worst possible collision.
-        title="Basics"
       >
         <div className="space-y-5">
           <div className="space-y-1.5">
             <div className="flex items-center">
               <label htmlFor={`${fieldId}-title`} className={labelClass}>
-                Title
+                {t("form.title")}
               </label>
               <RequiredMark />
             </div>
@@ -919,7 +951,7 @@ export function ProductForm({
               type="text"
               value={values.title}
               onChange={(event) => updateField("title", event.target.value)}
-              placeholder="e.g. Ambient Loops Vol. 1"
+              placeholder={t("form.titlePlaceholder")}
               required
               aria-invalid={errors.title ? true : undefined}
               aria-describedby={errors.title ? titleErrorId : undefined}
@@ -935,9 +967,9 @@ export function ProductForm({
 
           <div className="space-y-1.5">
             <label htmlFor={`${fieldId}-description`} className={labelClass}>
-              Description{" "}
+              {t("form.description")}{" "}
               <span className="font-normal text-muted-foreground">
-                (optional)
+                {t("form.optional")}
               </span>
             </label>
             <textarea
@@ -945,7 +977,7 @@ export function ProductForm({
               value={values.description}
               onChange={(event) => updateField("description", event.target.value)}
               rows={4}
-              placeholder="What is it, and what does the buyer get?"
+              placeholder={t("form.descriptionPlaceholder")}
               data-product-field="description"
               className={cn(fieldBaseClass, "resize-y")}
             />
@@ -972,7 +1004,6 @@ export function ProductForm({
       <FormSection
         {...section("stock")}
         icon={Boxes}
-        title="Stock"
       >
         <StockFields
           values={{
@@ -1004,8 +1035,8 @@ export function ProductForm({
                 const next = { ...previous, trackStock: checked, ...stockQuantityUpdate };
                 if (submitAttempted) {
                   setErrors({
-                    ...validate(next),
-                    ...validatePage(purchaseUrl, optionGroups),
+                    ...validate(next, t, resolveMessage, locale),
+                    ...validatePage(purchaseUrl, optionGroups, t),
                   });
                 }
                 return next;
@@ -1020,16 +1051,15 @@ export function ProductForm({
       <FormSection
         {...section("media")}
         icon={ImageIcon}
-        title="Media and delivery"
       >
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           <div className="space-y-1.5">
             <div className="flex items-center gap-1.5">
               <label htmlFor={`${fieldId}-image`} className={labelClass}>
-                Display image
+                {t("form.displayImage")}
               </label>
-              <InfoTip label="Where the display image is used">
-                Shown on your storefront and embeds.
+              <InfoTip label={t("form.displayImageAbout")}>
+                {t("form.displayImageHelp")}
               </InfoTip>
             </div>
             <ImageDropzone
@@ -1042,11 +1072,10 @@ export function ProductForm({
           <div className="space-y-1.5">
             <div className="flex items-center gap-1.5">
               <label htmlFor={`${fieldId}-file`} className={labelClass}>
-                Digital file
+                {t("form.digitalFile")}
               </label>
-              <InfoTip label="What the digital file is">
-                The file your buyer downloads after purchase. Adding one makes
-                this a download, so shipping and product-safety stop applying.
+              <InfoTip label={t("form.digitalFileAbout")}>
+                {t("form.digitalFileHelp")}
               </InfoTip>
             </div>
             <FileDropzone
@@ -1067,11 +1096,10 @@ export function ProductForm({
         <div className="mt-6 space-y-1.5">
           <div className="flex items-center gap-1.5">
             <label htmlFor={`${fieldId}-purchase`} className={labelClass}>
-              Purchase link
+              {t("form.purchaseLink")}
             </label>
-            <InfoTip label="Where the buy button sends buyers">
-              The product page&apos;s buy button follows this link. Without one, it
-              emails your store&apos;s contact address instead.
+            <InfoTip label={t("form.purchaseLinkAbout")}>
+              {t("form.purchaseLinkHelp")}
             </InfoTip>
           </div>
           <input
@@ -1080,7 +1108,7 @@ export function ProductForm({
             inputMode="url"
             value={purchaseUrl}
             onChange={(event) => updatePurchaseUrl(event.target.value)}
-            placeholder="e.g. https://your-shop.example/checkout/this-product"
+            placeholder={t("form.purchaseLinkPlaceholder")}
             spellCheck={false}
             aria-invalid={errors.purchaseUrl ? true : undefined}
             aria-describedby={errors.purchaseUrl ? purchaseErrorId : undefined}
@@ -1103,7 +1131,6 @@ export function ProductForm({
         <FormSection
           {...section("shipping")}
           icon={Truck}
-          title="Shipping"
         >
           <ShippingField
             inputId={`${fieldId}-shipping`}
@@ -1122,7 +1149,6 @@ export function ProductForm({
       <FormSection
         {...section("options")}
         icon={Layers}
-        title="Options"
       >
         <OptionsField
           inputId={`${fieldId}-options`}
@@ -1135,7 +1161,6 @@ export function ProductForm({
       <FormSection
         {...section("photos")}
         icon={Images}
-        title="Photos"
       >
         <GalleryField
           inputId={`${fieldId}-gallery`}
@@ -1148,7 +1173,6 @@ export function ProductForm({
       <FormSection
         {...section("specs")}
         icon={Ruler}
-        title="Specifications"
       >
         <DetailsFields
           inputId={`${fieldId}-details`}
@@ -1173,7 +1197,6 @@ export function ProductForm({
       <FormSection
         {...section("documents")}
         icon={FileText}
-        title="Documents"
       >
         <DocumentsField
           inputId={`${fieldId}-documents`}
@@ -1186,7 +1209,6 @@ export function ProductForm({
         <FormSection
           {...section("safety")}
           icon={ShieldCheck}
-          title="Safety and compliance"
         >
           <SafetyFields
             inputId={`${fieldId}-safety`}
@@ -1200,7 +1222,6 @@ export function ProductForm({
       <FormSection
         {...section("visibility")}
         icon={Eye}
-        title="Visibility"
       >
         {/* The datapoint sits on the WRAPPER, not on SegmentedControl:
             that component takes a closed set of props and spreads nothing
@@ -1221,13 +1242,13 @@ export function ProductForm({
                 choice is seen to exist and the notice below can explain it. */}
             <SegmentedControl
               value={values.status}
-              options={STATUS_OPTIONS.map((option) =>
-                option.value === "active" && !canPublish
-                  ? { ...option, disabled: true }
-                  : option,
-              )}
+              options={STATUS_ORDER.map((status) => ({
+                value: status,
+                label: t(`status.${status}`),
+                ...(status === "active" && !canPublish ? { disabled: true } : {}),
+              }))}
               onChange={(status) => updateField("status", status)}
-              ariaLabel="Product status"
+              ariaLabel={t("form.statusLabel")}
             />
           </div>
           {/* Not `detailed`: the banner in the chrome has already made the
@@ -1235,7 +1256,7 @@ export function ProductForm({
               dead. The button still goes to the field that revives it. */}
           <SellerDetailsNotice
             missing={missingTraderDetails}
-            blocks="put this product on sale"
+            blocks="putProductOnSale"
             detailed={false}
           />
         </div>
@@ -1259,9 +1280,7 @@ export function ProductForm({
           >
             <div className="flex items-center justify-between gap-3">
               <span>
-                {allProblems.length === 1
-                  ? "1 thing to fix before saving"
-                  : `${allProblems.length} things to fix before saving`}
+                {t("form.problems", { count: allProblems.length })}
               </span>
               {firstErrField && (
                 <button
@@ -1269,7 +1288,7 @@ export function ProductForm({
                   onClick={() => focusProductField(firstErrField)}
                   className="shrink-0 font-medium underline underline-offset-2 hover:no-underline"
                 >
-                  Jump to first
+                  {t("form.jumpToFirst")}
                 </button>
               )}
             </div>
@@ -1286,12 +1305,12 @@ export function ProductForm({
             <div className="flex items-center justify-between gap-3">
               <span className={helpTextClass}>
                 {upload.fraction === null
-                  ? `Processing ${uploadNoun}…`
-                  : `Uploading ${uploadNoun}…`}
+                  ? t("form.processing", { what: uploadNoun })
+                  : t("form.uploading", { what: uploadNoun })}
               </span>
               {upload.fraction !== null && (
                 <span className="font-mono text-xs tabular-nums text-muted-foreground">
-                  {Math.round(upload.fraction * 100)}%
+                  {formatPercent(Math.round(upload.fraction * 100), locale)}
                 </span>
               )}
             </div>
@@ -1299,8 +1318,8 @@ export function ProductForm({
               value={upload.fraction}
               label={
                 upload.fraction === null
-                  ? `Processing ${uploadNoun}`
-                  : `Uploading ${uploadNoun}`
+                  ? t("form.processingLabel", { what: uploadNoun })
+                  : t("form.uploadingLabel", { what: uploadNoun })
               }
             />
           </div>
@@ -1323,14 +1342,14 @@ export function ProductForm({
             onClick={() => requestLeave(!product && returnTo ? returnTo : "/products")}
             className={secondaryButtonClass}
           >
-            Cancel
+            {tCommon("cancel")}
           </button>
           <SaveButton
             pending={submitting}
             state={saveResult ?? undefined}
-            pendingLabel="Saving…"
+            pendingLabel={tCommon("saving")}
           >
-            {product ? "Save changes" : "Save product"}
+            {product ? t("form.saveChanges") : t("form.saveProduct")}
           </SaveButton>
         </div>
       </div>
@@ -1338,11 +1357,9 @@ export function ProductForm({
       <Modal
         open={leaveGuard.promptOpen}
         onClose={leaveGuard.cancel}
-        title="Discard your changes?"
+        title={t("form.discard.title")}
         description={
-          product
-            ? "The edits you've made to this product haven't been saved yet."
-            : "This product hasn't been saved yet, so nothing will be kept."
+          product ? t("form.discard.editDescription") : t("form.discard.newDescription")
         }
       >
         <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
@@ -1352,7 +1369,7 @@ export function ProductForm({
             disabled={submitting}
             className={cn(secondaryButtonClass, "whitespace-nowrap")}
           >
-            Cancel
+            {tCommon("cancel")}
           </button>
           <button
             type="button"
@@ -1361,7 +1378,7 @@ export function ProductForm({
             className={cn(destructiveButtonClass, "whitespace-nowrap")}
           >
             <Trash2 className="size-4" strokeWidth={2} aria-hidden="true" />
-            Discard
+            {t("form.discard.discard")}
           </button>
           <button
             type="button"
@@ -1370,11 +1387,11 @@ export function ProductForm({
             className={cn(primaryButtonClass, "whitespace-nowrap")}
           >
             {submitting ? (
-              "Saving…"
+              tCommon("saving")
             ) : (
               <>
                 <Save className="size-4" strokeWidth={2} aria-hidden="true" />
-                Save
+                {tCommon("save")}
               </>
             )}
           </button>

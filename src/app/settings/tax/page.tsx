@@ -1,16 +1,18 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { TaxSection } from "@/components/settings/TaxSection";
 import { requireProfile, requireUser } from "@/lib/auth/session";
 import { sellerEmailVerificationRequired } from "@/lib/settings/seller-email-verification";
 import { getPrimaryStorefrontId } from "@/lib/storefront/queries";
 
-export const metadata: Metadata = {
-  // The nav label, the page h1 and this title all say the same thing so a
-  // seller who arrives via search or a direct link immediately knows where
-  // they are. "Tax" was the original name when only VAT lived here; the page
-  // now carries the full trader identity distance-selling law asks for.
-  title: "Business & seller details",
-};
+// The nav label, the page h1 and this title all say the same thing so a
+// seller who arrives via search or a direct link immediately knows where
+// they are. "Tax" was the original name when only VAT lived here; the page
+// now carries the full trader identity distance-selling law asks for.
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Settings.metadata.tax");
+  return { title: t("title") };
+}
 
 export default async function TaxSettingsPage({
   searchParams,

@@ -1,0 +1,113 @@
+{
+  "actions": {
+    "save": "Uložiť",
+    "saving": "Ukladá sa…",
+    "saved": "Uložené",
+    "cancel": "Zrušiť",
+    "done": "Hotovo",
+    "close": "Zavrieť",
+    "back": "Späť",
+    "copy": "Kopírovať",
+    "copied": "Skopírované",
+    "copyFailed": "Kopírovanie zlyhalo",
+    "tryAgain": "Skúsiť znova",
+    "sending": "Odosiela sa…",
+    "sent": "Odoslané",
+    "loading": "Načítava sa…",
+    "confirm": "Potvrdiť",
+    "remove": "Odobrať",
+    "delete": "Zmazať",
+    "deleting": "Maže sa…"
+  },
+  "badge": {
+    "comingSoon": "Čoskoro"
+  },
+  "pagination": {
+    "previous": "Predchádzajúce",
+    "next": "Ďalšie"
+  },
+  "calendar": {
+    "previousMonth": "Predchádzajúci mesiac",
+    "nextMonth": "Nasledujúci mesiac",
+    "today": "Dnes"
+  },
+  "datePicker": {
+    "chooseDate": "Vybrať dátum",
+    "chooseDateRange": "Vybrať obdobie",
+    "selectDate": "Zvoliť dátum"
+  },
+  "colorPicker": {
+    "saturationBrightness": "Sýtosť a jas",
+    "saturationBrightnessValue": "{saturation} sýtosť, {brightness} jas",
+    "hue": "Odtieň",
+    "pickFromScreen": "Vybrať farbu z obrazovky",
+    "pickFromScreenTitle": "Vybrať z obrazovky",
+    "hexLabel": "Hex farba",
+    "hexCopied": "Hex skopírovaný",
+    "copyHex": "Kopírovať hex",
+    "invalidHex": "Použite 6-miestny hex kód farby, napríklad #a855f7.",
+    "pickerFor": "Výber farby pre {label}",
+    "picker": "Výber farby",
+    "colour": "Farba",
+    "swatchesFor": "Vzorky farieb pre {label}",
+    "swatches": "Vzorky farieb",
+    "moreColors": "Viac farieb",
+    "customColor": "Vlastná farba",
+    "currentColor": "Aktuálna farba {color}",
+    "hueValue": "{degrees, plural, one {# stupeň} few {# stupne} many {# stupňa} other {# stupňov}}"
+  },
+  "panelMenu": {
+    "backLeaving": "Späť na všetky nastavenia, opúšťate {title}"
+  },
+  "sliderField": {
+    "about": "Informácie o {label}",
+    "asNumber": "{label}, ako číslo"
+  },
+  "password": {
+    "show": "Zobraziť heslo",
+    "hide": "Skryť heslo"
+  },
+  "stock": {
+    "inStock": "Na sklade",
+    "lowStock": "{remaining, plural, one {Zostáva len {remaining}} few {Zostávajú len {remaining}} many {Zostáva len {remaining}} other {Zostáva len {remaining}}}",
+    "soldOut": "Vypredané"
+  },
+  "toast": {
+    "regionLabel": "Upozornenia",
+    "dismiss": "Zavrieť"
+  },
+  "charts": {
+    "bar": "Stĺpcový graf",
+    "horizontalBar": "Vodorovný stĺpcový graf",
+    "line": "Čiarový graf",
+    "composition": "Zloženie",
+    "proportional": "Pomerné rozdelenie",
+    "other": "Ostatné",
+    "total": "Spolu",
+    "category": "Kategória"
+  },
+  "legal": {
+    "cookies": {
+      "label": "Súbory cookie",
+      "name": "Zásady používania súborov cookie Squareshare"
+    },
+    "accessibility": {
+      "label": "Prístupnosť",
+      "name": "Vyhlásenie o prístupnosti Squareshare"
+    }
+  },
+  "grid": {
+    "ariaLabel": "Mriežka",
+    "addBlockAt": "Pridať blok do stĺpca {column}, riadka {row}",
+    "resize": "Zmeniť veľkosť: {label}",
+    "resizeBlock": "Zmeniť veľkosť bloku",
+    "resizeUnavailable": "Zmena veľkosti nie je dostupná: tento blok už vypĺňa všetok priestor, ktorý má zoskupené rozloženie k dispozícii",
+    "resizeUnavailableNamed": "Zmena veľkosti nie je dostupná: tento blok už vypĺňa všetok priestor, ktorý má zoskupené rozloženie k dispozícii: {label}",
+    "rotate": "Otočiť: {label}",
+    "rotateBlock": "Otočiť blok",
+    "rotation": "{degrees, plural, one {# stupeň} few {# stupne} many {# stupňa} other {# stupňov}}",
+    "rotated": "{label}: otočené na {degrees, plural, one {# stupeň} few {# stupne} many {# stupňa} other {# stupňov}}",
+    "rotatedBlock": "Blok otočený na {degrees, plural, one {# stupeň} few {# stupne} many {# stupňa} other {# stupňov}}",
+    "blocksMoved": "{count, plural, one {Presunutý # blok} few {Presunuté # bloky} many {Presunutého # bloku} other {Presunutých # blokov}}"
+  }
+}

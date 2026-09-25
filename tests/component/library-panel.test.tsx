@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, cleanup, fireEvent, within } from "@testing-library/react";
+import { render, screen, cleanup, fireEvent, within } from "../setup/render";
 import userEvent from "@testing-library/user-event";
 import { LibraryPanel } from "@/components/storefront/LibraryPanel";
 import type { StorefrontUpload } from "@/components/storefront/UploadsPanel";

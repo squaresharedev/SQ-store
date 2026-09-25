@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { AlertCircle, ArrowRight, CheckCircle2 } from "lucide-react";
 import { iconNudgeRightClass, infoTextClass } from "@/components/ui/control-styles";
 import type { AttentionItem } from "@/lib/dashboard/attention";
@@ -6,8 +7,9 @@ import { ModuleCard } from "./ModuleCard";
 
 /** Real, data-backed action items; quiet "all clear" when there are none. */
 export function NeedsAttention({ items }: { items: AttentionItem[] }) {
+  const t = useTranslations();
   return (
-    <ModuleCard title="Needs attention" decoration="dots">
+    <ModuleCard title={t("Dashboard.attention.title")} decoration="dots">
       {items.length === 0 ? (
         <p className="flex items-center gap-2 font-inter text-sm text-muted-foreground">
           <CheckCircle2
@@ -15,7 +17,7 @@ export function NeedsAttention({ items }: { items: AttentionItem[] }) {
             strokeWidth={2}
             aria-hidden="true"
           />
-          All clear. Nothing needs your attention right now.
+          {t("Dashboard.attention.allClear")}
         </p>
       ) : (
         <ul className="divide-y divide-border">
@@ -32,10 +34,10 @@ export function NeedsAttention({ items }: { items: AttentionItem[] }) {
                 />
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-foreground">
-                    {item.label}
+                    {t(item.label.key, item.label.values)}
                   </p>
                   <p className={infoTextClass}>
-                    {item.description}
+                    {t(item.description.key, item.description.values)}
                   </p>
                 </div>
               </div>
@@ -43,7 +45,7 @@ export function NeedsAttention({ items }: { items: AttentionItem[] }) {
                 href={item.href}
                 className="group/btn inline-flex items-center gap-1 font-inter text-xs font-medium text-foreground underline decoration-border underline-offset-4 transition-colors duration-base ease-standard hover:decoration-foreground motion-reduce:transition-none"
               >
-                {item.actionLabel}
+                {t(item.actionLabel.key, item.actionLabel.values)}
                 <ArrowRight
                   className={`size-3 ${iconNudgeRightClass}`}
                   strokeWidth={2}

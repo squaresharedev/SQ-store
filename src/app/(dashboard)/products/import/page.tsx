@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
@@ -8,9 +9,10 @@ import { ProductImport } from "@/components/products/ProductImport";
 import { getTraderIdentityStatus } from "@/lib/settings/seller-identity";
 import { ghostButtonClass } from "@/components/ui/control-styles";
 
-export const metadata: Metadata = {
-  title: "Import products",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Products.metadata.import");
+  return { title: t("title") };
+}
 
 // PROTECTED by (dashboard)/layout.tsx, and gated to writers for the same
 // reason /products/new is: a read-only member of the active store cannot
@@ -27,18 +29,19 @@ export default async function ImportProductsPage() {
     ? await getTraderIdentityStatus(account.accountId)
     : { ok: true as const, missing: [] };
 
+  const t = await getTranslations("Products.page");
+
   return (
     <div className="@container mx-auto w-full max-w-3xl space-y-6 p-4 @md:p-6">
       <div className="space-y-3">
         <Link href="/products" className={ghostButtonClass}>
           <ArrowLeft className="size-4" strokeWidth={2} aria-hidden="true" />
-          Products
+          {t("back")}
         </Link>
         <div>
-          <h1 className="font-inter text-2xl font-semibold text-foreground">Import products</h1>
+          <h1 className="font-inter text-2xl font-semibold text-foreground">{t("import.heading")}</h1>
           <p className="mt-1 font-inter text-sm text-muted-foreground">
-            Bring a catalogue over from Shopify, or any tool that exports a CSV. You will see
-            exactly what lands before anything is saved.
+            {t("import.description")}
           </p>
         </div>
       </div>

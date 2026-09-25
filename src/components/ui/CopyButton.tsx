@@ -2,6 +2,8 @@
 
 import * as React from "react";
 import { Copy } from "lucide-react";
+import { useTranslations } from "next-intl";
+import type { MessageKey } from "@/i18n/types";
 import { cn } from "@/lib/utils";
 import { AnimatedCheck } from "@/components/ui/animated-check";
 import {
@@ -9,6 +11,30 @@ import {
   secondaryButtonClass,
   transitionClass,
 } from "@/components/ui/control-styles";
+
+/**
+ * The accessible names a caller supplies, as whole sentences: the thing being
+ * copied is part of each message rather than a noun spliced into a shared one,
+ * because its word form changes with the sentence in languages that decline.
+ */
+export type CopyButtonMessages = {
+  copy: MessageKey;
+  copied: MessageKey;
+  failed: MessageKey;
+};
+
+/** A button that can be disabled also needs to say why it cannot copy yet. */
+export type DisableableCopyButtonMessages = CopyButtonMessages & {
+  cannotCopyYet: MessageKey;
+};
+
+type CopyButtonState =
+  | { messages: CopyButtonMessages; disabled?: never }
+  | {
+      messages: DisableableCopyButtonMessages;
+      /** Prevent copying until prerequisites are met (e.g. embed settings saved). */
+      disabled: boolean;
+    };
 
 /** How long the copied state lingers before reverting to the copy icon. */
 const COPIED_MS = 1600;
@@ -32,20 +58,17 @@ const COPIED_MS = 1600;
  */
 export function CopyButton({
   value,
-  label,
   variant = "icon",
-  disabled = false,
   className,
+  ...state
 }: {
   /** Text placed on the clipboard. */
   value: string;
-  /** What is being copied, e.g. "order ID". Used for the accessible name. */
-  label: string;
   variant?: "icon" | "labelled";
-  /** Prevent copying until prerequisites are met (e.g. embed settings saved). */
-  disabled?: boolean;
   className?: string;
-}) {
+} & CopyButtonState) {
+  const t = useTranslations();
+  const disabled = state.disabled ?? false;
   const [copied, setCopied] = React.useState(0);
   const [failed, setFailed] = React.useState(false);
 
@@ -81,13 +104,13 @@ export function CopyButton({
       onClick={handleCopy}
       disabled={disabled}
       aria-label={
-        disabled
-          ? `${label} cannot be copied yet`
+        state.disabled
+          ? t(state.messages.cannotCopyYet)
           : failed
-            ? `Couldn't copy ${label}. Select and copy it manually.`
+            ? t(state.messages.failed)
             : isCopied
-              ? `Copied ${label}`
-              : `Copy ${label}`
+              ? t(state.messages.copied)
+              : t(state.messages.copy)
       }
       className={cn(
         variant === "labelled"
@@ -105,7 +128,12 @@ export function CopyButton({
       )}
     >
       {icon}
-      {variant === "labelled" && (failed ? "Copy failed" : isCopied ? "Copied" : "Copy")}
+      {variant === "labelled" &&
+        (failed
+          ? t("Common.actions.copyFailed")
+          : isCopied
+            ? t("Common.actions.copied")
+            : t("Common.actions.copy"))}
     </button>
   );
 }

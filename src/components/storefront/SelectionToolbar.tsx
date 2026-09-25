@@ -54,6 +54,7 @@
  */
 
 import { useRef } from "react";
+import { useTranslations } from "next-intl";
 import {
   Blend,
   Copy,
@@ -498,6 +499,8 @@ export function SelectionToolbar({
    *  entry in the history, not three. */
   onRemove: (keys: readonly string[]) => void;
 }) {
+  const t = useTranslations("Storefront");
+  const tRoot = useTranslations();
   const frameRef = useRef<HTMLDivElement | null>(null);
   const barRef = useRef<HTMLDivElement | null>(null);
   const keys = blocks.map(blockKey);
@@ -539,13 +542,15 @@ export function SelectionToolbar({
    * over a square does not, and the bar is already pointing at it. The blank
    * space is worth more than the label.
    */
-  const name = only ? blockLabel(only, productsById) : `${blocks.length} elements`;
-  /** What the page control names, which is not always what the SELECTION is:
-   *  one product picked out of a mixed selection is still that product's page. */
-  const pageName =
+  const name = only
+    ? blockLabel(only, productsById, tRoot)
+    : t("selectionToolbar.elements", { count: blocks.length });
+  /** What the page control names for the single-product case (seller title or
+   *  the selection name). Multi-product counts are embedded in the label key. */
+  const singlePageName =
     pageProductIds.length === 1
       ? (productsById.get(pageProductIds[0])?.title ?? name)
-      : `${pageProductIds.length} products`;
+      : null;
 
   /**
    * WHAT DUPLICATE MEANS HERE. A product tile is one per product by design —
@@ -619,7 +624,7 @@ export function SelectionToolbar({
       >
         <div
           role="toolbar"
-          aria-label={`Tools for ${name}`}
+          aria-label={t("selectionToolbar.toolsFor", { name })}
           data-selection-toolbar=""
           // A pointerdown here is chrome, not board: without this the canvas
           // underneath takes it and a slider drag pans the workspace.
@@ -653,19 +658,23 @@ export function SelectionToolbar({
               tip={
                 pagesAreOpen
                   ? pageProductIds.length > 1
-                    ? "Hide pages"
-                    : "Hide page"
+                    ? t("selectionToolbar.hidePages")
+                    : t("selectionToolbar.hidePage")
                   : pageProductIds.length > 1
-                    ? "Open pages"
-                    : "Open page"
+                    ? t("selectionToolbar.openPages")
+                    : t("selectionToolbar.openPage")
               }
               pressed={pagesAreOpen}
               pageNode={pagesAreOpen ? "open" : "closed"}
               onClick={() => onOpenPages(pageProductIds)}
               label={
                 pagesAreOpen
-                  ? `Close the product ${pageProductIds.length > 1 ? "pages" : "page"} for ${pageName}`
-                  : `Open the product ${pageProductIds.length > 1 ? "pages" : "page"} for ${pageName}`
+                  ? pageProductIds.length > 1
+                    ? t("selectionToolbar.closeProductPages", { count: pageProductIds.length })
+                    : t("selectionToolbar.closeProductPage", { name: singlePageName ?? name })
+                  : pageProductIds.length > 1
+                    ? t("selectionToolbar.openProductPages", { count: pageProductIds.length })
+                    : t("selectionToolbar.openProductPage", { name: singlePageName ?? name })
               }
             >
               <FileText className={ACTION_ICON} strokeWidth={2} aria-hidden="true" />
@@ -674,9 +683,9 @@ export function SelectionToolbar({
 
           {only?.type === "text" && onlyKey !== null && (
             <ToolButton
-              tip="Edit text"
+              tip={t("selectionToolbar.editText")}
               onClick={() => onType(onlyKey)}
-              label={`Edit the text of ${name}`}
+              label={t("selectionToolbar.editTextOf", { name })}
             >
               <Type className={ACTION_ICON} strokeWidth={2} aria-hidden="true" />
             </ToolButton>
@@ -693,17 +702,17 @@ export function SelectionToolbar({
           {shape !== null && (
             <>
               <ToolButton
-                tip="Color"
+                tip={t("selectionToolbar.color")}
                 onClick={() => onOpenColor(shapeKeys, "fill")}
-                label={`Change the colour of ${name}`}
+                label={t("selectionToolbar.changeColorOf", { name })}
               >
                 <ColorSwatch color={shape.color} />
               </ToolButton>
 
               <ToolButton
-                tip="Stroke"
+                tip={t("selectionToolbar.stroke")}
                 onClick={() => onOpenSetting(shapeKeys, "stroke")}
-                label={`Edit the stroke of ${name}`}
+                label={t("selectionToolbar.editStrokeOf", { name })}
               >
                 <Equal className={ACTION_ICON} strokeWidth={2} aria-hidden="true" />
               </ToolButton>
@@ -713,9 +722,9 @@ export function SelectionToolbar({
                   among the squares is enough to withhold it from the group. */}
               {roundable && (
                 <ToolButton
-                  tip="Corners"
+                  tip={t("selectionToolbar.corners")}
                   onClick={() => onOpenSetting(shapeKeys, "corners")}
-                  label={`Edit the corner roundness of ${name}`}
+                  label={t("selectionToolbar.editCornersOf", { name })}
                 >
                   <Spline className={ACTION_ICON} strokeWidth={2} aria-hidden="true" />
                 </ToolButton>
@@ -727,9 +736,9 @@ export function SelectionToolbar({
               both get it, and it is last of the four for both. */}
           {opacityKeys.length > 0 && (
             <ToolButton
-              tip="Opacity"
+              tip={t("selectionToolbar.opacity")}
               onClick={() => onOpenSetting(opacityKeys, "opacity")}
-              label={`Edit the opacity of ${name}`}
+              label={t("selectionToolbar.editOpacityOf", { name })}
             >
               <Blend className={ACTION_ICON} strokeWidth={2} aria-hidden="true" />
             </ToolButton>
@@ -737,9 +746,9 @@ export function SelectionToolbar({
 
           {framable && onlyKey !== null && (
             <ToolButton
-              tip="Frame"
+              tip={t("selectionToolbar.frame")}
               onClick={() => onFrame(onlyKey)}
-              label={`Frame the image for ${name}`}
+              label={t("selectionToolbar.frameImageFor", { name })}
             >
               <Crop className={ACTION_ICON} strokeWidth={2} aria-hidden="true" />
             </ToolButton>
@@ -751,14 +760,12 @@ export function SelectionToolbar({
               inspector ends on: copy it, or be rid of it. */}
           {copyableKeys.length > 0 && (
             <ToolButton
-              tip="Duplicate"
+              tip={t("selectionToolbar.duplicate")}
               onClick={() => onDuplicate(copyableKeys)}
               label={
                 only
-                  ? `Duplicate ${name}`
-                  : `Duplicate ${copyableKeys.length} ${
-                      copyableKeys.length === 1 ? "element" : "elements"
-                    }`
+                  ? t("selectionToolbar.duplicateNamed", { name })
+                  : t("selectionToolbar.duplicateN", { count: copyableKeys.length })
               }
             >
               <Copy className={ACTION_ICON} strokeWidth={2} aria-hidden="true" />
@@ -766,13 +773,13 @@ export function SelectionToolbar({
           )}
 
           <ToolButton
-            tip="Delete"
+            tip={tRoot("Common.actions.delete")}
             danger
             onClick={() => onRemove(keys)}
             label={
               only
-                ? `Remove ${name} from grid`
-                : `Remove ${blocks.length} elements from grid`
+                ? t("selectionToolbar.removeFrom", { name })
+                : t("selectionToolbar.removeN", { count: blocks.length })
             }
           >
             <Trash2 className={ACTION_ICON} strokeWidth={2} aria-hidden="true" />

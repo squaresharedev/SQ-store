@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { hasVerifiedFactor } from "@/lib/auth/assurance";
@@ -7,6 +8,8 @@ import {
   parseSignInMethod,
 } from "@/lib/auth/last-method";
 import { safeInternalPath } from "@/lib/utils/safe-path";
+import { LOCALE_COOKIE } from "@/i18n/cookie";
+import { localeForSignedInBrowser } from "@/i18n/sign-in";
 
 /**
  * OAuth / PKCE code exchange. Also handles the default Supabase email links
@@ -38,10 +41,27 @@ export async function GET(request: Request) {
       // factors. For an account with 2FA on, the session they produce is aal1
       // and still owes its code, recovery links included: an inbox is not a
       // second factor, so a reset link must never skip the challenge.
-      const destination = hasVerifiedFactor(data.user)
+      const owesSecondFactor = hasVerifiedFactor(data.user);
+      const destination = owesSecondFactor
         ? twoFactorChallengePath(next)
         : next;
       const response = NextResponse.redirect(`${origin}${destination}`);
+      // An aal1 session cannot read an enrolled account's profile (RLS), so
+      // for those the language is copied when the challenge completes instead.
+      if (!owesSecondFactor) {
+        const accountLocale = await localeForSignedInBrowser(
+          supabase,
+          data.user.id,
+          (await cookies()).get(LOCALE_COOKIE.name)?.value,
+        );
+        if (accountLocale) {
+          response.cookies.set(
+            LOCALE_COOKIE.name,
+            accountLocale,
+            LOCALE_COOKIE.options,
+          );
+        }
+      }
       // Set on the response rather than through `cookies()`: this handler
       // returns a redirect it built itself, and that is the response the
       // browser actually receives.

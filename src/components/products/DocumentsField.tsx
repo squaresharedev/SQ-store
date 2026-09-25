@@ -2,6 +2,7 @@
 
 import { useRef, useState, type ChangeEvent, type DragEvent } from "react";
 import { FileText, Upload, X } from "lucide-react";
+import { useTranslations, useLocale } from "next-intl";
 import { cn } from "@/lib/utils";
 import { iconTileClass } from "@/components/ui/surface-styles";
 import {
@@ -24,10 +25,10 @@ const MAX_MB = Math.round(DOCUMENT_MAX_BYTES / 1024 / 1024);
 /** "safety_data_sheet_v2.pdf" -> "Safety data sheet v2" — a usable label with
  *  no typing, the way Shopify seeds a media name from the filename. The
  *  seller can still rename it; this only saves the common case. */
-function labelFromFileName(name: string): string {
+function labelFromFileName(name: string, fallback: string): string {
   const withoutExtension = name.replace(/\.[^./\\]+$/, "");
   const spaced = withoutExtension.replace(/[_-]+/g, " ").trim();
-  const capitalised = spaced ? spaced[0]!.toUpperCase() + spaced.slice(1) : "Document";
+  const capitalised = spaced ? spaced[0]!.toUpperCase() + spaced.slice(1) : fallback;
   return capitalised.slice(0, DOCUMENT_LABEL_MAX);
 }
 
@@ -50,6 +51,8 @@ export function DocumentsField({
   documents: DocumentFormValue[];
   onChange: (documents: DocumentFormValue[]) => void;
 }) {
+  const t = useTranslations("Products.documentsField");
+  const locale = useLocale();
   const [error, setError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -59,21 +62,21 @@ export function DocumentsField({
   function addFiles(files: File[]) {
     if (files.length === 0) return;
     if (room <= 0) {
-      setError(`A product can have up to ${DOCUMENTS_MAX} documents.`);
+      setError(t("tooMany", { max: DOCUMENTS_MAX }));
       return;
     }
     const accepted: DocumentFormValue[] = [];
     let problem: string | null = null;
     for (const file of files.slice(0, room)) {
       if (file.type !== "application/pdf") {
-        problem = "Use a PDF for certificates, manuals, and other documents.";
+        problem = t("wrongType");
         continue;
       }
       // Told here rather than after the upload: the server refuses the same
       // size, and finding that out at the end of a 40 MB upload is a worse way
       // to learn it. The server check is the one that counts.
       if (file.size > DOCUMENT_MAX_BYTES) {
-        problem = `"${file.name}" is too big. Documents have to be under ${MAX_MB} MB.`;
+        problem = t("tooLarge", { name: file.name, max: MAX_MB });
         continue;
       }
       accepted.push({
@@ -81,11 +84,11 @@ export function DocumentsField({
         key: null,
         file,
         fileName: file.name,
-        label: labelFromFileName(file.name),
+        label: labelFromFileName(file.name, t("fallbackLabel")),
       });
     }
     if (files.length > room) {
-      problem = `Only ${room} more document${room === 1 ? "" : "s"} fit.`;
+      problem = t("roomLeft", { count: room });
     }
     setError(problem);
     if (accepted.length > 0) onChange([...documents, ...accepted]);
@@ -114,7 +117,7 @@ export function DocumentsField({
   return (
     <div className="space-y-4">
       {documents.length > 0 && (
-        <ul className="space-y-2" aria-label="Documents">
+        <ul className="space-y-2" aria-label={t("list")}>
           {documents.map((document) => (
             <li
               key={document.localId}
@@ -129,22 +132,25 @@ export function DocumentsField({
                   type="text"
                   value={document.label}
                   maxLength={DOCUMENT_LABEL_MAX}
-                  aria-label="Document name, shown to buyers"
-                  placeholder="e.g. Safety Data Sheet"
+                  aria-label={t("nameLabel")}
+                  placeholder={t("namePlaceholder")}
                   onChange={(event) => updateLabel(document.localId, event.target.value)}
                   className={cn(fieldBaseClass, "py-1.5 text-sm")}
                 />
                 {document.fileName && (
                   <p className={cn(helpTextClass, "truncate")}>
                     {document.fileName}
-                    {document.file ? ` · ${formatBytes(document.file.size)}` : ""}
+                    {document.file ? ` · ${formatBytes(document.file.size, locale)}` : ""}
                   </p>
                 )}
               </div>
               <button
                 type="button"
                 className={cn(iconButtonClass, "size-8 shrink-0")}
-                aria-label={`Remove ${document.label || "document"}`}
+                aria-label={t("remove", {
+                  named: document.label ? "yes" : "no",
+                  name: document.label,
+                })}
                 onClick={() => remove(document.localId)}
               >
                 <X className="size-4" strokeWidth={2} aria-hidden="true" />
@@ -189,10 +195,10 @@ export function DocumentsField({
         </span>
         <span className="min-w-0 flex-1">
           <span className="block font-inter text-sm text-foreground">
-            {room <= 0 ? "Limit reached" : "Drop PDFs or click to upload"}
+            {room <= 0 ? t("limitReached") : t("dropPrompt")}
           </span>
           <span className="block font-inter text-xs text-muted-foreground">
-            {documents.length} of {DOCUMENTS_MAX} documents · PDF, up to {MAX_MB} MB each
+            {t("tally", { count: documents.length, max: DOCUMENTS_MAX, maxMb: MAX_MB })}
           </span>
         </span>
       </label>

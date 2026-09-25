@@ -4,10 +4,12 @@ import * as React from "react";
 import { useActionState } from "react";
 import Link from "next/link";
 import { KeyRound, Smartphone } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
+import { useResolveMessage } from "@/components/ui/ActionErrorNotice";
 import { helpTextClass, infoTextClass } from "@/components/ui/control-styles";
 import { FactorPicker, type FactorChoice } from "@/components/auth/FactorPicker";
 import { OneTimeCodeInput } from "@/components/auth/OneTimeCodeInput";
@@ -35,6 +37,7 @@ export function TwoFactorChallenge({
   email: string;
   factors: FactorChoice[];
 }) {
+  const t = useTranslations("Auth.twoFactor");
   const [mode, setMode] = React.useState<"code" | "recovery">("code");
 
   return (
@@ -55,12 +58,12 @@ export function TwoFactorChallenge({
           {mode === "code" ? (
             <>
               <KeyRound aria-hidden className="size-4" />
-              Use a recovery code instead
+              {t("useRecoveryCode")}
             </>
           ) : (
             <>
               <Smartphone aria-hidden className="size-4" />
-              Use your authenticator app instead
+              {t("useAuthenticatorApp")}
             </>
           )}
         </button>
@@ -71,7 +74,7 @@ export function TwoFactorChallenge({
             type="submit"
             className="font-inter text-xs text-muted-foreground underline decoration-border underline-offset-4 transition-colors duration-base ease-standard hover:text-foreground hover:decoration-foreground motion-reduce:transition-none"
           >
-            Not you? Sign out
+            {t("notYou")}
           </button>
         </form>
       </div>
@@ -80,22 +83,36 @@ export function TwoFactorChallenge({
 }
 
 function Status({ state, next }: { state: ChallengeState; next: string }) {
+  const t = useTranslations("Auth.twoFactor");
+  const resolve = useResolveMessage();
   if (!state.error) return null;
   return (
     <div aria-live="polite" className="flex flex-col gap-1">
       <p role="alert" className="text-sm font-medium text-destructive">
-        {state.error}
+        {resolve(state.error.message)}
       </p>
       {state.expired && (
         <Link
           href={`/login?next=${encodeURIComponent(next)}`}
           className="font-inter text-sm font-medium text-foreground underline underline-offset-4"
         >
-          Sign in again
+          {t("signInAgain")}
         </Link>
       )}
     </div>
   );
+}
+
+/** The factor's name and the account's email are data; each combination is its own sentence. */
+function CodeIntro({ name, email }: { name: string | null; email: string }) {
+  const t = useTranslations("Auth.twoFactor");
+  const strong = (chunks: React.ReactNode) => (
+    <span className="font-medium text-foreground">{chunks}</span>
+  );
+  if (name !== null && email) return t.rich("introNamedAs", { name, email, strong });
+  if (name !== null) return t.rich("introNamed", { name, strong });
+  if (email) return t.rich("introAs", { email, strong });
+  return t("intro");
 }
 
 function CodeForm({
@@ -107,6 +124,7 @@ function CodeForm({
   email: string;
   factors: FactorChoice[];
 }) {
+  const t = useTranslations("Auth.twoFactor");
   const [state, formAction, isPending] = useActionState(verifyTwoFactorSignIn, INITIAL);
   const single = factors.length < 2 ? factors[0] : null;
 
@@ -114,33 +132,16 @@ function CodeForm({
     <form action={formAction} className="flex flex-col gap-5" noValidate>
       <input type="hidden" name="next" value={next} />
       <div>
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          Two-factor authentication
-        </h1>
+        <h1 className="text-xl font-semibold tracking-tight text-foreground">{t("heading")}</h1>
         <p className={`${helpTextClass} mt-1`}>
-          Enter the 6-digit code from your authenticator app
-          {single ? (
-            <>
-              {" "}
-              (<span className="font-medium text-foreground">{single.name}</span>)
-            </>
-          ) : null}
-          {email ? (
-            <>
-              {" "}
-              to finish signing in as{" "}
-              <span className="font-medium text-foreground">{email}</span>.
-            </>
-          ) : (
-            "."
-          )}
+          <CodeIntro name={single ? single.name : null} email={email} />
         </p>
       </div>
 
       <FactorPicker factors={factors} name="factor_id" id="challenge-factor" />
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="code">Authentication code</Label>
+        <Label htmlFor="code">{t("codeLabel")}</Label>
         <OneTimeCodeInput
           id="code"
           name="code"
@@ -165,10 +166,10 @@ function CodeForm({
         {isPending ? (
           <>
             <Spinner />
-            Verifying…
+            {t("verifying")}
           </>
         ) : (
-          "Verify"
+          t("verify")
         )}
       </Button>
     </form>
@@ -176,23 +177,19 @@ function CodeForm({
 }
 
 function RecoveryForm({ next }: { next: string }) {
+  const t = useTranslations("Auth.twoFactor.recovery");
   const [state, formAction, isPending] = useActionState(signInWithRecoveryCode, INITIAL);
 
   return (
     <form action={formAction} className="flex flex-col gap-5" noValidate>
       <input type="hidden" name="next" value={next} />
       <div>
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          Use a recovery code
-        </h1>
-        <p className={`${helpTextClass} mt-1`}>
-          Enter one of the codes you saved when you turned on two-factor
-          authentication.
-        </p>
+        <h1 className="text-xl font-semibold tracking-tight text-foreground">{t("heading")}</h1>
+        <p className={`${helpTextClass} mt-1`}>{t("intro")}</p>
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="recovery_code">Recovery code</Label>
+        <Label htmlFor="recovery_code">{t("label")}</Label>
         <Input
           id="recovery_code"
           name="recovery_code"
@@ -208,11 +205,7 @@ function RecoveryForm({ next }: { next: string }) {
         />
         {/* Said BEFORE they press the button: this is not a quiet way round
             2FA, it switches it off. */}
-        <p className={infoTextClass}>
-          Each code works once. Using one turns two-factor authentication off
-          and signs out your other devices, so you can set it up again on your
-          new phone.
-        </p>
+        <p className={infoTextClass}>{t("warning")}</p>
       </div>
 
       <Status state={state} next={next} />
@@ -226,10 +219,10 @@ function RecoveryForm({ next }: { next: string }) {
         {isPending ? (
           <>
             <Spinner />
-            Checking…
+            {t("checking")}
           </>
         ) : (
-          "Continue"
+          t("continue")
         )}
       </Button>
     </form>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useLocale } from "next-intl";
 import { cn } from "@/lib/utils";
 import {
   legendLabelClass,
@@ -56,7 +57,7 @@ export function SliceLegend({
   slices,
   colors,
   total,
-  valueFormatter = formatNumber,
+  valueFormatter: valueFormatterProp,
   onHighlight,
   className,
 }: {
@@ -69,6 +70,9 @@ export function SliceLegend({
   onHighlight?: (index: number | null) => void;
   className?: string;
 }) {
+  const locale = useLocale();
+  const valueFormatter =
+    valueFormatterProp ?? ((value: number) => formatNumber(value, locale));
   return (
     <ul className={cn("flex flex-col gap-2.5", className)}>
       {slices.map((slice, i) => (
@@ -90,7 +94,7 @@ export function SliceLegend({
                 {valueFormatter(slice.value)}
               </span>
               <span className={cn(legendMetaClass, "ml-2")}>
-                {formatShare(slice.value, total)}
+                {formatShare(slice.value, total, locale)}
               </span>
             </span>
           </div>

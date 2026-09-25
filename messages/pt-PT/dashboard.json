@@ -1,0 +1,116 @@
+{
+  "metadata": {
+    "app": {
+      "title": "Painel Square Share",
+      "description": "Faça a gestão dos seus produtos, crie o design da sua montra, ligue o Stripe e veja estatísticas no Square Share."
+    },
+    "overview": {
+      "title": "Visão geral"
+    },
+    "payments": {
+      "title": "Pagamentos"
+    }
+  },
+  "loading": {
+    "overview": {
+      "srLoading": "A carregar a visão geral…"
+    },
+    "payments": {
+      "title": "Pagamentos",
+      "subtitle": "O seu saldo, transferências e ligação ao Stripe.",
+      "srLoading": "a carregar pagamentos"
+    }
+  },
+  "shell": {
+    "accountFallback": "Conta",
+    "anotherStore": "outra loja"
+  },
+  "overview": {
+    "title": "Visão geral",
+    "addProduct": "Adicionar produto",
+    "revenue30d": "Receita · 30 dias",
+    "sales30d": "Vendas · 30 dias",
+    "avgOrder30d": "Encomenda média · 30 dias",
+    "revenueHeroLabel": "Receita dos últimos 30 dias",
+    "noSales": "Ainda sem vendas"
+  },
+  "metric": {
+    "zeroDefault": "Ainda sem vendas",
+    "pendingDefault": "Disponível assim que as estatísticas estiverem ligadas."
+  },
+  "sidebar": {
+    "openMenu": "Abrir menu",
+    "closeMenu": "Fechar menu",
+    "navLabel": "Painel",
+    "title": "Painel"
+  },
+  "recentOrders": {
+    "title": "Encomendas recentes",
+    "empty": "Ainda sem encomendas. As vendas feitas através do seu próprio link de compra ou por e-mail não aparecem aqui."
+  },
+  "attention": {
+    "title": "Precisa de atenção",
+    "allClear": "Tudo em ordem. Não há nada que precise da sua atenção neste momento.",
+    "twoFactor": {
+      "label": "Ative a autenticação de dois fatores",
+      "description": "Um código do seu telemóvel ao iniciar sessão, para que uma palavra-passe roubada, por si só, não dê acesso à sua loja.",
+      "action": "Ativar"
+    },
+    "stripe": {
+      "label": "Ligue o Stripe para receber pagamentos",
+      "description": "As transferências ficam bloqueadas até a sua conta estar ligada.",
+      "action": "Abrir pagamentos"
+    },
+    "legal": {
+      "label": "Aceitar os termos de vendedor",
+      "labelUpdated": "Aceitar os termos de vendedor atualizados",
+      "description": "Leia as versões preliminares do Acordo de vendedor, Termos e Privacidade e aceite-as.",
+      "descriptionUpdated": "Os termos foram alterados desde que os aceitou. Leia e aceite a versão atual.",
+      "descriptionTerms": "Leia os Termos de serviço e aceite-os.",
+      "descriptionTermsUpdated": "Os Termos de serviço mudaram desde que os aceitou. Leia e aceite a versão atual.",
+      "action": "Rever termos"
+    },
+    "noBuyPath": {
+      "label": "{count, plural, one {{count} produto sem forma de compra} many {{count} de produtos sem forma de compra} other {{count} produtos sem forma de compra}}",
+      "description": "Adicione um link de compra, ou defina um e-mail de contacto em Definições para os compradores o poderem contactar.",
+      "action": "Rever produtos"
+    },
+    "noShipping": {
+      "label": "Adicione as suas condições de envio",
+      "description": "Os produtos físicos precisam de condições de envio e devoluções antes de os compradores verem todos os detalhes.",
+      "action": "Adicionar condições"
+    },
+    "storefront": {
+      "labelEmpty": "A sua montra está vazia",
+      "labelNone": "Crie a sua montra",
+      "descriptionEmpty": "Adicione um produto à grelha para lhe dar uma página que pode partilhar.",
+      "descriptionNone": "Escolha um aspeto e depois adicione os seus produtos à grelha.",
+      "actionOpen": "Abrir editor",
+      "actionCreate": "Criar montra"
+    },
+    "images": {
+      "label": "{count, plural, one {{count} produto sem imagem} many {{count} de produtos sem imagem} other {{count} produtos sem imagem}}",
+      "descriptionSingle": "«{title}» ainda não tem imagem principal.",
+      "descriptionMultiple": "Produtos sem imagem parecem vazios na sua montra.",
+      "actionSingle": "Adicionar uma imagem",
+      "actionMultiple": "Corrigir produtos"
+    },
+    "flaggedOrders": {
+      "label": "{count, plural, one {{count} encomenda para rever} many {{count} de encomendas para rever} other {{count} encomendas para rever}}",
+      "descriptionBoth": "{disputed, plural, one {{disputed} em disputa} many {{disputed} em disputa} other {{disputed} em disputa}}, {refunded, plural, one {{refunded} reembolsada} many {{refunded} reembolsadas} other {{refunded} reembolsadas}}.",
+      "descriptionDisputed": "{count, plural, one {{count} em disputa.} many {{count} em disputa.} other {{count} em disputa.}}",
+      "descriptionRefunded": "{count, plural, one {{count} reembolsada.} many {{count} reembolsadas.} other {{count} reembolsadas.}}",
+      "action": "Rever encomendas"
+    },
+    "noindexPages": {
+      "label": "Páginas de produto bloqueadas na pesquisa",
+      "description": "{count, plural, =1 {Uma montra tem a indexação desativada para as suas páginas de produto.} many {{count} montras têm a indexação desativada para as suas páginas de produto.} other {{count} montras têm a indexação desativada para as suas páginas de produto.}}",
+      "action": "Abrir editor"
+    },
+    "deadBlocks": {
+      "label": "{count, plural, one {{count} bloco de montra a referenciar produtos eliminados} many {{count} de blocos de montra a referenciar produtos eliminados} other {{count} blocos de montra a referenciar produtos eliminados}}",
+      "description": "Estes blocos aparecem vazios para os visitantes. Remova-os ou substitua-os.",
+      "action": "Abrir montra"
+    }
+  }
+}

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
+import { render, cleanup } from "../setup/render";
 import { DEFAULT_STOREFRONT_CONFIG, type ShapeBlock } from "@/types/storefront";
 import { BlockTile } from "@/components/storefront/BlockTile";
 

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ChevronRight, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { CollapsibleSection } from "@/components/ui/CollapsibleSection";
 import { PanelTabs, panelProps } from "@/components/ui/PanelTabs";
@@ -40,12 +41,7 @@ import { CANVAS_PANEL_ATTR } from "./useCanvasAnchor";
  * with fifteen props and no clearer story.
  */
 
-const TAB_OPTIONS = [
-  { value: "selection", label: "Selection" },
-  { value: "design", label: "Design" },
-] as const;
-
-type PanelTab = (typeof TAB_OPTIONS)[number]["value"];
+type PanelTab = "selection" | "design";
 
 export function DesignPanel({
   panelOpen,
@@ -58,6 +54,7 @@ export function DesignPanel({
   selectionKey,
   showInspector,
   inspectorTitle,
+  inspectorCloseLabel,
   onCloseInspector,
   inspectorHiddenOnMobile,
   inspector,
@@ -79,6 +76,8 @@ export function DesignPanel({
   selectionKey: string;
   showInspector: boolean;
   inspectorTitle: string;
+  /** Pre-translated close-button label, e.g. "Close product panel". */
+  inspectorCloseLabel: string;
   onCloseInspector: () => void;
   /** The colour sheet and the inspector share the one mobile slot; the colour
    *  sheet wins while it is open. */
@@ -132,6 +131,16 @@ export function DesignPanel({
     }
   }
 
+  const t = useTranslations("Storefront.designPanel");
+
+  const tabOptions: readonly { value: PanelTab; label: string }[] = useMemo(
+    () => [
+      { value: "selection" as const, label: t("tabSelection") },
+      { value: "design" as const, label: t("tabDesign") },
+    ],
+    [t],
+  );
+
   // With nothing selected there is no Selection tab to be on, so the Design
   // side is simply what the panel is.
   const showTabs = showInspector && !layersOpen;
@@ -142,13 +151,13 @@ export function DesignPanel({
       {/* Reopen tab, pinned to the screen edge while the panel is away. */}
       {!panelOpen && (
         <Tooltip
-          label="Show design panel"
+          label={t("show")}
           className={cn(PANEL_TAB_ANCHOR_CLASS, "fixed right-0")}
         >
           <button
             type="button"
             onClick={() => onPanelOpenChange(true)}
-            aria-label="Show design panel"
+            aria-label={t("show")}
             className={PANEL_TAB_CLASS}
           >
             <ChevronRight
@@ -176,7 +185,7 @@ export function DesignPanel({
         <div
           role="separator"
           aria-orientation="vertical"
-          aria-label="Resize design panel"
+          aria-label={t("resize")}
           aria-valuenow={panelWidth}
           aria-valuemin={minWidth}
           aria-valuemax={maxWidth}
@@ -188,13 +197,13 @@ export function DesignPanel({
 
         {/* Collapse tab, clipped to the panel's own left edge. */}
         <Tooltip
-          label="Hide design panel"
+          label={t("hide")}
           className={cn(PANEL_TAB_ANCHOR_CLASS, "absolute left-0 -translate-x-full")}
         >
           <button
             type="button"
             onClick={() => onPanelOpenChange(false)}
-            aria-label="Hide design panel"
+            aria-label={t("hide")}
             className={PANEL_TAB_CLASS}
           >
             <ChevronRight className="size-4" strokeWidth={2} aria-hidden="true" />
@@ -222,9 +231,9 @@ export function DesignPanel({
             <PanelTabs
               id="design-panel"
               value={tab}
-              options={TAB_OPTIONS}
+              options={tabOptions}
               onChange={setTab}
-              ariaLabel="Panel scope"
+              ariaLabel={t("scopeLabel")}
               className="hidden lg:flex"
             />
           )}
@@ -260,7 +269,7 @@ export function DesignPanel({
                   <button
                     type="button"
                     onClick={onCloseInspector}
-                    aria-label={`Close ${inspectorTitle.toLowerCase()} panel`}
+                    aria-label={inspectorCloseLabel}
                     className={INSPECTOR_CLOSE_CLASS}
                   >
                     <X className="size-4" strokeWidth={2} aria-hidden="true" />
@@ -284,11 +293,11 @@ export function DesignPanel({
             )}
           >
             <div className="mb-4 flex items-center justify-between lg:hidden">
-              <h2 className="text-sm font-semibold text-foreground">Design</h2>
+              <h2 className="text-sm font-semibold text-foreground">{t("tabDesign")}</h2>
               <button
                 type="button"
                 onClick={onCloseSettings}
-                aria-label="Close design settings"
+                aria-label={t("closeSettings")}
                 className={INSPECTOR_CLOSE_CLASS}
               >
                 <X className="size-4" strokeWidth={2} aria-hidden="true" />

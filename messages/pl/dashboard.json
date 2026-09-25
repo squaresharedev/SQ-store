@@ -1,0 +1,116 @@
+{
+  "metadata": {
+    "app": {
+      "title": "Panel Square Share",
+      "description": "Zarządzaj produktami, projektuj witrynę, połącz Stripe i przeglądaj analitykę w Square Share."
+    },
+    "overview": {
+      "title": "Przegląd"
+    },
+    "payments": {
+      "title": "Płatności"
+    }
+  },
+  "loading": {
+    "overview": {
+      "srLoading": "Wczytywanie przeglądu…"
+    },
+    "payments": {
+      "title": "Płatności",
+      "subtitle": "Twoje saldo, wypłaty i połączenie ze Stripe.",
+      "srLoading": "wczytywanie płatności"
+    }
+  },
+  "shell": {
+    "accountFallback": "Konto",
+    "anotherStore": "inny sklep"
+  },
+  "overview": {
+    "title": "Przegląd",
+    "addProduct": "Dodaj produkt",
+    "revenue30d": "Przychód · 30 dni",
+    "sales30d": "Sprzedaż · 30 dni",
+    "avgOrder30d": "Śr. zamówienie · 30 dni",
+    "revenueHeroLabel": "Przychód za ostatnie 30 dni",
+    "noSales": "Brak sprzedaży"
+  },
+  "metric": {
+    "zeroDefault": "Brak sprzedaży",
+    "pendingDefault": "Dostępne po podłączeniu analityki."
+  },
+  "sidebar": {
+    "openMenu": "Otwórz menu",
+    "closeMenu": "Zamknij menu",
+    "navLabel": "Panel",
+    "title": "Panel"
+  },
+  "recentOrders": {
+    "title": "Ostatnie zamówienia",
+    "empty": "Jeszcze żadnych zamówień. Sprzedaż przez twój własny link do zakupu albo e-mail się tu nie pojawi."
+  },
+  "attention": {
+    "title": "Wymaga uwagi",
+    "allClear": "Wszystko w porządku. Nic teraz nie wymaga twojej uwagi.",
+    "twoFactor": {
+      "label": "Włącz uwierzytelnianie dwuskładnikowe",
+      "description": "Kod z telefonu przy logowaniu sprawia, że samo skradzione hasło nie wystarczy, by wejść do twojego sklepu.",
+      "action": "Włącz"
+    },
+    "stripe": {
+      "label": "Połącz Stripe, aby otrzymywać płatności",
+      "description": "Wypłaty pozostają zablokowane, dopóki konto nie zostanie połączone.",
+      "action": "Otwórz płatności"
+    },
+    "legal": {
+      "label": "Zaakceptuj warunki dla sprzedawców",
+      "labelUpdated": "Zaakceptuj zaktualizowane warunki dla sprzedawców",
+      "description": "Przeczytaj wersje robocze Umowy sprzedawcy, Warunków i Polityki prywatności i je zaakceptuj.",
+      "descriptionUpdated": "Warunki zmieniły się od czasu ich akceptacji. Przeczytaj i zaakceptuj aktualną wersję.",
+      "descriptionTerms": "Przeczytaj Warunki korzystania z usługi i je zaakceptuj.",
+      "descriptionTermsUpdated": "Warunki korzystania z usługi zmieniły się od czasu ich akceptacji. Przeczytaj i zaakceptuj aktualną wersję.",
+      "action": "Sprawdź warunki"
+    },
+    "noBuyPath": {
+      "label": "{count, plural, one {{count} produkt bez sposobu na zakup} few {{count} produkty bez sposobu na zakup} many {{count} produktów bez sposobu na zakup} other {{count} produktu bez sposobu na zakup}}",
+      "description": "Dodaj link do zakupu albo ustaw e-mail kontaktowy w Ustawieniach, aby kupujący mogli się z tobą skontaktować.",
+      "action": "Sprawdź produkty"
+    },
+    "noShipping": {
+      "label": "Dodaj warunki wysyłki",
+      "description": "Produkty fizyczne wymagają warunków wysyłki i zwrotów, zanim kupujący zobaczą pełne szczegóły.",
+      "action": "Dodaj warunki"
+    },
+    "storefront": {
+      "labelEmpty": "Twoja witryna jest pusta",
+      "labelNone": "Utwórz swoją witrynę",
+      "descriptionEmpty": "Dodaj produkt do siatki, aby uzyskać stronę, którą możesz udostępnić.",
+      "descriptionNone": "Wybierz wygląd, a potem dodaj swoje produkty do siatki.",
+      "actionOpen": "Otwórz edytor",
+      "actionCreate": "Utwórz witrynę"
+    },
+    "images": {
+      "label": "{count, plural, one {{count} produkt bez zdjęcia} few {{count} produkty bez zdjęcia} many {{count} produktów bez zdjęcia} other {{count} produktu bez zdjęcia}}",
+      "descriptionSingle": "„{title}” nie ma jeszcze zdjęcia głównego.",
+      "descriptionMultiple": "Produkty bez zdjęć wyglądają pusto na twojej witrynie.",
+      "actionSingle": "Dodaj zdjęcie",
+      "actionMultiple": "Popraw produkty"
+    },
+    "flaggedOrders": {
+      "label": "{count, plural, one {{count} zamówienie do sprawdzenia} few {{count} zamówienia do sprawdzenia} many {{count} zamówień do sprawdzenia} other {{count} zamówienia do sprawdzenia}}",
+      "descriptionBoth": "{disputed, plural, one {{disputed} sporne zamówienie} few {{disputed} sporne zamówienia} many {{disputed} spornych zamówień} other {{disputed} spornego zamówienia}}, {refunded, plural, one {{refunded} zwrócone zamówienie} few {{refunded} zwrócone zamówienia} many {{refunded} zwróconych zamówień} other {{refunded} zwróconego zamówienia}}.",
+      "descriptionDisputed": "{count, plural, one {{count} sporne zamówienie.} few {{count} sporne zamówienia.} many {{count} spornych zamówień.} other {{count} spornego zamówienia.}}",
+      "descriptionRefunded": "{count, plural, one {{count} zwrócone zamówienie.} few {{count} zwrócone zamówienia.} many {{count} zwróconych zamówień.} other {{count} zwróconego zamówienia.}}",
+      "action": "Sprawdź zamówienia"
+    },
+    "noindexPages": {
+      "label": "Strony produktów zablokowane w wyszukiwarkach",
+      "description": "{count, plural, =1 {Jedna witryna ma wyłączone indeksowanie stron produktów.} one {{count} witryna ma wyłączone indeksowanie stron produktów.} few {{count} witryny mają wyłączone indeksowanie stron produktów.} many {{count} witryn ma wyłączone indeksowanie stron produktów.} other {{count} witryny mają wyłączone indeksowanie stron produktów.}}",
+      "action": "Otwórz edytor"
+    },
+    "deadBlocks": {
+      "label": "{count, plural, one {{count} blok witryny odwołujący się do usuniętych produktów} few {{count} bloki witryny odwołujące się do usuniętych produktów} many {{count} bloków witryny odwołujących się do usuniętych produktów} other {{count} bloku witryny odwołującego się do usuniętych produktów}}",
+      "description": "Te bloki wyglądają dla odwiedzających na puste. Usuń je lub zastąp innymi.",
+      "action": "Otwórz witrynę"
+    }
+  }
+}

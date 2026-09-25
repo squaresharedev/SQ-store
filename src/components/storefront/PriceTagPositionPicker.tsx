@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { EyeOff } from "lucide-react";
 import {
   PRICE_TAG_FLOAT_POSITIONS,
@@ -13,12 +14,6 @@ import { TileSpotPicker, unclippedSpots } from "./TileSpotPicker";
 /** The three placement modes the mode picker offers; "float" opens the
  *  per-spot picker below it. */
 export type PriceTagMode = "below" | "float" | "hidden";
-
-const MODE_LABELS: Record<PriceTagMode, string> = {
-  below: "Below",
-  float: "On image",
-  hidden: "Hidden",
-};
 
 /** Miniature card depicting one placement mode: an image area over an info
  *  bar, with the tag pill drawn where that mode puts it. */
@@ -52,6 +47,8 @@ function ModeGlyph({ mode }: { mode: PriceTagMode }) {
  * Visual mode picker for price tag placement: three mini cards showing the
  * tag below the image, floating on the image, or hidden.
  */
+const PRICE_TAG_MODES: readonly PriceTagMode[] = ["below", "float", "hidden"];
+
 export function PriceTagModePicker({
   value,
   onChange,
@@ -59,29 +56,26 @@ export function PriceTagModePicker({
   value: PriceTagMode;
   onChange: (mode: PriceTagMode) => void;
 }) {
+  const t = useTranslations("Storefront.priceTagPosition");
+  const modeLabels: Record<PriceTagMode, string> = {
+    below: t("below"),
+    float: t("onImage"),
+    hidden: t("hidden"),
+  };
   return (
     <OptionCardPicker
       value={value}
-      options={(Object.keys(MODE_LABELS) as PriceTagMode[]).map((mode) => ({
+      options={PRICE_TAG_MODES.map((mode) => ({
         value: mode,
-        label: MODE_LABELS[mode],
+        label: modeLabels[mode],
         glyph: <ModeGlyph mode={mode} />,
       }))}
       onChange={onChange}
-      ariaLabel="Price tag placement"
+      ariaLabel={t("placementAriaLabel")}
     />
   );
 }
 
-const FLOAT_POSITION_LABELS: Record<PriceTagFloatPosition, string> = {
-  "top-left": "Top left",
-  "top-center": "Top center",
-  "top-right": "Top right",
-  "middle-center": "Middle",
-  "bottom-left": "Bottom left",
-  "bottom-center": "Bottom center",
-  "bottom-right": "Bottom right",
-};
 
 /**
  * Which spots a tile actually has, mirroring resolvePriceTagPosition: the
@@ -116,16 +110,24 @@ export function PriceTagPositionPicker({
   titleBand?: SpotRow | null;
   onChange: (position: PriceTagFloatPosition) => void;
 }) {
+  const t = useTranslations("Storefront.priceTagPosition");
+  const spotLabels: Record<PriceTagFloatPosition, string> = {
+    "top-left": t("spotTopLeft"),
+    "top-center": t("spotTopCenter"),
+    "top-right": t("spotTopRight"),
+    "middle-center": t("spotMiddle"),
+    "bottom-left": t("spotBottomLeft"),
+    "bottom-center": t("spotBottomCenter"),
+    "bottom-right": t("spotBottomRight"),
+  };
   return (
     <TileSpotPicker
       value={value}
       cornerRadius={cornerRadius}
       available={availablePositions(cornerRadius, titleBand)}
       band={titleBand}
-      ariaLabel="Price tag spot"
-      spotLabel={(spot) =>
-        `Price tag ${FLOAT_POSITION_LABELS[spot].toLowerCase()}`
-      }
+      ariaLabel={t("spotAriaLabel")}
+      spotLabel={(spot) => spotLabels[spot]}
       onChange={onChange}
     />
   );

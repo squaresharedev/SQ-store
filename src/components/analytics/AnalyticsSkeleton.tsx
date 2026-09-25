@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { SIGNAL_SOURCES } from "@/lib/analytics/sources";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cardClass } from "@/components/ui/surface-styles";
@@ -15,9 +16,10 @@ import { cn } from "@/lib/utils";
  * design is meant to remove.
  */
 export function AnalyticsSkeleton() {
+  const t = useTranslations("Analytics.loading");
   return (
     <div className="flex flex-col gap-10" aria-hidden="true">
-      <span className="sr-only">loading analytics</span>
+      <span className="sr-only">{t("srLoading")}</span>
 
       <div className="flex flex-col gap-4">
         {/* Range controls placeholder */}

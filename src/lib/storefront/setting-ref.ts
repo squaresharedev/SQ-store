@@ -12,6 +12,7 @@
  * and the storefront-wide one when nothing is.
  */
 
+import type { MessageKey } from "@/i18n/types";
 import type { ProductPageSectionId } from "@/types/storefront";
 
 /** The design panel's six groups, mirrored from ControlsPanel. */
@@ -177,7 +178,8 @@ export function freshSettingRef(ref: SettingRef): SettingRef {
 export type SettingEntry = {
   /** Stable id, and the value carried in `?setting=`. */
   id: string;
-  label: string;
+  /** Resolved through the reader's translator wherever it is shown or matched. */
+  label: MessageKey;
   /**
    * What else a seller might call it.
    *
@@ -198,13 +200,24 @@ export type SettingEntry = {
 };
 
 /** Where each entry says it lives, for the second line of a search result. */
-export const GROUP_LABELS: Record<ControlsGroup, string> = {
-  theme: "Theme",
-  header: "Header",
-  typography: "Typography",
-  cards: "Product cards",
-  soldOut: "Sold out",
-  productPage: "Product page",
+export const GROUP_LABELS: Record<ControlsGroup, MessageKey> = {
+  theme: "Storefront.settings.groups.theme",
+  header: "Storefront.settings.groups.header",
+  typography: "Storefront.settings.groups.typography",
+  cards: "Storefront.settings.groups.cards",
+  soldOut: "Storefront.settings.groups.soldOut",
+  productPage: "Storefront.settings.groups.productPage",
+};
+
+/** The "Storefront / Theme" line, one whole message per group so a language
+ *  can word the path however it needs to. */
+export const GROUP_SUBTITLES: Record<ControlsGroup, MessageKey> = {
+  theme: "Storefront.settings.subtitle.theme",
+  header: "Storefront.settings.subtitle.header",
+  typography: "Storefront.settings.subtitle.typography",
+  cards: "Storefront.settings.subtitle.cards",
+  soldOut: "Storefront.settings.subtitle.soldOut",
+  productPage: "Storefront.settings.subtitle.productPage",
 };
 
 /**
@@ -220,15 +233,21 @@ export const GROUP_LABELS: Record<ControlsGroup, string> = {
  * it is what lets "store bg colour" find the Background setting rather than
  * getting two words out of three. The editor shows the group name instead of
  * this line, which is a presentation choice and costs the matching nothing.
+ *
+ * Title and subtitle are in the reader's language; the keywords stay English
+ * search vocabulary, matched in every language.
  */
-export function settingIndexFields(setting: SettingEntry): {
+export function settingIndexFields(
+  setting: SettingEntry,
+  t: (key: MessageKey) => string,
+): {
   title: string;
   subtitle: string;
   keywords: readonly string[];
 } {
   return {
-    title: setting.label,
-    subtitle: `Storefront / ${GROUP_LABELS[settingGroup(setting.ref)]}`,
+    title: t(setting.label),
+    subtitle: t(GROUP_SUBTITLES[settingGroup(setting.ref)]),
     keywords: setting.keywords,
   };
 }
@@ -236,7 +255,7 @@ export function settingIndexFields(setting: SettingEntry): {
 export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
   {
     id: "looks",
-    label: "Storefront look",
+    label: "Storefront.settings.labels.looks",
     keywords: [
       "preset",
       "theme preset",
@@ -257,7 +276,7 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
   },
   {
     id: "background",
-    label: "Background",
+    label: "Storefront.settings.labels.background",
     keywords: [
       "background colour",
       "store background colour",
@@ -276,7 +295,7 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
   },
   {
     id: "accent",
-    label: "Accent colour",
+    label: "Storefront.settings.labels.accent",
     keywords: [
       "brand colour",
       "primary colour",
@@ -289,7 +308,7 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
   },
   {
     id: "header",
-    label: "Store name and bio",
+    label: "Storefront.settings.labels.header",
     keywords: [
       "masthead",
       "heading",
@@ -307,7 +326,7 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
   },
   {
     id: "font",
-    label: "Font",
+    label: "Storefront.settings.labels.font",
     keywords: [
       "typeface",
       "typography",
@@ -322,7 +341,7 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
   },
   {
     id: "canvas-size",
-    label: "Canvas size",
+    label: "Storefront.settings.labels.canvasSize",
     keywords: [
       "columns",
       "rows",
@@ -339,7 +358,7 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
   },
   {
     id: "grid-gap",
-    label: "Grid spacing",
+    label: "Storefront.settings.labels.gridGap",
     keywords: [
       "gap",
       "gutter",
@@ -355,7 +374,7 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
   },
   {
     id: "tile-layout",
-    label: "Tile layout",
+    label: "Storefront.settings.labels.tileLayout",
     keywords: [
       "preset layout",
       "standard",
@@ -371,7 +390,7 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
   },
   {
     id: "title-position",
-    label: "Title position",
+    label: "Storefront.settings.labels.titlePosition",
     keywords: [
       "move the title",
       "where is the title",
@@ -385,7 +404,7 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
   },
   {
     id: "title-style",
-    label: "Title style",
+    label: "Storefront.settings.labels.titleStyle",
     keywords: [
       "bar",
       "overlay",
@@ -403,7 +422,7 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
   },
   {
     id: "corner-radius",
-    label: "Corner roundness",
+    label: "Storefront.settings.labels.cornerRadius",
     keywords: [
       "rounded corners",
       "circle tiles",
@@ -417,7 +436,7 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
   },
   {
     id: "title-inset",
-    label: "Title edge spacing",
+    label: "Storefront.settings.labels.titleInset",
     keywords: [
       "padding",
       "breathing room",
@@ -430,7 +449,7 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
   },
   {
     id: "price-position",
-    label: "Price position",
+    label: "Storefront.settings.labels.pricePosition",
     keywords: [
       "move the price",
       "where is the price",
@@ -443,7 +462,7 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
   },
   {
     id: "price-style",
-    label: "Price tag style",
+    label: "Storefront.settings.labels.priceStyle",
     keywords: [
       "price colour",
       "price tag colour",
@@ -456,7 +475,7 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
   },
   {
     id: "sold-out",
-    label: "Sold out products",
+    label: "Storefront.settings.labels.soldOut",
     keywords: [
       "out of stock",
       "hide sold out",
@@ -485,7 +504,7 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
   // ---------------------------------------------------------------------
   {
     id: "product-page-layout",
-    label: "Product page",
+    label: "Storefront.settings.labels.productPageLayout",
     keywords: [
       "product page",
       "detail page",
@@ -501,7 +520,7 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
   },
   {
     id: "product-page-background",
-    label: "Product page background",
+    label: "Storefront.settings.labels.productPageBackground",
     keywords: [
       "page background",
       "page colour",
@@ -517,7 +536,7 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
   },
   {
     id: "product-page-photos",
-    label: "Product page photos",
+    label: "Storefront.settings.labels.productPagePhotos",
     keywords: [
       "photo fit",
       "image fit",
@@ -535,7 +554,7 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
   },
   {
     id: "product-page-font",
-    label: "Product page font",
+    label: "Storefront.settings.labels.productPageFont",
     keywords: [
       "page font",
       "page typeface",
@@ -549,7 +568,7 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
   },
   {
     id: "product-page-indexing",
-    label: "Search engine listing",
+    label: "Storefront.settings.labels.productPageIndexing",
     keywords: [
       "search engines",
       "google",
@@ -565,7 +584,7 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
   },
   {
     id: "buy-button",
-    label: "Buy button",
+    label: "Storefront.settings.labels.buyButton",
     keywords: [
       "cta",
       "call to action",
@@ -581,7 +600,7 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
   },
   {
     id: "buy-button-colour",
-    label: "Buy button colour",
+    label: "Storefront.settings.labels.buyButtonColour",
     keywords: [
       "button colour",
       "buy button colour",
@@ -595,7 +614,7 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
   },
   {
     id: "buy-button-roundness",
-    label: "Buy button roundness",
+    label: "Storefront.settings.labels.buyButtonRoundness",
     keywords: [
       "rounded button",
       "button corners",
@@ -609,7 +628,7 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
   },
   {
     id: "buy-button-border",
-    label: "Buy button border",
+    label: "Storefront.settings.labels.buyButtonBorder",
     keywords: [
       "button border",
       "button outline",
@@ -623,7 +642,7 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
   },
   {
     id: "price-note",
-    label: "Price note",
+    label: "Storefront.settings.labels.priceNote",
     keywords: [
       "incl vat",
       "excl vat",
@@ -638,7 +657,7 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
   },
   {
     id: "shipping-note",
-    label: "Shipping note",
+    label: "Storefront.settings.labels.shippingNote",
     keywords: [
       "plus shipping",
       "free shipping",
@@ -651,7 +670,7 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
   },
   {
     id: "product-page-sections",
-    label: "Product page sections",
+    label: "Storefront.settings.labels.productPageSections",
     keywords: [
       "description",
       "specifications",
@@ -669,7 +688,7 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
   },
   {
     id: "product-page-availability",
-    label: "Availability on the page",
+    label: "Storefront.settings.labels.productPageAvailability",
     keywords: [
       "show stock",
       "stock level",
@@ -682,7 +701,7 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
   },
   {
     id: "product-page-byline",
-    label: "Sold by byline",
+    label: "Storefront.settings.labels.productPageByline",
     keywords: [
       "sold by",
       "seller name",
@@ -695,7 +714,7 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
   },
   {
     id: "shipping-returns",
-    label: "Shipping and returns policy",
+    label: "Storefront.settings.labels.shippingReturns",
     keywords: [
       "shipping policy",
       "returns policy",
@@ -720,7 +739,7 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
   },
   {
     id: "seller-details",
-    label: "Seller details",
+    label: "Storefront.settings.labels.sellerDetails",
     keywords: [
       "business name",
       "company name",

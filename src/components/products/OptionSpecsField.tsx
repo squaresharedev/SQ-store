@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ChevronDown, Plus, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import {
   errorTextClass,
@@ -65,6 +66,7 @@ export function OptionSpecsField({
   errors: Record<string, string>;
   onChange: (byOption: Record<string, OptionDetailsFormValues>) => void;
 }) {
+  const t = useTranslations("Products.optionSpecsField");
   const [openIds, setOpenIds] = useState<ReadonlySet<string>>(() => new Set<string>());
 
   const rows = optionGroups.flatMap((group) =>
@@ -97,12 +99,8 @@ export function OptionSpecsField({
       data-product-value={Object.keys(byOption).length}
     >
       <div className="flex items-center gap-1.5">
-        <span className={labelClass}>Different for each version</span>
-        <InfoTip label="How per-version specifications work">
-          Sizes and weights that change with the version go here. Anything left
-          blank uses what you filled in above, so state only what actually
-          differs. Buyers see the numbers for the version they have picked.
-        </InfoTip>
+        <span className={labelClass}>{t("heading")}</span>
+        <InfoTip label={t("about")}>{t("help")}</InfoTip>
       </div>
 
       <ul className={cn("divide-y divide-border rounded-sm border border-border")}>
@@ -113,8 +111,9 @@ export function OptionSpecsField({
           // row is a message nobody reads.
           const open = openIds.has(option.id) || Boolean(error);
           const filled = !optionDetailsEmpty(values);
-          const optionName = option.name.trim() || "Unnamed option";
-          const groupName = group.name.trim() || "Options";
+          const optionName = option.name.trim() || t("unnamedOption");
+          const optionRef = { named: option.name.trim() ? "yes" : "no", option: option.name.trim() };
+          const groupName = group.name.trim() || t("options");
 
           return (
             <li key={option.id} data-option-details={option.id}>
@@ -145,7 +144,7 @@ export function OptionSpecsField({
                     filled ? "text-foreground" : "text-muted-foreground",
                   )}
                 >
-                  {filled ? summarize(values, units) : "Same as above"}
+                  {filled ? summarize(values, units) : t("sameAsAbove")}
                 </span>
                 <ChevronDown
                   aria-hidden="true"
@@ -163,28 +162,28 @@ export function OptionSpecsField({
                   <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                     <Measure
                       id={`${inputId}-${option.id}-length`}
-                      label="Length"
+                      label={t("length")}
                       suffix={units.dimensionUnit}
                       value={values.length}
                       onChange={(length) => update(option.id, { ...values, length })}
                     />
                     <Measure
                       id={`${inputId}-${option.id}-width`}
-                      label="Width"
+                      label={t("width")}
                       suffix={units.dimensionUnit}
                       value={values.width}
                       onChange={(width) => update(option.id, { ...values, width })}
                     />
                     <Measure
                       id={`${inputId}-${option.id}-height`}
-                      label="Height"
+                      label={t("height")}
                       suffix={units.dimensionUnit}
                       value={values.height}
                       onChange={(height) => update(option.id, { ...values, height })}
                     />
                     <Measure
                       id={`${inputId}-${option.id}-weight`}
-                      label="Weight"
+                      label={t("weight")}
                       suffix={units.weightUnit}
                       value={values.weight}
                       onChange={(weight) => update(option.id, { ...values, weight })}
@@ -192,15 +191,15 @@ export function OptionSpecsField({
                   </div>
 
                   {values.specs.length > 0 && (
-                    <ul className="space-y-2" aria-label={`${optionName} specifications`}>
+                    <ul className="space-y-2" aria-label={t("specsList", optionRef)}>
                       {values.specs.map((spec, index) => (
                         <li key={index} className="flex gap-2" data-option-spec-row={index}>
                           <input
                             type="text"
                             value={spec.label}
                             maxLength={40}
-                            placeholder="Name, e.g. Seats"
-                            aria-label={`${optionName} specification ${index + 1} name`}
+                            placeholder={t("specName")}
+                            aria-label={t("specNameLabel", { ...optionRef, number: index + 1 })}
                             onChange={(event) =>
                               update(option.id, {
                                 ...values,
@@ -215,8 +214,8 @@ export function OptionSpecsField({
                             type="text"
                             value={spec.value}
                             maxLength={OPTION_SPEC_VALUE_MAX}
-                            placeholder="Value, e.g. 6"
-                            aria-label={`${optionName} specification ${index + 1} value`}
+                            placeholder={t("specValue")}
+                            aria-label={t("specValueLabel", { ...optionRef, number: index + 1 })}
                             onChange={(event) =>
                               update(option.id, {
                                 ...values,
@@ -230,7 +229,7 @@ export function OptionSpecsField({
                           <button
                             type="button"
                             className={cn(iconButtonClass, "size-8 shrink-0")}
-                            aria-label={`Remove ${optionName} specification ${index + 1}`}
+                            aria-label={t("removeSpec", { ...optionRef, number: index + 1 })}
                             onClick={() =>
                               update(option.id, {
                                 ...values,
@@ -261,7 +260,7 @@ export function OptionSpecsField({
                     <Plus className="size-3.5" strokeWidth={2} aria-hidden="true" />
                     {/* A row that replaces one from above by name, which is
                         worth saying where the seller is about to add one. */}
-                    Specification for this version
+                    {t("addSpec")}
                   </button>
                 </div>
               )}
@@ -270,7 +269,7 @@ export function OptionSpecsField({
         })}
       </ul>
       <p className={infoTextClass}>
-        A specification with the same name as one above replaces it for that version.
+        {t("replacesNote")}
       </p>
     </div>
   );

@@ -5,6 +5,7 @@ import {
   type SectionSpec,
 } from "@/lib/search/catalog";
 import {
+  GROUP_SUBTITLES,
   PRODUCT_PAGE_SETTINGS,
   STOREFRONT_ONLY_SETTINGS,
   settingIndexFields,
@@ -14,7 +15,12 @@ import {
 import type { Product } from "@/types/product";
 import { blockKey, type StorefrontBlock } from "@/types/storefront";
 import type { LibraryTab } from "./LibraryPanel";
-import { BLOCK_KIND_LABELS, blockKeywords, blockLabel } from "./block-label";
+import {
+  BLOCK_KIND_LABELS,
+  blockKeywords,
+  blockLabel,
+  type KeyTranslator,
+} from "./block-label";
 
 /**
  * WHAT THE EDITOR'S SEARCH FIELD CAN FIND.
@@ -77,24 +83,31 @@ export const EDITOR_SECTIONS = {
  * word that is both a setting and the name of something they placed. Their own
  * object is the more specific thing and the more likely target.
  */
-const SECTIONS: SectionSpec[] = [
-  { key: EDITOR_SECTIONS.canvas, label: "On the canvas" },
-  { key: EDITOR_SECTIONS.settings, label: "Settings" },
-  { key: EDITOR_SECTIONS.panels, label: "Panels" },
-];
+function sections(t: KeyTranslator): SectionSpec[] {
+  return [
+    { key: EDITOR_SECTIONS.canvas, label: t("Storefront.editorSearch.sections.canvas") },
+    { key: EDITOR_SECTIONS.settings, label: t("Storefront.editorSearch.sections.settings") },
+    { key: EDITOR_SECTIONS.panels, label: t("Storefront.editorSearch.sections.panels") },
+  ];
+}
 
-/** Settings never change, so these lists are built once. */
-function settingRows(settings: readonly SettingEntry[]): EditorSearchEntry[] {
+/** Settings never change, so these lists are built once per translator. */
+function settingRows(
+  settings: readonly SettingEntry[],
+  t: KeyTranslator,
+): EditorSearchEntry[] {
   return settings.map((setting) => ({
     id: `setting:${setting.id}`,
-    ...settingIndexFields(setting),
+    ...settingIndexFields(setting, t),
     section: EDITOR_SECTIONS.settings,
     payload: { kind: "setting", ref: setting.ref },
   }));
 }
 
-/** The storefront's own settings, findable whatever is on the canvas. */
-const SETTING_ENTRIES: EditorSearchEntry[] = settingRows(STOREFRONT_ONLY_SETTINGS);
+/*
+ * The storefront's own settings (SETTING_ENTRIES in the index below) are
+ * findable whatever is on the canvas.
+ */
 
 /**
  * The product page's settings, offered ONLY while a page is on the canvas.
@@ -106,7 +119,7 @@ const SETTING_ENTRIES: EditorSearchEntry[] = settingRows(STOREFRONT_ONLY_SETTING
  * confidently in the dark. So they are gated, and their absence is not silent:
  * see OPEN_PAGE_ENTRY below.
  */
-const PRODUCT_PAGE_ENTRIES: EditorSearchEntry[] = settingRows(PRODUCT_PAGE_SETTINGS);
+/* PRODUCT_PAGE_ENTRIES in the index below. */
 
 /**
  * WHAT STANDS IN FOR THEM while no page is open.
@@ -134,95 +147,125 @@ const PRODUCT_PAGE_ENTRIES: EditorSearchEntry[] = settingRows(PRODUCT_PAGE_SETTI
  * different row that happens to tie. Ties break on the earlier term, so the
  * names of the things go in front.
  */
-const OPEN_PAGE_ENTRY: EditorSearchEntry = {
-  id: "setting:open-product-page",
-  title: "Open the product page",
-  // The same subtitle the gated rows carry, so a query naming the group
-  // ("storefront product page") ranks this exactly as it ranked them.
-  subtitle: "Storefront / Product page",
-  keywords: Array.from(
-    new Set([
-      ...PRODUCT_PAGE_SETTINGS.map((setting) => setting.label),
-      ...PRODUCT_PAGE_SETTINGS.flatMap((setting) => setting.keywords),
-    ]),
-  ),
-  section: EDITOR_SECTIONS.settings,
-  payload: { kind: "setting", ref: { kind: "productPage", section: "layout" } },
-};
+function openPageEntry(t: KeyTranslator): EditorSearchEntry {
+  return {
+    id: "setting:open-product-page",
+    title: t("Storefront.editorSearch.openProductPage"),
+    // The same subtitle the gated rows carry, so a query naming the group
+    // ("storefront product page") ranks this exactly as it ranked them.
+    subtitle: t(GROUP_SUBTITLES.productPage),
+    keywords: Array.from(
+      new Set([
+        ...PRODUCT_PAGE_SETTINGS.map((setting) => t(setting.label)),
+        ...PRODUCT_PAGE_SETTINGS.flatMap((setting) => setting.keywords),
+      ]),
+    ),
+    section: EDITOR_SECTIONS.settings,
+    payload: { kind: "setting", ref: { kind: "productPage", section: "layout" } },
+  };
+}
 
 /**
  * The drawers. Titled as the thing you would go there TO DO rather than as
  * the panel's own name, because nobody searches for "the library".
  */
-const PANEL_ENTRIES: EditorSearchEntry[] = [
-  {
-    id: "panel:layers",
-    title: "Layers",
-    subtitle: "Panel",
-    keywords: [
-      "stack",
-      "order",
-      "arrange",
-      "z index",
-      "bring to front",
-      "send to back",
-      "overlapping",
-      "what is underneath",
-      "hidden behind",
-    ],
-    section: EDITOR_SECTIONS.panels,
-    payload: { kind: "panel", panel: "layers" },
-  },
-  {
-    id: "panel:products",
-    title: "Add a product",
-    subtitle: "Panel",
-    keywords: [
-      "product picker",
-      "place a product",
-      "insert a product",
-      "catalogue",
-      "my items",
-      "sell something here",
-    ],
-    section: EDITOR_SECTIONS.panels,
-    payload: { kind: "panel", panel: "products" },
-  },
-  {
-    id: "panel:shapes",
-    title: "Shapes",
-    subtitle: "Panel",
-    keywords: [
-      "add a shape",
-      "circle",
-      "square",
-      "star",
-      "line",
-      "arrow",
-      "divider",
-      "decoration",
-    ],
-    section: EDITOR_SECTIONS.panels,
-    payload: { kind: "panel", panel: "shapes" },
-  },
-  {
-    id: "panel:uploads",
-    title: "Uploads",
-    subtitle: "Panel",
-    keywords: [
-      "my files",
-      "add an image",
-      "logo",
-      "artwork",
-      "graphic",
-      "png",
-      "svg",
-      "element",
-    ],
-    section: EDITOR_SECTIONS.panels,
-    payload: { kind: "panel", panel: "uploads" },
-  },
-];
+function panelEntries(t: KeyTranslator): EditorSearchEntry[] {
+  return [
+    {
+      id: "panel:layers",
+      title: t("Storefront.editorSearch.panels.layers"),
+      subtitle: t("Storefront.editorSearch.panelSubtitle"),
+      keywords: [
+        "stack",
+        "order",
+        "arrange",
+        "z index",
+        "bring to front",
+        "send to back",
+        "overlapping",
+        "what is underneath",
+        "hidden behind",
+      ],
+      section: EDITOR_SECTIONS.panels,
+      payload: { kind: "panel", panel: "layers" },
+    },
+    {
+      id: "panel:products",
+      title: t("Storefront.editorSearch.panels.products"),
+      subtitle: t("Storefront.editorSearch.panelSubtitle"),
+      keywords: [
+        "product picker",
+        "place a product",
+        "insert a product",
+        "catalogue",
+        "my items",
+        "sell something here",
+      ],
+      section: EDITOR_SECTIONS.panels,
+      payload: { kind: "panel", panel: "products" },
+    },
+    {
+      id: "panel:shapes",
+      title: t("Storefront.editorSearch.panels.shapes"),
+      subtitle: t("Storefront.editorSearch.panelSubtitle"),
+      keywords: [
+        "add a shape",
+        "circle",
+        "square",
+        "star",
+        "line",
+        "arrow",
+        "divider",
+        "decoration",
+      ],
+      section: EDITOR_SECTIONS.panels,
+      payload: { kind: "panel", panel: "shapes" },
+    },
+    {
+      id: "panel:uploads",
+      title: t("Storefront.editorSearch.panels.uploads"),
+      subtitle: t("Storefront.editorSearch.panelSubtitle"),
+      keywords: [
+        "my files",
+        "add an image",
+        "logo",
+        "artwork",
+        "graphic",
+        "png",
+        "svg",
+        "element",
+      ],
+      section: EDITOR_SECTIONS.panels,
+      payload: { kind: "panel", panel: "uploads" },
+    },
+  ];
+}
+
+/** Everything in the index that does not depend on the board, per translator
+ *  (one per locale in practice), so the ranker's per-entry caches survive. */
+type StaticRows = {
+  sections: SectionSpec[];
+  settings: EditorSearchEntry[];
+  productPage: EditorSearchEntry[];
+  openPage: EditorSearchEntry;
+  panels: EditorSearchEntry[];
+};
+
+const STATIC_ROWS = new WeakMap<KeyTranslator, StaticRows>();
+
+function staticRows(t: KeyTranslator): StaticRows {
+  const cached = STATIC_ROWS.get(t);
+  if (cached) return cached;
+  const rows: StaticRows = {
+    sections: sections(t),
+    settings: settingRows(STOREFRONT_ONLY_SETTINGS, t),
+    productPage: settingRows(PRODUCT_PAGE_SETTINGS, t),
+    openPage: openPageEntry(t),
+    panels: panelEntries(t),
+  };
+  STATIC_ROWS.set(t, rows);
+  return rows;
+}
 
 /**
  * One entry per object on the board.
@@ -234,13 +277,14 @@ const PANEL_ENTRIES: EditorSearchEntry[] = [
 function canvasEntries(
   blocks: readonly StorefrontBlock[],
   productsById: ReadonlyMap<string, Product>,
+  t: KeyTranslator,
 ): EditorSearchEntry[] {
   return blocks.map((block) => {
     const key = blockKey(block);
     return {
       id: `block:${key}`,
-      title: blockLabel(block, productsById),
-      subtitle: BLOCK_KIND_LABELS[block.type],
+      title: blockLabel(block, productsById, t),
+      subtitle: t(BLOCK_KIND_LABELS[block.type]),
       keywords: blockKeywords(block),
       section: EDITOR_SECTIONS.canvas,
       payload: { kind: "block", key },
@@ -261,13 +305,15 @@ function canvasEntries(
 export function editorEntries(
   blocks: readonly StorefrontBlock[],
   productsById: ReadonlyMap<string, Product>,
+  t: KeyTranslator,
   options: { pageOpen?: boolean } = {},
 ): EditorSearchEntry[] {
+  const rows = staticRows(t);
   return [
-    ...canvasEntries(blocks, productsById),
-    ...SETTING_ENTRIES,
-    ...(options.pageOpen ? PRODUCT_PAGE_ENTRIES : [OPEN_PAGE_ENTRY]),
-    ...PANEL_ENTRIES,
+    ...canvasEntries(blocks, productsById, t),
+    ...rows.settings,
+    ...(options.pageOpen ? rows.productPage : [rows.openPage]),
+    ...rows.panels,
   ];
 }
 
@@ -278,7 +324,8 @@ const EDITOR_LIMIT = 8;
 export function searchEditor(
   entries: readonly EditorSearchEntry[],
   query: string,
+  t: KeyTranslator,
   limit = EDITOR_LIMIT,
 ): EditorSearchSection[] {
-  return searchCatalog(entries, query, { sections: SECTIONS, limit });
+  return searchCatalog(entries, query, { sections: staticRows(t).sections, limit });
 }

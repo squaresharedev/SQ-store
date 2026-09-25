@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import {
   focusRingClass,
@@ -61,6 +62,7 @@ export function SettingsShell({
   /** 2FA is off for this account: badge the Security entry until it isn't. */
   securityRecommended?: boolean;
 }) {
+  const t = useTranslations();
   const pathname = usePathname();
   const navRef = React.useRef<HTMLElement>(null);
   const [overflows, setOverflows] = React.useState({ start: false, end: false });
@@ -70,7 +72,7 @@ export function SettingsShell({
   const activeEntry = SETTINGS_NAV.find((entry) =>
     pathname.startsWith(entry.href),
   );
-  const sectionLabel = activeEntry?.label ?? "Settings";
+  const sectionLabel = t(activeEntry?.label ?? "Nav.main.settings.label");
 
   /** Which ends of the strip still have tabs hidden past them. */
   const syncEdges = React.useCallback(() => {
@@ -116,13 +118,13 @@ export function SettingsShell({
         className={navItemClasses(active, danger)}
       >
         <Icon aria-hidden className="size-4" />
-        {item.label}
+        {t(item.label)}
         {securityRecommended && item.href === "/settings/security" && (
           // Words, not just a dot: a coloured dot says "something is wrong"
           // without saying what, and a screen reader would say nothing at all.
           // Same quiet pill as the sign-in page's "Last used", for the same
           // contrast reason: the accent colour misses AA at this size.
-          <span className={cn(lastUsedBadgeClass, "ml-auto")}>Recommended</span>
+          <span className={cn(lastUsedBadgeClass, "ml-auto")}>{t("Settings.shell.recommended")}</span>
         )}
       </Link>
     );
@@ -142,7 +144,7 @@ export function SettingsShell({
             there entirely. */}
         <div className="md:px-10 md:pt-8 lg:px-4">
           <p className="hidden text-lg font-semibold tracking-tight text-foreground md:block">
-            Settings
+            {t("Nav.main.settings.label")}
           </p>
         </div>
         <div className="mt-4 lg:mt-6">
@@ -153,7 +155,7 @@ export function SettingsShell({
             <nav
               ref={navRef}
               onScroll={syncEdges}
-              aria-label="Settings sections"
+              aria-label={t("Settings.shell.sectionsLabel")}
               // Gutters follow the content column's so the first tab lines up
               // with the left edge of the cards below it.
               className="swipe-x flex snap-x gap-1 overflow-x-auto scroll-px-6 px-6 pb-3 md:scroll-px-10 md:px-10 lg:snap-none lg:flex-col lg:gap-0.5 lg:overflow-visible lg:px-3 lg:pb-6"
@@ -191,7 +193,7 @@ export function SettingsShell({
         <div className="mx-auto w-full max-w-2xl">
           <div className="mb-6">
             <p className="hidden font-inter text-xs font-semibold uppercase tracking-wide text-muted-foreground md:block">
-              Settings
+              {t("Nav.main.settings.label")}
             </p>
             <h1 className="text-xl font-semibold tracking-tight text-foreground">
               {sectionLabel}

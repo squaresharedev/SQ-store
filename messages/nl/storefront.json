@@ -1,0 +1,1297 @@
+{
+  "shapes": {
+    "name": {
+      "square": "Vierkant",
+      "circle": "Cirkel",
+      "ring": "Ring",
+      "diamond": "Ruit",
+      "rounded": "Afgerond vierkant",
+      "pill": "Pil",
+      "half": "Halve cirkel",
+      "quarter": "Kwart cirkel",
+      "bar": "Balk",
+      "triangle": "Driehoek",
+      "wedge": "Taartpunt",
+      "pentagon": "Vijfhoek",
+      "hexagon": "Zeshoek",
+      "octagon": "Achthoek",
+      "star": "Ster",
+      "sparkle": "Sprankeling",
+      "cross": "Kruis",
+      "arrow": "Pijl",
+      "chevron": "Chevron",
+      "trapezoid": "Trapezium",
+      "parallelogram": "Parallellogram",
+      "burst": "Uitbarsting"
+    },
+    "add": {
+      "square": "Vierkant toevoegen",
+      "circle": "Cirkel toevoegen",
+      "ring": "Ring toevoegen",
+      "diamond": "Ruit toevoegen",
+      "rounded": "Afgerond vierkant toevoegen",
+      "pill": "Pil toevoegen",
+      "half": "Halve cirkel toevoegen",
+      "quarter": "Kwart cirkel toevoegen",
+      "bar": "Balk toevoegen",
+      "triangle": "Driehoek toevoegen",
+      "wedge": "Taartpunt toevoegen",
+      "pentagon": "Vijfhoek toevoegen",
+      "hexagon": "Zeshoek toevoegen",
+      "octagon": "Achthoek toevoegen",
+      "star": "Ster toevoegen",
+      "sparkle": "Sprankeling toevoegen",
+      "cross": "Kruis toevoegen",
+      "arrow": "Pijl toevoegen",
+      "chevron": "Chevron toevoegen",
+      "trapezoid": "Trapezium toevoegen",
+      "parallelogram": "Parallellogram toevoegen",
+      "burst": "Uitbarsting toevoegen"
+    },
+    "group": {
+      "basic": "Basis",
+      "polygons": "Veelhoeken",
+      "accents": "Accenten"
+    },
+    "groupLabel": {
+      "basic": "Basisvormen",
+      "polygons": "Veelhoekvormen",
+      "accents": "Accentvormen"
+    }
+  },
+  "fonts": {
+    "sans": "Sans",
+    "serif": "Serif",
+    "mono": "Mono",
+    "display": "Display",
+    "hand": "Handgeschreven",
+    "inter": "Inter",
+    "montserrat": "Montserrat",
+    "custom": "Geüpload lettertype"
+  },
+  "textVariants": {
+    "heading": "Kop",
+    "subheading": "Subkop",
+    "body": "Hoofdtekst"
+  },
+  "layoutPresets": {
+    "standard": "Standaard",
+    "caption": "Bijschrift",
+    "header": "Koptekst",
+    "gallery": "Galerij",
+    "bare": "Sober"
+  },
+  "blockKinds": {
+    "product": "Product",
+    "text": "Tekst",
+    "shape": "Vorm",
+    "image": "Afbeelding"
+  },
+  "settings": {
+    "groups": {
+      "theme": "Thema",
+      "header": "Koptekst",
+      "typography": "Typografie",
+      "cards": "Producttegels",
+      "soldOut": "Uitverkocht",
+      "productPage": "Productpagina"
+    },
+    "subtitle": {
+      "theme": "Etalage / Thema",
+      "header": "Etalage / Koptekst",
+      "typography": "Etalage / Typografie",
+      "cards": "Etalage / Producttegels",
+      "soldOut": "Etalage / Uitverkocht",
+      "productPage": "Etalage / Productpagina"
+    },
+    "labels": {
+      "looks": "Etalage-uitstraling",
+      "background": "Achtergrond",
+      "accent": "Accentkleur",
+      "header": "Winkelnaam en bio",
+      "font": "Lettertype",
+      "canvasSize": "Canvasgrootte",
+      "gridGap": "Rasterafstand",
+      "tileLayout": "Tegellay-out",
+      "titlePosition": "Titelpositie",
+      "titleStyle": "Titelstijl",
+      "cornerRadius": "Hoekafronding",
+      "titleInset": "Titelrandafstand",
+      "pricePosition": "Prijspositie",
+      "priceStyle": "Prijslabelstijl",
+      "soldOut": "Uitverkochte producten",
+      "productPageLayout": "Productpagina",
+      "productPageBackground": "Achtergrond productpagina",
+      "productPagePhotos": "Foto's productpagina",
+      "productPageFont": "Lettertype productpagina",
+      "productPageIndexing": "Indexering door zoekmachines",
+      "buyButton": "Koopknop",
+      "buyButtonColour": "Kleur koopknop",
+      "buyButtonRoundness": "Afronding koopknop",
+      "buyButtonBorder": "Rand koopknop",
+      "priceNote": "Prijsvermelding",
+      "shippingNote": "Verzendvermelding",
+      "productPageSections": "Secties productpagina",
+      "productPageAvailability": "Beschikbaarheid op de pagina",
+      "productPageByline": "“Verkocht door”-regel",
+      "shippingReturns": "Verzend- en retourbeleid",
+      "sellerDetails": "Verkopersgegevens"
+    }
+  },
+  "editorSearch": {
+    "sections": {
+      "canvas": "Op het canvas",
+      "settings": "Instellingen",
+      "panels": "Panelen"
+    },
+    "openProductPage": "De productpagina openen",
+    "panelSubtitle": "Paneel",
+    "panels": {
+      "layers": "Lagen",
+      "products": "Product toevoegen",
+      "shapes": "Vormen",
+      "uploads": "Uploads"
+    }
+  },
+  "list": {
+    "showingOf": "{count} van {total} etalages weergegeven",
+    "count": "{count, plural, one {# etalage} other {# etalages}}",
+    "countSampleOnly": "Nog geen etalages",
+    "creating": "Aanmaken…",
+    "new": "Nieuwe etalage",
+    "emptyHeading": "Nog geen etalages",
+    "emptyHintOwner": "Maak je eerste etalage en voeg dan producten toe aan het raster. Elk product erop krijgt een pagina die je kunt delen.",
+    "emptyHintGuest": "Deze winkel heeft nog geen etalages.",
+    "create": "Etalage maken",
+    "loadMoreError": "Meer etalages laden is mislukt. Probeer het opnieuw.",
+    "loadMore": "Meer laden ({remaining} resterend)",
+    "deleteTitle": "Etalage verwijderen?",
+    "deleteDesc": "\"{name}\" en het bijbehorende raster worden definitief verwijderd. Dit kan niet ongedaan worden gemaakt.",
+    "deleteToast": "\"{name}\" is verwijderd."
+  },
+  "card": {
+    "editAriaLabel": "{name} bewerken",
+    "embedAriaLabel": "{name} insluiten",
+    "deleteAriaLabel": "{name} verwijderen",
+    "blockCount": "{count, plural, one {# blok} other {# blokken}}",
+    "updatedLabel": " · bijgewerkt {date}",
+    "emptyHint": "Dit raster is leeg",
+    "removed": "Verwijderd door SquareShare",
+    "pausedInReview": "Gepauzeerd · bij SquareShare ter beoordeling",
+    "pausedNeedsChanges": "Gepauzeerd door SquareShare · aanpassingen nodig"
+  },
+  "embed": {
+    "inDevNotice": "De insluitingswidget is in ontwikkeling en wordt nog niet weergegeven op externe sites. Stel je instellingen hieronder in, zodat je klaar bent om de insluitcode te plakken zodra die beschikbaar is.",
+    "title": "Deze etalage insluiten",
+    "description": "Plak deze insluitcode op een willekeurige site om \"{name}\" daar te tonen.",
+    "enabledLabel": "Insluiten ingeschakeld",
+    "domainsLabel": "Toegestane domeinen",
+    "domainsPlaceholder": "jouwsite.com, blog.jouwsite.com",
+    "domainsHint": "Tot {max}, gescheiden door komma's. Plak een URL en we knippen die terug tot het domein.",
+    "emptyDomainsWarning": "Voeg minstens één domein toe. Zolang dit leeg is, laadt de etalage nergens, ook al staat insluiten aan.",
+    "snippetLabel": "Insluitcode",
+    "snippetReadyHint": "Plak deze insluitcode in de HTML van je site.",
+    "snippetLockedHint": "Schakel insluiten in en voeg minstens één domein toe om de knop Kopiëren te ontgrendelen.",
+    "copySnippet": {
+      "copy": "Insluitcode kopiëren",
+      "copied": "Insluitcode gekopieerd",
+      "failed": "Kopiëren van de insluitcode is mislukt. Selecteer en kopieer hem handmatig.",
+      "cannotCopyYet": "insluitcode kan nog niet worden gekopieerd"
+    },
+    "snippetKeyLabel": "Insluitingssleutel",
+    "rotateConfirmText": "Vernieuwen genereert een nieuwe sleutel. Elke kopie van de oude insluitcode stopt onmiddellijk met werken, ook op sites die je nog wilt gebruiken: je moet de nieuwe insluitcode overal opnieuw plakken.",
+    "rotateKey": "Sleutel vernieuwen",
+    "rotating": "Vernieuwen…",
+    "revokeHint": "Ergens geplakt waar het niet had gemoeten? Vernieuw de sleutel om elke bestaande insluitcode in te trekken.",
+    "saveSettings": "Instellingen opslaan",
+    "saving": "Opslaan…",
+    "saved": "Insluitingsinstellingen opgeslagen.",
+    "newKeyIssued": "Nieuwe insluitingssleutel gegenereerd.",
+    "newKeyDetail": "Plak de insluitcode overnieuw op elke plek waar deze etalage is ingesloten."
+  },
+  "wizard": {
+    "category": {
+      "title": "Wat verkoop je?",
+      "description": "Dit is de belangrijkste aanwijzing voor welke lay-outs bij je passen."
+    },
+    "fulfilment": {
+      "title": "Hoe krijgen kopers het?",
+      "description": "Dit bepaalt wat je productpagina's vertellen over levering."
+    },
+    "vibe": {
+      "title": "Kies een uitstraling",
+      "description": "Je startpunt. Alles blijft aanpasbaar in de editor."
+    },
+    "name": {
+      "title": "Geef je etalage een naam",
+      "description": "Alleen voor jezelf. Je kunt het altijd hernoemen."
+    },
+    "stepOf": "Stap {current} van {total}",
+    "nameLabel": "Etalagenaam",
+    "nameHint": "Laat leeg en we noemen het Naamloze etalage.",
+    "otherCategoryLabel": "Wat verkoop je?",
+    "otherCategoryPlaceholder": "bijv. modelbouw",
+    "noProductsHint": "Nog geen producten? Voeg ze toe na het instellen.",
+    "skipSetup": "Instellen overslaan",
+    "skip": "Overslaan",
+    "creating": "Aanmaken…",
+    "create": "Etalage maken"
+  },
+  "createOptions": {
+    "categoryGroupLabel": "Wat je verkoopt",
+    "fulfilmentGroupLabel": "Hoe kopers het krijgen",
+    "vibeGroupLabel": "De uitstraling die je wilt",
+    "category": {
+      "fashion": "Kleding",
+      "art": "Kunst en prints",
+      "jewellery": "Sieraden",
+      "handmade": "Handgemaakt",
+      "home": "Wonen",
+      "beauty": "Beauty",
+      "food": "Eten en drinken",
+      "music": "Muziek",
+      "photography": "Fotografie",
+      "books": "Boeken en zines",
+      "digital": "Digitale producten",
+      "vintage": "Vintage",
+      "other": "Iets anders"
+    },
+    "categoryPlaceholder": {
+      "fashion": "Mijn kledingwinkel",
+      "art": "Mijn kunstwinkel",
+      "jewellery": "Mijn sieradenwinkel",
+      "handmade": "Mijn handgemaakte winkel",
+      "home": "Mijn woonwinkel",
+      "beauty": "Mijn beautywinkel",
+      "food": "Mijn eetwinkel",
+      "music": "Mijn muziekwinkel",
+      "photography": "Mijn fotowinkel",
+      "books": "Mijn boekwinkel",
+      "digital": "Mijn digitale winkel",
+      "vintage": "Mijn vintagewinkel",
+      "other": "Mijn winkel",
+      "default": "Mijn etalage"
+    },
+    "fulfilment": {
+      "physical": "Ik verzend het",
+      "digital": "Ze downloaden het",
+      "services": "Ze boeken mij",
+      "mixed": "Een beetje van alles"
+    },
+    "fulfilmentHint": {
+      "physical": "Fysieke producten",
+      "digital": "Bestanden, presets, muziek",
+      "services": "Sessies, opdrachten",
+      "mixed": "Meer dan één van deze"
+    },
+    "vibe": {
+      "minimal": "Minimaal",
+      "classic": "Klassiek",
+      "bold": "Gedurfd"
+    },
+    "vibeHint": {
+      "minimal": "Naam en prijs bij hover",
+      "classic": "Naam en prijs altijd zichtbaar",
+      "bold": "Prijs altijd, naam bij hover"
+    }
+  },
+  "picker": {
+    "addFirst": "Voeg je eerste product toe",
+    "noProducts": "Je hebt nog geen producten. Voeg er een toe en je komt direct hier terug om het te plaatsen.",
+    "searchPlaceholder": "Producten zoeken",
+    "searchAriaLabel": "Zoek in je producten",
+    "searching": "Zoeken…",
+    "noMatch": "Geen producten komen overeen met “{term}”.",
+    "searchFailed": "Zoeken is nu niet beschikbaar; toont wat al geladen is.",
+    "inGrid": "In het raster",
+    "available": "Beschikbaar",
+    "addSelected": "{count} geselecteerde toevoegen",
+    "addAll": "Alles toevoegen ({count})",
+    "deselectAriaLabel": "{title} deselecteren",
+    "selectAriaLabel": "{title} selecteren",
+    "inGridAriaLabel": "{title} staat in het raster",
+    "addToGridAriaLabel": "{title} toevoegen aan raster",
+    "draftAriaLabel": "Conceptproduct: niet zichtbaar voor kopers",
+    "draftBadge": "Concept"
+  },
+  "preview": {
+    "ariaLabel": "Voorbeeld van etalage"
+  },
+  "masthead": {
+    "namePlaceholder": "Je winkelnaam",
+    "bioPlaceholder": "Een korte regel over je winkel",
+    "editAriaLabel": "{line, select, name {De winkelnaam bewerken} bio {De winkelbio bewerken} other {De winkel {line} bewerken}}",
+    "editorNameAriaLabel": "Winkelnaam",
+    "editorBioAriaLabel": "Winkelbio"
+  },
+  "pageConnectors": {},
+  "artboard": {
+    "productPageLabel": " · Productpagina",
+    "closeAriaLabel": "De productpagina voor {title} sluiten",
+    "desktopSize": "Desktopformaat",
+    "mobileSize": "Mobiel formaat"
+  },
+  "customFont": {},
+  "metadata": {
+    "storefronts": {
+      "title": "Etalages",
+      "subtitle": "Elke etalage heeft een eigen raster en thema. Maak er zoveel als je nodig hebt, en open er een om te bewerken."
+    },
+    "editor": {
+      "title": "Etalage bewerken"
+    },
+    "sample": {
+      "title": "Voorbeeldetalage"
+    }
+  },
+  "routes": {
+    "editor": {
+      "loading": "De etalage-editor laden…"
+    },
+    "list": {
+      "loading": "etalages laden"
+    }
+  },
+  "controls": {
+    "off": "Uit",
+    "layers": "Lagen",
+    "objectCount": "{count, plural, one {1 object} other {# objecten}}",
+    "cardStyle": "Tegelstijl",
+    "priceTag": "Prijslabel",
+    "theme": "Thema",
+    "canvas": "Canvas",
+    "design": "Ontwerp"
+  },
+  "designPanel": {
+    "tabSelection": "Selectie",
+    "tabDesign": "Ontwerp",
+    "show": "Ontwerppaneel tonen",
+    "hide": "Ontwerppaneel verbergen",
+    "resize": "Ontwerppaneel vergroten of verkleinen",
+    "closeSettings": "Ontwerpinstellingen sluiten",
+    "scopeLabel": "Bereik van paneel"
+  },
+  "library": {
+    "title": "Bibliotheek",
+    "hint": "Kies er een om toe te voegen",
+    "canvasFull": "Canvas is vol",
+    "close": "Bibliotheekpaneel sluiten",
+    "tabUploads": "Uploads",
+    "tabShapes": "Vormen"
+  },
+  "uploads": {
+    "addImage": "Een afbeelding toevoegen",
+    "processing": "Verwerken…",
+    "uploadingPct": "Uploaden… {pct}%",
+    "dropToUpload": "Sleep hierheen om te uploaden",
+    "uploadImage": "Afbeelding uploaden",
+    "uploadHint": "SVG, PNG, JPEG, WebP, GIF of AVIF. Tot 2 MB. Sleep een bestand hierheen of klik om te bladeren.",
+    "canvasFullHint": "Het canvas is vol. Verwijder een blok om een ander toe te voegen.",
+    "inStorefront": "In deze etalage",
+    "imagesGroup": "Afbeeldingen in deze etalage",
+    "emptyHint": "Afbeeldingen die je uploadt, verzamelen zich hier, zodat je dezelfde nog een keer kunt plaatsen zonder opnieuw te uploaden.",
+    "placeAgain": "{alt} opnieuw plaatsen",
+    "placeAgainFallback": "Deze afbeelding opnieuw plaatsen"
+  },
+  "layers": {
+    "title": "Lagen",
+    "backAriaLabel": "Terug naar het geselecteerde blok, Lagen verlaten",
+    "empty": "Nog niets op het canvas. Blokken verschijnen hier zodra je ze toevoegt.",
+    "listAriaLabel": "Canvaslagen, van voor naar achter",
+    "layerOf": "Laag {index} van {total}",
+    "moveGroup": "{label} verplaatsen",
+    "reorderLabel": "{label} herordenen",
+    "dragToReorder": "Sleep om te herordenen",
+    "showOptions": "Laagopties voor {label} tonen",
+    "hideOptions": "Laagopties voor {label} verbergen",
+    "shortcutHint": "{mod} + [ en {mod} + ] verplaatsen de selectie één laag. Voeg Shift toe om helemaal door te gaan.",
+    "layerOp": {
+      "back": "Naar achtergrond",
+      "backward": "Eén laag naar achteren",
+      "forward": "Eén laag naar voren",
+      "front": "Naar voorgrond"
+    },
+    "layerOpFor": {
+      "back": "Naar achtergrond: {label}",
+      "backward": "Eén laag naar achteren: {label}",
+      "forward": "Eén laag naar voren: {label}",
+      "front": "Naar voorgrond: {label}"
+    }
+  },
+  "colorPanel": {
+    "close": "Kleurenpaneel sluiten",
+    "sectionType": "Type",
+    "font": "Lettertype",
+    "fontTheme": "Themalettertype",
+    "fontThemeDesc": "Volgt het lettertype van de etalage",
+    "sectionInDesign": "In dit ontwerp",
+    "inDesignGroup": "Kleuren in dit ontwerp",
+    "inDesignEmpty": "Kleuren die je op het canvas gebruikt, verzamelen zich hier.",
+    "inDesignSwatch": "In dit ontwerp ({hex})",
+    "sectionCustom": "Aangepast",
+    "sectionInherit": "Overnemen",
+    "sectionRecent": "Onlangs gebruikt",
+    "recentGroup": "Onlangs gebruikte kleuren",
+    "recentSwatch": "Onlangs gebruikt ({hex})",
+    "sectionStandard": "Standaard",
+    "standardGroup": "Standaardkleuren",
+    "sectionPalettes": "Paletten"
+  },
+  "themePanel": {
+    "accent": "Accent"
+  },
+  "panelSearch": {
+    "placeholder": "Zoek een instelling of object",
+    "clear": "Zoekopdracht wissen",
+    "noResults": "Niets in de editor komt hiermee overeen.",
+    "matchesLabel": "Overeenkomsten"
+  },
+  "looks": {
+    "title": "Uitstralingen",
+    "infoLabel": "Wat het kiezen van een uitstraling verandert",
+    "infoBody": "Een uitstraling stelt in één keer de kleuren, het lettertype, de hoeken, de afstand en wat een producttegel toont voor de hele etalage in. Je lay-out, je producten en elke tegel die je zelf hebt vormgegeven, blijven precies zoals ze zijn.",
+    "groupLabel": "Etalage-uitstraling",
+    "minimal": "Minimaal",
+    "classic": "Klassiek",
+    "bold": "Gedurfd",
+    "hintMinimal": "Alleen foto's. Naam en prijs bij hover.",
+    "hintClassic": "Naam en prijs onder elke foto.",
+    "hintBold": "Prijs altijd op de foto, naam bij hover."
+  },
+  "background": {
+    "label": "Achtergrond",
+    "typeLabel": "Type achtergrond",
+    "typeColor": "Kleur",
+    "typeGradient": "Verloop",
+    "typeImage": "Afbeelding",
+    "position": "Positie",
+    "dragAriaLabel": "Sleep om de achtergrondafbeelding te positioneren",
+    "dragHint": "Sleep het voorbeeld om te herpositioneren. Zoom om te vergroten of verkleinen.",
+    "zoomLabel": "Zoomen",
+    "zoomAriaLabel": "Zoomniveau achtergrondafbeelding",
+    "zoomValueText": "{n, plural, one {# procent} other {# procent}}",
+    "processing": "Verwerken…",
+    "uploadingPct": "Uploaden… {n}%",
+    "replaceImage": "Afbeelding vervangen",
+    "uploadImage": "Afbeelding uploaden",
+    "uploadingProgress": "Achtergrondafbeelding uploaden",
+    "uploadHint": "Tot 10 MB. JPEG, PNG, WebP, GIF of AVIF.",
+    "colorLabel": "Kleur",
+    "from": "Van",
+    "to": "Naar",
+    "angle": "Hoek",
+    "gradientAngle": "Hoek van verloop",
+    "angleValueText": "{n, plural, one {# graden} other {# graden}}"
+  },
+  "cardStyle": {
+    "layout": "Lay-out",
+    "position": "Positie",
+    "roundedHint": "Afgeronde tegels houden beide labels op de middenas.",
+    "spotHint": "Klik op een plek om het label te plaatsen, of sleep het hierheen of op de tegel.",
+    "cornerRoundness": "Hoekafronding",
+    "cornerValueText": "{n, plural, one {# pixels} other {# pixels}}",
+    "sharp": "Scherp",
+    "circle": "Cirkel",
+    "fineTuning": "Fijnafstelling",
+    "showTitle": "Titel tonen",
+    "titleStyleLabel": "Titelstijl",
+    "edgeSpacing": "Randafstand",
+    "edgeSpacingAriaLabel": "Titelrandafstand",
+    "edgeValueText": "{n, plural, one {# pixels} other {# pixels}}",
+    "auto": "Automatisch",
+    "showTitleOnHover": "Titel tonen bij hover",
+    "hoverHint": "De titel blijft verborgen totdat een koper met de muis over het product beweegt.",
+    "revealTop": "De balk schuift van bovenaf naar beneden wanneer een koper er met de muis overheen gaat.",
+    "revealMiddle": "De balk vervaagt in beeld wanneer een koper er met de muis overheen gaat.",
+    "revealBottom": "De balk schuift van onderaf omhoog wanneer een koper er met de muis overheen gaat."
+  },
+  "priceTag": {
+    "showPrice": "Prijs tonen",
+    "roundedHint": "Afgeronde tegels houden het label op de middenas.",
+    "dragHint": "Sleep het op de tegel, of gebruik het lay-outbord, om een plek te kiezen.",
+    "showOnHover": "Tonen bij hover",
+    "font": "Lettertype",
+    "fontAriaLabel": "Lettertype prijslabel",
+    "size": "Grootte",
+    "sizeAriaLabel": "Grootte prijslabel",
+    "sizeValueText": "{n, plural, one {# pixels} other {# pixels}}",
+    "sizeTip": "De grootte op één tegel. Het label schaalt mee met de tegel waarop het staat, dus een groter blok krijgt automatisch een groter label, zonder dat je er iets voor hoeft in te stellen.",
+    "borderThickness": "Randdikte",
+    "borderAriaLabel": "Randdikte prijslabel",
+    "borderValueText": "{n, plural, one {# pixels} other {# pixels}}",
+    "cornerRoundness": "Hoekafronding",
+    "cornerAriaLabel": "Hoekafronding prijslabel",
+    "cornerValueText": "{n, plural, one {# pixels} other {# pixels}}",
+    "sharp": "Scherp",
+    "pill": "Pil",
+    "none": "Geen"
+  },
+  "priceTagPosition": {
+    "placementAriaLabel": "Plaatsing prijslabel",
+    "below": "Eronder",
+    "onImage": "Op afbeelding",
+    "hidden": "Verborgen",
+    "spotAriaLabel": "Plek prijslabel",
+    "spotTopLeft": "Prijslabel linksboven",
+    "spotTopCenter": "Prijslabel bovenmidden",
+    "spotTopRight": "Prijslabel rechtsboven",
+    "spotMiddle": "Prijslabel midden",
+    "spotBottomLeft": "Prijslabel linksonder",
+    "spotBottomCenter": "Prijslabel ondermidden",
+    "spotBottomRight": "Prijslabel rechtsonder"
+  },
+  "layout": {
+    "canvasWidth": "Canvasbreedte",
+    "canvasWidthAriaLabel": "Canvasbreedte in blokken",
+    "blocksWide": "{n, plural, one {# blok breed} other {# blokken breed}}",
+    "canvasHeight": "Canvashoogte",
+    "heightTip": "Het bord kan niet kleiner worden dan de blokken die er al op staan: sleep eerst een blok omhoog en verkort dan het canvas.",
+    "canvasHeightAriaLabel": "Canvashoogte in blokken",
+    "blocksTall": "{n, plural, one {# blok hoog} other {# blokken hoog}}",
+    "gridDensity": "Rasterdichtheid",
+    "gridDensityAriaLabel": "Rasterdichtheid",
+    "gridGapValue": "{n, plural, one {# pixel tussenruimte} other {# pixels tussenruimte}}",
+    "noGap": "Geen tussenruimte",
+    "showGrid": "Raster tonen",
+    "gridInfoLabel": "Wie het raster ziet",
+    "gridInfoBody": "Een hulplijn voor jou tijdens het ontwerpen: het toont de lege vakken zodat je ziet waar een blok terechtkomt. Kopers zien het nooit."
+  },
+  "placement": {
+    "rotation": "Rotatie",
+    "rotationTipSingle": "Hele graden, beide kanten op vanaf recht. Het blok draait om zijn eigen middelpunt en behoudt de cellen die het inneemt.",
+    "rotationTipMultiple": "Hele graden, beide kanten op vanaf recht. Elk blok draait om zijn eigen middelpunt, zodat een rij blokken een rij blijft.",
+    "rotationAriaLabel": "Blokrotatie",
+    "valueTextMixed": "Gemengde hoeken",
+    "valueText": "{n, plural, one {# graden} other {# graden}}",
+    "statusMixed": "Gemengd",
+    "levelBlock": "Blok recht zetten",
+    "rotateTo": "Draaien naar {n, plural, one {# graden} other {# graden}}",
+    "level": "Recht",
+    "angle": "{n}°",
+    "layerLabel": "Laag",
+    "layerInfoLabel": "Hoe lagen werken",
+    "layerInfoBody": "Lagen bepalen alleen wat bovenop wordt getekend waar blokken elkaar overlappen; de volgorde die een schermlezer aanhoudt, verandert nooit.{multi, select, true { Deze selectie behoudt haar eigen volgorde binnen de stapel terwijl ze wordt verplaatst.} other {}}{stacked, select, true { Alt-klik op een stapel op het canvas om het onderliggende blok te bereiken.} other {}}",
+    "blocksSelected": "{count, plural, one {# blok geselecteerd} other {# blokken geselecteerd}}",
+    "layerOf": "Laag {index} van {total}",
+    "blockLayerLabel": "Laag van blok",
+    "sendToBack": "Naar achtergrond",
+    "sendBackward": "Eén laag naar achteren",
+    "bringForward": "Eén laag naar voren",
+    "bringToFront": "Naar voorgrond",
+    "seeAllLayers": "Alle lagen bekijken"
+  },
+  "header": {
+    "showHeader": "Koptekst tonen",
+    "infoLabel": "Andere manieren om de koptekst te bewerken",
+    "infoBody": "Klik op de naam of bio op het canvas om er direct te typen. Dit paneel opent tegelijk op die regel, waar het lettertype, de grootte, de kleur, de opmaak en de uitlijning worden ingesteld.",
+    "storeName": "Winkelnaam",
+    "storeNamePlaceholder": "Winkelnaam getoond aan kopers",
+    "bio": "Bio",
+    "bioPlaceholder": "Een korte regel over je winkel",
+    "charsLeft": "{n, plural, one {# teken over} other {# tekens over}}"
+  },
+  "soldOut": {
+    "hide": "Verbergen voor kopers",
+    "hideInfoLabel": "Wat het verbergen van uitverkochte producten doet",
+    "hideInfoBody": "Producten die je als uitverkocht hebt gemarkeerd, verdwijnen volledig van de etalage. Ze blijven hier op het canvas staan, gedimd, zodat je ze nog kunt verplaatsen en weer te koop kunt zetten.",
+    "badge": "Badge tonen",
+    "badgeInfoLabel": "Wanneer de badge “uitverkocht” verschijnt",
+    "badgeInfoBodyHidden": "Niets om te markeren zolang uitverkochte producten verborgen zijn. Zet Verbergen voor kopers uit en deze badge labelt ze in plaats daarvan.",
+    "badgeInfoBodyVisible": "Markeert een uitverkocht product op de etalage, zodat een koper weet dat het bestaat maar niet meer beschikbaar is, in plaats van zich dat af te vragen."
+  },
+  "typography": {
+    "font": "Lettertype",
+    "ownFont": "Je eigen lettertype",
+    "fontInfoLabel": "Welke lettertypebestanden werken",
+    "fontInfoBody": "WOFF2, WOFF, TTF of OTF, tot 2 MB. WOFF2 is de beste keuze: het is het kleinst, dus het laadt het snelst voor een koper, en elke browser kan het lezen.",
+    "processing": "Verwerken…",
+    "uploadingPct": "Uploaden… {n}%",
+    "replaceFont": "Lettertype vervangen",
+    "uploadFont": "Een lettertype uploaden",
+    "uploadingLabel": "Lettertype uploaden",
+    "uploadedFontDesc": "Je geüploade lettertype",
+    "fontDescDefault": "De standaard",
+    "fontDescInter": "Strak en neutraal",
+    "fontDescMontserrat": "Geometrisch en breed"
+  },
+  "textFormat": {
+    "format": "Opmaak",
+    "formatAriaLabel": "Tekstopmaak",
+    "bold": "Vet",
+    "italic": "Cursief",
+    "underline": "Onderstrepen",
+    "alignment": "Uitlijning",
+    "alignAriaLabel": "Tekstuitlijning",
+    "alignLeft": "Links uitlijnen",
+    "alignCenter": "Centreren",
+    "alignRight": "Rechts uitlijnen"
+  },
+  "fontSize": {
+    "label": "Grootte",
+    "autoPx": "Automatisch ({n} px)",
+    "auto": "Automatisch",
+    "ariaLabel": "Lettergrootte",
+    "valueText": "{n, plural, one {# pixels} other {# pixels}}"
+  },
+  "layoutPresetPicker": {
+    "ariaLabel": "Lay-out"
+  },
+  "titleStyle": {
+    "ariaLabel": "Titelstijl",
+    "bar": "Balk",
+    "overlay": "Overlay",
+    "shadow": "Schaduw"
+  },
+  "titlePosition": {
+    "ariaLabel": "Titelplek",
+    "spotTopLeft": "Titel linksboven",
+    "spotTopCenter": "Titel bovenmidden",
+    "spotTopRight": "Titel rechtsboven",
+    "spotMiddle": "Titel midden",
+    "spotBottomLeft": "Titel linksonder",
+    "spotBottomCenter": "Titel ondermidden",
+    "spotBottomRight": "Titel rechtsonder"
+  },
+  "tileSpot": {},
+  "tileLayoutBoard": {
+    "labelToPlace": "Te plaatsen label",
+    "labelPositions": "Labelposities",
+    "title": "Titel",
+    "price": "Prijs",
+    "titleAt": "{spot, select, top_left {Titel linksboven} top_center {Titel bovenmidden} top_right {Titel rechtsboven} middle_center {Titel in het midden} bottom_left {Titel linksonder} bottom_center {Titel ondermidden} bottom_right {Titel rechtsonder} other {Titel hier}}. Sleep, klik op een plek, of gebruik de pijltoetsen, om hem te verplaatsen.",
+    "priceAt": "{spot, select, top_left {Prijs linksboven} top_center {Prijs bovenmidden} top_right {Prijs rechtsboven} middle_center {Prijs in het midden} bottom_left {Prijs linksonder} bottom_center {Prijs ondermidden} bottom_right {Prijs rechtsonder} other {Prijs hier}}. Sleep, klik op een plek, of gebruik de pijltoetsen, om hem te verplaatsen.",
+    "moveTitleTo": "{spot, select, top_left {Verplaats de titel naar linksboven} top_center {Verplaats de titel naar bovenmidden} top_right {Verplaats de titel naar rechtsboven} middle_center {Verplaats de titel naar het midden} bottom_left {Verplaats de titel naar linksonder} bottom_center {Verplaats de titel naar ondermidden} bottom_right {Verplaats de titel naar rechtsonder} other {Verplaats de titel hierheen}}",
+    "movePriceTo": "{spot, select, top_left {Verplaats de prijs naar linksboven} top_center {Verplaats de prijs naar bovenmidden} top_right {Verplaats de prijs naar rechtsboven} middle_center {Verplaats de prijs naar het midden} bottom_left {Verplaats de prijs naar linksonder} bottom_center {Verplaats de prijs naar ondermidden} bottom_right {Verplaats de prijs naar rechtsonder} other {Verplaats de prijs hierheen}}"
+  },
+  "productPage": {
+    "layout": {
+      "title": "Pagina",
+      "showPage": {
+        "label": "Een productpagina tonen",
+        "infoLabel": "Wat deze schakelaar doet",
+        "infoOn": "Tikken op een producttegel opent de pagina ervan.",
+        "infoOff": "Producttegels hebben geen pagina om te openen."
+      },
+      "pageColor": "Paginakleur",
+      "storefrontBackground": "Achtergrond van de etalage",
+      "photoFit": {
+        "label": "Foto-aanpassing",
+        "ariaLabel": "Foto-aanpassing",
+        "fit": "Passend",
+        "fill": "Vullend"
+      },
+      "font": {
+        "label": "Lettertype",
+        "infoLabel": "Hoe het lettertype van deze pagina zich verhoudt tot dat van de etalage",
+        "infoOwn": "Deze pagina gebruikt zijn eigen lettertype, ongeacht wat de etalage gebruikt.",
+        "infoFollows": "Volgt het lettertype van je etalage. Wijzig dit onder Typografie.",
+        "inheritOption": "Zelfde als etalage ({name})"
+      },
+      "indexing": {
+        "label": "Zoekmachines toestaan",
+        "infoLabel": "Wat uitschakelen doet",
+        "infoContent": "Uit houdt je productpagina's buiten de zoekresultaten. Iedereen met een link kan ze nog steeds openen."
+      },
+      "useStorefrontBackground": "Etalageachtergrond gebruiken"
+    },
+    "cta": {
+      "title": "Koopknop",
+      "infoLabel": "Wat bepaalt of een knop wordt getoond",
+      "infoContent": "De knop volgt de aankooplink van elk product (ingesteld op het product). Zonder aankooplink stuurt hij een e-mail naar je contactadres hieronder; zonder allebei wordt er geen knop getoond.",
+      "buttonText": {
+        "label": "Knoptekst",
+        "charsLeft": "{count, plural, one {# teken over} other {# tekens over}}"
+      },
+      "buttonColor": "Knopkleur",
+      "storefrontAccent": "Accentkleur etalage",
+      "cornerRoundness": {
+        "label": "Hoekafronding",
+        "ariaLabel": "Hoekafronding koopknop",
+        "valueText": "{value} pixels",
+        "auto": "Automatisch"
+      },
+      "borderThickness": {
+        "label": "Randdikte",
+        "ariaLabel": "Randdikte koopknop",
+        "valueText": "{value} pixels",
+        "none": "Geen"
+      },
+      "borderColor": "Randkleur",
+      "buttonTextColor": "Kleur knoptekst",
+      "priceNote": {
+        "label": "Prijsvermelding",
+        "ariaLabel": "Prijsvermelding",
+        "inclVat": "Incl. btw",
+        "exclTax": "Excl. belasting",
+        "none": "Geen"
+      },
+      "shippingNote": {
+        "label": "Verzendvermelding",
+        "ariaLabel": "Verzendvermelding",
+        "plusShipping": "Plus verzendkosten",
+        "freeShipping": "Gratis verzending",
+        "none": "Geen"
+      },
+      "useStorefrontAccent": "Etalage-accent gebruiken",
+      "useButtonTextColor": "Knoptekstkleur gebruiken"
+    },
+    "sections": {
+      "title": "Secties",
+      "infoLabel": "Wanneer een sectie verborgen blijft",
+      "infoContent": "Een sectie zonder inhoud blijft verborgen, ook als hij aan staat. Verzending en veiligheid worden nooit getoond bij downloads. Veiligheid en conformiteit en Verkoper zijn wettelijk verplichte vermeldingen en kunnen niet worden uitgeschakeld.",
+      "listAriaLabel": "Wat de pagina toont",
+      "underTheTitle": "onder de titel",
+      "requiredByLaw": "wettelijk verplicht",
+      "sectionLabels": {
+        "description": "Beschrijving",
+        "specs": "Specificaties",
+        "documents": "Documenten",
+        "shipping": "Verzending",
+        "returns": "Retouren",
+        "safety": "Veiligheid en conformiteit",
+        "seller": "Verkoper"
+      },
+      "availability": "Beschikbaarheid",
+      "soldByByline": "“Verkocht door”-regel"
+    },
+    "shippingReturns": {
+      "title": "Verzending en retouren",
+      "infoLabel": "Waarom dit bij Instellingen staat, niet hier",
+      "infoContent": "Eenmalig ingesteld voor je hele account, zodat elke etalage en elk product onder dezelfde voorwaarden verkoopt. Voor EU-verkopers vermeldt de pagina ook het herroepingsrecht van 14 dagen en de garantie van 2 jaar, wat je ook zelf schrijft.",
+      "shippingLabel": "Verzending",
+      "returnsLabel": "Retouren",
+      "profileCount": "{count, plural, one {# verzendprofiel voor producten die anders worden verzonden.} other {# verzendprofielen voor producten die anders worden verzonden.}}",
+      "nothingSet": "Nog niets ingesteld. Totdat je je voorwaarden toevoegt, vermelden productpagina's dat de verkoper geen verzendgegevens heeft toegevoegd.",
+      "editSettings": "Bewerken in Instellingen",
+      "addTerms": "Voeg je verzendvoorwaarden toe"
+    },
+    "sellerDetails": {
+      "title": "Verkopersgegevens",
+      "infoLabel": "Waarom dit bij Instellingen staat, niet hier",
+      "infoContent": "De wetgeving voor verkoop op afstand vereist de naam, het adres en een contactmogelijkheid van de verkoper bij elk aanbod. Eenmalig ingesteld voor je hele account: elke etalage en elk product toont dezelfde gegevens, dus er is niets om per winkel te herhalen.",
+      "vatId": "Btw-id {vatId}",
+      "nothingSet": "Nog niets ingesteld. Totdat je je bedrijfsgegevens toevoegt, zien kopers alleen de regel “Verkocht door” onder de titel.",
+      "editSettings": "Bewerken in Instellingen",
+      "addDetails": "Voeg je bedrijfsgegevens toe"
+    }
+  },
+  "productBlock": {
+    "deleted": "Dit product is verwijderd uit je catalogus.",
+    "removeFromGrid": "Verwijderen uit raster",
+    "nameLabel": "Naam",
+    "namePlaceholder": "Productnaam",
+    "priceLabel": "Prijs ({currency})",
+    "saveDotDot": "Opslaan…",
+    "updating": "Bijwerken…",
+    "whereChangeLands": {
+      "label": "Waar een naam- of prijswijziging terechtkomt",
+      "content": "Naam en prijs horen bij het product, dus opslaan werkt ze overal bij waar het verschijnt, niet alleen op deze etalage."
+    },
+    "stock": {
+      "outOfStock": "Niet op voorraad (0 beschikbaar).",
+      "lowStock": "Lage voorraad: {count} beschikbaar.",
+      "inStock": "{count} op voorraad."
+    },
+    "openProductPage": "Productpagina openen",
+    "hideProductPage": "Productpagina verbergen",
+    "tileStyle": {
+      "title": "Tegelstijl",
+      "reset": "Terugzetten naar thema",
+      "infoLabel": "Hoe de stijl van deze tegel zich verhoudt tot het thema",
+      "infoWithOverrides": "Deze tegel heeft een eigen stijl. Instellingen die je hier niet hebt gewijzigd, blijven het thema volgen.",
+      "infoNoOverrides": "Geef deze tegel een eigen stijl. Alles wat je niet wijzigt, blijft het thema volgen."
+    },
+    "priceTag": "Prijslabel",
+    "modal": {
+      "title": "Product overal bijwerken?",
+      "description": "Dit bewerkt het product zelf. Elke etalage, aankooplink en je productcatalogus tonen de nieuwe gegevens, niet alleen dit raster.",
+      "nameLabel": "Naam:",
+      "priceLabel": "Prijs:",
+      "updateEverywhere": "Overal bijwerken"
+    },
+    "savedToast": "\"{title}\" is overal bijgewerkt waar het verschijnt.",
+    "validation": {
+      "noTitle": "Geef je product een titel.",
+      "noPrice": "Stel een prijs in.",
+      "badPrice": "De prijs moet een getal groter dan nul zijn.",
+      "tooHigh": "Die prijs is te hoog."
+    }
+  },
+  "textBlock": {
+    "text": {
+      "label": "Tekst",
+      "infoLabel": "Andere manieren om deze tekst te bewerken",
+      "infoContent": "Je kunt ook nogmaals op het blok op het canvas klikken en er direct op typen, wat sneller is voor een kleine wijziging."
+    },
+    "editOnCanvas": "Tekst bewerken op het canvas",
+    "style": {
+      "label": "Stijl"
+    },
+    "font": {
+      "label": "Lettertype",
+      "themeFont": "Themalettertype",
+      "themeFontDescription": "Volgt het lettertype van de etalage"
+    },
+    "color": {
+      "selectedWords": "Geselecteerde woorden",
+      "label": "Kleur",
+      "blockColor": "de kleur van het blok",
+      "themeColor": "Themakleur",
+      "useBlockColor": "De kleur van het blok gebruiken"
+    },
+    "colouringSelected": "Bezig met het inkleuren van {count, plural, one {# geselecteerd teken} other {# geselecteerde tekens}}. Klik weg van de woorden om in plaats daarvan het hele blok te kleuren."
+  },
+  "imageBlock": {
+    "size": {
+      "label": "Grootte",
+      "ariaLabel": "Afbeeldingsaanpassing",
+      "fill": "Vullend",
+      "fit": "Passend",
+      "fillHint": "Vult het blok, en snijdt het overtollige deel af.",
+      "fitHint": "Toont de hele afbeelding binnen het blok."
+    },
+    "reposition": "Afbeelding herpositioneren",
+    "opacity": {
+      "label": "Dekking",
+      "ariaLabel": "Dekking afbeelding",
+      "valueText": "{value} procent"
+    },
+    "description": {
+      "label": "Beschrijving",
+      "placeholder": "Logo, icoon, decoratie…",
+      "hint": "Wordt voorgelezen door schermlezers. Laat leeg als de afbeelding puur decoratief is."
+    }
+  },
+  "shapeBlock": {
+    "shape": {
+      "label": "Vorm",
+      "ariaLabel": "Soort vorm"
+    },
+    "points": {
+      "label": "Punten",
+      "ariaLabel": "Sterpunten",
+      "valueText": "{value} punten"
+    },
+    "corners": {
+      "label": "Hoekafronding",
+      "ariaLabel": "Hoekafronding",
+      "valueText": "{value} procent",
+      "sharp": "Scherp"
+    },
+    "fill": {
+      "ring": "Kleur",
+      "shape": "Vulling"
+    },
+    "border": {
+      "ringLabel": "Ringdikte",
+      "shapeLabel": "Randdikte",
+      "ringAriaLabel": "Ringdikte",
+      "shapeAriaLabel": "Randdikte",
+      "valueText": "{value} pixels",
+      "none": "Geen",
+      "color": "Randkleur"
+    },
+    "opacity": {
+      "label": "Dekking",
+      "ariaLabel": "Dekking vorm",
+      "valueText": "{value} procent"
+    }
+  },
+  "multiBlock": {
+    "shapesContext": "Bezig met het bewerken van {count, plural, one {# vorm} other {# vormen}} tegelijk. De getoonde waarden komen van de eerst geselecteerde vorm; elke wijziging geldt voor alle vormen.",
+    "textsContext": "Bezig met het bewerken van {count, plural, one {# tekstblok} other {# tekstblokken}} tegelijk. De getoonde waarden komen van het eerst geselecteerde blok; elke wijziging geldt voor alle blokken. Elk blok behoudt zijn eigen tekst.",
+    "imagesContext": "Bezig met het bewerken van {count, plural, one {# element} other {# elementen}} tegelijk. De getoonde waarden komen van het eerst geselecteerde element; elke wijziging geldt voor alle elementen. Elk element behoudt zijn eigen afbeelding.",
+    "productsContext": "Bezig met het stylen van {count, plural, one {# producttegel} other {# producttegels}} tegelijk. De getoonde waarden komen van de eerst geselecteerde tegel; elke wijziging geldt voor alle tegels.",
+    "mixedContext": "{count, plural, one {# blok} other {# blokken}} van verschillende typen zijn geselecteerd. Selecteer blokken van één type om hun instellingen samen te bewerken.",
+    "remove": "{count, plural, one {# blok} other {# blokken}} verwijderen",
+    "duplicate": "{count, plural, one {# blok} other {# blokken}} dupliceren",
+    "productsNotDuplicated": "Producten worden niet gedupliceerd.",
+    "tileStyle": {
+      "title": "Tegelstijl",
+      "reset": "Terugzetten naar thema"
+    },
+    "priceTag": "Prijslabel"
+  },
+  "blockActions": {
+    "duplicate": "Dupliceren",
+    "remove": "Verwijderen uit raster"
+  },
+  "toolbar": {
+    "ariaLabel": "Editorwerkbalk",
+    "addProduct": "Product toevoegen",
+    "addText": "Tekst toevoegen",
+    "addElement": "Element toevoegen",
+    "product": "Product",
+    "text": "Tekst",
+    "element": "Element",
+    "elementsMenu": "Elementen",
+    "uploading": "Uploaden…",
+    "upload": "Uploaden",
+    "uploadImage": "Afbeelding uploaden",
+    "allShapes": "Alle vormen",
+    "browseShapes": "Blader door de volledige vormenbibliotheek",
+    "closePage": "Productpagina sluiten",
+    "showPage": "Productpagina tonen",
+    "closePages": "De productpagina's sluiten",
+    "showPageFull": "De productpagina tonen",
+    "undo": "Ongedaan maken",
+    "undoTip": "Ongedaan maken (Ctrl+Z)",
+    "redo": "Opnieuw",
+    "redoTip": "Opnieuw (Ctrl+Shift+Z)",
+    "tidy": "Canvas opruimen",
+    "tidyTip": "Opruimen",
+    "zoomOut": "Uitzoomen",
+    "zoomOutTip": "Uitzoomen (Ctrl -)",
+    "zoomReset": "Zoom terugzetten naar 100%",
+    "zoomResetTip": "Zoom terugzetten (Ctrl 0)",
+    "zoomResetMenuItem": "Zoom terugzetten",
+    "zoomIn": "Inzoomen",
+    "zoomInTip": "Inzoomen (Ctrl +)",
+    "designSettings": "Ontwerpinstellingen",
+    "page": "Pagina",
+    "moreTools": "Meer hulpmiddelen"
+  },
+  "selectionToolbar": {
+    "toolsFor": "Hulpmiddelen voor {name}",
+    "elements": "{count, plural, one {# element} other {# elementen}}",
+    "hidePage": "Pagina verbergen",
+    "hidePages": "Pagina's verbergen",
+    "openPage": "Pagina openen",
+    "openPages": "Pagina's openen",
+    "openProductPage": "De productpagina voor {name} openen",
+    "closeProductPage": "De productpagina voor {name} sluiten",
+    "openProductPages": "De productpagina's openen voor {count, plural, one {# product} other {# producten}}",
+    "closeProductPages": "De productpagina's sluiten voor {count, plural, one {# product} other {# producten}}",
+    "editText": "Tekst bewerken",
+    "editTextOf": "De tekst van {name} bewerken",
+    "color": "Kleur",
+    "changeColorOf": "De kleur van {name} wijzigen",
+    "stroke": "Lijn",
+    "editStrokeOf": "De lijn van {name} bewerken",
+    "corners": "Hoeken",
+    "editCornersOf": "De hoekafronding van {name} bewerken",
+    "opacity": "Dekking",
+    "editOpacityOf": "De dekking van {name} bewerken",
+    "frame": "Kader",
+    "frameImageFor": "De afbeelding voor {name} kaderen",
+    "duplicate": "Dupliceren",
+    "duplicateNamed": "{name} dupliceren",
+    "duplicateN": "{count, plural, one {# element} other {# elementen}} dupliceren",
+    "removeFrom": "{name} verwijderen uit raster",
+    "removeN": "{count, plural, one {# element} other {# elementen}} verwijderen uit raster"
+  },
+  "canvas": {
+    "gridLabel": "Canvas van de etalage",
+    "emptyGrid": "Je raster is leeg",
+    "emptyGridHint": "Voeg een product toe om je etalage in te richten. Tekst en vormen staan in de werkbalk hieronder.",
+    "addProduct": "Product toevoegen",
+    "desktopPreview": "Desktopvoorbeeld",
+    "mobilePreview": "Mobiel voorbeeld"
+  },
+  "blockTile": {
+    "removedProduct": "Verwijderd product",
+    "shape": "{kind, select, square {vierkante vorm} circle {ronde vorm} ring {ringvorm} diamond {ruitvorm} rounded {afgeronde vierkante vorm} pill {pilvorm} half {halve cirkelvorm} quarter {kwart cirkelvorm} bar {balkvorm} triangle {driehoekige vorm} wedge {taartpuntvorm} pentagon {vijfhoekige vorm} hexagon {zeshoekige vorm} octagon {achthoekige vorm} star {stervorm} sparkle {sprankelvorm} cross {kruisvorm} arrow {pijlvorm} chevron {chevronvorm} trapezoid {trapeziumvorm} parallelogram {parallellogramvorm} burst {uitbarstingvorm} other {{kind} vorm}}",
+    "imageWithAlt": "Afbeelding: {alt}",
+    "imageElement": "Afbeeldingselement",
+    "textWithContent": "Tekst: {text}",
+    "textBlock": "Tekstblok",
+    "selected": "Geselecteerd: {label}. Druk op Enter om te deselecteren.",
+    "unselected": "{label}. Druk op Enter om te selecteren en te bewerken.",
+    "draftAriaLabel": "Conceptproduct: kopers kunnen deze link niet bereiken.",
+    "draft": "Concept"
+  },
+  "blockFace": {
+    "productRemoved": "Product verwijderd. Verwijder dit blok."
+  },
+  "framer": {
+    "ariaLabel": "De afbeelding voor {name} kaderen. Sleep om te herpositioneren, pijltoetsen om bij te sturen, plus en min om te zoomen, Escape wanneer je klaar bent. Nu {x}% opzij, {y}% omlaag, {zoom}% zoom.",
+    "hintZoomed": "{zoom}% · Slepen om te kaderen · Esc",
+    "hintMinZoom": "Trek aan een hoek om te zoomen · Esc"
+  },
+  "inlineText": {
+    "ariaLabel": "Bloktekst"
+  },
+  "tiles": {
+    "emptyText": "Leeg tekstblok",
+    "imageUnavailable": "Afbeelding niet beschikbaar"
+  },
+  "spotDrag": {
+    "tokenLabel": "{token, select, title {Titel} other {Prijs}} {drop, select, below {in de titelbalk} top_left {linksboven} top_center {bovenmidden} top_right {rechtsboven} middle_center {in het midden} bottom_left {linksonder} bottom_center {ondermidden} bottom_right {rechtsonder} other {}}. Druk om de instellingen te openen, of sleep (of gebruik de pijltoetsen) om het te verplaatsen."
+  },
+  "autoFit": {},
+  "designer": {
+    "header": {
+      "back": "Terug naar etalages",
+      "nameLabel": "Etalagenaam",
+      "namePlaceholder": "Naamloze etalage",
+      "unsaved": "Niet-opgeslagen wijzigingen",
+      "search": "Zoeken"
+    },
+    "mobileNotice": {
+      "body": "Voor de beste bewerkingservaring open je deze editor op een desktop of tablet. Blokken herordenen en de koptekst bewerken werken op elk apparaat.",
+      "dismiss": "De melding over bewerken op kleine schermen sluiten"
+    },
+    "inspector": {
+      "title": {
+        "addProduct": "Product toevoegen",
+        "blocks": "{count, plural, one {# blok} other {# blokken}}",
+        "product": "Product",
+        "shape": "Vorm",
+        "image": "Afbeelding",
+        "text": "Tekstblok"
+      },
+      "close": {
+        "addProduct": "Paneel Product toevoegen sluiten",
+        "blocks": "{count, plural, one {Paneel voor # blok sluiten} other {Paneel voor # blokken sluiten}}",
+        "product": "Productpaneel sluiten",
+        "shape": "Vormpaneel sluiten",
+        "image": "Afbeeldingspaneel sluiten",
+        "text": "Paneel tekstblok sluiten"
+      }
+    },
+    "toasts": {
+      "full": "Deze etalage is vol.",
+      "fullDetail": "Een etalage kan maximaal {max, plural, one {# blok} other {# blokken}} bevatten.",
+      "imageUploadFailed": "Die afbeelding kon niet worden geüpload.",
+      "imageUploadFailedDetail": "Probeer het straks opnieuw.",
+      "copied": "{count, plural, one {Blok gekopieerd.} other {# blokken gekopieerd.}}",
+      "copiedDetail": "Plak met Ctrl+V of Cmd+V.",
+      "savedWithDrafts": "Opgeslagen, maar sommige producten zijn nog concepten.",
+      "draftsDetail": "{count, plural, one {{names} is een concept en kopers kunnen het nog niet bereiken.} other {{names}{hidden, plural, =0 {} one { en # meer} other { en # meer}} zijn concepten en kopers kunnen ze nog niet bereiken.}}",
+      "publishDrafts": "Publiceer die producten zodra ze klaar zijn.",
+      "saved": "Etalage opgeslagen.",
+      "droppedBlocks": "{count, plural, one {# blok verwees naar een verwijderd product en is verwijderd.} other {# blokken verwezen naar verwijderde producten en zijn verwijderd.}}"
+    },
+    "leave": {
+      "title": "Wijzigingen opslaan?",
+      "description": "Je hebt niet-opgeslagen wijzigingen aan deze etalage. Sla ze op voordat je weggaat, of gooi ze weg.",
+      "save": "Wijzigingen opslaan",
+      "discard": "Wijzigingen negeren",
+      "keepEditing": "Doorgaan met bewerken"
+    },
+    "defaults": {
+      "textBlock": "Je tekst hier"
+    }
+  },
+  "sample": {
+    "name": "Voorbeeldetalage",
+    "card": {
+      "open": "De voorbeeldetalage openen",
+      "badge": "Voorbeeld",
+      "summary": "{count, plural, one {{count} blok · probeer alles uit, er wordt niets opgeslagen} other {{count} blokken · probeer alles uit, er wordt niets opgeslagen}}",
+      "hide": "De voorbeeldetalage verbergen"
+    },
+    "embed": {
+      "title": "Een etalage insluiten",
+      "description": "Elke etalage die je maakt krijgt een eigen insluitcode om op je website te plakken.",
+      "snippetLabel": "Een insluitcode ziet er zo uit",
+      "inDevelopment": "De widget is nog in ontwikkeling en wordt op andere sites nog niet getoond.",
+      "create": "Een etalage maken"
+    },
+    "list": {
+      "show": "De voorbeeldetalage tonen",
+      "showFailed": "De voorbeeldetalage kon niet worden teruggehaald.",
+      "hideFailed": "De voorbeeldetalage kon niet worden verborgen.",
+      "failedDetail": "Probeer het zo meteen opnieuw.",
+      "createFirst": "Maak je eerste etalage",
+      "createFirstHint": "Zet je producten op het raster. Elk product krijgt een pagina die je kunt delen."
+    },
+    "designer": {
+      "createAriaLabel": "Je eigen etalage maken",
+      "createShort": "Maken",
+      "create": "Maak je eigen",
+      "notice": "Dit is een voorbeeldetalage. Probeer alles uit: er wordt hier niets opgeslagen.",
+      "takeTour": "Volg de rondleiding"
+    },
+    "content": {
+      "bio": "Alledaagse tech en spullen voor je bureau, gekozen om lang mee te gaan.",
+      "heading": "Bestsellers",
+      "story": "We gebruiken alles wat we verkopen voordat het in de winkel komt. Retourneren kan binnen 14 dagen.",
+      "dispatch": "Verzonden binnen 2 werkdagen",
+      "products": {
+        "camera": {
+          "title": "Instantcamera",
+          "description": "Print de foto een paar seconden nadat je hem maakt. Film wordt apart verkocht."
+        },
+        "headphones": {
+          "title": "Koptelefoon",
+          "description": "Gesloten, met zachte oorkussens van traagschuim. Inclusief 3,5 mm-kabel."
+        },
+        "watch": {
+          "title": "Smartwatch",
+          "description": "Aluminium kast met sportband. Houdt stappen, slaap en trainingen bij."
+        },
+        "mouse": {
+          "title": "Draadloze muis",
+          "description": "Licht, met stille klikken en tot 250 uur op één batterij."
+        },
+        "speaker": {
+          "title": "Draagbare speaker",
+          "description": "Waterdicht, met 12 uur speeltijd op één lading."
+        },
+        "succulent": {
+          "title": "Vetplantje voor op je bureau",
+          "description": "Een kleine haworthia in een keramische pot. Heeft ongeveer eens per maand water nodig."
+        }
+      }
+    }
+  },
+  "colors": {
+    "fields": {
+      "accent": "Accent",
+      "storeName": "Etalagenaam",
+      "bio": "Bio",
+      "background": "Achtergrond",
+      "gradientFrom": "Verloop van",
+      "gradientTo": "Verloop naar",
+      "fill": "Vulling",
+      "color": "Kleur",
+      "borderColor": "Randkleur",
+      "selectedWords": "Geselecteerde woorden",
+      "textColor": "Tekstkleur",
+      "tagColor": "Labelkleur",
+      "shadowColor": "Schaduwkleur"
+    },
+    "inherit": {
+      "themeColor": {
+        "label": "Themakleur",
+        "use": "Themakleur gebruiken"
+      },
+      "default": {
+        "label": "Standaard",
+        "use": "Standaard gebruiken"
+      },
+      "noFill": {
+        "label": "Geen vulling",
+        "use": "Geen vulling gebruiken"
+      },
+      "cardColor": {
+        "label": "Kaartkleur",
+        "use": "Kaartkleur gebruiken"
+      },
+      "blockColor": {
+        "label": "de kleur van het blok",
+        "use": "De kleur van het blok gebruiken"
+      }
+    },
+    "presets": {
+      "white": {
+        "name": "Wit",
+        "label": "Wit ({value})"
+      },
+      "grey": {
+        "name": "Grijs",
+        "label": "Grijs ({value})"
+      },
+      "ink": {
+        "name": "Inkt",
+        "label": "Inkt ({value})"
+      },
+      "paleAccent": {
+        "name": "Lichtaccent",
+        "label": "Lichtaccent ({value})"
+      },
+      "softAccent": {
+        "name": "Zacht accent",
+        "label": "Zacht accent ({value})"
+      },
+      "accent": {
+        "name": "Accent",
+        "label": "Accent ({value})"
+      },
+      "deepAccent": {
+        "name": "Diep accent",
+        "label": "Diep accent ({value})"
+      }
+    },
+    "standard": {
+      "white": "Wit ({value})",
+      "grey200": "Grijs 200 ({value})",
+      "grey300": "Grijs 300 ({value})",
+      "grey400": "Grijs 400 ({value})",
+      "grey": "Grijs ({value})",
+      "grey600": "Grijs 600 ({value})",
+      "grey700": "Grijs 700 ({value})",
+      "grey800": "Grijs 800 ({value})",
+      "ink": "Inkt ({value})",
+      "black": "Zwart ({value})",
+      "red": "Rood ({value})",
+      "orange": "Oranje ({value})",
+      "amber": "Amber ({value})",
+      "yellow": "Geel ({value})",
+      "green": "Groen ({value})",
+      "teal": "Blauwgroen ({value})",
+      "sky": "Hemelblauw ({value})",
+      "blue": "Blauw ({value})",
+      "violet": "Violet ({value})",
+      "pink": "Roze ({value})",
+      "redDark": "Donkerrood ({value})",
+      "orangeDark": "Donkeroranje ({value})",
+      "amberDark": "Donkeramber ({value})",
+      "yellowDark": "Donkergeel ({value})",
+      "greenDark": "Donkergroen ({value})",
+      "tealDark": "Donker blauwgroen ({value})",
+      "skyDark": "Donker hemelblauw ({value})",
+      "blueDark": "Donkerblauw ({value})",
+      "violetDark": "Donkerviolet ({value})",
+      "pinkDark": "Donkerroze ({value})"
+    },
+    "palettes": {
+      "sunset": {
+        "name": "Zonsondergang",
+        "group": "Palet Zonsondergang",
+        "swatches": {
+          "cream": "Zonsondergang crème ({value})",
+          "amber": "Zonsondergang amber ({value})",
+          "orange": "Zonsondergang oranje ({value})",
+          "red": "Zonsondergang rood ({value})",
+          "ember": "Zonsondergang gloed ({value})"
+        }
+      },
+      "forest": {
+        "name": "Bos",
+        "group": "Palet Bos",
+        "swatches": {
+          "mist": "Bos nevel ({value})",
+          "sage": "Bos salie ({value})",
+          "green": "Bos groen ({value})",
+          "pine": "Bos den ({value})",
+          "deep": "Bos diepgroen ({value})"
+        }
+      },
+      "ocean": {
+        "name": "Oceaan",
+        "group": "Palet Oceaan",
+        "swatches": {
+          "foam": "Oceaan schuim ({value})",
+          "sky": "Oceaan hemel ({value})",
+          "cyan": "Oceaan cyaan ({value})",
+          "sea": "Oceaan zee ({value})",
+          "navy": "Oceaan marineblauw ({value})"
+        }
+      },
+      "mono": {
+        "name": "Mono",
+        "group": "Palet Mono",
+        "swatches": {
+          "white": "Mono wit ({value})",
+          "silver": "Mono zilver ({value})",
+          "grey": "Mono grijs ({value})",
+          "graphite": "Mono grafiet ({value})",
+          "ink": "Mono inkt ({value})"
+        }
+      },
+      "candy": {
+        "name": "Snoep",
+        "group": "Palet Snoep",
+        "swatches": {
+          "blush": "Snoep blush ({value})",
+          "rose": "Snoep roos ({value})",
+          "pink": "Snoep roze ({value})",
+          "purple": "Snoep paars ({value})",
+          "violet": "Snoep violet ({value})"
+        }
+      }
+    }
+  }
+}

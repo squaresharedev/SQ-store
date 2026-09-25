@@ -2,9 +2,11 @@
 
 import { useRef, useState, type ChangeEvent, type DragEvent } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations, useLocale } from "next-intl";
 import { AlertTriangle, FileSpreadsheet, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/Toast";
+import { useActionErrorToast, useResolveMessage } from "@/components/ui/ActionErrorNotice";
 import { SaveButton, type SaveResult } from "@/components/ui/SaveButton";
 import { Select } from "@/components/ui/select";
 import { iconTileClass } from "@/components/ui/surface-styles";
@@ -22,6 +24,7 @@ import {
   IMPORT_BYTES_MAX,
   IMPORT_ROWS_MAX,
   buildImportPlan,
+  importProblemMessage,
   importableRows,
   parseCsv,
   type ColumnMap,
@@ -45,14 +48,6 @@ import type { TraderIdentityField } from "@/lib/settings/trader-identity";
  * The mapping is offered but rarely needed: a Shopify export maps itself, and
  * so does any file whose columns are called roughly what they are.
  */
-
-const FIELD_LABELS: Record<ImportField, string> = {
-  title: "Title",
-  description: "Description",
-  price: "Price",
-  sku: "SKU",
-  stock: "Stock",
-};
 
 /** Fields a product cannot be built without, marked so the seller knows which
  *  mapping to fix when rows are failing. */
@@ -80,7 +75,11 @@ export function ProductImport({
   missingTraderDetails?: readonly TraderIdentityField[];
 } = {}) {
   const router = useRouter();
+  const t = useTranslations("Products.import");
+  const locale = useLocale();
   const toast = useToast();
+  const showActionError = useActionErrorToast();
+  const resolveMessage = useResolveMessage();
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [file, setFile] = useState<Loaded | null>(null);
@@ -110,13 +109,16 @@ export function ProductImport({
     setSaveResult(null);
     if (picked.size > IMPORT_BYTES_MAX) {
       setError(
-        `That file is ${formatBytes(picked.size)}. Import files up to ${formatBytes(IMPORT_BYTES_MAX)}.`,
+        t("fileTooLarge", {
+          size: formatBytes(picked.size, locale),
+          max: formatBytes(IMPORT_BYTES_MAX, locale),
+        }),
       );
       return;
     }
     const text = await picked.text();
     if (!text.trim()) {
-      setError("That file is empty.");
+      setError(t("fileEmpty"));
       return;
     }
     // A fresh file gets a fresh mapping: overrides made against the last
@@ -151,25 +153,18 @@ export function ProductImport({
         status: importStatus,
       });
       if (!result.ok) {
-        setError(result.error.message);
-        setSaveResult({ error: result.error.message });
-        toast.error(result.error.message, {
-          lines: result.error.fix ? [result.error.fix] : undefined,
-        });
+        setError(resolveMessage(result.error.message));
+        setSaveResult({ error: resolveMessage(result.error.message) });
+        showActionError(result.error);
         return;
       }
-      setSaveResult({ success: "Imported" });
-      toast.success(
-        result.imported === 1
-          ? "1 product was imported."
-          : `${result.imported} products were imported.`,
-        {
-          lines:
-            result.skipped.length > 0
-              ? [`${result.skipped.length} row(s) were skipped.`]
-              : undefined,
-        },
-      );
+      setSaveResult({ success: t("importedLabel") });
+      toast.success(t("imported", { count: result.imported }), {
+        lines:
+          result.skipped.length > 0
+            ? [t("skippedRows", { count: result.skipped.length })]
+            : undefined,
+      });
       router.push("/products");
     } finally {
       setBusy(false);
@@ -205,12 +200,12 @@ export function ProductImport({
         </span>
         <span className="min-w-0 flex-1">
           <span className="block font-inter text-sm text-foreground">
-            {file ? file.name : "Drop a CSV or click to choose one"}
+            {file ? file.name : t("dropPrompt")}
           </span>
           <span className="block font-inter text-xs text-muted-foreground">
             {file
-              ? `${formatBytes(file.size)} · choose another to start over`
-              : `Up to ${IMPORT_ROWS_MAX} products per file`}
+              ? t("fileMeta", { size: formatBytes(file.size, locale) })
+              : t("rowsLimit", { max: IMPORT_ROWS_MAX })}
           </span>
         </span>
       </label>
@@ -228,40 +223,34 @@ export function ProductImport({
               <FileSpreadsheet className="size-4" strokeWidth={2} aria-hidden="true" />
             </span>
             <p className="font-inter text-sm text-foreground">
-              {plan.shopify ? "Shopify export. " : ""}
-              <strong className="font-medium">{ready.length}</strong>{" "}
-              {ready.length === 1 ? "product" : "products"} ready
-              {failing.length > 0 ? `, ${failing.length} skipped` : ""}.
+              {t.rich("summary", {
+                shopify: plan.shopify ? "yes" : "no",
+                ready: ready.length,
+                skipped: failing.length,
+                count: (chunks) => <strong className="font-medium">{chunks}</strong>,
+              })}
             </p>
           </div>
 
           {(plan.foldedVariants > 0 || plan.dropped > 0) && (
             <ul className={cn(infoTextClass, "list-disc space-y-1 pl-5")}>
               {plan.foldedVariants > 0 && (
-                <li>
-                  {plan.foldedVariants} variant {plan.foldedVariants === 1 ? "row" : "rows"} folded
-                  into the products above them. Add sizes and colours after importing.
-                </li>
+                <li>{t("foldedVariants", { count: plan.foldedVariants })}</li>
               )}
               {plan.dropped > 0 && (
-                <li>
-                  {plan.dropped} {plan.dropped === 1 ? "row is" : "rows are"} past the{" "}
-                  {IMPORT_ROWS_MAX}-product limit and will not be imported. Split the file to bring
-                  {plan.dropped === 1 ? " it" : " them"} in.
-                </li>
+                <li>{t("droppedRows", { count: plan.dropped, max: IMPORT_ROWS_MAX })}</li>
               )}
             </ul>
           )}
 
           <p className={infoTextClass}>
-            Photos are not imported. Prices, stock and descriptions come across; add the pictures
-            once the products are here.
+            {t("photosNotImported")}
           </p>
 
           <div className="grid gap-4 @md:grid-cols-2">
             <div className="space-y-1.5">
               <label htmlFor="import-currency" className={labelClass}>
-                Currency
+                {t("currency")}
               </label>
               <Select
                 id="import-currency"
@@ -269,38 +258,36 @@ export function ProductImport({
                 options={CURRENCIES.map((code) => ({ value: code, label: code }))}
                 onChange={(value) => setCurrency(value)}
               />
-              <p className={helpTextClass}>Every imported product is priced in this.</p>
+              <p className={helpTextClass}>{t("currencyHelp")}</p>
             </div>
             <div className="space-y-1.5">
               {canImportLive ? (
                 <>
                   <label htmlFor="import-status" className={labelClass}>
-                    Import as
+                    {t("importAs")}
                   </label>
                   <Select
                     id="import-status"
                     value={status}
                     options={PRODUCT_STATUSES.map((value) => ({
                       value,
-                      label: value === "draft" ? "Drafts" : "Live products",
+                      label: value === "draft" ? t("asDrafts") : t("asLive"),
                     }))}
                     onChange={(value) => setStatus(value)}
                   />
                   <p className={helpTextClass}>
-                    {status === "draft"
-                      ? "Nothing goes live until you publish it."
-                      : "These appear in your store straight away."}
+                    {status === "draft" ? t("draftsHint") : t("liveHint")}
                   </p>
                 </>
               ) : (
                 <>
-                  <p className={labelClass}>Import as</p>
-                  <p className="font-inter text-sm text-foreground">Drafts</p>
+                  <p className={labelClass}>{t("importAs")}</p>
+                  <p className="font-inter text-sm text-foreground">{t("asDrafts")}</p>
                   {/* A new tab: following the link here must not throw away
                       the file and the column mapping already done. */}
                   <SellerDetailsNotice
                     missing={missingTraderDetails}
-                    blocks="import live products"
+                    blocks="importLiveProducts"
                     detailed={false}
                     newTab
                   />
@@ -310,7 +297,7 @@ export function ProductImport({
           </div>
 
           <div className="space-y-3">
-            <p className={labelClass}>Columns</p>
+            <p className={labelClass}>{t("columns")}</p>
             <div className="grid gap-3 @md:grid-cols-2 @2xl:grid-cols-3">
               {ORDERED_FIELDS.map((field) => {
                 const selected = plan.columns[field];
@@ -318,17 +305,17 @@ export function ProductImport({
                 return (
                   <div key={field} className="space-y-1.5">
                     <label htmlFor={`import-col-${field}`} className={cn(labelClass, "text-xs")}>
-                      {FIELD_LABELS[field]}
-                      {required && <span className="text-muted-foreground"> (needed)</span>}
+                      {t(`fields.${field}`)}
+                      {required && <span className="text-muted-foreground"> {t("needed")}</span>}
                     </label>
                     <Select
                       id={`import-col-${field}`}
                       value={selected === null ? "" : String(selected)}
                       options={[
-                        { value: "", label: required ? "Not set" : "Skip" },
+                        { value: "", label: required ? t("notSet") : t("skip") },
                         ...plan.header.map((name, index) => ({
                           value: String(index),
-                          label: name || `Column ${index + 1}`,
+                          label: name || t("columnFallback", { number: index + 1 }),
                         })),
                       ]}
                       onChange={(value) =>
@@ -346,14 +333,14 @@ export function ProductImport({
 
           {ready.length > 0 && (
             <div className="space-y-2">
-              <p className={labelClass}>What will be imported</p>
+              <p className={labelClass}>{t("previewHeading")}</p>
               <div className="overflow-x-auto rounded-sm border border-border">
                 <table className="w-full min-w-[32rem] text-left text-sm">
                   <thead className="border-b border-border bg-muted/40">
                     <tr>
-                      <th scope="col" className="px-3 py-2 font-medium">Title</th>
-                      <th scope="col" className="px-3 py-2 font-medium">Price</th>
-                      <th scope="col" className="px-3 py-2 font-medium">Stock</th>
+                      <th scope="col" className="px-3 py-2 font-medium">{t("previewTitle")}</th>
+                      <th scope="col" className="px-3 py-2 font-medium">{t("previewPrice")}</th>
+                      <th scope="col" className="px-3 py-2 font-medium">{t("previewStock")}</th>
                     </tr>
                   </thead>
                   <tbody data-import-preview="">
@@ -361,10 +348,10 @@ export function ProductImport({
                       <tr key={row.line} className="border-b border-border last:border-b-0">
                         <td className="max-w-[18rem] truncate px-3 py-2">{row.title}</td>
                         <td className="px-3 py-2 tabular-nums">
-                          {formatCents(row.priceCents ?? 0, currency)}
+                          {formatCents(row.priceCents ?? 0, currency, locale)}
                         </td>
                         <td className="px-3 py-2 tabular-nums text-muted-foreground">
-                          {row.stock ?? "Not tracked"}
+                          {row.stock ?? t("notTracked")}
                         </td>
                       </tr>
                     ))}
@@ -373,7 +360,7 @@ export function ProductImport({
               </div>
               {ready.length > PREVIEW_ROWS && (
                 <p className={helpTextClass}>
-                  and {ready.length - PREVIEW_ROWS} more.
+                  {t("andMore", { count: ready.length - PREVIEW_ROWS })}
                 </p>
               )}
             </div>
@@ -383,17 +370,22 @@ export function ProductImport({
             <div className="space-y-2" data-import-skipped="">
               <p className={cn(labelClass, "flex items-center gap-2")}>
                 <AlertTriangle className="size-4 text-muted-foreground" strokeWidth={2} aria-hidden="true" />
-                Rows that will be skipped
+                {t("skippedHeading")}
               </p>
               <ul className={cn(infoTextClass, "space-y-1")}>
                 {failing.slice(0, PREVIEW_ROWS).map((row) => (
                   <li key={row.line}>
-                    Line {row.line}
-                    {row.title ? ` (${row.title})` : ""}: {row.problem}
+                    {row.problem &&
+                      t("skippedRow", {
+                        titled: row.title ? "yes" : "no",
+                        line: row.line,
+                        title: row.title,
+                        problem: resolveMessage(importProblemMessage(row.problem)),
+                      })}
                   </li>
                 ))}
                 {failing.length > PREVIEW_ROWS && (
-                  <li>and {failing.length - PREVIEW_ROWS} more.</li>
+                  <li>{t("andMore", { count: failing.length - PREVIEW_ROWS })}</li>
                 )}
               </ul>
             </div>
@@ -406,10 +398,10 @@ export function ProductImport({
               disabled={ready.length === 0}
               pending={busy}
               state={saveResult ?? undefined}
-              pendingLabel="Importing…"
-              savedLabel="Imported"
+              pendingLabel={t("importing")}
+              savedLabel={t("importedLabel")}
             >
-              {ready.length === 1 ? "Import 1 product" : `Import ${ready.length} products`}
+              {t("run", { count: ready.length })}
             </SaveButton>
             <button
               type="button"
@@ -421,7 +413,7 @@ export function ProductImport({
                 setSaveResult(null);
               }}
             >
-              Clear
+              {t("clear")}
             </button>
           </div>
         </>

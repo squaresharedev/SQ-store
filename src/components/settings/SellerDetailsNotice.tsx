@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, ShieldAlert } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { iconNudgeRightClass } from "@/components/ui/control-styles";
 import {
   TRADER_IDENTITY_FIELDS,
@@ -8,6 +9,7 @@ import {
   traderIdentityHref,
   type TraderIdentityField,
 } from "@/lib/settings/trader-identity";
+import type { MessageKey } from "@/i18n/types";
 import { cn } from "@/lib/utils";
 
 /**
@@ -28,6 +30,21 @@ import { cn } from "@/lib/utils";
  * gate's output unconditionally instead of guarding at every call site.
  */
 
+/**
+ * What a notice can say it is blocking. Each maps to a whole sentence of its
+ * own: the blocked action is not a fragment that survives being spliced into
+ * another language's grammar.
+ */
+const BLOCK_HEADLINES = {
+  publishOrSell: "Settings.sellerDetails.headline.publishOrSell",
+  putProductOnSale: "Settings.sellerDetails.headline.putProductOnSale",
+  importLiveProducts: "Settings.sellerDetails.headline.importLiveProducts",
+  embedStorefront: "Settings.sellerDetails.headline.embedStorefront",
+  publishStorefront: "Settings.sellerDetails.headline.publishStorefront",
+} as const satisfies Record<string, MessageKey>;
+
+export type SellerDetailsBlock = keyof typeof BLOCK_HEADLINES;
+
 /** The full-width strip in the dashboard chrome. */
 export function SellerDetailsBanner({
   missing,
@@ -43,15 +60,17 @@ export function SellerDetailsBanner({
    */
   audience?: "owner" | "member";
 }) {
+  const t = useTranslations();
   if (missing.length === 0) return null;
   const member = audience === "member";
+  const fix = traderIdentityFix(missing);
   return (
     <div
       // A standing condition the seller has to act on, not a live announcement:
       // `status` would be re-read on every navigation inside the shell, which
       // is most of them.
       role="note"
-      aria-label="Seller details required"
+      aria-label={t("Settings.sellerDetails.bannerLabel")}
       // No rule underneath: the tint alone separates it from the page, and a
       // red line under a red strip read as a second, louder warning.
       className="flex flex-wrap items-center gap-x-2 gap-y-1 bg-destructive/5 px-4 py-2 text-sm md:px-6"
@@ -63,12 +82,14 @@ export function SellerDetailsBanner({
       />
       <p className="min-w-0 flex-1 text-foreground">
         <span className="font-semibold">
-          {member ? "This store can't publish or sell yet." : TRADER_IDENTITY_HEADLINE}
+          {member
+            ? t("Settings.sellerDetails.memberHeadline")
+            : t(TRADER_IDENTITY_HEADLINE.key)}
         </span>{" "}
         <span className="font-inter text-muted-foreground">
           {member
-            ? "Its owner has to add their seller details in their own settings."
-            : traderIdentityFix(missing)}
+            ? t("Settings.sellerDetails.memberFix")
+            : t(fix.key, fix.values)}
         </span>
       </p>
       {!member && (
@@ -79,7 +100,7 @@ export function SellerDetailsBanner({
           // instead of destructive red to signal this is a helpful action, not risky.
           className="group/btn inline-flex shrink-0 items-center gap-1 rounded-none border border-border px-2 py-1 font-inter text-xs font-medium text-muted-foreground transition-colors duration-base ease-standard hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none"
         >
-          Add seller details
+          {t("Settings.sellerDetails.addLink")}
           <ArrowRight
             className={cn("size-3.5", iconNudgeRightClass)}
             strokeWidth={2}
@@ -94,8 +115,8 @@ export function SellerDetailsBanner({
 /** The boxed version, for inside the surface being blocked. */
 export function SellerDetailsNotice({
   missing,
-  /** What this seller is being stopped from doing, as a verb phrase. */
-  blocks = "publish or sell anything",
+  /** What this seller is being stopped from doing. */
+  blocks = "publishOrSell",
   /** Spell out why each missing field is needed. Off in tight spaces. */
   detailed = true,
   /**
@@ -107,11 +128,12 @@ export function SellerDetailsNotice({
   className,
 }: {
   missing: readonly TraderIdentityField[];
-  blocks?: string;
+  blocks?: SellerDetailsBlock;
   detailed?: boolean;
   newTab?: boolean;
   className?: string;
 }) {
+  const t = useTranslations();
   if (missing.length === 0) return null;
   const fields = TRADER_IDENTITY_FIELDS.filter((field) =>
     missing.includes(field.key),
@@ -133,7 +155,7 @@ export function SellerDetailsNotice({
       <div className="min-w-0 space-y-2">
         <div className="space-y-0.5">
           <p className="font-inter text-sm font-medium text-destructive">
-            You can&apos;t {blocks} until your seller details are complete.
+            {t(BLOCK_HEADLINES[blocks])}
           </p>
           {/* Full destructive, not /80: faded over this bg-destructive/5 panel
               it lands at 4.04:1, under the 4.5:1 AA minimum (axe flagged it on
@@ -141,9 +163,7 @@ export function SellerDetailsNotice({
               on the same background, passes). The weight difference carries the
               hierarchy instead of the tint. */}
           <p className="font-inter text-sm text-destructive">
-            Buyers have to be able to see who they are buying from and how to
-            reach you before they order. These are shown on your product pages
-            for that reason only, never used for marketing.
+            {t("Settings.sellerDetails.reason")}
           </p>
         </div>
         {detailed && (
@@ -151,9 +171,9 @@ export function SellerDetailsNotice({
             {fields.map((field) => (
               <li key={field.key}>
                 <span className="font-medium text-foreground">
-                  {field.label}
+                  {t(field.label)}
                 </span>
-                : {field.why}
+                : {t(field.why)}
               </li>
             ))}
           </ul>
@@ -168,8 +188,10 @@ export function SellerDetailsNotice({
           // banner, so the two say the same thing in the same voice.
           className="inline-flex items-center rounded-sm border border-border px-3 py-1.5 font-inter text-xs font-medium text-muted-foreground transition-colors duration-base ease-standard hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none"
         >
-          Add seller details
-          {newTab && <span className="sr-only"> (opens in a new tab)</span>}
+          {t("Settings.sellerDetails.addLink")}
+          {newTab && (
+            <span className="sr-only">{t("Settings.sellerDetails.opensInNewTab")}</span>
+          )}
         </Link>
       </div>
     </div>

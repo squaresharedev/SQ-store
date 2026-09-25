@@ -1,0 +1,252 @@
+{
+  "steps": {
+    "seller": {
+      "label": "Voeg je verkopersgegevens toe",
+      "detail": "Je handelsnaam, vestigingsadres en contact-e-mailadres staan op elke productpagina.",
+      "detailDone": "Kopers kunnen zien van wie ze kopen.",
+      "detailUnconfirmed": "Open de link die we je hebben gemaild om je contact-e-mailadres te bevestigen.",
+      "action": "Gegevens toevoegen",
+      "actionUnconfirmed": "E-mail bevestigen",
+      "cta": "Voeg je verkopersgegevens toe",
+      "ctaUnconfirmed": "Bevestig je e-mailadres"
+    },
+    "product": {
+      "label": "Voeg een product toe",
+      "detail": "Een titel en een prijs zijn genoeg. Het mag voorlopig een concept blijven.",
+      "detailDone": "{count, plural, one {Je hebt {count} product.} other {Je hebt {count} producten.}}",
+      "action": "Product toevoegen",
+      "cta": "Voeg je eerste product toe"
+    },
+    "storefront": {
+      "label": "Zet een product op een etalage",
+      "detailDone": "Er staat een product op je etalage.",
+      "detailNone": "Maak een etalage en voeg dan een product toe aan het raster.",
+      "detailEmpty": "Open je etalage en kies Product toevoegen in de werkbalk.",
+      "actionCreate": "Etalage maken",
+      "actionOpen": "Editor openen",
+      "cta": "Open je etalage",
+      "ctaCreate": "Maak een etalage"
+    },
+    "publish": {
+      "label": "Publiceer de pagina",
+      "detailDone": "Je productpagina is online.",
+      "detailNeedsSeller": "Rond je verkopersgegevens af, dan kan je pagina online gaan.",
+      "detailNeedsStorefront": "Zodra een product op een etalage staat, kan de pagina online gaan.",
+      "detailNeedsActive": "Zet dat product op Actief zodat de pagina online gaat.",
+      "detailPagesOff": "Productpagina's staan uit voor die etalage. Zet ze aan in de editor.",
+      "actionEdit": "Product bewerken",
+      "actionOpen": "Editor openen",
+      "cta": "Publiceer je product",
+      "ctaPagesOff": "Zet productpagina's aan"
+    }
+  },
+  "checklist": {
+    "titleDone": "Je bent helemaal klaar",
+    "title": "Aan de slag",
+    "showMeAround": "Laat het me zien",
+    "showSteps": "Stappen tonen",
+    "hideSteps": "Stappen verbergen",
+    "liveHint": "Je eerste productpagina is online. Deel de link overal.",
+    "copyLink": {
+      "copy": "Link naar productpagina kopiëren",
+      "copied": "Link naar productpagina gekopieerd",
+      "failed": "Kopiëren van de link naar de productpagina is mislukt. Selecteer en kopieer hem handmatig."
+    },
+    "openPage": "Pagina openen",
+    "opensInNewTab": " (opent in nieuw tabblad)",
+    "hide": "Verbergen",
+    "progressLabel": "Installatievoortgang",
+    "progress": "{total, plural, one {{done} van {total} voltooid} other {{done} van {total} voltooid}}",
+    "stepDone": " (voltooid)",
+    "stepToDo": " (te doen)"
+  },
+  "welcome": {
+    "steps": {
+      "welcome": {
+        "title": "Welkom bij Square Share",
+        "description": "Vier stappen naar een productpagina die je kunt delen."
+      },
+      "path": {
+        "title": "Vier stappen naar je eerste pagina"
+      },
+      "seller": {
+        "title": "Voeg je verkopersgegevens toe",
+        "description": "Kopers zien deze op je productpagina's, en de wet vereist ze voordat je kunt verkopen. We gebruiken ze nooit voor marketing.",
+        "lawNote": "Kopers zien deze gegevens op je productpagina’s, zoals de wet voorschrijft. Ze worden nooit voor marketing gebruikt."
+      },
+      "tour": {
+        "title": "Waar alles staat",
+        "description": "Alles staat in de zijbalk. Hier is waarvoor elk onderdeel dient."
+      },
+      "terms": {
+        "title": "Onze Servicevoorwaarden",
+        "description": "Lees de korte versie of de volledige voorwaarden en ga akkoord om door te gaan."
+      }
+    },
+    "progress": "{total, plural, one {Stap {step} van {total}} other {Stap {step} van {total}}}",
+    "intro": "Elk product dat je verkoopt kan een eigen pagina krijgen, vormgegeven door een etalage die jij ontwerpt.",
+    "tagline": "Geef elk product een eigen pagina en deel die overal.",
+    "path": {
+      "seller": {
+        "title": "Voeg je verkopersgegevens toe",
+        "body": "Kopers moeten weten van wie ze kopen."
+      },
+      "product": {
+        "title": "Voeg een product toe",
+        "body": "Een titel, een prijs en een foto als je die hebt."
+      },
+      "storefront": {
+        "title": "Zet het op een etalage",
+        "body": "Kies een uitstraling en plaats dan het product op het raster."
+      },
+      "share": {
+        "title": "Deel de pagina",
+        "body": "Plak de link in je bio, een bericht of je eigen site."
+      }
+    },
+    "seller": {
+      "namePlaceholder": "bijv. Studio Builderboy e.U.",
+      "nameHelp": "Je handelsnaam, of je volledige naam als je als jezelf verkoopt.",
+      "nameAlternative": "Of je volledige naam, als je als privépersoon verkoopt.",
+      "addressPlaceholder": "bijv. Marktstraat 12\n1012 AB Amsterdam\nNederland",
+      "emailPlaceholder": "bijv. hallo@jouwwinkel.example",
+      "emailHelp": "Waar kopers je kunnen bereiken. Dit mag afwijken van je inlog-e-mailadres."
+    },
+    "confirm": {
+      "check": "Controleer {email} voor een bevestigingslink.",
+      "goLive": "Je productpagina's gaan online zodra je de link opent.",
+      "sendNewLink": "Nieuwe link verzenden"
+    },
+    "tour": {
+      "mobileMenu": "Open op je telefoon het menu linksboven.",
+      "searchShortcut": "Op zoek naar iets? Druk op <kbd>{shortcut}</kbd> om overal te zoeken.",
+      "searchNoShortcut": "Op zoek naar iets? Zoeken vindt elke pagina of instelling.",
+      "searchMobile": "Op zoek naar iets? Tik op Zoeken bovenaan."
+    },
+    "nav": {
+      "skipOnboarding": "Introductie overslaan",
+      "next": "Volgende",
+      "showMeAround": "Laat me rondkijken",
+      "skipIntro": "Intro overslaan",
+      "getStarted": "Aan de slag",
+      "skipForNow": "Voorlopig overslaan",
+      "saveAndContinue": "Opslaan en doorgaan",
+      "changeDetails": "Gegevens wijzigen",
+      "continue": "Doorgaan",
+      "exploreOnMyOwn": "Zelf verkennen",
+      "notNow": "Niet nu"
+    },
+    "hero": {
+      "buyNow": "Nu kopen",
+      "live": "Online",
+      "linkCopied": "Link gekopieerd"
+    },
+    "setupPath": {
+      "details": "Vul je gegevens in",
+      "product": "Voeg een product toe",
+      "storefront": "Ontwerp een etalage",
+      "share": "Deel de pagina"
+    },
+    "terms": {
+      "agreed": "Je bent akkoord gegaan met deze voorwaarden. Bedankt voor het lezen.",
+      "agreeNote": "Als je akkoord gaat, worden de datum en deze versie van de voorwaarden op je account vastgelegd."
+    }
+  },
+  "tourOverlay": {
+    "dialogLabel": "Rondleiding",
+    "progress": "{total, plural, other {{current} van {total}}}",
+    "shortcut": "Sneltoets: <kbd>{shortcut}</kbd>",
+    "skipTour": "Rondleiding overslaan",
+    "next": "Volgende",
+    "openingPage": "{page, select, overview {Overzicht openen…} products {Producten openen…} storefront {Etalage openen…} orders {Bestellingen openen…} analytics {Statistieken openen…} payments {Betalingen openen…} settings {Instellingen openen…} sampleStorefront {Voorbeeldetalage openen…} other {Openen…}}"
+  },
+  "tourReplay": {
+    "title": "Rondleiding",
+    "description": "Een korte wandeling langs het belangrijkste dat je op elke pagina kunt doen, stap voor stap.",
+    "start": "Start de rondleiding"
+  },
+  "guidedTour": {
+    "steps": {
+      "overviewNav": {
+        "title": "Zoek je weg",
+        "body": "Alles in je winkel is met één klik bereikbaar via het menu. Deze rondleiding stopt bij het belangrijkste dat je op elke pagina kunt doen.",
+        "bodySidebar": "Alles in je winkel is met één klik bereikbaar in deze zijbalk. Deze rondleiding stopt bij het belangrijkste dat je op elke pagina kunt doen.",
+        "bodyMenu": "Alles in je winkel zit achter dit menu. Deze rondleiding stopt bij het belangrijkste dat je op elke pagina kunt doen."
+      },
+      "search": {
+        "title": "Zoek naar alles",
+        "body": "Met zoeken spring je direct naar elke pagina, elk product, elke bestelling of instelling.",
+        "bodyTopBar": "Spring direct naar elke pagina, elk product, elke bestelling of instelling.",
+        "bodyPhone": "Tik hier om direct naar elke pagina, elk product, elke bestelling of instelling te springen."
+      },
+      "productsAdd": {
+        "title": "Voeg een product toe",
+        "body": "Een titel en een prijs zijn genoeg om te beginnen. Het kan een concept blijven tot je er klaar voor bent."
+      },
+      "productsImport": {
+        "title": "Of importeer je catalogus",
+        "body": "Verkoop je al ergens anders? Importeer een CSV-bestand. Een Shopify-export werkt zoals hij is."
+      },
+      "storefrontCreate": {
+        "title": "Maak een etalage",
+        "body": "Een etalage is een raster dat je zelf ontwerpt. Elk product dat je erop zet, krijgt een pagina die je kunt delen."
+      },
+      "storefrontSample": {
+        "title": "Zie hoe het werkt",
+        "body": "Dit voorbeeld toont een complete etalage. Open het om de editor uit te proberen. Wat je daar wijzigt, wordt niet opgeslagen.",
+        "fallbackBody": "Open een etalage om hem te ontwerpen."
+      },
+      "storefrontEmbed": {
+        "title": "Sluit een etalage in op je site",
+        "body": "Elke etalage heeft een insluitknop die je een insluitcode geeft zoals deze. De widget is nog in ontwikkeling en wordt op andere sites nog niet getoond.",
+        "bodyButton": "Deze knop geeft je een insluitcode zoals die hieronder, om in je site te plakken. De widget is nog in ontwikkeling en wordt op andere sites nog niet getoond.",
+        "fallbackBody": "Zodra je een etalage hebt, geeft de insluitknop op de kaart een insluitcode zoals deze. De widget is nog in ontwikkeling en wordt op andere sites nog niet getoond."
+      },
+      "ordersSearch": {
+        "title": "Zoek een bestelling",
+        "body": "Zoek op het e-mailadres van de koper. Bestellingen verschijnen hier zodra de checkout van Square Share opent."
+      },
+      "ordersFilters": {
+        "title": "Filteren en sorteren",
+        "body": "Beperk bestellingen op kanaal, status of datum en kies hoe ze worden gesorteerd."
+      },
+      "analytics": {
+        "title": "Zie hoe het gaat",
+        "body": "Verkopen en bezoeken van je productpagina’s, over de periode die je kiest.",
+        "bodyRange": "Verkopen en bezoeken van je productpagina’s, voor de periode die je hier kiest.",
+        "bodyFirstRun": "Verkopen en bezoeken van je productpagina’s verschijnen hier zodra er een online staat."
+      },
+      "payments": {
+        "title": "Betaald krijgen",
+        "bodyConnect": "Koppel hier Stripe, zodat uitbetalingen rechtstreeks naar je bank gaan.",
+        "bodyComingSoon": "Betaald worden via Stripe komt binnenkort. Tot die tijd betalen kopers je via de aankooplink van je product of per e-mail."
+      },
+      "finish": {
+        "title": "Doe de rondleiding op elk moment opnieuw",
+        "body": "Dat was de rondleiding. Je kunt hem hier opnieuw starten wanneer je wilt."
+      }
+    }
+  },
+  "editorTour": {
+    "steps": {
+      "editorAdd": {
+        "title": "Voeg iets toe aan je raster",
+        "body": "Voeg producten, tekst en vormen toe via deze balk. Sleep iets op het raster om het te verplaatsen en trek aan een hoek om het te vergroten of verkleinen."
+      },
+      "editorDesign": {
+        "title": "Bepaal de uitstraling",
+        "body": "Kleuren, lettertypen, de koptekst en hoe productkaarten eruitzien stel je één keer in voor de hele etalage.",
+        "bodyPanel": "Kleuren, lettertypen, de koptekst en hoe productkaarten eruitzien stel je hier in, één keer voor de hele etalage.",
+        "bodyButton": "Tik hier voor kleuren, lettertypen, de koptekst en de uitstraling van productkaarten, één keer ingesteld voor de hele etalage."
+      },
+      "editorPage": {
+        "title": "Elk product krijgt een pagina",
+        "body": "Elk product op het raster heeft een eigen pagina om te delen. Open er hier een om hem te bekijken en vorm te geven."
+      },
+      "editorFinish": {
+        "title": "Maak het helemaal van jou",
+        "body": "Het voorbeeld wordt nooit opgeslagen, dus probeer gerust alles uit. Maak een eigen etalage wanneer je er klaar voor bent."
+      }
+    }
+  }
+}

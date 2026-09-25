@@ -14,11 +14,27 @@ import type { ColorPreset } from "./color-presets";
  * deep one, without checking each swatch's name.
  */
 export function themeAccentPresets(accent: string): readonly ColorPreset[] {
-  const presets = [
-    { name: "Pale accent", value: mixHex(accent, "#ffffff", 0.85) },
-    { name: "Soft accent", value: mixHex(accent, "#ffffff", 0.45) },
-    { name: "Accent", value: accent },
-    { name: "Deep accent", value: mixHex(accent, "#000000", 0.45) },
+  const presets: ColorPreset[] = [
+    {
+      name: "Storefront.colors.presets.paleAccent.name",
+      label: "Storefront.colors.presets.paleAccent.label",
+      value: mixHex(accent, "#ffffff", 0.85),
+    },
+    {
+      name: "Storefront.colors.presets.softAccent.name",
+      label: "Storefront.colors.presets.softAccent.label",
+      value: mixHex(accent, "#ffffff", 0.45),
+    },
+    {
+      name: "Storefront.colors.presets.accent.name",
+      label: "Storefront.colors.presets.accent.label",
+      value: accent,
+    },
+    {
+      name: "Storefront.colors.presets.deepAccent.name",
+      label: "Storefront.colors.presets.deepAccent.label",
+      value: mixHex(accent, "#000000", 0.45),
+    },
   ];
   // An accent at or near the ends of the lightness range (white, black) mixes
   // toward one side to the same hex, e.g. mixHex("#ffffff", "#ffffff", t) is

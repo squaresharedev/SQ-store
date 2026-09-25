@@ -1,3 +1,5 @@
+import { useTranslations } from "next-intl";
+import type { MessageKey } from "@/i18n/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
@@ -11,20 +13,21 @@ import { cn } from "@/lib/utils";
  */
 export function CardGridSkeleton({
   cards = 8,
-  label,
+  loadingLabel,
   withImage = true,
   className,
 }: {
   cards?: number;
-  /** What is loading, e.g. "products". Read out to assistive tech. */
-  label: string;
+  /** The whole sentence read out to assistive tech, e.g. "loading products". */
+  loadingLabel: MessageKey;
   /** Reserve the card's image tile. Off for text-only cards. */
   withImage?: boolean;
   className?: string;
 }) {
+  const t = useTranslations();
   return (
     <div className={className}>
-      <span className="sr-only">loading {label}</span>
+      <span className="sr-only">{t(loadingLabel)}</span>
       <ul
         aria-hidden="true"
         className={cn(

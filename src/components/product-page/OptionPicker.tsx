@@ -2,6 +2,7 @@
 
 import { useRef, type CSSProperties, type KeyboardEvent } from "react";
 import { Check } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { isStrictHexColor } from "@/lib/validation/inputs";
 import type { ProductOption, ProductOptionGroup } from "@/types/product";
@@ -45,6 +46,7 @@ function OptionGroupControl({
   radius: number;
   ink: string;
 }) {
+  const t = useTranslations("ProductPage.options");
   const { selection, select } = useOptionSelection();
   const chosen = selection[group.id] ?? null;
   const groupRef = useRef<HTMLDivElement>(null);
@@ -70,7 +72,7 @@ function OptionGroupControl({
         <>
           <span className="opacity-70">: </span>
           <span className="font-medium">{chosen.name}</span>
-          {!chosen.available && <span className="opacity-70"> (unavailable)</span>}
+          {!chosen.available && <span className="opacity-70"> {t("unavailable")}</span>}
         </>
       )}
     </p>
@@ -92,7 +94,7 @@ function OptionGroupControl({
             // Kept in the list so the name is still readable, but disabled so
             // it cannot be chosen — the same bargain the swatches and chips
             // strike visually.
-            label: option.available ? option.name : `${option.name} — unavailable`,
+            label: option.available ? option.name : t("unavailableOption", { name: option.name }),
             disabled: !option.available,
           }))}
         />
@@ -117,6 +119,7 @@ function OptionGroupControl({
               option={option}
               checked={option.id === chosen?.id}
               anyChosen={chosen !== null}
+              unavailableLabel={t("unavailableLabel", { name: option.name })}
               radius={radius}
               ink={ink}
               onSelect={() => select(group.id, option.id)}
@@ -127,6 +130,7 @@ function OptionGroupControl({
               option={option}
               checked={option.id === chosen?.id}
               anyChosen={chosen !== null}
+              unavailableLabel={t("unavailableLabel", { name: option.name })}
               radius={radius}
               ink={ink}
               onSelect={() => select(group.id, option.id)}
@@ -142,6 +146,8 @@ type OptionButtonProps = {
   option: ProductOption;
   checked: boolean;
   anyChosen: boolean;
+  /** The accessible name when the option cannot be chosen, already resolved. */
+  unavailableLabel: string;
   radius: number;
   ink: string;
   onSelect: () => void;
@@ -149,12 +155,12 @@ type OptionButtonProps = {
 
 /** Shared radio wiring: only the checked option is in the tab order (roving
  *  focus), and an unavailable one is announced as such rather than hidden. */
-function radioProps({ option, checked, anyChosen }: OptionButtonProps) {
+function radioProps({ option, checked, anyChosen, unavailableLabel }: OptionButtonProps) {
   return {
     type: "button" as const,
     role: "radio" as const,
     "aria-checked": checked,
-    "aria-label": option.available ? option.name : `${option.name}, unavailable`,
+    "aria-label": option.available ? option.name : unavailableLabel,
     "aria-disabled": !option.available || undefined,
     "data-option-id": option.id,
     tabIndex: checked || (!anyChosen && option.available) ? 0 : -1,

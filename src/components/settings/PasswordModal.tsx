@@ -2,38 +2,34 @@
 
 import * as React from "react";
 import { useActionState } from "react";
-import { helpTextClass, infoTextClass } from "@/components/ui/control-styles";
+import { useTranslations } from "next-intl";
+import { helpTextClass } from "@/components/ui/control-styles";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { Modal } from "@/components/ui/modal";
-import { PasswordInput } from "@/components/ui/password-input";
 import { Spinner } from "@/components/ui/spinner";
-import { useActionToast } from "@/components/ui/Toast";
-import { StepUpField } from "@/components/auth/StepUp";
-import {
-  changePassword,
-  sendPasswordReset,
-  type SettingsActionState,
-} from "@/lib/settings/actions";
+import { useActionStateToast } from "@/components/ui/ActionErrorNotice";
+import { sendPasswordReset } from "@/lib/settings/actions";
+import type { ActionState } from "@/lib/errors";
 
-const INITIAL: SettingsActionState = {};
+const INITIAL: ActionState = {};
 
 /**
- * The one place a password is set from settings.
+ * The one place a password is set from settings, and it is ONLY ever by
+ * emailed link.
  *
- * Two views, because there are genuinely two situations and mixing them into a
- * single form asks people to ignore half of it:
+ * NO FIELD FOR THE CURRENT PASSWORD, ANYWHERE HERE. Settings used to offer a
+ * "change" form that asked for it, and a browser or password manager would
+ * fill that field the moment the dialog opened, one eye-toggle away from being
+ * shown to whoever was at the screen. The current password is never displayed,
+ * never fetched and never typed in this dialog: a new one is set by opening a
+ * link sent to the account's OWN address (read from the session server-side;
+ * the form has no email field on purpose, so there is nothing to point at
+ * somebody else's inbox). Setting it through that link signs out every other
+ * device, and with two-factor on the link asks for a code as well
+ * (lib/auth/actions.ts resetPassword).
  *
- *   - "change": you know your current password. Re-authentication is required,
- *     and that is not negotiable from the client: `changePassword` verifies the
- *     old password server-side before Supabase is asked to set the new one.
- *   - "reset": you do not know it, or the account has never had one (an OAuth
- *     signup). A link goes to the account's OWN address, read from the session
- *     server-side. The form has no email field on purpose, so there is nothing
- *     to point at somebody else's inbox.
- *
- * An account with no password only ever sees "reset": there is no current
- * password to ask for, and pretending otherwise would be a dead end.
+ * An account with no password (an OAuth signup) gets the same link, which is
+ * the only way it can get one.
  */
 export function PasswordModal({
   open,
@@ -47,13 +43,7 @@ export function PasswordModal({
   hasPassword: boolean;
   email: string;
 }) {
-  // Initialised once per mount. PasswordCard keys this component on `open`, so
-  // reopening remounts and lands back on the right view with no stale message
-  // from the previous attempt. That beats resetting from an effect, which would
-  // set state during render and cascade.
-  const [view, setView] = React.useState<"change" | "reset">(
-    hasPassword ? "change" : "reset",
-  );
+  const t = useTranslations("Settings.account.password");
 
   return (
     <Modal
@@ -66,112 +56,11 @@ export function PasswordModal({
       // the invite modals keep following the design system. rounded-none is a
       // token (--radius-none), not a raw value.
       className="rounded-none sm:rounded-none"
-      title={hasPassword ? "Change your password" : "Set a password"}
-      description={
-        view === "reset"
-          ? `We'll email a link to ${email}. It expires shortly after it arrives.`
-          : "Enter your current password, then the new one."
-      }
+      title={hasPassword ? t("modalTitleReset") : t("modalTitleSet")}
+      description={t("modalDescriptionReset", { email })}
     >
-      {view === "change" ? (
-        <ChangeView onForgot={() => setView("reset")} onDone={onClose} />
-      ) : (
-        <ResetView
-          hasPassword={hasPassword}
-          onBack={hasPassword ? () => setView("change") : undefined}
-          onClose={onClose}
-        />
-      )}
+      <ResetView hasPassword={hasPassword} onClose={onClose} />
     </Modal>
-  );
-}
-
-function ChangeView({
-  onForgot,
-  onDone,
-}: {
-  onForgot: () => void;
-  onDone: () => void;
-}) {
-  const [state, formAction, isPending] = useActionState(changePassword, INITIAL);
-  // The modal closes itself on success (below), so the confirmation has to
-  // outlive it — which is exactly what a toast does and an inline line cannot.
-  useActionToast(state);
-
-  // Closing on success keeps the modal from sitting there looking unfinished.
-  // The card underneath re-renders from the server with the new state.
-  React.useEffect(() => {
-    if (!state.success) return;
-    const timer = setTimeout(onDone, 1200);
-    return () => clearTimeout(timer);
-  }, [state.success, onDone]);
-
-  return (
-    <form action={formAction} className="flex flex-col gap-4" noValidate>
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="current_password">Current password</Label>
-        <PasswordInput
-          id="current_password"
-          name="current_password"
-          autoComplete="current-password"
-          placeholder="••••••••"
-          required
-        />
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="new_password">New password</Label>
-        <PasswordInput
-          id="new_password"
-          name="new_password"
-          autoComplete="new-password"
-          placeholder="••••••••"
-          required
-        />
-        {/* The ACTUAL rule, so the form does not invite a password it will
-            then reject. Mirrors passwordProblem() in lib/auth/password.ts. */}
-        <p className={infoTextClass}>
-          At least 8 characters, mixing cases, numbers or symbols (or a
-          passphrase of 16+).
-        </p>
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="confirm_password">Confirm new password</Label>
-        <PasswordInput
-          id="confirm_password"
-          name="confirm_password"
-          autoComplete="new-password"
-          placeholder="••••••••"
-          required
-        />
-      </div>
-
-      <StepUpField id="password-change" state={state} />
-
-      <p className={infoTextClass}>
-        Every other device will be signed out.
-      </p>
-
-      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
-        {/* type="button" matters: this sits INSIDE the change form, and a bare
-            <button> would default to submit and fire changePassword instead of
-            switching views. */}
-        <Button type="button" variant="secondary" onClick={onForgot}>
-          Forgot password?
-        </Button>
-        <Button type="submit" disabled={isPending} suppressHydrationWarning>
-          {isPending ? (
-            <>
-              <Spinner />
-              Updating…
-            </>
-          ) : (
-            "Update password"
-          )}
-        </Button>
-      </div>
-    </form>
   );
 }
 
@@ -203,18 +92,18 @@ function readCooldown(): number {
 
 function ResetView({
   hasPassword,
-  onBack,
   onClose,
 }: {
   hasPassword: boolean;
-  onBack?: () => void;
   onClose: () => void;
 }) {
+  const t = useTranslations("Settings.account.password");
+  const tCommon = useTranslations("Common.actions");
   const [state, formAction, isPending] = useActionState(
     sendPasswordReset,
     INITIAL,
   );
-  useActionToast(state);
+  useActionStateToast(state);
   // Seeded from storage at mount, so reopening the modal picks the countdown
   // up where it left off. Safe to read during render here: the modal returns
   // null while closed, so this view only ever renders in the browser.
@@ -246,25 +135,24 @@ function ResetView({
 
   const waiting = cooldown > 0;
   const label = isPending
-    ? "Sending…"
+    ? tCommon("sending")
     : waiting
-      ? `Resend in ${cooldown}s`
+      ? t("resendIn", { seconds: cooldown })
       : sent
-        ? "Resend email"
-        : "Email me a link";
+        ? t("resendEmail")
+        : t("emailMeALink");
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
-      {!hasPassword && (
-        <p className={helpTextClass}>
-          This account signs in with Google. Setting a password lets you sign in
-          with your email or username as well, and does not remove Google.
-        </p>
+      {hasPassword ? (
+        <p className={helpTextClass}>{t("neverShownNote")}</p>
+      ) : (
+        <p className={helpTextClass}>{t("googleAccountNote")}</p>
       )}
 
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-        <Button type="button" variant="ghost" onClick={onBack ?? onClose}>
-          {onBack ? "Back" : "Cancel"}
+        <Button type="button" variant="ghost" onClick={onClose}>
+          {tCommon("cancel")}
         </Button>
         <Button
           type="submit"

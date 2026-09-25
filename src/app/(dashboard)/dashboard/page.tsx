@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import {
   getDashboardOrders,
   getProductsSummary,
@@ -11,15 +12,17 @@ import { getActiveAccount } from "@/lib/team/account-context";
 import { getAssurance, getProfile } from "@/lib/auth/session";
 import { getTraderIdentityStatus } from "@/lib/settings/seller-identity";
 import { sellerEmailVerificationRequired } from "@/lib/settings/seller-email-verification";
+import { LEGAL_VERSION } from "@/lib/settings/constants";
 import { buildSetupSteps } from "@/lib/onboarding/steps";
 import { productPageUrl } from "@/lib/storefront/product-page-url";
 import { DashboardHome } from "@/components/dashboard/DashboardHome";
 import type { OnboardingData } from "@/components/dashboard/OnboardingSlot";
 import type { StorefrontAttentionInfo } from "@/lib/dashboard/attention";
 
-export const metadata: Metadata = {
-  title: "Overview",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Dashboard.metadata.overview");
+  return { title: t("title") };
+}
 
 // PROTECTED by (dashboard)/layout.tsx. All reads are owner-scoped (session +
 // RLS) and strictly read-only against products / storefronts / orders.
@@ -113,6 +116,9 @@ export default async function DashboardOverviewPage({
       // does not carry the column (undefined) must never welcome an
       // established seller; only a recorded "not seen yet" does.
       welcomePending: ownProfile?.onboarding_completed_at === null,
+      // Only an agreement to the CURRENT version counts; an older one is asked
+      // again (the welcome only opens for a readable profile, see above).
+      termsAccepted: ownProfile?.legal_accepted_version === LEGAL_VERSION,
       // Same strictness: only a recorded "not shown yet" shows the finished card.
       celebrationPending: ownProfile?.setup_celebrated_at === null,
       seller: ownProfile
@@ -134,6 +140,7 @@ export default async function DashboardOverviewPage({
       setup: null,
       traderMissing: [],
       welcomePending: false,
+      termsAccepted: true,
       celebrationPending: false,
       seller: null,
       verificationOn: false,

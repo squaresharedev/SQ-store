@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { CheckCheck } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { Spinner } from "@/components/ui/spinner";
 import {
@@ -38,6 +39,7 @@ export function NotificationList({
   /** Called when the user follows a link out of the dropdown (to close it). */
   onNavigateAway: () => void;
 }) {
+  const t = useTranslations("Notifications.list");
   const recent = notifications.slice(0, DROPDOWN_LIMIT);
 
   return (
@@ -51,10 +53,10 @@ export function NotificationList({
             aria-hidden
             className="mr-2 size-5 shrink-0 rounded-sm object-contain"
           />
-          Notifications
+          {t("title")}
           {unreadCount > 0 && (
             <span className="ml-1.5 font-inter text-xs font-normal text-muted-foreground">
-              {unreadCount} unread
+              {t("unread", { count: unreadCount })}
             </span>
           )}
         </h2>
@@ -68,7 +70,7 @@ export function NotificationList({
           )}
         >
           <CheckCheck aria-hidden className="size-3.5" />
-          Mark all read
+          {t("markAllRead")}
         </button>
       </div>
 
@@ -80,7 +82,7 @@ export function NotificationList({
           role="status"
           className="border-b border-border bg-muted px-3 py-1.5 font-inter text-xs text-muted-foreground"
         >
-          Live updates paused. Refresh to see the latest.
+          {t("livePaused")}
         </p>
       )}
 
@@ -91,7 +93,7 @@ export function NotificationList({
           </div>
         ) : recent.length === 0 ? (
           <p className="px-3 py-10 text-center font-inter text-sm text-muted-foreground">
-            You&apos;re all caught up. Nothing here yet.
+            {t("empty")}
           </p>
         ) : (
           <ul className="divide-y divide-border">
@@ -110,7 +112,7 @@ export function NotificationList({
           onClick={onNavigateAway}
           className={cn(overlayItemClass, "justify-center font-medium")}
         >
-          View all
+          {t("viewAll")}
         </Link>
       </div>
     </div>

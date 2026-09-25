@@ -21,7 +21,7 @@ vi.mock("@/lib/auth/session", async (importOriginal) => ({
 const requireStepUpMock = vi.fn();
 vi.mock("@/lib/auth/mfa", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/lib/auth/mfa")>()),
-  requireStepUp: (...args: unknown[]) => requireStepUpMock(...args),
+  requireStepUpState: (...args: unknown[]) => requireStepUpMock(...args),
 }));
 
 /** The throwaway-client password check used for 2FA accounts. */
@@ -47,7 +47,10 @@ const TWO_FACTOR = {
   factors: [{ id: "f0000000-0000-4000-8000-000000000001", name: "Phone", type: "totp", createdAt: "2026-09-01T00:00:00Z" }],
 };
 const STEP_UP_REFUSAL = {
-  error: "Enter the 6-digit code from your authenticator app to confirm it's you.",
+  error: {
+    code: "invalid_input",
+    message: { key: "Errors.stepUp.codeRequired" },
+  },
   stepUp: true,
 };
 
@@ -74,7 +77,7 @@ db.maybeSingle = vi.fn(() => dbFn());
 // Thenable for direct-await (updateOwnProfile and updateUsername pattern)
 db.then = (resolve: (v: unknown) => void, reject?: (e: unknown) => void) =>
   Promise.resolve(dbFn()).then(resolve, reject);
-// Auth methods for changePassword
+// Auth methods for requestEmailChange and sendPasswordReset
 db.auth = {
   signInWithPassword: vi.fn(),
   updateUser: vi.fn(),
@@ -84,7 +87,7 @@ db.auth = {
 };
 
 // Non-thenable wrapper: prevents async () => db from unwrapping via thenable protocol.
-// auth is delegated so supabase.auth.signInWithPassword/updateUser work in changePassword.
+// auth is delegated so supabase.auth.signInWithPassword/updateUser work in requestEmailChange.
 const clientWrapper = {
   from: (...args: unknown[]) => (db.from as (...a: unknown[]) => unknown)(...args),
   auth: db.auth,
@@ -143,17 +146,21 @@ import {
   acceptLegal,
   requestAccountDeletion,
   cancelAccountDeletion,
-  changePassword,
   requestEmailChange,
   sendPasswordReset,
 } from "@/lib/settings/actions";
 import { LEGAL_VERSION } from "@/lib/settings/constants";
+import { english } from "../../setup/translate";
+import type { ActionState } from "@/lib/errors";
+
+/** The English a reader is shown for a form action's result. */
+const errorText = (state: ActionState) => (state.error ? english(state.error.message) : undefined);
 
 // ---- test constants ------------------------------------------------------
 
 const USER_ID = "10000000-0000-4000-8000-000000000001";
 const USER = { id: USER_ID, email: "user@example.com" };
-const PREV: { error?: string; success?: string } = {};
+const PREV: ActionState = {};
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -191,7 +198,7 @@ describe("updateUsername - field whitelist", () => {
 
     const result = await updateUsername(PREV, fd);
 
-    expect(result.error).toMatch(/is_seller/);
+    expect(errorText(result)).toMatch(/is_seller/);
     expect(db.update).not.toHaveBeenCalled();
   });
 });
@@ -202,7 +209,7 @@ describe("updateUsername - auth", () => {
     const fd = new FormData();
     fd.append("username", "alice");
     const result = await updateUsername(PREV, fd);
-    expect(result.error).toMatch(/session/i);
+    expect(errorText(result)).toMatch(/session/i);
     expect(db.update).not.toHaveBeenCalled();
   });
 });
@@ -213,7 +220,7 @@ describe("updateUsername - validation", () => {
     const fd = new FormData();
     fd.append("username", "");
     const result = await updateUsername(PREV, fd);
-    expect(result.error).toBeTruthy();
+    expect(errorText(result)).toBeTruthy();
     expect(db.update).not.toHaveBeenCalled();
   });
 
@@ -225,7 +232,7 @@ describe("updateUsername - validation", () => {
 
     const result = await updateUsername(PREV, fd);
 
-    expect(result.error).toMatch(/taken/i);
+    expect(errorText(result)).toMatch(/taken/i);
   });
 });
 
@@ -259,7 +266,7 @@ describe("updateBio - field whitelist", () => {
 
     const result = await updateBio(PREV, fd);
 
-    expect(result.error).toMatch(/is_seller/);
+    expect(errorText(result)).toMatch(/is_seller/);
     expect(db.update).not.toHaveBeenCalled();
   });
 });
@@ -270,7 +277,7 @@ describe("updateBio - auth", () => {
     const fd = new FormData();
     fd.append("seller_bio", "Screen prints from a garage in Leipzig");
     const result = await updateBio(PREV, fd);
-    expect(result.error).toMatch(/session/i);
+    expect(errorText(result)).toMatch(/session/i);
     expect(db.update).not.toHaveBeenCalled();
   });
 });
@@ -297,7 +304,7 @@ describe("updateBio - validation", () => {
 
     const result = await updateBio(PREV, fd);
 
-    expect(result.error).toMatch(/100 characters/);
+    expect(errorText(result)).toMatch(/100 characters/);
     expect(db.update).not.toHaveBeenCalled();
   });
 
@@ -329,7 +336,7 @@ describe("saveTaxInfo - field whitelist", () => {
 
     const result = await saveTaxInfo(PREV, fd);
 
-    expect(result.error).toMatch(/is_seller/);
+    expect(errorText(result)).toMatch(/is_seller/);
     expect(db.update).not.toHaveBeenCalled();
   });
 });
@@ -425,7 +432,7 @@ describe("saveTaxInfo - happy path", () => {
 
     const result = await saveTaxInfo(PREV, fd);
 
-    expect(result.error).toMatch(/email/i);
+    expect(errorText(result)).toMatch(/email/i);
     expect(db.update).not.toHaveBeenCalled();
   });
 
@@ -448,7 +455,7 @@ describe("saveTaxInfo - happy path", () => {
     for (const address of ["hello@example.com", "someone@mailinator.com", "test@acme-prints.de"]) {
       db.update.mockClear();
       const result = await saveTaxInfo(PREV, taxForm(address));
-      expect(result.error, address).toBeTruthy();
+      expect(errorText(result), address).toBeTruthy();
       expect(db.update, address).not.toHaveBeenCalled();
     }
     // All three were settled without asking a resolver anything.
@@ -461,7 +468,7 @@ describe("saveTaxInfo - happy path", () => {
 
     const result = await saveTaxInfo(PREV, taxForm("hello@acme-prints.de"));
 
-    expect(result.error).toMatch(/doesn't accept mail/i);
+    expect(errorText(result)).toMatch(/doesn't accept mail/i);
     expect(db.update).not.toHaveBeenCalled();
   });
 
@@ -529,7 +536,7 @@ describe("saveTaxInfo - partial writes", () => {
 
     const result = await saveTaxInfo(PREV, new FormData());
 
-    expect(result.error).toBeTruthy();
+    expect(errorText(result)).toBeTruthy();
     expect(db.update).not.toHaveBeenCalled();
   });
 });
@@ -549,7 +556,7 @@ describe("saveNotifications", () => {
 
     const result = await saveNotifications(PREV, fd);
 
-    expect(result.error).toMatch(/extra_field/);
+    expect(errorText(result)).toMatch(/extra_field/);
     expect(db.update).not.toHaveBeenCalled();
   });
 
@@ -583,7 +590,7 @@ describe("acceptLegal", () => {
 
     const result = await acceptLegal(PREV, fd);
 
-    expect(result.error).toMatch(/extra/);
+    expect(errorText(result)).toMatch(/extra/);
     expect(db.update).not.toHaveBeenCalled();
   });
 
@@ -594,7 +601,7 @@ describe("acceptLegal", () => {
 
     const result = await acceptLegal(PREV, fd);
 
-    expect(result.error).toBeTruthy();
+    expect(errorText(result)).toBeTruthy();
     expect(db.update).not.toHaveBeenCalled();
   });
 
@@ -624,7 +631,7 @@ describe("requestAccountDeletion", () => {
 
     const result = await requestAccountDeletion(PREV, fd);
 
-    expect(result.error).toMatch(/delete my account/i);
+    expect(errorText(result)).toMatch(/delete my account/i);
     expect(db.update).not.toHaveBeenCalled();
   });
 
@@ -651,7 +658,7 @@ describe("requestAccountDeletion", () => {
 
     const result = await requestAccountDeletion(PREV, fd);
 
-    expect(result.error).toMatch(/user_id/);
+    expect(errorText(result)).toMatch(/user_id/);
     expect(db.update).not.toHaveBeenCalled();
   });
 });
@@ -679,7 +686,7 @@ describe("cancelAccountDeletion", () => {
 
     const result = await cancelAccountDeletion(PREV, fd);
 
-    expect(result.error).toMatch(/confirm/);
+    expect(errorText(result)).toMatch(/confirm/);
     expect(db.update).not.toHaveBeenCalled();
   });
 
@@ -687,81 +694,7 @@ describe("cancelAccountDeletion", () => {
     getUserMock.mockResolvedValue(null);
     const fd = new FormData();
     const result = await cancelAccountDeletion(PREV, fd);
-    expect(result.error).toMatch(/session/i);
-  });
-});
-
-// ==========================================================================
-// changePassword
-// ==========================================================================
-
-describe("changePassword", () => {
-  function validPasswordForm() {
-    const fd = new FormData();
-    fd.append("current_password", "old-pass-word-1");
-    fd.append("new_password", "new-pass-word-2");
-    fd.append("confirm_password", "new-pass-word-2");
-    return fd;
-  }
-
-  it("unknown field is rejected, no reauth attempted", async () => {
-    getUserMock.mockResolvedValue(USER);
-    const fd = validPasswordForm();
-    fd.append("email", "hacker@example.com");
-
-    const result = await changePassword(PREV, fd);
-
-    expect(result.error).toMatch(/email/);
-    expect(db.auth.signInWithPassword).not.toHaveBeenCalled();
-  });
-
-  it("wrong current password: reauth fails, updateUser NOT called", async () => {
-    getUserMock.mockResolvedValue(USER);
-    db.auth.signInWithPassword.mockResolvedValue({
-      error: { message: "Invalid credentials" },
-    });
-
-    const result = await changePassword(PREV, validPasswordForm());
-
-    expect(result.error).toMatch(/current password/i);
-    expect(db.auth.updateUser).not.toHaveBeenCalled();
-  });
-
-  it("mismatched new passwords returns validation error", async () => {
-    getUserMock.mockResolvedValue(USER);
-    const fd = new FormData();
-    fd.append("current_password", "old-pass-word-1");
-    fd.append("new_password", "new-pass-word-2");
-    fd.append("confirm_password", "different-pass-3");
-
-    const result = await changePassword(PREV, fd);
-
-    expect(result.error).toMatch(/match/i);
-    expect(db.auth.signInWithPassword).not.toHaveBeenCalled();
-  });
-
-  it("success: reauth succeeds then updateUser is called", async () => {
-    getUserMock.mockResolvedValue(USER);
-    db.auth.signInWithPassword.mockResolvedValue({ error: null });
-    db.auth.updateUser.mockResolvedValue({ error: null });
-
-    const result = await changePassword(PREV, validPasswordForm());
-
-    expect(result.success).toBeTruthy();
-    expect(db.auth.signInWithPassword).toHaveBeenCalledWith({
-      email: USER.email,
-      password: "old-pass-word-1",
-    });
-    expect(db.auth.updateUser).toHaveBeenCalledWith({
-      password: "new-pass-word-2",
-    });
-  });
-
-  it("signed out returns session expired error", async () => {
-    getUserMock.mockResolvedValue(null);
-    const result = await changePassword(PREV, validPasswordForm());
-    expect(result.error).toMatch(/session/i);
-    expect(db.auth.signInWithPassword).not.toHaveBeenCalled();
+    expect(errorText(result)).toMatch(/session/i);
   });
 });
 
@@ -794,7 +727,7 @@ describe("requestEmailChange - rate limit", () => {
 
     const result = await requestEmailChange(PREV, emailForm());
 
-    expect(result.error).toMatch(/too many/i);
+    expect(errorText(result)).toMatch(/too many/i);
     expect(db.auth.updateUser).not.toHaveBeenCalled();
   });
 
@@ -820,7 +753,7 @@ describe("settings writes - rate limit", () => {
     fd.append("username", "valid_name");
     const result = await updateUsername(PREV, fd);
 
-    expect(result.error).toMatch(/short time/i);
+    expect(errorText(result)).toMatch(/short time/i);
     expect(db.update).not.toHaveBeenCalled();
   });
 });
@@ -857,7 +790,7 @@ describe("requestEmailChange - re-authentication", () => {
 
     const result = await requestEmailChange(PREV, emailChangeForm());
 
-    expect(result.error).toMatch(/current password/i);
+    expect(errorText(result)).toMatch(/current password/i);
     expect(db.auth.updateUser).not.toHaveBeenCalled();
   });
 
@@ -869,7 +802,7 @@ describe("requestEmailChange - re-authentication", () => {
 
     const result = await requestEmailChange(PREV, emailChangeForm("new@example.com", "wrong"));
 
-    expect(result.error).toMatch(/incorrect/i);
+    expect(errorText(result)).toMatch(/incorrect/i);
     expect(db.auth.updateUser).not.toHaveBeenCalled();
   });
 
@@ -912,7 +845,7 @@ describe("requestEmailChange - re-authentication", () => {
 
     const result = await requestEmailChange(PREV, emailChangeForm());
 
-    expect(result.error).toMatch(/current password/i);
+    expect(errorText(result)).toMatch(/current password/i);
     expect(db.auth.updateUser).not.toHaveBeenCalled();
   });
 
@@ -924,7 +857,7 @@ describe("requestEmailChange - re-authentication", () => {
 
     const result = await requestEmailChange(PREV, emailChangeForm());
 
-    expect(result.error).toMatch(/current password/i);
+    expect(errorText(result)).toMatch(/current password/i);
   });
 
   it("records the request so a silent address move leaves a trail", async () => {
@@ -935,7 +868,7 @@ describe("requestEmailChange - re-authentication", () => {
     expect(alertMock).toHaveBeenCalledWith(
       USER_ID,
       "email.change_requested",
-      expect.objectContaining({ title: expect.any(String) }),
+      expect.objectContaining({ title: { key: "Notifications.messages.security.emailChangeRequested.title" } }),
     );
   });
 
@@ -946,68 +879,14 @@ describe("requestEmailChange - re-authentication", () => {
 
     const result = await requestEmailChange(PREV, fd);
 
-    expect(result.error).toMatch(/is_seller/);
+    expect(errorText(result)).toMatch(/is_seller/);
     expect(db.auth.updateUser).not.toHaveBeenCalled();
-  });
-});
-
-describe("changePassword - oracle and session hardening", () => {
-  function passwordForm() {
-    const fd = new FormData();
-    fd.append("current_password", "old-pass-word-1");
-    fd.append("new_password", "new-pass-word-2");
-    fd.append("confirm_password", "new-pass-word-2");
-    return fd;
-  }
-
-  it("bounds re-auth attempts BEFORE checking the guess", async () => {
-    // This endpoint verifies a caller-supplied password, so unbounded it is a
-    // password oracle a hijacked session could grind against.
-    getUserMock.mockResolvedValue(USER);
-    rateLimitMock.mockResolvedValue(false);
-
-    const result = await changePassword(PREV, passwordForm());
-
-    expect(result.error).toMatch(/too many/i);
-    expect(db.auth.signInWithPassword).not.toHaveBeenCalled();
-    expect(db.auth.updateUser).not.toHaveBeenCalled();
-  });
-
-  it("revokes other sessions after a successful change", async () => {
-    // A password change made BECAUSE an account was compromised is pointless
-    // if the intruder's existing session survives it.
-    getUserMock.mockResolvedValue(USER);
-
-    const result = await changePassword(PREV, passwordForm());
-
-    expect(result.success).toBeTruthy();
-    expect(db.auth.signOut).toHaveBeenCalledWith({ scope: "others" });
-  });
-
-  it("keeps THIS session alive (scope 'others', never 'global')", async () => {
-    getUserMock.mockResolvedValue(USER);
-    await changePassword(PREV, passwordForm());
-    const scopes = db.auth.signOut.mock.calls.map(
-      ([opts]: [{ scope: string }]) => opts.scope,
-    );
-    expect(scopes).not.toContain("global");
-    expect(scopes).not.toContain("local");
-  });
-
-  it("does not revoke anything when the change fails", async () => {
-    getUserMock.mockResolvedValue(USER);
-    db.auth.updateUser.mockResolvedValue({ error: { message: "nope" } });
-
-    const result = await changePassword(PREV, passwordForm());
-
-    expect(result.error).toBeTruthy();
-    expect(db.auth.signOut).not.toHaveBeenCalled();
   });
 });
 
 // ==========================================================================
-// sendPasswordReset — the escape hatch, and the only way an account with no
-// password gets one
+// sendPasswordReset: the ONLY way Settings sets a password (no change form
+// takes the current one), and how an account with no password gets one
 // ==========================================================================
 
 describe("sendPasswordReset - budgets", () => {
@@ -1031,7 +910,7 @@ describe("sendPasswordReset - budgets", () => {
 
     const result = await sendPasswordReset(PREV, new FormData());
 
-    expect(result.error).toMatch(/too many/i);
+    expect(errorText(result)).toMatch(/too many/i);
     expect(db.auth.resetPasswordForEmail).not.toHaveBeenCalled();
   });
 
@@ -1044,7 +923,7 @@ describe("sendPasswordReset - budgets", () => {
 
     const result = await sendPasswordReset(PREV, new FormData());
 
-    expect(result.error).toMatch(/too many/i);
+    expect(errorText(result)).toMatch(/too many/i);
     expect(db.auth.resetPasswordForEmail).not.toHaveBeenCalled();
   });
 
@@ -1055,7 +934,7 @@ describe("sendPasswordReset - budgets", () => {
 
     const result = await sendPasswordReset(PREV, fd);
 
-    expect(result.error).toMatch(/email/);
+    expect(errorText(result)).toMatch(/email/);
     expect(db.auth.resetPasswordForEmail).not.toHaveBeenCalled();
   });
 
@@ -1069,7 +948,7 @@ describe("sendPasswordReset - budgets", () => {
     expect(alertMock).toHaveBeenCalledWith(
       USER_ID,
       "password.reset_requested",
-      expect.objectContaining({ title: expect.any(String) }),
+      expect.objectContaining({ title: { key: "Notifications.messages.security.resetRequested.title" } }),
     );
   });
 
@@ -1084,128 +963,9 @@ describe("sendPasswordReset - budgets", () => {
   });
 });
 
-describe("changePassword - audit", () => {
-  it("records the change and notifies after the password is already set", async () => {
-    getUserMock.mockResolvedValue(PASSWORD_USER);
-    const fd = new FormData();
-    fd.append("current_password", "old-Password-1");
-    fd.append("new_password", "Kettle-Boat-99");
-    fd.append("confirm_password", "Kettle-Boat-99");
-
-    const result = await changePassword(PREV, fd);
-
-    expect(result.success).toBeTruthy();
-    expect(alertMock).toHaveBeenCalledWith(
-      USER_ID,
-      "password.changed",
-      expect.objectContaining({ title: expect.any(String) }),
-    );
-  });
-
-  it("a failing audit write never fails the password change", async () => {
-    // The log is best-effort by contract. Turning a completed credential
-    // change into an error the user retries would be worse than a missing row.
-    getUserMock.mockResolvedValue(PASSWORD_USER);
-    alertMock.mockRejectedValue(new Error("audit down"));
-    const fd = new FormData();
-    fd.append("current_password", "old-Password-1");
-    fd.append("new_password", "Kettle-Boat-99");
-    fd.append("confirm_password", "Kettle-Boat-99");
-
-    await expect(changePassword(PREV, fd)).resolves.toEqual(
-      expect.objectContaining({ success: expect.any(String) }),
-    );
-  });
-});
-
 // ---- two-factor ----------------------------------------------------------
 
 describe("sensitive settings actions - two-factor step-up", () => {
-  function passwordForm() {
-    const fd = new FormData();
-    fd.append("current_password", "old-pass-word-1");
-    fd.append("new_password", "Kettle-Boat-99");
-    fd.append("confirm_password", "Kettle-Boat-99");
-    return fd;
-  }
-
-  it("changePassword returns the step-up refusal and touches nothing", async () => {
-    getUserMock.mockResolvedValue(USER);
-    requireStepUpMock.mockResolvedValue(STEP_UP_REFUSAL);
-
-    const result = await changePassword(PREV, passwordForm());
-
-    expect(result).toEqual(STEP_UP_REFUSAL);
-    expect(db.auth.signInWithPassword).not.toHaveBeenCalled();
-    expect(checkPasswordMock).not.toHaveBeenCalled();
-    expect(db.auth.updateUser).not.toHaveBeenCalled();
-  });
-
-  it("changePassword accepts the step-up fields through its whitelist", async () => {
-    getUserMock.mockResolvedValue(USER);
-    db.auth.signInWithPassword.mockResolvedValue({ error: null });
-    db.auth.updateUser.mockResolvedValue({ error: null });
-    db.auth.signOut.mockResolvedValue({ error: null });
-    const fd = passwordForm();
-    fd.append("mfa_code", "123456");
-    fd.append("mfa_factor_id", TWO_FACTOR.factors[0].id);
-
-    const result = await changePassword(PREV, fd);
-
-    expect(result.error).toBeUndefined();
-    expect(requireStepUpMock).toHaveBeenCalledWith(fd);
-  });
-
-  it("changePassword on a 2FA account checks the password on a throwaway client, never the live session", async () => {
-    // signInWithPassword on the request client would swap the aal2 session
-    // for an aal1 one mid-change.
-    getUserMock.mockResolvedValue(USER);
-    getAssuranceMock.mockResolvedValue(TWO_FACTOR);
-    db.auth.updateUser.mockResolvedValue({ error: null });
-    db.auth.signOut.mockResolvedValue({ error: null });
-
-    const result = await changePassword(PREV, passwordForm());
-
-    expect(result.success).toBeTruthy();
-    expect(checkPasswordMock).toHaveBeenCalledWith(USER.email, "old-pass-word-1");
-    expect(db.auth.signInWithPassword).not.toHaveBeenCalled();
-    expect(db.auth.updateUser).toHaveBeenCalledWith({ password: "Kettle-Boat-99" });
-    expect(db.auth.signOut).toHaveBeenCalledWith({ scope: "others" });
-  });
-
-  it("changePassword on a 2FA account refuses a wrong password without updating", async () => {
-    getUserMock.mockResolvedValue(USER);
-    getAssuranceMock.mockResolvedValue(TWO_FACTOR);
-    checkPasswordMock.mockResolvedValue("incorrect");
-
-    const result = await changePassword(PREV, passwordForm());
-
-    expect(result.error).toMatch(/current password is incorrect/i);
-    expect(db.auth.updateUser).not.toHaveBeenCalled();
-  });
-
-  it("changePassword on a 2FA account does not call an unreachable check a wrong password", async () => {
-    getUserMock.mockResolvedValue(USER);
-    getAssuranceMock.mockResolvedValue(TWO_FACTOR);
-    checkPasswordMock.mockResolvedValue("unavailable");
-
-    const result = await changePassword(PREV, passwordForm());
-
-    expect(result.error).toMatch(/could not check/i);
-    expect(result.error).not.toMatch(/incorrect/i);
-    expect(db.auth.updateUser).not.toHaveBeenCalled();
-  });
-
-  it("changePassword explains GoTrue's reauthentication_needed instead of a generic failure", async () => {
-    getUserMock.mockResolvedValue(USER);
-    getAssuranceMock.mockResolvedValue(TWO_FACTOR);
-    db.auth.updateUser.mockResolvedValue({ error: { code: "reauthentication_needed" } });
-
-    const result = await changePassword(PREV, passwordForm());
-
-    expect(result.error).toMatch(/sign out and back in/i);
-  });
-
   it("requestEmailChange on a 2FA account uses the throwaway check and still sends the change", async () => {
     getUserMock.mockResolvedValue(USER);
     getAssuranceMock.mockResolvedValue(TWO_FACTOR);

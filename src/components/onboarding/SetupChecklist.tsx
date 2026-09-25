@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import {
   ArrowRight,
   CheckCircle2,
@@ -66,6 +67,7 @@ export function SetupChecklist({
   /** The finished card is on screen: record that it has been shown. */
   onCelebrated: () => void;
 }) {
+  const t = useTranslations();
   const listId = useId();
   const [collapsed, setCollapsed] = useStoredFlag(SETUP_COLLAPSED_KEY);
   const [hidden, setHidden] = useState(false);
@@ -85,7 +87,7 @@ export function SetupChecklist({
       aria-controls={listId}
       onClick={() => setCollapsed(!collapsed)}
     >
-      {collapsed ? "Show steps" : "Hide steps"}
+      {collapsed ? t("Onboarding.checklist.showSteps") : t("Onboarding.checklist.hideSteps")}
       <ChevronDown
         className={cn(
           "size-3.5 transition-transform duration-base ease-standard motion-reduce:transition-none",
@@ -108,7 +110,7 @@ export function SetupChecklist({
       data-setup-live-path={setup.livePage?.path}
     >
       <ModuleCard
-        title={setup.complete ? "You're set up" : "Get set up"}
+        title={setup.complete ? t("Onboarding.checklist.titleDone") : t("Onboarding.checklist.title")}
         action={headerAction}
       >
         {setup.complete ? (
@@ -119,14 +121,18 @@ export function SetupChecklist({
                 strokeWidth={2}
                 aria-hidden="true"
               />
-              Your first product page is live. Share the link anywhere.
+              {t("Onboarding.checklist.liveHint")}
             </p>
             <div className="flex flex-wrap items-center gap-2">
               {livePageUrl && (
                 <>
                   <CopyButton
                     value={livePageUrl}
-                    label="product page link"
+                    messages={{
+                      copy: "Onboarding.checklist.copyLink.copy",
+                      copied: "Onboarding.checklist.copyLink.copied",
+                      failed: "Onboarding.checklist.copyLink.failed",
+                    }}
                     variant="labelled"
                   />
                   <a
@@ -135,9 +141,9 @@ export function SetupChecklist({
                     rel="noopener noreferrer"
                     className={cn(secondaryButtonClass, "px-3 py-1.5 text-xs")}
                   >
-                    Open page
+                    {t("Onboarding.checklist.openPage")}
                     <ExternalLink className="size-3.5" strokeWidth={2} aria-hidden="true" />
-                    <span className="sr-only"> (opens in a new tab)</span>
+                    <span className="sr-only">{t("Onboarding.checklist.opensInNewTab")}</span>
                   </a>
                 </>
               )}
@@ -146,7 +152,7 @@ export function SetupChecklist({
                 className={cn(HEADER_BUTTON_CLASS, "ml-auto")}
                 onClick={() => setHidden(true)}
               >
-                Hide
+                {t("Onboarding.checklist.hide")}
               </Button>
             </div>
           </div>
@@ -155,10 +161,13 @@ export function SetupChecklist({
             <div className="mb-3 space-y-1.5">
               <ProgressBar
                 value={setup.doneCount / setup.total}
-                label="Setup progress"
+                label={t("Onboarding.checklist.progressLabel")}
               />
               <p className={infoTextClass}>
-                {setup.doneCount} of {setup.total} done
+                {t("Onboarding.checklist.progress", {
+                  done: setup.doneCount,
+                  total: setup.total,
+                })}
               </p>
             </div>
             <ol id={listId} hidden={collapsed} className="divide-y divide-border">
@@ -190,15 +199,19 @@ export function SetupChecklist({
                           step.done ? "text-muted-foreground" : "text-foreground",
                         )}
                       >
-                        {step.label}
-                        <span className="sr-only">{step.done ? " (done)" : " (to do)"}</span>
+                        {t(step.label.key, step.label.values)}
+                        <span className="sr-only">
+                          {step.done
+                            ? t("Onboarding.checklist.stepDone")
+                            : t("Onboarding.checklist.stepToDo")}
+                        </span>
                       </p>
-                      <p className={infoTextClass}>{step.detail}</p>
+                      <p className={infoTextClass}>{t(step.detail.key, step.detail.values)}</p>
                     </div>
                   </div>
                   {!step.done && step.action && (
                     <Link href={step.action.href} className={ROW_LINK_CLASS}>
-                      {step.action.label}
+                      {t(step.action.label.key, step.action.label.values)}
                       <ArrowRight
                         className={cn("size-3", iconNudgeRightClass)}
                         strokeWidth={2}

@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { badgeClass } from "@/components/ui/surface-styles";
 import type { StockBadge } from "@/types/stock";
@@ -9,6 +10,7 @@ export function StockBadge({
   badge: StockBadge | null;
   showInStock?: boolean;
 }) {
+  const t = useTranslations("Common.stock");
   if (badge === null) return null;
   // "In stock" is the default state, so it is noise unless a surface asks for
   // it (a product page confirming availability, say).
@@ -16,10 +18,10 @@ export function StockBadge({
 
   const { label, tone } =
     badge.state === "in_stock"
-      ? { label: "In stock", tone: "text-muted-foreground" }
+      ? { label: t("inStock"), tone: "text-muted-foreground" }
       : badge.state === "low_stock"
-        ? { label: `Only ${badge.remaining} left`, tone: "text-foreground" }
-        : { label: "Sold out", tone: "text-destructive" };
+        ? { label: t("lowStock", { remaining: badge.remaining }), tone: "text-foreground" }
+        : { label: t("soldOut"), tone: "text-destructive" };
 
   return <span className={cn(badgeClass, tone)}>{label}</span>;
 }

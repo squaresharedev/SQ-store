@@ -2,7 +2,7 @@ import type { ShapeKind } from "@/types/storefront";
 
 /**
  * The shape library: one code-defined spec per ShapeKind, the single source
- * of truth for labels and for how the CSS-rendered kinds size themselves on
+ * of truth for how the CSS-rendered kinds size themselves on
  * a tile. The polygon kinds (diamond, star, hexagon, ...) carry no classes
  * here: their geometry is generated as SVG path data in shape-geometry.ts,
  * and ShapeTileContent stretches that over the tile.
@@ -18,7 +18,6 @@ import type { ShapeKind } from "@/types/storefront";
  * a spec by its allowlisted KEY and never contributes a class name.
  */
 export type ShapeSpec = {
-  label: string;
   /** Sizing + radius classes for the CSS-rendered kinds; absent for the
    *  path kinds (they render as one stretched SVG). */
   className?: string;
@@ -29,59 +28,51 @@ export type ShapeSpec = {
 
 export const SHAPE_SPECS: Record<ShapeKind, ShapeSpec> = {
   square: {
-    label: "Square",
     className: "size-full",
     glyphClassName: "size-3.5",
   },
   circle: {
-    label: "Circle",
     className: "size-full rounded-[50%]",
     glyphClassName: "size-3.5 rounded-full",
   },
   ring: {
-    label: "Ring",
     className: "size-full rounded-[50%]",
     glyphClassName: "size-3.5 rounded-full",
   },
-  diamond: { label: "Diamond" },
+  diamond: {},
   rounded: {
-    label: "Rounded square",
     className: "size-full",
     glyphClassName: "size-3.5 rounded-[22%]",
   },
   pill: {
-    label: "Pill",
     className: "h-1/2 w-full rounded-full",
     glyphClassName: "h-2 w-3.5 rounded-full",
   },
   half: {
-    label: "Half circle",
     className: "h-1/2 w-full rounded-t-full",
     glyphClassName: "h-2 w-3.5 rounded-t-full",
   },
   quarter: {
-    label: "Quarter circle",
     className: "size-full rounded-tl-full",
     glyphClassName: "size-3.5 rounded-tl-full",
   },
   bar: {
-    label: "Bar",
     className: "h-1/4 w-full",
     glyphClassName: "h-1 w-3.5",
   },
-  triangle: { label: "Triangle" },
-  wedge: { label: "Wedge" },
-  pentagon: { label: "Pentagon" },
-  hexagon: { label: "Hexagon" },
-  octagon: { label: "Octagon" },
-  star: { label: "Star" },
-  sparkle: { label: "Sparkle" },
-  cross: { label: "Cross" },
-  arrow: { label: "Arrow" },
-  chevron: { label: "Chevron" },
-  trapezoid: { label: "Trapezoid" },
-  parallelogram: { label: "Parallelogram" },
-  burst: { label: "Burst" },
+  triangle: {},
+  wedge: {},
+  pentagon: {},
+  hexagon: {},
+  octagon: {},
+  star: {},
+  sparkle: {},
+  cross: {},
+  arrow: {},
+  chevron: {},
+  trapezoid: {},
+  parallelogram: {},
+  burst: {},
 };
 
 /**
@@ -94,15 +85,16 @@ export const SHAPE_SPECS: Record<ShapeKind, ShapeSpec> = {
  * holds this to SHAPE_KINDS, so a kind added later cannot go unbrowsable.
  */
 export const SHAPE_GROUPS: readonly {
-  title: string;
+  /** Its name is Storefront.shapes.group.<id>. */
+  id: "basic" | "polygons" | "accents";
   kinds: readonly ShapeKind[];
 }[] = [
   {
-    title: "Basic",
+    id: "basic",
     kinds: ["square", "rounded", "circle", "ring", "pill", "bar", "half", "quarter"],
   },
   {
-    title: "Polygons",
+    id: "polygons",
     kinds: [
       "triangle",
       "wedge",
@@ -115,7 +107,7 @@ export const SHAPE_GROUPS: readonly {
     ],
   },
   {
-    title: "Accents",
+    id: "accents",
     kinds: ["star", "sparkle", "burst", "cross", "arrow", "chevron"],
   },
 ];

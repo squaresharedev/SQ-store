@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { Slider } from "./slider";
 import { infoTextClass, labelClass, sliderNumberFieldClass } from "./control-styles";
@@ -69,6 +70,7 @@ export function SliderField({
 }) {
   // Local draft so a half-typed number ("1" on the way to "18") is not
   // clamped to the minimum under the seller's fingers.
+  const t = useTranslations("Common.sliderField");
   const [draft, setDraft] = useState<string | null>(null);
 
   function commit(next: number) {
@@ -81,7 +83,7 @@ export function SliderField({
       <div className="flex items-center justify-between gap-2">
         <span className="flex min-w-0 items-center gap-1.5">
           <span className={labelClassName}>{label}</span>
-          {tip && <InfoTip label={`About ${label}`}>{tip}</InfoTip>}
+          {tip && <InfoTip label={t("about", { label })}>{tip}</InfoTip>}
         </span>
         {headerAction ?? (statusText && <span className={infoTextClass}>{statusText}</span>)}
       </div>
@@ -108,7 +110,7 @@ export function SliderField({
             // screen reader lands on a number with nothing to say what it is.
             // Named for the value it types rather than repeating the slider's
             // name verbatim, so tabbing between the two says which is which.
-            aria-label={`${ariaLabel}, as a number`}
+            aria-label={t("asNumber", { label: ariaLabel })}
             inputMode={min < 0 ? "decimal" : "numeric"}
             min={min}
             max={max}

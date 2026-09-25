@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { getTranslations } from "next-intl/server";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
 import { ViewingBanner } from "@/components/layout/ViewingBanner";
@@ -42,6 +43,7 @@ export async function DashboardShell({
     getProfile(),
     getUser(),
   ]);
+  const t = await getTranslations("Dashboard.shell");
 
   const currentAccountId = account?.accountId ?? "";
   const email = user?.email ?? "";
@@ -51,7 +53,7 @@ export async function DashboardShell({
   const viewingOther = account && !account.isOwner ? account : null;
   const viewingStoreName = viewingOther
     ? accounts.find((a) => a.accountId === viewingOther.accountId)?.storeName ??
-      "another store"
+      t("anotherStore")
     : null;
 
   // The publish gate, stated once in the chrome so it is visible from whatever

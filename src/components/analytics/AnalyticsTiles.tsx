@@ -1,5 +1,7 @@
+import { useTranslations, useLocale } from "next-intl";
 import { MetricTile } from "@/components/dashboard/MetricTile";
 import { formatCents } from "@/lib/format/money";
+import { formatFixed, formatPercent } from "@/lib/format/intl";
 import { formatNumber } from "@/components/charts";
 import type { AnalyticsTotals } from "@/lib/analytics/types";
 
@@ -20,6 +22,8 @@ import type { AnalyticsTotals } from "@/lib/analytics/types";
  * come with a trend and a breakdown rather than a bare number.
  */
 export function AnalyticsTiles({ totals }: { totals: AnalyticsTotals }) {
+  const t = useTranslations("Analytics.tiles");
+  const locale = useLocale();
   const hasSales = totals.sales > 0;
   // Refund rate over settled outcomes (paid + refunded) — display-only math,
   // never money. "0.0%" with real orders is a true, earned zero.
@@ -32,14 +36,16 @@ export function AnalyticsTiles({ totals }: { totals: AnalyticsTotals }) {
   return (
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-6">
       <MetricTile
-        label="Revenue"
-        value={hasSales ? formatCents(totals.revenueCents, totals.currency) : null}
+        label={t("revenue")}
+        value={hasSales ? formatCents(totals.revenueCents, totals.currency, locale) : null}
         hint={
           hasSales
-            ? `${formatCents(totals.netRevenueCents, totals.currency)} after fees`
+            ? t("afterFees", {
+                amount: formatCents(totals.netRevenueCents, totals.currency, locale),
+              })
             : undefined
         }
-        zeroText="No sales yet"
+        zeroText={t("noSales")}
         datapoint={{
           metric: "sales.revenue",
           value: totals.revenueCents,
@@ -49,14 +55,14 @@ export function AnalyticsTiles({ totals }: { totals: AnalyticsTotals }) {
         }}
       />
       <MetricTile
-        label="Sales"
-        value={hasSales ? formatNumber(totals.sales) : null}
+        label={t("sales")}
+        value={hasSales ? formatNumber(totals.sales, locale) : null}
         hint={
           salesPerDay != null
-            ? `${salesPerDay.toFixed(1)} per day on average`
+            ? t("perDay", { rate: formatFixed(salesPerDay, 1, locale) })
             : undefined
         }
-        zeroText="No sales yet"
+        zeroText={t("noSales")}
         datapoint={{
           metric: "sales.count",
           value: totals.sales,
@@ -65,9 +71,9 @@ export function AnalyticsTiles({ totals }: { totals: AnalyticsTotals }) {
         }}
       />
       <MetricTile
-        label="Avg. order"
-        value={hasSales ? formatCents(totals.aovCents, totals.currency) : null}
-        zeroText="No sales yet"
+        label={t("avgOrder")}
+        value={hasSales ? formatCents(totals.aovCents, totals.currency, locale) : null}
+        zeroText={t("noSales")}
         datapoint={{
           metric: "sales.aov",
           value: totals.aovCents,
@@ -77,14 +83,14 @@ export function AnalyticsTiles({ totals }: { totals: AnalyticsTotals }) {
         }}
       />
       <MetricTile
-        label="Unique buyers"
-        value={hasSales ? formatNumber(totals.uniqueBuyers) : null}
+        label={t("uniqueBuyers")}
+        value={hasSales ? formatNumber(totals.uniqueBuyers, locale) : null}
         hint={
           hasSales && totals.repeatBuyers > 0
-            ? `${totals.repeatBuyers} bought more than once`
+            ? t("repeatBuyers", { count: totals.repeatBuyers })
             : undefined
         }
-        zeroText="No buyers yet"
+        zeroText={t("noBuyers")}
         datapoint={{
           metric: "sales.unique_buyers",
           value: totals.uniqueBuyers,
@@ -93,14 +99,17 @@ export function AnalyticsTiles({ totals }: { totals: AnalyticsTotals }) {
         }}
       />
       <MetricTile
-        label="Refund rate"
-        value={refundRate != null ? `${refundRate.toFixed(1)}%` : null}
+        label={t("refundRate")}
+        value={refundRate != null ? formatPercent(refundRate, locale, 1) : null}
         hint={
           totals.refundedCount > 0
-            ? `${totals.refundedCount} refunded, ${formatCents(totals.refundedCents, totals.currency)}`
+            ? t("refunded", {
+                count: totals.refundedCount,
+                amount: formatCents(totals.refundedCents, totals.currency, locale),
+              })
             : undefined
         }
-        zeroText="No orders yet"
+        zeroText={t("noOrders")}
         datapoint={{
           metric: "sales.refund_rate",
           // Published at full precision. The tile rounds to one decimal for

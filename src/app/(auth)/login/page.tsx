@@ -1,16 +1,18 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { LoginForm } from "@/components/auth/LoginForm";
+import { LocaleSelect } from "@/components/layout/LocaleSelect";
 import { BackgroundArrow } from "@/components/ui/BackgroundArrow";
 import { readSignInMethod } from "@/lib/auth/last-method";
 import { getSessionState, twoFactorChallengePath } from "@/lib/auth/session";
 import { MARKETPLACE_URL } from "@/lib/site";
 import { safeInternalPath } from "@/lib/utils/safe-path";
 
-export const metadata: Metadata = {
-  title: "Sign in",
-  description: "Sign in to your Square Share creator dashboard.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Auth.metadata.login");
+  return { title: t("title"), description: t("description") };
+}
 
 // force-dynamic: reads session state via getUser() (Supabase server client)
 // below to redirect already-signed-in visitors. See (dashboard)/layout.tsx
@@ -21,13 +23,22 @@ function sanitizeNext(value: string | string[] | undefined): string {
   return safeInternalPath(Array.isArray(value) ? value[0] : value);
 }
 
-const ERROR_MESSAGES: Record<string, string> = {
-  auth_callback: "That link is invalid or has expired. Try signing in again.",
-  auth_confirm: "That link is invalid or has expired. Try signing in again.",
-  reset_expired:
-    "That password reset link has expired. Request a new one below.",
-  oauth: "Google sign-in could not be started. Please try again.",
-};
+/**
+ * The `?error=` values this page will explain, each mapped to its message
+ * under Auth.login.linkErrors. Anything else in the param renders nothing.
+ */
+const ERROR_MESSAGES = {
+  auth_callback: "invalidLink",
+  auth_confirm: "invalidLink",
+  reset_expired: "resetExpired",
+  oauth: "oauth",
+} as const;
+
+function linkErrorKey(value: string | undefined) {
+  return value && Object.hasOwn(ERROR_MESSAGES, value)
+    ? ERROR_MESSAGES[value as keyof typeof ERROR_MESSAGES]
+    : null;
+}
 
 export default async function LoginPage({
   searchParams,
@@ -38,12 +49,15 @@ export default async function LoginPage({
   // still owed)? Straight to the challenge rather than asking for the
   // password again.
   const session = await getSessionState();
+  const tLocale = await getTranslations("LocaleSwitcher");
+  const t = await getTranslations("Auth");
   const sp = await searchParams;
   const next = sanitizeNext(sp.next);
   if (session.kind === "signed_in") redirect(next);
   if (session.kind === "needs_mfa") redirect(twoFactorChallengePath(next));
 
-  const linkError = sp.error ? (ERROR_MESSAGES[sp.error] ?? null) : null;
+  const errorKey = linkErrorKey(sp.error);
+  const linkError = errorKey ? t(`login.linkErrors.${errorKey}`) : null;
 
   // Read server-side so the "Last used" pill is in the first paint rather than
   // appearing a beat later. This page is already force-dynamic.
@@ -72,14 +86,14 @@ export default async function LoginPage({
           {/* eslint-disable-next-line @next/next/no-img-element -- static public asset; next/image adds no value here. */}
           <img
             src="/img/logo.png"
-            alt="Square Share"
+            alt={t("brand.logoAlt")}
             className="h-8 w-8 shrink-0 object-contain"
           />
           <div className="flex flex-col leading-tight">
             <span className="font-display text-lg font-black tracking-tight text-foreground">
               Square Share
             </span>
-            <span className="text-xs text-muted-foreground">Creator dashboard</span>
+            <span className="text-xs text-muted-foreground">{t("brand.tagline")}</span>
           </div>
         </div>
 
@@ -98,14 +112,27 @@ export default async function LoginPage({
 
         {/* Access note — creators onboard via the marketplace waitlist. */}
         <p className="mt-4 text-center text-sm text-muted-foreground">
-          No account yet?{" "}
-          <a
-            href={MARKETPLACE_URL}
-            className="font-medium text-foreground underline decoration-border underline-offset-4 transition-colors duration-base ease-standard hover:decoration-foreground motion-reduce:transition-none"
-          >
-            Request access
-          </a>
+          {t.rich("login.noAccount", {
+            link: (chunks) => (
+              <a
+                href={MARKETPLACE_URL}
+                className="font-medium text-foreground underline decoration-border underline-offset-4 transition-colors duration-base ease-standard hover:decoration-foreground motion-reduce:transition-none"
+              >
+                {chunks}
+              </a>
+            ),
+          })}
         </p>
+
+        {/* The first screen a new seller sees, and signed out, so the account
+            menu's language list is out of reach. Writes the cookie only; sign-in
+            then saves the choice to the account. */}
+        <div className="mt-4 flex items-center justify-center gap-2">
+          <label htmlFor="login-language" className="font-inter text-xs text-muted-foreground">
+            {tLocale("label")}
+          </label>
+          <LocaleSelect id="login-language" triggerClassName="h-8 w-40 text-xs" />
+        </div>
       </div>
     </main>
   );

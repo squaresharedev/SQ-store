@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { DatePicker } from "@/components/ui/DatePicker";
 import type { AnalyticsRange, RangePreset } from "@/lib/analytics/types";
@@ -11,10 +12,10 @@ import type { AnalyticsRange, RangePreset } from "@/lib/analytics/types";
 // back/forward works — same pattern as Orders. No data access here.
 
 const PRESET_OPTIONS = [
-  { value: "30d", label: "Last 30 days" },
-  { value: "all", label: "All time" },
-  { value: "custom", label: "Custom" },
-] as const satisfies readonly { value: RangePreset; label: string }[];
+  { value: "30d", labelKey: "last30Days" },
+  { value: "all", labelKey: "allTime" },
+  { value: "custom", labelKey: "custom" },
+] as const satisfies readonly { value: RangePreset; labelKey: string }[];
 
 function buildQuery(preset: RangePreset, range: AnalyticsRange): string {
   if (preset === "all") return "?range=all";
@@ -41,8 +42,13 @@ export function RangeSelector({
   /** The custom bounds currently in the URL (empty for presets). */
   range: AnalyticsRange;
 }) {
+  const t = useTranslations("Analytics.range");
   const router = useRouter();
   const pathname = usePathname();
+  const presetOptions = PRESET_OPTIONS.map(({ value, labelKey }) => ({
+    value,
+    label: t(labelKey),
+  }));
 
   // Local echo so "Custom" can show the picker before any date exists in the
   // URL. Resynced when external navigation (back/forward) changes the props —
@@ -67,12 +73,12 @@ export function RangeSelector({
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-3">
+    <div data-tour="analytics-range" className="flex flex-wrap items-center gap-3">
       <SegmentedControl
         value={draft}
-        options={PRESET_OPTIONS}
+        options={presetOptions}
         onChange={handlePreset}
-        ariaLabel="Date range"
+        ariaLabel={t("ariaLabel")}
       />
       {draft === "custom" && (
         <div className="w-64">
@@ -80,7 +86,7 @@ export function RangeSelector({
             mode="range"
             value={range}
             onChange={(next) => navigate("custom", next)}
-            placeholder="Pick a range"
+            placeholder={t("placeholder")}
           />
         </div>
       )}

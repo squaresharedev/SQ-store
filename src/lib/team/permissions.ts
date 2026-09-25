@@ -1,3 +1,4 @@
+import type { MessageKey } from "@/i18n/types";
 import type { Enums } from "@/types";
 
 /**
@@ -87,15 +88,20 @@ export const ASSIGNABLE_ROLES = ["editor", "viewer"] as const satisfies readonly
 /** Least-privilege default for new invites. */
 export const DEFAULT_INVITE_ROLE: TeamRole = "viewer";
 
-export const ROLE_LABELS: Record<TeamRole, string> = {
-  owner: "Owner",
-  editor: "Editor",
-  viewer: "Viewer",
+/**
+ * Each role's name and what it can do, as message keys: this module is shared
+ * by client and server, so the render site resolves them in the reader's
+ * language. A sentence that names a role takes the role as an ICU select
+ * value instead of splicing one of these labels in.
+ */
+export const ROLE_LABELS: Record<TeamRole, MessageKey> = {
+  owner: "Settings.team.roles.owner.label",
+  editor: "Settings.team.roles.editor.label",
+  viewer: "Settings.team.roles.viewer.label",
 };
 
-export const ROLE_DESCRIPTIONS: Record<TeamRole, string> = {
-  owner: "Full control. Exactly one per store, cannot be changed or removed.",
-  editor:
-    "Can view the store and edit products and the storefront. Can invite members at or below their role.",
-  viewer: "Can view the store and team. Read-only.",
+export const ROLE_DESCRIPTIONS: Record<TeamRole, MessageKey> = {
+  owner: "Settings.team.roles.owner.description",
+  editor: "Settings.team.roles.editor.description",
+  viewer: "Settings.team.roles.viewer.description",
 };

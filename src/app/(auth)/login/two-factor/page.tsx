@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { TwoFactorChallenge } from "@/components/auth/TwoFactorChallenge";
 import { BackgroundArrow } from "@/components/ui/BackgroundArrow";
 import { AuthUnreachableError, getSessionState } from "@/lib/auth/session";
 import { safeInternalPath } from "@/lib/utils/safe-path";
 
-export const metadata: Metadata = {
-  title: "Two-factor authentication",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Auth.metadata.twoFactor");
+  return { title: t("title") };
+}
 
 // force-dynamic: reads session state (cookies) on every request. See
 // (dashboard)/layout.tsx for why implicit detection isn't relied on.
@@ -42,6 +44,7 @@ export default async function TwoFactorPage({
   if (session.kind === "signed_in") redirect(next);
 
   const { user, assurance } = session;
+  const t = await getTranslations("Auth.brand");
 
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-x-hidden bg-muted px-6 py-8">
@@ -54,14 +57,14 @@ export default async function TwoFactorPage({
           {/* eslint-disable-next-line @next/next/no-img-element -- static public asset; next/image adds no value here. */}
           <img
             src="/img/logo.png"
-            alt="Square Share"
+            alt={t("logoAlt")}
             className="h-8 w-8 shrink-0 object-contain"
           />
           <div className="flex flex-col leading-tight">
             <span className="font-display text-lg font-black tracking-tight text-foreground">
               Square Share
             </span>
-            <span className="text-xs text-muted-foreground">Creator dashboard</span>
+            <span className="text-xs text-muted-foreground">{t("tagline")}</span>
           </div>
         </div>
 

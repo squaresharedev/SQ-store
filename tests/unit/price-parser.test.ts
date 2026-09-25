@@ -16,6 +16,7 @@ import {
   parseFormPriceCents,
   priceErrorMessage,
 } from "@/lib/products/price";
+import { english } from "../setup/translate";
 
 // ── parsePriceCents (tolerant — CSV) ─────────────────────────────────────────
 
@@ -202,34 +203,34 @@ describe("priceErrorMessage", () => {
   const max = 100_000_000;
 
   it("empty: prompts to set a price", () => {
-    expect(priceErrorMessage("empty", "EUR", max)).toBe(
+    expect(english(priceErrorMessage("empty", "EUR", max, "en"))).toBe(
       "Set a price before saving.",
     );
   });
 
   it("invalid_format: says number greater than zero", () => {
-    expect(priceErrorMessage("invalid_format", "EUR", max)).toBe(
+    expect(english(priceErrorMessage("invalid_format", "EUR", max, "en"))).toBe(
       "Price must be a number greater than zero.",
     );
   });
 
   it("too_many_decimals: says two decimal places at most", () => {
-    expect(priceErrorMessage("too_many_decimals", "EUR", max)).toBe(
+    expect(english(priceErrorMessage("too_many_decimals", "EUR", max, "en"))).toBe(
       "Prices can have at most two decimal places.",
     );
   });
 
   it("not_positive: says number greater than zero", () => {
-    expect(priceErrorMessage("not_positive", "EUR", max)).toBe(
+    expect(english(priceErrorMessage("not_positive", "EUR", max, "en"))).toBe(
       "Price must be a number greater than zero.",
     );
   });
 
   it("exceeds_max: names the currency and the ceiling in major units", () => {
-    expect(priceErrorMessage("exceeds_max", "EUR", max)).toBe(
+    expect(english(priceErrorMessage("exceeds_max", "EUR", max, "en"))).toBe(
       "Price cannot exceed EUR 1,000,000.",
     );
-    expect(priceErrorMessage("exceeds_max", "USD", max)).toBe(
+    expect(english(priceErrorMessage("exceeds_max", "USD", max, "en"))).toBe(
       "Price cannot exceed USD 1,000,000.",
     );
   });

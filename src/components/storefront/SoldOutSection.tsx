@@ -1,6 +1,7 @@
 "use client";
 
 import { useId } from "react";
+import { useTranslations } from "next-intl";
 import type { StorefrontTheme } from "@/types/storefront";
 import { Switch } from "@/components/ui/switch";
 import { labelClass } from "@/components/ui/control-styles";
@@ -27,6 +28,7 @@ export function SoldOutSection({
   theme: StorefrontTheme;
   onChange: (theme: StorefrontTheme) => void;
 }) {
+  const t = useTranslations("Storefront.soldOut");
   const fieldId = useId();
 
   return (
@@ -35,12 +37,10 @@ export function SoldOutSection({
         <div className="flex items-center justify-between gap-3">
           <span className="flex items-center gap-1.5">
             <label htmlFor={`${fieldId}-hide`} className={labelClass}>
-              Hide from buyers
+              {t("hide")}
             </label>
-            <InfoTip label="What hiding sold-out products does">
-              Products you marked sold out disappear from the storefront
-              entirely. They stay on the canvas here, dimmed, so you can still
-              move them and put them back on sale.
+            <InfoTip label={t("hideInfoLabel")}>
+              {t("hideInfoBody")}
             </InfoTip>
           </span>
           <Switch
@@ -55,12 +55,12 @@ export function SoldOutSection({
         <div className="flex items-center justify-between gap-3">
           <span className="flex items-center gap-1.5">
             <label htmlFor={`${fieldId}-badge`} className={labelClass}>
-              Show badge
+              {t("badge")}
             </label>
-            <InfoTip label="When the sold-out badge appears">
+            <InfoTip label={t("badgeInfoLabel")}>
               {theme.hideSoldOut
-                ? "Nothing to mark while sold-out products are hidden. Turn Hide from buyers off and this badge labels them instead."
-                : "Marks a sold-out product on the storefront, so a buyer learns it exists and is gone rather than wondering."}
+                ? t("badgeInfoBodyHidden")
+                : t("badgeInfoBodyVisible")}
             </InfoTip>
           </span>
           <Switch

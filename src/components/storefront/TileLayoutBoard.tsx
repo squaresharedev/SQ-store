@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   resolvePriceTagPosition,
   resolveTitlePosition,
@@ -15,7 +16,6 @@ import {
   nearestTileSpot,
   priceSpots,
   spotAfterArrow,
-  spotLabel,
   titleSpots,
   type SpotArrow,
 } from "@/lib/storefront/tile-spots";
@@ -54,8 +54,6 @@ const ROW_CLASSES: Record<SpotRow, string> = {
 
 type Token = "title" | "price";
 
-const TOKEN_LABELS: Record<Token, string> = { title: "Title", price: "Price" };
-
 export function TileLayoutBoard({
   titleStyle,
   titlePosition,
@@ -75,6 +73,11 @@ export function TileLayoutBoard({
   onTitleChange: (spot: TileSpot) => void;
   onPriceChange: (spot: TileSpot) => void;
 }) {
+  const t = useTranslations("Storefront.tileLayoutBoard");
+  const tokenLabels: Record<Token, string> = {
+    title: t("title"),
+    price: t("price"),
+  };
   const [dragging, setDragging] = useState<Token | null>(null);
   // Which token a click on a spot places. Held as a PREFERENCE rather than as
   // the answer, because the tile can take either token away underneath it: a
@@ -146,7 +149,9 @@ export function TileLayoutBoard({
     return {
       role: "button" as const,
       tabIndex: 0,
-      "aria-label": `${TOKEN_LABELS[token]} at ${spotLabel(at)}. Drag, click a spot, or use the arrow keys, to move it.`,
+      "aria-label": token === "title"
+        ? t("titleAt", { spot: at.replace(/-/g, "_") })
+        : t("priceAt", { spot: at.replace(/-/g, "_") }),
       onPointerDown: (event: React.PointerEvent<HTMLElement>) => {
         if (event.button !== 0) return;
         event.preventDefault();
@@ -186,17 +191,17 @@ export function TileLayoutBoard({
           value={active}
           options={present.map((token) => ({
             value: token,
-            label: TOKEN_LABELS[token],
+            label: tokenLabels[token],
           }))}
           onChange={setPreferred}
-          ariaLabel="Label to place"
+          ariaLabel={t("labelToPlace")}
         />
       )}
 
       <div
         data-tile-layout-board=""
         role="group"
-        aria-label="Label positions"
+        aria-label={t("labelPositions")}
         style={{ borderRadius: cornerRadius }}
         className="relative size-32 touch-none overflow-hidden border border-border bg-muted"
       >
@@ -269,7 +274,11 @@ export function TileLayoutBoard({
                 key={spot}
                 type="button"
                 onClick={() => commit(active, spot)}
-                aria-label={`Move the ${active} to the ${spotLabel(spot)}`}
+                aria-label={
+                  active === "title"
+                    ? t("moveTitleTo", { spot: spot.replace(/-/g, "_") })
+                    : t("movePriceTo", { spot: spot.replace(/-/g, "_") })
+                }
                 className={cn(
                   "group absolute z-20 flex size-7 items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                   TILE_SPOT_CLASSES[spot],

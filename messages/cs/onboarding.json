@@ -1,0 +1,252 @@
+{
+  "steps": {
+    "seller": {
+      "label": "Doplňte údaje prodejce",
+      "detail": "Obchodní jméno, adresa a kontaktní e-mail se zobrazují na každé produktové stránce.",
+      "detailDone": "Kupující vidí, od koho kupují.",
+      "detailUnconfirmed": "Otevřete odkaz, který jsme vám poslali, a potvrďte kontaktní e-mail.",
+      "action": "Doplnit údaje",
+      "actionUnconfirmed": "Potvrdit e-mail",
+      "cta": "Doplňte údaje prodejce",
+      "ctaUnconfirmed": "Potvrďte svůj e-mail"
+    },
+    "product": {
+      "label": "Přidejte produkt",
+      "detail": "Stačí název a cena. Zatím může zůstat jako koncept.",
+      "detailDone": "{count, plural, one {Máte {count} produkt.} few {Máte {count} produkty.} many {Máte {count} produktu.} other {Máte {count} produktů.}}",
+      "action": "Přidat produkt",
+      "cta": "Přidejte svůj první produkt"
+    },
+    "storefront": {
+      "label": "Umístěte produkt do výlohy",
+      "detailDone": "Ve vaší výloze je produkt.",
+      "detailNone": "Vytvořte výlohu a pak do její mřížky přidejte produkt.",
+      "detailEmpty": "Otevřete výlohu a na panelu nástrojů zvolte Přidat produkt.",
+      "actionCreate": "Vytvořit výlohu",
+      "actionOpen": "Otevřít editor",
+      "cta": "Otevřete svou výlohu",
+      "ctaCreate": "Vytvořte výlohu"
+    },
+    "publish": {
+      "label": "Zveřejněte jeho stránku",
+      "detailDone": "Vaše produktová stránka je zveřejněná.",
+      "detailNeedsSeller": "Dokončete údaje prodejce a pak můžete stránku zveřejnit.",
+      "detailNeedsStorefront": "Jakmile bude produkt ve výloze, můžete jeho stránku zveřejnit.",
+      "detailNeedsActive": "Nastavte produktu stav Aktivní, aby se jeho stránka zveřejnila.",
+      "detailPagesOff": "Produktové stránky jsou v této výloze vypnuté. Zapněte je v editoru.",
+      "actionEdit": "Upravit produkt",
+      "actionOpen": "Otevřít editor",
+      "cta": "Zveřejněte svůj produkt",
+      "ctaPagesOff": "Zapnout produktové stránky"
+    }
+  },
+  "checklist": {
+    "titleDone": "Máte hotovo",
+    "title": "Začínáme",
+    "showMeAround": "Provést mě panelem",
+    "showSteps": "Zobrazit kroky",
+    "hideSteps": "Skrýt kroky",
+    "liveHint": "Vaše první produktová stránka je zveřejněná. Odkaz můžete sdílet kdekoli.",
+    "copyLink": {
+      "copy": "Kopírovat odkaz na produktovou stránku",
+      "copied": "Odkaz na produktovou stránku zkopírován",
+      "failed": "Odkaz na produktovou stránku se nepodařilo zkopírovat. Označte ho a zkopírujte ručně."
+    },
+    "openPage": "Otevřít stránku",
+    "opensInNewTab": " (otevře se v nové kartě)",
+    "hide": "Skrýt",
+    "progressLabel": "Postup nastavení",
+    "progress": "{total, plural, one {Hotovo {done} z {total}} few {Hotovo {done} z {total}} many {Hotovo {done} z {total}} other {Hotovo {done} z {total}}}",
+    "stepDone": " (hotovo)",
+    "stepToDo": " (zbývá)"
+  },
+  "welcome": {
+    "steps": {
+      "welcome": {
+        "title": "Vítejte na Square Share",
+        "description": "Čtyři kroky k produktové stránce, kterou můžete sdílet."
+      },
+      "path": {
+        "title": "Čtyři kroky k první stránce"
+      },
+      "seller": {
+        "title": "Doplňte údaje prodejce",
+        "description": "Kupující je uvidí na vašich produktových stránkách a zákon je vyžaduje dřív, než začnete prodávat. K marketingu je nikdy nepoužíváme.",
+        "lawNote": "Kupující je uvidí na vašich produktových stránkách, jak vyžaduje zákon. Nikdy je nepoužijeme k marketingu."
+      },
+      "tour": {
+        "title": "Kde co najdete",
+        "description": "Vše najdete v postranním panelu. Tady je, k čemu jednotlivé části slouží."
+      },
+      "terms": {
+        "title": "Naše Podmínky služby",
+        "description": "Přečtěte si stručnou verzi nebo úplné Podmínky a pokračujte odsouhlasením."
+      }
+    },
+    "progress": "{total, plural, one {Krok {step} z {total}} few {Krok {step} z {total}} many {Krok {step} z {total}} other {Krok {step} z {total}}}",
+    "intro": "Každý produkt, který prodáváte, může mít vlastní stránku ve stylu výlohy, kterou si navrhnete.",
+    "tagline": "Dejte každému produktu vlastní stránku a sdílejte ji kdekoli.",
+    "path": {
+      "seller": {
+        "title": "Doplňte údaje prodejce",
+        "body": "Kupující musí vědět, od koho kupují."
+      },
+      "product": {
+        "title": "Přidejte produkt",
+        "body": "Název, cenu a fotku, pokud nějakou máte."
+      },
+      "storefront": {
+        "title": "Umístěte ho do výlohy",
+        "body": "Vyberte vzhled a pak produkt umístěte do mřížky."
+      },
+      "share": {
+        "title": "Sdílejte jeho stránku",
+        "body": "Vložte odkaz do popisu profilu, do zprávy nebo na svůj web."
+      }
+    },
+    "seller": {
+      "namePlaceholder": "např. Studio Builderboy e.U.",
+      "nameHelp": "Obchodní jméno vaší firmy, nebo vaše celé jméno, pokud prodáváte jako fyzická osoba.",
+      "nameAlternative": "Nebo své celé jméno, pokud prodáváte jako fyzická osoba.",
+      "addressPlaceholder": "např. Tržní 12\n110 00 Praha 1\nČeská republika",
+      "emailPlaceholder": "např. ahoj@vasobchod.example",
+      "emailHelp": "Sem vám budou psát kupující. Může se lišit od přihlašovacího e-mailu."
+    },
+    "confirm": {
+      "check": "Na adrese {email} najdete potvrzovací odkaz.",
+      "goLive": "Jakmile ho otevřete, vaše produktové stránky se zveřejní.",
+      "sendNewLink": "Poslat nový odkaz"
+    },
+    "tour": {
+      "mobileMenu": "Na telefonu otevřete nabídku vlevo nahoře.",
+      "searchShortcut": "Hledáte něco? Stiskněte <kbd>{shortcut}</kbd> a prohledejte vše.",
+      "searchNoShortcut": "Hledáte něco? Vyhledávání najde jakoukoli stránku nebo nastavení.",
+      "searchMobile": "Hledáte něco? Klepněte nahoře na Vyhledávání."
+    },
+    "nav": {
+      "skipOnboarding": "Přeskočit úvod",
+      "next": "Další",
+      "showMeAround": "Provést mě",
+      "skipIntro": "Přeskočit úvod",
+      "getStarted": "Začít",
+      "skipForNow": "Teď přeskočit",
+      "saveAndContinue": "Uložit a pokračovat",
+      "changeDetails": "Změnit údaje",
+      "continue": "Pokračovat",
+      "exploreOnMyOwn": "Prozkoumat na vlastní pěst",
+      "notNow": "Teď ne"
+    },
+    "hero": {
+      "buyNow": "Koupit",
+      "live": "Zveřejněno",
+      "linkCopied": "Odkaz zkopírován"
+    },
+    "setupPath": {
+      "details": "Doplňte své údaje",
+      "product": "Přidejte produkt",
+      "storefront": "Navrhněte výlohu",
+      "share": "Sdílejte její stránku"
+    },
+    "terms": {
+      "agreed": "S těmito Podmínkami souhlasíte. Děkujeme za přečtení.",
+      "agreeNote": "Souhlasem se k vašemu účtu uloží datum a tato verze Podmínek."
+    }
+  },
+  "tourOverlay": {
+    "dialogLabel": "Prohlídka s průvodcem",
+    "progress": "{total, plural, one {{current} z {total}} few {{current} z {total}} many {{current} z {total}} other {{current} z {total}}}",
+    "shortcut": "Zkratka: <kbd>{shortcut}</kbd>",
+    "skipTour": "Přeskočit prohlídku",
+    "next": "Další",
+    "openingPage": "{page, select, overview {Otevírám přehled…} products {Otevírám produkty…} storefront {Otevírám obchod…} orders {Otevírám objednávky…} analytics {Otevírám analytiku…} payments {Otevírám platby…} settings {Otevírám nastavení…} sampleStorefront {Otevírám ukázkový obchod…} other {Otevírám…}}"
+  },
+  "tourReplay": {
+    "title": "Prohlídka s průvodcem",
+    "description": "Krátká prohlídka hlavní věci, kterou můžete udělat na každé stránce, krok za krokem.",
+    "start": "Spustit prohlídku"
+  },
+  "guidedTour": {
+    "steps": {
+      "overviewNav": {
+        "title": "Zorientujte se",
+        "body": "Vše ve vašem obchodě je z menu na jedno kliknutí. Prohlídka se zastaví u hlavní věci na každé stránce.",
+        "bodySidebar": "Vše ve vašem obchodě je na jedno kliknutí v tomto bočním panelu. Prohlídka se zastaví u hlavní věci na každé stránce.",
+        "bodyMenu": "Vše ve vašem obchodě najdete v tomto menu. Prohlídka se zastaví u hlavní věci na každé stránce."
+      },
+      "search": {
+        "title": "Hledejte cokoli",
+        "body": "Vyhledávání vás rovnou přenese na libovolnou stránku, produkt, objednávku nebo nastavení.",
+        "bodyTopBar": "Rovnou přejděte na libovolnou stránku, produkt, objednávku nebo nastavení.",
+        "bodyPhone": "Klepnutím sem rovnou přejdete na libovolnou stránku, produkt, objednávku nebo nastavení."
+      },
+      "productsAdd": {
+        "title": "Přidejte produkt",
+        "body": "Na začátek stačí název a cena. Produkt může zůstat konceptem, dokud nebudete připraveni."
+      },
+      "productsImport": {
+        "title": "Nebo naimportujte svůj katalog",
+        "body": "Už jinde prodáváte? Naimportujte soubor CSV. Export ze Shopify funguje beze změn."
+      },
+      "storefrontCreate": {
+        "title": "Vytvořte výlohu",
+        "body": "Výloha je mřížka, kterou si navrhnete. Každý produkt, který na ni umístíte, dostane stránku ke sdílení."
+      },
+      "storefrontSample": {
+        "title": "Podívejte se, jak se to dělá",
+        "body": "Tato ukázka je hotová výloha. Otevřete ji a vyzkoušejte editor. Nic, co tam změníte, se neuloží.",
+        "fallbackBody": "Otevřete výlohu a upravte ji."
+      },
+      "storefrontEmbed": {
+        "title": "Vložte výlohu na svůj web",
+        "body": "Každá výloha má tlačítko pro vložení na web, které vám dá kód podobný tomuto. Widget je zatím ve vývoji a na jiných webech se ještě nezobrazuje.",
+        "bodyButton": "Toto tlačítko vám dá kód podobný tomu níže, který vložíte na svůj web. Widget je zatím ve vývoji a na jiných webech se ještě nezobrazuje.",
+        "fallbackBody": "Jakmile budete mít výlohu, tlačítko pro vložení na její kartě vám dá kód podobný tomuto. Widget je zatím ve vývoji a na jiných webech se ještě nezobrazuje."
+      },
+      "ordersSearch": {
+        "title": "Najděte objednávku",
+        "body": "Hledejte podle e-mailu kupujícího. Objednávky se tu objeví, až se otevře pokladna Square Share."
+      },
+      "ordersFilters": {
+        "title": "Filtrujte a řaďte",
+        "body": "Zúžte objednávky podle kanálu, stavu nebo data a zvolte, jak se seřadí."
+      },
+      "analytics": {
+        "title": "Sledujte, jak se vám daří",
+        "body": "Prodeje a návštěvy vašich produktových stránek za zvolené období.",
+        "bodyRange": "Prodeje a návštěvy vašich produktových stránek za období, které zvolíte tady.",
+        "bodyFirstRun": "Prodeje a návštěvy vašich produktových stránek se tu objeví, jakmile bude nějaká zveřejněná."
+      },
+      "payments": {
+        "title": "Jak dostanete zaplaceno",
+        "bodyConnect": "Propojte tady Stripe, aby výplaty chodily rovnou na váš bankovní účet.",
+        "bodyComingSoon": "Placení přes Stripe brzy přibude. Do té doby vám kupující platí přes odkaz na nákup u produktu nebo e-mailem."
+      },
+      "finish": {
+        "title": "Prohlídku si můžete kdykoli zopakovat",
+        "body": "To je celá prohlídka. Odtud ji můžete spustit znovu, kdykoli budete chtít."
+      }
+    }
+  },
+  "editorTour": {
+    "steps": {
+      "editorAdd": {
+        "title": "Přidávejte do mřížky",
+        "body": "Z tohoto panelu přidáte produkty, text a tvary. Cokoli na mřížce přesunete tažením a velikost změníte tažením za roh."
+      },
+      "editorDesign": {
+        "title": "Nastavte vzhled",
+        "body": "Barvy, písma, záhlaví i vzhled produktových karet se nastavují jednou pro celou výlohu.",
+        "bodyPanel": "Barvy, písma, záhlaví i vzhled produktových karet se nastavují tady, jednou pro celou výlohu.",
+        "bodyButton": "Klepnutím sem nastavíte barvy, písma, záhlaví i vzhled produktových karet, jednou pro celou výlohu."
+      },
+      "editorPage": {
+        "title": "Každý produkt má stránku",
+        "body": "Každý produkt na mřížce má vlastní stránku ke sdílení. Tady ji otevřete, prohlédnete si ji a upravíte její styl."
+      },
+      "editorFinish": {
+        "title": "Udělejte si ji po svém",
+        "body": "Ukázka se nikdy neukládá, takže si můžete zkusit cokoli. Až budete připraveni, vytvořte si vlastní výlohu."
+      }
+    }
+  }
+}

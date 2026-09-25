@@ -1,3 +1,5 @@
+import { useTranslations, useLocale } from "next-intl";
+import type { Locale } from "@/i18n/locales";
 import { cn } from "@/lib/utils";
 import { cardClass } from "@/components/ui/surface-styles";
 import { formatCents } from "@/lib/format/money";
@@ -5,10 +7,10 @@ import { formatOrderDate } from "@/lib/format/date";
 import type { Balance, MoneyAmount, UpcomingPayout } from "@/lib/payments/types";
 
 /** Join per-currency buckets for display; null means "show the zero state". */
-function formatBuckets(buckets: MoneyAmount[]): string | null {
+function formatBuckets(buckets: MoneyAmount[], locale: Locale): string | null {
   if (buckets.length === 0) return null;
   return buckets
-    .map((bucket) => formatCents(bucket.amountCents, bucket.currency))
+    .map((bucket) => formatCents(bucket.amountCents, bucket.currency, locale))
     .join(" · ");
 }
 
@@ -64,35 +66,37 @@ export function BalanceSummary({
   balance: Balance;
   upcomingPayout: UpcomingPayout;
 }) {
+  const t = useTranslations("Payments.balance");
+  const locale = useLocale();
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {/* A hint explains a figure. Under a zero state it contradicts it
           ("Nothing to pay out yet" over "Ready for your next payout"), so it
           only appears when there is a figure to explain. */}
       <Tile
-        label="Available"
-        value={formatBuckets(balance.available)}
-        zeroText="Nothing to pay out yet"
-        hint={balance.available.length > 0 ? "Ready for your next payout" : undefined}
+        label={t("available.label")}
+        value={formatBuckets(balance.available, locale)}
+        zeroText={t("available.zero")}
+        hint={balance.available.length > 0 ? t("available.hint") : undefined}
         emphasis
       />
       <Tile
-        label="Pending"
-        value={formatBuckets(balance.pending)}
-        zeroText="No pending sales"
-        hint={balance.pending.length > 0 ? "Clearing from recent sales" : undefined}
+        label={t("pending.label")}
+        value={formatBuckets(balance.pending, locale)}
+        zeroText={t("pending.zero")}
+        hint={balance.pending.length > 0 ? t("pending.hint") : undefined}
       />
       <Tile
-        label="Next payout"
+        label={t("nextPayout.label")}
         value={
           upcomingPayout
-            ? formatCents(upcomingPayout.amountCents, upcomingPayout.currency)
+            ? formatCents(upcomingPayout.amountCents, upcomingPayout.currency, locale)
             : null
         }
-        zeroText="No payout scheduled"
+        zeroText={t("nextPayout.zero")}
         hint={
           upcomingPayout
-            ? `Expected ${formatOrderDate(upcomingPayout.expectedAt)}`
+            ? t("nextPayout.hint", { date: formatOrderDate(upcomingPayout.expectedAt, locale) })
             : undefined
         }
       />

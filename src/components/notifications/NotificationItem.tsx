@@ -2,15 +2,18 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { safeInternalPath } from "@/lib/utils/safe-path";
 import { TYPE_DOT, TYPE_LABEL, formatRelativeTime } from "@/lib/notifications/presentation";
 import type { Notification } from "@/lib/notifications/types";
+import { useNotificationText } from "./useNotificationText";
 
 /**
  * One notification row. Renders as a button so the whole row is clickable:
  * clicking marks it read and, if `data.href` is a safe in-app path, navigates
- * there. Title and body are rendered as TEXT only — never as HTML.
+ * there. Title and body are rendered as TEXT only, never as HTML, including
+ * when they are resolved from the stored message keys.
  */
 export function NotificationItem({
   notification,
@@ -20,8 +23,12 @@ export function NotificationItem({
   /** Called on click with the id and an optional deep-link href. */
   onActivate: (id: string, href: string | null) => void;
 }) {
+  const t = useTranslations();
   const router = useRouter();
-  const { id, type, title, body, read, created_at, data } = notification;
+  const { id, type, read, created_at, data } = notification;
+  const { title, body } = useNotificationText(notification);
+  const locale = useLocale();
+  const time = formatRelativeTime(created_at, locale);
   const href = safeInAppHref(data);
 
   function handleClick() {
@@ -66,7 +73,7 @@ export function NotificationItem({
             suppressHydrationWarning
             className="shrink-0 font-inter text-xs text-muted-foreground"
           >
-            {formatRelativeTime(created_at)}
+            {typeof time === "string" ? time : t(time.key, time.values)}
           </time>
         </span>
         {body && (
@@ -74,10 +81,10 @@ export function NotificationItem({
             {body}
           </span>
         )}
-        <span className="sr-only">{TYPE_LABEL[type]}</span>
+        <span className="sr-only">{t(TYPE_LABEL[type])}</span>
       </span>
       {!read && (
-        <span aria-label="Unread" className="mt-1.5 size-2 shrink-0 rounded-full bg-foreground" />
+        <span aria-label={t("Notifications.item.unread")} className="mt-1.5 size-2 shrink-0 rounded-full bg-foreground" />
       )}
     </button>
   );

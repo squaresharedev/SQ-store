@@ -1,0 +1,17 @@
+{
+  "notFound": {
+    "title": "Pagina niet gevonden",
+    "description": "Deze pagina bestaat niet, of waar hij naar verwees is verwijderd. De link is misschien verouderd, maar je account en gegevens zijn in orde.",
+    "cta": "Terug naar dashboard"
+  },
+  "boundary": {
+    "title": "Er is iets misgegaan",
+    "description": "We konden deze pagina niet laden. Dit is meestal een tijdelijk verbindingsprobleem: je account is in orde en je bent nog steeds ingelogd.",
+    "reference": "Referentie: {digest}"
+  },
+  "footer": {
+    "legal": "Juridisch",
+    "contact": "Contact",
+    "credit": "© 2026 Squareshare. Gebouwd door <link>Root Labs</link>."
+  }
+}

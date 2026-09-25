@@ -1,0 +1,189 @@
+{
+  "metadata": {
+    "analytics": {
+      "title": "Statistieken"
+    }
+  },
+  "page": {
+    "title": "Statistieken",
+    "subtitle": "Verkopen, weergaven van je etalage en al het andere wat er in je winkel gebeurt."
+  },
+  "loading": {
+    "title": "Statistieken",
+    "subtitle": "Hoe je winkel presteert via de insluiting en de marketplace.",
+    "srLoading": "statistieken laden"
+  },
+  "firstRun": {
+    "title": "Nog niets om te meten",
+    "body": "Bezoeken aan je productpagina's verschijnen hier zodra er een online is.",
+    "backToSetup": "Terug naar Aan de slag"
+  },
+  "range": {
+    "ariaLabel": "Periode",
+    "last30Days": "Laatste 30 dagen",
+    "allTime": "Alle tijd",
+    "custom": "Aangepast",
+    "placeholder": "Kies een periode"
+  },
+  "section": {
+    "whatMeasures": "Wat {title} meet"
+  },
+  "chart": {
+    "howToRead": "Zo lees je {title}",
+    "emptyDefault": "Geen verkopen in deze periode"
+  },
+  "sales": {
+    "label": "Verkopen",
+    "description": "Betaalde bestellingen via de kassa van Square Share.",
+    "revenue": {
+      "title": "Omzet",
+      "description": "Betaalde omzet in de tijd.",
+      "series": "Omzet",
+      "ariaLabel": "Betaalde omzet in de tijd"
+    },
+    "aov": {
+      "title": "Gemiddelde orderwaarde",
+      "description": "Hoeveel een gemiddelde bestelling waard is, in de tijd.",
+      "series": "Gemiddelde bestelling",
+      "ariaLabel": "Gemiddelde orderwaarde in de tijd"
+    },
+    "channels": {
+      "title": "Kanalen",
+      "description": "Waar je verkopen vandaan komen.",
+      "ariaLabel": "Betaalde omzet per kanaal"
+    },
+    "weekday": {
+      "title": "Verkopen per weekdag",
+      "description": "Het wekelijkse ritme van je winkel.",
+      "series": "Verkopen",
+      "count": "{count, plural, one {{formatted} verkoop} other {{formatted} verkopen}}",
+      "ariaLabel": "Verkopen per weekdag"
+    },
+    "topProducts": {
+      "title": "Topproducten",
+      "description": "Je bestverkochte producten op basis van betaalde omzet.",
+      "series": "Omzet",
+      "ariaLabel": "Topproducten op basis van betaalde omzet"
+    },
+    "orderStatus": {
+      "title": "Bestelstatus",
+      "description": "De volledige mix van bestellingen, inclusief terugbetalingen en geschillen.",
+      "empty": "Geen bestellingen in deze periode",
+      "ariaLabel": "Mix van bestelstatussen"
+    }
+  },
+  "tiles": {
+    "revenue": "Omzet",
+    "afterFees": "{amount} na kosten",
+    "sales": "Verkopen",
+    "perDay": "{rate} per dag gemiddeld",
+    "avgOrder": "Gem. bestelling",
+    "uniqueBuyers": "Unieke kopers",
+    "repeatBuyers": "{count, plural, one {{count} kocht meer dan eens} other {{count} kochten meer dan eens}}",
+    "refundRate": "Terugbetalingspercentage",
+    "refunded": "{count, plural, one {{count} teruggebetaald, {amount}} other {{count} teruggebetaald, {amount}}}",
+    "noSales": "Nog geen verkopen",
+    "noBuyers": "Nog geen kopers",
+    "noOrders": "Nog geen bestellingen"
+  },
+  "channels": {
+    "embed": "Insluiting",
+    "marketplace": "Marketplace",
+    "direct": "Direct"
+  },
+  "signalsUnavailable": {
+    "title": "Weergaven en aanmeldingen zijn nu niet beschikbaar",
+    "body": "Je verkoopcijfers hierboven zijn niet beïnvloed. Laad de pagina opnieuw om het nogmaals te proberen."
+  },
+  "upcoming": {
+    "needProducts": "{labels} verschijnen hier zodra een product op een van je etalages staat.",
+    "needBlocks": "{labels} verschijnen hier zodra hun blok op een van je etalages staat."
+  },
+  "signal": {
+    "visitors": "Bezoekers",
+    "perVisitor": "{rate} per bezoeker gemiddeld",
+    "notCounted": "Nog niet geteld",
+    "value": "Waarde",
+    "noValue": "Nog geen waarde",
+    "notMeasured": "Nog niet gemeten.",
+    "panels": {
+      "trend": "In de tijd",
+      "channels": "Kanalen",
+      "weekdays": "Per weekdag",
+      "storefronts": "Per etalage"
+    },
+    "whereFrom": "Waar ze vandaan kwamen.",
+    "weeklyRhythm": "Het wekelijkse ritme.",
+    "whichStorefront": "Van welke etalage ze kwamen.",
+    "deletedStorefront": "Verwijderde etalage",
+    "deletedStorefrontNumbered": "Verwijderde etalage ({number})"
+  },
+  "sources": {
+    "storefront_view": {
+      "label": "Etalageweergaven",
+      "description": "Hoe vaak je etalage door een bezoeker werd geladen.",
+      "count": "{count, plural, one {{formatted} weergave} other {{formatted} weergaven}}",
+      "total": "Totaal aantal weergaven",
+      "emptyRange": "Geen weergaven in deze periode",
+      "overTime": "Etalageweergaven in de tijd",
+      "acrossRange": "Etalageweergaven in de geselecteerde periode.",
+      "byChannel": "Etalageweergaven per kanaal",
+      "byWeekday": "Etalageweergaven per weekdag",
+      "byStorefront": "Etalageweergaven per etalage"
+    },
+    "product_click": {
+      "label": "Productkliks",
+      "description": "Bezoekers die een product openen vanaf een van je etalages.",
+      "count": "{count, plural, one {{formatted} klik} other {{formatted} kliks}}",
+      "total": "Totaal aantal kliks",
+      "emptyRange": "Geen kliks in deze periode",
+      "overTime": "Productkliks in de tijd",
+      "acrossRange": "Productkliks in de geselecteerde periode.",
+      "byChannel": "Productkliks per kanaal",
+      "byWeekday": "Productkliks per weekdag",
+      "byStorefront": "Productkliks per etalage",
+      "awaiting": "Komt binnen zodra de insluitingswidget productopeningen doorgeeft.",
+      "readyToChart": "Klaar om weer te geven zodra de eerste kliks binnenkomen."
+    },
+    "product_view": {
+      "label": "Productpaginaweergaven",
+      "description": "Bezoekers die een van je gehoste productpagina's openen.",
+      "count": "{count, plural, one {{formatted} weergave} other {{formatted} weergaven}}",
+      "total": "Totaal aantal weergaven",
+      "emptyRange": "Geen weergaven in deze periode",
+      "overTime": "Productpaginaweergaven in de tijd",
+      "acrossRange": "Productpaginaweergaven in de geselecteerde periode.",
+      "byChannel": "Productpaginaweergaven per kanaal",
+      "byWeekday": "Productpaginaweergaven per weekdag",
+      "byStorefront": "Productpaginaweergaven per etalage"
+    },
+    "email_signup": {
+      "label": "E-mailaanmeldingen",
+      "description": "Mensen die zich vanaf een etalage aanmelden voor je lijst.",
+      "count": "{count, plural, one {{formatted} aanmelding} other {{formatted} aanmeldingen}}",
+      "total": "Totaal aantal aanmeldingen",
+      "emptyRange": "Geen aanmeldingen in deze periode",
+      "overTime": "E-mailaanmeldingen in de tijd",
+      "acrossRange": "E-mailaanmeldingen in de geselecteerde periode.",
+      "byChannel": "E-mailaanmeldingen per kanaal",
+      "byWeekday": "E-mailaanmeldingen per weekdag",
+      "byStorefront": "E-mailaanmeldingen per etalage",
+      "awaiting": "Komt binnen met het e-mailaanmeldingsblok.",
+      "readyToChart": "Klaar om weer te geven zodra de eerste aanmeldingen binnenkomen."
+    },
+    "booking": {
+      "label": "Reserveringen",
+      "description": "Tijdslots gereserveerd vanaf een etalage.",
+      "count": "{count, plural, one {{formatted} reservering} other {{formatted} reserveringen}}",
+      "total": "Totaal aantal reserveringen",
+      "emptyRange": "Geen reserveringen in deze periode",
+      "overTime": "Reserveringen in de tijd",
+      "acrossRange": "Reserveringen in de geselecteerde periode.",
+      "byChannel": "Reserveringen per kanaal",
+      "byWeekday": "Reserveringen per weekdag",
+      "byStorefront": "Reserveringen per etalage",
+      "awaiting": "Komt binnen met het reserveringsblok voor de kalender.",
+      "readyToChart": "Klaar om weer te geven zodra de eerste reserveringen binnenkomen."
+    }
+  }
+}

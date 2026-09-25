@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import type { StockBadge } from "@/types/stock";
 
 /**
@@ -16,17 +17,21 @@ export function StockLine({
   isDigital: boolean;
   digitalFormat: string | null;
 }) {
+  const tStock = useTranslations("Common.stock");
+  const t = useTranslations("ProductPage.stock");
   const lines: { text: string; emphasis: boolean }[] = [];
   if (soldOut) {
-    lines.push({ text: "Sold out", emphasis: true });
+    lines.push({ text: tStock("soldOut"), emphasis: true });
   } else if (stock?.state === "low_stock") {
-    lines.push({ text: `Only ${stock.remaining} left`, emphasis: true });
+    lines.push({ text: tStock("lowStock", { remaining: stock.remaining }), emphasis: true });
   } else if (stock?.state === "in_stock") {
-    lines.push({ text: "In stock", emphasis: false });
+    lines.push({ text: tStock("inStock"), emphasis: false });
   }
   if (isDigital) {
     lines.push({
-      text: digitalFormat ? `Digital download (${digitalFormat})` : "Digital download",
+      text: digitalFormat
+        ? t("digitalDownloadFormat", { format: digitalFormat })
+        : t("digitalDownload"),
       emphasis: false,
     });
   }

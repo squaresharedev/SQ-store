@@ -1,0 +1,391 @@
+{
+  "checkForm": "Überprüfe das Formular und versuche es erneut.",
+  "generic": {
+    "invalid": "Überprüfe das Formular und versuche es erneut."
+  },
+  "text": {
+    "productTitle": {
+      "required": "Produkttitel ist erforderlich.",
+      "tooLong": "Produkttitel darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Produkttitel enthält nicht unterstützte Zeichen."
+    },
+    "productDescription": {
+      "required": "Produktbeschreibung ist erforderlich.",
+      "tooLong": "Produktbeschreibung darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Produktbeschreibung enthält nicht unterstützte Zeichen."
+    },
+    "filename": {
+      "required": "Dateiname ist erforderlich.",
+      "tooLong": "Dateiname darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Dateiname enthält nicht unterstützte Zeichen."
+    },
+    "galleryAlt": {
+      "required": "Alternativtext ist erforderlich.",
+      "tooLong": "Alternativtext darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Alternativtext enthält nicht unterstützte Zeichen."
+    },
+    "specName": {
+      "required": "Name der Spezifikation ist erforderlich.",
+      "tooLong": "Name der Spezifikation darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Name der Spezifikation enthält nicht unterstützte Zeichen."
+    },
+    "specValue": {
+      "required": "Wert der Spezifikation ist erforderlich.",
+      "tooLong": "Wert der Spezifikation darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Wert der Spezifikation enthält nicht unterstützte Zeichen."
+    },
+    "optionName": {
+      "required": "Optionsname ist erforderlich.",
+      "tooLong": "Optionsname darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Optionsname enthält nicht unterstützte Zeichen."
+    },
+    "optionGroupName": {
+      "required": "Name der Optionsgruppe ist erforderlich.",
+      "tooLong": "Name der Optionsgruppe darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Name der Optionsgruppe enthält nicht unterstützte Zeichen."
+    },
+    "documentName": {
+      "required": "Dokumentname ist erforderlich.",
+      "tooLong": "Dokumentname darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Dokumentname enthält nicht unterstützte Zeichen."
+    },
+    "materials": {
+      "required": "Materialien sind erforderlich.",
+      "tooLong": "Materialien dürfen höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Materialien enthalten nicht unterstützte Zeichen."
+    },
+    "care": {
+      "required": "Pflegehinweise sind erforderlich.",
+      "tooLong": "Pflegehinweise dürfen höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Pflegehinweise enthalten nicht unterstützte Zeichen."
+    },
+    "includedItem": {
+      "required": "Enthaltenes Element ist erforderlich.",
+      "tooLong": "Enthaltenes Element darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Enthaltenes Element enthält nicht unterstützte Zeichen."
+    },
+    "origin": {
+      "required": "Herkunftsland ist erforderlich.",
+      "tooLong": "Herkunftsland darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Herkunftsland enthält nicht unterstützte Zeichen."
+    },
+    "manufacturerName": {
+      "required": "Hersteller ist erforderlich.",
+      "tooLong": "Hersteller darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Hersteller enthält nicht unterstützte Zeichen."
+    },
+    "manufacturerAddress": {
+      "required": "Herstelleradresse ist erforderlich.",
+      "tooLong": "Herstelleradresse darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Herstelleradresse enthält nicht unterstützte Zeichen."
+    },
+    "responsibleName": {
+      "required": "Verantwortliche Person in der EU ist erforderlich.",
+      "tooLong": "Verantwortliche Person in der EU darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Verantwortliche Person in der EU enthält nicht unterstützte Zeichen."
+    },
+    "responsibleAddress": {
+      "required": "Adresse der verantwortlichen Person in der EU ist erforderlich.",
+      "tooLong": "Adresse der verantwortlichen Person in der EU darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Adresse der verantwortlichen Person in der EU enthält nicht unterstützte Zeichen."
+    },
+    "safetyIdentifier": {
+      "required": "Typ, Charge oder Seriennummer ist erforderlich.",
+      "tooLong": "Typ, Charge oder Seriennummer darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Typ, Charge oder Seriennummer enthält nicht unterstützte Zeichen."
+    },
+    "warnings": {
+      "required": "Warnhinweise sind erforderlich.",
+      "tooLong": "Warnhinweise dürfen höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Warnhinweise enthalten nicht unterstützte Zeichen."
+    },
+    "businessName": {
+      "required": "Händlername ist erforderlich.",
+      "tooLong": "Händlername darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Händlername enthält nicht unterstützte Zeichen."
+    },
+    "businessAddress": {
+      "required": "Geschäftsadresse ist erforderlich.",
+      "tooLong": "Geschäftsadresse darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Geschäftsadresse enthält nicht unterstützte Zeichen."
+    },
+    "phone": {
+      "required": "Telefonnummer ist erforderlich.",
+      "tooLong": "Telefonnummer darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Telefonnummer enthält nicht unterstützte Zeichen."
+    },
+    "bio": {
+      "required": "Deine Kurzbio ist erforderlich.",
+      "tooLong": "Deine Kurzbio darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Deine Kurzbio enthält nicht unterstützte Zeichen."
+    },
+    "destinationArea": {
+      "required": "Lieferziel ist erforderlich.",
+      "tooLong": "Lieferziel darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Lieferziel enthält nicht unterstützte Zeichen."
+    },
+    "deliveryTime": {
+      "required": "Lieferzeit ist erforderlich.",
+      "tooLong": "Lieferzeit darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Lieferzeit enthält nicht unterstützte Zeichen."
+    },
+    "shippingCost": {
+      "required": "Versandkosten sind erforderlich.",
+      "tooLong": "Versandkosten dürfen höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Versandkosten enthalten nicht unterstützte Zeichen."
+    },
+    "dispatchTime": {
+      "required": "Bearbeitungszeit ist erforderlich.",
+      "tooLong": "Bearbeitungszeit darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Bearbeitungszeit enthält nicht unterstützte Zeichen."
+    },
+    "shippingNotes": {
+      "required": "Versandhinweise sind erforderlich.",
+      "tooLong": "Versandhinweise dürfen höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Versandhinweise enthalten nicht unterstützte Zeichen."
+    },
+    "shippingPolicy": {
+      "required": "Versandrichtlinie ist erforderlich.",
+      "tooLong": "Versandrichtlinie darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Versandrichtlinie enthält nicht unterstützte Zeichen."
+    },
+    "returnsNotes": {
+      "required": "Rückgabehinweise sind erforderlich.",
+      "tooLong": "Rückgabehinweise dürfen höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Rückgabehinweise enthalten nicht unterstützte Zeichen."
+    },
+    "returnsPolicy": {
+      "required": "Rückgaberichtlinie ist erforderlich.",
+      "tooLong": "Rückgaberichtlinie darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Rückgaberichtlinie enthält nicht unterstützte Zeichen."
+    },
+    "otherCategory": {
+      "required": "Kategorie ist erforderlich.",
+      "tooLong": "Kategorie darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Kategorie enthält nicht unterstützte Zeichen."
+    },
+    "storefrontName": {
+      "required": "Schaufenstername ist erforderlich.",
+      "tooLong": "Schaufenstername darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Schaufenstername enthält nicht unterstützte Zeichen."
+    },
+    "fontName": {
+      "required": "Schriftartname ist erforderlich.",
+      "tooLong": "Schriftartname darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Schriftartname enthält nicht unterstützte Zeichen."
+    },
+    "storeName": {
+      "required": "Shop-Name ist erforderlich.",
+      "tooLong": "Shop-Name darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Shop-Name enthält nicht unterstützte Zeichen."
+    },
+    "storeBio": {
+      "required": "Shop-Kurzbio ist erforderlich.",
+      "tooLong": "Shop-Kurzbio darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Shop-Kurzbio enthält nicht unterstützte Zeichen."
+    },
+    "ctaLabel": {
+      "required": "Beschriftung des Kauf-Buttons ist erforderlich.",
+      "tooLong": "Beschriftung des Kauf-Buttons darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Beschriftung des Kauf-Buttons enthält nicht unterstützte Zeichen."
+    },
+    "shippingProfileName": {
+      "required": "Name des Versandprofils ist erforderlich.",
+      "tooLong": "Name des Versandprofils darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Name des Versandprofils enthält nicht unterstützte Zeichen."
+    },
+    "shippingTerms": {
+      "required": "Versandbedingungen sind erforderlich.",
+      "tooLong": "Versandbedingungen dürfen höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Versandbedingungen enthalten nicht unterstützte Zeichen."
+    },
+    "blockText": {
+      "required": "Blocktext ist erforderlich.",
+      "tooLong": "Blocktext darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Blocktext enthält nicht unterstützte Zeichen."
+    },
+    "elementAlt": {
+      "required": "Alternativtext des Elements ist erforderlich.",
+      "tooLong": "Alternativtext des Elements darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Alternativtext des Elements enthält nicht unterstützte Zeichen."
+    },
+    "notificationTitle": {
+      "required": "Benachrichtigungstitel ist erforderlich.",
+      "tooLong": "Benachrichtigungstitel darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Benachrichtigungstitel enthält nicht unterstützte Zeichen."
+    },
+    "notificationBody": {
+      "required": "Text der Benachrichtigung ist erforderlich.",
+      "tooLong": "Text der Benachrichtigung darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Text der Benachrichtigung enthält nicht unterstützte Zeichen."
+    },
+    "searchQuery": {
+      "required": "Suchanfrage ist erforderlich.",
+      "tooShort": "Suchanfrage muss mindestens {minimum} Zeichen lang sein.",
+      "tooLong": "Suchanfrage darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Suchanfrage enthält nicht unterstützte Zeichen."
+    },
+    "factorName": {
+      "required": "Der Name ist erforderlich.",
+      "tooLong": "Der Name darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Der Name enthält nicht unterstützte Zeichen."
+    },
+    "reportDetails": {
+      "required": "Deine Beschreibung ist erforderlich.",
+      "tooLong": "Deine Beschreibung darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Deine Beschreibung enthält nicht unterstützte Zeichen."
+    }
+  },
+  "email": {
+    "generic": {
+      "format": "Das sieht nicht wie eine gültige E-Mail-Adresse aus.",
+      "tooLong": "Diese E-Mail-Adresse ist zu lang.",
+      "unsupported": "Diese E-Mail-Adresse enthält nicht unterstützte Zeichen."
+    },
+    "reporter": {
+      "format": "Deine E-Mail-Adresse sieht nicht wie eine E-Mail-Adresse aus.",
+      "tooLong": "Deine E-Mail-Adresse ist zu lang.",
+      "unsupported": "Deine E-Mail-Adresse enthält nicht unterstützte Zeichen."
+    },
+    "contactEmail": {
+      "format": "Die Kontakt-E-Mail scheint keine gültige E-Mail-Adresse zu sein.",
+      "tooLong": "Die Kontakt-E-Mail ist zu lang.",
+      "unsupported": "Die Kontakt-E-Mail enthält nicht unterstützte Zeichen."
+    },
+    "manufacturerEmail": {
+      "format": "Die E-Mail-Adresse des Herstellers scheint ungültig zu sein.",
+      "tooLong": "Die E-Mail-Adresse des Herstellers ist zu lang.",
+      "unsupported": "Die E-Mail-Adresse des Herstellers enthält nicht unterstützte Zeichen."
+    },
+    "responsibleEmail": {
+      "format": "Die E-Mail-Adresse der verantwortlichen Person in der EU scheint ungültig zu sein.",
+      "tooLong": "Die E-Mail-Adresse der verantwortlichen Person in der EU ist zu lang.",
+      "unsupported": "Die E-Mail-Adresse der verantwortlichen Person in der EU enthält nicht unterstützte Zeichen."
+    }
+  },
+  "emailQuality": {
+    "placeholder": "Die Kontakt-E-Mail sieht nach einer Platzhalteradresse aus. Verwende eine Adresse, die du tatsächlich abrufst.",
+    "disposable": "Die Kontakt-E-Mail gehört zu einem Wegwerfmail-Anbieter. Verwende eine dauerhafte Adresse."
+  },
+  "uuid": {
+    "id": "Diese ID ist ungültig.",
+    "option": "Diese Option ist ungültig.",
+    "optionGroup": "Diese Optionsgruppe ist ungültig.",
+    "shippingProfile": "Dieses Versandprofil ist ungültig.",
+    "storefrontId": "Diese Schaufenster-ID ist ungültig.",
+    "blockId": "Eine Block-ID ist ungültig.",
+    "notificationRecipient": "Ein Benachrichtigungsempfänger ist ungültig.",
+    "factor": "Dieser Authenticator ist ungültig.",
+    "reportTarget": "Dieses Element ist ungültig."
+  },
+  "handle": {
+    "username": "Ein Benutzername muss 3 bis 30 Zeichen lang sein und darf nur Buchstaben, Zahlen und Unterstriche enthalten."
+  },
+  "hostname": {
+    "domains": "Domains müssen einfache Domains in Kleinbuchstaben sein, z. B. yoursite.com, ohne https://, Port, Pfad oder Platzhalter."
+  },
+  "referenceCode": {
+    "vatId": "Eine USt-IdNr. hat {min} bis {max} Zeichen: Buchstaben, Ziffern, Leerzeichen, Punkte oder Bindestriche."
+  },
+  "oneTimeCode": {
+    "authenticator": "Der Code besteht aus den 6 Ziffern, die deine Authenticator-App anzeigt."
+  },
+  "hexColor": {
+    "colors": "Farben müssen 6-stellige Hex-Werte sein, z. B. #a855f7.",
+    "swatchColours": "Farbfelder müssen 6-stellige Hex-Werte sein, z. B. #a855f7."
+  },
+  "int": {
+    "price": {
+      "whole": "Preis muss eine ganze Zahl sein.",
+      "tooSmall": "Preis muss mindestens {minimum} betragen.",
+      "tooBig": "Preis darf höchstens {maximum} betragen."
+    },
+    "maxPerOrder": {
+      "whole": "Das Maximum pro Bestellung muss eine ganze Zahl sein.",
+      "tooSmall": "Das Maximum pro Bestellung muss mindestens {minimum} betragen.",
+      "tooBig": "Das Maximum pro Bestellung darf höchstens {maximum} betragen."
+    }
+  },
+  "list": {
+    "domains": {
+      "tooMany": "Gib höchstens {maximum} Domains an.",
+      "duplicate": "Jede Domain darf nur einmal eingetragen werden."
+    }
+  },
+  "settings": {
+    "currentPasswordRequired": "Gib dein aktuelles Passwort ein.",
+    "newPasswordTooShort": "Neues Passwort muss mindestens {minimum} Zeichen lang sein.",
+    "newPasswordTooLong": "Neues Passwort darf höchstens {maximum} Zeichen lang sein.",
+    "passwordsMismatch": "Die neuen Passwörter stimmen nicht überein.",
+    "pickCountry": "Wähle ein Land aus der Liste aus.",
+    "legalVersionChanged": "Die rechtlichen Dokumente haben sich während des Lesens geändert. Lade die Seite neu und versuche es erneut.",
+    "deleteConfirm": "Gib „{phrase}“ genau ein, um zu bestätigen."
+  },
+  "password": {
+    "tooShort": "Passwort muss mindestens {minimum} Zeichen lang sein.",
+    "tooLong": "Passwort darf höchstens {maximum} Zeichen lang sein.",
+    "tooCommon": "Dieses Passwort ist zu verbreitet. Wähle etwas, das schwerer zu erraten ist.",
+    "repeated": "Dieses Passwort ist zu leicht zu erraten. Versuche eine längere Kombination aus Wörtern.",
+    "sequence": "Dieses Passwort enthält eine häufige Tastatursequenz. Versuche etwas anderes.",
+    "containsIdentity": "Passwort darf weder deine E-Mail-Adresse noch deinen Benutzernamen enthalten.",
+    "weakMix": "Kombiniere Groß- und Kleinbuchstaben, Zahlen oder Sonderzeichen, oder verwende {length}+ Zeichen."
+  },
+  "team": {
+    "invalidStore": "Ungültige Shop-Referenz.",
+    "invalidEmail": "Das sieht nicht wie eine E-Mail-Adresse aus.",
+    "emailTooLong": "Diese E-Mail-Adresse ist zu lang.",
+    "invalidRole": "Wähle eine gültige Rolle aus.",
+    "invalidInvite": "Ungültige Einladungsreferenz.",
+    "invalidMember": "Ungültige Mitgliederreferenz."
+  },
+  "auth": {
+    "usernameReserved": "Dieser Benutzername ist reserviert. Wähle einen anderen."
+  },
+  "notifications": {
+    "invalidReference": "Ungültige Benachrichtigungsreferenz."
+  },
+  "product": {
+    "stockRequired": "Lege fest, wie viele Artikel auf Lager sind.",
+    "optionSpecsTooMany": "Eine Variante kann bis zu {maximum} eigene technische Daten haben.",
+    "optionGroupEmpty": "Gib jeder Optionsgruppe mindestens eine Option, oder entferne die Gruppe.",
+    "optionGroupTooManyOptions": "Eine Optionsgruppe kann bis zu {maximum} Optionen haben.",
+    "includedTooMany": "Liste bis zu {maximum} enthaltene Artikel auf.",
+    "specsTooMany": "Liste bis zu {maximum} technische Daten auf.",
+    "purchaseLinkFormat": "Der Kauflink muss eine vollständige https://-Adresse sein.",
+    "purchaseLinkTooLong": "Der Kauflink darf höchstens {maximum} Zeichen lang sein.",
+    "purchaseLinkCredentials": "Der Kauflink darf weder Benutzernamen noch Passwort enthalten.",
+    "galleryTooMany": "Ein Produkt kann bis zu {maximum} zusätzliche Fotos haben.",
+    "optionGroupsTooMany": "Ein Produkt kann bis zu {maximum} Optionsgruppen haben.",
+    "documentsTooMany": "Ein Produkt kann bis zu {maximum} Dokumente haben.",
+    "optionDuplicate": "Jede Option darf nur einmal eingetragen werden.",
+    "optionsTotalTooMany": "Ein Produkt kann insgesamt bis zu {maximum} Optionen haben.",
+    "galleryStaleOption": "Ein Foto verweist auf eine Option, die nicht mehr existiert."
+  },
+  "productImport": {
+    "noTitle": "Kein Titel.",
+    "titleTooLong": "Titel ist länger als 200 Zeichen.",
+    "noPrice": "Kein Preis lesbar.",
+    "priceZero": "Preis ist null.",
+    "duplicateTitle": "Eine andere Zeile hat diesen Titel."
+  },
+  "shipping": {
+    "shipsFromInvalid": "Dieses Land wird noch nicht als Versandursprung unterstützt.",
+    "destinationsTooMany": "Du kannst bis zu {maximum} Lieferziele angeben.",
+    "returnsWindowWhole": "Die Rückgabefrist muss eine ganze Zahl von Tagen sein.",
+    "returnsWindowNegative": "Die Rückgabefrist darf nicht negativ sein.",
+    "returnsWindowTooLong": "Die Rückgabefrist beträgt maximal {maximum} Tage."
+  },
+  "storefront": {
+    "backgroundImageKind": "Hintergrundbilder müssen hochgeladene Bilder sein.",
+    "customFontKind": "Eigene Schriftarten müssen hochgeladene Schriftartdateien sein.",
+    "elementKind": "Elemente müssen hochgeladene Elemente sein.",
+    "productPageSectionsTooMany": "Die Produktseite muss jeden Abschnitt genau einmal auflisten.",
+    "productPageSectionDuplicate": "Die Produktseite darf denselben Abschnitt nicht zweimal auflisten.",
+    "shippingProfilesTooMany": "Ein Shop kann bis zu {maximum} Versandprofile verwalten.",
+    "shippingProfileDuplicate": "Jedes Versandprofil darf nur einmal eingetragen werden.",
+    "spanRange": "Ein formatierter Bereich muss nach seinem Anfang enden.",
+    "blocksTooMany": "Ein Schaufenster kann bis zu {maximum} Blöcke enthalten. Entferne einige Blöcke oder teile dieses Schaufenster in zwei.",
+    "blocksDuplicate": "Rasterblöcke müssen eindeutig sein.",
+    "blockOutsideCanvas": "Ein Block liegt außerhalb der Arbeitsfläche."
+  }
+}

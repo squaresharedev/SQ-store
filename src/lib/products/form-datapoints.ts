@@ -12,6 +12,9 @@ import type {
 } from "@/components/products/form-values";
 import { optionDetailsEmpty, safetyStarted } from "@/components/products/form-values";
 import { parseFormPriceCents } from "@/lib/products/price";
+import { createTranslator } from "next-intl";
+import { msg, type MessageRef } from "@/i18n/types";
+import products from "../../../messages/en/products.json";
 
 /**
  * THE PRODUCT FORM, AS DATA.
@@ -51,91 +54,26 @@ export const PRODUCT_FORM_SNAPSHOT_ID = "product-form-snapshot";
  * The ids are the stable contract: they name the anchor a person jumps to
  * (`#product-section-<id>`), the `data-product-section` an automation matches,
  * and the entry in the snapshot. Labels and copy can change freely; an id
- * cannot, so append rather than rename.
+ * cannot, so append rather than rename. The copy (label, the "?" explanation)
+ * lives in the catalogue under `Products.form.sections.<id>`. The Stock
+ * explanation also covers the alert; Media has none (its three fields carry
+ * their own), and an empty explanation is what suppresses its "?".
  *
  * `required` marks a section the product cannot be saved without — which is
  * what lets the rail show a seller the two things standing between them and a
  * saved product, on a form with nine sections and forty fields.
  */
 export const PRODUCT_FORM_SECTIONS = [
-  {
-    id: "basics",
-    label: "Basics",
-    description: "What you are selling, in your words — and what it costs.",
-    required: true,
-  },
-  {
-    id: "stock",
-    label: "Stock",
-    // THE SECTION'S ONLY EXPLANATION, which is why it also covers the alert.
-    // Track stock and the low-stock alert had a "?" each, saying between them
-    // what this one sentence says: three buttons on a card with two controls,
-    // opening three windows onto the same idea. One section, one explanation.
-    description:
-      "Unlimited by default. Track it to stop overselling and show buyers sold-out and “Only N left” badges. The alert number is when that second badge appears. The order limit is separate: it caps how many one buyer can take at once, tracked or not.",
-    required: false,
-  },
-  {
-    id: "media",
-    label: "Media and delivery",
-    // NO DESCRIPTION, so this section shows no "?" beside its heading. Its
-    // three fields — display image, digital file, purchase link — each carry
-    // their own, and a fourth info button restating them in the header made a
-    // card of four "?"s where the header's was the one you could skip. Empty
-    // is the opt-out; see FormSection.
-    description: "",
-    required: false,
-  },
-  {
-    id: "shipping",
-    label: "Shipping",
-    description:
-      "Written once for your whole store, not per product. Pick a profile only if this one ships differently.",
-    required: false,
-  },
-  {
-    id: "options",
-    label: "Options",
-    description:
-      "Colours, sizes, power outputs — however this product varies. Buyers pick one of each.",
-    required: false,
-  },
-  {
-    id: "photos",
-    label: "Photos",
-    description: "More angles for the product page. Drop photos onto an option to show them only for it.",
-    required: false,
-  },
-  {
-    id: "specs",
-    label: "Specifications",
-    description: "Dimensions, materials and specifications for the product page.",
-    required: false,
-  },
-  {
-    id: "documents",
-    label: "Documents",
-    description:
-      "Certificates, manuals, or spec sheets buyers and regulators can check before buying.",
-    required: false,
-  },
-  {
-    id: "safety",
-    label: "Safety and compliance",
-    description:
-      "Who made it and how to reach them. EU product-safety law asks for this on physical goods.",
-    required: false,
-  },
-  {
-    id: "visibility",
-    label: "Visibility",
-    // Both states, because the point of the setting is the difference between
-    // them — this is where STATUS_HINTS went when the form stopped printing a
-    // sentence under a two-button control that already says Active and Draft.
-    description:
-      "Active is live: buyers can see it and buy it right away. Draft is hidden from buyers until you switch it.",
-    required: false,
-  },
+  { id: "basics", required: true },
+  { id: "stock", required: false },
+  { id: "media", required: false },
+  { id: "shipping", required: false },
+  { id: "options", required: false },
+  { id: "photos", required: false },
+  { id: "specs", required: false },
+  { id: "documents", required: false },
+  { id: "safety", required: false },
+  { id: "visibility", required: false },
 ] as const;
 
 export type ProductFormSectionId = (typeof PRODUCT_FORM_SECTIONS)[number]["id"];
@@ -284,8 +222,42 @@ function toCount(raw: string): number | null {
   return Number.isInteger(value) && value >= 0 ? value : null;
 }
 
-const plural = (count: number, one: string, many = `${one}s`) =>
-  `${count} ${count === 1 ? one : many}`;
+/**
+ * One piece of a section summary: a catalogue message, or text the SELLER
+ * typed (a title, a profile name), shown as it is. The pieces of one summary
+ * are separate labels ("Image · Download"), never parts of a sentence.
+ */
+export type SummaryPart = MessageRef | string;
+
+/** A summary as text, in the language `resolve` answers in. */
+export function summaryText(
+  parts: readonly SummaryPart[],
+  resolve: (ref: MessageRef) => string,
+): string {
+  return parts.map((part) => (typeof part === "string" ? part : resolve(part))).join(" · ");
+}
+
+const englishCatalogue = createTranslator({
+  locale: "en",
+  messages: { Products: products },
+  timeZone: "UTC",
+});
+
+type ProductsKey = Extract<MessageRef["key"], `Products.${string}`>;
+
+/**
+ * The snapshot is a MACHINE contract (docs/product-form-datapoints.md), so its
+ * labels and summaries stay English whatever language the seller reads the
+ * form in. The form resolves the same parts in the reader's language.
+ */
+function english(ref: MessageRef): string {
+  return englishCatalogue(ref.key as ProductsKey, ref.values);
+}
+
+/** A section's name, as a message. */
+export function sectionLabel(id: ProductFormSectionId): MessageRef {
+  return msg(`Products.form.sections.${id}.label`);
+}
 
 /** Versions stating measurements of their own. Only options the product still
  *  has count, because only those are saved. */
@@ -300,10 +272,13 @@ function versionsWithOwnSpecs(input: ProductFormStateInput): number {
 }
 
 /** The section summaries, which are also what the headers and the rail print. */
-function summarize(input: ProductFormStateInput): Record<ProductFormSectionId, string> {
+export function sectionSummaries(
+  input: ProductFormStateInput,
+): Record<ProductFormSectionId, SummaryPart[]> {
   const { values, details } = input;
   const optionCount = input.optionGroups.reduce((total, g) => total + g.options.length, 0);
   const ownSpecs = versionsWithOwnSpecs(input);
+  const when = (condition: unknown, ref: MessageRef): SummaryPart[] => (condition ? [ref] : []);
   // EVERY field in the section, not a sample of them. A summary that ignores
   // some of what it summarises is worse than none: filling "Made in" and
   // being told the section is still Empty teaches a seller not to trust it.
@@ -311,21 +286,30 @@ function summarize(input: ProductFormStateInput): Record<ProductFormSectionId, s
   // Named the way the FIELDS are named, not the way the state is. "Made in"
   // is what the seller filled in; "origin" is what we happen to call it, and
   // a summary is no place to make someone translate.
-  const specParts = [
-    details.length.trim() || details.width.trim() || details.height.trim() ? "Dimensions" : "",
-    details.weight.trim() ? "Weight" : "",
-    details.materials.trim() ? "Materials" : "",
-    details.care.trim() ? "Care" : "",
-    details.included.trim() ? "Contents" : "",
-    details.specs.filter((spec) => spec.label.trim()).length > 0 ? "Specs" : "",
-    details.origin.trim() ? "Made in" : "",
+  const specParts: SummaryPart[] = [
+    ...when(
+      details.length.trim() || details.width.trim() || details.height.trim(),
+      msg("Products.form.summary.dimensions"),
+    ),
+    ...when(details.weight.trim(), msg("Products.form.summary.weight")),
+    ...when(details.materials.trim(), msg("Products.form.summary.materials")),
+    ...when(details.care.trim(), msg("Products.form.summary.care")),
+    ...when(details.included.trim(), msg("Products.form.summary.contents")),
+    ...when(
+      details.specs.filter((spec) => spec.label.trim()).length > 0,
+      msg("Products.form.summary.specs"),
+    ),
+    ...when(details.origin.trim(), msg("Products.form.summary.madeIn")),
     // Named the way the seller thinks of it: "2 versions" is the count of
     // versions measuring something of their own, not a field they filled in.
-    ownSpecs > 0 ? plural(ownSpecs, "version") : "",
-  ].filter(Boolean);
+    ...when(ownSpecs > 0, msg("Products.form.summary.versions", { count: ownSpecs })),
+  ];
+
+  const title = values.title.trim();
+  const manufacturer = details.safety.manufacturerName.trim();
 
   return {
-    basics: values.title.trim() || "",
+    basics: title ? [title] : [],
     // BOTH answers, because the section now holds two independent ones and a
     // summary that reported only the shelf would call a product with a limit
     // of 1 "Unlimited". The order limit is always stated, default or not: the
@@ -338,38 +322,57 @@ function summarize(input: ProductFormStateInput): Record<ProductFormSectionId, s
           // units. The toggle flip now seeds a real value, so this branch reads
           // as unanswered only in the edge case where seeding hasn't run.
           values.stockQuantity.trim()
-          ? `Tracking ${values.stockQuantity.trim()}`
-          : "Set quantity"
-        : "Unlimited",
-      values.maxPerOrder.trim() ? `Max ${values.maxPerOrder.trim()} per order` : "",
-    ]
-      .filter(Boolean)
-      .join(" · "),
+          ? msg("Products.form.summary.tracking", { quantity: values.stockQuantity.trim() })
+          : msg("Products.form.summary.setQuantity")
+        : msg("Products.form.summary.unlimited"),
+      ...when(
+        values.maxPerOrder.trim(),
+        msg("Products.form.summary.maxPerOrder", { max: values.maxPerOrder.trim() }),
+      ),
+    ],
     media: [
-      input.hasCoverImage ? "Image" : "",
-      input.hasDigitalFile ? "Download" : "",
-      input.purchaseUrl.trim() ? "Buy link" : "",
-    ]
-      .filter(Boolean)
-      .join(" · "),
+      ...when(input.hasCoverImage, msg("Products.form.summary.image")),
+      ...when(input.hasDigitalFile, msg("Products.form.summary.download")),
+      ...when(input.purchaseUrl.trim(), msg("Products.form.summary.buyLink")),
+    ],
     // NEVER EMPTY, unlike every other summary here. "Store terms" is a real
     // answer and the right one for nearly every product, so a section that
     // read "Empty" would be telling a seller to go and fix something that is
     // already correct.
     shipping: input.isDigital
-      ? ""
-      : (input.shippingProfileName ?? (input.shippingProfileId ? "Removed profile" : "Store terms")),
+      ? []
+      : [
+          input.shippingProfileName ??
+            (input.shippingProfileId
+              ? msg("Products.form.summary.removedProfile")
+              : msg("Products.form.summary.storeTerms")),
+        ],
     options:
       input.optionGroups.length === 0
-        ? ""
-        : `${plural(input.optionGroups.length, "group")}, ${plural(optionCount, "option")}`,
-    photos: input.gallery.length === 0 ? "" : plural(input.gallery.length, "photo"),
-    specs: specParts.join(" · "),
-    documents: input.documents.length === 0 ? "" : plural(input.documents.length, "document"),
+        ? []
+        : [
+            msg("Products.form.summary.options", {
+              groups: input.optionGroups.length,
+              options: optionCount,
+            }),
+          ],
+    photos:
+      input.gallery.length === 0
+        ? []
+        : [msg("Products.form.summary.photos", { count: input.gallery.length })],
+    specs: specParts,
+    documents:
+      input.documents.length === 0
+        ? []
+        : [msg("Products.form.summary.documents", { count: input.documents.length })],
     safety: safetyStarted(details.safety)
-      ? details.safety.manufacturerName.trim() || "Started"
-      : "",
-    visibility: values.status === "active" ? "Active" : "Draft",
+      ? [manufacturer || msg("Products.form.summary.started")]
+      : [],
+    visibility: [
+      values.status === "active"
+        ? msg("Products.form.summary.active")
+        : msg("Products.form.summary.draft"),
+    ],
   };
 }
 
@@ -381,7 +384,7 @@ export function buildProductFormSnapshot(
   input: ProductFormStateInput,
 ): ProductFormSnapshot {
   const { values, details } = input;
-  const summaries = summarize(input);
+  const summaries = sectionSummaries(input);
   const invalid = new Set<string>(input.invalidSections);
 
   // Sections that are never SHOWN cannot be reported on: a download has no
@@ -394,10 +397,14 @@ export function buildProductFormSnapshot(
 
   const sections: ProductFormSectionSnapshot[] = visible.map((section) => ({
     id: section.id,
-    label: section.label,
+    label: english(sectionLabel(section.id)),
     required: section.required,
-    state: invalid.has(section.id) ? "invalid" : summaries[section.id] ? "filled" : "empty",
-    summary: summaries[section.id],
+    state: invalid.has(section.id)
+      ? "invalid"
+      : summaries[section.id].length > 0
+        ? "filled"
+        : "empty",
+    summary: summaryText(summaries[section.id], english),
   }));
 
   const requiredMissing: string[] = [];

@@ -1,0 +1,56 @@
+{
+  "main": {
+    "overview": {
+      "label": "Overview",
+      "description": "Your setup steps, and anything that needs you."
+    },
+    "products": {
+      "label": "Products",
+      "description": "What you sell: photos, prices, stock and details."
+    },
+    "storefront": {
+      "label": "Storefront",
+      "description": "Design the grid your products sit on."
+    },
+    "orders": {
+      "label": "Orders",
+      "description": "Orders will land here once checkout opens."
+    },
+    "analytics": {
+      "label": "Analytics",
+      "description": "Views of your product pages, and sales later on."
+    },
+    "payments": {
+      "label": "Payments",
+      "description": "Getting paid through Stripe. Coming soon."
+    },
+    "settings": {
+      "label": "Settings",
+      "description": "Your seller details, shipping terms and account."
+    }
+  },
+  "settings": {
+    "account": "Account",
+    "security": "Security",
+    "legal": "Legal",
+    "tax": "Business & seller details",
+    "shipping": "Shipping & returns",
+    "notifications": "Notifications",
+    "language": "Language",
+    "team": "Team & access",
+    "danger": "Danger zone"
+  },
+  "profileMenu": {
+    "label": "Account menu",
+    "account": "Account",
+    "switchAccounts": "Switch accounts",
+    "yourStore": "Your store",
+    "owner": "Owner",
+    "logOut": "Log out"
+  },
+  "viewingBanner": {
+    "viewing": "{role, select, owner {Viewing <store>{storeName}</store> as Owner} editor {Viewing <store>{storeName}</store> as Editor} viewer {Viewing <store>{storeName}</store> as Viewer} other {Viewing <store>{storeName}</store>}}",
+    "readOnly": " · read-only",
+    "backToYourStore": "Back to your store"
+  }
+}

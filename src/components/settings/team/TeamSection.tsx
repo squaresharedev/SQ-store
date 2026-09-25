@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { UserPlus } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { errorTextClass } from "@/components/ui/control-styles";
 import { MemberList } from "@/components/settings/team/MemberList";
 import { InviteModal } from "@/components/settings/team/InviteModal";
@@ -31,6 +32,8 @@ export function TeamSection({
   /** The signed-in user, so their own row can be marked "(you)". */
   viewerUserId?: string | null;
 }) {
+  const t = useTranslations("Settings.team");
+  const tCommon = useTranslations("Common.actions");
   const [inviteOpen, setInviteOpen] = React.useState(false);
 
   // Roster paging: the page seeds one server page; anything beyond it loads on
@@ -81,8 +84,8 @@ export function TeamSection({
       {/* id: universal search's landing point for "invite a team member". */}
       <SettingsCard
         id="invite"
-        title="Team"
-        description="People who can sign in to this store. Their role controls what they can see and change."
+        title={t("cardTitle")}
+        description={t("cardDescription")}
       >
         <MemberList
           accountOwnerId={accountOwnerId}
@@ -95,7 +98,7 @@ export function TeamSection({
           <div className="mt-3 flex flex-col items-start gap-1.5">
             {loadError && (
               <p role="alert" className={errorTextClass}>
-                Couldn&apos;t load more members. Try again.
+                {t("loadError")}
               </p>
             )}
             <Button
@@ -104,7 +107,7 @@ export function TeamSection({
               onClick={loadMore}
               disabled={loadingMore}
             >
-              {loadingMore ? "Loading…" : loadError ? "Try again" : "Load more members"}
+              {loadingMore ? tCommon("loading") : loadError ? tCommon("tryAgain") : t("loadMore")}
             </Button>
           </div>
         )}
@@ -116,7 +119,7 @@ export function TeamSection({
               onClick={() => setInviteOpen(true)}
             >
               <UserPlus aria-hidden className="size-4" />
-              Invite member
+              {t("inviteButton")}
             </Button>
           </div>
         )}

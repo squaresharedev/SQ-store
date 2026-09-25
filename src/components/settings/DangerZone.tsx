@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { DeleteAccountForm } from "@/components/settings/DeleteAccountForm";
 import { ExportDataButton } from "@/components/settings/ExportDataButton";
 import { SettingsCard } from "@/components/settings/SettingsCard";
@@ -12,14 +13,15 @@ export function DangerZone({
 }: {
   deletionRequestedAt: string | null;
 }) {
+  const t = useTranslations("Settings.danger.export");
   return (
     // The ids are universal search's landing points (/settings/danger#export,
     // #delete), so "download my data" goes straight to the right card.
     <div className="flex flex-col gap-6">
       <SettingsCard
         id="export"
-        title="Export my data"
-        description="Everything we hold about you: profile, products, storefront config, all bundled into one JSON file. It's your data, yours to keep."
+        title={t("cardTitle")}
+        description={t("cardDescription")}
       >
         <ExportDataButton />
       </SettingsCard>

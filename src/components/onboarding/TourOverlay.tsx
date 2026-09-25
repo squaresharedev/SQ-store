@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { usePathname, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { motion, useReducedMotion } from "motion/react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useSearch } from "@/components/search/SearchProvider";
@@ -177,6 +178,9 @@ function ActiveTour({
   next: TourNext | null;
 }) {
   const { end: endTour, goTo: goToStep, markArrived } = store;
+  const t = useTranslations();
+  const tOverlay = useTranslations("Onboarding.tourOverlay");
+  const tActions = useTranslations("Common.actions");
   const router = useRouter();
   const routerPathname = usePathname();
   const pathname = pathnameOverride ?? routerPathname;
@@ -548,7 +552,7 @@ function ActiveTour({
           ref={cardRef}
           role="dialog"
           aria-modal="true"
-          aria-label="Guided tour"
+          aria-label={tOverlay("dialogLabel")}
           tabIndex={-1}
           className={cn(
             overlaySurfaceClass,
@@ -560,10 +564,10 @@ function ActiveTour({
           transition={{ delay: 0.3, duration: reducedMotion ? 0 : 0.18, ease: EASE_STANDARD }}
         >
           <p role="status" className="font-inter text-sm text-muted-foreground">
-            Opening {step.pageLabel}…
+            {tOverlay("openingPage", { page: step.page })}
           </p>
           <Button variant="ghost" className={SMALL_GHOST_CLASS} onClick={endTour}>
-            Skip tour
+            {tOverlay("skipTour")}
           </Button>
         </motion.div>
       )}
@@ -604,20 +608,24 @@ function ActiveTour({
             transition={{ duration: 0.18, ease: EASE_STANDARD }}
           >
             <p id={counterId} className="font-inter text-xs text-muted-foreground">
-              {index + 1} of {steps.length}
+              {tOverlay("progress", { current: index + 1, total: steps.length })}
             </p>
             <h2 id={titleId} className="mt-1 text-base font-semibold text-foreground">
-              {step.title}
+              {t(step.title)}
             </h2>
             <p id={bodyId} className="mt-1 font-inter text-sm text-muted-foreground">
-              {body}
+              {t(body)}
             </p>
             {extra === "search-shortcut" && shortcut && (
               <p className="mt-2 font-inter text-sm text-muted-foreground">
-                Shortcut:{" "}
-                <kbd className="rounded-sm border border-border bg-muted px-1.5 py-0.5 font-inter text-xs font-medium text-foreground">
-                  {shortcut}
-                </kbd>
+                {tOverlay.rich("shortcut", {
+                  shortcut,
+                  kbd: (chunks) => (
+                    <kbd className="rounded-sm border border-border bg-muted px-1.5 py-0.5 font-inter text-xs font-medium text-foreground">
+                      {chunks}
+                    </kbd>
+                  ),
+                })}
               </p>
             )}
             {extra === "embed-snippet" && (
@@ -631,25 +639,25 @@ function ActiveTour({
             <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
               {!isLast && (
                 <Button variant="ghost" className={SMALL_GHOST_CLASS} onClick={endTour}>
-                  Skip tour
+                  {tOverlay("skipTour")}
                 </Button>
               )}
               <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
                 {!isFirst && (
                   <Button variant="ghost" onClick={backward}>
                     <ArrowLeft className={cn("size-4", iconNudgeLeftClass)} aria-hidden />
-                    Back
+                    {tActions("back")}
                   </Button>
                 )}
                 {!isLast ? (
                   <Button onClick={forward}>
-                    Next
+                    {tOverlay("next")}
                     <ArrowRight className={cn("size-4", iconNudgeRightClass)} aria-hidden />
                   </Button>
                 ) : next ? (
                   <>
                     <Button variant="ghost" onClick={endTour}>
-                      Done
+                      {tActions("done")}
                     </Button>
                     <Button onClick={() => finishWith(next)}>
                       {next.label}
@@ -657,7 +665,7 @@ function ActiveTour({
                     </Button>
                   </>
                 ) : (
-                  <Button onClick={endTour}>Done</Button>
+                  <Button onClick={endTour}>{tActions("done")}</Button>
                 )}
               </div>
             </div>

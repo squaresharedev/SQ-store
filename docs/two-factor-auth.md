@@ -158,9 +158,10 @@ Also:
   GoTrue from Cloudflare's egress addresses, so a very busy period could meet
   Supabase's per-IP limit on verifications before ours. Such failures show as
   "couldn't check that code just now", never as "wrong code".
-- **"Secure password change"** (Dashboard → Auth → Providers → Email): if it is
-  on, a 2FA user whose session is over 24 hours old is told to sign out and
-  back in before changing their password.
+- **"Secure password change"** (Dashboard → Auth → Providers → Email): no
+  longer matters to the app. Settings never changes a password in place (there
+  is no form taking the current one); a new password is only set through the
+  emailed link, whose recovery session is always fresh.
 - **"Secure email change"** (same page) should stay ON: it makes an email
   change need a click in BOTH inboxes, so a stolen session alone can never
   move the address.

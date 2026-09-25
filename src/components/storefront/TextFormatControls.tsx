@@ -8,6 +8,7 @@ import {
   Italic,
   Underline,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { TEXT_ALIGNS, type TextAlign } from "@/types/storefront";
 import { cn } from "@/lib/utils";
 import { labelClass } from "@/components/ui/control-styles";
@@ -34,28 +35,30 @@ const FORMAT_ICONS: Record<InlineFormat, typeof Bold> = {
   underline: Underline,
 };
 
-const FORMAT_LABELS: Record<InlineFormat, string> = {
-  bold: "Bold",
-  italic: "Italic",
-  underline: "Underline",
-};
 
 /** Bold / italic / underline. `active` is what each one currently is, so the
  *  caller stays the only place that knows where the value is stored. */
 export function FormatToggles({
   active,
   onToggle,
-  label = "Text formatting",
+  label,
 }: {
   active: Record<InlineFormat, boolean>;
   onToggle: (format: InlineFormat) => void;
   /** Group name, for the two places that host these side by side. */
   label?: string;
 }) {
+  const t = useTranslations("Storefront.textFormat");
+  const groupLabel = label ?? t("formatAriaLabel");
+  const formatLabels: Record<InlineFormat, string> = {
+    bold: t("bold"),
+    italic: t("italic"),
+    underline: t("underline"),
+  };
   return (
     <div className="space-y-1.5">
-      <span className={labelClass}>Format</span>
-      <div role="group" aria-label={label} className="flex gap-1">
+      <span className={labelClass}>{t("format")}</span>
+      <div role="group" aria-label={groupLabel} className="flex gap-1">
         {(Object.keys(FORMAT_ICONS) as InlineFormat[]).map((format) => {
           const Icon = FORMAT_ICONS[format];
           return (
@@ -63,7 +66,7 @@ export function FormatToggles({
               key={format}
               type="button"
               onClick={() => onToggle(format)}
-              aria-label={FORMAT_LABELS[format]}
+              aria-label={formatLabels[format]}
               aria-pressed={active[format]}
               className={cn(
                 TOGGLE_CLASS,
@@ -89,16 +92,23 @@ const ALIGN_ICONS: Record<TextAlign, typeof AlignLeft> = {
 export function AlignmentToggles({
   align,
   onChange,
-  label = "Text alignment",
+  label,
 }: {
   align: TextAlign;
   onChange: (align: TextAlign) => void;
   label?: string;
 }) {
+  const t = useTranslations("Storefront.textFormat");
+  const groupLabel = label ?? t("alignAriaLabel");
+  const alignLabels: Record<TextAlign, string> = {
+    left: t("alignLeft"),
+    center: t("alignCenter"),
+    right: t("alignRight"),
+  };
   return (
     <div className="space-y-1.5">
-      <span className={labelClass}>Alignment</span>
-      <div role="group" aria-label={label} className="flex gap-1">
+      <span className={labelClass}>{t("alignment")}</span>
+      <div role="group" aria-label={groupLabel} className="flex gap-1">
         {TEXT_ALIGNS.map((value) => {
           const Icon = ALIGN_ICONS[value];
           const active = align === value;
@@ -107,7 +117,7 @@ export function AlignmentToggles({
               key={value}
               type="button"
               onClick={() => onChange(value)}
-              aria-label={`Align ${value}`}
+              aria-label={alignLabels[value]}
               aria-pressed={active}
               className={cn(TOGGLE_CLASS, active && "bg-accent text-foreground")}
             >

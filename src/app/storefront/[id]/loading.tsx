@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/ui/skeleton";
 /**
  * Route-level loading state for the storefront EDITOR. Full-screen by design:
@@ -8,9 +9,10 @@ import { Skeleton } from "@/components/ui/skeleton";
  * resolved the storefront.
  */
 export default function StorefrontEditorLoading() {
+  const t = useTranslations("Storefront.routes");
   return (
     <div className="flex min-h-screen flex-col bg-muted">
-      <span className="sr-only">Loading the storefront editor…</span>
+      <span className="sr-only">{t("editor.loading")}</span>
 
       {/* Toolbar strip */}
       <div

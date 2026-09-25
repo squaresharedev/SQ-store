@@ -3,8 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
-import { getAssurance, getUser, revokeOtherSessions } from "@/lib/auth/session";
-import { STEP_UP_FIELDS, requireStepUp } from "@/lib/auth/mfa";
+import { getAssurance, getUser } from "@/lib/auth/session";
+import { STEP_UP_FIELDS, requireStepUpState } from "@/lib/auth/mfa";
 import { checkPassword } from "@/lib/auth/reauth";
 import { LEGAL_VERSION } from "@/lib/settings/constants";
 import { RATE_LIMITS, clientKey, rateLimit, rateLimitKey } from "@/lib/rate-limit";
@@ -16,7 +16,6 @@ import {
   emailChangeSchema,
   legalAcceptSchema,
   notificationsSchema,
-  passwordChangeSchema,
   taxSchema,
 } from "@/lib/validation/settings";
 import { hasMailExchanger } from "@/lib/validation/email-domain";
@@ -24,34 +23,32 @@ import {
   sellerEmailVerificationRequired,
   startSellerEmailVerification,
 } from "@/lib/settings/seller-email-verification";
-import { passwordProblem } from "@/lib/auth/password";
 import { usernameSchema } from "@/lib/validation/auth";
+import { firstIssue } from "@/lib/validation/messages";
+import {
+  actionError,
+  failed,
+  invalidInput,
+  succeeded,
+  type ActionState,
+} from "@/lib/errors";
+import { msg } from "@/i18n/types";
 import type { TablesUpdate } from "@/types";
 import type { z } from "zod";
 
-export type SettingsActionState = {
-  error?: string;
-  success?: string;
-  /**
-   * The action needs a fresh two-factor code before it will run (see
-   * requireStepUp). The form shows its StepUpField and the person resubmits.
-   */
-  stepUp?: true;
-};
-
-const SIGNED_OUT: SettingsActionState = {
-  error: "Your session expired. Sign in again.",
-};
-const SAVE_FAILED: SettingsActionState = {
-  error: "Could not save. Give it another try.",
-};
+const SIGNED_OUT: ActionState = failed(
+  actionError("session_expired", msg("Errors.form.sessionExpired")),
+);
+const SAVE_FAILED: ActionState = failed(
+  actionError("server_error", msg("Errors.form.saveFailed")),
+);
 
 /** Shown when a signed-in write budget is spent. Deliberately vague about the
  *  exact limit: the number is an implementation detail, and naming it only
  *  helps someone pace around it. */
-const TOO_MANY: SettingsActionState = {
-  error: "That's a lot of changes in a short time. Try again a bit later.",
-};
+const TOO_MANY: ActionState = failed(
+  actionError("rate_limited", msg("Errors.form.tooManyChanges")),
+);
 
 /**
  * Audit + notify, guaranteed not to throw AT THE CALL SITE.
@@ -100,18 +97,18 @@ function normalizeTextareaValue(raw: string): string {
 function unknownFieldError(
   formData: FormData,
   allowed: readonly string[],
-): SettingsActionState | null {
+): ActionState | null {
   for (const key of formData.keys()) {
     if (key.startsWith("$ACTION")) continue;
     if (!allowed.includes(key)) {
-      return { error: `Unexpected field "${key}" was rejected.` };
+      return failed(invalidInput(msg("Errors.form.unexpectedField", { field: key })));
     }
   }
   return null;
 }
 
-function firstIssue(error: z.ZodError): SettingsActionState {
-  return { error: error.issues[0]?.message ?? "Check the form and try again." };
+function invalid(error: z.ZodError): ActionState {
+  return failed(invalidInput(firstIssue(error)));
 }
 
 /** Owner-scoped profile update. Only whitelisted columns ever reach this. */
@@ -159,9 +156,9 @@ async function siteOrigin(): Promise<string> {
  * by handle, so a released one confers nothing on whoever takes it next.
  */
 export async function updateUsername(
-  _prev: SettingsActionState,
+  _prev: ActionState,
   formData: FormData,
-): Promise<SettingsActionState> {
+): Promise<ActionState> {
   const user = await getUser();
   if (!user) return SIGNED_OUT;
   const rejected = unknownFieldError(formData, ["username"]);
@@ -170,7 +167,7 @@ export async function updateUsername(
   const parsed = usernameSchema.safeParse({
     username: String(formData.get("username") ?? ""),
   });
-  if (!parsed.success) return firstIssue(parsed.error);
+  if (!parsed.success) return invalid(parsed.error);
 
   if (!(await rateLimit("settings_write", RATE_LIMITS.settingsWrite))) {
     return TOO_MANY;
@@ -187,11 +184,11 @@ export async function updateUsername(
 
   if (error) {
     return error.code === "23505"
-      ? { error: "That username is taken. Try another." }
+      ? failed(invalidInput(msg("Errors.settings.usernameTaken")))
       : SAVE_FAILED;
   }
   revalidatePath("/settings/account");
-  return { success: "Username saved." };
+  return succeeded(msg("Settings.account.success.usernameSaved"));
 }
 
 /**
@@ -207,9 +204,9 @@ export async function updateUsername(
  * moved.
  */
 export async function updateBio(
-  _prev: SettingsActionState,
+  _prev: ActionState,
   formData: FormData,
-): Promise<SettingsActionState> {
+): Promise<ActionState> {
   const user = await getUser();
   if (!user) return SIGNED_OUT;
   const rejected = unknownFieldError(formData, ["seller_bio"]);
@@ -218,7 +215,7 @@ export async function updateBio(
   const parsed = bioSchema.safeParse({
     seller_bio: String(formData.get("seller_bio") ?? ""),
   });
-  if (!parsed.success) return firstIssue(parsed.error);
+  if (!parsed.success) return invalid(parsed.error);
 
   if (!(await rateLimit("settings_write", RATE_LIMITS.settingsWrite))) {
     return TOO_MANY;
@@ -228,7 +225,7 @@ export async function updateBio(
     return SAVE_FAILED;
   }
   revalidatePath("/settings/account");
-  return { success: "Bio saved." };
+  return succeeded(msg("Settings.account.success.bioSaved"));
 }
 
 /**
@@ -240,9 +237,9 @@ export async function updateBio(
  * alone must not be enough to move it. Same bar as changing the password.
  */
 export async function requestEmailChange(
-  _prev: SettingsActionState,
+  _prev: ActionState,
   formData: FormData,
-): Promise<SettingsActionState> {
+): Promise<ActionState> {
   const user = await getUser();
   if (!user) return SIGNED_OUT;
   const rejected = unknownFieldError(formData, [
@@ -256,9 +253,9 @@ export async function requestEmailChange(
     new_email: String(formData.get("new_email") ?? "").trim(),
     current_password: String(formData.get("current_password") ?? ""),
   });
-  if (!parsed.success) return firstIssue(parsed.error);
+  if (!parsed.success) return invalid(parsed.error);
   if (parsed.data.new_email === user.email) {
-    return { error: "That's already your email." };
+    return failed(invalidInput(msg("Errors.settings.emailUnchanged")));
   }
 
   // Checked AFTER validation so a malformed request can't burn the budget,
@@ -266,10 +263,7 @@ export async function requestEmailChange(
   // address the caller chose, so it is the one that can be aimed at someone
   // else's inbox. It also bounds the re-auth attempts below.
   if (!(await rateLimit("email_change", RATE_LIMITS.emailChange))) {
-    return {
-      error:
-        "Too many email-change requests. Wait a while before trying again.",
-    };
+    return failed(actionError("rate_limited", msg("Errors.settings.emailChangeRateLimited")));
   }
 
   const hasPassword = await accountHasPassword(user.id);
@@ -280,7 +274,7 @@ export async function requestEmailChange(
   // code is the ONLY proof, so it must come with this very request: otherwise
   // a session cookie lifted within ten minutes of its owner's sign-in could
   // move the address with no proof at all, and then reset its way in.
-  const stepUp = await requireStepUp(formData, hasPassword ? {} : { maxAgeSeconds: 0 });
+  const stepUp = await requireStepUpState(formData, hasPassword ? {} : { maxAgeSeconds: 0 });
   if (stepUp) return stepUp;
 
   const origin = await siteOrigin();
@@ -294,22 +288,22 @@ export async function requestEmailChange(
   // password to it.
   if (hasPassword) {
     if (!parsed.data.current_password) {
-      return { error: "Enter your current password to change your email." };
+      return failed(invalidInput(msg("Errors.settings.emailChangeNeedsPassword")));
     }
     if (twoFactor) {
       // Checked on a throwaway client: signing in on THIS one would swap the
       // two-factor session for a password-only one mid-task.
       const check = await checkPassword(user.email ?? "", parsed.data.current_password);
       if (check === "unavailable") {
-        return { error: "Could not check your password right now. Try again." };
+        return failed(actionError("server_error", msg("Errors.settings.passwordCheckUnavailable")));
       }
-      if (check === "incorrect") return { error: "Current password is incorrect." };
+      if (check === "incorrect") return failed(invalidInput(msg("Errors.settings.wrongPassword")));
     } else {
       const { error: reauthError } = await supabase.auth.signInWithPassword({
         email: user.email!,
         password: parsed.data.current_password,
       });
-      if (reauthError) return { error: "Current password is incorrect." };
+      if (reauthError) return failed(invalidInput(msg("Errors.settings.wrongPassword")));
     }
   }
 
@@ -317,133 +311,40 @@ export async function requestEmailChange(
     { email: parsed.data.new_email },
     { emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent("/settings/account")}` },
   );
-  if (error) return { error: "Could not start the email change. Try again." };
+  if (error) {
+    return failed(actionError("server_error", msg("Errors.settings.emailChangeFailed")));
+  }
 
   await safeAlert(user.id, "email.change_requested", {
-    title: "Email change requested",
-    body: "Someone asked to move this account to a new email address. It only takes effect once the link in that inbox is confirmed. If this wasn't you, change your password now.",
+    title: { key: "Notifications.messages.security.emailChangeRequested.title" },
+    body: { key: "Notifications.messages.security.emailChangeRequested.body" },
     // To the CURRENT address: the one an intruder is trying to take away.
     emailTo: user.email,
   });
 
-  return {
-    success: "Check your inbox. The change applies once you confirm the link.",
-  };
+  return succeeded(msg("Settings.account.success.emailChangeStarted"));
 }
 
-/** Password changes go through Supabase auth, gated on the current password. */
-export async function changePassword(
-  _prev: SettingsActionState,
-  formData: FormData,
-): Promise<SettingsActionState> {
-  const user = await getUser();
-  if (!user || !user.email) return SIGNED_OUT;
-  const rejected = unknownFieldError(formData, [
-    "current_password",
-    "new_password",
-    "confirm_password",
-    ...STEP_UP_FIELDS,
-  ]);
-  if (rejected) return rejected;
-
-  const parsed = passwordChangeSchema.safeParse({
-    current_password: String(formData.get("current_password") ?? ""),
-    new_password: String(formData.get("new_password") ?? ""),
-    confirm_password: String(formData.get("confirm_password") ?? ""),
-  });
-  if (!parsed.success) return firstIssue(parsed.error);
-
-  // Same strength bar as sign-up and recovery reset. All three set a password,
-  // so all three answer to one rule; a weaker one here would be the way around
-  // the other two.
-  const weak = passwordProblem(parsed.data.new_password, {
-    email: user.email,
-    username:
-      typeof user.user_metadata?.username === "string"
-        ? user.user_metadata.username
-        : undefined,
-  });
-  if (weak) return { error: weak };
-
-  // The re-auth below verifies a caller-supplied password, which makes this
-  // endpoint a password ORACLE: without a budget, a hijacked session could sit
-  // here guessing the current password unthrottled. Bounded before the guess
-  // is checked, and shares the budget with the reset mail for the same reason.
-  if (!(await rateLimit("password_reauth", RATE_LIMITS.passwordReauth))) {
-    return {
-      error: "Too many attempts. Wait a few minutes before trying again.",
-    };
-  }
-
-  const stepUp = await requireStepUp(formData);
-  if (stepUp) return stepUp;
-
-  const supabase = await createClient();
-  // Re-authenticate before allowing the change: a stolen open session must
-  // not be enough to take over the account.
-  //
-  // Two ways, because they do different things to THIS session. Without 2FA,
-  // signing in again on the request client is the proof and also hands the
-  // update below a brand-new session. With 2FA, that new session would be
-  // password-only (aal1), which the app treats as signed out and so would
-  // bounce the person to the challenge mid-change; so the password
-  // is checked on a throwaway client and the update runs on the current,
-  // two-factor session.
-  if ((await getAssurance())?.enrolled) {
-    const check = await checkPassword(user.email, parsed.data.current_password);
-    if (check === "unavailable") {
-      return { error: "Could not check your password right now. Try again." };
-    }
-    if (check === "incorrect") return { error: "Current password is incorrect." };
-  } else {
-    const { error: reauthError } = await supabase.auth.signInWithPassword({
-      email: user.email,
-      password: parsed.data.current_password,
-    });
-    if (reauthError) return { error: "Current password is incorrect." };
-  }
-
-  const { error } = await supabase.auth.updateUser({
-    password: parsed.data.new_password,
-  });
-  if (error) {
-    if (error.code === "same_password") return { error: "That's already your password." };
-    // GoTrue's "secure password change" setting wants a recent sign-in, and a
-    // long-lived two-factor session is not one. Say what fixes it.
-    if (error.code === "reauthentication_needed") {
-      return {
-        error: "For your security, sign out and back in, then change your password.",
-      };
-    }
-    return { error: "Could not update the password. Try again." };
-  }
-
-  // Changing a password must not leave the OLD credential's sessions alive.
-  // If the reason for the change is "someone else got in", a still-valid
-  // session elsewhere defeats the entire point. `others` keeps this device
-  // signed in, so the user is not logged out of the tab they are using.
-  await revokeOtherSessions(supabase);
-
-  await safeAlert(user.id, "password.changed", {
-    title: "Your password was changed",
-    body: "The password on this account was just changed and other devices were signed out. If this wasn't you, reset your password immediately.",
-    emailTo: user.email,
-  });
-
-  return { success: "Password updated. Other devices have been signed out." };
-}
+const RESET_RATE_LIMITED: ActionState = failed(
+  actionError("rate_limited", msg("Errors.settings.resetRateLimited")),
+);
 
 /**
- * "Forgot your current password?" escape hatch for a signed-in user who can't
- * complete the change-password form (which requires the current password).
- * Emails a recovery link to their own account address, never a
- * client-supplied one, which lands on /reset-password to set a new password
- * without the old.
+ * THE way a signed-in person changes their password from Settings: a link to
+ * their own account address (never a client-supplied one), which lands on
+ * /reset-password to set a new password (lib/auth/actions.ts resetPassword
+ * signs out the other devices and sends the security alert).
+ *
+ * There is deliberately no "change" action that takes the current password.
+ * Settings never asks for, holds or shows the existing password on the way to a
+ * new one: a field for it is one a browser fills, and one a toggle can reveal.
+ * The emailed link proves the inbox instead, and with two-factor on, the link
+ * asks for a code as well.
  */
 export async function sendPasswordReset(
-  _prev: SettingsActionState,
+  _prev: ActionState,
   formData: FormData,
-): Promise<SettingsActionState> {
+): Promise<ActionState> {
   const user = await getUser();
   if (!user?.email) return SIGNED_OUT;
   const rejected = unknownFieldError(formData, []);
@@ -456,16 +357,14 @@ export async function sendPasswordReset(
   // not scale with how many accounts they have reached. Same pairing the
   // signed-out mail path uses (allowAuthEmail).
   if (!(await rateLimit("password_reset", RATE_LIMITS.passwordReset))) {
-    return { error: "Too many reset emails. Wait a while before trying again." };
+    return RESET_RATE_LIMITED;
   }
   const perClient = await rateLimitKey(
     await clientKey(await headers()),
     "password_reset_client",
     RATE_LIMITS.passwordResetPerClient,
   );
-  if (!perClient) {
-    return { error: "Too many reset emails. Wait a while before trying again." };
-  }
+  if (!perClient) return RESET_RATE_LIMITED;
 
   const origin = await siteOrigin();
   const supabase = await createClient();
@@ -474,26 +373,37 @@ export async function sendPasswordReset(
   });
   if (error) {
     return error.code === "over_email_send_rate_limit"
-      ? { error: "Too many requests. Wait a minute and try again." }
-      : { error: "Could not send the reset email. Try again." };
+      ? failed(actionError("rate_limited", msg("Errors.settings.resetSendRateLimited")))
+      : failed(actionError("server_error", msg("Errors.settings.resetFailed")));
   }
 
   // The one alert that reliably reaches its target: requesting a link does not
   // sign anyone out, so the owner is still able to read this and act.
   await safeAlert(user.id, "password.reset_requested", {
-    title: "A password reset link was requested",
-    body: "Someone asked for a link to set a new password on this account. If it wasn't you, ignore the email and change your password.",
+    title: { key: "Notifications.messages.security.resetRequested.title" },
+    body: { key: "Notifications.messages.security.resetRequested.body" },
   });
 
-  return { success: "Reset link sent. Check your inbox." };
+  return succeeded(msg("Settings.account.success.resetSent"));
 }
 
 // --- Legal -----------------------------------------------------------------
 
+/**
+ * Record that the signed-in person agrees to the Terms of Service: the moment,
+ * and WHICH Terms (LEGAL_VERSION). Called from the welcome flow's terms step
+ * and from Settings › Legal, both of which only offer it once the summary has
+ * been read to its end.
+ *
+ * The form posts the version it showed, and anything but the current one is
+ * refused (legalAcceptSchema), so an agreement can never be recorded against
+ * Terms the person was not looking at. Their own row only (id from the
+ * session, RLS underneath).
+ */
 export async function acceptLegal(
-  _prev: SettingsActionState,
+  _prev: ActionState,
   formData: FormData,
-): Promise<SettingsActionState> {
+): Promise<ActionState> {
   const user = await getUser();
   if (!user) return SIGNED_OUT;
   const rejected = unknownFieldError(formData, ["version"]);
@@ -502,7 +412,7 @@ export async function acceptLegal(
   const parsed = legalAcceptSchema.safeParse({
     version: String(formData.get("version") ?? ""),
   });
-  if (!parsed.success) return firstIssue(parsed.error);
+  if (!parsed.success) return invalid(parsed.error);
 
   const ok = await updateOwnProfile(user.id, {
     legal_accepted_at: new Date().toISOString(),
@@ -510,7 +420,9 @@ export async function acceptLegal(
   });
   if (!ok) return SAVE_FAILED;
   revalidatePath("/settings/legal");
-  return { success: "Accepted. Thanks for reading the fine print." };
+  // Overview's attention row asks for this until it is on file.
+  revalidatePath("/dashboard");
+  return succeeded(msg("Settings.legal.success.termsAgreed"));
 }
 
 // --- Tax & seller details ---------------------------------------------------
@@ -536,9 +448,9 @@ const TAX_FIELDS = [
 type TaxField = (typeof TAX_FIELDS)[number];
 
 export async function saveTaxInfo(
-  _prev: SettingsActionState,
+  _prev: ActionState,
   formData: FormData,
-): Promise<SettingsActionState> {
+): Promise<ActionState> {
   const user = await getUser();
   if (!user) return SIGNED_OUT;
   const rejected = unknownFieldError(formData, [...TAX_FIELDS, ...STEP_UP_FIELDS]);
@@ -551,7 +463,7 @@ export async function saveTaxInfo(
   // key sent EMPTY still clears it, which is how the settings form removes a
   // value on purpose.
   const present = TAX_FIELDS.filter((field) => formData.has(field));
-  if (present.length === 0) return { error: "Check the form and try again." };
+  if (present.length === 0) return failed(invalidInput(msg("Validation.checkForm")));
 
   const input: Partial<Record<TaxField, string>> = {};
   for (const field of present) {
@@ -559,12 +471,12 @@ export async function saveTaxInfo(
     input[field] = field === "seller_address" ? normalizeTextareaValue(raw) : raw;
   }
   const parsed = taxSchema.partial().safeParse(input);
-  if (!parsed.success) return firstIssue(parsed.error);
+  if (!parsed.success) return invalid(parsed.error);
 
   // The legal identity buyers see and the address their questions go to: an
   // intruder rewriting these redirects a seller's customers, so with 2FA on it
   // takes a recent code.
-  const stepUp = await requireStepUp(formData);
+  const stepUp = await requireStepUpState(formData);
   if (stepUp) return stepUp;
 
   if (!(await rateLimit("settings_write", RATE_LIMITS.settingsWrite))) {
@@ -582,10 +494,7 @@ export async function saveTaxInfo(
   // of the gate does not.
   if (parsed.data.seller_email) {
     if ((await hasMailExchanger(parsed.data.seller_email)) === "no") {
-      return {
-        error:
-          "That contact email's domain doesn't accept mail. Check the spelling, or use an address buyers can actually reach.",
-      };
+      return failed(invalidInput(msg("Errors.settings.contactEmailTakesNoMail")));
     }
   }
 
@@ -629,16 +538,19 @@ export async function saveTaxInfo(
     // save would be a lie, and would leave the seller re-typing an address
     // that is already stored. The resend button is the recovery.
     if (!started.ok) {
-      return {
-        error: `Saved, but the confirmation email didn't go out. ${started.reason} Try "Resend" below.`,
-      };
+      return failed(
+        actionError(
+          "server_error",
+          msg("Errors.settings.savedButConfirmationFailed", { reason: started.reason }),
+        ),
+      );
     }
-    return {
-      success: `Saved. Check ${parsed.data.seller_email} for a link to confirm the address.`,
-    };
+    return succeeded(
+      msg("Settings.tax.success.savedCheckEmail", { email: parsed.data.seller_email }),
+    );
   }
 
-  return { success: "Business & seller details saved." };
+  return succeeded(msg("Settings.tax.success.sellerDetailsSaved"));
 }
 
 /**
@@ -653,23 +565,21 @@ export async function saveTaxInfo(
  * this cannot be turned into a way to send mail to an arbitrary recipient.
  */
 export async function resendSellerEmailVerification(
-  _prev: SettingsActionState,
+  _prev: ActionState,
   formData: FormData,
-): Promise<SettingsActionState> {
+): Promise<ActionState> {
   const user = await getUser();
   if (!user) return SIGNED_OUT;
   const rejected = unknownFieldError(formData, []);
   if (rejected) return rejected;
 
   if (!sellerEmailVerificationRequired()) {
-    return { error: "Email confirmation is not available right now." };
+    return failed(actionError("server_error", msg("Errors.settings.confirmationUnavailable")));
   }
   // Its own budget, tighter than settingsWrite: this is the one control in
   // Settings that makes us send mail on demand.
   if (!(await rateLimit("seller_email_verify_send", RATE_LIMITS.sellerEmailVerifySend))) {
-    return {
-      error: "That's a lot of confirmation emails. Wait a while before asking for another.",
-    };
+    return failed(actionError("rate_limited", msg("Errors.settings.confirmationRateLimited")));
   }
 
   const supabase = await createClient();
@@ -679,10 +589,10 @@ export async function resendSellerEmailVerification(
     .eq("id", user.id)
     .maybeSingle();
   if (!profile?.seller_email) {
-    return { error: "Add a contact email first, then we can confirm it." };
+    return failed(invalidInput(msg("Errors.settings.noContactEmail")));
   }
   if (profile.seller_email_verified_at) {
-    return { success: "That address is already confirmed." };
+    return succeeded(msg("Settings.tax.success.alreadyConfirmed"));
   }
 
   const started = await startSellerEmailVerification(
@@ -690,16 +600,25 @@ export async function resendSellerEmailVerification(
     profile.seller_email,
     await siteOrigin(),
   );
-  if (!started.ok) return { error: started.reason };
-  return { success: `Sent. Check ${profile.seller_email} for the link.` };
+  if (!started.ok) {
+    return failed(
+      actionError(
+        "server_error",
+        msg("Errors.settings.confirmationFailed", { reason: started.reason }),
+      ),
+    );
+  }
+  return succeeded(
+    msg("Settings.tax.success.confirmationSent", { email: profile.seller_email }),
+  );
 }
 
 // --- Notifications ---------------------------------------------------------
 
 export async function saveNotifications(
-  _prev: SettingsActionState,
+  _prev: ActionState,
   formData: FormData,
-): Promise<SettingsActionState> {
+): Promise<ActionState> {
   const user = await getUser();
   if (!user) return SIGNED_OUT;
   const rejected = unknownFieldError(formData, [
@@ -714,7 +633,7 @@ export async function saveNotifications(
     notify_product_updates: formData.get("notify_product_updates") === "on",
     notify_marketing: formData.get("notify_marketing") === "on",
   });
-  if (!parsed.success) return firstIssue(parsed.error);
+  if (!parsed.success) return invalid(parsed.error);
 
   if (!(await rateLimit("settings_write", RATE_LIMITS.settingsWrite))) {
     return TOO_MANY;
@@ -722,7 +641,7 @@ export async function saveNotifications(
 
   if (!(await updateOwnProfile(user.id, parsed.data))) return SAVE_FAILED;
   revalidatePath("/settings/notifications");
-  return { success: "Preferences saved." };
+  return succeeded(msg("Settings.notifications.success.notificationsSaved"));
 }
 
 // --- Danger zone -----------------------------------------------------------
@@ -735,9 +654,9 @@ export async function saveNotifications(
  * Owner-scoped: the id comes from the session, never from the client.
  */
 export async function requestAccountDeletion(
-  _prev: SettingsActionState,
+  _prev: ActionState,
   formData: FormData,
-): Promise<SettingsActionState> {
+): Promise<ActionState> {
   const user = await getUser();
   if (!user) return SIGNED_OUT;
   const rejected = unknownFieldError(formData, ["confirm", ...STEP_UP_FIELDS]);
@@ -746,9 +665,9 @@ export async function requestAccountDeletion(
   const parsed = deleteConfirmSchema.safeParse({
     confirm: String(formData.get("confirm") ?? ""),
   });
-  if (!parsed.success) return firstIssue(parsed.error);
+  if (!parsed.success) return invalid(parsed.error);
 
-  const stepUp = await requireStepUp(formData);
+  const stepUp = await requireStepUpState(formData);
   if (stepUp) return stepUp;
 
   if (!(await rateLimit("settings_write", RATE_LIMITS.settingsWrite))) {
@@ -765,13 +684,13 @@ export async function requestAccountDeletion(
     `[settings] account deletion REQUESTED user=${user.id} at=${requestedAt}`,
   );
   revalidatePath("/settings/danger");
-  return { success: "Deletion requested." };
+  return succeeded(msg("Settings.danger.success.deletionRequested"));
 }
 
 export async function cancelAccountDeletion(
-  _prev: SettingsActionState,
+  _prev: ActionState,
   formData: FormData,
-): Promise<SettingsActionState> {
+): Promise<ActionState> {
   const user = await getUser();
   if (!user) return SIGNED_OUT;
   const rejected = unknownFieldError(formData, []);
@@ -782,5 +701,5 @@ export async function cancelAccountDeletion(
   }
   console.warn(`[settings] account deletion CANCELLED user=${user.id}`);
   revalidatePath("/settings/danger");
-  return { success: "Deletion request cancelled. Good to have you back." };
+  return succeeded(msg("Settings.danger.success.deletionCancelled"));
 }

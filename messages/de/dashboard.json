@@ -1,0 +1,116 @@
+{
+  "metadata": {
+    "app": {
+      "title": "Square Share Dashboard",
+      "description": "Verwalte deine Produkte, gestalte dein Schaufenster, verbinde Stripe und sieh dir deine Analysen auf Square Share an."
+    },
+    "overview": {
+      "title": "Übersicht"
+    },
+    "payments": {
+      "title": "Zahlungen"
+    }
+  },
+  "loading": {
+    "overview": {
+      "srLoading": "Übersicht wird geladen…"
+    },
+    "payments": {
+      "title": "Zahlungen",
+      "subtitle": "Dein Saldo, Auszahlungen und Stripe-Verbindung.",
+      "srLoading": "Zahlungen werden geladen"
+    }
+  },
+  "shell": {
+    "accountFallback": "Konto",
+    "anotherStore": "ein anderer Shop"
+  },
+  "overview": {
+    "title": "Übersicht",
+    "addProduct": "Produkt hinzufügen",
+    "revenue30d": "Umsatz · 30 Tage",
+    "sales30d": "Verkäufe · 30 Tage",
+    "avgOrder30d": "Ø Bestellwert · 30 Tage",
+    "revenueHeroLabel": "Umsatz, letzte 30 Tage",
+    "noSales": "Noch keine Verkäufe"
+  },
+  "metric": {
+    "zeroDefault": "Noch keine Verkäufe",
+    "pendingDefault": "Verfügbar, sobald Analysen verbunden sind."
+  },
+  "sidebar": {
+    "openMenu": "Menü öffnen",
+    "closeMenu": "Menü schließen",
+    "navLabel": "Dashboard",
+    "title": "Dashboard"
+  },
+  "recentOrders": {
+    "title": "Letzte Bestellungen",
+    "empty": "Noch keine Bestellungen. Verkäufe über deinen eigenen Kauflink oder per E-Mail werden hier nicht angezeigt."
+  },
+  "attention": {
+    "title": "Handlungsbedarf",
+    "allClear": "Alles in Ordnung. Gerade ist nichts zu tun.",
+    "twoFactor": {
+      "label": "Zwei-Faktor-Authentifizierung einschalten",
+      "description": "Bei der Anmeldung ein Code von deinem Handy, damit ein gestohlenes Passwort allein nicht reicht, um in deinen Shop zu kommen.",
+      "action": "Einschalten"
+    },
+    "stripe": {
+      "label": "Stripe verbinden, um Zahlungen zu erhalten",
+      "description": "Auszahlungen bleiben gesperrt, bis dein Konto verbunden ist.",
+      "action": "Zahlungen öffnen"
+    },
+    "legal": {
+      "label": "Verkäuferbedingungen akzeptieren",
+      "labelUpdated": "Aktualisierte Verkäuferbedingungen akzeptieren",
+      "description": "Lies die Entwürfe zu Verkäufervereinbarung, Nutzungsbedingungen und Datenschutz und akzeptiere sie.",
+      "descriptionUpdated": "Die Bedingungen haben sich seit deiner Zustimmung geändert. Lies die aktuelle Version und akzeptiere sie.",
+      "descriptionTerms": "Lies die Nutzungsbedingungen und stimme ihnen zu.",
+      "descriptionTermsUpdated": "Die Nutzungsbedingungen haben sich geändert, seit du ihnen zugestimmt hast. Lies die aktuelle Version und stimme ihr zu.",
+      "action": "Bedingungen prüfen"
+    },
+    "noBuyPath": {
+      "label": "{count, plural, one {{count} Produkt ohne Kaufmöglichkeit} other {{count} Produkte ohne Kaufmöglichkeit}}",
+      "description": "Füge einen Kauflink hinzu oder hinterlege eine Kontakt-E-Mail unter Einstellungen, damit Käufer dich erreichen können.",
+      "action": "Produkte prüfen"
+    },
+    "noShipping": {
+      "label": "Versandbedingungen hinzufügen",
+      "description": "Physische Produkte benötigen Versand- und Rücksendebedingungen, bevor Käufer alle Details sehen können.",
+      "action": "Bedingungen hinzufügen"
+    },
+    "storefront": {
+      "labelEmpty": "Dein Schaufenster ist leer",
+      "labelNone": "Erstelle dein Schaufenster",
+      "descriptionEmpty": "Füge dem Raster ein Produkt hinzu, um eine Seite zu erhalten, die du teilen kannst.",
+      "descriptionNone": "Wähle einen Look aus und füge dann deine Produkte zum Raster hinzu.",
+      "actionOpen": "Schaufenster-Editor öffnen",
+      "actionCreate": "Schaufenster erstellen"
+    },
+    "images": {
+      "label": "{count, plural, one {{count} Produkt ohne Bild} other {{count} Produkte ohne Bild}}",
+      "descriptionSingle": "Produkt „{title}“ hat noch kein Titelbild.",
+      "descriptionMultiple": "Produkte ohne Bilder sehen auf deinem Schaufenster leer aus.",
+      "actionSingle": "Bild hinzufügen",
+      "actionMultiple": "Produkte bearbeiten"
+    },
+    "flaggedOrders": {
+      "label": "{count, plural, one {{count} Bestellung zu prüfen} other {{count} Bestellungen zu prüfen}}",
+      "descriptionBoth": "{disputed, plural, one {{disputed} Zahlungsanfechtung} other {{disputed} Zahlungsanfechtungen}}, {refunded, plural, one {{refunded} Rückerstattung} other {{refunded} Rückerstattungen}}.",
+      "descriptionDisputed": "{count, plural, one {{count} Zahlungsanfechtung} other {{count} Zahlungsanfechtungen}}.",
+      "descriptionRefunded": "{count, plural, one {{count} Rückerstattung} other {{count} Rückerstattungen}}.",
+      "action": "Bestellungen prüfen"
+    },
+    "noindexPages": {
+      "label": "Produktseiten für Suchmaschinen gesperrt",
+      "description": "{count, plural, =1 {Ein Schaufenster hat die Indexierung für seine Produktseiten deaktiviert.} other {{count} Schaufenster haben die Indexierung für ihre Produktseiten deaktiviert.}}",
+      "action": "Schaufenster-Editor öffnen"
+    },
+    "deadBlocks": {
+      "label": "{count, plural, one {{count} Schaufenster-Block mit Verweis auf gelöschte Produkte} other {{count} Schaufenster-Blöcke mit Verweis auf gelöschte Produkte}}",
+      "description": "Diese Blöcke erscheinen Besuchern leer. Entferne oder ersetze sie.",
+      "action": "Schaufenster öffnen"
+    }
+  }
+}

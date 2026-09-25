@@ -1,0 +1,526 @@
+{
+  "metadata": {
+    "list": {
+      "title": "Produkty"
+    },
+    "new": {
+      "title": "Nový produkt"
+    },
+    "edit": {
+      "title": "Upraviť produkt"
+    },
+    "import": {
+      "title": "Import produktov"
+    }
+  },
+  "page": {
+    "heading": "Produkty",
+    "loading": "načítavajú sa produkty",
+    "back": "Produkty",
+    "backToStorefront": "Výklad",
+    "new": {
+      "title": "Nový produkt",
+      "subtitle": "Pridajte produkt a potom ho umiestnite do výkladu, aby dostal svoju stránku."
+    },
+    "edit": {
+      "title": "Upraviť produkt",
+      "subtitle": "Aktualizujte detaily, obrázok alebo súbor tohto produktu."
+    },
+    "import": {
+      "heading": "Import produktov",
+      "description": "Preneste katalóg zo Shopify alebo z ľubovoľného nástroja exportujúceho CSV. Pred uložením uvidíte presne, čo sa naimportuje."
+    },
+    "formLoading": "Načítava sa formulár produktu"
+  },
+  "emptyState": {
+    "title": "Zatiaľ žiadne produkty",
+    "descriptionWriter": "Pridajte prvý produkt. Môže zostať ako koncept, kým mu nebudete chcieť dať stránku.",
+    "descriptionReadOnly": "Tento obchod ešte nemá žiadne produkty.",
+    "add": "Pridať produkt"
+  },
+  "status": {
+    "active": "Aktívny",
+    "draft": "Koncept"
+  },
+  "browser": {
+    "sort": {
+      "default": "Najnovšie prvé",
+      "unitsSold": "Predané kusy",
+      "revenue": "Celková hodnota predaja",
+      "priceHigh": "Cena: od najvyššej",
+      "priceLow": "Cena: od najnižšej",
+      "title": "Názov: A–Z"
+    },
+    "allStatuses": "Všetky stavy",
+    "filterLabel": "Triediť a filtrovať produkty",
+    "sortResting": "Triediť",
+    "statusSection": "Stav",
+    "sortSection": "Triediť podľa",
+    "clear": "Vymazať",
+    "import": "Import",
+    "add": "Pridať produkt",
+    "updating": "Aktualizuje sa…",
+    "pagination": "{total, plural, one {{total} produkt · strana {page} z {pages}} few {{total} produkty · strana {page} z {pages}} many {{total} produktu · strana {page} z {pages}} other {{total} produktov · strana {page} z {pages}}}"
+  },
+  "list": {
+    "noMatch": {
+      "title": "Žiadne produkty nevyhovujú týmto filtrom",
+      "body": "Vyberte iný stav alebo vymažte filtre, aby ste videli všetko.",
+      "clear": "Vymazať filtre"
+    },
+    "deleted": "Produkt „{title}“ bol zmazaný.",
+    "linkCopied": "Odkaz bol skopírovaný.",
+    "copyFailed": "Kopírovanie zlyhalo.",
+    "copyFailedUrl": "URL adresa je: {url}",
+    "notOnStorefront": "Tento produkt ešte nie je v žiadnom výklade.",
+    "deleteDialog": {
+      "title": "Zmazať tento produkt?",
+      "description": "{storefronts, plural, =0 {„{title}“ a k nemu nahraný obrázok a súbor budú trvalo odstránené. Existujúce objednávky si zachovajú záznam o predaji.} one {„{title}“ a k nemu nahraný obrázok a súbor budú trvalo odstránené. Existujúce objednávky si zachovajú záznam o predaji. Je v {storefronts} výklade. Blok zostane, kým ho neodstránite.} few {„{title}“ a k nemu nahraný obrázok a súbor budú trvalo odstránené. Existujúce objednávky si zachovajú záznam o predaji. Je v {storefronts} výkladoch. Bloky zostanú, kým ich neodstránite.} many {„{title}“ a k nemu nahraný obrázok a súbor budú trvalo odstránené. Existujúce objednávky si zachovajú záznam o predaji. Je v {storefronts} výkladu. Bloky zostanú, kým ich neodstránite.} other {„{title}“ a k nemu nahraný obrázok a súbor budú trvalo odstránené. Existujúce objednávky si zachovajú záznam o predaji. Je v {storefronts} výkladoch. Bloky zostanú, kým ich neodstránite.}}",
+      "confirm": "Zmazať produkt"
+    },
+    "chooser": {
+      "openTitle": "Otvoriť v ktorom výklade?",
+      "copyTitle": "Skopírovať odkaz pre ktorý výklad?",
+      "description": "{count, plural, one {„{title}“ je v {count} výklade. Vyberte jeden.} few {„{title}“ je v {count} výkladoch. Vyberte jeden.} many {„{title}“ je v {count} výkladu. Vyberte jeden.} other {„{title}“ je v {count} výkladoch. Vyberte jeden.}}",
+      "hint": "Alebo zrušte akciu a v editore výkladu zvoľte predvolenú možnosť."
+    }
+  },
+  "card": {
+    "inStock": "{count, plural, one {{count} na sklade} few {{count} na sklade} many {{count} na sklade} other {{count} na sklade}}",
+    "bestseller": "Bestseller",
+    "edit": "Upraviť {title}",
+    "actions": "Akcie pre {title}",
+    "moreActions": "Ďalšie akcie pre {title}",
+    "notPlaced": "Ešte nie je v žiadnom výklade",
+    "copyLinkTitle": "Skopírovať odkaz na stránku produktu",
+    "chooseStorefront": "{count, plural, one {V {count} výklade, kliknutím vyberte} few {V {count} výkladoch, kliknutím vyberte} many {V {count} výkladu, kliknutím vyberte} other {V {count} výkladoch, kliknutím vyberte}}",
+    "copyLink": "Skopírovať odkaz na produkt",
+    "openPage": "Otvoriť stránku produktu",
+    "unitsSold": "{count, plural, one {{count} predaný kus} few {{count} predané kusy} many {{count} predaného kusa} other {{count} predaných kusov}}",
+    "noSales": "Zatiaľ žiadny predaj"
+  },
+  "removal": {
+    "badge": "Odstránené",
+    "badgePaused": "Pozastavené",
+    "title": "{kind, select, product {Tento produkt odstránil SquareShare} other {Tento výklad odstránil SquareShare}}",
+    "titlePaused": "{kind, select, product {Tento produkt je pozastavený, kým ho nezmeníte} other {Tento výklad je pozastavený, kým ho nezmeníte}}",
+    "hidden": "Kupujúci ho už nikde nevidia: ani na jeho stránke, ani vo vložení na web, ani v zdieľanom odkaze.",
+    "hiddenPaused": "Kupujúci ho teraz nevidia: ani na jeho stránke, ani vo vložení na web, ani v zdieľanom odkaze. Nič sa nezmazalo a vráti sa, keď človek skontroluje vaše zmeny.",
+    "hiddenRemoved": "Kupujúci ho už nikde nevidia: ani na jeho stránke, ani vo vložení na web, ani v zdieľanom odkaze. Je to konečné, takže úprava ho nevráti.",
+    "reason": "Dôvod",
+    "whatNeedsToChange": "Čo treba zmeniť",
+    "when": "Kedy",
+    "pausedOn": "Pozastavené dňa",
+    "statement": "{ground, select, illegal {Nezákonný tovar alebo činnosť. Ponúkal niečo, čo sa nedá legálne predávať, alebo ponuku využíval na zjednanie takého predaja.} sexual {Sexuálny obsah. Obsahoval explicitný sexuálny obsah.} violence {Násilie alebo krviprelievanie. Obsahoval grafické násilie.} hate {Nenávisť alebo obťažovanie. Útočil na osobu alebo skupinu, prípadne obsahoval symboly nenávisti.} counterfeit {Falzifikáty alebo ukradnutý obsah. Zdalo sa, že ponúka falšovaný tovar alebo dielo, ktoré patrí niekomu inému.} scam {Podvod. Zdalo sa, že je navrhnutý tak, aby vylákal platbu bez dodania sľúbeného.} spam {Spam. Bol opakujúci sa alebo klamlivý, nie skutočná ponuka.} other {Iný dôvod. Porušoval pravidlá platformy.}}{noted, select, yes { {note}} other {}}",
+    "statementUnlabelled": "Porušoval pravidlá platformy.{noted, select, yes { {note}} other {}}",
+    "fixHint": "{kind, select, product {Upravte produkt nižšie, aby ste to opravili, uložte ho a potom nám ho pošlite späť.} other {Otvorte výklad, aby ste to opravili, potom sa vráťte sem a pošlite nám ho.}}",
+    "readOnlyHint": "{kind, select, product {Zmenu musí urobiť niekto, kto môže tento produkt upravovať, a poslať ho na kontrolu.} other {Zmenu musí urobiť niekto, kto môže tento výklad upravovať, a poslať ho na kontrolu.}}",
+    "appeal": "{kind, select, product {Tento produkt môžete stále upravovať. Úpravou sa však nevráti: ak si myslíte, že odstránenie bolo neoprávnené, <link>požiadajte nás o nové posúdenie</link>.} other {Tento výklad môžete stále upravovať. Úpravou sa však nevráti: ak si myslíte, že odstránenie bolo neoprávnené, <link>požiadajte nás o nové posúdenie</link>.}}",
+    "appealPaused": "Myslíte si, že ide o omyl? <link>Napíšte nám</link>.",
+    "appealFinal": "Ak si myslíte, že sme sa pomýlili, <link>požiadajte nás o nové posúdenie</link>.",
+    "appealSubject": "{kind, select, product {Odvolanie: odstránenie produktu ({title})} other {Odvolanie: odstránenie výkladu ({title})}}",
+    "appealBody": "{kind, select, product {Žiadam o opätovné preskúmanie tohto produktu.\n\nID produktu: {id}\nNázov: {title}\n\nPrečo si myslím, že to bolo neoprávnené:\n} other {Žiadam o opätovné preskúmanie tohto výkladu.\n\nID výkladu: {id}\nNázov: {title}\n\nPrečo si myslím, že to bolo neoprávnené:\n}}",
+    "reviewRequest": {
+      "button": "Zmeny sú hotové, skontrolovať",
+      "sent": "Odoslané na kontrolu dňa <time>{date}</time>. Vaše zmeny si pozrie človek a odpoveď dostanete tu aj e-mailom.",
+      "failed": "Toto sa nepodarilo odoslať.",
+      "failedFix": "O chvíľu to skúste znova."
+    }
+  },
+  "import": {
+    "fields": {
+      "title": "Názov",
+      "description": "Popis",
+      "price": "Cena",
+      "sku": "SKU",
+      "stock": "Zásoby"
+    },
+    "fileTooLarge": "Tento súbor má {size}. Importujte súbory do veľkosti {max}.",
+    "fileEmpty": "Tento súbor je prázdny.",
+    "imported": "{count, plural, one {{count} produkt bol naimportovaný.} few {{count} produkty boli naimportované.} many {{count} produktu bolo naimportovaných.} other {{count} produktov bolo naimportovaných.}}",
+    "skippedRows": "{count, plural, one {{count} riadok bol preskočený.} few {{count} riadky boli preskočené.} many {{count} riadku bolo preskočených.} other {{count} riadkov bolo preskočených.}}",
+    "dropPrompt": "Presuňte sem CSV alebo kliknutím vyberte súbor",
+    "fileMeta": "{size} · vyberte iný na začatie odznova",
+    "rowsLimit": "{max, plural, one {Až {max} produkt na súbor} few {Až {max} produkty na súbor} many {Až {max} produktu na súbor} other {Až {max} produktov na súbor}}",
+    "summary": "{shopify, select, yes {{ready, plural, one {Export zo Shopify. <count>{ready}</count> produkt pripravený} few {Export zo Shopify. <count>{ready}</count> produkty pripravené} many {Export zo Shopify. <count>{ready}</count> produktu pripravených} other {Export zo Shopify. <count>{ready}</count> produktov pripravených}}} other {{ready, plural, one {<count>{ready}</count> produkt pripravený} few {<count>{ready}</count> produkty pripravené} many {<count>{ready}</count> produktu pripravených} other {<count>{ready}</count> produktov pripravených}}}}{skipped, plural, =0 {.} one {, {skipped} preskočený.} few {, {skipped} preskočené.} many {, {skipped} preskočeného.} other {, {skipped} preskočených.}}",
+    "foldedVariants": "{count, plural, one {{count} riadok variantu bol zahrnutý do produktov nad ním. Po importe pridajte veľkosti a farby.} few {{count} riadky variantov boli zahrnuté do produktov nad nimi. Po importe pridajte veľkosti a farby.} many {{count} riadku variantov bolo zahrnutých do produktov nad nimi. Po importe pridajte veľkosti a farby.} other {{count} riadkov variantov bolo zahrnutých do produktov nad nimi. Po importe pridajte veľkosti a farby.}}",
+    "droppedRows": "{count, plural, one {{count} riadok je za limitom {max} produktov a nebude naimportovaný. Rozdeľte súbor, aby ste ho mohli naimportovať.} few {{count} riadky sú za limitom {max} produktov a nebudú naimportované. Rozdeľte súbor, aby ste ich mohli naimportovať.} many {{count} riadku je za limitom {max} produktov a nebude naimportovaný. Rozdeľte súbor, aby ste ho mohli naimportovať.} other {{count} riadkov je za limitom {max} produktov a nebudú naimportované. Rozdeľte súbor, aby ste ich mohli naimportovať.}}",
+    "photosNotImported": "Fotky sa neimportujú. Ceny, zásoby a popisy sa prenesú; obrázky pridajte po naimportovaní produktov.",
+    "currency": "Mena",
+    "currencyHelp": "Každý naimportovaný produkt bude mať cenu v tejto mene.",
+    "importAs": "Importovať ako",
+    "asDrafts": "Koncepty",
+    "asLive": "Zverejnené produkty",
+    "draftsHint": "Nič sa nezverejní, kým to sami nezverejníte.",
+    "liveHint": "Tieto produkty sa okamžite zobrazia vo vašom obchode.",
+    "columns": "Stĺpce",
+    "needed": "(povinné)",
+    "notSet": "Nenastavené",
+    "skip": "Preskočiť",
+    "columnFallback": "Stĺpec {number}",
+    "previewHeading": "Čo sa naimportuje",
+    "previewTitle": "Názov",
+    "previewPrice": "Cena",
+    "previewStock": "Zásoby",
+    "notTracked": "Nesledované",
+    "andMore": "{count, plural, one {a {count} ďalší.} few {a {count} ďalšie.} many {a {count} ďalšieho.} other {a {count} ďalších.}}",
+    "skippedHeading": "Riadky, ktoré budú preskočené",
+    "skippedRow": "{titled, select, yes {Riadok {line} ({title}): {problem}} other {Riadok {line}: {problem}}}",
+    "importing": "Importuje sa…",
+    "importedLabel": "Naimportované",
+    "run": "{count, plural, one {Importovať {count} produkt} few {Importovať {count} produkty} many {Importovať {count} produktu} other {Importovať {count} produktov}}",
+    "clear": "Vymazať"
+  },
+  "form": {
+    "sections": {
+      "basics": {
+        "label": "Základy",
+        "description": "Čo predávate, vlastnými slovami, a za akú cenu.",
+        "about": "Na čo slúži sekcia Základy"
+      },
+      "stock": {
+        "label": "Zásoby",
+        "description": "Predvolene neobmedzené. Sledujte zásoby, aby ste zabránili predaju nad stav skladu a zobrazili kupujúcim odznaky „Vypredané“ a „Zostáva len N“. Číslo upozornenia určuje, kedy sa druhý odznak zobrazí. Limit na objednávku je samostatný: obmedzuje, koľko kusov môže naraz kúpiť jeden kupujúci, bez ohľadu na sledovanie.",
+        "about": "Na čo slúži sekcia Zásoby"
+      },
+      "media": {
+        "label": "Médiá a doručenie"
+      },
+      "shipping": {
+        "label": "Doprava",
+        "description": "Nastavuje sa raz pre celý obchod, nie pre každý produkt zvlášť. Vyberte profil dopravy len vtedy, ak sa tento produkt doručuje inak.",
+        "about": "Na čo slúži sekcia Doprava"
+      },
+      "options": {
+        "label": "Možnosti",
+        "description": "Farby, veľkosti, príkony, teda všetko, čím sa produkt líši. Kupujúci vyberá jednu z každej skupiny.",
+        "about": "Na čo slúži sekcia Možnosti"
+      },
+      "photos": {
+        "label": "Fotky",
+        "description": "Ďalšie pohľady na stránke produktu. Presuňte fotku na niektorú možnosť, ak chcete zobraziť ju iba pri nej.",
+        "about": "Na čo slúži sekcia Fotky"
+      },
+      "specs": {
+        "label": "Špecifikácie",
+        "description": "Rozmery, materiály a špecifikácie na stránke produktu.",
+        "about": "Na čo slúžia Špecifikácie"
+      },
+      "documents": {
+        "label": "Dokumenty",
+        "description": "Certifikáty, manuály alebo technické listy, ktoré si kupujúci a regulátori môžu skontrolovať pred kúpou.",
+        "about": "Na čo slúžia Dokumenty"
+      },
+      "safety": {
+        "label": "Bezpečnosť a zhoda",
+        "description": "Kto produkt vyrobil a ako ho kontaktovať. Zákon EÚ o bezpečnosti výrobkov to vyžaduje pre fyzické tovary.",
+        "about": "Na čo slúži sekcia Bezpečnosť a zhoda"
+      },
+      "visibility": {
+        "label": "Viditeľnosť",
+        "description": "Aktívny znamená zverejnený: kupujúci ho môžu okamžite vidieť a kúpiť. Koncept je skrytý pred kupujúcimi, kým ho neprepnete.",
+        "about": "Na čo slúži sekcia Viditeľnosť"
+      }
+    },
+    "summary": {
+      "dimensions": "Rozmery",
+      "weight": "Hmotnosť",
+      "materials": "Materiály",
+      "care": "Starostlivosť",
+      "contents": "Obsah",
+      "specs": "Špecifikácie",
+      "madeIn": "Vyrobené v",
+      "versions": "{count, plural, one {{count} variant} few {{count} varianty} many {{count} variantu} other {{count} variantov}}",
+      "tracking": "Sleduje {quantity}",
+      "setQuantity": "Nastaviť množstvo",
+      "unlimited": "Neobmedzené",
+      "maxPerOrder": "Max {max} na objednávku",
+      "image": "Obrázok",
+      "download": "Na stiahnutie",
+      "buyLink": "Odkaz na nákup",
+      "removedProfile": "Odstránený profil",
+      "storeTerms": "Podmienky obchodu",
+      "options": "{groups, plural, one {{groups} skupina} few {{groups} skupiny} many {{groups} skupiny} other {{groups} skupín}}, {options, plural, one {{options} možnosť} few {{options} možnosti} many {{options} možnosti} other {{options} možností}}",
+      "photos": "{count, plural, one {{count} fotka} few {{count} fotky} many {{count} fotky} other {{count} fotiek}}",
+      "documents": "{count, plural, one {{count} dokument} few {{count} dokumenty} many {{count} dokumentu} other {{count} dokumentov}}",
+      "started": "Začaté",
+      "active": "Aktívny",
+      "draft": "Koncept"
+    },
+    "errors": {
+      "titleRequired": "Dajte produktu názov, kupujúci ho uvidia ako prvé.",
+      "stockRequired": "Zadajte, koľko kusov máte na sklade, alebo vypnite sledovanie zásob pre neobmedzené množstvo.",
+      "stockWhole": "Zásoby musia byť celé číslo, 0 alebo viac, bez desatinnej časti.",
+      "lowStockWhole": "Upozornenie na dochádzajúce zásoby musí byť celé číslo 0 alebo väčšie.",
+      "maxPerOrderRequired": "Zadajte, koľko kusov môže naraz objednať jeden kupujúci, 1 až {max}.",
+      "maxPerOrderRange": "Maximum na objednávku musí byť celé číslo od 1 do {max}.",
+      "purchaseUrl": "Odkaz na nákup musí byť úplná adresa začínajúca https://.",
+      "optionGroupUnnamed": "Pomenujte každú skupinu možností alebo ju odstráňte.",
+      "optionGroupEmpty": "Skupina {group}: pridajte aspoň jednu možnosť, alebo skupinu odstráňte.",
+      "optionUnnamed": "Pomenujte každú možnosť alebo prázdny riadok odstráňte.",
+      "optionGroupFull": "Skupina možností môže mať najviac {max} možností.",
+      "versionSpecs": "{count, plural, one {Vlastné špecifikácie jedného variantu si vyžadujú opravu.} few {Vlastné špecifikácie {count} variantov si vyžadujú opravu.} many {Vlastné špecifikácie {count} variantu si vyžadujú opravu.} other {Vlastné špecifikácie {count} variantov si vyžadujú opravu.}}",
+      "measure": "Použite číslo, napr. 12 alebo 3,5.",
+      "specValue": "Každá špecifikácia vyžaduje hodnotu.",
+      "manufacturerName": "Uveďte výrobcu.",
+      "manufacturerAddress": "Uveďte poštovú adresu výrobcu.",
+      "manufacturerEmail": "Uveďte kontaktný e-mail výrobcu.",
+      "responsibleEmail": "Toto nevyzerá ako platná e-mailová adresa.",
+      "price": {
+        "empty": "Pred uložením nastavte cenu.",
+        "notPositive": "Cena musí byť číslo väčšie ako nula.",
+        "tooManyDecimals": "Ceny môžu mať najviac dve desatinné miesta.",
+        "tooHigh": "Cena nesmie presiahnuť {currency} {max}."
+      }
+    },
+    "title": "Názov",
+    "titlePlaceholder": "napr. Ambient Loops Vol. 1",
+    "description": "Popis",
+    "optional": "(voliteľné)",
+    "descriptionPlaceholder": "Čo to je a čo kupujúci dostane?",
+    "displayImage": "Hlavný obrázok",
+    "displayImageAbout": "Kde sa hlavný obrázok používa",
+    "displayImageHelp": "Zobrazuje sa vo vašom výklade a vo vloženiach na web.",
+    "digitalFile": "Digitálny súbor",
+    "digitalFileAbout": "Čo je digitálny súbor",
+    "digitalFileHelp": "Súbor, ktorý kupujúci stiahne po kúpe. Jeho pridaním sa produkt stane digitálnou položkou na stiahnutie, takže doprava a bezpečnosť výrobku sa na neho prestanú vzťahovať.",
+    "purchaseLink": "Odkaz na nákup",
+    "purchaseLinkAbout": "Kam tlačidlo na nákup presmeruje kupujúcich",
+    "purchaseLinkHelp": "Tlačidlo na nákup na stránke produktu sleduje tento odkaz. Bez neho pošle e-mail na kontaktnú adresu vášho obchodu.",
+    "purchaseLinkPlaceholder": "napr. https://your-shop.example/checkout/this-product",
+    "statusLabel": "Stav produktu",
+    "problems": "{count, plural, one {{count} vec na opravu pred uložením} few {{count} veci na opravu pred uložením} many {{count} veci na opravu pred uložením} other {{count} vecí na opravu pred uložením}}",
+    "jumpToFirst": "Prejsť na prvú",
+    "uploading": "{what, select, image {Nahráva sa obrázok…} photo {Nahráva sa fotka…} document {Nahráva sa dokument…} other {Nahráva sa súbor…}}",
+    "processing": "{what, select, image {Spracováva sa obrázok…} photo {Spracováva sa fotka…} document {Spracováva sa dokument…} other {Spracováva sa súbor…}}",
+    "uploadingLabel": "{what, select, image {Nahrávanie obrázka} photo {Nahrávanie fotky} document {Nahrávanie dokumentu} other {Nahrávanie súboru}}",
+    "processingLabel": "{what, select, image {Spracovanie obrázka} photo {Spracovanie fotky} document {Spracovanie dokumentu} other {Spracovanie súboru}}",
+    "saveChanges": "Uložiť zmeny",
+    "saveProduct": "Uložiť produkt",
+    "savedToast": "Produkt „{title}“ bol uložený.",
+    "addedToast": "Produkt „{title}“ bol pridaný k vašim produktom.",
+    "documentFallbackLabel": "Dokument",
+    "discard": {
+      "title": "Zahodiť zmeny?",
+      "editDescription": "Úpravy, ktoré ste vykonali na tomto produkte, ešte neboli uložené.",
+      "newDescription": "Tento produkt ešte nebol uložený, takže nič sa nezachová.",
+      "discard": "Zahodiť"
+    },
+    "nav": {
+      "label": "Sekcie formulára",
+      "heading": "Na tejto stránke"
+    }
+  },
+  "stockFields": {
+    "trackStock": "Sledovať zásoby",
+    "inStock": "Na sklade",
+    "decrease": "Znížiť zásoby",
+    "increase": "Zvýšiť zásoby",
+    "lowStockAlert": "Upozornenie na dochádzajúce zásoby pri",
+    "maxPerOrder": "Maximum na objednávku",
+    "maxPerOrderHint": "Koľko kusov môže naraz vziať jeden kupujúci. Kupujúci si vyberá zo zoznamu, ktorý tu končí, a limit sa overí aj pri objednaní. Najviac {max}; hodnota 1 predáva vždy po jednom kuse."
+  },
+  "priceField": {
+    "label": "Cena",
+    "placeholder": "napr. 9,00",
+    "currency": "Mena"
+  },
+  "shippingField": {
+    "usual": "Vaše štandardné podmienky dopravy",
+    "usualDescription": "Nastavuje sa raz pre váš účet. Pre takmer každý produkt je to to správne.",
+    "removed": "Odstránený profil",
+    "removedDescription": "Tento profil už neexistuje, takže kupujúci uvidí vaše predvolené podmienky.",
+    "untitled": "Profil bez názvu",
+    "profileNoTerms": "Pre tento profil zatiaľ nie sú napísané žiadne podmienky.",
+    "noTerms": "Zatiaľ nie sú napísané žiadne podmienky dopravy.",
+    "profile": "Profil dopravy",
+    "edit": "Upraviť",
+    "modalTitle": "Doprava a vrátenie tovaru"
+  },
+  "optionsField": {
+    "display": {
+      "swatch": "Farebné vzorky",
+      "chip": "Čipy",
+      "select": "Rozbaľovací zoznam"
+    },
+    "displayHint": {
+      "swatch": "Farebné kruhy. Dajte každej možnosti farebnú vzorku, inak kupujúci uvidí jej prvé písmeno.",
+      "chip": "Textové tlačidlá pre hodnoty, ktoré kupujúci čítajú: veľkosti, wattáže, dĺžky.",
+      "select": "Rozbaľovací zoznam. Najvhodnejší, keď je hodnôt viac, než sa zmestí ako tlačidlá."
+    },
+    "presets": {
+      "colour": {
+        "name": "Farba",
+        "placeholder": "Polnočná modrá"
+      },
+      "size": {
+        "name": "Veľkosť",
+        "placeholder": "Stredná"
+      },
+      "material": {
+        "name": "Materiál",
+        "placeholder": "Masívny dub"
+      },
+      "capacity": {
+        "name": "Objem",
+        "placeholder": "500 ml"
+      },
+      "powerOutput": {
+        "name": "Príkon",
+        "placeholder": "750 W"
+      },
+      "length": {
+        "name": "Dĺžka",
+        "placeholder": "2 m"
+      },
+      "style": {
+        "name": "Štýl",
+        "placeholder": "Voľný strih"
+      },
+      "finish": {
+        "name": "Povrch",
+        "placeholder": "Kefovaná mosadz"
+      }
+    },
+    "sharedPriceNote": "Všetky varianty zdieľajú jednu cenu a jedny zásoby.",
+    "addFirst": "Predávate vo viac ako jednom variante?",
+    "addAnother": "Pridať ďalší spôsob, ako sa líši",
+    "somethingElse": "Niečo iné",
+    "groupsFull": "{max, plural, one {Limit: {max} skupina možností.} few {Limit: {max} skupiny možností.} many {Limit: {max} skupiny možností.} other {Limit: {max} skupín možností.}}",
+    "optionsFull": "{max, plural, one {Limit: {max} možnosť.} few {Limit: {max} možnosti.} many {Limit: {max} možnosti.} other {Limit: {max} možností.}}",
+    "whatVaries": "Čo sa mení",
+    "whatVariesPlaceholder": "Čo sa mení? napr. Príkon",
+    "optionCount": "{count, plural, one {{count} možnosť} few {{count} možnosti} many {{count} možnosti} other {{count} možností}}",
+    "moveGroupEarlier": "{named, select, yes {Presunúť {name} skôr} other {Presunúť skupinu možností {position} skôr}}",
+    "moveGroupLater": "{named, select, yes {Presunúť {name} neskôr} other {Presunúť skupinu možností {position} neskôr}}",
+    "removeGroup": "{named, select, yes {Odobrať {name}} other {Odobrať skupinu možností {position}}}",
+    "howBuyersPick": "{named, select, yes {Ako kupujúci vyberajú {name}} other {Ako kupujúci vyberajú skupinu možností {position}}}",
+    "howBuyersPickAbout": "Ako kupujúci vyberajú",
+    "swatchColumn": "Farba",
+    "nameColumn": "Názov",
+    "groupOptionsList": "{named, select, yes {Možnosti skupiny {name}} other {Možnosti skupiny {position}}}",
+    "swatchFor": "{named, select, yes {Farba pre {name}} other {Farba pre možnosť {position}}}",
+    "noSwatch": "Bez farebnej vzorky",
+    "optionLabel": "{named, select, yes {Možnosť {name} {position}} other {Možnosť skupiny {groupPosition} číslo {position}}}",
+    "optionPlaceholder": "Možnosť {position}",
+    "available": "{named, select, yes {{name} je k dispozícii} other {možnosť {position} je k dispozícii}}",
+    "moveOptionEarlier": "{named, select, yes {Presunúť {name} skôr} other {Presunúť možnosť {position} skôr}}",
+    "moveOptionLater": "{named, select, yes {Presunúť {name} neskôr} other {Presunúť možnosť {position} neskôr}}",
+    "removeOption": "{named, select, yes {Odobrať {name}} other {Odobrať možnosť {position}}}",
+    "swatchConflict": "{names} majú rovnaké prvé písmeno a žiadna z nich nemá priradenú farebnú vzorku. Kupujúci uvidia rovnaké štvorčeky. Dajte každej z nich farbu.",
+    "addOptions": "Pridať možnosti",
+    "addOptionsAbout": "Ako pridať viac možností naraz",
+    "addOptionsHelp": "Po každej možnosti stlačte Enter alebo prilepte zoznam (napr. „S, M, L, XL“ alebo stĺpec skopírovaný z tabuľky) a všetky sa pridajú naraz.",
+    "noRoom": "Nie je miesto pre ďalšie možnosti",
+    "draftPlaceholder": "{preset, select, yes {{example}, alebo prilepte zoznam} other {Prvá možnosť, alebo prilepte zoznam}}",
+    "add": "Pridať",
+    "useNoSwatch": "Použiť možnosť Bez farebnej vzorky"
+  },
+  "galleryField": {
+    "tooMany": "Produkt môže mať najviac {max} extra fotiek.",
+    "wrongType": "Použite obrázky vo formáte PNG, JPG, WEBP, GIF alebo AVIF.",
+    "tooLarge": "Každá fotka musí mať menej ako {max} MB.",
+    "roomLeft": "{count, plural, one {Zmestí sa ešte len {count} fotka.} few {Zmestia sa ešte len {count} fotky.} many {Zmestí sa ešte len {count} fotky.} other {Zmestí sa ešte len {count} fotiek.}}",
+    "everyVersion": "Každý variant",
+    "photos": "Fotky",
+    "unnamedOption": "Nepomenovaná možnosť",
+    "options": "Možnosti",
+    "target": "{groupNamed, select, yes {{optionNamed, select, yes {{group}: {option}} other {{group}: Nepomenovaná možnosť}}} other {{optionNamed, select, yes {Možnosti: {option}} other {Možnosti: Nepomenovaná možnosť}}}}",
+    "moveToEveryVersion": "Presunúť na: Každý variant",
+    "moveToOption": "{groupNamed, select, yes {{optionNamed, select, yes {Presunúť na: {group}: {option}} other {Presunúť na: {group}: Nepomenovaná možnosť}}} other {{optionNamed, select, yes {Presunúť na: Možnosti: {option}} other {Presunúť na: Možnosti: Nepomenovaná možnosť}}}}",
+    "photoCount": "{count, plural, one {{count} fotka} few {{count} fotky} many {{count} fotky} other {{count} fotiek}}",
+    "removePhoto": "Odobrať fotku",
+    "movePhotoEarlier": "Posunúť fotku skôr",
+    "movePhotoLater": "Posunúť fotku neskôr",
+    "altPlaceholder": "Alternatívny text",
+    "altLabel": "Popíšte túto fotku pre ľudí, ktorí ju nevidia",
+    "versionLabel": "Pre ktorý variant sa táto fotka zobrazuje",
+    "tally": "{max, plural, one {{count} z {max} fotky} few {{count} z {max} fotiek} many {{count} z {max} fotky} other {{count} z {max} fotiek}}",
+    "orderAbout": "Ako sú tieto fotky zoradené",
+    "orderHelp": "Hlavný obrázok zo sekcie Médiá a doručenie je vždy prvý. Za ním sa fotky zobrazujú v poradí, v akom sú tu usporiadané.",
+    "limitReached": "Dosiahnutý limit",
+    "dropOrClick": "Presuňte sem alebo kliknite"
+  },
+  "optionSpecsField": {
+    "heading": "Iné pre každý variant",
+    "about": "Ako fungujú špecifikácie pre každý variant",
+    "help": "Rozmery a hmotnosti, ktoré sa menia podľa variantu, uveďte tu. Čokoľvek, čo necháte prázdne, používa to, čo ste vyplnili vyššie, takže uvádzajte len to, čo sa skutočne líši. Kupujúci vidí čísla pre vybraný variant.",
+    "unnamedOption": "Nepomenovaná možnosť",
+    "options": "Možnosti",
+    "sameAsAbove": "Rovnaké ako vyššie",
+    "length": "Dĺžka",
+    "width": "Šírka",
+    "height": "Výška",
+    "weight": "Hmotnosť",
+    "specsList": "{named, select, yes {Špecifikácie pre {option}} other {Špecifikácie nepomenovanej možnosti}}",
+    "specName": "Názov, napr. Počet miest",
+    "specValue": "Hodnota, napr. 6",
+    "specNameLabel": "{named, select, yes {Názov špecifikácie {number} pre {option}} other {Názov špecifikácie {number} pre nepomenovanú možnosť}}",
+    "specValueLabel": "{named, select, yes {Hodnota špecifikácie {number} pre {option}} other {Hodnota špecifikácie {number} pre nepomenovanú možnosť}}",
+    "removeSpec": "{named, select, yes {Odobrať špecifikáciu {number} pre {option}} other {Odobrať špecifikáciu {number} pre nepomenovanú možnosť}}",
+    "addSpec": "Špecifikácia pre tento variant",
+    "replacesNote": "Špecifikácia s rovnakým názvom, ako je vyššie, ju pre tento variant nahradí."
+  },
+  "detailsFields": {
+    "dimensions": "Rozmery",
+    "length": "Dĺžka",
+    "width": "Šírka",
+    "height": "Výška",
+    "unit": "Jednotka",
+    "weight": "Hmotnosť",
+    "materials": "Materiály",
+    "materialsPlaceholder": "napr. Masívny dub, mosadzné kovanie",
+    "madeIn": "Vyrobené v",
+    "madeInPlaceholder": "Krajina pôvodu",
+    "care": "Pokyny na starostlivosť",
+    "included": "Čo je súčasťou",
+    "includedPlaceholder": "Jedna položka na riadok\nnapr. 1 × lampa\n1 × kábel 2 m",
+    "specifications": "Špecifikácie",
+    "specName": "Názov, napr. Príkon",
+    "specValue": "Hodnota, napr. 40 W",
+    "specNameLabel": "Názov špecifikácie {number}",
+    "specValueLabel": "Hodnota špecifikácie {number}",
+    "removeSpec": "Odobrať špecifikáciu {number}",
+    "addSpec": "Pridať špecifikáciu"
+  },
+  "safetyFields": {
+    "manufacturer": "Výrobca",
+    "manufacturerEmail": "E-mail výrobcu",
+    "manufacturerAddress": "Adresa výrobcu",
+    "responsibleName": "Zodpovedná osoba v EÚ",
+    "responsibleNameAbout": "O zodpovednej osobe v EÚ",
+    "responsibleNameHint": "Iba keď je výrobca mimo EÚ.",
+    "responsibleEmail": "E-mail zodpovednej osoby",
+    "responsibleAddress": "Adresa zodpovednej osoby",
+    "identifier": "Typ, číslo série alebo šarže",
+    "warnings": "Upozornenia a bezpečnostné informácie"
+  },
+  "documentsField": {
+    "tooMany": "Produkt môže mať najviac {max} dokumentov.",
+    "wrongType": "Použite PDF pre certifikáty, manuály a iné dokumenty.",
+    "tooLarge": "Súbor „{name}“ je príliš veľký. Dokumenty musia mať menej ako {max} MB.",
+    "roomLeft": "{count, plural, one {Zmestí sa ešte len {count} dokument.} few {Zmestia sa ešte len {count} dokumenty.} many {Zmestí sa ešte len {count} dokumentu.} other {Zmestí sa ešte len {count} dokumentov.}}",
+    "fallbackLabel": "Dokument",
+    "list": "Dokumenty",
+    "nameLabel": "Názov dokumentu zobrazený kupujúcim",
+    "namePlaceholder": "napr. Bezpečnostný list",
+    "remove": "{named, select, yes {Odobrať {name}} other {Odobrať dokument}}",
+    "limitReached": "Dosiahnutý limit",
+    "dropPrompt": "Presuňte sem PDF alebo kliknutím nahrajte",
+    "tally": "{max, plural, one {{count} z {max} dokumentu · PDF, najviac {maxMb} MB každý} few {{count} z {max} dokumentov · PDF, najviac {maxMb} MB každý} many {{count} z {max} dokumentu · PDF, najviac {maxMb} MB každý} other {{count} z {max} dokumentov · PDF, najviac {maxMb} MB každý}}"
+  },
+  "imageDropzone": {
+    "wrongType": "Použite obrázok vo formáte PNG, JPG, WEBP, GIF alebo AVIF.",
+    "tooLarge": "Obrázok musí mať menej ako {max} MB.",
+    "previewAlt": "Náhľad hlavného obrázka",
+    "dropPrompt": "Presuňte sem obrázok alebo kliknutím nahrajte",
+    "hint": "PNG, JPG, WEBP, GIF alebo AVIF, najviac {max} MB",
+    "remove": "Odobrať hlavný obrázok"
+  },
+  "fileDropzone": {
+    "currentFile": "Aktuálny súbor",
+    "dropPrompt": "Presuňte sem súbor alebo kliknutím nahrajte",
+    "hint": "ZIP, PDF a podobné, najviac {max} MB",
+    "remove": "Odobrať digitálny súbor"
+  }
+}

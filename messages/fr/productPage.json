@@ -1,0 +1,162 @@
+{
+  "metadata": {
+    "descriptionFallback": "{title}, disponible chez {store}."
+  },
+  "notFound": {
+    "title": "Ce produit n’est pas disponible",
+    "body": "Il a peut-être été retiré, ou le lien que vous avez suivi n’est plus à jour. Retournez à la boutique pour voir ce qui est proposé en ce moment.",
+    "back": "Retour"
+  },
+  "sections": {
+    "description": "Description",
+    "specs": "Caractéristiques techniques",
+    "documents": "Documents",
+    "shipping": "Livraison",
+    "returns": "Retours",
+    "safety": "Sécurité et conformité",
+    "seller": "Vendeur"
+  },
+  "soldBy": "Vendu par {seller}",
+  "moreDetails": "Plus de détails",
+  "trust": {
+    "digitalDelivery": "Livré sous forme de téléchargement après achat.",
+    "euRights": "14 jours pour changer d’avis, et une garantie de 2 ans."
+  },
+  "safety": {
+    "manufacturer": "Fabricant",
+    "responsiblePerson": "Personne responsable dans l’UE",
+    "identifier": "Identifiant du produit :",
+    "warnings": "Avertissements"
+  },
+  "priceNotes": "{price, select, incl {{shipping, select, plus {TTC, livraison en sus} free {TTC, livraison gratuite} other {TTC}}} excl {{shipping, select, plus {HT, livraison en sus} free {HT, livraison gratuite} other {HT}}} other {{shipping, select, plus {livraison en sus} free {livraison gratuite} other {}}}}",
+  "stock": {
+    "digitalDownload": "Téléchargement numérique",
+    "digitalDownloadFormat": "Téléchargement numérique ({format})"
+  },
+  "description": {
+    "readMore": "Lire la suite",
+    "readLess": "Réduire"
+  },
+  "gallery": {
+    "noPhoto": "Pas encore de photo",
+    "photosOf": "Photos de {title}",
+    "photo": "Photo {current} sur {total}"
+  },
+  "options": {
+    "unavailable": "(indisponible)",
+    "unavailableOption": "{name} (indisponible)",
+    "unavailableLabel": "{name}, indisponible"
+  },
+  "quantity": {
+    "label": "Quantité"
+  },
+  "cta": {
+    "unwired": "Ce bouton ne mène nulle part pour l’instant. Ajoutez un lien d’achat sur le produit, ou un e-mail de contact dans les informations vendeur.",
+    "unavailableIn": "Indisponible pour l’option : {group}",
+    "askAbout": "Poser une question sur ce produit",
+    "checkoutOn": "Paiement sur <strong>{host}</strong>",
+    "mailSubject": "Question à propos de {title}",
+    "mailQuantity": "Quantité : {quantity}"
+  },
+  "specs": {
+    "dimensions": "Dimensions",
+    "weight": "Poids",
+    "materials": "Matériaux",
+    "madeIn": "Fabriqué en",
+    "included": "Ce qui est inclus",
+    "care": "Entretien"
+  },
+  "seller": {
+    "address": "Adresse :",
+    "country": "Pays :",
+    "email": "E-mail :",
+    "phone": "Téléphone :",
+    "vatId": "Numéro de TVA : {vatId}"
+  },
+  "statutory": {
+    "withdrawal": "Vous disposez d’un droit de rétractation vous permettant d’annuler cet achat dans un délai de 14 jours à compter de sa réception, sans avoir à vous justifier, sauf si l’une des exceptions légales s’applique (par exemple des biens confectionnés selon vos spécifications ou des biens scellés).",
+    "digitalWithdrawal": "Pour un téléchargement, le droit de rétractation prend fin dès que vous acceptez de commencer le téléchargement avant l’expiration du délai de 14 jours.",
+    "guarantee": "Le droit européen vous accorde une garantie légale de conformité d’au moins 2 ans, garantissant que les biens sont conformes à ce qui a été vendu."
+  },
+  "footer": {
+    "disclosure": "<seller>{name}</seller> est le vendeur de cette commande et est responsable du produit, de sa livraison, ainsi que de tout retour ou remboursement. Squareshare fournit la technologie derrière cette page et n’est pas partie au contrat de vente.",
+    "poweredBy": "Propulsé par <brand>Squareshare</brand>",
+    "policiesLabel": "Politiques Squareshare",
+    "policies": {
+      "privacy": {
+        "label": "Confidentialité",
+        "name": "Politique de confidentialité de Squareshare"
+      },
+      "terms": {
+        "label": "Conditions",
+        "name": "Conditions d’utilisation de Squareshare"
+      }
+    }
+  },
+  "report": {
+    "trigger": "{target, select, product {Signaler ce produit} other {Signaler cette vitrine}}",
+    "title": "{target, select, product {Signaler ce produit} other {Signaler cette vitrine}}",
+    "description": "Dites-nous ce qui ne va pas. Chaque signalement est examiné par une personne.",
+    "sentTitle": "Signalement envoyé",
+    "sentBody": "{target, select, product {Merci. Une personne examinera ce produit. Nous ne communiquons pas au vendeur l’identité de l’auteur d’un signalement.} other {Merci. Une personne examinera cette vitrine. Nous ne communiquons pas au vendeur l’identité de l’auteur d’un signalement.}}",
+    "reasonsLegend": "Qu’est-ce qui ne va pas ?",
+    "reasons": {
+      "illegal": {
+        "label": "Biens ou activité illégaux",
+        "hint": "Vente d’un article contraire à la loi, ou annonce utilisée pour l’organiser."
+      },
+      "sexual": {
+        "label": "Contenu sexuel",
+        "hint": "Images explicites, ou tout contenu sexualisant un mineur."
+      },
+      "violence": {
+        "label": "Violence ou images choquantes",
+        "hint": "Blessures explicites, menaces, ou contenu faisant l’apologie de la violence."
+      },
+      "hate": {
+        "label": "Haine ou harcèlement",
+        "hint": "Attaques contre une personne ou un groupe, ou symboles haineux."
+      },
+      "counterfeit": {
+        "label": "Contrefaçon ou vol",
+        "hint": "Faux articles de marque, ou création d’autrui vendue comme la sienne."
+      },
+      "scam": {
+        "label": "Arnaque ou fraude",
+        "hint": "L’annonce semble conçue pour encaisser de l’argent sans rien livrer."
+      },
+      "spam": {
+        "label": "Spam",
+        "hint": "Contenu répétitif, trompeur, ou qui n’est pas un vrai produit."
+      },
+      "other": {
+        "label": "Autre chose",
+        "hint": "Dites-le-nous ci-dessous, une personne vous lira."
+      }
+    },
+    "detailsLabel": "Autre chose à ajouter ? <muted>(facultatif)</muted>",
+    "detailsPlaceholder": "Que doit savoir la personne qui examinera ce signalement ?",
+    "emailLabel": "Votre e-mail <muted>(facultatif)</muted>",
+    "emailPlaceholder": "vous@exemple.fr",
+    "emailHelp": "Uniquement pour confirmer la réception et vous poser une question si nécessaire. Il n’est jamais montré au vendeur.",
+    "submitFailed": "Envoi impossible. Réessayez.",
+    "offline": "Envoi impossible. Vérifiez votre connexion et réessayez.",
+    "send": "Envoyer le signalement",
+    "api": {
+      "accepted": "Merci. Une personne examinera ce signalement.",
+      "unreadable": "Cette requête n’a pas pu être lue.",
+      "invalid": "Ce signalement n’est pas valide.",
+      "targetType": "Vous ne pouvez pas signaler cet élément ici.",
+      "reason": "Choisissez ce qui ne va pas.",
+      "rateLimited": "Trop de signalements depuis ce poste. Réessayez plus tard.",
+      "submitFailed": "Envoi impossible. Réessayez."
+    }
+  },
+  "shippingProse": {
+    "shipsFrom": "Expédié depuis {country}.",
+    "areaAndTime": "{area} : {time}",
+    "areaAndTimeWithCost": "{area} : {time} ({cost})",
+    "withCost": "{place} ({cost})",
+    "returnsWindow": "{paidBy, select, seller {{days, plural, one {Retours acceptés dans un délai de {days} jour après la livraison. Les frais de retour sont à notre charge.} many {Retours acceptés dans un délai de {days} jours après la livraison. Les frais de retour sont à notre charge.} other {Retours acceptés dans un délai de {days} jours après la livraison. Les frais de retour sont à notre charge.}}} buyer {{days, plural, one {Retours acceptés dans un délai de {days} jour après la livraison. Les frais de retour sont à la charge de l’acheteur.} many {Retours acceptés dans un délai de {days} jours après la livraison. Les frais de retour sont à la charge de l’acheteur.} other {Retours acceptés dans un délai de {days} jours après la livraison. Les frais de retour sont à la charge de l’acheteur.}}} other {{days, plural, one {Retours acceptés dans un délai de {days} jour après la livraison.} many {Retours acceptés dans un délai de {days} jours après la livraison.} other {Retours acceptés dans un délai de {days} jours après la livraison.}}}}"
+  }
+}

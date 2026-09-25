@@ -3371,6 +3371,17 @@ alter table public.profiles
       or (char_length(seller_bio) between 1 and 100 and seller_bio !~ '[\x01-\x1f\x7f]')
     );
 
+-- 20260925_profile_locale
+-- The account's chosen UI language. Replayed with its shape CHECK so the e2e
+-- stack exercises the same write the app makes when a seller switches language,
+-- and so a malformed value is refused here exactly as in production.
+alter table public.profiles
+  add column locale text;
+
+alter table public.profiles
+  add constraint profiles_locale_shape
+    check (locale is null or locale ~ '^[a-z]{2}(-[A-Z]{2})?$');
+
 -- 20260916_setup_celebrated
 -- When this person was first shown their finished setup card. Replayed so the
 -- e2e stack can prove the card shows once: the app treats only an explicit null

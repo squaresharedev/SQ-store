@@ -1,4 +1,6 @@
 import { revalidatePath } from "next/cache";
+import { getTranslations } from "next-intl/server";
+import { msg, type MessageRef } from "@/i18n/types";
 import { resolveCta, resolveInk } from "@/components/product-page/product-page-maps";
 import {
   invalidInput,
@@ -20,6 +22,7 @@ import {
   productPageSchema,
   storefrontIdSchema,
 } from "@/lib/validation/storefront";
+import { firstIssue } from "@/lib/validation/messages";
 import {
   PRODUCT_PAGE_CTA_BORDER_WIDTH_MAX,
   PRODUCT_PAGE_CTA_MAX,
@@ -83,11 +86,26 @@ const STATUS: Record<ActionErrorCode, number> = {
   unexpected: 500,
 };
 
-/** ActionError verbatim as the error envelope, per docs/agent-surface.md: a
- *  stable machine `code`, a human `message`, and a `fix` that is a next step
- *  rather than an apology. */
-function fail(error: ActionError) {
-  return Response.json({ error }, { status: STATUS[error.code] });
+/** ActionError as the error envelope, per docs/agent-surface.md: a stable
+ *  machine `code`, a human `message`, and a `fix` that is a next step rather
+ *  than an apology. The envelope carries TEXT, in the request's language: a
+ *  caller of a JSON API has no catalogue to resolve message keys against. */
+async function fail(error: ActionError) {
+  const t = await getTranslations();
+  const text = (ref: MessageRef) => t(ref.key, ref.values);
+  return Response.json(
+    {
+      error: {
+        code: error.code,
+        message: text(error.message),
+        ...(error.fix ? { fix: text(error.fix) } : {}),
+        ...(error.action
+          ? { action: { href: error.action.href, label: text(error.action.label) } }
+          : {}),
+      },
+    },
+    { status: STATUS[error.code] },
+  );
 }
 
 /** The one payload both verbs answer with, so a write's response is a read. */
@@ -135,13 +153,13 @@ async function loadConfig(
     .maybeSingle();
   if (error) {
     console.error("[product-page] read failed", error.message);
-    return { error: serverError("load your product page settings") };
+    return { error: serverError("loadProductPageSettings") };
   }
   if (!data) return { error: notFound("storefront") };
   const config = parseStoredStorefrontConfig(data.config);
   if (!config) {
     console.warn("[product-page] stored config failed to parse", id);
-    return { error: serverError("load your product page settings") };
+    return { error: serverError("loadProductPageSettings") };
   }
   return { config };
 }
@@ -156,10 +174,10 @@ export async function GET(
   const account = await getActiveAccount();
   if (!account) return fail(sessionExpired());
   if (!can(account.role, "store.read")) {
-    return fail(permissionDenied(account.role, "view storefronts"));
+    return fail(permissionDenied(account.role, "viewStorefronts"));
   }
   if (!(await rateLimit("product_page_read", RATE_LIMITS.productPageRead))) {
-    return fail(rateLimited("read product page settings"));
+    return fail(rateLimited("readProductPageSettings"));
   }
 
   const loaded = await loadConfig(id, account.accountId);
@@ -177,12 +195,12 @@ export async function PATCH(
   const account = await getActiveAccount();
   if (!account) return fail(sessionExpired());
   if (!can(account.role, "storefront.write")) {
-    return fail(permissionDenied(account.role, "edit storefronts"));
+    return fail(permissionDenied(account.role, "editStorefronts"));
   }
   // The designer's own budget: this writes the same column by the same rules,
   // so it is the same cost and belongs in the same bucket.
   if (!(await rateLimit("storefront_write", RATE_LIMITS.storefrontWrite))) {
-    return fail(rateLimited("save storefronts"));
+    return fail(rateLimited("saveStorefronts"));
   }
 
   let body: unknown;
@@ -190,14 +208,17 @@ export async function PATCH(
     body = await request.json();
   } catch {
     return fail(
-      invalidInput("That request body is not JSON.", "Send a JSON object of the fields to change."),
+      invalidInput(
+        msg("Errors.productPageApi.notJson.message"),
+        msg("Errors.productPageApi.notJson.fix"),
+      ),
     );
   }
   if (typeof body !== "object" || body === null || Array.isArray(body)) {
     return fail(
       invalidInput(
-        "That request body is not an object.",
-        'Send a JSON object, e.g. {"ctaColor": "#1d4ed8"}.',
+        msg("Errors.productPageApi.notObject.message"),
+        msg("Errors.productPageApi.notObject.fix"),
       ),
     );
   }
@@ -223,8 +244,8 @@ export async function PATCH(
     // carries no stored data, so returning it leaks nothing.
     return fail(
       invalidInput(
-        parsed.error.issues[0]?.message ?? "Those product page settings are invalid.",
-        "Check the field named above against `limits` from a GET of this URL, then try again.",
+        firstIssue(parsed.error, msg("Errors.productPageApi.invalid")),
+        msg("Errors.productPageApi.invalidFix"),
       ),
     );
   }
@@ -247,7 +268,7 @@ export async function PATCH(
     .maybeSingle();
   if (error) {
     console.error("[product-page] save failed", error.message);
-    return fail(serverError("save your product page settings"));
+    return fail(serverError("saveProductPageSettings"));
   }
   if (!row) return fail(notFound("storefront"));
 

@@ -1,0 +1,108 @@
+{
+  "metadata": {
+    "orders": {
+      "title": "Objednávky"
+    }
+  },
+  "page": {
+    "title": "Objednávky",
+    "subtitle": "Všechny objednávky zadané přes Square Share."
+  },
+  "status": {
+    "paid": "Zaplaceno",
+    "refunded": "Peníze vráceny",
+    "disputed": "Ve sporu",
+    "pending": "Čekající"
+  },
+  "channel": {
+    "embed": "Vložení",
+    "marketplace": "Tržiště"
+  },
+  "empty": {
+    "filteredTitle": "Filtrům neodpovídají žádné objednávky",
+    "filteredHint": "Zkuste rozšířit období nebo filtry vymazat.",
+    "clearFilters": "Vymazat filtry",
+    "title": "Zatím žádné objednávky",
+    "hint": "Pokladna Square Share zatím není spuštěná. Prodeje přes váš vlastní odkaz na nákup nebo e-mailem se tu nezobrazí.",
+    "goToProducts": "Přejít na produkty"
+  },
+  "list": {
+    "updating": "Aktualizace…",
+    "summary": "{total, plural, one {{total} objednávka} few {{total} objednávky} many {{total} objednávky} other {{total} objednávek}} · strana {page} z {totalPages}",
+    "detailDialog": "Podrobnosti objednávky",
+    "closeDetail": "Zavřít podrobnosti objednávky"
+  },
+  "table": {
+    "product": "Produkt",
+    "amount": "Částka",
+    "channel": "Kanál",
+    "status": "Stav",
+    "buyer": "Kupující",
+    "date": "Datum"
+  },
+  "toolbar": {
+    "region": "filtry objednávek",
+    "channel": "kanál",
+    "buyerEmail": "e-mail kupujícího",
+    "searchPlaceholder": "hledat e-mail kupujícího",
+    "status": "stav",
+    "statusAriaLabel": "Filtrovat podle stavu",
+    "allStatuses": "Všechny stavy",
+    "dateRange": "období",
+    "datePlaceholder": "jakékoli datum",
+    "sort": "řazení",
+    "sortAriaLabel": "Seřadit objednávky",
+    "clearFilters": "vymazat filtry"
+  },
+  "sort": {
+    "newest": "Od nejnovějších",
+    "oldest": "Od nejstarších",
+    "amountHigh": "Částka: od nejvyšší",
+    "amountLow": "Částka: od nejnižší"
+  },
+  "detail": {
+    "close": "Zavřít podrobnosti objednávky",
+    "version": "Verze",
+    "copyVersion": {
+      "copy": "Kopírovat verzi",
+      "copied": "Verze zkopírována",
+      "failed": "Verzi se nepodařilo zkopírovat. Označte ji a zkopírujte ručně."
+    },
+    "amount": "Částka",
+    "platformFee": "Poplatek platformy",
+    "youReceive": "Obdržíte",
+    "buyerEmail": "E-mail kupujícího",
+    "copyBuyerEmail": {
+      "copy": "Kopírovat e-mail kupujícího",
+      "copied": "E-mail kupujícího zkopírován",
+      "failed": "E-mail kupujícího se nepodařilo zkopírovat. Označte ho a zkopírujte ručně."
+    },
+    "noEmail": "bez e-mailu",
+    "channel": "Kanál",
+    "date": "Datum",
+    "orderId": "ID objednávky",
+    "copyOrderId": {
+      "copy": "Kopírovat ID objednávky",
+      "copied": "ID objednávky zkopírováno",
+      "failed": "ID objednávky se nepodařilo zkopírovat. Označte ho a zkopírujte ručně."
+    }
+  },
+  "actions": {
+    "refundNeedsStripe": "Vrácení peněz vyžaduje propojený Stripe.",
+    "connectStripe": "Propojte Stripe a povolte vracení peněz",
+    "refundConfirm": "Vrátit peníze za tuto objednávku? Po propojení se Stripe to nepůjde vzít zpět.",
+    "confirmRefund": "Potvrdit vrácení peněz",
+    "refundOrder": "Vrátit peníze",
+    "disputeInStripe": "Spory se po propojení Stripe řeší v panelu Stripe.",
+    "disputeConfirm": "Otevřít řešení sporu k této objednávce?",
+    "handleDispute": "Řešit spor",
+    "none": "K této objednávce nejsou dostupné žádné akce."
+  },
+  "skeleton": {
+    "loading": "načítání objednávek"
+  },
+  "loading": {
+    "title": "Objednávky",
+    "subtitle": "Všechny prodeje přes vložení na web i tržiště."
+  }
+}

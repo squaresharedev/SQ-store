@@ -1,0 +1,116 @@
+{
+  "pageTitle": "Płatności",
+  "soon": "Wkrótce",
+  "balance": {
+    "available": {
+      "label": "Dostępne",
+      "zero": "Jeszcze nic do wypłaty",
+      "hint": "Gotowe na twoją najbliższą wypłatę"
+    },
+    "pending": {
+      "label": "Oczekujące",
+      "zero": "Brak oczekującej sprzedaży",
+      "hint": "Rozliczane z niedawnej sprzedaży"
+    },
+    "nextPayout": {
+      "label": "Najbliższa wypłata",
+      "zero": "Brak zaplanowanej wypłaty",
+      "hint": "Spodziewana {date}"
+    }
+  },
+  "connection": {
+    "label": "Połączenie ze Stripe",
+    "comingSoonTitle": "Odbieranie płatności przez Stripe już wkrótce",
+    "comingSoonBody": "Do tego czasu kupujący płacą ci przez link do zakupu w produkcie albo pisząc do ciebie e-maila.",
+    "connectTitle": "Połącz Stripe, aby otrzymywać płatności",
+    "connectBody": "Wypłaty trafiają prosto na twoje konto bankowe. Konfiguracja odbywa się bezpiecznie na Stripe, nigdy nie widzimy ani nie przechowujemy danych twojego konta.",
+    "connectButton": "Połącz ze Stripe",
+    "connected": "Konto Stripe połączone",
+    "charges": "Przyjmowanie płatności",
+    "payouts": "Wypłaty",
+    "verified": "Zweryfikowano",
+    "requirementsDue": "Stripe potrzebuje więcej informacji, zanim wypłaty będą mogły być kontynuowane."
+  },
+  "connectModal": {
+    "title": "Połącz ze Stripe",
+    "description": "Otrzymuj płatności za to, co sprzedajesz. Konfiguracja odbywa się na Stripe, nie tutaj.",
+    "points": {
+      "sensitive": {
+        "title": "Stripe zajmuje się wrażliwą częścią",
+        "body": "Dane bankowe, weryfikacja tożsamości i potwierdzenia odbywają się na bezpiecznych stronach Stripe. Square Share nigdy ich nie widzi ani nie przechowuje."
+      },
+      "bank": {
+        "title": "Wypłaty trafiają prosto na twoje konto bankowe",
+        "body": "Po połączeniu twoje saldo jest automatycznie wypłacane w regularnym cyklu."
+      },
+      "time": {
+        "title": "Zajmuje około 5 minut",
+        "body": "Przekierujemy cię do Stripe, aby dokończyć konfigurację, a potem wrócisz właśnie tutaj."
+      }
+    },
+    "notNow": "Nie teraz",
+    "comingSoonTitle": "Wypłaty przez Stripe już wkrótce.",
+    "continue": "Przejdź do Stripe"
+  },
+  "payoutHistory": {
+    "label": "Historia wypłat",
+    "title": "Wypłaty",
+    "emptyConnectable": "Jeszcze żadnych wypłat. Gdy tylko pojawi się sprzedaż, Stripe automatycznie wyśle twoje saldo na konto bankowe.",
+    "empty": "Jeszcze żadnych wypłat.",
+    "columns": {
+      "amount": "Kwota",
+      "status": "Status",
+      "bank": "Bank",
+      "arrives": "Dotrze"
+    },
+    "rowLabel": "Wypłata {amount}, zobacz szczegóły"
+  },
+  "payoutStatus": "{status, select, paid {Opłacona} pending {Oczekująca} in_transit {W drodze} canceled {Anulowana} failed {Nieudana} other {Oczekująca}}",
+  "payoutMethod": {
+    "title": "Metoda wypłaty",
+    "manage": "Zarządzaj",
+    "detail": "{currency} · {country}",
+    "detailDefault": "{currency} · {country} · Domyślna",
+    "emptyConnectable": "Jeszcze brak metody wypłaty. Połącz Stripe i dodaj tam swoje konto bankowe, pojawi się tu automatycznie.",
+    "empty": "Jeszcze brak metody wypłaty."
+  },
+  "payoutMethodModal": {
+    "title": "Metoda wypłaty",
+    "description": "Dokąd trafiają twoje wypłaty.",
+    "bankAccountDetail": "Konto bankowe · {currency} · {country}",
+    "defaultLabel": "Domyślna dla wypłat",
+    "yes": "Tak",
+    "no": "Nie",
+    "referenceLabel": "Numer referencyjny",
+    "securityNote": "Dla twojego bezpieczeństwa dane bankowe zmienia się na Stripe, nigdy tutaj.",
+    "manageInStripe": "Zarządzaj w Stripe"
+  },
+  "recentActivity": {
+    "label": "Ostatnia aktywność",
+    "title": "Aktywność",
+    "empty": "Sprzedaż, zwroty i wypłaty pojawią się tutaj.",
+    "datePending": "{date} · Oczekująca"
+  },
+  "transactionModal": {
+    "title": "{type, select, charge {Sprzedaż} refund {Zwrot} payout {Wypłata} stripe_fee {Opłata Stripe} adjustment {Korekta} other {Transakcja}}",
+    "processingFee": "Opłata za obsługę płatności",
+    "net": "Netto na twoje saldo",
+    "status": "Status",
+    "statusPending": "Oczekująca, rozliczana na twoje saldo",
+    "statusAvailable": "Dostępne",
+    "date": "Data",
+    "id": "ID transakcji"
+  },
+  "payoutModal": {
+    "title": "Wypłata",
+    "sentTo": "Wysłano na",
+    "bankAccount": "Konto bankowe ···· {last4}",
+    "arrives": "Dotrze",
+    "initiated": "Zainicjowano",
+    "type": "Typ",
+    "typeValue": "{method, select, instant {Ekspresowa} other {Standardowa}} · {automatic, select, true {Automatyczna} other {Ręczna}}",
+    "statement": "Na wyciągu bankowym",
+    "id": "ID wypłaty",
+    "failed": "Tej wypłaty nie udało się zrealizować. Stripe ponawia próbę automatycznie, a kwota pozostaje w twoim dostępnym saldzie, dopóki się nie powiedzie."
+  }
+}

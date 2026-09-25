@@ -1,0 +1,1297 @@
+{
+  "shapes": {
+    "name": {
+      "square": "Kwadrat",
+      "circle": "Koło",
+      "ring": "Pierścień",
+      "diamond": "Romb",
+      "rounded": "Zaokrąglony kwadrat",
+      "pill": "Kapsułka",
+      "half": "Półkole",
+      "quarter": "Ćwiartka koła",
+      "bar": "Pasek",
+      "triangle": "Trójkąt",
+      "wedge": "Wycinek",
+      "pentagon": "Pięciokąt",
+      "hexagon": "Sześciokąt",
+      "octagon": "Ośmiokąt",
+      "star": "Gwiazda",
+      "sparkle": "Iskierka",
+      "cross": "Krzyż",
+      "arrow": "Strzałka",
+      "chevron": "Szewron",
+      "trapezoid": "Trapez",
+      "parallelogram": "Równoległobok",
+      "burst": "Rozbłysk"
+    },
+    "add": {
+      "square": "Dodaj kwadrat",
+      "circle": "Dodaj koło",
+      "ring": "Dodaj pierścień",
+      "diamond": "Dodaj romb",
+      "rounded": "Dodaj zaokrąglony kwadrat",
+      "pill": "Dodaj kapsułkę",
+      "half": "Dodaj półkole",
+      "quarter": "Dodaj ćwiartkę koła",
+      "bar": "Dodaj pasek",
+      "triangle": "Dodaj trójkąt",
+      "wedge": "Dodaj wycinek",
+      "pentagon": "Dodaj pięciokąt",
+      "hexagon": "Dodaj sześciokąt",
+      "octagon": "Dodaj ośmiokąt",
+      "star": "Dodaj gwiazdę",
+      "sparkle": "Dodaj iskierkę",
+      "cross": "Dodaj krzyż",
+      "arrow": "Dodaj strzałkę",
+      "chevron": "Dodaj szewron",
+      "trapezoid": "Dodaj trapez",
+      "parallelogram": "Dodaj równoległobok",
+      "burst": "Dodaj rozbłysk"
+    },
+    "group": {
+      "basic": "Podstawowe",
+      "polygons": "Wielokąty",
+      "accents": "Akcenty"
+    },
+    "groupLabel": {
+      "basic": "Podstawowe kształty",
+      "polygons": "Kształty wielokątne",
+      "accents": "Kształty akcentowe"
+    }
+  },
+  "fonts": {
+    "sans": "Sans",
+    "serif": "Serif",
+    "mono": "Mono",
+    "display": "Display",
+    "hand": "Odręczne",
+    "inter": "Inter",
+    "montserrat": "Montserrat",
+    "custom": "Przesłana czcionka"
+  },
+  "textVariants": {
+    "heading": "Nagłówek",
+    "subheading": "Podnagłówek",
+    "body": "Tekst podstawowy"
+  },
+  "layoutPresets": {
+    "standard": "Standardowy",
+    "caption": "Podpis",
+    "header": "Nagłówek",
+    "gallery": "Galeria",
+    "bare": "Prosty"
+  },
+  "blockKinds": {
+    "product": "Produkt",
+    "text": "Tekst",
+    "shape": "Kształt",
+    "image": "Obraz"
+  },
+  "settings": {
+    "groups": {
+      "theme": "Motyw",
+      "header": "Nagłówek",
+      "typography": "Typografia",
+      "cards": "Kafelki produktów",
+      "soldOut": "Wyprzedane",
+      "productPage": "Strona produktu"
+    },
+    "subtitle": {
+      "theme": "Witryna / Motyw",
+      "header": "Witryna / Nagłówek",
+      "typography": "Witryna / Typografia",
+      "cards": "Witryna / Kafelki produktów",
+      "soldOut": "Witryna / Wyprzedane",
+      "productPage": "Witryna / Strona produktu"
+    },
+    "labels": {
+      "looks": "Wygląd witryny",
+      "background": "Tło",
+      "accent": "Kolor akcentu",
+      "header": "Nazwa sklepu i bio",
+      "font": "Czcionka",
+      "canvasSize": "Rozmiar obszaru roboczego",
+      "gridGap": "Odstępy siatki",
+      "tileLayout": "Układ kafelka",
+      "titlePosition": "Pozycja tytułu",
+      "titleStyle": "Styl tytułu",
+      "cornerRadius": "Zaokrąglenie rogów",
+      "titleInset": "Odstęp tytułu od krawędzi",
+      "pricePosition": "Pozycja ceny",
+      "priceStyle": "Styl etykiety z ceną",
+      "soldOut": "Wyprzedane produkty",
+      "productPageLayout": "Strona produktu",
+      "productPageBackground": "Tło strony produktu",
+      "productPagePhotos": "Zdjęcia na stronie produktu",
+      "productPageFont": "Czcionka strony produktu",
+      "productPageIndexing": "Indeksowanie w wyszukiwarkach",
+      "buyButton": "Przycisk zakupu",
+      "buyButtonColour": "Kolor przycisku zakupu",
+      "buyButtonRoundness": "Zaokrąglenie przycisku zakupu",
+      "buyButtonBorder": "Obramowanie przycisku zakupu",
+      "priceNote": "Uwaga o cenie",
+      "shippingNote": "Uwaga o wysyłce",
+      "productPageSections": "Sekcje strony produktu",
+      "productPageAvailability": "Dostępność na stronie",
+      "productPageByline": "Podpis „Sprzedawca:”",
+      "shippingReturns": "Zasady wysyłki i zwrotów",
+      "sellerDetails": "Dane sprzedawcy"
+    }
+  },
+  "editorSearch": {
+    "sections": {
+      "canvas": "Na obszarze roboczym",
+      "settings": "Ustawienia",
+      "panels": "Panele"
+    },
+    "openProductPage": "Otwórz stronę produktu",
+    "panelSubtitle": "Panel",
+    "panels": {
+      "layers": "Warstwy",
+      "products": "Dodaj produkt",
+      "shapes": "Kształty",
+      "uploads": "Przesłane pliki"
+    }
+  },
+  "list": {
+    "showingOf": "Pokazano {count} z {total} witryn",
+    "count": "{count, plural, one {# witryna} few {# witryny} many {# witryn} other {# witryny}}",
+    "countSampleOnly": "Brak witryn",
+    "creating": "Tworzenie…",
+    "new": "Nowa witryna",
+    "emptyHeading": "Jeszcze brak witryn",
+    "emptyHintOwner": "Utwórz swoją pierwszą witrynę, a potem dodaj produkty do jej siatki. Każdy produkt na niej zyskuje stronę, którą możesz udostępnić.",
+    "emptyHintGuest": "Ten sklep nie ma jeszcze witryn.",
+    "create": "Utwórz witrynę",
+    "loadMoreError": "Nie udało się wczytać kolejnych witryn. Spróbuj ponownie.",
+    "loadMore": "Wczytaj więcej (pozostało: {remaining})",
+    "deleteTitle": "Usunąć witrynę?",
+    "deleteDesc": "Witryna „{name}” i jej siatka zostaną trwale usunięte. Tej operacji nie można cofnąć.",
+    "deleteToast": "Witryna „{name}” została usunięta."
+  },
+  "card": {
+    "editAriaLabel": "Edytuj: {name}",
+    "embedAriaLabel": "Osadź: {name}",
+    "deleteAriaLabel": "Usuń: {name}",
+    "blockCount": "{count, plural, one {# blok} few {# bloki} many {# bloków} other {# bloku}}",
+    "updatedLabel": " · zaktualizowano {date}",
+    "emptyHint": "Ta siatka jest pusta",
+    "removed": "Usunięto przez SquareShare",
+    "pausedInReview": "Wstrzymane · w SquareShare do sprawdzenia",
+    "pausedNeedsChanges": "Wstrzymane przez SquareShare · wymaga zmian"
+  },
+  "embed": {
+    "inDevNotice": "Widget osadzenia jest w trakcie tworzenia i nie renderuje się jeszcze na zewnętrznych stronach. Skonfiguruj ustawienia poniżej, aby być gotowym wkleić kod, gdy tylko zostanie wdrożony.",
+    "title": "Osadź tę witrynę",
+    "description": "Wklej ten kod na dowolną stronę, aby wyświetlić tam witrynę „{name}”.",
+    "enabledLabel": "Osadzenie włączone",
+    "domainsLabel": "Dozwolone domeny",
+    "domainsPlaceholder": "twojastrona.com, blog.twojastrona.com",
+    "domainsHint": "Maksymalnie {max}, oddzielone przecinkami. Wklej adres URL, a przytniemy go do samej domeny.",
+    "emptyDomainsWarning": "Dodaj co najmniej jedną domenę. Dopóki lista jest pusta, witryna nie wczyta się nigdzie, mimo że osadzenie jest włączone.",
+    "snippetLabel": "Kod",
+    "snippetReadyHint": "Wklej ten kod do kodu HTML swojej strony.",
+    "snippetLockedHint": "Włącz osadzenie i dodaj co najmniej jedną domenę, aby odblokować przycisk Kopiuj.",
+    "copySnippet": {
+      "copy": "Kopiuj kod do osadzenia",
+      "copied": "Skopiowano kod do osadzenia",
+      "failed": "Nie udało się skopiować kodu do osadzenia. Zaznacz i skopiuj ręcznie.",
+      "cannotCopyYet": "kodu do osadzenia nie można jeszcze skopiować"
+    },
+    "snippetKeyLabel": "Klucz kodu",
+    "rotateConfirmText": "Wygenerowanie nowego klucza od razu unieważnia każdą kopię starego kodu, również te na stronach, które nadal chcesz używać: nowy kod trzeba będzie wkleić wszędzie.",
+    "rotateKey": "Wygeneruj nowy klucz",
+    "rotating": "Generowanie…",
+    "revokeHint": "Wklejono gdzieś, gdzie nie powinno być? Wygeneruj nowy klucz, aby unieważnić każdy istniejący kod.",
+    "saveSettings": "Zapisz ustawienia",
+    "saving": "Zapisywanie…",
+    "saved": "Zapisano ustawienia osadzenia.",
+    "newKeyIssued": "Wygenerowano nowy klucz osadzenia.",
+    "newKeyDetail": "Wklej kod ponownie wszędzie tam, gdzie ta witryna jest osadzona."
+  },
+  "wizard": {
+    "category": {
+      "title": "Co sprzedajesz?",
+      "description": "To największa wskazówka, jakie układy będą dla ciebie odpowiednie."
+    },
+    "fulfilment": {
+      "title": "Jak kupujący to otrzymują?",
+      "description": "To wpływa na to, co strony twoich produktów mówią o dostawie."
+    },
+    "vibe": {
+      "title": "Wybierz wygląd",
+      "description": "Twój punkt wyjścia. Wszystko pozostaje edytowalne w edytorze."
+    },
+    "name": {
+      "title": "Nazwij swoją witrynę",
+      "description": "Tylko dla ciebie. Możesz zmienić nazwę w każdej chwili."
+    },
+    "stepOf": "Krok {current} z {total}",
+    "nameLabel": "Nazwa witryny",
+    "nameHint": "Zostaw puste, a nazwiemy ją Witryna bez nazwy.",
+    "otherCategoryLabel": "Co sprzedajesz?",
+    "otherCategoryPlaceholder": "np. modele do sklejania",
+    "noProductsHint": "Nie masz jeszcze produktów? Dodaj je po konfiguracji.",
+    "skipSetup": "Pomiń konfigurację",
+    "skip": "Pomiń",
+    "creating": "Tworzenie…",
+    "create": "Utwórz witrynę"
+  },
+  "createOptions": {
+    "categoryGroupLabel": "Co sprzedajesz",
+    "fulfilmentGroupLabel": "Jak kupujący to otrzymują",
+    "vibeGroupLabel": "Wygląd, jaki chcesz",
+    "category": {
+      "fashion": "Odzież",
+      "art": "Sztuka i grafiki",
+      "jewellery": "Biżuteria",
+      "handmade": "Rękodzieło",
+      "home": "Dom i wnętrza",
+      "beauty": "Uroda",
+      "food": "Jedzenie i napoje",
+      "music": "Muzyka",
+      "photography": "Fotografia",
+      "books": "Książki i ziny",
+      "digital": "Produkty cyfrowe",
+      "vintage": "Vintage",
+      "other": "Coś innego"
+    },
+    "categoryPlaceholder": {
+      "fashion": "Mój sklep odzieżowy",
+      "art": "Mój sklep z sztuką",
+      "jewellery": "Mój sklep z biżuterią",
+      "handmade": "Mój sklep z rękodziełem",
+      "home": "Mój sklep wnętrzarski",
+      "beauty": "Mój sklep kosmetyczny",
+      "food": "Mój sklep spożywczy",
+      "music": "Mój sklep muzyczny",
+      "photography": "Mój sklep fotograficzny",
+      "books": "Mój sklep z książkami",
+      "digital": "Mój sklep cyfrowy",
+      "vintage": "Mój sklep vintage",
+      "other": "Mój sklep",
+      "default": "Moja witryna"
+    },
+    "fulfilment": {
+      "physical": "Wysyłam to",
+      "digital": "Pobierają to",
+      "services": "Rezerwują mnie",
+      "mixed": "Po trochu każdego"
+    },
+    "fulfilmentHint": {
+      "physical": "Produkty fizyczne",
+      "digital": "Pliki, presety, muzyka",
+      "services": "Sesje, zlecenia",
+      "mixed": "Więcej niż jedno z powyższych"
+    },
+    "vibe": {
+      "minimal": "Minimalistyczny",
+      "classic": "Klasyczny",
+      "bold": "Odważny"
+    },
+    "vibeHint": {
+      "minimal": "Nazwa i cena po najechaniu kursorem",
+      "classic": "Nazwa i cena zawsze widoczne",
+      "bold": "Cena zawsze, nazwa po najechaniu kursorem"
+    }
+  },
+  "picker": {
+    "addFirst": "Dodaj swój pierwszy produkt",
+    "noProducts": "Nie masz jeszcze produktów. Dodaj jeden, a od razu wrócisz tutaj, aby go umieścić.",
+    "searchPlaceholder": "Szukaj produktów",
+    "searchAriaLabel": "Przeszukaj swoje produkty",
+    "searching": "Wyszukiwanie…",
+    "noMatch": "Żaden produkt nie pasuje do „{term}”.",
+    "searchFailed": "Wyszukiwanie jest teraz niedostępne; pokazujemy to, co już wczytano.",
+    "inGrid": "W siatce",
+    "available": "Dostępny",
+    "addSelected": "Dodaj {count} zaznaczonych",
+    "addAll": "Dodaj wszystkie ({count})",
+    "deselectAriaLabel": "Odznacz: {title}",
+    "selectAriaLabel": "Zaznacz: {title}",
+    "inGridAriaLabel": "{title} jest w siatce",
+    "addToGridAriaLabel": "Dodaj do siatki: {title}",
+    "draftAriaLabel": "Produkt w wersji roboczej: niewidoczny dla kupujących",
+    "draftBadge": "Wersja robocza"
+  },
+  "preview": {
+    "ariaLabel": "Podgląd witryny"
+  },
+  "masthead": {
+    "namePlaceholder": "Nazwa twojego sklepu",
+    "bioPlaceholder": "Krótka linijka o twoim sklepie",
+    "editAriaLabel": "{line, select, name {Edytuj nazwę sklepu} bio {Edytuj bio sklepu} other {Edytuj: {line}}}",
+    "editorNameAriaLabel": "Nazwa sklepu",
+    "editorBioAriaLabel": "Bio sklepu"
+  },
+  "pageConnectors": {},
+  "artboard": {
+    "productPageLabel": " · Strona produktu",
+    "closeAriaLabel": "Zamknij stronę produktu: {title}",
+    "desktopSize": "Rozmiar na komputer",
+    "mobileSize": "Rozmiar na telefon"
+  },
+  "customFont": {},
+  "metadata": {
+    "storefronts": {
+      "title": "Witryny",
+      "subtitle": "Każda witryna ma własną siatkę i motyw. Utwórz ich tyle, ile potrzebujesz, a potem otwórz jedną, aby ją edytować."
+    },
+    "editor": {
+      "title": "Edytuj witrynę"
+    },
+    "sample": {
+      "title": "Przykładowa witryna"
+    }
+  },
+  "routes": {
+    "editor": {
+      "loading": "Wczytywanie edytora witryny…"
+    },
+    "list": {
+      "loading": "wczytywanie witryn"
+    }
+  },
+  "controls": {
+    "off": "Wyłączone",
+    "layers": "Warstwy",
+    "objectCount": "{count, plural, one {1 obiekt} few {# obiekty} many {# obiektów} other {# obiektu}}",
+    "cardStyle": "Styl kafelka",
+    "priceTag": "Etykieta z ceną",
+    "theme": "Motyw",
+    "canvas": "Obszar roboczy",
+    "design": "Projekt"
+  },
+  "designPanel": {
+    "tabSelection": "Zaznaczenie",
+    "tabDesign": "Projekt",
+    "show": "Pokaż panel projektu",
+    "hide": "Ukryj panel projektu",
+    "resize": "Zmień rozmiar panelu projektu",
+    "closeSettings": "Zamknij ustawienia projektu",
+    "scopeLabel": "Zakres panelu"
+  },
+  "library": {
+    "title": "Biblioteka",
+    "hint": "Wybierz, aby dodać",
+    "canvasFull": "Obszar roboczy jest pełny",
+    "close": "Zamknij panel biblioteki",
+    "tabUploads": "Przesłane pliki",
+    "tabShapes": "Kształty"
+  },
+  "uploads": {
+    "addImage": "Dodaj obraz",
+    "processing": "Przetwarzanie…",
+    "uploadingPct": "Przesyłanie… {pct}%",
+    "dropToUpload": "Upuść, aby przesłać",
+    "uploadImage": "Prześlij obraz",
+    "uploadHint": "SVG, PNG, JPEG, WebP, GIF lub AVIF. Do 2 MB. Upuść plik tutaj albo kliknij, aby przeglądać.",
+    "canvasFullHint": "Obszar roboczy jest pełny. Usuń blok, aby dodać kolejny.",
+    "inStorefront": "W tej witrynie",
+    "imagesGroup": "Obrazy w tej witrynie",
+    "emptyHint": "Przesłane obrazy gromadzą się tutaj, dzięki czemu możesz użyć tego samego ponownie bez ponownego przesyłania.",
+    "placeAgain": "Umieść ponownie: {alt}",
+    "placeAgainFallback": "Umieść ten obraz ponownie"
+  },
+  "layers": {
+    "title": "Warstwy",
+    "backAriaLabel": "Wróć do zaznaczonego bloku, opuszczasz Warstwy",
+    "empty": "Na obszarze roboczym jeszcze nic nie ma. Bloki pojawiają się tutaj w miarę dodawania.",
+    "listAriaLabel": "Warstwy obszaru roboczego, od przodu do tyłu",
+    "layerOf": "Warstwa {index} z {total}",
+    "moveGroup": "Przesuń: {label}",
+    "reorderLabel": "Zmień kolejność: {label}",
+    "dragToReorder": "Przeciągnij, aby zmienić kolejność",
+    "showOptions": "Pokaż opcje warstwy: {label}",
+    "hideOptions": "Ukryj opcje warstwy: {label}",
+    "shortcutHint": "{mod} + [ i {mod} + ] przesuwają zaznaczenie o jedną warstwę. Dodaj Shift, aby przesunąć na sam koniec.",
+    "layerOp": {
+      "back": "Przesuń na spód",
+      "backward": "Przesuń o warstwę niżej",
+      "forward": "Przesuń o warstwę wyżej",
+      "front": "Przesuń na wierzch"
+    },
+    "layerOpFor": {
+      "back": "Przesuń na spód: {label}",
+      "backward": "Przesuń o warstwę niżej: {label}",
+      "forward": "Przesuń o warstwę wyżej: {label}",
+      "front": "Przesuń na wierzch: {label}"
+    }
+  },
+  "colorPanel": {
+    "close": "Zamknij panel kolorów",
+    "sectionType": "Typ",
+    "font": "Czcionka",
+    "fontTheme": "Czcionka motywu",
+    "fontThemeDesc": "Użyj czcionki witryny",
+    "sectionInDesign": "W tym projekcie",
+    "inDesignGroup": "Kolory w tym projekcie",
+    "inDesignEmpty": "Kolory używane na obszarze roboczym gromadzą się tutaj.",
+    "inDesignSwatch": "W tym projekcie ({hex})",
+    "sectionCustom": "Własny",
+    "sectionInherit": "Dziedziczony",
+    "sectionRecent": "Ostatnio używane",
+    "recentGroup": "Ostatnio używane kolory",
+    "recentSwatch": "Ostatnio używany ({hex})",
+    "sectionStandard": "Standardowy",
+    "standardGroup": "Standardowe kolory",
+    "sectionPalettes": "Palety"
+  },
+  "themePanel": {
+    "accent": "Akcent"
+  },
+  "panelSearch": {
+    "placeholder": "Znajdź ustawienie lub obiekt",
+    "clear": "Wyczyść wyszukiwanie",
+    "noResults": "Nic w edytorze nie pasuje do tego.",
+    "matchesLabel": "Wyniki"
+  },
+  "looks": {
+    "title": "Wyglądy",
+    "infoLabel": "Co zmienia wybór wyglądu",
+    "infoBody": "Wygląd ustawia jednocześnie kolory, czcionkę, zaokrąglenia, odstępy całej witryny oraz to, co pokazuje kafelek produktu. Twój układ, produkty i każdy kafelek ostylowany ręcznie pozostają dokładnie takie, jakie są.",
+    "groupLabel": "Wygląd witryny",
+    "minimal": "Minimalistyczny",
+    "classic": "Klasyczny",
+    "bold": "Odważny",
+    "hintMinimal": "Tylko zdjęcia. Nazwa i cena po najechaniu kursorem.",
+    "hintClassic": "Nazwa i cena pod każdym zdjęciem.",
+    "hintBold": "Cena zawsze na zdjęciu, nazwa po najechaniu kursorem."
+  },
+  "background": {
+    "label": "Tło",
+    "typeLabel": "Typ tła",
+    "typeColor": "Kolor",
+    "typeGradient": "Gradient",
+    "typeImage": "Obraz",
+    "position": "Pozycja",
+    "dragAriaLabel": "Przeciągnij, aby ustawić pozycję obrazu tła",
+    "dragHint": "Przeciągnij podgląd, aby zmienić pozycję. Przybliż, aby zmienić rozmiar.",
+    "zoomLabel": "Przybliżenie",
+    "zoomAriaLabel": "Przybliżenie obrazu tła",
+    "zoomValueText": "{n, plural, one {# procent} few {# procenty} many {# procent} other {# procenta}}",
+    "processing": "Przetwarzanie…",
+    "uploadingPct": "Przesyłanie… {n}%",
+    "replaceImage": "Zamień obraz",
+    "uploadImage": "Prześlij obraz",
+    "uploadingProgress": "Przesyłanie obrazu tła",
+    "uploadHint": "Do 10 MB. JPEG, PNG, WebP, GIF lub AVIF.",
+    "colorLabel": "Kolor",
+    "from": "Od",
+    "to": "Do",
+    "angle": "Kąt",
+    "gradientAngle": "Kąt gradientu",
+    "angleValueText": "{n, plural, one {# stopień} few {# stopnie} many {# stopni} other {# stopnia}}"
+  },
+  "cardStyle": {
+    "layout": "Układ",
+    "position": "Pozycja",
+    "roundedHint": "Zaokrąglone kafelki utrzymują obie etykiety na osi środkowej.",
+    "spotHint": "Kliknij miejsce, aby umieścić etykietę, albo przeciągnij ją tutaj lub na kafelek.",
+    "cornerRoundness": "Zaokrąglenie rogów",
+    "cornerValueText": "{n, plural, one {# piksel} few {# piksele} many {# pikseli} other {# piksela}}",
+    "sharp": "Ostre",
+    "circle": "Koło",
+    "fineTuning": "Dostrajanie",
+    "showTitle": "Pokaż tytuł",
+    "titleStyleLabel": "Styl tytułu",
+    "edgeSpacing": "Odstęp od krawędzi",
+    "edgeSpacingAriaLabel": "Odstęp tytułu od krawędzi",
+    "edgeValueText": "{n, plural, one {# piksel} few {# piksele} many {# pikseli} other {# piksela}}",
+    "auto": "Automatycznie",
+    "showTitleOnHover": "Pokaż tytuł po najechaniu kursorem",
+    "hoverHint": "Tytuł pozostaje ukryty, dopóki kupujący nie najedzie kursorem na produkt.",
+    "revealTop": "Pasek zsuwa się z góry, gdy kupujący najedzie kursorem.",
+    "revealMiddle": "Pasek pojawia się stopniowo, gdy kupujący najedzie kursorem.",
+    "revealBottom": "Pasek wysuwa się z dołu, gdy kupujący najedzie kursorem."
+  },
+  "priceTag": {
+    "showPrice": "Pokaż cenę",
+    "roundedHint": "Zaokrąglone kafelki utrzymują etykietę na osi środkowej.",
+    "dragHint": "Przeciągnij ją na kafelku albo użyj planszy układu, aby wybrać miejsce.",
+    "showOnHover": "Pokaż po najechaniu kursorem",
+    "font": "Czcionka",
+    "fontAriaLabel": "Czcionka etykiety z ceną",
+    "size": "Rozmiar",
+    "sizeAriaLabel": "Rozmiar etykiety z ceną",
+    "sizeValueText": "{n, plural, one {# piksel} few {# piksele} many {# pikseli} other {# piksela}}",
+    "sizeTip": "Rozmiar na pojedynczym kafelku. Etykieta skaluje się razem z kafelkiem, na którym się znajduje, więc większy blok ma większą cenę bez ręcznego ustawiania.",
+    "borderThickness": "Grubość obramowania",
+    "borderAriaLabel": "Grubość obramowania etykiety z ceną",
+    "borderValueText": "{n, plural, one {# piksel} few {# piksele} many {# pikseli} other {# piksela}}",
+    "cornerRoundness": "Zaokrąglenie rogów",
+    "cornerAriaLabel": "Zaokrąglenie rogów etykiety z ceną",
+    "cornerValueText": "{n, plural, one {# piksel} few {# piksele} many {# pikseli} other {# piksela}}",
+    "sharp": "Ostre",
+    "pill": "Kapsułka",
+    "none": "Brak"
+  },
+  "priceTagPosition": {
+    "placementAriaLabel": "Umiejscowienie etykiety z ceną",
+    "below": "Poniżej",
+    "onImage": "Na obrazie",
+    "hidden": "Ukryte",
+    "spotAriaLabel": "Miejsce etykiety z ceną",
+    "spotTopLeft": "Etykieta z ceną w lewym górnym rogu",
+    "spotTopCenter": "Etykieta z ceną na górnym środku",
+    "spotTopRight": "Etykieta z ceną w prawym górnym rogu",
+    "spotMiddle": "Etykieta z ceną na środku",
+    "spotBottomLeft": "Etykieta z ceną w lewym dolnym rogu",
+    "spotBottomCenter": "Etykieta z ceną na dolnym środku",
+    "spotBottomRight": "Etykieta z ceną w prawym dolnym rogu"
+  },
+  "layout": {
+    "canvasWidth": "Szerokość obszaru roboczego",
+    "canvasWidthAriaLabel": "Szerokość obszaru roboczego w blokach",
+    "blocksWide": "{n, plural, one {# blok szerokości} few {# bloki szerokości} many {# bloków szerokości} other {# bloku szerokości}}",
+    "canvasHeight": "Wysokość obszaru roboczego",
+    "heightTip": "Plansza nie może zmniejszyć się poniżej bloków już na niej umieszczonych: najpierw przeciągnij blok wyżej, a potem skróć obszar roboczy.",
+    "canvasHeightAriaLabel": "Wysokość obszaru roboczego w blokach",
+    "blocksTall": "{n, plural, one {# blok wysokości} few {# bloki wysokości} many {# bloków wysokości} other {# bloku wysokości}}",
+    "gridDensity": "Gęstość siatki",
+    "gridDensityAriaLabel": "Gęstość siatki",
+    "gridGapValue": "{n, plural, one {# piksel odstępu} few {# piksele odstępu} many {# pikseli odstępu} other {# piksela odstępu}}",
+    "noGap": "Bez odstępu",
+    "showGrid": "Pokaż siatkę",
+    "gridInfoLabel": "Kto widzi siatkę",
+    "gridInfoBody": "Pomoc podczas projektowania: rysuje puste miejsca, dzięki czemu widzisz, gdzie wyląduje blok. Kupujący nigdy jej nie widzą."
+  },
+  "placement": {
+    "rotation": "Obrót",
+    "rotationTipSingle": "Pełne stopnie, w obie strony od poziomu. Blok obraca się wokół własnego środka i zachowuje zajmowane komórki.",
+    "rotationTipMultiple": "Pełne stopnie, w obie strony od poziomu. Każdy blok obraca się wokół własnego środka, więc rząd bloków pozostaje rzędem.",
+    "rotationAriaLabel": "Obrót bloku",
+    "valueTextMixed": "Różne kąty",
+    "valueText": "{n, plural, one {# stopień} few {# stopnie} many {# stopni} other {# stopnia}}",
+    "statusMixed": "Różne",
+    "levelBlock": "Wypoziomuj blok",
+    "rotateTo": "Obróć do: {n, plural, one {# stopień} few {# stopnie} many {# stopni} other {# stopnia}}",
+    "level": "Poziom",
+    "angle": "{n}°",
+    "layerLabel": "Warstwa",
+    "layerInfoLabel": "Jak działają warstwy",
+    "layerInfoBody": "Warstwy decydują tylko o tym, co jest malowane na wierzchu tam, gdzie bloki się nakładają; kolejność odczytu przez czytnik ekranu nigdy się nie zmienia.{multi, select, true { To zaznaczenie zachowuje własną kolejność w stosie podczas przenoszenia.} other {}}{stacked, select, true { Kliknij Alt na stos na obszarze roboczym, aby dotrzeć do bloku pod spodem.} other {}}",
+    "blocksSelected": "{count, plural, one {# blok zaznaczony} few {# bloki zaznaczone} many {# bloków zaznaczonych} other {# bloku zaznaczonego}}",
+    "layerOf": "Warstwa {index} z {total}",
+    "blockLayerLabel": "Warstwa bloku",
+    "sendToBack": "Przesuń na spód",
+    "sendBackward": "Przesuń o warstwę niżej",
+    "bringForward": "Przesuń o warstwę wyżej",
+    "bringToFront": "Przesuń na wierzch",
+    "seeAllLayers": "Zobacz wszystkie warstwy"
+  },
+  "header": {
+    "showHeader": "Pokaż nagłówek",
+    "infoLabel": "Inne sposoby edycji nagłówka",
+    "infoBody": "Kliknij nazwę lub bio na obszarze roboczym, aby wpisać tekst bezpośrednio tam. Ten panel otwiera się jednocześnie na tej linii, gdzie ustawia się jej czcionkę, rozmiar, kolor, formatowanie i wyrównanie.",
+    "storeName": "Nazwa sklepu",
+    "storeNamePlaceholder": "Nazwa sklepu widoczna dla kupujących",
+    "bio": "Bio",
+    "bioPlaceholder": "Krótka linijka o twoim sklepie",
+    "charsLeft": "{n, plural, one {Pozostał # znak} few {Pozostały # znaki} many {Pozostało # znaków} other {Pozostało # znaku}}"
+  },
+  "soldOut": {
+    "hide": "Ukryj przed kupującymi",
+    "hideInfoLabel": "Co robi ukrywanie wyprzedanych produktów",
+    "hideInfoBody": "Produkty oznaczone jako wyprzedane znikają z witryny całkowicie. Tutaj, na obszarze roboczym, pozostają przyciemnione, dzięki czemu nadal możesz je przesuwać i przywrócić do sprzedaży.",
+    "badge": "Pokaż odznakę",
+    "badgeInfoLabel": "Kiedy pojawia się odznaka wyprzedania",
+    "badgeInfoBodyHidden": "Nie ma czego oznaczać, dopóki wyprzedane produkty są ukryte. Wyłącz Ukryj przed kupującymi, aby ta odznaka mogła je oznaczać.",
+    "badgeInfoBodyVisible": "Oznacza wyprzedany produkt w witrynie, dzięki czemu kupujący od razu wie, że istniał i się skończył, zamiast się zastanawiać."
+  },
+  "typography": {
+    "font": "Czcionka",
+    "ownFont": "Twoja własna czcionka",
+    "fontInfoLabel": "Jakie pliki czcionek działają",
+    "fontInfoBody": "WOFF2, WOFF, TTF lub OTF, do 2~NBSP~MB. WOFF2 to najlepszy wybór: jest najmniejszy, więc najszybciej wczytuje się kupującym, a odczytuje go każda przeglądarka.",
+    "processing": "Przetwarzanie…",
+    "uploadingPct": "Przesyłanie… {n}%",
+    "replaceFont": "Zamień czcionkę",
+    "uploadFont": "Prześlij czcionkę",
+    "uploadingLabel": "Przesyłanie czcionki",
+    "uploadedFontDesc": "Twoja przesłana czcionka",
+    "fontDescDefault": "Domyślna",
+    "fontDescInter": "Czysta i neutralna",
+    "fontDescMontserrat": "Geometryczna i szeroka"
+  },
+  "textFormat": {
+    "format": "Format",
+    "formatAriaLabel": "Formatowanie tekstu",
+    "bold": "Pogrubienie",
+    "italic": "Kursywa",
+    "underline": "Podkreślenie",
+    "alignment": "Wyrównanie",
+    "alignAriaLabel": "Wyrównanie tekstu",
+    "alignLeft": "Wyrównaj do lewej",
+    "alignCenter": "Wyśrodkuj",
+    "alignRight": "Wyrównaj do prawej"
+  },
+  "fontSize": {
+    "label": "Rozmiar",
+    "autoPx": "Automatycznie ({n} px)",
+    "auto": "Automatycznie",
+    "ariaLabel": "Rozmiar czcionki",
+    "valueText": "{n, plural, one {# piksel} few {# piksele} many {# pikseli} other {# piksela}}"
+  },
+  "layoutPresetPicker": {
+    "ariaLabel": "Układ"
+  },
+  "titleStyle": {
+    "ariaLabel": "Styl tytułu",
+    "bar": "Pasek",
+    "overlay": "Nakładka",
+    "shadow": "Cień"
+  },
+  "titlePosition": {
+    "ariaLabel": "Miejsce tytułu",
+    "spotTopLeft": "Tytuł w lewym górnym rogu",
+    "spotTopCenter": "Tytuł na górnym środku",
+    "spotTopRight": "Tytuł w prawym górnym rogu",
+    "spotMiddle": "Tytuł na środku",
+    "spotBottomLeft": "Tytuł w lewym dolnym rogu",
+    "spotBottomCenter": "Tytuł na dolnym środku",
+    "spotBottomRight": "Tytuł w prawym dolnym rogu"
+  },
+  "tileSpot": {},
+  "tileLayoutBoard": {
+    "labelToPlace": "Etykieta do umieszczenia",
+    "labelPositions": "Pozycje etykiet",
+    "title": "Tytuł",
+    "price": "Cena",
+    "titleAt": "{spot, select, top_left {Tytuł w lewym górnym rogu} top_center {Tytuł na górnym środku} top_right {Tytuł w prawym górnym rogu} middle_center {Tytuł na środku} bottom_left {Tytuł w lewym dolnym rogu} bottom_center {Tytuł na dolnym środku} bottom_right {Tytuł w prawym dolnym rogu} other {Tytuł tutaj}}. Przeciągnij, kliknij miejsce albo użyj klawiszy strzałek, aby go przesunąć.",
+    "priceAt": "{spot, select, top_left {Cena w lewym górnym rogu} top_center {Cena na górnym środku} top_right {Cena w prawym górnym rogu} middle_center {Cena na środku} bottom_left {Cena w lewym dolnym rogu} bottom_center {Cena na dolnym środku} bottom_right {Cena w prawym dolnym rogu} other {Cena tutaj}}. Przeciągnij, kliknij miejsce albo użyj klawiszy strzałek, aby ją przesunąć.",
+    "moveTitleTo": "{spot, select, top_left {Przesuń tytuł w lewy górny róg} top_center {Przesuń tytuł na górny środek} top_right {Przesuń tytuł w prawy górny róg} middle_center {Przesuń tytuł na środek} bottom_left {Przesuń tytuł w lewy dolny róg} bottom_center {Przesuń tytuł na dolny środek} bottom_right {Przesuń tytuł w prawy dolny róg} other {Przesuń tytuł tutaj}}",
+    "movePriceTo": "{spot, select, top_left {Przesuń cenę w lewy górny róg} top_center {Przesuń cenę na górny środek} top_right {Przesuń cenę w prawy górny róg} middle_center {Przesuń cenę na środek} bottom_left {Przesuń cenę w lewy dolny róg} bottom_center {Przesuń cenę na dolny środek} bottom_right {Przesuń cenę w prawy dolny róg} other {Przesuń cenę tutaj}}"
+  },
+  "productPage": {
+    "layout": {
+      "title": "Strona",
+      "showPage": {
+        "label": "Pokaż stronę produktu",
+        "infoLabel": "Co robi ten przełącznik",
+        "infoOn": "Stuknięcie w kafelek produktu otwiera jego stronę.",
+        "infoOff": "Kafelki produktów nie mają strony do otwarcia."
+      },
+      "pageColor": "Kolor strony",
+      "storefrontBackground": "Tło witryny",
+      "photoFit": {
+        "label": "Dopasowanie zdjęcia",
+        "ariaLabel": "Dopasowanie zdjęcia",
+        "fit": "Dopasuj",
+        "fill": "Wypełnij"
+      },
+      "font": {
+        "label": "Czcionka",
+        "infoLabel": "Jak czcionka tej strony wiąże się z czcionką witryny",
+        "infoOwn": "Ta strona wyświetla się własną czcionką, niezależnie od tego, jakiej używa witryna.",
+        "infoFollows": "Podąża za czcionką twojej witryny. Zmień ją w sekcji Typografia.",
+        "inheritOption": "Tak samo jak witryna ({name})"
+      },
+      "indexing": {
+        "label": "Zezwól wyszukiwarkom",
+        "infoLabel": "Co robi wyłączenie tego",
+        "infoContent": "Wyłączenie sprawia, że strony twoich produktów nie pojawiają się w wynikach wyszukiwania. Każdy, kto ma link, nadal może je otworzyć."
+      },
+      "useStorefrontBackground": "Użyj tła witryny"
+    },
+    "cta": {
+      "title": "Przycisk zakupu",
+      "infoLabel": "Co decyduje o tym, czy przycisk się pokazuje",
+      "infoContent": "Przycisk prowadzi pod link do zakupu każdego produktu (ustawiany na produkcie). Bez niego wysyła e-mail na twój adres kontaktowy poniżej; bez żadnego z nich przycisk się nie pokazuje.",
+      "buttonText": {
+        "label": "Tekst przycisku",
+        "charsLeft": "{count, plural, one {Pozostał # znak} few {Pozostały # znaki} many {Pozostało # znaków} other {Pozostało # znaku}}"
+      },
+      "buttonColor": "Kolor przycisku",
+      "storefrontAccent": "Akcent witryny",
+      "cornerRoundness": {
+        "label": "Zaokrąglenie rogów",
+        "ariaLabel": "Zaokrąglenie rogów przycisku zakupu",
+        "valueText": "{value} px",
+        "auto": "Automatycznie"
+      },
+      "borderThickness": {
+        "label": "Grubość obramowania",
+        "ariaLabel": "Grubość obramowania przycisku zakupu",
+        "valueText": "{value} px",
+        "none": "Brak"
+      },
+      "borderColor": "Kolor obramowania",
+      "buttonTextColor": "Kolor tekstu przycisku",
+      "priceNote": {
+        "label": "Uwaga o cenie",
+        "ariaLabel": "Uwaga o cenie",
+        "inclVat": "Z VAT",
+        "exclTax": "Bez podatku",
+        "none": "Brak"
+      },
+      "shippingNote": {
+        "label": "Uwaga o wysyłce",
+        "ariaLabel": "Uwaga o wysyłce",
+        "plusShipping": "Plus wysyłka",
+        "freeShipping": "Darmowa wysyłka",
+        "none": "Brak"
+      },
+      "useStorefrontAccent": "Użyj akcentu witryny",
+      "useButtonTextColor": "Użyj koloru tekstu przycisku"
+    },
+    "sections": {
+      "title": "Sekcje",
+      "infoLabel": "Kiedy sekcja pozostaje ukryta",
+      "infoContent": "Sekcja bez treści do pokazania pozostaje ukryta, nawet gdy jest włączona. Wysyłka i bezpieczeństwo nigdy nie pokazują się dla pobrań. Bezpieczeństwo i zgodność oraz Sprzedawca to ujawnienia prawne i nie można ich wyłączyć.",
+      "listAriaLabel": "Co pokazuje strona",
+      "underTheTitle": "pod tytułem",
+      "requiredByLaw": "wymagane prawem",
+      "sectionLabels": {
+        "description": "Opis",
+        "specs": "Specyfikacja",
+        "documents": "Dokumenty",
+        "shipping": "Wysyłka",
+        "returns": "Zwroty",
+        "safety": "Bezpieczeństwo i zgodność",
+        "seller": "Sprzedawca"
+      },
+      "availability": "Dostępność",
+      "soldByByline": "Podpis „Sprzedawca:”"
+    },
+    "shippingReturns": {
+      "title": "Wysyłka i zwroty",
+      "infoLabel": "Dlaczego to jest w Ustawieniach, a nie tutaj",
+      "infoContent": "Ustawiane raz dla całego konta, dzięki czemu każda witryna i każdy produkt sprzedają na tych samych warunkach. Dla sprzedawców z UE strona podaje też 14-dniowe prawo odstąpienia od umowy oraz dwuletnią odpowiedzialność za brak zgodności towaru z umową, niezależnie od tego, co napiszesz.",
+      "shippingLabel": "Wysyłka",
+      "returnsLabel": "Zwroty",
+      "profileCount": "{count, plural, one {# profil wysyłki dla produktów wysyłanych inaczej.} few {# profile wysyłki dla produktów wysyłanych inaczej.} many {# profili wysyłki dla produktów wysyłanych inaczej.} other {# profilu wysyłki dla produktów wysyłanych inaczej.}}",
+      "nothingSet": "Nic jeszcze nie ustawiono. Dopóki nie dodasz warunków, strony produktów informują, że sprzedawca nie dodał jeszcze informacji o wysyłce.",
+      "editSettings": "Edytuj w Ustawieniach",
+      "addTerms": "Dodaj warunki wysyłki"
+    },
+    "sellerDetails": {
+      "title": "Dane sprzedawcy",
+      "infoLabel": "Dlaczego to jest w Ustawieniach, a nie tutaj",
+      "infoContent": "Przepisy o sprzedaży na odległość wymagają nazwy sprzedawcy, adresu i sposobu kontaktu przy każdej ofercie. Ustawiane raz dla całego konta: każda witryna i każdy produkt pokazują te same dane, więc nie trzeba niczego powtarzać dla poszczególnych sklepów.",
+      "vatId": "Numer VAT UE {vatId}",
+      "nothingSet": "Nic jeszcze nie ustawiono. Dopóki nie dodasz danych firmy, kupujący widzą pod tytułem tylko linię „Sprzedawca:”.",
+      "editSettings": "Edytuj w Ustawieniach",
+      "addDetails": "Dodaj dane firmy"
+    }
+  },
+  "productBlock": {
+    "deleted": "Ten produkt został usunięty z twojego katalogu.",
+    "removeFromGrid": "Usuń z siatki",
+    "nameLabel": "Nazwa",
+    "namePlaceholder": "Nazwa produktu",
+    "priceLabel": "Cena ({currency})",
+    "saveDotDot": "Zapisz…",
+    "updating": "Aktualizowanie…",
+    "whereChangeLands": {
+      "label": "Gdzie trafia zmiana nazwy lub ceny",
+      "content": "Nazwa i cena należą do produktu, więc zapisanie aktualizuje je wszędzie tam, gdzie się pojawia, nie tylko w tej witrynie."
+    },
+    "stock": {
+      "outOfStock": "Brak w magazynie (0 sztuk).",
+      "lowStock": "Niski stan: {count} sztuk.",
+      "inStock": "{count} dostępnych."
+    },
+    "openProductPage": "Otwórz stronę produktu",
+    "hideProductPage": "Ukryj stronę produktu",
+    "tileStyle": {
+      "title": "Styl kafelka",
+      "reset": "Przywróć motyw",
+      "infoLabel": "Jak styl tego kafelka wiąże się z motywem",
+      "infoWithOverrides": "Ten kafelek ma własny styl. Ustawienia, których tu nie zmieniono, nadal podążają za motywem.",
+      "infoNoOverrides": "Ostyluj ten kafelek osobno. Wszystko, czego nie zmienisz, nadal podąża za motywem."
+    },
+    "priceTag": "Etykieta z ceną",
+    "modal": {
+      "title": "Zaktualizować produkt wszędzie?",
+      "description": "To edytuje sam produkt. Każda witryna, link do zakupu i katalog produktów pokażą nowe dane, nie tylko ta siatka.",
+      "nameLabel": "Nazwa:",
+      "priceLabel": "Cena:",
+      "updateEverywhere": "Zaktualizuj wszędzie"
+    },
+    "savedToast": "Produkt ~L~{title}~R~ został zaktualizowany wszędzie tam, gdzie się pojawia.",
+    "validation": {
+      "noTitle": "Nadaj produktowi nazwę.",
+      "noPrice": "Ustaw cenę.",
+      "badPrice": "Cena musi być liczbą większą od zera.",
+      "tooHigh": "Ta cena jest za wysoka."
+    }
+  },
+  "textBlock": {
+    "text": {
+      "label": "Tekst",
+      "infoLabel": "Inne sposoby edycji tego tekstu",
+      "infoContent": "Możesz też kliknąć blok ponownie na obszarze roboczym i wpisać tekst bezpośrednio, co jest szybsze przy małej zmianie."
+    },
+    "editOnCanvas": "Edytuj tekst na obszarze roboczym",
+    "style": {
+      "label": "Styl"
+    },
+    "font": {
+      "label": "Czcionka",
+      "themeFont": "Czcionka motywu",
+      "themeFontDescription": "Użyj czcionki witryny"
+    },
+    "color": {
+      "selectedWords": "Zaznaczone słowa",
+      "label": "Kolor",
+      "blockColor": "kolor bloku",
+      "themeColor": "Kolor motywu",
+      "useBlockColor": "Użyj koloru bloku"
+    },
+    "colouringSelected": "Kolorowanie {count, plural, one {# zaznaczonego znaku} few {# zaznaczonych znaków} many {# zaznaczonych znaków} other {# zaznaczonego znaku}}. Kliknij poza słowami, aby zamiast tego pokolorować cały blok."
+  },
+  "imageBlock": {
+    "size": {
+      "label": "Rozmiar",
+      "ariaLabel": "Dopasowanie obrazu",
+      "fill": "Wypełnij",
+      "fit": "Dopasuj",
+      "fillHint": "Wypełnia blok, przycinając nadmiar.",
+      "fitHint": "Pokazuje cały obraz wewnątrz bloku."
+    },
+    "reposition": "Zmień pozycję obrazu",
+    "opacity": {
+      "label": "Przezroczystość",
+      "ariaLabel": "Przezroczystość obrazu",
+      "valueText": "{value}%"
+    },
+    "description": {
+      "label": "Opis",
+      "placeholder": "Logo, ikona, dekoracja…",
+      "hint": "Odczytywane na głos przez czytniki ekranu. Zostaw puste, jeśli obraz jest czysto dekoracyjny."
+    }
+  },
+  "shapeBlock": {
+    "shape": {
+      "label": "Kształt",
+      "ariaLabel": "Rodzaj kształtu"
+    },
+    "points": {
+      "label": "Wierzchołki",
+      "ariaLabel": "Wierzchołki gwiazdy",
+      "valueText": "{value} wierzchołków"
+    },
+    "corners": {
+      "label": "Zaokrąglenie rogów",
+      "ariaLabel": "Zaokrąglenie rogów",
+      "valueText": "{value}%",
+      "sharp": "Ostre"
+    },
+    "fill": {
+      "ring": "Kolor",
+      "shape": "Wypełnienie"
+    },
+    "border": {
+      "ringLabel": "Grubość pierścienia",
+      "shapeLabel": "Grubość obramowania",
+      "ringAriaLabel": "Grubość pierścienia",
+      "shapeAriaLabel": "Grubość obramowania",
+      "valueText": "{value} px",
+      "none": "Brak",
+      "color": "Kolor obramowania"
+    },
+    "opacity": {
+      "label": "Przezroczystość",
+      "ariaLabel": "Przezroczystość kształtu",
+      "valueText": "{value}%"
+    }
+  },
+  "multiBlock": {
+    "shapesContext": "{count, plural, one {Edycja # kształtu razem.} few {Edycja # kształtów razem.} many {Edycja # kształtów razem.} other {Edycja # kształtu razem.}} Pokazane wartości pochodzą z pierwszego zaznaczonego kształtu; każda zmiana dotyczy ich wszystkich.",
+    "textsContext": "{count, plural, one {Edycja # bloku tekstowego razem.} few {Edycja # bloków tekstowych razem.} many {Edycja # bloków tekstowych razem.} other {Edycja # bloku tekstowego razem.}} Pokazane wartości pochodzą z pierwszego zaznaczonego bloku; każda zmiana dotyczy ich wszystkich. Każdy blok zachowuje własny tekst.",
+    "imagesContext": "{count, plural, one {Edycja # elementu razem.} few {Edycja # elementów razem.} many {Edycja # elementów razem.} other {Edycja # elementu razem.}} Pokazane wartości pochodzą z pierwszego zaznaczonego elementu; każda zmiana dotyczy ich wszystkich. Każdy zachowuje własny obraz.",
+    "productsContext": "{count, plural, one {Stylowanie # kafelka produktu razem.} few {Stylowanie # kafelków produktów razem.} many {Stylowanie # kafelków produktów razem.} other {Stylowanie # kafelka produktu razem.}} Pokazane wartości pochodzą z pierwszego zaznaczonego kafelka; każda zmiana dotyczy ich wszystkich.",
+    "mixedContext": "{count, plural, one {Zaznaczony jest # blok różnych typów.} few {Zaznaczone są # bloki różnych typów.} many {Zaznaczonych jest # bloków różnych typów.} other {Zaznaczone jest # bloku różnych typów.}} Zaznacz bloki jednego typu, aby edytować ich ustawienia razem.",
+    "remove": "Usuń {count, plural, one {# blok} few {# bloki} many {# bloków} other {# bloku}}",
+    "duplicate": "Duplikuj {count, plural, one {# blok} few {# bloki} many {# bloków} other {# bloku}}",
+    "productsNotDuplicated": "Produkty nie są duplikowane.",
+    "tileStyle": {
+      "title": "Styl kafelka",
+      "reset": "Przywróć motyw"
+    },
+    "priceTag": "Etykieta z ceną"
+  },
+  "blockActions": {
+    "duplicate": "Duplikuj",
+    "remove": "Usuń z siatki"
+  },
+  "toolbar": {
+    "ariaLabel": "Narzędzia edytora",
+    "addProduct": "Dodaj produkt",
+    "addText": "Dodaj tekst",
+    "addElement": "Dodaj element",
+    "product": "Produkt",
+    "text": "Tekst",
+    "element": "Element",
+    "elementsMenu": "Elementy",
+    "uploading": "Przesyłanie…",
+    "upload": "Prześlij",
+    "uploadImage": "Prześlij obraz",
+    "allShapes": "Wszystkie kształty",
+    "browseShapes": "Przeglądaj pełną bibliotekę kształtów",
+    "closePage": "Zamknij stronę produktu",
+    "showPage": "Pokaż stronę produktu",
+    "closePages": "Zamknij strony produktów",
+    "showPageFull": "Pokaż stronę produktu",
+    "undo": "Cofnij",
+    "undoTip": "Cofnij (Ctrl+Z)",
+    "redo": "Ponów",
+    "redoTip": "Ponów (Ctrl+Shift+Z)",
+    "tidy": "Uporządkuj obszar roboczy",
+    "tidyTip": "Uporządkuj",
+    "zoomOut": "Pomniejsz",
+    "zoomOutTip": "Pomniejsz (Ctrl -)",
+    "zoomReset": "Przywróć powiększenie do 100%",
+    "zoomResetTip": "Przywróć powiększenie (Ctrl 0)",
+    "zoomResetMenuItem": "Przywróć powiększenie",
+    "zoomIn": "Powiększ",
+    "zoomInTip": "Powiększ (Ctrl +)",
+    "designSettings": "Ustawienia projektu",
+    "page": "Strona",
+    "moreTools": "Więcej narzędzi"
+  },
+  "selectionToolbar": {
+    "toolsFor": "Narzędzia dla: {name}",
+    "elements": "{count, plural, one {# element} few {# elementy} many {# elementów} other {# elementu}}",
+    "hidePage": "Ukryj stronę",
+    "hidePages": "Ukryj strony",
+    "openPage": "Otwórz stronę",
+    "openPages": "Otwórz strony",
+    "openProductPage": "Otwórz stronę produktu: {name}",
+    "closeProductPage": "Zamknij stronę produktu: {name}",
+    "openProductPages": "Otwórz strony produktów dla: {count, plural, one {# produkt} few {# produkty} many {# produktów} other {# produktu}}",
+    "closeProductPages": "Zamknij strony produktów dla: {count, plural, one {# produkt} few {# produkty} many {# produktów} other {# produktu}}",
+    "editText": "Edytuj tekst",
+    "editTextOf": "Edytuj tekst: {name}",
+    "color": "Kolor",
+    "changeColorOf": "Zmień kolor: {name}",
+    "stroke": "Obrys",
+    "editStrokeOf": "Edytuj obrys: {name}",
+    "corners": "Rogi",
+    "editCornersOf": "Edytuj zaokrąglenie rogów: {name}",
+    "opacity": "Przezroczystość",
+    "editOpacityOf": "Edytuj przezroczystość: {name}",
+    "frame": "Kadrowanie",
+    "frameImageFor": "Kadruj obraz: {name}",
+    "duplicate": "Duplikuj",
+    "duplicateNamed": "Duplikuj: {name}",
+    "duplicateN": "Duplikuj {count, plural, one {# element} few {# elementy} many {# elementów} other {# elementu}}",
+    "removeFrom": "Usuń z siatki: {name}",
+    "removeN": "Usuń z siatki: {count, plural, one {# element} few {# elementy} many {# elementów} other {# elementu}}"
+  },
+  "canvas": {
+    "gridLabel": "Obszar roboczy witryny",
+    "emptyGrid": "Twoja siatka jest pusta",
+    "emptyGridHint": "Dodaj produkt, aby zacząć układać witrynę. Tekst i kształty znajdziesz na pasku narzędzi poniżej.",
+    "addProduct": "Dodaj produkt",
+    "desktopPreview": "Podgląd na komputer",
+    "mobilePreview": "Podgląd na telefon"
+  },
+  "blockTile": {
+    "removedProduct": "Usunięty produkt",
+    "shape": "{kind, select, square {kwadratowy kształt} circle {okrągły kształt} ring {kształt pierścienia} diamond {kształt rombu} rounded {zaokrąglony kształt} pill {kształt kapsułki} half {kształt półkola} quarter {kształt ćwiartki koła} bar {kształt paska} triangle {kształt trójkąta} wedge {kształt wycinka} pentagon {kształt pięciokąta} hexagon {kształt sześciokąta} octagon {kształt ośmiokąta} star {kształt gwiazdy} sparkle {kształt iskierki} cross {kształt krzyża} arrow {kształt strzałki} chevron {kształt szewronu} trapezoid {kształt trapezu} parallelogram {kształt równoległoboku} burst {kształt rozbłysku} other {kształt {kind}}}",
+    "imageWithAlt": "Obraz: {alt}",
+    "imageElement": "Element obrazu",
+    "textWithContent": "Tekst: {text}",
+    "textBlock": "Blok tekstowy",
+    "selected": "Zaznaczone: {label}. Naciśnij Enter, aby odznaczyć.",
+    "unselected": "{label}. Naciśnij Enter, aby zaznaczyć i edytować.",
+    "draftAriaLabel": "Produkt w wersji roboczej: kupujący nie mogą skorzystać z tego linku",
+    "draft": "Wersja robocza"
+  },
+  "blockFace": {
+    "productRemoved": "Produkt usunięty. Usuń ten blok."
+  },
+  "framer": {
+    "ariaLabel": "Kadrowanie obrazu: {name}. Przeciągnij, aby zmienić pozycję, użyj strzałek do drobnych przesunięć, plusa i minusa do przybliżenia, Escape po zakończeniu. Aktualnie {x}% w poziomie, {y}% w pionie, przybliżenie {zoom}%.",
+    "hintZoomed": "{zoom}% · Przeciągnij, aby kadrować · Esc",
+    "hintMinZoom": "Pociągnij za róg, aby przybliżyć · Esc"
+  },
+  "inlineText": {
+    "ariaLabel": "Tekst bloku"
+  },
+  "tiles": {
+    "emptyText": "Pusty blok tekstowy",
+    "imageUnavailable": "Obraz niedostępny"
+  },
+  "spotDrag": {
+    "tokenLabel": "{token, select, title {Tytuł} other {Cena}} {drop, select, below {na pasku tytułu} top_left {w lewym górnym rogu} top_center {na górnym środku} top_right {w prawym górnym rogu} middle_center {na środku} bottom_left {w lewym dolnym rogu} bottom_center {na dolnym środku} bottom_right {w prawym dolnym rogu} other {}}. Naciśnij, aby otworzyć ustawienia, albo przeciągnij (lub użyj klawiszy strzałek), aby to przesunąć."
+  },
+  "autoFit": {},
+  "designer": {
+    "header": {
+      "back": "Wróć do witryn",
+      "nameLabel": "Nazwa witryny",
+      "namePlaceholder": "Witryna bez nazwy",
+      "unsaved": "Niezapisane zmiany",
+      "search": "Szukaj"
+    },
+    "mobileNotice": {
+      "body": "Aby uzyskać najlepsze wrażenia podczas edycji, otwórz ten edytor na komputerze lub tablecie. Zmiana kolejności bloków i edycja nagłówka działają na każdym urządzeniu.",
+      "dismiss": "Zamknij powiadomienie o edycji na małym ekranie"
+    },
+    "inspector": {
+      "title": {
+        "addProduct": "Dodaj produkt",
+        "blocks": "{count, plural, one {# blok} few {# bloki} many {# bloków} other {# bloku}}",
+        "product": "Produkt",
+        "shape": "Kształt",
+        "image": "Obraz",
+        "text": "Blok tekstowy"
+      },
+      "close": {
+        "addProduct": "Zamknij panel dodawania produktu",
+        "blocks": "{count, plural, one {Zamknij panel # bloku} few {Zamknij panel # bloków} many {Zamknij panel # bloków} other {Zamknij panel # bloku}}",
+        "product": "Zamknij panel produktu",
+        "shape": "Zamknij panel kształtu",
+        "image": "Zamknij panel obrazu",
+        "text": "Zamknij panel bloku tekstowego"
+      }
+    },
+    "toasts": {
+      "full": "Ta witryna jest pełna.",
+      "fullDetail": "Witryna może pomieścić maksymalnie {max, plural, one {# blok} few {# bloki} many {# bloków} other {# bloku}}.",
+      "imageUploadFailed": "Nie udało się przesłać tego obrazu.",
+      "imageUploadFailedDetail": "Spróbuj ponownie za chwilę.",
+      "copied": "{count, plural, one {Skopiowano blok.} few {Skopiowano # bloki.} many {Skopiowano # bloków.} other {Skopiowano # bloku.}}",
+      "copiedDetail": "Wklej za pomocą Ctrl+V lub Cmd+V.",
+      "savedWithDrafts": "Zapisano, ale niektóre produkty są nadal wersjami roboczymi.",
+      "draftsDetail": "{count, plural, one {{names} jest wersją roboczą i kupujący nie mogą jeszcze do niego dotrzeć.} few {{names}{hidden, plural, =0 {} one { i # więcej} few { i # więcej} many { i # więcej} other { i # więcej}} są wersjami roboczymi i kupujący nie mogą jeszcze do nich dotrzeć.} many {{names}{hidden, plural, =0 {} one { i # więcej} few { i # więcej} many { i # więcej} other { i # więcej}} są wersjami roboczymi i kupujący nie mogą jeszcze do nich dotrzeć.} other {{names}{hidden, plural, =0 {} one { i # więcej} few { i # więcej} many { i # więcej} other { i # więcej}} są wersjami roboczymi i kupujący nie mogą jeszcze do nich dotrzeć.}}",
+      "publishDrafts": "Opublikuj te produkty, gdy zechcesz.",
+      "saved": "Zapisano witrynę.",
+      "droppedBlocks": "{count, plural, one {# blok wskazywał usunięty produkt i został usunięty.} few {# bloki wskazywały usunięte produkty i zostały usunięte.} many {# bloków wskazywało usunięte produkty i zostało usuniętych.} other {# bloku wskazywało usunięty produkt i zostało usunięte.}}"
+    },
+    "leave": {
+      "title": "Zapisać zmiany?",
+      "description": "Masz niezapisane zmiany w tej witrynie. Zapisz je przed wyjściem albo je odrzuć.",
+      "save": "Zapisz zmiany",
+      "discard": "Odrzuć zmiany",
+      "keepEditing": "Kontynuuj edycję"
+    },
+    "defaults": {
+      "textBlock": "Twój tekst tutaj"
+    }
+  },
+  "sample": {
+    "name": "Przykładowa witryna",
+    "card": {
+      "open": "Otwórz przykładową witrynę",
+      "badge": "Przykład",
+      "summary": "{count, plural, one {{count} blok · próbuj czego chcesz, nic się nie zapisuje} few {{count} bloki · próbuj czego chcesz, nic się nie zapisuje} many {{count} bloków · próbuj czego chcesz, nic się nie zapisuje} other {{count} bloku · próbuj czego chcesz, nic się nie zapisuje}}",
+      "hide": "Ukryj przykładową witrynę"
+    },
+    "embed": {
+      "title": "Osadź witrynę",
+      "description": "Każda utworzona witryna dostaje własny kod do wklejenia na twojej stronie internetowej.",
+      "snippetLabel": "Kod wygląda tak",
+      "inDevelopment": "Widget jest jeszcze w trakcie tworzenia i nie wyświetla się jeszcze na innych stronach.",
+      "create": "Utwórz witrynę"
+    },
+    "list": {
+      "show": "Pokaż przykładową witrynę",
+      "showFailed": "Nie udało się przywrócić przykładowej witryny.",
+      "hideFailed": "Nie udało się ukryć przykładowej witryny.",
+      "failedDetail": "Spróbuj za chwilę.",
+      "createFirst": "Utwórz pierwszą witrynę",
+      "createFirstHint": "Dodaj produkty do jej siatki. Każdy dostanie stronę, którą możesz udostępniać."
+    },
+    "designer": {
+      "createAriaLabel": "Utwórz własną witrynę",
+      "createShort": "Utwórz",
+      "create": "Utwórz własną",
+      "notice": "To przykładowa witryna. Próbuj czego chcesz: nic tutaj się nie zapisuje.",
+      "takeTour": "Zacznij przewodnik"
+    },
+    "content": {
+      "bio": "Technologia na co dzień i przedmioty na biurko, wybrane na lata.",
+      "heading": "Bestsellery",
+      "story": "Używamy wszystkiego, co sprzedajemy, zanim trafi do oferty. Zwroty przyjmujemy w ciągu 14 dni.",
+      "dispatch": "Wysyłka w ciągu 2 dni roboczych",
+      "products": {
+        "camera": {
+          "title": "Aparat natychmiastowy",
+          "description": "Drukuje zdjęcie kilka sekund po jego zrobieniu. Wkłady sprzedawane osobno."
+        },
+        "headphones": {
+          "title": "Słuchawki",
+          "description": "Zamknięte, z miękkimi nausznikami z pianki z pamięcią kształtu. Kabel 3,5 mm w zestawie."
+        },
+        "watch": {
+          "title": "Smartwatch",
+          "description": "Aluminiowa koperta ze sportowym paskiem. Liczy kroki, sen i treningi."
+        },
+        "mouse": {
+          "title": "Mysz bezprzewodowa",
+          "description": "Lekka, z cichymi kliknięciami i do 250 godzin na jednej baterii."
+        },
+        "speaker": {
+          "title": "Głośnik przenośny",
+          "description": "Wodoodporny, do 12 godzin odtwarzania na jednym ładowaniu."
+        },
+        "succulent": {
+          "title": "Sukulent na biurko",
+          "description": "Mała haworsja w ceramicznej doniczce. Podlewaj mniej więcej raz w miesiącu."
+        }
+      }
+    }
+  },
+  "colors": {
+    "fields": {
+      "accent": "Akcent",
+      "storeName": "Nazwa sklepu",
+      "bio": "Opis",
+      "background": "Tło",
+      "gradientFrom": "Gradient od",
+      "gradientTo": "Gradient do",
+      "fill": "Wypełnienie",
+      "color": "Kolor",
+      "borderColor": "Kolor obramowania",
+      "selectedWords": "Zaznaczone słowa",
+      "textColor": "Kolor tekstu",
+      "tagColor": "Kolor tagu",
+      "shadowColor": "Kolor cienia"
+    },
+    "inherit": {
+      "themeColor": {
+        "label": "Kolor motywu",
+        "use": "Użyj: kolor motywu"
+      },
+      "default": {
+        "label": "Domyślny",
+        "use": "Użyj: domyślny"
+      },
+      "noFill": {
+        "label": "Brak wypełnienia",
+        "use": "Użyj: brak wypełnienia"
+      },
+      "cardColor": {
+        "label": "Kolor karty",
+        "use": "Użyj: kolor karty"
+      },
+      "blockColor": {
+        "label": "kolor bloku",
+        "use": "Użyj: kolor bloku"
+      }
+    },
+    "presets": {
+      "white": {
+        "name": "Biały",
+        "label": "Biały ({value})"
+      },
+      "grey": {
+        "name": "Szary",
+        "label": "Szary ({value})"
+      },
+      "ink": {
+        "name": "Atramentowy",
+        "label": "Atramentowy ({value})"
+      },
+      "paleAccent": {
+        "name": "Jasny akcent",
+        "label": "Jasny akcent ({value})"
+      },
+      "softAccent": {
+        "name": "Delikatny akcent",
+        "label": "Delikatny akcent ({value})"
+      },
+      "accent": {
+        "name": "Akcent",
+        "label": "Akcent ({value})"
+      },
+      "deepAccent": {
+        "name": "Głęboki akcent",
+        "label": "Głęboki akcent ({value})"
+      }
+    },
+    "standard": {
+      "white": "Biały ({value})",
+      "grey200": "Szary 200 ({value})",
+      "grey300": "Szary 300 ({value})",
+      "grey400": "Szary 400 ({value})",
+      "grey": "Szary ({value})",
+      "grey600": "Szary 600 ({value})",
+      "grey700": "Szary 700 ({value})",
+      "grey800": "Szary 800 ({value})",
+      "ink": "Atramentowy ({value})",
+      "black": "Czarny ({value})",
+      "red": "Czerwony ({value})",
+      "orange": "Pomarańczowy ({value})",
+      "amber": "Bursztynowy ({value})",
+      "yellow": "Żółty ({value})",
+      "green": "Zielony ({value})",
+      "teal": "Turkusowy ({value})",
+      "sky": "Błękitny ({value})",
+      "blue": "Niebieski ({value})",
+      "violet": "Fioletowy ({value})",
+      "pink": "Różowy ({value})",
+      "redDark": "Ciemnoczerwony ({value})",
+      "orangeDark": "Ciemnopomarańczowy ({value})",
+      "amberDark": "Ciemnobursztynowy ({value})",
+      "yellowDark": "Ciemnożółty ({value})",
+      "greenDark": "Ciemnozielony ({value})",
+      "tealDark": "Ciemnoturkusowy ({value})",
+      "skyDark": "Ciemnobłękitny ({value})",
+      "blueDark": "Ciemnoniebieski ({value})",
+      "violetDark": "Ciemnofioletowy ({value})",
+      "pinkDark": "Ciemnoróżowy ({value})"
+    },
+    "palettes": {
+      "sunset": {
+        "name": "Zachód słońca",
+        "group": "Paleta: Zachód słońca",
+        "swatches": {
+          "cream": "Zachód słońca: krem ({value})",
+          "amber": "Zachód słońca: bursztyn ({value})",
+          "orange": "Zachód słońca: pomarańcz ({value})",
+          "red": "Zachód słońca: czerwień ({value})",
+          "ember": "Zachód słońca: żar ({value})"
+        }
+      },
+      "forest": {
+        "name": "Las",
+        "group": "Paleta: Las",
+        "swatches": {
+          "mist": "Las: mgła ({value})",
+          "sage": "Las: szałwia ({value})",
+          "green": "Las: zieleń ({value})",
+          "pine": "Las: sosna ({value})",
+          "deep": "Las: głęboka zieleń ({value})"
+        }
+      },
+      "ocean": {
+        "name": "Ocean",
+        "group": "Paleta: Ocean",
+        "swatches": {
+          "foam": "Ocean: piana ({value})",
+          "sky": "Ocean: niebo ({value})",
+          "cyan": "Ocean: cyjan ({value})",
+          "sea": "Ocean: morze ({value})",
+          "navy": "Ocean: granat ({value})"
+        }
+      },
+      "mono": {
+        "name": "Mono",
+        "group": "Paleta: Mono",
+        "swatches": {
+          "white": "Mono: biel ({value})",
+          "silver": "Mono: srebro ({value})",
+          "grey": "Mono: szarość ({value})",
+          "graphite": "Mono: grafit ({value})",
+          "ink": "Mono: atrament ({value})"
+        }
+      },
+      "candy": {
+        "name": "Cukierek",
+        "group": "Paleta: Cukierek",
+        "swatches": {
+          "blush": "Cukierek: pudrowy róż ({value})",
+          "rose": "Cukierek: róża ({value})",
+          "pink": "Cukierek: róż ({value})",
+          "purple": "Cukierek: purpura ({value})",
+          "violet": "Cukierek: fiolet ({value})"
+        }
+      }
+    }
+  }
+}

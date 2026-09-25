@@ -1,0 +1,252 @@
+{
+  "steps": {
+    "seller": {
+      "label": "Añade tus datos de vendedor",
+      "detail": "Tu nombre o razón social, dirección y correo de contacto aparecen en cada página de producto.",
+      "detailDone": "Los compradores pueden ver a quién le compran.",
+      "detailUnconfirmed": "Abre el enlace que te enviamos por correo para confirmar tu correo de contacto.",
+      "action": "Añadir datos",
+      "actionUnconfirmed": "Confirmar correo",
+      "cta": "Añade tus datos de vendedor",
+      "ctaUnconfirmed": "Confirma tu correo"
+    },
+    "product": {
+      "label": "Añade un producto",
+      "detail": "Con un nombre y un precio basta. Puede quedarse como borrador por ahora.",
+      "detailDone": "{count, plural, one {Tienes {count} producto.} many {Tienes {count} productos.} other {Tienes {count} productos.}}",
+      "action": "Añadir producto",
+      "cta": "Añade tu primer producto"
+    },
+    "storefront": {
+      "label": "Pon un producto en un escaparate",
+      "detailDone": "Hay un producto en tu escaparate.",
+      "detailNone": "Crea un escaparate y luego añade un producto a su cuadrícula.",
+      "detailEmpty": "Abre tu escaparate y elige Añadir producto en la barra de herramientas.",
+      "actionCreate": "Crear escaparate",
+      "actionOpen": "Abrir editor",
+      "cta": "Abre tu escaparate",
+      "ctaCreate": "Crea un escaparate"
+    },
+    "publish": {
+      "label": "Publica su página",
+      "detailDone": "Tu página de producto está publicada.",
+      "detailNeedsSeller": "Termina tus datos de vendedor y tu página podrá publicarse.",
+      "detailNeedsStorefront": "En cuanto un producto esté en un escaparate, su página podrá publicarse.",
+      "detailNeedsActive": "Pon ese producto como Activo para que su página se publique.",
+      "detailPagesOff": "Las páginas de producto están desactivadas en ese escaparate. Actívalas en el editor.",
+      "actionEdit": "Editar producto",
+      "actionOpen": "Abrir editor",
+      "cta": "Publica tu producto",
+      "ctaPagesOff": "Activar páginas de producto"
+    }
+  },
+  "checklist": {
+    "titleDone": "Ya está todo configurado",
+    "title": "Configúralo todo",
+    "showMeAround": "Enséñamelo todo",
+    "showSteps": "Mostrar pasos",
+    "hideSteps": "Ocultar pasos",
+    "liveHint": "Tu primera página de producto ya está publicada. Comparte el enlace donde quieras.",
+    "copyLink": {
+      "copy": "Copiar el enlace de la página de producto",
+      "copied": "Enlace de la página de producto copiado",
+      "failed": "No hemos podido copiar el enlace de la página de producto. Selecciónalo y cópialo a mano."
+    },
+    "openPage": "Abrir página",
+    "opensInNewTab": " (se abre en una pestaña nueva)",
+    "hide": "Ocultar",
+    "progressLabel": "Progreso de la configuración",
+    "progress": "{total, plural, one {{done} de {total} hecho} many {{done} de {total} hechos} other {{done} de {total} hechos}}",
+    "stepDone": " (hecho)",
+    "stepToDo": " (pendiente)"
+  },
+  "welcome": {
+    "steps": {
+      "welcome": {
+        "title": "Te damos la bienvenida a Square Share",
+        "description": "Cuatro pasos para tener una página de producto que puedas compartir."
+      },
+      "path": {
+        "title": "Cuatro pasos hasta tu primera página"
+      },
+      "seller": {
+        "title": "Añade tus datos de vendedor",
+        "description": "Los compradores los ven en tus páginas de producto, y la ley los exige antes de poder vender. Nunca los usamos para marketing.",
+        "lawNote": "Los compradores los ven en tus páginas de producto, como exige la ley. Nunca se usan para marketing."
+      },
+      "tour": {
+        "title": "Dónde está todo",
+        "description": "Todo está en la barra lateral. Esto es para qué sirve cada parte."
+      },
+      "terms": {
+        "title": "Nuestras Condiciones del servicio",
+        "description": "Lee la versión resumida o las Condiciones completas y acepta para continuar."
+      }
+    },
+    "progress": "{total, plural, one {Paso {step} de {total}} many {Paso {step} de {total}} other {Paso {step} de {total}}}",
+    "intro": "Cada producto que vendes puede tener su propia página, con el estilo de un escaparate que diseñas tú.",
+    "tagline": "Dale a cada producto su propia página y compártela donde quieras.",
+    "path": {
+      "seller": {
+        "title": "Añade tus datos de vendedor",
+        "body": "Los compradores necesitan saber a quién le compran."
+      },
+      "product": {
+        "title": "Añade un producto",
+        "body": "Un nombre, un precio y una foto si tienes una."
+      },
+      "storefront": {
+        "title": "Ponlo en un escaparate",
+        "body": "Elige un aspecto y luego coloca el producto en la cuadrícula."
+      },
+      "share": {
+        "title": "Comparte su página",
+        "body": "Pega el enlace en tu bio, un mensaje o tu propia web."
+      }
+    },
+    "seller": {
+      "namePlaceholder": "p. ej. Studio Builderboy e.U.",
+      "nameHelp": "Tu razón social, o tu nombre completo si vendes como particular.",
+      "nameAlternative": "O tu nombre completo, si vendes a título personal.",
+      "addressPlaceholder": "p. ej. Calle Mayor 12\n28013 Madrid\nEspaña",
+      "emailPlaceholder": "p. ej. hola@tutienda.example",
+      "emailHelp": "Adónde te escriben los compradores. Puede ser distinto de tu correo de inicio de sesión."
+    },
+    "confirm": {
+      "check": "Revisa {email} para ver el enlace de confirmación.",
+      "goLive": "Tus páginas de producto se publicarán en cuanto lo abras.",
+      "sendNewLink": "Enviar un nuevo enlace"
+    },
+    "tour": {
+      "mobileMenu": "En tu móvil, abre el menú arriba a la izquierda.",
+      "searchShortcut": "¿Buscas algo? Pulsa <kbd>{shortcut}</kbd> para buscar en todo.",
+      "searchNoShortcut": "¿Buscas algo? La búsqueda encuentra cualquier página o ajuste.",
+      "searchMobile": "¿Buscas algo? Toca Buscar arriba."
+    },
+    "nav": {
+      "skipOnboarding": "Omitir la bienvenida",
+      "next": "Siguiente",
+      "showMeAround": "Enséñame",
+      "skipIntro": "Saltar introducción",
+      "getStarted": "Empezar",
+      "skipForNow": "Saltar por ahora",
+      "saveAndContinue": "Guardar y continuar",
+      "changeDetails": "Cambiar datos",
+      "continue": "Continuar",
+      "exploreOnMyOwn": "Explorar por mi cuenta",
+      "notNow": "Ahora no"
+    },
+    "hero": {
+      "buyNow": "Comprar ahora",
+      "live": "Publicado",
+      "linkCopied": "Enlace copiado"
+    },
+    "setupPath": {
+      "details": "Añade tus datos",
+      "product": "Añade un producto",
+      "storefront": "Diseña un escaparate",
+      "share": "Comparte su página"
+    },
+    "terms": {
+      "agreed": "Has aceptado estas Condiciones. Gracias por leerlas.",
+      "agreeNote": "Al aceptar, se registran en tu cuenta la fecha y esta versión de las Condiciones."
+    }
+  },
+  "tourOverlay": {
+    "dialogLabel": "Visita guiada",
+    "progress": "{total, plural, other {{current} de {total}}}",
+    "shortcut": "Atajo: <kbd>{shortcut}</kbd>",
+    "skipTour": "Omitir visita",
+    "next": "Siguiente",
+    "openingPage": "{page, select, overview {Abriendo Resumen…} products {Abriendo Productos…} storefront {Abriendo Escaparate…} orders {Abriendo Pedidos…} analytics {Abriendo Estadísticas…} payments {Abriendo Pagos…} settings {Abriendo Configuración…} sampleStorefront {Abriendo Escaparate de ejemplo…} other {Abriendo…}}"
+  },
+  "tourReplay": {
+    "title": "Visita guiada",
+    "description": "Un breve recorrido por lo principal que puedes hacer en cada página, paso a paso.",
+    "start": "Empezar la visita"
+  },
+  "guidedTour": {
+    "steps": {
+      "overviewNav": {
+        "title": "Orientarte",
+        "body": "Todo lo de tu tienda está a un clic en el menú. Esta visita se detiene en lo principal que puedes hacer en cada página.",
+        "bodySidebar": "Todo lo de tu tienda está a un clic en esta barra lateral. Esta visita se detiene en lo principal que puedes hacer en cada página.",
+        "bodyMenu": "Todo lo de tu tienda está en este menú. Esta visita se detiene en lo principal que puedes hacer en cada página."
+      },
+      "search": {
+        "title": "Busca lo que quieras",
+        "body": "La búsqueda te lleva directo a cualquier página, producto, pedido o ajuste.",
+        "bodyTopBar": "Ve directo a cualquier página, producto, pedido o ajuste.",
+        "bodyPhone": "Toca aquí para ir directo a cualquier página, producto, pedido o ajuste."
+      },
+      "productsAdd": {
+        "title": "Añade un producto",
+        "body": "Con un título y un precio basta para empezar. Puede quedarse en borrador hasta que estés listo."
+      },
+      "productsImport": {
+        "title": "O importa tu catálogo",
+        "body": "¿Ya vendes en otro sitio? Importa un archivo CSV. Una exportación de Shopify sirve tal cual."
+      },
+      "storefrontCreate": {
+        "title": "Crea un escaparate",
+        "body": "Un escaparate es una cuadrícula que diseñas tú. Cada producto que coloques en ella tendrá una página que podrás compartir."
+      },
+      "storefrontSample": {
+        "title": "Mira cómo se hace",
+        "body": "Este ejemplo muestra un escaparate terminado. Ábrelo para probar el editor. Nada de lo que cambies ahí se guarda.",
+        "fallbackBody": "Abre un escaparate para diseñarlo."
+      },
+      "storefrontEmbed": {
+        "title": "Incorpora un escaparate a tu web",
+        "body": "Cada escaparate tiene un botón de incorporación que te da un fragmento como este. El widget aún está en desarrollo y todavía no se muestra en otros sitios.",
+        "bodyButton": "Este botón te da un fragmento como el de abajo para pegarlo en tu web. El widget aún está en desarrollo y todavía no se muestra en otros sitios.",
+        "fallbackBody": "Cuando tengas un escaparate, el botón de incorporación de su tarjeta te dará un fragmento como este. El widget aún está en desarrollo y todavía no se muestra en otros sitios."
+      },
+      "ordersSearch": {
+        "title": "Encuentra un pedido",
+        "body": "Busca por el correo del comprador. Los pedidos llegarán aquí cuando se abra el proceso de pago de Square Share."
+      },
+      "ordersFilters": {
+        "title": "Filtra y ordena",
+        "body": "Acota los pedidos por canal, estado o fecha, y elige cómo se ordenan."
+      },
+      "analytics": {
+        "title": "Mira cómo va",
+        "body": "Ventas y visitas a tus páginas de producto, en las fechas que elijas.",
+        "bodyRange": "Ventas y visitas a tus páginas de producto, en las fechas que elijas aquí.",
+        "bodyFirstRun": "Las ventas y visitas a tus páginas de producto aparecerán aquí cuando haya alguna publicada."
+      },
+      "payments": {
+        "title": "Cobrar",
+        "bodyConnect": "Conecta Stripe aquí para que las transferencias vayan directas a tu banco.",
+        "bodyComingSoon": "Pronto podrás cobrar con Stripe. Hasta entonces, los compradores te pagan mediante el enlace de compra de tu producto o por correo."
+      },
+      "finish": {
+        "title": "Repite la visita cuando quieras",
+        "body": "Esto es todo. Puedes volver a empezar desde aquí siempre que te apetezca."
+      }
+    }
+  },
+  "editorTour": {
+    "steps": {
+      "editorAdd": {
+        "title": "Añade a tu cuadrícula",
+        "body": "Añade productos, texto y formas desde esta barra. Arrastra cualquier elemento de la cuadrícula para moverlo y tira de una esquina para cambiar su tamaño."
+      },
+      "editorDesign": {
+        "title": "Define el aspecto",
+        "body": "Los colores, las fuentes, el encabezado y el aspecto de las tarjetas de producto se definen una sola vez para todo el escaparate.",
+        "bodyPanel": "Los colores, las fuentes, el encabezado y el aspecto de las tarjetas de producto se definen aquí, una sola vez para todo el escaparate.",
+        "bodyButton": "Toca aquí para los colores, las fuentes, el encabezado y el aspecto de las tarjetas de producto, que se definen una sola vez para todo el escaparate."
+      },
+      "editorPage": {
+        "title": "Cada producto tiene su página",
+        "body": "Cada producto de la cuadrícula tiene su propia página para compartir. Abre una aquí para verla y darle estilo."
+      },
+      "editorFinish": {
+        "title": "Hazlo tuyo",
+        "body": "El ejemplo nunca se guarda, así que prueba lo que quieras. Cuando estés listo, crea tu propio escaparate."
+      }
+    }
+  }
+}

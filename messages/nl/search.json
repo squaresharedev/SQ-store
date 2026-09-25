@@ -1,0 +1,72 @@
+{
+  "trigger": {
+    "label": "Zoeken"
+  },
+  "overlay": {
+    "label": "Zoeken",
+    "placeholder": "Zoek producten, bestellingen, instellingen…",
+    "clear": "Zoekopdracht wissen",
+    "close": "Zoeken sluiten",
+    "results": "Zoekresultaten",
+    "searching": "Zoeken…",
+    "noResults": "Geen resultaten voor {query}",
+    "resultCount": "{count, plural, one {{count} resultaat voor {query}} other {{count} resultaten voor {query}}}",
+    "nothingMatches": "Niets komt overeen met “{query}”.",
+    "startTyping": "Begin met typen om te zoeken.",
+    "remoteError": "De server is niet bereikbaar: alleen pagina's, instellingen en acties worden getoond.",
+    "remoteErrorCached": "Live zoeken niet bereikbaar: gecachte resultaten, pagina's en instellingen worden getoond.",
+    "remoteAuth": "Je sessie is verlopen, dus alleen pagina's en instellingen worden getoond.",
+    "remoteThrottled": "Je zoekt te snel achter elkaar: alleen pagina's, instellingen en acties worden getoond."
+  },
+  "sections": {
+    "pages": "Pagina's",
+    "actions": "Acties",
+    "settings": "Instellingen"
+  },
+  "groups": {
+    "products": "Producten",
+    "orders": "Bestellingen",
+    "storefronts": "Etalages",
+    "team": "Team",
+    "notifications": "Meldingen",
+    "recent": "Recent"
+  },
+  "results": {
+    "draft": "Concept",
+    "openInDesigner": "Openen in de editor",
+    "invited": "Uitgenodigd",
+    "order": "Bestelling",
+    "unread": "Ongelezen"
+  },
+  "fields": {
+    "username": "Gebruikersnaam",
+    "avatar": "Profielfoto",
+    "email": "E-mailadres",
+    "password": "Wachtwoord",
+    "twoFactor": "Tweestapsverificatie",
+    "recoveryCodes": "Herstelcodes",
+    "securityActivity": "Beveiligingsactiviteit",
+    "signOut": "Uitloggen",
+    "vat": "Btw-id",
+    "businessName": "Handelsnaam",
+    "country": "Land",
+    "address": "Vestigingsadres",
+    "contactEmail": "Contact-e-mailadres",
+    "phone": "Telefoon",
+    "bio": "Bio",
+    "salesEmails": "Verkoop-e-mails",
+    "marketingEmails": "Marketing-e-mails",
+    "productEmails": "E-mails over productupdates",
+    "sellerAgreement": "Verkopersovereenkomst",
+    "termsOfService": "Servicevoorwaarden",
+    "exportData": "Mijn gegevens exporteren",
+    "deleteAccount": "Account verwijderen"
+  },
+  "actions": {
+    "newProduct": "Nieuw product",
+    "newStorefront": "Nieuwe etalage",
+    "inviteMember": "Teamlid uitnodigen",
+    "notificationHistory": "Meldingengeschiedenis",
+    "showMeAround": "Laat het me zien"
+  }
+}

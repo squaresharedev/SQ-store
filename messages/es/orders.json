@@ -1,0 +1,108 @@
+{
+  "metadata": {
+    "orders": {
+      "title": "Pedidos"
+    }
+  },
+  "page": {
+    "title": "Pedidos",
+    "subtitle": "Todos los pedidos hechos a través de Square Share."
+  },
+  "status": {
+    "paid": "Pagado",
+    "refunded": "Reembolsado",
+    "disputed": "En disputa",
+    "pending": "Pendiente"
+  },
+  "channel": {
+    "embed": "Incorporación",
+    "marketplace": "Marketplace"
+  },
+  "empty": {
+    "filteredTitle": "Ningún pedido coincide con estos filtros",
+    "filteredHint": "Prueba a ampliar el intervalo de fechas o a borrar los filtros.",
+    "clearFilters": "Borrar filtros",
+    "title": "Todavía no hay pedidos",
+    "hint": "El proceso de pago de Square Share aún no está abierto. Las ventas hechas a través de tu propio enlace de compra o por correo no aparecerán aquí.",
+    "goToProducts": "Ir a productos"
+  },
+  "list": {
+    "updating": "Actualizando…",
+    "summary": "{total, plural, one {{total} pedido} many {{total} pedidos} other {{total} pedidos}} · página {page} de {totalPages}",
+    "detailDialog": "Detalles del pedido",
+    "closeDetail": "Cerrar detalles del pedido"
+  },
+  "table": {
+    "product": "Producto",
+    "amount": "Importe",
+    "channel": "Canal",
+    "status": "Estado",
+    "buyer": "Comprador",
+    "date": "Fecha"
+  },
+  "toolbar": {
+    "region": "filtros de pedidos",
+    "channel": "canal",
+    "buyerEmail": "correo del comprador",
+    "searchPlaceholder": "buscar correo del comprador",
+    "status": "estado",
+    "statusAriaLabel": "Filtrar por estado",
+    "allStatuses": "Todos los estados",
+    "dateRange": "intervalo de fechas",
+    "datePlaceholder": "cualquier fecha",
+    "sort": "ordenar",
+    "sortAriaLabel": "Ordenar pedidos",
+    "clearFilters": "borrar filtros"
+  },
+  "sort": {
+    "newest": "Más recientes primero",
+    "oldest": "Más antiguos primero",
+    "amountHigh": "Importe: de mayor a menor",
+    "amountLow": "Importe: de menor a mayor"
+  },
+  "detail": {
+    "close": "Cerrar detalles del pedido",
+    "version": "Versión",
+    "copyVersion": {
+      "copy": "Copiar versión",
+      "copied": "Versión copiada",
+      "failed": "No hemos podido copiar la versión. Selecciónala y cópiala a mano."
+    },
+    "amount": "Importe",
+    "platformFee": "Comisión de la plataforma",
+    "youReceive": "Tú recibes",
+    "buyerEmail": "Correo del comprador",
+    "copyBuyerEmail": {
+      "copy": "Copiar correo del comprador",
+      "copied": "Correo del comprador copiado",
+      "failed": "No hemos podido copiar el correo del comprador. Selecciónalo y cópialo a mano."
+    },
+    "noEmail": "sin correo",
+    "channel": "Canal",
+    "date": "Fecha",
+    "orderId": "ID del pedido",
+    "copyOrderId": {
+      "copy": "Copiar ID del pedido",
+      "copied": "ID del pedido copiado",
+      "failed": "No hemos podido copiar el ID del pedido. Selecciónalo y cópialo a mano."
+    }
+  },
+  "actions": {
+    "refundNeedsStripe": "Los reembolsos requieren tener Stripe conectado.",
+    "connectStripe": "Conecta Stripe para activar los reembolsos",
+    "refundConfirm": "¿Reembolsar este pedido? No se podrá deshacer una vez que Stripe esté conectado.",
+    "confirmRefund": "Confirmar reembolso",
+    "refundOrder": "Reembolsar pedido",
+    "disputeInStripe": "Las disputas se gestionan en tu panel de Stripe una vez que Stripe esté conectado.",
+    "disputeConfirm": "¿Abrir la gestión de disputas de este pedido?",
+    "handleDispute": "Gestionar disputa",
+    "none": "No hay acciones disponibles para este pedido."
+  },
+  "skeleton": {
+    "loading": "cargando pedidos"
+  },
+  "loading": {
+    "title": "Pedidos",
+    "subtitle": "Todas las ventas de tu incorporación y del marketplace."
+  }
+}

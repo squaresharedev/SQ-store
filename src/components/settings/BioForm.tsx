@@ -1,16 +1,18 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { useActionToast } from "@/components/ui/Toast";
+import { useTranslations } from "next-intl";
+import { useActionStateToast, useSaveResult } from "@/components/ui/ActionErrorNotice";
 import { SaveButton } from "@/components/ui/SaveButton";
 import { SettingsCard } from "@/components/settings/SettingsCard";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { updateBio, type SettingsActionState } from "@/lib/settings/actions";
+import type { ActionState } from "@/lib/errors";
+import { updateBio } from "@/lib/settings/actions";
 import { BIO_MAX } from "@/lib/settings/constants";
 import { helpTextClass } from "@/components/ui/control-styles";
 
-const INITIAL: SettingsActionState = {};
+const INITIAL: ActionState = {};
 
 /**
  * A short public line about the seller, shown in the Seller section of every
@@ -24,33 +26,31 @@ const INITIAL: SettingsActionState = {};
  * blocks anything.
  */
 export function BioForm({ bio: savedBio }: { bio: string }) {
+  const t = useTranslations("Settings.account.bio");
   const [state, formAction, isPending] = useActionState(updateBio, INITIAL);
-  useActionToast(state);
+  useActionStateToast(state);
+  const saveResult = useSaveResult(state);
 
   // Controlled, same reasoning as UsernameForm/TaxSection: a failed save must
   // not revert what was typed.
   const [bio, setBio] = useState(savedBio);
 
   return (
-    <SettingsCard
-      id="bio"
-      title="Bio"
-      description="A short line about you or what you make. Shown to buyers on your product pages."
-    >
+    <SettingsCard id="bio" title={t("cardTitle")} description={t("cardDescription")}>
       <form action={formAction} className="flex flex-col gap-1.5" noValidate>
         <span className="flex items-baseline gap-1.5">
-          <Label htmlFor="seller_bio">Bio</Label>
+          <Label htmlFor="seller_bio">{t("label")}</Label>
           {/* Not aria-hidden, unlike RequiredMark: this is information a
               screen reader user needs too ("must I fill this in?"), not
               decoration. */}
-          <span className="font-inter text-xs text-muted-foreground">(Optional)</span>
+          <span className="font-inter text-xs text-muted-foreground">{t("optional")}</span>
         </span>
         <Textarea
           id="seller_bio"
           name="seller_bio"
           value={bio}
           onChange={(e) => setBio(e.target.value)}
-          placeholder="e.g. Hand-thrown stoneware from a tiny studio in Galway"
+          placeholder={t("placeholder")}
           maxLength={BIO_MAX}
           rows={2}
           // Thinner than the shared Textarea's default 2px border-input: a
@@ -64,9 +64,9 @@ export function BioForm({ bio: savedBio }: { bio: string }) {
         />
         <div className="flex max-w-lg items-center justify-between gap-2">
           <p id="seller-bio-count" className={helpTextClass}>
-            {BIO_MAX - bio.length} characters left
+            {t("charactersLeft", { count: BIO_MAX - bio.length })}
           </p>
-          <SaveButton pending={isPending} state={state} className="shrink-0" />
+          <SaveButton pending={isPending} state={saveResult} className="shrink-0" />
         </div>
       </form>
     </SettingsCard>

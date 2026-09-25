@@ -1,0 +1,116 @@
+{
+  "pageTitle": "Pagos",
+  "soon": "Próximamente",
+  "balance": {
+    "available": {
+      "label": "Disponible",
+      "zero": "Todavía nada que transferir",
+      "hint": "Listo para tu próxima transferencia"
+    },
+    "pending": {
+      "label": "Pendiente",
+      "zero": "Sin ventas pendientes",
+      "hint": "Liquidándose de ventas recientes"
+    },
+    "nextPayout": {
+      "label": "Próxima transferencia",
+      "zero": "Sin transferencia programada",
+      "hint": "Prevista para el {date}"
+    }
+  },
+  "connection": {
+    "label": "Conexión con Stripe",
+    "comingSoonTitle": "Cobrar a través de Stripe estará disponible próximamente",
+    "comingSoonBody": "Hasta entonces, los compradores te pagan a través del enlace de compra de tu producto, o escribiéndote por correo.",
+    "connectTitle": "Conecta Stripe para cobrar",
+    "connectBody": "Las transferencias van directas a tu banco. La configuración se hace de forma segura en Stripe, nunca vemos ni guardamos tus datos bancarios.",
+    "connectButton": "Conectar con Stripe",
+    "connected": "Cuenta de Stripe conectada",
+    "charges": "Cobros",
+    "payouts": "Transferencias",
+    "verified": "Verificado",
+    "requirementsDue": "Stripe necesita más información antes de poder seguir haciendo transferencias."
+  },
+  "connectModal": {
+    "title": "Conectar con Stripe",
+    "description": "Cobra por lo que vendes. La configuración se hace en Stripe, no aquí.",
+    "points": {
+      "sensitive": {
+        "title": "Stripe se encarga de la parte sensible",
+        "body": "Los datos bancarios, las comprobaciones de identidad y la verificación se hacen en las páginas seguras de Stripe. Square Share nunca los ve ni los guarda."
+      },
+      "bank": {
+        "title": "Las transferencias van directas a tu banco",
+        "body": "Una vez conectado, tu saldo se transfiere automáticamente de forma periódica."
+      },
+      "time": {
+        "title": "Tarda unos 5 minutos",
+        "body": "Te redirigiremos a Stripe para terminar la configuración, y luego volverás aquí."
+      }
+    },
+    "notNow": "Ahora no",
+    "comingSoonTitle": "Las transferencias con Stripe estarán disponibles próximamente.",
+    "continue": "Continuar a Stripe"
+  },
+  "payoutHistory": {
+    "label": "Historial de transferencias",
+    "title": "Transferencias",
+    "emptyConnectable": "Todavía no hay transferencias. En cuanto hagas ventas, Stripe enviará tu saldo a tu banco automáticamente.",
+    "empty": "Todavía no hay transferencias.",
+    "columns": {
+      "amount": "Importe",
+      "status": "Estado",
+      "bank": "Banco",
+      "arrives": "Llega"
+    },
+    "rowLabel": "Transferencia de {amount}, ver detalles"
+  },
+  "payoutStatus": "{status, select, paid {Pagado} pending {Pendiente} in_transit {En tránsito} canceled {Cancelado} failed {Fallido} other {Pendiente}}",
+  "payoutMethod": {
+    "title": "Método de transferencia",
+    "manage": "Gestionar",
+    "detail": "{currency} · {country}",
+    "detailDefault": "{currency} · {country} · Predeterminado",
+    "emptyConnectable": "Todavía no hay método de transferencia. Conecta Stripe y añade tu banco allí, aparecerá aquí automáticamente.",
+    "empty": "Todavía no hay método de transferencia."
+  },
+  "payoutMethodModal": {
+    "title": "Método de transferencia",
+    "description": "Adónde se envían tus transferencias.",
+    "bankAccountDetail": "Cuenta bancaria · {currency} · {country}",
+    "defaultLabel": "Predeterminado para las transferencias",
+    "yes": "Sí",
+    "no": "No",
+    "referenceLabel": "Referencia",
+    "securityNote": "Por tu seguridad, los datos bancarios se cambian en Stripe, nunca aquí.",
+    "manageInStripe": "Gestionar en Stripe"
+  },
+  "recentActivity": {
+    "label": "Actividad reciente",
+    "title": "Actividad",
+    "empty": "Aquí aparecerán las ventas, los reembolsos y las transferencias.",
+    "datePending": "{date} · Pendiente"
+  },
+  "transactionModal": {
+    "title": "{type, select, charge {Venta} refund {Reembolso} payout {Transferencia} stripe_fee {Comisión de Stripe} adjustment {Ajuste} other {Transacción}}",
+    "processingFee": "Comisión de procesamiento",
+    "net": "Importe neto a tu saldo",
+    "status": "Estado",
+    "statusPending": "Pendiente, liquidándose a tu saldo",
+    "statusAvailable": "Disponible",
+    "date": "Fecha",
+    "id": "ID de transacción"
+  },
+  "payoutModal": {
+    "title": "Transferencia",
+    "sentTo": "Enviado a",
+    "bankAccount": "Cuenta bancaria ···· {last4}",
+    "arrives": "Llega",
+    "initiated": "Iniciada",
+    "type": "Tipo",
+    "typeValue": "{method, select, instant {Instantánea} other {Estándar}} · {automatic, select, true {Automática} other {Manual}}",
+    "statement": "En tu extracto bancario",
+    "id": "ID de transferencia",
+    "failed": "Esta transferencia no se ha podido entregar. Stripe lo reintenta automáticamente, y el importe permanece en tu saldo disponible hasta que se complete."
+  }
+}

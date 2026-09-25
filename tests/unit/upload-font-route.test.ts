@@ -2,6 +2,7 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { isOwnedObjectKey } from "@/lib/validation/product";
 import { customFontFamily } from "@/lib/theme/storefront-fonts";
+import type { Locale } from "@/i18n/locales";
 
 /**
  * The font upload route's gates.
@@ -17,6 +18,27 @@ import { customFontFamily } from "@/lib/theme/storefront-fonts";
  */
 
 const UPLOADER = "33333333-3333-4333-8333-333333333333";
+
+/**
+ * The route answers in the REQUEST'S language, so the locale next-intl would
+ * resolve from the cookie and Accept-Language is what this stands in for.
+ * Outside a Next request there is none, hence the explicit switch.
+ */
+const intl = vi.hoisted(() => ({ locale: "en" as Locale }));
+vi.mock("next-intl/server", async () => {
+  const { createTranslator } = await import("next-intl");
+  const { loadMessages } = await import("@/i18n/messages");
+  return {
+    getTranslations: async () =>
+      createTranslator({
+        locale: intl.locale,
+        messages: await loadMessages(intl.locale),
+        // The upload routes ask for this namespace and no other.
+        namespace: "Errors.uploadRoute",
+        timeZone: "UTC",
+      }),
+  };
+});
 
 // Hoisted with the mocks that read it, so the module factories below can see
 // it: `vi.mock` calls run before ordinary module-scope constants exist.
@@ -85,6 +107,7 @@ beforeEach(() => {
   limiter.allow = true;
   storage.configured = true;
   storage.puts.length = 0;
+  intl.locale = "en";
 });
 
 describe("POST /api/uploads/font", () => {
@@ -178,5 +201,79 @@ describe("POST /api/uploads/font", () => {
     storage.configured = false;
     const res = await post(fontFile(WOFF2));
     expect(res.status).toBe(503);
+  });
+});
+
+/**
+ * WHAT THE SELLER IS TOLD, and in which language.
+ *
+ * These responses are rendered verbatim by the client (lib/products/upload.ts
+ * passes the route's `error` and `fix` straight through), so they are the one
+ * place an English sentence could still reach a Czech seller. The English must
+ * also be exactly what it always was: e2e specs assert on this wording.
+ */
+describe("POST /api/uploads/font error copy", () => {
+  /** Between a number and its unit in every language but English. */
+  const NBSP = String.fromCharCode(0x00a0);
+
+  async function refusal(res: Response): Promise<{ error: string; fix?: string }> {
+    return (await res.json()) as { error: string; fix?: string };
+  }
+
+  it("answers in English by default, word for word as it always did", async () => {
+    account.current = null;
+    expect(await refusal(await post(fontFile(WOFF2)))).toEqual({
+      error: "Sign in to upload fonts.",
+      fix: undefined,
+    });
+
+    account.current = { accountId: UPLOADER, userId: UPLOADER, role: "viewer", isOwner: false };
+    expect((await refusal(await post(fontFile(WOFF2)))).error).toBe(
+      "You don't have permission to upload here.",
+    );
+
+    account.current = { accountId: UPLOADER, userId: UPLOADER, role: "owner", isOwner: true };
+    expect(await refusal(await post(fontFile(WOFF2, "Huge.woff2", 2 * 1024 * 1024 + 1)))).toEqual({
+      error: "That font file is too large.",
+      fix: "Use a font under 2 MB. A WOFF2 is usually well under 100 KB.",
+    });
+
+    expect(await refusal(await post(fontFile("<htm")))).toEqual({
+      error: "That file is not a supported font.",
+      fix: "Use a WOFF2, WOFF, TTF, or OTF file.",
+    });
+
+    expect(await refusal(await post(fontFile(WOFF2, "Empty.woff2", 0)))).toEqual({
+      error: "That font file is empty.",
+      fix: "Pick a different file.",
+    });
+
+    limiter.allow = false;
+    expect((await refusal(await post(fontFile(WOFF2)))).error).toBe(
+      "Too many uploads right now. Try again shortly.",
+    );
+  });
+
+  it("answers a Czech request in Czech, including the size cap", async () => {
+    intl.locale = "cs";
+
+    account.current = null;
+    expect((await refusal(await post(fontFile(WOFF2)))).error).toBe(
+      "Pro nahrávání písem se přihlaste.",
+    );
+
+    account.current = { accountId: UPLOADER, userId: UPLOADER, role: "owner", isOwner: true };
+    expect(await refusal(await post(fontFile(WOFF2, "Huge.woff2", 2 * 1024 * 1024 + 1)))).toEqual({
+      error: "Soubor písma je příliš velký.",
+      fix: `Použijte písmo menší než 2${NBSP}MB. Soubor WOFF2 mívá výrazně méně než 100${NBSP}KB.`,
+    });
+
+    expect(await refusal(await post(fontFile("<htm")))).toEqual({
+      error: "Tento soubor není podporované písmo.",
+      fix: "Použijte soubor WOFF2, WOFF, TTF nebo OTF.",
+    });
+
+    // The status codes are the route's contract and do not move with the language.
+    expect((await post(fontFile("<htm"))).status).toBe(415);
   });
 });

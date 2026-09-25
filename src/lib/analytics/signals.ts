@@ -17,6 +17,8 @@
 // the chart modules and (eventually) the agent surface, all of which run in
 // different places.
 
+import type { MessageKey } from "@/i18n/types";
+
 /** Every signal kind the stream accepts. Mirrored by the SQL CHECK. */
 export const SIGNAL_KINDS = [
   "storefront_view",
@@ -49,8 +51,8 @@ export function isSignalChannel(value: unknown): value is SignalChannel {
 }
 
 /** Display label for a channel, shared by every breakdown that shows one. */
-export const CHANNEL_LABELS: Record<SignalChannel, string> = {
-  embed: "Embed",
-  marketplace: "Marketplace",
-  direct: "Direct",
+export const CHANNEL_LABELS: Record<SignalChannel, MessageKey> = {
+  embed: "Analytics.channels.embed",
+  marketplace: "Analytics.channels.marketplace",
+  direct: "Analytics.channels.direct",
 };

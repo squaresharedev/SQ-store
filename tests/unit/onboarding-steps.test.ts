@@ -10,6 +10,17 @@ import {
   type SetupStepId,
 } from "@/lib/onboarding/steps";
 import { resolveProductPage } from "@/lib/storefront/product-page";
+import type { MessageRef } from "@/i18n/types";
+import { english } from "../setup/translate";
+
+/** Step copy as the English a seller reads, so assertions stay on the words. */
+function text(ref: MessageRef | undefined): string | undefined {
+  return ref && english(ref);
+}
+
+function action(value: { href: string; label: MessageRef } | undefined) {
+  return value && { href: value.href, label: english(value.label) };
+}
 import { DEFAULT_PRODUCT_PAGE_CONFIG, type StorefrontConfig } from "@/types/storefront";
 
 /**
@@ -109,7 +120,7 @@ describe("buildSetupSteps", () => {
 
     const seller = step(data, "seller-details");
     // The gate's own deep link: the first field that is actually blank.
-    expect(seller.action).toEqual({
+    expect(action(seller.action)).toEqual({
       href: "/settings/tax#business-name",
       label: "Add details",
     });
@@ -125,18 +136,18 @@ describe("buildSetupSteps", () => {
 
     expect(data.seller).toBe("unconfirmed");
     expect(seller.done).toBe(false);
-    expect(seller.action).toEqual({
+    expect(action(seller.action)).toEqual({
       href: "/settings/tax#contact-email",
       label: "Confirm email",
     });
-    expect(seller.cta).toBe("Confirm your email");
+    expect(text(seller.cta)).toBe("Confirm your email");
   });
 
   it("counts drafts as products", () => {
-    expect(step(buildSetupSteps({ ...NEW_SELLER, productCount: 1 }), "product").detail).toBe(
+    expect(english(step(buildSetupSteps({ ...NEW_SELLER, productCount: 1 }), "product").detail)).toBe(
       "You have 1 product.",
     );
-    expect(step(buildSetupSteps({ ...NEW_SELLER, productCount: 3 }), "product").detail).toBe(
+    expect(english(step(buildSetupSteps({ ...NEW_SELLER, productCount: 3 }), "product").detail)).toBe(
       "You have 3 products.",
     );
   });
@@ -146,7 +157,7 @@ describe("buildSetupSteps", () => {
       ...NEW_SELLER,
       storefronts: [storefront("sf-newest", []), storefront("sf-older", [])],
     });
-    expect(step(data, "storefront").action).toEqual({
+    expect(action(step(data, "storefront").action)).toEqual({
       href: "/storefront/sf-newest",
       label: "Open designer",
     });
@@ -173,8 +184,8 @@ describe("buildSetupSteps", () => {
     const data = buildSetupSteps(placedSeller({ activeProductIds: [] }));
     const publish = step(data, "publish");
     expect(publish.done).toBe(false);
-    expect(publish.action).toEqual({ href: "/products/p-1/edit", label: "Edit product" });
-    expect(publish.cta).toBe("Publish your product");
+    expect(action(publish.action)).toEqual({ href: "/products/p-1/edit", label: "Edit product" });
+    expect(text(publish.cta)).toBe("Publish your product");
   });
 
   it("points at the designer when the only placement has product pages switched off", () => {
@@ -183,8 +194,8 @@ describe("buildSetupSteps", () => {
     );
     const publish = step(data, "publish");
     expect(publish.done).toBe(false);
-    expect(publish.action).toEqual({ href: "/storefront/sf-1", label: "Open designer" });
-    expect(publish.cta).toBe("Turn on product pages");
+    expect(action(publish.action)).toEqual({ href: "/storefront/sf-1", label: "Open designer" });
+    expect(text(publish.cta)).toBe("Turn on product pages");
   });
 
   it("calls a page live only when the public gate would open it", () => {
@@ -225,7 +236,7 @@ describe("buildSetupSteps", () => {
   it("offers the first unfinished step that has somewhere to go as next", () => {
     const data = buildSetupSteps({ ...NEW_SELLER, traderMissing: [] });
     expect(data.next?.id).toBe("product");
-    expect(data.next?.cta).toBe("Add your first product");
+    expect(text(data.next?.cta)).toBe("Add your first product");
   });
 
   it("only ever links to routes that exist", () => {

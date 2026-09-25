@@ -1,0 +1,56 @@
+{
+  "main": {
+    "overview": {
+      "label": "Prehľad",
+      "description": "Kroky na spustenie a všetko, čo potrebuje vašu pozornosť."
+    },
+    "products": {
+      "label": "Produkty",
+      "description": "Čo predávate: fotky, ceny, zásoby a podrobnosti."
+    },
+    "storefront": {
+      "label": "Výklad",
+      "description": "Navrhnite mriežku, na ktorej sú vaše produkty."
+    },
+    "orders": {
+      "label": "Objednávky",
+      "description": "Objednávky sa tu objavia, keď spustíte pokladňu."
+    },
+    "analytics": {
+      "label": "Analytika",
+      "description": "Zobrazenia vašich produktových stránok, neskôr aj predaje."
+    },
+    "payments": {
+      "label": "Platby",
+      "description": "Príjem platieb cez Stripe. Čoskoro."
+    },
+    "settings": {
+      "label": "Nastavenia",
+      "description": "Vaše údaje predajcu, podmienky dopravy a účet."
+    }
+  },
+  "settings": {
+    "account": "Účet",
+    "security": "Zabezpečenie",
+    "legal": "Právne informácie",
+    "tax": "Firma a údaje predajcu",
+    "shipping": "Doprava a vrátenie tovaru",
+    "notifications": "Upozornenia",
+    "language": "Jazyk",
+    "team": "Tím a prístup",
+    "danger": "Nebezpečná zóna"
+  },
+  "profileMenu": {
+    "label": "Ponuka účtu",
+    "account": "Účet",
+    "switchAccounts": "Prepnúť účty",
+    "yourStore": "Váš obchod",
+    "owner": "Vlastník",
+    "logOut": "Odhlásiť sa"
+  },
+  "viewingBanner": {
+    "viewing": "{role, select, owner {Prezeranie obchodu <store>{storeName}</store> ako vlastník} editor {Prezeranie obchodu <store>{storeName}</store> ako editor} viewer {Prezeranie obchodu <store>{storeName}</store> ako čitateľ} other {Prezeranie obchodu <store>{storeName}</store>}}",
+    "readOnly": " · len na čítanie",
+    "backToYourStore": "Späť do vášho obchodu"
+  }
+}

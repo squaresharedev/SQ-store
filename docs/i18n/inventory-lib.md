@@ -32,7 +32,7 @@ The fix is to change the return type to carry a key, e.g. `{ errorKey?: string; 
 
 | Action file | Return type | Functions whose contract must change |
 |-------------|-------------|--------------------------------------|
-| `src/lib/settings/actions.ts` | `SettingsActionState` | `updateUsername`, `requestEmailChange`, `changePassword`, `sendPasswordReset`, `acceptLegal`, `saveTaxInfo`, `resendSellerEmailVerification`, `saveNotifications`, `requestAccountDeletion`, `cancelAccountDeletion` |
+| `src/lib/settings/actions.ts` | `SettingsActionState` | `updateUsername`, `requestEmailChange`, `sendPasswordReset`, `acceptLegal`, `saveTaxInfo`, `resendSellerEmailVerification`, `saveNotifications`, `requestAccountDeletion`, `cancelAccountDeletion` |
 | `src/lib/auth/actions.ts` | `AuthState` | `authenticate`, `resetPassword` |
 | `src/lib/team/actions.ts` | `TeamActionState` | `inviteMember`, `acceptInvite`, `changeMemberRole`, `revokeMemberAccess` |
 | `src/lib/settings/shipping-actions.ts` | `SettingsActionState` (imported) | `saveShippingPolicy` |

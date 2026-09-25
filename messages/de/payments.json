@@ -1,0 +1,116 @@
+{
+  "pageTitle": "Zahlungen",
+  "soon": "Bald",
+  "balance": {
+    "available": {
+      "label": "Verfügbar",
+      "zero": "Noch nichts auszuzahlen",
+      "hint": "Bereit für deine nächste Auszahlung"
+    },
+    "pending": {
+      "label": "Ausstehend",
+      "zero": "Keine ausstehenden Verkäufe",
+      "hint": "Wird aus aktuellen Verkäufen verrechnet"
+    },
+    "nextPayout": {
+      "label": "Nächste Auszahlung",
+      "zero": "Keine Auszahlung geplant",
+      "hint": "Erwartet am {date}"
+    }
+  },
+  "connection": {
+    "label": "Stripe-Verbindung",
+    "comingSoonTitle": "Bezahlung über Stripe kommt bald",
+    "comingSoonBody": "Bis dahin zahlen Käufer dir über den Kauflink deines Produkts oder per E-Mail.",
+    "connectTitle": "Stripe verbinden, um bezahlt zu werden",
+    "connectBody": "Auszahlungen gehen direkt auf dein Bankkonto. Die Einrichtung erfolgt sicher bei Stripe, wir sehen oder speichern deine Bankdaten nie.",
+    "connectButton": "Mit Stripe verbinden",
+    "connected": "Stripe-Konto verbunden",
+    "charges": "Zahlungsannahme",
+    "payouts": "Auszahlungen",
+    "verified": "Verifiziert",
+    "requirementsDue": "Stripe benötigt weitere Informationen, bevor Auszahlungen fortgesetzt werden können."
+  },
+  "connectModal": {
+    "title": "Mit Stripe verbinden",
+    "description": "Werde für das bezahlt, was du verkaufst. Die Einrichtung erfolgt bei Stripe, nicht hier.",
+    "points": {
+      "sensitive": {
+        "title": "Stripe übernimmt den sensiblen Teil",
+        "body": "Bankdaten, Identitätsprüfungen und Verifizierungen erfolgen alle auf den sicheren Seiten von Stripe. Square Share sieht oder speichert sie nie."
+      },
+      "bank": {
+        "title": "Auszahlungen gehen direkt auf dein Bankkonto",
+        "body": "Nach der Verbindung wird dein Saldo automatisch nach einem rollierenden Zeitplan ausgezahlt."
+      },
+      "time": {
+        "title": "Dauert ca. 5 Minuten",
+        "body": "Du wirst zu Stripe weitergeleitet, um die Einrichtung abzuschließen, und landest dann direkt wieder hier."
+      }
+    },
+    "notNow": "Nicht jetzt",
+    "comingSoonTitle": "Stripe-Auszahlungen kommen bald.",
+    "continue": "Weiter zu Stripe"
+  },
+  "payoutHistory": {
+    "label": "Auszahlungsverlauf",
+    "title": "Auszahlungen",
+    "emptyConnectable": "Noch keine Auszahlungen. Sobald du Verkäufe machst, sendet Stripe deinen Saldo automatisch an deine Bank.",
+    "empty": "Noch keine Auszahlungen.",
+    "columns": {
+      "amount": "Betrag",
+      "status": "Status",
+      "bank": "Bank",
+      "arrives": "Eingang"
+    },
+    "rowLabel": "Auszahlung {amount}, Details ansehen"
+  },
+  "payoutStatus": "{status, select, paid {Bezahlt} pending {Ausstehend} in_transit {Unterwegs} canceled {Abgebrochen} failed {Fehlgeschlagen} other {Ausstehend}}",
+  "payoutMethod": {
+    "title": "Auszahlungsmethode",
+    "manage": "Verwalten",
+    "detail": "{currency} · {country}",
+    "detailDefault": "{currency} · {country} · Standard",
+    "emptyConnectable": "Noch keine Auszahlungsmethode. Verbinde Stripe und füge deine Bank dort hinzu, sie erscheint hier automatisch.",
+    "empty": "Noch keine Auszahlungsmethode."
+  },
+  "payoutMethodModal": {
+    "title": "Auszahlungsmethode",
+    "description": "Wohin deine Auszahlungen gesendet werden.",
+    "bankAccountDetail": "Bankkonto · {currency} · {country}",
+    "defaultLabel": "Standard für Auszahlungen",
+    "yes": "Ja",
+    "no": "Nein",
+    "referenceLabel": "Referenz",
+    "securityNote": "Zu deiner Sicherheit werden Bankdaten bei Stripe geändert, nicht hier.",
+    "manageInStripe": "In Stripe verwalten"
+  },
+  "recentActivity": {
+    "label": "Aktuelle Aktivität",
+    "title": "Aktivität",
+    "empty": "Verkäufe, Rückerstattungen und Auszahlungen werden hier angezeigt.",
+    "datePending": "{date} · Ausstehend"
+  },
+  "transactionModal": {
+    "title": "{type, select, charge {Verkauf} refund {Rückerstattung} payout {Auszahlung} stripe_fee {Stripe-Gebühr} adjustment {Anpassung} other {Transaktion}}",
+    "processingFee": "Transaktionsgebühr",
+    "net": "Nettobetrag für deinen Saldo",
+    "status": "Status",
+    "statusPending": "Ausstehend, wird auf deinen Saldo verrechnet",
+    "statusAvailable": "Verfügbar",
+    "date": "Datum",
+    "id": "Transaktions-ID"
+  },
+  "payoutModal": {
+    "title": "Auszahlung",
+    "sentTo": "Gesendet an",
+    "bankAccount": "Bankkonto ···· {last4}",
+    "arrives": "Eingang",
+    "initiated": "Initiiert",
+    "type": "Typ",
+    "typeValue": "{method, select, instant {Sofort} other {Standard}} · {automatic, select, true {Automatisch} other {Manuell}}",
+    "statement": "Auf deinem Kontoauszug",
+    "id": "Auszahlungs-ID",
+    "failed": "Diese Auszahlung konnte nicht zugestellt werden. Stripe versucht es automatisch erneut, und der Betrag verbleibt auf deinem verfügbaren Saldo, bis es gelingt."
+  }
+}

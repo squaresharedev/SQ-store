@@ -1,4 +1,5 @@
 import { ArrowLeft } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/ui/skeleton";
 import { iconNudgeLeftClass } from "@/components/ui/control-styles";
 
@@ -24,13 +25,14 @@ function FieldSkeleton({ control = "h-10" }: { control?: string }) {
 }
 
 export function ProductFormSkeleton({ title }: { title: string }) {
+  const t = useTranslations("Products.page");
   return (
     <main className="mx-auto max-w-3xl px-6 py-8">
       {/* The back link is real, not a placeholder: it works immediately, and
           it is the one control a user might want while the form loads. */}
       <span className="inline-flex items-center gap-1.5 font-inter text-sm text-muted-foreground">
         <ArrowLeft className={`size-4 ${iconNudgeLeftClass}`} strokeWidth={2} aria-hidden="true" />
-        Products
+        {t("back")}
       </span>
 
       <div className="mb-8 mt-4">
@@ -40,7 +42,7 @@ export function ProductFormSkeleton({ title }: { title: string }) {
 
       <div
         role="status"
-        aria-label="Loading the product form"
+        aria-label={t("formLoading")}
         className="flex flex-col gap-6"
       >
         <FieldSkeleton />

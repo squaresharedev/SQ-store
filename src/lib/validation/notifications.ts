@@ -5,6 +5,7 @@ import {
   singleLineText,
   uuidField,
 } from "@/lib/validation/inputs";
+import { issueKey } from "@/lib/validation/messages";
 
 /**
  * Notification validation schemas, shared by the server (the real gate — every
@@ -17,10 +18,10 @@ import {
 const jsonRecord = z.record(z.string(), z.unknown());
 
 export const createNotificationSchema = z.strictObject({
-  userId: uuidField("A notification recipient"),
+  userId: uuidField("notificationRecipient"),
   type: z.enum(NOTIFICATION_TYPES),
-  title: singleLineText({ label: "A notification title", max: 200 }),
-  body: multiLineText({ label: "A notification body", max: 1000 })
+  title: singleLineText({ field: "notificationTitle", max: 200 }),
+  body: multiLineText({ field: "notificationBody", max: 1000 })
     .optional()
     .transform((v) => (v ? v : null)),
   data: jsonRecord.optional().default({}),
@@ -30,7 +31,7 @@ export type CreateNotificationInput = z.input<typeof createNotificationSchema>;
 
 /** Marking a single notification read: only an id is accepted. */
 export const markReadSchema = z.strictObject({
-  id: z.uuid("Invalid notification reference."),
+  id: z.uuid(issueKey("Validation.notifications.invalidReference")),
 });
 
 /** History pagination params (server-clamped). */

@@ -1,0 +1,116 @@
+{
+  "pageTitle": "Pagamenti",
+  "soon": "Presto",
+  "balance": {
+    "available": {
+      "label": "Disponibile",
+      "zero": "Ancora niente da pagare",
+      "hint": "Pronto per il tuo prossimo bonifico"
+    },
+    "pending": {
+      "label": "In sospeso",
+      "zero": "Nessuna vendita in sospeso",
+      "hint": "In fase di accredito dalle vendite recenti"
+    },
+    "nextPayout": {
+      "label": "Prossimo bonifico",
+      "zero": "Nessun bonifico programmato",
+      "hint": "Previsto per il {date}"
+    }
+  },
+  "connection": {
+    "label": "Connessione Stripe",
+    "comingSoonTitle": "Ricevere pagamenti tramite Stripe è in arrivo",
+    "comingSoonBody": "Nel frattempo, gli acquirenti ti pagano tramite il link di acquisto del tuo prodotto, o scrivendoti via email.",
+    "connectTitle": "Collega Stripe per ricevere pagamenti",
+    "connectBody": "I bonifici vanno direttamente sul tuo conto bancario. La configurazione avviene in sicurezza su Stripe: non vediamo né conserviamo mai i dati del tuo conto.",
+    "connectButton": "Collega con Stripe",
+    "connected": "Account Stripe collegato",
+    "charges": "Incassi",
+    "payouts": "Bonifici",
+    "verified": "Verificato",
+    "requirementsDue": "Stripe ha bisogno di ulteriori informazioni prima che i bonifici possano continuare."
+  },
+  "connectModal": {
+    "title": "Collega con Stripe",
+    "description": "Ricevi pagamenti per ciò che vendi. La configurazione avviene su Stripe, non qui.",
+    "points": {
+      "sensitive": {
+        "title": "Stripe gestisce la parte sensibile",
+        "body": "I dati bancari, i controlli d’identità e la verifica avvengono tutti sulle pagine sicure di Stripe. Square Share non li vede né li conserva mai."
+      },
+      "bank": {
+        "title": "I bonifici vanno direttamente sul tuo conto",
+        "body": "Una volta collegato, il tuo saldo viene pagato automaticamente con cadenza regolare."
+      },
+      "time": {
+        "title": "Richiede circa 5 minuti",
+        "body": "Verrai reindirizzato a Stripe per completare la configurazione, poi tornerai direttamente qui."
+      }
+    },
+    "notNow": "Non ora",
+    "comingSoonTitle": "I bonifici Stripe sono in arrivo.",
+    "continue": "Continua verso Stripe"
+  },
+  "payoutHistory": {
+    "label": "Cronologia bonifici",
+    "title": "Bonifici",
+    "emptyConnectable": "Ancora nessun bonifico. Non appena fai delle vendite, Stripe invia il tuo saldo al tuo conto bancario automaticamente.",
+    "empty": "Ancora nessun bonifico.",
+    "columns": {
+      "amount": "Importo",
+      "status": "Stato",
+      "bank": "Banca",
+      "arrives": "Arrivo"
+    },
+    "rowLabel": "Bonifico {amount}, visualizza dettagli"
+  },
+  "payoutStatus": "{status, select, paid {Pagato} pending {In sospeso} in_transit {In transito} canceled {Annullato} failed {Non riuscito} other {In sospeso}}",
+  "payoutMethod": {
+    "title": "Metodo di bonifico",
+    "manage": "Gestisci",
+    "detail": "{currency} · {country}",
+    "detailDefault": "{currency} · {country} · Predefinito",
+    "emptyConnectable": "Ancora nessun metodo di bonifico. Collega Stripe e aggiungi lì il tuo conto bancario: comparirà qui automaticamente.",
+    "empty": "Ancora nessun metodo di bonifico."
+  },
+  "payoutMethodModal": {
+    "title": "Metodo di bonifico",
+    "description": "Dove vengono inviati i tuoi bonifici.",
+    "bankAccountDetail": "Conto bancario · {currency} · {country}",
+    "defaultLabel": "Predefinito per i bonifici",
+    "yes": "Sì",
+    "no": "No",
+    "referenceLabel": "Riferimento",
+    "securityNote": "Per la tua sicurezza, i dati bancari si modificano su Stripe, mai qui.",
+    "manageInStripe": "Gestisci in Stripe"
+  },
+  "recentActivity": {
+    "label": "Attività recente",
+    "title": "Attività",
+    "empty": "Vendite, rimborsi e bonifici compariranno qui.",
+    "datePending": "{date} · In sospeso"
+  },
+  "transactionModal": {
+    "title": "{type, select, charge {Vendita} refund {Rimborso} payout {Bonifico} stripe_fee {Commissione Stripe} adjustment {Rettifica} other {Transazione}}",
+    "processingFee": "Commissione di elaborazione",
+    "net": "Netto sul tuo saldo",
+    "status": "Stato",
+    "statusPending": "In sospeso, in fase di accredito sul tuo saldo",
+    "statusAvailable": "Disponibile",
+    "date": "Data",
+    "id": "ID transazione"
+  },
+  "payoutModal": {
+    "title": "Bonifico",
+    "sentTo": "Inviato a",
+    "bankAccount": "Conto bancario ···· {last4}",
+    "arrives": "Arrivo",
+    "initiated": "Avviato",
+    "type": "Tipo",
+    "typeValue": "{method, select, instant {Istantaneo} other {Standard}} · {automatic, select, true {Automatico} other {Manuale}}",
+    "statement": "Sul tuo estratto conto",
+    "id": "ID bonifico",
+    "failed": "Non è stato possibile completare questo bonifico. Stripe riprova automaticamente, e l’importo resta nel tuo saldo disponibile finché non va a buon fine."
+  }
+}

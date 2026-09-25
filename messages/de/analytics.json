@@ -1,0 +1,189 @@
+{
+  "metadata": {
+    "analytics": {
+      "title": "Analysen"
+    }
+  },
+  "page": {
+    "title": "Analysen",
+    "subtitle": "Verkäufe, Schaufenster-Aufrufe und alles andere, was dein Shop tut."
+  },
+  "loading": {
+    "title": "Analysen",
+    "subtitle": "Wie dein Shop über die Einbettung und den Marktplatz abschneidet.",
+    "srLoading": "Analysen werden geladen"
+  },
+  "firstRun": {
+    "title": "Noch nichts zu messen",
+    "body": "Besuche auf deinen Produktseiten werden hier angezeigt, sobald eine davon online ist.",
+    "backToSetup": "Zurück zur Einrichtung"
+  },
+  "range": {
+    "ariaLabel": "Zeitraum",
+    "last30Days": "Letzte 30 Tage",
+    "allTime": "Gesamter Zeitraum",
+    "custom": "Benutzerdefiniert",
+    "placeholder": "Zeitraum auswählen"
+  },
+  "section": {
+    "whatMeasures": "Was {title} misst"
+  },
+  "chart": {
+    "howToRead": "So liest du {title}",
+    "emptyDefault": "Keine Verkäufe in diesem Zeitraum"
+  },
+  "sales": {
+    "label": "Verkäufe",
+    "description": "Bezahlte Bestellungen über den Square Share Checkout.",
+    "revenue": {
+      "title": "Umsatz",
+      "description": "Bezahlter Umsatz im Zeitverlauf.",
+      "series": "Umsatz",
+      "ariaLabel": "Bezahlter Umsatz im Zeitverlauf"
+    },
+    "aov": {
+      "title": "Durchschnittlicher Bestellwert",
+      "description": "Wie viel eine typische Bestellung im Zeitverlauf wert ist.",
+      "series": "Durchschnittliche Bestellung",
+      "ariaLabel": "Durchschnittlicher Bestellwert im Zeitverlauf"
+    },
+    "channels": {
+      "title": "Kanäle",
+      "description": "Woher deine Verkäufe kommen.",
+      "ariaLabel": "Bezahlter Umsatz nach Kanal"
+    },
+    "weekday": {
+      "title": "Verkäufe nach Wochentag",
+      "description": "Der wöchentliche Rhythmus deines Shops.",
+      "series": "Verkäufe",
+      "count": "{count, plural, one {{formatted} Verkauf} other {{formatted} Verkäufe}}",
+      "ariaLabel": "Verkäufe nach Wochentag"
+    },
+    "topProducts": {
+      "title": "Top-Produkte",
+      "description": "Deine Bestseller nach bezahltem Umsatz.",
+      "series": "Umsatz",
+      "ariaLabel": "Top-Produkte nach bezahltem Umsatz"
+    },
+    "orderStatus": {
+      "title": "Bestellstatus",
+      "description": "Alle Bestellungen im Überblick, Rückerstattungen und Zahlungsanfechtungen eingeschlossen.",
+      "empty": "Keine Bestellungen in diesem Zeitraum",
+      "ariaLabel": "Bestellstatus-Mix"
+    }
+  },
+  "tiles": {
+    "revenue": "Umsatz",
+    "afterFees": "{amount} nach Gebühren",
+    "sales": "Verkäufe",
+    "perDay": "{rate} pro Tag im Durchschnitt",
+    "avgOrder": "Ø Bestellung",
+    "uniqueBuyers": "Einzelne Käufer",
+    "repeatBuyers": "{count, plural, one {{count} hat mehr als einmal gekauft} other {{count} haben mehr als einmal gekauft}}",
+    "refundRate": "Rückerstattungsquote",
+    "refunded": "{count, plural, one {{count} erstattet, {amount}} other {{count} erstattet, {amount}}}",
+    "noSales": "Noch keine Verkäufe",
+    "noBuyers": "Noch keine Käufer",
+    "noOrders": "Noch keine Bestellungen"
+  },
+  "channels": {
+    "embed": "Einbettung",
+    "marketplace": "Marktplatz",
+    "direct": "Direkt"
+  },
+  "signalsUnavailable": {
+    "title": "Aufrufe und Anmeldungen sind gerade nicht verfügbar",
+    "body": "Deine Verkaufszahlen oben sind davon nicht betroffen. Lade die Seite neu, um es erneut zu versuchen."
+  },
+  "upcoming": {
+    "needProducts": "{labels} erscheinen hier, sobald ein Produkt auf einem deiner Schaufenster ist.",
+    "needBlocks": "{labels} erscheinen hier, sobald ihr Block auf einem deiner Schaufenster ist."
+  },
+  "signal": {
+    "visitors": "Besucher",
+    "perVisitor": "{rate} pro Besucher im Durchschnitt",
+    "notCounted": "Noch nicht gezählt",
+    "value": "Wert",
+    "noValue": "Noch kein Wert",
+    "notMeasured": "Noch nicht gemessen.",
+    "panels": {
+      "trend": "Im Zeitverlauf",
+      "channels": "Kanäle",
+      "weekdays": "Nach Wochentag",
+      "storefronts": "Nach Schaufenster"
+    },
+    "whereFrom": "Woher sie kamen.",
+    "weeklyRhythm": "Der wöchentliche Rhythmus.",
+    "whichStorefront": "Von welchem Schaufenster sie kamen.",
+    "deletedStorefront": "Gelöschtes Schaufenster",
+    "deletedStorefrontNumbered": "Gelöschtes Schaufenster ({number})"
+  },
+  "sources": {
+    "storefront_view": {
+      "label": "Schaufenster-Aufrufe",
+      "description": "Wie oft dein Schaufenster von einem Besucher geladen wurde.",
+      "count": "{count, plural, one {{formatted} Aufruf} other {{formatted} Aufrufe}}",
+      "total": "Aufrufe gesamt",
+      "emptyRange": "Keine Aufrufe in diesem Zeitraum",
+      "overTime": "Schaufenster-Aufrufe im Zeitverlauf",
+      "acrossRange": "Schaufenster-Aufrufe im ausgewählten Zeitraum.",
+      "byChannel": "Schaufenster-Aufrufe nach Kanal",
+      "byWeekday": "Schaufenster-Aufrufe nach Wochentag",
+      "byStorefront": "Schaufenster-Aufrufe nach Schaufenster"
+    },
+    "product_click": {
+      "label": "Produkt-Klicks",
+      "description": "Besucher, die ein Produkt von einem deiner Schaufenster öffnen.",
+      "count": "{count, plural, one {{formatted} Klick} other {{formatted} Klicks}}",
+      "total": "Klicks gesamt",
+      "emptyRange": "Keine Klicks in diesem Zeitraum",
+      "overTime": "Produkt-Klicks im Zeitverlauf",
+      "acrossRange": "Produkt-Klicks im ausgewählten Zeitraum.",
+      "byChannel": "Produkt-Klicks nach Kanal",
+      "byWeekday": "Produkt-Klicks nach Wochentag",
+      "byStorefront": "Produkt-Klicks nach Schaufenster",
+      "awaiting": "Verfügbar, sobald das Einbettungs-Widget Produktöffnungen meldet.",
+      "readyToChart": "Bereit zur Darstellung, sobald Klicks eintreffen."
+    },
+    "product_view": {
+      "label": "Produktseitenaufrufe",
+      "description": "Besucher, die eine deiner gehosteten Produktseiten öffnen.",
+      "count": "{count, plural, one {{formatted} Aufruf} other {{formatted} Aufrufe}}",
+      "total": "Aufrufe gesamt",
+      "emptyRange": "Keine Aufrufe in diesem Zeitraum",
+      "overTime": "Produktseitenaufrufe im Zeitverlauf",
+      "acrossRange": "Produktseitenaufrufe im ausgewählten Zeitraum.",
+      "byChannel": "Produktseitenaufrufe nach Kanal",
+      "byWeekday": "Produktseitenaufrufe nach Wochentag",
+      "byStorefront": "Produktseitenaufrufe nach Schaufenster"
+    },
+    "email_signup": {
+      "label": "E-Mail-Anmeldungen",
+      "description": "Personen, die sich von einem Schaufenster aus in deine Liste eintragen.",
+      "count": "{count, plural, one {{formatted} Anmeldung} other {{formatted} Anmeldungen}}",
+      "total": "Anmeldungen gesamt",
+      "emptyRange": "Keine Anmeldungen in diesem Zeitraum",
+      "overTime": "E-Mail-Anmeldungen im Zeitverlauf",
+      "acrossRange": "E-Mail-Anmeldungen im ausgewählten Zeitraum.",
+      "byChannel": "E-Mail-Anmeldungen nach Kanal",
+      "byWeekday": "E-Mail-Anmeldungen nach Wochentag",
+      "byStorefront": "E-Mail-Anmeldungen nach Schaufenster",
+      "awaiting": "Verfügbar mit dem E-Mail-Anmeldungs-Block.",
+      "readyToChart": "Bereit zur Darstellung, sobald Anmeldungen eintreffen."
+    },
+    "booking": {
+      "label": "Buchungen",
+      "description": "Von einem Schaufenster aus gebuchte Termine.",
+      "count": "{count, plural, one {{formatted} Buchung} other {{formatted} Buchungen}}",
+      "total": "Buchungen gesamt",
+      "emptyRange": "Keine Buchungen in diesem Zeitraum",
+      "overTime": "Buchungen im Zeitverlauf",
+      "acrossRange": "Buchungen im ausgewählten Zeitraum.",
+      "byChannel": "Buchungen nach Kanal",
+      "byWeekday": "Buchungen nach Wochentag",
+      "byStorefront": "Buchungen nach Schaufenster",
+      "awaiting": "Verfügbar mit dem Kalender-Buchungs-Block.",
+      "readyToChart": "Bereit zur Darstellung, sobald Buchungen eintreffen."
+    }
+  }
+}

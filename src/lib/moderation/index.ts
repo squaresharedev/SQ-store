@@ -44,8 +44,9 @@
 /** What the platform may do with a piece of uploaded media. */
 export type ModerationVerdict =
   | { decision: "allow" }
-  /** Refuse outright. `reason` is shown to the uploader, so keep it human. */
-  | { decision: "reject"; reason: string }
+  /** Refuse outright. The upload route tells the uploader why, in their own
+   *  language, from `code` (Errors.uploadRoute.moderationRejected). */
+  | { decision: "reject"; code: ModerationRejectCode }
   /** Hold for a human. `reason` is internal, for the review queue. */
   | { decision: "review"; reason: string };
 
@@ -92,12 +93,15 @@ const MODERATION_MODEL = "@cf/meta/llama-3.2-11b-vision-instruct";
  */
 const MODERATION_TIMEOUT_MS = 8_000;
 
-/** Categories the model is asked to decide between. Order is not significance. */
-const REJECT_CATEGORIES = new Set([
-  "sexual",
-  "graphic_violence",
-  "gore",
-  "hate_symbol",
+/** Why an image was refused. A closed set, so the route can translate it. */
+export type ModerationRejectCode = "explicit" | "violent" | "hate";
+
+/** Unsafe labels the model may answer with, and the refusal each one means. */
+const REJECT_CODES = new Map<string, ModerationRejectCode>([
+  ["sexual", "explicit"],
+  ["graphic_violence", "violent"],
+  ["gore", "violent"],
+  ["hate_symbol", "hate"],
 ]);
 
 /**
@@ -113,14 +117,6 @@ const MODERATION_PROMPT = [
   "Use 'unclear' only if the image is too ambiguous or corrupted to judge.",
   "Reply with the single label. No punctuation, no explanation.",
 ].join(" ");
-
-/** Human-facing copy per rejected category. The uploader sees these. */
-const REJECT_COPY: Record<string, string> = {
-  sexual: "That image looks explicit, so it can't be used on a product.",
-  graphic_violence: "That image looks graphically violent, so it can't be used.",
-  gore: "That image looks graphically violent, so it can't be used.",
-  hate_symbol: "That image appears to contain hate symbolism, so it can't be used.",
-};
 
 /**
  * Is the classifier switched on?
@@ -157,12 +153,8 @@ export function interpretModelVerdict(raw: unknown): ModerationVerdict {
   const label = text.trim().toLowerCase().replace(/[^a-z_]/g, "");
 
   if (label === "clean") return { decision: "allow" };
-  if (REJECT_CATEGORIES.has(label)) {
-    return {
-      decision: "reject",
-      reason: REJECT_COPY[label] ?? "That image can't be used on a product.",
-    };
-  }
+  const code = REJECT_CODES.get(label);
+  if (code) return { decision: "reject", code };
   return {
     decision: "review",
     reason: `Classifier returned an unusable answer: ${

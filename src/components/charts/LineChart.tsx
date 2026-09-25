@@ -1,5 +1,6 @@
 "use client";
 
+import { useLocale, useTranslations } from "next-intl";
 import { useId } from "react";
 import {
   Area,
@@ -75,14 +76,21 @@ export function LineChart({
   width,
   showDots = false,
   connectNulls = false,
-  valueFormatter = formatNumber,
-  axisValueFormatter = compactNumber,
+  valueFormatter: valueFormatterProp,
+  axisValueFormatter: axisValueFormatterProp,
   xFormatter,
   yAxisWidth = 44,
   animate = true,
-  ariaLabel = "Line chart",
+  ariaLabel: ariaLabelProp,
   className,
 }: LineChartProps) {
+  const t = useTranslations("Common.charts");
+  const locale = useLocale();
+  const valueFormatter =
+    valueFormatterProp ?? ((value: number) => formatNumber(value, locale));
+  const axisValueFormatter =
+    axisValueFormatterProp ?? ((value: number) => compactNumber(value, locale));
+  const ariaLabel = ariaLabelProp ?? t("line");
   const resolved = resolveSeries(series);
   const { highlighted, setHighlighted } = useSeriesHighlight();
   const reducedMotion = useReducedMotion();

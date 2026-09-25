@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { SettingsCard } from "@/components/settings/SettingsCard";
 import { InviteAcceptRow } from "@/components/settings/team/InviteAcceptRow";
 import type { PendingInviteRow } from "@/lib/team/queries";
@@ -10,11 +11,9 @@ import type { PendingInviteRow } from "@/lib/team/queries";
  * attention-grabbing counterpart; both share InviteAcceptRow.
  */
 export function PendingInvites({ invites }: { invites: PendingInviteRow[] }) {
+  const t = useTranslations("Settings.team.pendingInvites");
   return (
-    <SettingsCard
-      title="Invites for you"
-      description="Accept an invite to join that store's team."
-    >
+    <SettingsCard title={t("cardTitle")} description={t("cardDescription")}>
       <ul className="divide-y divide-border">
         {invites.map((invite) => (
           <li key={invite.id}>

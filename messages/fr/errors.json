@@ -1,0 +1,536 @@
+{
+  "sessionExpired": {
+    "message": "Votre session a expiré.",
+    "fix": "Reconnectez-vous, puis réessayez. Ce que vous avez saisi dans cet onglet est conservé jusqu’à ce que vous quittiez la page."
+  },
+  "permissionDenied": {
+    "fix": "Seul le propriétaire de la boutique peut modifier les rôles. Demandez-lui de vous passer Éditeur dans les paramètres d’équipe.",
+    "createProducts": {
+      "withRole": "Votre rôle {role, select, owner {Propriétaire} editor {Éditeur} viewer {Lecteur} other {{role}}} ne permet pas de créer des produits dans cette boutique.",
+      "noRole": "Vous n’avez pas la permission de créer des produits dans cette boutique."
+    },
+    "editProducts": {
+      "withRole": "Votre rôle {role, select, owner {Propriétaire} editor {Éditeur} viewer {Lecteur} other {{role}}} ne permet pas de modifier des produits dans cette boutique.",
+      "noRole": "Vous n’avez pas la permission de modifier des produits dans cette boutique."
+    },
+    "deleteProducts": {
+      "withRole": "Votre rôle {role, select, owner {Propriétaire} editor {Éditeur} viewer {Lecteur} other {{role}}} ne permet pas de supprimer des produits dans cette boutique.",
+      "noRole": "Vous n’avez pas la permission de supprimer des produits dans cette boutique."
+    },
+    "importProducts": {
+      "withRole": "Votre rôle {role, select, owner {Propriétaire} editor {Éditeur} viewer {Lecteur} other {{role}}} ne permet pas d’importer des produits dans cette boutique.",
+      "noRole": "Vous n’avez pas la permission d’importer des produits dans cette boutique."
+    },
+    "previewProductPages": {
+      "withRole": "Votre rôle {role, select, owner {Propriétaire} editor {Éditeur} viewer {Lecteur} other {{role}}} ne permet pas de prévisualiser les pages produit dans cette boutique.",
+      "noRole": "Vous n’avez pas la permission de prévisualiser les pages produit dans cette boutique."
+    },
+    "createStorefronts": {
+      "withRole": "Votre rôle {role, select, owner {Propriétaire} editor {Éditeur} viewer {Lecteur} other {{role}}} ne permet pas de créer des vitrines dans cette boutique.",
+      "noRole": "Vous n’avez pas la permission de créer des vitrines dans cette boutique."
+    },
+    "editStorefronts": {
+      "withRole": "Votre rôle {role, select, owner {Propriétaire} editor {Éditeur} viewer {Lecteur} other {{role}}} ne permet pas de modifier des vitrines dans cette boutique.",
+      "noRole": "Vous n’avez pas la permission de modifier des vitrines dans cette boutique."
+    },
+    "deleteStorefronts": {
+      "withRole": "Votre rôle {role, select, owner {Propriétaire} editor {Éditeur} viewer {Lecteur} other {{role}}} ne permet pas de supprimer des vitrines dans cette boutique.",
+      "noRole": "Vous n’avez pas la permission de supprimer des vitrines dans cette boutique."
+    },
+    "viewStorefronts": {
+      "withRole": "Votre rôle {role, select, owner {Propriétaire} editor {Éditeur} viewer {Lecteur} other {{role}}} ne permet pas de consulter les vitrines dans cette boutique.",
+      "noRole": "Vous n’avez pas la permission de consulter les vitrines dans cette boutique."
+    },
+    "editThisProduct": {
+      "withRole": "Votre rôle {role, select, owner {Propriétaire} editor {Éditeur} viewer {Lecteur} other {{role}}} ne permet pas de modifier ce produit dans cette boutique.",
+      "noRole": "Vous n’avez pas l’autorisation de modifier ce produit dans cette boutique."
+    },
+    "editThisStorefront": {
+      "withRole": "Votre rôle {role, select, owner {Propriétaire} editor {Éditeur} viewer {Lecteur} other {{role}}} ne permet pas de modifier cette vitrine dans cette boutique.",
+      "noRole": "Vous n’avez pas l’autorisation de modifier cette vitrine dans cette boutique."
+    }
+  },
+  "notFound": {
+    "fix": "Il a peut-être été supprimé, ou vous avez peut-être changé de boutique. Actualisez la page pour charger les données actuelles.",
+    "product": "Ce produit est introuvable.",
+    "storefront": "Cette vitrine est introuvable.",
+    "item": "Cet élément est introuvable."
+  },
+  "rateLimited": {
+    "fix": "Attendez quelques minutes puis réessayez. Si rien ne se relance en arrière-plan, rechargez d’abord la page.",
+    "createProducts": "Trop de tentatives de création de produits en peu de temps.",
+    "editProducts": "Trop de tentatives de modification de produits en peu de temps.",
+    "deleteProducts": "Trop de tentatives de suppression de produits en peu de temps.",
+    "importProducts": "Trop de tentatives d’importation de produits en peu de temps.",
+    "previewProductPages": "Trop de tentatives de prévisualisation de pages produit en peu de temps.",
+    "createStorefronts": "Trop de tentatives de création de vitrines en peu de temps.",
+    "saveStorefronts": "Trop de tentatives d’enregistrement de vitrines en peu de temps.",
+    "deleteStorefronts": "Trop de tentatives de suppression de vitrines en peu de temps.",
+    "rotateEmbedKeys": "Trop de tentatives de renouvellement de clés d’intégration en peu de temps.",
+    "updateStock": "Trop de tentatives de mise à jour du stock en peu de temps.",
+    "readProductPageSettings": "Trop de tentatives de lecture des paramètres de page produit en peu de temps.",
+    "requestReview": "Trop de demandes de réexamen en peu de temps."
+  },
+  "serverError": {
+    "fix": "C’est généralement temporaire. Attendez un instant puis réessayez ; si le problème persiste, actualisez la page.",
+    "createProduct": "Impossible de créer le produit en raison d’un problème de notre côté.",
+    "saveProduct": "Impossible d’enregistrer le produit en raison d’un problème de notre côté.",
+    "deleteProduct": "Impossible de supprimer le produit en raison d’un problème de notre côté.",
+    "importProducts": "Impossible d’importer vos produits en raison d’un problème de notre côté.",
+    "loadProductPagePreview": "Impossible de charger l’aperçu de la page produit en raison d’un problème de notre côté.",
+    "verifyImageUpload": "Impossible de vérifier l’import de votre image en raison d’un problème de notre côté.",
+    "verifyDocumentUpload": "Impossible de vérifier l’import de votre document en raison d’un problème de notre côté.",
+    "verifyFileUpload": "Impossible de vérifier l’import de votre fichier en raison d’un problème de notre côté.",
+    "verifyFontUpload": "Impossible de vérifier l’import de votre police en raison d’un problème de notre côté.",
+    "verifyElementUpload": "Impossible de vérifier l’import de votre élément en raison d’un problème de notre côté.",
+    "verifyBackgroundImage": "Impossible de vérifier votre image d’arrière-plan en raison d’un problème de notre côté.",
+    "verifyFont": "Impossible de vérifier votre police en raison d’un problème de notre côté.",
+    "verifyImage": "Impossible de vérifier votre image en raison d’un problème de notre côté.",
+    "createStorefront": "Impossible de créer la vitrine en raison d’un problème de notre côté.",
+    "saveStorefront": "Impossible d’enregistrer votre vitrine en raison d’un problème de notre côté.",
+    "saveEmbedSettings": "Impossible d’enregistrer les paramètres d’intégration en raison d’un problème de notre côté.",
+    "deleteStorefront": "Impossible de supprimer la vitrine en raison d’un problème de notre côté.",
+    "rotateEmbedKey": "Impossible de renouveler la clé d’intégration en raison d’un problème de notre côté.",
+    "saveStockSettings": "Impossible d’enregistrer les paramètres de stock en raison d’un problème de notre côté.",
+    "checkSellerDetails": "Impossible de vérifier vos informations vendeur en raison d’un problème de notre côté.",
+    "loadProductPageSettings": "Impossible de charger vos paramètres de page produit en raison d’un problème de notre côté.",
+    "saveProductPageSettings": "Impossible d’enregistrer vos paramètres de page produit en raison d’un problème de notre côté.",
+    "sendForReview": "Impossible d’envoyer cette demande de réexamen : un problème est survenu de notre côté."
+  },
+  "moderation": {
+    "removedNotPaused": "{target, select, product {Ce produit a été retiré, et non mis en pause.} storefront {Cette vitrine a été retirée, et non mise en pause.} other {Cet élément a été retiré, et non mis en pause.}}",
+    "removedFix": "Un retrait est définitif. Si vous pensez qu’il s’agit d’une erreur, utilisez le lien de contestation pour nous écrire.",
+    "notPaused": "{target, select, product {Ce produit n’est pas en pause.} storefront {Cette vitrine n’est pas en pause.} other {Cet élément n’est pas en pause.}}",
+    "notPausedFix": "Il n’y a rien à réexaminer : il est déjà visible par les acheteurs."
+  },
+  "traderIdentityRequired": {
+    "message": "Vous ne pouvez ni publier ni vendre tant que vos informations vendeur ne sont pas complètes.",
+    "action": "Ajouter les informations vendeur",
+    "fix": {
+      "add": "{fields, select, businessName {Ajoutez votre raison sociale dans Paramètres › Entreprise et informations vendeur, puis publiez.} address {Ajoutez votre adresse professionnelle dans Paramètres › Entreprise et informations vendeur, puis publiez.} email {Ajoutez votre e-mail de contact dans Paramètres › Entreprise et informations vendeur, puis publiez.} businessName_address {Ajoutez votre raison sociale et votre adresse professionnelle dans Paramètres › Entreprise et informations vendeur, puis publiez.} businessName_email {Ajoutez votre raison sociale et votre e-mail de contact dans Paramètres › Entreprise et informations vendeur, puis publiez.} address_email {Ajoutez votre adresse professionnelle et votre e-mail de contact dans Paramètres › Entreprise et informations vendeur, puis publiez.} other {Ajoutez votre raison sociale, votre adresse professionnelle et votre e-mail de contact dans Paramètres › Entreprise et informations vendeur, puis publiez.}}",
+      "addAndConfirm": "{fields, select, businessName {Ajoutez votre raison sociale dans Paramètres › Entreprise et informations vendeur, et confirmez votre e-mail de contact via le lien que nous vous avons envoyé.} address {Ajoutez votre adresse professionnelle dans Paramètres › Entreprise et informations vendeur, et confirmez votre e-mail de contact via le lien que nous vous avons envoyé.} email {Ajoutez votre e-mail de contact dans Paramètres › Entreprise et informations vendeur, et confirmez votre e-mail de contact via le lien que nous vous avons envoyé.} businessName_address {Ajoutez votre raison sociale et votre adresse professionnelle dans Paramètres › Entreprise et informations vendeur, et confirmez votre e-mail de contact via le lien que nous vous avons envoyé.} businessName_email {Ajoutez votre raison sociale et votre e-mail de contact dans Paramètres › Entreprise et informations vendeur, et confirmez votre e-mail de contact via le lien que nous vous avons envoyé.} address_email {Ajoutez votre adresse professionnelle et votre e-mail de contact dans Paramètres › Entreprise et informations vendeur, et confirmez votre e-mail de contact via le lien que nous vous avons envoyé.} other {Ajoutez votre raison sociale, votre adresse professionnelle et votre e-mail de contact dans Paramètres › Entreprise et informations vendeur, et confirmez votre e-mail de contact via le lien que nous vous avons envoyé.}}",
+      "confirm": "Ouvrez le lien de confirmation que nous avons envoyé à votre adresse de contact. Vous pouvez en demander un nouveau depuis Paramètres › Entreprise et informations vendeur.",
+      "complete": "Complétez Paramètres › Entreprise et informations vendeur, puis publiez."
+    }
+  },
+  "unexpected": {
+    "message": "Une erreur est survenue.",
+    "detail": "{detail}",
+    "fix": "Vérifiez votre connexion et réessayez. Si le problème persiste, actualisez la page ; vos données produit sont en sécurité sur le serveur."
+  },
+  "form": {
+    "sessionExpired": "Votre session a expiré. Reconnectez-vous.",
+    "saveFailed": "Impossible d’enregistrer. Réessayez.",
+    "tooManyChanges": "Beaucoup de changements en peu de temps. Réessayez un peu plus tard.",
+    "unexpectedField": "Le champ inattendu « {field} » a été rejeté.",
+    "malformed": "Impossible de lire le formulaire. Rechargez la page et réessayez.",
+    "unreachable": "Impossible de joindre le serveur. Vérifiez votre connexion et réessayez."
+  },
+  "stepUp": {
+    "codeRequired": "Saisissez le code à 6 chiffres de votre application d’authentification pour confirmer que c’est bien vous.",
+    "codeMalformed": "Le code est composé des 6 chiffres affichés dans votre application d’authentification.",
+    "factorUnknown": "Choisissez l’une de vos applications d’authentification.",
+    "invalid": "Ce code n’a pas fonctionné. Vérifiez votre application d’authentification et réessayez.",
+    "rateLimited": "Trop de tentatives. Patientez quelques minutes, puis réessayez.",
+    "replayed": "Ce code a déjà été utilisé. Attendez le suivant dans votre application.",
+    "unavailable": "Nous n’avons pas pu vérifier ce code à l’instant. Réessayez dans un moment."
+  },
+  "mfa": {
+    "signInExpired": "Votre connexion a expiré. Connectez-vous à nouveau.",
+    "unreachable": "Nous n’avons pas pu joindre le service de connexion. Vérifiez votre connexion et réessayez.",
+    "enterCode": "Saisissez le code à 6 chiffres.",
+    "recoveryCodeRequired": "Saisissez l’un de vos codes de récupération.",
+    "recoveryCodeInvalid": "Ce code de récupération n’a pas fonctionné. Vérifiez-le et réessayez.",
+    "recoveryIncomplete": "Nous n’avons pas pu terminer votre connexion. Réessayez avec le même code dans un moment.",
+    "factorNameRequired": "Donnez un nom à cette application d’authentification.",
+    "factorNameTaken": "Vous avez déjà une application d’authentification portant ce nom. Choisissez-en un autre.",
+    "passwordRequired": "Saisissez votre mot de passe actuel pour continuer.",
+    "passwordRequiredGoogle": "Saisissez votre mot de passe Square Share, ou utilisez plutôt « Confirmer avec Google ».",
+    "wrongPasswordGoogle": "Ce n’est pas le mot de passe Square Share de ce compte. Vous vous connectez avec Google : utilisez plutôt « Confirmer avec Google ».",
+    "passwordCheckUnavailable": "Nous n’avons pas pu vérifier votre mot de passe à l’instant. Réessayez dans un moment.",
+    "reauthRequired": "Pour votre sécurité, reconnectez-vous avant d’activer l’authentification à deux facteurs.",
+    "setupRateLimited": "Vous avez fait beaucoup de tentatives de configuration. Réessayez un peu plus tard.",
+    "tooManyFactors": "Ce compte a atteint le nombre maximal d’applications d’authentification. Supprimez-en une d’abord.",
+    "setupFailed": "Nous n’avons pas pu lancer la configuration à l’instant. Réessayez dans un moment.",
+    "setupUnavailable": "La configuration de l’authentification à deux facteurs n’est pas disponible pour le moment. Réessayez plus tard.",
+    "setupExpired": "La configuration a expiré. Recommencez.",
+    "setupCodeMismatch": "Ce code ne correspond pas. Vérifiez que votre application affiche Square Share, puis saisissez le code le plus récent.",
+    "factorNotOnAccount": "Cette application d’authentification n’est pas associée à votre compte.",
+    "removeFailed": "Nous n’avons pas pu supprimer cette application d’authentification. Réessayez.",
+    "notEnrolled": "Activez d’abord l’authentification à deux facteurs.",
+    "codesNotCreated": "Nous n’avons pas pu créer de nouveaux codes. Vos anciens codes fonctionnent toujours."
+  },
+  "settings": {
+    "usernameTaken": "Ce nom d’utilisateur est déjà pris. Essayez-en un autre.",
+    "emailUnchanged": "C’est déjà votre e-mail.",
+    "emailChangeRateLimited": "Trop de demandes de changement d’e-mail. Attendez un moment avant de réessayer.",
+    "emailChangeNeedsPassword": "Saisissez votre mot de passe actuel pour changer votre e-mail.",
+    "wrongPassword": "Le mot de passe actuel est incorrect.",
+    "passwordCheckUnavailable": "Impossible de vérifier votre mot de passe pour le moment. Réessayez.",
+    "emailChangeFailed": "Impossible de démarrer le changement d’e-mail. Réessayez.",
+    "passwordReauthRateLimited": "Trop de tentatives. Attendez quelques minutes avant de réessayer.",
+    "passwordUnchanged": "C’est déjà votre mot de passe.",
+    "passwordUpdateFailed": "Impossible de mettre à jour le mot de passe. Réessayez.",
+    "passwordReauthNeeded": "Pour votre sécurité, déconnectez-vous puis reconnectez-vous, et modifiez ensuite votre mot de passe.",
+    "resetRateLimited": "Trop d’e-mails de réinitialisation. Attendez un moment avant de réessayer.",
+    "resetSendRateLimited": "Trop de demandes. Attendez une minute et réessayez.",
+    "resetFailed": "Impossible d’envoyer l’e-mail de réinitialisation. Réessayez.",
+    "contactEmailTakesNoMail": "Le domaine de cet e-mail de contact n’accepte aucun courrier. Vérifiez l’orthographe, ou utilisez une adresse que les acheteurs peuvent réellement joindre.",
+    "savedButConfirmationFailed": "{reason, select, startFailed {Enregistré, mais l’e-mail de confirmation n’a pas été envoyé. Impossible de démarrer la confirmation par e-mail. Essayez « Renvoyer l’e-mail de confirmation » ci-dessous.} unavailable {Enregistré, mais l’e-mail de confirmation n’a pas été envoyé. La confirmation par e-mail n’est pas disponible pour le moment. Essayez « Renvoyer l’e-mail de confirmation » ci-dessous.} other {Enregistré, mais l’e-mail de confirmation n’a pas été envoyé. Nous n’avons pas pu envoyer l’e-mail de confirmation. Vérifiez l’adresse et réessayez. Essayez « Renvoyer l’e-mail de confirmation » ci-dessous.}}",
+    "confirmationFailed": "{reason, select, startFailed {Impossible de démarrer la confirmation par e-mail.} unavailable {La confirmation par e-mail n’est pas disponible pour le moment.} other {Nous n’avons pas pu envoyer l’e-mail de confirmation. Vérifiez l’adresse et réessayez.}}",
+    "confirmationUnavailable": "La confirmation par e-mail n’est pas disponible pour le moment.",
+    "confirmationRateLimited": "Beaucoup d’e-mails de confirmation ont déjà été envoyés. Attendez un moment avant d’en demander un autre.",
+    "noContactEmail": "Ajoutez d’abord un e-mail de contact, nous pourrons ensuite le confirmer."
+  },
+  "avatar": {
+    "unexpectedData": "Des données de formulaire inattendues ont été rejetées.",
+    "rateLimited": "Trop de changements de photo. Attendez un moment et réessayez.",
+    "noFile": "Choisissez une image à importer.",
+    "tooLarge": "Cette image est trop volumineuse. Restez en dessous de 2 Mo.",
+    "wrongType": "Utilisez une image JPEG, PNG ou WebP.",
+    "uploadFailed": "Échec de l’import. Réessayez.",
+    "saveFailed": "Impossible d’enregistrer votre nouvelle photo. Réessayez.",
+    "removeFailed": "Impossible de supprimer votre photo. Réessayez."
+  },
+  "team": {
+    "noInvitePermission": "Vous n’avez pas la permission d’inviter des membres.",
+    "inviteRoleTooHigh": "Vous ne pouvez pas inviter quelqu’un à un rôle supérieur au vôtre.",
+    "inviteSelf": "Vous êtes déjà là.",
+    "inviteRateLimited": "Vous avez envoyé beaucoup d’invitations récemment. Réessayez un peu plus tard.",
+    "alreadyInvited": "Déjà invité ou déjà dans l’équipe.",
+    "inviteFailed": "Impossible d’envoyer l’invitation. Réessayez.",
+    "noVerifiedEmail": "Votre compte n’a pas d’adresse e-mail vérifiée.",
+    "inviteNotFound": "Invitation introuvable ou déjà utilisée.",
+    "inviteUsed": "Cette invitation a déjà été acceptée ou révoquée.",
+    "inviteWrongEmail": "Cette invitation n’est pas pour votre adresse e-mail.",
+    "acceptFailed": "Impossible d’accepter l’invitation. Elle a peut-être été révoquée.",
+    "noRolePermission": "Vous n’avez pas la permission de modifier les rôles.",
+    "membershipRateLimited": "Trop de changements d’adhésion. Réessayez sous peu.",
+    "roleTooHigh": "Vous ne pouvez pas attribuer un rôle supérieur au vôtre.",
+    "roleChangeFailed": "Impossible de modifier le rôle. Réessayez.",
+    "memberNotChangeable": "Ce membre ne peut pas être modifié.",
+    "noRemovePermission": "Vous n’avez pas la permission de retirer des membres.",
+    "memberNotFound": "Membre introuvable.",
+    "removeSelf": "Vous ne pouvez pas vous retirer vous-même.",
+    "removeFailed": "Impossible de retirer le membre. Réessayez.",
+    "memberNotRemovable": "Ce membre ne peut pas être retiré."
+  },
+  "auth": {
+    "serviceUnreachable": "Impossible de se connecter au service d’authentification. Réessayez.",
+    "invalidEmail": "Saisissez une adresse e-mail valide.",
+    "emailRequired": "Saisissez votre e-mail.",
+    "tooManyAttempts": "Trop de tentatives. Attendez un moment et réessayez.",
+    "magicLinkFailed": "Impossible d’envoyer l’e-mail. Vérifiez votre connexion et réessayez.",
+    "resetEmailRequired": "Saisissez votre e-mail pour réinitialiser votre mot de passe.",
+    "resetEmailFailed": "Impossible d’envoyer l’e-mail de réinitialisation. Vérifiez votre connexion et réessayez.",
+    "credentialsRequired": "L’e-mail et le mot de passe sont obligatoires.",
+    "passwordsMismatch": "Les mots de passe ne correspondent pas.",
+    "invalidUsername": "Choisissez un nom d’utilisateur valide.",
+    "permanentEmailRequired": "Inscrivez-vous avec une adresse e-mail permanente.",
+    "verificationFailed": "Échec de la vérification. Réessayez.",
+    "usernameTaken": "Ce nom d’utilisateur est déjà pris. Essayez-en un autre.",
+    "signUpFailed": "Impossible de créer le compte. Vérifiez votre connexion et réessayez.",
+    "signInFailed": "Impossible de se connecter. Vérifiez votre connexion et réessayez.",
+    "badCredentials": "E-mail ou mot de passe incorrect.",
+    "emailNotConfirmed": "Confirmez d’abord votre e-mail : consultez votre boîte de réception pour trouver le lien.",
+    "weakPassword": "Ce mot de passe est trop faible. Utilisez au moins 8 caractères.",
+    "rateLimited": "Trop de tentatives. Attendez une minute et réessayez.",
+    "accountNotCreated": "Impossible de créer ce compte. Essayez un autre nom d’utilisateur.",
+    "providerMessage": "{message}",
+    "unknown": "Une erreur est survenue. Réessayez.",
+    "connectFailed": "Impossible de se connecter. Réessayez.",
+    "resetLinkExpired": "Votre lien de réinitialisation a expiré. Demandez-en un nouveau depuis la page de connexion.",
+    "passwordUpdateFailed": "Impossible de mettre à jour votre mot de passe. Vérifiez votre connexion et réessayez.",
+    "samePassword": "C’est déjà votre mot de passe. Choisissez-en un nouveau."
+  },
+  "upload": {
+    "typeNotSupported": "Ce type de fichier n’est pas pris en charge.",
+    "typeFix": {
+      "image": "Utilisez une image JPEG, PNG, WebP, GIF ou AVIF.",
+      "file": "Utilisez un fichier ZIP, PDF, EPUB, MP3, WAV, MP4, JPEG, PNG, WebP ou TXT.",
+      "font": "Utilisez un fichier de police WOFF2, WOFF, TTF ou OTF.",
+      "element": "Utilisez une image SVG, PNG, WebP, JPEG, GIF ou AVIF.",
+      "document": "Exportez le manuel ou le certificat en PDF, puis importez-le."
+    },
+    "tooLarge": {
+      "image": "Cette image est trop volumineuse.",
+      "document": "Ce document est trop volumineux.",
+      "file": "Ce fichier est trop volumineux.",
+      "font": "Cette police est trop volumineuse.",
+      "element": "Cet élément est trop volumineux."
+    },
+    "tooLargeFix": {
+      "image": "Utilisez une image de moins de {maxMb} Mo. Compressez-la ou redimensionnez-la, puis réessayez.",
+      "document": "Utilisez un document de moins de {maxMb} Mo. Compressez-le ou redimensionnez-le, puis réessayez.",
+      "file": "Utilisez un fichier de moins de {maxMb} Mo. Compressez-le ou redimensionnez-le, puis réessayez.",
+      "font": "Utilisez une police de moins de {maxMb} Mo. Compressez-la ou redimensionnez-la, puis réessayez.",
+      "element": "Utilisez un élément de moins de {maxMb} Mo. Compressez-le ou redimensionnez-le, puis réessayez."
+    },
+    "neverReached": {
+      "image": "L’image n’a jamais atteint le serveur.",
+      "document": "Le document n’a jamais atteint le serveur.",
+      "file": "Le fichier n’a jamais atteint le serveur.",
+      "font": "La police n’a jamais atteint le serveur.",
+      "element": "L’élément n’a jamais atteint le serveur."
+    },
+    "neverReachedFix": "Vérifiez votre connexion internet et réessayez.",
+    "rejected": {
+      "image": "Impossible d’importer cette image.",
+      "document": "Impossible d’importer ce document.",
+      "file": "Impossible d’importer ce fichier.",
+      "font": "Impossible d’importer cette police.",
+      "element": "Impossible d’importer cet élément."
+    },
+    "rejectedFix": {
+      "signedOut": "Reconnectez-vous, puis réessayez.",
+      "other": "Vérifiez le fichier et réessayez. Si le problème persiste, actualisez la page."
+    },
+    "serverSaid": "{text}"
+  },
+  "uploadRoute": {
+    "signIn": {
+      "image": "Connectez-vous pour importer des images.",
+      "element": "Connectez-vous pour importer des éléments.",
+      "document": "Connectez-vous pour importer des documents.",
+      "file": "Connectez-vous pour importer des fichiers.",
+      "font": "Connectez-vous pour importer des polices."
+    },
+    "permissionDenied": "Vous n’avez pas la permission d’importer ici.",
+    "rateLimited": {
+      "shared": "Trop d’imports en ce moment. Réessayez sous peu.",
+      "document": "Trop d’imports de documents en ce moment. Réessayez sous peu.",
+      "file": "Trop d’imports de fichiers en ce moment. Réessayez sous peu."
+    },
+    "notConfigured": {
+      "image": "L’import d’images n’est pas encore configuré. Contactez le propriétaire du site.",
+      "element": "L’import d’éléments n’est pas encore configuré. Contactez le propriétaire du site.",
+      "document": "L’import n’est pas encore configuré. Contactez le propriétaire du site.",
+      "file": "L’import de fichiers n’est pas encore configuré. Contactez le propriétaire du site.",
+      "font": "L’import de polices n’est pas encore configuré. Contactez le propriétaire du site."
+    },
+    "unreadable": "Impossible de lire le fichier importé.",
+    "unexpectedFields": "Champs d’import inattendus.",
+    "filenameInvalid": "Ce nom de fichier ne peut pas être utilisé.",
+    "lengthMissing": "La taille du fichier importé est manquante.",
+    "missing": {
+      "image": "Aucune image n’a été importée.",
+      "document": "Aucun document n’a été importé.",
+      "file": "Aucun fichier n’a été importé.",
+      "font": "Aucune police n’a été importée."
+    },
+    "empty": {
+      "image": "Cette image est vide.",
+      "file": "Ce fichier est vide.",
+      "font": "Ce fichier de police est vide."
+    },
+    "tooLarge": {
+      "image": "Cette image est trop volumineuse.",
+      "document": "Ce document est trop volumineux.",
+      "file": "Ce fichier est trop volumineux.",
+      "font": "Ce fichier de police est trop volumineux."
+    },
+    "tooLargeFix": {
+      "image": "Utilisez une image de moins de {maxMb} Mo. Compressez-la ou redimensionnez-la, puis réessayez.",
+      "document": "Utilisez un PDF de moins de {maxMb} Mo.",
+      "file": "Utilisez un fichier de moins de {maxMb} Mo.",
+      "font": "Utilisez une police de moins de {maxMb} Mo. Un fichier WOFF2 fait généralement bien moins de 100 Ko."
+    },
+    "unsupported": {
+      "image": "Ce fichier n’est pas une image prise en charge.",
+      "font": "Ce fichier n’est pas une police prise en charge.",
+      "fileType": "Ce type de fichier n’est pas pris en charge.",
+      "fileContents": "Le contenu de ce fichier ne correspond pas à son type.",
+      "documentType": "Les documents doivent être au format PDF.",
+      "documentContents": "Ce fichier n’est pas un PDF."
+    },
+    "unsupportedFix": {
+      "image": "Utilisez une image JPEG, PNG, WebP, GIF ou AVIF.",
+      "element": "Utilisez un fichier PNG, JPEG, WebP, GIF, AVIF ou un SVG sans scripts, liens externes ni images intégrées.",
+      "font": "Utilisez un fichier WOFF2, WOFF, TTF ou OTF.",
+      "fileType": "Utilisez un fichier ZIP, PDF, EPUB, MP3, WAV, MP4, JPEG, PNG, WebP ou TXT.",
+      "fileContents": "Exportez à nouveau le fichier ou choisissez le format qui correspond à ce que vous importez.",
+      "documentType": "Exportez le manuel ou le certificat en PDF, puis importez-le.",
+      "documentContents": "Exportez-le à nouveau en PDF. Renommer un fichier ne change pas son format."
+    },
+    "moderationUnavailable": "Les images ne peuvent pas être vérifiées pour le moment.",
+    "moderationRejected": {
+      "explicit": "Cette image semble sexuellement explicite, elle ne peut donc pas être utilisée pour un produit.",
+      "violent": "Cette image semble montrer une violence choquante, elle ne peut donc pas être utilisée.",
+      "hate": "Cette image semble contenir des symboles haineux, elle ne peut donc pas être utilisée."
+    },
+    "inReview": "Cette image est en cours de vérification avant sa mise en ligne.",
+    "inReviewFix": "Vous pourrez l’utiliser dès qu’elle sera approuvée.",
+    "storeFailed": {
+      "image": "L’image n’a pas pu être enregistrée.",
+      "document": "Le document n’a pas pu être enregistré.",
+      "file": "Le fichier n’a pas pu être enregistré.",
+      "font": "La police n’a pas pu être enregistrée."
+    },
+    "fix": {
+      "tryAgain": "Réessayez.",
+      "tryAgainInAMoment": "Réessayez dans un instant.",
+      "tryAgainInAFewMinutes": "Réessayez dans quelques minutes.",
+      "pickFile": "Choisissez un autre fichier.",
+      "pickImage": "Choisissez une autre image."
+    }
+  },
+  "products": {
+    "invalid": {
+      "message": "Les informations du produit n’ont pas passé la validation.",
+      "fix": "Vérifiez le nom, le prix et les autres champs, puis réessayez d’enregistrer."
+    },
+    "imageNotOwned": {
+      "message": "Cette image importée ne peut pas être utilisée avec ce produit.",
+      "fix": "Réimportez l’image, puis enregistrez à nouveau."
+    },
+    "fileNotOwned": {
+      "message": "Ce fichier importé ne peut pas être utilisé avec ce produit.",
+      "fix": "Réimportez le fichier, puis enregistrez à nouveau."
+    },
+    "uploadUnfinished": {
+      "image": "L’import de votre image ne s’est pas terminé.",
+      "document": "L’import de votre document ne s’est pas terminé.",
+      "file": "L’import de votre fichier ne s’est pas terminé.",
+      "font": "L’import de votre police ne s’est pas terminé.",
+      "element": "L’import de votre élément ne s’est pas terminé."
+    },
+    "uploadUnfinishedFix": {
+      "image": "Sélectionnez à nouveau l’image et réimportez-la avant d’enregistrer.",
+      "document": "Sélectionnez à nouveau le document et réimportez-le avant d’enregistrer.",
+      "file": "Sélectionnez à nouveau le fichier et réimportez-le avant d’enregistrer.",
+      "font": "Sélectionnez à nouveau la police et réimportez-la avant d’enregistrer.",
+      "element": "Sélectionnez à nouveau l’élément et réimportez-le avant d’enregistrer."
+    },
+    "uploadTooLarge": {
+      "image": "Cette image est trop volumineuse.",
+      "document": "Ce document est trop volumineux.",
+      "file": "Ce fichier est trop volumineux.",
+      "font": "Cette police est trop volumineuse.",
+      "element": "Cet élément est trop volumineux."
+    },
+    "uploadTooLargeFix": {
+      "image": "Utilisez une image de moins de {maxMb} Mo, puis réimportez-la.",
+      "document": "Utilisez un document de moins de {maxMb} Mo, puis réimportez-le.",
+      "file": "Utilisez un fichier de moins de {maxMb} Mo, puis réimportez-le.",
+      "font": "Utilisez une police de moins de {maxMb} Mo, puis réimportez-la.",
+      "element": "Utilisez un élément de moins de {maxMb} Mo, puis réimportez-le."
+    },
+    "wrongTypeFix": {
+      "image": "Utilisez une image JPEG, PNG, WebP, GIF ou AVIF.",
+      "document": "Les documents doivent être des PDF. Exportez-le en PDF, puis importez-le à nouveau.",
+      "other": "Utilisez un fichier ZIP, PDF, EPUB, MP3, WAV, MP4, JPEG, PNG, WebP ou TXT."
+    },
+    "tooManyPhotos": {
+      "message": "Trop de nouvelles photos en un seul enregistrement.",
+      "fix": "Ajoutez jusqu’à {max} photos, enregistrez, puis ajoutez le reste."
+    },
+    "photoNotOwned": {
+      "message": "L’une des photos ne peut pas être utilisée avec ce produit.",
+      "fix": "Retirez-la, réimportez-la, puis enregistrez."
+    },
+    "tooManyDocuments": {
+      "message": "Trop de nouveaux documents en un seul enregistrement.",
+      "fix": "Ajoutez jusqu’à {max} documents, enregistrez, puis ajoutez le reste."
+    },
+    "documentNotOwned": {
+      "message": "L’un des documents ne peut pas être utilisé avec ce produit.",
+      "fix": "Retirez-le, réimportez-le, puis enregistrez."
+    },
+    "staleOption": {
+      "message": "Une photo pointe vers une option qui n’existe plus.",
+      "fix": "Réattribuez ou détaguez cette photo, puis enregistrez à nouveau."
+    }
+  },
+  "productImport": {
+    "unreadable": {
+      "message": "Cet import n’a pas pu être lu.",
+      "fix": "Réimportez le fichier."
+    },
+    "empty": {
+      "message": "Ce fichier était vide.",
+      "fix": "Exportez à nouveau vos produits et réessayez."
+    },
+    "tooLarge": {
+      "message": "Ce fichier est trop volumineux pour être importé.",
+      "fix": "Divisez-le en fichiers de moins de {maxMb} Mo, ou importez jusqu’à {maxRows} produits à la fois."
+    },
+    "noCurrency": {
+      "message": "Choisissez une devise pour ces produits.",
+      "fix": "Choisissez-en une, puis importez à nouveau."
+    },
+    "noStatus": {
+      "message": "Choisissez si ces produits arrivent en brouillon ou déjà en ligne.",
+      "fix": "Choisissez une option, puis importez à nouveau."
+    },
+    "nothingImportable": {
+      "message": "Rien dans ce fichier n’a pu être importé.",
+      "fix": "Vérifiez qu’il contient une colonne de titre et une colonne de prix.",
+      "fixFirstRow": "{problem, select, noTitle {La première ligne indique : aucun titre. Vérifiez quelles colonnes contiennent le titre et le prix.} titleTooLong {La première ligne indique : le titre dépasse 200 caractères. Vérifiez quelles colonnes contiennent le titre et le prix.} noPrice {La première ligne indique : aucun prix n’a pu être lu. Vérifiez quelles colonnes contiennent le titre et le prix.} priceZero {La première ligne indique : le prix est à zéro. Vérifiez quelles colonnes contiennent le titre et le prix.} other {La première ligne indique : une autre ligne porte ce titre. Vérifiez quelles colonnes contiennent le titre et le prix.}}"
+    },
+    "noneSaved": {
+      "message": "Aucune de ces lignes n’a pu être enregistrée.",
+      "fix": "Vérifiez les colonnes de titre et de prix."
+    },
+    "invalidRow": "Cette ligne n’est pas un produit valide."
+  },
+  "stock": {
+    "invalid": {
+      "message": "Les paramètres de stock n’ont pas passé la validation.",
+      "fix": "La quantité et le seuil doivent être des nombres entiers de 0 ou plus, et lorsque le suivi est activé, indiquez la quantité en stock."
+    }
+  },
+  "storefront": {
+    "nameRequired": {
+      "message": "La vitrine a besoin d’un nom.",
+      "fix": "Saisissez un nom (1 à 80 caractères) dans le champ en haut de l’éditeur, puis enregistrez à nouveau."
+    },
+    "invalidLayout": {
+      "message": "Les données de mise en page de la vitrine ne sont pas valides.",
+      "fix": "Actualisez l’éditeur et réessayez d’enregistrer."
+    },
+    "tooManyImages": {
+      "message": "Trop de nouvelles images en un seul enregistrement.",
+      "fix": "Enregistrez votre vitrine, puis ajoutez le reste."
+    },
+    "invalidEmbedSettings": "Paramètres d’intégration non valides.",
+    "embedSettingsFix": "Vérifiez la liste des domaines (noms d’hôtes séparés par des virgules, comme example.com) et enregistrez à nouveau.",
+    "upload": {
+      "backgroundImage": {
+        "notOwned": "Cette image d’arrière-plan ne peut pas être utilisée.",
+        "unfinished": "L’import de votre image d’arrière-plan ne s’est pas terminé.",
+        "missingFix": "Sélectionnez à nouveau l’image et réimportez-la avant d’enregistrer.",
+        "tooLarge": "Cette image d’arrière-plan est trop volumineuse.",
+        "tooLargeFix": "Utilisez une image de moins de 10 Mo, puis réimportez-la.",
+        "wrongTypeFix": "Utilisez une image JPEG, PNG, WebP, GIF ou AVIF."
+      },
+      "font": {
+        "notOwned": "Cette police ne peut pas être utilisée.",
+        "unfinished": "L’import de votre police ne s’est pas terminé.",
+        "missingFix": "Sélectionnez à nouveau la police et réimportez-la avant d’enregistrer.",
+        "tooLarge": "Ce fichier de police est trop volumineux.",
+        "tooLargeFix": "Utilisez une police de moins de 2 Mo. Un fichier WOFF2 pèse généralement bien moins de 100 Ko.",
+        "wrongTypeFix": "Utilisez un fichier de police WOFF2, WOFF, TTF ou OTF."
+      },
+      "element": {
+        "notOwned": "Cette image ne peut pas être utilisée.",
+        "unfinished": "L’import de votre image ne s’est pas terminé.",
+        "missingFix": "Ajoutez à nouveau l’image et réimportez-la avant d’enregistrer.",
+        "tooLarge": "Cette image est trop volumineuse.",
+        "tooLargeFix": "Utilisez une image de moins de 2 Mo, puis ajoutez-la à nouveau.",
+        "wrongTypeFix": "Utilisez un fichier PNG, JPEG, WebP, GIF, AVIF, ou un SVG sans script, lien externe ni image intégrée."
+      }
+    }
+  },
+  "productPageApi": {
+    "notJson": {
+      "message": "Le corps de cette requête n’est pas du JSON.",
+      "fix": "Envoyez un objet JSON contenant les champs à modifier."
+    },
+    "notObject": {
+      "message": "Le corps de cette requête n’est pas un objet.",
+      "fix": "Envoyez un objet JSON, par exemple '{'\"ctaColor\": \"#1d4ed8\"'}'."
+    },
+    "invalid": "Ces paramètres de page produit ne sont pas valides.",
+    "invalidFix": "Vérifiez le champ nommé ci-dessus par rapport à `limits` d’un GET de cette URL, puis réessayez."
+  }
+}

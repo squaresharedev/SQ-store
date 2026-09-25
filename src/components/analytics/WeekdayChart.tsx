@@ -1,9 +1,10 @@
 "use client";
 
-import { BarChart } from "@/components/charts";
+import { useTranslations, useLocale } from "next-intl";
+import { BarChart, formatNumber } from "@/components/charts";
+import { formatWeekdayLabel } from "@/lib/analytics/buckets";
 import type { WeekdaySlice } from "@/lib/analytics/types";
 import { CHART_HEIGHT } from "@/components/analytics/chart-layout";
-import { countWithNoun } from "@/components/analytics/chart-format";
 import { TONE } from "@/components/analytics/palette";
 
 // Sales by weekday, on the shared chart kit (/dev/charts).
@@ -16,14 +17,17 @@ import { TONE } from "@/components/analytics/palette";
 // included, Mon first.
 
 export function WeekdayChart({ weekdays }: { weekdays: WeekdaySlice[] }) {
+  const t = useTranslations("Analytics.sales.weekday");
+  const locale = useLocale();
   return (
     <BarChart
       data={weekdays}
       xKey="weekday"
-      series={[{ key: "sales", label: "Sales", colorIndex: TONE.money }]}
+      xFormatter={(weekday) => formatWeekdayLabel(weekday, locale)}
+      series={[{ key: "sales", label: t("series"), colorIndex: TONE.money }]}
       height={CHART_HEIGHT}
-      valueFormatter={countWithNoun("sale", "sales")}
-      ariaLabel="Sales by weekday"
+      valueFormatter={(value) => t("count", { count: value, formatted: formatNumber(value, locale) })}
+      ariaLabel={t("ariaLabel")}
     />
   );
 }

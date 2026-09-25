@@ -1,0 +1,189 @@
+{
+  "metadata": {
+    "analytics": {
+      "title": "Estadísticas"
+    }
+  },
+  "page": {
+    "title": "Estadísticas",
+    "subtitle": "Ventas, visualizaciones del escaparate y todo lo demás que hace tu tienda."
+  },
+  "loading": {
+    "title": "Estadísticas",
+    "subtitle": "El rendimiento de tu tienda entre la incorporación y el marketplace.",
+    "srLoading": "cargando estadísticas"
+  },
+  "firstRun": {
+    "title": "Nada que medir todavía",
+    "body": "Las visitas a tus páginas de producto aparecerán aquí en cuanto una esté publicada.",
+    "backToSetup": "Volver a la configuración"
+  },
+  "range": {
+    "ariaLabel": "Intervalo de fechas",
+    "last30Days": "Últimos 30 días",
+    "allTime": "Todo el tiempo",
+    "custom": "Personalizado",
+    "placeholder": "Elige un intervalo"
+  },
+  "section": {
+    "whatMeasures": "Qué mide {title}"
+  },
+  "chart": {
+    "howToRead": "Cómo leer {title}",
+    "emptyDefault": "Sin ventas en este intervalo"
+  },
+  "sales": {
+    "label": "Ventas",
+    "description": "Pedidos pagados realizados a través del proceso de pago de Square Share.",
+    "revenue": {
+      "title": "Ingresos",
+      "description": "Ingresos pagados a lo largo del tiempo.",
+      "series": "Ingresos",
+      "ariaLabel": "Ingresos pagados a lo largo del tiempo"
+    },
+    "aov": {
+      "title": "Valor medio del pedido",
+      "description": "Cuánto vale un pedido típico a lo largo del tiempo.",
+      "series": "Pedido medio",
+      "ariaLabel": "Valor medio del pedido a lo largo del tiempo"
+    },
+    "channels": {
+      "title": "Canales",
+      "description": "De dónde vienen tus ventas.",
+      "ariaLabel": "Ingresos pagados por canal"
+    },
+    "weekday": {
+      "title": "Ventas por día de la semana",
+      "description": "El ritmo semanal de tu tienda.",
+      "series": "Ventas",
+      "count": "{count, plural, one {{formatted} venta} many {{formatted} ventas} other {{formatted} ventas}}",
+      "ariaLabel": "Ventas por día de la semana"
+    },
+    "topProducts": {
+      "title": "Productos más vendidos",
+      "description": "Tus productos más vendidos por ingresos pagados.",
+      "series": "Ingresos",
+      "ariaLabel": "Productos más vendidos por ingresos pagados"
+    },
+    "orderStatus": {
+      "title": "Estado de los pedidos",
+      "description": "Todo el conjunto de pedidos, incluidos reembolsos y disputas.",
+      "empty": "Sin pedidos en este intervalo",
+      "ariaLabel": "Desglose del estado de los pedidos"
+    }
+  },
+  "tiles": {
+    "revenue": "Ingresos",
+    "afterFees": "{amount} tras comisiones",
+    "sales": "Ventas",
+    "perDay": "{rate} al día de media",
+    "avgOrder": "Pedido medio",
+    "uniqueBuyers": "Compradores únicos",
+    "repeatBuyers": "{count, plural, one {{count} compró más de una vez} many {{count} compraron más de una vez} other {{count} compraron más de una vez}}",
+    "refundRate": "Tasa de reembolso",
+    "refunded": "{count, plural, one {{count} reembolsado, {amount}} many {{count} reembolsados, {amount}} other {{count} reembolsados, {amount}}}",
+    "noSales": "Todavía sin ventas",
+    "noBuyers": "Todavía sin compradores",
+    "noOrders": "Todavía sin pedidos"
+  },
+  "channels": {
+    "embed": "Incorporación",
+    "marketplace": "Marketplace",
+    "direct": "Directo"
+  },
+  "signalsUnavailable": {
+    "title": "Las visualizaciones y las suscripciones no están disponibles ahora mismo",
+    "body": "Tus cifras de ventas de arriba no se ven afectadas. Recarga la página para volver a intentarlo."
+  },
+  "upcoming": {
+    "needProducts": "{labels} aparecen aquí en cuanto un producto esté en uno de tus escaparates.",
+    "needBlocks": "{labels} aparecen aquí en cuanto su bloque esté en uno de tus escaparates."
+  },
+  "signal": {
+    "visitors": "Visitantes",
+    "perVisitor": "{rate} por visitante de media",
+    "notCounted": "Todavía sin contabilizar",
+    "value": "Valor",
+    "noValue": "Todavía sin valor",
+    "notMeasured": "Todavía sin medir.",
+    "panels": {
+      "trend": "A lo largo del tiempo",
+      "channels": "Canales",
+      "weekdays": "Por día de la semana",
+      "storefronts": "Por escaparate"
+    },
+    "whereFrom": "De dónde vinieron.",
+    "weeklyRhythm": "El ritmo semanal.",
+    "whichStorefront": "De qué escaparate vinieron.",
+    "deletedStorefront": "Escaparate eliminado",
+    "deletedStorefrontNumbered": "Escaparate eliminado ({number})"
+  },
+  "sources": {
+    "storefront_view": {
+      "label": "Visualizaciones del escaparate",
+      "description": "Con qué frecuencia un visitante cargó tu escaparate.",
+      "count": "{count, plural, one {{formatted} visualización} many {{formatted} visualizaciones} other {{formatted} visualizaciones}}",
+      "total": "Visualizaciones totales",
+      "emptyRange": "Sin visualizaciones en este intervalo",
+      "overTime": "Visualizaciones del escaparate a lo largo del tiempo",
+      "acrossRange": "Visualizaciones del escaparate en el intervalo seleccionado.",
+      "byChannel": "Visualizaciones del escaparate por canal",
+      "byWeekday": "Visualizaciones del escaparate por día de la semana",
+      "byStorefront": "Visualizaciones del escaparate por escaparate"
+    },
+    "product_click": {
+      "label": "Clics en productos",
+      "description": "Visitantes que abren un producto desde uno de tus escaparates.",
+      "count": "{count, plural, one {{formatted} clic} many {{formatted} clics} other {{formatted} clics}}",
+      "total": "Clics totales",
+      "emptyRange": "Sin clics en este intervalo",
+      "overTime": "Clics en productos a lo largo del tiempo",
+      "acrossRange": "Clics en productos en el intervalo seleccionado.",
+      "byChannel": "Clics en productos por canal",
+      "byWeekday": "Clics en productos por día de la semana",
+      "byStorefront": "Clics en productos por escaparate",
+      "awaiting": "Llega en cuanto el widget de incorporación informe de aperturas de productos.",
+      "readyToChart": "Listo para graficarse en cuanto empiecen a llegar clics."
+    },
+    "product_view": {
+      "label": "Visualizaciones de página de producto",
+      "description": "Visitantes que abren una de tus páginas de producto alojadas.",
+      "count": "{count, plural, one {{formatted} visualización} many {{formatted} visualizaciones} other {{formatted} visualizaciones}}",
+      "total": "Visualizaciones totales",
+      "emptyRange": "Sin visualizaciones en este intervalo",
+      "overTime": "Visualizaciones de página de producto a lo largo del tiempo",
+      "acrossRange": "Visualizaciones de página de producto en el intervalo seleccionado.",
+      "byChannel": "Visualizaciones de página de producto por canal",
+      "byWeekday": "Visualizaciones de página de producto por día de la semana",
+      "byStorefront": "Visualizaciones de página de producto por escaparate"
+    },
+    "email_signup": {
+      "label": "Suscripciones por correo",
+      "description": "Personas que se unen a tu lista desde un escaparate.",
+      "count": "{count, plural, one {{formatted} suscripción} many {{formatted} suscripciones} other {{formatted} suscripciones}}",
+      "total": "Suscripciones totales",
+      "emptyRange": "Sin suscripciones en este intervalo",
+      "overTime": "Suscripciones por correo a lo largo del tiempo",
+      "acrossRange": "Suscripciones por correo en el intervalo seleccionado.",
+      "byChannel": "Suscripciones por correo por canal",
+      "byWeekday": "Suscripciones por correo por día de la semana",
+      "byStorefront": "Suscripciones por correo por escaparate",
+      "awaiting": "Llega con el bloque de suscripción por correo.",
+      "readyToChart": "Listo para graficarse en cuanto empiecen a llegar suscripciones."
+    },
+    "booking": {
+      "label": "Reservas",
+      "description": "Franjas reservadas desde un escaparate.",
+      "count": "{count, plural, one {{formatted} reserva} many {{formatted} reservas} other {{formatted} reservas}}",
+      "total": "Reservas totales",
+      "emptyRange": "Sin reservas en este intervalo",
+      "overTime": "Reservas a lo largo del tiempo",
+      "acrossRange": "Reservas en el intervalo seleccionado.",
+      "byChannel": "Reservas por canal",
+      "byWeekday": "Reservas por día de la semana",
+      "byStorefront": "Reservas por escaparate",
+      "awaiting": "Llega con el bloque de reserva de calendario.",
+      "readyToChart": "Listo para graficarse en cuanto empiecen a llegar reservas."
+    }
+  }
+}

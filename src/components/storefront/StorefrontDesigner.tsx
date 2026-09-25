@@ -11,6 +11,8 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, Search, Sparkles, X } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import { formatList } from "@/lib/format/intl";
 import type { Product } from "@/types/product";
 import {
   CANVAS_COLUMNS_MAX,
@@ -66,6 +68,7 @@ import { EditorTour, startEditorTour } from "@/components/onboarding/EditorTour"
 import { CreateStorefrontWizard } from "./CreateStorefrontWizard";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/Toast";
+import { useActionErrorToast } from "@/components/ui/ActionErrorNotice";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import {
@@ -376,7 +379,12 @@ export function StorefrontDesigner({
   /** Active account id, for universal search's snapshot cache. */
   accountId?: string | null;
 }) {
+  const t = useTranslations("Storefront.designer");
+  const locale = useLocale();
+  const tCommon = useTranslations("Common.actions");
+  const tKey = useTranslations();
   const toast = useToast();
+  const showActionError = useActionErrorToast();
   const router = useRouter();
   const isSample = sample !== null;
   // The sample's "Create your own" opens the storefront setup flow right here,
@@ -559,8 +567,8 @@ export function StorefrontDesigner({
   // collapse to a single row that opens one, so the same words still answer
   // and what they answer with is the step that has to come first anyway.
   const editorSearchEntries = useMemo(
-    () => editorEntries(blocks, productsById, { pageOpen }),
-    [blocks, productsById, pageOpen],
+    () => editorEntries(blocks, productsById, tKey, { pageOpen }),
+    [blocks, productsById, tKey, pageOpen],
   );
   const usedProductIds = useMemo(
     () =>
@@ -2046,7 +2054,9 @@ export function StorefrontDesigner({
       (placement) => ({
         type: "text",
         id: crypto.randomUUID(),
-        text: "Your text here",
+        // Resolved once, now: saved, this is the seller's own text, and must
+        // not change language when someone else opens the board.
+        text: t("defaults.textBlock"),
         variant: "heading",
         align: "left",
         ...placement,
@@ -2094,8 +2104,8 @@ export function StorefrontDesigner({
    */
   async function addImageBlock(file: File) {
     if (blocks.length >= MAX_BLOCKS) {
-      toast.error("This storefront is full.", {
-        lines: [`A storefront can hold up to ${MAX_BLOCKS} blocks.`],
+      toast.error(t("toasts.full"), {
+        lines: [t("toasts.fullDetail", { max: MAX_BLOCKS })],
       });
       return;
     }
@@ -2113,10 +2123,10 @@ export function StorefrontDesigner({
       key = await uploadToR2(file, "element", setUploadProgress);
     } catch (error) {
       if (error instanceof UploadError) {
-        toast.error(error.info.message, { lines: [error.info.fix] });
+        showActionError(error.info);
       } else {
-        toast.error("That image could not be uploaded.", {
-          lines: ["Try again in a moment."],
+        toast.error(t("toasts.imageUploadFailed"), {
+          lines: [t("toasts.imageUploadFailedDetail")],
         });
       }
       return;
@@ -2314,12 +2324,9 @@ export function StorefrontDesigner({
     );
     if (copyable.length === 0) return;
     clipboard.current = structuredClone(copyable);
-    toast.success(
-      copyable.length === 1
-        ? "Block copied."
-        : `${copyable.length} blocks copied.`,
-      { lines: ["Paste with Ctrl+V or Cmd+V."] },
-    );
+    toast.success(t("toasts.copied", { count: copyable.length }), {
+      lines: [t("toasts.copiedDetail")],
+    });
   }
 
   function pasteClipboard() {
@@ -3455,7 +3462,7 @@ export function StorefrontDesigner({
     const result = await saveStorefront(storefrontId, { name, config });
     setSaving(false);
     if (!result.ok) {
-      toast.error(result.error.message, { lines: [result.error.fix] });
+      showActionError(result.error);
       return false;
     }
     if (result.droppedBlocks > 0) {
@@ -3471,23 +3478,26 @@ export function StorefrontDesigner({
     // otherwise a save that quietly removed tiles reads as a save that broke
     // the design.
     if (draftBlockTitles.length > 0) {
-      const names = draftBlockTitles.slice(0, 3).join(", ");
-      const more = draftBlockTitles.length > 3 ? ` and ${draftBlockTitles.length - 3} more` : "";
-      toast.info("Saved, but some products are still drafts.", {
+      // Product titles are the seller's own words, so they go in as data.
+      const names = formatList(draftBlockTitles.slice(0, 3), locale, {
+        englishSeparator: ", ",
+        truncated: draftBlockTitles.length > 3,
+      });
+      toast.info(t("toasts.savedWithDrafts"), {
         lines: [
-          `${names}${more} ${draftBlockTitles.length === 1 ? "is a draft" : "are drafts"} and buyers cannot reach ${draftBlockTitles.length === 1 ? "it" : "them"} yet.`,
-          "Publish those products when ready.",
+          t("toasts.draftsDetail", {
+            count: draftBlockTitles.length,
+            names,
+            hidden: Math.max(0, draftBlockTitles.length - 3),
+          }),
+          t("toasts.publishDrafts"),
         ],
       });
     } else {
-      toast.success("Storefront saved.", {
+      toast.success(t("toasts.saved"), {
         lines:
           result.droppedBlocks > 0
-            ? [
-                result.droppedBlocks === 1
-                  ? "1 block pointed at a deleted product and was removed."
-                  : `${result.droppedBlocks} blocks pointed at deleted products and were removed.`,
-              ]
+            ? [t("toasts.droppedBlocks", { count: result.droppedBlocks })]
             : undefined,
       });
     }
@@ -3501,21 +3511,31 @@ export function StorefrontDesigner({
     else leaveGuard.cancel();
   }
 
-  const inspectorTitle =
+  const inspectorKind =
     inspector?.kind === "picker"
-      ? "Add product"
+      ? "addProduct"
       : selectedBlocks.length > 1
-        ? `${selectedBlocks.length} blocks`
+        ? "blocks"
         : selectedBlock?.type === "product"
-          ? "Product"
+          ? "product"
           : selectedBlock?.type === "shape"
-            ? "Shape"
+            ? "shape"
             : // Named per type rather than falling through to the last one: an
               // image block used to be titled "Text block", because the chain
               // ended in text and nothing tested the image case.
               selectedBlock?.type === "image"
-              ? "Image"
-              : "Text block";
+              ? "image"
+              : "text";
+  // The title and the close button's label are separate messages rather than
+  // one spliced into the other, so each language can inflect them its own way.
+  const inspectorTitle =
+    inspectorKind === "blocks"
+      ? t("inspector.title.blocks", { count: selectedBlocks.length })
+      : t(`inspector.title.${inspectorKind}`);
+  const inspectorCloseLabel =
+    inspectorKind === "blocks"
+      ? t("inspector.close.blocks", { count: selectedBlocks.length })
+      : t(`inspector.close.${inspectorKind}`);
   const showInspector =
     inspector?.kind === "picker" || selectedBlocks.length > 0;
 
@@ -3590,7 +3610,7 @@ export function StorefrontDesigner({
         <div className="flex items-center gap-3 px-4 py-3 sm:px-6">
           <Link
             href="/storefront"
-            aria-label="Back to storefronts"
+            aria-label={t("header.back")}
             className={iconButtonClass}
             // Route through the guard so unsaved edits prompt first; keep the
             // href so middle-click / open-in-new-tab still work.
@@ -3608,14 +3628,14 @@ export function StorefrontDesigner({
 
           <div className="min-w-0 flex-1">
             <label htmlFor="storefront-name" className="sr-only">
-              Storefront name
+              {t("header.nameLabel")}
             </label>
             <input
               id="storefront-name"
               suppressHydrationWarning
               value={name}
               onChange={(event) => updateName(event.target.value)}
-              placeholder="Untitled storefront"
+              placeholder={t("header.namePlaceholder")}
               maxLength={STOREFRONT_NAME_MAX}
               spellCheck={false}
               className="w-full max-w-md truncate rounded-sm border border-transparent bg-transparent px-2 py-1 text-lg font-semibold text-foreground placeholder:text-muted-foreground hover:border-border focus:border-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
@@ -3631,13 +3651,13 @@ export function StorefrontDesigner({
               <button
                 type="button"
                 data-sample-create=""
-                aria-label="Create your own storefront"
+                aria-label={tKey("Storefront.sample.designer.createAriaLabel")}
                 onClick={() => setCreateOpen(true)}
                 disabled={creating}
                 className={cn(primaryButtonClass, "group/btn h-9 shrink-0 py-0")}
               >
-                <span className="sm:hidden">Create</span>
-                <span className="hidden sm:inline">Create your own</span>
+                <span className="sm:hidden">{tKey("Storefront.sample.designer.createShort")}</span>
+                <span className="hidden sm:inline">{tKey("Storefront.sample.designer.create")}</span>
                 <ArrowRight className={cn("size-4", iconNudgeRightClass)} aria-hidden="true" />
               </button>
             </div>
@@ -3663,7 +3683,7 @@ export function StorefrontDesigner({
                 role="status"
                 className={`shrink-0 max-sm:sr-only ${helpTextClass}`}
               >
-                Unsaved changes
+                {t("header.unsaved")}
               </span>
             )}
             {/* h-9 py-0 pairs it with the search button beside it: the default
@@ -3671,7 +3691,7 @@ export function StorefrontDesigner({
                 36px, and two controls of different heights sitting side by side
                 in the same bar look like a mistake rather than a hierarchy. */}
             <Button onClick={handleSave} disabled={saving} className="h-9 py-0">
-              {saving ? "Saving…" : "Save"}
+              {saving ? tCommon("saving") : tCommon("save")}
             </Button>
           </div>
           )}
@@ -3688,15 +3708,13 @@ export function StorefrontDesigner({
           className="flex shrink-0 items-center gap-2 border-b border-border bg-muted px-4 py-1.5 font-inter text-xs text-foreground sm:px-6"
         >
           <Sparkles className="size-3.5 shrink-0" strokeWidth={2} aria-hidden="true" />
-          <p className="min-w-0 flex-1">
-            This is a sample storefront. Try anything: nothing here is saved.
-          </p>
+          <p className="min-w-0 flex-1">{tKey("Storefront.sample.designer.notice")}</p>
           <button
             type="button"
             onClick={startEditorTour}
             className={cn(ghostButtonClass, "-my-1 shrink-0 px-2 py-1 text-xs text-foreground")}
           >
-            Take the tour
+            {tKey("Storefront.sample.designer.takeTour")}
           </button>
         </div>
       )}
@@ -3714,10 +3732,7 @@ export function StorefrontDesigner({
           is remembered rather than asked again on the next load. */}
       {!noticeDismissed && !isSample && (
         <div className="flex shrink-0 items-start gap-2 border-b border-amber-200 bg-amber-50 px-4 py-2 font-inter text-xs text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300 lg:hidden">
-          <p className="min-w-0 flex-1">
-            For the best editing experience, open this designer on a desktop or
-            tablet. Reordering blocks and editing the header work on any device.
-          </p>
+          <p className="min-w-0 flex-1">{t("mobileNotice.body")}</p>
           {/* -my-1 keeps a 44px touch target from making the banner taller than
               the text needs: the button overflows into the row's own padding
               rather than pushing the canvas further down the screen. */}
@@ -3725,7 +3740,7 @@ export function StorefrontDesigner({
             type="button"
             suppressHydrationWarning
             onClick={dismissMobileNotice}
-            aria-label="Dismiss the small-screen editing notice"
+            aria-label={t("mobileNotice.dismiss")}
             className="-my-1 -mr-2 inline-flex size-9 shrink-0 items-center justify-center rounded-sm text-amber-800 transition-colors duration-base ease-standard hover:bg-amber-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:text-amber-300 dark:hover:bg-amber-900/40 motion-reduce:transition-none"
           >
             <X className="size-4" strokeWidth={2} aria-hidden="true" />
@@ -4005,6 +4020,7 @@ export function StorefrontDesigner({
           }
           showInspector={showInspector}
           inspectorTitle={inspectorTitle}
+          inspectorCloseLabel={inspectorCloseLabel}
           onCloseInspector={() => setInspector(null)}
           // On mobile every panel is the SAME bottom slot, and selecting a
           // shape opens both this and the color sheet — which would stack one
@@ -4250,22 +4266,22 @@ export function StorefrontDesigner({
       <Modal
         open={leaveGuard.promptOpen}
         onClose={leaveGuard.cancel}
-        title="Save your changes?"
-        description="You have unsaved changes to this storefront. Save them before leaving, or discard them."
+        title={t("leave.title")}
+        description={t("leave.description")}
       >
         <div className="flex flex-col gap-2 sm:flex-row-reverse">
           <Button
             onClick={handleSaveAndLeave}
             disabled={saving}
           >
-            {saving ? "Saving…" : "Save changes"}
+            {saving ? tCommon("saving") : t("leave.save")}
           </Button>
           <Button
             variant="destructive"
             onClick={leaveGuard.leave}
             disabled={saving}
           >
-            Discard changes
+            {t("leave.discard")}
           </Button>
           {/* mr-auto pushes "Keep editing" to the opposite end from the two
               leave actions, so it's not mistaken for one of them. */}
@@ -4275,7 +4291,7 @@ export function StorefrontDesigner({
             disabled={saving}
             className="sm:mr-auto"
           >
-            Keep editing
+            {t("leave.keepEditing")}
           </Button>
         </div>
       </Modal>
@@ -4311,6 +4327,7 @@ export function StorefrontDesigner({
  * dashboard trigger, since this bar has no room for a field.
  */
 function DesignerSearchButton() {
+  const t = useTranslations("Storefront.designer.header");
   const search = useSearch();
   // Anchor the palette under this button, same as the dashboard trigger — the
   // editor's is at the bar's right, so the panel drops down right-side there.
@@ -4324,7 +4341,7 @@ function DesignerSearchButton() {
       type="button"
       suppressHydrationWarning
       onClick={search.open}
-      aria-label="Search"
+      aria-label={t("search")}
       aria-haspopup="dialog"
       aria-expanded={search.isOpen}
       aria-keyshortcuts="Meta+K Control+K"

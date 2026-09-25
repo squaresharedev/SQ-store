@@ -1,0 +1,108 @@
+{
+  "metadata": {
+    "orders": {
+      "title": "Zamówienia"
+    }
+  },
+  "page": {
+    "title": "Zamówienia",
+    "subtitle": "Każde zamówienie złożone przez Square Share."
+  },
+  "status": {
+    "paid": "Opłacone",
+    "refunded": "Zwrócone",
+    "disputed": "Sporne",
+    "pending": "Oczekujące"
+  },
+  "channel": {
+    "embed": "Osadzenie",
+    "marketplace": "Marketplace"
+  },
+  "empty": {
+    "filteredTitle": "Żadne zamówienie nie pasuje do tych filtrów",
+    "filteredHint": "Spróbuj poszerzyć zakres dat albo wyczyścić filtry.",
+    "clearFilters": "Wyczyść filtry",
+    "title": "Jeszcze żadnych zamówień",
+    "hint": "Realizacja zakupu Square Share nie jest jeszcze otwarta. Sprzedaż przez twój własny link do zakupu albo e-mail się tu nie pojawi.",
+    "goToProducts": "Przejdź do produktów"
+  },
+  "list": {
+    "updating": "Aktualizowanie…",
+    "summary": "{total, plural, one {{total} zamówienie} few {{total} zamówienia} many {{total} zamówień} other {{total} zamówienia}} · strona {page} z {totalPages}",
+    "detailDialog": "Szczegóły zamówienia",
+    "closeDetail": "Zamknij szczegóły zamówienia"
+  },
+  "table": {
+    "product": "Produkt",
+    "amount": "Kwota",
+    "channel": "Kanał",
+    "status": "Status",
+    "buyer": "Kupujący",
+    "date": "Data"
+  },
+  "toolbar": {
+    "region": "filtry zamówień",
+    "channel": "kanał",
+    "buyerEmail": "e-mail kupującego",
+    "searchPlaceholder": "szukaj e-maila kupującego",
+    "status": "status",
+    "statusAriaLabel": "Filtruj według statusu",
+    "allStatuses": "Wszystkie statusy",
+    "dateRange": "zakres dat",
+    "datePlaceholder": "dowolne daty",
+    "sort": "sortuj",
+    "sortAriaLabel": "Sortuj zamówienia",
+    "clearFilters": "wyczyść filtry"
+  },
+  "sort": {
+    "newest": "Od najnowszych",
+    "oldest": "Od najstarszych",
+    "amountHigh": "Kwota: od najwyższej",
+    "amountLow": "Kwota: od najniższej"
+  },
+  "detail": {
+    "close": "Zamknij szczegóły zamówienia",
+    "version": "Wersja",
+    "copyVersion": {
+      "copy": "Kopiuj wersję",
+      "copied": "Skopiowano wersję",
+      "failed": "Nie udało się skopiować wersji. Zaznacz i skopiuj ręcznie."
+    },
+    "amount": "Kwota",
+    "platformFee": "Opłata platformy",
+    "youReceive": "Otrzymujesz",
+    "buyerEmail": "E-mail kupującego",
+    "copyBuyerEmail": {
+      "copy": "Kopiuj e-mail kupującego",
+      "copied": "Skopiowano e-mail kupującego",
+      "failed": "Nie udało się skopiować e-maila kupującego. Zaznacz i skopiuj ręcznie."
+    },
+    "noEmail": "brak e-maila",
+    "channel": "Kanał",
+    "date": "Data",
+    "orderId": "ID zamówienia",
+    "copyOrderId": {
+      "copy": "Kopiuj ID zamówienia",
+      "copied": "Skopiowano ID zamówienia",
+      "failed": "Nie udało się skopiować ID zamówienia. Zaznacz i skopiuj ręcznie."
+    }
+  },
+  "actions": {
+    "refundNeedsStripe": "Zwroty wymagają połączenia ze Stripe.",
+    "connectStripe": "Połącz Stripe, aby włączyć zwroty",
+    "refundConfirm": "Zwrócić środki za to zamówienie? Tej operacji nie da się cofnąć po połączeniu ze Stripe.",
+    "confirmRefund": "Potwierdź zwrot",
+    "refundOrder": "Zwróć środki za zamówienie",
+    "disputeInStripe": "Spory obsługujesz w panelu Stripe po połączeniu ze Stripe.",
+    "disputeConfirm": "Otworzyć obsługę sporu dla tego zamówienia?",
+    "handleDispute": "Obsłuż spór",
+    "none": "Dla tego zamówienia nie ma dostępnych żadnych akcji."
+  },
+  "skeleton": {
+    "loading": "wczytywanie zamówień"
+  },
+  "loading": {
+    "title": "Zamówienia",
+    "subtitle": "Każda sprzedaż z twojego osadzenia i marketplace."
+  }
+}

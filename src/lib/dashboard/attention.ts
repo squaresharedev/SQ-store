@@ -1,16 +1,20 @@
 import { LEGAL_VERSION } from "@/lib/settings/constants";
 import { STRIPE_CONNECT_AVAILABLE } from "@/lib/payments/availability";
+import { msg, type MessageRef } from "@/i18n/types";
 import type { DashboardOrdersData, ProductsSummary, ProfileSummary } from "./queries";
 
-/** One row of the overview's "Needs attention" module. */
+/**
+ * One row of the overview's "Needs attention" module. The copy is MessageRefs,
+ * resolved in the reader's language by the component that renders the row.
+ */
 export type AttentionItem = {
   key: string;
-  label: string;
-  description: string;
+  label: MessageRef;
+  description: MessageRef;
   /** In-app destination. Every href must resolve to a real route, and land on
    *  the surface that actually fixes the thing the row is complaining about. */
   href: string;
-  actionLabel: string;
+  actionLabel: MessageRef;
 };
 
 /**
@@ -113,11 +117,10 @@ export function buildAttentionItems({
   if (!twoFactorEnabled) {
     items.push({
       key: "two-factor",
-      label: "Turn on two-factor authentication",
-      description:
-        "A code from your phone at sign-in, so a stolen password alone can't get into your store.",
+      label: msg("Dashboard.attention.twoFactor.label"),
+      description: msg("Dashboard.attention.twoFactor.description"),
       href: "/settings/security#two-factor",
-      actionLabel: "Turn on",
+      actionLabel: msg("Dashboard.attention.twoFactor.action"),
     });
   }
 
@@ -131,10 +134,10 @@ export function buildAttentionItems({
   if (stripeConnectAvailable && !stripeConnected) {
     items.push({
       key: "stripe",
-      label: "Connect Stripe to get paid",
-      description: "Payouts stay blocked until your account is connected.",
+      label: msg("Dashboard.attention.stripe.label"),
+      description: msg("Dashboard.attention.stripe.description"),
       href: "/payments",
-      actionLabel: "Open payments",
+      actionLabel: msg("Dashboard.attention.stripe.action"),
     });
   }
 
@@ -146,20 +149,24 @@ export function buildAttentionItems({
   // on every other page. A member viewing someone else's store never got it
   // either: getProfileSummary reads under own-row RLS and returns null for them.
 
-  // Legal: nothing enforces acceptance yet (see LegalSection), so the row asks
-  // rather than warns, and only says "updated" to someone who accepted an older
-  // version. Gated on profile being readable; skipped when the current
-  // LEGAL_VERSION is already accepted.
+  // Legal: a new seller agrees in the welcome flow (it cannot be left without
+  // it). This row is for everyone that did not reach: accounts from before the
+  // terms step, and anyone whose agreement predates the current Terms. It asks
+  // rather than warns, and only says "updated" to someone who agreed to an
+  // older version. Gated on profile being readable; skipped when the current
+  // LEGAL_VERSION is already agreed to.
   if (profile && profile.legalAcceptedVersion !== LEGAL_VERSION) {
     const updated = profile.legalAcceptedVersion !== null;
     items.push({
       key: "no-legal",
-      label: updated ? "Accept the updated seller terms" : "Accept the seller terms",
+      label: updated
+        ? msg("Dashboard.attention.legal.labelUpdated")
+        : msg("Dashboard.attention.legal.label"),
       description: updated
-        ? "The terms changed since you accepted them. Read and accept the current version."
-        : "Read the Seller Agreement, Terms and Privacy drafts and accept them.",
+        ? msg("Dashboard.attention.legal.descriptionTermsUpdated")
+        : msg("Dashboard.attention.legal.descriptionTerms"),
       href: "/settings/legal",
-      actionLabel: "Review terms",
+      actionLabel: msg("Dashboard.attention.legal.action"),
     });
   }
 
@@ -176,11 +183,10 @@ export function buildAttentionItems({
     const count = products.noBuyPathCount;
     items.push({
       key: "no-buy-path",
-      label: `${count} product${count === 1 ? "" : "s"} with no way to buy`,
-      description:
-        "Add a buy link, or set a contact email under Settings so buyers can reach you.",
+      label: msg("Dashboard.attention.noBuyPath.label", { count }),
+      description: msg("Dashboard.attention.noBuyPath.description"),
       href: "/products",
-      actionLabel: "Review products",
+      actionLabel: msg("Dashboard.attention.noBuyPath.action"),
     });
   }
 
@@ -189,11 +195,10 @@ export function buildAttentionItems({
   if (products.hasPhysicalProducts && profile && !profile.shippingPolicySet) {
     items.push({
       key: "no-shipping",
-      label: "Add your shipping terms",
-      description:
-        "Physical products need shipping and returns terms before buyers see full details.",
+      label: msg("Dashboard.attention.noShipping.label"),
+      description: msg("Dashboard.attention.noShipping.description"),
       href: "/settings/shipping",
-      actionLabel: "Add terms",
+      actionLabel: msg("Dashboard.attention.noShipping.action"),
     });
   }
 
@@ -214,12 +219,17 @@ export function buildAttentionItems({
       storefronts.rows.find((row) => row.blockCount === 0) ?? storefronts.rows[0];
     items.push({
       key: "storefront",
-      label: saved ? "Your storefront is empty" : "Create your storefront",
+      label: saved
+        ? msg("Dashboard.attention.storefront.labelEmpty")
+        : msg("Dashboard.attention.storefront.labelNone"),
       description: saved
-        ? "Add a product to its grid to give it a page you can share."
-        : "Pick a look, then add your products to its grid.",
+        ? msg("Dashboard.attention.storefront.descriptionEmpty")
+        : msg("Dashboard.attention.storefront.descriptionNone"),
       href: saved && empty ? `/storefront/${empty.id}` : "/storefront",
-      actionLabel: saved && empty ? "Open designer" : "Create storefront",
+      actionLabel:
+        saved && empty
+          ? msg("Dashboard.attention.storefront.actionOpen")
+          : msg("Dashboard.attention.storefront.actionCreate"),
     });
   }
 
@@ -230,12 +240,16 @@ export function buildAttentionItems({
     const only = products.missingImage.length === 1;
     items.push({
       key: "images",
-      label: `${products.missingImage.length} product${only ? "" : "s"} missing an image`,
+      label: msg("Dashboard.attention.images.label", {
+        count: products.missingImage.length,
+      }),
       description: only
-        ? `"${first.title}" has no display image yet.`
-        : "Products without images look empty on your storefront.",
+        ? msg("Dashboard.attention.images.descriptionSingle", { title: first.title })
+        : msg("Dashboard.attention.images.descriptionMultiple"),
       href: only ? `/products/${first.id}/edit` : "/products",
-      actionLabel: only ? "Add an image" : "Fix products",
+      actionLabel: only
+        ? msg("Dashboard.attention.images.actionSingle")
+        : msg("Dashboard.attention.images.actionMultiple"),
     });
   }
 
@@ -243,9 +257,6 @@ export function buildAttentionItems({
 
   const flagged = orders.refundedCount + orders.disputedCount;
   if (flagged > 0) {
-    const parts: string[] = [];
-    if (orders.disputedCount > 0) parts.push(`${orders.disputedCount} disputed`);
-    if (orders.refundedCount > 0) parts.push(`${orders.refundedCount} refunded`);
     // Filter the list only when a single status is involved; filtering on one
     // of two would hide orders the row just counted.
     const status =
@@ -256,10 +267,24 @@ export function buildAttentionItems({
           : "refunded";
     items.push({
       key: "flagged-orders",
-      label: `${flagged} order${flagged === 1 ? "" : "s"} to review`,
-      description: `${parts.join(", ")}.`,
+      label: msg("Dashboard.attention.flaggedOrders.label", { count: flagged }),
+      // One sentence per combination rather than joined fragments, so a
+      // language can order and inflect the two counts its own way.
+      description:
+        status === null
+          ? msg("Dashboard.attention.flaggedOrders.descriptionBoth", {
+              disputed: orders.disputedCount,
+              refunded: orders.refundedCount,
+            })
+          : status === "disputed"
+            ? msg("Dashboard.attention.flaggedOrders.descriptionDisputed", {
+                count: orders.disputedCount,
+              })
+            : msg("Dashboard.attention.flaggedOrders.descriptionRefunded", {
+                count: orders.refundedCount,
+              }),
       href: status ? `/orders?status=${status}` : "/orders",
-      actionLabel: "Review orders",
+      actionLabel: msg("Dashboard.attention.flaggedOrders.action"),
     });
   }
 
@@ -276,13 +301,10 @@ export function buildAttentionItems({
       : "/storefront";
     items.push({
       key: "noindex-product-pages",
-      label: "Product pages blocked from search",
-      description:
-        count === 1
-          ? "One storefront has indexing turned off for its product pages."
-          : `${count} storefronts have indexing turned off for their product pages.`,
+      label: msg("Dashboard.attention.noindexPages.label"),
+      description: msg("Dashboard.attention.noindexPages.description", { count }),
       href,
-      actionLabel: "Open designer",
+      actionLabel: msg("Dashboard.attention.noindexPages.action"),
     });
   }
 
@@ -292,10 +314,10 @@ export function buildAttentionItems({
     const count = storefronts.deadBlockCount;
     items.push({
       key: "dead-blocks",
-      label: `${count} storefront block${count === 1 ? "" : "s"} referencing deleted products`,
-      description: "These blocks appear empty to visitors. Remove or replace them.",
+      label: msg("Dashboard.attention.deadBlocks.label", { count }),
+      description: msg("Dashboard.attention.deadBlocks.description"),
       href: "/storefront",
-      actionLabel: "Open storefront",
+      actionLabel: msg("Dashboard.attention.deadBlocks.action"),
     });
   }
 

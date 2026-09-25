@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { getTranslations } from "next-intl/server";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { getProfile, getUser } from "@/lib/auth/session";
 
@@ -32,8 +33,10 @@ export default async function StorefrontListLayout({
   children: ReactNode;
 }) {
   const [user, profile] = await Promise.all([getUser(), getProfile()]);
+  // The same fallback, and the same message, as the dashboard layout.
+  const t = await getTranslations("Dashboard.shell");
   const username =
-    profile?.username || user?.email?.split("@")[0] || "Account";
+    profile?.username || user?.email?.split("@")[0] || t("accountFallback");
 
   return <DashboardShell username={username}>{children}</DashboardShell>;
 }

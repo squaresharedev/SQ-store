@@ -1,0 +1,162 @@
+{
+  "metadata": {
+    "descriptionFallback": "{title}, de {store}."
+  },
+  "notFound": {
+    "title": "Este produto não está disponível",
+    "body": "Pode ter sido removido, ou o link que seguiu está desatualizado. Volte à loja para ver o que está disponível agora.",
+    "back": "Voltar"
+  },
+  "sections": {
+    "description": "Descrição",
+    "specs": "Especificações",
+    "documents": "Documentos",
+    "shipping": "Envio",
+    "returns": "Devoluções",
+    "safety": "Segurança e conformidade",
+    "seller": "Vendedor"
+  },
+  "soldBy": "Vendido por {seller}",
+  "moreDetails": "Mais detalhes",
+  "trust": {
+    "digitalDelivery": "Entregue como transferência após a compra.",
+    "euRights": "14 dias para mudar de ideias, e uma garantia de 2 anos."
+  },
+  "safety": {
+    "manufacturer": "Fabricante",
+    "responsiblePerson": "Pessoa responsável na UE",
+    "identifier": "Identificador do produto:",
+    "warnings": "Avisos"
+  },
+  "priceNotes": "{price, select, incl {{shipping, select, plus {IVA incl., portes à parte} free {IVA incl., envio grátis} other {IVA incl.}}} excl {{shipping, select, plus {impostos não incl., portes à parte} free {impostos não incl., envio grátis} other {impostos não incl.}}} other {{shipping, select, plus {portes à parte} free {envio grátis} other {}}}}",
+  "stock": {
+    "digitalDownload": "Transferência digital",
+    "digitalDownloadFormat": "Transferência digital ({format})"
+  },
+  "description": {
+    "readMore": "Ler mais",
+    "readLess": "Ler menos"
+  },
+  "gallery": {
+    "noPhoto": "Ainda sem fotografia",
+    "photosOf": "Fotografias de {title}",
+    "photo": "Fotografia {current} de {total}"
+  },
+  "options": {
+    "unavailable": "(indisponível)",
+    "unavailableOption": "{name} (indisponível)",
+    "unavailableLabel": "{name}, indisponível"
+  },
+  "quantity": {
+    "label": "Quantidade"
+  },
+  "cta": {
+    "unwired": "Este botão ainda não tem destino. Adicione um link de compra ao produto, ou um e-mail de contacto em Dados do vendedor.",
+    "unavailableIn": "Indisponível para a opção: {group}",
+    "askAbout": "Perguntar sobre este produto",
+    "checkoutOn": "Finalizar compra em <strong>{host}</strong>",
+    "mailSubject": "Pergunta sobre {title}",
+    "mailQuantity": "Quantidade: {quantity}"
+  },
+  "specs": {
+    "dimensions": "Dimensões",
+    "weight": "Peso",
+    "materials": "Materiais",
+    "madeIn": "Fabricado em",
+    "included": "O que está incluído",
+    "care": "Cuidados"
+  },
+  "seller": {
+    "address": "Morada:",
+    "country": "País:",
+    "email": "E-mail:",
+    "phone": "Telefone:",
+    "vatId": "NIF: {vatId}"
+  },
+  "statutory": {
+    "withdrawal": "Pode retratar-se desta compra no prazo de 14 dias após a receção, sem indicar qualquer motivo, salvo se se aplicar uma das exceções legais (por exemplo, bens feitos por encomenda ou bens selados).",
+    "digitalWithdrawal": "Para uma transferência digital, o direito de retratação termina assim que aceitar iniciar a transferência antes de terminarem os 14 dias.",
+    "guarantee": "Segundo a legislação da UE, tem direito a uma garantia legal de, pelo menos, 2 anos quanto à conformidade dos bens com o que foi vendido."
+  },
+  "footer": {
+    "disclosure": "<seller>{name}</seller> é o vendedor desta encomenda e é responsável pelo produto, pela sua entrega e por quaisquer devoluções ou reembolsos. A Squareshare fornece a tecnologia por trás desta página e não é parte no contrato de compra e venda.",
+    "poweredBy": "Com tecnologia <brand>Squareshare</brand>",
+    "policiesLabel": "Políticas da Squareshare",
+    "policies": {
+      "privacy": {
+        "label": "Privacidade",
+        "name": "Política de Privacidade da Squareshare"
+      },
+      "terms": {
+        "label": "Termos",
+        "name": "Termos de Utilização da Squareshare"
+      }
+    }
+  },
+  "report": {
+    "trigger": "{target, select, product {Denunciar este produto} other {Denunciar esta montra}}",
+    "title": "{target, select, product {Denunciar este produto} other {Denunciar esta montra}}",
+    "description": "Diga-nos o que está errado. Todas as denúncias são analisadas por uma pessoa.",
+    "sentTitle": "Denúncia enviada",
+    "sentBody": "{target, select, product {Obrigado. Uma pessoa vai analisar este produto. Não revelamos ao vendedor quem denunciou.} other {Obrigado. Uma pessoa vai analisar esta montra. Não revelamos ao vendedor quem denunciou.}}",
+    "reasonsLegend": "O que está errado?",
+    "reasons": {
+      "illegal": {
+        "label": "Bens ou atividade ilegais",
+        "hint": "Venda de algo contrário à lei, ou utilização do anúncio para o combinar."
+      },
+      "sexual": {
+        "label": "Conteúdo sexual",
+        "hint": "Imagens explícitas, ou qualquer conteúdo que sexualize um menor."
+      },
+      "violence": {
+        "label": "Violência ou conteúdo gráfico",
+        "hint": "Ferimentos explícitos, ameaças, ou conteúdo que glorifique a violência."
+      },
+      "hate": {
+        "label": "Ódio ou assédio",
+        "hint": "Ataques a uma pessoa ou a um grupo, ou simbologia de ódio."
+      },
+      "counterfeit": {
+        "label": "Contrafação ou roubo",
+        "hint": "Artigos falsificados de marcas, ou trabalho de outra pessoa vendido como próprio."
+      },
+      "scam": {
+        "label": "Burla ou fraude",
+        "hint": "O anúncio parece concebido para receber dinheiro sem entregar nada."
+      },
+      "spam": {
+        "label": "Spam",
+        "hint": "Repetitivo, enganador, ou que nem sequer é um produto real."
+      },
+      "other": {
+        "label": "Outro motivo",
+        "hint": "Explique abaixo e uma pessoa irá ler."
+      }
+    },
+    "detailsLabel": "Mais alguma coisa? <muted>(opcional)</muted>",
+    "detailsPlaceholder": "O que deve saber quem vai analisar isto?",
+    "emailLabel": "O seu e-mail <muted>(opcional)</muted>",
+    "emailPlaceholder": "nome@exemplo.com",
+    "emailHelp": "Serve apenas para confirmarmos a receção e, se necessário, colocarmos uma pergunta. Nunca é mostrado ao vendedor.",
+    "submitFailed": "Não foi possível enviar. Tente novamente.",
+    "offline": "Não foi possível enviar. Verifique a ligação e tente novamente.",
+    "send": "Enviar denúncia",
+    "api": {
+      "accepted": "Obrigado. Uma pessoa vai analisar isto.",
+      "unreadable": "Não foi possível ler o pedido.",
+      "invalid": "Essa denúncia não é válida.",
+      "targetType": "Isso não é algo que possa denunciar aqui.",
+      "reason": "Escolha o que está errado.",
+      "rateLimited": "Demasiadas denúncias a partir daqui. Tente novamente mais tarde.",
+      "submitFailed": "Não foi possível enviar. Tente novamente."
+    }
+  },
+  "shippingProse": {
+    "shipsFrom": "Enviado de {country}.",
+    "areaAndTime": "{area}: {time}",
+    "areaAndTimeWithCost": "{area}: {time} ({cost})",
+    "withCost": "{place} ({cost})",
+    "returnsWindow": "{paidBy, select, seller {{days, plural, one {Aceitamos devoluções até {days} dia após a entrega. Os portes de devolução são por nossa conta.} many {Aceitamos devoluções até {days} dias após a entrega. Os portes de devolução são por nossa conta.} other {Aceitamos devoluções até {days} dias após a entrega. Os portes de devolução são por nossa conta.}}} buyer {{days, plural, one {Aceitamos devoluções até {days} dia após a entrega. Os portes de devolução são pagos pelo comprador.} many {Aceitamos devoluções até {days} dias após a entrega. Os portes de devolução são pagos pelo comprador.} other {Aceitamos devoluções até {days} dias após a entrega. Os portes de devolução são pagos pelo comprador.}}} other {{days, plural, one {Aceitamos devoluções até {days} dia após a entrega.} many {Aceitamos devoluções até {days} dias após a entrega.} other {Aceitamos devoluções até {days} dias após a entrega.}}}}"
+  }
+}

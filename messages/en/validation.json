@@ -1,0 +1,391 @@
+{
+  "checkForm": "Check the form and try again.",
+  "generic": {
+    "invalid": "Check the form and try again."
+  },
+  "text": {
+    "productTitle": {
+      "required": "A product title is required.",
+      "tooLong": "A product title must be {maximum} characters or fewer.",
+      "unsupported": "A product title contains unsupported characters."
+    },
+    "productDescription": {
+      "required": "A product description is required.",
+      "tooLong": "A product description must be {maximum} characters or fewer.",
+      "unsupported": "A product description contains unsupported characters."
+    },
+    "filename": {
+      "required": "A filename is required.",
+      "tooLong": "A filename must be {maximum} characters or fewer.",
+      "unsupported": "A filename contains unsupported characters."
+    },
+    "galleryAlt": {
+      "required": "Alt text is required.",
+      "tooLong": "Alt text must be {maximum} characters or fewer.",
+      "unsupported": "Alt text contains unsupported characters."
+    },
+    "specName": {
+      "required": "A specification name is required.",
+      "tooLong": "A specification name must be {maximum} characters or fewer.",
+      "unsupported": "A specification name contains unsupported characters."
+    },
+    "specValue": {
+      "required": "A specification value is required.",
+      "tooLong": "A specification value must be {maximum} characters or fewer.",
+      "unsupported": "A specification value contains unsupported characters."
+    },
+    "optionName": {
+      "required": "An option name is required.",
+      "tooLong": "An option name must be {maximum} characters or fewer.",
+      "unsupported": "An option name contains unsupported characters."
+    },
+    "optionGroupName": {
+      "required": "An option group name is required.",
+      "tooLong": "An option group name must be {maximum} characters or fewer.",
+      "unsupported": "An option group name contains unsupported characters."
+    },
+    "documentName": {
+      "required": "A document name is required.",
+      "tooLong": "A document name must be {maximum} characters or fewer.",
+      "unsupported": "A document name contains unsupported characters."
+    },
+    "materials": {
+      "required": "Materials is required.",
+      "tooLong": "Materials must be {maximum} characters or fewer.",
+      "unsupported": "Materials contains unsupported characters."
+    },
+    "care": {
+      "required": "Care instructions is required.",
+      "tooLong": "Care instructions must be {maximum} characters or fewer.",
+      "unsupported": "Care instructions contains unsupported characters."
+    },
+    "includedItem": {
+      "required": "An included item is required.",
+      "tooLong": "An included item must be {maximum} characters or fewer.",
+      "unsupported": "An included item contains unsupported characters."
+    },
+    "origin": {
+      "required": "Country of origin is required.",
+      "tooLong": "Country of origin must be {maximum} characters or fewer.",
+      "unsupported": "Country of origin contains unsupported characters."
+    },
+    "manufacturerName": {
+      "required": "The manufacturer is required.",
+      "tooLong": "The manufacturer must be {maximum} characters or fewer.",
+      "unsupported": "The manufacturer contains unsupported characters."
+    },
+    "manufacturerAddress": {
+      "required": "The manufacturer's address is required.",
+      "tooLong": "The manufacturer's address must be {maximum} characters or fewer.",
+      "unsupported": "The manufacturer's address contains unsupported characters."
+    },
+    "responsibleName": {
+      "required": "The EU responsible person is required.",
+      "tooLong": "The EU responsible person must be {maximum} characters or fewer.",
+      "unsupported": "The EU responsible person contains unsupported characters."
+    },
+    "responsibleAddress": {
+      "required": "The EU responsible person's address is required.",
+      "tooLong": "The EU responsible person's address must be {maximum} characters or fewer.",
+      "unsupported": "The EU responsible person's address contains unsupported characters."
+    },
+    "safetyIdentifier": {
+      "required": "The type, batch or serial is required.",
+      "tooLong": "The type, batch or serial must be {maximum} characters or fewer.",
+      "unsupported": "The type, batch or serial contains unsupported characters."
+    },
+    "warnings": {
+      "required": "Warnings is required.",
+      "tooLong": "Warnings must be {maximum} characters or fewer.",
+      "unsupported": "Warnings contains unsupported characters."
+    },
+    "businessName": {
+      "required": "Business name is required.",
+      "tooLong": "Business name must be {maximum} characters or fewer.",
+      "unsupported": "Business name contains unsupported characters."
+    },
+    "businessAddress": {
+      "required": "The business address is required.",
+      "tooLong": "The business address must be {maximum} characters or fewer.",
+      "unsupported": "The business address contains unsupported characters."
+    },
+    "phone": {
+      "required": "The phone number is required.",
+      "tooLong": "The phone number must be {maximum} characters or fewer.",
+      "unsupported": "The phone number contains unsupported characters."
+    },
+    "bio": {
+      "required": "Your bio is required.",
+      "tooLong": "Your bio must be {maximum} characters or fewer.",
+      "unsupported": "Your bio contains unsupported characters."
+    },
+    "destinationArea": {
+      "required": "A destination is required.",
+      "tooLong": "A destination must be {maximum} characters or fewer.",
+      "unsupported": "A destination contains unsupported characters."
+    },
+    "deliveryTime": {
+      "required": "A delivery time is required.",
+      "tooLong": "A delivery time must be {maximum} characters or fewer.",
+      "unsupported": "A delivery time contains unsupported characters."
+    },
+    "shippingCost": {
+      "required": "A shipping cost is required.",
+      "tooLong": "A shipping cost must be {maximum} characters or fewer.",
+      "unsupported": "A shipping cost contains unsupported characters."
+    },
+    "dispatchTime": {
+      "required": "The dispatch time is required.",
+      "tooLong": "The dispatch time must be {maximum} characters or fewer.",
+      "unsupported": "The dispatch time contains unsupported characters."
+    },
+    "shippingNotes": {
+      "required": "The shipping notes is required.",
+      "tooLong": "The shipping notes must be {maximum} characters or fewer.",
+      "unsupported": "The shipping notes contains unsupported characters."
+    },
+    "shippingPolicy": {
+      "required": "The shipping policy is required.",
+      "tooLong": "The shipping policy must be {maximum} characters or fewer.",
+      "unsupported": "The shipping policy contains unsupported characters."
+    },
+    "returnsNotes": {
+      "required": "The returns notes is required.",
+      "tooLong": "The returns notes must be {maximum} characters or fewer.",
+      "unsupported": "The returns notes contains unsupported characters."
+    },
+    "returnsPolicy": {
+      "required": "The returns policy is required.",
+      "tooLong": "The returns policy must be {maximum} characters or fewer.",
+      "unsupported": "The returns policy contains unsupported characters."
+    },
+    "otherCategory": {
+      "required": "The category is required.",
+      "tooLong": "The category must be {maximum} characters or fewer.",
+      "unsupported": "The category contains unsupported characters."
+    },
+    "storefrontName": {
+      "required": "A storefront name is required.",
+      "tooLong": "A storefront name must be {maximum} characters or fewer.",
+      "unsupported": "A storefront name contains unsupported characters."
+    },
+    "fontName": {
+      "required": "A font name is required.",
+      "tooLong": "A font name must be {maximum} characters or fewer.",
+      "unsupported": "A font name contains unsupported characters."
+    },
+    "storeName": {
+      "required": "A store name is required.",
+      "tooLong": "A store name must be {maximum} characters or fewer.",
+      "unsupported": "A store name contains unsupported characters."
+    },
+    "storeBio": {
+      "required": "A store bio is required.",
+      "tooLong": "A store bio must be {maximum} characters or fewer.",
+      "unsupported": "A store bio contains unsupported characters."
+    },
+    "ctaLabel": {
+      "required": "The buy button label is required.",
+      "tooLong": "The buy button label must be {maximum} characters or fewer.",
+      "unsupported": "The buy button label contains unsupported characters."
+    },
+    "shippingProfileName": {
+      "required": "A shipping profile name is required.",
+      "tooLong": "A shipping profile name must be {maximum} characters or fewer.",
+      "unsupported": "A shipping profile name contains unsupported characters."
+    },
+    "shippingTerms": {
+      "required": "The shipping terms is required.",
+      "tooLong": "The shipping terms must be {maximum} characters or fewer.",
+      "unsupported": "The shipping terms contains unsupported characters."
+    },
+    "blockText": {
+      "required": "Block text is required.",
+      "tooLong": "Block text must be {maximum} characters or fewer.",
+      "unsupported": "Block text contains unsupported characters."
+    },
+    "elementAlt": {
+      "required": "Element alt text is required.",
+      "tooLong": "Element alt text must be {maximum} characters or fewer.",
+      "unsupported": "Element alt text contains unsupported characters."
+    },
+    "notificationTitle": {
+      "required": "A notification title is required.",
+      "tooLong": "A notification title must be {maximum} characters or fewer.",
+      "unsupported": "A notification title contains unsupported characters."
+    },
+    "notificationBody": {
+      "required": "A notification body is required.",
+      "tooLong": "A notification body must be {maximum} characters or fewer.",
+      "unsupported": "A notification body contains unsupported characters."
+    },
+    "searchQuery": {
+      "required": "Search query is required.",
+      "tooShort": "Search query needs at least {minimum} characters.",
+      "tooLong": "Search query must be {maximum} characters or fewer.",
+      "unsupported": "Search query contains unsupported characters."
+    },
+    "factorName": {
+      "required": "The name is required.",
+      "tooLong": "The name must be {maximum} characters or fewer.",
+      "unsupported": "The name contains unsupported characters."
+    },
+    "reportDetails": {
+      "required": "Your description is required.",
+      "tooLong": "Your description must be {maximum} characters or fewer.",
+      "unsupported": "Your description contains unsupported characters."
+    }
+  },
+  "email": {
+    "generic": {
+      "format": "That email doesn't look like an email address.",
+      "tooLong": "That email is too long.",
+      "unsupported": "That email contains unsupported characters."
+    },
+    "reporter": {
+      "format": "Your email doesn't look like an email address.",
+      "tooLong": "Your email is too long.",
+      "unsupported": "Your email contains unsupported characters."
+    },
+    "contactEmail": {
+      "format": "The contact email doesn't look like an email address.",
+      "tooLong": "The contact email is too long.",
+      "unsupported": "The contact email contains unsupported characters."
+    },
+    "manufacturerEmail": {
+      "format": "The manufacturer's email doesn't look like an email address.",
+      "tooLong": "The manufacturer's email is too long.",
+      "unsupported": "The manufacturer's email contains unsupported characters."
+    },
+    "responsibleEmail": {
+      "format": "The EU responsible person's email doesn't look like an email address.",
+      "tooLong": "The EU responsible person's email is too long.",
+      "unsupported": "The EU responsible person's email contains unsupported characters."
+    }
+  },
+  "emailQuality": {
+    "placeholder": "The contact email looks like a placeholder. Use an address you actually read.",
+    "disposable": "The contact email is at a temporary-mail provider. Use a permanent address."
+  },
+  "uuid": {
+    "id": "That id is not valid.",
+    "option": "That option is not valid.",
+    "optionGroup": "That option group is not valid.",
+    "shippingProfile": "That shipping profile is not valid.",
+    "storefrontId": "That storefront id is not valid.",
+    "blockId": "A block id is not valid.",
+    "notificationRecipient": "A notification recipient is not valid.",
+    "factor": "That authenticator is not valid.",
+    "reportTarget": "That item is not valid."
+  },
+  "handle": {
+    "username": "A username must be 3 to 30 characters, using only letters, numbers and underscores."
+  },
+  "hostname": {
+    "domains": "Domains must be bare lowercase domains like yoursite.com — no https://, port, path, or wildcard."
+  },
+  "referenceCode": {
+    "vatId": "A VAT ID must be {min} to {max} letters, digits, spaces, dots or hyphens."
+  },
+  "oneTimeCode": {
+    "authenticator": "The code is the 6 digits shown in your authenticator app."
+  },
+  "hexColor": {
+    "colors": "Colors must be 6-digit hex, like #a855f7.",
+    "swatchColours": "Swatch colours must be 6-digit hex, like #a855f7."
+  },
+  "int": {
+    "price": {
+      "whole": "Price must be a whole number.",
+      "tooSmall": "Price must be {minimum} or more.",
+      "tooBig": "Price must be {maximum} or fewer."
+    },
+    "maxPerOrder": {
+      "whole": "The maximum per order must be a whole number.",
+      "tooSmall": "The maximum per order must be {minimum} or more.",
+      "tooBig": "The maximum per order must be {maximum} or fewer."
+    }
+  },
+  "list": {
+    "domains": {
+      "tooMany": "List up to {maximum} domains.",
+      "duplicate": "Each entry in domains can only be listed once."
+    }
+  },
+  "settings": {
+    "currentPasswordRequired": "Enter your current password.",
+    "newPasswordTooShort": "New password needs at least {minimum} characters.",
+    "newPasswordTooLong": "Keep it under {maximum} characters.",
+    "passwordsMismatch": "New passwords do not match.",
+    "pickCountry": "Pick a country from the list.",
+    "legalVersionChanged": "The legal docs changed while you were reading. Reload and try again.",
+    "deleteConfirm": "Type \"{phrase}\" exactly to confirm."
+  },
+  "password": {
+    "tooShort": "Password must be at least {minimum} characters.",
+    "tooLong": "Keep it under {maximum} characters.",
+    "tooCommon": "That password is too common. Pick something less guessable.",
+    "repeated": "That password is too easy to guess. Try a longer mix of words.",
+    "sequence": "That password contains a common keyboard sequence. Try something else.",
+    "containsIdentity": "Password must not contain your email address or username.",
+    "weakMix": "Mix in upper and lower case, a number or a symbol — or use {length}+ characters."
+  },
+  "team": {
+    "invalidStore": "Invalid store reference.",
+    "invalidEmail": "That doesn't look like an email address.",
+    "emailTooLong": "That email is too long.",
+    "invalidRole": "Pick a valid role.",
+    "invalidInvite": "Invalid invite reference.",
+    "invalidMember": "Invalid member reference."
+  },
+  "auth": {
+    "usernameReserved": "That username is reserved. Pick another."
+  },
+  "notifications": {
+    "invalidReference": "Invalid notification reference."
+  },
+  "product": {
+    "stockRequired": "Set how many are in stock.",
+    "optionSpecsTooMany": "A version can have up to {maximum} of its own specifications.",
+    "optionGroupEmpty": "Give every option group at least one option, or remove the group.",
+    "optionGroupTooManyOptions": "An option group can have up to {maximum} options.",
+    "includedTooMany": "List up to {maximum} included items.",
+    "specsTooMany": "List up to {maximum} specifications.",
+    "purchaseLinkFormat": "The purchase link must be a full https:// address.",
+    "purchaseLinkTooLong": "The purchase link must be {maximum} characters or fewer.",
+    "purchaseLinkCredentials": "The purchase link cannot contain a username or password.",
+    "galleryTooMany": "A product can have up to {maximum} extra photos.",
+    "optionGroupsTooMany": "A product can have up to {maximum} option groups.",
+    "documentsTooMany": "A product can have up to {maximum} documents.",
+    "optionDuplicate": "Each option can only be listed once.",
+    "optionsTotalTooMany": "A product can have up to {maximum} options in total.",
+    "galleryStaleOption": "A photo points at an option that no longer exists."
+  },
+  "productImport": {
+    "noTitle": "No title.",
+    "titleTooLong": "Title is longer than 200 characters.",
+    "noPrice": "No price we could read.",
+    "priceZero": "Price is zero.",
+    "duplicateTitle": "Another row has this title."
+  },
+  "shipping": {
+    "shipsFromInvalid": "That is not a country we can ship from yet.",
+    "destinationsTooMany": "You can list up to {maximum} destinations.",
+    "returnsWindowWhole": "A returns window is a whole number of days.",
+    "returnsWindowNegative": "A returns window cannot be negative.",
+    "returnsWindowTooLong": "A returns window tops out at {maximum} days."
+  },
+  "storefront": {
+    "backgroundImageKind": "Background images must be image uploads.",
+    "customFontKind": "Custom fonts must be font uploads.",
+    "elementKind": "Elements must be element uploads.",
+    "productPageSectionsTooMany": "The product page must list every section once.",
+    "productPageSectionDuplicate": "The product page can't list the same section twice.",
+    "shippingProfilesTooMany": "A store can keep up to {maximum} shipping profiles.",
+    "shippingProfileDuplicate": "Each shipping profile can only be listed once.",
+    "spanRange": "A formatted range must end after it starts",
+    "blocksTooMany": "A storefront can hold up to {maximum} blocks. Remove some blocks or split this storefront in two.",
+    "blocksDuplicate": "Grid blocks must be unique.",
+    "blockOutsideCanvas": "A block sits outside the canvas."
+  }
+}

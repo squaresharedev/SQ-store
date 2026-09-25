@@ -1,0 +1,189 @@
+{
+  "metadata": {
+    "analytics": {
+      "title": "Analytics"
+    }
+  },
+  "page": {
+    "title": "Analytics",
+    "subtitle": "Sales, storefront views and everything else your store is doing."
+  },
+  "loading": {
+    "title": "Analytics",
+    "subtitle": "How your store is performing across the embed and the marketplace.",
+    "srLoading": "loading analytics"
+  },
+  "firstRun": {
+    "title": "Nothing to measure yet",
+    "body": "Visits to your product pages show up here once one is live.",
+    "backToSetup": "Back to setup"
+  },
+  "range": {
+    "ariaLabel": "Date range",
+    "last30Days": "Last 30 days",
+    "allTime": "All time",
+    "custom": "Custom",
+    "placeholder": "Pick a range"
+  },
+  "section": {
+    "whatMeasures": "What {title} measures"
+  },
+  "chart": {
+    "howToRead": "How to read {title}",
+    "emptyDefault": "No sales in this range"
+  },
+  "sales": {
+    "label": "Sales",
+    "description": "Paid orders placed through Square Share checkout.",
+    "revenue": {
+      "title": "Revenue",
+      "description": "Paid revenue over time.",
+      "series": "Revenue",
+      "ariaLabel": "Paid revenue over time"
+    },
+    "aov": {
+      "title": "Average order value",
+      "description": "How much a typical order is worth over time.",
+      "series": "Average order",
+      "ariaLabel": "Average order value over time"
+    },
+    "channels": {
+      "title": "Channels",
+      "description": "Where your sales come from.",
+      "ariaLabel": "Paid revenue by channel"
+    },
+    "weekday": {
+      "title": "Sales by weekday",
+      "description": "Your store's weekly rhythm.",
+      "series": "Sales",
+      "count": "{count, plural, one {{formatted} sale} other {{formatted} sales}}",
+      "ariaLabel": "Sales by weekday"
+    },
+    "topProducts": {
+      "title": "Top products",
+      "description": "Your best sellers by paid revenue.",
+      "series": "Revenue",
+      "ariaLabel": "Top products by paid revenue"
+    },
+    "orderStatus": {
+      "title": "Order status",
+      "description": "The full order mix, refunds and disputes included.",
+      "empty": "No orders in this range",
+      "ariaLabel": "Order status mix"
+    }
+  },
+  "tiles": {
+    "revenue": "Revenue",
+    "afterFees": "{amount} after fees",
+    "sales": "Sales",
+    "perDay": "{rate} per day on average",
+    "avgOrder": "Avg. order",
+    "uniqueBuyers": "Unique buyers",
+    "repeatBuyers": "{count, plural, one {{count} bought more than once} other {{count} bought more than once}}",
+    "refundRate": "Refund rate",
+    "refunded": "{count, plural, one {{count} refunded, {amount}} other {{count} refunded, {amount}}}",
+    "noSales": "No sales yet",
+    "noBuyers": "No buyers yet",
+    "noOrders": "No orders yet"
+  },
+  "channels": {
+    "embed": "Embed",
+    "marketplace": "Marketplace",
+    "direct": "Direct"
+  },
+  "signalsUnavailable": {
+    "title": "Views and signups are unavailable right now",
+    "body": "Your sales figures above are unaffected. Reload the page to try again."
+  },
+  "upcoming": {
+    "needProducts": "{labels} appear here once a product is on one of your storefronts.",
+    "needBlocks": "{labels} appear here once their block is on one of your storefronts."
+  },
+  "signal": {
+    "visitors": "Visitors",
+    "perVisitor": "{rate} per visitor on average",
+    "notCounted": "Not counted yet",
+    "value": "Value",
+    "noValue": "No value yet",
+    "notMeasured": "Not measured yet.",
+    "panels": {
+      "trend": "Over time",
+      "channels": "Channels",
+      "weekdays": "By weekday",
+      "storefronts": "By storefront"
+    },
+    "whereFrom": "Where they came from.",
+    "weeklyRhythm": "The weekly rhythm.",
+    "whichStorefront": "Which storefront they came from.",
+    "deletedStorefront": "Deleted storefront",
+    "deletedStorefrontNumbered": "Deleted storefront ({number})"
+  },
+  "sources": {
+    "storefront_view": {
+      "label": "Storefront views",
+      "description": "How often your storefront was loaded by a visitor.",
+      "count": "{count, plural, one {{formatted} view} other {{formatted} views}}",
+      "total": "Total views",
+      "emptyRange": "No views in this range",
+      "overTime": "Storefront views over time",
+      "acrossRange": "Storefront views across the selected range.",
+      "byChannel": "Storefront views by channel",
+      "byWeekday": "Storefront views by weekday",
+      "byStorefront": "Storefront views by storefront"
+    },
+    "product_click": {
+      "label": "Product clicks",
+      "description": "Visitors opening a product from one of your storefronts.",
+      "count": "{count, plural, one {{formatted} click} other {{formatted} clicks}}",
+      "total": "Total clicks",
+      "emptyRange": "No clicks in this range",
+      "overTime": "Product clicks over time",
+      "acrossRange": "Product clicks across the selected range.",
+      "byChannel": "Product clicks by channel",
+      "byWeekday": "Product clicks by weekday",
+      "byStorefront": "Product clicks by storefront",
+      "awaiting": "Arrives once the embed widget reports product opens.",
+      "readyToChart": "Ready to chart as soon as clicks start arriving."
+    },
+    "product_view": {
+      "label": "Product page views",
+      "description": "Visitors opening one of your hosted product pages.",
+      "count": "{count, plural, one {{formatted} view} other {{formatted} views}}",
+      "total": "Total views",
+      "emptyRange": "No views in this range",
+      "overTime": "Product page views over time",
+      "acrossRange": "Product page views across the selected range.",
+      "byChannel": "Product page views by channel",
+      "byWeekday": "Product page views by weekday",
+      "byStorefront": "Product page views by storefront"
+    },
+    "email_signup": {
+      "label": "Email signups",
+      "description": "People joining your list from a storefront.",
+      "count": "{count, plural, one {{formatted} signup} other {{formatted} signups}}",
+      "total": "Total signups",
+      "emptyRange": "No signups in this range",
+      "overTime": "Email signups over time",
+      "acrossRange": "Email signups across the selected range.",
+      "byChannel": "Email signups by channel",
+      "byWeekday": "Email signups by weekday",
+      "byStorefront": "Email signups by storefront",
+      "awaiting": "Arrives with the email signup block.",
+      "readyToChart": "Ready to chart as soon as signups start arriving."
+    },
+    "booking": {
+      "label": "Bookings",
+      "description": "Slots booked from a storefront.",
+      "count": "{count, plural, one {{formatted} booking} other {{formatted} bookings}}",
+      "total": "Total bookings",
+      "emptyRange": "No bookings in this range",
+      "overTime": "Bookings over time",
+      "acrossRange": "Bookings across the selected range.",
+      "byChannel": "Bookings by channel",
+      "byWeekday": "Bookings by weekday",
+      "byStorefront": "Bookings by storefront",
+      "awaiting": "Arrives with the calendar booking block.",
+      "readyToChart": "Ready to chart as soon as bookings start arriving."
+    }
+  }
+}

@@ -132,11 +132,11 @@ describe("buildMonthGrid", () => {
 describe("labels", () => {
   it("fullDateLabel formats for screen readers", () => {
     // ICU versions differ on the comma after the weekday; both are fine.
-    expect(fullDateLabel(fromISODate("2026-07-04")!)).toMatch(
+    expect(fullDateLabel(fromISODate("2026-07-04")!, "en")).toMatch(
       /^Saturday,? 4 July 2026$/,
     );
   });
   it("formatDisplayDate short form", () => {
-    expect(formatDisplayDate(fromISODate("2026-07-04")!)).toBe("4 Jul 2026");
+    expect(formatDisplayDate(fromISODate("2026-07-04")!, "en")).toBe("4 Jul 2026");
   });
 });

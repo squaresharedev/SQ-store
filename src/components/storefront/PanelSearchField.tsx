@@ -9,6 +9,7 @@ import {
   type KeyboardEvent,
 } from "react";
 import { PanelRight, Settings as SettingsIcon, Square } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { infoTextClass } from "@/components/ui/control-styles";
 import {
@@ -62,12 +63,17 @@ export function PanelSearchField({
   entries: readonly EditorSearchEntry[];
   onPick: (target: EditorTarget) => void;
 }) {
+  const tKey = useTranslations();
+  const t = useTranslations("Storefront.panelSearch");
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const listboxId = useId();
   const optionId = useCallback((id: string) => `${listboxId}-${id}`, [listboxId]);
 
-  const sections = useMemo(() => searchEditor(entries, query), [entries, query]);
+  const sections = useMemo(
+    () => searchEditor(entries, query, tKey),
+    [entries, query, tKey],
+  );
   /** The rows in render order, which is the order the arrows walk. */
   const flat = useMemo(() => sections.flatMap((section) => section.hits), [sections]);
   const ids = useMemo(() => flat.map((hit) => hit.entry.id), [flat]);
@@ -122,15 +128,15 @@ export function PanelSearchField({
         value={query}
         onValueChange={setQuery}
         onKeyDown={onKeyDown}
-        label="Find a setting or object"
-        placeholder="Find a setting or object"
+        label={t("placeholder")}
+        placeholder={t("placeholder")}
         listboxId={listboxId}
         expanded={flat.length > 0}
         activeDescendant={activeId ? optionId(activeId) : undefined}
         clear={
           query
             ? {
-                label: "Clear search",
+                label: t("clear"),
                 onPress: () => {
                   reset();
                   inputRef.current?.focus();
@@ -148,10 +154,10 @@ export function PanelSearchField({
         <div className="mt-2">
           {flat.length === 0 ? (
             <p className={cn(infoTextClass, "px-2 py-1.5")}>
-              Nothing in the editor matches that.
+              {t("noResults")}
             </p>
           ) : (
-            <div id={listboxId} role="listbox" aria-label="Matches">
+            <div id={listboxId} role="listbox" aria-label={t("matchesLabel")}>
               {sections.map((section) => (
                 <EditorSearchGroup
                   key={section.key}

@@ -35,6 +35,7 @@ export function FormSection({
   icon: Icon,
   title,
   description,
+  about,
   state = "empty",
   summary,
   children,
@@ -45,6 +46,9 @@ export function FormSection({
   /** Revealed by the "?" beside the heading. Empty for a section whose own
    *  fields already explain it, which then shows no "?" at all. */
   description: string;
+  /** The accessible name of that "?" ("What Basics is for"), one whole
+   *  sentence per section rather than the title spliced into a template. */
+  about: string;
   state?: ProductFormSectionState;
   /** What this section currently holds, e.g. "3 photos". */
   summary?: string;
@@ -82,7 +86,7 @@ export function FormSection({
               And a section whose fields carry their own "?" gets none here: an
               empty description means no button, rather than a fourth info
               button on a card that already has three. */}
-          {description && <InfoTip label={`What ${title} is for`}>{description}</InfoTip>}
+          {description && <InfoTip label={about}>{description}</InfoTip>}
           {summary && (
             <span
               className={cn(

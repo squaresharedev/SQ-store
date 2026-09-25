@@ -1,29 +1,43 @@
 /**
  * The guided tour's contract with the pages it points at.
  *
- * The tour finds its controls by selectors those pages already render (an
- * href, an aria-label, an id), so a renamed label would quietly turn a stop
- * into its unspotlit fallback. These pin each selector against the markup: by
- * rendering the real component where that is cheap, and by reading the source
- * where the component needs a whole page around it (those stops are also walked
- * end to end in e2e/63-guided-tour).
+ * The tour finds its controls by selectors that do not depend on the reader's
+ * language: a `data-tour` id on the control, or an href, an id or a data
+ * attribute the page already renders. Never a label: labels are translated,
+ * and a tour that looked for "Dashboard" found nothing in Czech. So the real
+ * components are rendered here in English AND in Czech, and every stop of both
+ * tours must find its control in each. Stops on pages too heavy to render are
+ * checked against their source (and walked end to end in e2e/63-guided-tour
+ * and e2e/65-sample-storefront).
  *
  * jsdom has no layout, so this checks that a selector MATCHES; whether the
  * match is on screen is the e2e specs' job.
  */
 
-import type { ReactNode } from "react";
+import type { ReactElement, ReactNode } from "react";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { NextIntlClientProvider } from "next-intl";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { cleanup, render } from "../setup/render";
-import { tourStep, type TourStepId } from "@/lib/onboarding/tour-steps";
+import { english } from "../setup/translate";
+import { loadMessages, type Messages } from "@/i18n/messages";
+import { tourStep, TOUR_STEPS, type TourStepId } from "@/lib/onboarding/tour-steps";
 import { EDITOR_TOUR_STEPS, type EditorTourStepId } from "@/lib/onboarding/editor-tour-steps";
+import type { StorefrontSummary } from "@/lib/storefront/queries";
+import { DEFAULT_STOREFRONT_CONFIG } from "@/types/storefront";
+import { Sidebar } from "@/components/dashboard/Sidebar";
+import { SearchMobileTrigger } from "@/components/search/SearchMobileTrigger";
+import { SearchTrigger } from "@/components/search/SearchTrigger";
+import { OrdersToolbar } from "@/components/orders/OrdersToolbar";
+import { RangeSelector } from "@/components/analytics/RangeSelector";
+import { ConnectionStatusCard } from "@/components/payments/ConnectionStatusCard";
+import { StorefrontsList } from "@/components/storefront/StorefrontsList";
 import { EditorToolbar } from "@/components/storefront/EditorToolbar";
 import { useCanvasViewport } from "@/components/storefront/useCanvasViewport";
 
 beforeAll(() => {
-  // The sample card's live preview measures its box.
+  // The storefront cards' live previews measure their box.
   vi.stubGlobal(
     "ResizeObserver",
     class {
@@ -70,161 +84,258 @@ vi.mock("@/components/search/SearchProvider", () => ({
   }),
 }));
 
+// The storefront list's server actions and its setup flow, which only need to
+// exist here.
+vi.mock("@/lib/storefront/actions", () => ({
+  deleteStorefront: vi.fn(),
+  fetchStorefrontsPage: vi.fn(),
+  createStorefront: vi.fn(),
+  rotateEmbedKey: vi.fn(),
+  updateEmbedSettings: vi.fn(),
+}));
+vi.mock("@/components/storefront/CreateStorefrontWizard", () => ({
+  CreateStorefrontWizard: () => null,
+}));
+
 afterEach(cleanup);
 
+/** English, and Czech merged over it exactly as the app loads it. */
+const CATALOGUES: Record<"en" | "cs", Messages> = {
+  en: await loadMessages("en"),
+  cs: await loadMessages("cs"),
+};
+
+/** `ui` with its copy in `locale`. Nested inside ../setup/render's providers,
+ *  so everything else about the app's chrome stays as every spec has it. */
+function inLocale(locale: "en" | "cs", ui: ReactElement) {
+  return (
+    <NextIntlClientProvider locale={locale} messages={CATALOGUES[locale]} timeZone="UTC">
+      {ui}
+    </NextIntlClientProvider>
+  );
+}
+
+function renderIn(locale: "en" | "cs", ui: ReactElement) {
+  const view = render(inLocale(locale, ui));
+  return { ...view, rerender: (next: ReactElement) => view.rerender(inLocale(locale, next)) };
+}
+
 const selector = (id: TourStepId, index = 0) => tourStep(id)!.targets[index].selector;
+const editorSelector = (id: EditorTourStepId, index = 0) =>
+  EDITOR_TOUR_STEPS.find((step) => step.id === id)!.targets[index].selector;
 const source = (path: string) => readFileSync(join(process.cwd(), "src", path), "utf8");
 
-describe("tour targets", () => {
-  it("finds the orders search and filters on the real toolbar", async () => {
-    const { OrdersToolbar } = await import("@/components/orders/OrdersToolbar");
-    const { container } = render(
+const NOT_CONNECTED = {
+  connected: false,
+  accountId: null,
+  chargesEnabled: false,
+  payoutsEnabled: false,
+  detailsSubmitted: false,
+  requirementsDue: [],
+};
+
+const OWN_STOREFRONT: StorefrontSummary = {
+  id: "60000000-0000-4000-8000-000000000006",
+  name: "Gilt & Grain",
+  blockCount: 0,
+  updatedAt: "2026-09-01T00:00:00.000Z",
+  config: DEFAULT_STOREFRONT_CONFIG,
+  embedKey: "70000000-0000-4000-8000-000000000007",
+  brief: {},
+};
+
+function Toolbar({ pagesOpen = false }: { pagesOpen?: boolean }) {
+  const viewport = useCanvasViewport({ zoom: 1, pan: { x: 0, y: 0 } });
+  return (
+    <EditorToolbar
+      onAddProduct={vi.fn()}
+      onAddText={vi.fn()}
+      onAddShape={vi.fn()}
+      onAddElement={vi.fn()}
+      onOpenShapesPanel={vi.fn()}
+      canAddBlocks
+      canUndo={false}
+      canRedo={false}
+      onUndo={vi.fn()}
+      onRedo={vi.fn()}
+      viewport={viewport}
+      onZoomIn={vi.fn()}
+      onZoomOut={vi.fn()}
+      onZoomReset={vi.fn()}
+      onTidy={vi.fn()}
+      canTidy
+      settingsOpen={false}
+      onToggleSettings={vi.fn()}
+      pagesOpen={pagesOpen}
+      canOpenPage
+      onTogglePages={vi.fn()}
+    />
+  );
+}
+
+/**
+ * Every control either tour points at that renders without a whole page
+ * around it, laid out the way the app nests them (the sidebar and top bar
+ * outside `main`, the page's own controls inside).
+ */
+function TourSurfaces() {
+  return (
+    <>
+      <Sidebar topBarSlot={<SearchMobileTrigger />} />
+      <div data-testid="top-bar">
+        <SearchTrigger />
+      </div>
       <main>
+        <StorefrontsList
+          storefronts={[OWN_STOREFRONT]}
+          total={1}
+          products={[]}
+          canWrite
+          sample="shown"
+        />
         <OrdersToolbar
           filters={{}}
           onChange={vi.fn()}
           sort={{ field: "createdAt", direction: "desc" }}
           onSortChange={vi.fn()}
         />
-      </main>,
-    );
-    const searchStop = container.querySelector(selector("orders-search"));
-    expect(searchStop).not.toBeNull();
-    // The spotlight takes in the label with the field.
-    expect(searchStop?.querySelector("#orders-search")).not.toBeNull();
-    expect(searchStop?.querySelector('label[for="orders-search"]')).not.toBeNull();
-    expect(container.querySelector(selector("orders-search", 1))).not.toBeNull();
-    expect(container.querySelector(selector("orders-filters"))).not.toBeNull();
+        <RangeSelector preset="30d" range={{ from: null, to: null }} />
+        <ConnectionStatusCard account={NOT_CONNECTED} onConnect={vi.fn()} />
+        <Toolbar />
+      </main>
+    </>
+  );
+}
+
+/** Candidates whose control lives on a page too heavy to render here. Their
+ *  anchors are language-independent too, and checked against source below. */
+const FROM_SOURCE: ReadonlySet<string> = new Set([
+  'main a[href="/products/new"]',
+  'main a[href="/products/import"]',
+  "[data-analytics-first-run] > div",
+  "[data-analytics-range-preset]",
+  "#tour",
+  "[data-design-panel] [data-panel-menu]",
+  "[data-sample-create]",
+]);
+
+/** Every selector either tour looks up: each candidate, and each `waitFor`. */
+const LOOKUPS = [...TOUR_STEPS, ...EDITOR_TOUR_STEPS].flatMap((step) => [
+  ...step.targets.map((target) => ({ step: step.id, selector: target.selector })),
+  ...(step.waitFor ? [{ step: step.id, selector: step.waitFor }] : []),
+]);
+
+describe.each(["en", "cs"] as const)("tour targets, with the UI in %s", (locale) => {
+  it("finds every stop's control, in both tours", () => {
+    renderIn(locale, <TourSurfaces />);
+    const rendered = LOOKUPS.filter(({ selector }) => !FROM_SOURCE.has(selector));
+    // Every data-tour lookup is one of the rendered ones.
+    expect(
+      LOOKUPS.filter(({ selector }) => selector.includes("data-tour=") && FROM_SOURCE.has(selector)),
+    ).toEqual([]);
+    expect(rendered.length).toBeGreaterThan(10);
+    for (const { step, selector: lookup } of rendered) {
+      expect(document.querySelector(lookup), `${step}: ${lookup}`).not.toBeNull();
+    }
   });
 
-  it("finds the Stripe card on Payments", async () => {
-    const { ConnectionStatusCard } = await import("@/components/payments/ConnectionStatusCard");
-    const { container } = render(
+  it("puts the spotlight on the right element, not merely a match", () => {
+    renderIn(locale, <TourSurfaces />);
+    expect(document.querySelector(selector("overview-nav", 0))?.tagName).toBe("NAV");
+    expect(document.querySelector(selector("overview-nav", 1))?.closest("header")).not.toBeNull();
+    expect(document.querySelector(selector("search", 1))?.closest("header")).not.toBeNull();
+    expect(document.querySelector(selector("orders-filters"))).toHaveAttribute("role", "search");
+    // The orders search stop takes in the label with the field.
+    const searchStop = document.querySelector(selector("orders-search"));
+    expect(searchStop?.querySelector("#orders-search")).not.toBeNull();
+    expect(searchStop?.querySelector('label[for="orders-search"]')).not.toBeNull();
+    expect(document.querySelector(selector("analytics", 0))).toHaveAttribute("role", "group");
+    expect(document.querySelector(selector("payments"))?.tagName).toBe("SECTION");
+    expect(document.querySelector(editorSelector("editor-add"))).toHaveAttribute("role", "toolbar");
+    // The embed stop has the seller's own card to itself: the sample is a
+    // link at the foot of the list now, not a card with a button of its own.
+    expect(document.querySelectorAll(selector("storefront-embed"))).toHaveLength(1);
+    expect(
+      document.querySelector(selector("storefront-sample"))?.querySelector('a[href="/storefront/sample"]'),
+    ).not.toBeNull();
+  });
+
+  it("keeps the product page stop on the toolbar button whether the pages are open or not", () => {
+    const { rerender } = renderIn(locale, <Toolbar />);
+    expect(document.querySelector(editorSelector("editor-page"))).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
+    rerender(<Toolbar pagesOpen />);
+    expect(document.querySelector(editorSelector("editor-page"))).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+  });
+
+  it("finds the Stripe card whether or not Stripe is connected", () => {
+    const { rerender } = renderIn(
+      locale,
+      <ConnectionStatusCard account={NOT_CONNECTED} onConnect={vi.fn()} />,
+    );
+    expect(document.querySelector(selector("payments"))).not.toBeNull();
+    rerender(
       <ConnectionStatusCard
-        account={{
-          connected: false,
-          accountId: null,
-          chargesEnabled: false,
-          payoutsEnabled: false,
-          detailsSubmitted: false,
-          requirementsDue: [],
-        }}
+        account={{ ...NOT_CONNECTED, connected: true, accountId: "acct_1", chargesEnabled: true }}
         onConnect={vi.fn()}
       />,
     );
-    expect(container.querySelector(selector("payments"))).not.toBeNull();
+    expect(document.querySelector(selector("payments"))).not.toBeNull();
   });
+});
 
-  it("finds the sidebar on desktop and the menu button and search on a phone", async () => {
-    const { Sidebar } = await import("@/components/dashboard/Sidebar");
-    const { SearchMobileTrigger } = await import("@/components/search/SearchMobileTrigger");
-    render(<Sidebar topBarSlot={<SearchMobileTrigger />} />);
-    expect(document.querySelector(selector("overview-nav", 0))).not.toBeNull();
-    expect(document.querySelector(selector("overview-nav", 1))).not.toBeNull();
-    expect(document.querySelector(selector("search", 1))).not.toBeNull();
+describe("tour targets outside English", () => {
+  it("renders a UI the old English label lookups could not find their way around", () => {
+    renderIn("cs", <TourSurfaces />);
+    // The lookups the tour used before it had data-tour ids. With the UI in
+    // Czech each finds nothing, which is the bug the ids fix; if one of these
+    // ever matches, this spec is no longer rendering a translated UI.
+    for (const englishLookup of [
+      `nav[aria-label="${english("Dashboard.sidebar.navLabel")}"]`,
+      `header button[aria-label="${english("Dashboard.sidebar.openMenu")}"]`,
+      `header button[aria-label="${english("Search.trigger.label")}"]`,
+      `[role="search"][aria-label="${english("Orders.toolbar.region")}"]`,
+      `[role="group"][aria-label="${english("Analytics.range.ariaLabel")}"]`,
+      `section[aria-label="${english("Payments.connection.label")}"]`,
+      `[role="toolbar"][aria-label="${english("Storefront.toolbar.ariaLabel")}"]`,
+    ]) {
+      expect(document.querySelector(englishLookup), englishLookup).toBeNull();
+    }
   });
+});
 
-  it("finds the desktop search trigger inside the top bar", async () => {
-    const { SearchTrigger } = await import("@/components/search/SearchTrigger");
-    const { container } = render(
-      <div data-testid="top-bar">
-        <SearchTrigger />
-      </div>,
-    );
-    expect(container.querySelector(selector("search", 0))).not.toBeNull();
-    // And the real top bar is that wrapper around that trigger.
-    const topBar = source("components/layout/TopBar.tsx");
-    expect(topBar).toContain('data-testid="top-bar"');
-    expect(topBar).toContain("<SearchTrigger");
-  });
-
-  it("keeps the anchors the heavier pages render", () => {
+describe("tour targets on the heavier pages", () => {
+  it("keeps the anchors those pages render", () => {
     // Products: the toolbar's two links (whole-page component, in flux).
     const products = source("components/products/ProductsBrowser.tsx");
     expect(products).toContain('href="/products/new"');
     expect(products).toContain('href="/products/import"');
-    expect(selector("products-add")).toContain('a[href="/products/new"]');
-    expect(selector("products-import")).toContain('a[href="/products/import"]');
+    expect(selector("products-add")).toBe('main a[href="/products/new"]');
+    expect(selector("products-import")).toBe('main a[href="/products/import"]');
 
-    // Storefront: both create buttons, the sample's list item, and each card's
-    // embed button (the sample card's included).
+    // Storefront: both create buttons, and the sample's link.
     const list = source("components/storefront/StorefrontsList.tsx");
     expect(list.match(/data-tour="storefront-create"/g)).toHaveLength(2);
-    expect(list).toContain('<li data-storefront-sample="">');
+    expect(list).toContain('data-storefront-sample=""');
     expect(selector("storefront-sample")).toBe("main [data-storefront-sample]");
-    expect(source("components/storefront/StorefrontCard.tsx")).toContain(
-      "aria-label={`Embed ${name}`}",
-    );
-    expect(source("components/storefront/SampleStorefrontCard.tsx")).toContain(
-      "aria-label={`Embed ${SAMPLE_STOREFRONT_NAME}`}",
-    );
-    expect(selector("storefront-embed")).toContain('aria-label^="Embed "');
 
-    // Analytics: the range selector, or the first-run empty state.
-    expect(source("components/analytics/RangeSelector.tsx")).toContain('ariaLabel="Date range"');
-    expect(source("components/analytics/AnalyticsPage.tsx")).toContain("data-analytics-first-run");
+    // Analytics: the first-run empty state, when there is nothing to measure,
+    // and the page's own proof that it has rendered.
+    const analytics = source("components/analytics/AnalyticsPage.tsx");
+    expect(analytics).toContain("data-analytics-first-run");
+    expect(analytics).toContain("data-analytics-range-preset");
+    expect(selector("analytics", 1)).toBe("[data-analytics-first-run] > div");
+    expect(tourStep("analytics")!.waitFor).toBe("[data-analytics-range-preset]");
 
     // Settings: the replay card's wrapper is the last stop.
     const account = source("components/settings/AccountSection.tsx");
     expect(account).toMatch(/<div id="tour">\s*<TourReplayCard \/>/);
-  });
-
-  it("finds the sample storefront card and its embed button on the real card", async () => {
-    const { SampleStorefrontCard } = await import("@/components/storefront/SampleStorefrontCard");
-    const { container } = render(
-      <main>
-        <ul>
-          <li data-storefront-sample="">
-            <SampleStorefrontCard onEmbed={vi.fn()} onHide={vi.fn()} />
-          </li>
-        </ul>
-      </main>,
-    );
-    expect(container.querySelector(selector("storefront-sample"))).not.toBeNull();
-    expect(container.querySelector(selector("storefront-embed"))).not.toBeNull();
-  });
-});
-
-describe("editor tour targets", () => {
-  const editorSelector = (id: EditorTourStepId, index = 0) =>
-    EDITOR_TOUR_STEPS.find((step) => step.id === id)!.targets[index].selector;
-
-  function Toolbar({ pagesOpen = false }: { pagesOpen?: boolean }) {
-    const viewport = useCanvasViewport({ zoom: 1, pan: { x: 0, y: 0 } });
-    return (
-      <EditorToolbar
-        onAddProduct={vi.fn()}
-        onAddText={vi.fn()}
-        onAddShape={vi.fn()}
-        onAddElement={vi.fn()}
-        onOpenShapesPanel={vi.fn()}
-        canAddBlocks
-        canUndo={false}
-        canRedo={false}
-        onUndo={vi.fn()}
-        onRedo={vi.fn()}
-        viewport={viewport}
-        onZoomIn={vi.fn()}
-        onZoomOut={vi.fn()}
-        onZoomReset={vi.fn()}
-        onTidy={vi.fn()}
-        canTidy
-        settingsOpen={false}
-        onToggleSettings={vi.fn()}
-        pagesOpen={pagesOpen}
-        canOpenPage
-        onTogglePages={vi.fn()}
-      />
-    );
-  }
-
-  it("finds the toolbar, its Design settings button and its product page button", () => {
-    const { container, rerender } = render(<Toolbar />);
-    expect(container.querySelector(editorSelector("editor-add"))).not.toBeNull();
-    expect(container.querySelector(editorSelector("editor-design", 1))).not.toBeNull();
-    expect(container.querySelector(editorSelector("editor-page", 0))).not.toBeNull();
-    rerender(<Toolbar pagesOpen />);
-    expect(container.querySelector(editorSelector("editor-page", 1))).not.toBeNull();
+    expect(selector("finish")).toBe("#tour");
   });
 
   it("keeps the anchors the designer renders around the toolbar", () => {

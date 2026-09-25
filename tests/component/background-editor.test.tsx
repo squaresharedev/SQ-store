@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, afterEach, beforeAll } from "vitest";
-import { render, screen, cleanup, within } from "@testing-library/react";
+import { render, screen, cleanup, within } from "../setup/render";
+import { english } from "../setup/translate";
 import { BackgroundEditor } from "@/components/storefront/BackgroundEditor";
 import { ToastProvider } from "@/components/ui/Toast";
 import { themeAccentPresets } from "@/lib/theme/theme-color-presets";
@@ -55,14 +56,14 @@ describe("BackgroundEditor solid color quick picks", () => {
     const row = colorSwatchRow();
     for (const preset of themeAccentPresets(ACCENT)) {
       expect(
-        within(row).getByRole("button", { name: `${preset.name} (${preset.value})` }),
+        within(row).getByRole("button", { name: english(preset.label, { value: preset.value }) }),
       ).toBeInTheDocument();
     }
     // The three neutrals every other field shares are NOT here — this field
     // shows the seller's own brand color instead.
     for (const preset of COLOR_PRESETS) {
       expect(
-        within(row).queryByRole("button", { name: `${preset.name} (${preset.value})` }),
+        within(row).queryByRole("button", { name: english(preset.label, { value: preset.value }) }),
       ).toBeNull();
     }
   });
@@ -82,7 +83,7 @@ describe("BackgroundEditor solid color quick picks", () => {
     const greenPreset = themeAccentPresets("#16a34a")[2];
     expect(
       within(colorSwatchRow()).getByRole("button", {
-        name: `${greenPreset.name} (${greenPreset.value})`,
+        name: english(greenPreset.label, { value: greenPreset.value }),
       }),
     ).toBeInTheDocument();
 
@@ -100,12 +101,12 @@ describe("BackgroundEditor solid color quick picks", () => {
     const purplePreset = themeAccentPresets(ACCENT)[2];
     expect(
       within(colorSwatchRow()).getByRole("button", {
-        name: `${purplePreset.name} (${purplePreset.value})`,
+        name: english(purplePreset.label, { value: purplePreset.value }),
       }),
     ).toBeInTheDocument();
     expect(
       within(colorSwatchRow()).queryByRole("button", {
-        name: `${greenPreset.name} (${greenPreset.value})`,
+        name: english(greenPreset.label, { value: greenPreset.value }),
       }),
     ).toBeNull();
   });

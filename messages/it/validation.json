@@ -1,0 +1,391 @@
+{
+  "checkForm": "Controlla il modulo e riprova.",
+  "generic": {
+    "invalid": "Controlla il modulo e riprova."
+  },
+  "text": {
+    "productTitle": {
+      "required": "Il titolo del prodotto è obbligatorio.",
+      "tooLong": "Il titolo del prodotto deve avere al massimo {maximum} caratteri.",
+      "unsupported": "Il titolo del prodotto contiene caratteri non supportati."
+    },
+    "productDescription": {
+      "required": "La descrizione del prodotto è obbligatoria.",
+      "tooLong": "La descrizione del prodotto deve avere al massimo {maximum} caratteri.",
+      "unsupported": "La descrizione del prodotto contiene caratteri non supportati."
+    },
+    "filename": {
+      "required": "Il nome del file è obbligatorio.",
+      "tooLong": "Il nome del file deve avere al massimo {maximum} caratteri.",
+      "unsupported": "Il nome del file contiene caratteri non supportati."
+    },
+    "galleryAlt": {
+      "required": "Il testo alternativo è obbligatorio.",
+      "tooLong": "Il testo alternativo deve avere al massimo {maximum} caratteri.",
+      "unsupported": "Il testo alternativo contiene caratteri non supportati."
+    },
+    "specName": {
+      "required": "Il nome della specifica è obbligatorio.",
+      "tooLong": "Il nome della specifica deve avere al massimo {maximum} caratteri.",
+      "unsupported": "Il nome della specifica contiene caratteri non supportati."
+    },
+    "specValue": {
+      "required": "Il valore della specifica è obbligatorio.",
+      "tooLong": "Il valore della specifica deve avere al massimo {maximum} caratteri.",
+      "unsupported": "Il valore della specifica contiene caratteri non supportati."
+    },
+    "optionName": {
+      "required": "Il nome dell’opzione è obbligatorio.",
+      "tooLong": "Il nome dell’opzione deve avere al massimo {maximum} caratteri.",
+      "unsupported": "Il nome dell’opzione contiene caratteri non supportati."
+    },
+    "optionGroupName": {
+      "required": "Il nome del gruppo di opzioni è obbligatorio.",
+      "tooLong": "Il nome del gruppo di opzioni deve avere al massimo {maximum} caratteri.",
+      "unsupported": "Il nome del gruppo di opzioni contiene caratteri non supportati."
+    },
+    "documentName": {
+      "required": "Il nome del documento è obbligatorio.",
+      "tooLong": "Il nome del documento deve avere al massimo {maximum} caratteri.",
+      "unsupported": "Il nome del documento contiene caratteri non supportati."
+    },
+    "materials": {
+      "required": "I materiali sono obbligatori.",
+      "tooLong": "I materiali devono avere al massimo {maximum} caratteri.",
+      "unsupported": "I materiali contengono caratteri non supportati."
+    },
+    "care": {
+      "required": "Le istruzioni per la cura sono obbligatorie.",
+      "tooLong": "Le istruzioni per la cura devono avere al massimo {maximum} caratteri.",
+      "unsupported": "Le istruzioni per la cura contengono caratteri non supportati."
+    },
+    "includedItem": {
+      "required": "L’elemento incluso è obbligatorio.",
+      "tooLong": "L’elemento incluso deve avere al massimo {maximum} caratteri.",
+      "unsupported": "L’elemento incluso contiene caratteri non supportati."
+    },
+    "origin": {
+      "required": "Il paese di origine è obbligatorio.",
+      "tooLong": "Il paese di origine deve avere al massimo {maximum} caratteri.",
+      "unsupported": "Il paese di origine contiene caratteri non supportati."
+    },
+    "manufacturerName": {
+      "required": "Il fabbricante è obbligatorio.",
+      "tooLong": "Il fabbricante deve avere al massimo {maximum} caratteri.",
+      "unsupported": "Il fabbricante contiene caratteri non supportati."
+    },
+    "manufacturerAddress": {
+      "required": "L’indirizzo del fabbricante è obbligatorio.",
+      "tooLong": "L’indirizzo del fabbricante deve avere al massimo {maximum} caratteri.",
+      "unsupported": "L’indirizzo del fabbricante contiene caratteri non supportati."
+    },
+    "responsibleName": {
+      "required": "La persona responsabile nell’UE è obbligatoria.",
+      "tooLong": "La persona responsabile nell’UE deve avere al massimo {maximum} caratteri.",
+      "unsupported": "La persona responsabile nell’UE contiene caratteri non supportati."
+    },
+    "responsibleAddress": {
+      "required": "L’indirizzo della persona responsabile nell’UE è obbligatorio.",
+      "tooLong": "L’indirizzo della persona responsabile nell’UE deve avere al massimo {maximum} caratteri.",
+      "unsupported": "L’indirizzo della persona responsabile nell’UE contiene caratteri non supportati."
+    },
+    "safetyIdentifier": {
+      "required": "Il tipo, lotto o numero di serie è obbligatorio.",
+      "tooLong": "Il tipo, lotto o numero di serie deve avere al massimo {maximum} caratteri.",
+      "unsupported": "Il tipo, lotto o numero di serie contiene caratteri non supportati."
+    },
+    "warnings": {
+      "required": "Le avvertenze sono obbligatorie.",
+      "tooLong": "Le avvertenze devono avere al massimo {maximum} caratteri.",
+      "unsupported": "Le avvertenze contengono caratteri non supportati."
+    },
+    "businessName": {
+      "required": "La ragione sociale o il nome è obbligatorio.",
+      "tooLong": "La ragione sociale o il nome deve avere al massimo {maximum} caratteri.",
+      "unsupported": "La ragione sociale o il nome contiene caratteri non supportati."
+    },
+    "businessAddress": {
+      "required": "L’indirizzo commerciale è obbligatorio.",
+      "tooLong": "L’indirizzo commerciale deve avere al massimo {maximum} caratteri.",
+      "unsupported": "L’indirizzo commerciale contiene caratteri non supportati."
+    },
+    "phone": {
+      "required": "Il numero di telefono è obbligatorio.",
+      "tooLong": "Il numero di telefono deve avere al massimo {maximum} caratteri.",
+      "unsupported": "Il numero di telefono contiene caratteri non supportati."
+    },
+    "bio": {
+      "required": "La tua bio è obbligatoria.",
+      "tooLong": "La tua bio deve avere al massimo {maximum} caratteri.",
+      "unsupported": "La tua bio contiene caratteri non supportati."
+    },
+    "destinationArea": {
+      "required": "La destinazione è obbligatoria.",
+      "tooLong": "La destinazione deve avere al massimo {maximum} caratteri.",
+      "unsupported": "La destinazione contiene caratteri non supportati."
+    },
+    "deliveryTime": {
+      "required": "Il tempo di consegna è obbligatorio.",
+      "tooLong": "Il tempo di consegna deve avere al massimo {maximum} caratteri.",
+      "unsupported": "Il tempo di consegna contiene caratteri non supportati."
+    },
+    "shippingCost": {
+      "required": "Il costo di spedizione è obbligatorio.",
+      "tooLong": "Il costo di spedizione deve avere al massimo {maximum} caratteri.",
+      "unsupported": "Il costo di spedizione contiene caratteri non supportati."
+    },
+    "dispatchTime": {
+      "required": "Il tempo di spedizione è obbligatorio.",
+      "tooLong": "Il tempo di spedizione deve avere al massimo {maximum} caratteri.",
+      "unsupported": "Il tempo di spedizione contiene caratteri non supportati."
+    },
+    "shippingNotes": {
+      "required": "Le note sulla spedizione sono obbligatorie.",
+      "tooLong": "Le note sulla spedizione devono avere al massimo {maximum} caratteri.",
+      "unsupported": "Le note sulla spedizione contengono caratteri non supportati."
+    },
+    "shippingPolicy": {
+      "required": "La politica di spedizione è obbligatoria.",
+      "tooLong": "La politica di spedizione deve avere al massimo {maximum} caratteri.",
+      "unsupported": "La politica di spedizione contiene caratteri non supportati."
+    },
+    "returnsNotes": {
+      "required": "Le note sui resi sono obbligatorie.",
+      "tooLong": "Le note sui resi devono avere al massimo {maximum} caratteri.",
+      "unsupported": "Le note sui resi contengono caratteri non supportati."
+    },
+    "returnsPolicy": {
+      "required": "La politica di reso è obbligatoria.",
+      "tooLong": "La politica di reso deve avere al massimo {maximum} caratteri.",
+      "unsupported": "La politica di reso contiene caratteri non supportati."
+    },
+    "otherCategory": {
+      "required": "La categoria è obbligatoria.",
+      "tooLong": "La categoria deve avere al massimo {maximum} caratteri.",
+      "unsupported": "La categoria contiene caratteri non supportati."
+    },
+    "storefrontName": {
+      "required": "Il nome della vetrina è obbligatorio.",
+      "tooLong": "Il nome della vetrina deve avere al massimo {maximum} caratteri.",
+      "unsupported": "Il nome della vetrina contiene caratteri non supportati."
+    },
+    "fontName": {
+      "required": "Il nome del font è obbligatorio.",
+      "tooLong": "Il nome del font deve avere al massimo {maximum} caratteri.",
+      "unsupported": "Il nome del font contiene caratteri non supportati."
+    },
+    "storeName": {
+      "required": "Il nome del negozio è obbligatorio.",
+      "tooLong": "Il nome del negozio deve avere al massimo {maximum} caratteri.",
+      "unsupported": "Il nome del negozio contiene caratteri non supportati."
+    },
+    "storeBio": {
+      "required": "La bio del negozio è obbligatoria.",
+      "tooLong": "La bio del negozio deve avere al massimo {maximum} caratteri.",
+      "unsupported": "La bio del negozio contiene caratteri non supportati."
+    },
+    "ctaLabel": {
+      "required": "L’etichetta del pulsante di acquisto è obbligatoria.",
+      "tooLong": "L’etichetta del pulsante di acquisto deve avere al massimo {maximum} caratteri.",
+      "unsupported": "L’etichetta del pulsante di acquisto contiene caratteri non supportati."
+    },
+    "shippingProfileName": {
+      "required": "Il nome del profilo di spedizione è obbligatorio.",
+      "tooLong": "Il nome del profilo di spedizione deve avere al massimo {maximum} caratteri.",
+      "unsupported": "Il nome del profilo di spedizione contiene caratteri non supportati."
+    },
+    "shippingTerms": {
+      "required": "Le condizioni di spedizione sono obbligatorie.",
+      "tooLong": "Le condizioni di spedizione devono avere al massimo {maximum} caratteri.",
+      "unsupported": "Le condizioni di spedizione contengono caratteri non supportati."
+    },
+    "blockText": {
+      "required": "Il testo del blocco è obbligatorio.",
+      "tooLong": "Il testo del blocco deve avere al massimo {maximum} caratteri.",
+      "unsupported": "Il testo del blocco contiene caratteri non supportati."
+    },
+    "elementAlt": {
+      "required": "Il testo alternativo dell’elemento è obbligatorio.",
+      "tooLong": "Il testo alternativo dell’elemento deve avere al massimo {maximum} caratteri.",
+      "unsupported": "Il testo alternativo dell’elemento contiene caratteri non supportati."
+    },
+    "notificationTitle": {
+      "required": "Il titolo della notifica è obbligatorio.",
+      "tooLong": "Il titolo della notifica deve avere al massimo {maximum} caratteri.",
+      "unsupported": "Il titolo della notifica contiene caratteri non supportati."
+    },
+    "notificationBody": {
+      "required": "Il corpo della notifica è obbligatorio.",
+      "tooLong": "Il corpo della notifica deve avere al massimo {maximum} caratteri.",
+      "unsupported": "Il corpo della notifica contiene caratteri non supportati."
+    },
+    "searchQuery": {
+      "required": "Il termine di ricerca è obbligatorio.",
+      "tooShort": "Il termine di ricerca deve avere almeno {minimum} caratteri.",
+      "tooLong": "Il termine di ricerca deve avere al massimo {maximum} caratteri.",
+      "unsupported": "Il termine di ricerca contiene caratteri non supportati."
+    },
+    "factorName": {
+      "required": "Il nome è obbligatorio.",
+      "tooLong": "Il nome deve avere al massimo {maximum} caratteri.",
+      "unsupported": "Il nome contiene caratteri non supportati."
+    },
+    "reportDetails": {
+      "required": "La tua descrizione è obbligatoria.",
+      "tooLong": "La tua descrizione deve avere al massimo {maximum} caratteri.",
+      "unsupported": "La tua descrizione contiene caratteri non supportati."
+    }
+  },
+  "email": {
+    "generic": {
+      "format": "Quell’email non sembra un indirizzo email valido.",
+      "tooLong": "Quell’email è troppo lunga.",
+      "unsupported": "Quell’email contiene caratteri non supportati."
+    },
+    "reporter": {
+      "format": "La tua email non sembra un indirizzo email.",
+      "tooLong": "La tua email è troppo lunga.",
+      "unsupported": "La tua email contiene caratteri non supportati."
+    },
+    "contactEmail": {
+      "format": "L’email di contatto non sembra un indirizzo email valido.",
+      "tooLong": "L’email di contatto è troppo lunga.",
+      "unsupported": "L’email di contatto contiene caratteri non supportati."
+    },
+    "manufacturerEmail": {
+      "format": "L’email del fabbricante non sembra un indirizzo email valido.",
+      "tooLong": "L’email del fabbricante è troppo lunga.",
+      "unsupported": "L’email del fabbricante contiene caratteri non supportati."
+    },
+    "responsibleEmail": {
+      "format": "L’email della persona responsabile nell’UE non sembra un indirizzo email valido.",
+      "tooLong": "L’email della persona responsabile nell’UE è troppo lunga.",
+      "unsupported": "L’email della persona responsabile nell’UE contiene caratteri non supportati."
+    }
+  },
+  "emailQuality": {
+    "placeholder": "L’email di contatto sembra un indirizzo segnaposto. Usa un indirizzo che leggi davvero.",
+    "disposable": "L’email di contatto è di un provider di posta temporanea. Usa un indirizzo permanente."
+  },
+  "uuid": {
+    "id": "Quell’ID non è valido.",
+    "option": "Quell’opzione non è valida.",
+    "optionGroup": "Quel gruppo di opzioni non è valido.",
+    "shippingProfile": "Quel profilo di spedizione non è valido.",
+    "storefrontId": "Quell’ID della vetrina non è valido.",
+    "blockId": "Un ID del blocco non è valido.",
+    "notificationRecipient": "Un destinatario della notifica non è valido.",
+    "factor": "Quell’app di autenticazione non è valida.",
+    "reportTarget": "Quell’elemento non è valido."
+  },
+  "handle": {
+    "username": "Un nome utente deve avere da 3 a 30 caratteri, usando solo lettere, numeri e trattini bassi."
+  },
+  "hostname": {
+    "domains": "I domini devono essere semplici domini minuscoli come iltuosito.com: niente https://, porta, percorso o carattere jolly."
+  },
+  "referenceCode": {
+    "vatId": "Una partita IVA deve avere da {min} a {max} lettere, cifre, spazi, punti o trattini."
+  },
+  "oneTimeCode": {
+    "authenticator": "Il codice è formato dalle 6 cifre mostrate nella tua app di autenticazione."
+  },
+  "hexColor": {
+    "colors": "I colori devono essere esadecimali a 6 cifre, come #a855f7.",
+    "swatchColours": "I colori dei campioni devono essere esadecimali a 6 cifre, come #a855f7."
+  },
+  "int": {
+    "price": {
+      "whole": "Il prezzo deve essere un numero intero.",
+      "tooSmall": "Il prezzo deve essere {minimum} o superiore.",
+      "tooBig": "Il prezzo deve essere {maximum} o inferiore."
+    },
+    "maxPerOrder": {
+      "whole": "Il massimo per ordine deve essere un numero intero.",
+      "tooSmall": "Il massimo per ordine deve essere {minimum} o superiore.",
+      "tooBig": "Il massimo per ordine deve essere {maximum} o inferiore."
+    }
+  },
+  "list": {
+    "domains": {
+      "tooMany": "Elenca fino a {maximum} domini.",
+      "duplicate": "Ogni voce nei domini può essere elencata una sola volta."
+    }
+  },
+  "settings": {
+    "currentPasswordRequired": "Inserisci la tua password attuale.",
+    "newPasswordTooShort": "La nuova password deve avere almeno {minimum} caratteri.",
+    "newPasswordTooLong": "Mantienila sotto i {maximum} caratteri.",
+    "passwordsMismatch": "Le nuove password non coincidono.",
+    "pickCountry": "Scegli un paese dall’elenco.",
+    "legalVersionChanged": "I documenti legali sono cambiati mentre li stavi leggendo. Ricarica e riprova.",
+    "deleteConfirm": "Digita «{phrase}» esattamente per confermare."
+  },
+  "password": {
+    "tooShort": "La password deve avere almeno {minimum} caratteri.",
+    "tooLong": "Mantienila sotto i {maximum} caratteri.",
+    "tooCommon": "Quella password è troppo comune. Scegline una meno prevedibile.",
+    "repeated": "Quella password è troppo facile da indovinare. Prova un mix più lungo di parole.",
+    "sequence": "Quella password contiene una sequenza di tastiera comune. Prova qualcos’altro.",
+    "containsIdentity": "La password non deve contenere il tuo indirizzo email o nome utente.",
+    "weakMix": "Mescola maiuscole e minuscole, un numero o un simbolo, oppure usa {length}+ caratteri."
+  },
+  "team": {
+    "invalidStore": "Riferimento al negozio non valido.",
+    "invalidEmail": "Non sembra un indirizzo email valido.",
+    "emailTooLong": "Quell’email è troppo lunga.",
+    "invalidRole": "Scegli un ruolo valido.",
+    "invalidInvite": "Riferimento all’invito non valido.",
+    "invalidMember": "Riferimento al membro non valido."
+  },
+  "auth": {
+    "usernameReserved": "Quel nome utente è riservato. Scegline un altro."
+  },
+  "notifications": {
+    "invalidReference": "Riferimento alla notifica non valido."
+  },
+  "product": {
+    "stockRequired": "Imposta quante unità sono disponibili.",
+    "optionSpecsTooMany": "Una variante può avere fino a {maximum} specifiche proprie.",
+    "optionGroupEmpty": "Dai a ogni gruppo di opzioni almeno un’opzione, oppure rimuovi il gruppo.",
+    "optionGroupTooManyOptions": "Un gruppo di opzioni può avere fino a {maximum} opzioni.",
+    "includedTooMany": "Elenca fino a {maximum} elementi inclusi.",
+    "specsTooMany": "Elenca fino a {maximum} specifiche.",
+    "purchaseLinkFormat": "Il link di acquisto deve essere un indirizzo completo che inizia con https://.",
+    "purchaseLinkTooLong": "Il link di acquisto deve avere al massimo {maximum} caratteri.",
+    "purchaseLinkCredentials": "Il link di acquisto non può contenere un nome utente o una password.",
+    "galleryTooMany": "Un prodotto può avere fino a {maximum} foto extra.",
+    "optionGroupsTooMany": "Un prodotto può avere fino a {maximum} gruppi di opzioni.",
+    "documentsTooMany": "Un prodotto può avere fino a {maximum} documenti.",
+    "optionDuplicate": "Ogni opzione può essere elencata una sola volta.",
+    "optionsTotalTooMany": "Un prodotto può avere fino a {maximum} opzioni in totale.",
+    "galleryStaleOption": "Una foto fa riferimento a un’opzione che non esiste più."
+  },
+  "productImport": {
+    "noTitle": "Nessun titolo.",
+    "titleTooLong": "Il titolo supera i 200 caratteri.",
+    "noPrice": "Nessun prezzo leggibile.",
+    "priceZero": "Il prezzo è zero.",
+    "duplicateTitle": "Un’altra riga ha questo titolo."
+  },
+  "shipping": {
+    "shipsFromInvalid": "Non è ancora un paese da cui possiamo spedire.",
+    "destinationsTooMany": "Puoi elencare fino a {maximum} destinazioni.",
+    "returnsWindowWhole": "Un periodo di reso è un numero intero di giorni.",
+    "returnsWindowNegative": "Un periodo di reso non può essere negativo.",
+    "returnsWindowTooLong": "Un periodo di reso arriva al massimo a {maximum} giorni."
+  },
+  "storefront": {
+    "backgroundImageKind": "Le immagini di sfondo devono essere caricamenti di immagini.",
+    "customFontKind": "I font personalizzati devono essere caricamenti di font.",
+    "elementKind": "Gli elementi devono essere caricamenti di elementi.",
+    "productPageSectionsTooMany": "La pagina prodotto deve elencare ogni sezione una sola volta.",
+    "productPageSectionDuplicate": "La pagina prodotto non può elencare due volte la stessa sezione.",
+    "shippingProfilesTooMany": "Un negozio può avere fino a {maximum} profili di spedizione.",
+    "shippingProfileDuplicate": "Ogni profilo di spedizione può essere elencato una sola volta.",
+    "spanRange": "Un intervallo formattato deve terminare dopo il suo inizio.",
+    "blocksTooMany": "Una vetrina può contenere fino a {maximum} blocchi. Rimuovi alcuni blocchi o dividi questa vetrina in due.",
+    "blocksDuplicate": "I blocchi della griglia devono essere univoci.",
+    "blockOutsideCanvas": "Un blocco si trova fuori dall’area di lavoro."
+  }
+}

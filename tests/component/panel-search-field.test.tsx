@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, render, screen, within } from "@testing-library/react";
+import { cleanup, render, screen, within } from "../setup/render";
 import userEvent from "@testing-library/user-event";
+import { english } from "../setup/translate";
 import { PanelSearchField } from "@/components/storefront/PanelSearchField";
 import {
   editorEntries,
@@ -66,9 +67,9 @@ const PRODUCTS = new Map([["p1", PRODUCT]]);
 
 /** The whole editor index, exactly as the designer builds it, with a product
  *  page out on the canvas. */
-const ENTRIES = editorEntries(BLOCKS, PRODUCTS, { pageOpen: true });
+const ENTRIES = editorEntries(BLOCKS, PRODUCTS, english, { pageOpen: true });
 /** The same index with no page out: the product page's settings are gated. */
-const NO_PAGE = editorEntries(BLOCKS, PRODUCTS);
+const NO_PAGE = editorEntries(BLOCKS, PRODUCTS, english);
 /** What the dev gallery gets: no board, and nothing to jump to. */
 const SETTINGS_ONLY = ENTRIES.filter((e) => e.payload.kind === "setting");
 

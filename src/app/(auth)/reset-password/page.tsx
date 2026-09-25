@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { ResetPasswordForm } from "@/components/auth/ResetPasswordForm";
 import { BackgroundArrow } from "@/components/ui/BackgroundArrow";
 import { getSessionState, twoFactorChallengePath } from "@/lib/auth/session";
 
-export const metadata: Metadata = {
-  title: "Set a new password",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Auth.metadata.resetPassword");
+  return { title: t("title") };
+}
 
 // force-dynamic: reads session state via getUser() (Supabase server client)
 // below. See (dashboard)/layout.tsx for why implicit cookies()-based dynamic
@@ -27,6 +29,7 @@ export default async function ResetPasswordPage() {
   if (session.kind === "needs_mfa") redirect(twoFactorChallengePath("/reset-password"));
   if (session.kind !== "signed_in") redirect("/login?error=reset_expired");
   const { user } = session;
+  const t = await getTranslations("Auth");
 
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-muted px-6 py-5">
@@ -42,24 +45,23 @@ export default async function ResetPasswordPage() {
           {/* eslint-disable-next-line @next/next/no-img-element -- static public asset; next/image adds no value here. */}
           <img
             src="/img/logo.png"
-            alt="Square Share"
+            alt={t("brand.logoAlt")}
             className="h-8 w-8 shrink-0 object-contain"
           />
           <div className="flex flex-col leading-tight">
             <span className="font-display text-lg font-black tracking-tight text-foreground">
               Square Share
             </span>
-            <span className="text-xs text-muted-foreground">Creator dashboard</span>
+            <span className="text-xs text-muted-foreground">{t("brand.tagline")}</span>
           </div>
         </div>
 
         <div className="border border-border bg-background px-6 pt-7 pb-6 shadow-lg sm:px-7 sm:pt-8">
           <h1 className="text-xl font-semibold tracking-tight text-foreground">
-            Set a new password
+            {t("resetPassword.heading")}
           </h1>
           <p className="mt-1 mb-5 font-inter text-sm text-muted-foreground">
-            Pick something you&rsquo;ll remember. You&rsquo;re signed in on this
-            device once it&rsquo;s set.
+            {t("resetPassword.intro")}
           </p>
           <ResetPasswordForm email={user.email ?? undefined} />
         </div>

@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
+import { createTranslator } from "next-intl";
+import { english } from "../setup/translate";
+import { LOCALES } from "@/i18n/locales";
+import { loadMessages } from "@/i18n/messages";
 import {
-  SAMPLE_PRODUCTS,
-  SAMPLE_SELLER,
-  SAMPLE_STOREFRONT_CONFIG,
-  SAMPLE_STOREFRONT_NAME,
+  buildSampleStorefront,
   SAMPLE_STOREFRONT_PATH,
   sampleObjectKey,
 } from "@/lib/storefront/sample";
@@ -16,11 +17,19 @@ import { isOnBoard } from "@/lib/geometry/rotated-box";
 /**
  * The sample storefront is code, never a row, so nothing validates it on the way
  * in. These make sure it is still something a seller could really build: the
- * schema accepts it untouched, every tile points at one of its own products,
- * every picture exists, and its copy follows the house rules.
+ * schema accepts it untouched (in every language it is shown in), every tile
+ * points at one of its own products, every picture exists, and its copy follows
+ * the house rules.
  */
 
 const DASHES = new RegExp(`[${String.fromCharCode(0x2013)}${String.fromCharCode(0x2014)}]`);
+
+const {
+  name: SAMPLE_STOREFRONT_NAME,
+  config: SAMPLE_STOREFRONT_CONFIG,
+  products: SAMPLE_PRODUCTS,
+  seller: SAMPLE_SELLER,
+} = buildSampleStorefront(english);
 
 describe("sample storefront", () => {
   it("is a config the storefront schema accepts without changing a thing", () => {
@@ -48,9 +57,9 @@ describe("sample storefront", () => {
     expect(new Set(SAMPLE_PRODUCTS.map((product) => product.id)).size).toBe(SAMPLE_PRODUCTS.length);
   });
 
-  it("draws every product from a static picture that exists", () => {
+  it("draws every product from a static photo that exists", () => {
     for (const product of SAMPLE_PRODUCTS) {
-      expect(product.imageUrl, product.title).toMatch(/^\/sample-storefront\/[a-z]+\.svg$/);
+      expect(product.imageUrl, product.title).toMatch(/^\/sample-storefront\/[a-z]+\.webp$/);
       expect(existsSync(join(process.cwd(), "public", product.imageUrl!)), product.title).toBe(true);
       expect(product.status).toBe("active");
     }
@@ -80,5 +89,32 @@ describe("sample storefront", () => {
       ...SAMPLE_STOREFRONT_CONFIG.blocks.map((block) => (block.type === "text" ? block.text : "")),
     ].join(" ");
     expect(copy).not.toMatch(DASHES);
+  });
+
+  it("reads in English as written", () => {
+    expect(SAMPLE_STOREFRONT_NAME).toBe("Sample storefront");
+    expect(SAMPLE_STOREFRONT_CONFIG.header?.bio).toBe("Everyday tech and desk objects, chosen to last.");
+    expect(SAMPLE_PRODUCTS.map((product) => product.title)).toEqual([
+      "Instant camera",
+      "Headphones",
+      "Smartwatch",
+      "Wireless mouse",
+      "Portable speaker",
+      "Desk succulent",
+    ]);
+    // Brand names are never translated.
+    expect(SAMPLE_STOREFRONT_CONFIG.header?.name).toBe("Parallel Goods");
+  });
+
+  it.each(LOCALES)("stays a storefront a seller could build, in %s", async (locale) => {
+    const messages = await loadMessages(locale);
+    const t = createTranslator({ locale, messages, timeZone: "UTC" });
+    const sample = buildSampleStorefront((key) => t(key));
+    const parsed = storefrontConfigSchema.safeParse(sample.config);
+    expect(parsed.success, JSON.stringify(parsed.error?.issues)).toBe(true);
+    expect(storefrontNameSchema.safeParse(sample.name).success).toBe(true);
+    expect(sample.products.map((product) => product.id)).toEqual(
+      SAMPLE_PRODUCTS.map((product) => product.id),
+    );
   });
 });

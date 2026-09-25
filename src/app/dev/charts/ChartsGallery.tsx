@@ -16,7 +16,7 @@ import {
 // Deterministic sample data (no Date/random — server and client render the
 // same text). Money is integer cents, like the real analytics feed.
 
-const euro = (cents: number) => `€${formatNumber(Math.round(cents / 100))}`;
+const euro = (cents: number) => `€${formatNumber(Math.round(cents / 100), "en")}`;
 const euroCompact = (cents: number) => {
   const units = Math.round(cents / 100);
   if (Math.abs(units) < 1000) return `€${units}`;

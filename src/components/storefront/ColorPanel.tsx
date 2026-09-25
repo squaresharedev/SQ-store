@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { useTranslations } from "next-intl";
 import { Check, Copy, Pipette, X } from "lucide-react";
 import {
   STOREFRONT_FONTS,
@@ -72,20 +73,6 @@ const GRID_CLASS = "grid-cols-10";
 const THEME_FONT = "theme";
 type FontChoice = StorefrontFont | typeof THEME_FONT;
 
-function fontOptions(hasCustomFont: boolean): SelectOption<FontChoice>[] {
-  return [
-    {
-      value: THEME_FONT,
-      label: "Theme font",
-      description: "Follow the storefront font",
-    },
-    ...STOREFRONT_FONTS.filter(
-      // Offered only once there is an upload to point at.
-      (font) => font !== "custom" || hasCustomFont,
-    ).map((font) => ({ value: font, label: FONT_LABELS[font] })),
-  ];
-}
-
 /**
  * The type controls a field brings with it, when it has any.
  *
@@ -136,8 +123,25 @@ export function ColorPanel({
   onInherit?: () => void;
   onClose: () => void;
 }) {
+  const tKey = useTranslations();
+  const t = useTranslations("Storefront.colorPanel");
+
   const current = target.value.toLowerCase();
   const inheriting = target.inherit?.active ?? false;
+
+  const fontChoiceOptions = useMemo(
+    (): SelectOption<FontChoice>[] => [
+      {
+        value: THEME_FONT,
+        label: t("fontTheme"),
+        description: t("fontThemeDesc"),
+      },
+      ...STOREFRONT_FONTS.filter(
+        (font) => font !== "custom" || (typography?.hasCustomFont ?? false),
+      ).map((font) => ({ value: font, label: tKey(FONT_LABELS[font]) })),
+    ],
+    [t, tKey, typography?.hasCustomFont],
+  );
 
   const recent = useSyncExternalStore(
     subscribeRecentColors,
@@ -180,17 +184,17 @@ export function ColorPanel({
           />
           <div className="min-w-0">
             <h2 className="truncate text-sm font-semibold text-foreground">
-              {target.label}
+              {tKey(target.label)}
             </h2>
             <p className={cn(helpTextClass, "font-mono")}>
-              {inheriting ? target.inherit!.label : current}
+              {inheriting ? tKey(target.inherit!.label) : current}
             </p>
           </div>
         </div>
         <button
           type="button"
           onClick={onClose}
-          aria-label="Close color panel"
+          aria-label={t("close")}
           className={cn(
             "inline-flex size-7 shrink-0 items-center justify-center rounded-none text-muted-foreground",
             "hover:bg-accent hover:text-foreground",
@@ -208,16 +212,16 @@ export function ColorPanel({
           where they get everything a text block gets from its own: typeface,
           size, formatting and alignment, through the very same controls. */}
       {typography && (
-        <CollapsibleSection title="Type">
+        <CollapsibleSection title={t("sectionType")}>
           <div className="space-y-3">
             <div className="space-y-1.5">
               <label htmlFor="color-panel-font" className={labelClass}>
-                Font
+                {t("font")}
               </label>
               <Select
                 id="color-panel-font"
                 value={typography.font ?? THEME_FONT}
-                options={fontOptions(typography.hasCustomFont)}
+                options={fontChoiceOptions}
                 onChange={(font) =>
                   typography.onFontChange(
                     font === THEME_FONT ? undefined : font,
@@ -250,18 +254,18 @@ export function ColorPanel({
         </CollapsibleSection>
       )}
 
-      <CollapsibleSection title="In this design">
+      <CollapsibleSection title={t("sectionInDesign")}>
         {inDesign.length > 0 ? (
           <div
             role="group"
-            aria-label="Colors in this design"
+            aria-label={t("inDesignGroup")}
             className={cn("grid gap-1.5", GRID_CLASS)}
           >
             {inDesign.map((hex) => (
               <ColorDot
                 key={hex}
                 color={hex}
-                label={`In this design (${hex})`}
+                label={t("inDesignSwatch", { hex })}
                 active={isActive(hex)}
                 onSelect={() => pick(hex)}
               />
@@ -269,7 +273,7 @@ export function ColorPanel({
           </div>
         ) : (
           <p className={helpTextClass}>
-            Colors you use on the canvas collect here.
+            {t("inDesignEmpty")}
           </p>
         )}
       </CollapsibleSection>
@@ -279,7 +283,7 @@ export function ColorPanel({
       {/* "Follow the theme" for optional colors — the same affordance the
           inline picker offers, rather than a second reset invention. */}
       {target.inherit && onInherit && (
-        <CollapsibleSection title="Inherit">
+        <CollapsibleSection title={t("sectionInherit")}>
           <button
             type="button"
             onClick={onInherit}
@@ -298,7 +302,7 @@ export function ColorPanel({
               className="size-4 shrink-0 rounded-full ring-1 ring-inset ring-black/10"
             />
             <span className="min-w-0 flex-1 truncate text-foreground">
-              Use {target.inherit.label}
+              {tKey(target.inherit.useLabel)}
             </span>
             {inheriting && (
               <Check className="size-4 shrink-0 text-foreground" strokeWidth={2.5} aria-hidden="true" />
@@ -310,17 +314,17 @@ export function ColorPanel({
       {/* Never rendered empty: an empty labelled group is noise to a screen
           reader, and a heading over nothing reads as a bug. */}
       {recent.length > 0 && (
-        <CollapsibleSection title="Recently used">
+        <CollapsibleSection title={t("sectionRecent")}>
           <div
             role="group"
-            aria-label="Recently used colors"
+            aria-label={t("recentGroup")}
             className={cn("grid gap-1.5", GRID_CLASS)}
           >
             {recent.map((hex) => (
               <ColorDot
                 key={hex}
                 color={hex}
-                label={`Recently used (${hex})`}
+                label={t("recentSwatch", { hex })}
                 active={isActive(hex)}
                 onSelect={() => pick(hex)}
               />
@@ -329,20 +333,20 @@ export function ColorPanel({
         </CollapsibleSection>
       )}
 
-      <CollapsibleSection title="Standard">
+      <CollapsibleSection title={t("sectionStandard")}>
         {/* One grid, not three: three separate grids would let the rows fall out
             of column alignment, and the columns ARE the navigation here (each
             one is a hue family, light at the top). */}
         <div
           role="group"
-          aria-label="Standard colors"
+          aria-label={t("standardGroup")}
           className={cn("grid gap-1.5", GRID_CLASS)}
         >
           {STANDARD_COLOR_ROWS.flat().map((swatch) => (
             <ColorDot
               key={swatch.value}
               color={swatch.value}
-              label={`${swatch.name} (${swatch.value})`}
+              label={tKey(swatch.label, { value: swatch.value })}
               active={isActive(swatch.value)}
               onSelect={() => pick(swatch.value)}
             />
@@ -350,21 +354,21 @@ export function ColorPanel({
         </div>
       </CollapsibleSection>
 
-      <CollapsibleSection title="Palettes">
+      <CollapsibleSection title={t("sectionPalettes")}>
         <div className="space-y-2.5">
           {COLOR_PALETTES.map((palette) => (
-            <div key={palette.name}>
-              <p className={cn(helpTextClass, "mb-1")}>{palette.name}</p>
+            <div key={palette.id}>
+              <p className={cn(helpTextClass, "mb-1")}>{tKey(palette.name)}</p>
               <div
                 role="group"
-                aria-label={`${palette.name} palette`}
+                aria-label={tKey(palette.group)}
                 className={cn("grid gap-1.5", GRID_CLASS)}
               >
                 {palette.colors.map((swatch) => (
                   <ColorDot
                     key={swatch.value}
                     color={swatch.value}
-                    label={`${palette.name} ${swatch.name} (${swatch.value})`}
+                    label={tKey(swatch.label, { value: swatch.value })}
                     active={isActive(swatch.value)}
                     onSelect={() => pick(swatch.value)}
                   />
@@ -401,6 +405,10 @@ function CustomColorSection({
   onPreview: (hex: string) => void;
   onCommit: (hex: string) => void;
 }) {
+  const t = useTranslations("Storefront.colorPanel");
+  const tColorPicker = useTranslations("Common.colorPicker");
+  const tActions = useTranslations("Common.actions");
+
   const [hsv, setHsv] = useState<Hsv>(() => hexToHsv(value) ?? { h: 0, s: 0, v: 0 });
   const [text, setText] = useState(value);
   const [invalid, setInvalid] = useState(false);
@@ -463,7 +471,7 @@ function CustomColorSection({
   }
 
   return (
-    <CollapsibleSection title="Custom" collapsible defaultOpen={false}>
+    <CollapsibleSection title={t("sectionCustom")} collapsible defaultOpen={false}>
       <div className="space-y-3">
         {/* The gesture END is the commit. ColorArea emits continuously and has
             no notion of "done", so the wrapper listens for the pointer coming
@@ -481,8 +489,8 @@ function CustomColorSection({
               <button
                 type="button"
                 onClick={pickFromScreen}
-                aria-label="Pick a color from the screen"
-                title="Pick from screen"
+                aria-label={tColorPicker("pickFromScreen")}
+                title={tColorPicker("pickFromScreenTitle")}
                 className={cn(
                   "inline-flex size-10 shrink-0 items-center justify-center rounded-none border border-input",
                   "bg-background text-muted-foreground hover:bg-accent hover:text-foreground",
@@ -494,7 +502,7 @@ function CustomColorSection({
               </button>
             )}
             <label htmlFor="color-panel-hex" className="sr-only">
-              Hex color
+              {tColorPicker("hexLabel")}
             </label>
             <input
               id="color-panel-hex"
@@ -534,8 +542,8 @@ function CustomColorSection({
                   // Clipboard blocked (insecure context, denied). Stay quiet.
                 }
               }}
-              aria-label={copied ? "Hex copied" : "Copy hex"}
-              title={copied ? "Copied" : "Copy hex"}
+              aria-label={copied ? tColorPicker("hexCopied") : tColorPicker("copyHex")}
+              title={copied ? tActions("copied") : tColorPicker("copyHex")}
               className={cn(
                 "inline-flex size-10 shrink-0 items-center justify-center rounded-none border border-input",
                 "bg-background hover:bg-accent hover:text-foreground",
@@ -553,7 +561,7 @@ function CustomColorSection({
           </div>
           {invalid && (
             <p id="color-panel-hex-error" className={errorTextClass}>
-              Use a 6-digit hex color like #a855f7.
+              {tColorPicker("invalidHex")}
             </p>
           )}
         </div>

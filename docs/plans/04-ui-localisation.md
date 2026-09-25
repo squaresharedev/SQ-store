@@ -1,6 +1,7 @@
 # UI localisation plan (next-intl)
 
-Status: proposed, not yet implemented.
+Status: in progress. Foundation built (phases 1 to 3); extraction running
+in waves. Appendix B is the working contract for anyone converting a file.
 Target: translate the dashboard UI so a Czech seller can run the whole app in Czech.
 
 ## 1. Goal and scope
@@ -154,7 +155,7 @@ release because we are based in Czechia.
 | `it` | Italian | |
 | `nl` | Dutch | |
 | `pl` | Polish | |
-| `pt` | Portuguese | |
+| `pt-PT` | Portuguese (Portugal) | a full tag: plain `pt` is Brazilian to every Intl API (plurals, money) |
 | `sk` | Slovak | cheap adjacent market to `cs` |
 
 Ten locales. Adding one later is a JSON file plus one line in `locales.ts`.
@@ -499,3 +500,104 @@ server (they need `await getTranslations`), and a list of any file that looks
 like it needs restructuring rather than simple extraction (for example, copy
 built by string concatenation, or a sentence interrupted by a `<Link>`, which
 needs `t.rich` instead of `t`).
+
+---
+
+## Appendix B: implementation conventions
+
+The contract every converted file follows. The foundation it relies on is
+already in place; read these files before converting anything:
+
+| File | What it gives you |
+|------|-------------------|
+| `src/i18n/locales.ts` | `LOCALES`, `Locale`, `parseLocale`, `negotiateLocale` |
+| `src/i18n/request.ts` | per-request locale: cookie, then Accept-Language, then `en` |
+| `src/i18n/messages.ts` | catalogue loader; missing keys fall back to English |
+| `src/i18n/types.ts` | `MessageKey`, `MessageRef`, `msg()` for pure modules |
+| `src/i18n/next-intl.d.ts` | types every `t()` call against `messages/en` |
+| `messages/en/*.json` | the SOURCE catalogue, one file per namespace |
+| `tests/setup/render.tsx` | `render` (translations + toasts), `renderWithoutToasts` |
+| `tests/setup/translate.ts` | `english(refOrKey, values)` for asserting on resolved copy |
+
+### B.1 Catalogue
+
+- One JSON file per namespace in `messages/en/`. Write ONLY the namespace files
+  your area owns. Never edit another locale's files (the translation pass does)
+  and never edit `messages/*/index.ts` (the namespace list is fixed).
+- Keys are nested camelCase grouped by surface, then element:
+  `Orders.empty.filteredTitle`, `Settings.tax.fields.country.label`. Page
+  metadata lives under `<Namespace>.metadata.<page>.title|description`.
+- **English moves verbatim.** Character for character, including existing
+  punctuation. Specs and 69 e2e files assert on this text. Do not reword, do not
+  "fix" copy while extracting it. The only allowed change to English output is
+  none.
+- Any string that depends on a count is an ICU plural, in English too:
+  `{count, plural, one {# product} other {# products}}`. Czech and Polish need
+  more categories than English, and they can only add them if the English
+  message is a plural to begin with.
+- An enumeration the code switches on is an ICU `select`, with `other`:
+  `{status, select, paid {Paid} refunded {Refunded} other {Unknown}}`.
+- Never build a sentence by joining translated fragments, and never splice a
+  translated word into another message as a value. Word order and grammatical
+  case differ by language (Czech declines nouns: "product" in "Delete
+  {product}?" is not the same form as in "{product} deleted"). Give each
+  sentence its own key instead.
+
+### B.2 Call sites
+
+| Where the string renders | Use |
+|--------------------------|-----|
+| Client component, or any component using hooks | `const t = useTranslations("Ns")` |
+| Server component that is NOT `async` | `useTranslations` also works there |
+| `async` server component, page, layout, route handler | `const t = await getTranslations("Ns")` (`next-intl/server`) |
+| `export const metadata` | becomes `export async function generateMetadata()` using `getTranslations`; keep every non-copy field |
+| Pure module in `src/lib` shared by client and server | return a `MessageRef` (`msg("Ns.key", values)`), resolve at the render site |
+
+- Attributes (`aria-label`, `placeholder`, `title`, `alt`) take plain `t()`.
+  `t.rich` returns React nodes and cannot go in an attribute.
+- Rich text uses `t.rich("key", { link: (chunks) => <Link href="/x">{chunks}</Link> })`.
+  **Never** `t.markup`, never `dangerouslySetInnerHTML`, never `t.raw` into
+  HTML. `tests/unit/search-input-hardening.test.ts` fails the build on any of
+  them: the CSP here is report-only, so having no HTML sink is the defence.
+- Data goes in as ICU values, never into the message: a seller's product title,
+  a storefront name, an email address, a count.
+
+### B.3 Never translate
+
+Seller- or buyer-authored content; DB values and enum members; API field names;
+route segments; cookie names; `data-*` attribute values (especially
+`data-analytics-*`); CSS classes; `console.*` text and log prefixes; thrown
+errors that never reach a user; anything under `src/app/dev/`; brand names.
+
+`src/app/global-error.tsx` replaces the root layout, so it renders outside the
+translation provider and cannot read the request locale. It carries its own
+in-file dictionary (`GLOBAL_ERROR_COPY`, one entry per locale, held to
+`LOCALES` by `tests/unit/global-error-copy.test.ts`) and picks from it by
+`navigator.language` after hydration, English on the server.
+
+### B.4 Formatting
+
+Do not change number, currency, date or relative-time formatting while
+extracting strings. A dedicated pass threads the locale through
+`src/lib/format*`, the chart formatters and every `Intl`/`toLocale*` call site
+at once, so the whole app formats consistently.
+
+### B.5 Tests and verification
+
+- Component specs import from `tests/setup/render`, never RTL directly. If a
+  spec asserts on English copy it keeps passing unchanged, because the English
+  output does not change.
+- When a function's contract changes (it returns a `MessageRef` instead of a
+  sentence), update its spec to assert `english(result)` equals the old text.
+- Verify with the tools directly, not `pnpm exec` (pnpm's pre-run dependency
+  check fails in the worktree on an unrelated ignored-build warning):
+  - `node node_modules/typescript/bin/tsc --noEmit -p tsconfig.json`
+  - `node node_modules/vitest/vitest.mjs run --project unit <spec files>`
+- Do not start dev servers, do not run e2e, do not run `next build`, do not run
+  git commands that change state (no commit, stash, checkout, reset).
+
+### B.6 House style
+
+No em dashes in anything you write (comments, copy you author, test names):
+use commas, colons or parentheses. Comments only where the reason is not
+obvious from the code. Follow the patterns already in the file you are editing.

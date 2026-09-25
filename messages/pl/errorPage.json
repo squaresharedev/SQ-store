@@ -1,0 +1,17 @@
+{
+  "notFound": {
+    "title": "Nie znaleziono strony",
+    "description": "Ta strona nie istnieje albo element, do którego prowadziła, został usunięty. Link mógł się zdezaktualizować, ale twoje konto i dane są bezpieczne.",
+    "cta": "Wróć do panelu"
+  },
+  "boundary": {
+    "title": "Coś poszło nie tak",
+    "description": "Nie udało się wczytać tej strony. To zwykle tymczasowy problem z połączeniem: twoje konto jest bezpieczne, a sesja logowania pozostaje aktywna.",
+    "reference": "Numer referencyjny: {digest}"
+  },
+  "footer": {
+    "legal": "Informacje prawne",
+    "contact": "Kontakt",
+    "credit": "© 2026 Squareshare. Stworzone przez <link>Root Labs</link>."
+  }
+}

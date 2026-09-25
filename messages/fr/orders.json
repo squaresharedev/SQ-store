@@ -1,0 +1,108 @@
+{
+  "metadata": {
+    "orders": {
+      "title": "Commandes"
+    }
+  },
+  "page": {
+    "title": "Commandes",
+    "subtitle": "Toutes les commandes passées via Square Share."
+  },
+  "status": {
+    "paid": "Payée",
+    "refunded": "Remboursée",
+    "disputed": "En litige",
+    "pending": "En attente"
+  },
+  "channel": {
+    "embed": "Intégration",
+    "marketplace": "Marketplace"
+  },
+  "empty": {
+    "filteredTitle": "Aucune commande ne correspond à ces filtres",
+    "filteredHint": "Essayez d’élargir la période ou d’effacer les filtres.",
+    "clearFilters": "Effacer les filtres",
+    "title": "Pas encore de commandes",
+    "hint": "Le paiement Square Share n’est pas encore ouvert. Les ventes via votre propre lien d’achat ou par e-mail n’apparaissent pas ici.",
+    "goToProducts": "Aller aux produits"
+  },
+  "list": {
+    "updating": "Mise à jour…",
+    "summary": "{total, plural, one {{total} commande} many {{total} commandes} other {{total} commandes}} · page {page} sur {totalPages}",
+    "detailDialog": "Détails de la commande",
+    "closeDetail": "Fermer les détails de la commande"
+  },
+  "table": {
+    "product": "Produit",
+    "amount": "Montant",
+    "channel": "Canal",
+    "status": "Statut",
+    "buyer": "Acheteur",
+    "date": "Date"
+  },
+  "toolbar": {
+    "region": "filtres de commande",
+    "channel": "canal",
+    "buyerEmail": "e-mail de l’acheteur",
+    "searchPlaceholder": "rechercher l’e-mail de l’acheteur",
+    "status": "statut",
+    "statusAriaLabel": "Filtrer par statut",
+    "allStatuses": "Tous les statuts",
+    "dateRange": "période",
+    "datePlaceholder": "toutes les dates",
+    "sort": "trier",
+    "sortAriaLabel": "Trier les commandes",
+    "clearFilters": "effacer les filtres"
+  },
+  "sort": {
+    "newest": "Plus récentes d’abord",
+    "oldest": "Plus anciennes d’abord",
+    "amountHigh": "Montant : décroissant",
+    "amountLow": "Montant : croissant"
+  },
+  "detail": {
+    "close": "Fermer les détails de la commande",
+    "version": "Version",
+    "copyVersion": {
+      "copy": "Copier la version",
+      "copied": "Version copiée",
+      "failed": "Impossible de copier la version. Sélectionnez-la et copiez-la manuellement."
+    },
+    "amount": "Montant",
+    "platformFee": "Frais de plateforme",
+    "youReceive": "Vous recevez",
+    "buyerEmail": "E-mail de l’acheteur",
+    "copyBuyerEmail": {
+      "copy": "Copier l’e-mail de l’acheteur",
+      "copied": "E-mail de l’acheteur copié",
+      "failed": "Impossible de copier l’e-mail de l’acheteur. Sélectionnez-le et copiez-le manuellement."
+    },
+    "noEmail": "aucun e-mail",
+    "channel": "Canal",
+    "date": "Date",
+    "orderId": "ID de commande",
+    "copyOrderId": {
+      "copy": "Copier l’ID de commande",
+      "copied": "ID de commande copié",
+      "failed": "Impossible de copier l’ID de commande. Sélectionnez-le et copiez-le manuellement."
+    }
+  },
+  "actions": {
+    "refundNeedsStripe": "Les remboursements nécessitent que Stripe soit connecté.",
+    "connectStripe": "Connectez Stripe pour activer les remboursements",
+    "refundConfirm": "Rembourser cette commande ? Cette action est irréversible une fois Stripe connecté.",
+    "confirmRefund": "Confirmer le remboursement",
+    "refundOrder": "Rembourser la commande",
+    "disputeInStripe": "Les litiges se gèrent depuis votre tableau de bord Stripe une fois Stripe connecté.",
+    "disputeConfirm": "Ouvrir la gestion du litige pour cette commande ?",
+    "handleDispute": "Gérer le litige",
+    "none": "Aucune action n’est disponible pour cette commande."
+  },
+  "skeleton": {
+    "loading": "chargement des commandes"
+  },
+  "loading": {
+    "title": "Commandes",
+    "subtitle": "Toutes les ventes de votre intégration et de la marketplace."
+  }
+}

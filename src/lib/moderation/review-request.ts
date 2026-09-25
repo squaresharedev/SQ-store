@@ -17,7 +17,9 @@ import {
   serverError,
   sessionExpired,
   type ActionError,
+  type PermissionCapability,
 } from "@/lib/errors";
+import { msg } from "@/i18n/types";
 import { pingAdminModeration } from "@/lib/moderation/admin-ping";
 
 // THE SELLER'S WAY BACK FROM A PAUSE.
@@ -50,20 +52,21 @@ const TARGETS: Record<
   {
     table: "products" | "storefronts";
     permission: "products.write" | "storefront.write";
-    noun: string;
+    /** What a refused permission check says this caller cannot do. */
+    capability: PermissionCapability;
     paths: (id: string) => string[];
   }
 > = {
   product: {
     table: "products",
     permission: "products.write",
-    noun: "product",
+    capability: "editThisProduct",
     paths: (id) => ["/products", `/products/${id}/edit`],
   },
   storefront: {
     table: "storefronts",
     permission: "storefront.write",
-    noun: "storefront",
+    capability: "editThisStorefront",
     paths: () => ["/storefront"],
   },
 };
@@ -79,12 +82,12 @@ export async function requestModerationReview(
   const account = await getActiveAccount();
   if (!account) return failure(sessionExpired());
   if (!can(account.role, target.permission)) {
-    return failure(permissionDenied(account.role, `edit this ${target.noun}`));
+    return failure(permissionDenied(account.role, target.capability));
   }
-  if (!uuidField().safeParse(id).success) return failure(notFound(target.noun));
+  if (!uuidField().safeParse(id).success) return failure(notFound(targetType));
 
   if (!(await rateLimit("moderation_review", RATE_LIMITS.productWrite))) {
-    return failure(rateLimited("ask for a review"));
+    return failure(rateLimited("requestReview"));
   }
 
   // Read with the SELLER'S session, scoped to the active account explicitly
@@ -99,20 +102,20 @@ export async function requestModerationReview(
     .maybeSingle();
   if (readError) {
     console.error("[moderation] review request read failed", readError.message);
-    return failure(serverError("send this for review"));
+    return failure(serverError("sendForReview"));
   }
-  if (!row) return failure(notFound(target.noun));
+  if (!row) return failure(notFound(targetType));
 
   if (row.moderation_status !== "paused") {
     return failure(
       row.moderation_status === "removed"
         ? invalidInput(
-            `This ${target.noun} was removed, not paused.`,
-            "A removal is final. If you think it was wrong, use the appeal link to write to us.",
+            msg("Errors.moderation.removedNotPaused", { target: targetType }),
+            msg("Errors.moderation.removedFix"),
           )
         : invalidInput(
-            `This ${target.noun} is not paused.`,
-            "There is nothing to review: it is already visible to buyers.",
+            msg("Errors.moderation.notPaused", { target: targetType }),
+            msg("Errors.moderation.notPausedFix"),
           ),
     );
   }
@@ -136,7 +139,7 @@ export async function requestModerationReview(
     .is("moderation_review_requested_at", null);
   if (writeError) {
     console.error("[moderation] review request write failed", writeError.message);
-    return failure(serverError("send this for review"));
+    return failure(serverError("sendForReview"));
   }
 
   // Staff hear about it now rather than at the next scheduled scan. After the

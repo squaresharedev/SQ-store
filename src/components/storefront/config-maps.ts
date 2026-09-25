@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import type { MessageKey } from "@/i18n/types";
 import type { GridPlacement } from "@/components/grid/gridConstants";
 import {
   contrastRatio,
@@ -46,15 +47,16 @@ export const FONT_CLASSES: Record<StorefrontFont, string> = {
   custom: "",
 };
 
-export const FONT_LABELS: Record<StorefrontFont, string> = {
-  sans: "Sans",
-  serif: "Serif",
-  mono: "Mono",
-  display: "Display",
-  hand: "Handwritten",
-  inter: "Inter",
-  montserrat: "Montserrat",
-  custom: "Uploaded font",
+/** Message keys: resolve with `useTranslations()` at the render site. */
+export const FONT_LABELS: Record<StorefrontFont, MessageKey> = {
+  sans: "Storefront.fonts.sans",
+  serif: "Storefront.fonts.serif",
+  mono: "Storefront.fonts.mono",
+  display: "Storefront.fonts.display",
+  hand: "Storefront.fonts.hand",
+  inter: "Storefront.fonts.inter",
+  montserrat: "Storefront.fonts.montserrat",
+  custom: "Storefront.fonts.custom",
 };
 
 // Corner roundness is numeric (theme.cornerRadius, px) and applied as an
@@ -316,10 +318,10 @@ export const PRICE_TAG_FONT_CLASSES: Record<PriceTagFont, string> = {
   mono: "font-mono",
 };
 
-export const PRICE_TAG_FONT_LABELS: Record<PriceTagFont, string> = {
-  inter: "Sans",
-  serif: "Serif",
-  mono: "Mono",
+export const PRICE_TAG_FONT_LABELS: Record<PriceTagFont, MessageKey> = {
+  inter: "Storefront.fonts.sans",
+  serif: "Storefront.fonts.serif",
+  mono: "Storefront.fonts.mono",
 };
 
 /** The resolved price tag appearance a renderer works from — structural, so
@@ -460,10 +462,10 @@ function legiblePriceInk(ink: string, backdrop: string): string {
     : readableInkOn(backdrop);
 }
 
-export const TEXT_VARIANT_LABELS: Record<TextVariant, string> = {
-  heading: "Heading",
-  subheading: "Subheading",
-  body: "Body text",
+export const TEXT_VARIANT_LABELS: Record<TextVariant, MessageKey> = {
+  heading: "Storefront.textVariants.heading",
+  subheading: "Storefront.textVariants.subheading",
+  body: "Storefront.textVariants.body",
 };
 
 export const TEXT_ALIGN_CLASSES: Record<TextAlign, string> = {

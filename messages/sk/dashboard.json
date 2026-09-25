@@ -1,0 +1,116 @@
+{
+  "metadata": {
+    "app": {
+      "title": "Square Share Dashboard",
+      "description": "Spravujte produkty, navrhnite výklad, prepojte Stripe a sledujte analytiku na Square Share."
+    },
+    "overview": {
+      "title": "Prehľad"
+    },
+    "payments": {
+      "title": "Platby"
+    }
+  },
+  "loading": {
+    "overview": {
+      "srLoading": "Načítava sa prehľad…"
+    },
+    "payments": {
+      "title": "Platby",
+      "subtitle": "Váš zostatok, výplaty a pripojenie Stripe.",
+      "srLoading": "načítavajú sa platby"
+    }
+  },
+  "shell": {
+    "accountFallback": "Účet",
+    "anotherStore": "iný obchod"
+  },
+  "overview": {
+    "title": "Prehľad",
+    "addProduct": "Pridať produkt",
+    "revenue30d": "Tržby · 30 dní",
+    "sales30d": "Predaje · 30 dní",
+    "avgOrder30d": "Priem. objednávka · 30 dní",
+    "revenueHeroLabel": "Tržby za posledných 30 dní",
+    "noSales": "Zatiaľ žiadne predaje"
+  },
+  "metric": {
+    "zeroDefault": "Zatiaľ žiadne predaje",
+    "pendingDefault": "K dispozícii po prepojení analytiky."
+  },
+  "sidebar": {
+    "openMenu": "Otvoriť menu",
+    "closeMenu": "Zavrieť menu",
+    "navLabel": "Panel",
+    "title": "Panel"
+  },
+  "recentOrders": {
+    "title": "Nedávne objednávky",
+    "empty": "Zatiaľ žiadne objednávky. Predaje cez váš vlastný odkaz na nákup alebo e-mailom sa tu nezobrazujú."
+  },
+  "attention": {
+    "title": "Vyžaduje pozornosť",
+    "allClear": "Všetko v poriadku. Momentálne nie je nič, čo by si vyžadovalo vašu pozornosť.",
+    "twoFactor": {
+      "label": "Zapnite dvojfaktorové overenie",
+      "description": "Pri prihlásení kód z vášho telefónu, aby sa do vášho obchodu nedalo dostať iba s odcudzeným heslom.",
+      "action": "Zapnúť"
+    },
+    "stripe": {
+      "label": "Prepojiť Stripe pre vyplácanie",
+      "description": "Výplaty zostanú zablokované, kým neprepojíte účet.",
+      "action": "Otvoriť platby"
+    },
+    "legal": {
+      "label": "Prijať podmienky predajcu",
+      "labelUpdated": "Prijať aktualizované podmienky predajcu",
+      "description": "Prečítajte si návrhy Zmluvy s predajcom, Podmienok a Zásad ochrany osobných údajov a prijmite ich.",
+      "descriptionUpdated": "Podmienky sa od vášho prijatia zmenili. Prečítajte si aktuálnu verziu a prijmite ju.",
+      "descriptionTerms": "Prečítajte si Podmienky služby a prijmite ich.",
+      "descriptionTermsUpdated": "Podmienky služby sa od vášho prijatia zmenili. Prečítajte si aktuálnu verziu a prijmite ju.",
+      "action": "Skontrolovať podmienky"
+    },
+    "noBuyPath": {
+      "label": "{count, plural, one {{count} produkt bez možnosti nákupu} few {{count} produkty bez možnosti nákupu} many {{count} produktu bez možnosti nákupu} other {{count} produktov bez možnosti nákupu}}",
+      "description": "Pridajte odkaz na nákup alebo nastavte kontaktný e-mail v Nastaveniach, aby vás kupujúci mohli kontaktovať.",
+      "action": "Skontrolovať produkty"
+    },
+    "noShipping": {
+      "label": "Pridať podmienky dopravy",
+      "description": "Fyzické produkty potrebujú podmienky dopravy a vrátenia tovaru, aby kupujúci videli všetky podrobnosti.",
+      "action": "Pridať podmienky"
+    },
+    "storefront": {
+      "labelEmpty": "Váš výklad je prázdny",
+      "labelNone": "Vytvoriť výklad",
+      "descriptionEmpty": "Pridajte produkt do mriežky, aby ste mu dali stránku, ktorú môžete zdieľať.",
+      "descriptionNone": "Vyberte vzhľad a potom pridajte produkty do mriežky.",
+      "actionOpen": "Otvoriť editor",
+      "actionCreate": "Vytvoriť výklad"
+    },
+    "images": {
+      "label": "{count, plural, one {{count} produkt bez obrázka} few {{count} produkty bez obrázka} many {{count} produktu bez obrázka} other {{count} produktov bez obrázka}}",
+      "descriptionSingle": "„{title}“ ešte nemá hlavný obrázok.",
+      "descriptionMultiple": "Produkty bez obrázkov vyzerajú na výklade prázdne.",
+      "actionSingle": "Pridať obrázok",
+      "actionMultiple": "Opraviť produkty"
+    },
+    "flaggedOrders": {
+      "label": "{count, plural, one {{count} objednávka na kontrolu} few {{count} objednávky na kontrolu} many {{count} objednávky na kontrolu} other {{count} objednávok na kontrolu}}",
+      "descriptionBoth": "{disputed, plural, one {{disputed} napadnutá} few {{disputed} napadnuté} many {{disputed} napadnutej} other {{disputed} napadnutých}}, {refunded, plural, one {{refunded} vrátená} few {{refunded} vrátené} many {{refunded} vrátenej} other {{refunded} vrátených}}.",
+      "descriptionDisputed": "{count, plural, one {{count} napadnutá} few {{count} napadnuté} many {{count} napadnutej} other {{count} napadnutých}}.",
+      "descriptionRefunded": "{count, plural, one {{count} vrátená} few {{count} vrátené} many {{count} vrátenej} other {{count} vrátených}}.",
+      "action": "Skontrolovať objednávky"
+    },
+    "noindexPages": {
+      "label": "Produktové stránky zablokované pre vyhľadávače",
+      "description": "{count, plural, =1 {Jeden výklad má vypnuté indexovanie pre produktové stránky.} one {{count} výklad má vypnuté indexovanie pre produktové stránky.} few {{count} výklady majú vypnuté indexovanie pre produktové stránky.} many {{count} výkladu majú vypnuté indexovanie pre produktové stránky.} other {{count} výkladov má vypnuté indexovanie pre produktové stránky.}}",
+      "action": "Otvoriť editor"
+    },
+    "deadBlocks": {
+      "label": "{count, plural, one {{count} blok výkladu odkazujúci na zmazané produkty} few {{count} bloky výkladu odkazujúce na zmazané produkty} many {{count} bloku výkladu odkazujúceho na zmazané produkty} other {{count} blokov výkladu odkazujúcich na zmazané produkty}}",
+      "description": "Tieto bloky sa návštevníkom zobrazujú prázdne. Odoberte ich alebo nahraďte.",
+      "action": "Otvoriť výklad"
+    }
+  }
+}

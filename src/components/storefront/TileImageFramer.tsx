@@ -8,6 +8,7 @@ import {
   useState,
   type RefObject,
 } from "react";
+import { useTranslations } from "next-intl";
 import { MoveDiagonal, MoveDiagonal2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -251,6 +252,7 @@ export function TileImageFramer({
   onChange: (next: ImagePlacement) => void;
   onExit: () => void;
 }) {
+  const t = useTranslations("Storefront");
   const surfaceRef = useRef<HTMLDivElement>(null);
 
   // The live placement and callback, readable from the non-passive wheel
@@ -577,7 +579,7 @@ export function TileImageFramer({
       // screen reader to expect.
       role="application"
       tabIndex={0}
-      aria-label={`Framing the image for ${label}. Drag to reposition, arrow keys to nudge, plus and minus to zoom, Escape when done. Currently ${placement.x}% across, ${placement.y}% down, ${zoomed}% zoom.`}
+      aria-label={t("framer.ariaLabel", { name: label, x: placement.x, y: placement.y, zoom: zoomed })}
       data-testid="tile-image-framer"
       // Tells the grid cell that this block has an editing surface over it, so
       // the cell's own resize and rotate handles stand down: they sit under
@@ -644,8 +646,8 @@ export function TileImageFramer({
         className="pointer-events-none absolute bottom-1 left-1/2 hidden max-w-[calc(100%-5rem)] -translate-x-1/2 truncate rounded-full bg-black/55 px-2 py-0.5 text-center font-inter text-[0.625rem] leading-tight text-white @min-[11rem]:inline"
       >
         {zoomed > IMAGE_SCALE_MIN
-          ? `${zoomed}% · Drag to frame · Esc`
-          : "Pull a corner to zoom · Esc"}
+          ? t("framer.hintZoomed", { zoom: zoomed })
+          : t("framer.hintMinZoom")}
       </span>
     </div>
   );

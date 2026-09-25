@@ -2,9 +2,14 @@
 
 import { useEffect, useState, type MouseEvent } from "react";
 import { CircleCheck, CircleX } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { sectionAnchorId } from "./FormSection";
-import type { ProductFormSectionSnapshot } from "@/lib/products/form-datapoints";
+import {
+  sectionLabel,
+  type ProductFormSectionSnapshot,
+} from "@/lib/products/form-datapoints";
+import { useResolveMessage } from "@/components/ui/ActionErrorNotice";
 
 /**
  * A plain `href="#id"` click is a same-document navigation, and Chrome,
@@ -55,12 +60,14 @@ export function FormSectionNav({
   sections: ProductFormSectionSnapshot[];
   className?: string;
 }) {
+  const t = useTranslations("Products.form.nav");
+  const resolve = useResolveMessage();
   const active = useActiveSection(sections.map((section) => section.id));
 
   return (
-    <nav aria-label="Form sections" className={className} data-product-form-nav="">
+    <nav aria-label={t("label")} className={className} data-product-form-nav="">
       <p className="px-3 pb-2 font-inter text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-        On this page
+        {t("heading")}
       </p>
       <ul className="space-y-px">
         {sections.map((section) => {
@@ -96,7 +103,7 @@ export function FormSectionNav({
                 ) : (
                   <span className="size-3.5 shrink-0" aria-hidden="true" />
                 )}
-                <span className="min-w-0 truncate">{section.label}</span>
+                <span className="min-w-0 truncate">{resolve(sectionLabel(section.id))}</span>
               </a>
             </li>
           );

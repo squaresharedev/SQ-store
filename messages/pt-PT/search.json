@@ -1,0 +1,72 @@
+{
+  "trigger": {
+    "label": "Pesquisar"
+  },
+  "overlay": {
+    "label": "Pesquisa",
+    "placeholder": "Pesquisar produtos, encomendas, definições…",
+    "clear": "Limpar pesquisa",
+    "close": "Fechar pesquisa",
+    "results": "Resultados da pesquisa",
+    "searching": "A pesquisar…",
+    "noResults": "Sem resultados para {query}",
+    "resultCount": "{count, plural, one {{count} resultado para {query}} many {{count} de resultados para {query}} other {{count} resultados para {query}}}",
+    "nothingMatches": "Nada corresponde a «{query}».",
+    "startTyping": "Comece a escrever para pesquisar.",
+    "remoteError": "Não é possível contactar o servidor: a mostrar apenas páginas, definições e ações.",
+    "remoteErrorCached": "Pesquisa em direto indisponível: a mostrar resultados em cache, páginas e definições.",
+    "remoteAuth": "A sua sessão expirou, por isso só são mostradas páginas e definições.",
+    "remoteThrottled": "Demasiadas pesquisas seguidas: a mostrar apenas páginas, definições e ações."
+  },
+  "sections": {
+    "pages": "Páginas",
+    "actions": "Ações",
+    "settings": "Definições"
+  },
+  "groups": {
+    "products": "Produtos",
+    "orders": "Encomendas",
+    "storefronts": "Montras",
+    "team": "Equipa",
+    "notifications": "Notificações",
+    "recent": "Recentes"
+  },
+  "results": {
+    "draft": "Rascunho",
+    "openInDesigner": "Abrir no editor",
+    "invited": "Convidado",
+    "order": "Encomenda",
+    "unread": "Por ler"
+  },
+  "fields": {
+    "username": "Nome de utilizador",
+    "avatar": "Fotografia de perfil",
+    "email": "Endereço de e-mail",
+    "password": "Palavra-passe",
+    "twoFactor": "Autenticação de dois fatores",
+    "recoveryCodes": "Códigos de recuperação",
+    "securityActivity": "Atividade de segurança",
+    "signOut": "Terminar sessão",
+    "vat": "NIF",
+    "businessName": "Nome ou denominação social",
+    "country": "País",
+    "address": "Morada comercial",
+    "contactEmail": "E-mail de contacto",
+    "phone": "Telefone",
+    "bio": "Biografia",
+    "salesEmails": "E-mails de vendas",
+    "marketingEmails": "E-mails de marketing",
+    "productEmails": "E-mails de atualizações do produto",
+    "sellerAgreement": "Acordo de vendedor",
+    "termsOfService": "Termos de serviço",
+    "exportData": "Exportar os meus dados",
+    "deleteAccount": "Eliminar conta"
+  },
+  "actions": {
+    "newProduct": "Novo produto",
+    "newStorefront": "Nova montra",
+    "inviteMember": "Convidar um membro da equipa",
+    "notificationHistory": "Histórico de notificações",
+    "showMeAround": "Mostrar-me o essencial"
+  }
+}

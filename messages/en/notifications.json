@@ -1,0 +1,113 @@
+{
+  "metadata": {
+    "notifications": {
+      "title": "Notifications"
+    }
+  },
+  "loading": {
+    "title": "Notifications",
+    "srLoading": "loading notifications"
+  },
+  "bell": {
+    "label": "Notifications",
+    "unreadLabel": "{count, plural, one {Notifications, {count} unread} other {Notifications, {count} unread}}"
+  },
+  "list": {
+    "title": "Notifications",
+    "unread": "{count, plural, one {{count} unread} other {{count} unread}}",
+    "markAllRead": "Mark all read",
+    "livePaused": "Live updates paused. Refresh to see the latest.",
+    "empty": "You're all caught up. Nothing here yet.",
+    "viewAll": "View all"
+  },
+  "item": {
+    "unread": "Unread"
+  },
+  "page": {
+    "title": "Notifications",
+    "markAllRead": "Mark all read",
+    "emptyTitle": "No notifications yet",
+    "emptyHint": "Team, order, and payment activity will show up here.",
+    "loadError": "Couldn't load more notifications. Check your connection and try again.",
+    "loading": "Loading",
+    "loadMore": "Load more"
+  },
+  "types": {
+    "team": "Team",
+    "order": "Order",
+    "payment": "Payment",
+    "stock": "Stock",
+    "system": "System",
+    "security": "Security",
+    "policy": "Policy"
+  },
+  "time": {
+    "justNow": "just now",
+    "minutesAgo": "{count, plural, other {{count}m ago}}",
+    "hoursAgo": "{count, plural, other {{count}h ago}}",
+    "daysAgo": "{count, plural, other {{count}d ago}}"
+  },
+  "messages": {
+    "teamInvite": {
+      "title": "You have a team invite",
+      "body": "{role, select, owner {{store} invited you to join as Owner. Open Team & access to accept.} editor {{store} invited you to join as Editor. Open Team & access to accept.} viewer {{store} invited you to join as Viewer. Open Team & access to accept.} other {{store} invited you to join their team. Open Team & access to accept.}}",
+      "bodyUnnamedStore": "{role, select, owner {A SquareShare store invited you to join as Owner. Open Team & access to accept.} editor {A SquareShare store invited you to join as Editor. Open Team & access to accept.} viewer {A SquareShare store invited you to join as Viewer. Open Team & access to accept.} other {A SquareShare store invited you to join their team. Open Team & access to accept.}}"
+    },
+    "teamJoined": {
+      "title": "{name} joined your team",
+      "titleUnnamed": "A new member joined your team",
+      "body": "They now have access to your store."
+    },
+    "security": {
+      "passwordChanged": {
+        "title": "Your password was changed",
+        "body": "The password on this account was just changed and other devices were signed out. If this wasn't you, reset your password immediately."
+      },
+      "passwordReset": {
+        "title": "Your password was changed",
+        "body": "A reset link was used to set a new password, and other devices were signed out. If this wasn't you, reset it again immediately."
+      },
+      "passwordSet": {
+        "title": "A password was set on your account",
+        "body": "This account can now sign in with a password as well as Google. If this wasn't you, reset it immediately."
+      },
+      "resetRequested": {
+        "title": "A password reset link was requested",
+        "body": "Someone asked for a link to set a new password on this account. If it wasn't you, ignore the email and change your password."
+      },
+      "emailChangeRequested": {
+        "title": "Email change requested",
+        "body": "Someone asked to move this account to a new email address. It only takes effect once the link in that inbox is confirmed. If this wasn't you, change your password now."
+      },
+      "lockedOut": {
+        "title": "Someone is trying to sign in to your account",
+        "body": "Your password was entered correctly, followed by too many wrong two-factor codes, so sign-in has been paused for a few minutes. If this wasn't you, your password is known to someone else: change it now."
+      },
+      "recoveryCodeUsed": {
+        "title": "A recovery code was used to sign in",
+        "body": "Someone signed in to your account with a recovery code. That turns two-factor authentication off and signs out every other device. If this was you, set up two-factor again in Settings › Security. If it wasn't, change your password now."
+      },
+      "twoFactorEnabled": {
+        "title": "Two-factor authentication is on",
+        "body": "Signing in to your account now needs a code from your authenticator app, and every other device was signed out. If this wasn't you, change your password and contact support."
+      },
+      "factorAdded": {
+        "title": "An authenticator app was added",
+        "body": "\"{name}\" can now be used to sign in to your account. If this wasn't you, remove it in Settings › Security and change your password.",
+        "bodyUnnamed": "\"Authenticator app\" can now be used to sign in to your account. If this wasn't you, remove it in Settings › Security and change your password."
+      },
+      "twoFactorDisabled": {
+        "title": "Two-factor authentication is off",
+        "body": "Your last authenticator app was removed, so signing in now needs only your password. If this wasn't you, change your password and turn two-factor back on."
+      },
+      "factorRemoved": {
+        "title": "An authenticator app was removed",
+        "body": "\"{name}\" can no longer be used to sign in to your account. If this wasn't you, change your password now."
+      },
+      "recoveryCodesRegenerated": {
+        "title": "New recovery codes were generated",
+        "body": "Your old recovery codes no longer work. If this wasn't you, change your password now."
+      }
+    }
+  }
+}

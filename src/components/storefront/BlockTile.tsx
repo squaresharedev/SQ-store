@@ -1,6 +1,7 @@
 "use client";
 
 import { memo, useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import type { Product } from "@/types/product";
 import {
   DEFAULT_IMAGE_PLACEMENT,
@@ -173,21 +174,22 @@ export const BlockTile = memo(function BlockTile({
    *  it, which asks for the controls that shape it. */
   onOpenSpotSetting?: (key: string, token: SpotToken) => void;
 }) {
+  const t = useTranslations("Storefront");
   // Include the text content so several text blocks stay distinguishable to
   // screen readers.
   const label =
     block.type === "product"
-      ? (product?.title ?? "Removed product")
+      ? (product?.title ?? t("blockTile.removedProduct"))
       : block.type === "shape"
-        ? `${block.kind} shape`
+        ? t("blockTile.shape", { kind: block.kind })
         : block.type === "image"
           ? // The seller's own words about the artwork, when they gave any.
             block.alt.trim()
-            ? `Image: ${block.alt.trim().slice(0, 30)}`
-            : "Image element"
+            ? t("blockTile.imageWithAlt", { alt: block.alt.trim().slice(0, 30) })
+            : t("blockTile.imageElement")
           : block.text.trim()
-            ? `Text: ${block.text.trim().slice(0, 30)}`
-            : "Text block";
+            ? t("blockTile.textWithContent", { text: block.text.trim().slice(0, 30) })
+            : t("blockTile.textBlock");
 
   // While the words are being typed, the tile is a text field and nothing
   // else: a click inside them must not toggle the selection out from under
@@ -561,8 +563,8 @@ export const BlockTile = memo(function BlockTile({
       aria-label={
         selectable
           ? isEditing
-            ? `Selected: ${label}. Press Enter to deselect.`
-            : `${label}. Press Enter to select and edit.`
+            ? t("blockTile.selected", { label })
+            : t("blockTile.unselected", { label })
           : undefined
       }
       onPointerDown={
@@ -728,10 +730,10 @@ export const BlockTile = memo(function BlockTile({
             within the tile's bounds on any corner radius. */}
         {editable && block.type === "product" && product?.status === "draft" && (
           <span
-            aria-label="Draft product -- buyers cannot reach this link"
+            aria-label={t("blockTile.draftAriaLabel")}
             className="absolute bottom-1.5 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-sm bg-amber-100 px-1.5 py-0.5 font-inter text-[10px] font-semibold leading-none text-amber-800 shadow-sm dark:bg-amber-900/50 dark:text-amber-300"
           >
-            Draft
+            {t("blockTile.draft")}
           </span>
         )}
       </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { usePathname, useRouter } from "next/navigation";
 import { helpTextClass, infoTextClass, overlayScrimClass, secondaryButtonClass } from "@/components/ui/control-styles";
 import { Spinner } from "@/components/ui/spinner";
@@ -70,6 +71,8 @@ export function OrdersPage({
    *  so the first filter, sort or page change drops the marker with it. */
   highlightId?: string | null;
 }) {
+  const t = useTranslations("Orders");
+  const tCommon = useTranslations("Common.pagination");
   const router = useRouter();
   const pathname = usePathname();
 
@@ -212,7 +215,7 @@ export function OrdersPage({
           <div className="pointer-events-none absolute right-3 top-3 z-10 flex items-center gap-2 rounded-sm border border-border bg-background/90 px-2 py-1 shadow-sm backdrop-blur">
             <Spinner className="size-3.5 text-muted-foreground" />
             <span className={infoTextClass}>
-              Updating…
+              {t("list.updating")}
             </span>
           </div>
         )}
@@ -231,8 +234,11 @@ export function OrdersPage({
             />
             <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-4 py-3">
               <p className={helpTextClass}>
-                {data.total} order{data.total === 1 ? "" : "s"} · page{" "}
-                {data.page} of {totalPages}
+                {t("list.summary", {
+                  total: data.total,
+                  page: data.page,
+                  totalPages,
+                })}
               </p>
               <div className="flex gap-2">
                 <button
@@ -241,7 +247,7 @@ export function OrdersPage({
                   disabled={data.page <= 1}
                   onClick={() => handlePage(data.page - 1)}
                 >
-                  Previous
+                  {tCommon("previous")}
                 </button>
                 <button
                   type="button"
@@ -249,7 +255,7 @@ export function OrdersPage({
                   disabled={data.page >= totalPages}
                   onClick={() => handlePage(data.page + 1)}
                 >
-                  Next
+                  {tCommon("next")}
                 </button>
               </div>
             </div>
@@ -258,11 +264,11 @@ export function OrdersPage({
       </div>
 
       {selected && (
-        <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true" aria-label="Order details">
+        <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true" aria-label={t("list.detailDialog")}>
           <button
             type="button"
             className={overlayScrimClass}
-            aria-label="Close order details"
+            aria-label={t("list.closeDetail")}
             onClick={closeDetail}
           />
           <div className="relative h-full w-full max-w-md shadow-lg">

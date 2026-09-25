@@ -1,0 +1,252 @@
+{
+  "steps": {
+    "seller": {
+      "label": "Adicione os seus dados de vendedor",
+      "detail": "O seu nome ou denominação social, morada e e-mail de contacto aparecem em todas as páginas de produto.",
+      "detailDone": "Os compradores conseguem ver a quem estão a comprar.",
+      "detailUnconfirmed": "Abra o link que enviámos para confirmar o seu e-mail de contacto.",
+      "action": "Adicionar dados",
+      "actionUnconfirmed": "Confirmar e-mail",
+      "cta": "Adicione os seus dados de vendedor",
+      "ctaUnconfirmed": "Confirme o seu e-mail"
+    },
+    "product": {
+      "label": "Adicione um produto",
+      "detail": "Um título e um preço já chegam. Pode ficar como rascunho, para já.",
+      "detailDone": "{count, plural, one {Tem {count} produto.} many {Tem {count} de produtos.} other {Tem {count} produtos.}}",
+      "action": "Adicionar produto",
+      "cta": "Adicione o seu primeiro produto"
+    },
+    "storefront": {
+      "label": "Coloque um produto numa montra",
+      "detailDone": "Já tem um produto na sua montra.",
+      "detailNone": "Crie uma montra e depois adicione um produto à grelha.",
+      "detailEmpty": "Abra a sua montra e escolha Adicionar produto na barra de ferramentas.",
+      "actionCreate": "Criar montra",
+      "actionOpen": "Abrir editor",
+      "cta": "Abra a sua montra",
+      "ctaCreate": "Crie uma montra"
+    },
+    "publish": {
+      "label": "Publique a sua página",
+      "detailDone": "A sua página de produto está publicada.",
+      "detailNeedsSeller": "Complete os seus dados de vendedor para poder publicar a página.",
+      "detailNeedsStorefront": "Assim que um produto estiver numa montra, a página pode ser publicada.",
+      "detailNeedsActive": "Defina esse produto como Ativo para publicar a página.",
+      "detailPagesOff": "As páginas de produto estão desativadas nessa montra. Ative-as no editor.",
+      "actionEdit": "Editar produto",
+      "actionOpen": "Abrir editor",
+      "cta": "Publique o seu produto",
+      "ctaPagesOff": "Ativar páginas de produto"
+    }
+  },
+  "checklist": {
+    "titleDone": "Está tudo configurado",
+    "title": "Configuração inicial",
+    "showMeAround": "Mostrar-me o essencial",
+    "showSteps": "Mostrar passos",
+    "hideSteps": "Ocultar passos",
+    "liveHint": "A sua primeira página de produto está publicada. Partilhe o link onde quiser.",
+    "copyLink": {
+      "copy": "Copiar link da página de produto",
+      "copied": "Link da página de produto copiado",
+      "failed": "Não foi possível copiar o link da página de produto. Selecione-o e copie-o manualmente."
+    },
+    "openPage": "Abrir página",
+    "opensInNewTab": " (abre num novo separador)",
+    "hide": "Ocultar",
+    "progressLabel": "Progresso da configuração",
+    "progress": "{total, plural, one {{done} de {total} concluído} many {{done} de {total} concluídos} other {{done} de {total} concluídos}}",
+    "stepDone": " (concluído)",
+    "stepToDo": " (por fazer)"
+  },
+  "welcome": {
+    "steps": {
+      "welcome": {
+        "title": "Boas-vindas ao Square Share",
+        "description": "Quatro passos até uma página de produto que pode partilhar."
+      },
+      "path": {
+        "title": "Quatro passos até à sua primeira página"
+      },
+      "seller": {
+        "title": "Adicione os seus dados de vendedor",
+        "description": "Os compradores veem estes dados nas suas páginas de produto, e a lei exige-os antes de poder vender. Nunca os utilizamos para marketing.",
+        "lawNote": "Os compradores veem estes dados nas suas páginas de produto, como a lei exige. Nunca são usados para marketing."
+      },
+      "tour": {
+        "title": "Onde está tudo",
+        "description": "Está tudo na barra lateral. Veja para que serve cada parte."
+      },
+      "terms": {
+        "title": "Os nossos Termos de serviço",
+        "description": "Leia a versão resumida ou os Termos completos e aceite para continuar."
+      }
+    },
+    "progress": "{total, plural, one {Passo {step} de {total}} many {Passo {step} de {total}} other {Passo {step} de {total}}}",
+    "intro": "Cada produto que vende pode ter a sua própria página, com o estilo de uma montra desenhada por si.",
+    "tagline": "Dê a cada produto a sua própria página e partilhe-a onde quiser.",
+    "path": {
+      "seller": {
+        "title": "Adicione os seus dados de vendedor",
+        "body": "Os compradores precisam de saber a quem estão a comprar."
+      },
+      "product": {
+        "title": "Adicione um produto",
+        "body": "Um título, um preço e uma fotografia, se tiver uma."
+      },
+      "storefront": {
+        "title": "Coloque-o numa montra",
+        "body": "Escolha um aspeto e depois coloque o produto na grelha."
+      },
+      "share": {
+        "title": "Partilhe a página",
+        "body": "Cole o link na sua biografia, numa mensagem ou no seu próprio site."
+      }
+    },
+    "seller": {
+      "namePlaceholder": "p. ex. Studio Builderboy e.U.",
+      "nameHelp": "A sua denominação social, ou o seu nome completo, se vender a título individual.",
+      "nameAlternative": "Ou o seu nome completo, se vende em nome próprio.",
+      "addressPlaceholder": "p. ex. Rua do Mercado, 12\n1200-109 Lisboa\nPortugal",
+      "emailPlaceholder": "p. ex. ola@asualoja.example",
+      "emailHelp": "Para onde os compradores lhe escrevem. Pode ser diferente do seu e-mail de início de sessão."
+    },
+    "confirm": {
+      "check": "Verifique {email} para encontrar um link de confirmação.",
+      "goLive": "As suas páginas de produto ficam publicadas assim que o abrir.",
+      "sendNewLink": "Enviar um novo link"
+    },
+    "tour": {
+      "mobileMenu": "No telemóvel, abra o menu no canto superior esquerdo.",
+      "searchShortcut": "À procura de alguma coisa? Prima <kbd>{shortcut}</kbd> para pesquisar tudo.",
+      "searchNoShortcut": "À procura de alguma coisa? A pesquisa encontra qualquer página ou definição.",
+      "searchMobile": "À procura de alguma coisa? Toque em Pesquisar, no topo."
+    },
+    "nav": {
+      "skipOnboarding": "Saltar a introdução",
+      "next": "Seguinte",
+      "showMeAround": "Mostrar-me como funciona",
+      "skipIntro": "Saltar introdução",
+      "getStarted": "Começar",
+      "skipForNow": "Saltar por agora",
+      "saveAndContinue": "Guardar e continuar",
+      "changeDetails": "Alterar dados",
+      "continue": "Continuar",
+      "exploreOnMyOwn": "Explorar por conta própria",
+      "notNow": "Agora não"
+    },
+    "hero": {
+      "buyNow": "Comprar agora",
+      "live": "Publicado",
+      "linkCopied": "Link copiado"
+    },
+    "setupPath": {
+      "details": "Adicione os seus dados",
+      "product": "Adicione um produto",
+      "storefront": "Desenhe uma montra",
+      "share": "Partilhe a sua página"
+    },
+    "terms": {
+      "agreed": "Aceitou estes Termos. Obrigado por ler.",
+      "agreeNote": "Ao aceitar, ficam registados na sua conta a data e a versão dos Termos."
+    }
+  },
+  "tourOverlay": {
+    "dialogLabel": "Visita guiada",
+    "progress": "{total, plural, other {{current} de {total}}}",
+    "shortcut": "Atalho: <kbd>{shortcut}</kbd>",
+    "skipTour": "Saltar a visita",
+    "next": "Seguinte",
+    "openingPage": "{page, select, overview {A abrir Visão geral…} products {A abrir Produtos…} storefront {A abrir Montra…} orders {A abrir Encomendas…} analytics {A abrir Estatísticas…} payments {A abrir Pagamentos…} settings {A abrir Definições…} sampleStorefront {A abrir Montra de exemplo…} other {A abrir…}}"
+  },
+  "tourReplay": {
+    "title": "Visita guiada",
+    "description": "Um breve percurso pelo principal a fazer em cada página, passo a passo.",
+    "start": "Iniciar a visita"
+  },
+  "guidedTour": {
+    "steps": {
+      "overviewNav": {
+        "title": "Oriente-se",
+        "body": "Tudo na sua loja está a um clique de distância no menu. Esta visita pára no principal a fazer em cada página.",
+        "bodySidebar": "Tudo na sua loja está a um clique de distância nesta barra lateral. Esta visita pára no principal a fazer em cada página.",
+        "bodyMenu": "Tudo na sua loja está neste menu. Esta visita pára no principal a fazer em cada página."
+      },
+      "search": {
+        "title": "Pesquise o que quiser",
+        "body": "A pesquisa leva-o diretamente a qualquer página, produto, encomenda ou definição.",
+        "bodyTopBar": "Vá diretamente a qualquer página, produto, encomenda ou definição.",
+        "bodyPhone": "Toque aqui para ir diretamente a qualquer página, produto, encomenda ou definição."
+      },
+      "productsAdd": {
+        "title": "Adicione um produto",
+        "body": "Um título e um preço chegam para começar. Pode ficar como rascunho até estar pronto."
+      },
+      "productsImport": {
+        "title": "Ou importe o seu catálogo",
+        "body": "Já vende noutro sítio? Importe um ficheiro CSV. Uma exportação do Shopify funciona tal como está."
+      },
+      "storefrontCreate": {
+        "title": "Crie uma montra",
+        "body": "Uma montra é uma grelha que desenha. Cada produto que nela colocar passa a ter uma página que pode partilhar."
+      },
+      "storefrontSample": {
+        "title": "Veja como se faz",
+        "body": "Este exemplo mostra uma montra concluída. Abra-o para experimentar o editor. Nada do que alterar aí é guardado.",
+        "fallbackBody": "Abra uma montra para a desenhar."
+      },
+      "storefrontEmbed": {
+        "title": "Incorpore uma montra no seu site",
+        "body": "Cada montra tem um botão de incorporação que lhe dá um código como este. O widget ainda está em desenvolvimento e ainda não aparece noutros sites.",
+        "bodyButton": "Este botão dá-lhe um código como o que se vê abaixo para colar no seu site. O widget ainda está em desenvolvimento e ainda não aparece noutros sites.",
+        "fallbackBody": "Quando tiver uma montra, o botão de incorporação no respetivo cartão dá-lhe um código como este. O widget ainda está em desenvolvimento e ainda não aparece noutros sites."
+      },
+      "ordersSearch": {
+        "title": "Encontre uma encomenda",
+        "body": "Pesquise pelo e-mail do comprador. As encomendas chegam aqui quando o checkout da Square Share abrir."
+      },
+      "ordersFilters": {
+        "title": "Filtre e ordene",
+        "body": "Restrinja as encomendas por canal, estado ou data, e escolha como são ordenadas."
+      },
+      "analytics": {
+        "title": "Veja como está a correr",
+        "body": "Vendas e visitas às suas páginas de produto, nas datas que escolher.",
+        "bodyRange": "Vendas e visitas às suas páginas de produto, nas datas que escolher aqui.",
+        "bodyFirstRun": "As vendas e as visitas às suas páginas de produto aparecem aqui assim que uma estiver publicada."
+      },
+      "payments": {
+        "title": "Receber pagamentos",
+        "bodyConnect": "Ligue o Stripe aqui para que as transferências vão diretamente para o seu banco.",
+        "bodyComingSoon": "Receber pagamentos através do Stripe estará disponível em breve. Até lá, os compradores pagam-lhe através do link de compra do produto ou por e-mail."
+      },
+      "finish": {
+        "title": "Repita a visita quando quiser",
+        "body": "É tudo na visita. Pode iniciá-la novamente a partir daqui sempre que quiser."
+      }
+    }
+  },
+  "editorTour": {
+    "steps": {
+      "editorAdd": {
+        "title": "Adicione à grelha",
+        "body": "Adicione produtos, texto e formas a partir desta barra. Arraste qualquer elemento da grelha para o mover e puxe por um canto para o redimensionar."
+      },
+      "editorDesign": {
+        "title": "Defina o aspeto",
+        "body": "As cores, os tipos de letra, o cabeçalho e o aspeto dos cartões de produto são definidos uma só vez para toda a montra.",
+        "bodyPanel": "As cores, os tipos de letra, o cabeçalho e o aspeto dos cartões de produto são definidos aqui, uma só vez para toda a montra.",
+        "bodyButton": "Toque aqui para definir as cores, os tipos de letra, o cabeçalho e o aspeto dos cartões de produto, uma só vez para toda a montra."
+      },
+      "editorPage": {
+        "title": "Cada produto tem uma página",
+        "body": "Cada produto da grelha tem a sua própria página para partilhar. Abra uma aqui para a ver e personalizar."
+      },
+      "editorFinish": {
+        "title": "Torne-a sua",
+        "body": "O exemplo nunca é guardado, por isso experimente à vontade. Quando estiver pronto, crie uma montra própria."
+      }
+    }
+  }
+}

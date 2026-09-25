@@ -21,6 +21,7 @@
 // seller a link to copy that 404s.
 
 import type { StorefrontConfig } from "@/types/storefront";
+import { msg, type MessageRef } from "@/i18n/types";
 import {
   traderIdentityHref,
   type TraderIdentityField,
@@ -32,21 +33,22 @@ import { productPagePath } from "@/lib/storefront/product-page-url";
 export const SETUP_STEP_IDS = ["seller-details", "product", "storefront", "publish"] as const;
 export type SetupStepId = (typeof SETUP_STEP_IDS)[number];
 
+/** Every piece of copy on a step is a MessageRef, resolved where it renders. */
 export type SetupStep = {
   id: SetupStepId;
-  label: string;
+  label: MessageRef;
   done: boolean;
   /** One line under the label: what done means, or what is in the way. */
-  detail: string;
+  detail: MessageRef;
   /**
    * Where to go to take the step. Absent while the step is waiting on an
    * EARLIER one, so a row never offers a link to a surface that cannot help
    * yet (publishing before there is anything placed to publish).
    */
-  action?: { href: string; label: string };
+  action?: { href: string; label: MessageRef };
   /** The same destination phrased as a call to action, for the welcome flow's
    *  closing button ("Add your first product"). */
-  cta: string;
+  cta: MessageRef;
 };
 
 /** Where the trader identity stands: not typed yet, typed but the contact
@@ -158,13 +160,16 @@ function sellerStep(
   seller: SellerSetupState,
   missing: readonly TraderIdentityField[],
 ): SetupStep {
-  const base = { id: "seller-details", label: "Add your seller details" } as const;
+  const base = {
+    id: "seller-details",
+    label: msg("Onboarding.steps.seller.label"),
+  } as const;
   if (seller === "done") {
     return {
       ...base,
       done: true,
-      detail: "Buyers can see who they are buying from.",
-      cta: "Add your seller details",
+      detail: msg("Onboarding.steps.seller.detailDone"),
+      cta: msg("Onboarding.steps.seller.cta"),
     };
   }
   // The gate's own deep link lands on the first field still missing, or on the
@@ -174,62 +179,72 @@ function sellerStep(
     return {
       ...base,
       done: false,
-      detail: "Open the link we emailed to confirm your contact email.",
-      action: { href, label: "Confirm email" },
-      cta: "Confirm your email",
+      detail: msg("Onboarding.steps.seller.detailUnconfirmed"),
+      action: { href, label: msg("Onboarding.steps.seller.actionUnconfirmed") },
+      cta: msg("Onboarding.steps.seller.ctaUnconfirmed"),
     };
   }
   return {
     ...base,
     done: false,
-    detail: "Your trader name, address and contact email go on every product page.",
-    action: { href, label: "Add details" },
-    cta: "Add your seller details",
+    detail: msg("Onboarding.steps.seller.detail"),
+    action: { href, label: msg("Onboarding.steps.seller.action") },
+    cta: msg("Onboarding.steps.seller.cta"),
   };
 }
 
 function productStep(productCount: number): SetupStep {
-  const base = { id: "product", label: "Add a product", cta: "Add your first product" } as const;
+  const base = {
+    id: "product",
+    label: msg("Onboarding.steps.product.label"),
+    cta: msg("Onboarding.steps.product.cta"),
+  } as const;
   if (productCount > 0) {
     return {
       ...base,
       done: true,
-      detail: `You have ${productCount} product${productCount === 1 ? "" : "s"}.`,
+      detail: msg("Onboarding.steps.product.detailDone", { count: productCount }),
     };
   }
   return {
     ...base,
     done: false,
-    detail: "A title and a price are enough. It can stay a draft for now.",
-    action: { href: "/products/new", label: "Add product" },
+    detail: msg("Onboarding.steps.product.detail"),
+    action: { href: "/products/new", label: msg("Onboarding.steps.product.action") },
   };
 }
 
 function storefrontStep(anyPlaced: boolean, newestStorefrontId: string | null): SetupStep {
-  const base = { id: "storefront", label: "Put a product on a storefront" } as const;
+  const base = {
+    id: "storefront",
+    label: msg("Onboarding.steps.storefront.label"),
+  } as const;
   if (anyPlaced) {
     return {
       ...base,
       done: true,
-      detail: "A product is on your storefront.",
-      cta: "Open your storefront",
+      detail: msg("Onboarding.steps.storefront.detailDone"),
+      cta: msg("Onboarding.steps.storefront.cta"),
     };
   }
   if (newestStorefrontId === null) {
     return {
       ...base,
       done: false,
-      detail: "Create a storefront, then add a product to its grid.",
-      action: { href: "/storefront", label: "Create storefront" },
-      cta: "Create a storefront",
+      detail: msg("Onboarding.steps.storefront.detailNone"),
+      action: { href: "/storefront", label: msg("Onboarding.steps.storefront.actionCreate") },
+      cta: msg("Onboarding.steps.storefront.ctaCreate"),
     };
   }
   return {
     ...base,
     done: false,
-    detail: "Open your storefront and choose Add product in the toolbar.",
-    action: { href: `/storefront/${newestStorefrontId}`, label: "Open designer" },
-    cta: "Open your storefront",
+    detail: msg("Onboarding.steps.storefront.detailEmpty"),
+    action: {
+      href: `/storefront/${newestStorefrontId}`,
+      label: msg("Onboarding.steps.storefront.actionOpen"),
+    },
+    cta: msg("Onboarding.steps.storefront.cta"),
   };
 }
 
@@ -244,9 +259,10 @@ function publishStep({
   placed: readonly Placement[];
   placedActive: readonly Placement[];
 }): SetupStep {
-  const base = { id: "publish", label: "Publish its page" } as const;
+  const base = { id: "publish", label: msg("Onboarding.steps.publish.label") } as const;
+  const cta = msg("Onboarding.steps.publish.cta");
   if (live) {
-    return { ...base, done: true, detail: "Your product page is live.", cta: "Publish your product" };
+    return { ...base, done: true, detail: msg("Onboarding.steps.publish.detailDone"), cta };
   }
   // Blocked on an earlier step: say which, and offer no link of its own, since
   // that step's row already carries the way to fix it.
@@ -254,32 +270,38 @@ function publishStep({
     return {
       ...base,
       done: false,
-      detail: "Finish your seller details, then your page can go live.",
-      cta: "Publish your product",
+      detail: msg("Onboarding.steps.publish.detailNeedsSeller"),
+      cta,
     };
   }
   if (placed.length === 0) {
     return {
       ...base,
       done: false,
-      detail: "Once a product is on a storefront, its page can go live.",
-      cta: "Publish your product",
+      detail: msg("Onboarding.steps.publish.detailNeedsStorefront"),
+      cta,
     };
   }
   if (placedActive.length === 0) {
     return {
       ...base,
       done: false,
-      detail: "Set that product to Active so its page goes live.",
-      action: { href: `/products/${placed[0].productId}/edit`, label: "Edit product" },
-      cta: "Publish your product",
+      detail: msg("Onboarding.steps.publish.detailNeedsActive"),
+      action: {
+        href: `/products/${placed[0].productId}/edit`,
+        label: msg("Onboarding.steps.publish.actionEdit"),
+      },
+      cta,
     };
   }
   return {
     ...base,
     done: false,
-    detail: "Product pages are off on that storefront. Turn them on in the designer.",
-    action: { href: `/storefront/${placedActive[0].storefrontId}`, label: "Open designer" },
-    cta: "Turn on product pages",
+    detail: msg("Onboarding.steps.publish.detailPagesOff"),
+    action: {
+      href: `/storefront/${placedActive[0].storefrontId}`,
+      label: msg("Onboarding.steps.publish.actionOpen"),
+    },
+    cta: msg("Onboarding.steps.publish.ctaPagesOff"),
   };
 }

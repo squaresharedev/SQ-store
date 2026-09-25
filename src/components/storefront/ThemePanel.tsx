@@ -1,6 +1,7 @@
 "use client";
 
 import { useId } from "react";
+import { useTranslations } from "next-intl";
 import type { StorefrontBackground, StorefrontTheme } from "@/types/storefront";
 import { ColorPicker } from "@/components/ui/ColorPicker";
 import { BackgroundEditor } from "./BackgroundEditor";
@@ -29,6 +30,7 @@ export function ThemePanel({
   backgroundImageUrl: string | null;
   onBackgroundImageChange: (url: string | null) => void;
 }) {
+  const t = useTranslations("Storefront.themePanel");
   const fieldId = useId();
 
   function updateBackground(background: StorefrontBackground) {
@@ -47,7 +49,7 @@ export function ThemePanel({
       />
       <ColorPicker
         id={`${fieldId}-accent`}
-        label="Accent"
+        label={t("accent")}
         value={theme.accent}
         onChange={(accent) => onChange({ ...theme, accent })}
         target={{ kind: "theme-accent" }}

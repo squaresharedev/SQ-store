@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { transitionClass } from "@/components/ui/control-styles";
 import { LEGAL_LINKS } from "@/lib/legal/links";
 
@@ -41,20 +42,22 @@ const SOCIALS = [
 const linkClass = `font-mono text-xs uppercase tracking-widest text-muted-foreground hover:text-acid-ink ${transitionClass}`;
 
 export function BrandFooter() {
+  const t = useTranslations("ErrorPage.footer");
+  const tKey = useTranslations();
   return (
     <footer className="border-t border-border px-6 py-8">
       <div className="mx-auto flex max-w-5xl flex-col items-center gap-6 sm:flex-row sm:justify-between">
         <nav
-          aria-label="Legal"
+          aria-label={t("legal")}
           className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3"
         >
           {LEGAL.map(({ label, href }) => (
             <a key={href} href={href} className={linkClass}>
-              {label}
+              {tKey(label)}
             </a>
           ))}
           <a href="mailto:squareshare.to@gmail.com" className={linkClass}>
-            Contact
+            {t("contact")}
           </a>
         </nav>
 
@@ -83,16 +86,18 @@ export function BrandFooter() {
       </div>
 
       <p className="mx-auto mt-6 max-w-5xl text-center font-mono text-xs text-muted-foreground sm:text-left">
-        © 2026 Squareshare. Built by{" "}
-        <a
-          href="https://rootlabs.studio"
-          target="_blank"
-          rel="noopener noreferrer"
-          className={`text-foreground underline decoration-border underline-offset-4 hover:text-acid-ink hover:decoration-acid-ink ${transitionClass}`}
-        >
-          Root Labs
-        </a>
-        .
+        {t.rich("credit", {
+          link: (chunks) => (
+            <a
+              href="https://rootlabs.studio"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`text-foreground underline decoration-border underline-offset-4 hover:text-acid-ink hover:decoration-acid-ink ${transitionClass}`}
+            >
+              {chunks}
+            </a>
+          ),
+        })}
       </p>
     </footer>
   );

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, afterEach, beforeAll } from "vitest";
-import { render, screen, fireEvent, cleanup, within } from "@testing-library/react";
+import { render, screen, fireEvent, cleanup, within } from "../setup/render";
+import { english } from "../setup/translate";
 
 afterEach(cleanup);
 
@@ -91,7 +92,7 @@ describe("ColorPicker inline row", () => {
     const row = swatchRow();
     for (const preset of COLOR_PRESETS) {
       expect(
-        within(row).getByRole("button", { name: `${preset.name} (${preset.value})` }),
+        within(row).getByRole("button", { name: english(preset.label, { value: preset.value }) }),
       ).toBeInTheDocument();
     }
   });
@@ -149,7 +150,7 @@ describe("ColorPicker quick swatches", () => {
 
     const preset = COLOR_PRESETS[2];
     await user.click(
-      screen.getByRole("button", { name: `${preset.name} (${preset.value})` }),
+      screen.getByRole("button", { name: english(preset.label, { value: preset.value }) }),
     );
     expect(onChange).toHaveBeenLastCalledWith(preset.value);
   });
@@ -158,7 +159,7 @@ describe("ColorPicker quick swatches", () => {
     const active = COLOR_PRESETS[0];
     render(<ColorPicker value={active.value} onChange={vi.fn()} label="Color" />);
     expect(
-      screen.getByRole("button", { name: `${active.name} (${active.value})` }),
+      screen.getByRole("button", { name: english(active.label, { value: active.value }) }),
     ).toHaveAttribute("aria-pressed", "true");
   });
 
@@ -167,7 +168,7 @@ describe("ColorPicker quick swatches", () => {
     render(<ColorPicker value={active.value} onChange={vi.fn()} label="Color" />);
     for (const preset of COLOR_PRESETS.slice(1)) {
       expect(
-        screen.getByRole("button", { name: `${preset.name} (${preset.value})` }),
+        screen.getByRole("button", { name: english(preset.label, { value: preset.value }) }),
       ).toHaveAttribute("aria-pressed", "false");
     }
   });
@@ -178,7 +179,7 @@ describe("ColorPicker quick swatches", () => {
     render(<ColorPicker value={CUSTOM} onChange={onChange} label="Color" />);
     for (const preset of COLOR_PRESETS) {
       await user.click(
-        screen.getByRole("button", { name: `${preset.name} (${preset.value})` }),
+        screen.getByRole("button", { name: english(preset.label, { value: preset.value }) }),
       );
     }
     expect(onChange).toHaveBeenCalledTimes(COLOR_PRESETS.length);
@@ -252,6 +253,7 @@ describe("ColorPicker inherit option", () => {
   function inheritProp(over: Partial<{ active: boolean; onSelect: () => void }> = {}) {
     return {
       label: "Theme color",
+      useLabel: "Use Theme color",
       value: "#3b82f6",
       active: true,
       onSelect: vi.fn(),
@@ -306,7 +308,7 @@ describe("ColorPicker inherit option", () => {
       />,
     );
     expect(
-      screen.getByRole("button", { name: `${preset.name} (${preset.value})` }),
+      screen.getByRole("button", { name: english(preset.label, { value: preset.value }) }),
     ).toHaveAttribute("aria-pressed", "false");
   });
 
@@ -493,7 +495,7 @@ describe("ColorPicker target routing", () => {
     );
     const preset = COLOR_PRESETS[0];
     await user.click(
-      screen.getByRole("button", { name: `${preset.name} (${preset.value})` }),
+      screen.getByRole("button", { name: english(preset.label, { value: preset.value }) }),
     );
     expect(onChange).toHaveBeenLastCalledWith(preset.value);
   });
@@ -509,7 +511,7 @@ describe("ColorPicker recent-color recording", () => {
     render(<ColorPicker value={CUSTOM} onChange={vi.fn()} label="Color" />);
     const preset = COLOR_PRESETS[1];
     await user.click(
-      screen.getByRole("button", { name: `${preset.name} (${preset.value})` }),
+      screen.getByRole("button", { name: english(preset.label, { value: preset.value }) }),
     );
     expect(getRecentColors()).toEqual([preset.value]);
   });

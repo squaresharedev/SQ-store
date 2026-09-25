@@ -1,0 +1,113 @@
+{
+  "actions": {
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "saved": "Enregistré",
+    "cancel": "Annuler",
+    "done": "Terminé",
+    "close": "Fermer",
+    "back": "Retour",
+    "copy": "Copier",
+    "copied": "Copié",
+    "copyFailed": "Échec de la copie",
+    "tryAgain": "Réessayer",
+    "sending": "Envoi…",
+    "sent": "Envoyé",
+    "loading": "Chargement…",
+    "confirm": "Confirmer",
+    "remove": "Retirer",
+    "delete": "Supprimer",
+    "deleting": "Suppression…"
+  },
+  "badge": {
+    "comingSoon": "Bientôt disponible"
+  },
+  "pagination": {
+    "previous": "Précédent",
+    "next": "Suivant"
+  },
+  "calendar": {
+    "previousMonth": "Mois précédent",
+    "nextMonth": "Mois suivant",
+    "today": "Aujourd’hui"
+  },
+  "datePicker": {
+    "chooseDate": "Choisir une date",
+    "chooseDateRange": "Choisir une période",
+    "selectDate": "Sélectionner une date"
+  },
+  "colorPicker": {
+    "saturationBrightness": "Saturation et luminosité",
+    "saturationBrightnessValue": "Saturation {saturation}, luminosité {brightness}",
+    "hue": "Teinte",
+    "pickFromScreen": "Choisir une couleur à l’écran",
+    "pickFromScreenTitle": "Choisir à l’écran",
+    "hexLabel": "Couleur hexadécimale",
+    "hexCopied": "Code hex copié",
+    "copyHex": "Copier le code hex",
+    "invalidHex": "Utilisez un code hexadécimal à 6 chiffres, par exemple #a855f7.",
+    "pickerFor": "Sélecteur de couleur pour {label}",
+    "picker": "Sélecteur de couleur",
+    "colour": "Couleur",
+    "swatchesFor": "Échantillons de couleur pour {label}",
+    "swatches": "Échantillons de couleur",
+    "moreColors": "Plus de couleurs",
+    "customColor": "Couleur personnalisée",
+    "currentColor": "Couleur actuelle {color}",
+    "hueValue": "{degrees, plural, one {# degré} many {# degrés} other {# degrés}}"
+  },
+  "panelMenu": {
+    "backLeaving": "Retour à tous les paramètres : vous quittez {title}"
+  },
+  "sliderField": {
+    "about": "À propos de {label}",
+    "asNumber": "{label}, en valeur numérique"
+  },
+  "password": {
+    "show": "Afficher le mot de passe",
+    "hide": "Masquer le mot de passe"
+  },
+  "stock": {
+    "inStock": "En stock",
+    "lowStock": "{remaining, plural, one {Plus que {remaining}} many {Plus que {remaining}} other {Plus que {remaining}}}",
+    "soldOut": "Épuisé"
+  },
+  "toast": {
+    "regionLabel": "Notifications",
+    "dismiss": "Fermer"
+  },
+  "charts": {
+    "bar": "Graphique à barres",
+    "horizontalBar": "Graphique à barres horizontales",
+    "line": "Graphique linéaire",
+    "composition": "Composition",
+    "proportional": "Répartition proportionnelle",
+    "other": "Autre",
+    "total": "Total",
+    "category": "Catégorie"
+  },
+  "legal": {
+    "cookies": {
+      "label": "Cookies",
+      "name": "Politique relative aux cookies de Squareshare"
+    },
+    "accessibility": {
+      "label": "Accessibilité",
+      "name": "Déclaration d’accessibilité de Squareshare"
+    }
+  },
+  "grid": {
+    "ariaLabel": "Grille",
+    "addBlockAt": "Ajouter un bloc à la colonne {column}, ligne {row}",
+    "resize": "Redimensionner {label}",
+    "resizeBlock": "Redimensionner le bloc",
+    "resizeUnavailable": "Redimensionnement impossible : ce bloc occupe déjà toute la place disponible dans la disposition empilée",
+    "resizeUnavailableNamed": "Redimensionnement impossible : ce bloc occupe déjà toute la place disponible dans la disposition empilée : {label}",
+    "rotate": "Faire pivoter {label}",
+    "rotateBlock": "Faire pivoter le bloc",
+    "rotation": "{degrees, plural, one {# degré} many {# degrés} other {# degrés}}",
+    "rotated": "{label} pivoté à {degrees, plural, one {# degré} many {# degrés} other {# degrés}}",
+    "rotatedBlock": "Bloc pivoté à {degrees, plural, one {# degré} many {# degrés} other {# degrés}}",
+    "blocksMoved": "{count, plural, one {# bloc déplacé} many {# blocs déplacés} other {# blocs déplacés}}"
+  }
+}

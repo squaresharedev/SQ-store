@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useTranslations, useLocale } from "next-intl";
 import { infoTextClass } from "@/components/ui/control-styles";
 import { badgeClass } from "@/components/ui/surface-styles";
 import { cn } from "@/lib/utils";
@@ -6,12 +7,6 @@ import type { DashboardOrder, OrderStatus } from "@/lib/dashboard/queries";
 import { formatCents, formatOrderDate } from "@/lib/dashboard/format";
 import { ModuleCard, ModuleEmptyText } from "./ModuleCard";
 
-const STATUS_LABELS: Record<OrderStatus, string> = {
-  paid: "Paid",
-  refunded: "Refunded",
-  disputed: "Disputed",
-  pending: "Pending",
-};
 
 const STATUS_CLASSES: Record<OrderStatus, string> = {
   paid: "text-success",
@@ -20,13 +15,9 @@ const STATUS_CLASSES: Record<OrderStatus, string> = {
   pending: "text-muted-foreground",
 };
 
-const CHANNEL_LABELS: Record<DashboardOrder["channel"], string> = {
-  embed: "Embed",
-  marketplace: "Marketplace",
-};
-
 function StatusBadge({ status }: { status: OrderStatus }) {
-  const known: OrderStatus = STATUS_LABELS[status] ? status : "pending";
+  const t = useTranslations("Orders.status");
+  const known: OrderStatus = STATUS_CLASSES[status] ? status : "pending";
   return (
     <span
       className={cn(
@@ -34,7 +25,7 @@ function StatusBadge({ status }: { status: OrderStatus }) {
         STATUS_CLASSES[known],
       )}
     >
-      {STATUS_LABELS[known]}
+      {t(known)}
     </span>
   );
 }
@@ -47,13 +38,12 @@ export function RecentOrders({
   orders: DashboardOrder[];
   id?: string;
 }) {
+  const t = useTranslations();
+  const locale = useLocale();
   return (
-    <ModuleCard title="Recent orders" id={id}>
+    <ModuleCard title={t("Dashboard.recentOrders.title")} id={id}>
       {orders.length === 0 ? (
-        <ModuleEmptyText>
-          No orders yet. Sales through your own buy link or by email
-          won&apos;t show here.
-        </ModuleEmptyText>
+        <ModuleEmptyText>{t("Dashboard.recentOrders.empty")}</ModuleEmptyText>
       ) : (
         <ul className="divide-y divide-border">
           {orders.map((order, index) => (
@@ -73,14 +63,19 @@ export function RecentOrders({
                     {order.product_title}
                   </p>
                   <p className={infoTextClass}>
-                    {CHANNEL_LABELS[order.channel] ?? "Embed"} ·{" "}
-                    {formatOrderDate(order.created_at)}
+                    {t(
+                      order.channel === "marketplace"
+                        ? "Orders.channel.marketplace"
+                        : "Orders.channel.embed",
+                    )}{" "}
+                    ·{" "}
+                    {formatOrderDate(order.created_at, locale)}
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
                   <StatusBadge status={order.status} />
                   <span className="font-inter text-sm font-medium text-foreground">
-                    {formatCents(order.amount_cents, order.currency)}
+                    {formatCents(order.amount_cents, order.currency, locale)}
                   </span>
                 </div>
               </Link>

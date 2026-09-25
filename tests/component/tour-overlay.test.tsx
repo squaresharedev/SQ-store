@@ -14,6 +14,7 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import userEvent from "@testing-library/user-event";
 import { act, cleanup, render, screen, waitFor, within } from "../setup/render";
+import { english } from "../setup/translate";
 import type { TourStep } from "@/lib/onboarding/tour-steps";
 
 const router = vi.hoisted(() => ({
@@ -45,36 +46,49 @@ vi.mock("motion/react", async (importOriginal) => ({
 const { TourOverlay } = await import("@/components/onboarding/TourOverlay");
 const store = await import("@/lib/onboarding/tour-store");
 
+// Copy is message keys; any real ones will do. The assertions below read
+// them back in English.
 const STEPS: TourStep[] = [
   {
     id: "overview-nav",
     path: "/a",
-    pageLabel: "Page A",
-    title: "Step one",
-    body: "First body.",
-    targets: [{ selector: '[data-fixture="one"]', body: "One is here." }],
+    page: "overview",
+    title: "Onboarding.guidedTour.steps.overviewNav.title",
+    body: "Onboarding.guidedTour.steps.overviewNav.body",
+    targets: [
+      {
+        selector: '[data-fixture="one"]',
+        body: "Onboarding.guidedTour.steps.overviewNav.bodySidebar",
+        extra: "search-shortcut",
+      },
+    ],
     scroll: false,
   },
   {
     id: "search",
     path: "/a",
-    pageLabel: "Page A",
-    title: "Step two",
-    body: "Second body.",
+    page: "overview",
+    title: "Onboarding.guidedTour.steps.search.title",
+    body: "Onboarding.guidedTour.steps.search.body",
     targets: [{ selector: '[data-fixture="two"]' }],
-    fallbackBody: "Two is missing.",
+    fallbackBody: "Onboarding.guidedTour.steps.storefrontSample.fallbackBody",
     scroll: false,
   },
   {
     id: "products-add",
     path: "/b",
-    pageLabel: "Page B",
-    title: "Step three",
-    body: "Third body.",
+    page: "products",
+    title: "Onboarding.guidedTour.steps.productsAdd.title",
+    body: "Onboarding.guidedTour.steps.productsAdd.body",
     targets: [{ selector: '[data-fixture="three"]' }],
     scroll: false,
   },
 ];
+
+/** Each step's card, by its title (the dialog's accessible name). */
+const STEP_ONE = english(STEPS[0].title);
+const STEP_TWO = english(STEPS[1].title);
+const STEP_THREE = english(STEPS[2].title);
 
 const fixtures: HTMLElement[] = [];
 
@@ -155,9 +169,16 @@ describe("TourOverlay", () => {
     renderTour("/a");
     act(() => store.startTour());
 
-    const dialog = await screen.findByRole("dialog", { name: "Step one" });
+    const dialog = await screen.findByRole("dialog", { name: STEP_ONE });
     expect(within(dialog).getByText("1 of 3")).toBeInTheDocument();
-    expect(within(dialog).getByText("One is here.")).toBeInTheDocument();
+    // The matched candidate's own body, not the step's.
+    expect(
+      within(dialog).getByText(english("Onboarding.guidedTour.steps.overviewNav.bodySidebar")),
+    ).toBeInTheDocument();
+    // The candidate's extra: the shortcut, as a key cap inside its sentence.
+    const shortcut = within(dialog).getByText("Ctrl K");
+    expect(shortcut.tagName).toBe("KBD");
+    expect(shortcut.parentElement).toHaveTextContent(/^Shortcut: Ctrl K$/);
     expect(layer()).toHaveAttribute("data-tour-state", "anchored");
     expect(layer()).toHaveAttribute("data-tour-total", "3");
     await waitFor(() => expect(dialog).toHaveFocus());
@@ -172,9 +193,9 @@ describe("TourOverlay", () => {
     const { navigate } = renderTour("/a");
     act(() => store.startTour());
 
-    await screen.findByRole("dialog", { name: "Step one" });
+    await screen.findByRole("dialog", { name: STEP_ONE });
     await user.click(screen.getByRole("button", { name: "Next" }));
-    await screen.findByRole("dialog", { name: "Step two" });
+    await screen.findByRole("dialog", { name: STEP_TWO });
     expect(navigate).not.toHaveBeenCalled();
   });
 
@@ -188,14 +209,14 @@ describe("TourOverlay", () => {
       store.goToStep("search", { arrived: true });
     });
 
-    await screen.findByRole("dialog", { name: "Step two" });
+    await screen.findByRole("dialog", { name: STEP_TWO });
     await user.click(screen.getByRole("button", { name: "Next" }));
     await waitFor(() => expect(navigate).toHaveBeenCalledWith("/b"));
-    expect(screen.getByRole("status")).toHaveTextContent("Opening Page B");
+    expect(screen.getByRole("status")).toHaveTextContent("Opening Products…");
     expect(layer()).toHaveAttribute("data-tour-state", "navigating");
 
     setPath("/b");
-    await screen.findByRole("dialog", { name: "Step three" });
+    await screen.findByRole("dialog", { name: STEP_THREE });
     expect(navigate).toHaveBeenCalledTimes(1);
   });
 
@@ -209,9 +230,9 @@ describe("TourOverlay", () => {
       store.goToStep("search", { arrived: true });
     });
 
-    await screen.findByRole("dialog", { name: "Step two" });
+    await screen.findByRole("dialog", { name: STEP_TWO });
     await user.click(screen.getByRole("button", { name: "Back" }));
-    await screen.findByRole("dialog", { name: "Step one" });
+    await screen.findByRole("dialog", { name: STEP_ONE });
   });
 
   it("ends on Esc, and on Skip tour", async () => {
@@ -220,12 +241,12 @@ describe("TourOverlay", () => {
     renderTour("/a");
 
     act(() => store.startTour());
-    await screen.findByRole("dialog", { name: "Step one" });
+    await screen.findByRole("dialog", { name: STEP_ONE });
     await user.keyboard("{Escape}");
     await waitFor(() => expect(layer()).toBeNull());
 
     act(() => store.startTour());
-    await screen.findByRole("dialog", { name: "Step one" });
+    await screen.findByRole("dialog", { name: STEP_ONE });
     await user.click(screen.getByRole("button", { name: "Skip tour" }));
     await waitFor(() => expect(layer()).toBeNull());
     expect(sessionStorage.getItem("sq.dashboard.tour")).toBeNull();
@@ -235,7 +256,7 @@ describe("TourOverlay", () => {
     addTarget("one");
     const { setPath } = renderTour("/a");
     act(() => store.startTour());
-    await screen.findByRole("dialog", { name: "Step one" });
+    await screen.findByRole("dialog", { name: STEP_ONE });
 
     setPath("/elsewhere");
     await waitFor(() => expect(layer()).toBeNull());
@@ -245,7 +266,7 @@ describe("TourOverlay", () => {
     addTarget("one");
     const { setPath } = renderTour("/a");
     act(() => store.startTour());
-    await screen.findByRole("dialog", { name: "Step one" });
+    await screen.findByRole("dialog", { name: STEP_ONE });
 
     search.isOpen = true;
     setPath("/a");
@@ -260,8 +281,10 @@ describe("TourOverlay", () => {
       store.goToStep("search", { arrived: true });
     });
 
-    const dialog = await screen.findByRole("dialog", { name: "Step two" });
-    expect(within(dialog).getByText("Two is missing.")).toBeInTheDocument();
+    const dialog = await screen.findByRole("dialog", { name: STEP_TWO });
+    expect(
+      within(dialog).getByText(english("Onboarding.guidedTour.steps.storefrontSample.fallbackBody")),
+    ).toBeInTheDocument();
     expect(layer()).toHaveAttribute("data-tour-state", "fallback");
   });
 
@@ -274,7 +297,7 @@ describe("TourOverlay", () => {
       store.startTour({ next: { href: "/products/new", label: "Add your first product" } });
       store.goToStep("products-add", { arrived: true });
     });
-    let dialog = await screen.findByRole("dialog", { name: "Step three" });
+    let dialog = await screen.findByRole("dialog", { name: STEP_THREE });
     // Done already says it; a second way out on the last card is noise.
     expect(within(dialog).queryByRole("button", { name: "Skip tour" })).toBeNull();
     await user.click(within(dialog).getByRole("button", { name: "Add your first product" }));
@@ -286,7 +309,7 @@ describe("TourOverlay", () => {
       store.startTour({ next: { href: "//evil.example/steal", label: "Go on" } });
       store.goToStep("products-add", { arrived: true });
     });
-    dialog = await screen.findByRole("dialog", { name: "Step three" });
+    dialog = await screen.findByRole("dialog", { name: STEP_THREE });
     await user.click(within(dialog).getByRole("button", { name: "Go on" }));
     expect(navigate).toHaveBeenCalledWith("/dashboard");
   });
@@ -299,7 +322,7 @@ describe("TourOverlay", () => {
       store.startTour();
       store.goToStep("products-add", { arrived: true });
     });
-    const dialog = await screen.findByRole("dialog", { name: "Step three" });
+    const dialog = await screen.findByRole("dialog", { name: STEP_THREE });
     await user.click(within(dialog).getByRole("button", { name: "Done" }));
     await waitFor(() => expect(layer()).toBeNull());
   });
@@ -323,7 +346,7 @@ describe("TourOverlay", () => {
       store.startTour();
       store.goToStep("search", { arrived: true });
     });
-    const dialog = await screen.findByRole("dialog", { name: "Step two" });
+    const dialog = await screen.findByRole("dialog", { name: STEP_TWO });
     await waitFor(() => expect(dialog).toHaveFocus());
 
     const skip = within(dialog).getByRole("button", { name: "Skip tour" });

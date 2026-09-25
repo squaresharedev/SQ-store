@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
+import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { after } from "next/server";
 import { ProductPageView } from "@/components/product-page/ProductPageView";
@@ -44,7 +45,7 @@ import { OPTIONS_TOTAL_MAX } from "@/types/product";
 type Params = { storefrontId: string; productId: string };
 type SearchParams = { [key: string]: string | string[] | undefined };
 
-const optionIdSchema = uuidField("That option");
+const optionIdSchema = uuidField("option");
 
 /** A repeated parameter arrives as an array; take the first, as one address
  *  bar can only mean one selection. */
@@ -97,7 +98,11 @@ export async function generateMetadata({
   // SellerBlock prints on the page so the tab title and the on-page identity
   // agree on whose store this is.
   const displayName = resolveDisplayName(page);
-  const description = summary(product.description, `${product.title} from ${displayName}.`);
+  const t = await getTranslations("ProductPage.metadata");
+  const description = summary(
+    product.description,
+    t("descriptionFallback", { title: product.title, store: displayName }),
+  );
 
   // BUY-01: the og:image points at a STABLE route that 302-redirects to a
   // freshly signed R2 URL on every scrape. The presigned URL the product row

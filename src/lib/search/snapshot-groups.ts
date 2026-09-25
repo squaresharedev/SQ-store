@@ -1,9 +1,11 @@
 import { orderResultHref } from "@/lib/search/hrefs";
 import { rankEntries } from "@/lib/search/rank";
+import type { MessageKey } from "@/i18n/types";
 import type {
   SearchGroup,
   SearchResult,
   SearchSnapshot,
+  SearchTranslator,
 } from "@/lib/search/types";
 
 /**
@@ -13,7 +15,9 @@ import type {
  * same render as the keystroke, exactly like the local registry. Group labels
  * and result shapes MATCH the live /api/search groups on purpose — when the
  * live response lands it replaces these per type, and the swap must be
- * invisible apart from fresher rows.
+ * invisible apart from fresher rows. Both sides read the same `Search.*` keys,
+ * the route through getTranslations and this module through the caller's
+ * translator, so they agree in every language too.
  *
  * Registry-shaped things (pages, settings, actions) do NOT belong here; this
  * module only knows entity data.
@@ -30,7 +34,7 @@ const LIMITS = {
 
 /** Same ids as the live results (`product:${id}`…), so a row keeps its DOM id
  *  — and therefore aria-activedescendant — across the snapshot→live swap. */
-function toResults(snapshot: SearchSnapshot): SearchResult[] {
+function toResults(snapshot: SearchSnapshot, t: SearchTranslator): SearchResult[] {
   return [
     ...snapshot.products.map(
       (row): SearchResult => ({
@@ -38,7 +42,7 @@ function toResults(snapshot: SearchSnapshot): SearchResult[] {
         type: "product",
         title: row.title,
         href: `/products/${row.id}/edit`,
-        badge: row.status === "active" ? undefined : "Draft",
+        badge: row.status === "active" ? undefined : t("Search.results.draft"),
       }),
     ),
     ...snapshot.storefronts.map(
@@ -46,7 +50,7 @@ function toResults(snapshot: SearchSnapshot): SearchResult[] {
         id: `storefront:${row.id}`,
         type: "storefront",
         title: row.name,
-        subtitle: "Open in the designer",
+        subtitle: t("Search.results.openInDesigner"),
         href: `/storefront/${row.id}`,
       }),
     ),
@@ -55,7 +59,7 @@ function toResults(snapshot: SearchSnapshot): SearchResult[] {
         id: `team:${row.id}`,
         type: "team",
         title: row.username || row.invited_email,
-        subtitle: row.username ? row.invited_email : "Invited",
+        subtitle: row.username ? row.invited_email : t("Search.results.invited"),
         href: "/settings/team",
         badge: row.status === "active" ? row.role : row.status,
       }),
@@ -64,7 +68,7 @@ function toResults(snapshot: SearchSnapshot): SearchResult[] {
       (row): SearchResult => ({
         id: `order:${row.id}`,
         type: "order",
-        title: row.product_title || "Order",
+        title: row.product_title || t("Search.results.order"),
         subtitle: row.buyer_email ?? undefined,
         href: orderResultHref(row.id, row.buyer_email),
         badge: row.status || undefined,
@@ -76,18 +80,18 @@ function toResults(snapshot: SearchSnapshot): SearchResult[] {
         type: "notification",
         title: row.title,
         href: "/notifications",
-        badge: row.read ? undefined : "Unread",
+        badge: row.read ? undefined : t("Search.results.unread"),
       }),
     ),
   ];
 }
 
-const GROUPS: { type: SearchResult["type"]; label: string }[] = [
-  { type: "product", label: "Products" },
-  { type: "order", label: "Orders" },
-  { type: "storefront", label: "Storefronts" },
-  { type: "team", label: "Team" },
-  { type: "notification", label: "Notifications" },
+const GROUPS: { type: SearchResult["type"]; label: MessageKey }[] = [
+  { type: "product", label: "Search.groups.products" },
+  { type: "order", label: "Search.groups.orders" },
+  { type: "storefront", label: "Search.groups.storefronts" },
+  { type: "team", label: "Search.groups.team" },
+  { type: "notification", label: "Search.groups.notifications" },
 ];
 
 /** Which fields a query matches per entity. Title plus the same second column
@@ -103,14 +107,15 @@ function termsFor(result: SearchResult): string[] {
 export function buildSnapshotGroups(
   snapshot: SearchSnapshot | null,
   query: string,
+  t: SearchTranslator,
 ): SearchGroup[] {
   const term = query.trim();
   if (!snapshot || !term) return [];
 
-  const all = toResults(snapshot);
+  const all = toResults(snapshot, t);
   return GROUPS.map(({ type, label }) => ({
     type,
-    label,
+    label: t(label),
     results: rankEntries(
       all.filter((result) => result.type === type),
       term,
@@ -128,21 +133,25 @@ export function buildSnapshotGroups(
  */
 export function buildRecentGroup(
   snapshot: SearchSnapshot | null,
+  t: SearchTranslator,
 ): SearchGroup | null {
   if (!snapshot) return null;
   // Snapshot arrays are newest-first by contract (see the route handler).
   // Three rows total: the resting card shows Recent + Actions + Settings and
   // must fit its cap without scrolling.
-  const results: SearchResult[] = toResults({
-    ...snapshot,
-    products: snapshot.products.slice(0, 2),
-    storefronts: snapshot.storefronts.slice(0, 1),
-    team: [],
-    orders: [],
-    notifications: [],
-  });
+  const results: SearchResult[] = toResults(
+    {
+      ...snapshot,
+      products: snapshot.products.slice(0, 2),
+      storefronts: snapshot.storefronts.slice(0, 1),
+      team: [],
+      orders: [],
+      notifications: [],
+    },
+    t,
+  );
   if (results.length === 0) return null;
   // group.type is a key/order placeholder — each RESULT carries its own type,
   // which is what drives icons and activation.
-  return { type: "product", label: "Recent", results };
+  return { type: "product", label: t("Search.groups.recent"), results };
 }

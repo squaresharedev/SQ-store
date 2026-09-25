@@ -1,8 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
+import { render, screen, cleanup } from "../setup/render";
 import userEvent from "@testing-library/user-event";
 import { NotificationItem } from "@/components/notifications/NotificationItem";
 import type { Notification } from "@/lib/notifications/types";
+import { NextIntlClientProvider } from "next-intl";
+import messages from "../../messages/en";
 
 afterEach(cleanup);
 
@@ -164,5 +166,94 @@ describe("NotificationItem", () => {
       />,
     );
     expect(screen.queryByLabelText("Unread")).not.toBeInTheDocument();
+  });
+
+  // --- Stored message keys (resolved in the reader's language) ---
+
+  const STALE = "Stored English";
+
+  function renderStored(data: Notification["data"], body: string | null = null) {
+    render(
+      <NotificationItem
+        notification={makeNotification({ title: STALE, body, data })}
+        onActivate={vi.fn()}
+      />,
+    );
+  }
+
+  it("resolves the stored keys and values instead of the stored text", () => {
+    renderStored(
+      {
+        href: "/settings/team",
+        message: {
+          title: { key: "Notifications.messages.teamJoined.title", values: { name: "builderboy" } },
+          body: { key: "Notifications.messages.teamJoined.body" },
+        },
+      },
+      "Stored body",
+    );
+    expect(screen.getByText("builderboy joined your team")).toBeInTheDocument();
+    expect(screen.getByText("They now have access to your store.")).toBeInTheDocument();
+    expect(screen.queryByText(STALE)).not.toBeInTheDocument();
+  });
+
+  it("resolves in the reader's language, not the language it was sent in", () => {
+    const czech = {
+      ...messages,
+      Notifications: {
+        ...messages.Notifications,
+        messages: {
+          ...messages.Notifications.messages,
+          teamInvite: { ...messages.Notifications.messages.teamInvite, title: "Máte pozvánku do týmu" },
+        },
+      },
+    };
+    render(
+      <NextIntlClientProvider locale="cs" messages={czech} timeZone="UTC">
+        <NotificationItem
+          notification={makeNotification({
+            title: "You have a team invite",
+            data: { message: { title: { key: "Notifications.messages.teamInvite.title" } } },
+          })}
+          onActivate={vi.fn()}
+        />
+      </NextIntlClientProvider>,
+    );
+    expect(screen.getByText("Máte pozvánku do týmu")).toBeInTheDocument();
+  });
+
+  it.each([
+    ["no message at all", { href: "/settings/team" }],
+    ["a key that does not exist", { message: { title: { key: "Notifications.messages.nope" } } }],
+    ["a key naming a group, not a message", { message: { title: { key: "Notifications.messages" } } }],
+    ["a key outside the Notifications namespace", { message: { title: { key: "Common.actions.save" } } }],
+    ["a key that is not a string", { message: { title: { key: 42 } } }],
+    [
+      "a value that is not a string or number",
+      { message: { title: { key: "Notifications.messages.teamJoined.title", values: { name: { html: "<b>" } } } } },
+    ],
+    ["a message that is not an object", { message: "Notifications.messages.teamInvite.title" }],
+    [
+      "a message missing a value it needs",
+      { message: { title: { key: "Notifications.messages.teamJoined.title" } } },
+    ],
+  ])("falls back to the stored text on %s", (_label, data) => {
+    renderStored(data);
+    expect(screen.getByText(STALE)).toBeInTheDocument();
+    expect(screen.queryByText(/Notifications./)).not.toBeInTheDocument();
+  });
+
+  it("refuses the whole payload when any part of it is invalid", () => {
+    renderStored(
+      {
+        message: {
+          title: { key: "Notifications.messages.teamInvite.title" },
+          body: { key: "Settings.team.cardTitle" },
+        },
+      },
+      "Stored body",
+    );
+    expect(screen.getByText(STALE)).toBeInTheDocument();
+    expect(screen.getByText("Stored body")).toBeInTheDocument();
   });
 });

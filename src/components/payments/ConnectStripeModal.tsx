@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowUpRight, Landmark, ShieldCheck, Timer } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { iconTileClass } from "@/components/ui/surface-styles";
 import { cn } from "@/lib/utils";
 import { Modal } from "@/components/ui/modal";
@@ -9,23 +10,12 @@ import { stubBadgeClass } from "@/components/ui/control-styles";
 import { STRIPE_CONNECT_AVAILABLE } from "@/lib/payments/availability";
 import { CardSwipe } from "./CardSwipe";
 
+/** Each point's icon, and where its copy lives under Payments.connectModal.points. */
 const POINTS = [
-  {
-    icon: ShieldCheck,
-    title: "Stripe handles the sensitive part",
-    body: "Bank details, identity checks and verification all happen on Stripe's secure pages. Square Share never sees or stores them.",
-  },
-  {
-    icon: Landmark,
-    title: "Payouts go straight to your bank",
-    body: "Once connected, your balance is paid out automatically on a rolling schedule.",
-  },
-  {
-    icon: Timer,
-    title: "Takes about 5 minutes",
-    body: "You'll be redirected to Stripe to finish setup, then land right back here.",
-  },
-];
+  { icon: ShieldCheck, copy: "sensitive" },
+  { icon: Landmark, copy: "bank" },
+  { icon: Timer, copy: "time" },
+] as const;
 
 /**
  * Explains the Stripe Connect flow before redirecting. The CTA is a stub:
@@ -39,6 +29,7 @@ export function ConnectStripeModal({
   open: boolean;
   onClose: () => void;
 }) {
+  const t = useTranslations("Payments");
   // TODO(stripe): when Connect ships, this becomes a server call that creates
   // an Account Link (stripe.accountLinks.create, type "account_onboarding")
   // and redirects to the returned Stripe-hosted URL. No financial data is
@@ -51,21 +42,23 @@ export function ConnectStripeModal({
     <Modal
       open={open}
       onClose={onClose}
-      title="Connect with Stripe"
-      description="Get paid for what you sell. Setup happens on Stripe, not here."
+      title={t("connectModal.title")}
+      description={t("connectModal.description")}
     >
       <CardSwipe className="mb-5" />
 
       <ul className="space-y-4">
         {POINTS.map((point) => (
-          <li key={point.title} className="flex gap-3">
+          <li key={point.copy} className="flex gap-3">
             <span className={cn(iconTileClass, "size-9")}>
               <point.icon className="size-4" strokeWidth={2} aria-hidden />
             </span>
             <div>
-              <p className="text-sm font-medium text-foreground">{point.title}</p>
+              <p className="text-sm font-medium text-foreground">
+                {t(`connectModal.points.${point.copy}.title`)}
+              </p>
               <p className="mt-0.5 font-inter text-sm text-muted-foreground">
-                {point.body}
+                {t(`connectModal.points.${point.copy}.body`)}
               </p>
             </div>
           </li>
@@ -74,15 +67,15 @@ export function ConnectStripeModal({
 
       <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
         <Button variant="ghost" onClick={onClose}>
-          Not now
+          {t("connectModal.notNow")}
         </Button>
         <Button
           disabled={!STRIPE_CONNECT_AVAILABLE}
-          title={STRIPE_CONNECT_AVAILABLE ? undefined : "Stripe payouts are coming soon."}
+          title={STRIPE_CONNECT_AVAILABLE ? undefined : t("connectModal.comingSoonTitle")}
         >
-          Continue to Stripe
+          {t("connectModal.continue")}
           <ArrowUpRight className="size-4" strokeWidth={2} aria-hidden />
-          {!STRIPE_CONNECT_AVAILABLE && <span className={stubBadgeClass}>Soon</span>}
+          {!STRIPE_CONNECT_AVAILABLE && <span className={stubBadgeClass}>{t("soon")}</span>}
         </Button>
       </div>
     </Modal>

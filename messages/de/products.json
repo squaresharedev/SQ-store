@@ -1,0 +1,526 @@
+{
+  "metadata": {
+    "list": {
+      "title": "Produkte"
+    },
+    "new": {
+      "title": "Neues Produkt"
+    },
+    "edit": {
+      "title": "Produkt bearbeiten"
+    },
+    "import": {
+      "title": "Produkte importieren"
+    }
+  },
+  "page": {
+    "heading": "Produkte",
+    "loading": "Produkte werden geladen",
+    "back": "Produkte",
+    "backToStorefront": "Schaufenster",
+    "new": {
+      "title": "Neues Produkt",
+      "subtitle": "Füge ein Produkt hinzu und platziere es auf einem Schaufenster, um ihm eine Seite zu geben."
+    },
+    "edit": {
+      "title": "Produkt bearbeiten",
+      "subtitle": "Aktualisiere die Details, das Bild oder die Datei für dieses Produkt."
+    },
+    "import": {
+      "heading": "Produkte importieren",
+      "description": "Bringe einen Katalog aus Shopify oder einem anderen Tool, das eine CSV exportiert. Du siehst genau, was ankommen wird, bevor etwas gespeichert wird."
+    },
+    "formLoading": "Produktformular wird geladen"
+  },
+  "emptyState": {
+    "title": "Noch keine Produkte",
+    "descriptionWriter": "Füge dein erstes Produkt hinzu. Es kann als Entwurf bleiben, bis du bereit bist, ihm eine Seite zu geben.",
+    "descriptionReadOnly": "Dieser Shop hat noch keine Produkte.",
+    "add": "Produkt hinzufügen"
+  },
+  "status": {
+    "active": "Aktiv",
+    "draft": "Entwurf"
+  },
+  "browser": {
+    "sort": {
+      "default": "Neueste zuerst",
+      "unitsSold": "Verkaufte Einheiten",
+      "revenue": "Gesamtumsatz",
+      "priceHigh": "Preis: hoch bis niedrig",
+      "priceLow": "Preis: niedrig bis hoch",
+      "title": "Name: A–Z"
+    },
+    "allStatuses": "Alle Status",
+    "filterLabel": "Produkte sortieren und filtern",
+    "sortResting": "Sortieren",
+    "statusSection": "Status",
+    "sortSection": "Sortieren nach",
+    "clear": "Zurücksetzen",
+    "import": "Import",
+    "add": "Produkt hinzufügen",
+    "updating": "Wird aktualisiert…",
+    "pagination": "{total, plural, one {{total} Produkt · Seite {page} von {pages}} other {{total} Produkte · Seite {page} von {pages}}}"
+  },
+  "list": {
+    "noMatch": {
+      "title": "Keine Produkte entsprechen diesen Filtern",
+      "body": "Wähle einen anderen Status oder setze die Filter zurück, um alles wieder zu sehen.",
+      "clear": "Filter zurücksetzen"
+    },
+    "deleted": "„{title}“ wurde gelöscht.",
+    "linkCopied": "Link kopiert.",
+    "copyFailed": "Kopieren fehlgeschlagen.",
+    "copyFailedUrl": "Die URL lautet: {url}",
+    "notOnStorefront": "Dieses Produkt ist noch auf keinem Schaufenster.",
+    "deleteDialog": {
+      "title": "Dieses Produkt löschen?",
+      "description": "{storefronts, plural, =0 {„{title}“ sowie das hochgeladene Bild und die hochgeladene Datei werden dauerhaft entfernt. Bestehende Bestellungen behalten ihren Verkaufsnachweis.} one {„{title}“ sowie das hochgeladene Bild und die hochgeladene Datei werden dauerhaft entfernt. Bestehende Bestellungen behalten ihren Verkaufsnachweis. Es ist auf {storefronts} Schaufenster. Der Block bleibt, bis du ihn entfernst.} other {„{title}“ sowie das hochgeladene Bild und die hochgeladene Datei werden dauerhaft entfernt. Bestehende Bestellungen behalten ihren Verkaufsnachweis. Es ist auf {storefronts} Schaufenstern. Die Blöcke bleiben, bis du sie entfernst.}}",
+      "confirm": "Produkt löschen"
+    },
+    "chooser": {
+      "openTitle": "Auf welchem Schaufenster öffnen?",
+      "copyTitle": "Link für welches Schaufenster kopieren?",
+      "description": "{count, plural, one {„{title}“ ist auf {count} Schaufenster. Wähle eins aus.} other {„{title}“ ist auf {count} Schaufenstern. Wähle eins aus.}}",
+      "hint": "Oder brich ab und nutze den Schaufenster-Editor, um einen Standard festzulegen."
+    }
+  },
+  "card": {
+    "inStock": "{count, plural, one {{count} auf Lager} other {{count} auf Lager}}",
+    "bestseller": "Bestseller",
+    "edit": "{title} bearbeiten",
+    "actions": "Aktionen für {title}",
+    "moreActions": "Weitere Aktionen für {title}",
+    "notPlaced": "Noch auf keinem Schaufenster",
+    "copyLinkTitle": "Link zur Produktseite kopieren",
+    "chooseStorefront": "{count, plural, one {Auf {count} Schaufenster, klicke zum Auswählen} other {Auf {count} Schaufenstern, klicke zum Auswählen}}",
+    "copyLink": "Produktlink kopieren",
+    "openPage": "Produktseite öffnen",
+    "unitsSold": "{count, plural, one {{count} verkauft} other {{count} verkauft}}",
+    "noSales": "Noch keine Verkäufe"
+  },
+  "removal": {
+    "badge": "Entfernt",
+    "badgePaused": "Pausiert",
+    "title": "{kind, select, product {Dieses Produkt wurde von SquareShare entfernt} other {Dieses Schaufenster wurde von SquareShare entfernt}}",
+    "titlePaused": "{kind, select, product {Dieses Produkt ist pausiert, bis du es änderst} other {Dieses Schaufenster ist pausiert, bis du es änderst}}",
+    "hidden": "Es ist für Käufer nirgends mehr sichtbar: nicht auf seiner Seite, nicht in einer Einbettung, nicht in einem geteilten Link.",
+    "hiddenPaused": "Käufer können es im Moment nicht sehen: nicht auf seiner Seite, nicht in einer Einbettung, nicht über einen geteilten Link. Nichts wurde gelöscht, und es kehrt zurück, sobald eine Person deine Änderungen geprüft hat.",
+    "hiddenRemoved": "Es ist für Käufer nirgends mehr sichtbar: nicht auf seiner Seite, nicht in einer Einbettung, nicht über einen geteilten Link. Das ist endgültig, auch durch Bearbeiten kommt es nicht zurück.",
+    "reason": "Grund",
+    "whatNeedsToChange": "Was geändert werden muss",
+    "when": "Zeitpunkt",
+    "pausedOn": "Pausiert am",
+    "statement": "{ground, select, illegal {Illegale Waren oder Aktivitäten. Es wurde etwas angeboten, das sich nicht legal verkaufen lässt, oder das Angebot diente dazu, so etwas zu vermitteln.} sexual {Sexuelle Inhalte. Es waren explizite sexuelle Inhalte enthalten.} violence {Gewalt oder Gore. Es waren drastische Gewaltdarstellungen enthalten.} hate {Hass oder Belästigung. Eine Person oder Gruppe wurde angegriffen, oder es waren Hasssymbole enthalten.} counterfeit {Fälschung oder Diebstahl. Es schienen gefälschte Waren oder die Werke anderer angeboten zu werden.} scam {Betrug. Es schien darauf angelegt, Zahlungen zu kassieren, ohne das Versprochene zu liefern.} spam {Spam. Es war repetitiv oder irreführend und kein echtes Angebot.} other {Sonstiges. Es verstieß gegen die Plattformregeln.}}{noted, select, yes { {note}} other {}}",
+    "statementUnlabelled": "Es hat gegen die Plattformregeln verstoßen.{noted, select, yes { {note}} other {}}",
+    "fixHint": "{kind, select, product {Bearbeite das Produkt unten, um das zu beheben, speichere es und sende es dann wieder an uns.} other {Öffne das Schaufenster, um das zu beheben, komm dann hierher zurück und sende es an uns.}}",
+    "readOnlyHint": "{kind, select, product {Jemand mit Bearbeitungsrechten für dieses Produkt muss die Änderung vornehmen und es zur Prüfung senden.} other {Jemand mit Bearbeitungsrechten für dieses Schaufenster muss die Änderung vornehmen und es zur Prüfung senden.}}",
+    "appeal": "{kind, select, product {Du kannst dieses Produkt weiterhin bearbeiten. Eine Bearbeitung stellt es nicht wieder her: <link>Bitte uns, noch einmal hinzuschauen</link>, wenn du die Entfernung für falsch hältst.} other {Du kannst dieses Schaufenster weiterhin bearbeiten. Eine Bearbeitung stellt es nicht wieder her: <link>Bitte uns, noch einmal hinzuschauen</link>, wenn du die Entfernung für falsch hältst.}}",
+    "appealPaused": "Denkst du, das ist ein Fehler? <link>Schreib uns</link>.",
+    "appealFinal": "Wenn du denkst, dass wir uns geirrt haben, <link>bitte uns um eine erneute Prüfung</link>.",
+    "appealSubject": "{kind, select, product {Widerspruch: Entfernung eines Produkts ({title})} other {Widerspruch: Entfernung eines Schaufensters ({title})}}",
+    "appealBody": "{kind, select, product {Ich möchte, dass dieses Produkt erneut geprüft wird.\n\nProdukt-ID: {id}\nName: {title}\n\nWarum ich die Entfernung für falsch halte:\n} other {Ich möchte, dass dieses Schaufenster erneut geprüft wird.\n\nSchaufenster-ID: {id}\nName: {title}\n\nWarum ich die Entfernung für falsch halte:\n}}",
+    "reviewRequest": {
+      "button": "Ich habe die Änderungen vorgenommen, bitte prüfen",
+      "sent": "Am <time>{date}</time> zur Prüfung gesendet. Eine Person sieht sich deine Änderungen an, und du hörst hier und per E-Mail von uns.",
+      "failed": "Das konnte nicht gesendet werden.",
+      "failedFix": "Versuche es gleich noch einmal."
+    }
+  },
+  "import": {
+    "fields": {
+      "title": "Titel",
+      "description": "Beschreibung",
+      "price": "Preis",
+      "sku": "SKU",
+      "stock": "Lagerbestand"
+    },
+    "fileTooLarge": "Diese Datei ist {size}. Importiere Dateien bis zu {max}.",
+    "fileEmpty": "Diese Datei ist leer.",
+    "imported": "{count, plural, one {{count} Produkt wurde importiert.} other {{count} Produkte wurden importiert.}}",
+    "skippedRows": "{count, plural, one {{count} Zeile wurde übersprungen.} other {{count} Zeilen wurden übersprungen.}}",
+    "dropPrompt": "CSV ablegen oder klicken, um eine auszuwählen",
+    "fileMeta": "{size} · weitere auswählen, um von vorne zu beginnen",
+    "rowsLimit": "{max, plural, one {Bis zu {max} Produkt pro Datei} other {Bis zu {max} Produkte pro Datei}}",
+    "summary": "{shopify, select, yes {{ready, plural, one {Shopify-Export. <count>{ready}</count> Produkt bereit} other {Shopify-Export. <count>{ready}</count> Produkte bereit}}} other {{ready, plural, one {<count>{ready}</count> Produkt bereit} other {<count>{ready}</count> Produkte bereit}}}}{skipped, plural, =0 {.} other {, {skipped} übersprungen.}}",
+    "foldedVariants": "{count, plural, one {{count} Variantenzeile wurde in die Produkte darüber zusammengeführt. Füge Größen und Farben nach dem Import hinzu.} other {{count} Variantenzeilen wurden in die Produkte darüber zusammengeführt. Füge Größen und Farben nach dem Import hinzu.}}",
+    "droppedRows": "{count, plural, one {{count} Zeile überschreitet das Limit von {max} Produkten und wird nicht importiert. Teile die Datei auf, um sie einzubringen.} other {{count} Zeilen überschreiten das Limit von {max} Produkten und werden nicht importiert. Teile die Datei auf, um sie einzubringen.}}",
+    "photosNotImported": "Fotos werden nicht importiert. Preise, Lagerbestand und Beschreibungen werden übernommen; füge die Bilder hinzu, sobald die Produkte vorhanden sind.",
+    "currency": "Währung",
+    "currencyHelp": "Alle importierten Produkte werden damit bepreist.",
+    "importAs": "Importieren als",
+    "asDrafts": "Entwürfe",
+    "asLive": "Online-Produkte",
+    "draftsHint": "Nichts geht online, bis du es veröffentlichst.",
+    "liveHint": "Diese erscheinen sofort in deinem Shop.",
+    "columns": "Spalten",
+    "needed": "(erforderlich)",
+    "notSet": "Nicht festgelegt",
+    "skip": "Überspringen",
+    "columnFallback": "Spalte {number}",
+    "previewHeading": "Was importiert wird",
+    "previewTitle": "Titel",
+    "previewPrice": "Preis",
+    "previewStock": "Lagerbestand",
+    "notTracked": "Nicht verfolgt",
+    "andMore": "{count, plural, one {und {count} weitere.} other {und {count} weitere.}}",
+    "skippedHeading": "Zeilen, die übersprungen werden",
+    "skippedRow": "{titled, select, yes {Zeile {line} ({title}): {problem}} other {Zeile {line}: {problem}}}",
+    "importing": "Wird importiert…",
+    "importedLabel": "Importiert",
+    "run": "{count, plural, one {{count} Produkt importieren} other {{count} Produkte importieren}}",
+    "clear": "Zurücksetzen"
+  },
+  "form": {
+    "sections": {
+      "basics": {
+        "label": "Grundlagen",
+        "description": "Was du verkaufst, in deinen Worten, und was es kostet.",
+        "about": "Wozu Grundlagen dient"
+      },
+      "stock": {
+        "label": "Lagerbestand",
+        "description": "Standardmäßig unbegrenzt. Verfolge den Bestand, um Überverkäufe zu vermeiden und Käufern das „Ausverkauft“- und „Nur noch N“-Badge anzuzeigen. Die Warnzahl gibt an, ab wann das zweite Badge erscheint. Das Bestelllimit ist separat: Es begrenzt, wie viele ein Käufer auf einmal nehmen kann, ob verfolgt oder nicht.",
+        "about": "Wozu Lagerbestand dient"
+      },
+      "media": {
+        "label": "Medien und Lieferung"
+      },
+      "shipping": {
+        "label": "Versand",
+        "description": "Wird einmal für den gesamten Shop festgelegt, nicht pro Produkt. Wähle ein Profil nur dann, wenn dieses Produkt anders versendet wird.",
+        "about": "Wozu Versand dient"
+      },
+      "options": {
+        "label": "Optionen",
+        "description": "Farben, Größen, Leistungsabgaben, wie auch immer dieses Produkt variiert. Käufer wählen jeweils eine aus.",
+        "about": "Wozu Optionen dient"
+      },
+      "photos": {
+        "label": "Fotos",
+        "description": "Weitere Ansichten für die Produktseite. Lege Fotos auf eine Option, um sie nur für diese anzuzeigen.",
+        "about": "Wozu Fotos dient"
+      },
+      "specs": {
+        "label": "Technische Daten",
+        "description": "Abmessungen, Materialien und technische Daten für die Produktseite.",
+        "about": "Wozu Technische Daten dient"
+      },
+      "documents": {
+        "label": "Dokumente",
+        "description": "Zertifikate, Handbücher oder Datenblätter, die Käufer und Behörden vor dem Kauf einsehen können.",
+        "about": "Wozu Dokumente dient"
+      },
+      "safety": {
+        "label": "Sicherheit und Konformität",
+        "description": "Wer es hergestellt hat und wie man ihn erreicht. Das EU-Produktsicherheitsrecht verlangt dies für physische Waren.",
+        "about": "Wozu Sicherheit und Konformität dient"
+      },
+      "visibility": {
+        "label": "Sichtbarkeit",
+        "description": "Aktiv bedeutet online: Käufer können es sehen und sofort kaufen. Entwurf ist vor Käufern verborgen, bis du es umschaltest.",
+        "about": "Wozu Sichtbarkeit dient"
+      }
+    },
+    "summary": {
+      "dimensions": "Abmessungen",
+      "weight": "Gewicht",
+      "materials": "Materialien",
+      "care": "Pflegehinweise",
+      "contents": "Inhalt",
+      "specs": "Technische Daten",
+      "madeIn": "Hergestellt in",
+      "versions": "{count, plural, one {{count} Variante} other {{count} Varianten}}",
+      "tracking": "Verfolgt {quantity}",
+      "setQuantity": "Menge festlegen",
+      "unlimited": "Unbegrenzt",
+      "maxPerOrder": "Max. {max} pro Bestellung",
+      "image": "Bild",
+      "download": "Download",
+      "buyLink": "Kauflink",
+      "removedProfile": "Entferntes Profil",
+      "storeTerms": "Shop-Bedingungen",
+      "options": "{groups, plural, one {{groups} Gruppe} other {{groups} Gruppen}}, {options, plural, one {{options} Option} other {{options} Optionen}}",
+      "photos": "{count, plural, one {{count} Foto} other {{count} Fotos}}",
+      "documents": "{count, plural, one {{count} Dokument} other {{count} Dokumente}}",
+      "started": "Gestartet",
+      "active": "Aktiv",
+      "draft": "Entwurf"
+    },
+    "errors": {
+      "titleRequired": "Gib deinem Produkt einen Titel, Käufer sehen ihn zuerst.",
+      "stockRequired": "Gib an, wie viele Einheiten auf Lager sind, oder deaktiviere Bestand verfolgen für unbegrenzte Mengen.",
+      "stockWhole": "Der Lagerbestand muss eine ganze Zahl sein, 0 oder mehr, ohne Dezimalstellen.",
+      "lowStockWhole": "Der Niedrigbestand-Alarm muss eine ganze Zahl von 0 oder mehr sein.",
+      "maxPerOrderRequired": "Gib an, wie viele ein Käufer bestellen kann, 1 bis {max}.",
+      "maxPerOrderRange": "Das Maximum pro Bestellung muss eine ganze Zahl von 1 bis {max} sein.",
+      "purchaseUrl": "Der Kauflink muss eine vollständige https://-Adresse sein.",
+      "optionGroupUnnamed": "Gib an, was jede Optionsgruppe variiert, oder entferne sie.",
+      "optionGroupEmpty": "Füge mindestens eine {group}-Option hinzu oder entferne die Gruppe.",
+      "optionUnnamed": "Gib jeder Option einen Namen oder entferne die leere Zeile.",
+      "optionGroupFull": "Eine Optionsgruppe kann bis zu {max} Optionen haben.",
+      "versionSpecs": "{count, plural, one {Technische Daten einer Variante müssen korrigiert werden.} other {Technische Daten von {count} Varianten müssen korrigiert werden.}}",
+      "measure": "Verwende eine Zahl, z. B. 12 oder 3,5.",
+      "specValue": "Jede technische Angabe braucht einen Wert.",
+      "manufacturerName": "Gib den Hersteller an.",
+      "manufacturerAddress": "Füge die Postanschrift des Herstellers hinzu.",
+      "manufacturerEmail": "Füge eine Kontakt-E-Mail für den Hersteller hinzu.",
+      "responsibleEmail": "Das sieht nicht wie eine E-Mail-Adresse aus.",
+      "price": {
+        "empty": "Lege einen Preis fest, bevor du speicherst.",
+        "notPositive": "Der Preis muss eine Zahl größer als null sein.",
+        "tooManyDecimals": "Preise können höchstens zwei Dezimalstellen haben.",
+        "tooHigh": "Der Preis darf {currency} {max} nicht überschreiten."
+      }
+    },
+    "title": "Titel",
+    "titlePlaceholder": "z. B. Ambient Loops Vol. 1",
+    "description": "Beschreibung",
+    "optional": "(optional)",
+    "descriptionPlaceholder": "Was ist es, und was bekommt der Käufer?",
+    "displayImage": "Titelbild",
+    "displayImageAbout": "Wozu das Titelbild verwendet wird",
+    "displayImageHelp": "Wird auf deinem Schaufenster und in Einbettungen angezeigt.",
+    "digitalFile": "Digitale Datei",
+    "digitalFileAbout": "Was die digitale Datei ist",
+    "digitalFileHelp": "Die Datei, die dein Käufer nach dem Kauf herunterlädt. Wenn du eine hinzufügst, wird dies ein Download, sodass Versand und Produktsicherheit nicht mehr gelten.",
+    "purchaseLink": "Kauflink",
+    "purchaseLinkAbout": "Wohin der Kauf-Button Käufer leitet",
+    "purchaseLinkHelp": "Der Kauf-Button der Produktseite folgt diesem Link. Ohne einen wird stattdessen eine E-Mail an die Kontaktadresse deines Shops gesendet.",
+    "purchaseLinkPlaceholder": "z. B. https://dein-shop.example/checkout/dieses-produkt",
+    "statusLabel": "Produktstatus",
+    "problems": "{count, plural, one {{count} Problem muss vor dem Speichern behoben werden} other {{count} Probleme müssen vor dem Speichern behoben werden}}",
+    "jumpToFirst": "Zum ersten springen",
+    "uploading": "{what, select, image {Bild wird hochgeladen…} photo {Foto wird hochgeladen…} document {Dokument wird hochgeladen…} other {Datei wird hochgeladen…}}",
+    "processing": "{what, select, image {Bild wird verarbeitet…} photo {Foto wird verarbeitet…} document {Dokument wird verarbeitet…} other {Datei wird verarbeitet…}}",
+    "uploadingLabel": "{what, select, image {Bild wird hochgeladen} photo {Foto wird hochgeladen} document {Dokument wird hochgeladen} other {Datei wird hochgeladen}}",
+    "processingLabel": "{what, select, image {Bild wird verarbeitet} photo {Foto wird verarbeitet} document {Dokument wird verarbeitet} other {Datei wird verarbeitet}}",
+    "saveChanges": "Änderungen speichern",
+    "saveProduct": "Produkt speichern",
+    "savedToast": "„{title}“ wurde gespeichert.",
+    "addedToast": "„{title}“ wurde zu deinen Produkten hinzugefügt.",
+    "documentFallbackLabel": "Dokument",
+    "discard": {
+      "title": "Änderungen verwerfen?",
+      "editDescription": "Die Änderungen, die du an diesem Produkt vorgenommen hast, wurden noch nicht gespeichert.",
+      "newDescription": "Dieses Produkt wurde noch nicht gespeichert, daher wird nichts behalten.",
+      "discard": "Verwerfen"
+    },
+    "nav": {
+      "label": "Formularabschnitte",
+      "heading": "Auf dieser Seite"
+    }
+  },
+  "stockFields": {
+    "trackStock": "Bestand verfolgen",
+    "inStock": "Auf Lager",
+    "decrease": "Bestand verringern",
+    "increase": "Bestand erhöhen",
+    "lowStockAlert": "Niedrigbestand-Alarm bei",
+    "maxPerOrder": "Maximum pro Bestellung",
+    "maxPerOrderHint": "Wie viele ein Käufer auf einmal nehmen kann. Käufer wählen aus einer Liste, die hier endet, und das Limit wird beim Bestellen erneut geprüft. Bis zu {max}; 1 verkauft sie einzeln."
+  },
+  "priceField": {
+    "label": "Preis",
+    "placeholder": "z. B. 9,00",
+    "currency": "Währung"
+  },
+  "shippingField": {
+    "usual": "Deine üblichen Versandbedingungen",
+    "usualDescription": "Einmal für dein Konto festgelegt. Was fast jedes Produkt benötigt.",
+    "removed": "Entferntes Profil",
+    "removedDescription": "Dieses Profil existiert nicht mehr, daher sehen Käufer deine Standardbedingungen.",
+    "untitled": "Profil ohne Namen",
+    "profileNoTerms": "Noch keine Bedingungen für dieses Profil geschrieben.",
+    "noTerms": "Noch keine Versandbedingungen geschrieben.",
+    "profile": "Versandprofil",
+    "edit": "Bearbeiten",
+    "modalTitle": "Versand und Rücksendungen"
+  },
+  "optionsField": {
+    "display": {
+      "swatch": "Farbfelder",
+      "chip": "Chips",
+      "select": "Dropdown"
+    },
+    "displayHint": {
+      "swatch": "Farbkreise. Gib jeder Option ein Farbfeld, oder Käufer sehen den ersten Buchstaben.",
+      "chip": "Textschaltflächen für Werte, die Käufer lesen: Größen, Leistungen, Längen.",
+      "select": "Ein Dropdown. Am besten, wenn es mehr Werte gibt, als als Schaltflächen passen."
+    },
+    "presets": {
+      "colour": {
+        "name": "Farbe",
+        "placeholder": "Mitternachtsblau"
+      },
+      "size": {
+        "name": "Größe",
+        "placeholder": "Mittel"
+      },
+      "material": {
+        "name": "Material",
+        "placeholder": "Massivholz"
+      },
+      "capacity": {
+        "name": "Kapazität",
+        "placeholder": "500 ml"
+      },
+      "powerOutput": {
+        "name": "Leistungsabgabe",
+        "placeholder": "750 W"
+      },
+      "length": {
+        "name": "Länge",
+        "placeholder": "2 m"
+      },
+      "style": {
+        "name": "Stil",
+        "placeholder": "Weit geschnitten"
+      },
+      "finish": {
+        "name": "Oberfläche",
+        "placeholder": "Gebürstetes Messing"
+      }
+    },
+    "sharedPriceNote": "Alle Varianten teilen einen Preis und einen Lagerbestand.",
+    "addFirst": "In mehr als einer Variante erhältlich?",
+    "addAnother": "Weitere Variation hinzufügen",
+    "somethingElse": "Etwas anderes",
+    "groupsFull": "{max, plural, one {Das ist bereits die einzige {max} Optionsgruppe.} other {Das sind bereits alle {max} Optionsgruppen.}}",
+    "optionsFull": "{max, plural, one {Das ist bereits die einzige {max} Option.} other {Das sind bereits alle {max} Optionen.}}",
+    "whatVaries": "Was variiert",
+    "whatVariesPlaceholder": "Was variiert? z. B. Leistungsabgabe",
+    "optionCount": "{count, plural, one {{count} Option} other {{count} Optionen}}",
+    "moveGroupEarlier": "{named, select, yes {{name} nach vorne verschieben} other {Optionsgruppe {position} nach vorne verschieben}}",
+    "moveGroupLater": "{named, select, yes {{name} nach hinten verschieben} other {Optionsgruppe {position} nach hinten verschieben}}",
+    "removeGroup": "{named, select, yes {{name} entfernen} other {Optionsgruppe {position} entfernen}}",
+    "howBuyersPick": "{named, select, yes {Wie Käufer {name} auswählen} other {Wie Käufer Optionsgruppe {position} auswählen}}",
+    "howBuyersPickAbout": "Wie Käufer auswählen",
+    "swatchColumn": "Farbe",
+    "nameColumn": "Name",
+    "groupOptionsList": "{named, select, yes {{name}-Optionen} other {Optionen der Optionsgruppe {position}}}",
+    "swatchFor": "{named, select, yes {Farbe für {name}} other {Farbe für Option {position}}}",
+    "noSwatch": "Kein Farbfeld",
+    "optionLabel": "{named, select, yes {{name} Option {position}} other {Optionsgruppe {groupPosition} Option {position}}}",
+    "optionPlaceholder": "Option {position}",
+    "available": "{named, select, yes {{name} ist verfügbar} other {Option {position} ist verfügbar}}",
+    "moveOptionEarlier": "{named, select, yes {{name} nach vorne verschieben} other {Option {position} nach vorne verschieben}}",
+    "moveOptionLater": "{named, select, yes {{name} nach hinten verschieben} other {Option {position} nach hinten verschieben}}",
+    "removeOption": "{named, select, yes {{name} entfernen} other {Option {position} entfernen}}",
+    "swatchConflict": "{names} teilen den ersten Buchstaben und keine davon hat ein Farbfeld. Käufer sehen identische Quadrate. Gib jeder Option eine Farbe.",
+    "addOptions": "Optionen hinzufügen",
+    "addOptionsAbout": "Wie man mehrere Optionen auf einmal hinzufügt",
+    "addOptionsHelp": "Drücke nach jeder Option die Eingabetaste oder füge eine Liste ein, z. B. „S, M, L, XL“ oder eine aus einer Tabelle kopierte Spalte, um alle auf einmal hinzuzufügen.",
+    "noRoom": "Kein Platz für weitere Optionen",
+    "draftPlaceholder": "{preset, select, yes {{example}, oder Liste einfügen} other {Erste Option, oder Liste einfügen}}",
+    "add": "Hinzufügen",
+    "useNoSwatch": "Kein Farbfeld verwenden"
+  },
+  "galleryField": {
+    "tooMany": "Ein Produkt kann bis zu {max} zusätzliche Fotos haben.",
+    "wrongType": "Verwende PNG-, JPG-, WEBP-, GIF- oder AVIF-Bilder.",
+    "tooLarge": "Jedes Foto muss unter {max} MB sein.",
+    "roomLeft": "{count, plural, one {Nur noch {count} weiteres Foto passt.} other {Nur noch {count} weitere Fotos passen.}}",
+    "everyVersion": "Jede Variante",
+    "photos": "Fotos",
+    "unnamedOption": "Unbenannte Option",
+    "options": "Optionen",
+    "target": "{groupNamed, select, yes {{optionNamed, select, yes {{group}: {option}} other {{group}: Unbenannte Option}}} other {{optionNamed, select, yes {Optionen: {option}} other {Optionen: Unbenannte Option}}}}",
+    "moveToEveryVersion": "Verschieben nach: Jede Variante",
+    "moveToOption": "{groupNamed, select, yes {{optionNamed, select, yes {Verschieben nach: {group}: {option}} other {Verschieben nach: {group}: Unbenannte Option}}} other {{optionNamed, select, yes {Verschieben nach: Optionen: {option}} other {Verschieben nach: Optionen: Unbenannte Option}}}}",
+    "photoCount": "{count, plural, one {{count} Foto} other {{count} Fotos}}",
+    "removePhoto": "Foto entfernen",
+    "movePhotoEarlier": "Foto nach vorne verschieben",
+    "movePhotoLater": "Foto nach hinten verschieben",
+    "altPlaceholder": "Alternativtext",
+    "altLabel": "Beschreibe dieses Foto für Menschen, die es nicht sehen können",
+    "versionLabel": "Für welche Variante dieses Foto angezeigt wird",
+    "tally": "{max, plural, one {{count} von {max} Foto} other {{count} von {max} Fotos}}",
+    "orderAbout": "Wie diese Fotos sortiert sind",
+    "orderHelp": "Das Titelbild aus Medien und Lieferung ist immer das erste. Danach werden Fotos in der Reihenfolge angezeigt, in der sie hier stehen.",
+    "limitReached": "Limit erreicht",
+    "dropOrClick": "Ablegen oder klicken"
+  },
+  "optionSpecsField": {
+    "heading": "Unterschiedlich je nach Variante",
+    "about": "Wie variantenspezifische technische Daten funktionieren",
+    "help": "Größen und Gewichte, die sich je nach Variante ändern, kommen hierher. Alles Leere übernimmt, was du oben ausgefüllt hast; gib also nur an, was wirklich abweicht. Käufer sehen die Zahlen für die von ihnen gewählte Variante.",
+    "unnamedOption": "Unbenannte Option",
+    "options": "Optionen",
+    "sameAsAbove": "Wie oben",
+    "length": "Länge",
+    "width": "Breite",
+    "height": "Höhe",
+    "weight": "Gewicht",
+    "specsList": "{named, select, yes {{option}: technische Daten} other {Unbenannte Option: technische Daten}}",
+    "specName": "Name, z. B. Sitzplätze",
+    "specValue": "Wert, z. B. 6",
+    "specNameLabel": "{named, select, yes {{option} technische Angabe {number} Name} other {Unbenannte Option technische Angabe {number} Name}}",
+    "specValueLabel": "{named, select, yes {{option} technische Angabe {number} Wert} other {Unbenannte Option technische Angabe {number} Wert}}",
+    "removeSpec": "{named, select, yes {{option} technische Angabe {number} entfernen} other {Unbenannte Option technische Angabe {number} entfernen}}",
+    "addSpec": "Technische Angabe für diese Variante",
+    "replacesNote": "Eine technische Angabe mit demselben Namen wie eine darüber ersetzt sie für diese Variante."
+  },
+  "detailsFields": {
+    "dimensions": "Abmessungen",
+    "length": "Länge",
+    "width": "Breite",
+    "height": "Höhe",
+    "unit": "Einheit",
+    "weight": "Gewicht",
+    "materials": "Materialien",
+    "materialsPlaceholder": "z. B. Massiveiche, Messingbeschläge",
+    "madeIn": "Hergestellt in",
+    "madeInPlaceholder": "Herkunftsland",
+    "care": "Pflegehinweise",
+    "included": "Was enthalten ist",
+    "includedPlaceholder": "Ein Artikel pro Zeile\nz. B. 1 × Lampe\n1 × 2 m Kabel",
+    "specifications": "Technische Daten",
+    "specName": "Name, z. B. Wattzahl",
+    "specValue": "Wert, z. B. 40 W",
+    "specNameLabel": "Technische Angabe {number} Name",
+    "specValueLabel": "Technische Angabe {number} Wert",
+    "removeSpec": "Technische Angabe {number} entfernen",
+    "addSpec": "Technische Angabe hinzufügen"
+  },
+  "safetyFields": {
+    "manufacturer": "Hersteller",
+    "manufacturerEmail": "Hersteller-E-Mail",
+    "manufacturerAddress": "Herstelleradresse",
+    "responsibleName": "Verantwortliche Person in der EU",
+    "responsibleNameAbout": "Informationen zur verantwortlichen Person in der EU",
+    "responsibleNameHint": "Nur wenn der Hersteller außerhalb der EU ansässig ist.",
+    "responsibleEmail": "E-Mail der verantwortlichen Person",
+    "responsibleAddress": "Adresse der verantwortlichen Person",
+    "identifier": "Typ-, Chargen- oder Seriennummer",
+    "warnings": "Warnhinweise und Sicherheitsinformationen"
+  },
+  "documentsField": {
+    "tooMany": "Ein Produkt kann bis zu {max} Dokumente haben.",
+    "wrongType": "Verwende eine PDF für Zertifikate, Handbücher und andere Dokumente.",
+    "tooLarge": "„{name}“ ist zu groß. Dokumente müssen unter {max} MB sein.",
+    "roomLeft": "{count, plural, one {Nur noch {count} weiteres Dokument passt.} other {Nur noch {count} weitere Dokumente passen.}}",
+    "fallbackLabel": "Dokument",
+    "list": "Dokumente",
+    "nameLabel": "Dokumentname, für Käufer sichtbar",
+    "namePlaceholder": "z. B. Sicherheitsdatenblatt",
+    "remove": "{named, select, yes {{name} entfernen} other {Dokument entfernen}}",
+    "limitReached": "Limit erreicht",
+    "dropPrompt": "PDFs ablegen oder klicken, um hochzuladen",
+    "tally": "{max, plural, one {{count} von {max} Dokument · PDF, bis zu {maxMb} MB pro Stück} other {{count} von {max} Dokumente · PDF, bis zu {maxMb} MB pro Stück}}"
+  },
+  "imageDropzone": {
+    "wrongType": "Verwende ein PNG-, JPG-, WEBP-, GIF- oder AVIF-Bild.",
+    "tooLarge": "Das Bild muss unter {max} MB sein.",
+    "previewAlt": "Vorschau des Titelbilds",
+    "dropPrompt": "Bild ablegen oder klicken, um hochzuladen",
+    "hint": "PNG, JPG, WEBP, GIF oder AVIF, bis zu {max} MB",
+    "remove": "Titelbild entfernen"
+  },
+  "fileDropzone": {
+    "currentFile": "Aktuelle Datei",
+    "dropPrompt": "Datei ablegen oder klicken, um hochzuladen",
+    "hint": "ZIP, PDF und Ähnliches, bis zu {max} MB",
+    "remove": "Digitale Datei entfernen"
+  }
+}

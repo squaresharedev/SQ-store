@@ -1,0 +1,696 @@
+{
+  "metadata": {
+    "layout": {
+      "titleTemplate": "%s | Square Share",
+      "default": "Instellingen | Square Share"
+    },
+    "account": {
+      "title": "Accountinstellingen"
+    },
+    "notifications": {
+      "title": "Meldingsinstellingen"
+    },
+    "language": {
+      "title": "Taalinstellingen"
+    },
+    "danger": {
+      "title": "Gevarenzone"
+    },
+    "legal": {
+      "title": "Juridische instellingen"
+    },
+    "team": {
+      "title": "Team en toegang"
+    },
+    "tax": {
+      "title": "Bedrijfs- en verkopersgegevens"
+    },
+    "shipping": {
+      "title": "Instellingen voor verzending en retouren"
+    },
+    "security": {
+      "title": "Beveiliging"
+    }
+  },
+  "loading": "Instellingen laden…",
+  "shell": {
+    "sectionsLabel": "Secties van Instellingen",
+    "recommended": "Aanbevolen"
+  },
+  "continueToStorefront": "Doorgaan naar je etalage",
+  "account": {
+    "fallbackName": "Account",
+    "avatar": {
+      "cardTitle": "Profielfoto",
+      "cardDescription": "Een JPEG, PNG of WebP tot 2 MB. Wordt getoond in je hele dashboard.",
+      "errorTooLarge": "Die afbeelding is te groot. Houd hem onder 2 MB.",
+      "errorBadType": "Gebruik een JPEG-, PNG- of WebP-afbeelding.",
+      "errorReadFailed": "Dat bestand kon niet worden gelezen.",
+      "editLabel": "Je profielfoto bewerken",
+      "uploadLabel": "Een profielfoto uploaden",
+      "statusUploading": "Je profielfoto wordt geüpload",
+      "statusRemoving": "Je profielfoto wordt verwijderd",
+      "chooseLabel": "Profielfoto kiezen",
+      "changePhoto": "Foto wijzigen",
+      "uploadPhoto": "Foto uploaden"
+    },
+    "crop": {
+      "title": "Foto bijsnijden",
+      "description": "Sleep om te verplaatsen. Scroll of gebruik de schuifregelaar om in te zoomen.",
+      "areaLabel": "Bijsnijdgebied. Sleep of gebruik de pijltoetsen om te verplaatsen.",
+      "zoomLabel": "Zoomen",
+      "chooseAnother": "Kies een andere",
+      "savePhoto": "Foto opslaan",
+      "errors": {
+        "load": "Die afbeelding kon niet worden geladen. Probeer hem opnieuw te kiezen.",
+        "process": "Je browser kon die afbeelding niet verwerken.",
+        "prepare": "Die afbeelding kon niet worden voorbereid. Probeer een andere.",
+        "export": "Die afbeelding kon niet worden geëxporteerd. Upload hem opnieuw."
+      }
+    },
+    "username": {
+      "cardTitle": "Gebruikersnaam",
+      "cardDescription": "Log hiermee in in plaats van met je e-mailadres. Alleen letters, cijfers en underscores, en geen twee accounts kunnen dezelfde delen.",
+      "label": "Gebruikersnaam",
+      "placeholder": "jouwnaam",
+      "available": "Beschikbaar.",
+      "taken": "Iemand anders heeft deze gebruikersnaam al, probeer een andere.",
+      "checking": "Controleren…"
+    },
+    "bio": {
+      "cardTitle": "Bio",
+      "cardDescription": "Een korte regel over jou of wat je maakt. Wordt aan kopers getoond op je productpagina’s.",
+      "label": "Bio",
+      "optional": "(Optioneel)",
+      "placeholder": "bijv. Handgedraaid aardewerk uit een piepklein atelier in Haarlem",
+      "charactersLeft": "{count, plural, one {Nog {count} teken over} other {Nog {count} tekens over}}"
+    },
+    "email": {
+      "cardTitle": "E-mail",
+      "cardDescription": "Als je dit wijzigt, sturen we eerst een bevestigingslink. Er verandert niets totdat je er echt op klikt, dus een typefout hier is niet erg.",
+      "currentlySignedInAs": "Momenteel ingelogd als <address>{email}</address>",
+      "newEmailLabel": "Nieuw e-mailadres",
+      "newEmailPlaceholder": "jij@studio.com",
+      "currentPasswordLabel": "Huidig wachtwoord",
+      "passwordTipLabel": "Waarom je wachtwoord hier nodig is",
+      "passwordTipBody": "Wie je e-mailadres beheert, kan je wachtwoord opnieuw instellen, dus het wijzigen ervan verandert hoe je weer bij je account kunt. Je wachtwoord bevestigt dat de wijziging echt van jou komt.",
+      "sendConfirmationLink": "Bevestigingslink verzenden"
+    },
+    "password": {
+      "cardTitle": "Wachtwoord",
+      "descriptionHasPassword": "Wijzig het wanneer je wilt. We vragen eerst het huidige wachtwoord, om zeker te weten dat jij het echt bent.",
+      "descriptionNeverShown": "Voor je veiligheid wordt je wachtwoord hier nooit getoond. Om het te wijzigen sturen we je een e-mail met een link om een nieuw wachtwoord in te stellen.",
+      "descriptionNoPassword": "Je logt in met Google. Voeg een wachtwoord toe om ook met je e-mailadres of gebruikersnaam in te loggen.",
+      "changeButton": "Wachtwoord wijzigen",
+      "resetButton": "Wachtwoord resetten",
+      "setButton": "Wachtwoord instellen",
+      "modalTitleChange": "Wijzig je wachtwoord",
+      "modalTitleReset": "Reset je wachtwoord",
+      "modalTitleSet": "Wachtwoord instellen",
+      "modalDescriptionReset": "We e-mailen een link naar {email}. Deze verloopt kort nadat hij is aangekomen.",
+      "modalDescriptionChange": "Vul je huidige wachtwoord in, en daarna het nieuwe.",
+      "currentPasswordLabel": "Huidig wachtwoord",
+      "newPasswordLabel": "Nieuw wachtwoord",
+      "passwordHint": "Minstens 8 tekens, met een mix van hoofd- en kleine letters, cijfers of symbolen (of een wachtwoordzin van 16+ tekens).",
+      "confirmPasswordLabel": "Nieuw wachtwoord bevestigen",
+      "signOutWarning": "Elk ander apparaat wordt uitgelogd.",
+      "forgotPassword": "Wachtwoord vergeten?",
+      "updating": "Bijwerken…",
+      "updateButton": "Wachtwoord bijwerken",
+      "resendIn": "{seconds, plural, one {Opnieuw verzenden over #s} other {Opnieuw verzenden over #s}}",
+      "resendEmail": "E-mail opnieuw verzenden",
+      "emailMeALink": "Mail me een link",
+      "googleAccountNote": "Dit account logt in met Google. Door een wachtwoord in te stellen kun je ook met je e-mailadres of gebruikersnaam inloggen, en Google blijft gewoon werken.",
+      "neverShownNote": "Je huidige wachtwoord wordt nooit getoond. Open de link om een nieuw wachtwoord te kiezen; zodra je het instelt, word je op je andere apparaten uitgelogd."
+    },
+    "signOut": {
+      "cardTitle": "Uitloggen",
+      "cardDescription": "Beëindig deze sessie op dit apparaat, of log overal uit om in één keer op elk apparaat uit te loggen.",
+      "signingOut": "Uitloggen…",
+      "button": "Uitloggen",
+      "everywhereButton": "Overal uitloggen",
+      "everywhereNote": "Overal uitloggen beëindigt je sessie op elk apparaat en elke browser waarop je bent ingelogd. Je moet overal opnieuw inloggen."
+    },
+    "success": {
+      "usernameSaved": "Gebruikersnaam opgeslagen.",
+      "bioSaved": "Bio opgeslagen.",
+      "emailChangeStarted": "Controleer je inbox. De wijziging gaat in zodra je de link bevestigt.",
+      "passwordUpdated": "Wachtwoord bijgewerkt. Andere apparaten zijn uitgelogd.",
+      "resetSent": "Herstellink verzonden. Controleer je inbox.",
+      "avatarUpdated": "Profielfoto bijgewerkt.",
+      "avatarRemoved": "Profielfoto verwijderd."
+    }
+  },
+  "danger": {
+    "export": {
+      "cardTitle": "Mijn gegevens exporteren",
+      "cardDescription": "Alles wat we over je hebben: profiel, producten, etalageconfiguratie, allemaal gebundeld in één JSON-bestand. Het zijn jouw gegevens, om te bewaren.",
+      "downloadButton": "Mijn gegevens downloaden",
+      "stepUpDescription": "Je export bevat je hele account. Vul de huidige code uit je authenticator-app in om hem te downloaden."
+    },
+    "delete": {
+      "requestedTitle": "Verwijdering aangevraagd",
+      "requestedDescription": "Je hebt ons gevraagd dit account te verwijderen op {date}. Het staat gemarkeerd voor permanente verwijdering, inclusief producten en etalage. Tot dat daadwerkelijk gebeurt, kun je nog van gedachten veranderen.",
+      "cancelling": "Annuleren…",
+      "keepButton": "Mijn account behouden",
+      "title": "Account verwijderen",
+      "description": "Dit markeert je account, producten en etalage voor permanente verwijdering. Geen omwegen: zodra het gebeurt, is het weg.",
+      "deleteButton": "Mijn account verwijderen",
+      "confirmLabel": "Typ <code>{phrase}</code> ter bevestiging",
+      "flagging": "Markeren…",
+      "permanentlyDelete": "Permanent verwijderen",
+      "neverMind": "Toch niet"
+    },
+    "success": {
+      "deletionRequested": "Verwijdering aangevraagd.",
+      "deletionCancelled": "Verwijderingsverzoek geannuleerd. Fijn dat je er weer bent."
+    }
+  },
+  "notifications": {
+    "cardTitle": "E-mailmeldingen",
+    "cardDescription": "Kies wat er in je inbox terechtkomt. Beveiligings- en betalings-e-mails komen er altijd door, die kunnen we niet stilzetten.",
+    "prefs": {
+      "sales": {
+        "label": "Verkopen",
+        "blurb": "Mail me elke keer dat er iets wordt verkocht. Het goede soort inboxlawaai."
+      },
+      "productUpdates": {
+        "label": "Productupdates",
+        "blurb": "Nieuwe dashboardfuncties en verbeteringen, zodra ze klaar zijn om uit te brengen."
+      },
+      "marketing": {
+        "label": "Tips en marketplace-nieuws",
+        "blurb": "Af en toe ideeën om je te helpen meer te verkopen. We houden het luchtig, geen spam."
+      }
+    },
+    "success": {
+      "notificationsSaved": "Voorkeuren opgeslagen."
+    }
+  },
+  "legal": {
+    "cardTitle": "Verkopersovereenkomst, voorwaarden en privacy",
+    "cardDescription": "De huidige concepten, in gewone taal, want niemand leest voor de lol juridisch jargon. Echte juridische tekst is onderweg; accepteren dekt nu deze conceptversie.",
+    "termsTitle": "Servicevoorwaarden",
+    "termsDescription": "De korte versie van waarmee je akkoord gaat als je verkoopt via Square Share, met de volledige voorwaarden een klik verderop.",
+    "docs": {
+      "sellerAgreement": {
+        "title": "Verkopersovereenkomst",
+        "body": "Je werk blijft altijd van jou. Wij nemen een klein percentage per verkoop, verwerken betalingen via Stripe en houden de servers draaiende. Jij zorgt dat alles legaal is en levert wat je daadwerkelijk verkoopt. Dit is een conceptplaceholder; de echte overeenkomst is onderweg."
+      },
+      "terms": {
+        "title": "Servicevoorwaarden",
+        "body": "Misbruik het platform niet, verkoop geen dingen die mensen schaden, en respecteer de winkels van andere makers. Dit is een conceptplaceholder; de echte voorwaarden zijn onderweg."
+      },
+      "privacy": {
+        "title": "Privacybeleid",
+        "body": "We bewaren wat je ons geeft (profiel, producten, etalage), verkopen het nooit en verwijderen het zodra je vertrekt. Betalingen lopen via Stripe, dus je kaartgegevens blijven bij hen, niet bij ons. Dit is een conceptplaceholder; het echte beleid is onderweg."
+      },
+      "sellerDetails": {
+        "title": "Je verkopersgegevens, en waar ze terechtkomen",
+        "body": "Je handelsnaam, adres en contact-e-mailadres worden aan kopers getoond op je productpagina's, en zijn verplicht voordat je iets kunt publiceren of verkopen. Dat is het enige wat we ermee doen: de Europese consumentenwetgeving bepaalt dat een koper moet kunnen zien van wie hij koopt en die persoon moet kunnen bereiken voordat hij bestelt. We sturen één link naar je contactadres zodat je kunt bevestigen dat het werkt, en dat is de enige e-mail die we daar op eigen initiatief naartoe sturen: geen lijst, geen marketing, en we verkopen of delen het nooit. Je telefoonnummer en btw-id zijn optioneel en worden alleen getoond als je ze invult."
+      }
+    },
+    "accepted": "Je hebt versie <code>{version}</code> geaccepteerd op {date}. Hier hoef je verder niets te doen.",
+    "outdated": "Je hebt versie <code>{version}</code> geaccepteerd op {date}, maar de documenten zijn sindsdien gewijzigd. Lees ze nog eens door en accepteer de huidige versie.",
+    "agreed": "Je bent akkoord gegaan met versie <code>{version}</code> op {date}. Hier hoef je verder niets te doen.",
+    "agreedOutdated": "Je bent akkoord gegaan met versie <code>{version}</code> op {date}, maar de voorwaarden zijn sindsdien gewijzigd. Lees ze opnieuw en ga akkoord met de huidige versie.",
+    "recording": "Vastleggen…",
+    "acceptButton": "Ik accepteer",
+    "agreeButton": "Ik heb de voorwaarden gelezen en ga ermee akkoord",
+    "acceptNote": "Accepteren legt de datum en versie <code>{version}</code> vast bij je account.",
+    "agreeNote": "Als je akkoord gaat, worden de datum en versie <code>{version}</code> op je account vastgelegd.",
+    "scrollToAgree": "Scroll naar het einde van de samenvatting om akkoord te gaan.",
+    "success": {
+      "legalAccepted": "Geaccepteerd. Bedankt voor het lezen van de kleine lettertjes.",
+      "termsAgreed": "Je bent akkoord gegaan met de Servicevoorwaarden."
+    },
+    "termsSummary": {
+      "intro": "De korte versie, in gewone taal. Laatst bijgewerkt op {date}.",
+      "fullTermsLink": "Lees de volledige Servicevoorwaarden",
+      "opensInNewTab": " (opent in een nieuw tabblad)",
+      "regionLabel": "Servicevoorwaarden, korte versie",
+      "footer": "Deze samenvatting helpt je bij het lezen. Waarmee je akkoord gaat, zijn de volledige <terms>Servicevoorwaarden</terms> en het <privacy>Privacybeleid</privacy>.",
+      "sections": {
+        "parties": {
+          "heading": "Met wie je zaken doet",
+          "points": {
+            "merchantOfRecord": "Square Share is een platform dat je helpt te verkopen. Wanneer een koper bij je bestelt, komt de verkoop tot stand tussen jou en die koper: jij bent de verkoper en de verantwoordelijke handelaar (merchant of record), niet wij.",
+            "eligibility": "Je moet minstens 18 jaar zijn, of de meerderjarige leeftijd hebben die geldt waar je woont. Als je je aanmeldt namens een bedrijf, bevestig je dat je het aan deze voorwaarden kunt binden."
+          }
+        },
+        "account": {
+          "heading": "Je account",
+          "points": {
+            "security": "Houd je gegevens juist en je inlog veilig. Je bent verantwoordelijk voor alles wat er onder je account gebeurt, dus laat het ons meteen weten als je denkt dat iemand anders erin is gekomen.",
+            "traderDetails": "Voordat er iets live gaat, geef je ons je handelsnaam, een postadres en een contact-e-mailadres dat je bevestigt. Kopers zien die gegevens op je productpagina's, omdat het consumentenrecht dat vereist."
+          }
+        },
+        "selling": {
+          "heading": "Verkopen",
+          "points": {
+            "lawfulListings": "Vermeld je producten juist en verkoop alleen wettige zaken waarvoor je de verkooprechten hebt.",
+            "consumerRights": "Respecteer de consumentenrechten van je kopers, waaronder het herroepingsrecht van 14 dagen en de wettelijke garantie, en regel zelf je levering, klantenservice en terugbetalingen.",
+            "taxesAndRecords": "Belastingen en btw over je verkopen regel je zelf, en je bewaart je eigen verkoopadministratie 10 jaar."
+          }
+        },
+        "payments": {
+          "heading": "Betalingen",
+          "points": {
+            "stripe": "Betalingen lopen via Stripe, naar je eigen Stripe-account, onder de eigen voorwaarden van Stripe. Wij houden nooit jouw geld vast.",
+            "feesAndDisputes": "Wij rekenen platformkosten per verkoop, zoals getoond in je dashboard. Terugboekingen en geschillen zijn een zaak tussen jou, je koper en Stripe."
+          }
+        },
+        "notAllowed": {
+          "heading": "Wat niet is toegestaan",
+          "points": {
+            "products": "Illegale, namaak- of inbreukmakende producten, malware, haatdragende inhoud en inhoud voor volwassenen.",
+            "conduct": "Fraude, het ontduiken van platformkosten, scraping, andermans inhoud gebruiken om AI-modellen te trainen, of de dienst aanvallen.",
+            "tampering": "Verbergen of wijzigen wat Square Share aan kopers toont, zoals je verkopersgegevens, prijzen of juridische mededelingen."
+          }
+        },
+        "content": {
+          "heading": "Jouw inhoud",
+          "points": {
+            "ownership": "Wat je uploadt blijft van jou. Je geeft ons een licentie om het te hosten en te tonen, alleen om Square Share te laten draaien en te promoten."
+          }
+        },
+        "liability": {
+          "heading": "Aansprakelijkheid, wijzigingen en toepasselijk recht",
+          "points": {
+            "cap": "Square Share is nog in een vroeg stadium en wordt zoals het is (as is) aangeboden aan zakelijke gebruikers. Voor hen is onze aansprakelijkheid beperkt tot de kosten die ze de afgelopen 12 maanden aan ons hebben betaald of EUR 100, al naargelang welk bedrag hoger is, en zakelijke verkopers vrijwaren ons voor claims die voortvloeien uit hun producten, sites of overtredingen. Als je consument bent, blijven je wettelijke rechten onaangetast.",
+            "termination": "Wij kunnen accounts die deze voorwaarden overtreden opschorten of sluiten. Je kunt op elk moment vertrekken en je gegevens meenemen.",
+            "changesAndLaw": "Wij kunnen deze voorwaarden bijwerken, met voorafgaande kennisgeving van ingrijpende wijzigingen. Tsjechisch recht is van toepassing.",
+            "policies": "Ons Privacybeleid en Cookiebeleid maken deel uit van deze voorwaarden."
+          }
+        }
+      }
+    }
+  },
+  "tax": {
+    "cardTitle": "Bedrijfs- en verkopersgegevens",
+    "cardDescription": "Eenmalig ingesteld voor je hele account. Wordt getoond aan kopers op elke productpagina waarop je verkoopt, en gebruikt voor facturen en btw.",
+    "verifyOutcome": {
+      "verified": "Contact-e-mailadres bevestigd. Je kunt nu publiceren.",
+      "expired": "Die bevestigingslink is verlopen. Stuur hieronder een nieuwe naar jezelf.",
+      "stale": "Die link was voor een ander adres dan het adres dat hier is opgeslagen. Stuur hieronder een nieuwe.",
+      "invalid": "Die bevestigingslink is niet geldig, of is al gebruikt.",
+      "throttled": "Te veel bevestigingspogingen. Wacht even en open de link dan opnieuw."
+    },
+    "gate": {
+      "required": "<strong>Je handelsnaam, adres en contact-e-mailadres zijn verplicht voordat je iets kunt publiceren of verkopen.</strong> Kopers moeten kunnen zien van wie ze kopen en hoe ze je kunnen bereiken voordat ze bestellen.",
+      "privacyNoteLinked": "Deze gegevens verschijnen alleen daarom openbaar op je productpagina's. We gebruiken ze nooit voor marketing, en verkopen of delen ze nooit. De enige e-mail die we naar je contactadres sturen, is de link die dit bevestigt. Zie het <link>Squareshare-privacybeleid</link>."
+    },
+    "countryNotEu": "Niet in de EU / geef ik liever niet aan",
+    "vatAdvisory": {
+      "noCountry": "Dit btw-id lijkt te zijn uitgegeven door {issuer}. Misschien wil je je land instellen.",
+      "mismatch": "Dit btw-id lijkt te zijn uitgegeven door {issuer}, maar je land staat ingesteld op {selected}. Controleer of beide kloppen."
+    },
+    "fields": {
+      "businessName": {
+        "label": "Handelsnaam",
+        "tipLabel": "Wat je hier invult",
+        "tipBody": "De naam waarmee kopers een overeenkomst aangaan. Je geregistreerde bedrijfsnaam als je via een bedrijf verkoopt; je volledige naam als je als particulier verkoopt. De naam van je etalage is een winkelnaam, en dat is niet hetzelfde en kan dit niet vervangen.",
+        "placeholder": "bijv. Studio Builderboy e.U."
+      },
+      "address": {
+        "label": "Adres",
+        "tipLabel": "Waarom kopers dit zien",
+        "tipBody": "De wetgeving voor verkoop op afstand vereist een postadres bij elk aanbod. Wordt getoond in het gedeelte Verkoper van je productpagina's.",
+        "placeholder": "bijv. Marktstraat 12\n1012 AB Amsterdam\nNederland"
+      },
+      "email": {
+        "label": "Contact-e-mailadres",
+        "tipLabel": "Hoe dit verschilt van je inlog-e-mailadres",
+        "tipBody": "Wordt aan kopers getoond als mailto-link, en gebruikt als terugvaloptie voor de koopknop wanneer een product geen aankooplink heeft. Bewust gescheiden van je inlog-e-mailadres: gebruik het adres waarop je wilt dat kopers je schrijven. Het moet een adres zijn dat je ook echt leest: placeholders, tijdelijke-e-mailproviders en no-reply-adressen worden geweigerd, net als een domein dat geen e-mail accepteert.",
+        "placeholder": "bijv. hallo@jouwwinkel.example",
+        "statusDirty": "Sla op om een bevestigingslink naar het nieuwe adres te sturen. Kopers zien het pas zodra het is bevestigd.",
+        "statusConfirmed": "Bevestigd: kopers kunnen je hier bereiken.",
+        "statusUnconfirmed": "Nog niet bevestigd. Open de link die we naar dit adres hebben gemaild."
+      },
+      "vatId": {
+        "label": "Btw-id",
+        "placeholder": "bijv. NL123456789B01"
+      },
+      "country": {
+        "label": "Land"
+      },
+      "phone": {
+        "label": "Telefoon"
+      },
+      "bio": {
+        "label": "Bio",
+        "tipLabel": "Waar kopers dit zien",
+        "tipBody": "Eén regel over jou of wat je maakt, getoond onder je naam in het gedeelte Verkoper van je productpagina's. Optioneel: je kunt ook zonder publiceren. De headerbio van elke etalage stel je apart in, in de etalage-editor.",
+        "placeholder": "bijv. Handgedraaid steengoed uit een klein atelier in Utrecht",
+        "charactersLeft": "{count, plural, one {# teken over} other {# tekens over}}"
+      }
+    },
+    "resend": {
+      "button": "Bevestigingsmail opnieuw verzenden"
+    },
+    "success": {
+      "savedCheckEmail": "Opgeslagen. Controleer {email} voor een link om het adres te bevestigen.",
+      "sellerDetailsSaved": "Bedrijfs- en verkopersgegevens opgeslagen.",
+      "alreadyConfirmed": "Dat adres is al bevestigd.",
+      "confirmationSent": "Verzonden. Controleer {email} voor de link."
+    }
+  },
+  "shipping": {
+    "shipsFrom": {
+      "label": "Verzending vanuit",
+      "notSet": "Niet ingesteld"
+    },
+    "shippingCard": {
+      "title": "Verzending",
+      "description": "Eenmalig ingesteld voor je hele account. Wordt getoond op elke productpagina waarop je verkoopt, en gebruikt voor elk product dat hieronder geen uitzondering vermeldt."
+    },
+    "dispatch": {
+      "label": "Verzendtermijn",
+      "tipLabel": "Waarom dit een apart veld is",
+      "tipBody": "Eén regel, getoond naast de koopknop. “Wanneer gaat het de deur uit?” is het eerste wat kopers vragen, en daar hoeft geen hele alinea voor gelezen te worden.",
+      "placeholder": "bijv. Verzonden binnen 1–3 werkdagen"
+    },
+    "destinations": {
+      "label": "Waar je naartoe verzendt, en hoe lang het duurt",
+      "tipLabel": "Hoeveel detail je moet geven",
+      "tipBody": "Groepeer bestemmingen zoals je daadwerkelijk verzendt: één rij voor thuis, één voor de rest van de EU, één voor de rest van de wereld is meestal genoeg. Laat de kosten leeg als ze variëren.",
+      "empty": "Nog niets vermeld. Kopers zien geen levertijden totdat je een rij toevoegt.",
+      "areaLabel": "Bestemming {number}",
+      "areaPlaceholder": "bijv. Rest van de EU",
+      "timeLabel": "Levertijd {number}",
+      "timePlaceholder": "bijv. 5–7 werkdagen",
+      "costLabel": "Verzendkosten {number}",
+      "costPlaceholder": "bijv. € 9,00",
+      "removeNamed": "Bestemming {area} verwijderen",
+      "removeNumbered": "Bestemming {number} verwijderen",
+      "add": "Bestemming toevoegen",
+      "limitReached": "{max, plural, one {Dat is de enige # bestemming. Verwijder er een om een andere toe te voegen.} other {Dat zijn alle # bestemmingen. Verwijder er een om een andere toe te voegen.}}"
+    },
+    "notes": {
+      "label": "Nog iets over verzending",
+      "placeholder": "bijv. Standaard met Track & Trace. We verzenden niet naar postbussen."
+    },
+    "returnsCard": {
+      "title": "Retouren",
+      "description": "Wat je aanbiedt bovenop de wettelijke rechten die al op je productpagina's staan."
+    },
+    "returnsWindow": {
+      "label": "Retourtermijn",
+      "tipLabel": "Wat het wettelijke recht al dekt",
+      "tipBody": "Verkopen op afstand aan EU-kopers geeft hen sowieso 14 dagen bedenktijd en een garantie van twee jaar bij gebreken, wat je hier ook kiest. Je productpagina's vermelden beide al, dus dit is wat je daarbovenop aanbiedt.",
+      "none": "Niets naast het wettelijke recht",
+      "days": "{days, plural, one {# dag} other {# dagen}}",
+      "statutoryMinimum": "Het wettelijke EU-minimum",
+      "custom": "Iets anders",
+      "customLabel": "Retourtermijn in dagen",
+      "daysUnit": "dagen"
+    },
+    "returnsPaidBy": {
+      "label": "Retourkosten",
+      "buyer": "De koper betaalt de retourkosten",
+      "seller": "Wij betalen de retourkosten"
+    },
+    "exceptions": {
+      "label": "Uitzonderingen",
+      "tipLabel": "Wat hier thuishoort",
+      "tipBody": "Alles wat de termijn hierboven niet dekt: producten die op bestelling zijn gemaakt, hygiëneartikelen, geopende software. Kopers lezen dit voor ze kopen, niet erna.",
+      "placeholder": "bijv. Producten die op bestelling zijn gemaakt, kunnen niet worden geretourneerd, tenzij defect."
+    },
+    "preview": {
+      "title": "Wat kopers te lezen krijgen",
+      "description": "Opgebouwd uit je antwoorden hierboven, en getoond op elke productpagina.",
+      "shippingHeading": "Verzending",
+      "returnsHeading": "Retouren",
+      "empty": "Nog niets. Totdat je hierboven iets invult, hebben je productpagina's geen verzend- of retourgedeelte."
+    },
+    "ownWords": {
+      "title": "Schrijf het liever zelf",
+      "description": "Optioneel. Alles wat je hier invult, vervangt wat hierboven is gegenereerd, woord voor woord.",
+      "shippingLabel": "Je verzendbeleid",
+      "returnsLabel": "Je retourbeleid",
+      "placeholder": "Laat leeg om de antwoorden hierboven te gebruiken."
+    },
+    "profiles": {
+      "title": "Verzendprofielen",
+      "description": "Voor de enkele producten die anders worden verzonden. Kies er een op het product zelf, onder Verzending.",
+      "empty": "Nog geen. Voeg er alleen een toe als sommige producten anders worden verzonden dan de voorwaarden hierboven.",
+      "nameLabel": "Naam",
+      "namePlaceholder": "bijv. Grote artikelen",
+      "removeNamed": "Het verzendprofiel {name} verwijderen",
+      "removeUnnamed": "Dit verzendprofiel verwijderen",
+      "dispatchLabel": "Verzendtermijn",
+      "dispatchPlaceholder": "bijv. Op bestelling gemaakt, reken op 3 weken",
+      "bodyLabel": "Verzending",
+      "bodyPlaceholder": "Hoe deze producten worden verzonden, en wat het kost",
+      "noTerms": "Voeg voorwaarden toe, anders vervalt dit profiel wanneer je opslaat.",
+      "add": "Profiel toevoegen",
+      "limitReached": "{max, plural, one {Dat is het enige # profiel. Verwijder er een om een ander toe te voegen.} other {Dat zijn alle # profielen. Verwijder er een om een ander toe te voegen.}}"
+    },
+    "success": {
+      "shippingSaved": "Verzending en retouren opgeslagen."
+    }
+  },
+  "sellerDetails": {
+    "bannerLabel": "Verkopersgegevens vereist",
+    "memberHeadline": "Deze winkel kan nog niet publiceren of verkopen.",
+    "memberFix": "De eigenaar moet de verkopersgegevens toevoegen in de eigen instellingen.",
+    "addLink": "Verkopersgegevens toevoegen",
+    "opensInNewTab": " (opent in nieuw tabblad)",
+    "headline": {
+      "publishOrSell": "Je kunt niets publiceren of verkopen totdat je verkopersgegevens compleet zijn.",
+      "putProductOnSale": "Je kunt dit product niet te koop zetten totdat je verkopersgegevens compleet zijn.",
+      "importLiveProducts": "Je kunt geen online producten importeren totdat je verkopersgegevens compleet zijn.",
+      "embedStorefront": "Je kunt deze etalage niet insluiten totdat je verkopersgegevens compleet zijn.",
+      "publishStorefront": "Je kunt deze etalage niet publiceren of ermee verkopen totdat je verkopersgegevens compleet zijn."
+    },
+    "reason": "Kopers moeten kunnen zien van wie ze kopen en hoe ze je kunnen bereiken voordat ze bestellen. Dit wordt alleen daarom op je productpagina's getoond, nooit gebruikt voor marketing.",
+    "fields": {
+      "businessName": {
+        "label": "Handelsnaam",
+        "why": "Kopers moeten weten van wie ze kopen: je bedrijfsnaam, of je volledige naam als je als particulier verkoopt."
+      },
+      "address": {
+        "label": "Vestigingsadres",
+        "why": "Een postadres moet volgens de wetgeving voor verkoop op afstand bij elk aanbod staan."
+      },
+      "email": {
+        "label": "Contact-e-mailadres",
+        "why": "Het adres waarop kopers je over een bestelling schrijven. Het is ook de terugvaloptie van de koopknop wanneer een product geen aankooplink heeft."
+      },
+      "emailVerified": {
+        "label": "Bevestigd contact-e-mailadres",
+        "why": "We sturen een link naar dat adres en jij klikt erop. Niets anders bewijst dat een bericht van een koper daadwerkelijk iemand bereikt."
+      }
+    }
+  },
+  "security": {
+    "copyRecoveryCodes": {
+      "copy": "Herstelcodes kopiëren",
+      "copied": "Herstelcodes gekopieerd",
+      "failed": "De herstelcodes konden niet worden gekopieerd. Selecteer en kopieer ze handmatig."
+    },
+    "copySetupKey": {
+      "copy": "Installatiesleutel kopiëren",
+      "copied": "Installatiesleutel gekopieerd",
+      "failed": "De installatiesleutel kon niet worden gekopieerd. Selecteer en kopieer hem handmatig."
+    },
+    "prompt": {
+      "title": "Je wachtwoord is het enige slot op dit account",
+      "body": "Zet tweestapsverificatie aan, zodat je bij het inloggen ook een code van je telefoon nodig hebt. Het kost ongeveer een minuut.",
+      "cta": "2FA aanzetten"
+    },
+    "recoveredNotice": "<strong>Tweestapsverificatie staat uit.</strong> Je bent ingelogd met een herstelcode, waardoor je oude authenticator is verwijderd en je andere apparaten zijn uitgelogd. Stel het nu opnieuw in, zodat je wachtwoord niet het enige is dat je account beschermt.",
+    "stepUpConfirm": "Vul een huidige code uit je authenticator-app in om te bevestigen.",
+    "twoFactor": {
+      "cardTitle": "Tweestapsverificatie",
+      "descriptionOn": "Om in te loggen heb je je wachtwoord en een code uit je authenticator-app nodig.",
+      "descriptionOff": "Voeg een tweede stap toe aan het inloggen: een code van 6 cijfers uit een app op je telefoon.",
+      "statusOn": "Aan",
+      "statusOff": "Uit",
+      "listLabel": "Authenticator-apps",
+      "added": "Toegevoegd op {date}",
+      "removeLabel": "{name} verwijderen",
+      "addAnother": "Nog een authenticator toevoegen",
+      "benefits": {
+        "password": "Een gestolen of geraden wachtwoord is niet meer genoeg om in je winkel te komen.",
+        "changes": "Voor wijzigingen aan je uitbetalingsgegevens, je team en je account heb je een code van je telefoon nodig.",
+        "changesBusiness": "Voor wijzigingen aan je bedrijfsgegevens, je team en je account heb je een code van je telefoon nodig.",
+        "alerts": "Je krijgt direct een e-mail zodra iemand je wachtwoord goed heeft, maar de code fout."
+      },
+      "setUp": "Tweestapsverificatie instellen",
+      "takesAMinute": "Kost ongeveer een minuut."
+    },
+    "remove": {
+      "titleLast": "Tweestapsverificatie uitzetten?",
+      "title": "“{name}” verwijderen?",
+      "descriptionLast": "Dit is je enige authenticator. Als je hem verwijdert, gaat tweestapsverificatie uit en werken je herstelcodes niet meer. Om in te loggen heb je dan alleen je wachtwoord nodig.",
+      "description": "Met “{name}” kun je niet meer inloggen op je account.",
+      "removing": "Verwijderen…",
+      "turnOff": "Uitzetten"
+    },
+    "setup": {
+      "suggestedName": "Authenticator-app",
+      "suggestedNameNumbered": "Authenticator-app {number}",
+      "added": "Authenticator toegevoegd.",
+      "enabled": "Tweestapsverificatie staat aan.",
+      "titleCodes": "Bewaar je herstelcodes",
+      "titleAdd": "Een authenticator-app toevoegen",
+      "titleEnable": "Tweestapsverificatie aanzetten",
+      "descriptionAdd": "Gebruik een tweede telefoon of app als reservemanier om in te loggen.",
+      "descriptionEnable": "Daarna heb je om in te loggen je wachtwoord en een code uit een app op je telefoon nodig.",
+      "descriptionScan": "Scan de code met je authenticator-app en vul dan de 6 cijfers in die de app toont.",
+      "descriptionCodes": "Tweestapsverificatie staat aan.",
+      "googleReauth": "Je account logt in met Google, dus er is geen wachtwoord om te bevestigen dat jij het bent. Log opnieuw in, dan kom je meteen terug om het af te ronden.",
+      "confirmWithGoogleFirst": "Bevestig eerst met Google dat jij het bent. Daarna kom je meteen hier terug om af te ronden.",
+      "signInAgainFirst": "Log voor je veiligheid eerst opnieuw in. Daarna kom je meteen hier terug om af te ronden.",
+      "signInAgain": "Opnieuw inloggen",
+      "nameLabel": "Geef deze authenticator een naam",
+      "nameHint": "Zodat je je apps later uit elkaar kunt houden, bijv. “Pixel 8”.",
+      "stepUpDescription": "Vul een code in van een authenticator die je al gebruikt, om te bevestigen dat jij het bent.",
+      "passwordLabel": "Huidig wachtwoord",
+      "squareSharePasswordLabel": "Squareshare-wachtwoord",
+      "passwordHint": "Zodat niemand die je ingelogde laptop vindt je kan buitensluiten met zijn eigen telefoon.",
+      "notYourGooglePassword": "Niet je Google-wachtwoord. Ken je het niet? Bevestig dan hieronder met Google.",
+      "signedInRecently": "Je bent zojuist ingelogd, dus je hoeft verder niets te bevestigen.",
+      "or": "of",
+      "checking": "Controleren…",
+      "continue": "Doorgaan",
+      "qrAlt": "QR-code om te scannen met je authenticator-app",
+      "anyApp": "Elke authenticator-app werkt: Google Authenticator, Microsoft Authenticator, 1Password, Authy en andere.",
+      "cantScan": "Lukt scannen niet? Vul dan deze sleutel in:",
+      "setupKeyLabel": "Installatiesleutel",
+      "openInApp": "Openen in authenticator-app",
+      "codeLabel": "Code van 6 cijfers uit de app",
+      "verifying": "Verifiëren…",
+      "verifyAndAdd": "Verifiëren en toevoegen",
+      "verifyAndTurnOn": "Verifiëren en aanzetten"
+    },
+    "recoveryCodes": {
+      "cardTitle": "Herstelcodes",
+      "cardDescription": "Eenmalige codes om in te loggen als je je telefoon kwijtraakt. Bewaar ze ergens anders dan op de telefoon zelf.",
+      "countUnavailable": "We konden niet controleren hoeveel je er nog hebt.",
+      "remaining": "{count, plural, one {Nog {count} van {total} codes over.} other {Nog {count} van {total} codes over.}}",
+      "remainingLow": "{count, plural, one {Nog {count} van {total} codes over. Ze raken op: maak een nieuwe set.} other {Nog {count} van {total} codes over. Ze raken op: maak een nieuwe set.}}",
+      "remainingNone": "{count, plural, one {Nog {count} van {total} codes over. Je hebt er geen meer: maak nu een nieuwe set.} other {Nog {count} van {total} codes over. Je hebt er geen meer: maak nu een nieuwe set.}}",
+      "generate": "Nieuwe codes maken",
+      "generating": "Maken…",
+      "regenerateTitle": "Nieuwe herstelcodes maken?",
+      "regenerateDescription": "Je huidige codes werken niet meer zodra de nieuwe zijn gemaakt.",
+      "newTitle": "Je nieuwe herstelcodes",
+      "newDescription": "Je oude codes werken niet meer."
+    },
+    "recoveryCodesDisplay": {
+      "notCreated": "Tweestapsverificatie staat aan, maar we konden je herstelcodes niet maken. Maak een set via de kaart Herstelcodes voordat je uitlogt.",
+      "warning": "Bewaar deze ergens veilig, bijvoorbeeld in een wachtwoordmanager. Elke code werkt één keer, ze zijn de enige weg terug als je je telefoon kwijtraakt, en je ziet ze niet nog een keer.",
+      "listLabel": "Herstelcodes",
+      "download": "Downloaden",
+      "saved": "Ik heb mijn herstelcodes ergens veilig bewaard.",
+      "file": {
+        "title": "Herstelcodes van Square Share",
+        "explainer": "Elke code kun je één keer gebruiken om in te loggen als je je authenticator-app kwijtraakt.",
+        "generated": "Gemaakt op {date}"
+      }
+    },
+    "activity": {
+      "cardTitle": "Recente beveiligingsactiviteit",
+      "cardDescription": "Wijzigingen in hoe je inlogt, de nieuwste eerst. Herken je hier iets niet? Wijzig dan je wachtwoord en zet tweestapsverificatie aan.",
+      "unavailable": "Je activiteit kon nu niet worden geladen.",
+      "empty": "Nog niets.",
+      "timeUtc": "{time} UTC",
+      "events": {
+        "passwordChanged": "Wachtwoord gewijzigd",
+        "passwordSet": "Wachtwoord ingesteld",
+        "passwordResetRequested": "Link om het wachtwoord opnieuw in te stellen aangevraagd",
+        "emailChangeRequested": "E-mailwijziging aangevraagd",
+        "twoFactorEnabled": "Tweestapsverificatie aangezet",
+        "twoFactorDisabled": "Tweestapsverificatie uitgezet",
+        "factorAdded": "Authenticator-app toegevoegd",
+        "factorRemoved": "Authenticator-app verwijderd",
+        "recoveryCodesRegenerated": "Nieuwe herstelcodes gemaakt",
+        "recoveryCodeUsed": "Herstelcode gebruikt om in te loggen",
+        "challengeFailed": "Verkeerde tweestapscode ingevoerd bij het inloggen",
+        "lockedOut": "Inloggen met tweestapsverificatie gepauzeerd na herhaaldelijk foute codes"
+      }
+    },
+    "success": {
+      "twoFactorOff": "Tweestapsverificatie staat uit.",
+      "factorRemoved": "“{name}” verwijderd.",
+      "codesRegenerated": "Nieuwe herstelcodes staan klaar. Je oude werken niet meer.",
+      "confirmed": "Bevestigd."
+    }
+  },
+  "team": {
+    "roles": {
+      "owner": {
+        "label": "Eigenaar",
+        "description": "Volledige controle. Precies één per winkel, kan niet worden gewijzigd of verwijderd."
+      },
+      "editor": {
+        "label": "Bewerker",
+        "description": "Kan de winkel bekijken en producten en de etalage bewerken. Kan leden uitnodigen op of onder de eigen rol."
+      },
+      "viewer": {
+        "label": "Lezer",
+        "description": "Kan de winkel en het team bekijken. Alleen-lezen."
+      }
+    },
+    "cardTitle": "Team",
+    "cardDescription": "Mensen die kunnen inloggen bij deze winkel. Hun rol bepaalt wat ze kunnen zien en wijzigen.",
+    "loadError": "Meer leden laden is mislukt. Probeer het opnieuw.",
+    "loadMore": "Meer leden laden",
+    "inviteButton": "Lid uitnodigen",
+    "memberList": {
+      "onlyOwner": "Tot nu toe ben jij de enige. Nodig iemand uit om diegene toegang te geven.",
+      "invitedHeading": "Uitgenodigd",
+      "invitedTipLabel": "Wat een uitgenodigd lid kan doen",
+      "invitedTipBody": "Nog niets. Een uitnodiging gaat pas in als die persoon voor het eerst inlogt met het e-mailadres waarnaar hij is verstuurd, en pas dan verschijnt hij als lid met de rol die je hebt gekozen.",
+      "showingFirst": "{count, plural, one {Eerste # lid weergegeven.} other {Eerste # leden weergegeven.}}"
+    },
+    "memberRow": {
+      "you": "(jij)",
+      "cancelInviteLabel": "De uitnodiging aan {email} annuleren",
+      "removeMemberLabel": "{name} uit het team verwijderen",
+      "cancelInviteTitle": "Uitnodiging annuleren",
+      "removeFromTeamTitle": "Uit team verwijderen",
+      "confirmRoleChange": "Van {name} {role, select, owner {eigenaar} editor {bewerker} viewer {lezer} other {{role}}} maken?",
+      "confirmCancelInvite": "De uitnodiging aan {email} annuleren?",
+      "confirmRemove": "{name} verwijderen? Die persoon verliest direct toegang.",
+      "cancelling": "Annuleren…",
+      "removing": "Verwijderen…",
+      "cancelled": "Geannuleerd",
+      "removed": "Verwijderd",
+      "cancelInviteButton": "Uitnodiging annuleren",
+      "keep": "Behouden"
+    },
+    "inviteModal": {
+      "title": "Een lid uitnodigen",
+      "description": "Ze krijgen toegang zodra ze inloggen met dit e-mailadres.",
+      "emailLabel": "E-mailadres",
+      "emailPlaceholder": "collega@example.com",
+      "roleLabel": "Rol",
+      "notificationNote": "E-mailmeldingen zijn nog niet gekoppeld: de uitnodiging gaat in zodra ze inloggen. Je kunt ze misschien beter direct zelf laten weten.",
+      "sendButton": "Uitnodiging versturen"
+    },
+    "inviteRow": {
+      "invitedAs": "<store>{storeName}</store> heeft je uitgenodigd als <strong>{role, select, owner {Eigenaar} editor {Bewerker} viewer {Lezer} other {{role}}}</strong>",
+      "accepting": "Accepteren…",
+      "accepted": "Geaccepteerd",
+      "acceptButton": "Accepteren"
+    },
+    "invitePrompt": {
+      "title": "{count, plural, one {Je hebt een teamuitnodiging} other {Je hebt teamuitnodigingen}}",
+      "description": "{count, plural, one {Je bent uitgenodigd om lid te worden van een team. Accepteer om toegang te krijgen.} other {Je bent uitgenodigd om lid te worden van deze teams. Accepteer om toegang te krijgen.}}",
+      "maybeLater": "Misschien later"
+    },
+    "pendingInvites": {
+      "cardTitle": "Uitnodigingen voor jou",
+      "cardDescription": "Accepteer een uitnodiging om lid te worden van het team van die winkel."
+    },
+    "success": {
+      "inviteCreated": "Uitnodiging aangemaakt. Ze zien het zodra ze inloggen met dat e-mailadres. (E-mail versturen is nog niet gekoppeld.)",
+      "inviteAccepted": "Welkom bij het team.",
+      "roleUpdated": "Rol bijgewerkt.",
+      "memberRemoved": "Lid verwijderd."
+    }
+  }
+}

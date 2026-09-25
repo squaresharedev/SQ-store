@@ -24,6 +24,7 @@
  */
 
 import { Copy, Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import {
   destructiveButtonClass,
@@ -39,8 +40,8 @@ const ACTION_ICON = "hidden size-4 shrink-0 @3xs/actions:block";
 export function BlockActions({
   onDuplicate,
   onRemove,
-  duplicateLabel = "Duplicate",
-  removeLabel = "Remove from grid",
+  duplicateLabel,
+  removeLabel,
 }: {
   /** Absent for a selection with nothing copyable in it (a product tile is one
    *  per product by design), in which case Remove takes the whole row. */
@@ -49,6 +50,12 @@ export function BlockActions({
   duplicateLabel?: string;
   removeLabel?: string;
 }) {
+  // Resolve defaults here, not as parameter defaults, because a default
+  // parameter cannot call a hook.
+  const t = useTranslations("Storefront");
+  const resolvedDuplicate = duplicateLabel ?? t("blockActions.duplicate");
+  const resolvedRemove = removeLabel ?? t("blockActions.remove");
+
   if (!onDuplicate && !onRemove) return null;
   return (
     // `pt-4`, not a margin. These editors space their children with
@@ -67,7 +74,7 @@ export function BlockActions({
           className={cn(secondaryButtonClass, ACTION_BTN)}
         >
           <Copy className={ACTION_ICON} strokeWidth={2} aria-hidden="true" />
-          <span className="truncate">{duplicateLabel}</span>
+          <span className="truncate">{resolvedDuplicate}</span>
         </button>
       )}
       {onRemove && (
@@ -77,7 +84,7 @@ export function BlockActions({
           className={cn(destructiveButtonClass, ACTION_BTN)}
         >
           <Trash2 className={ACTION_ICON} strokeWidth={2} aria-hidden="true" />
-          <span className="truncate">{removeLabel}</span>
+          <span className="truncate">{resolvedRemove}</span>
         </button>
       )}
     </div>

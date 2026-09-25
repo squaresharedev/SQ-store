@@ -1,6 +1,8 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { formatPercent } from "@/lib/format/intl";
 import type { KeyboardEvent, PointerEvent as ReactPointerEvent } from "react";
 import { cn } from "@/lib/utils";
 import { clamp, hsvToHex, type Hsv } from "@/lib/format/color";
@@ -40,6 +42,8 @@ export function ColorArea({
   hsv: Hsv;
   onChange: (hsv: Hsv) => void;
 }) {
+  const t = useTranslations("Common.colorPicker");
+  const locale = useLocale();
   const svRef = useRef<HTMLDivElement>(null);
   const hueRef = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState<"sv" | "hue" | null>(null);
@@ -96,11 +100,14 @@ export function ColorArea({
         ref={svRef}
         role="slider"
         tabIndex={0}
-        aria-label="Saturation and brightness"
+        aria-label={t("saturationBrightness")}
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={Math.round(hsv.s)}
-        aria-valuetext={`${Math.round(hsv.s)}% saturation, ${Math.round(hsv.v)}% brightness`}
+        aria-valuetext={t("saturationBrightnessValue", {
+          saturation: formatPercent(Math.round(hsv.s), locale),
+          brightness: formatPercent(Math.round(hsv.v), locale),
+        })}
         onKeyDown={onSvKey}
         onPointerDown={(event) => {
           event.preventDefault();
@@ -146,11 +153,11 @@ export function ColorArea({
         ref={hueRef}
         role="slider"
         tabIndex={0}
-        aria-label="Hue"
+        aria-label={t("hue")}
         aria-valuemin={0}
         aria-valuemax={360}
         aria-valuenow={Math.round(hsv.h)}
-        aria-valuetext={`${Math.round(hsv.h)} degrees`}
+        aria-valuetext={t("hueValue", { degrees: Math.round(hsv.h) })}
         onKeyDown={onHueKey}
         onPointerDown={(event) => {
           event.preventDefault();

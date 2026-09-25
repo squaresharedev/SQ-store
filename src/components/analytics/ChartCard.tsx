@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { ChartNoAxesColumn } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { helpTextClass } from "@/components/ui/control-styles";
 import { badgeClass, cardClass } from "@/components/ui/surface-styles";
 import { cn } from "@/lib/utils";
@@ -29,7 +30,7 @@ export function ChartCard({
   description,
   children,
   empty,
-  emptyText = "No sales in this range",
+  emptyText,
   awaiting,
   panel,
   source,
@@ -56,6 +57,7 @@ export function ChartCard({
   headingLevel?: "h2" | "h3";
   className?: string;
 }) {
+  const t = useTranslations();
   const state = awaiting ? "awaiting" : empty ? "empty" : "live";
 
   return (
@@ -80,14 +82,14 @@ export function ChartCard({
             {title}
           </Heading>
           {description && (
-            <InfoTip label={`How to read ${title}`}>{description}</InfoTip>
+            <InfoTip label={t("Analytics.chart.howToRead", { title })}>{description}</InfoTip>
           )}
         </div>
         {awaiting && (
           <span
             className={cn(badgeClass, "shrink-0 font-normal text-muted-foreground")}
           >
-            Coming soon
+            {t("Common.badge.comingSoon")}
           </span>
         )}
       </div>
@@ -109,7 +111,7 @@ export function ChartCard({
               className="size-5 text-muted-foreground/60"
               aria-hidden="true"
             />
-            <p className={helpTextClass}>{emptyText}</p>
+            <p className={helpTextClass}>{emptyText ?? t("Analytics.chart.emptyDefault")}</p>
           </div>
         ) : (
           children

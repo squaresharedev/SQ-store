@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { lastUsedBadgeClass } from "@/components/ui/control-styles";
 import { cn } from "@/lib/utils";
 
@@ -10,5 +11,6 @@ import { cn } from "@/lib/utils";
  * being a sighted-only cue.
  */
 export function LastUsedBadge({ className }: { className?: string }) {
-  return <span className={cn(lastUsedBadgeClass, className)}>Last used</span>;
+  const t = useTranslations("Auth");
+  return <span className={cn(lastUsedBadgeClass, className)}>{t("lastUsed")}</span>;
 }

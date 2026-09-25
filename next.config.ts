@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin";
 import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 
 const isDev = process.env.NODE_ENV === "development";
@@ -179,7 +180,12 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// UI translations. Points next-intl at the per-request config, which resolves
+// the locale from a cookie rather than a URL segment: locale routing needs
+// middleware, and this stack cannot ship any (see the CSP note above).
+const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
+
+export default withNextIntl(nextConfig);
 
 // Make Cloudflare bindings/env available during `next dev` so local development
 // mirrors the Workers runtime.

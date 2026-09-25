@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { ErrorScreen } from "@/components/error/ErrorScreen";
 import { Button } from "@/components/ui/button";
 
@@ -28,6 +29,8 @@ export default function ErrorBoundary({
   unstable_retry?: () => void;
   reset: () => void;
 }) {
+  const t = useTranslations("ErrorPage.boundary");
+  const tCommon = useTranslations("Common.actions");
   useEffect(() => {
     console.error("[error boundary]", error);
   }, [error]);
@@ -36,21 +39,21 @@ export default function ErrorBoundary({
     <ErrorScreen
       code="500"
       readout="err_internal"
-      title="Something went wrong"
-      description="We couldn't load this page. This is usually a temporary connection problem: your account is fine and you're still signed in."
+      title={t("title")}
+      description={t("description")}
       action={
         /* Inverted for the same reason as the 404's CTA: see not-found.tsx. */
         <Button
           onClick={() => (unstable_retry ?? reset)()}
           className="bg-foreground text-background hover:bg-foreground/90"
         >
-          Try again
+          {tCommon("tryAgain")}
         </Button>
       }
       note={
         error.digest ? (
           <p className="mt-6 font-mono text-xs text-muted-foreground">
-            Reference: {error.digest}
+            {t("reference", { digest: error.digest })}
           </p>
         ) : null
       }

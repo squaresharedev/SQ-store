@@ -1,4 +1,5 @@
 import { TriangleAlert } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cardClass } from "@/components/ui/surface-styles";
 import { cn } from "@/lib/utils";
 
@@ -16,6 +17,7 @@ import { cn } from "@/lib/utils";
  * need to re-read, not the outcome of something they just did.
  */
 export function SignalsUnavailableNotice() {
+  const t = useTranslations("Analytics.signalsUnavailable");
   return (
     <div
       className={cn(cardClass, "flex items-start gap-3 border-dashed p-4")}
@@ -29,10 +31,10 @@ export function SignalsUnavailableNotice() {
       />
       <div className="min-w-0">
         <h2 className="text-base font-semibold text-foreground">
-          Views and signups are unavailable right now
+          {t("title")}
         </h2>
         <p className="mt-1 font-inter text-sm text-muted-foreground">
-          Your sales figures above are unaffected. Reload the page to try again.
+          {t("body")}
         </p>
       </div>
     </div>

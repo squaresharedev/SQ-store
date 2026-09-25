@@ -1,3 +1,4 @@
+import { useTranslations, useLocale } from "next-intl";
 import { MetricTile } from "@/components/dashboard/MetricTile";
 import { formatCents } from "@/lib/format/money";
 import { formatNumber } from "@/components/charts";
@@ -46,30 +47,32 @@ export function SignalSection({
   /** Only read when the source carries money. */
   currency: string;
 }) {
+  const t = useTranslations();
+  const locale = useLocale();
   const { totals } = breakdown;
   const state = resolveSourceState(source, totals.count);
   const awaiting = state === "awaiting" ? source.awaiting : undefined;
   const hasData = totals.count > 0;
-  const emptyText = `No ${source.noun.many} in this range`;
+  const emptyText = t(`Analytics.sources.${source.id}.emptyRange`);
 
   return (
     <AnalyticsSection
       id={source.id}
-      title={source.label}
-      description={source.description}
+      title={t(`Analytics.sources.${source.id}.label`)}
+      description={t(`Analytics.sources.${source.id}.description`)}
       icon={source.icon}
       state={state}
     >
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <MetricTile
-          label={`Total ${source.noun.many}`}
-          value={hasData ? formatNumber(totals.count) : null}
+          label={t(`Analytics.sources.${source.id}.total`)}
+          value={hasData ? formatNumber(totals.count, locale) : null}
           pending={awaiting !== undefined}
           // Short on purpose. The generic "waiting on analytics" would be
           // wrong (analytics IS connected; this metric is waiting on its own
           // block), and the full explanation belongs in exactly ONE place per
           // section: the card below, where there is room to read it.
-          pendingText="Not measured yet."
+          pendingText={t("Analytics.signal.notMeasured")}
           zeroText={emptyText}
           datapoint={{
             metric: `${source.id}.count`,
@@ -84,21 +87,21 @@ export function SignalSection({
             same noise as three identical placeholder charts. */}
         {!awaiting && (
           <MetricTile
-            label="Visitors"
+            label={t("Analytics.signal.visitors")}
             // Distinct visitors only exist if the producer sends a digest. Zero
             // with real signals means "not attributed", not "nobody", so it
             // renders the calm zero rather than a confident 0.
             value={
-              totals.uniqueVisitors > 0 ? formatNumber(totals.uniqueVisitors) : null
+              totals.uniqueVisitors > 0 ? formatNumber(totals.uniqueVisitors, locale) : null
             }
             hint={
               totals.uniqueVisitors > 0 && totals.count > totals.uniqueVisitors
-                ? `${
-                    Math.round((totals.count / totals.uniqueVisitors) * 10) / 10
-                  } per visitor on average`
+                ? t("Analytics.signal.perVisitor", {
+                    rate: String(Math.round((totals.count / totals.uniqueVisitors) * 10) / 10),
+                  })
                 : undefined
             }
-            zeroText="Not counted yet"
+            zeroText={t("Analytics.signal.notCounted")}
             datapoint={{
               metric: `${source.id}.unique_visitors`,
               value: totals.uniqueVisitors,
@@ -109,11 +112,11 @@ export function SignalSection({
         )}
         {!awaiting && source.carriesValue && (
           <MetricTile
-            label="Value"
+            label={t("Analytics.signal.value")}
             value={
-              totals.valueCents > 0 ? formatCents(totals.valueCents, currency) : null
+              totals.valueCents > 0 ? formatCents(totals.valueCents, currency, locale) : null
             }
-            zeroText="No value yet"
+            zeroText={t("Analytics.signal.noValue")}
             datapoint={{
               metric: `${source.id}.value`,
               value: totals.valueCents,
@@ -131,9 +134,9 @@ export function SignalSection({
         // reading the same sentence is noise pretending to be a layout
         // preview. The panels arrive when the data does.
         <ChartCard
-          title={`${source.label} over time`}
-          description={`Ready to chart as soon as ${source.noun.many} start arriving.`}
-          awaiting={awaiting}
+          title={t(`Analytics.sources.${source.id}.overTime`)}
+          description={t(awaiting.readyToChart)}
+          awaiting={t(awaiting.reason)}
           panel="trend"
           source={source.id}
           headingLevel="h3"
@@ -161,13 +164,6 @@ export function SignalSection({
   );
 }
 
-/** The panel titles, kept beside the switch that renders them. */
-const PANEL_TITLES: Record<SourcePanel, string> = {
-  trend: "Over time",
-  channels: "Channels",
-  weekdays: "By weekday",
-  storefronts: "By storefront",
-};
 
 function SignalPanel({
   panel,
@@ -184,6 +180,7 @@ function SignalPanel({
   hasData: boolean;
   className?: string;
 }) {
+  const t = useTranslations("Analytics");
   const shared = {
     panel,
     source: source.id,
@@ -199,14 +196,13 @@ function SignalPanel({
     return (
       <ChartCard
         {...shared}
-        title={PANEL_TITLES.trend}
-        description={`${source.label} across the selected range.`}
+        title={t("signal.panels.trend")}
+        description={t(`sources.${source.id}.acrossRange`)}
         empty={!hasData || breakdown.series.length === 0}
       >
         <SignalTrendChart
           series={breakdown.series}
-          noun={source.noun}
-          label={source.label}
+          kind={source.id}
           tone={tone}
         />
       </ChartCard>
@@ -217,14 +213,13 @@ function SignalPanel({
     return (
       <ChartCard
         {...shared}
-        title={PANEL_TITLES.channels}
-        description="Where they came from."
+        title={t("signal.panels.channels")}
+        description={t("signal.whereFrom")}
         empty={!hasData}
       >
         <SignalChannelChart
           channels={breakdown.channels}
-          noun={source.noun}
-          label={source.label}
+          kind={source.id}
         />
       </ChartCard>
     );
@@ -234,14 +229,13 @@ function SignalPanel({
     return (
       <ChartCard
         {...shared}
-        title={PANEL_TITLES.weekdays}
-        description="The weekly rhythm."
+        title={t("signal.panels.weekdays")}
+        description={t("signal.weeklyRhythm")}
         empty={!hasData}
       >
         <SignalWeekdayChart
           weekdays={breakdown.weekdays}
-          noun={source.noun}
-          label={source.label}
+          kind={source.id}
           tone={tone}
         />
       </ChartCard>
@@ -251,14 +245,13 @@ function SignalPanel({
   return (
     <ChartCard
       {...shared}
-      title={PANEL_TITLES.storefronts}
-      description="Which storefront they came from."
+      title={t("signal.panels.storefronts")}
+      description={t("signal.whichStorefront")}
       empty={!hasData || breakdown.storefronts.length === 0}
     >
       <SignalStorefrontsChart
         storefronts={breakdown.storefronts}
-        noun={source.noun}
-        label={source.label}
+        kind={source.id}
         tone={tone}
       />
     </ChartCard>

@@ -1,5 +1,6 @@
 import { SHIPPING_PROFILES_MAX, type ShippingProfile } from "@/types/storefront";
-import { buildShippingProse } from "@/lib/shipping/policy-prose";
+import type { Locale } from "@/i18n/locales";
+import { buildShippingProse, type ProseResolver } from "@/lib/shipping/policy-prose";
 import type { SellerShippingPolicy } from "@/types/shipping-policy";
 
 /**
@@ -63,13 +64,16 @@ export function findShippingProfile(
 export function resolveProductShipping(
   shippingProfileId: string | null | undefined,
   policy: SellerShippingPolicy | null | undefined,
+  /** The reader's language for the generated default. */
+  resolve: ProseResolver,
+  locale: Locale,
 ): ResolvedShipping | null {
   const profile = findShippingProfile(policy?.profiles, shippingProfileId);
   const resolved: ResolvedShipping = profile
     ? { name: profile.name, body: profile.body, dispatch: profile.dispatch ?? "" }
     : {
         name: null,
-        body: buildShippingProse(policy).shipping,
+        body: buildShippingProse(policy, resolve, locale).shipping,
         dispatch: policy?.dispatch ?? "",
       };
   return resolved.body.trim() === "" && resolved.dispatch.trim() === "" ? null : resolved;
@@ -85,8 +89,12 @@ export function resolveProductShipping(
  * to write a per-product returns policy that the statutory rights below it
  * would then contradict.
  */
-export function resolveReturns(policy: SellerShippingPolicy | null | undefined): string {
-  return buildShippingProse(policy).returns;
+export function resolveReturns(
+  policy: SellerShippingPolicy | null | undefined,
+  resolve: ProseResolver,
+  locale: Locale,
+): string {
+  return buildShippingProse(policy, resolve, locale).returns;
 }
 
 /**

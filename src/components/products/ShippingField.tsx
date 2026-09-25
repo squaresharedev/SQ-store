@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Truck } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { ShippingChoices } from "@/lib/storefront/queries";
 import type { SellerShippingPolicy } from "@/types/shipping-policy";
 import { Select, type SelectOption } from "@/components/ui/select";
@@ -46,6 +47,7 @@ export function ShippingField({
   policy: SellerShippingPolicy;
   onChange: (next: string | null) => void;
 }) {
+  const t = useTranslations("Products.shippingField");
   const router = useRouter();
   const [editing, setEditing] = useState(false);
   const { profiles, fallback } = choices;
@@ -65,21 +67,21 @@ export function ShippingField({
   const options: SelectOption<string>[] = [
     {
       value: DEFAULT_VALUE,
-      label: "Your usual shipping terms",
-      description: "Set once for your account. What almost every product wants.",
+      label: t("usual"),
+      description: t("usualDescription"),
     },
     ...(orphaned
       ? [
           {
             value,
-            label: "Removed profile",
-            description: "This profile no longer exists, so buyers see your default terms.",
+            label: t("removed"),
+            description: t("removedDescription"),
           },
         ]
       : []),
     ...profiles.map((profile) => ({
       value: profile.id,
-      label: profile.name || "Untitled profile",
+      label: profile.name || t("untitled"),
       description: firstLine(profile.body),
     })),
   ];
@@ -88,8 +90,8 @@ export function ShippingField({
   // for), falling back to the opening of the free-text terms, falling back to
   // an honest "nothing written yet" rather than silence.
   const summary = chosen
-    ? chosen.dispatch || firstLine(chosen.body) || "No terms written for this profile yet."
-    : fallback.dispatch || firstLine(fallback.body) || "No shipping terms written yet.";
+    ? chosen.dispatch || firstLine(chosen.body) || t("profileNoTerms")
+    : fallback.dispatch || firstLine(fallback.body) || t("noTerms");
 
   return (
     <div
@@ -100,7 +102,7 @@ export function ShippingField({
       {(profiles.length > 0 || orphaned) && (
         <div className="space-y-1.5 sm:max-w-sm">
           <label htmlFor={inputId} className={labelClass}>
-            Shipping profile
+            {t("profile")}
           </label>
           <Select
             id={inputId}
@@ -124,7 +126,7 @@ export function ShippingField({
           onClick={() => setEditing(true)}
           className="shrink-0 font-inter text-xs font-medium text-muted-foreground underline underline-offset-2 transition-colors duration-base ease-standard hover:text-foreground motion-reduce:transition-none"
         >
-          Edit
+          {t("edit")}
         </button>
       </div>
 

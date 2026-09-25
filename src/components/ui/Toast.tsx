@@ -12,6 +12,7 @@ import {
   type ReactNode,
 } from "react";
 import { X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { ToastToneIcon } from "@/components/ui/toast-icons";
 import {
@@ -130,6 +131,7 @@ function messageKey(tone: ToastTone, title: string, lines?: string[]) {
 }
 
 export function ToastProvider({ children }: { children: ReactNode }) {
+  const t = useTranslations("Common.toast");
   const [toasts, setToasts] = useState<Toast[]>([]);
   const nextId = useRef(0);
   // Removal timers for toasts currently playing their exit. Cleared on
@@ -264,7 +266,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         // so an error interrupts and a success waits its turn. Nesting a live
         // region inside another gets the message announced twice.
         role="region"
-        aria-label="Notifications"
+        aria-label={t("regionLabel")}
         onKeyDown={(event) => {
           // Only reachable with focus already inside the stack, so this can
           // never steal Escape from a modal or a popover.
@@ -339,6 +341,7 @@ function ToastCard({
   /** Tab-level pause, shared by every toast on screen. */
   paused: boolean;
 }) {
+  const t = useTranslations("Common.toast");
   const isError = toast.tone === "error";
   const tone = TONE[toast.tone];
 
@@ -475,7 +478,7 @@ function ToastCard({
         <button
           type="button"
           onClick={onClose}
-          aria-label="Dismiss"
+          aria-label={t("dismiss")}
           className={cn(
             overlayCloseButtonClass,
             "relative size-9 self-center",
@@ -503,22 +506,26 @@ function ToastCard({
   );
 }
 
-/** The result shape the server actions in this app settle into. */
+/**
+ * An action state that still carries English strings: the two-factor actions
+ * (lib/auth/mfa-actions.ts), until their copy moves into the catalogue. Every
+ * other action settles into ActionState and uses useActionStateToast
+ * (components/ui/ActionErrorNotice.tsx) instead.
+ */
 export type ActionResultState = {
   error?: string;
   success?: string;
 };
 
 /**
- * Bridge from a `useActionState` result to a toast: one line in a form
- * component, replacing the inline status paragraph it used to render.
+ * Bridge from a string-carrying `useActionState` result to a toast.
  *
  * WHY IT WATCHES IDENTITY rather than the message text: a resend that fails the
  * same way twice returns the same STRING both times, so comparing text would
  * announce the first failure and silently swallow every one after it. Each
  * dispatch settles into a fresh object, so the object IS the occurrence.
  *
- * Whatever state is present at mount is never announced — that is a page load,
+ * Whatever state is present at mount is never announced: that is a page load,
  * not something the user just did.
  */
 export function useActionToast(state: ActionResultState | undefined) {

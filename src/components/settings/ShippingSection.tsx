@@ -3,7 +3,8 @@
 import { useActionState, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Plus, Trash2 } from "lucide-react";
-import { useActionToast } from "@/components/ui/Toast";
+import { useLocale, useTranslations } from "next-intl";
+import { useActionStateToast, useSaveResult } from "@/components/ui/ActionErrorNotice";
 import { SaveButton } from "@/components/ui/SaveButton";
 import { SettingsCard } from "@/components/settings/SettingsCard";
 import { Input } from "@/components/ui/input";
@@ -19,9 +20,10 @@ import {
   secondaryButtonClass,
 } from "@/components/ui/control-styles";
 import { saveShippingPolicy } from "@/lib/settings/shipping-actions";
-import type { SettingsActionState } from "@/lib/settings/actions";
-import { EU_COUNTRIES } from "@/lib/settings/constants";
+import type { ActionState } from "@/lib/errors";
+import { useEuCountries } from "@/components/settings/use-eu-countries";
 import { buildShippingProse } from "@/lib/shipping/policy-prose";
+import { useResolveMessage as useResolveProse } from "@/components/ui/ActionErrorNotice";
 import {
   canAddShippingProfile,
   newShippingProfileId,
@@ -44,12 +46,7 @@ import {
   type ShippingProfile,
 } from "@/types/storefront";
 
-const INITIAL: SettingsActionState = {};
-
-const FROM_OPTIONS: readonly SelectOption<string>[] = [
-  { value: "", label: "Not set" },
-  ...EU_COUNTRIES.map((country) => ({ value: country.code, label: country.name })),
-];
+const INITIAL: ActionState = {};
 
 /**
  * The returns window as a small set of answers rather than a free number.
@@ -60,17 +57,7 @@ const FROM_OPTIONS: readonly SelectOption<string>[] = [
  * form in, so it is on the list rather than something you express by leaving a
  * field blank. "Custom" is the escape hatch for the rest.
  */
-const WINDOW_OPTIONS: readonly SelectOption<string>[] = [
-  { value: "0", label: "None beyond the statutory right" },
-  { value: "14", label: "14 days", description: "The EU statutory minimum" },
-  { value: "30", label: "30 days" },
-  { value: "custom", label: "Something else" },
-];
-
-const PAID_BY_OPTIONS: readonly SelectOption<string>[] = [
-  { value: "buyer", label: "The buyer pays return postage" },
-  { value: "seller", label: "We pay return postage" },
-];
+const WINDOW_CHOICES = ["0", "14", "30", "custom"] as const;
 
 /**
  * SHIPPING & RETURNS, set once for the whole account.
@@ -106,8 +93,41 @@ export function ShippingSection({
    *  link to go, so it is left out entirely rather than shown and disabled. */
   continueHref?: string;
 }) {
+  const t = useTranslations("Settings");
+  const { countries } = useEuCountries();
+  const fromOptions: readonly SelectOption<string>[] = useMemo(
+    () => [
+      { value: "", label: t("shipping.shipsFrom.notSet") },
+      ...countries.map((country) => ({ value: country.code, label: country.name })),
+    ],
+    [countries, t],
+  );
+  const windowOptions: readonly SelectOption<string>[] = useMemo(
+    () =>
+      WINDOW_CHOICES.map((value) => {
+        if (value === "0") return { value, label: t("shipping.returnsWindow.none") };
+        if (value === "custom") return { value, label: t("shipping.returnsWindow.custom") };
+        const days = Number(value);
+        return days === 14
+          ? {
+              value,
+              label: t("shipping.returnsWindow.days", { days }),
+              description: t("shipping.returnsWindow.statutoryMinimum"),
+            }
+          : { value, label: t("shipping.returnsWindow.days", { days }) };
+      }),
+    [t],
+  );
+  const paidByOptions: readonly SelectOption<string>[] = useMemo(
+    () => [
+      { value: "buyer", label: t("shipping.returnsPaidBy.buyer") },
+      { value: "seller", label: t("shipping.returnsPaidBy.seller") },
+    ],
+    [t],
+  );
   const [state, formAction, isPending] = useActionState(saveShippingPolicy, INITIAL);
-  useActionToast(state);
+  useActionStateToast(state);
+  const saveResult = useSaveResult(state);
 
   // Shown once a save lands, not just while SaveButton's own green flash is up
   // (that fades after a couple of seconds; the seller still needs a next step
@@ -186,7 +206,13 @@ export function ShippingSection({
     ],
   );
 
-  const preview = useMemo(() => buildShippingProse(draft), [draft]);
+  // What buyers will read, in the language this seller is reading in.
+  const resolveProse = useResolveProse();
+  const locale = useLocale();
+  const preview = useMemo(
+    () => buildShippingProse(draft, resolveProse, locale),
+    [draft, resolveProse, locale],
+  );
 
   function setDestination(index: number, patch: Partial<ShippingDestination>) {
     setDestinations((current) =>
@@ -210,17 +236,17 @@ export function ShippingSection({
 
       <SettingsCard
         id="shipping"
-        title="Shipping"
-        description="Set once for your whole account. Shown on every product page you sell on, and used for every product that does not name an exception below."
+        title={t("shipping.shippingCard.title")}
+        description={t("shipping.shippingCard.description")}
         decoration="grid"
       >
         <div className="flex flex-col gap-4 [&>div]:scroll-mt-20">
           <div id="ships-from" className="flex flex-col gap-1.5">
-            <Label htmlFor="ships_from">Ships from</Label>
+            <Label htmlFor="ships_from">{t("shipping.shipsFrom.label")}</Label>
             <Select
               id="ships_from"
               value={shipsFrom}
-              options={FROM_OPTIONS}
+              options={fromOptions}
               onChange={setShipsFrom}
               disabled={isPending}
             />
@@ -228,17 +254,16 @@ export function ShippingSection({
 
           <div id="dispatch-time" className="flex flex-col gap-1.5">
             <span className="flex items-center gap-1.5">
-              <Label htmlFor="dispatch">Dispatch time</Label>
-              <InfoTip label="Why this is its own field">
-                One line, printed beside the buy button. &ldquo;When does it leave?&rdquo; is the
-                first thing buyers ask, and it should not need reading a paragraph to answer.
+              <Label htmlFor="dispatch">{t("shipping.dispatch.label")}</Label>
+              <InfoTip label={t("shipping.dispatch.tipLabel")}>
+                {t("shipping.dispatch.tipBody")}
               </InfoTip>
             </span>
             <Input
               id="dispatch"
               value={dispatch}
               onChange={(event) => setDispatch(event.target.value)}
-              placeholder="e.g. Ships within 1-3 business days"
+              placeholder={t("shipping.dispatch.placeholder")}
               maxLength={SHIPPING_DISPATCH_MAX}
             />
           </div>
@@ -251,41 +276,37 @@ export function ShippingSection({
               mean. */}
           <div id="destinations" className="flex flex-col gap-2">
             <span className="flex items-center gap-1.5">
-              <Label>Where you ship, and how long it takes</Label>
-              <InfoTip label="How much detail to give">
-                Group destinations however you actually ship: one row for home, one for the
-                rest of the EU, one for everywhere else is plenty. Leave the cost blank if it
-                varies.
+              <Label>{t("shipping.destinations.label")}</Label>
+              <InfoTip label={t("shipping.destinations.tipLabel")}>
+                {t("shipping.destinations.tipBody")}
               </InfoTip>
             </span>
             {destinations.length === 0 ? (
-              <p className={helpTextClass}>
-                Nothing listed yet. Buyers see no delivery times until you add a row.
-              </p>
+              <p className={helpTextClass}>{t("shipping.destinations.empty")}</p>
             ) : (
               <ul className="flex flex-col gap-2">
                 {destinations.map((row, index) => (
                   <li key={index} className="flex items-start gap-2">
                     <div className="grid min-w-0 flex-1 gap-2 sm:grid-cols-[1fr_1fr_0.6fr]">
                       <Input
-                        aria-label={`Destination ${index + 1}`}
+                        aria-label={t("shipping.destinations.areaLabel", { number: index + 1 })}
                         value={row.area}
                         onChange={(event) => setDestination(index, { area: event.target.value })}
-                        placeholder="e.g. Rest of EU"
+                        placeholder={t("shipping.destinations.areaPlaceholder")}
                         maxLength={DESTINATION_AREA_MAX}
                       />
                       <Input
-                        aria-label={`Delivery time ${index + 1}`}
+                        aria-label={t("shipping.destinations.timeLabel", { number: index + 1 })}
                         value={row.time}
                         onChange={(event) => setDestination(index, { time: event.target.value })}
-                        placeholder="e.g. 5-7 business days"
+                        placeholder={t("shipping.destinations.timePlaceholder")}
                         maxLength={DESTINATION_TIME_MAX}
                       />
                       <Input
-                        aria-label={`Shipping cost ${index + 1}`}
+                        aria-label={t("shipping.destinations.costLabel", { number: index + 1 })}
                         value={row.cost ?? ""}
                         onChange={(event) => setDestination(index, { cost: event.target.value })}
-                        placeholder="e.g. €9.00"
+                        placeholder={t("shipping.destinations.costPlaceholder")}
                         maxLength={DESTINATION_COST_MAX}
                       />
                     </div>
@@ -298,8 +319,8 @@ export function ShippingSection({
                       }
                       aria-label={
                         row.area.trim()
-                          ? `Remove the ${row.area.trim()} destination`
-                          : `Remove destination ${index + 1}`
+                          ? t("shipping.destinations.removeNamed", { area: row.area.trim() })
+                          : t("shipping.destinations.removeNumbered", { number: index + 1 })
                       }
                       className={cn(iconButtonClass, "shrink-0")}
                     >
@@ -318,23 +339,23 @@ export function ShippingSection({
                 className={cn(secondaryButtonClass, "w-fit")}
               >
                 <Plus className="size-4" aria-hidden="true" />
-                Add a destination
+                {t("shipping.destinations.add")}
               </button>
             ) : (
               <p className={helpTextClass}>
-                That is all {SHIPPING_DESTINATIONS_MAX} destinations. Remove one to add another.
+                {t("shipping.destinations.limitReached", { max: SHIPPING_DESTINATIONS_MAX })}
               </p>
             )}
           </div>
 
           <div id="shipping-notes" className="flex flex-col gap-1.5">
-            <Label htmlFor="shipping_notes">Anything else about shipping</Label>
+            <Label htmlFor="shipping_notes">{t("shipping.notes.label")}</Label>
             <Textarea
               id="shipping_notes"
               value={shippingNotes}
               onChange={(event) => setShippingNotes(event.target.value)}
               rows={3}
-              placeholder="e.g. Tracked as standard. We do not ship to PO boxes."
+              placeholder={t("shipping.notes.placeholder")}
               maxLength={POLICY_TEXT_MAX}
             />
           </div>
@@ -343,30 +364,28 @@ export function ShippingSection({
 
       <SettingsCard
         id="returns"
-        title="Returns"
-        description="What you offer on top of the statutory rights your product pages already state."
+        title={t("shipping.returnsCard.title")}
+        description={t("shipping.returnsCard.description")}
       >
         <div className="flex flex-col gap-4 [&>div]:scroll-mt-20">
           <div id="returns-window" className="flex flex-col gap-1.5">
             <span className="flex items-center gap-1.5">
-              <Label htmlFor="returns_window">Returns window</Label>
-              <InfoTip label="What the statutory right already covers">
-                Selling to EU buyers at a distance gives them 14 days to change their mind and a
-                two-year guarantee on faults, whatever you choose here. Your product pages state
-                both already, so this is what you offer on top.
+              <Label htmlFor="returns_window">{t("shipping.returnsWindow.label")}</Label>
+              <InfoTip label={t("shipping.returnsWindow.tipLabel")}>
+                {t("shipping.returnsWindow.tipBody")}
               </InfoTip>
             </span>
             <Select
               id="returns_window"
               value={windowChoice}
-              options={WINDOW_OPTIONS}
+              options={windowOptions}
               onChange={setWindowChoice}
               disabled={isPending}
             />
             {windowChoice === "custom" && (
               <div className="mt-2 flex items-center gap-2 sm:max-w-40">
                 <Input
-                  aria-label="Returns window in days"
+                  aria-label={t("shipping.returnsWindow.customLabel")}
                   value={customDays}
                   onChange={(event) => setCustomDays(event.target.value.replace(/[^0-9]/g, ""))}
                   inputMode="numeric"
@@ -378,7 +397,9 @@ export function ShippingSection({
                   // styled example price for a real one elsewhere in the app).
                   className="flex-1 placeholder:text-muted-foreground/50"
                 />
-                <span className="text-sm text-muted-foreground">days</span>
+                <span className="text-sm text-muted-foreground">
+                  {t("shipping.returnsWindow.daysUnit")}
+                </span>
               </div>
             )}
           </div>
@@ -388,11 +409,11 @@ export function ShippingSection({
               drops it for the same reason. */}
           {returnsWindowDays !== undefined && returnsWindowDays > 0 && (
             <div id="returns-postage" className="flex flex-col gap-1.5">
-              <Label htmlFor="returns_paid_by">Return postage</Label>
+              <Label htmlFor="returns_paid_by">{t("shipping.returnsPaidBy.label")}</Label>
               <Select
                 id="returns_paid_by"
                 value={paidBy}
-                options={PAID_BY_OPTIONS}
+                options={paidByOptions}
                 onChange={(value) => setPaidBy(value as "buyer" | "seller")}
                 disabled={isPending}
               />
@@ -401,10 +422,9 @@ export function ShippingSection({
 
           <div id="returns-notes" className="flex flex-col gap-1.5">
             <span className="flex items-center gap-1.5">
-              <Label htmlFor="returns_notes">Exceptions</Label>
-              <InfoTip label="What belongs here">
-                Anything the window above does not cover: made-to-order pieces, hygiene items,
-                opened software. Buyers read this before they buy, not after.
+              <Label htmlFor="returns_notes">{t("shipping.exceptions.label")}</Label>
+              <InfoTip label={t("shipping.exceptions.tipLabel")}>
+                {t("shipping.exceptions.tipBody")}
               </InfoTip>
             </span>
             <Textarea
@@ -412,7 +432,7 @@ export function ShippingSection({
               value={returnsNotes}
               onChange={(event) => setReturnsNotes(event.target.value)}
               rows={3}
-              placeholder="e.g. Made-to-order pieces cannot be returned unless faulty."
+              placeholder={t("shipping.exceptions.placeholder")}
               maxLength={POLICY_TEXT_MAX}
             />
           </div>
@@ -425,15 +445,15 @@ export function ShippingSection({
           their answers stop saying anything useful. */}
       <SettingsCard
         id="preview"
-        title="What buyers will read"
-        description="Built from your answers above, and shown on every product page."
+        title={t("shipping.preview.title")}
+        description={t("shipping.preview.description")}
       >
         {preview.shipping || preview.returns ? (
           <div className="flex flex-col gap-4">
             {preview.shipping && (
               <div>
                 <h3 className="font-inter text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  Shipping
+                  {t("shipping.preview.shippingHeading")}
                 </h3>
                 <p className="mt-1 whitespace-pre-line text-sm leading-relaxed text-foreground">
                   {preview.shipping}
@@ -443,7 +463,7 @@ export function ShippingSection({
             {preview.returns && (
               <div>
                 <h3 className="font-inter text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  Returns
+                  {t("shipping.preview.returnsHeading")}
                 </h3>
                 <p className="mt-1 whitespace-pre-line text-sm leading-relaxed text-foreground">
                   {preview.returns}
@@ -452,10 +472,7 @@ export function ShippingSection({
             )}
           </div>
         ) : (
-          <p className={helpTextClass}>
-            Nothing yet. Until you answer something above, your product pages carry no shipping
-            or returns section at all.
-          </p>
+          <p className={helpTextClass}>{t("shipping.preview.empty")}</p>
         )}
       </SettingsCard>
 
@@ -467,29 +484,29 @@ export function ShippingSection({
           being three empty boxes nobody filled in. */}
       <SettingsCard
         id="own-words"
-        title="Write it yourself instead"
-        description="Optional. Anything you put here replaces what was generated above, word for word."
+        title={t("shipping.ownWords.title")}
+        description={t("shipping.ownWords.description")}
       >
         <div className="flex flex-col gap-4 [&>div]:scroll-mt-20">
           <div id="shipping-text" className="flex flex-col gap-1.5">
-            <Label htmlFor="shipping_text">Your shipping policy</Label>
+            <Label htmlFor="shipping_text">{t("shipping.ownWords.shippingLabel")}</Label>
             <Textarea
               id="shipping_text"
               value={shippingText}
               onChange={(event) => setShippingText(event.target.value)}
               rows={4}
-              placeholder="Leave blank to use the answers above."
+              placeholder={t("shipping.ownWords.placeholder")}
               maxLength={POLICY_TEXT_MAX}
             />
           </div>
           <div id="returns-text" className="flex flex-col gap-1.5">
-            <Label htmlFor="returns_text">Your returns policy</Label>
+            <Label htmlFor="returns_text">{t("shipping.ownWords.returnsLabel")}</Label>
             <Textarea
               id="returns_text"
               value={returnsText}
               onChange={(event) => setReturnsText(event.target.value)}
               rows={4}
-              placeholder="Leave blank to use the answers above."
+              placeholder={t("shipping.ownWords.placeholder")}
               maxLength={POLICY_TEXT_MAX}
             />
           </div>
@@ -505,14 +522,12 @@ export function ShippingSection({
           exception is a sentence, not a structure worth five fields. */}
       <SettingsCard
         id="profiles"
-        title="Shipping profiles"
-        description="For the few products that ship differently. Pick one on the product itself, under Shipping."
+        title={t("shipping.profiles.title")}
+        description={t("shipping.profiles.description")}
       >
         <div className="flex flex-col gap-3">
           {profiles.length === 0 ? (
-            <p className={helpTextClass}>
-              None yet. Add one only if some products ship differently from the terms above.
-            </p>
+            <p className={helpTextClass}>{t("shipping.profiles.empty")}</p>
           ) : (
             <ul className="flex flex-col gap-3">
               {profiles.map((profile, index) => (
@@ -523,12 +538,14 @@ export function ShippingSection({
                 >
                   <div className="flex items-start gap-2">
                     <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-                      <Label htmlFor={`profile-name-${profile.id}`}>Name</Label>
+                      <Label htmlFor={`profile-name-${profile.id}`}>
+                        {t("shipping.profiles.nameLabel")}
+                      </Label>
                       <Input
                         id={`profile-name-${profile.id}`}
                         value={profile.name}
                         onChange={(event) => setProfile(index, { name: event.target.value })}
-                        placeholder="e.g. Bulky items"
+                        placeholder={t("shipping.profiles.namePlaceholder")}
                         maxLength={SHIPPING_PROFILE_NAME_MAX}
                       />
                     </div>
@@ -541,8 +558,8 @@ export function ShippingSection({
                       }
                       aria-label={
                         profile.name.trim()
-                          ? `Remove the ${profile.name.trim()} shipping profile`
-                          : "Remove this shipping profile"
+                          ? t("shipping.profiles.removeNamed", { name: profile.name.trim() })
+                          : t("shipping.profiles.removeUnnamed")
                       }
                       className={cn(iconButtonClass, "mt-7 shrink-0")}
                     >
@@ -550,32 +567,34 @@ export function ShippingSection({
                     </button>
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <Label htmlFor={`profile-dispatch-${profile.id}`}>Dispatch time</Label>
+                    <Label htmlFor={`profile-dispatch-${profile.id}`}>
+                      {t("shipping.profiles.dispatchLabel")}
+                    </Label>
                     <Input
                       id={`profile-dispatch-${profile.id}`}
                       value={profile.dispatch ?? ""}
                       onChange={(event) => setProfile(index, { dispatch: event.target.value })}
-                      placeholder="e.g. Made to order, allow 3 weeks"
+                      placeholder={t("shipping.profiles.dispatchPlaceholder")}
                       maxLength={SHIPPING_DISPATCH_MAX}
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <Label htmlFor={`profile-body-${profile.id}`}>Shipping</Label>
+                    <Label htmlFor={`profile-body-${profile.id}`}>
+                      {t("shipping.profiles.bodyLabel")}
+                    </Label>
                     <Textarea
                       id={`profile-body-${profile.id}`}
                       value={profile.body}
                       onChange={(event) => setProfile(index, { body: event.target.value })}
                       rows={3}
-                      placeholder="How these products ship, and what it costs"
+                      placeholder={t("shipping.profiles.bodyPlaceholder")}
                       maxLength={POLICY_TEXT_MAX}
                     />
                     {/* A profile with no terms is dropped on save rather than
                         stored as a name pointing at nothing, so this says so
                         before the seller finds out by saving. */}
                     {profile.body.trim() === "" && (
-                      <p className={helpTextClass}>
-                        Add terms, or this profile is dropped when you save.
-                      </p>
+                      <p className={helpTextClass}>{t("shipping.profiles.noTerms")}</p>
                     )}
                   </div>
                 </li>
@@ -594,18 +613,18 @@ export function ShippingSection({
               className={cn(secondaryButtonClass, "w-fit")}
             >
               <Plus className="size-4" aria-hidden="true" />
-              Add a profile
+              {t("shipping.profiles.add")}
             </button>
           ) : (
             <p className={helpTextClass}>
-              That is all {SHIPPING_PROFILES_MAX} profiles. Remove one to add another.
+              {t("shipping.profiles.limitReached", { max: SHIPPING_PROFILES_MAX })}
             </p>
           )}
         </div>
       </SettingsCard>
 
       <div className="flex flex-wrap items-center gap-3">
-        <SaveButton pending={isPending} state={state} />
+        <SaveButton pending={isPending} state={saveResult} />
         {/* THE NEXT STEP, not just the confirmation. SaveButton already says
             "saved"; a seller who came here to set shipping terms still needs
             to be told where to go next rather than left on a settings page
@@ -613,7 +632,7 @@ export function ShippingSection({
             doesn't vanish before it's used. */}
         {justSaved && continueHref && (
           <Link href={continueHref} className={cn(secondaryButtonClass, "w-fit")}>
-            Continue to your storefront
+            {t("continueToStorefront")}
             <ArrowRight
               className={cn("size-4", iconNudgeRightClass)}
               strokeWidth={2}

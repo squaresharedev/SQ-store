@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 import type { Product } from "@/types/product";
 import {
   EMPTY_STOREFRONT_HEADER,
@@ -172,6 +173,7 @@ export function StorefrontPreview({
    *  textlessBlocks). */
   textless?: boolean;
 }) {
+  const t = useTranslations("Storefront.preview");
   const { theme, header } = config;
   const { boxRef, contentRef, scale } = useFitToBox();
   const canvasFont = fontPresentation(theme.font);
@@ -279,7 +281,7 @@ export function StorefrontPreview({
         {visibleBlocks.length > 0 && (
           <Grid
             blocks={gridBlocks}
-            ariaLabel="Storefront preview"
+            ariaLabel={t("ariaLabel")}
             columns={theme.columns}
             rows={theme.rows}
             // Never reflow: the preview is scaled down as a whole, so the

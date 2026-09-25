@@ -1,14 +1,7 @@
+import { useTranslations } from "next-intl";
 import { badgeClass } from "@/components/ui/surface-styles";
 import { cn } from "@/lib/utils";
 import type { PayoutStatus } from "@/lib/payments/types";
-
-const STATUS_LABELS: Record<PayoutStatus, string> = {
-  paid: "Paid",
-  pending: "Pending",
-  in_transit: "In transit",
-  canceled: "Canceled",
-  failed: "Failed",
-};
 
 const STATUS_CLASSES: Record<PayoutStatus, string> = {
   paid: "text-success",
@@ -20,7 +13,8 @@ const STATUS_CLASSES: Record<PayoutStatus, string> = {
 
 /** Same pill family as OrderStatusBadge, mapped to Stripe payout statuses. */
 export function PayoutStatusBadge({ status }: { status: PayoutStatus }) {
-  const known: PayoutStatus = status in STATUS_LABELS ? status : "pending";
+  const t = useTranslations("Payments");
+  const known: PayoutStatus = status in STATUS_CLASSES ? status : "pending";
   return (
     <span
       className={cn(
@@ -28,7 +22,7 @@ export function PayoutStatusBadge({ status }: { status: PayoutStatus }) {
         STATUS_CLASSES[known],
       )}
     >
-      {STATUS_LABELS[known]}
+      {t("payoutStatus", { status: known })}
     </span>
   );
 }

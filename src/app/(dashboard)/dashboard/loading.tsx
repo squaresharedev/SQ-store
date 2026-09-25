@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/ui/skeleton";
 import { pageShellClass } from "@/components/ui/surface-styles";
 import { cn } from "@/lib/utils";
@@ -5,6 +6,7 @@ import { cn } from "@/lib/utils";
 /** Route-level loading state: pulsing placeholders in the final layout's
  *  shape, so the page does not jump when data arrives. */
 export default function DashboardOverviewLoading() {
+  const t = useTranslations("Dashboard.loading.overview");
   return (
     <div className={cn(pageShellClass, "space-y-6")}>
       <Skeleton className="h-9 w-40" />
@@ -17,7 +19,7 @@ export default function DashboardOverviewLoading() {
         <Skeleton className="h-64 rounded-md lg:col-span-2" />
         <Skeleton className="h-64 rounded-md" />
       </div>
-      <span className="sr-only">Loading overview…</span>
+      <span className="sr-only">{t("srLoading")}</span>
     </div>
   );
 }

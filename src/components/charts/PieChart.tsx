@@ -1,5 +1,6 @@
 "use client";
 
+import { useLocale, useTranslations } from "next-intl";
 import { useState, type ReactNode } from "react";
 import { Cell, Pie, PieChart as RPieChart, Sector, Tooltip } from "recharts";
 import type { PieSectorDataItem } from "recharts";
@@ -48,7 +49,11 @@ export interface PieChartProps {
 }
 
 /** Keep the biggest (maxSlices - 1) parts in their given order; sum the rest. */
-function foldTail(items: ChartSlice[], maxSlices: number): ChartSlice[] {
+function foldTail(
+  items: ChartSlice[],
+  maxSlices: number,
+  otherLabel: string,
+): ChartSlice[] {
   if (items.length <= maxSlices) return items;
   const keep = new Set(
     [...items]
@@ -59,7 +64,7 @@ function foldTail(items: ChartSlice[], maxSlices: number): ChartSlice[] {
   const other = items
     .filter((item) => !keep.has(item))
     .reduce((sum, item) => sum + item.value, 0);
-  return [...kept, { label: "Other", value: other, color: CHART.other }];
+  return [...kept, { label: otherLabel, value: other, color: CHART.other }];
 }
 
 function SliceTooltip({
@@ -73,6 +78,7 @@ function SliceTooltip({
   total: number;
   valueFormatter: (value: number) => string;
 }) {
+  const locale = useLocale();
   const slice = payload?.[0]?.payload as ChartSlice | undefined;
   if (!active || !slice) return null;
   return (
@@ -81,7 +87,7 @@ function SliceTooltip({
       <p className={tooltipValueClass}>
         {valueFormatter(slice.value)}
         <span className={cn(tooltipLabelClass, "ml-1.5")}>
-          {formatShare(slice.value, total)}
+          {formatShare(slice.value, total, locale)}
         </span>
       </p>
     </div>
@@ -93,18 +99,23 @@ export function PieChart({
   variant = "donut",
   size = 224,
   maxSlices = 5,
-  valueFormatter = formatNumber,
+  valueFormatter: valueFormatterProp,
   center,
   showLegend = true,
   animate = true,
-  ariaLabel = "Proportional breakdown",
+  ariaLabel: ariaLabelProp,
   className,
 }: PieChartProps) {
+  const t = useTranslations("Common.charts");
+  const locale = useLocale();
+  const valueFormatter =
+    valueFormatterProp ?? ((value: number) => formatNumber(value, locale));
+  const ariaLabel = ariaLabelProp ?? t("proportional");
   const reducedMotion = useReducedMotion();
   // Hovering a slice (or its legend row) keeps it at full strength while the
   // rest recede — identity stays traceable without colour-matching.
   const [highlighted, setHighlighted] = useState<number | null>(null);
-  const slices = foldTail(items, maxSlices);
+  const slices = foldTail(items, maxSlices, t("other"));
   const colors = slices.map((slice, i) => resolveSliceColor(slice, i));
   const total = slices.reduce((sum, slice) => sum + Math.max(slice.value, 0), 0);
   const donut = variant === "donut";
@@ -171,7 +182,7 @@ export function PieChart({
           <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
             {center ?? (
               <>
-                <span className={infoTextClass}>Total</span>
+                <span className={infoTextClass}>{t("total")}</span>
                 <span className="text-lg font-semibold text-foreground">
                   {valueFormatter(total)}
                 </span>

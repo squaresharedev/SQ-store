@@ -31,9 +31,12 @@ import {
   uploadFailed,
   type ActionError,
   type ActionFailure,
+  type ServerErrorOperation,
 } from "@/lib/errors";
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
 import { publishBlockedError } from "@/lib/settings/seller-identity";
+import { firstIssue } from "@/lib/validation/messages";
+import { msg } from "@/i18n/types";
 import {
   listStorefronts,
   type StorefrontsPage,
@@ -91,10 +94,10 @@ export async function createStorefront(
   const account = await getActiveAccount();
   if (!account) return failure(sessionExpired());
   if (!can(account.role, "storefront.write")) {
-    return failure(permissionDenied(account.role, "create storefronts"));
+    return failure(permissionDenied(account.role, "createStorefronts"));
   }
   if (!(await rateLimit("storefront_write", RATE_LIMITS.storefrontWrite))) {
-    return failure(rateLimited("create storefronts"));
+    return failure(rateLimited("createStorefronts"));
   }
 
   const payload: { name?: unknown; brief?: unknown } =
@@ -172,7 +175,7 @@ export async function createStorefront(
 
   if (error || !row) {
     console.error("[storefront] create failed", error);
-    return failure(serverError("create the storefront"));
+    return failure(serverError("createStorefront"));
   }
 
   revalidatePath("/storefront");
@@ -192,32 +195,26 @@ export async function saveStorefront(
   const account = await getActiveAccount();
   if (!account) return failure(sessionExpired());
   if (!can(account.role, "storefront.write")) {
-    return failure(permissionDenied(account.role, "edit storefronts"));
+    return failure(permissionDenied(account.role, "editStorefronts"));
   }
   if (!storefrontIdSchema.safeParse(id).success) {
     return failure(notFound("storefront"));
   }
   if (!(await rateLimit("storefront_write", RATE_LIMITS.storefrontWrite))) {
-    return failure(rateLimited("save storefronts"));
+    return failure(rateLimited("saveStorefronts"));
   }
 
   const payload = (input ?? {}) as { name?: unknown; config?: unknown };
   const parsedName = storefrontNameSchema.safeParse(payload.name);
   if (!parsedName.success) {
     return failure(
-      invalidInput(
-        "The storefront needs a name.",
-        "Type a name (1 to 80 characters) in the field at the top of the editor, then save again.",
-      ),
+      invalidInput(msg("Errors.storefront.nameRequired.message"), msg("Errors.storefront.nameRequired.fix")),
     );
   }
   const parsed = storefrontConfigSchema.safeParse(payload.config);
   if (!parsed.success) {
     return failure(
-      invalidInput(
-        "The storefront layout data is invalid.",
-        "Refresh the editor and try saving again.",
-      ),
+      invalidInput(msg("Errors.storefront.invalidLayout.message"), msg("Errors.storefront.invalidLayout.fix")),
     );
   }
 
@@ -237,7 +234,7 @@ export async function saveStorefront(
       .in("id", productIds);
     if (error) {
       console.error("[storefront] ownership check failed", error);
-      return failure(serverError("save your storefront"));
+      return failure(serverError("saveStorefront"));
     }
     const ownedIds = new Set(ownedRows.map((row) => row.id));
     blocks = blocks.filter(
@@ -285,7 +282,7 @@ export async function saveStorefront(
     .maybeSingle();
   if (existingError) {
     console.error("[storefront] pre-save read failed", existingError);
-    return failure(serverError("save your storefront"));
+    return failure(serverError("saveStorefront"));
   }
   if (!existingRow) return failure(notFound("storefront"));
   const previousBackgroundKey = storedBackgroundKey(existingRow.config);
@@ -319,10 +316,7 @@ export async function saveStorefront(
   // time, so this ceiling is far above anything the UI can produce.
   if (newElementKeys.length > MAX_NEW_ELEMENT_KEYS_PER_SAVE) {
     return failure(
-      invalidInput(
-        "Too many new images in one save.",
-        "Save your storefront, then add the rest.",
-      ),
+      invalidInput(msg("Errors.storefront.tooManyImages.message"), msg("Errors.storefront.tooManyImages.fix")),
     );
   }
   for (const key of newElementKeys) {
@@ -344,7 +338,7 @@ export async function saveStorefront(
 
   if (error) {
     console.error("[storefront] save failed", error);
-    return failure(serverError("save your storefront"));
+    return failure(serverError("saveStorefront"));
   }
   if (!row) return failure(notFound("storefront"));
 
@@ -418,49 +412,16 @@ async function evictObject(key: string): Promise<void> {
   );
 }
 
-/** What each verifiable upload is called and what a rejection tells the seller
- *  to do about it. Keeps {@link verifyUpload} one function rather than two
- *  copies that drift on everything except the noun. */
+/** Where each verifiable upload's copy lives (Errors.storefront.upload.*) and
+ *  which operation a failed check names. Keeps {@link verifyUpload} one
+ *  function rather than three copies that drift. */
 const UPLOAD_COPY = {
-  image: {
-    noun: "background image",
-    missing: "Select the image again and re-upload it before saving.",
-    tooBig: {
-      message: "That background image is too large.",
-      fix: "Use an image under 10 MB, then re-upload it.",
-    },
-    wrongType: {
-      message: "That file type is not supported.",
-      fix: "Use a JPEG, PNG, WebP, GIF, or AVIF image.",
-    },
-  },
-  font: {
-    noun: "font",
-    missing: "Select the font again and re-upload it before saving.",
-    tooBig: {
-      message: "That font file is too large.",
-      fix: "Use a font under 2 MB. A WOFF2 is usually well under 100 KB.",
-    },
-    wrongType: {
-      message: "That file type is not supported.",
-      fix: "Use a WOFF2, WOFF, TTF, or OTF font file.",
-    },
-  },
-  element: {
-    noun: "image",
-    missing: "Add the image again and re-upload it before saving.",
-    tooBig: {
-      message: "That image is too large.",
-      fix: "Use an image under 2 MB, then add it again.",
-    },
-    wrongType: {
-      message: "That file type is not supported.",
-      fix:
-        "Use a PNG, JPEG, WebP, GIF, AVIF, or an SVG with no scripts, " +
-        "external links, or embedded images.",
-    },
-  },
-} as const satisfies Partial<Record<UploadKind, unknown>>;
+  image: { copy: "backgroundImage", verify: "verifyBackgroundImage" },
+  font: { copy: "font", verify: "verifyFont" },
+  element: { copy: "element", verify: "verifyImage" },
+} as const satisfies Partial<
+  Record<UploadKind, { copy: string; verify: ServerErrorOperation }>
+>;
 
 /**
  * Post-upload boundary for a NEW object key on a config, mirroring the product
@@ -473,11 +434,12 @@ async function verifyUpload(
   kind: keyof typeof UPLOAD_COPY,
   uploaderId: string,
 ): Promise<{ ok: true } | { ok: false; error: ActionError }> {
-  const copy = UPLOAD_COPY[kind];
+  const { copy, verify } = UPLOAD_COPY[kind];
+  const missingFix = msg(`Errors.storefront.upload.${copy}.missingFix`);
   if (!isOwnedObjectKey(key, kind, uploaderId)) {
     return {
       ok: false,
-      error: invalidInput(`That ${copy.noun} can't be used.`, copy.missing),
+      error: invalidInput(msg(`Errors.storefront.upload.${copy}.notOwned`), missingFix),
     };
   }
 
@@ -486,15 +448,12 @@ async function verifyUpload(
     meta = await headObject(key);
   } catch (error) {
     console.error(`[storefront] ${kind} verification failed`, error);
-    return { ok: false, error: serverError(`verify your ${copy.noun}`) };
+    return { ok: false, error: serverError(verify) };
   }
   if (!meta) {
     return {
       ok: false,
-      error: uploadFailed(
-        `Your ${copy.noun} upload didn't finish.`,
-        copy.missing,
-      ),
+      error: uploadFailed(msg(`Errors.storefront.upload.${copy}.unfinished`), missingFix),
     };
   }
   const tooBig =
@@ -504,8 +463,18 @@ async function verifyUpload(
   const wrongType = !isAllowedContentType(kind, meta.contentType);
   if (tooBig || wrongType) {
     await evictObject(key);
-    const reason = tooBig ? copy.tooBig : copy.wrongType;
-    return { ok: false, error: uploadFailed(reason.message, reason.fix) };
+    return {
+      ok: false,
+      error: tooBig
+        ? uploadFailed(
+            msg(`Errors.storefront.upload.${copy}.tooLarge`),
+            msg(`Errors.storefront.upload.${copy}.tooLargeFix`),
+          )
+        : uploadFailed(
+            msg("Errors.upload.typeNotSupported"),
+            msg(`Errors.storefront.upload.${copy}.wrongTypeFix`),
+          ),
+    };
   }
   return { ok: true };
 }
@@ -527,13 +496,13 @@ export async function updateEmbedSettings(
   const account = await getActiveAccount();
   if (!account) return failure(sessionExpired());
   if (!can(account.role, "storefront.write")) {
-    return failure(permissionDenied(account.role, "edit storefronts"));
+    return failure(permissionDenied(account.role, "editStorefronts"));
   }
   if (!storefrontIdSchema.safeParse(id).success) {
     return failure(notFound("storefront"));
   }
   if (!(await rateLimit("storefront_write", RATE_LIMITS.storefrontWrite))) {
-    return failure(rateLimited("save storefronts"));
+    return failure(rateLimited("saveStorefronts"));
   }
 
   // The security boundary: strict shape, hostname-regex-gated domains.
@@ -541,8 +510,8 @@ export async function updateEmbedSettings(
   if (!parsed.success) {
     return failure(
       invalidInput(
-        parsed.error.issues[0]?.message ?? "Invalid embed settings.",
-        "Check the domain list (comma-separated hostnames like example.com) and save again.",
+        firstIssue(parsed.error, msg("Errors.storefront.invalidEmbedSettings")),
+        msg("Errors.storefront.embedSettingsFix"),
       ),
     );
   }
@@ -566,7 +535,7 @@ export async function updateEmbedSettings(
     .maybeSingle();
   if (readError) {
     console.error("[storefront] embed settings read failed", readError);
-    return failure(serverError("save the embed settings"));
+    return failure(serverError("saveEmbedSettings"));
   }
   if (!row) return failure(notFound("storefront"));
 
@@ -584,7 +553,7 @@ export async function updateEmbedSettings(
     .maybeSingle();
   if (error) {
     console.error("[storefront] embed settings save failed", error);
-    return failure(serverError("save the embed settings"));
+    return failure(serverError("saveEmbedSettings"));
   }
   if (!updated) return failure(notFound("storefront"));
 
@@ -599,13 +568,13 @@ export async function deleteStorefront(
   const account = await getActiveAccount();
   if (!account) return failure(sessionExpired());
   if (!can(account.role, "storefront.write")) {
-    return failure(permissionDenied(account.role, "delete storefronts"));
+    return failure(permissionDenied(account.role, "deleteStorefronts"));
   }
   if (!storefrontIdSchema.safeParse(id).success) {
     return failure(notFound("storefront"));
   }
   if (!(await rateLimit("storefront_write", RATE_LIMITS.storefrontWrite))) {
-    return failure(rateLimited("delete storefronts"));
+    return failure(rateLimited("deleteStorefronts"));
   }
 
   const supabase = await createClient();
@@ -621,7 +590,7 @@ export async function deleteStorefront(
 
   if (error) {
     console.error("[storefront] delete failed", error);
-    return failure(serverError("delete the storefront"));
+    return failure(serverError("deleteStorefront"));
   }
   if (!deleted) return failure(notFound("storefront"));
 
@@ -656,13 +625,13 @@ export async function rotateEmbedKey(id: string): Promise<RotateEmbedKeyResult> 
   const account = await getActiveAccount();
   if (!account) return failure(sessionExpired());
   if (!can(account.role, "storefront.write")) {
-    return failure(permissionDenied(account.role, "edit storefronts"));
+    return failure(permissionDenied(account.role, "editStorefronts"));
   }
   if (!storefrontIdSchema.safeParse(id).success) {
     return failure(notFound("storefront"));
   }
   if (!(await rateLimit("storefront_write", RATE_LIMITS.storefrontWrite))) {
-    return failure(rateLimited("rotate embed keys"));
+    return failure(rateLimited("rotateEmbedKeys"));
   }
 
   const embedKey = crypto.randomUUID();
@@ -677,7 +646,7 @@ export async function rotateEmbedKey(id: string): Promise<RotateEmbedKeyResult> 
 
   if (error) {
     console.error("[storefront] embed key rotation failed", error);
-    return failure(serverError("rotate the embed key"));
+    return failure(serverError("rotateEmbedKey"));
   }
   if (!row) return failure(notFound("storefront"));
 

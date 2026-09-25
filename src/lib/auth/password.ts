@@ -1,3 +1,5 @@
+import { msg, type MessageRef } from "@/i18n/types";
+
 /**
  * ONE password strength rule, shared by every path that sets a new password:
  * sign-up, recovery reset, and the in-app change.
@@ -78,7 +80,9 @@ export type PasswordContext = {
 };
 
 /**
- * The problem with this password, or null when it is acceptable.
+ * The problem with this password, or null when it is acceptable. A message
+ * to show rather than a sentence: this runs in the browser and in actions, and
+ * neither knows the reader's language.
  *
  * Returns a SINGLE message rather than a list: the form shows one line, and a
  * wall of every rule at once reads as a lecture. Ordered cheapest and most
@@ -87,33 +91,33 @@ export type PasswordContext = {
 export function passwordProblem(
   password: string,
   context: PasswordContext = {},
-): string | null {
+): MessageRef | null {
   if (password.length < PASSWORD_MIN_LENGTH) {
-    return `Password must be at least ${PASSWORD_MIN_LENGTH} characters.`;
+    return msg("Validation.password.tooShort", { minimum: PASSWORD_MIN_LENGTH });
   }
   // Measured in BYTES, because that is what bcrypt truncates on: 72 emoji is
   // well past the limit even though it is 72 "characters".
   if (new TextEncoder().encode(password).length > PASSWORD_MAX_LENGTH) {
-    return `Keep it under ${PASSWORD_MAX_LENGTH} characters.`;
+    return msg("Validation.password.tooLong", { maximum: PASSWORD_MAX_LENGTH });
   }
 
   const lower = password.toLowerCase();
   const plain = deleet(password);
 
   if (COMMON_PASSWORDS.has(lower) || COMMON_PASSWORDS.has(plain)) {
-    return "That password is too common. Pick something less guessable.";
+    return msg("Validation.password.tooCommon");
   }
 
   // One repeated character, however long ("aaaaaaaaaa").
   if (/^(.)\1+$/.test(password)) {
-    return "That password is too easy to guess. Try a longer mix of words.";
+    return msg("Validation.password.repeated");
   }
 
   // Checked against BOTH forms. `plain` catches letter runs written with leet
   // substitutions, but de-leeting rewrites digits, so "12345678" only survives
   // in `lower` — check one and the digit runs walk straight through.
   if (SEQUENCES.some((seq) => lower.includes(seq) || plain.includes(seq))) {
-    return "That password contains a common keyboard sequence. Try something else.";
+    return msg("Validation.password.sequence");
   }
 
   // Restating your own identity gives an attacker who already knows your handle
@@ -124,11 +128,11 @@ export function passwordProblem(
   ].filter((value): value is string => Boolean(value) && value!.length >= 4);
 
   if (identities.some((value) => plain.includes(deleet(value)))) {
-    return "Password must not contain your email address or username.";
+    return msg("Validation.password.containsIdentity");
   }
 
   if (password.length < PASSPHRASE_LENGTH && classCount(password) < 3) {
-    return `Mix in upper and lower case, a number or a symbol — or use ${PASSPHRASE_LENGTH}+ characters.`;
+    return msg("Validation.password.weakMix", { length: PASSPHRASE_LENGTH });
   }
 
   return null;

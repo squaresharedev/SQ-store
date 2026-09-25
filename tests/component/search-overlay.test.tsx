@@ -7,15 +7,7 @@ import {
   it,
   vi,
 } from "vitest";
-import {
-  act,
-  cleanup,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-  within,
-} from "@testing-library/react";
+import { act, cleanup, fireEvent, renderWithoutToasts, screen, waitFor, within } from "../setup/render";
 import userEvent from "@testing-library/user-event";
 
 afterEach(cleanup);
@@ -55,7 +47,7 @@ const onClose = vi.fn();
 const navigate = vi.fn();
 
 function renderOverlay(props?: { open?: boolean; snapshot?: SearchSnapshot | null }) {
-  return render(
+  return renderWithoutToasts(
     <SearchOverlay
       open={props?.open ?? true}
       onClose={onClose}
@@ -320,7 +312,7 @@ describe("SearchOverlay — the local half", () => {
 
   it("hides write actions from a viewer", async () => {
     const user = userEvent.setup();
-    render(
+    renderWithoutToasts(
       <SearchOverlay open onClose={onClose} role="viewer" navigate={navigate} />,
     );
     await user.type(screen.getByRole("combobox"), "new product");
@@ -609,7 +601,7 @@ describe("SearchOverlay — anchored expansion", () => {
   const RECT = new DOMRect(100, 10, 320, 36);
 
   function renderAnchored() {
-    return render(
+    return renderWithoutToasts(
       <SearchOverlay
         open
         onClose={onClose}

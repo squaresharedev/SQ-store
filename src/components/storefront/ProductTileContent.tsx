@@ -1,6 +1,7 @@
 "use client";
 
 import type { CSSProperties, RefObject } from "react";
+import { useTranslations, useLocale } from "next-intl";
 import { Image as ImageIcon } from "lucide-react";
 import type { Product } from "@/types/product";
 import {
@@ -159,6 +160,9 @@ export function ProductTileContent({
    *  then renders with no handlers, no tab stops and no affordance. */
   spotDrag?: TileSpotDrag;
 }) {
+  const t = useTranslations("Storefront");
+  const tCommon = useTranslations("Common");
+  const locale = useLocale();
   const card = resolveCardStyle(theme, overrides);
 
   // A token in flight is drawn where it is GOING, not where it is stored: the
@@ -231,11 +235,11 @@ export function ProductTileContent({
   // buyer's: absent, both spans render exactly as they always have.
   const priceToken =
     spotDrag?.price && !priceHidden && tagPosition !== "hidden"
-      ? tileSpotTokenProps("price", spotDrag, tileSpotTokenLabel("price", tagPosition))
+      ? tileSpotTokenProps("price", spotDrag, tileSpotTokenLabel("price", tagPosition, t))
       : null;
   const titleToken =
     spotDrag?.title && card.showTitle
-      ? tileSpotTokenProps("title", spotDrag, tileSpotTokenLabel("title", titleSpot))
+      ? tileSpotTokenProps("title", spotDrag, tileSpotTokenLabel("title", titleSpot, t))
       : null;
 
   // Every pixel of the chip is inline (see priceTagChipStyle); the classes
@@ -257,7 +261,7 @@ export function ProductTileContent({
           ...hoverDurationStyle(card.priceHoverMs),
         }}
       >
-        {formatPrice(product.price, product.currency)}
+        {formatPrice(product.price, product.currency, locale)}
       </span>
     ) : null;
 
@@ -274,7 +278,7 @@ export function ProductTileContent({
         )}
         style={{ ...chipStyle, ...hoverDurationStyle(card.priceHoverMs) }}
       >
-        {formatPrice(product.price, product.currency)}
+        {formatPrice(product.price, product.currency, locale)}
       </span>
     ) : null;
 
@@ -415,7 +419,7 @@ export function ProductTileContent({
               overlaid && titleRow === "top" ? "bottom-2" : "top-2",
             )}
           >
-            Sold out
+            {tCommon("stock.soldOut")}
           </span>
         )}
       </div>

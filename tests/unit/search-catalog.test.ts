@@ -6,6 +6,7 @@ import {
   type SearchEntry,
 } from "@/lib/search/catalog";
 import { searchLocalRegistry } from "@/lib/search/registry";
+import { english } from "../setup/translate";
 import { searchEditor, editorEntries } from "@/components/storefront/editor-search";
 import { STOREFRONT_SETTINGS, settingIndexFields } from "@/lib/storefront/setting-ref";
 
@@ -182,13 +183,13 @@ describe("the two surfaces agree about a setting", () => {
     // (see editor-search), and that is a question of WHEN a row is offered,
     // never of what its terms are once it is.
     const editorBySetting = new Map(
-      editorEntries([], new Map(), { pageOpen: true })
+      editorEntries([], new Map(), english, { pageOpen: true })
         .filter((entry) => entry.payload.kind === "setting")
         .map((entry) => [entry.title, entryTerms(entry)]),
     );
 
     for (const setting of STOREFRONT_SETTINGS) {
-      const { title, subtitle, keywords } = settingIndexFields(setting);
+      const { title, subtitle, keywords } = settingIndexFields(setting, english);
       expect(editorBySetting.get(title), title).toEqual([
         title,
         subtitle,
@@ -200,12 +201,12 @@ describe("the two surfaces agree about a setting", () => {
   it("hands the gated settings' whole vocabulary to the row standing in", () => {
     // The gate must cost the seller no query. Every term that would have found
     // a product page setting still has to find the row that opens the page.
-    const closed = editorEntries([], new Map());
+    const closed = editorEntries([], new Map(), english);
     const standIn = closed.find((entry) => entry.title === "Open the product page");
     expect(standIn).toBeDefined();
     const terms = new Set(entryTerms(standIn!));
 
-    const open = editorEntries([], new Map(), { pageOpen: true });
+    const open = editorEntries([], new Map(), english, { pageOpen: true });
     const gated = open.filter(
       (entry) =>
         entry.payload.kind === "setting" &&
@@ -231,10 +232,10 @@ describe("the two surfaces agree about a setting", () => {
       "where is the price",
       "how many columns",
     ]) {
-      const palette = searchLocalRegistry(query, { role: "owner", limit: 12 })
+      const palette = searchLocalRegistry(query, { role: "owner", limit: 12, t: english })
         .flatMap((group) => group.results)
         .find((result) => result.href?.includes("?setting="))?.title;
-      const editor = searchEditor(editorEntries([], new Map()), query)
+      const editor = searchEditor(editorEntries([], new Map(), english), query, english)
         .flatMap((section) => section.hits)
         .find((hit) => hit.entry.payload.kind === "setting")?.entry.title;
       expect(editor, query).toBe(palette);

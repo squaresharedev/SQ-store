@@ -2,6 +2,7 @@
 
 import type { RefObject } from "react";
 import { AlertCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { infoTextClass } from "@/components/ui/control-styles";
 import type { Product } from "@/types/product";
 import type {
@@ -109,6 +110,13 @@ export function BlockFace({
       />
     );
   }
+  return <RemovedProductFace />;
+}
+
+/** A product tile whose product no longer exists. Its own component so the
+ *  translator hook is not called conditionally inside BlockFace. */
+function RemovedProductFace() {
+  const t = useTranslations("Storefront.blockFace");
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-1 p-2 text-center">
       <AlertCircle
@@ -116,9 +124,7 @@ export function BlockFace({
         strokeWidth={2}
         aria-hidden="true"
       />
-      <span className={infoTextClass}>
-        Product removed. Delete this block.
-      </span>
+      <span className={infoTextClass}>{t("productRemoved")}</span>
     </div>
   );
 }

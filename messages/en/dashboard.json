@@ -1,0 +1,116 @@
+{
+  "metadata": {
+    "app": {
+      "title": "Square Share Dashboard",
+      "description": "Manage your products, design your storefront, connect Stripe, and view analytics on Square Share."
+    },
+    "overview": {
+      "title": "Overview"
+    },
+    "payments": {
+      "title": "Payments"
+    }
+  },
+  "loading": {
+    "overview": {
+      "srLoading": "Loading overview…"
+    },
+    "payments": {
+      "title": "Payments",
+      "subtitle": "Your balance, payouts and Stripe connection.",
+      "srLoading": "loading payments"
+    }
+  },
+  "shell": {
+    "accountFallback": "Account",
+    "anotherStore": "another store"
+  },
+  "overview": {
+    "title": "Overview",
+    "addProduct": "Add product",
+    "revenue30d": "Revenue · 30 days",
+    "sales30d": "Sales · 30 days",
+    "avgOrder30d": "Avg order · 30 days",
+    "revenueHeroLabel": "Revenue, last 30 days",
+    "noSales": "No sales yet"
+  },
+  "metric": {
+    "zeroDefault": "No sales yet",
+    "pendingDefault": "Available once analytics is connected."
+  },
+  "sidebar": {
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "navLabel": "Dashboard",
+    "title": "Dashboard"
+  },
+  "recentOrders": {
+    "title": "Recent orders",
+    "empty": "No orders yet. Sales through your own buy link or by email won't show here."
+  },
+  "attention": {
+    "title": "Needs attention",
+    "allClear": "All clear. Nothing needs your attention right now.",
+    "twoFactor": {
+      "label": "Turn on two-factor authentication",
+      "description": "A code from your phone at sign-in, so a stolen password alone can't get into your store.",
+      "action": "Turn on"
+    },
+    "stripe": {
+      "label": "Connect Stripe to get paid",
+      "description": "Payouts stay blocked until your account is connected.",
+      "action": "Open payments"
+    },
+    "legal": {
+      "label": "Accept the seller terms",
+      "labelUpdated": "Accept the updated seller terms",
+      "description": "Read the Seller Agreement, Terms and Privacy drafts and accept them.",
+      "descriptionUpdated": "The terms changed since you accepted them. Read and accept the current version.",
+      "descriptionTerms": "Read the Terms of Service and agree to them.",
+      "descriptionTermsUpdated": "The Terms of Service changed since you agreed to them. Read and agree to the current version.",
+      "action": "Review terms"
+    },
+    "noBuyPath": {
+      "label": "{count, plural, one {{count} product with no way to buy} other {{count} products with no way to buy}}",
+      "description": "Add a buy link, or set a contact email under Settings so buyers can reach you.",
+      "action": "Review products"
+    },
+    "noShipping": {
+      "label": "Add your shipping terms",
+      "description": "Physical products need shipping and returns terms before buyers see full details.",
+      "action": "Add terms"
+    },
+    "storefront": {
+      "labelEmpty": "Your storefront is empty",
+      "labelNone": "Create your storefront",
+      "descriptionEmpty": "Add a product to its grid to give it a page you can share.",
+      "descriptionNone": "Pick a look, then add your products to its grid.",
+      "actionOpen": "Open designer",
+      "actionCreate": "Create storefront"
+    },
+    "images": {
+      "label": "{count, plural, one {{count} product missing an image} other {{count} products missing an image}}",
+      "descriptionSingle": "\"{title}\" has no display image yet.",
+      "descriptionMultiple": "Products without images look empty on your storefront.",
+      "actionSingle": "Add an image",
+      "actionMultiple": "Fix products"
+    },
+    "flaggedOrders": {
+      "label": "{count, plural, one {{count} order to review} other {{count} orders to review}}",
+      "descriptionBoth": "{disputed, plural, other {{disputed} disputed}}, {refunded, plural, other {{refunded} refunded}}.",
+      "descriptionDisputed": "{count, plural, other {{count} disputed}}.",
+      "descriptionRefunded": "{count, plural, other {{count} refunded}}.",
+      "action": "Review orders"
+    },
+    "noindexPages": {
+      "label": "Product pages blocked from search",
+      "description": "{count, plural, =1 {One storefront has indexing turned off for its product pages.} other {{count} storefronts have indexing turned off for their product pages.}}",
+      "action": "Open designer"
+    },
+    "deadBlocks": {
+      "label": "{count, plural, one {{count} storefront block referencing deleted products} other {{count} storefront blocks referencing deleted products}}",
+      "description": "These blocks appear empty to visitors. Remove or replace them.",
+      "action": "Open storefront"
+    }
+  }
+}

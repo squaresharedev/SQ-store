@@ -1,6 +1,7 @@
 "use client";
 
-import { useId } from "react";
+import { useId, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import {
   CORNER_SPOT_LIMIT,
   PRICE_TAG_BORDER_WIDTH_MAX,
@@ -29,8 +30,6 @@ import { infoTextClass, strongLabelClass } from "@/components/ui/control-styles"
 import { PRICE_TAG_FONT_LABELS } from "./config-maps";
 import { PriceTagModePicker, type PriceTagMode } from "./PriceTagPositionPicker";
 
-const FONT_OPTIONS: readonly { value: PriceTagFont; label: string }[] =
-  PRICE_TAG_FONTS.map((value) => ({ value, label: PRICE_TAG_FONT_LABELS[value] }));
 
 /**
  * The price tag's own controls: where it sits, and every pixel of the chip
@@ -64,8 +63,14 @@ export function PriceTagControls({
    */
   scope: "theme" | "many" | { blockKey: string };
 }) {
+  const t = useTranslations("Storefront.priceTag");
+  const tRoot = useTranslations();
   const fieldId = useId();
   const value: CardStyle = resolveCardStyle(theme, overrides);
+  const fontOptions = useMemo(
+    () => PRICE_TAG_FONTS.map((v) => ({ value: v, label: tRoot(PRICE_TAG_FONT_LABELS[v]) })),
+    [tRoot],
+  );
 
   const tagPosition = value.priceTagPosition;
   const tagMode: PriceTagMode =
@@ -101,14 +106,18 @@ export function PriceTagControls({
    *  the inline row and the panel can never disagree. */
   function colorField(part: PriceTagPart) {
     const field = priceTagColorField(theme, overrides, part);
+    const inherit = field.inherit!;
     const key = PRICE_TAG_COLOR_KEYS[part];
     return (
       <ColorPicker
-        label={field.label}
+        label={tRoot(field.label)}
         value={field.value}
         onChange={(hex) => onChange({ [key]: hex })}
         inherit={{
-          ...field.inherit!,
+          label: tRoot(inherit.label),
+          useLabel: tRoot(inherit.useLabel),
+          value: inherit.value,
+          active: inherit.active,
           onSelect: () => onChange({ [key]: undefined }),
         }}
         target={
@@ -127,13 +136,13 @@ export function PriceTagControls({
           the layout board's question (see TileLayoutBoard), and asking it twice
           in two places is how the two came to disagree. */}
       <div className="space-y-1.5">
-        <span className={strongLabelClass}>Show the price</span>
+        <span className={strongLabelClass}>{t("showPrice")}</span>
         <PriceTagModePicker value={tagMode} onChange={setTagMode} />
         {tagMode === "float" && (
           <p className={infoTextClass}>
             {value.cornerRadius >= CORNER_SPOT_LIMIT
-              ? "Rounded cards keep the tag on the center axis."
-              : "Drag it on the tile, or use the layout board, to choose a spot."}
+              ? t("roundedHint")
+              : t("dragHint")}
           </p>
         )}
       </div>
@@ -144,7 +153,7 @@ export function PriceTagControls({
       {tagMode !== "hidden" && (
         <div className="flex items-center justify-between gap-3">
           <label htmlFor={`${fieldId}-price-hover`} className={strongLabelClass}>
-            Show on hover
+            {t("showOnHover")}
           </label>
           <Switch
             id={`${fieldId}-price-hover`}
@@ -157,12 +166,12 @@ export function PriceTagControls({
       )}
 
       <div className="space-y-1.5">
-        <span className={strongLabelClass}>Font</span>
+        <span className={strongLabelClass}>{t("font")}</span>
         <SegmentedControl
           value={value.priceTagFont}
-          options={FONT_OPTIONS}
+          options={fontOptions}
           onChange={(priceTagFont) => onChange({ priceTagFont })}
-          ariaLabel="Price tag font"
+          ariaLabel={t("fontAriaLabel")}
         />
       </div>
 
@@ -176,16 +185,16 @@ export function PriceTagControls({
           then scrolls past forever. A hidden tag has no size to explain. */}
       <SliderField
         id={`${fieldId}-price-size`}
-        label="Size"
+        label={t("size")}
         min={PRICE_TAG_SIZE_MIN}
         max={PRICE_TAG_SIZE_MAX}
         value={value.priceTagSize}
         onChange={(priceTagSize) => onChange({ priceTagSize })}
-        ariaLabel="Price tag size"
-        valueText={`${value.priceTagSize} pixels`}
+        ariaLabel={t("sizeAriaLabel")}
+        valueText={t("sizeValueText", { n: value.priceTagSize })}
         labelClassName={strongLabelClass}
         unit="px"
-        tip="The size on a single tile. The tag scales with the tile it sits on, so a bigger block wears a bigger price without you setting one."
+        tip={t("sizeTip")}
       />
 
       {colorField("fill")}
@@ -194,34 +203,34 @@ export function PriceTagControls({
 
       <SliderField
         id={`${fieldId}-price-border-width`}
-        label="Border thickness"
+        label={t("borderThickness")}
         min={0}
         max={PRICE_TAG_BORDER_WIDTH_MAX}
         value={value.priceTagBorderWidth}
         onChange={(priceTagBorderWidth) => onChange({ priceTagBorderWidth })}
-        ariaLabel="Price tag border thickness"
-        valueText={`${value.priceTagBorderWidth} pixels`}
+        ariaLabel={t("borderAriaLabel")}
+        valueText={t("borderValueText", { n: value.priceTagBorderWidth })}
         labelClassName={strongLabelClass}
         unit="px"
-        statusText={value.priceTagBorderWidth === 0 ? "None" : undefined}
+        statusText={value.priceTagBorderWidth === 0 ? t("none") : undefined}
       />
 
       <SliderField
         id={`${fieldId}-price-radius`}
-        label="Corner roundness"
+        label={t("cornerRoundness")}
         min={0}
         max={PRICE_TAG_RADIUS_MAX}
         value={value.priceTagRadius}
         onChange={(priceTagRadius) => onChange({ priceTagRadius })}
-        ariaLabel="Price tag corner roundness"
-        valueText={`${value.priceTagRadius} pixels`}
+        ariaLabel={t("cornerAriaLabel")}
+        valueText={t("cornerValueText", { n: value.priceTagRadius })}
         labelClassName={strongLabelClass}
         unit="px"
         statusText={
           value.priceTagRadius === 0
-            ? "Sharp"
+            ? t("sharp")
             : value.priceTagRadius >= PRICE_TAG_RADIUS_MAX
-              ? "Pill"
+              ? t("pill")
               : undefined
         }
       />

@@ -46,14 +46,14 @@ const mfa = vi.hoisted(() => ({
   issueRecoveryCodes: vi.fn(),
   remainingRecoveryCodes: vi.fn(),
   discardPendingFactors: vi.fn(),
-  requireStepUp: vi.fn(),
+  requireStepUpState: vi.fn(),
   alertTwoFactorChange: vi.fn(),
 }));
 vi.mock("@/lib/auth/mfa", async (importOriginal) => {
   const real = await importOriginal<typeof import("@/lib/auth/mfa")>();
   return {
     STEP_UP_FIELDS: real.STEP_UP_FIELDS,
-    SECOND_FACTOR_MESSAGES: real.SECOND_FACTOR_MESSAGES,
+    SECOND_FACTOR_ERRORS: real.SECOND_FACTOR_ERRORS,
     pickFactor: real.pickFactor,
     ...Object.fromEntries(
       Object.entries(mfa).map(([name, fn]) => [name, (...args: unknown[]) => fn(...args)]),
@@ -78,18 +78,49 @@ const recordMock = vi.fn();
 vi.mock("@/lib/security/events", () => ({
   recordSecurityEvent: (...args: unknown[]) => recordMock(...args),
 }));
+// Completing the challenge is where sign-in completes for an enrolled account,
+// so it is where the account's language reaches a new browser.
+const localeSyncMock = vi.fn();
+const writeLocaleMock = vi.fn();
+vi.mock("@/i18n/sign-in", () => ({
+  localeForSignedInBrowser: (...args: unknown[]) => localeSyncMock(...args),
+}));
+vi.mock("@/i18n/cookie", () => ({
+  readLocaleCookieValue: async () => undefined,
+  writeLocaleCookie: (...args: unknown[]) => writeLocaleMock(...args),
+}));
 
 import {
   beginTwoFactorSetup,
   cancelTwoFactorSetup,
+  confirmIdentity,
   confirmTwoFactorSetup,
   regenerateRecoveryCodes,
   removeAuthenticator,
   signInWithRecoveryCode,
   verifyTwoFactorSignIn,
 } from "@/lib/auth/mfa-actions";
+import { invalidInput, type ActionState } from "@/lib/errors";
+import { msg } from "@/i18n/types";
+import { english } from "../../setup/translate";
 
 // ---- fixtures -------------------------------------------------------------
+
+/** What requireStepUpState answers when it wants a code first. */
+const CODE_PLEASE: ActionState = {
+  error: invalidInput(msg("Errors.stepUp.codeRequired")),
+  stepUp: true,
+};
+
+/** The English a state's error shows. */
+function errorText(state: ActionState): string | undefined {
+  return state.error ? english(state.error.message) : undefined;
+}
+
+/** The English a state's success shows. */
+function successText(state: ActionState): string | undefined {
+  return state.success ? english(state.success) : undefined;
+}
 
 const USER_ID = "10000000-0000-4000-8000-000000000001";
 const FACTOR = "a0000000-0000-4000-8000-00000000000a";
@@ -159,13 +190,15 @@ beforeEach(() => {
   mfa.clearRecoveryCodes.mockResolvedValue(true);
   mfa.issueRecoveryCodes.mockResolvedValue(["aaaa-bbbb-cccc-dddd"]);
   mfa.remainingRecoveryCodes.mockResolvedValue(0);
-  mfa.requireStepUp.mockResolvedValue(null);
+  mfa.requireStepUpState.mockResolvedValue(null);
   mfa.alertTwoFactorChange.mockResolvedValue(undefined);
   mfa.discardPendingFactors.mockResolvedValue(undefined);
   hasPasswordMock.mockResolvedValue(true);
   checkPasswordMock.mockResolvedValue("correct");
   rateLimitMock.mockResolvedValue(true);
   unenrollMock.mockResolvedValue({ data: {}, error: null });
+  localeSyncMock.mockResolvedValue(null);
+  writeLocaleMock.mockResolvedValue(undefined);
 });
 
 // ---- the sign-in challenge ------------------------------------------------
@@ -193,7 +226,24 @@ describe("verifyTwoFactorSignIn", () => {
     sessionStateMock.mockResolvedValue(state("needs_mfa"));
     mfa.verifySecondFactor.mockResolvedValue({ ok: false, reason: "invalid" });
     const result = await verifyTwoFactorSignIn({}, form({ code: "000000", next: "/" }));
-    expect(result.error).toMatch(/didn't work/);
+    expect(errorText(result)).toMatch(/didn't work/);
+    expect(localeSyncMock).not.toHaveBeenCalled();
+  });
+
+  it("copies the account's saved language onto a browser with none, once the code is accepted", async () => {
+    sessionStateMock.mockResolvedValue(state("needs_mfa"));
+    localeSyncMock.mockResolvedValue("cs");
+    await redirectOf(verifyTwoFactorSignIn({}, form({ code: "123456", next: "/" })));
+    expect(localeSyncMock).toHaveBeenCalledWith(client, USER_ID, undefined);
+    expect(writeLocaleMock).toHaveBeenCalledWith("cs");
+  });
+
+  it("a failed language sync never fails the sign-in", async () => {
+    sessionStateMock.mockResolvedValue(state("needs_mfa"));
+    localeSyncMock.mockRejectedValue(new Error("boom"));
+    expect(await redirectOf(verifyTwoFactorSignIn({}, form({ code: "123456", next: "/orders" })))).toBe(
+      "/orders",
+    );
   });
 
   it("a signed-out session is told to sign in again, and nothing is verified", async () => {
@@ -213,8 +263,8 @@ describe("verifyTwoFactorSignIn", () => {
 
   it("rejects unexpected fields and malformed codes before verifying", async () => {
     sessionStateMock.mockResolvedValue(state("needs_mfa"));
-    expect((await verifyTwoFactorSignIn({}, form({ code: "123456", aal: "aal2" }))).error).toMatch(/unexpected field/i);
-    expect((await verifyTwoFactorSignIn({}, form({ code: "12345" }))).error).toMatch(/6 digits/);
+    expect(errorText(await verifyTwoFactorSignIn({}, form({ code: "123456", aal: "aal2" })))).toMatch(/unexpected field/i);
+    expect(errorText(await verifyTwoFactorSignIn({}, form({ code: "12345" })))).toMatch(/6 digits/);
     expect(mfa.verifySecondFactor).not.toHaveBeenCalled();
   });
 });
@@ -243,11 +293,20 @@ describe("signInWithRecoveryCode", () => {
     );
   });
 
+  it("copies the account's saved language onto a browser with none", async () => {
+    sessionStateMock.mockResolvedValue(state("needs_mfa"));
+    mfa.spendRecoveryCode.mockResolvedValue("hash-1");
+    localeSyncMock.mockResolvedValue("cs");
+    await redirectOf(signInWithRecoveryCode({}, form({ recovery_code: "aaaa-bbbb-cccc-dddd" })));
+    expect(localeSyncMock).toHaveBeenCalledWith(client, USER_ID, undefined);
+    expect(writeLocaleMock).toHaveBeenCalledWith("cs");
+  });
+
   it("a wrong code is logged as a failed challenge and changes nothing", async () => {
     sessionStateMock.mockResolvedValue(state("needs_mfa"));
     mfa.spendRecoveryCode.mockResolvedValue(null);
     const result = await signInWithRecoveryCode({}, form({ recovery_code: "aaaa-bbbb-cccc-dddd" }));
-    expect(result.error).toMatch(/didn't work/);
+    expect(errorText(result)).toMatch(/didn't work/);
     expect(recordMock).toHaveBeenCalledWith({ userId: USER_ID, event: "mfa.challenge_failed" });
     expect(mfa.deleteAllFactors).not.toHaveBeenCalled();
   });
@@ -257,7 +316,7 @@ describe("signInWithRecoveryCode", () => {
     mfa.spendRecoveryCode.mockResolvedValue("hash-1");
     mfa.deleteAllFactors.mockResolvedValue(false);
     const result = await signInWithRecoveryCode({}, form({ recovery_code: "aaaa-bbbb-cccc-dddd" }));
-    expect(result.error).toMatch(/couldn't finish/);
+    expect(errorText(result)).toMatch(/couldn't finish/);
     expect(mfa.restoreRecoveryCode).toHaveBeenCalledWith(USER_ID, "hash-1");
     expect(mfa.clearRecoveryCodes).not.toHaveBeenCalled();
     expect(revokeOthersMock).not.toHaveBeenCalled();
@@ -267,7 +326,7 @@ describe("signInWithRecoveryCode", () => {
     sessionStateMock.mockResolvedValue(state("needs_mfa"));
     mfa.takeSecondFactorAttempt.mockResolvedValue(false);
     const result = await signInWithRecoveryCode({}, form({ recovery_code: "aaaa-bbbb-cccc-dddd" }));
-    expect(result.error).toMatch(/too many/i);
+    expect(errorText(result)).toMatch(/too many/i);
     expect(mfa.spendRecoveryCode).not.toHaveBeenCalled();
   });
 
@@ -367,14 +426,14 @@ describe("beginTwoFactorSetup", () => {
     sessionStateMock.mockResolvedValue(state("signed_in", { enrolled: false }));
     checkPasswordMock.mockResolvedValue("incorrect");
     const result = await beginTwoFactorSetup({}, form({ name: "Pixel 8", current_password: "nope" }));
-    expect(result.error).toMatch(/incorrect/);
+    expect(errorText(result)).toMatch(/incorrect/);
     expect(enrollMock).not.toHaveBeenCalled();
   });
 
   it("a missing password enrolls nothing (a stolen session cannot enrol its own phone)", async () => {
     sessionStateMock.mockResolvedValue(state("signed_in", { enrolled: false }));
     const result = await beginTwoFactorSetup({}, form({ name: "Pixel 8" }));
-    expect(result.error).toMatch(/current password/);
+    expect(errorText(result)).toMatch(/current password/);
     expect(enrollMock).not.toHaveBeenCalled();
   });
 
@@ -393,10 +452,10 @@ describe("beginTwoFactorSetup", () => {
 
   it("adding a second authenticator demands a code from an existing one, in this request", async () => {
     sessionStateMock.mockResolvedValue(state("signed_in"));
-    mfa.requireStepUp.mockResolvedValue({ error: "code please", stepUp: true });
+    mfa.requireStepUpState.mockResolvedValue(CODE_PLEASE);
     const result = await beginTwoFactorSetup({}, form({ name: "Tablet" }));
-    expect(mfa.requireStepUp).toHaveBeenCalledWith(expect.any(FormData), { maxAgeSeconds: 0 });
-    expect(result).toEqual({ error: "code please", stepUp: true });
+    expect(mfa.requireStepUpState).toHaveBeenCalledWith(expect.any(FormData), { maxAgeSeconds: 0 });
+    expect(result).toEqual(CODE_PLEASE);
     expect(enrollMock).not.toHaveBeenCalled();
   });
 
@@ -410,7 +469,7 @@ describe("beginTwoFactorSetup", () => {
   it("a sign-in just over the window no longer counts", async () => {
     sessionStateMock.mockResolvedValue(state("signed_in", { enrolled: false, signedInAt: now() - 11 * 60 }));
     const result = await beginTwoFactorSetup({}, form({ name: "Pixel 8" }));
-    expect(result.error).toMatch(/current password/i);
+    expect(errorText(result)).toMatch(/current password/i);
     expect(enrollMock).not.toHaveBeenCalled();
   });
 
@@ -421,7 +480,7 @@ describe("beginTwoFactorSetup", () => {
     checkPasswordMock.mockResolvedValue("incorrect");
     const result = await beginTwoFactorSetup({}, form({ name: "Pixel 8", current_password: "my-google-pw" }));
     expect(result).toMatchObject({ reauth: true });
-    expect(result.error).toMatch(/Confirm with Google/);
+    expect(errorText(result)).toMatch(/Confirm with Google/);
     expect(enrollMock).not.toHaveBeenCalled();
   });
 
@@ -429,7 +488,7 @@ describe("beginTwoFactorSetup", () => {
     sessionStateMock.mockResolvedValue(state("signed_in", { enrolled: false, google: true }));
     const result = await beginTwoFactorSetup({}, form({ name: "Pixel 8" }));
     expect(result).toMatchObject({ reauth: true });
-    expect(result.error).toMatch(/Confirm with Google/);
+    expect(errorText(result)).toMatch(/Confirm with Google/);
     expect(checkPasswordMock).not.toHaveBeenCalled();
   });
 
@@ -437,8 +496,8 @@ describe("beginTwoFactorSetup", () => {
     sessionStateMock.mockResolvedValue(state("signed_in", { enrolled: false }));
     checkPasswordMock.mockResolvedValue("unavailable");
     const result = await beginTwoFactorSetup({}, form({ name: "Pixel 8", current_password: "pw" }));
-    expect(result.error).toMatch(/couldn't check your password/i);
-    expect(result.error).not.toMatch(/incorrect/i);
+    expect(errorText(result)).toMatch(/couldn't check your password/i);
+    expect(errorText(result)).not.toMatch(/incorrect/i);
     expect(enrollMock).not.toHaveBeenCalled();
   });
 
@@ -448,14 +507,14 @@ describe("beginTwoFactorSetup", () => {
     sessionStateMock.mockResolvedValue(state("signed_in", { enrolled: false, signedInAt: now() - 60 }));
     mfa.remainingRecoveryCodes.mockResolvedValue(null);
     const result = await beginTwoFactorSetup({}, form({ name: "Pixel 8" }));
-    expect(result.error).toMatch(/isn't available/);
+    expect(errorText(result)).toMatch(/isn't available/);
     expect(enrollMock).not.toHaveBeenCalled();
   });
 
   it("refuses a name already in use without asking GoTrue", async () => {
     sessionStateMock.mockResolvedValue(state("signed_in"));
     const result = await beginTwoFactorSetup({}, form({ name: "phone" }));
-    expect(result.error).toMatch(/already have/);
+    expect(errorText(result)).toMatch(/already have/);
     expect(enrollMock).not.toHaveBeenCalled();
   });
 
@@ -470,7 +529,7 @@ describe("beginTwoFactorSetup", () => {
   it("is refused to a session that still owes its second factor", async () => {
     sessionStateMock.mockResolvedValue(state("needs_mfa"));
     const result = await beginTwoFactorSetup({}, form({ name: "Pixel 8", current_password: "pw" }));
-    expect(result.error).toMatch(/expired/);
+    expect(errorText(result)).toMatch(/expired/);
     expect(enrollMock).not.toHaveBeenCalled();
   });
 });
@@ -507,7 +566,7 @@ describe("confirmTwoFactorSetup", () => {
     );
     for (const factor_id of [FACTOR, "c0000000-0000-4000-8000-00000000000c", "nope"]) {
       const result = await confirmTwoFactorSetup({}, form({ factor_id, code: "123456" }));
-      expect(result.error, factor_id).toMatch(/start again/i);
+      expect(errorText(result), factor_id).toMatch(/start again/i);
     }
     expect(mfa.verifySecondFactor).not.toHaveBeenCalled();
   });
@@ -518,7 +577,7 @@ describe("confirmTwoFactorSetup", () => {
     );
     mfa.verifySecondFactor.mockResolvedValue({ ok: false, reason: "invalid" });
     const result = await confirmTwoFactorSetup({}, form({ factor_id: PENDING, code: "000000" }));
-    expect(result.error).toMatch(/didn't match/);
+    expect(errorText(result)).toMatch(/didn't match/);
     expect(mfa.issueRecoveryCodes).not.toHaveBeenCalled();
     expect(revokeOthersMock).not.toHaveBeenCalled();
   });
@@ -542,10 +601,10 @@ describe("cancelTwoFactorSetup", () => {
 describe("removeAuthenticator", () => {
   it("always demands a code in the request itself", async () => {
     sessionStateMock.mockResolvedValue(state("signed_in"));
-    mfa.requireStepUp.mockResolvedValue({ error: "code please", stepUp: true });
+    mfa.requireStepUpState.mockResolvedValue(CODE_PLEASE);
     const result = await removeAuthenticator({}, form({ factor_id: FACTOR }));
-    expect(mfa.requireStepUp).toHaveBeenCalledWith(expect.any(FormData), { maxAgeSeconds: 0 });
-    expect(result).toEqual({ error: "code please", stepUp: true });
+    expect(mfa.requireStepUpState).toHaveBeenCalledWith(expect.any(FormData), { maxAgeSeconds: 0 });
+    expect(result).toEqual(CODE_PLEASE);
     expect(unenrollMock).not.toHaveBeenCalled();
   });
 
@@ -555,7 +614,7 @@ describe("removeAuthenticator", () => {
     expect(unenrollMock).toHaveBeenCalledWith({ factorId: FACTOR });
     expect(mfa.clearRecoveryCodes).toHaveBeenCalledWith(USER_ID);
     expect(mfa.alertTwoFactorChange).toHaveBeenCalledWith(expect.anything(), "mfa.disabled", expect.anything());
-    expect(result.success).toMatch(/off/);
+    expect(successText(result)).toBe("Two-factor authentication is off.");
   });
 
   it("refuses a factor that is not on the account", async () => {
@@ -564,7 +623,7 @@ describe("removeAuthenticator", () => {
       {},
       form({ factor_id: "c0000000-0000-4000-8000-00000000000c", mfa_code: "123456" }),
     );
-    expect(result.error).toMatch(/isn't on your account/);
+    expect(errorText(result)).toMatch(/isn't on your account/);
     expect(unenrollMock).not.toHaveBeenCalled();
   });
 });
@@ -573,8 +632,9 @@ describe("regenerateRecoveryCodes", () => {
   it("demands a fresh code, then returns the new set and alerts", async () => {
     sessionStateMock.mockResolvedValue(state("signed_in"));
     const result = await regenerateRecoveryCodes({}, form({ mfa_code: "123456" }));
-    expect(mfa.requireStepUp).toHaveBeenCalledWith(expect.any(FormData), { maxAgeSeconds: 0 });
+    expect(mfa.requireStepUpState).toHaveBeenCalledWith(expect.any(FormData), { maxAgeSeconds: 0 });
     expect(result.codes).toEqual(["aaaa-bbbb-cccc-dddd"]);
+    expect(successText(result)).toBe("New recovery codes ready. Your old ones no longer work.");
     expect(mfa.alertTwoFactorChange).toHaveBeenCalledWith(
       expect.anything(),
       "mfa.recovery_codes_regenerated",
@@ -585,7 +645,219 @@ describe("regenerateRecoveryCodes", () => {
   it("is refused to an account without 2FA", async () => {
     sessionStateMock.mockResolvedValue(state("signed_in", { enrolled: false }));
     const result = await regenerateRecoveryCodes({}, form({}));
-    expect(result.error).toMatch(/turn on/i);
+    expect(errorText(result)).toMatch(/turn on/i);
     expect(mfa.issueRecoveryCodes).not.toHaveBeenCalled();
+  });
+});
+
+describe("confirmIdentity", () => {
+  it("passes a step-up refusal straight back, so the form keeps its code field", async () => {
+    mfa.requireStepUpState.mockResolvedValue(CODE_PLEASE);
+    expect(await confirmIdentity({}, form({}))).toEqual(CODE_PLEASE);
+    expect(mfa.requireStepUpState).toHaveBeenCalledWith(expect.any(FormData));
+  });
+
+  it("confirms once the code is accepted", async () => {
+    expect(successText(await confirmIdentity({}, form({ mfa_code: "123456" })))).toBe("Confirmed.");
+  });
+});
+
+// ---- the words ---------------------------------------------------------------
+
+/**
+ * Every refusal and confirmation these actions give, as a reader sees it in
+ * English. The actions return message keys now; what they SAY must not have
+ * moved by a character, including the deliberately identical wording for a
+ * wrong recovery code and one that could never be a code.
+ */
+describe("English is unchanged", () => {
+  it("the sign-in challenge", async () => {
+    sessionStateMock.mockResolvedValue({ kind: "unreachable" });
+    expect(errorText(await verifyTwoFactorSignIn({}, form({ code: "123456" })))).toBe(
+      "We couldn't reach the sign-in service. Check your connection and try again.",
+    );
+    sessionStateMock.mockResolvedValue({ kind: "signed_out" });
+    const expired = await verifyTwoFactorSignIn({}, form({ code: "123456" }));
+    expect(errorText(expired)).toBe("Your sign-in expired. Sign in again.");
+    expect(expired.error?.code).toBe("session_expired");
+
+    sessionStateMock.mockResolvedValue(state("needs_mfa"));
+    expect(errorText(await verifyTwoFactorSignIn({}, form({ code: "123456", aal: "aal2" })))).toBe(
+      'Unexpected field "aal" was rejected.',
+    );
+    expect(errorText(await verifyTwoFactorSignIn({}, form({ code: "12345" })))).toBe(
+      "The code is the 6 digits shown in your authenticator app.",
+    );
+    expect(
+      errorText(
+        await verifyTwoFactorSignIn(
+          {},
+          form({ code: "123456", factor_id: "c0000000-0000-4000-8000-00000000000c" }),
+        ),
+      ),
+    ).toBe("Pick one of your authenticator apps.");
+
+    const reasons = {
+      invalid: "That code didn't work. Check your authenticator app and try again.",
+      rate_limited: "Too many attempts. Wait a few minutes, then try again.",
+      replayed: "That code has already been used. Wait for the next one in your app.",
+      unavailable: "We couldn't check that code just now. Try again in a moment.",
+    };
+    for (const [reason, text] of Object.entries(reasons)) {
+      mfa.verifySecondFactor.mockResolvedValue({ ok: false, reason });
+      expect(errorText(await verifyTwoFactorSignIn({}, form({ code: "123456" }))), reason).toBe(text);
+    }
+  });
+
+  it("recovery-code sign-in", async () => {
+    sessionStateMock.mockResolvedValue(state("needs_mfa"));
+    expect(errorText(await signInWithRecoveryCode({}, form({ recovery_code: "  " })))).toBe(
+      "Enter one of your recovery codes.",
+    );
+
+    // A code too long to be one, and a code that is simply wrong, read the same.
+    const wrong = "That recovery code didn't work. Check it and try again.";
+    expect(errorText(await signInWithRecoveryCode({}, form({ recovery_code: "x".repeat(65) })))).toBe(
+      wrong,
+    );
+    mfa.spendRecoveryCode.mockResolvedValue(null);
+    expect(errorText(await signInWithRecoveryCode({}, form({ recovery_code: "aaaa-bbbb-cccc-dddd" })))).toBe(
+      wrong,
+    );
+
+    mfa.spendRecoveryCode.mockResolvedValue("hash-1");
+    mfa.deleteAllFactors.mockResolvedValue(false);
+    expect(errorText(await signInWithRecoveryCode({}, form({ recovery_code: "aaaa-bbbb-cccc-dddd" })))).toBe(
+      "We couldn't finish signing you in. Try the same code again in a moment.",
+    );
+
+    mfa.takeSecondFactorAttempt.mockResolvedValue(false);
+    expect(errorText(await signInWithRecoveryCode({}, form({ recovery_code: "aaaa-bbbb-cccc-dddd" })))).toBe(
+      "Too many attempts. Wait a few minutes, then try again.",
+    );
+  });
+
+  it("starting setup", async () => {
+    const begin = (fields: Record<string, string>) => beginTwoFactorSetup({}, form(fields));
+    sessionStateMock.mockResolvedValue(state("needs_mfa"));
+    expect(errorText(await begin({ name: "Pixel 8" }))).toBe("Your sign-in expired. Sign in again.");
+
+    sessionStateMock.mockResolvedValue(state("signed_in", { enrolled: false }));
+    expect(errorText(await begin({ name: "" }))).toBe("The name is required.");
+    expect(errorText(await begin({ name: "x".repeat(41) }))).toBe(
+      "The name must be 40 characters or fewer.",
+    );
+    expect(errorText(await begin({ name: "Pixel 8" }))).toBe(
+      "Enter your current password to continue.",
+    );
+    expect(errorText(await begin({ name: "Pixel 8", current_password: "x".repeat(73) }))).toBe(
+      "Current password is incorrect.",
+    );
+    checkPasswordMock.mockResolvedValue("unavailable");
+    expect(errorText(await begin({ name: "Pixel 8", current_password: "pw" }))).toBe(
+      "We couldn't check your password just now. Try again in a moment.",
+    );
+    rateLimitMock.mockImplementation(async (action: string) => action !== "password_reauth");
+    expect(errorText(await begin({ name: "Pixel 8", current_password: "pw" }))).toBe(
+      "Too many attempts. Wait a few minutes before trying again.",
+    );
+
+    hasPasswordMock.mockResolvedValue(false);
+    sessionStateMock.mockResolvedValue(
+      state("signed_in", { enrolled: false, signedInAt: now() - 3600 }),
+    );
+    expect(errorText(await begin({ name: "Pixel 8" }))).toBe(
+      "For your security, sign in again before turning on two-factor authentication.",
+    );
+
+    sessionStateMock.mockResolvedValue(
+      state("signed_in", { enrolled: false, signedInAt: now() - 60 }),
+    );
+    rateLimitMock.mockImplementation(async (action: string) => action !== "mfa_enroll");
+    expect(errorText(await begin({ name: "Pixel 8" }))).toBe(
+      "That's a lot of setup attempts. Try again a bit later.",
+    );
+
+    rateLimitMock.mockResolvedValue(true);
+    sessionStateMock.mockResolvedValue(state("signed_in"));
+    expect(errorText(await begin({ name: "PHONE" }))).toBe(
+      "You already have an authenticator with that name. Pick another.",
+    );
+    const enrollFailures = {
+      mfa_factor_name_conflict: "You already have an authenticator with that name. Pick another.",
+      too_many_enrolled_mfa_factors:
+        "This account has as many authenticators as it can hold. Remove one first.",
+      unexpected_failure: "We couldn't start setup just now. Try again in a moment.",
+    };
+    for (const [code, text] of Object.entries(enrollFailures)) {
+      enrollMock.mockResolvedValue({ data: null, error: { code, message: "no" } });
+      expect(errorText(await begin({ name: "Tablet" })), code).toBe(text);
+    }
+  });
+
+  it("finishing setup", async () => {
+    const confirm = (fields: Record<string, string>) => confirmTwoFactorSetup({}, form(fields));
+    sessionStateMock.mockResolvedValue(
+      state("signed_in", { enrolled: false, factors: [pendingFactor] }),
+    );
+    expect(errorText(await confirm({ factor_id: "nope", code: "123456" }))).toBe(
+      "Setup expired. Start again.",
+    );
+    expect(errorText(await confirm({ factor_id: PENDING, code: "12 34" }))).toBe(
+      "The code is the 6 digits shown in your authenticator app.",
+    );
+    mfa.verifySecondFactor.mockResolvedValue({ ok: false, reason: "invalid" });
+    expect(errorText(await confirm({ factor_id: PENDING, code: "000000" }))).toBe(
+      "That code didn't match. Make sure your app shows Square Share, then enter the newest code.",
+    );
+    mfa.verifySecondFactor.mockResolvedValue({ ok: false, reason: "replayed" });
+    expect(errorText(await confirm({ factor_id: PENDING, code: "000000" }))).toBe(
+      "That code has already been used. Wait for the next one in your app.",
+    );
+  });
+
+  it("managing it", async () => {
+    const twoFactors = state("signed_in");
+    twoFactors.assurance.factors.push({
+      id: PENDING,
+      name: "Tablet",
+      type: "totp",
+      createdAt: "2026-09-02T00:00:00Z",
+    });
+    sessionStateMock.mockResolvedValue(twoFactors);
+    const removed = await removeAuthenticator({}, form({ factor_id: PENDING, mfa_code: "123456" }));
+    expect(successText(removed)).toBe('Removed "Tablet".');
+    expect(mfa.alertTwoFactorChange).toHaveBeenCalledWith(
+      expect.anything(),
+      "mfa.factor_removed",
+      expect.anything(),
+    );
+
+    expect(
+      errorText(await removeAuthenticator({}, form({ factor_id: "nope", mfa_code: "123456" }))),
+    ).toBe("That authenticator isn't on your account.");
+
+    unenrollMock.mockResolvedValue({ data: null, error: { code: "x", message: "no" } });
+    expect(errorText(await removeAuthenticator({}, form({ factor_id: FACTOR, mfa_code: "123456" })))).toBe(
+      "We couldn't remove that authenticator. Try again.",
+    );
+
+    rateLimitMock.mockResolvedValue(false);
+    const changes = "That's a lot of changes in a short time. Try again a bit later.";
+    expect(errorText(await removeAuthenticator({}, form({ factor_id: FACTOR, mfa_code: "123456" })))).toBe(
+      changes,
+    );
+    expect(errorText(await regenerateRecoveryCodes({}, form({ mfa_code: "123456" })))).toBe(changes);
+
+    rateLimitMock.mockResolvedValue(true);
+    mfa.issueRecoveryCodes.mockResolvedValue(null);
+    expect(errorText(await regenerateRecoveryCodes({}, form({ mfa_code: "123456" })))).toBe(
+      "We couldn't create new codes. Your old ones still work.",
+    );
+
+    sessionStateMock.mockResolvedValue(state("signed_in", { enrolled: false }));
+    expect(errorText(await regenerateRecoveryCodes({}, form({})))).toBe(
+      "Turn on two-factor authentication first.",
+    );
   });
 });

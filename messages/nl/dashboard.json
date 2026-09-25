@@ -1,0 +1,116 @@
+{
+  "metadata": {
+    "app": {
+      "title": "Square Share Dashboard",
+      "description": "Beheer je producten, ontwerp je etalage, koppel Stripe en bekijk statistieken in Square Share."
+    },
+    "overview": {
+      "title": "Overzicht"
+    },
+    "payments": {
+      "title": "Betalingen"
+    }
+  },
+  "loading": {
+    "overview": {
+      "srLoading": "Overzicht laden…"
+    },
+    "payments": {
+      "title": "Betalingen",
+      "subtitle": "Je saldo, uitbetalingen en Stripe-koppeling.",
+      "srLoading": "betalingen laden"
+    }
+  },
+  "shell": {
+    "accountFallback": "Account",
+    "anotherStore": "een andere winkel"
+  },
+  "overview": {
+    "title": "Overzicht",
+    "addProduct": "Product toevoegen",
+    "revenue30d": "Omzet · 30 dagen",
+    "sales30d": "Verkopen · 30 dagen",
+    "avgOrder30d": "Gem. bestelling · 30 dagen",
+    "revenueHeroLabel": "Omzet, laatste 30 dagen",
+    "noSales": "Nog geen verkopen"
+  },
+  "metric": {
+    "zeroDefault": "Nog geen verkopen",
+    "pendingDefault": "Beschikbaar zodra statistieken zijn gekoppeld."
+  },
+  "sidebar": {
+    "openMenu": "Menu openen",
+    "closeMenu": "Menu sluiten",
+    "navLabel": "Dashboard",
+    "title": "Dashboard"
+  },
+  "recentOrders": {
+    "title": "Recente bestellingen",
+    "empty": "Nog geen bestellingen. Verkopen via je eigen aankooplink of per e-mail verschijnen hier niet."
+  },
+  "attention": {
+    "title": "Vraagt om aandacht",
+    "allClear": "Alles in orde. Er is nu niets dat je aandacht nodig heeft.",
+    "twoFactor": {
+      "label": "Zet tweestapsverificatie aan",
+      "description": "Een code van je telefoon bij het inloggen, zodat een gestolen wachtwoord alleen niet genoeg is om in je winkel te komen.",
+      "action": "Aanzetten"
+    },
+    "stripe": {
+      "label": "Koppel Stripe om betaald te worden",
+      "description": "Uitbetalingen blijven geblokkeerd totdat je account is gekoppeld.",
+      "action": "Betalingen openen"
+    },
+    "legal": {
+      "label": "Accepteer de voorwaarden voor verkopers",
+      "labelUpdated": "Accepteer de bijgewerkte voorwaarden voor verkopers",
+      "description": "Lees de concepten van de Verkopersovereenkomst, de Servicevoorwaarden en het Privacybeleid en accepteer ze.",
+      "descriptionUpdated": "De voorwaarden zijn gewijzigd sinds je ze hebt geaccepteerd. Lees en accepteer de huidige versie.",
+      "descriptionTerms": "Lees de Servicevoorwaarden en ga ermee akkoord.",
+      "descriptionTermsUpdated": "De Servicevoorwaarden zijn gewijzigd sinds je ze hebt geaccepteerd. Lees de huidige versie en ga ermee akkoord.",
+      "action": "Voorwaarden bekijken"
+    },
+    "noBuyPath": {
+      "label": "{count, plural, one {{count} product zonder aankoopmogelijkheid} other {{count} producten zonder aankoopmogelijkheid}}",
+      "description": "Voeg een aankooplink toe, of stel een contact-e-mailadres in bij Instellingen zodat kopers je kunnen bereiken.",
+      "action": "Producten bekijken"
+    },
+    "noShipping": {
+      "label": "Voeg je verzendvoorwaarden toe",
+      "description": "Fysieke producten hebben verzend- en retourvoorwaarden nodig voordat kopers alle details zien.",
+      "action": "Voorwaarden toevoegen"
+    },
+    "storefront": {
+      "labelEmpty": "Je etalage is leeg",
+      "labelNone": "Maak je etalage",
+      "descriptionEmpty": "Voeg een product toe aan het raster om er een pagina van te maken die je kunt delen.",
+      "descriptionNone": "Kies een uitstraling en voeg dan je producten toe aan het raster.",
+      "actionOpen": "Editor openen",
+      "actionCreate": "Etalage maken"
+    },
+    "images": {
+      "label": "{count, plural, one {{count} product zonder afbeelding} other {{count} producten zonder afbeelding}}",
+      "descriptionSingle": "\"{title}\" heeft nog geen hoofdafbeelding.",
+      "descriptionMultiple": "Producten zonder afbeeldingen ogen leeg in je etalage.",
+      "actionSingle": "Afbeelding toevoegen",
+      "actionMultiple": "Producten aanpassen"
+    },
+    "flaggedOrders": {
+      "label": "{count, plural, one {{count} bestelling om te beoordelen} other {{count} bestellingen om te beoordelen}}",
+      "descriptionBoth": "{disputed, plural, one {{disputed} betwist} other {{disputed} betwist}}, {refunded, plural, one {{refunded} terugbetaald} other {{refunded} terugbetaald}}.",
+      "descriptionDisputed": "{count, plural, one {{count} betwist} other {{count} betwist}}.",
+      "descriptionRefunded": "{count, plural, one {{count} terugbetaald} other {{count} terugbetaald}}.",
+      "action": "Bestellingen bekijken"
+    },
+    "noindexPages": {
+      "label": "Productpagina's uitgesloten van zoekmachines",
+      "description": "{count, plural, =1 {Eén etalage heeft indexering uitgeschakeld voor de productpagina's.} other {{count} etalages hebben indexering uitgeschakeld voor hun productpagina's.}}",
+      "action": "Editor openen"
+    },
+    "deadBlocks": {
+      "label": "{count, plural, one {{count} etalageblok dat naar verwijderde producten verwijst} other {{count} etalageblokken die naar verwijderde producten verwijzen}}",
+      "description": "Deze blokken lijken leeg voor bezoekers. Verwijder of vervang ze.",
+      "action": "Etalage openen"
+    }
+  }
+}

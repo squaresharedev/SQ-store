@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
 import { getProduct } from "@/lib/products/queries";
 import { ProductFormView } from "@/components/products/ProductFormView";
@@ -9,9 +10,10 @@ import { getShippingChoices } from "@/lib/storefront/queries";
 import { getShippingPolicy } from "@/lib/settings/shipping-policy";
 import { EMPTY_SHIPPING_POLICY } from "@/types/shipping-policy";
 
-export const metadata: Metadata = {
-  title: "Edit product",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Products.metadata.edit");
+  return { title: t("title") };
+}
 
 // PROTECTED by (dashboard)/layout.tsx. Read-only members of the active store
 // can't edit, so bounce them to the list instead of a non-savable form.
@@ -47,10 +49,12 @@ export default async function EditProductPage({
     ? await getShippingPolicy(account.userId)
     : EMPTY_SHIPPING_POLICY;
 
+  const t = await getTranslations("Products.page.edit");
+
   return (
     <ProductFormView
-      title="Edit product"
-      subtitle="Update the details, image, or file for this product."
+      title={t("title")}
+      subtitle={t("subtitle")}
       product={product}
       shippingChoices={shippingChoices}
       shippingPolicy={shippingPolicy}

@@ -1,0 +1,1297 @@
+{
+  "shapes": {
+    "name": {
+      "square": "Quadrat",
+      "circle": "Kreis",
+      "ring": "Ring",
+      "diamond": "Raute",
+      "rounded": "Abgerundetes Quadrat",
+      "pill": "Pille",
+      "half": "Halbkreis",
+      "quarter": "Viertelkreis",
+      "bar": "Balken",
+      "triangle": "Dreieck",
+      "wedge": "Keil",
+      "pentagon": "Fünfeck",
+      "hexagon": "Sechseck",
+      "octagon": "Achteck",
+      "star": "Stern",
+      "sparkle": "Glitzerstern",
+      "cross": "Kreuz",
+      "arrow": "Pfeil",
+      "chevron": "Pfeilspitze",
+      "trapezoid": "Trapez",
+      "parallelogram": "Parallelogramm",
+      "burst": "Strahlenburst"
+    },
+    "add": {
+      "square": "Quadrat hinzufügen",
+      "circle": "Kreis hinzufügen",
+      "ring": "Ring hinzufügen",
+      "diamond": "Raute hinzufügen",
+      "rounded": "Abgerundetes Quadrat hinzufügen",
+      "pill": "Pille hinzufügen",
+      "half": "Halbkreis hinzufügen",
+      "quarter": "Viertelkreis hinzufügen",
+      "bar": "Balken hinzufügen",
+      "triangle": "Dreieck hinzufügen",
+      "wedge": "Keil hinzufügen",
+      "pentagon": "Fünfeck hinzufügen",
+      "hexagon": "Sechseck hinzufügen",
+      "octagon": "Achteck hinzufügen",
+      "star": "Stern hinzufügen",
+      "sparkle": "Glitzerstern hinzufügen",
+      "cross": "Kreuz hinzufügen",
+      "arrow": "Pfeil hinzufügen",
+      "chevron": "Pfeilspitze hinzufügen",
+      "trapezoid": "Trapez hinzufügen",
+      "parallelogram": "Parallelogramm hinzufügen",
+      "burst": "Strahlenburst hinzufügen"
+    },
+    "group": {
+      "basic": "Grundformen",
+      "polygons": "Polygone",
+      "accents": "Akzente"
+    },
+    "groupLabel": {
+      "basic": "Grundformen",
+      "polygons": "Polygonformen",
+      "accents": "Akzentformen"
+    }
+  },
+  "fonts": {
+    "sans": "Sans",
+    "serif": "Serif",
+    "mono": "Mono",
+    "display": "Display",
+    "hand": "Handschrift",
+    "inter": "Inter",
+    "montserrat": "Montserrat",
+    "custom": "Hochgeladene Schriftart"
+  },
+  "textVariants": {
+    "heading": "Überschrift",
+    "subheading": "Unterüberschrift",
+    "body": "Fließtext"
+  },
+  "layoutPresets": {
+    "standard": "Standard",
+    "caption": "Beschriftung",
+    "header": "Kopfzeile",
+    "gallery": "Galerie",
+    "bare": "Pur"
+  },
+  "blockKinds": {
+    "product": "Produkt",
+    "text": "Text",
+    "shape": "Form",
+    "image": "Bild"
+  },
+  "settings": {
+    "groups": {
+      "theme": "Theme",
+      "header": "Kopfbereich",
+      "typography": "Typografie",
+      "cards": "Produktkacheln",
+      "soldOut": "Ausverkauft",
+      "productPage": "Produktseite"
+    },
+    "subtitle": {
+      "theme": "Schaufenster / Theme",
+      "header": "Schaufenster / Kopfbereich",
+      "typography": "Schaufenster / Typografie",
+      "cards": "Schaufenster / Produktkacheln",
+      "soldOut": "Schaufenster / Ausverkauft",
+      "productPage": "Schaufenster / Produktseite"
+    },
+    "labels": {
+      "looks": "Schaufenster-Look",
+      "background": "Hintergrund",
+      "accent": "Akzentfarbe",
+      "header": "Shop-Name und Kurzbio",
+      "font": "Schriftart",
+      "canvasSize": "Größe der Arbeitsfläche",
+      "gridGap": "Rasterabstand",
+      "tileLayout": "Kachel-Layout",
+      "titlePosition": "Titelposition",
+      "titleStyle": "Titelstil",
+      "cornerRadius": "Eckabrundung",
+      "titleInset": "Randabstand des Titels",
+      "pricePosition": "Preisposition",
+      "priceStyle": "Stil des Preisschilds",
+      "soldOut": "Ausverkaufte Produkte",
+      "productPageLayout": "Produktseite",
+      "productPageBackground": "Hintergrund der Produktseite",
+      "productPagePhotos": "Fotos auf der Produktseite",
+      "productPageFont": "Schriftart der Produktseite",
+      "productPageIndexing": "Indexierung durch Suchmaschinen",
+      "buyButton": "Kauf-Button",
+      "buyButtonColour": "Farbe des Kauf-Buttons",
+      "buyButtonRoundness": "Eckabrundung des Kauf-Buttons",
+      "buyButtonBorder": "Rahmen des Kauf-Buttons",
+      "priceNote": "Preishinweis",
+      "shippingNote": "Versandhinweis",
+      "productPageSections": "Abschnitte der Produktseite",
+      "productPageAvailability": "Verfügbarkeit auf der Seite",
+      "productPageByline": "„Verkauft von“-Zeile",
+      "shippingReturns": "Versand- und Rückgaberichtlinie",
+      "sellerDetails": "Verkäuferangaben"
+    }
+  },
+  "editorSearch": {
+    "sections": {
+      "canvas": "Auf der Arbeitsfläche",
+      "settings": "Einstellungen",
+      "panels": "Panels"
+    },
+    "openProductPage": "Produktseite öffnen",
+    "panelSubtitle": "Panel",
+    "panels": {
+      "layers": "Ebenen",
+      "products": "Produkt hinzufügen",
+      "shapes": "Formen",
+      "uploads": "Uploads"
+    }
+  },
+  "list": {
+    "showingOf": "Es werden {count} von {total} Schaufenstern angezeigt",
+    "count": "{count, plural, one {# Schaufenster} other {# Schaufenster}}",
+    "countSampleOnly": "Noch keine Schaufenster",
+    "creating": "Wird erstellt…",
+    "new": "Neues Schaufenster",
+    "emptyHeading": "Noch keine Schaufenster",
+    "emptyHintOwner": "Erstelle dein erstes Schaufenster und füge Produkte in sein Raster ein. Jedes Produkt darauf erhält eine Seite, die du teilen kannst.",
+    "emptyHintGuest": "Dieser Shop hat noch keine Schaufenster.",
+    "create": "Schaufenster erstellen",
+    "loadMoreError": "Weitere Schaufenster konnten nicht geladen werden. Versuche es erneut.",
+    "loadMore": "Mehr laden ({remaining} verbleibend)",
+    "deleteTitle": "Schaufenster löschen?",
+    "deleteDesc": "„{name}“ und sein Raster werden dauerhaft entfernt. Dies kann nicht rückgängig gemacht werden.",
+    "deleteToast": "„{name}“ wurde gelöscht."
+  },
+  "card": {
+    "editAriaLabel": "{name} bearbeiten",
+    "embedAriaLabel": "{name} einbetten",
+    "deleteAriaLabel": "{name} löschen",
+    "blockCount": "{count, plural, one {# Block} other {# Blöcke}}",
+    "updatedLabel": " · aktualisiert {date}",
+    "emptyHint": "Dieses Raster ist leer",
+    "removed": "Von SquareShare entfernt",
+    "pausedInReview": "Pausiert · bei SquareShare in Prüfung",
+    "pausedNeedsChanges": "Von SquareShare pausiert · Änderungen nötig"
+  },
+  "embed": {
+    "inDevNotice": "Das Einbettungs-Widget befindet sich in der Entwicklung und wird noch nicht auf externen Websites angezeigt. Konfiguriere deine Einstellungen unten, damit du den Einbettungscode einfügen kannst, sobald er verfügbar ist.",
+    "title": "Dieses Schaufenster einbetten",
+    "description": "Füge diesen Einbettungscode in eine beliebige Website ein, um „{name}“ dort anzuzeigen.",
+    "enabledLabel": "Einbettung aktiviert",
+    "domainsLabel": "Zugelassene Domains",
+    "domainsPlaceholder": "yoursite.com, blog.yoursite.com",
+    "domainsHint": "Bis zu {max}, kommagetrennt. Füge eine URL ein, und wir kürzen sie auf die Domain.",
+    "emptyDomainsWarning": "Füge mindestens eine Domain hinzu. Solange dies leer ist, wird das Schaufenster nirgendwo geladen, auch wenn die Einbettung aktiviert ist.",
+    "snippetLabel": "Einbettungscode",
+    "snippetReadyHint": "Füge diesen Einbettungscode in das HTML deiner Website ein.",
+    "snippetLockedHint": "Aktiviere die Einbettung und füge mindestens eine Domain hinzu, um die Schaltfläche „Kopieren“ freizuschalten.",
+    "copySnippet": {
+      "copy": "Einbettungscode kopieren",
+      "copied": "Einbettungscode kopiert",
+      "failed": "Einbettungscode konnte nicht kopiert werden. Wähle ihn aus und kopiere ihn manuell.",
+      "cannotCopyYet": "Einbettungscode kann noch nicht kopiert werden"
+    },
+    "snippetKeyLabel": "Schlüssel",
+    "rotateConfirmText": "Beim Erneuern wird ein neuer Schlüssel ausgestellt. Jede Kopie des alten Einbettungscodes hört sofort auf zu funktionieren, auch Kopien auf Websites, die du noch nutzt: Du musst den neuen Einbettungscode überall einfügen.",
+    "rotateKey": "Schlüssel erneuern",
+    "rotating": "Wird erneuert…",
+    "revokeHint": "An der falschen Stelle eingefügt? Erneuere den Schlüssel, um alle vorhandenen Einbettungscodes zu widerrufen.",
+    "saveSettings": "Einstellungen speichern",
+    "saving": "Wird gespeichert…",
+    "saved": "Einbettungseinstellungen gespeichert.",
+    "newKeyIssued": "Neuer Schlüssel ausgestellt.",
+    "newKeyDetail": "Füge den Einbettungscode überall neu ein, wo dieses Schaufenster eingebettet ist."
+  },
+  "wizard": {
+    "category": {
+      "title": "Was verkaufst du?",
+      "description": "Das ist der größte Anhaltspunkt dafür, welche Layouts zu dir passen."
+    },
+    "fulfilment": {
+      "title": "Wie erhalten Käufer das Produkt?",
+      "description": "Das beeinflusst, was deine Produktseiten über die Lieferung sagen."
+    },
+    "vibe": {
+      "title": "Wähle einen Look",
+      "description": "Dein Ausgangspunkt. Alles bleibt im Schaufenster-Editor bearbeitbar."
+    },
+    "name": {
+      "title": "Benenne dein Schaufenster",
+      "description": "Nur für dich. Du kannst es jederzeit umbenennen."
+    },
+    "stepOf": "Schritt {current} von {total}",
+    "nameLabel": "Name des Schaufensters",
+    "nameHint": "Lasse es leer, und wir nennen es Unbenanntes Schaufenster.",
+    "otherCategoryLabel": "Was verkaufst du?",
+    "otherCategoryPlaceholder": "z. B. Modellbausätze",
+    "noProductsHint": "Noch keine Produkte? Füge sie nach der Einrichtung hinzu.",
+    "skipSetup": "Einrichtung überspringen",
+    "skip": "Überspringen",
+    "creating": "Wird erstellt…",
+    "create": "Schaufenster erstellen"
+  },
+  "createOptions": {
+    "categoryGroupLabel": "Was du verkaufst",
+    "fulfilmentGroupLabel": "Wie Käufer es erhalten",
+    "vibeGroupLabel": "Der Look, den du möchtest",
+    "category": {
+      "fashion": "Kleidung",
+      "art": "Kunst & Drucke",
+      "jewellery": "Schmuck",
+      "handmade": "Handgemacht",
+      "home": "Wohnen & Leben",
+      "beauty": "Beauty",
+      "food": "Essen & Trinken",
+      "music": "Musik",
+      "photography": "Fotografie",
+      "books": "Bücher & Zines",
+      "digital": "Digitale Produkte",
+      "vintage": "Vintage",
+      "other": "Etwas anderes"
+    },
+    "categoryPlaceholder": {
+      "fashion": "Mein Kleidungsshop",
+      "art": "Mein Kunstshop",
+      "jewellery": "Mein Schmuckshop",
+      "handmade": "Mein Handmade-Shop",
+      "home": "Mein Einrichtungsshop",
+      "beauty": "Mein Beauty-Shop",
+      "food": "Mein Lebensmittelshop",
+      "music": "Mein Musikshop",
+      "photography": "Mein Fotoshop",
+      "books": "Mein Buchshop",
+      "digital": "Mein digitaler Shop",
+      "vintage": "Mein Vintage-Shop",
+      "other": "Mein Shop",
+      "default": "Mein Schaufenster"
+    },
+    "fulfilment": {
+      "physical": "Ich versende es",
+      "digital": "Sie laden es herunter",
+      "services": "Sie buchen mich",
+      "mixed": "Eine Mischung aus allem"
+    },
+    "fulfilmentHint": {
+      "physical": "Physische Produkte",
+      "digital": "Dateien, Presets, Musik",
+      "services": "Sitzungen, Auftragsarbeiten",
+      "mixed": "Mehr als eine dieser Optionen"
+    },
+    "vibe": {
+      "minimal": "Minimalistisch",
+      "classic": "Klassisch",
+      "bold": "Kräftig"
+    },
+    "vibeHint": {
+      "minimal": "Name und Preis beim Mouseover",
+      "classic": "Name und Preis immer sichtbar",
+      "bold": "Preis immer sichtbar, Name beim Mouseover"
+    }
+  },
+  "picker": {
+    "addFirst": "Füge dein erstes Produkt hinzu",
+    "noProducts": "Du hast noch keine Produkte. Füge eines hinzu, und du kommst direkt hierher zurück, um es zu platzieren.",
+    "searchPlaceholder": "Produkte suchen",
+    "searchAriaLabel": "Deine Produkte durchsuchen",
+    "searching": "Wird gesucht…",
+    "noMatch": "Keine Produkte entsprechen „{term}“.",
+    "searchFailed": "Die Suche ist zurzeit nicht verfügbar; es wird angezeigt, was bereits geladen ist.",
+    "inGrid": "Im Raster",
+    "available": "Verfügbar",
+    "addSelected": "{count} ausgewählte hinzufügen",
+    "addAll": "Alle hinzufügen ({count})",
+    "deselectAriaLabel": "{title} abwählen",
+    "selectAriaLabel": "{title} auswählen",
+    "inGridAriaLabel": "{title} ist im Raster",
+    "addToGridAriaLabel": "{title} zum Raster hinzufügen",
+    "draftAriaLabel": "Entwurf: nicht für Käufer sichtbar",
+    "draftBadge": "Entwurf"
+  },
+  "preview": {
+    "ariaLabel": "Schaufenster-Vorschau"
+  },
+  "masthead": {
+    "namePlaceholder": "Dein Shop-Name",
+    "bioPlaceholder": "Ein kurzer Satz über deinen Shop",
+    "editAriaLabel": "{line, select, name {Shop-Name bearbeiten} bio {Shop-Kurzbio bearbeiten} other {{line} bearbeiten}}",
+    "editorNameAriaLabel": "Shop-Name",
+    "editorBioAriaLabel": "Shop-Kurzbio"
+  },
+  "pageConnectors": {},
+  "artboard": {
+    "productPageLabel": " · Produktseite",
+    "closeAriaLabel": "Produktseite für {title} schließen",
+    "desktopSize": "Desktop-Größe",
+    "mobileSize": "Mobile Größe"
+  },
+  "customFont": {},
+  "metadata": {
+    "storefronts": {
+      "title": "Schaufenster",
+      "subtitle": "Jedes Schaufenster hat sein eigenes Raster und Theme. Erstelle so viele wie nötig und öffne eines zum Bearbeiten."
+    },
+    "editor": {
+      "title": "Schaufenster bearbeiten"
+    },
+    "sample": {
+      "title": "Beispiel-Schaufenster"
+    }
+  },
+  "routes": {
+    "editor": {
+      "loading": "Schaufenster-Editor wird geladen…"
+    },
+    "list": {
+      "loading": "Schaufenster werden geladen"
+    }
+  },
+  "controls": {
+    "off": "Aus",
+    "layers": "Ebenen",
+    "objectCount": "{count, plural, one {1 Objekt} other {# Objekte}}",
+    "cardStyle": "Kachelstil",
+    "priceTag": "Preisschild",
+    "theme": "Theme",
+    "canvas": "Arbeitsfläche",
+    "design": "Design"
+  },
+  "designPanel": {
+    "tabSelection": "Auswahl",
+    "tabDesign": "Design",
+    "show": "Designbereich anzeigen",
+    "hide": "Designbereich ausblenden",
+    "resize": "Designbereich skalieren",
+    "closeSettings": "Designeinstellungen schließen",
+    "scopeLabel": "Bereichsumfang"
+  },
+  "library": {
+    "title": "Bibliothek",
+    "hint": "Wähle eines aus, um es hinzuzufügen",
+    "canvasFull": "Arbeitsfläche ist voll",
+    "close": "Bibliotheksbereich schließen",
+    "tabUploads": "Uploads",
+    "tabShapes": "Formen"
+  },
+  "uploads": {
+    "addImage": "Bild hinzufügen",
+    "processing": "Wird verarbeitet…",
+    "uploadingPct": "Wird hochgeladen… {pct} %",
+    "dropToUpload": "Ablegen zum Hochladen",
+    "uploadImage": "Bild hochladen",
+    "uploadHint": "SVG, PNG, JPEG, WebP, GIF oder AVIF. Bis zu 2 MB. Lege eine Datei hier ab oder klicke, um zu suchen.",
+    "canvasFullHint": "Die Arbeitsfläche ist voll. Entferne einen Block, um einen weiteren hinzuzufügen.",
+    "inStorefront": "In diesem Schaufenster",
+    "imagesGroup": "Bilder in diesem Schaufenster",
+    "emptyHint": "Hochgeladene Bilder werden hier gesammelt, damit du dasselbe Bild erneut platzieren kannst, ohne es zweimal hochzuladen.",
+    "placeAgain": "{alt} erneut platzieren",
+    "placeAgainFallback": "Dieses Bild erneut platzieren"
+  },
+  "layers": {
+    "title": "Ebenen",
+    "backAriaLabel": "Zurück zum ausgewählten Block, Ebenenbereich verlassen",
+    "empty": "Noch nichts auf der Arbeitsfläche. Blöcke erscheinen hier, wenn du sie hinzufügst.",
+    "listAriaLabel": "Ebenen der Arbeitsfläche, vorne nach hinten",
+    "layerOf": "Ebene {index} von {total}",
+    "moveGroup": "{label} verschieben",
+    "reorderLabel": "{label} neu anordnen",
+    "dragToReorder": "Zum Neuanordnen ziehen",
+    "showOptions": "Ebenenoptionen für {label} anzeigen",
+    "hideOptions": "Ebenenoptionen für {label} ausblenden",
+    "shortcutHint": "{mod} + [ und {mod} + ] verschieben die Auswahl um eine Ebene. Shift dazudrücken, um sie ganz nach vorne oder hinten zu senden.",
+    "layerOp": {
+      "back": "In den Hintergrund",
+      "backward": "Eine Ebene nach hinten",
+      "forward": "Eine Ebene nach vorne",
+      "front": "In den Vordergrund"
+    },
+    "layerOpFor": {
+      "back": "In den Hintergrund: {label}",
+      "backward": "Eine Ebene nach hinten: {label}",
+      "forward": "Eine Ebene nach vorne: {label}",
+      "front": "In den Vordergrund: {label}"
+    }
+  },
+  "colorPanel": {
+    "close": "Farbbereich schließen",
+    "sectionType": "Typ",
+    "font": "Schriftart",
+    "fontTheme": "Theme-Schriftart",
+    "fontThemeDesc": "Schaufenster-Schriftart übernehmen",
+    "sectionInDesign": "In diesem Design",
+    "inDesignGroup": "Farben in diesem Design",
+    "inDesignEmpty": "Farben, die du auf der Arbeitsfläche verwendest, werden hier gesammelt.",
+    "inDesignSwatch": "In diesem Design ({hex})",
+    "sectionCustom": "Benutzerdefiniert",
+    "sectionInherit": "Geerbt",
+    "sectionRecent": "Zuletzt verwendet",
+    "recentGroup": "Zuletzt verwendete Farben",
+    "recentSwatch": "Zuletzt verwendet ({hex})",
+    "sectionStandard": "Standard",
+    "standardGroup": "Standardfarben",
+    "sectionPalettes": "Paletten"
+  },
+  "themePanel": {
+    "accent": "Akzentfarbe"
+  },
+  "panelSearch": {
+    "placeholder": "Einstellung oder Objekt suchen",
+    "clear": "Suche löschen",
+    "noResults": "Nichts im Editor stimmt damit überein.",
+    "matchesLabel": "Treffer"
+  },
+  "looks": {
+    "title": "Looks",
+    "infoLabel": "Was das Auswählen eines Looks ändert",
+    "infoBody": "Ein Look legt auf einen Schlag die Farben, Schriftart, Ecken, Abstände und den Inhalt einer Produktkachel für das gesamte Schaufenster fest. Dein Layout, deine Produkte und alle manuell gestalteten Kacheln bleiben genau so, wie sie sind.",
+    "groupLabel": "Schaufenster-Look",
+    "minimal": "Minimalistisch",
+    "classic": "Klassisch",
+    "bold": "Kräftig",
+    "hintMinimal": "Nur Bilder. Name und Preis beim Mouseover.",
+    "hintClassic": "Name und Preis unter jedem Bild.",
+    "hintBold": "Preis immer auf dem Bild, Name beim Mouseover."
+  },
+  "background": {
+    "label": "Hintergrund",
+    "typeLabel": "Hintergrundtyp",
+    "typeColor": "Farbe",
+    "typeGradient": "Farbverlauf",
+    "typeImage": "Bild",
+    "position": "Position",
+    "dragAriaLabel": "Hintergrundbild durch Ziehen positionieren",
+    "dragHint": "Vorschau ziehen zum Neupositionieren. Zoom zum Ändern der Größe.",
+    "zoomLabel": "Zoom",
+    "zoomAriaLabel": "Zoom des Hintergrundbilds",
+    "zoomValueText": "{n, plural, one {# Prozent} other {# Prozent}}",
+    "processing": "Wird verarbeitet…",
+    "uploadingPct": "Wird hochgeladen… {n} %",
+    "replaceImage": "Bild ersetzen",
+    "uploadImage": "Bild hochladen",
+    "uploadingProgress": "Hintergrundbild wird hochgeladen",
+    "uploadHint": "Bis zu 10 MB. JPEG, PNG, WebP, GIF oder AVIF.",
+    "colorLabel": "Farbe",
+    "from": "Von",
+    "to": "Bis",
+    "angle": "Winkel",
+    "gradientAngle": "Verlaufswinkel",
+    "angleValueText": "{n, plural, one {# Grad} other {# Grad}}"
+  },
+  "cardStyle": {
+    "layout": "Layout",
+    "position": "Position",
+    "roundedHint": "Abgerundete Kacheln halten beide Beschriftungen auf der Mittelachse.",
+    "spotHint": "Klicke auf eine Stelle, um die Beschriftung zu platzieren, oder ziehe sie hier oder auf die Kachel.",
+    "cornerRoundness": "Eckabrundung",
+    "cornerValueText": "{n, plural, one {# Pixel} other {# Pixel}}",
+    "sharp": "Eckig",
+    "circle": "Kreis",
+    "fineTuning": "Feineinstellung",
+    "showTitle": "Titel anzeigen",
+    "titleStyleLabel": "Titelstil",
+    "edgeSpacing": "Randabstand",
+    "edgeSpacingAriaLabel": "Rand-Titelabstand",
+    "edgeValueText": "{n, plural, one {# Pixel} other {# Pixel}}",
+    "auto": "Auto",
+    "showTitleOnHover": "Titel beim Mouseover anzeigen",
+    "hoverHint": "Der Titel bleibt verborgen, bis ein Käufer mit der Maus über das Produkt fährt.",
+    "revealTop": "Die Leiste gleitet beim Mouseover von oben herunter.",
+    "revealMiddle": "Die Leiste wird beim Mouseover eingeblendet.",
+    "revealBottom": "Die Leiste gleitet beim Mouseover von unten herauf."
+  },
+  "priceTag": {
+    "showPrice": "Preis anzeigen",
+    "roundedHint": "Abgerundete Kacheln halten das Preisschild auf der Mittelachse.",
+    "dragHint": "Auf der Kachel ziehen oder das Layout-Board nutzen, um eine Stelle auszuwählen.",
+    "showOnHover": "Beim Mouseover anzeigen",
+    "font": "Schriftart",
+    "fontAriaLabel": "Schriftart des Preisschilds",
+    "size": "Größe",
+    "sizeAriaLabel": "Größe des Preisschilds",
+    "sizeValueText": "{n, plural, one {# Pixel} other {# Pixel}}",
+    "sizeTip": "Die Größe auf einer einzelnen Kachel. Das Preisschild skaliert mit der Kachel, auf der es sitzt: Eine größere Kachel trägt automatisch ein größeres Preisschild.",
+    "borderThickness": "Rahmenstärke",
+    "borderAriaLabel": "Rahmenstärke des Preisschilds",
+    "borderValueText": "{n, plural, one {# Pixel} other {# Pixel}}",
+    "cornerRoundness": "Eckabrundung",
+    "cornerAriaLabel": "Eckabrundung des Preisschilds",
+    "cornerValueText": "{n, plural, one {# Pixel} other {# Pixel}}",
+    "sharp": "Eckig",
+    "pill": "Pill",
+    "none": "Kein"
+  },
+  "priceTagPosition": {
+    "placementAriaLabel": "Position des Preisschilds",
+    "below": "Darunter",
+    "onImage": "Auf dem Bild",
+    "hidden": "Verborgen",
+    "spotAriaLabel": "Stelle des Preisschilds",
+    "spotTopLeft": "Preisschild oben links",
+    "spotTopCenter": "Preisschild oben Mitte",
+    "spotTopRight": "Preisschild oben rechts",
+    "spotMiddle": "Preisschild Mitte",
+    "spotBottomLeft": "Preisschild unten links",
+    "spotBottomCenter": "Preisschild unten Mitte",
+    "spotBottomRight": "Preisschild unten rechts"
+  },
+  "layout": {
+    "canvasWidth": "Breite der Arbeitsfläche",
+    "canvasWidthAriaLabel": "Breite der Arbeitsfläche in Blöcken",
+    "blocksWide": "{n, plural, one {# Block breit} other {# Blöcke breit}}",
+    "canvasHeight": "Höhe der Arbeitsfläche",
+    "heightTip": "Die Arbeitsfläche kann nicht kleiner werden als die bereits darauf platzierten Blöcke: Ziehe zuerst einen Block nach oben, dann verkürze die Arbeitsfläche.",
+    "canvasHeightAriaLabel": "Höhe der Arbeitsfläche in Blöcken",
+    "blocksTall": "{n, plural, one {# Block hoch} other {# Blöcke hoch}}",
+    "gridDensity": "Rasterdichte",
+    "gridDensityAriaLabel": "Rasterdichte",
+    "gridGapValue": "{n, plural, one {# Pixel Abstand} other {# Pixel Abstand}}",
+    "noGap": "Kein Abstand",
+    "showGrid": "Raster anzeigen",
+    "gridInfoLabel": "Wer das Raster sieht",
+    "gridInfoBody": "Eine Hilfe für dich beim Gestalten: Es zeichnet die leeren Felder, damit du siehst, wo ein Block landet. Käufer sehen es nie."
+  },
+  "placement": {
+    "rotation": "Drehung",
+    "rotationTipSingle": "Ganzzahlige Grad, in beide Richtungen von der Ausgangsposition. Der Block dreht sich um seinen eigenen Mittelpunkt und behält die belegten Felder.",
+    "rotationTipMultiple": "Ganzzahlige Grad, in beide Richtungen von der Ausgangsposition. Jeder Block dreht sich um seinen eigenen Mittelpunkt, sodass eine Blockreihe eine Reihe bleibt.",
+    "rotationAriaLabel": "Blockdrehung",
+    "valueTextMixed": "Gemischte Winkel",
+    "valueText": "{n, plural, one {# Grad} other {# Grad}}",
+    "statusMixed": "Gemischt",
+    "levelBlock": "Block ausrichten",
+    "rotateTo": "Drehen auf {n, plural, one {# Grad} other {# Grad}}",
+    "level": "Ausgerichtet",
+    "angle": "{n}°",
+    "layerLabel": "Ebene",
+    "layerInfoLabel": "Wie Ebenen funktionieren",
+    "layerInfoBody": "Ebenen bestimmen nur, was oben gemalt wird, wo sich Blöcke überlappen; die Lesereihenfolge für Screenreader ändert sich nie.{multi, select, true { Diese Auswahl behält beim Verschieben ihre eigene Reihenfolge innerhalb des Stapels.} other {}}{stacked, select, true { Alt-Klick auf einen Stapel auf der Arbeitsfläche, um den darunterliegenden Block zu erreichen.} other {}}",
+    "blocksSelected": "{count, plural, one {# Block ausgewählt} other {# Blöcke ausgewählt}}",
+    "layerOf": "Ebene {index} von {total}",
+    "blockLayerLabel": "Block-Ebene",
+    "sendToBack": "In den Hintergrund",
+    "sendBackward": "Eine Ebene nach hinten",
+    "bringForward": "Eine Ebene nach vorne",
+    "bringToFront": "In den Vordergrund",
+    "seeAllLayers": "Alle Ebenen anzeigen"
+  },
+  "header": {
+    "showHeader": "Kopfbereich anzeigen",
+    "infoLabel": "Andere Möglichkeiten, den Kopfbereich zu bearbeiten",
+    "infoBody": "Klicke auf den Namen oder die Kurzbio auf der Arbeitsfläche, um dort zu tippen. Dieses Panel öffnet sich gleichzeitig auf dieser Zeile, wo Schriftart, Größe, Farbe, Formatierung und Ausrichtung eingestellt werden.",
+    "storeName": "Shop-Name",
+    "storeNamePlaceholder": "Shop-Name, der Käufern angezeigt wird",
+    "bio": "Kurzbio",
+    "bioPlaceholder": "Ein kurzer Satz über deinen Shop",
+    "charsLeft": "{n, plural, one {# Zeichen übrig} other {# Zeichen übrig}}"
+  },
+  "soldOut": {
+    "hide": "Vor Käufern ausblenden",
+    "hideInfoLabel": "Was das Ausblenden ausverkaufter Produkte bewirkt",
+    "hideInfoBody": "Produkte, die du als ausverkauft markiert hast, verschwinden vollständig aus dem Schaufenster. Sie bleiben hier auf der Arbeitsfläche, abgedunkelt, damit du sie weiterhin verschieben und wieder zum Verkauf stellen kannst.",
+    "badge": "Badge anzeigen",
+    "badgeInfoLabel": "Wann das Ausverkauft-Badge erscheint",
+    "badgeInfoBodyHidden": "Nichts zu markieren, solange ausverkaufte Produkte ausgeblendet sind. Deaktiviere „Vor Käufern ausblenden“, damit das Badge sie stattdessen kennzeichnet.",
+    "badgeInfoBodyVisible": "Kennzeichnet ein ausverkauftes Produkt im Schaufenster, damit ein Käufer erfährt, dass es existiert und vergriffen ist, anstatt sich zu wundern."
+  },
+  "typography": {
+    "font": "Schriftart",
+    "ownFont": "Eigene Schriftart",
+    "fontInfoLabel": "Welche Schriftartdateien funktionieren",
+    "fontInfoBody": "WOFF2, WOFF, TTF oder OTF, bis zu 2 MB. WOFF2 ist die empfohlene Wahl: Es ist die kleinste Datei und damit am schnellsten für einen Käufer zu laden, und jeder Browser kann es lesen.",
+    "processing": "Wird verarbeitet…",
+    "uploadingPct": "Wird hochgeladen… {n} %",
+    "replaceFont": "Schriftart ersetzen",
+    "uploadFont": "Schriftart hochladen",
+    "uploadingLabel": "Schriftart wird hochgeladen",
+    "uploadedFontDesc": "Deine hochgeladene Schriftart",
+    "fontDescDefault": "Standard",
+    "fontDescInter": "Klar und neutral",
+    "fontDescMontserrat": "Geometrisch und breit"
+  },
+  "textFormat": {
+    "format": "Format",
+    "formatAriaLabel": "Textformatierung",
+    "bold": "Fett",
+    "italic": "Kursiv",
+    "underline": "Unterstrichen",
+    "alignment": "Ausrichtung",
+    "alignAriaLabel": "Textausrichtung",
+    "alignLeft": "Linksbündig",
+    "alignCenter": "Zentriert",
+    "alignRight": "Rechtsbündig"
+  },
+  "fontSize": {
+    "label": "Größe",
+    "autoPx": "Auto ({n} px)",
+    "auto": "Auto",
+    "ariaLabel": "Schriftgröße",
+    "valueText": "{n, plural, one {# Pixel} other {# Pixel}}"
+  },
+  "layoutPresetPicker": {
+    "ariaLabel": "Layout"
+  },
+  "titleStyle": {
+    "ariaLabel": "Titelstil",
+    "bar": "Leiste",
+    "overlay": "Überlagerung",
+    "shadow": "Schatten"
+  },
+  "titlePosition": {
+    "ariaLabel": "Titelposition",
+    "spotTopLeft": "Titel oben links",
+    "spotTopCenter": "Titel oben Mitte",
+    "spotTopRight": "Titel oben rechts",
+    "spotMiddle": "Titel Mitte",
+    "spotBottomLeft": "Titel unten links",
+    "spotBottomCenter": "Titel unten Mitte",
+    "spotBottomRight": "Titel unten rechts"
+  },
+  "tileSpot": {},
+  "tileLayoutBoard": {
+    "labelToPlace": "Zu platzierende Beschriftung",
+    "labelPositions": "Beschriftungspositionen",
+    "title": "Titel",
+    "price": "Preis",
+    "titleAt": "{spot, select, top_left {Titel oben links} top_center {Titel oben Mitte} top_right {Titel oben rechts} middle_center {Titel in der Mitte} bottom_left {Titel unten links} bottom_center {Titel unten Mitte} bottom_right {Titel unten rechts} other {Titel hier}}. Ziehe ihn, klicke auf eine Stelle oder nutze die Pfeiltasten, um ihn zu verschieben.",
+    "priceAt": "{spot, select, top_left {Preis oben links} top_center {Preis oben Mitte} top_right {Preis oben rechts} middle_center {Preis in der Mitte} bottom_left {Preis unten links} bottom_center {Preis unten Mitte} bottom_right {Preis unten rechts} other {Preis hier}}. Ziehe ihn, klicke auf eine Stelle oder nutze die Pfeiltasten, um ihn zu verschieben.",
+    "moveTitleTo": "{spot, select, top_left {Titel nach oben links verschieben} top_center {Titel nach oben Mitte verschieben} top_right {Titel nach oben rechts verschieben} middle_center {Titel in die Mitte verschieben} bottom_left {Titel nach unten links verschieben} bottom_center {Titel nach unten Mitte verschieben} bottom_right {Titel nach unten rechts verschieben} other {Titel hierhin verschieben}}",
+    "movePriceTo": "{spot, select, top_left {Preis nach oben links verschieben} top_center {Preis nach oben Mitte verschieben} top_right {Preis nach oben rechts verschieben} middle_center {Preis in die Mitte verschieben} bottom_left {Preis nach unten links verschieben} bottom_center {Preis nach unten Mitte verschieben} bottom_right {Preis nach unten rechts verschieben} other {Preis hierhin verschieben}}"
+  },
+  "productPage": {
+    "layout": {
+      "title": "Seite",
+      "showPage": {
+        "label": "Produktseite anzeigen",
+        "infoLabel": "Was dieser Schalter bewirkt",
+        "infoOn": "Ein Tippen auf eine Produktkachel öffnet deren Seite.",
+        "infoOff": "Produktkacheln haben keine Seite zum Öffnen."
+      },
+      "pageColor": "Seitenfarbe",
+      "storefrontBackground": "Schaufenster-Hintergrund",
+      "photoFit": {
+        "label": "Foto-Anpassung",
+        "ariaLabel": "Foto-Anpassung",
+        "fit": "Einpassen",
+        "fill": "Füllen"
+      },
+      "font": {
+        "label": "Schriftart",
+        "infoLabel": "Wie die Schriftart dieser Seite mit der des Schaufensters zusammenhängt",
+        "infoOwn": "Diese Seite wird mit einer eigenen Schrift angezeigt, unabhängig vom Schaufenster.",
+        "infoFollows": "Übernimmt die Schriftart deines Schaufensters. Ändere sie unter Typografie.",
+        "inheritOption": "Wie das Schaufenster ({name})"
+      },
+      "indexing": {
+        "label": "Suchmaschinen erlauben",
+        "infoLabel": "Was das Deaktivieren bewirkt",
+        "infoContent": "Deaktiviert hält deine Produktseiten aus den Suchergebnissen heraus. Jeder mit einem Link kann sie trotzdem öffnen."
+      },
+      "useStorefrontBackground": "Schaufenster-Hintergrund verwenden"
+    },
+    "cta": {
+      "title": "Kauf-Button",
+      "infoLabel": "Was entscheidet, ob ein Button angezeigt wird",
+      "infoContent": "Der Button folgt dem Kauflink des jeweiligen Produkts (am Produkt eingestellt). Ohne Kauflink wird deine Kontakt-E-Mail-Adresse unten verwendet; fehlen beide, wird kein Button angezeigt.",
+      "buttonText": {
+        "label": "Button-Text",
+        "charsLeft": "{count, plural, one {# Zeichen übrig} other {# Zeichen übrig}}"
+      },
+      "buttonColor": "Button-Farbe",
+      "storefrontAccent": "Akzentfarbe des Schaufensters",
+      "cornerRoundness": {
+        "label": "Eckabrundung",
+        "ariaLabel": "Eckabrundung des Kauf-Buttons",
+        "valueText": "{value} Pixel",
+        "auto": "Auto"
+      },
+      "borderThickness": {
+        "label": "Rahmenstärke",
+        "ariaLabel": "Rahmenstärke des Kauf-Buttons",
+        "valueText": "{value} Pixel",
+        "none": "Kein"
+      },
+      "borderColor": "Rahmenfarbe",
+      "buttonTextColor": "Button-Textfarbe",
+      "priceNote": {
+        "label": "Preishinweis",
+        "ariaLabel": "Preishinweis",
+        "inclVat": "Inkl. MwSt.",
+        "exclTax": "Zzgl. Steuern",
+        "none": "Kein"
+      },
+      "shippingNote": {
+        "label": "Versandhinweis",
+        "ariaLabel": "Versandhinweis",
+        "plusShipping": "Zzgl. Versand",
+        "freeShipping": "Kostenloser Versand",
+        "none": "Kein"
+      },
+      "useStorefrontAccent": "Akzentfarbe des Schaufensters verwenden",
+      "useButtonTextColor": "Textfarbe des Buttons verwenden"
+    },
+    "sections": {
+      "title": "Abschnitte",
+      "infoLabel": "Wann ein Abschnitt ausgeblendet bleibt",
+      "infoContent": "Ein Abschnitt ohne anzuzeigende Inhalte bleibt ausgeblendet, auch wenn er aktiviert ist. Versand und Sicherheit werden bei Downloads nie angezeigt. Sicherheit und Konformität sowie Verkäufer sind gesetzlich vorgeschriebene Angaben und können nicht deaktiviert werden.",
+      "listAriaLabel": "Was die Seite anzeigt",
+      "underTheTitle": "unter dem Titel",
+      "requiredByLaw": "gesetzlich vorgeschrieben",
+      "sectionLabels": {
+        "description": "Beschreibung",
+        "specs": "Technische Daten",
+        "documents": "Dokumente",
+        "shipping": "Versand",
+        "returns": "Rücksendungen",
+        "safety": "Sicherheit und Konformität",
+        "seller": "Verkäufer"
+      },
+      "availability": "Verfügbarkeit",
+      "soldByByline": "„Verkauft von“-Zeile"
+    },
+    "shippingReturns": {
+      "title": "Versand und Rücksendungen",
+      "infoLabel": "Warum dies in den Einstellungen und nicht hier ist",
+      "infoContent": "Einmal für dein gesamtes Konto festgelegt, sodass jedes Schaufenster und jedes Produkt unter denselben Bedingungen verkauft wird. Für EU-Verkäufer gibt die Seite außerdem das 14-tägige Widerrufsrecht und die gesetzliche Gewährleistung von 2 Jahren an, unabhängig davon, was du einträgst.",
+      "shippingLabel": "Versand",
+      "returnsLabel": "Rücksendungen",
+      "profileCount": "{count, plural, one {# Versandprofil für Produkte, die unterschiedlich verschickt werden.} other {# Versandprofile für Produkte, die unterschiedlich verschickt werden.}}",
+      "nothingSet": "Noch nichts festgelegt. Bis du deine Bedingungen hinzufügst, zeigen Produktseiten an, dass der Verkäufer keine Versanddetails hinzugefügt hat.",
+      "editSettings": "In den Einstellungen bearbeiten",
+      "addTerms": "Versandbedingungen hinzufügen"
+    },
+    "sellerDetails": {
+      "title": "Verkäuferangaben",
+      "infoLabel": "Warum dies in den Einstellungen und nicht hier ist",
+      "infoContent": "Das Fernabsatzrecht verlangt, dass Name, Adresse und Kontaktmöglichkeit des Verkäufers bei jedem Angebot angegeben werden. Einmal für dein gesamtes Konto festgelegt: Jedes Schaufenster und jedes Produkt zeigt dieselben Angaben, sodass du sie nicht für jeden Shop wiederholen musst.",
+      "vatId": "USt-IdNr. {vatId}",
+      "nothingSet": "Noch nichts festgelegt. Bis du deine Geschäftsdaten hinzufügst, sehen Käufer nur die „Verkauft von“-Zeile unter dem Titel.",
+      "editSettings": "In den Einstellungen bearbeiten",
+      "addDetails": "Geschäftsdaten hinzufügen"
+    }
+  },
+  "productBlock": {
+    "deleted": "Dieses Produkt wurde aus deinem Katalog entfernt.",
+    "removeFromGrid": "Aus dem Raster entfernen",
+    "nameLabel": "Name",
+    "namePlaceholder": "Produktname",
+    "priceLabel": "Preis ({currency})",
+    "saveDotDot": "Speichern…",
+    "updating": "Wird aktualisiert…",
+    "whereChangeLands": {
+      "label": "Wo eine Namens- oder Preisänderung wirksam wird",
+      "content": "Name und Preis gehören zum Produkt, daher werden sie beim Speichern überall aktualisiert, wo das Produkt erscheint, nicht nur in diesem Schaufenster."
+    },
+    "stock": {
+      "outOfStock": "Nicht auf Lager (0 vorrätig).",
+      "lowStock": "Geringer Bestand: {count} vorrätig.",
+      "inStock": "{count} auf Lager."
+    },
+    "openProductPage": "Produktseite öffnen",
+    "hideProductPage": "Produktseite ausblenden",
+    "tileStyle": {
+      "title": "Kachel-Stil",
+      "reset": "Auf Theme zurücksetzen",
+      "infoLabel": "Wie der Stil dieser Kachel mit dem Theme zusammenhängt",
+      "infoWithOverrides": "Diese Kachel hat einen eigenen Stil. Einstellungen, die du hier nicht geändert hast, folgen weiterhin dem Theme.",
+      "infoNoOverrides": "Gestalte diese Kachel eigenständig. Alles, was du nicht änderst, folgt weiterhin dem Theme."
+    },
+    "priceTag": "Preisschild",
+    "modal": {
+      "title": "Produkt überall aktualisieren?",
+      "description": "Damit wird das Produkt selbst bearbeitet. Jedes Schaufenster, jeder Checkout-Link und dein Produktkatalog zeigen die neuen Details, nicht nur dieses Raster.",
+      "nameLabel": "Name:",
+      "priceLabel": "Preis:",
+      "updateEverywhere": "Überall aktualisieren"
+    },
+    "savedToast": "„{title}“ wurde überall aktualisiert, wo es erscheint.",
+    "validation": {
+      "noTitle": "Gib deinem Produkt einen Titel.",
+      "noPrice": "Lege einen Preis fest.",
+      "badPrice": "Der Preis muss eine Zahl größer als null sein.",
+      "tooHigh": "Dieser Preis ist zu hoch."
+    }
+  },
+  "textBlock": {
+    "text": {
+      "label": "Text",
+      "infoLabel": "Andere Möglichkeiten, diesen Text zu bearbeiten",
+      "infoContent": "Du kannst auch den Block auf der Arbeitsfläche erneut anklicken und direkt darauf tippen, was bei kleinen Änderungen schneller ist."
+    },
+    "editOnCanvas": "Text auf der Arbeitsfläche bearbeiten",
+    "style": {
+      "label": "Stil"
+    },
+    "font": {
+      "label": "Schriftart",
+      "themeFont": "Theme-Schriftart",
+      "themeFontDescription": "Schriftart des Schaufensters übernehmen"
+    },
+    "color": {
+      "selectedWords": "Ausgewählte Wörter",
+      "label": "Farbe",
+      "blockColor": "die Farbe des Blocks",
+      "themeColor": "Theme-Farbe",
+      "useBlockColor": "Farbe des Blocks verwenden"
+    },
+    "colouringSelected": "{count, plural, one {Das # ausgewählte Zeichen wird} other {Die # ausgewählten Zeichen werden}} eingefärbt. Klicke neben die Wörter, um stattdessen den ganzen Block einzufärben."
+  },
+  "imageBlock": {
+    "size": {
+      "label": "Größe",
+      "ariaLabel": "Bild anpassen",
+      "fill": "Füllen",
+      "fit": "Einpassen",
+      "fillHint": "Füllt den Block und schneidet den Überlauf ab.",
+      "fitHint": "Zeigt das gesamte Bild innerhalb des Blocks."
+    },
+    "reposition": "Bild neu positionieren",
+    "opacity": {
+      "label": "Deckkraft",
+      "ariaLabel": "Bild-Deckkraft",
+      "valueText": "{value} Prozent"
+    },
+    "description": {
+      "label": "Beschreibung",
+      "placeholder": "Logo, Symbol, Dekoration…",
+      "hint": "Wird von Screenreadern vorgelesen. Lass es leer, wenn das Bild rein dekorativ ist."
+    }
+  },
+  "shapeBlock": {
+    "shape": {
+      "label": "Form",
+      "ariaLabel": "Art der Form"
+    },
+    "points": {
+      "label": "Zacken",
+      "ariaLabel": "Stern-Zacken",
+      "valueText": "{value} Zacken"
+    },
+    "corners": {
+      "label": "Ecken-Rundung",
+      "ariaLabel": "Ecken-Rundung",
+      "valueText": "{value} Prozent",
+      "sharp": "Spitz"
+    },
+    "fill": {
+      "ring": "Farbe",
+      "shape": "Füllung"
+    },
+    "border": {
+      "ringLabel": "Ringdicke",
+      "shapeLabel": "Randstärke",
+      "ringAriaLabel": "Ringdicke",
+      "shapeAriaLabel": "Randstärke",
+      "valueText": "{value} Pixel",
+      "none": "Kein",
+      "color": "Randfarbe"
+    },
+    "opacity": {
+      "label": "Deckkraft",
+      "ariaLabel": "Form-Deckkraft",
+      "valueText": "{value} Prozent"
+    }
+  },
+  "multiBlock": {
+    "shapesContext": "{count, plural, one {# Form wird} other {# Formen werden}} gemeinsam bearbeitet. Die angezeigten Werte stammen von der ersten ausgewählten Form; jede Änderung gilt für alle.",
+    "textsContext": "{count, plural, one {# Textblock wird} other {# Textblöcke werden}} gemeinsam bearbeitet. Die angezeigten Werte stammen vom ersten ausgewählten Block; jede Änderung gilt für alle. Jeder Block behält seinen eigenen Text.",
+    "imagesContext": "{count, plural, one {# Element wird} other {# Elemente werden}} gemeinsam bearbeitet. Die angezeigten Werte stammen vom ersten ausgewählten Element; jede Änderung gilt für alle. Jedes behält sein eigenes Bild.",
+    "productsContext": "{count, plural, one {# Produktkachel wird} other {# Produktkacheln werden}} gemeinsam gestaltet. Die angezeigten Werte stammen von der ersten ausgewählten Kachel; jede Änderung gilt für alle.",
+    "mixedContext": "{count, plural, one {# Block verschiedener Typen ist ausgewählt.} other {# Blöcke verschiedener Typen sind ausgewählt.}} Wähle Blöcke desselben Typs aus, um ihre Einstellungen gemeinsam zu bearbeiten.",
+    "remove": "{count, plural, one {# Block entfernen} other {# Blöcke entfernen}}",
+    "duplicate": "{count, plural, one {# Block duplizieren} other {# Blöcke duplizieren}}",
+    "productsNotDuplicated": "Produkte werden nicht dupliziert.",
+    "tileStyle": {
+      "title": "Kachel-Stil",
+      "reset": "Auf Theme zurücksetzen"
+    },
+    "priceTag": "Preisschild"
+  },
+  "blockActions": {
+    "duplicate": "Duplizieren",
+    "remove": "Aus dem Raster entfernen"
+  },
+  "toolbar": {
+    "ariaLabel": "Editor-Werkzeuge",
+    "addProduct": "Produkt hinzufügen",
+    "addText": "Text hinzufügen",
+    "addElement": "Element hinzufügen",
+    "product": "Produkt",
+    "text": "Text",
+    "element": "Element",
+    "elementsMenu": "Elemente",
+    "uploading": "Wird hochgeladen…",
+    "upload": "Hochladen",
+    "uploadImage": "Bild hochladen",
+    "allShapes": "Alle Formen",
+    "browseShapes": "Die vollständige Formbibliothek durchsuchen",
+    "closePage": "Produktseite schließen",
+    "showPage": "Produktseite anzeigen",
+    "closePages": "Produktseiten schließen",
+    "showPageFull": "Produktseite anzeigen",
+    "undo": "Rückgängig",
+    "undoTip": "Rückgängig (Ctrl+Z)",
+    "redo": "Wiederholen",
+    "redoTip": "Wiederholen (Ctrl+Shift+Z)",
+    "tidy": "Arbeitsfläche aufräumen",
+    "tidyTip": "Aufräumen",
+    "zoomOut": "Herauszoomen",
+    "zoomOutTip": "Herauszoomen (Ctrl -)",
+    "zoomReset": "Zoom auf 100 % zurücksetzen",
+    "zoomResetTip": "Zoom zurücksetzen (Ctrl 0)",
+    "zoomResetMenuItem": "Zoom zurücksetzen",
+    "zoomIn": "Hineinzoomen",
+    "zoomInTip": "Hineinzoomen (Ctrl +)",
+    "designSettings": "Design-Einstellungen",
+    "page": "Seite",
+    "moreTools": "Weitere Werkzeuge"
+  },
+  "selectionToolbar": {
+    "toolsFor": "Werkzeuge für {name}",
+    "elements": "{count, plural, one {# Element} other {# Elemente}}",
+    "hidePage": "Seite ausblenden",
+    "hidePages": "Seiten ausblenden",
+    "openPage": "Seite öffnen",
+    "openPages": "Seiten öffnen",
+    "openProductPage": "Produktseite für {name} öffnen",
+    "closeProductPage": "Produktseite für {name} schließen",
+    "openProductPages": "Produktseiten für {count, plural, one {# Produkt} other {# Produkte}} öffnen",
+    "closeProductPages": "Produktseiten für {count, plural, one {# Produkt} other {# Produkte}} schließen",
+    "editText": "Text bearbeiten",
+    "editTextOf": "Text von {name} bearbeiten",
+    "color": "Farbe",
+    "changeColorOf": "Farbe von {name} ändern",
+    "stroke": "Kontur",
+    "editStrokeOf": "Kontur von {name} bearbeiten",
+    "corners": "Ecken",
+    "editCornersOf": "Eckenrundung von {name} bearbeiten",
+    "opacity": "Deckkraft",
+    "editOpacityOf": "Deckkraft von {name} bearbeiten",
+    "frame": "Einrahmen",
+    "frameImageFor": "Bild für {name} einrahmen",
+    "duplicate": "Duplizieren",
+    "duplicateNamed": "{name} duplizieren",
+    "duplicateN": "{count, plural, one {# Element duplizieren} other {# Elemente duplizieren}}",
+    "removeFrom": "{name} aus dem Raster entfernen",
+    "removeN": "{count, plural, one {# Element aus dem Raster entfernen} other {# Elemente aus dem Raster entfernen}}"
+  },
+  "canvas": {
+    "gridLabel": "Schaufenster-Arbeitsfläche",
+    "emptyGrid": "Dein Raster ist leer",
+    "emptyGridHint": "Füge ein Produkt hinzu, um dein Schaufenster zu gestalten. Text und Formen befinden sich in der Werkzeugleiste unten.",
+    "addProduct": "Produkt hinzufügen",
+    "desktopPreview": "Desktop-Vorschau",
+    "mobilePreview": "Mobile Vorschau"
+  },
+  "blockTile": {
+    "removedProduct": "Entferntes Produkt",
+    "shape": "{kind, select, square {Quadratform} circle {Kreisform} ring {Ringform} diamond {Rautenform} rounded {abgerundete Form} pill {Pillenform} half {Halbkreisform} quarter {Viertelkreisform} bar {Balkenform} triangle {Dreiecksform} wedge {Keilform} pentagon {Fünfeckform} hexagon {Sechseckform} octagon {Achteckform} star {Sternform} sparkle {Glitzersternform} cross {Kreuzform} arrow {Pfeilform} chevron {Pfeilspitzenform} trapezoid {Trapezform} parallelogram {Parallelogrammform} burst {Strahlenburstform} other {{kind} Form}}",
+    "imageWithAlt": "Bild: {alt}",
+    "imageElement": "Bildelement",
+    "textWithContent": "Text: {text}",
+    "textBlock": "Textblock",
+    "selected": "Ausgewählt: {label}. Drücke Enter, um die Auswahl aufzuheben.",
+    "unselected": "{label}. Drücke Enter, um auszuwählen und zu bearbeiten.",
+    "draftAriaLabel": "Entwurfsprodukt: Käufer können diesen Link nicht erreichen",
+    "draft": "Entwurf"
+  },
+  "blockFace": {
+    "productRemoved": "Produkt entfernt. Lösche diesen Block."
+  },
+  "framer": {
+    "ariaLabel": "Bild für {name} einrahmen. Ziehen zum Verschieben, Pfeiltasten zum Feinpositionieren, Plus und Minus zum Zoomen, Escape wenn fertig. Aktuell {x}% nach rechts, {y}% nach unten, {zoom}% Zoom.",
+    "hintZoomed": "{zoom}% · Ziehen zum Einrahmen · Esc",
+    "hintMinZoom": "Ecke ziehen zum Zoomen · Esc"
+  },
+  "inlineText": {
+    "ariaLabel": "Blocktext"
+  },
+  "tiles": {
+    "emptyText": "Leerer Textblock",
+    "imageUnavailable": "Bild nicht verfügbar"
+  },
+  "spotDrag": {
+    "tokenLabel": "{token, select, title {Titel} other {Preis}} {drop, select, below {in der Titelleiste} top_left {oben links} top_center {oben mitte} top_right {oben rechts} middle_center {in der Mitte} bottom_left {unten links} bottom_center {unten mitte} bottom_right {unten rechts} other {}}. Drücken zum Öffnen der Einstellungen oder ziehen (oder Pfeiltasten verwenden) zum Verschieben."
+  },
+  "autoFit": {},
+  "designer": {
+    "header": {
+      "back": "Zurück zu den Schaufenstern",
+      "nameLabel": "Schaufenster-Name",
+      "namePlaceholder": "Unbenanntes Schaufenster",
+      "unsaved": "Nicht gespeicherte Änderungen",
+      "search": "Suche"
+    },
+    "mobileNotice": {
+      "body": "Öffne diesen Designer für das beste Bearbeitungserlebnis auf einem Desktop oder Tablet. Blöcke neu anordnen und die Kopfzeile bearbeiten funktioniert auf jedem Gerät.",
+      "dismiss": "Hinweis zur Bearbeitung auf kleinem Bildschirm schließen"
+    },
+    "inspector": {
+      "title": {
+        "addProduct": "Produkt hinzufügen",
+        "blocks": "{count, plural, one {# Block} other {# Blöcke}}",
+        "product": "Produkt",
+        "shape": "Form",
+        "image": "Bild",
+        "text": "Textblock"
+      },
+      "close": {
+        "addProduct": "Panel „Produkt hinzufügen“ schließen",
+        "blocks": "{count, plural, one {Panel für # Block schließen} other {Panel für # Blöcke schließen}}",
+        "product": "Produktpanel schließen",
+        "shape": "Formpanel schließen",
+        "image": "Bildpanel schließen",
+        "text": "Textblock-Panel schließen"
+      }
+    },
+    "toasts": {
+      "full": "Dieses Schaufenster ist voll.",
+      "fullDetail": "Ein Schaufenster kann bis zu {max, plural, one {# Block} other {# Blöcke}} enthalten.",
+      "imageUploadFailed": "Dieses Bild konnte nicht hochgeladen werden.",
+      "imageUploadFailedDetail": "Versuche es gleich noch einmal.",
+      "copied": "{count, plural, one {Block kopiert.} other {# Blöcke kopiert.}}",
+      "copiedDetail": "Einfügen mit Ctrl+V oder Cmd+V.",
+      "savedWithDrafts": "Gespeichert, aber einige Produkte sind noch Entwürfe.",
+      "draftsDetail": "{count, plural, one {{names} ist ein Entwurf und Käufer können es noch nicht erreichen.} other {{names}{hidden, plural, =0 {} other { und # weitere}} sind Entwürfe und Käufer können sie noch nicht erreichen.}}",
+      "publishDrafts": "Veröffentliche diese Produkte, wenn sie fertig sind.",
+      "saved": "Schaufenster gespeichert.",
+      "droppedBlocks": "{count, plural, one {# Block verwies auf ein gelöschtes Produkt und wurde entfernt.} other {# Blöcke verwiesen auf gelöschte Produkte und wurden entfernt.}}"
+    },
+    "leave": {
+      "title": "Änderungen speichern?",
+      "description": "Du hast nicht gespeicherte Änderungen an diesem Schaufenster. Speichere sie vor dem Verlassen oder verwerfe sie.",
+      "save": "Änderungen speichern",
+      "discard": "Änderungen verwerfen",
+      "keepEditing": "Weiter bearbeiten"
+    },
+    "defaults": {
+      "textBlock": "Dein Text hier"
+    }
+  },
+  "sample": {
+    "name": "Beispiel-Schaufenster",
+    "card": {
+      "open": "Beispiel-Schaufenster öffnen",
+      "badge": "Beispiel",
+      "summary": "{count, plural, one {{count} Block · probiere alles aus, nichts wird gespeichert} other {{count} Blöcke · probiere alles aus, nichts wird gespeichert}}",
+      "hide": "Beispiel-Schaufenster ausblenden"
+    },
+    "embed": {
+      "title": "Ein Schaufenster einbetten",
+      "description": "Jedes Schaufenster, das du erstellst, bekommt einen eigenen Code zum Einfügen in deine Website.",
+      "snippetLabel": "So sieht ein Einbettungscode aus",
+      "inDevelopment": "Das Widget ist noch in Entwicklung und wird auf anderen Websites noch nicht angezeigt.",
+      "create": "Ein Schaufenster erstellen"
+    },
+    "list": {
+      "show": "Beispiel-Schaufenster einblenden",
+      "showFailed": "Das Beispiel-Schaufenster konnte nicht wieder eingeblendet werden.",
+      "hideFailed": "Das Beispiel-Schaufenster konnte nicht ausgeblendet werden.",
+      "failedDetail": "Versuche es gleich noch einmal.",
+      "createFirst": "Dein erstes Schaufenster erstellen",
+      "createFirstHint": "Füge deine Produkte zum Raster hinzu. Jedes bekommt eine Seite, die du teilen kannst."
+    },
+    "designer": {
+      "createAriaLabel": "Dein eigenes Schaufenster erstellen",
+      "createShort": "Erstellen",
+      "create": "Eigenes erstellen",
+      "notice": "Das ist ein Beispiel-Schaufenster. Probiere alles aus: Nichts hier wird gespeichert.",
+      "takeTour": "Tour starten"
+    },
+    "content": {
+      "bio": "Alltagstechnik und Dinge für den Schreibtisch, ausgewählt, um lange zu halten.",
+      "heading": "Bestseller",
+      "story": "Wir nutzen alles, was wir verkaufen, bevor es ins Sortiment kommt. Rücksendungen innerhalb von 14 Tagen.",
+      "dispatch": "Versand innerhalb von 2 Werktagen",
+      "products": {
+        "camera": {
+          "title": "Sofortbildkamera",
+          "description": "Druckt das Foto Sekunden nach der Aufnahme. Film separat erhältlich."
+        },
+        "headphones": {
+          "title": "Kopfhörer",
+          "description": "Geschlossen, mit weichen Polstern aus Memory-Schaum. 3,5-mm-Kabel inklusive."
+        },
+        "watch": {
+          "title": "Smartwatch",
+          "description": "Aluminiumgehäuse mit Sportarmband. Zählt Schritte, Schlaf und Trainings."
+        },
+        "mouse": {
+          "title": "Kabellose Maus",
+          "description": "Leicht, mit leisen Klicks und bis zu 250 Stunden mit einer Batterie."
+        },
+        "speaker": {
+          "title": "Tragbarer Lautsprecher",
+          "description": "Wasserdicht, mit 12 Stunden Spielzeit pro Ladung."
+        },
+        "succulent": {
+          "title": "Sukkulente für den Schreibtisch",
+          "description": "Eine kleine Haworthia im Keramiktopf. Braucht etwa einmal im Monat Wasser."
+        }
+      }
+    }
+  },
+  "colors": {
+    "fields": {
+      "accent": "Akzentfarbe",
+      "storeName": "Schaufenstername",
+      "bio": "Bio",
+      "background": "Hintergrund",
+      "gradientFrom": "Verlauf von",
+      "gradientTo": "Verlauf bis",
+      "fill": "Füllung",
+      "color": "Farbe",
+      "borderColor": "Rahmenfarbe",
+      "selectedWords": "Ausgewählte Wörter",
+      "textColor": "Textfarbe",
+      "tagColor": "Tag-Farbe",
+      "shadowColor": "Schattenfarbe"
+    },
+    "inherit": {
+      "themeColor": {
+        "label": "Themenfarbe",
+        "use": "Themenfarbe verwenden"
+      },
+      "default": {
+        "label": "Standard",
+        "use": "Standard verwenden"
+      },
+      "noFill": {
+        "label": "Keine Füllung",
+        "use": "Keine Füllung verwenden"
+      },
+      "cardColor": {
+        "label": "Kartenfarbe",
+        "use": "Kartenfarbe verwenden"
+      },
+      "blockColor": {
+        "label": "die Blockfarbe",
+        "use": "Blockfarbe verwenden"
+      }
+    },
+    "presets": {
+      "white": {
+        "name": "Weiß",
+        "label": "Weiß ({value})"
+      },
+      "grey": {
+        "name": "Grau",
+        "label": "Grau ({value})"
+      },
+      "ink": {
+        "name": "Tintenschwarz",
+        "label": "Tintenschwarz ({value})"
+      },
+      "paleAccent": {
+        "name": "Sehr helle Akzentfarbe",
+        "label": "Sehr helle Akzentfarbe ({value})"
+      },
+      "softAccent": {
+        "name": "Helle Akzentfarbe",
+        "label": "Helle Akzentfarbe ({value})"
+      },
+      "accent": {
+        "name": "Akzentfarbe",
+        "label": "Akzentfarbe ({value})"
+      },
+      "deepAccent": {
+        "name": "Dunkle Akzentfarbe",
+        "label": "Dunkle Akzentfarbe ({value})"
+      }
+    },
+    "standard": {
+      "white": "Weiß ({value})",
+      "grey200": "Grau 200 ({value})",
+      "grey300": "Grau 300 ({value})",
+      "grey400": "Grau 400 ({value})",
+      "grey": "Grau ({value})",
+      "grey600": "Grau 600 ({value})",
+      "grey700": "Grau 700 ({value})",
+      "grey800": "Grau 800 ({value})",
+      "ink": "Tintenschwarz ({value})",
+      "black": "Schwarz ({value})",
+      "red": "Rot ({value})",
+      "orange": "Orange ({value})",
+      "amber": "Bernstein ({value})",
+      "yellow": "Gelb ({value})",
+      "green": "Grün ({value})",
+      "teal": "Petrol ({value})",
+      "sky": "Himmelblau ({value})",
+      "blue": "Blau ({value})",
+      "violet": "Violett ({value})",
+      "pink": "Pink ({value})",
+      "redDark": "Dunkelrot ({value})",
+      "orangeDark": "Dunkelorange ({value})",
+      "amberDark": "Bernstein dunkel ({value})",
+      "yellowDark": "Dunkelgelb ({value})",
+      "greenDark": "Dunkelgrün ({value})",
+      "tealDark": "Petrol dunkel ({value})",
+      "skyDark": "Himmelblau dunkel ({value})",
+      "blueDark": "Dunkelblau ({value})",
+      "violetDark": "Violett dunkel ({value})",
+      "pinkDark": "Dunkelpink ({value})"
+    },
+    "palettes": {
+      "sunset": {
+        "name": "Sonnenuntergang",
+        "group": "Palette Sonnenuntergang",
+        "swatches": {
+          "cream": "Sonnenuntergang Creme ({value})",
+          "amber": "Sonnenuntergang Bernstein ({value})",
+          "orange": "Sonnenuntergang Orange ({value})",
+          "red": "Sonnenuntergang Rot ({value})",
+          "ember": "Sonnenuntergang Glutrot ({value})"
+        }
+      },
+      "forest": {
+        "name": "Wald",
+        "group": "Palette Wald",
+        "swatches": {
+          "mist": "Wald Nebelgrün ({value})",
+          "sage": "Wald Salbei ({value})",
+          "green": "Wald Grün ({value})",
+          "pine": "Wald Tannengrün ({value})",
+          "deep": "Wald Tiefgrün ({value})"
+        }
+      },
+      "ocean": {
+        "name": "Ozean",
+        "group": "Palette Ozean",
+        "swatches": {
+          "foam": "Ozean Gischt ({value})",
+          "sky": "Ozean Himmelblau ({value})",
+          "cyan": "Ozean Cyan ({value})",
+          "sea": "Ozean Meerblau ({value})",
+          "navy": "Ozean Marineblau ({value})"
+        }
+      },
+      "mono": {
+        "name": "Mono",
+        "group": "Palette Mono",
+        "swatches": {
+          "white": "Mono Weiß ({value})",
+          "silver": "Mono Silber ({value})",
+          "grey": "Mono Grau ({value})",
+          "graphite": "Mono Graphit ({value})",
+          "ink": "Mono Tintenschwarz ({value})"
+        }
+      },
+      "candy": {
+        "name": "Bonbon",
+        "group": "Palette Bonbon",
+        "swatches": {
+          "blush": "Bonbon Zartrosa ({value})",
+          "rose": "Bonbon Rosé ({value})",
+          "pink": "Bonbon Pink ({value})",
+          "purple": "Bonbon Lila ({value})",
+          "violet": "Bonbon Violett ({value})"
+        }
+      }
+    }
+  }
+}

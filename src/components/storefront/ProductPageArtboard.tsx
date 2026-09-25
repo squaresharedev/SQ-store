@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type MouseEvent } from "react";
+import { useTranslations } from "next-intl";
 import { X } from "lucide-react";
 import { DeviceSizeSwitch, type PreviewDevice } from "./DeviceSizeSwitch";
 import { useNaturalSize } from "./useNaturalSize";
@@ -98,6 +99,7 @@ export function ProductPageArtboard({
    *  step with it — this page's own switch takes over from there. */
   initialDevice: PreviewDevice;
 }) {
+  const t = useTranslations("Storefront.artboard");
   const [device, setDevice] = useState<PreviewDevice>(initialDevice);
   const width = widths[device];
   // The card's rendered footprint on the canvas: the actual page beneath it
@@ -198,19 +200,19 @@ export function ProductPageArtboard({
       <div className="flex items-center gap-2">
         <p className="min-w-0 flex-1 truncate font-inter text-sm font-medium text-foreground">
           {product.title}
-          <span className="text-muted-foreground"> · Product page</span>
+          <span className="text-muted-foreground">{t("productPageLabel")}</span>
         </p>
         <div className="flex shrink-0 items-center gap-1">
           <DeviceSizeSwitch
             device={device}
             onChange={setDevice}
-            labels={{ desktop: "Desktop size", mobile: "Mobile size" }}
+            labels={{ desktop: t("desktopSize"), mobile: t("mobileSize") }}
           />
           <button
             type="button"
             onClick={onClose}
-            aria-label={`Close the product page for ${product.title}`}
-            title={`Close the product page for ${product.title}`}
+            aria-label={t("closeAriaLabel", { title: product.title })}
+            title={t("closeAriaLabel", { title: product.title })}
             className="flex size-7 shrink-0 items-center justify-center rounded-sm border border-border bg-background text-muted-foreground transition-colors duration-base ease-standard hover:text-foreground"
           >
             <X className="size-3.5" strokeWidth={2} aria-hidden="true" />

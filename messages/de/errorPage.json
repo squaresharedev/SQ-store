@@ -1,0 +1,17 @@
+{
+  "notFound": {
+    "title": "Seite nicht gefunden",
+    "description": "Diese Seite existiert nicht, oder das Ziel wurde gelöscht. Der Link ist möglicherweise veraltet, aber dein Konto und deine Daten sind in Ordnung.",
+    "cta": "Zurück zum Dashboard"
+  },
+  "boundary": {
+    "title": "Etwas ist schiefgelaufen",
+    "description": "Diese Seite konnte nicht geladen werden. Das ist meist ein vorübergehendes Verbindungsproblem: Dein Konto ist in Ordnung, und du bist weiterhin angemeldet.",
+    "reference": "Referenz: {digest}"
+  },
+  "footer": {
+    "legal": "Rechtliches",
+    "contact": "Kontakt",
+    "credit": "© 2026 Squareshare. Entwickelt von <link>Root Labs</link>."
+  }
+}

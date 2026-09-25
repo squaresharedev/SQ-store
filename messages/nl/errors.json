@@ -1,0 +1,536 @@
+{
+  "sessionExpired": {
+    "message": "Je sessie is verlopen.",
+    "fix": "Log opnieuw in en probeer het dan opnieuw. Wat je in dit tabblad hebt getypt, blijft bewaard totdat je de pagina verlaat."
+  },
+  "permissionDenied": {
+    "fix": "Alleen de winkeleigenaar kan rollen wijzigen. Vraag diegene om je in Team en toegang te upgraden naar Bewerker.",
+    "createProducts": {
+      "withRole": "Je rol als {role, select, owner {eigenaar} editor {bewerker} viewer {lezer} other {{role}}} kan geen producten aanmaken in deze winkel.",
+      "noRole": "Je hebt geen toestemming om producten aan te maken in deze winkel."
+    },
+    "editProducts": {
+      "withRole": "Je rol als {role, select, owner {eigenaar} editor {bewerker} viewer {lezer} other {{role}}} kan geen producten bewerken in deze winkel.",
+      "noRole": "Je hebt geen toestemming om producten te bewerken in deze winkel."
+    },
+    "deleteProducts": {
+      "withRole": "Je rol als {role, select, owner {eigenaar} editor {bewerker} viewer {lezer} other {{role}}} kan geen producten verwijderen in deze winkel.",
+      "noRole": "Je hebt geen toestemming om producten te verwijderen in deze winkel."
+    },
+    "importProducts": {
+      "withRole": "Je rol als {role, select, owner {eigenaar} editor {bewerker} viewer {lezer} other {{role}}} kan geen producten importeren in deze winkel.",
+      "noRole": "Je hebt geen toestemming om producten te importeren in deze winkel."
+    },
+    "previewProductPages": {
+      "withRole": "Je rol als {role, select, owner {eigenaar} editor {bewerker} viewer {lezer} other {{role}}} kan geen voorbeeld van productpagina's bekijken in deze winkel.",
+      "noRole": "Je hebt geen toestemming om een voorbeeld van productpagina's te bekijken in deze winkel."
+    },
+    "createStorefronts": {
+      "withRole": "Je rol als {role, select, owner {eigenaar} editor {bewerker} viewer {lezer} other {{role}}} kan geen etalages aanmaken in deze winkel.",
+      "noRole": "Je hebt geen toestemming om etalages aan te maken in deze winkel."
+    },
+    "editStorefronts": {
+      "withRole": "Je rol als {role, select, owner {eigenaar} editor {bewerker} viewer {lezer} other {{role}}} kan geen etalages bewerken in deze winkel.",
+      "noRole": "Je hebt geen toestemming om etalages te bewerken in deze winkel."
+    },
+    "deleteStorefronts": {
+      "withRole": "Je rol als {role, select, owner {eigenaar} editor {bewerker} viewer {lezer} other {{role}}} kan geen etalages verwijderen in deze winkel.",
+      "noRole": "Je hebt geen toestemming om etalages te verwijderen in deze winkel."
+    },
+    "viewStorefronts": {
+      "withRole": "Je rol als {role, select, owner {eigenaar} editor {bewerker} viewer {lezer} other {{role}}} kan geen etalages bekijken in deze winkel.",
+      "noRole": "Je hebt geen toestemming om etalages te bekijken in deze winkel."
+    },
+    "editThisProduct": {
+      "withRole": "Met jouw rol als {role, select, owner {Eigenaar} editor {Bewerker} viewer {Lezer} other {{role}}} kun je dit product in deze winkel niet bewerken.",
+      "noRole": "Je hebt geen toestemming om dit product in deze winkel te bewerken."
+    },
+    "editThisStorefront": {
+      "withRole": "Met jouw rol als {role, select, owner {Eigenaar} editor {Bewerker} viewer {Lezer} other {{role}}} kun je deze etalage in deze winkel niet bewerken.",
+      "noRole": "Je hebt geen toestemming om deze etalage in deze winkel te bewerken."
+    }
+  },
+  "notFound": {
+    "fix": "Het is mogelijk verwijderd, of je bent misschien van winkel gewisseld. Vernieuw de pagina om de huidige gegevens te laden.",
+    "product": "Dat product kon niet worden gevonden.",
+    "storefront": "Die etalage kon niet worden gevonden.",
+    "item": "Dat item is niet gevonden."
+  },
+  "rateLimited": {
+    "fix": "Wacht een paar minuten en probeer het opnieuw. Als er niets op de achtergrond opnieuw wordt geprobeerd, laad de pagina dan eerst opnieuw.",
+    "createProducts": "Te veel pogingen om producten aan te maken in korte tijd.",
+    "editProducts": "Te veel pogingen om producten te bewerken in korte tijd.",
+    "deleteProducts": "Te veel pogingen om producten te verwijderen in korte tijd.",
+    "importProducts": "Te veel pogingen om producten te importeren in korte tijd.",
+    "previewProductPages": "Te veel pogingen om productpagina's te bekijken als voorbeeld in korte tijd.",
+    "createStorefronts": "Te veel pogingen om etalages aan te maken in korte tijd.",
+    "saveStorefronts": "Te veel pogingen om etalages op te slaan in korte tijd.",
+    "deleteStorefronts": "Te veel pogingen om etalages te verwijderen in korte tijd.",
+    "rotateEmbedKeys": "Te veel pogingen om insluitingssleutels te vernieuwen in korte tijd.",
+    "updateStock": "Te veel pogingen om de voorraad bij te werken in korte tijd.",
+    "readProductPageSettings": "Te veel pogingen om productpagina-instellingen te lezen in korte tijd.",
+    "requestReview": "Je hebt in korte tijd te vaak om een beoordeling gevraagd."
+  },
+  "serverError": {
+    "fix": "Dit is meestal tijdelijk. Wacht even en probeer het opnieuw; als het blijft mislukken, vernieuw dan de pagina.",
+    "createProduct": "Het product kon niet worden aangemaakt door een probleem aan onze kant.",
+    "saveProduct": "Het product kon niet worden opgeslagen door een probleem aan onze kant.",
+    "deleteProduct": "Het product kon niet worden verwijderd door een probleem aan onze kant.",
+    "importProducts": "Je producten konden niet worden geïmporteerd door een probleem aan onze kant.",
+    "loadProductPagePreview": "Het voorbeeld van de productpagina kon niet worden geladen door een probleem aan onze kant.",
+    "verifyImageUpload": "Je afbeeldingsupload kon niet worden geverifieerd door een probleem aan onze kant.",
+    "verifyDocumentUpload": "Je documentupload kon niet worden geverifieerd door een probleem aan onze kant.",
+    "verifyFileUpload": "Je bestandsupload kon niet worden geverifieerd door een probleem aan onze kant.",
+    "verifyFontUpload": "Je lettertype-upload kon niet worden geverifieerd door een probleem aan onze kant.",
+    "verifyElementUpload": "Je elementupload kon niet worden geverifieerd door een probleem aan onze kant.",
+    "verifyBackgroundImage": "Je achtergrondafbeelding kon niet worden geverifieerd door een probleem aan onze kant.",
+    "verifyFont": "Je lettertype kon niet worden geverifieerd door een probleem aan onze kant.",
+    "verifyImage": "Je afbeelding kon niet worden geverifieerd door een probleem aan onze kant.",
+    "createStorefront": "De etalage kon niet worden aangemaakt door een probleem aan onze kant.",
+    "saveStorefront": "Je etalage kon niet worden opgeslagen door een probleem aan onze kant.",
+    "saveEmbedSettings": "De insluitingsinstellingen konden niet worden opgeslagen door een probleem aan onze kant.",
+    "deleteStorefront": "De etalage kon niet worden verwijderd door een probleem aan onze kant.",
+    "rotateEmbedKey": "De insluitingssleutel kon niet worden vernieuwd door een probleem aan onze kant.",
+    "saveStockSettings": "De voorraadinstellingen konden niet worden opgeslagen door een probleem aan onze kant.",
+    "checkSellerDetails": "Je verkopersgegevens konden niet worden gecontroleerd door een probleem aan onze kant.",
+    "loadProductPageSettings": "Je productpagina-instellingen konden niet worden geladen door een probleem aan onze kant.",
+    "saveProductPageSettings": "Je productpagina-instellingen konden niet worden opgeslagen door een probleem aan onze kant.",
+    "sendForReview": "Dit kon niet ter beoordeling worden verstuurd vanwege een probleem aan onze kant."
+  },
+  "moderation": {
+    "removedNotPaused": "{target, select, product {Dit product is verwijderd, niet gepauzeerd.} storefront {Deze etalage is verwijderd, niet gepauzeerd.} other {Dit item is verwijderd, niet gepauzeerd.}}",
+    "removedFix": "Een verwijdering is definitief. Denk je dat die onterecht was? Gebruik dan de bezwaarlink om ons te schrijven.",
+    "notPaused": "{target, select, product {Dit product is niet gepauzeerd.} storefront {Deze etalage is niet gepauzeerd.} other {Dit item is niet gepauzeerd.}}",
+    "notPausedFix": "Er is niets te beoordelen: het is al zichtbaar voor kopers."
+  },
+  "traderIdentityRequired": {
+    "message": "Je kunt niet publiceren of verkopen totdat je verkopersgegevens compleet zijn.",
+    "action": "Verkopersgegevens toevoegen",
+    "fix": {
+      "add": "{fields, select, businessName {Voeg je handelsnaam toe in Instellingen › Bedrijfs- en verkopersgegevens en publiceer dan.} address {Voeg je vestigingsadres toe in Instellingen › Bedrijfs- en verkopersgegevens en publiceer dan.} email {Voeg je contact-e-mailadres toe in Instellingen › Bedrijfs- en verkopersgegevens en publiceer dan.} businessName_address {Voeg je handelsnaam en vestigingsadres toe in Instellingen › Bedrijfs- en verkopersgegevens en publiceer dan.} businessName_email {Voeg je handelsnaam en contact-e-mailadres toe in Instellingen › Bedrijfs- en verkopersgegevens en publiceer dan.} address_email {Voeg je vestigingsadres en contact-e-mailadres toe in Instellingen › Bedrijfs- en verkopersgegevens en publiceer dan.} other {Voeg je handelsnaam, vestigingsadres en contact-e-mailadres toe in Instellingen › Bedrijfs- en verkopersgegevens en publiceer dan.}}",
+      "addAndConfirm": "{fields, select, businessName {Voeg je handelsnaam toe in Instellingen › Bedrijfs- en verkopersgegevens, en bevestig je contact-e-mailadres via de link die we je hebben gestuurd.} address {Voeg je vestigingsadres toe in Instellingen › Bedrijfs- en verkopersgegevens, en bevestig je contact-e-mailadres via de link die we je hebben gestuurd.} email {Voeg je contact-e-mailadres toe in Instellingen › Bedrijfs- en verkopersgegevens, en bevestig je contact-e-mailadres via de link die we je hebben gestuurd.} businessName_address {Voeg je handelsnaam en vestigingsadres toe in Instellingen › Bedrijfs- en verkopersgegevens, en bevestig je contact-e-mailadres via de link die we je hebben gestuurd.} businessName_email {Voeg je handelsnaam en contact-e-mailadres toe in Instellingen › Bedrijfs- en verkopersgegevens, en bevestig je contact-e-mailadres via de link die we je hebben gestuurd.} address_email {Voeg je vestigingsadres en contact-e-mailadres toe in Instellingen › Bedrijfs- en verkopersgegevens, en bevestig je contact-e-mailadres via de link die we je hebben gestuurd.} other {Voeg je handelsnaam, vestigingsadres en contact-e-mailadres toe in Instellingen › Bedrijfs- en verkopersgegevens, en bevestig je contact-e-mailadres via de link die we je hebben gestuurd.}}",
+      "confirm": "Open de bevestigingslink die we naar je contactadres hebben gemaild. Je kunt een nieuwe versturen vanuit Instellingen › Bedrijfs- en verkopersgegevens.",
+      "complete": "Rond Instellingen › Bedrijfs- en verkopersgegevens af en publiceer dan."
+    }
+  },
+  "unexpected": {
+    "message": "Er is iets misgegaan.",
+    "detail": "{detail}",
+    "fix": "Controleer je verbinding en probeer het opnieuw. Als het blijft gebeuren, vernieuw dan de pagina; je productgegevens staan veilig op de server."
+  },
+  "form": {
+    "sessionExpired": "Je sessie is verlopen. Log opnieuw in.",
+    "saveFailed": "Opslaan is mislukt. Probeer het nog eens.",
+    "tooManyChanges": "Dat zijn veel wijzigingen in korte tijd. Probeer het straks opnieuw.",
+    "unexpectedField": "Onverwacht veld \"{field}\" is geweigerd.",
+    "malformed": "Het formulier kon niet worden gelezen. Herlaad de pagina en probeer het opnieuw.",
+    "unreachable": "De server was niet bereikbaar. Controleer je verbinding en probeer het opnieuw."
+  },
+  "stepUp": {
+    "codeRequired": "Vul de code van 6 cijfers uit je authenticator-app in om te bevestigen dat jij het bent.",
+    "codeMalformed": "De code bestaat uit de 6 cijfers die je authenticator-app toont.",
+    "factorUnknown": "Kies een van je authenticator-apps.",
+    "invalid": "Die code werkte niet. Controleer je authenticator-app en probeer het opnieuw.",
+    "rateLimited": "Te veel pogingen. Wacht een paar minuten en probeer het dan opnieuw.",
+    "replayed": "Die code is al gebruikt. Wacht op de volgende in je app.",
+    "unavailable": "We konden die code nu niet controleren. Probeer het zo meteen opnieuw."
+  },
+  "mfa": {
+    "signInExpired": "Je inlogsessie is verlopen. Log opnieuw in.",
+    "unreachable": "We konden de inlogservice niet bereiken. Controleer je verbinding en probeer het opnieuw.",
+    "enterCode": "Vul de code van 6 cijfers in.",
+    "recoveryCodeRequired": "Vul een van je herstelcodes in.",
+    "recoveryCodeInvalid": "Die herstelcode werkte niet. Controleer de code en probeer het opnieuw.",
+    "recoveryIncomplete": "We konden het inloggen niet afronden. Probeer zo meteen dezelfde code opnieuw.",
+    "factorNameRequired": "Geef deze authenticator een naam.",
+    "factorNameTaken": "Je hebt al een authenticator met die naam. Kies een andere.",
+    "passwordRequired": "Vul je huidige wachtwoord in om door te gaan.",
+    "passwordRequiredGoogle": "Vul je Squareshare-wachtwoord in, of kies “Bevestigen met Google”.",
+    "wrongPasswordGoogle": "Dat is niet het Squareshare-wachtwoord van dit account. Je logt in met Google, dus kies in plaats daarvan “Bevestigen met Google”.",
+    "passwordCheckUnavailable": "We konden je wachtwoord nu niet controleren. Probeer het zo meteen opnieuw.",
+    "reauthRequired": "Log voor je veiligheid opnieuw in voordat je tweestapsverificatie aanzet.",
+    "setupRateLimited": "Dat zijn veel pogingen om het in te stellen. Probeer het later opnieuw.",
+    "tooManyFactors": "Dit account heeft het maximale aantal authenticators. Verwijder er eerst een.",
+    "setupFailed": "We konden het instellen nu niet starten. Probeer het zo meteen opnieuw.",
+    "setupUnavailable": "Tweestapsverificatie instellen is nu niet beschikbaar. Probeer het later opnieuw.",
+    "setupExpired": "Het instellen is verlopen. Begin opnieuw.",
+    "setupCodeMismatch": "Die code klopte niet. Controleer of je app Square Share toont en vul dan de nieuwste code in.",
+    "factorNotOnAccount": "Die authenticator hoort niet bij jouw account.",
+    "removeFailed": "We konden die authenticator niet verwijderen. Probeer het opnieuw.",
+    "notEnrolled": "Zet eerst tweestapsverificatie aan.",
+    "codesNotCreated": "We konden geen nieuwe codes maken. Je oude codes werken nog."
+  },
+  "settings": {
+    "usernameTaken": "Die gebruikersnaam is al bezet. Probeer een andere.",
+    "emailUnchanged": "Dat is al je e-mailadres.",
+    "emailChangeRateLimited": "Te veel verzoeken om je e-mailadres te wijzigen. Wacht even voordat je het opnieuw probeert.",
+    "emailChangeNeedsPassword": "Vul je huidige wachtwoord in om je e-mailadres te wijzigen.",
+    "wrongPassword": "Huidig wachtwoord is onjuist.",
+    "passwordCheckUnavailable": "We konden je wachtwoord nu niet controleren. Probeer het opnieuw.",
+    "emailChangeFailed": "De e-mailwijziging kon niet worden gestart. Probeer het opnieuw.",
+    "passwordReauthRateLimited": "Te veel pogingen. Wacht een paar minuten voordat je het opnieuw probeert.",
+    "passwordUnchanged": "Dat is al je wachtwoord.",
+    "passwordUpdateFailed": "Het wachtwoord kon niet worden bijgewerkt. Probeer het opnieuw.",
+    "passwordReauthNeeded": "Log voor je veiligheid uit en weer in, en wijzig daarna je wachtwoord.",
+    "resetRateLimited": "Te veel herstel-e-mails. Wacht even voordat je het opnieuw probeert.",
+    "resetSendRateLimited": "Te veel verzoeken. Wacht een minuut en probeer het opnieuw.",
+    "resetFailed": "De herstel-e-mail kon niet worden verzonden. Probeer het opnieuw.",
+    "contactEmailTakesNoMail": "Het domein van dat contact-e-mailadres accepteert geen e-mail. Controleer de spelling, of gebruik een adres dat kopers echt kunnen bereiken.",
+    "savedButConfirmationFailed": "{reason, select, startFailed {Opgeslagen, maar de bevestigingsmail is niet verstuurd. E-mailbevestiging kon niet worden gestart. Probeer hieronder \"Bevestigingsmail opnieuw verzenden\".} unavailable {Opgeslagen, maar de bevestigingsmail is niet verstuurd. E-mailbevestiging is nu niet beschikbaar. Probeer hieronder \"Bevestigingsmail opnieuw verzenden\".} other {Opgeslagen, maar de bevestigingsmail is niet verstuurd. We konden de bevestigingsmail niet versturen. Controleer het adres en probeer het opnieuw. Probeer hieronder \"Bevestigingsmail opnieuw verzenden\".}}",
+    "confirmationFailed": "{reason, select, startFailed {E-mailbevestiging kon niet worden gestart.} unavailable {E-mailbevestiging is nu niet beschikbaar.} other {We konden de bevestigingsmail niet versturen. Controleer het adres en probeer het opnieuw.}}",
+    "confirmationUnavailable": "E-mailbevestiging is nu niet beschikbaar.",
+    "confirmationRateLimited": "Dat zijn veel bevestigingsmails. Wacht even voordat je om een nieuwe vraagt.",
+    "noContactEmail": "Voeg eerst een contact-e-mailadres toe, dan kunnen we het bevestigen."
+  },
+  "avatar": {
+    "unexpectedData": "Onverwachte formuliergegevens zijn geweigerd.",
+    "rateLimited": "Te veel wijzigingen aan je foto. Wacht even en probeer het opnieuw.",
+    "noFile": "Kies een afbeelding om te uploaden.",
+    "tooLarge": "Die afbeelding is te groot. Houd hem onder 2 MB.",
+    "wrongType": "Gebruik een JPEG-, PNG- of WebP-afbeelding.",
+    "uploadFailed": "Uploaden is mislukt. Probeer het opnieuw.",
+    "saveFailed": "Je nieuwe foto kon niet worden opgeslagen. Probeer het opnieuw.",
+    "removeFailed": "Je foto kon niet worden verwijderd. Probeer het opnieuw."
+  },
+  "team": {
+    "noInvitePermission": "Je hebt geen toestemming om leden uit te nodigen.",
+    "inviteRoleTooHigh": "Je kunt niemand uitnodigen met een hogere rol dan die van jezelf.",
+    "inviteSelf": "Je bent hier al.",
+    "inviteRateLimited": "Je hebt recent veel uitnodigingen verstuurd. Probeer het straks opnieuw.",
+    "alreadyInvited": "Al uitgenodigd of al lid van het team.",
+    "inviteFailed": "De uitnodiging kon niet worden verstuurd. Probeer het nog eens.",
+    "noVerifiedEmail": "Je account heeft geen bevestigd e-mailadres.",
+    "inviteNotFound": "Uitnodiging niet gevonden of al gebruikt.",
+    "inviteUsed": "Deze uitnodiging is al geaccepteerd of ingetrokken.",
+    "inviteWrongEmail": "Deze uitnodiging is niet voor jouw e-mailadres.",
+    "acceptFailed": "De uitnodiging kon niet worden geaccepteerd. Mogelijk is die ingetrokken.",
+    "noRolePermission": "Je hebt geen toestemming om rollen te wijzigen.",
+    "membershipRateLimited": "Te veel wijzigingen aan het lidmaatschap. Probeer het straks opnieuw.",
+    "roleTooHigh": "Je kunt geen rol toewijzen die hoger is dan je eigen rol.",
+    "roleChangeFailed": "De rol kon niet worden gewijzigd. Probeer het nog eens.",
+    "memberNotChangeable": "Dat lid kan niet worden gewijzigd.",
+    "noRemovePermission": "Je hebt geen toestemming om leden te verwijderen.",
+    "memberNotFound": "Lid niet gevonden.",
+    "removeSelf": "Je kunt jezelf niet verwijderen.",
+    "removeFailed": "Het lid kon niet worden verwijderd. Probeer het nog eens.",
+    "memberNotRemovable": "Dat lid kan niet worden verwijderd."
+  },
+  "auth": {
+    "serviceUnreachable": "Kon geen verbinding maken met de authenticatieservice. Probeer het opnieuw.",
+    "invalidEmail": "Vul een geldig e-mailadres in.",
+    "emailRequired": "Vul je e-mailadres in.",
+    "tooManyAttempts": "Te veel pogingen. Wacht even en probeer het opnieuw.",
+    "magicLinkFailed": "De e-mail kon niet worden verstuurd. Controleer je verbinding en probeer het opnieuw.",
+    "resetEmailRequired": "Vul je e-mailadres in om je wachtwoord opnieuw in te stellen.",
+    "resetEmailFailed": "De herstel-e-mail kon niet worden verstuurd. Controleer je verbinding en probeer het opnieuw.",
+    "credentialsRequired": "E-mailadres en wachtwoord zijn verplicht.",
+    "passwordsMismatch": "Wachtwoorden komen niet overeen.",
+    "invalidUsername": "Kies een geldige gebruikersnaam.",
+    "permanentEmailRequired": "Registreer met een permanent e-mailadres.",
+    "verificationFailed": "Verificatie is mislukt. Probeer het opnieuw.",
+    "usernameTaken": "Die gebruikersnaam is al bezet. Probeer een andere.",
+    "signUpFailed": "Het account kon niet worden aangemaakt. Controleer je verbinding en probeer het opnieuw.",
+    "signInFailed": "Inloggen is mislukt. Controleer je verbinding en probeer het opnieuw.",
+    "badCredentials": "Onjuist e-mailadres of wachtwoord.",
+    "emailNotConfirmed": "Bevestig eerst je e-mailadres: controleer je inbox voor de link.",
+    "weakPassword": "Dat wachtwoord is te zwak. Gebruik minstens 8 tekens.",
+    "rateLimited": "Te veel pogingen. Wacht een minuut en probeer het opnieuw.",
+    "accountNotCreated": "Dat account kon niet worden aangemaakt. Probeer een andere gebruikersnaam.",
+    "providerMessage": "{message}",
+    "unknown": "Er is iets misgegaan. Probeer het opnieuw.",
+    "connectFailed": "Er kon geen verbinding worden gemaakt. Probeer het opnieuw.",
+    "resetLinkExpired": "Je herstellink is verlopen. Vraag een nieuwe aan via de inlogpagina.",
+    "passwordUpdateFailed": "Je wachtwoord kon niet worden bijgewerkt. Controleer je verbinding en probeer het opnieuw.",
+    "samePassword": "Dat is al je wachtwoord. Kies een nieuw wachtwoord."
+  },
+  "upload": {
+    "typeNotSupported": "Dat bestandstype wordt niet ondersteund.",
+    "typeFix": {
+      "image": "Gebruik een JPEG-, PNG-, WEBP-, GIF- of AVIF-afbeelding.",
+      "file": "Gebruik een ZIP-, PDF-, EPUB-, MP3-, WAV-, MP4-, JPEG-, PNG-, WEBP- of TXT-bestand.",
+      "font": "Gebruik een WOFF2-, WOFF-, TTF- of OTF-lettertypebestand.",
+      "element": "Gebruik een SVG-, PNG-, WEBP-, JPEG-, GIF- of AVIF-afbeelding.",
+      "document": "Exporteer de handleiding of het certificaat als PDF en upload het dan."
+    },
+    "tooLarge": {
+      "image": "Die afbeelding is te groot.",
+      "document": "Dat document is te groot.",
+      "file": "Dat bestand is te groot.",
+      "font": "Dat lettertype is te groot.",
+      "element": "Dat element is te groot."
+    },
+    "tooLargeFix": {
+      "image": "Gebruik een afbeelding onder {maxMb} MB. Comprimeer of verklein hem en probeer het opnieuw.",
+      "document": "Gebruik een document onder {maxMb} MB. Comprimeer of verklein het en probeer het opnieuw.",
+      "file": "Gebruik een bestand onder {maxMb} MB. Comprimeer of verklein het en probeer het opnieuw.",
+      "font": "Gebruik een lettertype onder {maxMb} MB. Comprimeer of verklein het en probeer het opnieuw.",
+      "element": "Gebruik een element onder {maxMb} MB. Comprimeer of verklein het en probeer het opnieuw."
+    },
+    "neverReached": {
+      "image": "De afbeelding heeft de server nooit bereikt.",
+      "document": "Het document heeft de server nooit bereikt.",
+      "file": "Het bestand heeft de server nooit bereikt.",
+      "font": "Het lettertype heeft de server nooit bereikt.",
+      "element": "Het element heeft de server nooit bereikt."
+    },
+    "neverReachedFix": "Controleer je internetverbinding en probeer het opnieuw.",
+    "rejected": {
+      "image": "Die afbeelding kon niet worden geüpload.",
+      "document": "Dat document kon niet worden geüpload.",
+      "file": "Dat bestand kon niet worden geüpload.",
+      "font": "Dat lettertype kon niet worden geüpload.",
+      "element": "Dat element kon niet worden geüpload."
+    },
+    "rejectedFix": {
+      "signedOut": "Log opnieuw in en probeer het dan opnieuw.",
+      "other": "Controleer het bestand en probeer het opnieuw. Als het blijft mislukken, vernieuw dan de pagina."
+    },
+    "serverSaid": "{text}"
+  },
+  "uploadRoute": {
+    "signIn": {
+      "image": "Log in om afbeeldingen te uploaden.",
+      "element": "Log in om elementen te uploaden.",
+      "document": "Log in om documenten te uploaden.",
+      "file": "Log in om bestanden te uploaden.",
+      "font": "Log in om lettertypen te uploaden."
+    },
+    "permissionDenied": "Je hebt geen toestemming om hier te uploaden.",
+    "rateLimited": {
+      "shared": "Te veel uploads op dit moment. Probeer het straks opnieuw.",
+      "document": "Te veel documentuploads op dit moment. Probeer het straks opnieuw.",
+      "file": "Te veel bestandsuploads op dit moment. Probeer het straks opnieuw."
+    },
+    "notConfigured": {
+      "image": "Het uploaden van afbeeldingen is nog niet ingesteld. Neem contact op met de beheerder van de site.",
+      "element": "Het uploaden van elementen is nog niet ingesteld. Neem contact op met de beheerder van de site.",
+      "document": "Uploaden is nog niet ingesteld. Neem contact op met de beheerder van de site.",
+      "file": "Het uploaden van bestanden is nog niet ingesteld. Neem contact op met de beheerder van de site.",
+      "font": "Het uploaden van lettertypen is nog niet ingesteld. Neem contact op met de beheerder van de site."
+    },
+    "unreadable": "Die upload kon niet worden gelezen.",
+    "unexpectedFields": "Onverwachte uploadvelden.",
+    "filenameInvalid": "Die bestandsnaam kan niet worden gebruikt.",
+    "lengthMissing": "Bij die upload ontbreekt de lengte.",
+    "missing": {
+      "image": "Er is geen afbeelding geüpload.",
+      "document": "Er is geen document geüpload.",
+      "file": "Er is geen bestand geüpload.",
+      "font": "Er is geen lettertype geüpload."
+    },
+    "empty": {
+      "image": "Die afbeelding is leeg.",
+      "file": "Dat bestand is leeg.",
+      "font": "Dat lettertypebestand is leeg."
+    },
+    "tooLarge": {
+      "image": "Die afbeelding is te groot.",
+      "document": "Dat document is te groot.",
+      "file": "Dat bestand is te groot.",
+      "font": "Dat lettertypebestand is te groot."
+    },
+    "tooLargeFix": {
+      "image": "Gebruik een afbeelding onder {maxMb} MB. Comprimeer of verklein hem en probeer het opnieuw.",
+      "document": "Gebruik een PDF onder {maxMb} MB.",
+      "file": "Gebruik een bestand onder {maxMb} MB.",
+      "font": "Gebruik een lettertype onder {maxMb} MB. Een WOFF2 is meestal ruim onder 100 KB."
+    },
+    "unsupported": {
+      "image": "Dat bestand is geen ondersteunde afbeelding.",
+      "font": "Dat bestand is geen ondersteund lettertype.",
+      "fileType": "Dat bestandstype wordt niet ondersteund.",
+      "fileContents": "De inhoud van dat bestand past niet bij het type.",
+      "documentType": "Documenten moeten PDF-bestanden zijn.",
+      "documentContents": "Dat bestand is geen PDF."
+    },
+    "unsupportedFix": {
+      "image": "Gebruik een JPEG-, PNG-, WEBP-, GIF- of AVIF-afbeelding.",
+      "element": "Gebruik een PNG, JPEG, WEBP, GIF, AVIF of een SVG zonder scripts, externe links of ingesloten afbeeldingen.",
+      "font": "Gebruik een WOFF2-, WOFF-, TTF- of OTF-bestand.",
+      "fileType": "Gebruik een ZIP-, PDF-, EPUB-, MP3-, WAV-, MP4-, JPEG-, PNG-, WEBP- of TXT-bestand.",
+      "fileContents": "Exporteer het bestand opnieuw of kies het formaat dat past bij wat je uploadt.",
+      "documentType": "Exporteer de handleiding of het certificaat als PDF en upload het dan.",
+      "documentContents": "Exporteer het opnieuw als PDF. Een bestand hernoemen verandert het formaat niet."
+    },
+    "moderationUnavailable": "Afbeeldingen kunnen nu niet worden gecontroleerd.",
+    "moderationRejected": {
+      "explicit": "Die afbeelding lijkt seksueel expliciet en kan daarom niet bij een product worden gebruikt.",
+      "violent": "Die afbeelding lijkt grof geweld te tonen en kan daarom niet worden gebruikt.",
+      "hate": "Die afbeelding lijkt haatsymbolen te bevatten en kan daarom niet worden gebruikt."
+    },
+    "inReview": "Die afbeelding wordt gecontroleerd voordat hij online gaat.",
+    "inReviewFix": "Je kunt hem gebruiken zodra hij is goedgekeurd.",
+    "storeFailed": {
+      "image": "De afbeelding kon niet worden opgeslagen.",
+      "document": "Het document kon niet worden opgeslagen.",
+      "file": "Het bestand kon niet worden opgeslagen.",
+      "font": "Het lettertype kon niet worden opgeslagen."
+    },
+    "fix": {
+      "tryAgain": "Probeer het opnieuw.",
+      "tryAgainInAMoment": "Probeer het straks opnieuw.",
+      "tryAgainInAFewMinutes": "Probeer het over een paar minuten opnieuw.",
+      "pickFile": "Kies een ander bestand.",
+      "pickImage": "Kies een andere afbeelding."
+    }
+  },
+  "products": {
+    "invalid": {
+      "message": "De productgegevens zijn niet geldig bevonden.",
+      "fix": "Controleer de naam, prijs en andere velden, en probeer dan opnieuw op te slaan."
+    },
+    "imageNotOwned": {
+      "message": "Die afbeeldingsupload kan niet bij dit product worden gebruikt.",
+      "fix": "Upload de afbeelding opnieuw en sla dan weer op."
+    },
+    "fileNotOwned": {
+      "message": "Die bestandsupload kan niet bij dit product worden gebruikt.",
+      "fix": "Upload het bestand opnieuw en sla dan weer op."
+    },
+    "uploadUnfinished": {
+      "image": "Je afbeeldingsupload is niet voltooid.",
+      "document": "Je documentupload is niet voltooid.",
+      "file": "Je bestandsupload is niet voltooid.",
+      "font": "Je lettertype-upload is niet voltooid.",
+      "element": "Je elementupload is niet voltooid."
+    },
+    "uploadUnfinishedFix": {
+      "image": "Selecteer de afbeelding opnieuw en upload hem opnieuw voordat je opslaat.",
+      "document": "Selecteer het document opnieuw en upload het opnieuw voordat je opslaat.",
+      "file": "Selecteer het bestand opnieuw en upload het opnieuw voordat je opslaat.",
+      "font": "Selecteer het lettertype opnieuw en upload het opnieuw voordat je opslaat.",
+      "element": "Selecteer het element opnieuw en upload het opnieuw voordat je opslaat."
+    },
+    "uploadTooLarge": {
+      "image": "Die afbeelding is te groot.",
+      "document": "Dat document is te groot.",
+      "file": "Dat bestand is te groot.",
+      "font": "Dat lettertype is te groot.",
+      "element": "Dat element is te groot."
+    },
+    "uploadTooLargeFix": {
+      "image": "Gebruik een afbeelding onder {maxMb} MB en upload hem opnieuw.",
+      "document": "Gebruik een document onder {maxMb} MB en upload het opnieuw.",
+      "file": "Gebruik een bestand onder {maxMb} MB en upload het opnieuw.",
+      "font": "Gebruik een lettertype onder {maxMb} MB en upload het opnieuw.",
+      "element": "Gebruik een element onder {maxMb} MB en upload het opnieuw."
+    },
+    "wrongTypeFix": {
+      "image": "Gebruik een JPEG-, PNG-, WEBP-, GIF- of AVIF-afbeelding.",
+      "document": "Documenten moeten PDF's zijn. Exporteer het als PDF en upload het opnieuw.",
+      "other": "Gebruik een ZIP-, PDF-, EPUB-, MP3-, WAV-, MP4-, JPEG-, PNG-, WEBP- of TXT-bestand."
+    },
+    "tooManyPhotos": {
+      "message": "Te veel nieuwe foto's in één keer opslaan.",
+      "fix": "Voeg tot {max} foto's toe, sla op, en voeg dan de rest toe."
+    },
+    "photoNotOwned": {
+      "message": "Een van de foto's kan niet bij dit product worden gebruikt.",
+      "fix": "Verwijder hem, upload hem opnieuw en sla dan op."
+    },
+    "tooManyDocuments": {
+      "message": "Te veel nieuwe documenten in één keer opslaan.",
+      "fix": "Voeg tot {max} documenten toe, sla op, en voeg dan de rest toe."
+    },
+    "documentNotOwned": {
+      "message": "Een van de documenten kan niet bij dit product worden gebruikt.",
+      "fix": "Verwijder het, upload het opnieuw en sla dan op."
+    },
+    "staleOption": {
+      "message": "Een foto verwijst naar een optie die niet meer bestaat.",
+      "fix": "Wijs de foto opnieuw toe of ontkoppel de tag, en sla dan opnieuw op."
+    }
+  },
+  "productImport": {
+    "unreadable": {
+      "message": "Dat importbestand kon niet worden gelezen.",
+      "fix": "Upload het bestand opnieuw."
+    },
+    "empty": {
+      "message": "Dat bestand was leeg.",
+      "fix": "Exporteer je producten opnieuw en probeer het nog eens."
+    },
+    "tooLarge": {
+      "message": "Dat bestand is te groot om te importeren.",
+      "fix": "Splits het in bestanden onder {maxMb} MB, of importeer maximaal {maxRows} producten tegelijk."
+    },
+    "noCurrency": {
+      "message": "Kies een valuta voor deze producten.",
+      "fix": "Kies er een en importeer opnieuw."
+    },
+    "noStatus": {
+      "message": "Kies of deze binnenkomen als concepten of als online producten.",
+      "fix": "Kies er een en importeer opnieuw."
+    },
+    "nothingImportable": {
+      "message": "Niets in dat bestand kon worden geïmporteerd.",
+      "fix": "Controleer of het een titelkolom en een prijskolom heeft.",
+      "fixFirstRow": "{problem, select, noTitle {De eerste rij zegt: Geen titel. Controleer welke kolommen de titel en de prijs bevatten.} titleTooLong {De eerste rij zegt: Titel is langer dan 200 tekens. Controleer welke kolommen de titel en de prijs bevatten.} noPrice {De eerste rij zegt: Geen prijs die we konden lezen. Controleer welke kolommen de titel en de prijs bevatten.} priceZero {De eerste rij zegt: Prijs is nul. Controleer welke kolommen de titel en de prijs bevatten.} other {De eerste rij zegt: Een andere rij heeft deze titel. Controleer welke kolommen de titel en de prijs bevatten.}}"
+    },
+    "noneSaved": {
+      "message": "Geen van die rijen kon worden opgeslagen.",
+      "fix": "Controleer de titel- en prijskolommen."
+    },
+    "invalidRow": "Die rij is geen geldig product."
+  },
+  "stock": {
+    "invalid": {
+      "message": "De voorraadinstellingen zijn niet geldig bevonden.",
+      "fix": "Aantal en drempel moeten hele getallen van 0 of meer zijn, en als bijhouden aan staat, geef dan op hoeveel er op voorraad zijn."
+    }
+  },
+  "storefront": {
+    "nameRequired": {
+      "message": "De etalage heeft een naam nodig.",
+      "fix": "Typ een naam (1 tot 80 tekens) in het veld bovenaan de editor en sla dan opnieuw op."
+    },
+    "invalidLayout": {
+      "message": "De lay-outgegevens van de etalage zijn ongeldig.",
+      "fix": "Vernieuw de editor en probeer opnieuw op te slaan."
+    },
+    "tooManyImages": {
+      "message": "Te veel nieuwe afbeeldingen in één keer opslaan.",
+      "fix": "Sla je etalage op, en voeg dan de rest toe."
+    },
+    "invalidEmbedSettings": "Ongeldige insluitingsinstellingen.",
+    "embedSettingsFix": "Controleer de domeinlijst (hostnamen gescheiden door komma's, zoals example.com) en sla opnieuw op.",
+    "upload": {
+      "backgroundImage": {
+        "notOwned": "Die achtergrondafbeelding kan niet worden gebruikt.",
+        "unfinished": "Je achtergrondafbeelding-upload is niet voltooid.",
+        "missingFix": "Selecteer de afbeelding opnieuw en upload hem opnieuw voordat je opslaat.",
+        "tooLarge": "Die achtergrondafbeelding is te groot.",
+        "tooLargeFix": "Gebruik een afbeelding onder 10 MB en upload hem opnieuw.",
+        "wrongTypeFix": "Gebruik een JPEG-, PNG-, WEBP-, GIF- of AVIF-afbeelding."
+      },
+      "font": {
+        "notOwned": "Dat lettertype kan niet worden gebruikt.",
+        "unfinished": "Je lettertype-upload is niet voltooid.",
+        "missingFix": "Selecteer het lettertype opnieuw en upload het opnieuw voordat je opslaat.",
+        "tooLarge": "Dat lettertypebestand is te groot.",
+        "tooLargeFix": "Gebruik een lettertype onder 2 MB. Een WOFF2 is meestal ruim onder 100 KB.",
+        "wrongTypeFix": "Gebruik een WOFF2-, WOFF-, TTF- of OTF-lettertypebestand."
+      },
+      "element": {
+        "notOwned": "Die afbeelding kan niet worden gebruikt.",
+        "unfinished": "Je afbeeldingsupload is niet voltooid.",
+        "missingFix": "Voeg de afbeelding opnieuw toe en upload hem opnieuw voordat je opslaat.",
+        "tooLarge": "Die afbeelding is te groot.",
+        "tooLargeFix": "Gebruik een afbeelding onder 2 MB en voeg hem opnieuw toe.",
+        "wrongTypeFix": "Gebruik een PNG-, JPEG-, WEBP-, GIF-, AVIF-afbeelding, of een SVG zonder scripts, externe links of ingesloten afbeeldingen."
+      }
+    }
+  },
+  "productPageApi": {
+    "notJson": {
+      "message": "Die aanvraagbody is geen JSON.",
+      "fix": "Stuur een JSON-object met de velden die je wilt wijzigen."
+    },
+    "notObject": {
+      "message": "Die aanvraagbody is geen object.",
+      "fix": "Stuur een JSON-object, bijv. '{'\"ctaColor\": \"#1d4ed8\"'}'."
+    },
+    "invalid": "Die productpagina-instellingen zijn ongeldig.",
+    "invalidFix": "Controleer het hierboven genoemde veld tegen `limits` van een GET van deze URL, en probeer het opnieuw."
+  }
+}

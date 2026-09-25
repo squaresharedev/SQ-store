@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { BackgroundArrow } from "@/components/ui/BackgroundArrow";
 import type {
   BalanceTransaction,
@@ -32,6 +33,7 @@ type ActiveModal =
  * that will become redirects to Stripe-hosted surfaces.
  */
 export function PaymentsPage({ overview }: { overview: PaymentsOverview }) {
+  const t = useTranslations("Payments");
   const [modal, setModal] = useState<ActiveModal>({ kind: "none" });
   const close = () => setModal({ kind: "none" });
 
@@ -42,7 +44,7 @@ export function PaymentsPage({ overview }: { overview: PaymentsOverview }) {
       <main className="relative mx-auto max-w-7xl space-y-6 px-6 py-8">
         <div>
           <h1 className="text-2xl font-semibold text-foreground md:text-3xl">
-            Payments
+            {t("pageTitle")}
           </h1>
         </div>
 

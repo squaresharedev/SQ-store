@@ -1,0 +1,116 @@
+{
+  "pageTitle": "Betalingen",
+  "soon": "Binnenkort",
+  "balance": {
+    "available": {
+      "label": "Beschikbaar",
+      "zero": "Nog niets om uit te betalen",
+      "hint": "Klaar voor je volgende uitbetaling"
+    },
+    "pending": {
+      "label": "In behandeling",
+      "zero": "Geen verkopen in behandeling",
+      "hint": "Wordt verwerkt vanuit recente verkopen"
+    },
+    "nextPayout": {
+      "label": "Volgende uitbetaling",
+      "zero": "Geen uitbetaling gepland",
+      "hint": "Verwacht op {date}"
+    }
+  },
+  "connection": {
+    "label": "Stripe-koppeling",
+    "comingSoonTitle": "Betaald worden via Stripe komt binnenkort",
+    "comingSoonBody": "Tot die tijd betalen kopers je via de aankooplink van je product, of door je te e-mailen.",
+    "connectTitle": "Koppel Stripe om betaald te worden",
+    "connectBody": "Uitbetalingen gaan rechtstreeks naar je bank. Het instellen gebeurt veilig op Stripe, we zien of bewaren je bankgegevens nooit.",
+    "connectButton": "Stripe koppelen",
+    "connected": "Stripe-account gekoppeld",
+    "charges": "Betalingen ontvangen",
+    "payouts": "Uitbetalingen",
+    "verified": "Geverifieerd",
+    "requirementsDue": "Stripe heeft meer informatie nodig voordat uitbetalingen kunnen doorgaan."
+  },
+  "connectModal": {
+    "title": "Stripe koppelen",
+    "description": "Word betaald voor wat je verkoopt. Het instellen gebeurt op Stripe, niet hier.",
+    "points": {
+      "sensitive": {
+        "title": "Stripe regelt het gevoelige gedeelte",
+        "body": "Bankgegevens, identiteitscontroles en verificatie gebeuren allemaal op de beveiligde pagina's van Stripe. Square Share ziet of bewaart ze nooit."
+      },
+      "bank": {
+        "title": "Uitbetalingen gaan rechtstreeks naar je bank",
+        "body": "Zodra je gekoppeld bent, wordt je saldo automatisch uitbetaald volgens een doorlopend schema."
+      },
+      "time": {
+        "title": "Duurt ongeveer 5 minuten",
+        "body": "Je wordt doorgestuurd naar Stripe om het instellen af te ronden, en komt daarna direct hier terug."
+      }
+    },
+    "notNow": "Niet nu",
+    "comingSoonTitle": "Uitbetalingen via Stripe komen binnenkort.",
+    "continue": "Doorgaan naar Stripe"
+  },
+  "payoutHistory": {
+    "label": "Uitbetalingsgeschiedenis",
+    "title": "Uitbetalingen",
+    "emptyConnectable": "Nog geen uitbetalingen. Zodra je verkopen hebt, stuurt Stripe je saldo automatisch naar je bank.",
+    "empty": "Nog geen uitbetalingen.",
+    "columns": {
+      "amount": "Bedrag",
+      "status": "Status",
+      "bank": "Bank",
+      "arrives": "Aankomst"
+    },
+    "rowLabel": "Uitbetaling {amount}, details bekijken"
+  },
+  "payoutStatus": "{status, select, paid {Betaald} pending {In behandeling} in_transit {Onderweg} canceled {Geannuleerd} failed {Mislukt} other {In behandeling}}",
+  "payoutMethod": {
+    "title": "Uitbetalingsmethode",
+    "manage": "Beheren",
+    "detail": "{currency} · {country}",
+    "detailDefault": "{currency} · {country} · Standaard",
+    "emptyConnectable": "Nog geen uitbetalingsmethode. Koppel Stripe en voeg daar je bank toe, die verschijnt dan automatisch hier.",
+    "empty": "Nog geen uitbetalingsmethode."
+  },
+  "payoutMethodModal": {
+    "title": "Uitbetalingsmethode",
+    "description": "Waar je uitbetalingen naartoe worden gestuurd.",
+    "bankAccountDetail": "Bankrekening · {currency} · {country}",
+    "defaultLabel": "Standaard voor uitbetalingen",
+    "yes": "Ja",
+    "no": "Nee",
+    "referenceLabel": "Referentie",
+    "securityNote": "Voor je veiligheid worden bankgegevens gewijzigd op Stripe, nooit hier.",
+    "manageInStripe": "Beheren in Stripe"
+  },
+  "recentActivity": {
+    "label": "Recente activiteit",
+    "title": "Activiteit",
+    "empty": "Verkopen, terugbetalingen en uitbetalingen verschijnen hier.",
+    "datePending": "{date} · In behandeling"
+  },
+  "transactionModal": {
+    "title": "{type, select, charge {Verkoop} refund {Terugbetaling} payout {Uitbetaling} stripe_fee {Stripe-kosten} adjustment {Aanpassing} other {Transactie}}",
+    "processingFee": "Verwerkingskosten",
+    "net": "Netto naar je saldo",
+    "status": "Status",
+    "statusPending": "In behandeling, wordt verrekend met je saldo",
+    "statusAvailable": "Beschikbaar",
+    "date": "Datum",
+    "id": "Transactie-ID"
+  },
+  "payoutModal": {
+    "title": "Uitbetaling",
+    "sentTo": "Verzonden naar",
+    "bankAccount": "Bankrekening ···· {last4}",
+    "arrives": "Aankomst",
+    "initiated": "Gestart",
+    "type": "Type",
+    "typeValue": "{method, select, instant {Direct} other {Standaard}} · {automatic, select, true {Automatisch} other {Handmatig}}",
+    "statement": "Op je bankafschrift",
+    "id": "Uitbetalings-ID",
+    "failed": "Deze uitbetaling kon niet worden afgeleverd. Stripe probeert het automatisch opnieuw, en het bedrag blijft in je beschikbare saldo totdat het lukt."
+  }
+}

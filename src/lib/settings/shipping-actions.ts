@@ -8,7 +8,15 @@ import {
   compactShippingPolicy,
   shippingPolicySchema,
 } from "@/lib/validation/shipping-policy";
-import type { SettingsActionState } from "@/lib/settings/actions";
+import { firstIssue } from "@/lib/validation/messages";
+import {
+  actionError,
+  failed,
+  invalidInput,
+  succeeded,
+  type ActionState,
+} from "@/lib/errors";
+import { msg } from "@/i18n/types";
 
 /**
  * SAVING THE ACCOUNT'S SHIPPING AND RETURNS TERMS.
@@ -34,18 +42,16 @@ import type { SettingsActionState } from "@/lib/settings/actions";
  * form to `id`, `is_seller` or any other profile column.
  */
 
-const SIGNED_OUT: SettingsActionState = {
-  error: "Your session expired. Sign in again.",
-};
-const SAVE_FAILED: SettingsActionState = {
-  error: "Could not save. Give it another try.",
-};
-const TOO_MANY: SettingsActionState = {
-  error: "That's a lot of changes in a short time. Try again a bit later.",
-};
-const MALFORMED: SettingsActionState = {
-  error: "Could not read the form. Reload the page and try again.",
-};
+const SIGNED_OUT: ActionState = failed(
+  actionError("session_expired", msg("Errors.form.sessionExpired")),
+);
+const SAVE_FAILED: ActionState = failed(
+  actionError("server_error", msg("Errors.form.saveFailed")),
+);
+const TOO_MANY: ActionState = failed(
+  actionError("rate_limited", msg("Errors.form.tooManyChanges")),
+);
+const MALFORMED: ActionState = failed(invalidInput(msg("Errors.form.malformed")));
 
 /**
  * Refused before `JSON.parse` ever runs. The column's own CHECK caps the
@@ -59,15 +65,17 @@ const MALFORMED: SettingsActionState = {
 const MAX_PAYLOAD_BYTES = 64_000;
 
 export async function saveShippingPolicy(
-  _prev: SettingsActionState,
+  _prev: ActionState,
   formData: FormData,
-): Promise<SettingsActionState> {
+): Promise<ActionState> {
   const user = await getUser();
   if (!user) return SIGNED_OUT;
 
   for (const key of formData.keys()) {
     if (key.startsWith("$ACTION")) continue;
-    if (key !== "policy") return { error: `Unexpected field "${key}" was rejected.` };
+    if (key !== "policy") {
+      return failed(invalidInput(msg("Errors.form.unexpectedField", { field: key })));
+    }
   }
 
   const raw = formData.get("policy");
@@ -84,9 +92,7 @@ export async function saveShippingPolicy(
   // text fields are min-1, so an untouched field would otherwise be an error
   // where the seller meant "blank".
   const parsed = shippingPolicySchema.safeParse(compactShippingPolicy(document));
-  if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Check the form and try again." };
-  }
+  if (!parsed.success) return failed(invalidInput(firstIssue(parsed.error)));
 
   if (!(await rateLimit("settings_write", RATE_LIMITS.settingsWrite))) return TOO_MANY;
 
@@ -110,5 +116,5 @@ export async function saveShippingPolicy(
   // a summary of them. Neither is under /settings, so neither is revalidated
   // by the line above.
   revalidatePath("/s", "layout");
-  return { success: "Shipping & returns saved." };
+  return succeeded(msg("Settings.shipping.success.shippingSaved"));
 }

@@ -9,15 +9,15 @@ import {
   nextCode,
   signInToChallenge,
   signInWithTwoFactor,
-  wrongCode,
   type Authenticator,
 } from "./two-factor";
 
 /**
  * "Confirm it's you" for sensitive actions. With 2FA on, a session that
- * passed its code more than ten minutes ago cannot change the password, the
- * email, the business details or the team, delete the account, or export it,
- * without a fresh code. The 2FA controls themselves (removing an authenticator,
+ * passed its code more than ten minutes ago cannot change the email, the
+ * business details or the team, delete the account, or export it, without a
+ * fresh code. (A new password is only ever set through the emailed link, which
+ * asks for a code itself: 69-two-factor-recovery.) The 2FA controls themselves (removing an authenticator,
  * turning 2FA off, new recovery codes) take a code every single time.
  *
  * ageSecondFactor() re-signs the session token with older timestamps, which
@@ -39,57 +39,6 @@ async function setUp(browser: import("@playwright/test").Browser, tag: string) {
 test.describe.configure({ timeout: 180_000 });
 
 test.describe("two-factor step-up", () => {
-  test("changing the password: no code inside the window, a code once it has passed", async ({ browser }) => {
-    const { context, page, user, app } = await setUp(browser, "stepuppw");
-
-    // Just verified: no code asked for.
-    await page.goto("/settings/account");
-    await page.waitForLoadState("networkidle").catch(() => {});
-    await page.getByRole("button", { name: "Change password" }).click();
-    let dialog = page.getByRole("dialog");
-    await expect(dialog.getByLabel("Authenticator code")).toHaveCount(0);
-    await dialog.getByLabel("Current password").fill(user.password);
-    await dialog.getByLabel("New password", { exact: true }).fill("Second-Pass-Word-7");
-    await dialog.getByLabel("Confirm new password").fill("Second-Pass-Word-7");
-    await dialog.getByRole("button", { name: "Update password" }).click();
-    await expectToast(page, /password updated/i);
-    // The 2FA session survived the change (no bounce to the challenge).
-    await page.goto("/settings/account");
-    await expect(page).toHaveURL(/\/settings\/account/);
-
-    // Eleven minutes later: the form asks for a code BEFORE submitting.
-    await ageSecondFactor(context, ELEVEN_MINUTES);
-    await page.goto("/settings/account");
-    await page.waitForLoadState("networkidle").catch(() => {});
-    await page.getByRole("button", { name: "Change password" }).click();
-    dialog = page.getByRole("dialog");
-    const codeBox = dialog.getByLabel("Authenticator code");
-    await expect(codeBox).toBeVisible({ timeout: 10_000 });
-
-    // Everything right except the code: refused, password unchanged.
-    await dialog.getByLabel("Current password").fill("Second-Pass-Word-7");
-    await dialog.getByLabel("New password", { exact: true }).fill("Third-Pass-Word-8");
-    await dialog.getByLabel("Confirm new password").fill("Third-Pass-Word-8");
-    await codeBox.fill(wrongCode(app));
-    await dialog.getByRole("button", { name: "Update password" }).click();
-    await expectToast(page, /didn't work/i);
-
-    // With the right code it goes through.
-    await dialog.getByLabel("Current password").fill("Second-Pass-Word-7");
-    await dialog.getByLabel("New password", { exact: true }).fill("Third-Pass-Word-8");
-    await dialog.getByLabel("Confirm new password").fill("Third-Pass-Word-8");
-    await dialog.getByLabel("Authenticator code").fill(await nextCode(app));
-    await dialog.getByRole("button", { name: "Update password" }).click();
-    await expectToast(page, /password updated/i);
-
-    // The owner was emailed about each change.
-    await expect(async () => {
-      const subjects = (await devEmails(user.email)).map((m) => m.subject);
-      expect(subjects.filter((s) => s === "Security alert: Your password was changed")).toHaveLength(2);
-    }).toPass({ timeout: 15_000 });
-    await context.close();
-  });
-
   test("a stale session cannot request account deletion or invite a team member without a code", async ({
     browser,
   }) => {

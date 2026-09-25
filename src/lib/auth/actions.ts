@@ -11,6 +11,8 @@ import {
 } from "@/lib/auth/session";
 import { hasVerifiedFactor } from "@/lib/auth/assurance";
 import { rememberSignInMethod } from "@/lib/auth/last-method";
+import { readLocaleCookieValue, writeLocaleCookie } from "@/i18n/cookie";
+import { localeForSignedInBrowser } from "@/i18n/sign-in";
 import { emailForUsername, isUsernameTaken } from "@/lib/auth/handles";
 import { passwordProblem } from "@/lib/auth/password";
 import { accountHasPassword } from "@/lib/auth/has-password";
@@ -22,6 +24,16 @@ import { isDisposableEmailDomain } from "@/lib/validation/disposable-email";
 import { isPlaceholderEmail } from "@/lib/validation/email-quality";
 import { verifyTurnstile } from "@/lib/turnstile";
 import { RATE_LIMITS, clientKey, rateLimitKey } from "@/lib/rate-limit";
+import {
+  actionError,
+  failed,
+  invalidInput,
+  succeeded,
+  type ActionError,
+  type ActionState,
+} from "@/lib/errors";
+import { firstIssue } from "@/lib/validation/messages";
+import { msg } from "@/i18n/types";
 
 export type { AuthIntent } from "@/lib/validation/auth";
 
@@ -33,7 +45,7 @@ export type { AuthIntent } from "@/lib/validation/auth";
  * through to a send. This is the format check, spent before the rate-limit
  * budget so that garbage is refused without costing the caller their quota.
  */
-const emailSchema = emailAddress("That email");
+const emailSchema = emailAddress("generic");
 
 /**
  * The one reply a signup attempt ever gets.
@@ -50,15 +62,10 @@ const emailSchema = emailAddress("That email");
  * existing account) never comes. Naming both paths tells them exactly what to
  * do next while telling an attacker nothing, because everyone reads it.
  */
-const SIGNUP_CHECK_EMAIL =
-  "Check your email for a link to confirm your account. " +
-  "If you already have an account with that address, sign in instead — or reset your password if you've forgotten it.";
+const SIGNUP_CHECK_EMAIL: ActionState = succeeded(msg("Auth.success.signUpCheckEmail"));
 
-export type AuthState = {
-  error?: string;
-  /** Non-error confirmation (e.g. "check your email"). */
-  message?: string;
-};
+/** One reply for "a reset link may be on its way", sent or throttled alike. */
+const RESET_LINK_ON_ITS_WAY: ActionState = succeeded(msg("Auth.success.resetLinkOnItsWay"));
 
 /** Only allow internal, absolute paths as post-login redirect targets. */
 function sanitizeNext(next: FormDataEntryValue | null): string {
@@ -80,7 +87,7 @@ async function siteOrigin(): Promise<string> {
 
 /** Shown whenever a limiter denies — deliberately identical everywhere so it
  *  reveals nothing about which budget was hit or whether an account exists. */
-const TOO_MANY = "Too many attempts. Wait a while and try again.";
+const TOO_MANY: ActionState = failed(actionError("rate_limited", msg("Errors.auth.tooManyAttempts")));
 
 /**
  * THE answer to every failed password attempt, whichever way it failed: wrong
@@ -88,7 +95,7 @@ const TOO_MANY = "Too many attempts. Wait a while and try again.";
  * error map and the sign-in path so the two can never drift into telling an
  * attacker apart the cases we went to some trouble to make identical.
  */
-const BAD_CREDENTIALS = "Incorrect email or password.";
+const BAD_CREDENTIALS: ActionError = invalidInput(msg("Errors.auth.badCredentials"));
 
 /**
  * An address that provably belongs to no one, minted fresh each time.
@@ -186,33 +193,40 @@ async function resolveSignInEmail(identifier: string): Promise<Resolution> {
 }
 
 /** Map Supabase auth errors to friendly, non-leaky copy. */
-function friendly(error: AuthError): string {
+function friendly(error: AuthError): ActionError {
   switch (error.code) {
     case "invalid_credentials":
       return BAD_CREDENTIALS;
     case "email_not_confirmed":
-      return "Confirm your email first — check your inbox for the link.";
+      return invalidInput(msg("Errors.auth.emailNotConfirmed"));
     // NOTE: user_already_exists / email_exists are deliberately absent. They are
     // intercepted at the signup branch and answered with SIGNUP_CHECK_EMAIL,
     // the same copy a new address gets. Adding a case for them here would
     // quietly reopen the enumeration oracle, since `friendly` is what every
     // other error path renders.
     case "weak_password":
-      return "That password is too weak. Use at least 8 characters.";
+      return invalidInput(msg("Errors.auth.weakPassword"));
     case "over_email_send_rate_limit":
     case "over_request_rate_limit":
-      return "Too many attempts. Wait a minute and try again.";
+      return actionError("rate_limited", msg("Errors.auth.rateLimited"));
     case "validation_failed":
-      return "Enter a valid email address.";
+      return invalidInput(msg("Errors.auth.invalidEmail"));
     case "unexpected_failure":
       // What a raised exception inside handle_new_user surfaces as, which for
       // us means the handle was claimed between the availability check and the
       // insert. The raw message carries the Postgres error text (constraint
       // and index names included), so it must never reach the default branch
       // below and get printed at the user.
-      return "Could not create that account. Try a different username.";
+      return actionError("server_error", msg("Errors.auth.accountNotCreated"));
     default:
-      return error.message || "Something went wrong. Please try again.";
+      // Supabase's own wording, passed through as it always has been: it is
+      // the only description of an error this map does not know.
+      return actionError(
+        "unexpected",
+        error.message
+          ? msg("Errors.auth.providerMessage", { message: error.message })
+          : msg("Errors.auth.unknown"),
+      );
   }
 }
 
@@ -223,9 +237,9 @@ function friendly(error: AuthError): string {
  * otherwise we return a friendly message to render.
  */
 export async function authenticate(
-  _prev: AuthState,
+  _prev: ActionState,
   formData: FormData,
-): Promise<AuthState> {
+): Promise<ActionState> {
   // Parsed, not cast. An unrecognised intent resolves to "signin", the most
   // restrictive branch — it still demands a valid password — so a hand-crafted
   // post cannot steer itself into a flow that sends mail.
@@ -258,18 +272,16 @@ export async function authenticate(
       "[auth] failed to create Supabase client:",
       err instanceof Error ? err.message : String(err),
     );
-    return {
-      error: "Could not connect to authentication service. Please try again.",
-    };
+    return failed(actionError("unexpected", msg("Errors.auth.serviceUnreachable")));
   }
 
-  if (notAnAddress) return { error: "Enter a valid email address." };
+  if (notAnAddress) return failed(invalidInput(msg("Errors.auth.invalidEmail")));
 
   // --- Magic link (passwordless OTP) ---
   if (intent === "magic") {
-    if (!email) return { error: "Enter your email." };
+    if (!email) return failed(invalidInput(msg("Errors.auth.emailRequired")));
     // Deny BEFORE calling Supabase: the email is the side effect to prevent.
-    if (!(await allowAuthEmail(email))) return { error: TOO_MANY };
+    if (!(await allowAuthEmail(email))) return TOO_MANY;
     const origin = await siteOrigin();
     let result;
     try {
@@ -285,22 +297,22 @@ export async function authenticate(
       });
     } catch (err) {
       console.error("[auth] magic link failed:", err instanceof Error ? err.message : String(err));
-      return { error: "Could not send email. Please check your connection and try again." };
+      return failed(actionError("unexpected", msg("Errors.auth.magicLinkFailed")));
     }
-    if (result.error) return { error: friendly(result.error) };
-    return { message: "Check your email for a link to sign in." };
+    if (result.error) return failed(friendly(result.error));
+    return succeeded(msg("Auth.success.magicLinkSent"));
   }
 
   // --- Password reset ---
   if (intent === "reset") {
-    if (!email) return { error: "Enter your email to reset your password." };
+    if (!email) return failed(invalidInput(msg("Errors.auth.resetEmailRequired")));
     // Same gate as the magic link — this one mails a password-reset link, so
     // aiming it at someone else's inbox is the higher-value abuse.
     if (!(await allowAuthEmail(email))) {
       // Mirror the success copy exactly. The unthrottled path already refuses
       // to confirm whether an account exists; a distinct "rate limited" reply
       // here would reintroduce that oracle for anyone probing addresses.
-      return { message: "If that email has an account, a reset link is on its way." };
+      return RESET_LINK_ON_ITS_WAY;
     }
     const origin = await siteOrigin();
     // The recovery link always lands on /reset-password (where the new password
@@ -312,7 +324,7 @@ export async function authenticate(
       });
     } catch (err) {
       console.error("[auth] reset password failed:", err instanceof Error ? err.message : String(err));
-      return { error: "Could not send reset email. Please check your connection and try again." };
+      return failed(actionError("unexpected", msg("Errors.auth.resetEmailFailed")));
     }
     // Supabase's own reply is NOT surfaced here. Its errors are
     // address-specific ("user_not_found", and its per-address send throttle),
@@ -326,40 +338,37 @@ export async function authenticate(
         result.error.message,
       );
     }
-    return { message: "If that email has an account, a reset link is on its way." };
+    return RESET_LINK_ON_ITS_WAY;
   }
 
   // --- Password sign-up / sign-in ---
   if (!email || !password) {
-    return { error: "Email and password are required." };
+    return failed(invalidInput(msg("Errors.auth.credentialsRequired")));
   }
 
   if (intent === "signup") {
     const confirmPassword = String(formData.get("confirm_password") ?? "");
     if (password !== confirmPassword) {
-      return { error: "Passwords do not match." };
+      return failed(invalidInput(msg("Errors.auth.passwordsMismatch")));
     }
     const parsedUsername = usernameSchema.safeParse({
       username: String(formData.get("username") ?? ""),
     });
     if (!parsedUsername.success) {
-      return {
-        error:
-          parsedUsername.error.issues[0]?.message ?? "Pick a valid username.",
-      };
+      return failed(invalidInput(firstIssue(parsedUsername.error, msg("Errors.auth.invalidUsername"))));
     }
     const username = parsedUsername.data.username;
     // Strength is checked AFTER the handle is known, so "your password is your
     // username" can actually be caught. Both are in hand by this point and
     // neither has been spent on a network call yet.
     const weak = passwordProblem(password, { email, username });
-    if (weak) return { error: weak };
+    if (weak) return failed(invalidInput(weak));
     // Free, local, and worth refusing before anything else costs a cycle: a
     // throwaway address is never a legitimate signup on this product, and
     // neither is a placeholder — the confirmation mail has nowhere to go, so
     // the account could never be used anyway.
     if (isDisposableEmailDomain(email) || isPlaceholderEmail(email)) {
-      return { error: "Please sign up with a permanent email address." };
+      return failed(invalidInput(msg("Errors.auth.permanentEmailRequired")));
     }
     // Bot check BEFORE the rate-limit budget is spent, so a scripted signup
     // loop is refused here rather than grinding through (and eventually
@@ -367,23 +376,23 @@ export async function authenticate(
     const turnstileToken = String(formData.get("cf_turnstile_token") ?? "");
     const clientIp = (await headers()).get("cf-connecting-ip") ?? undefined;
     if (!(await verifyTurnstile(turnstileToken, clientIp))) {
-      return { error: "Verification failed. Please try again." };
+      return failed(invalidInput(msg("Errors.auth.verificationFailed")));
     }
     // Sign-up also sends a confirmation email, so it needs the per-address gate
     // as well as a cap on how many accounts one client can spin up.
-    if (!(await allowAuthEmail(email))) return { error: TOO_MANY };
+    if (!(await allowAuthEmail(email))) return TOO_MANY;
     const signUpOk = await rateLimitKey(
       await clientKey(await headers()),
       "auth_signup_client",
       RATE_LIMITS.authSignUpPerClient,
     );
-    if (!signUpOk) return { error: TOO_MANY };
+    if (!signUpOk) return TOO_MANY;
     // Readable copy for the ordinary case. It is NOT the guard: the real one is
     // profiles_username_lower_idx, which decides the race between two people
     // submitting the same handle in the same instant. A failed check (null)
     // therefore falls through rather than blocking a legitimate signup.
     if (await isUsernameTaken(username)) {
-      return { error: "That username is taken. Try another." };
+      return failed(invalidInput(msg("Errors.auth.usernameTaken")));
     }
     const origin = await siteOrigin();
     let result;
@@ -406,7 +415,7 @@ export async function authenticate(
       });
     } catch (err) {
       console.error("[auth] signup failed:", err instanceof Error ? err.message : String(err));
-      return { error: "Could not create account. Please check your connection and try again." };
+      return failed(actionError("unexpected", msg("Errors.auth.signUpFailed")));
     }
     // "That address is already registered" must never be answerable from out
     // here. GoTrue reveals it two different ways depending on how the project
@@ -424,13 +433,13 @@ export async function authenticate(
       result.error?.code === "email_exists" ||
       (!result.error && result.data.user?.identities?.length === 0);
 
-    if (result.error && !alreadyRegistered) return { error: friendly(result.error) };
+    if (result.error && !alreadyRegistered) return failed(friendly(result.error));
 
     // With email confirmation ON there is no session yet — and there is no
     // session for an existing address either, so these two cases return the
     // same thing by construction rather than by remembering to.
     if (alreadyRegistered || !result.data.session) {
-      return { message: SIGNUP_CHECK_EMAIL };
+      return SIGNUP_CHECK_EMAIL;
     }
     // Confirmation disabled -> already signed in.
     redirect(next);
@@ -445,10 +454,10 @@ export async function authenticate(
     "auth_signin_client",
     RATE_LIMITS.authSignInPerClient,
   );
-  if (!signInOk) return { error: TOO_MANY };
+  if (!signInOk) return TOO_MANY;
 
   const resolution = await resolveSignInEmail(identifier);
-  if (resolution.kind === "denied") return { error: TOO_MANY };
+  if (resolution.kind === "denied") return TOO_MANY;
 
   let result;
   try {
@@ -466,21 +475,29 @@ export async function authenticate(
       "[auth] sign-in request failed:",
       err instanceof Error ? err.message : String(err),
     );
-    return { error: "Could not sign in. Please check your connection and try again." };
+    return failed(actionError("unexpected", msg("Errors.auth.signInFailed")));
   }
 
   // Whatever the probe came back with is discarded: an unknown handle answers
   // with the one credentials message, same as an unknown email and a wrong
   // password.
-  if (resolution.kind === "missing") return { error: BAD_CREDENTIALS };
-  if (result.error) return { error: friendly(result.error) };
+  if (resolution.kind === "missing") return failed(BAD_CREDENTIALS);
+  if (result.error) return failed(friendly(result.error));
   // Only now, with the sign-in actually through: a failed attempt must not
   // relabel the option this browser last used successfully.
   await rememberSignInMethod("password");
   // The password was right, but for an account with 2FA on that is only half
   // of signing in: the session just created is aal1, and every page would
   // bounce it to the challenge anyway. Going there directly saves the hop.
+  // The language is copied once the challenge completes: this aal1 session
+  // cannot read an enrolled account's profile.
   if (hasVerifiedFactor(result.data.user)) redirect(twoFactorChallengePath(next));
+  const accountLocale = await localeForSignedInBrowser(
+    supabase,
+    result.data.user.id,
+    await readLocaleCookieValue(),
+  );
+  if (accountLocale) await writeLocaleCookie(accountLocale);
   redirect(next);
 }
 
@@ -494,27 +511,27 @@ export async function authenticate(
  * page is auth-gated, and updateUser is scoped to that session's own account.
  */
 export async function resetPassword(
-  _prev: AuthState,
+  _prev: ActionState,
   formData: FormData,
-): Promise<AuthState> {
+): Promise<ActionState> {
   const password = String(formData.get("password") ?? "");
   const confirmPassword = String(formData.get("confirm_password") ?? "");
 
   if (password !== confirmPassword) {
-    return { error: "Passwords do not match." };
+    return failed(invalidInput(msg("Errors.auth.passwordsMismatch")));
   }
   // The same bar as sign-up, and for a concrete reason: without it, "reset my
   // password" is a way to walk around the sign-up gate and land on `password1`.
   // Run bare first so an obviously weak password is refused before we spend a
   // round trip on the session.
   const weak = passwordProblem(password);
-  if (weak) return { error: weak };
+  if (weak) return failed(invalidInput(weak));
 
   let supabase;
   try {
     supabase = await createClient();
   } catch {
-    return { error: "Could not connect. Please try again." };
+    return failed(actionError("unexpected", msg("Errors.auth.connectFailed")));
   }
 
   // Confirm the recovery session actually took — an expired/invalid link
@@ -527,11 +544,11 @@ export async function resetPassword(
   // challenge first; this refuses one that skipped it.
   const { user, unreachable } = await actionUser();
   if (!user) {
-    return {
-      error: unreachable
-        ? "Could not connect. Please try again."
-        : "Your reset link has expired. Request a new one from the sign-in page.",
-    };
+    return failed(
+      unreachable
+        ? actionError("unexpected", msg("Errors.auth.connectFailed"))
+        : actionError("session_expired", msg("Errors.auth.resetLinkExpired")),
+    );
   }
 
   // Now that we know WHO is resetting, re-check against their own identity —
@@ -543,7 +560,7 @@ export async function resetPassword(
         ? user.user_metadata.username
         : undefined,
   });
-  if (weakForUser) return { error: weakForUser };
+  if (weakForUser) return failed(invalidInput(weakForUser));
 
   // Captured BEFORE the update, since afterwards every account has one. Tells
   // "an OAuth user set their first password" apart from "an existing password
@@ -555,12 +572,12 @@ export async function resetPassword(
     result = await supabase.auth.updateUser({ password });
   } catch (err) {
     console.error("[auth] update password failed:", err instanceof Error ? err.message : String(err));
-    return { error: "Could not update your password. Check your connection and try again." };
+    return failed(actionError("unexpected", msg("Errors.auth.passwordUpdateFailed")));
   }
   if (result.error) {
     return result.error.code === "same_password"
-      ? { error: "That's already your password. Pick a new one." }
-      : { error: friendly(result.error) };
+      ? failed(invalidInput(msg("Errors.auth.samePassword")))
+      : failed(friendly(result.error));
   }
 
   // A recovery reset is the flow people reach for when they think someone
@@ -574,10 +591,16 @@ export async function resetPassword(
   // when it replaced an existing password: the distinction is worth keeping,
   // because the second one means a credential was taken over or rotated.
   await safeAlert(user.id, hadPassword ? "password.changed" : "password.set", {
-    title: hadPassword ? "Your password was changed" : "A password was set on your account",
-    body: hadPassword
-      ? "A reset link was used to set a new password, and other devices were signed out. If this wasn't you, reset it again immediately."
-      : "This account can now sign in with a password as well as Google. If this wasn't you, reset it immediately.",
+    title: {
+      key: hadPassword
+        ? "Notifications.messages.security.passwordReset.title"
+        : "Notifications.messages.security.passwordSet.title",
+    },
+    body: {
+      key: hadPassword
+        ? "Notifications.messages.security.passwordReset.body"
+        : "Notifications.messages.security.passwordSet.body",
+    },
     emailTo: user.email,
   });
 

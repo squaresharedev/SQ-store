@@ -1,12 +1,10 @@
+import type { ReactNode } from "react";
 import { PauseCircle, ShieldAlert } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
-import {
-  REMOVAL_GROUND_COPY,
-  formatTakedownDate,
-  isRemovalGround,
-  removalAppealHref,
-  removalStatement,
-} from "@/lib/moderation/removal";
+import type { MessageRef } from "@/i18n/types";
+import { formatLongDate } from "@/lib/format/date";
+import { removalAppealHref, removalFinding } from "@/lib/moderation/removal";
 import type { ProductRemoval } from "@/types/product";
 import { ReviewRequestButton } from "./ReviewRequestButton";
 
@@ -50,16 +48,20 @@ export function RemovalNotice({
   canRequestReview?: boolean;
   className?: string;
 }) {
-  const noun = kind === "product" ? "product" : "storefront";
-  // "Something else" is a picker option for staff, not a finding; in front of
-  // a sentence it reads as noise, so `other` (and anything unknown) shows the
-  // sentence alone. Mirror of groundedStatement in the admin panel.
-  const groundLabel =
-    isRemovalGround(removal.ground) && removal.ground !== "other"
-      ? `${REMOVAL_GROUND_COPY[removal.ground].label}. `
-      : "";
+  const t = useTranslations("Products.removal");
+  const tAll = useTranslations();
+  const locale = useLocale();
+  const resolve = (ref: MessageRef) => tAll(ref.key, ref.values);
   const paused = removal.kind === "paused";
   const headingId = `takedown-${id}`;
+  const appealLink = (chunks: ReactNode) => (
+    <a
+      className="font-medium text-foreground underline underline-offset-2"
+      href={removalAppealHref(kind, id, title, resolve)}
+    >
+      {chunks}
+    </a>
+  );
 
   return (
     <section
@@ -83,14 +85,10 @@ export function RemovalNotice({
         )}
         <div className="flex flex-col gap-1">
           <h2 id={headingId} className="text-sm font-semibold text-foreground">
-            {paused
-              ? `This ${noun} is paused until you change it`
-              : `This ${noun} was removed by SquareShare`}
+            {paused ? t("titlePaused", { kind }) : t("title", { kind })}
           </h2>
           <p className="text-sm text-muted-foreground">
-            {paused
-              ? "Buyers cannot see it right now: not on its page, not in an embed, not in a shared link. Nothing has been deleted, and it comes back once a person has checked your changes."
-              : "It is no longer visible to buyers anywhere: not on its page, not in an embed, not in a shared link. This is final, so editing it will not bring it back."}
+            {paused ? t("hiddenPaused") : t("hiddenRemoved")}
           </p>
         </div>
       </div>
@@ -98,20 +96,19 @@ export function RemovalNotice({
       <dl className="flex flex-col gap-2 pl-8 text-sm">
         <div className="flex flex-col gap-0.5">
           <dt className="font-medium text-foreground">
-            {paused ? "What needs to change" : "Reason"}
+            {paused ? t("whatNeedsToChange") : t("reason")}
           </dt>
           <dd className="text-muted-foreground" data-takedown-reason="">
-            {groundLabel}
-            {removalStatement(removal.ground, removal.note)}
+            {resolve(removalFinding(removal.ground, removal.note))}
           </dd>
         </div>
         {removal.at && (
           <div className="flex flex-col gap-0.5">
             <dt className="font-medium text-foreground">
-              {paused ? "Paused on" : "When"}
+              {paused ? t("pausedOn") : t("when")}
             </dt>
             <dd className="text-muted-foreground">
-              <time dateTime={removal.at}>{formatTakedownDate(removal.at)}</time>
+              <time dateTime={removal.at}>{formatLongDate(removal.at, locale)}</time>
             </dd>
           </div>
         )}
@@ -122,11 +119,7 @@ export function RemovalNotice({
           {canRequestReview ? (
             <>
               {!removal.reviewRequestedAt && (
-                <p className="text-sm text-muted-foreground">
-                  {kind === "product"
-                    ? "Edit the product below to fix this, save it, then send it back to us."
-                    : "Open the storefront to fix this, then come back here and send it to us."}
-                </p>
+                <p className="text-sm text-muted-foreground">{t("fixHint", { kind })}</p>
               )}
               <ReviewRequestButton
                 kind={kind}
@@ -135,32 +128,15 @@ export function RemovalNotice({
               />
             </>
           ) : (
-            <p className="text-sm text-muted-foreground">
-              Someone who can edit this {noun} has to make the change and send
-              it for review.
-            </p>
+            <p className="text-sm text-muted-foreground">{t("readOnlyHint", { kind })}</p>
           )}
           <p className="text-sm text-muted-foreground">
-            Think this is a mistake?{" "}
-            <a
-              className="font-medium text-foreground underline underline-offset-2"
-              href={removalAppealHref(kind, id, title)}
-            >
-              Write to us
-            </a>
-            .
+            {t.rich("appealPaused", { link: appealLink })}
           </p>
         </div>
       ) : (
         <p className="pl-8 text-sm text-muted-foreground">
-          If you think we got this wrong,{" "}
-          <a
-            className="font-medium text-foreground underline underline-offset-2"
-            href={removalAppealHref(kind, id, title)}
-          >
-            ask us to look again
-          </a>
-          .
+          {t.rich("appealFinal", { link: appealLink })}
         </p>
       )}
     </section>
@@ -182,6 +158,7 @@ export function RemovalBadge({
   kind: "paused" | "removed";
   className?: string;
 }) {
+  const t = useTranslations("Products.removal");
   return (
     <span
       className={cn(
@@ -194,7 +171,7 @@ export function RemovalBadge({
       )}
       data-removal-badge={kind}
     >
-      {kind === "paused" ? "Paused" : "Removed"}
+      {kind === "paused" ? t("badgePaused") : t("badge")}
     </span>
   );
 }

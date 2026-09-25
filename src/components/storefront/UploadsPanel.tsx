@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { ImageOff, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CollapsibleSection } from "@/components/ui/CollapsibleSection";
@@ -54,6 +55,8 @@ export function UploadsPanel({
   /** Place another block using artwork already uploaded. */
   onPlace: (upload: StorefrontUpload) => void;
 }) {
+  const t = useTranslations("Storefront.uploads");
+
   const inputRef = useRef<HTMLInputElement>(null);
   // Drag-over state, counted rather than boolean: dragging across a child
   // fires leave-then-enter, and a plain flag flickers the highlight off.
@@ -69,7 +72,7 @@ export function UploadsPanel({
 
   return (
     <div>
-      <CollapsibleSection title="Add an image">
+      <CollapsibleSection title={t("addImage")}>
         {/* Click OR drop. The drop target is the same surface as the button so
             there is nothing to aim at that is not also the thing you press. */}
         <div
@@ -102,19 +105,17 @@ export function UploadsPanel({
             <span className="text-xs font-medium">
               {uploading
                 ? progress === null
-                  ? "Processing…"
-                  : `Uploading… ${Math.round(progress * 100)}%`
+                  ? t("processing")
+                  : t("uploadingPct", { pct: Math.round(progress * 100) })
                 : dragging
-                  ? "Drop to upload"
-                  : "Upload image"}
+                  ? t("dropToUpload")
+                  : t("uploadImage")}
             </span>
           </button>
         </div>
 
         <p className={cn(helpTextClass, "mt-2")}>
-          {canAddBlocks
-            ? "SVG, PNG, JPEG, WebP, GIF or AVIF. Up to 2 MB. Drop a file here or press to browse."
-            : "The canvas is full. Remove a block to add another."}
+          {canAddBlocks ? t("uploadHint") : t("canvasFullHint")}
         </p>
 
         {/* PLT-02: aria-hidden removes this from the AT tree. The visible
@@ -139,11 +140,11 @@ export function UploadsPanel({
         />
       </CollapsibleSection>
 
-      <CollapsibleSection title="In this storefront">
+      <CollapsibleSection title={t("inStorefront")}>
         {uploads.length > 0 ? (
           <div
             role="group"
-            aria-label="Images in this storefront"
+            aria-label={t("imagesGroup")}
             className="grid grid-cols-3 gap-1.5"
           >
             {uploads.map((upload) => (
@@ -152,11 +153,11 @@ export function UploadsPanel({
                 type="button"
                 onClick={() => onPlace(upload)}
                 disabled={!canAddBlocks}
-                title={upload.alt || "Place this image again"}
+                title={upload.alt || t("placeAgainFallback")}
                 aria-label={
                   upload.alt
-                    ? `Place ${upload.alt} again`
-                    : "Place this image again"
+                    ? t("placeAgain", { alt: upload.alt })
+                    : t("placeAgainFallback")
                 }
                 className={cn(
                   "flex aspect-square items-center justify-center overflow-hidden rounded-sm border border-border bg-card p-1",
@@ -188,8 +189,7 @@ export function UploadsPanel({
           </div>
         ) : (
           <p className={helpTextClass}>
-            Images you upload collect here, so you can place the same one
-            again without uploading it twice.
+            {t("emptyHint")}
           </p>
         )}
       </CollapsibleSection>

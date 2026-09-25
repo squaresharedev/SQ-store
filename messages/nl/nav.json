@@ -1,0 +1,56 @@
+{
+  "main": {
+    "overview": {
+      "label": "Overzicht",
+      "description": "Je opstartstappen, en alles wat je aandacht nodig heeft."
+    },
+    "products": {
+      "label": "Producten",
+      "description": "Wat je verkoopt: foto's, prijzen, voorraad en details."
+    },
+    "storefront": {
+      "label": "Etalage",
+      "description": "Ontwerp het raster waarop je producten staan."
+    },
+    "orders": {
+      "label": "Bestellingen",
+      "description": "Bestellingen komen hier binnen zodra je kunt afrekenen."
+    },
+    "analytics": {
+      "label": "Statistieken",
+      "description": "Weergaven van je productpagina's, en later ook verkopen."
+    },
+    "payments": {
+      "label": "Betalingen",
+      "description": "Betaald worden via Stripe. Binnenkort beschikbaar."
+    },
+    "settings": {
+      "label": "Instellingen",
+      "description": "Je verkopersgegevens, verzendvoorwaarden en account."
+    }
+  },
+  "settings": {
+    "account": "Account",
+    "security": "Beveiliging",
+    "legal": "Juridisch",
+    "tax": "Bedrijfs- en verkopersgegevens",
+    "shipping": "Verzending en retouren",
+    "notifications": "Meldingen",
+    "language": "Taal",
+    "team": "Team en toegang",
+    "danger": "Gevarenzone"
+  },
+  "profileMenu": {
+    "label": "Accountmenu",
+    "account": "Account",
+    "switchAccounts": "Van account wisselen",
+    "yourStore": "Je winkel",
+    "owner": "Eigenaar",
+    "logOut": "Uitloggen"
+  },
+  "viewingBanner": {
+    "viewing": "{role, select, owner {Je bekijkt <store>{storeName}</store> als eigenaar} editor {Je bekijkt <store>{storeName}</store> als bewerker} viewer {Je bekijkt <store>{storeName}</store> als lezer} other {Je bekijkt <store>{storeName}</store>}}",
+    "readOnly": " · alleen-lezen",
+    "backToYourStore": "Terug naar je winkel"
+  }
+}

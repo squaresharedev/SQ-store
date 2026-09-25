@@ -1,6 +1,7 @@
 "use client";
 
 import { useId } from "react";
+import { useTranslations } from "next-intl";
 import {
   BringToFront,
   ChevronDown,
@@ -99,13 +100,12 @@ function layerState(
  *  copies of this table is how the panel and the list end up disagreeing about
  *  what "backward" is called. */
 export const LAYER_CONTROLS = [
-  { op: "back", label: "Send to back", icon: SendToBack, end: "back" },
-  { op: "backward", label: "Send backward", icon: ChevronDown, end: "back" },
-  { op: "forward", label: "Bring forward", icon: ChevronUp, end: "front" },
-  { op: "front", label: "Bring to front", icon: BringToFront, end: "front" },
+  { op: "back", icon: SendToBack, end: "back" },
+  { op: "backward", icon: ChevronDown, end: "back" },
+  { op: "forward", icon: ChevronUp, end: "front" },
+  { op: "front", icon: BringToFront, end: "front" },
 ] as const satisfies readonly {
   op: LayerOp;
-  label: string;
   icon: typeof SendToBack;
   end: "front" | "back";
 }[];
@@ -163,21 +163,28 @@ export function PlacementSection({
    *  to swap (the dev gallery), and the row simply does not render. */
   onOpenLayers?: () => void;
 }) {
+  const t = useTranslations("Storefront.placement");
   const fieldId = useId();
   const shared = sharedRotation(blocks);
   const multiple = blocks.length > 1;
   const layer = layerState(board, blocks);
+  const layerLabels: Record<string, string> = {
+    back: t("sendToBack"),
+    backward: t("sendBackward"),
+    forward: t("bringForward"),
+    front: t("bringToFront"),
+  };
 
   return (
     <div className="space-y-4">
       <div className="space-y-1.5">
         <SliderField
           id={`${fieldId}-rotation`}
-          label="Rotation"
+          label={t("rotation")}
           tip={
             multiple
-              ? "Whole degrees, either way from level. Each block turns about its own centre, so a row of blocks stays a row."
-              : "Whole degrees, either way from level. The block turns about its own centre and keeps the cells it occupies."
+              ? t("rotationTipMultiple")
+              : t("rotationTipSingle")
           }
           min={ROTATION_MIN}
           max={ROTATION_MAX}
@@ -185,13 +192,13 @@ export function PlacementSection({
           // been touched sits in the middle rather than pinned to one end.
           value={shared ?? 0}
           onChange={onRotate}
-          ariaLabel="Block rotation"
+          ariaLabel={t("rotationAriaLabel")}
           valueText={
             shared === null
-              ? "Mixed angles"
-              : `${shared} degrees`
+              ? t("valueTextMixed")
+              : t("valueText", { n: shared })
           }
-          statusText={shared === null ? "Mixed" : undefined}
+          statusText={shared === null ? t("statusMixed") : undefined}
           unit="°"
         />
         <div className="flex gap-1.5">
@@ -203,10 +210,10 @@ export function PlacementSection({
               // "Level" rather than "0°": the button CLEARS the tilt, and the
               // word says so where a number would just look like another
               // angle to land on.
-              aria-label={angle === 0 ? "Level the block" : `Rotate to ${angle} degrees`}
+              aria-label={angle === 0 ? t("levelBlock") : t("rotateTo", { n: angle })}
               className={QUICK_BUTTON_CLASS}
             >
-              {angle === 0 ? "Level" : `${angle}°`}
+              {angle === 0 ? t("level") : t("angle", { n: angle })}
             </button>
           ))}
         </div>
@@ -217,47 +224,50 @@ export function PlacementSection({
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
           <span className="flex items-center gap-1.5">
-            <span className={labelClass}>Layer</span>
-            <InfoTip label="How layering works">
-              Layers decide only what paints on top where blocks overlap; the
-              reading order a screen reader follows never changes.
-              {multiple && " This selection keeps its own order within the stack as it moves."}
-              {layer.stacked && " Alt-click a stack on the canvas to reach the block underneath."}
+            <span className={labelClass}>{t("layerLabel")}</span>
+            <InfoTip label={t("layerInfoLabel")}>
+              {t("layerInfoBody", {
+                multi: String(multiple),
+                stacked: String(layer.stacked),
+              })}
             </InfoTip>
           </span>
           <span className={helpTextClass}>
             {multiple
-              ? `${blocks.length} blocks selected`
+              ? t("blocksSelected", { count: blocks.length })
               : layer.index === null
                 ? ""
-                : `Layer ${layer.index + 1} of ${layer.total}`}
+                : t("layerOf", { index: layer.index + 1, total: layer.total })}
           </span>
         </div>
         <div className="flex gap-1">
-          <div role="group" aria-label="Block layer" className="flex gap-1">
+          <div role="group" aria-label={t("blockLayerLabel")} className="flex gap-1">
             {/* Four arrows that all point up or down: which one is a step and
                 which is the whole way is not readable off the glyphs, and this
                 is the row a seller reaches for least often, so it is the one
                 they have relearned every time. The tooltip says the action,
                 the same words the screen reader already gets. */}
-            {LAYER_CONTROLS.map(({ op, label, icon: Icon, end }) => (
-              <Tooltip key={op} label={label}>
-                <button
-                  type="button"
-                  onClick={() => onReorder(op)}
-                  // Named for the ACTION, never the arrow: "chevron up" tells a
-                  // screen reader nothing about what it does to the stack.
-                  aria-label={label}
-                  // A control that does nothing is worse than one that says it
-                  // cannot: both ends disable together, since a selection already
-                  // at the front has neither a step nor a jump left to make.
-                  disabled={end === "front" ? layer.atFront : layer.atBack}
-                  className={LAYER_BUTTON_CLASS}
-                >
-                  <Icon className="size-4" strokeWidth={2} aria-hidden="true" />
-                </button>
-              </Tooltip>
-            ))}
+            {LAYER_CONTROLS.map(({ op, icon: Icon, end }) => {
+              const opLabel = layerLabels[op];
+              return (
+                <Tooltip key={op} label={opLabel}>
+                  <button
+                    type="button"
+                    onClick={() => onReorder(op)}
+                    // Named for the ACTION, never the arrow: "chevron up" tells a
+                    // screen reader nothing about what it does to the stack.
+                    aria-label={opLabel}
+                    // A control that does nothing is worse than one that says it
+                    // cannot: both ends disable together, since a selection already
+                    // at the front has neither a step nor a jump left to make.
+                    disabled={end === "front" ? layer.atFront : layer.atBack}
+                    className={LAYER_BUTTON_CLASS}
+                  >
+                    <Icon className="size-4" strokeWidth={2} aria-hidden="true" />
+                  </button>
+                </Tooltip>
+              );
+            })}
           </div>
           {/* Four buttons answer "move this one"; they cannot answer "what else
               is under here". That is the whole stack, and it opens IN the panel
@@ -271,7 +281,7 @@ export function PlacementSection({
               className={SEE_LAYERS_CLASS}
             >
               <Layers className="size-4 shrink-0" strokeWidth={2} aria-hidden="true" />
-              <span className="truncate">See all layers</span>
+              <span className="truncate">{t("seeAllLayers")}</span>
             </button>
           )}
         </div>

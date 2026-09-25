@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { InviteAcceptRow } from "@/components/settings/team/InviteAcceptRow";
@@ -15,6 +16,7 @@ import type { PendingInviteRow } from "@/lib/team/queries";
  * card. Deep-linked here from the invite notification's bell entry.
  */
 export function InvitePromptModal({ invites }: { invites: PendingInviteRow[] }) {
+  const t = useTranslations("Settings.team.invitePrompt");
   // Auto-open once per mount; dismissing sticks for the visit.
   const [open, setOpen] = React.useState(true);
 
@@ -35,18 +37,12 @@ export function InvitePromptModal({ invites }: { invites: PendingInviteRow[] }) 
 
   if (invites.length === 0) return null;
 
-  const plural = invites.length > 1;
-
   return (
     <Modal
       open={open}
       onClose={() => setOpen(false)}
-      title={plural ? "You have team invites" : "You have a team invite"}
-      description={
-        plural
-          ? "You've been invited to join these teams. Accept to get access."
-          : "You've been invited to join a team. Accept to get access."
-      }
+      title={t("title", { count: invites.length })}
+      description={t("description", { count: invites.length })}
     >
       <ul className="divide-y divide-border">
         {invites.map((invite) => (
@@ -58,7 +54,7 @@ export function InvitePromptModal({ invites }: { invites: PendingInviteRow[] }) 
 
       <div className="mt-4 flex justify-end">
         <Button variant="ghost" onClick={() => setOpen(false)}>
-          Maybe later
+          {t("maybeLater")}
         </Button>
       </div>
     </Modal>

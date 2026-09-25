@@ -112,6 +112,7 @@ export function PickersGallery() {
             onChange={setTextColor}
             inherit={{
               label: "Theme color",
+              useLabel: "Use Theme color",
               value: accent,
               active: textColor === undefined,
               onSelect: () => setTextColor(undefined),
@@ -152,7 +153,7 @@ export function PickersGallery() {
         <div className="flex flex-col gap-6 sm:flex-row">
           <div className="w-full shrink-0 border border-border sm:w-[17.5rem]">
             <ColorPanel
-              target={{ label: "Fill", value: panelColor }}
+              target={{ label: "Storefront.colors.fields.fill", value: panelColor }}
               inDesign={inDesign}
               onPick={setPanelColor}
               onClose={() => setPanelColor("#a855f7")}

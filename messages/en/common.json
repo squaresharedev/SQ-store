@@ -1,0 +1,113 @@
+{
+  "actions": {
+    "save": "Save",
+    "saving": "Saving…",
+    "saved": "Saved",
+    "cancel": "Cancel",
+    "done": "Done",
+    "close": "Close",
+    "back": "Back",
+    "copy": "Copy",
+    "copied": "Copied",
+    "copyFailed": "Copy failed",
+    "tryAgain": "Try again",
+    "sending": "Sending…",
+    "sent": "Sent",
+    "loading": "Loading…",
+    "confirm": "Confirm",
+    "remove": "Remove",
+    "delete": "Delete",
+    "deleting": "Deleting…"
+  },
+  "badge": {
+    "comingSoon": "Coming soon"
+  },
+  "pagination": {
+    "previous": "Previous",
+    "next": "Next"
+  },
+  "calendar": {
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "today": "Today"
+  },
+  "datePicker": {
+    "chooseDate": "Choose date",
+    "chooseDateRange": "Choose date range",
+    "selectDate": "Select date"
+  },
+  "colorPicker": {
+    "saturationBrightness": "Saturation and brightness",
+    "saturationBrightnessValue": "{saturation} saturation, {brightness} brightness",
+    "hue": "Hue",
+    "pickFromScreen": "Pick a color from the screen",
+    "pickFromScreenTitle": "Pick from screen",
+    "hexLabel": "Hex color",
+    "hexCopied": "Hex copied",
+    "copyHex": "Copy hex",
+    "invalidHex": "Use a 6-digit hex color like #a855f7.",
+    "pickerFor": "{label} color picker",
+    "picker": "Color picker",
+    "colour": "Colour",
+    "swatchesFor": "{label} swatches",
+    "swatches": "Color swatches",
+    "moreColors": "More colors",
+    "customColor": "Custom color",
+    "currentColor": "Current color {color}",
+    "hueValue": "{degrees, plural, other {# degrees}}"
+  },
+  "panelMenu": {
+    "backLeaving": "Back to all settings, leaving {title}"
+  },
+  "sliderField": {
+    "about": "About {label}",
+    "asNumber": "{label}, as a number"
+  },
+  "password": {
+    "show": "Show password",
+    "hide": "Hide password"
+  },
+  "stock": {
+    "inStock": "In stock",
+    "lowStock": "{remaining, plural, one {Only {remaining} left} other {Only {remaining} left}}",
+    "soldOut": "Sold out"
+  },
+  "toast": {
+    "regionLabel": "Notifications",
+    "dismiss": "Dismiss"
+  },
+  "charts": {
+    "bar": "Bar chart",
+    "horizontalBar": "Horizontal bar chart",
+    "line": "Line chart",
+    "composition": "Composition",
+    "proportional": "Proportional breakdown",
+    "other": "Other",
+    "total": "Total",
+    "category": "Category"
+  },
+  "legal": {
+    "cookies": {
+      "label": "Cookies",
+      "name": "Squareshare Cookie Policy"
+    },
+    "accessibility": {
+      "label": "Accessibility",
+      "name": "Squareshare Accessibility Statement"
+    }
+  },
+  "grid": {
+    "ariaLabel": "Grid",
+    "addBlockAt": "Add a block at column {column}, row {row}",
+    "resize": "Resize {label}",
+    "resizeBlock": "Resize block",
+    "resizeUnavailable": "Resizing is unavailable: this block already fills all the room the stacked layout has",
+    "resizeUnavailableNamed": "Resizing is unavailable: this block already fills all the room the stacked layout has: {label}",
+    "rotate": "Rotate {label}",
+    "rotateBlock": "Rotate block",
+    "rotation": "{degrees, plural, other {# degrees}}",
+    "rotated": "{label} rotated to {degrees, plural, other {# degrees}}",
+    "rotatedBlock": "Block rotated to {degrees, plural, other {# degrees}}",
+    "blocksMoved": "{count, plural, other {# blocks moved}}"
+  }
+}

@@ -2,22 +2,25 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { destructiveButtonClass, ghostButtonClass, helpTextClass, primaryButtonClass, secondaryButtonClass } from "@/components/ui/control-styles";
 import type { OrderView } from "@/types/order-view";
 
 type ConfirmState = "idle" | "confirming" | "done";
 
 function RefundAction() {
+  const t = useTranslations("Orders.actions");
+  const tCommon = useTranslations("Common.actions");
   const [state, setState] = useState<ConfirmState>("idle");
 
   if (state === "done") {
     return (
       <div className="flex flex-col gap-2">
         <p className={helpTextClass}>
-          Refunds require Stripe to be connected.
+          {t("refundNeedsStripe")}
         </p>
         <Link href="/settings" className={secondaryButtonClass}>
-          Connect Stripe to enable refunds
+          {t("connectStripe")}
         </Link>
       </div>
     );
@@ -27,7 +30,7 @@ function RefundAction() {
     return (
       <div className="flex flex-col gap-3">
         <p className="font-inter text-sm text-foreground">
-          Refund this order? This cannot be undone once Stripe is connected.
+          {t("refundConfirm")}
         </p>
         <div className="flex gap-2">
           <button
@@ -38,14 +41,14 @@ function RefundAction() {
               setState("done");
             }}
           >
-            Confirm refund
+            {t("confirmRefund")}
           </button>
           <button
             type="button"
             className={ghostButtonClass}
             onClick={() => setState("idle")}
           >
-            Cancel
+            {tCommon("cancel")}
           </button>
         </div>
       </div>
@@ -58,18 +61,20 @@ function RefundAction() {
       className={destructiveButtonClass}
       onClick={() => setState("confirming")}
     >
-      Refund order
+      {t("refundOrder")}
     </button>
   );
 }
 
 function DisputeAction() {
+  const t = useTranslations("Orders.actions");
+  const tCommon = useTranslations("Common.actions");
   const [state, setState] = useState<ConfirmState>("idle");
 
   if (state === "done") {
     return (
       <p className={helpTextClass}>
-        Disputes are handled in your Stripe dashboard once Stripe is connected.
+        {t("disputeInStripe")}
       </p>
     );
   }
@@ -78,7 +83,7 @@ function DisputeAction() {
     return (
       <div className="flex flex-col gap-3">
         <p className="font-inter text-sm text-foreground">
-          Open dispute handling for this order?
+          {t("disputeConfirm")}
         </p>
         <div className="flex gap-2">
           <button
@@ -89,14 +94,14 @@ function DisputeAction() {
               setState("done");
             }}
           >
-            Confirm
+            {tCommon("confirm")}
           </button>
           <button
             type="button"
             className={ghostButtonClass}
             onClick={() => setState("idle")}
           >
-            Cancel
+            {tCommon("cancel")}
           </button>
         </div>
       </div>
@@ -109,12 +114,13 @@ function DisputeAction() {
       className={secondaryButtonClass}
       onClick={() => setState("confirming")}
     >
-      Handle dispute
+      {t("handleDispute")}
     </button>
   );
 }
 
 export function OrderActions({ order }: { order: OrderView }) {
+  const t = useTranslations("Orders.actions");
   if (order.status === "paid") {
     return <RefundAction />;
   }
@@ -126,7 +132,7 @@ export function OrderActions({ order }: { order: OrderView }) {
   // status === "refunded" | "pending"
   return (
     <p className={helpTextClass}>
-      No actions are available for this order.
+      {t("none")}
     </p>
   );
 }

@@ -1,0 +1,17 @@
+{
+  "notFound": {
+    "title": "Page introuvable",
+    "description": "Cette page n’existe pas, ou l’élément qu’elle visait a été supprimé. Le lien est peut-être obsolète, mais votre compte et vos données n’ont rien.",
+    "cta": "Retour au tableau de bord"
+  },
+  "boundary": {
+    "title": "Une erreur est survenue",
+    "description": "Nous n’avons pas pu charger cette page. Il s’agit généralement d’un problème de connexion temporaire : votre compte n’a rien et vous êtes toujours connecté.",
+    "reference": "Référence : {digest}"
+  },
+  "footer": {
+    "legal": "Informations juridiques",
+    "contact": "Contact",
+    "credit": "© 2026 Squareshare. Créé par <link>Root Labs</link>."
+  }
+}

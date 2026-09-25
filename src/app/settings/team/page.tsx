@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { TeamSection } from "@/components/settings/team/TeamSection";
 import { requireUser } from "@/lib/auth/session";
 import {
@@ -8,9 +9,10 @@ import {
   TEAM_PAGE_SIZE,
 } from "@/lib/team/queries";
 
-export const metadata: Metadata = {
-  title: "Team & access",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Settings.metadata.team");
+  return { title: t("title") };
+}
 
 /**
  * Team & Access — PROTECTED. The roster shown is the signed-in user's OWN

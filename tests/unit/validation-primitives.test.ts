@@ -20,7 +20,7 @@ import {
 const ctrl = (code: number) => String.fromCharCode(code);
 
 describe("singleLineText", () => {
-  const field = singleLineText({ label: "Title", max: 10 });
+  const field = singleLineText({ field: "productTitle", max: 10 });
 
   it("accepts ordinary text and trims it", () => {
     expect(field.parse("  hello  ")).toBe("hello");
@@ -43,14 +43,14 @@ describe("singleLineText", () => {
   });
 
   it("allows empty when made optional", () => {
-    const optional = optionalSingleLineText({ label: "VAT", max: 10 });
+    const optional = optionalSingleLineText({ field: "businessName", max: 10 });
     expect(optional.parse("")).toBe("");
     expect(optional.safeParse(ctrl(0)).success).toBe(false);
   });
 });
 
 describe("multiLineText", () => {
-  const field = multiLineText({ label: "Bio", max: 100 });
+  const field = multiLineText({ field: "storeBio", max: 100 });
 
   it("allows newlines", () => {
     expect(field.parse("one\ntwo")).toBe("one\ntwo");
@@ -151,7 +151,7 @@ describe("hexColor", () => {
 });
 
 describe("boundedInt", () => {
-  const field = boundedInt({ label: "Stock", min: 0, max: 100 });
+  const field = boundedInt({ field: "price", min: 0, max: 100 });
 
   it("rejects floats, NaN and Infinity", () => {
     for (const bad of [1.5, Number.NaN, Number.POSITIVE_INFINITY]) {
@@ -168,7 +168,7 @@ describe("boundedInt", () => {
 });
 
 describe("uniqueList", () => {
-  const field = uniqueList(hostname(), { label: "domains", max: 2 });
+  const field = uniqueList(hostname(), { field: "domains", max: 2 });
 
   it("rejects duplicates and over-long lists", () => {
     expect(field.safeParse(["a.com", "a.com"]).success).toBe(false);

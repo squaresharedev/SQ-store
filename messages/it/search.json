@@ -1,0 +1,72 @@
+{
+  "trigger": {
+    "label": "Cerca"
+  },
+  "overlay": {
+    "label": "Cerca",
+    "placeholder": "Cerca prodotti, ordini, impostazioni…",
+    "clear": "Cancella ricerca",
+    "close": "Chiudi ricerca",
+    "results": "Risultati di ricerca",
+    "searching": "Ricerca in corso…",
+    "noResults": "Nessun risultato per {query}",
+    "resultCount": "{count, plural, one {{count} risultato per {query}} many {{count} di risultati per {query}} other {{count} risultati per {query}}}",
+    "nothingMatches": "Nessun risultato per «{query}».",
+    "startTyping": "Inizia a digitare per cercare.",
+    "remoteError": "Impossibile raggiungere il server: vengono mostrati solo pagine, impostazioni e azioni.",
+    "remoteErrorCached": "Ricerca in tempo reale non raggiungibile: vengono mostrati risultati salvati, pagine e impostazioni.",
+    "remoteAuth": "La tua sessione è scaduta, quindi vengono mostrate solo pagine e impostazioni.",
+    "remoteThrottled": "Stai cercando troppo velocemente: vengono mostrati solo pagine, impostazioni e azioni."
+  },
+  "sections": {
+    "pages": "Pagine",
+    "actions": "Azioni",
+    "settings": "Impostazioni"
+  },
+  "groups": {
+    "products": "Prodotti",
+    "orders": "Ordini",
+    "storefronts": "Vetrine",
+    "team": "Team",
+    "notifications": "Notifiche",
+    "recent": "Recenti"
+  },
+  "results": {
+    "draft": "Bozza",
+    "openInDesigner": "Apri nell’editor",
+    "invited": "Invitato",
+    "order": "Ordine",
+    "unread": "Non letta"
+  },
+  "fields": {
+    "username": "Nome utente",
+    "avatar": "Foto del profilo",
+    "email": "Indirizzo email",
+    "password": "Password",
+    "twoFactor": "Autenticazione a due fattori",
+    "recoveryCodes": "Codici di recupero",
+    "securityActivity": "Attività di sicurezza",
+    "signOut": "Esci",
+    "vat": "Partita IVA",
+    "businessName": "Ragione sociale o nome",
+    "country": "Paese",
+    "address": "Indirizzo commerciale",
+    "contactEmail": "Email di contatto",
+    "phone": "Telefono",
+    "bio": "Bio",
+    "salesEmails": "Email di vendita",
+    "marketingEmails": "Email di marketing",
+    "productEmails": "Novità della piattaforma",
+    "sellerAgreement": "Accordo per i venditori",
+    "termsOfService": "Termini di servizio",
+    "exportData": "Esporta i miei dati",
+    "deleteAccount": "Elimina account"
+  },
+  "actions": {
+    "newProduct": "Nuovo prodotto",
+    "newStorefront": "Nuova vetrina",
+    "inviteMember": "Invita un membro del team",
+    "notificationHistory": "Cronologia notifiche",
+    "showMeAround": "Fammi fare un giro"
+  }
+}

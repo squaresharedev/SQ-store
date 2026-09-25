@@ -4,9 +4,14 @@
 // PURE ON PURPOSE, exactly like lib/settings/trader-identity.ts and for the
 // same reason: the public reads, the dashboard banners and the seller's
 // notification all have to agree about what "removed" means, so there is one
-// predicate and no second opinion. No imports, nothing server-only, so a
-// Client Component can render the banner from the same source the embed route
-// gates on.
+// predicate and no second opinion. Nothing server-only, so a Client Component
+// can render the banner from the same source the embed route gates on. The
+// words are message references, resolved in the SELLER'S language where they
+// render.
+
+import type { Locale } from "@/i18n/locales";
+import { msg, type MessageRef } from "@/i18n/types";
+import { dateTimeFormat, intlTag } from "@/lib/format/intl";
 //
 // MIRROR OF @squaresharedev/moderation. That package is the cross-repo
 // contract (the admin panel writes these values, the marketplace reads them);
@@ -103,52 +108,6 @@ export const REMOVAL_GROUNDS = [
 
 export type RemovalGround = (typeof REMOVAL_GROUNDS)[number];
 
-/**
- * What the seller reads. Written to be understood by someone who has just lost
- * a listing and is upset about it: plain, specific about what was wrong, and
- * silent about intent, because we do not know theirs.
- */
-export const REMOVAL_GROUND_COPY: Record<
-  RemovalGround,
-  { label: string; sellerExplanation: string }
-> = {
-  illegal: {
-    label: "Illegal goods or activity",
-    sellerExplanation:
-      "It offered something that cannot be sold legally, or used the listing to arrange it.",
-  },
-  sexual: {
-    label: "Sexual content",
-    sellerExplanation: "It contained explicit sexual content.",
-  },
-  violence: {
-    label: "Violence or gore",
-    sellerExplanation: "It contained graphic violence.",
-  },
-  hate: {
-    label: "Hate or harassment",
-    sellerExplanation: "It attacked a person or group, or carried hate symbolism.",
-  },
-  counterfeit: {
-    label: "Counterfeit or stolen",
-    sellerExplanation:
-      "It appeared to offer counterfeit goods, or work that belongs to someone else.",
-  },
-  scam: {
-    label: "Scam or fraud",
-    sellerExplanation:
-      "It appeared designed to take payment without delivering what was promised.",
-  },
-  spam: {
-    label: "Spam",
-    sellerExplanation: "It was repetitive or misleading rather than a genuine listing.",
-  },
-  other: {
-    label: "Something else",
-    sellerExplanation: "It broke the platform rules.",
-  },
-};
-
 /** Narrow a value that arrived as a database string or a form field. */
 export function isRemovalGround(value: unknown): value is RemovalGround {
   return (
@@ -161,23 +120,49 @@ export function isRemovalGround(value: unknown): value is RemovalGround {
 export const REMOVAL_NOTE_MAX = 500;
 
 /**
- * The full statement of reasons for one removal.
+ * The full statement of reasons for one removal: the ground in plain words,
+ * what it means, then whatever the reviewer added, verbatim.
  *
  * Assembled here rather than in each surface so the seller reads the same
  * sentence in the notification, on the product page banner and in the list.
  * A seller whose content came down is entitled to know why (EU Digital
  * Services Act, Art. 17), and "entitled" means it cannot depend on which
  * screen they happened to open.
+ *
+ * The wording (Products.removal.statement) is written to be understood by
+ * someone who has just lost a listing and is upset about it: plain, specific
+ * about what was wrong, and silent about intent, because we do not know
+ * theirs. An unrecognised ground reads as `other`. The staff note is data in
+ * whatever language staff wrote it, so it goes in as a value.
  */
 export function removalStatement(
   ground: string | null | undefined,
   note?: string | null,
-): string {
-  const base = isRemovalGround(ground)
-    ? REMOVAL_GROUND_COPY[ground].sellerExplanation
-    : REMOVAL_GROUND_COPY.other.sellerExplanation;
+): MessageRef {
   const trimmed = (note ?? "").trim();
-  return trimmed ? `${base} ${trimmed}` : base;
+  return msg("Products.removal.statement", {
+    ground: isRemovalGround(ground) ? ground : "other",
+    noted: trimmed ? "yes" : "no",
+    note: trimmed,
+  });
+}
+
+/**
+ * The statement as the seller's banner prints it. "Something else" is a picker
+ * option for staff, not a finding, and in front of a sentence it reads as
+ * noise, so `other` (and anything unknown) is the sentence alone; every other
+ * ground is removalStatement. Mirror of groundedStatement in the admin panel.
+ */
+export function removalFinding(
+  ground: string | null | undefined,
+  note?: string | null,
+): MessageRef {
+  if (isRemovalGround(ground) && ground !== "other") return removalStatement(ground, note);
+  const trimmed = (note ?? "").trim();
+  return msg("Products.removal.statementUnlabelled", {
+    noted: trimmed ? "yes" : "no",
+    note: trimmed,
+  });
 }
 
 /**
@@ -216,14 +201,15 @@ export function takedownFromRow(row: {
 
 /** A takedown's dates, as every seller surface prints them. One formatter so
  *  the banner and the "sent for review" line cannot disagree about the day. */
-const TAKEDOWN_DATE = new Intl.DateTimeFormat("en-IE", {
+const TAKEDOWN_DATE: Intl.DateTimeFormatOptions = {
   day: "numeric",
   month: "long",
   year: "numeric",
-});
+};
 
-export function formatTakedownDate(iso: string): string {
-  return TAKEDOWN_DATE.format(new Date(iso));
+/** `"2026-09-23T12:00:00Z"` -> `"23 September 2026"` in English. */
+export function formatTakedownDate(iso: string, locale: Locale): string {
+  return dateTimeFormat(intlTag(locale, "en-IE"), TAKEDOWN_DATE).format(new Date(iso));
 }
 
 /** Where a seller goes to argue. MVP: a real inbox rather than an appeals
@@ -232,22 +218,16 @@ export function formatTakedownDate(iso: string): string {
 export const REMOVAL_APPEAL_EMAIL = "support@squareshare.eu";
 
 /** The mailto a removal banner offers, pre-addressed so the person on the
- *  other end knows which listing is being argued about. */
+ *  other end knows which listing is being argued about. `resolve` puts the
+ *  subject and body in the seller's language; the id and title go in as data. */
 export function removalAppealHref(
   kind: "product" | "storefront",
   id: string,
   title: string,
+  resolve: (ref: MessageRef) => string,
 ): string {
-  const subject = `Appeal: ${kind} removal (${title})`;
-  const body = [
-    `I would like this ${kind} reviewed again.`,
-    "",
-    `${kind === "product" ? "Product" : "Storefront"} id: ${id}`,
-    `Name: ${title}`,
-    "",
-    "Why I think this was wrong:",
-    "",
-  ].join("\n");
+  const subject = resolve(msg("Products.removal.appealSubject", { kind, title }));
+  const body = resolve(msg("Products.removal.appealBody", { kind, id, title }));
   return `mailto:${REMOVAL_APPEAL_EMAIL}?subject=${encodeURIComponent(
     subject,
   )}&body=${encodeURIComponent(body)}`;

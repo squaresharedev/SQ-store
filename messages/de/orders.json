@@ -1,0 +1,108 @@
+{
+  "metadata": {
+    "orders": {
+      "title": "Bestellungen"
+    }
+  },
+  "page": {
+    "title": "Bestellungen",
+    "subtitle": "Alle Bestellungen über Square Share."
+  },
+  "status": {
+    "paid": "Bezahlt",
+    "refunded": "Erstattet",
+    "disputed": "Angefochten",
+    "pending": "Ausstehend"
+  },
+  "channel": {
+    "embed": "Einbettung",
+    "marketplace": "Marktplatz"
+  },
+  "empty": {
+    "filteredTitle": "Keine Bestellungen entsprechen diesen Filtern",
+    "filteredHint": "Versuche, den Zeitraum zu erweitern oder Filter zu entfernen.",
+    "clearFilters": "Filter entfernen",
+    "title": "Noch keine Bestellungen",
+    "hint": "Der Square Share Checkout ist noch nicht geöffnet. Verkäufe über deinen eigenen Kauflink oder per E-Mail werden hier nicht angezeigt.",
+    "goToProducts": "Zu den Produkten"
+  },
+  "list": {
+    "updating": "Wird aktualisiert…",
+    "summary": "{total, plural, one {{total} Bestellung} other {{total} Bestellungen}} · Seite {page} von {totalPages}",
+    "detailDialog": "Bestelldetails",
+    "closeDetail": "Bestelldetails schließen"
+  },
+  "table": {
+    "product": "Produkt",
+    "amount": "Betrag",
+    "channel": "Kanal",
+    "status": "Status",
+    "buyer": "Käufer",
+    "date": "Datum"
+  },
+  "toolbar": {
+    "region": "Bestellfilter",
+    "channel": "Kanal",
+    "buyerEmail": "Käufer-E-Mail",
+    "searchPlaceholder": "Käufer-E-Mail suchen",
+    "status": "Status",
+    "statusAriaLabel": "Nach Status filtern",
+    "allStatuses": "Alle Status",
+    "dateRange": "Zeitraum",
+    "datePlaceholder": "Alle Daten",
+    "sort": "Sortieren",
+    "sortAriaLabel": "Bestellungen sortieren",
+    "clearFilters": "Filter entfernen"
+  },
+  "sort": {
+    "newest": "Neueste zuerst",
+    "oldest": "Älteste zuerst",
+    "amountHigh": "Betrag: hoch bis niedrig",
+    "amountLow": "Betrag: niedrig bis hoch"
+  },
+  "detail": {
+    "close": "Bestelldetails schließen",
+    "version": "Version",
+    "copyVersion": {
+      "copy": "Version kopieren",
+      "copied": "Version kopiert",
+      "failed": "Version konnte nicht kopiert werden. Wähle sie aus und kopiere sie manuell."
+    },
+    "amount": "Betrag",
+    "platformFee": "Plattformgebühr",
+    "youReceive": "Du erhältst",
+    "buyerEmail": "Käufer-E-Mail",
+    "copyBuyerEmail": {
+      "copy": "Käufer-E-Mail kopieren",
+      "copied": "Käufer-E-Mail kopiert",
+      "failed": "Käufer-E-Mail konnte nicht kopiert werden. Wähle sie aus und kopiere sie manuell."
+    },
+    "noEmail": "keine E-Mail",
+    "channel": "Kanal",
+    "date": "Datum",
+    "orderId": "Bestell-ID",
+    "copyOrderId": {
+      "copy": "Bestell-ID kopieren",
+      "copied": "Bestell-ID kopiert",
+      "failed": "Bestell-ID konnte nicht kopiert werden. Wähle sie aus und kopiere sie manuell."
+    }
+  },
+  "actions": {
+    "refundNeedsStripe": "Rückerstattungen erfordern eine verbundene Stripe-Verbindung.",
+    "connectStripe": "Stripe verbinden, um Rückerstattungen zu aktivieren",
+    "refundConfirm": "Diese Bestellung erstatten? Dies kann nicht rückgängig gemacht werden, sobald Stripe verbunden ist.",
+    "confirmRefund": "Rückerstattung bestätigen",
+    "refundOrder": "Bestellung erstatten",
+    "disputeInStripe": "Zahlungsanfechtungen werden in deinem Stripe-Dashboard bearbeitet, sobald Stripe verbunden ist.",
+    "disputeConfirm": "Zahlungsanfechtung für diese Bestellung öffnen?",
+    "handleDispute": "Zahlungsanfechtung bearbeiten",
+    "none": "Für diese Bestellung sind keine Aktionen verfügbar."
+  },
+  "skeleton": {
+    "loading": "Bestellungen werden geladen"
+  },
+  "loading": {
+    "title": "Bestellungen",
+    "subtitle": "Alle Verkäufe über deine Einbettung und den Marktplatz."
+  }
+}

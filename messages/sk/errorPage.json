@@ -1,0 +1,17 @@
+{
+  "notFound": {
+    "title": "Stránka sa nenašla",
+    "description": "Táto stránka neexistuje, alebo bola vec, na ktorú odkazovala, zmazaná. Odkaz môže byť neplatný, no váš účet a údaje sú v poriadku.",
+    "cta": "Späť na panel"
+  },
+  "boundary": {
+    "title": "Niečo sa pokazilo",
+    "description": "Túto stránku sa nepodarilo načítať. Zvyčajne ide o dočasný problém s pripojením: váš účet je v poriadku a stále ste prihlásení.",
+    "reference": "Referencia: {digest}"
+  },
+  "footer": {
+    "legal": "Právne informácie",
+    "contact": "Kontakt",
+    "credit": "© 2026 Squareshare. Vytvoril <link>Root Labs</link>."
+  }
+}

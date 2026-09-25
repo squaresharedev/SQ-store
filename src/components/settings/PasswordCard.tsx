@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { SettingsCard } from "@/components/settings/SettingsCard";
 import { PasswordModal } from "@/components/settings/PasswordModal";
@@ -23,19 +24,18 @@ export function PasswordCard({
   hasPassword: boolean;
   email: string;
 }) {
+  const t = useTranslations("Settings.account.password");
   const [open, setOpen] = React.useState(false);
 
   return (
     <SettingsCard
-      title="Password"
+      title={t("cardTitle")}
       description={
-        hasPassword
-          ? "Change it whenever you like. We ask for the current one first, just to double-check it's really you."
-          : "You sign in with Google. Add a password to sign in with your email or username too."
+        hasPassword ? t("descriptionNeverShown") : t("descriptionNoPassword")
       }
     >
       <Button type="button" variant="primary" onClick={() => setOpen(true)}>
-        {hasPassword ? "Change password" : "Set a password"}
+        {hasPassword ? t("resetButton") : t("setButton")}
       </Button>
 
       {/* Keyed on `open` so each opening is a fresh mount: no stale view and no

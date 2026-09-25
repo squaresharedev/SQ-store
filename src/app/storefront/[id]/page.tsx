@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { listAllProducts } from "@/lib/products/queries";
 import { getStorefront } from "@/lib/storefront/queries";
 import { StorefrontDesigner } from "@/components/storefront/StorefrontDesigner";
@@ -10,9 +10,10 @@ import { getShippingPolicy } from "@/lib/settings/shipping-policy";
 import { presignGetUrl } from "@/lib/r2";
 import { blockKey, type StorefrontConfig } from "@/types/storefront";
 
-export const metadata: Metadata = {
-  title: "Edit storefront",
-};
+export async function generateMetadata() {
+  const t = await getTranslations("Storefront.metadata");
+  return { title: t("editor.title") };
+}
 
 /**
  * Display URLs for every uploaded element on the canvas, keyed by blockKey.

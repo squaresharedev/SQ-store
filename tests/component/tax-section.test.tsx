@@ -14,6 +14,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, cleanup, waitFor } from "../setup/render";
 import userEvent from "@testing-library/user-event";
+import { failed, invalidInput, succeeded } from "@/lib/errors";
+import { msg } from "@/i18n/types";
 
 afterEach(cleanup);
 
@@ -62,9 +64,9 @@ describe("TaxSection — SET-01: field retention after a failed save", () => {
   it("keeps what the user typed in every valid field after the server rejects", async () => {
     // The server rejects because the contact email is malformed. The two valid
     // fields (business name, phone) that were also changed must not revert.
-    mockSaveTaxInfo.mockResolvedValue({
-      error: "The contact email doesn't look like an email address.",
-    });
+    mockSaveTaxInfo.mockResolvedValue(
+      failed(invalidInput(msg("Validation.email.contactEmail.format"))),
+    );
 
     const user = userEvent.setup();
     render(<TaxSection {...SAVED} />);
@@ -95,9 +97,9 @@ describe("TaxSection — SET-01: field retention after a failed save", () => {
     // The audit scenario: typed {biz:"SHOULD SURVIVE Ltd", email:"broken"}
     // -> failed save -> biz reverted to "Root Labs Studio". After the fix,
     // biz must stay as typed.
-    mockSaveTaxInfo.mockResolvedValue({
-      error: "The contact email doesn't look like an email address.",
-    });
+    mockSaveTaxInfo.mockResolvedValue(
+      failed(invalidInput(msg("Validation.email.contactEmail.format"))),
+    );
 
     const user = userEvent.setup();
     render(<TaxSection {...SAVED} />);
@@ -122,9 +124,9 @@ describe("TaxSection — SET-01: field state after a successful save", () => {
     // value, which is also the saved value. The component stays consistent
     // before the RSC re-mount brings the freshly saved props back from the
     // server.
-    mockSaveTaxInfo.mockResolvedValue({
-      success: "Business & seller details saved.",
-    });
+    mockSaveTaxInfo.mockResolvedValue(
+      succeeded(msg("Settings.tax.success.sellerDetailsSaved")),
+    );
 
     const user = userEvent.setup();
     render(<TaxSection {...SAVED} />);

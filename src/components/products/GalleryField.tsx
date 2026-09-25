@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import { ChevronDown, ChevronUp, ImagePlus, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import {
   fieldBaseClass,
@@ -34,6 +35,16 @@ const MAX_MB = IMAGE_MAX_BYTES / (1024 * 1024);
  *  whatever is picked) bucket — kept as a plain string so it can key a Map and
  *  React lists without a union type leaking into every helper below. */
 const GENERAL = "";
+
+/** ICU values for a "group: option" target, with whether each is named. */
+function targetValues(target: { group: string; option: string }) {
+  return {
+    groupNamed: target.group ? "yes" : "no",
+    group: target.group,
+    optionNamed: target.option ? "yes" : "no",
+    option: target.option,
+  };
+}
 
 /**
  * Extra product photos for the product page, bucketed by OPTION — the same
@@ -67,6 +78,7 @@ export function GalleryField({
   optionGroups: ProductOptionGroup[];
   onChange: (images: GalleryFormImage[]) => void;
 }) {
+  const t = useTranslations("Products.galleryField");
   const [error, setError] = useState<string | null>(null);
   // Object URLs this field minted, revoked on unmount.
   const owned = useRef<string[]>([]);
@@ -82,18 +94,18 @@ export function GalleryField({
   function addFiles(bucketId: string, files: File[]) {
     if (files.length === 0) return;
     if (room <= 0) {
-      setError(`A product can have up to ${GALLERY_MAX} extra photos.`);
+      setError(t("tooMany", { max: GALLERY_MAX }));
       return;
     }
     const accepted: GalleryFormImage[] = [];
     let problem: string | null = null;
     for (const file of files.slice(0, room)) {
       if (!ACCEPTED.includes(file.type)) {
-        problem = "Use PNG, JPG, WEBP, GIF, or AVIF images.";
+        problem = t("wrongType");
         continue;
       }
       if (file.size > IMAGE_MAX_BYTES) {
-        problem = `Each photo must be under ${MAX_MB} MB.`;
+        problem = t("tooLarge", { max: MAX_MB });
         continue;
       }
       const previewUrl = URL.createObjectURL(file);
@@ -108,7 +120,7 @@ export function GalleryField({
       });
     }
     if (files.length > room) {
-      problem = `Only ${room} more photo${room === 1 ? "" : "s"} fit.`;
+      problem = t("roomLeft", { count: room });
     }
     setError(problem);
     if (accepted.length > 0) onChange([...images, ...accepted]);
@@ -147,15 +159,19 @@ export function GalleryField({
   const buckets = [
     {
       id: GENERAL,
-      label: optionGroups.length > 0 ? "Every version" : "Photos",
+      label: optionGroups.length > 0 ? t("everyVersion") : t("photos"),
       group: undefined as string | undefined,
+      target: undefined as { group: string; option: string } | undefined,
       swatch: undefined as string | undefined,
     },
     ...optionGroups.flatMap((optionGroup) =>
       optionGroup.options.map((option) => ({
         id: option.id,
-        label: option.name || "Unnamed option",
-        group: optionGroup.name || "Options",
+        label: option.name || t("unnamedOption"),
+        group: optionGroup.name || t("options"),
+        // The names themselves, not the fallback words: a sentence naming an
+        // unnamed option says so in its own wording.
+        target: { group: optionGroup.name, option: option.name },
         // Only a swatch group paints one; a chip group's colour would be a
         // decoration the buyer never sees.
         swatch: optionGroup.display === "swatch" ? option.swatch : undefined,
@@ -163,9 +179,16 @@ export function GalleryField({
     ),
   ];
 
+  // Whole phrases per target: "Move to: Every version" and "Move to: Size: L"
+  // are each their own message rather than a prefix glued onto a label.
   const moveTargets = buckets.map((bucket) => ({
     value: bucket.id,
-    label: bucket.group ? `${bucket.group}: ${bucket.label}` : "Every version",
+    label: bucket.target
+      ? t("target", targetValues(bucket.target))
+      : t("everyVersion"),
+    moveLabel: bucket.target
+      ? t("moveToOption", targetValues(bucket.target))
+      : t("moveToEveryVersion"),
   }));
 
   return (
@@ -181,7 +204,7 @@ export function GalleryField({
         // rather than inside the per-photo map below.
         const moveOptions = moveTargets.map((target) => ({
           value: target.value,
-          label: target.value === bucket.id ? target.label : `Move to: ${target.label}`,
+          label: target.value === bucket.id ? target.label : target.moveLabel,
         }));
 
         const heading = (
@@ -224,7 +247,7 @@ export function GalleryField({
             <div className="mb-3 flex items-center gap-2">
               {heading}
               <span className={cn(helpTextClass, "text-xs")}>
-                {photos.length} photo{photos.length === 1 ? "" : "s"}
+                {t("photoCount", { count: photos.length })}
               </span>
             </div>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -244,7 +267,7 @@ export function GalleryField({
                       <button
                         type="button"
                         className={cn(iconButtonClass, "absolute right-1 top-1 size-7 bg-background/90")}
-                        aria-label="Remove photo"
+                        aria-label={t("removePhoto")}
                         onClick={() => remove(image.localId)}
                       >
                         <X className="size-3.5" strokeWidth={2} aria-hidden="true" />
@@ -253,7 +276,7 @@ export function GalleryField({
                         <button
                           type="button"
                           className={cn(iconButtonClass, "size-7 bg-background/90")}
-                          aria-label="Move photo earlier"
+                          aria-label={t("movePhotoEarlier")}
                           disabled={index === 0}
                           onClick={() => moveWithinBucket(image.localId, -1)}
                         >
@@ -262,7 +285,7 @@ export function GalleryField({
                         <button
                           type="button"
                           className={cn(iconButtonClass, "size-7 bg-background/90")}
-                          aria-label="Move photo later"
+                          aria-label={t("movePhotoLater")}
                           disabled={index === photos.length - 1}
                           onClick={() => moveWithinBucket(image.localId, 1)}
                         >
@@ -274,15 +297,15 @@ export function GalleryField({
                       type="text"
                       value={image.alt}
                       maxLength={GALLERY_ALT_MAX}
-                      placeholder="Alt text"
-                      aria-label="Describe this photo, for people who cannot see it"
+                      placeholder={t("altPlaceholder")}
+                      aria-label={t("altLabel")}
                       onChange={(event) => update(image.localId, { alt: event.target.value })}
                       className={cn(fieldBaseClass, "py-1 text-xs")}
                     />
                     {optionGroups.length > 0 && (
                       <>
                         <label htmlFor={`${inputId}-move-${image.localId}`} className="sr-only">
-                          Which version this photo is shown for
+                          {t("versionLabel")}
                         </label>
                         <Select
                           id={`${inputId}-move-${image.localId}`}
@@ -312,12 +335,9 @@ export function GalleryField({
 
       <div className="flex items-center gap-1.5">
         <p className={cn(infoTextClass, "tabular-nums")}>
-          {images.length} of {GALLERY_MAX} photos
+          {t("tally", { count: images.length, max: GALLERY_MAX })}
         </p>
-        <InfoTip label="How these photos are ordered">
-          The display image from Media and delivery is always first. After it,
-          photos show in the order they sit in here.
-        </InfoTip>
+        <InfoTip label={t("orderAbout")}>{t("orderHelp")}</InfoTip>
       </div>
       {error && (
         <p className={cn(infoTextClass, "text-destructive")} role="alert">
@@ -355,6 +375,7 @@ function AddPhotoTile({
   /** The option's label. Its presence is what selects the slim shape. */
   heading?: ReactNode;
 }) {
+  const t = useTranslations("Products.galleryField");
   const [dragging, setDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -423,7 +444,7 @@ function AddPhotoTile({
           slim ? "ml-auto shrink-0 pl-2" : "px-2",
         )}
       >
-        {disabled ? "Limit reached" : "Drop or click"}
+        {disabled ? t("limitReached") : t("dropOrClick")}
       </span>
     </label>
   );

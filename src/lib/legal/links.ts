@@ -25,6 +25,12 @@
  * ever grows an import, that reasoning gets worse for every other consumer
  * too. Keep it plain data.
  *
+ * `label` and `name` are MESSAGE KEYS, not copy: every consumer resolves them
+ * in the reader's language (useTranslations() with no namespace). Plain string
+ * literals rather than a typed import, to keep this file import-free; the
+ * translator call at each render site is what type-checks them. Privacy and
+ * Terms share the buyer footer's keys, which say the same thing.
+ *
  * WHOSE POLICIES THESE ARE MATTERS. On a seller's storefront these are the
  * PLATFORM's terms, not the shop's, and they do not govern the sale. See the
  * disclosure in components/product-page/PoweredByFooter.tsx. Anything
@@ -34,25 +40,25 @@ export const SQUARESHARE_SITE = "https://squareshare.eu";
 
 export const LEGAL_LINKS = {
   privacy: {
-    label: "Privacy",
+    label: "ProductPage.footer.policies.privacy.label",
     /** Spelled out for use as an accessible name where "Privacy" alone would
      *  read as the seller's own policy. */
-    name: "Squareshare Privacy Policy",
+    name: "ProductPage.footer.policies.privacy.name",
     href: `${SQUARESHARE_SITE}/legal/privacy-policy/`,
   },
   cookies: {
-    label: "Cookies",
-    name: "Squareshare Cookie Policy",
+    label: "Common.legal.cookies.label",
+    name: "Common.legal.cookies.name",
     href: `${SQUARESHARE_SITE}/legal/cookie-policy/`,
   },
   terms: {
-    label: "Terms",
-    name: "Squareshare Terms of Use",
+    label: "ProductPage.footer.policies.terms.label",
+    name: "ProductPage.footer.policies.terms.name",
     href: `${SQUARESHARE_SITE}/terms/`,
   },
   accessibility: {
-    label: "Accessibility",
-    name: "Squareshare Accessibility Statement",
+    label: "Common.legal.accessibility.label",
+    name: "Common.legal.accessibility.name",
     href: `${SQUARESHARE_SITE}/accessibility/`,
   },
 } as const;

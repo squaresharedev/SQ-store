@@ -1,23 +1,19 @@
 "use client";
 
 import { X } from "lucide-react";
+import { useTranslations, useLocale } from "next-intl";
 import {
   iconButtonClass,
   overlaySurfaceClass,
 } from "@/components/ui/control-styles";
 import { cn } from "@/lib/utils";
-import { CopyButton } from "@/components/ui/CopyButton";
+import { CopyButton, type CopyButtonMessages } from "@/components/ui/CopyButton";
 import { formatOrderDateTime } from "@/lib/format/date";
 import { formatCents } from "@/lib/format/money";
 import { formatOrderSelection } from "@/lib/orders/selection";
 import type { OrderView } from "@/types/order-view";
 import { OrderStatusBadge } from "./OrderStatusBadge";
 import { OrderActions } from "./OrderActions";
-
-const CHANNEL_LABELS: Record<OrderView["channel"], string> = {
-  embed: "Embed",
-  marketplace: "Marketplace",
-};
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -30,6 +26,24 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
   );
 }
 
+const copyMessages = {
+  copyVersion: {
+    copy: "Orders.detail.copyVersion.copy",
+    copied: "Orders.detail.copyVersion.copied",
+    failed: "Orders.detail.copyVersion.failed",
+  },
+  copyBuyerEmail: {
+    copy: "Orders.detail.copyBuyerEmail.copy",
+    copied: "Orders.detail.copyBuyerEmail.copied",
+    failed: "Orders.detail.copyBuyerEmail.failed",
+  },
+  copyOrderId: {
+    copy: "Orders.detail.copyOrderId.copy",
+    copied: "Orders.detail.copyOrderId.copied",
+    failed: "Orders.detail.copyOrderId.failed",
+  },
+} satisfies Record<string, CopyButtonMessages>;
+
 export function OrderDetail({
   order,
   onClose,
@@ -37,6 +51,8 @@ export function OrderDetail({
   order: OrderView;
   onClose: () => void;
 }) {
+  const t = useTranslations("Orders");
+  const locale = useLocale();
   const youReceiveCents = order.amountCents - order.platformFeeCents;
 
   return (
@@ -59,7 +75,7 @@ export function OrderDetail({
             type="button"
             onClick={onClose}
             className={iconButtonClass}
-            aria-label="Close order details"
+            aria-label={t("detail.close")}
           >
             <X size={16} strokeWidth={2} aria-hidden />
           </button>
@@ -73,7 +89,7 @@ export function OrderDetail({
             leads it: the money below is for the books, this is for the box.
             Absent entirely for a product sold in one version. */}
         {order.selection.length > 0 && (
-          <Row label="Version">
+          <Row label={t("detail.version")}>
             <div className="flex items-start gap-1">
               <dl className="min-w-0 flex-1 text-sm text-foreground" data-order-selection="">
                 {order.selection.map((entry) => (
@@ -83,30 +99,30 @@ export function OrderDetail({
                   </div>
                 ))}
               </dl>
-              <CopyButton value={formatOrderSelection(order.selection)} label="version" />
+              <CopyButton value={formatOrderSelection(order.selection)} messages={copyMessages.copyVersion} />
             </div>
           </Row>
         )}
 
-        <Row label="Amount">
+        <Row label={t("detail.amount")}>
           <span className="text-sm text-foreground">
-            {formatCents(order.amountCents, order.currency)}
+            {formatCents(order.amountCents, order.currency, locale)}
           </span>
         </Row>
 
-        <Row label="Platform fee">
+        <Row label={t("detail.platformFee")}>
           <span className="text-sm text-foreground">
-            {formatCents(order.platformFeeCents, order.currency)}
+            {formatCents(order.platformFeeCents, order.currency, locale)}
           </span>
         </Row>
 
-        <Row label="You receive">
+        <Row label={t("detail.youReceive")}>
           <span className="text-sm text-foreground">
-            {formatCents(youReceiveCents, order.currency)}
+            {formatCents(youReceiveCents, order.currency, locale)}
           </span>
         </Row>
 
-        <Row label="Buyer email">
+        <Row label={t("detail.buyerEmail")}>
           {order.buyerEmail ? (
             // Copyable: the buyer's email is the thing a seller reaches for
             // when answering a support message about this order.
@@ -114,31 +130,31 @@ export function OrderDetail({
               <span className="min-w-0 break-all text-sm text-foreground">
                 {order.buyerEmail}
               </span>
-              <CopyButton value={order.buyerEmail} label="buyer email" />
+              <CopyButton value={order.buyerEmail} messages={copyMessages.copyBuyerEmail} />
             </div>
           ) : (
-            <span className="text-sm text-muted-foreground">no email</span>
+            <span className="text-sm text-muted-foreground">{t("detail.noEmail")}</span>
           )}
         </Row>
 
-        <Row label="Channel">
+        <Row label={t("detail.channel")}>
           <span className="text-sm text-foreground">
-            {CHANNEL_LABELS[order.channel]}
+            {t(`channel.${order.channel}`)}
           </span>
         </Row>
 
-        <Row label="Date">
+        <Row label={t("detail.date")}>
           <span className="text-sm text-foreground">
-            {formatOrderDateTime(order.createdAt)}
+            {formatOrderDateTime(order.createdAt, locale)}
           </span>
         </Row>
 
-        <Row label="Order ID">
+        <Row label={t("detail.orderId")}>
           <div className="flex items-center gap-1">
             <span className="min-w-0 break-all font-mono text-xs text-muted-foreground">
               {order.id}
             </span>
-            <CopyButton value={order.id} label="order ID" />
+            <CopyButton value={order.id} messages={copyMessages.copyOrderId} />
           </div>
         </Row>
       </div>

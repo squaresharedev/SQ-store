@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, cleanup, within, fireEvent } from "@testing-library/react";
+import { render, screen, cleanup, within, fireEvent } from "../setup/render";
 import userEvent from "@testing-library/user-event";
 import { EditorToolbar } from "@/components/storefront/EditorToolbar";
 import { useCanvasViewport } from "@/components/storefront/useCanvasViewport";

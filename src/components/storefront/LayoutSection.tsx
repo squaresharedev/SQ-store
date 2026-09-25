@@ -9,6 +9,7 @@ import {
   type StorefrontTheme,
 } from "@/types/storefront";
 import { useId } from "react";
+import { useTranslations } from "next-intl";
 import { SliderField } from "@/components/ui/SliderField";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -42,50 +43,50 @@ export function LayoutSection({
   showGrid: boolean;
   onShowGridChange: (show: boolean) => void;
 }) {
+  const t = useTranslations("Storefront.layout");
   const fieldId = useId();
-
 
   return (
     <div className="space-y-4">
       <SliderField
         id={`${fieldId}-columns`}
-        label="Canvas width"
+        label={t("canvasWidth")}
         min={CANVAS_COLUMNS_MIN}
         max={CANVAS_COLUMNS_MAX}
         value={theme.columns}
         onChange={(columns) => onCanvasChange(columns, theme.rows)}
-        ariaLabel="Canvas width in blocks"
-        valueText={`${theme.columns} blocks wide`}
+        ariaLabel={t("canvasWidthAriaLabel")}
+        valueText={t("blocksWide", { n: theme.columns })}
         unit="blocks"
       />
 
       <div className="space-y-1.5">
         <SliderField
           id={`${fieldId}-rows`}
-          label="Canvas height"
-          tip="The board can't shrink below the blocks already on it: drag a block up first, then shorten the canvas."
+          label={t("canvasHeight")}
+          tip={t("heightTip")}
           min={CANVAS_ROWS_MIN}
           max={CANVAS_ROWS_MAX}
           value={theme.rows}
           onChange={(rows) => onCanvasChange(theme.columns, rows)}
-          ariaLabel="Canvas height in blocks"
-          valueText={`${theme.rows} blocks tall`}
+          ariaLabel={t("canvasHeightAriaLabel")}
+          valueText={t("blocksTall", { n: theme.rows })}
           unit="blocks"
         />
       </div>
 
       <SliderField
         id={`${fieldId}-grid-gap`}
-        label="Grid density"
+        label={t("gridDensity")}
         min={0}
         max={GRID_GAP_MAX}
         step={2}
         value={theme.gridGap}
         onChange={(gridGap) => onChange({ ...theme, gridGap })}
-        ariaLabel="Grid density"
-        valueText={`${theme.gridGap} pixel gap`}
+        ariaLabel={t("gridDensityAriaLabel")}
+        valueText={t("gridGapValue", { n: theme.gridGap })}
         unit="px"
-        statusText={theme.gridGap === 0 ? "No gap" : undefined}
+        statusText={theme.gridGap === 0 ? t("noGap") : undefined}
       />
 
       {/* Editor guide only: buyers never see the empty slots. */}
@@ -93,11 +94,10 @@ export function LayoutSection({
         <div className="flex items-center justify-between gap-3">
           <span className="flex items-center gap-1.5">
             <label htmlFor={`${fieldId}-show-grid`} className={labelClass}>
-              Show grid
+              {t("showGrid")}
             </label>
-            <InfoTip label="Who sees the grid">
-              A guide for you while you design: it draws the empty slots so
-              you can see where a block will land. Buyers never see it.
+            <InfoTip label={t("gridInfoLabel")}>
+              {t("gridInfoBody")}
             </InfoTip>
           </span>
           <Switch

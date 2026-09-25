@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { LEGAL_LINKS, SQUARESHARE_SITE } from "@/lib/legal/links";
 import { ReportDialog } from "./ReportDialog";
 
@@ -61,7 +62,12 @@ import { ReportDialog } from "./ReportDialog";
 // Ours, not the seller's. Only these two: Cookies and Accessibility are on the
 // marketing footer because that origin sets cookies and is the front door for
 // the statement. Neither is what a buyer mid-purchase is owed here.
-const POLICIES = [LEGAL_LINKS.privacy, LEGAL_LINKS.terms];
+// Keyed so each policy's visible label and spelled-out name come from the
+// buyer's language (`ProductPage.footer.policies.<id>`).
+const POLICIES = [
+  { id: "privacy", href: LEGAL_LINKS.privacy.href },
+  { id: "terms", href: LEGAL_LINKS.terms.href },
+] as const;
 
 /** A dot between footer items, spoken by nothing. */
 function Dot() {
@@ -84,6 +90,7 @@ export function PoweredByFooter({
   productId: string;
   preview?: boolean;
 }) {
+  const t = useTranslations("ProductPage.footer");
   return (
     <footer className="w-full border-t" style={{ borderColor: ruleColor }} data-product-page-footer="">
       {/* opacity-70, not lighter: that is the muted level already proven to
@@ -98,9 +105,10 @@ export function PoweredByFooter({
           className="max-w-[46rem] text-center leading-relaxed"
           data-product-sale-disclosure=""
         >
-          <span className="font-medium">{sellerName}</span> is the seller for this order and is
-          responsible for the product, its delivery, and any returns or refunds. Squareshare
-          provides the technology behind this page and is not a party to the sale.
+          {t.rich("disclosure", {
+            name: sellerName,
+            seller: (chunks) => <span className="font-medium">{chunks}</span>,
+          })}
         </p>
 
         {/* ALWAYS REAL LINKS: the attribution and both policies alike, in the
@@ -131,13 +139,15 @@ export function PoweredByFooter({
             rel="noopener noreferrer"
             className="underline-offset-2 hover:underline"
           >
-            Powered by <span className="font-medium">Squareshare</span>
+            {t.rich("poweredBy", {
+              brand: (chunks) => <span className="font-medium">{chunks}</span>,
+            })}
           </a>
           <Dot />
           {/* Named for what it is: a screen reader reaching this group is
               told whose policies these are before it reads "Privacy". */}
           <nav
-            aria-label="Squareshare policies"
+            aria-label={t("policiesLabel")}
             className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5"
           >
             {POLICIES.map((policy, index) => (
@@ -153,10 +163,10 @@ export function PoweredByFooter({
                   // Spelled out: an unqualified "Privacy" or "Terms" reads as
                   // the seller's own, on the live page and to a seller
                   // skimming their own storefront alike.
-                  aria-label={policy.name}
+                  aria-label={t(`policies.${policy.id}.name`)}
                   className="underline-offset-2 hover:underline"
                 >
-                  {policy.label}
+                  {t(`policies.${policy.id}.label`)}
                 </a>
               </span>
             ))}

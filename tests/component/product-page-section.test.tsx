@@ -1,5 +1,5 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
-import { cleanup, render, screen, within } from "@testing-library/react";
+import { cleanup, render, screen, within } from "../setup/render";
 import userEvent from "@testing-library/user-event";
 import { ProductPageSection } from "@/components/storefront/ProductPageSection";
 import {

@@ -1,12 +1,7 @@
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { StorefrontDesigner } from "@/components/storefront/StorefrontDesigner";
-import {
-  SAMPLE_PRODUCTS,
-  SAMPLE_SELLER,
-  SAMPLE_SHIPPING_POLICY,
-  SAMPLE_STOREFRONT_CONFIG,
-  SAMPLE_STOREFRONT_NAME,
-} from "@/lib/storefront/sample";
+import { buildSampleStorefront } from "@/lib/storefront/sample";
 
 // Living reference for the sample storefront and its designer tour: the real
 // designer in sample mode, exactly as /storefront/sample renders it, minus the
@@ -23,15 +18,16 @@ export default async function SampleStorefrontDevPage({
 }) {
   if (process.env.NODE_ENV === "production") notFound();
   const { tour } = await searchParams;
+  const sample = buildSampleStorefront(await getTranslations());
   return (
     <StorefrontDesigner
       sample={{ autoStartTour: tour !== "0", productCount: 0 }}
       storefrontId="sample"
-      initialName={SAMPLE_STOREFRONT_NAME}
-      initialConfig={SAMPLE_STOREFRONT_CONFIG}
-      products={[...SAMPLE_PRODUCTS]}
-      sellerIdentity={SAMPLE_SELLER}
-      shippingPolicy={SAMPLE_SHIPPING_POLICY}
+      initialName={sample.name}
+      initialConfig={sample.config}
+      products={[...sample.products]}
+      sellerIdentity={sample.seller}
+      shippingPolicy={sample.shippingPolicy}
     />
   );
 }

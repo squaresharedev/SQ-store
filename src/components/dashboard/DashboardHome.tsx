@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Plus } from "lucide-react";
+import { useTranslations, useLocale } from "next-intl";
 import { iconPopClass, primaryButtonClass } from "@/components/ui/control-styles";
 import { BackgroundArrow } from "@/components/ui/BackgroundArrow";
 import type { DashboardOrdersData, ProductsSummary } from "@/lib/dashboard/queries";
@@ -38,6 +39,8 @@ export function DashboardHome({
   /** Whether the signed-in person has 2FA on; off adds the nudge row. */
   twoFactorEnabled?: boolean;
 }) {
+  const t = useTranslations("Dashboard.overview");
+  const locale = useLocale();
   const { last30d } = orders;
   const setupVisible = Boolean(onboarding?.setup && !onboarding.setup.complete);
 
@@ -51,7 +54,7 @@ export function DashboardHome({
         <div className="hidden flex-wrap items-center justify-between gap-3 md:flex">
           <div>
             <h1 className="text-2xl font-semibold text-foreground md:text-3xl">
-              Overview
+              {t("title")}
             </h1>
           </div>
           <Link href="/products/new" className={primaryButtonClass}>
@@ -60,11 +63,11 @@ export function DashboardHome({
               strokeWidth={2}
               aria-hidden="true"
             />
-            Add product
+            {t("addProduct")}
           </Link>
         </div>
 
-        <MobileRevenueHero value={formatMoney(last30d.revenue)} />
+        <MobileRevenueHero value={formatMoney(last30d.revenue, locale)} />
 
         {/* On mobile everything below the hero rides a white sheet with a
             rounded top that overlaps the glow (same radius family as the
@@ -77,19 +80,19 @@ export function DashboardHome({
           {/* Mobile shows revenue as the hero above instead of this cell. */}
           <div className="hidden md:block">
             <MetricTile
-              label="Revenue · 30 days"
-              value={formatMoney(last30d.revenue)}
+              label={t("revenue30d")}
+              value={formatMoney(last30d.revenue, locale)}
               emphasis
             />
           </div>
           <MetricTile
-            label="Sales · 30 days"
+            label={t("sales30d")}
             value={last30d.sales > 0 ? String(last30d.sales) : null}
             trend={orders.salesTrend}
           />
           <MetricTile
-            label="Avg order · 30 days"
-            value={formatMoney(last30d.aov)}
+            label={t("avgOrder30d")}
+            value={formatMoney(last30d.aov, locale)}
             trend={orders.aovTrend}
           />
         </div>

@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Search } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { focusRingClass, transitionClass } from "@/components/ui/control-styles";
 import { useSearch } from "@/components/search/SearchProvider";
@@ -14,6 +15,7 @@ import { useIsMacPlatform } from "@/lib/hooks/useIsMacPlatform";
  * text fields would mean two places for the caret to be.
  */
 export function SearchTrigger() {
+  const t = useTranslations("Search.trigger");
   const search = useSearch();
   const isMac = useIsMacPlatform();
 
@@ -58,7 +60,7 @@ export function SearchTrigger() {
       )}
     >
       <Search className="size-4 shrink-0" aria-hidden />
-      <span className="min-w-0 flex-1 truncate">Search</span>
+      <span className="min-w-0 flex-1 truncate">{t("label")}</span>
       {isMac !== null && (
         <kbd
           aria-hidden

@@ -1,0 +1,116 @@
+{
+  "pageTitle": "Paiements",
+  "soon": "Bientôt",
+  "balance": {
+    "available": {
+      "label": "Disponible",
+      "zero": "Rien à verser pour l’instant",
+      "hint": "Prêt pour votre prochain virement"
+    },
+    "pending": {
+      "label": "En attente",
+      "zero": "Aucune vente en attente",
+      "hint": "En cours de traitement suite à des ventes récentes"
+    },
+    "nextPayout": {
+      "label": "Prochain virement",
+      "zero": "Aucun virement prévu",
+      "hint": "Prévu le {date}"
+    }
+  },
+  "connection": {
+    "label": "Connexion Stripe",
+    "comingSoonTitle": "Être payé via Stripe arrive bientôt",
+    "comingSoonBody": "En attendant, les acheteurs vous paient via le lien d’achat de votre produit, ou en vous écrivant.",
+    "connectTitle": "Connectez Stripe pour être payé",
+    "connectBody": "Les virements vont directement sur votre compte bancaire. La configuration se fait de façon sécurisée sur Stripe, nous ne voyons ni ne stockons jamais vos coordonnées bancaires.",
+    "connectButton": "Se connecter avec Stripe",
+    "connected": "Compte Stripe connecté",
+    "charges": "Encaissements",
+    "payouts": "Virements",
+    "verified": "Vérifié",
+    "requirementsDue": "Stripe a besoin d’informations supplémentaires pour poursuivre les virements."
+  },
+  "connectModal": {
+    "title": "Se connecter avec Stripe",
+    "description": "Soyez payé pour ce que vous vendez. La configuration se fait sur Stripe, pas ici.",
+    "points": {
+      "sensitive": {
+        "title": "Stripe gère la partie sensible",
+        "body": "Les coordonnées bancaires, les vérifications d’identité et les contrôles se font tous sur les pages sécurisées de Stripe. Square Share ne les voit ni ne les stocke jamais."
+      },
+      "bank": {
+        "title": "Les virements vont directement sur votre compte bancaire",
+        "body": "Une fois connecté, votre solde est versé automatiquement selon un calendrier continu."
+      },
+      "time": {
+        "title": "Prend environ 5 minutes",
+        "body": "Vous serez redirigé vers Stripe pour terminer la configuration, puis vous reviendrez directement ici."
+      }
+    },
+    "notNow": "Pas maintenant",
+    "comingSoonTitle": "Les virements Stripe arrivent bientôt.",
+    "continue": "Continuer vers Stripe"
+  },
+  "payoutHistory": {
+    "label": "Historique des virements",
+    "title": "Virements",
+    "emptyConnectable": "Pas encore de virements. Dès que vous réalisez des ventes, Stripe verse automatiquement votre solde sur votre compte bancaire.",
+    "empty": "Pas encore de virements.",
+    "columns": {
+      "amount": "Montant",
+      "status": "Statut",
+      "bank": "Banque",
+      "arrives": "Arrivée"
+    },
+    "rowLabel": "Virement {amount}, voir les détails"
+  },
+  "payoutStatus": "{status, select, paid {Payé} pending {En attente} in_transit {En transit} canceled {Annulé} failed {Échoué} other {En attente}}",
+  "payoutMethod": {
+    "title": "Mode de virement",
+    "manage": "Gérer",
+    "detail": "{currency} · {country}",
+    "detailDefault": "{currency} · {country} · Par défaut",
+    "emptyConnectable": "Pas encore de mode de virement. Connectez Stripe et ajoutez-y votre compte bancaire, il apparaîtra ici automatiquement.",
+    "empty": "Pas encore de mode de virement."
+  },
+  "payoutMethodModal": {
+    "title": "Mode de virement",
+    "description": "Où sont envoyés vos virements.",
+    "bankAccountDetail": "Compte bancaire · {currency} · {country}",
+    "defaultLabel": "Par défaut pour les virements",
+    "yes": "Oui",
+    "no": "Non",
+    "referenceLabel": "Référence",
+    "securityNote": "Pour votre sécurité, les coordonnées bancaires se modifient sur Stripe, jamais ici.",
+    "manageInStripe": "Gérer dans Stripe"
+  },
+  "recentActivity": {
+    "label": "Activité récente",
+    "title": "Activité",
+    "empty": "Les ventes, remboursements et virements apparaîtront ici.",
+    "datePending": "{date} · En attente"
+  },
+  "transactionModal": {
+    "title": "{type, select, charge {Vente} refund {Remboursement} payout {Virement} stripe_fee {Frais Stripe} adjustment {Ajustement} other {Transaction}}",
+    "processingFee": "Frais de traitement",
+    "net": "Net sur votre solde",
+    "status": "Statut",
+    "statusPending": "En attente, en cours de versement sur votre solde",
+    "statusAvailable": "Disponible",
+    "date": "Date",
+    "id": "ID de transaction"
+  },
+  "payoutModal": {
+    "title": "Virement",
+    "sentTo": "Envoyé à",
+    "bankAccount": "Compte bancaire ···· {last4}",
+    "arrives": "Arrivée",
+    "initiated": "Initié",
+    "type": "Type",
+    "typeValue": "{method, select, instant {Instantané} other {Standard}} · {automatic, select, true {Automatique} other {Manuel}}",
+    "statement": "Sur votre relevé bancaire",
+    "id": "ID de virement",
+    "failed": "Ce virement n’a pas pu être délivré. Stripe réessaie automatiquement, et le montant reste dans votre solde disponible jusqu’à ce qu’il aboutisse."
+  }
+}

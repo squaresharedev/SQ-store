@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach } from "vitest";
-import { render, cleanup } from "@testing-library/react";
+import { render, cleanup } from "../setup/render";
 import { SHAPE_KINDS, type ShapeBlock, type ShapeKind } from "@/types/storefront";
 import { ShapeTileContent } from "@/components/storefront/ShapeTileContent";
 import { isPathKind, shapePath } from "@/components/storefront/shape-geometry";

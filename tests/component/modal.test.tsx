@@ -1,6 +1,6 @@
 import * as React from "react";
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, fireEvent, cleanup } from "@testing-library/react";
+import { renderWithoutToasts, screen, fireEvent, cleanup } from "../setup/render";
 
 afterEach(cleanup);
 import userEvent from "@testing-library/user-event";
@@ -13,7 +13,7 @@ function renderModal(props: {
   description?: string;
   children?: React.ReactNode;
 }) {
-  return render(
+  return renderWithoutToasts(
     <Modal
       open={props.open}
       onClose={props.onClose}
@@ -120,7 +120,7 @@ describe("Modal", () => {
   });
 
   it("initialFocus=\"dialog\" lands on the inert panel even when a control exists", () => {
-    render(
+    renderWithoutToasts(
       <Modal open onClose={vi.fn()} title="T" initialFocus="dialog">
         <input type="radio" aria-label="A choice that a stray Space would record" />
       </Modal>,
@@ -153,7 +153,7 @@ describe("Modal", () => {
         </Modal>
       );
     }
-    render(<Harness />);
+    renderWithoutToasts(<Harness />);
     const field = screen.getByLabelText("notes");
     await userEvent.click(field);
     await userEvent.keyboard("two words here");
@@ -164,7 +164,7 @@ describe("Modal", () => {
   it("Escape calls the LATEST onClose, not the one from when it opened", () => {
     const first = vi.fn();
     const second = vi.fn();
-    const { rerender } = render(<Modal open onClose={first} title="T"><button>x</button></Modal>);
+    const { rerender } = renderWithoutToasts(<Modal open onClose={first} title="T"><button>x</button></Modal>);
     rerender(<Modal open onClose={second} title="T"><button>x</button></Modal>);
     fireEvent.keyDown(document, { key: "Escape" });
     expect(first).not.toHaveBeenCalled();
@@ -173,7 +173,7 @@ describe("Modal", () => {
 
   it("focus returns to previously focused element when modal closes", () => {
     const onClose = vi.fn();
-    const { rerender } = render(
+    const { rerender } = renderWithoutToasts(
       <div>
         <button data-testid="trigger">Open</button>
         <Modal open={false} onClose={onClose} title="Test">

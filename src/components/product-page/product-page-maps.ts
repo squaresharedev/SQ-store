@@ -22,16 +22,18 @@ import {
 // The three layout class maps that lived here are gone with the layout
 // option: the page has one arrangement, written where it is used.
 
-export const PRICE_NOTE_LABELS: Record<ProductPagePriceNote, string> = {
-  "incl-vat": "incl. VAT",
-  "excl-vat": "excl. tax",
-  none: "",
+/** The price notes as the branch names `ProductPage.priceNotes` selects on.
+ *  The copy itself lives in the catalogue, in the buyer's language. */
+export const PRICE_NOTE_TOKENS: Record<ProductPagePriceNote, "incl" | "excl" | "none"> = {
+  "incl-vat": "incl",
+  "excl-vat": "excl",
+  none: "none",
 };
 
-export const SHIPPING_NOTE_LABELS: Record<ProductPageShippingNote, string> = {
-  "plus-shipping": "plus shipping",
-  "free-shipping": "free shipping",
-  none: "",
+export const SHIPPING_NOTE_TOKENS: Record<ProductPageShippingNote, "plus" | "free" | "none"> = {
+  "plus-shipping": "plus",
+  "free-shipping": "free",
+  none: "none",
 };
 
 export const DARK_INK = "#171717";

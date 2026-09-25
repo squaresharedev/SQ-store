@@ -1,0 +1,162 @@
+{
+  "metadata": {
+    "descriptionFallback": "{title}, sklep {store}."
+  },
+  "notFound": {
+    "title": "Ten produkt jest niedostępny",
+    "body": "Mógł zostać usunięty albo link, w który kliknięto, jest nieaktualny. Wróć do sklepu, aby zobaczyć aktualną ofertę.",
+    "back": "Wróć"
+  },
+  "sections": {
+    "description": "Opis",
+    "specs": "Specyfikacja",
+    "documents": "Dokumenty",
+    "shipping": "Wysyłka",
+    "returns": "Zwroty",
+    "safety": "Bezpieczeństwo i zgodność",
+    "seller": "Sprzedawca"
+  },
+  "soldBy": "Sprzedawca: {seller}",
+  "moreDetails": "Więcej szczegółów",
+  "trust": {
+    "digitalDelivery": "Dostarczane jako plik do pobrania po zakupie.",
+    "euRights": "14 dni na zmianę zdania i 2 lata ochrony na wypadek niezgodności towaru z umową."
+  },
+  "safety": {
+    "manufacturer": "Producent",
+    "responsiblePerson": "Osoba odpowiedzialna w UE",
+    "identifier": "Identyfikator produktu:",
+    "warnings": "Ostrzeżenia"
+  },
+  "priceNotes": "{price, select, incl {{shipping, select, plus {z VAT, plus wysyłka} free {z VAT, darmowa wysyłka} other {z VAT}}} excl {{shipping, select, plus {bez podatku, plus wysyłka} free {bez podatku, darmowa wysyłka} other {bez podatku}}} other {{shipping, select, plus {plus wysyłka} free {darmowa wysyłka} other {}}}}",
+  "stock": {
+    "digitalDownload": "Pobranie cyfrowe",
+    "digitalDownloadFormat": "Pobranie cyfrowe ({format})"
+  },
+  "description": {
+    "readMore": "Czytaj więcej",
+    "readLess": "Czytaj mniej"
+  },
+  "gallery": {
+    "noPhoto": "Jeszcze brak zdjęcia",
+    "photosOf": "Zdjęcia: {title}",
+    "photo": "Zdjęcie {current} z {total}"
+  },
+  "options": {
+    "unavailable": "(niedostępne)",
+    "unavailableOption": "{name} (niedostępne)",
+    "unavailableLabel": "{name}, niedostępne"
+  },
+  "quantity": {
+    "label": "Ilość"
+  },
+  "cta": {
+    "unwired": "Ten przycisk nie ma jeszcze dokąd prowadzić. Dodaj link do zakupu w produkcie albo e-mail kontaktowy w danych sprzedawcy.",
+    "unavailableIn": "Niedostępne dla opcji: {group}",
+    "askAbout": "Zapytaj o ten produkt",
+    "checkoutOn": "Dokończ zakup na <strong>{host}</strong>",
+    "mailSubject": "Pytanie: {title}",
+    "mailQuantity": "Ilość: {quantity}"
+  },
+  "specs": {
+    "dimensions": "Wymiary",
+    "weight": "Waga",
+    "materials": "Materiały",
+    "madeIn": "Kraj pochodzenia",
+    "included": "Zawartość zestawu",
+    "care": "Pielęgnacja"
+  },
+  "seller": {
+    "address": "Adres:",
+    "country": "Kraj:",
+    "email": "E-mail:",
+    "phone": "Telefon:",
+    "vatId": "Numer VAT UE: {vatId}"
+  },
+  "statutory": {
+    "withdrawal": "Możesz odstąpić od umowy w ciągu 14 dni od otrzymania towaru, bez podawania przyczyny, chyba że zastosowanie ma jeden z ustawowych wyjątków (na przykład towar wykonany na zamówienie lub zapieczętowany).",
+    "digitalWithdrawal": "W przypadku pliku do pobrania prawo odstąpienia od umowy wygasa z chwilą wyrażenia zgody na rozpoczęcie pobierania przed upływem 14 dni.",
+    "guarantee": "Prawo UE zapewnia ci co najmniej dwuletnią odpowiedzialność sprzedawcy za brak zgodności towaru z umową."
+  },
+  "footer": {
+    "disclosure": "<seller>{name}</seller> jest sprzedawcą w tym zamówieniu i odpowiada za produkt, jego dostawę oraz wszelkie zwroty towaru lub zwroty środków. Squareshare dostarcza technologię, na której działa ta strona, i nie jest stroną umowy sprzedaży.",
+    "poweredBy": "Obsługiwane przez <brand>Squareshare</brand>",
+    "policiesLabel": "Zasady Squareshare",
+    "policies": {
+      "privacy": {
+        "label": "Prywatność",
+        "name": "Polityka prywatności Squareshare"
+      },
+      "terms": {
+        "label": "Warunki",
+        "name": "Warunki korzystania z usługi Squareshare"
+      }
+    }
+  },
+  "report": {
+    "trigger": "{target, select, product {Zgłoś ten produkt} other {Zgłoś tę witrynę}}",
+    "title": "{target, select, product {Zgłoś ten produkt} other {Zgłoś tę witrynę}}",
+    "description": "Napisz, co jest nie tak. Każde zgłoszenie sprawdza człowiek.",
+    "sentTitle": "Zgłoszenie wysłane",
+    "sentBody": "{target, select, product {Dziękujemy. Człowiek sprawdzi ten produkt. Nie ujawniamy sprzedawcy, kto coś zgłosił.} other {Dziękujemy. Człowiek sprawdzi tę witrynę. Nie ujawniamy sprzedawcy, kto coś zgłosił.}}",
+    "reasonsLegend": "Co jest nie tak?",
+    "reasons": {
+      "illegal": {
+        "label": "Nielegalne towary lub działania",
+        "hint": "Sprzedaż czegoś, co jest sprzeczne z prawem, albo wykorzystanie oferty do zorganizowania takiej sprzedaży."
+      },
+      "sexual": {
+        "label": "Treści seksualne",
+        "hint": "Wulgarne obrazy albo cokolwiek seksualizującego małoletniego."
+      },
+      "violence": {
+        "label": "Przemoc lub drastyczne treści",
+        "hint": "Drastyczne obrażenia, groźby albo treści gloryfikujące przemoc."
+      },
+      "hate": {
+        "label": "Nienawiść lub nękanie",
+        "hint": "Ataki na osobę lub grupę albo symbole nienawiści."
+      },
+      "counterfeit": {
+        "label": "Podróbki lub skradzione treści",
+        "hint": "Podrabiane towary znanych marek albo cudza praca sprzedawana jako własna."
+      },
+      "scam": {
+        "label": "Oszustwo",
+        "hint": "Oferta wygląda na zaprojektowaną tak, by wyłudzić pieniądze bez dostarczenia towaru."
+      },
+      "spam": {
+        "label": "Spam",
+        "hint": "Powtarzalna, wprowadzająca w błąd albo w ogóle nie będąca prawdziwym produktem."
+      },
+      "other": {
+        "label": "Coś innego",
+        "hint": "Napisz o tym poniżej, a człowiek to przeczyta."
+      }
+    },
+    "detailsLabel": "Coś jeszcze? <muted>(opcjonalnie)</muted>",
+    "detailsPlaceholder": "Co powinna wiedzieć osoba, która to sprawdza?",
+    "emailLabel": "Twój e-mail <muted>(opcjonalnie)</muted>",
+    "emailPlaceholder": "ty@example.com",
+    "emailHelp": "Tylko po to, byśmy mogli potwierdzić otrzymanie zgłoszenia i w razie potrzeby zadać pytanie. Sprzedawca nigdy go nie zobaczy.",
+    "submitFailed": "Nie udało się tego wysłać. Spróbuj ponownie.",
+    "offline": "Nie udało się tego wysłać. Sprawdź połączenie i spróbuj ponownie.",
+    "send": "Wyślij zgłoszenie",
+    "api": {
+      "accepted": "Dziękujemy. Człowiek to sprawdzi.",
+      "unreadable": "Nie udało się odczytać tego żądania.",
+      "invalid": "To zgłoszenie jest nieprawidłowe.",
+      "targetType": "Tego nie można tu zgłosić.",
+      "reason": "Wybierz, co jest nie tak.",
+      "rateLimited": "Zbyt wiele zgłoszeń stąd. Spróbuj ponownie później.",
+      "submitFailed": "Nie udało się tego wysłać. Spróbuj ponownie."
+    }
+  },
+  "shippingProse": {
+    "shipsFrom": "Wysyłka z: {country}.",
+    "areaAndTime": "{area}: {time}",
+    "areaAndTimeWithCost": "{area}: {time} ({cost})",
+    "withCost": "{place} ({cost})",
+    "returnsWindow": "{paidBy, select, seller {{days, plural, one {Zwroty przyjmujemy w ciągu {days} dnia od dostawy. Koszt odesłania zwrotu pokrywamy my.} few {Zwroty przyjmujemy w ciągu {days} dni od dostawy. Koszt odesłania zwrotu pokrywamy my.} many {Zwroty przyjmujemy w ciągu {days} dni od dostawy. Koszt odesłania zwrotu pokrywamy my.} other {Zwroty przyjmujemy w ciągu {days} dnia od dostawy. Koszt odesłania zwrotu pokrywamy my.}}} buyer {{days, plural, one {Zwroty przyjmujemy w ciągu {days} dnia od dostawy. Koszt odesłania zwrotu pokrywa kupujący.} few {Zwroty przyjmujemy w ciągu {days} dni od dostawy. Koszt odesłania zwrotu pokrywa kupujący.} many {Zwroty przyjmujemy w ciągu {days} dni od dostawy. Koszt odesłania zwrotu pokrywa kupujący.} other {Zwroty przyjmujemy w ciągu {days} dnia od dostawy. Koszt odesłania zwrotu pokrywa kupujący.}}} other {{days, plural, one {Zwroty przyjmujemy w ciągu {days} dnia od dostawy.} few {Zwroty przyjmujemy w ciągu {days} dni od dostawy.} many {Zwroty przyjmujemy w ciągu {days} dni od dostawy.} other {Zwroty przyjmujemy w ciągu {days} dnia od dostawy.}}}}"
+  }
+}

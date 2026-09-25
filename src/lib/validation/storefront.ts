@@ -8,6 +8,7 @@ import {
   uniqueList,
   uuidField,
 } from "@/lib/validation/inputs";
+import { issueKey } from "@/lib/validation/messages";
 import { isOnBoard } from "@/lib/geometry/rotated-box";
 import {
   BACKGROUND_IMAGE_SCALE_MAX,
@@ -86,13 +87,13 @@ export { isStrictHexColor };
 
 /** A storefront's public id (also the future embed/attribution key). Guards
  *  URL params + action inputs so a garbage id 404s instead of erroring. */
-export const storefrontIdSchema = uuidField("That storefront id");
+export const storefrontIdSchema = uuidField("storefrontId");
 
 /** Display name shown in the storefront list. Mirrors the DB check
  *  (char_length 1..80); trimmed before validation by callers. */
 export const STOREFRONT_NAME_MAX = 80;
 export const storefrontNameSchema = singleLineText({
-  label: "A storefront name",
+  field: "storefrontName",
   max: STOREFRONT_NAME_MAX,
 });
 
@@ -128,7 +129,7 @@ const backgroundSchema = z.discriminatedUnion("kind", [
       .max(600)
       .regex(OBJECT_KEY_PATTERN)
       .refine((key) => key.startsWith("images/"), {
-        error: "Background images must be image uploads.",
+        error: issueKey("Validation.storefront.backgroundImageKind"),
       }),
     x: z.number().int().min(0).max(100),
     y: z.number().int().min(0).max(100),
@@ -149,9 +150,9 @@ const customFontSchema = z.strictObject({
     .max(600)
     .regex(OBJECT_KEY_PATTERN)
     .refine((key) => key.startsWith("fonts/"), {
-      error: "Custom fonts must be font uploads.",
+      error: issueKey("Validation.storefront.customFontKind"),
     }),
-  name: singleLineText({ label: "A font name", max: CUSTOM_FONT_NAME_MAX }),
+  name: singleLineText({ field: "fontName", max: CUSTOM_FONT_NAME_MAX }),
 });
 
 /**
@@ -381,8 +382,8 @@ const headerSizeSchema = z
 // line with an optional color and size of its own (absent = follows the theme).
 const headerSchema = z.strictObject({
   show: z.boolean(),
-  name: singleLineText({ label: "A store name", max: HEADER_NAME_MAX, min: 0 }),
-  bio: multiLineText({ label: "A store bio", max: HEADER_BIO_MAX }),
+  name: singleLineText({ field: "storeName", max: HEADER_NAME_MAX, min: 0 }),
+  bio: multiLineText({ field: "storeBio", max: HEADER_BIO_MAX }),
   nameColor: hexColorSchema.optional(),
   bioColor: hexColorSchema.optional(),
   // Sizes share the text block's bounds; absent = the line's own default.
@@ -409,7 +410,7 @@ const headerSchema = z.strictObject({
  *  the updateEmbedSettings action (the boundary) and the modal (UX only). */
 export const embedSettingsSchema = z.strictObject({
   enabled: z.boolean(),
-  domains: uniqueList(hostname(), { label: "domains", max: EMBED_MAX_DOMAINS }),
+  domains: uniqueList(hostname(), { field: "domains", max: EMBED_MAX_DOMAINS }),
 });
 
 // ── Product page ────────────────────────────────────────────────────────
@@ -474,7 +475,7 @@ export const productPageSchema = z.preprocess(
     imageFit: z.enum(IMAGE_FITS),
     // Absent = the storefront's own font, which is the default.
     font: z.enum(STOREFRONT_FONTS).optional(),
-    ctaLabel: singleLineText({ label: "The buy button label", max: PRODUCT_PAGE_CTA_MAX }),
+    ctaLabel: singleLineText({ field: "ctaLabel", max: PRODUCT_PAGE_CTA_MAX }),
     // The button's paint. Every one optional and absent = follow the
     // storefront (see ProductPageConfig), so a page saved before these existed
     // parses unchanged and an untouched one never grows a key.
@@ -495,13 +496,13 @@ export const productPageSchema = z.preprocess(
     sections: z
       .array(productPageSectionSchema)
       .max(PRODUCT_PAGE_SECTION_IDS.length, {
-        error: "The product page must list every section once.",
+        error: issueKey("Validation.storefront.productPageSectionsTooMany"),
       })
       // The stored ORDER is no longer read (the page renders the fixed one),
       // but the array keeps its shape so no saved config has to be rewritten.
       .refine(
         (sections) => new Set(sections.map((section) => section.id)).size === sections.length,
-        { error: "The product page can't list the same section twice." },
+        { error: issueKey("Validation.storefront.productPageSectionDuplicate") },
       ),
   }),
 );
@@ -523,24 +524,24 @@ export const productPageSchema = z.preprocess(
  * change the dispatch line for one product still owes the buyer the terms.
  */
 export const shippingProfileSchema = z.strictObject({
-  id: uuidField("That shipping profile"),
-  name: singleLineText({ label: "A shipping profile name", max: SHIPPING_PROFILE_NAME_MAX }),
+  id: uuidField("shippingProfile"),
+  name: singleLineText({ field: "shippingProfileName", max: SHIPPING_PROFILE_NAME_MAX }),
   dispatch: singleLineText({
-    label: "The dispatch time",
+    field: "dispatchTime",
     max: SHIPPING_DISPATCH_MAX,
   }).optional(),
-  body: multiLineText({ label: "The shipping terms", max: POLICY_TEXT_MAX, min: 1 }),
+  body: multiLineText({ field: "shippingTerms", max: POLICY_TEXT_MAX, min: 1 }),
 });
 
 export const shippingProfilesSchema = z
   .array(shippingProfileSchema)
   .max(SHIPPING_PROFILES_MAX, {
-    error: `A store can keep up to ${SHIPPING_PROFILES_MAX} shipping profiles.`,
+    error: issueKey("Validation.storefront.shippingProfilesTooMany"),
   })
   // Ids are what products point at, so a duplicate would make "which terms"
   // unanswerable — exactly the rule the product option tree lives by.
   .refine((profiles) => new Set(profiles.map((profile) => profile.id)).size === profiles.length, {
-    error: "Each shipping profile can only be listed once.",
+    error: issueKey("Validation.storefront.shippingProfileDuplicate"),
   });
 
 // `sellerSchema` lived here. Trader identity is account-level now (Settings ›
@@ -637,15 +638,15 @@ const textSpanSchema = z
     underline: z.boolean().optional(),
   })
   .refine((span) => span.start < span.end, {
-    message: "A formatted range must end after it starts",
+    message: issueKey("Validation.storefront.spanRange"),
   });
 
 // Plain text only. Rendered exclusively as a React text node (React escapes
 // it); the schema still refuses control characters so stored data stays sane.
 const textBlockSchema = z.strictObject({
   type: z.literal("text"),
-  id: uuidField("A block id"),
-  text: multiLineText({ label: "Block text", max: TEXT_MAX_LENGTH }),
+  id: uuidField("blockId"),
+  text: multiLineText({ field: "blockText", max: TEXT_MAX_LENGTH }),
   variant: z.enum(TEXT_VARIANTS),
   align: z.enum(TEXT_ALIGNS),
   ...placementFields,
@@ -675,7 +676,7 @@ const textBlockSchema = z.strictObject({
 // Decorative shape: allowlisted kind + regex-gated color, nothing free-form.
 const shapeBlockSchema = z.strictObject({
   type: z.literal("shape"),
-  id: uuidField("A block id"),
+  id: uuidField("blockId"),
   kind: z.enum(SHAPE_KINDS),
   color: hexColorSchema,
   ...placementFields,
@@ -698,15 +699,15 @@ const shapeBlockSchema = z.strictObject({
 // element be linked as a product photo.
 const imageBlockSchema = z.strictObject({
   type: z.literal("image"),
-  id: uuidField("A block id"),
+  id: uuidField("blockId"),
   key: z
     .string()
     .max(600)
     .regex(OBJECT_KEY_PATTERN)
     .refine((key) => key.startsWith("elements/"), {
-      error: "Elements must be element uploads.",
+      error: issueKey("Validation.storefront.elementKind"),
     }),
-  alt: singleLineText({ label: "Element alt text", max: IMAGE_ALT_MAX, min: 0 }),
+  alt: singleLineText({ field: "elementAlt", max: IMAGE_ALT_MAX, min: 0 }),
   ...placementFields,
   fit: z.enum(IMAGE_FITS).optional(),
   imagePlacement: imagePlacementSchema.optional(),
@@ -728,11 +729,11 @@ const configObjectSchema = z
       // Custom message: Zod's default ("Array must contain at most...") leaks
       // implementation vocabulary at the one seller-facing cap in this schema.
       .max(MAX_BLOCKS, {
-        error: `A storefront can hold up to ${MAX_BLOCKS} blocks. Remove some blocks or split this storefront in two.`,
+        error: issueKey("Validation.storefront.blocksTooMany"),
       })
       .refine(
         (blocks) => new Set(blocks.map(blockKey)).size === blocks.length,
-        { error: "Grid blocks must be unique." },
+        { error: issueKey("Validation.storefront.blocksDuplicate") },
       ),
     // Optional so configs saved before these features still parse directly.
     header: headerSchema.optional(),
@@ -769,7 +770,7 @@ const configObjectSchema = z
         ctx.addIssue({
           code: "custom",
           path: ["blocks", index],
-          message: "A block sits outside the canvas.",
+          message: issueKey("Validation.storefront.blockOutsideCanvas"),
         });
       }
     });

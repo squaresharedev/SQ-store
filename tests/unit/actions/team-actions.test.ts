@@ -18,7 +18,7 @@ vi.mock("@/lib/auth/session", () => ({
 const requireStepUpMock = vi.fn(async (): Promise<unknown> => null);
 vi.mock("@/lib/auth/mfa", () => ({
   STEP_UP_FIELDS: ["mfa_code", "mfa_factor_id"],
-  requireStepUp: (...args: unknown[]) => requireStepUpMock(...(args as [])),
+  requireStepUpState: (...args: unknown[]) => requireStepUpMock(...(args as [])),
 }));
 
 const getActorRoleMock = vi.fn();
@@ -89,6 +89,12 @@ import {
   revokeMemberAccess,
   setActiveAccount,
 } from "@/lib/team/actions";
+import { english } from "../../setup/translate";
+import type { ActionState } from "@/lib/errors";
+import type { MessageKey, MessageValues } from "@/i18n/types";
+
+/** The English a reader is shown for a form action's result. */
+const errorText = (state: ActionState) => (state.error ? english(state.error.message) : undefined);
 
 // ---- test constants ------------------------------------------------------
 
@@ -100,7 +106,7 @@ const INVITE_ID = "40000000-0000-4000-8000-000000000004";
 const OWNER_USER = { id: OWNER_ID, email: "owner@example.com" };
 const EDITOR_USER = { id: EDITOR_ID, email: "editor@example.com" };
 
-const PREV: { error?: string; success?: string } = {};
+const PREV: ActionState = {};
 
 function makeInviteForm(overrides: Record<string, string> = {}) {
   const fd = new FormData();
@@ -164,7 +170,7 @@ describe("inviteMember - field whitelist", () => {
 
     const result = await inviteMember(PREV, fd);
 
-    expect(result.error).toMatch(/is_seller/);
+    expect(errorText(result)).toMatch(/is_seller/);
     expect(db.insert).not.toHaveBeenCalled();
   });
 });
@@ -173,7 +179,7 @@ describe("inviteMember - auth / role gates", () => {
   it("signed out returns SIGNED_OUT error", async () => {
     getUserMock.mockResolvedValue(null);
     const result = await inviteMember(PREV, makeInviteForm());
-    expect(result.error).toMatch(/session/i);
+    expect(errorText(result)).toMatch(/session/i);
     expect(db.insert).not.toHaveBeenCalled();
   });
 
@@ -183,7 +189,7 @@ describe("inviteMember - auth / role gates", () => {
 
     const result = await inviteMember(PREV, makeInviteForm());
 
-    expect(result.error).toMatch(/permission/i);
+    expect(errorText(result)).toMatch(/permission/i);
     expect(db.insert).not.toHaveBeenCalled();
   });
 
@@ -194,7 +200,7 @@ describe("inviteMember - auth / role gates", () => {
 
     const result = await inviteMember(PREV, makeInviteForm());
 
-    expect(result.error).toMatch(/invites/i);
+    expect(errorText(result)).toMatch(/invites/i);
     // Nothing is written and nobody is notified — the spam never lands.
     expect(db.insert).not.toHaveBeenCalled();
     expect(createNotificationMock).not.toHaveBeenCalled();
@@ -234,7 +240,7 @@ describe("inviteMember - self-invite", () => {
     const fd = makeInviteForm({ invited_email: "owner@example.com" });
     const result = await inviteMember(PREV, fd);
 
-    expect(result.error).toMatch(/already here/i);
+    expect(errorText(result)).toMatch(/already here/i);
     expect(db.insert).not.toHaveBeenCalled();
   });
 });
@@ -245,7 +251,7 @@ describe("inviteMember - schema rejection", () => {
     const fd = makeInviteForm({ role: "owner" });
     const result = await inviteMember(PREV, fd);
     // Zod parse fails before the actor-role lookup
-    expect(result.error).toBeTruthy();
+    expect(errorText(result)).toBeTruthy();
     expect(getActorRoleMock).not.toHaveBeenCalled();
     expect(db.insert).not.toHaveBeenCalled();
   });
@@ -263,7 +269,7 @@ describe("acceptInvite - field whitelist", () => {
 
     const result = await acceptInvite(PREV, fd);
 
-    expect(result.error).toMatch(/account_owner_id/);
+    expect(errorText(result)).toMatch(/account_owner_id/);
   });
 });
 
@@ -285,13 +291,74 @@ describe("acceptInvite - RPC result", () => {
 
     const result = await acceptInvite(PREV, makeAcceptForm());
 
-    expect(result.error).toMatch(/could not accept/i);
+    expect(errorText(result)).toMatch(/could not accept/i);
   });
 
   it("signed out returns SIGNED_OUT error", async () => {
     getUserMock.mockResolvedValue(null);
     const result = await acceptInvite(PREV, makeAcceptForm());
-    expect(result.error).toMatch(/session/i);
+    expect(errorText(result)).toMatch(/session/i);
+  });
+});
+
+describe("team notifications are stored as message keys", () => {
+  type SentMessage = {
+    title: { key: MessageKey; values?: MessageValues };
+    body?: { key: MessageKey; values?: MessageValues };
+  };
+  const sent = (): SentMessage =>
+    (createNotificationMock.mock.calls[0][0] as { message: SentMessage }).message;
+
+  it("an invite names the store and the role as values, in the same English as before", async () => {
+    getUserMock.mockResolvedValue(OWNER_USER);
+    getActorRoleMock.mockResolvedValue("owner");
+    dbFn.mockResolvedValueOnce({ error: null }); // insert
+    resolveUserIdByEmailMock.mockResolvedValue(MEMBER_ID);
+    getProfileMock.mockResolvedValue({ username: "builderboy" });
+
+    await inviteMember(PREV, makeInviteForm({ role: "editor" }));
+
+    const { title, body } = sent();
+    expect(english(title.key, title.values)).toBe("You have a team invite");
+    expect(body && english(body.key, body.values)).toBe(
+      "builderboy invited you to join as Editor. Open Team & access to accept.",
+    );
+  });
+
+  it("an invite from a store with no name uses its own sentence, not a spliced word", async () => {
+    getUserMock.mockResolvedValue(OWNER_USER);
+    getActorRoleMock.mockResolvedValue("owner");
+    dbFn.mockResolvedValueOnce({ error: null });
+    resolveUserIdByEmailMock.mockResolvedValue(MEMBER_ID);
+    getProfileMock.mockResolvedValue(null);
+
+    await inviteMember(PREV, makeInviteForm());
+
+    const { body } = sent();
+    expect(body?.key).toBe("Notifications.messages.teamInvite.bodyUnnamedStore");
+    expect(body && english(body.key, body.values)).toBe(
+      "A SquareShare store invited you to join as Viewer. Open Team & access to accept.",
+    );
+  });
+
+  it("accepting tells the owner who joined", async () => {
+    getUserMock.mockResolvedValue({ id: EDITOR_ID, email: "editor@example.com" });
+    dbFn.mockResolvedValueOnce({
+      data: {
+        id: INVITE_ID,
+        status: "invited",
+        invited_email: "editor@example.com",
+        account_owner_id: OWNER_ID,
+      },
+      error: null,
+    });
+    dbFn.mockResolvedValueOnce({ data: true, error: null });
+
+    await acceptInvite(PREV, makeAcceptForm());
+
+    const { title, body } = sent();
+    expect(english(title.key, title.values)).toBe("editor joined your team");
+    expect(body && english(body.key, body.values)).toBe("They now have access to your store.");
   });
 });
 
@@ -307,7 +374,7 @@ describe("changeMemberRole - field whitelist", () => {
 
     const result = await changeMemberRole(PREV, fd);
 
-    expect(result.error).toMatch(/is_seller/);
+    expect(errorText(result)).toMatch(/is_seller/);
     expect(db.update).not.toHaveBeenCalled();
   });
 });
@@ -319,7 +386,7 @@ describe("changeMemberRole - role gates", () => {
 
     const result = await changeMemberRole(PREV, makeChangeRoleForm());
 
-    expect(result.error).toMatch(/permission/i);
+    expect(errorText(result)).toMatch(/permission/i);
     expect(db.update).not.toHaveBeenCalled();
   });
 
@@ -347,7 +414,7 @@ describe("revokeMemberAccess - field whitelist", () => {
 
     const result = await revokeMemberAccess(PREV, fd);
 
-    expect(result.error).toMatch(/extra_field/);
+    expect(errorText(result)).toMatch(/extra_field/);
   });
 });
 
@@ -363,7 +430,7 @@ describe("revokeMemberAccess - self-removal guard", () => {
 
     const result = await revokeMemberAccess(PREV, makeRevokeForm());
 
-    expect(result.error).toMatch(/yourself/i);
+    expect(errorText(result)).toMatch(/yourself/i);
     // The second update should never be called
     expect(db.update).not.toHaveBeenCalled();
   });
@@ -387,7 +454,7 @@ describe("revokeMemberAccess - owner row protection", () => {
     const neqCalls = db.neq.mock.calls as [string, string][];
     expect(neqCalls.some(([col, val]) => col === "role" && val === "owner")).toBe(true);
     // And the action surfaces a friendly error when 0 rows updated
-    expect(result.error).toMatch(/can't be removed/i);
+    expect(errorText(result)).toMatch(/can't be removed/i);
   });
 
   it("permission denied when actor is a viewer", async () => {
@@ -396,7 +463,7 @@ describe("revokeMemberAccess - owner row protection", () => {
 
     const result = await revokeMemberAccess(PREV, makeRevokeForm());
 
-    expect(result.error).toMatch(/permission/i);
+    expect(errorText(result)).toMatch(/permission/i);
     expect(db.from).not.toHaveBeenCalled();
   });
 });
@@ -466,7 +533,10 @@ describe("setActiveAccount", () => {
 
 describe("membership changes - two-factor step-up", () => {
   const REFUSAL = {
-    error: "Enter the 6-digit code from your authenticator app to confirm it's you.",
+    error: {
+      code: "invalid_input",
+      message: { key: "Errors.stepUp.codeRequired" },
+    },
     stepUp: true,
   };
 
@@ -489,7 +559,7 @@ describe("membership changes - two-factor step-up", () => {
 
     const result = await inviteMember(PREV, makeInviteForm());
 
-    expect(result.error).toMatch(/permission/i);
+    expect(errorText(result)).toMatch(/permission/i);
     expect(requireStepUpMock).not.toHaveBeenCalled();
   });
 
@@ -500,7 +570,7 @@ describe("membership changes - two-factor step-up", () => {
 
     const result = await inviteMember(PREV, fd);
 
-    expect(result.error ?? "").not.toMatch(/unexpected field/i);
+    expect(errorText(result) ?? "").not.toMatch(/unexpected field/i);
     expect(requireStepUpMock).toHaveBeenCalledWith(fd);
   });
 

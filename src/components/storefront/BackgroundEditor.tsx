@@ -1,6 +1,7 @@
 "use client";
 
-import { useId, useRef, useState } from "react";
+import { useId, useMemo, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { ImagePlus } from "lucide-react";
 import {
   BACKGROUND_IMAGE_SCALE_MAX,
@@ -14,7 +15,7 @@ import { UploadError, uploadToR2 } from "@/lib/products/upload";
 import { sampleObjectKey } from "@/lib/storefront/sample";
 import { useSampleMode } from "@/lib/storefront/sample-mode";
 import { cn } from "@/lib/utils";
-import { useToast } from "@/components/ui/Toast";
+import { useActionErrorToast } from "@/components/ui/ActionErrorNotice";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { ColorPicker } from "@/components/ui/ColorPicker";
 import { SliderField } from "@/components/ui/SliderField";
@@ -23,12 +24,6 @@ import { themeAccentPresets } from "@/lib/theme/theme-color-presets";
 import { resolveBackgroundStyle } from "./background-presets";
 
 type Kind = StorefrontBackground["kind"];
-
-const KINDS: readonly { value: Kind; label: string }[] = [
-  { value: "solid", label: "Color" },
-  { value: "gradient", label: "Gradient" },
-  { value: "image", label: "Image" },
-];
 
 // Data default for the config's second gradient stop (configs store raw hex
 // by design) — matches the design system's neutral-200.
@@ -83,6 +78,15 @@ export function BackgroundEditor({
 }) {
   // "Image" tab can be open before any upload exists; the stored background
   // only becomes {kind:"image"} once an upload succeeds.
+  const t = useTranslations("Storefront.background");
+  const kinds = useMemo(
+    () => [
+      { value: "solid" as const, label: t("typeColor") },
+      { value: "gradient" as const, label: t("typeGradient") },
+      { value: "image" as const, label: t("typeImage") },
+    ],
+    [t],
+  );
   const fieldId = useId();
   const [imageTab, setImageTab] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -90,7 +94,7 @@ export function BackgroundEditor({
   // null once the bytes are sent and the server is still working (sniff,
   // moderate, store) — an indeterminate bar, not a stalled 100%.
   const [progress, setProgress] = useState<number | null>(0);
-  const toast = useToast();
+  const showActionError = useActionErrorToast();
   const sample = useSampleMode();
   const fileInputRef = useRef<HTMLInputElement>(null);
   // Drag-to-position bookkeeping: pointer + position at drag start.
@@ -141,7 +145,7 @@ export function BackgroundEditor({
         error instanceof UploadError
           ? error.info
           : unexpectedError(error instanceof Error ? error.message : undefined);
-      toast.error(info.message, { lines: [info.fix] });
+      showActionError(info);
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -187,10 +191,10 @@ export function BackgroundEditor({
 
   return (
     <div className="space-y-3">
-      <span className={labelClass}>Background</span>
+      <span className={labelClass}>{t("label")}</span>
 
-      <div role="group" aria-label="Background type" className="flex">
-        {KINDS.map((kind, index) => {
+      <div role="group" aria-label={t("typeLabel")} className="flex">
+        {kinds.map((kind, index) => {
           const active =
             kind.value === "image"
               ? activeKind === "image" || activeKind === "image-pending"
@@ -221,11 +225,11 @@ export function BackgroundEditor({
         <div className="space-y-3">
           {value.kind === "image" && imageUrl && (
             <div className="space-y-1.5">
-              <span className={labelClass}>Position</span>
+              <span className={labelClass}>{t("position")}</span>
               {/* Drag the image inside the frame to choose what shows. */}
               <div
                 role="application"
-                aria-label="Drag to position the background image"
+                aria-label={t("dragAriaLabel")}
                 onPointerDown={startPan}
                 onPointerMove={movePan}
                 onPointerUp={endPan}
@@ -234,18 +238,18 @@ export function BackgroundEditor({
                 className="h-28 w-full cursor-move touch-none rounded-sm border border-border"
               />
               <p className={infoTextClass}>
-                Drag the preview to reposition. Zoom to resize.
+                {t("dragHint")}
               </p>
               <SliderField
                 id={`${fieldId}-zoom`}
-                label="Zoom"
+                label={t("zoomLabel")}
                 min={BACKGROUND_IMAGE_SCALE_MIN}
                 max={BACKGROUND_IMAGE_SCALE_MAX}
                 step={5}
                 value={value.scale}
                 onChange={(scale) => onChange({ ...value, scale })}
-                ariaLabel="Background image zoom"
-                valueText={`${value.scale} percent`}
+                ariaLabel={t("zoomAriaLabel")}
+                valueText={t("zoomValueText", { n: value.scale })}
                 unit="%"
               />
             </div>
@@ -273,21 +277,21 @@ export function BackgroundEditor({
               ? progress === null
                 ? // Bytes are all sent; the server is still sniffing,
                   // moderating and storing. A frozen "100%" reads as hung.
-                  "Processing…"
-                : `Uploading… ${Math.round(progress * 100)}%`
+                  t("processing")
+                : t("uploadingPct", { n: Math.round(progress * 100) })
               : value.kind === "image"
-                ? "Replace image"
-                : "Upload image"}
+                ? t("replaceImage")
+                : t("uploadImage")}
           </button>
-          {uploading && <ProgressBar value={progress} label="Uploading background image" />}
-          <p className={infoTextClass}>Up to 10 MB. JPEG, PNG, WebP, GIF, or AVIF.</p>
+          {uploading && <ProgressBar value={progress} label={t("uploadingProgress")} />}
+          <p className={infoTextClass}>{t("uploadHint")}</p>
         </div>
       )}
 
       {value.kind === "solid" && (
         <ColorPicker
           id={`${fieldId}-solid`}
-          label="Color"
+          label={t("colorLabel")}
           value={value.color}
           onChange={(color) => onChange({ kind: "solid", color })}
           target={{ kind: "theme-background-solid" }}
@@ -299,28 +303,28 @@ export function BackgroundEditor({
         <div className="space-y-3">
           <ColorPicker
             id={`${fieldId}-grad-from`}
-            label="From"
+            label={t("from")}
             value={value.from}
             onChange={(from) => onChange({ ...value, from })}
             target={{ kind: "theme-background-from" }}
           />
           <ColorPicker
             id={`${fieldId}-grad-to`}
-            label="To"
+            label={t("to")}
             value={value.to}
             onChange={(to) => onChange({ ...value, to })}
             target={{ kind: "theme-background-to" }}
           />
           <SliderField
             id={`${fieldId}-angle`}
-            label="Angle"
+            label={t("angle")}
             min={0}
             max={360}
             step={5}
             value={value.angle}
             onChange={(angle) => onChange({ ...value, angle })}
-            ariaLabel="Gradient angle"
-            valueText={`${value.angle} degrees`}
+            ariaLabel={t("gradientAngle")}
+            valueText={t("angleValueText", { n: value.angle })}
             unit="°"
           />
         </div>

@@ -1,0 +1,162 @@
+{
+  "metadata": {
+    "descriptionFallback": "{title} from {store}."
+  },
+  "notFound": {
+    "title": "This product isn't available",
+    "body": "It may have been removed, or the link you followed is out of date. Head back to the shop to see what's on offer now.",
+    "back": "Go back"
+  },
+  "sections": {
+    "description": "Description",
+    "specs": "Specifications",
+    "documents": "Documents",
+    "shipping": "Shipping",
+    "returns": "Returns",
+    "safety": "Safety and compliance",
+    "seller": "Seller"
+  },
+  "soldBy": "Sold by {seller}",
+  "moreDetails": "More details",
+  "trust": {
+    "digitalDelivery": "Delivered as a download after purchase.",
+    "euRights": "14 days to change your mind, and a 2-year guarantee."
+  },
+  "safety": {
+    "manufacturer": "Manufacturer",
+    "responsiblePerson": "Responsible person in the EU",
+    "identifier": "Product identifier:",
+    "warnings": "Warnings"
+  },
+  "priceNotes": "{price, select, incl {{shipping, select, plus {incl. VAT, plus shipping} free {incl. VAT, free shipping} other {incl. VAT}}} excl {{shipping, select, plus {excl. tax, plus shipping} free {excl. tax, free shipping} other {excl. tax}}} other {{shipping, select, plus {plus shipping} free {free shipping} other {}}}}",
+  "stock": {
+    "digitalDownload": "Digital download",
+    "digitalDownloadFormat": "Digital download ({format})"
+  },
+  "description": {
+    "readMore": "Read more",
+    "readLess": "Read less"
+  },
+  "gallery": {
+    "noPhoto": "No photo yet",
+    "photosOf": "Photos of {title}",
+    "photo": "Photo {current} of {total}"
+  },
+  "options": {
+    "unavailable": "(unavailable)",
+    "unavailableOption": "{name} — unavailable",
+    "unavailableLabel": "{name}, unavailable"
+  },
+  "quantity": {
+    "label": "Quantity"
+  },
+  "cta": {
+    "unwired": "This button has nowhere to go yet. Add a purchase link on the product, or a contact email under Seller details.",
+    "unavailableIn": "Unavailable in this {group}",
+    "askAbout": "Ask about this product",
+    "checkoutOn": "Checkout on <strong>{host}</strong>",
+    "mailSubject": "Question about {title}",
+    "mailQuantity": "Quantity: {quantity}"
+  },
+  "specs": {
+    "dimensions": "Dimensions",
+    "weight": "Weight",
+    "materials": "Materials",
+    "madeIn": "Made in",
+    "included": "What's included",
+    "care": "Care"
+  },
+  "seller": {
+    "address": "Address:",
+    "country": "Country:",
+    "email": "Email:",
+    "phone": "Phone:",
+    "vatId": "VAT ID: {vatId}"
+  },
+  "statutory": {
+    "withdrawal": "You can cancel this purchase within 14 days of receiving it without giving a reason, unless one of the legal exceptions applies (for example made-to-order or sealed goods).",
+    "digitalWithdrawal": "For a download, the right to cancel ends once you agree to start the download before the 14 days are over.",
+    "guarantee": "EU law gives you at least a 2-year guarantee that goods conform to what was sold."
+  },
+  "footer": {
+    "disclosure": "<seller>{name}</seller> is the seller for this order and is responsible for the product, its delivery, and any returns or refunds. Squareshare provides the technology behind this page and is not a party to the sale.",
+    "poweredBy": "Powered by <brand>Squareshare</brand>",
+    "policiesLabel": "Squareshare policies",
+    "policies": {
+      "privacy": {
+        "label": "Privacy",
+        "name": "Squareshare Privacy Policy"
+      },
+      "terms": {
+        "label": "Terms",
+        "name": "Squareshare Terms of Use"
+      }
+    }
+  },
+  "report": {
+    "trigger": "{target, select, product {Report this product} other {Report this storefront}}",
+    "title": "{target, select, product {Report this product} other {Report this storefront}}",
+    "description": "Tell us what is wrong with it. A person reviews every report.",
+    "sentTitle": "Report sent",
+    "sentBody": "{target, select, product {Thanks. A person will review this product. We do not share who reported something with the seller.} other {Thanks. A person will review this storefront. We do not share who reported something with the seller.}}",
+    "reasonsLegend": "What is wrong with it?",
+    "reasons": {
+      "illegal": {
+        "label": "Illegal goods or activity",
+        "hint": "Selling something that is against the law, or using the listing to arrange it."
+      },
+      "sexual": {
+        "label": "Sexual content",
+        "hint": "Explicit imagery, or anything sexualising a minor."
+      },
+      "violence": {
+        "label": "Violence or gore",
+        "hint": "Graphic injury, threats, or content glorifying violence."
+      },
+      "hate": {
+        "label": "Hate or harassment",
+        "hint": "Attacks on a person or group, or hate symbolism."
+      },
+      "counterfeit": {
+        "label": "Counterfeit or stolen",
+        "hint": "Fake branded goods, or someone else's work sold as their own."
+      },
+      "scam": {
+        "label": "Scam or fraud",
+        "hint": "The listing looks designed to take money without delivering."
+      },
+      "spam": {
+        "label": "Spam",
+        "hint": "Repetitive, misleading, or not a real product at all."
+      },
+      "other": {
+        "label": "Something else",
+        "hint": "Tell us below and a person will read it."
+      }
+    },
+    "detailsLabel": "Anything else? <muted>(optional)</muted>",
+    "detailsPlaceholder": "What should the person reviewing this know?",
+    "emailLabel": "Your email <muted>(optional)</muted>",
+    "emailPlaceholder": "you@example.com",
+    "emailHelp": "Only so we can confirm we got this and ask a question if we need to. It is never shown to the seller.",
+    "submitFailed": "That could not be submitted. Try again.",
+    "offline": "That could not be submitted. Check your connection and try again.",
+    "send": "Send report",
+    "api": {
+      "accepted": "Thanks. A person will review this.",
+      "unreadable": "That request could not be read.",
+      "invalid": "That report is not valid.",
+      "targetType": "That is not something you can report here.",
+      "reason": "Pick what is wrong with it.",
+      "rateLimited": "Too many reports from here. Try again later.",
+      "submitFailed": "That could not be submitted. Try again."
+    }
+  },
+  "shippingProse": {
+    "shipsFrom": "Ships from {country}.",
+    "areaAndTime": "{area}: {time}",
+    "areaAndTimeWithCost": "{area}: {time} ({cost})",
+    "withCost": "{place} ({cost})",
+    "returnsWindow": "{paidBy, select, seller {{days, plural, one {Returns accepted within {days} day of delivery. Return postage is on us.} other {Returns accepted within {days} days of delivery. Return postage is on us.}}} buyer {{days, plural, one {Returns accepted within {days} day of delivery. Return postage is paid by the buyer.} other {Returns accepted within {days} days of delivery. Return postage is paid by the buyer.}}} other {{days, plural, one {Returns accepted within {days} day of delivery.} other {Returns accepted within {days} days of delivery.}}}}"
+  }
+}

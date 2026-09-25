@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, afterEach, beforeAll } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
+import { render, screen, cleanup } from "../setup/render";
 import userEvent from "@testing-library/user-event";
+import { english } from "../setup/translate";
 import { useState } from "react";
 import { DEFAULT_PRODUCT_PAGE_CONFIG, DEFAULT_STOREFRONT_CONFIG } from "@/types/storefront";
 import { ToastProvider } from "@/components/ui/Toast";
@@ -118,7 +119,7 @@ describe("ControlsPanel grouping", () => {
         onProductPageChange={vi.fn()}
         shippingPolicy={{}}
         sellerIdentity={{}}
-        searchEntries={editorEntries([], new Map())}
+        searchEntries={editorEntries([], new Map(), english)}
       />
     </ToastProvider>
   );
@@ -207,7 +208,7 @@ describe("ControlsPanel reopening a setting by name", () => {
             onProductPageChange={vi.fn()}
             shippingPolicy={{}}
             sellerIdentity={{}}
-            searchEntries={editorEntries([], new Map())}
+            searchEntries={editorEntries([], new Map(), english)}
           />
         </SettingTargetProvider>
       </ToastProvider>

@@ -1,0 +1,391 @@
+{
+  "checkForm": "Sprawdź formularz i spróbuj ponownie.",
+  "generic": {
+    "invalid": "Sprawdź formularz i spróbuj ponownie."
+  },
+  "text": {
+    "productTitle": {
+      "required": "Nazwa produktu jest wymagana.",
+      "tooLong": "Nazwa produktu może mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Nazwa produktu zawiera nieobsługiwane znaki."
+    },
+    "productDescription": {
+      "required": "Opis produktu jest wymagany.",
+      "tooLong": "Opis produktu może mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Opis produktu zawiera nieobsługiwane znaki."
+    },
+    "filename": {
+      "required": "Nazwa pliku jest wymagana.",
+      "tooLong": "Nazwa pliku może mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Nazwa pliku zawiera nieobsługiwane znaki."
+    },
+    "galleryAlt": {
+      "required": "Tekst alternatywny jest wymagany.",
+      "tooLong": "Tekst alternatywny może mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Tekst alternatywny zawiera nieobsługiwane znaki."
+    },
+    "specName": {
+      "required": "Nazwa specyfikacji jest wymagana.",
+      "tooLong": "Nazwa specyfikacji może mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Nazwa specyfikacji zawiera nieobsługiwane znaki."
+    },
+    "specValue": {
+      "required": "Wartość specyfikacji jest wymagana.",
+      "tooLong": "Wartość specyfikacji może mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Wartość specyfikacji zawiera nieobsługiwane znaki."
+    },
+    "optionName": {
+      "required": "Nazwa opcji jest wymagana.",
+      "tooLong": "Nazwa opcji może mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Nazwa opcji zawiera nieobsługiwane znaki."
+    },
+    "optionGroupName": {
+      "required": "Nazwa grupy opcji jest wymagana.",
+      "tooLong": "Nazwa grupy opcji może mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Nazwa grupy opcji zawiera nieobsługiwane znaki."
+    },
+    "documentName": {
+      "required": "Nazwa dokumentu jest wymagana.",
+      "tooLong": "Nazwa dokumentu może mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Nazwa dokumentu zawiera nieobsługiwane znaki."
+    },
+    "materials": {
+      "required": "Materiały są wymagane.",
+      "tooLong": "Materiały mogą mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Materiały zawierają nieobsługiwane znaki."
+    },
+    "care": {
+      "required": "Instrukcje pielęgnacji są wymagane.",
+      "tooLong": "Instrukcje pielęgnacji mogą mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Instrukcje pielęgnacji zawierają nieobsługiwane znaki."
+    },
+    "includedItem": {
+      "required": "Element zestawu jest wymagany.",
+      "tooLong": "Element zestawu może mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Element zestawu zawiera nieobsługiwane znaki."
+    },
+    "origin": {
+      "required": "Kraj pochodzenia jest wymagany.",
+      "tooLong": "Kraj pochodzenia może mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Kraj pochodzenia zawiera nieobsługiwane znaki."
+    },
+    "manufacturerName": {
+      "required": "Producent jest wymagany.",
+      "tooLong": "Producent może mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Producent zawiera nieobsługiwane znaki."
+    },
+    "manufacturerAddress": {
+      "required": "Adres producenta jest wymagany.",
+      "tooLong": "Adres producenta może mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Adres producenta zawiera nieobsługiwane znaki."
+    },
+    "responsibleName": {
+      "required": "Osoba odpowiedzialna w UE jest wymagana.",
+      "tooLong": "Osoba odpowiedzialna w UE może mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Osoba odpowiedzialna w UE zawiera nieobsługiwane znaki."
+    },
+    "responsibleAddress": {
+      "required": "Adres osoby odpowiedzialnej w UE jest wymagany.",
+      "tooLong": "Adres osoby odpowiedzialnej w UE może mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Adres osoby odpowiedzialnej w UE zawiera nieobsługiwane znaki."
+    },
+    "safetyIdentifier": {
+      "required": "Numer typu, partii lub seryjny jest wymagany.",
+      "tooLong": "Numer typu, partii lub seryjny może mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Numer typu, partii lub seryjny zawiera nieobsługiwane znaki."
+    },
+    "warnings": {
+      "required": "Ostrzeżenia są wymagane.",
+      "tooLong": "Ostrzeżenia mogą mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Ostrzeżenia zawierają nieobsługiwane znaki."
+    },
+    "businessName": {
+      "required": "Nazwa przedsiębiorcy jest wymagana.",
+      "tooLong": "Nazwa przedsiębiorcy może mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Nazwa przedsiębiorcy zawiera nieobsługiwane znaki."
+    },
+    "businessAddress": {
+      "required": "Adres firmy jest wymagany.",
+      "tooLong": "Adres firmy może mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Adres firmy zawiera nieobsługiwane znaki."
+    },
+    "phone": {
+      "required": "Numer telefonu jest wymagany.",
+      "tooLong": "Numer telefonu może mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Numer telefonu zawiera nieobsługiwane znaki."
+    },
+    "bio": {
+      "required": "Bio jest wymagane.",
+      "tooLong": "Bio może mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Bio zawiera nieobsługiwane znaki."
+    },
+    "destinationArea": {
+      "required": "Kierunek wysyłki jest wymagany.",
+      "tooLong": "Kierunek wysyłki może mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Kierunek wysyłki zawiera nieobsługiwane znaki."
+    },
+    "deliveryTime": {
+      "required": "Czas dostawy jest wymagany.",
+      "tooLong": "Czas dostawy może mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Czas dostawy zawiera nieobsługiwane znaki."
+    },
+    "shippingCost": {
+      "required": "Koszt wysyłki jest wymagany.",
+      "tooLong": "Koszt wysyłki może mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Koszt wysyłki zawiera nieobsługiwane znaki."
+    },
+    "dispatchTime": {
+      "required": "Czas wysyłki jest wymagany.",
+      "tooLong": "Czas wysyłki może mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Czas wysyłki zawiera nieobsługiwane znaki."
+    },
+    "shippingNotes": {
+      "required": "Uwagi o wysyłce są wymagane.",
+      "tooLong": "Uwagi o wysyłce mogą mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Uwagi o wysyłce zawierają nieobsługiwane znaki."
+    },
+    "shippingPolicy": {
+      "required": "Zasady wysyłki są wymagane.",
+      "tooLong": "Zasady wysyłki mogą mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Zasady wysyłki zawierają nieobsługiwane znaki."
+    },
+    "returnsNotes": {
+      "required": "Uwagi o zwrotach są wymagane.",
+      "tooLong": "Uwagi o zwrotach mogą mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Uwagi o zwrotach zawierają nieobsługiwane znaki."
+    },
+    "returnsPolicy": {
+      "required": "Zasady zwrotów są wymagane.",
+      "tooLong": "Zasady zwrotów mogą mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Zasady zwrotów zawierają nieobsługiwane znaki."
+    },
+    "otherCategory": {
+      "required": "Kategoria jest wymagana.",
+      "tooLong": "Kategoria może mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Kategoria zawiera nieobsługiwane znaki."
+    },
+    "storefrontName": {
+      "required": "Nazwa witryny jest wymagana.",
+      "tooLong": "Nazwa witryny może mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Nazwa witryny zawiera nieobsługiwane znaki."
+    },
+    "fontName": {
+      "required": "Nazwa czcionki jest wymagana.",
+      "tooLong": "Nazwa czcionki może mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Nazwa czcionki zawiera nieobsługiwane znaki."
+    },
+    "storeName": {
+      "required": "Nazwa sklepu jest wymagana.",
+      "tooLong": "Nazwa sklepu może mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Nazwa sklepu zawiera nieobsługiwane znaki."
+    },
+    "storeBio": {
+      "required": "Bio sklepu jest wymagane.",
+      "tooLong": "Bio sklepu może mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Bio sklepu zawiera nieobsługiwane znaki."
+    },
+    "ctaLabel": {
+      "required": "Etykieta przycisku zakupu jest wymagana.",
+      "tooLong": "Etykieta przycisku zakupu może mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Etykieta przycisku zakupu zawiera nieobsługiwane znaki."
+    },
+    "shippingProfileName": {
+      "required": "Nazwa profilu wysyłki jest wymagana.",
+      "tooLong": "Nazwa profilu wysyłki może mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Nazwa profilu wysyłki zawiera nieobsługiwane znaki."
+    },
+    "shippingTerms": {
+      "required": "Warunki wysyłki są wymagane.",
+      "tooLong": "Warunki wysyłki mogą mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Warunki wysyłki zawierają nieobsługiwane znaki."
+    },
+    "blockText": {
+      "required": "Tekst bloku jest wymagany.",
+      "tooLong": "Tekst bloku może mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Tekst bloku zawiera nieobsługiwane znaki."
+    },
+    "elementAlt": {
+      "required": "Tekst alternatywny elementu jest wymagany.",
+      "tooLong": "Tekst alternatywny elementu może mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Tekst alternatywny elementu zawiera nieobsługiwane znaki."
+    },
+    "notificationTitle": {
+      "required": "Tytuł powiadomienia jest wymagany.",
+      "tooLong": "Tytuł powiadomienia może mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Tytuł powiadomienia zawiera nieobsługiwane znaki."
+    },
+    "notificationBody": {
+      "required": "Treść powiadomienia jest wymagana.",
+      "tooLong": "Treść powiadomienia może mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Treść powiadomienia zawiera nieobsługiwane znaki."
+    },
+    "searchQuery": {
+      "required": "Zapytanie wyszukiwania jest wymagane.",
+      "tooShort": "Zapytanie wyszukiwania musi mieć co najmniej {minimum} znaków.",
+      "tooLong": "Zapytanie wyszukiwania może mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Zapytanie wyszukiwania zawiera nieobsługiwane znaki."
+    },
+    "factorName": {
+      "required": "Nazwa jest wymagana.",
+      "tooLong": "Nazwa może mieć najwyżej {maximum} znaków.",
+      "unsupported": "Nazwa zawiera nieobsługiwane znaki."
+    },
+    "reportDetails": {
+      "required": "Opis jest wymagany.",
+      "tooLong": "Opis może mieć najwyżej {maximum} znaków.",
+      "unsupported": "Opis zawiera nieobsługiwane znaki."
+    }
+  },
+  "email": {
+    "generic": {
+      "format": "Ten e-mail nie wygląda na adres e-mail.",
+      "tooLong": "Ten e-mail jest za długi.",
+      "unsupported": "Ten e-mail zawiera nieobsługiwane znaki."
+    },
+    "reporter": {
+      "format": "To nie wygląda na adres e-mail.",
+      "tooLong": "Adres e-mail jest zbyt długi.",
+      "unsupported": "Adres e-mail zawiera nieobsługiwane znaki."
+    },
+    "contactEmail": {
+      "format": "E-mail kontaktowy nie wygląda na adres e-mail.",
+      "tooLong": "E-mail kontaktowy jest za długi.",
+      "unsupported": "E-mail kontaktowy zawiera nieobsługiwane znaki."
+    },
+    "manufacturerEmail": {
+      "format": "E-mail producenta nie wygląda na adres e-mail.",
+      "tooLong": "E-mail producenta jest za długi.",
+      "unsupported": "E-mail producenta zawiera nieobsługiwane znaki."
+    },
+    "responsibleEmail": {
+      "format": "E-mail osoby odpowiedzialnej w UE nie wygląda na adres e-mail.",
+      "tooLong": "E-mail osoby odpowiedzialnej w UE jest za długi.",
+      "unsupported": "E-mail osoby odpowiedzialnej w UE zawiera nieobsługiwane znaki."
+    }
+  },
+  "emailQuality": {
+    "placeholder": "E-mail kontaktowy wygląda na przykładowy. Użyj adresu, który faktycznie czytasz.",
+    "disposable": "E-mail kontaktowy znajduje się w domenie tymczasowej skrzynki. Użyj stałego adresu."
+  },
+  "uuid": {
+    "id": "Ten identyfikator jest nieprawidłowy.",
+    "option": "Ta opcja jest nieprawidłowa.",
+    "optionGroup": "Ta grupa opcji jest nieprawidłowa.",
+    "shippingProfile": "Ten profil wysyłki jest nieprawidłowy.",
+    "storefrontId": "Ten identyfikator witryny jest nieprawidłowy.",
+    "blockId": "Identyfikator bloku jest nieprawidłowy.",
+    "notificationRecipient": "Odbiorca powiadomienia jest nieprawidłowy.",
+    "factor": "Ta aplikacja uwierzytelniająca jest nieprawidłowa.",
+    "reportTarget": "Ten element jest nieprawidłowy."
+  },
+  "handle": {
+    "username": "Nazwa użytkownika musi mieć od 3 do 30 znaków, tylko litery, cyfry i znaki podkreślenia."
+  },
+  "hostname": {
+    "domains": "Domeny muszą być zwykłymi domenami pisanymi małymi literami, np. twojastrona.com: bez https://, portu, ścieżki czy symboli wieloznacznych."
+  },
+  "referenceCode": {
+    "vatId": "Numer VAT UE musi mieć od {min} do {max} znaków: liter, cyfr, spacji, kropek lub myślników."
+  },
+  "oneTimeCode": {
+    "authenticator": "Kod to 6 cyfr widocznych w aplikacji uwierzytelniającej."
+  },
+  "hexColor": {
+    "colors": "Kolory muszą być 6-cyfrowym kodem hex, np. #a855f7.",
+    "swatchColours": "Kolory próbek muszą być 6-cyfrowym kodem hex, np. #a855f7."
+  },
+  "int": {
+    "price": {
+      "whole": "Cena musi być liczbą całkowitą.",
+      "tooSmall": "Cena musi wynosić co najmniej {minimum}.",
+      "tooBig": "Cena nie może przekraczać {maximum}."
+    },
+    "maxPerOrder": {
+      "whole": "Maksimum na zamówienie musi być liczbą całkowitą.",
+      "tooSmall": "Maksimum na zamówienie musi wynosić co najmniej {minimum}.",
+      "tooBig": "Maksimum na zamówienie nie może przekraczać {maximum}."
+    }
+  },
+  "list": {
+    "domains": {
+      "tooMany": "Podaj maksymalnie {maximum} domen.",
+      "duplicate": "Każdy wpis w domenach może wystąpić tylko raz."
+    }
+  },
+  "settings": {
+    "currentPasswordRequired": "Podaj aktualne hasło.",
+    "newPasswordTooShort": "Nowe hasło musi mieć co najmniej {minimum} znaków.",
+    "newPasswordTooLong": "Musi mieć mniej niż {maximum} znaków.",
+    "passwordsMismatch": "Nowe hasła nie są takie same.",
+    "pickCountry": "Wybierz kraj z listy.",
+    "legalVersionChanged": "Dokumenty prawne zmieniły się w trakcie czytania. Odśwież i spróbuj ponownie.",
+    "deleteConfirm": "Wpisz dokładnie „{phrase}”, aby potwierdzić."
+  },
+  "password": {
+    "tooShort": "Hasło musi mieć co najmniej {minimum} znaków.",
+    "tooLong": "Musi mieć mniej niż {maximum} znaków.",
+    "tooCommon": "To hasło jest zbyt popularne. Wybierz coś trudniejszego do odgadnięcia.",
+    "repeated": "To hasło jest zbyt łatwe do odgadnięcia. Spróbuj dłuższej kombinacji słów.",
+    "sequence": "To hasło zawiera popularny ciąg znaków z klawiatury. Spróbuj czegoś innego.",
+    "containsIdentity": "Hasło nie może zawierać twojego adresu e-mail ani nazwy użytkownika.",
+    "weakMix": "Użyj wielkich i małych liter, cyfry lub symbolu, albo co najmniej {length} znaków."
+  },
+  "team": {
+    "invalidStore": "Nieprawidłowe odwołanie do sklepu.",
+    "invalidEmail": "To nie wygląda na adres e-mail.",
+    "emailTooLong": "Ten e-mail jest za długi.",
+    "invalidRole": "Wybierz prawidłową rolę.",
+    "invalidInvite": "Nieprawidłowe odwołanie do zaproszenia.",
+    "invalidMember": "Nieprawidłowe odwołanie do członka."
+  },
+  "auth": {
+    "usernameReserved": "Ta nazwa użytkownika jest zastrzeżona. Wybierz inną."
+  },
+  "notifications": {
+    "invalidReference": "Nieprawidłowe odwołanie do powiadomienia."
+  },
+  "product": {
+    "stockRequired": "Ustaw, ile sztuk jest w magazynie.",
+    "optionSpecsTooMany": "Wariant może mieć maksymalnie {maximum} własnych specyfikacji.",
+    "optionGroupEmpty": "Nadaj każdej grupie opcji co najmniej jedną opcję albo usuń grupę.",
+    "optionGroupTooManyOptions": "Grupa opcji może mieć maksymalnie {maximum} opcji.",
+    "includedTooMany": "Podaj maksymalnie {maximum} elementów zestawu.",
+    "specsTooMany": "Podaj maksymalnie {maximum} specyfikacji.",
+    "purchaseLinkFormat": "Link do zakupu musi być pełnym adresem https://.",
+    "purchaseLinkTooLong": "Link do zakupu może mieć maksymalnie {maximum} znaków.",
+    "purchaseLinkCredentials": "Link do zakupu nie może zawierać nazwy użytkownika ani hasła.",
+    "galleryTooMany": "Produkt może mieć maksymalnie {maximum} dodatkowych zdjęć.",
+    "optionGroupsTooMany": "Produkt może mieć maksymalnie {maximum} grup opcji.",
+    "documentsTooMany": "Produkt może mieć maksymalnie {maximum} dokumentów.",
+    "optionDuplicate": "Każda opcja może wystąpić tylko raz.",
+    "optionsTotalTooMany": "Produkt może mieć maksymalnie {maximum} opcji łącznie.",
+    "galleryStaleOption": "Zdjęcie wskazuje na opcję, która już nie istnieje."
+  },
+  "productImport": {
+    "noTitle": "Brak nazwy.",
+    "titleTooLong": "Nazwa jest dłuższa niż 200 znaków.",
+    "noPrice": "Nie udało się odczytać ceny.",
+    "priceZero": "Cena wynosi zero.",
+    "duplicateTitle": "Inny wiersz ma tę samą nazwę."
+  },
+  "shipping": {
+    "shipsFromInvalid": "Z tego kraju nie obsługujemy jeszcze wysyłki.",
+    "destinationsTooMany": "Możesz podać maksymalnie {maximum} kierunków.",
+    "returnsWindowWhole": "Termin na zwrot to liczba całkowita dni.",
+    "returnsWindowNegative": "Termin na zwrot nie może być ujemny.",
+    "returnsWindowTooLong": "Termin na zwrot wynosi maksymalnie {maximum} dni."
+  },
+  "storefront": {
+    "backgroundImageKind": "Obrazy tła muszą być przesłanymi obrazami.",
+    "customFontKind": "Własne czcionki muszą być przesłanymi plikami czcionek.",
+    "elementKind": "Elementy muszą być przesłanymi elementami.",
+    "productPageSectionsTooMany": "Strona produktu musi zawierać każdą sekcję dokładnie raz.",
+    "productPageSectionDuplicate": "Strona produktu nie może zawierać tej samej sekcji dwa razy.",
+    "shippingProfilesTooMany": "Sklep może mieć maksymalnie {maximum} profili wysyłki.",
+    "shippingProfileDuplicate": "Każdy profil wysyłki może wystąpić tylko raz.",
+    "spanRange": "Sformatowany zakres musi kończyć się po jego rozpoczęciu",
+    "blocksTooMany": "Witryna może zawierać maksymalnie {maximum} bloków. Usuń część bloków albo podziel tę witrynę na dwie.",
+    "blocksDuplicate": "Bloki siatki muszą być unikalne.",
+    "blockOutsideCanvas": "Blok znajduje się poza obszarem roboczym."
+  }
+}

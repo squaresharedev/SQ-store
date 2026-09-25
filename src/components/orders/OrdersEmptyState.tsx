@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import {
   ghostButtonClass,
@@ -25,35 +26,31 @@ export function OrdersEmptyState({
   filtered: boolean;
   onClear?: () => void;
 }) {
+  const t = useTranslations("Orders.empty");
   return (
     <div className="border border-border bg-card px-4 py-16 text-center">
       {filtered ? (
         <>
           <p className="text-base font-semibold text-foreground">
-            No orders match these filters
+            {t("filteredTitle")}
           </p>
-          <p className={cn(helpTextClass, "mt-1")}>
-            Try widening the date range or clearing filters.
-          </p>
+          <p className={cn(helpTextClass, "mt-1")}>{t("filteredHint")}</p>
           {onClear && (
             <button
               type="button"
               className={cn(ghostButtonClass, "mt-4")}
               onClick={onClear}
             >
-              Clear filters
+              {t("clearFilters")}
             </button>
           )}
         </>
       ) : (
         <>
-          <p className="text-base font-semibold text-foreground">No orders yet</p>
-          <p className={cn(helpTextClass, "mx-auto mt-1 max-w-md")}>
-            Square Share checkout isn&apos;t open yet. Sales through your own buy
-            link or by email won&apos;t show up here.
-          </p>
+          <p className="text-base font-semibold text-foreground">{t("title")}</p>
+          <p className={cn(helpTextClass, "mx-auto mt-1 max-w-md")}>{t("hint")}</p>
           <Link href="/products" className={cn(secondaryButtonClass, "mt-4")}>
-            Go to products
+            {t("goToProducts")}
           </Link>
         </>
       )}

@@ -1,9 +1,11 @@
+import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function OrdersSkeleton({ rows = 8 }: { rows?: number }) {
+  const t = useTranslations("Orders.skeleton");
   return (
     <div className="border border-border bg-card">
-      <span className="sr-only">loading orders</span>
+      <span className="sr-only">{t("loading")}</span>
 
       {/* Header bar */}
       <div className="border-b border-border px-4 py-3" aria-hidden="true">

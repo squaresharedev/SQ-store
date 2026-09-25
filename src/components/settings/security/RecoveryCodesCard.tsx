@@ -3,9 +3,11 @@
 import * as React from "react";
 import { useActionState } from "react";
 import { RefreshCw, TriangleAlert } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { Spinner } from "@/components/ui/spinner";
+import { useResolveMessage } from "@/components/ui/ActionErrorNotice";
 import { helpTextClass } from "@/components/ui/control-styles";
 import { SettingsCard } from "@/components/settings/SettingsCard";
 import { StepUpField } from "@/components/auth/StepUp";
@@ -21,19 +23,16 @@ const INITIAL: ManageState = {};
  * holds only hashes.
  */
 export function RecoveryCodesCard({ remaining }: { remaining: number | null }) {
+  const t = useTranslations("Settings.security.recoveryCodes");
   const [open, setOpen] = React.useState(false);
   const low = remaining !== null && remaining <= RECOVERY_CODES_LOW;
   const close = React.useCallback(() => setOpen(false), []);
 
   return (
-    <SettingsCard
-      id="recovery-codes"
-      title="Recovery codes"
-      description="One-time codes for signing in if you lose your phone. Keep them somewhere other than the phone itself."
-    >
+    <SettingsCard id="recovery-codes" title={t("cardTitle")} description={t("cardDescription")}>
       <div className="flex flex-col gap-4">
         {remaining === null ? (
-          <p className={helpTextClass}>We couldn&rsquo;t check how many you have left.</p>
+          <p className={helpTextClass}>{t("countUnavailable")}</p>
         ) : (
           <p
             className={low ? "flex items-start gap-2 font-inter text-sm text-destructive" : helpTextClass}
@@ -41,19 +40,17 @@ export function RecoveryCodesCard({ remaining }: { remaining: number | null }) {
           >
             {low && <TriangleAlert aria-hidden className="mt-0.5 size-4 shrink-0" />}
             <span>
-              {remaining} of {RECOVERY_CODE_COUNT} codes left.
-              {remaining === 0
-                ? " You have none left: generate a new set now."
-                : low
-                  ? " Running low: generate a new set."
-                  : ""}
+              {t(remaining === 0 ? "remainingNone" : low ? "remainingLow" : "remaining", {
+                count: remaining,
+                total: RECOVERY_CODE_COUNT,
+              })}
             </span>
           </p>
         )}
         <div>
           <Button type="button" variant="secondary" onClick={() => setOpen(true)}>
             <RefreshCw aria-hidden className="size-4" />
-            Generate new codes
+            {t("generate")}
           </Button>
         </div>
       </div>
@@ -64,17 +61,20 @@ export function RecoveryCodesCard({ remaining }: { remaining: number | null }) {
 }
 
 function RegenerateModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const t = useTranslations("Settings.security");
+  const tCommon = useTranslations("Common.actions");
+  const resolve = useResolveMessage();
   const [state, formAction, isPending] = useActionState(regenerateRecoveryCodes, INITIAL);
 
   return (
     <Modal
       open={open}
       onClose={onClose}
-      title={state.codes ? "Your new recovery codes" : "Generate new recovery codes?"}
+      title={state.codes ? t("recoveryCodes.newTitle") : t("recoveryCodes.regenerateTitle")}
       description={
         state.codes
-          ? "Your old codes no longer work."
-          : "Your current codes stop working as soon as the new ones are made."
+          ? t("recoveryCodes.newDescription")
+          : t("recoveryCodes.regenerateDescription")
       }
       className="rounded-none sm:rounded-none"
     >
@@ -86,25 +86,25 @@ function RegenerateModal({ open, onClose }: { open: boolean; onClose: () => void
             id="regenerate-codes"
             state={state}
             always
-            description="Enter a current code from your authenticator app to confirm."
+            description={t("stepUpConfirm")}
           />
           {state.error && (
             <p role="alert" className="font-inter text-sm font-medium text-destructive">
-              {state.error}
+              {resolve(state.error.message)}
             </p>
           )}
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <Button type="button" variant="ghost" onClick={onClose}>
-              Cancel
+              {tCommon("cancel")}
             </Button>
             <Button type="submit" disabled={isPending} suppressHydrationWarning>
               {isPending ? (
                 <>
                   <Spinner />
-                  Generating…
+                  {t("recoveryCodes.generating")}
                 </>
               ) : (
-                "Generate new codes"
+                t("recoveryCodes.generate")
               )}
             </Button>
           </div>

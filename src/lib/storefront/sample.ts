@@ -1,3 +1,4 @@
+import type { MessageKey } from "@/i18n/types";
 import type { Product } from "@/types/product";
 import type { SellerShippingPolicy } from "@/types/shipping-policy";
 import {
@@ -22,23 +23,38 @@ import { VIBE_PRESETS } from "./presets";
  *
  * Every value stays inside the storefront contract (storefrontConfigSchema), so
  * what a seller sees here is something they could really build; a unit test
- * parses it to keep it that way. Pictures are static illustrations under
- * public/sample-storefront, which is why these products carry plain paths where
- * a real product carries a signed URL.
+ * parses it to keep it that way. Pictures are real product photos under
+ * public/sample-storefront (the same studio shots the marketing site uses),
+ * which is why these products carry plain paths where a real product carries a
+ * signed URL.
+ *
+ * THE LOOK is deliberately plain and current: a light neutral canvas, the sans
+ * face, near-black ink, white cards with softly rounded corners and the name
+ * and price always under the picture. A first storefront gets copied, so the
+ * example should be one worth copying.
+ *
+ * IN THE SELLER'S LANGUAGE. It is an example of what they will make, so its
+ * words (the name, the product titles and descriptions, the bio and text
+ * blocks, the dispatch line) are messages under `Storefront.sample`, and
+ * buildSampleStorefront puts it together for whoever is reading. The brand name
+ * and the example address stay as they are, like any seller's own would.
  */
 
 export const SAMPLE_STOREFRONT_PATH = "/storefront/sample";
-export const SAMPLE_STOREFRONT_NAME = "Sample storefront";
+
+/** A translator over full message keys: `useTranslations()` with no namespace,
+ *  or `getTranslations()` on the server. */
+type Translate = (key: MessageKey) => string;
 
 /** Fixed, well-formed ids: block keys and product lookups need stable values,
  *  and nothing checks them against the database because nothing is stored. */
 const PRODUCT_IDS = {
-  mug: "5a3e1d20-0c4f-4b6e-9a61-1f0d2c3b4a01",
-  bowl: "5a3e1d20-0c4f-4b6e-9a61-1f0d2c3b4a02",
-  vase: "5a3e1d20-0c4f-4b6e-9a61-1f0d2c3b4a03",
-  candle: "5a3e1d20-0c4f-4b6e-9a61-1f0d2c3b4a04",
-  towel: "5a3e1d20-0c4f-4b6e-9a61-1f0d2c3b4a05",
-  plate: "5a3e1d20-0c4f-4b6e-9a61-1f0d2c3b4a06",
+  camera: "5a3e1d20-0c4f-4b6e-9a61-1f0d2c3b4a01",
+  headphones: "5a3e1d20-0c4f-4b6e-9a61-1f0d2c3b4a02",
+  watch: "5a3e1d20-0c4f-4b6e-9a61-1f0d2c3b4a03",
+  mouse: "5a3e1d20-0c4f-4b6e-9a61-1f0d2c3b4a04",
+  speaker: "5a3e1d20-0c4f-4b6e-9a61-1f0d2c3b4a05",
+  succulent: "5a3e1d20-0c4f-4b6e-9a61-1f0d2c3b4a06",
 } as const;
 
 function sampleProduct(
@@ -54,7 +70,7 @@ function sampleProduct(
     price,
     currency: "EUR",
     status: "active",
-    imageUrl: `/sample-storefront/${key}.svg`,
+    imageUrl: `/sample-storefront/${key}.webp`,
     digitalFileName: null,
     trackStock: false,
     stockQuantity: null,
@@ -63,88 +79,147 @@ function sampleProduct(
   };
 }
 
-export const SAMPLE_PRODUCTS: readonly Product[] = [
-  sampleProduct("mug", "Speckled mug", 24, "Stoneware mug with a speckled glaze and a blue dipped base. Holds 350 ml."),
-  sampleProduct("bowl", "Stoneware bowl", 32, "A deep everyday bowl, glazed sage inside. Dishwasher safe."),
-  sampleProduct("vase", "Bud vase", 28, "A small terracotta vase for a few dried stems."),
-  sampleProduct("candle", "Soy candle", 22, "Hand-poured soy wax in a reusable tin. Around 40 hours of burn time."),
-  sampleProduct("towel", "Linen tea towel", 18, "Washed linen with a woven stripe. Gets softer with every wash."),
-  sampleProduct("plate", "Serving plate", 45, "A wide plate for sharing, with a speckled rim."),
+const PRODUCTS: readonly {
+  key: keyof typeof PRODUCT_IDS;
+  price: number;
+  title: MessageKey;
+  description: MessageKey;
+}[] = [
+  {
+    key: "camera",
+    price: 119,
+    title: "Storefront.sample.content.products.camera.title",
+    description: "Storefront.sample.content.products.camera.description",
+  },
+  {
+    key: "headphones",
+    price: 89,
+    title: "Storefront.sample.content.products.headphones.title",
+    description: "Storefront.sample.content.products.headphones.description",
+  },
+  {
+    key: "watch",
+    price: 249,
+    title: "Storefront.sample.content.products.watch.title",
+    description: "Storefront.sample.content.products.watch.description",
+  },
+  {
+    key: "mouse",
+    price: 39,
+    title: "Storefront.sample.content.products.mouse.title",
+    description: "Storefront.sample.content.products.mouse.description",
+  },
+  {
+    key: "speaker",
+    price: 79,
+    title: "Storefront.sample.content.products.speaker.title",
+    description: "Storefront.sample.content.products.speaker.description",
+  },
+  {
+    key: "succulent",
+    price: 18,
+    title: "Storefront.sample.content.products.succulent.title",
+    description: "Storefront.sample.content.products.succulent.description",
+  },
 ];
 
 const TEXT_IDS = {
   heading: "7c2b9e40-3d1a-4f5c-8b72-2e4f6a8c0d01",
   story: "7c2b9e40-3d1a-4f5c-8b72-2e4f6a8c0d02",
 } as const;
-const SHAPE_IDS = {
-  sparkle: "9d4c2a60-5e3b-4a7d-9c83-3f5a7b9d1e01",
-  circle: "9d4c2a60-5e3b-4a7d-9c83-3f5a7b9d1e02",
-} as const;
 
-export const SAMPLE_STOREFRONT_CONFIG: StorefrontConfig = {
-  theme: {
-    ...DEFAULT_STOREFRONT_CONFIG.theme,
-    // The Classic look: every tile labelled, in the same serif.
-    ...VIBE_PRESETS.classic,
-    accent: "#5b4636",
-    columns: 6,
-    rows: 9,
-  },
-  header: {
-    show: true,
-    name: "Juniper & Clay",
-    bio: "Small-batch ceramics and linens, made by hand.",
-  },
-  blocks: [
-    { type: "product", productId: PRODUCT_IDS.mug, x: 0, y: 0, w: 3, h: 3 },
-    { type: "product", productId: PRODUCT_IDS.bowl, x: 3, y: 0, w: 3, h: 3 },
-    {
-      type: "text",
-      id: TEXT_IDS.heading,
-      text: "New this season",
-      variant: "subheading",
-      align: "center",
-      x: 0,
-      y: 3,
-      w: 6,
-      h: 1,
+/** The sample's own brand, a name like any seller's: never translated. */
+const SAMPLE_BRAND = "Parallel Goods";
+
+function sampleConfig(t: Translate): StorefrontConfig {
+  return {
+    theme: {
+      ...DEFAULT_STOREFRONT_CONFIG.theme,
+      // A shop: every tile labelled, all the time (the Classic behaviour), but
+      // in the sans face on a light neutral canvas rather than serif on cream.
+      ...VIBE_PRESETS.classic,
+      background: { kind: "solid", color: "#f4f4f5" },
+      accent: "#0a0a0a",
+      font: "sans",
+      priceTagFont: "inter",
+      cornerRadius: 14,
+      gridGap: 12,
+      columns: 6,
+      rows: 9,
     },
-    { type: "product", productId: PRODUCT_IDS.vase, x: 0, y: 4, w: 2, h: 2 },
-    { type: "product", productId: PRODUCT_IDS.candle, x: 2, y: 4, w: 2, h: 2 },
-    { type: "product", productId: PRODUCT_IDS.towel, x: 4, y: 4, w: 2, h: 2 },
-    { type: "product", productId: PRODUCT_IDS.plate, x: 0, y: 6, w: 4, h: 3 },
-    {
-      type: "text",
-      id: TEXT_IDS.story,
-      text: "Every piece is thrown, glazed and fired by hand, so no two are quite the same.",
-      variant: "body",
-      align: "left",
-      x: 4,
-      y: 6,
-      w: 2,
-      h: 2,
+    header: {
+      show: true,
+      name: SAMPLE_BRAND,
+      bio: t("Storefront.sample.content.bio"),
     },
-    { type: "shape", id: SHAPE_IDS.sparkle, kind: "sparkle", color: "#5b4636", x: 4, y: 8, w: 1, h: 1 },
-    { type: "shape", id: SHAPE_IDS.circle, kind: "circle", color: "#d8c3a5", x: 5, y: 8, w: 1, h: 1 },
-  ],
-  productPage: DEFAULT_PRODUCT_PAGE_CONFIG,
-};
+    blocks: [
+      { type: "product", productId: PRODUCT_IDS.camera, x: 0, y: 0, w: 3, h: 3 },
+      { type: "product", productId: PRODUCT_IDS.headphones, x: 3, y: 0, w: 3, h: 3 },
+      {
+        type: "text",
+        id: TEXT_IDS.heading,
+        text: t("Storefront.sample.content.heading"),
+        variant: "subheading",
+        align: "left",
+        x: 0,
+        y: 3,
+        w: 6,
+        h: 1,
+      },
+      { type: "product", productId: PRODUCT_IDS.watch, x: 0, y: 4, w: 2, h: 2 },
+      { type: "product", productId: PRODUCT_IDS.mouse, x: 2, y: 4, w: 2, h: 2 },
+      { type: "product", productId: PRODUCT_IDS.succulent, x: 4, y: 4, w: 2, h: 2 },
+      { type: "product", productId: PRODUCT_IDS.speaker, x: 0, y: 6, w: 4, h: 3 },
+      {
+        type: "text",
+        id: TEXT_IDS.story,
+        text: t("Storefront.sample.content.story"),
+        variant: "body",
+        align: "left",
+        x: 4,
+        y: 6,
+        w: 2,
+        h: 3,
+      },
+    ],
+    productPage: DEFAULT_PRODUCT_PAGE_CONFIG,
+  };
+}
 
 /** The trader details the sample's product pages show. Complete, so the
  *  designer's "seller details missing" notices stay out of a storefront the
  *  seller cannot publish anyway. */
 export const SAMPLE_SELLER: StorefrontSeller = {
-  businessName: "Juniper & Clay",
+  businessName: SAMPLE_BRAND,
   address: "12 Example Street, Lisbon, Portugal",
   email: "hello@example.com",
   country: "PT",
 };
 
-export const SAMPLE_SHIPPING_POLICY: SellerShippingPolicy = {
-  shipsFrom: "PT",
-  dispatch: "Ships within 2 business days",
-  returnsWindowDays: 14,
+export type SampleStorefront = {
+  name: string;
+  config: StorefrontConfig;
+  products: readonly Product[];
+  seller: StorefrontSeller;
+  shippingPolicy: SellerShippingPolicy;
 };
+
+/** The whole sample, in the language `t` speaks. */
+export function buildSampleStorefront(t: Translate): SampleStorefront {
+  return {
+    name: t("Storefront.sample.name"),
+    config: sampleConfig(t),
+    products: PRODUCTS.map((product) =>
+      sampleProduct(product.key, t(product.title), product.price, t(product.description)),
+    ),
+    seller: SAMPLE_SELLER,
+    shippingPolicy: {
+      shipsFrom: "PT",
+      dispatch: t("Storefront.sample.content.dispatch"),
+      returnsWindowDays: 14,
+    },
+  };
+}
 
 /**
  * A stand-in object key for a file added inside the sample.

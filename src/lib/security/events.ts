@@ -1,8 +1,10 @@
 import { headers } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { createNotification } from "@/lib/notifications/create";
+import { createNotification, notificationInEnglish } from "@/lib/notifications/create";
 import { sendEmail } from "@/lib/email/send";
+import type { NotificationMessageRef } from "@/lib/notifications/message";
 import { clientKey } from "@/lib/rate-limit";
+import type { MessageKey } from "@/i18n/types";
 import type { Json } from "@/types";
 
 /**
@@ -53,21 +55,22 @@ export type SecurityEvent = (typeof SECURITY_EVENTS)[number];
 
 /**
  * How each event reads in the account's own activity list (Settings ›
- * Security). Past tense, plain language, no jargon beyond "two-factor".
+ * Security): the message key for each, resolved where the list renders. Past
+ * tense, plain language, no jargon beyond "two-factor".
  */
-export const SECURITY_EVENT_LABELS: Record<SecurityEvent, string> = {
-  "password.changed": "Password changed",
-  "password.set": "Password set",
-  "password.reset_requested": "Password reset link requested",
-  "email.change_requested": "Email change requested",
-  "mfa.enabled": "Two-factor authentication turned on",
-  "mfa.disabled": "Two-factor authentication turned off",
-  "mfa.factor_added": "Authenticator app added",
-  "mfa.factor_removed": "Authenticator app removed",
-  "mfa.recovery_codes_regenerated": "New recovery codes generated",
-  "mfa.recovery_code_used": "Recovery code used to sign in",
-  "mfa.challenge_failed": "Wrong two-factor code entered at sign-in",
-  "mfa.locked_out": "Two-factor sign-in paused after repeated wrong codes",
+export const SECURITY_EVENT_LABELS: Record<SecurityEvent, MessageKey> = {
+  "password.changed": "Settings.security.activity.events.passwordChanged",
+  "password.set": "Settings.security.activity.events.passwordSet",
+  "password.reset_requested": "Settings.security.activity.events.passwordResetRequested",
+  "email.change_requested": "Settings.security.activity.events.emailChangeRequested",
+  "mfa.enabled": "Settings.security.activity.events.twoFactorEnabled",
+  "mfa.disabled": "Settings.security.activity.events.twoFactorDisabled",
+  "mfa.factor_added": "Settings.security.activity.events.factorAdded",
+  "mfa.factor_removed": "Settings.security.activity.events.factorRemoved",
+  "mfa.recovery_codes_regenerated": "Settings.security.activity.events.recoveryCodesRegenerated",
+  "mfa.recovery_code_used": "Settings.security.activity.events.recoveryCodeUsed",
+  "mfa.challenge_failed": "Settings.security.activity.events.challengeFailed",
+  "mfa.locked_out": "Settings.security.activity.events.lockedOut",
 };
 
 export function isSecurityEvent(value: unknown): value is SecurityEvent {
@@ -149,23 +152,26 @@ export async function recordSecurityEvent(input: {
  * until Cloudflare Email Service is configured, so until then the bell and the
  * activity log are what the owner has.
  */
+export type SecurityNotice = {
+  /** Keys, like every notification: the bell resolves them for the reader. */
+  title: NotificationMessageRef;
+  body: NotificationMessageRef;
+  /** Where the bell entry links. Defaults to the password card. */
+  href?: string;
+  /**
+   * Also email this to the account's address. For the events where the
+   * in-app bell is the WRONG channel: if an intruder just turned 2FA off,
+   * the owner may never see the dashboard again, but they will see their
+   * inbox. Goes through lib/email/send.ts, so it is off until Cloudflare
+   * Email Service is configured, and lands in the dev outbox locally.
+   */
+  emailTo?: string | null;
+};
+
 export async function alertSecurityEvent(
   userId: string,
   event: SecurityEvent,
-  notify: {
-    title: string;
-    body: string;
-    /** Where the bell entry links. Defaults to the password card. */
-    href?: string;
-    /**
-     * Also email this to the account's address. For the events where the
-     * in-app bell is the WRONG channel: if an intruder just turned 2FA off,
-     * the owner may never see the dashboard again, but they will see their
-     * inbox. Goes through lib/email/send.ts, so it is off until Cloudflare
-     * Email Service is configured, and lands in the dev outbox locally.
-     */
-    emailTo?: string | null;
-  },
+  notify: SecurityNotice,
 ): Promise<void> {
   try {
     await Promise.allSettled([
@@ -173,8 +179,7 @@ export async function alertSecurityEvent(
       createNotification({
         userId,
         type: "security",
-        title: notify.title,
-        body: notify.body,
+        message: { title: notify.title, body: notify.body },
         data: { href: notify.href ?? "/settings/account#password" },
       }),
       notify.emailTo ? emailSecurityNotice(notify.emailTo, notify) : Promise.resolve(),
@@ -197,12 +202,17 @@ export async function alertSecurityEvent(
  * than the request's Host header, so a forged Host cannot point it elsewhere.
  * Never throws (sendEmail only throws on a deployment misconfiguration, which
  * is caught here so the credential change that triggered it still stands).
+ *
+ * In English, like the bell row's stored title and body: the mailer has no
+ * localised templates yet.
  */
-async function emailSecurityNotice(
-  to: string,
-  notice: { title: string; body: string; href?: string },
-): Promise<void> {
+async function emailSecurityNotice(to: string, notify: SecurityNotice): Promise<void> {
   try {
+    const notice = {
+      title: notificationInEnglish(notify.title),
+      body: notificationInEnglish(notify.body),
+      href: notify.href,
+    };
     const origin = (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").replace(
       /\/+$/,
       "",

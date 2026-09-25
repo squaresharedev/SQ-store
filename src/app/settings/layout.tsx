@@ -1,20 +1,25 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
+import { ScopedIntlProvider } from "@/i18n/ScopedIntlProvider";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { SettingsShell } from "@/components/settings/SettingsShell";
 import { StepUpProvider } from "@/components/auth/StepUp";
 import { stepUpFreshUntil } from "@/lib/auth/assurance";
 import { getAssurance, getProfile, requireUser } from "@/lib/auth/session";
 
-export const metadata: Metadata = {
-  // The template applies to every child page's `title` field, so a page
-  // that exports title: "Business & seller details" gets the full tab title
-  // "Business & seller details | Square Share". The default covers the
-  // (unreachable, since / redirects) root URL.
-  title: {
-    template: "%s | Square Share",
-    default: "Settings | Square Share",
-  },
-};
+// The template applies to every child page's `title` field, so a page
+// whose title is "Business & seller details" gets the full tab title
+// "Business & seller details | Square Share". The default covers the
+// (unreachable, since / redirects) root URL.
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Settings.metadata.layout");
+  return {
+    title: {
+      template: t("titleTemplate"),
+      default: t("default"),
+    },
+  };
+}
 
 // force-dynamic: see (dashboard)/layout.tsx — requireUser()'s cookies() call
 // happens after an env-var guard that can throw first, so implicit dynamic
@@ -39,14 +44,16 @@ export default async function SettingsLayout({
 }) {
   const user = await requireUser("/settings");
   const [profile, assurance] = await Promise.all([getProfile(), getAssurance()]);
+  const t = await getTranslations("Settings.account");
   const username =
-    profile?.username || user.email?.split("@")[0] || "Account";
+    profile?.username || user.email?.split("@")[0] || t("fallbackName");
 
   // Every sensitive settings form asks for a two-factor code once the
   // session's last one is more than a few minutes old. The provider tells
   // those forms when that is, so the code box is on screen BEFORE they submit
   // (see components/auth/StepUp.tsx for why that matters).
   return (
+    <ScopedIntlProvider scope="app">
     <DashboardShell username={username}>
       <StepUpProvider
         enrolled={assurance?.enrolled ?? false}
@@ -58,5 +65,6 @@ export default async function SettingsLayout({
         </SettingsShell>
       </StepUpProvider>
     </DashboardShell>
+    </ScopedIntlProvider>
   );
 }

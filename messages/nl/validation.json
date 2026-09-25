@@ -1,0 +1,391 @@
+{
+  "checkForm": "Controleer het formulier en probeer het opnieuw.",
+  "generic": {
+    "invalid": "Controleer het formulier en probeer het opnieuw."
+  },
+  "text": {
+    "productTitle": {
+      "required": "Een producttitel is verplicht.",
+      "tooLong": "Een producttitel mag maximaal {maximum} tekens bevatten.",
+      "unsupported": "Een producttitel bevat niet-ondersteunde tekens."
+    },
+    "productDescription": {
+      "required": "Een productbeschrijving is verplicht.",
+      "tooLong": "Een productbeschrijving mag maximaal {maximum} tekens bevatten.",
+      "unsupported": "Een productbeschrijving bevat niet-ondersteunde tekens."
+    },
+    "filename": {
+      "required": "Een bestandsnaam is verplicht.",
+      "tooLong": "Een bestandsnaam mag maximaal {maximum} tekens bevatten.",
+      "unsupported": "Een bestandsnaam bevat niet-ondersteunde tekens."
+    },
+    "galleryAlt": {
+      "required": "Alt-tekst is verplicht.",
+      "tooLong": "Alt-tekst mag maximaal {maximum} tekens bevatten.",
+      "unsupported": "Alt-tekst bevat niet-ondersteunde tekens."
+    },
+    "specName": {
+      "required": "Een specificatienaam is verplicht.",
+      "tooLong": "Een specificatienaam mag maximaal {maximum} tekens bevatten.",
+      "unsupported": "Een specificatienaam bevat niet-ondersteunde tekens."
+    },
+    "specValue": {
+      "required": "Een specificatiewaarde is verplicht.",
+      "tooLong": "Een specificatiewaarde mag maximaal {maximum} tekens bevatten.",
+      "unsupported": "Een specificatiewaarde bevat niet-ondersteunde tekens."
+    },
+    "optionName": {
+      "required": "Een optienaam is verplicht.",
+      "tooLong": "Een optienaam mag maximaal {maximum} tekens bevatten.",
+      "unsupported": "Een optienaam bevat niet-ondersteunde tekens."
+    },
+    "optionGroupName": {
+      "required": "Een optiegroepnaam is verplicht.",
+      "tooLong": "Een optiegroepnaam mag maximaal {maximum} tekens bevatten.",
+      "unsupported": "Een optiegroepnaam bevat niet-ondersteunde tekens."
+    },
+    "documentName": {
+      "required": "Een documentnaam is verplicht.",
+      "tooLong": "Een documentnaam mag maximaal {maximum} tekens bevatten.",
+      "unsupported": "Een documentnaam bevat niet-ondersteunde tekens."
+    },
+    "materials": {
+      "required": "Materialen zijn verplicht.",
+      "tooLong": "Materialen mogen maximaal {maximum} tekens bevatten.",
+      "unsupported": "Materialen bevatten niet-ondersteunde tekens."
+    },
+    "care": {
+      "required": "Onderhoudsinstructies zijn verplicht.",
+      "tooLong": "Onderhoudsinstructies mogen maximaal {maximum} tekens bevatten.",
+      "unsupported": "Onderhoudsinstructies bevatten niet-ondersteunde tekens."
+    },
+    "includedItem": {
+      "required": "Een inbegrepen item is verplicht.",
+      "tooLong": "Een inbegrepen item mag maximaal {maximum} tekens bevatten.",
+      "unsupported": "Een inbegrepen item bevat niet-ondersteunde tekens."
+    },
+    "origin": {
+      "required": "Land van herkomst is verplicht.",
+      "tooLong": "Land van herkomst mag maximaal {maximum} tekens bevatten.",
+      "unsupported": "Land van herkomst bevat niet-ondersteunde tekens."
+    },
+    "manufacturerName": {
+      "required": "De fabrikant is verplicht.",
+      "tooLong": "De fabrikant mag maximaal {maximum} tekens bevatten.",
+      "unsupported": "De fabrikant bevat niet-ondersteunde tekens."
+    },
+    "manufacturerAddress": {
+      "required": "Het adres van de fabrikant is verplicht.",
+      "tooLong": "Het adres van de fabrikant mag maximaal {maximum} tekens bevatten.",
+      "unsupported": "Het adres van de fabrikant bevat niet-ondersteunde tekens."
+    },
+    "responsibleName": {
+      "required": "De verantwoordelijke persoon in de EU is verplicht.",
+      "tooLong": "De verantwoordelijke persoon in de EU mag maximaal {maximum} tekens bevatten.",
+      "unsupported": "De verantwoordelijke persoon in de EU bevat niet-ondersteunde tekens."
+    },
+    "responsibleAddress": {
+      "required": "Het adres van de verantwoordelijke persoon in de EU is verplicht.",
+      "tooLong": "Het adres van de verantwoordelijke persoon in de EU mag maximaal {maximum} tekens bevatten.",
+      "unsupported": "Het adres van de verantwoordelijke persoon in de EU bevat niet-ondersteunde tekens."
+    },
+    "safetyIdentifier": {
+      "required": "Het type, partij- of serienummer is verplicht.",
+      "tooLong": "Het type, partij- of serienummer mag maximaal {maximum} tekens bevatten.",
+      "unsupported": "Het type, partij- of serienummer bevat niet-ondersteunde tekens."
+    },
+    "warnings": {
+      "required": "Waarschuwingen zijn verplicht.",
+      "tooLong": "Waarschuwingen mogen maximaal {maximum} tekens bevatten.",
+      "unsupported": "Waarschuwingen bevatten niet-ondersteunde tekens."
+    },
+    "businessName": {
+      "required": "De handelsnaam is verplicht.",
+      "tooLong": "De handelsnaam mag maximaal {maximum} tekens bevatten.",
+      "unsupported": "De handelsnaam bevat niet-ondersteunde tekens."
+    },
+    "businessAddress": {
+      "required": "Het vestigingsadres is verplicht.",
+      "tooLong": "Het vestigingsadres mag maximaal {maximum} tekens bevatten.",
+      "unsupported": "Het vestigingsadres bevat niet-ondersteunde tekens."
+    },
+    "phone": {
+      "required": "Het telefoonnummer is verplicht.",
+      "tooLong": "Het telefoonnummer mag maximaal {maximum} tekens bevatten.",
+      "unsupported": "Het telefoonnummer bevat niet-ondersteunde tekens."
+    },
+    "bio": {
+      "required": "Je bio is verplicht.",
+      "tooLong": "Je bio mag maximaal {maximum} tekens bevatten.",
+      "unsupported": "Je bio bevat niet-ondersteunde tekens."
+    },
+    "destinationArea": {
+      "required": "Een bestemming is verplicht.",
+      "tooLong": "Een bestemming mag maximaal {maximum} tekens bevatten.",
+      "unsupported": "Een bestemming bevat niet-ondersteunde tekens."
+    },
+    "deliveryTime": {
+      "required": "Een levertijd is verplicht.",
+      "tooLong": "Een levertijd mag maximaal {maximum} tekens bevatten.",
+      "unsupported": "Een levertijd bevat niet-ondersteunde tekens."
+    },
+    "shippingCost": {
+      "required": "Verzendkosten zijn verplicht.",
+      "tooLong": "Verzendkosten mogen maximaal {maximum} tekens bevatten.",
+      "unsupported": "Verzendkosten bevatten niet-ondersteunde tekens."
+    },
+    "dispatchTime": {
+      "required": "De verzendtermijn is verplicht.",
+      "tooLong": "De verzendtermijn mag maximaal {maximum} tekens bevatten.",
+      "unsupported": "De verzendtermijn bevat niet-ondersteunde tekens."
+    },
+    "shippingNotes": {
+      "required": "De verzendopmerkingen zijn verplicht.",
+      "tooLong": "De verzendopmerkingen mogen maximaal {maximum} tekens bevatten.",
+      "unsupported": "De verzendopmerkingen bevatten niet-ondersteunde tekens."
+    },
+    "shippingPolicy": {
+      "required": "Het verzendbeleid is verplicht.",
+      "tooLong": "Het verzendbeleid mag maximaal {maximum} tekens bevatten.",
+      "unsupported": "Het verzendbeleid bevat niet-ondersteunde tekens."
+    },
+    "returnsNotes": {
+      "required": "De retouropmerkingen zijn verplicht.",
+      "tooLong": "De retouropmerkingen mogen maximaal {maximum} tekens bevatten.",
+      "unsupported": "De retouropmerkingen bevatten niet-ondersteunde tekens."
+    },
+    "returnsPolicy": {
+      "required": "Het retourbeleid is verplicht.",
+      "tooLong": "Het retourbeleid mag maximaal {maximum} tekens bevatten.",
+      "unsupported": "Het retourbeleid bevat niet-ondersteunde tekens."
+    },
+    "otherCategory": {
+      "required": "De categorie is verplicht.",
+      "tooLong": "De categorie mag maximaal {maximum} tekens bevatten.",
+      "unsupported": "De categorie bevat niet-ondersteunde tekens."
+    },
+    "storefrontName": {
+      "required": "Een etalagenaam is verplicht.",
+      "tooLong": "Een etalagenaam mag maximaal {maximum} tekens bevatten.",
+      "unsupported": "Een etalagenaam bevat niet-ondersteunde tekens."
+    },
+    "fontName": {
+      "required": "Een lettertypenaam is verplicht.",
+      "tooLong": "Een lettertypenaam mag maximaal {maximum} tekens bevatten.",
+      "unsupported": "Een lettertypenaam bevat niet-ondersteunde tekens."
+    },
+    "storeName": {
+      "required": "Een winkelnaam is verplicht.",
+      "tooLong": "Een winkelnaam mag maximaal {maximum} tekens bevatten.",
+      "unsupported": "Een winkelnaam bevat niet-ondersteunde tekens."
+    },
+    "storeBio": {
+      "required": "Een winkelbio is verplicht.",
+      "tooLong": "Een winkelbio mag maximaal {maximum} tekens bevatten.",
+      "unsupported": "Een winkelbio bevat niet-ondersteunde tekens."
+    },
+    "ctaLabel": {
+      "required": "Het label van de koopknop is verplicht.",
+      "tooLong": "Het label van de koopknop mag maximaal {maximum} tekens bevatten.",
+      "unsupported": "Het label van de koopknop bevat niet-ondersteunde tekens."
+    },
+    "shippingProfileName": {
+      "required": "Een naam voor het verzendprofiel is verplicht.",
+      "tooLong": "Een naam voor het verzendprofiel mag maximaal {maximum} tekens bevatten.",
+      "unsupported": "Een naam voor het verzendprofiel bevat niet-ondersteunde tekens."
+    },
+    "shippingTerms": {
+      "required": "De verzendvoorwaarden zijn verplicht.",
+      "tooLong": "De verzendvoorwaarden mogen maximaal {maximum} tekens bevatten.",
+      "unsupported": "De verzendvoorwaarden bevatten niet-ondersteunde tekens."
+    },
+    "blockText": {
+      "required": "Bloktekst is verplicht.",
+      "tooLong": "Bloktekst mag maximaal {maximum} tekens bevatten.",
+      "unsupported": "Bloktekst bevat niet-ondersteunde tekens."
+    },
+    "elementAlt": {
+      "required": "Alt-tekst voor het element is verplicht.",
+      "tooLong": "Alt-tekst voor het element mag maximaal {maximum} tekens bevatten.",
+      "unsupported": "Alt-tekst voor het element bevat niet-ondersteunde tekens."
+    },
+    "notificationTitle": {
+      "required": "Een titel voor de melding is verplicht.",
+      "tooLong": "Een titel voor de melding mag maximaal {maximum} tekens bevatten.",
+      "unsupported": "Een titel voor de melding bevat niet-ondersteunde tekens."
+    },
+    "notificationBody": {
+      "required": "Een tekst voor de melding is verplicht.",
+      "tooLong": "Een tekst voor de melding mag maximaal {maximum} tekens bevatten.",
+      "unsupported": "Een tekst voor de melding bevat niet-ondersteunde tekens."
+    },
+    "searchQuery": {
+      "required": "Een zoekopdracht is verplicht.",
+      "tooShort": "Een zoekopdracht moet minstens {minimum} tekens hebben.",
+      "tooLong": "Een zoekopdracht mag maximaal {maximum} tekens bevatten.",
+      "unsupported": "Een zoekopdracht bevat niet-ondersteunde tekens."
+    },
+    "factorName": {
+      "required": "De naam is verplicht.",
+      "tooLong": "De naam mag maximaal {maximum} tekens bevatten.",
+      "unsupported": "De naam bevat niet-ondersteunde tekens."
+    },
+    "reportDetails": {
+      "required": "Je beschrijving is verplicht.",
+      "tooLong": "Je beschrijving mag maximaal {maximum} tekens bevatten.",
+      "unsupported": "Je beschrijving bevat niet-ondersteunde tekens."
+    }
+  },
+  "email": {
+    "generic": {
+      "format": "Dat e-mailadres lijkt geen geldig e-mailadres te zijn.",
+      "tooLong": "Dat e-mailadres is te lang.",
+      "unsupported": "Dat e-mailadres bevat niet-ondersteunde tekens."
+    },
+    "reporter": {
+      "format": "Je e-mailadres ziet er niet uit als een e-mailadres.",
+      "tooLong": "Je e-mailadres is te lang.",
+      "unsupported": "Je e-mailadres bevat niet-ondersteunde tekens."
+    },
+    "contactEmail": {
+      "format": "Het contact-e-mailadres lijkt geen geldig e-mailadres te zijn.",
+      "tooLong": "Het contact-e-mailadres is te lang.",
+      "unsupported": "Het contact-e-mailadres bevat niet-ondersteunde tekens."
+    },
+    "manufacturerEmail": {
+      "format": "Het e-mailadres van de fabrikant lijkt geen geldig e-mailadres te zijn.",
+      "tooLong": "Het e-mailadres van de fabrikant is te lang.",
+      "unsupported": "Het e-mailadres van de fabrikant bevat niet-ondersteunde tekens."
+    },
+    "responsibleEmail": {
+      "format": "Het e-mailadres van de verantwoordelijke persoon in de EU lijkt geen geldig e-mailadres te zijn.",
+      "tooLong": "Het e-mailadres van de verantwoordelijke persoon in de EU is te lang.",
+      "unsupported": "Het e-mailadres van de verantwoordelijke persoon in de EU bevat niet-ondersteunde tekens."
+    }
+  },
+  "emailQuality": {
+    "placeholder": "Het contact-e-mailadres lijkt een placeholder. Gebruik een adres dat je ook echt leest.",
+    "disposable": "Het contact-e-mailadres staat bij een tijdelijke-e-mailprovider. Gebruik een permanent adres."
+  },
+  "uuid": {
+    "id": "Dat id is niet geldig.",
+    "option": "Die optie is niet geldig.",
+    "optionGroup": "Die optiegroep is niet geldig.",
+    "shippingProfile": "Dat verzendprofiel is niet geldig.",
+    "storefrontId": "Dat etalage-id is niet geldig.",
+    "blockId": "Een blok-id is niet geldig.",
+    "notificationRecipient": "Een ontvanger van de melding is niet geldig.",
+    "factor": "Die authenticator is niet geldig.",
+    "reportTarget": "Dat item is niet geldig."
+  },
+  "handle": {
+    "username": "Een gebruikersnaam moet 3 tot 30 tekens lang zijn en mag alleen letters, cijfers en underscores bevatten."
+  },
+  "hostname": {
+    "domains": "Domeinen moeten kale, kleine letters zijn, zoals jouwsite.com: geen https://, poort, pad of jokerteken."
+  },
+  "referenceCode": {
+    "vatId": "Een btw-id moet {min} tot {max} letters, cijfers, spaties, punten of streepjes bevatten."
+  },
+  "oneTimeCode": {
+    "authenticator": "De code bestaat uit de 6 cijfers die je authenticator-app toont."
+  },
+  "hexColor": {
+    "colors": "Kleuren moeten 6-cijferige hexcodes zijn, zoals #a855f7.",
+    "swatchColours": "Kleurstalen moeten 6-cijferige hexcodes zijn, zoals #a855f7."
+  },
+  "int": {
+    "price": {
+      "whole": "Prijs moet een heel getal zijn.",
+      "tooSmall": "Prijs moet {minimum} of meer zijn.",
+      "tooBig": "Prijs moet {maximum} of minder zijn."
+    },
+    "maxPerOrder": {
+      "whole": "Het maximum per bestelling moet een heel getal zijn.",
+      "tooSmall": "Het maximum per bestelling moet {minimum} of meer zijn.",
+      "tooBig": "Het maximum per bestelling moet {maximum} of minder zijn."
+    }
+  },
+  "list": {
+    "domains": {
+      "tooMany": "Vermeld maximaal {maximum} domeinen.",
+      "duplicate": "Elke vermelding bij domeinen mag maar één keer voorkomen."
+    }
+  },
+  "settings": {
+    "currentPasswordRequired": "Vul je huidige wachtwoord in.",
+    "newPasswordTooShort": "Het nieuwe wachtwoord moet minstens {minimum} tekens hebben.",
+    "newPasswordTooLong": "Houd het onder {maximum} tekens.",
+    "passwordsMismatch": "De nieuwe wachtwoorden komen niet overeen.",
+    "pickCountry": "Kies een land uit de lijst.",
+    "legalVersionChanged": "De juridische documenten zijn gewijzigd terwijl je ze las. Herlaad en probeer het opnieuw.",
+    "deleteConfirm": "Typ \"{phrase}\" precies zo om te bevestigen."
+  },
+  "password": {
+    "tooShort": "Het wachtwoord moet minstens {minimum} tekens hebben.",
+    "tooLong": "Houd het onder {maximum} tekens.",
+    "tooCommon": "Dat wachtwoord komt te vaak voor. Kies iets dat lastiger te raden is.",
+    "repeated": "Dat wachtwoord is te makkelijk te raden. Probeer een langere combinatie van woorden.",
+    "sequence": "Dat wachtwoord bevat een veelgebruikte toetsenbordreeks. Probeer iets anders.",
+    "containsIdentity": "Het wachtwoord mag je e-mailadres of gebruikersnaam niet bevatten.",
+    "weakMix": "Combineer hoofd- en kleine letters, een cijfer of een symbool, of gebruik {length}+ tekens."
+  },
+  "team": {
+    "invalidStore": "Ongeldige winkelverwijzing.",
+    "invalidEmail": "Dat lijkt geen e-mailadres te zijn.",
+    "emailTooLong": "Dat e-mailadres is te lang.",
+    "invalidRole": "Kies een geldige rol.",
+    "invalidInvite": "Ongeldige uitnodigingsverwijzing.",
+    "invalidMember": "Ongeldige lidverwijzing."
+  },
+  "auth": {
+    "usernameReserved": "Die gebruikersnaam is gereserveerd. Kies een andere."
+  },
+  "notifications": {
+    "invalidReference": "Ongeldige meldingsverwijzing."
+  },
+  "product": {
+    "stockRequired": "Geef op hoeveel er op voorraad zijn.",
+    "optionSpecsTooMany": "Een variant kan maximaal {maximum} eigen specificaties hebben.",
+    "optionGroupEmpty": "Geef elke optiegroep minstens één optie, of verwijder de groep.",
+    "optionGroupTooManyOptions": "Een optiegroep kan maximaal {maximum} opties bevatten.",
+    "includedTooMany": "Vermeld maximaal {maximum} inbegrepen items.",
+    "specsTooMany": "Vermeld maximaal {maximum} specificaties.",
+    "purchaseLinkFormat": "De aankooplink moet een volledig https://-adres zijn.",
+    "purchaseLinkTooLong": "De aankooplink mag maximaal {maximum} tekens bevatten.",
+    "purchaseLinkCredentials": "De aankooplink mag geen gebruikersnaam of wachtwoord bevatten.",
+    "galleryTooMany": "Een product kan maximaal {maximum} extra foto's hebben.",
+    "optionGroupsTooMany": "Een product kan maximaal {maximum} optiegroepen hebben.",
+    "documentsTooMany": "Een product kan maximaal {maximum} documenten hebben.",
+    "optionDuplicate": "Elke optie mag maar één keer voorkomen.",
+    "optionsTotalTooMany": "Een product kan in totaal maximaal {maximum} opties hebben.",
+    "galleryStaleOption": "Een foto verwijst naar een optie die niet meer bestaat."
+  },
+  "productImport": {
+    "noTitle": "Geen titel.",
+    "titleTooLong": "Titel is langer dan 200 tekens.",
+    "noPrice": "Geen prijs die we konden lezen.",
+    "priceZero": "Prijs is nul.",
+    "duplicateTitle": "Een andere rij heeft deze titel."
+  },
+  "shipping": {
+    "shipsFromInvalid": "Dat is nog geen land van waaruit we kunnen verzenden.",
+    "destinationsTooMany": "Je kunt maximaal {maximum} bestemmingen vermelden.",
+    "returnsWindowWhole": "Een retourtermijn is een heel aantal dagen.",
+    "returnsWindowNegative": "Een retourtermijn kan niet negatief zijn.",
+    "returnsWindowTooLong": "Een retourtermijn is maximaal {maximum} dagen."
+  },
+  "storefront": {
+    "backgroundImageKind": "Achtergrondafbeeldingen moeten geüploade afbeeldingen zijn.",
+    "customFontKind": "Aangepaste lettertypen moeten geüploade lettertypebestanden zijn.",
+    "elementKind": "Elementen moeten geüploade elementen zijn.",
+    "productPageSectionsTooMany": "De productpagina moet elke sectie precies één keer vermelden.",
+    "productPageSectionDuplicate": "De productpagina kan dezelfde sectie niet twee keer vermelden.",
+    "shippingProfilesTooMany": "Een winkel kan maximaal {maximum} verzendprofielen bewaren.",
+    "shippingProfileDuplicate": "Elk verzendprofiel mag maar één keer voorkomen.",
+    "spanRange": "Een geformatteerd bereik moet later eindigen dan het begint.",
+    "blocksTooMany": "Een etalage kan maximaal {maximum} blokken bevatten. Verwijder een paar blokken of splits deze etalage in tweeën.",
+    "blocksDuplicate": "Rasterblokken moeten uniek zijn.",
+    "blockOutsideCanvas": "Een blok staat buiten het canvas."
+  }
+}

@@ -7,6 +7,7 @@ import {
   recordSecurityEvent,
   type SecurityEvent,
 } from "@/lib/security/events";
+import type { NotificationMessageRef } from "@/lib/notifications/message";
 import { getSessionState } from "@/lib/auth/session";
 import {
   STEP_UP_HINT_COOKIE,
@@ -24,6 +25,14 @@ import {
   factorIdSchema,
   totpCodeSchema,
 } from "@/lib/validation/mfa";
+import {
+  actionError,
+  failed,
+  invalidInput,
+  type ActionError,
+  type ActionState,
+} from "@/lib/errors";
+import { msg } from "@/i18n/types";
 
 // SERVER ONLY, and deliberately NOT a "use server" module: nothing in here is
 // meant to be callable from the browser. The actions that are live in
@@ -37,13 +46,14 @@ type ServerClient = Awaited<ReturnType<typeof createClient>>;
 
 export type SecondFactorFailure = "invalid" | "rate_limited" | "replayed" | "unavailable";
 
-/** What each failure tells the person. None of them reveals anything about
- *  the account beyond what the person typing already knows. */
-export const SECOND_FACTOR_MESSAGES: Record<SecondFactorFailure, string> = {
-  invalid: "That code didn't work. Check your authenticator app and try again.",
-  rate_limited: "Too many attempts. Wait a few minutes, then try again.",
-  replayed: "That code has already been used. Wait for the next one in your app.",
-  unavailable: "We couldn't check that code just now. Try again in a moment.",
+/** What each failure tells the person, wherever a code is checked (sign-in,
+ *  setup, step-up). None of them reveals anything about the account beyond
+ *  what the person typing already knows. */
+export const SECOND_FACTOR_ERRORS: Record<SecondFactorFailure, ActionError> = {
+  invalid: invalidInput(msg("Errors.stepUp.invalid")),
+  rate_limited: actionError("rate_limited", msg("Errors.stepUp.rateLimited")),
+  replayed: invalidInput(msg("Errors.stepUp.replayed")),
+  unavailable: actionError("server_error", msg("Errors.stepUp.unavailable")),
 };
 
 /**
@@ -76,8 +86,8 @@ async function alertLockout(userId: string, email: string | null | undefined): P
   );
   if (!firstThisHour) return;
   await alertSecurityEvent(userId, "mfa.locked_out", {
-    title: "Someone is trying to sign in to your account",
-    body: "Your password was entered correctly, followed by too many wrong two-factor codes, so sign-in has been paused for a few minutes. If this wasn't you, your password is known to someone else: change it now.",
+    title: { key: "Notifications.messages.security.lockedOut.title" },
+    body: { key: "Notifications.messages.security.lockedOut.body" },
     href: "/settings/account#password",
     emailTo: email,
   });
@@ -182,19 +192,22 @@ function failureFrom(error: { code?: string; status?: number } | null | undefine
 
 /**
  * The form fields a step-up adds to any sensitive form. Every action that calls
- * requireStepUp must allow these in its field whitelist.
+ * requireStepUpState must allow these in its field whitelist.
  */
 export const STEP_UP_FIELDS = ["mfa_code", "mfa_factor_id"] as const;
 
-export type StepUpRefusal = {
-  error: string;
-  /** Tells the form to show (or keep showing) its code field. */
-  stepUp?: true;
-};
+/** Why a sensitive action may not run yet. */
+type StepUpProblem =
+  | "signed_out"
+  | "code_required"
+  | "code_malformed"
+  | "factor_unknown"
+  | SecondFactorFailure;
 
 /**
  * Gate a sensitive action on a RECENT second factor, for accounts with 2FA.
- * Returns null when the action may go ahead, or the state to return from it.
+ * Returns null when the action may go ahead, otherwise why not.
+ * requireStepUpState below turns the answer into the state an action returns.
  *
  * - No 2FA on the account: null. Whatever the action already asks for (a
  *   password, a typed confirmation) is still its own business.
@@ -206,14 +219,12 @@ export type StepUpRefusal = {
  * minute ago. Used for the 2FA settings themselves: turning the protection off
  * must take the protection, never just a session that once had it.
  */
-export async function requireStepUp(
+async function checkStepUp(
   formData: FormData,
-  options: { maxAgeSeconds?: number } = {},
-): Promise<StepUpRefusal | null> {
+  options: { maxAgeSeconds?: number },
+): Promise<{ problem: StepUpProblem } | null> {
   const state = await getSessionState();
-  if (state.kind !== "signed_in") {
-    return { error: "Your session expired. Sign in again." };
-  }
+  if (state.kind !== "signed_in") return { problem: "signed_out" };
   const { user, assurance } = state;
   if (!assurance.enrolled) return null;
 
@@ -221,21 +232,12 @@ export async function requireStepUp(
   if (maxAge > 0 && secondFactorIsFresh(assurance, maxAge)) return null;
 
   const rawCode = String(formData.get("mfa_code") ?? "");
-  if (!rawCode.trim()) {
-    return {
-      error: "Enter the 6-digit code from your authenticator app to confirm it's you.",
-      stepUp: true,
-    };
-  }
+  if (!rawCode.trim()) return { problem: "code_required" };
   const code = totpCodeSchema.safeParse(rawCode);
-  if (!code.success) {
-    return { error: code.error.issues[0]?.message ?? "Check the code and try again.", stepUp: true };
-  }
+  if (!code.success) return { problem: "code_malformed" };
 
   const factorId = pickFactor(assurance, formData.get("mfa_factor_id"));
-  if (!factorId) {
-    return { error: "Pick one of your authenticator apps.", stepUp: true };
-  }
+  if (!factorId) return { problem: "factor_unknown" };
 
   const supabase = await createClient();
   const result = await verifySecondFactor({
@@ -246,9 +248,33 @@ export async function requireStepUp(
     code: code.data,
     context: "step_up",
   });
-  if (!result.ok) return { error: SECOND_FACTOR_MESSAGES[result.reason], stepUp: true };
+  if (!result.ok) return { problem: result.reason };
   await setStepUpHint();
   return null;
+}
+
+const STEP_UP_ERRORS: Record<Exclude<StepUpProblem, "signed_out">, ActionError> = {
+  code_required: invalidInput(msg("Errors.stepUp.codeRequired")),
+  code_malformed: invalidInput(msg("Errors.stepUp.codeMalformed")),
+  factor_unknown: invalidInput(msg("Errors.stepUp.factorUnknown")),
+  ...SECOND_FACTOR_ERRORS,
+};
+
+/**
+ * The step-up gate in the shared form-action shape (lib/errors.ts): what a
+ * sensitive action (settings, team, the 2FA controls) returns when it needs a
+ * fresh code first.
+ */
+export async function requireStepUpState(
+  formData: FormData,
+  options: { maxAgeSeconds?: number } = {},
+): Promise<ActionState | null> {
+  const refused = await checkStepUp(formData, options);
+  if (!refused) return null;
+  if (refused.problem === "signed_out") {
+    return failed(actionError("session_expired", msg("Errors.form.sessionExpired")));
+  }
+  return { error: STEP_UP_ERRORS[refused.problem], stepUp: true };
 }
 
 /** See STEP_UP_HINT_COOKIE: a UI hint for the browser, never read here. */
@@ -457,7 +483,7 @@ export async function discardPendingFactors(
 export async function alertTwoFactorChange(
   user: { id: string; email?: string | null },
   event: Extract<SecurityEvent, `mfa.${string}`>,
-  notice: { title: string; body: string },
+  notice: { title: NotificationMessageRef; body: NotificationMessageRef },
 ): Promise<void> {
   try {
     await alertSecurityEvent(user.id, event, {

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { VIBE_PRESETS, themeMatchesVibe } from "@/lib/storefront/presets";
 import { STOREFRONT_VIBES, type StorefrontVibe } from "@/types/storefront-brief";
 import type { StorefrontTheme } from "@/types/storefront";
@@ -29,20 +30,6 @@ import { InfoTip } from "@/components/ui/InfoTip";
  * shows and when — so each one gets a line of prose saying so, and a row is the
  * only shape in a panel this narrow that has room for one.
  */
-
-const VIBE_LABELS: Record<StorefrontVibe, string> = {
-  minimal: "Minimal",
-  classic: "Classic",
-  bold: "Bold",
-};
-
-/** What the look actually does to a tile. The reason to pick one over another,
- *  in the words a seller would use for it. */
-const VIBE_HINTS: Record<StorefrontVibe, string> = {
-  minimal: "Pictures only. Name and price on hover.",
-  classic: "Name and price under every picture.",
-  bold: "Price always on the picture, name on hover.",
-};
 
 /** The look, drawn in the look: its own canvas, its own accent, its own
  *  roundness and its own gutter. Radius and gap are scaled down because the
@@ -82,18 +69,26 @@ export function LooksSection({
   theme: StorefrontTheme;
   onChange: (theme: StorefrontTheme) => void;
 }) {
+  const t = useTranslations("Storefront.looks");
+  const vibeLabels: Record<StorefrontVibe, string> = {
+    minimal: t("minimal"),
+    classic: t("classic"),
+    bold: t("bold"),
+  };
+  const vibeHints: Record<StorefrontVibe, string> = {
+    minimal: t("hintMinimal"),
+    classic: t("hintClassic"),
+    bold: t("hintBold"),
+  };
   return (
     <div className="space-y-1.5">
       <span className="flex items-center gap-1.5">
-        <span className={strongLabelClass}>Looks</span>
-        <InfoTip label="What picking a look changes">
-          A look sets the whole storefront&apos;s colours, font, corners,
-          spacing and what a product tile shows in one go. Your layout, your
-          products and any tile you styled by hand are left exactly as they
-          are.
+        <span className={strongLabelClass}>{t("title")}</span>
+        <InfoTip label={t("infoLabel")}>
+          {t("infoBody")}
         </InfoTip>
       </span>
-      <div role="group" aria-label="Storefront look" className="space-y-1.5">
+      <div role="group" aria-label={t("groupLabel")} className="space-y-1.5">
         {STOREFRONT_VIBES.map((vibe) => {
           // A look is "on" while everything it writes still matches. One edit
           // away and nothing is pressed, which is the truth.
@@ -130,10 +125,10 @@ export function LooksSection({
                     active && "font-medium",
                   )}
                 >
-                  {VIBE_LABELS[vibe]}
+                  {vibeLabels[vibe]}
                 </span>
                 <span className="block text-xs leading-tight text-muted-foreground">
-                  {VIBE_HINTS[vibe]}
+                  {vibeHints[vibe]}
                 </span>
               </span>
             </button>

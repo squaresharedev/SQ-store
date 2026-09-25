@@ -1,6 +1,7 @@
 "use client";
 
 import { Plus, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import {
   errorTextClass,
@@ -28,6 +29,8 @@ export function DetailsFields({
   errors: DetailsFieldErrors;
   onChange: (next: DetailsFormValues) => void;
 }) {
+  const t = useTranslations("Products.detailsFields");
+
   function set<Key extends keyof DetailsFormValues>(key: Key, value: DetailsFormValues[Key]) {
     onChange({ ...values, [key]: value });
   }
@@ -55,14 +58,14 @@ export function DetailsFields({
   return (
     <div className="space-y-6">
       <fieldset className="space-y-2">
-        <legend className={labelClass}>Dimensions</legend>
+        <legend className={labelClass}>{t("dimensions")}</legend>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {measure("length", "Length")}
-          {measure("width", "Width")}
-          {measure("height", "Height")}
+          {measure("length", t("length"))}
+          {measure("width", t("width"))}
+          {measure("height", t("height"))}
           <div className="space-y-1" data-product-field="dimensionUnit" data-product-value={values.dimensionUnit}>
             <label htmlFor={`${inputId}-dimension-unit`} className={cn(labelClass, "text-xs")}>
-              Unit
+              {t("unit")}
             </label>
             <Select
               id={`${inputId}-dimension-unit`}
@@ -75,12 +78,12 @@ export function DetailsFields({
       </fieldset>
 
       <fieldset className="space-y-2">
-        <legend className={labelClass}>Weight</legend>
+        <legend className={labelClass}>{t("weight")}</legend>
         <div className="grid grid-cols-2 gap-3 sm:max-w-xs">
-          {measure("weight", "Weight")}
+          {measure("weight", t("weight"))}
           <div className="space-y-1" data-product-field="weightUnit" data-product-value={values.weightUnit}>
             <label htmlFor={`${inputId}-weight-unit`} className={cn(labelClass, "text-xs")}>
-              Unit
+              {t("unit")}
             </label>
             <Select
               id={`${inputId}-weight-unit`}
@@ -95,14 +98,14 @@ export function DetailsFields({
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <div className="space-y-1.5">
           <label htmlFor={`${inputId}-materials`} className={labelClass}>
-            Materials
+            {t("materials")}
           </label>
           <textarea
             id={`${inputId}-materials`}
             value={values.materials}
             maxLength={300}
             rows={2}
-            placeholder="e.g. Solid oak, brass fittings"
+            placeholder={t("materialsPlaceholder")}
             onChange={(event) => set("materials", event.target.value)}
             data-product-field="materials"
             className={fieldBaseClass}
@@ -110,14 +113,14 @@ export function DetailsFields({
         </div>
         <div className="space-y-1.5">
           <label htmlFor={`${inputId}-origin`} className={labelClass}>
-            Made in
+            {t("madeIn")}
           </label>
           <input
             id={`${inputId}-origin`}
             type="text"
             value={values.origin}
             maxLength={60}
-            placeholder="Country of origin"
+            placeholder={t("madeInPlaceholder")}
             onChange={(event) => set("origin", event.target.value)}
             data-product-field="origin"
             className={fieldBaseClass}
@@ -127,7 +130,7 @@ export function DetailsFields({
 
       <div className="space-y-1.5">
         <label htmlFor={`${inputId}-care`} className={labelClass}>
-          Care instructions
+          {t("care")}
         </label>
         <textarea
           id={`${inputId}-care`}
@@ -142,13 +145,13 @@ export function DetailsFields({
 
       <div className="space-y-1.5">
         <label htmlFor={`${inputId}-included`} className={labelClass}>
-          What&apos;s included
+          {t("included")}
         </label>
         <textarea
           id={`${inputId}-included`}
           value={values.included}
           rows={3}
-          placeholder={"One item per line\ne.g. 1 × lamp\n1 × 2 m cable"}
+          placeholder={t("includedPlaceholder")}
           onChange={(event) => set("included", event.target.value)}
           data-product-field="included"
           className={fieldBaseClass}
@@ -156,17 +159,17 @@ export function DetailsFields({
       </div>
 
       <div className="space-y-2">
-        <span className={labelClass}>Specifications</span>
+        <span className={labelClass}>{t("specifications")}</span>
         {values.specs.length > 0 && (
-          <ul className="space-y-2" aria-label="Specifications">
+          <ul className="space-y-2" aria-label={t("specifications")}>
             {values.specs.map((spec, index) => (
               <li key={index} className="flex gap-2" data-product-spec-row={index}>
                 <input
                   type="text"
                   value={spec.label}
                   maxLength={40}
-                  placeholder="Name, e.g. Wattage"
-                  aria-label={`Specification ${index + 1} name`}
+                  placeholder={t("specName")}
+                  aria-label={t("specNameLabel", { number: index + 1 })}
                   data-product-field={`spec.${index}.label`}
                   onChange={(event) =>
                     set(
@@ -182,8 +185,8 @@ export function DetailsFields({
                   type="text"
                   value={spec.value}
                   maxLength={200}
-                  placeholder="Value, e.g. 40 W"
-                  aria-label={`Specification ${index + 1} value`}
+                  placeholder={t("specValue")}
+                  aria-label={t("specValueLabel", { number: index + 1 })}
                   data-product-field={`spec.${index}.value`}
                   onChange={(event) =>
                     set(
@@ -198,7 +201,7 @@ export function DetailsFields({
                 <button
                   type="button"
                   className={cn(iconButtonClass, "size-9 shrink-0")}
-                  aria-label={`Remove specification ${index + 1}`}
+                  aria-label={t("removeSpec", { number: index + 1 })}
                   onClick={() => set("specs", values.specs.filter((_, i) => i !== index))}
                 >
                   <X className="size-4" strokeWidth={2} aria-hidden="true" />
@@ -215,7 +218,7 @@ export function DetailsFields({
           onClick={() => set("specs", [...values.specs, { label: "", value: "" }])}
         >
           <Plus className="size-4" strokeWidth={2} aria-hidden="true" />
-          Add specification
+          {t("addSpec")}
         </button>
       </div>
     </div>

@@ -1,0 +1,1297 @@
+{
+  "shapes": {
+    "name": {
+      "square": "Square",
+      "circle": "Circle",
+      "ring": "Ring",
+      "diamond": "Diamond",
+      "rounded": "Rounded square",
+      "pill": "Pill",
+      "half": "Half circle",
+      "quarter": "Quarter circle",
+      "bar": "Bar",
+      "triangle": "Triangle",
+      "wedge": "Wedge",
+      "pentagon": "Pentagon",
+      "hexagon": "Hexagon",
+      "octagon": "Octagon",
+      "star": "Star",
+      "sparkle": "Sparkle",
+      "cross": "Cross",
+      "arrow": "Arrow",
+      "chevron": "Chevron",
+      "trapezoid": "Trapezoid",
+      "parallelogram": "Parallelogram",
+      "burst": "Burst"
+    },
+    "add": {
+      "square": "Add square",
+      "circle": "Add circle",
+      "ring": "Add ring",
+      "diamond": "Add diamond",
+      "rounded": "Add rounded square",
+      "pill": "Add pill",
+      "half": "Add half circle",
+      "quarter": "Add quarter circle",
+      "bar": "Add bar",
+      "triangle": "Add triangle",
+      "wedge": "Add wedge",
+      "pentagon": "Add pentagon",
+      "hexagon": "Add hexagon",
+      "octagon": "Add octagon",
+      "star": "Add star",
+      "sparkle": "Add sparkle",
+      "cross": "Add cross",
+      "arrow": "Add arrow",
+      "chevron": "Add chevron",
+      "trapezoid": "Add trapezoid",
+      "parallelogram": "Add parallelogram",
+      "burst": "Add burst"
+    },
+    "group": {
+      "basic": "Basic",
+      "polygons": "Polygons",
+      "accents": "Accents"
+    },
+    "groupLabel": {
+      "basic": "Basic shapes",
+      "polygons": "Polygon shapes",
+      "accents": "Accent shapes"
+    }
+  },
+  "fonts": {
+    "sans": "Sans",
+    "serif": "Serif",
+    "mono": "Mono",
+    "display": "Display",
+    "hand": "Handwritten",
+    "inter": "Inter",
+    "montserrat": "Montserrat",
+    "custom": "Uploaded font"
+  },
+  "textVariants": {
+    "heading": "Heading",
+    "subheading": "Subheading",
+    "body": "Body text"
+  },
+  "layoutPresets": {
+    "standard": "Standard",
+    "caption": "Caption",
+    "header": "Header",
+    "gallery": "Gallery",
+    "bare": "Bare"
+  },
+  "blockKinds": {
+    "product": "Product",
+    "text": "Text",
+    "shape": "Shape",
+    "image": "Image"
+  },
+  "settings": {
+    "groups": {
+      "theme": "Theme",
+      "header": "Header",
+      "typography": "Typography",
+      "cards": "Product cards",
+      "soldOut": "Sold out",
+      "productPage": "Product page"
+    },
+    "subtitle": {
+      "theme": "Storefront / Theme",
+      "header": "Storefront / Header",
+      "typography": "Storefront / Typography",
+      "cards": "Storefront / Product cards",
+      "soldOut": "Storefront / Sold out",
+      "productPage": "Storefront / Product page"
+    },
+    "labels": {
+      "looks": "Storefront look",
+      "background": "Background",
+      "accent": "Accent colour",
+      "header": "Store name and bio",
+      "font": "Font",
+      "canvasSize": "Canvas size",
+      "gridGap": "Grid spacing",
+      "tileLayout": "Tile layout",
+      "titlePosition": "Title position",
+      "titleStyle": "Title style",
+      "cornerRadius": "Corner roundness",
+      "titleInset": "Title edge spacing",
+      "pricePosition": "Price position",
+      "priceStyle": "Price tag style",
+      "soldOut": "Sold out products",
+      "productPageLayout": "Product page",
+      "productPageBackground": "Product page background",
+      "productPagePhotos": "Product page photos",
+      "productPageFont": "Product page font",
+      "productPageIndexing": "Search engine listing",
+      "buyButton": "Buy button",
+      "buyButtonColour": "Buy button colour",
+      "buyButtonRoundness": "Buy button roundness",
+      "buyButtonBorder": "Buy button border",
+      "priceNote": "Price note",
+      "shippingNote": "Shipping note",
+      "productPageSections": "Product page sections",
+      "productPageAvailability": "Availability on the page",
+      "productPageByline": "Sold by byline",
+      "shippingReturns": "Shipping and returns policy",
+      "sellerDetails": "Seller details"
+    }
+  },
+  "editorSearch": {
+    "sections": {
+      "canvas": "On the canvas",
+      "settings": "Settings",
+      "panels": "Panels"
+    },
+    "openProductPage": "Open the product page",
+    "panelSubtitle": "Panel",
+    "panels": {
+      "layers": "Layers",
+      "products": "Add a product",
+      "shapes": "Shapes",
+      "uploads": "Uploads"
+    }
+  },
+  "list": {
+    "showingOf": "Showing {count} of {total} storefronts",
+    "count": "{count, plural, one {# storefront} other {# storefronts}}",
+    "countSampleOnly": "No storefronts yet",
+    "creating": "Creating…",
+    "new": "New storefront",
+    "emptyHeading": "No storefronts yet",
+    "emptyHintOwner": "Create your first storefront, then add products to its grid. Each product on it gets a page you can share.",
+    "emptyHintGuest": "This store has no storefronts yet.",
+    "create": "Create storefront",
+    "loadMoreError": "Couldn''t load more storefronts. Try again.",
+    "loadMore": "Load more ({remaining} remaining)",
+    "deleteTitle": "Delete storefront?",
+    "deleteDesc": "\"{name}\" and its grid will be permanently removed. This cannot be undone.",
+    "deleteToast": "\"{name}\" was deleted."
+  },
+  "card": {
+    "editAriaLabel": "Edit {name}",
+    "embedAriaLabel": "Embed {name}",
+    "deleteAriaLabel": "Delete {name}",
+    "blockCount": "{count, plural, one {# block} other {# blocks}}",
+    "updatedLabel": " · updated {date}",
+    "emptyHint": "This grid is empty",
+    "removed": "Removed by SquareShare",
+    "pausedInReview": "Paused · with SquareShare for review",
+    "pausedNeedsChanges": "Paused by SquareShare · needs changes"
+  },
+  "embed": {
+    "inDevNotice": "The embed widget is in development and not yet rendering on external sites. Configure your settings below so you are ready to paste the snippet the moment it ships.",
+    "title": "Embed this storefront",
+    "description": "Paste this snippet into any site to show \"{name}\" there.",
+    "enabledLabel": "Embed enabled",
+    "domainsLabel": "Allowed domains",
+    "domainsPlaceholder": "yoursite.com, blog.yoursite.com",
+    "domainsHint": "Up to {max}, comma-separated. Paste a URL and we''ll trim it to the domain.",
+    "emptyDomainsWarning": "Add at least one domain. While this is empty the storefront won''t load anywhere, even though embedding is on.",
+    "snippetLabel": "Snippet",
+    "snippetReadyHint": "Paste this snippet into your site''s HTML.",
+    "snippetLockedHint": "Enable embedding and add at least one domain to unlock the Copy button.",
+    "copySnippet": {
+      "copy": "Copy embed snippet",
+      "copied": "Copied embed snippet",
+      "failed": "Couldn't copy embed snippet. Select and copy it manually.",
+      "cannotCopyYet": "embed snippet cannot be copied yet"
+    },
+    "snippetKeyLabel": "Snippet key",
+    "rotateConfirmText": "Rotating issues a new key. Every copy of the old snippet stops working immediately, including ones on sites you still want -- you''ll need to paste the new snippet everywhere.",
+    "rotateKey": "Rotate key",
+    "rotating": "Rotating...",
+    "revokeHint": "Pasted somewhere it shouldn''t be? Rotate the key to revoke every existing snippet.",
+    "saveSettings": "Save settings",
+    "saving": "Saving...",
+    "saved": "Embed settings saved.",
+    "newKeyIssued": "New embed key issued.",
+    "newKeyDetail": "Re-paste the snippet everywhere this storefront is embedded."
+  },
+  "wizard": {
+    "category": {
+      "title": "What do you sell?",
+      "description": "This is the biggest clue for which layouts will suit you."
+    },
+    "fulfilment": {
+      "title": "How do buyers get it?",
+      "description": "It shapes what your product pages say about delivery."
+    },
+    "vibe": {
+      "title": "Pick a look",
+      "description": "Your starting point. Everything stays editable in the designer."
+    },
+    "name": {
+      "title": "Name your storefront",
+      "description": "Just for you. You can rename it any time."
+    },
+    "stepOf": "Step {current} of {total}",
+    "nameLabel": "Storefront name",
+    "nameHint": "Leave it blank and we will call it Untitled storefront.",
+    "otherCategoryLabel": "What do you sell?",
+    "otherCategoryPlaceholder": "e.g. model kits",
+    "noProductsHint": "No products yet? Add them after setup.",
+    "skipSetup": "Skip setup",
+    "skip": "Skip",
+    "creating": "Creating…",
+    "create": "Create storefront"
+  },
+  "createOptions": {
+    "categoryGroupLabel": "What you sell",
+    "fulfilmentGroupLabel": "How buyers get it",
+    "vibeGroupLabel": "The look you want",
+    "category": {
+      "fashion": "Clothing",
+      "art": "Art & prints",
+      "jewellery": "Jewellery",
+      "handmade": "Handmade",
+      "home": "Home & living",
+      "beauty": "Beauty",
+      "food": "Food & drink",
+      "music": "Music",
+      "photography": "Photography",
+      "books": "Books & zines",
+      "digital": "Digital goods",
+      "vintage": "Vintage",
+      "other": "Something else"
+    },
+    "categoryPlaceholder": {
+      "fashion": "My clothing shop",
+      "art": "My art shop",
+      "jewellery": "My jewellery shop",
+      "handmade": "My handmade shop",
+      "home": "My home shop",
+      "beauty": "My beauty shop",
+      "food": "My food shop",
+      "music": "My music shop",
+      "photography": "My photo shop",
+      "books": "My book shop",
+      "digital": "My digital shop",
+      "vintage": "My vintage shop",
+      "other": "My shop",
+      "default": "My storefront"
+    },
+    "fulfilment": {
+      "physical": "I ship it",
+      "digital": "They download it",
+      "services": "They book me",
+      "mixed": "A bit of each"
+    },
+    "fulfilmentHint": {
+      "physical": "Physical products",
+      "digital": "Files, presets, music",
+      "services": "Sessions, commissions",
+      "mixed": "More than one of these"
+    },
+    "vibe": {
+      "minimal": "Minimal",
+      "classic": "Classic",
+      "bold": "Bold"
+    },
+    "vibeHint": {
+      "minimal": "Name and price on hover",
+      "classic": "Name and price always shown",
+      "bold": "Price always, name on hover"
+    }
+  },
+  "picker": {
+    "addFirst": "Add your first product",
+    "noProducts": "You have no products yet. Add one and you''ll come straight back here to place it.",
+    "searchPlaceholder": "Search products",
+    "searchAriaLabel": "Search your products",
+    "searching": "Searching...",
+    "noMatch": "No products match “{term}”.",
+    "searchFailed": "Search is unavailable right now; showing what''s already loaded.",
+    "inGrid": "In grid",
+    "available": "Available",
+    "addSelected": "Add {count} selected",
+    "addAll": "Add all ({count})",
+    "deselectAriaLabel": "Deselect {title}",
+    "selectAriaLabel": "Select {title}",
+    "inGridAriaLabel": "{title} is in the grid",
+    "addToGridAriaLabel": "Add {title} to grid",
+    "draftAriaLabel": "Draft product -- not visible to buyers",
+    "draftBadge": "Draft"
+  },
+  "preview": {
+    "ariaLabel": "Storefront preview"
+  },
+  "masthead": {
+    "namePlaceholder": "Your store name",
+    "bioPlaceholder": "A short line about your shop",
+    "editAriaLabel": "{line, select, name {Edit the store name} bio {Edit the store bio} other {Edit the store {line}}}",
+    "editorNameAriaLabel": "Store name",
+    "editorBioAriaLabel": "Store bio"
+  },
+  "pageConnectors": {},
+  "artboard": {
+    "productPageLabel": " · Product page",
+    "closeAriaLabel": "Close the product page for {title}",
+    "desktopSize": "Desktop size",
+    "mobileSize": "Mobile size"
+  },
+  "customFont": {},
+  "metadata": {
+    "storefronts": {
+      "title": "Storefronts",
+      "subtitle": "Each storefront is its own grid and theme. Create as many as you need, then open one to edit it."
+    },
+    "editor": {
+      "title": "Edit storefront"
+    },
+    "sample": {
+      "title": "Sample storefront"
+    }
+  },
+  "routes": {
+    "editor": {
+      "loading": "Loading the storefront editor…"
+    },
+    "list": {
+      "loading": "loading storefronts"
+    }
+  },
+  "controls": {
+    "off": "Off",
+    "layers": "Layers",
+    "objectCount": "{count, plural, one {1 object} other {# objects}}",
+    "cardStyle": "Card style",
+    "priceTag": "Price tag",
+    "theme": "Theme",
+    "canvas": "Canvas",
+    "design": "Design"
+  },
+  "designPanel": {
+    "tabSelection": "Selection",
+    "tabDesign": "Design",
+    "show": "Show design panel",
+    "hide": "Hide design panel",
+    "resize": "Resize design panel",
+    "closeSettings": "Close design settings",
+    "scopeLabel": "Panel scope"
+  },
+  "library": {
+    "title": "Library",
+    "hint": "Pick one to add it",
+    "canvasFull": "Canvas is full",
+    "close": "Close library panel",
+    "tabUploads": "Uploads",
+    "tabShapes": "Shapes"
+  },
+  "uploads": {
+    "addImage": "Add an image",
+    "processing": "Processing…",
+    "uploadingPct": "Uploading… {pct}%",
+    "dropToUpload": "Drop to upload",
+    "uploadImage": "Upload image",
+    "uploadHint": "SVG, PNG, JPEG, WebP, GIF or AVIF. Up to 2 MB. Drop a file here or press to browse.",
+    "canvasFullHint": "The canvas is full. Remove a block to add another.",
+    "inStorefront": "In this storefront",
+    "imagesGroup": "Images in this storefront",
+    "emptyHint": "Images you upload collect here, so you can place the same one again without uploading it twice.",
+    "placeAgain": "Place {alt} again",
+    "placeAgainFallback": "Place this image again"
+  },
+  "layers": {
+    "title": "Layers",
+    "backAriaLabel": "Back to the selected block, leaving Layers",
+    "empty": "Nothing on the canvas yet. Blocks appear here as you add them.",
+    "listAriaLabel": "Canvas layers, front to back",
+    "layerOf": "Layer {index} of {total}",
+    "moveGroup": "Move {label}",
+    "reorderLabel": "Reorder {label}",
+    "dragToReorder": "Drag to reorder",
+    "showOptions": "Show layer options for {label}",
+    "hideOptions": "Hide layer options for {label}",
+    "shortcutHint": "{mod} + [ and {mod} + ] move the selection one layer. Add Shift to send it all the way.",
+    "layerOp": {
+      "back": "Send to back",
+      "backward": "Send backward",
+      "forward": "Bring forward",
+      "front": "Bring to front"
+    },
+    "layerOpFor": {
+      "back": "Send to back: {label}",
+      "backward": "Send backward: {label}",
+      "forward": "Bring forward: {label}",
+      "front": "Bring to front: {label}"
+    }
+  },
+  "colorPanel": {
+    "close": "Close color panel",
+    "sectionType": "Type",
+    "font": "Font",
+    "fontTheme": "Theme font",
+    "fontThemeDesc": "Follow the storefront font",
+    "sectionInDesign": "In this design",
+    "inDesignGroup": "Colors in this design",
+    "inDesignEmpty": "Colors you use on the canvas collect here.",
+    "inDesignSwatch": "In this design ({hex})",
+    "sectionCustom": "Custom",
+    "sectionInherit": "Inherit",
+    "sectionRecent": "Recently used",
+    "recentGroup": "Recently used colors",
+    "recentSwatch": "Recently used ({hex})",
+    "sectionStandard": "Standard",
+    "standardGroup": "Standard colors",
+    "sectionPalettes": "Palettes"
+  },
+  "themePanel": {
+    "accent": "Accent"
+  },
+  "panelSearch": {
+    "placeholder": "Find a setting or object",
+    "clear": "Clear search",
+    "noResults": "Nothing in the editor matches that.",
+    "matchesLabel": "Matches"
+  },
+  "looks": {
+    "title": "Looks",
+    "infoLabel": "What picking a look changes",
+    "infoBody": "A look sets the whole storefront's colours, font, corners, spacing and what a product tile shows in one go. Your layout, your products and any tile you styled by hand are left exactly as they are.",
+    "groupLabel": "Storefront look",
+    "minimal": "Minimal",
+    "classic": "Classic",
+    "bold": "Bold",
+    "hintMinimal": "Pictures only. Name and price on hover.",
+    "hintClassic": "Name and price under every picture.",
+    "hintBold": "Price always on the picture, name on hover."
+  },
+  "background": {
+    "label": "Background",
+    "typeLabel": "Background type",
+    "typeColor": "Color",
+    "typeGradient": "Gradient",
+    "typeImage": "Image",
+    "position": "Position",
+    "dragAriaLabel": "Drag to position the background image",
+    "dragHint": "Drag the preview to reposition. Zoom to resize.",
+    "zoomLabel": "Zoom",
+    "zoomAriaLabel": "Background image zoom",
+    "zoomValueText": "{n, plural, one {# percent} other {# percent}}",
+    "processing": "Processing…",
+    "uploadingPct": "Uploading… {n}%",
+    "replaceImage": "Replace image",
+    "uploadImage": "Upload image",
+    "uploadingProgress": "Uploading background image",
+    "uploadHint": "Up to 10 MB. JPEG, PNG, WebP, GIF, or AVIF.",
+    "colorLabel": "Color",
+    "from": "From",
+    "to": "To",
+    "angle": "Angle",
+    "gradientAngle": "Gradient angle",
+    "angleValueText": "{n, plural, one {# degrees} other {# degrees}}"
+  },
+  "cardStyle": {
+    "layout": "Layout",
+    "position": "Position",
+    "roundedHint": "Rounded cards keep both labels on the center axis.",
+    "spotHint": "Click a spot to place the label, or drag it here or on the tile.",
+    "cornerRoundness": "Corner roundness",
+    "cornerValueText": "{n, plural, one {# pixels} other {# pixels}}",
+    "sharp": "Sharp",
+    "circle": "Circle",
+    "fineTuning": "Fine tuning",
+    "showTitle": "Show title",
+    "titleStyleLabel": "Title style",
+    "edgeSpacing": "Edge spacing",
+    "edgeSpacingAriaLabel": "Title edge spacing",
+    "edgeValueText": "{n, plural, one {# pixels} other {# pixels}}",
+    "auto": "Auto",
+    "showTitleOnHover": "Show title on hover",
+    "hoverHint": "The title stays hidden until a buyer hovers over the product.",
+    "revealTop": "The bar slides down from the top when a buyer hovers.",
+    "revealMiddle": "The bar fades in when a buyer hovers.",
+    "revealBottom": "The bar slides up from the bottom when a buyer hovers."
+  },
+  "priceTag": {
+    "showPrice": "Show the price",
+    "roundedHint": "Rounded cards keep the tag on the center axis.",
+    "dragHint": "Drag it on the tile, or use the layout board, to choose a spot.",
+    "showOnHover": "Show on hover",
+    "font": "Font",
+    "fontAriaLabel": "Price tag font",
+    "size": "Size",
+    "sizeAriaLabel": "Price tag size",
+    "sizeValueText": "{n, plural, one {# pixels} other {# pixels}}",
+    "sizeTip": "The size on a single tile. The tag scales with the tile it sits on, so a bigger block wears a bigger price without you setting one.",
+    "borderThickness": "Border thickness",
+    "borderAriaLabel": "Price tag border thickness",
+    "borderValueText": "{n, plural, one {# pixels} other {# pixels}}",
+    "cornerRoundness": "Corner roundness",
+    "cornerAriaLabel": "Price tag corner roundness",
+    "cornerValueText": "{n, plural, one {# pixels} other {# pixels}}",
+    "sharp": "Sharp",
+    "pill": "Pill",
+    "none": "None"
+  },
+  "priceTagPosition": {
+    "placementAriaLabel": "Price tag placement",
+    "below": "Below",
+    "onImage": "On image",
+    "hidden": "Hidden",
+    "spotAriaLabel": "Price tag spot",
+    "spotTopLeft": "Price tag top left",
+    "spotTopCenter": "Price tag top center",
+    "spotTopRight": "Price tag top right",
+    "spotMiddle": "Price tag middle",
+    "spotBottomLeft": "Price tag bottom left",
+    "spotBottomCenter": "Price tag bottom center",
+    "spotBottomRight": "Price tag bottom right"
+  },
+  "layout": {
+    "canvasWidth": "Canvas width",
+    "canvasWidthAriaLabel": "Canvas width in blocks",
+    "blocksWide": "{n, plural, one {# blocks wide} other {# blocks wide}}",
+    "canvasHeight": "Canvas height",
+    "heightTip": "The board can't shrink below the blocks already on it: drag a block up first, then shorten the canvas.",
+    "canvasHeightAriaLabel": "Canvas height in blocks",
+    "blocksTall": "{n, plural, one {# blocks tall} other {# blocks tall}}",
+    "gridDensity": "Grid density",
+    "gridDensityAriaLabel": "Grid density",
+    "gridGapValue": "{n, plural, one {# pixel gap} other {# pixel gap}}",
+    "noGap": "No gap",
+    "showGrid": "Show grid",
+    "gridInfoLabel": "Who sees the grid",
+    "gridInfoBody": "A guide for you while you design: it draws the empty slots so you can see where a block will land. Buyers never see it."
+  },
+  "placement": {
+    "rotation": "Rotation",
+    "rotationTipSingle": "Whole degrees, either way from level. The block turns about its own centre and keeps the cells it occupies.",
+    "rotationTipMultiple": "Whole degrees, either way from level. Each block turns about its own centre, so a row of blocks stays a row.",
+    "rotationAriaLabel": "Block rotation",
+    "valueTextMixed": "Mixed angles",
+    "valueText": "{n, plural, one {# degrees} other {# degrees}}",
+    "statusMixed": "Mixed",
+    "levelBlock": "Level the block",
+    "rotateTo": "Rotate to {n, plural, one {# degrees} other {# degrees}}",
+    "level": "Level",
+    "angle": "{n}°",
+    "layerLabel": "Layer",
+    "layerInfoLabel": "How layering works",
+    "layerInfoBody": "Layers decide only what paints on top where blocks overlap; the reading order a screen reader follows never changes.{multi, select, true { This selection keeps its own order within the stack as it moves.} other {}}{stacked, select, true { Alt-click a stack on the canvas to reach the block underneath.} other {}}",
+    "blocksSelected": "{count, plural, one {# blocks selected} other {# blocks selected}}",
+    "layerOf": "Layer {index} of {total}",
+    "blockLayerLabel": "Block layer",
+    "sendToBack": "Send to back",
+    "sendBackward": "Send backward",
+    "bringForward": "Bring forward",
+    "bringToFront": "Bring to front",
+    "seeAllLayers": "See all layers"
+  },
+  "header": {
+    "showHeader": "Show header",
+    "infoLabel": "Other ways to edit the header",
+    "infoBody": "Click the name or bio on the canvas to type it there. This panel opens on that line at the same time, where its font, size, colour, formatting and alignment are set.",
+    "storeName": "Store name",
+    "storeNamePlaceholder": "Store name shown to buyers",
+    "bio": "Bio",
+    "bioPlaceholder": "A short line about your shop",
+    "charsLeft": "{n, plural, one {# characters left} other {# characters left}}"
+  },
+  "soldOut": {
+    "hide": "Hide from buyers",
+    "hideInfoLabel": "What hiding sold-out products does",
+    "hideInfoBody": "Products you marked sold out disappear from the storefront entirely. They stay on the canvas here, dimmed, so you can still move them and put them back on sale.",
+    "badge": "Show badge",
+    "badgeInfoLabel": "When the sold-out badge appears",
+    "badgeInfoBodyHidden": "Nothing to mark while sold-out products are hidden. Turn Hide from buyers off and this badge labels them instead.",
+    "badgeInfoBodyVisible": "Marks a sold-out product on the storefront, so a buyer learns it exists and is gone rather than wondering."
+  },
+  "typography": {
+    "font": "Font",
+    "ownFont": "Your own font",
+    "fontInfoLabel": "Which font files work",
+    "fontInfoBody": "WOFF2, WOFF, TTF or OTF, up to 2 MB. WOFF2 is the one to use: it is the smallest, so it is the fastest for a buyer to load, and every browser reads it.",
+    "processing": "Processing…",
+    "uploadingPct": "Uploading… {n}%",
+    "replaceFont": "Replace font",
+    "uploadFont": "Upload a font",
+    "uploadingLabel": "Uploading font",
+    "uploadedFontDesc": "Your uploaded font",
+    "fontDescDefault": "The default",
+    "fontDescInter": "Clean and neutral",
+    "fontDescMontserrat": "Geometric and wide"
+  },
+  "textFormat": {
+    "format": "Format",
+    "formatAriaLabel": "Text formatting",
+    "bold": "Bold",
+    "italic": "Italic",
+    "underline": "Underline",
+    "alignment": "Alignment",
+    "alignAriaLabel": "Text alignment",
+    "alignLeft": "Align left",
+    "alignCenter": "Align center",
+    "alignRight": "Align right"
+  },
+  "fontSize": {
+    "label": "Size",
+    "autoPx": "Auto ({n} px)",
+    "auto": "Auto",
+    "ariaLabel": "Font size",
+    "valueText": "{n, plural, one {# pixels} other {# pixels}}"
+  },
+  "layoutPresetPicker": {
+    "ariaLabel": "Layout"
+  },
+  "titleStyle": {
+    "ariaLabel": "Title style",
+    "bar": "Bar",
+    "overlay": "Overlay",
+    "shadow": "Shadow"
+  },
+  "titlePosition": {
+    "ariaLabel": "Title spot",
+    "spotTopLeft": "Title top left",
+    "spotTopCenter": "Title top center",
+    "spotTopRight": "Title top right",
+    "spotMiddle": "Title middle",
+    "spotBottomLeft": "Title bottom left",
+    "spotBottomCenter": "Title bottom center",
+    "spotBottomRight": "Title bottom right"
+  },
+  "tileSpot": {},
+  "tileLayoutBoard": {
+    "labelToPlace": "Label to place",
+    "labelPositions": "Label positions",
+    "title": "Title",
+    "price": "Price",
+    "titleAt": "{spot, select, top_left {Title at top left} top_center {Title at top center} top_right {Title at top right} middle_center {Title at middle} bottom_left {Title at bottom left} bottom_center {Title at bottom center} bottom_right {Title at bottom right} other {Title here}}. Drag, click a spot, or use the arrow keys, to move it.",
+    "priceAt": "{spot, select, top_left {Price at top left} top_center {Price at top center} top_right {Price at top right} middle_center {Price at middle} bottom_left {Price at bottom left} bottom_center {Price at bottom center} bottom_right {Price at bottom right} other {Price here}}. Drag, click a spot, or use the arrow keys, to move it.",
+    "moveTitleTo": "{spot, select, top_left {Move the title to the top left} top_center {Move the title to the top center} top_right {Move the title to the top right} middle_center {Move the title to the middle} bottom_left {Move the title to the bottom left} bottom_center {Move the title to the bottom center} bottom_right {Move the title to the bottom right} other {Move the title here}}",
+    "movePriceTo": "{spot, select, top_left {Move the price to the top left} top_center {Move the price to the top center} top_right {Move the price to the top right} middle_center {Move the price to the middle} bottom_left {Move the price to the bottom left} bottom_center {Move the price to the bottom center} bottom_right {Move the price to the bottom right} other {Move the price here}}"
+  },
+  "productPage": {
+    "layout": {
+      "title": "Page",
+      "showPage": {
+        "label": "Show a product page",
+        "infoLabel": "What this switch does",
+        "infoOn": "Tapping a product tile opens its page.",
+        "infoOff": "Product tiles have no page to open."
+      },
+      "pageColor": "Page color",
+      "storefrontBackground": "Storefront background",
+      "photoFit": {
+        "label": "Photo fit",
+        "ariaLabel": "Photo fit",
+        "fit": "Fit",
+        "fill": "Fill"
+      },
+      "font": {
+        "label": "Font",
+        "infoLabel": "How this page's font relates to the storefront's",
+        "infoOwn": "This page reads in its own face, whatever the storefront uses.",
+        "infoFollows": "Follows your storefront's font. Change it under Typography.",
+        "inheritOption": "Same as storefront ({name})"
+      },
+      "indexing": {
+        "label": "Allow search engines",
+        "infoLabel": "What turning this off does",
+        "infoContent": "Off keeps your product pages out of search results. Anyone with a link can still open them."
+      },
+      "useStorefrontBackground": "Use Storefront background"
+    },
+    "cta": {
+      "title": "Buy button",
+      "infoLabel": "What decides whether a button shows",
+      "infoContent": "The button follows each product’s purchase link (set on the product). Without one it emails your contact address below; with neither, no button is shown.",
+      "buttonText": {
+        "label": "Button text",
+        "charsLeft": "{count, plural, one {# character left} other {# characters left}}"
+      },
+      "buttonColor": "Button color",
+      "storefrontAccent": "Storefront accent",
+      "cornerRoundness": {
+        "label": "Corner roundness",
+        "ariaLabel": "Buy button corner roundness",
+        "valueText": "{value} pixels",
+        "auto": "Auto"
+      },
+      "borderThickness": {
+        "label": "Border thickness",
+        "ariaLabel": "Buy button border thickness",
+        "valueText": "{value} pixels",
+        "none": "None"
+      },
+      "borderColor": "Border color",
+      "buttonTextColor": "Button text color",
+      "priceNote": {
+        "label": "Price note",
+        "ariaLabel": "Price note",
+        "inclVat": "Incl. VAT",
+        "exclTax": "Excl. tax",
+        "none": "None"
+      },
+      "shippingNote": {
+        "label": "Shipping note",
+        "ariaLabel": "Shipping note",
+        "plusShipping": "Plus shipping",
+        "freeShipping": "Free shipping",
+        "none": "None"
+      },
+      "useStorefrontAccent": "Use Storefront accent",
+      "useButtonTextColor": "Use Button text color"
+    },
+    "sections": {
+      "title": "Sections",
+      "infoLabel": "When a section stays hidden",
+      "infoContent": "A section with nothing to show stays hidden even when it is on. Shipping and safety never show for downloads. Safety and compliance and Seller are legal disclosures and cannot be turned off.",
+      "listAriaLabel": "What the page shows",
+      "underTheTitle": "under the title",
+      "requiredByLaw": "required by law",
+      "sectionLabels": {
+        "description": "Description",
+        "specs": "Specifications",
+        "documents": "Documents",
+        "shipping": "Shipping",
+        "returns": "Returns",
+        "safety": "Safety and compliance",
+        "seller": "Seller"
+      },
+      "availability": "Availability",
+      "soldByByline": "“Sold by” byline"
+    },
+    "shippingReturns": {
+      "title": "Shipping and returns",
+      "infoLabel": "Why this lives in Settings, not here",
+      "infoContent": "Set once for your whole account, so every storefront and every product sells under the same terms. For EU sellers the page also states the 14-day cancellation right and the 2-year guarantee, whatever you write.",
+      "shippingLabel": "Shipping",
+      "returnsLabel": "Returns",
+      "profileCount": "{count, plural, one {# shipping profile for products that ship differently.} other {# shipping profiles for products that ship differently.}}",
+      "nothingSet": "Nothing set yet. Until you add your terms, product pages say the seller has not added shipping details.",
+      "editSettings": "Edit in Settings",
+      "addTerms": "Add your shipping terms"
+    },
+    "sellerDetails": {
+      "title": "Seller details",
+      "infoLabel": "Why this lives in Settings, not here",
+      "infoContent": "Distance-selling law asks for the seller’s name, address and a way to get in touch next to every offer. Set once for your whole account — every storefront and every product shows the same details, so there is nothing to repeat per store.",
+      "vatId": "VAT ID {vatId}",
+      "nothingSet": "Nothing set yet. Until you add your business details, buyers only see the “Sold by” line under the title.",
+      "editSettings": "Edit in Settings",
+      "addDetails": "Add your business details"
+    }
+  },
+  "productBlock": {
+    "deleted": "This product was removed from your catalog.",
+    "removeFromGrid": "Remove from grid",
+    "nameLabel": "Name",
+    "namePlaceholder": "Product name",
+    "priceLabel": "Price ({currency})",
+    "saveDotDot": "Save…",
+    "updating": "Updating…",
+    "whereChangeLands": {
+      "label": "Where a name or price change lands",
+      "content": "Name and price belong to the product, so saving updates them everywhere it appears, not just this storefront."
+    },
+    "stock": {
+      "outOfStock": "Out of stock in inventory (0 on hand).",
+      "lowStock": "Low stock: {count} on hand.",
+      "inStock": "{count} in stock."
+    },
+    "openProductPage": "Open product page",
+    "hideProductPage": "Hide product page",
+    "tileStyle": {
+      "title": "Tile style",
+      "reset": "Reset to theme",
+      "infoLabel": "How this tile's style relates to the theme",
+      "infoWithOverrides": "This tile has its own style. Settings you have not changed here keep following the theme.",
+      "infoNoOverrides": "Style this tile on its own. Anything you do not change keeps following the theme."
+    },
+    "priceTag": "Price tag",
+    "modal": {
+      "title": "Update product everywhere?",
+      "description": "This edits the product itself. Every storefront, checkout link, and your product catalog will show the new details, not just this grid.",
+      "nameLabel": "Name:",
+      "priceLabel": "Price:",
+      "updateEverywhere": "Update everywhere"
+    },
+    "savedToast": "\"{title}\" was updated everywhere it appears.",
+    "validation": {
+      "noTitle": "Give your product a title.",
+      "noPrice": "Set a price.",
+      "badPrice": "Price must be a number greater than zero.",
+      "tooHigh": "That price is too high."
+    }
+  },
+  "textBlock": {
+    "text": {
+      "label": "Text",
+      "infoLabel": "Other ways to edit this text",
+      "infoContent": "You can also click the block again on the canvas and type straight onto it, which is quicker for a small change."
+    },
+    "editOnCanvas": "Edit text on the canvas",
+    "style": {
+      "label": "Style"
+    },
+    "font": {
+      "label": "Font",
+      "themeFont": "Theme font",
+      "themeFontDescription": "Follow the storefront font"
+    },
+    "color": {
+      "selectedWords": "Selected words",
+      "label": "Color",
+      "blockColor": "the block’s color",
+      "themeColor": "Theme color",
+      "useBlockColor": "Use the block’s color"
+    },
+    "colouringSelected": "Colouring the {count, plural, one {# selected character} other {# selected characters}}. Click away from the words to colour the whole block instead."
+  },
+  "imageBlock": {
+    "size": {
+      "label": "Size",
+      "ariaLabel": "Image fit",
+      "fill": "Fill",
+      "fit": "Fit",
+      "fillHint": "Fills the block, cropping the overflow.",
+      "fitHint": "Shows the whole image inside the block."
+    },
+    "reposition": "Reposition image",
+    "opacity": {
+      "label": "Opacity",
+      "ariaLabel": "Image opacity",
+      "valueText": "{value} percent"
+    },
+    "description": {
+      "label": "Description",
+      "placeholder": "Logo, icon, decoration…",
+      "hint": "Read aloud by screen readers. Leave it empty if the image is purely decorative."
+    }
+  },
+  "shapeBlock": {
+    "shape": {
+      "label": "Shape",
+      "ariaLabel": "Shape kind"
+    },
+    "points": {
+      "label": "Points",
+      "ariaLabel": "Star points",
+      "valueText": "{value} points"
+    },
+    "corners": {
+      "label": "Corner roundness",
+      "ariaLabel": "Corner roundness",
+      "valueText": "{value} percent",
+      "sharp": "Sharp"
+    },
+    "fill": {
+      "ring": "Color",
+      "shape": "Fill"
+    },
+    "border": {
+      "ringLabel": "Ring thickness",
+      "shapeLabel": "Border thickness",
+      "ringAriaLabel": "Ring thickness",
+      "shapeAriaLabel": "Border thickness",
+      "valueText": "{value} pixels",
+      "none": "None",
+      "color": "Border color"
+    },
+    "opacity": {
+      "label": "Opacity",
+      "ariaLabel": "Shape opacity",
+      "valueText": "{value} percent"
+    }
+  },
+  "multiBlock": {
+    "shapesContext": "Editing {count, plural, one {# shape} other {# shapes}} together. Values shown come from the first selected shape; every change applies to all of them.",
+    "textsContext": "Editing {count, plural, one {# text block} other {# text blocks}} together. Values shown come from the first selected block; every change applies to all of them. Each block keeps its own text.",
+    "imagesContext": "Editing {count, plural, one {# element} other {# elements}} together. Values shown come from the first selected element; every change applies to all of them. Each keeps its own picture.",
+    "productsContext": "Styling {count, plural, one {# product tile} other {# product tiles}} together. Values shown come from the first selected tile; every change applies to all of them.",
+    "mixedContext": "{count, plural, one {# block} other {# blocks}} of different types are selected. Select blocks of one type to edit their settings together.",
+    "remove": "Remove {count, plural, one {# block} other {# blocks}}",
+    "duplicate": "Duplicate {count, plural, one {# block} other {# blocks}}",
+    "productsNotDuplicated": "Products are not duplicated.",
+    "tileStyle": {
+      "title": "Tile style",
+      "reset": "Reset to theme"
+    },
+    "priceTag": "Price tag"
+  },
+  "blockActions": {
+    "duplicate": "Duplicate",
+    "remove": "Remove from grid"
+  },
+  "toolbar": {
+    "ariaLabel": "Editor tools",
+    "addProduct": "Add product",
+    "addText": "Add text",
+    "addElement": "Add element",
+    "product": "Product",
+    "text": "Text",
+    "element": "Element",
+    "elementsMenu": "Elements",
+    "uploading": "Uploading…",
+    "upload": "Upload",
+    "uploadImage": "Upload image",
+    "allShapes": "All shapes",
+    "browseShapes": "Browse the full shape library",
+    "closePage": "Close product page",
+    "showPage": "Show product page",
+    "closePages": "Close the product pages",
+    "showPageFull": "Show the product page",
+    "undo": "Undo",
+    "undoTip": "Undo (Ctrl+Z)",
+    "redo": "Redo",
+    "redoTip": "Redo (Ctrl+Shift+Z)",
+    "tidy": "Tidy the canvas",
+    "tidyTip": "Tidy up",
+    "zoomOut": "Zoom out",
+    "zoomOutTip": "Zoom out (Ctrl -)",
+    "zoomReset": "Reset zoom to 100%",
+    "zoomResetTip": "Reset zoom (Ctrl 0)",
+    "zoomResetMenuItem": "Reset zoom",
+    "zoomIn": "Zoom in",
+    "zoomInTip": "Zoom in (Ctrl +)",
+    "designSettings": "Design settings",
+    "page": "Page",
+    "moreTools": "More tools"
+  },
+  "selectionToolbar": {
+    "toolsFor": "Tools for {name}",
+    "elements": "{count, plural, one {# element} other {# elements}}",
+    "hidePage": "Hide page",
+    "hidePages": "Hide pages",
+    "openPage": "Open page",
+    "openPages": "Open pages",
+    "openProductPage": "Open the product page for {name}",
+    "closeProductPage": "Close the product page for {name}",
+    "openProductPages": "Open the product pages for {count, plural, one {# product} other {# products}}",
+    "closeProductPages": "Close the product pages for {count, plural, one {# product} other {# products}}",
+    "editText": "Edit text",
+    "editTextOf": "Edit the text of {name}",
+    "color": "Color",
+    "changeColorOf": "Change the colour of {name}",
+    "stroke": "Stroke",
+    "editStrokeOf": "Edit the stroke of {name}",
+    "corners": "Corners",
+    "editCornersOf": "Edit the corner roundness of {name}",
+    "opacity": "Opacity",
+    "editOpacityOf": "Edit the opacity of {name}",
+    "frame": "Frame",
+    "frameImageFor": "Frame the image for {name}",
+    "duplicate": "Duplicate",
+    "duplicateNamed": "Duplicate {name}",
+    "duplicateN": "Duplicate {count, plural, one {# element} other {# elements}}",
+    "removeFrom": "Remove {name} from grid",
+    "removeN": "Remove {count, plural, one {# element} other {# elements}} from grid"
+  },
+  "canvas": {
+    "gridLabel": "Storefront canvas",
+    "emptyGrid": "Your grid is empty",
+    "emptyGridHint": "Add a product to start arranging your storefront. Text and shapes are on the toolbar below.",
+    "addProduct": "Add product",
+    "desktopPreview": "Desktop preview",
+    "mobilePreview": "Mobile preview"
+  },
+  "blockTile": {
+    "removedProduct": "Removed product",
+    "shape": "{kind, select, square {square shape} circle {circle shape} ring {ring shape} diamond {diamond shape} rounded {rounded shape} pill {pill shape} half {half shape} quarter {quarter shape} bar {bar shape} triangle {triangle shape} wedge {wedge shape} pentagon {pentagon shape} hexagon {hexagon shape} octagon {octagon shape} star {star shape} sparkle {sparkle shape} cross {cross shape} arrow {arrow shape} chevron {chevron shape} trapezoid {trapezoid shape} parallelogram {parallelogram shape} burst {burst shape} other {{kind} shape}}",
+    "imageWithAlt": "Image: {alt}",
+    "imageElement": "Image element",
+    "textWithContent": "Text: {text}",
+    "textBlock": "Text block",
+    "selected": "Selected: {label}. Press Enter to deselect.",
+    "unselected": "{label}. Press Enter to select and edit.",
+    "draftAriaLabel": "Draft product -- buyers cannot reach this link",
+    "draft": "Draft"
+  },
+  "blockFace": {
+    "productRemoved": "Product removed. Delete this block."
+  },
+  "framer": {
+    "ariaLabel": "Framing the image for {name}. Drag to reposition, arrow keys to nudge, plus and minus to zoom, Escape when done. Currently {x}% across, {y}% down, {zoom}% zoom.",
+    "hintZoomed": "{zoom}% · Drag to frame · Esc",
+    "hintMinZoom": "Pull a corner to zoom · Esc"
+  },
+  "inlineText": {
+    "ariaLabel": "Block text"
+  },
+  "tiles": {
+    "emptyText": "Empty text block",
+    "imageUnavailable": "Image unavailable"
+  },
+  "spotDrag": {
+    "tokenLabel": "{token, select, title {Title} other {Price}} {drop, select, below {in the title bar} top_left {at top left} top_center {at top center} top_right {at top right} middle_center {at middle} bottom_left {at bottom left} bottom_center {at bottom center} bottom_right {at bottom right} other {}}. Press to open its settings, or drag (or use the arrow keys) to move it."
+  },
+  "autoFit": {},
+  "designer": {
+    "header": {
+      "back": "Back to storefronts",
+      "nameLabel": "Storefront name",
+      "namePlaceholder": "Untitled storefront",
+      "unsaved": "Unsaved changes",
+      "search": "Search"
+    },
+    "mobileNotice": {
+      "body": "For the best editing experience, open this designer on a desktop or tablet. Reordering blocks and editing the header work on any device.",
+      "dismiss": "Dismiss the small-screen editing notice"
+    },
+    "inspector": {
+      "title": {
+        "addProduct": "Add product",
+        "blocks": "{count, plural, one {# block} other {# blocks}}",
+        "product": "Product",
+        "shape": "Shape",
+        "image": "Image",
+        "text": "Text block"
+      },
+      "close": {
+        "addProduct": "Close add product panel",
+        "blocks": "{count, plural, one {Close # block panel} other {Close # blocks panel}}",
+        "product": "Close product panel",
+        "shape": "Close shape panel",
+        "image": "Close image panel",
+        "text": "Close text block panel"
+      }
+    },
+    "toasts": {
+      "full": "This storefront is full.",
+      "fullDetail": "A storefront can hold up to {max, plural, one {# block} other {# blocks}}.",
+      "imageUploadFailed": "That image could not be uploaded.",
+      "imageUploadFailedDetail": "Try again in a moment.",
+      "copied": "{count, plural, one {Block copied.} other {# blocks copied.}}",
+      "copiedDetail": "Paste with Ctrl+V or Cmd+V.",
+      "savedWithDrafts": "Saved, but some products are still drafts.",
+      "draftsDetail": "{count, plural, one {{names} is a draft and buyers cannot reach it yet.} other {{names}{hidden, plural, =0 {} other { and # more}} are drafts and buyers cannot reach them yet.}}",
+      "publishDrafts": "Publish those products when ready.",
+      "saved": "Storefront saved.",
+      "droppedBlocks": "{count, plural, one {# block pointed at a deleted product and was removed.} other {# blocks pointed at deleted products and were removed.}}"
+    },
+    "leave": {
+      "title": "Save your changes?",
+      "description": "You have unsaved changes to this storefront. Save them before leaving, or discard them.",
+      "save": "Save changes",
+      "discard": "Discard changes",
+      "keepEditing": "Keep editing"
+    },
+    "defaults": {
+      "textBlock": "Your text here"
+    }
+  },
+  "sample": {
+    "name": "Sample storefront",
+    "card": {
+      "open": "Open the sample storefront",
+      "badge": "Sample",
+      "summary": "{count, plural, one {{count} block · try anything, nothing is saved} other {{count} blocks · try anything, nothing is saved}}",
+      "hide": "Hide the sample storefront"
+    },
+    "embed": {
+      "title": "Embed a storefront",
+      "description": "Every storefront you create gets its own snippet to paste into your website.",
+      "snippetLabel": "A snippet looks like this",
+      "inDevelopment": "The widget is still in development and doesn't show on other sites yet.",
+      "create": "Create a storefront"
+    },
+    "list": {
+      "show": "Show the sample storefront",
+      "showFailed": "Couldn't bring back the sample storefront.",
+      "hideFailed": "Couldn't hide the sample storefront.",
+      "failedDetail": "Try again in a moment.",
+      "createFirst": "Create your first storefront",
+      "createFirstHint": "Add your products to its grid. Each one gets a page you can share."
+    },
+    "designer": {
+      "createAriaLabel": "Create your own storefront",
+      "createShort": "Create",
+      "create": "Create your own",
+      "notice": "This is a sample storefront. Try anything: nothing here is saved.",
+      "takeTour": "Take the tour"
+    },
+    "content": {
+      "bio": "Everyday tech and desk objects, chosen to last.",
+      "heading": "Best sellers",
+      "story": "We use everything we sell before it goes on the shelf. Returns are accepted within 14 days.",
+      "dispatch": "Ships within 2 business days",
+      "products": {
+        "camera": {
+          "title": "Instant camera",
+          "description": "Prints the photo seconds after you take it. Film sold separately."
+        },
+        "headphones": {
+          "title": "Headphones",
+          "description": "Closed-back, with soft memory foam cushions. 3.5 mm cable included."
+        },
+        "watch": {
+          "title": "Smartwatch",
+          "description": "Aluminium case with a sport band. Tracks steps, sleep and workouts."
+        },
+        "mouse": {
+          "title": "Wireless mouse",
+          "description": "Light, with quiet clicks and up to 250 hours on one battery."
+        },
+        "speaker": {
+          "title": "Portable speaker",
+          "description": "Waterproof, with 12 hours of play on a single charge."
+        },
+        "succulent": {
+          "title": "Desk succulent",
+          "description": "A small haworthia in a ceramic pot. Needs water about once a month."
+        }
+      }
+    }
+  },
+  "colors": {
+    "fields": {
+      "accent": "Accent",
+      "storeName": "Store name",
+      "bio": "Bio",
+      "background": "Background",
+      "gradientFrom": "Gradient from",
+      "gradientTo": "Gradient to",
+      "fill": "Fill",
+      "color": "Color",
+      "borderColor": "Border color",
+      "selectedWords": "Selected words",
+      "textColor": "Text color",
+      "tagColor": "Tag color",
+      "shadowColor": "Shadow color"
+    },
+    "inherit": {
+      "themeColor": {
+        "label": "Theme color",
+        "use": "Use Theme color"
+      },
+      "default": {
+        "label": "Default",
+        "use": "Use Default"
+      },
+      "noFill": {
+        "label": "No fill",
+        "use": "Use No fill"
+      },
+      "cardColor": {
+        "label": "Card color",
+        "use": "Use Card color"
+      },
+      "blockColor": {
+        "label": "the block's color",
+        "use": "Use the block's color"
+      }
+    },
+    "presets": {
+      "white": {
+        "name": "White",
+        "label": "White ({value})"
+      },
+      "grey": {
+        "name": "Grey",
+        "label": "Grey ({value})"
+      },
+      "ink": {
+        "name": "Ink",
+        "label": "Ink ({value})"
+      },
+      "paleAccent": {
+        "name": "Pale accent",
+        "label": "Pale accent ({value})"
+      },
+      "softAccent": {
+        "name": "Soft accent",
+        "label": "Soft accent ({value})"
+      },
+      "accent": {
+        "name": "Accent",
+        "label": "Accent ({value})"
+      },
+      "deepAccent": {
+        "name": "Deep accent",
+        "label": "Deep accent ({value})"
+      }
+    },
+    "standard": {
+      "white": "White ({value})",
+      "grey200": "Grey 200 ({value})",
+      "grey300": "Grey 300 ({value})",
+      "grey400": "Grey 400 ({value})",
+      "grey": "Grey ({value})",
+      "grey600": "Grey 600 ({value})",
+      "grey700": "Grey 700 ({value})",
+      "grey800": "Grey 800 ({value})",
+      "ink": "Ink ({value})",
+      "black": "Black ({value})",
+      "red": "Red ({value})",
+      "orange": "Orange ({value})",
+      "amber": "Amber ({value})",
+      "yellow": "Yellow ({value})",
+      "green": "Green ({value})",
+      "teal": "Teal ({value})",
+      "sky": "Sky ({value})",
+      "blue": "Blue ({value})",
+      "violet": "Violet ({value})",
+      "pink": "Pink ({value})",
+      "redDark": "Red dark ({value})",
+      "orangeDark": "Orange dark ({value})",
+      "amberDark": "Amber dark ({value})",
+      "yellowDark": "Yellow dark ({value})",
+      "greenDark": "Green dark ({value})",
+      "tealDark": "Teal dark ({value})",
+      "skyDark": "Sky dark ({value})",
+      "blueDark": "Blue dark ({value})",
+      "violetDark": "Violet dark ({value})",
+      "pinkDark": "Pink dark ({value})"
+    },
+    "palettes": {
+      "sunset": {
+        "name": "Sunset",
+        "group": "Sunset palette",
+        "swatches": {
+          "cream": "Sunset Cream ({value})",
+          "amber": "Sunset Amber ({value})",
+          "orange": "Sunset Orange ({value})",
+          "red": "Sunset Red ({value})",
+          "ember": "Sunset Ember ({value})"
+        }
+      },
+      "forest": {
+        "name": "Forest",
+        "group": "Forest palette",
+        "swatches": {
+          "mist": "Forest Mist ({value})",
+          "sage": "Forest Sage ({value})",
+          "green": "Forest Green ({value})",
+          "pine": "Forest Pine ({value})",
+          "deep": "Forest Deep ({value})"
+        }
+      },
+      "ocean": {
+        "name": "Ocean",
+        "group": "Ocean palette",
+        "swatches": {
+          "foam": "Ocean Foam ({value})",
+          "sky": "Ocean Sky ({value})",
+          "cyan": "Ocean Cyan ({value})",
+          "sea": "Ocean Sea ({value})",
+          "navy": "Ocean Navy ({value})"
+        }
+      },
+      "mono": {
+        "name": "Mono",
+        "group": "Mono palette",
+        "swatches": {
+          "white": "Mono White ({value})",
+          "silver": "Mono Silver ({value})",
+          "grey": "Mono Grey ({value})",
+          "graphite": "Mono Graphite ({value})",
+          "ink": "Mono Ink ({value})"
+        }
+      },
+      "candy": {
+        "name": "Candy",
+        "group": "Candy palette",
+        "swatches": {
+          "blush": "Candy Blush ({value})",
+          "rose": "Candy Rose ({value})",
+          "pink": "Candy Pink ({value})",
+          "purple": "Candy Purple ({value})",
+          "violet": "Candy Violet ({value})"
+        }
+      }
+    }
+  }
+}

@@ -3,10 +3,12 @@
 import * as React from "react";
 import { useActionState } from "react";
 import { Pencil, Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Avatar } from "@/components/ui/avatar";
 import { ImageUpIcon } from "@/components/ui/ImageUpIcon";
 import { SettingsCard } from "@/components/settings/SettingsCard";
-import { useActionToast, useToast } from "@/components/ui/Toast";
+import { useToast } from "@/components/ui/Toast";
+import { useActionStateToast } from "@/components/ui/ActionErrorNotice";
 import { ProfilePicCropModal } from "@/components/settings/ProfilePicCropModal";
 import {
   ghostButtonClass,
@@ -14,8 +16,9 @@ import {
 } from "@/components/ui/control-styles";
 import { cn } from "@/lib/utils";
 import { removeAvatar, uploadAvatar } from "@/lib/settings/avatar";
+import type { ActionState } from "@/lib/errors";
 
-const INITIAL: { error?: string; success?: string } = {};
+const INITIAL: ActionState = {};
 
 const MAX_SOURCE_BYTES = 2 * 1024 * 1024; // matches the server's cap
 const ACCEPTED = "image/jpeg,image/png,image/webp";
@@ -36,6 +39,8 @@ export function AvatarUpload({
   avatarUrl: string | null;
   name: string;
 }) {
+  const t = useTranslations("Settings.account.avatar");
+  const tCommon = useTranslations("Common.actions");
   const fileRef = React.useRef<HTMLInputElement>(null);
   const toast = useToast();
   const [uploadState, uploadAction, uploading] = useActionState(
@@ -49,8 +54,8 @@ export function AvatarUpload({
   // Two independent actions, two independent results. Merging them into one
   // "latest state" is what used to make a failed remove silently inherit the
   // previous upload's success line.
-  useActionToast(uploadState);
-  useActionToast(removeState);
+  useActionStateToast(uploadState);
+  useActionStateToast(removeState);
   const busy = uploading || removing;
 
   // Data URL of a freshly picked file. Null means "crop the current avatar",
@@ -75,11 +80,11 @@ export function AvatarUpload({
     // input is visually hidden, so an inline message beside it had nothing to
     // sit next to anyway.
     if (file.size > MAX_SOURCE_BYTES) {
-      toast.error("That image is too large. Keep it under 2 MB.");
+      toast.error(t("errorTooLarge"));
       return;
     }
     if (!ACCEPTED.split(",").includes(file.type)) {
-      toast.error("Use a JPEG, PNG, or WebP image.");
+      toast.error(t("errorBadType"));
       return;
     }
 
@@ -88,7 +93,7 @@ export function AvatarUpload({
       setPicked(reader.result as string);
       setCropOpen(true);
     };
-    reader.onerror = () => toast.error("Could not read that file.");
+    reader.onerror = () => toast.error(t("errorReadFailed"));
     reader.readAsDataURL(file);
   }
 
@@ -117,8 +122,8 @@ export function AvatarUpload({
 
   return (
     <SettingsCard
-      title="Profile photo"
-      description="A JPEG, PNG, or WebP up to 2 MB. Shown across your dashboard."
+      title={t("cardTitle")}
+      description={t("cardDescription")}
     >
       <div className="flex items-center gap-4">
         {/* The photo itself is what is changing, so the progress lives on it:
@@ -136,9 +141,7 @@ export function AvatarUpload({
             onClick={handleAvatarClick}
             disabled={busy}
             suppressHydrationWarning
-            aria-label={
-              avatarUrl ? "Edit your profile photo" : "Upload a profile photo"
-            }
+            aria-label={avatarUrl ? t("editLabel") : t("uploadLabel")}
             className="group/avatar relative flex size-16 items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-default"
           >
             <Avatar
@@ -166,9 +169,9 @@ export function AvatarUpload({
           )}
           <span className="sr-only" role="status">
             {uploading
-              ? "Uploading your profile photo"
+              ? t("statusUploading")
               : removing
-                ? "Removing your profile photo"
+                ? t("statusRemoving")
                 : ""}
           </span>
         </div>
@@ -177,7 +180,7 @@ export function AvatarUpload({
           <input
             ref={fileRef}
             type="file"
-            aria-label="Choose profile photo"
+            aria-label={t("chooseLabel")}
             accept={ACCEPTED}
             className="sr-only"
             onChange={handleFile}
@@ -198,7 +201,7 @@ export function AvatarUpload({
                 around the avatar, and two indicators for one upload is one
                 too many. */}
             <ImageUpIcon className="size-4" />
-            {avatarUrl ? "Change photo" : "Upload photo"}
+            {avatarUrl ? t("changePhoto") : t("uploadPhoto")}
           </button>
 
           {avatarUrl && (
@@ -210,7 +213,7 @@ export function AvatarUpload({
                 className={cn(ghostButtonClass, "px-3 hover:text-destructive")}
               >
                 <Trash2 className="size-4" strokeWidth={2} aria-hidden />
-                Remove
+                {tCommon("remove")}
               </button>
             </form>
           )}

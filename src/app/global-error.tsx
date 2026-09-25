@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 
 /**
  * Last-resort boundary for crashes in the ROOT layout itself (error.tsx only
@@ -44,6 +44,92 @@ const PALETTE = `
   }
 }`;
 
+/**
+ * This surface's only copy, in every UI language (the locales in
+ * src/i18n/locales.ts; a unit test holds the two lists together). In code
+ * rather than in messages/, like DELETE_CONFIRM_PHRASES, because the
+ * translation provider lives in the root layout, which is what failed. Not
+ * imported from anywhere for the same reason: this file must not depend on a
+ * module that could be part of the crash.
+ */
+export const GLOBAL_ERROR_COPY = {
+  en: {
+    title: "Something went wrong",
+    body: "The app failed to load. This is usually temporary: your account and data are fine.",
+    retry: "Try again",
+  },
+  cs: {
+    title: "Něco se pokazilo",
+    body: "Aplikaci se nepodařilo načíst. Obvykle jde o dočasný problém: váš účet i data jsou v pořádku.",
+    retry: "Zkusit znovu",
+  },
+  de: {
+    title: "Etwas ist schiefgelaufen",
+    body: "Die App konnte nicht geladen werden. Das ist meist nur vorübergehend: Dein Konto und deine Daten sind in Ordnung.",
+    retry: "Erneut versuchen",
+  },
+  fr: {
+    title: "Une erreur est survenue",
+    body: "L’application n’a pas pu se charger. C’est généralement temporaire : votre compte et vos données n’ont rien.",
+    retry: "Réessayer",
+  },
+  es: {
+    title: "Algo ha ido mal",
+    body: "No se ha podido cargar la aplicación. Suele ser algo temporal: tu cuenta y tus datos están bien.",
+    retry: "Inténtalo de nuevo",
+  },
+  it: {
+    title: "Qualcosa è andato storto",
+    body: "Non è stato possibile caricare l’app. Di solito è un problema temporaneo: il tuo account e i tuoi dati sono al sicuro.",
+    retry: "Riprova",
+  },
+  nl: {
+    title: "Er is iets misgegaan",
+    body: "De app kon niet worden geladen. Dit is meestal tijdelijk: je account en gegevens zijn in orde.",
+    retry: "Opnieuw proberen",
+  },
+  pl: {
+    title: "Coś poszło nie tak",
+    body: "Nie udało się wczytać aplikacji. To zwykle chwilowy problem: twoje konto i dane są bezpieczne.",
+    retry: "Spróbuj ponownie",
+  },
+  "pt-PT": {
+    title: "Ocorreu um erro",
+    body: "Não foi possível carregar a aplicação. Normalmente, é temporário: a sua conta e os seus dados estão bem.",
+    retry: "Tentar novamente",
+  },
+  sk: {
+    title: "Niečo sa pokazilo",
+    body: "Aplikáciu sa nepodarilo načítať. Zvyčajne ide o dočasný problém: váš účet aj údaje sú v poriadku.",
+    retry: "Skúsiť znova",
+  },
+} as const;
+
+export type GlobalErrorLocale = keyof typeof GLOBAL_ERROR_COPY;
+
+function isGlobalErrorLocale(value: string): value is GlobalErrorLocale {
+  return Object.hasOwn(GLOBAL_ERROR_COPY, value);
+}
+
+/**
+ * The copy's language for a browser language tag: its primary subtag
+ * ("cs-CZ" is cs), with every Portuguese meaning pt-PT, the one shipped, and
+ * anything unsupported meaning English.
+ */
+export function globalErrorLocale(language: string | undefined): GlobalErrorLocale {
+  const primary = (language ?? "").split("-")[0].toLowerCase();
+  if (primary === "pt") return "pt-PT";
+  return isGlobalErrorLocale(primary) ? primary : "en";
+}
+
+// The browser's language, read through useSyncExternalStore: the server
+// snapshot is English, so the server render and the hydrating render agree
+// and only then does the copy switch. It never changes while this is on
+// screen, hence the no-op subscribe.
+const subscribeNever = () => () => {};
+const readBrowserLocale = () => globalErrorLocale(navigator.language);
+const readServerLocale = (): GlobalErrorLocale => "en";
+
 const INK = "var(--ge-ink)";
 const SURFACE = "var(--ge-surface)";
 const MUTED = "var(--ge-muted)";
@@ -73,8 +159,15 @@ export default function GlobalError({
     console.error("[global error boundary]", error);
   }, [error]);
 
+  const locale = useSyncExternalStore(
+    subscribeNever,
+    readBrowserLocale,
+    readServerLocale,
+  );
+  const copy = GLOBAL_ERROR_COPY[locale];
+
   return (
-    <html lang="en">
+    <html lang={locale}>
       <head>
         {/* Passed as a string child rather than through a raw-HTML prop:
             <style> is a raw-text element so the CSS lands verbatim, and the
@@ -126,7 +219,7 @@ export default function GlobalError({
               letterSpacing: "-0.01em",
             }}
           >
-            Something went wrong
+            {copy.title}
           </h1>
           <p
             style={{
@@ -137,8 +230,7 @@ export default function GlobalError({
               color: MUTED,
             }}
           >
-            The app failed to load. This is usually temporary: your account and
-            data are fine.
+            {copy.body}
           </p>
           <button
             type="button"
@@ -155,7 +247,7 @@ export default function GlobalError({
               cursor: "pointer",
             }}
           >
-            Try again
+            {copy.retry}
           </button>
           {error.digest && (
             <p

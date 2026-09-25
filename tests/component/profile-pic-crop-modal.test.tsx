@@ -1,5 +1,5 @@
 ﻿import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, cleanup, waitFor, fireEvent } from "@testing-library/react";
+import { renderWithoutToasts, screen, cleanup, waitFor, fireEvent } from "../setup/render";
 
 import { ProfilePicCropModal } from "@/components/settings/ProfilePicCropModal";
 
@@ -93,7 +93,7 @@ const noop = () => {};
 
 function renderModal() {
   const onSave = vi.fn<(file: File) => void>();
-  render(
+  renderWithoutToasts(
     <ProfilePicCropModal
       open
       src={SRC}
@@ -116,7 +116,7 @@ async function ready() {
 
 describe("ProfilePicCropModal: surface", () => {
   it("renders nothing when closed", () => {
-    const { container } = render(
+    const { container } = renderWithoutToasts(
       <ProfilePicCropModal open={false} src={SRC} onSave={noop} onClose={noop} onUploadNew={noop} />,
     );
     expect(container.firstChild).toBeNull();

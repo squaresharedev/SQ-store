@@ -1,15 +1,16 @@
 "use client";
 
 import { useCallback, useMemo, useState, type ReactNode } from "react";
+import Link from "next/link";
 import { Code, Menu, Search } from "lucide-react";
 import { TourOverlay } from "@/components/onboarding/TourOverlay";
 import { TourReplayCard } from "@/components/onboarding/TourReplayCard";
 import { OrdersToolbar } from "@/components/orders/OrdersToolbar";
 import { ConnectionStatusCard } from "@/components/payments/ConnectionStatusCard";
-import { SampleStorefrontCard } from "@/components/storefront/SampleStorefrontCard";
 import { Button } from "@/components/ui/button";
 import {
   focusRingClass,
+  ghostButtonClass,
   iconButtonClass,
   primaryButtonClass,
   secondaryButtonClass,
@@ -231,7 +232,12 @@ export function TourHarness() {
           <div className="relative h-48 border border-border bg-muted/40">
             {canWriteStorefront && (
               <div className="absolute right-3 top-3 flex gap-1.5">
-                <button type="button" aria-label="Embed Demo storefront" className={iconButtonClass}>
+                <button
+                  type="button"
+                  data-tour="storefront-embed"
+                  aria-label="Embed Demo storefront"
+                  className={iconButtonClass}
+                >
                   <Code className="size-4" aria-hidden />
                 </button>
               </div>
@@ -240,12 +246,19 @@ export function TourHarness() {
           </div>
         )}
         {hasSample && canWriteStorefront && (
-          // The REAL sample card, after the seller's own like the real list.
-          <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <li data-storefront-sample="">
-              <SampleStorefrontCard onEmbed={() => {}} onHide={() => setHasSample(false)} />
-            </li>
-          </ul>
+          // The sample's quiet link, after the seller's own like the real list
+          // (StorefrontsList), with the attribute on the wrapper that hugs it.
+          <div className="flex justify-center">
+            <span data-storefront-sample="" className="inline-flex">
+              <Link
+                href="/storefront/sample"
+                onClick={(event) => event.preventDefault()}
+                className={cn(ghostButtonClass, "px-3 py-2")}
+              >
+                Open the sample storefront
+              </Link>
+            </span>
+          </div>
         )}
       </div>
     );
@@ -275,7 +288,7 @@ export function TourHarness() {
             </div>
           </div>
         ) : (
-          <div data-analytics-range-preset="30d" className="space-y-6">
+          <div data-analytics-range-preset="30d" data-tour="analytics-range" className="space-y-6">
             <div role="group" aria-label="Date range" className="inline-flex border border-border">
               <button type="button" aria-pressed="true" className={cn("px-3 py-2 text-sm", focusRingClass)}>
                 Last 30 days
@@ -321,12 +334,22 @@ export function TourHarness() {
   return (
     <div className="min-h-screen bg-background" data-harness-path={pathname}>
       <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b border-border bg-background px-4 md:hidden">
-        <button type="button" aria-label="Open menu" className={cn(iconButtonClass, "size-10 border-0")}>
+        <button
+          type="button"
+          data-tour="menu-button"
+          aria-label="Open menu"
+          className={cn(iconButtonClass, "size-10 border-0")}
+        >
           <Menu className="size-5" aria-hidden />
         </button>
         <span className="font-medium text-foreground">{pageLabel}</span>
         <div className="ml-auto">
-          <button type="button" aria-label="Search" className={cn(iconButtonClass, "size-10 border-0")}>
+          <button
+            type="button"
+            data-tour="search-phone"
+            aria-label="Search"
+            className={cn(iconButtonClass, "size-10 border-0")}
+          >
             <Search className="size-5" aria-hidden />
           </button>
         </div>
@@ -334,6 +357,7 @@ export function TourHarness() {
 
       {/* Same translate classes as the real rail: on a phone it is off screen. */}
       <nav
+        data-tour="dashboard-nav"
         aria-label="Dashboard"
         className="fixed inset-y-0 left-0 z-50 flex w-64 -translate-x-full flex-col gap-1 border-r border-border bg-background p-4 md:translate-x-0"
       >

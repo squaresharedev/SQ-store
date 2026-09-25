@@ -2,6 +2,7 @@
 
 import { useId, useState } from "react";
 import { ArrowRight, Image as ImageIcon, Trash2 } from "lucide-react";
+import { useTranslations, useLocale } from "next-intl";
 import type { Product } from "@/types/product";
 import {
   blockKey,
@@ -11,6 +12,7 @@ import {
   type StorefrontTheme,
 } from "@/types/storefront";
 import { formatPrice } from "@/lib/format";
+import { currencySymbol } from "@/lib/format/money";
 import { updateProduct } from "@/lib/products/actions";
 import {
   PRICE_CENTS_MAX,
@@ -18,6 +20,7 @@ import {
 } from "@/lib/validation/product";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/Toast";
+import { useActionErrorToast } from "@/components/ui/ActionErrorNotice";
 import { destructiveButtonClass, errorTextClass, fieldBaseClass, ghostButtonClass, infoTextClass, primaryButtonClass, secondaryButtonClass } from "@/components/ui/control-styles";
 import { CollapsibleSection } from "@/components/ui/CollapsibleSection";
 import { useSettingTarget } from "@/lib/storefront/setting-context";
@@ -39,23 +42,6 @@ function centsOf(input: string): number | null {
 /** The panel's short field: two of these stacked are the height of the
  *  thumbnail beside them. */
 const COMPACT_FIELD_CLASS = "h-8 px-2 py-0 text-sm";
-
-/** "€" for EUR, falling back to the code where there is no narrow sign. */
-function currencySignOf(currency: string): string {
-  try {
-    return (
-      new Intl.NumberFormat("en-IE", {
-        style: "currency",
-        currency,
-        currencyDisplay: "narrowSymbol",
-      })
-        .formatToParts(0)
-        .find((part) => part.type === "currency")?.value ?? currency
-    );
-  } catch {
-    return currency;
-  }
-}
 
 /**
  * Inspector card body for a PRODUCT block in the side panel. Block-level
@@ -96,6 +82,9 @@ export function ProductBlockEditor({
   pageOpen?: boolean;
 }) {
   const fieldId = useId();
+  const t = useTranslations("Storefront");
+  const tCommon = useTranslations("Common");
+  const locale = useLocale();
   const [draftTitle, setDraftTitle] = useState(product?.title ?? "");
   const [draftPrice, setDraftPrice] = useState(
     product ? String(product.price) : "",
@@ -105,6 +94,7 @@ export function ProductBlockEditor({
   const [saving, setSaving] = useState(false);
   const toast = useToast();
   const sample = useSampleMode();
+  const showActionError = useActionErrorToast();
 
   // A setting opened by name lands HERE rather than on the theme's copy when a
   // tile is selected, because the seller asking about "price position" with a
@@ -118,7 +108,7 @@ export function ProductBlockEditor({
     return (
       <div className="space-y-4">
         <p className={errorTextClass}>
-          This product was removed from your catalog.
+          {t("productBlock.deleted")}
         </p>
         <button
           type="button"
@@ -126,13 +116,13 @@ export function ProductBlockEditor({
           className={destructiveButtonClass + " w-full"}
         >
           <Trash2 className="size-4" strokeWidth={2} aria-hidden="true" />
-          Remove from grid
+          {t("productBlock.removeFromGrid")}
         </button>
       </div>
     );
   }
 
-  const currencySign = currencySignOf(product.currency);
+  const currencySign = currencySymbol(product.currency, locale);
   const trimmedTitle = draftTitle.trim();
   const draftCents = centsOf(draftPrice);
   const titleChanged = trimmedTitle !== product.title;
@@ -152,15 +142,15 @@ export function ProductBlockEditor({
   // Same rules as ProductForm: UX feedback only; the server re-validates.
   function handleSaveClick() {
     const nextErrors: { title?: string; price?: string } = {};
-    if (!trimmedTitle) nextErrors.title = "Give your product a title.";
+    if (!trimmedTitle) nextErrors.title = t("productBlock.validation.noTitle");
     const trimmedPrice = draftPrice.trim();
     const priceNumber = Number(trimmedPrice);
     if (!trimmedPrice) {
-      nextErrors.price = "Set a price.";
+      nextErrors.price = t("productBlock.validation.noPrice");
     } else if (!Number.isFinite(priceNumber) || priceNumber <= 0) {
-      nextErrors.price = "Price must be a number greater than zero.";
+      nextErrors.price = t("productBlock.validation.badPrice");
     } else if (Math.round(priceNumber * 100) > PRICE_CENTS_MAX) {
-      nextErrors.price = "That price is too high.";
+      nextErrors.price = t("productBlock.validation.tooHigh");
     }
     setErrors(nextErrors);
     if (nextErrors.title || nextErrors.price) return;
@@ -194,7 +184,7 @@ export function ProductBlockEditor({
     setSaving(false);
     setConfirmOpen(false);
     if (!result.ok) {
-      toast.error(result.error.message, { lines: [result.error.fix] });
+      showActionError(result.error);
       return;
     }
     const price = draftCents / 100;
@@ -204,7 +194,7 @@ export function ProductBlockEditor({
     // This write reaches past the storefront being designed, so the
     // confirmation says so rather than leaving the seller to wonder whether
     // they just renamed one tile.
-    toast.success(`"${trimmedTitle}" was updated everywhere it appears.`);
+    toast.success(t("productBlock.savedToast", { title: trimmedTitle }));
   }
 
   // Stock status line: display-only. The designer REPORTS availability and
@@ -212,14 +202,14 @@ export function ProductBlockEditor({
   let stockLine: string | null = null;
   if (product.trackStock) {
     if (product.stockQuantity === 0) {
-      stockLine = "Out of stock in inventory (0 on hand).";
+      stockLine = t("productBlock.stock.outOfStock");
     } else if (
       product.stockQuantity !== null &&
       product.stockQuantity <= product.lowStockThreshold
     ) {
-      stockLine = `Low stock: ${product.stockQuantity} on hand.`;
+      stockLine = t("productBlock.stock.lowStock", { count: product.stockQuantity });
     } else if (product.stockQuantity !== null) {
-      stockLine = `${product.stockQuantity} in stock.`;
+      stockLine = t("productBlock.stock.inStock", { count: product.stockQuantity });
     }
   }
 
@@ -255,14 +245,14 @@ export function ProductBlockEditor({
             {/* Labels are for assistive tech only: the placeholder, the
                 currency sign and the values themselves say which is which. */}
             <label htmlFor={`${fieldId}-title`} className="sr-only">
-              Name
+              {t("productBlock.nameLabel")}
             </label>
             <input
               id={`${fieldId}-title`}
               value={draftTitle}
               maxLength={200}
               disabled={saving}
-              placeholder="Product name"
+              placeholder={t("productBlock.namePlaceholder")}
               aria-invalid={errors.title ? true : undefined}
               onChange={(event) => editField("title", event.target.value)}
               className={cn(fieldBaseClass, COMPACT_FIELD_CLASS)}
@@ -270,7 +260,7 @@ export function ProductBlockEditor({
             <div className="flex items-center gap-1.5">
               <div className="relative min-w-0 flex-1">
                 <label htmlFor={`${fieldId}-price`} className="sr-only">
-                  Price ({product.currency})
+                  {t("productBlock.priceLabel", { currency: product.currency })}
                 </label>
                 <span
                   aria-hidden="true"
@@ -297,12 +287,11 @@ export function ProductBlockEditor({
                   disabled={saving}
                   className={cn(primaryButtonClass, "h-8 shrink-0 px-3 py-0")}
                 >
-                  {saving ? "Updating…" : "Save…"}
+                  {saving ? t("productBlock.updating") : t("productBlock.saveDotDot")}
                 </button>
               )}
-              <InfoTip label="Where a name or price change lands">
-                Name and price belong to the product, so saving updates them
-                everywhere it appears, not just this storefront.
+              <InfoTip label={t("productBlock.whereChangeLands.label")}>
+                {t("productBlock.whereChangeLands.content")}
               </InfoTip>
             </div>
           </div>
@@ -331,7 +320,7 @@ export function ProductBlockEditor({
           data-product-page-row=""
           className={cn(primaryButtonClass, "w-full")}
         >
-          {pageOpen ? "Hide product page" : "Open product page"}
+          {pageOpen ? t("productBlock.hideProductPage") : t("productBlock.openProductPage")}
           <ArrowRight className="size-4" strokeWidth={2} aria-hidden="true" />
         </button>
       )}
@@ -349,7 +338,7 @@ export function ProductBlockEditor({
           side by side. */}
       <div className="-mx-4 border-t border-border">
         <CollapsibleSection
-          title="Tile style"
+          title={t("productBlock.tileStyle.title")}
           collapsible
           defaultOpen={false}
           summon={summoned === "cardStyle"}
@@ -361,13 +350,13 @@ export function ProductBlockEditor({
                   onClick={onStyleReset}
                   className={cn(ghostButtonClass, "px-2 py-1 text-xs")}
                 >
-                  Reset to theme
+                  {t("productBlock.tileStyle.reset")}
                 </button>
               )}
-              <InfoTip label="How this tile's style relates to the theme">
+              <InfoTip label={t("productBlock.tileStyle.infoLabel")}>
                 {hasStyleOverrides
-                  ? "This tile has its own style. Settings you have not changed here keep following the theme."
-                  : "Style this tile on its own. Anything you do not change keeps following the theme."}
+                  ? t("productBlock.tileStyle.infoWithOverrides")
+                  : t("productBlock.tileStyle.infoNoOverrides")}
               </InfoTip>
             </div>
           }
@@ -384,7 +373,7 @@ export function ProductBlockEditor({
         </CollapsibleSection>
 
         <CollapsibleSection
-          title="Price tag"
+          title={t("productBlock.priceTag")}
           collapsible
           defaultOpen={false}
           summon={summoned === "priceTag"}
@@ -405,7 +394,7 @@ export function ProductBlockEditor({
         className={destructiveButtonClass + " w-full"}
       >
         <Trash2 className="size-4" strokeWidth={2} aria-hidden="true" />
-        Remove from grid
+        {t("productBlock.removeFromGrid")}
       </button>
 
       <Modal
@@ -417,14 +406,15 @@ export function ProductBlockEditor({
         onClose={() => {
           setConfirmOpen(false);
         }}
-        title="Update product everywhere?"
-        description="This edits the product itself. Every storefront, checkout link, and your product catalog will show the new details, not just this grid."
+        title={t("productBlock.modal.title")}
+        description={t("productBlock.modal.description")}
       >
         <div className="space-y-4">
           <ul className="space-y-1 font-inter text-sm text-muted-foreground">
             {titleChanged && (
               <li>
-                Name: <span className="line-through">{product.title}</span>{" "}
+                {t("productBlock.modal.nameLabel")}{" "}
+                <span className="line-through">{product.title}</span>{" "}
                 <span className="font-medium text-foreground">
                   {trimmedTitle}
                 </span>
@@ -432,12 +422,12 @@ export function ProductBlockEditor({
             )}
             {priceChanged && draftCents !== null && (
               <li>
-                Price:{" "}
+                {t("productBlock.modal.priceLabel")}{" "}
                 <span className="line-through">
-                  {formatPrice(product.price, product.currency)}
+                  {formatPrice(product.price, product.currency, locale)}
                 </span>{" "}
                 <span className="font-medium text-foreground">
-                  {formatPrice(draftCents / 100, product.currency)}
+                  {formatPrice(draftCents / 100, product.currency, locale)}
                 </span>
               </li>
             )}
@@ -449,7 +439,7 @@ export function ProductBlockEditor({
               disabled={saving}
               className={secondaryButtonClass}
             >
-              Cancel
+              {tCommon("actions.cancel")}
             </button>
             <button
               type="button"
@@ -457,7 +447,7 @@ export function ProductBlockEditor({
               disabled={saving}
               className={primaryButtonClass}
             >
-              {saving ? "Updating…" : "Update everywhere"}
+              {saving ? t("productBlock.updating") : t("productBlock.modal.updateEverywhere")}
             </button>
           </div>
         </div>

@@ -2,7 +2,8 @@
 
 import { useActionState, useState } from "react";
 import { ArrowRight } from "lucide-react";
-import { useActionToast } from "@/components/ui/Toast";
+import { useTranslations } from "next-intl";
+import { useActionStateToast, useSaveResult } from "@/components/ui/ActionErrorNotice";
 import { SaveButton } from "@/components/ui/SaveButton";
 import { SettingsCard } from "@/components/settings/SettingsCard";
 import { Input } from "@/components/ui/input";
@@ -11,12 +12,12 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { helpTextClass, iconNudgeRightClass } from "@/components/ui/control-styles";
 import {
   requestEmailChange,
-  type SettingsActionState,
 } from "@/lib/settings/actions";
+import type { ActionState } from "@/lib/errors";
 import { InfoTip } from "@/components/ui/InfoTip";
 import { StepUpField } from "@/components/auth/StepUp";
 
-const INITIAL: SettingsActionState = {};
+const INITIAL: ActionState = {};
 
 /**
  * Email changes never touch the DB directly: Supabase sends a confirmation
@@ -39,33 +40,40 @@ export function EmailChangeForm({
   /** OAuth-only accounts have no password, so they are not asked for one. */
   hasPassword: boolean;
 }) {
+  const t = useTranslations("Settings.account.email");
+  const tCommon = useTranslations("Common.actions");
   const [state, formAction, isPending] = useActionState(
     requestEmailChange,
     INITIAL,
   );
-  useActionToast(state);
+  useActionStateToast(state);
+  const saveResult = useSaveResult(state);
 
   const [newEmail, setNewEmail] = useState("");
 
   return (
     <SettingsCard
-      title="Email"
-      description="Changing it sends a confirmation link first. Nothing moves until you actually click it, so typos here are low stakes."
+      title={t("cardTitle")}
+      description={t("cardDescription")}
     >
       <form action={formAction} className="flex flex-col gap-4" noValidate>
         <p className={helpTextClass}>
-          Currently signed in as{" "}
-          <span className="font-medium text-foreground">{email}</span>
+          {t.rich("currentlySignedInAs", {
+            email,
+            address: (chunks) => (
+              <span className="font-medium text-foreground">{chunks}</span>
+            ),
+          })}
         </p>
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="new_email">New email</Label>
+          <Label htmlFor="new_email">{t("newEmailLabel")}</Label>
           <Input
             id="new_email"
             name="new_email"
             type="email"
             inputMode="email"
             autoComplete="email"
-            placeholder="you@studio.com"
+            placeholder={t("newEmailPlaceholder")}
             value={newEmail}
             onChange={(e) => setNewEmail(e.target.value)}
             required
@@ -74,19 +82,19 @@ export function EmailChangeForm({
         {hasPassword && (
           <div className="flex flex-col gap-1.5">
             <span className="flex items-center gap-1.5">
-              <Label htmlFor="email_current_password">Current password</Label>
-              <InfoTip label="Why your password is needed here">
-                Whoever controls your email address can reset your password, so
-                changing it is a change to how you get back into the account.
-                Your password confirms the change is really you.
-              </InfoTip>
+              <Label htmlFor="email_current_password">
+                {t("currentPasswordLabel")}
+              </Label>
+              <InfoTip label={t("passwordTipLabel")}>{t("passwordTipBody")}</InfoTip>
             </span>
             {/* The password field is intentionally uncontrolled: it should
                 always be re-entered after any action, success or failure,
-                and the React 19 reset gives us that for free. */}
+                and the React 19 reset gives us that for free. Never
+                revealable: it holds the account's existing password. */}
             <PasswordInput
               id="email_current_password"
               name="current_password"
+              revealable={false}
               autoComplete="current-password"
               placeholder="••••••••"
               required
@@ -99,14 +107,14 @@ export function EmailChangeForm({
         <div>
           <SaveButton
             pending={isPending}
-            state={state}
-            pendingLabel="Sending…"
-            savedLabel="Sent"
+            state={saveResult}
+            pendingLabel={tCommon("sending")}
+            savedLabel={tCommon("sent")}
             // Plain text on the error state: it already carries an X, and a
             // "go" arrow beside it would point at an action that just failed.
-            failedLabel="Send confirmation link"
+            failedLabel={t("sendConfirmationLink")}
           >
-            Send confirmation link
+            {t("sendConfirmationLink")}
             {/* Trailing arrow = a "go / next" action (styles.md §6.2); the
                 shared nudge class slides it on hover and keyboard focus. */}
             <ArrowRight

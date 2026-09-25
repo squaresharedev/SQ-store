@@ -6,6 +6,16 @@
  * the route handler.
  */
 
+import type { MessageKey } from "@/i18n/types";
+
+/**
+ * Resolves a catalogue key in the reader's language. The palette passes
+ * `useTranslations()`; tests pass the English resolver. Everything the local
+ * index and the snapshot groups show, and therefore everything they MATCH on,
+ * goes through one of these, so a seller searches in the language they read.
+ */
+export type SearchTranslator = (key: MessageKey) => string;
+
 /** Where a result came from. The first three are LOCAL (matched in the browser,
  *  no network); the rest are REMOTE (one query each in /api/search). */
 export type SearchResultType =

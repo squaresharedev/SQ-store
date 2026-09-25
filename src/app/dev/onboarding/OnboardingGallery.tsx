@@ -7,41 +7,64 @@ import { SellerDetailsBanner } from "@/components/settings/SellerDetailsNotice";
 import { SetupChecklist } from "@/components/onboarding/SetupChecklist";
 import { WelcomeFlow } from "@/components/onboarding/WelcomeFlow";
 import type { SetupChecklistData } from "@/lib/onboarding/steps";
-import type { SettingsActionState } from "@/lib/settings/actions";
+import { succeeded, type ActionState } from "@/lib/errors";
+import { msg } from "@/i18n/types";
 
 type Scenario = {
   key: string;
   label: string;
+  includeTermsStep: boolean;
   includeSellerStep: boolean;
   verificationOn: boolean;
 };
 
 const SCENARIOS: Scenario[] = [
-  { key: "new", label: "New seller", includeSellerStep: true, verificationOn: false },
+  {
+    key: "new",
+    label: "New seller",
+    includeTermsStep: true,
+    includeSellerStep: true,
+    verificationOn: false,
+  },
   {
     key: "verify",
     label: "New seller, confirmation email on",
+    includeTermsStep: true,
     includeSellerStep: true,
     verificationOn: true,
   },
   {
     key: "details-on-file",
     label: "Details already on file",
+    includeTermsStep: true,
     includeSellerStep: false,
+    verificationOn: false,
+  },
+  {
+    key: "terms-agreed",
+    label: "Terms already agreed",
+    includeTermsStep: false,
+    includeSellerStep: true,
     verificationOn: false,
   },
 ];
 
-/** Stand-ins for saveTaxInfo and resendSellerEmailVerification: a short wait so
- *  the pending state is visible, then the real success copy. Nothing is saved. */
-async function fakeSave(): Promise<SettingsActionState> {
+/** Stand-ins for acceptLegal, saveTaxInfo and resendSellerEmailVerification: a
+ *  short wait so the pending state is visible, then the real success copy.
+ *  Nothing is saved. */
+async function fakeAccept(): Promise<ActionState> {
   await new Promise((resolve) => setTimeout(resolve, 600));
-  return { success: "Business & seller details saved." };
+  return succeeded(msg("Settings.legal.success.termsAgreed"));
 }
 
-async function fakeResend(): Promise<SettingsActionState> {
+async function fakeSave(): Promise<ActionState> {
   await new Promise((resolve) => setTimeout(resolve, 600));
-  return { success: "Sent. Check your inbox for the link." };
+  return succeeded(msg("Settings.tax.success.sellerDetailsSaved"));
+}
+
+async function fakeResend(): Promise<ActionState> {
+  await new Promise((resolve) => setTimeout(resolve, 600));
+  return succeeded(msg("Settings.tax.success.confirmationSent", { email: "your inbox" }));
 }
 
 export function OnboardingGallery({
@@ -143,10 +166,12 @@ export function OnboardingGallery({
         open={active !== null}
         onClose={skip}
         onStartTour={startTour}
+        includeTermsStep={active?.includeTermsStep ?? false}
         includeSellerStep={active?.includeSellerStep ?? false}
         seller={{ businessName: "", address: "", email: "" }}
         emailVerified={false}
         verificationOn={active?.verificationOn ?? false}
+        acceptAction={fakeAccept}
         saveAction={fakeSave}
         resendAction={fakeResend}
       />

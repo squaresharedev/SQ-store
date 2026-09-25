@@ -1,6 +1,9 @@
+import type { MessageKey } from "@/i18n/types";
 import type { Product } from "@/types/product";
 import type { StorefrontBlock } from "@/types/storefront";
-import { SHAPE_SPECS } from "./shape-specs";
+
+/** A translator over full message keys: `useTranslations()` with no namespace. */
+export type KeyTranslator = (key: MessageKey) => string;
 
 /**
  * WHAT A BLOCK IS CALLED, in one place.
@@ -13,6 +16,9 @@ import { SHAPE_SPECS } from "./shape-specs";
  * This lived inside LayersPanel until the search needed it too. It sits beside
  * the components rather than under lib/ because it reaches into the shape
  * library for its labels, and that is presentation.
+ *
+ * A seller's own words (a product title, a text block, an image description)
+ * come back untouched; only the fallbacks and shape names are translated.
  */
 
 /**
@@ -23,28 +29,29 @@ import { SHAPE_SPECS } from "./shape-specs";
 export function blockLabel(
   block: StorefrontBlock,
   productsById: ReadonlyMap<string, Product>,
+  t: KeyTranslator,
 ): string {
   switch (block.type) {
     case "product":
-      return productsById.get(block.productId)?.title ?? "Product";
+      return productsById.get(block.productId)?.title ?? t(BLOCK_KIND_LABELS.product);
     case "text": {
       const text = block.text.trim().replace(/\s+/g, " ");
-      return text.length > 0 ? text : "Text";
+      return text.length > 0 ? text : t(BLOCK_KIND_LABELS.text);
     }
     case "shape":
-      return SHAPE_SPECS[block.kind].label;
+      return t(`Storefront.shapes.name.${block.kind}`);
     case "image":
-      return block.alt.trim().length > 0 ? block.alt.trim() : "Image";
+      return block.alt.trim().length > 0 ? block.alt.trim() : t(BLOCK_KIND_LABELS.image);
   }
 }
 
 /** The kind, spelled out under the name. A text block's name IS its words, so
  *  without this line there is nothing saying which of four things it is. */
-export const BLOCK_KIND_LABELS: Record<StorefrontBlock["type"], string> = {
-  product: "Product",
-  text: "Text",
-  shape: "Shape",
-  image: "Image",
+export const BLOCK_KIND_LABELS: Record<StorefrontBlock["type"], MessageKey> = {
+  product: "Storefront.blockKinds.product",
+  text: "Storefront.blockKinds.text",
+  shape: "Storefront.blockKinds.shape",
+  image: "Storefront.blockKinds.image",
 };
 
 /**

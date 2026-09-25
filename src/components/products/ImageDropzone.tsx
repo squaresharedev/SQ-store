@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { DragEvent } from "react";
 import { Image as ImageIcon, UploadCloud, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { iconButtonClass, infoTextClass } from "@/components/ui/control-styles";
 import {
@@ -28,6 +29,7 @@ export function ImageDropzone({
   initialPreviewUrl?: string | null;
   onFileChange: (file: File | null) => void;
 }) {
+  const t = useTranslations("Products.imageDropzone");
   const [preview, setPreview] = useState<string | null>(initialPreviewUrl);
   const [dragging, setDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,11 +52,11 @@ export function ImageDropzone({
 
   function selectFile(file: File) {
     if (!ACCEPTED_TYPES.includes(file.type)) {
-      setError("Use a PNG, JPG, WEBP, GIF, or AVIF image.");
+      setError(t("wrongType"));
       return;
     }
     if (file.size > MAX_MB * 1024 * 1024) {
-      setError(`Image must be under ${MAX_MB} MB.`);
+      setError(t("tooLarge", { max: MAX_MB }));
       return;
     }
     setError(null);
@@ -112,15 +114,15 @@ export function ImageDropzone({
           />
           {preview ? (
             // eslint-disable-next-line @next/next/no-img-element -- local object-URL preview, not a remote asset.
-            <img src={preview} alt="Display image preview" className="size-full object-cover" />
+            <img src={preview} alt={t("previewAlt")} className="size-full object-cover" />
           ) : (
             <span className="flex flex-col items-center gap-2 px-4 py-6">
               <UploadCloud className="size-6 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
               <span className="font-inter text-sm text-foreground">
-                Drop an image or click to upload
+                {t("dropPrompt")}
               </span>
               <span className={infoTextClass}>
-                PNG, JPG, WEBP, GIF, or AVIF, up to {MAX_MB} MB
+                {t("hint", { max: MAX_MB })}
               </span>
             </span>
           )}
@@ -130,7 +132,7 @@ export function ImageDropzone({
           <button
             type="button"
             onClick={handleRemove}
-            aria-label="Remove display image"
+            aria-label={t("remove")}
             className={cn(iconButtonClass, "absolute right-2 top-2 size-8")}
           >
             <X className="size-4" strokeWidth={2} aria-hidden="true" />

@@ -1,0 +1,116 @@
+{
+  "pageTitle": "Platby",
+  "soon": "Brzy",
+  "balance": {
+    "available": {
+      "label": "K dispozici",
+      "zero": "Zatím není co vyplatit",
+      "hint": "Připraveno k další výplatě"
+    },
+    "pending": {
+      "label": "Čekající",
+      "zero": "Žádné čekající prodeje",
+      "hint": "Zpracovává se z nedávných prodejů"
+    },
+    "nextPayout": {
+      "label": "Další výplata",
+      "zero": "Žádná naplánovaná výplata",
+      "hint": "Očekáváno {date}"
+    }
+  },
+  "connection": {
+    "label": "Propojení se Stripe",
+    "comingSoonTitle": "Příjem plateb přes Stripe už brzy",
+    "comingSoonBody": "Do té doby vám kupující platí přes odkaz na nákup u produktu nebo se vám ozvou e-mailem.",
+    "connectTitle": "Propojte Stripe a začněte dostávat peníze",
+    "connectBody": "Výplaty chodí přímo na váš bankovní účet. Nastavení probíhá bezpečně u Stripe, vaše bankovní údaje nikdy nevidíme ani neukládáme.",
+    "connectButton": "Propojit se Stripe",
+    "connected": "Účet Stripe propojen",
+    "charges": "Přijímání plateb",
+    "payouts": "Výplaty",
+    "verified": "Ověřeno",
+    "requirementsDue": "Stripe potřebuje další informace, než bude možné pokračovat ve výplatách."
+  },
+  "connectModal": {
+    "title": "Propojit se Stripe",
+    "description": "Dostávejte peníze za to, co prodáte. Nastavení probíhá u Stripe, ne tady.",
+    "points": {
+      "sensitive": {
+        "title": "Citlivé údaje řeší Stripe",
+        "body": "Bankovní údaje, ověření totožnosti a další kontroly probíhají na zabezpečených stránkách Stripe. Square Share je nikdy nevidí ani neukládá."
+      },
+      "bank": {
+        "title": "Výplaty chodí přímo na váš účet",
+        "body": "Po propojení se váš zůstatek vyplácí automaticky v pravidelných intervalech."
+      },
+      "time": {
+        "title": "Zabere asi 5 minut",
+        "body": "Nastavení dokončíte na stránkách Stripe a pak se vrátíte zpátky sem."
+      }
+    },
+    "notNow": "Teď ne",
+    "comingSoonTitle": "Výplaty přes Stripe už brzy.",
+    "continue": "Pokračovat na Stripe"
+  },
+  "payoutHistory": {
+    "label": "Historie výplat",
+    "title": "Výplaty",
+    "emptyConnectable": "Zatím žádné výplaty. Jakmile začnete prodávat, Stripe bude váš zůstatek automaticky posílat na bankovní účet.",
+    "empty": "Zatím žádné výplaty.",
+    "columns": {
+      "amount": "Částka",
+      "status": "Stav",
+      "bank": "Banka",
+      "arrives": "Připsání"
+    },
+    "rowLabel": "Výplata {amount}, zobrazit podrobnosti"
+  },
+  "payoutStatus": "{status, select, paid {Vyplaceno} pending {Čekající} in_transit {Na cestě} canceled {Zrušeno} failed {Nezdařilo se} other {Čekající}}",
+  "payoutMethod": {
+    "title": "Způsob výplaty",
+    "manage": "Spravovat",
+    "detail": "{currency} · {country}",
+    "detailDefault": "{currency} · {country} · Výchozí",
+    "emptyConnectable": "Zatím žádný způsob výplaty. Propojte Stripe a přidejte tam bankovní účet, tady se pak zobrazí automaticky.",
+    "empty": "Zatím žádný způsob výplaty."
+  },
+  "payoutMethodModal": {
+    "title": "Způsob výplaty",
+    "description": "Kam se posílají vaše výplaty.",
+    "bankAccountDetail": "Bankovní účet · {currency} · {country}",
+    "defaultLabel": "Výchozí pro výplaty",
+    "yes": "Ano",
+    "no": "Ne",
+    "referenceLabel": "Reference",
+    "securityNote": "Z bezpečnostních důvodů se bankovní údaje mění u Stripe, nikdy ne tady.",
+    "manageInStripe": "Spravovat ve Stripe"
+  },
+  "recentActivity": {
+    "label": "Nedávná aktivita",
+    "title": "Aktivita",
+    "empty": "Objeví se tu prodeje, vrácení peněz a výplaty.",
+    "datePending": "{date} · Čekající"
+  },
+  "transactionModal": {
+    "title": "{type, select, charge {Prodej} refund {Vrácení peněz} payout {Výplata} stripe_fee {Poplatek Stripe} adjustment {Úprava} other {Transakce}}",
+    "processingFee": "Poplatek za zpracování platby",
+    "net": "Čistá částka do zůstatku",
+    "status": "Stav",
+    "statusPending": "Čekající, připisuje se do zůstatku",
+    "statusAvailable": "K dispozici",
+    "date": "Datum",
+    "id": "ID transakce"
+  },
+  "payoutModal": {
+    "title": "Výplata",
+    "sentTo": "Odesláno na",
+    "bankAccount": "Bankovní účet ···· {last4}",
+    "arrives": "Připsání",
+    "initiated": "Zahájeno",
+    "type": "Typ",
+    "typeValue": "{method, select, instant {Okamžitá} other {Standardní}} · {automatic, select, true {Automatická} other {Ruční}}",
+    "statement": "Na bankovním výpisu",
+    "id": "ID výplaty",
+    "failed": "Tuto výplatu se nepodařilo doručit. Stripe to automaticky zkusí znovu a částka zůstane ve vašem dostupném zůstatku, dokud výplata neproběhne."
+  }
+}

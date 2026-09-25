@@ -59,6 +59,19 @@ function builderFor(table: string) {
   return builder;
 }
 
+// Outside a Next request there is no locale to resolve, so the route reads the
+// English catalogue: the labels it returns are asserted as a reader sees them.
+vi.mock("next-intl/server", async () => {
+  const { createTranslator } = await import("next-intl");
+  const { default: messages } = await import("../../messages/en");
+  return {
+    // The route asks for one namespace only.
+    getTranslations: async () =>
+      createTranslator({ locale: "en", messages, namespace: "Search", timeZone: "UTC" }),
+    getLocale: async () => "en",
+  };
+});
+
 vi.mock("@/lib/supabase/server", () => ({
   createClient: async () => ({ from: (table: string) => builderFor(table) }),
 }));

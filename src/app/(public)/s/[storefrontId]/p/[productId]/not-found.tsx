@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 /**
  * The buyer-facing page for every way a product can be unavailable: unknown
@@ -17,21 +18,21 @@ import { useRouter } from "next/navigation";
  * storefront goes back to that storefront rather than the browser start page.
  */
 export default function ProductNotFound() {
+  const t = useTranslations("ProductPage.notFound");
   const router = useRouter();
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-6 px-6 py-12 text-center">
       <h1 className="text-2xl font-semibold tracking-tight">
-        This product isn&apos;t available
+        {t("title")}
       </h1>
       <p className="max-w-sm text-sm leading-relaxed opacity-70">
-        It may have been removed, or the link you followed is out of date. Head
-        back to the shop to see what&apos;s on offer now.
+        {t("body")}
       </p>
       <button
         onClick={() => router.back()}
         className="rounded-lg border border-current px-5 py-2.5 text-sm font-medium opacity-75 hover:opacity-100"
       >
-        Go back
+        {t("back")}
       </button>
     </div>
   );

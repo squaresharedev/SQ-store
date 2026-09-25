@@ -1,15 +1,32 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { Input, type InputProps } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 /**
  * Password field with a show/hide toggle. Leaves room on the right for the eye
  * button and swaps the input type between "password" and "text".
+ *
+ * `revealable={false}` drops the toggle: the field is masked, always. That is
+ * the rule for every field in Settings that holds the account's EXISTING
+ * password (the re-authentication fields): a browser or password manager may
+ * fill it, and a toggle would then display the password to whoever is at the
+ * screen. The toggle stays where someone is typing a password they are
+ * choosing or signing in with.
  */
-export function PasswordInput({ className, ...props }: InputProps) {
+export function PasswordInput({
+  className,
+  revealable = true,
+  ...props
+}: InputProps & { revealable?: boolean }) {
+  const t = useTranslations("Common.password");
   const [show, setShow] = React.useState(false);
+
+  if (!revealable) {
+    return <Input {...props} type="password" className={className} />;
+  }
 
   return (
     <div className="relative">
@@ -21,7 +38,7 @@ export function PasswordInput({ className, ...props }: InputProps) {
       <button
         type="button"
         onClick={() => setShow((s) => !s)}
-        aria-label={show ? "Hide password" : "Show password"}
+        aria-label={show ? t("hide") : t("show")}
         aria-pressed={show}
         suppressHydrationWarning
         className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground transition-colors duration-base ease-standard motion-reduce:transition-none hover:text-acid focus-visible:outline-none focus-visible:text-acid"

@@ -1,9 +1,11 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useActionState, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { ArrowRight, Check } from "lucide-react";
-import { useActionToast, useToast } from "@/components/ui/Toast";
+import { useToast } from "@/components/ui/Toast";
+import { useActionStateToast, useSaveResult } from "@/components/ui/ActionErrorNotice";
 import { SaveButton } from "@/components/ui/SaveButton";
 import { StepUpField } from "@/components/auth/StepUp";
 import { SettingsCard } from "@/components/settings/SettingsCard";
@@ -14,9 +16,10 @@ import { Select, type SelectOption } from "@/components/ui/select";
 import {
   resendSellerEmailVerification,
   saveTaxInfo,
-  type SettingsActionState,
 } from "@/lib/settings/actions";
-import { EU_COUNTRIES, SELLER_FIELD_MAX } from "@/lib/settings/constants";
+import type { ActionState } from "@/lib/errors";
+import { SELLER_FIELD_MAX } from "@/lib/settings/constants";
+import { useEuCountries } from "@/components/settings/use-eu-countries";
 import { InfoTip } from "@/components/ui/InfoTip";
 import { RequiredMark } from "@/components/ui/RequiredMark";
 import { LEGAL_LINKS } from "@/lib/legal/links";
@@ -27,53 +30,42 @@ import {
 } from "@/components/ui/control-styles";
 import { cn } from "@/lib/utils";
 
-const INITIAL: SettingsActionState = {};
+const INITIAL: ActionState = {};
 
 /**
- * What each `?verified=` outcome means to a seller, and what to do about it.
- * Every branch names a next step, because arriving here from a mail client
- * with "expired" and nothing else is a dead end.
+ * Each `?verified=` outcome the confirmation route can report, and its tone.
+ * The words are under Settings.tax.verifyOutcome, and every one names a next
+ * step, because arriving here from a mail client with "expired" and nothing
+ * else is a dead end. An outcome not listed here is never announced.
  */
-const VERIFY_OUTCOMES: Record<string, { tone: "success" | "error"; message: string }> = {
-  verified: { tone: "success", message: "Contact email confirmed. You can publish now." },
-  expired: {
-    tone: "error",
-    message: "That confirmation link has expired. Send yourself a new one below.",
-  },
-  stale: {
-    tone: "error",
-    message:
-      "That link was for a different address than the one saved here. Send a new one below.",
-  },
-  invalid: {
-    tone: "error",
-    message: "That confirmation link is not valid, or has already been used.",
-  },
-  throttled: {
-    tone: "error",
-    message: "Too many confirmation attempts. Wait a while, then open the link again.",
-  },
-};
+const VERIFY_OUTCOMES = {
+  verified: "success",
+  expired: "error",
+  stale: "error",
+  invalid: "error",
+  throttled: "error",
+} as const;
+
+type VerifyOutcome = keyof typeof VERIFY_OUTCOMES;
+
+function isVerifyOutcome(value: string): value is VerifyOutcome {
+  return Object.hasOwn(VERIFY_OUTCOMES, value);
+}
 
 /** Report a `?verified=` outcome once per arrival. */
 function useVerifyOutcomeToast(outcome: string | undefined) {
+  const t = useTranslations("Settings.tax.verifyOutcome");
   const toast = useToast();
   const announced = useRef<string | undefined>(undefined);
   useEffect(() => {
     if (!outcome || announced.current === outcome) return;
     announced.current = outcome;
-    const entry = VERIFY_OUTCOMES[outcome];
-    if (!entry) return;
-    if (entry.tone === "success") toast.success(entry.message);
-    else toast.error(entry.message);
-  }, [outcome, toast]);
+    if (!isVerifyOutcome(outcome)) return;
+    const message = t(outcome);
+    if (VERIFY_OUTCOMES[outcome] === "success") toast.success(message);
+    else toast.error(message);
+  }, [outcome, toast, t]);
 }
-
-/** "" is a real choice (non-EU / declined), so it leads the list. */
-const COUNTRY_OPTIONS: readonly SelectOption<string>[] = [
-  { value: "", label: "Not in the EU / prefer not to say" },
-  ...EU_COUNTRIES.map((c) => ({ value: c.code, label: c.name })),
-];
 
 /**
  * VAT prefix -> ISO country code. Most EU countries use their ISO code as the
@@ -93,12 +85,20 @@ const ISO_TO_VAT_PREFIX: Partial<Record<string, string>> = {
   GR: "EL",
 };
 
+type VatAdvisory =
+  | { kind: "noCountry"; issuer: string }
+  | { kind: "mismatch"; issuer: string; selected: string };
+
 /**
- * Country/VAT advisory: returns a warning string when the VAT ID's country
+ * Country/VAT advisory: says which warning applies when the VAT ID's country
  * prefix and the selected country disagree, or when an EU VAT ID is paired
  * with "Not in the EU". Advisory only — the server still accepts the save.
  */
-function vatAdvisory(vatId: string, countryCode: string): string | null {
+function vatAdvisory(
+  vatId: string,
+  countryCode: string,
+  countryName: (code: string) => string,
+): VatAdvisory | null {
   const raw = vatId.trim().toUpperCase();
   if (raw.length < 2) return null;
 
@@ -107,21 +107,18 @@ function vatAdvisory(vatId: string, countryCode: string): string | null {
   if (!impliedIso) return null; // not a recognised EU VAT prefix
 
   // Find the country name for a friendlier message.
-  const countryName =
-    EU_COUNTRIES.find((c) => c.code === impliedIso)?.name ?? impliedIso;
+  const issuer = countryName(impliedIso);
 
   if (countryCode === "") {
     // A recognised EU VAT prefix alongside "not in the EU" is almost certainly
     // a mistake, since the prefix tells us which member state issued the number.
-    return `This VAT ID looks like it was issued by ${countryName}. You may want to set your country.`;
+    return { kind: "noCountry", issuer };
   }
 
   // The expected prefix for the selected country (default: same as ISO code).
   const expectedPrefix = ISO_TO_VAT_PREFIX[countryCode] ?? countryCode;
   if (prefix !== expectedPrefix) {
-    const selectedName =
-      EU_COUNTRIES.find((c) => c.code === countryCode)?.name ?? countryCode;
-    return `This VAT ID looks like it was issued by ${countryName}, but your country is set to ${selectedName}. Check both are correct.`;
+    return { kind: "mismatch", issuer, selected: countryName(countryCode) };
   }
 
   return null;
@@ -173,8 +170,20 @@ export function TaxSection({
   /** Where "Continue to your storefront" goes once these details are saved. */
   continueHref: string;
 }) {
+  const t = useTranslations("Settings");
+  const tCommon = useTranslations("Common.actions");
+  const { countries, countryName } = useEuCountries();
+  // "" is a real choice (non-EU / declined), so it leads the list.
+  const countryOptions: readonly SelectOption<string>[] = useMemo(
+    () => [
+      { value: "", label: t("tax.countryNotEu") },
+      ...countries.map((c) => ({ value: c.code, label: c.name })),
+    ],
+    [countries, t],
+  );
   const [state, formAction, isPending] = useActionState(saveTaxInfo, INITIAL);
-  useActionToast(state);
+  useActionStateToast(state);
+  const saveResult = useSaveResult(state);
 
   // Controlled fields — seeded from the last saved values. The shared Select
   // is a button + listbox that can't submit via the form on its own, so its
@@ -187,7 +196,7 @@ export function TaxSection({
   const [countryCode, setCountryCode] = useState(savedCountry);
   const [phone, setPhone] = useState(savedPhone);
 
-  const vatWarning = vatAdvisory(vatId, countryCode);
+  const vatWarning = vatAdvisory(vatId, countryCode, countryName);
 
   // Shown once a save lands, not just while SaveButton's own green flash is up
   // (that fades after a couple of seconds; the seller still needs a next
@@ -202,7 +211,8 @@ export function TaxSection({
     resendSellerEmailVerification,
     INITIAL,
   );
-  useActionToast(resendState);
+  useActionStateToast(resendState);
+  const resendResult = useSaveResult(resendState);
   useVerifyOutcomeToast(verifyOutcome);
 
   // The saved address is what a link would confirm; an edit in progress is
@@ -213,8 +223,8 @@ export function TaxSection({
 
   return (
     <SettingsCard
-      title="Business & seller details"
-      description="Set once for your whole account. Shown to buyers on every product page you sell on, and used for invoices and VAT."
+      title={t("tax.cardTitle")}
+      description={t("tax.cardDescription")}
     >
       {/* THE GATE, STATED WHERE IT IS RESOLVED. The three starred fields are
           what lib/settings/trader-identity.ts requires before anything of this
@@ -226,27 +236,23 @@ export function TaxSection({
           would have to go and find. */}
       <div className="mb-4 rounded-md border border-border bg-muted/40 px-4 py-3">
         <p className="font-inter text-sm text-foreground">
-          <span className="font-medium">
-            Your trader name, address and contact email are required before you
-            can publish or sell anything.
-          </span>{" "}
-          Buyers have to be able to see who they are buying from and how to
-          reach you before they order.
+          {t.rich("tax.gate.required", {
+            strong: (chunks) => <span className="font-medium">{chunks}</span>,
+          })}
         </p>
         <p className={`${helpTextClass} mt-1`}>
-          These details appear publicly on your product pages for that reason
-          alone. We never use them for marketing, and never sell or share them.
-          The one email we send to your contact address is the link that
-          confirms it. See the{" "}
-          <a
-            href={LEGAL_LINKS.privacy.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline underline-offset-2 hover:no-underline"
-          >
-            {LEGAL_LINKS.privacy.name}
-          </a>
-          .
+          {t.rich("tax.gate.privacyNoteLinked", {
+            link: (chunks) => (
+              <a
+                href={LEGAL_LINKS.privacy.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline underline-offset-2 hover:no-underline"
+              >
+                {chunks}
+              </a>
+            ),
+          })}
         </p>
       </div>
       {/* The ids on each field wrapper are universal search's landing points
@@ -260,14 +266,11 @@ export function TaxSection({
         <div id="business-name" className="flex flex-col gap-1.5">
           <span className="flex items-center gap-1.5">
             <Label htmlFor="tax_business_name">
-              Trader name
+              {t("tax.fields.businessName.label")}
               <RequiredMark />
             </Label>
-            <InfoTip label="What to put here">
-              The name buyers are contracting with. Your registered business
-              name if you sell through one; your own full name if you sell as
-              an individual. Your storefront&apos;s name is a shop name, which
-              is not the same thing and cannot stand in for this.
+            <InfoTip label={t("tax.fields.businessName.tipLabel")}>
+              {t("tax.fields.businessName.tipBody")}
             </InfoTip>
           </span>
           <Input
@@ -275,7 +278,7 @@ export function TaxSection({
             name="tax_business_name"
             value={businessName}
             onChange={(e) => setBusinessName(e.target.value)}
-            placeholder="e.g. Studio Builderboy e.U."
+            placeholder={t("tax.fields.businessName.placeholder")}
             maxLength={200}
             autoComplete="organization"
             aria-required="true"
@@ -285,12 +288,11 @@ export function TaxSection({
         <div id="address" className="flex flex-col gap-1.5">
           <span className="flex items-center gap-1.5">
             <Label htmlFor="seller_address">
-              Address
+              {t("tax.fields.address.label")}
               <RequiredMark />
             </Label>
-            <InfoTip label="Why buyers see this">
-              Distance-selling law asks for a postal address next to every offer.
-              Shown in the Seller section of your product pages.
+            <InfoTip label={t("tax.fields.address.tipLabel")}>
+              {t("tax.fields.address.tipBody")}
             </InfoTip>
           </span>
           <Textarea
@@ -298,7 +300,7 @@ export function TaxSection({
             name="seller_address"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
-            placeholder={"e.g. 12 Market Street\nDublin, D02 X285\nIreland"}
+            placeholder={t("tax.fields.address.placeholder")}
             maxLength={SELLER_FIELD_MAX.address}
             rows={3}
             aria-required="true"
@@ -308,16 +310,11 @@ export function TaxSection({
         <div id="contact-email" className="flex flex-col gap-1.5">
           <span className="flex items-center gap-1.5">
             <Label htmlFor="seller_email">
-              Contact email
+              {t("tax.fields.email.label")}
               <RequiredMark />
             </Label>
-            <InfoTip label="How this differs from your sign-in email">
-              Shown to buyers as a mailto link, and used as the buy button&apos;s
-              fallback when a product has no purchase link. Kept separate from
-              your sign-in email on purpose: use whichever address you want
-              buyers writing to. It has to be an address you actually read —
-              placeholders, temp-mail providers and no-reply addresses are
-              refused, and so is a domain that takes no mail.
+            <InfoTip label={t("tax.fields.email.tipLabel")}>
+              {t("tax.fields.email.tipBody")}
             </InfoTip>
           </span>
           <Input
@@ -326,7 +323,7 @@ export function TaxSection({
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="e.g. hello@yourshop.example"
+            placeholder={t("tax.fields.email.placeholder")}
             maxLength={254}
             autoComplete="email"
             aria-required="true"
@@ -344,30 +341,27 @@ export function TaxSection({
               // and the outcomes that DO need announcing arrive as toasts.
             >
               {emailDirty ? (
-                <>
-                  Save to send a confirmation link to the new address. Buyers
-                  see it only once it is confirmed.
-                </>
+                t("tax.fields.email.statusDirty")
               ) : emailVerified ? (
                 <span className="inline-flex items-center gap-1 text-foreground">
                   <Check aria-hidden className="size-3.5" strokeWidth={2.5} />
-                  Confirmed — buyers can reach you here.
+                  {t("tax.fields.email.statusConfirmed")}
                 </span>
               ) : (
-                <>Not confirmed yet. Open the link we emailed to this address.</>
+                t("tax.fields.email.statusUnconfirmed")
               )}
             </p>
           )}
         </div>
 
         <div id="vat" className="flex flex-col gap-1.5">
-          <Label htmlFor="tax_vat_id">VAT ID</Label>
+          <Label htmlFor="tax_vat_id">{t("tax.fields.vatId.label")}</Label>
           <Input
             id="tax_vat_id"
             name="tax_vat_id"
             value={vatId}
             onChange={(e) => setVatId(e.target.value)}
-            placeholder="e.g. ATU12345678"
+            placeholder={t("tax.fields.vatId.placeholder")}
             maxLength={32}
             disabled={isPending}
           />
@@ -377,23 +371,28 @@ export function TaxSection({
               real compliance problem, so the warning is worth showing. */}
           {vatWarning && (
             <p className={helpTextClass} aria-live="polite">
-              {vatWarning}
+              {vatWarning.kind === "noCountry"
+                ? t("tax.vatAdvisory.noCountry", { issuer: vatWarning.issuer })
+                : t("tax.vatAdvisory.mismatch", {
+                    issuer: vatWarning.issuer,
+                    selected: vatWarning.selected,
+                  })}
             </p>
           )}
         </div>
         <div id="country" className="flex flex-col gap-1.5">
-          <Label htmlFor="tax_country">Country</Label>
+          <Label htmlFor="tax_country">{t("tax.fields.country.label")}</Label>
           <input type="hidden" name="tax_country" value={countryCode} />
           <Select
             id="tax_country"
             value={countryCode}
-            options={COUNTRY_OPTIONS}
+            options={countryOptions}
             onChange={setCountryCode}
             disabled={isPending}
           />
         </div>
         <div id="phone" className="flex flex-col gap-1.5">
-          <Label htmlFor="seller_phone">Phone</Label>
+          <Label htmlFor="seller_phone">{t("tax.fields.phone.label")}</Label>
           <Input
             id="seller_phone"
             name="seller_phone"
@@ -407,7 +406,7 @@ export function TaxSection({
         </div>
         <StepUpField id="business-details" state={state} />
         <div className="flex flex-wrap items-center gap-3">
-          <SaveButton pending={isPending} state={state} />
+          <SaveButton pending={isPending} state={saveResult} />
           {/* THE NEXT STEP, not just the confirmation. SaveButton already says
               "saved"; a seller who came here to clear the publish gate still
               needs to be told where to go next rather than left on a settings
@@ -415,7 +414,7 @@ export function TaxSection({
               answer doesn't vanish before it's used. */}
           {justSaved && (
             <Link href={continueHref} className={cn(secondaryButtonClass, "w-fit")}>
-              Continue to your storefront
+              {t("continueToStorefront")}
               <ArrowRight
                 className={cn("size-4", iconNudgeRightClass)}
                 strokeWidth={2}
@@ -436,12 +435,12 @@ export function TaxSection({
         <form action={resendAction} className="mt-4">
           <SaveButton
             pending={resendPending}
-            state={resendState}
-            pendingLabel="Sending…"
-            savedLabel="Sent"
+            state={resendResult}
+            pendingLabel={tCommon("sending")}
+            savedLabel={tCommon("sent")}
             variant="secondary"
           >
-            Resend confirmation email
+            {t("tax.resend.button")}
           </SaveButton>
         </form>
       )}

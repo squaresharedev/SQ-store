@@ -1,0 +1,113 @@
+{
+  "metadata": {
+    "notifications": {
+      "title": "Oznámení"
+    }
+  },
+  "loading": {
+    "title": "Oznámení",
+    "srLoading": "načítání oznámení"
+  },
+  "bell": {
+    "label": "Oznámení",
+    "unreadLabel": "{count, plural, one {Oznámení, {count} nepřečtené} few {Oznámení, {count} nepřečtená} many {Oznámení, {count} nepřečteného} other {Oznámení, {count} nepřečtených}}"
+  },
+  "list": {
+    "title": "Oznámení",
+    "unread": "{count, plural, one {{count} nepřečtené} few {{count} nepřečtená} many {{count} nepřečteného} other {{count} nepřečtených}}",
+    "markAllRead": "Označit vše jako přečtené",
+    "livePaused": "Živé aktualizace jsou pozastavené. Obnovte stránku a uvidíte nejnovější.",
+    "empty": "Máte přečteno vše. Zatím tu nic není.",
+    "viewAll": "Zobrazit vše"
+  },
+  "item": {
+    "unread": "Nepřečtené"
+  },
+  "page": {
+    "title": "Oznámení",
+    "markAllRead": "Označit vše jako přečtené",
+    "emptyTitle": "Zatím žádná oznámení",
+    "emptyHint": "Objeví se tu dění v týmu, objednávky a platby.",
+    "loadError": "Další oznámení se nepodařilo načíst. Zkontrolujte připojení a zkuste to znovu.",
+    "loading": "Načítání",
+    "loadMore": "Načíst další"
+  },
+  "types": {
+    "team": "Tým",
+    "order": "Objednávka",
+    "payment": "Platba",
+    "stock": "Zásoby",
+    "system": "Systém",
+    "security": "Zabezpečení",
+    "policy": "Zásady"
+  },
+  "time": {
+    "justNow": "právě teď",
+    "minutesAgo": "{count, plural, one {před {count} min} few {před {count} min} many {před {count} min} other {před {count} min}}",
+    "hoursAgo": "{count, plural, one {před {count} h} few {před {count} h} many {před {count} h} other {před {count} h}}",
+    "daysAgo": "{count, plural, one {před {count} d} few {před {count} d} many {před {count} d} other {před {count} d}}"
+  },
+  "messages": {
+    "teamInvite": {
+      "title": "Máte pozvánku do týmu",
+      "body": "{role, select, owner {Obchod {store} vás zve do týmu v roli vlastníka. Přijmout ji můžete v sekci Tým a přístup.} editor {Obchod {store} vás zve do týmu v roli editora. Přijmout ji můžete v sekci Tým a přístup.} viewer {Obchod {store} vás zve do týmu v roli čtenáře. Přijmout ji můžete v sekci Tým a přístup.} other {Obchod {store} vás zve do svého týmu. Přijmout ji můžete v sekci Tým a přístup.}}",
+      "bodyUnnamedStore": "{role, select, owner {Obchod na SquareShare vás zve do týmu v roli vlastníka. Přijmout ji můžete v sekci Tým a přístup.} editor {Obchod na SquareShare vás zve do týmu v roli editora. Přijmout ji můžete v sekci Tým a přístup.} viewer {Obchod na SquareShare vás zve do týmu v roli čtenáře. Přijmout ji můžete v sekci Tým a přístup.} other {Obchod na SquareShare vás zve do svého týmu. Přijmout ji můžete v sekci Tým a přístup.}}"
+    },
+    "teamJoined": {
+      "title": "Nový člen vašeho týmu: {name}",
+      "titleUnnamed": "Do vašeho týmu přibyl nový člen",
+      "body": "Teď má přístup k vašemu obchodu."
+    },
+    "security": {
+      "passwordChanged": {
+        "title": "Heslo bylo změněno",
+        "body": "Heslo k tomuto účtu bylo právě změněno a ostatní zařízení byla odhlášena. Pokud o této změně nevíte, ihned si obnovte heslo."
+      },
+      "passwordReset": {
+        "title": "Heslo bylo změněno",
+        "body": "Pomocí odkazu pro obnovení bylo nastaveno nové heslo a ostatní zařízení byla odhlášena. Pokud o této změně nevíte, ihned heslo obnovte znovu."
+      },
+      "passwordSet": {
+        "title": "K vašemu účtu bylo nastaveno heslo",
+        "body": "K tomuto účtu se teď lze přihlásit heslem i přes Google. Pokud o této změně nevíte, ihned heslo obnovte."
+      },
+      "resetRequested": {
+        "title": "Byl vyžádán odkaz pro obnovení hesla",
+        "body": "Někdo si vyžádal odkaz k nastavení nového hesla k tomuto účtu. Pokud o tom nevíte, e-mail ignorujte a změňte si heslo."
+      },
+      "emailChangeRequested": {
+        "title": "Žádost o změnu e-mailu",
+        "body": "Někdo požádal o převedení tohoto účtu na novou e-mailovou adresu. Změna se projeví, až bude potvrzen odkaz v dané schránce. Pokud o tom nevíte, hned si změňte heslo."
+      },
+      "lockedOut": {
+        "title": "Někdo se pokouší přihlásit k vašemu účtu",
+        "body": "Vaše heslo bylo zadáno správně, ale následovalo příliš mnoho chybných kódů dvoufázového ověření, a proto je přihlášení na několik minut pozastaveno. Pokud jste to nebyli vy, vaše heslo zná někdo další: ihned ho změňte."
+      },
+      "recoveryCodeUsed": {
+        "title": "K přihlášení byl použit záložní kód",
+        "body": "Někdo se do vašeho účtu přihlásil záložním kódem. Tím se vypíná dvoufázové ověření a odhlašují se všechna ostatní zařízení. Pokud jste to byli vy, nastavte si dvoufázové ověření znovu v sekci Nastavení › Zabezpečení. Pokud ne, ihned změňte heslo."
+      },
+      "twoFactorEnabled": {
+        "title": "Dvoufázové ověření je zapnuté",
+        "body": "K přihlášení do vašeho účtu teď potřebujete kód z ověřovací aplikace a všechna ostatní zařízení byla odhlášena. Pokud jste to nebyli vy, změňte heslo a kontaktujte podporu."
+      },
+      "factorAdded": {
+        "title": "Byla přidána ověřovací aplikace",
+        "body": "„{name}“ se teď dá použít k přihlášení do vašeho účtu. Pokud jste to nebyli vy, odeberte ji v sekci Nastavení › Zabezpečení a změňte heslo.",
+        "bodyUnnamed": "„Ověřovací aplikace“ se teď dá použít k přihlášení do vašeho účtu. Pokud jste to nebyli vy, odeberte ji v sekci Nastavení › Zabezpečení a změňte heslo."
+      },
+      "twoFactorDisabled": {
+        "title": "Dvoufázové ověření je vypnuté",
+        "body": "Vaše poslední ověřovací aplikace byla odebrána, takže k přihlášení teď stačí jen heslo. Pokud jste to nebyli vy, změňte heslo a dvoufázové ověření znovu zapněte."
+      },
+      "factorRemoved": {
+        "title": "Byla odebrána ověřovací aplikace",
+        "body": "„{name}“ už nelze použít k přihlášení do vašeho účtu. Pokud jste to nebyli vy, ihned změňte heslo."
+      },
+      "recoveryCodesRegenerated": {
+        "title": "Byly vytvořeny nové záložní kódy",
+        "body": "Vaše staré záložní kódy už nefungují. Pokud jste to nebyli vy, ihned změňte heslo."
+      }
+    }
+  }
+}

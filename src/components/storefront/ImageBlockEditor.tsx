@@ -1,7 +1,8 @@
 "use client";
 
-import { useId } from "react";
+import { useId, useMemo } from "react";
 import { Crop } from "lucide-react";
+import { useTranslations } from "next-intl";
 import {
   IMAGE_ALT_MAX,
   IMAGE_FITS,
@@ -24,12 +25,6 @@ import { SummonedField, type BlockFieldSummons } from "./SummonedField";
 export type ImageBlockPatch = Partial<
   Pick<ImageBlock, "alt" | "fit" | "opacity">
 >;
-
-/** What each fit does, in the seller's terms rather than CSS's. */
-const FIT_COPY: Record<ImageFit, { label: string; hint: string }> = {
-  cover: { label: "Fill", hint: "Fills the block, cropping the overflow." },
-  contain: { label: "Fit", hint: "Shows the whole image inside the block." },
-};
 
 const FIT_BUTTON_CLASS = `inline-flex flex-1 items-center justify-center rounded-none border border-border bg-background px-2 py-1.5 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-foreground ${transitionClass} ${focusRingClass}`;
 
@@ -81,16 +76,32 @@ export function ImageBlockEditor({
   summons?: BlockFieldSummons;
 }) {
   const fieldId = useId();
+  const t = useTranslations("Storefront");
   const fit = block.fit ?? "cover";
   const opacity = block.opacity ?? 100;
+
+  /** What each fit does, in the seller's terms rather than CSS's. */
+  const fitCopy: Record<ImageFit, { label: string; hint: string }> = useMemo(
+    () => ({
+      cover: {
+        label: t("imageBlock.size.fill"),
+        hint: t("imageBlock.size.fillHint"),
+      },
+      contain: {
+        label: t("imageBlock.size.fit"),
+        hint: t("imageBlock.size.fitHint"),
+      },
+    }),
+    [t],
+  );
 
   return (
     <div className="space-y-4">
       {/* How the picture fills its block. Two options, so a pair of buttons
           rather than a select: both labels are visible and one press away. */}
       <div className="space-y-1.5">
-        <span className={labelClass}>Size</span>
-        <div role="group" aria-label="Image fit" className="flex gap-1">
+        <span className={labelClass}>{t("imageBlock.size.label")}</span>
+        <div role="group" aria-label={t("imageBlock.size.ariaLabel")} className="flex gap-1">
           {IMAGE_FITS.map((option) => {
             const selected = fit === option;
             return (
@@ -99,18 +110,18 @@ export function ImageBlockEditor({
                 type="button"
                 onClick={() => onUpdate({ fit: option })}
                 aria-pressed={selected}
-                title={FIT_COPY[option].hint}
+                title={fitCopy[option].hint}
                 className={cn(
                   FIT_BUTTON_CLASS,
                   selected && "border-foreground bg-accent text-foreground",
                 )}
               >
-                {FIT_COPY[option].label}
+                {fitCopy[option].label}
               </button>
             );
           })}
         </div>
-        <p className={helpTextClass}>{FIT_COPY[fit].hint}</p>
+        <p className={helpTextClass}>{fitCopy[fit].hint}</p>
       </div>
 
       {/* Framing only means something when there IS overflow to position. */}
@@ -122,7 +133,7 @@ export function ImageBlockEditor({
           className={cn(secondaryButtonClass, "w-full disabled:opacity-50")}
         >
           <Crop className="size-4" strokeWidth={2} aria-hidden="true" />
-          Reposition image
+          {t("imageBlock.reposition")}
         </button>
       )}
 
@@ -130,14 +141,14 @@ export function ImageBlockEditor({
         {(highlighted) => (
           <SliderField
             id={`${fieldId}-opacity`}
-            label="Opacity"
+            label={t("imageBlock.opacity.label")}
             min={0}
             max={100}
             step={5}
             value={opacity}
             onChange={(next) => onUpdate({ opacity: next })}
-            ariaLabel="Image opacity"
-            valueText={`${opacity} percent`}
+            ariaLabel={t("imageBlock.opacity.ariaLabel")}
+            valueText={t("imageBlock.opacity.valueText", { value: opacity })}
             unit="%"
             highlighted={highlighted}
           />
@@ -150,20 +161,19 @@ export function ImageBlockEditor({
       {!multi && (
       <div className="space-y-1.5">
         <label htmlFor={`${fieldId}-alt`} className={labelClass}>
-          Description
+          {t("imageBlock.description.label")}
         </label>
         <input
           id={`${fieldId}-alt`}
           type="text"
           value={block.alt}
           maxLength={IMAGE_ALT_MAX}
-          placeholder="Logo, icon, decoration…"
+          placeholder={t("imageBlock.description.placeholder")}
           onChange={(event) => onUpdate({ alt: event.target.value })}
           className={fieldBaseClass}
         />
         <p className={helpTextClass}>
-          Read aloud by screen readers. Leave it empty if the image is purely
-          decorative.
+          {t("imageBlock.description.hint")}
         </p>
       </div>
       )}

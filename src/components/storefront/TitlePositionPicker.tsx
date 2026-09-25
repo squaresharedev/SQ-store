@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import {
   TILE_SPOTS,
   spotRow,
@@ -8,16 +9,6 @@ import {
   type TitleStyle,
 } from "@/types/storefront";
 import { TileSpotPicker, unclippedSpots } from "./TileSpotPicker";
-
-const TITLE_SPOT_LABELS: Record<TileSpot, string> = {
-  "top-left": "Top left",
-  "top-center": "Top center",
-  "top-right": "Top right",
-  "middle-center": "Middle",
-  "bottom-left": "Bottom left",
-  "bottom-center": "Bottom center",
-  "bottom-right": "Bottom right",
-};
 
 /**
  * Which spots the title really has, mirroring resolveTitlePosition: the
@@ -52,14 +43,24 @@ export function TitlePositionPicker({
   cornerRadius: number;
   onChange: (spot: TileSpot) => void;
 }) {
+  const t = useTranslations("Storefront.titlePosition");
+  const titleSpotLabels: Record<TileSpot, string> = {
+    "top-left": t("spotTopLeft"),
+    "top-center": t("spotTopCenter"),
+    "top-right": t("spotTopRight"),
+    "middle-center": t("spotMiddle"),
+    "bottom-left": t("spotBottomLeft"),
+    "bottom-center": t("spotBottomCenter"),
+    "bottom-right": t("spotBottomRight"),
+  };
   return (
     <TileSpotPicker
       value={value}
       cornerRadius={cornerRadius}
       available={availableSpots(titleStyle, cornerRadius)}
       band={spotRow(value)}
-      ariaLabel="Title spot"
-      spotLabel={(spot) => `Title ${TITLE_SPOT_LABELS[spot].toLowerCase()}`}
+      ariaLabel={t("ariaLabel")}
+      spotLabel={(spot) => titleSpotLabels[spot]}
       onChange={onChange}
     />
   );

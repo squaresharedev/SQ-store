@@ -1,6 +1,7 @@
 "use client";
 
 import { Search } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { focusRingClass, transitionClass } from "@/components/ui/control-styles";
 import { useSearch } from "@/components/search/SearchProvider";
@@ -15,6 +16,7 @@ import { useSearch } from "@/components/search/SearchProvider";
  * menu toggle it sits in line with, which also keeps it a 40px touch target.
  */
 export function SearchMobileTrigger() {
+  const t = useTranslations("Search.trigger");
   const search = useSearch();
   if (!search) return null;
 
@@ -22,7 +24,8 @@ export function SearchMobileTrigger() {
     <button
       type="button"
       onClick={search.open}
-      aria-label="Search"
+      data-tour="search-phone"
+      aria-label={t("label")}
       aria-haspopup="dialog"
       aria-expanded={search.isOpen}
       className={cn(

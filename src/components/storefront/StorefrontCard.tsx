@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations, useLocale } from "next-intl";
 import { motion } from "motion/react";
 import { Trash2 } from "lucide-react";
 import { cardClass } from "@/components/ui/surface-styles";
@@ -65,6 +66,7 @@ const SHAPE_OPACITY = 0.3;
  * something screen readers are told in words.
  */
 function EmptyPreviewHint({ accent }: { accent: string }) {
+  const t = useTranslations("Storefront.card");
   return (
     <div className="absolute inset-0 flex items-center justify-center">
       <svg
@@ -113,7 +115,7 @@ function EmptyPreviewHint({ accent }: { accent: string }) {
       </svg>
 
       <span className="relative rounded-full border border-border bg-background px-2.5 py-1 font-inter text-xs font-medium text-foreground shadow-xs">
-        This grid is empty
+        {t("emptyHint")}
       </span>
     </div>
   );
@@ -136,6 +138,8 @@ export function StorefrontCard({
   onEmbed: () => void;
   onDelete: () => void;
 }) {
+  const t = useTranslations("Storefront.card");
+  const locale = useLocale();
   const { id, name, blockCount, updatedAt, config, removal } = storefront;
 
   // The embed button is the animation trigger for the icon inside it: the whole
@@ -171,7 +175,7 @@ export function StorefrontCard({
       {canWrite && (
         <Link
           href={`/storefront/${id}`}
-          aria-label={`Edit ${name}`}
+          aria-label={t("editAriaLabel", { name })}
           className={cn("absolute inset-0 z-10 rounded-md", focusRingClass)}
         />
       )}
@@ -198,8 +202,8 @@ export function StorefrontCard({
             {name}
           </h3>
           <p className="mt-0.5 font-inter text-sm text-muted-foreground">
-            {blockCount} block{blockCount === 1 ? "" : "s"} · updated{" "}
-            {formatOrderDate(updatedAt)}
+            {t("blockCount", { count: blockCount })}
+            {t("updatedLabel", { date: formatOrderDate(updatedAt, locale) })}
           </p>
           {/* One line, in place of the reason. A card has room for a state, not
               an explanation; the full statement of reasons sits above the
@@ -217,9 +221,9 @@ export function StorefrontCard({
             >
               {removal.kind === "paused"
                 ? removal.reviewRequestedAt
-                  ? "Paused · with SquareShare for review"
-                  : "Paused by SquareShare · needs changes"
-                : "Removed by SquareShare"}
+                  ? t("pausedInReview")
+                  : t("pausedNeedsChanges")
+                : t("removed")}
             </p>
           )}
         </div>
@@ -229,8 +233,9 @@ export function StorefrontCard({
         <div className="absolute right-3 top-3 z-20 flex gap-1.5">
           <motion.button
             type="button"
+            data-tour="storefront-embed"
             onClick={onEmbed}
-            aria-label={`Embed ${name}`}
+            aria-label={t("embedAriaLabel", { name })}
             className={cn(CARD_ACTION_CLASS, "hover:text-foreground")}
             {...iconHover}
           >
@@ -239,7 +244,7 @@ export function StorefrontCard({
           <button
             type="button"
             onClick={onDelete}
-            aria-label={`Delete ${name}`}
+            aria-label={t("deleteAriaLabel", { name })}
             className={cn(CARD_ACTION_CLASS, "hover:text-destructive")}
           >
             <Trash2 className="size-4" strokeWidth={2} aria-hidden="true" />

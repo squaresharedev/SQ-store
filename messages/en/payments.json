@@ -1,0 +1,116 @@
+{
+  "pageTitle": "Payments",
+  "soon": "Soon",
+  "balance": {
+    "available": {
+      "label": "Available",
+      "zero": "Nothing to pay out yet",
+      "hint": "Ready for your next payout"
+    },
+    "pending": {
+      "label": "Pending",
+      "zero": "No pending sales",
+      "hint": "Clearing from recent sales"
+    },
+    "nextPayout": {
+      "label": "Next payout",
+      "zero": "No payout scheduled",
+      "hint": "Expected {date}"
+    }
+  },
+  "connection": {
+    "label": "Stripe connection",
+    "comingSoonTitle": "Getting paid through Stripe is coming soon",
+    "comingSoonBody": "Until then, buyers pay you through your product's buy link, or by emailing you.",
+    "connectTitle": "Connect Stripe to get paid",
+    "connectBody": "Payouts go straight to your bank. Setup happens securely on Stripe, we never see or store your bank details.",
+    "connectButton": "Connect with Stripe",
+    "connected": "Stripe account connected",
+    "charges": "Charges",
+    "payouts": "Payouts",
+    "verified": "Verified",
+    "requirementsDue": "Stripe needs more information before payouts can continue."
+  },
+  "connectModal": {
+    "title": "Connect with Stripe",
+    "description": "Get paid for what you sell. Setup happens on Stripe, not here.",
+    "points": {
+      "sensitive": {
+        "title": "Stripe handles the sensitive part",
+        "body": "Bank details, identity checks and verification all happen on Stripe's secure pages. Square Share never sees or stores them."
+      },
+      "bank": {
+        "title": "Payouts go straight to your bank",
+        "body": "Once connected, your balance is paid out automatically on a rolling schedule."
+      },
+      "time": {
+        "title": "Takes about 5 minutes",
+        "body": "You'll be redirected to Stripe to finish setup, then land right back here."
+      }
+    },
+    "notNow": "Not now",
+    "comingSoonTitle": "Stripe payouts are coming soon.",
+    "continue": "Continue to Stripe"
+  },
+  "payoutHistory": {
+    "label": "Payout history",
+    "title": "Payouts",
+    "emptyConnectable": "No payouts yet. Once you make sales, Stripe sends your balance to your bank automatically.",
+    "empty": "No payouts yet.",
+    "columns": {
+      "amount": "Amount",
+      "status": "Status",
+      "bank": "Bank",
+      "arrives": "Arrives"
+    },
+    "rowLabel": "Payout {amount}, view details"
+  },
+  "payoutStatus": "{status, select, paid {Paid} pending {Pending} in_transit {In transit} canceled {Canceled} failed {Failed} other {Pending}}",
+  "payoutMethod": {
+    "title": "Payout method",
+    "manage": "Manage",
+    "detail": "{currency} · {country}",
+    "detailDefault": "{currency} · {country} · Default",
+    "emptyConnectable": "No payout method yet. Connect Stripe and add your bank there, it shows up here automatically.",
+    "empty": "No payout method yet."
+  },
+  "payoutMethodModal": {
+    "title": "Payout method",
+    "description": "Where your payouts are sent.",
+    "bankAccountDetail": "Bank account · {currency} · {country}",
+    "defaultLabel": "Default for payouts",
+    "yes": "Yes",
+    "no": "No",
+    "referenceLabel": "Reference",
+    "securityNote": "For your security, bank details are changed on Stripe, never here.",
+    "manageInStripe": "Manage in Stripe"
+  },
+  "recentActivity": {
+    "label": "Recent activity",
+    "title": "Activity",
+    "empty": "Sales, refunds and payouts will show up here.",
+    "datePending": "{date} · Pending"
+  },
+  "transactionModal": {
+    "title": "{type, select, charge {Sale} refund {Refund} payout {Payout} stripe_fee {Stripe fee} adjustment {Adjustment} other {Transaction}}",
+    "processingFee": "Processing fee",
+    "net": "Net to your balance",
+    "status": "Status",
+    "statusPending": "Pending, clearing to your balance",
+    "statusAvailable": "Available",
+    "date": "Date",
+    "id": "Transaction ID"
+  },
+  "payoutModal": {
+    "title": "Payout",
+    "sentTo": "Sent to",
+    "bankAccount": "Bank account ···· {last4}",
+    "arrives": "Arrives",
+    "initiated": "Initiated",
+    "type": "Type",
+    "typeValue": "{method, select, instant {Instant} other {Standard}} · {automatic, select, true {Automatic} other {Manual}}",
+    "statement": "On your bank statement",
+    "id": "Payout ID",
+    "failed": "This payout could not be delivered. Stripe retries automatically, and the amount stays in your available balance until it succeeds."
+  }
+}

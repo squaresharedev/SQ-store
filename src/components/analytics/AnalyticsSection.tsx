@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { InfoTip } from "@/components/ui/InfoTip";
 
 /**
@@ -31,6 +32,7 @@ export function AnalyticsSection({
   state: "live" | "awaiting";
   children: ReactNode;
 }) {
+  const t = useTranslations("Analytics.section");
   return (
     <section
       aria-labelledby={`analytics-${id}`}
@@ -56,7 +58,7 @@ export function AnalyticsSection({
           >
             {title}
           </h2>
-          <InfoTip label={`What ${title} measures`}>{description}</InfoTip>
+          <InfoTip label={t("whatMeasures", { title })}>{description}</InfoTip>
         </div>
       </div>
       {children}

@@ -3,8 +3,8 @@ import { SHAPE_KINDS } from "@/types/storefront";
 import {
   QUICK_SHAPE_KINDS,
   SHAPE_GROUPS,
-  SHAPE_SPECS,
 } from "@/components/storefront/shape-specs";
+import { english } from "../setup/translate";
 
 /**
  * The browsable shape library.
@@ -24,7 +24,7 @@ describe("SHAPE_GROUPS — the panel's view of the library", () => {
 
   it("names every group and leaves none empty", () => {
     for (const group of SHAPE_GROUPS) {
-      expect(group.title.trim().length).toBeGreaterThan(0);
+      expect(english(`Storefront.shapes.group.${group.id}`).trim().length).toBeGreaterThan(0);
       expect(group.kinds.length).toBeGreaterThan(0);
     }
   });
@@ -32,7 +32,7 @@ describe("SHAPE_GROUPS — the panel's view of the library", () => {
   it("every grouped kind has a label to render", () => {
     for (const group of SHAPE_GROUPS) {
       for (const kind of group.kinds) {
-        expect(SHAPE_SPECS[kind]?.label, kind).toBeTruthy();
+        expect(english(`Storefront.shapes.name.${kind}`), kind).toBeTruthy();
       }
     }
   });

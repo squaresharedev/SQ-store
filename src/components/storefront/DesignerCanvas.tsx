@@ -1,6 +1,7 @@
 "use client";
 
 import { memo, useCallback, useEffect, useMemo, useRef, type ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import type { SellerShippingPolicy } from "@/types/shipping-policy";
 import { ShoppingBag } from "lucide-react";
 import type { Product } from "@/types/product";
@@ -52,17 +53,6 @@ import {
 import type { CanvasViewport } from "./useCanvasViewport";
 import { iconPopClass, primaryButtonClass } from "@/components/ui/control-styles";
 
-/** Accessible label for a block's drag/resize handles. */
-function blockLabel(block: StorefrontBlock, product: Product | null): string {
-  if (block.type === "product") return product?.title ?? "Removed product";
-  if (block.type === "shape") return `${block.kind} shape`;
-  if (block.type === "image") {
-    const alt = block.alt.trim();
-    return alt ? `Image: ${alt.slice(0, 30)}` : "Image element";
-  }
-  const text = block.text.trim();
-  return text ? `Text: ${text.slice(0, 30)}` : "Text block";
-}
 
 /**
  * The live preview + editing canvas: renders the current config through the
@@ -292,6 +282,7 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   shippingPolicy?: SellerShippingPolicy;
   seller?: StorefrontSeller;
 }) {
+  const t = useTranslations("Storefront");
   const productFor = useCallback(
     (block: StorefrontBlock): Product | null =>
       block.type === "product"
@@ -803,11 +794,10 @@ export const DesignerCanvas = memo(function DesignerCanvas({
               />
             </div>
             <p className="text-sm font-medium text-foreground">
-              Your grid is empty
+              {t("canvas.emptyGrid")}
             </p>
             <p className="mt-1 max-w-xs font-inter text-sm text-muted-foreground">
-              Add a product to start arranging your storefront. Text and
-              shapes are on the toolbar below.
+              {t("canvas.emptyGridHint")}
             </p>
             {onAddProduct && (
               <button
@@ -821,7 +811,7 @@ export const DesignerCanvas = memo(function DesignerCanvas({
                   strokeWidth={2}
                   aria-hidden="true"
                 />
-                Add product
+                {t("canvas.addProduct")}
               </button>
             )}
           </div>
@@ -834,7 +824,7 @@ export const DesignerCanvas = memo(function DesignerCanvas({
             allowOverlap
             showEmptyCells={showGrid}
             blocks={gridBlocks}
-            ariaLabel="Storefront canvas"
+            ariaLabel={t("canvas.gridLabel")}
             columns={theme.columns}
             rows={theme.rows}
             // A board with a tilt or a stack on it has no honest narrow-screen
@@ -872,9 +862,18 @@ export const DesignerCanvas = memo(function DesignerCanvas({
                 ? { zIndex: FRAME_Z }
                 : {}),
             })}
-            getBlockLabel={(gridBlock) =>
-              blockLabel(gridBlock.data, productFor(gridBlock.data))
-            }
+            getBlockLabel={(gridBlock) => {
+              const block = gridBlock.data;
+              const product = productFor(block);
+              if (block.type === "product") return product?.title ?? t("blockTile.removedProduct");
+              if (block.type === "shape") return t("blockTile.shape", { kind: block.kind });
+              if (block.type === "image") {
+                const alt = block.alt.trim();
+                return alt ? t("blockTile.imageWithAlt", { alt: alt.slice(0, 30) }) : t("blockTile.imageElement");
+              }
+              const text = block.text.trim();
+              return text ? t("blockTile.textWithContent", { text: text.slice(0, 30) }) : t("blockTile.textBlock");
+            }}
             onMove={onMoveBlock}
             onResize={onResizeBlock}
             onRotate={onRotateBlock}
@@ -941,7 +940,7 @@ export const DesignerCanvas = memo(function DesignerCanvas({
           <DeviceSizeSwitch
             device={previewMode}
             onChange={onPreviewModeChange}
-            labels={{ desktop: "Desktop preview", mobile: "Mobile preview" }}
+            labels={{ desktop: t("canvas.desktopPreview"), mobile: t("canvas.mobilePreview") }}
           />
         </div>
         {canvas}
@@ -999,6 +998,7 @@ function Stage({
   previewMode: PreviewDevice;
   onPreviewModeChange: (mode: PreviewDevice) => void;
 }) {
+  const t = useTranslations("Storefront");
   const stageRef = useRef<HTMLDivElement | null>(null);
   const registerStage = useCallback(
     (node: HTMLDivElement | null) => {
@@ -1042,7 +1042,7 @@ function Stage({
           <DeviceSizeSwitch
             device={previewMode}
             onChange={onPreviewModeChange}
-            labels={{ desktop: "Desktop preview", mobile: "Mobile preview" }}
+            labels={{ desktop: t("canvas.desktopPreview"), mobile: t("canvas.mobilePreview") }}
           />
         </div>
         {canvas}

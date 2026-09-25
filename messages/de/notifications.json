@@ -1,0 +1,113 @@
+{
+  "metadata": {
+    "notifications": {
+      "title": "Benachrichtigungen"
+    }
+  },
+  "loading": {
+    "title": "Benachrichtigungen",
+    "srLoading": "Benachrichtigungen werden geladen"
+  },
+  "bell": {
+    "label": "Benachrichtigungen",
+    "unreadLabel": "{count, plural, one {Benachrichtigungen, {count} ungelesen} other {Benachrichtigungen, {count} ungelesen}}"
+  },
+  "list": {
+    "title": "Benachrichtigungen",
+    "unread": "{count, plural, one {{count} ungelesen} other {{count} ungelesen}}",
+    "markAllRead": "Alle als gelesen markieren",
+    "livePaused": "Live-Updates pausiert. Aktualisiere die Seite, um die neuesten Inhalte zu sehen.",
+    "empty": "Du bist auf dem neuesten Stand. Noch nichts hier.",
+    "viewAll": "Alle anzeigen"
+  },
+  "item": {
+    "unread": "Ungelesen"
+  },
+  "page": {
+    "title": "Benachrichtigungen",
+    "markAllRead": "Alle als gelesen markieren",
+    "emptyTitle": "Noch keine Benachrichtigungen",
+    "emptyHint": "Team-, Bestell- und Zahlungsaktivitäten erscheinen hier.",
+    "loadError": "Weitere Benachrichtigungen konnten nicht geladen werden. Überprüfe deine Verbindung und versuche es erneut.",
+    "loading": "Wird geladen",
+    "loadMore": "Mehr laden"
+  },
+  "types": {
+    "team": "Team",
+    "order": "Bestellung",
+    "payment": "Zahlung",
+    "stock": "Lagerbestand",
+    "system": "System",
+    "security": "Sicherheit",
+    "policy": "Richtlinie"
+  },
+  "time": {
+    "justNow": "gerade eben",
+    "minutesAgo": "{count, plural, one {vor {count} Min.} other {vor {count} Min.}}",
+    "hoursAgo": "{count, plural, one {vor {count} Std.} other {vor {count} Std.}}",
+    "daysAgo": "{count, plural, one {vor {count} T.} other {vor {count} T.}}"
+  },
+  "messages": {
+    "teamInvite": {
+      "title": "Du hast eine Team-Einladung",
+      "body": "{role, select, owner {{store} hat dich eingeladen, als Inhaber beizutreten. Öffne Team und Zugriff zum Akzeptieren.} editor {{store} hat dich eingeladen, als Bearbeiter beizutreten. Öffne Team und Zugriff zum Akzeptieren.} viewer {{store} hat dich eingeladen, als Betrachter beizutreten. Öffne Team und Zugriff zum Akzeptieren.} other {{store} hat dich eingeladen, dem Team beizutreten. Öffne Team und Zugriff zum Akzeptieren.}}",
+      "bodyUnnamedStore": "{role, select, owner {Ein SquareShare-Shop hat dich eingeladen, als Inhaber beizutreten. Öffne Team und Zugriff zum Akzeptieren.} editor {Ein SquareShare-Shop hat dich eingeladen, als Bearbeiter beizutreten. Öffne Team und Zugriff zum Akzeptieren.} viewer {Ein SquareShare-Shop hat dich eingeladen, als Betrachter beizutreten. Öffne Team und Zugriff zum Akzeptieren.} other {Ein SquareShare-Shop hat dich eingeladen, dem Team beizutreten. Öffne Team und Zugriff zum Akzeptieren.}}"
+    },
+    "teamJoined": {
+      "title": "{name} ist deinem Team beigetreten",
+      "titleUnnamed": "Ein neues Mitglied ist deinem Team beigetreten",
+      "body": "Diese Person hat jetzt Zugriff auf deinen Shop."
+    },
+    "security": {
+      "passwordChanged": {
+        "title": "Dein Passwort wurde geändert",
+        "body": "Das Passwort dieses Kontos wurde gerade geändert und andere Geräte wurden abgemeldet. Wenn du das nicht warst, setze dein Passwort sofort zurück."
+      },
+      "passwordReset": {
+        "title": "Dein Passwort wurde geändert",
+        "body": "Ein Link zum Zurücksetzen wurde verwendet, um ein neues Passwort festzulegen, und andere Geräte wurden abgemeldet. Wenn du das nicht warst, setze es sofort erneut zurück."
+      },
+      "passwordSet": {
+        "title": "Ein Passwort wurde für dein Konto festgelegt",
+        "body": "Dieses Konto kann sich jetzt mit einem Passwort sowie mit Google anmelden. Wenn du das nicht warst, setze es sofort zurück."
+      },
+      "resetRequested": {
+        "title": "Ein Link zum Zurücksetzen des Passworts wurde angefordert",
+        "body": "Jemand hat einen Link zum Festlegen eines neuen Passworts für dieses Konto angefordert. Wenn du das nicht warst, ignoriere die E-Mail und ändere dein Passwort."
+      },
+      "emailChangeRequested": {
+        "title": "Änderung der E-Mail-Adresse angefordert",
+        "body": "Jemand hat darum gebeten, dieses Konto auf eine neue E-Mail-Adresse umzustellen. Die Änderung wird erst wirksam, wenn der Link in diesem Posteingang bestätigt wurde. Wenn du das nicht warst, ändere jetzt dein Passwort."
+      },
+      "lockedOut": {
+        "title": "Jemand versucht, sich in deinem Konto anzumelden",
+        "body": "Dein Passwort wurde richtig eingegeben, danach aber zu viele falsche Zwei-Faktor-Codes. Die Anmeldung ist deshalb für ein paar Minuten pausiert. Wenn du das nicht warst, kennt jemand dein Passwort: Ändere es sofort."
+      },
+      "recoveryCodeUsed": {
+        "title": "Ein Wiederherstellungscode wurde zur Anmeldung verwendet",
+        "body": "Jemand hat sich mit einem Wiederherstellungscode in deinem Konto angemeldet. Dadurch wird die Zwei-Faktor-Authentifizierung ausgeschaltet und jedes andere Gerät abgemeldet. Wenn du das warst, richte sie unter Einstellungen › Sicherheit wieder ein. Wenn nicht, ändere sofort dein Passwort."
+      },
+      "twoFactorEnabled": {
+        "title": "Die Zwei-Faktor-Authentifizierung ist eingeschaltet",
+        "body": "Für die Anmeldung in deinem Konto brauchst du jetzt einen Code aus deiner Authenticator-App, und alle anderen Geräte wurden abgemeldet. Wenn du das nicht warst, ändere dein Passwort und wende dich an den Support."
+      },
+      "factorAdded": {
+        "title": "Eine Authenticator-App wurde hinzugefügt",
+        "body": "„{name}“ kann jetzt zur Anmeldung in deinem Konto verwendet werden. Wenn du das nicht warst, entferne sie unter Einstellungen › Sicherheit und ändere dein Passwort.",
+        "bodyUnnamed": "„Authenticator-App“ kann jetzt zur Anmeldung in deinem Konto verwendet werden. Wenn du das nicht warst, entferne sie unter Einstellungen › Sicherheit und ändere dein Passwort."
+      },
+      "twoFactorDisabled": {
+        "title": "Die Zwei-Faktor-Authentifizierung ist ausgeschaltet",
+        "body": "Deine letzte Authenticator-App wurde entfernt, deshalb reicht für die Anmeldung jetzt dein Passwort. Wenn du das nicht warst, ändere dein Passwort und schalte die Zwei-Faktor-Authentifizierung wieder ein."
+      },
+      "factorRemoved": {
+        "title": "Eine Authenticator-App wurde entfernt",
+        "body": "„{name}“ kann nicht mehr zur Anmeldung in deinem Konto verwendet werden. Wenn du das nicht warst, ändere sofort dein Passwort."
+      },
+      "recoveryCodesRegenerated": {
+        "title": "Neue Wiederherstellungscodes wurden erstellt",
+        "body": "Deine alten Wiederherstellungscodes funktionieren nicht mehr. Wenn du das nicht warst, ändere sofort dein Passwort."
+      }
+    }
+  }
+}

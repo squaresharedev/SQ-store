@@ -1,0 +1,113 @@
+{
+  "metadata": {
+    "notifications": {
+      "title": "Powiadomienia"
+    }
+  },
+  "loading": {
+    "title": "Powiadomienia",
+    "srLoading": "wczytywanie powiadomień"
+  },
+  "bell": {
+    "label": "Powiadomienia",
+    "unreadLabel": "{count, plural, one {Powiadomienia, {count} nieprzeczytane} few {Powiadomienia, {count} nieprzeczytane} many {Powiadomienia, {count} nieprzeczytanych} other {Powiadomienia, {count} nieprzeczytanego}}"
+  },
+  "list": {
+    "title": "Powiadomienia",
+    "unread": "{count, plural, one {{count} nieprzeczytane} few {{count} nieprzeczytane} many {{count} nieprzeczytanych} other {{count} nieprzeczytanego}}",
+    "markAllRead": "Oznacz wszystkie jako przeczytane",
+    "livePaused": "Aktualizacje na żywo wstrzymane. Odśwież, aby zobaczyć najnowsze.",
+    "empty": "Wszystko na bieżąco. Nic tu jeszcze nie ma.",
+    "viewAll": "Zobacz wszystkie"
+  },
+  "item": {
+    "unread": "Nieprzeczytane"
+  },
+  "page": {
+    "title": "Powiadomienia",
+    "markAllRead": "Oznacz wszystkie jako przeczytane",
+    "emptyTitle": "Jeszcze brak powiadomień",
+    "emptyHint": "Aktywność zespołu, zamówień i płatności pojawi się tutaj.",
+    "loadError": "Nie udało się wczytać kolejnych powiadomień. Sprawdź połączenie i spróbuj ponownie.",
+    "loading": "Wczytywanie",
+    "loadMore": "Wczytaj więcej"
+  },
+  "types": {
+    "team": "Zespół",
+    "order": "Zamówienie",
+    "payment": "Płatność",
+    "stock": "Stan magazynowy",
+    "system": "System",
+    "security": "Bezpieczeństwo",
+    "policy": "Zasady"
+  },
+  "time": {
+    "justNow": "przed chwilą",
+    "minutesAgo": "{count, plural, one {{count} min temu} few {{count} min temu} many {{count} min temu} other {{count} min temu}}",
+    "hoursAgo": "{count, plural, one {{count} godz. temu} few {{count} godz. temu} many {{count} godz. temu} other {{count} godz. temu}}",
+    "daysAgo": "{count, plural, one {{count} dni temu} few {{count} dni temu} many {{count} dni temu} other {{count} dni temu}}"
+  },
+  "messages": {
+    "teamInvite": {
+      "title": "Masz zaproszenie do zespołu",
+      "body": "{role, select, owner {{store} zaprasza cię do dołączenia jako właściciel. Otwórz Zespół i dostęp, aby zaakceptować.} editor {{store} zaprasza cię do dołączenia jako edytor. Otwórz Zespół i dostęp, aby zaakceptować.} viewer {{store} zaprasza cię do dołączenia jako przeglądający. Otwórz Zespół i dostęp, aby zaakceptować.} other {{store} zaprasza cię do dołączenia do swojego zespołu. Otwórz Zespół i dostęp, aby zaakceptować.}}",
+      "bodyUnnamedStore": "{role, select, owner {Sklep na SquareShare zaprasza cię do dołączenia jako właściciel. Otwórz Zespół i dostęp, aby zaakceptować.} editor {Sklep na SquareShare zaprasza cię do dołączenia jako edytor. Otwórz Zespół i dostęp, aby zaakceptować.} viewer {Sklep na SquareShare zaprasza cię do dołączenia jako przeglądający. Otwórz Zespół i dostęp, aby zaakceptować.} other {Sklep na SquareShare zaprasza cię do dołączenia do jego zespołu. Otwórz Zespół i dostęp, aby zaakceptować.}}"
+    },
+    "teamJoined": {
+      "title": "{name} w twoim zespole",
+      "titleUnnamed": "Nowy członek w twoim zespole",
+      "body": "Ta osoba ma teraz dostęp do twojego sklepu."
+    },
+    "security": {
+      "passwordChanged": {
+        "title": "Zmieniono twoje hasło",
+        "body": "Hasło do tego konta zostało właśnie zmienione, a inne urządzenia zostały wylogowane. Jeśli to nie ty, natychmiast zresetuj hasło."
+      },
+      "passwordReset": {
+        "title": "Zmieniono twoje hasło",
+        "body": "Link resetujący posłużył do ustawienia nowego hasła, a inne urządzenia zostały wylogowane. Jeśli to nie ty, natychmiast zresetuj je ponownie."
+      },
+      "passwordSet": {
+        "title": "Ustawiono hasło na twoim koncie",
+        "body": "To konto może teraz logować się hasłem, a także przez Google. Jeśli to nie ty, natychmiast je zresetuj."
+      },
+      "resetRequested": {
+        "title": "Poproszono o link do zresetowania hasła",
+        "body": "Ktoś poprosił o link do ustawienia nowego hasła na tym koncie. Jeśli to nie ty, zignoruj tę wiadomość i zmień hasło."
+      },
+      "emailChangeRequested": {
+        "title": "Poproszono o zmianę adresu e-mail",
+        "body": "Ktoś poprosił o przeniesienie tego konta na nowy adres e-mail. Zmiana zacznie obowiązywać dopiero po potwierdzeniu linku w tamtej skrzynce. Jeśli to nie ty, zmień teraz hasło."
+      },
+      "lockedOut": {
+        "title": "Ktoś próbuje zalogować się na twoje konto",
+        "body": "Hasło zostało wpisane poprawnie, ale po nim podano zbyt wiele błędnych kodów dwuskładnikowych, więc logowanie zostało wstrzymane na kilka minut. Jeśli to nie ty, ktoś zna twoje hasło: zmień je teraz."
+      },
+      "recoveryCodeUsed": {
+        "title": "Do logowania użyto kodu odzyskiwania",
+        "body": "Ktoś zalogował się na twoje konto kodem odzyskiwania. To wyłącza uwierzytelnianie dwuskładnikowe i wylogowuje wszystkie pozostałe urządzenia. Jeśli to ty, skonfiguruj je ponownie w sekcji Ustawienia › Bezpieczeństwo. Jeśli nie, zmień teraz hasło."
+      },
+      "twoFactorEnabled": {
+        "title": "Uwierzytelnianie dwuskładnikowe jest włączone",
+        "body": "Logowanie na twoje konto wymaga teraz kodu z aplikacji uwierzytelniającej, a wszystkie pozostałe urządzenia zostały wylogowane. Jeśli to nie ty, zmień hasło i skontaktuj się z pomocą."
+      },
+      "factorAdded": {
+        "title": "Dodano aplikację uwierzytelniającą",
+        "body": "Aplikacji „{name}” można teraz używać do logowania na twoje konto. Jeśli to nie ty, usuń ją w sekcji Ustawienia › Bezpieczeństwo i zmień hasło.",
+        "bodyUnnamed": "Aplikacji „Aplikacja uwierzytelniająca” można teraz używać do logowania na twoje konto. Jeśli to nie ty, usuń ją w sekcji Ustawienia › Bezpieczeństwo i zmień hasło."
+      },
+      "twoFactorDisabled": {
+        "title": "Uwierzytelnianie dwuskładnikowe jest wyłączone",
+        "body": "Ostatnia aplikacja uwierzytelniająca została usunięta, więc do logowania wystarczy teraz samo hasło. Jeśli to nie ty, zmień hasło i włącz uwierzytelnianie dwuskładnikowe ponownie."
+      },
+      "factorRemoved": {
+        "title": "Usunięto aplikację uwierzytelniającą",
+        "body": "Aplikacji „{name}” nie można już używać do logowania na twoje konto. Jeśli to nie ty, zmień teraz hasło."
+      },
+      "recoveryCodesRegenerated": {
+        "title": "Wygenerowano nowe kody odzyskiwania",
+        "body": "Twoje dotychczasowe kody odzyskiwania już nie działają. Jeśli to nie ty, zmień teraz hasło."
+      }
+    }
+  }
+}

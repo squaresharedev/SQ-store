@@ -1,18 +1,22 @@
 import { z } from "zod";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
 import {
   BIO_MAX,
-  DELETE_CONFIRM_PHRASE,
+  DELETE_CONFIRM_PHRASES,
   EU_COUNTRY_CODES,
   LEGAL_VERSION,
   SELLER_FIELD_MAX,
+  isDeleteConfirmPhrase,
 } from "@/lib/settings/constants";
 import {
   emailAddress,
   multiLineText,
   optionalSingleLineText,
   referenceCode,
+  type TextField,
 } from "@/lib/validation/inputs";
 import { emailQualityProblem } from "@/lib/validation/email-quality";
+import { issueKey } from "@/lib/validation/messages";
 
 /**
  * Settings validation schemas, shared by the client (UX hints) and the server
@@ -33,52 +37,39 @@ import { emailQualityProblem } from "@/lib/validation/email-quality";
 /**
  * Changing the account email is a takeover-grade action: whoever controls the
  * address can request a password reset to it. So the current password is
- * required, exactly like a password change.
+ * required. (There is no password-change schema: Settings sets a new password
+ * only through an emailed link, never by taking the current one.)
  *
  * Optional in the SCHEMA because accounts created through an OAuth provider
  * have no password to type; the action checks whether this account actually
  * has a password identity and enforces it there, where that is knowable.
  */
 export const emailChangeSchema = z.strictObject({
-  new_email: emailAddress("That email"),
+  new_email: emailAddress("generic"),
   current_password: z.string().max(72).optional(),
 });
-
-export const passwordChangeSchema = z
-  .strictObject({
-    current_password: z.string().min(1, "Enter your current password."),
-    new_password: z
-      .string()
-      .min(8, "New password needs at least 8 characters.")
-      .max(72, "Keep it under 72 characters."),
-    confirm_password: z.string(),
-  })
-  .refine((v) => v.new_password === v.confirm_password, {
-    message: "New passwords do not match.",
-    path: ["confirm_password"],
-  });
 
 /** Empty string means "not set" and is stored as NULL. */
 /** Optional single-line free text. Control characters are rejected here so
  *  every field built on this helper inherits the gate (tax_business_name ends
  *  up on invoices and in tax exports). */
-const optionalTrimmed = (max: number, label: string) =>
-  optionalSingleLineText({ label, max }).transform((v) => (v === "" ? null : v));
+const optionalTrimmed = (max: number, field: TextField) =>
+  optionalSingleLineText({ field, max }).transform((v) => (v === "" ? null : v));
 
 /** Same as above but newlines survive — for the postal address. */
-const optionalMultiLine = (max: number, label: string) =>
-  multiLineText({ label, max, min: 0 }).transform((v) => (v === "" ? null : v));
+const optionalMultiLine = (max: number, field: TextField) =>
+  multiLineText({ field, max, min: 0 }).transform((v) => (v === "" ? null : v));
 
 /** Empty clears the field; anything else must actually look like an email.
  *  Reuses `emailAddress`'s own format + control-character gate rather than a
  *  second copy of it, so the two can never disagree about what's valid. */
-const optionalEmail = (label: string) =>
+const optionalContactEmail = () =>
   z
     .string()
     .trim()
     .transform((v) => (v === "" ? null : v))
-    .refine((v) => v === null || emailAddress(label).safeParse(v).success, {
-      message: `${label} doesn't look like an email address.`,
+    .refine((v) => v === null || emailAddress("contactEmail").safeParse(v).success, {
+      message: issueKey("Validation.email.contactEmail.format"),
     });
 
 /**
@@ -98,14 +89,14 @@ const optionalEmail = (label: string) =>
  * action — Zod's sync parse cannot make a network call, and the action is
  * where a rate limit already bounds how often one can be provoked.
  */
-const publishedContactEmail = (label: string) =>
-  optionalEmail(label).superRefine((value, ctx) => {
+const publishedContactEmail = () =>
+  optionalContactEmail().superRefine((value, ctx) => {
     // A refinement still runs after an earlier one on the same field has
     // failed, so the format is re-established here rather than assumed:
     // without this, "not an address" would be reported as "looks like a
     // placeholder", which is advice about the wrong problem.
-    if (value === null || !emailAddress(label).safeParse(value).success) return;
-    const problem = emailQualityProblem(value, label);
+    if (value === null || !emailAddress("contactEmail").safeParse(value).success) return;
+    const problem = emailQualityProblem(value);
     if (problem) ctx.addIssue({ code: "custom", message: problem });
   });
 
@@ -117,19 +108,19 @@ const publishedContactEmail = (label: string) =>
  * the profile instead of a storefront's own config.
  */
 export const taxSchema = z.strictObject({
-  tax_business_name: optionalTrimmed(200, "Business name"),
-  seller_address: optionalMultiLine(SELLER_FIELD_MAX.address, "The business address"),
-  seller_email: publishedContactEmail("The contact email"),
-  tax_vat_id: referenceCode({ label: "A VAT ID", min: 2, max: 32 }).transform(
+  tax_business_name: optionalTrimmed(200, "businessName"),
+  seller_address: optionalMultiLine(SELLER_FIELD_MAX.address, "businessAddress"),
+  seller_email: publishedContactEmail(),
+  tax_vat_id: referenceCode({ field: "vatId", min: 2, max: 32 }).transform(
     (v) => (v === "" ? null : v.toUpperCase()),
   ),
   tax_country: z
     .string()
     .refine((v) => v === "" || (EU_COUNTRY_CODES as string[]).includes(v), {
-      message: "Pick a country from the list.",
+      message: issueKey("Validation.settings.pickCountry"),
     })
     .transform((v) => (v === "" ? null : v)),
-  seller_phone: optionalTrimmed(SELLER_FIELD_MAX.phone, "The phone number"),
+  seller_phone: optionalTrimmed(SELLER_FIELD_MAX.phone, "phone"),
 });
 
 /**
@@ -143,7 +134,7 @@ export const taxSchema = z.strictObject({
  * literally, never interpreted.
  */
 export const bioSchema = z.strictObject({
-  seller_bio: optionalTrimmed(BIO_MAX, "Your bio"),
+  seller_bio: optionalTrimmed(BIO_MAX, "bio"),
 });
 
 export const notificationsSchema = z.strictObject({
@@ -154,15 +145,21 @@ export const notificationsSchema = z.strictObject({
 
 /** Acceptance is only valid for the exact current version. */
 export const legalAcceptSchema = z.strictObject({
-  version: z.literal(LEGAL_VERSION, "The legal docs changed while you were reading. Reload and try again."),
+  version: z.literal(LEGAL_VERSION, issueKey("Validation.settings.legalVersionChanged")),
 });
 
-/** Type-to-confirm gate for account deletion. */
+/**
+ * Type-to-confirm gate for account deletion. Accepts the phrase in any
+ * supported language (see isDeleteConfirmPhrase). The message names the
+ * default language's phrase; a form that renders it knows its own language
+ * and passes that phrase in instead.
+ */
 export const deleteConfirmSchema = z.strictObject({
   confirm: z
     .string()
     .trim()
-    .refine((v) => v.toLowerCase() === DELETE_CONFIRM_PHRASE, {
-      message: `Type "${DELETE_CONFIRM_PHRASE}" exactly to confirm.`,
+    .refine(isDeleteConfirmPhrase, {
+      message: issueKey("Validation.settings.deleteConfirm"),
+      params: { phrase: DELETE_CONFIRM_PHRASES[DEFAULT_LOCALE] },
     }),
 });

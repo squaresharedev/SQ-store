@@ -1,0 +1,162 @@
+{
+  "metadata": {
+    "descriptionFallback": "{title} z obchodu {store}."
+  },
+  "notFound": {
+    "title": "Tento produkt není dostupný",
+    "body": "Mohl být odstraněn, nebo je odkaz zastaralý. Vraťte se do obchodu a podívejte se, co je teď v nabídce.",
+    "back": "Zpět"
+  },
+  "sections": {
+    "description": "Popis",
+    "specs": "Specifikace",
+    "documents": "Dokumenty",
+    "shipping": "Doprava",
+    "returns": "Vrácení zboží",
+    "safety": "Bezpečnost a shoda",
+    "seller": "Prodejce"
+  },
+  "soldBy": "Prodává {seller}",
+  "moreDetails": "Další podrobnosti",
+  "trust": {
+    "digitalDelivery": "Po nákupu dodáno ke stažení.",
+    "euRights": "14 dní na rozmyšlenou a 2 roky na uplatnění práv z vadného plnění."
+  },
+  "safety": {
+    "manufacturer": "Výrobce",
+    "responsiblePerson": "Odpovědná osoba v EU",
+    "identifier": "Identifikátor produktu:",
+    "warnings": "Upozornění"
+  },
+  "priceNotes": "{price, select, incl {{shipping, select, plus {vč. DPH, doprava zvlášť} free {vč. DPH, doprava zdarma} other {vč. DPH}}} excl {{shipping, select, plus {bez daně, doprava zvlášť} free {bez daně, doprava zdarma} other {bez daně}}} other {{shipping, select, plus {doprava zvlášť} free {doprava zdarma} other {}}}}",
+  "stock": {
+    "digitalDownload": "Ke stažení",
+    "digitalDownloadFormat": "Ke stažení ({format})"
+  },
+  "description": {
+    "readMore": "Zobrazit více",
+    "readLess": "Zobrazit méně"
+  },
+  "gallery": {
+    "noPhoto": "Zatím bez fotky",
+    "photosOf": "Fotky produktu {title}",
+    "photo": "Fotka {current} z {total}"
+  },
+  "options": {
+    "unavailable": "(nedostupné)",
+    "unavailableOption": "{name} (nedostupné)",
+    "unavailableLabel": "{name}, nedostupné"
+  },
+  "quantity": {
+    "label": "Množství"
+  },
+  "cta": {
+    "unwired": "Toto tlačítko zatím nikam nevede. Přidejte k produktu odkaz na nákup, nebo vyplňte kontaktní e-mail v sekci Firma a údaje prodejce.",
+    "unavailableIn": "Nedostupné pro možnost: {group}",
+    "askAbout": "Zeptat se na tento produkt",
+    "checkoutOn": "Pokladna na <strong>{host}</strong>",
+    "mailSubject": "Dotaz k produktu {title}",
+    "mailQuantity": "Množství: {quantity}"
+  },
+  "specs": {
+    "dimensions": "Rozměry",
+    "weight": "Hmotnost",
+    "materials": "Materiály",
+    "madeIn": "Země původu",
+    "included": "Obsah balení",
+    "care": "Péče"
+  },
+  "seller": {
+    "address": "Adresa:",
+    "country": "Země:",
+    "email": "E-mail:",
+    "phone": "Telefon:",
+    "vatId": "DIČ: {vatId}"
+  },
+  "statutory": {
+    "withdrawal": "Od této kupní smlouvy můžete odstoupit bez udání důvodu do 14 dnů od převzetí zboží, pokud se neuplatní některá ze zákonných výjimek (například u zboží vyrobeného na zakázku nebo zboží v zapečetěném obalu).",
+    "digitalWithdrawal": "U obsahu ke stažení právo odstoupit od smlouvy zaniká, jakmile před uplynutím 14denní lhůty vyjádříte souhlas se zahájením stahování.",
+    "guarantee": "Podle práva EU odpovídá prodávající nejméně 2 roky za to, že je zboží v souladu s kupní smlouvou."
+  },
+  "footer": {
+    "disclosure": "Prodávajícím u této objednávky je <seller>{name}</seller> a odpovídá za produkt, jeho doručení i případné vrácení zboží nebo peněz. Squareshare poskytuje technologii, na které tato stránka běží, a není smluvní stranou kupní smlouvy.",
+    "poweredBy": "Běží na platformě <brand>Squareshare</brand>",
+    "policiesLabel": "Zásady Squareshare",
+    "policies": {
+      "privacy": {
+        "label": "Ochrana soukromí",
+        "name": "Zásady ochrany osobních údajů Squareshare"
+      },
+      "terms": {
+        "label": "Podmínky",
+        "name": "Podmínky služby Squareshare"
+      }
+    }
+  },
+  "report": {
+    "trigger": "{target, select, product {Nahlásit tento produkt} other {Nahlásit tuto výlohu}}",
+    "title": "{target, select, product {Nahlásit tento produkt} other {Nahlásit tuto výlohu}}",
+    "description": "Napište nám, co je špatně. Každé nahlášení posuzuje člověk.",
+    "sentTitle": "Nahlášení odesláno",
+    "sentBody": "{target, select, product {Děkujeme. Tento produkt posoudí člověk. Prodejci neprozrazujeme, kdo něco nahlásil.} other {Děkujeme. Tuto výlohu posoudí člověk. Prodejci neprozrazujeme, kdo něco nahlásil.}}",
+    "reasonsLegend": "Co je na tom špatně?",
+    "reasons": {
+      "illegal": {
+        "label": "Nelegální zboží nebo činnost",
+        "hint": "Prodej něčeho, co je v rozporu se zákonem, nebo využití nabídky k jeho zprostředkování."
+      },
+      "sexual": {
+        "label": "Sexuální obsah",
+        "hint": "Explicitní snímky nebo cokoli, co sexualizuje nezletilé."
+      },
+      "violence": {
+        "label": "Násilí nebo krveprolití",
+        "hint": "Drastická zranění, výhrůžky nebo obsah oslavující násilí."
+      },
+      "hate": {
+        "label": "Nenávist nebo obtěžování",
+        "hint": "Útoky na osobu nebo skupinu, nebo symboly nenávisti."
+      },
+      "counterfeit": {
+        "label": "Padělky nebo ukradené zboží",
+        "hint": "Falešné značkové zboží nebo cizí práce prodávaná jako vlastní."
+      },
+      "scam": {
+        "label": "Podvod",
+        "hint": "Nabídka vypadá, že má vylákat peníze, aniž by se cokoli dodalo."
+      },
+      "spam": {
+        "label": "Spam",
+        "hint": "Opakující se nebo zavádějící obsah, případně vůbec ne skutečný produkt."
+      },
+      "other": {
+        "label": "Něco jiného",
+        "hint": "Napište to níže a člověk si to přečte."
+      }
+    },
+    "detailsLabel": "Chcete ještě něco dodat? <muted>(nepovinné)</muted>",
+    "detailsPlaceholder": "Co by měl vědět ten, kdo to bude posuzovat?",
+    "emailLabel": "Váš e-mail <muted>(nepovinné)</muted>",
+    "emailPlaceholder": "vy@example.com",
+    "emailHelp": "Jen abychom mohli potvrdit, že jsme nahlášení dostali, a v případě potřeby se na něco zeptat. Prodejci se nikdy nezobrazí.",
+    "submitFailed": "Odeslání se nepodařilo. Zkuste to znovu.",
+    "offline": "Odeslání se nepodařilo. Zkontrolujte připojení a zkuste to znovu.",
+    "send": "Odeslat nahlášení",
+    "api": {
+      "accepted": "Děkujeme. Nahlášení posoudí člověk.",
+      "unreadable": "Požadavek se nepodařilo přečíst.",
+      "invalid": "Toto nahlášení není platné.",
+      "targetType": "Tohle tady nahlásit nejde.",
+      "reason": "Vyberte, co je špatně.",
+      "rateLimited": "Odsud přišlo příliš mnoho nahlášení. Zkuste to později.",
+      "submitFailed": "Odeslání se nepodařilo. Zkuste to znovu."
+    }
+  },
+  "shippingProse": {
+    "shipsFrom": "Odesílá se z: {country}.",
+    "areaAndTime": "{area}: {time}",
+    "areaAndTimeWithCost": "{area}: {time} ({cost})",
+    "withCost": "{place} ({cost})",
+    "returnsWindow": "{paidBy, select, seller {{days, plural, one {Vrácení zboží přijímáme do {days} dne od doručení. Poštovné za vrácení hradíme my.} few {Vrácení zboží přijímáme do {days} dnů od doručení. Poštovné za vrácení hradíme my.} many {Vrácení zboží přijímáme do {days} dne od doručení. Poštovné za vrácení hradíme my.} other {Vrácení zboží přijímáme do {days} dnů od doručení. Poštovné za vrácení hradíme my.}}} buyer {{days, plural, one {Vrácení zboží přijímáme do {days} dne od doručení. Poštovné za vrácení hradí kupující.} few {Vrácení zboží přijímáme do {days} dnů od doručení. Poštovné za vrácení hradí kupující.} many {Vrácení zboží přijímáme do {days} dne od doručení. Poštovné za vrácení hradí kupující.} other {Vrácení zboží přijímáme do {days} dnů od doručení. Poštovné za vrácení hradí kupující.}}} other {{days, plural, one {Vrácení zboží přijímáme do {days} dne od doručení.} few {Vrácení zboží přijímáme do {days} dnů od doručení.} many {Vrácení zboží přijímáme do {days} dne od doručení.} other {Vrácení zboží přijímáme do {days} dnů od doručení.}}}}"
+  }
+}

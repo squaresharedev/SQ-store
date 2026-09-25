@@ -2,6 +2,7 @@
 // visually hidden. Tooltips enhance, they never gate — every plotted value
 // stays reachable without a pointer.
 
+import { useLocale, useTranslations } from "next-intl";
 import { formatNumber } from "@/components/charts/format";
 import type { ChartDatum, ResolvedSeries } from "@/components/charts/types";
 
@@ -11,7 +12,7 @@ export function ChartDataTable({
   series,
   caption,
   xFormatter,
-  valueFormatter = formatNumber,
+  valueFormatter: valueFormatterProp,
 }: {
   data: ChartDatum[];
   xKey: string;
@@ -20,12 +21,16 @@ export function ChartDataTable({
   xFormatter?: (value: string) => string;
   valueFormatter?: (value: number) => string;
 }) {
+  const t = useTranslations("Common.charts");
+  const locale = useLocale();
+  const valueFormatter =
+    valueFormatterProp ?? ((value: number) => formatNumber(value, locale));
   return (
     <table className="sr-only">
       <caption>{caption}</caption>
       <thead>
         <tr>
-          <th scope="col">Category</th>
+          <th scope="col">{t("category")}</th>
           {series.map((s) => (
             <th key={s.key} scope="col">
               {s.label}

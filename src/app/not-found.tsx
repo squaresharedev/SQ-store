@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { ArrowUpRight } from "lucide-react";
 import { ErrorScreen } from "@/components/error/ErrorScreen";
 import { buttonClassName } from "@/components/ui/button";
@@ -13,12 +14,13 @@ import { buttonClassName } from "@/components/ui/button";
  * route that is right whatever they were looking for.
  */
 export default function NotFound() {
+  const t = useTranslations("ErrorPage.notFound");
   return (
     <ErrorScreen
       code="404"
       readout="err_not_found"
-      title="Page not found"
-      description="This page doesn't exist, or the thing it pointed at was deleted. The link may be stale, but your account and data are fine."
+      title={t("title")}
+      description={t("description")}
       action={
         /* Inverted rather than `primary`. In the dark palette primary is the
            same purple the ring is wearing, so a primary button would put a
@@ -33,7 +35,7 @@ export default function NotFound() {
             "bg-foreground text-background hover:bg-foreground/90",
           )}
         >
-          Back to dashboard
+          {t("cta")}
           {/* Leans along its own diagonal on hover (.cta-arrow in globals.css).
               Decorative: "Back to dashboard" already says where it goes. */}
           <ArrowUpRight

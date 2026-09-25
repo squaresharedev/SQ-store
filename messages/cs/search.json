@@ -1,0 +1,72 @@
+{
+  "trigger": {
+    "label": "Vyhledávání"
+  },
+  "overlay": {
+    "label": "Vyhledávání",
+    "placeholder": "Hledat produkty, objednávky, nastavení…",
+    "clear": "Vymazat hledání",
+    "close": "Zavřít vyhledávání",
+    "results": "Výsledky hledání",
+    "searching": "Hledání…",
+    "noResults": "Žádné výsledky pro dotaz {query}",
+    "resultCount": "{count, plural, one {{count} výsledek pro dotaz {query}} few {{count} výsledky pro dotaz {query}} many {{count} výsledku pro dotaz {query}} other {{count} výsledků pro dotaz {query}}}",
+    "nothingMatches": "Dotazu „{query}“ nic neodpovídá.",
+    "startTyping": "Začněte psát a hledejte.",
+    "remoteError": "Server je nedostupný, zobrazujeme jen stránky, nastavení a akce.",
+    "remoteErrorCached": "Živé vyhledávání je nedostupné, zobrazujeme uložené výsledky, stránky a nastavení.",
+    "remoteAuth": "Vaše relace vypršela, proto zobrazujeme jen stránky a nastavení.",
+    "remoteThrottled": "Hledáte příliš rychle, zobrazujeme jen stránky, nastavení a akce."
+  },
+  "sections": {
+    "pages": "Stránky",
+    "actions": "Akce",
+    "settings": "Nastavení"
+  },
+  "groups": {
+    "products": "Produkty",
+    "orders": "Objednávky",
+    "storefronts": "Výlohy",
+    "team": "Tým",
+    "notifications": "Oznámení",
+    "recent": "Nedávné"
+  },
+  "results": {
+    "draft": "Koncept",
+    "openInDesigner": "Otevřít v editoru",
+    "invited": "Pozvánka",
+    "order": "Objednávka",
+    "unread": "Nepřečtené"
+  },
+  "fields": {
+    "username": "Uživatelské jméno",
+    "avatar": "Profilová fotka",
+    "email": "E-mailová adresa",
+    "password": "Heslo",
+    "twoFactor": "Dvoufázové ověření",
+    "recoveryCodes": "Záložní kódy",
+    "securityActivity": "Bezpečnostní aktivita",
+    "signOut": "Odhlásit se",
+    "vat": "DIČ",
+    "businessName": "Obchodní jméno",
+    "country": "Země",
+    "address": "Adresa sídla",
+    "contactEmail": "Kontaktní e-mail",
+    "phone": "Telefon",
+    "bio": "Medailonek",
+    "salesEmails": "E-maily o prodejích",
+    "marketingEmails": "Marketingové e-maily",
+    "productEmails": "E-maily o novinkách v produktu",
+    "sellerAgreement": "Smlouva s prodejcem",
+    "termsOfService": "Podmínky služby",
+    "exportData": "Export mých dat",
+    "deleteAccount": "Smazat účet"
+  },
+  "actions": {
+    "newProduct": "Nový produkt",
+    "newStorefront": "Nová výloha",
+    "inviteMember": "Pozvat člena týmu",
+    "notificationHistory": "Historie oznámení",
+    "showMeAround": "Provést mě panelem"
+  }
+}

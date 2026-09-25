@@ -3,8 +3,9 @@
 import * as React from "react";
 import { useActionState } from "react";
 import { Crown, UserMinus, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
-import { useActionToast } from "@/components/ui/Toast";
+import { useActionStateToast, useSaveResult } from "@/components/ui/ActionErrorNotice";
 import { SaveButton } from "@/components/ui/SaveButton";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -21,10 +22,9 @@ import {
 import type { TeamRole } from "@/lib/team/permissions";
 import type { TeamMemberRow } from "@/lib/team/queries";
 import { changeMemberRole, revokeMemberAccess } from "@/lib/team/actions";
+import type { ActionState } from "@/lib/errors";
 
-type TeamActionState = { error?: string; success?: string };
-
-const INITIAL: TeamActionState = {};
+const INITIAL: ActionState = {};
 
 /**
  * Confirms sit in their own quiet grey panel — borderless, so it reads as a
@@ -32,13 +32,6 @@ const INITIAL: TeamActionState = {};
  * the row above and below it.
  */
 const CONFIRM_PANEL = "mt-3 flex flex-col gap-2 bg-muted px-4 py-3";
-
-const ROLE_OPTIONS: readonly SelectOption<"editor" | "viewer">[] =
-  ASSIGNABLE_ROLES.map((r) => ({
-    value: r,
-    label: ROLE_LABELS[r],
-    description: ROLE_DESCRIPTIONS[r],
-  }));
 
 /** Username if they have claimed one, else the local part of the email (never the raw uuid). */
 export function usernameFor(member: TeamMemberRow): string {
@@ -73,6 +66,17 @@ export function MemberRow({
   isSelf?: boolean;
   variant?: "member" | "invite";
 }) {
+  const t = useTranslations();
+  const tRow = useTranslations("Settings.team.memberRow");
+  const roleOptions: readonly SelectOption<"editor" | "viewer">[] = React.useMemo(
+    () =>
+      ASSIGNABLE_ROLES.map((r) => ({
+        value: r,
+        label: t(ROLE_LABELS[r]),
+        description: t(ROLE_DESCRIPTIONS[r]),
+      })),
+    [t],
+  );
   const isOwner = member.role === "owner";
   const name = usernameFor(member);
 
@@ -87,8 +91,10 @@ export function MemberRow({
   // A successful revoke revalidates this row out of existence, and a role
   // change replaces the confirm panel that used to hold the message. Both
   // outcomes have to be reported somewhere that outlives the row.
-  useActionToast(roleState);
-  useActionToast(revokeState);
+  useActionStateToast(roleState);
+  const roleResult = useSaveResult(roleState);
+  useActionStateToast(revokeState);
+  const revokeResult = useSaveResult(revokeState);
 
   // You can never change or remove the owner, nor remove yourself (the server
   // enforces both; this just keeps dead controls off the screen).
@@ -126,7 +132,7 @@ export function MemberRow({
             <span className="truncate">{name}</span>
             {isSelf && (
               <span className="shrink-0 font-inter text-xs font-normal text-muted-foreground">
-                (you)
+                {tRow("you")}
               </span>
             )}
           </p>
@@ -144,7 +150,7 @@ export function MemberRow({
               <Select
                 id={`role-${member.id}`}
                 value={selectValue}
-                options={ROLE_OPTIONS}
+                options={roleOptions}
                 onChange={handleRoleChange}
                 disabled={rolePending}
                 // Narrow trigger at the row's right edge: grow the panel inward.
@@ -157,7 +163,7 @@ export function MemberRow({
           ) : (
             <span
               className="inline-flex items-center gap-1.5 rounded-sm border border-border px-2 py-0.5 font-inter text-xs font-medium text-muted-foreground"
-              title={ROLE_DESCRIPTIONS[member.role]}
+              title={t(ROLE_DESCRIPTIONS[member.role])}
             >
               {isOwner && (
                 // Decorative: the label carries the meaning, so the gold is
@@ -169,7 +175,7 @@ export function MemberRow({
                   aria-hidden
                 />
               )}
-              {ROLE_LABELS[member.role]}
+              {t(ROLE_LABELS[member.role])}
             </span>
           )}
 
@@ -179,10 +185,14 @@ export function MemberRow({
               onClick={() => setConfirmMode("revoke")}
               aria-label={
                 variant === "invite"
-                  ? `Cancel the invite to ${member.invited_email}`
-                  : `Remove ${name} from the team`
+                  ? tRow("cancelInviteLabel", { email: member.invited_email })
+                  : tRow("removeMemberLabel", { name })
               }
-              title={variant === "invite" ? "Cancel invite" : "Remove from team"}
+              title={
+                variant === "invite"
+                  ? tRow("cancelInviteTitle")
+                  : tRow("removeFromTeamTitle")
+              }
               className={cn(iconButtonClass, "size-9 hover:border-destructive hover:text-destructive")}
             >
               {variant === "invite" ? (
@@ -203,9 +213,9 @@ export function MemberRow({
           <input type="hidden" name="member_id" value={member.id} />
           <input type="hidden" name="role" value={pendingRole} />
           <p className="font-inter text-sm text-foreground">
-            Make {name} {ROLE_LABELS[pendingRole].toLowerCase()}?{" "}
+            {tRow("confirmRoleChange", { name, role: pendingRole })}{" "}
             <span className="text-muted-foreground">
-              {ROLE_DESCRIPTIONS[pendingRole]}
+              {t(ROLE_DESCRIPTIONS[pendingRole])}
             </span>
           </p>
           <StepUpField id={`role-step-up-${member.id}`} state={roleState} />
@@ -213,12 +223,12 @@ export function MemberRow({
             <SaveButton
               type="submit"
               pending={rolePending}
-              state={roleState}
-              pendingLabel="Saving…"
-              savedLabel="Done"
+              state={roleResult}
+              pendingLabel={t("Common.actions.saving")}
+              savedLabel={t("Common.actions.done")}
               className="px-3 py-1.5 text-xs"
             >
-              Confirm
+              {t("Common.actions.confirm")}
             </SaveButton>
             <Button
               type="button"
@@ -227,7 +237,7 @@ export function MemberRow({
               disabled={rolePending}
               className="px-3 py-1.5 text-xs"
             >
-              Cancel
+              {t("Common.actions.cancel")}
             </Button>
           </div>
         </form>
@@ -240,9 +250,9 @@ export function MemberRow({
           <input type="hidden" name="member_id" value={member.id} />
           <p className="font-inter text-sm text-foreground">
             {variant === "invite" ? (
-              <>Cancel the invite to {member.invited_email}?</>
+              tRow("confirmCancelInvite", { email: member.invited_email })
             ) : (
-              <>Remove {name}? They lose access immediately.</>
+              tRow("confirmRemove", { name })
             )}
           </p>
           <StepUpField id={`revoke-step-up-${member.id}`} state={revokeState} />
@@ -251,12 +261,14 @@ export function MemberRow({
               type="submit"
               variant="destructive"
               pending={revokePending}
-              state={revokeState}
-              pendingLabel={variant === "invite" ? "Cancelling…" : "Removing…"}
-              savedLabel={variant === "invite" ? "Cancelled" : "Removed"}
+              state={revokeResult}
+              pendingLabel={
+                variant === "invite" ? tRow("cancelling") : tRow("removing")
+              }
+              savedLabel={variant === "invite" ? tRow("cancelled") : tRow("removed")}
               className="px-3 py-1.5 text-xs"
             >
-              {variant === "invite" ? "Cancel invite" : "Remove"}
+              {variant === "invite" ? tRow("cancelInviteButton") : t("Common.actions.remove")}
             </SaveButton>
             <Button
               type="button"
@@ -265,7 +277,7 @@ export function MemberRow({
               disabled={revokePending}
               className="px-3 py-1.5 text-xs"
             >
-              Keep
+              {tRow("keep")}
             </Button>
           </div>
         </form>

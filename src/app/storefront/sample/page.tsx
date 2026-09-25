@@ -1,20 +1,16 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { StorefrontDesigner } from "@/components/storefront/StorefrontDesigner";
 import { countActiveAccountProducts, getSampleStorefrontFlags } from "@/lib/onboarding/queries";
-import {
-  SAMPLE_PRODUCTS,
-  SAMPLE_SELLER,
-  SAMPLE_SHIPPING_POLICY,
-  SAMPLE_STOREFRONT_CONFIG,
-  SAMPLE_STOREFRONT_NAME,
-} from "@/lib/storefront/sample";
+import { buildSampleStorefront } from "@/lib/storefront/sample";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
 
-export const metadata: Metadata = {
-  title: "Sample storefront",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Storefront.metadata");
+  return { title: t("sample.title") };
+}
 
 /**
  * The sample storefront in the designer (lib/storefront/sample.ts).
@@ -41,21 +37,23 @@ export default async function SampleStorefrontPage({
   const account = await getActiveAccount();
   if (!can(account?.role, "storefront.write")) redirect("/storefront");
 
-  const [flags, productCount] = await Promise.all([
+  const [flags, productCount, t] = await Promise.all([
     getSampleStorefrontFlags(),
     countActiveAccountProducts(),
+    getTranslations(),
   ]);
+  const sample = buildSampleStorefront(t);
 
   return (
     <StorefrontDesigner
       sample={{ autoStartTour: flags?.editorTourPending === true, productCount }}
       storefrontId="sample"
-      initialName={SAMPLE_STOREFRONT_NAME}
-      initialConfig={SAMPLE_STOREFRONT_CONFIG}
-      products={[...SAMPLE_PRODUCTS]}
+      initialName={sample.name}
+      initialConfig={sample.config}
+      products={[...sample.products]}
       initialSetting={initialSetting ?? null}
-      sellerIdentity={SAMPLE_SELLER}
-      shippingPolicy={SAMPLE_SHIPPING_POLICY}
+      sellerIdentity={sample.seller}
+      shippingPolicy={sample.shippingPolicy}
       role={account?.role ?? null}
       accountId={account?.accountId ?? null}
     />

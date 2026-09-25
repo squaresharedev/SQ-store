@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations, useLocale } from "next-intl";
 import { LineChart } from "@/components/charts";
 import { formatBucketLabel, isMonthlySeries } from "@/lib/analytics/buckets";
 import type { RevenuePoint } from "@/lib/analytics/types";
@@ -26,19 +27,21 @@ export function RevenueTrendChart({
   series: RevenuePoint[];
   currency: string;
 }) {
+  const t = useTranslations("Analytics.sales.revenue");
+  const locale = useLocale();
   const monthly = isMonthlySeries(series.map((point) => point.date));
   return (
     <LineChart
       data={series}
       xKey="date"
-      series={[{ key: "revenueCents", label: "Revenue", colorIndex: TONE.money }]}
+      series={[{ key: "revenueCents", label: t("series"), colorIndex: TONE.money }]}
       variant="area"
       height={CHART_HEIGHT}
-      valueFormatter={moneyExact(currency)}
-      axisValueFormatter={moneyCompact(currency)}
-      xFormatter={(date) => formatBucketLabel(date, monthly)}
+      valueFormatter={moneyExact(currency, locale)}
+      axisValueFormatter={moneyCompact(currency, locale)}
+      xFormatter={(date) => formatBucketLabel(date, monthly, locale)}
       yAxisWidth={56}
-      ariaLabel="Paid revenue over time"
+      ariaLabel={t("ariaLabel")}
     />
   );
 }

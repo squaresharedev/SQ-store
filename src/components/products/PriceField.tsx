@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { CURRENCIES, type Currency } from "@/types/product";
 import {
@@ -42,6 +43,7 @@ export function PriceField({
   // Integer cents for the datapoint below, or undefined while the field is
   // blank or mid-edit. Deliberately the same parser the save path uses, so
   // the attribute and the DB write can never disagree.
+  const t = useTranslations("Products.priceField");
   const parseResult = parseFormPriceCents(price);
   const priceCents = parseResult.ok ? parseResult.cents : null;
 
@@ -62,7 +64,7 @@ export function PriceField({
           teaches a seller to stop reading the ones that do. */}
       <div className="flex items-center">
         <label htmlFor={id} className={labelClass}>
-          Price
+          {t("label")}
         </label>
         <RequiredMark />
       </div>
@@ -80,7 +82,7 @@ export function PriceField({
           value={price}
           onChange={(event) => onPriceChange(event.target.value)}
           onBlur={handleBlur}
-          placeholder="e.g. 9.00"
+          placeholder={t("placeholder")}
           required
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? errorId : undefined}
@@ -97,7 +99,7 @@ export function PriceField({
         />
         <div
           role="group"
-          aria-label="Currency"
+          aria-label={t("currency")}
           data-product-field="currency"
           data-product-value={currency}
           className="absolute inset-y-0 right-1.5 flex items-center"

@@ -1,3 +1,4 @@
+import type { MessageKey } from "@/i18n/types";
 import type { CardStyle, CardStyleOverrides } from "@/types/storefront";
 
 /**
@@ -72,12 +73,12 @@ export const LAYOUT_PRESET_VALUES: Record<LayoutPreset, LayoutPresetValues> = {
   },
 };
 
-export const LAYOUT_PRESET_LABELS: Record<LayoutPreset, string> = {
-  standard: "Standard",
-  caption: "Caption",
-  header: "Header",
-  gallery: "Gallery",
-  bare: "Bare",
+export const LAYOUT_PRESET_LABELS: Record<LayoutPreset, MessageKey> = {
+  standard: "Storefront.layoutPresets.standard",
+  caption: "Storefront.layoutPresets.caption",
+  header: "Storefront.layoutPresets.header",
+  gallery: "Storefront.layoutPresets.gallery",
+  bare: "Storefront.layoutPresets.bare",
 };
 
 /**

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, cleanup, fireEvent } from "@testing-library/react";
+import { render, screen, cleanup, fireEvent } from "../setup/render";
 import type { Product } from "@/types/product";
 import {
   DEFAULT_STOREFRONT_CONFIG,

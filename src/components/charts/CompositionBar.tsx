@@ -1,5 +1,6 @@
 "use client";
 
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import {
@@ -38,12 +39,17 @@ export function CompositionBar({
   items,
   thickness = 12,
   rounded = true,
-  valueFormatter = formatNumber,
+  valueFormatter: valueFormatterProp,
   showLegend = true,
   animate = true,
-  ariaLabel = "Composition",
+  ariaLabel: ariaLabelProp,
   className,
 }: CompositionBarProps) {
+  const t = useTranslations("Common.charts");
+  const locale = useLocale();
+  const valueFormatter =
+    valueFormatterProp ?? ((value: number) => formatNumber(value, locale));
+  const ariaLabel = ariaLabelProp ?? t("composition");
   // `active` (segment hover/focus) drives the readout; the legend only dims.
   const [active, setActive] = useState<number | null>(null);
   const [legendActive, setLegendActive] = useState<number | null>(null);
@@ -80,7 +86,7 @@ export function CompositionBar({
               <p className={tooltipValueClass}>
                 {valueFormatter(activeSegment.item.value)}
                 <span className={cn(tooltipLabelClass, "ml-1.5")}>
-                  {formatShare(activeSegment.item.value, total)}
+                  {formatShare(activeSegment.item.value, total, locale)}
                 </span>
               </p>
             </div>
@@ -95,7 +101,7 @@ export function CompositionBar({
               <span
                 key={item.label}
                 role="img"
-                aria-label={`${item.label}: ${valueFormatter(item.value)} (${formatShare(item.value, total)})`}
+                aria-label={`${item.label}: ${valueFormatter(item.value)} (${formatShare(item.value, total, locale)})`}
                 tabIndex={0}
                 className={cn(
                   "h-full min-w-1 outline-none",

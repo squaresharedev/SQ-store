@@ -3,6 +3,7 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { helpTextClass, overlayCloseButtonClass, overlayScrimClass, overlaySurfaceClass } from "@/components/ui/control-styles";
 
@@ -47,6 +48,7 @@ export function Modal({
    */
   initialFocus?: "first-control" | "dialog";
 }) {
+  const t = useTranslations("Common.actions");
   const panelRef = React.useRef<HTMLDivElement>(null);
   const closeButtonRef = React.useRef<HTMLButtonElement>(null);
   const titleId = React.useId();
@@ -208,7 +210,7 @@ export function Modal({
               ref={closeButtonRef}
               type="button"
               onClick={onClose}
-              aria-label="Close"
+              aria-label={t("close")}
               className={cn(overlayCloseButtonClass, "-mr-1.5 -mt-1.5")}
             >
               <X className="size-5" aria-hidden />

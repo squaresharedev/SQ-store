@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "../setup/render";
 import userEvent from "@testing-library/user-event";
 import { Tooltip } from "@/components/ui/Tooltip";
 import { InfoTip } from "@/components/ui/InfoTip";

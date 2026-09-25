@@ -1,5 +1,6 @@
 "use client";
 
+import { useLocale, useTranslations } from "next-intl";
 import {
   Bar,
   BarChart as RBarChart,
@@ -72,14 +73,21 @@ export function HBarChart({
   height,
   width,
   maxBarSize = MARK.maxBarSize,
-  valueFormatter = formatNumber,
-  axisValueFormatter = compactNumber,
+  valueFormatter: valueFormatterProp,
+  axisValueFormatter: axisValueFormatterProp,
   categoryFormatter,
   categoryWidth = 96,
   animate = true,
-  ariaLabel = "Horizontal bar chart",
+  ariaLabel: ariaLabelProp,
   className,
 }: HBarChartProps) {
+  const t = useTranslations("Common.charts");
+  const locale = useLocale();
+  const valueFormatter =
+    valueFormatterProp ?? ((value: number) => formatNumber(value, locale));
+  const axisValueFormatter =
+    axisValueFormatterProp ?? ((value: number) => compactNumber(value, locale));
+  const ariaLabel = ariaLabelProp ?? t("horizontalBar");
   const resolved = resolveSeries(series);
   const { highlighted, setHighlighted } = useSeriesHighlight();
   const reducedMotion = useReducedMotion();

@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
+import { getLocale, getTranslations } from "next-intl/server";
 import "./globals.css";
+import { ScopedIntlProvider } from "@/i18n/ScopedIntlProvider";
 import { ToastProvider } from "@/components/ui/Toast";
 import { THEME_BOOTSTRAP } from "@/lib/theme-mode";
 import { cn } from "@/lib/utils";
@@ -62,28 +64,35 @@ const montserrat = localFont({
   preload: false,
 });
 
-export const metadata: Metadata = {
-  title: {
-    default: "Square Share Dashboard",
-    template: "%s | Square Share",
-  },
-  description:
-    "Manage your products, design your storefront, connect Stripe, and view analytics on Square Share.",
-  robots: { index: false, follow: false }, // dashboard is private
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Dashboard.metadata.app");
+  return {
+    title: {
+      default: t("title"),
+      template: "%s | Square Share",
+    },
+    description: t("description"),
+    robots: { index: false, follow: false }, // dashboard is private
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: "#ffffff",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // The resolved request locale (src/i18n/request.ts). Always a valid BCP 47
+  // code from a fixed list, which matters beyond looks: the a11y suite's axe
+  // scan fails on an empty or malformed `lang`.
+  const locale = await getLocale();
+
   return (
     <html
-      lang="en"
+      lang={locale}
       // globals.css sets scroll-behavior: smooth; Next 16 wants it declared
       // here too so it can disable smooth scrolling during route transitions.
       data-scroll-behavior="smooth"
@@ -136,7 +145,12 @@ export default function RootLayout({
           toast raised just before a cross-group navigation was unmounted
           mid-sentence by the very navigation it was confirming. */}
       <body className="min-h-screen antialiased">
-        <ToastProvider>{children}</ToastProvider>
+        {/* Outside the toast stack so toasts can render translated copy. Ships
+            only the shared shell of the catalogue; each route group adds what
+            its own client components need (src/i18n/scopes.ts). */}
+        <ScopedIntlProvider scope="shell">
+          <ToastProvider>{children}</ToastProvider>
+        </ScopedIntlProvider>
       </body>
     </html>
   );

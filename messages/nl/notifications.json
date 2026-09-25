@@ -1,0 +1,113 @@
+{
+  "metadata": {
+    "notifications": {
+      "title": "Meldingen"
+    }
+  },
+  "loading": {
+    "title": "Meldingen",
+    "srLoading": "meldingen laden"
+  },
+  "bell": {
+    "label": "Meldingen",
+    "unreadLabel": "{count, plural, one {Meldingen, {count} ongelezen} other {Meldingen, {count} ongelezen}}"
+  },
+  "list": {
+    "title": "Meldingen",
+    "unread": "{count, plural, one {{count} ongelezen} other {{count} ongelezen}}",
+    "markAllRead": "Alles als gelezen markeren",
+    "livePaused": "Live-updates gepauzeerd. Vernieuw om het laatste te zien.",
+    "empty": "Je bent helemaal bij. Hier staat nog niets.",
+    "viewAll": "Alles bekijken"
+  },
+  "item": {
+    "unread": "Ongelezen"
+  },
+  "page": {
+    "title": "Meldingen",
+    "markAllRead": "Alles als gelezen markeren",
+    "emptyTitle": "Nog geen meldingen",
+    "emptyHint": "Activiteit van team, bestellingen en betalingen verschijnt hier.",
+    "loadError": "Meer meldingen laden is mislukt. Controleer je verbinding en probeer het opnieuw.",
+    "loading": "Laden",
+    "loadMore": "Meer laden"
+  },
+  "types": {
+    "team": "Team",
+    "order": "Bestelling",
+    "payment": "Betaling",
+    "stock": "Voorraad",
+    "system": "Systeem",
+    "security": "Beveiliging",
+    "policy": "Beleid"
+  },
+  "time": {
+    "justNow": "zojuist",
+    "minutesAgo": "{count, plural, one {{count} min geleden} other {{count} min geleden}}",
+    "hoursAgo": "{count, plural, one {{count} u geleden} other {{count} u geleden}}",
+    "daysAgo": "{count, plural, one {{count} d geleden} other {{count} d geleden}}"
+  },
+  "messages": {
+    "teamInvite": {
+      "title": "Je hebt een teamuitnodiging",
+      "body": "{role, select, owner {{store} heeft je uitgenodigd om lid te worden als eigenaar. Open Team en toegang om te accepteren.} editor {{store} heeft je uitgenodigd om lid te worden als bewerker. Open Team en toegang om te accepteren.} viewer {{store} heeft je uitgenodigd om lid te worden als lezer. Open Team en toegang om te accepteren.} other {{store} heeft je uitgenodigd voor hun team. Open Team en toegang om te accepteren.}}",
+      "bodyUnnamedStore": "{role, select, owner {Een SquareShare-winkel heeft je uitgenodigd om lid te worden als eigenaar. Open Team en toegang om te accepteren.} editor {Een SquareShare-winkel heeft je uitgenodigd om lid te worden als bewerker. Open Team en toegang om te accepteren.} viewer {Een SquareShare-winkel heeft je uitgenodigd om lid te worden als lezer. Open Team en toegang om te accepteren.} other {Een SquareShare-winkel heeft je uitgenodigd voor hun team. Open Team en toegang om te accepteren.}}"
+    },
+    "teamJoined": {
+      "title": "{name} is toegetreden tot je team",
+      "titleUnnamed": "Er is een nieuw lid toegetreden tot je team",
+      "body": "Deze persoon heeft nu toegang tot je winkel."
+    },
+    "security": {
+      "passwordChanged": {
+        "title": "Je wachtwoord is gewijzigd",
+        "body": "Het wachtwoord voor dit account is zojuist gewijzigd en andere apparaten zijn uitgelogd. Was jij dit niet? Stel dan meteen je wachtwoord opnieuw in."
+      },
+      "passwordReset": {
+        "title": "Je wachtwoord is gewijzigd",
+        "body": "Er is een herstellink gebruikt om een nieuw wachtwoord in te stellen, en andere apparaten zijn uitgelogd. Was jij dit niet? Stel het dan meteen opnieuw in."
+      },
+      "passwordSet": {
+        "title": "Er is een wachtwoord ingesteld voor je account",
+        "body": "Dit account kan nu inloggen met een wachtwoord, naast Google. Was jij dit niet? Stel het dan meteen opnieuw in."
+      },
+      "resetRequested": {
+        "title": "Er is een link aangevraagd om je wachtwoord opnieuw in te stellen",
+        "body": "Iemand heeft een link aangevraagd om een nieuw wachtwoord voor dit account in te stellen. Was jij dit niet? Negeer de e-mail dan en wijzig je wachtwoord."
+      },
+      "emailChangeRequested": {
+        "title": "E-mailwijziging aangevraagd",
+        "body": "Iemand heeft gevraagd om dit account naar een nieuw e-mailadres te verplaatsen. Dit gaat pas in zodra de link in die inbox is bevestigd. Was jij dit niet? Wijzig dan nu je wachtwoord."
+      },
+      "lockedOut": {
+        "title": "Iemand probeert in te loggen op je account",
+        "body": "Je wachtwoord was juist, maar daarna zijn er te veel foute tweestapscodes ingevoerd. Daarom is inloggen een paar minuten gepauzeerd. Ben jij dit niet? Dan kent iemand anders je wachtwoord: wijzig het nu."
+      },
+      "recoveryCodeUsed": {
+        "title": "Er is een herstelcode gebruikt om in te loggen",
+        "body": "Iemand is met een herstelcode ingelogd op je account. Daardoor gaat tweestapsverificatie uit en worden alle andere apparaten uitgelogd. Was jij dit? Stel tweestapsverificatie dan opnieuw in via Instellingen › Beveiliging. Was jij dit niet? Wijzig dan nu je wachtwoord."
+      },
+      "twoFactorEnabled": {
+        "title": "Tweestapsverificatie staat aan",
+        "body": "Om in te loggen op je account is nu een code uit je authenticator-app nodig, en alle andere apparaten zijn uitgelogd. Was jij dit niet? Wijzig dan je wachtwoord en neem contact op met support."
+      },
+      "factorAdded": {
+        "title": "Er is een authenticator-app toegevoegd",
+        "body": "Met “{name}” kun je nu inloggen op je account. Was jij dit niet? Verwijder de app dan via Instellingen › Beveiliging en wijzig je wachtwoord.",
+        "bodyUnnamed": "Met “Authenticator-app” kun je nu inloggen op je account. Was jij dit niet? Verwijder de app dan via Instellingen › Beveiliging en wijzig je wachtwoord."
+      },
+      "twoFactorDisabled": {
+        "title": "Tweestapsverificatie staat uit",
+        "body": "Je laatste authenticator-app is verwijderd, dus inloggen gaat nu alleen met je wachtwoord. Was jij dit niet? Wijzig dan je wachtwoord en zet tweestapsverificatie weer aan."
+      },
+      "factorRemoved": {
+        "title": "Er is een authenticator-app verwijderd",
+        "body": "Met “{name}” kun je niet meer inloggen op je account. Was jij dit niet? Wijzig dan nu je wachtwoord."
+      },
+      "recoveryCodesRegenerated": {
+        "title": "Er zijn nieuwe herstelcodes gemaakt",
+        "body": "Je oude herstelcodes werken niet meer. Was jij dit niet? Wijzig dan nu je wachtwoord."
+      }
+    }
+  }
+}

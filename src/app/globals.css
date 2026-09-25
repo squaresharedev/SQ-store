@@ -1097,6 +1097,39 @@ textarea {
   }
 }
 
+/* An empty list's examples (components/ui/AddShowcase) slide out from under the
+   add card once, on arrival, one to each side, so the eye lands on the card
+   first. Only a `from` frame: the rest pose is whatever the element's utilities
+   say, so the two can never disagree. They animate the individual
+   `translate`/`rotate` properties, which is what Tailwind v4's translate/rotate
+   utilities write (not `transform`). `backwards`, not `both`: once it ends it
+   lets go of those properties entirely, so the hover fan-out transitions them
+   normally. */
+@keyframes showcase-peek-left {
+  from {
+    translate: 40% 0;
+    rotate: 0deg;
+  }
+}
+@keyframes showcase-peek-right {
+  from {
+    translate: -40% 0;
+    rotate: 0deg;
+  }
+}
+.showcase-peek-left {
+  animation: showcase-peek-left var(--transition-duration-slow) var(--ease-entrance) 120ms backwards;
+}
+.showcase-peek-right {
+  animation: showcase-peek-right var(--transition-duration-slow) var(--ease-entrance) 120ms backwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .showcase-peek-left,
+  .showcase-peek-right {
+    animation: none;
+  }
+}
+
 /* Toasts. They arrive from the edge they are pinned to (the bottom) and leave
    the same way, so the motion always reads as "in from / out to" one place
    rather than as the stack rearranging itself. The exit is faster than the

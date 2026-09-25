@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, render as rtlRender, screen } from "@testing-library/react";
+import { cleanup, render as rtlRender, screen } from "../setup/render";
 import type { ReactElement } from "react";
 import userEvent from "@testing-library/user-event";
 import { ToastProvider } from "@/components/ui/Toast";

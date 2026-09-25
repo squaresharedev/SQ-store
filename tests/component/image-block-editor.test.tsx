@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
+import { render, screen, cleanup } from "../setup/render";
 import userEvent from "@testing-library/user-event";
 import { IMAGE_ALT_MAX, type ImageBlock } from "@/types/storefront";
 import { ImageBlockEditor } from "@/components/storefront/ImageBlockEditor";

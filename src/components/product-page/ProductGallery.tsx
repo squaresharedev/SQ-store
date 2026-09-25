@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, type CSSProperties } from "react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import type { ProductPageImage } from "@/types/product";
 import type { ImageFit } from "@/types/storefront";
@@ -33,6 +34,7 @@ export function ProductGallery({
   radius: number;
   ink: string;
 }) {
+  const t = useTranslations("ProductPage.gallery");
   const { selectedIds } = useOptionSelection();
   // A stable identity for "which options are chosen", so the memo and the
   // reset below compare by value rather than by Set identity.
@@ -71,7 +73,7 @@ export function ProductGallery({
         style={frameStyle}
         data-product-gallery="empty"
       >
-        No photo yet
+        {t("noPhoto")}
       </div>
     );
   }
@@ -96,7 +98,7 @@ export function ProductGallery({
       {visible.length > 1 && (
         <div
           role="group"
-          aria-label={`Photos of ${title}`}
+          aria-label={t("photosOf", { title })}
           className="flex gap-2 overflow-x-auto pb-1"
         >
           {visible.map((image, i) => {
@@ -106,7 +108,7 @@ export function ProductGallery({
                 key={image.url}
                 type="button"
                 onClick={() => setIndex(i)}
-                aria-label={`Photo ${i + 1} of ${visible.length}`}
+                aria-label={t("photo", { current: i + 1, total: visible.length })}
                 aria-current={active ? "true" : undefined}
                 className={cn(
                   "size-16 shrink-0 overflow-hidden transition-opacity duration-base ease-standard focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2",

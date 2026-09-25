@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { helpTextClass } from "@/components/ui/control-styles";
 import { ToastProvider } from "@/components/ui/Toast";
 import type { Product } from "@/types/product";
@@ -158,6 +159,7 @@ export function PanelsGallery() {
   // settings are gated on the page being on screen, and both halves of that
   // gate have to be readable side by side to be worth anything.
   const [pageOpen, setPageOpen] = useState(false);
+  const tKey = useTranslations();
 
   // The editor's search index over the SAME fixtures the inspectors below use,
   // so the field can be exercised on all three of the things it finds:
@@ -165,10 +167,10 @@ export function PanelsGallery() {
   // state here; the gallery holds four blocks that never move.
   const searchEntries = useMemo(
     () =>
-      editorEntries([PRODUCT_BLOCK, text, shape, image], PRODUCTS_BY_ID, {
+      editorEntries([PRODUCT_BLOCK, text, shape, image], PRODUCTS_BY_ID, tKey, {
         pageOpen,
       }),
-    [text, shape, image, pageOpen],
+    [text, shape, image, pageOpen, tKey],
   );
   // Standing in for the editor, which selects the block or opens the drawer.
   // Shown rather than performed: there is no canvas here to select on.

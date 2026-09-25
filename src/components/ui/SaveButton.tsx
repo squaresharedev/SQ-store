@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { AnimatedCheck } from "@/components/ui/animated-check";
 import { Button, type ButtonProps } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -22,7 +23,7 @@ const RESULT_MS = 2500;
  * it flips solid green with a check ("Saved") when the last submit succeeded,
  * or solid red with a cross when it failed, then reverts after a couple of
  * seconds. The button is the LOCAL confirmation, right where the click landed;
- * the toast raised alongside it (see useActionToast) carries the words. Forms
+ * the toast raised alongside it (see useActionStateToast) carries the words. Forms
  * never also print an inline "saved" line — that was the third copy of the
  * same news.
  *
@@ -32,10 +33,10 @@ const RESULT_MS = 2500;
 export function SaveButton({
   pending,
   state,
-  pendingLabel = "Saving…",
-  savedLabel = "Saved",
+  pendingLabel,
+  savedLabel,
   failedLabel,
-  children = "Save",
+  children,
   className,
   ...props
 }: ButtonProps & {
@@ -52,6 +53,8 @@ export function SaveButton({
   // the plain button. A fresh submit returns a new `state` object (even with
   // identical text), so it differs from the last-dismissed one and shows again.
   // Only the timer mutates state — keeps this off React's cascading-render path.
+  const t = useTranslations("Common.actions");
+  const label = children === undefined ? t("save") : children;
   const [dismissed, setDismissed] = React.useState<SaveResult | null>(
     null,
   );
@@ -71,7 +74,7 @@ export function SaveButton({
     return (
       <Button type="submit" disabled className={className} {...props}>
         <Spinner />
-        {pendingLabel}
+        {pendingLabel ?? t("saving")}
       </Button>
     );
   }
@@ -90,7 +93,7 @@ export function SaveButton({
         {...props}
       >
         <AnimatedCheck className="size-4" />
-        {savedLabel}
+        {savedLabel ?? t("saved")}
       </Button>
     );
   }
@@ -106,14 +109,14 @@ export function SaveButton({
         {...props}
       >
         <X aria-hidden className="size-4" />
-        {failedLabel ?? children}
+        {failedLabel ?? label}
       </Button>
     );
   }
 
   return (
     <Button type="submit" className={className} {...props}>
-      {children}
+      {label}
     </Button>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations, useLocale } from "next-intl";
 import { PieChart } from "@/components/charts";
 import type { ChannelSlice } from "@/lib/analytics/types";
 import { moneyExact } from "@/components/analytics/chart-format";
@@ -15,10 +16,6 @@ import { TONE } from "@/components/analytics/palette";
 // nothing to is noise, and the card's empty state already covers the case
 // where there is no revenue at all.
 
-const CHANNEL_LABELS: Record<ChannelSlice["channel"], string> = {
-  embed: "Embed",
-  marketplace: "Marketplace",
-};
 
 /** Colour is PINNED per channel rather than taken in slice order, so a channel
  *  keeps its identity when the other one is empty and the ring re-sorts. Both
@@ -36,10 +33,12 @@ export function ChannelSplitChart({
   channels: ChannelSlice[];
   currency: string;
 }) {
+  const t = useTranslations("Analytics");
+  const locale = useLocale();
   const items = channels
     .filter((slice) => slice.revenueCents > 0)
     .map((slice) => ({
-      label: CHANNEL_LABELS[slice.channel],
+      label: t(`channels.${slice.channel}`),
       value: slice.revenueCents,
       colorIndex: CHANNEL_COLOR_INDEX[slice.channel],
     }));
@@ -48,8 +47,8 @@ export function ChannelSplitChart({
     <div className="flex items-center" style={{ minHeight: CHART_HEIGHT }}>
       <PieChart
         items={items}
-        valueFormatter={moneyExact(currency)}
-        ariaLabel="Paid revenue by channel"
+        valueFormatter={moneyExact(currency, locale)}
+        ariaLabel={t("sales.channels.ariaLabel")}
         className="w-full"
       />
     </div>

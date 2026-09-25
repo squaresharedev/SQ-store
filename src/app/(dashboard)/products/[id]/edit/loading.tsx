@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { ProductFormSkeleton } from "@/components/products/ProductFormSkeleton";
 
 /**
@@ -5,5 +6,6 @@ import { ProductFormSkeleton } from "@/components/products/ProductFormSkeleton";
  * nested route), so editing a product flashed the products LIST skeleton.
  */
 export default function EditProductLoading() {
-  return <ProductFormSkeleton title="Edit product" />;
+  const t = useTranslations("Products.page.edit");
+  return <ProductFormSkeleton title={t("title")} />;
 }

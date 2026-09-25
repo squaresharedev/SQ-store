@@ -1,4 +1,5 @@
 import { isDisposableEmailDomain } from "@/lib/validation/disposable-email";
+import type { ValidationKey } from "@/lib/validation/messages";
 
 /**
  * "Is this address plausibly a real one someone reads?" — the checks that cost
@@ -133,19 +134,14 @@ export function isPlaceholderEmail(email: string): boolean {
 }
 
 /**
- * The one sync verdict for an address a real person is expected to reach: null
- * to accept, or the message to show. `label` names the field ("Your contact
- * email"), so the same function speaks for sign-up and for seller details.
+ * The one sync verdict for a seller's published contact address: null to
+ * accept, or the key of the message to show.
  *
  * Assumes the FORMAT has already been checked — every caller runs
  * `emailAddress` first, and a malformed string is that check's to reject.
  */
-export function emailQualityProblem(email: string, label: string): string | null {
-  if (isPlaceholderEmail(email)) {
-    return `${label} looks like a placeholder. Use an address you actually read.`;
-  }
-  if (isDisposableEmailDomain(email)) {
-    return `${label} is at a temporary-mail provider. Use a permanent address.`;
-  }
+export function emailQualityProblem(email: string): ValidationKey | null {
+  if (isPlaceholderEmail(email)) return "Validation.emailQuality.placeholder";
+  if (isDisposableEmailDomain(email)) return "Validation.emailQuality.disposable";
   return null;
 }

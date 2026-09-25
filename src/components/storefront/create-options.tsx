@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { LucideIcon } from "lucide-react";
 import {
   BookOpen,
@@ -47,62 +48,29 @@ import {
 
 // ── Categories ──────────────────────────────────────────────────────────
 
-type CategoryMeta = {
-  label: string;
-  icon: LucideIcon;
-  /** Seeds the name field's placeholder once this category is chosen, so the
-   *  last step opens with a suggestion instead of an empty box. */
-  namePlaceholder: string;
+const CATEGORY_ICONS: Record<StorefrontCategory, LucideIcon> = {
+  fashion: Shirt,
+  art: Palette,
+  jewellery: Gem,
+  handmade: Scissors,
+  home: Lamp,
+  beauty: Sparkles,
+  food: Coffee,
+  music: Music,
+  photography: Camera,
+  books: BookOpen,
+  digital: FileDown,
+  vintage: Clock,
+  other: Shapes,
 };
-
-const CATEGORY_META: Record<StorefrontCategory, CategoryMeta> = {
-  fashion: { label: "Clothing", icon: Shirt, namePlaceholder: "My clothing shop" },
-  art: { label: "Art & prints", icon: Palette, namePlaceholder: "My art shop" },
-  jewellery: { label: "Jewellery", icon: Gem, namePlaceholder: "My jewellery shop" },
-  handmade: { label: "Handmade", icon: Scissors, namePlaceholder: "My handmade shop" },
-  home: { label: "Home & living", icon: Lamp, namePlaceholder: "My home shop" },
-  beauty: { label: "Beauty", icon: Sparkles, namePlaceholder: "My beauty shop" },
-  food: { label: "Food & drink", icon: Coffee, namePlaceholder: "My food shop" },
-  music: { label: "Music", icon: Music, namePlaceholder: "My music shop" },
-  photography: { label: "Photography", icon: Camera, namePlaceholder: "My photo shop" },
-  books: { label: "Books & zines", icon: BookOpen, namePlaceholder: "My book shop" },
-  digital: { label: "Digital goods", icon: FileDown, namePlaceholder: "My digital shop" },
-  vintage: { label: "Vintage", icon: Clock, namePlaceholder: "My vintage shop" },
-  other: { label: "Something else", icon: Shapes, namePlaceholder: "My shop" },
-};
-
-/** The placeholder the name step opens with, given what they picked. */
-export function namePlaceholderFor(category: StorefrontCategory | null): string {
-  return category ? CATEGORY_META[category].namePlaceholder : "My storefront";
-}
 
 // ── Fulfilment ──────────────────────────────────────────────────────────
 
-const FULFILMENT_META: Record<
-  StorefrontFulfilment,
-  { label: string; hint: string; icon: LucideIcon }
-> = {
-  physical: { label: "I ship it", hint: "Physical products", icon: Package },
-  digital: { label: "They download it", hint: "Files, presets, music", icon: Download },
-  services: { label: "They book me", hint: "Sessions, commissions", icon: CalendarClock },
-  mixed: { label: "A bit of each", hint: "More than one of these", icon: Layers },
-};
-
-// ── Vibes ───────────────────────────────────────────────────────────────
-
-const VIBE_LABELS: Record<StorefrontVibe, string> = {
-  minimal: "Minimal",
-  classic: "Classic",
-  bold: "Bold",
-};
-
-/** What the look does to a tile, which is what actually separates the three.
- *  Kept in the same words the editor's Looks row uses (LooksSection), so the
- *  seller meets one description of each look rather than two. */
-const VIBE_HINTS: Record<StorefrontVibe, string> = {
-  minimal: "Name and price on hover",
-  classic: "Name and price always shown",
-  bold: "Price always, name on hover",
+const FULFILMENT_ICONS: Record<StorefrontFulfilment, LucideIcon> = {
+  physical: Package,
+  digital: Download,
+  services: CalendarClock,
+  mixed: Layers,
 };
 
 /**
@@ -217,10 +185,11 @@ export function CategoryGrid({
   value: StorefrontCategory | null;
   onChange: (value: StorefrontCategory) => void;
 }) {
+  const t = useTranslations("Storefront.createOptions");
   return (
     <div
       role="group"
-      aria-label="What you sell"
+      aria-label={t("categoryGroupLabel")}
       className="grid grid-cols-2 gap-2 sm:grid-cols-3"
     >
       {STOREFRONT_CATEGORIES.map((category) => (
@@ -228,9 +197,9 @@ export function CategoryGrid({
           key={category}
           selected={value === category}
           onSelect={() => onChange(category)}
-          label={CATEGORY_META[category].label}
+          label={t(`category.${category}`)}
         >
-          <TileIcon icon={CATEGORY_META[category].icon} />
+          <TileIcon icon={CATEGORY_ICONS[category]} />
         </ChoiceTile>
       ))}
     </div>
@@ -244,10 +213,11 @@ export function FulfilmentGrid({
   value: StorefrontFulfilment | null;
   onChange: (value: StorefrontFulfilment) => void;
 }) {
+  const t = useTranslations("Storefront.createOptions");
   return (
     <div
       role="group"
-      aria-label="How buyers get it"
+      aria-label={t("fulfilmentGroupLabel")}
       className="grid grid-cols-2 gap-2"
     >
       {STOREFRONT_FULFILMENTS.map((fulfilment) => (
@@ -255,10 +225,10 @@ export function FulfilmentGrid({
           key={fulfilment}
           selected={value === fulfilment}
           onSelect={() => onChange(fulfilment)}
-          label={FULFILMENT_META[fulfilment].label}
-          hint={FULFILMENT_META[fulfilment].hint}
+          label={t(`fulfilment.${fulfilment}`)}
+          hint={t(`fulfilmentHint.${fulfilment}`)}
         >
-          <TileIcon icon={FULFILMENT_META[fulfilment].icon} />
+          <TileIcon icon={FULFILMENT_ICONS[fulfilment]} />
         </ChoiceTile>
       ))}
     </div>
@@ -272,10 +242,11 @@ export function VibeGrid({
   value: StorefrontVibe | null;
   onChange: (value: StorefrontVibe) => void;
 }) {
+  const t = useTranslations("Storefront.createOptions");
   return (
     <div
       role="group"
-      aria-label="The look you want"
+      aria-label={t("vibeGroupLabel")}
       // One per row on a phone: with three looks the old two-across grid left
       // a widow, and the hint under each name needs the width to stay one line.
       className="grid grid-cols-1 gap-2 sm:grid-cols-3"
@@ -285,8 +256,8 @@ export function VibeGrid({
           key={vibe}
           selected={value === vibe}
           onSelect={() => onChange(vibe)}
-          label={VIBE_LABELS[vibe]}
-          hint={VIBE_HINTS[vibe]}
+          label={t(`vibe.${vibe}`)}
+          hint={t(`vibeHint.${vibe}`)}
           // Set in its own typeface, so the label doubles as a specimen.
           labelClassName={FONT_CLASSES[VIBE_PRESETS[vibe].font]}
         >

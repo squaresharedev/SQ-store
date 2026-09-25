@@ -11,6 +11,7 @@ import {
   settingIdFromHref,
 } from "@/lib/storefront/setting-ref";
 import { searchLocalRegistry } from "@/lib/search/registry";
+import { english } from "../setup/translate";
 
 /**
  * The settings catalogue is the contract between three things that must agree:
@@ -104,14 +105,14 @@ describe("universal search", () => {
   const owner = "owner" as const;
 
   it("finds a storefront setting by a phrase a seller would use", () => {
-    const titles = searchLocalRegistry("move the price", { role: owner }).flatMap((group) =>
+    const titles = searchLocalRegistry("move the price", { role: owner, t: english }).flatMap((group) =>
       group.results.map((result) => result.title),
     );
     expect(titles).toContain("Price position");
   });
 
   it("carries a link the designer can parse back to the same setting", () => {
-    const result = searchLocalRegistry("title position", { role: owner })
+    const result = searchLocalRegistry("title position", { role: owner, t: english })
       .flatMap((group) => group.results)
       .find((r) => r.title === "Title position");
     expect(result).toBeDefined();
@@ -119,14 +120,14 @@ describe("universal search", () => {
   });
 
   it("says where the setting lives, so a result is not just a word", () => {
-    const result = searchLocalRegistry("roundness", { role: owner })
+    const result = searchLocalRegistry("roundness", { role: owner, t: english })
       .flatMap((group) => group.results)
       .find((r) => r.title === "Corner roundness");
     expect(result?.subtitle).toBe("Storefront / Product cards");
   });
 
   it("hides every storefront setting from a role that cannot edit one", () => {
-    const titles = searchLocalRegistry("price position", { role: "viewer" }).flatMap((group) =>
+    const titles = searchLocalRegistry("price position", { role: "viewer", t: english }).flatMap((group) =>
       group.results.map((result) => result.title),
     );
     expect(titles).not.toContain("Price position");

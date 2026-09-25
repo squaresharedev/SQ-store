@@ -1,6 +1,8 @@
 "use client";
 
 import { Library, X } from "lucide-react";
+import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import {
   focusRingClass,
@@ -15,11 +17,6 @@ import { UploadsPanel, type StorefrontUpload } from "./UploadsPanel";
 /** The two halves of the library: your own artwork, or the built-in shapes. */
 export const LIBRARY_TABS = ["uploads", "shapes"] as const;
 export type LibraryTab = (typeof LIBRARY_TABS)[number];
-
-const TAB_OPTIONS: readonly { value: LibraryTab; label: string }[] = [
-  { value: "uploads", label: "Uploads" },
-  { value: "shapes", label: "Shapes" },
-];
 
 /**
  * "Things you can put on the canvas", as the left panel's second mode.
@@ -58,6 +55,16 @@ export function LibraryPanel({
   onAddShape: (kind: ShapeKind) => void;
   onClose: () => void;
 }) {
+  const t = useTranslations("Storefront.library");
+
+  const tabOptions: readonly { value: LibraryTab; label: string }[] = useMemo(
+    () => [
+      { value: "uploads" as const, label: t("tabUploads") },
+      { value: "shapes" as const, label: t("tabShapes") },
+    ],
+    [t],
+  );
+
   return (
     <div>
       {/* Header: the same shape as ColorPanel's, deliberately. */}
@@ -70,17 +77,17 @@ export function LibraryPanel({
           />
           <div className="min-w-0">
             <h2 className="truncate text-sm font-semibold text-foreground">
-              Library
+              {t("title")}
             </h2>
             <p className={helpTextClass}>
-              {canAddBlocks ? "Pick one to add it" : "Canvas is full"}
+              {canAddBlocks ? t("hint") : t("canvasFull")}
             </p>
           </div>
         </div>
         <button
           type="button"
           onClick={onClose}
-          aria-label="Close library panel"
+          aria-label={t("close")}
           className={cn(
             "inline-flex size-7 shrink-0 items-center justify-center rounded-none text-muted-foreground",
             "hover:bg-accent hover:text-foreground",
@@ -95,9 +102,9 @@ export function LibraryPanel({
       <PanelTabs
         id="library"
         value={tab}
-        options={TAB_OPTIONS}
+        options={tabOptions}
         onChange={onTabChange}
-        ariaLabel="Library"
+        ariaLabel={t("title")}
       />
 
       <div {...panelProps("library", tab)}>

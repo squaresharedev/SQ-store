@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, cleanup, fireEvent } from "@testing-library/react";
+import { renderWithoutToasts, screen, cleanup, fireEvent } from "../setup/render";
 import type { Product } from "@/types/product";
 import { blockKey, type StorefrontBlock } from "@/types/storefront";
 import { SelectionToolbar } from "@/components/storefront/SelectionToolbar";
@@ -106,7 +106,7 @@ function renderToolbar(
   const onOpenSetting = vi.fn();
   const onDuplicate = vi.fn();
   const onRemove = vi.fn();
-  const view = render(
+  const view = renderWithoutToasts(
     <SelectionToolbar
       blocks={blocks}
       productsById={productsById}

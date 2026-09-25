@@ -7,6 +7,7 @@ import {
   singleLineText,
   uuidField,
 } from "@/lib/validation/inputs";
+import { issueKey } from "@/lib/validation/messages";
 import {
   CURRENCIES,
   DIMENSION_UNITS,
@@ -182,7 +183,7 @@ export function isAllowedContentType(
 }
 
 // A user-supplied file NAME (the stored key is server-minted separately).
-const filenameSchema = singleLineText({ label: "A filename", max: 200 });
+const filenameSchema = singleLineText({ field: "filename", max: 200 });
 
 export const presignRequestSchema = z.discriminatedUnion("kind", [
   z.object({
@@ -242,8 +243,8 @@ export const NEW_GALLERY_KEYS_PER_SAVE_MAX = GALLERY_MAX;
 export const galleryImageSchema = z.strictObject({
   // Shape-checked here; ownership is checked in the action, like imageKey.
   key: z.string().max(600),
-  alt: singleLineText({ label: "Alt text", max: GALLERY_ALT_MAX, min: 0 }),
-  optionId: uuidField("That option").optional(),
+  alt: singleLineText({ field: "galleryAlt", max: GALLERY_ALT_MAX, min: 0 }),
+  optionId: uuidField("option").optional(),
 });
 
 /** A physical measure: non-negative, sane upper bound, no NaN or infinities
@@ -268,8 +269,8 @@ export const weightSchema = z.strictObject({
  *  option's (see OPTION_SPEC_VALUE_MAX), so the value cap is a parameter. */
 function specSchema(valueMax: number) {
   return z.strictObject({
-    label: singleLineText({ label: "A specification name", max: 40 }),
-    value: singleLineText({ label: "A specification value", max: valueMax }),
+    label: singleLineText({ field: "specName", max: 40 }),
+    value: singleLineText({ field: "specValue", max: valueMax }),
   });
 }
 
@@ -283,14 +284,14 @@ export const productOptionDetailsSchema = z.strictObject({
   weight: weightSchema.optional(),
   specs: z
     .array(specSchema(OPTION_SPEC_VALUE_MAX))
-    .max(OPTION_SPECS_MAX, `A version can have up to ${OPTION_SPECS_MAX} of its own specifications.`)
+    .max(OPTION_SPECS_MAX, issueKey("Validation.product.optionSpecsTooMany"))
     .optional(),
 });
 
 export const productOptionSchema = z.strictObject({
-  id: uuidField("That option"),
-  name: singleLineText({ label: "An option name", max: OPTION_NAME_MAX }),
-  swatch: hexColor("Swatch colours").optional(),
+  id: uuidField("option"),
+  name: singleLineText({ field: "optionName", max: OPTION_NAME_MAX }),
+  swatch: hexColor("swatchColours").optional(),
   available: z.boolean(),
   details: productOptionDetailsSchema.optional(),
 });
@@ -301,13 +302,13 @@ export const productOptionSchema = z.strictObject({
  * never produces one.
  */
 export const optionGroupSchema = z.strictObject({
-  id: uuidField("That option group"),
-  name: singleLineText({ label: "An option group name", max: OPTION_GROUP_NAME_MAX }),
+  id: uuidField("optionGroup"),
+  name: singleLineText({ field: "optionGroupName", max: OPTION_GROUP_NAME_MAX }),
   display: z.enum(OPTION_DISPLAYS),
   options: z
     .array(productOptionSchema)
-    .min(1, "Give every option group at least one option, or remove the group.")
-    .max(OPTIONS_PER_GROUP_MAX, `An option group can have up to ${OPTIONS_PER_GROUP_MAX} options.`),
+    .min(1, issueKey("Validation.product.optionGroupEmpty"))
+    .max(OPTIONS_PER_GROUP_MAX, issueKey("Validation.product.optionGroupTooManyOptions")),
 });
 
 /** The structural minimum both the parsed shape and the app type satisfy, so
@@ -346,43 +347,43 @@ export const NEW_DOCUMENT_KEYS_PER_SAVE_MAX = DOCUMENTS_MAX;
  *  (against the uploader) is checked in the action, like digitalFileKey. */
 export const documentSchema = z.strictObject({
   key: z.string().max(600),
-  label: singleLineText({ label: "A document name", max: DOCUMENT_LABEL_MAX }),
+  label: singleLineText({ field: "documentName", max: DOCUMENT_LABEL_MAX }),
 });
 
 export const productDetailsSchema = z.strictObject({
   dimensions: dimensionsSchema.optional(),
   weight: weightSchema.optional(),
-  materials: multiLineText({ label: "Materials", max: 300 }).optional(),
-  care: multiLineText({ label: "Care instructions", max: 1000 }).optional(),
+  materials: multiLineText({ field: "materials", max: 300 }).optional(),
+  care: multiLineText({ field: "care", max: 1000 }).optional(),
   included: z
-    .array(singleLineText({ label: "An included item", max: 120 }))
-    .max(INCLUDED_MAX, `List up to ${INCLUDED_MAX} included items.`)
+    .array(singleLineText({ field: "includedItem", max: 120 }))
+    .max(INCLUDED_MAX, issueKey("Validation.product.includedTooMany"))
     .optional(),
   specs: z
     .array(specSchema(200))
-    .max(SPECS_MAX, `List up to ${SPECS_MAX} specifications.`)
+    .max(SPECS_MAX, issueKey("Validation.product.specsTooMany"))
     .optional(),
-  origin: singleLineText({ label: "Country of origin", max: 60 }).optional(),
+  origin: singleLineText({ field: "origin", max: 60 }).optional(),
   safety: z
     .strictObject({
-      manufacturerName: singleLineText({ label: "The manufacturer", max: 120 }),
+      manufacturerName: singleLineText({ field: "manufacturerName", max: 120 }),
       manufacturerAddress: multiLineText({
-        label: "The manufacturer's address",
+        field: "manufacturerAddress",
         max: 300,
         min: 1,
       }),
-      manufacturerEmail: emailAddress("The manufacturer's email"),
+      manufacturerEmail: emailAddress("manufacturerEmail"),
       responsibleName: singleLineText({
-        label: "The EU responsible person",
+        field: "responsibleName",
         max: 120,
       }).optional(),
       responsibleAddress: multiLineText({
-        label: "The EU responsible person's address",
+        field: "responsibleAddress",
         max: 300,
       }).optional(),
-      responsibleEmail: emailAddress("The EU responsible person's email").optional(),
-      identifier: singleLineText({ label: "The type, batch or serial", max: 80 }).optional(),
-      warnings: multiLineText({ label: "Warnings", max: 2000 }).optional(),
+      responsibleEmail: emailAddress("responsibleEmail").optional(),
+      identifier: singleLineText({ field: "safetyIdentifier", max: 80 }).optional(),
+      warnings: multiLineText({ field: "warnings", max: 2000 }).optional(),
     })
     .optional(),
 });
@@ -400,9 +401,9 @@ export const purchaseUrlSchema = z
   .url({
     protocol: /^https$/,
     hostname: z.regexes.domain,
-    error: "The purchase link must be a full https:// address.",
+    error: issueKey("Validation.product.purchaseLinkFormat"),
   })
-  .max(PURCHASE_URL_MAX, `The purchase link must be ${PURCHASE_URL_MAX} characters or fewer.`)
+  .max(PURCHASE_URL_MAX, issueKey("Validation.product.purchaseLinkTooLong"))
   .refine(
     (value) => {
       // Refinements still run after a failed format check, so a string that
@@ -414,7 +415,7 @@ export const purchaseUrlSchema = z
         return false;
       }
     },
-    { error: "The purchase link cannot contain a username or password." },
+    { error: issueKey("Validation.product.purchaseLinkCredentials") },
   );
 
 /**
@@ -426,9 +427,9 @@ export const purchaseUrlSchema = z
  */
 export const productWriteSchema = z
   .object({
-    title: singleLineText({ label: "A product title", max: 200 }),
-    description: multiLineText({ label: "A product description", max: 5000 }),
-    priceCents: boundedInt({ label: "Price", min: 1, max: PRICE_CENTS_MAX }),
+    title: singleLineText({ field: "productTitle", max: 200 }),
+    description: multiLineText({ field: "productDescription", max: 5000 }),
+    priceCents: boundedInt({ field: "price", min: 1, max: PRICE_CENTS_MAX }),
     currency: z.enum(CURRENCIES),
     status: z.enum(PRODUCT_STATUSES),
     imageKey: z.string().max(600).nullish(),
@@ -445,7 +446,7 @@ export const productWriteSchema = z
     // shelf. Absent leaves the stored value alone (MAX_PER_ORDER_DEFAULT on a
     // new row, from the column default).
     maxPerOrder: boundedInt({
-      label: "The maximum per order",
+      field: "maxPerOrder",
       min: 1,
       max: PURCHASE_QUANTITY_MAX,
     }).optional(),
@@ -453,16 +454,16 @@ export const productWriteSchema = z
     // patch), so an empty array clears; absent leaves the stored value alone.
     gallery: z
       .array(galleryImageSchema)
-      .max(GALLERY_MAX, `A product can have up to ${GALLERY_MAX} extra photos.`)
+      .max(GALLERY_MAX, issueKey("Validation.product.galleryTooMany"))
       .optional(),
     optionGroups: z
       .array(optionGroupSchema)
-      .max(OPTION_GROUPS_MAX, `A product can have up to ${OPTION_GROUPS_MAX} option groups.`)
+      .max(OPTION_GROUPS_MAX, issueKey("Validation.product.optionGroupsTooMany"))
       .optional(),
     details: productDetailsSchema.optional(),
     documents: z
       .array(documentSchema)
-      .max(DOCUMENTS_MAX, `A product can have up to ${DOCUMENTS_MAX} documents.`)
+      .max(DOCUMENTS_MAX, issueKey("Validation.product.documentsTooMany"))
       .optional(),
     purchaseUrl: purchaseUrlSchema.nullish(),
     // Which of the storefront's shipping profiles this product ships under.
@@ -472,19 +473,19 @@ export const productWriteSchema = z
     // storefront, so there is no single list to check against, and an id that
     // resolves nowhere falls back to the store default by design (see
     // lib/storefront/shipping.ts).
-    shippingProfileId: uuidField("That shipping profile").nullish(),
+    shippingProfileId: uuidField("shippingProfile").nullish(),
   })
   // Mirrors the DB constraint: tracking without a concrete quantity is invalid.
   .refine(
     (data) => data.trackStock !== true || typeof data.stockQuantity === "number",
-    { error: "Set how many are in stock.", path: ["stockQuantity"] },
+    { error: issueKey("Validation.product.stockRequired"), path: ["stockQuantity"] },
   )
   // EVERY id in the option tree is unique, group ids and option ids alike and
   // across groups, not merely within one. A photo tie and the page's `?o=`
   // parameter name an option id on its own with no group beside it, so a
   // repeated id would make "which option is this" unanswerable.
   .refine((data) => !data.optionGroups || uniqueOptionTreeIds(data.optionGroups), {
-    error: "Each option can only be listed once.",
+    error: issueKey("Validation.product.optionDuplicate"),
     path: ["optionGroups"],
   })
   .refine(
@@ -493,7 +494,8 @@ export const productWriteSchema = z
       data.optionGroups.reduce((total, group) => total + group.options.length, 0) <=
         OPTIONS_TOTAL_MAX,
     {
-      error: `A product can have up to ${OPTIONS_TOTAL_MAX} options in total.`,
+      error: issueKey("Validation.product.optionsTotalTooMany"),
+      params: { maximum: OPTIONS_TOTAL_MAX },
       path: ["optionGroups"],
     },
   )
@@ -506,7 +508,7 @@ export const productWriteSchema = z
       const ids = collectOptionIds(data.optionGroups);
       return data.gallery.every((image) => !image.optionId || ids.has(image.optionId));
     },
-    { error: "A photo points at an option that no longer exists.", path: ["gallery"] },
+    { error: issueKey("Validation.product.galleryStaleOption"), path: ["gallery"] },
   );
 export type ProductWriteInput = z.infer<typeof productWriteSchema>;
 

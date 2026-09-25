@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { Calendar as CalendarIcon } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import type { Locale } from "@/i18n/locales";
 import { cn } from "@/lib/utils";
 import { fieldBaseClass, labelClass, primaryButtonClass } from "./control-styles";
 import { Popover } from "./Popover";
@@ -37,11 +39,11 @@ type DatePickerProps =
   | ({ mode: "single"; value: string | null; onChange: (value: string | null) => void } & CommonProps)
   | ({ mode: "range"; value: DateRangeValue; onChange: (value: DateRangeValue) => void } & CommonProps);
 
-function rangeLabel(from: Date | null, to: Date | null): string {
+function rangeLabel(from: Date | null, to: Date | null, locale: Locale): string {
   if (!from && !to) return "";
-  if (from && !to) return `${formatDisplayDate(from)} – …`;
-  if (!from && to) return `… – ${formatDisplayDate(to)}`;
-  return `${formatDisplayDate(from!)} – ${formatDisplayDate(to!)}`;
+  if (from && !to) return `${formatDisplayDate(from, locale)} – …`;
+  if (!from && to) return `… – ${formatDisplayDate(to, locale)}`;
+  return `${formatDisplayDate(from!, locale)} – ${formatDisplayDate(to!, locale)}`;
 }
 
 /**
@@ -53,6 +55,8 @@ function rangeLabel(from: Date | null, to: Date | null): string {
  */
 export function DatePicker(props: DatePickerProps) {
   const { mode, label, placeholder, min, max, id, triggerClassName } = props;
+  const t = useTranslations("Common");
+  const locale = useLocale();
   const [open, setOpen] = useState(false);
 
   const minDate = fromISODate(min);
@@ -91,9 +95,9 @@ export function DatePicker(props: DatePickerProps) {
   const display =
     mode === "single"
       ? selected.from
-        ? formatDisplayDate(selected.from)
+        ? formatDisplayDate(selected.from, locale)
         : ""
-      : rangeLabel(selected.from, selected.to);
+      : rangeLabel(selected.from, selected.to, locale);
 
   return (
     <div className="flex w-full flex-col gap-1.5">
@@ -108,7 +112,7 @@ export function DatePicker(props: DatePickerProps) {
       <Popover
         open={open}
         onOpenChange={setOpen}
-        label={mode === "single" ? "Choose date" : "Choose date range"}
+        label={mode === "single" ? t("datePicker.chooseDate") : t("datePicker.chooseDateRange")}
         panelClassName="sm:w-[19rem]"
         trigger={
           <button
@@ -124,7 +128,7 @@ export function DatePicker(props: DatePickerProps) {
             )}
           >
             <span className={cn("truncate", !display && "text-muted-foreground")}>
-              {display || placeholder || "Select date"}
+              {display || placeholder || t("datePicker.selectDate")}
             </span>
             <CalendarIcon
               className="size-4 shrink-0 text-muted-foreground"
@@ -148,7 +152,7 @@ export function DatePicker(props: DatePickerProps) {
               onClick={() => setOpen(false)}
               className={cn(primaryButtonClass, "h-9 py-0")}
             >
-              Done
+              {t("actions.done")}
             </button>
           </div>
         )}

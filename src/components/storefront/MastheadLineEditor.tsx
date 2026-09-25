@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useLayoutEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 import type { CSSProperties } from "react";
 import type { HeaderLine } from "@/types/storefront";
 import {
@@ -56,6 +57,7 @@ export function MastheadLineEditor({
   /** Escape, or focus leaving the line. */
   onDone: () => void;
 }) {
+  const t = useTranslations("Storefront.masthead");
   const ref = useRef<HTMLElement | null>(null);
   // A callback ref, so the one ref serves whichever tag the line renders as.
   const attach = useCallback((node: HTMLElement | null) => {
@@ -194,7 +196,7 @@ export function MastheadLineEditor({
     suppressContentEditableWarning: true,
     role: "textbox",
     "aria-multiline": multiline,
-    "aria-label": line === "name" ? "Store name" : "Store bio",
+    "aria-label": line === "name" ? t("editorNameAriaLabel") : t("editorBioAriaLabel"),
     spellCheck: false,
     onInput: syncFromDom,
     onKeyDown: handleKeyDown,

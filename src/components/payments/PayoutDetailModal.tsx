@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations, useLocale } from "next-intl";
 import { Modal } from "@/components/ui/modal";
 import { formatCents } from "@/lib/format/money";
 import { formatOrderDate, formatOrderDateTime } from "@/lib/format/date";
@@ -17,45 +18,49 @@ export function PayoutDetailModal({
   onClose: () => void;
   payout: Payout;
 }) {
+  const t = useTranslations("Payments.payoutModal");
+  const locale = useLocale();
   return (
-    <Modal open={open} onClose={onClose} title="Payout">
+    <Modal open={open} onClose={onClose} title={t("title")}>
       <div className="flex items-baseline justify-between gap-3">
         <p className="text-3xl font-bold text-foreground">
-          {formatCents(payout.amountCents, payout.currency)}
+          {formatCents(payout.amountCents, payout.currency, locale)}
         </p>
         <PayoutStatusBadge status={payout.status} />
       </div>
 
       <div className="mt-6 space-y-4">
-        <DetailRow label="Sent to">
+        <DetailRow label={t("sentTo")}>
           <span className="text-sm text-foreground">
-            Bank account ···· {payout.destinationLast4}
+            {t("bankAccount", { last4: payout.destinationLast4 })}
           </span>
         </DetailRow>
-        <DetailRow label="Arrives">
+        <DetailRow label={t("arrives")}>
           <span className="text-sm text-foreground">
-            {formatOrderDate(payout.arrivalDate)}
+            {formatOrderDate(payout.arrivalDate, locale)}
           </span>
         </DetailRow>
-        <DetailRow label="Initiated">
+        <DetailRow label={t("initiated")}>
           <span className="text-sm text-foreground">
-            {formatOrderDateTime(payout.createdAt)}
+            {formatOrderDateTime(payout.createdAt, locale)}
           </span>
         </DetailRow>
-        <DetailRow label="Type">
+        <DetailRow label={t("type")}>
           <span className="text-sm text-foreground">
-            {payout.method === "instant" ? "Instant" : "Standard"}
-            {payout.automatic ? " · Automatic" : " · Manual"}
+            {t("typeValue", {
+              method: payout.method,
+              automatic: payout.automatic ? "true" : "false",
+            })}
           </span>
         </DetailRow>
         {payout.statementDescriptor && (
-          <DetailRow label="On your bank statement">
+          <DetailRow label={t("statement")}>
             <span className="text-sm text-foreground">
               {payout.statementDescriptor}
             </span>
           </DetailRow>
         )}
-        <DetailRow label="Payout ID">
+        <DetailRow label={t("id")}>
           <span className="break-all font-mono text-xs text-muted-foreground">
             {payout.id}
           </span>
@@ -64,8 +69,7 @@ export function PayoutDetailModal({
 
       {payout.status === "failed" && (
         <p className="mt-4 border-t border-border pt-4 font-inter text-sm text-danger-strong">
-          This payout could not be delivered. Stripe retries automatically, and
-          the amount stays in your available balance until it succeeds.
+          {t("failed")}
         </p>
       )}
     </Modal>

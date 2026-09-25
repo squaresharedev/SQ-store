@@ -1,0 +1,391 @@
+{
+  "checkForm": "Zkontrolujte formulář a zkuste to znovu.",
+  "generic": {
+    "invalid": "Zkontrolujte formulář a zkuste to znovu."
+  },
+  "text": {
+    "productTitle": {
+      "required": "Vyplňte název produktu.",
+      "tooLong": "Název produktu může mít nejvýše {maximum} znaků.",
+      "unsupported": "Název produktu obsahuje nepodporované znaky."
+    },
+    "productDescription": {
+      "required": "Vyplňte popis produktu.",
+      "tooLong": "Popis produktu může mít nejvýše {maximum} znaků.",
+      "unsupported": "Popis produktu obsahuje nepodporované znaky."
+    },
+    "filename": {
+      "required": "Vyplňte název souboru.",
+      "tooLong": "Název souboru může mít nejvýše {maximum} znaků.",
+      "unsupported": "Název souboru obsahuje nepodporované znaky."
+    },
+    "galleryAlt": {
+      "required": "Vyplňte alternativní text.",
+      "tooLong": "Alternativní text může mít nejvýše {maximum} znaků.",
+      "unsupported": "Alternativní text obsahuje nepodporované znaky."
+    },
+    "specName": {
+      "required": "Vyplňte název specifikace.",
+      "tooLong": "Název specifikace může mít nejvýše {maximum} znaků.",
+      "unsupported": "Název specifikace obsahuje nepodporované znaky."
+    },
+    "specValue": {
+      "required": "Vyplňte hodnotu specifikace.",
+      "tooLong": "Hodnota specifikace může mít nejvýše {maximum} znaků.",
+      "unsupported": "Hodnota specifikace obsahuje nepodporované znaky."
+    },
+    "optionName": {
+      "required": "Vyplňte název možnosti.",
+      "tooLong": "Název možnosti může mít nejvýše {maximum} znaků.",
+      "unsupported": "Název možnosti obsahuje nepodporované znaky."
+    },
+    "optionGroupName": {
+      "required": "Vyplňte název skupiny možností.",
+      "tooLong": "Název skupiny možností může mít nejvýše {maximum} znaků.",
+      "unsupported": "Název skupiny možností obsahuje nepodporované znaky."
+    },
+    "documentName": {
+      "required": "Vyplňte název dokumentu.",
+      "tooLong": "Název dokumentu může mít nejvýše {maximum} znaků.",
+      "unsupported": "Název dokumentu obsahuje nepodporované znaky."
+    },
+    "materials": {
+      "required": "Vyplňte materiály.",
+      "tooLong": "Materiály mohou mít nejvýše {maximum} znaků.",
+      "unsupported": "Materiály obsahují nepodporované znaky."
+    },
+    "care": {
+      "required": "Vyplňte pokyny k péči.",
+      "tooLong": "Pokyny k péči mohou mít nejvýše {maximum} znaků.",
+      "unsupported": "Pokyny k péči obsahují nepodporované znaky."
+    },
+    "includedItem": {
+      "required": "Vyplňte položku obsahu balení.",
+      "tooLong": "Položka obsahu balení může mít nejvýše {maximum} znaků.",
+      "unsupported": "Položka obsahu balení obsahuje nepodporované znaky."
+    },
+    "origin": {
+      "required": "Vyplňte zemi původu.",
+      "tooLong": "Země původu může mít nejvýše {maximum} znaků.",
+      "unsupported": "Země původu obsahuje nepodporované znaky."
+    },
+    "manufacturerName": {
+      "required": "Vyplňte výrobce.",
+      "tooLong": "Název výrobce může mít nejvýše {maximum} znaků.",
+      "unsupported": "Název výrobce obsahuje nepodporované znaky."
+    },
+    "manufacturerAddress": {
+      "required": "Vyplňte adresu výrobce.",
+      "tooLong": "Adresa výrobce může mít nejvýše {maximum} znaků.",
+      "unsupported": "Adresa výrobce obsahuje nepodporované znaky."
+    },
+    "responsibleName": {
+      "required": "Vyplňte odpovědnou osobu v EU.",
+      "tooLong": "Jméno odpovědné osoby v EU může mít nejvýše {maximum} znaků.",
+      "unsupported": "Jméno odpovědné osoby v EU obsahuje nepodporované znaky."
+    },
+    "responsibleAddress": {
+      "required": "Vyplňte adresu odpovědné osoby v EU.",
+      "tooLong": "Adresa odpovědné osoby v EU může mít nejvýše {maximum} znaků.",
+      "unsupported": "Adresa odpovědné osoby v EU obsahuje nepodporované znaky."
+    },
+    "safetyIdentifier": {
+      "required": "Vyplňte typ, číslo šarže nebo sériové číslo.",
+      "tooLong": "Typ, číslo šarže nebo sériové číslo může mít nejvýše {maximum} znaků.",
+      "unsupported": "Typ, číslo šarže nebo sériové číslo obsahuje nepodporované znaky."
+    },
+    "warnings": {
+      "required": "Vyplňte upozornění.",
+      "tooLong": "Upozornění může mít nejvýše {maximum} znaků.",
+      "unsupported": "Upozornění obsahuje nepodporované znaky."
+    },
+    "businessName": {
+      "required": "Vyplňte obchodní jméno.",
+      "tooLong": "Obchodní jméno může mít nejvýše {maximum} znaků.",
+      "unsupported": "Obchodní jméno obsahuje nepodporované znaky."
+    },
+    "businessAddress": {
+      "required": "Vyplňte adresu sídla.",
+      "tooLong": "Adresa sídla může mít nejvýše {maximum} znaků.",
+      "unsupported": "Adresa sídla obsahuje nepodporované znaky."
+    },
+    "phone": {
+      "required": "Vyplňte telefonní číslo.",
+      "tooLong": "Telefonní číslo může mít nejvýše {maximum} znaků.",
+      "unsupported": "Telefonní číslo obsahuje nepodporované znaky."
+    },
+    "bio": {
+      "required": "Vyplňte medailonek.",
+      "tooLong": "Medailonek může mít nejvýše {maximum} znaků.",
+      "unsupported": "Medailonek obsahuje nepodporované znaky."
+    },
+    "destinationArea": {
+      "required": "Vyplňte oblast doručení.",
+      "tooLong": "Oblast doručení může mít nejvýše {maximum} znaků.",
+      "unsupported": "Oblast doručení obsahuje nepodporované znaky."
+    },
+    "deliveryTime": {
+      "required": "Vyplňte dobu doručení.",
+      "tooLong": "Doba doručení může mít nejvýše {maximum} znaků.",
+      "unsupported": "Doba doručení obsahuje nepodporované znaky."
+    },
+    "shippingCost": {
+      "required": "Vyplňte cenu dopravy.",
+      "tooLong": "Cena dopravy může mít nejvýše {maximum} znaků.",
+      "unsupported": "Cena dopravy obsahuje nepodporované znaky."
+    },
+    "dispatchTime": {
+      "required": "Vyplňte dobu odeslání.",
+      "tooLong": "Doba odeslání může mít nejvýše {maximum} znaků.",
+      "unsupported": "Doba odeslání obsahuje nepodporované znaky."
+    },
+    "shippingNotes": {
+      "required": "Vyplňte poznámky k dopravě.",
+      "tooLong": "Poznámky k dopravě mohou mít nejvýše {maximum} znaků.",
+      "unsupported": "Poznámky k dopravě obsahují nepodporované znaky."
+    },
+    "shippingPolicy": {
+      "required": "Vyplňte podmínky dopravy.",
+      "tooLong": "Podmínky dopravy mohou mít nejvýše {maximum} znaků.",
+      "unsupported": "Podmínky dopravy obsahují nepodporované znaky."
+    },
+    "returnsNotes": {
+      "required": "Vyplňte poznámky k vrácení zboží.",
+      "tooLong": "Poznámky k vrácení zboží mohou mít nejvýše {maximum} znaků.",
+      "unsupported": "Poznámky k vrácení zboží obsahují nepodporované znaky."
+    },
+    "returnsPolicy": {
+      "required": "Vyplňte podmínky vrácení zboží.",
+      "tooLong": "Podmínky vrácení zboží mohou mít nejvýše {maximum} znaků.",
+      "unsupported": "Podmínky vrácení zboží obsahují nepodporované znaky."
+    },
+    "otherCategory": {
+      "required": "Vyplňte kategorii.",
+      "tooLong": "Kategorie může mít nejvýše {maximum} znaků.",
+      "unsupported": "Kategorie obsahuje nepodporované znaky."
+    },
+    "storefrontName": {
+      "required": "Vyplňte název výlohy.",
+      "tooLong": "Název výlohy může mít nejvýše {maximum} znaků.",
+      "unsupported": "Název výlohy obsahuje nepodporované znaky."
+    },
+    "fontName": {
+      "required": "Vyplňte název písma.",
+      "tooLong": "Název písma může mít nejvýše {maximum} znaků.",
+      "unsupported": "Název písma obsahuje nepodporované znaky."
+    },
+    "storeName": {
+      "required": "Vyplňte název obchodu.",
+      "tooLong": "Název obchodu může mít nejvýše {maximum} znaků.",
+      "unsupported": "Název obchodu obsahuje nepodporované znaky."
+    },
+    "storeBio": {
+      "required": "Vyplňte medailonek obchodu.",
+      "tooLong": "Medailonek obchodu může mít nejvýše {maximum} znaků.",
+      "unsupported": "Medailonek obchodu obsahuje nepodporované znaky."
+    },
+    "ctaLabel": {
+      "required": "Vyplňte text tlačítka nákupu.",
+      "tooLong": "Text tlačítka nákupu může mít nejvýše {maximum} znaků.",
+      "unsupported": "Text tlačítka nákupu obsahuje nepodporované znaky."
+    },
+    "shippingProfileName": {
+      "required": "Vyplňte název profilu dopravy.",
+      "tooLong": "Název profilu dopravy může mít nejvýše {maximum} znaků.",
+      "unsupported": "Název profilu dopravy obsahuje nepodporované znaky."
+    },
+    "shippingTerms": {
+      "required": "Vyplňte dopravní podmínky.",
+      "tooLong": "Dopravní podmínky mohou mít nejvýše {maximum} znaků.",
+      "unsupported": "Dopravní podmínky obsahují nepodporované znaky."
+    },
+    "blockText": {
+      "required": "Vyplňte text bloku.",
+      "tooLong": "Text bloku může mít nejvýše {maximum} znaků.",
+      "unsupported": "Text bloku obsahuje nepodporované znaky."
+    },
+    "elementAlt": {
+      "required": "Vyplňte alternativní text prvku.",
+      "tooLong": "Alternativní text prvku může mít nejvýše {maximum} znaků.",
+      "unsupported": "Alternativní text prvku obsahuje nepodporované znaky."
+    },
+    "notificationTitle": {
+      "required": "Vyplňte nadpis oznámení.",
+      "tooLong": "Nadpis oznámení může mít nejvýše {maximum} znaků.",
+      "unsupported": "Nadpis oznámení obsahuje nepodporované znaky."
+    },
+    "notificationBody": {
+      "required": "Vyplňte text oznámení.",
+      "tooLong": "Text oznámení může mít nejvýše {maximum} znaků.",
+      "unsupported": "Text oznámení obsahuje nepodporované znaky."
+    },
+    "searchQuery": {
+      "required": "Zadejte hledaný výraz.",
+      "tooShort": "Hledaný výraz je příliš krátký (minimální počet znaků: {minimum}).",
+      "tooLong": "Hledaný výraz může mít nejvýše {maximum} znaků.",
+      "unsupported": "Hledaný výraz obsahuje nepodporované znaky."
+    },
+    "factorName": {
+      "required": "Název je povinný.",
+      "tooLong": "Název může mít nejvýše {maximum} znaků.",
+      "unsupported": "Název obsahuje nepodporované znaky."
+    },
+    "reportDetails": {
+      "required": "Popis je povinný.",
+      "tooLong": "Popis může mít nejvýše {maximum} znaků.",
+      "unsupported": "Popis obsahuje nepodporované znaky."
+    }
+  },
+  "email": {
+    "generic": {
+      "format": "Tohle nevypadá jako e-mailová adresa.",
+      "tooLong": "E-mail je příliš dlouhý.",
+      "unsupported": "E-mail obsahuje nepodporované znaky."
+    },
+    "reporter": {
+      "format": "Váš e-mail nevypadá jako e-mailová adresa.",
+      "tooLong": "Váš e-mail je příliš dlouhý.",
+      "unsupported": "Váš e-mail obsahuje nepodporované znaky."
+    },
+    "contactEmail": {
+      "format": "Kontaktní e-mail nevypadá jako e-mailová adresa.",
+      "tooLong": "Kontaktní e-mail je příliš dlouhý.",
+      "unsupported": "Kontaktní e-mail obsahuje nepodporované znaky."
+    },
+    "manufacturerEmail": {
+      "format": "E-mail výrobce nevypadá jako e-mailová adresa.",
+      "tooLong": "E-mail výrobce je příliš dlouhý.",
+      "unsupported": "E-mail výrobce obsahuje nepodporované znaky."
+    },
+    "responsibleEmail": {
+      "format": "E-mail odpovědné osoby v EU nevypadá jako e-mailová adresa.",
+      "tooLong": "E-mail odpovědné osoby v EU je příliš dlouhý.",
+      "unsupported": "E-mail odpovědné osoby v EU obsahuje nepodporované znaky."
+    }
+  },
+  "emailQuality": {
+    "placeholder": "Kontaktní e-mail vypadá jako zástupná adresa. Použijte adresu, kterou opravdu čtete.",
+    "disposable": "Kontaktní e-mail je u poskytovatele dočasných schránek. Použijte trvalou adresu."
+  },
+  "uuid": {
+    "id": "Toto ID není platné.",
+    "option": "Tato možnost není platná.",
+    "optionGroup": "Tato skupina možností není platná.",
+    "shippingProfile": "Tento profil dopravy není platný.",
+    "storefrontId": "ID výlohy není platné.",
+    "blockId": "ID bloku není platné.",
+    "notificationRecipient": "Příjemce oznámení není platný.",
+    "factor": "Tato ověřovací aplikace není platná.",
+    "reportTarget": "Tato položka není platná."
+  },
+  "handle": {
+    "username": "Uživatelské jméno musí mít 3 až 30 znaků a smí obsahovat jen písmena, číslice a podtržítka."
+  },
+  "hostname": {
+    "domains": "Domény zadávejte jen jako holé domény malými písmeny, např. vasweb.cz (bez https://, portu, cesty a zástupných znaků)."
+  },
+  "referenceCode": {
+    "vatId": "DIČ musí mít {min} až {max} znaků: písmena, číslice, mezery, tečky nebo pomlčky."
+  },
+  "oneTimeCode": {
+    "authenticator": "Kód tvoří 6 číslic zobrazených ve vaší ověřovací aplikaci."
+  },
+  "hexColor": {
+    "colors": "Barvy musí být šestimístné v hex, např. #a855f7.",
+    "swatchColours": "Barvy vzorků musí být šestimístné v hex, např. #a855f7."
+  },
+  "int": {
+    "price": {
+      "whole": "Cena musí být celé číslo.",
+      "tooSmall": "Cena musí být alespoň {minimum}.",
+      "tooBig": "Cena může být nejvýše {maximum}."
+    },
+    "maxPerOrder": {
+      "whole": "Maximum na objednávku musí být celé číslo.",
+      "tooSmall": "Maximum na objednávku musí být alespoň {minimum}.",
+      "tooBig": "Maximum na objednávku může být nejvýše {maximum}."
+    }
+  },
+  "list": {
+    "domains": {
+      "tooMany": "Uveďte nejvýše {maximum} domén.",
+      "duplicate": "Každá doména smí být v seznamu jen jednou."
+    }
+  },
+  "settings": {
+    "currentPasswordRequired": "Zadejte současné heslo.",
+    "newPasswordTooShort": "Nové heslo je příliš krátké (minimální počet znaků: {minimum}).",
+    "newPasswordTooLong": "Heslo může mít nejvýše {maximum} znaků.",
+    "passwordsMismatch": "Nová hesla se neshodují.",
+    "pickCountry": "Vyberte zemi ze seznamu.",
+    "legalVersionChanged": "Během čtení se právní dokumenty změnily. Obnovte stránku a zkuste to znovu.",
+    "deleteConfirm": "Pro potvrzení napište přesně „{phrase}“."
+  },
+  "password": {
+    "tooShort": "Heslo je příliš krátké (minimální počet znaků: {minimum}).",
+    "tooLong": "Heslo může mít nejvýše {maximum} znaků.",
+    "tooCommon": "Toto heslo je příliš běžné. Zvolte něco, co se hůř uhodne.",
+    "repeated": "Toto heslo se dá snadno uhodnout. Zkuste delší kombinaci slov.",
+    "sequence": "Heslo obsahuje běžnou posloupnost kláves. Zkuste něco jiného.",
+    "containsIdentity": "Heslo nesmí obsahovat vaši e-mailovou adresu ani uživatelské jméno.",
+    "weakMix": "Zkombinujte velká a malá písmena, číslici nebo symbol (nebo použijte alespoň {length} znaků)."
+  },
+  "team": {
+    "invalidStore": "Neplatný odkaz na obchod.",
+    "invalidEmail": "Tohle nevypadá jako e-mailová adresa.",
+    "emailTooLong": "E-mail je příliš dlouhý.",
+    "invalidRole": "Vyberte platnou roli.",
+    "invalidInvite": "Neplatný odkaz na pozvánku.",
+    "invalidMember": "Neplatný odkaz na člena."
+  },
+  "auth": {
+    "usernameReserved": "Toto uživatelské jméno je vyhrazené. Zvolte jiné."
+  },
+  "notifications": {
+    "invalidReference": "Neplatný odkaz na oznámení."
+  },
+  "product": {
+    "stockRequired": "Zadejte, kolik kusů máte skladem.",
+    "optionSpecsTooMany": "Varianta může mít nejvýše {maximum} vlastních specifikací.",
+    "optionGroupEmpty": "Každá skupina možností musí mít alespoň jednu možnost, jinak skupinu odeberte.",
+    "optionGroupTooManyOptions": "Skupina možností může mít nejvýše {maximum} možností.",
+    "includedTooMany": "Uveďte nejvýše {maximum} položek obsahu balení.",
+    "specsTooMany": "Uveďte nejvýše {maximum} specifikací.",
+    "purchaseLinkFormat": "Odkaz na nákup musí být úplná adresa začínající https://.",
+    "purchaseLinkTooLong": "Odkaz na nákup může mít nejvýše {maximum} znaků.",
+    "purchaseLinkCredentials": "Odkaz na nákup nesmí obsahovat uživatelské jméno ani heslo.",
+    "galleryTooMany": "Produkt může mít nejvýše {maximum} dalších fotek.",
+    "optionGroupsTooMany": "Produkt může mít nejvýše {maximum} skupin možností.",
+    "documentsTooMany": "Produkt může mít nejvýše {maximum} dokumentů.",
+    "optionDuplicate": "Každá možnost smí být uvedena jen jednou.",
+    "optionsTotalTooMany": "Produkt může mít celkem nejvýše {maximum} možností.",
+    "galleryStaleOption": "Jedna z fotek je přiřazená k možnosti, která už neexistuje."
+  },
+  "productImport": {
+    "noTitle": "Chybí název.",
+    "titleTooLong": "Název je delší než 200 znaků.",
+    "noPrice": "Cenu se nepodařilo přečíst.",
+    "priceZero": "Cena je nulová.",
+    "duplicateTitle": "Stejný název má i jiný řádek."
+  },
+  "shipping": {
+    "shipsFromInvalid": "Z této země zatím odesílat nelze.",
+    "destinationsTooMany": "Můžete uvést nejvýše {maximum} oblastí doručení.",
+    "returnsWindowWhole": "Lhůta pro vrácení musí být celý počet dní.",
+    "returnsWindowNegative": "Lhůta pro vrácení nemůže být záporná.",
+    "returnsWindowTooLong": "Lhůta pro vrácení může být nejvýše {maximum} dní."
+  },
+  "storefront": {
+    "backgroundImageKind": "Obrázky pozadí musí být nahrané obrázky.",
+    "customFontKind": "Vlastní písma musí být nahraná písma.",
+    "elementKind": "Prvky musí být nahrané prvky.",
+    "productPageSectionsTooMany": "Produktová stránka musí obsahovat každou sekci právě jednou.",
+    "productPageSectionDuplicate": "Produktová stránka nemůže obsahovat stejnou sekci dvakrát.",
+    "shippingProfilesTooMany": "Obchod může mít nejvýše {maximum} profilů dopravy.",
+    "shippingProfileDuplicate": "Každý profil dopravy smí být uveden jen jednou.",
+    "spanRange": "Formátovaný úsek musí končit až za svým začátkem",
+    "blocksTooMany": "Výloha může obsahovat nejvýše {maximum} bloků. Některé bloky odeberte, nebo výlohu rozdělte na dvě.",
+    "blocksDuplicate": "Bloky v mřížce musí být jedinečné.",
+    "blockOutsideCanvas": "Jeden z bloků leží mimo plátno."
+  }
+}

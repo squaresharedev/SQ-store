@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowUpRight, Mail } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { optionSummaryRows } from "@/lib/products/option-details";
 import { mailtoHref, type CtaTarget } from "./cta-target";
@@ -64,6 +65,8 @@ export function ProductCta({
   preview: boolean;
   className?: string;
 }) {
+  const t = useTranslations("ProductPage.cta");
+  const tStock = useTranslations("Common.stock");
   const { unavailableIn, groups, selection } = useOptionSelection();
   const { quantity } = useQuantity();
 
@@ -83,8 +86,7 @@ export function ProductCta({
           {label}
         </span>
         <p className="text-center text-xs opacity-70">
-          This button has nowhere to go yet. Add a purchase link on the product, or a contact
-          email under Seller details.
+          {t("unwired")}
         </p>
       </div>
     );
@@ -103,11 +105,11 @@ export function ProductCta({
   const mailSoldOut = soldOut && target.kind !== "mail";
   const unavailable = mailSoldOut || unavailableIn !== null;
   const text = mailSoldOut
-    ? "Sold out"
+    ? tStock("soldOut")
     : unavailableIn
-      ? `Unavailable in this ${unavailableIn.name.toLowerCase()}`
+      ? t("unavailableIn", { group: unavailableIn.name.toLowerCase() })
       : target.kind === "mail"
-        ? "Ask about this product"
+        ? t("askAbout")
         : label;
   const Icon = target.kind === "mail" ? Mail : ArrowUpRight;
 
@@ -125,6 +127,10 @@ export function ProductCta({
       ? mailtoHref(
           target.email,
           target.productTitle,
+          {
+            subject: t("mailSubject", { title: target.productTitle }),
+            quantityLine: t("mailQuantity", { quantity }),
+          },
           optionSummaryRows(groups, selection),
           quantity,
         )
@@ -174,7 +180,10 @@ export function ProductCta({
       )}
       {target.kind === "link" && (
         <p className="text-center text-xs opacity-70">
-          Checkout on <span className="font-medium">{target.host}</span>
+          {t.rich("checkoutOn", {
+            host: target.host,
+            strong: (chunks) => <span className="font-medium">{chunks}</span>,
+          })}
         </p>
       )}
     </div>

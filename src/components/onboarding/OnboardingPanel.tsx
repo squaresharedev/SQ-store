@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { completeOnboarding, markSetupCelebrated } from "@/lib/onboarding/actions";
 import type { SetupChecklistData } from "@/lib/onboarding/steps";
 import { endTour, setTourNext, startTour, type TourNext } from "@/lib/onboarding/tour-store";
@@ -16,6 +17,9 @@ export type OnboardingData = {
   traderMissing: readonly TraderIdentityField[];
   /** The welcome flow has never been seen by this person. */
   welcomePending: boolean;
+  /** This person has agreed to the CURRENT Terms (LEGAL_VERSION). When false,
+   *  the welcome flow asks for it, and cannot be left until it has it. */
+  termsAccepted: boolean;
   /** The finished setup card ("You're set up") has never been shown to them. */
   celebrationPending: boolean;
   /** The profile's current trader identity, to prefill the seller step. */
@@ -54,12 +58,14 @@ export function OnboardingPanel({
   setup,
   traderMissing,
   welcomePending,
+  termsAccepted,
   celebrationPending,
   seller,
   verificationOn,
   livePageUrl,
   tourRequested,
 }: OnboardingData) {
+  const t = useTranslations();
   const router = useRouter();
   const [open, setOpen] = useState(welcomePending);
   const pendingRef = useRef(welcomePending);
@@ -69,7 +75,10 @@ export function OnboardingPanel({
   // (a seller save refreshes the page mid-tour) in a ref for the handlers and
   // in the store for a tour already running.
   const nextHref = setup?.next?.action?.href ?? null;
-  const nextLabel = setup?.next?.action ? setup.next.cta : null;
+  // Resolved here: the tour store holds display text, not message keys.
+  const nextLabel = setup?.next?.action
+    ? t(setup.next.cta.key, setup.next.cta.values)
+    : null;
   const nextRef = useRef<TourNext | null>(null);
   useEffect(() => {
     const offer = nextHref && nextLabel ? { href: nextHref, label: nextLabel } : null;
@@ -132,6 +141,7 @@ export function OnboardingPanel({
         open={open}
         onClose={close}
         onStartTour={beginTour}
+        includeTermsStep={!termsAccepted}
         includeSellerStep={seller !== null && setup?.seller === "missing"}
         seller={seller ?? EMPTY_SELLER}
         emailVerified={!traderMissing.includes("emailVerified")}

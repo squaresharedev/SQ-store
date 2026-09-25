@@ -1,7 +1,8 @@
 "use client";
 
-import { useId } from "react";
+import { useId, useMemo } from "react";
 import { Type } from "lucide-react";
+import { useTranslations } from "next-intl";
 import {
   STOREFRONT_FONTS,
   TEXT_VARIANT_BASE_PX,
@@ -42,26 +43,9 @@ export type TextBlockPatch = Partial<
   >
 >;
 
-const VARIANT_OPTIONS: readonly SelectOption<(typeof TEXT_VARIANTS)[number]>[] =
-  TEXT_VARIANTS.map((variant) => ({
-    value: variant,
-    label: TEXT_VARIANT_LABELS[variant],
-  }));
-
 // "Inherit" sentinel: the block stores NOTHING for the theme-default font —
 // the select just needs a concrete value to point at.
 type FontChoice = StorefrontFont | "theme";
-
-/** The uploaded face is offered only once there IS one; without an upload the
- *  option would set a font the storefront cannot render. */
-function fontOptions(hasCustomFont: boolean): SelectOption<FontChoice>[] {
-  return [
-    { value: "theme", label: "Theme font", description: "Follow the storefront font" },
-    ...STOREFRONT_FONTS.filter(
-      (font) => font !== "custom" || hasCustomFont,
-    ).map((font) => ({ value: font, label: FONT_LABELS[font] })),
-  ];
-}
 
 /**
  * Text-block editor rendered in the side panel: style, formatting, alignment,
@@ -115,6 +99,33 @@ export function TextBlockEditor({
   multi?: boolean;
 }) {
   const fieldId = useId();
+  const t = useTranslations("Storefront");
+  const tRoot = useTranslations();
+
+  const variantOptions: SelectOption<(typeof TEXT_VARIANTS)[number]>[] = useMemo(
+    () =>
+      TEXT_VARIANTS.map((variant) => ({
+        value: variant,
+        label: tRoot(TEXT_VARIANT_LABELS[variant]),
+      })),
+    [tRoot],
+  );
+
+  /** The uploaded face is offered only once there IS one; without an upload the
+   *  option would set a font the storefront cannot render. */
+  const fontOptionsForBlock: SelectOption<FontChoice>[] = useMemo(
+    () => [
+      {
+        value: "theme",
+        label: t("textBlock.font.themeFont"),
+        description: t("textBlock.font.themeFontDescription"),
+      },
+      ...STOREFRONT_FONTS.filter(
+        (font) => font !== "custom" || hasCustomFont,
+      ).map((font) => ({ value: font, label: tRoot(FONT_LABELS[font]) })),
+    ],
+    [t, tRoot, hasCustomFont],
+  );
 
   // The tile's OWN report of what Auto currently renders at, which may be
   // smaller than the style's flat base once the block has had to shrink to
@@ -146,10 +157,9 @@ export function TextBlockEditor({
       {!multi && onEditText && (
         <div className="space-y-1.5">
           <span className="flex items-center gap-1.5">
-            <span className={labelClass}>Text</span>
-            <InfoTip label="Other ways to edit this text">
-              You can also click the block again on the canvas and type
-              straight onto it, which is quicker for a small change.
+            <span className={labelClass}>{t("textBlock.text.label")}</span>
+            <InfoTip label={t("textBlock.text.infoLabel")}>
+              {t("textBlock.text.infoContent")}
             </InfoTip>
           </span>
           <button
@@ -158,31 +168,31 @@ export function TextBlockEditor({
             className={secondaryButtonClass + " w-full"}
           >
             <Type className="size-4" strokeWidth={2} aria-hidden="true" />
-            Edit text on the canvas
+            {t("textBlock.editOnCanvas")}
           </button>
         </div>
       )}
 
       <div className="space-y-1.5">
         <label htmlFor={`${fieldId}-variant`} className={labelClass}>
-          Style
+          {t("textBlock.style.label")}
         </label>
         <Select
           id={`${fieldId}-variant`}
           value={block.variant}
-          options={VARIANT_OPTIONS}
+          options={variantOptions}
           onChange={(variant) => onUpdate({ variant })}
         />
       </div>
 
       <div className="space-y-1.5">
         <label htmlFor={`${fieldId}-font`} className={labelClass}>
-          Font
+          {t("textBlock.font.label")}
         </label>
         <Select
           id={`${fieldId}-font`}
           value={(block.font ?? "theme") as FontChoice}
-          options={fontOptions(hasCustomFont)}
+          options={fontOptionsForBlock}
           onChange={(font) =>
             onUpdate({ font: font === "theme" ? undefined : font })
           }
@@ -204,19 +214,21 @@ export function TextBlockEditor({
           selected it is the block's own colour, exactly as before. */}
       <ColorPicker
         id={`${fieldId}-color`}
-        label={selectedWords ? "Selected words" : "Color"}
+        label={selectedWords ? t("textBlock.color.selectedWords") : t("textBlock.color.label")}
         value={rangeHex ?? blockHex}
         onChange={(color) => setColor(color)}
         inherit={
           selectedWords
             ? {
-                label: "the block's color",
+                label: t("textBlock.color.blockColor"),
+                useLabel: t("textBlock.color.useBlockColor"),
                 value: blockHex,
                 active: rangeHex === null,
                 onSelect: () => setColor(undefined),
               }
             : {
-                label: "Theme color",
+                label: t("textBlock.color.themeColor"),
+                useLabel: t("colors.inherit.themeColor.use"),
                 value: themeColor,
                 active: block.color === undefined,
                 onSelect: () => setColor(undefined),
@@ -228,9 +240,7 @@ export function TextBlockEditor({
       />
       {selectedWords && (
         <p className={helpTextClass}>
-          Colouring the {selectedWords} selected{" "}
-          {selectedWords === 1 ? "character" : "characters"}. Click away from
-          the words to colour the whole block instead.
+          {t("textBlock.colouringSelected", { count: selectedWords })}
         </p>
       )}
 

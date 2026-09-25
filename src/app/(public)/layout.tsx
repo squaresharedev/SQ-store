@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { ScopedIntlProvider } from "@/i18n/ScopedIntlProvider";
 
 /**
  * The buyer-facing side of the app. No session, no dashboard chrome, no
@@ -13,5 +14,5 @@ export const metadata: Metadata = {
 };
 
 export default function PublicLayout({ children }: { children: ReactNode }) {
-  return children;
+  return <ScopedIntlProvider scope="public">{children}</ScopedIntlProvider>;
 }

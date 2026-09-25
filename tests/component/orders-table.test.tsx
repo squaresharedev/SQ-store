@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeAll, afterEach } from "vitest";
-import { render, screen, cleanup, waitFor } from "@testing-library/react";
+import { render, screen, cleanup, waitFor } from "../setup/render";
 import userEvent from "@testing-library/user-event";
 import { OrdersTable } from "@/components/orders/OrdersTable";
 import type { OrderView } from "@/types/order-view";

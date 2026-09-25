@@ -1,5 +1,6 @@
 import { Globe, Mail, MapPin, Phone, Receipt } from "lucide-react";
-import { EU_COUNTRIES } from "@/lib/settings/constants";
+import { useLocale, useTranslations } from "next-intl";
+import { countryName } from "@/lib/format/country";
 import type { StorefrontSeller } from "@/types/storefront";
 
 /** Icon + label styling shared by every row, matching the trust list beside
@@ -30,7 +31,9 @@ export function SellerBlock({
   /** The storefront's name, shown when no business name was given. */
   fallbackName: string;
 }) {
-  const country = EU_COUNTRIES.find((entry) => entry.code === seller.country)?.name;
+  const t = useTranslations("ProductPage.seller");
+  // In the buyer's language; null for a code we do not know, as before.
+  const country = countryName(seller.country, useLocale());
   return (
     <address className="flex flex-col gap-2 text-sm not-italic">
       <p className="font-medium">{seller.businessName || fallbackName}</p>
@@ -43,7 +46,7 @@ export function SellerBlock({
         <p className="flex items-start gap-2">
           <MapPin className={ROW_ICON_CLASS} strokeWidth={2} aria-hidden="true" />
           <span>
-            <span className={LABEL_CLASS}>Address: </span>
+            <span className={LABEL_CLASS}>{t("address")} </span>
             <span className="whitespace-pre-line">{seller.address}</span>
           </span>
         </p>
@@ -53,7 +56,7 @@ export function SellerBlock({
         <p className="flex items-start gap-2">
           <Globe className={ROW_ICON_CLASS} strokeWidth={2} aria-hidden="true" />
           <span>
-            <span className={LABEL_CLASS}>Country: </span>
+            <span className={LABEL_CLASS}>{t("country")} </span>
             {country}
           </span>
         </p>
@@ -63,7 +66,7 @@ export function SellerBlock({
         <p className="flex items-start gap-2">
           <Mail className={ROW_ICON_CLASS} strokeWidth={2} aria-hidden="true" />
           <span>
-            <span className={LABEL_CLASS}>Email: </span>
+            <span className={LABEL_CLASS}>{t("email")} </span>
             <a href={`mailto:${seller.email}`} className="underline underline-offset-2">
               {seller.email}
             </a>
@@ -75,7 +78,7 @@ export function SellerBlock({
         <p className="flex items-start gap-2">
           <Phone className={ROW_ICON_CLASS} strokeWidth={2} aria-hidden="true" />
           <span>
-            <span className={LABEL_CLASS}>Phone: </span>
+            <span className={LABEL_CLASS}>{t("phone")} </span>
             {seller.phone}
           </span>
         </p>
@@ -84,7 +87,7 @@ export function SellerBlock({
       {seller.vatId && (
         <p className="flex items-start gap-2">
           <Receipt className={ROW_ICON_CLASS} strokeWidth={2} aria-hidden="true" />
-          <span className={LABEL_CLASS}>VAT ID: {seller.vatId}</span>
+          <span className={LABEL_CLASS}>{t("vatId", { vatId: seller.vatId })}</span>
         </p>
       )}
     </address>

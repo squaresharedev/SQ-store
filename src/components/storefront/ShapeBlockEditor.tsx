@@ -1,6 +1,7 @@
 "use client";
 
 import { useId } from "react";
+import { useTranslations } from "next-intl";
 import {
   RING_DEFAULT_WIDTH,
   SHAPE_BORDER_WIDTH_MAX,
@@ -23,7 +24,6 @@ import { SliderField } from "@/components/ui/SliderField";
 import { BlockActions } from "./BlockActions";
 import { SummonedField, type BlockFieldSummons } from "./SummonedField";
 import { ShapeKindGlyph } from "./ShapeTileContent";
-import { SHAPE_SPECS } from "./shape-specs";
 import {
   STAR_DEFAULTS,
   defaultRoundness,
@@ -78,6 +78,7 @@ export function ShapeBlockEditor({
   summons?: BlockFieldSummons;
 }) {
   const fieldId = useId();
+  const t = useTranslations("Storefront");
   const isRing = block.kind === "ring";
   const borderWidth =
     block.borderWidth ?? (isRing ? RING_DEFAULT_WIDTH : 0);
@@ -100,11 +101,11 @@ export function ShapeBlockEditor({
       {/* Shape kind: the shapes themselves, wrapping to fill the panel width
           (too many to fit one row), current one highlighted. */}
       <div className="space-y-1.5">
-        <span className={labelClass}>Shape</span>
-        <div role="group" aria-label="Shape kind" className="flex flex-wrap gap-1">
+        <span className={labelClass}>{t("shapeBlock.shape.label")}</span>
+        <div role="group" aria-label={t("shapeBlock.shape.ariaLabel")} className="flex flex-wrap gap-1">
           {SHAPE_KINDS.map((kind) => {
             const selected = block.kind === kind;
-            const label = SHAPE_SPECS[kind].label;
+            const label = t(`shapes.name.${kind}`);
             return (
               <button
                 key={kind}
@@ -129,13 +130,13 @@ export function ShapeBlockEditor({
       {supportsPoints(block.kind) && (
         <SliderField
           id={`${fieldId}-points`}
-          label="Points"
+          label={t("shapeBlock.points.label")}
           min={SHAPE_POINTS_MIN}
           max={SHAPE_POINTS_MAX}
           value={points}
           onChange={(next) => onUpdate({ points: next })}
-          ariaLabel="Star points"
-          valueText={`${points} points`}
+          ariaLabel={t("shapeBlock.points.ariaLabel")}
+          valueText={t("shapeBlock.points.valueText", { value: points })}
         />
       )}
 
@@ -146,15 +147,15 @@ export function ShapeBlockEditor({
           {(highlighted) => (
             <SliderField
               id={`${fieldId}-roundness`}
-              label="Corner roundness"
+              label={t("shapeBlock.corners.label")}
               min={0}
               max={SHAPE_ROUNDNESS_MAX}
               step={2}
               value={roundness}
               onChange={(next) => onUpdate({ roundness: next })}
-              ariaLabel="Corner roundness"
-              valueText={`${roundness} percent`}
-              statusText={roundness === 0 ? "Sharp" : undefined}
+              ariaLabel={t("shapeBlock.corners.ariaLabel")}
+              valueText={t("shapeBlock.corners.valueText", { value: roundness })}
+              statusText={roundness === 0 ? t("shapeBlock.corners.sharp") : undefined}
               unit="%"
               highlighted={highlighted}
             />
@@ -165,7 +166,7 @@ export function ShapeBlockEditor({
       <SummonedField field="fill" summons={summons}>
         <ColorPicker
           id={`${fieldId}-fill`}
-          label={isRing ? "Color" : "Fill"}
+          label={isRing ? t("shapeBlock.fill.ring") : t("shapeBlock.fill.shape")}
           value={block.color}
           onChange={(color) => onUpdate({ color })}
           // Names the block whose colour is SHOWN. Driving a whole selection,
@@ -185,14 +186,14 @@ export function ShapeBlockEditor({
           <>
             <SliderField
               id={`${fieldId}-border-width`}
-              label={isRing ? "Ring thickness" : "Border thickness"}
+              label={isRing ? t("shapeBlock.border.ringLabel") : t("shapeBlock.border.shapeLabel")}
               min={isRing ? 1 : 0}
               max={SHAPE_BORDER_WIDTH_MAX}
               value={borderWidth}
               onChange={setBorderWidth}
-              ariaLabel={isRing ? "Ring thickness" : "Border thickness"}
-              valueText={`${borderWidth} pixels`}
-              statusText={!isRing && borderWidth === 0 ? "None" : undefined}
+              ariaLabel={isRing ? t("shapeBlock.border.ringAriaLabel") : t("shapeBlock.border.shapeAriaLabel")}
+              valueText={t("shapeBlock.border.valueText", { value: borderWidth })}
+              statusText={!isRing && borderWidth === 0 ? t("shapeBlock.border.none") : undefined}
               unit="px"
               highlighted={highlighted}
             />
@@ -202,7 +203,7 @@ export function ShapeBlockEditor({
               <div className="mt-4">
                 <ColorPicker
                   id={`${fieldId}-border-color`}
-                  label="Border color"
+                  label={t("shapeBlock.border.color")}
                   value={block.borderColor ?? DEFAULT_BORDER_COLOR}
                   onChange={(borderColor) => onUpdate({ borderColor })}
                   target={{ kind: "shape-border", blockKey: blockKey(block) }}
@@ -217,14 +218,14 @@ export function ShapeBlockEditor({
         {(highlighted) => (
           <SliderField
             id={`${fieldId}-opacity`}
-            label="Opacity"
+            label={t("shapeBlock.opacity.label")}
             min={0}
             max={100}
             step={5}
             value={opacity}
             onChange={(next) => onUpdate({ opacity: next })}
-            ariaLabel="Shape opacity"
-            valueText={`${opacity} percent`}
+            ariaLabel={t("shapeBlock.opacity.ariaLabel")}
+            valueText={t("shapeBlock.opacity.valueText", { value: opacity })}
             unit="%"
             highlighted={highlighted}
           />

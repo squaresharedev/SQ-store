@@ -12,14 +12,14 @@ import {
 } from "./helpers";
 
 /**
- * THE SAMPLE STOREFRONT, end to end: the card a new seller finds on the
- * storefront list, the designer it opens in (where nothing saves), and the short
- * designer tour that runs the first time they open it.
+ * THE SAMPLE STOREFRONT, end to end: the quiet link a new seller finds under
+ * the storefront list's empty state, the designer it opens in (where nothing
+ * saves), and the short designer tour that runs the first time they open it.
  *
  * The promises worth guarding: the sample is never a storefront row (so nothing
  * that counts storefronts can see it), trying things in it writes nothing and
- * never asks about unsaved changes, the tour starts once per person, and hiding
- * the sample sticks until they bring it back.
+ * never asks about unsaved changes, the tour starts once per person, and anyone
+ * who hid the sample back when it was a card is not shown the link.
  */
 
 async function profileFlags(email: string) {
@@ -46,8 +46,9 @@ test.describe("sample storefront", () => {
     await gotoApp(page, "/storefront");
     const sample = page.locator("main [data-storefront-sample]");
     await expect(sample).toBeVisible({ timeout: 30_000 });
-    await expect(page.getByText("No storefronts yet")).toBeVisible();
-    await expect(page.getByRole("button", { name: /create your first storefront/i })).toBeVisible();
+    // The empty state, with the sample as a link under it rather than a card.
+    await expect(page.getByRole("heading", { name: "No storefronts yet" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Create storefront", exact: true })).toBeVisible();
 
     await sample.getByRole("link", { name: "Open the sample storefront" }).click();
     await page.waitForURL(/\/storefront\/sample$/, { timeout: 60_000 });
@@ -98,31 +99,19 @@ test.describe("sample storefront", () => {
     await expect(page.locator(TOUR_LAYER)).toHaveCount(0);
   });
 
-  test("hiding the sample sticks until it is brought back", async ({ page }) => {
+  test("someone who hid the sample back when it was a card is not shown the link", async ({ page }) => {
     test.setTimeout(150_000);
-    const user = freshUser("sample-hide");
+    const user = freshUser("sample-hidden");
     await signUp(page, user);
+    await serviceRest(`/profiles?id=eq.${await userIdByEmail(user.email)}`, {
+      method: "PATCH",
+      body: { sample_storefront_hidden_at: new Date().toISOString() },
+    });
+    expect((await profileFlags(user.email)).sample_storefront_hidden_at).not.toBeNull();
+
     await gotoApp(page, "/storefront");
-
-    const sample = page.locator("main [data-storefront-sample]");
-    await expect(sample).toBeVisible({ timeout: 30_000 });
-    await sample.getByRole("button", { name: "Hide the sample storefront" }).click();
-    await expect(sample).toHaveCount(0);
-    await expect
-      .poll(async () => (await profileFlags(user.email)).sample_storefront_hidden_at, { timeout: 15_000 })
-      .not.toBeNull();
-
-    await page.reload();
     await expect(page.getByRole("heading", { name: "No storefronts yet" })).toBeVisible({ timeout: 30_000 });
-    await expect(sample).toHaveCount(0);
-
-    await page.getByRole("button", { name: "Show the sample storefront" }).click();
-    await expect(sample).toBeVisible();
-    await expect
-      .poll(async () => (await profileFlags(user.email)).sample_storefront_hidden_at, { timeout: 15_000 })
-      .toBeNull();
-    await page.reload();
-    await expect(sample).toBeVisible({ timeout: 30_000 });
+    await expect(page.locator("main [data-storefront-sample]")).toHaveCount(0);
   });
 
   test("Create your own opens the setup flow over the sample, and lands in a real storefront", async ({

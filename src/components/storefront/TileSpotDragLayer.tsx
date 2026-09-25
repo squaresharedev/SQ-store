@@ -1,7 +1,7 @@
 "use client";
 
 import { FRAME_Z } from "@/components/grid/gridConstants";
-import { spotLabel, type SpotArrow } from "@/lib/storefront/tile-spots";
+import type { SpotArrow } from "@/lib/storefront/tile-spots";
 import type { TileSpot } from "@/types/storefront";
 import { cn } from "@/lib/utils";
 import { TILE_SPOT_CLASSES } from "./config-maps";
@@ -127,14 +127,26 @@ export function tileSpotTokenProps(
   };
 }
 
+/** Minimal translator shape: a function that accepts the tokenLabel key and
+ *  its ICU values, returning the formatted string. Satisfied by
+ *  `useTranslations("Storefront")` from the call site. */
+type SpotLabelTranslator = (
+  key: "spotDrag.tokenLabel",
+  values: { token: string; drop: string },
+) => string;
+
 /** What a token's aria-label says: what it is, where it is, and the two things
  *  pressing it can do. Both are worth naming — moving it is the gesture the
  *  token was built for, and opening its settings is the one a seller reaches
  *  for when the thing they want to change is not its position. */
-export function tileSpotTokenLabel(token: SpotToken, drop: SpotDrop): string {
-  const what = token === "title" ? "Title" : "Price";
-  const where = drop === "below" ? "in the title bar" : `at ${spotLabel(drop)}`;
-  return `${what} ${where}. Press to open its settings, or drag (or use the arrow keys) to move it.`;
+export function tileSpotTokenLabel(
+  token: SpotToken,
+  drop: SpotDrop,
+  t: SpotLabelTranslator,
+): string {
+  // ICU select case names cannot contain hyphens, so "top-left" is passed as
+  // "top_left".
+  return t("spotDrag.tokenLabel", { token, drop: drop.replace(/-/g, "_") });
 }
 
 /**

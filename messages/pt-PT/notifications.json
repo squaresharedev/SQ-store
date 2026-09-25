@@ -1,0 +1,113 @@
+{
+  "metadata": {
+    "notifications": {
+      "title": "Notificações"
+    }
+  },
+  "loading": {
+    "title": "Notificações",
+    "srLoading": "a carregar notificações"
+  },
+  "bell": {
+    "label": "Notificações",
+    "unreadLabel": "{count, plural, one {Notificações, {count} por ler} many {Notificações, {count} por ler} other {Notificações, {count} por ler}}"
+  },
+  "list": {
+    "title": "Notificações",
+    "unread": "{count, plural, one {{count} por ler} many {{count} por ler} other {{count} por ler}}",
+    "markAllRead": "Marcar tudo como lido",
+    "livePaused": "Atualizações em direto em pausa. Atualize a página para ver as mais recentes.",
+    "empty": "Está tudo em dia. Ainda não há nada aqui.",
+    "viewAll": "Ver tudo"
+  },
+  "item": {
+    "unread": "Por ler"
+  },
+  "page": {
+    "title": "Notificações",
+    "markAllRead": "Marcar tudo como lido",
+    "emptyTitle": "Ainda sem notificações",
+    "emptyHint": "A atividade de equipa, encomendas e pagamentos vai aparecer aqui.",
+    "loadError": "Não foi possível carregar mais notificações. Verifique a sua ligação e tente novamente.",
+    "loading": "A carregar",
+    "loadMore": "Carregar mais"
+  },
+  "types": {
+    "team": "Equipa",
+    "order": "Encomenda",
+    "payment": "Pagamento",
+    "stock": "Stock",
+    "system": "Sistema",
+    "security": "Segurança",
+    "policy": "Política"
+  },
+  "time": {
+    "justNow": "agora mesmo",
+    "minutesAgo": "{count, plural, one {há {count} min} many {há {count} min} other {há {count} min}}",
+    "hoursAgo": "{count, plural, one {há {count} h} many {há {count} h} other {há {count} h}}",
+    "daysAgo": "{count, plural, one {há {count} d} many {há {count} d} other {há {count} d}}"
+  },
+  "messages": {
+    "teamInvite": {
+      "title": "Tem um convite de equipa",
+      "body": "{role, select, owner {{store} enviou-lhe um convite para se juntar como proprietário. Abra Equipa e acesso para aceitar.} editor {{store} enviou-lhe um convite para se juntar como editor. Abra Equipa e acesso para aceitar.} viewer {{store} enviou-lhe um convite para se juntar como leitor. Abra Equipa e acesso para aceitar.} other {{store} enviou-lhe um convite para se juntar à equipa. Abra Equipa e acesso para aceitar.}}",
+      "bodyUnnamedStore": "{role, select, owner {Uma loja SquareShare enviou-lhe um convite para se juntar como proprietário. Abra Equipa e acesso para aceitar.} editor {Uma loja SquareShare enviou-lhe um convite para se juntar como editor. Abra Equipa e acesso para aceitar.} viewer {Uma loja SquareShare enviou-lhe um convite para se juntar como leitor. Abra Equipa e acesso para aceitar.} other {Uma loja SquareShare enviou-lhe um convite para se juntar à equipa. Abra Equipa e acesso para aceitar.}}"
+    },
+    "teamJoined": {
+      "title": "{name} juntou-se à sua equipa",
+      "titleUnnamed": "Um novo membro juntou-se à sua equipa",
+      "body": "Já tem acesso à sua loja."
+    },
+    "security": {
+      "passwordChanged": {
+        "title": "A sua palavra-passe foi alterada",
+        "body": "A palavra-passe desta conta acabou de ser alterada e os outros dispositivos tiveram a sessão terminada. Se a alteração não foi feita por si, redefina a palavra-passe de imediato."
+      },
+      "passwordReset": {
+        "title": "A sua palavra-passe foi alterada",
+        "body": "Foi utilizado um link de redefinição para definir uma nova palavra-passe, e os outros dispositivos tiveram a sessão terminada. Se não foi si, redefina-a novamente de imediato."
+      },
+      "passwordSet": {
+        "title": "Foi definida uma palavra-passe na sua conta",
+        "body": "Esta conta já pode iniciar sessão com uma palavra-passe, além do Google. Se não foi si, redefina-a de imediato."
+      },
+      "resetRequested": {
+        "title": "Foi pedido um link de redefinição da palavra-passe",
+        "body": "Alguém pediu um link para definir uma nova palavra-passe nesta conta. Se não foi si, ignore o e-mail e altere a sua palavra-passe."
+      },
+      "emailChangeRequested": {
+        "title": "Pedido de alteração de e-mail",
+        "body": "Alguém pediu para mudar esta conta para um novo endereço de e-mail. Só produz efeito depois de o link nessa caixa de entrada ser confirmado. Se não foi si, altere a sua palavra-passe agora."
+      },
+      "lockedOut": {
+        "title": "Alguém está a tentar iniciar sessão na sua conta",
+        "body": "A palavra-passe foi introduzida corretamente, seguida de demasiados códigos de dois fatores errados, pelo que o início de sessão foi suspenso durante alguns minutos. Se não foi uma tentativa sua, a sua palavra-passe é conhecida por outra pessoa: altere-a já."
+      },
+      "recoveryCodeUsed": {
+        "title": "Foi utilizado um código de recuperação para iniciar sessão",
+        "body": "Alguém iniciou sessão na sua conta com um código de recuperação. Isso desativa a autenticação de dois fatores e termina a sessão em todos os outros dispositivos. Se foi uma ação sua, configure novamente a autenticação de dois fatores em Definições › Segurança. Caso contrário, altere já a palavra-passe."
+      },
+      "twoFactorEnabled": {
+        "title": "A autenticação de dois fatores está ativa",
+        "body": "Iniciar sessão na sua conta passa a exigir um código da sua aplicação de autenticação, e a sessão foi terminada em todos os outros dispositivos. Se não foi uma ação sua, altere a palavra-passe e contacte o suporte."
+      },
+      "factorAdded": {
+        "title": "Foi adicionada uma aplicação de autenticação",
+        "body": "«{name}» já pode ser utilizada para iniciar sessão na sua conta. Se não foi uma ação sua, remova-a em Definições › Segurança e altere a palavra-passe.",
+        "bodyUnnamed": "«Aplicação de autenticação» já pode ser utilizada para iniciar sessão na sua conta. Se não foi uma ação sua, remova-a em Definições › Segurança e altere a palavra-passe."
+      },
+      "twoFactorDisabled": {
+        "title": "A autenticação de dois fatores está desativada",
+        "body": "A sua última aplicação de autenticação foi removida, pelo que iniciar sessão passa a exigir apenas a palavra-passe. Se não foi uma ação sua, altere a palavra-passe e volte a ativar os dois fatores."
+      },
+      "factorRemoved": {
+        "title": "Foi removida uma aplicação de autenticação",
+        "body": "«{name}» já não pode ser utilizada para iniciar sessão na sua conta. Se não foi uma ação sua, altere já a palavra-passe."
+      },
+      "recoveryCodesRegenerated": {
+        "title": "Foram gerados novos códigos de recuperação",
+        "body": "Os seus códigos de recuperação anteriores deixaram de funcionar. Se não foi uma ação sua, altere já a palavra-passe."
+      }
+    }
+  }
+}

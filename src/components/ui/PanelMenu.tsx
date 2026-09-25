@@ -26,6 +26,7 @@
  */
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import {
   focusRingInsetClass,
@@ -106,13 +107,14 @@ export function PanelBackRow({
   ariaLabel?: string;
   onBack: () => void;
 }) {
+  const t = useTranslations("Common.panelMenu");
   return (
     <div className="sticky top-0 z-10 border-b border-border bg-background">
       <button
         type="button"
         suppressHydrationWarning
         onClick={onBack}
-        aria-label={ariaLabel ?? `Back to all settings, leaving ${title}`}
+        aria-label={ariaLabel ?? t("backLeaving", { title })}
         className={cn(
           "flex min-h-11 w-full items-center gap-1.5 rounded-none py-3 text-left lg:px-4",
           transitionClass,

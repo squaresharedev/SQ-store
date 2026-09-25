@@ -2,6 +2,7 @@
 
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MoveDiagonal2, RotateCw } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import {
   clampOntoBoard,
@@ -574,7 +575,7 @@ export function Grid<TData>(props: GridProps<TData>) {
     onMove,
     onResize,
     onMoveMany,
-    ariaLabel = "Grid",
+    ariaLabel,
     getBlockLabel,
     className,
     cellClassName,
@@ -585,6 +586,15 @@ export function Grid<TData>(props: GridProps<TData>) {
     allowOverlap = false,
     groupKeys,
   } = props;
+  const t = useTranslations("Common.grid");
+
+  /** What the live region says once a spin settles. */
+  const rotatedAnnouncement = (block: GridBlock<TData>, degrees: number) => {
+    const label = getBlockLabel?.(block);
+    return label === undefined
+      ? t("rotatedBlock", { degrees })
+      : t("rotated", { label, degrees });
+  };
 
   /**
    * Where a gesture may leave a block. One predicate, so the drag, the two
@@ -1592,7 +1602,7 @@ export function Grid<TData>(props: GridProps<TData>) {
       endGesture(handleMove, handleUp);
       if (latest === origin) return;
       onRotate(block.key, latest);
-      setAnnouncement(`${getBlockLabel?.(block) ?? "Block"} rotated to ${latest} degrees`);
+      setAnnouncement(rotatedAnnouncement(block, latest));
     };
 
     window.addEventListener("pointermove", handleMove);
@@ -1659,9 +1669,7 @@ export function Grid<TData>(props: GridProps<TData>) {
         (block.rotation ?? 0) + (event.key === "ArrowRight" ? step : -step),
       );
       onRotate(block.key, next);
-      setAnnouncement(
-        `${getBlockLabel?.(block) ?? "Block"} rotated to ${next} degrees`,
-      );
+      setAnnouncement(rotatedAnnouncement(block, next));
       return;
     }
 
@@ -1693,7 +1701,7 @@ export function Grid<TData>(props: GridProps<TData>) {
           y: member.y + step.y,
         })),
       );
-      setAnnouncement(`${group.length} blocks moved`);
+      setAnnouncement(t("blocksMoved", { count: group.length }));
       return;
     }
 
@@ -1764,7 +1772,7 @@ export function Grid<TData>(props: GridProps<TData>) {
     <div ref={containerRef} className={cn(GRID_CONTAINER_CLASS, className)}>
       <ul
         ref={gridRef}
-        aria-label={ariaLabel}
+        aria-label={ariaLabel ?? t("ariaLabel")}
         className={cn(GRID_ROOT_CLASS, "m-0 list-none p-0")}
         style={rootStyle}
       >
@@ -1994,9 +2002,11 @@ export function Grid<TData>(props: GridProps<TData>) {
                   aria-label={
                     resizableBlock(block)
                       ? label
-                        ? `Resize ${label}`
-                        : "Resize block"
-                      : `Resizing is unavailable: this block already fills all the room the stacked layout has${label ? `: ${label}` : ""}`
+                        ? t("resize", { label })
+                        : t("resizeBlock")
+                      : label
+                        ? t("resizeUnavailableNamed", { label })
+                        : t("resizeUnavailable")
                   }
                   onPointerDown={(event) => startResize(event, block)}
                   className={cn(
@@ -2031,11 +2041,11 @@ export function Grid<TData>(props: GridProps<TData>) {
                   type="button"
                   data-tile-chrome=""
                   role="slider"
-                  aria-label={label ? `Rotate ${label}` : "Rotate block"}
+                  aria-label={label ? t("rotate", { label }) : t("rotateBlock")}
                   aria-valuemin={-180}
                   aria-valuemax={180}
                   aria-valuenow={block.rotation ?? 0}
-                  aria-valuetext={`${block.rotation ?? 0} degrees`}
+                  aria-valuetext={t("rotation", { degrees: block.rotation ?? 0 })}
                   onPointerDown={(event) => startRotate(event, block)}
                   // The fastest undo of a spin that went wrong.
                   onDoubleClick={(event) => {
@@ -2106,7 +2116,7 @@ export function Grid<TData>(props: GridProps<TData>) {
                 // designer's marquee) may start here, unlike real controls.
                 data-grid-empty=""
                 onClick={() => onEmptyCellClick(cell.x, cell.y)}
-                aria-label={`Add a block at column ${cell.x + 1}, row ${cell.y + 1}`}
+                aria-label={t("addBlockAt", { column: cell.x + 1, row: cell.y + 1 })}
                 style={cellStyle?.({ ...cell, w: 1, h: 1 })}
                 className={cn(
                   "size-full border border-dashed border-border bg-background/40 transition-colors duration-base ease-standard hover:border-foreground/40 hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring motion-reduce:transition-none",

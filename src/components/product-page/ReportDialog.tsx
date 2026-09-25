@@ -2,18 +2,25 @@
 
 import * as React from "react";
 import { Flag } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { AnimatedCheck } from "@/components/ui/animated-check";
+import type { MessageRef } from "@/i18n/types";
 import {
   REPORT_DETAILS_MAX,
   REPORT_REASONS,
   REPORT_REASON_COPY,
   type ReportReason,
 } from "@/lib/validation/reports";
+
+/** The "(optional)" after a field label, a step quieter than the label. */
+function optionalMarker(chunks: React.ReactNode) {
+  return <span className="font-normal text-muted-foreground">{chunks}</span>;
+}
 
 /**
  * "Report this product" and the dialog behind it.
@@ -64,8 +71,12 @@ export function ReportDialog({
   const [email, setEmail] = React.useState("");
   const [state, setState] = React.useState<"idle" | "sending" | "sent">("idle");
   const [error, setError] = React.useState<string | null>(null);
-
-  const noun = targetType === "product" ? "product" : "storefront";
+  // The buyer's language, from their own request: this is their dialog, not
+  // the seller's page copy.
+  const t = useTranslations("ProductPage.report");
+  const tAll = useTranslations();
+  const tActions = useTranslations("Common.actions");
+  const resolve = (ref: MessageRef) => tAll(ref.key, ref.values);
 
   function close() {
     setOpen(false);
@@ -99,16 +110,18 @@ export function ReportDialog({
         }),
       });
       if (!response.ok) {
+        // Already in the reporter's language: the endpoint resolves its
+        // refusals from this same request.
         const body = (await response.json().catch(() => null)) as
           | { error?: string }
           | null;
-        setError(body?.error ?? "That could not be submitted. Try again.");
+        setError(body?.error ?? t("submitFailed"));
         setState("idle");
         return;
       }
       setState("sent");
     } catch {
-      setError("That could not be submitted. Check your connection and try again.");
+      setError(t("offline"));
       setState("idle");
     }
   }
@@ -125,7 +138,7 @@ export function ReportDialog({
         data-report-trigger={targetType}
       >
         <Flag aria-hidden="true" className="size-3" />
-        Report this {noun}
+        {t("trigger", { target: targetType })}
       </button>
 
       <Modal
@@ -136,12 +149,8 @@ export function ReportDialog({
         // silently file the most serious category. Land on the inert panel so
         // choosing a reason is always deliberate.
         initialFocus="dialog"
-        title={state === "sent" ? "Report sent" : `Report this ${noun}`}
-        description={
-          state === "sent"
-            ? undefined
-            : "Tell us what is wrong with it. A person reviews every report."
-        }
+        title={state === "sent" ? t("sentTitle") : t("title", { target: targetType })}
+        description={state === "sent" ? undefined : t("description")}
       >
         {state === "sent" ? (
           <div className="flex flex-col items-center gap-4 py-2 text-center">
@@ -158,19 +167,16 @@ export function ReportDialog({
               <AnimatedCheck className="size-6" />
             </span>
             <p className="text-sm text-muted-foreground">
-              Thanks. A person will review this {noun}. We do not share who
-              reported something with the seller.
+              {t("sentBody", { target: targetType })}
             </p>
             <Button type="button" onClick={close} className="w-full sm:w-auto">
-              Close
+              {tActions("close")}
             </Button>
           </div>
         ) : (
           <form onSubmit={submit} className="flex flex-col gap-5">
             <fieldset className="flex flex-col gap-2">
-              <legend className="pb-2 text-sm font-medium">
-                What is wrong with it?
-              </legend>
+              <legend className="pb-2 text-sm font-medium">{t("reasonsLegend")}</legend>
               {REPORT_REASONS.map((value) => (
                 <label
                   key={value}
@@ -187,10 +193,10 @@ export function ReportDialog({
                   />
                   <span className="flex flex-col gap-0.5">
                     <span className="text-sm font-medium">
-                      {REPORT_REASON_COPY[value].label}
+                      {resolve(REPORT_REASON_COPY[value].label)}
                     </span>
                     <span className="text-xs text-muted-foreground">
-                      {REPORT_REASON_COPY[value].hint}
+                      {resolve(REPORT_REASON_COPY[value].hint)}
                     </span>
                   </span>
                 </label>
@@ -199,7 +205,7 @@ export function ReportDialog({
 
             <div className="flex flex-col gap-2">
               <Label htmlFor="report-details">
-                Anything else? <span className="font-normal text-muted-foreground">(optional)</span>
+                {t.rich("detailsLabel", { muted: optionalMarker })}
               </Label>
               <Textarea
                 id="report-details"
@@ -208,13 +214,13 @@ export function ReportDialog({
                 maxLength={REPORT_DETAILS_MAX}
                 value={details}
                 onChange={(event) => setDetails(event.target.value)}
-                placeholder="What should the person reviewing this know?"
+                placeholder={t("detailsPlaceholder")}
               />
             </div>
 
             <div className="flex flex-col gap-2">
               <Label htmlFor="report-email">
-                Your email <span className="font-normal text-muted-foreground">(optional)</span>
+                {t.rich("emailLabel", { muted: optionalMarker })}
               </Label>
               <Input
                 id="report-email"
@@ -223,12 +229,9 @@ export function ReportDialog({
                 autoComplete="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                placeholder="you@example.com"
+                placeholder={t("emailPlaceholder")}
               />
-              <p className="text-xs text-muted-foreground">
-                Only so we can confirm we got this and ask a question if we need
-                to. It is never shown to the seller.
-              </p>
+              <p className="text-xs text-muted-foreground">{t("emailHelp")}</p>
             </div>
 
             {error && (
@@ -239,10 +242,10 @@ export function ReportDialog({
 
             <div className="flex items-center justify-end gap-3">
               <Button type="button" variant="ghost" onClick={close}>
-                Cancel
+                {tActions("cancel")}
               </Button>
               <Button type="submit" disabled={!reason || state === "sending"}>
-                {state === "sending" ? "Sending…" : "Send report"}
+                {state === "sending" ? tActions("sending") : t("send")}
               </Button>
             </div>
           </form>

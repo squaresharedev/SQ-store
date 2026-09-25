@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach, beforeAll } from "vitest";
-import { render, screen, cleanup, fireEvent, within } from "@testing-library/react";
+import { render, screen, cleanup, fireEvent, within } from "../setup/render";
 import { BarChart } from "@/components/charts/BarChart";
 import { CompositionBar } from "@/components/charts/CompositionBar";
 import { HBarChart } from "@/components/charts/HBarChart";
@@ -32,13 +32,13 @@ const TREND = [
 
 describe("formatters", () => {
   it("groups thousands and compacts large values deterministically", () => {
-    expect(formatNumber(1284)).toBe("1,284");
-    expect(formatNumber(-42_500.5)).toBe("-42,500.5");
-    expect(compactNumber(950)).toBe("950");
-    expect(compactNumber(12_400)).toBe("12.4k");
-    expect(compactNumber(4_200_000)).toBe("4.2M");
-    expect(formatShare(3, 12)).toBe("25%");
-    expect(formatShare(1, 0)).toBe("0%");
+    expect(formatNumber(1284, "en")).toBe("1,284");
+    expect(formatNumber(-42_500.5, "en")).toBe("-42,500.5");
+    expect(compactNumber(950, "en")).toBe("950");
+    expect(compactNumber(12_400, "en")).toBe("12.4k");
+    expect(compactNumber(4_200_000, "en")).toBe("4.2M");
+    expect(formatShare(3, 12, "en")).toBe("25%");
+    expect(formatShare(1, 0, "en")).toBe("0%");
   });
 });
 

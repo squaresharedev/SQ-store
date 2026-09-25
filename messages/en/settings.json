@@ -1,0 +1,696 @@
+{
+  "metadata": {
+    "layout": {
+      "titleTemplate": "%s | Square Share",
+      "default": "Settings | Square Share"
+    },
+    "account": {
+      "title": "Account settings"
+    },
+    "notifications": {
+      "title": "Notification settings"
+    },
+    "language": {
+      "title": "Language settings"
+    },
+    "danger": {
+      "title": "Danger zone"
+    },
+    "legal": {
+      "title": "Legal settings"
+    },
+    "team": {
+      "title": "Team & access"
+    },
+    "tax": {
+      "title": "Business & seller details"
+    },
+    "shipping": {
+      "title": "Shipping & returns settings"
+    },
+    "security": {
+      "title": "Security"
+    }
+  },
+  "loading": "Loading settings…",
+  "shell": {
+    "sectionsLabel": "Settings sections",
+    "recommended": "Recommended"
+  },
+  "continueToStorefront": "Continue to your storefront",
+  "account": {
+    "fallbackName": "Account",
+    "avatar": {
+      "cardTitle": "Profile photo",
+      "cardDescription": "A JPEG, PNG, or WebP up to 2 MB. Shown across your dashboard.",
+      "errorTooLarge": "That image is too large. Keep it under 2 MB.",
+      "errorBadType": "Use a JPEG, PNG, or WebP image.",
+      "errorReadFailed": "Could not read that file.",
+      "editLabel": "Edit your profile photo",
+      "uploadLabel": "Upload a profile photo",
+      "statusUploading": "Uploading your profile photo",
+      "statusRemoving": "Removing your profile photo",
+      "chooseLabel": "Choose profile photo",
+      "changePhoto": "Change photo",
+      "uploadPhoto": "Upload photo"
+    },
+    "crop": {
+      "title": "Crop your photo",
+      "description": "Drag to reposition. Scroll or use the slider to zoom.",
+      "areaLabel": "Crop area. Drag or use the arrow keys to reposition.",
+      "zoomLabel": "Zoom",
+      "chooseAnother": "Choose another",
+      "savePhoto": "Save photo",
+      "errors": {
+        "load": "That image could not be loaded. Try choosing it again.",
+        "process": "Your browser could not process that image.",
+        "prepare": "Could not prepare that image. Try a different one.",
+        "export": "That image could not be exported. Upload it again instead."
+      }
+    },
+    "username": {
+      "cardTitle": "Username",
+      "cardDescription": "Sign in with this instead of your email. Letters, numbers and underscores only, and no two accounts can share one.",
+      "label": "Username",
+      "placeholder": "yourhandle",
+      "available": "Available.",
+      "taken": "Someone already has this username, try another.",
+      "checking": "Checking…"
+    },
+    "bio": {
+      "cardTitle": "Bio",
+      "cardDescription": "A short line about you or what you make. Shown to buyers on your product pages.",
+      "label": "Bio",
+      "optional": "(Optional)",
+      "placeholder": "e.g. Hand-thrown stoneware from a tiny studio in Galway",
+      "charactersLeft": "{count, plural, one {{count} characters left} other {{count} characters left}}"
+    },
+    "email": {
+      "cardTitle": "Email",
+      "cardDescription": "Changing it sends a confirmation link first. Nothing moves until you actually click it, so typos here are low stakes.",
+      "currentlySignedInAs": "Currently signed in as <address>{email}</address>",
+      "newEmailLabel": "New email",
+      "newEmailPlaceholder": "you@studio.com",
+      "currentPasswordLabel": "Current password",
+      "passwordTipLabel": "Why your password is needed here",
+      "passwordTipBody": "Whoever controls your email address can reset your password, so changing it is a change to how you get back into the account. Your password confirms the change is really you.",
+      "sendConfirmationLink": "Send confirmation link"
+    },
+    "password": {
+      "cardTitle": "Password",
+      "descriptionHasPassword": "Change it whenever you like. We ask for the current one first, just to double-check it's really you.",
+      "descriptionNeverShown": "For your security, your password is never shown here. To change it, we email you a link to set a new one.",
+      "descriptionNoPassword": "You sign in with Google. Add a password to sign in with your email or username too.",
+      "changeButton": "Change password",
+      "resetButton": "Reset password",
+      "setButton": "Set a password",
+      "modalTitleChange": "Change your password",
+      "modalTitleReset": "Reset your password",
+      "modalTitleSet": "Set a password",
+      "modalDescriptionReset": "We'll email a link to {email}. It expires shortly after it arrives.",
+      "modalDescriptionChange": "Enter your current password, then the new one.",
+      "currentPasswordLabel": "Current password",
+      "newPasswordLabel": "New password",
+      "passwordHint": "At least 8 characters, mixing cases, numbers or symbols (or a passphrase of 16+).",
+      "confirmPasswordLabel": "Confirm new password",
+      "signOutWarning": "Every other device will be signed out.",
+      "forgotPassword": "Forgot password?",
+      "updating": "Updating…",
+      "updateButton": "Update password",
+      "resendIn": "{seconds, plural, other {Resend in #s}}",
+      "resendEmail": "Resend email",
+      "emailMeALink": "Email me a link",
+      "googleAccountNote": "This account signs in with Google. Setting a password lets you sign in with your email or username as well, and does not remove Google.",
+      "neverShownNote": "Your current password is never shown. Open the link to choose a new one; setting it signs out your other devices."
+    },
+    "signOut": {
+      "cardTitle": "Sign out",
+      "cardDescription": "End this session on this device, or sign out everywhere to log out of every device at once.",
+      "signingOut": "Signing out…",
+      "button": "Sign out",
+      "everywhereButton": "Sign out everywhere",
+      "everywhereNote": "Signing out everywhere ends your session on every device and browser you’re signed in on. You’ll need to sign in again each place."
+    },
+    "success": {
+      "usernameSaved": "Username saved.",
+      "bioSaved": "Bio saved.",
+      "emailChangeStarted": "Check your inbox. The change applies once you confirm the link.",
+      "passwordUpdated": "Password updated. Other devices have been signed out.",
+      "resetSent": "Reset link sent. Check your inbox.",
+      "avatarUpdated": "Profile photo updated.",
+      "avatarRemoved": "Profile photo removed."
+    }
+  },
+  "danger": {
+    "export": {
+      "cardTitle": "Export my data",
+      "cardDescription": "Everything we hold about you: profile, products, storefront config, all bundled into one JSON file. It's your data, yours to keep.",
+      "downloadButton": "Download my data",
+      "stepUpDescription": "Your export contains your whole account. Enter the current code from your authenticator app to download it."
+    },
+    "delete": {
+      "requestedTitle": "Deletion requested",
+      "requestedDescription": "You asked us to delete this account on {date}. It's flagged for permanent deletion, products and storefront included. Until that actually runs, you can still change your mind.",
+      "cancelling": "Cancelling…",
+      "keepButton": "Keep my account",
+      "title": "Delete account",
+      "description": "This flags your account, products and storefront for permanent deletion. No soft-pedaling: once it runs, it's gone.",
+      "deleteButton": "Delete my account",
+      "confirmLabel": "Type <code>{phrase}</code> to confirm",
+      "flagging": "Flagging…",
+      "permanentlyDelete": "Permanently delete",
+      "neverMind": "Never mind"
+    },
+    "success": {
+      "deletionRequested": "Deletion requested.",
+      "deletionCancelled": "Deletion request cancelled. Good to have you back."
+    }
+  },
+  "notifications": {
+    "cardTitle": "Email notifications",
+    "cardDescription": "Pick what lands in your inbox. Security and payment emails sneak through regardless, we can't let those go quiet.",
+    "prefs": {
+      "sales": {
+        "label": "Sales",
+        "blurb": "Email me every time something sells. The good kind of inbox noise."
+      },
+      "productUpdates": {
+        "label": "Product updates",
+        "blurb": "New dashboard features and improvements, as soon as they're ready to ship."
+      },
+      "marketing": {
+        "label": "Tips & marketplace news",
+        "blurb": "Occasional ideas to help you sell more. We keep it light, no spam."
+      }
+    },
+    "success": {
+      "notificationsSaved": "Preferences saved."
+    }
+  },
+  "legal": {
+    "cardTitle": "Seller Agreement, Terms & Privacy",
+    "cardDescription": "The current drafts, in plain language, because nobody reads legalese for fun. Real legal copy is on its way; accepting now covers this draft version.",
+    "termsTitle": "Terms of Service",
+    "termsDescription": "The short version of what you agree to by selling on Square Share, with the full Terms a click away.",
+    "docs": {
+      "sellerAgreement": {
+        "title": "Seller Agreement",
+        "body": "You own your work, always. We take a small cut per sale, handle payments through Stripe, and keep the servers humming along. You keep it legal and ship what you actually sell. This is a draft placeholder; the real agreement is on its way."
+      },
+      "terms": {
+        "title": "Terms of Service",
+        "body": "Don't abuse the platform, don't sell things that hurt people, and play nice with other creators' stores. This is a draft placeholder; the real terms are on their way."
+      },
+      "privacy": {
+        "title": "Privacy Policy",
+        "body": "We store what you give us (profile, products, storefront), never sell it, and delete it when you leave. Payments run through Stripe, so your card details stay with them, not us. This is a draft placeholder; the real policy is on its way."
+      },
+      "sellerDetails": {
+        "title": "Your seller details, and where they go",
+        "body": "Your trader name, address and contact email are shown to buyers on your product pages, and are required before you can publish or sell anything. That is the only thing we do with them: EU consumer law says a buyer has to be able to see who they are buying from and reach them before they order. We send one link to your contact address so you can confirm it works, and that is the only email we send there on our own initiative — no list, no marketing, and we never sell or share any of it. Your phone number and VAT ID are optional and are shown only if you fill them in."
+      }
+    },
+    "accepted": "You accepted version <code>{version}</code> on {date}. Nothing more to do here.",
+    "outdated": "You accepted version <code>{version}</code> on {date}, but the docs have changed since. Give them another read and accept the current version.",
+    "agreed": "You agreed to version <code>{version}</code> on {date}. Nothing more to do here.",
+    "agreedOutdated": "You agreed to version <code>{version}</code> on {date}, but the Terms have changed since. Give them another read and agree to the current version.",
+    "recording": "Recording…",
+    "acceptButton": "I accept",
+    "agreeButton": "I have read and agree to the Terms",
+    "acceptNote": "Accepting records the date and version <code>{version}</code> to your account.",
+    "agreeNote": "Agreeing records the date and version <code>{version}</code> on your account.",
+    "scrollToAgree": "Scroll to the end of the summary to agree.",
+    "success": {
+      "legalAccepted": "Accepted. Thanks for reading the fine print.",
+      "termsAgreed": "You've agreed to the Terms of Service."
+    },
+    "termsSummary": {
+      "intro": "The short version, in plain language. Last updated {date}.",
+      "fullTermsLink": "Read the full Terms of Service",
+      "opensInNewTab": " (opens in a new tab)",
+      "regionLabel": "Terms of Service, short version",
+      "footer": "This summary is here to help you read them. What you agree to is the full <terms>Terms of Service</terms> and <privacy>Privacy Policy</privacy>.",
+      "sections": {
+        "parties": {
+          "heading": "Who you're dealing with",
+          "points": {
+            "merchantOfRecord": "Square Share is a platform that helps you sell. When a buyer orders from you, the sale is between you and that buyer: you are the seller and merchant of record, not us.",
+            "eligibility": "You must be at least 18, or the age of majority where you live. If you sign up for a business, you confirm you can bind it to these Terms."
+          }
+        },
+        "account": {
+          "heading": "Your account",
+          "points": {
+            "security": "Keep your details accurate and your sign-in secure. You are responsible for what happens under your account, so tell us straight away if you think someone else got in.",
+            "traderDetails": "Before anything goes live, you give us your trader name, a postal address and a contact email that you confirm. Buyers see these on your product pages, because consumer law requires it."
+          }
+        },
+        "selling": {
+          "heading": "Selling",
+          "points": {
+            "lawfulListings": "List accurately, and only sell lawful things you have the right to sell.",
+            "consumerRights": "Honour your buyers' consumer rights, including the 14-day right of withdrawal and the legal guarantee, and handle your own delivery, support and refunds.",
+            "taxesAndRecords": "Taxes and VAT on your sales are yours to handle, and you keep your own sales records for 10 years."
+          }
+        },
+        "payments": {
+          "heading": "Payments",
+          "points": {
+            "stripe": "Payments run through Stripe, into your own Stripe account, under Stripe's own terms. We never hold your money.",
+            "feesAndDisputes": "We take a platform fee on each sale, as shown in your dashboard. Chargebacks and disputes are between you, your buyer and Stripe."
+          }
+        },
+        "notAllowed": {
+          "heading": "What's not allowed",
+          "points": {
+            "products": "Illegal, counterfeit or infringing products, malware, hateful content and adult content.",
+            "conduct": "Fraud, dodging platform fees, scraping, using anyone's content to train AI models, or attacking the service.",
+            "tampering": "Hiding or changing what Square Share shows buyers, such as your seller details, prices or legal notices."
+          }
+        },
+        "content": {
+          "heading": "Your content",
+          "points": {
+            "ownership": "What you upload stays yours. You give us a licence to host and show it, only to run and promote Square Share."
+          }
+        },
+        "liability": {
+          "heading": "Liability, changes and the law",
+          "points": {
+            "cap": "Square Share is early and offered as is to business users. For them, our liability is capped at the fees paid to us in the last 12 months or EUR 100, whichever is greater, and business sellers cover us for claims caused by their products, sites or breaches. If you are a consumer, your legal rights are unaffected.",
+            "termination": "We can suspend or close accounts that break these Terms. You can leave at any time and take your data with you.",
+            "changesAndLaw": "We may update these Terms, with advance notice of material changes. Czech law applies.",
+            "policies": "Our Privacy Policy and Cookie Policy form part of these Terms."
+          }
+        }
+      }
+    }
+  },
+  "tax": {
+    "cardTitle": "Business & seller details",
+    "cardDescription": "Set once for your whole account. Shown to buyers on every product page you sell on, and used for invoices and VAT.",
+    "verifyOutcome": {
+      "verified": "Contact email confirmed. You can publish now.",
+      "expired": "That confirmation link has expired. Send yourself a new one below.",
+      "stale": "That link was for a different address than the one saved here. Send a new one below.",
+      "invalid": "That confirmation link is not valid, or has already been used.",
+      "throttled": "Too many confirmation attempts. Wait a while, then open the link again."
+    },
+    "gate": {
+      "required": "<strong>Your trader name, address and contact email are required before you can publish or sell anything.</strong> Buyers have to be able to see who they are buying from and how to reach you before they order.",
+      "privacyNoteLinked": "These details appear publicly on your product pages for that reason alone. We never use them for marketing, and never sell or share them. The one email we send to your contact address is the link that confirms it. See the <link>Squareshare Privacy Policy</link>."
+    },
+    "countryNotEu": "Not in the EU / prefer not to say",
+    "vatAdvisory": {
+      "noCountry": "This VAT ID looks like it was issued by {issuer}. You may want to set your country.",
+      "mismatch": "This VAT ID looks like it was issued by {issuer}, but your country is set to {selected}. Check both are correct."
+    },
+    "fields": {
+      "businessName": {
+        "label": "Trader name",
+        "tipLabel": "What to put here",
+        "tipBody": "The name buyers are contracting with. Your registered business name if you sell through one; your own full name if you sell as an individual. Your storefront's name is a shop name, which is not the same thing and cannot stand in for this.",
+        "placeholder": "e.g. Studio Builderboy e.U."
+      },
+      "address": {
+        "label": "Address",
+        "tipLabel": "Why buyers see this",
+        "tipBody": "Distance-selling law asks for a postal address next to every offer. Shown in the Seller section of your product pages.",
+        "placeholder": "e.g. 12 Market Street\nDublin, D02 X285\nIreland"
+      },
+      "email": {
+        "label": "Contact email",
+        "tipLabel": "How this differs from your sign-in email",
+        "tipBody": "Shown to buyers as a mailto link, and used as the buy button's fallback when a product has no purchase link. Kept separate from your sign-in email on purpose: use whichever address you want buyers writing to. It has to be an address you actually read — placeholders, temp-mail providers and no-reply addresses are refused, and so is a domain that takes no mail.",
+        "placeholder": "e.g. hello@yourshop.example",
+        "statusDirty": "Save to send a confirmation link to the new address. Buyers see it only once it is confirmed.",
+        "statusConfirmed": "Confirmed — buyers can reach you here.",
+        "statusUnconfirmed": "Not confirmed yet. Open the link we emailed to this address."
+      },
+      "vatId": {
+        "label": "VAT ID",
+        "placeholder": "e.g. ATU12345678"
+      },
+      "country": {
+        "label": "Country"
+      },
+      "phone": {
+        "label": "Phone"
+      },
+      "bio": {
+        "label": "Bio",
+        "tipLabel": "Where buyers see this",
+        "tipBody": "One line about you or what you make, shown under your name in the Seller section of your product pages. Optional: you can publish without it. Each storefront's header bio is set separately in the storefront editor.",
+        "placeholder": "e.g. Hand-thrown stoneware from a tiny studio in Galway",
+        "charactersLeft": "{count, plural, one {# characters left} other {# characters left}}"
+      }
+    },
+    "resend": {
+      "button": "Resend confirmation email"
+    },
+    "success": {
+      "savedCheckEmail": "Saved. Check {email} for a link to confirm the address.",
+      "sellerDetailsSaved": "Business & seller details saved.",
+      "alreadyConfirmed": "That address is already confirmed.",
+      "confirmationSent": "Sent. Check {email} for the link."
+    }
+  },
+  "shipping": {
+    "shipsFrom": {
+      "label": "Ships from",
+      "notSet": "Not set"
+    },
+    "shippingCard": {
+      "title": "Shipping",
+      "description": "Set once for your whole account. Shown on every product page you sell on, and used for every product that does not name an exception below."
+    },
+    "dispatch": {
+      "label": "Dispatch time",
+      "tipLabel": "Why this is its own field",
+      "tipBody": "One line, printed beside the buy button. “When does it leave?” is the first thing buyers ask, and it should not need reading a paragraph to answer.",
+      "placeholder": "e.g. Ships within 1-3 business days"
+    },
+    "destinations": {
+      "label": "Where you ship, and how long it takes",
+      "tipLabel": "How much detail to give",
+      "tipBody": "Group destinations however you actually ship: one row for home, one for the rest of the EU, one for everywhere else is plenty. Leave the cost blank if it varies.",
+      "empty": "Nothing listed yet. Buyers see no delivery times until you add a row.",
+      "areaLabel": "Destination {number}",
+      "areaPlaceholder": "e.g. Rest of EU",
+      "timeLabel": "Delivery time {number}",
+      "timePlaceholder": "e.g. 5-7 business days",
+      "costLabel": "Shipping cost {number}",
+      "costPlaceholder": "e.g. €9.00",
+      "removeNamed": "Remove the {area} destination",
+      "removeNumbered": "Remove destination {number}",
+      "add": "Add a destination",
+      "limitReached": "{max, plural, one {That is all # destination. Remove one to add another.} other {That is all # destinations. Remove one to add another.}}"
+    },
+    "notes": {
+      "label": "Anything else about shipping",
+      "placeholder": "e.g. Tracked as standard. We do not ship to PO boxes."
+    },
+    "returnsCard": {
+      "title": "Returns",
+      "description": "What you offer on top of the statutory rights your product pages already state."
+    },
+    "returnsWindow": {
+      "label": "Returns window",
+      "tipLabel": "What the statutory right already covers",
+      "tipBody": "Selling to EU buyers at a distance gives them 14 days to change their mind and a two-year guarantee on faults, whatever you choose here. Your product pages state both already, so this is what you offer on top.",
+      "none": "None beyond the statutory right",
+      "days": "{days, plural, one {# day} other {# days}}",
+      "statutoryMinimum": "The EU statutory minimum",
+      "custom": "Something else",
+      "customLabel": "Returns window in days",
+      "daysUnit": "days"
+    },
+    "returnsPaidBy": {
+      "label": "Return postage",
+      "buyer": "The buyer pays return postage",
+      "seller": "We pay return postage"
+    },
+    "exceptions": {
+      "label": "Exceptions",
+      "tipLabel": "What belongs here",
+      "tipBody": "Anything the window above does not cover: made-to-order pieces, hygiene items, opened software. Buyers read this before they buy, not after.",
+      "placeholder": "e.g. Made-to-order pieces cannot be returned unless faulty."
+    },
+    "preview": {
+      "title": "What buyers will read",
+      "description": "Built from your answers above, and shown on every product page.",
+      "shippingHeading": "Shipping",
+      "returnsHeading": "Returns",
+      "empty": "Nothing yet. Until you answer something above, your product pages carry no shipping or returns section at all."
+    },
+    "ownWords": {
+      "title": "Write it yourself instead",
+      "description": "Optional. Anything you put here replaces what was generated above, word for word.",
+      "shippingLabel": "Your shipping policy",
+      "returnsLabel": "Your returns policy",
+      "placeholder": "Leave blank to use the answers above."
+    },
+    "profiles": {
+      "title": "Shipping profiles",
+      "description": "For the few products that ship differently. Pick one on the product itself, under Shipping.",
+      "empty": "None yet. Add one only if some products ship differently from the terms above.",
+      "nameLabel": "Name",
+      "namePlaceholder": "e.g. Bulky items",
+      "removeNamed": "Remove the {name} shipping profile",
+      "removeUnnamed": "Remove this shipping profile",
+      "dispatchLabel": "Dispatch time",
+      "dispatchPlaceholder": "e.g. Made to order, allow 3 weeks",
+      "bodyLabel": "Shipping",
+      "bodyPlaceholder": "How these products ship, and what it costs",
+      "noTerms": "Add terms, or this profile is dropped when you save.",
+      "add": "Add a profile",
+      "limitReached": "{max, plural, one {That is all # profile. Remove one to add another.} other {That is all # profiles. Remove one to add another.}}"
+    },
+    "success": {
+      "shippingSaved": "Shipping & returns saved."
+    }
+  },
+  "sellerDetails": {
+    "bannerLabel": "Seller details required",
+    "memberHeadline": "This store can't publish or sell yet.",
+    "memberFix": "Its owner has to add their seller details in their own settings.",
+    "addLink": "Add seller details",
+    "opensInNewTab": " (opens in a new tab)",
+    "headline": {
+      "publishOrSell": "You can't publish or sell anything until your seller details are complete.",
+      "putProductOnSale": "You can't put this product on sale until your seller details are complete.",
+      "importLiveProducts": "You can't import live products until your seller details are complete.",
+      "embedStorefront": "You can't embed this storefront until your seller details are complete.",
+      "publishStorefront": "You can't publish this storefront or sell from it until your seller details are complete."
+    },
+    "reason": "Buyers have to be able to see who they are buying from and how to reach you before they order. These are shown on your product pages for that reason only, never used for marketing.",
+    "fields": {
+      "businessName": {
+        "label": "Trader name",
+        "why": "Buyers have to know who they are buying from: your business name, or your own full name if you sell as an individual."
+      },
+      "address": {
+        "label": "Business address",
+        "why": "A postal address has to appear with every offer under distance-selling law."
+      },
+      "email": {
+        "label": "Contact email",
+        "why": "The address buyers write to about an order. It is also the buy button's fallback when a product has no purchase link."
+      },
+      "emailVerified": {
+        "label": "Confirmed contact email",
+        "why": "We send a link to that address and you click it. Nothing else proves a buyer's message would actually reach someone."
+      }
+    }
+  },
+  "security": {
+    "copyRecoveryCodes": {
+      "copy": "Copy recovery codes",
+      "copied": "Copied recovery codes",
+      "failed": "Couldn't copy recovery codes. Select and copy it manually."
+    },
+    "copySetupKey": {
+      "copy": "Copy setup key",
+      "copied": "Copied setup key",
+      "failed": "Couldn't copy setup key. Select and copy it manually."
+    },
+    "prompt": {
+      "title": "Your password is the only lock on this account",
+      "body": "Turn on two-factor authentication so signing in also needs a code from your phone. It takes about a minute.",
+      "cta": "Turn on 2FA"
+    },
+    "recoveredNotice": "<strong>Two-factor authentication is off.</strong> You signed in with a recovery code, which removed your old authenticator and signed out your other devices. Set it up again now so your password isn’t the only thing protecting your account.",
+    "stepUpConfirm": "Enter a current code from your authenticator app to confirm.",
+    "twoFactor": {
+      "cardTitle": "Two-factor authentication",
+      "descriptionOn": "Signing in needs your password and a code from your authenticator app.",
+      "descriptionOff": "Add a second step to signing in: a 6-digit code from an app on your phone.",
+      "statusOn": "On",
+      "statusOff": "Off",
+      "listLabel": "Authenticator apps",
+      "added": "Added {date}",
+      "removeLabel": "Remove {name}",
+      "addAnother": "Add another authenticator",
+      "benefits": {
+        "password": "A stolen or guessed password is no longer enough to get into your store.",
+        "changes": "Changes to payouts details, your team and your account need a code from your phone.",
+        "changesBusiness": "Changes to your business details, your team and your account need a code from your phone.",
+        "alerts": "You get an email the moment someone gets your password right but the code wrong."
+      },
+      "setUp": "Set up two-factor authentication",
+      "takesAMinute": "Takes about a minute."
+    },
+    "remove": {
+      "titleLast": "Turn off two-factor authentication?",
+      "title": "Remove \"{name}\"?",
+      "descriptionLast": "This is your only authenticator. Removing it turns two-factor authentication off, and your recovery codes stop working. Signing in will need only your password.",
+      "description": "\"{name}\" will no longer be able to sign in to your account.",
+      "removing": "Removing…",
+      "turnOff": "Turn off"
+    },
+    "setup": {
+      "suggestedName": "Authenticator app",
+      "suggestedNameNumbered": "Authenticator app {number}",
+      "added": "Authenticator added.",
+      "enabled": "Two-factor authentication is on.",
+      "titleCodes": "Save your recovery codes",
+      "titleAdd": "Add an authenticator app",
+      "titleEnable": "Turn on two-factor authentication",
+      "descriptionAdd": "Use a second phone or app as a backup way to sign in.",
+      "descriptionEnable": "After this, signing in takes your password and a code from an app on your phone.",
+      "descriptionScan": "Scan the code with your authenticator app, then enter the 6 digits it shows.",
+      "descriptionCodes": "Two-factor authentication is on.",
+      "googleReauth": "Your account signs in with Google, so there’s no password to confirm it’s you. Sign in again, and you’ll come straight back here to finish.",
+      "confirmWithGoogleFirst": "Confirm it's you with Google first. You'll come straight back here to finish.",
+      "signInAgainFirst": "For your security, sign in again first. You'll come straight back here to finish.",
+      "signInAgain": "Sign in again",
+      "nameLabel": "Name this authenticator",
+      "nameHint": "So you can tell your apps apart later, e.g. “Pixel 8”.",
+      "stepUpDescription": "Enter a code from an authenticator you already use, to confirm it's you.",
+      "passwordLabel": "Current password",
+      "squareSharePasswordLabel": "Square Share password",
+      "passwordHint": "So nobody who finds your laptop signed in can lock you out with their own phone.",
+      "notYourGooglePassword": "Not your Google password. Don't know it? Confirm with Google below instead.",
+      "signedInRecently": "You signed in a moment ago, so there’s nothing else to confirm.",
+      "or": "or",
+      "checking": "Checking…",
+      "continue": "Continue",
+      "qrAlt": "QR code to scan with your authenticator app",
+      "anyApp": "Any authenticator app works: Google Authenticator, Microsoft Authenticator, 1Password, Authy and others.",
+      "cantScan": "Can’t scan it? Enter this key instead:",
+      "setupKeyLabel": "Setup key",
+      "openInApp": "Open in authenticator app",
+      "codeLabel": "6-digit code from the app",
+      "verifying": "Verifying…",
+      "verifyAndAdd": "Verify and add",
+      "verifyAndTurnOn": "Verify and turn on"
+    },
+    "recoveryCodes": {
+      "cardTitle": "Recovery codes",
+      "cardDescription": "One-time codes for signing in if you lose your phone. Keep them somewhere other than the phone itself.",
+      "countUnavailable": "We couldn’t check how many you have left.",
+      "remaining": "{count, plural, one {{count} of {total} codes left.} other {{count} of {total} codes left.}}",
+      "remainingLow": "{count, plural, one {{count} of {total} codes left. Running low: generate a new set.} other {{count} of {total} codes left. Running low: generate a new set.}}",
+      "remainingNone": "{count, plural, one {{count} of {total} codes left. You have none left: generate a new set now.} other {{count} of {total} codes left. You have none left: generate a new set now.}}",
+      "generate": "Generate new codes",
+      "generating": "Generating…",
+      "regenerateTitle": "Generate new recovery codes?",
+      "regenerateDescription": "Your current codes stop working as soon as the new ones are made.",
+      "newTitle": "Your new recovery codes",
+      "newDescription": "Your old codes no longer work."
+    },
+    "recoveryCodesDisplay": {
+      "notCreated": "Two-factor authentication is on, but we couldn’t create your recovery codes. Generate a set from the Recovery codes card before you sign out.",
+      "warning": "Save these somewhere safe, like a password manager. Each works once, they’re the only way back in if you lose your phone, and you won’t see them again.",
+      "listLabel": "Recovery codes",
+      "download": "Download",
+      "saved": "I’ve saved my recovery codes somewhere safe.",
+      "file": {
+        "title": "Square Share recovery codes",
+        "explainer": "Each code can be used once to sign in if you lose your authenticator app.",
+        "generated": "Generated {date}"
+      }
+    },
+    "activity": {
+      "cardTitle": "Recent security activity",
+      "cardDescription": "Changes to how you sign in, newest first. If you don't recognise something here, change your password and turn on two-factor authentication.",
+      "unavailable": "Your activity couldn’t be loaded right now.",
+      "empty": "Nothing yet.",
+      "timeUtc": "{time} UTC",
+      "events": {
+        "passwordChanged": "Password changed",
+        "passwordSet": "Password set",
+        "passwordResetRequested": "Password reset link requested",
+        "emailChangeRequested": "Email change requested",
+        "twoFactorEnabled": "Two-factor authentication turned on",
+        "twoFactorDisabled": "Two-factor authentication turned off",
+        "factorAdded": "Authenticator app added",
+        "factorRemoved": "Authenticator app removed",
+        "recoveryCodesRegenerated": "New recovery codes generated",
+        "recoveryCodeUsed": "Recovery code used to sign in",
+        "challengeFailed": "Wrong two-factor code entered at sign-in",
+        "lockedOut": "Two-factor sign-in paused after repeated wrong codes"
+      }
+    },
+    "success": {
+      "twoFactorOff": "Two-factor authentication is off.",
+      "factorRemoved": "Removed \"{name}\".",
+      "codesRegenerated": "New recovery codes ready. Your old ones no longer work.",
+      "confirmed": "Confirmed."
+    }
+  },
+  "team": {
+    "roles": {
+      "owner": {
+        "label": "Owner",
+        "description": "Full control. Exactly one per store, cannot be changed or removed."
+      },
+      "editor": {
+        "label": "Editor",
+        "description": "Can view the store and edit products and the storefront. Can invite members at or below their role."
+      },
+      "viewer": {
+        "label": "Viewer",
+        "description": "Can view the store and team. Read-only."
+      }
+    },
+    "cardTitle": "Team",
+    "cardDescription": "People who can sign in to this store. Their role controls what they can see and change.",
+    "loadError": "Couldn't load more members. Try again.",
+    "loadMore": "Load more members",
+    "inviteButton": "Invite member",
+    "memberList": {
+      "onlyOwner": "It's just you so far. Invite someone to give them access.",
+      "invitedHeading": "Invited",
+      "invitedTipLabel": "What an invited member can do",
+      "invitedTipBody": "Nothing yet. An invite takes effect the first time that person signs in with the email address it was sent to, and only then do they appear as a member with the role you chose.",
+      "showingFirst": "{count, plural, other {Showing the first # members.}}"
+    },
+    "memberRow": {
+      "you": "(you)",
+      "cancelInviteLabel": "Cancel the invite to {email}",
+      "removeMemberLabel": "Remove {name} from the team",
+      "cancelInviteTitle": "Cancel invite",
+      "removeFromTeamTitle": "Remove from team",
+      "confirmRoleChange": "Make {name} {role, select, owner {owner} editor {editor} viewer {viewer} other {{role}}}?",
+      "confirmCancelInvite": "Cancel the invite to {email}?",
+      "confirmRemove": "Remove {name}? They lose access immediately.",
+      "cancelling": "Cancelling…",
+      "removing": "Removing…",
+      "cancelled": "Cancelled",
+      "removed": "Removed",
+      "cancelInviteButton": "Cancel invite",
+      "keep": "Keep"
+    },
+    "inviteModal": {
+      "title": "Invite a member",
+      "description": "They'll get access when they sign in with this email address.",
+      "emailLabel": "Email address",
+      "emailPlaceholder": "colleague@example.com",
+      "roleLabel": "Role",
+      "notificationNote": "Email notifications aren't wired up yet — the invite takes effect when they sign in. You may want to let them know directly.",
+      "sendButton": "Send invite"
+    },
+    "inviteRow": {
+      "invitedAs": "<store>{storeName}</store> invited you as <strong>{role, select, owner {Owner} editor {Editor} viewer {Viewer} other {{role}}}</strong>",
+      "accepting": "Accepting…",
+      "accepted": "Accepted",
+      "acceptButton": "Accept"
+    },
+    "invitePrompt": {
+      "title": "{count, plural, one {You have a team invite} other {You have team invites}}",
+      "description": "{count, plural, one {You've been invited to join a team. Accept to get access.} other {You've been invited to join these teams. Accept to get access.}}",
+      "maybeLater": "Maybe later"
+    },
+    "pendingInvites": {
+      "cardTitle": "Invites for you",
+      "cardDescription": "Accept an invite to join that store's team."
+    },
+    "success": {
+      "inviteCreated": "Invite created. They'll see it when they sign in with that email. (Email sending isn't wired up yet.)",
+      "inviteAccepted": "Welcome to the team.",
+      "roleUpdated": "Role updated.",
+      "memberRemoved": "Member removed."
+    }
+  }
+}

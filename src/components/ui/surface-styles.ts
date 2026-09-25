@@ -22,6 +22,15 @@ export const emptyStateClass =
   "flex flex-col items-center justify-center rounded-md border border-dashed border-border px-6 py-16 text-center";
 
 /**
+ * The frame around an empty list that leads with an AddShowcase (products,
+ * storefronts): a plain hairline card, no dashes and no texture, so the add
+ * card's glow and the examples beside it are the only decoration on it.
+ * `overflow-hidden` keeps the glow inside the frame.
+ */
+export const emptyShowcaseClass =
+  "relative flex flex-col items-center justify-center overflow-hidden rounded-md border border-border bg-background px-6 py-16 text-center";
+
+/**
  * One shimmering placeholder block. Give it a width/height at the call site;
  * the pulse stops under reduced motion (styles.md §6.2).
  */

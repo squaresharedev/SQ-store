@@ -204,8 +204,13 @@ describe("search — the XSS surface", () => {
     // The CSP in next.config.ts is report-only and cannot use a nonce on this
     // stack (see the comment there), so "there is no sink" is doing the actual
     // work rather than being a nice-to-have on top of a strict policy.
+    //
+    // `.markup(` is next-intl's `t.markup`, which returns translated copy as an
+    // HTML STRING. Its only use is feeding a sink like the ones above, so it is
+    // banned with them; rich text goes through `t.rich`, which returns React
+    // nodes and escapes like any other JSX.
     const offenders = ALL_SOURCES.filter(({ source }) =>
-      /dangerouslySetInnerHTML|\.innerHTML\s*=|\beval\(|new Function\(/.test(
+      /dangerouslySetInnerHTML|\.innerHTML\s*=|\beval\(|new Function\(|\.markup\(/.test(
         source,
       ),
     ).map(({ path }) => path);

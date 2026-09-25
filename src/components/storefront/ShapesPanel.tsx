@@ -1,11 +1,12 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { CollapsibleSection } from "@/components/ui/CollapsibleSection";
 import { focusRingClass, transitionClass } from "@/components/ui/control-styles";
 import type { ShapeKind } from "@/types/storefront";
 import { ShapeKindGlyph } from "./ShapeTileContent";
-import { SHAPE_GROUPS, SHAPE_SPECS } from "./shape-specs";
+import { SHAPE_GROUPS } from "./shape-specs";
 
 /**
  * The shape library, the second half of the left-hand library panel.
@@ -28,13 +29,14 @@ export function ShapesPanel({
   /** False at the block cap; the buttons disable rather than fail silently. */
   canAddBlocks: boolean;
 }) {
+  const t = useTranslations("Storefront.shapes");
   return (
     <div>
       {SHAPE_GROUPS.map((group) => (
-        <CollapsibleSection key={group.title} title={group.title}>
+        <CollapsibleSection key={group.id} title={t(`group.${group.id}`)}>
           <div
             role="group"
-            aria-label={`${group.title} shapes`}
+            aria-label={t(`groupLabel.${group.id}`)}
             className="grid grid-cols-4 gap-1.5"
           >
             {group.kinds.map((kind) => (
@@ -43,8 +45,8 @@ export function ShapesPanel({
                 type="button"
                 onClick={() => onAddShape(kind)}
                 disabled={!canAddBlocks}
-                aria-label={`Add ${SHAPE_SPECS[kind].label.toLowerCase()}`}
-                title={SHAPE_SPECS[kind].label}
+                aria-label={t(`add.${kind}`)}
+                title={t(`name.${kind}`)}
                 className={cn(
                   "inline-flex aspect-square w-full items-center justify-center rounded-sm border border-border",
                   "text-foreground hover:border-foreground hover:bg-accent",

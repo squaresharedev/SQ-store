@@ -1,0 +1,536 @@
+{
+  "sessionExpired": {
+    "message": "Vaša relácia vypršala.",
+    "fix": "Prihláste sa znova a skúste to znova. Čo ste zadali v tejto záložke, zostáva, kým neopustíte stránku."
+  },
+  "permissionDenied": {
+    "fix": "Roly môže meniť iba vlastník obchodu. Požiadajte vlastníka, aby vás povýšil na editora v sekcii Tím a prístup.",
+    "createProducts": {
+      "withRole": "Vaša rola {role, select, owner {vlastník} editor {editor} viewer {čitateľ} other {{role}}} nemôže v tomto obchode vytvárať produkty.",
+      "noRole": "Nemáte oprávnenie vytvárať produkty v tomto obchode."
+    },
+    "editProducts": {
+      "withRole": "Vaša rola {role, select, owner {vlastník} editor {editor} viewer {čitateľ} other {{role}}} nemôže v tomto obchode upravovať produkty.",
+      "noRole": "Nemáte oprávnenie upravovať produkty v tomto obchode."
+    },
+    "deleteProducts": {
+      "withRole": "Vaša rola {role, select, owner {vlastník} editor {editor} viewer {čitateľ} other {{role}}} nemôže v tomto obchode mazať produkty.",
+      "noRole": "Nemáte oprávnenie mazať produkty v tomto obchode."
+    },
+    "importProducts": {
+      "withRole": "Vaša rola {role, select, owner {vlastník} editor {editor} viewer {čitateľ} other {{role}}} nemôže v tomto obchode importovať produkty.",
+      "noRole": "Nemáte oprávnenie importovať produkty v tomto obchode."
+    },
+    "previewProductPages": {
+      "withRole": "Vaša rola {role, select, owner {vlastník} editor {editor} viewer {čitateľ} other {{role}}} nemôže v tomto obchode zobrazovať náhľady produktových stránok.",
+      "noRole": "Nemáte oprávnenie zobrazovať náhľady produktových stránok v tomto obchode."
+    },
+    "createStorefronts": {
+      "withRole": "Vaša rola {role, select, owner {vlastník} editor {editor} viewer {čitateľ} other {{role}}} nemôže v tomto obchode vytvárať výklady.",
+      "noRole": "Nemáte oprávnenie vytvárať výklady v tomto obchode."
+    },
+    "editStorefronts": {
+      "withRole": "Vaša rola {role, select, owner {vlastník} editor {editor} viewer {čitateľ} other {{role}}} nemôže v tomto obchode upravovať výklady.",
+      "noRole": "Nemáte oprávnenie upravovať výklady v tomto obchode."
+    },
+    "deleteStorefronts": {
+      "withRole": "Vaša rola {role, select, owner {vlastník} editor {editor} viewer {čitateľ} other {{role}}} nemôže v tomto obchode mazať výklady.",
+      "noRole": "Nemáte oprávnenie mazať výklady v tomto obchode."
+    },
+    "viewStorefronts": {
+      "withRole": "Vaša rola {role, select, owner {vlastník} editor {editor} viewer {čitateľ} other {{role}}} nemôže v tomto obchode zobrazovať výklady.",
+      "noRole": "Nemáte oprávnenie zobrazovať výklady v tomto obchode."
+    },
+    "editThisProduct": {
+      "withRole": "Vaša rola {role, select, owner {vlastníka} editor {editora} viewer {čitateľa} other {{role}}} nemôže upravovať tento produkt v tomto obchode.",
+      "noRole": "Nemáte oprávnenie upravovať tento produkt v tomto obchode."
+    },
+    "editThisStorefront": {
+      "withRole": "Vaša rola {role, select, owner {vlastníka} editor {editora} viewer {čitateľa} other {{role}}} nemôže upravovať tento výklad v tomto obchode.",
+      "noRole": "Nemáte oprávnenie upravovať tento výklad v tomto obchode."
+    }
+  },
+  "notFound": {
+    "fix": "Mohlo to byť odstránené alebo ste prepli obchod. Obnovte stránku a načítajte aktuálne údaje.",
+    "product": "Tento produkt sa nepodarilo nájsť.",
+    "storefront": "Tento výklad sa nepodarilo nájsť.",
+    "item": "Táto položka sa nenašla."
+  },
+  "rateLimited": {
+    "fix": "Počkajte niekoľko minút a skúste to znova. Ak sa nič nepokúša opakovať na pozadí, najskôr znovu načítajte stránku.",
+    "createProducts": "Príliš veľa pokusov o vytvorenie produktov za krátky čas.",
+    "editProducts": "Príliš veľa pokusov o úpravu produktov za krátky čas.",
+    "deleteProducts": "Príliš veľa pokusov o mazanie produktov za krátky čas.",
+    "importProducts": "Príliš veľa pokusov o import produktov za krátky čas.",
+    "previewProductPages": "Príliš veľa pokusov o zobrazenie náhľadu produktových stránok za krátky čas.",
+    "createStorefronts": "Príliš veľa pokusov o vytvorenie výkladov za krátky čas.",
+    "saveStorefronts": "Príliš veľa pokusov o uloženie výkladov za krátky čas.",
+    "deleteStorefronts": "Príliš veľa pokusov o zmazanie výkladov za krátky čas.",
+    "rotateEmbedKeys": "Príliš veľa pokusov o obnovenie kľúčov na vloženie za krátky čas.",
+    "updateStock": "Príliš veľa pokusov o aktualizáciu zásob za krátky čas.",
+    "readProductPageSettings": "Príliš veľa pokusov o načítanie nastavení produktovej stránky za krátky čas.",
+    "requestReview": "Príliš veľa žiadostí o preskúmanie za krátky čas."
+  },
+  "serverError": {
+    "fix": "Zvyčajne je to dočasné. Chvíľu počkajte a skúste to znova. Ak sa problém opakuje, obnovte stránku.",
+    "createProduct": "Produkt sa nepodarilo vytvoriť kvôli problému na našej strane.",
+    "saveProduct": "Produkt sa nepodarilo uložiť kvôli problému na našej strane.",
+    "deleteProduct": "Produkt sa nepodarilo zmazať kvôli problému na našej strane.",
+    "importProducts": "Produkty sa nepodarilo importovať kvôli problému na našej strane.",
+    "loadProductPagePreview": "Náhľad produktovej stránky sa nepodarilo načítať kvôli problému na našej strane.",
+    "verifyImageUpload": "Nahranie obrázka sa nepodarilo overiť kvôli problému na našej strane.",
+    "verifyDocumentUpload": "Nahranie dokumentu sa nepodarilo overiť kvôli problému na našej strane.",
+    "verifyFileUpload": "Nahranie súboru sa nepodarilo overiť kvôli problému na našej strane.",
+    "verifyFontUpload": "Nahranie písma sa nepodarilo overiť kvôli problému na našej strane.",
+    "verifyElementUpload": "Nahranie prvku sa nepodarilo overiť kvôli problému na našej strane.",
+    "verifyBackgroundImage": "Obrázok pozadia sa nepodarilo overiť kvôli problému na našej strane.",
+    "verifyFont": "Písmo sa nepodarilo overiť kvôli problému na našej strane.",
+    "verifyImage": "Obrázok sa nepodarilo overiť kvôli problému na našej strane.",
+    "createStorefront": "Výklad sa nepodarilo vytvoriť kvôli problému na našej strane.",
+    "saveStorefront": "Výklad sa nepodarilo uložiť kvôli problému na našej strane.",
+    "saveEmbedSettings": "Nastavenia vloženia sa nepodarilo uložiť kvôli problému na našej strane.",
+    "deleteStorefront": "Výklad sa nepodarilo zmazať kvôli problému na našej strane.",
+    "rotateEmbedKey": "Kľúč na vloženie sa nepodarilo obnoviť kvôli problému na našej strane.",
+    "saveStockSettings": "Nastavenia zásob sa nepodarilo uložiť kvôli problému na našej strane.",
+    "checkSellerDetails": "Údaje predajcu sa nepodarilo skontrolovať kvôli problému na našej strane.",
+    "loadProductPageSettings": "Nastavenia produktovej stránky sa nepodarilo načítať kvôli problému na našej strane.",
+    "saveProductPageSettings": "Nastavenia produktovej stránky sa nepodarilo uložiť kvôli problému na našej strane.",
+    "sendForReview": "Nepodarilo sa to odoslať na preskúmanie kvôli problému na našej strane."
+  },
+  "moderation": {
+    "removedNotPaused": "{target, select, product {Tento produkt bol odstránený, nie pozastavený.} storefront {Tento výklad bol odstránený, nie pozastavený.} other {Táto položka bola odstránená, nie pozastavená.}}",
+    "removedFix": "Odstránenie je konečné. Ak si myslíte, že bolo neoprávnené, napíšte nám cez odkaz na odvolanie.",
+    "notPaused": "{target, select, product {Tento produkt nie je pozastavený.} storefront {Tento výklad nie je pozastavený.} other {Táto položka nie je pozastavená.}}",
+    "notPausedFix": "Nie je čo preskúmavať: kupujúci ju už vidia."
+  },
+  "traderIdentityRequired": {
+    "message": "Nemôžete zverejniť ani predávať, kým nie sú vaše údaje predajcu kompletné.",
+    "action": "Doplniť údaje predajcu",
+    "fix": {
+      "add": "{fields, select, businessName {Doplňte obchodné meno v sekcii Nastavenia › Firma a údaje predajcu a potom zverejnite.} address {Doplňte adresu sídla v sekcii Nastavenia › Firma a údaje predajcu a potom zverejnite.} email {Doplňte kontaktný e-mail v sekcii Nastavenia › Firma a údaje predajcu a potom zverejnite.} businessName_address {Doplňte obchodné meno a adresu sídla v sekcii Nastavenia › Firma a údaje predajcu a potom zverejnite.} businessName_email {Doplňte obchodné meno a kontaktný e-mail v sekcii Nastavenia › Firma a údaje predajcu a potom zverejnite.} address_email {Doplňte adresu sídla a kontaktný e-mail v sekcii Nastavenia › Firma a údaje predajcu a potom zverejnite.} other {Doplňte obchodné meno, adresu sídla a kontaktný e-mail v sekcii Nastavenia › Firma a údaje predajcu a potom zverejnite.}}",
+      "addAndConfirm": "{fields, select, businessName {Doplňte obchodné meno v sekcii Nastavenia › Firma a údaje predajcu a potvrďte kontaktný e-mail odkazom, ktorý sme vám poslali.} address {Doplňte adresu sídla v sekcii Nastavenia › Firma a údaje predajcu a potvrďte kontaktný e-mail odkazom, ktorý sme vám poslali.} email {Doplňte kontaktný e-mail v sekcii Nastavenia › Firma a údaje predajcu a potvrďte ho odkazom, ktorý sme vám poslali.} businessName_address {Doplňte obchodné meno a adresu sídla v sekcii Nastavenia › Firma a údaje predajcu a potvrďte kontaktný e-mail odkazom, ktorý sme vám poslali.} businessName_email {Doplňte obchodné meno a kontaktný e-mail v sekcii Nastavenia › Firma a údaje predajcu a potvrďte ho odkazom, ktorý sme vám poslali.} address_email {Doplňte adresu sídla a kontaktný e-mail v sekcii Nastavenia › Firma a údaje predajcu a potvrďte ho odkazom, ktorý sme vám poslali.} other {Doplňte obchodné meno, adresu sídla a kontaktný e-mail v sekcii Nastavenia › Firma a údaje predajcu a potvrďte kontaktný e-mail odkazom, ktorý sme vám poslali.}}",
+      "confirm": "Otvorte potvrdzovací odkaz, ktorý sme poslali na váš kontaktný e-mail. Nový môžete odoslať v sekcii Nastavenia › Firma a údaje predajcu.",
+      "complete": "Vyplňte sekciu Nastavenia › Firma a údaje predajcu a potom zverejnite."
+    }
+  },
+  "unexpected": {
+    "message": "Niečo sa pokazilo.",
+    "detail": "{detail}",
+    "fix": "Skontrolujte pripojenie a skúste to znova. Ak sa to opakuje, obnovte stránku. Vaše produktové údaje sú bezpečne uložené na serveri."
+  },
+  "form": {
+    "sessionExpired": "Vaša relácia vypršala. Prihláste sa znova.",
+    "saveFailed": "Uloženie sa nepodarilo. Skúste to znova.",
+    "tooManyChanges": "Za krátky čas ste vykonali veľa zmien. Skúste to o chvíľu znova.",
+    "unexpectedField": "Neočakávané pole „{field}“ bolo odmietnuté.",
+    "malformed": "Formulár sa nepodarilo načítať. Znovu načítajte stránku a skúste to znova.",
+    "unreachable": "Server sa nepodarilo dosiahnuť. Skontrolujte pripojenie a skúste to znova."
+  },
+  "stepUp": {
+    "codeRequired": "Zadajte 6-miestny kód z overovacej aplikácie, aby ste potvrdili, že ste to vy.",
+    "codeMalformed": "Kód tvorí 6 číslic zobrazených vo vašej overovacej aplikácii.",
+    "factorUnknown": "Vyberte jednu zo svojich overovacích aplikácií.",
+    "invalid": "Tento kód nefungoval. Skontrolujte overovaciu aplikáciu a skúste to znova.",
+    "rateLimited": "Príliš veľa pokusov. Počkajte niekoľko minút a skúste to znova.",
+    "replayed": "Tento kód už bol použitý. Počkajte na ďalší vo svojej aplikácii.",
+    "unavailable": "Tento kód sa teraz nepodarilo skontrolovať. O chvíľu to skúste znova."
+  },
+  "mfa": {
+    "signInExpired": "Platnosť vášho prihlásenia vypršala. Prihláste sa znova.",
+    "unreachable": "Prihlasovaciu službu sa nepodarilo kontaktovať. Skontrolujte pripojenie a skúste to znova.",
+    "enterCode": "Zadajte 6-miestny kód.",
+    "recoveryCodeRequired": "Zadajte jeden zo svojich záložných kódov.",
+    "recoveryCodeInvalid": "Tento záložný kód nefungoval. Skontrolujte ho a skúste to znova.",
+    "recoveryIncomplete": "Prihlásenie sa nepodarilo dokončiť. O chvíľu skúste rovnaký kód znova.",
+    "factorNameRequired": "Pomenujte túto overovaciu aplikáciu.",
+    "factorNameTaken": "Overovaciu aplikáciu s týmto názvom už máte. Zvoľte iný.",
+    "passwordRequired": "Ak chcete pokračovať, zadajte svoje aktuálne heslo.",
+    "passwordRequiredGoogle": "Zadajte svoje heslo do Square Share alebo namiesto toho použite „Potvrdiť cez Google“.",
+    "wrongPasswordGoogle": "Toto nie je heslo tohto účtu do Square Share. Prihlasujete sa cez Google, preto namiesto toho použite „Potvrdiť cez Google“.",
+    "passwordCheckUnavailable": "Vaše heslo sa teraz nepodarilo overiť. O chvíľu to skúste znova.",
+    "reauthRequired": "Pre vaše bezpečie sa pred zapnutím dvojfaktorového overenia prihláste znova.",
+    "setupRateLimited": "Príliš veľa pokusov o nastavenie. Skúste to o chvíľu.",
+    "tooManyFactors": "Tento účet má už maximálny počet overovacích aplikácií. Najprv niektorú odoberte.",
+    "setupFailed": "Nastavenie sa teraz nepodarilo spustiť. O chvíľu to skúste znova.",
+    "setupUnavailable": "Nastavenie dvojfaktorového overenia teraz nie je dostupné. Skúste to neskôr.",
+    "setupExpired": "Platnosť nastavenia vypršala. Začnite znova.",
+    "setupCodeMismatch": "Tento kód nesedel. Uistite sa, že vaša aplikácia zobrazuje Square Share, a zadajte najnovší kód.",
+    "factorNotOnAccount": "Táto overovacia aplikácia nie je vo vašom účte.",
+    "removeFailed": "Túto overovaciu aplikáciu sa nepodarilo odobrať. Skúste to znova.",
+    "notEnrolled": "Najprv zapnite dvojfaktorové overenie.",
+    "codesNotCreated": "Nové kódy sa nepodarilo vytvoriť. Vaše staré stále fungujú."
+  },
+  "settings": {
+    "usernameTaken": "Toto používateľské meno je obsadené. Skúste iné.",
+    "emailUnchanged": "Tento e-mail je už váš.",
+    "emailChangeRateLimited": "Príliš veľa požiadaviek na zmenu e-mailu. Pred ďalším pokusom chvíľu počkajte.",
+    "emailChangeNeedsPassword": "Na zmenu e-mailu zadajte aktuálne heslo.",
+    "wrongPassword": "Aktuálne heslo je nesprávne.",
+    "passwordCheckUnavailable": "Vaše heslo sa teraz nepodarilo skontrolovať. Skúste to znova.",
+    "emailChangeFailed": "Zmenu e-mailu sa nepodarilo spustiť. Skúste to znova.",
+    "passwordReauthRateLimited": "Príliš veľa pokusov. Pred ďalším pokusom počkajte niekoľko minút.",
+    "passwordUnchanged": "Toto heslo je už vaše.",
+    "passwordUpdateFailed": "Heslo sa nepodarilo aktualizovať. Skúste to znova.",
+    "passwordReauthNeeded": "Pre vaše bezpečie sa odhláste, znova prihláste a potom zmeňte heslo.",
+    "resetRateLimited": "Príliš veľa e-mailov na obnovenie. Pred ďalším pokusom chvíľu počkajte.",
+    "resetSendRateLimited": "Príliš veľa požiadaviek. Minútu počkajte a skúste to znova.",
+    "resetFailed": "E-mail na obnovenie sa nepodarilo odoslať. Skúste to znova.",
+    "contactEmailTakesNoMail": "Doména tohto kontaktného e-mailu neprijíma poštu. Skontrolujte pravopis alebo použite adresu, na ktorú vás kupujúci skutočne dosiahnu.",
+    "savedButConfirmationFailed": "{reason, select, startFailed {Uložené, ale potvrdzovací e-mail nebol odoslaný. Overenie e-mailu sa nepodarilo spustiť. Skúste „Znova odoslať“ nižšie.} unavailable {Uložené, ale potvrdzovací e-mail nebol odoslaný. Overenie e-mailu momentálne nie je k dispozícii. Skúste „Znova odoslať“ nižšie.} other {Uložené, ale potvrdzovací e-mail nebol odoslaný. Potvrdzovací e-mail sa nepodarilo odoslať. Skontrolujte adresu a skúste to znova. Skúste „Znova odoslať“ nižšie.}}",
+    "confirmationFailed": "{reason, select, startFailed {Overenie e-mailu sa nepodarilo spustiť.} unavailable {Overenie e-mailu momentálne nie je k dispozícii.} other {Potvrdzovací e-mail sa nepodarilo odoslať. Skontrolujte adresu a skúste to znova.}}",
+    "confirmationUnavailable": "Overenie e-mailu momentálne nie je k dispozícii.",
+    "confirmationRateLimited": "Odoslali ste veľa potvrdzovacích e-mailov. Pred ďalšou žiadosťou chvíľu počkajte.",
+    "noContactEmail": "Najskôr doplňte kontaktný e-mail a potom ho môžeme potvrdiť."
+  },
+  "avatar": {
+    "unexpectedData": "Neočakávané dáta formulára boli odmietnuté.",
+    "rateLimited": "Príliš veľa zmien fotografie. Chvíľu počkajte a skúste to znova.",
+    "noFile": "Vyberte obrázok na nahratie.",
+    "tooLarge": "Tento obrázok je príliš veľký. Použite obrázok menší ako 2 MB.",
+    "wrongType": "Použite obrázok vo formáte JPEG, PNG alebo WebP.",
+    "uploadFailed": "Nahrávanie zlyhalo. Skúste to znova.",
+    "saveFailed": "Novú fotografiu sa nepodarilo uložiť. Skúste to znova.",
+    "removeFailed": "Fotografiu sa nepodarilo odobrať. Skúste to znova."
+  },
+  "team": {
+    "noInvitePermission": "Nemáte oprávnenie pozývať členov.",
+    "inviteRoleTooHigh": "Nemôžete pozvať niekoho s vyššou rolou, ako je vaša.",
+    "inviteSelf": "Ste tu už.",
+    "inviteRateLimited": "Nedávno ste odoslali veľa pozvánok. Skúste to o chvíľu znova.",
+    "alreadyInvited": "Táto osoba už bola pozvaná alebo je súčasťou tímu.",
+    "inviteFailed": "Pozvánku sa nepodarilo odoslať. Skúste to znova.",
+    "noVerifiedEmail": "Váš účet nemá overenú e-mailovú adresu.",
+    "inviteNotFound": "Pozvánka sa nenašla alebo už bola použitá.",
+    "inviteUsed": "Táto pozvánka bola už prijatá alebo odvolaná.",
+    "inviteWrongEmail": "Táto pozvánka nie je určená pre vašu e-mailovú adresu.",
+    "acceptFailed": "Pozvánku sa nepodarilo prijať. Možno bola odvolaná.",
+    "noRolePermission": "Nemáte oprávnenie meniť roly.",
+    "membershipRateLimited": "Príliš veľa zmien členstva. Čoskoro to skúste znova.",
+    "roleTooHigh": "Nemôžete priradiť rolu vyššiu, ako je vaša.",
+    "roleChangeFailed": "Rolu sa nepodarilo zmeniť. Skúste to znova.",
+    "memberNotChangeable": "Tohto člena nie je možné zmeniť.",
+    "noRemovePermission": "Nemáte oprávnenie odoberať členov.",
+    "memberNotFound": "Člen sa nenašiel.",
+    "removeSelf": "Nemôžete odobrať seba samého.",
+    "removeFailed": "Člena sa nepodarilo odobrať. Skúste to znova.",
+    "memberNotRemovable": "Tohto člena nie je možné odobrať."
+  },
+  "auth": {
+    "serviceUnreachable": "Overovacia služba je nedostupná. Skúste to znova.",
+    "invalidEmail": "Zadajte platnú e-mailovú adresu.",
+    "emailRequired": "Zadajte svoj e-mail.",
+    "tooManyAttempts": "Príliš veľa pokusov. Chvíľu počkajte a skúste to znova.",
+    "magicLinkFailed": "E-mail sa nepodarilo odoslať. Skontrolujte pripojenie a skúste to znova.",
+    "resetEmailRequired": "Zadajte e-mail na obnovenie hesla.",
+    "resetEmailFailed": "E-mail na obnovenie sa nepodarilo odoslať. Skontrolujte pripojenie a skúste to znova.",
+    "credentialsRequired": "E-mail a heslo sú povinné.",
+    "passwordsMismatch": "Heslá sa nezhodujú.",
+    "invalidUsername": "Zvoľte platné používateľské meno.",
+    "permanentEmailRequired": "Zaregistrujte sa s trvalou e-mailovou adresou.",
+    "verificationFailed": "Overenie zlyhalo. Skúste to znova.",
+    "usernameTaken": "Toto používateľské meno je obsadené. Skúste iné.",
+    "signUpFailed": "Účet sa nepodarilo vytvoriť. Skontrolujte pripojenie a skúste to znova.",
+    "signInFailed": "Prihlásenie sa nepodarilo. Skontrolujte pripojenie a skúste to znova.",
+    "badCredentials": "Nesprávny e-mail alebo heslo.",
+    "emailNotConfirmed": "Najskôr potvrďte e-mail, odkaz nájdete v doručenej pošte.",
+    "weakPassword": "Toto heslo je príliš slabé. Použite aspoň 8 znakov.",
+    "rateLimited": "Príliš veľa pokusov. Minútu počkajte a skúste to znova.",
+    "accountNotCreated": "Tento účet sa nepodarilo vytvoriť. Skúste iné používateľské meno.",
+    "providerMessage": "{message}",
+    "unknown": "Niečo sa pokazilo. Skúste to znova.",
+    "connectFailed": "Pripojenie sa nepodarilo. Skúste to znova.",
+    "resetLinkExpired": "Odkaz na obnovenie hesla vypršal. Vyžiadajte si nový na prihlasovacej stránke.",
+    "passwordUpdateFailed": "Heslo sa nepodarilo aktualizovať. Skontrolujte pripojenie a skúste to znova.",
+    "samePassword": "Toto heslo je vaše aktuálne. Zvoľte nové."
+  },
+  "upload": {
+    "typeNotSupported": "Tento typ súboru nie je podporovaný.",
+    "typeFix": {
+      "image": "Použite obrázok vo formáte JPEG, PNG, WebP, GIF alebo AVIF.",
+      "file": "Použite súbor vo formáte ZIP, PDF, EPUB, MP3, WAV, MP4, JPEG, PNG, WebP alebo TXT.",
+      "font": "Použite súbor písma vo formáte WOFF2, WOFF, TTF alebo OTF.",
+      "element": "Použite obrázok vo formáte SVG, PNG, WebP, JPEG, GIF alebo AVIF.",
+      "document": "Exportujte návod alebo certifikát ako PDF a potom ho nahrajte."
+    },
+    "tooLarge": {
+      "image": "Tento obrázok je príliš veľký.",
+      "document": "Tento dokument je príliš veľký.",
+      "file": "Tento súbor je príliš veľký.",
+      "font": "Toto písmo je príliš veľké.",
+      "element": "Tento prvok je príliš veľký."
+    },
+    "tooLargeFix": {
+      "image": "Použite obrázok menší ako {maxMb} MB. Komprimujte ho alebo zmeňte jeho veľkosť a skúste to znova.",
+      "document": "Použite dokument menší ako {maxMb} MB. Komprimujte ho a skúste to znova.",
+      "file": "Použite súbor menší ako {maxMb} MB. Komprimujte ho alebo zmeňte jeho veľkosť a skúste to znova.",
+      "font": "Použite písmo menšie ako {maxMb} MB. Komprimujte ho a skúste to znova.",
+      "element": "Použite prvok menší ako {maxMb} MB. Komprimujte ho alebo zmeňte jeho veľkosť a skúste to znova."
+    },
+    "neverReached": {
+      "image": "Obrázok sa nedostal na server.",
+      "document": "Dokument sa nedostal na server.",
+      "file": "Súbor sa nedostal na server.",
+      "font": "Písmo sa nedostalo na server.",
+      "element": "Prvok sa nedostal na server."
+    },
+    "neverReachedFix": "Skontrolujte internetové pripojenie a skúste to znova.",
+    "rejected": {
+      "image": "Tento obrázok sa nepodarilo nahrať.",
+      "document": "Tento dokument sa nepodarilo nahrať.",
+      "file": "Tento súbor sa nepodarilo nahrať.",
+      "font": "Toto písmo sa nepodarilo nahrať.",
+      "element": "Tento prvok sa nepodarilo nahrať."
+    },
+    "rejectedFix": {
+      "signedOut": "Prihláste sa znova a skúste to znova.",
+      "other": "Skontrolujte súbor a skúste to znova. Ak sa to opakuje, obnovte stránku."
+    },
+    "serverSaid": "{text}"
+  },
+  "uploadRoute": {
+    "signIn": {
+      "image": "Ak chcete nahrávať obrázky, prihláste sa.",
+      "element": "Ak chcete nahrávať prvky, prihláste sa.",
+      "document": "Ak chcete nahrávať dokumenty, prihláste sa.",
+      "file": "Ak chcete nahrávať súbory, prihláste sa.",
+      "font": "Ak chcete nahrávať písma, prihláste sa."
+    },
+    "permissionDenied": "Nemáte oprávnenie sem nahrávať.",
+    "rateLimited": {
+      "shared": "Príliš veľa nahrávaní naraz. Skúste to o chvíľu znova.",
+      "document": "Príliš veľa nahrávaní dokumentov naraz. Skúste to o chvíľu znova.",
+      "file": "Príliš veľa nahrávaní súborov naraz. Skúste to o chvíľu znova."
+    },
+    "notConfigured": {
+      "image": "Nahrávanie obrázkov zatiaľ nie je nastavené. Obráťte sa na prevádzkovateľa webu.",
+      "element": "Nahrávanie prvkov zatiaľ nie je nastavené. Obráťte sa na prevádzkovateľa webu.",
+      "document": "Nahrávanie zatiaľ nie je nastavené. Obráťte sa na prevádzkovateľa webu.",
+      "file": "Nahrávanie súborov zatiaľ nie je nastavené. Obráťte sa na prevádzkovateľa webu.",
+      "font": "Nahrávanie písiem zatiaľ nie je nastavené. Obráťte sa na prevádzkovateľa webu."
+    },
+    "unreadable": "Nahraný súbor sa nepodarilo prečítať.",
+    "unexpectedFields": "Nahrávanie obsahuje neočakávané polia.",
+    "filenameInvalid": "Tento názov súboru sa nedá použiť.",
+    "lengthMissing": "Pri nahrávanom súbore chýba údaj o veľkosti.",
+    "missing": {
+      "image": "Nebol nahraný žiadny obrázok.",
+      "document": "Nebol nahraný žiadny dokument.",
+      "file": "Nebol nahraný žiadny súbor.",
+      "font": "Nebolo nahrané žiadne písmo."
+    },
+    "empty": {
+      "image": "Tento obrázok je prázdny.",
+      "file": "Tento súbor je prázdny.",
+      "font": "Tento súbor písma je prázdny."
+    },
+    "tooLarge": {
+      "image": "Tento obrázok je príliš veľký.",
+      "document": "Tento dokument je príliš veľký.",
+      "file": "Tento súbor je príliš veľký.",
+      "font": "Tento súbor písma je príliš veľký."
+    },
+    "tooLargeFix": {
+      "image": "Použite obrázok menší ako {maxMb} MB. Komprimujte ho alebo zmeňte jeho veľkosť a skúste to znova.",
+      "document": "Použite PDF menšie ako {maxMb} MB.",
+      "file": "Použite súbor menší ako {maxMb} MB.",
+      "font": "Použite písmo menšie ako {maxMb} MB. Súbor WOFF2 má zvyčajne oveľa menej ako 100 KB."
+    },
+    "unsupported": {
+      "image": "Tento súbor nie je podporovaný obrázok.",
+      "font": "Tento súbor nie je podporované písmo.",
+      "fileType": "Tento typ súboru nie je podporovaný.",
+      "fileContents": "Obsah súboru nezodpovedá jeho typu.",
+      "documentType": "Dokumenty musia byť vo formáte PDF.",
+      "documentContents": "Tento súbor nie je PDF."
+    },
+    "unsupportedFix": {
+      "image": "Použite obrázok vo formáte JPEG, PNG, WebP, GIF alebo AVIF.",
+      "element": "Použite PNG, JPEG, WebP, GIF, AVIF alebo SVG bez skriptov, externých odkazov a vložených obrázkov.",
+      "font": "Použite súbor vo formáte WOFF2, WOFF, TTF alebo OTF.",
+      "fileType": "Použite súbor vo formáte ZIP, PDF, EPUB, MP3, WAV, MP4, JPEG, PNG, WebP alebo TXT.",
+      "fileContents": "Súbor znova exportujte alebo zvoľte formát, ktorý zodpovedá tomu, čo nahrávate.",
+      "documentType": "Exportujte návod alebo certifikát ako PDF a potom ho nahrajte.",
+      "documentContents": "Znova ho exportujte ako PDF. Premenovaním sa formát súboru nezmení."
+    },
+    "moderationUnavailable": "Obrázky teraz nie je možné skontrolovať.",
+    "moderationRejected": {
+      "explicit": "Tento obrázok pôsobí sexuálne explicitne, preto sa pri produkte nedá použiť.",
+      "violent": "Tento obrázok zobrazuje drastické násilie, preto sa nedá použiť.",
+      "hate": "Tento obrázok zrejme obsahuje symboly nenávisti, preto sa nedá použiť."
+    },
+    "inReview": "Tento obrázok pred zverejnením prechádza kontrolou.",
+    "inReviewFix": "Po schválení ho budete môcť použiť.",
+    "storeFailed": {
+      "image": "Obrázok sa nepodarilo uložiť.",
+      "document": "Dokument sa nepodarilo uložiť.",
+      "file": "Súbor sa nepodarilo uložiť.",
+      "font": "Písmo sa nepodarilo uložiť."
+    },
+    "fix": {
+      "tryAgain": "Skúste to znova.",
+      "tryAgainInAMoment": "Skúste to o chvíľu znova.",
+      "tryAgainInAFewMinutes": "Skúste to znova o pár minút.",
+      "pickFile": "Vyberte iný súbor.",
+      "pickImage": "Vyberte iný obrázok."
+    }
+  },
+  "products": {
+    "invalid": {
+      "message": "Údaje produktu neprešli overením.",
+      "fix": "Skontrolujte názov, cenu a ostatné polia a skúste uložiť znova."
+    },
+    "imageNotOwned": {
+      "message": "Tento nahraný obrázok nie je možné použiť s týmto produktom.",
+      "fix": "Nahrajte obrázok znova a potom uložte."
+    },
+    "fileNotOwned": {
+      "message": "Tento nahraný súbor nie je možné použiť s týmto produktom.",
+      "fix": "Nahrajte súbor znova a potom uložte."
+    },
+    "uploadUnfinished": {
+      "image": "Nahrávanie obrázka sa nedokončilo.",
+      "document": "Nahrávanie dokumentu sa nedokončilo.",
+      "file": "Nahrávanie súboru sa nedokončilo.",
+      "font": "Nahrávanie písma sa nedokončilo.",
+      "element": "Nahrávanie prvku sa nedokončilo."
+    },
+    "uploadUnfinishedFix": {
+      "image": "Vyberte obrázok znova a nahrajte ho pred uložením.",
+      "document": "Vyberte dokument znova a nahrajte ho pred uložením.",
+      "file": "Vyberte súbor znova a nahrajte ho pred uložením.",
+      "font": "Vyberte písmo znova a nahrajte ho pred uložením.",
+      "element": "Vyberte prvok znova a nahrajte ho pred uložením."
+    },
+    "uploadTooLarge": {
+      "image": "Tento obrázok je príliš veľký.",
+      "document": "Tento dokument je príliš veľký.",
+      "file": "Tento súbor je príliš veľký.",
+      "font": "Toto písmo je príliš veľké.",
+      "element": "Tento prvok je príliš veľký."
+    },
+    "uploadTooLargeFix": {
+      "image": "Použite obrázok menší ako {maxMb} MB a potom ho nahrajte znova.",
+      "document": "Použite dokument menší ako {maxMb} MB a potom ho nahrajte znova.",
+      "file": "Použite súbor menší ako {maxMb} MB a potom ho nahrajte znova.",
+      "font": "Použite písmo menšie ako {maxMb} MB a potom ho nahrajte znova.",
+      "element": "Použite prvok menší ako {maxMb} MB a potom ho nahrajte znova."
+    },
+    "wrongTypeFix": {
+      "image": "Použite obrázok vo formáte JPEG, PNG, WebP, GIF alebo AVIF.",
+      "document": "Dokumenty musia byť vo formáte PDF. Exportujte dokument ako PDF a potom ho nahrajte znova.",
+      "other": "Použite súbor vo formáte ZIP, PDF, EPUB, MP3, WAV, MP4, JPEG, PNG, WebP alebo TXT."
+    },
+    "tooManyPhotos": {
+      "message": "Príliš veľa nových fotografií v jednom uložení.",
+      "fix": "Pridajte najviac {max} fotografií, uložte a potom pridajte zvyšok."
+    },
+    "photoNotOwned": {
+      "message": "Jednu z fotografií nie je možné použiť s týmto produktom.",
+      "fix": "Odoberte ju, nahrajte znova a potom uložte."
+    },
+    "tooManyDocuments": {
+      "message": "Príliš veľa nových dokumentov v jednom uložení.",
+      "fix": "Pridajte najviac {max} dokumentov, uložte a potom pridajte zvyšok."
+    },
+    "documentNotOwned": {
+      "message": "Jeden z dokumentov nie je možné použiť s týmto produktom.",
+      "fix": "Odoberte ho, nahrajte znova a potom uložte."
+    },
+    "staleOption": {
+      "message": "Fotografia odkazuje na možnosť, ktorá už neexistuje.",
+      "fix": "Priraďte fotografiu k inej možnosti alebo odstráňte značku a potom znova uložte."
+    }
+  },
+  "productImport": {
+    "unreadable": {
+      "message": "Tento import sa nepodarilo prečítať.",
+      "fix": "Nahrajte súbor znova."
+    },
+    "empty": {
+      "message": "Tento súbor bol prázdny.",
+      "fix": "Exportujte produkty znova a skúste to znova."
+    },
+    "tooLarge": {
+      "message": "Tento súbor je príliš veľký na import.",
+      "fix": "Rozdeľte ho na súbory menšie ako {maxMb} MB alebo importujte najviac {maxRows} produktov naraz."
+    },
+    "noCurrency": {
+      "message": "Vyberte menu pre tieto produkty.",
+      "fix": "Vyberte jednu a importujte znova."
+    },
+    "noStatus": {
+      "message": "Vyberte, či tieto produkty budú importované ako koncepty alebo zverejnené.",
+      "fix": "Vyberte jednu z možností a importujte znova."
+    },
+    "nothingImportable": {
+      "message": "Nič v tomto súbore sa nepodarilo importovať.",
+      "fix": "Skontrolujte, či súbor obsahuje stĺpec s názvom a stĺpec s cenou.",
+      "fixFirstRow": "{problem, select, noTitle {Prvý riadok hovorí: Bez názvu. Skontrolujte, ktoré stĺpce obsahujú názov a cenu.} titleTooLong {Prvý riadok hovorí: Názov je dlhší ako 200 znakov. Skontrolujte, ktoré stĺpce obsahujú názov a cenu.} noPrice {Prvý riadok hovorí: Žiadna čitateľná cena. Skontrolujte, ktoré stĺpce obsahujú názov a cenu.} priceZero {Prvý riadok hovorí: Cena je nulová. Skontrolujte, ktoré stĺpce obsahujú názov a cenu.} other {Prvý riadok hovorí: Iný riadok má rovnaký názov. Skontrolujte, ktoré stĺpce obsahujú názov a cenu.}}"
+    },
+    "noneSaved": {
+      "message": "Žiadny z týchto riadkov sa nepodarilo uložiť.",
+      "fix": "Skontrolujte stĺpce s názvom a cenou."
+    },
+    "invalidRow": "Tento riadok nie je platný produkt."
+  },
+  "stock": {
+    "invalid": {
+      "message": "Nastavenia zásob neprešli overením.",
+      "fix": "Množstvo a prahová hodnota musia byť celé čísla od 0 a viac. Keď je sledovanie zapnuté, nastavte počet kusov na sklade."
+    }
+  },
+  "storefront": {
+    "nameRequired": {
+      "message": "Výklad potrebuje názov.",
+      "fix": "Zadajte názov (1 až 80 znakov) do poľa v hornej časti editora výkladu a potom uložte znova."
+    },
+    "invalidLayout": {
+      "message": "Dáta rozloženia výkladu sú neplatné.",
+      "fix": "Obnovte editor a skúste uložiť znova."
+    },
+    "tooManyImages": {
+      "message": "Príliš veľa nových obrázkov v jednom uložení.",
+      "fix": "Uložte výklad a potom pridajte zvyšok."
+    },
+    "invalidEmbedSettings": "Neplatné nastavenia vloženia.",
+    "embedSettingsFix": "Skontrolujte zoznam domén (názvy hostiteľov oddelené čiarkou, napr. example.com) a uložte znova.",
+    "upload": {
+      "backgroundImage": {
+        "notOwned": "Tento obrázok pozadia nie je možné použiť.",
+        "unfinished": "Nahrávanie obrázka pozadia sa nedokončilo.",
+        "missingFix": "Vyberte obrázok znova a nahrajte ho pred uložením.",
+        "tooLarge": "Tento obrázok pozadia je príliš veľký.",
+        "tooLargeFix": "Použite obrázok menší ako 10 MB a potom ho nahrajte znova.",
+        "wrongTypeFix": "Použite obrázok vo formáte JPEG, PNG, WebP, GIF alebo AVIF."
+      },
+      "font": {
+        "notOwned": "Toto písmo nie je možné použiť.",
+        "unfinished": "Nahrávanie písma sa nedokončilo.",
+        "missingFix": "Vyberte písmo znova a nahrajte ho pred uložením.",
+        "tooLarge": "Tento súbor písma je príliš veľký.",
+        "tooLargeFix": "Použite písmo menšie ako 2 MB. Súbor WOFF2 je zvyčajne oveľa menší ako 100 KB.",
+        "wrongTypeFix": "Použite súbor písma vo formáte WOFF2, WOFF, TTF alebo OTF."
+      },
+      "element": {
+        "notOwned": "Tento obrázok nie je možné použiť.",
+        "unfinished": "Nahrávanie obrázka sa nedokončilo.",
+        "missingFix": "Pridajte obrázok znova a nahrajte ho pred uložením.",
+        "tooLarge": "Tento obrázok je príliš veľký.",
+        "tooLargeFix": "Použite obrázok menší ako 2 MB a potom ho pridajte znova.",
+        "wrongTypeFix": "Použite PNG, JPEG, WebP, GIF, AVIF alebo SVG bez skriptov, externých odkazov alebo vložených obrázkov."
+      }
+    }
+  },
+  "productPageApi": {
+    "notJson": {
+      "message": "Telo tejto požiadavky nie je JSON.",
+      "fix": "Odošlite JSON objekt s poľami, ktoré chcete zmeniť."
+    },
+    "notObject": {
+      "message": "Telo tejto požiadavky nie je objekt.",
+      "fix": "Odošlite JSON objekt, napr. '{'\"ctaColor\": \"#1d4ed8\"'}'."
+    },
+    "invalid": "Tieto nastavenia produktovej stránky sú neplatné.",
+    "invalidFix": "Porovnajte uvedené pole s hodnotami `limits` z GET tohto URL a skúste to znova."
+  }
+}

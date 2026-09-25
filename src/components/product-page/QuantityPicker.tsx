@@ -1,6 +1,7 @@
 "use client";
 
 import { useId } from "react";
+import { useTranslations, useLocale } from "next-intl";
 import { formatCents } from "@/lib/format/money";
 import type { Currency } from "@/types/product";
 import { PageSelect } from "./PageSelect";
@@ -41,6 +42,8 @@ export function QuantityPicker({
   // Minted rather than spelled out: the editor can have a product page beside
   // other surfaces, and a duplicated id would point the label at the wrong
   // control.
+  const t = useTranslations("ProductPage.quantity");
+  const locale = useLocale();
   const controlId = useId();
   const { quantity, limit, setQuantity } = useQuantity();
   if (limit <= 1) return null;
@@ -54,14 +57,14 @@ export function QuantityPicker({
       data-quantity-limit={limit}
     >
       <label className="text-sm opacity-70" htmlFor={controlId}>
-        Quantity
+        {t("label")}
       </label>
       {/* The same control as an option group's dropdown, from the same file:
           two lists sitting one above the other in the buy box have no business
           looking like two different things. */}
       <PageSelect
         id={controlId}
-        label="Quantity"
+        label={t("label")}
         value={String(quantity)}
         onChange={(next) => setQuantity(Number(next))}
         options={Array.from({ length: limit }, (_, index) => ({
@@ -77,8 +80,8 @@ export function QuantityPicker({
           different number. */}
       {quantity > 1 && (
         <p className="text-sm opacity-70" data-product-line-total={total}>
-          {quantity} × {formatCents(priceCents, currency)} ={" "}
-          <span className="font-medium opacity-100">{formatCents(total, currency)}</span>
+          {quantity} × {formatCents(priceCents, currency, locale)} ={" "}
+          <span className="font-medium opacity-100">{formatCents(total, currency, locale)}</span>
         </p>
       )}
     </div>

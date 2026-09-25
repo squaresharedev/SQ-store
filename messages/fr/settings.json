@@ -1,0 +1,696 @@
+{
+  "metadata": {
+    "layout": {
+      "titleTemplate": "%s | Square Share",
+      "default": "Paramètres | Square Share"
+    },
+    "account": {
+      "title": "Paramètres du compte"
+    },
+    "notifications": {
+      "title": "Paramètres de notifications"
+    },
+    "language": {
+      "title": "Paramètres de langue"
+    },
+    "danger": {
+      "title": "Zone de danger"
+    },
+    "legal": {
+      "title": "Paramètres juridiques"
+    },
+    "team": {
+      "title": "Équipe et accès"
+    },
+    "tax": {
+      "title": "Entreprise et informations vendeur"
+    },
+    "shipping": {
+      "title": "Paramètres de livraison et retours"
+    },
+    "security": {
+      "title": "Sécurité"
+    }
+  },
+  "loading": "Chargement des paramètres…",
+  "shell": {
+    "sectionsLabel": "Sections des paramètres",
+    "recommended": "Recommandé"
+  },
+  "continueToStorefront": "Continuer vers votre vitrine",
+  "account": {
+    "fallbackName": "Compte",
+    "avatar": {
+      "cardTitle": "Photo de profil",
+      "cardDescription": "Un fichier JPEG, PNG ou WebP jusqu’à 2 Mo. Affichée dans tout votre tableau de bord.",
+      "errorTooLarge": "Cette image est trop volumineuse. Restez en dessous de 2 Mo.",
+      "errorBadType": "Utilisez une image JPEG, PNG ou WebP.",
+      "errorReadFailed": "Impossible de lire ce fichier.",
+      "editLabel": "Modifier votre photo de profil",
+      "uploadLabel": "Importer une photo de profil",
+      "statusUploading": "Importation de votre photo de profil",
+      "statusRemoving": "Suppression de votre photo de profil",
+      "chooseLabel": "Choisir une photo de profil",
+      "changePhoto": "Changer de photo",
+      "uploadPhoto": "Importer une photo"
+    },
+    "crop": {
+      "title": "Recadrer votre photo",
+      "description": "Faites glisser pour repositionner. Utilisez la molette ou le curseur pour zoomer.",
+      "areaLabel": "Zone de recadrage. Faites glisser ou utilisez les flèches du clavier pour repositionner.",
+      "zoomLabel": "Zoom",
+      "chooseAnother": "Choisir une autre",
+      "savePhoto": "Enregistrer la photo",
+      "errors": {
+        "load": "Cette image n’a pas pu être chargée. Essayez de la choisir à nouveau.",
+        "process": "Votre navigateur n’a pas pu traiter cette image.",
+        "prepare": "Impossible de préparer cette image. Essayez-en une autre.",
+        "export": "Cette image n’a pas pu être exportée. Importez-la à nouveau."
+      }
+    },
+    "username": {
+      "cardTitle": "Nom d’utilisateur",
+      "cardDescription": "Utilisez-le pour vous connecter à la place de votre e-mail. Lettres, chiffres et tirets bas uniquement, et deux comptes ne peuvent pas le partager.",
+      "label": "Nom d’utilisateur",
+      "placeholder": "yourhandle",
+      "available": "Disponible.",
+      "taken": "Ce nom d’utilisateur est déjà pris, essayez-en un autre.",
+      "checking": "Vérification…"
+    },
+    "bio": {
+      "cardTitle": "Bio",
+      "cardDescription": "Une courte phrase sur vous ou ce que vous créez. Visible des acheteurs sur vos pages produit.",
+      "label": "Bio",
+      "optional": "(Facultatif)",
+      "placeholder": "p. ex. Grès tourné à la main dans un petit atelier en Bretagne",
+      "charactersLeft": "{count, plural, one {{count} caractère restant} many {{count} de caractères restants} other {{count} caractères restants}}"
+    },
+    "email": {
+      "cardTitle": "E-mail",
+      "cardDescription": "Le modifier envoie d’abord un lien de confirmation. Rien ne change tant que vous ne cliquez pas dessus, donc une faute de frappe ici ne prête pas à conséquence.",
+      "currentlySignedInAs": "Actuellement connecté avec <address>{email}</address>",
+      "newEmailLabel": "Nouvel e-mail",
+      "newEmailPlaceholder": "you@studio.com",
+      "currentPasswordLabel": "Mot de passe actuel",
+      "passwordTipLabel": "Pourquoi votre mot de passe est nécessaire ici",
+      "passwordTipBody": "Quiconque contrôle votre adresse e-mail peut réinitialiser votre mot de passe : la modifier revient donc à changer votre moyen de reconnecter le compte. Votre mot de passe confirme que ce changement vient bien de vous.",
+      "sendConfirmationLink": "Envoyer le lien de confirmation"
+    },
+    "password": {
+      "cardTitle": "Mot de passe",
+      "descriptionHasPassword": "Modifiez-le quand vous le souhaitez. Nous demandons d’abord l’actuel, simplement pour vérifier qu’il s’agit bien de vous.",
+      "descriptionNeverShown": "Pour votre sécurité, votre mot de passe n’est jamais affiché ici. Pour le changer, nous vous envoyons par e-mail un lien permettant d’en définir un nouveau.",
+      "descriptionNoPassword": "Vous vous connectez avec Google. Ajoutez un mot de passe pour pouvoir aussi vous connecter avec votre e-mail ou votre nom d’utilisateur.",
+      "changeButton": "Modifier le mot de passe",
+      "resetButton": "Réinitialiser le mot de passe",
+      "setButton": "Définir un mot de passe",
+      "modalTitleChange": "Modifier votre mot de passe",
+      "modalTitleReset": "Réinitialiser votre mot de passe",
+      "modalTitleSet": "Définir un mot de passe",
+      "modalDescriptionReset": "Nous enverrons un lien par e-mail à {email}. Il expire peu après son arrivée.",
+      "modalDescriptionChange": "Saisissez votre mot de passe actuel, puis le nouveau.",
+      "currentPasswordLabel": "Mot de passe actuel",
+      "newPasswordLabel": "Nouveau mot de passe",
+      "passwordHint": "Au moins 8 caractères, en mélangeant majuscules, minuscules, chiffres ou symboles (ou une phrase de passe de 16 caractères ou plus).",
+      "confirmPasswordLabel": "Confirmer le nouveau mot de passe",
+      "signOutWarning": "Tous les autres appareils seront déconnectés.",
+      "forgotPassword": "Mot de passe oublié ?",
+      "updating": "Mise à jour…",
+      "updateButton": "Mettre à jour le mot de passe",
+      "resendIn": "{seconds, plural, one {Renvoyer dans #s} many {Renvoyer dans #s} other {Renvoyer dans #s}}",
+      "resendEmail": "Renvoyer l’e-mail",
+      "emailMeALink": "M’envoyer un lien par e-mail",
+      "googleAccountNote": "Ce compte se connecte avec Google. Définir un mot de passe vous permet aussi de vous connecter avec votre e-mail ou votre nom d’utilisateur, sans supprimer Google.",
+      "neverShownNote": "Votre mot de passe actuel n’est jamais affiché. Ouvrez le lien pour en choisir un nouveau : le définir déconnecte vos autres appareils."
+    },
+    "signOut": {
+      "cardTitle": "Déconnexion",
+      "cardDescription": "Mettez fin à cette session sur cet appareil, ou déconnectez-vous partout pour vous déconnecter de tous les appareils à la fois.",
+      "signingOut": "Déconnexion…",
+      "button": "Se déconnecter",
+      "everywhereButton": "Se déconnecter partout",
+      "everywhereNote": "Se déconnecter partout met fin à votre session sur tous les appareils et navigateurs où vous êtes connecté. Vous devrez vous reconnecter à chaque endroit."
+    },
+    "success": {
+      "usernameSaved": "Nom d’utilisateur enregistré.",
+      "bioSaved": "Bio enregistrée.",
+      "emailChangeStarted": "Consultez votre boîte de réception. Le changement s’applique dès que vous confirmez le lien.",
+      "passwordUpdated": "Mot de passe mis à jour. Les autres appareils ont été déconnectés.",
+      "resetSent": "Lien de réinitialisation envoyé. Consultez votre boîte de réception.",
+      "avatarUpdated": "Photo de profil mise à jour.",
+      "avatarRemoved": "Photo de profil supprimée."
+    }
+  },
+  "danger": {
+    "export": {
+      "cardTitle": "Exporter mes données",
+      "cardDescription": "Tout ce que nous détenons sur vous : profil, produits, configuration de la vitrine, réuni dans un seul fichier JSON. Ce sont vos données, à vous de les garder.",
+      "downloadButton": "Télécharger mes données",
+      "stepUpDescription": "Votre export contient l’ensemble de votre compte. Saisissez le code actuel de votre application d’authentification pour le télécharger."
+    },
+    "delete": {
+      "requestedTitle": "Suppression demandée",
+      "requestedDescription": "Vous nous avez demandé de supprimer ce compte le {date}. Il est marqué pour une suppression définitive, produits et vitrine compris. Tant que cela n’est pas encore effectif, vous pouvez encore changer d’avis.",
+      "cancelling": "Annulation…",
+      "keepButton": "Garder mon compte",
+      "title": "Supprimer le compte",
+      "description": "Ceci marque votre compte, vos produits et votre vitrine pour une suppression définitive. Sans détour : une fois effectuée, c’est irréversible.",
+      "deleteButton": "Supprimer mon compte",
+      "confirmLabel": "Tapez <code>{phrase}</code> pour confirmer",
+      "flagging": "Marquage…",
+      "permanentlyDelete": "Supprimer définitivement",
+      "neverMind": "Laisser tomber"
+    },
+    "success": {
+      "deletionRequested": "Suppression demandée.",
+      "deletionCancelled": "Demande de suppression annulée. Ravis de vous revoir."
+    }
+  },
+  "notifications": {
+    "cardTitle": "Notifications par e-mail",
+    "cardDescription": "Choisissez ce qui arrive dans votre boîte de réception. Les e-mails de sécurité et de paiement passent toujours, on ne peut pas se permettre de les couper.",
+    "prefs": {
+      "sales": {
+        "label": "Ventes",
+        "blurb": "M’envoyer un e-mail à chaque vente. Le bon genre de bruit dans la boîte de réception."
+      },
+      "productUpdates": {
+        "label": "Mises à jour produit",
+        "blurb": "Les nouvelles fonctionnalités et améliorations du tableau de bord, dès qu’elles sont prêtes."
+      },
+      "marketing": {
+        "label": "Astuces et actualités du marketplace",
+        "blurb": "Des idées occasionnelles pour vous aider à vendre plus. On reste léger, pas de spam."
+      }
+    },
+    "success": {
+      "notificationsSaved": "Préférences enregistrées."
+    }
+  },
+  "legal": {
+    "cardTitle": "Contrat vendeur, conditions et confidentialité",
+    "cardDescription": "Les versions actuelles, en langage clair, parce que personne ne lit le jargon juridique pour le plaisir. Les vrais textes juridiques arrivent bientôt ; accepter maintenant couvre cette version provisoire.",
+    "termsTitle": "Conditions d’utilisation",
+    "termsDescription": "La version courte de ce que vous acceptez en vendant sur Square Share, avec les Conditions complètes à un clic.",
+    "docs": {
+      "sellerAgreement": {
+        "title": "Contrat vendeur",
+        "body": "Votre travail vous appartient, toujours. Nous prenons une petite commission par vente, gérons les paiements via Stripe, et faisons tourner les serveurs. Vous restez dans la légalité et livrez ce que vous vendez réellement. Ceci est un brouillon provisoire ; le vrai contrat arrive bientôt."
+      },
+      "terms": {
+        "title": "Conditions d’utilisation",
+        "body": "N’abusez pas de la plateforme, ne vendez pas de choses qui font du mal, et respectez les boutiques des autres créateurs. Ceci est un brouillon provisoire ; les vraies conditions arrivent bientôt."
+      },
+      "privacy": {
+        "title": "Politique de confidentialité",
+        "body": "Nous conservons ce que vous nous donnez (profil, produits, vitrine), ne le vendons jamais, et le supprimons quand vous partez. Les paiements passent par Stripe, donc les détails de votre carte restent chez eux, pas chez nous. Ceci est un brouillon provisoire ; la vraie politique arrive bientôt."
+      },
+      "sellerDetails": {
+        "title": "Vos informations vendeur, et où elles apparaissent",
+        "body": "Votre raison sociale, votre adresse et votre e-mail de contact sont affichés aux acheteurs sur vos pages produit, et sont obligatoires avant de pouvoir publier ou vendre quoi que ce soit. C’est la seule chose que nous en faisons : le droit européen de la consommation impose qu’un acheteur puisse voir à qui il achète et le contacter avant de commander. Nous envoyons un seul lien à votre adresse de contact pour que vous puissiez confirmer qu’elle fonctionne, et c’est le seul e-mail que nous envoyons à cette adresse de notre propre initiative : pas de liste de diffusion, pas de marketing, et nous ne la vendons ni ne la partageons jamais."
+      }
+    },
+    "accepted": "Vous avez accepté la version <code>{version}</code> le {date}. Rien de plus à faire ici.",
+    "outdated": "Vous avez accepté la version <code>{version}</code> le {date}, mais les documents ont changé depuis. Relisez-les et acceptez la version actuelle.",
+    "agreed": "Vous avez accepté la version <code>{version}</code> le {date}. Rien d’autre à faire ici.",
+    "agreedOutdated": "Vous avez accepté la version <code>{version}</code> le {date}, mais les Conditions ont changé depuis. Relisez-les et acceptez la version en vigueur.",
+    "recording": "Enregistrement…",
+    "acceptButton": "J’accepte",
+    "agreeButton": "J’ai lu les Conditions et je les accepte",
+    "acceptNote": "Accepter enregistre la date et la version <code>{version}</code> sur votre compte.",
+    "agreeNote": "En les acceptant, la date et la version <code>{version}</code> sont enregistrées sur votre compte.",
+    "scrollToAgree": "Faites défiler jusqu’à la fin du résumé pour accepter.",
+    "success": {
+      "legalAccepted": "Accepté. Merci d’avoir lu les petites lignes.",
+      "termsAgreed": "Vous avez accepté les Conditions d’utilisation."
+    },
+    "termsSummary": {
+      "intro": "La version courte, en langage simple. Dernière mise à jour le {date}.",
+      "fullTermsLink": "Lire les Conditions d’utilisation complètes",
+      "opensInNewTab": " (s’ouvre dans un nouvel onglet)",
+      "regionLabel": "Conditions d’utilisation, version courte",
+      "footer": "Ce résumé sert à vous aider à les lire. Ce que vous acceptez, ce sont les <terms>Conditions d’utilisation</terms> complètes et la <privacy>Politique de confidentialité</privacy>.",
+      "sections": {
+        "parties": {
+          "heading": "À qui vous avez affaire",
+          "points": {
+            "merchantOfRecord": "Square Share est une plateforme qui vous aide à vendre. Lorsqu’un acheteur vous passe commande, la vente est conclue entre vous et cet acheteur : c’est vous le vendeur et le professionnel responsable de la vente, et non nous.",
+            "eligibility": "Vous devez avoir au moins 18 ans, ou l’âge de la majorité là où vous vivez. Si vous vous inscrivez pour une entreprise, vous confirmez pouvoir l’engager au titre de ces Conditions."
+          }
+        },
+        "account": {
+          "heading": "Votre compte",
+          "points": {
+            "security": "Gardez vos informations exactes et votre connexion sécurisée. Vous êtes responsable de ce qui se passe sous votre compte : prévenez-nous immédiatement si vous pensez que quelqu’un d’autre y a eu accès.",
+            "traderDetails": "Avant toute mise en ligne, vous nous communiquez votre raison sociale ou nom, une adresse postale et un e-mail de contact que vous confirmez. Les acheteurs les voient sur vos pages produit, car le droit de la consommation l’exige."
+          }
+        },
+        "selling": {
+          "heading": "Vendre",
+          "points": {
+            "lawfulListings": "Décrivez vos offres avec exactitude, et ne vendez que des produits licites que vous avez le droit de vendre.",
+            "consumerRights": "Respectez les droits des consommateurs de vos acheteurs, y compris le droit de rétractation de 14 jours et la garantie légale, et assurez vous-même la livraison, l’assistance et les remboursements.",
+            "taxesAndRecords": "Les taxes et la TVA sur vos ventes relèvent de vous, et vous conservez vos propres registres de ventes pendant 10 ans."
+          }
+        },
+        "payments": {
+          "heading": "Paiements",
+          "points": {
+            "stripe": "Les paiements transitent par Stripe, vers votre propre compte Stripe, selon les conditions propres à Stripe. Nous ne détenons jamais votre argent.",
+            "feesAndDisputes": "Nous prélevons des frais de plateforme sur chaque vente, comme indiqué dans votre tableau de bord. Les rétrofacturations et les litiges opposent vous, votre acheteur et Stripe."
+          }
+        },
+        "notAllowed": {
+          "heading": "Ce qui n’est pas autorisé",
+          "points": {
+            "products": "Les produits illégaux, contrefaits ou portant atteinte à des droits, les logiciels malveillants, les contenus haineux et les contenus pour adultes.",
+            "conduct": "La fraude, le contournement des frais de plateforme, le scraping, l’utilisation du contenu de quiconque pour entraîner des modèles d’IA, ou les attaques contre le service.",
+            "tampering": "Masquer ou modifier ce que Square Share montre aux acheteurs, comme vos informations vendeur, vos prix ou vos mentions légales."
+          }
+        },
+        "content": {
+          "heading": "Votre contenu",
+          "points": {
+            "ownership": "Ce que vous importez reste à vous. Vous nous accordez une licence pour l’héberger et l’afficher, uniquement pour faire fonctionner et promouvoir Square Share."
+          }
+        },
+        "liability": {
+          "heading": "Responsabilité, modifications et droit applicable",
+          "points": {
+            "cap": "Square Share en est à ses débuts et est proposé « en l’état » aux utilisateurs professionnels. À leur égard, notre responsabilité est plafonnée aux frais qu’ils nous ont versés au cours des 12 derniers mois ou à 100 EUR, le montant le plus élevé étant retenu, et les vendeurs professionnels nous garantissent contre les réclamations causées par leurs produits, leurs sites ou leurs manquements. Si vous êtes un consommateur, vos droits légaux ne sont pas affectés.",
+            "termination": "Nous pouvons suspendre ou fermer les comptes qui ne respectent pas ces Conditions. Vous pouvez partir à tout moment et emporter vos données.",
+            "changesAndLaw": "Nous pouvons mettre à jour ces Conditions, avec un préavis en cas de modification importante. Le droit tchèque s’applique.",
+            "policies": "Notre Politique de confidentialité et notre Politique relative aux cookies font partie de ces Conditions."
+          }
+        }
+      }
+    }
+  },
+  "tax": {
+    "cardTitle": "Entreprise et informations vendeur",
+    "cardDescription": "À définir une seule fois pour tout votre compte. Affiché aux acheteurs sur chaque page produit où vous vendez, et utilisé pour les factures et la TVA.",
+    "verifyOutcome": {
+      "verified": "E-mail de contact confirmé. Vous pouvez publier dès maintenant.",
+      "expired": "Ce lien de confirmation a expiré. Envoyez-vous-en un nouveau ci-dessous.",
+      "stale": "Ce lien correspondait à une adresse différente de celle enregistrée ici. Envoyez-en un nouveau ci-dessous.",
+      "invalid": "Ce lien de confirmation n’est pas valide, ou a déjà été utilisé.",
+      "throttled": "Trop de tentatives de confirmation. Attendez un moment, puis rouvrez le lien."
+    },
+    "gate": {
+      "required": "<strong>Votre raison sociale, votre adresse et votre e-mail de contact sont obligatoires avant de pouvoir publier ou vendre quoi que ce soit.</strong> Les acheteurs doivent pouvoir voir à qui ils achètent et comment vous contacter avant de commander.",
+      "privacyNoteLinked": "Ces informations apparaissent publiquement sur vos pages produit pour cette seule raison. Nous ne les utilisons jamais pour le marketing, et ne les vendons ni ne les partageons jamais. Le seul e-mail que nous envoyons à votre adresse de contact est le lien qui la confirme. Voir la <link>Politique de confidentialité de Squareshare</link>."
+    },
+    "countryNotEu": "Hors UE / je préfère ne pas préciser",
+    "vatAdvisory": {
+      "noCountry": "Ce numéro de TVA semble avoir été délivré par {issuer}. Vous voudrez peut-être définir votre pays.",
+      "mismatch": "Ce numéro de TVA semble avoir été délivré par {issuer}, mais votre pays est défini sur {selected}. Vérifiez que les deux sont corrects."
+    },
+    "fields": {
+      "businessName": {
+        "label": "Raison sociale ou nom",
+        "tipLabel": "Que mettre ici",
+        "tipBody": "Le nom avec lequel les acheteurs contractent. Votre raison sociale si vous vendez à travers une entreprise ; votre nom complet si vous vendez en tant qu’individu. Le nom de votre vitrine est un nom de boutique, ce qui n’est pas la même chose et ne peut pas remplacer ceci.",
+        "placeholder": "p. ex. Studio Builderboy e.U."
+      },
+      "address": {
+        "label": "Adresse",
+        "tipLabel": "Pourquoi les acheteurs voient ceci",
+        "tipBody": "Le droit de la vente à distance exige une adresse postale à côté de chaque offre. Affichée dans la section Vendeur de vos pages produit.",
+        "placeholder": "p. ex. 12 rue du Marché\n75001 Paris\nFrance"
+      },
+      "email": {
+        "label": "E-mail de contact",
+        "tipLabel": "En quoi ceci diffère de votre e-mail de connexion",
+        "tipBody": "Affiché aux acheteurs comme un lien mailto, et utilisé comme solution de repli du bouton d’achat lorsqu’un produit n’a pas de lien d’achat. Volontairement distinct de votre e-mail de connexion : utilisez l’adresse à laquelle vous voulez que les acheteurs vous écrivent. Elle doit être une adresse que vous lisez réellement : les adresses factices, les fournisseurs d’e-mails temporaires et les adresses sans réponse sont refusés, tout comme un domaine qui n’accepte aucun courrier.",
+        "placeholder": "p. ex. bonjour@votreboutique.example",
+        "statusDirty": "Enregistrez pour envoyer un lien de confirmation à la nouvelle adresse. Les acheteurs ne la voient qu’une fois confirmée.",
+        "statusConfirmed": "Confirmé : les acheteurs peuvent vous joindre ici.",
+        "statusUnconfirmed": "Pas encore confirmé. Ouvrez le lien que nous avons envoyé à cette adresse."
+      },
+      "vatId": {
+        "label": "Numéro de TVA",
+        "placeholder": "p. ex. FR12345678901"
+      },
+      "country": {
+        "label": "Pays"
+      },
+      "phone": {
+        "label": "Téléphone"
+      },
+      "bio": {
+        "label": "Bio",
+        "tipLabel": "Où les acheteurs voient ceci",
+        "tipBody": "Une ligne à propos de vous ou de ce que vous fabriquez, affichée sous votre nom dans la section Vendeur de vos pages produit. Facultatif : vous pouvez publier sans elle. La bio d’en-tête de chaque vitrine se définit séparément dans l’éditeur de vitrine.",
+        "placeholder": "p. ex. Grès tourné à la main dans un petit atelier de Nantes",
+        "charactersLeft": "{count, plural, one {# caractère restant} many {# caractères restants} other {# caractères restants}}"
+      }
+    },
+    "resend": {
+      "button": "Renvoyer l’e-mail de confirmation"
+    },
+    "success": {
+      "savedCheckEmail": "Enregistré. Consultez {email} pour un lien de confirmation de l’adresse.",
+      "sellerDetailsSaved": "Entreprise et informations vendeur enregistrées.",
+      "alreadyConfirmed": "Cette adresse est déjà confirmée.",
+      "confirmationSent": "Envoyé. Consultez {email} pour le lien."
+    }
+  },
+  "shipping": {
+    "shipsFrom": {
+      "label": "Expédié depuis",
+      "notSet": "Non défini"
+    },
+    "shippingCard": {
+      "title": "Livraison",
+      "description": "À définir une seule fois pour tout votre compte. Affiché sur chaque page produit où vous vendez, et utilisé pour tout produit qui ne fait pas l’objet d’une exception ci-dessous."
+    },
+    "dispatch": {
+      "label": "Délai d’expédition",
+      "tipLabel": "Pourquoi ce champ existe à part",
+      "tipBody": "Une ligne, affichée à côté du bouton d’achat. « Quand est-ce que ça part ? » est la première question que se posent les acheteurs, elle ne devrait pas nécessiter de lire tout un paragraphe.",
+      "placeholder": "p. ex. Expédié sous 1 à 3 jours ouvrés"
+    },
+    "destinations": {
+      "label": "Où vous livrez, et en combien de temps",
+      "tipLabel": "Quel niveau de détail donner",
+      "tipBody": "Regroupez les destinations comme vous expédiez réellement : une ligne pour votre pays, une pour le reste de l’UE, une pour tout le reste suffit largement. Laissez le coût vide s’il varie.",
+      "empty": "Rien n’est encore renseigné. Les acheteurs ne voient aucun délai de livraison tant que vous n’ajoutez pas de ligne.",
+      "areaLabel": "Destination {number}",
+      "areaPlaceholder": "p. ex. Reste de l’UE",
+      "timeLabel": "Délai de livraison {number}",
+      "timePlaceholder": "p. ex. 5 à 7 jours ouvrés",
+      "costLabel": "Frais de livraison {number}",
+      "costPlaceholder": "p. ex. 9,00 €",
+      "removeNamed": "Supprimer la destination {area}",
+      "removeNumbered": "Supprimer la destination {number}",
+      "add": "Ajouter une destination",
+      "limitReached": "{max, plural, one {C’est la limite : # destination. Retirez-en une pour en ajouter une autre.} many {C’est la limite : # destinations. Retirez-en une pour en ajouter une autre.} other {C’est la limite : # destinations. Retirez-en une pour en ajouter une autre.}}"
+    },
+    "notes": {
+      "label": "Autre chose à propos de la livraison",
+      "placeholder": "p. ex. Suivi en standard. Nous ne livrons pas dans les points relais."
+    },
+    "returnsCard": {
+      "title": "Retours",
+      "description": "Ce que vous proposez en plus des droits légaux déjà indiqués sur vos pages produit."
+    },
+    "returnsWindow": {
+      "label": "Délai de retour",
+      "tipLabel": "Ce que le droit légal couvre déjà",
+      "tipBody": "Vendre à des acheteurs de l’UE à distance leur donne 14 jours pour changer d’avis et une garantie de deux ans sur les défauts, quel que soit votre choix ici. Vos pages produit indiquent déjà les deux, ceci est donc ce que vous proposez en plus.",
+      "none": "Rien au-delà du droit légal",
+      "days": "{days, plural, one {# jour} many {# jours} other {# jours}}",
+      "statutoryMinimum": "Le minimum légal de l’UE",
+      "custom": "Autre chose",
+      "customLabel": "Délai de retour en jours",
+      "daysUnit": "jours"
+    },
+    "returnsPaidBy": {
+      "label": "Frais de retour",
+      "buyer": "L’acheteur paie les frais de retour",
+      "seller": "Nous payons les frais de retour"
+    },
+    "exceptions": {
+      "label": "Exceptions",
+      "tipLabel": "Ce qui a sa place ici",
+      "tipBody": "Tout ce que le délai ci-dessus ne couvre pas : pièces fabriquées sur commande, articles d’hygiène, logiciels ouverts. Les acheteurs lisent ceci avant d’acheter, pas après.",
+      "placeholder": "p. ex. Les pièces fabriquées sur commande ne peuvent être retournées, sauf défaut."
+    },
+    "preview": {
+      "title": "Ce que les acheteurs liront",
+      "description": "Construit à partir de vos réponses ci-dessus, et affiché sur chaque page produit.",
+      "shippingHeading": "Livraison",
+      "returnsHeading": "Retours",
+      "empty": "Rien pour l’instant. Tant que vous ne répondez à rien ci-dessus, vos pages produit n’affichent aucune section livraison ou retours."
+    },
+    "ownWords": {
+      "title": "Rédigez-le vous-même",
+      "description": "Facultatif. Ce que vous mettez ici remplace ce qui est généré ci-dessus, mot pour mot.",
+      "shippingLabel": "Votre politique de livraison",
+      "returnsLabel": "Votre politique de retours",
+      "placeholder": "Laissez vide pour utiliser les réponses ci-dessus."
+    },
+    "profiles": {
+      "title": "Profils de livraison",
+      "description": "Pour les quelques produits qui s’expédient différemment. À choisir sur le produit lui-même, sous Livraison.",
+      "empty": "Aucun pour l’instant. N’en ajoutez un que si certains produits s’expédient différemment des conditions ci-dessus.",
+      "nameLabel": "Nom",
+      "namePlaceholder": "p. ex. Objets volumineux",
+      "removeNamed": "Supprimer le profil de livraison {name}",
+      "removeUnnamed": "Supprimer ce profil de livraison",
+      "dispatchLabel": "Délai d’expédition",
+      "dispatchPlaceholder": "p. ex. Fabriqué sur commande, comptez 3 semaines",
+      "bodyLabel": "Livraison",
+      "bodyPlaceholder": "Comment ces produits sont expédiés, et ce que ça coûte",
+      "noTerms": "Ajoutez des conditions, sinon ce profil est abandonné à l’enregistrement.",
+      "add": "Ajouter un profil",
+      "limitReached": "{max, plural, one {C’est la limite : # profil. Retirez-en un pour en ajouter un autre.} many {C’est la limite : # profils. Retirez-en un pour en ajouter un autre.} other {C’est la limite : # profils. Retirez-en un pour en ajouter un autre.}}"
+    },
+    "success": {
+      "shippingSaved": "Livraison et retours enregistrés."
+    }
+  },
+  "sellerDetails": {
+    "bannerLabel": "Informations vendeur requises",
+    "memberHeadline": "Cette boutique ne peut pas encore publier ni vendre.",
+    "memberFix": "Son propriétaire doit ajouter ses informations vendeur dans ses propres paramètres.",
+    "addLink": "Ajouter les informations vendeur",
+    "opensInNewTab": " (ouvre un nouvel onglet)",
+    "headline": {
+      "publishOrSell": "Vous ne pouvez rien publier ni vendre tant que vos informations vendeur ne sont pas complètes.",
+      "putProductOnSale": "Vous ne pouvez pas mettre ce produit en vente tant que vos informations vendeur ne sont pas complètes.",
+      "importLiveProducts": "Vous ne pouvez pas importer de produits actifs tant que vos informations vendeur ne sont pas complètes.",
+      "embedStorefront": "Vous ne pouvez pas intégrer cette vitrine tant que vos informations vendeur ne sont pas complètes.",
+      "publishStorefront": "Vous ne pouvez pas publier cette vitrine ni vendre depuis celle-ci tant que vos informations vendeur ne sont pas complètes."
+    },
+    "reason": "Les acheteurs doivent pouvoir voir à qui ils achètent et comment vous contacter avant de commander. Elles sont affichées sur vos pages produit pour cette seule raison, jamais utilisées pour le marketing.",
+    "fields": {
+      "businessName": {
+        "label": "Raison sociale ou nom",
+        "why": "Les acheteurs doivent savoir à qui ils achètent : votre raison sociale, ou votre nom complet si vous vendez en tant qu’individu."
+      },
+      "address": {
+        "label": "Adresse professionnelle",
+        "why": "Une adresse postale doit accompagner chaque offre selon le droit de la vente à distance."
+      },
+      "email": {
+        "label": "E-mail de contact",
+        "why": "L’adresse à laquelle les acheteurs écrivent au sujet d’une commande. C’est aussi la solution de repli du bouton d’achat lorsqu’un produit n’a pas de lien d’achat."
+      },
+      "emailVerified": {
+        "label": "E-mail de contact confirmé",
+        "why": "Nous envoyons un lien à cette adresse et vous cliquez dessus. Rien d’autre ne prouve qu’un message d’acheteur atteindrait vraiment quelqu’un."
+      }
+    }
+  },
+  "security": {
+    "copyRecoveryCodes": {
+      "copy": "Copier les codes de récupération",
+      "copied": "Codes de récupération copiés",
+      "failed": "Impossible de copier les codes de récupération. Sélectionnez-les et copiez-les manuellement."
+    },
+    "copySetupKey": {
+      "copy": "Copier la clé de configuration",
+      "copied": "Clé de configuration copiée",
+      "failed": "Impossible de copier la clé de configuration. Sélectionnez-la et copiez-la manuellement."
+    },
+    "prompt": {
+      "title": "Votre mot de passe est la seule protection de ce compte",
+      "body": "Activez l’authentification à deux facteurs pour que la connexion exige aussi un code de votre téléphone. Cela prend environ une minute.",
+      "cta": "Activer la 2FA"
+    },
+    "recoveredNotice": "<strong>L’authentification à deux facteurs est désactivée.</strong> Vous vous êtes connecté avec un code de récupération, ce qui a supprimé votre ancienne application d’authentification et déconnecté vos autres appareils. Configurez-la à nouveau maintenant pour que votre mot de passe ne soit pas la seule protection de votre compte.",
+    "stepUpConfirm": "Saisissez un code actuel de votre application d’authentification pour confirmer.",
+    "twoFactor": {
+      "cardTitle": "Authentification à deux facteurs",
+      "descriptionOn": "La connexion exige votre mot de passe et un code de votre application d’authentification.",
+      "descriptionOff": "Ajoutez une seconde étape à la connexion : un code à 6 chiffres généré par une application sur votre téléphone.",
+      "statusOn": "Activée",
+      "statusOff": "Désactivée",
+      "listLabel": "Applications d’authentification",
+      "added": "Ajoutée le {date}",
+      "removeLabel": "Supprimer {name}",
+      "addAnother": "Ajouter une autre application d’authentification",
+      "benefits": {
+        "password": "Un mot de passe volé ou deviné ne suffit plus pour accéder à votre boutique.",
+        "changes": "Les modifications des informations de virement, de votre équipe et de votre compte exigent un code de votre téléphone.",
+        "changesBusiness": "Les modifications de vos informations d’entreprise, de votre équipe et de votre compte nécessitent un code depuis votre téléphone.",
+        "alerts": "Vous recevez un e-mail dès que quelqu’un saisit correctement votre mot de passe mais se trompe de code."
+      },
+      "setUp": "Configurer l’authentification à deux facteurs",
+      "takesAMinute": "Prend environ une minute."
+    },
+    "remove": {
+      "titleLast": "Désactiver l’authentification à deux facteurs ?",
+      "title": "Supprimer « {name} » ?",
+      "descriptionLast": "C’est votre seule application d’authentification. La supprimer désactive l’authentification à deux facteurs, et vos codes de récupération cessent de fonctionner. La connexion ne demandera plus que votre mot de passe.",
+      "description": "« {name} » ne pourra plus servir à se connecter à votre compte.",
+      "removing": "Suppression…",
+      "turnOff": "Désactiver"
+    },
+    "setup": {
+      "suggestedName": "Application d’authentification",
+      "suggestedNameNumbered": "Application d’authentification {number}",
+      "added": "Application d’authentification ajoutée.",
+      "enabled": "L’authentification à deux facteurs est activée.",
+      "titleCodes": "Enregistrez vos codes de récupération",
+      "titleAdd": "Ajouter une application d’authentification",
+      "titleEnable": "Activer l’authentification à deux facteurs",
+      "descriptionAdd": "Utilisez un second téléphone ou une autre application comme moyen de connexion de secours.",
+      "descriptionEnable": "Ensuite, la connexion demandera votre mot de passe et un code généré par une application sur votre téléphone.",
+      "descriptionScan": "Scannez le code avec votre application d’authentification, puis saisissez les 6 chiffres qu’elle affiche.",
+      "descriptionCodes": "L’authentification à deux facteurs est activée.",
+      "googleReauth": "Votre compte se connecte avec Google : il n’y a pas de mot de passe pour confirmer que c’est bien vous. Reconnectez-vous, et vous reviendrez directement ici pour terminer.",
+      "confirmWithGoogleFirst": "Confirmez d’abord votre identité avec Google. Vous reviendrez directement ici pour terminer.",
+      "signInAgainFirst": "Pour votre sécurité, reconnectez-vous d’abord. Vous reviendrez directement ici pour terminer.",
+      "signInAgain": "Se reconnecter",
+      "nameLabel": "Nommez cette application d’authentification",
+      "nameHint": "Pour distinguer vos applications plus tard, p. ex. « Pixel 8 ».",
+      "stepUpDescription": "Saisissez un code d’une application d’authentification que vous utilisez déjà, pour confirmer que c’est bien vous.",
+      "passwordLabel": "Mot de passe actuel",
+      "squareSharePasswordLabel": "Mot de passe Square Share",
+      "passwordHint": "Pour que personne ne puisse vous bloquer avec son propre téléphone s’il trouve votre ordinateur resté connecté.",
+      "notYourGooglePassword": "Ce n’est pas votre mot de passe Google. Vous ne le connaissez pas ? Confirmez plutôt avec Google ci-dessous.",
+      "signedInRecently": "Vous vous êtes connecté à l’instant, il n’y a donc rien d’autre à confirmer.",
+      "or": "ou",
+      "checking": "Vérification…",
+      "continue": "Continuer",
+      "qrAlt": "QR code à scanner avec votre application d’authentification",
+      "anyApp": "Toute application d’authentification convient : Google Authenticator, Microsoft Authenticator, 1Password, Authy et d’autres.",
+      "cantScan": "Impossible de scanner ? Saisissez plutôt cette clé :",
+      "setupKeyLabel": "Clé de configuration",
+      "openInApp": "Ouvrir dans l’application d’authentification",
+      "codeLabel": "Code à 6 chiffres de l’application",
+      "verifying": "Vérification…",
+      "verifyAndAdd": "Vérifier et ajouter",
+      "verifyAndTurnOn": "Vérifier et activer"
+    },
+    "recoveryCodes": {
+      "cardTitle": "Codes de récupération",
+      "cardDescription": "Des codes à usage unique pour vous connecter si vous perdez votre téléphone. Conservez-les ailleurs que sur le téléphone lui-même.",
+      "countUnavailable": "Nous n’avons pas pu vérifier combien il vous en reste.",
+      "remaining": "{count, plural, one {Il reste {count} code sur {total}.} many {Il reste {count} codes sur {total}.} other {Il reste {count} codes sur {total}.}}",
+      "remainingLow": "{count, plural, one {Il reste {count} code sur {total}. Ils s’épuisent : générez un nouveau jeu.} many {Il reste {count} codes sur {total}. Ils s’épuisent : générez un nouveau jeu.} other {Il reste {count} codes sur {total}. Ils s’épuisent : générez un nouveau jeu.}}",
+      "remainingNone": "{count, plural, one {Il reste {count} code sur {total}. Il n’y en a plus : générez un nouveau jeu maintenant.} many {Il reste {count} codes sur {total}. Il n’y en a plus : générez un nouveau jeu maintenant.} other {Il reste {count} codes sur {total}. Il n’y en a plus : générez un nouveau jeu maintenant.}}",
+      "generate": "Générer de nouveaux codes",
+      "generating": "Génération…",
+      "regenerateTitle": "Générer de nouveaux codes de récupération ?",
+      "regenerateDescription": "Vos codes actuels cessent de fonctionner dès que les nouveaux sont créés.",
+      "newTitle": "Vos nouveaux codes de récupération",
+      "newDescription": "Vos anciens codes ne fonctionnent plus."
+    },
+    "recoveryCodesDisplay": {
+      "notCreated": "L’authentification à deux facteurs est activée, mais nous n’avons pas pu créer vos codes de récupération. Générez un jeu depuis la carte Codes de récupération avant de vous déconnecter.",
+      "warning": "Conservez-les en lieu sûr, par exemple dans un gestionnaire de mots de passe. Chacun ne fonctionne qu’une fois, ils sont le seul moyen de récupérer l’accès si vous perdez votre téléphone, et vous ne les reverrez plus.",
+      "listLabel": "Codes de récupération",
+      "download": "Télécharger",
+      "saved": "J’ai enregistré mes codes de récupération en lieu sûr.",
+      "file": {
+        "title": "Codes de récupération Square Share",
+        "explainer": "Chaque code peut servir une seule fois à vous connecter si vous perdez votre application d’authentification.",
+        "generated": "Générés le {date}"
+      }
+    },
+    "activity": {
+      "cardTitle": "Activité de sécurité récente",
+      "cardDescription": "Les modifications de votre mode de connexion, de la plus récente à la plus ancienne. Si vous ne reconnaissez pas un élément, changez votre mot de passe et activez l’authentification à deux facteurs.",
+      "unavailable": "Impossible de charger votre activité pour le moment.",
+      "empty": "Rien pour l’instant.",
+      "timeUtc": "{time} UTC",
+      "events": {
+        "passwordChanged": "Mot de passe modifié",
+        "passwordSet": "Mot de passe défini",
+        "passwordResetRequested": "Lien de réinitialisation du mot de passe demandé",
+        "emailChangeRequested": "Changement d’e-mail demandé",
+        "twoFactorEnabled": "Authentification à deux facteurs activée",
+        "twoFactorDisabled": "Authentification à deux facteurs désactivée",
+        "factorAdded": "Application d’authentification ajoutée",
+        "factorRemoved": "Application d’authentification supprimée",
+        "recoveryCodesRegenerated": "Nouveaux codes de récupération générés",
+        "recoveryCodeUsed": "Code de récupération utilisé pour se connecter",
+        "challengeFailed": "Code à deux facteurs erroné saisi à la connexion",
+        "lockedOut": "Connexion à deux facteurs suspendue après plusieurs codes erronés"
+      }
+    },
+    "success": {
+      "twoFactorOff": "L’authentification à deux facteurs est désactivée.",
+      "factorRemoved": "« {name} » supprimée.",
+      "codesRegenerated": "Nouveaux codes de récupération prêts. Vos anciens codes ne fonctionnent plus.",
+      "confirmed": "Confirmé."
+    }
+  },
+  "team": {
+    "roles": {
+      "owner": {
+        "label": "Propriétaire",
+        "description": "Contrôle total. Exactement un par boutique, ne peut être changé ni retiré."
+      },
+      "editor": {
+        "label": "Éditeur",
+        "description": "Peut voir la boutique et modifier les produits et la vitrine. Peut inviter des membres à son rôle ou en dessous."
+      },
+      "viewer": {
+        "label": "Lecteur",
+        "description": "Peut voir la boutique et l’équipe. Lecture seule."
+      }
+    },
+    "cardTitle": "Équipe",
+    "cardDescription": "Les personnes qui peuvent se connecter à cette boutique. Leur rôle détermine ce qu’elles peuvent voir et modifier.",
+    "loadError": "Impossible de charger plus de membres. Réessayez.",
+    "loadMore": "Charger plus de membres",
+    "inviteButton": "Inviter un membre",
+    "memberList": {
+      "onlyOwner": "Il n’y a que vous pour l’instant. Invitez quelqu’un pour lui donner accès.",
+      "invitedHeading": "Invités",
+      "invitedTipLabel": "Ce qu’un membre invité peut faire",
+      "invitedTipBody": "Rien pour l’instant. Une invitation prend effet la première fois que cette personne se connecte avec l’adresse e-mail à laquelle elle a été envoyée, et c’est seulement alors qu’elle apparaît comme membre avec le rôle que vous avez choisi.",
+      "showingFirst": "{count, plural, one {Affichage du premier # membre.} many {Affichage des # premiers membres.} other {Affichage des # premiers membres.}}"
+    },
+    "memberRow": {
+      "you": "(vous)",
+      "cancelInviteLabel": "Annuler l’invitation envoyée à {email}",
+      "removeMemberLabel": "Retirer {name} de l’équipe",
+      "cancelInviteTitle": "Annuler l’invitation",
+      "removeFromTeamTitle": "Retirer de l’équipe",
+      "confirmRoleChange": "Faire de {name} {role, select, owner {le propriétaire} editor {un éditeur} viewer {un lecteur} other {{role}}} ?",
+      "confirmCancelInvite": "Annuler l’invitation envoyée à {email} ?",
+      "confirmRemove": "Retirer {name} ? Il perd l’accès immédiatement.",
+      "cancelling": "Annulation…",
+      "removing": "Suppression…",
+      "cancelled": "Annulé",
+      "removed": "Retiré",
+      "cancelInviteButton": "Annuler l’invitation",
+      "keep": "Garder"
+    },
+    "inviteModal": {
+      "title": "Inviter un membre",
+      "description": "Il aura accès dès qu’il se connectera avec cette adresse e-mail.",
+      "emailLabel": "Adresse e-mail",
+      "emailPlaceholder": "collegue@example.com",
+      "roleLabel": "Rôle",
+      "notificationNote": "Les notifications par e-mail ne sont pas encore en place : l’invitation prend effet à la connexion. Vous voudrez peut-être le prévenir directement.",
+      "sendButton": "Envoyer l’invitation"
+    },
+    "inviteRow": {
+      "invitedAs": "<store>{storeName}</store> vous a invité en tant que <strong>{role, select, owner {propriétaire} editor {éditeur} viewer {lecteur} other {{role}}}</strong>",
+      "accepting": "Acceptation…",
+      "accepted": "Accepté",
+      "acceptButton": "Accepter"
+    },
+    "invitePrompt": {
+      "title": "{count, plural, one {Vous avez une invitation d’équipe} many {Vous avez des invitations d’équipe} other {Vous avez des invitations d’équipe}}",
+      "description": "{count, plural, one {Vous avez été invité à rejoindre une équipe. Acceptez pour obtenir l’accès.} many {Vous avez été invité à rejoindre ces équipes. Acceptez pour obtenir l’accès.} other {Vous avez été invité à rejoindre ces équipes. Acceptez pour obtenir l’accès.}}",
+      "maybeLater": "Plus tard"
+    },
+    "pendingInvites": {
+      "cardTitle": "Invitations pour vous",
+      "cardDescription": "Acceptez une invitation pour rejoindre l’équipe de cette boutique."
+    },
+    "success": {
+      "inviteCreated": "Invitation créée. Il la verra en se connectant avec cette adresse e-mail. (L’envoi d’e-mails n’est pas encore en place.)",
+      "inviteAccepted": "Bienvenue dans l’équipe.",
+      "roleUpdated": "Rôle mis à jour.",
+      "memberRemoved": "Membre retiré."
+    }
+  }
+}

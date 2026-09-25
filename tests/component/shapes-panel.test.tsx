@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
+import { render, screen, cleanup } from "../setup/render";
 import userEvent from "@testing-library/user-event";
 import { SHAPE_KINDS } from "@/types/storefront";
-import { SHAPE_SPECS } from "@/components/storefront/shape-specs";
+import { english } from "../setup/translate";
 import { ShapesPanel } from "@/components/storefront/ShapesPanel";
 
 /**
@@ -21,9 +21,9 @@ function renderPanel(canAddBlocks = true) {
   return { onAddShape };
 }
 
-/** The panel labels each button "Add {label}", lowercased. */
+/** The panel labels each button "Add {shape}". */
 const buttonName = (kind: (typeof SHAPE_KINDS)[number]) =>
-  `Add ${SHAPE_SPECS[kind].label.toLowerCase()}`;
+  english(`Storefront.shapes.add.${kind}`);
 
 describe("ShapesPanel", () => {
   it("renders a button for EVERY shape kind", () => {
@@ -61,8 +61,11 @@ describe("ShapesPanel", () => {
 
   it("groups the library rather than listing it flat", () => {
     renderPanel();
-    for (const title of ["Basic", "Polygons", "Accents"]) {
-      expect(screen.getByRole("group", { name: `${title} shapes` })).toBeInTheDocument();
+    // The group's aria-label is its own catalogue key (groupLabel.*), not the
+    // tab title with "shapes" appended: the two happen to share a root word,
+    // but they are independent strings and a translation can diverge.
+    for (const name of ["Basic shapes", "Polygon shapes", "Accent shapes"]) {
+      expect(screen.getByRole("group", { name })).toBeInTheDocument();
     }
   });
 });

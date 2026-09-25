@@ -17,6 +17,8 @@ import {
 } from "@/lib/errors";
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
 import { STOCK_QUANTITY_MAX } from "@/lib/validation/product";
+import { issueKey } from "@/lib/validation/messages";
+import { msg } from "@/i18n/types";
 
 // Stock settings server action. Follows the same session-check → Zod parse →
 // owner-scoped mutation pattern as lib/products/actions.ts. The owner sets an
@@ -36,7 +38,7 @@ const stockSettingsSchema = z
   })
   .refine(
     (data) => data.trackStock !== true || typeof data.stockQuantity === "number",
-    { error: "Set how many are in stock.", path: ["stockQuantity"] },
+    { error: issueKey("Validation.product.stockRequired"), path: ["stockQuantity"] },
   );
 
 /**
@@ -55,10 +57,10 @@ export async function updateStockSettings(
   const account = await getActiveAccount();
   if (!account) return failure(sessionExpired());
   if (!can(account.role, "products.write")) {
-    return failure(permissionDenied(account.role, "edit products"));
+    return failure(permissionDenied(account.role, "editProducts"));
   }
   if (!(await rateLimit("stock_write", RATE_LIMITS.stockWrite))) {
-    return failure(rateLimited("update stock"));
+    return failure(rateLimited("updateStock"));
   }
 
   // Validate product id shape before querying (prevents garbage URL params from
@@ -69,10 +71,7 @@ export async function updateStockSettings(
   const parsed = stockSettingsSchema.safeParse(input);
   if (!parsed.success) {
     return failure(
-      invalidInput(
-        "The stock settings didn't pass validation.",
-        "Quantity and threshold must be whole numbers of 0 or more, and when tracking is on, set how many are in stock.",
-      ),
+      invalidInput(msg("Errors.stock.invalid.message"), msg("Errors.stock.invalid.fix")),
     );
   }
 
@@ -99,7 +98,7 @@ export async function updateStockSettings(
 
   if (error) {
     console.error("[stock] updateStockSettings failed", error);
-    return failure(serverError("save the stock settings"));
+    return failure(serverError("saveStockSettings"));
   }
   if (!row) return failure(notFound("product"));
 

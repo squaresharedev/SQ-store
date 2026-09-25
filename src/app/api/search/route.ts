@@ -1,4 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { getLocale, getTranslations } from "next-intl/server";
+import type { Locale } from "@/i18n/locales";
+import { formatFixed } from "@/lib/format/intl";
 import { getUser } from "@/lib/auth/session";
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
@@ -69,8 +72,9 @@ function mergeById(...sets: SearchResult[][]): SearchResult[] {
   return merged;
 }
 
-function money(cents: number | null, currency: string | null): string {
-  const amount = ((cents ?? 0) / 100).toFixed(2);
+/** A result subtitle a person reads, "12.00 EUR" in English and "12,00 EUR" in Czech. */
+function money(cents: number | null, currency: string | null, locale: Locale): string {
+  const amount = formatFixed((cents ?? 0) / 100, 2, locale);
   return `${amount} ${toCurrency(currency ?? "EUR")}`;
 }
 
@@ -110,7 +114,11 @@ export async function GET(request: Request) {
   // so this is about matching correctness, not injection.
   const pattern = `%${escapeIlike(query)}%`;
 
-  const sources = buildSources({ supabase, account, pattern, query }).filter(
+  // Group labels and badges come back already in the reader's language, from
+  // the same Search.* keys the client's snapshot groups use.
+  const t = await getTranslations("Search");
+  const locale = await getLocale();
+  const sources = buildSources({ supabase, account, pattern, query, t, locale }).filter(
     (source) => types.includes(source.type),
   );
 
@@ -147,11 +155,15 @@ function buildSources({
   account,
   pattern,
   query,
+  t,
+  locale,
 }: {
   supabase: Awaited<ReturnType<typeof createClient>>;
   account: ActiveAccount;
   pattern: string;
   query: string;
+  t: Awaited<ReturnType<typeof getTranslations<"Search">>>;
+  locale: Locale;
 }): Source[] {
   const { accountId, role, userId } = account;
   // `orders` is absent from the generated Database types (see
@@ -161,7 +173,7 @@ function buildSources({
   return [
     {
       type: "product",
-      label: "Products",
+      label: t("groups.products"),
       run: async () => {
         const { data, error } = await supabase
           .from("products")
@@ -175,9 +187,9 @@ function buildSources({
             id: `product:${row.id}`,
             type: "product" as const,
             title: row.title,
-            subtitle: money(row.price_cents, row.currency),
+            subtitle: money(row.price_cents, row.currency, locale),
             href: `/products/${row.id}/edit`,
-            badge: row.status === "active" ? undefined : "Draft",
+            badge: row.status === "active" ? undefined : t("results.draft"),
           })),
           query,
         );
@@ -185,7 +197,7 @@ function buildSources({
     },
     {
       type: "order",
-      label: "Orders",
+      label: t("groups.orders"),
       run: async () => {
         // TWO queries, not one `.or()`. PostgREST's `or=` takes a PARSED filter
         // string, so a comma, period or parenthesis inside the user's term
@@ -217,10 +229,10 @@ function buildSources({
         const toResult = (row: Record<string, unknown>): SearchResult => ({
           id: `order:${String(row.id)}`,
           type: "order",
-          title: String(row.product_title ?? "Order"),
+          title: String(row.product_title ?? t("results.order")),
           subtitle: [
             row.buyer_email ? String(row.buyer_email) : null,
-            money(Number(row.amount_cents ?? 0), String(row.currency ?? "EUR")),
+            money(Number(row.amount_cents ?? 0), String(row.currency ?? "EUR"), locale),
           ]
             .filter(Boolean)
             .join(" · "),
@@ -239,7 +251,7 @@ function buildSources({
     },
     {
       type: "storefront",
-      label: "Storefronts",
+      label: t("groups.storefronts"),
       run: async () => {
         const { data, error } = await supabase
           .from("storefronts")
@@ -253,7 +265,7 @@ function buildSources({
             id: `storefront:${row.id}`,
             type: "storefront" as const,
             title: row.name,
-            subtitle: "Open in the designer",
+            subtitle: t("results.openInDesigner"),
             href: `/storefront/${row.id}`,
           })),
           query,
@@ -262,7 +274,7 @@ function buildSources({
     },
     {
       type: "team",
-      label: "Team",
+      label: t("groups.team"),
       run: async () => {
         // Through the roster RPC rather than the team_members table, so DISPLAY
         // NAMES are searchable and not just the address someone was invited at.
@@ -279,7 +291,7 @@ function buildSources({
           id: `team:${member.id}`,
           type: "team" as const,
           title: member.username || member.invited_email,
-          subtitle: member.username ? member.invited_email : "Invited",
+          subtitle: member.username ? member.invited_email : t("results.invited"),
           href: "/settings/team",
           badge: member.status === "active" ? member.role : member.status,
         }));
@@ -287,7 +299,7 @@ function buildSources({
     },
     {
       type: "notification",
-      label: "Notifications",
+      label: t("groups.notifications"),
       run: async () => {
         // Scoped to the USER, not the account: notifications follow the person
         // across every store they can see, they are not store data.
@@ -322,7 +334,7 @@ function buildSources({
           title: row.title,
           subtitle: row.body ?? undefined,
           href: "/notifications",
-          badge: row.read ? undefined : "Unread",
+          badge: row.read ? undefined : t("results.unread"),
         });
 
         return mergeById(

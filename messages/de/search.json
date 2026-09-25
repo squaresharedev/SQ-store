@@ -1,0 +1,72 @@
+{
+  "trigger": {
+    "label": "Suche"
+  },
+  "overlay": {
+    "label": "Suche",
+    "placeholder": "Produkte, Bestellungen, Einstellungen suchen…",
+    "clear": "Suche löschen",
+    "close": "Suche schließen",
+    "results": "Suchergebnisse",
+    "searching": "Wird gesucht…",
+    "noResults": "Keine Ergebnisse für {query}",
+    "resultCount": "{count, plural, one {{count} Ergebnis für {query}} other {{count} Ergebnisse für {query}}}",
+    "nothingMatches": "Nichts entspricht „{query}“.",
+    "startTyping": "Tippe, um zu suchen.",
+    "remoteError": "Server nicht erreichbar. Es werden nur Seiten, Einstellungen und Aktionen angezeigt.",
+    "remoteErrorCached": "Live-Suche nicht erreichbar. Es werden zwischengespeicherte Treffer, Seiten und Einstellungen angezeigt.",
+    "remoteAuth": "Deine Sitzung ist abgelaufen, daher werden nur Seiten und Einstellungen angezeigt.",
+    "remoteThrottled": "Zu schnell gesucht. Es werden nur Seiten, Einstellungen und Aktionen angezeigt."
+  },
+  "sections": {
+    "pages": "Seiten",
+    "actions": "Aktionen",
+    "settings": "Einstellungen"
+  },
+  "groups": {
+    "products": "Produkte",
+    "orders": "Bestellungen",
+    "storefronts": "Schaufenster",
+    "team": "Team",
+    "notifications": "Benachrichtigungen",
+    "recent": "Zuletzt"
+  },
+  "results": {
+    "draft": "Entwurf",
+    "openInDesigner": "Im Schaufenster-Editor öffnen",
+    "invited": "Eingeladen",
+    "order": "Bestellung",
+    "unread": "Ungelesen"
+  },
+  "fields": {
+    "username": "Benutzername",
+    "avatar": "Profilbild",
+    "email": "E-Mail-Adresse",
+    "password": "Passwort",
+    "twoFactor": "Zwei-Faktor-Authentifizierung",
+    "recoveryCodes": "Wiederherstellungscodes",
+    "securityActivity": "Sicherheitsaktivität",
+    "signOut": "Abmelden",
+    "vat": "USt-IdNr.",
+    "businessName": "Händlername",
+    "country": "Land",
+    "address": "Geschäftsadresse",
+    "contactEmail": "Kontakt-E-Mail",
+    "phone": "Telefon",
+    "bio": "Kurzbio",
+    "salesEmails": "Verkaufs-E-Mails",
+    "marketingEmails": "Marketing-E-Mails",
+    "productEmails": "Produkt-Update-E-Mails",
+    "sellerAgreement": "Verkäufervereinbarung",
+    "termsOfService": "Nutzungsbedingungen",
+    "exportData": "Meine Daten exportieren",
+    "deleteAccount": "Konto löschen"
+  },
+  "actions": {
+    "newProduct": "Neues Produkt",
+    "newStorefront": "Neues Schaufenster",
+    "inviteMember": "Teammitglied einladen",
+    "notificationHistory": "Benachrichtigungsverlauf",
+    "showMeAround": "Alles zeigen"
+  }
+}

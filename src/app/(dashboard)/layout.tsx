@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
+import { getTranslations } from "next-intl/server";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { getProfile, requireUser } from "@/lib/auth/session";
+import { ScopedIntlProvider } from "@/i18n/ScopedIntlProvider";
 import { NavigationBlockerProvider } from "@/lib/hooks/useNavigationBlocker";
 
 /**
@@ -26,7 +28,8 @@ export default async function DashboardLayout({
 }) {
   const user = await requireUser("/");
   const profile = await getProfile();
-  const username = profile?.username || user.email?.split("@")[0] || "Account";
+  const t = await getTranslations("Dashboard.shell");
+  const username = profile?.username || user.email?.split("@")[0] || t("accountFallback");
 
   // Toasts come from the ROOT layout (app/layout.tsx), not from here: they
   // have to outlive a navigation out of this route group.
@@ -38,8 +41,10 @@ export default async function DashboardLayout({
   // internal link in the chrome — sidebar, back links, breadcrumbs — goes
   // through the active blocker when a dirty editor is mounted.
   return (
-    <NavigationBlockerProvider>
-      <DashboardShell username={username}>{children}</DashboardShell>
-    </NavigationBlockerProvider>
+    <ScopedIntlProvider scope="app">
+      <NavigationBlockerProvider>
+        <DashboardShell username={username}>{children}</DashboardShell>
+      </NavigationBlockerProvider>
+    </ScopedIntlProvider>
   );
 }

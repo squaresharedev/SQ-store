@@ -1,17 +1,19 @@
+import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cardClass, pageShellClass } from "@/components/ui/surface-styles";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { cn } from "@/lib/utils";
 /** Route-level loading state while the payments overview is assembled. */
 export default function PaymentsLoading() {
+  const t = useTranslations("Dashboard.loading.payments");
   return (
     <main className={cn(pageShellClass, "space-y-6")}>
       <PageHeader
-        title="Payments"
-        subtitle="Your balance, payouts and Stripe connection."
+        title={t("title")}
+        subtitle={t("subtitle")}
       />
 
-      <span className="sr-only">loading payments</span>
+      <span className="sr-only">{t("srLoading")}</span>
 
       {/* Balance tiles */}
       <div aria-hidden="true" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

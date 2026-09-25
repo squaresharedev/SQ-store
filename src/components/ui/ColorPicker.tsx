@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState, useSyncExternalStore } from "react";
 import { Check, Copy, Pipette, Plus } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import {
   errorTextClass,
@@ -71,6 +72,10 @@ const ROW_COLUMNS: Record<number, string> = {
 export type ColorInheritOption = {
   /** Names the source, e.g. "Theme color". */
   label: string;
+  /** The inherit dot's accessible name, a whole phrase such as "Use Theme
+   *  color". Passed in rather than built from `label`, which would have to be
+   *  spliced into a sentence in the reader's language. */
+  useLabel: string;
   /** The hex actually rendered while inheriting — fills the dot. */
   value: string;
   /** True when nothing is overridden. */
@@ -199,6 +204,9 @@ export function ColorPicker({
 }) {
   const hexId = useId();
   const errorId = `${hexId}-error`;
+  const t = useTranslations("Common.colorPicker");
+  const tCommon = useTranslations("Common.actions");
+  const tKey = useTranslations();
   const [open, setOpen] = useState(false);
   const [hsv, setHsv] = useState<Hsv>(() => hexToHsv(value) ?? { h: 0, s: 0, v: 0 });
   const [text, setText] = useState(value);
@@ -377,8 +385,8 @@ export function ColorPicker({
                 key={preset.value}
                 type="button"
                 onClick={() => commitHex(preset.value)}
-                aria-label={`${preset.name} (${preset.value})`}
-                title={preset.name}
+                aria-label={tKey(preset.label, { value: preset.value })}
+                title={tKey(preset.name)}
                 style={{ backgroundColor: preset.value }}
                 className={cn(
                   "size-8 rounded-full ring-1 ring-inset ring-black/10",
@@ -400,8 +408,8 @@ export function ColorPicker({
             <button
               type="button"
               onClick={pickFromScreen}
-              aria-label="Pick a color from the screen"
-              title="Pick from screen"
+              aria-label={t("pickFromScreen")}
+              title={t("pickFromScreenTitle")}
               className={cn(
                 "inline-flex size-10 shrink-0 items-center justify-center rounded-none border border-input",
                 "bg-background text-muted-foreground hover:bg-accent hover:text-foreground",
@@ -413,7 +421,7 @@ export function ColorPicker({
             </button>
           )}
           <label htmlFor={hexId} className="sr-only">
-            Hex color
+            {t("hexLabel")}
           </label>
           <input
             id={hexId}
@@ -437,8 +445,8 @@ export function ColorPicker({
           <button
             type="button"
             onClick={copyHex}
-            aria-label={copied ? "Hex copied" : "Copy hex"}
-            title={copied ? "Copied" : "Copy hex"}
+            aria-label={copied ? t("hexCopied") : t("copyHex")}
+            title={copied ? tCommon("copied") : t("copyHex")}
             className={cn(
               "inline-flex size-10 shrink-0 items-center justify-center rounded-none border border-input",
               "bg-background hover:bg-accent hover:text-foreground",
@@ -456,7 +464,7 @@ export function ColorPicker({
         </div>
         {invalid && (
           <p id={errorId} className={errorTextClass}>
-            Use a 6-digit hex color like #a855f7.
+            {t("invalidHex")}
           </p>
         )}
       </div>
@@ -469,7 +477,7 @@ export function ColorPicker({
       <Popover
         open={open && !panelHandlesThis}
         onOpenChange={handleOpenChange}
-        label={label ? `${label} color picker` : "Color picker"}
+        label={label ? t("pickerFor", { label }) : t("picker")}
         panelClassName="sm:w-[17rem]"
         // Popover's root is `w-full` — right for a settings panel where it owns
         // the line, wrong here: it would take the whole row and squeeze the
@@ -482,7 +490,7 @@ export function ColorPicker({
             type="button"
             aria-haspopup={panelHandlesThis ? undefined : "dialog"}
             aria-expanded={panelHandlesThis ? panelIsOnThisField : open}
-            aria-label={label ?? "Colour"}
+            aria-label={label ?? t("colour")}
             title={inheriting && inherit ? inherit.label : current}
             data-testid="color-picker-trigger"
             onClick={handleWheel}
@@ -520,7 +528,7 @@ export function ColorPicker({
 
       <div
         role="group"
-        aria-label={label ? `${label} swatches` : "Color swatches"}
+        aria-label={label ? t("swatchesFor", { label }) : t("swatches")}
         className={cn("grid gap-1.5", ROW_COLUMNS[dotCount] ?? "grid-cols-7")}
       >
         <Popover
@@ -529,7 +537,7 @@ export function ColorPicker({
           // choosers for one value.
           open={open && !panelHandlesThis}
           onOpenChange={handleOpenChange}
-          label={label ? `${label} color picker` : "Color picker"}
+          label={label ? t("pickerFor", { label }) : t("picker")}
           panelClassName="sm:w-[17rem]"
           trigger={
             <button
@@ -537,8 +545,8 @@ export function ColorPicker({
               type="button"
               aria-haspopup={panelHandlesThis ? undefined : "dialog"}
               aria-expanded={panelHandlesThis ? panelIsOnThisField : open}
-              aria-label={panelHandlesThis ? "More colors" : "Custom color"}
-              title={panelHandlesThis ? "More colors" : "Custom color"}
+              aria-label={panelHandlesThis ? t("moreColors") : t("customColor")}
+              title={panelHandlesThis ? t("moreColors") : t("customColor")}
               data-testid="color-picker-trigger"
               onClick={handleWheel}
               className={cn(
@@ -565,8 +573,8 @@ export function ColorPicker({
           <button
             type="button"
             onClick={pickFromScreen}
-            aria-label="Pick a color from the screen"
-            title="Pick from screen"
+            aria-label={t("pickFromScreen")}
+            title={t("pickFromScreenTitle")}
             className={cn(
               DOT_BASE,
               "border border-border bg-background text-foreground",
@@ -582,7 +590,7 @@ export function ColorPicker({
         {inherit && (
           <ColorDot
             color={inherit.value}
-            label={`Use ${inherit.label}`}
+            label={inherit.useLabel}
             active={inheriting}
             onSelect={inherit.onSelect}
           />
@@ -591,7 +599,7 @@ export function ColorPicker({
         {showCustomDot && (
           <ColorDot
             color={current}
-            label={`Current color ${current}`}
+            label={t("currentColor", { color: current })}
             active
             onSelect={() => handleOpenChange(true)}
           />
@@ -601,7 +609,7 @@ export function ColorPicker({
           <ColorDot
             key={preset.value}
             color={preset.value}
-            label={`${preset.name} (${preset.value})`}
+            label={tKey(preset.label, { value: preset.value })}
             active={!inheriting && current === preset.value}
             onSelect={() => commitHex(preset.value)}
           />

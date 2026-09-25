@@ -1,9 +1,10 @@
 import { devices, expect, test } from "@playwright/test";
 import {
+  agreeToTerms,
   expectSpotlightOn,
   expectTourStep,
   freshUser,
-  openSellerStep,
+  openTermsStep,
   signUp,
   TOUR_LAYER,
   WELCOME_DIALOG,
@@ -13,7 +14,9 @@ import {
  * The welcome flow on a phone, and its hand-over to the guided tour.
  *
  * Below `sm` the dialog is a bottom sheet, and its way out of everything ("Skip
- * onboarding") sits at the top of it. What can go wrong there is geometry: a
+ * onboarding", offered once the Terms are agreed) sits at the top of it. The
+ * Terms step has its own scroll box inside the sheet, whose agree button must
+ * stay reachable. What can go wrong there is geometry: a
  * control pushed off the screen, a sheet wider than the phone. After the sheet,
  * the tour's first stop is the menu button, because on a phone the sidebar is
  * the same element slid off screen. Its own file because
@@ -47,9 +50,18 @@ test.describe("onboarding on a phone", () => {
     }
 
     await expectOnScreen("Next");
-    await expectOnScreen("Skip onboarding");
+    // Not before the Terms are agreed.
+    await expect(dialog.getByRole("button", { name: "Skip onboarding" })).toHaveCount(0);
 
-    await openSellerStep(page);
+    const terms = await openTermsStep(page);
+    await expectOnScreen("I have read and agree to the Terms");
+    const summary = (await terms.locator("[data-terms-summary]").boundingBox())!;
+    expect(summary.y, "summary top edge").toBeGreaterThanOrEqual(0);
+    expect(summary.x + summary.width, "summary right edge").toBeLessThanOrEqual(viewport.width);
+    await agreeToTerms(page);
+    await expectOnScreen("Skip onboarding");
+    await dialog.getByRole("button", { name: "Get started" }).click();
+    await expect(page.getByRole("dialog", { name: "Add your seller details" })).toBeVisible();
     await expectOnScreen("Save and continue");
     await expectOnScreen("Skip for now");
     await expectOnScreen("Skip onboarding");

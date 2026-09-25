@@ -1,0 +1,189 @@
+{
+  "metadata": {
+    "analytics": {
+      "title": "Statistiques"
+    }
+  },
+  "page": {
+    "title": "Statistiques",
+    "subtitle": "Ventes, vues de vitrine et tout ce qui se passe dans votre boutique."
+  },
+  "loading": {
+    "title": "Statistiques",
+    "subtitle": "Les performances de votre boutique sur l’intégration et la marketplace.",
+    "srLoading": "chargement des statistiques"
+  },
+  "firstRun": {
+    "title": "Rien à mesurer pour l’instant",
+    "body": "Les visites sur vos pages produit apparaissent ici dès qu’une page est en ligne.",
+    "backToSetup": "Retour à la configuration"
+  },
+  "range": {
+    "ariaLabel": "Période",
+    "last30Days": "30 derniers jours",
+    "allTime": "Depuis le début",
+    "custom": "Personnalisée",
+    "placeholder": "Choisir une période"
+  },
+  "section": {
+    "whatMeasures": "Ce que mesure {title}"
+  },
+  "chart": {
+    "howToRead": "Comment lire {title}",
+    "emptyDefault": "Aucune vente sur cette période"
+  },
+  "sales": {
+    "label": "Ventes",
+    "description": "Commandes payées passées via le paiement Square Share.",
+    "revenue": {
+      "title": "Chiffre d’affaires",
+      "description": "Chiffre d’affaires payé dans le temps.",
+      "series": "Chiffre d’affaires",
+      "ariaLabel": "Chiffre d’affaires payé dans le temps"
+    },
+    "aov": {
+      "title": "Panier moyen",
+      "description": "La valeur d’une commande type dans le temps.",
+      "series": "Panier moyen",
+      "ariaLabel": "Panier moyen dans le temps"
+    },
+    "channels": {
+      "title": "Canaux",
+      "description": "D’où viennent vos ventes.",
+      "ariaLabel": "Chiffre d’affaires payé par canal"
+    },
+    "weekday": {
+      "title": "Ventes par jour de la semaine",
+      "description": "Le rythme hebdomadaire de votre boutique.",
+      "series": "Ventes",
+      "count": "{count, plural, one {{formatted} vente} many {{formatted} ventes} other {{formatted} ventes}}",
+      "ariaLabel": "Ventes par jour de la semaine"
+    },
+    "topProducts": {
+      "title": "Meilleurs produits",
+      "description": "Vos meilleures ventes par chiffre d’affaires payé.",
+      "series": "Chiffre d’affaires",
+      "ariaLabel": "Meilleurs produits par chiffre d’affaires payé"
+    },
+    "orderStatus": {
+      "title": "Statut des commandes",
+      "description": "La répartition complète des commandes, remboursements et litiges compris.",
+      "empty": "Aucune commande sur cette période",
+      "ariaLabel": "Répartition des statuts de commande"
+    }
+  },
+  "tiles": {
+    "revenue": "Chiffre d’affaires",
+    "afterFees": "{amount} après frais",
+    "sales": "Ventes",
+    "perDay": "{rate} par jour en moyenne",
+    "avgOrder": "Panier moyen",
+    "uniqueBuyers": "Acheteurs uniques",
+    "repeatBuyers": "{count, plural, one {{count} a acheté plus d’une fois} many {{count} ont acheté plus d’une fois} other {{count} ont acheté plus d’une fois}}",
+    "refundRate": "Taux de remboursement",
+    "refunded": "{count, plural, one {{count} remboursée, {amount}} many {{count} remboursées, {amount}} other {{count} remboursées, {amount}}}",
+    "noSales": "Pas encore de ventes",
+    "noBuyers": "Pas encore d’acheteurs",
+    "noOrders": "Pas encore de commandes"
+  },
+  "channels": {
+    "embed": "Intégration",
+    "marketplace": "Marketplace",
+    "direct": "Direct"
+  },
+  "signalsUnavailable": {
+    "title": "Les vues et inscriptions sont indisponibles pour le moment",
+    "body": "Vos chiffres de ventes ci-dessus ne sont pas affectés. Rechargez la page pour réessayer."
+  },
+  "upcoming": {
+    "needProducts": "{labels} apparaissent ici dès qu’un produit est sur l’une de vos vitrines.",
+    "needBlocks": "{labels} apparaissent ici dès que leur bloc est sur l’une de vos vitrines."
+  },
+  "signal": {
+    "visitors": "Visiteurs",
+    "perVisitor": "{rate} par visiteur en moyenne",
+    "notCounted": "Pas encore comptabilisé",
+    "value": "Valeur",
+    "noValue": "Pas encore de valeur",
+    "notMeasured": "Pas encore mesuré.",
+    "panels": {
+      "trend": "Dans le temps",
+      "channels": "Canaux",
+      "weekdays": "Par jour de la semaine",
+      "storefronts": "Par vitrine"
+    },
+    "whereFrom": "D’où ils viennent.",
+    "weeklyRhythm": "Le rythme hebdomadaire.",
+    "whichStorefront": "De quelle vitrine ils viennent.",
+    "deletedStorefront": "Vitrine supprimée",
+    "deletedStorefrontNumbered": "Vitrine supprimée ({number})"
+  },
+  "sources": {
+    "storefront_view": {
+      "label": "Vues de vitrine",
+      "description": "La fréquence à laquelle votre vitrine a été chargée par un visiteur.",
+      "count": "{count, plural, one {{formatted} vue} many {{formatted} vues} other {{formatted} vues}}",
+      "total": "Total des vues",
+      "emptyRange": "Aucune vue sur cette période",
+      "overTime": "Vues de vitrine dans le temps",
+      "acrossRange": "Vues de vitrine sur la période sélectionnée.",
+      "byChannel": "Vues de vitrine par canal",
+      "byWeekday": "Vues de vitrine par jour de la semaine",
+      "byStorefront": "Vues de vitrine par vitrine"
+    },
+    "product_click": {
+      "label": "Clics sur les produits",
+      "description": "Visiteurs ouvrant un produit depuis l’une de vos vitrines.",
+      "count": "{count, plural, one {{formatted} clic} many {{formatted} clics} other {{formatted} clics}}",
+      "total": "Total des clics",
+      "emptyRange": "Aucun clic sur cette période",
+      "overTime": "Clics sur les produits dans le temps",
+      "acrossRange": "Clics sur les produits sur la période sélectionnée.",
+      "byChannel": "Clics sur les produits par canal",
+      "byWeekday": "Clics sur les produits par jour de la semaine",
+      "byStorefront": "Clics sur les produits par vitrine",
+      "awaiting": "Arrive dès que le widget d’intégration signale des ouvertures de produit.",
+      "readyToChart": "Prêt à afficher dès que les clics commencent à arriver."
+    },
+    "product_view": {
+      "label": "Vues des pages produit",
+      "description": "Visiteurs ouvrant l’une de vos pages produit hébergées.",
+      "count": "{count, plural, one {{formatted} vue} many {{formatted} vues} other {{formatted} vues}}",
+      "total": "Total des vues",
+      "emptyRange": "Aucune vue sur cette période",
+      "overTime": "Vues des pages produit dans le temps",
+      "acrossRange": "Vues des pages produit sur la période sélectionnée.",
+      "byChannel": "Vues des pages produit par canal",
+      "byWeekday": "Vues des pages produit par jour de la semaine",
+      "byStorefront": "Vues des pages produit par vitrine"
+    },
+    "email_signup": {
+      "label": "Inscriptions par e-mail",
+      "description": "Personnes rejoignant votre liste depuis une vitrine.",
+      "count": "{count, plural, one {{formatted} inscription} many {{formatted} inscriptions} other {{formatted} inscriptions}}",
+      "total": "Total des inscriptions",
+      "emptyRange": "Aucune inscription sur cette période",
+      "overTime": "Inscriptions par e-mail dans le temps",
+      "acrossRange": "Inscriptions par e-mail sur la période sélectionnée.",
+      "byChannel": "Inscriptions par e-mail par canal",
+      "byWeekday": "Inscriptions par e-mail par jour de la semaine",
+      "byStorefront": "Inscriptions par e-mail par vitrine",
+      "awaiting": "Arrive avec le bloc d’inscription par e-mail.",
+      "readyToChart": "Prêt à afficher dès que les inscriptions commencent à arriver."
+    },
+    "booking": {
+      "label": "Réservations",
+      "description": "Créneaux réservés depuis une vitrine.",
+      "count": "{count, plural, one {{formatted} réservation} many {{formatted} réservations} other {{formatted} réservations}}",
+      "total": "Total des réservations",
+      "emptyRange": "Aucune réservation sur cette période",
+      "overTime": "Réservations dans le temps",
+      "acrossRange": "Réservations sur la période sélectionnée.",
+      "byChannel": "Réservations par canal",
+      "byWeekday": "Réservations par jour de la semaine",
+      "byStorefront": "Réservations par vitrine",
+      "awaiting": "Arrive avec le bloc de réservation de calendrier.",
+      "readyToChart": "Prêt à afficher dès que les réservations commencent à arriver."
+    }
+  }
+}

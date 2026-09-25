@@ -1,18 +1,18 @@
 /**
  * The sample storefront in the storefront list.
  *
- * What these pin: the sample shows after the seller's own cards and is never
- * counted as one of them; with none of their own it sits beside a create card
- * instead of the full empty state; hiding it is optimistic, recorded on the
- * profile, rolled back on failure, and reversible from the foot of the list;
- * read-only roles and an unreadable flag get no sample at all; and its embed
- * button explains the snippet and leads into the setup flow.
+ * What these pin: the sample is a quiet LINK at the foot of the list, never a
+ * card, so the list holds the seller's own storefronts and nothing else (and
+ * with none, the empty state alone, with no "0 storefronts" above it); the link
+ * opens the sample in the designer and carries the guided tour's hook; and it
+ * stays away for a read-only role, an unreadable flag, and anyone who hid the
+ * sample back when it was a card.
  */
 
 import type { ReactNode } from "react";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import userEvent from "@testing-library/user-event";
-import { cleanup, render, screen, waitFor, within } from "../setup/render";
+import { cleanup, render, screen } from "../setup/render";
 import type { StorefrontSummary } from "@/lib/storefront/queries";
 import { DEFAULT_STOREFRONT_CONFIG } from "@/types/storefront";
 // Static, so its (large) import is paid once before the tests start rather than
@@ -64,11 +64,6 @@ vi.mock("next/link", () => ({
   ),
 }));
 
-const actions = vi.hoisted(() => ({
-  setSampleStorefrontHidden: vi.fn(async (_hidden: unknown) => ({ ok: true })),
-}));
-vi.mock("@/lib/onboarding/actions", () => actions);
-
 vi.mock("@/lib/storefront/actions", () => ({
   deleteStorefront: vi.fn(),
   fetchStorefrontsPage: vi.fn(),
@@ -84,10 +79,7 @@ vi.mock("@/components/storefront/CreateStorefrontWizard", () => ({
     open ? <div role="dialog" aria-label="Create storefront setup" /> : null,
 }));
 
-beforeEach(() => {
-  vi.clearAllMocks();
-  actions.setSampleStorefrontHidden.mockImplementation(async () => ({ ok: true }));
-});
+beforeEach(() => vi.clearAllMocks());
 afterEach(cleanup);
 
 function storefront(name: string): StorefrontSummary {
@@ -121,86 +113,50 @@ function renderList(props: {
   );
 }
 
-const sampleItem = () => document.querySelector("[data-storefront-sample]");
+const sampleLink = () => screen.queryByRole("link", { name: "Open the sample storefront" });
 
 describe("sample storefront in the list", () => {
-  it("shows beside a create card for a seller with no storefront, uncounted", async () => {
+  it("is a link under the empty state for a seller with no storefront, never a card", async () => {
     await renderList({ sample: "shown" });
-    expect(sampleItem()).not.toBeNull();
-    expect(screen.getByRole("link", { name: "Open the sample storefront" })).toHaveAttribute(
-      "href",
-      "/storefront/sample",
-    );
-    expect(screen.getByText("No storefronts yet")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "No storefronts yet" })).toBeInTheDocument();
+    expect(sampleLink()).toHaveAttribute("href", "/storefront/sample");
+    // The tour's hook hugs the link.
+    expect(sampleLink()?.closest("[data-storefront-sample]")).not.toBeNull();
+    // Nothing in the list but the seller's own: no sample card, no grid of
+    // cards (the empty state's mini boards have grids of their own, deeper in).
+    expect(document.querySelector("main > ul")).toBeNull();
     expect(screen.queryByText("0 storefronts")).toBeNull();
-    // The create card, not the full empty state.
-    expect(screen.getByRole("button", { name: /create your first storefront/i })).toBeInTheDocument();
-    expect(screen.queryByRole("heading", { name: "No storefronts yet" })).toBeNull();
   });
 
-  it("comes after the seller's own cards", async () => {
-    await renderList({ sample: "shown", storefronts: [storefront("Gilt & Grain")] });
-    // The list's own items: the previews inside them are grids of <li> too.
-    const items = [...document.querySelectorAll("main > ul > li")];
-    expect(items).toHaveLength(2);
-    expect(within(items[0] as HTMLElement).getByRole("heading", { name: "Gilt & Grain" })).toBeInTheDocument();
-    expect(items[1]).toBe(sampleItem());
-    expect(screen.getByText("1 storefront")).toBeInTheDocument();
-    // The first embed button is the seller's own storefront's.
-    expect(screen.getAllByRole("button", { name: /^Embed / })[0]).toHaveAccessibleName("Embed Gilt & Grain");
-  });
-
-  it("hides on request, records it, and can be brought back", async () => {
+  it("opens the setup flow from the empty state's create card", async () => {
     const user = userEvent.setup();
     await renderList({ sample: "shown" });
-
-    await user.click(screen.getByRole("button", { name: "Hide the sample storefront" }));
-    expect(sampleItem()).toBeNull();
-    expect(actions.setSampleStorefrontHidden).toHaveBeenCalledWith(true);
-    // With nothing left, the full empty state is back.
-    expect(screen.getByRole("heading", { name: "No storefronts yet" })).toBeInTheDocument();
-
-    await user.click(screen.getByRole("button", { name: "Show the sample storefront" }));
-    await waitFor(() => expect(sampleItem()).not.toBeNull());
-    expect(actions.setSampleStorefrontHidden).toHaveBeenLastCalledWith(false);
-  });
-
-  it("puts the sample back when hiding it fails", async () => {
-    actions.setSampleStorefrontHidden.mockImplementation(async () => ({ ok: false }));
-    const user = userEvent.setup();
-    await renderList({ sample: "shown" });
-    await user.click(screen.getByRole("button", { name: "Hide the sample storefront" }));
-    await waitFor(() => expect(sampleItem()).not.toBeNull());
-    expect(await screen.findByText("Couldn't hide the sample storefront.")).toBeInTheDocument();
-  });
-
-  it("offers only the way back when this person hid it", async () => {
-    await renderList({ sample: "hidden" });
-    expect(sampleItem()).toBeNull();
-    expect(screen.getByRole("button", { name: "Show the sample storefront" })).toBeInTheDocument();
-  });
-
-  it("offers nothing to a read-only role or when the flag could not be read", async () => {
-    await renderList({ sample: "shown", canWrite: false });
-    expect(sampleItem()).toBeNull();
-    expect(screen.queryByRole("button", { name: "Show the sample storefront" })).toBeNull();
-    cleanup();
-
-    await renderList({ sample: null });
-    expect(sampleItem()).toBeNull();
-    expect(screen.queryByRole("button", { name: "Show the sample storefront" })).toBeNull();
-    expect(screen.getByRole("heading", { name: "No storefronts yet" })).toBeInTheDocument();
-  });
-
-  it("explains embedding from the sample card, and leads into the setup flow", async () => {
-    const user = userEvent.setup();
-    await renderList({ sample: "shown" });
-    await user.click(screen.getByRole("button", { name: "Embed Sample storefront" }));
-    const dialog = await screen.findByRole("dialog", { name: "Embed a storefront" });
-    expect(dialog).toHaveTextContent("your-storefront-key");
-    expect(dialog).toHaveTextContent(/still in development/i);
-    await user.click(within(dialog).getByRole("button", { name: "Create a storefront" }));
+    await user.click(screen.getByRole("button", { name: "Create storefront" }));
     expect(await screen.findByRole("dialog", { name: "Create storefront setup" })).toBeInTheDocument();
   });
 
+  it("sits at the foot of the list, after the seller's own cards", async () => {
+    await renderList({ sample: "shown", storefronts: [storefront("Gilt & Grain")] });
+    const items = [...document.querySelectorAll("main > ul > li")];
+    expect(items).toHaveLength(1);
+    expect(screen.getByText("1 storefront")).toBeInTheDocument();
+    const list = document.querySelector("main > ul")!;
+    const link = sampleLink()!;
+    expect(list.compareDocumentPosition(link) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it("stays away for a read-only role, an unreadable flag, or someone who hid the sample", async () => {
+    await renderList({ sample: "shown", canWrite: false });
+    expect(sampleLink()).toBeNull();
+    cleanup();
+
+    await renderList({ sample: null });
+    expect(sampleLink()).toBeNull();
+    expect(screen.getByRole("heading", { name: "No storefronts yet" })).toBeInTheDocument();
+    cleanup();
+
+    await renderList({ sample: "hidden" });
+    expect(sampleLink()).toBeNull();
+    expect(document.querySelector("[data-storefront-sample]")).toBeNull();
+  });
 });

@@ -1,0 +1,116 @@
+{
+  "metadata": {
+    "app": {
+      "title": "Tableau de bord Square Share",
+      "description": "Gérez vos produits, concevez votre vitrine, connectez Stripe et consultez vos statistiques sur Square Share."
+    },
+    "overview": {
+      "title": "Vue d’ensemble"
+    },
+    "payments": {
+      "title": "Paiements"
+    }
+  },
+  "loading": {
+    "overview": {
+      "srLoading": "Chargement de la vue d’ensemble…"
+    },
+    "payments": {
+      "title": "Paiements",
+      "subtitle": "Votre solde, vos virements et votre connexion Stripe.",
+      "srLoading": "chargement des paiements"
+    }
+  },
+  "shell": {
+    "accountFallback": "Compte",
+    "anotherStore": "une autre boutique"
+  },
+  "overview": {
+    "title": "Vue d’ensemble",
+    "addProduct": "Ajouter un produit",
+    "revenue30d": "Chiffre d’affaires · 30 jours",
+    "sales30d": "Ventes · 30 jours",
+    "avgOrder30d": "Panier moyen · 30 jours",
+    "revenueHeroLabel": "Chiffre d’affaires, 30 derniers jours",
+    "noSales": "Pas encore de ventes"
+  },
+  "metric": {
+    "zeroDefault": "Pas encore de ventes",
+    "pendingDefault": "Disponible une fois les statistiques connectées."
+  },
+  "sidebar": {
+    "openMenu": "Ouvrir le menu",
+    "closeMenu": "Fermer le menu",
+    "navLabel": "Tableau de bord",
+    "title": "Tableau de bord"
+  },
+  "recentOrders": {
+    "title": "Commandes récentes",
+    "empty": "Pas encore de commandes. Les ventes via votre propre lien d’achat ou par e-mail n’apparaissent pas ici."
+  },
+  "attention": {
+    "title": "Nécessite votre attention",
+    "allClear": "Tout est en ordre. Rien ne nécessite votre attention pour le moment.",
+    "twoFactor": {
+      "label": "Activer l’authentification à deux facteurs",
+      "description": "Un code envoyé par votre téléphone à la connexion, pour qu’un mot de passe volé ne suffise pas à accéder à votre boutique.",
+      "action": "Activer"
+    },
+    "stripe": {
+      "label": "Connectez Stripe pour être payé",
+      "description": "Les virements restent bloqués tant que votre compte n’est pas connecté.",
+      "action": "Ouvrir les paiements"
+    },
+    "legal": {
+      "label": "Acceptez les conditions vendeur",
+      "labelUpdated": "Acceptez les nouvelles conditions vendeur",
+      "description": "Lisez les brouillons du Contrat vendeur, des Conditions d’utilisation et de la Politique de confidentialité, et acceptez-les.",
+      "descriptionUpdated": "Les conditions ont changé depuis votre dernière acceptation. Lisez-les et acceptez la version actuelle.",
+      "descriptionTerms": "Lisez les Conditions d’utilisation et acceptez-les.",
+      "descriptionTermsUpdated": "Les Conditions d’utilisation ont changé depuis que vous les avez acceptées. Lisez la version en vigueur et acceptez-la.",
+      "action": "Vérifier les conditions"
+    },
+    "noBuyPath": {
+      "label": "{count, plural, one {{count} produit sans moyen d’achat} many {{count} produits sans moyen d’achat} other {{count} produits sans moyen d’achat}}",
+      "description": "Ajoutez un lien d’achat, ou définissez un e-mail de contact dans Paramètres pour que les acheteurs puissent vous joindre.",
+      "action": "Vérifier les produits"
+    },
+    "noShipping": {
+      "label": "Ajoutez vos conditions de livraison",
+      "description": "Les produits physiques ont besoin de conditions de livraison et de retour avant que les acheteurs voient tous les détails.",
+      "action": "Ajouter les conditions"
+    },
+    "storefront": {
+      "labelEmpty": "Votre vitrine est vide",
+      "labelNone": "Créez votre vitrine",
+      "descriptionEmpty": "Ajoutez un produit à sa grille pour lui donner une page que vous pourrez partager.",
+      "descriptionNone": "Choisissez un aspect, puis ajoutez vos produits à sa grille.",
+      "actionOpen": "Ouvrir l’éditeur",
+      "actionCreate": "Créer une vitrine"
+    },
+    "images": {
+      "label": "{count, plural, one {{count} produit sans image} many {{count} produits sans image} other {{count} produits sans image}}",
+      "descriptionSingle": "« {title} » n’a pas encore d’image principale.",
+      "descriptionMultiple": "Les produits sans image semblent vides sur votre vitrine.",
+      "actionSingle": "Ajouter une image",
+      "actionMultiple": "Corriger les produits"
+    },
+    "flaggedOrders": {
+      "label": "{count, plural, one {{count} commande à vérifier} many {{count} commandes à vérifier} other {{count} commandes à vérifier}}",
+      "descriptionBoth": "{disputed, plural, one {{disputed} en litige} many {{disputed} en litige} other {{disputed} en litige}}, {refunded, plural, one {{refunded} remboursée} many {{refunded} remboursées} other {{refunded} remboursées}}.",
+      "descriptionDisputed": "{count, plural, one {{count} en litige} many {{count} en litige} other {{count} en litige}}.",
+      "descriptionRefunded": "{count, plural, one {{count} remboursée} many {{count} remboursées} other {{count} remboursées}}.",
+      "action": "Vérifier les commandes"
+    },
+    "noindexPages": {
+      "label": "Pages produit exclues des recherches",
+      "description": "{count, plural, =1 {Une vitrine a désactivé l’indexation pour ses pages produit.} other {{count} vitrines ont désactivé l’indexation pour leurs pages produit.}}",
+      "action": "Ouvrir l’éditeur"
+    },
+    "deadBlocks": {
+      "label": "{count, plural, one {{count} bloc de vitrine référençant un produit supprimé} many {{count} blocs de vitrine référençant des produits supprimés} other {{count} blocs de vitrine référençant des produits supprimés}}",
+      "description": "Ces blocs apparaissent vides pour les visiteurs. Supprimez-les ou remplacez-les.",
+      "action": "Ouvrir la vitrine"
+    }
+  }
+}

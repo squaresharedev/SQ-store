@@ -31,6 +31,8 @@
  */
 
 import { useEffect, useRef, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { formatPercent } from "@/lib/format/intl";
 import {
   Ellipsis,
   FileText,
@@ -57,7 +59,7 @@ import {
   transitionClass as TRANSITION,
 } from "@/components/ui/control-styles";
 import { ShapeKindGlyph } from "./ShapeTileContent";
-import { QUICK_SHAPE_KINDS, SHAPE_SPECS } from "./shape-specs";
+import { QUICK_SHAPE_KINDS } from "./shape-specs";
 
 /**
  * What the file dialog offers. Extensions alongside the MIME types because
@@ -71,7 +73,9 @@ import { useZoomValue, type CanvasViewport } from "./useCanvasViewport";
 /** The live zoom percentage. Its own component so that subscribing to the
  *  viewport re-renders this text alone. */
 function ZoomReadout({ viewport }: { viewport: CanvasViewport }) {
-  return <>{Math.round(useZoomValue(viewport) * 100)}%</>;
+  const zoom = useZoomValue(viewport);
+  const locale = useLocale();
+  return <>{formatPercent(Math.round(zoom * 100), locale)}</>;
 }
 
 /** Labelled insert-tool button: icon + text label (label hidden on mobile).
@@ -210,6 +214,7 @@ export function EditorToolbar({
    *  so the bar stands down until it closes. */
   sheetOpen?: boolean;
 }) {
+  const t = useTranslations("Storefront");
   // Touch/click fallback for the shape menu (hover has no meaning there).
   const [shapeMenuOpen, setShapeMenuOpen] = useState(false);
   // Phone-only overflow menu (see the file header for what lands in it).
@@ -274,7 +279,8 @@ export function EditorToolbar({
     <div className={sheetOpen ? "hidden lg:contents" : "contents"}>
     <div
       role="toolbar"
-      aria-label="Editor tools"
+      data-tour="editor-toolbar"
+      aria-label={t("toolbar.ariaLabel")}
       // No overflow clipping here: the shape menu pops out above the bar.
       className={cn(
         overlaySurfaceClass,
@@ -288,11 +294,11 @@ export function EditorToolbar({
         className={INSERT_BTN}
         onClick={onAddProduct}
         disabled={!canAddBlocks}
-        aria-label="Add product"
+        aria-label={t("toolbar.addProduct")}
       >
         <ShoppingBag className={INSERT_ICON} strokeWidth={2} aria-hidden="true" />
-        <span className="hidden sm:inline">Product</span>
-        <ToolbarTip>Add product</ToolbarTip>
+        <span className="hidden sm:inline">{t("toolbar.product")}</span>
+        <ToolbarTip>{t("toolbar.addProduct")}</ToolbarTip>
       </button>
 
       <button
@@ -301,11 +307,11 @@ export function EditorToolbar({
         className={INSERT_BTN}
         onClick={onAddText}
         disabled={!canAddBlocks}
-        aria-label="Add text"
+        aria-label={t("toolbar.addText")}
       >
         <Type className={INSERT_ICON} strokeWidth={2} aria-hidden="true" />
-        <span className="hidden sm:inline">Text</span>
-        <ToolbarTip>Add text</ToolbarTip>
+        <span className="hidden sm:inline">{t("toolbar.text")}</span>
+        <ToolbarTip>{t("toolbar.addText")}</ToolbarTip>
       </button>
 
       {/* Element tool: hovering (or clicking, on touch) reveals the menu —
@@ -322,12 +328,12 @@ export function EditorToolbar({
           className={INSERT_BTN}
           onClick={() => setShapeMenuOpen((open) => !open)}
           disabled={!canAddBlocks}
-          aria-label="Add element"
+          aria-label={t("toolbar.addElement")}
           aria-haspopup="true"
           aria-expanded={shapeMenuOpen}
         >
           <Shapes className={INSERT_ICON} strokeWidth={2} aria-hidden="true" />
-          <span className="hidden sm:inline">Element</span>
+          <span className="hidden sm:inline">{t("toolbar.element")}</span>
           {/* NO ToolbarTip here, alone among the insert tools. Tips pop ABOVE
               the bar, and so does this button's own menu, which opens on the
               same hover, is far bigger, and is drawn on top. The tip was a
@@ -374,7 +380,7 @@ export function EditorToolbar({
               nobody wants to open a panel for. */}
           <div
             role="menu"
-            aria-label="Elements"
+            aria-label={t("toolbar.elementsMenu")}
             className={cn(
               overlaySurfaceClass,
               // shrink-0 for the phone case above, where this row is a flex
@@ -393,7 +399,7 @@ export function EditorToolbar({
               role="menuitem"
               onClick={() => fileInputRef.current?.click()}
               disabled={!canAddBlocks || uploadingElement}
-              aria-label={uploadingElement ? "Uploading…" : "Upload"}
+              aria-label={uploadingElement ? t("toolbar.uploading") : t("toolbar.upload")}
               aria-busy={uploadingElement}
               className={cn(ICON_BTN, "shrink-0")}
             >
@@ -409,7 +415,7 @@ export function EditorToolbar({
                 <Upload className="size-4" strokeWidth={2} aria-hidden="true" />
               )}
               <ToolbarTip>
-                {uploadingElement ? "Uploading…" : "Upload image"}
+                {uploadingElement ? t("toolbar.uploading") : t("toolbar.uploadImage")}
               </ToolbarTip>
             </button>
 
@@ -421,11 +427,11 @@ export function EditorToolbar({
                 onOpenShapesPanel();
                 setShapeMenuOpen(false);
               }}
-              title="Browse the full shape library"
+              title={t("toolbar.browseShapes")}
               className={MENU_ROW_BTN}
             >
               <Shapes className="size-4 shrink-0" strokeWidth={2} aria-hidden="true" />
-              All shapes
+              {t("toolbar.allShapes")}
             </button>
 
             <div aria-hidden="true" className="mx-0.5 h-6 w-px shrink-0 bg-border" />
@@ -441,11 +447,11 @@ export function EditorToolbar({
                   setShapeMenuOpen(false);
                 }}
                 disabled={!canAddBlocks}
-                aria-label={`Add ${SHAPE_SPECS[kind].label.toLowerCase()}`}
+                aria-label={t(`shapes.add.${kind}`)}
                 className={cn(ICON_BTN, "shrink-0")}
               >
                 <ShapeKindGlyph kind={kind} />
-                <ToolbarTip>{SHAPE_SPECS[kind].label}</ToolbarTip>
+                <ToolbarTip>{t(`shapes.name.${kind}`)}</ToolbarTip>
               </button>
             ))}
           </div>
@@ -491,11 +497,12 @@ export function EditorToolbar({
         onClick={onTogglePages}
         disabled={!canOpenPage && !pagesOpen}
         aria-pressed={pagesOpen}
-        aria-label={pagesOpen ? "Close the product pages" : "Show the product page"}
+        data-tour="editor-product-pages"
+        aria-label={pagesOpen ? t("toolbar.closePages") : t("toolbar.showPageFull")}
       >
         <FileText className={INSERT_ICON} strokeWidth={2} aria-hidden="true" />
-        <span className="hidden sm:inline">Page</span>
-        <ToolbarTip>{pagesOpen ? "Close product page" : "Show product page"}</ToolbarTip>
+        <span className="hidden sm:inline">{t("toolbar.page")}</span>
+        <ToolbarTip>{pagesOpen ? t("toolbar.closePage") : t("toolbar.showPage")}</ToolbarTip>
       </button>
 
       <Divider />
@@ -507,10 +514,10 @@ export function EditorToolbar({
         className={ICON_BTN}
         onClick={onUndo}
         disabled={!canUndo}
-        aria-label="Undo"
+        aria-label={t("toolbar.undo")}
       >
         <Undo2 className="size-4" strokeWidth={2} aria-hidden="true" />
-        <ToolbarTip>Undo (Ctrl+Z)</ToolbarTip>
+        <ToolbarTip>{t("toolbar.undoTip")}</ToolbarTip>
       </button>
 
       {/* Redo and Tidy move into "More" on a phone — a thumb mid-edit reaches
@@ -526,10 +533,10 @@ export function EditorToolbar({
           className={ICON_BTN}
           onClick={onRedo}
           disabled={!canRedo}
-          aria-label="Redo"
+          aria-label={t("toolbar.redo")}
         >
           <Redo2 className="size-4" strokeWidth={2} aria-hidden="true" />
-          <ToolbarTip>Redo (Ctrl+Shift+Z)</ToolbarTip>
+          <ToolbarTip>{t("toolbar.redoTip")}</ToolbarTip>
         </button>
 
         <button
@@ -538,10 +545,10 @@ export function EditorToolbar({
           className={ICON_BTN}
           onClick={onTidy}
           disabled={!canTidy}
-          aria-label="Tidy the canvas"
+          aria-label={t("toolbar.tidy")}
         >
           <WandSparkles className="size-4" strokeWidth={2} aria-hidden="true" />
-          <ToolbarTip>Tidy up</ToolbarTip>
+          <ToolbarTip>{t("toolbar.tidyTip")}</ToolbarTip>
         </button>
       </div>
 
@@ -554,30 +561,30 @@ export function EditorToolbar({
           suppressHydrationWarning
           className={ICON_BTN}
           onClick={onZoomOut}
-          aria-label="Zoom out"
+          aria-label={t("toolbar.zoomOut")}
         >
           <Minus className="size-4" strokeWidth={2} aria-hidden="true" />
-          <ToolbarTip>Zoom out (Ctrl -)</ToolbarTip>
+          <ToolbarTip>{t("toolbar.zoomOutTip")}</ToolbarTip>
         </button>
         <button
           type="button"
           suppressHydrationWarning
           onClick={onZoomReset}
-          aria-label="Reset zoom to 100%"
+          aria-label={t("toolbar.zoomReset")}
           className={`${INSERT_BTN} min-w-14 justify-center tabular-nums`}
         >
           <ZoomReadout viewport={viewport} />
-          <ToolbarTip>Reset zoom (Ctrl 0)</ToolbarTip>
+          <ToolbarTip>{t("toolbar.zoomResetTip")}</ToolbarTip>
         </button>
         <button
           type="button"
           suppressHydrationWarning
           className={ICON_BTN}
           onClick={onZoomIn}
-          aria-label="Zoom in"
+          aria-label={t("toolbar.zoomIn")}
         >
           <Plus className="size-4" strokeWidth={2} aria-hidden="true" />
-          <ToolbarTip>Zoom in (Ctrl +)</ToolbarTip>
+          <ToolbarTip>{t("toolbar.zoomInTip")}</ToolbarTip>
         </button>
       </div>
 
@@ -597,14 +604,15 @@ export function EditorToolbar({
           className={`${NARROW_ICON_BTN} ${settingsOpen ? PREVIEW_ACTIVE : PREVIEW_IDLE}`}
           onClick={onToggleSettings}
           aria-pressed={settingsOpen}
-          aria-label="Design settings"
+          data-tour="editor-design-settings"
+          aria-label={t("toolbar.designSettings")}
         >
           <SlidersHorizontal
             className="size-4"
             strokeWidth={2}
             aria-hidden="true"
           />
-          <ToolbarTip>Design settings</ToolbarTip>
+          <ToolbarTip>{t("toolbar.designSettings")}</ToolbarTip>
         </button>
 
       {/* Phone only: everything the bar had to give up. */}
@@ -616,16 +624,16 @@ export function EditorToolbar({
           onClick={() => setMoreOpen((open) => !open)}
           aria-haspopup="menu"
           aria-expanded={moreOpen}
-          aria-label="More tools"
+          aria-label={t("toolbar.moreTools")}
         >
           <Ellipsis className="size-4" strokeWidth={2} aria-hidden="true" />
-          <ToolbarTip>More tools</ToolbarTip>
+          <ToolbarTip>{t("toolbar.moreTools")}</ToolbarTip>
         </button>
 
         {moreOpen && (
           <div
             role="menu"
-            aria-label="More tools"
+            aria-label={t("toolbar.moreTools")}
             className={cn(
               overlaySurfaceClass,
               "absolute bottom-full right-0 z-50 mb-2 w-52 p-1",
@@ -643,7 +651,7 @@ export function EditorToolbar({
                 disabled={!canRedo}
               >
                 <Redo2 className="size-4" strokeWidth={2} aria-hidden="true" />
-                Redo
+                {t("toolbar.redo")}
               </button>
               <button
                 type="button"
@@ -657,7 +665,7 @@ export function EditorToolbar({
                 disabled={!canTidy}
               >
                 <WandSparkles className="size-4" strokeWidth={2} aria-hidden="true" />
-                Tidy up
+                {t("toolbar.tidyTip")}
               </button>
               <button
                 type="button"
@@ -670,7 +678,7 @@ export function EditorToolbar({
                 }}
               >
                 <Plus className="size-4" strokeWidth={2} aria-hidden="true" />
-                Reset zoom
+                {t("toolbar.zoomResetMenuItem")}
               </button>
               {/* NO "All shapes" row. It was here because the Element menu
                   opened on HOVER, which a thumb does not do. But that button

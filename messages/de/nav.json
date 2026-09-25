@@ -1,0 +1,56 @@
+{
+  "main": {
+    "overview": {
+      "label": "Übersicht",
+      "description": "Deine Einrichtungsschritte und alles, was deine Aufmerksamkeit braucht."
+    },
+    "products": {
+      "label": "Produkte",
+      "description": "Was du verkaufst: Fotos, Preise, Lagerbestand und Details."
+    },
+    "storefront": {
+      "label": "Schaufenster",
+      "description": "Gestalte das Raster, auf dem deine Produkte liegen."
+    },
+    "orders": {
+      "label": "Bestellungen",
+      "description": "Bestellungen landen hier, sobald der Checkout startet."
+    },
+    "analytics": {
+      "label": "Analysen",
+      "description": "Aufrufe deiner Produktseiten, später auch Verkäufe."
+    },
+    "payments": {
+      "label": "Zahlungen",
+      "description": "Bezahlt werden über Stripe. Demnächst verfügbar."
+    },
+    "settings": {
+      "label": "Einstellungen",
+      "description": "Deine Verkäuferangaben, Versandbedingungen und dein Konto."
+    }
+  },
+  "settings": {
+    "account": "Konto",
+    "security": "Sicherheit",
+    "legal": "Rechtliches",
+    "tax": "Unternehmen und Verkäuferangaben",
+    "shipping": "Versand und Rücksendungen",
+    "notifications": "Benachrichtigungen",
+    "language": "Sprache",
+    "team": "Team und Zugriff",
+    "danger": "Gefahrenzone"
+  },
+  "profileMenu": {
+    "label": "Kontomenü",
+    "account": "Konto",
+    "switchAccounts": "Konto wechseln",
+    "yourStore": "Dein Shop",
+    "owner": "Inhaber",
+    "logOut": "Abmelden"
+  },
+  "viewingBanner": {
+    "viewing": "{role, select, owner {Ansicht von <store>{storeName}</store> als Inhaber} editor {Ansicht von <store>{storeName}</store> als Bearbeiter} viewer {Ansicht von <store>{storeName}</store> als Betrachter} other {Ansicht von <store>{storeName}</store>}}",
+    "readOnly": " · nur Lesezugriff",
+    "backToYourStore": "Zurück zu deinem Shop"
+  }
+}

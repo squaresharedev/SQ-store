@@ -26,6 +26,7 @@ import {
   type OrderSort,
   type OrderStatus,
 } from "@/types/order-view";
+import { useTranslations } from "next-intl";
 import { FilterSelect, type FilterOption } from "./FilterSelect";
 
 export type SortValue = `${OrderSort["field"]}-${OrderSort["direction"]}`;
@@ -39,24 +40,24 @@ interface OrdersToolbarProps {
 
 /** Status options with icon + colour tone reused from the status-badge palette
  *  (paid→success, disputed→destructive, refunded→muted). `""` is "no filter". */
-const STATUS_OPTIONS: FilterOption<OrderStatus | "">[] = [
-  { value: "", label: "All statuses", icon: ListFilter },
-  { value: "paid", label: "Paid", icon: CircleCheck, tone: "text-success" },
-  { value: "pending", label: "Pending", icon: Clock, tone: "text-foreground" },
-  { value: "disputed", label: "Disputed", icon: TriangleAlert, tone: "text-destructive" },
-  { value: "refunded", label: "Refunded", icon: RotateCcw, tone: "text-muted-foreground" },
+const STATUS_OPTIONS: Omit<FilterOption<OrderStatus | "">, "label">[] = [
+  { value: "", icon: ListFilter },
+  { value: "paid", icon: CircleCheck, tone: "text-success" },
+  { value: "pending", icon: Clock, tone: "text-foreground" },
+  { value: "disputed", icon: TriangleAlert, tone: "text-destructive" },
+  { value: "refunded", icon: RotateCcw, tone: "text-muted-foreground" },
 ];
 
-const SORT_OPTIONS: FilterOption<SortValue>[] = [
-  { value: "createdAt-desc", label: "Newest first", icon: ArrowDownWideNarrow },
-  { value: "createdAt-asc", label: "Oldest first", icon: ArrowUpWideNarrow },
-  { value: "amount-desc", label: "Amount: high to low", icon: TrendingDown, tone: "text-success" },
-  { value: "amount-asc", label: "Amount: low to high", icon: TrendingUp, tone: "text-muted-foreground" },
-];
+const SORT_OPTIONS = [
+  { value: "createdAt-desc", labelKey: "newest", icon: ArrowDownWideNarrow },
+  { value: "createdAt-asc", labelKey: "oldest", icon: ArrowUpWideNarrow },
+  { value: "amount-desc", labelKey: "amountHigh", icon: TrendingDown, tone: "text-success" },
+  { value: "amount-asc", labelKey: "amountLow", icon: TrendingUp, tone: "text-muted-foreground" },
+] as const satisfies readonly (Omit<FilterOption<SortValue>, "label"> & { labelKey: string })[];
 
-const CHANNEL_META: Record<OrderChannel, { label: string; icon: LucideIcon }> = {
-  embed: { label: "Embed", icon: Code2 },
-  marketplace: { label: "Marketplace", icon: Store },
+const CHANNEL_ICONS: Record<OrderChannel, LucideIcon> = {
+  embed: Code2,
+  marketplace: Store,
 };
 
 const CHANNEL_ORDER: OrderChannel[] = ["marketplace", "embed"];
@@ -80,6 +81,15 @@ export function OrdersToolbar({
   sort,
   onSortChange,
 }: OrdersToolbarProps) {
+  const t = useTranslations("Orders");
+  const statusOptions: FilterOption<OrderStatus | "">[] = STATUS_OPTIONS.map((option) => ({
+    ...option,
+    label: option.value === "" ? t("toolbar.allStatuses") : t(`status.${option.value}`),
+  }));
+  const sortOptions: FilterOption<SortValue>[] = SORT_OPTIONS.map(({ labelKey, ...option }) => ({
+    ...option,
+    label: t(`sort.${labelKey}`),
+  }));
   function emit(patch: Partial<OrderFilters>) {
     const next = { ...filters, ...patch };
     // Remove keys that are undefined so callers get a clean object
@@ -114,13 +124,14 @@ export function OrdersToolbar({
   return (
     <div
       role="search"
-      aria-label="order filters"
+      data-tour="orders-filters"
+      aria-label={t("toolbar.region")}
       className="flex flex-wrap items-end gap-x-3 gap-y-3 rounded-lg border border-border bg-muted/50 p-4"
     >
       {/* Channel segmented toggle */}
       <div className="flex flex-col gap-1.5">
         <span className={fieldLabelClass} id="orders-channel-label">
-          channel
+          {t("toolbar.channel")}
         </span>
         <div
           role="group"
@@ -128,8 +139,7 @@ export function OrdersToolbar({
           className="flex overflow-hidden rounded-md border border-border bg-background"
         >
           {CHANNEL_ORDER.map((value, i) => {
-            const meta = CHANNEL_META[value];
-            const Icon = meta.icon;
+            const Icon = CHANNEL_ICONS[value];
             const isActive = filters.channel === value;
             return (
               <button
@@ -147,7 +157,7 @@ export function OrdersToolbar({
                 )}
               >
                 <Icon className="size-4 shrink-0" aria-hidden="true" />
-                {meta.label}
+                {t(`channel.${value}`)}
               </button>
             );
           })}
@@ -158,7 +168,7 @@ export function OrdersToolbar({
           the field's label, not just the input. */}
       <div data-tour="orders-search" className="flex flex-col gap-1.5">
         <label htmlFor="orders-search" className={fieldLabelClass}>
-          buyer email
+          {t("toolbar.buyerEmail")}
         </label>
         <div className="relative flex items-center">
           <Search
@@ -172,7 +182,7 @@ export function OrdersToolbar({
             // The column this matches is an email address, so the RFC's own
             // maximum is the natural bound — see ORDERS_SEARCH_MAX_LENGTH.
             maxLength={ORDERS_SEARCH_MAX_LENGTH}
-            placeholder="search buyer email"
+            placeholder={t("toolbar.searchPlaceholder")}
             value={filters.search ?? ""}
             onChange={handleSearch}
             className={cn(fieldBaseClass, "!py-2 w-56 pl-9")}
@@ -183,13 +193,13 @@ export function OrdersToolbar({
       {/* Status */}
       <div className="flex flex-col gap-1.5">
         <label htmlFor="orders-status" className={fieldLabelClass}>
-          status
+          {t("toolbar.status")}
         </label>
         <FilterSelect
           id="orders-status"
-          ariaLabel="Filter by status"
+          ariaLabel={t("toolbar.statusAriaLabel")}
           value={filters.status ?? ""}
-          options={STATUS_OPTIONS}
+          options={statusOptions}
           mutedValue=""
           onChange={handleStatus}
           triggerClassName="w-44"
@@ -199,13 +209,13 @@ export function OrdersToolbar({
       {/* Date range */}
       <div className="flex flex-col gap-1.5">
         <label htmlFor="orders-date" className={fieldLabelClass}>
-          date range
+          {t("toolbar.dateRange")}
         </label>
         <div className="w-64">
           <DatePicker
             id="orders-date"
             mode="range"
-            placeholder="any dates"
+            placeholder={t("toolbar.datePlaceholder")}
             triggerClassName="py-2"
             value={{
               from: filters.dateFrom ?? null,
@@ -221,13 +231,13 @@ export function OrdersToolbar({
       {/* Sort */}
       <div className="flex flex-col gap-1.5">
         <label htmlFor="orders-sort" className={fieldLabelClass}>
-          sort
+          {t("toolbar.sort")}
         </label>
         <FilterSelect
           id="orders-sort"
-          ariaLabel="Sort orders"
+          ariaLabel={t("toolbar.sortAriaLabel")}
           value={`${sort.field}-${sort.direction}` as SortValue}
-          options={SORT_OPTIONS}
+          options={sortOptions}
           onChange={onSortChange}
           triggerClassName="w-52"
           panelClassName="sm:w-60"
@@ -242,7 +252,7 @@ export function OrdersToolbar({
           className={cn(ghostButtonClass, "ml-auto gap-1.5 px-3 py-2")}
         >
           <X className="size-4 shrink-0" aria-hidden="true" />
-          clear filters
+          {t("toolbar.clearFilters")}
         </button>
       )}
     </div>

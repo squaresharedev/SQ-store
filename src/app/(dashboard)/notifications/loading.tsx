@@ -1,16 +1,18 @@
+import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cardClass } from "@/components/ui/surface-styles";
 /** Route-level loading state while the first page of notifications is read. */
 export default function NotificationsLoading() {
+  const t = useTranslations("Notifications.loading");
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-8 md:px-6 md:py-10">
       <div className="mb-6 flex items-center justify-between gap-4">
         <h1 className="text-2xl font-semibold tracking-tight text-foreground md:text-3xl">
-          Notifications
+          {t("title")}
         </h1>
       </div>
 
-      <span className="sr-only">loading notifications</span>
+      <span className="sr-only">{t("srLoading")}</span>
 
       <ul aria-hidden="true" className={cardClass}>
         {Array.from({ length: 6 }, (_, index) => (

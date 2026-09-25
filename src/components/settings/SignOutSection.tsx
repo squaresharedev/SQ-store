@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useFormStatus } from "react-dom";
 import { LogOut } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { SettingsCard } from "@/components/settings/SettingsCard";
 import { Button, type ButtonProps } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -54,32 +55,29 @@ function SignOutButton({
  * tab, without being a danger-zone CTA like account deletion.
  */
 export function SignOutSection() {
+  const t = useTranslations("Settings.account.signOut");
   return (
-    <SettingsCard
-      title="Sign out"
-      description="End this session on this device, or sign out everywhere to log out of every device at once."
-    >
+    <SettingsCard title={t("cardTitle")} description={t("cardDescription")}>
       <div className="flex flex-wrap items-center gap-3">
         <form action={signOut}>
           <SignOutButton
             variant="secondary"
-            pendingLabel="Signing out…"
+            pendingLabel={t("signingOut")}
             trailingIcon={
               <LogOut aria-hidden className={cn("size-4", iconNudgeRightClass)} />
             }
           >
-            Sign out
+            {t("button")}
           </SignOutButton>
         </form>
         <form action={signOutEverywhere}>
-          <SignOutButton variant="ghost-danger" pendingLabel="Signing out…">
-            Sign out everywhere
+          <SignOutButton variant="ghost-danger" pendingLabel={t("signingOut")}>
+            {t("everywhereButton")}
           </SignOutButton>
         </form>
       </div>
       <p className="mt-4 font-inter text-xs text-muted-foreground">
-        Signing out everywhere ends your session on every device and browser
-        you&rsquo;re signed in on. You&rsquo;ll need to sign in again each place.
+        {t("everywhereNote")}
       </p>
     </SettingsCard>
   );

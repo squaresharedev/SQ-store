@@ -6,6 +6,7 @@ import {
 import { COLOR_PALETTES } from "@/lib/theme/color-palettes";
 import { COLOR_PRESETS } from "@/lib/theme/color-presets";
 import { themeAccentPresets } from "@/lib/theme/theme-color-presets";
+import { english } from "../setup/translate";
 
 const STRICT_HEX = /^#[0-9a-f]{6}$/;
 
@@ -31,9 +32,11 @@ describe("standard colors", () => {
     }
   });
 
-  it("every swatch is named", () => {
+  it("every swatch is named, as a whole phrase carrying its hex", () => {
     for (const swatch of allStandard) {
-      expect(swatch.name.trim().length).toBeGreaterThan(0);
+      expect(english(swatch.label, { value: swatch.value })).toMatch(
+        new RegExp(`^\\S.* \\(${swatch.value}\\)$`),
+      );
     }
   });
 
@@ -70,7 +73,7 @@ describe("color palettes", () => {
   it("every palette is named and five wide", () => {
     expect(COLOR_PALETTES.length).toBeGreaterThan(0);
     for (const palette of COLOR_PALETTES) {
-      expect(palette.name.trim().length).toBeGreaterThan(0);
+      expect(english(palette.name).trim().length).toBeGreaterThan(0);
       expect(palette.colors).toHaveLength(5);
     }
   });
@@ -79,7 +82,9 @@ describe("color palettes", () => {
     for (const palette of COLOR_PALETTES) {
       for (const swatch of palette.colors) {
         expect(swatch.value).toMatch(STRICT_HEX);
-        expect(swatch.name.trim().length).toBeGreaterThan(0);
+        expect(english(swatch.label, { value: swatch.value })).toMatch(
+          new RegExp(`^${english(palette.name)} \\S.* \\(${swatch.value}\\)$`),
+        );
       }
     }
   });
@@ -102,9 +107,17 @@ describe("color palettes", () => {
     }
   });
 
-  it("palette names are unique", () => {
-    const names = COLOR_PALETTES.map((p) => p.name);
+  it("palette ids and names are unique", () => {
+    const ids = COLOR_PALETTES.map((p) => p.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    const names = COLOR_PALETTES.map((p) => english(p.name));
     expect(new Set(names).size).toBe(names.length);
+  });
+
+  it("names each palette's group after the palette", () => {
+    for (const palette of COLOR_PALETTES) {
+      expect(english(palette.group)).toBe(`${english(palette.name)} palette`);
+    }
   });
 });
 
@@ -120,7 +133,10 @@ describe("theme accent presets", () => {
 
   it("the third swatch is the accent itself, unmixed", () => {
     const accent = "#a855f7";
-    expect(themeAccentPresets(accent)[2]).toEqual({ name: "Accent", value: accent });
+    const preset = themeAccentPresets(accent)[2];
+    expect(preset.value).toBe(accent);
+    expect(english(preset.name)).toBe("Accent");
+    expect(english(preset.label, { value: accent })).toBe(`Accent (${accent})`);
   });
 
   it("follows a different accent to a different row", () => {
@@ -132,7 +148,9 @@ describe("theme accent presets", () => {
   it("every swatch is strict lowercase hex and named", () => {
     for (const swatch of themeAccentPresets("#2563eb")) {
       expect(swatch.value).toMatch(STRICT_HEX);
-      expect(swatch.name.trim().length).toBeGreaterThan(0);
+      expect(english(swatch.label, { value: swatch.value })).toBe(
+        `${english(swatch.name)} (${swatch.value})`,
+      );
     }
   });
 });

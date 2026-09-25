@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations, useLocale } from "next-intl";
 import { HBarChart } from "@/components/charts";
 import type { TopProduct } from "@/lib/analytics/types";
 import { moneyCompact, moneyExact } from "@/components/analytics/chart-format";
@@ -27,18 +28,20 @@ export function TopProductsChart({
   products: TopProduct[];
   currency: string;
 }) {
+  const t = useTranslations("Analytics.sales.topProducts");
+  const locale = useLocale();
   return (
     <HBarChart
       data={products}
       xKey="title"
-      series={[{ key: "revenueCents", label: "Revenue", colorIndex: TONE.money }]}
+      series={[{ key: "revenueCents", label: t("series"), colorIndex: TONE.money }]}
       categoryWidth={116}
       categoryFormatter={(title) =>
         title.length > MAX_LABEL ? `${title.slice(0, MAX_LABEL - 1)}…` : title
       }
-      valueFormatter={moneyExact(currency)}
-      axisValueFormatter={moneyCompact(currency)}
-      ariaLabel="Top products by paid revenue"
+      valueFormatter={moneyExact(currency, locale)}
+      axisValueFormatter={moneyCompact(currency, locale)}
+      ariaLabel={t("ariaLabel")}
     />
   );
 }

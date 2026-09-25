@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { english } from "../setup/translate";
 import {
   canAddShippingProfile,
   compactShippingProfiles,
@@ -33,7 +34,7 @@ describe("resolveProductShipping", () => {
   };
 
   it("gives the account's default terms to a product that names no profile", () => {
-    expect(resolveProductShipping(null, policy)).toEqual({
+    expect(resolveProductShipping(null, policy, english, "en")).toEqual({
       name: null,
       body: "Ships in 3 days.",
       dispatch: "Ships within 24 hours",
@@ -44,7 +45,7 @@ describe("resolveProductShipping", () => {
     // The whole point of choosing a profile is that it supersedes the account's
     // terms. Inheriting the default's dispatch would leave "ships within 24
     // hours" printed on a made-to-order product.
-    expect(resolveProductShipping(BULKY, policy)).toEqual({
+    expect(resolveProductShipping(BULKY, policy, english, "en")).toEqual({
       name: "Bulky items",
       body: "Pallet courier, ground floor only.",
       dispatch: "Allow 3 weeks",
@@ -53,15 +54,15 @@ describe("resolveProductShipping", () => {
 
   it("says nothing about dispatch for a profile that set none", () => {
     const bare = { ...policy, profiles: [profile({ dispatch: undefined })] };
-    expect(resolveProductShipping(BULKY, bare)?.dispatch).toBe("");
+    expect(resolveProductShipping(BULKY, bare, english, "en")?.dispatch).toBe("");
   });
 
   it("falls back to the default for an id the account does not have", () => {
     // One honest way to get here now: the seller deleted the profile. (Before
     // terms moved to the account there was a second — a product placed on a
     // storefront that never had the profile — which the move removed.)
-    expect(resolveProductShipping(SLOW, policy)?.name).toBeNull();
-    expect(resolveProductShipping(SLOW, { shippingText: "Ships in 3 days." })?.body).toBe(
+    expect(resolveProductShipping(SLOW, policy, english, "en")?.name).toBeNull();
+    expect(resolveProductShipping(SLOW, { shippingText: "Ships in 3 days." }, english, "en")?.body).toBe(
       "Ships in 3 days.",
     );
   });
@@ -69,13 +70,13 @@ describe("resolveProductShipping", () => {
   it("is null when the seller has written nothing at all", () => {
     // Not an empty section: a page with nothing to say about shipping says
     // nothing rather than printing an empty heading.
-    expect(resolveProductShipping(null, {})).toBeNull();
-    expect(resolveProductShipping(BULKY, {})).toBeNull();
-    expect(resolveProductShipping(null, null)).toBeNull();
+    expect(resolveProductShipping(null, {}, english, "en")).toBeNull();
+    expect(resolveProductShipping(BULKY, {}, english, "en")).toBeNull();
+    expect(resolveProductShipping(null, null, english, "en")).toBeNull();
   });
 
   it("counts a dispatch line on its own as something to say", () => {
-    expect(resolveProductShipping(null, { dispatch: "Ships Fridays" })).toEqual({
+    expect(resolveProductShipping(null, { dispatch: "Ships Fridays" }, english, "en")).toEqual({
       name: null,
       body: "",
       dispatch: "Ships Fridays",
@@ -92,7 +93,7 @@ describe("resolveProductShipping", () => {
         { area: "Rest of EU", time: "5-7 business days" },
       ],
     };
-    expect(resolveProductShipping(null, structured)?.body).toBe(
+    expect(resolveProductShipping(null, structured, english, "en")?.body).toBe(
       "Ships from Ireland.\n\nIreland: 2-3 business days (€4.50)\nRest of EU: 5-7 business days",
     );
   });
@@ -102,16 +103,16 @@ describe("resolveReturns", () => {
   it("says nothing when no window is offered", () => {
     // 0 and absent are the same answer: the seller offers nothing BEYOND the
     // statutory right, which the page states on its own.
-    expect(resolveReturns({})).toBe("");
-    expect(resolveReturns({ returnsWindowDays: 0 })).toBe("");
-    expect(resolveReturns(null)).toBe("");
+    expect(resolveReturns({}, english, "en")).toBe("");
+    expect(resolveReturns({ returnsWindowDays: 0 }, english, "en")).toBe("");
+    expect(resolveReturns(null, english, "en")).toBe("");
   });
 
   it("states the window and who pays in one sentence", () => {
-    expect(resolveReturns({ returnsWindowDays: 30, returnsPaidBy: "buyer" })).toBe(
+    expect(resolveReturns({ returnsWindowDays: 30, returnsPaidBy: "buyer" }, english, "en")).toBe(
       "Returns accepted within 30 days of delivery. Return postage is paid by the buyer.",
     );
-    expect(resolveReturns({ returnsWindowDays: 14, returnsPaidBy: "seller" })).toBe(
+    expect(resolveReturns({ returnsWindowDays: 14, returnsPaidBy: "seller" }, english, "en")).toBe(
       "Returns accepted within 14 days of delivery. Return postage is on us.",
     );
   });
@@ -122,7 +123,7 @@ describe("resolveReturns", () => {
         returnsWindowDays: 14,
         returnsPaidBy: "buyer",
         returnsNotes: "Made-to-order pieces cannot be returned.",
-      }),
+      }, english, "en"),
     ).toBe(
       "Returns accepted within 14 days of delivery. Return postage is paid by the buyer." +
         "\n\nMade-to-order pieces cannot be returned.",
@@ -133,7 +134,7 @@ describe("resolveReturns", () => {
     // Never appended to: a block whose job is legal accuracy must not mix
     // sentences the seller wrote with sentences they did not.
     expect(
-      resolveReturns({ returnsWindowDays: 30, returnsText: "Talk to us and we'll sort it." }),
+      resolveReturns({ returnsWindowDays: 30, returnsText: "Talk to us and we'll sort it." }, english, "en"),
     ).toBe("Talk to us and we'll sort it.");
   });
 });

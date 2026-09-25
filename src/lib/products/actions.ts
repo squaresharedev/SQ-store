@@ -18,8 +18,10 @@ import {
   sessionExpired,
   uploadFailed,
   type ActionError,
+  type ServerErrorOperation,
 } from "@/lib/errors";
 import { publishBlockedError } from "@/lib/settings/seller-identity";
+import { msg } from "@/i18n/types";
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
 import {
   NEW_DOCUMENT_KEYS_PER_SAVE_MAX,
@@ -75,27 +77,18 @@ function parseWrite(
   const parsed = productWriteSchema.safeParse(input);
   if (!parsed.success) {
     return {
-      error: invalidInput(
-        "The product details didn't pass validation.",
-        "Check the name, price, and other fields, then try saving again.",
-      ),
+      error: invalidInput(msg("Errors.products.invalid.message"), msg("Errors.products.invalid.fix")),
     };
   }
   const { imageKey, digitalFileKey } = parsed.data;
   if (imageKey && !isOwnedObjectKey(imageKey, "image", uploaderId)) {
     return {
-      error: invalidInput(
-        "That image upload can't be used with this product.",
-        "Re-upload the image, then save again.",
-      ),
+      error: invalidInput(msg("Errors.products.imageNotOwned.message"), msg("Errors.products.imageNotOwned.fix")),
     };
   }
   if (digitalFileKey && !isOwnedObjectKey(digitalFileKey, "file", uploaderId)) {
     return {
-      error: invalidInput(
-        "That file upload can't be used with this product.",
-        "Re-upload the file, then save again.",
-      ),
+      error: invalidInput(msg("Errors.products.fileNotOwned.message"), msg("Errors.products.fileNotOwned.fix")),
     };
   }
   return { data: parsed.data };
@@ -125,15 +118,15 @@ function storedDocumentKind(key: string): UploadKind {
   return key.startsWith(`${objectKeyPrefix("document")}/`) ? "document" : "file";
 }
 
-const KIND_NOUN: Record<UploadKind, string> = {
-  image: "image",
-  document: "document",
-  file: "file",
-  // Products never carry either of these (a font belongs to a storefront's
-  // theme, an element to its canvas), but the kinds exist, so this map answers
-  // for them rather than leaving a hole.
-  font: "font",
-  element: "element",
+// Products never carry a font or an element (a font belongs to a storefront's
+// theme, an element to its canvas), but the kinds exist, so this map answers
+// for them rather than leaving a hole.
+const VERIFY_OPERATION: Record<UploadKind, ServerErrorOperation> = {
+  image: "verifyImageUpload",
+  document: "verifyDocumentUpload",
+  file: "verifyFileUpload",
+  font: "verifyFontUpload",
+  element: "verifyElementUpload",
 };
 
 /**
@@ -147,21 +140,20 @@ async function verifyUploadedObject(
   key: string,
   kind: UploadKind,
 ): Promise<{ ok: true } | { ok: false; error: ActionError }> {
-  const noun = KIND_NOUN[kind];
-  const maxLabel = `${Math.round(maxBytesForKind(kind) / 1024 / 1024)} MB`;
+  const maxMb = Math.round(maxBytesForKind(kind) / 1024 / 1024);
   let meta;
   try {
     meta = await headObject(key);
   } catch (error) {
     console.error("[products] object verification failed", error);
-    return { ok: false, error: serverError(`verify your ${noun} upload`) };
+    return { ok: false, error: serverError(VERIFY_OPERATION[kind]) };
   }
   if (!meta) {
     return {
       ok: false,
       error: uploadFailed(
-        `Your ${noun} upload didn't finish.`,
-        `Select the ${noun} again and re-upload it before saving.`,
+        msg(`Errors.products.uploadUnfinished.${kind}`),
+        msg(`Errors.products.uploadUnfinishedFix.${kind}`),
       ),
     };
   }
@@ -179,16 +171,16 @@ async function verifyUploadedObject(
       ok: false,
       error: tooBig
         ? uploadFailed(
-            `That ${noun} is too large.`,
-            `Use a ${noun} under ${maxLabel}, then re-upload it.`,
+            msg(`Errors.products.uploadTooLarge.${kind}`),
+            msg(`Errors.products.uploadTooLargeFix.${kind}`, { maxMb }),
           )
         : uploadFailed(
-            "That file type is not supported.",
+            msg("Errors.upload.typeNotSupported"),
             kind === "image"
-              ? "Use a JPEG, PNG, WebP, GIF, or AVIF image."
+              ? msg("Errors.products.wrongTypeFix.image")
               : kind === "document"
-                ? "Documents have to be PDFs. Export it as a PDF, then upload it again."
-                : "Use a ZIP, PDF, EPUB, MP3, WAV, MP4, JPEG, PNG, WebP, or TXT file.",
+                ? msg("Errors.products.wrongTypeFix.document")
+                : msg("Errors.products.wrongTypeFix.other"),
           ),
     };
   }
@@ -236,8 +228,8 @@ async function verifyNewKeys(
     return {
       ok: false,
       error: invalidInput(
-        "Too many new photos in one save.",
-        `Add up to ${NEW_GALLERY_KEYS_PER_SAVE_MAX} photos, save, then add the rest.`,
+        msg("Errors.products.tooManyPhotos.message"),
+        msg("Errors.products.tooManyPhotos.fix", { max: NEW_GALLERY_KEYS_PER_SAVE_MAX }),
       ),
     };
   }
@@ -245,10 +237,7 @@ async function verifyNewKeys(
   if (newGalleryKeys.some((key) => !isOwnedObjectKey(key, "image", uploaderId))) {
     return {
       ok: false,
-      error: invalidInput(
-        "One of the photos can't be used with this product.",
-        "Remove it, upload it again, then save.",
-      ),
+      error: invalidInput(msg("Errors.products.photoNotOwned.message"), msg("Errors.products.photoNotOwned.fix")),
     };
   }
   for (const key of newGalleryKeys) {
@@ -265,8 +254,8 @@ async function verifyNewKeys(
     return {
       ok: false,
       error: invalidInput(
-        "Too many new documents in one save.",
-        `Add up to ${NEW_DOCUMENT_KEYS_PER_SAVE_MAX} documents, save, then add the rest.`,
+        msg("Errors.products.tooManyDocuments.message"),
+        msg("Errors.products.tooManyDocuments.fix", { max: NEW_DOCUMENT_KEYS_PER_SAVE_MAX }),
       ),
     };
   }
@@ -274,10 +263,7 @@ async function verifyNewKeys(
   if (newDocumentKeys.some((key) => documentKeyKind(key, uploaderId) === null)) {
     return {
       ok: false,
-      error: invalidInput(
-        "One of the documents can't be used with this product.",
-        "Remove it, upload it again, then save.",
-      ),
+      error: invalidInput(msg("Errors.products.documentNotOwned.message"), msg("Errors.products.documentNotOwned.fix")),
     };
   }
   for (const key of newDocumentKeys) {
@@ -304,10 +290,7 @@ function galleryMatchesOptions(
   return data.gallery.every((image) => !image.optionId || ids.has(image.optionId));
 }
 
-const STALE_OPTION_ERROR = invalidInput(
-  "A photo points at an option that no longer exists.",
-  "Reassign or untag that photo, then save again.",
-);
+const STALE_OPTION_ERROR = invalidInput(msg("Errors.products.staleOption.message"), msg("Errors.products.staleOption.fix"));
 
 /**
  * The publish gate for a product write.
@@ -336,12 +319,12 @@ export async function createProduct(
   const account = await getActiveAccount();
   if (!account) return failure(sessionExpired());
   if (!can(account.role, "products.write")) {
-    return failure(permissionDenied(account.role, "create products"));
+    return failure(permissionDenied(account.role, "createProducts"));
   }
   // After the role check, before any R2 head or DB write: RLS decides WHETHER
   // this caller may write, the budget bounds HOW MUCH.
   if (!(await rateLimit("product_write", RATE_LIMITS.productWrite))) {
-    return failure(rateLimited("create products"));
+    return failure(rateLimited("createProducts"));
   }
 
   const parsed = parseWrite(account.userId, input);
@@ -392,7 +375,7 @@ export async function createProduct(
 
   if (error || !row) {
     console.error("[products] create failed", error);
-    return failure(serverError("create the product"));
+    return failure(serverError("createProduct"));
   }
   revalidatePath("/products");
   return { ok: true, id: row.id };
@@ -405,10 +388,10 @@ export async function updateProduct(
   const account = await getActiveAccount();
   if (!account) return failure(sessionExpired());
   if (!can(account.role, "products.write")) {
-    return failure(permissionDenied(account.role, "edit products"));
+    return failure(permissionDenied(account.role, "editProducts"));
   }
   if (!(await rateLimit("product_write", RATE_LIMITS.productWrite))) {
-    return failure(rateLimited("edit products"));
+    return failure(rateLimited("editProducts"));
   }
   if (!productIdSchema.safeParse(id).success) {
     return failure(notFound("product"));
@@ -454,7 +437,7 @@ export async function updateProduct(
       .maybeSingle();
     if (error) {
       console.error("[products] pre-save read failed", error);
-      return failure(serverError("save the product"));
+      return failure(serverError("saveProduct"));
     }
     if (!row) return failure(notFound("product"));
     existing = row;
@@ -523,7 +506,7 @@ export async function updateProduct(
 
   if (error) {
     console.error("[products] update failed", error);
-    return failure(serverError("save the product"));
+    return failure(serverError("saveProduct"));
   }
   if (!row) return failure(notFound("product"));
 
@@ -556,10 +539,10 @@ export async function deleteProduct(id: string): Promise<ProductActionResult> {
   const account = await getActiveAccount();
   if (!account) return failure(sessionExpired());
   if (!can(account.role, "products.write")) {
-    return failure(permissionDenied(account.role, "delete products"));
+    return failure(permissionDenied(account.role, "deleteProducts"));
   }
   if (!(await rateLimit("product_write", RATE_LIMITS.productWrite))) {
-    return failure(rateLimited("delete products"));
+    return failure(rateLimited("deleteProducts"));
   }
   if (!productIdSchema.safeParse(id).success) {
     return failure(notFound("product"));
@@ -579,7 +562,7 @@ export async function deleteProduct(id: string): Promise<ProductActionResult> {
 
   if (error) {
     console.error("[products] delete failed", error);
-    return failure(serverError("delete the product"));
+    return failure(serverError("deleteProduct"));
   }
   if (!deleted) return failure(notFound("product"));
 

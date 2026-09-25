@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Download, TriangleAlert } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { CopyButton } from "@/components/ui/CopyButton";
 import { helpTextClass } from "@/components/ui/control-styles";
@@ -13,31 +14,35 @@ import { helpTextClass } from "@/components/ui/control-styles";
  * "Done" stays disabled until the person ticks that they saved them: a set of
  * codes nobody kept is worse than none, because the account then looks
  * recoverable when it is not.
+ *
+ * The codes are data: shown and saved exactly as the server minted them.
  */
 export function RecoveryCodesDisplay({
   codes,
   onDone,
-  doneLabel = "Done",
+  doneLabel,
 }: {
   /** Null when the codes could not be created. */
   codes: string[] | null;
   onDone: () => void;
+  /** Defaults to "Done". */
   doneLabel?: string;
 }) {
+  const t = useTranslations("Settings.security.recoveryCodesDisplay");
+  const tCommon = useTranslations("Common.actions");
   const [saved, setSaved] = React.useState(false);
   const checkboxId = React.useId();
+  const done = doneLabel ?? tCommon("done");
 
   if (!codes) {
     return (
       <div className="flex flex-col gap-4">
         <p role="alert" className="font-inter text-sm text-destructive">
-          Two-factor authentication is on, but we couldn&rsquo;t create your
-          recovery codes. Generate a set from the Recovery codes card before you
-          sign out.
+          {t("notCreated")}
         </p>
         <div className="flex justify-end">
           <Button type="button" onClick={onDone}>
-            {doneLabel}
+            {done}
           </Button>
         </div>
       </div>
@@ -45,12 +50,12 @@ export function RecoveryCodesDisplay({
   }
 
   const text = [
-    "Square Share recovery codes",
-    "Each code can be used once to sign in if you lose your authenticator app.",
+    t("file.title"),
+    t("file.explainer"),
     "",
     ...codes,
     "",
-    `Generated ${new Date().toISOString().slice(0, 10)}`,
+    t("file.generated", { date: new Date().toISOString().slice(0, 10) }),
   ].join("\n");
 
   function download() {
@@ -69,15 +74,11 @@ export function RecoveryCodesDisplay({
     <div className="flex flex-col gap-4" data-recovery-codes>
       <p className="flex items-start gap-2 border border-border bg-muted/40 p-3 font-inter text-sm text-foreground">
         <TriangleAlert aria-hidden className="mt-0.5 size-4 shrink-0" />
-        <span>
-          Save these somewhere safe, like a password manager. Each works once,
-          they&rsquo;re the only way back in if you lose your phone, and you
-          won&rsquo;t see them again.
-        </span>
+        <span>{t("warning")}</span>
       </p>
 
       <ol
-        aria-label="Recovery codes"
+        aria-label={t("listLabel")}
         className="grid grid-cols-1 gap-x-6 gap-y-1.5 border border-border bg-background p-4 font-mono text-sm tabular-nums text-foreground min-[380px]:grid-cols-2"
       >
         {codes.map((code) => (
@@ -88,10 +89,18 @@ export function RecoveryCodesDisplay({
       </ol>
 
       <div className="flex flex-wrap gap-2">
-        <CopyButton value={codes.join("\n")} label="recovery codes" variant="labelled" />
+        <CopyButton
+          value={codes.join("\n")}
+          messages={{
+            copy: "Settings.security.copyRecoveryCodes.copy",
+            copied: "Settings.security.copyRecoveryCodes.copied",
+            failed: "Settings.security.copyRecoveryCodes.failed",
+          }}
+          variant="labelled"
+        />
         <Button type="button" variant="secondary" onClick={download}>
           <Download aria-hidden className="size-4" />
-          Download
+          {t("download")}
         </Button>
       </div>
 
@@ -103,12 +112,12 @@ export function RecoveryCodesDisplay({
           onChange={(event) => setSaved(event.target.checked)}
           className="mt-0.5 size-4 shrink-0 accent-foreground"
         />
-        <span className={helpTextClass}>I&rsquo;ve saved my recovery codes somewhere safe.</span>
+        <span className={helpTextClass}>{t("saved")}</span>
       </label>
 
       <div className="flex justify-end">
         <Button type="button" onClick={onDone} disabled={!saved}>
-          {doneLabel}
+          {done}
         </Button>
       </div>
     </div>

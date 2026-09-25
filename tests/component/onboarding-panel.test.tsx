@@ -1,7 +1,9 @@
 /**
  * OnboardingPanel: the setup slot's client half.
  *
- * What these pin: Skip onboarding records the welcome and starts NO tour; every
+ * What these pin: Skip onboarding records the welcome and starts NO tour, and
+ * is not there until the Terms are agreed (so the welcome can never be recorded
+ * as seen without an agreement on file); every
  * way forward records it and starts the tour carrying the checklist's next
  * step; `?tour=1` starts the tour for someone past the welcome (never over it)
  * and drops the query either way; a welcome that opens ends a tour left
@@ -11,7 +13,8 @@
 import type { ReactNode } from "react";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import userEvent from "@testing-library/user-event";
-import { act, cleanup, render, screen, waitFor } from "../setup/render";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "../setup/render";
+import { english } from "../setup/translate";
 import type { OnboardingData } from "@/components/onboarding/OnboardingPanel";
 import { buildSetupSteps, type SetupFacts } from "@/lib/onboarding/steps";
 import { DEFAULT_PRODUCT_PAGE_CONFIG, type StorefrontConfig } from "@/types/storefront";
@@ -59,6 +62,7 @@ const actions = vi.hoisted(() => ({
 vi.mock("@/lib/onboarding/actions", () => actions);
 
 vi.mock("@/lib/settings/actions", () => ({
+  acceptLegal: vi.fn(async () => ({ success: { key: "Settings.legal.success.termsAgreed" } })),
   saveTaxInfo: vi.fn(),
   resendSellerEmailVerification: vi.fn(),
 }));
@@ -100,6 +104,7 @@ function data(overrides: Partial<OnboardingData> = {}): OnboardingData {
     setup: buildSetupSteps(NEW_SELLER),
     traderMissing: ["businessName", "address", "email"],
     welcomePending: true,
+    termsAccepted: true,
     celebrationPending: true,
     seller: { businessName: "", address: "", email: "" },
     verificationOn: false,
@@ -139,6 +144,27 @@ describe("OnboardingPanel", () => {
     expect(screen.queryByRole("dialog", { name: "Welcome to Square Share" })).toBeNull();
   });
 
+  it("holds the welcome open, unrecorded, until the Terms are agreed", async () => {
+    const user = userEvent.setup();
+    render(<OnboardingPanel {...data({ termsAccepted: false })} />);
+
+    expect(screen.queryByRole("button", { name: "Skip onboarding" })).toBeNull();
+    await user.keyboard("{Escape}");
+    expect(screen.getByRole("dialog", { name: "Welcome to Square Share" })).toBeInTheDocument();
+    expect(actions.completeOnboarding).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    const box = document.querySelector<HTMLElement>("[data-terms-summary]")!;
+    Object.defineProperty(box, "clientHeight", { configurable: true, value: 300 });
+    Object.defineProperty(box, "scrollHeight", { configurable: true, value: 900 });
+    Object.defineProperty(box, "scrollTop", { configurable: true, value: 600 });
+    fireEvent.scroll(box);
+    await user.click(screen.getByRole("button", { name: "I have read and agree to the Terms" }));
+
+    await user.click(await screen.findByRole("button", { name: "Skip onboarding" }));
+    await waitFor(() => expect(actions.completeOnboarding).toHaveBeenCalledTimes(1));
+  });
+
   it("records the welcome and starts the tour carrying the next setup step", async () => {
     const user = userEvent.setup();
     const setup = buildSetupSteps(NEW_SELLER);
@@ -157,7 +183,8 @@ describe("OnboardingPanel", () => {
       status: "active",
       stepId: "overview-nav",
       arrived: false,
-      next: { href: setup.next!.action!.href, label: setup.next!.cta },
+      // Resolved: the tour store holds display text, not message keys.
+      next: { href: setup.next!.action!.href, label: english(setup.next!.cta) },
     });
   });
 

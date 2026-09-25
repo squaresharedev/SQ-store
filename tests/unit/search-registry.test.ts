@@ -7,6 +7,7 @@ import {
   SETTINGS_NAV,
 } from "@/lib/search/nav-constants";
 import { searchLocalRegistry } from "@/lib/search/registry";
+import { english } from "../setup/translate";
 import type { SearchGroup, SearchResult } from "@/lib/search/types";
 
 /** Flatten groups to the rows the palette would render. */
@@ -19,25 +20,25 @@ function hrefs(groups: SearchGroup[]): (string | undefined)[] {
 }
 
 /** Owner sees everything; used wherever the permission gate isn't the subject. */
-const AS_OWNER = { role: "owner" as const, limit: 50 };
+const AS_OWNER = { role: "owner" as const, limit: 50, t: english };
 
 describe("local search registry — coverage", () => {
   it("indexes every dashboard nav route", () => {
     for (const link of [...MAIN_NAV, SETTINGS_LINK]) {
-      const found = searchLocalRegistry(link.label, AS_OWNER);
+      const found = searchLocalRegistry(english(link.label), AS_OWNER);
       expect(
         hrefs(found),
-        `"${link.label}" (${link.href}) is in the sidebar but not findable`,
+        `"${english(link.label)}" (${link.href}) is in the sidebar but not findable`,
       ).toContain(link.href);
     }
   });
 
   it("indexes every settings section", () => {
     for (const link of SETTINGS_NAV) {
-      const found = searchLocalRegistry(link.label, AS_OWNER);
+      const found = searchLocalRegistry(english(link.label), AS_OWNER);
       expect(
         hrefs(found),
-        `"${link.label}" (${link.href}) is in the settings rail but not findable`,
+        `"${english(link.label)}" (${link.href}) is in the settings rail but not findable`,
       ).toContain(link.href);
     }
   });
@@ -45,7 +46,7 @@ describe("local search registry — coverage", () => {
   it("gives every entry a unique id", () => {
     // Ids become DOM ids for aria-activedescendant; a duplicate silently points
     // the screen reader at the wrong row.
-    const all = rows(searchLocalRegistry("e", { role: "owner", limit: 500 }));
+    const all = rows(searchLocalRegistry("e", { role: "owner", limit: 500, t: english }));
     const ids = all.map((result) => result.id);
     expect(new Set(ids).size).toBe(ids.length);
   });
@@ -64,6 +65,10 @@ describe("local search registry — matching by intent", () => {
     ["logout", "/settings/account#sign-out"],
     ["change password", "/settings/account#password"],
     ["avatar", "/settings/account#avatar"],
+    // The language picker has its own tab, not a card on Account.
+    ["change language", "/settings/language"],
+    ["translate", "/settings/language"],
+    ["locale", "/settings/language"],
     ["vat", "/settings/tax#vat"],
     ["gdpr export", "/settings/danger#export"],
     ["close account", "/settings/danger#delete"],
@@ -183,7 +188,7 @@ describe("local search registry — empty query", () => {
   });
 
   it("keeps the curation permission-gated for a viewer", () => {
-    const suggested = hrefs(searchLocalRegistry("", { role: "viewer", limit: 50 }));
+    const suggested = hrefs(searchLocalRegistry("", { role: "viewer", limit: 50, t: english }));
     expect(suggested).not.toContain("/products/new");
     expect(suggested).toContain("/settings/account#password");
   });
@@ -197,29 +202,29 @@ describe("local search registry — empty query", () => {
 
 describe("local search registry — permission gate", () => {
   it("hides write actions from a viewer", () => {
-    const viewer = searchLocalRegistry("product", { role: "viewer", limit: 50 });
+    const viewer = searchLocalRegistry("product", { role: "viewer", limit: 50, t: english });
     expect(hrefs(viewer)).not.toContain("/products/new");
     // ...but the read-only page is still offered.
     expect(hrefs(viewer)).toContain("/products");
   });
 
   it("offers write actions to an editor", () => {
-    const editor = searchLocalRegistry("product", { role: "editor", limit: 50 });
+    const editor = searchLocalRegistry("product", { role: "editor", limit: 50, t: english });
     expect(hrefs(editor)).toContain("/products/new");
   });
 
   it("hides invite from a viewer but not from an editor", () => {
     expect(
-      hrefs(searchLocalRegistry("invite", { role: "viewer", limit: 50 })),
+      hrefs(searchLocalRegistry("invite", { role: "viewer", limit: 50, t: english })),
     ).not.toContain("/settings/team#invite");
     expect(
-      hrefs(searchLocalRegistry("invite", { role: "editor", limit: 50 })),
+      hrefs(searchLocalRegistry("invite", { role: "editor", limit: 50, t: english })),
     ).toContain("/settings/team#invite");
   });
 
   it("hides every gated action when the role is unknown", () => {
     // Fail closed: no role resolved yet means no privileged suggestion.
-    const anonymous = searchLocalRegistry("product", { role: null, limit: 50 });
+    const anonymous = searchLocalRegistry("product", { role: null, limit: 50, t: english });
     expect(hrefs(anonymous)).not.toContain("/products/new");
   });
 });
@@ -251,13 +256,13 @@ describe("local search registry — deep links land somewhere", () => {
     // into a link to the top of a long page — the exact failure the deep links
     // were added to avoid, and one nothing else would catch.
     const anchors = settingsAnchors();
-    const hashed = rows(searchLocalRegistry("", { role: "owner", limit: 500 }))
+    const hashed = rows(searchLocalRegistry("", { role: "owner", limit: 500, t: english }))
       .concat(
         // The empty query only returns pages, so sweep the fields too.
         ...["username", "email", "vat", "export", "delete", "invite", "sign out",
             "password", "avatar", "display name", "country", "business",
             "sales emails", "marketing"].map((q) =>
-          rows(searchLocalRegistry(q, { role: "owner", limit: 500 })),
+          rows(searchLocalRegistry(q, { role: "owner", limit: 500, t: english })),
         ),
       )
       .map((result) => result.href)
@@ -280,7 +285,7 @@ describe("local search registry — shape", () => {
   });
 
   it("respects the limit across all groups combined", () => {
-    expect(rows(searchLocalRegistry("e", { role: "owner", limit: 3 })).length)
+    expect(rows(searchLocalRegistry("e", { role: "owner", limit: 3, t: english })).length)
       .toBeLessThanOrEqual(3);
   });
 

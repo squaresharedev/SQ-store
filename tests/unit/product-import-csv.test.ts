@@ -4,11 +4,13 @@ import {
   buildImportPlan,
   guessColumns,
   htmlToText,
+  importProblemMessage,
   importableRows,
   isShopifyExport,
   parseCsv,
   parsePriceCents,
 } from "@/lib/products/csv";
+import { english } from "../setup/translate";
 
 // The importer's whole job is to not corrupt a seller's catalogue silently, so
 // these lean on the cases that DO corrupt naive parsers: commas and newlines
@@ -141,10 +143,10 @@ describe("buildImportPlan", () => {
     ]);
     const problems = plan.rows.filter((row) => row.problem);
     expect(problems.map((row) => row.line)).toEqual([2, 3, 4, 6]);
-    expect(problems[0]!.problem).toMatch(/no title/i);
-    expect(problems[1]!.problem).toMatch(/price/i);
-    expect(problems[2]!.problem).toMatch(/zero/i);
-    expect(problems[3]!.problem).toMatch(/another row/i);
+    expect(english(importProblemMessage(problems[0]!.problem!))).toMatch(/no title/i);
+    expect(english(importProblemMessage(problems[1]!.problem!))).toMatch(/price/i);
+    expect(english(importProblemMessage(problems[2]!.problem!))).toMatch(/zero/i);
+    expect(english(importProblemMessage(problems[3]!.problem!))).toMatch(/another row/i);
     expect(importableRows(plan).map((row) => row.title)).toEqual(["Lamp"]);
   });
 

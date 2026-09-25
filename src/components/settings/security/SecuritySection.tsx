@@ -1,4 +1,5 @@
 import { TriangleAlert } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { TwoFactorCard } from "@/components/settings/security/TwoFactorCard";
 import { RecoveryCodesCard } from "@/components/settings/security/RecoveryCodesCard";
 import {
@@ -35,6 +36,8 @@ export function SecuritySection({
   recovered: boolean;
   openSetup: boolean;
 }) {
+  const t = useTranslations("Settings.security");
+
   return (
     <div className="flex flex-col gap-6">
       {recovered && !enrolled && (
@@ -44,11 +47,9 @@ export function SecuritySection({
         >
           <TriangleAlert aria-hidden className="mt-0.5 size-4 shrink-0 text-destructive" />
           <p className="font-inter text-sm text-foreground">
-            <span className="font-semibold">Two-factor authentication is off.</span>{" "}
-            You signed in with a recovery code, which removed your old
-            authenticator and signed out your other devices. Set it up again
-            now so your password isn&rsquo;t the only thing protecting your
-            account.
+            {t.rich("recoveredNotice", {
+              strong: (chunks) => <span className="font-semibold">{chunks}</span>,
+            })}
           </p>
         </div>
       )}

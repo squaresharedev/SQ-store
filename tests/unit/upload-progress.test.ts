@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { uploadToR2, UploadError } from "@/lib/products/upload";
+import { english } from "../setup/translate";
 
 /**
  * `uploadToR2` now takes two different routes, and the difference is the point:
@@ -175,7 +176,7 @@ describe("uploadToR2 - images go through our own server", () => {
     await expect(uploadToR2(imageFile(), "image")).rejects.toSatisfy(
       (error: unknown) =>
         error instanceof UploadError &&
-        error.info.message === "That image breaks the content rules.",
+        english(error.info.message) === "That image breaks the content rules.",
     );
   });
 
@@ -190,7 +191,7 @@ describe("uploadToR2 - images go through our own server", () => {
     xhrOptions = { status: undefined };
     await expect(uploadToR2(imageFile(), "image")).rejects.toSatisfy(
       (error: unknown) =>
-        error instanceof UploadError && /never reached the server/i.test(error.info.message),
+        error instanceof UploadError && /never reached the server/i.test(english(error.info.message)),
     );
   });
 
@@ -233,7 +234,7 @@ describe("uploadToR2 - digital files stream through our server too", () => {
     await expect(uploadToR2(zipFile(), "file")).rejects.toSatisfy(
       (error: unknown) =>
         error instanceof UploadError &&
-        error.info.message === "That file type is not supported.",
+        english(error.info.message) === "That file type is not supported.",
     );
   });
 
@@ -241,7 +242,7 @@ describe("uploadToR2 - digital files stream through our server too", () => {
     xhrOptions = { status: undefined };
     await expect(uploadToR2(zipFile(), "file")).rejects.toSatisfy(
       (error: unknown) =>
-        error instanceof UploadError && /never reached the server/i.test(error.info.message),
+        error instanceof UploadError && /never reached the server/i.test(english(error.info.message)),
     );
   });
 });

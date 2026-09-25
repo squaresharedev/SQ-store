@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowUpRight, Landmark } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { infoTextClass, stubBadgeClass } from "@/components/ui/control-styles";
@@ -21,6 +22,8 @@ export function PayoutMethodModal({
   onClose: () => void;
   method: PayoutMethod;
 }) {
+  const t = useTranslations("Payments");
+  const tCommon = useTranslations("Common.actions");
   function handleManageInStripe() {
     // TODO(stripe): call the server to create a login link for the connected
     // account (stripe.accounts.createLoginLink) and redirect to Stripe's
@@ -31,8 +34,8 @@ export function PayoutMethodModal({
     <Modal
       open={open}
       onClose={onClose}
-      title="Payout method"
-      description="Where your payouts are sent."
+      title={t("payoutMethodModal.title")}
+      description={t("payoutMethodModal.description")}
     >
       <div className="flex items-center gap-3 rounded-md border border-border bg-muted p-4">
         <span className="flex size-10 shrink-0 items-center justify-center rounded-sm bg-background text-foreground">
@@ -43,18 +46,21 @@ export function PayoutMethodModal({
             {method.bankName} ···· {method.last4}
           </p>
           <p className={infoTextClass}>
-            Bank account · {method.currency} · {method.country}
+            {t("payoutMethodModal.bankAccountDetail", {
+              currency: method.currency,
+              country: method.country,
+            })}
           </p>
         </div>
       </div>
 
       <div className="mt-4 space-y-4">
-        <DetailRow label="Default for payouts">
+        <DetailRow label={t("payoutMethodModal.defaultLabel")}>
           <span className="text-sm text-foreground">
-            {method.isDefault ? "Yes" : "No"}
+            {method.isDefault ? t("payoutMethodModal.yes") : t("payoutMethodModal.no")}
           </span>
         </DetailRow>
-        <DetailRow label="Reference">
+        <DetailRow label={t("payoutMethodModal.referenceLabel")}>
           <span className="break-all font-mono text-xs text-muted-foreground">
             {method.id}
           </span>
@@ -62,17 +68,17 @@ export function PayoutMethodModal({
       </div>
 
       <p className="mt-4 border-t border-border pt-4 font-inter text-sm text-muted-foreground">
-        For your security, bank details are changed on Stripe, never here.
+        {t("payoutMethodModal.securityNote")}
       </p>
 
       <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
         <Button variant="ghost" onClick={onClose}>
-          Close
+          {tCommon("close")}
         </Button>
         <Button onClick={handleManageInStripe}>
-          Manage in Stripe
+          {t("payoutMethodModal.manageInStripe")}
           <ArrowUpRight className="size-4" strokeWidth={2} aria-hidden />
-          <span className={stubBadgeClass}>Soon</span>
+          <span className={stubBadgeClass}>{t("soon")}</span>
         </Button>
       </div>
     </Modal>

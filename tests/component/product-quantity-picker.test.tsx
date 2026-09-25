@@ -8,7 +8,7 @@
  * affect — the enquiry the seller receives.
  */
 import { afterEach, describe, expect, it } from "vitest";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "../setup/render";
 import userEvent from "@testing-library/user-event";
 import { ProductPageView } from "@/components/product-page/ProductPageView";
 import { DEFAULT_PRODUCT_PAGE_CONFIG, DEFAULT_STOREFRONT_CONFIG } from "@/types/storefront";

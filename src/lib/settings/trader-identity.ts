@@ -11,7 +11,7 @@
 // make. So this is enforced at every write that publishes and at every read
 // that sells, rather than shown as a suggestion the seller can dismiss.
 //
-// PURE ON PURPOSE. No imports beyond the shared type: client components render
+// PURE ON PURPOSE. No imports beyond the shared types: client components render
 // the warning from this module, server actions and the public read gate decide
 // from the same predicate, and there is exactly one answer to "is this seller
 // allowed to sell" in the codebase. The service-role read that feeds it lives
@@ -29,6 +29,7 @@
 //   - VAT ID. Only meaningful for a VAT-registered trader; requiring it would
 //     be wrong for everyone else.
 
+import { msg, type MessageKey, type MessageRef } from "@/i18n/types";
 import type { StorefrontSeller } from "@/types/storefront";
 
 /** The fields that block publishing while they are empty. */
@@ -57,37 +58,38 @@ export const TRADER_IDENTITY_HREF = "/settings/tax";
  * Each required field, with the anchor on the settings page that lands on it
  * (see the `id`s on TaxSection's field wrappers) and the reason a buyer needs
  * it. The order is the order the settings form asks for them in, so a seller
- * working down the warning works down the page.
+ * working down the warning works down the page. `label` and `why` are message
+ * keys, resolved where they render.
  */
 export const TRADER_IDENTITY_FIELDS: readonly {
   key: TraderIdentityField;
-  label: string;
+  label: MessageKey;
   anchor: string;
-  why: string;
+  why: MessageKey;
 }[] = [
   {
     key: "businessName",
-    label: "Trader name",
+    label: "Settings.sellerDetails.fields.businessName.label",
     anchor: "business-name",
-    why: "Buyers have to know who they are buying from: your business name, or your own full name if you sell as an individual.",
+    why: "Settings.sellerDetails.fields.businessName.why",
   },
   {
     key: "address",
-    label: "Business address",
+    label: "Settings.sellerDetails.fields.address.label",
     anchor: "address",
-    why: "A postal address has to appear with every offer under distance-selling law.",
+    why: "Settings.sellerDetails.fields.address.why",
   },
   {
     key: "email",
-    label: "Contact email",
+    label: "Settings.sellerDetails.fields.email.label",
     anchor: "contact-email",
-    why: "The address buyers write to about an order. It is also the buy button's fallback when a product has no purchase link.",
+    why: "Settings.sellerDetails.fields.email.why",
   },
   {
     key: "emailVerified",
-    label: "Confirmed contact email",
+    label: "Settings.sellerDetails.fields.emailVerified.label",
     anchor: "contact-email",
-    why: "We send a link to that address and you click it. Nothing else proves a buyer's message would actually reach someone.",
+    why: "Settings.sellerDetails.fields.emailVerified.why",
   },
 ] as const;
 
@@ -144,45 +146,36 @@ export function isTraderIdentityComplete(
   return missingTraderIdentity(seller, options).length === 0;
 }
 
-/** "your trader name and contact email" — for use inside a sentence. */
-export function listMissingTraderFields(
-  missing: readonly TraderIdentityField[],
-): string {
-  const labels = TRADER_IDENTITY_FIELDS.filter((field) =>
-    missing.includes(field.key),
-  ).map((field) => field.label.toLowerCase());
-  if (labels.length === 0) return "";
-  if (labels.length === 1) return labels[0];
-  return `${labels.slice(0, -1).join(", ")} and ${labels[labels.length - 1]}`;
-}
-
 /**
  * The one sentence every surface leads with. Kept here so the storefront
  * editor, the product form, the dashboard banner and the server actions all
  * tell the seller the same thing.
  */
-export const TRADER_IDENTITY_HEADLINE =
-  "You can't publish or sell until your seller details are complete.";
+export const TRADER_IDENTITY_HEADLINE: MessageRef = msg("Errors.traderIdentityRequired.message");
+
+/** The fields a seller types, in the order the settings form asks for them. */
+const TYPED_TRADER_FIELDS = ["businessName", "address", "email"] as const;
 
 /**
- * The follow-up line, naming what is actually missing.
+ * The follow-up line, naming what is actually missing. The missing set goes in
+ * as one DATA value ("businessName_email") that the message selects on, so
+ * each combination is a whole sentence a translator controls, rather than a
+ * list of translated labels joined with an English "and".
  *
  * An unconfirmed address gets its own sentence: "add your confirmed contact
  * email" would be advice to type something, and the thing to do is click a
  * link that has already been sent.
  */
-export function traderIdentityFix(missing: readonly TraderIdentityField[]): string {
-  const typed = missing.filter((field) => field !== "emailVerified");
+export function traderIdentityFix(missing: readonly TraderIdentityField[]): MessageRef {
+  const typed = TYPED_TRADER_FIELDS.filter((field) => missing.includes(field));
   const confirm = missing.includes("emailVerified");
-  const list = listMissingTraderFields(typed);
+  const fields = typed.join("_");
 
-  if (list && confirm) {
-    return `Add your ${list} in Settings › Business & seller details, and confirm your contact email from the link we sent you.`;
+  if (typed.length > 0 && confirm) {
+    return msg("Errors.traderIdentityRequired.fix.addAndConfirm", { fields });
   }
-  if (confirm) {
-    return "Open the confirmation link we emailed to your contact address. You can send a new one from Settings › Business & seller details.";
-  }
-  return list
-    ? `Add your ${list} in Settings › Business & seller details, then publish.`
-    : "Complete Settings › Business & seller details, then publish.";
+  if (confirm) return msg("Errors.traderIdentityRequired.fix.confirm");
+  return typed.length > 0
+    ? msg("Errors.traderIdentityRequired.fix.add", { fields })
+    : msg("Errors.traderIdentityRequired.fix.complete");
 }

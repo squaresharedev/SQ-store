@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { msg, type MessageKey, type MessageRef } from "@/i18n/types";
 import {
   emailAddress,
   multiLineText,
@@ -54,42 +55,43 @@ export type ReportReason = (typeof REPORT_REASONS)[number];
 
 /** The label and helper line the dialog shows per reason. Shared with the
  *  marketplace so both surfaces ask the same question in the same words,
- *  which is what makes the resulting counts comparable. */
+ *  which is what makes the resulting counts comparable. The words are in the
+ *  catalogue (ProductPage.report.reasons), shown in the REPORTER'S language. */
 export const REPORT_REASON_COPY: Record<
   ReportReason,
-  { label: string; hint: string }
+  { label: MessageRef; hint: MessageRef }
 > = {
   illegal: {
-    label: "Illegal goods or activity",
-    hint: "Selling something that is against the law, or using the listing to arrange it.",
+    label: msg("ProductPage.report.reasons.illegal.label"),
+    hint: msg("ProductPage.report.reasons.illegal.hint"),
   },
   sexual: {
-    label: "Sexual content",
-    hint: "Explicit imagery, or anything sexualising a minor.",
+    label: msg("ProductPage.report.reasons.sexual.label"),
+    hint: msg("ProductPage.report.reasons.sexual.hint"),
   },
   violence: {
-    label: "Violence or gore",
-    hint: "Graphic injury, threats, or content glorifying violence.",
+    label: msg("ProductPage.report.reasons.violence.label"),
+    hint: msg("ProductPage.report.reasons.violence.hint"),
   },
   hate: {
-    label: "Hate or harassment",
-    hint: "Attacks on a person or group, or hate symbolism.",
+    label: msg("ProductPage.report.reasons.hate.label"),
+    hint: msg("ProductPage.report.reasons.hate.hint"),
   },
   counterfeit: {
-    label: "Counterfeit or stolen",
-    hint: "Fake branded goods, or someone else's work sold as their own.",
+    label: msg("ProductPage.report.reasons.counterfeit.label"),
+    hint: msg("ProductPage.report.reasons.counterfeit.hint"),
   },
   scam: {
-    label: "Scam or fraud",
-    hint: "The listing looks designed to take money without delivering.",
+    label: msg("ProductPage.report.reasons.scam.label"),
+    hint: msg("ProductPage.report.reasons.scam.hint"),
   },
   spam: {
-    label: "Spam",
-    hint: "Repetitive, misleading, or not a real product at all.",
+    label: msg("ProductPage.report.reasons.spam.label"),
+    hint: msg("ProductPage.report.reasons.spam.hint"),
   },
   other: {
-    label: "Something else",
-    hint: "Tell us below and a person will read it.",
+    label: msg("ProductPage.report.reasons.other.label"),
+    hint: msg("ProductPage.report.reasons.other.hint"),
   },
 };
 
@@ -105,6 +107,16 @@ export type ReportTargetType = (typeof REPORT_TARGET_TYPES)[number];
 export const REPORT_DETAILS_MAX = 1000;
 
 /**
+ * The two refusals only this schema words. Message keys, like every other
+ * schema's, but kept with the report's own copy rather than in the shared
+ * Validation namespace; the endpoint resolves them in the reporter's language.
+ */
+export const REPORT_ISSUE_KEYS = {
+  targetType: "ProductPage.report.api.targetType",
+  reason: "ProductPage.report.api.reason",
+} as const satisfies Record<string, MessageKey>;
+
+/**
  * The wire shape the endpoint parses.
  *
  * `strictObject`, so an unknown key is refused rather than dropped: a client
@@ -112,17 +124,15 @@ export const REPORT_DETAILS_MAX = 1000;
  * of discovering later when someone asks why it never arrived.
  */
 export const reportSchema = z.strictObject({
-  targetType: z.enum(REPORT_TARGET_TYPES, {
-    error: "That is not something you can report here.",
-  }),
-  targetId: uuidField("That item"),
-  reason: z.enum(REPORT_REASONS, { error: "Pick what is wrong with it." }),
-  details: multiLineText({ label: "Your description", max: REPORT_DETAILS_MAX }).default(""),
+  targetType: z.enum(REPORT_TARGET_TYPES, { error: REPORT_ISSUE_KEYS.targetType }),
+  targetId: uuidField("reportTarget"),
+  reason: z.enum(REPORT_REASONS, { error: REPORT_ISSUE_KEYS.reason }),
+  details: multiLineText({ field: "reportDetails", max: REPORT_DETAILS_MAX }).default(""),
   // Empty means "not given", which is the common case and not an error. The
   // union rather than `.optional()` keeps the parsed type a plain string, so
   // no call site has to decide what `undefined` means.
   reporterEmail: z
-    .union([z.literal(""), emailAddress("Your email")])
+    .union([z.literal(""), emailAddress("reporter")])
     .default(""),
 });
 

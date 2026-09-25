@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Link from "next/link";
+import { useTranslations, useLocale } from "next-intl";
 import { Copy, ExternalLink, Image as ImageIcon, MoreVertical, Pencil, Trash2, TrendingUp } from "lucide-react";
 import type { Product, ProductSales } from "@/types/product";
 import { cn } from "@/lib/utils";
@@ -55,6 +56,10 @@ export function ProductCard({
   const { id, title, price, currency, status, imageUrl, trackStock, stockQuantity, lowStockThreshold, removal } = product;
   const stockBadge = deriveStockBadge({ trackStock, stockQuantity, lowStockThreshold });
   const [menuOpen, setMenuOpen] = useState(false);
+  const t = useTranslations("Products.card");
+  const tStock = useTranslations("Common.stock");
+  const tCommon = useTranslations("Common.actions");
+  const locale = useLocale();
 
   // Footer stock: the count in plain prose, colour-coded by urgency. Only
   // shown when the seller is tracking stock on this product. Untracked
@@ -63,15 +68,15 @@ export function ProductCard({
     trackStock && stockQuantity !== null ? (
       stockQuantity <= 0 ? (
         <span className="font-inter text-xs font-medium text-destructive tabular-nums">
-          Sold out
+          {tStock("soldOut")}
         </span>
       ) : stockQuantity <= lowStockThreshold ? (
         <span className="font-inter text-xs font-medium text-foreground tabular-nums">
-          {stockQuantity} in stock
+          {t("inStock", { count: stockQuantity })}
         </span>
       ) : (
         <span className={cn(infoTextClass, "tabular-nums")}>
-          {stockQuantity} in stock
+          {t("inStock", { count: stockQuantity })}
         </span>
       )
     ) : null;
@@ -80,10 +85,10 @@ export function ProductCard({
   // needs a nudge rather than a silent no-op from the copy/open buttons.
   const linkTitle =
     storefrontCount === 0
-      ? "Not on a storefront yet"
+      ? t("notPlaced")
       : storefrontCount === 1
-        ? "Copy product page link"
-        : `On ${storefrontCount} storefronts, click to choose`;
+        ? t("copyLinkTitle")
+        : t("chooseStorefront", { count: storefrontCount });
 
   return (
     <div
@@ -122,7 +127,7 @@ export function ProductCard({
           // introducing a hue — chrome stays greyscale (styles.md §1).
           <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-none bg-primary px-1.5 py-0.5 text-xs font-medium text-primary-foreground">
             <TrendingUp className="size-3" strokeWidth={2} aria-hidden="true" />
-            Bestseller
+            {t("bestseller")}
           </span>
         )}
       </div>
@@ -133,7 +138,7 @@ export function ProductCard({
             {title}
           </h3>
           <p className="mt-0.5 font-inter text-xs text-muted-foreground">
-            {formatPrice(price, currency)}
+            {formatPrice(price, currency, locale)}
           </p>
           {stockBadge !== null && (
             <div className="mt-1.5">
@@ -150,7 +155,7 @@ export function ProductCard({
           {canWrite && (
             <Link
               href={`/products/${id}/edit`}
-              aria-label={`Edit ${title}`}
+              aria-label={t("edit", { title })}
               className={cn(iconButtonClass, "size-8")}
             >
               <Pencil className="size-3.5" strokeWidth={2} aria-hidden="true" />
@@ -161,13 +166,13 @@ export function ProductCard({
             onOpenChange={setMenuOpen}
             variant="anchored"
             placement="above"
-            label={`${title} actions`}
+            label={t("actions", { title })}
             rootClassName="w-auto shrink-0"
             panelClassName="w-56 p-1"
             trigger={
               <button
                 type="button"
-                aria-label={`More actions for ${title}`}
+                aria-label={t("moreActions", { title })}
                 aria-haspopup="dialog"
                 aria-expanded={menuOpen}
                 onClick={() => setMenuOpen((open) => !open)}
@@ -188,7 +193,7 @@ export function ProductCard({
                 className={cn(overlayItemClass, storefrontCount === 0 && "opacity-40")}
               >
                 <Copy className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-                Copy product link
+                {t("copyLink")}
               </button>
               <button
                 type="button"
@@ -196,11 +201,11 @@ export function ProductCard({
                   setMenuOpen(false);
                   onOpenPage();
                 }}
-                title={storefrontCount === 0 ? "Not on a storefront yet" : "Open product page"}
+                title={storefrontCount === 0 ? t("notPlaced") : t("openPage")}
                 className={cn(overlayItemClass, storefrontCount === 0 && "opacity-40")}
               >
                 <ExternalLink className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-                Open product page
+                {t("openPage")}
               </button>
               {canWrite && (
                 <button
@@ -212,7 +217,7 @@ export function ProductCard({
                   className={cn(overlayItemClass, "hover:text-destructive")}
                 >
                   <Trash2 className="size-4 shrink-0" aria-hidden="true" />
-                  Delete
+                  {tCommon("delete")}
                 </button>
               )}
             </div>
@@ -228,10 +233,10 @@ export function ProductCard({
           revenue. */}
       <div className="mt-2.5 flex items-baseline justify-between gap-2 border-t border-border pt-2">
         <span className={infoTextClass}>
-          {sales ? `${sales.unitsSold} sold` : "No sales yet"}
+          {sales ? t("unitsSold", { count: sales.unitsSold }) : t("noSales")}
         </span>
         <span className="font-inter text-xs font-semibold text-foreground tabular-nums">
-          {sales ? formatCents(sales.revenueCents, sales.currency) : (stockFooter ?? "—")}
+          {sales ? formatCents(sales.revenueCents, sales.currency, locale) : (stockFooter ?? "—")}
         </span>
       </div>
       {/* When the seller has both sales and stock tracking, show the count on

@@ -28,7 +28,7 @@ import {
 export const storefrontBriefSchema = z.object({
   category: z.enum(STOREFRONT_CATEGORIES).optional(),
   otherCategory: optionalSingleLineText({
-    label: "The category",
+    field: "otherCategory",
     max: BRIEF_OTHER_CATEGORY_MAX,
   }).optional(),
   fulfilment: z.enum(STOREFRONT_FULFILMENTS).optional(),

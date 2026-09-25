@@ -93,9 +93,15 @@ function verificationEmail(link: string, email: string) {
   };
 }
 
+/**
+ * Why a link did not go out. A code rather than a sentence: the settings
+ * action words it for the reader (Errors.settings.confirmationFailed).
+ */
+export type VerificationFailureReason = "startFailed" | "unavailable" | "sendFailed";
+
 export type VerificationStartResult =
   | { ok: true; sent: boolean }
-  | { ok: false; reason: string };
+  | { ok: false; reason: VerificationFailureReason };
 
 /**
  * Issue a link for `email` and send it.
@@ -127,7 +133,7 @@ export async function startSellerEmailVerification(
     .is("consumed_at", null);
   if (clearError) {
     console.error("[seller-email] could not clear old tokens", clearError.message);
-    return { ok: false, reason: "Could not start email confirmation." };
+    return { ok: false, reason: "startFailed" };
   }
 
   const { error } = await admin.from("seller_email_verifications").insert({
@@ -138,7 +144,7 @@ export async function startSellerEmailVerification(
   });
   if (error) {
     console.error("[seller-email] could not store token", error.message);
-    return { ok: false, reason: "Could not start email confirmation." };
+    return { ok: false, reason: "startFailed" };
   }
 
   // The RAW token only ever exists in this function and in the link.
@@ -147,10 +153,7 @@ export async function startSellerEmailVerification(
   if (!result.sent) {
     return {
       ok: false,
-      reason:
-        result.reason === "disabled"
-          ? "Email confirmation is not available right now."
-          : "We couldn't send the confirmation email. Check the address and try again.",
+      reason: result.reason === "disabled" ? "unavailable" : "sendFailed",
     };
   }
   return { ok: true, sent: true };

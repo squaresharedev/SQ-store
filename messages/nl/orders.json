@@ -1,0 +1,108 @@
+{
+  "metadata": {
+    "orders": {
+      "title": "Bestellingen"
+    }
+  },
+  "page": {
+    "title": "Bestellingen",
+    "subtitle": "Elke bestelling geplaatst via Square Share."
+  },
+  "status": {
+    "paid": "Betaald",
+    "refunded": "Terugbetaald",
+    "disputed": "Betwist",
+    "pending": "In behandeling"
+  },
+  "channel": {
+    "embed": "Insluiting",
+    "marketplace": "Marketplace"
+  },
+  "empty": {
+    "filteredTitle": "Geen bestellingen komen overeen met deze filters",
+    "filteredHint": "Probeer een ruimere periode of wis de filters.",
+    "clearFilters": "Filters wissen",
+    "title": "Nog geen bestellingen",
+    "hint": "De kassa van Square Share is nog niet open. Verkopen via je eigen aankooplink of per e-mail verschijnen hier niet.",
+    "goToProducts": "Naar producten"
+  },
+  "list": {
+    "updating": "Bijwerken…",
+    "summary": "{total, plural, one {{total} bestelling} other {{total} bestellingen}} · pagina {page} van {totalPages}",
+    "detailDialog": "Bestelgegevens",
+    "closeDetail": "Bestelgegevens sluiten"
+  },
+  "table": {
+    "product": "Product",
+    "amount": "Bedrag",
+    "channel": "Kanaal",
+    "status": "Status",
+    "buyer": "Koper",
+    "date": "Datum"
+  },
+  "toolbar": {
+    "region": "bestelfilters",
+    "channel": "kanaal",
+    "buyerEmail": "e-mail koper",
+    "searchPlaceholder": "zoek e-mail koper",
+    "status": "status",
+    "statusAriaLabel": "Filter op status",
+    "allStatuses": "Alle statussen",
+    "dateRange": "periode",
+    "datePlaceholder": "alle datums",
+    "sort": "sorteren",
+    "sortAriaLabel": "Bestellingen sorteren",
+    "clearFilters": "filters wissen"
+  },
+  "sort": {
+    "newest": "Nieuwste eerst",
+    "oldest": "Oudste eerst",
+    "amountHigh": "Bedrag: hoog naar laag",
+    "amountLow": "Bedrag: laag naar hoog"
+  },
+  "detail": {
+    "close": "Bestelgegevens sluiten",
+    "version": "Versie",
+    "copyVersion": {
+      "copy": "Versie kopiëren",
+      "copied": "Versie gekopieerd",
+      "failed": "Kopiëren van versie is mislukt. Selecteer en kopieer hem handmatig."
+    },
+    "amount": "Bedrag",
+    "platformFee": "Platformkosten",
+    "youReceive": "Jij ontvangt",
+    "buyerEmail": "E-mail koper",
+    "copyBuyerEmail": {
+      "copy": "E-mail koper kopiëren",
+      "copied": "E-mail koper gekopieerd",
+      "failed": "Kopiëren van e-mail koper is mislukt. Selecteer en kopieer hem handmatig."
+    },
+    "noEmail": "geen e-mail",
+    "channel": "Kanaal",
+    "date": "Datum",
+    "orderId": "Bestel-ID",
+    "copyOrderId": {
+      "copy": "Bestel-ID kopiëren",
+      "copied": "Bestel-ID gekopieerd",
+      "failed": "Kopiëren van bestel-ID is mislukt. Selecteer en kopieer het handmatig."
+    }
+  },
+  "actions": {
+    "refundNeedsStripe": "Voor terugbetalingen moet Stripe gekoppeld zijn.",
+    "connectStripe": "Koppel Stripe om terugbetalingen mogelijk te maken",
+    "refundConfirm": "Deze bestelling terugbetalen? Dit kan niet ongedaan worden gemaakt zodra Stripe is gekoppeld.",
+    "confirmRefund": "Terugbetaling bevestigen",
+    "refundOrder": "Bestelling terugbetalen",
+    "disputeInStripe": "Geschillen worden afgehandeld in je Stripe-dashboard zodra Stripe is gekoppeld.",
+    "disputeConfirm": "Geschilbehandeling openen voor deze bestelling?",
+    "handleDispute": "Geschil behandelen",
+    "none": "Er zijn geen acties beschikbaar voor deze bestelling."
+  },
+  "skeleton": {
+    "loading": "bestellingen laden"
+  },
+  "loading": {
+    "title": "Bestellingen",
+    "subtitle": "Elke verkoop via je insluiting en de marketplace."
+  }
+}

@@ -1,0 +1,116 @@
+{
+  "metadata": {
+    "app": {
+      "title": "Square Share Dashboard",
+      "description": "Gestisci i tuoi prodotti, progetta la tua vetrina, collega Stripe e visualizza le statistiche su Square Share."
+    },
+    "overview": {
+      "title": "Panoramica"
+    },
+    "payments": {
+      "title": "Pagamenti"
+    }
+  },
+  "loading": {
+    "overview": {
+      "srLoading": "Caricamento della panoramica…"
+    },
+    "payments": {
+      "title": "Pagamenti",
+      "subtitle": "Il tuo saldo, i bonifici e la connessione con Stripe.",
+      "srLoading": "caricamento pagamenti"
+    }
+  },
+  "shell": {
+    "accountFallback": "Account",
+    "anotherStore": "un altro negozio"
+  },
+  "overview": {
+    "title": "Panoramica",
+    "addProduct": "Aggiungi prodotto",
+    "revenue30d": "Ricavi · 30 giorni",
+    "sales30d": "Vendite · 30 giorni",
+    "avgOrder30d": "Ordine medio · 30 giorni",
+    "revenueHeroLabel": "Ricavi, ultimi 30 giorni",
+    "noSales": "Ancora nessuna vendita"
+  },
+  "metric": {
+    "zeroDefault": "Ancora nessuna vendita",
+    "pendingDefault": "Disponibile non appena le statistiche sono collegate."
+  },
+  "sidebar": {
+    "openMenu": "Apri menu",
+    "closeMenu": "Chiudi menu",
+    "navLabel": "Dashboard",
+    "title": "Dashboard"
+  },
+  "recentOrders": {
+    "title": "Ordini recenti",
+    "empty": "Ancora nessun ordine. Le vendite tramite il tuo link di acquisto personale o via email non compariranno qui."
+  },
+  "attention": {
+    "title": "Richiede attenzione",
+    "allClear": "Tutto a posto. Niente richiede la tua attenzione al momento.",
+    "twoFactor": {
+      "label": "Attiva l’autenticazione a due fattori",
+      "description": "Un codice dal telefono all’accesso, così una password rubata da sola non basta per entrare nel tuo negozio.",
+      "action": "Attiva"
+    },
+    "stripe": {
+      "label": "Collega Stripe per ricevere pagamenti",
+      "description": "I bonifici restano bloccati finché il tuo account non è collegato.",
+      "action": "Apri pagamenti"
+    },
+    "legal": {
+      "label": "Accetta le condizioni per i venditori",
+      "labelUpdated": "Accetta le condizioni aggiornate per i venditori",
+      "description": "Leggi le bozze di Accordo per i venditori, Termini e Privacy e accettale.",
+      "descriptionUpdated": "Le condizioni sono cambiate da quando le hai accettate. Leggi e accetta la versione attuale.",
+      "descriptionTerms": "Leggi i Termini di servizio e accettali.",
+      "descriptionTermsUpdated": "I Termini di servizio sono cambiati dopo la tua accettazione. Leggi la versione attuale e accettala.",
+      "action": "Rivedi le condizioni"
+    },
+    "noBuyPath": {
+      "label": "{count, plural, one {{count} prodotto senza modo di acquistarlo} many {{count} prodotti senza modo di acquistarli} other {{count} prodotti senza modo di acquistarli}}",
+      "description": "Aggiungi un link di acquisto, oppure imposta un’email di contatto in Impostazioni così gli acquirenti possono contattarti.",
+      "action": "Rivedi prodotti"
+    },
+    "noShipping": {
+      "label": "Aggiungi le tue condizioni di spedizione",
+      "description": "I prodotti fisici richiedono condizioni di spedizione e reso prima che gli acquirenti vedano tutti i dettagli.",
+      "action": "Aggiungi condizioni"
+    },
+    "storefront": {
+      "labelEmpty": "La tua vetrina è vuota",
+      "labelNone": "Crea la tua vetrina",
+      "descriptionEmpty": "Aggiungi un prodotto alla sua griglia per darle una pagina da condividere.",
+      "descriptionNone": "Scegli un aspetto, poi aggiungi i tuoi prodotti alla griglia.",
+      "actionOpen": "Apri editor",
+      "actionCreate": "Crea vetrina"
+    },
+    "images": {
+      "label": "{count, plural, one {{count} prodotto senza immagine} many {{count} prodotti senza immagine} other {{count} prodotti senza immagine}}",
+      "descriptionSingle": "«{title}» non ha ancora un’immagine principale.",
+      "descriptionMultiple": "I prodotti senza immagini sembrano vuoti nella tua vetrina.",
+      "actionSingle": "Aggiungi un’immagine",
+      "actionMultiple": "Correggi i prodotti"
+    },
+    "flaggedOrders": {
+      "label": "{count, plural, one {{count} ordine da rivedere} many {{count} ordini da rivedere} other {{count} ordini da rivedere}}",
+      "descriptionBoth": "{disputed, plural, one {{disputed} contestato} many {{disputed} contestati} other {{disputed} contestati}}, {refunded, plural, one {{refunded} rimborsato} many {{refunded} rimborsati} other {{refunded} rimborsati}}.",
+      "descriptionDisputed": "{count, plural, one {{count} contestato} many {{count} contestati} other {{count} contestati}}.",
+      "descriptionRefunded": "{count, plural, one {{count} rimborsato} many {{count} rimborsati} other {{count} rimborsati}}.",
+      "action": "Rivedi ordini"
+    },
+    "noindexPages": {
+      "label": "Pagine prodotto bloccate dai motori di ricerca",
+      "description": "{count, plural, =1 {Una vetrina ha disattivato l’indicizzazione per le sue pagine prodotto.} many {{count} vetrine hanno disattivato l’indicizzazione per le loro pagine prodotto.} other {{count} vetrine hanno disattivato l’indicizzazione per le loro pagine prodotto.}}",
+      "action": "Apri editor"
+    },
+    "deadBlocks": {
+      "label": "{count, plural, one {{count} blocco della vetrina che fa riferimento a prodotti eliminati} many {{count} blocchi della vetrina che fanno riferimento a prodotti eliminati} other {{count} blocchi della vetrina che fanno riferimento a prodotti eliminati}}",
+      "description": "Questi blocchi appaiono vuoti ai visitatori. Rimuovili o sostituiscili.",
+      "action": "Apri vetrina"
+    }
+  }
+}

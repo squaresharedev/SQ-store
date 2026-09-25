@@ -25,12 +25,34 @@
 // (like globals.css @theme and storefront/background-presets.ts), not a
 // component. Components import the list; they never inline colors.
 
-export type ColorPreset = { name: string; value: string };
+import type { MessageKey } from "@/i18n/types";
+
+/**
+ * One swatch in a grid or palette. Its hex is its identity (React key, active
+ * check); `label` is its accessible name as a whole phrase, taking the hex as
+ * `{value}`, so no translated colour name is ever spliced into another message.
+ */
+export type ColorSwatch = { label: MessageKey; value: string };
+
+/** A swatch in a picker row, which also shows its name on its own (a tooltip). */
+export type ColorPreset = ColorSwatch & { name: MessageKey };
 
 export const COLOR_PRESETS: readonly ColorPreset[] = [
-  { name: "White", value: "#ffffff" },
-  { name: "Grey", value: "#737373" },
-  { name: "Ink", value: "#171717" },
+  {
+    name: "Storefront.colors.presets.white.name",
+    label: "Storefront.colors.presets.white.label",
+    value: "#ffffff",
+  },
+  {
+    name: "Storefront.colors.presets.grey.name",
+    label: "Storefront.colors.presets.grey.label",
+    value: "#737373",
+  },
+  {
+    name: "Storefront.colors.presets.ink.name",
+    label: "Storefront.colors.presets.ink.label",
+    value: "#171717",
+  },
 ] as const;
 
 /** Fast membership test for the fixed swatches, so the suggested row never

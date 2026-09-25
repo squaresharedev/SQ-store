@@ -1,0 +1,1297 @@
+{
+  "shapes": {
+    "name": {
+      "square": "Carré",
+      "circle": "Cercle",
+      "ring": "Anneau",
+      "diamond": "Losange",
+      "rounded": "Carré arrondi",
+      "pill": "Pilule",
+      "half": "Demi-cercle",
+      "quarter": "Quart de cercle",
+      "bar": "Barre",
+      "triangle": "Triangle",
+      "wedge": "Biseau",
+      "pentagon": "Pentagone",
+      "hexagon": "Hexagone",
+      "octagon": "Octogone",
+      "star": "Étoile",
+      "sparkle": "Étincelle",
+      "cross": "Croix",
+      "arrow": "Flèche",
+      "chevron": "Chevron",
+      "trapezoid": "Trapèze",
+      "parallelogram": "Parallélogramme",
+      "burst": "Éclat"
+    },
+    "add": {
+      "square": "Ajouter un carré",
+      "circle": "Ajouter un cercle",
+      "ring": "Ajouter un anneau",
+      "diamond": "Ajouter un losange",
+      "rounded": "Ajouter un carré arrondi",
+      "pill": "Ajouter une pilule",
+      "half": "Ajouter un demi-cercle",
+      "quarter": "Ajouter un quart de cercle",
+      "bar": "Ajouter une barre",
+      "triangle": "Ajouter un triangle",
+      "wedge": "Ajouter un biseau",
+      "pentagon": "Ajouter un pentagone",
+      "hexagon": "Ajouter un hexagone",
+      "octagon": "Ajouter un octogone",
+      "star": "Ajouter une étoile",
+      "sparkle": "Ajouter une étincelle",
+      "cross": "Ajouter une croix",
+      "arrow": "Ajouter une flèche",
+      "chevron": "Ajouter un chevron",
+      "trapezoid": "Ajouter un trapèze",
+      "parallelogram": "Ajouter un parallélogramme",
+      "burst": "Ajouter un éclat"
+    },
+    "group": {
+      "basic": "De base",
+      "polygons": "Polygones",
+      "accents": "Accents"
+    },
+    "groupLabel": {
+      "basic": "Formes de base",
+      "polygons": "Formes polygonales",
+      "accents": "Formes d’accent"
+    }
+  },
+  "fonts": {
+    "sans": "Sans",
+    "serif": "Serif",
+    "mono": "Mono",
+    "display": "Display",
+    "hand": "Manuscrite",
+    "inter": "Inter",
+    "montserrat": "Montserrat",
+    "custom": "Police importée"
+  },
+  "textVariants": {
+    "heading": "Titre",
+    "subheading": "Sous-titre",
+    "body": "Texte de corps"
+  },
+  "layoutPresets": {
+    "standard": "Standard",
+    "caption": "Légende",
+    "header": "En-tête",
+    "gallery": "Galerie",
+    "bare": "Dépouillé"
+  },
+  "blockKinds": {
+    "product": "Produit",
+    "text": "Texte",
+    "shape": "Forme",
+    "image": "Image"
+  },
+  "settings": {
+    "groups": {
+      "theme": "Thème",
+      "header": "En-tête",
+      "typography": "Typographie",
+      "cards": "Vignettes produit",
+      "soldOut": "Épuisé",
+      "productPage": "Page produit"
+    },
+    "subtitle": {
+      "theme": "Vitrine / Thème",
+      "header": "Vitrine / En-tête",
+      "typography": "Vitrine / Typographie",
+      "cards": "Vitrine / Vignettes produit",
+      "soldOut": "Vitrine / Épuisé",
+      "productPage": "Vitrine / Page produit"
+    },
+    "labels": {
+      "looks": "Aspect de la vitrine",
+      "background": "Arrière-plan",
+      "accent": "Couleur d’accent",
+      "header": "Nom et bio de la boutique",
+      "font": "Police",
+      "canvasSize": "Taille du canevas",
+      "gridGap": "Espacement de la grille",
+      "tileLayout": "Disposition de la vignette",
+      "titlePosition": "Position du titre",
+      "titleStyle": "Style du titre",
+      "cornerRadius": "Arrondi des coins",
+      "titleInset": "Marge du titre",
+      "pricePosition": "Position du prix",
+      "priceStyle": "Style de l’étiquette de prix",
+      "soldOut": "Produits épuisés",
+      "productPageLayout": "Page produit",
+      "productPageBackground": "Arrière-plan de la page produit",
+      "productPagePhotos": "Photos de la page produit",
+      "productPageFont": "Police de la page produit",
+      "productPageIndexing": "Indexation par les moteurs de recherche",
+      "buyButton": "Bouton d’achat",
+      "buyButtonColour": "Couleur du bouton d’achat",
+      "buyButtonRoundness": "Arrondi du bouton d’achat",
+      "buyButtonBorder": "Bordure du bouton d’achat",
+      "priceNote": "Mention de prix",
+      "shippingNote": "Mention de livraison",
+      "productPageSections": "Sections de la page produit",
+      "productPageAvailability": "Disponibilité sur la page",
+      "productPageByline": "Mention « Vendu par »",
+      "shippingReturns": "Politique de livraison et retours",
+      "sellerDetails": "Informations vendeur"
+    }
+  },
+  "editorSearch": {
+    "sections": {
+      "canvas": "Sur le canevas",
+      "settings": "Paramètres",
+      "panels": "Panneaux"
+    },
+    "openProductPage": "Ouvrir la page produit",
+    "panelSubtitle": "Panneau",
+    "panels": {
+      "layers": "Calques",
+      "products": "Ajouter un produit",
+      "shapes": "Formes",
+      "uploads": "Imports"
+    }
+  },
+  "list": {
+    "showingOf": "Affichage de {count} sur {total} vitrines",
+    "count": "{count, plural, one {# vitrine} many {# vitrines} other {# vitrines}}",
+    "countSampleOnly": "Aucune vitrine pour l’instant",
+    "creating": "Création…",
+    "new": "Nouvelle vitrine",
+    "emptyHeading": "Pas encore de vitrines",
+    "emptyHintOwner": "Créez votre première vitrine, puis ajoutez des produits à sa grille. Chaque produit qui s’y trouve obtient une page que vous pouvez partager.",
+    "emptyHintGuest": "Cette boutique n’a pas encore de vitrines.",
+    "create": "Créer une vitrine",
+    "loadMoreError": "Impossible de charger plus de vitrines. Réessayez.",
+    "loadMore": "Charger plus ({remaining} restantes)",
+    "deleteTitle": "Supprimer la vitrine ?",
+    "deleteDesc": "« {name} » et sa grille seront définitivement supprimées. Cette action est irréversible.",
+    "deleteToast": "« {name} » a été supprimée."
+  },
+  "card": {
+    "editAriaLabel": "Modifier {name}",
+    "embedAriaLabel": "Intégrer {name}",
+    "deleteAriaLabel": "Supprimer {name}",
+    "blockCount": "{count, plural, one {# bloc} many {# blocs} other {# blocs}}",
+    "updatedLabel": " · mis à jour le {date}",
+    "emptyHint": "Cette grille est vide",
+    "removed": "Retiré par SquareShare",
+    "pausedInReview": "En pause · en cours d’examen par SquareShare",
+    "pausedNeedsChanges": "Mise en pause par SquareShare · modifications requises"
+  },
+  "embed": {
+    "inDevNotice": "Le widget d’intégration est en développement et ne s’affiche pas encore sur les sites externes. Configurez vos paramètres ci-dessous pour être prêt à coller le code dès sa sortie.",
+    "title": "Intégrer cette vitrine",
+    "description": "Collez ce code sur n’importe quel site pour y afficher « {name} ».",
+    "enabledLabel": "Intégration activée",
+    "domainsLabel": "Domaines autorisés",
+    "domainsPlaceholder": "votresite.com, blog.votresite.com",
+    "domainsHint": "Jusqu’à {max}, séparés par des virgules. Collez une URL, nous la réduirons au domaine.",
+    "emptyDomainsWarning": "Ajoutez au moins un domaine. Tant que ce champ est vide, la vitrine ne se charge nulle part, même si l’intégration est activée.",
+    "snippetLabel": "Code d’intégration",
+    "snippetReadyHint": "Collez ce code dans le HTML de votre site.",
+    "snippetLockedHint": "Activez l’intégration et ajoutez au moins un domaine pour débloquer le bouton Copier.",
+    "copySnippet": {
+      "copy": "Copier le code d’intégration",
+      "copied": "Code d’intégration copié",
+      "failed": "Impossible de copier le code d’intégration. Sélectionnez-le et copiez-le manuellement.",
+      "cannotCopyYet": "le code d’intégration ne peut pas encore être copié"
+    },
+    "snippetKeyLabel": "Clé du code d’intégration",
+    "rotateConfirmText": "Renouveler la clé en émet une nouvelle. Chaque copie de l’ancien code cesse immédiatement de fonctionner, y compris sur les sites que vous voulez garder : vous devrez coller le nouveau code partout.",
+    "rotateKey": "Renouveler la clé",
+    "rotating": "Renouvellement…",
+    "revokeHint": "Collé quelque part où il ne devrait pas être ? Renouvelez la clé pour révoquer tous les codes existants.",
+    "saveSettings": "Enregistrer les paramètres",
+    "saving": "Enregistrement…",
+    "saved": "Paramètres d’intégration enregistrés.",
+    "newKeyIssued": "Nouvelle clé d’intégration émise.",
+    "newKeyDetail": "Recollez le code partout où cette vitrine est intégrée."
+  },
+  "wizard": {
+    "category": {
+      "title": "Que vendez-vous ?",
+      "description": "C’est le meilleur indice pour savoir quelles dispositions vous conviendront."
+    },
+    "fulfilment": {
+      "title": "Comment les acheteurs le reçoivent-ils ?",
+      "description": "Cela détermine ce que vos pages produit indiquent sur la livraison."
+    },
+    "vibe": {
+      "title": "Choisissez un aspect",
+      "description": "Votre point de départ. Tout reste modifiable dans l’éditeur."
+    },
+    "name": {
+      "title": "Nommez votre vitrine",
+      "description": "Juste pour vous. Vous pouvez la renommer à tout moment."
+    },
+    "stepOf": "Étape {current} sur {total}",
+    "nameLabel": "Nom de la vitrine",
+    "nameHint": "Laissez vide et nous l’appellerons Vitrine sans titre.",
+    "otherCategoryLabel": "Que vendez-vous ?",
+    "otherCategoryPlaceholder": "p. ex. maquettes",
+    "noProductsHint": "Pas encore de produits ? Ajoutez-les après la configuration.",
+    "skipSetup": "Passer la configuration",
+    "skip": "Passer",
+    "creating": "Création…",
+    "create": "Créer une vitrine"
+  },
+  "createOptions": {
+    "categoryGroupLabel": "Ce que vous vendez",
+    "fulfilmentGroupLabel": "Comment les acheteurs le reçoivent",
+    "vibeGroupLabel": "L’aspect que vous voulez",
+    "category": {
+      "fashion": "Vêtements",
+      "art": "Art et estampes",
+      "jewellery": "Bijoux",
+      "handmade": "Fait main",
+      "home": "Maison et décoration",
+      "beauty": "Beauté",
+      "food": "Alimentation et boissons",
+      "music": "Musique",
+      "photography": "Photographie",
+      "books": "Livres et fanzines",
+      "digital": "Produits numériques",
+      "vintage": "Vintage",
+      "other": "Autre chose"
+    },
+    "categoryPlaceholder": {
+      "fashion": "Ma boutique de vêtements",
+      "art": "Ma boutique d’art",
+      "jewellery": "Ma boutique de bijoux",
+      "handmade": "Ma boutique d’artisanat",
+      "home": "Ma boutique déco",
+      "beauty": "Ma boutique beauté",
+      "food": "Ma boutique gourmande",
+      "music": "Ma boutique de musique",
+      "photography": "Ma boutique photo",
+      "books": "Ma boutique de livres",
+      "digital": "Ma boutique numérique",
+      "vintage": "Ma boutique vintage",
+      "other": "Ma boutique",
+      "default": "Ma vitrine"
+    },
+    "fulfilment": {
+      "physical": "Je l’expédie",
+      "digital": "Ils le téléchargent",
+      "services": "Ils me réservent",
+      "mixed": "Un peu des deux"
+    },
+    "fulfilmentHint": {
+      "physical": "Produits physiques",
+      "digital": "Fichiers, préréglages, musique",
+      "services": "Séances, commandes personnalisées",
+      "mixed": "Plusieurs de ces options"
+    },
+    "vibe": {
+      "minimal": "Minimal",
+      "classic": "Classique",
+      "bold": "Audacieux"
+    },
+    "vibeHint": {
+      "minimal": "Nom et prix au survol",
+      "classic": "Nom et prix toujours affichés",
+      "bold": "Prix toujours affiché, nom au survol"
+    }
+  },
+  "picker": {
+    "addFirst": "Ajoutez votre premier produit",
+    "noProducts": "Vous n’avez pas encore de produits. Ajoutez-en un et vous reviendrez directement ici pour le placer.",
+    "searchPlaceholder": "Rechercher des produits",
+    "searchAriaLabel": "Rechercher parmi vos produits",
+    "searching": "Recherche…",
+    "noMatch": "Aucun produit ne correspond à « {term} ».",
+    "searchFailed": "La recherche est indisponible pour le moment ; affichage de ce qui est déjà chargé.",
+    "inGrid": "Dans la grille",
+    "available": "Disponible",
+    "addSelected": "Ajouter {count} sélectionnés",
+    "addAll": "Tout ajouter ({count})",
+    "deselectAriaLabel": "Désélectionner {title}",
+    "selectAriaLabel": "Sélectionner {title}",
+    "inGridAriaLabel": "{title} est dans la grille",
+    "addToGridAriaLabel": "Ajouter {title} à la grille",
+    "draftAriaLabel": "Produit brouillon : non visible par les acheteurs",
+    "draftBadge": "Brouillon"
+  },
+  "preview": {
+    "ariaLabel": "Aperçu de la vitrine"
+  },
+  "masthead": {
+    "namePlaceholder": "Le nom de votre boutique",
+    "bioPlaceholder": "Une courte phrase sur votre boutique",
+    "editAriaLabel": "{line, select, name {Modifier le nom de la boutique} bio {Modifier la bio de la boutique} other {Modifier {line} de la boutique}}",
+    "editorNameAriaLabel": "Nom de la boutique",
+    "editorBioAriaLabel": "Bio de la boutique"
+  },
+  "pageConnectors": {},
+  "artboard": {
+    "productPageLabel": " · Page produit",
+    "closeAriaLabel": "Fermer la page produit de {title}",
+    "desktopSize": "Taille bureau",
+    "mobileSize": "Taille mobile"
+  },
+  "customFont": {},
+  "metadata": {
+    "storefronts": {
+      "title": "Vitrines",
+      "subtitle": "Chaque vitrine a sa propre grille et son propre thème. Créez-en autant que nécessaire, puis ouvrez-en une pour la modifier."
+    },
+    "editor": {
+      "title": "Modifier la vitrine"
+    },
+    "sample": {
+      "title": "Vitrine d’exemple"
+    }
+  },
+  "routes": {
+    "editor": {
+      "loading": "Chargement de l’éditeur de vitrine…"
+    },
+    "list": {
+      "loading": "chargement des vitrines"
+    }
+  },
+  "controls": {
+    "off": "Désactivé",
+    "layers": "Calques",
+    "objectCount": "{count, plural, one {1 objet} many {# objets} other {# objets}}",
+    "cardStyle": "Style de vignette",
+    "priceTag": "Étiquette de prix",
+    "theme": "Thème",
+    "canvas": "Canevas",
+    "design": "Design"
+  },
+  "designPanel": {
+    "tabSelection": "Sélection",
+    "tabDesign": "Design",
+    "show": "Afficher le panneau de design",
+    "hide": "Masquer le panneau de design",
+    "resize": "Redimensionner le panneau de design",
+    "closeSettings": "Fermer les paramètres de design",
+    "scopeLabel": "Portée du panneau"
+  },
+  "library": {
+    "title": "Bibliothèque",
+    "hint": "Choisissez-en un pour l’ajouter",
+    "canvasFull": "Le canevas est plein",
+    "close": "Fermer le panneau de bibliothèque",
+    "tabUploads": "Imports",
+    "tabShapes": "Formes"
+  },
+  "uploads": {
+    "addImage": "Ajouter une image",
+    "processing": "Traitement…",
+    "uploadingPct": "Import… {pct} %",
+    "dropToUpload": "Déposez pour importer",
+    "uploadImage": "Importer une image",
+    "uploadHint": "SVG, PNG, JPEG, WebP, GIF ou AVIF. Jusqu’à 2 Mo. Déposez un fichier ici ou cliquez pour parcourir.",
+    "canvasFullHint": "Le canevas est plein. Supprimez un bloc pour en ajouter un autre.",
+    "inStorefront": "Dans cette vitrine",
+    "imagesGroup": "Images de cette vitrine",
+    "emptyHint": "Les images que vous importez se rassemblent ici, pour que vous puissiez replacer la même sans l’importer deux fois.",
+    "placeAgain": "Replacer {alt}",
+    "placeAgainFallback": "Replacer cette image"
+  },
+  "layers": {
+    "title": "Calques",
+    "backAriaLabel": "Retour au bloc sélectionné, quitter Calques",
+    "empty": "Rien sur le canevas pour l’instant. Les blocs apparaissent ici au fur et à mesure que vous les ajoutez.",
+    "listAriaLabel": "Calques du canevas, du premier au dernier plan",
+    "layerOf": "Calque {index} sur {total}",
+    "moveGroup": "Déplacer {label}",
+    "reorderLabel": "Réordonner {label}",
+    "dragToReorder": "Glisser pour réordonner",
+    "showOptions": "Afficher les options de calque pour {label}",
+    "hideOptions": "Masquer les options de calque pour {label}",
+    "shortcutHint": "{mod} + [ et {mod} + ] déplacent la sélection d’un calque. Ajoutez Maj pour l’envoyer tout en haut ou tout en bas.",
+    "layerOp": {
+      "back": "Mettre à l’arrière-plan",
+      "backward": "Reculer d’un niveau",
+      "forward": "Avancer d’un niveau",
+      "front": "Mettre au premier plan"
+    },
+    "layerOpFor": {
+      "back": "Mettre à l’arrière-plan : {label}",
+      "backward": "Reculer d’un niveau : {label}",
+      "forward": "Avancer d’un niveau : {label}",
+      "front": "Mettre au premier plan : {label}"
+    }
+  },
+  "colorPanel": {
+    "close": "Fermer le panneau de couleur",
+    "sectionType": "Type",
+    "font": "Police",
+    "fontTheme": "Police du thème",
+    "fontThemeDesc": "Suit la police de la vitrine",
+    "sectionInDesign": "Dans ce design",
+    "inDesignGroup": "Couleurs de ce design",
+    "inDesignEmpty": "Les couleurs que vous utilisez sur le canevas se rassemblent ici.",
+    "inDesignSwatch": "Dans ce design ({hex})",
+    "sectionCustom": "Personnalisée",
+    "sectionInherit": "Hériter",
+    "sectionRecent": "Récemment utilisées",
+    "recentGroup": "Couleurs récemment utilisées",
+    "recentSwatch": "Récemment utilisée ({hex})",
+    "sectionStandard": "Standard",
+    "standardGroup": "Couleurs standard",
+    "sectionPalettes": "Palettes"
+  },
+  "themePanel": {
+    "accent": "Accent"
+  },
+  "panelSearch": {
+    "placeholder": "Rechercher un paramètre ou un objet",
+    "clear": "Effacer la recherche",
+    "noResults": "Rien dans l’éditeur ne correspond à cela.",
+    "matchesLabel": "Résultats"
+  },
+  "looks": {
+    "title": "Aspects",
+    "infoLabel": "Ce que change le choix d’un aspect",
+    "infoBody": "Un aspect définit d’un coup les couleurs, la police, les coins, l’espacement et ce qu’affiche une vignette produit pour toute la vitrine. Votre disposition, vos produits et toute vignette que vous avez stylée à la main restent exactement tels quels.",
+    "groupLabel": "Aspect de la vitrine",
+    "minimal": "Minimal",
+    "classic": "Classique",
+    "bold": "Audacieux",
+    "hintMinimal": "Images seules. Nom et prix au survol.",
+    "hintClassic": "Nom et prix sous chaque image.",
+    "hintBold": "Prix toujours sur l’image, nom au survol."
+  },
+  "background": {
+    "label": "Arrière-plan",
+    "typeLabel": "Type d’arrière-plan",
+    "typeColor": "Couleur",
+    "typeGradient": "Dégradé",
+    "typeImage": "Image",
+    "position": "Position",
+    "dragAriaLabel": "Glisser pour positionner l’image d’arrière-plan",
+    "dragHint": "Faites glisser l’aperçu pour repositionner. Zoomez pour redimensionner.",
+    "zoomLabel": "Zoom",
+    "zoomAriaLabel": "Zoom de l’image d’arrière-plan",
+    "zoomValueText": "{n, plural, one {# pour cent} many {# pour cent} other {# pour cent}}",
+    "processing": "Traitement…",
+    "uploadingPct": "Import… {n} %",
+    "replaceImage": "Remplacer l’image",
+    "uploadImage": "Importer une image",
+    "uploadingProgress": "Import de l’image d’arrière-plan",
+    "uploadHint": "Jusqu’à 10 Mo. JPEG, PNG, WebP, GIF ou AVIF.",
+    "colorLabel": "Couleur",
+    "from": "De",
+    "to": "À",
+    "angle": "Angle",
+    "gradientAngle": "Angle du dégradé",
+    "angleValueText": "{n, plural, one {# degré} many {# degrés} other {# degrés}}"
+  },
+  "cardStyle": {
+    "layout": "Disposition",
+    "position": "Position",
+    "roundedHint": "Les vignettes arrondies gardent les deux libellés sur l’axe central.",
+    "spotHint": "Cliquez sur un emplacement pour placer le libellé, ou faites-le glisser ici ou sur la vignette.",
+    "cornerRoundness": "Arrondi des coins",
+    "cornerValueText": "{n, plural, one {# pixel} many {# pixels} other {# pixels}}",
+    "sharp": "Net",
+    "circle": "Cercle",
+    "fineTuning": "Réglage fin",
+    "showTitle": "Afficher le titre",
+    "titleStyleLabel": "Style du titre",
+    "edgeSpacing": "Marge de bord",
+    "edgeSpacingAriaLabel": "Marge de bord du titre",
+    "edgeValueText": "{n, plural, one {# pixel} many {# pixels} other {# pixels}}",
+    "auto": "Auto",
+    "showTitleOnHover": "Afficher le titre au survol",
+    "hoverHint": "Le titre reste masqué jusqu’à ce qu’un acheteur survole le produit.",
+    "revealTop": "La barre glisse depuis le haut quand un acheteur survole.",
+    "revealMiddle": "La barre apparaît en fondu quand un acheteur survole.",
+    "revealBottom": "La barre glisse depuis le bas quand un acheteur survole."
+  },
+  "priceTag": {
+    "showPrice": "Afficher le prix",
+    "roundedHint": "Les vignettes arrondies gardent l’étiquette sur l’axe central.",
+    "dragHint": "Faites-la glisser sur la vignette, ou utilisez le plan de disposition, pour choisir un emplacement.",
+    "showOnHover": "Afficher au survol",
+    "font": "Police",
+    "fontAriaLabel": "Police de l’étiquette de prix",
+    "size": "Taille",
+    "sizeAriaLabel": "Taille de l’étiquette de prix",
+    "sizeValueText": "{n, plural, one {# pixel} many {# pixels} other {# pixels}}",
+    "sizeTip": "La taille sur une seule vignette. L’étiquette s’adapte à la taille du bloc sur lequel elle repose, un bloc plus grand porte donc un prix plus grand sans que vous en régliez un.",
+    "borderThickness": "Épaisseur de la bordure",
+    "borderAriaLabel": "Épaisseur de la bordure de l’étiquette de prix",
+    "borderValueText": "{n, plural, one {# pixel} many {# pixels} other {# pixels}}",
+    "cornerRoundness": "Arrondi des coins",
+    "cornerAriaLabel": "Arrondi des coins de l’étiquette de prix",
+    "cornerValueText": "{n, plural, one {# pixel} many {# pixels} other {# pixels}}",
+    "sharp": "Net",
+    "pill": "Pilule",
+    "none": "Aucun"
+  },
+  "priceTagPosition": {
+    "placementAriaLabel": "Emplacement de l’étiquette de prix",
+    "below": "En dessous",
+    "onImage": "Sur l’image",
+    "hidden": "Masqué",
+    "spotAriaLabel": "Emplacement de l’étiquette de prix",
+    "spotTopLeft": "Étiquette de prix en haut à gauche",
+    "spotTopCenter": "Étiquette de prix en haut au centre",
+    "spotTopRight": "Étiquette de prix en haut à droite",
+    "spotMiddle": "Étiquette de prix au milieu",
+    "spotBottomLeft": "Étiquette de prix en bas à gauche",
+    "spotBottomCenter": "Étiquette de prix en bas au centre",
+    "spotBottomRight": "Étiquette de prix en bas à droite"
+  },
+  "layout": {
+    "canvasWidth": "Largeur du canevas",
+    "canvasWidthAriaLabel": "Largeur du canevas en blocs",
+    "blocksWide": "{n, plural, one {# bloc de large} many {# blocs de large} other {# blocs de large}}",
+    "canvasHeight": "Hauteur du canevas",
+    "heightTip": "Le plan ne peut pas rétrécir en dessous des blocs déjà présents : déplacez d’abord un bloc, puis raccourcissez le canevas.",
+    "canvasHeightAriaLabel": "Hauteur du canevas en blocs",
+    "blocksTall": "{n, plural, one {# bloc de haut} many {# blocs de haut} other {# blocs de haut}}",
+    "gridDensity": "Densité de la grille",
+    "gridDensityAriaLabel": "Densité de la grille",
+    "gridGapValue": "{n, plural, one {# pixel d’écart} many {# pixels d’écart} other {# pixels d’écart}}",
+    "noGap": "Aucun écart",
+    "showGrid": "Afficher la grille",
+    "gridInfoLabel": "Qui voit la grille",
+    "gridInfoBody": "Un guide pour vous pendant que vous concevez : il dessine les emplacements vides pour que vous voyiez où un bloc va atterrir. Les acheteurs ne le voient jamais."
+  },
+  "placement": {
+    "rotation": "Rotation",
+    "rotationTipSingle": "Degrés entiers, dans un sens ou l’autre depuis l’horizontale. Le bloc tourne autour de son propre centre et garde les cellules qu’il occupe.",
+    "rotationTipMultiple": "Degrés entiers, dans un sens ou l’autre depuis l’horizontale. Chaque bloc tourne autour de son propre centre, une rangée de blocs reste donc une rangée.",
+    "rotationAriaLabel": "Rotation du bloc",
+    "valueTextMixed": "Angles mixtes",
+    "valueText": "{n, plural, one {# degré} many {# degrés} other {# degrés}}",
+    "statusMixed": "Mixte",
+    "levelBlock": "Remettre le bloc à l’horizontale",
+    "rotateTo": "Faire pivoter à {n, plural, one {# degré} many {# degrés} other {# degrés}}",
+    "level": "Horizontale",
+    "angle": "{n}°",
+    "layerLabel": "Calque",
+    "layerInfoLabel": "Comment fonctionnent les calques",
+    "layerInfoBody": "Les calques déterminent seulement ce qui s’affiche au-dessus là où les blocs se chevauchent ; l’ordre de lecture suivi par un lecteur d’écran ne change jamais.{multi, select, true { Cette sélection garde son propre ordre au sein de la pile lorsqu’elle se déplace.} other {}}{stacked, select, true { Alt-cliquez sur une pile du canevas pour atteindre le bloc en dessous.} other {}}",
+    "blocksSelected": "{count, plural, one {# bloc sélectionné} many {# blocs sélectionnés} other {# blocs sélectionnés}}",
+    "layerOf": "Calque {index} sur {total}",
+    "blockLayerLabel": "Calque du bloc",
+    "sendToBack": "Mettre à l’arrière-plan",
+    "sendBackward": "Reculer d’un niveau",
+    "bringForward": "Avancer d’un niveau",
+    "bringToFront": "Mettre au premier plan",
+    "seeAllLayers": "Voir tous les calques"
+  },
+  "header": {
+    "showHeader": "Afficher l’en-tête",
+    "infoLabel": "Autres façons de modifier l’en-tête",
+    "infoBody": "Cliquez sur le nom ou la bio dans le canevas pour les saisir directement. Ce panneau s’ouvre en même temps sur cette ligne, où se règlent sa police, sa taille, sa couleur, sa mise en forme et son alignement.",
+    "storeName": "Nom de la boutique",
+    "storeNamePlaceholder": "Nom de la boutique affiché aux acheteurs",
+    "bio": "Bio",
+    "bioPlaceholder": "Une courte phrase sur votre boutique",
+    "charsLeft": "{n, plural, one {# caractère restant} many {# caractères restants} other {# caractères restants}}"
+  },
+  "soldOut": {
+    "hide": "Masquer aux acheteurs",
+    "hideInfoLabel": "Ce que fait le masquage des produits épuisés",
+    "hideInfoBody": "Les produits que vous avez marqués épuisés disparaissent entièrement de la vitrine. Ils restent sur ce canevas, estompés, afin que vous puissiez encore les déplacer et les remettre en vente.",
+    "badge": "Afficher le badge",
+    "badgeInfoLabel": "Quand le badge épuisé apparaît",
+    "badgeInfoBodyHidden": "Rien à marquer tant que les produits épuisés sont masqués. Désactivez Masquer aux acheteurs pour que ce badge les signale à la place.",
+    "badgeInfoBodyVisible": "Signale un produit épuisé sur la vitrine, pour qu’un acheteur sache qu’il existe et n’est plus disponible plutôt que de se poser la question."
+  },
+  "typography": {
+    "font": "Police",
+    "ownFont": "Votre propre police",
+    "fontInfoLabel": "Quels fichiers de police fonctionnent",
+    "fontInfoBody": "WOFF2, WOFF, TTF ou OTF, jusqu’à 2 Mo. WOFF2 est celui à privilégier : c’est le plus léger, donc le plus rapide à charger pour un acheteur, et tous les navigateurs le lisent.",
+    "processing": "Traitement…",
+    "uploadingPct": "Import… {n} %",
+    "replaceFont": "Remplacer la police",
+    "uploadFont": "Importer une police",
+    "uploadingLabel": "Import de la police",
+    "uploadedFontDesc": "Votre police importée",
+    "fontDescDefault": "La police par défaut",
+    "fontDescInter": "Épurée et neutre",
+    "fontDescMontserrat": "Géométrique et large"
+  },
+  "textFormat": {
+    "format": "Format",
+    "formatAriaLabel": "Mise en forme du texte",
+    "bold": "Gras",
+    "italic": "Italique",
+    "underline": "Souligné",
+    "alignment": "Alignement",
+    "alignAriaLabel": "Alignement du texte",
+    "alignLeft": "Aligner à gauche",
+    "alignCenter": "Centrer",
+    "alignRight": "Aligner à droite"
+  },
+  "fontSize": {
+    "label": "Taille",
+    "autoPx": "Auto ({n} px)",
+    "auto": "Auto",
+    "ariaLabel": "Taille de la police",
+    "valueText": "{n, plural, one {# pixel} many {# pixels} other {# pixels}}"
+  },
+  "layoutPresetPicker": {
+    "ariaLabel": "Disposition"
+  },
+  "titleStyle": {
+    "ariaLabel": "Style du titre",
+    "bar": "Barre",
+    "overlay": "Superposition",
+    "shadow": "Ombre"
+  },
+  "titlePosition": {
+    "ariaLabel": "Emplacement du titre",
+    "spotTopLeft": "Titre en haut à gauche",
+    "spotTopCenter": "Titre en haut au centre",
+    "spotTopRight": "Titre en haut à droite",
+    "spotMiddle": "Titre au milieu",
+    "spotBottomLeft": "Titre en bas à gauche",
+    "spotBottomCenter": "Titre en bas au centre",
+    "spotBottomRight": "Titre en bas à droite"
+  },
+  "tileSpot": {},
+  "tileLayoutBoard": {
+    "labelToPlace": "Libellé à placer",
+    "labelPositions": "Positions des libellés",
+    "title": "Titre",
+    "price": "Prix",
+    "titleAt": "{spot, select, top_left {Titre en haut à gauche} top_center {Titre en haut au centre} top_right {Titre en haut à droite} middle_center {Titre au milieu} bottom_left {Titre en bas à gauche} bottom_center {Titre en bas au centre} bottom_right {Titre en bas à droite} other {Titre ici}}. Faites glisser, cliquez sur un emplacement, ou utilisez les flèches du clavier, pour le déplacer.",
+    "priceAt": "{spot, select, top_left {Prix en haut à gauche} top_center {Prix en haut au centre} top_right {Prix en haut à droite} middle_center {Prix au milieu} bottom_left {Prix en bas à gauche} bottom_center {Prix en bas au centre} bottom_right {Prix en bas à droite} other {Prix ici}}. Faites glisser, cliquez sur un emplacement, ou utilisez les flèches du clavier, pour le déplacer.",
+    "moveTitleTo": "{spot, select, top_left {Déplacer le titre en haut à gauche} top_center {Déplacer le titre en haut au centre} top_right {Déplacer le titre en haut à droite} middle_center {Déplacer le titre au milieu} bottom_left {Déplacer le titre en bas à gauche} bottom_center {Déplacer le titre en bas au centre} bottom_right {Déplacer le titre en bas à droite} other {Déplacer le titre ici}}",
+    "movePriceTo": "{spot, select, top_left {Déplacer le prix en haut à gauche} top_center {Déplacer le prix en haut au centre} top_right {Déplacer le prix en haut à droite} middle_center {Déplacer le prix au milieu} bottom_left {Déplacer le prix en bas à gauche} bottom_center {Déplacer le prix en bas au centre} bottom_right {Déplacer le prix en bas à droite} other {Déplacer le prix ici}}"
+  },
+  "productPage": {
+    "layout": {
+      "title": "Page",
+      "showPage": {
+        "label": "Afficher une page produit",
+        "infoLabel": "Ce que fait ce bouton",
+        "infoOn": "Toucher une vignette produit ouvre sa page.",
+        "infoOff": "Les vignettes produit n’ont aucune page à ouvrir."
+      },
+      "pageColor": "Couleur de la page",
+      "storefrontBackground": "Arrière-plan de la vitrine",
+      "photoFit": {
+        "label": "Ajustement de la photo",
+        "ariaLabel": "Ajustement de la photo",
+        "fit": "Ajuster",
+        "fill": "Remplir"
+      },
+      "font": {
+        "label": "Police",
+        "infoLabel": "Comment la police de cette page se rapporte à celle de la vitrine",
+        "infoOwn": "Cette page s’affiche dans sa propre police, quelle que soit celle de la vitrine.",
+        "infoFollows": "Suit la police de votre vitrine. Modifiez-la dans Typographie.",
+        "inheritOption": "Identique à la vitrine ({name})"
+      },
+      "indexing": {
+        "label": "Autoriser les moteurs de recherche",
+        "infoLabel": "Ce que fait la désactivation",
+        "infoContent": "Désactivé, vos pages produit n’apparaissent pas dans les résultats de recherche. Quiconque possède un lien peut toujours les ouvrir."
+      },
+      "useStorefrontBackground": "Utiliser l’arrière-plan de la vitrine"
+    },
+    "cta": {
+      "title": "Bouton d’achat",
+      "infoLabel": "Ce qui détermine si un bouton s’affiche",
+      "infoContent": "Le bouton suit le lien d’achat de chaque produit (défini sur le produit). En l’absence de lien, il envoie un e-mail à votre adresse de contact ci-dessous ; sans aucun des deux, aucun bouton ne s’affiche.",
+      "buttonText": {
+        "label": "Texte du bouton",
+        "charsLeft": "{count, plural, one {# caractère restant} many {# caractères restants} other {# caractères restants}}"
+      },
+      "buttonColor": "Couleur du bouton",
+      "storefrontAccent": "Accent de la vitrine",
+      "cornerRoundness": {
+        "label": "Arrondi des coins",
+        "ariaLabel": "Arrondi des coins du bouton d’achat",
+        "valueText": "{value} pixels",
+        "auto": "Auto"
+      },
+      "borderThickness": {
+        "label": "Épaisseur de la bordure",
+        "ariaLabel": "Épaisseur de la bordure du bouton d’achat",
+        "valueText": "{value} pixels",
+        "none": "Aucune"
+      },
+      "borderColor": "Couleur de la bordure",
+      "buttonTextColor": "Couleur du texte du bouton",
+      "priceNote": {
+        "label": "Mention de prix",
+        "ariaLabel": "Mention de prix",
+        "inclVat": "TTC",
+        "exclTax": "HT",
+        "none": "Aucune"
+      },
+      "shippingNote": {
+        "label": "Mention de livraison",
+        "ariaLabel": "Mention de livraison",
+        "plusShipping": "Livraison en sus",
+        "freeShipping": "Livraison gratuite",
+        "none": "Aucune"
+      },
+      "useStorefrontAccent": "Utiliser l’accent de la vitrine",
+      "useButtonTextColor": "Utiliser la couleur du texte du bouton"
+    },
+    "sections": {
+      "title": "Sections",
+      "infoLabel": "Quand une section reste masquée",
+      "infoContent": "Une section qui n’a rien à afficher reste masquée même si elle est activée. Livraison et Sécurité ne s’affichent jamais pour les téléchargements. Sécurité et conformité et Vendeur sont des mentions légales et ne peuvent pas être désactivées.",
+      "listAriaLabel": "Ce que la page affiche",
+      "underTheTitle": "sous le titre",
+      "requiredByLaw": "exigé par la loi",
+      "sectionLabels": {
+        "description": "Description",
+        "specs": "Caractéristiques techniques",
+        "documents": "Documents",
+        "shipping": "Livraison",
+        "returns": "Retours",
+        "safety": "Sécurité et conformité",
+        "seller": "Vendeur"
+      },
+      "availability": "Disponibilité",
+      "soldByByline": "Mention « Vendu par »"
+    },
+    "shippingReturns": {
+      "title": "Livraison et retours",
+      "infoLabel": "Pourquoi ceci se trouve dans Paramètres, pas ici",
+      "infoContent": "Défini une seule fois pour tout votre compte, afin que chaque vitrine et chaque produit vende selon les mêmes conditions. Pour les vendeurs de l’UE, la page indique aussi le droit de rétractation de 14 jours et la garantie légale de conformité de 2 ans, quoi que vous écriviez.",
+      "shippingLabel": "Livraison",
+      "returnsLabel": "Retours",
+      "profileCount": "{count, plural, one {# profil de livraison pour les produits qui s’expédient différemment.} many {# profils de livraison pour les produits qui s’expédient différemment.} other {# profils de livraison pour les produits qui s’expédient différemment.}}",
+      "nothingSet": "Rien n’est encore défini. Tant que vous n’ajoutez pas vos conditions, les pages produit indiquent que le vendeur n’a pas ajouté de détails de livraison.",
+      "editSettings": "Modifier dans Paramètres",
+      "addTerms": "Ajoutez vos conditions de livraison"
+    },
+    "sellerDetails": {
+      "title": "Informations vendeur",
+      "infoLabel": "Pourquoi ceci se trouve dans Paramètres, pas ici",
+      "infoContent": "Le droit de la vente à distance exige le nom, l’adresse et un moyen de contact du vendeur à côté de chaque offre. Défini une seule fois pour tout votre compte : chaque vitrine et chaque produit affiche les mêmes informations, il n’y a donc rien à répéter par boutique.",
+      "vatId": "Numéro de TVA {vatId}",
+      "nothingSet": "Rien n’est encore défini. Tant que vous n’ajoutez pas vos informations d’entreprise, les acheteurs ne voient que la mention « Vendu par » sous le titre.",
+      "editSettings": "Modifier dans Paramètres",
+      "addDetails": "Ajoutez vos informations d’entreprise"
+    }
+  },
+  "productBlock": {
+    "deleted": "Ce produit a été retiré de votre catalogue.",
+    "removeFromGrid": "Retirer de la grille",
+    "nameLabel": "Nom",
+    "namePlaceholder": "Nom du produit",
+    "priceLabel": "Prix ({currency})",
+    "saveDotDot": "Enregistrer…",
+    "updating": "Mise à jour…",
+    "whereChangeLands": {
+      "label": "Où atterrit un changement de nom ou de prix",
+      "content": "Le nom et le prix appartiennent au produit, donc l’enregistrement les met à jour partout où il apparaît, pas seulement sur cette vitrine."
+    },
+    "stock": {
+      "outOfStock": "En rupture de stock dans l’inventaire (0 disponible).",
+      "lowStock": "Stock faible : {count} en stock.",
+      "inStock": "{count} en stock."
+    },
+    "openProductPage": "Ouvrir la page produit",
+    "hideProductPage": "Masquer la page produit",
+    "tileStyle": {
+      "title": "Style de vignette",
+      "reset": "Réinitialiser au thème",
+      "infoLabel": "Comment le style de cette vignette se rapporte au thème",
+      "infoWithOverrides": "Cette vignette a son propre style. Les paramètres que vous n’avez pas modifiés ici continuent de suivre le thème.",
+      "infoNoOverrides": "Stylez cette vignette indépendamment. Tout ce que vous ne modifiez pas continue de suivre le thème."
+    },
+    "priceTag": "Étiquette de prix",
+    "modal": {
+      "title": "Mettre à jour le produit partout ?",
+      "description": "Cela modifie le produit lui-même. Chaque vitrine, lien de paiement et votre catalogue produit afficheront les nouveaux détails, pas seulement cette grille.",
+      "nameLabel": "Nom :",
+      "priceLabel": "Prix :",
+      "updateEverywhere": "Mettre à jour partout"
+    },
+    "savedToast": "« {title} » a été mis à jour partout où il apparaît.",
+    "validation": {
+      "noTitle": "Donnez un titre à votre produit.",
+      "noPrice": "Définissez un prix.",
+      "badPrice": "Le prix doit être un nombre supérieur à zéro.",
+      "tooHigh": "Ce prix est trop élevé."
+    }
+  },
+  "textBlock": {
+    "text": {
+      "label": "Texte",
+      "infoLabel": "Autres façons de modifier ce texte",
+      "infoContent": "Vous pouvez aussi recliquer sur le bloc dans le canevas et taper directement dessus, ce qui est plus rapide pour un petit changement."
+    },
+    "editOnCanvas": "Modifier le texte sur le canevas",
+    "style": {
+      "label": "Style"
+    },
+    "font": {
+      "label": "Police",
+      "themeFont": "Police du thème",
+      "themeFontDescription": "Suit la police de la vitrine"
+    },
+    "color": {
+      "selectedWords": "Mots sélectionnés",
+      "label": "Couleur",
+      "blockColor": "la couleur du bloc",
+      "themeColor": "Couleur du thème",
+      "useBlockColor": "Utiliser la couleur du bloc"
+    },
+    "colouringSelected": "Coloration de {count, plural, one {# caractère sélectionné} many {# caractères sélectionnés} other {# caractères sélectionnés}}. Cliquez en dehors des mots pour colorer tout le bloc à la place."
+  },
+  "imageBlock": {
+    "size": {
+      "label": "Taille",
+      "ariaLabel": "Ajustement de l’image",
+      "fill": "Remplir",
+      "fit": "Ajuster",
+      "fillHint": "Remplit le bloc, en recadrant le surplus.",
+      "fitHint": "Affiche l’image entière à l’intérieur du bloc."
+    },
+    "reposition": "Repositionner l’image",
+    "opacity": {
+      "label": "Opacité",
+      "ariaLabel": "Opacité de l’image",
+      "valueText": "{value} pour cent"
+    },
+    "description": {
+      "label": "Description",
+      "placeholder": "Logo, icône, décoration…",
+      "hint": "Lu à voix haute par les lecteurs d’écran. Laissez vide si l’image est purement décorative."
+    }
+  },
+  "shapeBlock": {
+    "shape": {
+      "label": "Forme",
+      "ariaLabel": "Type de forme"
+    },
+    "points": {
+      "label": "Pointes",
+      "ariaLabel": "Pointes de l’étoile",
+      "valueText": "{value} pointes"
+    },
+    "corners": {
+      "label": "Arrondi des coins",
+      "ariaLabel": "Arrondi des coins",
+      "valueText": "{value} pour cent",
+      "sharp": "Net"
+    },
+    "fill": {
+      "ring": "Couleur",
+      "shape": "Remplissage"
+    },
+    "border": {
+      "ringLabel": "Épaisseur de l’anneau",
+      "shapeLabel": "Épaisseur de la bordure",
+      "ringAriaLabel": "Épaisseur de l’anneau",
+      "shapeAriaLabel": "Épaisseur de la bordure",
+      "valueText": "{value} pixels",
+      "none": "Aucune",
+      "color": "Couleur de la bordure"
+    },
+    "opacity": {
+      "label": "Opacité",
+      "ariaLabel": "Opacité de la forme",
+      "valueText": "{value} pour cent"
+    }
+  },
+  "multiBlock": {
+    "shapesContext": "Modification de {count, plural, one {# forme} many {# formes} other {# formes}} ensemble. Les valeurs affichées proviennent de la première forme sélectionnée ; chaque changement s’applique à toutes.",
+    "textsContext": "Modification de {count, plural, one {# bloc de texte} many {# blocs de texte} other {# blocs de texte}} ensemble. Les valeurs affichées proviennent du premier bloc sélectionné ; chaque changement s’applique à tous. Chaque bloc garde son propre texte.",
+    "imagesContext": "Modification de {count, plural, one {# élément} many {# éléments} other {# éléments}} ensemble. Les valeurs affichées proviennent du premier élément sélectionné ; chaque changement s’applique à tous. Chacun garde sa propre image.",
+    "productsContext": "Style de {count, plural, one {# vignette produit} many {# vignettes produit} other {# vignettes produit}} ensemble. Les valeurs affichées proviennent de la première vignette sélectionnée ; chaque changement s’applique à toutes.",
+    "mixedContext": "{count, plural, one {# bloc} many {# blocs} other {# blocs}} de types différents sont sélectionnés. Sélectionnez des blocs d’un seul type pour modifier leurs paramètres ensemble.",
+    "remove": "Retirer {count, plural, one {# bloc} many {# blocs} other {# blocs}}",
+    "duplicate": "Dupliquer {count, plural, one {# bloc} many {# blocs} other {# blocs}}",
+    "productsNotDuplicated": "Les produits ne sont pas dupliqués.",
+    "tileStyle": {
+      "title": "Style de vignette",
+      "reset": "Réinitialiser au thème"
+    },
+    "priceTag": "Étiquette de prix"
+  },
+  "blockActions": {
+    "duplicate": "Dupliquer",
+    "remove": "Retirer de la grille"
+  },
+  "toolbar": {
+    "ariaLabel": "Outils de l’éditeur",
+    "addProduct": "Ajouter un produit",
+    "addText": "Ajouter du texte",
+    "addElement": "Ajouter un élément",
+    "product": "Produit",
+    "text": "Texte",
+    "element": "Élément",
+    "elementsMenu": "Éléments",
+    "uploading": "Import…",
+    "upload": "Importer",
+    "uploadImage": "Importer une image",
+    "allShapes": "Toutes les formes",
+    "browseShapes": "Parcourir toute la bibliothèque de formes",
+    "closePage": "Fermer la page produit",
+    "showPage": "Afficher la page produit",
+    "closePages": "Fermer les pages produit",
+    "showPageFull": "Afficher la page produit",
+    "undo": "Annuler",
+    "undoTip": "Annuler (Ctrl+Z)",
+    "redo": "Rétablir",
+    "redoTip": "Rétablir (Ctrl+Shift+Z)",
+    "tidy": "Ranger le canevas",
+    "tidyTip": "Ranger",
+    "zoomOut": "Zoom arrière",
+    "zoomOutTip": "Zoom arrière (Ctrl -)",
+    "zoomReset": "Réinitialiser le zoom à 100 %",
+    "zoomResetTip": "Réinitialiser le zoom (Ctrl 0)",
+    "zoomResetMenuItem": "Réinitialiser le zoom",
+    "zoomIn": "Zoom avant",
+    "zoomInTip": "Zoom avant (Ctrl +)",
+    "designSettings": "Paramètres de design",
+    "page": "Page",
+    "moreTools": "Plus d’outils"
+  },
+  "selectionToolbar": {
+    "toolsFor": "Outils pour {name}",
+    "elements": "{count, plural, one {# élément} many {# éléments} other {# éléments}}",
+    "hidePage": "Masquer la page",
+    "hidePages": "Masquer les pages",
+    "openPage": "Ouvrir la page",
+    "openPages": "Ouvrir les pages",
+    "openProductPage": "Ouvrir la page produit de {name}",
+    "closeProductPage": "Fermer la page produit de {name}",
+    "openProductPages": "Ouvrir les pages produit de {count, plural, one {# produit} many {# produits} other {# produits}}",
+    "closeProductPages": "Fermer les pages produit de {count, plural, one {# produit} many {# produits} other {# produits}}",
+    "editText": "Modifier le texte",
+    "editTextOf": "Modifier le texte de {name}",
+    "color": "Couleur",
+    "changeColorOf": "Changer la couleur de {name}",
+    "stroke": "Trait",
+    "editStrokeOf": "Modifier le trait de {name}",
+    "corners": "Coins",
+    "editCornersOf": "Modifier l’arrondi des coins de {name}",
+    "opacity": "Opacité",
+    "editOpacityOf": "Modifier l’opacité de {name}",
+    "frame": "Cadrer",
+    "frameImageFor": "Cadrer l’image de {name}",
+    "duplicate": "Dupliquer",
+    "duplicateNamed": "Dupliquer {name}",
+    "duplicateN": "Dupliquer {count, plural, one {# élément} many {# éléments} other {# éléments}}",
+    "removeFrom": "Retirer {name} de la grille",
+    "removeN": "Retirer {count, plural, one {# élément} many {# éléments} other {# éléments}} de la grille"
+  },
+  "canvas": {
+    "gridLabel": "Canevas de la vitrine",
+    "emptyGrid": "Votre grille est vide",
+    "emptyGridHint": "Ajoutez un produit pour commencer à organiser votre vitrine. Le texte et les formes sont dans la barre d’outils ci-dessous.",
+    "addProduct": "Ajouter un produit",
+    "desktopPreview": "Aperçu bureau",
+    "mobilePreview": "Aperçu mobile"
+  },
+  "blockTile": {
+    "removedProduct": "Produit supprimé",
+    "shape": "{kind, select, square {forme carrée} circle {forme ronde} ring {forme anneau} diamond {forme losange} rounded {forme carré arrondi} pill {forme pilule} half {forme demi-cercle} quarter {forme quart de cercle} bar {forme barre} triangle {forme triangle} wedge {forme biseau} pentagon {forme pentagone} hexagon {forme hexagone} octagon {forme octogone} star {forme étoile} sparkle {forme étincelle} cross {forme croix} arrow {forme flèche} chevron {forme chevron} trapezoid {forme trapèze} parallelogram {forme parallélogramme} burst {forme éclat} other {forme {kind}}}",
+    "imageWithAlt": "Image : {alt}",
+    "imageElement": "Élément image",
+    "textWithContent": "Texte : {text}",
+    "textBlock": "Bloc de texte",
+    "selected": "Sélectionné : {label}. Appuyez sur Entrée pour désélectionner.",
+    "unselected": "{label}. Appuyez sur Entrée pour sélectionner et modifier.",
+    "draftAriaLabel": "Produit brouillon : les acheteurs ne peuvent pas accéder à ce lien",
+    "draft": "Brouillon"
+  },
+  "blockFace": {
+    "productRemoved": "Produit retiré. Supprimez ce bloc."
+  },
+  "framer": {
+    "ariaLabel": "Cadrage de l’image de {name}. Faites glisser pour repositionner, flèches du clavier pour ajuster, plus et moins pour zoomer, Échap une fois terminé. Actuellement {x} % horizontalement, {y} % verticalement, zoom {zoom} %.",
+    "hintZoomed": "{zoom} % · Glisser pour cadrer · Échap",
+    "hintMinZoom": "Tirez un coin pour zoomer · Échap"
+  },
+  "inlineText": {
+    "ariaLabel": "Texte du bloc"
+  },
+  "tiles": {
+    "emptyText": "Bloc de texte vide",
+    "imageUnavailable": "Image indisponible"
+  },
+  "spotDrag": {
+    "tokenLabel": "{token, select, title {Titre} other {Prix}} {drop, select, below {dans la barre de titre} top_left {en haut à gauche} top_center {en haut au centre} top_right {en haut à droite} middle_center {au milieu} bottom_left {en bas à gauche} bottom_center {en bas au centre} bottom_right {en bas à droite} other {}}. Appuyez pour ouvrir ses paramètres, ou faites glisser (ou utilisez les flèches du clavier) pour le déplacer."
+  },
+  "autoFit": {},
+  "designer": {
+    "header": {
+      "back": "Retour aux vitrines",
+      "nameLabel": "Nom de la vitrine",
+      "namePlaceholder": "Vitrine sans titre",
+      "unsaved": "Modifications non enregistrées",
+      "search": "Rechercher"
+    },
+    "mobileNotice": {
+      "body": "Pour la meilleure expérience de modification, ouvrez cet éditeur sur un ordinateur ou une tablette. Réordonner les blocs et modifier l’en-tête fonctionnent sur tous les appareils.",
+      "dismiss": "Fermer la notification d’édition sur petit écran"
+    },
+    "inspector": {
+      "title": {
+        "addProduct": "Ajouter un produit",
+        "blocks": "{count, plural, one {# bloc} many {# blocs} other {# blocs}}",
+        "product": "Produit",
+        "shape": "Forme",
+        "image": "Image",
+        "text": "Bloc de texte"
+      },
+      "close": {
+        "addProduct": "Fermer le panneau d’ajout de produit",
+        "blocks": "{count, plural, one {Fermer le panneau du # bloc} many {Fermer le panneau des # blocs} other {Fermer le panneau des # blocs}}",
+        "product": "Fermer le panneau produit",
+        "shape": "Fermer le panneau de forme",
+        "image": "Fermer le panneau d’image",
+        "text": "Fermer le panneau de bloc de texte"
+      }
+    },
+    "toasts": {
+      "full": "Cette vitrine est pleine.",
+      "fullDetail": "Une vitrine peut contenir jusqu’à {max, plural, one {# bloc} many {# blocs} other {# blocs}}.",
+      "imageUploadFailed": "Cette image n’a pas pu être importée.",
+      "imageUploadFailedDetail": "Réessayez dans un instant.",
+      "copied": "{count, plural, one {Bloc copié.} many {# blocs copiés.} other {# blocs copiés.}}",
+      "copiedDetail": "Collez avec Ctrl+V ou Cmd+V.",
+      "savedWithDrafts": "Enregistré, mais certains produits sont encore en brouillon.",
+      "draftsDetail": "{count, plural, one {{names} est un brouillon, les acheteurs ne peuvent pas encore y accéder.} many {{names}{hidden, plural, =0 {} one { et # de plus} many { et # de plus} other { et # de plus}} sont des brouillons, les acheteurs ne peuvent pas encore y accéder.} other {{names}{hidden, plural, =0 {} one { et # de plus} many { et # de plus} other { et # de plus}} sont des brouillons, les acheteurs ne peuvent pas encore y accéder.}}",
+      "publishDrafts": "Publiez ces produits quand vous serez prêt.",
+      "saved": "Vitrine enregistrée.",
+      "droppedBlocks": "{count, plural, one {# bloc pointait vers un produit supprimé et a été retiré.} many {# blocs pointaient vers des produits supprimés et ont été retirés.} other {# blocs pointaient vers des produits supprimés et ont été retirés.}}"
+    },
+    "leave": {
+      "title": "Enregistrer vos modifications ?",
+      "description": "Vous avez des modifications non enregistrées sur cette vitrine. Enregistrez-les avant de quitter, ou abandonnez-les.",
+      "save": "Enregistrer les modifications",
+      "discard": "Abandonner les modifications",
+      "keepEditing": "Continuer à modifier"
+    },
+    "defaults": {
+      "textBlock": "Votre texte ici"
+    }
+  },
+  "sample": {
+    "name": "Vitrine d’exemple",
+    "card": {
+      "open": "Ouvrir la vitrine d’exemple",
+      "badge": "Exemple",
+      "summary": "{count, plural, one {{count} bloc · essayez ce que vous voulez, rien n’est enregistré} many {{count} de blocs · essayez ce que vous voulez, rien n’est enregistré} other {{count} blocs · essayez ce que vous voulez, rien n’est enregistré}}",
+      "hide": "Masquer la vitrine d’exemple"
+    },
+    "embed": {
+      "title": "Intégrer une vitrine",
+      "description": "Chaque vitrine que vous créez a son propre code à coller dans votre site.",
+      "snippetLabel": "Un code d’intégration ressemble à ceci",
+      "inDevelopment": "Le widget est encore en développement et ne s’affiche pas encore sur d’autres sites.",
+      "create": "Créer une vitrine"
+    },
+    "list": {
+      "show": "Afficher la vitrine d’exemple",
+      "showFailed": "Impossible de rétablir la vitrine d’exemple.",
+      "hideFailed": "Impossible de masquer la vitrine d’exemple.",
+      "failedDetail": "Réessayez dans un moment.",
+      "createFirst": "Créez votre première vitrine",
+      "createFirstHint": "Ajoutez vos produits à sa grille. Chacun obtient une page à partager."
+    },
+    "designer": {
+      "createAriaLabel": "Créer votre propre vitrine",
+      "createShort": "Créer",
+      "create": "Créer la vôtre",
+      "notice": "Ceci est une vitrine d’exemple. Essayez ce que vous voulez : rien n’est enregistré ici.",
+      "takeTour": "Suivre la visite"
+    },
+    "content": {
+      "bio": "Tech du quotidien et objets de bureau, choisis pour durer.",
+      "heading": "Meilleures ventes",
+      "story": "Nous utilisons tout ce que nous vendons avant de le mettre en rayon. Retours acceptés sous 14 jours.",
+      "dispatch": "Expédié sous 2 jours ouvrés",
+      "products": {
+        "camera": {
+          "title": "Appareil photo instantané",
+          "description": "Imprime la photo quelques secondes après la prise de vue. Film vendu séparément."
+        },
+        "headphones": {
+          "title": "Casque audio",
+          "description": "Fermé, avec de doux coussinets en mousse à mémoire de forme. Câble 3,5 mm inclus."
+        },
+        "watch": {
+          "title": "Montre connectée",
+          "description": "Boîtier en aluminium et bracelet sport. Suit les pas, le sommeil et les entraînements."
+        },
+        "mouse": {
+          "title": "Souris sans fil",
+          "description": "Légère, avec des clics silencieux et jusqu’à 250 heures avec une seule pile."
+        },
+        "speaker": {
+          "title": "Enceinte portable",
+          "description": "Étanche, avec 12 heures d’écoute par charge."
+        },
+        "succulent": {
+          "title": "Succulente de bureau",
+          "description": "Une petite haworthia dans un pot en céramique. À arroser environ une fois par mois."
+        }
+      }
+    }
+  },
+  "colors": {
+    "fields": {
+      "accent": "Accent",
+      "storeName": "Nom de la boutique",
+      "bio": "Bio",
+      "background": "Arrière-plan",
+      "gradientFrom": "Début du dégradé",
+      "gradientTo": "Fin du dégradé",
+      "fill": "Remplissage",
+      "color": "Couleur",
+      "borderColor": "Couleur de bordure",
+      "selectedWords": "Mots sélectionnés",
+      "textColor": "Couleur du texte",
+      "tagColor": "Couleur de l’étiquette",
+      "shadowColor": "Couleur de l’ombre"
+    },
+    "inherit": {
+      "themeColor": {
+        "label": "Couleur du thème",
+        "use": "Utiliser la couleur du thème"
+      },
+      "default": {
+        "label": "Par défaut",
+        "use": "Utiliser la valeur par défaut"
+      },
+      "noFill": {
+        "label": "Sans remplissage",
+        "use": "Utiliser sans remplissage"
+      },
+      "cardColor": {
+        "label": "Couleur de la carte",
+        "use": "Utiliser la couleur de la carte"
+      },
+      "blockColor": {
+        "label": "la couleur du bloc",
+        "use": "Utiliser la couleur du bloc"
+      }
+    },
+    "presets": {
+      "white": {
+        "name": "Blanc",
+        "label": "Blanc ({value})"
+      },
+      "grey": {
+        "name": "Gris",
+        "label": "Gris ({value})"
+      },
+      "ink": {
+        "name": "Encre",
+        "label": "Encre ({value})"
+      },
+      "paleAccent": {
+        "name": "Accent pâle",
+        "label": "Accent pâle ({value})"
+      },
+      "softAccent": {
+        "name": "Accent doux",
+        "label": "Accent doux ({value})"
+      },
+      "accent": {
+        "name": "Accent",
+        "label": "Accent ({value})"
+      },
+      "deepAccent": {
+        "name": "Accent profond",
+        "label": "Accent profond ({value})"
+      }
+    },
+    "standard": {
+      "white": "Blanc ({value})",
+      "grey200": "Gris 200 ({value})",
+      "grey300": "Gris 300 ({value})",
+      "grey400": "Gris 400 ({value})",
+      "grey": "Gris ({value})",
+      "grey600": "Gris 600 ({value})",
+      "grey700": "Gris 700 ({value})",
+      "grey800": "Gris 800 ({value})",
+      "ink": "Encre ({value})",
+      "black": "Noir ({value})",
+      "red": "Rouge ({value})",
+      "orange": "Orange ({value})",
+      "amber": "Ambre ({value})",
+      "yellow": "Jaune ({value})",
+      "green": "Vert ({value})",
+      "teal": "Sarcelle ({value})",
+      "sky": "Bleu ciel ({value})",
+      "blue": "Bleu ({value})",
+      "violet": "Violet ({value})",
+      "pink": "Rose ({value})",
+      "redDark": "Rouge foncé ({value})",
+      "orangeDark": "Orange foncé ({value})",
+      "amberDark": "Ambre foncé ({value})",
+      "yellowDark": "Jaune foncé ({value})",
+      "greenDark": "Vert foncé ({value})",
+      "tealDark": "Sarcelle foncé ({value})",
+      "skyDark": "Bleu ciel foncé ({value})",
+      "blueDark": "Bleu foncé ({value})",
+      "violetDark": "Violet foncé ({value})",
+      "pinkDark": "Rose foncé ({value})"
+    },
+    "palettes": {
+      "sunset": {
+        "name": "Coucher de soleil",
+        "group": "Palette Coucher de soleil",
+        "swatches": {
+          "cream": "Coucher de soleil, crème ({value})",
+          "amber": "Coucher de soleil, ambre ({value})",
+          "orange": "Coucher de soleil, orange ({value})",
+          "red": "Coucher de soleil, rouge ({value})",
+          "ember": "Coucher de soleil, braise ({value})"
+        }
+      },
+      "forest": {
+        "name": "Forêt",
+        "group": "Palette Forêt",
+        "swatches": {
+          "mist": "Forêt, brume ({value})",
+          "sage": "Forêt, sauge ({value})",
+          "green": "Forêt, vert ({value})",
+          "pine": "Forêt, pin ({value})",
+          "deep": "Forêt, vert profond ({value})"
+        }
+      },
+      "ocean": {
+        "name": "Océan",
+        "group": "Palette Océan",
+        "swatches": {
+          "foam": "Océan, écume ({value})",
+          "sky": "Océan, ciel ({value})",
+          "cyan": "Océan, cyan ({value})",
+          "sea": "Océan, mer ({value})",
+          "navy": "Océan, marine ({value})"
+        }
+      },
+      "mono": {
+        "name": "Mono",
+        "group": "Palette Mono",
+        "swatches": {
+          "white": "Mono, blanc ({value})",
+          "silver": "Mono, argent ({value})",
+          "grey": "Mono, gris ({value})",
+          "graphite": "Mono, graphite ({value})",
+          "ink": "Mono, encre ({value})"
+        }
+      },
+      "candy": {
+        "name": "Bonbon",
+        "group": "Palette Bonbon",
+        "swatches": {
+          "blush": "Bonbon, rose poudré ({value})",
+          "rose": "Bonbon, rose ({value})",
+          "pink": "Bonbon, rose bonbon ({value})",
+          "purple": "Bonbon, mauve ({value})",
+          "violet": "Bonbon, violet ({value})"
+        }
+      }
+    }
+  }
+}

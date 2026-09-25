@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { MemberRow, usernameFor } from "@/components/settings/team/MemberRow";
 import type { TeamRole } from "@/lib/team/permissions";
 import type { TeamMemberRow } from "@/lib/team/queries";
@@ -37,6 +38,7 @@ export function MemberList({
   /** Marks the viewer's own row with "(you)". */
   viewerUserId?: string | null;
 }) {
+  const t = useTranslations("Settings.team.memberList");
   const active = members.filter((m) => m.status === "active").sort(byRoleThenName);
   const invited = members.filter((m) => m.status === "invited").sort(byRoleThenName);
 
@@ -61,7 +63,7 @@ export function MemberList({
 
       {onlyOwner && (
         <p className="pt-4 font-inter text-sm text-muted-foreground">
-          It&apos;s just you so far. Invite someone to give them access.
+          {t("onlyOwner")}
         </p>
       )}
 
@@ -69,13 +71,9 @@ export function MemberList({
         <div className="pt-6">
           <span className="flex items-center gap-1.5">
             <h3 className="font-inter text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Invited
+              {t("invitedHeading")}
             </h3>
-            <InfoTip label="What an invited member can do">
-              Nothing yet. An invite takes effect the first time that person
-              signs in with the email address it was sent to, and only then do
-              they appear as a member with the role you chose.
-            </InfoTip>
+            <InfoTip label={t("invitedTipLabel")}>{t("invitedTipBody")}</InfoTip>
           </span>
           <ul className="mt-1 divide-y divide-border border-b border-border">
             {invited.map((member) => (
@@ -94,7 +92,7 @@ export function MemberList({
 
       {members.length >= 50 && (
         <p className="pt-3 font-inter text-sm text-muted-foreground">
-          Showing the first 50 members.
+          {t("showingFirst", { count: 50 })}
         </p>
       )}
     </div>

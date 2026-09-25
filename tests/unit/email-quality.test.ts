@@ -4,6 +4,7 @@ import {
   isPlaceholderEmail,
 } from "@/lib/validation/email-quality";
 import { hasMailExchanger } from "@/lib/validation/email-domain";
+import { english } from "../setup/translate";
 
 // "Is this an address a buyer could actually reach the seller at?" These
 // filters are what stands between a required contact field and a seller
@@ -67,23 +68,26 @@ describe("isPlaceholderEmail", () => {
 });
 
 describe("emailQualityProblem", () => {
+  const problemText = (email: string) => {
+    const key = emailQualityProblem(email);
+    return key ? english(key) : null;
+  };
+
   it("names the field it is speaking about", () => {
-    expect(emailQualityProblem("hello@example.com", "Your contact email")).toContain(
-      "Your contact email",
-    );
+    expect(problemText("hello@example.com")).toContain("The contact email");
   });
 
   it("distinguishes a placeholder from a throwaway provider", () => {
-    expect(emailQualityProblem("hello@example.com", "That email")).toContain(
-      "placeholder",
+    expect(problemText("hello@example.com")).toBe(
+      "The contact email looks like a placeholder. Use an address you actually read.",
     );
-    expect(emailQualityProblem("someone@mailinator.com", "That email")).toContain(
-      "temporary-mail",
+    expect(problemText("someone@mailinator.com")).toBe(
+      "The contact email is at a temporary-mail provider. Use a permanent address.",
     );
   });
 
   it("accepts a real address", () => {
-    expect(emailQualityProblem("hello@studio-builderboy.at", "That email")).toBeNull();
+    expect(emailQualityProblem("hello@studio-builderboy.at")).toBeNull();
   });
 });
 

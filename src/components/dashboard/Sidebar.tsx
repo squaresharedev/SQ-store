@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { MotionConfig, motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { focusRingClass, overlayScrimClass, transitionClass } from "@/components/ui/control-styles";
@@ -39,12 +40,11 @@ function isNavLinkActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-/** Title shown in the mobile top bar — the active nav item's label. */
-function mobileTitle(pathname: string): string | null {
-  const item = [...MAIN_NAV, SETTINGS_LINK].find((link) =>
+/** The nav item the mobile top bar is titled after: the active one. */
+function activeNavItem(pathname: string): NavEntry | undefined {
+  return [...MAIN_NAV, SETTINGS_LINK].find((link) =>
     isNavLinkActive(pathname, link.href),
   );
-  return item?.label ?? null;
 }
 
 // Nav rows keep a radius (the brand rule squares buttons and overlays, not
@@ -65,6 +65,7 @@ function NavLinkItem({
   pathname: string;
   onNavigate: () => void;
 }) {
+  const t = useTranslations();
   const active = isNavLinkActive(pathname, item.href);
   const animationProps = useNavAnimationProps();
   const [hoverCount, setHoverCount] = useState(0);
@@ -89,7 +90,7 @@ function NavLinkItem({
       )}
     >
       <item.icon hoverCount={hoverCount} />
-      {item.label}
+      {t(item.label)}
     </MotionLink>
   );
 }
@@ -105,8 +106,10 @@ export function Sidebar({
    */
   topBarSlot?: React.ReactNode;
 }) {
+  const t = useTranslations();
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const titleItem = activeNavItem(pathname);
   const toggleButtonRef = useRef<HTMLButtonElement>(null);
   const navRef = useRef<HTMLElement>(null);
   const navId = useId();
@@ -168,7 +171,8 @@ export function Sidebar({
         <button
           ref={toggleButtonRef}
           type="button"
-          aria-label={isOpen ? "Close menu" : "Open menu"}
+          data-tour="menu-button"
+          aria-label={isOpen ? t("Dashboard.sidebar.closeMenu") : t("Dashboard.sidebar.openMenu")}
           aria-expanded={isOpen}
           aria-controls={navId}
           onClick={() => setIsOpen((open) => !open)}
@@ -186,7 +190,7 @@ export function Sidebar({
         </button>
 
         <span className="min-w-0 flex-1 truncate text-xl font-semibold text-foreground">
-          {mobileTitle(pathname)}
+          {titleItem ? t(titleItem.label) : null}
         </span>
 
         {/* Right cluster: the shared top-bar slot (notification bell + menu). */}
@@ -206,7 +210,8 @@ export function Sidebar({
         id={navId}
         ref={navRef}
         tabIndex={-1}
-        aria-label="Dashboard"
+        data-tour="dashboard-nav"
+        aria-label={t("Dashboard.sidebar.navLabel")}
         className={cn(
           "fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-border bg-background",
           "transition-transform duration-slow ease-entrance motion-reduce:transition-none",
@@ -225,7 +230,7 @@ export function Sidebar({
             className="size-6 shrink-0 rounded-sm object-contain"
           />
           <span className="truncate text-lg font-semibold tracking-tight text-foreground">
-            Dashboard
+            {t("Dashboard.sidebar.title")}
           </span>
         </div>
 

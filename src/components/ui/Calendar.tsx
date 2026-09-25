@@ -3,12 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { ghostButtonClass } from "./control-styles";
 import {
-  MONTH_LABEL,
-  WEEKDAY_FULL,
-  WEEKDAY_LABELS,
   addDays,
   addMonths,
   buildMonthGrid,
@@ -19,8 +17,11 @@ import {
   isOutsideRange,
   isSameDay,
   isSameMonth,
+  monthLabel,
   startOfDay,
   startOfMonth,
+  weekdayFullNames,
+  weekdayLabels,
 } from "@/lib/format/calendar";
 
 export type CalendarRange = { from: Date | null; to: Date | null };
@@ -55,6 +56,9 @@ export function Calendar({
   max: Date | null;
   initialMonth: Date;
 }) {
+  const t = useTranslations("Common.calendar");
+  const locale = useLocale();
+  const weekdayFull = weekdayFullNames(locale);
   const today = startOfDay(new Date());
   const [month, setMonth] = useState(startOfMonth(initialMonth));
   const [focused, setFocused] = useState<Date>(() =>
@@ -132,18 +136,18 @@ export function Calendar({
         <button
           type="button"
           onClick={() => setMonth(addMonths(month, -1))}
-          aria-label="Previous month"
+          aria-label={t("previousMonth")}
           className={NAV_BUTTON}
         >
           <ChevronLeft className="size-4" aria-hidden="true" />
         </button>
         <span aria-live="polite" className="text-sm font-medium text-foreground">
-          {MONTH_LABEL.format(month)}
+          {monthLabel(month, locale)}
         </span>
         <button
           type="button"
           onClick={() => setMonth(addMonths(month, 1))}
-          aria-label="Next month"
+          aria-label={t("nextMonth")}
           className={NAV_BUTTON}
         >
           <ChevronRight className="size-4" aria-hidden="true" />
@@ -153,20 +157,20 @@ export function Calendar({
       <table
         ref={gridRef}
         role="grid"
-        aria-label={MONTH_LABEL.format(month)}
+        aria-label={monthLabel(month, locale)}
         onKeyDown={onKeyDown}
         className="w-full border-collapse"
       >
         <thead>
           <tr>
-            {WEEKDAY_LABELS.map((day, index) => (
+            {weekdayLabels(locale).map((day, index) => (
               <th
                 key={day}
                 scope="col"
                 className="pb-1 text-center font-inter text-xs font-normal text-muted-foreground"
               >
                 <span aria-hidden="true">{day}</span>
-                <span className="sr-only">{WEEKDAY_FULL[index]}</span>
+                <span className="sr-only">{weekdayFull[index]}</span>
               </th>
             ))}
           </tr>
@@ -196,7 +200,7 @@ export function Calendar({
                       disabled={disabled}
                       aria-disabled={disabled || undefined}
                       aria-current={isToday ? "date" : undefined}
-                      aria-label={fullDateLabel(day)}
+                      aria-label={fullDateLabel(day, locale)}
                       onClick={() => onSelect(day)}
                       onFocus={() => setFocused(day)}
                       onMouseEnter={() =>
@@ -233,7 +237,7 @@ export function Calendar({
           onClick={goToday}
           className={cn(ghostButtonClass, "h-8 px-3 py-0 text-sm")}
         >
-          Today
+          {t("today")}
         </button>
       </div>
     </div>

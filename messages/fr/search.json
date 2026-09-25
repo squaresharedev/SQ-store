@@ -1,0 +1,72 @@
+{
+  "trigger": {
+    "label": "Rechercher"
+  },
+  "overlay": {
+    "label": "Recherche",
+    "placeholder": "Rechercher produits, commandes, paramètres…",
+    "clear": "Effacer la recherche",
+    "close": "Fermer la recherche",
+    "results": "Résultats de recherche",
+    "searching": "Recherche…",
+    "noResults": "Aucun résultat pour {query}",
+    "resultCount": "{count, plural, one {{count} résultat pour {query}} many {{count} résultats pour {query}} other {{count} résultats pour {query}}}",
+    "nothingMatches": "Rien ne correspond à « {query} ».",
+    "startTyping": "Commencez à écrire pour rechercher.",
+    "remoteError": "Impossible de joindre le serveur : affichage des pages, paramètres et actions uniquement.",
+    "remoteErrorCached": "Recherche en direct indisponible : affichage des résultats en cache, des pages et des paramètres.",
+    "remoteAuth": "Votre session a expiré, seules les pages et les paramètres sont affichés.",
+    "remoteThrottled": "Recherche trop rapide : affichage des pages, paramètres et actions uniquement."
+  },
+  "sections": {
+    "pages": "Pages",
+    "actions": "Actions",
+    "settings": "Paramètres"
+  },
+  "groups": {
+    "products": "Produits",
+    "orders": "Commandes",
+    "storefronts": "Vitrines",
+    "team": "Équipe",
+    "notifications": "Notifications",
+    "recent": "Récents"
+  },
+  "results": {
+    "draft": "Brouillon",
+    "openInDesigner": "Ouvrir dans l’éditeur",
+    "invited": "Invité",
+    "order": "Commande",
+    "unread": "Non lu"
+  },
+  "fields": {
+    "username": "Nom d’utilisateur",
+    "avatar": "Photo de profil",
+    "email": "Adresse e-mail",
+    "password": "Mot de passe",
+    "twoFactor": "Authentification à deux facteurs",
+    "recoveryCodes": "Codes de récupération",
+    "securityActivity": "Activité de sécurité",
+    "signOut": "Déconnexion",
+    "vat": "Numéro de TVA",
+    "businessName": "Raison sociale ou nom",
+    "country": "Pays",
+    "address": "Adresse professionnelle",
+    "contactEmail": "E-mail de contact",
+    "phone": "Téléphone",
+    "bio": "Bio",
+    "salesEmails": "E-mails de ventes",
+    "marketingEmails": "E-mails marketing",
+    "productEmails": "E-mails de mises à jour produit",
+    "sellerAgreement": "Contrat vendeur",
+    "termsOfService": "Conditions d’utilisation",
+    "exportData": "Exporter mes données",
+    "deleteAccount": "Supprimer le compte"
+  },
+  "actions": {
+    "newProduct": "Nouveau produit",
+    "newStorefront": "Nouvelle vitrine",
+    "inviteMember": "Inviter un membre de l’équipe",
+    "notificationHistory": "Historique des notifications",
+    "showMeAround": "Faire une visite guidée"
+  }
+}

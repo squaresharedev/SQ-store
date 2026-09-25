@@ -1,0 +1,72 @@
+{
+  "trigger": {
+    "label": "Buscar"
+  },
+  "overlay": {
+    "label": "Buscar",
+    "placeholder": "Buscar productos, pedidos, ajustes…",
+    "clear": "Borrar búsqueda",
+    "close": "Cerrar búsqueda",
+    "results": "Resultados de la búsqueda",
+    "searching": "Buscando…",
+    "noResults": "Sin resultados para {query}",
+    "resultCount": "{count, plural, one {{count} resultado para {query}} many {{count} resultados para {query}} other {{count} resultados para {query}}}",
+    "nothingMatches": "Nada coincide con «{query}».",
+    "startTyping": "Empieza a escribir para buscar.",
+    "remoteError": "No se puede contactar con el servidor: se muestran solo páginas, ajustes y acciones.",
+    "remoteErrorCached": "Búsqueda en directo no disponible: se muestran coincidencias en caché, páginas y ajustes.",
+    "remoteAuth": "Tu sesión ha caducado, así que solo se muestran páginas y ajustes.",
+    "remoteThrottled": "Buscas demasiado rápido: se muestran solo páginas, ajustes y acciones."
+  },
+  "sections": {
+    "pages": "Páginas",
+    "actions": "Acciones",
+    "settings": "Configuración"
+  },
+  "groups": {
+    "products": "Productos",
+    "orders": "Pedidos",
+    "storefronts": "Escaparates",
+    "team": "Equipo",
+    "notifications": "Notificaciones",
+    "recent": "Recientes"
+  },
+  "results": {
+    "draft": "Borrador",
+    "openInDesigner": "Abrir en el editor",
+    "invited": "Invitado",
+    "order": "Pedido",
+    "unread": "Sin leer"
+  },
+  "fields": {
+    "username": "Nombre de usuario",
+    "avatar": "Foto de perfil",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "twoFactor": "Verificación en dos pasos",
+    "recoveryCodes": "Códigos de recuperación",
+    "securityActivity": "Actividad de seguridad",
+    "signOut": "Cerrar sesión",
+    "vat": "NIF-IVA",
+    "businessName": "Nombre o razón social",
+    "country": "País",
+    "address": "Dirección comercial",
+    "contactEmail": "Correo de contacto",
+    "phone": "Teléfono",
+    "bio": "Bio",
+    "salesEmails": "Correos de ventas",
+    "marketingEmails": "Correos de marketing",
+    "productEmails": "Correos de novedades del producto",
+    "sellerAgreement": "Acuerdo de vendedor",
+    "termsOfService": "Condiciones del servicio",
+    "exportData": "Exportar mis datos",
+    "deleteAccount": "Eliminar cuenta"
+  },
+  "actions": {
+    "newProduct": "Nuevo producto",
+    "newStorefront": "Nuevo escaparate",
+    "inviteMember": "Invitar a un miembro del equipo",
+    "notificationHistory": "Historial de notificaciones",
+    "showMeAround": "Enséñamelo todo"
+  }
+}

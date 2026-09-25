@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowUpRight, BadgeCheck } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cardClass } from "@/components/ui/surface-styles";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -36,24 +37,25 @@ export function ConnectionStatusCard({
   account: AccountStatus;
   onConnect: () => void;
 }) {
+  const t = useTranslations("Payments");
   // Until Stripe Connect ships, a "Connect with Stripe" button only opens a
   // modal whose continue button is disabled. Say what is true instead, and how
   // buyers pay in the meantime (lib/payments/availability.ts).
   if (!account.connected && !STRIPE_CONNECT_AVAILABLE) {
     return (
       <section
-        aria-label="Stripe connection"
+        data-tour="stripe-connection"
+        aria-label={t("connection.label")}
         className={cn(cardClass, "overflow-hidden")}
       >
         <CardSwipe className="rounded-none border-x-0 border-t-0" />
         <div className="p-6">
           <h2 className="flex flex-wrap items-center text-base font-semibold text-foreground">
-            Getting paid through Stripe is coming soon
-            <span className={stubBadgeClass}>Soon</span>
+            {t("connection.comingSoonTitle")}
+            <span className={stubBadgeClass}>{t("soon")}</span>
           </h2>
           <p className="mt-1 max-w-md font-inter text-sm text-muted-foreground">
-            Until then, buyers pay you through your product&apos;s buy link, or
-            by emailing you.
+            {t("connection.comingSoonBody")}
           </p>
         </div>
       </section>
@@ -63,7 +65,8 @@ export function ConnectionStatusCard({
   if (!account.connected) {
     return (
       <section
-        aria-label="Stripe connection"
+        data-tour="stripe-connection"
+        aria-label={t("connection.label")}
         className={cn(cardClass, "overflow-hidden")}
       >
         {/* Hero: a card being swiped — the "get paid" moment made tangible. */}
@@ -71,15 +74,14 @@ export function ConnectionStatusCard({
         <div className="flex flex-wrap items-center justify-between gap-4 p-6">
           <div>
             <h2 className="text-base font-semibold text-foreground">
-              Connect Stripe to get paid
+              {t("connection.connectTitle")}
             </h2>
             <p className="mt-1 max-w-md font-inter text-sm text-muted-foreground">
-              Payouts go straight to your bank. Setup happens securely on
-              Stripe, we never see or store your bank details.
+              {t("connection.connectBody")}
             </p>
           </div>
           <Button onClick={onConnect}>
-            Connect with Stripe
+            {t("connection.connectButton")}
             <ArrowUpRight className="size-4" strokeWidth={2} aria-hidden />
           </Button>
         </div>
@@ -89,7 +91,8 @@ export function ConnectionStatusCard({
 
   return (
     <section
-      aria-label="Stripe connection"
+      data-tour="stripe-connection"
+      aria-label={t("connection.label")}
       className={cn(cardClass, "p-4")}
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -97,7 +100,7 @@ export function ConnectionStatusCard({
           <BadgeCheck className="size-5 shrink-0 text-success" strokeWidth={2} aria-hidden />
           <div>
             <p className="text-sm font-medium text-foreground">
-              Stripe account connected
+              {t("connection.connected")}
             </p>
             {account.accountId && (
               <p className="font-mono text-xs text-muted-foreground">
@@ -107,14 +110,14 @@ export function ConnectionStatusCard({
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-4">
-          <StatusDot ok={account.chargesEnabled} label="Charges" />
-          <StatusDot ok={account.payoutsEnabled} label="Payouts" />
-          <StatusDot ok={account.detailsSubmitted} label="Verified" />
+          <StatusDot ok={account.chargesEnabled} label={t("connection.charges")} />
+          <StatusDot ok={account.payoutsEnabled} label={t("connection.payouts")} />
+          <StatusDot ok={account.detailsSubmitted} label={t("connection.verified")} />
         </div>
       </div>
       {account.requirementsDue.length > 0 && (
         <p className="mt-3 border-t border-border pt-3 font-inter text-sm text-danger-strong">
-          Stripe needs more information before payouts can continue.
+          {t("connection.requirementsDue")}
         </p>
       )}
     </section>

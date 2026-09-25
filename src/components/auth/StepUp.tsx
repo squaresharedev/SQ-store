@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { ShieldCheck } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Label } from "@/components/ui/label";
 import { infoTextClass } from "@/components/ui/control-styles";
 import { FactorPicker, type FactorChoice } from "@/components/auth/FactorPicker";
@@ -10,7 +11,7 @@ import { STEP_UP_HINT_COOKIE, STEP_UP_WINDOW_SECONDS } from "@/lib/auth/assuranc
 
 /**
  * Client half of the step-up ("confirm it's you") check that sensitive
- * actions run on the server (requireStepUp in lib/auth/mfa.ts).
+ * actions run on the server (requireStepUpState in lib/auth/mfa.ts).
  *
  * THE SERVER DECIDES; this only decides when to SHOW the code field. It shows
  * the field BEFORE the person submits whenever the server is going to ask,
@@ -115,7 +116,7 @@ export function useStepUpRequired(): boolean {
 }
 
 /**
- * Drop inside any form whose action calls requireStepUp. Renders nothing until
+ * Drop inside any form whose action calls requireStepUpState. Renders nothing until
  * a code is needed; then a code box (and, for more than one authenticator, a
  * picker) posting `mfa_code` / `mfa_factor_id`, the names the server's field
  * whitelists allow.
@@ -128,10 +129,13 @@ export function StepUpField({
   id,
   always = false,
   requireFresh = false,
-  description = "This is a sensitive change. Enter the current code from your authenticator app to confirm it's you.",
+  description,
 }: {
-  /** The form's action state, whose `stepUp` flag forces the field on. */
-  state?: { stepUp?: true; success?: string; error?: string };
+  /**
+   * The form's action state, whose `stepUp` flag forces the field on. Only
+   * the flag and whether it succeeded are read, so any action state fits.
+   */
+  state?: { stepUp?: true; success?: unknown };
   /** Unique per form on a page: several step-up forms can be mounted at once. */
   id: string;
   always?: boolean;
@@ -142,8 +146,10 @@ export function StepUpField({
    * without 2FA.
    */
   requireFresh?: boolean;
+  /** Why a code is asked for here. Defaults to the generic "sensitive change". */
   description?: string;
 }) {
+  const t = useTranslations("Auth.stepUp");
   const { enrolled, factors, markFresh } = React.useContext(StepUpContext);
   const required = useStepUpRequired();
   const show = always || (requireFresh && enrolled) || required || Boolean(state?.stepUp);
@@ -165,13 +171,13 @@ export function StepUpField({
     >
       <p className="flex items-start gap-2 font-inter text-sm text-foreground">
         <ShieldCheck aria-hidden className="mt-0.5 size-4 shrink-0" />
-        <span>{description}</span>
+        <span>{description ?? t("description")}</span>
       </p>
       <FactorPicker factors={factors} name="mfa_factor_id" id={`${id}-factor`} />
       <div className="flex flex-col gap-2">
-        <Label htmlFor={`${id}-code`}>Authenticator code</Label>
+        <Label htmlFor={`${id}-code`}>{t("codeLabel")}</Label>
         <OneTimeCodeInput id={`${id}-code`} name="mfa_code" required />
-        <p className={infoTextClass}>The 6 digits in your app right now.</p>
+        <p className={infoTextClass}>{t("codeHint")}</p>
       </div>
     </div>
   );

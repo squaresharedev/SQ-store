@@ -1,0 +1,252 @@
+{
+  "steps": {
+    "seller": {
+      "label": "Add your seller details",
+      "detail": "Your trader name, address and contact email go on every product page.",
+      "detailDone": "Buyers can see who they are buying from.",
+      "detailUnconfirmed": "Open the link we emailed to confirm your contact email.",
+      "action": "Add details",
+      "actionUnconfirmed": "Confirm email",
+      "cta": "Add your seller details",
+      "ctaUnconfirmed": "Confirm your email"
+    },
+    "product": {
+      "label": "Add a product",
+      "detail": "A title and a price are enough. It can stay a draft for now.",
+      "detailDone": "{count, plural, one {You have {count} product.} other {You have {count} products.}}",
+      "action": "Add product",
+      "cta": "Add your first product"
+    },
+    "storefront": {
+      "label": "Put a product on a storefront",
+      "detailDone": "A product is on your storefront.",
+      "detailNone": "Create a storefront, then add a product to its grid.",
+      "detailEmpty": "Open your storefront and choose Add product in the toolbar.",
+      "actionCreate": "Create storefront",
+      "actionOpen": "Open designer",
+      "cta": "Open your storefront",
+      "ctaCreate": "Create a storefront"
+    },
+    "publish": {
+      "label": "Publish its page",
+      "detailDone": "Your product page is live.",
+      "detailNeedsSeller": "Finish your seller details, then your page can go live.",
+      "detailNeedsStorefront": "Once a product is on a storefront, its page can go live.",
+      "detailNeedsActive": "Set that product to Active so its page goes live.",
+      "detailPagesOff": "Product pages are off on that storefront. Turn them on in the designer.",
+      "actionEdit": "Edit product",
+      "actionOpen": "Open designer",
+      "cta": "Publish your product",
+      "ctaPagesOff": "Turn on product pages"
+    }
+  },
+  "checklist": {
+    "titleDone": "You're set up",
+    "title": "Get set up",
+    "showMeAround": "Show me around",
+    "showSteps": "Show steps",
+    "hideSteps": "Hide steps",
+    "liveHint": "Your first product page is live. Share the link anywhere.",
+    "copyLink": {
+      "copy": "Copy product page link",
+      "copied": "Copied product page link",
+      "failed": "Couldn't copy product page link. Select and copy it manually."
+    },
+    "openPage": "Open page",
+    "opensInNewTab": " (opens in a new tab)",
+    "hide": "Hide",
+    "progressLabel": "Setup progress",
+    "progress": "{total, plural, other {{done} of {total} done}}",
+    "stepDone": " (done)",
+    "stepToDo": " (to do)"
+  },
+  "welcome": {
+    "steps": {
+      "welcome": {
+        "title": "Welcome to Square Share",
+        "description": "Four steps to a product page you can share."
+      },
+      "path": {
+        "title": "Four steps to your first page"
+      },
+      "seller": {
+        "title": "Add your seller details",
+        "description": "Buyers see these on your product pages, and the law asks for them before you can sell. We never use them for marketing.",
+        "lawNote": "Buyers see these on your product pages, as the law requires. Never used for marketing."
+      },
+      "tour": {
+        "title": "Where everything lives",
+        "description": "Everything is in the sidebar. Here is what each part is for."
+      },
+      "terms": {
+        "title": "Our Terms of Service",
+        "description": "Read the short version, or the full Terms, then agree to carry on."
+      }
+    },
+    "progress": "{total, plural, other {Step {step} of {total}}}",
+    "intro": "Every product you sell can have its own page, styled by a storefront you design.",
+    "tagline": "Give every product its own page, and share it anywhere.",
+    "path": {
+      "seller": {
+        "title": "Add your seller details",
+        "body": "Buyers need to know who they are buying from."
+      },
+      "product": {
+        "title": "Add a product",
+        "body": "A title, a price and a photo if you have one."
+      },
+      "storefront": {
+        "title": "Put it on a storefront",
+        "body": "Pick a look, then place the product on the grid."
+      },
+      "share": {
+        "title": "Share its page",
+        "body": "Paste the link in your bio, a message or your own site."
+      }
+    },
+    "seller": {
+      "namePlaceholder": "e.g. Studio Builderboy e.U.",
+      "nameHelp": "Your business name, or your full name if you sell as yourself.",
+      "nameAlternative": "Or your full name, if you sell as yourself.",
+      "addressPlaceholder": "e.g. 12 Market Street\nDublin, D02 X285\nIreland",
+      "emailPlaceholder": "e.g. hello@yourshop.example",
+      "emailHelp": "Where buyers write to you. It can differ from your sign-in email."
+    },
+    "confirm": {
+      "check": "Check {email} for a confirmation link.",
+      "goLive": "Your product pages go live once you open it.",
+      "sendNewLink": "Send a new link"
+    },
+    "tour": {
+      "mobileMenu": "On your phone, open the menu at the top left.",
+      "searchShortcut": "Looking for something? Press <kbd>{shortcut}</kbd> to search everything.",
+      "searchNoShortcut": "Looking for something? Search finds any page or setting.",
+      "searchMobile": "Looking for something? Tap Search at the top."
+    },
+    "nav": {
+      "skipOnboarding": "Skip onboarding",
+      "next": "Next",
+      "showMeAround": "Show me around",
+      "skipIntro": "Skip intro",
+      "getStarted": "Get started",
+      "skipForNow": "Skip for now",
+      "saveAndContinue": "Save and continue",
+      "changeDetails": "Change details",
+      "continue": "Continue",
+      "exploreOnMyOwn": "Explore on my own",
+      "notNow": "Not now"
+    },
+    "hero": {
+      "buyNow": "Buy now",
+      "live": "Live",
+      "linkCopied": "Link copied"
+    },
+    "setupPath": {
+      "details": "Add your details",
+      "product": "Add a product",
+      "storefront": "Design a storefront",
+      "share": "Share its page"
+    },
+    "terms": {
+      "agreed": "You've agreed to these Terms. Thanks for reading.",
+      "agreeNote": "Agreeing records the date and this version of the Terms on your account."
+    }
+  },
+  "tourOverlay": {
+    "dialogLabel": "Guided tour",
+    "progress": "{total, plural, other {{current} of {total}}}",
+    "shortcut": "Shortcut: <kbd>{shortcut}</kbd>",
+    "skipTour": "Skip tour",
+    "next": "Next",
+    "openingPage": "{page, select, overview {Opening Overview…} products {Opening Products…} storefront {Opening Storefront…} orders {Opening Orders…} analytics {Opening Analytics…} payments {Opening Payments…} settings {Opening Settings…} sampleStorefront {Opening Sample storefront…} other {Opening…}}"
+  },
+  "tourReplay": {
+    "title": "Guided tour",
+    "description": "A short walk through the main thing to do on each page, one step at a time.",
+    "start": "Start the tour"
+  },
+  "guidedTour": {
+    "steps": {
+      "overviewNav": {
+        "title": "Find your way around",
+        "body": "Everything in your store is one click away from the menu. This tour stops at the main thing to do on each page.",
+        "bodySidebar": "Everything in your store is one click away in this sidebar. This tour stops at the main thing to do on each page.",
+        "bodyMenu": "Everything in your store is behind this menu. This tour stops at the main thing to do on each page."
+      },
+      "search": {
+        "title": "Search for anything",
+        "body": "Search jumps straight to any page, product, order or setting.",
+        "bodyTopBar": "Jump straight to any page, product, order or setting.",
+        "bodyPhone": "Tap here to jump straight to any page, product, order or setting."
+      },
+      "productsAdd": {
+        "title": "Add a product",
+        "body": "A title and a price are enough to start. It can stay a draft until you're ready."
+      },
+      "productsImport": {
+        "title": "Or import your catalogue",
+        "body": "Already selling somewhere else? Import a CSV file. A Shopify export works as it is."
+      },
+      "storefrontCreate": {
+        "title": "Create a storefront",
+        "body": "A storefront is a grid you design. Each product you place on it gets a page you can share."
+      },
+      "storefrontSample": {
+        "title": "See how it's done",
+        "body": "This sample shows a finished storefront. Open it to try the designer. Nothing you change there is saved.",
+        "fallbackBody": "Open a storefront to design it."
+      },
+      "storefrontEmbed": {
+        "title": "Embed a storefront on your site",
+        "body": "Each storefront has an embed button that gives you a snippet like this one. The widget is still in development and doesn't show on other sites yet.",
+        "bodyButton": "This button gives you a snippet like the one below to paste into your site. The widget is still in development and doesn't show on other sites yet.",
+        "fallbackBody": "Once you have a storefront, the embed button on its card gives you a snippet like this one. The widget is still in development and doesn't show on other sites yet."
+      },
+      "ordersSearch": {
+        "title": "Find an order",
+        "body": "Search by the buyer's email. Orders land here once Square Share checkout opens."
+      },
+      "ordersFilters": {
+        "title": "Filter and sort",
+        "body": "Narrow orders by channel, status or date, and choose how they're sorted."
+      },
+      "analytics": {
+        "title": "See how it's going",
+        "body": "Sales and visits to your product pages, over the dates you choose.",
+        "bodyRange": "Sales and visits to your product pages, for the dates you pick here.",
+        "bodyFirstRun": "Sales and visits to your product pages show up here once one is live."
+      },
+      "payments": {
+        "title": "Getting paid",
+        "bodyConnect": "Connect Stripe here so payouts go straight to your bank.",
+        "bodyComingSoon": "Getting paid through Stripe is coming soon. Until then, buyers pay you through your product's buy link or by email."
+      },
+      "finish": {
+        "title": "Replay the tour any time",
+        "body": "That's the tour. You can start it again from here whenever you like."
+      }
+    }
+  },
+  "editorTour": {
+    "steps": {
+      "editorAdd": {
+        "title": "Add to your grid",
+        "body": "Add products, text and shapes from this bar. Drag anything on the grid to move it, and pull a corner to resize it."
+      },
+      "editorDesign": {
+        "title": "Set the look",
+        "body": "Colours, fonts, the header and how product cards look are set once for the whole storefront.",
+        "bodyPanel": "Colours, fonts, the header and how product cards look are set here, once for the whole storefront.",
+        "bodyButton": "Tap here for colours, fonts, the header and how product cards look, set once for the whole storefront."
+      },
+      "editorPage": {
+        "title": "Every product gets a page",
+        "body": "Each product on the grid has its own page to share. Open one here to see it and style it."
+      },
+      "editorFinish": {
+        "title": "Make it yours",
+        "body": "The sample never saves, so try anything. When you're ready, create a storefront of your own."
+      }
+    }
+  }
+}

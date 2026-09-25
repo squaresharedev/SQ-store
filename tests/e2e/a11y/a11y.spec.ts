@@ -1,6 +1,8 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 import {
+  agreeToTerms,
+  openTermsStep,
   createProductViaUI,
   createStorefrontViaUI,
   expectTourStep,
@@ -154,7 +156,8 @@ test.describe("accessibility", () => {
 
   test("welcome flow and guided tour", async ({ page }) => {
     // The first thing a new seller meets, so each part is scanned: the welcome
-    // (icon tiles), the seller details form, then the tour it hands over to at
+    // (icon tiles), the Terms (a scroll region, a gated button), the seller
+    // details form, then the tour it hands over to at
     // an anchored stop, a stop on another page, and a fallback stop.
     test.setTimeout(180_000);
     await signUp(page, freshUser("a11y-welcome"), { welcome: "keep" });
@@ -198,14 +201,14 @@ test.describe("accessibility", () => {
     await settled();
     await expectNoSeriousViolations(page, "welcome flow (welcome picture)");
 
-    // Retried: a click that lands before hydration does nothing.
+    // The Terms, with the agree button still shut (a real state to scan), then
+    // read and agreed to.
+    await openTermsStep(page);
+    await settled();
+    await expectNoSeriousViolations(page, "welcome flow (terms of service)");
+    await agreeToTerms(page);
+
     const pathSlide = page.getByRole("dialog", { name: "Four steps to your first page" });
-    await expect(async () => {
-      if (!(await pathSlide.isVisible())) {
-        await dialog.getByRole("button", { name: "Next" }).click();
-      }
-      await expect(pathSlide).toBeVisible({ timeout: 2_000 });
-    }).toPass({ timeout: 20_000 });
     await settled();
     await expectNoSeriousViolations(page, "welcome flow (four-step timeline)");
 
@@ -247,11 +250,13 @@ test.describe("accessibility", () => {
     await tourButton(page, "Next");
     await expectTourStep(page, "storefront-sample");
     await tourSettled();
-    await expectNoSeriousViolations(page, "guided tour (the sample storefront's card)");
+    await expectNoSeriousViolations(page, "guided tour (the sample storefront's link)");
     await tourButton(page, "Next");
-    await expectTourStep(page, "storefront-embed");
+    // A new seller has no card of their own, so the embed stop falls back,
+    // snippet and all.
+    await expectTourStep(page, "storefront-embed", "fallback");
     await tourSettled();
-    await expectNoSeriousViolations(page, "guided tour (embed, with snippet)");
+    await expectNoSeriousViolations(page, "guided tour (embed fallback, with snippet)");
   });
 
   test("sample storefront and its designer tour", async ({ page }) => {

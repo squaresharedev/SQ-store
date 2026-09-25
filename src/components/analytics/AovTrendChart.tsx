@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations, useLocale } from "next-intl";
 import { LineChart } from "@/components/charts";
 import { formatBucketLabel, isMonthlySeries } from "@/lib/analytics/buckets";
 import type { RevenuePoint } from "@/lib/analytics/types";
@@ -22,6 +23,8 @@ export function AovTrendChart({
   series: RevenuePoint[];
   currency: string;
 }) {
+  const t = useTranslations("Analytics.sales.aov");
+  const locale = useLocale();
   const monthly = isMonthlySeries(series.map((point) => point.date));
   const data = series.map((point) => ({
     date: point.date,
@@ -32,14 +35,14 @@ export function AovTrendChart({
     <LineChart
       data={data}
       xKey="date"
-      series={[{ key: "aovCents", label: "Average order", colorIndex: TONE.money }]}
+      series={[{ key: "aovCents", label: t("series"), colorIndex: TONE.money }]}
       height={CHART_HEIGHT}
       connectNulls
-      valueFormatter={moneyExact(currency)}
-      axisValueFormatter={moneyCompact(currency)}
-      xFormatter={(date) => formatBucketLabel(date, monthly)}
+      valueFormatter={moneyExact(currency, locale)}
+      axisValueFormatter={moneyCompact(currency, locale)}
+      xFormatter={(date) => formatBucketLabel(date, monthly, locale)}
       yAxisWidth={56}
-      ariaLabel="Average order value over time"
+      ariaLabel={t("ariaLabel")}
     />
   );
 }

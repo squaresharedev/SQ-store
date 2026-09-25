@@ -1,0 +1,696 @@
+{
+  "metadata": {
+    "layout": {
+      "titleTemplate": "%s | Square Share",
+      "default": "Ustawienia | Square Share"
+    },
+    "account": {
+      "title": "Ustawienia konta"
+    },
+    "notifications": {
+      "title": "Ustawienia powiadomień"
+    },
+    "language": {
+      "title": "Ustawienia języka"
+    },
+    "danger": {
+      "title": "Strefa niebezpieczna"
+    },
+    "legal": {
+      "title": "Ustawienia prawne"
+    },
+    "team": {
+      "title": "Zespół i dostęp"
+    },
+    "tax": {
+      "title": "Firma i dane sprzedawcy"
+    },
+    "shipping": {
+      "title": "Ustawienia wysyłki i zwrotów"
+    },
+    "security": {
+      "title": "Bezpieczeństwo"
+    }
+  },
+  "loading": "Wczytywanie ustawień…",
+  "shell": {
+    "sectionsLabel": "Sekcje ustawień",
+    "recommended": "Zalecane"
+  },
+  "continueToStorefront": "Przejdź do swojej witryny",
+  "account": {
+    "fallbackName": "Konto",
+    "avatar": {
+      "cardTitle": "Zdjęcie profilowe",
+      "cardDescription": "Plik JPEG, PNG lub WebP do 2 MB. Widoczne w całym panelu.",
+      "errorTooLarge": "Ten obraz jest za duży. Musi mieć mniej niż 2 MB.",
+      "errorBadType": "Użyj obrazu w formacie JPEG, PNG lub WebP.",
+      "errorReadFailed": "Nie udało się odczytać tego pliku.",
+      "editLabel": "Edytuj zdjęcie profilowe",
+      "uploadLabel": "Prześlij zdjęcie profilowe",
+      "statusUploading": "Przesyłanie zdjęcia profilowego",
+      "statusRemoving": "Usuwanie zdjęcia profilowego",
+      "chooseLabel": "Wybierz zdjęcie profilowe",
+      "changePhoto": "Zmień zdjęcie",
+      "uploadPhoto": "Prześlij zdjęcie"
+    },
+    "crop": {
+      "title": "Przytnij zdjęcie",
+      "description": "Przeciągnij, aby zmienić położenie. Przewiń lub użyj suwaka, aby przybliżyć.",
+      "areaLabel": "Obszar przycinania. Przeciągnij lub użyj klawiszy strzałek, aby zmienić położenie.",
+      "zoomLabel": "Przybliżenie",
+      "chooseAnother": "Wybierz inne",
+      "savePhoto": "Zapisz zdjęcie",
+      "errors": {
+        "load": "Nie udało się wczytać tego obrazu. Spróbuj wybrać je ponownie.",
+        "process": "Twoja przeglądarka nie mogła przetworzyć tego obrazu.",
+        "prepare": "Nie udało się przygotować tego obrazu. Spróbuj innego.",
+        "export": "Nie udało się wyeksportować tego obrazu. Prześlij je ponownie."
+      }
+    },
+    "username": {
+      "cardTitle": "Nazwa użytkownika",
+      "cardDescription": "Logujesz się nią zamiast adresem e-mail. Tylko litery, cyfry i znaki podkreślenia, każda nazwa jest unikalna.",
+      "label": "Nazwa użytkownika",
+      "placeholder": "twojanazwa",
+      "available": "Dostępna.",
+      "taken": "Ta nazwa użytkownika jest już zajęta, spróbuj innej.",
+      "checking": "Sprawdzanie…"
+    },
+    "bio": {
+      "cardTitle": "Bio",
+      "cardDescription": "Krótkie zdanie o tobie lub o tym, co tworzysz. Kupujący widzą je na stronach twoich produktów.",
+      "label": "Bio",
+      "optional": "(Opcjonalnie)",
+      "placeholder": "np. Ręcznie toczona kamionka z małej pracowni w Krakowie",
+      "charactersLeft": "{count, plural, one {Pozostał {count} znak} few {Pozostały {count} znaki} many {Pozostało {count} znaków} other {Pozostało {count} znaku}}"
+    },
+    "email": {
+      "cardTitle": "E-mail",
+      "cardDescription": "Zmiana wysyła najpierw link potwierdzający. Nic się nie zmienia, dopóki go nie klikniesz, więc literówka tutaj nic nie kosztuje.",
+      "currentlySignedInAs": "Obecnie zalogowano jako <address>{email}</address>",
+      "newEmailLabel": "Nowy e-mail",
+      "newEmailPlaceholder": "ty@studio.com",
+      "currentPasswordLabel": "Aktualne hasło",
+      "passwordTipLabel": "Dlaczego potrzebne jest tu hasło",
+      "passwordTipBody": "Osoba, która ma dostęp do twojego adresu e-mail, może zresetować twoje hasło, więc zmiana adresu wpływa na sposób odzyskania dostępu do konta. Hasło potwierdza, że to naprawdę ty wprowadzasz tę zmianę.",
+      "sendConfirmationLink": "Wyślij link potwierdzający"
+    },
+    "password": {
+      "cardTitle": "Hasło",
+      "descriptionHasPassword": "Zmień je, kiedy chcesz. Najpierw prosimy o aktualne hasło, żeby się upewnić, że to naprawdę ty.",
+      "descriptionNeverShown": "Ze względów bezpieczeństwa hasło nigdy nie jest tu wyświetlane. Aby je zmienić, wyślemy ci e-mailem link do ustawienia nowego.",
+      "descriptionNoPassword": "Logujesz się przez Google. Dodaj hasło, aby móc logować się też e-mailem lub nazwą użytkownika.",
+      "changeButton": "Zmień hasło",
+      "resetButton": "Zresetuj hasło",
+      "setButton": "Ustaw hasło",
+      "modalTitleChange": "Zmień hasło",
+      "modalTitleReset": "Zresetuj swoje hasło",
+      "modalTitleSet": "Ustaw hasło",
+      "modalDescriptionReset": "Wyślemy link na adres {email}. Wygaśnie wkrótce po dotarciu.",
+      "modalDescriptionChange": "Podaj aktualne hasło, a potem nowe.",
+      "currentPasswordLabel": "Aktualne hasło",
+      "newPasswordLabel": "Nowe hasło",
+      "passwordHint": "Co najmniej 8 znaków, wielkie i małe litery, cyfry lub symbole (albo fraza o długości 16 znaków lub więcej).",
+      "confirmPasswordLabel": "Potwierdź nowe hasło",
+      "signOutWarning": "Wszystkie inne urządzenia zostaną wylogowane.",
+      "forgotPassword": "Nie pamiętasz hasła?",
+      "updating": "Aktualizowanie…",
+      "updateButton": "Zaktualizuj hasło",
+      "resendIn": "{seconds, plural, one {Wyślij ponownie za #s} few {Wyślij ponownie za #s} many {Wyślij ponownie za #s} other {Wyślij ponownie za #s}}",
+      "resendEmail": "Wyślij e-mail ponownie",
+      "emailMeALink": "Wyślij mi link e-mailem",
+      "googleAccountNote": "To konto loguje się przez Google. Ustawienie hasła pozwala logować się też e-mailem lub nazwą użytkownika i nie usuwa logowania przez Google.",
+      "neverShownNote": "Twoje obecne hasło nigdy nie jest wyświetlane. Otwórz link, aby wybrać nowe; jego ustawienie wyloguje pozostałe urządzenia."
+    },
+    "signOut": {
+      "cardTitle": "Wyloguj się",
+      "cardDescription": "Zakończ tę sesję na tym urządzeniu albo wyloguj się wszędzie, aby wylogować się ze wszystkich urządzeń naraz.",
+      "signingOut": "Wylogowywanie…",
+      "button": "Wyloguj się",
+      "everywhereButton": "Wyloguj się wszędzie",
+      "everywhereNote": "Wylogowanie wszędzie kończy sesję na każdym urządzeniu i w każdej przeglądarce z aktywnym logowaniem. Ponowne zalogowanie będzie potrzebne w każdym miejscu z osobna."
+    },
+    "success": {
+      "usernameSaved": "Zapisano nazwę użytkownika.",
+      "bioSaved": "Zapisano bio.",
+      "emailChangeStarted": "Sprawdź skrzynkę odbiorczą. Zmiana zacznie obowiązywać po potwierdzeniu linku.",
+      "passwordUpdated": "Zaktualizowano hasło. Inne urządzenia zostały wylogowane.",
+      "resetSent": "Wysłano link do resetowania hasła. Sprawdź skrzynkę odbiorczą.",
+      "avatarUpdated": "Zaktualizowano zdjęcie profilowe.",
+      "avatarRemoved": "Usunięto zdjęcie profilowe."
+    }
+  },
+  "danger": {
+    "export": {
+      "cardTitle": "Eksportuj moje dane",
+      "cardDescription": "Wszystko, co o tobie przechowujemy: profil, produkty, konfiguracja witryny, w jednym pliku JSON. To twoje dane, należą do ciebie.",
+      "downloadButton": "Pobierz moje dane",
+      "stepUpDescription": "Eksport zawiera całe twoje konto. Wpisz aktualny kod z aplikacji uwierzytelniającej, aby go pobrać."
+    },
+    "delete": {
+      "requestedTitle": "Zgłoszono usunięcie",
+      "requestedDescription": "Zgłoszono prośbę o usunięcie tego konta dnia {date}. Zostało oznaczone do trwałego usunięcia, razem z produktami i witryną. Do czasu faktycznego usunięcia nadal można to cofnąć.",
+      "cancelling": "Anulowanie…",
+      "keepButton": "Zachowaj moje konto",
+      "title": "Usuń konto",
+      "description": "To oznacza twoje konto, produkty i witrynę do trwałego usunięcia. Bez owijania w bawełnę: gdy to nastąpi, wszystko znika bezpowrotnie.",
+      "deleteButton": "Usuń moje konto",
+      "confirmLabel": "Wpisz <code>{phrase}</code>, aby potwierdzić",
+      "flagging": "Oznaczanie…",
+      "permanentlyDelete": "Usuń trwale",
+      "neverMind": "Nieważne"
+    },
+    "success": {
+      "deletionRequested": "Zgłoszono usunięcie.",
+      "deletionCancelled": "Anulowano prośbę o usunięcie. Dobrze, że jesteś z nami."
+    }
+  },
+  "notifications": {
+    "cardTitle": "Powiadomienia e-mail",
+    "cardDescription": "Wybierz, co ma trafiać na twoją skrzynkę. Wiadomości o bezpieczeństwie i płatnościach docierają zawsze, tych nie możemy wyciszyć.",
+    "prefs": {
+      "sales": {
+        "label": "Sprzedaż",
+        "blurb": "Wysyłaj e-mail za każdym razem, gdy coś się sprzeda. Ten rodzaj hałasu w skrzynce lubimy."
+      },
+      "productUpdates": {
+        "label": "Nowości w produkcie",
+        "blurb": "Nowe funkcje i ulepszenia panelu, gdy tylko są gotowe do wdrożenia."
+      },
+      "marketing": {
+        "label": "Porady i nowości z rynku",
+        "blurb": "Od czasu do czasu pomysły, jak sprzedawać więcej. Bez spamu, bez przesady."
+      }
+    },
+    "success": {
+      "notificationsSaved": "Zapisano preferencje."
+    }
+  },
+  "legal": {
+    "cardTitle": "Umowa sprzedawcy, warunki i prywatność",
+    "cardDescription": "Aktualne wersje robocze, prostym językiem, bo nikt nie czyta prawniczego żargonu dla przyjemności. Prawdziwe treści prawne są w przygotowaniu; akceptacja teraz obejmuje tę wersję roboczą.",
+    "termsTitle": "Warunki korzystania z usługi",
+    "termsDescription": "Skrócona wersja tego, na co się zgadzasz, sprzedając w Square Share, z pełnymi Warunkami o jedno kliknięcie dalej.",
+    "docs": {
+      "sellerAgreement": {
+        "title": "Umowa sprzedawcy",
+        "body": "Twoja praca zawsze należy do ciebie. Pobieramy niewielką prowizję od każdej sprzedaży, obsługujemy płatności przez Stripe i dbamy o działanie serwerów. Ty dbasz o zgodność z prawem i wysyłasz to, co faktycznie sprzedajesz. To wersja robocza zastępcza; prawdziwa umowa jest w przygotowaniu."
+      },
+      "terms": {
+        "title": "Warunki korzystania z usługi",
+        "body": "Nie nadużywaj platformy, nie sprzedawaj rzeczy, które komuś szkodzą, i zachowuj się fair wobec sklepów innych twórców. To wersja robocza zastępcza; prawdziwe warunki są w przygotowaniu."
+      },
+      "privacy": {
+        "title": "Polityka prywatności",
+        "body": "Przechowujemy to, co nam przekazujesz (profil, produkty, witrynę), nigdy tego nie sprzedajemy i usuwamy, gdy odchodzisz. Płatności obsługuje Stripe, więc dane twojej karty zostają u nich, nie u nas. To wersja robocza zastępcza; prawdziwa polityka jest w przygotowaniu."
+      },
+      "sellerDetails": {
+        "title": "Twoje dane sprzedawcy i gdzie trafiają",
+        "body": "Twoja nazwa przedsiębiorcy, adres i e-mail kontaktowy są widoczne dla kupujących na stronach twoich produktów i są wymagane, aby móc cokolwiek opublikować lub sprzedać. To jedyne, do czego ich używamy: prawo konsumenckie UE wymaga, aby kupujący mógł zobaczyć, od kogo kupuje, i mógł się z nim skontaktować przed złożeniem zamówienia. Wysyłamy jeden link na twój adres kontaktowy, aby można było potwierdzić, że działa, i to jedyna wiadomość, jaką wysyłamy tam z własnej inicjatywy: żadnej listy mailingowej, żadnego marketingu, i nigdy nie sprzedajemy ani nie udostępniamy tych danych. Numer telefonu i numer VAT UE są opcjonalne i widoczne tylko wtedy, gdy je uzupełnisz."
+      }
+    },
+    "accepted": "Zaakceptowano wersję <code>{version}</code> dnia {date}. Nie musisz tu nic więcej robić.",
+    "outdated": "Zaakceptowano wersję <code>{version}</code> dnia {date}, ale od tego czasu dokumenty się zmieniły. Przeczytaj je ponownie i zaakceptuj aktualną wersję.",
+    "agreed": "Zaakceptowano wersję <code>{version}</code> dnia {date}. Nic więcej nie trzeba tu robić.",
+    "agreedOutdated": "Zaakceptowano wersję <code>{version}</code> dnia {date}, ale od tego czasu Warunki się zmieniły. Przeczytaj je ponownie i zaakceptuj aktualną wersję.",
+    "recording": "Zapisywanie…",
+    "acceptButton": "Akceptuję",
+    "agreeButton": "Akceptuję Warunki po zapoznaniu się z nimi",
+    "acceptNote": "Akceptacja zapisuje na twoim koncie datę i wersję <code>{version}</code>.",
+    "agreeNote": "Akceptacja zapisuje na twoim koncie datę i wersję <code>{version}</code>.",
+    "scrollToAgree": "Przewiń do końca podsumowania, aby zaakceptować.",
+    "success": {
+      "legalAccepted": "Zaakceptowano. Dziękujemy za przeczytanie drobnego druku.",
+      "termsAgreed": "Warunki korzystania z usługi zostały zaakceptowane."
+    },
+    "termsSummary": {
+      "intro": "Krótka wersja, prostym językiem. Ostatnia aktualizacja: {date}.",
+      "fullTermsLink": "Przeczytaj pełne Warunki korzystania z usługi",
+      "opensInNewTab": " (otwiera się w nowej karcie)",
+      "regionLabel": "Warunki korzystania z usługi, wersja skrócona",
+      "footer": "To podsumowanie ma ci pomóc w czytaniu. Wiążące są pełne <terms>Warunki korzystania z usługi</terms> i <privacy>Polityka prywatności</privacy>.",
+      "sections": {
+        "parties": {
+          "heading": "Z kim masz do czynienia",
+          "points": {
+            "merchantOfRecord": "Square Share to platforma, która pomaga ci sprzedawać. Gdy kupujący składa u ciebie zamówienie, sprzedaż zawierana jest między tobą a tym kupującym: to ty jesteś sprzedawcą i podmiotem odpowiedzialnym za sprzedaż (merchant of record), a nie my.",
+            "eligibility": "Musisz mieć ukończone 18 lat lub wiek pełnoletności obowiązujący tam, gdzie mieszkasz. Jeśli rejestrujesz się w imieniu firmy, potwierdzasz, że możesz ją związać tymi Warunkami."
+          }
+        },
+        "account": {
+          "heading": "Twoje konto",
+          "points": {
+            "security": "Dbaj o prawdziwość swoich danych i bezpieczeństwo logowania. Odpowiadasz za to, co dzieje się na twoim koncie, więc od razu daj nam znać, jeśli uważasz, że ktoś się na nie dostał.",
+            "traderDetails": "Zanim cokolwiek zostanie opublikowane, podajesz nam nazwę przedsiębiorcy, adres pocztowy i potwierdzony adres e-mail do kontaktu. Kupujący widzą te dane na stronach twoich produktów, ponieważ wymaga tego prawo konsumenckie."
+          }
+        },
+        "selling": {
+          "heading": "Sprzedaż",
+          "points": {
+            "lawfulListings": "Podawaj rzetelne informacje w ofertach i sprzedawaj tylko legalne rzeczy, do których sprzedaży masz prawo.",
+            "consumerRights": "Przestrzegaj praw konsumenckich swoich kupujących, w tym 14-dniowego prawa odstąpienia od umowy i odpowiedzialności za brak zgodności towaru z umową, oraz samodzielnie zajmuj się dostawą, obsługą i zwrotami pieniędzy.",
+            "taxesAndRecords": "Podatki i VAT od twojej sprzedaży leżą po twojej stronie, a własne zapisy sprzedaży przechowujesz przez 10 lat."
+          }
+        },
+        "payments": {
+          "heading": "Płatności",
+          "points": {
+            "stripe": "Płatności przechodzą przez Stripe, na twoje własne konto Stripe, na warunkach samego Stripe. Nigdy nie przechowujemy twoich pieniędzy.",
+            "feesAndDisputes": "Pobieramy opłatę platformową od każdej sprzedaży, zgodnie z tym, co widać w twoim panelu. Zwrotne obciążenia i spory toczą się między tobą, twoim kupującym i Stripe."
+          }
+        },
+        "notAllowed": {
+          "heading": "Czego nie wolno",
+          "points": {
+            "products": "Nielegalne, podrabiane lub naruszające prawa produkty, złośliwe oprogramowanie, treści szerzące nienawiść i treści dla dorosłych.",
+            "conduct": "Oszustwa, omijanie opłat platformowych, scraping, wykorzystywanie cudzych treści do trenowania modeli AI oraz atakowanie usługi.",
+            "tampering": "Ukrywanie lub zmienianie tego, co Square Share pokazuje kupującym, np. danych sprzedawcy, cen czy informacji prawnych."
+          }
+        },
+        "content": {
+          "heading": "Twoje treści",
+          "points": {
+            "ownership": "To, co przesyłasz, pozostaje twoje. Udzielasz nam licencji na przechowywanie i wyświetlanie tych treści, wyłącznie po to, by prowadzić i promować Square Share."
+          }
+        },
+        "liability": {
+          "heading": "Odpowiedzialność, zmiany i prawo",
+          "points": {
+            "cap": "Square Share jest na wczesnym etapie i jest udostępniany użytkownikom biznesowym w stanie „takim, jaki jest”. W ich przypadku nasza odpowiedzialność jest ograniczona do opłat zapłaconych nam w ostatnich 12 miesiącach lub 100 EUR, zależnie od tego, która kwota jest wyższa, a sprzedawcy biznesowi zabezpieczają nas przed roszczeniami wynikającymi z ich produktów, stron internetowych lub naruszeń. Jeśli jesteś konsumentem, twoje prawa ustawowe pozostają nienaruszone.",
+            "termination": "Możemy zawiesić lub zamknąć konta naruszające te Warunki. Możesz odejść w dowolnym momencie i zabrać swoje dane.",
+            "changesAndLaw": "Możemy aktualizować te Warunki, z wcześniejszym powiadomieniem o istotnych zmianach. Stosuje się prawo czeskie.",
+            "policies": "Nasza Polityka prywatności i Polityka plików cookie stanowią część tych Warunków."
+          }
+        }
+      }
+    }
+  },
+  "tax": {
+    "cardTitle": "Firma i dane sprzedawcy",
+    "cardDescription": "Ustawiane raz dla całego konta. Widoczne dla kupujących na każdej stronie produktu, na której sprzedajesz, i używane do faktur oraz VAT.",
+    "verifyOutcome": {
+      "verified": "Potwierdzono e-mail kontaktowy. Możesz teraz publikować.",
+      "expired": "Ten link potwierdzający wygasł. Wyślij sobie nowy poniżej.",
+      "stale": "Ten link dotyczył innego adresu niż zapisany tutaj. Wyślij nowy poniżej.",
+      "invalid": "Ten link potwierdzający jest nieprawidłowy albo został już użyty.",
+      "throttled": "Zbyt wiele prób potwierdzenia. Odczekaj chwilę, a potem otwórz link ponownie."
+    },
+    "gate": {
+      "required": "<strong>Twoja nazwa przedsiębiorcy, adres i e-mail kontaktowy są wymagane, aby móc cokolwiek opublikować lub sprzedać.</strong> Kupujący muszą wiedzieć, od kogo kupują, i jak się z tobą skontaktować, zanim złożą zamówienie.",
+      "privacyNoteLinked": "Te dane są publicznie widoczne na stronach twoich produktów wyłącznie z tego powodu. Nigdy nie używamy ich do marketingu i nigdy ich nie sprzedajemy ani nie udostępniamy. Jedyna wiadomość, jaką wysyłamy na twój adres kontaktowy, to link potwierdzający go. Zobacz <link>Politykę prywatności Squareshare</link>."
+    },
+    "countryNotEu": "Poza UE / wolę nie podawać",
+    "vatAdvisory": {
+      "noCountry": "Ten numer VAT wygląda na wydany przez {issuer}. Warto ustawić odpowiedni kraj.",
+      "mismatch": "Ten numer VAT wygląda na wydany przez {issuer}, ale jako kraj ustawiono {selected}. Sprawdź, czy oba są poprawne."
+    },
+    "fields": {
+      "businessName": {
+        "label": "Nazwa przedsiębiorcy",
+        "tipLabel": "Co tu wpisać",
+        "tipBody": "Nazwa, z którą kupujący zawierają umowę. Twoja zarejestrowana nazwa firmy, jeśli sprzedajesz jako firma; twoje pełne imię i nazwisko, jeśli sprzedajesz jako osoba prywatna. Nazwa twojej witryny to nazwa sklepu, co nie jest tym samym i nie może jej zastąpić.",
+        "placeholder": "np. Studio Builderboy e.U."
+      },
+      "address": {
+        "label": "Adres",
+        "tipLabel": "Dlaczego widzą to kupujący",
+        "tipBody": "Przepisy o sprzedaży na odległość wymagają adresu pocztowego przy każdej ofercie. Widoczny w sekcji Sprzedawca na stronach twoich produktów.",
+        "placeholder": "np. ul. Rynek 12\nWarszawa, 00-001\nPolska"
+      },
+      "email": {
+        "label": "E-mail kontaktowy",
+        "tipLabel": "Czym różni się od e-maila do logowania",
+        "tipBody": "Widoczny dla kupujących jako link mailto i używany jako zapasowy przycisk zakupu, gdy produkt nie ma linku do zakupu. Celowo oddzielony od e-maila do logowania: użyj adresu, na który chcesz, żeby kupujący pisali. Musi to być adres, który faktycznie czytasz: adresy zastępcze, tymczasowe skrzynki i adresy no-reply są odrzucane, podobnie jak domena, która nie przyjmuje poczty.",
+        "placeholder": "np. kontakt@twojsklep.example",
+        "statusDirty": "Zapisz, aby wysłać link potwierdzający na nowy adres. Kupujący zobaczą go dopiero po potwierdzeniu.",
+        "statusConfirmed": "Potwierdzony: kupujący mogą się tu z tobą skontaktować.",
+        "statusUnconfirmed": "Jeszcze niepotwierdzony. Otwórz link, który wysłaliśmy na ten adres."
+      },
+      "vatId": {
+        "label": "Numer VAT UE",
+        "placeholder": "np. PL1234567890"
+      },
+      "country": {
+        "label": "Kraj"
+      },
+      "phone": {
+        "label": "Telefon"
+      },
+      "bio": {
+        "label": "Bio",
+        "tipLabel": "Gdzie widzą to kupujący",
+        "tipBody": "Jedna linijka o tobie lub o tym, co tworzysz, widoczna pod twoim imieniem i nazwiskiem w sekcji Sprzedawca na stronach twoich produktów. Opcjonalne: możesz publikować bez tego. Bio w nagłówku każdej witryny ustawia się osobno w edytorze witryny.",
+        "placeholder": "np. Kamionka toczona ręcznie w małej pracowni w Krakowie",
+        "charactersLeft": "{count, plural, one {Pozostał # znak} few {Pozostały # znaki} many {Pozostało # znaków} other {Pozostało # znaku}}"
+      }
+    },
+    "resend": {
+      "button": "Wyślij e-mail potwierdzający ponownie"
+    },
+    "success": {
+      "savedCheckEmail": "Zapisano. Sprawdź {email}, żeby znaleźć link do potwierdzenia adresu.",
+      "sellerDetailsSaved": "Zapisano dane firmy i sprzedawcy.",
+      "alreadyConfirmed": "Ten adres jest już potwierdzony.",
+      "confirmationSent": "Wysłano. Sprawdź {email}, żeby znaleźć link."
+    }
+  },
+  "shipping": {
+    "shipsFrom": {
+      "label": "Wysyłka z",
+      "notSet": "Nie ustawiono"
+    },
+    "shippingCard": {
+      "title": "Wysyłka",
+      "description": "Ustawiane raz dla całego konta. Widoczne na każdej stronie produktu, na której sprzedajesz, i stosowane do każdego produktu, który nie ma wyjątku poniżej."
+    },
+    "dispatch": {
+      "label": "Czas wysyłki",
+      "tipLabel": "Dlaczego to osobne pole",
+      "tipBody": "Jedna linijka, wyświetlana obok przycisku zakupu. „Kiedy to wyjedzie?” to pierwsze pytanie kupujących i nie powinno wymagać czytania akapitu, żeby na nie odpowiedzieć.",
+      "placeholder": "np. Wysyłka w ciągu 1-3 dni roboczych"
+    },
+    "destinations": {
+      "label": "Dokąd wysyłasz i ile to trwa",
+      "tipLabel": "Ile szczegółów podać",
+      "tipBody": "Grupuj kierunki tak, jak faktycznie wysyłasz: jeden wiersz dla kraju, jeden dla reszty UE, jeden dla wszystkiego innego zwykle wystarczy. Zostaw koszt pusty, jeśli się zmienia.",
+      "empty": "Nic tu jeszcze nie ma. Kupujący nie zobaczą czasu dostawy, dopóki nie dodasz wiersza.",
+      "areaLabel": "Kierunek {number}",
+      "areaPlaceholder": "np. Reszta UE",
+      "timeLabel": "Czas dostawy {number}",
+      "timePlaceholder": "np. 5-7 dni roboczych",
+      "costLabel": "Koszt wysyłki {number}",
+      "costPlaceholder": "np. 9,00 EUR",
+      "removeNamed": "Usuń kierunek {area}",
+      "removeNumbered": "Usuń kierunek {number}",
+      "add": "Dodaj kierunek",
+      "limitReached": "{max, plural, one {To wszystkie # kierunek. Usuń jeden, aby dodać kolejny.} few {To wszystkie # kierunki. Usuń jeden, aby dodać kolejny.} many {To wszystkie # kierunków. Usuń jeden, aby dodać kolejny.} other {To wszystkie # kierunku. Usuń jeden, aby dodać kolejny.}}"
+    },
+    "notes": {
+      "label": "Coś jeszcze o wysyłce",
+      "placeholder": "np. Standardowo z numerem śledzenia. Nie wysyłamy na skrytki pocztowe."
+    },
+    "returnsCard": {
+      "title": "Zwroty",
+      "description": "To, co oferujesz ponad ustawowe prawa, które już podane są na stronach twoich produktów."
+    },
+    "returnsWindow": {
+      "label": "Termin na zwrot",
+      "tipLabel": "Co już obejmuje prawo ustawowe",
+      "tipBody": "Sprzedaż kupującym z UE na odległość daje im 14 dni na zmianę zdania i dwuletnią odpowiedzialność za brak zgodności towaru z umową, niezależnie od tego, co wybierzesz tutaj. Twoje strony produktów podają już oba te terminy, więc to, co ustawisz tu, jest ofertą ponad nie.",
+      "none": "Nic ponad prawo ustawowe",
+      "days": "{days, plural, one {# dzień} few {# dni} many {# dni} other {# dnia}}",
+      "statutoryMinimum": "Ustawowe minimum UE",
+      "custom": "Coś innego",
+      "customLabel": "Termin na zwrot w dniach",
+      "daysUnit": "dni"
+    },
+    "returnsPaidBy": {
+      "label": "Koszt odesłania zwrotu",
+      "buyer": "Koszt odesłania zwrotu pokrywa kupujący",
+      "seller": "Koszt odesłania zwrotu pokrywamy my"
+    },
+    "exceptions": {
+      "label": "Wyjątki",
+      "tipLabel": "Co tu podać",
+      "tipBody": "Wszystko, czego nie obejmuje termin powyżej: przedmioty na zamówienie, artykuły higieniczne, otwarte oprogramowanie. Kupujący czytają to przed zakupem, nie po.",
+      "placeholder": "np. Przedmiotów na zamówienie nie można zwrócić, chyba że są wadliwe."
+    },
+    "preview": {
+      "title": "Co przeczytają kupujący",
+      "description": "Tworzone na podstawie twoich odpowiedzi powyżej i widoczne na każdej stronie produktu.",
+      "shippingHeading": "Wysyłka",
+      "returnsHeading": "Zwroty",
+      "empty": "Nic jeszcze. Dopóki nie odpowiesz na coś powyżej, strony twoich produktów nie mają sekcji wysyłki ani zwrotów."
+    },
+    "ownWords": {
+      "title": "Napisz to samodzielnie",
+      "description": "Opcjonalne. Wszystko, co tu wpiszesz, zastępuje słowo w słowo to, co wygenerowano powyżej.",
+      "shippingLabel": "Twoje zasady wysyłki",
+      "returnsLabel": "Twoje zasady zwrotów",
+      "placeholder": "Zostaw puste, aby użyć odpowiedzi powyżej."
+    },
+    "profiles": {
+      "title": "Profile wysyłki",
+      "description": "Dla nielicznych produktów, które wysyłasz inaczej. Wybierz jeden na samym produkcie, w sekcji Wysyłka.",
+      "empty": "Jeszcze żadnego. Dodaj profil tylko wtedy, gdy niektóre produkty wysyłasz inaczej niż wynika to z warunków powyżej.",
+      "nameLabel": "Nazwa",
+      "namePlaceholder": "np. Produkty wielkogabarytowe",
+      "removeNamed": "Usuń profil wysyłki {name}",
+      "removeUnnamed": "Usuń ten profil wysyłki",
+      "dispatchLabel": "Czas wysyłki",
+      "dispatchPlaceholder": "np. Na zamówienie, licz się z 3 tygodniami",
+      "bodyLabel": "Wysyłka",
+      "bodyPlaceholder": "Jak wysyłane są te produkty i ile to kosztuje",
+      "noTerms": "Dodaj warunki, w przeciwnym razie ten profil zostanie usunięty przy zapisie.",
+      "add": "Dodaj profil",
+      "limitReached": "{max, plural, one {To wszystkie # profil. Usuń jeden, aby dodać kolejny.} few {To wszystkie # profile. Usuń jeden, aby dodać kolejny.} many {To wszystkie # profili. Usuń jeden, aby dodać kolejny.} other {To wszystkie # profilu. Usuń jeden, aby dodać kolejny.}}"
+    },
+    "success": {
+      "shippingSaved": "Zapisano ustawienia wysyłki i zwrotów."
+    }
+  },
+  "sellerDetails": {
+    "bannerLabel": "Wymagane dane sprzedawcy",
+    "memberHeadline": "Ten sklep nie może jeszcze publikować ani sprzedawać.",
+    "memberFix": "Jego właściciel musi uzupełnić dane sprzedawcy we własnych ustawieniach.",
+    "addLink": "Dodaj dane sprzedawcy",
+    "opensInNewTab": " (otwiera się w nowej karcie)",
+    "headline": {
+      "publishOrSell": "Nie możesz niczego opublikować ani sprzedać, dopóki dane sprzedawcy nie są kompletne.",
+      "putProductOnSale": "Nie możesz wystawić tego produktu na sprzedaż, dopóki dane sprzedawcy nie są kompletne.",
+      "importLiveProducts": "Nie możesz importować opublikowanych produktów, dopóki dane sprzedawcy nie są kompletne.",
+      "embedStorefront": "Nie możesz osadzić tej witryny, dopóki dane sprzedawcy nie są kompletne.",
+      "publishStorefront": "Nie możesz opublikować tej witryny ani z niej sprzedawać, dopóki dane sprzedawcy nie są kompletne."
+    },
+    "reason": "Kupujący muszą wiedzieć, od kogo kupują, i jak się z tobą skontaktować, zanim złożą zamówienie. Dane te są widoczne na stronach twoich produktów tylko z tego powodu, nigdy nie są używane do marketingu.",
+    "fields": {
+      "businessName": {
+        "label": "Nazwa przedsiębiorcy",
+        "why": "Kupujący muszą wiedzieć, od kogo kupują: twoją nazwę firmy albo twoje pełne imię i nazwisko, jeśli sprzedajesz jako osoba prywatna."
+      },
+      "address": {
+        "label": "Adres firmy",
+        "why": "Adres pocztowy musi być podany przy każdej ofercie zgodnie z przepisami o sprzedaży na odległość."
+      },
+      "email": {
+        "label": "E-mail kontaktowy",
+        "why": "Adres, na który kupujący piszą w sprawie zamówienia. To także zapasowy przycisk zakupu, gdy produkt nie ma linku do zakupu."
+      },
+      "emailVerified": {
+        "label": "Potwierdzony e-mail kontaktowy",
+        "why": "Wysyłamy link na ten adres, a ty go klikasz. Nic innego nie dowodzi, że wiadomość od kupującego rzeczywiście do kogoś dotrze."
+      }
+    }
+  },
+  "security": {
+    "copyRecoveryCodes": {
+      "copy": "Kopiuj kody odzyskiwania",
+      "copied": "Skopiowano kody odzyskiwania",
+      "failed": "Nie udało się skopiować kodów odzyskiwania. Zaznacz je i skopiuj ręcznie."
+    },
+    "copySetupKey": {
+      "copy": "Kopiuj klucz konfiguracji",
+      "copied": "Skopiowano klucz konfiguracji",
+      "failed": "Nie udało się skopiować klucza konfiguracji. Zaznacz go i skopiuj ręcznie."
+    },
+    "prompt": {
+      "title": "Twoje hasło to jedyny zamek na tym koncie",
+      "body": "Włącz uwierzytelnianie dwuskładnikowe, aby logowanie wymagało też kodu z telefonu. Zajmuje to około minuty.",
+      "cta": "Włącz 2FA"
+    },
+    "recoveredNotice": "<strong>Uwierzytelnianie dwuskładnikowe jest wyłączone.</strong> Zalogowano kodem odzyskiwania, co usunęło dotychczasową aplikację uwierzytelniającą i wylogowało pozostałe urządzenia. Skonfiguruj je ponownie teraz, aby samo hasło nie było jedynym zabezpieczeniem twojego konta.",
+    "stepUpConfirm": "Wpisz aktualny kod z aplikacji uwierzytelniającej, aby potwierdzić.",
+    "twoFactor": {
+      "cardTitle": "Uwierzytelnianie dwuskładnikowe",
+      "descriptionOn": "Logowanie wymaga hasła i kodu z aplikacji uwierzytelniającej.",
+      "descriptionOff": "Dodaj drugi krok do logowania: 6-cyfrowy kod z aplikacji na telefonie.",
+      "statusOn": "Włączone",
+      "statusOff": "Wyłączone",
+      "listLabel": "Aplikacje uwierzytelniające",
+      "added": "Dodano {date}",
+      "removeLabel": "Usuń: {name}",
+      "addAnother": "Dodaj kolejną aplikację uwierzytelniającą",
+      "benefits": {
+        "password": "Skradzione lub odgadnięte hasło już nie wystarczy, by wejść do twojego sklepu.",
+        "changes": "Zmiany danych wypłat, zespołu i konta wymagają kodu z telefonu.",
+        "changesBusiness": "Zmiany danych firmy, zespołu i konta wymagają kodu z telefonu.",
+        "alerts": "Dostajesz e-mail w chwili, gdy ktoś poda dobre hasło, ale zły kod."
+      },
+      "setUp": "Skonfiguruj uwierzytelnianie dwuskładnikowe",
+      "takesAMinute": "Zajmuje około minuty."
+    },
+    "remove": {
+      "titleLast": "Wyłączyć uwierzytelnianie dwuskładnikowe?",
+      "title": "Usunąć aplikację „{name}”?",
+      "descriptionLast": "To twoja jedyna aplikacja uwierzytelniająca. Jej usunięcie wyłączy uwierzytelnianie dwuskładnikowe, a twoje kody odzyskiwania przestaną działać. Do logowania wystarczy samo hasło.",
+      "description": "Aplikacja „{name}” nie będzie już mogła logować się na twoje konto.",
+      "removing": "Usuwanie…",
+      "turnOff": "Wyłącz"
+    },
+    "setup": {
+      "suggestedName": "Aplikacja uwierzytelniająca",
+      "suggestedNameNumbered": "Aplikacja uwierzytelniająca {number}",
+      "added": "Dodano aplikację uwierzytelniającą.",
+      "enabled": "Uwierzytelnianie dwuskładnikowe jest włączone.",
+      "titleCodes": "Zapisz kody odzyskiwania",
+      "titleAdd": "Dodaj aplikację uwierzytelniającą",
+      "titleEnable": "Włącz uwierzytelnianie dwuskładnikowe",
+      "descriptionAdd": "Użyj drugiego telefonu lub aplikacji jako zapasowego sposobu logowania.",
+      "descriptionEnable": "Odtąd logowanie wymaga hasła i kodu z aplikacji na telefonie.",
+      "descriptionScan": "Zeskanuj kod aplikacją uwierzytelniającą, a potem wpisz 6 cyfr, które pokaże.",
+      "descriptionCodes": "Uwierzytelnianie dwuskładnikowe jest włączone.",
+      "googleReauth": "Twoje konto loguje się przez Google, więc nie ma hasła, którym można potwierdzić, że to ty. Zaloguj się ponownie, a wrócisz prosto tutaj, aby dokończyć.",
+      "confirmWithGoogleFirst": "Najpierw potwierdź przez Google, że to ty. Zaraz wrócisz tutaj, by dokończyć.",
+      "signInAgainFirst": "Ze względów bezpieczeństwa najpierw zaloguj się ponownie. Zaraz wrócisz tutaj, by dokończyć.",
+      "signInAgain": "Zaloguj się ponownie",
+      "nameLabel": "Nazwij tę aplikację uwierzytelniającą",
+      "nameHint": "Aby później odróżniać swoje aplikacje, np. „Pixel 8”.",
+      "stepUpDescription": "Wpisz kod z aplikacji uwierzytelniającej, której już używasz, aby potwierdzić, że to ty.",
+      "passwordLabel": "Obecne hasło",
+      "squareSharePasswordLabel": "Hasło do Square Share",
+      "passwordHint": "Aby nikt, kto znajdzie twój zalogowany laptop, nie mógł zablokować ci dostępu własnym telefonem.",
+      "notYourGooglePassword": "To nie hasło do Google. Nie znasz go? Potwierdź zamiast tego przez Google poniżej.",
+      "signedInRecently": "Logowanie było przed chwilą, więc nic więcej nie trzeba potwierdzać.",
+      "or": "lub",
+      "checking": "Sprawdzanie…",
+      "continue": "Dalej",
+      "qrAlt": "Kod QR do zeskanowania aplikacją uwierzytelniającą",
+      "anyApp": "Działa każda aplikacja uwierzytelniająca: Google Authenticator, Microsoft Authenticator, 1Password, Authy i inne.",
+      "cantScan": "Nie możesz zeskanować? Wpisz zamiast tego ten klucz:",
+      "setupKeyLabel": "Klucz konfiguracji",
+      "openInApp": "Otwórz w aplikacji uwierzytelniającej",
+      "codeLabel": "6-cyfrowy kod z aplikacji",
+      "verifying": "Weryfikowanie…",
+      "verifyAndAdd": "Zweryfikuj i dodaj",
+      "verifyAndTurnOn": "Zweryfikuj i włącz"
+    },
+    "recoveryCodes": {
+      "cardTitle": "Kody odzyskiwania",
+      "cardDescription": "Jednorazowe kody do logowania na wypadek utraty telefonu. Trzymaj je w innym miejscu niż sam telefon.",
+      "countUnavailable": "Nie udało się sprawdzić, ile ich zostało.",
+      "remaining": "{count, plural, one {Został {count} z {total} kodów.} few {Zostały {count} z {total} kodów.} many {Zostało {count} z {total} kodów.} other {Zostało {count} z {total} kodów.}}",
+      "remainingLow": "{count, plural, one {Został {count} z {total} kodów. Kończą się: wygeneruj nowy zestaw.} few {Zostały {count} z {total} kodów. Kończą się: wygeneruj nowy zestaw.} many {Zostało {count} z {total} kodów. Kończą się: wygeneruj nowy zestaw.} other {Zostało {count} z {total} kodów. Kończą się: wygeneruj nowy zestaw.}}",
+      "remainingNone": "{count, plural, one {Został {count} z {total} kodów. Nie masz już żadnego: wygeneruj teraz nowy zestaw.} few {Zostały {count} z {total} kodów. Nie masz już żadnego: wygeneruj teraz nowy zestaw.} many {Zostało {count} z {total} kodów. Nie masz już żadnego: wygeneruj teraz nowy zestaw.} other {Zostało {count} z {total} kodów. Nie masz już żadnego: wygeneruj teraz nowy zestaw.}}",
+      "generate": "Wygeneruj nowe kody",
+      "generating": "Generowanie…",
+      "regenerateTitle": "Wygenerować nowe kody odzyskiwania?",
+      "regenerateDescription": "Dotychczasowe kody przestaną działać, gdy tylko powstaną nowe.",
+      "newTitle": "Twoje nowe kody odzyskiwania",
+      "newDescription": "Dotychczasowe kody już nie działają."
+    },
+    "recoveryCodesDisplay": {
+      "notCreated": "Uwierzytelnianie dwuskładnikowe jest włączone, ale nie udało się utworzyć kodów odzyskiwania. Zanim się wylogujesz, wygeneruj zestaw w karcie Kody odzyskiwania.",
+      "warning": "Zapisz je w bezpiecznym miejscu, na przykład w menedżerze haseł. Każdy działa raz, to jedyny sposób powrotu na konto po utracie telefonu i nie zobaczysz ich ponownie.",
+      "listLabel": "Kody odzyskiwania",
+      "download": "Pobierz",
+      "saved": "Kody odzyskiwania zapisane w bezpiecznym miejscu.",
+      "file": {
+        "title": "Kody odzyskiwania Square Share",
+        "explainer": "Każdego kodu można użyć raz do zalogowania, jeśli utracisz aplikację uwierzytelniającą.",
+        "generated": "Wygenerowano {date}"
+      }
+    },
+    "activity": {
+      "cardTitle": "Ostatnia aktywność związana z bezpieczeństwem",
+      "cardDescription": "Zmiany dotyczące logowania, od najnowszych. Jeśli czegoś tu nie rozpoznajesz, zmień hasło i włącz uwierzytelnianie dwuskładnikowe.",
+      "unavailable": "Nie udało się teraz wczytać aktywności.",
+      "empty": "Na razie nic.",
+      "timeUtc": "{time} UTC",
+      "events": {
+        "passwordChanged": "Zmieniono hasło",
+        "passwordSet": "Ustawiono hasło",
+        "passwordResetRequested": "Zażądano linku do resetowania hasła",
+        "emailChangeRequested": "Zażądano zmiany adresu e-mail",
+        "twoFactorEnabled": "Włączono uwierzytelnianie dwuskładnikowe",
+        "twoFactorDisabled": "Wyłączono uwierzytelnianie dwuskładnikowe",
+        "factorAdded": "Dodano aplikację uwierzytelniającą",
+        "factorRemoved": "Usunięto aplikację uwierzytelniającą",
+        "recoveryCodesRegenerated": "Wygenerowano nowe kody odzyskiwania",
+        "recoveryCodeUsed": "Do logowania użyto kodu odzyskiwania",
+        "challengeFailed": "Podano błędny kod dwuskładnikowy przy logowaniu",
+        "lockedOut": "Logowanie dwuskładnikowe wstrzymane po wielokrotnym podaniu błędnych kodów"
+      }
+    },
+    "success": {
+      "twoFactorOff": "Uwierzytelnianie dwuskładnikowe jest wyłączone.",
+      "factorRemoved": "Usunięto „{name}”.",
+      "codesRegenerated": "Nowe kody odzyskiwania są gotowe. Dotychczasowe już nie działają.",
+      "confirmed": "Potwierdzono."
+    }
+  },
+  "team": {
+    "roles": {
+      "owner": {
+        "label": "Właściciel",
+        "description": "Pełna kontrola. Dokładnie jeden na sklep, nie można go zmienić ani usunąć."
+      },
+      "editor": {
+        "label": "Edytor",
+        "description": "Może przeglądać sklep oraz edytować produkty i witrynę. Może zapraszać członków na swojej roli lub niższej."
+      },
+      "viewer": {
+        "label": "Przeglądający",
+        "description": "Może przeglądać sklep i zespół. Tylko do odczytu."
+      }
+    },
+    "cardTitle": "Zespół",
+    "cardDescription": "Osoby, które mogą logować się do tego sklepu. Ich rola określa, co mogą widzieć i zmieniać.",
+    "loadError": "Nie udało się wczytać kolejnych członków. Spróbuj ponownie.",
+    "loadMore": "Wczytaj kolejnych członków",
+    "inviteButton": "Zaproś członka",
+    "memberList": {
+      "onlyOwner": "Na razie jesteś tylko ty. Zaproś kogoś, aby dać mu dostęp.",
+      "invitedHeading": "Zaproszeni",
+      "invitedTipLabel": "Co może zrobić zaproszony członek",
+      "invitedTipBody": "Na razie nic. Zaproszenie zaczyna działać dopiero przy pierwszym logowaniu tej osoby adresem e-mail, na który je wysłano, i dopiero wtedy pojawia się ona jako członek z wybraną przez ciebie rolą.",
+      "showingFirst": "{count, plural, one {Pokazano pierwszego członka.} few {Pokazano pierwszych # członków.} many {Pokazano pierwszych # członków.} other {Pokazano pierwszych # członka.}}"
+    },
+    "memberRow": {
+      "you": "(ty)",
+      "cancelInviteLabel": "Anuluj zaproszenie wysłane na {email}",
+      "removeMemberLabel": "Usuń osobę {name} z zespołu",
+      "cancelInviteTitle": "Anuluj zaproszenie",
+      "removeFromTeamTitle": "Usuń z zespołu",
+      "confirmRoleChange": "Nadać osobie {name} rolę {role, select, owner {właściciela} editor {edytora} viewer {przeglądającego} other {{role}}}?",
+      "confirmCancelInvite": "Anulować zaproszenie wysłane na {email}?",
+      "confirmRemove": "Usunąć osobę {name}? Straci dostęp natychmiast.",
+      "cancelling": "Anulowanie…",
+      "removing": "Usuwanie…",
+      "cancelled": "Anulowano",
+      "removed": "Usunięto",
+      "cancelInviteButton": "Anuluj zaproszenie",
+      "keep": "Zachowaj"
+    },
+    "inviteModal": {
+      "title": "Zaproś członka",
+      "description": "Otrzyma dostęp, gdy zaloguje się tym adresem e-mail.",
+      "emailLabel": "Adres e-mail",
+      "emailPlaceholder": "kolega@example.com",
+      "roleLabel": "Rola",
+      "notificationNote": "Powiadomienia e-mail nie są jeszcze podłączone: zaproszenie zaczyna działać przy logowaniu. Warto dać tej osobie znać bezpośrednio.",
+      "sendButton": "Wyślij zaproszenie"
+    },
+    "inviteRow": {
+      "invitedAs": "<store>{storeName}</store> zaprasza cię jako <strong>{role, select, owner {właściciela} editor {edytora} viewer {przeglądającego} other {{role}}}</strong>",
+      "accepting": "Akceptowanie…",
+      "accepted": "Zaakceptowano",
+      "acceptButton": "Akceptuj"
+    },
+    "invitePrompt": {
+      "title": "{count, plural, one {Masz zaproszenie do zespołu} few {Masz zaproszenia do zespołu} many {Masz zaproszenia do zespołu} other {Masz zaproszenia do zespołu}}",
+      "description": "{count, plural, one {Zaproszono cię do zespołu. Zaakceptuj, aby uzyskać dostęp.} few {Zaproszono cię do tych zespołów. Zaakceptuj, aby uzyskać dostęp.} many {Zaproszono cię do tych zespołów. Zaakceptuj, aby uzyskać dostęp.} other {Zaproszono cię do tych zespołów. Zaakceptuj, aby uzyskać dostęp.}}",
+      "maybeLater": "Może później"
+    },
+    "pendingInvites": {
+      "cardTitle": "Zaproszenia dla ciebie",
+      "cardDescription": "Zaakceptuj zaproszenie, aby dołączyć do zespołu tego sklepu."
+    },
+    "success": {
+      "inviteCreated": "Utworzono zaproszenie. Osoba zobaczy je po zalogowaniu tym adresem e-mail. (Wysyłka e-maili nie jest jeszcze podłączona.)",
+      "inviteAccepted": "Witaj w zespole.",
+      "roleUpdated": "Zaktualizowano rolę.",
+      "memberRemoved": "Usunięto członka."
+    }
+  }
+}

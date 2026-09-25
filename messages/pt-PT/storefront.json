@@ -1,0 +1,1297 @@
+{
+  "shapes": {
+    "name": {
+      "square": "Quadrado",
+      "circle": "Círculo",
+      "ring": "Anel",
+      "diamond": "Losango",
+      "rounded": "Quadrado arredondado",
+      "pill": "Pílula",
+      "half": "Meio círculo",
+      "quarter": "Quarto de círculo",
+      "bar": "Barra",
+      "triangle": "Triângulo",
+      "wedge": "Cunha",
+      "pentagon": "Pentágono",
+      "hexagon": "Hexágono",
+      "octagon": "Octógono",
+      "star": "Estrela",
+      "sparkle": "Brilho",
+      "cross": "Cruz",
+      "arrow": "Seta",
+      "chevron": "Galão",
+      "trapezoid": "Trapézio",
+      "parallelogram": "Paralelogramo",
+      "burst": "Explosão"
+    },
+    "add": {
+      "square": "Adicionar quadrado",
+      "circle": "Adicionar círculo",
+      "ring": "Adicionar anel",
+      "diamond": "Adicionar losango",
+      "rounded": "Adicionar quadrado arredondado",
+      "pill": "Adicionar pílula",
+      "half": "Adicionar meio círculo",
+      "quarter": "Adicionar quarto de círculo",
+      "bar": "Adicionar barra",
+      "triangle": "Adicionar triângulo",
+      "wedge": "Adicionar cunha",
+      "pentagon": "Adicionar pentágono",
+      "hexagon": "Adicionar hexágono",
+      "octagon": "Adicionar octógono",
+      "star": "Adicionar estrela",
+      "sparkle": "Adicionar brilho",
+      "cross": "Adicionar cruz",
+      "arrow": "Adicionar seta",
+      "chevron": "Adicionar galão",
+      "trapezoid": "Adicionar trapézio",
+      "parallelogram": "Adicionar paralelogramo",
+      "burst": "Adicionar explosão"
+    },
+    "group": {
+      "basic": "Básicas",
+      "polygons": "Polígonos",
+      "accents": "Acentos"
+    },
+    "groupLabel": {
+      "basic": "Formas básicas",
+      "polygons": "Formas poligonais",
+      "accents": "Formas de destaque"
+    }
+  },
+  "fonts": {
+    "sans": "Sans",
+    "serif": "Serif",
+    "mono": "Mono",
+    "display": "Display",
+    "hand": "Manuscrito",
+    "inter": "Inter",
+    "montserrat": "Montserrat",
+    "custom": "Tipo de letra carregado"
+  },
+  "textVariants": {
+    "heading": "Título",
+    "subheading": "Subtítulo",
+    "body": "Texto do corpo"
+  },
+  "layoutPresets": {
+    "standard": "Padrão",
+    "caption": "Legenda",
+    "header": "Cabeçalho",
+    "gallery": "Galeria",
+    "bare": "Simples"
+  },
+  "blockKinds": {
+    "product": "Produto",
+    "text": "Texto",
+    "shape": "Forma",
+    "image": "Imagem"
+  },
+  "settings": {
+    "groups": {
+      "theme": "Tema",
+      "header": "Cabeçalho",
+      "typography": "Tipografia",
+      "cards": "Cartões de produto",
+      "soldOut": "Esgotado",
+      "productPage": "Página de produto"
+    },
+    "subtitle": {
+      "theme": "Montra / Tema",
+      "header": "Montra / Cabeçalho",
+      "typography": "Montra / Tipografia",
+      "cards": "Montra / Cartões de produto",
+      "soldOut": "Montra / Esgotado",
+      "productPage": "Montra / Página de produto"
+    },
+    "labels": {
+      "looks": "Aspeto da montra",
+      "background": "Fundo",
+      "accent": "Cor de destaque",
+      "header": "Nome da loja e biografia",
+      "font": "Tipo de letra",
+      "canvasSize": "Tamanho da tela",
+      "gridGap": "Espaçamento da grelha",
+      "tileLayout": "Esquema do cartão",
+      "titlePosition": "Posição do título",
+      "titleStyle": "Estilo do título",
+      "cornerRadius": "Arredondamento dos cantos",
+      "titleInset": "Espaçamento do título na margem",
+      "pricePosition": "Posição do preço",
+      "priceStyle": "Estilo da etiqueta de preço",
+      "soldOut": "Produtos esgotados",
+      "productPageLayout": "Página de produto",
+      "productPageBackground": "Fundo da página de produto",
+      "productPagePhotos": "Fotografias da página de produto",
+      "productPageFont": "Tipo de letra da página de produto",
+      "productPageIndexing": "Indexação em motores de pesquisa",
+      "buyButton": "Botão de compra",
+      "buyButtonColour": "Cor do botão de compra",
+      "buyButtonRoundness": "Arredondamento do botão de compra",
+      "buyButtonBorder": "Contorno do botão de compra",
+      "priceNote": "Nota de preço",
+      "shippingNote": "Nota de envio",
+      "productPageSections": "Secções da página de produto",
+      "productPageAvailability": "Disponibilidade na página",
+      "productPageByline": "Assinatura Vendido por",
+      "shippingReturns": "Política de envio e devoluções",
+      "sellerDetails": "Dados do vendedor"
+    }
+  },
+  "editorSearch": {
+    "sections": {
+      "canvas": "Na tela",
+      "settings": "Definições",
+      "panels": "Painéis"
+    },
+    "openProductPage": "Abrir a página de produto",
+    "panelSubtitle": "Painel",
+    "panels": {
+      "layers": "Camadas",
+      "products": "Adicionar um produto",
+      "shapes": "Formas",
+      "uploads": "Carregamentos"
+    }
+  },
+  "list": {
+    "showingOf": "A mostrar {count} de {total} montras",
+    "count": "{count, plural, one {# montra} many {# de montras} other {# montras}}",
+    "countSampleOnly": "Ainda sem montras",
+    "creating": "A criar…",
+    "new": "Nova montra",
+    "emptyHeading": "Ainda sem montras",
+    "emptyHintOwner": "Crie a sua primeira montra e depois adicione produtos à grelha. Cada produto nela ganha uma página que pode partilhar.",
+    "emptyHintGuest": "Esta loja ainda não tem montras.",
+    "create": "Criar montra",
+    "loadMoreError": "Não foi possível carregar mais montras. Tente novamente.",
+    "loadMore": "Carregar mais ({remaining} restantes)",
+    "deleteTitle": "Eliminar montra?",
+    "deleteDesc": "«{name}» e a sua grelha serão removidos permanentemente. Esta ação não pode ser anulada.",
+    "deleteToast": "«{name}» foi eliminada."
+  },
+  "card": {
+    "editAriaLabel": "Editar {name}",
+    "embedAriaLabel": "Incorporar {name}",
+    "deleteAriaLabel": "Eliminar {name}",
+    "blockCount": "{count, plural, one {# bloco} many {# de blocos} other {# blocos}}",
+    "updatedLabel": " · atualizado em {date}",
+    "emptyHint": "Esta grelha está vazia",
+    "removed": "Removido pela SquareShare",
+    "pausedInReview": "Pausado · na SquareShare para análise",
+    "pausedNeedsChanges": "Pausado pela SquareShare · requer alterações"
+  },
+  "embed": {
+    "inDevNotice": "O widget de incorporação está em desenvolvimento e ainda não é apresentado em sites externos. Configure as definições abaixo para estar pronto a colar o código assim que for lançado.",
+    "title": "Incorporar esta montra",
+    "description": "Cole este código em qualquer site para mostrar «{name}» lá.",
+    "enabledLabel": "Incorporação ativada",
+    "domainsLabel": "Domínios permitidos",
+    "domainsPlaceholder": "oseusite.com, blog.oseusite.com",
+    "domainsHint": "Até {max}, separados por vírgulas. Cole um URL e nós reduzimo-lo ao domínio.",
+    "emptyDomainsWarning": "Adicione pelo menos um domínio. Enquanto isto estiver vazio, a montra não carrega em lado nenhum, mesmo com a incorporação ativada.",
+    "snippetLabel": "Código",
+    "snippetReadyHint": "Cole este código no HTML do seu site.",
+    "snippetLockedHint": "Ative a incorporação e adicione pelo menos um domínio para desbloquear o botão Copiar.",
+    "copySnippet": {
+      "copy": "Copiar código de incorporação",
+      "copied": "Código de incorporação copiado",
+      "failed": "Não foi possível copiar o código de incorporação. Selecione-o e copie-o manualmente.",
+      "cannotCopyYet": "o código de incorporação ainda não pode ser copiado"
+    },
+    "snippetKeyLabel": "Chave do código",
+    "rotateConfirmText": "Renovar emite uma nova chave. Todas as cópias do código antigo deixam de funcionar de imediato, incluindo as que estão em sites que ainda quer manter: vai ter de colar o novo código em todo o lado.",
+    "rotateKey": "Renovar chave",
+    "rotating": "A renovar…",
+    "revokeHint": "Colou nalgum sítio onde não devia? Renove a chave para revogar todos os códigos existentes.",
+    "saveSettings": "Guardar definições",
+    "saving": "A guardar…",
+    "saved": "Definições de incorporação guardadas.",
+    "newKeyIssued": "Nova chave de incorporação emitida.",
+    "newKeyDetail": "Cole novamente o código em todos os locais onde esta montra está incorporada."
+  },
+  "wizard": {
+    "category": {
+      "title": "O que vende?",
+      "description": "Esta é a maior pista sobre que esquemas lhe vão servir melhor."
+    },
+    "fulfilment": {
+      "title": "Como é que os compradores o recebem?",
+      "description": "Isto molda o que as suas páginas de produto dizem sobre a entrega."
+    },
+    "vibe": {
+      "title": "Escolha um aspeto",
+      "description": "O seu ponto de partida. Tudo continua editável no editor."
+    },
+    "name": {
+      "title": "Dê um nome à sua montra",
+      "description": "Só para si. Pode mudar o nome quando quiser."
+    },
+    "stepOf": "Passo {current} de {total}",
+    "nameLabel": "Nome da montra",
+    "nameHint": "Deixe em branco e vamos chamar-lhe Montra sem título.",
+    "otherCategoryLabel": "O que vende?",
+    "otherCategoryPlaceholder": "p. ex. kits de modelismo",
+    "noProductsHint": "Ainda sem produtos? Adicione-os depois da configuração.",
+    "skipSetup": "Saltar configuração",
+    "skip": "Saltar",
+    "creating": "A criar…",
+    "create": "Criar montra"
+  },
+  "createOptions": {
+    "categoryGroupLabel": "O que vende",
+    "fulfilmentGroupLabel": "Como o recebem",
+    "vibeGroupLabel": "O aspeto que quer",
+    "category": {
+      "fashion": "Roupa",
+      "art": "Arte e impressões",
+      "jewellery": "Joalharia",
+      "handmade": "Artesanato",
+      "home": "Casa e decoração",
+      "beauty": "Beleza",
+      "food": "Comida e bebidas",
+      "music": "Música",
+      "photography": "Fotografia",
+      "books": "Livros e fanzines",
+      "digital": "Produtos digitais",
+      "vintage": "Vintage",
+      "other": "Outra coisa"
+    },
+    "categoryPlaceholder": {
+      "fashion": "A minha loja de roupa",
+      "art": "A minha loja de arte",
+      "jewellery": "A minha loja de joalharia",
+      "handmade": "A minha loja de artesanato",
+      "home": "A minha loja de casa e decoração",
+      "beauty": "A minha loja de beleza",
+      "food": "A minha loja de comida",
+      "music": "A minha loja de música",
+      "photography": "A minha loja de fotografia",
+      "books": "A minha loja de livros",
+      "digital": "A minha loja digital",
+      "vintage": "A minha loja vintage",
+      "other": "A minha loja",
+      "default": "A minha montra"
+    },
+    "fulfilment": {
+      "physical": "Eu envio",
+      "digital": "Eles transferem",
+      "services": "Eles reservam comigo",
+      "mixed": "Um pouco de cada"
+    },
+    "fulfilmentHint": {
+      "physical": "Produtos físicos",
+      "digital": "Ficheiros, predefinições, música",
+      "services": "Sessões, encomendas personalizadas",
+      "mixed": "Mais do que uma destas opções"
+    },
+    "vibe": {
+      "minimal": "Minimalista",
+      "classic": "Clássico",
+      "bold": "Marcante"
+    },
+    "vibeHint": {
+      "minimal": "Nome e preço ao passar o rato",
+      "classic": "Nome e preço sempre visíveis",
+      "bold": "Preço sempre visível, nome ao passar o rato"
+    }
+  },
+  "picker": {
+    "addFirst": "Adicione o seu primeiro produto",
+    "noProducts": "Ainda não tem produtos. Adicione um e volta logo aqui para o colocar.",
+    "searchPlaceholder": "Pesquisar produtos",
+    "searchAriaLabel": "Pesquisar os seus produtos",
+    "searching": "A pesquisar…",
+    "noMatch": "Nenhum produto corresponde a «{term}».",
+    "searchFailed": "A pesquisa está indisponível de momento; a mostrar o que já está carregado.",
+    "inGrid": "Na grelha",
+    "available": "Disponível",
+    "addSelected": "Adicionar {count} selecionados",
+    "addAll": "Adicionar tudo ({count})",
+    "deselectAriaLabel": "Anular seleção de {title}",
+    "selectAriaLabel": "Selecionar {title}",
+    "inGridAriaLabel": "{title} está na grelha",
+    "addToGridAriaLabel": "Adicionar {title} à grelha",
+    "draftAriaLabel": "Produto em rascunho: não visível para os compradores",
+    "draftBadge": "Rascunho"
+  },
+  "preview": {
+    "ariaLabel": "Pré-visualização da montra"
+  },
+  "masthead": {
+    "namePlaceholder": "O nome da sua loja",
+    "bioPlaceholder": "Uma linha curta sobre a sua loja",
+    "editAriaLabel": "{line, select, name {Editar o nome da loja} bio {Editar a biografia da loja} other {Editar {line} da loja}}",
+    "editorNameAriaLabel": "Nome da loja",
+    "editorBioAriaLabel": "Biografia da loja"
+  },
+  "pageConnectors": {},
+  "artboard": {
+    "productPageLabel": " · Página de produto",
+    "closeAriaLabel": "Fechar a página de produto de {title}",
+    "desktopSize": "Tamanho para computador",
+    "mobileSize": "Tamanho para telemóvel"
+  },
+  "customFont": {},
+  "metadata": {
+    "storefronts": {
+      "title": "Montras",
+      "subtitle": "Cada montra tem a sua própria grelha e tema. Crie tantas quantas precisar e depois abra uma para a editar."
+    },
+    "editor": {
+      "title": "Editar montra"
+    },
+    "sample": {
+      "title": "Montra de exemplo"
+    }
+  },
+  "routes": {
+    "editor": {
+      "loading": "A carregar o editor da montra…"
+    },
+    "list": {
+      "loading": "a carregar montras"
+    }
+  },
+  "controls": {
+    "off": "Desativado",
+    "layers": "Camadas",
+    "objectCount": "{count, plural, one {1 objeto} many {# de objetos} other {# objetos}}",
+    "cardStyle": "Estilo do cartão",
+    "priceTag": "Etiqueta de preço",
+    "theme": "Tema",
+    "canvas": "Tela",
+    "design": "Design"
+  },
+  "designPanel": {
+    "tabSelection": "Seleção",
+    "tabDesign": "Design",
+    "show": "Mostrar painel de design",
+    "hide": "Ocultar painel de design",
+    "resize": "Redimensionar painel de design",
+    "closeSettings": "Fechar definições de design",
+    "scopeLabel": "Âmbito do painel"
+  },
+  "library": {
+    "title": "Biblioteca",
+    "hint": "Escolha um para o adicionar",
+    "canvasFull": "A tela está cheia",
+    "close": "Fechar painel da biblioteca",
+    "tabUploads": "Carregamentos",
+    "tabShapes": "Formas"
+  },
+  "uploads": {
+    "addImage": "Adicionar uma imagem",
+    "processing": "A processar…",
+    "uploadingPct": "A carregar… {pct}%",
+    "dropToUpload": "Largue para carregar",
+    "uploadImage": "Carregar imagem",
+    "uploadHint": "SVG, PNG, JPEG, WebP, GIF ou AVIF. Até 2 MB. Largue um ficheiro aqui ou clique para procurar.",
+    "canvasFullHint": "A tela está cheia. Remova um bloco para adicionar outro.",
+    "inStorefront": "Nesta montra",
+    "imagesGroup": "Imagens nesta montra",
+    "emptyHint": "As imagens que carrega ficam aqui reunidas, para poder colocar a mesma novamente sem a carregar duas vezes.",
+    "placeAgain": "Colocar {alt} novamente",
+    "placeAgainFallback": "Colocar esta imagem novamente"
+  },
+  "layers": {
+    "title": "Camadas",
+    "backAriaLabel": "Voltar ao bloco selecionado, saindo de Camadas",
+    "empty": "Ainda nada na tela. Os blocos aparecem aqui à medida que os adiciona.",
+    "listAriaLabel": "Camadas da tela, da frente para trás",
+    "layerOf": "Camada {index} de {total}",
+    "moveGroup": "Mover {label}",
+    "reorderLabel": "Reordenar {label}",
+    "dragToReorder": "Arraste para reordenar",
+    "showOptions": "Mostrar opções de camada de {label}",
+    "hideOptions": "Ocultar opções de camada de {label}",
+    "shortcutHint": "{mod} + [ e {mod} + ] movem a seleção uma camada. Adicione Shift para a enviar até ao fim.",
+    "layerOp": {
+      "back": "Enviar para trás",
+      "backward": "Recuar uma camada",
+      "forward": "Avançar uma camada",
+      "front": "Trazer para a frente"
+    },
+    "layerOpFor": {
+      "back": "Enviar para trás: {label}",
+      "backward": "Recuar uma camada: {label}",
+      "forward": "Avançar uma camada: {label}",
+      "front": "Trazer para a frente: {label}"
+    }
+  },
+  "colorPanel": {
+    "close": "Fechar painel de cor",
+    "sectionType": "Tipo",
+    "font": "Tipo de letra",
+    "fontTheme": "Tipo de letra do tema",
+    "fontThemeDesc": "Seguir o tipo de letra da montra",
+    "sectionInDesign": "Neste design",
+    "inDesignGroup": "Cores neste design",
+    "inDesignEmpty": "As cores que utiliza na tela ficam aqui reunidas.",
+    "inDesignSwatch": "Neste design ({hex})",
+    "sectionCustom": "Personalizada",
+    "sectionInherit": "Herdar",
+    "sectionRecent": "Usadas recentemente",
+    "recentGroup": "Cores usadas recentemente",
+    "recentSwatch": "Usada recentemente ({hex})",
+    "sectionStandard": "Padrão",
+    "standardGroup": "Cores padrão",
+    "sectionPalettes": "Paletas"
+  },
+  "themePanel": {
+    "accent": "Destaque"
+  },
+  "panelSearch": {
+    "placeholder": "Encontrar uma definição ou objeto",
+    "clear": "Limpar pesquisa",
+    "noResults": "Nada no editor corresponde a isso.",
+    "matchesLabel": "Resultados"
+  },
+  "looks": {
+    "title": "Aspetos",
+    "infoLabel": "O que muda ao escolher um aspeto",
+    "infoBody": "Um aspeto define de uma só vez as cores, o tipo de letra, os cantos, o espaçamento e o que cada cartão de produto mostra em toda a montra. O seu esquema, os seus produtos e qualquer cartão que tenha estilizado à mão mantêm-se exatamente como estão.",
+    "groupLabel": "Aspeto da montra",
+    "minimal": "Minimalista",
+    "classic": "Clássico",
+    "bold": "Marcante",
+    "hintMinimal": "Só imagens. Nome e preço ao passar o rato.",
+    "hintClassic": "Nome e preço debaixo de cada imagem.",
+    "hintBold": "Preço sempre sobre a imagem, nome ao passar o rato."
+  },
+  "background": {
+    "label": "Fundo",
+    "typeLabel": "Tipo de fundo",
+    "typeColor": "Cor",
+    "typeGradient": "Gradiente",
+    "typeImage": "Imagem",
+    "position": "Posição",
+    "dragAriaLabel": "Arraste para posicionar a imagem de fundo",
+    "dragHint": "Arraste a pré-visualização para reposicionar. Aplique zoom para redimensionar.",
+    "zoomLabel": "Zoom",
+    "zoomAriaLabel": "Zoom da imagem de fundo",
+    "zoomValueText": "{n, plural, one {# por cento} many {# por cento} other {# por cento}}",
+    "processing": "A processar…",
+    "uploadingPct": "A carregar… {n}%",
+    "replaceImage": "Substituir imagem",
+    "uploadImage": "Carregar imagem",
+    "uploadingProgress": "A carregar imagem de fundo",
+    "uploadHint": "Até 10 MB. JPEG, PNG, WebP, GIF ou AVIF.",
+    "colorLabel": "Cor",
+    "from": "De",
+    "to": "Para",
+    "angle": "Ângulo",
+    "gradientAngle": "Ângulo do gradiente",
+    "angleValueText": "{n, plural, one {# grau} many {# graus} other {# graus}}"
+  },
+  "cardStyle": {
+    "layout": "Esquema",
+    "position": "Posição",
+    "roundedHint": "Os cartões arredondados mantêm as duas etiquetas no eixo central.",
+    "spotHint": "Clique num ponto para colocar a etiqueta, ou arraste-a aqui ou sobre o cartão.",
+    "cornerRoundness": "Arredondamento dos cantos",
+    "cornerValueText": "{n, plural, one {# pixel} many {# pixels} other {# pixels}}",
+    "sharp": "Reto",
+    "circle": "Círculo",
+    "fineTuning": "Ajuste fino",
+    "showTitle": "Mostrar título",
+    "titleStyleLabel": "Estilo do título",
+    "edgeSpacing": "Espaçamento na margem",
+    "edgeSpacingAriaLabel": "Espaçamento do título na margem",
+    "edgeValueText": "{n, plural, one {# pixel} many {# pixels} other {# pixels}}",
+    "auto": "Automático",
+    "showTitleOnHover": "Mostrar título ao passar o rato",
+    "hoverHint": "O título mantém-se oculto até um comprador passar o rato sobre o produto.",
+    "revealTop": "A barra desliza a partir do topo quando um comprador passa o rato.",
+    "revealMiddle": "A barra surge com um efeito de desvanecimento quando um comprador passa o rato.",
+    "revealBottom": "A barra desliza a partir da base quando um comprador passa o rato."
+  },
+  "priceTag": {
+    "showPrice": "Mostrar o preço",
+    "roundedHint": "Os cartões arredondados mantêm a etiqueta no eixo central.",
+    "dragHint": "Arraste-a sobre o cartão, ou utilize o painel de esquema, para escolher um ponto.",
+    "showOnHover": "Mostrar ao passar o rato",
+    "font": "Tipo de letra",
+    "fontAriaLabel": "Tipo de letra da etiqueta de preço",
+    "size": "Tamanho",
+    "sizeAriaLabel": "Tamanho da etiqueta de preço",
+    "sizeValueText": "{n, plural, one {# pixel} many {# pixels} other {# pixels}}",
+    "sizeTip": "O tamanho num único cartão. A etiqueta ajusta-se ao cartão onde está, por isso um bloco maior tem um preço maior sem precisar de o definir.",
+    "borderThickness": "Espessura do contorno",
+    "borderAriaLabel": "Espessura do contorno da etiqueta de preço",
+    "borderValueText": "{n, plural, one {# pixel} many {# pixels} other {# pixels}}",
+    "cornerRoundness": "Arredondamento dos cantos",
+    "cornerAriaLabel": "Arredondamento dos cantos da etiqueta de preço",
+    "cornerValueText": "{n, plural, one {# pixel} many {# pixels} other {# pixels}}",
+    "sharp": "Reto",
+    "pill": "Pílula",
+    "none": "Nenhum"
+  },
+  "priceTagPosition": {
+    "placementAriaLabel": "Posicionamento da etiqueta de preço",
+    "below": "Abaixo",
+    "onImage": "Sobre a imagem",
+    "hidden": "Oculto",
+    "spotAriaLabel": "Ponto da etiqueta de preço",
+    "spotTopLeft": "Etiqueta de preço no canto superior esquerdo",
+    "spotTopCenter": "Etiqueta de preço no topo ao centro",
+    "spotTopRight": "Etiqueta de preço no canto superior direito",
+    "spotMiddle": "Etiqueta de preço ao centro",
+    "spotBottomLeft": "Etiqueta de preço no canto inferior esquerdo",
+    "spotBottomCenter": "Etiqueta de preço na base ao centro",
+    "spotBottomRight": "Etiqueta de preço no canto inferior direito"
+  },
+  "layout": {
+    "canvasWidth": "Largura da tela",
+    "canvasWidthAriaLabel": "Largura da tela em blocos",
+    "blocksWide": "{n, plural, one {# bloco de largura} many {# blocos de largura} other {# blocos de largura}}",
+    "canvasHeight": "Altura da tela",
+    "heightTip": "O painel não pode ficar mais pequeno do que os blocos que já tem: arraste um bloco para cima primeiro e depois reduza a tela.",
+    "canvasHeightAriaLabel": "Altura da tela em blocos",
+    "blocksTall": "{n, plural, one {# bloco de altura} many {# blocos de altura} other {# blocos de altura}}",
+    "gridDensity": "Densidade da grelha",
+    "gridDensityAriaLabel": "Densidade da grelha",
+    "gridGapValue": "{n, plural, one {espaço de # pixel} many {espaço de # pixels} other {espaço de # pixels}}",
+    "noGap": "Sem espaço",
+    "showGrid": "Mostrar grelha",
+    "gridInfoLabel": "Quem vê a grelha",
+    "gridInfoBody": "Um guia para si enquanto cria o design: desenha os espaços vazios para poder ver onde um bloco vai ficar. Os compradores nunca a veem."
+  },
+  "placement": {
+    "rotation": "Rotação",
+    "rotationTipSingle": "Graus inteiros, em qualquer direção a partir do nivelado. O bloco roda em torno do seu próprio centro e mantém as células que ocupa.",
+    "rotationTipMultiple": "Graus inteiros, em qualquer direção a partir do nivelado. Cada bloco roda em torno do seu próprio centro, por isso uma linha de blocos continua a ser uma linha.",
+    "rotationAriaLabel": "Rotação do bloco",
+    "valueTextMixed": "Ângulos variados",
+    "valueText": "{n, plural, one {# grau} many {# graus} other {# graus}}",
+    "statusMixed": "Variado",
+    "levelBlock": "Nivelar o bloco",
+    "rotateTo": "Rodar para {n, plural, one {# grau} many {# graus} other {# graus}}",
+    "level": "Nivelado",
+    "angle": "{n}°",
+    "layerLabel": "Camada",
+    "layerInfoLabel": "Como funcionam as camadas",
+    "layerInfoBody": "As camadas decidem apenas o que é desenhado por cima onde os blocos se sobrepõem; a ordem de leitura que um leitor de ecrã segue nunca muda.{multi, select, true { Esta seleção mantém a sua própria ordem dentro da pilha ao mover-se.} other {}}{stacked, select, true { Alt-clique numa pilha na tela para alcançar o bloco por baixo.} other {}}",
+    "blocksSelected": "{count, plural, one {# bloco selecionado} many {# de blocos selecionados} other {# blocos selecionados}}",
+    "layerOf": "Camada {index} de {total}",
+    "blockLayerLabel": "Camada do bloco",
+    "sendToBack": "Enviar para trás",
+    "sendBackward": "Recuar uma camada",
+    "bringForward": "Avançar uma camada",
+    "bringToFront": "Trazer para a frente",
+    "seeAllLayers": "Ver todas as camadas"
+  },
+  "header": {
+    "showHeader": "Mostrar cabeçalho",
+    "infoLabel": "Outras formas de editar o cabeçalho",
+    "infoBody": "Clique no nome ou na biografia na tela para escrever diretamente lá. Este painel abre nessa linha ao mesmo tempo, onde se define o tipo de letra, o tamanho, a cor, a formatação e o alinhamento.",
+    "storeName": "Nome da loja",
+    "storeNamePlaceholder": "Nome da loja mostrado aos compradores",
+    "bio": "Biografia",
+    "bioPlaceholder": "Uma linha curta sobre a sua loja",
+    "charsLeft": "{n, plural, one {Resta # carácter} many {Restam # carateres} other {Restam # carateres}}"
+  },
+  "soldOut": {
+    "hide": "Ocultar dos compradores",
+    "hideInfoLabel": "O que faz ocultar produtos esgotados",
+    "hideInfoBody": "Os produtos que marcar como esgotados desaparecem completamente da montra. Continuam na tela aqui, esbatidos, para os poder mover e voltar a colocar à venda.",
+    "badge": "Mostrar aviso",
+    "badgeInfoLabel": "Quando aparece o aviso de esgotado",
+    "badgeInfoBodyHidden": "Nada para assinalar enquanto os produtos esgotados estiverem ocultos. Desative Ocultar dos compradores para este aviso os assinalar em vez disso.",
+    "badgeInfoBodyVisible": "Assinala um produto esgotado na montra, para o comprador saber que existe e já não está disponível, em vez de ficar na dúvida."
+  },
+  "typography": {
+    "font": "Tipo de letra",
+    "ownFont": "O seu próprio tipo de letra",
+    "fontInfoLabel": "Que ficheiros de tipo de letra funcionam",
+    "fontInfoBody": "WOFF2, WOFF, TTF ou OTF, até 2 MB. O WOFF2 é o mais indicado: é o mais pequeno, por isso é o mais rápido a carregar para um comprador, e todos os navegadores o leem.",
+    "processing": "A processar…",
+    "uploadingPct": "A carregar… {n}%",
+    "replaceFont": "Substituir tipo de letra",
+    "uploadFont": "Carregar um tipo de letra",
+    "uploadingLabel": "A carregar tipo de letra",
+    "uploadedFontDesc": "O seu tipo de letra carregado",
+    "fontDescDefault": "A predefinição",
+    "fontDescInter": "Limpo e neutro",
+    "fontDescMontserrat": "Geométrico e largo"
+  },
+  "textFormat": {
+    "format": "Formato",
+    "formatAriaLabel": "Formatação de texto",
+    "bold": "Negrito",
+    "italic": "Itálico",
+    "underline": "Sublinhado",
+    "alignment": "Alinhamento",
+    "alignAriaLabel": "Alinhamento do texto",
+    "alignLeft": "Alinhar à esquerda",
+    "alignCenter": "Alinhar ao centro",
+    "alignRight": "Alinhar à direita"
+  },
+  "fontSize": {
+    "label": "Tamanho",
+    "autoPx": "Automático ({n} px)",
+    "auto": "Automático",
+    "ariaLabel": "Tamanho do tipo de letra",
+    "valueText": "{n, plural, one {# pixel} many {# pixels} other {# pixels}}"
+  },
+  "layoutPresetPicker": {
+    "ariaLabel": "Esquema"
+  },
+  "titleStyle": {
+    "ariaLabel": "Estilo do título",
+    "bar": "Barra",
+    "overlay": "Sobreposição",
+    "shadow": "Sombra"
+  },
+  "titlePosition": {
+    "ariaLabel": "Ponto do título",
+    "spotTopLeft": "Título no canto superior esquerdo",
+    "spotTopCenter": "Título no topo ao centro",
+    "spotTopRight": "Título no canto superior direito",
+    "spotMiddle": "Título ao centro",
+    "spotBottomLeft": "Título no canto inferior esquerdo",
+    "spotBottomCenter": "Título na base ao centro",
+    "spotBottomRight": "Título no canto inferior direito"
+  },
+  "tileSpot": {},
+  "tileLayoutBoard": {
+    "labelToPlace": "Etiqueta a colocar",
+    "labelPositions": "Posições das etiquetas",
+    "title": "Título",
+    "price": "Preço",
+    "titleAt": "{spot, select, top_left {Título no canto superior esquerdo} top_center {Título no topo ao centro} top_right {Título no canto superior direito} middle_center {Título ao centro} bottom_left {Título no canto inferior esquerdo} bottom_center {Título na base ao centro} bottom_right {Título no canto inferior direito} other {Título aqui}}. Arraste, clique num ponto, ou utilize as teclas de seta, para o mover.",
+    "priceAt": "{spot, select, top_left {Preço no canto superior esquerdo} top_center {Preço no topo ao centro} top_right {Preço no canto superior direito} middle_center {Preço ao centro} bottom_left {Preço no canto inferior esquerdo} bottom_center {Preço na base ao centro} bottom_right {Preço no canto inferior direito} other {Preço aqui}}. Arraste, clique num ponto, ou utilize as teclas de seta, para o mover.",
+    "moveTitleTo": "{spot, select, top_left {Mover o título para o canto superior esquerdo} top_center {Mover o título para o topo ao centro} top_right {Mover o título para o canto superior direito} middle_center {Mover o título para o centro} bottom_left {Mover o título para o canto inferior esquerdo} bottom_center {Mover o título para a base ao centro} bottom_right {Mover o título para o canto inferior direito} other {Mover o título para aqui}}",
+    "movePriceTo": "{spot, select, top_left {Mover o preço para o canto superior esquerdo} top_center {Mover o preço para o topo ao centro} top_right {Mover o preço para o canto superior direito} middle_center {Mover o preço para o centro} bottom_left {Mover o preço para o canto inferior esquerdo} bottom_center {Mover o preço para a base ao centro} bottom_right {Mover o preço para o canto inferior direito} other {Mover o preço para aqui}}"
+  },
+  "productPage": {
+    "layout": {
+      "title": "Página",
+      "showPage": {
+        "label": "Mostrar uma página de produto",
+        "infoLabel": "O que este interruptor faz",
+        "infoOn": "Tocar num cartão de produto abre a sua página.",
+        "infoOff": "Os cartões de produto não têm página para abrir."
+      },
+      "pageColor": "Cor da página",
+      "storefrontBackground": "Fundo da montra",
+      "photoFit": {
+        "label": "Ajuste da fotografia",
+        "ariaLabel": "Ajuste da fotografia",
+        "fit": "Ajustar",
+        "fill": "Preencher"
+      },
+      "font": {
+        "label": "Tipo de letra",
+        "infoLabel": "Como o tipo de letra desta página se relaciona com o da montra",
+        "infoOwn": "Esta página é apresentada no seu próprio tipo de letra, seja qual for o que a montra usa.",
+        "infoFollows": "Segue o tipo de letra da sua montra. Altere-o em Tipografia.",
+        "inheritOption": "Igual ao da montra ({name})"
+      },
+      "indexing": {
+        "label": "Permitir motores de pesquisa",
+        "infoLabel": "O que fazer isto desativar",
+        "infoContent": "Desativado mantém as suas páginas de produto fora dos resultados de pesquisa. Quem tiver um link ainda as consegue abrir."
+      },
+      "useStorefrontBackground": "Utilizar o fundo da montra"
+    },
+    "cta": {
+      "title": "Botão de compra",
+      "infoLabel": "O que decide se um botão aparece",
+      "infoContent": "O botão segue o link de compra de cada produto (definido no produto). Sem um, envia um e-mail para o seu endereço de contacto abaixo; sem nenhum dos dois, não é mostrado nenhum botão.",
+      "buttonText": {
+        "label": "Texto do botão",
+        "charsLeft": "{count, plural, one {Resta # carácter} many {Restam # carateres} other {Restam # carateres}}"
+      },
+      "buttonColor": "Cor do botão",
+      "storefrontAccent": "Destaque da montra",
+      "cornerRoundness": {
+        "label": "Arredondamento dos cantos",
+        "ariaLabel": "Arredondamento dos cantos do botão de compra",
+        "valueText": "{value} pixels",
+        "auto": "Automático"
+      },
+      "borderThickness": {
+        "label": "Espessura do contorno",
+        "ariaLabel": "Espessura do contorno do botão de compra",
+        "valueText": "{value} pixels",
+        "none": "Nenhum"
+      },
+      "borderColor": "Cor do contorno",
+      "buttonTextColor": "Cor do texto do botão",
+      "priceNote": {
+        "label": "Nota de preço",
+        "ariaLabel": "Nota de preço",
+        "inclVat": "IVA incl.",
+        "exclTax": "Impostos não incl.",
+        "none": "Nenhuma"
+      },
+      "shippingNote": {
+        "label": "Nota de envio",
+        "ariaLabel": "Nota de envio",
+        "plusShipping": "Portes à parte",
+        "freeShipping": "Envio grátis",
+        "none": "Nenhuma"
+      },
+      "useStorefrontAccent": "Utilizar a cor de destaque da montra",
+      "useButtonTextColor": "Utilizar a cor do texto do botão"
+    },
+    "sections": {
+      "title": "Secções",
+      "infoLabel": "Quando uma secção fica oculta",
+      "infoContent": "Uma secção sem nada para mostrar fica oculta mesmo quando está ativada. Envio e segurança nunca aparecem para transferências digitais. Segurança e conformidade e Vendedor são divulgações legais e não podem ser desativadas.",
+      "listAriaLabel": "O que a página mostra",
+      "underTheTitle": "por baixo do título",
+      "requiredByLaw": "exigido por lei",
+      "sectionLabels": {
+        "description": "Descrição",
+        "specs": "Especificações",
+        "documents": "Documentos",
+        "shipping": "Envio",
+        "returns": "Devoluções",
+        "safety": "Segurança e conformidade",
+        "seller": "Vendedor"
+      },
+      "availability": "Disponibilidade",
+      "soldByByline": "Assinatura «Vendido por»"
+    },
+    "shippingReturns": {
+      "title": "Envio e devoluções",
+      "infoLabel": "Porque está isto em Definições, e não aqui",
+      "infoContent": "Definido uma vez para toda a sua conta, para que todas as montras e todos os produtos vendam sob as mesmas condições. Para vendedores da UE, a página também indica o direito de retratação de 14 dias e a garantia legal de 2 anos, seja o que for que escreva.",
+      "shippingLabel": "Envio",
+      "returnsLabel": "Devoluções",
+      "profileCount": "{count, plural, one {# perfil de envio para produtos enviados de forma diferente.} many {# de perfis de envio para produtos enviados de forma diferente.} other {# perfis de envio para produtos enviados de forma diferente.}}",
+      "nothingSet": "Ainda nada definido. Até adicionar as suas condições, as páginas de produto indicam que o vendedor não adicionou dados de envio.",
+      "editSettings": "Editar em Definições",
+      "addTerms": "Adicione as suas condições de envio"
+    },
+    "sellerDetails": {
+      "title": "Dados do vendedor",
+      "infoLabel": "Porque está isto em Definições, e não aqui",
+      "infoContent": "A legislação sobre vendas à distância exige o nome do vendedor, a morada e uma forma de contacto junto de cada oferta. Definido uma vez para toda a sua conta: todas as montras e todos os produtos mostram os mesmos dados, por isso não há nada a repetir por loja.",
+      "vatId": "NIF {vatId}",
+      "nothingSet": "Ainda nada definido. Até adicionar os seus dados de empresa, os compradores só veem a linha «Vendido por» debaixo do título.",
+      "editSettings": "Editar em Definições",
+      "addDetails": "Adicione os seus dados de empresa"
+    }
+  },
+  "productBlock": {
+    "deleted": "Este produto foi removido do seu catálogo.",
+    "removeFromGrid": "Remover da grelha",
+    "nameLabel": "Nome",
+    "namePlaceholder": "Nome do produto",
+    "priceLabel": "Preço ({currency})",
+    "saveDotDot": "Guardar…",
+    "updating": "A atualizar…",
+    "whereChangeLands": {
+      "label": "Onde se reflete uma alteração de nome ou preço",
+      "content": "O nome e o preço pertencem ao produto, por isso guardar atualiza-os em todo o lado onde aparece, não só nesta montra."
+    },
+    "stock": {
+      "outOfStock": "Sem stock no inventário (0 disponíveis).",
+      "lowStock": "Stock baixo: {count} disponíveis.",
+      "inStock": "{count} em stock."
+    },
+    "openProductPage": "Abrir página de produto",
+    "hideProductPage": "Ocultar página de produto",
+    "tileStyle": {
+      "title": "Estilo do cartão",
+      "reset": "Repor tema",
+      "infoLabel": "Como o estilo deste cartão se relaciona com o tema",
+      "infoWithOverrides": "Este cartão tem o seu próprio estilo. As definições que não alterou aqui continuam a seguir o tema.",
+      "infoNoOverrides": "Dê um estilo próprio a este cartão. Tudo o que não alterar continua a seguir o tema."
+    },
+    "priceTag": "Etiqueta de preço",
+    "modal": {
+      "title": "Atualizar o produto em todo o lado?",
+      "description": "Isto edita o próprio produto. Todas as montras, links de finalização de compra e o seu catálogo de produtos vão mostrar os novos dados, não só esta grelha.",
+      "nameLabel": "Nome:",
+      "priceLabel": "Preço:",
+      "updateEverywhere": "Atualizar em todo o lado"
+    },
+    "savedToast": "«{title}» foi atualizado em todo o lado onde aparece.",
+    "validation": {
+      "noTitle": "Dê um título ao seu produto.",
+      "noPrice": "Defina um preço.",
+      "badPrice": "O preço deve ser um número maior do que zero.",
+      "tooHigh": "Esse preço é demasiado alto."
+    }
+  },
+  "textBlock": {
+    "text": {
+      "label": "Texto",
+      "infoLabel": "Outras formas de editar este texto",
+      "infoContent": "Também pode clicar novamente no bloco na tela e escrever diretamente nele, o que é mais rápido para uma alteração pequena."
+    },
+    "editOnCanvas": "Editar texto na tela",
+    "style": {
+      "label": "Estilo"
+    },
+    "font": {
+      "label": "Tipo de letra",
+      "themeFont": "Tipo de letra do tema",
+      "themeFontDescription": "Seguir o tipo de letra da montra"
+    },
+    "color": {
+      "selectedWords": "Palavras selecionadas",
+      "label": "Cor",
+      "blockColor": "a cor do bloco",
+      "themeColor": "Cor do tema",
+      "useBlockColor": "Utilizar a cor do bloco"
+    },
+    "colouringSelected": "A colorir {count, plural, one {o # carácter selecionado} many {os # carateres selecionados} other {os # carateres selecionados}}. Clique fora das palavras para colorir antes o bloco inteiro."
+  },
+  "imageBlock": {
+    "size": {
+      "label": "Tamanho",
+      "ariaLabel": "Ajuste da imagem",
+      "fill": "Preencher",
+      "fit": "Ajustar",
+      "fillHint": "Preenche o bloco, recortando o excedente.",
+      "fitHint": "Mostra a imagem inteira dentro do bloco."
+    },
+    "reposition": "Reposicionar imagem",
+    "opacity": {
+      "label": "Opacidade",
+      "ariaLabel": "Opacidade da imagem",
+      "valueText": "{value} por cento"
+    },
+    "description": {
+      "label": "Descrição",
+      "placeholder": "Logótipo, ícone, decoração…",
+      "hint": "Lido em voz alta por leitores de ecrã. Deixe vazio se a imagem for puramente decorativa."
+    }
+  },
+  "shapeBlock": {
+    "shape": {
+      "label": "Forma",
+      "ariaLabel": "Tipo de forma"
+    },
+    "points": {
+      "label": "Pontas",
+      "ariaLabel": "Pontas da estrela",
+      "valueText": "{value} pontas"
+    },
+    "corners": {
+      "label": "Arredondamento dos cantos",
+      "ariaLabel": "Arredondamento dos cantos",
+      "valueText": "{value} por cento",
+      "sharp": "Reto"
+    },
+    "fill": {
+      "ring": "Cor",
+      "shape": "Preenchimento"
+    },
+    "border": {
+      "ringLabel": "Espessura do anel",
+      "shapeLabel": "Espessura do contorno",
+      "ringAriaLabel": "Espessura do anel",
+      "shapeAriaLabel": "Espessura do contorno",
+      "valueText": "{value} pixels",
+      "none": "Nenhum",
+      "color": "Cor do contorno"
+    },
+    "opacity": {
+      "label": "Opacidade",
+      "ariaLabel": "Opacidade da forma",
+      "valueText": "{value} por cento"
+    }
+  },
+  "multiBlock": {
+    "shapesContext": "A editar {count, plural, one {# forma} many {# de formas} other {# formas}} em conjunto. Os valores mostrados vêm da primeira forma selecionada; cada alteração aplica-se a todas.",
+    "textsContext": "A editar {count, plural, one {# bloco de texto} many {# de blocos de texto} other {# blocos de texto}} em conjunto. Os valores mostrados vêm do primeiro bloco selecionado; cada alteração aplica-se a todos. Cada bloco mantém o seu próprio texto.",
+    "imagesContext": "A editar {count, plural, one {# elemento} many {# de elementos} other {# elementos}} em conjunto. Os valores mostrados vêm do primeiro elemento selecionado; cada alteração aplica-se a todos. Cada um mantém a sua própria imagem.",
+    "productsContext": "A estilizar {count, plural, one {# cartão de produto} many {# de cartões de produto} other {# cartões de produto}} em conjunto. Os valores mostrados vêm do primeiro cartão selecionado; cada alteração aplica-se a todos.",
+    "mixedContext": "{count, plural, one {Está selecionado # bloco} many {Estão selecionados # de blocos} other {Estão selecionados # blocos}} de tipos diferentes. Selecione blocos de um único tipo para editar as suas definições em conjunto.",
+    "remove": "Remover {count, plural, one {# bloco} many {# de blocos} other {# blocos}}",
+    "duplicate": "Duplicar {count, plural, one {# bloco} many {# de blocos} other {# blocos}}",
+    "productsNotDuplicated": "Os produtos não são duplicados.",
+    "tileStyle": {
+      "title": "Estilo do cartão",
+      "reset": "Repor tema"
+    },
+    "priceTag": "Etiqueta de preço"
+  },
+  "blockActions": {
+    "duplicate": "Duplicar",
+    "remove": "Remover da grelha"
+  },
+  "toolbar": {
+    "ariaLabel": "Ferramentas do editor",
+    "addProduct": "Adicionar produto",
+    "addText": "Adicionar texto",
+    "addElement": "Adicionar elemento",
+    "product": "Produto",
+    "text": "Texto",
+    "element": "Elemento",
+    "elementsMenu": "Elementos",
+    "uploading": "A carregar…",
+    "upload": "Carregar",
+    "uploadImage": "Carregar imagem",
+    "allShapes": "Todas as formas",
+    "browseShapes": "Explorar a biblioteca completa de formas",
+    "closePage": "Fechar página de produto",
+    "showPage": "Mostrar página de produto",
+    "closePages": "Fechar as páginas de produto",
+    "showPageFull": "Mostrar a página de produto",
+    "undo": "Anular",
+    "undoTip": "Anular (Ctrl+Z)",
+    "redo": "Refazer",
+    "redoTip": "Refazer (Ctrl+Shift+Z)",
+    "tidy": "Organizar a tela",
+    "tidyTip": "Organizar",
+    "zoomOut": "Reduzir zoom",
+    "zoomOutTip": "Reduzir zoom (Ctrl -)",
+    "zoomReset": "Repor zoom para 100%",
+    "zoomResetTip": "Repor zoom (Ctrl 0)",
+    "zoomResetMenuItem": "Repor zoom",
+    "zoomIn": "Aumentar zoom",
+    "zoomInTip": "Aumentar zoom (Ctrl +)",
+    "designSettings": "Definições de design",
+    "page": "Página",
+    "moreTools": "Mais ferramentas"
+  },
+  "selectionToolbar": {
+    "toolsFor": "Ferramentas para {name}",
+    "elements": "{count, plural, one {# elemento} many {# de elementos} other {# elementos}}",
+    "hidePage": "Ocultar página",
+    "hidePages": "Ocultar páginas",
+    "openPage": "Abrir página",
+    "openPages": "Abrir páginas",
+    "openProductPage": "Abrir a página de produto de {name}",
+    "closeProductPage": "Fechar a página de produto de {name}",
+    "openProductPages": "Abrir as páginas de produto de {count, plural, one {# produto} many {# de produtos} other {# produtos}}",
+    "closeProductPages": "Fechar as páginas de produto de {count, plural, one {# produto} many {# de produtos} other {# produtos}}",
+    "editText": "Editar texto",
+    "editTextOf": "Editar o texto de {name}",
+    "color": "Cor",
+    "changeColorOf": "Alterar a cor de {name}",
+    "stroke": "Traço",
+    "editStrokeOf": "Editar o traço de {name}",
+    "corners": "Cantos",
+    "editCornersOf": "Editar o arredondamento dos cantos de {name}",
+    "opacity": "Opacidade",
+    "editOpacityOf": "Editar a opacidade de {name}",
+    "frame": "Moldura",
+    "frameImageFor": "Enquadrar a imagem de {name}",
+    "duplicate": "Duplicar",
+    "duplicateNamed": "Duplicar {name}",
+    "duplicateN": "Duplicar {count, plural, one {# elemento} many {# de elementos} other {# elementos}}",
+    "removeFrom": "Remover {name} da grelha",
+    "removeN": "Remover {count, plural, one {# elemento} many {# de elementos} other {# elementos}} da grelha"
+  },
+  "canvas": {
+    "gridLabel": "Tela da montra",
+    "emptyGrid": "A sua grelha está vazia",
+    "emptyGridHint": "Adicione um produto para começar a organizar a sua montra. O texto e as formas estão na barra de ferramentas abaixo.",
+    "addProduct": "Adicionar produto",
+    "desktopPreview": "Pré-visualização para computador",
+    "mobilePreview": "Pré-visualização para telemóvel"
+  },
+  "blockTile": {
+    "removedProduct": "Produto removido",
+    "shape": "{kind, select, square {forma de quadrado} circle {forma de círculo} ring {forma de anel} diamond {forma de losango} rounded {forma de quadrado arredondado} pill {forma de pílula} half {forma de meio círculo} quarter {forma de quarto de círculo} bar {forma de barra} triangle {forma de triângulo} wedge {forma de cunha} pentagon {forma de pentágono} hexagon {forma de hexágono} octagon {forma de octógono} star {forma de estrela} sparkle {forma de brilho} cross {forma de cruz} arrow {forma de seta} chevron {forma de galão} trapezoid {forma de trapézio} parallelogram {forma de paralelogramo} burst {forma de explosão} other {forma {kind}}}",
+    "imageWithAlt": "Imagem: {alt}",
+    "imageElement": "Elemento de imagem",
+    "textWithContent": "Texto: {text}",
+    "textBlock": "Bloco de texto",
+    "selected": "Selecionado: {label}. Prima Enter para anular a seleção.",
+    "unselected": "{label}. Prima Enter para selecionar e editar.",
+    "draftAriaLabel": "Produto em rascunho: os compradores não conseguem aceder a este link",
+    "draft": "Rascunho"
+  },
+  "blockFace": {
+    "productRemoved": "Produto removido. Elimine este bloco."
+  },
+  "framer": {
+    "ariaLabel": "A enquadrar a imagem de {name}. Arraste para reposicionar, teclas de seta para ajustar, mais e menos para zoom, Escape quando terminar. Atualmente {x}% na horizontal, {y}% na vertical, {zoom}% de zoom.",
+    "hintZoomed": "{zoom}% · Arraste para enquadrar · Esc",
+    "hintMinZoom": "Puxe um canto para aplicar zoom · Esc"
+  },
+  "inlineText": {
+    "ariaLabel": "Texto do bloco"
+  },
+  "tiles": {
+    "emptyText": "Bloco de texto vazio",
+    "imageUnavailable": "Imagem indisponível"
+  },
+  "spotDrag": {
+    "tokenLabel": "{token, select, title {Título} other {Preço}} {drop, select, below {na barra de título} top_left {no canto superior esquerdo} top_center {no topo ao centro} top_right {no canto superior direito} middle_center {ao centro} bottom_left {no canto inferior esquerdo} bottom_center {na base ao centro} bottom_right {no canto inferior direito} other {}}. Prima para abrir as suas definições, ou arraste (ou utilize as teclas de seta) para o mover."
+  },
+  "autoFit": {},
+  "designer": {
+    "header": {
+      "back": "Voltar às montras",
+      "nameLabel": "Nome da montra",
+      "namePlaceholder": "Montra sem título",
+      "unsaved": "Alterações não guardadas",
+      "search": "Pesquisar"
+    },
+    "mobileNotice": {
+      "body": "Para a melhor experiência de edição, abra este editor num computador ou tablet. Reordenar blocos e editar o cabeçalho funcionam em qualquer dispositivo.",
+      "dismiss": "Dispensar o aviso de edição em ecrã pequeno"
+    },
+    "inspector": {
+      "title": {
+        "addProduct": "Adicionar produto",
+        "blocks": "{count, plural, one {# bloco} many {# de blocos} other {# blocos}}",
+        "product": "Produto",
+        "shape": "Forma",
+        "image": "Imagem",
+        "text": "Bloco de texto"
+      },
+      "close": {
+        "addProduct": "Fechar painel de adicionar produto",
+        "blocks": "{count, plural, one {Fechar painel de # bloco} many {Fechar painel de # de blocos} other {Fechar painel de # blocos}}",
+        "product": "Fechar painel de produto",
+        "shape": "Fechar painel de forma",
+        "image": "Fechar painel de imagem",
+        "text": "Fechar painel de bloco de texto"
+      }
+    },
+    "toasts": {
+      "full": "Esta montra está cheia.",
+      "fullDetail": "Uma montra pode ter até {max, plural, one {# bloco} many {# de blocos} other {# blocos}}.",
+      "imageUploadFailed": "Não foi possível carregar essa imagem.",
+      "imageUploadFailedDetail": "Tente novamente daqui a pouco.",
+      "copied": "{count, plural, one {Bloco copiado.} many {# de blocos copiados.} other {# blocos copiados.}}",
+      "copiedDetail": "Cole com Ctrl+V ou Cmd+V.",
+      "savedWithDrafts": "Guardado, mas alguns produtos ainda são rascunhos.",
+      "draftsDetail": "{count, plural, one {{names} é um rascunho e os compradores ainda não conseguem aceder a ele.} many {{names}{hidden, plural, =0 {} one { e mais #} many { e mais #} other { e mais #}} são rascunhos e os compradores ainda não conseguem aceder a eles.} other {{names}{hidden, plural, =0 {} one { e mais #} many { e mais #} other { e mais #}} são rascunhos e os compradores ainda não conseguem aceder a eles.}}",
+      "publishDrafts": "Publique esses produtos quando estiver pronto.",
+      "saved": "Montra guardada.",
+      "droppedBlocks": "{count, plural, one {# bloco apontava para um produto eliminado e foi removido.} many {# de blocos apontavam para produtos eliminados e foram removidos.} other {# blocos apontavam para produtos eliminados e foram removidos.}}"
+    },
+    "leave": {
+      "title": "Guardar as suas alterações?",
+      "description": "Tem alterações não guardadas nesta montra. Guarde-as antes de sair, ou descarte-as.",
+      "save": "Guardar alterações",
+      "discard": "Descartar alterações",
+      "keepEditing": "Continuar a editar"
+    },
+    "defaults": {
+      "textBlock": "O seu texto aqui"
+    }
+  },
+  "sample": {
+    "name": "Montra de exemplo",
+    "card": {
+      "open": "Abrir a montra de exemplo",
+      "badge": "Exemplo",
+      "summary": "{count, plural, one {{count} bloco · experimente à vontade, nada é guardado} many {{count} de blocos · experimente à vontade, nada é guardado} other {{count} blocos · experimente à vontade, nada é guardado}}",
+      "hide": "Ocultar a montra de exemplo"
+    },
+    "embed": {
+      "title": "Incorporar uma montra",
+      "description": "Cada montra que criar tem o seu próprio código para colar no seu site.",
+      "snippetLabel": "Um código tem este aspeto",
+      "inDevelopment": "O widget ainda está em desenvolvimento e ainda não aparece noutros sites.",
+      "create": "Criar uma montra"
+    },
+    "list": {
+      "show": "Mostrar a montra de exemplo",
+      "showFailed": "Não foi possível repor a montra de exemplo.",
+      "hideFailed": "Não foi possível ocultar a montra de exemplo.",
+      "failedDetail": "Tente novamente dentro de momentos.",
+      "createFirst": "Crie a sua primeira montra",
+      "createFirstHint": "Adicione os seus produtos à grelha. Cada um passa a ter uma página que pode partilhar."
+    },
+    "designer": {
+      "createAriaLabel": "Criar a sua própria montra",
+      "createShort": "Criar",
+      "create": "Criar a sua",
+      "notice": "Esta é uma montra de exemplo. Experimente à vontade: nada aqui é guardado.",
+      "takeTour": "Fazer a visita guiada"
+    },
+    "content": {
+      "bio": "Tecnologia do dia a dia e objetos para a secretária, escolhidos para durar.",
+      "heading": "Os mais vendidos",
+      "story": "Usamos tudo o que vendemos antes de o pôr à venda. Aceitamos devoluções no prazo de 14 dias.",
+      "dispatch": "Enviado em 2 dias úteis",
+      "products": {
+        "camera": {
+          "title": "Câmara instantânea",
+          "description": "Imprime a fotografia segundos depois de a tirar. Película vendida em separado."
+        },
+        "headphones": {
+          "title": "Auscultadores",
+          "description": "Fechados, com almofadas macias de espuma com memória. Inclui cabo de 3,5 mm."
+        },
+        "watch": {
+          "title": "Smartwatch",
+          "description": "Caixa em alumínio com bracelete desportiva. Regista passos, sono e treinos."
+        },
+        "mouse": {
+          "title": "Rato sem fios",
+          "description": "Leve, com cliques silenciosos e até 250 horas com uma só pilha."
+        },
+        "speaker": {
+          "title": "Coluna portátil",
+          "description": "À prova de água, com 12 horas de reprodução por carga."
+        },
+        "succulent": {
+          "title": "Suculenta de secretária",
+          "description": "Uma pequena haworthia num vaso de cerâmica. Precisa de água mais ou menos uma vez por mês."
+        }
+      }
+    }
+  },
+  "colors": {
+    "fields": {
+      "accent": "Cor de destaque",
+      "storeName": "Nome da loja",
+      "bio": "Biografia",
+      "background": "Fundo",
+      "gradientFrom": "Gradiente de",
+      "gradientTo": "Gradiente até",
+      "fill": "Preenchimento",
+      "color": "Cor",
+      "borderColor": "Cor do contorno",
+      "selectedWords": "Palavras selecionadas",
+      "textColor": "Cor do texto",
+      "tagColor": "Cor da etiqueta",
+      "shadowColor": "Cor da sombra"
+    },
+    "inherit": {
+      "themeColor": {
+        "label": "Cor do tema",
+        "use": "Utilizar a cor do tema"
+      },
+      "default": {
+        "label": "Predefinida",
+        "use": "Utilizar a cor predefinida"
+      },
+      "noFill": {
+        "label": "Sem preenchimento",
+        "use": "Utilizar sem preenchimento"
+      },
+      "cardColor": {
+        "label": "Cor do cartão",
+        "use": "Utilizar a cor do cartão"
+      },
+      "blockColor": {
+        "label": "a cor do bloco",
+        "use": "Utilizar a cor do bloco"
+      }
+    },
+    "presets": {
+      "white": {
+        "name": "Branco",
+        "label": "Branco ({value})"
+      },
+      "grey": {
+        "name": "Cinzento",
+        "label": "Cinzento ({value})"
+      },
+      "ink": {
+        "name": "Tinta",
+        "label": "Tinta ({value})"
+      },
+      "paleAccent": {
+        "name": "Destaque pálido",
+        "label": "Destaque pálido ({value})"
+      },
+      "softAccent": {
+        "name": "Destaque suave",
+        "label": "Destaque suave ({value})"
+      },
+      "accent": {
+        "name": "Destaque",
+        "label": "Destaque ({value})"
+      },
+      "deepAccent": {
+        "name": "Destaque intenso",
+        "label": "Destaque intenso ({value})"
+      }
+    },
+    "standard": {
+      "white": "Branco ({value})",
+      "grey200": "Cinzento 200 ({value})",
+      "grey300": "Cinzento 300 ({value})",
+      "grey400": "Cinzento 400 ({value})",
+      "grey": "Cinzento ({value})",
+      "grey600": "Cinzento 600 ({value})",
+      "grey700": "Cinzento 700 ({value})",
+      "grey800": "Cinzento 800 ({value})",
+      "ink": "Tinta ({value})",
+      "black": "Preto ({value})",
+      "red": "Vermelho ({value})",
+      "orange": "Laranja ({value})",
+      "amber": "Âmbar ({value})",
+      "yellow": "Amarelo ({value})",
+      "green": "Verde ({value})",
+      "teal": "Azul-petróleo ({value})",
+      "sky": "Azul-céu ({value})",
+      "blue": "Azul ({value})",
+      "violet": "Violeta ({value})",
+      "pink": "Rosa ({value})",
+      "redDark": "Vermelho escuro ({value})",
+      "orangeDark": "Laranja escuro ({value})",
+      "amberDark": "Âmbar escuro ({value})",
+      "yellowDark": "Amarelo escuro ({value})",
+      "greenDark": "Verde escuro ({value})",
+      "tealDark": "Azul-petróleo escuro ({value})",
+      "skyDark": "Azul-céu escuro ({value})",
+      "blueDark": "Azul escuro ({value})",
+      "violetDark": "Violeta escuro ({value})",
+      "pinkDark": "Rosa escuro ({value})"
+    },
+    "palettes": {
+      "sunset": {
+        "name": "Pôr do sol",
+        "group": "Paleta Pôr do sol",
+        "swatches": {
+          "cream": "Creme do pôr do sol ({value})",
+          "amber": "Âmbar do pôr do sol ({value})",
+          "orange": "Laranja do pôr do sol ({value})",
+          "red": "Vermelho do pôr do sol ({value})",
+          "ember": "Brasa do pôr do sol ({value})"
+        }
+      },
+      "forest": {
+        "name": "Floresta",
+        "group": "Paleta Floresta",
+        "swatches": {
+          "mist": "Névoa da floresta ({value})",
+          "sage": "Sálvia da floresta ({value})",
+          "green": "Verde da floresta ({value})",
+          "pine": "Pinho da floresta ({value})",
+          "deep": "Verde-escuro da floresta ({value})"
+        }
+      },
+      "ocean": {
+        "name": "Oceano",
+        "group": "Paleta Oceano",
+        "swatches": {
+          "foam": "Espuma do oceano ({value})",
+          "sky": "Céu do oceano ({value})",
+          "cyan": "Ciano do oceano ({value})",
+          "sea": "Azul-mar do oceano ({value})",
+          "navy": "Azul-marinho do oceano ({value})"
+        }
+      },
+      "mono": {
+        "name": "Mono",
+        "group": "Paleta Mono",
+        "swatches": {
+          "white": "Branco mono ({value})",
+          "silver": "Prata mono ({value})",
+          "grey": "Cinzento mono ({value})",
+          "graphite": "Grafite mono ({value})",
+          "ink": "Tinta mono ({value})"
+        }
+      },
+      "candy": {
+        "name": "Doce",
+        "group": "Paleta Doce",
+        "swatches": {
+          "blush": "Rosa-pálido doce ({value})",
+          "rose": "Rosa-antigo doce ({value})",
+          "pink": "Rosa-vivo doce ({value})",
+          "purple": "Roxo doce ({value})",
+          "violet": "Violeta doce ({value})"
+        }
+      }
+    }
+  }
+}

@@ -34,8 +34,9 @@ type Stop = {
   target?: string;
 };
 
-/** A new seller's tour: no storefront of their own (so the sample storefront's
- *  card is what the storefront stops point at), no orders. */
+/** A new seller's tour: no storefront of their own (so the sample stop points
+ *  at the sample's link, and the embed stop, with no card to point at, falls
+ *  back to its snippet), no orders. */
 const NEW_SELLER_STOPS: Stop[] = [
   { id: "overview-nav", path: /\/dashboard$/, target: 'nav[aria-label="Dashboard"]' },
   { id: "search", path: /\/dashboard$/, target: '[data-testid="top-bar"] button[aria-keyshortcuts]' },
@@ -43,11 +44,7 @@ const NEW_SELLER_STOPS: Stop[] = [
   { id: "products-import", path: /\/products$/, target: 'main a[href="/products/import"]' },
   { id: "storefront-create", path: /\/storefront$/, target: '[data-tour="storefront-create"] >> nth=0' },
   { id: "storefront-sample", path: /\/storefront$/, target: "main [data-storefront-sample]" },
-  {
-    id: "storefront-embed",
-    path: /\/storefront$/,
-    target: 'main button[aria-label="Embed Sample storefront"]',
-  },
+  { id: "storefront-embed", path: /\/storefront$/, state: "fallback" },
   { id: "orders-search", path: /\/orders$/, target: '[data-tour="orders-search"]' },
   { id: "orders-filters", path: /\/orders$/, target: '[role="search"][aria-label="order filters"]' },
   { id: "analytics", path: /\/analytics$/, target: "[data-analytics-first-run] > div" },
@@ -88,8 +85,9 @@ test.describe("guided tour", () => {
         await expect(layer).toContainText("Nothing you change there is saved");
       }
       if (stop.id === "storefront-embed") {
-        // No storefront of their own: the sample card's button, with the snippet.
-        await expect(layer).toContainText("This button gives you a snippet");
+        // No storefront of their own and no card to point at: the fallback,
+        // still with the snippet.
+        await expect(layer).toContainText("Once you have a storefront");
         await expect(layer).toContainText("data-squareshare-storefront");
       }
       if (stop.id === "orders-search") {
@@ -184,15 +182,15 @@ test.describe("guided tour", () => {
     await expect(layer).toContainText("This button gives you a snippet");
     await expect(layer).toContainText("still in development");
 
-    // Back walks the same page without a navigation, to the sample after
-    // their own card.
+    // Back walks the same page without a navigation, to the sample's link
+    // after their own card.
     await tourButton(page, "Back");
     await expectTourStep(page, "storefront-sample");
     await expectSpotlightOn(page, page.locator("main [data-storefront-sample]"));
     await expect(page).toHaveURL(/\/storefront$/);
   });
 
-  test("with the sample hidden, its stop says where it went", async ({ page }) => {
+  test("with the sample hidden, its stop falls back to what the page is for", async ({ page }) => {
     test.setTimeout(150_000);
     const user = freshUser("tour-sample-hidden");
     await signUp(page, user);
@@ -208,7 +206,7 @@ test.describe("guided tour", () => {
       await tourButton(page, "Next");
     }
     await expectTourStep(page, "storefront-sample", "fallback");
-    await expect(page.locator(TOUR_LAYER)).toContainText("brought back from the bottom of this page");
+    await expect(page.locator(TOUR_LAYER)).toContainText("Open a storefront to design it.");
     await tourButton(page, "Next");
     // Nothing of their own and no sample: the embed stop falls back too.
     await expectTourStep(page, "storefront-embed", "fallback");

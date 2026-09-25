@@ -1,4 +1,6 @@
 import type { CSSProperties } from "react";
+import { FitText } from "@/components/ui/FitText";
+import { useTranslations } from "next-intl";
 
 /**
  * Mobile-only hero for the Overview page: the 30-day revenue as one big green
@@ -37,9 +39,10 @@ const GRAIN_STYLE: CSSProperties = {
 };
 
 export function MobileRevenueHero({ value }: { value: string | null }) {
+  const t = useTranslations("Dashboard.overview");
   return (
     <section
-      aria-label="Revenue, last 30 days"
+      aria-label={t("revenueHeroLabel")}
       className="relative -mx-6 -mt-8 px-6 pb-24 pt-20 text-center md:hidden"
     >
       <div
@@ -57,19 +60,19 @@ export function MobileRevenueHero({ value }: { value: string | null }) {
         {value ? (
           <>
             <p className="text-6xl font-bold tracking-tight text-success">
-              {value}
+              <FitText measure={value}>{value}</FitText>
             </p>
             <p className="mt-4 font-inter text-xs text-muted-foreground">
-              Revenue · 30 days
+              {t("revenue30d")}
             </p>
           </>
         ) : (
           <>
             <p className="text-xl font-medium text-muted-foreground">
-              No sales yet
+              {t("noSales")}
             </p>
             <p className="mt-2 font-inter text-xs text-muted-foreground">
-              Revenue · 30 days
+              {t("revenue30d")}
             </p>
           </>
         )}

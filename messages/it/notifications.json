@@ -1,0 +1,113 @@
+{
+  "metadata": {
+    "notifications": {
+      "title": "Notifiche"
+    }
+  },
+  "loading": {
+    "title": "Notifiche",
+    "srLoading": "caricamento notifiche"
+  },
+  "bell": {
+    "label": "Notifiche",
+    "unreadLabel": "{count, plural, one {Notifiche, {count} non letta} many {Notifiche, {count} non lette} other {Notifiche, {count} non lette}}"
+  },
+  "list": {
+    "title": "Notifiche",
+    "unread": "{count, plural, one {{count} non letta} many {{count} non lette} other {{count} non lette}}",
+    "markAllRead": "Segna tutte come lette",
+    "livePaused": "Aggiornamenti in tempo reale in pausa. Aggiorna la pagina per vedere le ultime novità.",
+    "empty": "Sei in pari. Ancora niente qui.",
+    "viewAll": "Vedi tutte"
+  },
+  "item": {
+    "unread": "Non letta"
+  },
+  "page": {
+    "title": "Notifiche",
+    "markAllRead": "Segna tutte come lette",
+    "emptyTitle": "Ancora nessuna notifica",
+    "emptyHint": "Le attività di team, ordini e pagamenti compariranno qui.",
+    "loadError": "Non è stato possibile caricare altre notifiche. Controlla la connessione e riprova.",
+    "loading": "Caricamento",
+    "loadMore": "Carica altre"
+  },
+  "types": {
+    "team": "Team",
+    "order": "Ordine",
+    "payment": "Pagamento",
+    "stock": "Scorte",
+    "system": "Sistema",
+    "security": "Sicurezza",
+    "policy": "Norme"
+  },
+  "time": {
+    "justNow": "adesso",
+    "minutesAgo": "{count, plural, one {{count} min fa} many {{count} min fa} other {{count} min fa}}",
+    "hoursAgo": "{count, plural, one {{count} h fa} many {{count} h fa} other {{count} h fa}}",
+    "daysAgo": "{count, plural, one {{count} g fa} many {{count} g fa} other {{count} g fa}}"
+  },
+  "messages": {
+    "teamInvite": {
+      "title": "Hai un invito al team",
+      "body": "{role, select, owner {{store} ti ha invitato a unirti come proprietario. Apri Team e accessi per accettare.} editor {{store} ti ha invitato a unirti come editor. Apri Team e accessi per accettare.} viewer {{store} ti ha invitato a unirti come visualizzatore. Apri Team e accessi per accettare.} other {{store} ti ha invitato a unirti al suo team. Apri Team e accessi per accettare.}}",
+      "bodyUnnamedStore": "{role, select, owner {Un negozio SquareShare ti ha invitato a unirti come proprietario. Apri Team e accessi per accettare.} editor {Un negozio SquareShare ti ha invitato a unirti come editor. Apri Team e accessi per accettare.} viewer {Un negozio SquareShare ti ha invitato a unirti come visualizzatore. Apri Team e accessi per accettare.} other {Un negozio SquareShare ti ha invitato a unirti al suo team. Apri Team e accessi per accettare.}}"
+    },
+    "teamJoined": {
+      "title": "{name} ora fa parte del tuo team",
+      "titleUnnamed": "Un nuovo membro ora fa parte del tuo team",
+      "body": "Ora ha accesso al tuo negozio."
+    },
+    "security": {
+      "passwordChanged": {
+        "title": "La tua password è stata cambiata",
+        "body": "La password di questo account è appena stata cambiata e gli altri dispositivi sono stati disconnessi. Se non l’hai fatto tu, reimposta subito la password."
+      },
+      "passwordReset": {
+        "title": "La tua password è stata cambiata",
+        "body": "Un link di reimpostazione è stato usato per impostare una nuova password, e gli altri dispositivi sono stati disconnessi. Se non l’hai fatto tu, reimpostala di nuovo subito."
+      },
+      "passwordSet": {
+        "title": "È stata impostata una password sul tuo account",
+        "body": "Questo account può ora accedere anche con una password, oltre che con Google. Se non l’hai fatto tu, reimpostala subito."
+      },
+      "resetRequested": {
+        "title": "È stato richiesto un link per reimpostare la password",
+        "body": "Qualcuno ha richiesto un link per impostare una nuova password su questo account. Se non l’hai fatto tu, ignora l’email e cambia la password."
+      },
+      "emailChangeRequested": {
+        "title": "Richiesta di cambio email",
+        "body": "Qualcuno ha richiesto di spostare questo account a un nuovo indirizzo email. Ha effetto solo dopo la conferma del link in quella casella di posta. Se non l’hai fatto tu, cambia subito la password."
+      },
+      "lockedOut": {
+        "title": "Qualcuno sta cercando di accedere al tuo account",
+        "body": "La tua password è stata inserita correttamente, ma poi sono stati inseriti troppi codici a due fattori sbagliati, quindi l’accesso è stato sospeso per qualche minuto. Se non eri tu, qualcun altro conosce la tua password: cambiala subito."
+      },
+      "recoveryCodeUsed": {
+        "title": "Per accedere è stato usato un codice di recupero",
+        "body": "Qualcuno ha effettuato l’accesso al tuo account con un codice di recupero. Questo disattiva l’autenticazione a due fattori e disconnette tutti gli altri dispositivi. Se eri tu, configura di nuovo l’autenticazione a due fattori in Impostazioni › Sicurezza. Se non eri tu, cambia subito la password."
+      },
+      "twoFactorEnabled": {
+        "title": "L’autenticazione a due fattori è attiva",
+        "body": "Ora per accedere al tuo account serve un codice dalla tua app di autenticazione, e tutti gli altri dispositivi sono stati disconnessi. Se non eri tu, cambia la password e contatta l’assistenza."
+      },
+      "factorAdded": {
+        "title": "È stata aggiunta un’app di autenticazione",
+        "body": "Ora puoi accedere al tuo account anche con «{name}». Se non eri tu, rimuovila in Impostazioni › Sicurezza e cambia la password.",
+        "bodyUnnamed": "Ora puoi accedere al tuo account anche con «App di autenticazione». Se non eri tu, rimuovila in Impostazioni › Sicurezza e cambia la password."
+      },
+      "twoFactorDisabled": {
+        "title": "L’autenticazione a due fattori è disattivata",
+        "body": "La tua ultima app di autenticazione è stata rimossa, quindi ora per accedere basta la password. Se non eri tu, cambia la password e riattiva l’autenticazione a due fattori."
+      },
+      "factorRemoved": {
+        "title": "È stata rimossa un’app di autenticazione",
+        "body": "Non è più possibile accedere al tuo account con «{name}». Se non eri tu, cambia subito la password."
+      },
+      "recoveryCodesRegenerated": {
+        "title": "Sono stati generati nuovi codici di recupero",
+        "body": "I tuoi vecchi codici di recupero non funzionano più. Se non eri tu, cambia subito la password."
+      }
+    }
+  }
+}

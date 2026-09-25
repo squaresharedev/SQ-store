@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
+import { formatList } from "@/lib/format/intl";
 import { TrendingUp } from "lucide-react";
 import { secondaryButtonClass } from "@/components/ui/control-styles";
 import { emptyStateClass } from "@/components/ui/surface-styles";
@@ -62,6 +64,8 @@ export function AnalyticsPage({
    */
   firstRun?: boolean;
 }) {
+  const t = useTranslations("Analytics");
+  const locale = useLocale();
   const { sales, signals, range, currency } = snapshot;
   const hasSales = sales.totals.sales > 0;
   const hasOrders = sales.statuses.some((slice) => slice.count > 0);
@@ -86,13 +90,13 @@ export function AnalyticsPage({
             />
           </div>
           <h2 className="mt-4 text-lg font-semibold text-foreground">
-            Nothing to measure yet
+            {t("firstRun.title")}
           </h2>
           <p className="mt-1 max-w-sm font-inter text-sm text-muted-foreground">
-            Visits to your product pages show up here once one is live.
+            {t("firstRun.body")}
           </p>
           <Link href="/dashboard" className={cn(secondaryButtonClass, "mt-5")}>
-            Back to setup
+            {t("firstRun.backToSetup")}
           </Link>
         </div>
       </div>
@@ -110,16 +114,16 @@ export function AnalyticsPage({
 
       <AnalyticsSection
         id={SALES_SOURCE.id}
-        title={SALES_SOURCE.label}
-        description={SALES_SOURCE.description}
+        title={t("sales.label")}
+        description={t("sales.description")}
         icon={SALES_SOURCE.icon}
         state="live"
       >
         <AnalyticsTiles totals={sales.totals} />
 
         <ChartCard
-          title="Revenue"
-          description="Paid revenue over time."
+          title={t("sales.revenue.title")}
+          description={t("sales.revenue.description")}
           empty={!hasSales || sales.series.length === 0}
           panel="trend"
           source="sales"
@@ -130,8 +134,8 @@ export function AnalyticsPage({
 
         <div className="grid gap-4 lg:grid-cols-2">
           <ChartCard
-            title="Average order value"
-            description="How much a typical order is worth over time."
+            title={t("sales.aov.title")}
+            description={t("sales.aov.description")}
             empty={!hasSales || sales.series.length === 0}
             panel="aov"
             source="sales"
@@ -140,8 +144,8 @@ export function AnalyticsPage({
             <AovTrendChart series={sales.series} currency={currency} />
           </ChartCard>
           <ChartCard
-            title="Channels"
-            description="Where your sales come from."
+            title={t("sales.channels.title")}
+            description={t("sales.channels.description")}
             empty={!hasSales}
             panel="channels"
             source="sales"
@@ -153,8 +157,8 @@ export function AnalyticsPage({
 
         <div className="grid gap-4 lg:grid-cols-2">
           <ChartCard
-            title="Sales by weekday"
-            description="Your store's weekly rhythm."
+            title={t("sales.weekday.title")}
+            description={t("sales.weekday.description")}
             empty={!hasSales}
             panel="weekdays"
             source="sales"
@@ -163,8 +167,8 @@ export function AnalyticsPage({
             <WeekdayChart weekdays={sales.weekdays} />
           </ChartCard>
           <ChartCard
-            title="Top products"
-            description="Your best sellers by paid revenue."
+            title={t("sales.topProducts.title")}
+            description={t("sales.topProducts.description")}
             empty={sales.topProducts.length === 0}
             panel="top_products"
             source="sales"
@@ -180,10 +184,10 @@ export function AnalyticsPage({
             section for a block the seller has not added, and the same answer
             applies. A composition bar is happy across the full column. */}
         <ChartCard
-          title="Order status"
-          description="The full order mix, refunds and disputes included."
+          title={t("sales.orderStatus.title")}
+          description={t("sales.orderStatus.description")}
           empty={!hasOrders}
-          emptyText="No orders in this range"
+          emptyText={t("sales.orderStatus.empty")}
           panel="statuses"
           source="sales"
           headingLevel="h3"
@@ -217,7 +221,11 @@ export function AnalyticsPage({
             (source) =>
               !source.awaiting && !isSourceRelevant(source, relevantContext),
           );
-          const upcomingLabels = upcomingSources.map((source) => source.label).join(", ");
+          const upcomingLabels = formatList(
+            upcomingSources.map((source) => t(`sources.${source.id}.label`)),
+            locale,
+            { englishSeparator: ", " },
+          );
           const upcomingNeedProducts = upcomingSources.every(
             (source) => source.blockType === "product",
           );
@@ -234,8 +242,8 @@ export function AnalyticsPage({
               {upcomingSources.length > 0 && (
                 <p className="text-sm text-muted-foreground">
                   {upcomingNeedProducts
-                    ? `${upcomingLabels} appear here once a product is on one of your storefronts.`
-                    : `${upcomingLabels} appear here once their block is on one of your storefronts.`}
+                    ? t("upcoming.needProducts", { labels: upcomingLabels })
+                    : t("upcoming.needBlocks", { labels: upcomingLabels })}
                 </p>
               )}
             </>

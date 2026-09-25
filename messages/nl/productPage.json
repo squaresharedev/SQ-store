@@ -1,0 +1,162 @@
+{
+  "metadata": {
+    "descriptionFallback": "{title} van {store}."
+  },
+  "notFound": {
+    "title": "Dit product is niet beschikbaar",
+    "body": "Het is mogelijk verwijderd, of de link die je volgde is verouderd. Ga terug naar de winkel om te zien wat er nu te koop is.",
+    "back": "Terug"
+  },
+  "sections": {
+    "description": "Beschrijving",
+    "specs": "Specificaties",
+    "documents": "Documenten",
+    "shipping": "Verzending",
+    "returns": "Retouren",
+    "safety": "Veiligheid en conformiteit",
+    "seller": "Verkoper"
+  },
+  "soldBy": "Verkocht door {seller}",
+  "moreDetails": "Meer details",
+  "trust": {
+    "digitalDelivery": "Geleverd als download na aankoop.",
+    "euRights": "14 dagen bedenktijd, en een garantie van 2 jaar."
+  },
+  "safety": {
+    "manufacturer": "Fabrikant",
+    "responsiblePerson": "Verantwoordelijke persoon in de EU",
+    "identifier": "Productidentificatie:",
+    "warnings": "Waarschuwingen"
+  },
+  "priceNotes": "{price, select, incl {{shipping, select, plus {incl. btw, plus verzendkosten} free {incl. btw, gratis verzending} other {incl. btw}}} excl {{shipping, select, plus {excl. belasting, plus verzendkosten} free {excl. belasting, gratis verzending} other {excl. belasting}}} other {{shipping, select, plus {plus verzendkosten} free {gratis verzending} other {}}}}",
+  "stock": {
+    "digitalDownload": "Digitale download",
+    "digitalDownloadFormat": "Digitale download ({format})"
+  },
+  "description": {
+    "readMore": "Meer lezen",
+    "readLess": "Minder lezen"
+  },
+  "gallery": {
+    "noPhoto": "Nog geen foto",
+    "photosOf": "Foto's van {title}",
+    "photo": "Foto {current} van {total}"
+  },
+  "options": {
+    "unavailable": "(niet beschikbaar)",
+    "unavailableOption": "{name} (niet beschikbaar)",
+    "unavailableLabel": "{name}, niet beschikbaar"
+  },
+  "quantity": {
+    "label": "Aantal"
+  },
+  "cta": {
+    "unwired": "Deze knop heeft nog geen bestemming. Voeg een aankooplink toe aan het product, of een contact-e-mailadres bij Verkopersgegevens.",
+    "unavailableIn": "Niet beschikbaar bij deze {group}",
+    "askAbout": "Vraag stellen over dit product",
+    "checkoutOn": "Afrekenen op <strong>{host}</strong>",
+    "mailSubject": "Vraag over {title}",
+    "mailQuantity": "Aantal: {quantity}"
+  },
+  "specs": {
+    "dimensions": "Afmetingen",
+    "weight": "Gewicht",
+    "materials": "Materialen",
+    "madeIn": "Gemaakt in",
+    "included": "Wat is inbegrepen",
+    "care": "Onderhoud"
+  },
+  "seller": {
+    "address": "Adres:",
+    "country": "Land:",
+    "email": "E-mail:",
+    "phone": "Telefoon:",
+    "vatId": "Btw-id: {vatId}"
+  },
+  "statutory": {
+    "withdrawal": "Je kunt deze aankoop binnen 14 dagen na ontvangst herroepen zonder opgaaf van reden, tenzij een van de wettelijke uitzonderingen van toepassing is (bijvoorbeeld op bestelling gemaakte of verzegelde goederen).",
+    "digitalWithdrawal": "Voor een download vervalt het herroepingsrecht zodra je ermee instemt de download te starten voordat de 14 dagen voorbij zijn.",
+    "guarantee": "Volgens EU-recht heb je recht op minstens 2 jaar wettelijke garantie dat de goederen overeenkomen met wat er is verkocht."
+  },
+  "footer": {
+    "disclosure": "<seller>{name}</seller> is de verkoper voor deze bestelling en is verantwoordelijk voor het product, de levering ervan en eventuele retouren of terugbetalingen. Squareshare levert de technologie achter deze pagina en is geen partij bij de koopovereenkomst.",
+    "poweredBy": "Mogelijk gemaakt door <brand>Squareshare</brand>",
+    "policiesLabel": "Squareshare-beleid",
+    "policies": {
+      "privacy": {
+        "label": "Privacy",
+        "name": "Squareshare-privacybeleid"
+      },
+      "terms": {
+        "label": "Voorwaarden",
+        "name": "Squareshare-gebruiksvoorwaarden"
+      }
+    }
+  },
+  "report": {
+    "trigger": "{target, select, product {Dit product melden} other {Deze etalage melden}}",
+    "title": "{target, select, product {Dit product melden} other {Deze etalage melden}}",
+    "description": "Vertel ons wat er mis mee is. Elke melding wordt door een medewerker beoordeeld.",
+    "sentTitle": "Melding verstuurd",
+    "sentBody": "{target, select, product {Bedankt. Een medewerker beoordeelt dit product. We delen niet met de verkoper wie iets heeft gemeld.} other {Bedankt. Een medewerker beoordeelt deze etalage. We delen niet met de verkoper wie iets heeft gemeld.}}",
+    "reasonsLegend": "Wat is er mis mee?",
+    "reasons": {
+      "illegal": {
+        "label": "Illegale goederen of activiteiten",
+        "hint": "Iets verkopen dat tegen de wet is, of de advertentie gebruiken om dat te regelen."
+      },
+      "sexual": {
+        "label": "Seksuele inhoud",
+        "hint": "Expliciete beelden, of alles wat een minderjarige seksualiseert."
+      },
+      "violence": {
+        "label": "Geweld of bloederige beelden",
+        "hint": "Grafisch letsel, bedreigingen of inhoud die geweld verheerlijkt."
+      },
+      "hate": {
+        "label": "Haat of intimidatie",
+        "hint": "Aanvallen op een persoon of groep, of haatsymbolen."
+      },
+      "counterfeit": {
+        "label": "Namaak of gestolen",
+        "hint": "Nagemaakte merkproducten, of werk van iemand anders dat als eigen werk wordt verkocht."
+      },
+      "scam": {
+        "label": "Oplichting of fraude",
+        "hint": "De advertentie lijkt bedoeld om geld aan te nemen zonder te leveren."
+      },
+      "spam": {
+        "label": "Spam",
+        "hint": "Repetitief, misleidend of helemaal geen echt product."
+      },
+      "other": {
+        "label": "Iets anders",
+        "hint": "Vertel het ons hieronder en een medewerker leest het."
+      }
+    },
+    "detailsLabel": "Nog iets? <muted>(optioneel)</muted>",
+    "detailsPlaceholder": "Wat moet de medewerker die dit beoordeelt weten?",
+    "emailLabel": "Je e-mailadres <muted>(optioneel)</muted>",
+    "emailPlaceholder": "jij@voorbeeld.nl",
+    "emailHelp": "Alleen zodat we kunnen bevestigen dat we dit hebben ontvangen en zo nodig een vraag kunnen stellen. Het wordt nooit aan de verkoper getoond.",
+    "submitFailed": "Dat kon niet worden verstuurd. Probeer het opnieuw.",
+    "offline": "Dat kon niet worden verstuurd. Controleer je verbinding en probeer het opnieuw.",
+    "send": "Melding versturen",
+    "api": {
+      "accepted": "Bedankt. Een medewerker beoordeelt dit.",
+      "unreadable": "Dat verzoek kon niet worden gelezen.",
+      "invalid": "Die melding is niet geldig.",
+      "targetType": "Dat kun je hier niet melden.",
+      "reason": "Kies wat er mis mee is.",
+      "rateLimited": "Te veel meldingen vanaf hier. Probeer het later opnieuw.",
+      "submitFailed": "Dat kon niet worden verstuurd. Probeer het opnieuw."
+    }
+  },
+  "shippingProse": {
+    "shipsFrom": "Verzonden vanuit {country}.",
+    "areaAndTime": "{area}: {time}",
+    "areaAndTimeWithCost": "{area}: {time} ({cost})",
+    "withCost": "{place} ({cost})",
+    "returnsWindow": "{paidBy, select, seller {{days, plural, one {Retouren worden geaccepteerd binnen {days} dag na levering. De retourkosten zijn voor ons.} other {Retouren worden geaccepteerd binnen {days} dagen na levering. De retourkosten zijn voor ons.}}} buyer {{days, plural, one {Retouren worden geaccepteerd binnen {days} dag na levering. De retourkosten zijn voor de koper.} other {Retouren worden geaccepteerd binnen {days} dagen na levering. De retourkosten zijn voor de koper.}}} other {{days, plural, one {Retouren worden geaccepteerd binnen {days} dag na levering.} other {Retouren worden geaccepteerd binnen {days} dagen na levering.}}}}"
+  }
+}

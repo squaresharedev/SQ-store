@@ -1,7 +1,33 @@
+import { createTranslator } from "next-intl";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createNotificationSchema } from "@/lib/validation/notifications";
-import type { CreateNotificationInput } from "@/lib/validation/notifications";
+import type { NotificationMessage, NotificationMessageRef } from "@/lib/notifications/message";
+import type { NotificationType } from "@/lib/notifications/types";
 import type { Json } from "@/types";
+import notifications from "../../../messages/en/notifications.json";
+
+const english = createTranslator({
+  locale: "en",
+  messages: { Notifications: notifications },
+  timeZone: "UTC",
+});
+
+/**
+ * A notification message in English: what the `title`/`body` columns hold,
+ * and what an out-of-band copy (a security alert email) says.
+ */
+export function notificationInEnglish(ref: NotificationMessageRef): string {
+  return english(ref.key, ref.values);
+}
+
+export type NewNotification = {
+  userId: string;
+  type: NotificationType;
+  /** Keys and values, resolved in the READER'S language when shown. */
+  message: NotificationMessage;
+  /** Deep-linking payload, e.g. `{ href: "/settings/team" }`. */
+  data?: Record<string, unknown>;
+};
 
 /**
  * The ONE place a notification is created. Server-side only (service_role),
@@ -15,11 +41,22 @@ import type { Json } from "@/types";
  * Best-effort by contract: returns false on failure and never throws, so a
  * notification problem can never break the business action that triggered it.
  * Callers should not await-and-branch on the result for correctness.
+ *
+ * The message is stored twice: as keys in `data.message` (see
+ * lib/notifications/message.ts), and as English in `title`/`body`, the
+ * fallback for rows the reader cannot resolve.
  */
 export async function createNotification(
-  input: CreateNotificationInput,
+  input: NewNotification,
 ): Promise<boolean> {
-  const parsed = createNotificationSchema.safeParse(input);
+  const { message } = input;
+  const parsed = createNotificationSchema.safeParse({
+    userId: input.userId,
+    type: input.type,
+    title: notificationInEnglish(message.title),
+    body: message.body ? notificationInEnglish(message.body) : undefined,
+    data: { ...input.data, message },
+  });
   if (!parsed.success) {
     console.error(
       "[notifications] rejected invalid createNotification input:",

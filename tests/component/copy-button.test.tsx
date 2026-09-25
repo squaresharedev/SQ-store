@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, cleanup, waitFor } from "@testing-library/react";
+import { render, screen, cleanup, waitFor } from "../setup/render";
 import userEvent from "@testing-library/user-event";
-import { CopyButton } from "@/components/ui/CopyButton";
+import { CopyButton, type CopyButtonMessages } from "@/components/ui/CopyButton";
 
 afterEach(cleanup);
 
@@ -22,6 +22,19 @@ function stubClipboard(impl: () => Promise<void>) {
   return writeText;
 }
 
+const orderId: CopyButtonMessages = {
+  copy: "Orders.detail.copyOrderId.copy",
+  copied: "Orders.detail.copyOrderId.copied",
+  failed: "Orders.detail.copyOrderId.failed",
+};
+
+const snippet = {
+  copy: "Storefront.embed.copySnippet.copy",
+  copied: "Storefront.embed.copySnippet.copied",
+  failed: "Storefront.embed.copySnippet.failed",
+  cannotCopyYet: "Storefront.embed.copySnippet.cannotCopyYet",
+} as const;
+
 const resolves = () => Promise.resolve();
 const rejects = () => Promise.reject(new Error("denied"));
 
@@ -29,7 +42,7 @@ describe("CopyButton", () => {
   it("writes the value to the clipboard", async () => {
     const user = userEvent.setup();
     const writeText = stubClipboard(resolves);
-    render(<CopyButton value="order-123" label="order ID" />);
+    render(<CopyButton value="order-123" messages={orderId} />);
 
     await user.click(screen.getByRole("button"));
 
@@ -39,7 +52,7 @@ describe("CopyButton", () => {
   it("names the action before copying and the result after", async () => {
     const user = userEvent.setup();
     stubClipboard(resolves);
-    render(<CopyButton value="order-123" label="order ID" />);
+    render(<CopyButton value="order-123" messages={orderId} />);
 
     await user.click(screen.getByRole("button", { name: "Copy order ID" }));
 
@@ -51,7 +64,7 @@ describe("CopyButton", () => {
   it("surfaces a denied clipboard instead of pretending it worked", async () => {
     const user = userEvent.setup();
     stubClipboard(rejects);
-    render(<CopyButton value="order-123" label="order ID" />);
+    render(<CopyButton value="order-123" messages={orderId} />);
 
     await user.click(screen.getByRole("button"));
 
@@ -65,7 +78,7 @@ describe("CopyButton", () => {
   it("reverts to the idle label after the copied state lapses", async () => {
     const user = userEvent.setup();
     stubClipboard(resolves);
-    render(<CopyButton value="order-123" label="order ID" />);
+    render(<CopyButton value="order-123" messages={orderId} />);
 
     await user.click(screen.getByRole("button"));
     await waitFor(() =>
@@ -82,7 +95,7 @@ describe("CopyButton", () => {
     const user = userEvent.setup();
     stubClipboard(resolves);
     render(
-      <CopyButton value="<script/>" label="embed snippet" variant="labelled" />,
+      <CopyButton value="<script/>" messages={snippet} variant="labelled" />,
     );
 
     const button = screen.getByRole("button");
@@ -90,5 +103,12 @@ describe("CopyButton", () => {
 
     await user.click(button);
     await waitFor(() => expect(button).toHaveTextContent("Copied"));
+  });
+
+  it("names a disabled button with the caller's own sentence", () => {
+    render(<CopyButton value="<script/>" messages={snippet} disabled />);
+    expect(screen.getByRole("button")).toHaveAccessibleName(
+      "embed snippet cannot be copied yet",
+    );
   });
 });

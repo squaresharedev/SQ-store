@@ -5,6 +5,14 @@ import {
   resolveDetailsForSelection,
 } from "@/lib/products/option-details";
 import { specRows } from "@/components/product-page/SpecsTable";
+import { english } from "../setup/translate";
+
+const SPEC_LABELS = {
+  dimensions: english("ProductPage.specs.dimensions"),
+  weight: english("ProductPage.specs.weight"),
+  materials: english("ProductPage.specs.materials"),
+  madeIn: english("ProductPage.specs.madeIn"),
+};
 import type { ProductDetails, ProductOption, ProductOptionGroup } from "@/types/product";
 
 /**
@@ -128,7 +136,7 @@ describe("resolveDetailsForSelection", () => {
 
   it("carries a version's measurements for a product that states none of its own", () => {
     const resolved = resolveDetailsForSelection({}, [SIZE], new Set([SMALL.id]));
-    expect(specRows(resolved)).toEqual([
+    expect(specRows(resolved, SPEC_LABELS, "en")).toEqual([
       { label: "Dimensions", value: "120 × 80 × 75 cm" },
       { label: "Weight", value: "18 kg" },
       { label: "Seats", value: "4" },

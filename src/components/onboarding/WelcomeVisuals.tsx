@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { motion, useReducedMotion } from "motion/react";
 import {
   BadgeCheck,
@@ -10,6 +11,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { EASE_ENTRANCE, EASE_STANDARD } from "@/components/ui/motion-tokens";
+import type { MessageKey } from "@/i18n/types";
 
 /**
  * The welcome flow's pictures: what a seller is about to make, and the four
@@ -22,11 +24,11 @@ import { EASE_ENTRANCE, EASE_STANDARD } from "@/components/ui/motion-tokens";
  */
 
 /** The four steps, in the order the setup checklist tracks them. */
-export const SETUP_PATH: readonly { icon: LucideIcon; label: string }[] = [
-  { icon: BadgeCheck, label: "Add your details" },
-  { icon: Package, label: "Add a product" },
-  { icon: LayoutGrid, label: "Design a storefront" },
-  { icon: Link2, label: "Share its page" },
+export const SETUP_PATH: readonly { icon: LucideIcon; label: MessageKey }[] = [
+  { icon: BadgeCheck, label: "Onboarding.welcome.setupPath.details" },
+  { icon: Package, label: "Onboarding.welcome.setupPath.product" },
+  { icon: LayoutGrid, label: "Onboarding.welcome.setupPath.storefront" },
+  { icon: Link2, label: "Onboarding.welcome.setupPath.share" },
 ];
 
 /**
@@ -35,6 +37,7 @@ export const SETUP_PATH: readonly { icon: LucideIcon; label: string }[] = [
  * is hidden from assistive tech.
  */
 export function WelcomeHero() {
+  const t = useTranslations("Onboarding.welcome.hero");
   const reduced = useReducedMotion();
 
   /** Entrance props: `from` animates to rest after `delay`, or nothing at all. */
@@ -85,7 +88,7 @@ export function WelcomeHero() {
             className="mt-2.5 flex h-6 items-center justify-center bg-primary font-inter text-xs font-medium text-primary-foreground"
             {...enter(0.7, { opacity: 0, y: 6 })}
           >
-            Buy now
+            {t("buyNow")}
           </motion.div>
         </div>
       </motion.div>
@@ -106,7 +109,7 @@ export function WelcomeHero() {
           )}
           <span className="relative size-2 bg-foreground" />
         </span>
-        Live
+        {t("live")}
       </motion.div>
 
       {/* ...and its link is shared. */}
@@ -115,7 +118,7 @@ export function WelcomeHero() {
         {...enter(1.05, { opacity: 0, x: 14, y: 6 })}
       >
         <Link2 className="size-3.5" strokeWidth={2} />
-        Link copied
+        {t("linkCopied")}
         <motion.span
           className="flex size-4 items-center justify-center bg-foreground text-background"
           {...enter(1.35, { scale: 0 }, 0.3)}
@@ -140,6 +143,7 @@ const reachedAt = (index: number) =>
  * order; the line, fills and checks are decoration.
  */
 export function SetupPath() {
+  const t = useTranslations();
   const reduced = useReducedMotion();
   const last = SETUP_PATH.length - 1;
 
@@ -207,7 +211,7 @@ export function SetupPath() {
             animate={{ opacity: 1 }}
             transition={{ delay: reachedAt(index), duration: 0.3, ease: EASE_STANDARD }}
           >
-            {step.label}
+            {t(step.label)}
           </motion.span>
         </li>
       ))}

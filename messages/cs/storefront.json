@@ -1,0 +1,1297 @@
+{
+  "shapes": {
+    "name": {
+      "square": "Čtverec",
+      "circle": "Kruh",
+      "ring": "Prstenec",
+      "diamond": "Kosočtverec",
+      "rounded": "Zaoblený čtverec",
+      "pill": "Kapsle",
+      "half": "Půlkruh",
+      "quarter": "Čtvrtkruh",
+      "bar": "Pruh",
+      "triangle": "Trojúhelník",
+      "wedge": "Klín",
+      "pentagon": "Pětiúhelník",
+      "hexagon": "Šestiúhelník",
+      "octagon": "Osmiúhelník",
+      "star": "Hvězda",
+      "sparkle": "Jiskra",
+      "cross": "Kříž",
+      "arrow": "Šipka",
+      "chevron": "Lomená šipka",
+      "trapezoid": "Lichoběžník",
+      "parallelogram": "Rovnoběžník",
+      "burst": "Výbuch"
+    },
+    "add": {
+      "square": "Přidat čtverec",
+      "circle": "Přidat kruh",
+      "ring": "Přidat prstenec",
+      "diamond": "Přidat kosočtverec",
+      "rounded": "Přidat zaoblený čtverec",
+      "pill": "Přidat kapsli",
+      "half": "Přidat půlkruh",
+      "quarter": "Přidat čtvrtkruh",
+      "bar": "Přidat pruh",
+      "triangle": "Přidat trojúhelník",
+      "wedge": "Přidat klín",
+      "pentagon": "Přidat pětiúhelník",
+      "hexagon": "Přidat šestiúhelník",
+      "octagon": "Přidat osmiúhelník",
+      "star": "Přidat hvězdu",
+      "sparkle": "Přidat jiskru",
+      "cross": "Přidat kříž",
+      "arrow": "Přidat šipku",
+      "chevron": "Přidat lomenou šipku",
+      "trapezoid": "Přidat lichoběžník",
+      "parallelogram": "Přidat rovnoběžník",
+      "burst": "Přidat výbuch"
+    },
+    "group": {
+      "basic": "Základní",
+      "polygons": "Mnohoúhelníky",
+      "accents": "Ozdoby"
+    },
+    "groupLabel": {
+      "basic": "Základní tvary",
+      "polygons": "Mnohoúhelníky",
+      "accents": "Ozdobné tvary"
+    }
+  },
+  "fonts": {
+    "sans": "Sans",
+    "serif": "Serif",
+    "mono": "Mono",
+    "display": "Display",
+    "hand": "Ručně psané",
+    "inter": "Inter",
+    "montserrat": "Montserrat",
+    "custom": "Nahrané písmo"
+  },
+  "textVariants": {
+    "heading": "Nadpis",
+    "subheading": "Podnadpis",
+    "body": "Běžný text"
+  },
+  "layoutPresets": {
+    "standard": "Standardní",
+    "caption": "Popisek",
+    "header": "Záhlaví",
+    "gallery": "Galerie",
+    "bare": "Čistá"
+  },
+  "blockKinds": {
+    "product": "Produkt",
+    "text": "Text",
+    "shape": "Tvar",
+    "image": "Obrázek"
+  },
+  "settings": {
+    "groups": {
+      "theme": "Motiv",
+      "header": "Záhlaví",
+      "typography": "Typografie",
+      "cards": "Dlaždice produktů",
+      "soldOut": "Vyprodáno",
+      "productPage": "Produktová stránka"
+    },
+    "subtitle": {
+      "theme": "Výloha / Motiv",
+      "header": "Výloha / Záhlaví",
+      "typography": "Výloha / Typografie",
+      "cards": "Výloha / Dlaždice produktů",
+      "soldOut": "Výloha / Vyprodáno",
+      "productPage": "Výloha / Produktová stránka"
+    },
+    "labels": {
+      "looks": "Vzhled výlohy",
+      "background": "Pozadí",
+      "accent": "Barva zvýraznění",
+      "header": "Název obchodu a medailonek",
+      "font": "Písmo",
+      "canvasSize": "Velikost plátna",
+      "gridGap": "Rozestupy mřížky",
+      "tileLayout": "Rozvržení dlaždice",
+      "titlePosition": "Pozice názvu",
+      "titleStyle": "Styl názvu",
+      "cornerRadius": "Zaoblení rohů",
+      "titleInset": "Odsazení názvu od okraje",
+      "pricePosition": "Pozice ceny",
+      "priceStyle": "Styl cenovky",
+      "soldOut": "Vyprodané produkty",
+      "productPageLayout": "Produktová stránka",
+      "productPageBackground": "Pozadí produktové stránky",
+      "productPagePhotos": "Fotky na produktové stránce",
+      "productPageFont": "Písmo produktové stránky",
+      "productPageIndexing": "Indexování ve vyhledávačích",
+      "buyButton": "Tlačítko nákupu",
+      "buyButtonColour": "Barva tlačítka nákupu",
+      "buyButtonRoundness": "Zaoblení tlačítka nákupu",
+      "buyButtonBorder": "Ohraničení tlačítka nákupu",
+      "priceNote": "Poznámka k ceně",
+      "shippingNote": "Poznámka k dopravě",
+      "productPageSections": "Sekce produktové stránky",
+      "productPageAvailability": "Dostupnost na stránce",
+      "productPageByline": "Řádek „Prodává“",
+      "shippingReturns": "Podmínky dopravy a vrácení zboží",
+      "sellerDetails": "Údaje prodejce"
+    }
+  },
+  "editorSearch": {
+    "sections": {
+      "canvas": "Na plátně",
+      "settings": "Nastavení",
+      "panels": "Panely"
+    },
+    "openProductPage": "Otevřít produktovou stránku",
+    "panelSubtitle": "Panel",
+    "panels": {
+      "layers": "Vrstvy",
+      "products": "Přidat produkt",
+      "shapes": "Tvary",
+      "uploads": "Nahrané soubory"
+    }
+  },
+  "list": {
+    "showingOf": "Zobrazené výlohy: {count} z {total}",
+    "count": "{count, plural, one {# výloha} few {# výlohy} many {# výlohy} other {# výloh}}",
+    "countSampleOnly": "Zatím žádné výlohy",
+    "creating": "Vytváření…",
+    "new": "Nová výloha",
+    "emptyHeading": "Zatím žádné výlohy",
+    "emptyHintOwner": "Vytvořte svou první výlohu a pak do její mřížky přidejte produkty. Každý produkt v ní získá stránku, kterou můžete sdílet.",
+    "emptyHintGuest": "Tento obchod zatím nemá žádné výlohy.",
+    "create": "Vytvořit výlohu",
+    "loadMoreError": "Další výlohy se nepodařilo načíst. Zkuste to znovu.",
+    "loadMore": "Načíst další (zbývá {remaining})",
+    "deleteTitle": "Smazat výlohu?",
+    "deleteDesc": "Výloha „{name}“ bude i s mřížkou trvale odstraněna. Tuto akci nelze vrátit zpět.",
+    "deleteToast": "Výloha „{name}“ byla smazána."
+  },
+  "card": {
+    "editAriaLabel": "Upravit výlohu {name}",
+    "embedAriaLabel": "Vložit výlohu {name} na web",
+    "deleteAriaLabel": "Smazat výlohu {name}",
+    "blockCount": "{count, plural, one {# blok} few {# bloky} many {# bloku} other {# bloků}}",
+    "updatedLabel": " · aktualizováno {date}",
+    "emptyHint": "Tato mřížka je prázdná",
+    "removed": "Odebráno službou Squareshare",
+    "pausedInReview": "Pozastaveno · SquareShare ji kontroluje",
+    "pausedNeedsChanges": "Pozastaveno společností SquareShare · vyžaduje změny"
+  },
+  "embed": {
+    "inDevNotice": "Widget pro vložení na web je ve vývoji a na cizích webech se zatím nezobrazuje. Nastavte si vše níže, ať můžete kód pro vložení použít hned, jak bude hotový.",
+    "title": "Vložit výlohu na web",
+    "description": "Vložte tento kód na jakýkoli web a zobrazí se na něm výloha „{name}“.",
+    "enabledLabel": "Vložení na web zapnuto",
+    "domainsLabel": "Povolené domény",
+    "domainsPlaceholder": "vasweb.cz, blog.vasweb.cz",
+    "domainsHint": "Nejvýše {max}, oddělené čárkou. Když vložíte adresu URL, zkrátíme ji na doménu.",
+    "emptyDomainsWarning": "Přidejte alespoň jednu doménu. Dokud je seznam prázdný, výloha se nikde nenačte, i když je vložení na web zapnuté.",
+    "snippetLabel": "Kód pro vložení",
+    "snippetReadyHint": "Vložte tento kód do HTML svého webu.",
+    "snippetLockedHint": "Zapněte vložení na web a přidejte alespoň jednu doménu, pak se odemkne tlačítko Kopírovat.",
+    "copySnippet": {
+      "copy": "Kopírovat kód pro vložení",
+      "copied": "Kód pro vložení zkopírován",
+      "failed": "Kód pro vložení se nepodařilo zkopírovat. Označte ho a zkopírujte ručně.",
+      "cannotCopyYet": "kód pro vložení zatím nelze zkopírovat"
+    },
+    "snippetKeyLabel": "Klíč kódu pro vložení",
+    "rotateConfirmText": "Výměnou vznikne nový klíč. Všechny kopie starého kódu okamžitě přestanou fungovat, i ty na webech, kde je chcete dál mít: nový kód pak budete muset vložit všude znovu.",
+    "rotateKey": "Vyměnit klíč",
+    "rotating": "Výměna klíče…",
+    "revokeHint": "Kód se dostal někam, kam nemá? Vyměňte klíč a všechny stávající kódy zneplatníte.",
+    "saveSettings": "Uložit nastavení",
+    "saving": "Ukládání…",
+    "saved": "Nastavení vložení na web uloženo.",
+    "newKeyIssued": "Nový klíč pro vložení na web vytvořen.",
+    "newKeyDetail": "Vložte kód znovu všude, kde je tato výloha vložená."
+  },
+  "wizard": {
+    "category": {
+      "title": "Co prodáváte?",
+      "description": "Podle toho nejlépe poznáme, jaká rozvržení se vám budou hodit."
+    },
+    "fulfilment": {
+      "title": "Jak se zboží dostane ke kupujícím?",
+      "description": "Ovlivní to, co vaše produktové stránky uvedou o doručení."
+    },
+    "vibe": {
+      "title": "Vyberte vzhled",
+      "description": "Výchozí bod. V editoru půjde upravit úplně všechno."
+    },
+    "name": {
+      "title": "Pojmenujte výlohu",
+      "description": "Jen pro vás. Přejmenovat ji můžete kdykoli."
+    },
+    "stepOf": "Krok {current} z {total}",
+    "nameLabel": "Název výlohy",
+    "nameHint": "Když pole necháte prázdné, pojmenujeme ji Výloha bez názvu.",
+    "otherCategoryLabel": "Co prodáváte?",
+    "otherCategoryPlaceholder": "např. modely ke slepení",
+    "noProductsHint": "Ještě nemáte produkty? Přidejte je po nastavení.",
+    "skipSetup": "Přeskočit nastavení",
+    "skip": "Přeskočit",
+    "creating": "Vytváření…",
+    "create": "Vytvořit výlohu"
+  },
+  "createOptions": {
+    "categoryGroupLabel": "Co prodáváte",
+    "fulfilmentGroupLabel": "Jak se zboží dostane ke kupujícím",
+    "vibeGroupLabel": "Jaký vzhled chcete",
+    "category": {
+      "fashion": "Oblečení",
+      "art": "Umění a tisky",
+      "jewellery": "Šperky",
+      "handmade": "Ruční výroba",
+      "home": "Domov a bydlení",
+      "beauty": "Kosmetika",
+      "food": "Jídlo a pití",
+      "music": "Hudba",
+      "photography": "Fotografie",
+      "books": "Knihy a ziny",
+      "digital": "Digitální produkty",
+      "vintage": "Vintage",
+      "other": "Něco jiného"
+    },
+    "categoryPlaceholder": {
+      "fashion": "Můj obchod s oblečením",
+      "art": "Můj obchod s uměním",
+      "jewellery": "Můj obchod se šperky",
+      "handmade": "Můj obchod s ruční výrobou",
+      "home": "Můj obchod s bytovými doplňky",
+      "beauty": "Můj obchod s kosmetikou",
+      "food": "Můj obchod s jídlem",
+      "music": "Můj hudební obchod",
+      "photography": "Můj obchod s fotografiemi",
+      "books": "Moje knihkupectví",
+      "digital": "Můj digitální obchod",
+      "vintage": "Můj vintage obchod",
+      "other": "Můj obchod",
+      "default": "Moje výloha"
+    },
+    "fulfilment": {
+      "physical": "Posílám ho poštou",
+      "digital": "Stáhnou si ho",
+      "services": "Rezervují si termín",
+      "mixed": "Od všeho trochu"
+    },
+    "fulfilmentHint": {
+      "physical": "Fyzické produkty",
+      "digital": "Soubory, presety, hudba",
+      "services": "Lekce, zakázky",
+      "mixed": "Víc možností najednou"
+    },
+    "vibe": {
+      "minimal": "Minimalistický",
+      "classic": "Klasický",
+      "bold": "Výrazný"
+    },
+    "vibeHint": {
+      "minimal": "Název a cena při najetí myší",
+      "classic": "Název a cena vždy viditelné",
+      "bold": "Cena vždy, název při najetí myší"
+    }
+  },
+  "picker": {
+    "addFirst": "Přidejte svůj první produkt",
+    "noProducts": "Zatím nemáte žádné produkty. Přidejte nějaký a vrátíte se rovnou sem, kde ho umístíte.",
+    "searchPlaceholder": "Hledat produkty",
+    "searchAriaLabel": "Hledat ve vašich produktech",
+    "searching": "Hledání…",
+    "noMatch": "Hledání „{term}“ neodpovídají žádné produkty.",
+    "searchFailed": "Vyhledávání teď není k dispozici; zobrazujeme to, co už je načtené.",
+    "inGrid": "V mřížce",
+    "available": "K dispozici",
+    "addSelected": "Přidat vybrané ({count})",
+    "addAll": "Přidat vše ({count})",
+    "deselectAriaLabel": "Zrušit výběr produktu {title}",
+    "selectAriaLabel": "Vybrat produkt {title}",
+    "inGridAriaLabel": "Produkt {title} je v mřížce",
+    "addToGridAriaLabel": "Přidat produkt {title} do mřížky",
+    "draftAriaLabel": "Koncept produktu (kupující ho nevidí)",
+    "draftBadge": "Koncept"
+  },
+  "preview": {
+    "ariaLabel": "Náhled výlohy"
+  },
+  "masthead": {
+    "namePlaceholder": "Název vašeho obchodu",
+    "bioPlaceholder": "Krátká věta o vašem obchodě",
+    "editAriaLabel": "{line, select, name {Upravit název obchodu} bio {Upravit medailonek obchodu} other {Upravit záhlaví obchodu: {line}}}",
+    "editorNameAriaLabel": "Název obchodu",
+    "editorBioAriaLabel": "Medailonek obchodu"
+  },
+  "pageConnectors": {},
+  "artboard": {
+    "productPageLabel": " · Produktová stránka",
+    "closeAriaLabel": "Zavřít produktovou stránku produktu {title}",
+    "desktopSize": "Velikost pro počítač",
+    "mobileSize": "Velikost pro mobil"
+  },
+  "customFont": {},
+  "metadata": {
+    "storefronts": {
+      "title": "Výlohy",
+      "subtitle": "Každá výloha má vlastní mřížku a motiv. Vytvořte jich, kolik potřebujete, a pak některou otevřete a upravte."
+    },
+    "editor": {
+      "title": "Upravit výlohu"
+    },
+    "sample": {
+      "title": "Ukázková výloha"
+    }
+  },
+  "routes": {
+    "editor": {
+      "loading": "Načítání editoru výlohy…"
+    },
+    "list": {
+      "loading": "načítání výloh"
+    }
+  },
+  "controls": {
+    "off": "Vypnuto",
+    "layers": "Vrstvy",
+    "objectCount": "{count, plural, one {1 objekt} few {# objekty} many {# objektu} other {# objektů}}",
+    "cardStyle": "Styl dlaždice",
+    "priceTag": "Cenovka",
+    "theme": "Motiv",
+    "canvas": "Plátno",
+    "design": "Design"
+  },
+  "designPanel": {
+    "tabSelection": "Výběr",
+    "tabDesign": "Design",
+    "show": "Zobrazit panel designu",
+    "hide": "Skrýt panel designu",
+    "resize": "Změnit velikost panelu designu",
+    "closeSettings": "Zavřít nastavení designu",
+    "scopeLabel": "Rozsah panelu"
+  },
+  "library": {
+    "title": "Knihovna",
+    "hint": "Kliknutím přidáte",
+    "canvasFull": "Plátno je plné",
+    "close": "Zavřít panel knihovny",
+    "tabUploads": "Nahrané",
+    "tabShapes": "Tvary"
+  },
+  "uploads": {
+    "addImage": "Přidat obrázek",
+    "processing": "Zpracování…",
+    "uploadingPct": "Nahrávání… {pct} %",
+    "dropToUpload": "Pusťte soubor a nahraje se",
+    "uploadImage": "Nahrát obrázek",
+    "uploadHint": "SVG, PNG, JPEG, WebP, GIF nebo AVIF. Do 2 MB. Přetáhněte sem soubor nebo ho vyberte kliknutím.",
+    "canvasFullHint": "Plátno je plné. Pokud chcete přidat další blok, nějaký odeberte.",
+    "inStorefront": "V této výloze",
+    "imagesGroup": "Obrázky v této výloze",
+    "emptyHint": "Nahrané obrázky se shromažďují tady, takže stejný obrázek můžete umístit znovu, bez opakovaného nahrávání.",
+    "placeAgain": "Znovu umístit obrázek {alt}",
+    "placeAgainFallback": "Znovu umístit tento obrázek"
+  },
+  "layers": {
+    "title": "Vrstvy",
+    "backAriaLabel": "Zpět na vybraný blok, opustit Vrstvy",
+    "empty": "Na plátně zatím nic není. Bloky se tu objeví, jak je budete přidávat.",
+    "listAriaLabel": "Vrstvy plátna, od popředí do pozadí",
+    "layerOf": "Vrstva {index} z {total}",
+    "moveGroup": "Přesunout: {label}",
+    "reorderLabel": "Změnit pořadí: {label}",
+    "dragToReorder": "Přetažením změníte pořadí",
+    "showOptions": "Zobrazit možnosti vrstvy: {label}",
+    "hideOptions": "Skrýt možnosti vrstvy: {label}",
+    "shortcutHint": "{mod} + [ a {mod} + ] posunou výběr o vrstvu. Se Shift ho přesunou úplně na konec.",
+    "layerOp": {
+      "back": "Přesunout do pozadí",
+      "backward": "O vrstvu níž",
+      "forward": "O vrstvu výš",
+      "front": "Přenést do popředí"
+    },
+    "layerOpFor": {
+      "back": "Přesunout do pozadí: {label}",
+      "backward": "O vrstvu níž: {label}",
+      "forward": "O vrstvu výš: {label}",
+      "front": "Přenést do popředí: {label}"
+    }
+  },
+  "colorPanel": {
+    "close": "Zavřít panel barev",
+    "sectionType": "Písmo",
+    "font": "Písmo",
+    "fontTheme": "Písmo motivu",
+    "fontThemeDesc": "Podle písma výlohy",
+    "sectionInDesign": "V tomto designu",
+    "inDesignGroup": "Barvy v tomto designu",
+    "inDesignEmpty": "Barvy, které použijete na plátně, se shromažďují tady.",
+    "inDesignSwatch": "V tomto designu ({hex})",
+    "sectionCustom": "Vlastní",
+    "sectionInherit": "Zděděné",
+    "sectionRecent": "Nedávno použité",
+    "recentGroup": "Nedávno použité barvy",
+    "recentSwatch": "Nedávno použitá ({hex})",
+    "sectionStandard": "Standardní",
+    "standardGroup": "Standardní barvy",
+    "sectionPalettes": "Palety"
+  },
+  "themePanel": {
+    "accent": "Zvýraznění"
+  },
+  "panelSearch": {
+    "placeholder": "Najít nastavení nebo objekt",
+    "clear": "Vymazat hledání",
+    "noResults": "V editoru tomu nic neodpovídá.",
+    "matchesLabel": "Výsledky"
+  },
+  "looks": {
+    "title": "Vzhledy",
+    "infoLabel": "Co změní výběr vzhledu",
+    "infoBody": "Vzhled najednou nastaví barvy, písmo, rohy a rozestupy celé výlohy i to, co ukazuje dlaždice produktu. Rozvržení, produkty a ručně upravené dlaždice zůstanou přesně tak, jak jsou.",
+    "groupLabel": "Vzhled výlohy",
+    "minimal": "Minimalistický",
+    "classic": "Klasický",
+    "bold": "Výrazný",
+    "hintMinimal": "Jen obrázky. Název a cena při najetí myší.",
+    "hintClassic": "Název a cena pod každým obrázkem.",
+    "hintBold": "Cena vždy na obrázku, název při najetí myší."
+  },
+  "background": {
+    "label": "Pozadí",
+    "typeLabel": "Typ pozadí",
+    "typeColor": "Barva",
+    "typeGradient": "Přechod",
+    "typeImage": "Obrázek",
+    "position": "Pozice",
+    "dragAriaLabel": "Přetažením umístíte obrázek pozadí",
+    "dragHint": "Polohu změníte přetažením náhledu. Velikost změníte přiblížením.",
+    "zoomLabel": "Přiblížení",
+    "zoomAriaLabel": "Přiblížení obrázku pozadí",
+    "zoomValueText": "{n, plural, one {# procento} few {# procenta} many {# procenta} other {# procent}}",
+    "processing": "Zpracování…",
+    "uploadingPct": "Nahrávání… {n} %",
+    "replaceImage": "Nahradit obrázek",
+    "uploadImage": "Nahrát obrázek",
+    "uploadingProgress": "Nahrávání obrázku pozadí",
+    "uploadHint": "Do 10 MB. JPEG, PNG, WebP, GIF nebo AVIF.",
+    "colorLabel": "Barva",
+    "from": "Od",
+    "to": "Do",
+    "angle": "Úhel",
+    "gradientAngle": "Úhel přechodu",
+    "angleValueText": "{n, plural, one {# stupeň} few {# stupně} many {# stupně} other {# stupňů}}"
+  },
+  "cardStyle": {
+    "layout": "Rozvržení",
+    "position": "Pozice",
+    "roundedHint": "U zaoblených dlaždic zůstávají oba popisky na střední ose.",
+    "spotHint": "Kliknutím na místo umístíte popisek, nebo ho přetáhněte sem či na dlaždici.",
+    "cornerRoundness": "Zaoblení rohů",
+    "cornerValueText": "{n, plural, one {# pixel} few {# pixely} many {# pixelu} other {# pixelů}}",
+    "sharp": "Ostré",
+    "circle": "Kruh",
+    "fineTuning": "Doladění",
+    "showTitle": "Zobrazit název",
+    "titleStyleLabel": "Styl názvu",
+    "edgeSpacing": "Odsazení od okraje",
+    "edgeSpacingAriaLabel": "Odsazení názvu od okraje",
+    "edgeValueText": "{n, plural, one {# pixel} few {# pixely} many {# pixelu} other {# pixelů}}",
+    "auto": "Automaticky",
+    "showTitleOnHover": "Zobrazit název při najetí myší",
+    "hoverHint": "Název zůstane skrytý, dokud kupující nenajede myší na produkt.",
+    "revealTop": "Když kupující najede myší, pruh vyjede shora.",
+    "revealMiddle": "Když kupující najede myší, pruh se plynule objeví.",
+    "revealBottom": "Když kupující najede myší, pruh vyjede zdola."
+  },
+  "priceTag": {
+    "showPrice": "Zobrazit cenu",
+    "roundedHint": "U zaoblených dlaždic zůstává cenovka na střední ose.",
+    "dragHint": "Místo vyberete přetažením cenovky na dlaždici nebo pomocí plánku rozvržení.",
+    "showOnHover": "Zobrazit při najetí myší",
+    "font": "Písmo",
+    "fontAriaLabel": "Písmo cenovky",
+    "size": "Velikost",
+    "sizeAriaLabel": "Velikost cenovky",
+    "sizeValueText": "{n, plural, one {# pixel} few {# pixely} many {# pixelu} other {# pixelů}}",
+    "sizeTip": "Velikost na jedné dlaždici. Cenovka se přizpůsobuje dlaždici, na které je, takže větší blok má větší cenovku bez dalšího nastavování.",
+    "borderThickness": "Tloušťka ohraničení",
+    "borderAriaLabel": "Tloušťka ohraničení cenovky",
+    "borderValueText": "{n, plural, one {# pixel} few {# pixely} many {# pixelu} other {# pixelů}}",
+    "cornerRoundness": "Zaoblení rohů",
+    "cornerAriaLabel": "Zaoblení rohů cenovky",
+    "cornerValueText": "{n, plural, one {# pixel} few {# pixely} many {# pixelu} other {# pixelů}}",
+    "sharp": "Ostré",
+    "pill": "Kapsle",
+    "none": "Žádné"
+  },
+  "priceTagPosition": {
+    "placementAriaLabel": "Umístění cenovky",
+    "below": "Pod obrázkem",
+    "onImage": "Na obrázku",
+    "hidden": "Skrytá",
+    "spotAriaLabel": "Místo cenovky",
+    "spotTopLeft": "Cenovka vlevo nahoře",
+    "spotTopCenter": "Cenovka nahoře uprostřed",
+    "spotTopRight": "Cenovka vpravo nahoře",
+    "spotMiddle": "Cenovka uprostřed",
+    "spotBottomLeft": "Cenovka vlevo dole",
+    "spotBottomCenter": "Cenovka dole uprostřed",
+    "spotBottomRight": "Cenovka vpravo dole"
+  },
+  "layout": {
+    "canvasWidth": "Šířka plátna",
+    "canvasWidthAriaLabel": "Šířka plátna v blocích",
+    "blocksWide": "{n, plural, one {# blok na šířku} few {# bloky na šířku} many {# bloku na šířku} other {# bloků na šířku}}",
+    "canvasHeight": "Výška plátna",
+    "heightTip": "Plátno nejde zmenšit pod bloky, které na něm už jsou: nejdřív přetáhněte blok výš a pak plátno zkraťte.",
+    "canvasHeightAriaLabel": "Výška plátna v blocích",
+    "blocksTall": "{n, plural, one {# blok na výšku} few {# bloky na výšku} many {# bloku na výšku} other {# bloků na výšku}}",
+    "gridDensity": "Hustota mřížky",
+    "gridDensityAriaLabel": "Hustota mřížky",
+    "gridGapValue": "{n, plural, one {Mezera # pixel} few {Mezera # pixely} many {Mezera # pixelu} other {Mezera # pixelů}}",
+    "noGap": "Bez mezery",
+    "showGrid": "Zobrazit mřížku",
+    "gridInfoLabel": "Kdo mřížku vidí",
+    "gridInfoBody": "Pomůcka pro vás při navrhování: vykresluje prázdná místa, takže je vidět, kam blok dopadne. Kupující ji nikdy neuvidí."
+  },
+  "placement": {
+    "rotation": "Otočení",
+    "rotationTipSingle": "Celé stupně, na obě strany od vodorovné polohy. Blok se otáčí kolem vlastního středu a zůstává na svých buňkách.",
+    "rotationTipMultiple": "Celé stupně, na obě strany od vodorovné polohy. Každý blok se otáčí kolem vlastního středu, takže řada bloků zůstane řadou.",
+    "rotationAriaLabel": "Otočení bloku",
+    "valueTextMixed": "Různé úhly",
+    "valueText": "{n, plural, one {# stupeň} few {# stupně} many {# stupně} other {# stupňů}}",
+    "statusMixed": "Různé",
+    "levelBlock": "Vyrovnat blok",
+    "rotateTo": "Otočit na {n, plural, one {# stupeň} few {# stupně} many {# stupně} other {# stupňů}}",
+    "level": "Vyrovnat",
+    "angle": "{n}°",
+    "layerLabel": "Vrstva",
+    "layerInfoLabel": "Jak fungují vrstvy",
+    "layerInfoBody": "Vrstvy určují jen to, co se vykreslí navrchu, když se bloky překrývají; pořadí, ve kterém obsah čte čtečka obrazovky, se nikdy nemění.{multi, select, true { Tento výběr si při přesunu zachová své vnitřní pořadí ve vrstvách.} other {}}{stacked, select, true { Alt + kliknutím na překrývající se bloky na plátně se dostanete k bloku pod nimi.} other {}}",
+    "blocksSelected": "{count, plural, one {Vybrán # blok} few {Vybrány # bloky} many {Vybráno # bloku} other {Vybráno # bloků}}",
+    "layerOf": "Vrstva {index} z {total}",
+    "blockLayerLabel": "Vrstva bloku",
+    "sendToBack": "Přesunout do pozadí",
+    "sendBackward": "O vrstvu níž",
+    "bringForward": "O vrstvu výš",
+    "bringToFront": "Přenést do popředí",
+    "seeAllLayers": "Zobrazit všechny vrstvy"
+  },
+  "header": {
+    "showHeader": "Zobrazit záhlaví",
+    "infoLabel": "Další způsoby úpravy záhlaví",
+    "infoBody": "Klikněte na plátně na název nebo medailonek a pište přímo tam. Zároveň se tento panel otevře na daném řádku, kde nastavíte písmo, velikost, barvu, formátování a zarovnání.",
+    "storeName": "Název obchodu",
+    "storeNamePlaceholder": "Název obchodu, který uvidí kupující",
+    "bio": "Medailonek",
+    "bioPlaceholder": "Krátká věta o vašem obchodě",
+    "charsLeft": "{n, plural, one {Zbývá # znak} few {Zbývají # znaky} many {Zbývá # znaku} other {Zbývá # znaků}}"
+  },
+  "soldOut": {
+    "hide": "Skrýt před kupujícími",
+    "hideInfoLabel": "Co dělá skrytí vyprodaných produktů",
+    "hideInfoBody": "Produkty označené jako vyprodané z výlohy úplně zmizí. Tady na plátně zůstanou ztlumené, takže je můžete dál přesouvat a znovu dát do prodeje.",
+    "badge": "Zobrazit štítek",
+    "badgeInfoLabel": "Kdy se zobrazí štítek Vyprodáno",
+    "badgeInfoBodyHidden": "Dokud jsou vyprodané produkty skryté, není co označovat. Vypněte Skrýt před kupujícími a štítek je místo toho označí.",
+    "badgeInfoBodyVisible": "Označí ve výloze vyprodaný produkt, takže kupující ví, že existuje a je vyprodaný, a nemusí nad tím dumat."
+  },
+  "typography": {
+    "font": "Písmo",
+    "ownFont": "Vlastní písmo",
+    "fontInfoLabel": "Jaké soubory písma fungují",
+    "fontInfoBody": "WOFF2, WOFF, TTF nebo OTF, do 2 MB. Nejlepší je WOFF2: je nejmenší, takže se kupujícím načte nejrychleji, a umí ho každý prohlížeč.",
+    "processing": "Zpracování…",
+    "uploadingPct": "Nahrávání… {n} %",
+    "replaceFont": "Nahradit písmo",
+    "uploadFont": "Nahrát písmo",
+    "uploadingLabel": "Nahrávání písma",
+    "uploadedFontDesc": "Vaše nahrané písmo",
+    "fontDescDefault": "Výchozí",
+    "fontDescInter": "Čisté a neutrální",
+    "fontDescMontserrat": "Geometrické a široké"
+  },
+  "textFormat": {
+    "format": "Formát",
+    "formatAriaLabel": "Formátování textu",
+    "bold": "Tučné",
+    "italic": "Kurzíva",
+    "underline": "Podtržení",
+    "alignment": "Zarovnání",
+    "alignAriaLabel": "Zarovnání textu",
+    "alignLeft": "Zarovnat vlevo",
+    "alignCenter": "Zarovnat na střed",
+    "alignRight": "Zarovnat vpravo"
+  },
+  "fontSize": {
+    "label": "Velikost",
+    "autoPx": "Automaticky ({n} px)",
+    "auto": "Automaticky",
+    "ariaLabel": "Velikost písma",
+    "valueText": "{n, plural, one {# pixel} few {# pixely} many {# pixelu} other {# pixelů}}"
+  },
+  "layoutPresetPicker": {
+    "ariaLabel": "Rozvržení"
+  },
+  "titleStyle": {
+    "ariaLabel": "Styl názvu",
+    "bar": "Pruh",
+    "overlay": "Překryv",
+    "shadow": "Stín"
+  },
+  "titlePosition": {
+    "ariaLabel": "Místo názvu",
+    "spotTopLeft": "Název vlevo nahoře",
+    "spotTopCenter": "Název nahoře uprostřed",
+    "spotTopRight": "Název vpravo nahoře",
+    "spotMiddle": "Název uprostřed",
+    "spotBottomLeft": "Název vlevo dole",
+    "spotBottomCenter": "Název dole uprostřed",
+    "spotBottomRight": "Název vpravo dole"
+  },
+  "tileSpot": {},
+  "tileLayoutBoard": {
+    "labelToPlace": "Popisek k umístění",
+    "labelPositions": "Pozice popisků",
+    "title": "Název",
+    "price": "Cena",
+    "titleAt": "{spot, select, top_left {Název vlevo nahoře} top_center {Název nahoře uprostřed} top_right {Název vpravo nahoře} middle_center {Název uprostřed} bottom_left {Název vlevo dole} bottom_center {Název dole uprostřed} bottom_right {Název vpravo dole} other {Název zde}}. Přesunete ho přetažením, kliknutím na místo nebo šipkami.",
+    "priceAt": "{spot, select, top_left {Cena vlevo nahoře} top_center {Cena nahoře uprostřed} top_right {Cena vpravo nahoře} middle_center {Cena uprostřed} bottom_left {Cena vlevo dole} bottom_center {Cena dole uprostřed} bottom_right {Cena vpravo dole} other {Cena zde}}. Přesunete ji přetažením, kliknutím na místo nebo šipkami.",
+    "moveTitleTo": "{spot, select, top_left {Přesunout název vlevo nahoru} top_center {Přesunout název nahoru doprostřed} top_right {Přesunout název vpravo nahoru} middle_center {Přesunout název doprostřed} bottom_left {Přesunout název vlevo dolů} bottom_center {Přesunout název dolů doprostřed} bottom_right {Přesunout název vpravo dolů} other {Přesunout název sem}}",
+    "movePriceTo": "{spot, select, top_left {Přesunout cenu vlevo nahoru} top_center {Přesunout cenu nahoru doprostřed} top_right {Přesunout cenu vpravo nahoru} middle_center {Přesunout cenu doprostřed} bottom_left {Přesunout cenu vlevo dolů} bottom_center {Přesunout cenu dolů doprostřed} bottom_right {Přesunout cenu vpravo dolů} other {Přesunout cenu sem}}"
+  },
+  "productPage": {
+    "layout": {
+      "title": "Stránka",
+      "showPage": {
+        "label": "Zobrazit produktovou stránku",
+        "infoLabel": "Co dělá tento přepínač",
+        "infoOn": "Klepnutím na dlaždici produktu se otevře jeho stránka.",
+        "infoOff": "Dlaždice produktů nemají žádnou stránku k otevření."
+      },
+      "pageColor": "Barva stránky",
+      "storefrontBackground": "Pozadí výlohy",
+      "photoFit": {
+        "label": "Přizpůsobení fotky",
+        "ariaLabel": "Přizpůsobení fotky",
+        "fit": "Přizpůsobit",
+        "fill": "Vyplnit"
+      },
+      "font": {
+        "label": "Písmo",
+        "infoLabel": "Jak souvisí písmo této stránky s písmem výlohy",
+        "infoOwn": "Tato stránka má vlastní písmo bez ohledu na to, jaké používá výloha.",
+        "infoFollows": "Řídí se písmem vaší výlohy. Změníte ho v sekci Typografie.",
+        "inheritOption": "Stejné jako výloha ({name})"
+      },
+      "indexing": {
+        "label": "Povolit vyhledávače",
+        "infoLabel": "Co se stane, když to vypnete",
+        "infoContent": "Po vypnutí se vaše produktové stránky nebudou zobrazovat ve výsledcích vyhledávání. Kdokoli s odkazem je ale otevře dál."
+      },
+      "useStorefrontBackground": "Použít pozadí obchodu"
+    },
+    "cta": {
+      "title": "Tlačítko nákupu",
+      "infoLabel": "Co rozhoduje o tom, jestli se tlačítko zobrazí",
+      "infoContent": "Tlačítko vede na odkaz na nákup u každého produktu (nastavuje se u produktu). Bez něj otevře e-mail na vaši kontaktní adresu níže; když chybí obojí, tlačítko se nezobrazí.",
+      "buttonText": {
+        "label": "Text tlačítka",
+        "charsLeft": "{count, plural, one {Zbývá # znak} few {Zbývají # znaky} many {Zbývá # znaku} other {Zbývá # znaků}}"
+      },
+      "buttonColor": "Barva tlačítka",
+      "storefrontAccent": "Zvýraznění výlohy",
+      "cornerRoundness": {
+        "label": "Zaoblení rohů",
+        "ariaLabel": "Zaoblení rohů tlačítka nákupu",
+        "valueText": "{value} px",
+        "auto": "Automaticky"
+      },
+      "borderThickness": {
+        "label": "Tloušťka ohraničení",
+        "ariaLabel": "Tloušťka ohraničení tlačítka nákupu",
+        "valueText": "{value} px",
+        "none": "Žádné"
+      },
+      "borderColor": "Barva ohraničení",
+      "buttonTextColor": "Barva textu tlačítka",
+      "priceNote": {
+        "label": "Poznámka k ceně",
+        "ariaLabel": "Poznámka k ceně",
+        "inclVat": "Vč. DPH",
+        "exclTax": "Bez daně",
+        "none": "Žádná"
+      },
+      "shippingNote": {
+        "label": "Poznámka k dopravě",
+        "ariaLabel": "Poznámka k dopravě",
+        "plusShipping": "Doprava zvlášť",
+        "freeShipping": "Doprava zdarma",
+        "none": "Žádná"
+      },
+      "useStorefrontAccent": "Použít zvýraznění obchodu",
+      "useButtonTextColor": "Použít barvu textu tlačítka"
+    },
+    "sections": {
+      "title": "Sekce",
+      "infoLabel": "Kdy sekce zůstane skrytá",
+      "infoContent": "Sekce, která nemá co zobrazit, zůstane skrytá, i když je zapnutá. Doprava a bezpečnost se u obsahu ke stažení nezobrazují nikdy. Bezpečnost a shoda a Prodejce jsou zákonem vyžadované informace a nejdou vypnout.",
+      "listAriaLabel": "Co stránka zobrazuje",
+      "underTheTitle": "pod názvem",
+      "requiredByLaw": "vyžaduje zákon",
+      "sectionLabels": {
+        "description": "Popis",
+        "specs": "Specifikace",
+        "documents": "Dokumenty",
+        "shipping": "Doprava",
+        "returns": "Vrácení zboží",
+        "safety": "Bezpečnost a shoda",
+        "seller": "Prodejce"
+      },
+      "availability": "Dostupnost",
+      "soldByByline": "Řádek „Prodává“"
+    },
+    "shippingReturns": {
+      "title": "Doprava a vrácení zboží",
+      "infoLabel": "Proč se to nastavuje v Nastavení, a ne tady",
+      "infoContent": "Nastavuje se jednou pro celý účet, takže všechny výlohy a všechny produkty se prodávají za stejných podmínek. U prodejců z EU stránka navíc vždy uvádí 14denní lhůtu pro odstoupení od smlouvy a dvouleté zákonné právo z vadného plnění, ať napíšete cokoli.",
+      "shippingLabel": "Doprava",
+      "returnsLabel": "Vrácení zboží",
+      "profileCount": "{count, plural, one {# profil dopravy pro produkty, které se posílají jinak.} few {# profily dopravy pro produkty, které se posílají jinak.} many {# profilu dopravy pro produkty, které se posílají jinak.} other {# profilů dopravy pro produkty, které se posílají jinak.}}",
+      "nothingSet": "Zatím nic. Dokud podmínky nedoplníte, produktové stránky uvádějí, že prodejce informace o dopravě nedoplnil.",
+      "editSettings": "Upravit v Nastavení",
+      "addTerms": "Doplnit dopravní podmínky"
+    },
+    "sellerDetails": {
+      "title": "Údaje prodejce",
+      "infoLabel": "Proč se to nastavuje v Nastavení, a ne tady",
+      "infoContent": "Předpisy o prodeji na dálku vyžadují u každé nabídky jméno prodejce, adresu a kontakt. Nastavuje se jednou pro celý účet: všechny výlohy a všechny produkty zobrazují stejné údaje, takže nic nemusíte opakovat u každého obchodu.",
+      "vatId": "DIČ {vatId}",
+      "nothingSet": "Zatím nic. Dokud nedoplníte údaje o firmě, kupující uvidí pod názvem jen řádek „Prodává“.",
+      "editSettings": "Upravit v Nastavení",
+      "addDetails": "Doplnit údaje o firmě"
+    }
+  },
+  "productBlock": {
+    "deleted": "Tento produkt byl odebrán z vašeho katalogu.",
+    "removeFromGrid": "Odebrat z mřížky",
+    "nameLabel": "Název",
+    "namePlaceholder": "Název produktu",
+    "priceLabel": "Cena ({currency})",
+    "saveDotDot": "Uložit…",
+    "updating": "Aktualizace…",
+    "whereChangeLands": {
+      "label": "Kde se změna názvu nebo ceny projeví",
+      "content": "Název a cena patří k produktu, takže uložení je změní všude, kde se produkt zobrazuje, nejen v této výloze."
+    },
+    "stock": {
+      "outOfStock": "Není skladem (0 kusů).",
+      "lowStock": "Docházející zásoby: {count} ks.",
+      "inStock": "Skladem: {count} ks."
+    },
+    "openProductPage": "Otevřít produktovou stránku",
+    "hideProductPage": "Skrýt produktovou stránku",
+    "tileStyle": {
+      "title": "Styl dlaždice",
+      "reset": "Obnovit podle motivu",
+      "infoLabel": "Jak souvisí styl této dlaždice s motivem",
+      "infoWithOverrides": "Tato dlaždice má vlastní styl. Nastavení, která tu zůstala beze změny, se dál řídí motivem.",
+      "infoNoOverrides": "Nastavte styl jen této dlaždici. Co nezměníte, se bude dál řídit motivem."
+    },
+    "priceTag": "Cenovka",
+    "modal": {
+      "title": "Změnit produkt všude?",
+      "description": "Tímto upravíte samotný produkt. Nové údaje se zobrazí ve všech výlohách, odkazech na pokladnu i v katalogu produktů, nejen v této mřížce.",
+      "nameLabel": "Název:",
+      "priceLabel": "Cena:",
+      "updateEverywhere": "Změnit všude"
+    },
+    "savedToast": "Produkt „{title}“ byl změněn všude, kde se zobrazuje.",
+    "validation": {
+      "noTitle": "Dejte produktu název.",
+      "noPrice": "Nastavte cenu.",
+      "badPrice": "Cena musí být číslo větší než nula.",
+      "tooHigh": "Tato cena je příliš vysoká."
+    }
+  },
+  "textBlock": {
+    "text": {
+      "label": "Text",
+      "infoLabel": "Další způsoby úpravy tohoto textu",
+      "infoContent": "Na blok můžete na plátně také znovu kliknout a psát přímo do něj, což je u drobné změny rychlejší."
+    },
+    "editOnCanvas": "Upravit text na plátně",
+    "style": {
+      "label": "Styl"
+    },
+    "font": {
+      "label": "Písmo",
+      "themeFont": "Písmo motivu",
+      "themeFontDescription": "Podle písma výlohy"
+    },
+    "color": {
+      "selectedWords": "Vybraná slova",
+      "label": "Barva",
+      "blockColor": "barva bloku",
+      "themeColor": "Barva motivu",
+      "useBlockColor": "Použít barvu bloku"
+    },
+    "colouringSelected": "Barvíte {count, plural, one {# vybraný znak} few {# vybrané znaky} many {# vybraného znaku} other {# vybraných znaků}}. Pokud chcete obarvit celý blok, klikněte mimo text."
+  },
+  "imageBlock": {
+    "size": {
+      "label": "Velikost",
+      "ariaLabel": "Přizpůsobení obrázku",
+      "fill": "Vyplnit",
+      "fit": "Přizpůsobit",
+      "fillHint": "Vyplní blok a přesahující část ořízne.",
+      "fitHint": "Zobrazí celý obrázek uvnitř bloku."
+    },
+    "reposition": "Změnit polohu obrázku",
+    "opacity": {
+      "label": "Neprůhlednost",
+      "ariaLabel": "Neprůhlednost obrázku",
+      "valueText": "{value} %"
+    },
+    "description": {
+      "label": "Popis",
+      "placeholder": "Logo, ikona, dekorace…",
+      "hint": "Čtečky obrazovky ho přečtou nahlas. Pokud je obrázek čistě dekorativní, nechte popis prázdný."
+    }
+  },
+  "shapeBlock": {
+    "shape": {
+      "label": "Tvar",
+      "ariaLabel": "Druh tvaru"
+    },
+    "points": {
+      "label": "Cípy",
+      "ariaLabel": "Počet cípů hvězdy",
+      "valueText": "Počet cípů: {value}"
+    },
+    "corners": {
+      "label": "Zaoblení rohů",
+      "ariaLabel": "Zaoblení rohů",
+      "valueText": "{value} %",
+      "sharp": "Ostré"
+    },
+    "fill": {
+      "ring": "Barva",
+      "shape": "Výplň"
+    },
+    "border": {
+      "ringLabel": "Tloušťka prstence",
+      "shapeLabel": "Tloušťka ohraničení",
+      "ringAriaLabel": "Tloušťka prstence",
+      "shapeAriaLabel": "Tloušťka ohraničení",
+      "valueText": "{value} px",
+      "none": "Žádné",
+      "color": "Barva ohraničení"
+    },
+    "opacity": {
+      "label": "Neprůhlednost",
+      "ariaLabel": "Neprůhlednost tvaru",
+      "valueText": "{value} %"
+    }
+  },
+  "multiBlock": {
+    "shapesContext": "Upravujete {count, plural, one {# tvar} few {# tvary} many {# tvaru} other {# tvarů}} najednou. Zobrazené hodnoty pocházejí z prvního vybraného tvaru; každá změna se použije na všechny.",
+    "textsContext": "Upravujete {count, plural, one {# textový blok} few {# textové bloky} many {# textového bloku} other {# textových bloků}} najednou. Zobrazené hodnoty pocházejí z prvního vybraného bloku; každá změna se použije na všechny. Každý blok si ponechá svůj text.",
+    "imagesContext": "Upravujete {count, plural, one {# prvek} few {# prvky} many {# prvku} other {# prvků}} najednou. Zobrazené hodnoty pocházejí z prvního vybraného prvku; každá změna se použije na všechny. Každý si ponechá svůj obrázek.",
+    "productsContext": "Upravujete styl {count, plural, one {# dlaždice produktu} few {# dlaždic produktů} many {# dlaždice produktu} other {# dlaždic produktů}} najednou. Zobrazené hodnoty pocházejí z první vybrané dlaždice; každá změna se použije na všechny.",
+    "mixedContext": "{count, plural, one {Je vybrán # blok} few {Jsou vybrány # bloky} many {Je vybráno # bloku} other {Je vybráno # bloků}} různých typů. Pokud chcete upravit nastavení najednou, vyberte bloky jednoho typu.",
+    "remove": "Odebrat {count, plural, one {# blok} few {# bloky} many {# bloku} other {# bloků}}",
+    "duplicate": "Duplikovat {count, plural, one {# blok} few {# bloky} many {# bloku} other {# bloků}}",
+    "productsNotDuplicated": "Produkty se neduplikují.",
+    "tileStyle": {
+      "title": "Styl dlaždice",
+      "reset": "Obnovit podle motivu"
+    },
+    "priceTag": "Cenovka"
+  },
+  "blockActions": {
+    "duplicate": "Duplikovat",
+    "remove": "Odebrat z mřížky"
+  },
+  "toolbar": {
+    "ariaLabel": "Nástroje editoru",
+    "addProduct": "Přidat produkt",
+    "addText": "Přidat text",
+    "addElement": "Přidat prvek",
+    "product": "Produkt",
+    "text": "Text",
+    "element": "Prvek",
+    "elementsMenu": "Prvky",
+    "uploading": "Nahrávání…",
+    "upload": "Nahrát",
+    "uploadImage": "Nahrát obrázek",
+    "allShapes": "Všechny tvary",
+    "browseShapes": "Procházet celou knihovnu tvarů",
+    "closePage": "Zavřít produktovou stránku",
+    "showPage": "Zobrazit produktovou stránku",
+    "closePages": "Zavřít produktové stránky",
+    "showPageFull": "Zobrazit produktovou stránku",
+    "undo": "Zpět",
+    "undoTip": "Zpět (Ctrl+Z)",
+    "redo": "Znovu",
+    "redoTip": "Znovu (Ctrl+Shift+Z)",
+    "tidy": "Uklidit plátno",
+    "tidyTip": "Uklidit",
+    "zoomOut": "Oddálit",
+    "zoomOutTip": "Oddálit (Ctrl -)",
+    "zoomReset": "Obnovit přiblížení na 100 %",
+    "zoomResetTip": "Obnovit přiblížení (Ctrl 0)",
+    "zoomResetMenuItem": "Obnovit přiblížení",
+    "zoomIn": "Přiblížit",
+    "zoomInTip": "Přiblížit (Ctrl +)",
+    "designSettings": "Nastavení designu",
+    "page": "Stránka",
+    "moreTools": "Další nástroje"
+  },
+  "selectionToolbar": {
+    "toolsFor": "Nástroje: {name}",
+    "elements": "{count, plural, one {# prvek} few {# prvky} many {# prvku} other {# prvků}}",
+    "hidePage": "Skrýt stránku",
+    "hidePages": "Skrýt stránky",
+    "openPage": "Otevřít stránku",
+    "openPages": "Otevřít stránky",
+    "openProductPage": "Otevřít produktovou stránku: {name}",
+    "closeProductPage": "Zavřít produktovou stránku: {name}",
+    "openProductPages": "Otevřít produktové stránky {count, plural, one {# produktu} few {# produktů} many {# produktu} other {# produktů}}",
+    "closeProductPages": "Zavřít produktové stránky {count, plural, one {# produktu} few {# produktů} many {# produktu} other {# produktů}}",
+    "editText": "Upravit text",
+    "editTextOf": "Upravit text: {name}",
+    "color": "Barva",
+    "changeColorOf": "Změnit barvu: {name}",
+    "stroke": "Obrys",
+    "editStrokeOf": "Upravit obrys: {name}",
+    "corners": "Rohy",
+    "editCornersOf": "Upravit zaoblení rohů: {name}",
+    "opacity": "Neprůhlednost",
+    "editOpacityOf": "Upravit neprůhlednost: {name}",
+    "frame": "Výřez",
+    "frameImageFor": "Upravit výřez obrázku: {name}",
+    "duplicate": "Duplikovat",
+    "duplicateNamed": "Duplikovat: {name}",
+    "duplicateN": "Duplikovat {count, plural, one {# prvek} few {# prvky} many {# prvku} other {# prvků}}",
+    "removeFrom": "Odebrat z mřížky: {name}",
+    "removeN": "Odebrat z mřížky {count, plural, one {# prvek} few {# prvky} many {# prvku} other {# prvků}}"
+  },
+  "canvas": {
+    "gridLabel": "Plátno výlohy",
+    "emptyGrid": "Vaše mřížka je prázdná",
+    "emptyGridHint": "Přidejte produkt a začněte výlohu uspořádávat. Text a tvary najdete na panelu nástrojů dole.",
+    "addProduct": "Přidat produkt",
+    "desktopPreview": "Náhled na počítači",
+    "mobilePreview": "Náhled na mobilu"
+  },
+  "blockTile": {
+    "removedProduct": "Odebraný produkt",
+    "shape": "{kind, select, square {tvar čtverce} circle {tvar kruhu} ring {tvar prstence} diamond {tvar kosočtverce} rounded {zaoblený tvar} pill {tvar kapsle} half {tvar půlkruhu} quarter {tvar čtvrtkruhu} bar {tvar pruhu} triangle {tvar trojúhelníku} wedge {tvar klínu} pentagon {tvar pětiúhelníku} hexagon {tvar šestiúhelníku} octagon {tvar osmiúhelníku} star {tvar hvězdy} sparkle {tvar jiskry} cross {tvar kříže} arrow {tvar šipky} chevron {tvar lomené šipky} trapezoid {tvar lichoběžníku} parallelogram {tvar rovnoběžníku} burst {tvar výbuchu} other {tvar {kind}}}",
+    "imageWithAlt": "Obrázek: {alt}",
+    "imageElement": "Obrázkový prvek",
+    "textWithContent": "Text: {text}",
+    "textBlock": "Textový blok",
+    "selected": "Vybráno: {label}. Stisknutím Enter výběr zrušíte.",
+    "unselected": "{label}. Stisknutím Enter blok vyberete a můžete ho upravit.",
+    "draftAriaLabel": "Koncept produktu (kupující se na tento odkaz nedostanou)",
+    "draft": "Koncept"
+  },
+  "blockFace": {
+    "productRemoved": "Produkt byl odebrán. Smažte tento blok."
+  },
+  "framer": {
+    "ariaLabel": "Úprava výřezu obrázku: {name}. Přetažením změníte polohu, šipkami ho posunete o kousek, plusem a minusem přiblížíte, klávesou Escape úpravu dokončíte. Aktuálně {x} % zleva, {y} % shora, přiblížení {zoom} %.",
+    "hintZoomed": "{zoom} % · Přetažením upravíte výřez · Esc",
+    "hintMinZoom": "Tažením za roh přiblížíte · Esc"
+  },
+  "inlineText": {
+    "ariaLabel": "Text bloku"
+  },
+  "tiles": {
+    "emptyText": "Prázdný textový blok",
+    "imageUnavailable": "Obrázek není k dispozici"
+  },
+  "spotDrag": {
+    "tokenLabel": "{token, select, title {Název} other {Cena}} {drop, select, below {v pruhu s názvem} top_left {vlevo nahoře} top_center {nahoře uprostřed} top_right {vpravo nahoře} middle_center {uprostřed} bottom_left {vlevo dole} bottom_center {dole uprostřed} bottom_right {vpravo dole} other {}}. Stisknutím otevřete nastavení, přetažením (nebo šipkami) popisek přesunete."
+  },
+  "autoFit": {},
+  "designer": {
+    "header": {
+      "back": "Zpět na výlohy",
+      "nameLabel": "Název výlohy",
+      "namePlaceholder": "Výloha bez názvu",
+      "unsaved": "Neuložené změny",
+      "search": "Vyhledávání"
+    },
+    "mobileNotice": {
+      "body": "Pro nejpohodlnější úpravy otevřete editor na počítači nebo tabletu. Změna pořadí bloků a úprava záhlaví fungují na jakémkoli zařízení.",
+      "dismiss": "Zavřít upozornění o úpravách na malé obrazovce"
+    },
+    "inspector": {
+      "title": {
+        "addProduct": "Přidat produkt",
+        "blocks": "{count, plural, one {# blok} few {# bloky} many {# bloku} other {# bloků}}",
+        "product": "Produkt",
+        "shape": "Tvar",
+        "image": "Obrázek",
+        "text": "Textový blok"
+      },
+      "close": {
+        "addProduct": "Zavřít panel přidání produktu",
+        "blocks": "{count, plural, one {Zavřít panel # bloku} few {Zavřít panel # bloků} many {Zavřít panel # bloku} other {Zavřít panel # bloků}}",
+        "product": "Zavřít panel produktu",
+        "shape": "Zavřít panel tvaru",
+        "image": "Zavřít panel obrázku",
+        "text": "Zavřít panel textového bloku"
+      }
+    },
+    "toasts": {
+      "full": "Tato výloha je plná.",
+      "fullDetail": "Výloha může obsahovat nejvýše {max, plural, one {# blok} few {# bloky} many {# bloku} other {# bloků}}.",
+      "imageUploadFailed": "Obrázek se nepodařilo nahrát.",
+      "imageUploadFailedDetail": "Zkuste to za chvíli znovu.",
+      "copied": "{count, plural, one {Blok zkopírován.} few {# bloky zkopírovány.} many {# bloku zkopírováno.} other {# bloků zkopírováno.}}",
+      "copiedDetail": "Vložte pomocí Ctrl+V nebo Cmd+V.",
+      "savedWithDrafts": "Uloženo, ale některé produkty jsou stále koncepty.",
+      "draftsDetail": "{count, plural, one {Produkt {names} je zatím koncept a kupující se k němu nedostanou.} few {Produkty {names}{hidden, plural, =0 {} one { a # další} few { a # další} many { a # dalšího} other { a # dalších}} jsou zatím koncepty a kupující se k nim nedostanou.} many {Produkty {names}{hidden, plural, =0 {} one { a # další} few { a # další} many { a # dalšího} other { a # dalších}} jsou zatím koncepty a kupující se k nim nedostanou.} other {Produkty {names}{hidden, plural, =0 {} one { a # další} few { a # další} many { a # dalšího} other { a # dalších}} jsou zatím koncepty a kupující se k nim nedostanou.}}",
+      "publishDrafts": "Až budou připravené, tyto produkty zveřejněte.",
+      "saved": "Výloha uložena.",
+      "droppedBlocks": "{count, plural, one {# blok odkazoval na smazaný produkt a byl odebrán.} few {# bloky odkazovaly na smazané produkty a byly odebrány.} many {# bloku odkazovalo na smazané produkty a bylo odebráno.} other {# bloků odkazovalo na smazané produkty a bylo odebráno.}}"
+    },
+    "leave": {
+      "title": "Uložit změny?",
+      "description": "V této výloze máte neuložené změny. Před odchodem je uložte, nebo je zahoďte.",
+      "save": "Uložit změny",
+      "discard": "Zahodit změny",
+      "keepEditing": "Pokračovat v úpravách"
+    },
+    "defaults": {
+      "textBlock": "Sem napište text"
+    }
+  },
+  "sample": {
+    "name": "Ukázková výloha",
+    "card": {
+      "open": "Otevřít ukázkovou výlohu",
+      "badge": "Ukázka",
+      "summary": "{count, plural, one {{count} blok · zkoušejte cokoli, nic se neukládá} few {{count} bloky · zkoušejte cokoli, nic se neukládá} many {{count} bloku · zkoušejte cokoli, nic se neukládá} other {{count} bloků · zkoušejte cokoli, nic se neukládá}}",
+      "hide": "Skrýt ukázkovou výlohu"
+    },
+    "embed": {
+      "title": "Vložení výlohy na web",
+      "description": "Každá výloha, kterou vytvoříte, dostane vlastní kód pro vložení na váš web.",
+      "snippetLabel": "Kód vypadá takto",
+      "inDevelopment": "Widget je zatím ve vývoji a na jiných webech se ještě nezobrazuje.",
+      "create": "Vytvořit výlohu"
+    },
+    "list": {
+      "show": "Zobrazit ukázkovou výlohu",
+      "showFailed": "Ukázkovou výlohu se nepodařilo vrátit.",
+      "hideFailed": "Ukázkovou výlohu se nepodařilo skrýt.",
+      "failedDetail": "Zkuste to za chvíli znovu.",
+      "createFirst": "Vytvořte svou první výlohu",
+      "createFirstHint": "Přidejte do její mřížky své produkty. Každý dostane stránku ke sdílení."
+    },
+    "designer": {
+      "createAriaLabel": "Vytvořit vlastní výlohu",
+      "createShort": "Vytvořit",
+      "create": "Vytvořit vlastní",
+      "notice": "Toto je ukázková výloha. Zkoušejte cokoli: nic se tady neukládá.",
+      "takeTour": "Spustit prohlídku"
+    },
+    "content": {
+      "bio": "Každodenní technika a věci na stůl, vybrané tak, aby vydržely.",
+      "heading": "Nejprodávanější",
+      "story": "Všechno, co prodáváme, sami používáme, než to zařadíme do nabídky. Vrácení přijímáme do 14 dnů.",
+      "dispatch": "Odesíláme do 2 pracovních dnů",
+      "products": {
+        "camera": {
+          "title": "Instantní fotoaparát",
+          "description": "Vytiskne fotku pár vteřin po vyfocení. Film se prodává zvlášť."
+        },
+        "headphones": {
+          "title": "Sluchátka",
+          "description": "Uzavřená, s měkkými polštářky z paměťové pěny. Kabel 3,5 mm je součástí balení."
+        },
+        "watch": {
+          "title": "Chytré hodinky",
+          "description": "Hliníkové pouzdro se sportovním řemínkem. Měří kroky, spánek i tréninky."
+        },
+        "mouse": {
+          "title": "Bezdrátová myš",
+          "description": "Lehká, s tichým klikáním a až 250 hodinami na jednu baterii."
+        },
+        "speaker": {
+          "title": "Přenosný reproduktor",
+          "description": "Voděodolný, až 12 hodin přehrávání na jedno nabití."
+        },
+        "succulent": {
+          "title": "Sukulent na stůl",
+          "description": "Malá haworthie v keramickém květináči. Stačí ji zalít zhruba jednou za měsíc."
+        }
+      }
+    }
+  },
+  "colors": {
+    "fields": {
+      "accent": "Zvýraznění",
+      "storeName": "Název obchodu",
+      "bio": "Bio",
+      "background": "Pozadí",
+      "gradientFrom": "Přechod od",
+      "gradientTo": "Přechod do",
+      "fill": "Výplň",
+      "color": "Barva",
+      "borderColor": "Barva okraje",
+      "selectedWords": "Vybraná slova",
+      "textColor": "Barva textu",
+      "tagColor": "Barva štítku",
+      "shadowColor": "Barva stínu"
+    },
+    "inherit": {
+      "themeColor": {
+        "label": "Barva motivu",
+        "use": "Použít barvu motivu"
+      },
+      "default": {
+        "label": "Výchozí",
+        "use": "Použít výchozí"
+      },
+      "noFill": {
+        "label": "Bez výplně",
+        "use": "Použít možnost Bez výplně"
+      },
+      "cardColor": {
+        "label": "Barva karty",
+        "use": "Použít barvu karty"
+      },
+      "blockColor": {
+        "label": "barva bloku",
+        "use": "Použít barvu bloku"
+      }
+    },
+    "presets": {
+      "white": {
+        "name": "Bílá",
+        "label": "Bílá ({value})"
+      },
+      "grey": {
+        "name": "Šedá",
+        "label": "Šedá ({value})"
+      },
+      "ink": {
+        "name": "Inkoustová",
+        "label": "Inkoustová ({value})"
+      },
+      "paleAccent": {
+        "name": "Světlé zvýraznění",
+        "label": "Světlé zvýraznění ({value})"
+      },
+      "softAccent": {
+        "name": "Jemné zvýraznění",
+        "label": "Jemné zvýraznění ({value})"
+      },
+      "accent": {
+        "name": "Zvýraznění",
+        "label": "Zvýraznění ({value})"
+      },
+      "deepAccent": {
+        "name": "Tmavé zvýraznění",
+        "label": "Tmavé zvýraznění ({value})"
+      }
+    },
+    "standard": {
+      "white": "Bílá ({value})",
+      "grey200": "Šedá 200 ({value})",
+      "grey300": "Šedá 300 ({value})",
+      "grey400": "Šedá 400 ({value})",
+      "grey": "Šedá ({value})",
+      "grey600": "Šedá 600 ({value})",
+      "grey700": "Šedá 700 ({value})",
+      "grey800": "Šedá 800 ({value})",
+      "ink": "Inkoustová ({value})",
+      "black": "Černá ({value})",
+      "red": "Červená ({value})",
+      "orange": "Oranžová ({value})",
+      "amber": "Jantarová ({value})",
+      "yellow": "Žlutá ({value})",
+      "green": "Zelená ({value})",
+      "teal": "Modrozelená ({value})",
+      "sky": "Nebeská modř ({value})",
+      "blue": "Modrá ({value})",
+      "violet": "Fialová ({value})",
+      "pink": "Růžová ({value})",
+      "redDark": "Tmavě červená ({value})",
+      "orangeDark": "Tmavě oranžová ({value})",
+      "amberDark": "Tmavě jantarová ({value})",
+      "yellowDark": "Tmavě žlutá ({value})",
+      "greenDark": "Tmavě zelená ({value})",
+      "tealDark": "Tmavě modrozelená ({value})",
+      "skyDark": "Tmavá nebeská modř ({value})",
+      "blueDark": "Tmavě modrá ({value})",
+      "violetDark": "Tmavě fialová ({value})",
+      "pinkDark": "Tmavě růžová ({value})"
+    },
+    "palettes": {
+      "sunset": {
+        "name": "Západ slunce",
+        "group": "Paleta Západ slunce",
+        "swatches": {
+          "cream": "Západ slunce: krémová ({value})",
+          "amber": "Západ slunce: jantarová ({value})",
+          "orange": "Západ slunce: oranžová ({value})",
+          "red": "Západ slunce: červená ({value})",
+          "ember": "Západ slunce: žhavá ({value})"
+        }
+      },
+      "forest": {
+        "name": "Les",
+        "group": "Paleta Les",
+        "swatches": {
+          "mist": "Les: lesní mlha ({value})",
+          "sage": "Les: šalvějová ({value})",
+          "green": "Les: zelená ({value})",
+          "pine": "Les: borovicová ({value})",
+          "deep": "Les: hlubinná zeleň ({value})"
+        }
+      },
+      "ocean": {
+        "name": "Oceán",
+        "group": "Paleta Oceán",
+        "swatches": {
+          "foam": "Oceán: mořská pěna ({value})",
+          "sky": "Oceán: nebeská modř ({value})",
+          "cyan": "Oceán: azurová ({value})",
+          "sea": "Oceán: mořská modř ({value})",
+          "navy": "Oceán: námořnická modř ({value})"
+        }
+      },
+      "mono": {
+        "name": "Mono",
+        "group": "Paleta Mono",
+        "swatches": {
+          "white": "Mono: bílá ({value})",
+          "silver": "Mono: stříbrná ({value})",
+          "grey": "Mono: šedá ({value})",
+          "graphite": "Mono: grafitová ({value})",
+          "ink": "Mono: inkoustová ({value})"
+        }
+      },
+      "candy": {
+        "name": "Bonbóny",
+        "group": "Paleta Bonbóny",
+        "swatches": {
+          "blush": "Bonbóny: nádech růže ({value})",
+          "rose": "Bonbóny: růžová ({value})",
+          "pink": "Bonbóny: sytě růžová ({value})",
+          "purple": "Bonbóny: purpurová ({value})",
+          "violet": "Bonbóny: fialová ({value})"
+        }
+      }
+    }
+  }
+}

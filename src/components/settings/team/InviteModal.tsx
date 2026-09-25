@@ -3,8 +3,9 @@
 import * as React from "react";
 import { useActionState } from "react";
 import { Mail } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { infoTextClass } from "@/components/ui/control-styles";
-import { useActionToast } from "@/components/ui/Toast";
+import { useActionStateToast, useSaveResult } from "@/components/ui/ActionErrorNotice";
 import { SaveButton } from "@/components/ui/SaveButton";
 import { Modal } from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";
@@ -21,10 +22,9 @@ import {
 } from "@/lib/team/permissions";
 import type { TeamRole } from "@/lib/team/permissions";
 import { inviteMember } from "@/lib/team/actions";
+import type { ActionState } from "@/lib/errors";
 
-type TeamActionState = { error?: string; success?: string };
-
-const INITIAL: TeamActionState = {};
+const INITIAL: ActionState = {};
 
 export function InviteModal({
   accountOwnerId,
@@ -37,8 +37,10 @@ export function InviteModal({
   open: boolean;
   onClose: () => void;
 }) {
+  const t = useTranslations();
   const [state, formAction, isPending] = useActionState(inviteMember, INITIAL);
-  useActionToast(state);
+  useActionStateToast(state);
+  const saveResult = useSaveResult(state);
   const [email, setEmail] = React.useState("");
   const [selectedRole, setSelectedRole] = React.useState<"editor" | "viewer">(
     DEFAULT_INVITE_ROLE === "owner" ? "viewer" : (DEFAULT_INVITE_ROLE as "editor" | "viewer"),
@@ -51,12 +53,12 @@ export function InviteModal({
   const roleSelectOptions: readonly SelectOption<"editor" | "viewer">[] =
     grantableOptions.map((r) => ({
       value: r,
-      label: ROLE_LABELS[r],
-      description: ROLE_DESCRIPTIONS[r],
+      label: t(ROLE_LABELS[r]),
+      description: t(ROLE_DESCRIPTIONS[r]),
     }));
 
   // Reset the email field once, each time a submit succeeds.
-  const prevSuccess = React.useRef<string | undefined>(undefined);
+  const prevSuccess = React.useRef<ActionState["success"]>(undefined);
   React.useEffect(() => {
     if (state.success && state.success !== prevSuccess.current) {
       setEmail("");
@@ -78,8 +80,8 @@ export function InviteModal({
     <Modal
       open={open}
       onClose={onClose}
-      title="Invite a member"
-      description="They'll get access when they sign in with this email address."
+      title={t("Settings.team.inviteModal.title")}
+      description={t("Settings.team.inviteModal.description")}
     >
       <form action={formAction} className="flex flex-col gap-4" noValidate>
         <input type="hidden" name="account_owner_id" value={accountOwnerId} />
@@ -88,7 +90,7 @@ export function InviteModal({
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="invite-email">
             <Mail aria-hidden className="mr-1.5 inline size-3.5 align-text-bottom" />
-            Email address
+            {t("Settings.team.inviteModal.emailLabel")}
           </Label>
           <Input
             id="invite-email"
@@ -96,7 +98,7 @@ export function InviteModal({
             type="email"
             inputMode="email"
             autoComplete="email"
-            placeholder="colleague@example.com"
+            placeholder={t("Settings.team.inviteModal.emailPlaceholder")}
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -106,7 +108,7 @@ export function InviteModal({
 
         {roleSelectOptions.length > 1 && (
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="invite-role">Role</Label>
+            <Label htmlFor="invite-role">{t("Settings.team.inviteModal.roleLabel")}</Label>
             <Select
               id="invite-role"
               value={effectiveRole}
@@ -117,10 +119,7 @@ export function InviteModal({
           </div>
         )}
 
-        <p className={infoTextClass}>
-          Email notifications aren&apos;t wired up yet — the invite takes effect
-          when they sign in. You may want to let them know directly.
-        </p>
+        <p className={infoTextClass}>{t("Settings.team.inviteModal.notificationNote")}</p>
 
         <StepUpField id="invite-step-up" state={state} />
 
@@ -128,11 +127,11 @@ export function InviteModal({
           <SaveButton
             type="submit"
             pending={isPending}
-            state={state}
-            pendingLabel="Sending…"
-            savedLabel="Sent"
+            state={saveResult}
+            pendingLabel={t("Common.actions.sending")}
+            savedLabel={t("Common.actions.sent")}
           >
-            Send invite
+            {t("Settings.team.inviteModal.sendButton")}
           </SaveButton>
         </div>
       </form>

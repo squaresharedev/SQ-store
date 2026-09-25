@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import { helpTextClass } from "@/components/ui/control-styles";
 import { badgeClass } from "@/components/ui/surface-styles";
 import { cn } from "@/lib/utils";
@@ -8,6 +9,7 @@ import {
   type CardBackdropVariant,
 } from "@/components/ui/CardBackdrop";
 import { CountUp } from "@/components/ui/CountUp";
+import { FitText } from "@/components/ui/FitText";
 import type { MetricTrend } from "@/lib/dashboard/queries";
 import { Sparkline } from "./Sparkline";
 
@@ -40,9 +42,9 @@ export function MetricTile({
   label,
   value,
   hint,
-  zeroText = "No sales yet",
+  zeroText,
   pending = false,
-  pendingText = "Available once analytics is connected.",
+  pendingText,
   emphasis = false,
   trend,
   decoration,
@@ -72,6 +74,7 @@ export function MetricTile({
   /** Custom body instead of a single value. */
   children?: ReactNode;
 }) {
+  const t = useTranslations();
   return (
     <div
       className={cn(
@@ -99,14 +102,14 @@ export function MetricTile({
         </span>
         {pending && (
           <span className={cn(badgeClass, "font-normal text-muted-foreground")}>
-            Coming soon
+            {t("Common.badge.comingSoon")}
           </span>
         )}
       </div>
 
       <div className="relative mt-2">
         {pending ? (
-          <p className={helpTextClass}>{pendingText}</p>
+          <p className={helpTextClass}>{pendingText ?? t("Dashboard.metric.pendingDefault")}</p>
         ) : children ? (
           children
         ) : value && trend ? (
@@ -124,17 +127,22 @@ export function MetricTile({
         ) : value ? (
           <p
             className={cn(
-              "truncate",
               emphasis
                 ? "text-4xl font-bold text-success sm:text-5xl lg:text-6xl"
-                : "text-2xl font-semibold text-foreground",
+                : "truncate text-2xl font-semibold text-foreground",
             )}
           >
-            <CountUp value={value} />
+            {emphasis ? (
+              <FitText measure={value}>
+                <CountUp value={value} />
+              </FitText>
+            ) : (
+              <CountUp value={value} />
+            )}
           </p>
         ) : (
           <p className="text-base font-medium text-muted-foreground">
-            {zeroText}
+            {zeroText ?? t("Dashboard.metric.zeroDefault")}
           </p>
         )}
         {!pending && hint && (

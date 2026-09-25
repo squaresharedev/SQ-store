@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
 import {
@@ -43,16 +44,17 @@ function bad(status: number, error: string, fix?: string) {
 }
 
 export async function POST(request: Request) {
+  const t = await getTranslations("Errors.uploadRoute");
   const account = await getActiveAccount();
-  if (!account) return bad(401, "Sign in to upload images.");
+  if (!account) return bad(401, t("signIn.image"));
   if (!can(account.role, "products.write")) {
-    return bad(403, "You don't have permission to upload here.");
+    return bad(403, t("permissionDenied"));
   }
 
   // Same budget as presigning: each call authorises bytes into R2. After the
   // permission checks, so a caller who may not upload never spends it.
   if (!(await rateLimit("upload_presign", RATE_LIMITS.uploadPresign))) {
-    return bad(429, "Too many uploads right now. Try again shortly.");
+    return bad(429, t("rateLimited.shared"));
   }
 
   if (!hasR2Credentials()) {
@@ -60,33 +62,33 @@ export async function POST(request: Request) {
       "[uploads] R2 is not configured — set R2_ACCOUNT_ID, R2_BUCKET_NAME, " +
         "R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY in .env.local (see .env.example).",
     );
-    return bad(503, "Image uploads are not configured yet. Contact the site owner.");
+    return bad(503, t("notConfigured.image"));
   }
 
   let form: FormData;
   try {
     form = await request.formData();
   } catch {
-    return bad(400, "That upload could not be read.", "Try again.");
+    return bad(400, t("unreadable"), t("fix.tryAgain"));
   }
 
   // Unknown fields are a sign the caller is not our form; refuse rather than
   // ignore, so a future field can never be silently accepted.
   for (const key of form.keys()) {
-    if (key !== FIELD) return bad(400, "Unexpected upload fields.");
+    if (key !== FIELD) return bad(400, t("unexpectedFields"));
   }
 
   const file = form.get(FIELD);
-  if (!(file instanceof File)) return bad(400, "No image was uploaded.");
+  if (!(file instanceof File)) return bad(400, t("missing.image"));
 
   // Cheap rejection before reading the body into memory.
-  if (file.size <= 0) return bad(400, "That image is empty.", "Pick a different file.");
+  if (file.size <= 0) return bad(400, t("empty.image"), t("fix.pickFile"));
   if (file.size > IMAGE_MAX_BYTES) {
     const maxMb = Math.round(IMAGE_MAX_BYTES / 1024 / 1024);
     return bad(
       413,
-      "That image is too large.",
-      `Use an image under ${maxMb} MB. Compress or resize it, then try again.`,
+      t("tooLarge.image"),
+      t("tooLargeFix.image", { maxMb }),
     );
   }
 
@@ -94,7 +96,7 @@ export async function POST(request: Request) {
   // The measured length is the one that counts: `file.size` is a claim in the
   // multipart headers, this is what we actually received.
   if (bytes.byteLength > IMAGE_MAX_BYTES || bytes.byteLength === 0) {
-    return bad(413, "That image is too large.");
+    return bad(413, t("tooLarge.image"));
   }
 
   // What the file IS, not what it says it is.
@@ -103,8 +105,8 @@ export async function POST(request: Request) {
   if (!sniffed || !allowed.includes(sniffed.mime)) {
     return bad(
       415,
-      "That file is not a supported image.",
-      "Use a JPEG, PNG, WebP, GIF, or AVIF image.",
+      t("unsupported.image"),
+      t("unsupportedFix.image"),
     );
   }
 
@@ -123,13 +125,13 @@ export async function POST(request: Request) {
     console.error("[uploads] moderation failed", error);
     return bad(
       503,
-      "Images can't be checked right now.",
-      "Try again in a few minutes.",
+      t("moderationUnavailable"),
+      t("fix.tryAgainInAFewMinutes"),
     );
   }
 
   if (verdict.decision === "reject") {
-    return bad(422, verdict.reason, "Pick a different image.");
+    return bad(422, t(`moderationRejected.${verdict.code}`), t("fix.pickImage"));
   }
 
   const key = buildObjectKey("image", account.userId, file.name || `image.${sniffed.ext}`);
@@ -148,8 +150,8 @@ export async function POST(request: Request) {
     // not-usable-yet rather than success — see lib/products/upload.ts.
     return bad(
       202,
-      "That image is being checked before it goes live.",
-      "You'll be able to use it once it's approved.",
+      t("inReview"),
+      t("inReviewFix"),
     );
   }
 
@@ -157,7 +159,7 @@ export async function POST(request: Request) {
     await putObject(key, bytes, sniffed.mime);
   } catch (error) {
     console.error("[uploads] store failed:", r2FailureMessage(error));
-    return bad(502, "The image could not be stored.", "Try again in a moment.");
+    return bad(502, t("storeFailed.image"), t("fix.tryAgainInAMoment"));
   }
 
   return Response.json({ key });

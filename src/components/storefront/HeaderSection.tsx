@@ -1,6 +1,7 @@
 "use client";
 
 import { useId } from "react";
+import { useTranslations } from "next-intl";
 import {
   HEADER_BIO_MAX,
   HEADER_NAME_MAX,
@@ -32,13 +33,14 @@ export function HeaderSection({
   header: StorefrontHeader;
   onChange: (header: StorefrontHeader) => void;
 }) {
+  const t = useTranslations("Storefront.header");
   const fieldId = useId();
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3">
         <label htmlFor={`${fieldId}-show`} className={labelClass}>
-          Show header
+          {t("showHeader")}
         </label>
         <Switch
           id={`${fieldId}-show`}
@@ -50,12 +52,10 @@ export function HeaderSection({
       <div className="space-y-1.5">
         <span className="flex items-center gap-1.5">
           <label htmlFor={`${fieldId}-name`} className={labelClass}>
-            Store name
+            {t("storeName")}
           </label>
-          <InfoTip label="Other ways to edit the header">
-            Click the name or bio on the canvas to type it there. This panel
-            opens on that line at the same time, where its font, size,
-            colour, formatting and alignment are set.
+          <InfoTip label={t("infoLabel")}>
+            {t("infoBody")}
           </InfoTip>
         </span>
         <input
@@ -63,7 +63,7 @@ export function HeaderSection({
           type="text"
           value={header.name}
           maxLength={HEADER_NAME_MAX}
-          placeholder="Store name shown to buyers"
+          placeholder={t("storeNamePlaceholder")}
           spellCheck={false}
           onChange={(event) =>
             onChange({
@@ -77,14 +77,14 @@ export function HeaderSection({
 
       <div className="space-y-1.5">
         <label htmlFor={`${fieldId}-bio`} className={labelClass}>
-          Bio
+          {t("bio")}
         </label>
         <textarea
           id={`${fieldId}-bio`}
           value={header.bio}
           maxLength={HEADER_BIO_MAX}
           rows={2}
-          placeholder="A short line about your shop"
+          placeholder={t("bioPlaceholder")}
           onChange={(event) =>
             onChange({
               ...header,
@@ -94,7 +94,7 @@ export function HeaderSection({
           className={fieldBaseClass}
         />
         <p className={helpTextClass}>
-          {HEADER_BIO_MAX - header.bio.length} characters left
+          {t("charsLeft", { n: HEADER_BIO_MAX - header.bio.length })}
         </p>
       </div>
 

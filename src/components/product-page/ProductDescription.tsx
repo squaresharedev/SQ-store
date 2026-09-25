@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { paragraphs } from "./product-page-maps";
 
 /**
@@ -30,6 +31,7 @@ import { paragraphs } from "./product-page-maps";
 const CLAMP_CHARS = 260;
 
 export function ProductDescription({ text }: { text: string }) {
+  const t = useTranslations("ProductPage.description");
   const [expanded, setExpanded] = useState(false);
   const blocks = paragraphs(text);
   if (blocks.length === 0) return null;
@@ -62,7 +64,7 @@ export function ProductDescription({ text }: { text: string }) {
           className="text-sm font-medium underline underline-offset-2 opacity-80 transition-opacity duration-base ease-standard hover:opacity-100 motion-reduce:transition-none"
           data-product-description-toggle=""
         >
-          {expanded ? "Read less" : "Read more"}
+          {expanded ? t("readLess") : t("readMore")}
         </button>
       )}
     </div>

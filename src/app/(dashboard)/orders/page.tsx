@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { pageShellClass } from "@/components/ui/surface-styles";
 import { cn } from "@/lib/utils";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -12,9 +13,10 @@ import {
   type OrderStatus,
 } from "@/types/order-view";
 
-export const metadata: Metadata = {
-  title: "Orders",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Orders.metadata.orders");
+  return { title: t("title") };
+}
 
 // PROTECTED by (dashboard)/layout.tsx. Reads are owner-scoped (session + RLS)
 // and strictly read-only against orders. Filters/sort/page live in the URL so
@@ -95,6 +97,7 @@ export default async function OrdersRoutePage({
   const params = await searchParams;
   const { filters, sort, page } = parseParams(params);
   const deepLinkedId = first(params.order);
+  const t = await getTranslations("Orders.page");
 
   const [data, deepLinked] = await Promise.all([
     listOrders({ filters, sort, page, pageSize: DEFAULT_PAGE_SIZE }),
@@ -106,8 +109,8 @@ export default async function OrdersRoutePage({
   return (
     <main className={cn(pageShellClass, "space-y-6")}>
       <PageHeader
-        title="Orders"
-        subtitle="Every order placed through Square Share."
+        title={t("title")}
+        subtitle={t("subtitle")}
       />
       <OrdersPage
         data={data}

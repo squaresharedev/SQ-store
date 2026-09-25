@@ -61,6 +61,7 @@ vi.mock("@/lib/supabase/admin", () => ({
 
 import { markNotificationRead, getRealtimeToken } from "@/lib/notifications/actions";
 import { createNotification } from "@/lib/notifications/create";
+import { english } from "../../setup/translate";
 
 // ---- test constants ------------------------------------------------------
 
@@ -139,22 +140,13 @@ describe("markNotificationRead", () => {
 // ==========================================================================
 
 describe("createNotification", () => {
+  const INVITE_TITLE = { key: "Notifications.messages.teamInvite.title" } as const;
+
   it("invalid input (bad userId) returns false without inserting", async () => {
     const result = await createNotification({
       userId: "not-a-uuid",
       type: "team",
-      title: "Hello",
-    });
-
-    expect(result).toBe(false);
-    expect(adminDb.insert).not.toHaveBeenCalled();
-  });
-
-  it("missing title returns false without inserting", async () => {
-    const result = await createNotification({
-      userId: USER_ID,
-      type: "team",
-      title: "", // empty - will fail the min(1) check
+      message: { title: INVITE_TITLE },
     });
 
     expect(result).toBe(false);
@@ -165,7 +157,7 @@ describe("createNotification", () => {
     const result = await createNotification({
       userId: USER_ID,
       type: "unknown_type" as "team",
-      title: "Test",
+      message: { title: INVITE_TITLE },
     });
 
     expect(result).toBe(false);
@@ -178,8 +170,10 @@ describe("createNotification", () => {
     const result = await createNotification({
       userId: USER_ID,
       type: "team",
-      title: "You have a team invite",
-      body: "Welcome to the team.",
+      message: {
+        title: INVITE_TITLE,
+        body: { key: "Notifications.messages.teamJoined.body" },
+      },
     });
 
     expect(result).toBe(true);
@@ -190,13 +184,52 @@ describe("createNotification", () => {
     expect(insertPayload.title).toBe("You have a team invite");
   });
 
+  it("writes the English into title and body AND the keys into data.message", async () => {
+    adminDbFn.mockResolvedValueOnce({ error: null });
+    const message = {
+      title: INVITE_TITLE,
+      body: {
+        key: "Notifications.messages.teamInvite.body",
+        values: { store: "builderboy", role: "editor" },
+      },
+    } as const;
+
+    await createNotification({
+      userId: USER_ID,
+      type: "team",
+      message,
+      data: { href: "/settings/team" },
+    });
+
+    const insertPayload = adminDb.insert.mock.calls[0][0] as Record<string, unknown>;
+    expect(insertPayload.title).toBe(english(message.title));
+    expect(insertPayload.body).toBe(
+      "builderboy invited you to join as Editor. Open Team & access to accept.",
+    );
+    expect(insertPayload.data).toEqual({ href: "/settings/team", message });
+  });
+
+  it("a message without a body stores a null body", async () => {
+    adminDbFn.mockResolvedValueOnce({ error: null });
+
+    await createNotification({
+      userId: USER_ID,
+      type: "team",
+      message: { title: { key: "Notifications.messages.teamJoined.titleUnnamed" } },
+    });
+
+    const insertPayload = adminDb.insert.mock.calls[0][0] as Record<string, unknown>;
+    expect(insertPayload.title).toBe("A new member joined your team");
+    expect(insertPayload.body).toBeNull();
+  });
+
   it("DB insert error returns false (never throws)", async () => {
     adminDbFn.mockResolvedValueOnce({ error: { message: "DB error" } });
 
     const result = await createNotification({
       userId: USER_ID,
       type: "system",
-      title: "System notification",
+      message: { title: INVITE_TITLE },
     });
 
     expect(result).toBe(false);
@@ -206,7 +239,7 @@ describe("createNotification", () => {
     adminDbFn.mockRejectedValueOnce(new Error("unexpected"));
 
     await expect(
-      createNotification({ userId: USER_ID, type: "system", title: "Test" }),
+      createNotification({ userId: USER_ID, type: "system", message: { title: INVITE_TITLE } }),
     ).resolves.toBe(false);
   });
 });

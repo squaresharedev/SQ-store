@@ -1,5 +1,6 @@
 "use client";
 
+import { useLocale } from "next-intl";
 import {
   tooltipLabelClass,
   tooltipValueClass,
@@ -29,7 +30,7 @@ export function ChartTooltipContent({
   active,
   payload,
   label,
-  valueFormatter = formatNumber,
+  valueFormatter: valueFormatterProp,
   labelFormatter,
   colorFor,
 }: {
@@ -42,6 +43,9 @@ export function ChartTooltipContent({
    *  `color` on some mark types). */
   colorFor?: (key: string) => string | undefined;
 }) {
+  const locale = useLocale();
+  const valueFormatter =
+    valueFormatterProp ?? ((value: number) => formatNumber(value, locale));
   if (!active || !payload || payload.length === 0) return null;
   const heading =
     label === undefined

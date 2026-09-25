@@ -1,6 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, waitFor, cleanup } from "@testing-library/react";
+import { render, screen, waitFor, cleanup } from "../setup/render";
 import userEvent from "@testing-library/user-event";
+import { failed, invalidInput, succeeded } from "@/lib/errors";
+import { msg } from "@/i18n/types";
 
 afterEach(cleanup);
 
@@ -61,7 +63,7 @@ describe("LoginForm", () => {
   it("names the action under way rather than saying 'Working'", async () => {
     // Three modes share one button, so a generic label cannot be honest about
     // all of them, and the sign-in wait is ~1s of real credential checking.
-    let release: (value: { error: string }) => void = () => {};
+    let release: (value: object) => void = () => {};
     mockAuthenticate.mockImplementation(
       () => new Promise((resolve) => { release = resolve; }),
     );
@@ -77,7 +79,7 @@ describe("LoginForm", () => {
     );
     expect(screen.getByTestId("login-submit")).not.toHaveTextContent(/working/i);
 
-    release({ error: "done" });
+    release({});
   });
 
   // --- Identifier field (email or username) ---
@@ -211,7 +213,7 @@ describe("LoginForm", () => {
   // --- Error state ---
 
   it("error state renders in role=alert", async () => {
-    mockAuthenticate.mockResolvedValue({ error: "Invalid credentials" });
+    mockAuthenticate.mockResolvedValue(failed(invalidInput(msg("Errors.auth.badCredentials"))));
     const user = userEvent.setup();
     render(<LoginForm />);
 
@@ -220,11 +222,11 @@ describe("LoginForm", () => {
     await user.click(screen.getByTestId("login-submit"));
 
     const alert = await screen.findByRole("alert");
-    expect(alert).toHaveTextContent("Invalid credentials");
+    expect(alert).toHaveTextContent("Incorrect email or password.");
   });
 
   it("confirmation message renders when action returns a message", async () => {
-    mockAuthenticate.mockResolvedValue({ message: "Check your email." });
+    mockAuthenticate.mockResolvedValue(succeeded(msg("Auth.success.magicLinkSent")));
     const user = userEvent.setup();
     render(<LoginForm />);
 
@@ -236,7 +238,7 @@ describe("LoginForm", () => {
     await user.click(screen.getByRole("button", { name: /send magic link/i }));
 
     await waitFor(() => {
-      expect(screen.getByText("Check your email.")).toBeInTheDocument();
+      expect(screen.getByText("Check your email for a link to sign in.")).toBeInTheDocument();
     });
   });
 

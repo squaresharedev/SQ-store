@@ -1,46 +1,30 @@
 "use client";
 
-import { useActionState } from "react";
-import { Check, ChevronDown } from "lucide-react";
+import { useActionState, useId, useState, type ReactNode } from "react";
+import { Check } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { infoTextClass } from "@/components/ui/control-styles";
-import { useActionToast } from "@/components/ui/Toast";
+import { useActionStateToast, useSaveResult } from "@/components/ui/ActionErrorNotice";
 import { SaveButton } from "@/components/ui/SaveButton";
 import { SettingsCard } from "@/components/settings/SettingsCard";
-import { acceptLegal, type SettingsActionState } from "@/lib/settings/actions";
+import { TermsSummary } from "@/components/legal/TermsSummary";
+import { acceptLegal } from "@/lib/settings/actions";
+import type { ActionState } from "@/lib/errors";
+import { formatLongDate } from "@/lib/format/date";
 import { LEGAL_VERSION } from "@/lib/settings/constants";
 
-const INITIAL: SettingsActionState = {};
+const INITIAL: ActionState = {};
 
-// Placeholder drafts. REAL LEGAL COPY IS PENDING legal review. Swap the
-// bodies (and bump LEGAL_VERSION) when it lands.
-const DOCS = [
-  {
-    title: "Seller Agreement",
-    body: "You own your work, always. We take a small cut per sale, handle payments through Stripe, and keep the servers humming along. You keep it legal and ship what you actually sell. This is a draft placeholder; the real agreement is on its way.",
-  },
-  {
-    title: "Terms of Service",
-    body: "Don't abuse the platform, don't sell things that hurt people, and play nice with other creators' stores. This is a draft placeholder; the real terms are on their way.",
-  },
-  {
-    title: "Privacy Policy",
-    body: "We store what you give us (profile, products, storefront), never sell it, and delete it when you leave. Payments run through Stripe, so your card details stay with them, not us. This is a draft placeholder; the real policy is on its way.",
-  },
-  {
-    title: "Your seller details, and where they go",
-    body: "Your trader name, address and contact email are shown to buyers on your product pages, and are required before you can publish or sell anything. That is the only thing we do with them: EU consumer law says a buyer has to be able to see who they are buying from and reach them before they order. We send one link to your contact address so you can confirm it works, and that is the only email we send there on our own initiative — no list, no marketing, and we never sell or share any of it. Your phone number and VAT ID are optional and are shown only if you fill them in.",
-  },
-] as const;
-
-function formatDate(iso: string) {
-  // Fixed locale so server and client render identically.
-  return new Date(iso).toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-}
-
+/**
+ * Settings › Legal: the Terms of Service agreement on file, and the way to give
+ * it when there is none for the current version (a seller who skipped past the
+ * welcome before it asked, or Terms that changed since).
+ *
+ * The SAME summary and the same rule as the welcome flow's terms step
+ * (components/onboarding/WelcomeFlow.tsx): read to the end, then "I have read
+ * and agree to the Terms", recorded by acceptLegal with the time and version.
+ * Two places that record one agreement must ask for it the same way.
+ */
 export function LegalSection({
   acceptedAt,
   acceptedVersion,
@@ -48,72 +32,70 @@ export function LegalSection({
   acceptedAt: string | null;
   acceptedVersion: string | null;
 }) {
+  const t = useTranslations("Settings.legal");
+  const locale = useLocale();
   const [state, formAction, isPending] = useActionState(acceptLegal, INITIAL);
-  useActionToast(state);
+  const versionTag = (chunks: ReactNode) => (
+    <span className="font-mono text-xs">{chunks}</span>
+  );
+  useActionStateToast(state);
+  const saveResult = useSaveResult(state);
+  const [read, setRead] = useState(false);
+  const hintId = useId();
   const isCurrent = acceptedAt !== null && acceptedVersion === LEGAL_VERSION;
   const isOutdated = acceptedAt !== null && !isCurrent;
 
   return (
     <SettingsCard
-      title="Seller Agreement, Terms & Privacy"
-      description="The current drafts, in plain language, because nobody reads legalese for fun. Real legal copy is on its way; accepting now covers this draft version."
+      title={t("termsTitle")}
+      description={t("termsDescription")}
     >
       <div className="flex flex-col gap-4">
-        {/* NOTE ON LEGAL EFFECT: acceptance is recorded (version + timestamp)
-            but not yet checked anywhere in the app. Under GDPR and consumer
-            law a gating flow you never enforce is worse than none, because it
-            creates a record of consent without any real checkpoint behind it.
-            Do not add gating logic here until the real legal copy lands and the
-            product decides what accepting actually unlocks. */}
-        <div className="flex flex-col divide-y divide-border border border-border">
-          {DOCS.map((doc) => (
-            <details key={doc.title} className="group/doc">
-              {/* The chevron rotates open/closed via group-open/doc, giving the
-                  <details> a visible and recognisable disclosure affordance.
-                  list-none removes the browser's own triangle so we can control
-                  its placement and style. */}
-              <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-sm font-medium text-foreground transition-colors duration-base ease-standard hover:bg-accent group-open/doc:bg-accent motion-reduce:transition-none">
-                {doc.title}
-                <ChevronDown
-                  aria-hidden
-                  className="size-4 shrink-0 text-muted-foreground transition-transform duration-base ease-standard group-open/doc:rotate-180 motion-reduce:transition-none"
-                />
-              </summary>
-              <p className="px-4 pb-4 font-inter text-sm leading-relaxed text-muted-foreground">
-                {doc.body}
-              </p>
-            </details>
-          ))}
-        </div>
+        <TermsSummary onReadToEnd={() => setRead(true)} />
 
         {isCurrent ? (
-          <p className="flex items-start gap-2 border border-border bg-accent px-4 py-3 text-sm text-foreground">
+          <p
+            className="flex items-start gap-2 border border-border bg-accent px-4 py-3 text-sm text-foreground"
+            data-terms-agreed
+          >
             <Check aria-hidden className="mt-0.5 size-4 shrink-0 text-success" />
             <span>
-              You accepted version{" "}
-              <span className="font-mono text-xs">{acceptedVersion}</span> on{" "}
-              {formatDate(acceptedAt)}. Nothing more to do here.
+              {t.rich("agreed", {
+                version: acceptedVersion,
+                date: formatLongDate(acceptedAt, locale),
+                code: versionTag,
+              })}
             </span>
           </p>
         ) : (
           <form action={formAction} className="flex flex-col gap-4">
             {isOutdated && (
               <p className="border border-border bg-accent px-4 py-3 font-inter text-sm text-muted-foreground">
-                You accepted version{" "}
-                <span className="font-mono text-xs">{acceptedVersion}</span> on{" "}
-                {formatDate(acceptedAt)}, but the docs have changed since. Give
-                them another read and accept the current version.
+                {t.rich("agreedOutdated", {
+                  version: acceptedVersion ?? "",
+                  date: formatLongDate(acceptedAt, locale),
+                  code: versionTag,
+                })}
               </p>
             )}
             <input type="hidden" name="version" value={LEGAL_VERSION} />
-            <div className="flex flex-col gap-2">
-              <SaveButton pending={isPending} state={state} pendingLabel="Recording…">
-                I accept
+            <div className="flex flex-col items-start gap-2">
+              <SaveButton
+                pending={isPending}
+                state={saveResult}
+                pendingLabel={t("recording")}
+                disabled={!read}
+                aria-describedby={hintId}
+              >
+                {t("agreeButton")}
               </SaveButton>
-              <p className={infoTextClass}>
-                Accepting records the date and version{" "}
-                <span className="font-mono">{LEGAL_VERSION}</span> to your
-                account.
+              <p id={hintId} className={infoTextClass} aria-live="polite">
+                {read
+                  ? t.rich("agreeNote", {
+                      version: LEGAL_VERSION,
+                      code: (chunks) => <span className="font-mono">{chunks}</span>,
+                    })
+                  : t("scrollToAgree")}
               </p>
             </div>
           </form>

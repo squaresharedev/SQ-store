@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useTranslations } from "next-intl";
 import {
   ChevronDown,
   GripVertical,
@@ -151,6 +152,9 @@ export function LayersPanel({
   onMoveTo: (key: string, index: number) => void;
   onBack: () => void;
 }) {
+  const tKey = useTranslations();
+  const t = useTranslations("Storefront.layers");
+
   // Front first, which is the opposite of the paint order underneath.
   const ordered = useMemo(
     () => layerOrder([...blocks]).reverse(),
@@ -256,21 +260,21 @@ export function LayersPanel({
   return (
     <div>
       <PanelBackRow
-        title="Layers"
-        ariaLabel="Back to the selected block, leaving Layers"
+        title={t("title")}
+        ariaLabel={t("backAriaLabel")}
         onBack={onBack}
       />
 
       {total === 0 ? (
         <p className={cn(infoTextClass, "px-0 py-4 lg:px-4")}>
-          Nothing on the canvas yet. Blocks appear here as you add them.
+          {t("empty")}
         </p>
       ) : (
         <>
           <ul
             // Depth is the ONLY thing this list orders by, and the board's
             // reading order is untouched by everything in it.
-            aria-label="Canvas layers, front to back"
+            aria-label={t("listAriaLabel")}
             className="relative"
           >
             {ordered.map((block, index) => {
@@ -279,7 +283,7 @@ export function LayersPanel({
               const isOpen = expanded === key;
               const grabbed = drag?.key === key && !drag.idle;
               const shift = rowShift(index);
-              const label = blockLabel(block, productsById);
+              const label = blockLabel(block, productsById, tKey);
               return (
                 <li
                   key={key}
@@ -305,8 +309,8 @@ export function LayersPanel({
                         reachable at all by keyboard. */}
                     <button
                       type="button"
-                      aria-label={`Reorder ${label}`}
-                      title="Drag to reorder"
+                      aria-label={t("reorderLabel", { label })}
+                      title={t("dragToReorder")}
                       onPointerDown={(event) => startDrag(event, index)}
                       onPointerMove={moveDrag}
                       onPointerUp={endDrag}
@@ -358,7 +362,7 @@ export function LayersPanel({
                           {label}
                         </span>
                         <span className={cn(infoTextClass, "truncate")}>
-                          {BLOCK_KIND_LABELS[block.type]}
+                          {tKey(BLOCK_KIND_LABELS[block.type])}
                         </span>
                       </span>
                     </button>
@@ -367,7 +371,7 @@ export function LayersPanel({
                       type="button"
                       onClick={() => setExpanded(isOpen ? null : key)}
                       aria-expanded={isOpen}
-                      aria-label={`${isOpen ? "Hide" : "Show"} layer options for ${label}`}
+                      aria-label={isOpen ? t("hideOptions", { label }) : t("showOptions", { label })}
                       className={cn(
                         "flex size-8 shrink-0 items-center justify-center rounded-none",
                         "text-muted-foreground hover:bg-accent hover:text-foreground",
@@ -392,23 +396,23 @@ export function LayersPanel({
                         {/* Counted from the BACK, the way the four buttons and
                             the placement readout already count, so the two
                             never disagree about which layer this is. */}
-                        Layer {total - index} of {total}
+                        {t("layerOf", { index: total - index, total })}
                       </span>
                       <div
                         role="group"
-                        aria-label={`Move ${label}`}
+                        aria-label={t("moveGroup", { label })}
                         className="flex gap-1"
                       >
                         {/* Same four glyphs as the placement panel, so they
                             carry the same hover label — the tooltip names the
                             action alone, since the row it is sitting in has
                             already said which block. */}
-                        {LAYER_CONTROLS.map(({ op, label: action, icon: Icon, end }) => (
-                          <Tooltip key={op} label={action}>
+                        {LAYER_CONTROLS.map(({ op, icon: Icon, end }) => (
+                          <Tooltip key={op} label={t(`layerOp.${op}`)}>
                             <button
                               type="button"
                               onClick={() => onReorder(key, op)}
-                              aria-label={`${action}: ${label}`}
+                              aria-label={t(`layerOpFor.${op}`, { label })}
                               disabled={
                                 end === "front" ? index === 0 : index === total - 1
                               }
@@ -455,6 +459,7 @@ const SERVER_MODIFIER = () => "Ctrl";
  * client disagree, on purpose" case React built that hook's third argument for.
  */
 function ShortcutHint() {
+  const t = useTranslations("Storefront.layers");
   const mod = useSyncExternalStore(
     NEVER_CHANGES,
     readModifier,
@@ -462,8 +467,7 @@ function ShortcutHint() {
   );
   return (
     <p className={cn(infoTextClass, "py-3 lg:px-4")}>
-      {mod} + [ and {mod} + ] move the selection one layer. Add Shift to send it
-      all the way.
+      {t("shortcutHint", { mod })}
     </p>
   );
 }

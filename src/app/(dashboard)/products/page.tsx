@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { pageShellClass } from "@/components/ui/surface-styles";
 import {
   PRODUCTS_DEFAULT_PAGE_SIZE,
@@ -12,9 +13,10 @@ import { PRODUCT_STATUSES, type ProductFilters, type ProductStatus } from "@/typ
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
 
-export const metadata: Metadata = {
-  title: "Products",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Products.metadata.list");
+  return { title: t("title") };
+}
 
 // PROTECTED by (dashboard)/layout.tsx. Reads are account-scoped (session +
 // RLS). Status/sort/page live in the URL so views are shareable and
@@ -69,6 +71,7 @@ export default async function ProductsPage({
     getProductPlacements(),
   ]);
   const canWrite = can(account?.role, "products.write");
+  const t = await getTranslations("Products.page");
 
   return (
     <main className={pageShellClass}>
@@ -84,7 +87,7 @@ export default async function ProductsPage({
         heading={
           <div>
             <h1 className="text-3xl font-semibold text-foreground md:text-4xl">
-              Products
+              {t("heading")}
             </h1>
           </div>
         }

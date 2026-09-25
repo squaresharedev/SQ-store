@@ -1,0 +1,252 @@
+{
+  "steps": {
+    "seller": {
+      "label": "Verkäuferangaben hinzufügen",
+      "detail": "Dein Händlername, deine Adresse und deine Kontakt-E-Mail erscheinen auf jeder Produktseite.",
+      "detailDone": "Käufer können sehen, von wem sie kaufen.",
+      "detailUnconfirmed": "Öffne den Link, den wir dir per E-Mail geschickt haben, um deine Kontakt-E-Mail zu bestätigen.",
+      "action": "Details hinzufügen",
+      "actionUnconfirmed": "E-Mail bestätigen",
+      "cta": "Verkäuferangaben hinzufügen",
+      "ctaUnconfirmed": "E-Mail bestätigen"
+    },
+    "product": {
+      "label": "Ein Produkt hinzufügen",
+      "detail": "Ein Titel und ein Preis reichen. Es kann vorerst ein Entwurf bleiben.",
+      "detailDone": "{count, plural, one {Du hast {count} Produkt.} other {Du hast {count} Produkte.}}",
+      "action": "Produkt hinzufügen",
+      "cta": "Dein erstes Produkt hinzufügen"
+    },
+    "storefront": {
+      "label": "Ein Produkt auf ein Schaufenster legen",
+      "detailDone": "Ein Produkt ist auf deinem Schaufenster.",
+      "detailNone": "Erstelle ein Schaufenster und füge dann ein Produkt zu seinem Raster hinzu.",
+      "detailEmpty": "Öffne dein Schaufenster und wähle „Produkt hinzufügen“ in der Werkzeugleiste.",
+      "actionCreate": "Schaufenster erstellen",
+      "actionOpen": "Designer öffnen",
+      "cta": "Dein Schaufenster öffnen",
+      "ctaCreate": "Ein Schaufenster erstellen"
+    },
+    "publish": {
+      "label": "Seite veröffentlichen",
+      "detailDone": "Deine Produktseite ist online.",
+      "detailNeedsSeller": "Vervollständige deine Verkäuferangaben, damit deine Seite online gehen kann.",
+      "detailNeedsStorefront": "Sobald ein Produkt auf einem Schaufenster ist, kann seine Seite online gehen.",
+      "detailNeedsActive": "Setze dieses Produkt auf Aktiv, damit seine Seite online geht.",
+      "detailPagesOff": "Produktseiten sind auf diesem Schaufenster deaktiviert. Schalte sie im Designer ein.",
+      "actionEdit": "Produkt bearbeiten",
+      "actionOpen": "Designer öffnen",
+      "cta": "Dein Produkt veröffentlichen",
+      "ctaPagesOff": "Produktseiten einschalten"
+    }
+  },
+  "checklist": {
+    "titleDone": "Du bist eingerichtet",
+    "title": "Einrichten",
+    "showMeAround": "Zeig mir alles",
+    "showSteps": "Schritte anzeigen",
+    "hideSteps": "Schritte ausblenden",
+    "liveHint": "Deine erste Produktseite ist online. Teile den Link überall.",
+    "copyLink": {
+      "copy": "Link zur Produktseite kopieren",
+      "copied": "Link zur Produktseite kopiert",
+      "failed": "Link zur Produktseite konnte nicht kopiert werden. Wähle ihn aus und kopiere ihn manuell."
+    },
+    "openPage": "Seite öffnen",
+    "opensInNewTab": " (öffnet in einem neuen Tab)",
+    "hide": "Ausblenden",
+    "progressLabel": "Einrichtungsfortschritt",
+    "progress": "{total, plural, one {{done} von {total} erledigt} other {{done} von {total} erledigt}}",
+    "stepDone": " (erledigt)",
+    "stepToDo": " (zu erledigen)"
+  },
+  "welcome": {
+    "steps": {
+      "welcome": {
+        "title": "Willkommen bei Square Share",
+        "description": "Vier Schritte zu einer Produktseite, die du teilen kannst."
+      },
+      "path": {
+        "title": "Vier Schritte bis zu deiner ersten Seite"
+      },
+      "seller": {
+        "title": "Verkäuferangaben hinzufügen",
+        "description": "Käufer sehen diese auf deinen Produktseiten, und das Gesetz verlangt sie, bevor du verkaufen kannst. Wir nutzen sie nie für Marketing.",
+        "lawNote": "Käufer sehen diese Angaben auf deinen Produktseiten, wie es das Gesetz verlangt. Sie werden nie für Marketing verwendet."
+      },
+      "tour": {
+        "title": "Wo alles zu finden ist",
+        "description": "Alles befindet sich in der Seitenleiste. Hier ist, wofür jeder Teil gedacht ist."
+      },
+      "terms": {
+        "title": "Unsere Nutzungsbedingungen",
+        "description": "Lies die Kurzfassung oder die vollständigen Bedingungen und stimme dann zu, um fortzufahren."
+      }
+    },
+    "progress": "{total, plural, one {Schritt {step} von {total}} other {Schritt {step} von {total}}}",
+    "intro": "Jedes Produkt, das du verkaufst, kann eine eigene Seite haben, gestaltet von einem Schaufenster, das du selbst designst.",
+    "tagline": "Gib jedem Produkt seine eigene Seite und teile sie überall.",
+    "path": {
+      "seller": {
+        "title": "Verkäuferangaben hinzufügen",
+        "body": "Käufer müssen wissen, von wem sie kaufen."
+      },
+      "product": {
+        "title": "Ein Produkt hinzufügen",
+        "body": "Ein Titel, ein Preis und ein Foto, falls du eines hast."
+      },
+      "storefront": {
+        "title": "Es auf ein Schaufenster legen",
+        "body": "Wähle einen Look, dann platziere das Produkt im Raster."
+      },
+      "share": {
+        "title": "Seite teilen",
+        "body": "Füge den Link in deine Bio, eine Nachricht oder deine eigene Website ein."
+      }
+    },
+    "seller": {
+      "namePlaceholder": "z. B. Studio Builderboy e.U.",
+      "nameHelp": "Dein Firmenname oder dein vollständiger Name, wenn du als Privatperson verkaufst.",
+      "nameAlternative": "Oder dein vollständiger Name, wenn du unter eigenem Namen verkaufst.",
+      "addressPlaceholder": "z. B. Musterstraße 12\n10115 Berlin\nDeutschland",
+      "emailPlaceholder": "z. B. hallo@deinshop.example",
+      "emailHelp": "Wohin Käufer dir schreiben. Diese kann sich von deiner Anmelde-E-Mail unterscheiden."
+    },
+    "confirm": {
+      "check": "Prüfe {email} auf einen Bestätigungslink.",
+      "goLive": "Deine Produktseiten gehen online, sobald du ihn öffnest.",
+      "sendNewLink": "Neuen Link senden"
+    },
+    "tour": {
+      "mobileMenu": "Öffne auf deinem Telefon das Menü oben links.",
+      "searchShortcut": "Suchst du etwas? Drücke <kbd>{shortcut}</kbd>, um alles zu durchsuchen.",
+      "searchNoShortcut": "Suchst du etwas? Die Suche findet jede Seite und Einstellung.",
+      "searchMobile": "Suchst du etwas? Tippe oben auf Suche."
+    },
+    "nav": {
+      "skipOnboarding": "Einführung überspringen",
+      "next": "Weiter",
+      "showMeAround": "Zeig mir alles",
+      "skipIntro": "Einführung überspringen",
+      "getStarted": "Loslegen",
+      "skipForNow": "Vorerst überspringen",
+      "saveAndContinue": "Speichern und fortfahren",
+      "changeDetails": "Details ändern",
+      "continue": "Weiter",
+      "exploreOnMyOwn": "Selbst erkunden",
+      "notNow": "Nicht jetzt"
+    },
+    "hero": {
+      "buyNow": "Jetzt kaufen",
+      "live": "Online",
+      "linkCopied": "Link kopiert"
+    },
+    "setupPath": {
+      "details": "Deine Angaben ergänzen",
+      "product": "Ein Produkt hinzufügen",
+      "storefront": "Ein Schaufenster gestalten",
+      "share": "Seite teilen"
+    },
+    "terms": {
+      "agreed": "Du hast diesen Bedingungen zugestimmt. Danke fürs Lesen.",
+      "agreeNote": "Mit deiner Zustimmung werden Datum und diese Version der Bedingungen in deinem Konto gespeichert."
+    }
+  },
+  "tourOverlay": {
+    "dialogLabel": "Geführte Tour",
+    "progress": "{total, plural, other {{current} von {total}}}",
+    "shortcut": "Tastenkürzel: <kbd>{shortcut}</kbd>",
+    "skipTour": "Tour überspringen",
+    "next": "Weiter",
+    "openingPage": "{page, select, overview {Übersicht wird geöffnet…} products {Produkte werden geöffnet…} storefront {Schaufenster wird geöffnet…} orders {Bestellungen werden geöffnet…} analytics {Analysen werden geöffnet…} payments {Zahlungen werden geöffnet…} settings {Einstellungen werden geöffnet…} sampleStorefront {Beispiel-Schaufenster wird geöffnet…} other {Wird geöffnet…}}"
+  },
+  "tourReplay": {
+    "title": "Geführte Tour",
+    "description": "Ein kurzer Rundgang durch das Wichtigste auf jeder Seite, Schritt für Schritt.",
+    "start": "Tour starten"
+  },
+  "guidedTour": {
+    "steps": {
+      "overviewNav": {
+        "title": "Finde dich zurecht",
+        "body": "Alles in deinem Shop ist im Menü nur einen Klick entfernt. Die Tour hält bei dem Wichtigsten auf jeder Seite an.",
+        "bodySidebar": "Alles in deinem Shop ist in dieser Seitenleiste nur einen Klick entfernt. Die Tour hält bei dem Wichtigsten auf jeder Seite an.",
+        "bodyMenu": "Alles in deinem Shop findest du hinter diesem Menü. Die Tour hält bei dem Wichtigsten auf jeder Seite an."
+      },
+      "search": {
+        "title": "Suche nach allem",
+        "body": "Die Suche springt direkt zu jeder Seite, jedem Produkt, jeder Bestellung und jeder Einstellung.",
+        "bodyTopBar": "Springe direkt zu jeder Seite, jedem Produkt, jeder Bestellung und jeder Einstellung.",
+        "bodyPhone": "Tippe hier, um direkt zu jeder Seite, jedem Produkt, jeder Bestellung und jeder Einstellung zu springen."
+      },
+      "productsAdd": {
+        "title": "Ein Produkt hinzufügen",
+        "body": "Ein Titel und ein Preis reichen zum Start. Es kann ein Entwurf bleiben, bis du bereit bist."
+      },
+      "productsImport": {
+        "title": "Oder importiere deinen Katalog",
+        "body": "Du verkaufst schon woanders? Importiere eine CSV-Datei. Ein Shopify-Export funktioniert unverändert."
+      },
+      "storefrontCreate": {
+        "title": "Ein Schaufenster erstellen",
+        "body": "Ein Schaufenster ist ein Raster, das du selbst gestaltest. Jedes Produkt, das du darauf platzierst, bekommt eine Seite, die du teilen kannst."
+      },
+      "storefrontSample": {
+        "title": "Sieh, wie es geht",
+        "body": "Dieses Beispiel zeigt ein fertiges Schaufenster. Öffne es, um den Editor auszuprobieren. Nichts, was du dort änderst, wird gespeichert.",
+        "fallbackBody": "Öffne ein Schaufenster, um es zu gestalten."
+      },
+      "storefrontEmbed": {
+        "title": "Ein Schaufenster auf deiner Website einbetten",
+        "body": "Jedes Schaufenster hat einen Einbetten-Button, der dir einen Code wie diesen gibt. Das Widget ist noch in Entwicklung und wird auf anderen Websites noch nicht angezeigt.",
+        "bodyButton": "Dieser Button gibt dir einen Code wie den darunter, den du in deine Website einfügst. Das Widget ist noch in Entwicklung und wird auf anderen Websites noch nicht angezeigt.",
+        "fallbackBody": "Sobald du ein Schaufenster hast, gibt dir der Einbetten-Button auf seiner Kachel einen Code wie diesen. Das Widget ist noch in Entwicklung und wird auf anderen Websites noch nicht angezeigt."
+      },
+      "ordersSearch": {
+        "title": "Eine Bestellung finden",
+        "body": "Suche nach der E-Mail-Adresse des Käufers. Bestellungen erscheinen hier, sobald der Square Share Checkout startet."
+      },
+      "ordersFilters": {
+        "title": "Filtern und sortieren",
+        "body": "Grenze Bestellungen nach Kanal, Status oder Datum ein und wähle, wie sie sortiert werden."
+      },
+      "analytics": {
+        "title": "Sieh, wie es läuft",
+        "body": "Verkäufe und Besuche deiner Produktseiten, für den Zeitraum deiner Wahl.",
+        "bodyRange": "Verkäufe und Besuche deiner Produktseiten, für den Zeitraum, den du hier auswählst.",
+        "bodyFirstRun": "Verkäufe und Besuche deiner Produktseiten erscheinen hier, sobald eine online ist."
+      },
+      "payments": {
+        "title": "Geld erhalten",
+        "bodyConnect": "Verbinde hier Stripe, damit Auszahlungen direkt auf dein Bankkonto gehen.",
+        "bodyComingSoon": "Zahlungen über Stripe kommen bald. Bis dahin zahlen Käufer dich über den Kauflink deines Produkts oder per E-Mail."
+      },
+      "finish": {
+        "title": "Die Tour jederzeit wiederholen",
+        "body": "Das war die Tour. Du kannst sie von hier aus jederzeit neu starten."
+      }
+    }
+  },
+  "editorTour": {
+    "steps": {
+      "editorAdd": {
+        "title": "Zu deinem Raster hinzufügen",
+        "body": "Füge über diese Leiste Produkte, Text und Formen hinzu. Ziehe etwas auf dem Raster, um es zu verschieben, und zieh an einer Ecke, um die Größe zu ändern."
+      },
+      "editorDesign": {
+        "title": "Den Look festlegen",
+        "body": "Farben, Schriftarten, der Kopfbereich und das Aussehen der Produktkacheln werden einmal für das ganze Schaufenster festgelegt.",
+        "bodyPanel": "Farben, Schriftarten, der Kopfbereich und das Aussehen der Produktkacheln werden hier einmal für das ganze Schaufenster festgelegt.",
+        "bodyButton": "Tippe hier für Farben, Schriftarten, den Kopfbereich und das Aussehen der Produktkacheln, einmal für das ganze Schaufenster festgelegt."
+      },
+      "editorPage": {
+        "title": "Jedes Produkt bekommt eine Seite",
+        "body": "Jedes Produkt auf dem Raster hat eine eigene Seite zum Teilen. Öffne hier eine, um sie anzusehen und zu gestalten."
+      },
+      "editorFinish": {
+        "title": "Mach es zu deinem",
+        "body": "Das Beispiel wird nie gespeichert, probiere also alles aus. Wenn du bereit bist, erstelle dein eigenes Schaufenster."
+      }
+    }
+  }
+}

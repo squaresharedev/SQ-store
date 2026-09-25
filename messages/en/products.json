@@ -1,0 +1,526 @@
+{
+  "metadata": {
+    "list": {
+      "title": "Products"
+    },
+    "new": {
+      "title": "New product"
+    },
+    "edit": {
+      "title": "Edit product"
+    },
+    "import": {
+      "title": "Import products"
+    }
+  },
+  "page": {
+    "heading": "Products",
+    "loading": "loading products",
+    "back": "Products",
+    "backToStorefront": "Storefront",
+    "new": {
+      "title": "New product",
+      "subtitle": "Add a product, then place it on a storefront to give it a page."
+    },
+    "edit": {
+      "title": "Edit product",
+      "subtitle": "Update the details, image, or file for this product."
+    },
+    "import": {
+      "heading": "Import products",
+      "description": "Bring a catalogue over from Shopify, or any tool that exports a CSV. You will see exactly what lands before anything is saved."
+    },
+    "formLoading": "Loading the product form"
+  },
+  "emptyState": {
+    "title": "No products yet",
+    "descriptionWriter": "Add your first product. It can stay a draft until you're ready to give it a page.",
+    "descriptionReadOnly": "This store has no products yet.",
+    "add": "Add product"
+  },
+  "status": {
+    "active": "Active",
+    "draft": "Draft"
+  },
+  "browser": {
+    "sort": {
+      "default": "Newest first",
+      "unitsSold": "Units sold",
+      "revenue": "Total value sold",
+      "priceHigh": "Price: high to low",
+      "priceLow": "Price: low to high",
+      "title": "Name: A–Z"
+    },
+    "allStatuses": "All statuses",
+    "filterLabel": "Sort and filter products",
+    "sortResting": "Sort",
+    "statusSection": "Status",
+    "sortSection": "Sort by",
+    "clear": "Clear",
+    "import": "Import",
+    "add": "Add product",
+    "updating": "Updating…",
+    "pagination": "{total, plural, one {{total} product · page {page} of {pages}} other {{total} products · page {page} of {pages}}}"
+  },
+  "list": {
+    "noMatch": {
+      "title": "No products match these filters",
+      "body": "Pick a different status, or clear the filters to see everything again.",
+      "clear": "Clear filters"
+    },
+    "deleted": "\"{title}\" was deleted.",
+    "linkCopied": "Link copied.",
+    "copyFailed": "Could not copy.",
+    "copyFailedUrl": "The URL is: {url}",
+    "notOnStorefront": "This product is not on any storefront yet.",
+    "deleteDialog": {
+      "title": "Delete this product?",
+      "description": "{storefronts, plural, =0 {\"{title}\" and its uploaded image and file will be permanently removed. Existing orders keep their record of the sale.} one {\"{title}\" and its uploaded image and file will be permanently removed. Existing orders keep their record of the sale. It is on {storefronts} storefront. The block stays until you remove it.} other {\"{title}\" and its uploaded image and file will be permanently removed. Existing orders keep their record of the sale. It is on {storefronts} storefronts. The blocks stay until you remove them.}}",
+      "confirm": "Delete product"
+    },
+    "chooser": {
+      "openTitle": "Open on which storefront?",
+      "copyTitle": "Copy link for which storefront?",
+      "description": "{count, plural, one {\"{title}\" is on {count} storefront. Pick one.} other {\"{title}\" is on {count} storefronts. Pick one.}}",
+      "hint": "Or cancel and use the storefront designer to choose a default."
+    }
+  },
+  "card": {
+    "inStock": "{count, plural, one {{count} in stock} other {{count} in stock}}",
+    "bestseller": "Bestseller",
+    "edit": "Edit {title}",
+    "actions": "{title} actions",
+    "moreActions": "More actions for {title}",
+    "notPlaced": "Not on a storefront yet",
+    "copyLinkTitle": "Copy product page link",
+    "chooseStorefront": "{count, plural, one {On {count} storefront, click to choose} other {On {count} storefronts, click to choose}}",
+    "copyLink": "Copy product link",
+    "openPage": "Open product page",
+    "unitsSold": "{count, plural, one {{count} sold} other {{count} sold}}",
+    "noSales": "No sales yet"
+  },
+  "removal": {
+    "badge": "Removed",
+    "badgePaused": "Paused",
+    "title": "{kind, select, product {This product was removed by SquareShare} other {This storefront was removed by SquareShare}}",
+    "titlePaused": "{kind, select, product {This product is paused until you change it} other {This storefront is paused until you change it}}",
+    "hidden": "It is no longer visible to buyers anywhere: not on its page, not in an embed, not in a shared link.",
+    "hiddenPaused": "Buyers cannot see it right now: not on its page, not in an embed, not in a shared link. Nothing has been deleted, and it comes back once a person has checked your changes.",
+    "hiddenRemoved": "It is no longer visible to buyers anywhere: not on its page, not in an embed, not in a shared link. This is final, so editing it will not bring it back.",
+    "reason": "Reason",
+    "whatNeedsToChange": "What needs to change",
+    "when": "When",
+    "pausedOn": "Paused on",
+    "statement": "{ground, select, illegal {Illegal goods or activity. It offered something that cannot be sold legally, or used the listing to arrange it.} sexual {Sexual content. It contained explicit sexual content.} violence {Violence or gore. It contained graphic violence.} hate {Hate or harassment. It attacked a person or group, or carried hate symbolism.} counterfeit {Counterfeit or stolen. It appeared to offer counterfeit goods, or work that belongs to someone else.} scam {Scam or fraud. It appeared designed to take payment without delivering what was promised.} spam {Spam. It was repetitive or misleading rather than a genuine listing.} other {Something else. It broke the platform rules.}}{noted, select, yes { {note}} other {}}",
+    "statementUnlabelled": "It broke the platform rules.{noted, select, yes { {note}} other {}}",
+    "fixHint": "{kind, select, product {Edit the product below to fix this, save it, then send it back to us.} other {Open the storefront to fix this, then come back here and send it to us.}}",
+    "readOnlyHint": "{kind, select, product {Someone who can edit this product has to make the change and send it for review.} other {Someone who can edit this storefront has to make the change and send it for review.}}",
+    "appeal": "{kind, select, product {You can still edit this product. Editing does not put it back: <link>ask us to look again</link> if you think this was wrong.} other {You can still edit this storefront. Editing does not put it back: <link>ask us to look again</link> if you think this was wrong.}}",
+    "appealPaused": "Think this is a mistake? <link>Write to us</link>.",
+    "appealFinal": "If you think we got this wrong, <link>ask us to look again</link>.",
+    "appealSubject": "{kind, select, product {Appeal: product removal ({title})} other {Appeal: storefront removal ({title})}}",
+    "appealBody": "{kind, select, product {I would like this product reviewed again.\n\nProduct id: {id}\nName: {title}\n\nWhy I think this was wrong:\n} other {I would like this storefront reviewed again.\n\nStorefront id: {id}\nName: {title}\n\nWhy I think this was wrong:\n}}",
+    "reviewRequest": {
+      "button": "I've made the changes, review it",
+      "sent": "Sent for review on <time>{date}</time>. A person will look at your changes, and you will hear back here and by email.",
+      "failed": "That could not be sent.",
+      "failedFix": "Try again in a moment."
+    }
+  },
+  "import": {
+    "fields": {
+      "title": "Title",
+      "description": "Description",
+      "price": "Price",
+      "sku": "SKU",
+      "stock": "Stock"
+    },
+    "fileTooLarge": "That file is {size}. Import files up to {max}.",
+    "fileEmpty": "That file is empty.",
+    "imported": "{count, plural, one {{count} product was imported.} other {{count} products were imported.}}",
+    "skippedRows": "{count, plural, one {{count} row was skipped.} other {{count} rows were skipped.}}",
+    "dropPrompt": "Drop a CSV or click to choose one",
+    "fileMeta": "{size} · choose another to start over",
+    "rowsLimit": "{max, plural, one {Up to {max} product per file} other {Up to {max} products per file}}",
+    "summary": "{shopify, select, yes {{ready, plural, one {Shopify export. <count>{ready}</count> product ready} other {Shopify export. <count>{ready}</count> products ready}}} other {{ready, plural, one {<count>{ready}</count> product ready} other {<count>{ready}</count> products ready}}}}{skipped, plural, =0 {.} other {, {skipped} skipped.}}",
+    "foldedVariants": "{count, plural, one {{count} variant row folded into the products above them. Add sizes and colours after importing.} other {{count} variant rows folded into the products above them. Add sizes and colours after importing.}}",
+    "droppedRows": "{count, plural, one {{count} row is past the {max}-product limit and will not be imported. Split the file to bring it in.} other {{count} rows are past the {max}-product limit and will not be imported. Split the file to bring them in.}}",
+    "photosNotImported": "Photos are not imported. Prices, stock and descriptions come across; add the pictures once the products are here.",
+    "currency": "Currency",
+    "currencyHelp": "Every imported product is priced in this.",
+    "importAs": "Import as",
+    "asDrafts": "Drafts",
+    "asLive": "Live products",
+    "draftsHint": "Nothing goes live until you publish it.",
+    "liveHint": "These appear in your store straight away.",
+    "columns": "Columns",
+    "needed": "(needed)",
+    "notSet": "Not set",
+    "skip": "Skip",
+    "columnFallback": "Column {number}",
+    "previewHeading": "What will be imported",
+    "previewTitle": "Title",
+    "previewPrice": "Price",
+    "previewStock": "Stock",
+    "notTracked": "Not tracked",
+    "andMore": "{count, plural, one {and {count} more.} other {and {count} more.}}",
+    "skippedHeading": "Rows that will be skipped",
+    "skippedRow": "{titled, select, yes {Line {line} ({title}): {problem}} other {Line {line}: {problem}}}",
+    "importing": "Importing…",
+    "importedLabel": "Imported",
+    "run": "{count, plural, one {Import {count} product} other {Import {count} products}}",
+    "clear": "Clear"
+  },
+  "form": {
+    "sections": {
+      "basics": {
+        "label": "Basics",
+        "description": "What you are selling, in your words — and what it costs.",
+        "about": "What Basics is for"
+      },
+      "stock": {
+        "label": "Stock",
+        "description": "Unlimited by default. Track it to stop overselling and show buyers sold-out and “Only N left” badges. The alert number is when that second badge appears. The order limit is separate: it caps how many one buyer can take at once, tracked or not.",
+        "about": "What Stock is for"
+      },
+      "media": {
+        "label": "Media and delivery"
+      },
+      "shipping": {
+        "label": "Shipping",
+        "description": "Written once for your whole store, not per product. Pick a profile only if this one ships differently.",
+        "about": "What Shipping is for"
+      },
+      "options": {
+        "label": "Options",
+        "description": "Colours, sizes, power outputs — however this product varies. Buyers pick one of each.",
+        "about": "What Options is for"
+      },
+      "photos": {
+        "label": "Photos",
+        "description": "More angles for the product page. Drop photos onto an option to show them only for it.",
+        "about": "What Photos is for"
+      },
+      "specs": {
+        "label": "Specifications",
+        "description": "Dimensions, materials and specifications for the product page.",
+        "about": "What Specifications is for"
+      },
+      "documents": {
+        "label": "Documents",
+        "description": "Certificates, manuals, or spec sheets buyers and regulators can check before buying.",
+        "about": "What Documents is for"
+      },
+      "safety": {
+        "label": "Safety and compliance",
+        "description": "Who made it and how to reach them. EU product-safety law asks for this on physical goods.",
+        "about": "What Safety and compliance is for"
+      },
+      "visibility": {
+        "label": "Visibility",
+        "description": "Active is live: buyers can see it and buy it right away. Draft is hidden from buyers until you switch it.",
+        "about": "What Visibility is for"
+      }
+    },
+    "summary": {
+      "dimensions": "Dimensions",
+      "weight": "Weight",
+      "materials": "Materials",
+      "care": "Care",
+      "contents": "Contents",
+      "specs": "Specs",
+      "madeIn": "Made in",
+      "versions": "{count, plural, one {{count} version} other {{count} versions}}",
+      "tracking": "Tracking {quantity}",
+      "setQuantity": "Set quantity",
+      "unlimited": "Unlimited",
+      "maxPerOrder": "Max {max} per order",
+      "image": "Image",
+      "download": "Download",
+      "buyLink": "Buy link",
+      "removedProfile": "Removed profile",
+      "storeTerms": "Store terms",
+      "options": "{groups, plural, one {{groups} group} other {{groups} groups}}, {options, plural, one {{options} option} other {{options} options}}",
+      "photos": "{count, plural, one {{count} photo} other {{count} photos}}",
+      "documents": "{count, plural, one {{count} document} other {{count} documents}}",
+      "started": "Started",
+      "active": "Active",
+      "draft": "Draft"
+    },
+    "errors": {
+      "titleRequired": "Give your product a title — buyers see it first.",
+      "stockRequired": "Enter how many units are in stock, or turn Track stock off for unlimited.",
+      "stockWhole": "Stock must be a whole number — 0 or more, with no decimals.",
+      "lowStockWhole": "The low-stock alert must be a whole number of 0 or more.",
+      "maxPerOrderRequired": "Enter how many one buyer can order — 1 to {max}.",
+      "maxPerOrderRange": "The maximum per order must be a whole number from 1 to {max}.",
+      "purchaseUrl": "The purchase link must be a full https:// address.",
+      "optionGroupUnnamed": "Say what each option group varies, or remove it.",
+      "optionGroupEmpty": "Add at least one {group} option, or remove the group.",
+      "optionUnnamed": "Give every option a name, or remove the empty row.",
+      "optionGroupFull": "An option group can have up to {max} options.",
+      "versionSpecs": "{count, plural, one {One version's own specifications need fixing.} other {{count} versions' own specifications need fixing.}}",
+      "measure": "Use a number, like 12 or 3.5.",
+      "specValue": "Every specification needs a value.",
+      "manufacturerName": "Name the manufacturer.",
+      "manufacturerAddress": "Add the manufacturer's postal address.",
+      "manufacturerEmail": "Add a contact email for the manufacturer.",
+      "responsibleEmail": "That doesn't look like an email address.",
+      "price": {
+        "empty": "Set a price before saving.",
+        "notPositive": "Price must be a number greater than zero.",
+        "tooManyDecimals": "Prices can have at most two decimal places.",
+        "tooHigh": "Price cannot exceed {currency} {max}."
+      }
+    },
+    "title": "Title",
+    "titlePlaceholder": "e.g. Ambient Loops Vol. 1",
+    "description": "Description",
+    "optional": "(optional)",
+    "descriptionPlaceholder": "What is it, and what does the buyer get?",
+    "displayImage": "Display image",
+    "displayImageAbout": "Where the display image is used",
+    "displayImageHelp": "Shown on your storefront and embeds.",
+    "digitalFile": "Digital file",
+    "digitalFileAbout": "What the digital file is",
+    "digitalFileHelp": "The file your buyer downloads after purchase. Adding one makes this a download, so shipping and product-safety stop applying.",
+    "purchaseLink": "Purchase link",
+    "purchaseLinkAbout": "Where the buy button sends buyers",
+    "purchaseLinkHelp": "The product page's buy button follows this link. Without one, it emails your store's contact address instead.",
+    "purchaseLinkPlaceholder": "e.g. https://your-shop.example/checkout/this-product",
+    "statusLabel": "Product status",
+    "problems": "{count, plural, one {{count} thing to fix before saving} other {{count} things to fix before saving}}",
+    "jumpToFirst": "Jump to first",
+    "uploading": "{what, select, image {Uploading image…} photo {Uploading photo…} document {Uploading document…} other {Uploading file…}}",
+    "processing": "{what, select, image {Processing image…} photo {Processing photo…} document {Processing document…} other {Processing file…}}",
+    "uploadingLabel": "{what, select, image {Uploading image} photo {Uploading photo} document {Uploading document} other {Uploading file}}",
+    "processingLabel": "{what, select, image {Processing image} photo {Processing photo} document {Processing document} other {Processing file}}",
+    "saveChanges": "Save changes",
+    "saveProduct": "Save product",
+    "savedToast": "\"{title}\" was saved.",
+    "addedToast": "\"{title}\" was added to your products.",
+    "documentFallbackLabel": "Document",
+    "discard": {
+      "title": "Discard your changes?",
+      "editDescription": "The edits you've made to this product haven't been saved yet.",
+      "newDescription": "This product hasn't been saved yet, so nothing will be kept.",
+      "discard": "Discard"
+    },
+    "nav": {
+      "label": "Form sections",
+      "heading": "On this page"
+    }
+  },
+  "stockFields": {
+    "trackStock": "Track stock",
+    "inStock": "In stock",
+    "decrease": "Decrease stock",
+    "increase": "Increase stock",
+    "lowStockAlert": "Low-stock alert at",
+    "maxPerOrder": "Maximum per order",
+    "maxPerOrderHint": "How many one buyer can take at once. Buyers pick from a list that stops here, and the limit is checked again when they order. Up to {max}; 1 sells them one at a time."
+  },
+  "priceField": {
+    "label": "Price",
+    "placeholder": "e.g. 9.00",
+    "currency": "Currency"
+  },
+  "shippingField": {
+    "usual": "Your usual shipping terms",
+    "usualDescription": "Set once for your account. What almost every product wants.",
+    "removed": "Removed profile",
+    "removedDescription": "This profile no longer exists, so buyers see your default terms.",
+    "untitled": "Untitled profile",
+    "profileNoTerms": "No terms written for this profile yet.",
+    "noTerms": "No shipping terms written yet.",
+    "profile": "Shipping profile",
+    "edit": "Edit",
+    "modalTitle": "Shipping & returns"
+  },
+  "optionsField": {
+    "display": {
+      "swatch": "Swatches",
+      "chip": "Chips",
+      "select": "Dropdown"
+    },
+    "displayHint": {
+      "swatch": "Colour circles. Give each option a swatch, or buyers see its first letter.",
+      "chip": "Text buttons, for values buyers read: sizes, wattages, lengths.",
+      "select": "A dropdown. Best when there are more values than fit as buttons."
+    },
+    "presets": {
+      "colour": {
+        "name": "Colour",
+        "placeholder": "Midnight blue"
+      },
+      "size": {
+        "name": "Size",
+        "placeholder": "Medium"
+      },
+      "material": {
+        "name": "Material",
+        "placeholder": "Solid oak"
+      },
+      "capacity": {
+        "name": "Capacity",
+        "placeholder": "500 ml"
+      },
+      "powerOutput": {
+        "name": "Power output",
+        "placeholder": "750 W"
+      },
+      "length": {
+        "name": "Length",
+        "placeholder": "2 m"
+      },
+      "style": {
+        "name": "Style",
+        "placeholder": "Wide fit"
+      },
+      "finish": {
+        "name": "Finish",
+        "placeholder": "Brushed brass"
+      }
+    },
+    "sharedPriceNote": "All versions share one price and one stock level.",
+    "addFirst": "Sold in more than one version?",
+    "addAnother": "Add another way it varies",
+    "somethingElse": "Something else",
+    "groupsFull": "{max, plural, one {That is all {max} option group.} other {That is all {max} option groups.}}",
+    "optionsFull": "{max, plural, one {That is all {max} option.} other {That is all {max} options.}}",
+    "whatVaries": "What varies",
+    "whatVariesPlaceholder": "What varies? e.g. Power output",
+    "optionCount": "{count, plural, one {{count} option} other {{count} options}}",
+    "moveGroupEarlier": "{named, select, yes {Move {name} earlier} other {Move Option group {position} earlier}}",
+    "moveGroupLater": "{named, select, yes {Move {name} later} other {Move Option group {position} later}}",
+    "removeGroup": "{named, select, yes {Remove {name}} other {Remove Option group {position}}}",
+    "howBuyersPick": "{named, select, yes {How buyers pick {name}} other {How buyers pick Option group {position}}}",
+    "howBuyersPickAbout": "How buyers pick it",
+    "swatchColumn": "Colour",
+    "nameColumn": "Name",
+    "groupOptionsList": "{named, select, yes {{name} options} other {Option group {position} options}}",
+    "swatchFor": "{named, select, yes {Colour for {name}} other {Colour for option {position}}}",
+    "noSwatch": "No swatch",
+    "optionLabel": "{named, select, yes {{name} option {position}} other {Option group {groupPosition} option {position}}}",
+    "optionPlaceholder": "Option {position}",
+    "available": "{named, select, yes {{name} is available} other {option {position} is available}}",
+    "moveOptionEarlier": "{named, select, yes {Move {name} earlier} other {Move option {position} earlier}}",
+    "moveOptionLater": "{named, select, yes {Move {name} later} other {Move option {position} later}}",
+    "removeOption": "{named, select, yes {Remove {name}} other {Remove option {position}}}",
+    "swatchConflict": "{names} share a first letter and neither has a colour. Buyers will see identical squares. Give each one a colour.",
+    "addOptions": "Add options",
+    "addOptionsAbout": "How to add several options at once",
+    "addOptionsHelp": "Press Enter after each one, or paste a list — \"S, M, L, XL\", or a column copied from a spreadsheet — to add them all at once.",
+    "noRoom": "No room for more options",
+    "draftPlaceholder": "{preset, select, yes {{example}  —  or paste a list} other {First option  —  or paste a list}}",
+    "add": "Add",
+    "useNoSwatch": "Use No swatch"
+  },
+  "galleryField": {
+    "tooMany": "A product can have up to {max} extra photos.",
+    "wrongType": "Use PNG, JPG, WEBP, GIF, or AVIF images.",
+    "tooLarge": "Each photo must be under {max} MB.",
+    "roomLeft": "{count, plural, one {Only {count} more photo fit.} other {Only {count} more photos fit.}}",
+    "everyVersion": "Every version",
+    "photos": "Photos",
+    "unnamedOption": "Unnamed option",
+    "options": "Options",
+    "target": "{groupNamed, select, yes {{optionNamed, select, yes {{group}: {option}} other {{group}: Unnamed option}}} other {{optionNamed, select, yes {Options: {option}} other {Options: Unnamed option}}}}",
+    "moveToEveryVersion": "Move to: Every version",
+    "moveToOption": "{groupNamed, select, yes {{optionNamed, select, yes {Move to: {group}: {option}} other {Move to: {group}: Unnamed option}}} other {{optionNamed, select, yes {Move to: Options: {option}} other {Move to: Options: Unnamed option}}}}",
+    "photoCount": "{count, plural, one {{count} photo} other {{count} photos}}",
+    "removePhoto": "Remove photo",
+    "movePhotoEarlier": "Move photo earlier",
+    "movePhotoLater": "Move photo later",
+    "altPlaceholder": "Alt text",
+    "altLabel": "Describe this photo, for people who cannot see it",
+    "versionLabel": "Which version this photo is shown for",
+    "tally": "{max, plural, one {{count} of {max} photo} other {{count} of {max} photos}}",
+    "orderAbout": "How these photos are ordered",
+    "orderHelp": "The display image from Media and delivery is always first. After it, photos show in the order they sit in here.",
+    "limitReached": "Limit reached",
+    "dropOrClick": "Drop or click"
+  },
+  "optionSpecsField": {
+    "heading": "Different for each version",
+    "about": "How per-version specifications work",
+    "help": "Sizes and weights that change with the version go here. Anything left blank uses what you filled in above, so state only what actually differs. Buyers see the numbers for the version they have picked.",
+    "unnamedOption": "Unnamed option",
+    "options": "Options",
+    "sameAsAbove": "Same as above",
+    "length": "Length",
+    "width": "Width",
+    "height": "Height",
+    "weight": "Weight",
+    "specsList": "{named, select, yes {{option} specifications} other {Unnamed option specifications}}",
+    "specName": "Name, e.g. Seats",
+    "specValue": "Value, e.g. 6",
+    "specNameLabel": "{named, select, yes {{option} specification {number} name} other {Unnamed option specification {number} name}}",
+    "specValueLabel": "{named, select, yes {{option} specification {number} value} other {Unnamed option specification {number} value}}",
+    "removeSpec": "{named, select, yes {Remove {option} specification {number}} other {Remove Unnamed option specification {number}}}",
+    "addSpec": "Specification for this version",
+    "replacesNote": "A specification with the same name as one above replaces it for that version."
+  },
+  "detailsFields": {
+    "dimensions": "Dimensions",
+    "length": "Length",
+    "width": "Width",
+    "height": "Height",
+    "unit": "Unit",
+    "weight": "Weight",
+    "materials": "Materials",
+    "materialsPlaceholder": "e.g. Solid oak, brass fittings",
+    "madeIn": "Made in",
+    "madeInPlaceholder": "Country of origin",
+    "care": "Care instructions",
+    "included": "What's included",
+    "includedPlaceholder": "One item per line\ne.g. 1 × lamp\n1 × 2 m cable",
+    "specifications": "Specifications",
+    "specName": "Name, e.g. Wattage",
+    "specValue": "Value, e.g. 40 W",
+    "specNameLabel": "Specification {number} name",
+    "specValueLabel": "Specification {number} value",
+    "removeSpec": "Remove specification {number}",
+    "addSpec": "Add specification"
+  },
+  "safetyFields": {
+    "manufacturer": "Manufacturer",
+    "manufacturerEmail": "Manufacturer email",
+    "manufacturerAddress": "Manufacturer address",
+    "responsibleName": "EU responsible person",
+    "responsibleNameAbout": "About EU responsible person",
+    "responsibleNameHint": "Only when the manufacturer is outside the EU.",
+    "responsibleEmail": "Responsible person email",
+    "responsibleAddress": "Responsible person address",
+    "identifier": "Type, batch or serial number",
+    "warnings": "Warnings and safety information"
+  },
+  "documentsField": {
+    "tooMany": "A product can have up to {max} documents.",
+    "wrongType": "Use a PDF for certificates, manuals, and other documents.",
+    "tooLarge": "\"{name}\" is too big. Documents have to be under {max} MB.",
+    "roomLeft": "{count, plural, one {Only {count} more document fit.} other {Only {count} more documents fit.}}",
+    "fallbackLabel": "Document",
+    "list": "Documents",
+    "nameLabel": "Document name, shown to buyers",
+    "namePlaceholder": "e.g. Safety Data Sheet",
+    "remove": "{named, select, yes {Remove {name}} other {Remove document}}",
+    "limitReached": "Limit reached",
+    "dropPrompt": "Drop PDFs or click to upload",
+    "tally": "{max, plural, one {{count} of {max} document · PDF, up to {maxMb} MB each} other {{count} of {max} documents · PDF, up to {maxMb} MB each}}"
+  },
+  "imageDropzone": {
+    "wrongType": "Use a PNG, JPG, WEBP, GIF, or AVIF image.",
+    "tooLarge": "Image must be under {max} MB.",
+    "previewAlt": "Display image preview",
+    "dropPrompt": "Drop an image or click to upload",
+    "hint": "PNG, JPG, WEBP, GIF, or AVIF, up to {max} MB",
+    "remove": "Remove display image"
+  },
+  "fileDropzone": {
+    "currentFile": "Current file",
+    "dropPrompt": "Drop a file or click to upload",
+    "hint": "ZIP, PDF, and similar, up to {max} MB",
+    "remove": "Remove digital file"
+  }
+}

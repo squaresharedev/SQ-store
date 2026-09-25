@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useLayoutEffect, useRef, type RefObject } from "react";
 import {
   TEXT_MAX_LENGTH,
@@ -98,6 +99,7 @@ export function InlineTextEditor({
   /** Escape, or focus leaving for anywhere but the design panel. */
   onDone: () => void;
 }) {
+  const t = useTranslations("Storefront.inlineText");
   const ref = useRef<HTMLParagraphElement>(null);
   // What was last WRITTEN to the DOM. Props that differ came from outside and
   // have to be painted; props that match are this editor's own echo.
@@ -311,7 +313,7 @@ export function InlineTextEditor({
       suppressContentEditableWarning
       role="textbox"
       aria-multiline="true"
-      aria-label="Block text"
+      aria-label={t("ariaLabel")}
       spellCheck={false}
       onInput={syncFromDom}
       onKeyDown={handleKeyDown}

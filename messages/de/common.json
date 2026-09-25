@@ -1,0 +1,113 @@
+{
+  "actions": {
+    "save": "Speichern",
+    "saving": "Wird gespeichert…",
+    "saved": "Gespeichert",
+    "cancel": "Abbrechen",
+    "done": "Fertig",
+    "close": "Schließen",
+    "back": "Zurück",
+    "copy": "Kopieren",
+    "copied": "Kopiert",
+    "copyFailed": "Kopieren fehlgeschlagen",
+    "tryAgain": "Erneut versuchen",
+    "sending": "Wird gesendet…",
+    "sent": "Gesendet",
+    "loading": "Wird geladen…",
+    "confirm": "Bestätigen",
+    "remove": "Entfernen",
+    "delete": "Löschen",
+    "deleting": "Wird gelöscht…"
+  },
+  "badge": {
+    "comingSoon": "Demnächst verfügbar"
+  },
+  "pagination": {
+    "previous": "Vorherige",
+    "next": "Nächste"
+  },
+  "calendar": {
+    "previousMonth": "Vorheriger Monat",
+    "nextMonth": "Nächster Monat",
+    "today": "Heute"
+  },
+  "datePicker": {
+    "chooseDate": "Datum wählen",
+    "chooseDateRange": "Zeitraum wählen",
+    "selectDate": "Datum auswählen"
+  },
+  "colorPicker": {
+    "saturationBrightness": "Sättigung und Helligkeit",
+    "saturationBrightnessValue": "{saturation} Sättigung, {brightness} Helligkeit",
+    "hue": "Farbton",
+    "pickFromScreen": "Farbe vom Bildschirm auswählen",
+    "pickFromScreenTitle": "Vom Bildschirm auswählen",
+    "hexLabel": "Hex-Farbe",
+    "hexCopied": "Hex-Wert kopiert",
+    "copyHex": "Hex-Wert kopieren",
+    "invalidHex": "Verwende einen sechsstelligen Hex-Code wie #a855f7.",
+    "pickerFor": "Farbwähler für {label}",
+    "picker": "Farbwähler",
+    "colour": "Farbe",
+    "swatchesFor": "Farbmuster für {label}",
+    "swatches": "Farbmuster",
+    "moreColors": "Weitere Farben",
+    "customColor": "Eigene Farbe",
+    "currentColor": "Aktuelle Farbe {color}",
+    "hueValue": "{degrees, plural, one {# Grad} other {# Grad}}"
+  },
+  "panelMenu": {
+    "backLeaving": "Zurück zu allen Einstellungen, verlässt {title}"
+  },
+  "sliderField": {
+    "about": "Über {label}",
+    "asNumber": "{label} als Zahl"
+  },
+  "password": {
+    "show": "Passwort anzeigen",
+    "hide": "Passwort ausblenden"
+  },
+  "stock": {
+    "inStock": "Auf Lager",
+    "lowStock": "{remaining, plural, one {Nur noch {remaining} übrig} other {Nur noch {remaining} übrig}}",
+    "soldOut": "Ausverkauft"
+  },
+  "toast": {
+    "regionLabel": "Benachrichtigungen",
+    "dismiss": "Schließen"
+  },
+  "charts": {
+    "bar": "Balkendiagramm",
+    "horizontalBar": "Horizontales Balkendiagramm",
+    "line": "Liniendiagramm",
+    "composition": "Zusammensetzung",
+    "proportional": "Anteilige Aufschlüsselung",
+    "other": "Andere",
+    "total": "Gesamt",
+    "category": "Kategorie"
+  },
+  "legal": {
+    "cookies": {
+      "label": "Cookies",
+      "name": "Squareshare Cookie-Richtlinie"
+    },
+    "accessibility": {
+      "label": "Barrierefreiheit",
+      "name": "Squareshare Erklärung zur Barrierefreiheit"
+    }
+  },
+  "grid": {
+    "ariaLabel": "Raster",
+    "addBlockAt": "Block in Spalte {column}, Zeile {row} hinzufügen",
+    "resize": "Größe von {label} ändern",
+    "resizeBlock": "Blockgröße ändern",
+    "resizeUnavailable": "Die Größe lässt sich nicht ändern: Dieser Block füllt bereits den gesamten Platz, den das gestapelte Layout bietet",
+    "resizeUnavailableNamed": "Die Größe lässt sich nicht ändern: Dieser Block füllt bereits den gesamten Platz, den das gestapelte Layout bietet: {label}",
+    "rotate": "{label} drehen",
+    "rotateBlock": "Block drehen",
+    "rotation": "{degrees, plural, one {# Grad} other {# Grad}}",
+    "rotated": "{label} auf {degrees, plural, one {# Grad} other {# Grad}} gedreht",
+    "rotatedBlock": "Block auf {degrees, plural, one {# Grad} other {# Grad}} gedreht",
+    "blocksMoved": "{count, plural, one {# Block verschoben} other {# Blöcke verschoben}}"
+  }
+}

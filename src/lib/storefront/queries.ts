@@ -1,3 +1,4 @@
+import { getLocale, getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { getShippingPolicy } from "@/lib/settings/shipping-policy";
@@ -188,6 +189,9 @@ export async function getShippingChoices(): Promise<ShippingChoices> {
   if (!account) return empty;
 
   const policy = await getShippingPolicy(account.accountId);
+  // The seller reads this preview, so it is in the seller's language.
+  const t = await getTranslations();
+  const locale = await getLocale();
   return {
     profiles: (policy.profiles ?? []).map((profile) => ({
       id: profile.id,
@@ -199,7 +203,7 @@ export async function getShippingChoices(): Promise<ShippingChoices> {
     // the text a buyer gets and not a second rendering of the same answers.
     fallback: {
       dispatch: policy.dispatch ?? "",
-      body: buildShippingProse(policy).shipping,
+      body: buildShippingProse(policy, (ref) => t(ref.key, ref.values), locale).shipping,
     },
     editHref: SHIPPING_SETTINGS_HREF,
   };

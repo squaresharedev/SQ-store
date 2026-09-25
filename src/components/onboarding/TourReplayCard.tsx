@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { SettingsCard } from "@/components/settings/SettingsCard";
 import { Button } from "@/components/ui/button";
 import { startTour } from "@/lib/onboarding/tour-store";
@@ -14,13 +15,11 @@ import { startTour } from "@/lib/onboarding/tour-store";
  * about the person, like the welcome it follows, not about the store.
  */
 export function TourReplayCard() {
+  const t = useTranslations("Onboarding.tourReplay");
   return (
-    <SettingsCard
-      title="Guided tour"
-      description="A short walk through the main thing to do on each page, one step at a time."
-    >
+    <SettingsCard title={t("title")} description={t("description")}>
       <Button variant="secondary" onClick={() => startTour()}>
-        Start the tour
+        {t("start")}
       </Button>
     </SettingsCard>
   );

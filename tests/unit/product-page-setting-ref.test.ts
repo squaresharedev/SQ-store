@@ -24,11 +24,12 @@ import {
   DEFAULT_STOREFRONT_CONFIG,
   PRODUCT_PAGE_SECTION_IDS,
 } from "@/types/storefront";
+import { english } from "../setup/translate";
 
 describe("product page settings catalogue", () => {
   it("registers the group and labels it", () => {
     expect(CONTROLS_GROUPS).toContain("productPage");
-    expect(GROUP_LABELS.productPage).toBe("Product page");
+    expect(english(GROUP_LABELS.productPage)).toBe("Product page");
   });
 
   it("files every entry under the group, whatever section it opens", () => {
@@ -40,7 +41,7 @@ describe("product page settings catalogue", () => {
       expect(entry, id).not.toBeNull();
       expect(settingGroup(entry!.ref)).toBe("productPage");
       expect(isPerTileSetting(entry!.ref)).toBe(false);
-      expect(settingIndexFields(entry!).subtitle).toBe("Storefront / Product page");
+      expect(settingIndexFields(entry!, english).subtitle).toBe("Storefront / Product page");
     }
   });
 

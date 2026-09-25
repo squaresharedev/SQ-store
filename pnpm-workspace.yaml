@@ -18,6 +18,8 @@ ignoredBuiltDependencies:
   - unrs-resolver
 allowBuilds:
   '@embedded-postgres/windows-x64': true
+  '@parcel/watcher': set this to true or false
+  '@swc/core': set this to true or false
   # Mirrors onlyBuiltDependencies / ignoredBuiltDependencies above.
   esbuild: true
   sharp: false

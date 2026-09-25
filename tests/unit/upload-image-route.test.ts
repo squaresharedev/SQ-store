@@ -46,6 +46,22 @@ vi.mock("@/lib/rate-limit", async (importOriginal) => ({
   rateLimit: vi.fn(async () => true),
 }));
 
+// There is no Next request here, so no locale to resolve: the route reads the
+// English catalogue and the refusals below are asserted as a reader sees them.
+vi.mock("next-intl/server", async () => {
+  const { createTranslator } = await import("next-intl");
+  const { default: messages } = await import("../../messages/en");
+  return {
+    getTranslations: async () =>
+      createTranslator({
+        locale: "en",
+        messages,
+        namespace: "Errors.uploadRoute",
+        timeZone: "UTC",
+      }),
+  };
+});
+
 const PNG_BASE64 =
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
 
@@ -138,7 +154,7 @@ describe.skipIf(!HAS_R2)("moderation verdicts are honoured", () => {
       ...(await importOriginal<typeof import("@/lib/moderation")>()),
       moderateUpload: vi.fn(async () => ({
         decision: "reject" as const,
-        reason: "That image breaks the content rules.",
+        code: "explicit" as const,
       })),
     }));
     const { POST } = await import("@/app/api/uploads/image/route");
@@ -146,7 +162,9 @@ describe.skipIf(!HAS_R2)("moderation verdicts are honoured", () => {
     const res = await POST(request(png()));
     expect(res.status).toBe(422);
     const body = (await res.json()) as { error: string };
-    expect(body.error).toBe("That image breaks the content rules.");
+    // The code, not the classifier's words: the sentence comes from the
+    // catalogue, so a Czech seller reads it in Czech.
+    expect(body.error).toBe("That image looks explicit, so it can't be used on a product.");
     vi.doUnmock("@/lib/moderation");
     vi.resetModules();
   });

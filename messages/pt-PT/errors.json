@@ -1,0 +1,536 @@
+{
+  "sessionExpired": {
+    "message": "A sua sessão expirou.",
+    "fix": "Inicie sessão novamente e tente outra vez. O que escreveu neste separador mantém-se até sair da página."
+  },
+  "permissionDenied": {
+    "fix": "Só o proprietário da loja pode alterar funções. Peça-lhe para o promover a Editor nas definições de equipa.",
+    "createProducts": {
+      "withRole": "A sua função de {role, select, owner {proprietário} editor {editor} viewer {leitor} other {{role}}} não permite criar produtos nesta loja.",
+      "noRole": "Não tem permissão para criar produtos nesta loja."
+    },
+    "editProducts": {
+      "withRole": "A sua função de {role, select, owner {proprietário} editor {editor} viewer {leitor} other {{role}}} não permite editar produtos nesta loja.",
+      "noRole": "Não tem permissão para editar produtos nesta loja."
+    },
+    "deleteProducts": {
+      "withRole": "A sua função de {role, select, owner {proprietário} editor {editor} viewer {leitor} other {{role}}} não permite eliminar produtos nesta loja.",
+      "noRole": "Não tem permissão para eliminar produtos nesta loja."
+    },
+    "importProducts": {
+      "withRole": "A sua função de {role, select, owner {proprietário} editor {editor} viewer {leitor} other {{role}}} não permite importar produtos nesta loja.",
+      "noRole": "Não tem permissão para importar produtos nesta loja."
+    },
+    "previewProductPages": {
+      "withRole": "A sua função de {role, select, owner {proprietário} editor {editor} viewer {leitor} other {{role}}} não permite pré-visualizar páginas de produto nesta loja.",
+      "noRole": "Não tem permissão para pré-visualizar páginas de produto nesta loja."
+    },
+    "createStorefronts": {
+      "withRole": "A sua função de {role, select, owner {proprietário} editor {editor} viewer {leitor} other {{role}}} não permite criar montras nesta loja.",
+      "noRole": "Não tem permissão para criar montras nesta loja."
+    },
+    "editStorefronts": {
+      "withRole": "A sua função de {role, select, owner {proprietário} editor {editor} viewer {leitor} other {{role}}} não permite editar montras nesta loja.",
+      "noRole": "Não tem permissão para editar montras nesta loja."
+    },
+    "deleteStorefronts": {
+      "withRole": "A sua função de {role, select, owner {proprietário} editor {editor} viewer {leitor} other {{role}}} não permite eliminar montras nesta loja.",
+      "noRole": "Não tem permissão para eliminar montras nesta loja."
+    },
+    "viewStorefronts": {
+      "withRole": "A sua função de {role, select, owner {proprietário} editor {editor} viewer {leitor} other {{role}}} não permite ver montras nesta loja.",
+      "noRole": "Não tem permissão para ver montras nesta loja."
+    },
+    "editThisProduct": {
+      "withRole": "A sua função de {role, select, owner {proprietário} editor {editor} viewer {leitor} other {{role}}} não permite editar este produto nesta loja.",
+      "noRole": "Não tem permissão para editar este produto nesta loja."
+    },
+    "editThisStorefront": {
+      "withRole": "A sua função de {role, select, owner {proprietário} editor {editor} viewer {leitor} other {{role}}} não permite editar esta montra nesta loja.",
+      "noRole": "Não tem permissão para editar esta montra nesta loja."
+    }
+  },
+  "notFound": {
+    "fix": "Pode ter sido eliminado, ou pode ter mudado de loja. Atualize a página para carregar os dados atuais.",
+    "product": "Esse produto não foi encontrado.",
+    "storefront": "Essa montra não foi encontrada.",
+    "item": "Não foi possível encontrar esse item."
+  },
+  "rateLimited": {
+    "fix": "Aguarde alguns minutos e tente novamente. Se nada estiver a repetir a tentativa em segundo plano, recarregue primeiro a página.",
+    "createProducts": "Demasiadas tentativas de criar produtos num curto espaço de tempo.",
+    "editProducts": "Demasiadas tentativas de editar produtos num curto espaço de tempo.",
+    "deleteProducts": "Demasiadas tentativas de eliminar produtos num curto espaço de tempo.",
+    "importProducts": "Demasiadas tentativas de importar produtos num curto espaço de tempo.",
+    "previewProductPages": "Demasiadas tentativas de pré-visualizar páginas de produto num curto espaço de tempo.",
+    "createStorefronts": "Demasiadas tentativas de criar montras num curto espaço de tempo.",
+    "saveStorefronts": "Demasiadas tentativas de guardar montras num curto espaço de tempo.",
+    "deleteStorefronts": "Demasiadas tentativas de eliminar montras num curto espaço de tempo.",
+    "rotateEmbedKeys": "Demasiadas tentativas de renovar chaves de incorporação num curto espaço de tempo.",
+    "updateStock": "Demasiadas tentativas de atualizar o stock num curto espaço de tempo.",
+    "readProductPageSettings": "Demasiadas tentativas de ler as definições da página de produto num curto espaço de tempo.",
+    "requestReview": "Demasiadas tentativas de pedir uma revisão num curto espaço de tempo."
+  },
+  "serverError": {
+    "fix": "Isto costuma ser temporário. Aguarde um momento e tente novamente; se continuar a falhar, atualize a página.",
+    "createProduct": "Não foi possível criar o produto devido a um problema do nosso lado.",
+    "saveProduct": "Não foi possível guardar o produto devido a um problema do nosso lado.",
+    "deleteProduct": "Não foi possível eliminar o produto devido a um problema do nosso lado.",
+    "importProducts": "Não foi possível importar os seus produtos devido a um problema do nosso lado.",
+    "loadProductPagePreview": "Não foi possível carregar a pré-visualização da página de produto devido a um problema do nosso lado.",
+    "verifyImageUpload": "Não foi possível verificar o carregamento da imagem devido a um problema do nosso lado.",
+    "verifyDocumentUpload": "Não foi possível verificar o carregamento do documento devido a um problema do nosso lado.",
+    "verifyFileUpload": "Não foi possível verificar o carregamento do ficheiro devido a um problema do nosso lado.",
+    "verifyFontUpload": "Não foi possível verificar o carregamento do tipo de letra devido a um problema do nosso lado.",
+    "verifyElementUpload": "Não foi possível verificar o carregamento do elemento devido a um problema do nosso lado.",
+    "verifyBackgroundImage": "Não foi possível verificar a imagem de fundo devido a um problema do nosso lado.",
+    "verifyFont": "Não foi possível verificar o tipo de letra devido a um problema do nosso lado.",
+    "verifyImage": "Não foi possível verificar a imagem devido a um problema do nosso lado.",
+    "createStorefront": "Não foi possível criar a montra devido a um problema do nosso lado.",
+    "saveStorefront": "Não foi possível guardar a montra devido a um problema do nosso lado.",
+    "saveEmbedSettings": "Não foi possível guardar as definições de incorporação devido a um problema do nosso lado.",
+    "deleteStorefront": "Não foi possível eliminar a montra devido a um problema do nosso lado.",
+    "rotateEmbedKey": "Não foi possível renovar a chave de incorporação devido a um problema do nosso lado.",
+    "saveStockSettings": "Não foi possível guardar as definições de stock devido a um problema do nosso lado.",
+    "checkSellerDetails": "Não foi possível verificar os seus dados de vendedor devido a um problema do nosso lado.",
+    "loadProductPageSettings": "Não foi possível carregar as definições da página de produto devido a um problema do nosso lado.",
+    "saveProductPageSettings": "Não foi possível guardar as definições da página de produto devido a um problema do nosso lado.",
+    "sendForReview": "Não foi possível enviar isto para revisão devido a um problema do nosso lado."
+  },
+  "moderation": {
+    "removedNotPaused": "{target, select, product {Este produto foi removido, não pausado.} storefront {Esta montra foi removida, não pausada.} other {Este item foi removido, não pausado.}}",
+    "removedFix": "Uma remoção é definitiva. Se considera que foi um erro, utilize o link de recurso para nos escrever.",
+    "notPaused": "{target, select, product {Este produto não está pausado.} storefront {Esta montra não está pausada.} other {Este item não está pausado.}}",
+    "notPausedFix": "Não há nada para rever: já está visível para os compradores."
+  },
+  "traderIdentityRequired": {
+    "message": "Não pode publicar nem vender enquanto os seus dados de vendedor não estiverem completos.",
+    "action": "Adicionar dados de vendedor",
+    "fix": {
+      "add": "{fields, select, businessName {Adicione o seu nome ou denominação social em Definições › Empresa e dados do vendedor e depois publique.} address {Adicione a sua morada comercial em Definições › Empresa e dados do vendedor e depois publique.} email {Adicione o seu e-mail de contacto em Definições › Empresa e dados do vendedor e depois publique.} businessName_address {Adicione o seu nome ou denominação social e a morada comercial em Definições › Empresa e dados do vendedor e depois publique.} businessName_email {Adicione o seu nome ou denominação social e o e-mail de contacto em Definições › Empresa e dados do vendedor e depois publique.} address_email {Adicione a sua morada comercial e o e-mail de contacto em Definições › Empresa e dados do vendedor e depois publique.} other {Adicione o seu nome ou denominação social, morada comercial e e-mail de contacto em Definições › Empresa e dados do vendedor e depois publique.}}",
+      "addAndConfirm": "{fields, select, businessName {Adicione o seu nome ou denominação social em Definições › Empresa e dados do vendedor, e confirme o seu e-mail de contacto através do link que lhe enviámos.} address {Adicione a sua morada comercial em Definições › Empresa e dados do vendedor, e confirme o seu e-mail de contacto através do link que lhe enviámos.} email {Adicione o seu e-mail de contacto em Definições › Empresa e dados do vendedor, e confirme o seu e-mail de contacto através do link que lhe enviámos.} businessName_address {Adicione o seu nome ou denominação social e a morada comercial em Definições › Empresa e dados do vendedor, e confirme o seu e-mail de contacto através do link que lhe enviámos.} businessName_email {Adicione o seu nome ou denominação social e o e-mail de contacto em Definições › Empresa e dados do vendedor, e confirme o seu e-mail de contacto através do link que lhe enviámos.} address_email {Adicione a sua morada comercial e o e-mail de contacto em Definições › Empresa e dados do vendedor, e confirme o seu e-mail de contacto através do link que lhe enviámos.} other {Adicione o seu nome ou denominação social, morada comercial e e-mail de contacto em Definições › Empresa e dados do vendedor, e confirme o seu e-mail de contacto através do link que lhe enviámos.}}",
+      "confirm": "Abra o link de confirmação que enviámos para o seu endereço de contacto. Pode enviar um novo a partir de Definições › Empresa e dados do vendedor.",
+      "complete": "Complete Definições › Empresa e dados do vendedor e depois publique."
+    }
+  },
+  "unexpected": {
+    "message": "Ocorreu um erro.",
+    "detail": "{detail}",
+    "fix": "Verifique a sua ligação e tente novamente. Se continuar a acontecer, atualize a página; os dados dos seus produtos estão seguros no servidor."
+  },
+  "form": {
+    "sessionExpired": "A sua sessão expirou. Inicie sessão novamente.",
+    "saveFailed": "Não foi possível guardar. Tente novamente.",
+    "tooManyChanges": "São muitas alterações num curto espaço de tempo. Tente novamente daqui a pouco.",
+    "unexpectedField": "O campo inesperado «{field}» foi rejeitado.",
+    "malformed": "Não foi possível ler o formulário. Recarregue a página e tente novamente.",
+    "unreachable": "Não foi possível contactar o servidor. Verifique a sua ligação e tente novamente."
+  },
+  "stepUp": {
+    "codeRequired": "Introduza o código de 6 dígitos da sua aplicação de autenticação para confirmar que é o próprio.",
+    "codeMalformed": "O código são os 6 dígitos que a aplicação de autenticação mostra.",
+    "factorUnknown": "Escolha uma das suas aplicações de autenticação.",
+    "invalid": "Esse código não funcionou. Verifique a aplicação de autenticação e tente novamente.",
+    "rateLimited": "Demasiadas tentativas. Aguarde alguns minutos e tente novamente.",
+    "replayed": "Esse código já foi utilizado. Aguarde pelo próximo na aplicação.",
+    "unavailable": "Não foi possível verificar esse código neste momento. Tente novamente dentro de momentos."
+  },
+  "mfa": {
+    "signInExpired": "O início de sessão expirou. Inicie sessão novamente.",
+    "unreachable": "Não foi possível contactar o serviço de início de sessão. Verifique a ligação e tente novamente.",
+    "enterCode": "Introduza o código de 6 dígitos.",
+    "recoveryCodeRequired": "Introduza um dos seus códigos de recuperação.",
+    "recoveryCodeInvalid": "Esse código de recuperação não funcionou. Verifique-o e tente novamente.",
+    "recoveryIncomplete": "Não foi possível concluir o início de sessão. Tente o mesmo código novamente dentro de momentos.",
+    "factorNameRequired": "Dê um nome a este autenticador.",
+    "factorNameTaken": "Já tem um autenticador com esse nome. Escolha outro.",
+    "passwordRequired": "Introduza a palavra-passe atual para continuar.",
+    "passwordRequiredGoogle": "Introduza a palavra-passe da Square Share ou utilize antes «Confirmar com o Google».",
+    "wrongPasswordGoogle": "Essa não é a palavra-passe da Square Share desta conta. A conta inicia sessão com o Google, por isso utilize antes «Confirmar com o Google».",
+    "passwordCheckUnavailable": "Não foi possível verificar a palavra-passe neste momento. Tente novamente daqui a pouco.",
+    "reauthRequired": "Por motivos de segurança, inicie sessão novamente antes de ativar a autenticação de dois fatores.",
+    "setupRateLimited": "Já fez muitas tentativas de configuração. Tente novamente mais tarde.",
+    "tooManyFactors": "Esta conta já tem o número máximo de autenticadores. Remova primeiro um deles.",
+    "setupFailed": "Não foi possível iniciar a configuração neste momento. Tente novamente dentro de momentos.",
+    "setupUnavailable": "A configuração da autenticação de dois fatores não está disponível neste momento. Tente novamente mais tarde.",
+    "setupExpired": "A configuração expirou. Comece de novo.",
+    "setupCodeMismatch": "Esse código não corresponde. Confirme que a aplicação mostra Square Share e introduza o código mais recente.",
+    "factorNotOnAccount": "Esse autenticador não pertence à sua conta.",
+    "removeFailed": "Não foi possível remover esse autenticador. Tente novamente.",
+    "notEnrolled": "Ative primeiro a autenticação de dois fatores.",
+    "codesNotCreated": "Não foi possível criar novos códigos. Os anteriores continuam a funcionar."
+  },
+  "settings": {
+    "usernameTaken": "Esse nome de utilizador já está em uso. Experimente outro.",
+    "emailUnchanged": "Esse já é o seu e-mail.",
+    "emailChangeRateLimited": "Demasiados pedidos de alteração de e-mail. Aguarde um pouco antes de tentar novamente.",
+    "emailChangeNeedsPassword": "Indique a sua palavra-passe atual para alterar o e-mail.",
+    "wrongPassword": "A palavra-passe atual está incorreta.",
+    "passwordCheckUnavailable": "Não foi possível verificar a palavra-passe neste momento. Tente novamente.",
+    "emailChangeFailed": "Não foi possível iniciar a alteração de e-mail. Tente novamente.",
+    "passwordReauthRateLimited": "Demasiadas tentativas. Aguarde alguns minutos antes de tentar novamente.",
+    "passwordUnchanged": "Essa já é a sua palavra-passe.",
+    "passwordUpdateFailed": "Não foi possível atualizar a palavra-passe. Tente novamente.",
+    "passwordReauthNeeded": "Por motivos de segurança, termine a sessão, inicie-a de novo e depois altere a palavra-passe.",
+    "resetRateLimited": "Demasiados e-mails de redefinição. Aguarde um pouco antes de tentar novamente.",
+    "resetSendRateLimited": "Demasiados pedidos. Aguarde um minuto e tente novamente.",
+    "resetFailed": "Não foi possível enviar o e-mail de redefinição. Tente novamente.",
+    "contactEmailTakesNoMail": "O domínio desse e-mail de contacto não aceita correio. Verifique a ortografia, ou utilize um endereço que os compradores consigam realmente contactar.",
+    "savedButConfirmationFailed": "{reason, select, startFailed {Guardado, mas o e-mail de confirmação não foi enviado. Não foi possível iniciar a confirmação por e-mail. Experimente «Reenviar e-mail de confirmação» abaixo.} unavailable {Guardado, mas o e-mail de confirmação não foi enviado. A confirmação por e-mail não está disponível neste momento. Experimente «Reenviar e-mail de confirmação» abaixo.} other {Guardado, mas o e-mail de confirmação não foi enviado. Não foi possível enviar o e-mail de confirmação. Verifique o endereço e tente novamente. Experimente «Reenviar e-mail de confirmação» abaixo.}}",
+    "confirmationFailed": "{reason, select, startFailed {Não foi possível iniciar a confirmação por e-mail.} unavailable {A confirmação por e-mail não está disponível neste momento.} other {Não foi possível enviar o e-mail de confirmação. Verifique o endereço e tente novamente.}}",
+    "confirmationUnavailable": "A confirmação por e-mail não está disponível neste momento.",
+    "confirmationRateLimited": "São muitos e-mails de confirmação. Aguarde um pouco antes de pedir outro.",
+    "noContactEmail": "Adicione primeiro um e-mail de contacto para o podermos confirmar."
+  },
+  "avatar": {
+    "unexpectedData": "Os dados inesperados do formulário foram rejeitados.",
+    "rateLimited": "Demasiadas alterações de fotografia. Aguarde um pouco e tente novamente.",
+    "noFile": "Escolha uma imagem para carregar.",
+    "tooLarge": "Essa imagem é demasiado grande. Mantenha-a abaixo de 2 MB.",
+    "wrongType": "Utilize uma imagem JPEG, PNG ou WebP.",
+    "uploadFailed": "Falha ao carregar. Tente novamente.",
+    "saveFailed": "Não foi possível guardar a nova fotografia. Tente novamente.",
+    "removeFailed": "Não foi possível remover a fotografia. Tente novamente."
+  },
+  "team": {
+    "noInvitePermission": "Não tem permissão para convidar membros.",
+    "inviteRoleTooHigh": "Não pode convidar alguém para uma função superior à sua.",
+    "inviteSelf": "Já está aqui.",
+    "inviteRateLimited": "Enviou muitos convites recentemente. Tente novamente daqui a pouco.",
+    "alreadyInvited": "Já foi convidado ou já faz parte da equipa.",
+    "inviteFailed": "Não foi possível enviar o convite. Tente novamente.",
+    "noVerifiedEmail": "A sua conta não tem um endereço de e-mail confirmado.",
+    "inviteNotFound": "Convite não encontrado ou já utilizado.",
+    "inviteUsed": "Este convite já foi aceite ou revogado.",
+    "inviteWrongEmail": "Este convite não é para o seu endereço de e-mail.",
+    "acceptFailed": "Não foi possível aceitar o convite. Pode ter sido revogado.",
+    "noRolePermission": "Não tem permissão para alterar funções.",
+    "membershipRateLimited": "Demasiadas alterações de membros. Tente novamente dentro de momentos.",
+    "roleTooHigh": "Não pode atribuir uma função superior à sua.",
+    "roleChangeFailed": "Não foi possível alterar a função. Tente novamente.",
+    "memberNotChangeable": "Esse membro não pode ser alterado.",
+    "noRemovePermission": "Não tem permissão para remover membros.",
+    "memberNotFound": "Membro não encontrado.",
+    "removeSelf": "Não se pode remover a si próprio.",
+    "removeFailed": "Não foi possível remover o membro. Tente novamente.",
+    "memberNotRemovable": "Esse membro não pode ser removido."
+  },
+  "auth": {
+    "serviceUnreachable": "Não foi possível ligar ao serviço de autenticação. Tente novamente.",
+    "invalidEmail": "Indique um endereço de e-mail válido.",
+    "emailRequired": "Indique o seu e-mail.",
+    "tooManyAttempts": "Demasiadas tentativas. Aguarde um pouco e tente novamente.",
+    "magicLinkFailed": "Não foi possível enviar o e-mail. Verifique a sua ligação e tente novamente.",
+    "resetEmailRequired": "Indique o seu e-mail para redefinir a palavra-passe.",
+    "resetEmailFailed": "Não foi possível enviar o e-mail de redefinição. Verifique a sua ligação e tente novamente.",
+    "credentialsRequired": "O e-mail e a palavra-passe são obrigatórios.",
+    "passwordsMismatch": "As palavras-passe não coincidem.",
+    "invalidUsername": "Escolha um nome de utilizador válido.",
+    "permanentEmailRequired": "Registe-se com um endereço de e-mail permanente.",
+    "verificationFailed": "A verificação falhou. Tente novamente.",
+    "usernameTaken": "Esse nome de utilizador já está em uso. Experimente outro.",
+    "signUpFailed": "Não foi possível criar a conta. Verifique a sua ligação e tente novamente.",
+    "signInFailed": "Não foi possível iniciar sessão. Verifique a sua ligação e tente novamente.",
+    "badCredentials": "E-mail ou palavra-passe incorretos.",
+    "emailNotConfirmed": "Confirme primeiro o seu e-mail: verifique a sua caixa de entrada para encontrar o link.",
+    "weakPassword": "Essa palavra-passe é demasiado fraca. Utilize pelo menos 8 carateres.",
+    "rateLimited": "Demasiadas tentativas. Aguarde um minuto e tente novamente.",
+    "accountNotCreated": "Não foi possível criar essa conta. Experimente um nome de utilizador diferente.",
+    "providerMessage": "{message}",
+    "unknown": "Ocorreu um erro. Tente novamente.",
+    "connectFailed": "Não foi possível ligar. Tente novamente.",
+    "resetLinkExpired": "O seu link de redefinição expirou. Peça um novo na página de início de sessão.",
+    "passwordUpdateFailed": "Não foi possível atualizar a sua palavra-passe. Verifique a sua ligação e tente novamente.",
+    "samePassword": "Essa já é a sua palavra-passe. Escolha uma nova."
+  },
+  "upload": {
+    "typeNotSupported": "Esse tipo de ficheiro não é suportado.",
+    "typeFix": {
+      "image": "Utilize uma imagem JPEG, PNG, WebP, GIF ou AVIF.",
+      "file": "Utilize um ficheiro ZIP, PDF, EPUB, MP3, WAV, MP4, JPEG, PNG, WebP ou TXT.",
+      "font": "Utilize um ficheiro de tipo de letra WOFF2, WOFF, TTF ou OTF.",
+      "element": "Utilize uma imagem SVG, PNG, WebP, JPEG, GIF ou AVIF.",
+      "document": "Exporte o manual ou certificado como PDF e depois carregue-o."
+    },
+    "tooLarge": {
+      "image": "Essa imagem é demasiado grande.",
+      "document": "Esse documento é demasiado grande.",
+      "file": "Esse ficheiro é demasiado grande.",
+      "font": "Esse tipo de letra é demasiado grande.",
+      "element": "Esse elemento é demasiado grande."
+    },
+    "tooLargeFix": {
+      "image": "Utilize uma imagem com menos de {maxMb} MB. Comprima-a ou redimensione-a e tente novamente.",
+      "document": "Utilize um documento com menos de {maxMb} MB. Comprima-o ou redimensione-o e tente novamente.",
+      "file": "Utilize um ficheiro com menos de {maxMb} MB. Comprima-o ou redimensione-o e tente novamente.",
+      "font": "Utilize um tipo de letra com menos de {maxMb} MB. Comprima-o ou redimensione-o e tente novamente.",
+      "element": "Utilize um elemento com menos de {maxMb} MB. Comprima-o ou redimensione-o e tente novamente."
+    },
+    "neverReached": {
+      "image": "A imagem nunca chegou ao servidor.",
+      "document": "O documento nunca chegou ao servidor.",
+      "file": "O ficheiro nunca chegou ao servidor.",
+      "font": "O tipo de letra nunca chegou ao servidor.",
+      "element": "O elemento nunca chegou ao servidor."
+    },
+    "neverReachedFix": "Verifique a sua ligação à Internet e tente novamente.",
+    "rejected": {
+      "image": "Não foi possível carregar essa imagem.",
+      "document": "Não foi possível carregar esse documento.",
+      "file": "Não foi possível carregar esse ficheiro.",
+      "font": "Não foi possível carregar esse tipo de letra.",
+      "element": "Não foi possível carregar esse elemento."
+    },
+    "rejectedFix": {
+      "signedOut": "Inicie sessão novamente e tente outra vez.",
+      "other": "Verifique o ficheiro e tente novamente. Se continuar a falhar, atualize a página."
+    },
+    "serverSaid": "{text}"
+  },
+  "uploadRoute": {
+    "signIn": {
+      "image": "Inicie sessão para carregar imagens.",
+      "element": "Inicie sessão para carregar elementos.",
+      "document": "Inicie sessão para carregar documentos.",
+      "file": "Inicie sessão para carregar ficheiros.",
+      "font": "Inicie sessão para carregar tipos de letra."
+    },
+    "permissionDenied": "Não tem permissão para carregar ficheiros aqui.",
+    "rateLimited": {
+      "shared": "Demasiados carregamentos neste momento. Tente novamente dentro de momentos.",
+      "document": "Demasiados carregamentos de documentos neste momento. Tente novamente dentro de momentos.",
+      "file": "Demasiados carregamentos de ficheiros neste momento. Tente novamente dentro de momentos."
+    },
+    "notConfigured": {
+      "image": "O carregamento de imagens ainda não está configurado. Contacte o proprietário do site.",
+      "element": "O carregamento de elementos ainda não está configurado. Contacte o proprietário do site.",
+      "document": "O carregamento ainda não está configurado. Contacte o proprietário do site.",
+      "file": "O carregamento de ficheiros ainda não está configurado. Contacte o proprietário do site.",
+      "font": "O carregamento de tipos de letra ainda não está configurado. Contacte o proprietário do site."
+    },
+    "unreadable": "Não foi possível ler o ficheiro carregado.",
+    "unexpectedFields": "Campos de carregamento inesperados.",
+    "filenameInvalid": "Esse nome de ficheiro não pode ser utilizado.",
+    "lengthMissing": "Falta o tamanho do ficheiro carregado.",
+    "missing": {
+      "image": "Não foi carregada nenhuma imagem.",
+      "document": "Não foi carregado nenhum documento.",
+      "file": "Não foi carregado nenhum ficheiro.",
+      "font": "Não foi carregado nenhum tipo de letra."
+    },
+    "empty": {
+      "image": "Essa imagem está vazia.",
+      "file": "Esse ficheiro está vazio.",
+      "font": "Esse ficheiro de tipo de letra está vazio."
+    },
+    "tooLarge": {
+      "image": "Essa imagem é demasiado grande.",
+      "document": "Esse documento é demasiado grande.",
+      "file": "Esse ficheiro é demasiado grande.",
+      "font": "Esse ficheiro de tipo de letra é demasiado grande."
+    },
+    "tooLargeFix": {
+      "image": "Utilize uma imagem com menos de {maxMb} MB. Comprima-a ou redimensione-a e tente novamente.",
+      "document": "Utilize um PDF com menos de {maxMb} MB.",
+      "file": "Utilize um ficheiro com menos de {maxMb} MB.",
+      "font": "Utilize um tipo de letra com menos de {maxMb} MB. Um WOFF2 tem normalmente bem menos de 100 KB."
+    },
+    "unsupported": {
+      "image": "Esse ficheiro não é uma imagem suportada.",
+      "font": "Esse ficheiro não é um tipo de letra suportado.",
+      "fileType": "Esse tipo de ficheiro não é suportado.",
+      "fileContents": "O conteúdo desse ficheiro não corresponde ao seu tipo.",
+      "documentType": "Os documentos têm de estar em formato PDF.",
+      "documentContents": "Esse ficheiro não é um PDF."
+    },
+    "unsupportedFix": {
+      "image": "Utilize uma imagem JPEG, PNG, WebP, GIF ou AVIF.",
+      "element": "Utilize um PNG, JPEG, WebP, GIF, AVIF ou um SVG sem scripts, ligações externas nem imagens incorporadas.",
+      "font": "Utilize um ficheiro WOFF2, WOFF, TTF ou OTF.",
+      "fileType": "Utilize um ficheiro ZIP, PDF, EPUB, MP3, WAV, MP4, JPEG, PNG, WebP ou TXT.",
+      "fileContents": "Exporte o ficheiro novamente ou escolha o formato que corresponde ao que está a carregar.",
+      "documentType": "Exporte o manual ou certificado como PDF e depois carregue-o.",
+      "documentContents": "Exporte-o novamente como PDF. Mudar o nome de um ficheiro não altera o seu formato."
+    },
+    "moderationUnavailable": "Neste momento não é possível verificar imagens.",
+    "moderationRejected": {
+      "explicit": "Essa imagem parece sexualmente explícita, por isso não pode ser utilizada num produto.",
+      "violent": "Essa imagem parece conter violência gráfica, por isso não pode ser utilizada.",
+      "hate": "Essa imagem parece conter símbolos de ódio, por isso não pode ser utilizada."
+    },
+    "inReview": "Essa imagem está a ser verificada antes de ser publicada.",
+    "inReviewFix": "Poderá utilizá-la assim que for aprovada.",
+    "storeFailed": {
+      "image": "Não foi possível guardar a imagem.",
+      "document": "Não foi possível guardar o documento.",
+      "file": "Não foi possível guardar o ficheiro.",
+      "font": "Não foi possível guardar o tipo de letra."
+    },
+    "fix": {
+      "tryAgain": "Tente novamente.",
+      "tryAgainInAMoment": "Tente novamente daqui a pouco.",
+      "tryAgainInAFewMinutes": "Tente novamente dentro de alguns minutos.",
+      "pickFile": "Escolha outro ficheiro.",
+      "pickImage": "Escolha outra imagem."
+    }
+  },
+  "products": {
+    "invalid": {
+      "message": "Os detalhes do produto não passaram na validação.",
+      "fix": "Verifique o nome, o preço e os outros campos, e tente guardar novamente."
+    },
+    "imageNotOwned": {
+      "message": "Esse carregamento de imagem não pode ser utilizado com este produto.",
+      "fix": "Carregue a imagem novamente e depois guarde outra vez."
+    },
+    "fileNotOwned": {
+      "message": "Esse carregamento de ficheiro não pode ser utilizado com este produto.",
+      "fix": "Carregue o ficheiro novamente e depois guarde outra vez."
+    },
+    "uploadUnfinished": {
+      "image": "O carregamento da imagem não terminou.",
+      "document": "O carregamento do documento não terminou.",
+      "file": "O carregamento do ficheiro não terminou.",
+      "font": "O carregamento do tipo de letra não terminou.",
+      "element": "O carregamento do elemento não terminou."
+    },
+    "uploadUnfinishedFix": {
+      "image": "Selecione a imagem novamente e carregue-a antes de guardar.",
+      "document": "Selecione o documento novamente e carregue-o antes de guardar.",
+      "file": "Selecione o ficheiro novamente e carregue-o antes de guardar.",
+      "font": "Selecione o tipo de letra novamente e carregue-o antes de guardar.",
+      "element": "Selecione o elemento novamente e carregue-o antes de guardar."
+    },
+    "uploadTooLarge": {
+      "image": "Essa imagem é demasiado grande.",
+      "document": "Esse documento é demasiado grande.",
+      "file": "Esse ficheiro é demasiado grande.",
+      "font": "Esse tipo de letra é demasiado grande.",
+      "element": "Esse elemento é demasiado grande."
+    },
+    "uploadTooLargeFix": {
+      "image": "Utilize uma imagem com menos de {maxMb} MB e carregue-a novamente.",
+      "document": "Utilize um documento com menos de {maxMb} MB e carregue-o novamente.",
+      "file": "Utilize um ficheiro com menos de {maxMb} MB e carregue-o novamente.",
+      "font": "Utilize um tipo de letra com menos de {maxMb} MB e carregue-o novamente.",
+      "element": "Utilize um elemento com menos de {maxMb} MB e carregue-o novamente."
+    },
+    "wrongTypeFix": {
+      "image": "Utilize uma imagem JPEG, PNG, WebP, GIF ou AVIF.",
+      "document": "Os documentos têm de ser PDF. Exporte-o como PDF e carregue-o novamente.",
+      "other": "Utilize um ficheiro ZIP, PDF, EPUB, MP3, WAV, MP4, JPEG, PNG, WebP ou TXT."
+    },
+    "tooManyPhotos": {
+      "message": "Demasiadas fotografias novas numa só gravação.",
+      "fix": "Adicione até {max} fotografias, guarde e depois adicione as restantes."
+    },
+    "photoNotOwned": {
+      "message": "Uma das fotografias não pode ser utilizada com este produto.",
+      "fix": "Remova-a, carregue-a novamente e depois guarde."
+    },
+    "tooManyDocuments": {
+      "message": "Demasiados documentos novos numa só gravação.",
+      "fix": "Adicione até {max} documentos, guarde e depois adicione os restantes."
+    },
+    "documentNotOwned": {
+      "message": "Um dos documentos não pode ser utilizado com este produto.",
+      "fix": "Remova-o, carregue-o novamente e depois guarde."
+    },
+    "staleOption": {
+      "message": "Uma fotografia aponta para uma opção que já não existe.",
+      "fix": "Reatribua ou remova a marcação dessa fotografia e depois guarde novamente."
+    }
+  },
+  "productImport": {
+    "unreadable": {
+      "message": "Não foi possível ler essa importação.",
+      "fix": "Carregue o ficheiro novamente."
+    },
+    "empty": {
+      "message": "Esse ficheiro estava vazio.",
+      "fix": "Exporte os seus produtos novamente e tente outra vez."
+    },
+    "tooLarge": {
+      "message": "Esse ficheiro é demasiado grande para importar.",
+      "fix": "Divida-o em ficheiros com menos de {maxMb} MB, ou importe até {maxRows} produtos de cada vez."
+    },
+    "noCurrency": {
+      "message": "Escolha uma moeda para estes produtos.",
+      "fix": "Escolha uma e importe novamente."
+    },
+    "noStatus": {
+      "message": "Escolha se estes chegam como rascunhos ou como produtos publicados.",
+      "fix": "Escolha uma opção e importe novamente."
+    },
+    "nothingImportable": {
+      "message": "Nada nesse ficheiro pôde ser importado.",
+      "fix": "Verifique se tem uma coluna de título e uma coluna de preço.",
+      "fixFirstRow": "{problem, select, noTitle {A primeira linha diz: Sem título. Verifique que colunas contêm o título e o preço.} titleTooLong {A primeira linha diz: O título tem mais de 200 carateres. Verifique que colunas contêm o título e o preço.} noPrice {A primeira linha diz: Não foi possível ler o preço. Verifique que colunas contêm o título e o preço.} priceZero {A primeira linha diz: O preço é zero. Verifique que colunas contêm o título e o preço.} other {A primeira linha diz: Outra linha já tem este título. Verifique que colunas contêm o título e o preço.}}"
+    },
+    "noneSaved": {
+      "message": "Nenhuma dessas linhas pôde ser guardada.",
+      "fix": "Verifique as colunas de título e preço."
+    },
+    "invalidRow": "Essa linha não é um produto válido."
+  },
+  "stock": {
+    "invalid": {
+      "message": "As definições de stock não passaram na validação.",
+      "fix": "A quantidade e o limite têm de ser números inteiros de 0 ou mais, e quando o registo de stock está ativado, é preciso definir quantas unidades há em stock."
+    }
+  },
+  "storefront": {
+    "nameRequired": {
+      "message": "A montra precisa de um nome.",
+      "fix": "Escreva um nome (entre 1 e 80 carateres) no campo no topo do editor e guarde novamente."
+    },
+    "invalidLayout": {
+      "message": "Os dados de esquema da montra não são válidos.",
+      "fix": "Atualize o editor e tente guardar novamente."
+    },
+    "tooManyImages": {
+      "message": "Demasiadas imagens novas numa só gravação.",
+      "fix": "Guarde a sua montra e depois adicione as restantes."
+    },
+    "invalidEmbedSettings": "Definições de incorporação inválidas.",
+    "embedSettingsFix": "Verifique a lista de domínios (nomes de anfitrião separados por vírgulas, como example.com) e guarde novamente.",
+    "upload": {
+      "backgroundImage": {
+        "notOwned": "Essa imagem de fundo não pode ser utilizada.",
+        "unfinished": "O carregamento da imagem de fundo não terminou.",
+        "missingFix": "Selecione a imagem novamente e carregue-a antes de guardar.",
+        "tooLarge": "Essa imagem de fundo é demasiado grande.",
+        "tooLargeFix": "Utilize uma imagem com menos de 10 MB e carregue-a novamente.",
+        "wrongTypeFix": "Utilize uma imagem JPEG, PNG, WebP, GIF ou AVIF."
+      },
+      "font": {
+        "notOwned": "Esse tipo de letra não pode ser utilizado.",
+        "unfinished": "O carregamento do tipo de letra não terminou.",
+        "missingFix": "Selecione o tipo de letra novamente e carregue-o antes de guardar.",
+        "tooLarge": "Esse ficheiro de tipo de letra é demasiado grande.",
+        "tooLargeFix": "Utilize um tipo de letra com menos de 2 MB. Um WOFF2 costuma ficar bem abaixo dos 100 KB.",
+        "wrongTypeFix": "Utilize um ficheiro de tipo de letra WOFF2, WOFF, TTF ou OTF."
+      },
+      "element": {
+        "notOwned": "Essa imagem não pode ser utilizada.",
+        "unfinished": "O carregamento da imagem não terminou.",
+        "missingFix": "Adicione a imagem novamente e carregue-a antes de guardar.",
+        "tooLarge": "Essa imagem é demasiado grande.",
+        "tooLargeFix": "Utilize uma imagem com menos de 2 MB e adicione-a novamente.",
+        "wrongTypeFix": "Utilize uma imagem PNG, JPEG, WebP, GIF, AVIF ou um SVG sem scripts, links externos ou imagens incorporadas."
+      }
+    }
+  },
+  "productPageApi": {
+    "notJson": {
+      "message": "O corpo desse pedido não é JSON.",
+      "fix": "Envie um objeto JSON com os campos a alterar."
+    },
+    "notObject": {
+      "message": "O corpo desse pedido não é um objeto.",
+      "fix": "Envie um objeto JSON, p. ex. '{'\"ctaColor\": \"#1d4ed8\"'}'."
+    },
+    "invalid": "Essas definições da página de produto não são válidas.",
+    "invalidFix": "Verifique o campo indicado acima em relação a `limits`, obtido através de um GET a este URL, e tente novamente."
+  }
+}

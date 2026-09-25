@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import type {
   ProductPageConfig,
   StorefrontHeader,
@@ -170,6 +171,10 @@ export function ControlsPanel({
     [searchEntries, onJump],
   );
 
+  // Hooks must be called before conditional returns.
+  const tKey = useTranslations();
+  const t = useTranslations("Storefront.controls");
+
   if (group === null) {
     return (
       <PanelMenu>
@@ -191,7 +196,7 @@ export function ControlsPanel({
         {GROUPS.map((id) => (
           <PanelMenuItem
             key={id}
-            label={GROUP_TITLES[id]}
+            label={tKey(GROUP_TITLES[id])}
             // Only where one value really represents the group. "Theme" has a
             // background that may be a gradient or a photo, with no single
             // thing to show, so it shows nothing.
@@ -199,9 +204,9 @@ export function ControlsPanel({
               id === "typography"
                 ? theme.customFont && theme.font === "custom"
                   ? theme.customFont.name
-                  : FONT_LABELS[theme.font]
+                  : tKey(FONT_LABELS[theme.font])
                 : id === "productPage" && !productPage.enabled
-                  ? "Off"
+                  ? t("off")
                   : undefined
             }
             // The product page group turns the canvas to the page it edits, so
@@ -221,13 +226,11 @@ export function ControlsPanel({
             you CANNOT click — the one buried under something else. */}
         {onOpenLayers && (
           <PanelMenuItem
-            label="Layers"
+            label={t("layers")}
             hint={
               blockCount === undefined
                 ? undefined
-                : blockCount === 1
-                  ? "1 object"
-                  : `${blockCount} objects`
+                : t("objectCount", { count: blockCount })
             }
             onClick={onOpenLayers}
           />
@@ -239,8 +242,8 @@ export function ControlsPanel({
   return (
     <div>
       <PanelBackRow
-        title={GROUP_TITLES[group]}
-        path="Design"
+        title={tKey(GROUP_TITLES[group])}
+        path={t("design")}
         onBack={() => setGroup(null)}
       />
 
@@ -251,14 +254,14 @@ export function ControlsPanel({
       {group === "cards" ? (
         <>
           <CollapsibleSection
-            title="Card style"
+            title={t("cardStyle")}
             collapsible
             summon={summoned === "cardStyle"}
           >
             <CardsSection theme={theme} onChange={onThemeChange} />
           </CollapsibleSection>
           <CollapsibleSection
-            title="Price tag"
+            title={t("priceTag")}
             collapsible
             defaultOpen={false}
             summon={summoned === "priceTag"}
@@ -290,7 +293,7 @@ export function ControlsPanel({
            with a scroll-into-view and a flash, but `collapsible` is left at
            its default false so there is nothing to expand. */
         <>
-          <CollapsibleSection title="Theme" summon={summonedTheme === "look"}>
+          <CollapsibleSection title={t("theme")} summon={summonedTheme === "look"}>
             <ThemePanel
               theme={theme}
               onChange={onThemeChange}
@@ -298,7 +301,7 @@ export function ControlsPanel({
               onBackgroundImageChange={onBackgroundImageChange}
             />
           </CollapsibleSection>
-          <CollapsibleSection title="Canvas" summon={summonedTheme === "canvas"}>
+          <CollapsibleSection title={t("canvas")} summon={summonedTheme === "canvas"}>
             <LayoutSection
               theme={theme}
               onChange={onThemeChange}

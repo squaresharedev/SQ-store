@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
+import { render, screen, cleanup } from "../setup/render";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 
 afterEach(cleanup);

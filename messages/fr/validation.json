@@ -1,0 +1,391 @@
+{
+  "checkForm": "Vérifiez le formulaire et réessayez.",
+  "generic": {
+    "invalid": "Vérifiez le formulaire et réessayez."
+  },
+  "text": {
+    "productTitle": {
+      "required": "Le champ Titre du produit est obligatoire.",
+      "tooLong": "Le champ Titre du produit doit compter au maximum {maximum} caractères.",
+      "unsupported": "Le champ Titre du produit contient des caractères non pris en charge."
+    },
+    "productDescription": {
+      "required": "Le champ Description du produit est obligatoire.",
+      "tooLong": "Le champ Description du produit doit compter au maximum {maximum} caractères.",
+      "unsupported": "Le champ Description du produit contient des caractères non pris en charge."
+    },
+    "filename": {
+      "required": "Le champ Nom de fichier est obligatoire.",
+      "tooLong": "Le champ Nom de fichier doit compter au maximum {maximum} caractères.",
+      "unsupported": "Le champ Nom de fichier contient des caractères non pris en charge."
+    },
+    "galleryAlt": {
+      "required": "Le champ Texte alternatif est obligatoire.",
+      "tooLong": "Le champ Texte alternatif doit compter au maximum {maximum} caractères.",
+      "unsupported": "Le champ Texte alternatif contient des caractères non pris en charge."
+    },
+    "specName": {
+      "required": "Le champ Nom de la caractéristique est obligatoire.",
+      "tooLong": "Le champ Nom de la caractéristique doit compter au maximum {maximum} caractères.",
+      "unsupported": "Le champ Nom de la caractéristique contient des caractères non pris en charge."
+    },
+    "specValue": {
+      "required": "Le champ Valeur de la caractéristique est obligatoire.",
+      "tooLong": "Le champ Valeur de la caractéristique doit compter au maximum {maximum} caractères.",
+      "unsupported": "Le champ Valeur de la caractéristique contient des caractères non pris en charge."
+    },
+    "optionName": {
+      "required": "Le champ Nom de l’option est obligatoire.",
+      "tooLong": "Le champ Nom de l’option doit compter au maximum {maximum} caractères.",
+      "unsupported": "Le champ Nom de l’option contient des caractères non pris en charge."
+    },
+    "optionGroupName": {
+      "required": "Le champ Nom du groupe d’options est obligatoire.",
+      "tooLong": "Le champ Nom du groupe d’options doit compter au maximum {maximum} caractères.",
+      "unsupported": "Le champ Nom du groupe d’options contient des caractères non pris en charge."
+    },
+    "documentName": {
+      "required": "Le champ Nom du document est obligatoire.",
+      "tooLong": "Le champ Nom du document doit compter au maximum {maximum} caractères.",
+      "unsupported": "Le champ Nom du document contient des caractères non pris en charge."
+    },
+    "materials": {
+      "required": "Le champ Matériaux est obligatoire.",
+      "tooLong": "Le champ Matériaux doit compter au maximum {maximum} caractères.",
+      "unsupported": "Le champ Matériaux contient des caractères non pris en charge."
+    },
+    "care": {
+      "required": "Le champ Instructions d’entretien est obligatoire.",
+      "tooLong": "Le champ Instructions d’entretien doit compter au maximum {maximum} caractères.",
+      "unsupported": "Le champ Instructions d’entretien contient des caractères non pris en charge."
+    },
+    "includedItem": {
+      "required": "Le champ Élément inclus est obligatoire.",
+      "tooLong": "Le champ Élément inclus doit compter au maximum {maximum} caractères.",
+      "unsupported": "Le champ Élément inclus contient des caractères non pris en charge."
+    },
+    "origin": {
+      "required": "Le champ Pays d’origine est obligatoire.",
+      "tooLong": "Le champ Pays d’origine doit compter au maximum {maximum} caractères.",
+      "unsupported": "Le champ Pays d’origine contient des caractères non pris en charge."
+    },
+    "manufacturerName": {
+      "required": "Le champ Fabricant est obligatoire.",
+      "tooLong": "Le champ Fabricant doit compter au maximum {maximum} caractères.",
+      "unsupported": "Le champ Fabricant contient des caractères non pris en charge."
+    },
+    "manufacturerAddress": {
+      "required": "Le champ Adresse du fabricant est obligatoire.",
+      "tooLong": "Le champ Adresse du fabricant doit compter au maximum {maximum} caractères.",
+      "unsupported": "Le champ Adresse du fabricant contient des caractères non pris en charge."
+    },
+    "responsibleName": {
+      "required": "Le champ Personne responsable dans l’UE est obligatoire.",
+      "tooLong": "Le champ Personne responsable dans l’UE doit compter au maximum {maximum} caractères.",
+      "unsupported": "Le champ Personne responsable dans l’UE contient des caractères non pris en charge."
+    },
+    "responsibleAddress": {
+      "required": "Le champ Adresse de la personne responsable dans l’UE est obligatoire.",
+      "tooLong": "Le champ Adresse de la personne responsable dans l’UE doit compter au maximum {maximum} caractères.",
+      "unsupported": "Le champ Adresse de la personne responsable dans l’UE contient des caractères non pris en charge."
+    },
+    "safetyIdentifier": {
+      "required": "Le champ Numéro de type, de lot ou de série est obligatoire.",
+      "tooLong": "Le champ Numéro de type, de lot ou de série doit compter au maximum {maximum} caractères.",
+      "unsupported": "Le champ Numéro de type, de lot ou de série contient des caractères non pris en charge."
+    },
+    "warnings": {
+      "required": "Le champ Avertissements est obligatoire.",
+      "tooLong": "Le champ Avertissements doit compter au maximum {maximum} caractères.",
+      "unsupported": "Le champ Avertissements contient des caractères non pris en charge."
+    },
+    "businessName": {
+      "required": "Le champ Raison sociale est obligatoire.",
+      "tooLong": "Le champ Raison sociale doit compter au maximum {maximum} caractères.",
+      "unsupported": "Le champ Raison sociale contient des caractères non pris en charge."
+    },
+    "businessAddress": {
+      "required": "Le champ Adresse professionnelle est obligatoire.",
+      "tooLong": "Le champ Adresse professionnelle doit compter au maximum {maximum} caractères.",
+      "unsupported": "Le champ Adresse professionnelle contient des caractères non pris en charge."
+    },
+    "phone": {
+      "required": "Le champ Numéro de téléphone est obligatoire.",
+      "tooLong": "Le champ Numéro de téléphone doit compter au maximum {maximum} caractères.",
+      "unsupported": "Le champ Numéro de téléphone contient des caractères non pris en charge."
+    },
+    "bio": {
+      "required": "Le champ Bio est obligatoire.",
+      "tooLong": "Le champ Bio doit compter au maximum {maximum} caractères.",
+      "unsupported": "Le champ Bio contient des caractères non pris en charge."
+    },
+    "destinationArea": {
+      "required": "Le champ Destination est obligatoire.",
+      "tooLong": "Le champ Destination doit compter au maximum {maximum} caractères.",
+      "unsupported": "Le champ Destination contient des caractères non pris en charge."
+    },
+    "deliveryTime": {
+      "required": "Le champ Délai de livraison est obligatoire.",
+      "tooLong": "Le champ Délai de livraison doit compter au maximum {maximum} caractères.",
+      "unsupported": "Le champ Délai de livraison contient des caractères non pris en charge."
+    },
+    "shippingCost": {
+      "required": "Le champ Frais de livraison est obligatoire.",
+      "tooLong": "Le champ Frais de livraison doit compter au maximum {maximum} caractères.",
+      "unsupported": "Le champ Frais de livraison contient des caractères non pris en charge."
+    },
+    "dispatchTime": {
+      "required": "Le champ Délai d’expédition est obligatoire.",
+      "tooLong": "Le champ Délai d’expédition doit compter au maximum {maximum} caractères.",
+      "unsupported": "Le champ Délai d’expédition contient des caractères non pris en charge."
+    },
+    "shippingNotes": {
+      "required": "Le champ Notes de livraison est obligatoire.",
+      "tooLong": "Le champ Notes de livraison doit compter au maximum {maximum} caractères.",
+      "unsupported": "Le champ Notes de livraison contient des caractères non pris en charge."
+    },
+    "shippingPolicy": {
+      "required": "Le champ Politique de livraison est obligatoire.",
+      "tooLong": "Le champ Politique de livraison doit compter au maximum {maximum} caractères.",
+      "unsupported": "Le champ Politique de livraison contient des caractères non pris en charge."
+    },
+    "returnsNotes": {
+      "required": "Le champ Notes de retour est obligatoire.",
+      "tooLong": "Le champ Notes de retour doit compter au maximum {maximum} caractères.",
+      "unsupported": "Le champ Notes de retour contient des caractères non pris en charge."
+    },
+    "returnsPolicy": {
+      "required": "Le champ Politique de retour est obligatoire.",
+      "tooLong": "Le champ Politique de retour doit compter au maximum {maximum} caractères.",
+      "unsupported": "Le champ Politique de retour contient des caractères non pris en charge."
+    },
+    "otherCategory": {
+      "required": "Le champ Catégorie est obligatoire.",
+      "tooLong": "Le champ Catégorie doit compter au maximum {maximum} caractères.",
+      "unsupported": "Le champ Catégorie contient des caractères non pris en charge."
+    },
+    "storefrontName": {
+      "required": "Le champ Nom de la vitrine est obligatoire.",
+      "tooLong": "Le champ Nom de la vitrine doit compter au maximum {maximum} caractères.",
+      "unsupported": "Le champ Nom de la vitrine contient des caractères non pris en charge."
+    },
+    "fontName": {
+      "required": "Le champ Nom de la police est obligatoire.",
+      "tooLong": "Le champ Nom de la police doit compter au maximum {maximum} caractères.",
+      "unsupported": "Le champ Nom de la police contient des caractères non pris en charge."
+    },
+    "storeName": {
+      "required": "Le champ Nom de la boutique est obligatoire.",
+      "tooLong": "Le champ Nom de la boutique doit compter au maximum {maximum} caractères.",
+      "unsupported": "Le champ Nom de la boutique contient des caractères non pris en charge."
+    },
+    "storeBio": {
+      "required": "Le champ Bio de la boutique est obligatoire.",
+      "tooLong": "Le champ Bio de la boutique doit compter au maximum {maximum} caractères.",
+      "unsupported": "Le champ Bio de la boutique contient des caractères non pris en charge."
+    },
+    "ctaLabel": {
+      "required": "Le champ Libellé du bouton d’achat est obligatoire.",
+      "tooLong": "Le champ Libellé du bouton d’achat doit compter au maximum {maximum} caractères.",
+      "unsupported": "Le champ Libellé du bouton d’achat contient des caractères non pris en charge."
+    },
+    "shippingProfileName": {
+      "required": "Le champ Nom du profil de livraison est obligatoire.",
+      "tooLong": "Le champ Nom du profil de livraison doit compter au maximum {maximum} caractères.",
+      "unsupported": "Le champ Nom du profil de livraison contient des caractères non pris en charge."
+    },
+    "shippingTerms": {
+      "required": "Le champ Conditions de livraison est obligatoire.",
+      "tooLong": "Le champ Conditions de livraison doit compter au maximum {maximum} caractères.",
+      "unsupported": "Le champ Conditions de livraison contient des caractères non pris en charge."
+    },
+    "blockText": {
+      "required": "Le champ Texte du bloc est obligatoire.",
+      "tooLong": "Le champ Texte du bloc doit compter au maximum {maximum} caractères.",
+      "unsupported": "Le champ Texte du bloc contient des caractères non pris en charge."
+    },
+    "elementAlt": {
+      "required": "Le champ Texte alternatif de l’élément est obligatoire.",
+      "tooLong": "Le champ Texte alternatif de l’élément doit compter au maximum {maximum} caractères.",
+      "unsupported": "Le champ Texte alternatif de l’élément contient des caractères non pris en charge."
+    },
+    "notificationTitle": {
+      "required": "Le champ Titre de la notification est obligatoire.",
+      "tooLong": "Le champ Titre de la notification doit compter au maximum {maximum} caractères.",
+      "unsupported": "Le champ Titre de la notification contient des caractères non pris en charge."
+    },
+    "notificationBody": {
+      "required": "Le champ Contenu de la notification est obligatoire.",
+      "tooLong": "Le champ Contenu de la notification doit compter au maximum {maximum} caractères.",
+      "unsupported": "Le champ Contenu de la notification contient des caractères non pris en charge."
+    },
+    "searchQuery": {
+      "required": "Le champ Recherche est obligatoire.",
+      "tooShort": "Le champ Recherche nécessite au moins {minimum} caractères.",
+      "tooLong": "Le champ Recherche doit compter au maximum {maximum} caractères.",
+      "unsupported": "Le champ Recherche contient des caractères non pris en charge."
+    },
+    "factorName": {
+      "required": "Le nom est obligatoire.",
+      "tooLong": "Le nom ne doit pas dépasser {maximum} caractères.",
+      "unsupported": "Le nom contient des caractères non pris en charge."
+    },
+    "reportDetails": {
+      "required": "Votre description est obligatoire.",
+      "tooLong": "Votre description ne doit pas dépasser {maximum} caractères.",
+      "unsupported": "Votre description contient des caractères non pris en charge."
+    }
+  },
+  "email": {
+    "generic": {
+      "format": "Cet e-mail ne ressemble pas à une adresse e-mail.",
+      "tooLong": "Cet e-mail est trop long.",
+      "unsupported": "Cet e-mail contient des caractères non pris en charge."
+    },
+    "reporter": {
+      "format": "Votre e-mail ne ressemble pas à une adresse e-mail.",
+      "tooLong": "Votre e-mail est trop long.",
+      "unsupported": "Votre e-mail contient des caractères non pris en charge."
+    },
+    "contactEmail": {
+      "format": "L’e-mail de contact ne ressemble pas à une adresse e-mail.",
+      "tooLong": "L’e-mail de contact est trop long.",
+      "unsupported": "L’e-mail de contact contient des caractères non pris en charge."
+    },
+    "manufacturerEmail": {
+      "format": "L’e-mail du fabricant ne ressemble pas à une adresse e-mail.",
+      "tooLong": "L’e-mail du fabricant est trop long.",
+      "unsupported": "L’e-mail du fabricant contient des caractères non pris en charge."
+    },
+    "responsibleEmail": {
+      "format": "L’e-mail de la personne responsable dans l’UE ne ressemble pas à une adresse e-mail.",
+      "tooLong": "L’e-mail de la personne responsable dans l’UE est trop long.",
+      "unsupported": "L’e-mail de la personne responsable dans l’UE contient des caractères non pris en charge."
+    }
+  },
+  "emailQuality": {
+    "placeholder": "L’e-mail de contact ressemble à une adresse factice. Utilisez une adresse que vous consultez réellement.",
+    "disposable": "L’e-mail de contact utilise un fournisseur de messagerie temporaire. Utilisez une adresse permanente."
+  },
+  "uuid": {
+    "id": "Cet ID n’est pas valide.",
+    "option": "Cette option n’est pas valide.",
+    "optionGroup": "Ce groupe d’options n’est pas valide.",
+    "shippingProfile": "Ce profil de livraison n’est pas valide.",
+    "storefrontId": "Cet ID de vitrine n’est pas valide.",
+    "blockId": "Un ID de bloc n’est pas valide.",
+    "notificationRecipient": "Un destinataire de notification n’est pas valide.",
+    "factor": "Cette application d’authentification n’est pas valide.",
+    "reportTarget": "Cet élément n’est pas valide."
+  },
+  "handle": {
+    "username": "Un nom d’utilisateur doit comporter de 3 à 30 caractères, en utilisant uniquement des lettres, chiffres et tirets bas."
+  },
+  "hostname": {
+    "domains": "Les domaines doivent être de simples domaines en minuscules, comme yoursite.com (sans https://, port, chemin ni caractère générique)."
+  },
+  "referenceCode": {
+    "vatId": "Un numéro de TVA doit comporter de {min} à {max} lettres, chiffres, espaces, points ou tirets."
+  },
+  "oneTimeCode": {
+    "authenticator": "Le code est composé des 6 chiffres affichés dans votre application d’authentification."
+  },
+  "hexColor": {
+    "colors": "Les couleurs doivent être un code hexadécimal à 6 chiffres, comme #a855f7.",
+    "swatchColours": "Les couleurs d’échantillon doivent être un code hexadécimal à 6 chiffres, comme #a855f7."
+  },
+  "int": {
+    "price": {
+      "whole": "Le prix doit être un nombre entier.",
+      "tooSmall": "Le prix doit être {minimum} ou plus.",
+      "tooBig": "Le prix doit être {maximum} ou moins."
+    },
+    "maxPerOrder": {
+      "whole": "Le maximum par commande doit être un nombre entier.",
+      "tooSmall": "Le maximum par commande doit être {minimum} ou plus.",
+      "tooBig": "Le maximum par commande doit être {maximum} ou moins."
+    }
+  },
+  "list": {
+    "domains": {
+      "tooMany": "Indiquez jusqu’à {maximum} domaines.",
+      "duplicate": "Chaque domaine ne peut être indiqué qu’une seule fois."
+    }
+  },
+  "settings": {
+    "currentPasswordRequired": "Saisissez votre mot de passe actuel.",
+    "newPasswordTooShort": "Le nouveau mot de passe nécessite au moins {minimum} caractères.",
+    "newPasswordTooLong": "Restez en dessous de {maximum} caractères.",
+    "passwordsMismatch": "Les nouveaux mots de passe ne correspondent pas.",
+    "pickCountry": "Choisissez un pays dans la liste.",
+    "legalVersionChanged": "Les documents juridiques ont changé pendant que vous les lisiez. Rechargez et réessayez.",
+    "deleteConfirm": "Tapez exactement « {phrase} » pour confirmer."
+  },
+  "password": {
+    "tooShort": "Le mot de passe doit comporter au moins {minimum} caractères.",
+    "tooLong": "Restez en dessous de {maximum} caractères.",
+    "tooCommon": "Ce mot de passe est trop courant. Choisissez quelque chose de moins devinable.",
+    "repeated": "Ce mot de passe est trop facile à deviner. Essayez un mélange de mots plus long.",
+    "sequence": "Ce mot de passe contient une séquence de clavier courante. Essayez autre chose.",
+    "containsIdentity": "Le mot de passe ne doit pas contenir votre adresse e-mail ni votre nom d’utilisateur.",
+    "weakMix": "Mélangez majuscules et minuscules, un chiffre ou un symbole, ou utilisez {length} caractères ou plus."
+  },
+  "team": {
+    "invalidStore": "Référence de boutique non valide.",
+    "invalidEmail": "Cela ne ressemble pas à une adresse e-mail.",
+    "emailTooLong": "Cet e-mail est trop long.",
+    "invalidRole": "Choisissez un rôle valide.",
+    "invalidInvite": "Référence d’invitation non valide.",
+    "invalidMember": "Référence de membre non valide."
+  },
+  "auth": {
+    "usernameReserved": "Ce nom d’utilisateur est réservé. Choisissez-en un autre."
+  },
+  "notifications": {
+    "invalidReference": "Référence de notification non valide."
+  },
+  "product": {
+    "stockRequired": "Indiquez la quantité en stock.",
+    "optionSpecsTooMany": "Une variante peut avoir jusqu’à {maximum} caractéristiques qui lui sont propres.",
+    "optionGroupEmpty": "Donnez au moins une option à chaque groupe d’options, ou supprimez le groupe.",
+    "optionGroupTooManyOptions": "Un groupe d’options peut contenir jusqu’à {maximum} options.",
+    "includedTooMany": "Indiquez jusqu’à {maximum} éléments inclus.",
+    "specsTooMany": "Indiquez jusqu’à {maximum} caractéristiques.",
+    "purchaseLinkFormat": "Le lien d’achat doit être une adresse https:// complète.",
+    "purchaseLinkTooLong": "Le lien d’achat doit compter au maximum {maximum} caractères.",
+    "purchaseLinkCredentials": "Le lien d’achat ne peut pas contenir de nom d’utilisateur ni de mot de passe.",
+    "galleryTooMany": "Un produit peut avoir jusqu’à {maximum} photos supplémentaires.",
+    "optionGroupsTooMany": "Un produit peut avoir jusqu’à {maximum} groupes d’options.",
+    "documentsTooMany": "Un produit peut avoir jusqu’à {maximum} documents.",
+    "optionDuplicate": "Chaque option ne peut être indiquée qu’une seule fois.",
+    "optionsTotalTooMany": "Un produit peut avoir jusqu’à {maximum} options au total.",
+    "galleryStaleOption": "Une photo pointe vers une option qui n’existe plus."
+  },
+  "productImport": {
+    "noTitle": "Aucun titre.",
+    "titleTooLong": "Le titre dépasse 200 caractères.",
+    "noPrice": "Aucun prix n’a pu être lu.",
+    "priceZero": "Le prix est à zéro.",
+    "duplicateTitle": "Une autre ligne porte ce titre."
+  },
+  "shipping": {
+    "shipsFromInvalid": "Ce n’est pas un pays depuis lequel nous pouvons encore expédier.",
+    "destinationsTooMany": "Vous pouvez indiquer jusqu’à {maximum} destinations.",
+    "returnsWindowWhole": "Un délai de retour est un nombre entier de jours.",
+    "returnsWindowNegative": "Un délai de retour ne peut pas être négatif.",
+    "returnsWindowTooLong": "Un délai de retour est plafonné à {maximum} jours."
+  },
+  "storefront": {
+    "backgroundImageKind": "Les images d’arrière-plan doivent être des images importées.",
+    "customFontKind": "Les polices personnalisées doivent être des polices importées.",
+    "elementKind": "Les éléments doivent être des éléments importés.",
+    "productPageSectionsTooMany": "La page produit doit lister chaque section une fois.",
+    "productPageSectionDuplicate": "La page produit ne peut pas lister la même section deux fois.",
+    "shippingProfilesTooMany": "Une boutique peut conserver jusqu’à {maximum} profils de livraison.",
+    "shippingProfileDuplicate": "Chaque profil de livraison ne peut être indiqué qu’une seule fois.",
+    "spanRange": "Une période formatée doit se terminer après son début",
+    "blocksTooMany": "Une vitrine peut contenir jusqu’à {maximum} blocs. Supprimez des blocs ou divisez cette vitrine en deux.",
+    "blocksDuplicate": "Les blocs de la grille doivent être uniques.",
+    "blockOutsideCanvas": "Un bloc se trouve en dehors du canevas."
+  }
+}

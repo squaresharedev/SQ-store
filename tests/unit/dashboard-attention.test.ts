@@ -10,6 +10,13 @@ import {
 import type { DashboardOrdersData, ProductsSummary } from "@/lib/dashboard/queries";
 import { STRIPE_CONNECT_AVAILABLE } from "@/lib/payments/availability";
 import { LEGAL_VERSION } from "@/lib/settings/constants";
+import type { MessageRef } from "@/i18n/types";
+import { english } from "../setup/translate";
+
+/** The English a row shows, so these assertions still read the copy a seller sees. */
+function text(ref: MessageRef | undefined): string | undefined {
+  return ref && english(ref);
+}
 
 /**
  * The "Needs attention" module is a list of DESTINATIONS. A row that describes
@@ -213,8 +220,8 @@ describe("needs-attention destinations", () => {
   it("opens the storefront list when none is saved yet", () => {
     const item = build().get("storefront");
     expect(item?.href).toBe("/storefront");
-    expect(item?.label).toBe("Create your storefront");
-    expect(item?.actionLabel).toBe("Create storefront");
+    expect(text(item?.label)).toBe("Create your storefront");
+    expect(text(item?.actionLabel)).toBe("Create storefront");
   });
 
   it("opens the designer for the empty storefront itself", () => {
@@ -235,7 +242,7 @@ describe("needs-attention destinations", () => {
       storefronts: { total: 1, rows: [{ id: "sf-1", blockCount: 0 }] },
     }).get("storefront");
     expect(single?.href).toBe("/storefront/sf-1");
-    expect(single?.actionLabel).toBe("Open designer");
+    expect(text(single?.actionLabel)).toBe("Open designer");
   });
 
   it("leaves the storefront row to the setup checklist while it is showing", () => {
@@ -284,13 +291,13 @@ describe("needs-attention destinations", () => {
       orders: { disputedCount: 1, refundedCount: 1 },
     }).get("flagged-orders");
     expect(item?.href).toBe("/orders");
-    expect(item?.description).toBe("1 disputed, 1 refunded.");
+    expect(text(item?.description)).toBe("1 disputed, 1 refunded.");
   });
 
   it("never counts a status it does not describe", () => {
     const item = build({ orders: { refundedCount: 2 } }).get("flagged-orders");
-    expect(item?.label).toBe("2 orders to review");
-    expect(item?.description).toBe("2 refunded.");
+    expect(text(item?.label)).toBe("2 orders to review");
+    expect(text(item?.description)).toBe("2 refunded.");
   });
 
   // --- Profile rows ---------------------------------------------------
@@ -321,17 +328,17 @@ describe("needs-attention destinations", () => {
       profile: { ...HEALTHY_PROFILE, legalAcceptedVersion: null },
     }).get("no-legal");
     expect(item?.href).toBe("/settings/legal");
-    expect(item?.label).toBe("Accept the seller terms");
+    expect(text(item?.label)).toBe("Accept the seller terms");
     // Acceptance gates nothing today, so the row must not threaten anything.
-    expect(item?.description).not.toMatch(/account active/i);
+    expect(text(item?.description)).not.toMatch(/account active/i);
   });
 
   it("calls the terms updated only for someone who accepted an older version", () => {
     const item = build({
       profile: { ...HEALTHY_PROFILE, legalAcceptedVersion: "2025-01-old" },
     }).get("no-legal");
-    expect(item?.label).toBe("Accept the updated seller terms");
-    expect(item?.description).not.toMatch(/account active/i);
+    expect(text(item?.label)).toBe("Accept the updated seller terms");
+    expect(text(item?.description)).not.toMatch(/account active/i);
   });
 
   it("hides the no-legal row when the current version is accepted", () => {
@@ -347,7 +354,7 @@ describe("needs-attention destinations", () => {
       profile: { ...HEALTHY_PROFILE, sellerEmail: null },
     }).get("no-buy-path");
     expect(item?.href).toBe("/products");
-    expect(item?.label).toContain("3 products");
+    expect(text(item?.label)).toContain("3 products");
   });
 
   it("hides the no-buy-path row when the account has a contact email", () => {
@@ -400,7 +407,7 @@ describe("needs-attention destinations", () => {
       },
     }).get("noindex-product-pages");
     expect(item?.href).toBe("/storefront/sf-1");
-    expect(item?.actionLabel).toBe("Open designer");
+    expect(text(item?.actionLabel)).toBe("Open designer");
   });
 
   it("falls back to the storefront list for the noindex row when no specific id", () => {
@@ -424,13 +431,13 @@ describe("needs-attention destinations", () => {
   it("adds the dead-blocks row with a count in the label", () => {
     const item = build({ storefronts: { deadBlockCount: 3 } }).get("dead-blocks");
     expect(item?.href).toBe("/storefront");
-    expect(item?.label).toContain("3 storefront blocks");
+    expect(text(item?.label)).toContain("3 storefront blocks");
   });
 
   it("uses the singular label for a single dead block", () => {
     const item = build({ storefronts: { deadBlockCount: 1 } }).get("dead-blocks");
-    expect(item?.label).toContain("1 storefront block");
-    expect(item?.label).not.toContain("blocks");
+    expect(text(item?.label)).toContain("1 storefront block");
+    expect(text(item?.label)).not.toContain("blocks");
   });
 
   it("hides the dead-blocks row when there are no dead blocks", () => {
@@ -476,7 +483,7 @@ describe("needs-attention destinations", () => {
   it("gives every row an action label", () => {
     for (const items of ALL_BRANCHES) {
       for (const item of items.values()) {
-        expect(item.actionLabel.length).toBeGreaterThan(0);
+        expect(english(item.actionLabel).length).toBeGreaterThan(0);
       }
     }
   });

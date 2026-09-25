@@ -1,0 +1,108 @@
+{
+  "metadata": {
+    "orders": {
+      "title": "Orders"
+    }
+  },
+  "page": {
+    "title": "Orders",
+    "subtitle": "Every order placed through Square Share."
+  },
+  "status": {
+    "paid": "Paid",
+    "refunded": "Refunded",
+    "disputed": "Disputed",
+    "pending": "Pending"
+  },
+  "channel": {
+    "embed": "Embed",
+    "marketplace": "Marketplace"
+  },
+  "empty": {
+    "filteredTitle": "No orders match these filters",
+    "filteredHint": "Try widening the date range or clearing filters.",
+    "clearFilters": "Clear filters",
+    "title": "No orders yet",
+    "hint": "Square Share checkout isn't open yet. Sales through your own buy link or by email won't show up here.",
+    "goToProducts": "Go to products"
+  },
+  "list": {
+    "updating": "Updating…",
+    "summary": "{total, plural, one {{total} order} other {{total} orders}} · page {page} of {totalPages}",
+    "detailDialog": "Order details",
+    "closeDetail": "Close order details"
+  },
+  "table": {
+    "product": "Product",
+    "amount": "Amount",
+    "channel": "Channel",
+    "status": "Status",
+    "buyer": "Buyer",
+    "date": "Date"
+  },
+  "toolbar": {
+    "region": "order filters",
+    "channel": "channel",
+    "buyerEmail": "buyer email",
+    "searchPlaceholder": "search buyer email",
+    "status": "status",
+    "statusAriaLabel": "Filter by status",
+    "allStatuses": "All statuses",
+    "dateRange": "date range",
+    "datePlaceholder": "any dates",
+    "sort": "sort",
+    "sortAriaLabel": "Sort orders",
+    "clearFilters": "clear filters"
+  },
+  "sort": {
+    "newest": "Newest first",
+    "oldest": "Oldest first",
+    "amountHigh": "Amount: high to low",
+    "amountLow": "Amount: low to high"
+  },
+  "detail": {
+    "close": "Close order details",
+    "version": "Version",
+    "copyVersion": {
+      "copy": "Copy version",
+      "copied": "Copied version",
+      "failed": "Couldn't copy version. Select and copy it manually."
+    },
+    "amount": "Amount",
+    "platformFee": "Platform fee",
+    "youReceive": "You receive",
+    "buyerEmail": "Buyer email",
+    "copyBuyerEmail": {
+      "copy": "Copy buyer email",
+      "copied": "Copied buyer email",
+      "failed": "Couldn't copy buyer email. Select and copy it manually."
+    },
+    "noEmail": "no email",
+    "channel": "Channel",
+    "date": "Date",
+    "orderId": "Order ID",
+    "copyOrderId": {
+      "copy": "Copy order ID",
+      "copied": "Copied order ID",
+      "failed": "Couldn't copy order ID. Select and copy it manually."
+    }
+  },
+  "actions": {
+    "refundNeedsStripe": "Refunds require Stripe to be connected.",
+    "connectStripe": "Connect Stripe to enable refunds",
+    "refundConfirm": "Refund this order? This cannot be undone once Stripe is connected.",
+    "confirmRefund": "Confirm refund",
+    "refundOrder": "Refund order",
+    "disputeInStripe": "Disputes are handled in your Stripe dashboard once Stripe is connected.",
+    "disputeConfirm": "Open dispute handling for this order?",
+    "handleDispute": "Handle dispute",
+    "none": "No actions are available for this order."
+  },
+  "skeleton": {
+    "loading": "loading orders"
+  },
+  "loading": {
+    "title": "Orders",
+    "subtitle": "Every sale across your embed and the marketplace."
+  }
+}

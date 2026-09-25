@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 
@@ -25,12 +26,13 @@ export function FactorPicker({
   name: string;
   id: string;
 }) {
+  const t = useTranslations("Auth.factorPicker");
   const [value, setValue] = React.useState(factors[0]?.id ?? "");
   if (factors.length < 2) return null;
 
   return (
     <div className="flex flex-col gap-2">
-      <Label htmlFor={id}>Authenticator</Label>
+      <Label htmlFor={id}>{t("label")}</Label>
       <Select
         id={id}
         value={value}

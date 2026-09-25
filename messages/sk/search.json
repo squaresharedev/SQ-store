@@ -1,0 +1,72 @@
+{
+  "trigger": {
+    "label": "Vyhľadávanie"
+  },
+  "overlay": {
+    "label": "Vyhľadávanie",
+    "placeholder": "Vyhľadajte produkty, objednávky, nastavenia…",
+    "clear": "Vymazať vyhľadávanie",
+    "close": "Zavrieť vyhľadávanie",
+    "results": "Výsledky vyhľadávania",
+    "searching": "Vyhľadáva sa…",
+    "noResults": "Žiadne výsledky pre {query}",
+    "resultCount": "{count, plural, one {{count} výsledok pre {query}} few {{count} výsledky pre {query}} many {{count} výsledku pre {query}} other {{count} výsledkov pre {query}}}",
+    "nothingMatches": "Nič nezodpovedá „{query}“.",
+    "startTyping": "Začnite písať pre vyhľadávanie.",
+    "remoteError": "Server nie je dostupný: zobrazujú sa iba stránky, nastavenia a akcie.",
+    "remoteErrorCached": "Vyhľadávanie nie je dostupné: zobrazujú sa uložené výsledky, stránky a nastavenia.",
+    "remoteAuth": "Platnosť relácie vypršala, zobrazujú sa iba stránky a nastavenia.",
+    "remoteThrottled": "Vyhľadávate príliš rýchlo: zobrazujú sa iba stránky, nastavenia a akcie."
+  },
+  "sections": {
+    "pages": "Stránky",
+    "actions": "Akcie",
+    "settings": "Nastavenia"
+  },
+  "groups": {
+    "products": "Produkty",
+    "orders": "Objednávky",
+    "storefronts": "Výklady",
+    "team": "Tím",
+    "notifications": "Upozornenia",
+    "recent": "Nedávne"
+  },
+  "results": {
+    "draft": "Koncept",
+    "openInDesigner": "Otvoriť v editore",
+    "invited": "Pozvaný",
+    "order": "Objednávka",
+    "unread": "Neprečítané"
+  },
+  "fields": {
+    "username": "Používateľské meno",
+    "avatar": "Profilová fotka",
+    "email": "E-mailová adresa",
+    "password": "Heslo",
+    "twoFactor": "Dvojfaktorové overenie",
+    "recoveryCodes": "Záložné kódy",
+    "securityActivity": "Bezpečnostná aktivita",
+    "signOut": "Odhlásiť sa",
+    "vat": "IČ DPH",
+    "businessName": "Obchodné meno",
+    "country": "Krajina",
+    "address": "Adresa sídla",
+    "contactEmail": "Kontaktný e-mail",
+    "phone": "Telefón",
+    "bio": "Medailón",
+    "salesEmails": "E-maily o predajoch",
+    "marketingEmails": "Marketingové e-maily",
+    "productEmails": "E-maily o aktualizáciách produktov",
+    "sellerAgreement": "Zmluva s predajcom",
+    "termsOfService": "Podmienky služby",
+    "exportData": "Exportovať moje dáta",
+    "deleteAccount": "Zmazať účet"
+  },
+  "actions": {
+    "newProduct": "Nový produkt",
+    "newStorefront": "Nový výklad",
+    "inviteMember": "Pozvať člena tímu",
+    "notificationHistory": "História upozornení",
+    "showMeAround": "Spustiť prehliadku"
+  }
+}

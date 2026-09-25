@@ -1,0 +1,189 @@
+{
+  "metadata": {
+    "analytics": {
+      "title": "Analytika"
+    }
+  },
+  "page": {
+    "title": "Analytika",
+    "subtitle": "Prodeje, zobrazení výloh a vše ostatní, co se ve vašem obchodě děje."
+  },
+  "loading": {
+    "title": "Analytika",
+    "subtitle": "Jak si váš obchod vede ve vložení na web i na tržišti.",
+    "srLoading": "načítání analytiky"
+  },
+  "firstRun": {
+    "title": "Zatím není co měřit",
+    "body": "Návštěvy produktových stránek se tu objeví, jakmile bude některá z nich zveřejněná.",
+    "backToSetup": "Zpět k nastavení"
+  },
+  "range": {
+    "ariaLabel": "Období",
+    "last30Days": "Posledních 30 dní",
+    "allTime": "Celou dobu",
+    "custom": "Vlastní",
+    "placeholder": "Vyberte období"
+  },
+  "section": {
+    "whatMeasures": "Co měří: {title}"
+  },
+  "chart": {
+    "howToRead": "Jak číst graf: {title}",
+    "emptyDefault": "V tomto období žádné prodeje"
+  },
+  "sales": {
+    "label": "Prodeje",
+    "description": "Zaplacené objednávky přes pokladnu Square Share.",
+    "revenue": {
+      "title": "Tržby",
+      "description": "Zaplacené tržby v čase.",
+      "series": "Tržby",
+      "ariaLabel": "Zaplacené tržby v čase"
+    },
+    "aov": {
+      "title": "Průměrná hodnota objednávky",
+      "description": "Kolik má typická objednávka hodnotu v čase.",
+      "series": "Průměrná objednávka",
+      "ariaLabel": "Průměrná hodnota objednávky v čase"
+    },
+    "channels": {
+      "title": "Kanály",
+      "description": "Odkud přicházejí vaše prodeje.",
+      "ariaLabel": "Zaplacené tržby podle kanálu"
+    },
+    "weekday": {
+      "title": "Prodeje podle dne v týdnu",
+      "description": "Týdenní rytmus vašeho obchodu.",
+      "series": "Prodeje",
+      "count": "{count, plural, one {{formatted} prodej} few {{formatted} prodeje} many {{formatted} prodeje} other {{formatted} prodejů}}",
+      "ariaLabel": "Prodeje podle dne v týdnu"
+    },
+    "topProducts": {
+      "title": "Nejlepší produkty",
+      "description": "Vaše nejprodávanější produkty podle zaplacených tržeb.",
+      "series": "Tržby",
+      "ariaLabel": "Nejlepší produkty podle zaplacených tržeb"
+    },
+    "orderStatus": {
+      "title": "Stav objednávek",
+      "description": "Všechny objednávky včetně vrácení peněz a sporů.",
+      "empty": "V tomto období žádné objednávky",
+      "ariaLabel": "Rozložení stavů objednávek"
+    }
+  },
+  "tiles": {
+    "revenue": "Tržby",
+    "afterFees": "{amount} po odečtení poplatků",
+    "sales": "Prodeje",
+    "perDay": "V průměru {rate} denně",
+    "avgOrder": "Prům. objednávka",
+    "uniqueBuyers": "Unikátní kupující",
+    "repeatBuyers": "{count, plural, one {{count} opakovaný kupující} few {{count} opakovaní kupující} many {{count} opakovaného kupujícího} other {{count} opakovaných kupujících}}",
+    "refundRate": "Podíl vrácených peněz",
+    "refunded": "{count, plural, one {{count} vrácení peněz, {amount}} few {{count} vrácení peněz, {amount}} many {{count} vrácení peněz, {amount}} other {{count} vrácení peněz, {amount}}}",
+    "noSales": "Zatím žádné prodeje",
+    "noBuyers": "Zatím žádní kupující",
+    "noOrders": "Zatím žádné objednávky"
+  },
+  "channels": {
+    "embed": "Vložení",
+    "marketplace": "Tržiště",
+    "direct": "Přímý"
+  },
+  "signalsUnavailable": {
+    "title": "Zobrazení a přihlášení k odběru teď nejsou k dispozici",
+    "body": "Údaje o prodejích výše to neovlivňuje. Obnovte stránku a zkuste to znovu."
+  },
+  "upcoming": {
+    "needProducts": "Tyto metriky se tu objeví, jakmile bude produkt v některé z vašich výloh: {labels}.",
+    "needBlocks": "Tyto metriky se tu objeví, jakmile bude jejich blok v některé z vašich výloh: {labels}."
+  },
+  "signal": {
+    "visitors": "Návštěvníci",
+    "perVisitor": "V průměru {rate} na návštěvníka",
+    "notCounted": "Zatím se nepočítá",
+    "value": "Hodnota",
+    "noValue": "Zatím bez hodnoty",
+    "notMeasured": "Zatím se neměří.",
+    "panels": {
+      "trend": "V čase",
+      "channels": "Kanály",
+      "weekdays": "Podle dne v týdnu",
+      "storefronts": "Podle výlohy"
+    },
+    "whereFrom": "Odkud přišli.",
+    "weeklyRhythm": "Týdenní rytmus.",
+    "whichStorefront": "Ze které výlohy přišli.",
+    "deletedStorefront": "Smazaná výloha",
+    "deletedStorefrontNumbered": "Smazaná výloha ({number})"
+  },
+  "sources": {
+    "storefront_view": {
+      "label": "Zobrazení výlohy",
+      "description": "Jak často návštěvníci načetli vaši výlohu.",
+      "count": "{count, plural, one {{formatted} zobrazení} few {{formatted} zobrazení} many {{formatted} zobrazení} other {{formatted} zobrazení}}",
+      "total": "Zobrazení celkem",
+      "emptyRange": "V tomto období žádná zobrazení",
+      "overTime": "Zobrazení výlohy v čase",
+      "acrossRange": "Zobrazení výlohy ve vybraném období.",
+      "byChannel": "Zobrazení výlohy podle kanálu",
+      "byWeekday": "Zobrazení výlohy podle dne v týdnu",
+      "byStorefront": "Zobrazení výlohy podle výlohy"
+    },
+    "product_click": {
+      "label": "Kliknutí na produkty",
+      "description": "Návštěvníci, kteří otevřeli produkt z některé z vašich výloh.",
+      "count": "{count, plural, one {{formatted} kliknutí} few {{formatted} kliknutí} many {{formatted} kliknutí} other {{formatted} kliknutí}}",
+      "total": "Kliknutí celkem",
+      "emptyRange": "V tomto období žádná kliknutí",
+      "overTime": "Kliknutí na produkty v čase",
+      "acrossRange": "Kliknutí na produkty ve vybraném období.",
+      "byChannel": "Kliknutí na produkty podle kanálu",
+      "byWeekday": "Kliknutí na produkty podle dne v týdnu",
+      "byStorefront": "Kliknutí na produkty podle výlohy",
+      "awaiting": "Začne se počítat, až widget pro vložení na web bude hlásit otevření produktů.",
+      "readyToChart": "Graf se zobrazí, jakmile začnou přicházet kliknutí."
+    },
+    "product_view": {
+      "label": "Zobrazení produktových stránek",
+      "description": "Návštěvníci, kteří otevřeli některou z vašich produktových stránek.",
+      "count": "{count, plural, one {{formatted} zobrazení} few {{formatted} zobrazení} many {{formatted} zobrazení} other {{formatted} zobrazení}}",
+      "total": "Zobrazení celkem",
+      "emptyRange": "V tomto období žádná zobrazení",
+      "overTime": "Zobrazení produktových stránek v čase",
+      "acrossRange": "Zobrazení produktových stránek ve vybraném období.",
+      "byChannel": "Zobrazení produktových stránek podle kanálu",
+      "byWeekday": "Zobrazení produktových stránek podle dne v týdnu",
+      "byStorefront": "Zobrazení produktových stránek podle výlohy"
+    },
+    "email_signup": {
+      "label": "Přihlášení k odběru",
+      "description": "Lidé, kteří se z výlohy přihlásili k odběru vašich e-mailů.",
+      "count": "{count, plural, one {{formatted} přihlášení} few {{formatted} přihlášení} many {{formatted} přihlášení} other {{formatted} přihlášení}}",
+      "total": "Přihlášení celkem",
+      "emptyRange": "V tomto období žádná přihlášení",
+      "overTime": "Přihlášení k odběru v čase",
+      "acrossRange": "Přihlášení k odběru ve vybraném období.",
+      "byChannel": "Přihlášení k odběru podle kanálu",
+      "byWeekday": "Přihlášení k odběru podle dne v týdnu",
+      "byStorefront": "Přihlášení k odběru podle výlohy",
+      "awaiting": "Začne se počítat s blokem pro přihlášení k odběru.",
+      "readyToChart": "Graf se zobrazí, jakmile začnou přicházet přihlášení."
+    },
+    "booking": {
+      "label": "Rezervace",
+      "description": "Termíny rezervované z výlohy.",
+      "count": "{count, plural, one {{formatted} rezervace} few {{formatted} rezervace} many {{formatted} rezervace} other {{formatted} rezervací}}",
+      "total": "Rezervace celkem",
+      "emptyRange": "V tomto období žádné rezervace",
+      "overTime": "Rezervace v čase",
+      "acrossRange": "Rezervace ve vybraném období.",
+      "byChannel": "Rezervace podle kanálu",
+      "byWeekday": "Rezervace podle dne v týdnu",
+      "byStorefront": "Rezervace podle výlohy",
+      "awaiting": "Začne se počítat s blokem pro rezervace v kalendáři.",
+      "readyToChart": "Graf se zobrazí, jakmile začnou přicházet rezervace."
+    }
+  }
+}

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "../setup/render";
 import userEvent from "@testing-library/user-event";
 import { LooksSection } from "@/components/storefront/LooksSection";
 import { DEFAULT_STOREFRONT_CONFIG } from "@/types/storefront";

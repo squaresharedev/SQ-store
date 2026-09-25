@@ -1,0 +1,72 @@
+{
+  "trigger": {
+    "label": "Szukaj"
+  },
+  "overlay": {
+    "label": "Szukaj",
+    "placeholder": "Szukaj produktów, zamówień, ustawień…",
+    "clear": "Wyczyść wyszukiwanie",
+    "close": "Zamknij wyszukiwanie",
+    "results": "Wyniki wyszukiwania",
+    "searching": "Wyszukiwanie…",
+    "noResults": "Brak wyników dla: {query}",
+    "resultCount": "{count, plural, one {{count} wynik dla: {query}} few {{count} wyniki dla: {query}} many {{count} wyników dla: {query}} other {{count} wyniku dla: {query}}}",
+    "nothingMatches": "Nic nie pasuje do „{query}”.",
+    "startTyping": "Zacznij pisać, aby wyszukać.",
+    "remoteError": "Nie można połączyć się z serwerem: pokazujemy tylko strony, ustawienia i akcje.",
+    "remoteErrorCached": "Wyszukiwanie na żywo niedostępne: pokazujemy zapisane wyniki, strony i ustawienia.",
+    "remoteAuth": "Twoja sesja wygasła, więc pokazujemy tylko strony i ustawienia.",
+    "remoteThrottled": "Zbyt szybkie wyszukiwanie: pokazujemy tylko strony, ustawienia i akcje."
+  },
+  "sections": {
+    "pages": "Strony",
+    "actions": "Akcje",
+    "settings": "Ustawienia"
+  },
+  "groups": {
+    "products": "Produkty",
+    "orders": "Zamówienia",
+    "storefronts": "Witryny",
+    "team": "Zespół",
+    "notifications": "Powiadomienia",
+    "recent": "Ostatnie"
+  },
+  "results": {
+    "draft": "Wersja robocza",
+    "openInDesigner": "Otwórz w edytorze",
+    "invited": "Zaproszony",
+    "order": "Zamówienie",
+    "unread": "Nieprzeczytane"
+  },
+  "fields": {
+    "username": "Nazwa użytkownika",
+    "avatar": "Zdjęcie profilowe",
+    "email": "Adres e-mail",
+    "password": "Hasło",
+    "twoFactor": "Uwierzytelnianie dwuskładnikowe",
+    "recoveryCodes": "Kody odzyskiwania",
+    "securityActivity": "Aktywność związana z bezpieczeństwem",
+    "signOut": "Wyloguj się",
+    "vat": "Numer VAT UE",
+    "businessName": "Nazwa przedsiębiorcy",
+    "country": "Kraj",
+    "address": "Adres firmy",
+    "contactEmail": "E-mail kontaktowy",
+    "phone": "Telefon",
+    "bio": "Bio",
+    "salesEmails": "E-maile o sprzedaży",
+    "marketingEmails": "E-maile marketingowe",
+    "productEmails": "E-maile o nowościach w produkcie",
+    "sellerAgreement": "Umowa sprzedawcy",
+    "termsOfService": "Warunki korzystania z usługi",
+    "exportData": "Eksportuj moje dane",
+    "deleteAccount": "Usuń konto"
+  },
+  "actions": {
+    "newProduct": "Nowy produkt",
+    "newStorefront": "Nowa witryna",
+    "inviteMember": "Zaproś członka zespołu",
+    "notificationHistory": "Historia powiadomień",
+    "showMeAround": "Oprowadź mnie"
+  }
+}

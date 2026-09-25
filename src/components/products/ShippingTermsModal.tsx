@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Modal } from "@/components/ui/modal";
 import { ShippingSection } from "@/components/settings/ShippingSection";
 import type { SellerShippingPolicy } from "@/types/shipping-policy";
@@ -29,11 +30,12 @@ export function ShippingTermsModal({
   onClose: () => void;
   policy: SellerShippingPolicy;
 }) {
+  const t = useTranslations("Products.shippingField");
   return (
     <Modal
       open={open}
       onClose={onClose}
-      title="Shipping & returns"
+      title={t("modalTitle")}
       className="sm:max-w-2xl"
     >
       {/* No `continueHref`: "Continue to your storefront" has nowhere sensible

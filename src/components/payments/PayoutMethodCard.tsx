@@ -1,6 +1,7 @@
 "use client";
 
 import { Landmark } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { infoTextClass } from "@/components/ui/control-styles";
 import { cn } from "@/lib/utils";
 import { cardClass, iconTileClass } from "@/components/ui/surface-styles";
@@ -20,16 +21,17 @@ export function PayoutMethodCard({
   method: PayoutMethod | null;
   onManage: () => void;
 }) {
+  const t = useTranslations("Payments.payoutMethod");
   return (
     <section
-      aria-label="Payout method"
+      aria-label={t("title")}
       className={cn(cardClass, "p-4")}
     >
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-base font-semibold text-foreground">Payout method</h2>
+        <h2 className="text-base font-semibold text-foreground">{t("title")}</h2>
         {method && (
           <Button variant="secondary" onClick={onManage}>
-            Manage
+            {t("manage")}
           </Button>
         )}
       </div>
@@ -44,17 +46,17 @@ export function PayoutMethodCard({
               {method.bankName} ···· {method.last4}
             </p>
             <p className={infoTextClass}>
-              {method.currency} · {method.country}
-              {method.isDefault && " · Default"}
+              {t(method.isDefault ? "detailDefault" : "detail", {
+                currency: method.currency,
+                country: method.country,
+              })}
             </p>
           </div>
         </div>
       ) : (
         <p className="mt-3 font-inter text-sm text-muted-foreground">
           {/* "Connect Stripe" is only advice once connecting is possible. */}
-          {STRIPE_CONNECT_AVAILABLE
-            ? "No payout method yet. Connect Stripe and add your bank there, it shows up here automatically."
-            : "No payout method yet."}
+          {STRIPE_CONNECT_AVAILABLE ? t("emptyConnectable") : t("empty")}
         </p>
       )}
     </section>

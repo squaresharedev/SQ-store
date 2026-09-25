@@ -9,6 +9,10 @@ import {
   type WeightUnit,
 } from "@/types/product";
 import type { ProductDetailsInput } from "@/lib/validation/product";
+import type { useTranslations } from "next-intl";
+
+/** The seller-side translator the form validators write their messages with. */
+export type ProductsTranslator = ReturnType<typeof useTranslations<"Products">>;
 
 // The product form's in-progress strings for the page-detail fields, and the
 // two mappings around them: stored details -> strings for editing, and strings
@@ -138,26 +142,30 @@ export function safetyStarted(safety: SafetyFormValues): boolean {
 }
 
 /** UX-only checks (the server re-parses with Zod). */
-export function validateDetails(values: DetailsFormValues, isDigital: boolean): DetailsFieldErrors {
+export function validateDetails(
+  values: DetailsFormValues,
+  isDigital: boolean,
+  t: ProductsTranslator,
+): DetailsFieldErrors {
   const errors: DetailsFieldErrors = {};
   for (const key of ["length", "width", "height", "weight"] as const) {
     if (parseMeasure(values[key]) === "invalid") {
-      errors[key] = "Use a number, like 12 or 3.5.";
+      errors[key] = t("form.errors.measure");
     }
   }
   if (values.specs.some((spec) => spec.label.trim() !== "" && spec.value.trim() === "")) {
-    errors.specs = "Every specification needs a value.";
+    errors.specs = t("form.errors.specValue");
   }
   if (!isDigital && safetyStarted(values.safety)) {
     const { manufacturerName, manufacturerAddress, manufacturerEmail, responsibleEmail } =
       values.safety;
-    if (!manufacturerName.trim()) errors.manufacturerName = "Name the manufacturer.";
-    if (!manufacturerAddress.trim()) errors.manufacturerAddress = "Add the manufacturer's postal address.";
+    if (!manufacturerName.trim()) errors.manufacturerName = t("form.errors.manufacturerName");
+    if (!manufacturerAddress.trim()) errors.manufacturerAddress = t("form.errors.manufacturerAddress");
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(manufacturerEmail.trim())) {
-      errors.manufacturerEmail = "Add a contact email for the manufacturer.";
+      errors.manufacturerEmail = t("form.errors.manufacturerEmail");
     }
     if (responsibleEmail.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(responsibleEmail.trim())) {
-      errors.responsibleEmail = "That doesn't look like an email address.";
+      errors.responsibleEmail = t("form.errors.responsibleEmail");
     }
   }
   return errors;
@@ -273,6 +281,7 @@ export function optionDetailsEmpty(values: OptionDetailsFormValues): boolean {
 export function validateOptionDetails(
   byOption: Record<string, OptionDetailsFormValues>,
   liveOptionIds: ReadonlySet<string>,
+  t: ProductsTranslator,
 ): Record<string, string> {
   const errors: Record<string, string> = {};
   for (const [optionId, values] of Object.entries(byOption)) {
@@ -281,9 +290,9 @@ export function validateOptionDetails(
       (key) => parseMeasure(values[key]) === "invalid",
     );
     if (badMeasure) {
-      errors[optionId] = "Use a number, like 12 or 3.5.";
+      errors[optionId] = t("form.errors.measure");
     } else if (values.specs.some((spec) => spec.label.trim() && !spec.value.trim())) {
-      errors[optionId] = "Every specification needs a value.";
+      errors[optionId] = t("form.errors.specValue");
     }
   }
   return errors;

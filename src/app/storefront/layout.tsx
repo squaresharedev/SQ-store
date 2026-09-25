@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { ScopedIntlProvider } from "@/i18n/ScopedIntlProvider";
 import { requireUser } from "@/lib/auth/session";
 
 /**
@@ -24,5 +25,5 @@ export default async function StorefrontLayout({
   children: ReactNode;
 }) {
   await requireUser("/storefront");
-  return children;
+  return <ScopedIntlProvider scope="full">{children}</ScopedIntlProvider>;
 }

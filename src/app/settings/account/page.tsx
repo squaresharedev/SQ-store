@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { AccountSection } from "@/components/settings/AccountSection";
 import { accountHasPassword } from "@/lib/auth/has-password";
 import { getAssurance, requireProfile, requireUser } from "@/lib/auth/session";
 
-export const metadata: Metadata = {
-  title: "Account settings",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Settings.metadata.account");
+  return { title: t("title") };
+}
 
 export default async function AccountSettingsPage() {
   // Overlapped: requireProfile redirects to /login itself when signed out

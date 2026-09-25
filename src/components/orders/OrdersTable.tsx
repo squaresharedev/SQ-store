@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { OrderView } from "@/types/order-view";
 import { OrderRow } from "./OrderRow";
 
@@ -13,28 +14,29 @@ export function OrdersTable({
   /** Row to mark as the one the user arrived for (see OrdersPage). */
   highlightId?: string | null;
 }) {
+  const t = useTranslations("Orders.table");
   return (
     <div className="overflow-x-auto">
       <table className="w-full border-collapse">
         <thead>
           <tr>
             <th className="py-2 px-3 text-left font-inter text-xs uppercase tracking-wide text-muted-foreground">
-              Product
+              {t("product")}
             </th>
             <th className="py-2 px-3 text-left font-inter text-xs uppercase tracking-wide text-muted-foreground whitespace-nowrap">
-              Amount
+              {t("amount")}
             </th>
             <th className="hidden md:table-cell py-2 px-3 text-left font-inter text-xs uppercase tracking-wide text-muted-foreground">
-              Channel
+              {t("channel")}
             </th>
             <th className="py-2 px-3 text-left font-inter text-xs uppercase tracking-wide text-muted-foreground">
-              Status
+              {t("status")}
             </th>
             <th className="hidden md:table-cell py-2 px-3 text-left font-inter text-xs uppercase tracking-wide text-muted-foreground">
-              Buyer
+              {t("buyer")}
             </th>
             <th className="py-2 px-3 text-left font-inter text-xs uppercase tracking-wide text-muted-foreground whitespace-nowrap">
-              Date
+              {t("date")}
             </th>
           </tr>
         </thead>

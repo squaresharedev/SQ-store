@@ -1,0 +1,189 @@
+{
+  "metadata": {
+    "analytics": {
+      "title": "Estatísticas"
+    }
+  },
+  "page": {
+    "title": "Estatísticas",
+    "subtitle": "Vendas, visualizações da montra e tudo o resto que a sua loja está a fazer."
+  },
+  "loading": {
+    "title": "Estatísticas",
+    "subtitle": "O desempenho da sua loja na incorporação e no marketplace.",
+    "srLoading": "a carregar estatísticas"
+  },
+  "firstRun": {
+    "title": "Ainda nada para medir",
+    "body": "As visitas às suas páginas de produto aparecem aqui assim que uma estiver publicada.",
+    "backToSetup": "Voltar à configuração"
+  },
+  "range": {
+    "ariaLabel": "Intervalo de datas",
+    "last30Days": "Últimos 30 dias",
+    "allTime": "Desde sempre",
+    "custom": "Personalizado",
+    "placeholder": "Escolher um intervalo"
+  },
+  "section": {
+    "whatMeasures": "O que {title} mede"
+  },
+  "chart": {
+    "howToRead": "Como ler {title}",
+    "emptyDefault": "Sem vendas neste intervalo"
+  },
+  "sales": {
+    "label": "Vendas",
+    "description": "Encomendas pagas feitas através da finalização de compra do Square Share.",
+    "revenue": {
+      "title": "Receita",
+      "description": "Receita paga ao longo do tempo.",
+      "series": "Receita",
+      "ariaLabel": "Receita paga ao longo do tempo"
+    },
+    "aov": {
+      "title": "Valor médio da encomenda",
+      "description": "Quanto vale uma encomenda típica ao longo do tempo.",
+      "series": "Encomenda média",
+      "ariaLabel": "Valor médio da encomenda ao longo do tempo"
+    },
+    "channels": {
+      "title": "Canais",
+      "description": "De onde vêm as suas vendas.",
+      "ariaLabel": "Receita paga por canal"
+    },
+    "weekday": {
+      "title": "Vendas por dia da semana",
+      "description": "O ritmo semanal da sua loja.",
+      "series": "Vendas",
+      "count": "{count, plural, one {{formatted} venda} many {{formatted} de vendas} other {{formatted} vendas}}",
+      "ariaLabel": "Vendas por dia da semana"
+    },
+    "topProducts": {
+      "title": "Produtos mais vendidos",
+      "description": "Os seus mais vendidos por receita paga.",
+      "series": "Receita",
+      "ariaLabel": "Produtos mais vendidos por receita paga"
+    },
+    "orderStatus": {
+      "title": "Estado das encomendas",
+      "description": "A distribuição completa das encomendas, incluindo reembolsos e disputas.",
+      "empty": "Sem encomendas neste intervalo",
+      "ariaLabel": "Distribuição do estado das encomendas"
+    }
+  },
+  "tiles": {
+    "revenue": "Receita",
+    "afterFees": "{amount} após taxas",
+    "sales": "Vendas",
+    "perDay": "{rate} por dia, em média",
+    "avgOrder": "Encomenda média",
+    "uniqueBuyers": "Compradores únicos",
+    "repeatBuyers": "{count, plural, one {{count} comprou mais do que uma vez} many {{count} compraram mais do que uma vez} other {{count} compraram mais do que uma vez}}",
+    "refundRate": "Taxa de reembolso",
+    "refunded": "{count, plural, one {{count} reembolsada, {amount}} many {{count} reembolsadas, {amount}} other {{count} reembolsadas, {amount}}}",
+    "noSales": "Ainda sem vendas",
+    "noBuyers": "Ainda sem compradores",
+    "noOrders": "Ainda sem encomendas"
+  },
+  "channels": {
+    "embed": "Incorporação",
+    "marketplace": "Marketplace",
+    "direct": "Direto"
+  },
+  "signalsUnavailable": {
+    "title": "As visualizações e subscrições estão indisponíveis de momento",
+    "body": "Os valores de vendas acima não são afetados. Recarregue a página para tentar novamente."
+  },
+  "upcoming": {
+    "needProducts": "{labels} aparecem aqui assim que um produto estiver numa das suas montras.",
+    "needBlocks": "{labels} aparecem aqui assim que o respetivo bloco estiver numa das suas montras."
+  },
+  "signal": {
+    "visitors": "Visitantes",
+    "perVisitor": "{rate} por visitante, em média",
+    "notCounted": "Ainda não contabilizado",
+    "value": "Valor",
+    "noValue": "Ainda sem valor",
+    "notMeasured": "Ainda não medido.",
+    "panels": {
+      "trend": "Ao longo do tempo",
+      "channels": "Canais",
+      "weekdays": "Por dia da semana",
+      "storefronts": "Por montra"
+    },
+    "whereFrom": "De onde vieram.",
+    "weeklyRhythm": "O ritmo semanal.",
+    "whichStorefront": "De que montra vieram.",
+    "deletedStorefront": "Montra eliminada",
+    "deletedStorefrontNumbered": "Montra eliminada ({number})"
+  },
+  "sources": {
+    "storefront_view": {
+      "label": "Visualizações da montra",
+      "description": "Com que frequência a sua montra foi carregada por um visitante.",
+      "count": "{count, plural, one {{formatted} visualização} many {{formatted} de visualizações} other {{formatted} visualizações}}",
+      "total": "Total de visualizações",
+      "emptyRange": "Sem visualizações neste intervalo",
+      "overTime": "Visualizações da montra ao longo do tempo",
+      "acrossRange": "Visualizações da montra no intervalo selecionado.",
+      "byChannel": "Visualizações da montra por canal",
+      "byWeekday": "Visualizações da montra por dia da semana",
+      "byStorefront": "Visualizações da montra por montra"
+    },
+    "product_click": {
+      "label": "Cliques em produtos",
+      "description": "Visitantes que abrem um produto a partir de uma das suas montras.",
+      "count": "{count, plural, one {{formatted} clique} many {{formatted} de cliques} other {{formatted} cliques}}",
+      "total": "Total de cliques",
+      "emptyRange": "Sem cliques neste intervalo",
+      "overTime": "Cliques em produtos ao longo do tempo",
+      "acrossRange": "Cliques em produtos no intervalo selecionado.",
+      "byChannel": "Cliques em produtos por canal",
+      "byWeekday": "Cliques em produtos por dia da semana",
+      "byStorefront": "Cliques em produtos por montra",
+      "awaiting": "Chega assim que o widget de incorporação comunicar aberturas de produtos.",
+      "readyToChart": "Pronto para o gráfico assim que os cliques começarem a chegar."
+    },
+    "product_view": {
+      "label": "Visualizações da página de produto",
+      "description": "Visitantes que abrem uma das suas páginas de produto.",
+      "count": "{count, plural, one {{formatted} visualização} many {{formatted} de visualizações} other {{formatted} visualizações}}",
+      "total": "Total de visualizações",
+      "emptyRange": "Sem visualizações neste intervalo",
+      "overTime": "Visualizações da página de produto ao longo do tempo",
+      "acrossRange": "Visualizações da página de produto no intervalo selecionado.",
+      "byChannel": "Visualizações da página de produto por canal",
+      "byWeekday": "Visualizações da página de produto por dia da semana",
+      "byStorefront": "Visualizações da página de produto por montra"
+    },
+    "email_signup": {
+      "label": "Subscrições por e-mail",
+      "description": "Pessoas que se juntam à sua lista a partir de uma montra.",
+      "count": "{count, plural, one {{formatted} subscrição} many {{formatted} de subscrições} other {{formatted} subscrições}}",
+      "total": "Total de subscrições",
+      "emptyRange": "Sem subscrições neste intervalo",
+      "overTime": "Subscrições por e-mail ao longo do tempo",
+      "acrossRange": "Subscrições por e-mail no intervalo selecionado.",
+      "byChannel": "Subscrições por e-mail por canal",
+      "byWeekday": "Subscrições por e-mail por dia da semana",
+      "byStorefront": "Subscrições por e-mail por montra",
+      "awaiting": "Chega com o bloco de subscrição por e-mail.",
+      "readyToChart": "Pronto para o gráfico assim que as subscrições começarem a chegar."
+    },
+    "booking": {
+      "label": "Reservas",
+      "description": "Horários reservados a partir de uma montra.",
+      "count": "{count, plural, one {{formatted} reserva} many {{formatted} de reservas} other {{formatted} reservas}}",
+      "total": "Total de reservas",
+      "emptyRange": "Sem reservas neste intervalo",
+      "overTime": "Reservas ao longo do tempo",
+      "acrossRange": "Reservas no intervalo selecionado.",
+      "byChannel": "Reservas por canal",
+      "byWeekday": "Reservas por dia da semana",
+      "byStorefront": "Reservas por montra",
+      "awaiting": "Chega com o bloco de reservas de calendário.",
+      "readyToChart": "Pronto para o gráfico assim que as reservas começarem a chegar."
+    }
+  }
+}

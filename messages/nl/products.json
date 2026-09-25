@@ -1,0 +1,526 @@
+{
+  "metadata": {
+    "list": {
+      "title": "Producten"
+    },
+    "new": {
+      "title": "Nieuw product"
+    },
+    "edit": {
+      "title": "Product bewerken"
+    },
+    "import": {
+      "title": "Producten importeren"
+    }
+  },
+  "page": {
+    "heading": "Producten",
+    "loading": "producten laden",
+    "back": "Producten",
+    "backToStorefront": "Etalage",
+    "new": {
+      "title": "Nieuw product",
+      "subtitle": "Voeg een product toe en plaats het dan op een etalage om er een pagina voor te maken."
+    },
+    "edit": {
+      "title": "Product bewerken",
+      "subtitle": "Werk de details, afbeelding of het bestand voor dit product bij."
+    },
+    "import": {
+      "heading": "Producten importeren",
+      "description": "Breng een catalogus over vanuit Shopify, of een andere tool die een CSV exporteert. Je ziet precies wat er binnenkomt voordat er iets wordt opgeslagen."
+    },
+    "formLoading": "Het productformulier laden"
+  },
+  "emptyState": {
+    "title": "Nog geen producten",
+    "descriptionWriter": "Voeg je eerste product toe. Het mag een concept blijven totdat je klaar bent om er een pagina voor te maken.",
+    "descriptionReadOnly": "Deze winkel heeft nog geen producten.",
+    "add": "Product toevoegen"
+  },
+  "status": {
+    "active": "Actief",
+    "draft": "Concept"
+  },
+  "browser": {
+    "sort": {
+      "default": "Nieuwste eerst",
+      "unitsSold": "Verkochte eenheden",
+      "revenue": "Totale verkoopwaarde",
+      "priceHigh": "Prijs: hoog naar laag",
+      "priceLow": "Prijs: laag naar hoog",
+      "title": "Naam: A–Z"
+    },
+    "allStatuses": "Alle statussen",
+    "filterLabel": "Producten sorteren en filteren",
+    "sortResting": "Sorteren",
+    "statusSection": "Status",
+    "sortSection": "Sorteren op",
+    "clear": "Wissen",
+    "import": "Importeren",
+    "add": "Product toevoegen",
+    "updating": "Bijwerken…",
+    "pagination": "{total, plural, one {{total} product · pagina {page} van {pages}} other {{total} producten · pagina {page} van {pages}}}"
+  },
+  "list": {
+    "noMatch": {
+      "title": "Geen producten komen overeen met deze filters",
+      "body": "Kies een andere status, of wis de filters om alles weer te zien.",
+      "clear": "Filters wissen"
+    },
+    "deleted": "\"{title}\" is verwijderd.",
+    "linkCopied": "Link gekopieerd.",
+    "copyFailed": "Kopiëren is mislukt.",
+    "copyFailedUrl": "De URL is: {url}",
+    "notOnStorefront": "Dit product staat nog op geen enkele etalage.",
+    "deleteDialog": {
+      "title": "Dit product verwijderen?",
+      "description": "{storefronts, plural, =0 {\"{title}\" en de geüploade afbeelding en het bestand worden definitief verwijderd. Bestaande bestellingen behouden hun registratie van de verkoop.} one {\"{title}\" en de geüploade afbeelding en het bestand worden definitief verwijderd. Bestaande bestellingen behouden hun registratie van de verkoop. Het staat op {storefronts} etalage. Het blok blijft staan totdat je het verwijdert.} other {\"{title}\" en de geüploade afbeelding en het bestand worden definitief verwijderd. Bestaande bestellingen behouden hun registratie van de verkoop. Het staat op {storefronts} etalages. De blokken blijven staan totdat je ze verwijdert.}}",
+      "confirm": "Product verwijderen"
+    },
+    "chooser": {
+      "openTitle": "Op welke etalage openen?",
+      "copyTitle": "Link kopiëren voor welke etalage?",
+      "description": "{count, plural, one {\"{title}\" staat op {count} etalage. Kies er een.} other {\"{title}\" staat op {count} etalages. Kies er een.}}",
+      "hint": "Of annuleer en gebruik de etalage-editor om een standaard te kiezen."
+    }
+  },
+  "card": {
+    "inStock": "{count, plural, one {{count} op voorraad} other {{count} op voorraad}}",
+    "bestseller": "Bestseller",
+    "edit": "{title} bewerken",
+    "actions": "Acties voor {title}",
+    "moreActions": "Meer acties voor {title}",
+    "notPlaced": "Nog op geen etalage geplaatst",
+    "copyLinkTitle": "Link naar productpagina kopiëren",
+    "chooseStorefront": "{count, plural, one {Op {count} etalage, klik om te kiezen} other {Op {count} etalages, klik om te kiezen}}",
+    "copyLink": "Productlink kopiëren",
+    "openPage": "Productpagina openen",
+    "unitsSold": "{count, plural, one {{count} verkocht} other {{count} verkocht}}",
+    "noSales": "Nog geen verkopen"
+  },
+  "removal": {
+    "badge": "Verwijderd",
+    "badgePaused": "Gepauzeerd",
+    "title": "{kind, select, product {Dit product is door SquareShare verwijderd} other {Deze etalage is door SquareShare verwijderd}}",
+    "titlePaused": "{kind, select, product {Dit product is gepauzeerd totdat je het aanpast} other {Deze etalage is gepauzeerd totdat je hem aanpast}}",
+    "hidden": "Kopers zien het nergens meer: niet op de bijbehorende pagina, niet in een insluiting en niet via een gedeelde link.",
+    "hiddenPaused": "Kopers kunnen het nu niet zien: niet op de pagina zelf, niet in een embed en niet via een gedeelde link. Er is niets verwijderd, en het komt terug zodra iemand je aanpassingen heeft gecontroleerd.",
+    "hiddenRemoved": "Het is nergens meer zichtbaar voor kopers: niet op de pagina zelf, niet in een embed en niet via een gedeelde link. Dit is definitief, dus aanpassen brengt het niet terug.",
+    "reason": "Reden",
+    "whatNeedsToChange": "Wat er moet veranderen",
+    "when": "Wanneer",
+    "pausedOn": "Gepauzeerd op",
+    "statement": "{ground, select, illegal {Illegale goederen of activiteiten. Er werd iets aangeboden dat niet legaal verkocht mag worden, of de advertentie werd gebruikt om dat te regelen.} sexual {Seksuele inhoud. Het bevatte expliciete seksuele inhoud.} violence {Geweld of bloederige beelden. Het bevatte grafisch geweld.} hate {Haat of intimidatie. Het viel een persoon of groep aan, of bevatte haatsymbolen.} counterfeit {Namaak of gestolen. Het leek namaakgoederen aan te bieden, of werk dat van iemand anders is.} scam {Oplichting of fraude. Het leek bedoeld om betalingen aan te nemen zonder te leveren wat was beloofd.} spam {Spam. Het was repetitief of misleidend en geen echte advertentie.} other {Iets anders. Het overtrad de regels van het platform.}}{noted, select, yes { {note}} other {}}",
+    "statementUnlabelled": "Het overtrad de regels van het platform.{noted, select, yes { {note}} other {}}",
+    "fixHint": "{kind, select, product {Pas het product hieronder aan, sla het op en stuur het daarna terug naar ons.} other {Open de etalage om dit op te lossen, kom daarna terug en stuur hem naar ons.}}",
+    "readOnlyHint": "{kind, select, product {Iemand die dit product mag bewerken, moet de aanpassing doen en het ter beoordeling insturen.} other {Iemand die deze etalage mag bewerken, moet de aanpassing doen en hem ter beoordeling insturen.}}",
+    "appeal": "{kind, select, product {Je kunt dit product nog steeds bewerken. Bewerken zet het niet terug: <link>vraag ons om er opnieuw naar te kijken</link> als je denkt dat dit onterecht was.} other {Je kunt deze etalage nog steeds bewerken. Bewerken zet hem niet terug: <link>vraag ons om er opnieuw naar te kijken</link> als je denkt dat dit onterecht was.}}",
+    "appealPaused": "Denk je dat dit een vergissing is? <link>Schrijf ons</link>.",
+    "appealFinal": "Denk je dat we het bij het verkeerde eind hadden? <link>Vraag ons er opnieuw naar te kijken</link>.",
+    "appealSubject": "{kind, select, product {Bezwaar: verwijdering van product ({title})} other {Bezwaar: verwijdering van etalage ({title})}}",
+    "appealBody": "{kind, select, product {Ik wil graag dat dit product opnieuw wordt beoordeeld.\n\nProduct-ID: {id}\nNaam: {title}\n\nWaarom ik denk dat dit onterecht was:\n} other {Ik wil graag dat deze etalage opnieuw wordt beoordeeld.\n\nEtalage-ID: {id}\nNaam: {title}\n\nWaarom ik denk dat dit onterecht was:\n}}",
+    "reviewRequest": {
+      "button": "Ik heb de aanpassingen gedaan, beoordeel het",
+      "sent": "Ter beoordeling ingestuurd op <time>{date}</time>. Iemand kijkt naar je aanpassingen en je hoort het hier en per e-mail.",
+      "failed": "Dat kon niet worden verstuurd.",
+      "failedFix": "Probeer het zo meteen opnieuw."
+    }
+  },
+  "import": {
+    "fields": {
+      "title": "Titel",
+      "description": "Beschrijving",
+      "price": "Prijs",
+      "sku": "SKU",
+      "stock": "Voorraad"
+    },
+    "fileTooLarge": "Dat bestand is {size}. Importeer bestanden tot {max}.",
+    "fileEmpty": "Dat bestand is leeg.",
+    "imported": "{count, plural, one {{count} product is geïmporteerd.} other {{count} producten zijn geïmporteerd.}}",
+    "skippedRows": "{count, plural, one {{count} rij is overgeslagen.} other {{count} rijen zijn overgeslagen.}}",
+    "dropPrompt": "Sleep een CSV hierheen of klik om er een te kiezen",
+    "fileMeta": "{size} · kies een ander bestand om opnieuw te beginnen",
+    "rowsLimit": "{max, plural, one {Tot {max} product per bestand} other {Tot {max} producten per bestand}}",
+    "summary": "{shopify, select, yes {{ready, plural, one {Shopify-export. <count>{ready}</count> product klaar} other {Shopify-export. <count>{ready}</count> producten klaar}}} other {{ready, plural, one {<count>{ready}</count> product klaar} other {<count>{ready}</count> producten klaar}}}}{skipped, plural, =0 {.} other {, {skipped} overgeslagen.}}",
+    "foldedVariants": "{count, plural, one {{count} variantrij is samengevoegd met het product erboven. Voeg maten en kleuren toe na het importeren.} other {{count} variantrijen zijn samengevoegd met de producten erboven. Voeg maten en kleuren toe na het importeren.}}",
+    "droppedRows": "{count, plural, one {{count} rij overschrijdt de limiet van {max} producten en wordt niet geïmporteerd. Splits het bestand om deze rij toch te importeren.} other {{count} rijen overschrijden de limiet van {max} producten en worden niet geïmporteerd. Splits het bestand om ze toch te importeren.}}",
+    "photosNotImported": "Foto's worden niet geïmporteerd. Prijzen, voorraad en beschrijvingen komen wel over; voeg de foto's toe zodra de producten hier staan.",
+    "currency": "Valuta",
+    "currencyHelp": "Elk geïmporteerd product krijgt hierin een prijs.",
+    "importAs": "Importeren als",
+    "asDrafts": "Concepten",
+    "asLive": "Online producten",
+    "draftsHint": "Niets gaat online totdat je het publiceert.",
+    "liveHint": "Deze verschijnen meteen in je winkel.",
+    "columns": "Kolommen",
+    "needed": "(vereist)",
+    "notSet": "Niet ingesteld",
+    "skip": "Overslaan",
+    "columnFallback": "Kolom {number}",
+    "previewHeading": "Wat er wordt geïmporteerd",
+    "previewTitle": "Titel",
+    "previewPrice": "Prijs",
+    "previewStock": "Voorraad",
+    "notTracked": "Niet bijgehouden",
+    "andMore": "{count, plural, one {en {count} meer.} other {en {count} meer.}}",
+    "skippedHeading": "Rijen die worden overgeslagen",
+    "skippedRow": "{titled, select, yes {Regel {line} ({title}): {problem}} other {Regel {line}: {problem}}}",
+    "importing": "Importeren…",
+    "importedLabel": "Geïmporteerd",
+    "run": "{count, plural, one {{count} product importeren} other {{count} producten importeren}}",
+    "clear": "Wissen"
+  },
+  "form": {
+    "sections": {
+      "basics": {
+        "label": "Basisgegevens",
+        "description": "Wat je verkoopt, in je eigen woorden, en wat het kost.",
+        "about": "Waar Basisgegevens voor is"
+      },
+      "stock": {
+        "label": "Voorraad",
+        "description": "Standaard onbeperkt. Houd de voorraad bij om overselling te voorkomen en kopers de badges uitverkocht en “Nog maar N” te tonen. Het waarschuwingsgetal bepaalt wanneer die tweede badge verschijnt. De bestellimiet is apart: die begrenst hoeveel één koper tegelijk kan afnemen, bijgehouden of niet.",
+        "about": "Waar Voorraad voor is"
+      },
+      "media": {
+        "label": "Media en levering"
+      },
+      "shipping": {
+        "label": "Verzending",
+        "description": "Eén keer geschreven voor je hele winkel, niet per product. Kies alleen een profiel als dit product anders verzonden wordt.",
+        "about": "Waar Verzending voor is"
+      },
+      "options": {
+        "label": "Opties",
+        "description": "Kleuren, maten, vermogens, hoe dit product ook varieert. Kopers kiezen er telkens één van elk.",
+        "about": "Waar Opties voor is"
+      },
+      "photos": {
+        "label": "Foto's",
+        "description": "Extra invalshoeken voor de productpagina. Sleep foto's op een optie om ze alleen daarvoor te tonen.",
+        "about": "Waar Foto's voor is"
+      },
+      "specs": {
+        "label": "Specificaties",
+        "description": "Afmetingen, materialen en specificaties voor de productpagina.",
+        "about": "Waar Specificaties voor is"
+      },
+      "documents": {
+        "label": "Documenten",
+        "description": "Certificaten, handleidingen of specificatiebladen die kopers en toezichthouders kunnen controleren voor aankoop.",
+        "about": "Waar Documenten voor is"
+      },
+      "safety": {
+        "label": "Veiligheid en conformiteit",
+        "description": "Wie het heeft gemaakt en hoe je diegene kunt bereiken. De EU-productveiligheidswet vereist dit voor fysieke producten.",
+        "about": "Waar Veiligheid en conformiteit voor is"
+      },
+      "visibility": {
+        "label": "Zichtbaarheid",
+        "description": "Actief is online: kopers kunnen het meteen zien en kopen. Concept is verborgen voor kopers totdat je het omzet.",
+        "about": "Waar Zichtbaarheid voor is"
+      }
+    },
+    "summary": {
+      "dimensions": "Afmetingen",
+      "weight": "Gewicht",
+      "materials": "Materialen",
+      "care": "Onderhoud",
+      "contents": "Inhoud",
+      "specs": "Specs",
+      "madeIn": "Gemaakt in",
+      "versions": "{count, plural, one {{count} variant} other {{count} varianten}}",
+      "tracking": "Bijhouden {quantity}",
+      "setQuantity": "Aantal instellen",
+      "unlimited": "Onbeperkt",
+      "maxPerOrder": "Max {max} per bestelling",
+      "image": "Afbeelding",
+      "download": "Download",
+      "buyLink": "Aankooplink",
+      "removedProfile": "Verwijderd profiel",
+      "storeTerms": "Winkelvoorwaarden",
+      "options": "{groups, plural, one {{groups} groep} other {{groups} groepen}}, {options, plural, one {{options} optie} other {{options} opties}}",
+      "photos": "{count, plural, one {{count} foto} other {{count} foto's}}",
+      "documents": "{count, plural, one {{count} document} other {{count} documenten}}",
+      "started": "Gestart",
+      "active": "Actief",
+      "draft": "Concept"
+    },
+    "errors": {
+      "titleRequired": "Geef je product een titel, kopers zien die als eerste.",
+      "stockRequired": "Vul in hoeveel eenheden er op voorraad zijn, of zet Voorraad bijhouden uit voor onbeperkt.",
+      "stockWhole": "Voorraad moet een heel getal zijn, 0 of meer, zonder decimalen.",
+      "lowStockWhole": "De waarschuwing voor lage voorraad moet een heel getal van 0 of meer zijn.",
+      "maxPerOrderRequired": "Vul in hoeveel één koper kan bestellen, 1 tot {max}.",
+      "maxPerOrderRange": "Het maximum per bestelling moet een heel getal zijn van 1 tot {max}.",
+      "purchaseUrl": "De aankooplink moet een volledig https://-adres zijn.",
+      "optionGroupUnnamed": "Geef aan wat elke optiegroep laat variëren, of verwijder de groep.",
+      "optionGroupEmpty": "Voeg minstens één optie toe aan {group}, of verwijder de groep.",
+      "optionUnnamed": "Geef elke optie een naam, of verwijder de lege rij.",
+      "optionGroupFull": "Een optiegroep kan maximaal {max} opties bevatten.",
+      "versionSpecs": "{count, plural, one {De specificaties van één variant moeten worden gecorrigeerd.} other {De specificaties van {count} varianten moeten worden gecorrigeerd.}}",
+      "measure": "Gebruik een getal, zoals 12 of 3,5.",
+      "specValue": "Elke specificatie heeft een waarde nodig.",
+      "manufacturerName": "Vermeld de fabrikant.",
+      "manufacturerAddress": "Voeg het postadres van de fabrikant toe.",
+      "manufacturerEmail": "Voeg een contact-e-mailadres voor de fabrikant toe.",
+      "responsibleEmail": "Dat lijkt geen e-mailadres te zijn.",
+      "price": {
+        "empty": "Stel een prijs in voordat je opslaat.",
+        "notPositive": "De prijs moet een getal groter dan nul zijn.",
+        "tooManyDecimals": "Prijzen mogen maximaal twee decimalen hebben.",
+        "tooHigh": "De prijs mag niet hoger zijn dan {currency} {max}."
+      }
+    },
+    "title": "Titel",
+    "titlePlaceholder": "bijv. Ambient Loops Vol. 1",
+    "description": "Beschrijving",
+    "optional": "(optioneel)",
+    "descriptionPlaceholder": "Wat is het, en wat krijgt de koper?",
+    "displayImage": "Hoofdafbeelding",
+    "displayImageAbout": "Waar de hoofdafbeelding wordt gebruikt",
+    "displayImageHelp": "Wordt getoond in je etalage en in insluitingen.",
+    "digitalFile": "Digitaal bestand",
+    "digitalFileAbout": "Wat het digitale bestand is",
+    "digitalFileHelp": "Het bestand dat je koper na aankoop downloadt. Als je er een toevoegt, wordt dit een download, waardoor verzending en productveiligheid niet meer van toepassing zijn.",
+    "purchaseLink": "Aankooplink",
+    "purchaseLinkAbout": "Waarheen de koopknop kopers stuurt",
+    "purchaseLinkHelp": "De koopknop op de productpagina volgt deze link. Zonder link stuurt hij in plaats daarvan een e-mail naar het contactadres van je winkel.",
+    "purchaseLinkPlaceholder": "bijv. https://jouw-winkel.example/checkout/dit-product",
+    "statusLabel": "Productstatus",
+    "problems": "{count, plural, one {{count} ding om op te lossen voor je opslaat} other {{count} dingen om op te lossen voor je opslaat}}",
+    "jumpToFirst": "Ga naar eerste",
+    "uploading": "{what, select, image {Afbeelding uploaden…} photo {Foto uploaden…} document {Document uploaden…} other {Bestand uploaden…}}",
+    "processing": "{what, select, image {Afbeelding verwerken…} photo {Foto verwerken…} document {Document verwerken…} other {Bestand verwerken…}}",
+    "uploadingLabel": "{what, select, image {Afbeelding uploaden} photo {Foto uploaden} document {Document uploaden} other {Bestand uploaden}}",
+    "processingLabel": "{what, select, image {Afbeelding verwerken} photo {Foto verwerken} document {Document verwerken} other {Bestand verwerken}}",
+    "saveChanges": "Wijzigingen opslaan",
+    "saveProduct": "Product opslaan",
+    "savedToast": "\"{title}\" is opgeslagen.",
+    "addedToast": "\"{title}\" is toegevoegd aan je producten.",
+    "documentFallbackLabel": "Document",
+    "discard": {
+      "title": "Wijzigingen negeren?",
+      "editDescription": "De wijzigingen die je aan dit product hebt aangebracht, zijn nog niet opgeslagen.",
+      "newDescription": "Dit product is nog niet opgeslagen, dus er blijft niets bewaard.",
+      "discard": "Negeren"
+    },
+    "nav": {
+      "label": "Formulieronderdelen",
+      "heading": "Op deze pagina"
+    }
+  },
+  "stockFields": {
+    "trackStock": "Voorraad bijhouden",
+    "inStock": "Op voorraad",
+    "decrease": "Voorraad verlagen",
+    "increase": "Voorraad verhogen",
+    "lowStockAlert": "Waarschuwing lage voorraad bij",
+    "maxPerOrder": "Maximum per bestelling",
+    "maxPerOrderHint": "Hoeveel één koper tegelijk kan afnemen. Kopers kiezen uit een lijst die hier stopt, en de limiet wordt bij het bestellen opnieuw gecontroleerd. Tot {max}; bij 1 verkoop je ze één voor één."
+  },
+  "priceField": {
+    "label": "Prijs",
+    "placeholder": "bijv. 9,00",
+    "currency": "Valuta"
+  },
+  "shippingField": {
+    "usual": "Je gebruikelijke verzendvoorwaarden",
+    "usualDescription": "Eenmalig ingesteld voor je account. Wat bijna elk product wil.",
+    "removed": "Verwijderd profiel",
+    "removedDescription": "Dit profiel bestaat niet meer, dus kopers zien je standaardvoorwaarden.",
+    "untitled": "Naamloos profiel",
+    "profileNoTerms": "Voor dit profiel zijn nog geen voorwaarden geschreven.",
+    "noTerms": "Nog geen verzendvoorwaarden geschreven.",
+    "profile": "Verzendprofiel",
+    "edit": "Bewerken",
+    "modalTitle": "Verzending en retouren"
+  },
+  "optionsField": {
+    "display": {
+      "swatch": "Kleurstalen",
+      "chip": "Chips",
+      "select": "Vervolgkeuzelijst"
+    },
+    "displayHint": {
+      "swatch": "Kleurcirkels. Geef elke optie een kleurstaal, anders zien kopers de eerste letter.",
+      "chip": "Tekstknoppen, voor waarden die kopers lezen: maten, vermogens, lengtes.",
+      "select": "Een vervolgkeuzelijst. Handig wanneer er meer waarden zijn dan als knoppen passen."
+    },
+    "presets": {
+      "colour": {
+        "name": "Kleur",
+        "placeholder": "Middernachtblauw"
+      },
+      "size": {
+        "name": "Maat",
+        "placeholder": "Medium"
+      },
+      "material": {
+        "name": "Materiaal",
+        "placeholder": "Massief eiken"
+      },
+      "capacity": {
+        "name": "Inhoud",
+        "placeholder": "500 ml"
+      },
+      "powerOutput": {
+        "name": "Vermogen",
+        "placeholder": "750 W"
+      },
+      "length": {
+        "name": "Lengte",
+        "placeholder": "2 m"
+      },
+      "style": {
+        "name": "Stijl",
+        "placeholder": "Ruime pasvorm"
+      },
+      "finish": {
+        "name": "Afwerking",
+        "placeholder": "Geborsteld messing"
+      }
+    },
+    "sharedPriceNote": "Alle varianten delen één prijs en één voorraadniveau.",
+    "addFirst": "Verkocht in meer dan één variant?",
+    "addAnother": "Nog een manier toevoegen waarop het varieert",
+    "somethingElse": "Iets anders",
+    "groupsFull": "{max, plural, one {Dat is de maximale {max} optiegroep.} other {Dat zijn alle {max} optiegroepen.}}",
+    "optionsFull": "{max, plural, one {Dat is de maximale {max} optie.} other {Dat zijn alle {max} opties.}}",
+    "whatVaries": "Wat varieert",
+    "whatVariesPlaceholder": "Wat varieert? bijv. Vermogen",
+    "optionCount": "{count, plural, one {{count} optie} other {{count} opties}}",
+    "moveGroupEarlier": "{named, select, yes {Verplaats {name} naar voren} other {Verplaats optiegroep {position} naar voren}}",
+    "moveGroupLater": "{named, select, yes {Verplaats {name} naar achteren} other {Verplaats optiegroep {position} naar achteren}}",
+    "removeGroup": "{named, select, yes {Verwijder {name}} other {Verwijder optiegroep {position}}}",
+    "howBuyersPick": "{named, select, yes {Hoe kopers {name} kiezen} other {Hoe kopers optiegroep {position} kiezen}}",
+    "howBuyersPickAbout": "Hoe kopers het kiezen",
+    "swatchColumn": "Kleur",
+    "nameColumn": "Naam",
+    "groupOptionsList": "{named, select, yes {Opties van {name}} other {Opties van optiegroep {position}}}",
+    "swatchFor": "{named, select, yes {Kleur voor {name}} other {Kleur voor optie {position}}}",
+    "noSwatch": "Geen kleurstaal",
+    "optionLabel": "{named, select, yes {{name} optie {position}} other {Optiegroep {groupPosition} optie {position}}}",
+    "optionPlaceholder": "Optie {position}",
+    "available": "{named, select, yes {{name} is beschikbaar} other {optie {position} is beschikbaar}}",
+    "moveOptionEarlier": "{named, select, yes {Verplaats {name} naar voren} other {Verplaats optie {position} naar voren}}",
+    "moveOptionLater": "{named, select, yes {Verplaats {name} naar achteren} other {Verplaats optie {position} naar achteren}}",
+    "removeOption": "{named, select, yes {Verwijder {name}} other {Verwijder optie {position}}}",
+    "swatchConflict": "{names} delen dezelfde eerste letter en geen van beide heeft een kleur. Kopers zien identieke vierkantjes. Geef elke optie een kleur.",
+    "addOptions": "Opties toevoegen",
+    "addOptionsAbout": "Hoe je meerdere opties tegelijk toevoegt",
+    "addOptionsHelp": "Druk na elke optie op Enter, of plak een lijst (\"S, M, L, XL\", of een kolom gekopieerd uit een spreadsheet) om ze allemaal in één keer toe te voegen.",
+    "noRoom": "Geen ruimte voor meer opties",
+    "draftPlaceholder": "{preset, select, yes {{example} (of plak een lijst)} other {Eerste optie (of plak een lijst)}}",
+    "add": "Toevoegen",
+    "useNoSwatch": "Geen kleurstaal gebruiken"
+  },
+  "galleryField": {
+    "tooMany": "Een product kan maximaal {max} extra foto's hebben.",
+    "wrongType": "Gebruik PNG-, JPG-, WEBP-, GIF- of AVIF-afbeeldingen.",
+    "tooLarge": "Elke foto moet kleiner zijn dan {max} MB.",
+    "roomLeft": "{count, plural, one {Er past nog maar {count} foto.} other {Er passen nog maar {count} foto's.}}",
+    "everyVersion": "Elke variant",
+    "photos": "Foto's",
+    "unnamedOption": "Naamloze optie",
+    "options": "Opties",
+    "target": "{groupNamed, select, yes {{optionNamed, select, yes {{group}: {option}} other {{group}: Naamloze optie}}} other {{optionNamed, select, yes {Opties: {option}} other {Opties: Naamloze optie}}}}",
+    "moveToEveryVersion": "Verplaatsen naar: Elke variant",
+    "moveToOption": "{groupNamed, select, yes {{optionNamed, select, yes {Verplaatsen naar: {group}: {option}} other {Verplaatsen naar: {group}: Naamloze optie}}} other {{optionNamed, select, yes {Verplaatsen naar: Opties: {option}} other {Verplaatsen naar: Opties: Naamloze optie}}}}",
+    "photoCount": "{count, plural, one {{count} foto} other {{count} foto's}}",
+    "removePhoto": "Foto verwijderen",
+    "movePhotoEarlier": "Foto naar voren verplaatsen",
+    "movePhotoLater": "Foto naar achteren verplaatsen",
+    "altPlaceholder": "Alt-tekst",
+    "altLabel": "Beschrijf deze foto voor mensen die hem niet kunnen zien",
+    "versionLabel": "Voor welke variant deze foto wordt getoond",
+    "tally": "{max, plural, one {{count} van {max} foto} other {{count} van {max} foto's}}",
+    "orderAbout": "Hoe deze foto's worden gesorteerd",
+    "orderHelp": "De hoofdafbeelding uit Media en levering staat altijd vooraan. Daarna verschijnen foto's in de volgorde waarin ze hier staan.",
+    "limitReached": "Limiet bereikt",
+    "dropOrClick": "Slepen of klikken"
+  },
+  "optionSpecsField": {
+    "heading": "Verschilt per variant",
+    "about": "Hoe specificaties per variant werken",
+    "help": "Maten en gewichten die per variant verschillen, komen hier. Wat je leeg laat, gebruikt wat je hierboven hebt ingevuld, dus geef alleen op wat echt verschilt. Kopers zien de waarden voor de variant die ze hebben gekozen.",
+    "unnamedOption": "Naamloze optie",
+    "options": "Opties",
+    "sameAsAbove": "Zelfde als hierboven",
+    "length": "Lengte",
+    "width": "Breedte",
+    "height": "Hoogte",
+    "weight": "Gewicht",
+    "specsList": "{named, select, yes {Specificaties van {option}} other {Specificaties van naamloze optie}}",
+    "specName": "Naam, bijv. Aantal zitplaatsen",
+    "specValue": "Waarde, bijv. 6",
+    "specNameLabel": "{named, select, yes {Naam van specificatie {number} van {option}} other {Naam van specificatie {number} van naamloze optie}}",
+    "specValueLabel": "{named, select, yes {Waarde van specificatie {number} van {option}} other {Waarde van specificatie {number} van naamloze optie}}",
+    "removeSpec": "{named, select, yes {Verwijder specificatie {number} van {option}} other {Verwijder specificatie {number} van naamloze optie}}",
+    "addSpec": "Specificatie voor deze variant",
+    "replacesNote": "Een specificatie met dezelfde naam als hierboven vervangt die voor deze variant."
+  },
+  "detailsFields": {
+    "dimensions": "Afmetingen",
+    "length": "Lengte",
+    "width": "Breedte",
+    "height": "Hoogte",
+    "unit": "Eenheid",
+    "weight": "Gewicht",
+    "materials": "Materialen",
+    "materialsPlaceholder": "bijv. Massief eiken, messing beslag",
+    "madeIn": "Gemaakt in",
+    "madeInPlaceholder": "Land van herkomst",
+    "care": "Onderhoudsinstructies",
+    "included": "Wat is inbegrepen",
+    "includedPlaceholder": "Eén item per regel\nbijv. 1 × lamp\n1 × kabel van 2 m",
+    "specifications": "Specificaties",
+    "specName": "Naam, bijv. Wattage",
+    "specValue": "Waarde, bijv. 40 W",
+    "specNameLabel": "Naam van specificatie {number}",
+    "specValueLabel": "Waarde van specificatie {number}",
+    "removeSpec": "Specificatie {number} verwijderen",
+    "addSpec": "Specificatie toevoegen"
+  },
+  "safetyFields": {
+    "manufacturer": "Fabrikant",
+    "manufacturerEmail": "E-mail fabrikant",
+    "manufacturerAddress": "Adres fabrikant",
+    "responsibleName": "Verantwoordelijke persoon in de EU",
+    "responsibleNameAbout": "Over de verantwoordelijke persoon in de EU",
+    "responsibleNameHint": "Alleen wanneer de fabrikant buiten de EU is gevestigd.",
+    "responsibleEmail": "E-mail verantwoordelijke persoon",
+    "responsibleAddress": "Adres verantwoordelijke persoon",
+    "identifier": "Type-, partij- of serienummer",
+    "warnings": "Waarschuwingen en veiligheidsinformatie"
+  },
+  "documentsField": {
+    "tooMany": "Een product kan maximaal {max} documenten hebben.",
+    "wrongType": "Gebruik een PDF voor certificaten, handleidingen en andere documenten.",
+    "tooLarge": "\"{name}\" is te groot. Documenten moeten kleiner zijn dan {max} MB.",
+    "roomLeft": "{count, plural, one {Er past nog maar {count} document.} other {Er passen nog maar {count} documenten.}}",
+    "fallbackLabel": "Document",
+    "list": "Documenten",
+    "nameLabel": "Documentnaam, getoond aan kopers",
+    "namePlaceholder": "bijv. Veiligheidsinformatieblad",
+    "remove": "{named, select, yes {Verwijder {name}} other {Document verwijderen}}",
+    "limitReached": "Limiet bereikt",
+    "dropPrompt": "Sleep PDF's hierheen of klik om te uploaden",
+    "tally": "{max, plural, one {{count} van {max} document · PDF, tot {maxMb} MB elk} other {{count} van {max} documenten · PDF, tot {maxMb} MB elk}}"
+  },
+  "imageDropzone": {
+    "wrongType": "Gebruik een PNG-, JPG-, WEBP-, GIF- of AVIF-afbeelding.",
+    "tooLarge": "Afbeelding moet kleiner zijn dan {max} MB.",
+    "previewAlt": "Voorbeeld van hoofdafbeelding",
+    "dropPrompt": "Sleep een afbeelding hierheen of klik om te uploaden",
+    "hint": "PNG, JPG, WEBP, GIF of AVIF, tot {max} MB",
+    "remove": "Hoofdafbeelding verwijderen"
+  },
+  "fileDropzone": {
+    "currentFile": "Huidig bestand",
+    "dropPrompt": "Sleep een bestand hierheen of klik om te uploaden",
+    "hint": "ZIP, PDF en vergelijkbaar, tot {max} MB",
+    "remove": "Digitaal bestand verwijderen"
+  }
+}

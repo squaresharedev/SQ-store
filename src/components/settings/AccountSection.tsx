@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { TourReplayCard } from "@/components/onboarding/TourReplayCard";
 import { AvatarUpload } from "@/components/settings/AvatarUpload";
 import { BioForm } from "@/components/settings/BioForm";
@@ -40,7 +41,8 @@ export function AccountSection({
   /** Whether 2FA is on; off shows the prompt to turn it on. */
   twoFactorEnabled?: boolean;
 }) {
-  const name = username || email.split("@")[0] || "Account";
+  const t = useTranslations("Settings.account");
+  const name = username || email.split("@")[0] || t("fallbackName");
   // The ids are universal search's landing points: the registry maps "handle",
   // "log out", "change my email" and friends to /settings/account#<id>, so a
   // search lands on the CONTROL rather than the top of a long page. `scroll-mt`

@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
 import { buildObjectKey, hasR2Credentials, presignPutUrl } from "@/lib/r2";
@@ -45,27 +46,28 @@ const SNIFF_BYTES = 12;
  * word.
  */
 
-const filenameSchema = singleLineText({ label: "A filename", max: 200 });
+const filenameSchema = singleLineText({ field: "filename", max: 200 });
 
 function bad(status: number, error: string, fix?: string) {
   return Response.json({ error, fix }, { status });
 }
 
 export async function POST(request: Request) {
+  const t = await getTranslations("Errors.uploadRoute");
   const account = await getActiveAccount();
-  if (!account) return bad(401, "Sign in to upload documents.");
+  if (!account) return bad(401, t("signIn.document"));
   if (!can(account.role, "products.write")) {
-    return bad(403, "You don't have permission to upload here.");
+    return bad(403, t("permissionDenied"));
   }
   if (!(await rateLimit("document_upload", RATE_LIMITS.documentUpload))) {
-    return bad(429, "Too many document uploads right now. Try again shortly.");
+    return bad(429, t("rateLimited.document"));
   }
   if (!hasR2Credentials()) {
     console.error(
       "[uploads] R2 is not configured — set R2_ACCOUNT_ID, R2_BUCKET_NAME, " +
         "R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY in .env.local (see .env.example).",
     );
-    return bad(503, "Uploads are not configured yet. Contact the site owner.");
+    return bad(503, t("notConfigured.document"));
   }
 
   // Metadata rides in the query string (percent-encoded, so a filename with
@@ -76,26 +78,26 @@ export async function POST(request: Request) {
   if (!allowed.includes(contentType)) {
     return bad(
       415,
-      "Documents have to be PDFs.",
-      "Export the manual or certificate as a PDF, then upload it.",
+      t("unsupported.documentType"),
+      t("unsupportedFix.documentType"),
     );
   }
 
   const filename = filenameSchema.safeParse(params.get("filename") ?? "");
-  if (!filename.success) return bad(400, "That filename can't be used.");
+  if (!filename.success) return bad(400, t("filenameInvalid"));
 
   // R2 needs a length, and it is also the only chance to reject an oversized
   // upload BEFORE streaming it. The stored object's true size is re-checked at
   // save time, so a dishonest header cannot get a document attached.
   const declared = Number(request.headers.get("content-length"));
   if (!Number.isFinite(declared) || declared <= 0) {
-    return bad(411, "That upload is missing its length.", "Try again.");
+    return bad(411, t("lengthMissing"), t("fix.tryAgain"));
   }
   if (declared > DOCUMENT_MAX_BYTES) {
     const maxMb = Math.round(DOCUMENT_MAX_BYTES / 1024 / 1024);
-    return bad(413, "That document is too large.", `Use a PDF under ${maxMb} MB.`);
+    return bad(413, t("tooLarge.document"), t("tooLargeFix.document", { maxMb }));
   }
-  if (!request.body) return bad(400, "No document was uploaded.");
+  if (!request.body) return bad(400, t("missing.document"));
 
   // POSITIVE identification, not the file route's "is the claim a provable
   // lie". One accepted type, and it has a magic number, so the bytes must
@@ -106,8 +108,8 @@ export async function POST(request: Request) {
   if (sniffFile(head) !== "pdf") {
     return bad(
       415,
-      "That file isn't a PDF.",
-      "Re-export it as a PDF. Renaming a file does not change its format.",
+      t("unsupported.documentContents"),
+      t("unsupportedFix.documentContents"),
     );
   }
 
@@ -127,11 +129,11 @@ export async function POST(request: Request) {
     } as RequestInit & { duplex: "half" });
     if (!res.ok) {
       console.error("[uploads] document store failed", res.status);
-      return bad(502, "The document could not be stored.", "Try again in a moment.");
+      return bad(502, t("storeFailed.document"), t("fix.tryAgainInAMoment"));
     }
   } catch (error) {
     console.error("[uploads] document stream failed", error);
-    return bad(502, "The document could not be stored.", "Try again in a moment.");
+    return bad(502, t("storeFailed.document"), t("fix.tryAgainInAMoment"));
   }
 
   return Response.json({ key });

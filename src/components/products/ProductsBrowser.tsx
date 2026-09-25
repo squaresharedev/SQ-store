@@ -2,6 +2,7 @@
 
 import { Fragment, useTransition } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { usePathname, useRouter } from "next/navigation";
 import {
   ArrowDownAZ,
@@ -54,19 +55,14 @@ import { ProductList } from "./ProductList";
 // designer's product picker runs on it (lib/products/picker-actions). It is
 // only the page's own box, and its `?q=` param, that are gone.
 
-const SORT_OPTIONS: FilterOption<ProductSort>[] = [
-  { value: "default", label: "Newest first", icon: SlidersHorizontal },
-  { value: "unitsSold", label: "Units sold", icon: ShoppingBag },
-  { value: "revenue", label: "Total value sold", icon: Banknote },
-  { value: "priceHigh", label: "Price: high to low", icon: ArrowDownWideNarrow },
-  { value: "priceLow", label: "Price: low to high", icon: ArrowUpNarrowWide },
-  { value: "title", label: "Name: A–Z", icon: ArrowDownAZ },
-];
-
-const STATUS_OPTIONS: FilterOption<ProductStatus | "">[] = [
-  { value: "", label: "All statuses", icon: ListFilter },
-  { value: "active", label: "Active", icon: CircleDot, tone: "text-success" },
-  { value: "draft", label: "Draft", icon: FileEdit, tone: "text-muted-foreground" },
+// Labels come from `Products.browser.sort.<value>` and `Products.status.*`.
+const SORT_ICONS: { value: ProductSort; icon: FilterOption<ProductSort>["icon"] }[] = [
+  { value: "default", icon: SlidersHorizontal },
+  { value: "unitsSold", icon: ShoppingBag },
+  { value: "revenue", icon: Banknote },
+  { value: "priceHigh", icon: ArrowDownWideNarrow },
+  { value: "priceLow", icon: ArrowUpNarrowWide },
+  { value: "title", icon: ArrowDownAZ },
 ];
 
 /** Build the products URL from the current view. Defaults are omitted so a
@@ -112,6 +108,19 @@ export function ProductsBrowser({
 }) {
   const router = useRouter();
   const pathname = usePathname();
+  const t = useTranslations("Products");
+  const tPagination = useTranslations("Common.pagination");
+
+  const sortOptions: FilterOption<ProductSort>[] = SORT_ICONS.map(({ value, icon }) => ({
+    value,
+    label: t(`browser.sort.${value}`),
+    icon,
+  }));
+  const statusOptions: FilterOption<ProductStatus | "">[] = [
+    { value: "", label: t("browser.allStatuses"), icon: ListFilter },
+    { value: "active", label: t("status.active"), icon: CircleDot, tone: "text-success" },
+    { value: "draft", label: t("status.draft"), icon: FileEdit, tone: "text-muted-foreground" },
+  ];
 
   // Every remaining control navigates on the spot (no typing to debounce), so
   // the URL is the only copy of the view: no draft state, and nothing to
@@ -177,20 +186,20 @@ export function ProductsBrowser({
         <div className="flex w-full flex-nowrap items-center justify-between gap-2 sm:w-auto sm:justify-end">
           {showToolbar && (
             <FilterMenu
-              ariaLabel="Sort and filter products"
-              restingLabel="Sort"
+              ariaLabel={t("browser.filterLabel")}
+              restingLabel={t("browser.sortResting")}
               sections={[
                 {
-                  label: "Status",
+                  label: t("browser.statusSection"),
                   value: filters.status ?? "",
-                  options: STATUS_OPTIONS,
+                  options: statusOptions,
                   onChange: handleStatus,
                   defaultValue: "",
                 },
                 {
-                  label: "Sort by",
+                  label: t("browser.sortSection"),
                   value: sort,
-                  options: SORT_OPTIONS,
+                  options: sortOptions,
                   onChange: handleSort,
                   defaultValue: "default",
                 },
@@ -220,7 +229,7 @@ export function ProductsBrowser({
               onClick={handleClear}
               className={cn(secondaryButtonClass, "h-10 shrink-0 px-3 py-2 text-sm")}
             >
-              Clear
+              {t("browser.clear")}
             </button>
           )}
           {canWrite && (
@@ -233,11 +242,11 @@ export function ProductsBrowser({
                 className={cn(secondaryButtonClass, "h-10 shrink-0 px-3 py-2 text-sm")}
               >
                 <UploadIcon className="size-4" />
-                Import
+                {t("browser.import")}
               </Link>
               <Link href="/products/new" className={`${primaryButtonClass} h-10 shrink-0`}>
                 <Plus className="size-4" strokeWidth={2} aria-hidden="true" />
-                Add product
+                {t("browser.add")}
               </Link>
             </>
           )}
@@ -257,7 +266,7 @@ export function ProductsBrowser({
           <div className="pointer-events-none absolute right-3 top-3 z-10 flex items-center gap-2 rounded-sm border border-border bg-background/90 px-2 py-1 shadow-sm backdrop-blur">
             <Spinner className="size-3.5 text-muted-foreground" />
             <span className={infoTextClass}>
-              Updating…
+              {t("browser.updating")}
             </span>
           </div>
         )}
@@ -274,8 +283,11 @@ export function ProductsBrowser({
         {totalPages > 1 && (
           <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
             <p className={helpTextClass}>
-              {data.total} product{data.total === 1 ? "" : "s"} · page {data.page}{" "}
-              of {totalPages}
+              {t("browser.pagination", {
+                total: data.total,
+                page: data.page,
+                pages: totalPages,
+              })}
             </p>
             <div className="flex gap-2">
               <button
@@ -284,7 +296,7 @@ export function ProductsBrowser({
                 disabled={data.page <= 1}
                 onClick={() => handlePage(data.page - 1)}
               >
-                Previous
+                {tPagination("previous")}
               </button>
               <button
                 type="button"
@@ -292,7 +304,7 @@ export function ProductsBrowser({
                 disabled={data.page >= totalPages}
                 onClick={() => handlePage(data.page + 1)}
               >
-                Next
+                {tPagination("next")}
               </button>
             </div>
           </div>

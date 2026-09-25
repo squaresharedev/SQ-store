@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, ShieldAlert } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { iconNudgeRightClass, primaryButtonClass } from "@/components/ui/control-styles";
 import { cn } from "@/lib/utils";
 
@@ -8,6 +9,7 @@ import { cn } from "@/lib/utils";
  * how they sign in (beside the password card). Renders nothing once it's on.
  */
 export function TwoFactorPrompt({ enabled }: { enabled: boolean }) {
+  const t = useTranslations("Settings.security.prompt");
   if (enabled) return null;
   return (
     <section
@@ -18,11 +20,10 @@ export function TwoFactorPrompt({ enabled }: { enabled: boolean }) {
         <ShieldAlert aria-hidden className="mt-0.5 size-5 shrink-0 text-foreground" />
         <div className="min-w-0">
           <h2 id="two-factor-prompt-title" className="text-base font-semibold text-foreground">
-            Your password is the only lock on this account
+            {t("title")}
           </h2>
           <p className="mt-1 font-inter text-sm leading-relaxed text-muted-foreground">
-            Turn on two-factor authentication so signing in also needs a code
-            from your phone. It takes about a minute.
+            {t("body")}
           </p>
         </div>
       </div>
@@ -30,7 +31,7 @@ export function TwoFactorPrompt({ enabled }: { enabled: boolean }) {
         href="/settings/security?setup=1"
         className={cn(primaryButtonClass, "group/btn shrink-0")}
       >
-        Turn on 2FA
+        {t("cta")}
         <ArrowRight aria-hidden className={cn("size-4", iconNudgeRightClass)} />
       </Link>
     </section>

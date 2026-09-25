@@ -1,0 +1,113 @@
+{
+  "metadata": {
+    "notifications": {
+      "title": "Notifications"
+    }
+  },
+  "loading": {
+    "title": "Notifications",
+    "srLoading": "chargement des notifications"
+  },
+  "bell": {
+    "label": "Notifications",
+    "unreadLabel": "{count, plural, one {Notifications, {count} non lue} many {Notifications, {count} non lues} other {Notifications, {count} non lues}}"
+  },
+  "list": {
+    "title": "Notifications",
+    "unread": "{count, plural, one {{count} non lue} many {{count} non lues} other {{count} non lues}}",
+    "markAllRead": "Tout marquer comme lu",
+    "livePaused": "Mises à jour en direct interrompues. Actualisez pour voir les dernières.",
+    "empty": "Vous êtes à jour. Rien ici pour l’instant.",
+    "viewAll": "Tout voir"
+  },
+  "item": {
+    "unread": "Non lu"
+  },
+  "page": {
+    "title": "Notifications",
+    "markAllRead": "Tout marquer comme lu",
+    "emptyTitle": "Pas encore de notifications",
+    "emptyHint": "L’activité de l’équipe, des commandes et des paiements apparaîtra ici.",
+    "loadError": "Impossible de charger plus de notifications. Vérifiez votre connexion et réessayez.",
+    "loading": "Chargement",
+    "loadMore": "Charger plus"
+  },
+  "types": {
+    "team": "Équipe",
+    "order": "Commande",
+    "payment": "Paiement",
+    "stock": "Stock",
+    "system": "Système",
+    "security": "Sécurité",
+    "policy": "Règles"
+  },
+  "time": {
+    "justNow": "à l’instant",
+    "minutesAgo": "{count, plural, one {il y a {count} min} many {il y a {count} min} other {il y a {count} min}}",
+    "hoursAgo": "{count, plural, one {il y a {count} h} many {il y a {count} h} other {il y a {count} h}}",
+    "daysAgo": "{count, plural, one {il y a {count} j} many {il y a {count} j} other {il y a {count} j}}"
+  },
+  "messages": {
+    "teamInvite": {
+      "title": "Vous avez une invitation d’équipe",
+      "body": "{role, select, owner {{store} vous a invité à les rejoindre en tant que propriétaire. Ouvrez Équipe et accès pour accepter.} editor {{store} vous a invité à les rejoindre en tant qu’éditeur. Ouvrez Équipe et accès pour accepter.} viewer {{store} vous a invité à les rejoindre en tant que lecteur. Ouvrez Équipe et accès pour accepter.} other {{store} vous a invité à rejoindre leur équipe. Ouvrez Équipe et accès pour accepter.}}",
+      "bodyUnnamedStore": "{role, select, owner {Une boutique SquareShare vous a invité à la rejoindre en tant que propriétaire. Ouvrez Équipe et accès pour accepter.} editor {Une boutique SquareShare vous a invité à la rejoindre en tant qu’éditeur. Ouvrez Équipe et accès pour accepter.} viewer {Une boutique SquareShare vous a invité à la rejoindre en tant que lecteur. Ouvrez Équipe et accès pour accepter.} other {Une boutique SquareShare vous a invité à rejoindre son équipe. Ouvrez Équipe et accès pour accepter.}}"
+    },
+    "teamJoined": {
+      "title": "{name} a rejoint votre équipe",
+      "titleUnnamed": "Un nouveau membre a rejoint votre équipe",
+      "body": "Cette personne a maintenant accès à votre boutique."
+    },
+    "security": {
+      "passwordChanged": {
+        "title": "Votre mot de passe a été modifié",
+        "body": "Le mot de passe de ce compte vient d’être modifié et les autres appareils ont été déconnectés. Si ce n’était pas vous, réinitialisez votre mot de passe immédiatement."
+      },
+      "passwordReset": {
+        "title": "Votre mot de passe a été modifié",
+        "body": "Un lien de réinitialisation a été utilisé pour définir un nouveau mot de passe, et les autres appareils ont été déconnectés. Si ce n’était pas vous, réinitialisez-le à nouveau immédiatement."
+      },
+      "passwordSet": {
+        "title": "Un mot de passe a été défini sur votre compte",
+        "body": "Ce compte peut désormais se connecter avec un mot de passe en plus de Google. Si ce n’était pas vous, réinitialisez-le immédiatement."
+      },
+      "resetRequested": {
+        "title": "Une demande de réinitialisation du mot de passe a été effectuée",
+        "body": "Quelqu’un a demandé un lien pour définir un nouveau mot de passe sur ce compte. Si ce n’était pas vous, ignorez l’e-mail et changez votre mot de passe."
+      },
+      "emailChangeRequested": {
+        "title": "Changement d’e-mail demandé",
+        "body": "Quelqu’un a demandé à transférer ce compte vers une nouvelle adresse e-mail. Cela ne prend effet qu’une fois le lien de cette boîte de réception confirmé. Si ce n’était pas vous, changez votre mot de passe dès maintenant."
+      },
+      "lockedOut": {
+        "title": "Quelqu’un tente de se connecter à votre compte",
+        "body": "Votre mot de passe a été saisi correctement, puis de trop nombreux codes à deux facteurs erronés ont été saisis : la connexion est suspendue pendant quelques minutes. Si ce n’était pas vous, quelqu’un d’autre connaît votre mot de passe : changez-le maintenant."
+      },
+      "recoveryCodeUsed": {
+        "title": "Un code de récupération a servi à se connecter",
+        "body": "Quelqu’un s’est connecté à votre compte avec un code de récupération. Cela désactive l’authentification à deux facteurs et déconnecte tous les autres appareils. Si c’était vous, configurez-la à nouveau dans Paramètres › Sécurité. Sinon, changez votre mot de passe maintenant."
+      },
+      "twoFactorEnabled": {
+        "title": "L’authentification à deux facteurs est activée",
+        "body": "Se connecter à votre compte nécessite désormais un code de votre application d’authentification, et tous les autres appareils ont été déconnectés. Si ce n’était pas vous, changez votre mot de passe et contactez le support."
+      },
+      "factorAdded": {
+        "title": "Une application d’authentification a été ajoutée",
+        "body": "« {name} » peut désormais servir à se connecter à votre compte. Si ce n’était pas vous, supprimez-la dans Paramètres › Sécurité et changez votre mot de passe.",
+        "bodyUnnamed": "« Application d’authentification » peut désormais servir à se connecter à votre compte. Si ce n’était pas vous, supprimez-la dans Paramètres › Sécurité et changez votre mot de passe."
+      },
+      "twoFactorDisabled": {
+        "title": "L’authentification à deux facteurs est désactivée",
+        "body": "Votre dernière application d’authentification a été supprimée : se connecter ne nécessite plus que votre mot de passe. Si ce n’était pas vous, changez votre mot de passe et réactivez l’authentification à deux facteurs."
+      },
+      "factorRemoved": {
+        "title": "Une application d’authentification a été supprimée",
+        "body": "« {name} » ne peut plus servir à se connecter à votre compte. Si ce n’était pas vous, changez votre mot de passe maintenant."
+      },
+      "recoveryCodesRegenerated": {
+        "title": "De nouveaux codes de récupération ont été générés",
+        "body": "Vos anciens codes de récupération ne fonctionnent plus. Si ce n’était pas vous, changez votre mot de passe maintenant."
+      }
+    }
+  }
+}

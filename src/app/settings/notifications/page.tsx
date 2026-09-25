@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { NotificationsSection } from "@/components/settings/NotificationsSection";
 import { requireProfile, requireUser } from "@/lib/auth/session";
 
-export const metadata: Metadata = {
-  title: "Notification settings",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Settings.metadata.notifications");
+  return { title: t("title") };
+}
 
 export default async function NotificationsSettingsPage() {
   await requireUser("/settings/notifications");

@@ -10,7 +10,9 @@ import {
 import {
   priceTagAutoTextColor,
   resolveColorTarget,
+  type ResolvedColorTarget,
 } from "@/lib/theme/color-target";
+import { english } from "../setup/translate";
 import {
   titleShadowBackdrop,
   titleShadowInk,
@@ -90,12 +92,35 @@ describe("shadow ink and backdrop", () => {
   });
 });
 
+/**
+ * A resolved target as a reader sees it: every key turned into its English, so
+ * the assertions below still read as the copy on screen. The whole "Use ..."
+ * phrase is dropped here and checked on its own.
+ */
+function inEnglish(target: ResolvedColorTarget | null) {
+  if (!target) return target;
+  const { inherit, ...rest } = target;
+  return {
+    ...rest,
+    label: english(target.label),
+    ...(inherit
+      ? {
+          inherit: {
+            label: english(inherit.label),
+            value: inherit.value,
+            active: inherit.active,
+          },
+        }
+      : {}),
+  };
+}
+
 describe("resolveColorTarget: title-shadow", () => {
   const resolve = (
     ref: Parameters<typeof resolveColorTarget>[0],
     theme: StorefrontTheme,
     blocks: Parameters<typeof resolveColorTarget>[2],
-  ) => resolveColorTarget(ref, theme, blocks, DEFAULT_STOREFRONT_HEADER);
+  ) => inEnglish(resolveColorTarget(ref, theme, blocks, DEFAULT_STOREFRONT_HEADER));
 
   it("resolves the theme's own tint, defaulting to black", () => {
     expect(resolve({ kind: "title-shadow" }, themeWith(), [])).toEqual({

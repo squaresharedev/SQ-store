@@ -16,63 +16,78 @@
 // Raw hex is permitted in THIS file alone — a token-definition module, like
 // standard-colors.ts and color-presets.ts.
 
-import type { ColorPreset } from "./color-presets";
+import type { MessageKey } from "@/i18n/types";
+import type { ColorSwatch } from "./color-presets";
 
 export type ColorPalette = {
-  /** Shown beside the row, and used in each swatch's accessible name. */
-  name: string;
-  colors: readonly ColorPreset[];
+  /** Stable identity (React key). Never shown, never translated. */
+  id: string;
+  /** Shown above the row. */
+  name: MessageKey;
+  /** The row's accessible name, a whole phrase ("Sunset palette"). */
+  group: MessageKey;
+  colors: readonly ColorSwatch[];
 };
 
 export const COLOR_PALETTES: readonly ColorPalette[] = [
   {
-    name: "Sunset",
+    id: "sunset",
+    name: "Storefront.colors.palettes.sunset.name",
+    group: "Storefront.colors.palettes.sunset.group",
     colors: [
-      { name: "Cream", value: "#fef3c7" },
-      { name: "Amber", value: "#fbbf24" },
-      { name: "Orange", value: "#f97316" },
-      { name: "Red", value: "#dc2626" },
-      { name: "Ember", value: "#7c2d12" },
+      { label: "Storefront.colors.palettes.sunset.swatches.cream", value: "#fef3c7" },
+      { label: "Storefront.colors.palettes.sunset.swatches.amber", value: "#fbbf24" },
+      { label: "Storefront.colors.palettes.sunset.swatches.orange", value: "#f97316" },
+      { label: "Storefront.colors.palettes.sunset.swatches.red", value: "#dc2626" },
+      { label: "Storefront.colors.palettes.sunset.swatches.ember", value: "#7c2d12" },
     ],
   },
   {
-    name: "Forest",
+    id: "forest",
+    name: "Storefront.colors.palettes.forest.name",
+    group: "Storefront.colors.palettes.forest.group",
     colors: [
-      { name: "Mist", value: "#f0fdf4" },
-      { name: "Sage", value: "#86efac" },
-      { name: "Green", value: "#22c55e" },
-      { name: "Pine", value: "#15803d" },
-      { name: "Deep", value: "#14532d" },
+      { label: "Storefront.colors.palettes.forest.swatches.mist", value: "#f0fdf4" },
+      { label: "Storefront.colors.palettes.forest.swatches.sage", value: "#86efac" },
+      { label: "Storefront.colors.palettes.forest.swatches.green", value: "#22c55e" },
+      { label: "Storefront.colors.palettes.forest.swatches.pine", value: "#15803d" },
+      { label: "Storefront.colors.palettes.forest.swatches.deep", value: "#14532d" },
     ],
   },
   {
-    name: "Ocean",
+    id: "ocean",
+    name: "Storefront.colors.palettes.ocean.name",
+    group: "Storefront.colors.palettes.ocean.group",
     colors: [
-      { name: "Foam", value: "#f0f9ff" },
-      { name: "Sky", value: "#7dd3fc" },
-      { name: "Cyan", value: "#0ea5e9" },
-      { name: "Sea", value: "#0369a1" },
-      { name: "Navy", value: "#0c4a6e" },
+      { label: "Storefront.colors.palettes.ocean.swatches.foam", value: "#f0f9ff" },
+      { label: "Storefront.colors.palettes.ocean.swatches.sky", value: "#7dd3fc" },
+      { label: "Storefront.colors.palettes.ocean.swatches.cyan", value: "#0ea5e9" },
+      { label: "Storefront.colors.palettes.ocean.swatches.sea", value: "#0369a1" },
+      { label: "Storefront.colors.palettes.ocean.swatches.navy", value: "#0c4a6e" },
     ],
   },
   {
-    name: "Mono",
+    id: "mono",
+    name: "Storefront.colors.palettes.mono.name",
+    group: "Storefront.colors.palettes.mono.group",
     colors: [
-      { name: "White", value: "#ffffff" },
-      { name: "Silver", value: "#d4d4d4" },
-      { name: "Grey", value: "#737373" },
-      { name: "Graphite", value: "#404040" },
-      { name: "Ink", value: "#171717" },
+      { label: "Storefront.colors.palettes.mono.swatches.white", value: "#ffffff" },
+      { label: "Storefront.colors.palettes.mono.swatches.silver", value: "#d4d4d4" },
+      { label: "Storefront.colors.palettes.mono.swatches.grey", value: "#737373" },
+      { label: "Storefront.colors.palettes.mono.swatches.graphite", value: "#404040" },
+      { label: "Storefront.colors.palettes.mono.swatches.ink", value: "#171717" },
     ],
   },
   {
-    name: "Candy",
+    id: "candy",
+    name: "Storefront.colors.palettes.candy.name",
+    group: "Storefront.colors.palettes.candy.group",
     colors: [
-      { name: "Blush", value: "#fdf2f8" },
-      { name: "Rose", value: "#f9a8d4" },
-      { name: "Pink", value: "#ec4899" },
-      { name: "Purple", value: "#a855f7" },
-      { name: "Violet", value: "#6d28d9" },
+      { label: "Storefront.colors.palettes.candy.swatches.blush", value: "#fdf2f8" },
+      { label: "Storefront.colors.palettes.candy.swatches.rose", value: "#f9a8d4" },
+      { label: "Storefront.colors.palettes.candy.swatches.pink", value: "#ec4899" },
+      { label: "Storefront.colors.palettes.candy.swatches.purple", value: "#a855f7" },
+      { label: "Storefront.colors.palettes.candy.swatches.violet", value: "#6d28d9" },
     ],
   },
 ];

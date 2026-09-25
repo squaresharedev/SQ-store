@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { ASSIGNABLE_ROLES } from "@/lib/team/permissions";
+import { issueKey } from "@/lib/validation/messages";
 
 /**
  * Team & Access validation schemas, shared by the client (UX hints) and the
@@ -14,30 +15,30 @@ import { ASSIGNABLE_ROLES } from "@/lib/team/permissions";
  */
 
 export const teamInviteSchema = z.strictObject({
-  account_owner_id: z.uuid("Invalid store reference."),
+  account_owner_id: z.uuid(issueKey("Validation.team.invalidStore")),
   invited_email: z
-    .email("That doesn't look like an email address.")
-    .max(254, "That email is too long.")
+    .email(issueKey("Validation.team.invalidEmail"))
+    .max(254, issueKey("Validation.team.emailTooLong"))
     .trim()
     .transform((v) => v.toLowerCase()),
   role: z.enum(ASSIGNABLE_ROLES, {
-    error: "Pick a valid role.",
+    error: issueKey("Validation.team.invalidRole"),
   }),
 });
 
 export const teamAcceptSchema = z.strictObject({
-  invite_id: z.uuid("Invalid invite reference."),
+  invite_id: z.uuid(issueKey("Validation.team.invalidInvite")),
 });
 
 export const teamChangeRoleSchema = z.strictObject({
-  account_owner_id: z.uuid("Invalid store reference."),
-  member_id: z.uuid("Invalid member reference."),
+  account_owner_id: z.uuid(issueKey("Validation.team.invalidStore")),
+  member_id: z.uuid(issueKey("Validation.team.invalidMember")),
   role: z.enum(ASSIGNABLE_ROLES, {
-    error: "Pick a valid role.",
+    error: issueKey("Validation.team.invalidRole"),
   }),
 });
 
 export const teamRevokeSchema = z.strictObject({
-  account_owner_id: z.uuid("Invalid store reference."),
-  member_id: z.uuid("Invalid member reference."),
+  account_owner_id: z.uuid(issueKey("Validation.team.invalidStore")),
+  member_id: z.uuid(issueKey("Validation.team.invalidMember")),
 });

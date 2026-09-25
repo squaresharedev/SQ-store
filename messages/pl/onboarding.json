@@ -1,0 +1,252 @@
+{
+  "steps": {
+    "seller": {
+      "label": "Dodaj dane sprzedawcy",
+      "detail": "Twoja nazwa przedsiębiorcy, adres i e-mail kontaktowy trafiają na każdą stronę produktu.",
+      "detailDone": "Kupujący widzą, od kogo kupują.",
+      "detailUnconfirmed": "Otwórz link, który wysłaliśmy e-mailem, aby potwierdzić adres kontaktowy.",
+      "action": "Dodaj dane",
+      "actionUnconfirmed": "Potwierdź e-mail",
+      "cta": "Dodaj dane sprzedawcy",
+      "ctaUnconfirmed": "Potwierdź swój e-mail"
+    },
+    "product": {
+      "label": "Dodaj produkt",
+      "detail": "Wystarczy nazwa i cena. Na razie może zostać wersją roboczą.",
+      "detailDone": "{count, plural, one {Masz {count} produkt.} few {Masz {count} produkty.} many {Masz {count} produktów.} other {Masz {count} produktu.}}",
+      "action": "Dodaj produkt",
+      "cta": "Dodaj swój pierwszy produkt"
+    },
+    "storefront": {
+      "label": "Umieść produkt w witrynie",
+      "detailDone": "Produkt znajduje się w twojej witrynie.",
+      "detailNone": "Utwórz witrynę, a potem dodaj produkt do jej siatki.",
+      "detailEmpty": "Otwórz witrynę i wybierz Dodaj produkt na pasku narzędzi.",
+      "actionCreate": "Utwórz witrynę",
+      "actionOpen": "Otwórz edytor",
+      "cta": "Otwórz swoją witrynę",
+      "ctaCreate": "Utwórz witrynę"
+    },
+    "publish": {
+      "label": "Opublikuj stronę",
+      "detailDone": "Strona twojego produktu jest opublikowana.",
+      "detailNeedsSeller": "Uzupełnij dane sprzedawcy, aby móc opublikować stronę.",
+      "detailNeedsStorefront": "Gdy produkt znajdzie się w witrynie, jego strona będzie mogła zostać opublikowana.",
+      "detailNeedsActive": "Ustaw ten produkt jako Aktywny, aby jego strona została opublikowana.",
+      "detailPagesOff": "Strony produktów są wyłączone w tej witrynie. Włącz je w edytorze.",
+      "actionEdit": "Edytuj produkt",
+      "actionOpen": "Otwórz edytor",
+      "cta": "Opublikuj swój produkt",
+      "ctaPagesOff": "Włącz strony produktów"
+    }
+  },
+  "checklist": {
+    "titleDone": "Konfiguracja ukończona",
+    "title": "Konfiguracja",
+    "showMeAround": "Oprowadź mnie",
+    "showSteps": "Pokaż kroki",
+    "hideSteps": "Ukryj kroki",
+    "liveHint": "Strona twojego pierwszego produktu jest opublikowana. Udostępnij link, gdzie chcesz.",
+    "copyLink": {
+      "copy": "Kopiuj link do strony produktu",
+      "copied": "Skopiowano link do strony produktu",
+      "failed": "Nie udało się skopiować linku do strony produktu. Zaznacz i skopiuj ręcznie."
+    },
+    "openPage": "Otwórz stronę",
+    "opensInNewTab": " (otwiera się w nowej karcie)",
+    "hide": "Ukryj",
+    "progressLabel": "Postęp konfiguracji",
+    "progress": "{total, plural, one {Ukończono {done} z {total}} few {Ukończono {done} z {total}} many {Ukończono {done} z {total}} other {Ukończono {done} z {total}}}",
+    "stepDone": " (gotowe)",
+    "stepToDo": " (do zrobienia)"
+  },
+  "welcome": {
+    "steps": {
+      "welcome": {
+        "title": "Witaj w Square Share",
+        "description": "Cztery kroki do strony produktu, którą możesz udostępnić."
+      },
+      "path": {
+        "title": "Cztery kroki do pierwszej strony"
+      },
+      "seller": {
+        "title": "Dodaj dane sprzedawcy",
+        "description": "Kupujący widzą je na stronach twoich produktów, a prawo wymaga ich podania, zanim zaczniesz sprzedawać. Nigdy nie używamy ich do marketingu.",
+        "lawNote": "Kupujący widzą te dane na stronach twoich produktów, tak jak wymaga tego prawo. Nigdy nie używamy ich do marketingu."
+      },
+      "tour": {
+        "title": "Gdzie co znaleźć",
+        "description": "Wszystko znajduje się w panelu bocznym. Oto do czego służy każda część."
+      },
+      "terms": {
+        "title": "Nasze Warunki korzystania z usługi",
+        "description": "Przeczytaj skróconą wersję albo pełne Warunki, a potem zaakceptuj, aby przejść dalej."
+      }
+    },
+    "progress": "{total, plural, one {Krok {step} z {total}} few {Krok {step} z {total}} many {Krok {step} z {total}} other {Krok {step} z {total}}}",
+    "intro": "Każdy sprzedawany produkt może mieć własną stronę, ostylowaną przez zaprojektowaną przez ciebie witrynę.",
+    "tagline": "Daj każdemu produktowi własną stronę i udostępniaj ją, gdzie chcesz.",
+    "path": {
+      "seller": {
+        "title": "Dodaj dane sprzedawcy",
+        "body": "Kupujący muszą wiedzieć, od kogo kupują."
+      },
+      "product": {
+        "title": "Dodaj produkt",
+        "body": "Nazwa, cena i zdjęcie, jeśli je masz."
+      },
+      "storefront": {
+        "title": "Umieść go w witrynie",
+        "body": "Wybierz wygląd, a potem umieść produkt na siatce."
+      },
+      "share": {
+        "title": "Udostępnij jego stronę",
+        "body": "Wklej link w swoim bio, wiadomości albo na własnej stronie."
+      }
+    },
+    "seller": {
+      "namePlaceholder": "np. Studio Builderboy e.U.",
+      "nameHelp": "Nazwa twojej firmy albo twoje pełne imię i nazwisko, jeśli sprzedajesz jako osoba prywatna.",
+      "nameAlternative": "Albo swoje imię i nazwisko, jeśli sprzedajesz jako osoba prywatna.",
+      "addressPlaceholder": "np. ul. Rynek 12\nWarszawa, 00-001\nPolska",
+      "emailPlaceholder": "np. kontakt@twojsklep.example",
+      "emailHelp": "Adres, na który piszą kupujący. Może różnić się od e-maila do logowania."
+    },
+    "confirm": {
+      "check": "Sprawdź {email}, żeby znaleźć link potwierdzający.",
+      "goLive": "Strony twoich produktów zostaną opublikowane, gdy go otworzysz.",
+      "sendNewLink": "Wyślij nowy link"
+    },
+    "tour": {
+      "mobileMenu": "Na telefonie otwórz menu w lewym górnym rogu.",
+      "searchShortcut": "Czegoś szukasz? Naciśnij <kbd>{shortcut}</kbd>, aby przeszukać wszystko.",
+      "searchNoShortcut": "Czegoś szukasz? Wyszukiwarka znajdzie każdą stronę i ustawienie.",
+      "searchMobile": "Czegoś szukasz? Stuknij Szukaj u góry."
+    },
+    "nav": {
+      "skipOnboarding": "Pomiń wprowadzenie",
+      "next": "Dalej",
+      "showMeAround": "Pokaż mi, jak to działa",
+      "skipIntro": "Pomiń wprowadzenie",
+      "getStarted": "Zacznij",
+      "skipForNow": "Pomiń na razie",
+      "saveAndContinue": "Zapisz i kontynuuj",
+      "changeDetails": "Zmień dane",
+      "continue": "Kontynuuj",
+      "exploreOnMyOwn": "Zbadam to samodzielnie",
+      "notNow": "Nie teraz"
+    },
+    "hero": {
+      "buyNow": "Kup teraz",
+      "live": "Opublikowano",
+      "linkCopied": "Skopiowano link"
+    },
+    "setupPath": {
+      "details": "Dodaj swoje dane",
+      "product": "Dodaj produkt",
+      "storefront": "Zaprojektuj witrynę",
+      "share": "Udostępnij jej stronę"
+    },
+    "terms": {
+      "agreed": "Zaakceptowano te Warunki. Dzięki za przeczytanie.",
+      "agreeNote": "Akceptacja zapisuje na twoim koncie datę i wersję Warunków."
+    }
+  },
+  "tourOverlay": {
+    "dialogLabel": "Przewodnik po panelu",
+    "progress": "{total, plural, one {{current} z {total}} few {{current} z {total}} many {{current} z {total}} other {{current} z {total}}}",
+    "shortcut": "Skrót: <kbd>{shortcut}</kbd>",
+    "skipTour": "Pomiń przewodnik",
+    "next": "Dalej",
+    "openingPage": "{page, select, overview {Otwieram Przegląd…} products {Otwieram Produkty…} storefront {Otwieram Witrynę…} orders {Otwieram Zamówienia…} analytics {Otwieram Analitykę…} payments {Otwieram Płatności…} settings {Otwieram Ustawienia…} sampleStorefront {Otwieram Przykładową witrynę…} other {Otwieram…}}"
+  },
+  "tourReplay": {
+    "title": "Przewodnik po panelu",
+    "description": "Krótki spacer po najważniejszej rzeczy do zrobienia na każdej stronie, krok po kroku.",
+    "start": "Rozpocznij przewodnik"
+  },
+  "guidedTour": {
+    "steps": {
+      "overviewNav": {
+        "title": "Odnajdź się w panelu",
+        "body": "Wszystko w twoim sklepie jest o jedno kliknięcie od menu. Przewodnik zatrzymuje się przy najważniejszej rzeczy do zrobienia na każdej stronie.",
+        "bodySidebar": "Wszystko w twoim sklepie jest o jedno kliknięcie w tym panelu bocznym. Przewodnik zatrzymuje się przy najważniejszej rzeczy do zrobienia na każdej stronie.",
+        "bodyMenu": "Wszystko w twoim sklepie znajdziesz w tym menu. Przewodnik zatrzymuje się przy najważniejszej rzeczy do zrobienia na każdej stronie."
+      },
+      "search": {
+        "title": "Szukaj czegokolwiek",
+        "body": "Wyszukiwarka przenosi od razu do dowolnej strony, produktu, zamówienia lub ustawienia.",
+        "bodyTopBar": "Przejdź od razu do dowolnej strony, produktu, zamówienia lub ustawienia.",
+        "bodyPhone": "Stuknij tutaj, aby przejść od razu do dowolnej strony, produktu, zamówienia lub ustawienia."
+      },
+      "productsAdd": {
+        "title": "Dodaj produkt",
+        "body": "Na początek wystarczy nazwa i cena. Produkt może zostać wersją roboczą, dopóki go nie opublikujesz."
+      },
+      "productsImport": {
+        "title": "Albo zaimportuj katalog",
+        "body": "Sprzedajesz już gdzie indziej? Zaimportuj plik CSV. Eksport z Shopify działa bez zmian."
+      },
+      "storefrontCreate": {
+        "title": "Utwórz witrynę",
+        "body": "Witryna to siatka, którą projektujesz. Każdy produkt umieszczony na niej dostaje stronę, którą możesz udostępniać."
+      },
+      "storefrontSample": {
+        "title": "Zobacz, jak to się robi",
+        "body": "Ta przykładowa witryna pokazuje gotowy efekt. Otwórz ją, aby wypróbować edytor. Nic, co tam zmienisz, nie zostanie zapisane.",
+        "fallbackBody": "Otwórz witrynę, aby ją zaprojektować."
+      },
+      "storefrontEmbed": {
+        "title": "Osadź witrynę na swojej stronie",
+        "body": "Każda witryna ma przycisk osadzenia, który daje kod taki jak ten. Widget jest jeszcze w trakcie tworzenia i nie wyświetla się jeszcze na innych stronach.",
+        "bodyButton": "Ten przycisk daje kod taki jak ten poniżej, do wklejenia na swojej stronie. Widget jest jeszcze w trakcie tworzenia i nie wyświetla się jeszcze na innych stronach.",
+        "fallbackBody": "Gdy będziesz mieć witrynę, przycisk osadzenia na jej kafelku da ci kod taki jak ten. Widget jest jeszcze w trakcie tworzenia i nie wyświetla się jeszcze na innych stronach."
+      },
+      "ordersSearch": {
+        "title": "Znajdź zamówienie",
+        "body": "Szukaj po adresie e-mail kupującego. Zamówienia pojawią się tutaj, gdy ruszy realizacja zakupu w Square Share."
+      },
+      "ordersFilters": {
+        "title": "Filtruj i sortuj",
+        "body": "Zawęź zamówienia według kanału, statusu lub daty i wybierz sposób sortowania."
+      },
+      "analytics": {
+        "title": "Zobacz, jak idzie",
+        "body": "Sprzedaż i wizyty na stronach twoich produktów w wybranym zakresie dat.",
+        "bodyRange": "Sprzedaż i wizyty na stronach twoich produktów w zakresie dat wybranym tutaj.",
+        "bodyFirstRun": "Sprzedaż i wizyty na stronach twoich produktów pojawią się tutaj, gdy któraś zostanie opublikowana."
+      },
+      "payments": {
+        "title": "Odbieranie płatności",
+        "bodyConnect": "Połącz tutaj Stripe, aby wypłaty trafiały prosto na twój rachunek bankowy.",
+        "bodyComingSoon": "Odbieranie płatności przez Stripe już wkrótce. Do tego czasu kupujący płacą przez link do zakupu przy produkcie albo przez e-mail."
+      },
+      "finish": {
+        "title": "Powtórz przewodnik, kiedy zechcesz",
+        "body": "To już cały przewodnik. Możesz uruchomić go ponownie stąd, kiedy tylko chcesz."
+      }
+    }
+  },
+  "editorTour": {
+    "steps": {
+      "editorAdd": {
+        "title": "Dodaj coś do siatki",
+        "body": "Dodawaj produkty, tekst i kształty z tego paska. Przeciągnij dowolny element na siatce, aby go przesunąć, i pociągnij za róg, aby zmienić jego rozmiar."
+      },
+      "editorDesign": {
+        "title": "Ustaw wygląd",
+        "body": "Kolory, czcionki, nagłówek i wygląd kafelków produktów ustawiasz raz dla całej witryny.",
+        "bodyPanel": "Kolory, czcionki, nagłówek i wygląd kafelków produktów ustawiasz tutaj, raz dla całej witryny.",
+        "bodyButton": "Stuknij tutaj, aby ustawić kolory, czcionki, nagłówek i wygląd kafelków produktów, raz dla całej witryny."
+      },
+      "editorPage": {
+        "title": "Każdy produkt ma własną stronę",
+        "body": "Każdy produkt na siatce ma własną stronę do udostępniania. Otwórz ją tutaj, aby ją zobaczyć i nadać jej styl."
+      },
+      "editorFinish": {
+        "title": "Zrób to po swojemu",
+        "body": "Przykład nigdy się nie zapisuje, więc próbuj wszystkiego. Gdy przyjdzie pora, utwórz własną witrynę."
+      }
+    }
+  }
+}

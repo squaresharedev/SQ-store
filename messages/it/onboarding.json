@@ -1,0 +1,252 @@
+{
+  "steps": {
+    "seller": {
+      "label": "Aggiungi i tuoi dati venditore",
+      "detail": "La tua ragione sociale, l’indirizzo e l’email di contatto compaiono su ogni pagina prodotto.",
+      "detailDone": "Gli acquirenti possono vedere da chi stanno comprando.",
+      "detailUnconfirmed": "Apri il link che ti abbiamo inviato per confermare la tua email di contatto.",
+      "action": "Aggiungi dati",
+      "actionUnconfirmed": "Conferma email",
+      "cta": "Aggiungi i tuoi dati venditore",
+      "ctaUnconfirmed": "Conferma la tua email"
+    },
+    "product": {
+      "label": "Aggiungi un prodotto",
+      "detail": "Bastano un titolo e un prezzo. Per ora può restare una bozza.",
+      "detailDone": "{count, plural, one {Hai {count} prodotto.} many {Hai {count} di prodotti.} other {Hai {count} prodotti.}}",
+      "action": "Aggiungi prodotto",
+      "cta": "Aggiungi il tuo primo prodotto"
+    },
+    "storefront": {
+      "label": "Metti un prodotto su una vetrina",
+      "detailDone": "Un prodotto è sulla tua vetrina.",
+      "detailNone": "Crea una vetrina, poi aggiungi un prodotto alla sua griglia.",
+      "detailEmpty": "Apri la tua vetrina e scegli Aggiungi prodotto nella barra degli strumenti.",
+      "actionCreate": "Crea vetrina",
+      "actionOpen": "Apri editor",
+      "cta": "Apri la tua vetrina",
+      "ctaCreate": "Crea una vetrina"
+    },
+    "publish": {
+      "label": "Pubblica la sua pagina",
+      "detailDone": "La tua pagina prodotto è pubblicata.",
+      "detailNeedsSeller": "Completa i tuoi dati venditore, poi la tua pagina potrà essere pubblicata.",
+      "detailNeedsStorefront": "Una volta che un prodotto è su una vetrina, la sua pagina può essere pubblicata.",
+      "detailNeedsActive": "Imposta quel prodotto su Attivo perché la sua pagina venga pubblicata.",
+      "detailPagesOff": "Le pagine prodotto sono disattivate su quella vetrina. Attivale nell’editor.",
+      "actionEdit": "Modifica prodotto",
+      "actionOpen": "Apri editor",
+      "cta": "Pubblica il tuo prodotto",
+      "ctaPagesOff": "Attiva le pagine prodotto"
+    }
+  },
+  "checklist": {
+    "titleDone": "Sei pronto",
+    "title": "Configurazione iniziale",
+    "showMeAround": "Fammi fare un giro",
+    "showSteps": "Mostra i passaggi",
+    "hideSteps": "Nascondi i passaggi",
+    "liveHint": "La tua prima pagina prodotto è pubblicata. Condividi il link ovunque.",
+    "copyLink": {
+      "copy": "Copia link pagina prodotto",
+      "copied": "Link pagina prodotto copiato",
+      "failed": "Non è stato possibile copiare il link della pagina prodotto. Selezionalo e copialo manualmente."
+    },
+    "openPage": "Apri pagina",
+    "opensInNewTab": " (si apre in una nuova scheda)",
+    "hide": "Nascondi",
+    "progressLabel": "Avanzamento configurazione",
+    "progress": "{total, plural, one {{done} di {total} completato} many {{done} di {total} completati} other {{done} di {total} completati}}",
+    "stepDone": " (fatto)",
+    "stepToDo": " (da fare)"
+  },
+  "welcome": {
+    "steps": {
+      "welcome": {
+        "title": "Benvenuto su Square Share",
+        "description": "Quattro passaggi per una pagina prodotto da condividere."
+      },
+      "path": {
+        "title": "Quattro passaggi per la tua prima pagina"
+      },
+      "seller": {
+        "title": "Aggiungi i tuoi dati venditore",
+        "description": "Gli acquirenti li vedono sulle tue pagine prodotto, e la legge li richiede prima che tu possa vendere. Non li usiamo mai per il marketing.",
+        "lawNote": "Gli acquirenti li vedono sulle tue pagine prodotto, come richiede la legge. Mai usati per il marketing."
+      },
+      "tour": {
+        "title": "Dove trovare tutto",
+        "description": "Tutto si trova nella barra laterale. Ecco a cosa serve ogni parte."
+      },
+      "terms": {
+        "title": "I nostri Termini di servizio",
+        "description": "Leggi la versione breve o i Termini completi, poi accettali per continuare."
+      }
+    },
+    "progress": "{total, plural, one {Passaggio {step} di {total}} many {Passaggio {step} di {total}} other {Passaggio {step} di {total}}}",
+    "intro": "Ogni prodotto che vendi può avere una propria pagina, personalizzata da una vetrina che progetti tu.",
+    "tagline": "Dai a ogni prodotto la sua pagina e condividila ovunque.",
+    "path": {
+      "seller": {
+        "title": "Aggiungi i tuoi dati venditore",
+        "body": "Gli acquirenti devono sapere da chi stanno comprando."
+      },
+      "product": {
+        "title": "Aggiungi un prodotto",
+        "body": "Un titolo, un prezzo e una foto, se ne hai una."
+      },
+      "storefront": {
+        "title": "Mettilo su una vetrina",
+        "body": "Scegli un aspetto, poi posiziona il prodotto sulla griglia."
+      },
+      "share": {
+        "title": "Condividi la sua pagina",
+        "body": "Incolla il link nella tua bio, in un messaggio o sul tuo sito."
+      }
+    },
+    "seller": {
+      "namePlaceholder": "es. Studio Builderboy e.U.",
+      "nameHelp": "La tua ragione sociale, o il tuo nome completo se vendi come persona fisica.",
+      "nameAlternative": "Oppure il tuo nome e cognome, se vendi a titolo personale.",
+      "addressPlaceholder": "es. Via del Mercato 12\n20100 Milano\nItalia",
+      "emailPlaceholder": "es. ciao@iltuonegozio.example",
+      "emailHelp": "Dove gli acquirenti ti scrivono. Può essere diversa dalla tua email di accesso."
+    },
+    "confirm": {
+      "check": "Controlla {email} per un link di conferma.",
+      "goLive": "Le tue pagine prodotto vengono pubblicate non appena lo apri.",
+      "sendNewLink": "Invia un nuovo link"
+    },
+    "tour": {
+      "mobileMenu": "Sul telefono, apri il menu in alto a sinistra.",
+      "searchShortcut": "Cerchi qualcosa? Premi <kbd>{shortcut}</kbd> per cercare ovunque.",
+      "searchNoShortcut": "Cerchi qualcosa? La ricerca trova qualsiasi pagina o impostazione.",
+      "searchMobile": "Cerchi qualcosa? Tocca Cerca in alto."
+    },
+    "nav": {
+      "skipOnboarding": "Salta l’onboarding",
+      "next": "Avanti",
+      "showMeAround": "Fammi vedere",
+      "skipIntro": "Salta l’introduzione",
+      "getStarted": "Inizia",
+      "skipForNow": "Salta per ora",
+      "saveAndContinue": "Salva e continua",
+      "changeDetails": "Cambia dati",
+      "continue": "Continua",
+      "exploreOnMyOwn": "Esplora in autonomia",
+      "notNow": "Non ora"
+    },
+    "hero": {
+      "buyNow": "Acquista ora",
+      "live": "Pubblicato",
+      "linkCopied": "Link copiato"
+    },
+    "setupPath": {
+      "details": "Aggiungi i tuoi dati",
+      "product": "Aggiungi un prodotto",
+      "storefront": "Progetta una vetrina",
+      "share": "Condividi la sua pagina"
+    },
+    "terms": {
+      "agreed": "Hai accettato questi Termini. Grazie per aver letto.",
+      "agreeNote": "Accettando, sul tuo account vengono registrate la data e la versione dei Termini."
+    }
+  },
+  "tourOverlay": {
+    "dialogLabel": "Tour guidato",
+    "progress": "{total, plural, other {{current} di {total}}}",
+    "shortcut": "Scorciatoia: <kbd>{shortcut}</kbd>",
+    "skipTour": "Salta il tour",
+    "next": "Avanti",
+    "openingPage": "{page, select, overview {Apertura di Panoramica…} products {Apertura di Prodotti…} storefront {Apertura di Vetrina…} orders {Apertura di Ordini…} analytics {Apertura di Statistiche…} payments {Apertura di Pagamenti…} settings {Apertura di Impostazioni…} sampleStorefront {Apertura della vetrina di esempio…} other {Apertura…}}"
+  },
+  "tourReplay": {
+    "title": "Tour guidato",
+    "description": "Una breve visita alla cosa principale da fare in ogni pagina, un passo alla volta.",
+    "start": "Avvia il tour"
+  },
+  "guidedTour": {
+    "steps": {
+      "overviewNav": {
+        "title": "Orientati",
+        "body": "Tutto nel tuo negozio è a un clic dal menu. Questo tour si ferma sulla cosa principale da fare in ogni pagina.",
+        "bodySidebar": "Tutto nel tuo negozio è a un clic in questa barra laterale. Questo tour si ferma sulla cosa principale da fare in ogni pagina.",
+        "bodyMenu": "Tutto nel tuo negozio si trova in questo menu. Questo tour si ferma sulla cosa principale da fare in ogni pagina."
+      },
+      "search": {
+        "title": "Cerca qualsiasi cosa",
+        "body": "La ricerca porta subito a qualsiasi pagina, prodotto, ordine o impostazione.",
+        "bodyTopBar": "Vai subito a qualsiasi pagina, prodotto, ordine o impostazione.",
+        "bodyPhone": "Tocca qui per andare subito a qualsiasi pagina, prodotto, ordine o impostazione."
+      },
+      "productsAdd": {
+        "title": "Aggiungi un prodotto",
+        "body": "Bastano un titolo e un prezzo per iniziare. Può restare una bozza finché non vuoi pubblicarlo."
+      },
+      "productsImport": {
+        "title": "Oppure importa il tuo catalogo",
+        "body": "Vendi già altrove? Importa un file CSV. Un’esportazione Shopify va bene così com’è."
+      },
+      "storefrontCreate": {
+        "title": "Crea una vetrina",
+        "body": "Una vetrina è una griglia che progetti tu. Ogni prodotto che ci metti ottiene una pagina da condividere."
+      },
+      "storefrontSample": {
+        "title": "Guarda come si fa",
+        "body": "Questo esempio mostra una vetrina finita. Aprila per provare l’editor. Nulla di ciò che cambi lì viene salvato.",
+        "fallbackBody": "Apri una vetrina per progettarla."
+      },
+      "storefrontEmbed": {
+        "title": "Incorpora una vetrina nel tuo sito",
+        "body": "Ogni vetrina ha un pulsante di incorporamento che ti dà uno snippet come questo. Il widget è ancora in sviluppo e non compare ancora sugli altri siti.",
+        "bodyButton": "Questo pulsante ti dà uno snippet come quello qui sotto da incollare nel tuo sito. Il widget è ancora in sviluppo e non compare ancora sugli altri siti.",
+        "fallbackBody": "Quando avrai una vetrina, il pulsante di incorporamento sulla sua scheda ti darà uno snippet come questo. Il widget è ancora in sviluppo e non compare ancora sugli altri siti."
+      },
+      "ordersSearch": {
+        "title": "Trova un ordine",
+        "body": "Cerca per email dell’acquirente. Gli ordini arrivano qui quando si apre il checkout di Square Share."
+      },
+      "ordersFilters": {
+        "title": "Filtra e ordina",
+        "body": "Restringi gli ordini per canale, stato o data e scegli come ordinarli."
+      },
+      "analytics": {
+        "title": "Guarda come sta andando",
+        "body": "Vendite e visite alle tue pagine prodotto, nelle date che scegli.",
+        "bodyRange": "Vendite e visite alle tue pagine prodotto, per le date che scegli qui.",
+        "bodyFirstRun": "Le vendite e le visite alle tue pagine prodotto compaiono qui non appena una è pubblicata."
+      },
+      "payments": {
+        "title": "Come ricevere i pagamenti",
+        "bodyConnect": "Collega Stripe qui, così i bonifici arrivano direttamente sul tuo conto bancario.",
+        "bodyComingSoon": "Ricevere i pagamenti tramite Stripe arriverà presto. Fino ad allora, gli acquirenti ti pagano tramite il link di acquisto del prodotto o via email."
+      },
+      "finish": {
+        "title": "Rivedi il tour quando vuoi",
+        "body": "Il tour è finito. Puoi riavviarlo da qui quando vuoi."
+      }
+    }
+  },
+  "editorTour": {
+    "steps": {
+      "editorAdd": {
+        "title": "Aggiungi alla griglia",
+        "body": "Aggiungi prodotti, testo e forme da questa barra. Trascina qualsiasi elemento sulla griglia per spostarlo e tira un angolo per ridimensionarlo."
+      },
+      "editorDesign": {
+        "title": "Imposta l’aspetto",
+        "body": "Colori, font, intestazione e aspetto dei riquadri prodotto si impostano una volta sola per tutta la vetrina.",
+        "bodyPanel": "Colori, font, intestazione e aspetto dei riquadri prodotto si impostano qui, una volta sola per tutta la vetrina.",
+        "bodyButton": "Tocca qui per impostare colori, font, intestazione e aspetto dei riquadri prodotto, una volta sola per tutta la vetrina."
+      },
+      "editorPage": {
+        "title": "Ogni prodotto ha la sua pagina",
+        "body": "Ogni prodotto sulla griglia ha la sua pagina da condividere. Aprine una qui per vederla e personalizzarla."
+      },
+      "editorFinish": {
+        "title": "Rendila tua",
+        "body": "L’esempio non viene mai salvato, quindi prova pure di tutto. Quando vuoi, crea una vetrina tutta tua."
+      }
+    }
+  }
+}

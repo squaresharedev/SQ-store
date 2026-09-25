@@ -8,6 +8,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, cleanup } from "../setup/render";
 import userEvent from "@testing-library/user-event";
+import { failed, invalidInput } from "@/lib/errors";
+import { msg } from "@/i18n/types";
 
 afterEach(cleanup);
 
@@ -62,7 +64,9 @@ describe("BioForm — initial state", () => {
 
 describe("BioForm — SET-01: field retention after a failed save", () => {
   it("keeps what the user typed after the server rejects", async () => {
-    mockUpdateBio.mockResolvedValue({ error: "Your bio must be 100 characters or fewer." });
+    mockUpdateBio.mockResolvedValue(
+      failed(invalidInput(msg("Validation.text.bio.tooLong", { maximum: 100 }))),
+    );
     const user = userEvent.setup();
     render(<BioForm bio="Old bio" />);
 

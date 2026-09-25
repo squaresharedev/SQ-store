@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import type { DragEvent } from "react";
 import { FileText, FileUp, X } from "lucide-react";
+import { useTranslations, useLocale } from "next-intl";
 import { iconTileClass } from "@/components/ui/surface-styles";
 import { cn } from "@/lib/utils";
 import { iconButtonClass } from "@/components/ui/control-styles";
@@ -28,6 +29,8 @@ export function FileDropzone({
   initialFileName?: string | null;
   onFileChange: (file: File | null) => void;
 }) {
+  const t = useTranslations("Products.fileDropzone");
+  const locale = useLocale();
   const [selected, setSelected] = useState<Selected | null>(
     initialFileName ? { name: initialFileName, size: null } : null,
   );
@@ -94,16 +97,16 @@ export function FileDropzone({
                 {selected.name}
               </span>
               <span className="block font-inter text-xs text-muted-foreground">
-                {selected.size !== null ? formatBytes(selected.size) : "Current file"}
+                {selected.size !== null ? formatBytes(selected.size, locale) : t("currentFile")}
               </span>
             </>
           ) : (
             <>
               <span className="block font-inter text-sm text-foreground">
-                Drop a file or click to upload
+                {t("dropPrompt")}
               </span>
               <span className="block font-inter text-xs text-muted-foreground">
-                ZIP, PDF, and similar, up to {MAX_MB} MB
+                {t("hint", { max: MAX_MB })}
               </span>
             </>
           )}
@@ -114,7 +117,7 @@ export function FileDropzone({
         <button
           type="button"
           onClick={handleRemove}
-          aria-label="Remove digital file"
+          aria-label={t("remove")}
           className={cn(iconButtonClass, "absolute right-2 top-2 size-8")}
         >
           <X className="size-4" strokeWidth={2} aria-hidden="true" />

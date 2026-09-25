@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { pageShellClass } from "@/components/ui/surface-styles";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { cn } from "@/lib/utils";
@@ -7,9 +8,10 @@ import type { AnalyticsRange, RangePreset } from "@/lib/analytics/types";
 import { AnalyticsPage } from "@/components/analytics/AnalyticsPage";
 import { getAccountActivity } from "@/lib/onboarding/queries";
 
-export const metadata: Metadata = {
-  title: "Analytics",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Analytics.metadata.analytics");
+  return { title: t("title") };
+}
 
 // PROTECTED by (dashboard)/layout.tsx. Reads are owner-scoped (session + RLS)
 // and strictly read-only against orders. The date range lives in the URL so
@@ -71,6 +73,7 @@ export default async function AnalyticsRoutePage({
   const { preset, custom, effective } = parseParams(await searchParams);
   // One payload for the whole page: the charts render it and the page also
   // publishes it verbatim as machine-readable JSON, so the two cannot drift.
+  const t = await getTranslations("Analytics.page");
   const [snapshot, activity] = await Promise.all([
     getAnalyticsSnapshot(effective, preset),
     getAccountActivity(),
@@ -90,8 +93,8 @@ export default async function AnalyticsRoutePage({
   return (
     <main className={cn(pageShellClass, "space-y-6")}>
       <PageHeader
-        title="Analytics"
-        subtitle="Sales, storefront views and everything else your store is doing."
+        title={t("title")}
+        subtitle={t("subtitle")}
       />
       <AnalyticsPage snapshot={snapshot} custom={custom} firstRun={firstRun} />
     </main>

@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import { useActionState } from "react";
-import { useActionToast } from "@/components/ui/Toast";
+import { useLocale, useTranslations } from "next-intl";
+import { useActionStateToast, useSaveResult } from "@/components/ui/ActionErrorNotice";
 import { SaveButton } from "@/components/ui/SaveButton";
 import { SettingsCard } from "@/components/settings/SettingsCard";
 import { StepUpField } from "@/components/auth/StepUp";
@@ -12,19 +13,15 @@ import { Label } from "@/components/ui/label";
 import {
   cancelAccountDeletion,
   requestAccountDeletion,
-  type SettingsActionState,
 } from "@/lib/settings/actions";
-import { DELETE_CONFIRM_PHRASE } from "@/lib/settings/constants";
+import {
+  DELETE_CONFIRM_PHRASES,
+  isDeleteConfirmPhrase,
+} from "@/lib/settings/constants";
+import type { ActionState } from "@/lib/errors";
+import { formatLongDate } from "@/lib/format/date";
 
-const INITIAL: SettingsActionState = {};
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-}
+const INITIAL: ActionState = {};
 
 /**
  * Deliberate, two-step deletion: reveal, then type-to-confirm. Submitting
@@ -36,6 +33,7 @@ export function DeleteAccountForm({
 }: {
   deletionRequestedAt: string | null;
 }) {
+  const t = useTranslations("Settings.danger.delete");
   const [armed, setArmed] = React.useState(false);
   const [phrase, setPhrase] = React.useState("");
   const [deleteState, deleteAction, deletePending] = useActionState(
@@ -46,14 +44,23 @@ export function DeleteAccountForm({
     cancelAccountDeletion,
     INITIAL,
   );
-  useActionToast(deleteState);
-  useActionToast(cancelState);
+  const locale = useLocale();
+  const confirmPhrase = DELETE_CONFIRM_PHRASES[locale];
+  // The server names the default language's phrase; this form knows the one
+  // it is showing.
+  const phraseValues = React.useMemo(() => ({ phrase: confirmPhrase }), [confirmPhrase]);
+  useActionStateToast(deleteState, { values: phraseValues });
+  useActionStateToast(cancelState);
+  const deleteResult = useSaveResult(deleteState);
+  const cancelResult = useSaveResult(cancelState);
 
   if (deletionRequestedAt) {
     return (
       <SettingsCard
-        title="Deletion requested"
-        description={`You asked us to delete this account on ${formatDate(deletionRequestedAt)}. It's flagged for permanent deletion, products and storefront included. Until that actually runs, you can still change your mind.`}
+        title={t("requestedTitle")}
+        description={t("requestedDescription", {
+          date: formatLongDate(deletionRequestedAt, locale),
+        })}
         danger
       >
         <form action={cancelAction} className="flex flex-col gap-4">
@@ -61,10 +68,10 @@ export function DeleteAccountForm({
             <SaveButton
               variant="secondary"
               pending={cancelPending}
-              state={cancelState}
-              pendingLabel="Cancelling…"
+              state={cancelResult}
+              pendingLabel={t("cancelling")}
             >
-              Keep my account
+              {t("keepButton")}
             </SaveButton>
           </div>
         </form>
@@ -74,30 +81,31 @@ export function DeleteAccountForm({
 
   return (
     <SettingsCard
-      title="Delete account"
-      description="This flags your account, products and storefront for permanent deletion. No soft-pedaling: once it runs, it's gone."
+      title={t("title")}
+      description={t("description")}
       danger
     >
       {!armed ? (
         <Button variant="destructive" onClick={() => setArmed(true)}>
-          Delete my account
+          {t("deleteButton")}
         </Button>
       ) : (
         <form action={deleteAction} className="flex flex-col gap-4" noValidate>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="confirm" className="text-destructive">
-              Type{" "}
-              <span className="font-mono text-xs">
-                {DELETE_CONFIRM_PHRASE}
-              </span>{" "}
-              to confirm
+              {t.rich("confirmLabel", {
+                phrase: confirmPhrase,
+                code: (chunks) => (
+                  <span className="font-mono text-xs">{chunks}</span>
+                ),
+              })}
             </Label>
             <Input
               id="confirm"
               name="confirm"
               value={phrase}
               onChange={(e) => setPhrase(e.target.value)}
-              placeholder={DELETE_CONFIRM_PHRASE}
+              placeholder={confirmPhrase}
               autoComplete="off"
               spellCheck={false}
               required
@@ -108,14 +116,14 @@ export function DeleteAccountForm({
             <SaveButton
               variant="destructive"
               pending={deletePending}
-              state={deleteState}
-              pendingLabel="Flagging…"
+              state={deleteResult}
+              pendingLabel={t("flagging")}
               disabled={
                 deletePending ||
-                phrase.trim().toLowerCase() !== DELETE_CONFIRM_PHRASE
+                !isDeleteConfirmPhrase(phrase)
               }
             >
-              Permanently delete
+              {t("permanentlyDelete")}
             </SaveButton>
             <Button
               variant="ghost"
@@ -124,7 +132,7 @@ export function DeleteAccountForm({
                 setPhrase("");
               }}
             >
-              Never mind
+              {t("neverMind")}
             </Button>
           </div>
         </form>

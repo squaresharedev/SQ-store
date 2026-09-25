@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, cleanup, within } from "@testing-library/react";
+import { render, screen, cleanup, within } from "../setup/render";
 import userEvent from "@testing-library/user-event";
 import {
   TEXT_SIZE_MAX,

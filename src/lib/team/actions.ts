@@ -22,9 +22,9 @@ import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { getProfile, getUser } from "@/lib/auth/session";
-import { STEP_UP_FIELDS, requireStepUp } from "@/lib/auth/mfa";
+import { STEP_UP_FIELDS, requireStepUpState } from "@/lib/auth/mfa";
 import { createNotification, resolveUserIdByEmail } from "@/lib/notifications/create";
-import { can, canGrant, ROLE_LABELS } from "@/lib/team/permissions";
+import { can, canGrant } from "@/lib/team/permissions";
 import {
   getActorRole,
   getTeamRoster,
@@ -38,22 +38,24 @@ import {
   teamChangeRoleSchema,
   teamRevokeSchema,
 } from "@/lib/validation/team";
+import { firstIssue } from "@/lib/validation/messages";
+import {
+  actionError,
+  failed,
+  invalidInput,
+  succeeded,
+  type ActionState,
+} from "@/lib/errors";
+import { msg } from "@/i18n/types";
 import { z } from "zod";
-
-export type TeamActionState = {
-  error?: string;
-  success?: string;
-  /** A fresh two-factor code is needed first (see requireStepUp). */
-  stepUp?: true;
-};
 
 // ---------------------------------------------------------------------------
 // Module-local helpers (mirrors the pattern in lib/settings/actions.ts)
 // ---------------------------------------------------------------------------
 
-const SIGNED_OUT: TeamActionState = {
-  error: "Your session expired. Sign in again.",
-};
+const SIGNED_OUT: ActionState = failed(
+  actionError("session_expired", msg("Errors.form.sessionExpired")),
+);
 
 /**
  * FIELD WHITELIST guard: reject any submitted field not explicitly expected.
@@ -62,19 +64,23 @@ const SIGNED_OUT: TeamActionState = {
 function unknownFieldError(
   formData: FormData,
   allowed: readonly string[],
-): TeamActionState | null {
+): ActionState | null {
   for (const key of formData.keys()) {
     if (key.startsWith("$ACTION")) continue;
     if (!allowed.includes(key)) {
-      return { error: `Unexpected field "${key}" was rejected.` };
+      return failed(invalidInput(msg("Errors.form.unexpectedField", { field: key })));
     }
   }
   return null;
 }
 
-function firstIssue(error: z.ZodError): TeamActionState {
-  return { error: error.issues[0]?.message ?? "Check the form and try again." };
+function invalid(error: z.ZodError): ActionState {
+  return failed(invalidInput(firstIssue(error)));
 }
+
+const MEMBERSHIP_RATE_LIMITED: ActionState = failed(
+  actionError("rate_limited", msg("Errors.team.membershipRateLimited")),
+);
 
 const SETTINGS_TEAM_PATH = "/settings/team";
 
@@ -90,9 +96,9 @@ const SETTINGS_TEAM_PATH = "/settings/team";
  * is not yet wired up — see the stub comment below.
  */
 export async function inviteMember(
-  _prev: TeamActionState,
+  _prev: ActionState,
   formData: FormData,
-): Promise<TeamActionState> {
+): Promise<ActionState> {
   const user = await getUser();
   if (!user) return SIGNED_OUT;
 
@@ -109,29 +115,29 @@ export async function inviteMember(
     invited_email: String(formData.get("invited_email") ?? ""),
     role: String(formData.get("role") ?? ""),
   });
-  if (!parsed.success) return firstIssue(parsed.error);
+  if (!parsed.success) return invalid(parsed.error);
 
   const { account_owner_id, invited_email, role } = parsed.data;
 
   // DB-authoritative actor role — never trust a role claim from the client.
   const actorRole = await getActorRole(account_owner_id);
   if (!can(actorRole, "team.invite")) {
-    return { error: "You don't have permission to invite members." };
+    return failed(actionError("permission_denied", msg("Errors.team.noInvitePermission")));
   }
   if (!canGrant(actorRole, role)) {
-    return { error: "You can't invite someone at a role higher than your own." };
+    return failed(actionError("permission_denied", msg("Errors.team.inviteRoleTooHigh")));
   }
 
   // Block inviting yourself — you're already here.
   if (user.email && invited_email === user.email.toLowerCase()) {
-    return { error: "You're already here." };
+    return failed(invalidInput(msg("Errors.team.inviteSelf")));
   }
 
   // Granting someone access to the store is how an intruder keeps a way in
   // after the owner changes their password, so with 2FA on it takes a recent
   // code. After the permission checks: nobody without invite rights ever
   // spends a second-factor attempt here.
-  const stepUp = await requireStepUp(formData);
+  const stepUp = await requireStepUpState(formData);
   if (stepUp) return stepUp;
 
   // An invite notifies (and will email) an arbitrary address of the inviter's
@@ -141,9 +147,7 @@ export async function inviteMember(
   // by waiting for a boundary. Checked AFTER the permission checks so a user
   // without invite rights can never spend the budget.
   if (!(await rateLimit("team_invite", RATE_LIMITS.teamInvite))) {
-    return {
-      error: "You've sent a lot of invites recently. Try again a bit later.",
-    };
+    return failed(actionError("rate_limited", msg("Errors.team.inviteRateLimited")));
   }
 
   const supabase = await createClient();
@@ -158,9 +162,9 @@ export async function inviteMember(
     // Postgres unique violation: a live or previously revoked invite already
     // exists for this email on this account.
     if (error.code === "23505") {
-      return { error: "Already invited or already on the team." };
+      return failed(invalidInput(msg("Errors.team.alreadyInvited")));
     }
-    return { error: "Could not send the invite. Give it another try." };
+    return failed(actionError("server_error", msg("Errors.team.inviteFailed")));
   }
 
   // In-app notification: if the invitee already has an account, drop a
@@ -175,13 +179,16 @@ export async function inviteMember(
     const inviteeUserId = await resolveUserIdByEmail(invited_email);
     if (inviteeUserId) {
       const inviterProfile = await getProfile();
-      const storeLabel =
-        inviterProfile?.username?.trim() || "A SquareShare store";
+      const store = inviterProfile?.username?.trim();
       await createNotification({
         userId: inviteeUserId,
         type: "team",
-        title: "You have a team invite",
-        body: `${storeLabel} invited you to join as ${ROLE_LABELS[role]}. Open Team & access to accept.`,
+        message: {
+          title: { key: "Notifications.messages.teamInvite.title" },
+          body: store
+            ? { key: "Notifications.messages.teamInvite.body", values: { store, role } }
+            : { key: "Notifications.messages.teamInvite.bodyUnnamedStore", values: { role } },
+        },
         data: { href: SETTINGS_TEAM_PATH },
       });
       notifiedExistingUser = true;
@@ -204,10 +211,7 @@ export async function inviteMember(
   });
 
   revalidatePath(SETTINGS_TEAM_PATH);
-  return {
-    success:
-      "Invite created. They'll see it when they sign in with that email. (Email sending isn't wired up yet.)",
-  };
+  return succeeded(msg("Settings.team.success.inviteCreated"));
 }
 
 /**
@@ -218,13 +222,13 @@ export async function inviteMember(
  * than a raw Postgres exception if something is off.
  */
 export async function acceptInvite(
-  _prev: TeamActionState,
+  _prev: ActionState,
   formData: FormData,
-): Promise<TeamActionState> {
+): Promise<ActionState> {
   const user = await getUser();
   if (!user) return SIGNED_OUT;
   if (!user.email) {
-    return { error: "Your account has no verified email address." };
+    return failed(invalidInput(msg("Errors.team.noVerifiedEmail")));
   }
 
   const rejected = unknownFieldError(formData, ["invite_id"]);
@@ -233,7 +237,7 @@ export async function acceptInvite(
   const parsed = teamAcceptSchema.safeParse({
     invite_id: String(formData.get("invite_id") ?? ""),
   });
-  if (!parsed.success) return firstIssue(parsed.error);
+  if (!parsed.success) return invalid(parsed.error);
 
   const { invite_id } = parsed.data;
   const supabase = await createClient();
@@ -247,15 +251,15 @@ export async function acceptInvite(
     .maybeSingle();
 
   if (fetchError || !invite) {
-    return { error: "Invite not found or already used." };
+    return failed(actionError("not_found", msg("Errors.team.inviteNotFound")));
   }
 
   // Server-side identity check before touching the row.
   if (invite.status !== "invited") {
-    return { error: "This invite has already been accepted or revoked." };
+    return failed(invalidInput(msg("Errors.team.inviteUsed")));
   }
   if (invite.invited_email !== user.email.toLowerCase()) {
-    return { error: "This invite isn't for your email address." };
+    return failed(actionError("permission_denied", msg("Errors.team.inviteWrongEmail")));
   }
 
   // Acceptance is an atomic, server-authoritative RPC: it re-verifies the JWT
@@ -268,7 +272,7 @@ export async function acceptInvite(
   );
 
   if (rpcError || !accepted) {
-    return { error: "Could not accept the invite. It may have been revoked." };
+    return failed(actionError("server_error", msg("Errors.team.acceptFailed")));
   }
 
   console.warn(
@@ -279,18 +283,21 @@ export async function acceptInvite(
   // notification failure must never fail the accept (createNotification never
   // throws and returns false on error).
   const profile = await getProfile();
-  const joinerName =
-    profile?.username?.trim() || user.email?.split("@")[0] || "A new member";
+  const joinerName = profile?.username?.trim() || user.email?.split("@")[0];
   await createNotification({
     userId: invite.account_owner_id,
     type: "team",
-    title: `${joinerName} joined your team`,
-    body: "They now have access to your store.",
+    message: {
+      title: joinerName
+        ? { key: "Notifications.messages.teamJoined.title", values: { name: joinerName } }
+        : { key: "Notifications.messages.teamJoined.titleUnnamed" },
+      body: { key: "Notifications.messages.teamJoined.body" },
+    },
     data: { href: SETTINGS_TEAM_PATH },
   });
 
   revalidatePath(SETTINGS_TEAM_PATH);
-  return { success: "Welcome to the team." };
+  return succeeded(msg("Settings.team.success.inviteAccepted"));
 }
 
 /**
@@ -301,9 +308,9 @@ export async function acceptInvite(
  * rules as a backstop.
  */
 export async function changeMemberRole(
-  _prev: TeamActionState,
+  _prev: ActionState,
   formData: FormData,
-): Promise<TeamActionState> {
+): Promise<ActionState> {
   const user = await getUser();
   if (!user) return SIGNED_OUT;
 
@@ -320,22 +327,22 @@ export async function changeMemberRole(
     member_id: String(formData.get("member_id") ?? ""),
     role: String(formData.get("role") ?? ""),
   });
-  if (!parsed.success) return firstIssue(parsed.error);
+  if (!parsed.success) return invalid(parsed.error);
 
   const { account_owner_id, member_id, role } = parsed.data;
 
   const actorRole = await getActorRole(account_owner_id);
   if (!can(actorRole, "team.change_role")) {
-    return { error: "You don't have permission to change roles." };
+    return failed(actionError("permission_denied", msg("Errors.team.noRolePermission")));
   }
   if (!(await rateLimit("team_membership", RATE_LIMITS.teamMembership))) {
-    return { error: "Too many membership changes. Try again shortly." };
+    return MEMBERSHIP_RATE_LIMITED;
   }
   if (!canGrant(actorRole, role)) {
-    return { error: "You can't assign a role higher than your own." };
+    return failed(actionError("permission_denied", msg("Errors.team.roleTooHigh")));
   }
 
-  const stepUp = await requireStepUp(formData);
+  const stepUp = await requireStepUpState(formData);
   if (stepUp) return stepUp;
 
   const supabase = await createClient();
@@ -350,17 +357,17 @@ export async function changeMemberRole(
     .maybeSingle();
 
   if (error) {
-    return { error: "Could not change the role. Give it another try." };
+    return failed(actionError("server_error", msg("Errors.team.roleChangeFailed")));
   }
   if (!updated) {
-    return { error: "That member can't be changed." };
+    return failed(actionError("not_found", msg("Errors.team.memberNotChangeable")));
   }
 
   console.warn(
     `[team] role CHANGED account=${account_owner_id} member=${member_id} new_role=${role} by=${user.id}`,
   );
   revalidatePath(SETTINGS_TEAM_PATH);
-  return { success: "Role updated." };
+  return succeeded(msg("Settings.team.success.roleUpdated"));
 }
 
 /**
@@ -370,9 +377,9 @@ export async function changeMemberRole(
  * the DB trigger). Members cannot revoke themselves through this action.
  */
 export async function revokeMemberAccess(
-  _prev: TeamActionState,
+  _prev: ActionState,
   formData: FormData,
-): Promise<TeamActionState> {
+): Promise<ActionState> {
   const user = await getUser();
   if (!user) return SIGNED_OUT;
 
@@ -387,16 +394,16 @@ export async function revokeMemberAccess(
     account_owner_id: String(formData.get("account_owner_id") ?? ""),
     member_id: String(formData.get("member_id") ?? ""),
   });
-  if (!parsed.success) return firstIssue(parsed.error);
+  if (!parsed.success) return invalid(parsed.error);
 
   const { account_owner_id, member_id } = parsed.data;
 
   const actorRole = await getActorRole(account_owner_id);
   if (!can(actorRole, "team.revoke")) {
-    return { error: "You don't have permission to remove members." };
+    return failed(actionError("permission_denied", msg("Errors.team.noRemovePermission")));
   }
   if (!(await rateLimit("team_membership", RATE_LIMITS.teamMembership))) {
-    return { error: "Too many membership changes. Try again shortly." };
+    return MEMBERSHIP_RATE_LIMITED;
   }
 
   // Fetch the target row to check if the actor is revoking themselves.
@@ -409,13 +416,13 @@ export async function revokeMemberAccess(
     .maybeSingle();
 
   if (fetchError || !target) {
-    return { error: "Member not found." };
+    return failed(actionError("not_found", msg("Errors.team.memberNotFound")));
   }
   if (target.member_user_id === user.id) {
-    return { error: "You can't remove yourself." };
+    return failed(invalidInput(msg("Errors.team.removeSelf")));
   }
 
-  const stepUp = await requireStepUp(formData);
+  const stepUp = await requireStepUpState(formData);
   if (stepUp) return stepUp;
 
   const { data: updated, error } = await supabase
@@ -429,17 +436,17 @@ export async function revokeMemberAccess(
     .maybeSingle();
 
   if (error) {
-    return { error: "Could not remove the member. Give it another try." };
+    return failed(actionError("server_error", msg("Errors.team.removeFailed")));
   }
   if (!updated) {
-    return { error: "That member can't be removed." };
+    return failed(actionError("not_found", msg("Errors.team.memberNotRemovable")));
   }
 
   console.warn(
     `[team] access REVOKED account=${account_owner_id} member=${member_id} by=${user.id}`,
   );
   revalidatePath(SETTINGS_TEAM_PATH);
-  return { success: "Member removed." };
+  return succeeded(msg("Settings.team.success.memberRemoved"));
 }
 
 // ---------------------------------------------------------------------------

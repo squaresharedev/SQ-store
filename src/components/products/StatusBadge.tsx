@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import type { ProductStatus } from "@/types/product";
 import { cn } from "@/lib/utils";
 
@@ -16,6 +17,7 @@ export function StatusBadge({
   status: ProductStatus;
   className?: string;
 }) {
+  const t = useTranslations("Products.status");
   if (status === "active") return null;
 
   return (
@@ -26,7 +28,7 @@ export function StatusBadge({
         className,
       )}
     >
-      Draft
+      {t("draft")}
     </span>
   );
 }

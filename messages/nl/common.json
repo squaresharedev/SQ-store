@@ -1,0 +1,113 @@
+{
+  "actions": {
+    "save": "Opslaan",
+    "saving": "Opslaan…",
+    "saved": "Opgeslagen",
+    "cancel": "Annuleren",
+    "done": "Klaar",
+    "close": "Sluiten",
+    "back": "Terug",
+    "copy": "Kopiëren",
+    "copied": "Gekopieerd",
+    "copyFailed": "Kopiëren mislukt",
+    "tryAgain": "Opnieuw proberen",
+    "sending": "Verzenden…",
+    "sent": "Verzonden",
+    "loading": "Laden…",
+    "confirm": "Bevestigen",
+    "remove": "Weghalen",
+    "delete": "Verwijderen",
+    "deleting": "Verwijderen…"
+  },
+  "badge": {
+    "comingSoon": "Binnenkort beschikbaar"
+  },
+  "pagination": {
+    "previous": "Vorige",
+    "next": "Volgende"
+  },
+  "calendar": {
+    "previousMonth": "Vorige maand",
+    "nextMonth": "Volgende maand",
+    "today": "Vandaag"
+  },
+  "datePicker": {
+    "chooseDate": "Datum kiezen",
+    "chooseDateRange": "Periode kiezen",
+    "selectDate": "Datum selecteren"
+  },
+  "colorPicker": {
+    "saturationBrightness": "Verzadiging en helderheid",
+    "saturationBrightnessValue": "{saturation} verzadiging, {brightness} helderheid",
+    "hue": "Tint",
+    "pickFromScreen": "Een kleur van het scherm kiezen",
+    "pickFromScreenTitle": "Van scherm kiezen",
+    "hexLabel": "Hexkleur",
+    "hexCopied": "Hex gekopieerd",
+    "copyHex": "Hex kopiëren",
+    "invalidHex": "Gebruik een 6-cijferige hexkleur zoals #a855f7.",
+    "pickerFor": "Kleurkiezer voor {label}",
+    "picker": "Kleurkiezer",
+    "colour": "Kleur",
+    "swatchesFor": "Kleurstalen voor {label}",
+    "swatches": "Kleurstalen",
+    "moreColors": "Meer kleuren",
+    "customColor": "Aangepaste kleur",
+    "currentColor": "Huidige kleur {color}",
+    "hueValue": "{degrees, plural, one {# graad} other {# graden}}"
+  },
+  "panelMenu": {
+    "backLeaving": "Terug naar alle instellingen, {title} verlaten"
+  },
+  "sliderField": {
+    "about": "Over {label}",
+    "asNumber": "{label}, als getal"
+  },
+  "password": {
+    "show": "Wachtwoord tonen",
+    "hide": "Wachtwoord verbergen"
+  },
+  "stock": {
+    "inStock": "Op voorraad",
+    "lowStock": "{remaining, plural, one {Nog maar {remaining}} other {Nog maar {remaining}}}",
+    "soldOut": "Uitverkocht"
+  },
+  "toast": {
+    "regionLabel": "Meldingen",
+    "dismiss": "Sluiten"
+  },
+  "charts": {
+    "bar": "Staafdiagram",
+    "horizontalBar": "Horizontaal staafdiagram",
+    "line": "Lijndiagram",
+    "composition": "Samenstelling",
+    "proportional": "Procentuele verdeling",
+    "other": "Overig",
+    "total": "Totaal",
+    "category": "Categorie"
+  },
+  "legal": {
+    "cookies": {
+      "label": "Cookies",
+      "name": "Squareshare-cookiebeleid"
+    },
+    "accessibility": {
+      "label": "Toegankelijkheid",
+      "name": "Squareshare-toegankelijkheidsverklaring"
+    }
+  },
+  "grid": {
+    "ariaLabel": "Raster",
+    "addBlockAt": "Blok toevoegen in kolom {column}, rij {row}",
+    "resize": "Formaat van {label} wijzigen",
+    "resizeBlock": "Formaat van blok wijzigen",
+    "resizeUnavailable": "Formaat wijzigen kan niet: dit blok neemt al alle ruimte in die de gestapelde indeling heeft",
+    "resizeUnavailableNamed": "Formaat wijzigen kan niet: dit blok neemt al alle ruimte in die de gestapelde indeling heeft: {label}",
+    "rotate": "{label} draaien",
+    "rotateBlock": "Blok draaien",
+    "rotation": "{degrees, plural, one {# graad} other {# graden}}",
+    "rotated": "{label} gedraaid naar {degrees, plural, one {# graad} other {# graden}}",
+    "rotatedBlock": "Blok gedraaid naar {degrees, plural, one {# graad} other {# graden}}",
+    "blocksMoved": "{count, plural, one {# blok verplaatst} other {# blokken verplaatst}}"
+  }
+}

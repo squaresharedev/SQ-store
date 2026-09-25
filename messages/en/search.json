@@ -1,0 +1,72 @@
+{
+  "trigger": {
+    "label": "Search"
+  },
+  "overlay": {
+    "label": "Search",
+    "placeholder": "Search products, orders, settings…",
+    "clear": "Clear search",
+    "close": "Close search",
+    "results": "Search results",
+    "searching": "Searching…",
+    "noResults": "No results for {query}",
+    "resultCount": "{count, plural, one {{count} result for {query}} other {{count} results for {query}}}",
+    "nothingMatches": "Nothing matches “{query}”.",
+    "startTyping": "Start typing to search.",
+    "remoteError": "Can't reach the server — showing pages, settings and actions only.",
+    "remoteErrorCached": "Live search unreachable — showing cached matches, pages and settings.",
+    "remoteAuth": "Your session expired, so only pages and settings are shown.",
+    "remoteThrottled": "Searching too fast — showing pages, settings and actions only."
+  },
+  "sections": {
+    "pages": "Pages",
+    "actions": "Actions",
+    "settings": "Settings"
+  },
+  "groups": {
+    "products": "Products",
+    "orders": "Orders",
+    "storefronts": "Storefronts",
+    "team": "Team",
+    "notifications": "Notifications",
+    "recent": "Recent"
+  },
+  "results": {
+    "draft": "Draft",
+    "openInDesigner": "Open in the designer",
+    "invited": "Invited",
+    "order": "Order",
+    "unread": "Unread"
+  },
+  "fields": {
+    "username": "Username",
+    "avatar": "Profile photo",
+    "email": "Email address",
+    "password": "Password",
+    "twoFactor": "Two-factor authentication",
+    "recoveryCodes": "Recovery codes",
+    "securityActivity": "Security activity",
+    "signOut": "Sign out",
+    "vat": "VAT ID",
+    "businessName": "Trader name",
+    "country": "Country",
+    "address": "Business address",
+    "contactEmail": "Contact email",
+    "phone": "Phone",
+    "bio": "Bio",
+    "salesEmails": "Sales emails",
+    "marketingEmails": "Marketing emails",
+    "productEmails": "Product update emails",
+    "sellerAgreement": "Seller agreement",
+    "termsOfService": "Terms of Service",
+    "exportData": "Export my data",
+    "deleteAccount": "Delete account"
+  },
+  "actions": {
+    "newProduct": "New product",
+    "newStorefront": "New storefront",
+    "inviteMember": "Invite a team member",
+    "notificationHistory": "Notification history",
+    "showMeAround": "Show me around"
+  }
+}

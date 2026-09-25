@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { CSSProperties, RefObject } from "react";
 import { ImageOff } from "lucide-react";
 import { imageStyle } from "@/lib/images/placement";
@@ -46,6 +47,7 @@ export function ImageTileContent({
    *  measure the picture it is moving. */
   imageRef?: RefObject<HTMLImageElement | null>;
 }) {
+  const t = useTranslations("Storefront.tiles");
   const opacity = block.opacity ?? 100;
   // Whole-block transparency; omitted entirely when fully opaque, so an
   // untouched element carries no inline style at all.
@@ -60,7 +62,7 @@ export function ImageTileContent({
           strokeWidth={2}
           aria-hidden="true"
         />
-        <span className={infoTextClass}>Image unavailable</span>
+        <span className={infoTextClass}>{t("imageUnavailable")}</span>
       </div>
     );
   }

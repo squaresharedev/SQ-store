@@ -3,8 +3,10 @@
 import * as React from "react";
 import { useActionState } from "react";
 import { Download } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button, buttonClassName } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import { useResolveMessage } from "@/components/ui/ActionErrorNotice";
 import { StepUpField, useStepUpRequired } from "@/components/auth/StepUp";
 import { confirmIdentity, type ManageState } from "@/lib/auth/mfa-actions";
 
@@ -19,6 +21,8 @@ const EXPORT_URL = "/settings/export";
  * download. The route re-checks the same window server-side regardless.
  */
 export function ExportDataButton() {
+  const t = useTranslations("Settings.danger.export");
+  const resolve = useResolveMessage();
   const required = useStepUpRequired();
   const [state, formAction, isPending] = useActionState(confirmIdentity, INITIAL);
 
@@ -31,7 +35,7 @@ export function ExportDataButton() {
     return (
       <a href={EXPORT_URL} download className={buttonClassName("secondary")}>
         <Download aria-hidden className="size-4" />
-        Download my data
+        {t("downloadButton")}
       </a>
     );
   }
@@ -42,17 +46,17 @@ export function ExportDataButton() {
         id="export-step-up"
         state={state}
         always
-        description="Your export contains your whole account. Enter the current code from your authenticator app to download it."
+        description={t("stepUpDescription")}
       />
       {state.error && (
         <p role="alert" className="font-inter text-sm font-medium text-destructive">
-          {state.error}
+          {resolve(state.error.message)}
         </p>
       )}
       <div>
         <Button type="submit" variant="secondary" disabled={isPending} suppressHydrationWarning>
           {isPending ? <Spinner /> : <Download aria-hidden className="size-4" />}
-          Download my data
+          {t("downloadButton")}
         </Button>
       </div>
     </form>

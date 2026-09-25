@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowDownLeft, ArrowUpRight, ReceiptText, Undo2 } from "lucide-react";
+import { useTranslations, useLocale } from "next-intl";
 import { cardClass, iconTileClass } from "@/components/ui/surface-styles";
 import { cn } from "@/lib/utils";
 import { formatCents } from "@/lib/format/money";
@@ -26,18 +27,20 @@ export function RecentActivity({
   transactions: BalanceTransaction[];
   onSelect: (transaction: BalanceTransaction) => void;
 }) {
+  const t = useTranslations("Payments.recentActivity");
+  const locale = useLocale();
   return (
     <section
-      aria-label="Recent activity"
+      aria-label={t("label")}
       className={cardClass}
     >
       <div className="border-b border-border px-4 py-3">
-        <h2 className="text-base font-semibold text-foreground">Activity</h2>
+        <h2 className="text-base font-semibold text-foreground">{t("title")}</h2>
       </div>
 
       {transactions.length === 0 ? (
         <p className="px-4 py-8 text-center font-inter text-sm text-muted-foreground">
-          Sales, refunds and payouts will show up here.
+          {t("empty")}
         </p>
       ) : (
         <ul className="divide-y divide-border">
@@ -59,8 +62,9 @@ export function RecentActivity({
                       {transaction.description}
                     </span>
                     <span className="block font-inter text-xs text-muted-foreground">
-                      {formatOrderDate(transaction.createdAt)}
-                      {transaction.status === "pending" && " · Pending"}
+                      {transaction.status === "pending"
+                        ? t("datePending", { date: formatOrderDate(transaction.createdAt, locale) })
+                        : formatOrderDate(transaction.createdAt, locale)}
                     </span>
                   </span>
                   <span
@@ -70,7 +74,7 @@ export function RecentActivity({
                     )}
                   >
                     {negative ? "" : "+"}
-                    {formatCents(transaction.amountCents, transaction.currency)}
+                    {formatCents(transaction.amountCents, transaction.currency, locale)}
                   </span>
                 </button>
               </li>

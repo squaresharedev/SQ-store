@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "../setup/render";
 import { SellerBlock, hasSellerDetails } from "@/components/product-page/SellerBlock";
 import type { StorefrontSeller } from "@/types/storefront";
 

@@ -1,13 +1,7 @@
+import { useTranslations } from "next-intl";
 import { badgeClass } from "@/components/ui/surface-styles";
 import { cn } from "@/lib/utils";
 import type { OrderStatus } from "@/types/order-view";
-
-const STATUS_LABELS: Record<OrderStatus, string> = {
-  paid: "Paid",
-  refunded: "Refunded",
-  disputed: "Disputed",
-  pending: "Pending",
-};
 
 const STATUS_CLASSES: Record<OrderStatus, string> = {
   paid: "text-success",
@@ -17,7 +11,8 @@ const STATUS_CLASSES: Record<OrderStatus, string> = {
 };
 
 export function OrderStatusBadge({ status }: { status: OrderStatus }) {
-  const known: OrderStatus = status in STATUS_LABELS ? status : "pending";
+  const t = useTranslations("Orders.status");
+  const known: OrderStatus = status in STATUS_CLASSES ? status : "pending";
   return (
     <span
       className={cn(
@@ -25,7 +20,7 @@ export function OrderStatusBadge({ status }: { status: OrderStatus }) {
         STATUS_CLASSES[known],
       )}
     >
-      {STATUS_LABELS[known]}
+      {t(known)}
     </span>
   );
 }

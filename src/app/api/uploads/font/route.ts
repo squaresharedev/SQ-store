@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
 import { buildObjectKey, hasR2Credentials, putObject } from "@/lib/r2";
@@ -27,16 +28,17 @@ function bad(status: number, error: string, fix?: string) {
 }
 
 export async function POST(request: Request) {
+  const t = await getTranslations("Errors.uploadRoute");
   const account = await getActiveAccount();
-  if (!account) return bad(401, "Sign in to upload fonts.");
+  if (!account) return bad(401, t("signIn.font"));
   if (!can(account.role, "storefront.write")) {
-    return bad(403, "You don't have permission to upload here.");
+    return bad(403, t("permissionDenied"));
   }
 
   // Same budget as every other route that authorises bytes into R2, and taken
   // after the permission checks so a caller who may not upload never spends it.
   if (!(await rateLimit("upload_presign", RATE_LIMITS.uploadPresign))) {
-    return bad(429, "Too many uploads right now. Try again shortly.");
+    return bad(429, t("rateLimited.shared"));
   }
 
   if (!hasR2Credentials()) {
@@ -44,33 +46,33 @@ export async function POST(request: Request) {
       "[uploads] R2 is not configured: set R2_ACCOUNT_ID, R2_BUCKET_NAME, " +
         "R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY in .env.local (see .env.example).",
     );
-    return bad(503, "Font uploads are not configured yet. Contact the site owner.");
+    return bad(503, t("notConfigured.font"));
   }
 
   let form: FormData;
   try {
     form = await request.formData();
   } catch {
-    return bad(400, "That upload could not be read.", "Try again.");
+    return bad(400, t("unreadable"), t("fix.tryAgain"));
   }
 
   // Unknown fields are a sign the caller is not our form; refuse rather than
   // ignore, so a future field can never be silently accepted.
   for (const key of form.keys()) {
-    if (key !== FIELD) return bad(400, "Unexpected upload fields.");
+    if (key !== FIELD) return bad(400, t("unexpectedFields"));
   }
 
   const file = form.get(FIELD);
-  if (!(file instanceof File)) return bad(400, "No font was uploaded.");
+  if (!(file instanceof File)) return bad(400, t("missing.font"));
 
   // Cheap rejection before reading the body into memory.
-  if (file.size <= 0) return bad(400, "That font file is empty.", "Pick a different file.");
+  if (file.size <= 0) return bad(400, t("empty.font"), t("fix.pickFile"));
   const maxMb = Math.round(FONT_MAX_BYTES / 1024 / 1024);
   if (file.size > FONT_MAX_BYTES) {
     return bad(
       413,
-      "That font file is too large.",
-      `Use a font under ${maxMb} MB. A WOFF2 is usually well under 100 KB.`,
+      t("tooLarge.font"),
+      t("tooLargeFix.font", { maxMb }),
     );
   }
 
@@ -78,7 +80,7 @@ export async function POST(request: Request) {
   // The measured length is the one that counts: `file.size` is a claim in the
   // multipart headers, this is what we actually received.
   if (bytes.byteLength > FONT_MAX_BYTES || bytes.byteLength === 0) {
-    return bad(413, "That font file is too large.");
+    return bad(413, t("tooLarge.font"));
   }
 
   // What the file IS, not what it says it is.
@@ -87,8 +89,8 @@ export async function POST(request: Request) {
   if (!sniffed || !allowed.includes(sniffed.mime)) {
     return bad(
       415,
-      "That file is not a supported font.",
-      "Use a WOFF2, WOFF, TTF, or OTF file.",
+      t("unsupported.font"),
+      t("unsupportedFix.font"),
     );
   }
 
@@ -97,7 +99,7 @@ export async function POST(request: Request) {
     await putObject(key, bytes, sniffed.mime);
   } catch (error) {
     console.error("[uploads] font store failed", error);
-    return bad(502, "The font could not be stored.", "Try again in a moment.");
+    return bad(502, t("storeFailed.font"), t("fix.tryAgainInAMoment"));
   }
 
   return Response.json({ key });

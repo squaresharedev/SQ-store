@@ -25,20 +25,31 @@ export type CtaTarget =
  * them rather than around them. Nothing here claims an intent to order: the
  * button asks a question, and putting words in the buyer's mouth is not this
  * function's business.
+ *
+ * The wording (`copy`) is resolved by the caller in the BUYER's language: the
+ * buyer is the one sending it.
  */
+export type EnquiryCopy = {
+  /** The subject line, already naming the product. */
+  subject: string;
+  /** "Quantity: 3", for the quantity passed alongside it. */
+  quantityLine: string;
+};
+
 export function mailtoHref(
   email: string,
   productTitle: string,
+  copy: EnquiryCopy,
   selection: readonly { label: string; value: string }[] = [],
   /** How many the buyer had chosen. Stated only when it is more than one: an
    *  enquiry about a single item does not need a line saying so, and a seller
    *  reading "Quantity: 1" on every message stops reading the line at all. */
   quantity = 1,
 ): string {
-  const subject = encodeURIComponent(`Question about ${productTitle}`);
+  const subject = encodeURIComponent(copy.subject);
   const facts = [
     ...selection.map((entry) => `${entry.label}: ${entry.value}`),
-    ...(quantity > 1 ? [`Quantity: ${quantity}`] : []),
+    ...(quantity > 1 ? [copy.quantityLine] : []),
   ];
   if (facts.length === 0) return `mailto:${email}?subject=${subject}`;
   const body = encodeURIComponent([productTitle, ...facts, "", ""].join("\n"));
@@ -49,6 +60,8 @@ export function resolveCtaTarget(
   purchaseUrl: string | null,
   sellerEmail: string | undefined,
   productTitle: string,
+  /** The enquiry subject, in the buyer's language (see mailtoHref). */
+  enquirySubject: string,
 ): CtaTarget {
   if (purchaseUrl) {
     try {
@@ -65,7 +78,7 @@ export function resolveCtaTarget(
     // The version-less href, which is what a server render can honestly build.
     return {
       kind: "mail",
-      href: mailtoHref(sellerEmail, productTitle),
+      href: mailtoHref(sellerEmail, productTitle, { subject: enquirySubject, quantityLine: "" }),
       email: sellerEmail,
       productTitle,
     };

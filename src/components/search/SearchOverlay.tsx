@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import {
   Bell,
   FileText,
@@ -126,11 +127,11 @@ const ICONS: Record<SearchResultType, React.ComponentType<{ className?: string }
 /** Message shown under the input when the remote half could not answer. Local
  *  results are still on screen in every one of these cases, which is why none
  *  of them is phrased as a failure of the search itself. */
-const REMOTE_NOTICE: Partial<Record<RemoteStatus, string>> = {
-  error: "Can't reach the server — showing pages, settings and actions only.",
-  auth: "Your session expired, so only pages and settings are shown.",
-  throttled: "Searching too fast — showing pages, settings and actions only.",
-};
+const REMOTE_NOTICE = {
+  error: "remoteError",
+  auth: "remoteAuth",
+  throttled: "remoteThrottled",
+} as const satisfies Partial<Record<RemoteStatus, string>>;
 
 export function SearchOverlay({
   open,
@@ -158,6 +159,8 @@ export function SearchOverlay({
   /** The registered trigger elements, for re-measuring on window resize. */
   anchorsRef?: React.RefObject<Set<HTMLElement>>;
 }) {
+  // No namespace: the local index resolves full catalogue keys through this.
+  const t = useTranslations();
   const [query, setQuery] = React.useState("");
   const [remoteGroups, setRemoteGroups] = React.useState<SearchGroup[]>([]);
   const [remoteStatus, setRemoteStatus] = React.useState<RemoteStatus>("idle");
@@ -178,15 +181,15 @@ export function SearchOverlay({
   // Local results are derived, not fetched: no effect, no loading state, no way
   // for them to lag the caret or disagree with what is in the box.
   const localGroups = React.useMemo(
-    () => searchLocalRegistry(query, { role }),
-    [query, role],
+    () => searchLocalRegistry(query, { role, t }),
+    [query, role, t],
   );
 
   // Snapshot matches are just as derived — the cache was filled long before
   // the first keystroke, so entity names answer in the same render too.
   const snapshotGroups = React.useMemo(
-    () => buildSnapshotGroups(snapshot, query),
-    [snapshot, query],
+    () => buildSnapshotGroups(snapshot, query, t),
+    [snapshot, query, t],
   );
 
   // THE MERGE. Three sources, one list:
@@ -201,14 +204,14 @@ export function SearchOverlay({
   // query leads with the snapshot's "Recent" rail when there is one.
   const groups = React.useMemo(() => {
     if (!trimmed) {
-      const recent = buildRecentGroup(snapshot);
+      const recent = buildRecentGroup(snapshot, t);
       return recent ? [recent, ...localGroups] : localGroups;
     }
     const live = wantsRemote ? remoteGroups : [];
     const liveTypes = new Set(live.map((group) => group.type));
     const fillIn = snapshotGroups.filter((group) => !liveTypes.has(group.type));
     return [...localGroups, ...fillIn, ...live];
-  }, [trimmed, localGroups, snapshotGroups, remoteGroups, wantsRemote, snapshot]);
+  }, [trimmed, localGroups, snapshotGroups, remoteGroups, wantsRemote, snapshot, t]);
   const flat = React.useMemo(
     () => groups.flatMap((group) => group.results),
     [groups],
@@ -495,16 +498,20 @@ export function SearchOverlay({
   // claims: entity matches ARE showing, they're just cached rather than live.
   const notice =
     effectiveStatus === "error" && snapshot !== null
-      ? "Live search unreachable — showing cached matches, pages and settings."
-      : REMOTE_NOTICE[effectiveStatus];
+      ? t("Search.overlay.remoteErrorCached")
+      : effectiveStatus === "error" ||
+          effectiveStatus === "auth" ||
+          effectiveStatus === "throttled"
+        ? t(`Search.overlay.${REMOTE_NOTICE[effectiveStatus]}`)
+        : undefined;
   const count = flat.length;
   const status = !trimmed
     ? ""
     : effectiveStatus === "loading"
-      ? "Searching…"
+      ? t("Search.overlay.searching")
       : count === 0
-        ? `No results for ${trimmed}`
-        : `${count} result${count === 1 ? "" : "s"} for ${trimmed}`;
+        ? t("Search.overlay.noResults", { query: trimmed })
+        : t("Search.overlay.resultCount", { count, query: trimmed });
 
   // Anchored is desktop-only by construction (the provider never captures a
   // rect under the sm breakpoint), so the anchored branches below can use
@@ -524,7 +531,7 @@ export function SearchOverlay({
         // The anchored expansion leaves the page live, and claiming otherwise
         // would have a screen reader treat the whole app as inert.
         aria-modal={anchored ? undefined : "true"}
-        aria-label="Search"
+        aria-label={t("Search.overlay.label")}
         // Anchored: a TRANSPARENT column sitting exactly on the trigger. Its
         // first child is a bar that pixel-matches the trigger it covers, so
         // what the user sees is THE SAME BAR — which then widens (the width
@@ -565,8 +572,8 @@ export function SearchOverlay({
           value={query}
           onValueChange={setQuery}
           onKeyDown={onKeyDown}
-          label="Search"
-          placeholder="Search products, orders, settings…"
+          label={t("Search.overlay.label")}
+          placeholder={t("Search.overlay.placeholder")}
           listboxId={listboxId}
           expanded={count > 0}
           activeDescendant={activeId ? optionId(activeId) : undefined}
@@ -577,7 +584,7 @@ export function SearchOverlay({
           // behave identically. On desktop it exists only while there is text,
           // purely as the field-clear (closing is Esc / a click outside).
           clear={{
-            label: query ? "Clear search" : "Close search",
+            label: query ? t("Search.overlay.clear") : t("Search.overlay.close"),
             onPress: () => {
               if (query) {
                 setQuery("");
@@ -632,7 +639,7 @@ export function SearchOverlay({
                 <div
                   id={listboxId}
                   role="listbox"
-                  aria-label="Search results"
+                  aria-label={t("Search.overlay.results")}
                   tabIndex={-1}
                   className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-safe focus:outline-none"
                 >
@@ -650,8 +657,8 @@ export function SearchOverlay({
               ) : (
                 <p className="flex-1 px-4 py-8 text-center font-inter text-sm text-muted-foreground">
                   {trimmed
-                    ? `Nothing matches “${trimmed}”.`
-                    : "Start typing to search."}
+                    ? t("Search.overlay.nothingMatches", { query: trimmed })
+                    : t("Search.overlay.startTyping")}
                 </p>
               )}
 

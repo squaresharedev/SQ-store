@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 /**
  * lib/auth/mfa.ts: how a second-factor code is checked (budgets, replay guard,
- * GoTrue challenge + verify), how sensitive actions demand one (requireStepUp),
+ * GoTrue challenge + verify), how sensitive actions demand one (requireStepUpState),
  * and how recovery codes are stored and spent. GoTrue, the rate limiter and
  * the database are faked; the ORDER of the checks and what each refusal does
  * (and does not do) is the thing under test.
@@ -64,16 +64,17 @@ vi.mock("@/lib/security/events", () => ({
 }));
 
 import {
-  SECOND_FACTOR_MESSAGES,
+  SECOND_FACTOR_ERRORS,
   deleteAllFactors,
   issueRecoveryCodes,
   pickFactor,
-  requireStepUp,
+  requireStepUpState,
   spendRecoveryCode,
   verifySecondFactor,
 } from "@/lib/auth/mfa";
 import { hashRecoveryCode, normalizeRecoveryCode } from "@/lib/auth/recovery-codes";
 import { STEP_UP_WINDOW_SECONDS } from "@/lib/auth/assurance";
+import { english } from "../setup/translate";
 
 // ---- fixtures -------------------------------------------------------------
 
@@ -118,36 +119,41 @@ beforeEach(() => {
   verifyMock.mockResolvedValue({ data: {}, error: null });
 });
 
-// ---- requireStepUp --------------------------------------------------------
+// ---- requireStepUpState -----------------------------------------------------
 
-describe("requireStepUp", () => {
+/** The English a refusal shows, or undefined for none. */
+function refusalText(refusal: Awaited<ReturnType<typeof requireStepUpState>>): string | undefined {
+  return refusal?.error ? english(refusal.error.message) : undefined;
+}
+
+describe("requireStepUpState", () => {
   it("lets an account WITHOUT 2FA straight through, no code, no GoTrue", async () => {
     sessionStateMock.mockResolvedValue(signedIn({ enrolled: false, factors: [] }));
-    expect(await requireStepUp(form({}))).toBeNull();
+    expect(await requireStepUpState(form({}))).toBeNull();
     expect(challengeMock).not.toHaveBeenCalled();
   });
 
   it("lets a session with a code from the last few minutes through", async () => {
     sessionStateMock.mockResolvedValue(signedIn({ secondFactorAt: now() - 60 }));
-    expect(await requireStepUp(form({}))).toBeNull();
+    expect(await requireStepUpState(form({}))).toBeNull();
     expect(takes).toEqual([]);
   });
 
   it("asks for a code once the window has passed", async () => {
-    const refusal = await requireStepUp(form({}));
+    const refusal = await requireStepUpState(form({}));
     expect(refusal).toMatchObject({ stepUp: true });
-    expect(refusal?.error).toMatch(/6-digit code/);
+    expect(refusalText(refusal)).toMatch(/6-digit code/);
     expect(challengeMock).not.toHaveBeenCalled();
   });
 
   it("maxAgeSeconds: 0 demands a code even from a session that just gave one", async () => {
     sessionStateMock.mockResolvedValue(signedIn({ secondFactorAt: now() }));
-    expect(await requireStepUp(form({}), { maxAgeSeconds: 0 })).toMatchObject({ stepUp: true });
+    expect(await requireStepUpState(form({}), { maxAgeSeconds: 0 })).toMatchObject({ stepUp: true });
   });
 
   it("refuses a malformed code without spending an attempt", async () => {
     for (const code of ["12345", "1234567", "abcdef", "١٢٣٤٥٦"]) {
-      const refusal = await requireStepUp(form({ mfa_code: code }));
+      const refusal = await requireStepUpState(form({ mfa_code: code }));
       expect(refusal, code).toMatchObject({ stepUp: true });
     }
     expect(takes).toEqual([]);
@@ -155,32 +161,32 @@ describe("requireStepUp", () => {
   });
 
   it("accepts a code with the space most apps show in the middle", async () => {
-    expect(await requireStepUp(form({ mfa_code: "123 456" }))).toBeNull();
+    expect(await requireStepUpState(form({ mfa_code: "123 456" }))).toBeNull();
     expect(verifyMock).toHaveBeenCalledWith(
       expect.objectContaining({ code: "123456", factorId: FACTOR_A }),
     );
   });
 
   it("checks the code against the factor the form named, if it is the caller's", async () => {
-    await requireStepUp(form({ mfa_code: "123456", mfa_factor_id: FACTOR_B }));
+    await requireStepUpState(form({ mfa_code: "123456", mfa_factor_id: FACTOR_B }));
     expect(challengeMock).toHaveBeenCalledWith({ factorId: FACTOR_B });
   });
 
   it("never checks against a factor id that is not the caller's", async () => {
     const stranger = "c0000000-0000-4000-8000-00000000000c";
-    const refusal = await requireStepUp(form({ mfa_code: "123456", mfa_factor_id: stranger }));
-    expect(refusal?.error).toMatch(/pick one/i);
+    const refusal = await requireStepUpState(form({ mfa_code: "123456", mfa_factor_id: stranger }));
+    expect(refusalText(refusal)).toMatch(/pick one/i);
     expect(challengeMock).not.toHaveBeenCalled();
   });
 
   it("reports a wrong code and keeps the field up", async () => {
     verifyMock.mockResolvedValue({ data: null, error: { code: "mfa_verification_failed", status: 422 } });
-    const refusal = await requireStepUp(form({ mfa_code: "000000" }));
-    expect(refusal).toEqual({ error: SECOND_FACTOR_MESSAGES.invalid, stepUp: true });
+    const refusal = await requireStepUpState(form({ mfa_code: "000000" }));
+    expect(refusal).toEqual({ error: SECOND_FACTOR_ERRORS.invalid, stepUp: true });
   });
 
   it("a code that goes through tells the browser (a readable, non-secret hint cookie)", async () => {
-    expect(await requireStepUp(form({ mfa_code: "123456" }))).toBeNull();
+    expect(await requireStepUpState(form({ mfa_code: "123456" }))).toBeNull();
     expect(cookieSetMock).toHaveBeenCalledWith(
       "ss_step_up_until",
       expect.stringMatching(/^\d+$/),
@@ -192,16 +198,70 @@ describe("requireStepUp", () => {
 
   it("a wrong code sets no hint", async () => {
     verifyMock.mockResolvedValue({ data: null, error: { code: "mfa_verification_failed", status: 422 } });
-    await requireStepUp(form({ mfa_code: "000000" }));
+    await requireStepUpState(form({ mfa_code: "000000" }));
     expect(cookieSetMock).not.toHaveBeenCalled();
   });
 
-  it("refuses when the session is not fully signed in", async () => {
+  it("a session that is not fully signed in gets the session message, and no code field", async () => {
     sessionStateMock.mockResolvedValue({ kind: "needs_mfa", user: USER, assurance: signedIn().assurance });
-    const refusal = await requireStepUp(form({ mfa_code: "123456" }));
-    expect(refusal?.error).toMatch(/session expired/i);
+    const refusal = await requireStepUpState(form({ mfa_code: "123456" }));
+    expect(refusal?.error?.code).toBe("session_expired");
+    expect(refusalText(refusal)).toBe("Your session expired. Sign in again.");
     expect(refusal?.stepUp).toBeUndefined();
     expect(challengeMock).not.toHaveBeenCalled();
+  });
+
+  it("words every refusal exactly as it has always read, and keeps the field up", async () => {
+    const cases: [Record<string, string>, string][] = [
+      [{}, "Enter the 6-digit code from your authenticator app to confirm it's you."],
+      [{ mfa_code: "12345" }, "The code is the 6 digits shown in your authenticator app."],
+      [
+        { mfa_code: "123456", mfa_factor_id: "c0000000-0000-4000-8000-00000000000c" },
+        "Pick one of your authenticator apps.",
+      ],
+    ];
+    for (const [fields, text] of cases) {
+      const refusal = await requireStepUpState(form(fields));
+      expect(refusal?.stepUp, JSON.stringify(fields)).toBe(true);
+      expect(refusalText(refusal), JSON.stringify(fields)).toBe(text);
+    }
+    for (const [error, text] of [
+      [
+        { code: "mfa_verification_failed", status: 422 },
+        "That code didn't work. Check your authenticator app and try again.",
+      ],
+      [
+        { code: "mfa_challenge_expired", status: 422 },
+        "That code didn't work. Check your authenticator app and try again.",
+      ],
+      [
+        { code: "unexpected_failure", status: 500 },
+        "We couldn't check that code just now. Try again in a moment.",
+      ],
+    ] as const) {
+      verifyMock.mockResolvedValue({ data: null, error });
+      const refusal = await requireStepUpState(form({ mfa_code: "000001" }));
+      expect(refusal?.stepUp, error.code).toBe(true);
+      expect(refusalText(refusal), error.code).toBe(text);
+    }
+  });
+});
+
+describe("SECOND_FACTOR_ERRORS", () => {
+  it("reads exactly as it always has, and says nothing about the account", () => {
+    expect(english(SECOND_FACTOR_ERRORS.invalid.message)).toBe(
+      "That code didn't work. Check your authenticator app and try again.",
+    );
+    expect(english(SECOND_FACTOR_ERRORS.rate_limited.message)).toBe(
+      "Too many attempts. Wait a few minutes, then try again.",
+    );
+    expect(english(SECOND_FACTOR_ERRORS.replayed.message)).toBe(
+      "That code has already been used. Wait for the next one in your app.",
+    );
+    expect(english(SECOND_FACTOR_ERRORS.unavailable.message)).toBe(
+      "We couldn't check that code just now. Try again in a moment.",
+    );
+    expect(SECOND_FACTOR_ERRORS.rate_limited.code).toBe("rate_limited");
   });
 });
 

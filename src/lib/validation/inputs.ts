@@ -1,4 +1,6 @@
 import { z } from "zod";
+import type { Messages } from "@/i18n/messages";
+import { issueKey, isValidationKey } from "@/lib/validation/messages";
 
 /**
  * THE input primitives. Every user-supplied field in the product is built from
@@ -20,7 +22,25 @@ import { z } from "zod";
  *   text nodes, never markup. This keeps stored data sane and keeps control
  *   characters out of places (email headers, notification bodies) where they
  *   mean something.
+ * - Messages are keys (see ./messages.ts). A primitive takes the FIELD it
+ *   validates, and each field owns whole sentences in the Validation catalogue:
+ *   "is required" cannot be glued onto a translated noun, because the noun's
+ *   form changes with the sentence around it.
  */
+
+type ValidationCatalogue = Messages["Validation"];
+
+/** A free-text field, named by its entry under Validation.text. */
+export type TextField = keyof ValidationCatalogue["text"];
+export type EmailField = keyof ValidationCatalogue["email"];
+export type UuidField = keyof ValidationCatalogue["uuid"];
+export type HandleField = keyof ValidationCatalogue["handle"];
+export type HostnameField = keyof ValidationCatalogue["hostname"];
+export type ReferenceCodeField = keyof ValidationCatalogue["referenceCode"];
+export type OneTimeCodeField = keyof ValidationCatalogue["oneTimeCode"];
+export type HexColorField = keyof ValidationCatalogue["hexColor"];
+export type IntField = keyof ValidationCatalogue["int"];
+export type ListField = keyof ValidationCatalogue["list"];
 
 // ── Text ────────────────────────────────────────────────────────────────
 
@@ -35,50 +55,63 @@ const CONTROL_CHARS_EXCEPT_NEWLINE = /[\u0000-\u0009\u000b-\u001f\u007f]/;
  * a field of pure whitespace fails `min` instead of passing it.
  */
 export function singleLineText(options: {
-  /** Field name used in the error, e.g. "A product needs a title." */
-  label: string;
+  /** The field, which decides the wording of every message. */
+  field: TextField;
   max: number;
   /** Default 1: single-line fields are required unless stated otherwise. */
   min?: number;
 }) {
-  const { label, max, min = 1 } = options;
+  const { field, max, min = 1 } = options;
   return z
     .string()
     .trim()
-    .min(min, min === 1 ? `${label} is required.` : `${label} needs at least ${min} characters.`)
-    .max(max, `${label} must be ${max} characters or fewer.`)
+    .min(min, min > 1 ? tooShortKey(field) : issueKey(`Validation.text.${field}.required`))
+    .max(max, issueKey(`Validation.text.${field}.tooLong`))
     .refine((value) => !CONTROL_CHARS.test(value), {
-      error: `${label} contains unsupported characters.`,
+      error: issueKey(`Validation.text.${field}.unsupported`),
     });
+}
+
+/**
+ * "Needs at least N characters" exists only for the fields that set a minimum
+ * above one, so it is looked up rather than assumed. A field missing it is a
+ * mistake in this codebase, reported when the schema is built.
+ */
+function tooShortKey(field: TextField): string {
+  const key = `Validation.text.${field}.tooShort`;
+  if (!isValidationKey(key)) {
+    throw new Error(`[validation] ${key} is missing from the catalogue`);
+  }
+  return issueKey(key);
 }
 
 /** Multi-line text: newlines allowed, every other control character rejected. */
 export function multiLineText(options: {
-  label: string;
+  field: TextField;
   max: number;
   min?: number;
 }) {
-  const { label, max, min = 0 } = options;
+  const { field, max, min = 0 } = options;
   return z
     .string()
     .trim()
-    .min(min, `${label} is required.`)
-    .max(max, `${label} must be ${max} characters or fewer.`)
+    .min(min, issueKey(`Validation.text.${field}.required`))
+    .max(max, issueKey(`Validation.text.${field}.tooLong`))
     .refine((value) => !CONTROL_CHARS_EXCEPT_NEWLINE.test(value), {
-      error: `${label} contains unsupported characters.`,
+      error: issueKey(`Validation.text.${field}.unsupported`),
     });
 }
 
 /** Optional single-line field where empty string means "not set". */
-export function optionalSingleLineText(options: { label: string; max: number }) {
+export function optionalSingleLineText(options: { field: TextField; max: number }) {
   return singleLineText({ ...options, min: 0 });
 }
 
 // ── Identity ────────────────────────────────────────────────────────────
 
 /** A UUID we minted (row ids, storefront ids, embed keys). */
-export function uuidField(label = "That id") {
-  return z.uuid({ error: `${label} is not valid.` });
+export function uuidField(field: UuidField = "id") {
+  return z.uuid({ error: issueKey(`Validation.uuid.${field}`) });
 }
 
 /**
@@ -86,12 +119,12 @@ export function uuidField(label = "That id") {
  * ride into the mail path, and control-char gated for the same header-safety
  * reason as single-line text.
  */
-export function emailAddress(label = "That email") {
+export function emailAddress(field: EmailField = "generic") {
   return z
-    .email({ error: `${label} doesn't look like an email address.` })
-    .max(254, `${label} is too long.`)
+    .email({ error: issueKey(`Validation.email.${field}.format`) })
+    .max(254, issueKey(`Validation.email.${field}.tooLong`))
     .refine((value) => !CONTROL_CHARS.test(value), {
-      error: `${label} contains unsupported characters.`,
+      error: issueKey(`Validation.email.${field}.unsupported`),
     });
 }
 
@@ -111,13 +144,13 @@ export function emailAddress(label = "That email") {
  */
 const HANDLE_PATTERN = /^[a-z0-9_]{3,30}$/;
 
-export function handle(label = "A username") {
+export function handle(field: HandleField = "username") {
   return z
     .string()
     .trim()
     .toLowerCase()
     .regex(HANDLE_PATTERN, {
-      error: `${label} must be 3 to 30 characters, using only letters, numbers and underscores.`,
+      error: issueKey(`Validation.handle.${field}`),
     });
 }
 
@@ -138,9 +171,9 @@ export function handle(label = "A username") {
 const HOSTNAME_PATTERN =
   /^(?=[a-z0-9.-]{4,253}$)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?[.])+[a-z]{2,63}$/;
 
-export function hostname(label = "Domains") {
+export function hostname(field: HostnameField = "domains") {
   return z.string().regex(HOSTNAME_PATTERN, {
-    error: `${label} must be bare lowercase domains like yoursite.com — no https://, port, path, or wildcard.`,
+    error: issueKey(`Validation.hostname.${field}`),
   });
 }
 
@@ -170,11 +203,11 @@ export function normalizeHostname(raw: string): string {
 const CODE_PATTERN = /^[A-Za-z0-9 .-]+$/;
 
 export function referenceCode(options: {
-  label: string;
+  field: ReferenceCodeField;
   min: number;
   max: number;
 }) {
-  const { label, min, max } = options;
+  const { field, min, max } = options;
   return z
     .string()
     .trim()
@@ -182,7 +215,7 @@ export function referenceCode(options: {
       (value) =>
         value === "" ||
         (value.length >= min && value.length <= max && CODE_PATTERN.test(value)),
-      { error: `${label} must be ${min} to ${max} letters, digits, spaces, dots or hyphens.` },
+      { error: issueKey(`Validation.referenceCode.${field}`), params: { min, max } },
     );
 }
 
@@ -193,13 +226,13 @@ export function referenceCode(options: {
  * that happens to start with six, and never a non-ASCII digit that a lax
  * `\d` could let through.
  */
-export function oneTimeCode(label = "The code") {
+export function oneTimeCode(field: OneTimeCodeField = "authenticator") {
   return z
     .string()
     .transform((value) => value.replace(/\s+/g, ""))
     .pipe(
       z.string().regex(/^[0-9]{6}$/, {
-        error: `${label} is the 6 digits shown in your authenticator app.`,
+        error: issueKey(`Validation.oneTimeCode.${field}`),
       }),
     );
 }
@@ -209,9 +242,9 @@ export function oneTimeCode(label = "The code") {
 /** Strict 6-digit hex. Gates every colour before it reaches a style attribute. */
 const HEX_COLOR_PATTERN = /^#[0-9a-fA-F]{6}$/;
 
-export function hexColor(label = "Colors") {
+export function hexColor(field: HexColorField = "colors") {
   return z.string().regex(HEX_COLOR_PATTERN, {
-    error: `${label} must be 6-digit hex, like #a855f7.`,
+    error: issueKey(`Validation.hexColor.${field}`),
   });
 }
 
@@ -222,27 +255,27 @@ export function isStrictHexColor(value: string): boolean {
 
 /** A whole number inside explicit bounds. Rejects floats, NaN and Infinity. */
 export function boundedInt(options: {
-  label: string;
+  field: IntField;
   min: number;
   max: number;
 }) {
-  const { label, min, max } = options;
+  const { field, min, max } = options;
   return z
     .number()
-    .int(`${label} must be a whole number.`)
-    .min(min, `${label} must be ${min} or more.`)
-    .max(max, `${label} must be ${max} or fewer.`);
+    .int(issueKey(`Validation.int.${field}.whole`))
+    .min(min, issueKey(`Validation.int.${field}.tooSmall`))
+    .max(max, issueKey(`Validation.int.${field}.tooBig`));
 }
 
 /** A bounded list with no duplicates. */
 export function uniqueList<T extends z.ZodType>(
   item: T,
-  options: { label: string; max: number },
+  options: { field: ListField; max: number },
 ) {
   return z
     .array(item)
-    .max(options.max, `List up to ${options.max} ${options.label}.`)
+    .max(options.max, issueKey(`Validation.list.${options.field}.tooMany`))
     .refine((values) => new Set(values).size === values.length, {
-      error: `Each entry in ${options.label} can only be listed once.`,
+      error: issueKey(`Validation.list.${options.field}.duplicate`),
     });
 }

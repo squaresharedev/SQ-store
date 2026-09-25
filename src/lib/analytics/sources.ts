@@ -8,6 +8,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import type { SignalKind } from "@/lib/analytics/signals";
+import type { MessageKey } from "@/i18n/types";
 
 // THE SOURCE REGISTRY: the one place that says what the analytics page
 // measures, and therefore what it draws.
@@ -18,7 +19,7 @@ import type { SignalKind } from "@/lib/analytics/signals";
 // skeleton, the empty states and the machine-readable payload in four separate
 // places, and forgetting one of them is how a feature ships half-instrumented.
 //
-// Instead the page maps over this array. A source declares its label, the
+// Instead the page maps over this array. A source declares the
 // signal kind it counts, the panels it wants and what unit it is in; the
 // section component knows how to render any source that shape. Shipping
 // bookings is then: add the kind to signals.ts + the SQL CHECK, write the
@@ -42,26 +43,28 @@ import type { SignalKind } from "@/lib/analytics/signals";
 /** Which panels a source's section renders, in this order. */
 export type SourcePanel = "trend" | "channels" | "weekdays" | "storefronts";
 
-/** What one unit of this source IS, for tiles, tooltips and empty states. */
-export type SourceNoun = { one: string; many: string };
-
+/**
+ * A source's COPY is not in this file. Every sentence about a source (its
+ * label, description, count noun, tile and panel titles) lives in the catalogue
+ * under `Analytics.sources.<id>`, keyed by the same id this registry and the
+ * data attributes use. The noun is not a word the section splices into a
+ * sentence: languages decline it differently in "Total views" and "No views in
+ * this range", so each sentence is its own message.
+ */
 export type AnalyticsSource = {
-  /** Stable id. Used as the section anchor and as the `data-analytics-source`
-   *  value, so it is part of the machine-readable contract: do not rename one
-   *  without updating docs/analytics-datapoints.md. */
+  /** Stable id. Used as the section anchor, as the `data-analytics-source`
+   *  value and as the catalogue key for its copy, so it is part of the
+   *  machine-readable contract: do not rename one without updating
+   *  docs/analytics-datapoints.md. */
   id: SignalKind;
-  label: string;
-  /** One line under the section heading. Plain, no marketing. */
-  description: string;
-  noun: SourceNoun;
   icon: LucideIcon;
   panels: SourcePanel[];
   /**
-   * Set while nothing writes this kind yet. The string names what ships it, so
+   * Set while nothing writes this kind yet. `reason` names what ships it, so
    * the placeholder answers "why is this empty" instead of just saying it is.
    * Removing it is a one-line change once the producer lands.
    */
-  awaiting?: string;
+  awaiting?: { reason: MessageKey; readyToChart: MessageKey };
   /**
    * The storefront block that produces this signal, if one does. This is what
    * makes a source RELEVANT before it has any data: a seller who has placed
@@ -84,49 +87,43 @@ export type AnalyticsSource = {
 export const SIGNAL_SOURCES: AnalyticsSource[] = [
   {
     id: "storefront_view",
-    label: "Storefront views",
-    description: "How often your storefront was loaded by a visitor.",
-    noun: { one: "view", many: "views" },
     icon: Eye,
     panels: ["trend", "storefronts", "channels"],
   },
   {
     id: "product_click",
-    label: "Product clicks",
-    description: "Visitors opening a product from one of your storefronts.",
-    noun: { one: "click", many: "clicks" },
     icon: MousePointerClick,
     panels: ["trend", "storefronts", "channels"],
-    awaiting: "Arrives once the embed widget reports product opens.",
+    awaiting: {
+      reason: "Analytics.sources.product_click.awaiting",
+      readyToChart: "Analytics.sources.product_click.readyToChart",
+    },
     blockType: "product",
   },
   {
     id: "product_view",
-    label: "Product page views",
-    description: "Visitors opening one of your hosted product pages.",
-    noun: { one: "view", many: "views" },
     icon: ScanEye,
     panels: ["trend", "storefronts", "channels"],
     blockType: "product",
   },
   {
     id: "email_signup",
-    label: "Email signups",
-    description: "People joining your list from a storefront.",
-    noun: { one: "signup", many: "signups" },
     icon: Mail,
     panels: ["trend", "storefronts", "weekdays"],
-    awaiting: "Arrives with the email signup block.",
+    awaiting: {
+      reason: "Analytics.sources.email_signup.awaiting",
+      readyToChart: "Analytics.sources.email_signup.readyToChart",
+    },
     blockType: "email_signup",
   },
   {
     id: "booking",
-    label: "Bookings",
-    description: "Slots booked from a storefront.",
-    noun: { one: "booking", many: "bookings" },
     icon: CalendarCheck,
     panels: ["trend", "weekdays", "storefronts"],
-    awaiting: "Arrives with the calendar booking block.",
+    awaiting: {
+      reason: "Analytics.sources.booking.awaiting",
+      readyToChart: "Analytics.sources.booking.readyToChart",
+    },
     blockType: "booking",
     carriesValue: true,
   },
@@ -134,11 +131,9 @@ export const SIGNAL_SOURCES: AnalyticsSource[] = [
 
 /** The sales section is not a signal source (orders carry money, refunds and a
  *  status lifecycle), but it shares the section chrome and the data-attribute
- *  contract, so its identity lives here too. */
+ *  contract, so its identity lives here too. Its copy is `Analytics.sales`. */
 export const SALES_SOURCE = {
   id: "sales" as const,
-  label: "Sales",
-  description: "Paid orders placed through Square Share checkout.",
   icon: Receipt,
 };
 

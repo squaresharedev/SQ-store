@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { handle } from "@/lib/validation/inputs";
+import { issueKey } from "@/lib/validation/messages";
 
 /**
  * Auth validation shared by the sign-in screen, the sign-up flow and the
@@ -62,9 +63,9 @@ export function normalizeUsername(raw: string): string {
 }
 
 export const usernameSchema = z.strictObject({
-  username: handle("A username").refine(
+  username: handle("username").refine(
     (value) => !RESERVED_USERNAMES.includes(value),
-    { error: "That username is reserved. Pick another." },
+    { error: issueKey("Validation.auth.usernameReserved") },
   ),
 });
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import {
   blockKey,
   resolveCardStyle,
@@ -69,13 +70,14 @@ export function MultiBlockEditor({
   /** Remove the whole selection. */
   onRemove: () => void;
 }) {
+  const t = useTranslations("Storefront");
   const products = blocks.filter((b): b is ProductBlock => b.type === "product");
   const shapes = blocks.filter((b): b is ShapeBlock => b.type === "shape");
   const texts = blocks.filter((b): b is TextBlock => b.type === "text");
   const images = blocks.filter((b): b is ImageBlock => b.type === "image");
   const copyableCount = shapes.length + texts.length + images.length;
 
-  const removeLabel = `Remove ${blocks.length} blocks`;
+  const removeLabel = t("multiBlock.remove", { count: blocks.length });
   const removeAll = (
     <button
       type="button"
@@ -92,8 +94,7 @@ export function MultiBlockEditor({
     return (
       <div className="space-y-4">
         <p className={helpTextClass}>
-          Editing {blocks.length} shapes together. Values shown come from the
-          first selected shape; every change applies to all of them.
+          {t("multiBlock.shapesContext", { count: blocks.length })}
         </p>
         <ShapeBlockEditor
           block={shapes[0]}
@@ -111,9 +112,7 @@ export function MultiBlockEditor({
     return (
       <div className="space-y-4">
         <p className={helpTextClass}>
-          Editing {blocks.length} text blocks together. Values shown come from
-          the first selected block; every change applies to all of them. Each
-          block keeps its own text.
+          {t("multiBlock.textsContext", { count: blocks.length })}
         </p>
         {/* Duplicate and Remove ride together at the foot of the editor, as
             they do for every other kind — the group's own remove button used
@@ -137,9 +136,7 @@ export function MultiBlockEditor({
     return (
       <div className="space-y-4">
         <p className={helpTextClass}>
-          Editing {blocks.length} elements together. Values shown come from the
-          first selected element; every change applies to all of them. Each
-          keeps its own picture.
+          {t("multiBlock.imagesContext", { count: blocks.length })}
         </p>
         {/* No frame button: framing is a gesture on ONE picture, positioning
             that artwork inside that block, and there is no group answer to
@@ -166,15 +163,14 @@ export function MultiBlockEditor({
     return (
       <div className="space-y-4">
         <p className={helpTextClass}>
-          Styling {blocks.length} product tiles together. Values shown come
-          from the first selected tile; every change applies to all of them.
+          {t("multiBlock.productsContext", { count: blocks.length })}
         </p>
 
         {/* The same two groups a single product tile gets, so styling one tile
             and styling six read the same way. */}
         <div className="-mx-4 border-t border-border">
           <CollapsibleSection
-            title="Tile style"
+            title={t("multiBlock.tileStyle.title")}
             collapsible
             headerAction={
               anyOverrides && (
@@ -183,7 +179,7 @@ export function MultiBlockEditor({
                   onClick={onProductStyleReset}
                   className={cn(ghostButtonClass, "px-2 py-1 text-xs")}
                 >
-                  Reset to theme
+                  {t("multiBlock.tileStyle.reset")}
                 </button>
               )
             }
@@ -199,7 +195,7 @@ export function MultiBlockEditor({
             />
           </CollapsibleSection>
 
-          <CollapsibleSection title="Price tag" collapsible defaultOpen={false}>
+          <CollapsibleSection title={t("multiBlock.priceTag")} collapsible defaultOpen={false}>
             <PriceTagControls
               theme={theme}
               overrides={products[0].style ?? {}}
@@ -218,21 +214,18 @@ export function MultiBlockEditor({
   return (
     <div className="space-y-4">
       <p className={helpTextClass}>
-        {blocks.length} blocks of different types are selected. Select blocks
-        of one type to edit their settings together.
+        {t("multiBlock.mixedContext", { count: blocks.length })}
       </p>
       <BlockActions
         onDuplicate={copyableCount > 0 ? onDuplicate : undefined}
         onRemove={onRemove}
-        duplicateLabel={
-          copyableCount === 1 ? "Duplicate 1 block" : `Duplicate ${copyableCount} blocks`
-        }
+        duplicateLabel={t("multiBlock.duplicate", { count: copyableCount })}
         removeLabel={removeLabel}
       />
       {/* The caveat the button no longer has room to carry: a product tile is
           one per product by design, so a mixed selection copies the rest. */}
       {copyableCount > 0 && products.length > 0 && (
-        <p className={helpTextClass}>Products are not duplicated.</p>
+        <p className={helpTextClass}>{t("multiBlock.productsNotDuplicated")}</p>
       )}
     </div>
   );

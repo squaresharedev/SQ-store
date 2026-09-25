@@ -1,0 +1,17 @@
+{
+  "notFound": {
+    "title": "Pagina non trovata",
+    "description": "Questa pagina non esiste, oppure l’elemento a cui puntava è stato eliminato. Il link potrebbe non essere più valido, ma il tuo account e i tuoi dati sono al sicuro.",
+    "cta": "Torna alla dashboard"
+  },
+  "boundary": {
+    "title": "Qualcosa è andato storto",
+    "description": "Non siamo riusciti a caricare questa pagina. Di solito è un problema di connessione temporaneo: il tuo account è a posto e l’accesso resta attivo.",
+    "reference": "Riferimento: {digest}"
+  },
+  "footer": {
+    "legal": "Note legali",
+    "contact": "Contatti",
+    "credit": "© 2026 Squareshare. Realizzato da <link>Root Labs</link>."
+  }
+}

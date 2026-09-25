@@ -1,14 +1,14 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, cleanup, waitFor } from "../setup/render";
 import userEvent from "@testing-library/user-event";
+import { actionError, failed, succeeded } from "@/lib/errors";
+import { msg } from "@/i18n/types";
 
 afterEach(cleanup);
 
-const changePasswordMock = vi.hoisted(() => vi.fn().mockResolvedValue({}));
 const sendPasswordResetMock = vi.hoisted(() => vi.fn().mockResolvedValue({}));
 
 vi.mock("@/lib/settings/actions", () => ({
-  changePassword: changePasswordMock,
   sendPasswordReset: sendPasswordResetMock,
 }));
 
@@ -16,69 +16,56 @@ const { PasswordModal } = await import("@/components/settings/PasswordModal");
 
 beforeEach(() => {
   vi.clearAllMocks();
-  changePasswordMock.mockResolvedValue({});
   sendPasswordResetMock.mockResolvedValue({});
   // The resend cooldown is persisted, so it would otherwise leak between tests.
   sessionStorage.clear();
 });
 
 const LAST_SENT_KEY = "sq:password-reset-sent-at";
-const RESET_SENT = { success: "Reset link sent. Check your inbox." };
+const RESET_SENT = succeeded(msg("Settings.account.success.resetSent"));
 
 const noop = () => {};
 
-describe("PasswordModal — account that has a password", () => {
-  it("opens on the change view and asks for the current password", () => {
-    render(
-      <PasswordModal open onClose={noop} hasPassword email="a@b.com" />,
-    );
-    expect(screen.getByLabelText("Current password")).toBeInTheDocument();
-    expect(screen.getByLabelText("New password")).toBeInTheDocument();
-    expect(screen.getByLabelText("Confirm new password")).toBeInTheDocument();
-  });
-
-  it("states the real strength rule rather than just the length floor", () => {
+describe("PasswordModal: account that has a password", () => {
+  it("offers only the emailed link: there is no field for the current password at all", () => {
+    // Settings never holds the existing password. A field for it is one a
+    // browser fills on open, and a show/hide toggle would then display it to
+    // whoever is at the screen.
     render(<PasswordModal open onClose={noop} hasPassword email="a@b.com" />);
-    const hint = screen.getByText(/at least 8 characters/i);
-    expect(hint).toHaveTextContent(/mixing cases, numbers or symbols/i);
-    expect(hint).toHaveTextContent(/16\+/);
-  });
-
-  it("warns that other devices will be signed out", () => {
-    // The change really does revoke them, so the form has to say so.
-    render(<PasswordModal open onClose={noop} hasPassword email="a@b.com" />);
-    expect(screen.getByText(/every other device will be signed out/i)).toBeInTheDocument();
-  });
-
-  it("offers the fallback as a real button, not a bare link", async () => {
-    // It sits inside the change form, so it has to be type="button": a default
-    // submit would fire changePassword instead of switching views.
-    render(<PasswordModal open onClose={noop} hasPassword email="a@b.com" />);
-    const forgot = screen.getByRole("button", { name: /forgot password/i });
-    expect(forgot).toHaveAttribute("type", "button");
-  });
-
-  it("switches to the reset view and back without leaving the modal", async () => {
-    const user = userEvent.setup();
-    render(<PasswordModal open onClose={noop} hasPassword email="a@b.com" />);
-
-    await user.click(screen.getByRole("button", { name: /forgot password/i }));
-    expect(screen.queryByLabelText("Current password")).not.toBeInTheDocument();
+    const dialog = screen.getByRole("dialog", { name: "Reset your password" });
+    expect(dialog.querySelector("input")).toBeNull();
+    expect(document.querySelector('input[type="password"], input[type="text"]')).toBeNull();
+    expect(screen.queryByRole("button", { name: /show password/i })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: /email me a link/i })).toBeInTheDocument();
+  });
 
-    await user.click(screen.getByRole("button", { name: /^back$/i }));
-    expect(screen.getByLabelText("Current password")).toBeInTheDocument();
+  it("says the password is never shown, and what setting a new one does", () => {
+    render(<PasswordModal open onClose={noop} hasPassword email="a@b.com" />);
+    expect(screen.getByText(/never shown/i)).toHaveTextContent(/signs out your other devices/i);
+  });
+
+  it("names the address the link goes to", () => {
+    render(<PasswordModal open onClose={noop} hasPassword email="owner@studio.com" />);
+    expect(screen.getByText(/owner@studio.com/)).toBeInTheDocument();
+  });
+
+  it("cancels without sending anything", async () => {
+    const onClose = vi.fn();
+    const user = userEvent.setup();
+    render(<PasswordModal open onClose={onClose} hasPassword email="a@b.com" />);
+    await user.click(screen.getByRole("button", { name: /^cancel$/i }));
+    expect(onClose).toHaveBeenCalled();
+    expect(sendPasswordResetMock).not.toHaveBeenCalled();
   });
 });
 
-describe("PasswordModal — account with no password", () => {
-  it("offers only the emailed link, never a current-password field", () => {
-    // There is nothing to re-authenticate against, so asking would be a dead
-    // end. This is also the only route by which an OAuth account gets one.
+describe("PasswordModal: account with no password", () => {
+  it("offers the emailed link, which is how an OAuth account gets one", () => {
     render(
       <PasswordModal open onClose={noop} hasPassword={false} email="a@b.com" />,
     );
-    expect(screen.queryByLabelText("Current password")).not.toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "Set a password" })).toBeInTheDocument();
+    expect(document.querySelector('input[type="password"], input[type="text"]')).toBeNull();
     expect(screen.getByRole("button", { name: /email me a link/i })).toBeInTheDocument();
     expect(screen.getByText(/signs in with google/i)).toBeInTheDocument();
   });
@@ -89,13 +76,13 @@ describe("PasswordModal — account with no password", () => {
     render(
       <PasswordModal open onClose={noop} hasPassword={false} email="owner@studio.com" />,
     );
-    expect(screen.getByText(/owner@studio\.com/)).toBeInTheDocument();
+    expect(screen.getByText(/owner@studio.com/)).toBeInTheDocument();
     expect(screen.queryByLabelText(/^email$/i)).not.toBeInTheDocument();
     expect(document.querySelector('input[name="email"]')).toBeNull();
   });
 });
 
-describe("PasswordModal — wiring", () => {
+describe("PasswordModal: wiring", () => {
   it("renders nothing when closed", () => {
     render(
       <PasswordModal open={false} onClose={noop} hasPassword email="a@b.com" />,
@@ -103,56 +90,27 @@ describe("PasswordModal — wiring", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
-  it("submits the change to the changePassword action", async () => {
+  it("submits the request to sendPasswordReset, with no fields", async () => {
     const user = userEvent.setup();
     render(<PasswordModal open onClose={noop} hasPassword email="a@b.com" />);
-
-    await user.type(screen.getByLabelText("Current password"), "old-Password-1");
-    await user.type(screen.getByLabelText("New password"), "Kettle-Boat-99");
-    await user.type(screen.getByLabelText("Confirm new password"), "Kettle-Boat-99");
-    await user.click(screen.getByRole("button", { name: /update password/i }));
-
-    await waitFor(() => expect(changePasswordMock).toHaveBeenCalled());
-    expect(sendPasswordResetMock).not.toHaveBeenCalled();
-  });
-
-  it("submits the reset request to sendPasswordReset", async () => {
-    const user = userEvent.setup();
-    render(
-      <PasswordModal open onClose={noop} hasPassword={false} email="a@b.com" />,
-    );
 
     await user.click(screen.getByRole("button", { name: /email me a link/i }));
 
     await waitFor(() => expect(sendPasswordResetMock).toHaveBeenCalled());
-    expect(changePasswordMock).not.toHaveBeenCalled();
+    const formData = sendPasswordResetMock.mock.calls[0]![1] as FormData;
+    expect([...formData.keys()].filter((key) => !key.startsWith("$ACTION"))).toEqual([]);
   });
 
   it("surfaces an action error to the user", async () => {
-    changePasswordMock.mockResolvedValue({ error: "Current password is incorrect." });
+    sendPasswordResetMock.mockResolvedValue(
+      failed(actionError("server_error", msg("Errors.settings.resetFailed"))),
+    );
     const user = userEvent.setup();
     render(<PasswordModal open onClose={noop} hasPassword email="a@b.com" />);
 
-    await user.type(screen.getByLabelText("Current password"), "wrong");
-    await user.type(screen.getByLabelText("New password"), "Kettle-Boat-99");
-    await user.type(screen.getByLabelText("Confirm new password"), "Kettle-Boat-99");
-    await user.click(screen.getByRole("button", { name: /update password/i }));
+    await user.click(screen.getByRole("button", { name: /email me a link/i }));
 
-    expect(await screen.findByRole("alert")).toHaveTextContent(/incorrect/i);
-  });
-
-  it("closes itself once the change succeeds", async () => {
-    changePasswordMock.mockResolvedValue({ success: "Password updated." });
-    const onClose = vi.fn();
-    const user = userEvent.setup();
-    render(<PasswordModal open onClose={onClose} hasPassword email="a@b.com" />);
-
-    await user.type(screen.getByLabelText("Current password"), "old-Password-1");
-    await user.type(screen.getByLabelText("New password"), "Kettle-Boat-99");
-    await user.type(screen.getByLabelText("Confirm new password"), "Kettle-Boat-99");
-    await user.click(screen.getByRole("button", { name: /update password/i }));
-
-    await waitFor(() => expect(onClose).toHaveBeenCalled(), { timeout: 3000 });
+    expect(await screen.findByRole("alert")).toHaveTextContent(/could not send/i);
   });
 });
 
@@ -187,7 +145,9 @@ describe("PasswordModal: resend cooldown", () => {
   });
 
   it("does not start a cooldown when the send failed", async () => {
-    sendPasswordResetMock.mockResolvedValue({ error: "Could not send the reset email. Try again." });
+    sendPasswordResetMock.mockResolvedValue(
+      failed(actionError("server_error", msg("Errors.settings.resetFailed"))),
+    );
     const user = userEvent.setup();
     openReset();
 

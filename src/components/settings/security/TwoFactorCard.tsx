@@ -3,38 +3,40 @@
 import * as React from "react";
 import { useActionState } from "react";
 import { Check, Plus, ShieldCheck, Smartphone } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { Spinner } from "@/components/ui/spinner";
-import { useActionToast } from "@/components/ui/Toast";
+import { useActionStateToast, useResolveMessage } from "@/components/ui/ActionErrorNotice";
 import { helpTextClass, infoTextClass } from "@/components/ui/control-styles";
 import { SettingsCard } from "@/components/settings/SettingsCard";
 import { StepUpField } from "@/components/auth/StepUp";
 import { TwoFactorSetupModal } from "@/components/settings/security/TwoFactorSetupModal";
 import type { SecurityFactor } from "@/components/settings/security/SecuritySection";
+import type { Locale } from "@/i18n/locales";
 import { removeAuthenticator, type ManageState } from "@/lib/auth/mfa-actions";
+import type { ActionState } from "@/lib/errors";
+import { dateTimeFormat, intlTag } from "@/lib/format/intl";
 import { cn } from "@/lib/utils";
 
 const MANAGE_INITIAL: ManageState = {};
 
-function formatDay(iso: string): string {
+const ADDED_DAY: Intl.DateTimeFormatOptions = {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+  timeZone: "UTC",
+};
+
+function formatDay(iso: string, locale: Locale): string {
   const date = new Date(iso);
   return Number.isNaN(date.getTime())
     ? ""
-    : date.toLocaleDateString("en-GB", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-        timeZone: "UTC",
-      });
+    : dateTimeFormat(intlTag(locale, "en-GB"), ADDED_DAY).format(date);
 }
 
 /** Why bother, in the three sentences a busy seller will actually read. */
-const BENEFITS = [
-  "A stolen or guessed password is no longer enough to get into your store.",
-  "Changes to your business details, your team and your account need a code from your phone.",
-  "You get an email the moment someone gets your password right but the code wrong.",
-];
+const BENEFITS = ["password", "changesBusiness", "alerts"] as const;
 
 /**
  * The two-factor switch. Off: the case for turning it on, and the button that
@@ -56,6 +58,9 @@ export function TwoFactorCard({
   signsInWithGoogle: boolean;
   openSetup: boolean;
 }) {
+  const t = useTranslations("Settings.security.twoFactor");
+  const tCommon = useTranslations("Common.actions");
+  const locale = useLocale();
   const [setupOpen, setSetupOpen] = React.useState(openSetup);
   const [removing, setRemoving] = React.useState<SecurityFactor | null>(null);
   const closeSetup = React.useCallback(() => setSetupOpen(false), []);
@@ -64,12 +69,8 @@ export function TwoFactorCard({
   return (
     <SettingsCard
       id="two-factor"
-      title="Two-factor authentication"
-      description={
-        enrolled
-          ? "Signing in needs your password and a code from your authenticator app."
-          : "Add a second step to signing in: a 6-digit code from an app on your phone."
-      }
+      title={t("cardTitle")}
+      description={enrolled ? t("descriptionOn") : t("descriptionOff")}
       decoration={enrolled ? undefined : "dots"}
     >
       <div className="flex flex-col gap-5">
@@ -83,12 +84,12 @@ export function TwoFactorCard({
           data-two-factor-status={enrolled ? "on" : "off"}
         >
           <ShieldCheck aria-hidden className="size-3.5" />
-          {enrolled ? "On" : "Off"}
+          {enrolled ? t("statusOn") : t("statusOff")}
         </p>
 
         {enrolled ? (
           <>
-            <ul className="divide-y divide-border border-y border-border" aria-label="Authenticator apps">
+            <ul className="divide-y divide-border border-y border-border" aria-label={t("listLabel")}>
               {factors.map((factor) => (
                 <li
                   key={factor.id}
@@ -100,16 +101,18 @@ export function TwoFactorCard({
                       <p className="truncate font-inter text-sm font-medium text-foreground">
                         {factor.name}
                       </p>
-                      <p className={infoTextClass}>Added {formatDay(factor.createdAt)}</p>
+                      <p className={infoTextClass}>
+                        {t("added", { date: formatDay(factor.createdAt, locale) })}
+                      </p>
                     </div>
                   </div>
                   <Button
                     type="button"
                     variant="ghost-danger"
                     onClick={() => setRemoving(factor)}
-                    aria-label={`Remove ${factor.name}`}
+                    aria-label={t("removeLabel", { name: factor.name })}
                   >
-                    Remove
+                    {tCommon("remove")}
                   </Button>
                 </li>
               ))}
@@ -117,7 +120,7 @@ export function TwoFactorCard({
             <div>
               <Button type="button" variant="secondary" onClick={() => setSetupOpen(true)}>
                 <Plus aria-hidden className="size-4" />
-                Add another authenticator
+                {t("addAnother")}
               </Button>
             </div>
           </>
@@ -127,16 +130,16 @@ export function TwoFactorCard({
               {BENEFITS.map((benefit) => (
                 <li key={benefit} className={cn(helpTextClass, "flex items-start gap-2")}>
                   <Check aria-hidden className="mt-0.5 size-4 shrink-0 text-foreground" />
-                  <span>{benefit}</span>
+                  <span>{t(`benefits.${benefit}`)}</span>
                 </li>
               ))}
             </ul>
             <div className="flex flex-wrap items-center gap-3">
               <Button type="button" onClick={() => setSetupOpen(true)}>
                 <ShieldCheck aria-hidden className="size-4" />
-                Set up two-factor authentication
+                {t("setUp")}
               </Button>
-              <span className={infoTextClass}>Takes about a minute.</span>
+              <span className={infoTextClass}>{t("takesAMinute")}</span>
             </div>
           </>
         )}
@@ -179,15 +182,18 @@ function RemoveAuthenticatorModal({
   isLast: boolean;
   onClose: () => void;
 }) {
+  const t = useTranslations("Settings.security");
+  const tCommon = useTranslations("Common.actions");
+  const resolve = useResolveMessage();
   const [state, formAction, isPending] = useActionState(removeAuthenticator, MANAGE_INITIAL);
   // Success as a toast (the modal closes, so an inline line would vanish with
   // it); errors stay inline beside the code they are about. Memoised on the
   // state object, because the toast hook announces each NEW object it sees.
-  const announced = React.useMemo(
+  const announced = React.useMemo<ActionState | undefined>(
     () => (state.success ? { success: state.success } : undefined),
     [state],
   );
-  useActionToast(announced);
+  useActionStateToast(announced);
 
   React.useEffect(() => {
     if (state.success) onClose();
@@ -199,11 +205,11 @@ function RemoveAuthenticatorModal({
     <Modal
       open
       onClose={onClose}
-      title={isLast ? "Turn off two-factor authentication?" : `Remove "${factor.name}"?`}
+      title={isLast ? t("remove.titleLast") : t("remove.title", { name: factor.name })}
       description={
         isLast
-          ? "This is your only authenticator. Removing it turns two-factor authentication off, and your recovery codes stop working. Signing in will need only your password."
-          : `"${factor.name}" will no longer be able to sign in to your account.`
+          ? t("remove.descriptionLast")
+          : t("remove.description", { name: factor.name })
       }
       className="rounded-none sm:rounded-none"
     >
@@ -213,27 +219,27 @@ function RemoveAuthenticatorModal({
           id="remove-factor"
           state={state}
           always
-          description="Enter a current code from your authenticator app to confirm."
+          description={t("stepUpConfirm")}
         />
         {state.error && (
           <p role="alert" className="font-inter text-sm font-medium text-destructive">
-            {state.error}
+            {resolve(state.error.message)}
           </p>
         )}
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <Button type="button" variant="ghost" onClick={onClose}>
-            Cancel
+            {tCommon("cancel")}
           </Button>
           <Button type="submit" variant="destructive" disabled={isPending} suppressHydrationWarning>
             {isPending ? (
               <>
                 <Spinner />
-                Removing…
+                {t("remove.removing")}
               </>
             ) : isLast ? (
-              "Turn off"
+              t("remove.turnOff")
             ) : (
-              "Remove"
+              tCommon("remove")
             )}
           </Button>
         </div>

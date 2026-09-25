@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { multiLineText, singleLineText } from "@/lib/validation/inputs";
+import { issueKey } from "@/lib/validation/messages";
 import { EU_COUNTRY_CODES } from "@/lib/settings/constants";
 import {
   DESTINATION_AREA_MAX,
@@ -34,9 +35,9 @@ import type { ShippingProfile } from "@/types/storefront";
  */
 
 const destinationSchema = z.strictObject({
-  area: singleLineText({ label: "A destination", max: DESTINATION_AREA_MAX }),
-  time: singleLineText({ label: "A delivery time", max: DESTINATION_TIME_MAX }),
-  cost: singleLineText({ label: "A shipping cost", max: DESTINATION_COST_MAX }).optional(),
+  area: singleLineText({ field: "destinationArea", max: DESTINATION_AREA_MAX }),
+  time: singleLineText({ field: "deliveryTime", max: DESTINATION_TIME_MAX }),
+  cost: singleLineText({ field: "shippingCost", max: DESTINATION_COST_MAX }).optional(),
 });
 
 export const shippingPolicySchema = z.strictObject({
@@ -46,26 +47,26 @@ export const shippingPolicySchema = z.strictObject({
   shipsFrom: z
     .string()
     .refine((code) => (EU_COUNTRY_CODES as readonly string[]).includes(code), {
-      error: "That is not a country we can ship from yet.",
+      error: issueKey("Validation.shipping.shipsFromInvalid"),
     })
     .optional(),
   dispatch: singleLineText({
-    label: "The dispatch time",
+    field: "dispatchTime",
     max: SHIPPING_DISPATCH_MAX,
   }).optional(),
   destinations: z
     .array(destinationSchema)
     .max(SHIPPING_DESTINATIONS_MAX, {
-      error: `You can list up to ${SHIPPING_DESTINATIONS_MAX} destinations.`,
+      error: issueKey("Validation.shipping.destinationsTooMany"),
     })
     .optional(),
   shippingNotes: multiLineText({
-    label: "The shipping notes",
+    field: "shippingNotes",
     max: POLICY_TEXT_MAX,
     min: 1,
   }).optional(),
   shippingText: multiLineText({
-    label: "The shipping policy",
+    field: "shippingPolicy",
     max: POLICY_TEXT_MAX,
     min: 1,
   }).optional(),
@@ -75,20 +76,20 @@ export const shippingPolicySchema = z.strictObject({
   // returns window.
   returnsWindowDays: z
     .number()
-    .int({ error: "A returns window is a whole number of days." })
-    .min(0, { error: "A returns window cannot be negative." })
+    .int({ error: issueKey("Validation.shipping.returnsWindowWhole") })
+    .min(0, { error: issueKey("Validation.shipping.returnsWindowNegative") })
     .max(RETURNS_WINDOW_MAX_DAYS, {
-      error: `A returns window tops out at ${RETURNS_WINDOW_MAX_DAYS} days.`,
+      error: issueKey("Validation.shipping.returnsWindowTooLong"),
     })
     .optional(),
   returnsPaidBy: z.enum(RETURNS_PAID_BY).optional(),
   returnsNotes: multiLineText({
-    label: "The returns notes",
+    field: "returnsNotes",
     max: POLICY_TEXT_MAX,
     min: 1,
   }).optional(),
   returnsText: multiLineText({
-    label: "The returns policy",
+    field: "returnsPolicy",
     max: POLICY_TEXT_MAX,
     min: 1,
   }).optional(),

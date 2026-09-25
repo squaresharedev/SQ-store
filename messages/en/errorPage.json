@@ -1,0 +1,17 @@
+{
+  "notFound": {
+    "title": "Page not found",
+    "description": "This page doesn't exist, or the thing it pointed at was deleted. The link may be stale, but your account and data are fine.",
+    "cta": "Back to dashboard"
+  },
+  "boundary": {
+    "title": "Something went wrong",
+    "description": "We couldn't load this page. This is usually a temporary connection problem: your account is fine and you're still signed in.",
+    "reference": "Reference: {digest}"
+  },
+  "footer": {
+    "legal": "Legal",
+    "contact": "Contact",
+    "credit": "© 2026 Squareshare. Built by <link>Root Labs</link>."
+  }
+}

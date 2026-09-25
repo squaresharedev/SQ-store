@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { CheckCheck } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cardClass } from "@/components/ui/surface-styles";
 import { cn } from "@/lib/utils";
 import { errorTextClass, helpTextClass, secondaryButtonClass } from "@/components/ui/control-styles";
@@ -27,6 +28,8 @@ export function NotificationsPageClient({
   initial: Notification[];
   initialCursor: string | null;
 }) {
+  const t = useTranslations("Notifications.page");
+  const tCommon = useTranslations("Common.actions");
   const [items, setItems] = React.useState<Notification[]>(initial);
   const [cursor, setCursor] = React.useState<string | null>(initialCursor);
   const [loadingMore, setLoadingMore] = React.useState(false);
@@ -71,7 +74,7 @@ export function NotificationsPageClient({
     <div className="mx-auto w-full max-w-2xl px-4 py-8 md:px-6 md:py-10">
       <div className="mb-6 flex items-center justify-between gap-4">
         <h1 className="text-2xl font-semibold tracking-tight text-foreground md:text-3xl">
-          Notifications
+          {t("title")}
         </h1>
         <button
           type="button"
@@ -80,16 +83,14 @@ export function NotificationsPageClient({
           className={cn(secondaryButtonClass, "gap-1.5 px-3 py-2 text-muted-foreground hover:text-foreground")}
         >
           <CheckCheck aria-hidden className="size-4" />
-          Mark all read
+          {t("markAllRead")}
         </button>
       </div>
 
       {items.length === 0 ? (
         <div className={cn(cardClass, "py-16 text-center")}>
-          <p className="text-sm font-medium text-foreground">No notifications yet</p>
-          <p className={cn(helpTextClass, "mt-1")}>
-            Team, order, and payment activity will show up here.
-          </p>
+          <p className="text-sm font-medium text-foreground">{t("emptyTitle")}</p>
+          <p className={cn(helpTextClass, "mt-1")}>{t("emptyHint")}</p>
         </div>
       ) : (
         <ul className={cn(cardClass, "divide-y divide-border overflow-hidden")}>
@@ -108,8 +109,7 @@ export function NotificationsPageClient({
         <div className="mt-6 flex flex-col items-center gap-2">
           {loadError && (
             <p role="alert" className={errorTextClass}>
-              Couldn&apos;t load more notifications. Check your connection and
-              try again.
+              {t("loadError")}
             </p>
           )}
           <button
@@ -119,7 +119,7 @@ export function NotificationsPageClient({
             className={cn(secondaryButtonClass, "py-2")}
           >
             {loadingMore && <Spinner />}
-            {loadingMore ? "Loading" : loadError ? "Try again" : "Load more"}
+            {loadingMore ? t("loading") : loadError ? tCommon("tryAgain") : t("loadMore")}
           </button>
         </div>
       )}

@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { motion } from "motion/react";
 import { useToast } from "@/components/ui/Toast";
+import { useActionErrorToast } from "@/components/ui/ActionErrorNotice";
 import {
   RotateArrowIcon,
   useIconHoverProps,
@@ -12,6 +14,8 @@ import { Modal } from "@/components/ui/modal";
 import { Switch } from "@/components/ui/switch";
 import { destructiveButtonClass, errorTextClass, fieldBaseClass, helpTextClass, labelClass, primaryButtonClass, secondaryButtonClass } from "@/components/ui/control-styles";
 import { invalidInput } from "@/lib/errors";
+import { firstIssue } from "@/lib/validation/messages";
+import { msg } from "@/i18n/types";
 import { embedSettingsSchema } from "@/lib/validation/storefront";
 import { normalizeHostname } from "@/lib/validation/inputs";
 import { rotateEmbedKey, updateEmbedSettings } from "@/lib/storefront/actions";
@@ -69,7 +73,10 @@ export function EmbedModal({
    *  switch is not offered. Turning it OFF is never blocked, here or there. */
   missingTraderDetails?: readonly TraderIdentityField[];
 }) {
+  const t = useTranslations("Storefront.embed");
+  const tCommon = useTranslations("Common");
   const toast = useToast();
+  const showActionError = useActionErrorToast();
   // The rotate buttons drive their own icon: hovering anywhere on the button
   // turns the key.
   const iconHover = useIconHoverProps();
@@ -107,23 +114,24 @@ export function EmbedModal({
     // Client-side parse for instant feedback; the action re-validates.
     const parsed = embedSettingsSchema.safeParse(settings);
     if (!parsed.success) {
-      const problem = invalidInput(
-        parsed.error.issues[0]?.message ?? "Invalid embed settings.",
-        "Check the domain list (comma-separated hostnames like example.com) and save again.",
+      showActionError(
+        invalidInput(
+          firstIssue(parsed.error, msg("Errors.storefront.invalidEmbedSettings")),
+          msg("Errors.storefront.embedSettingsFix"),
+        ),
       );
-      toast.error(problem.message, { lines: [problem.fix] });
       return;
     }
     setSaving(true);
     const result = await updateEmbedSettings(storefront.id, parsed.data);
     setSaving(false);
     if (!result.ok) {
-      toast.error(result.error.message, { lines: [result.error.fix] });
+      showActionError(result.error);
       return;
     }
     setDomainsText(parsed.data.domains.join(", "));
     onSaved(storefront.id, parsed.data);
-    toast.success("Embed settings saved.");
+    toast.success(t("saved"));
   }
 
   async function handleRotate() {
@@ -132,7 +140,7 @@ export function EmbedModal({
     const result = await rotateEmbedKey(storefront.id);
     if (!result.ok) {
       setRotateState({ status: "idle" });
-      toast.error(result.error.message, { lines: [result.error.fix] });
+      showActionError(result.error);
       return;
     }
     setEmbedKey(result.embedKey);
@@ -140,8 +148,8 @@ export function EmbedModal({
     // The old snippet is dead the instant this lands, so the follow-up action
     // travels WITH the confirmation rather than as a line the modal shows once
     // and then loses on close.
-    toast.success("New embed key issued.", {
-      lines: ["Re-paste the snippet everywhere this storefront is embedded."],
+    toast.success(t("newKeyIssued"), {
+      lines: [t("newKeyDetail")],
     });
   }
 
@@ -158,10 +166,10 @@ export function EmbedModal({
     <Modal
       open={storefront !== null}
       onClose={onClose}
-      title="Embed this storefront"
+      title={t("title")}
       description={
         storefront
-          ? `Paste this snippet into any site to show "${storefront.name}" there.`
+          ? t("description", { name: storefront.name })
           : undefined
       }
     >
@@ -169,23 +177,21 @@ export function EmbedModal({
         <div className="space-y-5">
           {/* SELL-03: in-development notice is the headline, not a footnote. */}
           <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 font-inter text-xs font-medium text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
-            The embed widget is in development and not yet rendering on
-            external sites. Configure your settings below so you are ready
-            to paste the snippet the moment it ships.
+            {t("inDevNotice")}
           </p>
 
           {/* Above the switch it disables, so the reason arrives before the
               dead control rather than after it. */}
           <SellerDetailsNotice
             missing={missingTraderDetails}
-            blocks="embed this storefront"
+            blocks="embedStorefront"
           />
 
           {/* SELL-03: switches appear ABOVE the snippet so settings
               are visible before the seller decides whether to copy. */}
           <div className="flex items-center justify-between gap-3">
             <label htmlFor="embed-enabled" className={labelClass}>
-              Embed enabled
+              {t("enabledLabel")}
             </label>
             <Switch
               id="embed-enabled"
@@ -200,47 +206,50 @@ export function EmbedModal({
 
           <div className="space-y-1.5">
             <label htmlFor="embed-domains" className={labelClass}>
-              Allowed domains
+              {t("domainsLabel")}
             </label>
             <input
               id="embed-domains"
               type="text"
               value={domainsText}
               onChange={(event) => setDomainsText(event.target.value)}
-              placeholder="yoursite.com, blog.yoursite.com"
+              placeholder={t("domainsPlaceholder")}
               spellCheck={false}
               className={fieldBaseClass}
             />
             <p className={helpTextClass}>
-              Up to {EMBED_MAX_DOMAINS}, comma-separated. Paste a URL and
-              we&apos;ll trim it to the domain.
+              {t("domainsHint", { max: EMBED_MAX_DOMAINS })}
             </p>
             {/* Deny-by-default: an empty list serves nowhere. Said plainly
                 here, because "enabled but blank" otherwise looks like it
                 should work and silently doesn't. */}
             {enabled && domains.length === 0 && (
               <p role="status" className={errorTextClass}>
-                Add at least one domain. While this is empty the storefront
-                won&apos;t load anywhere, even though embedding is on.
+                {t("emptyDomainsWarning")}
               </p>
             )}
           </div>
 
           <div className="space-y-1.5">
-            <span className={labelClass}>Snippet</span>
+            <span className={labelClass}>{t("snippetLabel")}</span>
             <pre className="overflow-x-auto rounded-none border border-border bg-muted p-3 font-mono text-xs text-foreground">
               {embedSnippet(embedKey)}
             </pre>
             <div className="flex items-center justify-between gap-3">
               <p className={helpTextClass}>
                 {canCopy
-                  ? "Paste this snippet into your site's HTML."
-                  : "Enable embedding and add at least one domain to unlock the Copy button."}
+                  ? t("snippetReadyHint")
+                  : t("snippetLockedHint")}
               </p>
               {/* SELL-03: Copy is disabled until both conditions are met. */}
               <CopyButton
                 value={embedSnippet(embedKey)}
-                label="embed snippet"
+                messages={{
+                  copy: "Storefront.embed.copySnippet.copy",
+                  copied: "Storefront.embed.copySnippet.copied",
+                  failed: "Storefront.embed.copySnippet.failed",
+                  cannotCopyYet: "Storefront.embed.copySnippet.cannotCopyYet",
+                }}
                 variant="labelled"
                 disabled={!canCopy}
               />
@@ -250,13 +259,11 @@ export function EmbedModal({
           {/* Revoke. Its own section, its own confirm, its own errors: this is
               the only control here that breaks working embeds. */}
           <div className="space-y-1.5 rounded-none border border-border bg-muted/40 p-3">
-            <span className={labelClass}>Snippet key</span>
+            <span className={labelClass}>{t("snippetKeyLabel")}</span>
             {rotateState.status === "confirming" ? (
               <>
                 <p className={helpTextClass}>
-                  Rotating issues a new key. Every copy of the old snippet stops
-                  working immediately, including ones on sites you still want --
-                  you&apos;ll need to paste the new snippet everywhere.
+                  {t("rotateConfirmText")}
                 </p>
                 <div className="flex flex-wrap items-center gap-2 pt-1">
                   <motion.button
@@ -266,22 +273,21 @@ export function EmbedModal({
                     {...iconHover}
                   >
                     <RotateArrowIcon />
-                    Rotate key
+                    {t("rotateKey")}
                   </motion.button>
                   <button
                     type="button"
                     onClick={() => setRotateState({ status: "idle" })}
                     className={`${secondaryButtonClass} px-3 py-1.5 text-xs`}
                   >
-                    Cancel
+                    {tCommon("actions.cancel")}
                   </button>
                 </div>
               </>
             ) : (
               <>
                 <p className={helpTextClass}>
-                  Pasted somewhere it shouldn&apos;t be? Rotate the key to
-                  revoke every existing snippet.
+                  {t("revokeHint")}
                 </p>
                 <div className="flex flex-wrap items-center gap-3 pt-1">
                   <motion.button
@@ -298,8 +304,8 @@ export function EmbedModal({
                       spinning={rotateState.status === "rotating"}
                     />
                     {rotateState.status === "rotating"
-                      ? "Rotating..."
-                      : "Rotate key"}
+                      ? t("rotating")
+                      : t("rotateKey")}
                   </motion.button>
                 </div>
               </>
@@ -313,7 +319,7 @@ export function EmbedModal({
               disabled={saving}
               className={primaryButtonClass}
             >
-              {saving ? "Saving..." : "Save settings"}
+              {saving ? t("saving") : t("saveSettings")}
             </button>
           </div>
         </div>

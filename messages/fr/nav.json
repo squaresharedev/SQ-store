@@ -1,0 +1,56 @@
+{
+  "main": {
+    "overview": {
+      "label": "Vue d’ensemble",
+      "description": "Vos étapes de configuration, et tout ce qui nécessite votre attention."
+    },
+    "products": {
+      "label": "Produits",
+      "description": "Ce que vous vendez : photos, prix, stock et détails."
+    },
+    "storefront": {
+      "label": "Vitrine",
+      "description": "Concevez la grille sur laquelle reposent vos produits."
+    },
+    "orders": {
+      "label": "Commandes",
+      "description": "Les commandes arriveront ici une fois le paiement activé."
+    },
+    "analytics": {
+      "label": "Statistiques",
+      "description": "Les vues de vos pages produit, et bientôt vos ventes."
+    },
+    "payments": {
+      "label": "Paiements",
+      "description": "Recevez vos paiements via Stripe. Bientôt disponible."
+    },
+    "settings": {
+      "label": "Paramètres",
+      "description": "Vos informations vendeur, conditions de livraison et compte."
+    }
+  },
+  "settings": {
+    "account": "Compte",
+    "security": "Sécurité",
+    "legal": "Informations juridiques",
+    "tax": "Entreprise et informations vendeur",
+    "shipping": "Livraison et retours",
+    "notifications": "Notifications",
+    "language": "Langue",
+    "team": "Équipe et accès",
+    "danger": "Zone de danger"
+  },
+  "profileMenu": {
+    "label": "Menu du compte",
+    "account": "Compte",
+    "switchAccounts": "Changer de compte",
+    "yourStore": "Votre boutique",
+    "owner": "Propriétaire",
+    "logOut": "Se déconnecter"
+  },
+  "viewingBanner": {
+    "viewing": "{role, select, owner {Vous consultez <store>{storeName}</store> en tant que propriétaire} editor {Vous consultez <store>{storeName}</store> en tant qu’éditeur} viewer {Vous consultez <store>{storeName}</store> en tant que lecteur} other {Vous consultez <store>{storeName}</store>}}",
+    "readOnly": " · lecture seule",
+    "backToYourStore": "Retour à votre boutique"
+  }
+}

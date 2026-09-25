@@ -1,6 +1,7 @@
 "use client";
 
 import type { CSSProperties, KeyboardEvent, MouseEvent } from "react";
+import { useTranslations } from "next-intl";
 import {
   headerStyleValue,
   type HeaderLine,
@@ -71,6 +72,7 @@ export function StorefrontMasthead({
   ) => void;
   onEditDone?: () => void;
 }) {
+  const t = useTranslations("Storefront.masthead");
   // Editor only: a buyer-facing render has no lines to type in.
   const editable = Boolean(onEditLine);
 
@@ -176,7 +178,7 @@ export function StorefrontMasthead({
       ? {
           role: "button" as const,
           tabIndex: 0,
-          "aria-label": `Edit the store ${line}`,
+          "aria-label": t("editAriaLabel", { line }),
           "aria-pressed": activeLine === line,
           onClick: (event: MouseEvent<HTMLElement>) => {
             if (onEditLine) {
@@ -254,7 +256,7 @@ export function StorefrontMasthead({
               // never see this text: the masthead returns null when the buyer
               // page renders with an empty name. Click to type replaces it.
               <span className="text-muted-foreground opacity-50 select-none">
-                Your store name
+                {t("namePlaceholder")}
               </span>
             )}
           </h2>
@@ -283,7 +285,7 @@ export function StorefrontMasthead({
             ) : (
               // SF-02: Placeholder, editor only.
               <span className="text-muted-foreground opacity-50 select-none">
-                A short line about your shop
+                {t("bioPlaceholder")}
               </span>
             )}
           </p>

@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import {
+  agreeToTerms,
   createStorefrontViaUI,
   expectToast,
   expectTourStep,
@@ -7,12 +8,14 @@ import {
   freshUser,
   gotoApp,
   openSellerStep,
+  openTermsStep,
   PUBLISHABLE_SELLER,
   seedProducts,
   seedSellerIdentity,
   seedStorefronts,
   serviceRest,
   signUp,
+  TERMS_DIALOG,
   TOUR_LAYER,
   tourButton,
   userIdByEmail,
@@ -22,7 +25,8 @@ import {
 
 /**
  * ONBOARDING, end to end: the welcome flow a new seller meets on their first
- * Overview, the guided tour it hands over to, and the "Get set up" checklist
+ * Overview (the Terms of Service they must agree to inside it), the guided
+ * tour it hands over to, and the "Get set up" checklist
  * that stays with them afterwards.
  *
  * What matters here is the round trip through real data. The seller step saves
@@ -57,11 +61,13 @@ type ProfileRow = {
   seller_phone: string | null;
   onboarding_completed_at: string | null;
   setup_celebrated_at: string | null;
+  legal_accepted_at: string | null;
+  legal_accepted_version: string | null;
 };
 
 async function profile(sellerId: string): Promise<ProfileRow> {
   const rows = (await serviceRest(
-    `/profiles?id=eq.${sellerId}&select=tax_business_name,seller_phone,onboarding_completed_at,setup_celebrated_at`,
+    `/profiles?id=eq.${sellerId}&select=tax_business_name,seller_phone,onboarding_completed_at,setup_celebrated_at,legal_accepted_at,legal_accepted_version`,
   )) as ProfileRow[];
   return rows[0]!;
 }
@@ -114,6 +120,9 @@ test.describe("onboarding", () => {
     expect(saved.tax_business_name).toBe("Welcome Studio Ltd");
     expect(saved.seller_phone).toBe("+353 1 234 5678");
     expect(saved.onboarding_completed_at).not.toBeNull();
+    // The Terms were agreed to on the way through, and it is on file.
+    expect(saved.legal_accepted_at).not.toBeNull();
+    expect(saved.legal_accepted_version).toMatch(/^tos-\d{4}-\d{2}-\d{2}$/);
 
     // Seen once, never again; the checklist carries on without it.
     await gotoApp(page, "/dashboard");
@@ -131,22 +140,57 @@ test.describe("onboarding", () => {
     ).toHaveAttribute("data-setup-state", "done");
   });
 
-  test("closing the welcome flow at its first step counts as seen", async ({ page }) => {
-    const user = freshUser("welcome-close");
+  test("the Terms cannot be walked past, and agreeing to them is recorded", async ({
+    page,
+  }) => {
+    test.setTimeout(120_000);
+    const user = freshUser("welcome-terms");
     await signUp(page, user, { welcome: "keep" });
     const sellerId = await userIdByEmail(user.email);
 
     const welcome = page.getByRole("dialog", { name: WELCOME_DIALOG });
     await expect(welcome).toBeVisible({ timeout: 20_000 });
+    // No way out before the Terms: no skip, no close button, and Esc (pressed
+    // once hydrated, which the Next click inside openTermsStep proves) does
+    // nothing.
+    await expect(welcome.getByRole("button", { name: "Skip onboarding" })).toHaveCount(0);
+    await expect(welcome.getByRole("button", { name: "Close" })).toHaveCount(0);
+    const terms = await openTermsStep(page);
+    await page.keyboard.press("Escape");
+    await expect(terms).toBeVisible();
+    await expect(terms.getByRole("button", { name: "Skip onboarding" })).toHaveCount(0);
+
+    // The short version, with the full Terms a click away on the real site.
+    const summary = terms.getByRole("region", { name: "Terms of Service, short version" });
+    await expect(summary).toContainText("merchant of record");
+    await expect(
+      terms.getByRole("link", { name: /read the full terms of service/i }),
+    ).toHaveAttribute("href", "https://squareshare.eu/terms/");
+
+    // Shut until the summary has been scrolled to its end, by a real wheel.
+    const agree = terms.getByRole("button", { name: "I have read and agree to the Terms" });
+    await expect(agree).toBeDisabled();
+    await summary.hover();
     await expect(async () => {
-      await page.keyboard.press("Escape");
-      await expect(welcome).toBeHidden({ timeout: 1_000 });
-    }).toPass({ timeout: 20_000 });
+      await page.mouse.wheel(0, 2_000);
+      await expect(agree).toBeEnabled({ timeout: 1_000 });
+    }).toPass({ timeout: 15_000 });
+    // Nothing is recorded by reading alone.
+    expect((await profile(sellerId)).legal_accepted_at).toBeNull();
 
-    // Closing is skipping: no tour follows.
+    await agree.click();
+    const path = page.getByRole("dialog", { name: "Four steps to your first page" });
+    await expect(path).toBeVisible({ timeout: 20_000 });
+    const agreed = await profile(sellerId);
+    expect(agreed.legal_accepted_at).not.toBeNull();
+    expect(agreed.legal_accepted_version).toMatch(/^tos-\d{4}-\d{2}-\d{2}$/);
+    // Agreeing is not finishing: the welcome is still unrecorded.
+    expect(agreed.onboarding_completed_at).toBeNull();
+
+    // Agreed, the ways out open: Esc now closes it, and closing counts as seen.
+    await page.keyboard.press("Escape");
+    await expect(path).toBeHidden();
     await expect(page.locator(TOUR_LAYER)).toHaveCount(0);
-
-    // The write leaves as the dialog closes; wait for it before coming back.
     await expect
       .poll(async () => (await profile(sellerId)).onboarding_completed_at, {
         timeout: 15_000,
@@ -155,6 +199,30 @@ test.describe("onboarding", () => {
     await gotoApp(page, "/dashboard");
     await expect(page.locator("[data-setup-checklist]")).toBeVisible();
     await expect(page.getByRole("dialog", { name: WELCOME_DIALOG })).toHaveCount(0);
+
+    // Settings › Legal shows it as the agreement for the CURRENT Terms (it only
+    // says so when the stored version is the one the app is asking for).
+    await gotoApp(page, "/settings/legal");
+    await expect(page.locator("[data-terms-agreed]")).toContainText(
+      `You agreed to version ${agreed.legal_accepted_version}`,
+    );
+  });
+
+  test("leaving the page instead of agreeing brings the welcome, and the Terms, back", async ({
+    page,
+  }) => {
+    const user = freshUser("welcome-leave");
+    await signUp(page, user, { welcome: "keep" });
+    const sellerId = await userIdByEmail(user.email);
+    await openTermsStep(page);
+
+    await gotoApp(page, "/dashboard");
+    await expect(page.getByRole("dialog", { name: WELCOME_DIALOG })).toBeVisible({
+      timeout: 20_000,
+    });
+    const row = await profile(sellerId);
+    expect(row.onboarding_completed_at).toBeNull();
+    expect(row.legal_accepted_at).toBeNull();
   });
 
   test("Skip onboarding skips the welcome, the details and the tour, for good", async ({
@@ -164,13 +232,12 @@ test.describe("onboarding", () => {
     await signUp(page, user, { welcome: "keep" });
     const sellerId = await userIdByEmail(user.email);
 
-    const welcome = page.getByRole("dialog", { name: WELCOME_DIALOG });
-    await expect(welcome).toBeVisible({ timeout: 20_000 });
-    // Retried: a click that lands before hydration does nothing.
-    await expect(async () => {
-      await welcome.getByRole("button", { name: "Skip onboarding" }).click();
-      await expect(welcome).toBeHidden({ timeout: 2_000 });
-    }).toPass({ timeout: 20_000 });
+    await openTermsStep(page);
+    await agreeToTerms(page);
+    const path = page.getByRole("dialog", { name: "Four steps to your first page" });
+    await path.getByRole("button", { name: "Skip onboarding" }).click();
+    await expect(path).toBeHidden();
+    await expect(page.getByRole("dialog", { name: TERMS_DIALOG })).toHaveCount(0);
     await expect(page.locator(TOUR_LAYER)).toHaveCount(0);
 
     await expect

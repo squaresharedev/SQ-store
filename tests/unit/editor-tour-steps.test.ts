@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { english } from "../setup/translate";
 import {
   EDITOR_TOUR_STEP_IDS,
   EDITOR_TOUR_STEPS,
@@ -41,12 +42,18 @@ describe("editor tour steps", () => {
   it("ends on the way out of the sample", () => {
     const last = EDITOR_TOUR_STEPS[EDITOR_TOUR_STEPS.length - 1];
     expect(last.targets.map((target) => target.selector)).toEqual(["[data-sample-create]"]);
-    expect(last.body).toMatch(/never saves/i);
+    expect(english(last.body)).toMatch(/never saves/i);
   });
 
   it("writes its copy without dashes standing in for punctuation", () => {
     for (const step of EDITOR_TOUR_STEPS) {
-      const copy = [step.title, step.body, ...step.targets.map((target) => target.body ?? "")].join(" ");
+      const copy = [
+        step.title,
+        step.body,
+        ...step.targets.flatMap((target) => (target.body ? [target.body] : [])),
+      ]
+        .map((key) => english(key))
+        .join(" ");
       expect(copy, step.id).not.toMatch(DASHES);
     }
   });

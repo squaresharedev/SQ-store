@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { SecuritySection } from "@/components/settings/security/SecuritySection";
 import { accountHasPassword } from "@/lib/auth/has-password";
 import { RECENT_SIGN_IN_SECONDS, signedInRecently } from "@/lib/auth/assurance";
@@ -7,9 +8,10 @@ import { getAssurance, requireUser } from "@/lib/auth/session";
 import { SECURITY_EVENT_LABELS, isSecurityEvent } from "@/lib/security/events";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata: Metadata = {
-  title: "Security",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Settings.metadata.security");
+  return { title: t("title") };
+}
 
 /** How many recent security events the activity card lists. */
 const ACTIVITY_LIMIT = 10;
@@ -70,9 +72,9 @@ export default async function SecuritySettingsPage({
           ? null
           : (activity.data ?? []).map((row) => ({
               id: row.id,
-              label: isSecurityEvent(row.event)
-                ? SECURITY_EVENT_LABELS[row.event]
-                : row.event,
+              // A kind this build has no words for is shown as its raw slug.
+              label: isSecurityEvent(row.event) ? SECURITY_EVENT_LABELS[row.event] : null,
+              event: row.event,
               at: row.created_at,
             }))
       }

@@ -19,52 +19,79 @@
 // Raw hex is permitted in THIS file alone — it is a token-definition module
 // like color-presets.ts and globals.css @theme, not a component.
 
-import type { ColorPreset } from "./color-presets";
+import type { MessageKey } from "@/i18n/types";
+import type { ColorSwatch } from "./color-presets";
 
 /** Names the columns, so every swatch can say which family it belongs to. */
-const HUE_NAMES = [
-  "Red",
-  "Orange",
-  "Amber",
-  "Yellow",
-  "Green",
-  "Teal",
-  "Sky",
-  "Blue",
-  "Violet",
-  "Pink",
+const HUE_IDS = [
+  "red",
+  "orange",
+  "amber",
+  "yellow",
+  "green",
+  "teal",
+  "sky",
+  "blue",
+  "violet",
+  "pink",
 ] as const;
 
-const NEUTRAL_NAMES = [
-  "White",
-  "Grey 200",
-  "Grey 300",
-  "Grey 400",
-  "Grey",
-  "Grey 600",
-  "Grey 700",
-  "Grey 800",
-  "Ink",
-  "Black",
-] as const;
+type HueId = (typeof HUE_IDS)[number];
+
+const NEUTRAL_LABELS: readonly MessageKey[] = [
+  "Storefront.colors.standard.white",
+  "Storefront.colors.standard.grey200",
+  "Storefront.colors.standard.grey300",
+  "Storefront.colors.standard.grey400",
+  "Storefront.colors.standard.grey",
+  "Storefront.colors.standard.grey600",
+  "Storefront.colors.standard.grey700",
+  "Storefront.colors.standard.grey800",
+  "Storefront.colors.standard.ink",
+  "Storefront.colors.standard.black",
+];
+
+// Whole phrases per swatch ("Red dark"), never a hue name plus a suffix: the
+// word order and agreement of "dark" differ by language.
+const HUE_LABELS: Record<HueId, MessageKey> = {
+  red: "Storefront.colors.standard.red",
+  orange: "Storefront.colors.standard.orange",
+  amber: "Storefront.colors.standard.amber",
+  yellow: "Storefront.colors.standard.yellow",
+  green: "Storefront.colors.standard.green",
+  teal: "Storefront.colors.standard.teal",
+  sky: "Storefront.colors.standard.sky",
+  blue: "Storefront.colors.standard.blue",
+  violet: "Storefront.colors.standard.violet",
+  pink: "Storefront.colors.standard.pink",
+};
+
+const DARK_HUE_LABELS: Record<HueId, MessageKey> = {
+  red: "Storefront.colors.standard.redDark",
+  orange: "Storefront.colors.standard.orangeDark",
+  amber: "Storefront.colors.standard.amberDark",
+  yellow: "Storefront.colors.standard.yellowDark",
+  green: "Storefront.colors.standard.greenDark",
+  teal: "Storefront.colors.standard.tealDark",
+  sky: "Storefront.colors.standard.skyDark",
+  blue: "Storefront.colors.standard.blueDark",
+  violet: "Storefront.colors.standard.violetDark",
+  pink: "Storefront.colors.standard.pinkDark",
+};
 
 function row(
-  names: readonly string[],
+  labels: readonly MessageKey[],
   values: readonly string[],
-  suffix = "",
-): readonly ColorPreset[] {
-  return values.map((value, index) => ({
-    name: `${names[index]}${suffix}`,
-    value,
-  }));
+): readonly ColorSwatch[] {
+  return values.map((value, index) => ({ label: labels[index], value }));
 }
 
 /** Exactly three rows of ten. The panel renders this as a `grid-cols-10`. */
-export const STANDARD_COLOR_ROWS: readonly (readonly ColorPreset[])[] = [
+export const STANDARD_COLOR_ROWS: readonly (readonly ColorSwatch[])[] = [
   // Ten steps of the styles.md neutral ramp. #fafafa and #f5f5f5 are skipped
   // (indistinguishable from white at swatch size) to make room for BOTH #171717
   // and #000000, since the product's own defaults are ink, not pure black.
-  row(NEUTRAL_NAMES, [
+  row(NEUTRAL_LABELS, [
     "#ffffff",
     "#e5e5e5",
     "#d4d4d4",
@@ -76,7 +103,7 @@ export const STANDARD_COLOR_ROWS: readonly (readonly ColorPreset[])[] = [
     "#171717",
     "#000000",
   ]),
-  row(HUE_NAMES, [
+  row(HUE_IDS.map((hue) => HUE_LABELS[hue]), [
     "#ef4444",
     "#f97316",
     "#f59e0b",
@@ -88,22 +115,18 @@ export const STANDARD_COLOR_ROWS: readonly (readonly ColorPreset[])[] = [
     "#8b5cf6",
     "#ec4899",
   ]),
-  row(
-    HUE_NAMES,
-    [
-      "#b91c1c",
-      "#c2410c",
-      "#b45309",
-      "#a16207",
-      "#15803d",
-      "#0f766e",
-      "#0369a1",
-      "#1d4ed8",
-      "#6d28d9",
-      "#be185d",
-    ],
-    " dark",
-  ),
+  row(HUE_IDS.map((hue) => DARK_HUE_LABELS[hue]), [
+    "#b91c1c",
+    "#c2410c",
+    "#b45309",
+    "#a16207",
+    "#15803d",
+    "#0f766e",
+    "#0369a1",
+    "#1d4ed8",
+    "#6d28d9",
+    "#be185d",
+  ]),
 ];
 
 /** How many columns the grid is, so the panel's static Tailwind class and this

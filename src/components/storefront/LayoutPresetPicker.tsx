@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import {
   LAYOUT_PRESETS,
   LAYOUT_PRESET_LABELS,
@@ -95,6 +96,8 @@ export function LayoutPresetPicker({
   value: LayoutPreset | null;
   onChange: (preset: LayoutPreset) => void;
 }) {
+  const t = useTranslations("Storefront.layoutPresetPicker");
+  const tRoot = useTranslations();
   return (
     <OptionCardPicker
       // No preset matches: an empty string is a value no option carries, so
@@ -102,11 +105,11 @@ export function LayoutPresetPicker({
       value={value ?? ""}
       options={LAYOUT_PRESETS.map((preset) => ({
         value: preset as string,
-        label: LAYOUT_PRESET_LABELS[preset],
+        label: tRoot(LAYOUT_PRESET_LABELS[preset]),
         glyph: <PresetGlyph preset={preset} />,
       }))}
       onChange={(next) => onChange(next as LayoutPreset)}
-      ariaLabel="Layout"
+      ariaLabel={t("ariaLabel")}
       wrap
     />
   );

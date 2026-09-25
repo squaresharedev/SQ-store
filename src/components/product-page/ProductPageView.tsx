@@ -1,14 +1,12 @@
 import type { CSSProperties, ReactNode } from "react";
 import { ChevronDown, Clock, PackageCheck, RotateCcw, ShieldCheck, Truck } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { resolveBackgroundStyle } from "@/components/storefront/background-presets";
 import { CustomFontFace } from "@/components/storefront/CustomFontFace";
 import { customFontVars, fontPresentation } from "@/lib/theme/storefront-fonts";
-import {
-  isEuSeller,
-  MANDATORY_PRODUCT_PAGE_SECTION_IDS,
-  PRODUCT_PAGE_SECTION_LABELS,
-} from "@/lib/storefront/product-page";
+import { isEuSeller, MANDATORY_PRODUCT_PAGE_SECTION_IDS } from "@/lib/storefront/product-page";
+import type { ProseResolver } from "@/lib/shipping/policy-prose";
 import { resolveProductShipping, resolveReturns } from "@/lib/storefront/shipping";
 import { SECTION_SETTING } from "@/lib/storefront/setting-ref";
 import type { ProductPageData } from "@/types/product-page";
@@ -70,6 +68,13 @@ export function ProductPageView({
   const { storefront, product } = page;
   const { theme, productPage, shippingPolicy, seller } = storefront;
   const preview = mode === "preview";
+  const t = useTranslations("ProductPage");
+  const tAll = useTranslations();
+  const locale = useLocale();
+
+  // The generated shipping and returns paragraphs, in the BUYER's language.
+  // Seller-typed terms (an override, a profile's body) come out untouched.
+  const resolveProse: ProseResolver = (ref) => tAll(ref.key, ref.values);
 
   // WHICH SHIPPING TERMS THIS PRODUCT IS SOLD UNDER. Almost always the
   // account's default; a product that names one of the account's shipping
@@ -78,11 +83,11 @@ export function ProductPageView({
   // below — so the two can never quote different terms.
   const shipping = product.isDigital
     ? null
-    : resolveProductShipping(product.shippingProfileId, shippingPolicy);
+    : resolveProductShipping(product.shippingProfileId, shippingPolicy, resolveProse, locale);
   // Returns do not vary by product, so this is the account's answer, full
   // stop. Generated from the structured settings (or the seller's own words,
   // which the generator prefers) rather than read from a stored paragraph.
-  const returnsText = resolveReturns(shippingPolicy);
+  const returnsText = resolveReturns(shippingPolicy, resolveProse, locale);
 
   // BUY-02: Derive the price and shipping notes from the seller's actual facts
   // rather than blindly forwarding the stored config defaults.
@@ -115,7 +120,12 @@ export function ProductPageView({
   const isEu = isEuSeller(seller);
   const storeName = storefront.header?.show && storefront.header.name ? storefront.header.name : storefront.name;
   const soldBy = seller.businessName || storefront.name;
-  const target = resolveCtaTarget(product.purchaseUrl, seller.email, product.title);
+  const target = resolveCtaTarget(
+    product.purchaseUrl,
+    seller.email,
+    product.title,
+    t("cta.mailSubject", { title: product.title }),
+  );
   // The editor always shows the button, even with nowhere to send it, so the
   // seller can see the page's one action and be told how to wire it up.
   const hasCta = target.kind !== "none" || preview;
@@ -145,7 +155,7 @@ export function ProductPageView({
     trust.push({ icon: Clock, text: shipping.dispatch });
   }
   const shippingLine = product.isDigital
-    ? "Delivered as a download after purchase."
+    ? t("trust.digitalDelivery")
     : firstSentence(shipping?.body);
   if (shippingLine) {
     trust.push({ icon: product.isDigital ? PackageCheck : Truck, text: shippingLine });
@@ -153,7 +163,7 @@ export function ProductPageView({
   const returnsLine = firstSentence(returnsText);
   if (returnsLine) trust.push({ icon: RotateCcw, text: returnsLine });
   if (isEu) {
-    trust.push({ icon: ShieldCheck, text: "14 days to change your mind, and a 2-year guarantee." });
+    trust.push({ icon: ShieldCheck, text: t("trust.euRights") });
   }
 
   // THE DESCRIPTION READS UNDER THE TITLE, always: with the title and the
@@ -247,7 +257,7 @@ export function ProductPageView({
         return (
           <div className="flex flex-col gap-3 text-sm leading-relaxed">
             <div>
-              <p className="font-medium">Manufacturer</p>
+              <p className="font-medium">{t("safety.manufacturer")}</p>
               <p>{safety.manufacturerName}</p>
               <p className="whitespace-pre-line">{safety.manufacturerAddress}</p>
               <p>
@@ -258,7 +268,7 @@ export function ProductPageView({
             </div>
             {(safety.responsibleName || safety.responsibleAddress || safety.responsibleEmail) && (
               <div>
-                <p className="font-medium">Responsible person in the EU</p>
+                <p className="font-medium">{t("safety.responsiblePerson")}</p>
                 {safety.responsibleName && <p>{safety.responsibleName}</p>}
                 {safety.responsibleAddress && (
                   <p className="whitespace-pre-line">{safety.responsibleAddress}</p>
@@ -274,13 +284,13 @@ export function ProductPageView({
             )}
             {safety.identifier && (
               <p>
-                <span className="opacity-70">Product identifier: </span>
+                <span className="opacity-70">{t("safety.identifier")} </span>
                 {safety.identifier}
               </p>
             )}
             {safety.warnings && (
               <div>
-                <p className="font-medium">Warnings</p>
+                <p className="font-medium">{t("safety.warnings")}</p>
                 <p className="whitespace-pre-line">{safety.warnings}</p>
               </div>
             )}
@@ -360,7 +370,7 @@ export function ProductPageView({
                     </h1>
                     {productPage.showSeller && (
                       <p className="text-sm opacity-70" data-product-sold-by="">
-                        Sold by {soldBy}
+                        {t("soldBy", { seller: soldBy })}
                       </p>
                     )}
                   </div>
@@ -455,7 +465,7 @@ export function ProductPageView({
                       material a buyer consults, and it deserves to be announced
                       as one thing rather than to trail off the buy box. */}
                   <h2 className="pb-3 text-lg font-semibold" data-product-details-heading="">
-                    More details
+                    {t("moreDetails")}
                   </h2>
                   {sections.map((section, index) => (
                     <details
@@ -468,7 +478,7 @@ export function ProductPageView({
                     >
                       <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-left [&::-webkit-details-marker]:hidden">
                         <h3 className="text-base font-semibold">
-                          {PRODUCT_PAGE_SECTION_LABELS[section.id]}
+                          {t(`sections.${section.id}`)}
                         </h3>
                         <ChevronDown
                           aria-hidden="true"
@@ -493,7 +503,7 @@ export function ProductPageView({
                   data-setting-hotspot="seller"
                 >
                   <h2 className="pb-3 text-lg font-semibold">
-                    {PRODUCT_PAGE_SECTION_LABELS.seller}
+                    {t("sections.seller")}
                   </h2>
                   <SellerBlock seller={seller} fallbackName={storefront.name} />
                 </section>

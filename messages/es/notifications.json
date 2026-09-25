@@ -1,0 +1,113 @@
+{
+  "metadata": {
+    "notifications": {
+      "title": "Notificaciones"
+    }
+  },
+  "loading": {
+    "title": "Notificaciones",
+    "srLoading": "cargando notificaciones"
+  },
+  "bell": {
+    "label": "Notificaciones",
+    "unreadLabel": "{count, plural, one {Notificaciones, {count} sin leer} many {Notificaciones, {count} sin leer} other {Notificaciones, {count} sin leer}}"
+  },
+  "list": {
+    "title": "Notificaciones",
+    "unread": "{count, plural, one {{count} sin leer} many {{count} sin leer} other {{count} sin leer}}",
+    "markAllRead": "Marcar todo como leído",
+    "livePaused": "Actualizaciones en directo en pausa. Recarga para ver lo último.",
+    "empty": "Estás al día. Todavía no hay nada aquí.",
+    "viewAll": "Ver todas"
+  },
+  "item": {
+    "unread": "Sin leer"
+  },
+  "page": {
+    "title": "Notificaciones",
+    "markAllRead": "Marcar todo como leído",
+    "emptyTitle": "Todavía no hay notificaciones",
+    "emptyHint": "Aquí aparecerá la actividad de equipo, pedidos y pagos.",
+    "loadError": "No hemos podido cargar más notificaciones. Comprueba tu conexión e inténtalo de nuevo.",
+    "loading": "Cargando",
+    "loadMore": "Cargar más"
+  },
+  "types": {
+    "team": "Equipo",
+    "order": "Pedido",
+    "payment": "Pago",
+    "stock": "Stock",
+    "system": "Sistema",
+    "security": "Seguridad",
+    "policy": "Normas"
+  },
+  "time": {
+    "justNow": "ahora mismo",
+    "minutesAgo": "{count, plural, one {hace {count} min} many {hace {count} min} other {hace {count} min}}",
+    "hoursAgo": "{count, plural, one {hace {count} h} many {hace {count} h} other {hace {count} h}}",
+    "daysAgo": "{count, plural, one {hace {count} d} many {hace {count} d} other {hace {count} d}}"
+  },
+  "messages": {
+    "teamInvite": {
+      "title": "Tienes una invitación de equipo",
+      "body": "{role, select, owner {{store} te invitó a unirte como propietario. Abre Equipo y acceso para aceptar.} editor {{store} te invitó a unirte como editor. Abre Equipo y acceso para aceptar.} viewer {{store} te invitó a unirte como lector. Abre Equipo y acceso para aceptar.} other {{store} te invitó a unirte a su equipo. Abre Equipo y acceso para aceptar.}}",
+      "bodyUnnamedStore": "{role, select, owner {Una tienda de SquareShare te invitó a unirte como propietario. Abre Equipo y acceso para aceptar.} editor {Una tienda de SquareShare te invitó a unirte como editor. Abre Equipo y acceso para aceptar.} viewer {Una tienda de SquareShare te invitó a unirte como lector. Abre Equipo y acceso para aceptar.} other {Una tienda de SquareShare te invitó a unirte a su equipo. Abre Equipo y acceso para aceptar.}}"
+    },
+    "teamJoined": {
+      "title": "{name} se unió a tu equipo",
+      "titleUnnamed": "Un nuevo miembro se unió a tu equipo",
+      "body": "Ahora tiene acceso a tu tienda."
+    },
+    "security": {
+      "passwordChanged": {
+        "title": "Se ha cambiado tu contraseña",
+        "body": "La contraseña de esta cuenta se acaba de cambiar y se ha cerrado la sesión en el resto de dispositivos. Si no has sido tú, restablece tu contraseña de inmediato."
+      },
+      "passwordReset": {
+        "title": "Se ha cambiado tu contraseña",
+        "body": "Se ha usado un enlace de restablecimiento para establecer una nueva contraseña, y se ha cerrado la sesión en el resto de dispositivos. Si no has sido tú, restablécela de nuevo de inmediato."
+      },
+      "passwordSet": {
+        "title": "Se ha establecido una contraseña en tu cuenta",
+        "body": "Esta cuenta ya puede iniciar sesión con una contraseña además de con Google. Si no has sido tú, restablécela de inmediato."
+      },
+      "resetRequested": {
+        "title": "Se ha solicitado un enlace de restablecimiento de contraseña",
+        "body": "Alguien ha pedido un enlace para establecer una nueva contraseña en esta cuenta. Si no has sido tú, ignora el correo y cambia tu contraseña."
+      },
+      "emailChangeRequested": {
+        "title": "Cambio de correo solicitado",
+        "body": "Alguien ha pedido mover esta cuenta a una nueva dirección de correo. Solo se aplicará cuando se confirme el enlace de esa bandeja de entrada. Si no has sido tú, cambia tu contraseña ahora."
+      },
+      "lockedOut": {
+        "title": "Alguien está intentando iniciar sesión en tu cuenta",
+        "body": "Se introdujo bien tu contraseña, pero después se fallaron demasiados códigos de verificación en dos pasos, así que el inicio de sesión se ha pausado unos minutos. Si no has sido tú, otra persona conoce tu contraseña: cámbiala ahora."
+      },
+      "recoveryCodeUsed": {
+        "title": "Se ha usado un código de recuperación para iniciar sesión",
+        "body": "Alguien ha iniciado sesión en tu cuenta con un código de recuperación. Eso desactiva la verificación en dos pasos y cierra la sesión en todos los demás dispositivos. Si has sido tú, vuelve a configurarla en Configuración › Seguridad. Si no, cambia tu contraseña ahora."
+      },
+      "twoFactorEnabled": {
+        "title": "La verificación en dos pasos está activada",
+        "body": "Ahora, para iniciar sesión en tu cuenta hace falta un código de tu aplicación de autenticación, y se ha cerrado la sesión en todos los demás dispositivos. Si no has sido tú, cambia tu contraseña y contacta con el soporte."
+      },
+      "factorAdded": {
+        "title": "Se ha añadido una aplicación de autenticación",
+        "body": "Ya se puede usar «{name}» para iniciar sesión en tu cuenta. Si no has sido tú, quítala en Configuración › Seguridad y cambia tu contraseña.",
+        "bodyUnnamed": "Ya se puede usar «Aplicación de autenticación» para iniciar sesión en tu cuenta. Si no has sido tú, quítala en Configuración › Seguridad y cambia tu contraseña."
+      },
+      "twoFactorDisabled": {
+        "title": "La verificación en dos pasos está desactivada",
+        "body": "Se ha quitado tu última aplicación de autenticación, así que ahora para iniciar sesión solo hace falta tu contraseña. Si no has sido tú, cambia tu contraseña y vuelve a activar la verificación en dos pasos."
+      },
+      "factorRemoved": {
+        "title": "Se ha quitado una aplicación de autenticación",
+        "body": "Ya no se puede usar «{name}» para iniciar sesión en tu cuenta. Si no has sido tú, cambia tu contraseña ahora."
+      },
+      "recoveryCodesRegenerated": {
+        "title": "Se han generado códigos de recuperación nuevos",
+        "body": "Tus códigos de recuperación anteriores ya no funcionan. Si no has sido tú, cambia tu contraseña ahora."
+      }
+    }
+  }
+}

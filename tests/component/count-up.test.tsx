@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
-import { render, screen, cleanup, waitFor } from "@testing-library/react";
+import { renderWithoutToasts, screen, cleanup, waitFor } from "../setup/render";
 import { CountUp } from "@/components/ui/CountUp";
 
 afterEach(cleanup);
@@ -39,7 +39,7 @@ beforeEach(() => {
 
 describe("CountUp", () => {
   it("exposes the settled figure to assistive tech as real text", () => {
-    const { container } = render(<CountUp value="€1,234.56" />);
+    const { container } = renderWithoutToasts(<CountUp value="€1,234.56" />);
     // Real (visually hidden) text, NOT aria-label: aria-label is prohibited on
     // a role-less span and is widely ignored by screen readers there, which
     // would leave the figure announced as nothing at all.
@@ -49,12 +49,12 @@ describe("CountUp", () => {
 
   it("hides the animating digits from assistive tech", () => {
     // Otherwise every frame of the count would be announced.
-    const { container } = render(<CountUp value="42" />);
+    const { container } = renderWithoutToasts(<CountUp value="42" />);
     expect(animated(container)).toBeInTheDocument();
   });
 
   it("lands on the exact original string", async () => {
-    const { container } = render(<CountUp value="€1,234.56" />);
+    const { container } = renderWithoutToasts(<CountUp value="€1,234.56" />);
     await waitFor(() => expect(animated(container)).toHaveTextContent("€1,234.56"), {
       timeout: 3000,
     });
@@ -62,18 +62,18 @@ describe("CountUp", () => {
 
   it("skips the animation under reduced motion", () => {
     stubReducedMotion(true);
-    const { container } = render(<CountUp value="42" />);
+    const { container } = renderWithoutToasts(<CountUp value="42" />);
     expect(animated(container)).toHaveTextContent("42");
   });
 
   it("renders a string with no digits unchanged", () => {
     stubReducedMotion(true);
-    const { container } = render(<CountUp value="No sales yet" />);
+    const { container } = renderWithoutToasts(<CountUp value="No sales yet" />);
     expect(animated(container)).toHaveTextContent("No sales yet");
   });
 
   it("handles a multi-currency figure without dropping either part", async () => {
-    const { container } = render(<CountUp value="€100.00 · $50.00" />);
+    const { container } = renderWithoutToasts(<CountUp value="€100.00 · $50.00" />);
     await waitFor(
       () => expect(animated(container)).toHaveTextContent("€100.00 · $50.00"),
       { timeout: 3000 },

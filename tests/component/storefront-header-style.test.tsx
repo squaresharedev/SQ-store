@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
+import { renderWithoutToasts, screen, cleanup } from "../setup/render";
 import userEvent from "@testing-library/user-event";
 import {
   DEFAULT_STOREFRONT_CONFIG,
@@ -30,7 +30,7 @@ function header(over: Partial<StorefrontHeader> = {}): StorefrontHeader {
 
 describe("StorefrontMasthead: colour", () => {
   it("paints each line in its own colour when one is set", () => {
-    render(
+    renderWithoutToasts(
       <StorefrontMasthead
         header={header({ nameColor: "#aa0000", bioColor: "#00aa00" })}
         theme={themeWith({ accent: "#123456" })}
@@ -43,7 +43,7 @@ describe("StorefrontMasthead: colour", () => {
   });
 
   it("without overrides the name follows the accent and the bio inherits", () => {
-    render(
+    renderWithoutToasts(
       <StorefrontMasthead header={header()} theme={themeWith({ accent: "#123456" })} />,
     );
     expect(screen.getByText("Shop")).toHaveStyle({ color: "rgb(18, 52, 86)" });
@@ -53,7 +53,7 @@ describe("StorefrontMasthead: colour", () => {
   });
 
   it("refuses a colour that is not strict hex, whatever is in the config", () => {
-    render(
+    renderWithoutToasts(
       <StorefrontMasthead
         header={header({ nameColor: "red; background:url(x)", bioColor: "#FFF" })}
         theme={themeWith({ accent: "#123456" })}
@@ -67,7 +67,7 @@ describe("StorefrontMasthead: colour", () => {
 
 describe("StorefrontMasthead: size", () => {
   it("renders a stored size as px, dropping the class scale", () => {
-    render(
+    renderWithoutToasts(
       <StorefrontMasthead
         header={header({ nameSize: 57, bioSize: 9 })}
         theme={themeWith()}
@@ -81,7 +81,7 @@ describe("StorefrontMasthead: size", () => {
   });
 
   it("falls back to the line's own scale when no size is stored", () => {
-    render(<StorefrontMasthead header={header()} theme={themeWith()} />);
+    renderWithoutToasts(<StorefrontMasthead header={header()} theme={themeWith()} />);
     const name = screen.getByText("Shop");
     expect(name.style.fontSize).toBe("");
     expect(name.className).toContain("text-xl");
@@ -90,7 +90,7 @@ describe("StorefrontMasthead: size", () => {
   it("ignores a stored size in the compact preview", () => {
     // A 200px store name would fill a list card; the miniature keeps its own
     // small type whatever the storefront says.
-    render(
+    renderWithoutToasts(
       <StorefrontMasthead header={header({ nameSize: 200 })} theme={themeWith()} compact />,
     );
     expect(screen.getByText("Shop").style.fontSize).toBe("");
@@ -99,14 +99,14 @@ describe("StorefrontMasthead: size", () => {
 
 describe("StorefrontMasthead: selecting a line", () => {
   it("is inert without a select handler, so previews stay plain text", () => {
-    render(<StorefrontMasthead header={header()} theme={themeWith()} />);
+    renderWithoutToasts(<StorefrontMasthead header={header()} theme={themeWith()} />);
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
 
   it("reports which line was clicked", async () => {
     const user = userEvent.setup();
     const onSelectLine = vi.fn();
-    render(
+    renderWithoutToasts(
       <StorefrontMasthead
         header={header()}
         theme={themeWith()}
@@ -122,7 +122,7 @@ describe("StorefrontMasthead: selecting a line", () => {
   it("is reachable from the keyboard", async () => {
     const user = userEvent.setup();
     const onSelectLine = vi.fn();
-    render(
+    renderWithoutToasts(
       <StorefrontMasthead
         header={header()}
         theme={themeWith()}
@@ -135,7 +135,7 @@ describe("StorefrontMasthead: selecting a line", () => {
   });
 
   it("marks the line the panel is currently on", () => {
-    render(
+    renderWithoutToasts(
       <StorefrontMasthead
         header={header()}
         theme={themeWith()}
@@ -159,7 +159,7 @@ describe("StorefrontMasthead: editing a line directly", () => {
     const user = userEvent.setup();
     const onSelectLine = vi.fn();
     const onEditLine = vi.fn();
-    render(
+    renderWithoutToasts(
       <StorefrontMasthead
         header={header()}
         theme={themeWith()}
@@ -182,7 +182,7 @@ describe("StorefrontMasthead: editing a line directly", () => {
     const user = userEvent.setup();
     const onSelectLine = vi.fn();
     const onEditLine = vi.fn();
-    render(
+    renderWithoutToasts(
       <StorefrontMasthead
         header={header()}
         theme={themeWith()}
@@ -206,7 +206,7 @@ describe("StorefrontMasthead: editing a line directly", () => {
     // (there is none today, but the component has to degrade sanely).
     const user = userEvent.setup();
     const onSelectLine = vi.fn();
-    render(
+    renderWithoutToasts(
       <StorefrontMasthead
         header={header()}
         theme={themeWith()}
@@ -227,7 +227,7 @@ describe("header defaults", () => {
     expect(DEFAULT_STOREFRONT_HEADER).toMatchObject({ show: true, name: "", bio: "" });
     expect(DEFAULT_STOREFRONT_CONFIG.header).toEqual(DEFAULT_STOREFRONT_HEADER);
 
-    const { container } = render(
+    const { container } = renderWithoutToasts(
       <StorefrontMasthead header={DEFAULT_STOREFRONT_HEADER} theme={themeWith()} />,
     );
     // Non-editor render (no onSelectLine) with empty lines renders nothing.
@@ -239,14 +239,14 @@ describe("header defaults", () => {
     // a seller who never had a masthead must not find one appear over their
     // storefront because the default for new ones changed.
     expect(EMPTY_STOREFRONT_HEADER.show).toBe(false);
-    const { container } = render(
+    const { container } = renderWithoutToasts(
       <StorefrontMasthead header={EMPTY_STOREFRONT_HEADER} theme={themeWith()} />,
     );
     expect(container).toBeEmptyDOMElement();
   });
 
   it("the sizes the control calls Auto are what the lines actually render at", () => {
-    render(<StorefrontMasthead header={header()} theme={themeWith()} />);
+    renderWithoutToasts(<StorefrontMasthead header={header()} theme={themeWith()} />);
     // text-xl/sm:text-2xl and text-sm; jsdom applies no stylesheet, so this
     // pins the numbers the size control shows against the classes in use.
     expect(HEADER_BASE_PX.name).toBe(24);

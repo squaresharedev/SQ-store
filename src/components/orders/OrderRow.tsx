@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useTranslations, useLocale } from "next-intl";
 import type { OrderView } from "@/types/order-view";
 import { cn } from "@/lib/utils";
 import { OrderStatusBadge } from "./OrderStatusBadge";
@@ -20,8 +21,9 @@ export function OrderRow({
    *  Enter or one click away, and that press is the user's to make. */
   highlighted?: boolean;
 }) {
-  const channelLabel =
-    order.channel === "marketplace" ? "Marketplace" : "Embed";
+  const t = useTranslations("Orders.channel");
+  const locale = useLocale();
+  const channelLabel = t(order.channel === "marketplace" ? "marketplace" : "embed");
 
   // Bring the row to the user rather than making them find the marked one:
   // it can be well down a filtered list. Focus goes with the scroll so the
@@ -88,7 +90,7 @@ export function OrderRow({
 
       {/* amount */}
       <td className="py-2.5 px-3 font-inter text-sm text-foreground whitespace-nowrap">
-        {formatCents(order.amountCents, order.currency)}
+        {formatCents(order.amountCents, order.currency, locale)}
       </td>
 
       {/* channel — hidden below md */}
@@ -110,7 +112,7 @@ export function OrderRow({
 
       {/* date */}
       <td className="py-2.5 px-3 font-inter text-sm text-muted-foreground whitespace-nowrap">
-        {formatOrderDate(order.createdAt)}
+        {formatOrderDate(order.createdAt, locale)}
       </td>
     </tr>
   );

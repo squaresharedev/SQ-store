@@ -709,6 +709,7 @@ export type Database = {
           is_seller: boolean
           legal_accepted_at: string | null
           legal_accepted_version: string | null
+          locale: string | null
           notify_marketing: boolean
           notify_product_updates: boolean
           notify_sales: boolean
@@ -737,6 +738,7 @@ export type Database = {
           is_seller?: boolean
           legal_accepted_at?: string | null
           legal_accepted_version?: string | null
+          locale?: string | null
           notify_marketing?: boolean
           notify_product_updates?: boolean
           notify_sales?: boolean
@@ -765,6 +767,7 @@ export type Database = {
           is_seller?: boolean
           legal_accepted_at?: string | null
           legal_accepted_version?: string | null
+          locale?: string | null
           notify_marketing?: boolean
           notify_product_updates?: boolean
           notify_sales?: boolean

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach, beforeAll } from "vitest";
-import { render, screen, fireEvent, cleanup } from "@testing-library/react";
+import { render, screen, fireEvent, cleanup } from "../setup/render";
 
 afterEach(cleanup);
 
@@ -26,7 +26,7 @@ import { startOfMonth, fullDateLabel } from "@/lib/format/calendar";
 
 /** Exact accessible-name for a calendar day button (avoids substring ambiguity). */
 const day = (year: number, month: number, d: number) =>
-  fullDateLabel(new Date(year, month, d));
+  fullDateLabel(new Date(year, month, d), "en");
 
 // Pin the system clock so "today" is deterministic.
 // Using 2025-07-10 (Thursday, week starting Monday).

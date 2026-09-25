@@ -221,11 +221,11 @@ component that calls them will need to pass the locale once the lib functions ac
 
 | File:line | Cat | Client/Server | Current string | Proposed key |
 |-----------|-----|---------------|----------------|--------------|
-| `PasswordCard.tsx:31` | B | Client | `title="Password"` | `Settings.account.password.cardTitle` |
-| `PasswordCard.tsx:33` | B | Client | `"Change it whenever you like. We ask for the current one first…"` | `Settings.account.password.descriptionChange` |
-| `PasswordCard.tsx:35` | B | Client | `"You sign in with Google. Add a password to sign in with your email or username too."` | `Settings.account.password.descriptionSet` |
-| `PasswordCard.tsx:44` | A | Client | `"Change password"` (conditional) | `Settings.account.password.changeButton` |
-| `PasswordCard.tsx:44` | A | Client | `"Set a password"` (conditional) | `Settings.account.password.setButton` |
+| `PasswordCard.tsx:30` | B | Client | `title="Password"` | `Settings.account.password.cardTitle` |
+| `PasswordCard.tsx:33` | B | Client | `"For your security, your password is never shown here. To change it, we email you a link to set a new one."` | `Settings.account.password.descriptionReset` |
+| `PasswordCard.tsx:34` | B | Client | `"You sign in with Google. Add a password to sign in with your email or username too."` | `Settings.account.password.descriptionSet` |
+| `PasswordCard.tsx:38` | A | Client | `"Reset password"` (conditional) | `Settings.account.password.resetButton` |
+| `PasswordCard.tsx:38` | A | Client | `"Set a password"` (conditional) | `Settings.account.password.setButton` |
 
 ---
 
@@ -233,25 +233,16 @@ component that calls them will need to pass the locale once the lib functions ac
 
 | File:line | Cat | Client/Server | Current string | Proposed key |
 |-----------|-----|---------------|----------------|--------------|
-| `PasswordModal.tsx:68` | B | Client | `"Change your password"` (title, conditional) | `Settings.account.password.modalTitleChange` |
-| `PasswordModal.tsx:68` | B | Client | `"Set a password"` (title, conditional) | `Settings.account.password.modalTitleSet` |
-| `PasswordModal.tsx:71` | B | Client | `"We'll email a link to {email}. It expires shortly after it arrives."` | `Settings.account.password.descriptionReset` |
-| `PasswordModal.tsx:73` | B | Client | `"Enter your current password, then the new one."` | `Settings.account.password.descriptionChange2` |
-| `PasswordModal.tsx:111` | A | Client | `"Current password"` (Label) | `Settings.account.password.currentPasswordLabel` |
-| `PasswordModal.tsx:121` | A | Client | `"New password"` (Label) | `Settings.account.password.newPasswordLabel` |
-| `PasswordModal.tsx:133` | A | Client | `"At least 8 characters, mixing cases, numbers or symbols (or a passphrase of 16+)."` | `Settings.account.password.passwordHint` |
-| `PasswordModal.tsx:139` | A | Client | `"Confirm new password"` (Label) | `Settings.account.password.confirmPasswordLabel` |
-| `PasswordModal.tsx:150` | A | Client | `"Every other device will be signed out."` | `Settings.account.password.signOutWarning` |
-| `PasswordModal.tsx:158` | A | Client | `"Forgot password?"` | `Settings.account.password.forgotPassword` |
-| `PasswordModal.tsx:164` | A | Client | `"Updating…"` (pending) | `Common.actions.updating` |
-| `PasswordModal.tsx:169` | A | Client | `"Update password"` | `Settings.account.password.updateButton` |
-| `PasswordModal.tsx:248` | A | Client | `"Sending…"` (pending) | `Common.actions.sending` |
-| `PasswordModal.tsx:249` | A | Client | `"Resend in {cooldown}s"` | `Settings.account.password.resendIn` |
-| `PasswordModal.tsx:250` | A | Client | `"Resend email"` | `Settings.account.password.resendEmail` |
-| `PasswordModal.tsx:251` | A | Client | `"Email me a link"` | `Settings.account.password.emailMeALink` |
-| `PasswordModal.tsx:256` | A | Client | `"This account signs in with Google. Setting a password lets you sign in with your email or username as well, and does not remove Google."` | `Settings.account.password.googleAccountNote` |
-| `PasswordModal.tsx:263` | A | Client | `"Back"` (conditional) | `Common.actions.back` |
-| `PasswordModal.tsx:263` | A | Client | `"Cancel"` (conditional) | `Common.actions.cancel` |
+| `PasswordModal.tsx:55` | B | Client | `"Reset your password"` (title, conditional) | `Settings.account.password.modalTitleReset` |
+| `PasswordModal.tsx:55` | B | Client | `"Set a password"` (title, conditional) | `Settings.account.password.modalTitleSet` |
+| `PasswordModal.tsx:56` | B | Client | `"We'll email a link to {email}. It expires shortly after it arrives."` | `Settings.account.password.descriptionLink` |
+| `PasswordModal.tsx:132` | A | Client | `"Sending…"` (pending) | `Common.actions.sending` |
+| `PasswordModal.tsx:134` | A | Client | `"Resend in {cooldown}s"` | `Settings.account.password.resendIn` |
+| `PasswordModal.tsx:136` | A | Client | `"Resend email"` | `Settings.account.password.resendEmail` |
+| `PasswordModal.tsx:137` | A | Client | `"Email me a link"` | `Settings.account.password.emailMeALink` |
+| `PasswordModal.tsx:143` | A | Client | `"Your current password is never shown. Open the link to choose a new one; setting it signs out your other devices."` | `Settings.account.password.neverShownNote` |
+| `PasswordModal.tsx:148` | A | Client | `"This account signs in with Google. Setting a password lets you sign in with your email or username as well, and does not remove Google."` | `Settings.account.password.googleAccountNote` |
+| `PasswordModal.tsx:155` | A | Client | `"Cancel"` | `Common.actions.cancel` |
 
 ---
 

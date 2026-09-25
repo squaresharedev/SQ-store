@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
 import {
   TEXT_SIZE_MIN,
@@ -66,6 +67,7 @@ export function TextTileContent({
   /** Escape, or focus leaving the tile for anywhere but the design panel. */
   onEditEnd?: () => void;
 }) {
+  const t = useTranslations("Storefront.tiles");
   // An explicit block color wins; else headings pick up the accent and other
   // variants stay foreground. Every color is re-gated before touching style.
   const color =
@@ -171,7 +173,7 @@ export function TextTileContent({
           {block.text ? (
             renderRuns(block.text, block.spans)
           ) : (
-            "Empty text block"
+            t("emptyText")
           )}
         </p>
       )}

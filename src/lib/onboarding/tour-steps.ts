@@ -1,3 +1,4 @@
+import type { MessageKey } from "@/i18n/types";
 import { STRIPE_CONNECT_AVAILABLE } from "@/lib/payments/availability";
 import { can, type TeamAction, type TeamRole } from "@/lib/team/permissions";
 
@@ -5,11 +6,12 @@ import { can, type TeamAction, type TeamRole } from "@/lib/team/permissions";
  * THE GUIDED TOUR, as data: one stop per thing worth pointing at, in order.
  *
  * Each step names the page it lives on and the REAL control it spotlights, found
- * by a selector the page already renders (an href, an aria-label, an id). A few
- * of those controls live in files other people are actively changing, so the
- * tour reads what is there rather than adding hooks to them; the
- * tour-targets component test and the guided-tour e2e specs are what make a
- * renamed label fail loudly instead of quietly falling back.
+ * by a selector that never depends on the reader's language: a `data-tour` id
+ * on the control, or an href, an id or a data attribute the page already
+ * renders. NEVER an aria-label or visible text: those are translated, and a
+ * lookup by English words finds nothing in Czech. The tour-targets component
+ * test renders the targets in another language to keep it that way, and the
+ * guided-tour e2e specs walk the stops end to end.
  *
  * Candidates are tried in order and the first one actually on screen wins (see
  * tour-dom.ts), which is how one list serves both surfaces: the desktop sidebar
@@ -17,7 +19,8 @@ import { can, type TeamAction, type TeamRole } from "@/lib/team/permissions";
  *
  * Copy is short on purpose (one idea per stop), and honest about what is not
  * built: checkout, Stripe payouts and the embed widget are all said to be
- * coming rather than implied to work.
+ * coming rather than implied to work. It is message keys, resolved by the
+ * overlay in the reader's language.
  *
  * Nothing here is stored: the tour's position is session state
  * (tour-store.ts), and this module stays pure so it can be tested in node.
@@ -47,27 +50,43 @@ export type TourExtra = "search-shortcut" | "embed-snippet";
 export type TourReveal = "orders-toolbar";
 
 export type TourTarget = {
+  /** Language-independent: see the note at the top of this file. */
   selector: string;
   /** Replaces the step's body when this candidate is the one on screen. */
-  body?: string;
+  body?: MessageKey;
   extra?: TourExtra;
   /** Replaces the step's preferred card side when this candidate is on screen
    *  (a docked column and a toolbar button want the card in different places). */
   side?: TourStep["side"];
 };
 
+/** Every page a tour can send the seller to: the sidebar's destinations, plus
+ *  the sample storefront the editor tour runs on. */
+export type TourPage =
+  | "overview"
+  | "products"
+  | "storefront"
+  | "orders"
+  | "analytics"
+  | "payments"
+  | "settings"
+  | "sampleStorefront";
+
 export type TourStep<Id extends string = TourStepId> = {
   id: Id;
   /** The page the step lives on: a canonical pathname, no query. */
   path: `/${string}`;
-  /** For "Opening {page}…" while the tour navigates there. */
-  pageLabel: string;
-  title: string;
+  /** For "Opening Products…" while the tour navigates there. A stable id
+   *  rather than the page's label, because the sentence is one whole message
+   *  per page (Onboarding.tourOverlay.openingPage), never a label spliced into
+   *  "Opening {page}…". */
+  page: TourPage;
+  title: MessageKey;
   /** Used when no candidate's own body applies. */
-  body: string;
+  body: MessageKey;
   targets: readonly TourTarget[];
   /** Shown, centred and with nothing spotlit, when no candidate is on screen. */
-  fallbackBody?: string;
+  fallbackBody?: MessageKey;
   fallbackExtra?: TourExtra;
   /** A selector that proves the page has rendered, before a missing target is
    *  believed to be missing rather than not painted yet. */
@@ -81,25 +100,21 @@ export type TourStep<Id extends string = TourStepId> = {
   reveal?: TourReveal;
 };
 
-const PAGE_INTRO = "This tour stops at the main thing to do on each page.";
-const EMBED_IN_DEVELOPMENT =
-  "The widget is still in development and doesn't show on other sites yet.";
-
 export const TOUR_STEPS: readonly TourStep[] = [
   {
     id: "overview-nav",
     path: "/dashboard",
-    pageLabel: "Overview",
-    title: "Find your way around",
-    body: `Everything in your store is one click away from the menu. ${PAGE_INTRO}`,
+    page: "overview",
+    title: "Onboarding.guidedTour.steps.overviewNav.title",
+    body: "Onboarding.guidedTour.steps.overviewNav.body",
     targets: [
       {
-        selector: 'nav[aria-label="Dashboard"]',
-        body: `Everything in your store is one click away in this sidebar. ${PAGE_INTRO}`,
+        selector: '[data-tour="dashboard-nav"]',
+        body: "Onboarding.guidedTour.steps.overviewNav.bodySidebar",
       },
       {
-        selector: 'header button[aria-label="Open menu"]',
-        body: `Everything in your store is behind this menu. ${PAGE_INTRO}`,
+        selector: '[data-tour="menu-button"]',
+        body: "Onboarding.guidedTour.steps.overviewNav.bodyMenu",
       },
     ],
     scroll: false,
@@ -108,19 +123,18 @@ export const TOUR_STEPS: readonly TourStep[] = [
   {
     id: "search",
     path: "/dashboard",
-    pageLabel: "Overview",
-    title: "Search for anything",
-    body: "Search jumps straight to any page, product, order or setting.",
+    page: "overview",
+    title: "Onboarding.guidedTour.steps.search.title",
+    body: "Onboarding.guidedTour.steps.search.body",
     targets: [
       {
         selector: '[data-testid="top-bar"] button[aria-keyshortcuts]',
-        body: "Jump straight to any page, product, order or setting.",
+        body: "Onboarding.guidedTour.steps.search.bodyTopBar",
         extra: "search-shortcut",
       },
       {
-        // Scoped to the header: the open search panel is also labelled Search.
-        selector: 'header button[aria-label="Search"]',
-        body: "Tap here to jump straight to any page, product, order or setting.",
+        selector: '[data-tour="search-phone"]',
+        body: "Onboarding.guidedTour.steps.search.bodyPhone",
       },
     ],
     scroll: false,
@@ -128,9 +142,9 @@ export const TOUR_STEPS: readonly TourStep[] = [
   {
     id: "products-add",
     path: "/products",
-    pageLabel: "Products",
-    title: "Add a product",
-    body: "A title and a price are enough to start. It can stay a draft until you're ready.",
+    page: "products",
+    title: "Onboarding.guidedTour.steps.productsAdd.title",
+    body: "Onboarding.guidedTour.steps.productsAdd.body",
     // The first match is the toolbar's; an empty store renders a second one in
     // its empty state further down.
     targets: [{ selector: 'main a[href="/products/new"]' }],
@@ -140,9 +154,9 @@ export const TOUR_STEPS: readonly TourStep[] = [
   {
     id: "products-import",
     path: "/products",
-    pageLabel: "Products",
-    title: "Or import your catalogue",
-    body: "Already selling somewhere else? Import a CSV file. A Shopify export works as it is.",
+    page: "products",
+    title: "Onboarding.guidedTour.steps.productsImport.title",
+    body: "Onboarding.guidedTour.steps.productsImport.body",
     targets: [{ selector: 'main a[href="/products/import"]' }],
     scroll: true,
     requires: "products.write",
@@ -150,9 +164,9 @@ export const TOUR_STEPS: readonly TourStep[] = [
   {
     id: "storefront-create",
     path: "/storefront",
-    pageLabel: "Storefront",
-    title: "Create a storefront",
-    body: "A storefront is a grid you design. Each product you place on it gets a page you can share.",
+    page: "storefront",
+    title: "Onboarding.guidedTour.steps.storefrontCreate.title",
+    body: "Onboarding.guidedTour.steps.storefrontCreate.body",
     targets: [{ selector: '[data-tour="storefront-create"]' }],
     scroll: true,
     requires: "storefront.write",
@@ -160,14 +174,14 @@ export const TOUR_STEPS: readonly TourStep[] = [
   {
     id: "storefront-sample",
     path: "/storefront",
-    pageLabel: "Storefront",
-    title: "See how it's done",
-    body: "This sample shows a finished storefront. Open it to try the designer. Nothing you change there is saved.",
-    // The sample's card sits after the seller's own cards in the list.
+    page: "storefront",
+    title: "Onboarding.guidedTour.steps.storefrontSample.title",
+    body: "Onboarding.guidedTour.steps.storefrontSample.body",
+    // The quiet link to the sample at the foot of the list (StorefrontsList).
     targets: [{ selector: "main [data-storefront-sample]" }],
-    // They hid it: nothing to point at, so say where it went.
-    fallbackBody:
-      "Open a storefront to design it. The sample storefront you hid can be brought back from the bottom of this page.",
+    // No link: this person hid the sample back when it was a card, or the flag
+    // could not be read. Nothing to point at, so just say what the page is for.
+    fallbackBody: "Onboarding.guidedTour.steps.storefrontSample.fallbackBody",
     waitFor: '[data-tour="storefront-create"]',
     scroll: true,
     requires: "storefront.write",
@@ -175,19 +189,19 @@ export const TOUR_STEPS: readonly TourStep[] = [
   {
     id: "storefront-embed",
     path: "/storefront",
-    pageLabel: "Storefront",
-    title: "Embed a storefront on your site",
-    body: `Each storefront has an embed button that gives you a snippet like this one. ${EMBED_IN_DEVELOPMENT}`,
+    page: "storefront",
+    title: "Onboarding.guidedTour.steps.storefrontEmbed.title",
+    body: "Onboarding.guidedTour.steps.storefrontEmbed.body",
     targets: [
       {
-        selector: 'main button[aria-label^="Embed "]',
-        body: `This button gives you a snippet like the one below to paste into your site. ${EMBED_IN_DEVELOPMENT}`,
+        selector: 'main [data-tour="storefront-embed"]',
+        body: "Onboarding.guidedTour.steps.storefrontEmbed.bodyButton",
         extra: "embed-snippet",
       },
     ],
-    // First match in DOM order: the seller's own card when they have one, the
-    // sample's otherwise. No card at all only when both are missing.
-    fallbackBody: `Once you have a storefront, the embed button on its card gives you a snippet like this one. ${EMBED_IN_DEVELOPMENT}`,
+    // The first of the seller's own cards. A new seller has none (the sample is
+    // a link, not a card), so they get the fallback, snippet and all.
+    fallbackBody: "Onboarding.guidedTour.steps.storefrontEmbed.fallbackBody",
     fallbackExtra: "embed-snippet",
     // The create button renders with the list, so its presence means "no card"
     // really is no card rather than a list still on its way.
@@ -198,10 +212,10 @@ export const TOUR_STEPS: readonly TourStep[] = [
   {
     id: "orders-search",
     path: "/orders",
-    pageLabel: "Orders",
-    title: "Find an order",
+    page: "orders",
+    title: "Onboarding.guidedTour.steps.ordersSearch.title",
     // Keep in step with OrdersEmptyState, which makes the same promise.
-    body: "Search by the buyer's email. Orders land here once Square Share checkout opens.",
+    body: "Onboarding.guidedTour.steps.ordersSearch.body",
     targets: [{ selector: '[data-tour="orders-search"]' }, { selector: "#orders-search" }],
     scroll: true,
     reveal: "orders-toolbar",
@@ -209,28 +223,30 @@ export const TOUR_STEPS: readonly TourStep[] = [
   {
     id: "orders-filters",
     path: "/orders",
-    pageLabel: "Orders",
-    title: "Filter and sort",
-    body: "Narrow orders by channel, status or date, and choose how they're sorted.",
-    targets: [{ selector: '[role="search"][aria-label="order filters"]' }],
+    page: "orders",
+    title: "Onboarding.guidedTour.steps.ordersFilters.title",
+    body: "Onboarding.guidedTour.steps.ordersFilters.body",
+    targets: [{ selector: '[data-tour="orders-filters"]' }],
     scroll: true,
     reveal: "orders-toolbar",
   },
   {
     id: "analytics",
     path: "/analytics",
-    pageLabel: "Analytics",
-    title: "See how it's going",
-    body: "Sales and visits to your product pages, over the dates you choose.",
+    page: "analytics",
+    title: "Onboarding.guidedTour.steps.analytics.title",
+    body: "Onboarding.guidedTour.steps.analytics.body",
     targets: [
       {
-        selector: '[role="group"][aria-label="Date range"]',
-        body: "Sales and visits to your product pages, for the dates you pick here.",
+        // The preset switch, not the row around it: the row also holds the
+        // custom range's date field, and spans the page.
+        selector: '[data-tour="analytics-range"] > [role="group"]',
+        body: "Onboarding.guidedTour.steps.analytics.bodyRange",
       },
       {
         // A store with nothing to measure yet renders one empty state instead.
         selector: "[data-analytics-first-run] > div",
-        body: "Sales and visits to your product pages show up here once one is live.",
+        body: "Onboarding.guidedTour.steps.analytics.bodyFirstRun",
       },
     ],
     waitFor: "[data-analytics-range-preset]",
@@ -239,20 +255,20 @@ export const TOUR_STEPS: readonly TourStep[] = [
   {
     id: "payments",
     path: "/payments",
-    pageLabel: "Payments",
-    title: "Getting paid",
+    page: "payments",
+    title: "Onboarding.guidedTour.steps.payments.title",
     body: STRIPE_CONNECT_AVAILABLE
-      ? "Connect Stripe here so payouts go straight to your bank."
-      : "Getting paid through Stripe is coming soon. Until then, buyers pay you through your product's buy link or by email.",
-    targets: [{ selector: 'section[aria-label="Stripe connection"]' }],
+      ? "Onboarding.guidedTour.steps.payments.bodyConnect"
+      : "Onboarding.guidedTour.steps.payments.bodyComingSoon",
+    targets: [{ selector: '[data-tour="stripe-connection"]' }],
     scroll: true,
   },
   {
     id: "finish",
     path: "/settings/account",
-    pageLabel: "Settings",
-    title: "Replay the tour any time",
-    body: "That's the tour. You can start it again from here whenever you like.",
+    page: "settings",
+    title: "Onboarding.guidedTour.steps.finish.title",
+    body: "Onboarding.guidedTour.steps.finish.body",
     targets: [{ selector: "#tour" }],
     scroll: true,
   },

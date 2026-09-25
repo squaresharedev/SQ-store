@@ -2,13 +2,13 @@ import { describe, expect, it } from "vitest";
 import {
   TRADER_IDENTITY_FIELDS,
   isTraderIdentityComplete,
-  listMissingTraderFields,
   missingTraderIdentity,
   traderIdentityFix,
   traderIdentityHref,
 } from "@/lib/settings/trader-identity";
 import { buildSellerIdentity } from "@/lib/settings/seller-identity";
 import type { StorefrontSeller } from "@/types/storefront";
+import { english } from "../setup/translate";
 
 // The publish gate's rule, pinned. Every enforcement point in the app — the
 // product write, the CSV import, the embed toggle, the public product page,
@@ -130,28 +130,27 @@ describe("the copy the gate hands every surface", () => {
   it("tells an unconfirmed seller to click a link, not to type something", () => {
     // "Add your confirmed contact email" would be advice to fill in a field
     // that is already filled in.
-    const fix = traderIdentityFix(["emailVerified"]);
+    const fix = english(traderIdentityFix(["emailVerified"]));
     expect(fix).toMatch(/confirmation link/i);
     expect(fix).not.toMatch(/^Add your/);
     // With typed fields missing too, both asks are made, once each.
-    const both = traderIdentityFix(["address", "emailVerified"]);
+    const both = english(traderIdentityFix(["address", "emailVerified"]));
     expect(both).toContain("business address");
     expect(both).toMatch(/confirm your contact email/i);
   });
 
-  it("lists missing fields as a readable phrase", () => {
-    expect(listMissingTraderFields(["email"])).toBe("contact email");
-    expect(listMissingTraderFields(["address", "email"])).toBe(
+  it("names every missing field in one sentence", () => {
+    expect(english(traderIdentityFix(["email"]))).toContain("your contact email in");
+    expect(english(traderIdentityFix(["address", "email"]))).toContain(
       "business address and contact email",
     );
-    expect(listMissingTraderFields(["businessName", "address", "email"])).toBe(
+    expect(english(traderIdentityFix(["businessName", "address", "email"]))).toContain(
       "trader name, business address and contact email",
     );
-    expect(listMissingTraderFields([])).toBe("");
   });
 
   it("always gives a next step, even when handed nothing", () => {
-    expect(traderIdentityFix(["email"])).toContain("contact email");
-    expect(traderIdentityFix([])).toContain("Settings");
+    expect(english(traderIdentityFix(["email"]))).toContain("contact email");
+    expect(english(traderIdentityFix([]))).toContain("Settings");
   });
 });

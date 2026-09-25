@@ -7,7 +7,9 @@ import {
   primaryColorTarget,
   resolveColorTarget,
   textBlockThemeColor,
+  type ResolvedColorTarget,
 } from "@/lib/theme/color-target";
+import { english } from "../setup/translate";
 import {
   DEFAULT_STOREFRONT_CONFIG,
   DEFAULT_STOREFRONT_HEADER,
@@ -41,7 +43,30 @@ function resolve(
   blocks: Parameters<typeof resolveColorTarget>[2],
   header: StorefrontHeader = DEFAULT_STOREFRONT_HEADER,
 ) {
-  return resolveColorTarget(ref, theme, blocks, header);
+  return inEnglish(resolveColorTarget(ref, theme, blocks, header));
+}
+
+/**
+ * A resolved target as a reader sees it: every key turned into its English, so
+ * the assertions below still read as the copy on screen. The whole "Use ..."
+ * phrase is dropped here and checked on its own.
+ */
+function inEnglish(target: ResolvedColorTarget | null) {
+  if (!target) return target;
+  const { inherit, ...rest } = target;
+  return {
+    ...rest,
+    label: english(target.label),
+    ...(inherit
+      ? {
+          inherit: {
+            label: english(inherit.label),
+            value: inherit.value,
+            active: inherit.active,
+          },
+        }
+      : {}),
+  };
 }
 
 function shape(over: Partial<ShapeBlock> = {}): ShapeBlock {
@@ -503,5 +528,51 @@ describe("color target helpers", () => {
 
   it("a product tile opens nothing — it has no color of its own", () => {
     expect(primaryColorTarget(product)).toBeNull();
+  });
+});
+
+describe("resolveColorTarget: inherit phrases", () => {
+  it("names every inherit option as a whole phrase, reading exactly as before", () => {
+    const theme = themeWith();
+    const block = text();
+    const key = blockKey(block);
+    const tile = blockKey(product);
+    const targets = [
+      resolveColorTarget({ kind: "header-name" }, theme, [], headerWith()),
+      resolveColorTarget({ kind: "header-bio" }, theme, [], headerWith()),
+      resolveColorTarget({ kind: "text-color", blockKey: key }, theme, [block], DEFAULT_STOREFRONT_HEADER),
+      resolveColorTarget(
+        { kind: "text-color", blockKey: key },
+        theme,
+        [block],
+        DEFAULT_STOREFRONT_HEADER,
+        { blockKey: key, range: { start: 0, end: 2 } },
+      ),
+      ...(["fill", "text", "border"] as const).flatMap((part) => [
+        resolveColorTarget({ kind: "price-tag", part }, theme, [], DEFAULT_STOREFRONT_HEADER),
+        resolveColorTarget(
+          { kind: "price-tag", part, blockKey: tile },
+          theme,
+          [product],
+          DEFAULT_STOREFRONT_HEADER,
+        ),
+      ]),
+      resolveColorTarget({ kind: "title-shadow" }, theme, [], DEFAULT_STOREFRONT_HEADER),
+      resolveColorTarget(
+        { kind: "title-shadow", blockKey: tile },
+        theme,
+        [product],
+        DEFAULT_STOREFRONT_HEADER,
+      ),
+    ];
+    const seen = new Set<string>();
+    for (const target of targets) {
+      const inherit = target?.inherit;
+      expect(inherit).toBeDefined();
+      if (!inherit) continue;
+      expect(english(inherit.useLabel)).toBe(`Use ${english(inherit.label)}`);
+      seen.add(english(inherit.label));
+    }
+    expect(seen).toContain("the block's color");
   });
 });

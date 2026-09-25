@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, afterEach, beforeAll, beforeEach } from "vitest";
 import { render, screen, cleanup, waitFor, within } from "../setup/render";
 import userEvent from "@testing-library/user-event";
+import { permissionDenied } from "@/lib/errors";
 
 const deleteProductMock = vi.fn();
 vi.mock("@/lib/products/actions", () => ({
@@ -161,11 +162,7 @@ describe("product delete confirmation", () => {
   it("restores the card and explains why when the server refuses", async () => {
     deleteProductMock.mockResolvedValue({
       ok: false,
-      error: {
-        code: "permission_denied",
-        message: "Your Viewer role can't delete products in this store.",
-        fix: "Ask the store owner to change your role.",
-      },
+      error: permissionDenied("viewer", "deleteProducts"),
     });
     const user = userEvent.setup();
     renderList();

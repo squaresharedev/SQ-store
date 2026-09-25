@@ -8,6 +8,7 @@ import {
   type UploadKind,
 } from "@/lib/validation/product";
 import { uploadFailed, type ActionError } from "@/lib/errors";
+import { msg, type MessageRef } from "@/i18n/types";
 
 /**
  * Thrown by uploadToR2: carries a structured ActionError (message + fix) so
@@ -18,28 +19,14 @@ import { uploadFailed, type ActionError } from "@/lib/errors";
 export class UploadError extends Error {
   readonly info: ActionError;
   constructor(info: ActionError) {
-    super(info.message);
+    // The code, not the message: the message is a key for the render site,
+    // and anything reading Error#message wants a stable description.
+    super(info.code);
     this.name = "UploadError";
     this.info = info;
   }
 }
 
-const TYPE_FIX: Record<UploadKind, string> = {
-  image: "Use a JPEG, PNG, WebP, GIF, or AVIF image.",
-  file: "Use a ZIP, PDF, EPUB, MP3, WAV, MP4, JPEG, PNG, WebP, or TXT file.",
-  font: "Use a WOFF2, WOFF, TTF, or OTF font file.",
-  element: "Use an SVG, PNG, WebP, JPEG, GIF, or AVIF image.",
-  document: "Export the manual or certificate as a PDF, then upload it.",
-};
-
-/** What each kind is CALLED in the messages a seller reads. */
-const UPLOAD_NOUN: Record<UploadKind, string> = {
-  image: "image",
-  file: "file",
-  font: "font",
-  element: "element",
-  document: "document",
-};
 
 function allowedTypes(kind: UploadKind): readonly string[] {
   switch (kind) {
@@ -57,12 +44,19 @@ function allowedTypes(kind: UploadKind): readonly string[] {
 }
 
 /** Fix line for a failed presign response, keyed off the HTTP status. */
-function presignFix(status: number): string {
-  if (status === 401) return "Sign in again, then retry.";
-  if (status === 403) {
-    return "Only the store owner can change roles. Ask them to upgrade you to Editor in Team settings.";
-  }
-  return "Check the file and try again. If it keeps failing, refresh the page.";
+function presignFix(status: number): MessageRef {
+  if (status === 401) return msg("Errors.upload.rejectedFix.signedOut");
+  if (status === 403) return msg("Errors.permissionDenied.fix");
+  return msg("Errors.upload.rejectedFix.other");
+}
+
+/**
+ * The upload routes answer with their own `error` and `fix` text, already in
+ * the request's locale (Errors.uploadRoute, resolved server-side), so it is
+ * shown as the route wrote it and carried as data, never translated again.
+ */
+function routeText(text: string | undefined): MessageRef | null {
+  return typeof text === "string" && text !== "" ? msg("Errors.upload.serverSaid", { text }) : null;
 }
 
 /** Outcome of the PUT, distinguishing "never left the browser" from "storage
@@ -135,13 +129,13 @@ function sendWithProgress(
 /** Read a { key } | { error, fix } response from one of our upload routes. */
 function keyFromResponse(
   outcome: PutOutcome & { status: number; text: string },
-  noun: string,
+  kind: UploadKind,
 ): string {
   if (!outcome.reached) {
     throw new UploadError(
       uploadFailed(
-        `The ${noun} never reached the server.`,
-        "Check your internet connection and try again.",
+        msg(`Errors.upload.neverReached.${kind}`),
+        msg("Errors.upload.neverReachedFix"),
       ),
     );
   }
@@ -158,8 +152,8 @@ function keyFromResponse(
   if (!outcome.ok || !payload?.key) {
     throw new UploadError(
       uploadFailed(
-        payload?.error ?? `Could not upload that ${noun}.`,
-        payload?.fix ?? presignFix(outcome.status),
+        routeText(payload?.error) ?? msg(`Errors.upload.rejected.${kind}`),
+        routeText(payload?.fix) ?? presignFix(outcome.status),
       ),
     );
   }
@@ -178,7 +172,7 @@ function keyFromResponse(
 async function uploadStreamViaServer(
   file: File,
   route: string,
-  noun: string,
+  kind: "file" | "document",
   onProgress?: (fraction: number | null) => void,
 ): Promise<string> {
   const query = new URLSearchParams({
@@ -192,7 +186,7 @@ async function uploadStreamViaServer(
     onProgress,
     file.type,
   );
-  return keyFromResponse(outcome, noun);
+  return keyFromResponse(outcome, kind);
 }
 
 /** Multipart POST to one of our own upload routes, under the field name that
@@ -200,7 +194,7 @@ async function uploadStreamViaServer(
 async function uploadFormViaServer(
   file: File,
   route: string,
-  field: string,
+  field: "image" | "font" | "element",
   onProgress?: (fraction: number | null) => void,
 ): Promise<string> {
   const body = new FormData();
@@ -249,8 +243,6 @@ export async function uploadToR2(
   /** Called with 0..1 as the body uploads, when the total size is known. */
   onProgress?: (fraction: number | null) => void,
 ): Promise<string> {
-  const noun = UPLOAD_NOUN[kind];
-
   const typeLooksRight =
     kind === "font"
       ? looksLikeFont(file)
@@ -259,15 +251,15 @@ export async function uploadToR2(
         : allowedTypes(kind).includes(file.type);
   if (!typeLooksRight) {
     throw new UploadError(
-      uploadFailed("That file type is not supported.", TYPE_FIX[kind]),
+      uploadFailed(msg("Errors.upload.typeNotSupported"), msg(`Errors.upload.typeFix.${kind}`)),
     );
   }
   if (file.size > maxBytesForKind(kind)) {
     const maxMb = Math.round(maxBytesForKind(kind) / 1024 / 1024);
     throw new UploadError(
       uploadFailed(
-        `That ${noun} is too large.`,
-        `Use a ${noun} under ${maxMb} MB. Compress or resize it, then try again.`,
+        msg(`Errors.upload.tooLarge.${kind}`),
+        msg(`Errors.upload.tooLargeFix.${kind}`, { maxMb }),
       ),
     );
   }

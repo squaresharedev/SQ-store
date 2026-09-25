@@ -24,7 +24,7 @@ import {
  */
 export const searchQuerySchema = z.object({
   q: singleLineText({
-    label: "Search query",
+    field: "searchQuery",
     min: MIN_REMOTE_QUERY_LENGTH,
     max: MAX_QUERY_LENGTH,
   }),

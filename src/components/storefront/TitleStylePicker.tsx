@@ -1,13 +1,8 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { TITLE_STYLES, type TitleStyle } from "@/types/storefront";
 import { OptionCardPicker } from "./OptionCardPicker";
-
-const TITLE_STYLE_LABELS: Record<TitleStyle, string> = {
-  bar: "Bar",
-  overlay: "Overlay",
-  shadow: "Shadow",
-};
 
 /** Miniature card depicting one title style: where the title line sits and
  *  what backs it (solid bar, translucent overlay, or gradient shadow). */
@@ -49,16 +44,22 @@ export function TitleStylePicker({
   value: TitleStyle;
   onChange: (style: TitleStyle) => void;
 }) {
+  const t = useTranslations("Storefront.titleStyle");
+  const titleStyleLabels: Record<TitleStyle, string> = {
+    bar: t("bar"),
+    overlay: t("overlay"),
+    shadow: t("shadow"),
+  };
   return (
     <OptionCardPicker
       value={value}
       options={TITLE_STYLES.map((style) => ({
         value: style,
-        label: TITLE_STYLE_LABELS[style],
+        label: titleStyleLabels[style],
         glyph: <StyleGlyph style={style} />,
       }))}
       onChange={onChange}
-      ariaLabel="Title style"
+      ariaLabel={t("ariaLabel")}
     />
   );
 }

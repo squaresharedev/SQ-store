@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
+import { render, screen, cleanup } from "../setup/render";
 import userEvent from "@testing-library/user-event";
 import { RemovalNotice } from "@/components/products/RemovalNotice";
 import type { ProductRemoval } from "@/types/product";
+import { msg } from "@/i18n/types";
 
 afterEach(cleanup);
 
@@ -114,8 +115,8 @@ describe("RemovalNotice", () => {
       ok: false,
       error: {
         code: "invalid_input",
-        message: "This product was removed, not paused.",
-        fix: "A removal is final.",
+        message: msg("Errors.moderation.removedNotPaused", { target: "product" }),
+        fix: msg("Errors.moderation.removedFix"),
       },
     });
     render(<RemovalNotice removal={takedown()} kind="product" id={ID} title="Print" />);

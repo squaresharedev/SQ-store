@@ -9,16 +9,16 @@ import { oneTimeCode, singleLineText, uuidField } from "@/lib/validation/inputs"
  *  requires it to be unique per account; the action handles that clash. */
 export const FACTOR_NAME_MAX = 40;
 export const factorNameSchema = singleLineText({
-  label: "The name",
+  field: "factorName",
   max: FACTOR_NAME_MAX,
 });
 
 /** A six-digit authenticator code, spaces tolerated. */
-export const totpCodeSchema = oneTimeCode("The code");
+export const totpCodeSchema = oneTimeCode("authenticator");
 
 /** A factor id as GoTrue minted it. Always checked against the caller's OWN
  *  factor list as well; being a well-formed uuid proves nothing about whose. */
-export const factorIdSchema = uuidField("That authenticator");
+export const factorIdSchema = uuidField("factor");
 
 /** Longest thing the recovery-code box will even look at (a 16-character code
  *  with dashes and stray spaces fits many times over). Anything past it is

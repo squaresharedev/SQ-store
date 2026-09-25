@@ -3,22 +3,25 @@
 import * as React from "react";
 import { useActionState } from "react";
 import { Check, X } from "lucide-react";
-import { useActionToast } from "@/components/ui/Toast";
+import { useTranslations } from "next-intl";
+import { useActionStateToast, useResolveMessage, useSaveResult } from "@/components/ui/ActionErrorNotice";
 import { SaveButton } from "@/components/ui/SaveButton";
 import { SettingsCard } from "@/components/settings/SettingsCard";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
-import { updateUsername, type SettingsActionState } from "@/lib/settings/actions";
+import { updateUsername } from "@/lib/settings/actions";
+import type { ActionState } from "@/lib/errors";
 import {
   USERNAME_MAX_LENGTH,
   normalizeUsername,
   usernameSchema,
 } from "@/lib/validation/auth";
+import { firstIssue } from "@/lib/validation/messages";
 import { cn } from "@/lib/utils";
 import { TYPING_DEBOUNCE_MS } from "@/lib/typing-debounce";
 
-const INITIAL: SettingsActionState = {};
+const INITIAL: ActionState = {};
 
 type CheckResult = "idle" | "available" | "taken";
 type CheckStatus = CheckResult | "checking" | "mine";
@@ -42,8 +45,11 @@ type CheckStatus = CheckResult | "checking" | "mine";
  * real boundary; the availability round trip stays debounced.
  */
 export function UsernameForm({ username }: { username: string }) {
+  const t = useTranslations("Settings.account.username");
   const [state, formAction, isPending] = useActionState(updateUsername, INITIAL);
-  useActionToast(state);
+  useActionStateToast(state);
+  const saveResult = useSaveResult(state);
+  const resolveMessage = useResolveMessage();
   const [value, setValue] = React.useState(username);
   const [checking, setChecking] = React.useState(false);
   const [checkResult, setCheckResult] = React.useState<CheckResult>("idle");
@@ -61,7 +67,7 @@ export function UsernameForm({ username }: { username: string }) {
   // the field is blank or when it already holds their own saved handle.
   const validationHint =
     !isValidFormat && trimmed !== "" && !isMine
-      ? (parseResult.error.issues[0]?.message ?? null)
+      ? resolveMessage(firstIssue(parseResult.error))
       : null;
 
   const shouldCheck = isValidFormat && !isMine;
@@ -116,13 +122,13 @@ export function UsernameForm({ username }: { username: string }) {
 
   return (
     <SettingsCard
-      title="Username"
-      description="Sign in with this instead of your email. Letters, numbers and underscores only, and no two accounts can share one."
+      title={t("cardTitle")}
+      description={t("cardDescription")}
       decoration="dots"
     >
       <form action={formAction} className="flex flex-col gap-4" noValidate>
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="username">Username</Label>
+          <Label htmlFor="username">{t("label")}</Label>
           <div className="flex max-w-lg items-stretch gap-2">
             <div className="relative min-w-0 flex-1">
               <Input
@@ -130,7 +136,7 @@ export function UsernameForm({ username }: { username: string }) {
                 name="username"
                 value={value}
                 onChange={(e) => setValue(normalizeUsername(e.target.value))}
-                placeholder="yourhandle"
+                placeholder={t("placeholder")}
                 // Typing hint only. usernameSchema is re-parsed on the server on
                 // every write path, and a hand-rolled POST never sees this.
                 maxLength={USERNAME_MAX_LENGTH}
@@ -158,7 +164,7 @@ export function UsernameForm({ username }: { username: string }) {
             </div>
             <SaveButton
               pending={isPending}
-              state={state}
+              state={saveResult}
               disabled={status === "taken"}
               className="shrink-0"
             />
@@ -190,10 +196,9 @@ export function UsernameForm({ username }: { username: string }) {
                   : "text-muted-foreground",
               )}
             >
-              {status === "available" && "Available."}
-              {status === "taken" &&
-                "Someone already has this username, try another."}
-              {status === "checking" && "Checking…"}
+              {status === "available" && t("available")}
+              {status === "taken" && t("taken")}
+              {status === "checking" && t("checking")}
             </p>
           )}
         </div>

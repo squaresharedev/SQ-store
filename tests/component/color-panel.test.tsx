@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, afterEach, beforeAll } from "vitest";
-import { render, screen, cleanup, within } from "@testing-library/react";
+import { render, screen, cleanup, within } from "../setup/render";
+import { english } from "../setup/translate";
 import userEvent from "@testing-library/user-event";
 import { ColorPanel } from "@/components/storefront/ColorPanel";
 import { STANDARD_COLOR_ROWS } from "@/lib/theme/standard-colors";
@@ -38,7 +39,10 @@ afterEach(() => {
   __resetRecentColors();
 });
 
-const FILL: ResolvedColorTarget = { label: "Fill", value: "#123456" };
+const FILL: ResolvedColorTarget = {
+  label: "Storefront.colors.fields.fill",
+  value: "#123456",
+};
 
 function renderPanel(over: Partial<Parameters<typeof ColorPanel>[0]> = {}) {
   const onPick = vi.fn();
@@ -90,7 +94,7 @@ describe("ColorPanel sections", () => {
     renderPanel();
     for (const palette of COLOR_PALETTES) {
       const group = screen.getByRole("group", {
-        name: new RegExp(`${palette.name} palette`, "i"),
+        name: english(palette.group),
       });
       expect(within(group).getAllByRole("button")).toHaveLength(
         palette.colors.length,
@@ -229,7 +233,7 @@ describe("ColorPanel picking", () => {
     const { onPick } = renderPanel();
     const swatch = STANDARD_COLOR_ROWS[1][0];
     await user.click(
-      screen.getByRole("button", { name: `${swatch.name} (${swatch.value})` }),
+      screen.getByRole("button", { name: english(swatch.label, { value: swatch.value }) }),
     );
     expect(onPick).toHaveBeenLastCalledWith(swatch.value);
   });
@@ -241,7 +245,7 @@ describe("ColorPanel picking", () => {
     const swatch = palette.colors[2];
     await user.click(
       screen.getByRole("button", {
-        name: `${palette.name} ${swatch.name} (${swatch.value})`,
+        name: english(swatch.label, { value: swatch.value }),
       }),
     );
     expect(onPick).toHaveBeenLastCalledWith(swatch.value);
@@ -259,7 +263,7 @@ describe("ColorPanel picking", () => {
     const { onPick } = renderPanel({ inDesign: ["#aa0000"] });
     for (const swatch of STANDARD_COLOR_ROWS[0]) {
       await user.click(
-        screen.getByRole("button", { name: `${swatch.name} (${swatch.value})` }),
+        screen.getByRole("button", { name: english(swatch.label, { value: swatch.value }) }),
       );
     }
     expect(onPick).toHaveBeenCalled();
@@ -271,20 +275,20 @@ describe("ColorPanel picking", () => {
     renderPanel();
     const swatch = STANDARD_COLOR_ROWS[1][3];
     await user.click(
-      screen.getByRole("button", { name: `${swatch.name} (${swatch.value})` }),
+      screen.getByRole("button", { name: english(swatch.label, { value: swatch.value }) }),
     );
     expect(getRecentColors()[0]).toBe(swatch.value);
   });
 
   it("the swatch matching the target is the one marked pressed", () => {
     const swatch = STANDARD_COLOR_ROWS[1][0];
-    renderPanel({ target: { label: "Fill", value: swatch.value } });
+    renderPanel({ target: { ...FILL, value: swatch.value } });
     expect(
-      screen.getByRole("button", { name: `${swatch.name} (${swatch.value})` }),
+      screen.getByRole("button", { name: english(swatch.label, { value: swatch.value }) }),
     ).toHaveAttribute("aria-pressed", "true");
     const other = STANDARD_COLOR_ROWS[1][1];
     expect(
-      screen.getByRole("button", { name: `${other.name} (${other.value})` }),
+      screen.getByRole("button", { name: english(other.label, { value: other.value }) }),
     ).toHaveAttribute("aria-pressed", "false");
   });
 });
@@ -295,9 +299,14 @@ describe("ColorPanel picking", () => {
 
 describe("ColorPanel inherit", () => {
   const inheriting: ResolvedColorTarget = {
-    label: "Text color",
+    label: "Storefront.colors.fields.textColor",
     value: "#171717",
-    inherit: { label: "Theme color", value: "#171717", active: true },
+    inherit: {
+      label: "Storefront.colors.inherit.themeColor.label",
+      useLabel: "Storefront.colors.inherit.themeColor.use",
+      value: "#171717",
+      active: true,
+    },
   };
 
   it("offers nothing to inherit on a required color", () => {

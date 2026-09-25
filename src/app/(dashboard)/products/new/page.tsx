@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { ProductFormView } from "@/components/products/ProductFormView";
 import { getActiveAccount } from "@/lib/team/account-context";
@@ -9,9 +10,10 @@ import { getShippingPolicy } from "@/lib/settings/shipping-policy";
 import { EMPTY_SHIPPING_POLICY } from "@/types/shipping-policy";
 import { storefrontReturnPath } from "@/lib/products/return-path";
 
-export const metadata: Metadata = {
-  title: "New product",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Products.metadata.new");
+  return { title: t("title") };
+}
 
 // PROTECTED by (dashboard)/layout.tsx. Also gated to writers: a read-only
 // member of the active store can't create products, so we bounce them back to
@@ -45,10 +47,12 @@ export default async function NewProductPage({
     ? await getShippingPolicy(account.userId)
     : EMPTY_SHIPPING_POLICY;
 
+  const t = await getTranslations("Products.page.new");
+
   return (
     <ProductFormView
-      title="New product"
-      subtitle="Add a product, then place it on a storefront to give it a page."
+      title={t("title")}
+      subtitle={t("subtitle")}
       // Set when the seller left a storefront designer to create this product
       // (ProductPicker's empty state): saving takes them back to that board.
       returnTo={storefrontReturnPath(params.next)}

@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { NotificationsPageClient } from "@/components/notifications/NotificationsPageClient";
 import { getNotificationPage } from "@/lib/notifications/queries";
 
-export const metadata: Metadata = {
-  title: "Notifications",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Notifications.metadata.notifications");
+  return { title: t("title") };
+}
 
 /**
  * Full notification history. Auth is enforced by the (dashboard) layout; the

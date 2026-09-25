@@ -2,8 +2,11 @@
 
 import * as React from "react";
 import { useActionState } from "react";
+import { useTranslations } from "next-intl";
 import { infoTextClass } from "@/components/ui/control-styles";
-import { authenticate, type AuthState } from "@/lib/auth/actions";
+import { authenticate } from "@/lib/auth/actions";
+import type { ActionState } from "@/lib/errors";
+import { useResolveMessage } from "@/components/ui/ActionErrorNotice";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,7 +22,7 @@ import { cn } from "@/lib/utils";
 
 type Mode = "signin" | "signup" | "magic";
 
-const INITIAL: AuthState = {};
+const INITIAL: ActionState = {};
 
 /**
  * Public by design (it identifies the widget, not a secret) and inlined at
@@ -43,8 +46,10 @@ export function LoginForm({
   /** Sign-in option this browser used last, or null if unknown. */
   lastUsed?: SignInMethod | null;
 }) {
+  const t = useTranslations("Auth.login");
   const [mode, setMode] = React.useState<Mode>("signin");
   const [state, formAction, isPending] = useActionState(authenticate, INITIAL);
+  const resolveMessage = useResolveMessage();
   const formRef = React.useRef<HTMLFormElement>(null);
   const [resetOpen, setResetOpen] = React.useState(false);
   const [resetEmail, setResetEmail] = React.useState("");
@@ -53,7 +58,7 @@ export function LoginForm({
 
   React.useEffect(() => {
     if (state.error) {
-      console.error("[LoginForm] Auth error:", state.error);
+      console.error("[LoginForm] Auth error:", state.error.code);
     }
   }, [state.error]);
 
@@ -71,12 +76,7 @@ export function LoginForm({
   const isMagic = mode === "magic";
   // The clicked submit button carries the intent, so exactly one is submitted.
   const primaryIntent = isMagic ? "magic" : mode;
-  const cta =
-    mode === "signup"
-      ? "Create account"
-      : mode === "magic"
-        ? "Send magic link"
-        : "Sign in";
+  const cta = t("cta", { mode });
 
   /**
    * The pending label names the ACTION under way, rather than a generic
@@ -91,12 +91,7 @@ export function LoginForm({
    * machine. The skeleton belongs AFTER the redirect, where it already is
    * (see (dashboard)/dashboard/loading.tsx).
    */
-  const pendingCta =
-    mode === "signup"
-      ? "Creating account…"
-      : mode === "magic"
-        ? "Sending link…"
-        : "Signing in…";
+  const pendingCta = t("pendingCta", { mode });
 
   // "Forgot?" opens the reset modal, prefilled with whatever email was typed.
   // Only an email: the identifier box also accepts a handle, and prefilling the
@@ -118,7 +113,7 @@ export function LoginForm({
       {/* Divider */}
       <div className="flex items-center gap-4">
         <span className="h-px flex-1 bg-border" />
-        <span className={infoTextClass}>or</span>
+        <span className={infoTextClass}>{t("or")}</span>
         <span className="h-px flex-1 bg-border" />
       </div>
 
@@ -147,7 +142,7 @@ export function LoginForm({
                 )}
               >
                 <span className="truncate">
-                  {m === "signin" ? "Sign in" : "Sign up"}
+                  {m === "signin" ? t("tabSignIn") : t("tabSignUp")}
                 </span>
               </button>
             ))}
@@ -165,7 +160,7 @@ export function LoginForm({
               box that has nothing to do with the last password sign-in. */}
           <div className="flex items-baseline justify-between gap-2">
             <Label htmlFor="identifier">
-              {mode === "signin" ? "Email or username" : "Email"}
+              {mode === "signin" ? t("identifierLabel") : t("emailLabel")}
             </Label>
             {mode === "signin" && lastUsed === "password" && <LastUsedBadge />}
           </div>
@@ -180,7 +175,7 @@ export function LoginForm({
             autoComplete={mode === "signin" ? "username" : "email"}
             inputMode={mode === "signin" ? "text" : "email"}
             placeholder={
-              mode === "signin" ? "you@studio.com or yourhandle" : "you@studio.com"
+              mode === "signin" ? t("identifierPlaceholder") : t("emailPlaceholder")
             }
             required
           />
@@ -189,22 +184,19 @@ export function LoginForm({
         {/* Username (sign-up only) */}
         {mode === "signup" && (
           <div className="flex flex-col gap-2">
-            <Label htmlFor="username">Username</Label>
+            <Label htmlFor="username">{t("usernameLabel")}</Label>
             <Input
               id="username"
               name="username"
               type="text"
               autoComplete="username"
-              placeholder="yourhandle"
+              placeholder={t("usernamePlaceholder")}
               // Typing hint only. The real rule is usernameSchema, re-parsed on
               // the server, with the DB's unique index behind it.
               maxLength={USERNAME_MAX_LENGTH}
               required
             />
-            <p className={infoTextClass}>
-              Letters, numbers and underscores. You can sign in with this
-              instead of your email.
-            </p>
+            <p className={infoTextClass}>{t("usernameHint")}</p>
           </div>
         )}
 
@@ -212,7 +204,7 @@ export function LoginForm({
         {!isMagic && (
           <div className="flex flex-col gap-2">
             <div className="flex items-baseline justify-between">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t("passwordLabel")}</Label>
               {mode === "signin" && (
                 <button
                   type="button"
@@ -220,7 +212,7 @@ export function LoginForm({
                   suppressHydrationWarning
                   className="font-inter text-xs text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  Forgot?
+                  {t("forgot")}
                 </button>
               )}
             </div>
@@ -238,10 +230,7 @@ export function LoginForm({
                 worst kind of hint: it invites a password the form then
                 rejects. See lib/auth/password.ts. */}
             {mode === "signup" && (
-              <p className={infoTextClass}>
-                At least 8 characters, mixing cases, numbers or symbols (or a
-                passphrase of 16+).
-              </p>
+              <p className={infoTextClass}>{t("passwordHint")}</p>
             )}
           </div>
         )}
@@ -249,7 +238,7 @@ export function LoginForm({
         {/* Confirm password (sign-up only) */}
         {mode === "signup" && (
           <div className="flex flex-col gap-2">
-            <Label htmlFor="confirm_password">Confirm password</Label>
+            <Label htmlFor="confirm_password">{t("confirmPasswordLabel")}</Label>
             <PasswordInput
               id="confirm_password"
               name="confirm_password"
@@ -275,16 +264,16 @@ export function LoginForm({
         )}
 
         {/* Status: error (red) or confirmation (neutral) */}
-        {(state.error || state.message) && (
+        {(state.error || state.success) && (
           <div aria-live="polite">
             {state.error && (
               <p role="alert" className="text-sm font-medium text-destructive">
-                {state.error}
+                {resolveMessage(state.error.message)}
               </p>
             )}
-            {state.message && (
+            {state.success && (
               <p className="text-sm font-medium text-foreground">
-                {state.message}
+                {resolveMessage(state.success)}
               </p>
             )}
           </div>
@@ -324,9 +313,7 @@ export function LoginForm({
             suppressHydrationWarning
             className="inline-flex max-w-full items-center gap-1.5 rounded-md px-3 py-1.5 font-inter text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
           >
-            {isMagic
-              ? "Use a password instead"
-              : "Email me a magic link instead"}
+            {isMagic ? t("usePassword") : t("useMagicLink")}
             {/* Only while this button OFFERS the magic link. In magic mode it
                 offers the password instead, and badging that would point at
                 the wrong option. */}

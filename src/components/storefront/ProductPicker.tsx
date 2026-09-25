@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations, useLocale } from "next-intl";
 import Link from "next/link";
 import { Check, Image as ImageIcon, Plus, Search } from "lucide-react";
 import type { Product } from "@/types/product";
@@ -59,6 +60,7 @@ export function ProductPicker({
    */
   onCreateProduct?: () => void;
 }) {
+  const t = useTranslations("Storefront.picker");
   const [search, setSearch] = React.useState("");
   const [remoteState, setRemoteState] = React.useState<{
     results: Product[] | null;
@@ -114,14 +116,13 @@ export function ProductPicker({
     const label = (
       <>
         <Plus className={cn("size-4", iconPopClass)} strokeWidth={2} aria-hidden="true" />
-        Add your first product
+        {t("addFirst")}
       </>
     );
     return (
       <div className="space-y-3">
         <p className={helpTextClass}>
-          You have no products yet. Add one and you&apos;ll come straight back
-          here to place it.
+          {t("noProducts")}
         </p>
         {onCreateProduct ? (
           <button
@@ -206,32 +207,32 @@ export function ProductPicker({
           onChange={(event) =>
             setSearch(event.target.value.slice(0, PICKER_SEARCH_MAX_LENGTH))
           }
-          placeholder="Search products"
-          aria-label="Search your products"
+          placeholder={t("searchPlaceholder")}
+          aria-label={t("searchAriaLabel")}
           className={cn(fieldBaseClass, "py-2 pl-8 text-sm")}
         />
       </div>
 
       {term && searching && merged.length === 0 && (
         <p className={helpTextClass} role="status">
-          Searching...
+          {t("searching")}
         </p>
       )}
       {term && !searching && merged.length === 0 && !searchFailed && (
         <p className={helpTextClass} role="status">
-          No products match &ldquo;{search.trim()}&rdquo;.
+          {t("noMatch", { term: search.trim() })}
         </p>
       )}
       {searchFailed && (
         <p className="font-inter text-xs text-destructive" role="alert">
-          Search is unavailable right now; showing what&apos;s already loaded.
+          {t("searchFailed")}
         </p>
       )}
 
       {selected.length > 0 && (
         <div className="space-y-1">
           <p className="font-inter text-xs font-medium text-muted-foreground">
-            In grid
+            {t("inGrid")}
           </p>
           <ProductList
             products={selected}
@@ -247,7 +248,7 @@ export function ProductPicker({
         <div className="space-y-1">
           {selected.length > 0 && (
             <p className="font-inter text-xs font-medium text-muted-foreground">
-              Available
+              {t("available")}
             </p>
           )}
           <ProductList
@@ -266,7 +267,7 @@ export function ProductPicker({
                 onClick={addSelected}
                 className="flex-1 rounded-md bg-foreground px-3 py-1.5 font-inter text-xs font-medium text-background transition-opacity duration-base ease-standard hover:opacity-80 motion-reduce:transition-none"
               >
-                Add {pendingCount} selected
+                {t("addSelected", { count: pendingCount })}
               </button>
             )}
             {gridIsEmpty && pendingCount === 0 && available.length > 1 && (
@@ -275,7 +276,7 @@ export function ProductPicker({
                 onClick={addAll}
                 className="flex-1 rounded-md border border-border px-3 py-1.5 font-inter text-xs font-medium text-foreground transition-colors duration-base ease-standard hover:bg-muted motion-reduce:transition-none"
               >
-                Add all ({available.length})
+                {t("addAll", { count: available.length })}
               </button>
             )}
           </div>
@@ -301,6 +302,8 @@ function ProductList({
   /** Whether checkboxes are shown (only for the "available" group). */
   selectable: boolean;
 }) {
+  const t = useTranslations("Storefront.picker");
+  const locale = useLocale();
   return (
     <ul className="space-y-1">
       {products.map((product) => {
@@ -315,7 +318,7 @@ function ProductList({
                 type="button"
                 onClick={() => onToggleSelect(product.id)}
                 aria-pressed={isChecked}
-                aria-label={`${isChecked ? "Deselect" : "Select"} ${product.title}`}
+                aria-label={isChecked ? t("deselectAriaLabel", { title: product.title }) : t("selectAriaLabel", { title: product.title })}
                 className={cn(
                   "flex size-5 shrink-0 items-center justify-center rounded border transition-colors duration-base ease-standard motion-reduce:transition-none",
                   isChecked
@@ -353,15 +356,15 @@ function ProductList({
                 {/* SF-01: badge draft products so sellers know buyers hit a dead link */}
                 {isDraft && (
                   <span
-                    aria-label="Draft product -- not visible to buyers"
+                    aria-label={t("draftAriaLabel")}
                     className="shrink-0 rounded-sm bg-amber-100 px-1 py-0.5 font-inter text-[10px] font-medium leading-none text-amber-800 dark:bg-amber-900/40 dark:text-amber-300"
                   >
-                    Draft
+                    {t("draftBadge")}
                   </span>
                 )}
               </span>
               <span className="block font-inter text-xs text-muted-foreground">
-                {formatPrice(product.price, product.currency)}
+                {formatPrice(product.price, product.currency, locale)}
               </span>
             </span>
             {!selectable || !selectedIds.size ? (
@@ -371,8 +374,8 @@ function ProductList({
                 disabled={used}
                 aria-label={
                   used
-                    ? `${product.title} is in the grid`
-                    : `Add ${product.title} to grid`
+                    ? t("inGridAriaLabel", { title: product.title })
+                    : t("addToGridAriaLabel", { title: product.title })
                 }
                 className={cn(ADD_BUTTON_CLASS)}
               >

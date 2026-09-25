@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { english } from "../setup/translate";
 import { buildShippingProse, hasShippingPolicy } from "@/lib/shipping/policy-prose";
 import {
   compactShippingPolicy,
@@ -14,20 +15,20 @@ import { buildShippingPolicy } from "@/lib/settings/shipping-policy";
 
 describe("buildShippingProse", () => {
   it("says nothing for a seller who has answered nothing", () => {
-    expect(buildShippingProse({})).toEqual({ shipping: "", returns: "" });
-    expect(buildShippingProse(null)).toEqual({ shipping: "", returns: "" });
+    expect(buildShippingProse({}, english, "en")).toEqual({ shipping: "", returns: "" });
+    expect(buildShippingProse(null, english, "en")).toEqual({ shipping: "", returns: "" });
   });
 
   it("opens with where the goods ship from, by name and not by code", () => {
     // A buyer comparing sellers often needs no more than this line, and "IE"
     // is not an answer to "where does this come from".
-    expect(buildShippingProse({ shipsFrom: "IE" }).shipping).toBe("Ships from Ireland.");
+    expect(buildShippingProse({ shipsFrom: "IE" }, english, "en").shipping).toBe("Ships from Ireland.");
   });
 
   it("keeps an unknown country code rather than dropping where it ships from", () => {
     // A stored value from before a list changed. Printing the code lets a
     // reader look it up; silently dropping it loses a fact the seller gave.
-    expect(buildShippingProse({ shipsFrom: "ZZ" }).shipping).toBe("Ships from ZZ.");
+    expect(buildShippingProse({ shipsFrom: "ZZ" }, english, "en").shipping).toBe("Ships from ZZ.");
   });
 
   it("prints destinations as one block of lines, not one paragraph each", () => {
@@ -39,7 +40,7 @@ describe("buildShippingProse", () => {
           { area: "Ireland", time: "2-3 business days", cost: "€4.50" },
           { area: "Rest of EU", time: "5-7 business days" },
         ],
-      }).shipping,
+      }, english, "en").shipping,
     ).toBe("Ireland: 2-3 business days (€4.50)\nRest of EU: 5-7 business days");
   });
 
@@ -48,7 +49,7 @@ describe("buildShippingProse", () => {
       buildShippingProse({
         shipsFrom: "IE",
         shippingNotes: "We do not ship to PO boxes.",
-      }).shipping,
+      }, english, "en").shipping,
     ).toBe("Ships from Ireland.\n\nWe do not ship to PO boxes.");
   });
 
@@ -56,15 +57,15 @@ describe("buildShippingProse", () => {
     // Both mean "nothing beyond the statutory right", which the page states on
     // its own. Generating a sentence here would either repeat it or contradict
     // it.
-    expect(buildShippingProse({ returnsWindowDays: 0 }).returns).toBe("");
-    expect(buildShippingProse({ returnsPaidBy: "buyer" }).returns).toBe("");
+    expect(buildShippingProse({ returnsWindowDays: 0 }, english, "en").returns).toBe("");
+    expect(buildShippingProse({ returnsPaidBy: "buyer" }, english, "en").returns).toBe("");
   });
 
   it("puts the window and who pays in ONE sentence", () => {
     // Who pays is the second thing every buyer asks and the one sellers most
     // often leave out, so it does not wait for a paragraph nobody writes.
     expect(
-      buildShippingProse({ returnsWindowDays: 1, returnsPaidBy: "seller" }).returns,
+      buildShippingProse({ returnsWindowDays: 1, returnsPaidBy: "seller" }, english, "en").returns,
     ).toBe("Returns accepted within 1 day of delivery. Return postage is on us.");
   });
 
@@ -77,7 +78,7 @@ describe("buildShippingProse", () => {
       shippingText: "Ask us.",
       returnsWindowDays: 30,
       returnsText: "Talk to us.",
-    });
+    }, english, "en");
     expect(prose.shipping).toBe("Ask us.");
     expect(prose.returns).toBe("Talk to us.");
   });

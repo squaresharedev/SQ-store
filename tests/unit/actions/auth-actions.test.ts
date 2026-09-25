@@ -59,6 +59,13 @@ vi.mock("@/lib/supabase/admin", () => ({
 // ---- imports -------------------------------------------------------------
 
 import { authenticate, resetPassword } from "@/lib/auth/actions";
+import { english } from "../../setup/translate";
+import type { ActionState } from "@/lib/errors";
+
+/** The English a reader is shown for a form action's result. */
+const errorText = (state: ActionState) => (state.error ? english(state.error.message) : undefined);
+const successText = (state: ActionState) =>
+  state.success ? english(state.success) : undefined;
 
 // ---- helpers -------------------------------------------------------------
 
@@ -104,7 +111,11 @@ beforeEach(() => {
   rateLimitKeyMock.mockResolvedValue(true);
   adminRpc.mockResolvedValue({ data: null, error: null });
   auth.resetPasswordForEmail.mockResolvedValue({ error: null });
-  auth.signInWithPassword.mockResolvedValue({ data: {}, error: null });
+  // Shaped like a real success: Supabase always returns the user with it.
+  auth.signInWithPassword.mockResolvedValue({
+    data: { user: { id: "u1" }, session: {} },
+    error: null,
+  });
   auth.signUp.mockResolvedValue({ data: { session: null }, error: null });
   auth.updateUser.mockResolvedValue({ error: null });
   auth.getUser.mockResolvedValue({ data: { user: { id: "u1" } } });
@@ -182,8 +193,8 @@ describe("username sign-in - handle enumeration", () => {
     adminRpc.mockResolvedValue({ data: null, error: null });
     const unknownHandle = await authenticate({}, signInForm("nobodyhasthis"));
 
-    expect(unknownHandle.error).toBe(wrongPassword.error);
-    expect(unknownHandle.error).toBe("Incorrect email or password.");
+    expect(errorText(unknownHandle)).toBe(errorText(wrongPassword));
+    expect(errorText(unknownHandle)).toBe("Incorrect email or password.");
   });
 
   it("answers a failed LOOKUP the same way too, so an outage is not a signal", async () => {
@@ -191,7 +202,7 @@ describe("username sign-in - handle enumeration", () => {
 
     const result = await authenticate({}, signInForm("builderboy"));
 
-    expect(result.error).toBe("Incorrect email or password.");
+    expect(errorText(result)).toBe("Incorrect email or password.");
   });
 
   it("still spends a full password round trip on a handle nobody holds", async () => {
@@ -226,7 +237,7 @@ describe("username sign-in - handle enumeration", () => {
     const result = await authenticate({}, signInForm("ab"));
 
     expect(adminRpc).not.toHaveBeenCalled();
-    expect(result.error).toBe("Incorrect email or password.");
+    expect(errorText(result)).toBe("Incorrect email or password.");
   });
 });
 
@@ -258,7 +269,7 @@ describe("username sign-in - rate limiting", () => {
 
     const result = await authenticate({}, signInForm("builderboy"));
 
-    expect(result.error).toMatch(/too many attempts/i);
+    expect(errorText(result)).toMatch(/too many attempts/i);
     expect(adminRpc).not.toHaveBeenCalled();
     expect(auth.signInWithPassword).not.toHaveBeenCalled();
   });
@@ -292,7 +303,7 @@ describe("username sign-up - claiming the handle", () => {
 
     const result = await authenticate({}, signUpForm());
 
-    expect(result.error).toMatch(/taken/i);
+    expect(errorText(result)).toMatch(/taken/i);
     expect(auth.signUp).not.toHaveBeenCalled();
   });
 
@@ -309,7 +320,7 @@ describe("username sign-up - claiming the handle", () => {
   it("rejects reserved handles", async () => {
     for (const reserved of ["admin", "support", "squareshare"]) {
       const result = await authenticate({}, signUpForm({ username: reserved }));
-      expect(result.error, reserved).toMatch(/reserved/i);
+      expect(errorText(result), reserved).toMatch(/reserved/i);
     }
     expect(auth.signUp).not.toHaveBeenCalled();
   });
@@ -320,7 +331,7 @@ describe("username sign-up - claiming the handle", () => {
         {},
         signUpForm({ password: weak, confirm_password: weak }),
       );
-      expect(result.error, weak).toBeTruthy();
+      expect(errorText(result), weak).toBeTruthy();
     }
     expect(auth.signUp).not.toHaveBeenCalled();
   });
@@ -331,14 +342,14 @@ describe("username sign-up - claiming the handle", () => {
       {},
       signUpForm({ password: "Builderboy-1", confirm_password: "Builderboy-1" }),
     );
-    expect(result.error).toMatch(/must not contain your email address or username/i);
+    expect(errorText(result)).toMatch(/must not contain your email address or username/i);
     expect(auth.signUp).not.toHaveBeenCalled();
   });
 
   it("rejects a badly shaped handle before spending any budget", async () => {
     for (const bad of ["ab", "has spaces", "Bad-Hyphen", "x".repeat(31), "héllo"]) {
       const result = await authenticate({}, signUpForm({ username: bad }));
-      expect(result.error, bad).toBeTruthy();
+      expect(errorText(result), bad).toBeTruthy();
     }
     expect(auth.signUp).not.toHaveBeenCalled();
     expect(rateLimitKeyMock).not.toHaveBeenCalled();
@@ -357,8 +368,8 @@ describe("username sign-up - claiming the handle", () => {
 
     const result = await authenticate({}, signUpForm());
 
-    expect(result.error).not.toMatch(/profiles_username_lower_idx/);
-    expect(result.error).toMatch(/different username/i);
+    expect(errorText(result)).not.toMatch(/profiles_username_lower_idx/);
+    expect(errorText(result)).toMatch(/different username/i);
   });
 });
 
@@ -375,7 +386,7 @@ describe("username sign-up - the email is still the account", () => {
           confirm_password: "correct-horse",
         }),
       );
-      expect(result.error, intent).toMatch(/valid email address/i);
+      expect(errorText(result), intent).toMatch(/valid email address/i);
     }
     expect(auth.signUp).not.toHaveBeenCalled();
     expect(auth.signInWithOtp).not.toHaveBeenCalled();
@@ -393,19 +404,19 @@ describe("auth rate limits", () => {
 
     const result = await authenticate({}, signInForm("someone@example.com"));
 
-    expect(result.error).toMatch(/too many attempts/i);
+    expect(errorText(result)).toMatch(/too many attempts/i);
     expect(auth.signInWithPassword).not.toHaveBeenCalled();
   });
 
   it("bounds SIGN-UP per client as well as per address", async () => {
     denyOnly("auth_signup_client");
-    expect((await authenticate({}, signUpForm())).error).toMatch(/too many attempts/i);
+    expect(errorText(await authenticate({}, signUpForm()))).toMatch(/too many attempts/i);
     expect(auth.signUp).not.toHaveBeenCalled();
 
     vi.clearAllMocks();
     adminRpc.mockResolvedValue({ data: null, error: null });
     denyOnly("auth_email_address");
-    expect((await authenticate({}, signUpForm())).error).toMatch(/too many attempts/i);
+    expect(errorText(await authenticate({}, signUpForm()))).toMatch(/too many attempts/i);
     expect(auth.signUp).not.toHaveBeenCalled();
   });
 
@@ -418,7 +429,7 @@ describe("auth rate limits", () => {
 
     expect(auth.resetPasswordForEmail).not.toHaveBeenCalled();
     // Still the success copy — see the enumeration test below.
-    expect(result.message).toBe(RESET_REPLY);
+    expect(successText(result)).toBe(RESET_REPLY);
   });
 
   it("bounds the MAGIC link on both budgets too", async () => {
@@ -426,7 +437,7 @@ describe("auth rate limits", () => {
       vi.clearAllMocks();
       denyOnly(action);
       const result = await authenticate({}, form({ intent: "magic", email: "a@b.com" }));
-      expect(result.error, action).toMatch(/too many attempts/i);
+      expect(errorText(result), action).toMatch(/too many attempts/i);
       expect(auth.signInWithOtp).not.toHaveBeenCalled();
     }
   });
@@ -440,7 +451,7 @@ describe("auth rate limits", () => {
 describe("password reset request - account enumeration", () => {
   it("gives the same reply whether or not Supabase accepted the address", async () => {
     const sent = await authenticate({}, form({ intent: "reset", email: "a@b.com" }));
-    expect(sent.message).toBe(RESET_REPLY);
+    expect(successText(sent)).toBe(RESET_REPLY);
 
     // Supabase's errors are address-specific (unknown user, per-address send
     // throttle), so surfacing them would let someone tell real addresses apart.
@@ -448,16 +459,16 @@ describe("password reset request - account enumeration", () => {
       error: { code: "user_not_found", message: "not found" },
     });
     const unknown = await authenticate({}, form({ intent: "reset", email: "a@b.com" }));
-    expect(unknown.message).toBe(RESET_REPLY);
-    expect(unknown.error).toBeUndefined();
+    expect(successText(unknown)).toBe(RESET_REPLY);
+    expect(errorText(unknown)).toBeUndefined();
 
     // Same for its per-address rate limit, which only trips on real accounts.
     auth.resetPasswordForEmail.mockResolvedValue({
       error: { code: "over_email_send_rate_limit", message: "too soon" },
     });
     const throttled = await authenticate({}, form({ intent: "reset", email: "a@b.com" }));
-    expect(throttled.message).toBe(RESET_REPLY);
-    expect(throttled.error).toBeUndefined();
+    expect(successText(throttled)).toBe(RESET_REPLY);
+    expect(errorText(throttled)).toBeUndefined();
   });
 
   it("gives the SAME reply when rate limited, so throttling is not an oracle", async () => {
@@ -467,13 +478,13 @@ describe("password reset request - account enumeration", () => {
 
     const result = await authenticate({}, form({ intent: "reset", email: "a@b.com" }));
 
-    expect(result.message).toBe(RESET_REPLY);
+    expect(successText(result)).toBe(RESET_REPLY);
     expect(auth.resetPasswordForEmail).not.toHaveBeenCalled();
   });
 
   it("requires an email before spending any budget", async () => {
     const result = await authenticate({}, form({ intent: "reset", email: "" }));
-    expect(result.error).toMatch(/enter your email/i);
+    expect(errorText(result)).toMatch(/enter your email/i);
     expect(rateLimitKeyMock).not.toHaveBeenCalled();
   });
 });
@@ -513,7 +524,7 @@ describe("resetPassword - session requirement", () => {
 
     const result = await resetPassword({}, resetForm("new-password-1"));
 
-    expect(result.error).toMatch(/expired/i);
+    expect(errorText(result)).toMatch(/expired/i);
     expect(auth.updateUser).not.toHaveBeenCalled();
   });
 });
@@ -521,19 +532,19 @@ describe("resetPassword - session requirement", () => {
 describe("resetPassword - validation", () => {
   it("rejects a short password before touching the session", async () => {
     const result = await resetPassword({}, resetForm("short"));
-    expect(result.error).toMatch(/8 characters/i);
+    expect(errorText(result)).toMatch(/8 characters/i);
     expect(auth.getUser).not.toHaveBeenCalled();
   });
 
   it("rejects a password beyond the bcrypt input limit", async () => {
     const result = await resetPassword({}, resetForm("x".repeat(73)));
-    expect(result.error).toMatch(/72 characters/i);
+    expect(errorText(result)).toMatch(/72 characters/i);
     expect(auth.updateUser).not.toHaveBeenCalled();
   });
 
   it("rejects a mismatched confirmation", async () => {
     const result = await resetPassword({}, resetForm("new-password-1", "different-1"));
-    expect(result.error).toMatch(/do not match/i);
+    expect(errorText(result)).toMatch(/do not match/i);
     expect(auth.updateUser).not.toHaveBeenCalled();
   });
 });
@@ -565,7 +576,7 @@ describe("resetPassword - session revocation", () => {
 
     const result = await resetPassword({}, resetForm("new-password-1"));
 
-    expect(result.error).toBeTruthy();
+    expect(errorText(result)).toBeTruthy();
     expect(auth.signOut).not.toHaveBeenCalled();
   });
 

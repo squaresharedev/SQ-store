@@ -1,0 +1,696 @@
+{
+  "metadata": {
+    "layout": {
+      "titleTemplate": "%s | Square Share",
+      "default": "Nastavení | Square Share"
+    },
+    "account": {
+      "title": "Nastavení účtu"
+    },
+    "notifications": {
+      "title": "Nastavení oznámení"
+    },
+    "language": {
+      "title": "Nastavení jazyka"
+    },
+    "danger": {
+      "title": "Nebezpečná zóna"
+    },
+    "legal": {
+      "title": "Právní informace"
+    },
+    "team": {
+      "title": "Tým a přístup"
+    },
+    "tax": {
+      "title": "Firma a údaje prodejce"
+    },
+    "shipping": {
+      "title": "Nastavení dopravy a vrácení zboží"
+    },
+    "security": {
+      "title": "Zabezpečení"
+    }
+  },
+  "loading": "Načítání nastavení…",
+  "shell": {
+    "sectionsLabel": "Sekce nastavení",
+    "recommended": "Doporučeno"
+  },
+  "continueToStorefront": "Pokračovat na výlohu",
+  "account": {
+    "fallbackName": "Účet",
+    "avatar": {
+      "cardTitle": "Profilová fotka",
+      "cardDescription": "JPEG, PNG nebo WebP do 2 MB. Zobrazuje se v celém panelu.",
+      "errorTooLarge": "Obrázek je příliš velký. Maximum jsou 2 MB.",
+      "errorBadType": "Použijte obrázek ve formátu JPEG, PNG nebo WebP.",
+      "errorReadFailed": "Soubor se nepodařilo přečíst.",
+      "editLabel": "Upravit profilovou fotku",
+      "uploadLabel": "Nahrát profilovou fotku",
+      "statusUploading": "Nahrávání profilové fotky",
+      "statusRemoving": "Odebírání profilové fotky",
+      "chooseLabel": "Vybrat profilovou fotku",
+      "changePhoto": "Změnit fotku",
+      "uploadPhoto": "Nahrát fotku"
+    },
+    "crop": {
+      "title": "Oříznutí fotky",
+      "description": "Přetažením změníte polohu. Přiblížíte kolečkem myši nebo posuvníkem.",
+      "areaLabel": "Oblast oříznutí. Polohu změníte přetažením nebo šipkami.",
+      "zoomLabel": "Přiblížení",
+      "chooseAnother": "Vybrat jinou",
+      "savePhoto": "Uložit fotku",
+      "errors": {
+        "load": "Obrázek se nepodařilo načíst. Zkuste ho vybrat znovu.",
+        "process": "Váš prohlížeč tento obrázek nedokázal zpracovat.",
+        "prepare": "Obrázek se nepodařilo připravit. Zkuste jiný.",
+        "export": "Obrázek se nepodařilo exportovat. Nahrajte ho raději znovu."
+      }
+    },
+    "username": {
+      "cardTitle": "Uživatelské jméno",
+      "cardDescription": "Můžete se jím přihlašovat místo e-mailu. Jen písmena, číslice a podtržítka; dva účty nemohou mít stejné.",
+      "label": "Uživatelské jméno",
+      "placeholder": "vasejmeno",
+      "available": "Volné.",
+      "taken": "Toto uživatelské jméno už někdo má, zkuste jiné.",
+      "checking": "Ověřování…"
+    },
+    "bio": {
+      "cardTitle": "Medailonek",
+      "cardDescription": "Krátká věta o vás nebo o tom, co tvoříte. Zobrazuje se kupujícím na vašich produktových stránkách.",
+      "label": "Medailonek",
+      "optional": "(nepovinné)",
+      "placeholder": "např. Ručně točená kamenina z malé dílny v Kutné Hoře",
+      "charactersLeft": "{count, plural, one {Zbývá {count} znak} few {Zbývají {count} znaky} many {Zbývá {count} znaku} other {Zbývá {count} znaků}}"
+    },
+    "email": {
+      "cardTitle": "E-mail",
+      "cardDescription": "Při změně nejdřív pošleme potvrzovací odkaz. Dokud na něj opravdu nekliknete, nic se nezmění, takže překlep tu nic nezkazí.",
+      "currentlySignedInAs": "Aktuálně přihlášený účet: <address>{email}</address>",
+      "newEmailLabel": "Nový e-mail",
+      "newEmailPlaceholder": "vy@studio.cz",
+      "currentPasswordLabel": "Současné heslo",
+      "passwordTipLabel": "Proč je tu potřeba heslo",
+      "passwordTipBody": "Kdo ovládá vaši e-mailovou adresu, může obnovit vaše heslo, takže její změna mění i to, jak se k účtu dostanete zpět. Heslem potvrdíte, že změnu opravdu provádíte vy.",
+      "sendConfirmationLink": "Poslat potvrzovací odkaz"
+    },
+    "password": {
+      "cardTitle": "Heslo",
+      "descriptionHasPassword": "Změnit ho můžete kdykoli. Nejdřív se zeptáme na to současné, jen abychom si ověřili, že jste to opravdu vy.",
+      "descriptionNeverShown": "Z bezpečnostních důvodů se vaše heslo tady nikdy nezobrazuje. Pokud ho chcete změnit, pošleme vám e-mailem odkaz pro nastavení nového.",
+      "descriptionNoPassword": "Přihlašujete se přes Google. Přidejte heslo a budete se moct přihlásit i e-mailem nebo uživatelským jménem.",
+      "changeButton": "Změnit heslo",
+      "resetButton": "Obnovit heslo",
+      "setButton": "Nastavit heslo",
+      "modalTitleChange": "Změna hesla",
+      "modalTitleReset": "Obnovení hesla",
+      "modalTitleSet": "Nastavení hesla",
+      "modalDescriptionReset": "Na adresu {email} vám pošleme odkaz. Jeho platnost brzy po doručení vyprší.",
+      "modalDescriptionChange": "Zadejte současné heslo a potom nové.",
+      "currentPasswordLabel": "Současné heslo",
+      "newPasswordLabel": "Nové heslo",
+      "passwordHint": "Alespoň 8 znaků, kombinace velkých a malých písmen, číslic nebo symbolů (nebo heslová fráze o 16 a více znacích).",
+      "confirmPasswordLabel": "Potvrzení nového hesla",
+      "signOutWarning": "Všechna ostatní zařízení budou odhlášena.",
+      "forgotPassword": "Zapomenuté heslo?",
+      "updating": "Ukládání…",
+      "updateButton": "Změnit heslo",
+      "resendIn": "{seconds, plural, one {Znovu odeslat za # s} few {Znovu odeslat za # s} many {Znovu odeslat za # s} other {Znovu odeslat za # s}}",
+      "resendEmail": "Znovu poslat e-mail",
+      "emailMeALink": "Poslat odkaz e-mailem",
+      "googleAccountNote": "Tento účet se přihlašuje přes Google. Když nastavíte heslo, budete se moct přihlásit i e-mailem nebo uživatelským jménem a přihlášení přes Google zůstane zachováno.",
+      "neverShownNote": "Vaše současné heslo se nikdy nezobrazuje. Otevřete odkaz a zvolte nové; jeho nastavením se odhlásíte na ostatních zařízeních."
+    },
+    "signOut": {
+      "cardTitle": "Odhlášení",
+      "cardDescription": "Ukončete relaci na tomto zařízení, nebo se odhlaste všude a odhlásíte se ze všech zařízení najednou.",
+      "signingOut": "Odhlašování…",
+      "button": "Odhlásit se",
+      "everywhereButton": "Odhlásit se všude",
+      "everywhereNote": "Odhlášení všude ukončí relaci ve všech zařízeních a prohlížečích, kde máte aktivní přihlášení. Na každém z nich se pak budete muset přihlásit znovu."
+    },
+    "success": {
+      "usernameSaved": "Uživatelské jméno uloženo.",
+      "bioSaved": "Medailonek uložen.",
+      "emailChangeStarted": "Podívejte se do e-mailu. Změna se projeví, jakmile potvrdíte odkaz.",
+      "passwordUpdated": "Heslo změněno. Ostatní zařízení byla odhlášena.",
+      "resetSent": "Odkaz pro obnovení odeslán. Podívejte se do e-mailu.",
+      "avatarUpdated": "Profilová fotka aktualizována.",
+      "avatarRemoved": "Profilová fotka odebrána."
+    }
+  },
+  "danger": {
+    "export": {
+      "cardTitle": "Export mých dat",
+      "cardDescription": "Vše, co o vás uchováváme: profil, produkty, nastavení výlohy, to vše v jednom souboru JSON. Jsou to vaše data a patří vám.",
+      "downloadButton": "Stáhnout moje data",
+      "stepUpDescription": "Váš export obsahuje celý váš účet. Pro jeho stažení zadejte aktuální kód z ověřovací aplikace."
+    },
+    "delete": {
+      "requestedTitle": "Požádáno o smazání",
+      "requestedDescription": "O smazání tohoto účtu bylo požádáno {date}. Účet je označen k trvalému smazání včetně produktů a výloh. Dokud k tomu opravdu nedojde, můžete si to ještě rozmyslet.",
+      "cancelling": "Rušení…",
+      "keepButton": "Ponechat účet",
+      "title": "Smazání účtu",
+      "description": "Tímto označíte svůj účet, produkty a výlohu k trvalému smazání. Nebudeme nic přikrášlovat: jakmile se smazání provede, je vše pryč.",
+      "deleteButton": "Smazat můj účet",
+      "confirmLabel": "Pro potvrzení napište <code>{phrase}</code>",
+      "flagging": "Označování…",
+      "permanentlyDelete": "Trvale smazat",
+      "neverMind": "Nechat být"
+    },
+    "success": {
+      "deletionRequested": "Žádost o smazání odeslána.",
+      "deletionCancelled": "Žádost o smazání zrušena. Jsme rádi, že zůstáváte."
+    }
+  },
+  "notifications": {
+    "cardTitle": "E-mailová oznámení",
+    "cardDescription": "Vyberte si, co vám bude chodit do schránky. E-maily o zabezpečení a platbách chodí vždy, ty vypnout nejde.",
+    "prefs": {
+      "sales": {
+        "label": "Prodeje",
+        "blurb": "E-mail pokaždé, když se něco prodá. Takové zprávy ve schránce potěší."
+      },
+      "productUpdates": {
+        "label": "Novinky v produktu",
+        "blurb": "Nové funkce a vylepšení panelu, jakmile budou hotové."
+      },
+      "marketing": {
+        "label": "Tipy a novinky z tržiště",
+        "blurb": "Občasné nápady, jak prodávat víc. Jen s mírou, žádný spam."
+      }
+    },
+    "success": {
+      "notificationsSaved": "Předvolby uloženy."
+    }
+  },
+  "legal": {
+    "cardTitle": "Smlouva s prodejcem, podmínky a ochrana soukromí",
+    "cardDescription": "Aktuální koncepty srozumitelnou řečí, protože právnický jazyk nikdo nečte pro zábavu. Skutečné právní znění je na cestě; přijetím teď souhlasíte s touto verzí konceptu.",
+    "termsTitle": "Podmínky služby",
+    "termsDescription": "Stručná verze toho, s čím souhlasíte prodejem na Square Share, a úplné Podmínky na jedno kliknutí.",
+    "docs": {
+      "sellerAgreement": {
+        "title": "Smlouva s prodejcem",
+        "body": "Vaše tvorba vždy patří vám. Z každého prodeje si bereme malý podíl, platby zajišťujeme přes Stripe a staráme se o to, aby servery běžely. Vy dodržujete zákony a posíláte to, co opravdu prodáváte. Toto je předběžný koncept; skutečná smlouva je na cestě."
+      },
+      "terms": {
+        "title": "Podmínky služby",
+        "body": "Nezneužívejte platformu, neprodávejte nic, co lidem ubližuje, a chovejte se slušně k obchodům ostatních tvůrců. Toto je předběžný koncept; skutečné podmínky jsou na cestě."
+      },
+      "privacy": {
+        "title": "Zásady ochrany osobních údajů",
+        "body": "Uchováváme to, co nám poskytnete (profil, produkty, výlohu), nikdy to neprodáváme a smažeme to, když odejdete. Platby probíhají přes Stripe, takže údaje o vaší kartě zůstávají u nich, ne u nás. Toto je předběžný koncept; skutečné zásady jsou na cestě."
+      },
+      "sellerDetails": {
+        "title": "Vaše údaje prodejce a kde se zobrazují",
+        "body": "Vaše obchodní jméno, adresa a kontaktní e-mail se kupujícím zobrazují na vašich produktových stránkách a bez nich nemůžete nic zveřejnit ani prodat. Nic jiného s nimi neděláme: podle spotřebitelského práva EU musí kupující před objednávkou vidět, od koho kupuje, a mít možnost ho kontaktovat. Na kontaktní adresu pošleme jeden odkaz, kterým ověříte, že funguje, a to je jediný e-mail, který tam z vlastní iniciativy posíláme (žádné seznamy, žádný marketing, a nic z toho nikdy neprodáváme ani nesdílíme). Telefonní číslo a DIČ jsou nepovinné a zobrazí se, jen pokud je vyplníte."
+      }
+    },
+    "accepted": "Verze <code>{version}</code> přijata {date}. Tady už nemusíte nic dělat.",
+    "outdated": "Verze <code>{version}</code> přijata {date}, ale dokumenty se od té doby změnily. Přečtěte si je znovu a přijměte aktuální verzi.",
+    "agreed": "Souhlas s verzí <code>{version}</code> je zaznamenán k {date}. Tady už není co dělat.",
+    "agreedOutdated": "Souhlas s verzí <code>{version}</code> je zaznamenán k {date}, ale Podmínky se od té doby změnily. Přečtěte si je znovu a odsouhlaste aktuální verzi.",
+    "recording": "Ukládání…",
+    "acceptButton": "Souhlasím",
+    "agreeButton": "Beru Podmínky na vědomí a souhlasím s nimi",
+    "acceptNote": "Přijetím se k vašemu účtu uloží datum a verze <code>{version}</code>.",
+    "agreeNote": "Souhlasem se k vašemu účtu uloží datum a verze <code>{version}</code>.",
+    "scrollToAgree": "Chcete-li souhlasit, přejděte na konec shrnutí.",
+    "success": {
+      "legalAccepted": "Přijato. Díky, že čtete i drobné písmo.",
+      "termsAgreed": "Podmínky služby byly odsouhlaseny."
+    },
+    "termsSummary": {
+      "intro": "Stručná verze srozumitelným jazykem. Poslední aktualizace {date}.",
+      "fullTermsLink": "Přečíst úplné Podmínky služby",
+      "opensInNewTab": " (otevře se na nové kartě)",
+      "regionLabel": "Podmínky služby, stručná verze",
+      "footer": "Toto shrnutí má usnadnit čtení. Závazné jsou úplné <terms>Podmínky služby</terms> a <privacy>Zásady ochrany osobních údajů</privacy>.",
+      "sections": {
+        "parties": {
+          "heading": "S kým jednáte",
+          "points": {
+            "merchantOfRecord": "Square Share je platforma, která vám pomáhá prodávat. Když u vás kupující objedná, prodej se uzavírá mezi vámi a tímto kupujícím: prodávajícím a odpovědným obchodníkem jste vy, ne my.",
+            "eligibility": "Musíte být starší 18 let nebo dosáhnout zletilosti podle místa svého bydliště. Pokud se registrujete za firmu, potvrzujete, že ji můžete těmito Podmínkami zavázat."
+          }
+        },
+        "account": {
+          "heading": "Váš účet",
+          "points": {
+            "security": "Udržujte své údaje přesné a své přihlášení zabezpečené. Za dění na svém účtu odpovídáte, proto nám ihned řekněte, pokud si myslíte, že se do něj dostal někdo jiný.",
+            "traderDetails": "Než se cokoli zveřejní, poskytnete nám své obchodní jméno, poštovní adresu a kontaktní e-mail, který potvrdíte. Kupující je uvidí na stránkách vašich produktů, protože to vyžaduje spotřebitelské právo."
+          }
+        },
+        "selling": {
+          "heading": "Prodej",
+          "points": {
+            "lawfulListings": "Uvádějte údaje přesně a prodávejte jen zákonné věci, které máte právo prodávat.",
+            "consumerRights": "Dodržujte spotřebitelská práva svých kupujících, včetně 14denní lhůty pro odstoupení od smlouvy a zákonných práv z vadného plnění, a sami zajišťujte doručení, podporu a vrácení peněz.",
+            "taxesAndRecords": "Daně a DPH z vašich prodejů řešíte vy a své záznamy o prodejích uchováváte 10 let."
+          }
+        },
+        "payments": {
+          "heading": "Platby",
+          "points": {
+            "stripe": "Platby probíhají přes Stripe, na váš vlastní účet Stripe, podle podmínek Stripe. Vaše peníze nikdy nedržíme.",
+            "feesAndDisputes": "Z každého prodeje si bereme poplatek platformy, jak je uvedeno ve vašem přehledu. Zpětná stržení plateb a spory se řeší mezi vámi, vaším kupujícím a Stripe."
+          }
+        },
+        "notAllowed": {
+          "heading": "Co není povoleno",
+          "points": {
+            "products": "Nezákonné, padělané nebo práva porušující produkty, malware, nenávistný obsah a obsah pro dospělé.",
+            "conduct": "Podvody, obcházení poplatků platformy, automatizované stahování dat, používání cizího obsahu k trénování modelů umělé inteligence nebo útoky na službu.",
+            "tampering": "Skrývání nebo měnění toho, co Square Share zobrazuje kupujícím, například údajů o prodejci, cen nebo právních upozornění."
+          }
+        },
+        "content": {
+          "heading": "Váš obsah",
+          "points": {
+            "ownership": "To, co nahrajete, zůstává vaše. Udělujete nám licenci k jeho hostování a zobrazování, a to jen za účelem provozu a propagace Square Share."
+          }
+        },
+        "liability": {
+          "heading": "Odpovědnost, změny a rozhodné právo",
+          "points": {
+            "cap": "Square Share je v rané fázi a podnikatelským uživatelům se poskytuje ve stavu, v jakém je. Vůči nim je naše odpovědnost omezena na poplatky, které nám zaplatili za posledních 12 měsíců, nebo na 100 EUR, podle toho, co je vyšší, a podnikající prodejci nás odškodní za nároky způsobené jejich produkty, weby nebo porušením Podmínek. Pokud jste spotřebitel, vaše zákonná práva nejsou dotčena.",
+            "termination": "Účty, které porušují tyto Podmínky, můžeme pozastavit nebo zrušit. Vy můžete odejít kdykoli a své údaje si odnést.",
+            "changesAndLaw": "Tyto Podmínky můžeme aktualizovat, o podstatných změnách vás předem upozorníme. Použije se české právo.",
+            "policies": "Součástí těchto Podmínek jsou i naše Zásady ochrany osobních údajů a Zásady používání cookies."
+          }
+        }
+      }
+    }
+  },
+  "tax": {
+    "cardTitle": "Firma a údaje prodejce",
+    "cardDescription": "Nastavíte jednou pro celý účet. Zobrazují se kupujícím na každé produktové stránce, přes kterou prodáváte, a používají se pro faktury a DPH.",
+    "verifyOutcome": {
+      "verified": "Kontaktní e-mail je potvrzený. Teď můžete zveřejňovat.",
+      "expired": "Platnost potvrzovacího odkazu vypršela. Níže si pošlete nový.",
+      "stale": "Odkaz patřil k jiné adrese, než je tu uložená. Níže si pošlete nový.",
+      "invalid": "Potvrzovací odkaz není platný, nebo už byl použit.",
+      "throttled": "Příliš mnoho pokusů o potvrzení. Chvíli počkejte a pak odkaz otevřete znovu."
+    },
+    "gate": {
+      "required": "<strong>Bez obchodního jména, adresy a kontaktního e-mailu nemůžete nic zveřejnit ani prodat.</strong> Kupující musí před objednávkou vidět, od koho kupují a jak vás kontaktovat.",
+      "privacyNoteLinked": "Tyto údaje se zobrazují veřejně na stránkách vašich produktů, a to jen z tohoto důvodu. Nikdy je nepoužíváme k marketingu ani je neprodáváme či nesdílíme. Jediný e-mail, který na váš kontaktní e-mail pošleme, je odkaz pro jeho potvrzení. Viz <link>Zásady ochrany osobních údajů Squareshare</link>."
+    },
+    "countryNotEu": "Mimo EU / nechci uvádět",
+    "vatAdvisory": {
+      "noCountry": "Toto DIČ vypadá, že ho vydal stát: {issuer}. Možná budete chtít nastavit zemi.",
+      "mismatch": "Toto DIČ vypadá, že ho vydal stát: {issuer}, ale jako země je nastaveno: {selected}. Zkontrolujte, že je obojí správně."
+    },
+    "fields": {
+      "businessName": {
+        "label": "Obchodní jméno",
+        "tipLabel": "Co sem napsat",
+        "tipBody": "Jméno, se kterým kupující uzavírá smlouvu. Registrované obchodní jméno, pokud prodáváte přes firmu; vaše celé jméno, pokud prodáváte jako fyzická osoba. Název výlohy je název obchodu, což není totéž a nemůže ho nahradit.",
+        "placeholder": "např. Studio Builderboy e.U."
+      },
+      "address": {
+        "label": "Adresa",
+        "tipLabel": "Proč ji kupující vidí",
+        "tipBody": "Předpisy o prodeji na dálku vyžadují u každé nabídky poštovní adresu. Zobrazuje se v sekci Prodejce na vašich produktových stránkách.",
+        "placeholder": "např. Tržní 12\n110 00 Praha 1\nČeská republika"
+      },
+      "email": {
+        "label": "Kontaktní e-mail",
+        "tipLabel": "Jak se liší od přihlašovacího e-mailu",
+        "tipBody": "Kupujícím se zobrazuje jako odkaz mailto a slouží jako náhradní cíl tlačítka nákupu, když produkt nemá odkaz na nákup. Záměrně je oddělený od přihlašovacího e-mailu: použijte adresu, na kterou chcete, aby vám kupující psali. Musí to být adresa, kterou opravdu čtete. Zástupné adresy, dočasné e-mailové schránky a adresy typu no-reply odmítneme, stejně jako doménu, která nepřijímá poštu.",
+        "placeholder": "např. ahoj@vasobchod.example",
+        "statusDirty": "Uložte a na novou adresu pošleme potvrzovací odkaz. Kupující ji uvidí až po potvrzení.",
+        "statusConfirmed": "Potvrzeno: kupující vás tu zastihnou.",
+        "statusUnconfirmed": "Zatím nepotvrzeno. Otevřete odkaz, který jsme na tuto adresu poslali."
+      },
+      "vatId": {
+        "label": "DIČ",
+        "placeholder": "např. CZ12345678"
+      },
+      "country": {
+        "label": "Země"
+      },
+      "phone": {
+        "label": "Telefon"
+      },
+      "bio": {
+        "label": "Medailonek",
+        "tipLabel": "Kde ho kupující uvidí",
+        "tipBody": "Jedna věta o vás nebo o tom, co tvoříte, zobrazená pod vaším jménem v sekci Prodejce na produktových stránkách. Je nepovinný: zveřejnit můžete i bez něj. Medailonek v záhlaví každé výlohy se nastavuje zvlášť v editoru výlohy.",
+        "placeholder": "např. Ručně točená kamenina z malého ateliéru v Kutné Hoře",
+        "charactersLeft": "{count, plural, one {Zbývá # znak} few {Zbývají # znaky} many {Zbývá # znaku} other {Zbývá # znaků}}"
+      }
+    },
+    "resend": {
+      "button": "Znovu poslat potvrzovací e-mail"
+    },
+    "success": {
+      "savedCheckEmail": "Uloženo. Na adrese {email} najdete odkaz k potvrzení adresy.",
+      "sellerDetailsSaved": "Firma a údaje prodejce uloženy.",
+      "alreadyConfirmed": "Tato adresa už je potvrzená.",
+      "confirmationSent": "Odesláno. Odkaz najdete na adrese {email}."
+    }
+  },
+  "shipping": {
+    "shipsFrom": {
+      "label": "Odesílá se z",
+      "notSet": "Nenastaveno"
+    },
+    "shippingCard": {
+      "title": "Doprava",
+      "description": "Nastavíte jednou pro celý účet. Zobrazuje se na každé produktové stránce, přes kterou prodáváte, a platí pro všechny produkty, které nemají níže uvedenou výjimku."
+    },
+    "dispatch": {
+      "label": "Doba odeslání",
+      "tipLabel": "Proč je to samostatné pole",
+      "tipBody": "Jeden řádek vedle tlačítka nákupu. „Kdy to odejde?“ je první, na co se kupující ptají, a odpověď by neměla vyžadovat čtení celého odstavce.",
+      "placeholder": "např. Odesíláme do 1–3 pracovních dnů"
+    },
+    "destinations": {
+      "label": "Kam posíláte a jak dlouho to trvá",
+      "tipLabel": "Jak podrobně to uvést",
+      "tipBody": "Oblasti doručení seskupte podle toho, jak skutečně posíláte: jeden řádek pro domácí zásilky, jeden pro zbytek EU a jeden pro ostatní svět úplně stačí. Pokud se cena liší, nechte ji prázdnou.",
+      "empty": "Zatím nic. Dokud nepřidáte řádek, kupující neuvidí žádné doby doručení.",
+      "areaLabel": "Oblast doručení {number}",
+      "areaPlaceholder": "např. Zbytek EU",
+      "timeLabel": "Doba doručení {number}",
+      "timePlaceholder": "např. 5–7 pracovních dnů",
+      "costLabel": "Cena dopravy {number}",
+      "costPlaceholder": "např. 9,00 €",
+      "removeNamed": "Odebrat oblast doručení {area}",
+      "removeNumbered": "Odebrat oblast doručení {number}",
+      "add": "Přidat oblast doručení",
+      "limitReached": "{max, plural, one {Maximum je # oblast doručení. Pokud chcete přidat další, nějakou odeberte.} few {Maximum jsou # oblasti doručení. Pokud chcete přidat další, nějakou odeberte.} many {Maximum je # oblasti doručení. Pokud chcete přidat další, nějakou odeberte.} other {Maximum je # oblastí doručení. Pokud chcete přidat další, nějakou odeberte.}}"
+    },
+    "notes": {
+      "label": "Cokoli dalšího k dopravě",
+      "placeholder": "např. Standardně se sledováním zásilky. Na P.O. boxy neposíláme."
+    },
+    "returnsCard": {
+      "title": "Vrácení zboží",
+      "description": "Co nabízíte navíc k zákonným právům, která už uvádějí vaše produktové stránky."
+    },
+    "returnsWindow": {
+      "label": "Lhůta pro vrácení",
+      "tipLabel": "Co už pokrývá zákonné právo",
+      "tipBody": "Kupující z EU mají při nákupu na dálku 14 dní na to, aby si to rozmysleli, a dvouleté zákonné právo z vadného plnění, ať tu zvolíte cokoli. Obojí už uvádějí vaše produktové stránky, takže tady nastavujete to, co nabízíte navíc.",
+      "none": "Nic nad rámec zákonného práva",
+      "days": "{days, plural, one {# den} few {# dny} many {# dne} other {# dní}}",
+      "statutoryMinimum": "Zákonné minimum v EU",
+      "custom": "Jiná lhůta",
+      "customLabel": "Lhůta pro vrácení ve dnech",
+      "daysUnit": "dní"
+    },
+    "returnsPaidBy": {
+      "label": "Poštovné za vrácení",
+      "buyer": "Poštovné za vrácení hradí kupující",
+      "seller": "Poštovné za vrácení hradíme my"
+    },
+    "exceptions": {
+      "label": "Výjimky",
+      "tipLabel": "Co sem patří",
+      "tipBody": "Vše, na co se výše uvedená lhůta nevztahuje: kusy na zakázku, hygienické zboží, rozbalený software. Kupující si to přečtou před nákupem, ne až po něm.",
+      "placeholder": "např. Kusy na zakázku nelze vrátit, pokud nejsou vadné."
+    },
+    "preview": {
+      "title": "Co si přečtou kupující",
+      "description": "Sestaveno z vašich odpovědí výše a zobrazeno na každé produktové stránce.",
+      "shippingHeading": "Doprava",
+      "returnsHeading": "Vrácení zboží",
+      "empty": "Zatím nic. Dokud výše na něco neodpovíte, nebudou mít vaše produktové stránky žádnou sekci o dopravě ani vrácení zboží."
+    },
+    "ownWords": {
+      "title": "Napsat to vlastními slovy",
+      "description": "Nepovinné. Cokoli sem napíšete, nahradí slovo od slova text vygenerovaný výše.",
+      "shippingLabel": "Vaše podmínky dopravy",
+      "returnsLabel": "Vaše podmínky vrácení zboží",
+      "placeholder": "Nechte prázdné, pokud chcete použít odpovědi výše."
+    },
+    "profiles": {
+      "title": "Profily dopravy",
+      "description": "Pro těch pár produktů, které se posílají jinak. Profil vyberete přímo u produktu v sekci Doprava.",
+      "empty": "Zatím žádné. Profil přidejte, jen pokud se některé produkty posílají jinak než podle podmínek výše.",
+      "nameLabel": "Název",
+      "namePlaceholder": "např. Objemné zboží",
+      "removeNamed": "Odebrat profil dopravy {name}",
+      "removeUnnamed": "Odebrat tento profil dopravy",
+      "dispatchLabel": "Doba odeslání",
+      "dispatchPlaceholder": "např. Na zakázku, počítejte se 3 týdny",
+      "bodyLabel": "Doprava",
+      "bodyPlaceholder": "Jak se tyto produkty posílají a kolik to stojí",
+      "noTerms": "Doplňte podmínky, jinak se profil při uložení zahodí.",
+      "add": "Přidat profil",
+      "limitReached": "{max, plural, one {Maximum je # profil. Pokud chcete přidat další, nějaký odeberte.} few {Maximum jsou # profily. Pokud chcete přidat další, nějaký odeberte.} many {Maximum je # profilu. Pokud chcete přidat další, nějaký odeberte.} other {Maximum je # profilů. Pokud chcete přidat další, nějaký odeberte.}}"
+    },
+    "success": {
+      "shippingSaved": "Doprava a vrácení zboží uloženy."
+    }
+  },
+  "sellerDetails": {
+    "bannerLabel": "Chybí údaje prodejce",
+    "memberHeadline": "Tento obchod zatím nemůže zveřejňovat ani prodávat.",
+    "memberFix": "Jeho vlastník musí doplnit údaje prodejce ve svém nastavení.",
+    "addLink": "Doplnit údaje prodejce",
+    "opensInNewTab": " (otevře se v nové kartě)",
+    "headline": {
+      "publishOrSell": "Dokud nebudou vaše údaje prodejce kompletní, nemůžete nic zveřejnit ani prodat.",
+      "putProductOnSale": "Dokud nebudou vaše údaje prodejce kompletní, nemůžete tento produkt začít prodávat.",
+      "importLiveProducts": "Dokud nebudou vaše údaje prodejce kompletní, nemůžete importovat zveřejněné produkty.",
+      "embedStorefront": "Dokud nebudou vaše údaje prodejce kompletní, nemůžete tuto výlohu vložit na web.",
+      "publishStorefront": "Dokud nebudou vaše údaje prodejce kompletní, nemůžete tuto výlohu zveřejnit ani přes ni prodávat."
+    },
+    "reason": "Kupující musí před objednávkou vidět, od koho kupují a jak vás kontaktovat. Na produktových stránkách se tyto údaje zobrazují jen z tohoto důvodu a nikdy je nepoužíváme k marketingu.",
+    "fields": {
+      "businessName": {
+        "label": "Obchodní jméno",
+        "why": "Kupující musí vědět, od koho kupují: obchodní jméno vaší firmy, nebo vaše celé jméno, pokud prodáváte jako fyzická osoba."
+      },
+      "address": {
+        "label": "Adresa sídla",
+        "why": "Podle předpisů o prodeji na dálku musí být u každé nabídky uvedena poštovní adresa."
+      },
+      "email": {
+        "label": "Kontaktní e-mail",
+        "why": "Adresa, na kterou vám kupující píší kvůli objednávce. Slouží také jako náhradní cíl tlačítka nákupu, když produkt nemá odkaz na nákup."
+      },
+      "emailVerified": {
+        "label": "Potvrzený kontaktní e-mail",
+        "why": "Na tuto adresu pošleme odkaz a vy na něj kliknete. Nic jiného nedokáže, že zpráva od kupujícího opravdu někoho zastihne."
+      }
+    }
+  },
+  "security": {
+    "copyRecoveryCodes": {
+      "copy": "Zkopírovat záložní kódy",
+      "copied": "Záložní kódy zkopírovány",
+      "failed": "Záložní kódy se nepodařilo zkopírovat. Označte je a zkopírujte ručně."
+    },
+    "copySetupKey": {
+      "copy": "Zkopírovat klíč k nastavení",
+      "copied": "Klíč k nastavení zkopírován",
+      "failed": "Klíč k nastavení se nepodařilo zkopírovat. Označte ho a zkopírujte ručně."
+    },
+    "prompt": {
+      "title": "Váš účet zamyká jen heslo",
+      "body": "Zapněte dvoufázové ověření, aby přihlášení vyžadovalo i kód z telefonu. Zabere to asi minutu.",
+      "cta": "Zapnout ověření"
+    },
+    "recoveredNotice": "<strong>Dvoufázové ověření je vypnuté.</strong> Přihlášení záložním kódem odebralo vaši původní ověřovací aplikaci a odhlásilo vaše ostatní zařízení. Nastavte si ho znovu hned teď, aby váš účet nechránilo jen heslo.",
+    "stepUpConfirm": "Pro potvrzení zadejte aktuální kód z ověřovací aplikace.",
+    "twoFactor": {
+      "cardTitle": "Dvoufázové ověření",
+      "descriptionOn": "K přihlášení potřebujete heslo a kód z ověřovací aplikace.",
+      "descriptionOff": "Přidejte k přihlášení druhý krok: 6místný kód z aplikace v telefonu.",
+      "statusOn": "Zapnuto",
+      "statusOff": "Vypnuto",
+      "listLabel": "Ověřovací aplikace",
+      "added": "Přidáno {date}",
+      "removeLabel": "Odebrat: {name}",
+      "addAnother": "Přidat další ověřovací aplikaci",
+      "benefits": {
+        "password": "Odcizené nebo uhádnuté heslo už nestačí k tomu, aby se někdo dostal do vašeho obchodu.",
+        "changes": "Změny údajů o výplatách, týmu a účtu vyžadují kód z vašeho telefonu.",
+        "changesBusiness": "Změny údajů o vaší firmě, týmu a účtu vyžadují kód z telefonu.",
+        "alerts": "Pošleme vám e-mail ve chvíli, kdy někdo zadá správné heslo, ale špatný kód."
+      },
+      "setUp": "Nastavit dvoufázové ověření",
+      "takesAMinute": "Zabere to asi minutu."
+    },
+    "remove": {
+      "titleLast": "Vypnout dvoufázové ověření?",
+      "title": "Odebrat aplikaci „{name}“?",
+      "descriptionLast": "Toto je vaše jediná ověřovací aplikace. Jejím odebráním se dvoufázové ověření vypne a vaše záložní kódy přestanou platit. K přihlášení pak bude stačit jen heslo.",
+      "description": "Aplikace „{name}“ se už nebude moci přihlásit do vašeho účtu.",
+      "removing": "Odebírání…",
+      "turnOff": "Vypnout"
+    },
+    "setup": {
+      "suggestedName": "Ověřovací aplikace",
+      "suggestedNameNumbered": "Ověřovací aplikace {number}",
+      "added": "Ověřovací aplikace přidána.",
+      "enabled": "Dvoufázové ověření je zapnuté.",
+      "titleCodes": "Uložte si záložní kódy",
+      "titleAdd": "Přidání ověřovací aplikace",
+      "titleEnable": "Zapnutí dvoufázového ověření",
+      "descriptionAdd": "Použijte druhý telefon nebo aplikaci jako záložní způsob přihlášení.",
+      "descriptionEnable": "Poté k přihlášení potřebujete heslo a kód z aplikace v telefonu.",
+      "descriptionScan": "Naskenujte kód ověřovací aplikací a zadejte 6 číslic, které zobrazí.",
+      "descriptionCodes": "Dvoufázové ověření je zapnuté.",
+      "googleReauth": "Váš účet se přihlašuje přes Google, takže není heslo, kterým byste potvrdili, že jste to vy. Přihlaste se znovu a hned se sem vrátíte dokončit nastavení.",
+      "confirmWithGoogleFirst": "Nejdřív se přes Google potvrďte, že jste to vy. Hned se sem vrátíte a dokončíte to.",
+      "signInAgainFirst": "Z bezpečnostních důvodů se nejdřív přihlaste znovu. Hned se sem vrátíte a dokončíte to.",
+      "signInAgain": "Přihlásit se znovu",
+      "nameLabel": "Pojmenujte tuto ověřovací aplikaci",
+      "nameHint": "Abyste je později od sebe rozeznali, např. „Pixel 8“.",
+      "stepUpDescription": "Pro potvrzení, že jste to vy, zadejte kód z ověřovací aplikace, kterou už používáte.",
+      "passwordLabel": "Aktuální heslo",
+      "squareSharePasswordLabel": "Heslo do Square Share",
+      "passwordHint": "Aby vás nikdo, kdo najde váš přihlášený notebook, nemohl vlastním telefonem zamknout venku.",
+      "notYourGooglePassword": "Nejde o heslo ke Google. Nevíte ho? Raději se potvrďte přes Google níže.",
+      "signedInRecently": "Přihlášení proběhlo před chvílí, takže není třeba nic dalšího potvrzovat.",
+      "or": "nebo",
+      "checking": "Kontrola…",
+      "continue": "Pokračovat",
+      "qrAlt": "QR kód k naskenování ověřovací aplikací",
+      "anyApp": "Funguje jakákoli ověřovací aplikace: Google Authenticator, Microsoft Authenticator, 1Password, Authy a další.",
+      "cantScan": "Nejde to naskenovat? Zadejte místo toho tento klíč:",
+      "setupKeyLabel": "Klíč k nastavení",
+      "openInApp": "Otevřít v ověřovací aplikaci",
+      "codeLabel": "6místný kód z aplikace",
+      "verifying": "Ověřování…",
+      "verifyAndAdd": "Ověřit a přidat",
+      "verifyAndTurnOn": "Ověřit a zapnout"
+    },
+    "recoveryCodes": {
+      "cardTitle": "Záložní kódy",
+      "cardDescription": "Jednorázové kódy pro přihlášení, kdybyste přišli o telefon. Uložte je jinam než do samotného telefonu.",
+      "countUnavailable": "Nepodařilo se zjistit, kolik vám jich zbývá.",
+      "remaining": "{count, plural, one {Zbývá {count} z {total} kódů.} few {Zbývá {count} z {total} kódů.} many {Zbývá {count} z {total} kódů.} other {Zbývá {count} z {total} kódů.}}",
+      "remainingLow": "{count, plural, one {Zbývá {count} z {total} kódů. Dochází vám: vytvořte novou sadu.} few {Zbývá {count} z {total} kódů. Dochází vám: vytvořte novou sadu.} many {Zbývá {count} z {total} kódů. Dochází vám: vytvořte novou sadu.} other {Zbývá {count} z {total} kódů. Dochází vám: vytvořte novou sadu.}}",
+      "remainingNone": "{count, plural, one {Zbývá {count} z {total} kódů. Žádný vám nezbývá: hned vytvořte novou sadu.} few {Zbývá {count} z {total} kódů. Žádný vám nezbývá: hned vytvořte novou sadu.} many {Zbývá {count} z {total} kódů. Žádný vám nezbývá: hned vytvořte novou sadu.} other {Zbývá {count} z {total} kódů. Žádný vám nezbývá: hned vytvořte novou sadu.}}",
+      "generate": "Vytvořit nové kódy",
+      "generating": "Vytváření…",
+      "regenerateTitle": "Vytvořit nové záložní kódy?",
+      "regenerateDescription": "Vaše stávající kódy přestanou platit, jakmile vzniknou nové.",
+      "newTitle": "Vaše nové záložní kódy",
+      "newDescription": "Vaše staré kódy už nefungují."
+    },
+    "recoveryCodesDisplay": {
+      "notCreated": "Dvoufázové ověření je zapnuté, ale záložní kódy se nepodařilo vytvořit. Než se odhlásíte, vytvořte sadu v kartě Záložní kódy.",
+      "warning": "Uložte si je na bezpečné místo, třeba do správce hesel. Každý platí jen jednou, jsou jediná cesta zpět, když přijdete o telefon, a znovu je neuvidíte.",
+      "listLabel": "Záložní kódy",
+      "download": "Stáhnout",
+      "saved": "Záložní kódy mám uložené na bezpečném místě.",
+      "file": {
+        "title": "Záložní kódy Square Share",
+        "explainer": "Každý kód lze jednou použít k přihlášení, pokud přijdete o ověřovací aplikaci.",
+        "generated": "Vytvořeno {date}"
+      }
+    },
+    "activity": {
+      "cardTitle": "Nedávná bezpečnostní aktivita",
+      "cardDescription": "Změny způsobu přihlašování, od nejnovějších. Pokud tu něco nepoznáváte, změňte heslo a zapněte dvoufázové ověření.",
+      "unavailable": "Vaši aktivitu se teď nepodařilo načíst.",
+      "empty": "Zatím nic.",
+      "timeUtc": "{time} UTC",
+      "events": {
+        "passwordChanged": "Heslo změněno",
+        "passwordSet": "Heslo nastaveno",
+        "passwordResetRequested": "Vyžádán odkaz pro obnovení hesla",
+        "emailChangeRequested": "Vyžádána změna e-mailu",
+        "twoFactorEnabled": "Dvoufázové ověření zapnuto",
+        "twoFactorDisabled": "Dvoufázové ověření vypnuto",
+        "factorAdded": "Přidána ověřovací aplikace",
+        "factorRemoved": "Odebrána ověřovací aplikace",
+        "recoveryCodesRegenerated": "Vytvořeny nové záložní kódy",
+        "recoveryCodeUsed": "K přihlášení použit záložní kód",
+        "challengeFailed": "Při přihlášení zadán špatný kód dvoufázového ověření",
+        "lockedOut": "Přihlášení s dvoufázovým ověřením pozastaveno po opakovaných chybných kódech"
+      }
+    },
+    "success": {
+      "twoFactorOff": "Dvoufázové ověření je vypnuté.",
+      "factorRemoved": "Aplikace „{name}“ odebrána.",
+      "codesRegenerated": "Nové záložní kódy jsou připraveny. Vaše staré už nefungují.",
+      "confirmed": "Potvrzeno."
+    }
+  },
+  "team": {
+    "roles": {
+      "owner": {
+        "label": "Vlastník",
+        "description": "Plná kontrola. V každém obchodě právě jeden, nelze ho změnit ani odebrat."
+      },
+      "editor": {
+        "label": "Editor",
+        "description": "Může zobrazit obchod a upravovat produkty i výlohu. Může zvát členy se stejnou nebo nižší rolí."
+      },
+      "viewer": {
+        "label": "Čtenář",
+        "description": "Může zobrazit obchod a tým. Jen pro čtení."
+      }
+    },
+    "cardTitle": "Tým",
+    "cardDescription": "Lidé, kteří se mohou přihlásit do tohoto obchodu. Jejich role určuje, co mohou vidět a měnit.",
+    "loadError": "Další členy se nepodařilo načíst. Zkuste to znovu.",
+    "loadMore": "Načíst další členy",
+    "inviteButton": "Pozvat člena",
+    "memberList": {
+      "onlyOwner": "Zatím jste tu jen vy. Pozvěte někoho, kdo má mít přístup.",
+      "invitedHeading": "Pozvaní",
+      "invitedTipLabel": "Co může pozvaný člen dělat",
+      "invitedTipBody": "Zatím nic. Pozvánka začne platit, až se dotyčný poprvé přihlásí e-mailovou adresou, na kterou byla poslána. Teprve pak se objeví jako člen se zvolenou rolí.",
+      "showingFirst": "{count, plural, one {Zobrazuje se první # člen.} few {Zobrazují se první # členové.} many {Zobrazuje se prvních # člena.} other {Zobrazuje se prvních # členů.}}"
+    },
+    "memberRow": {
+      "you": "(vy)",
+      "cancelInviteLabel": "Zrušit pozvánku pro {email}",
+      "removeMemberLabel": "Odebrat z týmu: {name}",
+      "cancelInviteTitle": "Zrušit pozvánku",
+      "removeFromTeamTitle": "Odebrat z týmu",
+      "confirmRoleChange": "Udělat z {name} {role, select, owner {vlastníka} editor {editora} viewer {čtenáře} other {{role}}}?",
+      "confirmCancelInvite": "Zrušit pozvánku pro {email}?",
+      "confirmRemove": "Odebrat z týmu: {name}? Přístup ztratí okamžitě.",
+      "cancelling": "Rušení…",
+      "removing": "Odebírání…",
+      "cancelled": "Zrušeno",
+      "removed": "Odebráno",
+      "cancelInviteButton": "Zrušit pozvánku",
+      "keep": "Ponechat"
+    },
+    "inviteModal": {
+      "title": "Pozvat člena",
+      "description": "Přístup získá, až se přihlásí touto e-mailovou adresou.",
+      "emailLabel": "E-mailová adresa",
+      "emailPlaceholder": "kolega@example.com",
+      "roleLabel": "Role",
+      "notificationNote": "E-mailová oznámení zatím nefungují: pozvánka začne platit, až se dotyčný přihlásí. Možná mu o ní budete chtít dát vědět sami.",
+      "sendButton": "Poslat pozvánku"
+    },
+    "inviteRow": {
+      "invitedAs": "<store>{storeName}</store> vás zve do role <strong>{role, select, owner {Vlastník} editor {Editor} viewer {Čtenář} other {{role}}}</strong>",
+      "accepting": "Přijímání…",
+      "accepted": "Přijato",
+      "acceptButton": "Přijmout"
+    },
+    "invitePrompt": {
+      "title": "{count, plural, one {Máte pozvánku do týmu} few {Máte pozvánky do týmů} many {Máte pozvánky do týmů} other {Máte pozvánky do týmů}}",
+      "description": "{count, plural, one {Byla vám poslána pozvánka do týmu. Přijetím získáte přístup.} few {Byly vám poslány pozvánky do těchto týmů. Přijetím získáte přístup.} many {Byly vám poslány pozvánky do těchto týmů. Přijetím získáte přístup.} other {Byly vám poslány pozvánky do těchto týmů. Přijetím získáte přístup.}}",
+      "maybeLater": "Možná později"
+    },
+    "pendingInvites": {
+      "cardTitle": "Pozvánky pro vás",
+      "cardDescription": "Přijetím pozvánky se připojíte k týmu daného obchodu."
+    },
+    "success": {
+      "inviteCreated": "Pozvánka vytvořena. Uvidí ji, až se přihlásí tímto e-mailem. (Odesílání e-mailů zatím nefunguje.)",
+      "inviteAccepted": "Vítejte v týmu.",
+      "roleUpdated": "Role změněna.",
+      "memberRemoved": "Člen odebrán."
+    }
+  }
+}

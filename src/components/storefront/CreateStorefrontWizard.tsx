@@ -1,13 +1,14 @@
 "use client";
 
-import { useCallback, useId, useRef, useState } from "react";
+import { useCallback, useId, useMemo, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { ProgressBar } from "@/components/ui/ProgressBar";
-import { useToast } from "@/components/ui/Toast";
+import { useActionErrorToast } from "@/components/ui/ActionErrorNotice";
 import {
   fieldBaseClass,
   helpTextClass,
@@ -29,7 +30,6 @@ import {
   CategoryGrid,
   FulfilmentGrid,
   VibeGrid,
-  namePlaceholderFor,
 } from "./create-options";
 
 /**
@@ -58,24 +58,6 @@ import {
 const STEPS = ["category", "fulfilment", "vibe", "name"] as const;
 type Step = (typeof STEPS)[number];
 
-const STEP_COPY: Record<Step, { title: string; description: string }> = {
-  category: {
-    title: "What do you sell?",
-    description: "This is the biggest clue for which layouts will suit you.",
-  },
-  fulfilment: {
-    title: "How do buyers get it?",
-    description: "It shapes what your product pages say about delivery.",
-  },
-  vibe: {
-    title: "Pick a look",
-    description: "Your starting point. Everything stays editable in the designer.",
-  },
-  name: {
-    title: "Name your storefront",
-    description: "Just for you. You can rename it any time.",
-  },
-};
 
 export function CreateStorefrontWizard({
   open,
@@ -95,10 +77,20 @@ export function CreateStorefrontWizard({
    *  than re-answers. Undefined for the first one. */
   previousBrief?: StorefrontBrief;
 }) {
-  const toast = useToast();
+  const t = useTranslations("Storefront.wizard");
+  const tOptions = useTranslations("Storefront.createOptions");
+  const tCommon = useTranslations("Common");
+  const showActionError = useActionErrorToast();
   const fieldId = useId();
   const reducedMotion = useReducedMotion();
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const STEP_COPY = useMemo<Record<Step, { title: string; description: string }>>(() => ({
+    category: { title: t("category.title"), description: t("category.description") },
+    fulfilment: { title: t("fulfilment.title"), description: t("fulfilment.description") },
+    vibe: { title: t("vibe.title"), description: t("vibe.description") },
+    name: { title: t("name.title"), description: t("name.description") },
+  }), [t]);
 
   const [stepIndex, setStepIndex] = useState(0);
   const [category, setCategory] = useState<StorefrontCategory | null>(null);
@@ -193,7 +185,7 @@ export function CreateStorefrontWizard({
       brief: collectBrief(),
     });
     if (!result.ok) {
-      toast.error(result.error.message, { lines: [result.error.fix] });
+      showActionError(result.error);
       setSubmitting(false);
       return;
     }
@@ -221,11 +213,11 @@ export function CreateStorefrontWizard({
       <div className="shrink-0">
         <ProgressBar
           value={(stepIndex + 1) / STEPS.length}
-          label={`Step ${stepIndex + 1} of ${STEPS.length}`}
+          label={t("stepOf", { current: stepIndex + 1, total: STEPS.length })}
           className="mb-1"
         />
         <p className="mb-4 font-inter text-xs text-muted-foreground">
-          Step {stepIndex + 1} of {STEPS.length}
+          {t("stepOf", { current: stepIndex + 1, total: STEPS.length })}
         </p>
       </div>
 
@@ -259,7 +251,7 @@ export function CreateStorefrontWizard({
                       htmlFor={`${fieldId}-other`}
                       className={labelClass}
                     >
-                      What do you sell?
+                      {t("otherCategoryLabel")}
                     </label>
                     <input
                       id={`${fieldId}-other`}
@@ -267,14 +259,14 @@ export function CreateStorefrontWizard({
                       value={otherCategory}
                       onChange={(event) => setOtherCategory(event.target.value)}
                       maxLength={BRIEF_OTHER_CATEGORY_MAX}
-                      placeholder="e.g. model kits"
+                      placeholder={t("otherCategoryPlaceholder")}
                       className={fieldBaseClass}
                     />
                   </div>
                 )}
                 {productCount === 0 && (
                   <p className={cn(helpTextClass, "mt-3")}>
-                    No products yet? Add them after setup.
+                    {t("noProductsHint")}
                   </p>
                 )}
               </>
@@ -289,7 +281,7 @@ export function CreateStorefrontWizard({
             {step === "name" && (
               <div className="space-y-1.5">
                 <label htmlFor={`${fieldId}-name`} className={labelClass}>
-                  Storefront name
+                  {t("nameLabel")}
                 </label>
                 <input
                   id={`${fieldId}-name`}
@@ -303,11 +295,13 @@ export function CreateStorefrontWizard({
                     }
                   }}
                   maxLength={STOREFRONT_NAME_MAX}
-                  placeholder={namePlaceholderFor(category)}
+                  placeholder={category
+                    ? tOptions(`categoryPlaceholder.${category}`)
+                    : tOptions("categoryPlaceholder.default")}
                   className={fieldBaseClass}
                 />
                 <p className={helpTextClass}>
-                  Leave it blank and we will call it Untitled storefront.
+                  {t("nameHint")}
                 </p>
               </div>
             )}
@@ -328,27 +322,27 @@ export function CreateStorefrontWizard({
             disabled={submitting}
           >
             <ArrowLeft className={cn("size-4", iconNudgeLeftClass)} aria-hidden />
-            Back
+            {tCommon("actions.back")}
           </Button>
         ) : (
           <Button variant="ghost" onClick={create} disabled={submitting}>
-            Skip setup
+            {t("skipSetup")}
           </Button>
         )}
 
         <div className="flex items-center gap-2">
           {stepIndex > 0 && !isLastStep && (
             <Button variant="ghost" onClick={create} disabled={submitting}>
-              Skip
+              {t("skip")}
             </Button>
           )}
           {isLastStep ? (
             <Button onClick={create} disabled={submitting}>
-              {submitting ? "Creating…" : "Create storefront"}
+              {submitting ? t("creating") : t("create")}
             </Button>
           ) : (
             <Button onClick={() => goTo(stepIndex + 1)} disabled={submitting}>
-              Next
+              {tCommon("pagination.next")}
               <ArrowRight
                 className={cn("size-4", iconNudgeRightClass)}
                 aria-hidden

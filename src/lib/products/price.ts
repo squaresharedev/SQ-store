@@ -33,6 +33,9 @@
  *     currency unit, not in cents.
  */
 
+import type { Locale } from "@/i18n/locales";
+import { msg, type MessageRef } from "@/i18n/types";
+import { intlTag, numberFormat } from "@/lib/format/intl";
 import { PRICE_CENTS_MAX } from "@/lib/validation/product";
 
 // ── Tolerant parser (CSV importer) ────────────────────────────────────────────
@@ -153,7 +156,8 @@ export function parseFormPriceCents(raw: string): PriceParseResult {
 
 /**
  * The seller-facing copy for a price parse error. Kept here so the form and
- * any future surface say the same thing for the same problem.
+ * any future surface say the same thing for the same problem. A message
+ * reference, resolved in the reader's language where it is shown.
  *
  * `maxCents` is the server's PRICE_CENTS_MAX; `currency` is the ISO code the
  * form is currently set to (for phrasing the ceiling in money, not in cents).
@@ -162,22 +166,24 @@ export function priceErrorMessage(
   error: PriceParseError,
   currency: string,
   maxCents: number,
-): string {
+  /** The reader's locale, for how the ceiling is written. */
+  locale: Locale,
+): MessageRef {
   switch (error) {
     case "empty":
-      return "Set a price before saving.";
+      return msg("Products.form.errors.price.empty");
     case "invalid_format":
-      return "Price must be a number greater than zero.";
+      return msg("Products.form.errors.price.notPositive");
     case "too_many_decimals":
-      return "Prices can have at most two decimal places.";
+      return msg("Products.form.errors.price.tooManyDecimals");
     case "not_positive":
-      return "Price must be a number greater than zero.";
+      return msg("Products.form.errors.price.notPositive");
     case "exceeds_max": {
-      const maxMajor = (maxCents / 100).toLocaleString("en", {
+      const maxMajor = numberFormat(intlTag(locale, "en"), {
         minimumFractionDigits: 0,
         maximumFractionDigits: 0,
-      });
-      return `Price cannot exceed ${currency} ${maxMajor}.`;
+      }).format(maxCents / 100);
+      return msg("Products.form.errors.price.tooHigh", { currency, max: maxMajor });
     }
   }
 }

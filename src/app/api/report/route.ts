@@ -1,9 +1,13 @@
 import { headers } from "next/headers";
 import { after } from "next/server";
+import { getTranslations } from "next-intl/server";
+import type { z } from "zod";
+import { msg, type MessageRef } from "@/i18n/types";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isContentVisible } from "@/lib/moderation/removal";
 import { pingAdminModeration } from "@/lib/moderation/admin-ping";
-import { reportSchema } from "@/lib/validation/reports";
+import { REPORT_ISSUE_KEYS, reportSchema } from "@/lib/validation/reports";
+import { isValidationKey, issueMessage } from "@/lib/validation/messages";
 import { reporterHash } from "@/lib/moderation/reporter-hash";
 import { RATE_LIMITS, clientKey, rateLimitKey } from "@/lib/rate-limit";
 
@@ -33,21 +37,34 @@ import { RATE_LIMITS, clientKey, rateLimitKey } from "@/lib/rate-limit";
  * exists, whether someone else already reported it, and eventually whether
  * staff acted. None of that is theirs to know, and the difference is exactly
  * what a brigade would tune against.
+ *
+ * IN THE REPORTER'S LANGUAGE. The dialog shows `message` and `error` as they
+ * arrive, so they are resolved here from the request (cookie, then
+ * Accept-Language): the buyer's language, never the seller's.
  */
 
 /** The one answer this endpoint gives when it has accepted responsibility for
  *  a notice, whatever happened underneath. */
-function accepted() {
-  return Response.json(
-    { ok: true, message: "Thanks. A person will review this." },
-    { status: 202 },
-  );
+function accepted(message: string) {
+  return Response.json({ ok: true, message }, { status: 202 });
 }
 
 /** Refusals that are about the REQUEST rather than the content, so the client
  *  can show the person what to fix. */
 function badRequest(message: string) {
   return Response.json({ error: message }, { status: 400 });
+}
+
+/**
+ * A failed parse's issue as a message, or null when the issue carries Zod's
+ * own wording instead of one of our keys. That only happens for a request the
+ * dialog cannot send (an unknown field, a body that is not an object), and
+ * the caller passes Zod's text through exactly as this endpoint always has.
+ */
+function issueRef(issue: z.core.$ZodIssue): MessageRef | null {
+  if (isValidationKey(issue.message)) return issueMessage(issue);
+  const own = Object.values(REPORT_ISSUE_KEYS).find((key) => key === issue.message);
+  return own ? msg(own) : null;
 }
 
 /**
@@ -94,16 +111,24 @@ async function targetIsReportable(
 }
 
 export async function POST(request: Request): Promise<Response> {
+  const t = await getTranslations("ProductPage.report.api");
+
   let body: unknown;
   try {
     body = await request.json();
   } catch {
-    return badRequest("That request could not be read.");
+    return badRequest(t("unreadable"));
   }
 
   const parsed = reportSchema.safeParse(body);
   if (!parsed.success) {
-    return badRequest(parsed.error.issues[0]?.message ?? "That report is not valid.");
+    const issue = parsed.error.issues[0];
+    if (!issue) return badRequest(t("invalid"));
+    const ref = issueRef(issue);
+    if (!ref) return badRequest(issue.message);
+    // Validation keys are full paths, so they resolve from the catalogue root.
+    const resolve = await getTranslations();
+    return badRequest(resolve(ref.key, ref.values));
   }
   const { targetType, targetId, reason, details, reporterEmail } = parsed.data;
 
@@ -111,12 +136,12 @@ export async function POST(request: Request): Promise<Response> {
   const who = await clientKey(headerList);
   if (!(await rateLimitKey(who, "content_report", RATE_LIMITS.contentReport))) {
     return Response.json(
-      { error: "Too many reports from here. Try again later." },
+      { error: t("rateLimited") },
       { status: 429, headers: { "Retry-After": "3600" } },
     );
   }
 
-  if (!(await targetIsReportable(targetType, targetId))) return accepted();
+  if (!(await targetIsReportable(targetType, targetId))) return accepted(t("accepted"));
 
   // Bound to the target, so the same person reporting two listings produces
   // two unrelated digests and this column cannot be used to follow someone
@@ -139,22 +164,16 @@ export async function POST(request: Request): Promise<Response> {
     if (error) {
       // 23505 is the per-reporter dedupe index doing its job. Indistinguishable
       // from a first report in the response, on purpose.
-      if (error.code === "23505") return accepted();
+      if (error.code === "23505") return accepted(t("accepted"));
       console.error("[report] insert failed:", error.message);
-      return Response.json(
-        { error: "That could not be submitted. Try again." },
-        { status: 503 },
-      );
+      return Response.json({ error: t("submitFailed") }, { status: 503 });
     }
   } catch (err) {
     console.error(
       "[report] insert threw:",
       err instanceof Error ? err.message : String(err),
     );
-    return Response.json(
-      { error: "That could not be submitted. Try again." },
-      { status: 503 },
-    );
+    return Response.json({ error: t("submitFailed") }, { status: 503 });
   }
 
   // Staff are told now rather than at the admin panel's next scheduled scan.
@@ -165,5 +184,5 @@ export async function POST(request: Request): Promise<Response> {
   // hammer staff phones.
   after(pingAdminModeration);
 
-  return accepted();
+  return accepted(t("accepted"));
 }

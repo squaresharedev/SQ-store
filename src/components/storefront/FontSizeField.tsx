@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { RotateCcw } from "lucide-react";
 import {
   TEXT_SIZE_MAX,
@@ -46,6 +47,7 @@ export function FontSizeField({
   /** undefined clears the override and goes back to Auto. */
   onChange: (size: number | undefined) => void;
 }) {
+  const t = useTranslations("Storefront.fontSize");
   const effective = value ?? autoSize;
   // Local draft so a half-typed number ("1" on the way to "18") is not clamped
   // to the minimum under the seller's fingers.
@@ -60,10 +62,10 @@ export function FontSizeField({
     <div className="space-y-1.5">
       <div className="flex items-center justify-between gap-2">
         <label htmlFor={`${id}-number`} className={labelClass}>
-          Size
+          {t("label")}
         </label>
         {value === undefined ? (
-          <span className={infoTextClass}>Auto ({autoSize} px)</span>
+          <span className={infoTextClass}>{t("autoPx", { n: autoSize })}</span>
         ) : (
           <button
             type="button"
@@ -74,7 +76,7 @@ export function FontSizeField({
             className={cn(ghostButtonClass, "px-2 py-1 text-xs")}
           >
             <RotateCcw className="size-3" strokeWidth={2} aria-hidden="true" />
-            Auto
+            {t("auto")}
           </button>
         )}
       </div>
@@ -86,8 +88,8 @@ export function FontSizeField({
             max={TEXT_SIZE_MAX}
             value={effective}
             onChange={commit}
-            ariaLabel="Font size"
-            valueText={`${effective} pixels`}
+            ariaLabel={t("ariaLabel")}
+            valueText={t("valueText", { n: effective })}
           />
         </div>
         <input

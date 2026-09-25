@@ -1,5 +1,7 @@
 // @vitest-environment node
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { english } from "../../setup/translate";
+import { traderIdentityRequired, type ActionError } from "@/lib/errors";
 
 // ---- mocks ---------------------------------------------------------------
 
@@ -185,7 +187,7 @@ describe("createProduct - object verification", () => {
     headObjectMock.mockResolvedValue(null);
     const result = await createProduct(validInput({ imageKey: ownedImageKey }));
     expect(result.ok).toBe(false);
-    expect((result as { error: { message: string } }).error.message).toMatch(/didn't finish/i);
+    expect(english((result as { error: ActionError }).error.message)).toMatch(/didn't finish/i);
     expect(db.insert).not.toHaveBeenCalled();
   });
 
@@ -194,7 +196,7 @@ describe("createProduct - object verification", () => {
     headObjectMock.mockResolvedValue({ size: IMAGE_MAX_BYTES + 1, contentType: "image/png" });
     const result = await createProduct(validInput({ imageKey: ownedImageKey }));
     expect(result.ok).toBe(false);
-    expect((result as { error: { message: string } }).error.message).toMatch(/too large/i);
+    expect(english((result as { error: ActionError }).error.message)).toMatch(/too large/i);
     expect(deleteObjectMock).toHaveBeenCalledWith(ownedImageKey);
     expect(db.insert).not.toHaveBeenCalled();
   });
@@ -204,7 +206,7 @@ describe("createProduct - object verification", () => {
     headObjectMock.mockResolvedValue({ size: 1024, contentType: "text/html" });
     const result = await createProduct(validInput({ imageKey: ownedImageKey }));
     expect(result.ok).toBe(false);
-    expect((result as { error: { message: string } }).error.message).toMatch(/not supported/i);
+    expect(english((result as { error: ActionError }).error.message)).toMatch(/not supported/i);
     expect(deleteObjectMock).toHaveBeenCalledWith(ownedImageKey);
     expect(db.insert).not.toHaveBeenCalled();
   });
@@ -250,12 +252,7 @@ describe("createProduct - happy path", () => {
 // ==========================================================================
 
 describe("the publish gate", () => {
-  const BLOCKED = {
-    code: "trader_identity_required",
-    message: "You can't publish or sell until your seller details are complete.",
-    fix: "Add your contact email in Settings › Business & seller details, then publish.",
-    action: { href: "/settings/tax#contact-email", label: "Add seller details" },
-  };
+  const BLOCKED = traderIdentityRequired(["email"]);
 
   it("refuses to create an ACTIVE product for a store that may not publish", async () => {
     getActiveAccountMock.mockResolvedValue(ownerAccount());

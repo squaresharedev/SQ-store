@@ -18,6 +18,7 @@ import {
   REPORT_REASON_COPY,
   reportSchema,
 } from "@/lib/validation/reports";
+import { english } from "../setup/translate";
 
 const TARGET = "0b1f7b1e-6d3a-4f4e-9f6c-1a2b3c4d5e6f";
 
@@ -121,27 +122,54 @@ describe("isRowVisible", () => {
 describe("removalStatement", () => {
   it("gives every ground a sentence a person can read", () => {
     for (const ground of REMOVAL_GROUNDS) {
-      const statement = removalStatement(ground);
+      const statement = english(removalStatement(ground));
       expect(statement.length).toBeGreaterThan(10);
       expect(statement.endsWith(".")).toBe(true);
     }
   });
 
+  it("names the ground, then what it means, in the words it always used", () => {
+    // What the removal banner has always printed: the ground's label, then
+    // the explanation. Legal copy, so moved word for word.
+    const expected: Record<(typeof REMOVAL_GROUNDS)[number], string> = {
+      illegal:
+        "Illegal goods or activity. It offered something that cannot be sold legally, or used the listing to arrange it.",
+      sexual: "Sexual content. It contained explicit sexual content.",
+      violence: "Violence or gore. It contained graphic violence.",
+      hate: "Hate or harassment. It attacked a person or group, or carried hate symbolism.",
+      counterfeit:
+        "Counterfeit or stolen. It appeared to offer counterfeit goods, or work that belongs to someone else.",
+      scam: "Scam or fraud. It appeared designed to take payment without delivering what was promised.",
+      spam: "Spam. It was repetitive or misleading rather than a genuine listing.",
+      other: "Something else. It broke the platform rules.",
+    };
+    for (const ground of REMOVAL_GROUNDS) {
+      expect(english(removalStatement(ground))).toBe(expected[ground]);
+    }
+  });
+
   it("appends a staff note when there is one", () => {
-    expect(removalStatement("counterfeit", "The mark is registered.")).toContain(
-      "The mark is registered.",
+    expect(english(removalStatement("counterfeit", "The mark is registered."))).toBe(
+      "Counterfeit or stolen. It appeared to offer counterfeit goods, or work that belongs to someone else. The mark is registered.",
+    );
+  });
+
+  it("carries the note as data, never as a message to parse", () => {
+    const note = "Seller's {name} <b>tag</b> #1";
+    expect(english(removalStatement("spam", note))).toBe(
+      `Spam. It was repetitive or misleading rather than a genuine listing. ${note}`,
     );
   });
 
   it("ignores a note that is only whitespace", () => {
-    expect(removalStatement("spam", "   ")).toBe(removalStatement("spam"));
+    expect(removalStatement("spam", "   ")).toEqual(removalStatement("spam"));
   });
 
   it("falls back to a real sentence for a ground it does not know", () => {
     // The admin panel writes this column. A value from a newer deploy there
     // must not produce an empty explanation here.
-    expect(removalStatement("something-new")).toBe(removalStatement("other"));
-    expect(removalStatement(null)).toBe(removalStatement("other"));
+    expect(removalStatement("something-new")).toEqual(removalStatement("other"));
+    expect(removalStatement(null)).toEqual(removalStatement("other"));
   });
 
   it("bounds the note to what the column accepts", () => {
@@ -160,14 +188,37 @@ describe("isRemovalGround", () => {
 
 describe("removalAppealHref", () => {
   it("pre-addresses the mail with what it is about", () => {
-    const href = removalAppealHref("product", TARGET, "Brass lamp");
+    const href = removalAppealHref("product", TARGET, "Brass lamp", english);
     expect(href.startsWith("mailto:")).toBe(true);
     expect(decodeURIComponent(href)).toContain("Brass lamp");
     expect(decodeURIComponent(href)).toContain(TARGET);
   });
 
+  it("says in English exactly what it always said", () => {
+    const url = new URL(removalAppealHref("product", TARGET, "Brass lamp", english));
+    expect(url.pathname).toBe("support@squareshare.eu");
+    expect(url.searchParams.get("subject")).toBe("Appeal: product removal (Brass lamp)");
+    expect(url.searchParams.get("body")).toBe(
+      [
+        "I would like this product reviewed again.",
+        "",
+        `Product id: ${TARGET}`,
+        "Name: Brass lamp",
+        "",
+        "Why I think this was wrong:",
+        "",
+      ].join("\n"),
+    );
+
+    const storefront = new URL(removalAppealHref("storefront", TARGET, "Shop", english));
+    expect(storefront.searchParams.get("subject")).toBe("Appeal: storefront removal (Shop)");
+    expect(storefront.searchParams.get("body")).toContain(
+      `I would like this storefront reviewed again.\n\nStorefront id: ${TARGET}`,
+    );
+  });
+
   it("escapes a title that would otherwise break the URL", () => {
-    const href = removalAppealHref("product", TARGET, "Lamp & Co #1 ?sale");
+    const href = removalAppealHref("product", TARGET, "Lamp & Co #1 ?sale", english);
     // The raw characters must not survive into the href unencoded, or the
     // mailto silently truncates at the first one.
     expect(href).not.toContain("&subject");
@@ -244,8 +295,33 @@ describe("reportSchema", () => {
 
   it("gives every reason a label and a hint for the dialog", () => {
     for (const reason of REPORT_REASONS) {
-      expect(REPORT_REASON_COPY[reason].label.length).toBeGreaterThan(0);
-      expect(REPORT_REASON_COPY[reason].hint.length).toBeGreaterThan(0);
+      expect(english(REPORT_REASON_COPY[reason].label).length).toBeGreaterThan(0);
+      expect(english(REPORT_REASON_COPY[reason].hint).length).toBeGreaterThan(0);
     }
+  });
+
+  it("asks in the words it always used, which the marketplace mirrors", () => {
+    const copy = Object.fromEntries(
+      REPORT_REASONS.map((reason) => [
+        reason,
+        [english(REPORT_REASON_COPY[reason].label), english(REPORT_REASON_COPY[reason].hint)],
+      ]),
+    );
+    expect(copy).toEqual({
+      illegal: [
+        "Illegal goods or activity",
+        "Selling something that is against the law, or using the listing to arrange it.",
+      ],
+      sexual: ["Sexual content", "Explicit imagery, or anything sexualising a minor."],
+      violence: ["Violence or gore", "Graphic injury, threats, or content glorifying violence."],
+      hate: ["Hate or harassment", "Attacks on a person or group, or hate symbolism."],
+      counterfeit: [
+        "Counterfeit or stolen",
+        "Fake branded goods, or someone else's work sold as their own.",
+      ],
+      scam: ["Scam or fraud", "The listing looks designed to take money without delivering."],
+      spam: ["Spam", "Repetitive, misleading, or not a real product at all."],
+      other: ["Something else", "Tell us below and a person will read it."],
+    });
   });
 });

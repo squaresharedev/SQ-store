@@ -1,0 +1,162 @@
+{
+  "metadata": {
+    "descriptionFallback": "{title} von {store}."
+  },
+  "notFound": {
+    "title": "Dieses Produkt ist nicht verfügbar",
+    "body": "Es wurde möglicherweise entfernt, oder der Link ist veraltet. Geh zurück zum Shop, um zu sehen, was jetzt angeboten wird.",
+    "back": "Zurück"
+  },
+  "sections": {
+    "description": "Beschreibung",
+    "specs": "Technische Daten",
+    "documents": "Dokumente",
+    "shipping": "Versand",
+    "returns": "Rücksendungen",
+    "safety": "Sicherheit und Konformität",
+    "seller": "Verkäufer"
+  },
+  "soldBy": "Verkauft von {seller}",
+  "moreDetails": "Weitere Details",
+  "trust": {
+    "digitalDelivery": "Nach dem Kauf als Download geliefert.",
+    "euRights": "14 Tage Bedenkzeit und eine 2-jährige Gewährleistung."
+  },
+  "safety": {
+    "manufacturer": "Hersteller",
+    "responsiblePerson": "Verantwortliche Person in der EU",
+    "identifier": "Produktkennung:",
+    "warnings": "Warnhinweise"
+  },
+  "priceNotes": "{price, select, incl {{shipping, select, plus {inkl. MwSt., zzgl. Versandkosten} free {inkl. MwSt., versandkostenfrei} other {inkl. MwSt.}}} excl {{shipping, select, plus {zzgl. Steuern, zzgl. Versandkosten} free {zzgl. Steuern, versandkostenfrei} other {zzgl. Steuern}}} other {{shipping, select, plus {zzgl. Versandkosten} free {versandkostenfrei} other {}}}}",
+  "stock": {
+    "digitalDownload": "Digitaler Download",
+    "digitalDownloadFormat": "Digitaler Download ({format})"
+  },
+  "description": {
+    "readMore": "Mehr lesen",
+    "readLess": "Weniger lesen"
+  },
+  "gallery": {
+    "noPhoto": "Noch kein Foto",
+    "photosOf": "Fotos von {title}",
+    "photo": "Foto {current} von {total}"
+  },
+  "options": {
+    "unavailable": "(nicht verfügbar)",
+    "unavailableOption": "{name} (nicht verfügbar)",
+    "unavailableLabel": "{name}, nicht verfügbar"
+  },
+  "quantity": {
+    "label": "Menge"
+  },
+  "cta": {
+    "unwired": "Diese Schaltfläche hat noch kein Ziel. Füge einen Kauflink beim Produkt hinzu oder eine Kontakt-E-Mail unter Verkäuferangaben.",
+    "unavailableIn": "Nicht verfügbar in dieser {group}",
+    "askAbout": "Über dieses Produkt anfragen",
+    "checkoutOn": "Checkout auf <strong>{host}</strong>",
+    "mailSubject": "Frage zu {title}",
+    "mailQuantity": "Menge: {quantity}"
+  },
+  "specs": {
+    "dimensions": "Abmessungen",
+    "weight": "Gewicht",
+    "materials": "Materialien",
+    "madeIn": "Hergestellt in",
+    "included": "Was enthalten ist",
+    "care": "Pflege"
+  },
+  "seller": {
+    "address": "Adresse:",
+    "country": "Land:",
+    "email": "E-Mail:",
+    "phone": "Telefon:",
+    "vatId": "USt-IdNr.: {vatId}"
+  },
+  "statutory": {
+    "withdrawal": "Du kannst diesen Kauf innerhalb von 14 Tagen nach Erhalt ohne Angabe von Gründen widerrufen, sofern keine der gesetzlichen Ausnahmen greift (z. B. Waren, die nach Kundenspezifikation angefertigt oder eindeutig auf die persönlichen Bedürfnisse zugeschnitten sind, oder versiegelte Waren).",
+    "digitalWithdrawal": "Bei einem Download erlischt das Widerrufsrecht, sobald du zustimmst, den Download vor Ablauf der 14-tägigen Widerrufsfrist zu starten.",
+    "guarantee": "Das EU-Recht räumt dir mindestens eine 2-jährige gesetzliche Gewährleistung ein, dass die Waren der Vertragsmäßigkeit entsprechen."
+  },
+  "footer": {
+    "disclosure": "<seller>{name}</seller> ist der Verkäufer dieser Bestellung und verantwortlich für das Produkt, seine Lieferung sowie etwaige Rücksendungen oder Erstattungen. Squareshare stellt die Technologie hinter dieser Seite bereit und ist nicht Vertragspartei des Kaufvertrags.",
+    "poweredBy": "Bereitgestellt von <brand>Squareshare</brand>",
+    "policiesLabel": "Squareshare-Richtlinien",
+    "policies": {
+      "privacy": {
+        "label": "Datenschutz",
+        "name": "Squareshare Datenschutzerklärung"
+      },
+      "terms": {
+        "label": "Nutzungsbedingungen",
+        "name": "Squareshare Nutzungsbedingungen"
+      }
+    }
+  },
+  "report": {
+    "trigger": "{target, select, product {Dieses Produkt melden} other {Dieses Schaufenster melden}}",
+    "title": "{target, select, product {Dieses Produkt melden} other {Dieses Schaufenster melden}}",
+    "description": "Sag uns, was daran nicht stimmt. Jede Meldung prüft eine Person.",
+    "sentTitle": "Meldung gesendet",
+    "sentBody": "{target, select, product {Danke. Eine Person prüft dieses Produkt. Wir teilen dem Verkäufer nicht mit, wer etwas gemeldet hat.} other {Danke. Eine Person prüft dieses Schaufenster. Wir teilen dem Verkäufer nicht mit, wer etwas gemeldet hat.}}",
+    "reasonsLegend": "Was stimmt daran nicht?",
+    "reasons": {
+      "illegal": {
+        "label": "Illegale Waren oder Aktivitäten",
+        "hint": "Es wird etwas verkauft, das gegen das Gesetz verstößt, oder das Angebot dient dazu, so etwas zu vermitteln."
+      },
+      "sexual": {
+        "label": "Sexuelle Inhalte",
+        "hint": "Explizite Bilder oder alles, was Minderjährige sexualisiert."
+      },
+      "violence": {
+        "label": "Gewalt oder Gore",
+        "hint": "Drastische Verletzungen, Drohungen oder Inhalte, die Gewalt verherrlichen."
+      },
+      "hate": {
+        "label": "Hass oder Belästigung",
+        "hint": "Angriffe auf eine Person oder Gruppe oder Hasssymbole."
+      },
+      "counterfeit": {
+        "label": "Fälschung oder Diebstahl",
+        "hint": "Gefälschte Markenware oder fremde Werke, die als eigene verkauft werden."
+      },
+      "scam": {
+        "label": "Betrug",
+        "hint": "Das Angebot wirkt darauf angelegt, Geld zu kassieren, ohne zu liefern."
+      },
+      "spam": {
+        "label": "Spam",
+        "hint": "Repetitiv, irreführend oder gar kein echtes Produkt."
+      },
+      "other": {
+        "label": "Sonstiges",
+        "hint": "Schreib es unten auf, eine Person liest es."
+      }
+    },
+    "detailsLabel": "Noch etwas? <muted>(optional)</muted>",
+    "detailsPlaceholder": "Was sollte die Person wissen, die das prüft?",
+    "emailLabel": "Deine E-Mail-Adresse <muted>(optional)</muted>",
+    "emailPlaceholder": "du@beispiel.de",
+    "emailHelp": "Nur damit wir den Eingang bestätigen und bei Bedarf nachfragen können. Sie wird dem Verkäufer nie angezeigt.",
+    "submitFailed": "Das konnte nicht gesendet werden. Versuche es noch einmal.",
+    "offline": "Das konnte nicht gesendet werden. Prüfe deine Verbindung und versuche es noch einmal.",
+    "send": "Meldung senden",
+    "api": {
+      "accepted": "Danke. Eine Person prüft das.",
+      "unreadable": "Die Anfrage konnte nicht gelesen werden.",
+      "invalid": "Diese Meldung ist ungültig.",
+      "targetType": "Das kannst du hier nicht melden.",
+      "reason": "Wähle aus, was nicht stimmt.",
+      "rateLimited": "Zu viele Meldungen von hier. Versuche es später noch einmal.",
+      "submitFailed": "Das konnte nicht gesendet werden. Versuche es noch einmal."
+    }
+  },
+  "shippingProse": {
+    "shipsFrom": "Versand aus {country}.",
+    "areaAndTime": "{area}: {time}",
+    "areaAndTimeWithCost": "{area}: {time} ({cost})",
+    "withCost": "{place} ({cost})",
+    "returnsWindow": "{paidBy, select, seller {{days, plural, one {Rücksendungen werden innerhalb von {days} Tag nach Lieferung akzeptiert. Die Rücksendekosten trägt der Verkäufer.} other {Rücksendungen werden innerhalb von {days} Tagen nach Lieferung akzeptiert. Die Rücksendekosten trägt der Verkäufer.}}} buyer {{days, plural, one {Rücksendungen werden innerhalb von {days} Tag nach Lieferung akzeptiert. Die Rücksendekosten trägt der Käufer.} other {Rücksendungen werden innerhalb von {days} Tagen nach Lieferung akzeptiert. Die Rücksendekosten trägt der Käufer.}}} other {{days, plural, one {Rücksendungen werden innerhalb von {days} Tag nach Lieferung akzeptiert.} other {Rücksendungen werden innerhalb von {days} Tagen nach Lieferung akzeptiert.}}}}}"
+  }
+}

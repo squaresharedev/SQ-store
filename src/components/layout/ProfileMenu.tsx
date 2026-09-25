@@ -3,8 +3,11 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Check, ChevronRight, LogOut, Store, User } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import { Check, ChevronRight, Languages, LogOut, Store, User } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { setLocale } from "@/i18n/actions";
+import { LOCALES, LOCALE_NAMES, type Locale } from "@/i18n/locales";
 import { Avatar } from "@/components/ui/avatar";
 import { Popover } from "@/components/ui/Popover";
 import {
@@ -40,13 +43,30 @@ export function ProfileMenu({
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
   const [showAccounts, setShowAccounts] = React.useState(false);
+  const [showLanguages, setShowLanguages] = React.useState(false);
   const [pending, startTransition] = React.useTransition();
   const canSwitch = accounts.length > 1;
+  const locale = useLocale();
+  const tLocale = useTranslations("LocaleSwitcher");
+  const t = useTranslations("Nav.profileMenu");
+  const tAll = useTranslations();
 
-  // Collapse the accounts sub-list whenever the menu closes (so it opens tidy).
+  // Collapse the sub-lists whenever the menu closes (so it opens tidy).
   function handleOpenChange(next: boolean) {
     setOpen(next);
-    if (!next) setShowAccounts(false);
+    if (!next) {
+      setShowAccounts(false);
+      setShowLanguages(false);
+    }
+  }
+
+  function chooseLocale(next: Locale) {
+    handleOpenChange(false);
+    if (next === locale) return;
+    startTransition(async () => {
+      const result = await setLocale(next);
+      if (result.ok) router.refresh();
+    });
   }
 
   function switchTo(id: string) {
@@ -61,7 +81,7 @@ export function ProfileMenu({
   const trigger = (
     <button
       type="button"
-      aria-label="Account menu"
+      aria-label={t("label")}
       aria-haspopup="dialog"
       aria-expanded={open}
       onClick={() => handleOpenChange(!open)}
@@ -86,7 +106,7 @@ export function ProfileMenu({
         open={open}
         onOpenChange={handleOpenChange}
         trigger={trigger}
-        label="Account menu"
+        label={t("label")}
         variant="anchored"
         panelClassName="w-64 p-1"
       >
@@ -105,7 +125,7 @@ export function ProfileMenu({
         <div className="py-1">
           <Link href="/settings/account" onClick={() => setOpen(false)} className={ITEM}>
             <User className="size-4 shrink-0 text-muted-foreground" aria-hidden />
-            Account
+            {t("account")}
           </Link>
 
           {canSwitch && (
@@ -117,7 +137,7 @@ export function ProfileMenu({
                 className={ITEM}
               >
                 <Store className="size-4 shrink-0 text-muted-foreground" aria-hidden />
-                Switch accounts
+                {t("switchAccounts")}
                 <ChevronRight
                   className={cn(
                     "ml-auto size-4 shrink-0 text-muted-foreground transition-transform motion-reduce:transition-none",
@@ -139,10 +159,10 @@ export function ProfileMenu({
                       >
                         <span className="min-w-0 flex-1">
                           <span className="block truncate">
-                            {a.isSelf ? "Your store" : a.storeName}
+                            {a.isSelf ? t("yourStore") : a.storeName}
                           </span>
                           <span className="block font-inter text-xs text-muted-foreground">
-                            {a.isSelf ? "Owner" : ROLE_LABELS[a.role]}
+                            {a.isSelf ? t("owner") : tAll(ROLE_LABELS[a.role])}
                           </span>
                         </span>
                         {a.accountId === currentAccountId && (
@@ -158,10 +178,56 @@ export function ProfileMenu({
         </div>
 
         <div className="border-t border-border py-1">
+          <button
+            type="button"
+            onClick={() => setShowLanguages((v) => !v)}
+            aria-expanded={showLanguages}
+            className={ITEM}
+          >
+            <Languages className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+            {tLocale("label")}
+            <span className="ml-auto truncate font-inter text-xs text-muted-foreground">
+              {LOCALE_NAMES[locale]}
+            </span>
+            <ChevronRight
+              className={cn(
+                "size-4 shrink-0 text-muted-foreground transition-transform motion-reduce:transition-none",
+                showLanguages && "rotate-90",
+              )}
+              aria-hidden
+            />
+          </button>
+
+          {showLanguages && (
+            <ul className="mb-1 ml-2 border-l border-border pl-1.5">
+              {LOCALES.map((code) => (
+                <li key={code}>
+                  <button
+                    type="button"
+                    // Each name is in its own language; `lang` lets a screen
+                    // reader pronounce "Čeština" as Czech, not as English.
+                    lang={code}
+                    onClick={() => chooseLocale(code)}
+                    disabled={pending}
+                    aria-current={code === locale ? "true" : undefined}
+                    className={cn(ITEM, "disabled:opacity-60")}
+                  >
+                    <span className="min-w-0 flex-1 truncate">{LOCALE_NAMES[code]}</span>
+                    {code === locale && (
+                      <Check className="size-4 shrink-0 text-foreground" aria-hidden />
+                    )}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div className="border-t border-border py-1">
           <form action={signOut}>
             <button type="submit" className={cn(ITEM, "hover:text-destructive")}>
               <LogOut className="size-4 shrink-0" aria-hidden />
-              Log out
+              {t("logOut")}
             </button>
           </form>
         </div>

@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Bell } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { Popover } from "@/components/ui/Popover";
 import {
@@ -26,6 +27,7 @@ export function NotificationBell({ className }: { className?: string }) {
     markRead,
     markAllRead,
   } = useNotificationsContext();
+  const t = useTranslations("Notifications.bell");
   const [open, setOpen] = React.useState(false);
 
   const badge = unreadCount > 99 ? "99+" : String(unreadCount);
@@ -40,7 +42,7 @@ export function NotificationBell({ className }: { className?: string }) {
     <button
       type="button"
       aria-label={
-        unreadCount > 0 ? `Notifications, ${unreadCount} unread` : "Notifications"
+        unreadCount > 0 ? t("unreadLabel", { count: unreadCount }) : t("label")
       }
       aria-haspopup="dialog"
       aria-expanded={open}
@@ -95,7 +97,7 @@ export function NotificationBell({ className }: { className?: string }) {
         open={open}
         onOpenChange={setOpen}
         trigger={trigger}
-        label="Notifications"
+        label={t("label")}
         variant="anchored"
         panelClassName="w-[22rem] p-0 overflow-hidden"
       >

@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { ZoomIn, ZoomOut } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Modal } from "@/components/ui/modal";
 import { ImageUpIcon } from "@/components/ui/ImageUpIcon";
 import { cn } from "@/lib/utils";
@@ -38,6 +39,9 @@ const clampTo = (value: number, limit: number) =>
  *  to the background: half the overhang the zoom created, on each axis. */
 const maxOffset = (zoom: number, size: number) => ((zoom - 1) * size) / 2;
 
+/** Why the crop could not go ahead; each names its own message. */
+type CropError = "load" | "process" | "prepare" | "export";
+
 export function ProfilePicCropModal({
   open,
   src,
@@ -52,6 +56,8 @@ export function ProfilePicCropModal({
   onClose: () => void;
   onUploadNew: () => void;
 }) {
+  const t = useTranslations("Settings.account.crop");
+  const tCommon = useTranslations("Common.actions");
   const boxRef = React.useRef<HTMLDivElement>(null);
   const imgRef = React.useRef<HTMLImageElement | null>(null);
   const dragging = React.useRef(false);
@@ -59,7 +65,7 @@ export function ProfilePicCropModal({
 
   const [view, setView] = React.useState<View>({ zoom: 1, x: 0, y: 0 });
   const [natural, setNatural] = React.useState({ w: 0, h: 0 });
-  const [error, setError] = React.useState<string | null>(null);
+  const [error, setError] = React.useState<CropError | null>(null);
   const [saving, setSaving] = React.useState(false);
   const [grabbing, setGrabbing] = React.useState(false);
 
@@ -114,7 +120,7 @@ export function ProfilePicCropModal({
     };
     img.onerror = () => {
       if (cancelled) return;
-      setError("That image could not be loaded. Try choosing it again.");
+      setError("load");
     };
     img.src = src;
     return () => {
@@ -209,7 +215,7 @@ export function ProfilePicCropModal({
     const ctx = canvas.getContext("2d");
     if (!ctx) {
       setSaving(false);
-      setError("Your browser could not process that image.");
+      setError("process");
       return;
     }
 
@@ -245,7 +251,7 @@ export function ProfilePicCropModal({
         (blob) => {
           if (!blob) {
             setSaving(false);
-            setError("Could not prepare that image. Try a different one.");
+            setError("prepare");
             return;
           }
           // A browser without WebP encoding silently hands back a PNG, so the
@@ -261,7 +267,7 @@ export function ProfilePicCropModal({
       // SecurityError: the canvas was tainted, i.e. the source loaded without
       // usable CORS headers. Nothing the user can fix except re-picking a file.
       setSaving(false);
-      setError("That image could not be exported. Upload it again instead.");
+      setError("export");
     }
   }
 
@@ -271,14 +277,14 @@ export function ProfilePicCropModal({
     <Modal
       open={open}
       onClose={onClose}
-      title="Crop your photo"
-      description="Drag to reposition. Scroll or use the slider to zoom."
+      title={t("title")}
+      description={t("description")}
     >
       <div className="flex flex-col items-center gap-5">
         <div
           ref={boxRef}
           role="application"
-          aria-label="Crop area. Drag or use the arrow keys to reposition."
+          aria-label={t("areaLabel")}
           tabIndex={0}
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
@@ -344,7 +350,7 @@ export function ProfilePicCropModal({
             step={0.01}
             value={view.zoom}
             disabled={!ready}
-            aria-label="Zoom"
+            aria-label={t("zoomLabel")}
             onChange={(e) => setZoom(parseFloat(e.target.value))}
             className={cn(
               "h-1.5 flex-1 cursor-pointer appearance-none rounded-full bg-border accent-foreground disabled:opacity-50",
@@ -356,7 +362,7 @@ export function ProfilePicCropModal({
 
         {error && (
           <p role="alert" className={errorTextClass}>
-            {error}
+            {t(`errors.${error}`)}
           </p>
         )}
 
@@ -368,7 +374,7 @@ export function ProfilePicCropModal({
             className={secondaryButtonClass}
           >
             <ImageUpIcon className="size-4" />
-            Choose another
+            {t("chooseAnother")}
           </button>
           <button
             type="button"
@@ -377,7 +383,7 @@ export function ProfilePicCropModal({
             suppressHydrationWarning
             className={primaryButtonClass}
           >
-            {saving ? "Saving…" : "Save photo"}
+            {saving ? tCommon("saving") : t("savePhoto")}
           </button>
         </div>
       </div>

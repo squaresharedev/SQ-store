@@ -1,6 +1,7 @@
 "use client";
 
 import { useId } from "react";
+import { useTranslations } from "next-intl";
 import { RotateCcw } from "lucide-react";
 import {
   CORNER_RADIUS_MAX,
@@ -33,15 +34,6 @@ import { LayoutPresetPicker } from "./LayoutPresetPicker";
 import { TileLayoutBoard } from "./TileLayoutBoard";
 import { TitleStylePicker } from "./TitleStylePicker";
 
-/** How an overlay bar arrives on hover, per row: it comes in from the edge it
- *  is pinned to, and a middle bar — which has no edge, and whose own transform
- *  is already centering it — fades instead. Mirrors HOVER_RISE_CLASSES. */
-const REVEAL_HINTS: Record<SpotRow, string> = {
-  top: "The bar slides down from the top when a buyer hovers.",
-  middle: "The bar fades in when a buyer hovers.",
-  bottom: "The bar slides up from the bottom when a buyer hovers.",
-};
-
 /** The shadow's tint: an inherit dot that clears the override, and a target so
  *  the wheel opens the docked panel. Resolved by color-target, the same call
  *  the panel makes, so the two cannot disagree. */
@@ -53,14 +45,19 @@ function TitleShadowColorField({
 }: NonNullable<Parameters<typeof CardStyleControls>[0]["colorScope"]> & {
   onChange: (patch: CardStyleOverrides) => void;
 }) {
+  const tKey = useTranslations();
   const field = titleShadowColorField(theme, overrides);
+  const inherit = field.inherit!;
   return (
     <ColorPicker
-      label={field.label}
+      label={tKey(field.label)}
       value={field.value}
       onChange={(titleShadowColor) => onChange({ titleShadowColor })}
       inherit={{
-        ...field.inherit!,
+        label: tKey(inherit.label),
+        useLabel: tKey(inherit.useLabel),
+        value: inherit.value,
+        active: inherit.active,
         onSelect: () => onChange({ titleShadowColor: undefined }),
       }}
       target={
@@ -107,7 +104,13 @@ export function CardStyleControls({
     scope: "theme" | "many" | { blockKey: string };
   };
 }) {
+  const t = useTranslations("Storefront.cardStyle");
   const fieldId = useId();
+  const revealHints: Record<SpotRow, string> = {
+    top: t("revealTop"),
+    middle: t("revealMiddle"),
+    bottom: t("revealBottom"),
+  };
 
   // Resolved, so the board shows the spot that will really be used: a stored
   // corner shows as its fallback on a round tile, and a stored middle shows
@@ -122,7 +125,7 @@ export function CardStyleControls({
     <div className="space-y-4">
       {/* The whole question, answered in one press for most sellers. */}
       <div className="space-y-1.5">
-        <span className={strongLabelClass}>Layout</span>
+        <span className={strongLabelClass}>{t("layout")}</span>
         <LayoutPresetPicker
           value={matchLayoutPreset(value)}
           onChange={(preset) => onChange(layoutPresetPatch(preset))}
@@ -133,7 +136,7 @@ export function CardStyleControls({
           price's spots, so "these two cannot share a row" is something the
           board shows rather than something a hint line has to say. */}
       <div className="space-y-1.5">
-        <span className={strongLabelClass}>Position</span>
+        <span className={strongLabelClass}>{t("position")}</span>
         <TileLayoutBoard
           titleStyle={value.titleStyle}
           titlePosition={titleSpot}
@@ -145,28 +148,28 @@ export function CardStyleControls({
         />
         <p className={infoTextClass}>
           {value.cornerRadius >= CORNER_SPOT_LIMIT
-            ? "Rounded cards keep both labels on the center axis."
-            : "Click a spot to place the label, or drag it here or on the tile."}
+            ? t("roundedHint")
+            : t("spotHint")}
         </p>
       </div>
 
       <SliderField
         id={`${fieldId}-corner-radius`}
-        label="Corner roundness"
+        label={t("cornerRoundness")}
         min={0}
         max={CORNER_RADIUS_MAX}
         step={2}
         value={value.cornerRadius}
         onChange={(cornerRadius) => onChange({ cornerRadius })}
-        ariaLabel="Corner roundness"
-        valueText={`${value.cornerRadius} pixels`}
+        ariaLabel={t("cornerRoundness")}
+        valueText={t("cornerValueText", { n: value.cornerRadius })}
         labelClassName={strongLabelClass}
         unit="px"
         statusText={
           value.cornerRadius === 0
-            ? "Sharp"
+            ? t("sharp")
             : value.cornerRadius >= CORNER_RADIUS_MAX
-              ? "Circle"
+              ? t("circle")
               : undefined
         }
       />
@@ -178,11 +181,11 @@ export function CardStyleControls({
         <TitleShadowColorField {...colorScope} onChange={onChange} />
       )}
 
-      <CollapsibleSection title="Fine tuning" collapsible defaultOpen={false}>
+      <CollapsibleSection title={t("fineTuning")} collapsible defaultOpen={false}>
         <div className="space-y-4">
           <div className="flex items-center justify-between gap-3">
             <label htmlFor={`${fieldId}-show-title`} className={strongLabelClass}>
-              Show title
+              {t("showTitle")}
             </label>
             <Switch
               id={`${fieldId}-show-title`}
@@ -194,7 +197,7 @@ export function CardStyleControls({
           {value.showTitle && (
             <>
               <div className="space-y-1.5">
-                <span className={strongLabelClass}>Title style</span>
+                <span className={strongLabelClass}>{t("titleStyleLabel")}</span>
                 <TitleStylePicker
                   value={value.titleStyle}
                   onChange={(titleStyle) => onChange({ titleStyle })}
@@ -206,18 +209,18 @@ export function CardStyleControls({
                   only reaches for this to want more or less air than that. */}
               <SliderField
                 id={`${fieldId}-title-inset`}
-                label="Edge spacing"
+                label={t("edgeSpacing")}
                 min={0}
                 max={TITLE_INSET_MAX}
                 value={inset ?? autoTitleInset(value.cornerRadius)}
                 onChange={(titleInset) => onChange({ titleInset })}
-                ariaLabel="Title edge spacing"
-                valueText={`${inset ?? autoTitleInset(value.cornerRadius)} pixels`}
+                ariaLabel={t("edgeSpacingAriaLabel")}
+                valueText={t("edgeValueText", { n: inset ?? autoTitleInset(value.cornerRadius) })}
                 labelClassName={strongLabelClass}
                 unit="px"
                 headerAction={
                   inset === undefined ? (
-                    <span className={infoTextClass}>Auto</span>
+                    <span className={infoTextClass}>{t("auto")}</span>
                   ) : (
                     <button
                       type="button"
@@ -229,7 +232,7 @@ export function CardStyleControls({
                         strokeWidth={2}
                         aria-hidden="true"
                       />
-                      Auto
+                      {t("auto")}
                     </button>
                   )
                 }
@@ -241,7 +244,7 @@ export function CardStyleControls({
                     htmlFor={`${fieldId}-title-hover`}
                     className={strongLabelClass}
                   >
-                    Show title on hover
+                    {t("showTitleOnHover")}
                   </label>
                   <Switch
                     id={`${fieldId}-title-hover`}
@@ -255,8 +258,8 @@ export function CardStyleControls({
                     the sentence has to follow the spot, not name the bottom. */}
                 <p className={infoTextClass}>
                   {value.titleStyle === "overlay"
-                    ? REVEAL_HINTS[spotRow(titleSpot)]
-                    : "The title stays hidden until a buyer hovers over the product."}
+                    ? revealHints[spotRow(titleSpot)]
+                    : t("hoverHint")}
                 </p>
               </div>
             </>

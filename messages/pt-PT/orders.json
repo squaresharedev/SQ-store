@@ -1,0 +1,108 @@
+{
+  "metadata": {
+    "orders": {
+      "title": "Encomendas"
+    }
+  },
+  "page": {
+    "title": "Encomendas",
+    "subtitle": "Todas as encomendas feitas através do Square Share."
+  },
+  "status": {
+    "paid": "Paga",
+    "refunded": "Reembolsada",
+    "disputed": "Em disputa",
+    "pending": "Pendente"
+  },
+  "channel": {
+    "embed": "Incorporação",
+    "marketplace": "Marketplace"
+  },
+  "empty": {
+    "filteredTitle": "Nenhuma encomenda corresponde a estes filtros",
+    "filteredHint": "Tente alargar o intervalo de datas ou limpar os filtros.",
+    "clearFilters": "Limpar filtros",
+    "title": "Ainda sem encomendas",
+    "hint": "A finalização de compra do Square Share ainda não está disponível. As vendas feitas através do seu próprio link de compra ou por e-mail não aparecem aqui.",
+    "goToProducts": "Ir para produtos"
+  },
+  "list": {
+    "updating": "A atualizar…",
+    "summary": "{total, plural, one {{total} encomenda} many {{total} de encomendas} other {{total} encomendas}} · página {page} de {totalPages}",
+    "detailDialog": "Detalhes da encomenda",
+    "closeDetail": "Fechar detalhes da encomenda"
+  },
+  "table": {
+    "product": "Produto",
+    "amount": "Valor",
+    "channel": "Canal",
+    "status": "Estado",
+    "buyer": "Comprador",
+    "date": "Data"
+  },
+  "toolbar": {
+    "region": "filtros de encomendas",
+    "channel": "canal",
+    "buyerEmail": "e-mail do comprador",
+    "searchPlaceholder": "pesquisar e-mail do comprador",
+    "status": "estado",
+    "statusAriaLabel": "Filtrar por estado",
+    "allStatuses": "Todos os estados",
+    "dateRange": "intervalo de datas",
+    "datePlaceholder": "qualquer data",
+    "sort": "ordenar",
+    "sortAriaLabel": "Ordenar encomendas",
+    "clearFilters": "limpar filtros"
+  },
+  "sort": {
+    "newest": "Mais recentes primeiro",
+    "oldest": "Mais antigas primeiro",
+    "amountHigh": "Valor: do mais alto para o mais baixo",
+    "amountLow": "Valor: do mais baixo para o mais alto"
+  },
+  "detail": {
+    "close": "Fechar detalhes da encomenda",
+    "version": "Versão",
+    "copyVersion": {
+      "copy": "Copiar versão",
+      "copied": "Versão copiada",
+      "failed": "Não foi possível copiar a versão. Selecione-a e copie-a manualmente."
+    },
+    "amount": "Valor",
+    "platformFee": "Taxa da plataforma",
+    "youReceive": "Recebe",
+    "buyerEmail": "E-mail do comprador",
+    "copyBuyerEmail": {
+      "copy": "Copiar e-mail do comprador",
+      "copied": "E-mail do comprador copiado",
+      "failed": "Não foi possível copiar o e-mail do comprador. Selecione-o e copie-o manualmente."
+    },
+    "noEmail": "sem e-mail",
+    "channel": "Canal",
+    "date": "Data",
+    "orderId": "ID da encomenda",
+    "copyOrderId": {
+      "copy": "Copiar ID da encomenda",
+      "copied": "ID da encomenda copiado",
+      "failed": "Não foi possível copiar o ID da encomenda. Selecione-o e copie-o manualmente."
+    }
+  },
+  "actions": {
+    "refundNeedsStripe": "Os reembolsos exigem que o Stripe esteja ligado.",
+    "connectStripe": "Ligue o Stripe para ativar reembolsos",
+    "refundConfirm": "Reembolsar esta encomenda? Esta ação não pode ser anulada assim que o Stripe estiver ligado.",
+    "confirmRefund": "Confirmar reembolso",
+    "refundOrder": "Reembolsar encomenda",
+    "disputeInStripe": "As disputas são geridas no seu painel do Stripe assim que o Stripe estiver ligado.",
+    "disputeConfirm": "Abrir gestão de disputa para esta encomenda?",
+    "handleDispute": "Gerir disputa",
+    "none": "Não há ações disponíveis para esta encomenda."
+  },
+  "skeleton": {
+    "loading": "a carregar encomendas"
+  },
+  "loading": {
+    "title": "Encomendas",
+    "subtitle": "Todas as vendas através da sua incorporação e do marketplace."
+  }
+}

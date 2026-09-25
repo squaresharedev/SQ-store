@@ -210,7 +210,7 @@ export async function publishBlockedError(
   const identity = await getTraderIdentityStatus(accountId);
   // A read failure refuses rather than waving the publish through: see
   // getTraderIdentityStatus for why this end fails closed.
-  if (!identity.ok) return serverError("check your seller details");
+  if (!identity.ok) return serverError("checkSellerDetails");
   if (identity.missing.length === 0) return null;
   return traderIdentityRequired(identity.missing);
 }

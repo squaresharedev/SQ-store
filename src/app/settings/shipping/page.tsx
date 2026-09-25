@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { ShippingSection } from "@/components/settings/ShippingSection";
 import { requireUser } from "@/lib/auth/session";
 import { getShippingPolicy } from "@/lib/settings/shipping-policy";
 import { getPrimaryStorefrontId } from "@/lib/storefront/queries";
 
-export const metadata: Metadata = {
-  title: "Shipping & returns settings",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Settings.metadata.shipping");
+  return { title: t("title") };
+}
 
 /**
  * The account's shipping and returns terms. Read for the SIGNED-IN USER's own

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { pageShellClass } from "@/components/ui/surface-styles";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { listAllProducts } from "@/lib/products/queries";
@@ -9,15 +9,17 @@ import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
 import { getTraderIdentityStatus } from "@/lib/settings/seller-identity";
 
-export const metadata: Metadata = {
-  title: "Storefronts",
-};
+export async function generateMetadata() {
+  const t = await getTranslations("Storefront.metadata");
+  return { title: t("storefronts.title") };
+}
 
 // Auth is enforced by storefront/layout.tsx. The dashboard shell (sidebar) is
 // supplied by (list)/layout.tsx rather than here, so that loading.tsx renders
 // inside the same chrome instead of replacing it. The editor route sits outside
 // this group and stays full-screen.
 export default async function StorefrontsPage() {
+  const t = await getTranslations("Storefront.metadata");
   // Products feed the cards' live grid previews (image tiles).
   const [storefronts, products, account, sampleFlags] = await Promise.all([
     listStorefronts(),
@@ -39,8 +41,8 @@ export default async function StorefrontsPage() {
     <main className={pageShellClass}>
       <PageHeader
         className="mb-6"
-        title="Storefronts"
-        subtitle="Each storefront is its own grid and theme. Create as many as you need, then open one to edit it."
+        title={t("storefronts.title")}
+        subtitle={t("storefronts.subtitle")}
       />
 
       <StorefrontsList

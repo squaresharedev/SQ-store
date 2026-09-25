@@ -15,30 +15,43 @@ import {
 // axes. So these are one-click shortcuts for the axes most shops share, and
 // "Something else" is a first-class row beside them, not a fallback.
 
-/** A one-click group: what it is called, how it should draw, and (where the
- *  values are genuinely standard) the values themselves. */
+/**
+ * A one-click group: which axis it is, how it should draw, and (where the
+ * values are genuinely standard) the values themselves.
+ *
+ * The axis NAME and the example the value box shows are copy, in the seller's
+ * language (`Products.optionsField.presets.<id>`). The name a click writes into
+ * the group is seller data from then on, like any name they typed.
+ */
 export type OptionGroupPreset = {
-  name: string;
+  id: OptionGroupPresetId;
   display: OptionDisplay;
   /** Prefilled choices. Empty when the values are the seller's own — nobody
    *  else can guess a shop's colours, materials or wattages. */
   values: readonly string[];
-  /** What the seller types into the value box first, when there is nothing to
-   *  prefill. Concrete, so the shape of an answer is obvious. */
-  placeholder: string;
 };
 
+export type OptionGroupPresetId =
+  | "colour"
+  | "size"
+  | "material"
+  | "capacity"
+  | "powerOutput"
+  | "length"
+  | "style"
+  | "finish";
+
 export const OPTION_GROUP_PRESETS: readonly OptionGroupPreset[] = [
-  { name: "Colour", display: "swatch", values: [], placeholder: "Midnight blue" },
+  { id: "colour", display: "swatch", values: [] },
   // The one axis with genuinely conventional values, so it is the one that
   // arrives filled in: a clothing seller adds sizes in a single click.
-  { name: "Size", display: "chip", values: ["XS", "S", "M", "L", "XL", "XXL"], placeholder: "Medium" },
-  { name: "Material", display: "chip", values: [], placeholder: "Solid oak" },
-  { name: "Capacity", display: "chip", values: [], placeholder: "500 ml" },
-  { name: "Power output", display: "chip", values: [], placeholder: "750 W" },
-  { name: "Length", display: "chip", values: [], placeholder: "2 m" },
-  { name: "Style", display: "chip", values: [], placeholder: "Wide fit" },
-  { name: "Finish", display: "swatch", values: [], placeholder: "Brushed brass" },
+  { id: "size", display: "chip", values: ["XS", "S", "M", "L", "XL", "XXL"] },
+  { id: "material", display: "chip", values: [] },
+  { id: "capacity", display: "chip", values: [] },
+  { id: "powerOutput", display: "chip", values: [] },
+  { id: "length", display: "chip", values: [] },
+  { id: "style", display: "chip", values: [] },
+  { id: "finish", display: "swatch", values: [] },
 ];
 
 /**
@@ -95,7 +108,7 @@ export function addOptions(
 /** A new group from a preset, ids minted by the caller so tests can be
  *  deterministic and the browser can use crypto.randomUUID. */
 export function groupFromPreset(
-  preset: OptionGroupPreset,
+  preset: { name: string; display: OptionDisplay; values: readonly string[] },
   mintId: () => string,
 ): ProductOptionGroup {
   return addOptions(

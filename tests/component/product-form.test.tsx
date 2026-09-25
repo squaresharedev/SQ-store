@@ -1,9 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render as rtlRender, screen, waitFor, cleanup, within } from "@testing-library/react";
+import { render as rtlRender, screen, waitFor, cleanup, within } from "../setup/render";
 import type { ReactElement } from "react";
 import { ToastProvider } from "@/components/ui/Toast";
 import { NavigationBlockerProvider } from "@/lib/hooks/useNavigationBlocker";
 import userEvent from "@testing-library/user-event";
+import { permissionDenied } from "@/lib/errors";
 
 afterEach(cleanup);
 
@@ -311,11 +312,7 @@ describe("ProductForm", () => {
     // being told what to do about it.
     mockCreateProduct.mockResolvedValue({
       ok: false,
-      error: {
-        code: "permission_denied",
-        message: "Your Viewer role can't add products in this store.",
-        fix: "Ask the store owner to change your role.",
-      },
+      error: permissionDenied("viewer", "createProducts"),
     });
     const user = userEvent.setup();
     render(<ProductForm />);
@@ -327,15 +324,17 @@ describe("ProductForm", () => {
     // In the page, beside the Save button, where it persists…
     await waitFor(() => {
       const notice = inForm().getByRole("alert");
-      expect(notice).toHaveTextContent("Your Viewer role can't add products in this store.");
-      expect(notice).toHaveTextContent("Ask the store owner to change your role.");
+      expect(notice).toHaveTextContent("Your Viewer role can't create products in this store.");
+      expect(notice).toHaveTextContent(
+        "Only the store owner can change roles. Ask them to upgrade you to Editor in Team settings.",
+      );
     });
 
     // …and as a toast, so it is seen even if the notice is off-screen.
     const alerts = await screen.findAllByRole("alert");
     expect(
       alerts.some((el) =>
-        el.textContent?.includes("Your Viewer role can't add products in this store."),
+        el.textContent?.includes("Your Viewer role can't create products in this store."),
       ),
     ).toBe(true);
   });

@@ -8,6 +8,8 @@ import {
   type ReactNode,
 } from "react";
 import { AlertTriangle, ChevronDown, ChevronUp, Plus, X } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import { formatList } from "@/lib/format/intl";
 import { cn } from "@/lib/utils";
 import {
   fieldBaseClass,
@@ -27,7 +29,6 @@ import {
   defaultDisplayFor,
   groupFromPreset,
   splitOptionInput,
-  type OptionGroupPreset,
 } from "@/lib/products/option-presets";
 import {
   OPTION_GROUP_NAME_MAX,
@@ -43,16 +44,17 @@ import {
  *  as what "no swatch" currently looks like. */
 const NO_SWATCH = "#e5e5e5";
 
-const DISPLAY_OPTIONS: readonly { value: OptionDisplay; label: string }[] = [
-  { value: "swatch", label: "Swatches" },
-  { value: "chip", label: "Chips" },
-  { value: "select", label: "Dropdown" },
-];
+/** The three ways a group can draw, in the order the control offers them.
+ *  Their names and hints are `Products.optionsField.display*.<value>`. */
+const DISPLAYS: readonly OptionDisplay[] = ["swatch", "chip", "select"];
 
-const DISPLAY_HINTS: Record<OptionDisplay, string> = {
-  swatch: "Colour circles. Give each option a swatch, or buyers see its first letter.",
-  chip: "Text buttons, for values buyers read: sizes, wattages, lengths.",
-  select: "A dropdown. Best when there are more values than fit as buttons.",
+/** A preset as this form offers it: named in the seller's language. */
+type LocalPreset = {
+  name: string;
+  display: OptionDisplay;
+  values: readonly string[];
+  /** The example in the value box; absent for "Something else". */
+  placeholder?: string;
 };
 
 /**
@@ -84,6 +86,13 @@ export function OptionsField({
   onChange: (groups: ProductOptionGroup[]) => void;
   error?: string;
 }) {
+  const t = useTranslations("Products.optionsField");
+  const presets: LocalPreset[] = OPTION_GROUP_PRESETS.map((preset) => ({
+    name: t(`presets.${preset.id}.name`),
+    display: preset.display,
+    values: preset.values,
+    placeholder: t(`presets.${preset.id}.placeholder`),
+  }));
   const totalOptions = groups.reduce((total, group) => total + group.options.length, 0);
   const roomForGroup = groups.length < OPTION_GROUPS_MAX && totalOptions < OPTIONS_TOTAL_MAX;
 
@@ -91,7 +100,7 @@ export function OptionsField({
     onChange(groups.map((group) => (group.id === id ? next : group)));
   }
 
-  function addPreset(preset: OptionGroupPreset) {
+  function addPreset(preset: LocalPreset) {
     if (!roomForGroup) return;
     // Trimmed to the total cap, so clicking "Size" with 45 options already
     // present adds three rather than being refused outright.
@@ -117,7 +126,7 @@ export function OptionsField({
   // greyed-out buttons is noise, and a second "Colour" group is almost always
   // a misclick rather than an intent.
   const taken = new Set(groups.map((group) => group.name.trim().toLowerCase()));
-  const available = OPTION_GROUP_PRESETS.filter(
+  const available = presets.filter(
     (preset) => !taken.has(preset.name.toLowerCase()),
   );
 
@@ -131,6 +140,7 @@ export function OptionsField({
           position={index}
           count={groups.length}
           totalOptions={totalOptions}
+          presets={presets}
           onChange={(next) => updateGroup(group.id, next)}
           onMove={(direction) => moveGroup(group.id, direction)}
           onRemove={() => onChange(groups.filter((candidate) => candidate.id !== group.id))}
@@ -142,14 +152,14 @@ export function OptionsField({
           group, when the question is live, not before anything is added. */}
       {groups.length > 0 && (
         <p className={infoTextClass}>
-          All versions share one price and one stock level.
+          {t("sharedPriceNote")}
         </p>
       )}
 
       {roomForGroup ? (
         <div className="space-y-2">
           <p className={cn(labelClass, "text-xs")}>
-            {groups.length === 0 ? "Sold in more than one version?" : "Add another way it varies"}
+            {groups.length === 0 ? t("addFirst") : t("addAnother")}
           </p>
           <div className="flex flex-wrap gap-2">
             {available.map((preset) => (
@@ -167,19 +177,19 @@ export function OptionsField({
               type="button"
               className={cn(secondaryButtonClass, "px-3 py-1.5 text-xs")}
               onClick={() =>
-                addPreset({ name: "", display: "chip", values: [], placeholder: "First option" })
+                addPreset({ name: "", display: "chip", values: [] })
               }
             >
               <Plus className="size-3.5" strokeWidth={2} aria-hidden="true" />
-              Something else
+              {t("somethingElse")}
             </button>
           </div>
         </div>
       ) : (
         <p className={infoTextClass}>
           {groups.length >= OPTION_GROUPS_MAX
-            ? `That is all ${OPTION_GROUPS_MAX} option groups.`
-            : `That is all ${OPTIONS_TOTAL_MAX} options.`}
+            ? t("groupsFull", { max: OPTION_GROUPS_MAX })
+            : t("optionsFull", { max: OPTIONS_TOTAL_MAX })}
         </p>
       )}
 
@@ -252,6 +262,7 @@ function OptionGroupEditor({
   position,
   count,
   totalOptions,
+  presets,
   onChange,
   onMove,
   onRemove,
@@ -261,10 +272,13 @@ function OptionGroupEditor({
   position: number;
   count: number;
   totalOptions: number;
+  presets: readonly LocalPreset[];
   onChange: (group: ProductOptionGroup) => void;
   onMove: (direction: -1 | 1) => void;
   onRemove: () => void;
 }) {
+  const t = useTranslations("Products.optionsField");
+  const locale = useLocale();
   const [draft, setDraft] = useState("");
   // Whether the seller has overridden the display for this group. Until they
   // do, renaming it keeps re-deriving one, so typing "Colour" over "Style"
@@ -297,8 +311,15 @@ function OptionGroupEditor({
     }
     return conflicting;
   })();
-  const heading = group.name.trim() || `Option group ${position + 1}`;
-  const preset = OPTION_GROUP_PRESETS.find(
+  // The group's own name when it has one. Without one, every sentence naming
+  // the group has its own "Option group N" wording (see the `named` selects).
+  const groupName = group.name.trim();
+  const heading = {
+    named: groupName ? "yes" : "no",
+    name: groupName,
+    position: position + 1,
+  };
+  const preset = presets.find(
     (candidate) => candidate.name.toLowerCase() === group.name.trim().toLowerCase(),
   );
   const full =
@@ -374,14 +395,14 @@ function OptionGroupEditor({
           the loudest position on the card. */}
       <div className="flex items-center gap-2">
         <label htmlFor={`${inputId}-name`} className="sr-only">
-          What varies
+          {t("whatVaries")}
         </label>
         <input
           id={`${inputId}-name`}
           type="text"
           value={group.name}
           maxLength={OPTION_GROUP_NAME_MAX}
-          placeholder="What varies? e.g. Power output"
+          placeholder={t("whatVariesPlaceholder")}
           onChange={(event) => {
             const name = event.target.value;
             onChange({
@@ -398,11 +419,11 @@ function OptionGroupEditor({
           )}
         />
         <span className={cn(infoTextClass, "shrink-0 tabular-nums")}>
-          {group.options.length === 1 ? "1 option" : `${group.options.length} options`}
+          {t("optionCount", { count: group.options.length })}
         </span>
         <div className="flex items-center">
           <RowButton
-            label={`Move ${heading} earlier`}
+            label={t("moveGroupEarlier", heading)}
             disabled={position === 0}
             onClick={() => onMove(-1)}
             groupName="group"
@@ -410,14 +431,14 @@ function OptionGroupEditor({
             <ChevronUp className="size-4" strokeWidth={2} aria-hidden="true" />
           </RowButton>
           <RowButton
-            label={`Move ${heading} later`}
+            label={t("moveGroupLater", heading)}
             disabled={position === count - 1}
             onClick={() => onMove(1)}
             groupName="group"
           >
             <ChevronDown className="size-4" strokeWidth={2} aria-hidden="true" />
           </RowButton>
-          <RowButton label={`Remove ${heading}`} destructive onClick={onRemove} groupName="group">
+          <RowButton label={t("removeGroup", heading)} destructive onClick={onRemove} groupName="group">
             <X className="size-4" strokeWidth={2} aria-hidden="true" />
           </RowButton>
         </div>
@@ -430,8 +451,8 @@ function OptionGroupEditor({
         <div className="w-full max-w-[19rem]">
           <SegmentedControl
             value={group.display}
-            options={DISPLAY_OPTIONS}
-            ariaLabel={`How buyers pick ${heading}`}
+            options={DISPLAYS.map((display) => ({ value: display, label: t(`display.${display}`) }))}
+            ariaLabel={t("howBuyersPick", heading)}
             onChange={(display) => {
               displayTouched.current = true;
               onChange({ ...group, display });
@@ -442,7 +463,7 @@ function OptionGroupEditor({
             Swatches looks like" sits in the same group as the "Swatches"
             button and is a second match for it — confusing to anything
             querying by accessible name, a screen reader included. */}
-        <InfoTip label="How buyers pick it">{DISPLAY_HINTS[group.display]}</InfoTip>
+        <InfoTip label={t("howBuyersPickAbout")}>{t(`displayHint.${group.display}`)}</InfoTip>
       </div>
 
       {/* THE OPTIONS ARE A LIST, so they are drawn as one.
@@ -461,9 +482,9 @@ function OptionGroupEditor({
           className="flex items-center gap-2.5 px-2.5"
         >
           <span className={cn(infoTextClass, "w-7 shrink-0 text-center")}>
-            Colour
+            {t("swatchColumn")}
           </span>
-          <span className={cn(infoTextClass, "flex-1")}>Name</span>
+          <span className={cn(infoTextClass, "flex-1")}>{t("nameColumn")}</span>
         </div>
       )}
       {group.options.length > 0 && (
@@ -476,10 +497,15 @@ function OptionGroupEditor({
             "divide-y divide-border rounded-sm border border-border",
             "[&>li:first-child]:rounded-t-sm [&>li:last-child]:rounded-b-sm",
           )}
-          aria-label={`${heading} options`}
+          aria-label={t("groupOptionsList", heading)}
         >
           {group.options.map((option, index) => {
-            const optionName = option.name || `option ${index + 1}`;
+            // Same idea for an unnamed option: "option N" is its own wording.
+            const optionRef = {
+              named: option.name ? "yes" : "no",
+              name: option.name,
+              position: index + 1,
+            };
             return (
               <li
                 key={option.id}
@@ -510,11 +536,12 @@ function OptionGroupEditor({
                     <ColorPicker
                       compact
                       id={`${inputId}-swatch-${option.id}`}
-                      label={`Colour for ${optionName}`}
+                      label={t("swatchFor", optionRef)}
                       value={option.swatch ?? NO_SWATCH}
                       onChange={(hex) => updateOption(option.id, { swatch: hex })}
                       inherit={{
-                        label: "No swatch",
+                        label: t("noSwatch"),
+                        useLabel: t("useNoSwatch"),
                         value: NO_SWATCH,
                         active: option.swatch === undefined,
                         onSelect: () => {
@@ -535,14 +562,19 @@ function OptionGroupEditor({
                 {/* The name is the row. Borderless until you touch it, so a
                     list of five reads as five words rather than five boxes. */}
                 <label htmlFor={`${inputId}-option-${option.id}`} className="sr-only">
-                  {heading} option {index + 1}
+                  {t("optionLabel", {
+                    named: heading.named,
+                    name: groupName,
+                    groupPosition: position + 1,
+                    position: index + 1,
+                  })}
                 </label>
                 <input
                   id={`${inputId}-option-${option.id}`}
                   type="text"
                   value={option.name}
                   maxLength={OPTION_NAME_MAX}
-                  placeholder={preset?.placeholder ?? `Option ${index + 1}`}
+                  placeholder={preset?.placeholder ?? t("optionPlaceholder", { position: index + 1 })}
                   onChange={(event) => updateOption(option.id, { name: event.target.value })}
                   className={cn(
                     "min-w-0 flex-1 rounded-sm border border-transparent bg-transparent px-2 py-1 font-inter text-sm text-foreground",
@@ -559,26 +591,26 @@ function OptionGroupEditor({
                   id={`${inputId}-available-${option.id}`}
                   checked={option.available}
                   onCheckedChange={(available) => updateOption(option.id, { available })}
-                  aria-label={`${optionName} is available`}
+                  aria-label={t("available", optionRef)}
                 />
 
                 <div className="flex items-center">
                   <RowButton
-                    label={`Move ${optionName} earlier`}
+                    label={t("moveOptionEarlier", optionRef)}
                     disabled={index === 0}
                     onClick={() => moveOption(option.id, -1)}
                   >
                     <ChevronUp className="size-4" strokeWidth={2} aria-hidden="true" />
                   </RowButton>
                   <RowButton
-                    label={`Move ${optionName} later`}
+                    label={t("moveOptionLater", optionRef)}
                     disabled={index === group.options.length - 1}
                     onClick={() => moveOption(option.id, 1)}
                   >
                     <ChevronDown className="size-4" strokeWidth={2} aria-hidden="true" />
                   </RowButton>
                   <RowButton
-                    label={`Remove ${optionName}`}
+                    label={t("removeOption", optionRef)}
                     destructive
                     onClick={() =>
                       onChange({
@@ -609,11 +641,15 @@ function OptionGroupEditor({
           />
           <p className={cn(infoTextClass, "text-foreground")}>
             {(() => {
+              // Joined the way the reader's language joins a list.
               const names = group.options
                 .filter((o) => swatchConflicts.has(o.id))
-                .map((o) => o.name.trim() || "Unnamed")
-                .join(" and ");
-              return `${names} share a first letter and neither has a colour. Buyers will see identical squares. Give each one a colour.`;
+                // Only named options can conflict (the check is on a first
+                // letter), so there is no unnamed one to word here.
+                .map((o) => o.name.trim());
+              return t("swatchConflict", {
+                names: formatList(names, locale, { englishSeparator: " and " }),
+              });
             })()}
           </p>
         </div>
@@ -626,12 +662,9 @@ function OptionGroupEditor({
         <div className="min-w-48 flex-1 space-y-1">
           <div className="flex items-center gap-1.5">
             <label htmlFor={`${inputId}-draft`} className={cn(labelClass, "text-xs")}>
-              Add options
+              {t("addOptions")}
             </label>
-            <InfoTip label="How to add several options at once">
-              Press Enter after each one, or paste a list — &quot;S, M, L, XL&quot;, or a
-              column copied from a spreadsheet — to add them all at once.
-            </InfoTip>
+            <InfoTip label={t("addOptionsAbout")}>{t("addOptionsHelp")}</InfoTip>
           </div>
           <input
             id={`${inputId}-draft`}
@@ -640,8 +673,11 @@ function OptionGroupEditor({
             disabled={full}
             placeholder={
               full
-                ? "No room for more options"
-                : `${preset?.placeholder ?? "First option"}  —  or paste a list`
+                ? t("noRoom")
+                : t("draftPlaceholder", {
+                    preset: preset?.placeholder ? "yes" : "no",
+                    example: preset?.placeholder ?? "",
+                  })
             }
             onChange={(event) => setDraft(event.target.value)}
             onKeyDown={onDraftKeyDown}
@@ -659,7 +695,7 @@ function OptionGroupEditor({
           onClick={commitDraft}
         >
           <Plus className="size-3.5" strokeWidth={2} aria-hidden="true" />
-          Add
+          {t("add")}
         </button>
       </div>
     </div>

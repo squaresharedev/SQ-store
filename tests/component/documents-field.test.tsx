@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "../setup/render";
 import userEvent from "@testing-library/user-event";
 import { DocumentsField } from "@/components/products/DocumentsField";
 import type { DocumentFormValue } from "@/components/products/form-values";

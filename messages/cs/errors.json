@@ -1,0 +1,536 @@
+{
+  "sessionExpired": {
+    "message": "Vaše relace vypršela.",
+    "fix": "Přihlaste se znovu a akci zopakujte. Text napsaný v této kartě zůstane zachován, dokud stránku neopustíte."
+  },
+  "permissionDenied": {
+    "fix": "Role může měnit jen vlastník obchodu. Požádejte ho, aby vám v sekci Tým a přístup přidělil roli Editor.",
+    "createProducts": {
+      "withRole": "Vaše role {role, select, owner {Vlastník} editor {Editor} viewer {Čtenář} other {{role}}} neumožňuje v tomto obchodě vytvářet produkty.",
+      "noRole": "Nemáte oprávnění vytvářet produkty v tomto obchodě."
+    },
+    "editProducts": {
+      "withRole": "Vaše role {role, select, owner {Vlastník} editor {Editor} viewer {Čtenář} other {{role}}} neumožňuje v tomto obchodě upravovat produkty.",
+      "noRole": "Nemáte oprávnění upravovat produkty v tomto obchodě."
+    },
+    "deleteProducts": {
+      "withRole": "Vaše role {role, select, owner {Vlastník} editor {Editor} viewer {Čtenář} other {{role}}} neumožňuje v tomto obchodě mazat produkty.",
+      "noRole": "Nemáte oprávnění mazat produkty v tomto obchodě."
+    },
+    "importProducts": {
+      "withRole": "Vaše role {role, select, owner {Vlastník} editor {Editor} viewer {Čtenář} other {{role}}} neumožňuje v tomto obchodě importovat produkty.",
+      "noRole": "Nemáte oprávnění importovat produkty do tohoto obchodu."
+    },
+    "previewProductPages": {
+      "withRole": "Vaše role {role, select, owner {Vlastník} editor {Editor} viewer {Čtenář} other {{role}}} neumožňuje v tomto obchodě zobrazovat náhledy produktových stránek.",
+      "noRole": "Nemáte oprávnění zobrazovat náhledy produktových stránek v tomto obchodě."
+    },
+    "createStorefronts": {
+      "withRole": "Vaše role {role, select, owner {Vlastník} editor {Editor} viewer {Čtenář} other {{role}}} neumožňuje v tomto obchodě vytvářet výlohy.",
+      "noRole": "Nemáte oprávnění vytvářet výlohy v tomto obchodě."
+    },
+    "editStorefronts": {
+      "withRole": "Vaše role {role, select, owner {Vlastník} editor {Editor} viewer {Čtenář} other {{role}}} neumožňuje v tomto obchodě upravovat výlohy.",
+      "noRole": "Nemáte oprávnění upravovat výlohy v tomto obchodě."
+    },
+    "deleteStorefronts": {
+      "withRole": "Vaše role {role, select, owner {Vlastník} editor {Editor} viewer {Čtenář} other {{role}}} neumožňuje v tomto obchodě mazat výlohy.",
+      "noRole": "Nemáte oprávnění mazat výlohy v tomto obchodě."
+    },
+    "viewStorefronts": {
+      "withRole": "Vaše role {role, select, owner {Vlastník} editor {Editor} viewer {Čtenář} other {{role}}} neumožňuje v tomto obchodě zobrazovat výlohy.",
+      "noRole": "Nemáte oprávnění zobrazovat výlohy v tomto obchodě."
+    },
+    "editThisProduct": {
+      "withRole": "Vaše role {role, select, owner {vlastníka} editor {editora} viewer {čtenáře} other {{role}}} nedovoluje upravovat tento produkt v tomto obchodě.",
+      "noRole": "Nemáte oprávnění upravovat tento produkt v tomto obchodě."
+    },
+    "editThisStorefront": {
+      "withRole": "Vaše role {role, select, owner {vlastníka} editor {editora} viewer {čtenáře} other {{role}}} nedovoluje upravovat tuto výlohu v tomto obchodě.",
+      "noRole": "Nemáte oprávnění upravovat tuto výlohu v tomto obchodě."
+    }
+  },
+  "notFound": {
+    "fix": "Mohlo to být smazáno, nebo došlo k přepnutí obchodu. Obnovte stránku a načtou se aktuální data.",
+    "product": "Tento produkt se nepodařilo najít.",
+    "storefront": "Tuto výlohu se nepodařilo najít.",
+    "item": "Tuto položku se nepodařilo najít."
+  },
+  "rateLimited": {
+    "fix": "Počkejte pár minut a zkuste to znovu. Pokud se nic nezkouší znovu na pozadí, nejdřív obnovte stránku.",
+    "createProducts": "Příliš mnoho pokusů o vytvoření produktů v krátké době.",
+    "editProducts": "Příliš mnoho pokusů o úpravu produktů v krátké době.",
+    "deleteProducts": "Příliš mnoho pokusů o smazání produktů v krátké době.",
+    "importProducts": "Příliš mnoho pokusů o import produktů v krátké době.",
+    "previewProductPages": "Příliš mnoho pokusů o náhled produktových stránek v krátké době.",
+    "createStorefronts": "Příliš mnoho pokusů o vytvoření výloh v krátké době.",
+    "saveStorefronts": "Příliš mnoho pokusů o uložení výloh v krátké době.",
+    "deleteStorefronts": "Příliš mnoho pokusů o smazání výloh v krátké době.",
+    "rotateEmbedKeys": "Příliš mnoho pokusů o výměnu klíčů pro vložení na web v krátké době.",
+    "updateStock": "Příliš mnoho pokusů o aktualizaci zásob v krátké době.",
+    "readProductPageSettings": "Příliš mnoho pokusů o načtení nastavení produktové stránky v krátké době.",
+    "requestReview": "Příliš mnoho žádostí o kontrolu během krátké doby."
+  },
+  "serverError": {
+    "fix": "Obvykle jde o dočasný problém. Chvíli počkejte a zkuste to znovu; pokud to stále nejde, obnovte stránku.",
+    "createProduct": "Produkt se kvůli problému na naší straně nepodařilo vytvořit.",
+    "saveProduct": "Produkt se kvůli problému na naší straně nepodařilo uložit.",
+    "deleteProduct": "Produkt se kvůli problému na naší straně nepodařilo smazat.",
+    "importProducts": "Vaše produkty se kvůli problému na naší straně nepodařilo importovat.",
+    "loadProductPagePreview": "Náhled produktové stránky se kvůli problému na naší straně nepodařilo načíst.",
+    "verifyImageUpload": "Nahraný obrázek se kvůli problému na naší straně nepodařilo ověřit.",
+    "verifyDocumentUpload": "Nahraný dokument se kvůli problému na naší straně nepodařilo ověřit.",
+    "verifyFileUpload": "Nahraný soubor se kvůli problému na naší straně nepodařilo ověřit.",
+    "verifyFontUpload": "Nahrané písmo se kvůli problému na naší straně nepodařilo ověřit.",
+    "verifyElementUpload": "Nahraný prvek se kvůli problému na naší straně nepodařilo ověřit.",
+    "verifyBackgroundImage": "Obrázek pozadí se kvůli problému na naší straně nepodařilo ověřit.",
+    "verifyFont": "Písmo se kvůli problému na naší straně nepodařilo ověřit.",
+    "verifyImage": "Obrázek se kvůli problému na naší straně nepodařilo ověřit.",
+    "createStorefront": "Výlohu se kvůli problému na naší straně nepodařilo vytvořit.",
+    "saveStorefront": "Vaši výlohu se kvůli problému na naší straně nepodařilo uložit.",
+    "saveEmbedSettings": "Nastavení vložení na web se kvůli problému na naší straně nepodařilo uložit.",
+    "deleteStorefront": "Výlohu se kvůli problému na naší straně nepodařilo smazat.",
+    "rotateEmbedKey": "Klíč pro vložení na web se kvůli problému na naší straně nepodařilo vyměnit.",
+    "saveStockSettings": "Nastavení zásob se kvůli problému na naší straně nepodařilo uložit.",
+    "checkSellerDetails": "Vaše údaje prodejce se kvůli problému na naší straně nepodařilo ověřit.",
+    "loadProductPageSettings": "Nastavení produktové stránky se kvůli problému na naší straně nepodařilo načíst.",
+    "saveProductPageSettings": "Nastavení produktové stránky se kvůli problému na naší straně nepodařilo uložit.",
+    "sendForReview": "Kontrolu se nepodařilo odeslat kvůli chybě na naší straně."
+  },
+  "moderation": {
+    "removedNotPaused": "{target, select, product {Tento produkt byl odstraněn, nikoli pozastaven.} storefront {Tato výloha byla odstraněna, nikoli pozastavena.} other {Tato položka byla odstraněna, nikoli pozastavena.}}",
+    "removedFix": "Odstranění je konečné. Pokud si myslíte, že bylo neoprávněné, napište nám přes odkaz pro odvolání.",
+    "notPaused": "{target, select, product {Tento produkt není pozastaven.} storefront {Tato výloha není pozastavena.} other {Tato položka není pozastavena.}}",
+    "notPausedFix": "Není co kontrolovat: kupující ji už vidí."
+  },
+  "traderIdentityRequired": {
+    "message": "Dokud nebudou vaše údaje prodejce kompletní, nemůžete zveřejňovat ani prodávat.",
+    "action": "Doplnit údaje prodejce",
+    "fix": {
+      "add": "{fields, select, businessName {Doplňte obchodní jméno v sekci Nastavení › Firma a údaje prodejce a pak zveřejněte.} address {Doplňte adresu sídla v sekci Nastavení › Firma a údaje prodejce a pak zveřejněte.} email {Doplňte kontaktní e-mail v sekci Nastavení › Firma a údaje prodejce a pak zveřejněte.} businessName_address {Doplňte obchodní jméno a adresu sídla v sekci Nastavení › Firma a údaje prodejce a pak zveřejněte.} businessName_email {Doplňte obchodní jméno a kontaktní e-mail v sekci Nastavení › Firma a údaje prodejce a pak zveřejněte.} address_email {Doplňte adresu sídla a kontaktní e-mail v sekci Nastavení › Firma a údaje prodejce a pak zveřejněte.} other {Doplňte obchodní jméno, adresu sídla a kontaktní e-mail v sekci Nastavení › Firma a údaje prodejce a pak zveřejněte.}}",
+      "addAndConfirm": "{fields, select, businessName {Doplňte obchodní jméno v sekci Nastavení › Firma a údaje prodejce a potvrďte kontaktní e-mail odkazem, který jsme vám poslali.} address {Doplňte adresu sídla v sekci Nastavení › Firma a údaje prodejce a potvrďte kontaktní e-mail odkazem, který jsme vám poslali.} email {Doplňte kontaktní e-mail v sekci Nastavení › Firma a údaje prodejce a potvrďte ho odkazem, který jsme vám poslali.} businessName_address {Doplňte obchodní jméno a adresu sídla v sekci Nastavení › Firma a údaje prodejce a potvrďte kontaktní e-mail odkazem, který jsme vám poslali.} businessName_email {Doplňte obchodní jméno a kontaktní e-mail v sekci Nastavení › Firma a údaje prodejce a potvrďte kontaktní e-mail odkazem, který jsme vám poslali.} address_email {Doplňte adresu sídla a kontaktní e-mail v sekci Nastavení › Firma a údaje prodejce a potvrďte kontaktní e-mail odkazem, který jsme vám poslali.} other {Doplňte obchodní jméno, adresu sídla a kontaktní e-mail v sekci Nastavení › Firma a údaje prodejce a potvrďte kontaktní e-mail odkazem, který jsme vám poslali.}}",
+      "confirm": "Otevřete potvrzovací odkaz, který jsme poslali na vaši kontaktní adresu. Nový si můžete poslat v sekci Nastavení › Firma a údaje prodejce.",
+      "complete": "Vyplňte sekci Nastavení › Firma a údaje prodejce a pak zveřejněte."
+    }
+  },
+  "unexpected": {
+    "message": "Něco se pokazilo.",
+    "detail": "{detail}",
+    "fix": "Zkontrolujte připojení a zkuste to znovu. Pokud se to opakuje, obnovte stránku; data vašich produktů jsou na serveru v bezpečí."
+  },
+  "form": {
+    "sessionExpired": "Vaše relace vypršela. Přihlaste se znovu.",
+    "saveFailed": "Uložení se nezdařilo. Zkuste to ještě jednou.",
+    "tooManyChanges": "To je hodně změn za krátkou dobu. Zkuste to o něco později.",
+    "unexpectedField": "Neočekávané pole „{field}“ bylo odmítnuto.",
+    "malformed": "Formulář se nepodařilo přečíst. Obnovte stránku a zkuste to znovu.",
+    "unreachable": "Server je nedostupný. Zkontrolujte připojení a zkuste to znovu."
+  },
+  "stepUp": {
+    "codeRequired": "Zadejte 6místný kód z ověřovací aplikace a potvrďte, že jste to vy.",
+    "codeMalformed": "Kód tvoří 6 číslic zobrazených ve vaší ověřovací aplikaci.",
+    "factorUnknown": "Vyberte jednu ze svých ověřovacích aplikací.",
+    "invalid": "Tento kód nefunguje. Zkontrolujte ověřovací aplikaci a zkuste to znovu.",
+    "rateLimited": "Příliš mnoho pokusů. Počkejte pár minut a zkuste to znovu.",
+    "replayed": "Tento kód už byl použit. Počkejte na další kód v aplikaci.",
+    "unavailable": "Kód se teď nepodařilo zkontrolovat. Zkuste to za chvíli znovu."
+  },
+  "mfa": {
+    "signInExpired": "Platnost přihlášení vypršela. Přihlaste se znovu.",
+    "unreachable": "Nepodařilo se spojit se službou přihlášení. Zkontrolujte připojení a zkuste to znovu.",
+    "enterCode": "Zadejte 6místný kód.",
+    "recoveryCodeRequired": "Zadejte jeden ze svých záložních kódů.",
+    "recoveryCodeInvalid": "Tento záložní kód nefunguje. Zkontrolujte ho a zkuste to znovu.",
+    "recoveryIncomplete": "Přihlášení se nepodařilo dokončit. Zkuste za chvíli stejný kód znovu.",
+    "factorNameRequired": "Pojmenujte tuto ověřovací aplikaci.",
+    "factorNameTaken": "Ověřovací aplikaci s tímto názvem už máte. Zvolte jiný.",
+    "passwordRequired": "Pro pokračování zadejte své aktuální heslo.",
+    "passwordRequiredGoogle": "Zadejte své heslo do Square Share, nebo místo toho použijte “Potvrdit přes Google”.",
+    "wrongPasswordGoogle": "To není heslo k tomuto účtu Square Share. Přihlašujete se přes Google, proto místo toho použijte “Potvrdit přes Google”.",
+    "passwordCheckUnavailable": "Heslo se teď nepodařilo ověřit. Zkuste to za chvíli znovu.",
+    "reauthRequired": "Z bezpečnostních důvodů se před zapnutím dvoufázového ověření znovu přihlaste.",
+    "setupRateLimited": "Příliš mnoho pokusů o nastavení. Zkuste to o něco později.",
+    "tooManyFactors": "Tento účet už má maximum ověřovacích aplikací. Nejdřív jednu odeberte.",
+    "setupFailed": "Nastavení se teď nepodařilo spustit. Zkuste to za chvíli znovu.",
+    "setupUnavailable": "Nastavení dvoufázového ověření teď není k dispozici. Zkuste to později.",
+    "setupExpired": "Platnost nastavení vypršela. Začněte znovu.",
+    "setupCodeMismatch": "Kód nesouhlasí. Ověřte, že aplikace ukazuje Square Share, a zadejte nejnovější kód.",
+    "factorNotOnAccount": "Tato ověřovací aplikace není ve vašem účtu.",
+    "removeFailed": "Tuto ověřovací aplikaci se nepodařilo odebrat. Zkuste to znovu.",
+    "notEnrolled": "Nejdřív zapněte dvoufázové ověření.",
+    "codesNotCreated": "Nové kódy se nepodařilo vytvořit. Vaše staré kódy stále platí."
+  },
+  "settings": {
+    "usernameTaken": "Toto uživatelské jméno je obsazené. Zkuste jiné.",
+    "emailUnchanged": "Tohle už je váš e-mail.",
+    "emailChangeRateLimited": "Příliš mnoho žádostí o změnu e-mailu. Chvíli počkejte a zkuste to znovu.",
+    "emailChangeNeedsPassword": "Pro změnu e-mailu zadejte současné heslo.",
+    "wrongPassword": "Současné heslo není správné.",
+    "passwordCheckUnavailable": "Heslo se teď nepodařilo zkontrolovat. Zkuste to znovu.",
+    "emailChangeFailed": "Změnu e-mailu se nepodařilo zahájit. Zkuste to znovu.",
+    "passwordReauthRateLimited": "Příliš mnoho pokusů. Počkejte pár minut a zkuste to znovu.",
+    "passwordUnchanged": "Tohle už je vaše heslo.",
+    "passwordUpdateFailed": "Heslo se nepodařilo změnit. Zkuste to znovu.",
+    "passwordReauthNeeded": "Z bezpečnostních důvodů se odhlaste, znovu přihlaste a pak změňte heslo.",
+    "resetRateLimited": "Příliš mnoho e-mailů pro obnovení hesla. Chvíli počkejte a zkuste to znovu.",
+    "resetSendRateLimited": "Příliš mnoho požadavků. Počkejte minutu a zkuste to znovu.",
+    "resetFailed": "E-mail pro obnovení hesla se nepodařilo odeslat. Zkuste to znovu.",
+    "contactEmailTakesNoMail": "Doména tohoto kontaktního e-mailu nepřijímá poštu. Zkontrolujte, zda je adresa napsaná správně, nebo použijte adresu, na kterou vám kupující opravdu mohou napsat.",
+    "savedButConfirmationFailed": "{reason, select, startFailed {Uloženo, ale potvrzovací e-mail se neodeslal. Potvrzení e-mailu se nepodařilo zahájit. Zkuste níže „Znovu poslat potvrzovací e-mail“.} unavailable {Uloženo, ale potvrzovací e-mail se neodeslal. Potvrzení e-mailu teď není k dispozici. Zkuste níže „Znovu poslat potvrzovací e-mail“.} other {Uloženo, ale potvrzovací e-mail se neodeslal. Potvrzovací e-mail se nepodařilo odeslat. Zkontrolujte adresu a zkuste níže „Znovu poslat potvrzovací e-mail“.}}",
+    "confirmationFailed": "{reason, select, startFailed {Potvrzení e-mailu se nepodařilo zahájit.} unavailable {Potvrzení e-mailu teď není k dispozici.} other {Potvrzovací e-mail se nepodařilo odeslat. Zkontrolujte adresu a zkuste to znovu.}}",
+    "confirmationUnavailable": "Potvrzení e-mailu teď není k dispozici.",
+    "confirmationRateLimited": "To je hodně potvrzovacích e-mailů. Chvíli počkejte, než si vyžádáte další.",
+    "noContactEmail": "Nejdřív doplňte kontaktní e-mail, pak ho můžeme potvrdit."
+  },
+  "avatar": {
+    "unexpectedData": "Neočekávaná data formuláře byla odmítnuta.",
+    "rateLimited": "Příliš mnoho změn fotky. Chvíli počkejte a zkuste to znovu.",
+    "noFile": "Vyberte obrázek k nahrání.",
+    "tooLarge": "Obrázek je příliš velký. Maximum jsou 2 MB.",
+    "wrongType": "Použijte obrázek ve formátu JPEG, PNG nebo WebP.",
+    "uploadFailed": "Nahrání se nezdařilo. Zkuste to znovu.",
+    "saveFailed": "Novou fotku se nepodařilo uložit. Zkuste to znovu.",
+    "removeFailed": "Fotku se nepodařilo odebrat. Zkuste to znovu."
+  },
+  "team": {
+    "noInvitePermission": "Nemáte oprávnění zvát členy.",
+    "inviteRoleTooHigh": "Nemůžete nikoho pozvat do vyšší role, než je ta vaše.",
+    "inviteSelf": "Tady už jste.",
+    "inviteRateLimited": "V poslední době bylo odesláno hodně pozvánek. Zkuste to o něco později.",
+    "alreadyInvited": "Tato osoba už má pozvánku nebo je členem týmu.",
+    "inviteFailed": "Pozvánku se nepodařilo odeslat. Zkuste to ještě jednou.",
+    "noVerifiedEmail": "Váš účet nemá ověřenou e-mailovou adresu.",
+    "inviteNotFound": "Pozvánka nebyla nalezena, nebo už byla použita.",
+    "inviteUsed": "Tato pozvánka už byla přijata nebo zrušena.",
+    "inviteWrongEmail": "Tato pozvánka není pro vaši e-mailovou adresu.",
+    "acceptFailed": "Pozvánku se nepodařilo přijmout. Možná byla zrušena.",
+    "noRolePermission": "Nemáte oprávnění měnit role.",
+    "membershipRateLimited": "Příliš mnoho změn členství. Zkuste to za chvíli.",
+    "roleTooHigh": "Nemůžete přidělit vyšší roli, než je ta vaše.",
+    "roleChangeFailed": "Roli se nepodařilo změnit. Zkuste to ještě jednou.",
+    "memberNotChangeable": "Tohoto člena nelze změnit.",
+    "noRemovePermission": "Nemáte oprávnění odebírat členy.",
+    "memberNotFound": "Člen nebyl nalezen.",
+    "removeSelf": "Sebe z týmu odebrat nemůžete.",
+    "removeFailed": "Člena se nepodařilo odebrat. Zkuste to ještě jednou.",
+    "memberNotRemovable": "Tohoto člena nelze odebrat."
+  },
+  "auth": {
+    "serviceUnreachable": "Nepodařilo se připojit ke službě pro přihlášení. Zkuste to prosím znovu.",
+    "invalidEmail": "Zadejte platnou e-mailovou adresu.",
+    "emailRequired": "Zadejte svůj e-mail.",
+    "tooManyAttempts": "Příliš mnoho pokusů. Chvíli počkejte a zkuste to znovu.",
+    "magicLinkFailed": "E-mail se nepodařilo odeslat. Zkontrolujte prosím připojení a zkuste to znovu.",
+    "resetEmailRequired": "Pro obnovení hesla zadejte svůj e-mail.",
+    "resetEmailFailed": "E-mail pro obnovení hesla se nepodařilo odeslat. Zkontrolujte prosím připojení a zkuste to znovu.",
+    "credentialsRequired": "Zadejte e-mail a heslo.",
+    "passwordsMismatch": "Hesla se neshodují.",
+    "invalidUsername": "Zvolte platné uživatelské jméno.",
+    "permanentEmailRequired": "Zaregistrujte se prosím trvalou e-mailovou adresou.",
+    "verificationFailed": "Ověření se nezdařilo. Zkuste to prosím znovu.",
+    "usernameTaken": "Toto uživatelské jméno je obsazené. Zkuste jiné.",
+    "signUpFailed": "Účet se nepodařilo vytvořit. Zkontrolujte prosím připojení a zkuste to znovu.",
+    "signInFailed": "Přihlášení se nezdařilo. Zkontrolujte prosím připojení a zkuste to znovu.",
+    "badCredentials": "Nesprávný e-mail nebo heslo.",
+    "emailNotConfirmed": "Nejdřív potvrďte svůj e-mail: odkaz najdete ve schránce.",
+    "weakPassword": "Toto heslo je příliš slabé. Použijte alespoň 8 znaků.",
+    "rateLimited": "Příliš mnoho pokusů. Počkejte minutu a zkuste to znovu.",
+    "accountNotCreated": "Tento účet se nepodařilo vytvořit. Zkuste jiné uživatelské jméno.",
+    "providerMessage": "{message}",
+    "unknown": "Něco se pokazilo. Zkuste to prosím znovu.",
+    "connectFailed": "Připojení se nezdařilo. Zkuste to prosím znovu.",
+    "resetLinkExpired": "Platnost odkazu pro obnovení vypršela. Nový si vyžádejte na přihlašovací stránce.",
+    "passwordUpdateFailed": "Heslo se nepodařilo změnit. Zkontrolujte připojení a zkuste to znovu.",
+    "samePassword": "Tohle už je vaše heslo. Zvolte nové."
+  },
+  "upload": {
+    "typeNotSupported": "Tento typ souboru není podporovaný.",
+    "typeFix": {
+      "image": "Použijte obrázek JPEG, PNG, WebP, GIF nebo AVIF.",
+      "file": "Použijte soubor ZIP, PDF, EPUB, MP3, WAV, MP4, JPEG, PNG, WebP nebo TXT.",
+      "font": "Použijte soubor písma WOFF2, WOFF, TTF nebo OTF.",
+      "element": "Použijte obrázek SVG, PNG, WebP, JPEG, GIF nebo AVIF.",
+      "document": "Exportujte návod nebo certifikát do PDF a pak ho nahrajte."
+    },
+    "tooLarge": {
+      "image": "Obrázek je příliš velký.",
+      "document": "Dokument je příliš velký.",
+      "file": "Soubor je příliš velký.",
+      "font": "Písmo je příliš velké.",
+      "element": "Prvek je příliš velký."
+    },
+    "tooLargeFix": {
+      "image": "Použijte obrázek menší než {maxMb} MB. Zkomprimujte ho nebo zmenšete a zkuste to znovu.",
+      "document": "Použijte dokument menší než {maxMb} MB. Zkomprimujte ho nebo zmenšete a zkuste to znovu.",
+      "file": "Použijte soubor menší než {maxMb} MB. Zkomprimujte ho nebo zmenšete a zkuste to znovu.",
+      "font": "Použijte písmo menší než {maxMb} MB. Zkomprimujte ho nebo zmenšete a zkuste to znovu.",
+      "element": "Použijte prvek menší než {maxMb} MB. Zkomprimujte ho nebo zmenšete a zkuste to znovu."
+    },
+    "neverReached": {
+      "image": "Obrázek se na server nedostal.",
+      "document": "Dokument se na server nedostal.",
+      "file": "Soubor se na server nedostal.",
+      "font": "Písmo se na server nedostalo.",
+      "element": "Prvek se na server nedostal."
+    },
+    "neverReachedFix": "Zkontrolujte připojení k internetu a zkuste to znovu.",
+    "rejected": {
+      "image": "Obrázek se nepodařilo nahrát.",
+      "document": "Dokument se nepodařilo nahrát.",
+      "file": "Soubor se nepodařilo nahrát.",
+      "font": "Písmo se nepodařilo nahrát.",
+      "element": "Prvek se nepodařilo nahrát."
+    },
+    "rejectedFix": {
+      "signedOut": "Přihlaste se znovu a akci zopakujte.",
+      "other": "Zkontrolujte soubor a zkuste to znovu. Pokud to stále nejde, obnovte stránku."
+    },
+    "serverSaid": "{text}"
+  },
+  "uploadRoute": {
+    "signIn": {
+      "image": "Pro nahrávání obrázků se přihlaste.",
+      "element": "Pro nahrávání prvků se přihlaste.",
+      "document": "Pro nahrávání dokumentů se přihlaste.",
+      "file": "Pro nahrávání souborů se přihlaste.",
+      "font": "Pro nahrávání písem se přihlaste."
+    },
+    "permissionDenied": "Nemáte oprávnění sem nahrávat.",
+    "rateLimited": {
+      "shared": "Příliš mnoho nahrávání najednou. Zkuste to za chvíli.",
+      "document": "Příliš mnoho nahrávání dokumentů najednou. Zkuste to za chvíli.",
+      "file": "Příliš mnoho nahrávání souborů najednou. Zkuste to za chvíli."
+    },
+    "notConfigured": {
+      "image": "Nahrávání obrázků zatím není nastavené. Obraťte se na provozovatele webu.",
+      "element": "Nahrávání prvků zatím není nastavené. Obraťte se na provozovatele webu.",
+      "document": "Nahrávání zatím není nastavené. Obraťte se na provozovatele webu.",
+      "file": "Nahrávání souborů zatím není nastavené. Obraťte se na provozovatele webu.",
+      "font": "Nahrávání písem zatím není nastavené. Obraťte se na provozovatele webu."
+    },
+    "unreadable": "Nahraný soubor se nepodařilo přečíst.",
+    "unexpectedFields": "Nahrávání obsahuje neočekávaná pole.",
+    "filenameInvalid": "Tento název souboru nelze použít.",
+    "lengthMissing": "U nahrávaného souboru chybí údaj o velikosti.",
+    "missing": {
+      "image": "Nebyl nahrán žádný obrázek.",
+      "document": "Nebyl nahrán žádný dokument.",
+      "file": "Nebyl nahrán žádný soubor.",
+      "font": "Nebylo nahráno žádné písmo."
+    },
+    "empty": {
+      "image": "Obrázek je prázdný.",
+      "file": "Soubor je prázdný.",
+      "font": "Soubor písma je prázdný."
+    },
+    "tooLarge": {
+      "image": "Obrázek je příliš velký.",
+      "document": "Dokument je příliš velký.",
+      "file": "Soubor je příliš velký.",
+      "font": "Soubor písma je příliš velký."
+    },
+    "tooLargeFix": {
+      "image": "Použijte obrázek menší než {maxMb} MB. Zkomprimujte ho nebo zmenšete a zkuste to znovu.",
+      "document": "Použijte PDF menší než {maxMb} MB.",
+      "file": "Použijte soubor menší než {maxMb} MB.",
+      "font": "Použijte písmo menší než {maxMb} MB. Soubor WOFF2 mívá výrazně méně než 100 KB."
+    },
+    "unsupported": {
+      "image": "Tento soubor není podporovaný obrázek.",
+      "font": "Tento soubor není podporované písmo.",
+      "fileType": "Tento typ souboru není podporovaný.",
+      "fileContents": "Obsah souboru neodpovídá jeho typu.",
+      "documentType": "Dokumenty musí být ve formátu PDF.",
+      "documentContents": "Tento soubor není PDF."
+    },
+    "unsupportedFix": {
+      "image": "Použijte obrázek JPEG, PNG, WebP, GIF nebo AVIF.",
+      "element": "Použijte PNG, JPEG, WebP, GIF, AVIF nebo SVG bez skriptů, externích odkazů a vložených obrázků.",
+      "font": "Použijte soubor WOFF2, WOFF, TTF nebo OTF.",
+      "fileType": "Použijte soubor ZIP, PDF, EPUB, MP3, WAV, MP4, JPEG, PNG, WebP nebo TXT.",
+      "fileContents": "Soubor znovu vyexportujte, nebo zvolte formát, který odpovídá tomu, co nahráváte.",
+      "documentType": "Exportujte návod nebo certifikát do PDF a pak ho nahrajte.",
+      "documentContents": "Znovu ho vyexportujte do PDF. Přejmenováním se formát souboru nezmění."
+    },
+    "moderationUnavailable": "Obrázky teď nelze zkontrolovat.",
+    "moderationRejected": {
+      "explicit": "Obrázek působí sexuálně explicitně, proto ho u produktu nelze použít.",
+      "violent": "Obrázek zobrazuje drastické násilí, proto ho nelze použít.",
+      "hate": "Obrázek zřejmě obsahuje symboly nenávisti, proto ho nelze použít."
+    },
+    "inReview": "Obrázek před zveřejněním prochází kontrolou.",
+    "inReviewFix": "Po schválení ho budete moct použít.",
+    "storeFailed": {
+      "image": "Obrázek se nepodařilo uložit.",
+      "document": "Dokument se nepodařilo uložit.",
+      "file": "Soubor se nepodařilo uložit.",
+      "font": "Písmo se nepodařilo uložit."
+    },
+    "fix": {
+      "tryAgain": "Zkuste to znovu.",
+      "tryAgainInAMoment": "Zkuste to za chvíli znovu.",
+      "tryAgainInAFewMinutes": "Zkuste to znovu za pár minut.",
+      "pickFile": "Vyberte jiný soubor.",
+      "pickImage": "Vyberte jiný obrázek."
+    }
+  },
+  "products": {
+    "invalid": {
+      "message": "Údaje o produktu neprošly kontrolou.",
+      "fix": "Zkontrolujte název, cenu a další pole a zkuste produkt uložit znovu."
+    },
+    "imageNotOwned": {
+      "message": "Tento nahraný obrázek nelze u tohoto produktu použít.",
+      "fix": "Nahrajte obrázek znovu a pak znovu uložte."
+    },
+    "fileNotOwned": {
+      "message": "Tento nahraný soubor nelze u tohoto produktu použít.",
+      "fix": "Nahrajte soubor znovu a pak znovu uložte."
+    },
+    "uploadUnfinished": {
+      "image": "Nahrávání obrázku se nedokončilo.",
+      "document": "Nahrávání dokumentu se nedokončilo.",
+      "file": "Nahrávání souboru se nedokončilo.",
+      "font": "Nahrávání písma se nedokončilo.",
+      "element": "Nahrávání prvku se nedokončilo."
+    },
+    "uploadUnfinishedFix": {
+      "image": "Před uložením obrázek znovu vyberte a nahrajte.",
+      "document": "Před uložením dokument znovu vyberte a nahrajte.",
+      "file": "Před uložením soubor znovu vyberte a nahrajte.",
+      "font": "Před uložením písmo znovu vyberte a nahrajte.",
+      "element": "Před uložením prvek znovu vyberte a nahrajte."
+    },
+    "uploadTooLarge": {
+      "image": "Obrázek je příliš velký.",
+      "document": "Dokument je příliš velký.",
+      "file": "Soubor je příliš velký.",
+      "font": "Písmo je příliš velké.",
+      "element": "Prvek je příliš velký."
+    },
+    "uploadTooLargeFix": {
+      "image": "Použijte obrázek menší než {maxMb} MB a nahrajte ho znovu.",
+      "document": "Použijte dokument menší než {maxMb} MB a nahrajte ho znovu.",
+      "file": "Použijte soubor menší než {maxMb} MB a nahrajte ho znovu.",
+      "font": "Použijte písmo menší než {maxMb} MB a nahrajte ho znovu.",
+      "element": "Použijte prvek menší než {maxMb} MB a nahrajte ho znovu."
+    },
+    "wrongTypeFix": {
+      "image": "Použijte obrázek JPEG, PNG, WebP, GIF nebo AVIF.",
+      "document": "Dokumenty musí být ve formátu PDF. Exportujte dokument do PDF a nahrajte ho znovu.",
+      "other": "Použijte soubor ZIP, PDF, EPUB, MP3, WAV, MP4, JPEG, PNG, WebP nebo TXT."
+    },
+    "tooManyPhotos": {
+      "message": "Příliš mnoho nových fotek najednou.",
+      "fix": "Přidejte nejvýše {max} fotek, uložte a pak přidejte zbytek."
+    },
+    "photoNotOwned": {
+      "message": "Jednu z fotek nelze u tohoto produktu použít.",
+      "fix": "Odeberte ji, nahrajte znovu a pak uložte."
+    },
+    "tooManyDocuments": {
+      "message": "Příliš mnoho nových dokumentů najednou.",
+      "fix": "Přidejte nejvýše {max} dokumentů, uložte a pak přidejte zbytek."
+    },
+    "documentNotOwned": {
+      "message": "Jeden z dokumentů nelze u tohoto produktu použít.",
+      "fix": "Odeberte ho, nahrajte znovu a pak uložte."
+    },
+    "staleOption": {
+      "message": "Jedna z fotek je přiřazená k možnosti, která už neexistuje.",
+      "fix": "Přiřaďte fotku jinam nebo přiřazení zrušte a pak znovu uložte."
+    }
+  },
+  "productImport": {
+    "unreadable": {
+      "message": "Import se nepodařilo přečíst.",
+      "fix": "Nahrajte soubor znovu."
+    },
+    "empty": {
+      "message": "Soubor byl prázdný.",
+      "fix": "Exportujte produkty znovu a zkuste to ještě jednou."
+    },
+    "tooLarge": {
+      "message": "Soubor je na import příliš velký.",
+      "fix": "Rozdělte ho na soubory menší než {maxMb} MB, nebo importujte najednou nejvýše {maxRows} produktů."
+    },
+    "noCurrency": {
+      "message": "Vyberte pro tyto produkty měnu.",
+      "fix": "Vyberte ji a spusťte import znovu."
+    },
+    "noStatus": {
+      "message": "Vyberte, jestli se mají produkty importovat jako koncepty, nebo jako zveřejněné.",
+      "fix": "Vyberte jednu možnost a spusťte import znovu."
+    },
+    "nothingImportable": {
+      "message": "Ze souboru se nedalo nic importovat.",
+      "fix": "Zkontrolujte, že obsahuje sloupec s názvem a sloupec s cenou.",
+      "fixFirstRow": "{problem, select, noTitle {U prvního řádku: chybí název. Zkontrolujte, ve kterých sloupcích je název a cena.} titleTooLong {U prvního řádku: název je delší než 200 znaků. Zkontrolujte, ve kterých sloupcích je název a cena.} noPrice {U prvního řádku: cenu se nepodařilo přečíst. Zkontrolujte, ve kterých sloupcích je název a cena.} priceZero {U prvního řádku: cena je nulová. Zkontrolujte, ve kterých sloupcích je název a cena.} other {U prvního řádku: stejný název má i jiný řádek. Zkontrolujte, ve kterých sloupcích je název a cena.}}"
+    },
+    "noneSaved": {
+      "message": "Žádný z řádků se nepodařilo uložit.",
+      "fix": "Zkontrolujte sloupce s názvem a cenou."
+    },
+    "invalidRow": "Tento řádek není platný produkt."
+  },
+  "stock": {
+    "invalid": {
+      "message": "Nastavení zásob neprošlo kontrolou.",
+      "fix": "Množství i hranice upozornění musí být celá čísla 0 nebo vyšší, a když je sledování zapnuté, zadejte, kolik kusů máte skladem."
+    }
+  },
+  "storefront": {
+    "nameRequired": {
+      "message": "Výloha potřebuje název.",
+      "fix": "Zadejte název (1 až 80 znaků) do pole v horní části editoru a znovu uložte."
+    },
+    "invalidLayout": {
+      "message": "Data rozvržení výlohy jsou neplatná.",
+      "fix": "Obnovte editor a zkuste výlohu uložit znovu."
+    },
+    "tooManyImages": {
+      "message": "Příliš mnoho nových obrázků najednou.",
+      "fix": "Uložte výlohu a pak přidejte zbytek."
+    },
+    "invalidEmbedSettings": "Neplatné nastavení vložení na web.",
+    "embedSettingsFix": "Zkontrolujte seznam domén (názvy hostitelů oddělené čárkou, např. example.com) a znovu uložte.",
+    "upload": {
+      "backgroundImage": {
+        "notOwned": "Tento obrázek pozadí nelze použít.",
+        "unfinished": "Nahrávání obrázku pozadí se nedokončilo.",
+        "missingFix": "Před uložením obrázek znovu vyberte a nahrajte.",
+        "tooLarge": "Obrázek pozadí je příliš velký.",
+        "tooLargeFix": "Použijte obrázek menší než 10 MB a nahrajte ho znovu.",
+        "wrongTypeFix": "Použijte obrázek JPEG, PNG, WebP, GIF nebo AVIF."
+      },
+      "font": {
+        "notOwned": "Toto písmo nelze použít.",
+        "unfinished": "Nahrávání písma se nedokončilo.",
+        "missingFix": "Před uložením písmo znovu vyberte a nahrajte.",
+        "tooLarge": "Soubor písma je příliš velký.",
+        "tooLargeFix": "Použijte písmo menší než 2 MB. Soubor WOFF2 mívá výrazně méně než 100 KB.",
+        "wrongTypeFix": "Použijte soubor písma WOFF2, WOFF, TTF nebo OTF."
+      },
+      "element": {
+        "notOwned": "Tento obrázek nelze použít.",
+        "unfinished": "Nahrávání obrázku se nedokončilo.",
+        "missingFix": "Před uložením obrázek znovu přidejte a nahrajte.",
+        "tooLarge": "Obrázek je příliš velký.",
+        "tooLargeFix": "Použijte obrázek menší než 2 MB a přidejte ho znovu.",
+        "wrongTypeFix": "Použijte PNG, JPEG, WebP, GIF, AVIF nebo SVG bez skriptů, externích odkazů a vložených obrázků."
+      }
+    }
+  },
+  "productPageApi": {
+    "notJson": {
+      "message": "Tělo požadavku není JSON.",
+      "fix": "Pošlete objekt JSON s poli, která chcete změnit."
+    },
+    "notObject": {
+      "message": "Tělo požadavku není objekt.",
+      "fix": "Pošlete objekt JSON, např. '{'\"ctaColor\": \"#1d4ed8\"'}'."
+    },
+    "invalid": "Nastavení produktové stránky je neplatné.",
+    "invalidFix": "Zkontrolujte výše uvedené pole podle `limits` z požadavku GET na tuto adresu URL a zkuste to znovu."
+  }
+}

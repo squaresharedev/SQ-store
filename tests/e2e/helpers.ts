@@ -159,6 +159,9 @@ export async function clearAuthRateLimits() {
 /** The welcome flow's dialog, as named by its first step's title. */
 export const WELCOME_DIALOG = "Welcome to Square Share";
 
+/** The welcome flow's Terms step, as named by its title. */
+export const TERMS_DIALOG = "Our Terms of Service";
+
 /**
  * Sign up through the real UI; lands on the dashboard.
  *
@@ -166,8 +169,11 @@ export const WELCOME_DIALOG = "Welcome to Square Share";
  * that traps focus and locks scroll, which every spec that is NOT about
  * onboarding would otherwise have to fight. So by default it is put out of the
  * way deterministically: the "seen it" flag is written through the service key,
- * so no later page opens it again, and the dialog already on screen is closed
- * with Escape. No reload, which matters across a hundred-odd call sites.
+ * so no later page opens it again, and Overview is loaded again without it.
+ * A reload rather than Escape: the dialog on screen cannot be closed until the
+ * Terms are agreed to, and agreeing is 60-onboarding's business, not every
+ * spec's. The Terms stay unagreed, exactly as for a real seller who has not
+ * yet been through the welcome.
  *
  * Pass `{ welcome: "keep" }` to land with the dialog still open.
  */
@@ -204,16 +210,43 @@ export async function signUp(
     method: "PATCH",
     body: { onboarding_completed_at: new Date().toISOString() },
   });
-  const dialog = page.getByRole("dialog", { name: WELCOME_DIALOG });
-  await expect(dialog).toBeVisible({ timeout: 20_000 });
-  // Retried: an Escape pressed before hydration has no listener to reach.
-  await expect(async () => {
-    await page.keyboard.press("Escape");
-    await expect(dialog).toBeHidden({ timeout: 1_000 });
-  }).toPass({ timeout: 20_000 });
-  // Escape means "skip onboarding", which must never leave the guided tour's
-  // layer over every page the spec goes on to click.
+  await page.reload();
+  await page.waitForLoadState("networkidle").catch(() => {});
+  await expect(page.getByRole("dialog", { name: WELCOME_DIALOG })).toHaveCount(0);
+  // Nothing about signing up may leave the guided tour's layer over every page
+  // the spec goes on to click.
   await expect(page.locator(TOUR_LAYER)).toHaveCount(0);
+}
+
+/**
+ * From the welcome slide to the Terms. Retried, because a click that lands
+ * before hydration does nothing.
+ */
+export async function openTermsStep(page: Page) {
+  const welcome = page.getByRole("dialog", { name: WELCOME_DIALOG });
+  const terms = page.getByRole("dialog", { name: TERMS_DIALOG });
+  await expect(async () => {
+    if (await welcome.isVisible()) await welcome.getByRole("button", { name: "Next" }).click();
+    await expect(terms).toBeVisible({ timeout: 2_000 });
+  }).toPass({ timeout: 20_000 });
+  return terms;
+}
+
+/**
+ * On the Terms step: scroll the summary to its end (which is what opens the
+ * button) and agree. Lands on the four-step path.
+ */
+export async function agreeToTerms(page: Page) {
+  const terms = page.getByRole("dialog", { name: TERMS_DIALOG });
+  await terms.locator("[data-terms-summary]").evaluate((box) => {
+    box.scrollTop = box.scrollHeight;
+  });
+  const agree = terms.getByRole("button", { name: "I have read and agree to the Terms" });
+  await expect(agree).toBeEnabled();
+  await agree.click();
+  await expect(page.getByRole("dialog", { name: "Four steps to your first page" })).toBeVisible({
+    timeout: 20_000,
+  });
 }
 
 /** The guided tour's layer (components/onboarding/TourOverlay.tsx). */
@@ -270,15 +303,12 @@ export async function expectSpotlightOn(page: Page, target: Locator) {
     .toBe("on target");
 }
 
-/** The welcome's slides up to its seller details form: Next, then Get started.
- *  Retried, because a click that lands before hydration does nothing. */
+/** The welcome's slides up to its seller details form: Next, agree to the
+ *  Terms, then Get started. */
 export async function openSellerStep(page: Page) {
-  const welcome = page.getByRole("dialog", { name: WELCOME_DIALOG });
+  await openTermsStep(page);
+  await agreeToTerms(page);
   const path = page.getByRole("dialog", { name: "Four steps to your first page" });
-  await expect(async () => {
-    if (await welcome.isVisible()) await welcome.getByRole("button", { name: "Next" }).click();
-    await expect(path).toBeVisible({ timeout: 2_000 });
-  }).toPass({ timeout: 20_000 });
   await path.getByRole("button", { name: "Get started" }).click();
   await expect(page.getByRole("dialog", { name: "Add your seller details" })).toBeVisible();
 }

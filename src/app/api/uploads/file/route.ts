@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
 import { buildObjectKey, hasR2Credentials, presignPutUrl } from "@/lib/r2";
@@ -42,29 +43,30 @@ const SNIFF_BYTES = 12;
  * which remains the boundary that actually decides what reaches a buyer.
  */
 
-const filenameSchema = singleLineText({ label: "A filename", max: 200 });
+const filenameSchema = singleLineText({ field: "filename", max: 200 });
 
 function bad(status: number, error: string, fix?: string) {
   return Response.json({ error, fix }, { status });
 }
 
 export async function POST(request: Request) {
+  const t = await getTranslations("Errors.uploadRoute");
   const account = await getActiveAccount();
-  if (!account) return bad(401, "Sign in to upload files.");
+  if (!account) return bad(401, t("signIn.file"));
   if (!can(account.role, "products.write")) {
-    return bad(403, "You don't have permission to upload here.");
+    return bad(403, t("permissionDenied"));
   }
   // Its own budget, not the shared upload one: each call here authorises up to
   // 200 MB into R2, so it is priced far more tightly than an image upload.
   if (!(await rateLimit("file_upload", RATE_LIMITS.fileUpload))) {
-    return bad(429, "Too many file uploads right now. Try again shortly.");
+    return bad(429, t("rateLimited.file"));
   }
   if (!hasR2Credentials()) {
     console.error(
       "[uploads] R2 is not configured — set R2_ACCOUNT_ID, R2_BUCKET_NAME, " +
         "R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY in .env.local (see .env.example).",
     );
-    return bad(503, "File uploads are not configured yet. Contact the site owner.");
+    return bad(503, t("notConfigured.file"));
   }
 
   // Metadata rides in the query string (percent-encoded, so a filename with
@@ -75,30 +77,30 @@ export async function POST(request: Request) {
   if (!allowed.includes(contentType)) {
     return bad(
       415,
-      "That file type is not supported.",
-      "Use a ZIP, PDF, EPUB, MP3, WAV, MP4, JPEG, PNG, WebP, or TXT file.",
+      t("unsupported.fileType"),
+      t("unsupportedFix.fileType"),
     );
   }
 
   const filename = filenameSchema.safeParse(params.get("filename") ?? "");
-  if (!filename.success) return bad(400, "That filename can't be used.");
+  if (!filename.success) return bad(400, t("filenameInvalid"));
 
   // R2 needs a length, and it is also the only chance to reject an oversized
   // upload BEFORE streaming it. The stored object's true size is re-checked at
   // save time, so a dishonest header cannot get a file attached to a product.
   const declared = Number(request.headers.get("content-length"));
   if (!Number.isFinite(declared) || declared <= 0) {
-    return bad(411, "That upload is missing its length.", "Try again.");
+    return bad(411, t("lengthMissing"), t("fix.tryAgain"));
   }
   if (declared > DIGITAL_FILE_MAX_BYTES) {
     const maxMb = Math.round(DIGITAL_FILE_MAX_BYTES / 1024 / 1024);
     return bad(
       413,
-      "That file is too large.",
-      `Use a file under ${maxMb} MB.`,
+      t("tooLarge.file"),
+      t("tooLargeFix.file", { maxMb }),
     );
   }
-  if (!request.body) return bad(400, "No file was uploaded.");
+  if (!request.body) return bad(400, t("missing.file"));
 
   // Look at the leading bytes before storing anything. This route cannot sniff
   // the way the image route does — it never holds the file — so it peeks at the
@@ -110,8 +112,8 @@ export async function POST(request: Request) {
   if (head.byteLength >= SNIFF_BYTES && fileBytesContradictType(head, contentType)) {
     return bad(
       415,
-      "That file's contents don't match its type.",
-      "Re-export the file, or pick the format that matches what you're uploading.",
+      t("unsupported.fileContents"),
+      t("unsupportedFix.fileContents"),
     );
   }
 
@@ -131,11 +133,11 @@ export async function POST(request: Request) {
     } as RequestInit & { duplex: "half" });
     if (!res.ok) {
       console.error("[uploads] file store failed", res.status);
-      return bad(502, "The file could not be stored.", "Try again in a moment.");
+      return bad(502, t("storeFailed.file"), t("fix.tryAgainInAMoment"));
     }
   } catch (error) {
     console.error("[uploads] file stream failed", error);
-    return bad(502, "The file could not be stored.", "Try again in a moment.");
+    return bad(502, t("storeFailed.file"), t("fix.tryAgainInAMoment"));
   }
 
   return Response.json({ key });

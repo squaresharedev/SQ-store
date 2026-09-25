@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
+import { render, screen, cleanup } from "../setup/render";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { DesignPanel } from "@/components/storefront/DesignPanel";
@@ -39,6 +39,7 @@ function Harness({
         selectionKey={selectionKey}
         showInspector={selectionKey !== ""}
         inspectorTitle="Product"
+        inspectorCloseLabel="Close product panel"
         onCloseInspector={vi.fn()}
         inspectorHiddenOnMobile={false}
         inspector={<p>inspector body</p>}

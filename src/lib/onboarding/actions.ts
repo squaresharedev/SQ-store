@@ -77,36 +77,6 @@ export async function markSetupCelebrated(): Promise<{ ok: boolean }> {
 }
 
 /**
- * Hide the sample storefront from the signed-in person's storefront list, or
- * bring it back.
- *
- * A TOGGLE, not first-write-wins: hiding stamps the time, showing clears it.
- * Nothing else is touched, because the sample is code (lib/storefront/sample.ts)
- * and this flag is all there is of it in the database.
- *
- * Their own row only (id from the session, RLS underneath). Revalidates the list
- * so a Back navigation cannot bring back the state from before the click.
- */
-export async function setSampleStorefrontHidden(hidden: unknown): Promise<{ ok: boolean }> {
-  // A server action is a public endpoint: the argument is whatever was posted.
-  if (typeof hidden !== "boolean") return { ok: false };
-  const user = await getUser();
-  if (!user) return { ok: false };
-
-  const supabase = await createClient();
-  const { error } = await supabase
-    .from("profiles")
-    .update({ sample_storefront_hidden_at: hidden ? new Date().toISOString() : null })
-    .eq("id", user.id);
-  if (error) {
-    console.warn("[onboarding] could not update the sample storefront:", error.code, error.message);
-    return { ok: false };
-  }
-  revalidatePath("/storefront");
-  return { ok: true };
-}
-
-/**
  * Record that the storefront designer tour has started for the signed-in person,
  * so it starts by itself only the first time they open the sample storefront.
  *

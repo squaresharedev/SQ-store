@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Trash2, Type } from "lucide-react";
 import {
   CUSTOM_FONT_NAME_MAX,
@@ -14,7 +15,7 @@ import { UploadError, uploadToR2 } from "@/lib/products/upload";
 import { sampleObjectKey } from "@/lib/storefront/sample";
 import { useSampleMode } from "@/lib/storefront/sample-mode";
 import { cn } from "@/lib/utils";
-import { useToast } from "@/components/ui/Toast";
+import { useActionErrorToast } from "@/components/ui/ActionErrorNotice";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { Select, type SelectOption } from "@/components/ui/select";
 import {
@@ -25,12 +26,6 @@ import {
 import { InfoTip } from "@/components/ui/InfoTip";
 import { FONT_LABELS } from "./config-maps";
 
-/** Extra words for the two presets whose names alone do not say what they are. */
-const FONT_DESCRIPTIONS: Partial<Record<StorefrontFont, string>> = {
-  sans: "The default",
-  inter: "Clean and neutral",
-  montserrat: "Geometric and wide",
-};
 
 /**
  * The file types the picker offers. Deliberately by extension: browsers report
@@ -62,8 +57,10 @@ export function TypographySection({
   /** Reports a new local preview URL after an upload (null on remove). */
   onFontUrlChange: (url: string | null) => void;
 }) {
+  const t = useTranslations("Storefront.typography");
+  const tRoot = useTranslations();
   const fieldId = useId();
-  const toast = useToast();
+  const showActionError = useActionErrorToast();
   const sample = useSampleMode();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -74,6 +71,12 @@ export function TypographySection({
   const customFont = theme.customFont;
   const specimenFamily = customFont ? customFontFamily(customFont.key) : null;
 
+  const fontDescriptions: Partial<Record<StorefrontFont, string>> = {
+    sans: t("fontDescDefault"),
+    inter: t("fontDescInter"),
+    montserrat: t("fontDescMontserrat"),
+  };
+
   const options: SelectOption<StorefrontFont>[] = STOREFRONT_FONTS.filter(
     // Offered only once there is something to point at.
     (font) => font !== "custom" || customFont !== undefined,
@@ -82,9 +85,9 @@ export function TypographySection({
     label:
       font === "custom" && customFont
         ? customFont.name
-        : FONT_LABELS[font],
+        : tRoot(FONT_LABELS[font]),
     description:
-      font === "custom" ? "Your uploaded font" : FONT_DESCRIPTIONS[font],
+      font === "custom" ? t("uploadedFontDesc") : fontDescriptions[font],
   }));
 
   async function handleFile(file: File | undefined) {
@@ -113,7 +116,7 @@ export function TypographySection({
         error instanceof UploadError
           ? error.info
           : unexpectedError(error instanceof Error ? error.message : undefined);
-      toast.error(info.message, { lines: [info.fix] });
+      showActionError(info);
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -139,7 +142,7 @@ export function TypographySection({
     <div className="space-y-4">
       <div className="space-y-1.5">
         <label htmlFor={`${fieldId}-font`} className={labelClass}>
-          Font
+          {t("font")}
         </label>
         <Select
           id={`${fieldId}-font`}
@@ -151,11 +154,9 @@ export function TypographySection({
 
       <div className="space-y-1.5">
         <span className="flex items-center gap-1.5">
-          <span className={labelClass}>Your own font</span>
-          <InfoTip label="Which font files work">
-            WOFF2, WOFF, TTF or OTF, up to 2 MB. WOFF2 is the one to use:
-            it is the smallest, so it is the fastest for a buyer to load, and
-            every browser reads it.
+          <span className={labelClass}>{t("ownFont")}</span>
+          <InfoTip label={t("fontInfoLabel")}>
+            {t("fontInfoBody")}
           </InfoTip>
         </span>
         {/* Out of the AT tree: the visible button below is the labelled
@@ -178,13 +179,13 @@ export function TypographySection({
           <Type className="size-4" strokeWidth={2} aria-hidden="true" />
           {uploading
             ? progress === null
-              ? "Processing…"
-              : `Uploading… ${Math.round(progress * 100)}%`
+              ? t("processing")
+              : t("uploadingPct", { n: Math.round(progress * 100) })
             : customFont
-              ? "Replace font"
-              : "Upload a font"}
+              ? t("replaceFont")
+              : t("uploadFont")}
         </button>
-        {uploading && <ProgressBar value={progress} label="Uploading font" />}
+        {uploading && <ProgressBar value={progress} label={t("uploadingLabel")} />}
 
         {customFont && !uploading && (
           <div className="space-y-1.5">
@@ -198,7 +199,7 @@ export function TypographySection({
                 className={cn(secondaryButtonClass, "shrink-0 px-2 py-1 text-xs")}
               >
                 <Trash2 className="size-3" strokeWidth={2} aria-hidden="true" />
-                Remove
+                {tRoot("Common.actions.remove")}
               </button>
             </div>
 

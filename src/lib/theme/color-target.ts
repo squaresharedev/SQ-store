@@ -16,6 +16,7 @@ import {
 import { isStrictHexColor } from "@/lib/validation/storefront";
 import { rangeColor } from "@/lib/storefront/text-spans";
 import { readableInkOn } from "@/lib/format/color";
+import type { MessageKey } from "@/i18n/types";
 
 /**
  * WHICH color the left-hand ColorPanel is editing.
@@ -118,11 +119,42 @@ export const PRICE_TAG_COLOR_KEYS = {
   border: "priceTagBorderColor",
 } as const satisfies Record<PriceTagPart, keyof CardStyle>;
 
-const PRICE_TAG_COLOR_LABELS: Record<PriceTagPart, string> = {
-  fill: "Tag color",
-  text: "Text color",
-  border: "Border color",
+const PRICE_TAG_COLOR_LABELS: Record<PriceTagPart, MessageKey> = {
+  fill: "Storefront.colors.fields.tagColor",
+  text: "Storefront.colors.fields.textColor",
+  border: "Storefront.colors.fields.borderColor",
 };
+
+/**
+ * What an optional colour follows while it stores nothing, named twice: on its
+ * own (the panel header, the compact picker's button) and as the whole phrase
+ * that selects it ("Use Theme color"). Two keys rather than one name spliced
+ * into "Use {label}", because the name's grammatical case changes with it.
+ */
+export type ColorInheritLabels = { label: MessageKey; useLabel: MessageKey };
+
+const INHERIT = {
+  theme: {
+    label: "Storefront.colors.inherit.themeColor.label",
+    useLabel: "Storefront.colors.inherit.themeColor.use",
+  },
+  default: {
+    label: "Storefront.colors.inherit.default.label",
+    useLabel: "Storefront.colors.inherit.default.use",
+  },
+  noFill: {
+    label: "Storefront.colors.inherit.noFill.label",
+    useLabel: "Storefront.colors.inherit.noFill.use",
+  },
+  cardColor: {
+    label: "Storefront.colors.inherit.cardColor.label",
+    useLabel: "Storefront.colors.inherit.cardColor.use",
+  },
+  blockColor: {
+    label: "Storefront.colors.inherit.blockColor.label",
+    useLabel: "Storefront.colors.inherit.blockColor.use",
+  },
+} as const satisfies Record<string, ColorInheritLabels>;
 
 /**
  * What the price actually paints while `priceTagTextColor` is unset: the theme
@@ -153,12 +185,12 @@ export function titleShadowColorField(
   const stored = (overrides ?? theme).titleShadowColor;
   const inherit = overrides
     ? {
-        label: "Theme color",
+        ...INHERIT.theme,
         value: gate(theme.titleShadowColor, TITLE_SHADOW_DEFAULT_COLOR),
       }
-    : { label: "Default", value: TITLE_SHADOW_DEFAULT_COLOR };
+    : { ...INHERIT.default, value: TITLE_SHADOW_DEFAULT_COLOR };
   return {
-    label: "Shadow color",
+    label: "Storefront.colors.fields.shadowColor",
     value: gate(stored, inherit.value),
     inherit: { ...inherit, active: stored === undefined },
   };
@@ -174,18 +206,18 @@ function priceTagAutoColor(
   card: CardStyle,
   accent: string,
   part: PriceTagPart,
-): { label: string; value: string } {
+): ColorInheritLabels & { value: string } {
   switch (part) {
     case "fill": {
       const fill = defaultPriceTagFill(card.priceTagPosition);
       return fill === "transparent"
-        ? { label: "No fill", value: "#ffffff" }
-        : { label: "Card color", value: fill };
+        ? { ...INHERIT.noFill, value: "#ffffff" }
+        : { ...INHERIT.cardColor, value: fill };
     }
     case "text":
-      return { label: "Theme color", value: priceTagAutoTextColor(card, accent) };
+      return { ...INHERIT.theme, value: priceTagAutoTextColor(card, accent) };
     case "border":
-      return { label: "Default", value: PRICE_TAG_DEFAULT_BORDER };
+      return { ...INHERIT.default, value: PRICE_TAG_DEFAULT_BORDER };
   }
 }
 
@@ -215,7 +247,7 @@ export function priceTagColorField(
     part,
   );
   const inherit = overrides
-    ? { label: "Theme color", value: gate(theme[key], auto.value) }
+    ? { ...INHERIT.theme, value: gate(theme[key], auto.value) }
     : auto;
   return {
     label: PRICE_TAG_COLOR_LABELS[part],
@@ -234,7 +266,7 @@ export type TextSelectionTarget = {
 /** A target resolved against current state, ready to render. */
 export type ResolvedColorTarget = {
   /** Names the field in the panel header, e.g. "Fill", "Accent". */
-  label: string;
+  label: MessageKey;
   /** Strict lowercase hex actually in effect right now. */
   value: string;
   /**
@@ -242,7 +274,7 @@ export type ResolvedColorTarget = {
    * else), so the panel can offer "back to the theme" without inventing its own
    * reset affordance. Mirrors ColorPicker's `inherit`.
    */
-  inherit?: { label: string; value: string; active: boolean };
+  inherit?: ColorInheritLabels & { value: string; active: boolean };
 };
 
 function find(blocks: readonly StorefrontBlock[], key: string) {
@@ -277,7 +309,10 @@ export function resolveColorTarget(
 ): ResolvedColorTarget | null {
   switch (ref.kind) {
     case "theme-accent":
-      return { label: "Accent", value: gate(theme.accent, "#171717") };
+      return {
+        label: "Storefront.colors.fields.accent",
+        value: gate(theme.accent, "#171717"),
+      };
 
     // The two masthead lines resolve only while they are actually on screen:
     // hiding the header (or emptying the line) leaves nothing to style, so the
@@ -287,10 +322,10 @@ export function resolveColorTarget(
       if (!headerLineVisible(header, "name", editingLine)) return null;
       const themeColor = headerThemeColors(theme.accent).name;
       return {
-        label: "Store name",
+        label: "Storefront.colors.fields.storeName",
         value: gate(header.nameColor, themeColor),
         inherit: {
-          label: "Theme color",
+          ...INHERIT.theme,
           value: themeColor,
           active: header.nameColor === undefined,
         },
@@ -301,10 +336,10 @@ export function resolveColorTarget(
       if (!headerLineVisible(header, "bio", editingLine)) return null;
       const themeColor = headerThemeColors(theme.accent).bio;
       return {
-        label: "Bio",
+        label: "Storefront.colors.fields.bio",
         value: gate(header.bioColor, themeColor),
         inherit: {
-          label: "Theme color",
+          ...INHERIT.theme,
           value: themeColor,
           active: header.bioColor === undefined,
         },
@@ -313,17 +348,26 @@ export function resolveColorTarget(
 
     case "theme-background-solid":
       return theme.background.kind === "solid"
-        ? { label: "Background", value: gate(theme.background.color, "#ffffff") }
+        ? {
+            label: "Storefront.colors.fields.background",
+            value: gate(theme.background.color, "#ffffff"),
+          }
         : null;
 
     case "theme-background-from":
       return theme.background.kind === "gradient"
-        ? { label: "Gradient from", value: gate(theme.background.from, "#ffffff") }
+        ? {
+            label: "Storefront.colors.fields.gradientFrom",
+            value: gate(theme.background.from, "#ffffff"),
+          }
         : null;
 
     case "theme-background-to":
       return theme.background.kind === "gradient"
-        ? { label: "Gradient to", value: gate(theme.background.to, "#e5e5e5") }
+        ? {
+            label: "Storefront.colors.fields.gradientTo",
+            value: gate(theme.background.to, "#e5e5e5"),
+          }
         : null;
 
     case "shape-fill": {
@@ -332,7 +376,10 @@ export function resolveColorTarget(
       // A ring draws its stroke in `color`, so calling it "Fill" would name the
       // one thing it does not have.
       return {
-        label: block.kind === "ring" ? "Color" : "Fill",
+        label:
+          block.kind === "ring"
+            ? "Storefront.colors.fields.color"
+            : "Storefront.colors.fields.fill",
         value: gate(block.color, "#171717"),
       };
     }
@@ -344,7 +391,7 @@ export function resolveColorTarget(
       // entirely when borderColor is absent, so "clear it" would produce a
       // browser default rather than the color shown here.
       return {
-        label: "Border color",
+        label: "Storefront.colors.fields.borderColor",
         value: gate(block.borderColor, DEFAULT_SHAPE_BORDER_COLOR),
       };
     }
@@ -363,20 +410,20 @@ export function resolveColorTarget(
         const selected = rangeColor(block, selection.range);
         const blockColor = gate(block.color, themeColor);
         return {
-          label: "Selected words",
+          label: "Storefront.colors.fields.selectedWords",
           value: selected ? gate(selected, blockColor) : blockColor,
           inherit: {
-            label: "the block's color",
+            ...INHERIT.blockColor,
             value: blockColor,
             active: selected === null,
           },
         };
       }
       return {
-        label: "Text color",
+        label: "Storefront.colors.fields.textColor",
         value: gate(block.color, themeColor),
         inherit: {
-          label: "Theme color",
+          ...INHERIT.theme,
           value: themeColor,
           active: block.color === undefined,
         },

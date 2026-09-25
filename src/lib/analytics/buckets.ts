@@ -1,4 +1,6 @@
+import type { Locale } from "@/i18n/locales";
 import type { AnalyticsRange } from "@/lib/analytics/types";
+import { dateTimeFormat } from "@/lib/format/intl";
 
 // TIME BUCKETING, shared by every series on the analytics page.
 //
@@ -113,12 +115,38 @@ const MONTHS = [
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
 ] as const;
 
-/** Deterministic short label for a bucket key. No Intl: server and client must
- *  render identical text or hydration reports a mismatch. */
-export function formatBucketLabel(date: string, monthly: boolean): string {
+/** Short label for a bucket key: "Jul 2" daily, "Jul 2026" monthly, in English.
+ *  Server and client must render identical text or hydration reports a
+ *  mismatch, so English stays hand-built and other locales format the UTC day
+ *  in UTC, never in the runtime's own zone. */
+export function formatBucketLabel(date: string, monthly: boolean, locale: Locale): string {
   const [year, month, day] = date.split("-");
+  if (locale !== "en") {
+    const utc = dayStartUtc(date);
+    if (!Number.isNaN(utc)) {
+      return dateTimeFormat(
+        locale,
+        monthly
+          ? { month: "short", year: "numeric", timeZone: "UTC" }
+          : { month: "short", day: "numeric", timeZone: "UTC" },
+      ).format(utc);
+    }
+  }
   const name = MONTHS[Number(month) - 1] ?? month;
   return monthly ? `${name} ${year}` : `${name} ${Number(day)}`;
+}
+
+/** A Monday, as UTC ms (1 January 2024), for naming weekdays. */
+const UTC_MONDAY = Date.UTC(2024, 0, 1);
+
+/** The reader's short name for a WEEKDAYS entry ("Mon" stays "Mon" in English).
+ *  The entry itself is data and stays English in the published datapoints. */
+export function formatWeekdayLabel(weekday: string, locale: Locale): string {
+  const index = WEEKDAYS.findIndex((entry) => entry === weekday);
+  if (locale === "en" || index === -1) return weekday;
+  return dateTimeFormat(locale, { weekday: "short", timeZone: "UTC" }).format(
+    UTC_MONDAY + index * DAY_MS,
+  );
 }
 
 /** Month-grained series? Detected from the gap between the first two buckets,

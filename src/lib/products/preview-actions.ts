@@ -48,13 +48,13 @@ export async function getProductPagePreviewData(
   const account = await getActiveAccount();
   if (!account) return failure(sessionExpired());
   if (!can(account.role, "store.read")) {
-    return failure(permissionDenied(account.role, "preview product pages"));
+    return failure(permissionDenied(account.role, "previewProductPages"));
   }
   if (!productIdSchema.safeParse(productId).success) {
     return failure(notFound("product"));
   }
   if (!(await rateLimit("product_preview", RATE_LIMITS.productPreview))) {
-    return failure(rateLimited("preview product pages"));
+    return failure(rateLimited("previewProductPages"));
   }
 
   const supabase = await createClient();
@@ -66,7 +66,7 @@ export async function getProductPagePreviewData(
     .maybeSingle();
   if (error) {
     console.error("[products] preview read failed", error);
-    return failure(serverError("load the product page preview"));
+    return failure(serverError("loadProductPagePreview"));
   }
   if (!data) return failure(notFound("product"));
 

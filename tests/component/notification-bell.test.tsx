@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
+import { render, screen, cleanup } from "../setup/render";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import type { UseNotifications } from "@/lib/notifications/useNotifications";
 

@@ -9,7 +9,12 @@ import {
   SETTINGS_LINK,
   SETTINGS_NAV,
 } from "@/lib/search/nav-constants";
-import type { SearchGroup, SearchResult } from "@/lib/search/types";
+import type { MessageKey } from "@/i18n/types";
+import type {
+  SearchGroup,
+  SearchResult,
+  SearchTranslator,
+} from "@/lib/search/types";
 import {
   STOREFRONT_SETTINGS,
   settingHref,
@@ -40,6 +45,14 @@ import type { TeamAction, TeamRole } from "@/lib/team/permissions";
  * anywhere. What still has to be written down is the vocabulary a rule could
  * never derive: other names for the same thing, and the phrasing someone
  * reaches for when they do not know its name.
+ *
+ * IN THE READER'S LANGUAGE. Titles, breadcrumbs and group labels are message
+ * keys here, resolved through the caller's translator when the index is built,
+ * so a Czech seller both SEES and MATCHES Czech titles. The synonyms stay
+ * English and are matched in every language: they are search vocabulary, not
+ * display copy, and they keep everything that finds a result today finding it.
+ * The index is built once per translator (one per locale in practice) and
+ * reused on every keystroke.
  */
 
 /**
@@ -49,10 +62,24 @@ import type { TeamAction, TeamRole } from "@/lib/team/permissions";
  */
 type LocalEntry = SearchEntry<SearchResult>;
 
+/** An entry before translation: its copy is still message keys. */
+type EntrySpec = {
+  id: string;
+  type: SearchResult["type"];
+  title: MessageKey;
+  /** The settings section it sits under, for the "Settings › Account" crumb. */
+  section?: MessageKey;
+  /** A plain second line, for an entry with no section to sit under. */
+  subtitle?: MessageKey;
+  href: string;
+  synonyms?: string[];
+  permission?: TeamAction;
+};
+
 function entry(
   id: string,
   result: Omit<SearchResult, "id">,
-  synonyms: string[] = [],
+  synonyms: readonly string[] = [],
   permission?: TeamAction,
 ): LocalEntry {
   return {
@@ -66,6 +93,30 @@ function entry(
   };
 }
 
+function resolveSpec(spec: EntrySpec, t: SearchTranslator): LocalEntry {
+  return entry(
+    spec.id,
+    {
+      type: spec.type,
+      title: t(spec.title),
+      subtitle: spec.section
+        ? breadcrumb(spec.section, t)
+        : spec.subtitle
+          ? t(spec.subtitle)
+          : undefined,
+      href: spec.href,
+    },
+    spec.synonyms,
+    spec.permission,
+  );
+}
+
+/** "Settings › Account". A path of two names, not a sentence, so it is built
+ *  from the nav labels themselves and can never drift from the rail. */
+function breadcrumb(section: MessageKey, t: SearchTranslator): string {
+  return `${t(SETTINGS_LINK.label)} › ${t(section)}`;
+}
+
 const PAGE_SYNONYMS: Record<string, string[]> = {
   "/dashboard": ["home", "overview", "summary", "start"],
   "/products": ["catalogue", "catalog", "items", "inventory", "stock", "listings"],
@@ -76,34 +127,50 @@ const PAGE_SYNONYMS: Record<string, string[]> = {
   "/settings": ["preferences", "options", "configuration", "account"],
 };
 
-const PAGES: LocalEntry[] = [...MAIN_NAV, SETTINGS_LINK].map((link) =>
-  entry(
-    `page:${link.href}`,
-    { type: "page", title: link.label, href: link.href },
-    PAGE_SYNONYMS[link.href] ?? [],
-  ),
-);
+const PAGES: EntrySpec[] = [...MAIN_NAV, SETTINGS_LINK].map((link) => ({
+  id: `page:${link.href}`,
+  type: "page",
+  title: link.label,
+  href: link.href,
+  synonyms: PAGE_SYNONYMS[link.href] ?? [],
+}));
 
-const SETTINGS_SECTIONS: LocalEntry[] = SETTINGS_NAV.map((link) =>
-  entry(`settings:${link.href}`, {
-    type: "settings",
-    title: link.label,
-    subtitle: "Settings",
-    href: link.href,
-  }),
-);
+/** Extra words a settings section answers to, beyond its own name. */
+const SECTION_SYNONYMS: Record<string, string[]> = {
+  "/settings/language": ["change language", "locale", "translate", "translation", "english", "czech"],
+};
+
+const SETTINGS_SECTIONS: EntrySpec[] = SETTINGS_NAV.map((link) => ({
+  id: `settings:${link.href}`,
+  type: "settings",
+  title: link.label,
+  subtitle: SETTINGS_LINK.label,
+  href: link.href,
+  synonyms: SECTION_SYNONYMS[link.href],
+}));
+
+/** The settings sections the fields below sit in, by the rail's own labels. */
+const ACCOUNT: MessageKey = "Nav.settings.account";
+const SECURITY: MessageKey = "Nav.settings.security";
+const BUSINESS: MessageKey = "Nav.settings.tax";
+const NOTIFICATIONS: MessageKey = "Nav.settings.notifications";
+const LEGAL: MessageKey = "Nav.settings.legal";
+const DANGER: MessageKey = "Nav.settings.danger";
 
 /**
  * Individual settings CONTROLS. The `#hash` targets the element id on the
  * section that owns the field, so the browser scrolls straight to it.
  */
-const SETTINGS_FIELDS: LocalEntry[] = [
+const SETTINGS_FIELDS: EntrySpec[] = [
   // One name now, so the old "display name" search terms land here too: the
   // username IS the store name buyers see as well as the sign-in handle.
-  entry(
-    "field:username",
-    { type: "settings", title: "Username", subtitle: "Settings › Account", href: "/settings/account#username" },
-    [
+  {
+    id: "field:username",
+    type: "settings",
+    title: "Search.fields.username",
+    section: ACCOUNT,
+    href: "/settings/account#username",
+    synonyms: [
       "handle",
       "sign in name",
       "login name",
@@ -116,21 +183,30 @@ const SETTINGS_FIELDS: LocalEntry[] = [
       "rename",
       "nickname",
     ],
-  ),
-  entry(
-    "field:avatar",
-    { type: "settings", title: "Profile photo", subtitle: "Settings › Account", href: "/settings/account#avatar" },
-    ["avatar", "profile picture", "image", "headshot", "logo", "store logo"],
-  ),
-  entry(
-    "field:email",
-    { type: "settings", title: "Email address", subtitle: "Settings › Account", href: "/settings/account#email" },
-    ["change email", "mail", "address", "contact email"],
-  ),
-  entry(
-    "field:password",
-    { type: "settings", title: "Password", subtitle: "Settings › Account", href: "/settings/account#password" },
-    [
+  },
+  {
+    id: "field:avatar",
+    type: "settings",
+    title: "Search.fields.avatar",
+    section: ACCOUNT,
+    href: "/settings/account#avatar",
+    synonyms: ["avatar", "profile picture", "image", "headshot", "logo", "store logo"],
+  },
+  {
+    id: "field:email",
+    type: "settings",
+    title: "Search.fields.email",
+    section: ACCOUNT,
+    href: "/settings/account#email",
+    synonyms: ["change email", "mail", "address", "contact email"],
+  },
+  {
+    id: "field:password",
+    type: "settings",
+    title: "Search.fields.password",
+    section: ACCOUNT,
+    href: "/settings/account#password",
+    synonyms: [
       "change password",
       "reset password",
       "forgot password",
@@ -138,16 +214,14 @@ const SETTINGS_FIELDS: LocalEntry[] = [
       "security",
       "credentials",
     ],
-  ),
-  entry(
-    "field:two-factor",
-    {
-      type: "settings",
-      title: "Two-factor authentication",
-      subtitle: "Settings › Security",
-      href: "/settings/security#two-factor",
-    },
-    [
+  },
+  {
+    id: "field:two-factor",
+    type: "settings",
+    title: "Search.fields.twoFactor",
+    section: SECURITY,
+    href: "/settings/security#two-factor",
+    synonyms: [
       "2fa",
       "mfa",
       "two factor",
@@ -160,135 +234,183 @@ const SETTINGS_FIELDS: LocalEntry[] = [
       "one time code",
       "security",
     ],
-  ),
-  entry(
-    "field:recovery-codes",
-    {
-      type: "settings",
-      title: "Recovery codes",
-      subtitle: "Settings › Security",
-      href: "/settings/security#recovery-codes",
-    },
-    ["backup codes", "lost phone", "2fa recovery", "account recovery"],
-  ),
-  entry(
-    "field:security-activity",
-    {
-      type: "settings",
-      title: "Security activity",
-      subtitle: "Settings › Security",
-      href: "/settings/security#activity",
-    },
-    ["security log", "login history", "audit log", "recent activity"],
-  ),
-  entry(
-    "field:sign-out",
-    { type: "settings", title: "Sign out", subtitle: "Settings › Account", href: "/settings/account#sign-out" },
-    ["log out", "logout", "leave", "exit"],
-  ),
-  entry(
-    "field:seller-bio",
-    { type: "settings", title: "Bio", subtitle: "Settings › Account", href: "/settings/account#bio" },
-    ["seller bio", "about me", "about", "description", "who i am"],
-  ),
+  },
+  {
+    id: "field:recovery-codes",
+    type: "settings",
+    title: "Search.fields.recoveryCodes",
+    section: SECURITY,
+    href: "/settings/security#recovery-codes",
+    synonyms: ["backup codes", "lost phone", "2fa recovery", "account recovery"],
+  },
+  {
+    id: "field:security-activity",
+    type: "settings",
+    title: "Search.fields.securityActivity",
+    section: SECURITY,
+    href: "/settings/security#activity",
+    synonyms: ["security log", "login history", "audit log", "recent activity"],
+  },
+  {
+    id: "field:sign-out",
+    type: "settings",
+    title: "Search.fields.signOut",
+    section: ACCOUNT,
+    href: "/settings/account#sign-out",
+    synonyms: ["log out", "logout", "leave", "exit"],
+  },
+  {
+    id: "field:seller-bio",
+    type: "settings",
+    title: "Search.fields.bio",
+    section: ACCOUNT,
+    href: "/settings/account#bio",
+    synonyms: ["seller bio", "about me", "about", "description", "who i am"],
+  },
   // The page and its fields carry the names the page itself uses ("Business &
   // seller details", "Trader name"), so a result never reads like a different
   // screen from the one it opens. The old names stay as synonyms: people still
   // type "tax" and "business name".
-  entry(
-    "field:vat",
-    { type: "settings", title: "VAT ID", subtitle: "Settings › Business & seller details", href: "/settings/tax#vat" },
-    ["tax number", "vat number", "tax id", "eu vat"],
-  ),
-  entry(
-    "field:business-name",
-    { type: "settings", title: "Trader name", subtitle: "Settings › Business & seller details", href: "/settings/tax#business-name" },
-    ["business name", "company name", "legal name", "trading name", "seller details", "tax"],
-  ),
-  entry(
-    "field:tax-country",
-    { type: "settings", title: "Country", subtitle: "Settings › Business & seller details", href: "/settings/tax#country" },
-    ["tax country", "eu", "residence", "jurisdiction"],
-  ),
-  entry(
-    "field:seller-address",
-    { type: "settings", title: "Business address", subtitle: "Settings › Business & seller details", href: "/settings/tax#address" },
-    ["seller address", "postal address", "trader address", "who is selling"],
-  ),
-  entry(
-    "field:seller-email",
-    { type: "settings", title: "Contact email", subtitle: "Settings › Business & seller details", href: "/settings/tax#contact-email" },
-    ["seller email", "buyer contact", "support email"],
-  ),
-  entry(
-    "field:seller-phone",
-    { type: "settings", title: "Phone", subtitle: "Settings › Business & seller details", href: "/settings/tax#phone" },
-    ["phone number", "contact number", "seller phone"],
-  ),
-  entry(
-    "field:notify-sales",
-    { type: "settings", title: "Sales emails", subtitle: "Settings › Notifications", href: "/settings/notifications#preferences" },
-    ["email me when something sells", "order emails", "sale alerts"],
-  ),
-  entry(
-    "field:notify-marketing",
-    { type: "settings", title: "Marketing emails", subtitle: "Settings › Notifications", href: "/settings/notifications#preferences" },
-    ["tips", "newsletter", "marketplace news", "unsubscribe"],
-  ),
-  entry(
-    "field:notify-product",
-    { type: "settings", title: "Product update emails", subtitle: "Settings › Notifications", href: "/settings/notifications#preferences" },
-    ["feature announcements", "changelog emails"],
-  ),
-  entry(
-    "field:legal",
-    { type: "settings", title: "Seller agreement", subtitle: "Settings › Legal", href: "/settings/legal" },
-    ["terms of service", "terms", "privacy policy", "gdpr", "contract"],
-  ),
-  entry(
-    "field:export",
-    { type: "settings", title: "Export my data", subtitle: "Settings › Danger zone", href: "/settings/danger#export" },
-    ["download my data", "gdpr export", "backup", "data dump"],
-  ),
-  entry(
-    "field:delete-account",
-    { type: "settings", title: "Delete account", subtitle: "Settings › Danger zone", href: "/settings/danger#delete" },
-    ["close account", "remove account", "cancel account", "delete everything"],
-  ),
+  {
+    id: "field:vat",
+    type: "settings",
+    title: "Search.fields.vat",
+    section: BUSINESS,
+    href: "/settings/tax#vat",
+    synonyms: ["tax number", "vat number", "tax id", "eu vat"],
+  },
+  {
+    id: "field:business-name",
+    type: "settings",
+    title: "Search.fields.businessName",
+    section: BUSINESS,
+    href: "/settings/tax#business-name",
+    synonyms: ["business name", "company name", "legal name", "trading name", "seller details", "tax"],
+  },
+  {
+    id: "field:tax-country",
+    type: "settings",
+    title: "Search.fields.country",
+    section: BUSINESS,
+    href: "/settings/tax#country",
+    synonyms: ["tax country", "eu", "residence", "jurisdiction"],
+  },
+  {
+    id: "field:seller-address",
+    type: "settings",
+    title: "Search.fields.address",
+    section: BUSINESS,
+    href: "/settings/tax#address",
+    synonyms: ["seller address", "postal address", "trader address", "who is selling"],
+  },
+  {
+    id: "field:seller-email",
+    type: "settings",
+    title: "Search.fields.contactEmail",
+    section: BUSINESS,
+    href: "/settings/tax#contact-email",
+    synonyms: ["seller email", "buyer contact", "support email"],
+  },
+  {
+    id: "field:seller-phone",
+    type: "settings",
+    title: "Search.fields.phone",
+    section: BUSINESS,
+    href: "/settings/tax#phone",
+    synonyms: ["phone number", "contact number", "seller phone"],
+  },
+  {
+    id: "field:notify-sales",
+    type: "settings",
+    title: "Search.fields.salesEmails",
+    section: NOTIFICATIONS,
+    href: "/settings/notifications#preferences",
+    synonyms: ["email me when something sells", "order emails", "sale alerts"],
+  },
+  {
+    id: "field:notify-marketing",
+    type: "settings",
+    title: "Search.fields.marketingEmails",
+    section: NOTIFICATIONS,
+    href: "/settings/notifications#preferences",
+    synonyms: ["tips", "newsletter", "marketplace news", "unsubscribe"],
+  },
+  {
+    id: "field:notify-product",
+    type: "settings",
+    title: "Search.fields.productEmails",
+    section: NOTIFICATIONS,
+    href: "/settings/notifications#preferences",
+    synonyms: ["feature announcements", "changelog emails"],
+  },
+  {
+    id: "field:legal",
+    type: "settings",
+    title: "Search.fields.termsOfService",
+    section: LEGAL,
+    href: "/settings/legal",
+    synonyms: ["seller agreement", "terms of use", "terms", "privacy policy", "gdpr", "contract"],
+  },
+  {
+    id: "field:export",
+    type: "settings",
+    title: "Search.fields.exportData",
+    section: DANGER,
+    href: "/settings/danger#export",
+    synonyms: ["download my data", "gdpr export", "backup", "data dump"],
+  },
+  {
+    id: "field:delete-account",
+    type: "settings",
+    title: "Search.fields.deleteAccount",
+    section: DANGER,
+    href: "/settings/danger#delete",
+    synonyms: ["close account", "remove account", "cancel account", "delete everything"],
+  },
 ];
 
 /** Things you DO, not places you go. Ordered by how often they're wanted. */
-const ACTIONS: LocalEntry[] = [
-  entry(
-    "action:new-product",
-    { type: "action", title: "New product", href: "/products/new" },
-    ["add product", "create product", "sell something", "upload", "list an item"],
-    "products.write",
-  ),
-  entry(
-    "action:new-storefront",
-    { type: "action", title: "New storefront", href: "/storefront" },
-    ["add storefront", "create shop", "design a store", "embed"],
-    "storefront.write",
-  ),
-  entry(
-    "action:invite-member",
-    { type: "action", title: "Invite a team member", href: "/settings/team#invite" },
-    ["add teammate", "add user", "share access", "collaborator", "invite"],
-    "team.invite",
-  ),
-  entry(
-    "action:notifications",
-    { type: "action", title: "Notification history", href: "/notifications" },
-    ["alerts", "inbox", "unread", "bell"],
-  ),
+const ACTIONS: EntrySpec[] = [
+  {
+    id: "action:new-product",
+    type: "action",
+    title: "Search.actions.newProduct",
+    href: "/products/new",
+    synonyms: ["add product", "create product", "sell something", "upload", "list an item"],
+    permission: "products.write",
+  },
+  {
+    id: "action:new-storefront",
+    type: "action",
+    title: "Search.actions.newStorefront",
+    href: "/storefront",
+    synonyms: ["add storefront", "create shop", "design a store", "embed"],
+    permission: "storefront.write",
+  },
+  {
+    id: "action:invite-member",
+    type: "action",
+    title: "Search.actions.inviteMember",
+    href: "/settings/team#invite",
+    synonyms: ["add teammate", "add user", "share access", "collaborator", "invite"],
+    permission: "team.invite",
+  },
+  {
+    id: "action:notifications",
+    type: "action",
+    title: "Search.actions.notificationHistory",
+    href: "/notifications",
+    synonyms: ["alerts", "inbox", "unread", "bell"],
+  },
   // The welcome flow's map, on demand. Last on purpose: the empty state shows
   // the first three actions, and this one is for someone who goes looking.
-  entry(
-    "action:show-me-around",
-    { type: "action", title: "Show me around", href: "/dashboard?tour=1" },
-    ["tour", "help", "where is", "onboarding", "getting started", "guide", "how does this work"],
-  ),
+  {
+    id: "action:show-me-around",
+    type: "action",
+    title: "Search.actions.showMeAround",
+    href: "/dashboard?tour=1",
+    synonyms: ["tour", "help", "where is", "onboarding", "getting started", "guide", "how does this work"],
+  },
 ];
 
 /**
@@ -301,34 +423,29 @@ const ACTIONS: LocalEntry[] = [
  * `?setting=` links and opens the panel in place without navigating. From
  * anywhere else the link lands on the storefront list, which is the right
  * destination for a seller who has not opened one yet.
+ *
+ * Resolved per translator like every other entry: that catalogue carries
+ * message keys, and settingIndexFields turns them into the reader's language.
  */
-const STOREFRONT_DESIGN_SETTINGS: LocalEntry[] = STOREFRONT_SETTINGS.map(
-  (setting) => {
-    const { title, subtitle, keywords } = settingIndexFields(setting);
+function storefrontDesignSettings(t: SearchTranslator): LocalEntry[] {
+  return STOREFRONT_SETTINGS.map((setting) => {
+    const { title, subtitle, keywords } = settingIndexFields(setting, t);
     return entry(
       `storefront-setting:${setting.id}`,
       { type: "settings", title, subtitle, href: settingHref(setting.id) },
       [...keywords],
       "storefront.write",
     );
-  },
-);
-
-const ALL_ENTRIES: LocalEntry[] = [
-  ...PAGES,
-  ...ACTIONS,
-  ...SETTINGS_SECTIONS,
-  ...SETTINGS_FIELDS,
-  ...STOREFRONT_DESIGN_SETTINGS,
-];
+  });
+}
 
 /** The palette's sections. Keys ARE result types, so an entry classifies
  *  itself and a fourth local type would need no second list. The order is only
  *  the tiebreak; searchCatalog leads with whatever answered best. */
-const SECTIONS: SectionSpec[] = [
-  { key: "page", label: "Pages" },
-  { key: "action", label: "Actions" },
-  { key: "settings", label: "Settings" },
+const SECTIONS: { key: SearchResult["type"]; label: MessageKey }[] = [
+  { key: "page", label: "Search.sections.pages" },
+  { key: "action", label: "Search.sections.actions" },
+  { key: "settings", label: "Search.sections.settings" },
 ];
 
 /**
@@ -351,22 +468,54 @@ const SUGGESTION_SETTINGS_IDS = new Set([
   "field:export",
 ]);
 
-// Pages are DELIBERATELY absent: the sidebar already shows every page, so
-// recommending them here is noise. They stay fully searchable — this list
-// only shapes the empty state, never the query path.
-const EMPTY_STATE_GROUPS: {
-  type: SearchResult["type"];
-  label: string;
-  source: LocalEntry[];
-}[] = [
-  // The first three actions only, same fit-without-scrolling budget as above.
-  { type: "action", label: "Actions", source: ACTIONS.slice(0, 3) },
-  {
-    type: "settings",
-    label: "Settings",
-    source: SETTINGS_FIELDS.filter((item) => SUGGESTION_SETTINGS_IDS.has(item.id)),
-  },
-];
+/** One locale's resolved index. */
+type LocalIndex = {
+  all: LocalEntry[];
+  sections: SectionSpec[];
+  // Pages are DELIBERATELY absent: the sidebar already shows every page, so
+  // recommending them here is noise. They stay fully searchable — this list
+  // only shapes the empty state, never the query path.
+  emptyState: { type: SearchResult["type"]; label: string; source: LocalEntry[] }[];
+};
+
+/**
+ * Built once per translator. The ranker memoises its terms per entry OBJECT,
+ * so reusing the same entries across keystrokes is what keeps matching cheap.
+ */
+const INDEXES = new WeakMap<SearchTranslator, LocalIndex>();
+
+function localIndex(t: SearchTranslator): LocalIndex {
+  const cached = INDEXES.get(t);
+  if (cached) return cached;
+
+  const resolve = (specs: EntrySpec[]) => specs.map((spec) => resolveSpec(spec, t));
+  const actions = resolve(ACTIONS);
+  const fields = resolve(SETTINGS_FIELDS);
+  const sectionLabel = (key: SearchResult["type"]) =>
+    t(SECTIONS.find((section) => section.key === key)!.label);
+
+  const index: LocalIndex = {
+    all: [
+      ...resolve(PAGES),
+      ...actions,
+      ...resolve(SETTINGS_SECTIONS),
+      ...fields,
+      ...storefrontDesignSettings(t),
+    ],
+    sections: SECTIONS.map(({ key, label }) => ({ key, label: t(label) })),
+    emptyState: [
+      // The first three actions only, same fit-without-scrolling budget as above.
+      { type: "action", label: sectionLabel("action"), source: actions.slice(0, 3) },
+      {
+        type: "settings",
+        label: sectionLabel("settings"),
+        source: fields.filter((item) => SUGGESTION_SETTINGS_IDS.has(item.id)),
+      },
+    ],
+  };
+  INDEXES.set(t, index);
+  return index;
+}
 
 const DEFAULT_LIMIT = 12;
 
@@ -381,21 +530,22 @@ const DEFAULT_LIMIT = 12;
  */
 export function searchLocalRegistry(
   query: string,
-  options?: { role?: TeamRole | null; limit?: number },
+  options: { t: SearchTranslator; role?: TeamRole | null; limit?: number },
 ): SearchGroup[] {
-  const limit = options?.limit ?? DEFAULT_LIMIT;
-  const role = options?.role;
+  const limit = options.limit ?? DEFAULT_LIMIT;
+  const role = options.role;
   const term = query.trim();
+  const index = localIndex(options.t);
 
   if (!term) {
-    return EMPTY_STATE_GROUPS.map(({ type, label, source }) => ({
+    return index.emptyState.map(({ type, label, source }) => ({
       type,
       label,
       results: allowedFor(source, role).map((item) => item.payload),
     })).filter((group) => group.results.length > 0);
   }
 
-  return searchCatalog(ALL_ENTRIES, term, { sections: SECTIONS, limit, role })
+  return searchCatalog(index.all, term, { sections: index.sections, limit, role })
     .map((section) => ({
       // The section key IS the result type; the cast is the one place that
       // knowledge is spent, and SECTIONS is built from those types above.

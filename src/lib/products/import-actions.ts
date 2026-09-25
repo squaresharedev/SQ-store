@@ -16,6 +16,8 @@ import {
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
 import { publishBlockedError } from "@/lib/settings/seller-identity";
 import { productWriteSchema } from "@/lib/validation/product";
+import { firstIssue } from "@/lib/validation/messages";
+import { msg, type MessageRef } from "@/i18n/types";
 import { CURRENCIES, PRODUCT_STATUSES, type Currency, type ProductStatus } from "@/types/product";
 import {
   IMPORT_BYTES_MAX,
@@ -24,6 +26,7 @@ import {
   importableRows,
   parseCsv,
   type ColumnMap,
+  importProblemMessage,
   type ImportField,
 } from "./csv";
 
@@ -47,7 +50,7 @@ export type ImportResult =
       ok: true;
       imported: number;
       /** Rows that could not be written, each with the reason. */
-      skipped: { line: number; title: string; reason: string }[];
+      skipped: { line: number; title: string; reason: MessageRef }[];
     }
   | { ok: false; error: ActionError };
 
@@ -96,21 +99,21 @@ export async function importProducts(input: unknown): Promise<ImportResult> {
   const account = await getActiveAccount();
   if (!account) return failure(sessionExpired());
   if (!can(account.role, "products.write")) {
-    return failure(permissionDenied(account.role, "import products"));
+    return failure(permissionDenied(account.role, "importProducts"));
   }
   // Before any parsing: one call here can insert IMPORT_ROWS_MAX rows, so the
   // budget is spent before the work, not after it.
   if (!(await rateLimit("product_import", RATE_LIMITS.productImport))) {
-    return failure(rateLimited("import products"));
+    return failure(rateLimited("importProducts"));
   }
 
   if (typeof input !== "object" || input === null) {
-    return failure(invalidInput("That import could not be read.", "Upload the file again."));
+    return failure(invalidInput(msg("Errors.productImport.unreadable.message"), msg("Errors.productImport.unreadable.fix")));
   }
   const { csv, columns, currency, status } = input as Partial<ImportInput>;
 
   if (typeof csv !== "string" || csv.trim() === "") {
-    return failure(invalidInput("That file was empty.", "Export your products again and retry."));
+    return failure(invalidInput(msg("Errors.productImport.empty.message"), msg("Errors.productImport.empty.fix")));
   }
   // Measured in BYTES, not characters: a file of multi-byte text is bigger
   // than its length suggests, and the cap is about the work this does.
@@ -118,22 +121,19 @@ export async function importProducts(input: unknown): Promise<ImportResult> {
     const maxMb = Math.round(IMPORT_BYTES_MAX / 1024 / 1024);
     return failure(
       invalidInput(
-        "That file is too large to import.",
-        `Split it into files under ${maxMb} MB, or import up to ${IMPORT_ROWS_MAX} products at a time.`,
+        msg("Errors.productImport.tooLarge.message"),
+        msg("Errors.productImport.tooLarge.fix", { maxMb, maxRows: IMPORT_ROWS_MAX }),
       ),
     );
   }
   if (typeof currency !== "string" || !(CURRENCIES as readonly string[]).includes(currency)) {
     return failure(
-      invalidInput("Pick a currency for these products.", "Choose one, then import again."),
+      invalidInput(msg("Errors.productImport.noCurrency.message"), msg("Errors.productImport.noCurrency.fix")),
     );
   }
   if (typeof status !== "string" || !(PRODUCT_STATUSES as readonly string[]).includes(status)) {
     return failure(
-      invalidInput(
-        "Pick whether these arrive as drafts or live products.",
-        "Choose one, then import again.",
-      ),
+      invalidInput(msg("Errors.productImport.noStatus.message"), msg("Errors.productImport.noStatus.fix")),
     );
   }
 
@@ -149,17 +149,21 @@ export async function importProducts(input: unknown): Promise<ImportResult> {
     status: status as ProductStatus,
   });
   const rows = importableRows(plan);
-  const skipped = plan.rows
-    .filter((row) => row.problem !== null)
-    .map((row) => ({ line: row.line, title: row.title, reason: row.problem! }));
+  const problems = plan.rows.flatMap((row) =>
+    row.problem === null ? [] : [{ line: row.line, title: row.title, problem: row.problem }],
+  );
+  const skipped: { line: number; title: string; reason: MessageRef }[] = problems.map(
+    ({ line, title, problem }) => ({ line, title, reason: importProblemMessage(problem) }),
+  );
 
   if (rows.length === 0) {
+    const first = problems[0];
     return failure(
       invalidInput(
-        "Nothing in that file could be imported.",
-        skipped[0]?.reason
-          ? `The first row says: ${skipped[0].reason} Check which columns hold the title and the price.`
-          : "Check that it has a title column and a price column.",
+        msg("Errors.productImport.nothingImportable.message"),
+        first
+          ? msg("Errors.productImport.nothingImportable.fixFirstRow", { problem: first.problem })
+          : msg("Errors.productImport.nothingImportable.fix"),
       ),
     );
   }
@@ -193,7 +197,7 @@ export async function importProducts(input: unknown): Promise<ImportResult> {
       skipped.push({
         line: row.line,
         title: row.title,
-        reason: parsed.error.issues[0]?.message ?? "That row is not a valid product.",
+        reason: firstIssue(parsed.error, msg("Errors.productImport.invalidRow")),
       });
       continue;
     }
@@ -213,10 +217,7 @@ export async function importProducts(input: unknown): Promise<ImportResult> {
 
   if (inserts.length === 0) {
     return failure(
-      invalidInput(
-        "None of those rows could be saved.",
-        skipped[0]?.reason ?? "Check the title and price columns.",
-      ),
+      invalidInput(msg("Errors.productImport.noneSaved.message"), skipped[0]?.reason ?? msg("Errors.productImport.noneSaved.fix")),
     );
   }
 
@@ -231,7 +232,7 @@ export async function importProducts(input: unknown): Promise<ImportResult> {
     .select("id");
   if (error) {
     console.error("[products] import failed", error);
-    return failure(serverError("import your products"));
+    return failure(serverError("importProducts"));
   }
 
   revalidatePath("/products");

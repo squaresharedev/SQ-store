@@ -3,12 +3,12 @@
 import { useId } from "react";
 import Link from "next/link";
 import { RotateCcw } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
-import { EU_COUNTRIES } from "@/lib/settings/constants";
+import { countryName } from "@/lib/format/country";
 import { sanitizeHeaderText } from "@/lib/storefront/header-text";
 import {
   MANDATORY_PRODUCT_PAGE_SECTION_IDS,
-  PRODUCT_PAGE_SECTION_LABELS,
   normalizeSections,
 } from "@/lib/storefront/product-page";
 import { buildShippingProse, hasShippingPolicy } from "@/lib/shipping/policy-prose";
@@ -135,6 +135,9 @@ export function ProductPageSection({
   summoned: ProductPagePanelSection | null;
 }) {
   const fieldId = useId();
+  const t = useTranslations("Storefront");
+  const tRoot = useTranslations();
+  const locale = useLocale();
 
   // Exactly what the page paints, resolved by the same functions the buyer's
   // page calls — so a slider's number, an inherit dot's colour and what the
@@ -142,14 +145,15 @@ export function ProductPageSection({
   const cta = resolveCta(productPage, { accent, cornerRadius });
   const storefrontBackdrop = storefrontBackdropHex({ background });
 
+  const storefrontFontName =
+    storefrontFont === "custom" && customFontName
+      ? customFontName
+      : tRoot(FONT_LABELS[storefrontFont]);
+
   const fontOptions: SelectOption<string>[] = [
     {
       value: INHERIT_FONT,
-      label: `Same as storefront (${
-        storefrontFont === "custom" && customFontName
-          ? customFontName
-          : FONT_LABELS[storefrontFont]
-      })`,
+      label: t("productPage.layout.font.inheritOption", { name: storefrontFontName }),
     },
     ...STOREFRONT_FONTS.filter(
       // Offered only once there is something to point at, exactly as the
@@ -157,7 +161,7 @@ export function ProductPageSection({
       (font) => font !== "custom" || customFontName !== undefined,
     ).map((font) => ({
       value: font as string,
-      label: font === "custom" && customFontName ? customFontName : FONT_LABELS[font],
+      label: font === "custom" && customFontName ? customFontName : tRoot(FONT_LABELS[font]),
     })),
   ];
 
@@ -170,7 +174,7 @@ export function ProductPageSection({
   // the "Shipping and returns" section below for why. Built by the same
   // generator the live page uses, so this summary and what a buyer reads can
   // never be different text.
-  const shippingProse = buildShippingProse(shippingPolicy);
+  const shippingProse = buildShippingProse(shippingPolicy, (ref) => tRoot(ref.key, ref.values), locale);
   const shippingIsSet = hasShippingPolicy(shippingPolicy);
   const profileCount = shippingPolicy.profiles?.length ?? 0;
 
@@ -178,24 +182,26 @@ export function ProductPageSection({
   // "Seller details" section below for why. `sellerCountryName` mirrors the
   // exact lookup SellerBlock uses on the live page, so the summary here reads
   // the same as what a buyer sees.
-  const sellerCountryName = EU_COUNTRIES.find(
-    (entry) => entry.code === sellerIdentity.country,
-  )?.name;
+  const sellerCountryName = countryName(sellerIdentity.country, locale);
   const sellerIsSet = hasSellerDetails(sellerIdentity);
 
   return (
     <>
-      <CollapsibleSection title="Page" collapsible summon={summoned === "layout"}>
+      <CollapsibleSection
+        title={t("productPage.layout.title")}
+        collapsible
+        summon={summoned === "layout"}
+      >
         <div className="space-y-4">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-1.5">
               <label htmlFor={`${fieldId}-enabled`} className={labelClass}>
-                Show a product page
+                {t("productPage.layout.showPage.label")}
               </label>
-              <InfoTip label="What this switch does">
+              <InfoTip label={t("productPage.layout.showPage.infoLabel")}>
                 {productPage.enabled
-                  ? "Tapping a product tile opens its page."
-                  : "Product tiles have no page to open."}
+                  ? t("productPage.layout.showPage.infoOn")
+                  : t("productPage.layout.showPage.infoOff")}
               </InfoTip>
             </div>
             <Switch
@@ -213,13 +219,14 @@ export function ProductPageSection({
               (an image backdrop reads as dark, which is the ink decision the
               page has always made about photos). */}
           <ColorPicker
-            label="Page color"
+            label={t("productPage.layout.pageColor")}
             value={productPage.backgroundColor ?? storefrontBackdrop}
             onChange={(backgroundColor) =>
               onProductPageChange({ ...productPage, backgroundColor })
             }
             inherit={{
-              label: "Storefront background",
+              label: t("productPage.layout.storefrontBackground"),
+              useLabel: t("productPage.layout.useStorefrontBackground"),
               value: storefrontBackdrop,
               active: productPage.backgroundColor === undefined,
               onSelect: () => onProductPageChange(withoutKey(productPage, "backgroundColor")),
@@ -227,13 +234,13 @@ export function ProductPageSection({
           />
 
           <div className="space-y-1.5">
-            <span className={labelClass}>Photo fit</span>
+            <span className={labelClass}>{t("productPage.layout.photoFit.label")}</span>
             <SegmentedControl
-              ariaLabel="Photo fit"
+              ariaLabel={t("productPage.layout.photoFit.ariaLabel")}
               value={productPage.imageFit}
               options={[
-                { value: "contain", label: "Fit" },
-                { value: "cover", label: "Fill" },
+                { value: "contain", label: t("productPage.layout.photoFit.fit") },
+                { value: "cover", label: t("productPage.layout.photoFit.fill") },
               ]}
               onChange={(imageFit) => onProductPageChange({ ...productPage, imageFit })}
             />
@@ -242,12 +249,12 @@ export function ProductPageSection({
           <div className="space-y-1.5">
             <div className="flex items-center gap-1.5">
               <label htmlFor={`${fieldId}-font`} className={labelClass}>
-                Font
+                {t("productPage.layout.font.label")}
               </label>
-              <InfoTip label="How this page's font relates to the storefront's">
+              <InfoTip label={t("productPage.layout.font.infoLabel")}>
                 {productPage.font
-                  ? "This page reads in its own face, whatever the storefront uses."
-                  : "Follows your storefront's font. Change it under Typography."}
+                  ? t("productPage.layout.font.infoOwn")
+                  : t("productPage.layout.font.infoFollows")}
               </InfoTip>
             </div>
             <Select
@@ -269,11 +276,10 @@ export function ProductPageSection({
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-1.5">
               <label htmlFor={`${fieldId}-index`} className={labelClass}>
-                Allow search engines
+                {t("productPage.layout.indexing.label")}
               </label>
-              <InfoTip label="What turning this off does">
-                Off keeps your product pages out of search results. Anyone with a link can still
-                open them.
+              <InfoTip label={t("productPage.layout.indexing.infoLabel")}>
+                {t("productPage.layout.indexing.infoContent")}
               </InfoTip>
             </div>
             <Switch
@@ -288,21 +294,20 @@ export function ProductPageSection({
       </CollapsibleSection>
 
       <CollapsibleSection
-        title="Buy button"
+        title={t("productPage.cta.title")}
         collapsible
         defaultOpen={false}
         summon={summoned === "cta"}
         headerAction={
-          <InfoTip label="What decides whether a button shows">
-            The button follows each product&apos;s purchase link (set on the product). Without
-            one it emails your contact address below; with neither, no button is shown.
+          <InfoTip label={t("productPage.cta.infoLabel")}>
+            {t("productPage.cta.infoContent")}
           </InfoTip>
         }
       >
         <div className="space-y-4">
           <div className="space-y-1.5">
             <label htmlFor={`${fieldId}-cta`} className={labelClass}>
-              Button text
+              {t("productPage.cta.buttonText.label")}
             </label>
             <input
               id={`${fieldId}-cta`}
@@ -319,7 +324,9 @@ export function ProductPageSection({
               className={fieldBaseClass}
             />
             <p className={helpTextClass}>
-              {PRODUCT_PAGE_CTA_MAX - productPage.ctaLabel.length} characters left
+              {t("productPage.cta.buttonText.charsLeft", {
+                count: PRODUCT_PAGE_CTA_MAX - productPage.ctaLabel.length,
+              })}
             </p>
           </div>
 
@@ -330,11 +337,12 @@ export function ProductPageSection({
               label's ink — it is derived from the fill (see resolveCta), so
               there is no way to end up with a button nobody can read. */}
           <ColorPicker
-            label="Button color"
+            label={t("productPage.cta.buttonColor")}
             value={cta.fill}
             onChange={(ctaColor) => onProductPageChange({ ...productPage, ctaColor })}
             inherit={{
-              label: "Storefront accent",
+              label: t("productPage.cta.storefrontAccent"),
+              useLabel: t("productPage.cta.useStorefrontAccent"),
               value: accent,
               active: productPage.ctaColor === undefined,
               onSelect: () => onProductPageChange(withoutKey(productPage, "ctaColor")),
@@ -343,20 +351,20 @@ export function ProductPageSection({
 
           <SliderField
             id={`${fieldId}-cta-radius`}
-            label="Corner roundness"
+            label={t("productPage.cta.cornerRoundness.label")}
             min={0}
             max={PRODUCT_PAGE_CTA_RADIUS_MAX}
             value={cta.radius}
             onChange={(ctaRadius) => onProductPageChange({ ...productPage, ctaRadius })}
-            ariaLabel="Buy button corner roundness"
-            valueText={`${cta.radius} pixels`}
+            ariaLabel={t("productPage.cta.cornerRoundness.ariaLabel")}
+            valueText={t("productPage.cta.cornerRoundness.valueText", { value: cta.radius })}
             unit="px"
             // Auto is a real state, not a number: with nothing chosen the
             // button takes the storefront's own tile roundness, so the page
             // and the board it opened from match without anyone setting this.
             headerAction={
               productPage.ctaRadius === undefined ? (
-                <span className={infoTextClass}>Auto</span>
+                <span className={infoTextClass}>{t("productPage.cta.cornerRoundness.auto")}</span>
               ) : (
                 <button
                   type="button"
@@ -364,7 +372,7 @@ export function ProductPageSection({
                   className={cn(ghostButtonClass, "px-2 py-1 text-xs")}
                 >
                   <RotateCcw className="size-3" strokeWidth={2} aria-hidden="true" />
-                  Auto
+                  {t("productPage.cta.cornerRoundness.auto")}
                 </button>
               )
             }
@@ -372,7 +380,7 @@ export function ProductPageSection({
 
           <SliderField
             id={`${fieldId}-cta-border-width`}
-            label="Border thickness"
+            label={t("productPage.cta.borderThickness.label")}
             min={0}
             max={PRODUCT_PAGE_CTA_BORDER_WIDTH_MAX}
             value={cta.borderWidth}
@@ -386,23 +394,24 @@ export function ProductPageSection({
                   : { ...productPage, ctaBorderWidth: width },
               )
             }
-            ariaLabel="Buy button border thickness"
-            valueText={`${cta.borderWidth} pixels`}
+            ariaLabel={t("productPage.cta.borderThickness.ariaLabel")}
+            valueText={t("productPage.cta.borderThickness.valueText", { value: cta.borderWidth })}
             unit="px"
-            statusText={cta.borderWidth === 0 ? "None" : undefined}
+            statusText={cta.borderWidth === 0 ? t("productPage.cta.borderThickness.none") : undefined}
           />
 
           {/* Only once there is a border to colour. A colour picker for an
               invisible outline is a control that appears to do nothing. */}
           {cta.borderWidth > 0 && (
             <ColorPicker
-              label="Border color"
+              label={t("productPage.cta.borderColor")}
               value={cta.borderColor}
               onChange={(ctaBorderColor) =>
                 onProductPageChange({ ...productPage, ctaBorderColor })
               }
               inherit={{
-                label: "Button text color",
+                label: t("productPage.cta.buttonTextColor"),
+                useLabel: t("productPage.cta.useButtonTextColor"),
                 value: cta.text,
                 active: productPage.ctaBorderColor === undefined,
                 onSelect: () =>
@@ -412,28 +421,28 @@ export function ProductPageSection({
           )}
 
           <div className="space-y-1.5">
-            <span className={labelClass}>Price note</span>
+            <span className={labelClass}>{t("productPage.cta.priceNote.label")}</span>
             <SegmentedControl
-              ariaLabel="Price note"
+              ariaLabel={t("productPage.cta.priceNote.ariaLabel")}
               value={productPage.priceNote}
               options={[
-                { value: "incl-vat", label: "Incl. VAT" },
-                { value: "excl-vat", label: "Excl. tax" },
-                { value: "none", label: "None" },
+                { value: "incl-vat", label: t("productPage.cta.priceNote.inclVat") },
+                { value: "excl-vat", label: t("productPage.cta.priceNote.exclTax") },
+                { value: "none", label: t("productPage.cta.priceNote.none") },
               ]}
               onChange={(priceNote) => onProductPageChange({ ...productPage, priceNote })}
             />
           </div>
 
           <div className="space-y-1.5">
-            <span className={labelClass}>Shipping note</span>
+            <span className={labelClass}>{t("productPage.cta.shippingNote.label")}</span>
             <SegmentedControl
-              ariaLabel="Shipping note"
+              ariaLabel={t("productPage.cta.shippingNote.ariaLabel")}
               value={productPage.shippingNote}
               options={[
-                { value: "plus-shipping", label: "Plus shipping" },
-                { value: "free-shipping", label: "Free shipping" },
-                { value: "none", label: "None" },
+                { value: "plus-shipping", label: t("productPage.cta.shippingNote.plusShipping") },
+                { value: "free-shipping", label: t("productPage.cta.shippingNote.freeShipping") },
+                { value: "none", label: t("productPage.cta.shippingNote.none") },
               ]}
               onChange={(shippingNote) => onProductPageChange({ ...productPage, shippingNote })}
             />
@@ -442,15 +451,13 @@ export function ProductPageSection({
       </CollapsibleSection>
 
       <CollapsibleSection
-        title="Sections"
+        title={t("productPage.sections.title")}
         collapsible
         defaultOpen={false}
         summon={summoned === "sections"}
         headerAction={
-          <InfoTip label="When a section stays hidden">
-            A section with nothing to show stays hidden even when it is on. Shipping and safety
-            never show for downloads. Safety and compliance and Seller are legal disclosures and
-            cannot be turned off.
+          <InfoTip label={t("productPage.sections.infoLabel")}>
+            {t("productPage.sections.infoContent")}
           </InfoTip>
         }
       >
@@ -462,7 +469,7 @@ export function ProductPageSection({
             stored order: the fixed one runs from what a buyer reaches for
             first to what they reach for last. */}
         <div className="space-y-4">
-          <ul className="space-y-2" aria-label="What the page shows">
+          <ul className="space-y-2" aria-label={t("productPage.sections.listAriaLabel")}>
             {rows.map((entry) => {
               const rowId = `${fieldId}-section-${entry.id}`;
               // Safety and seller are legal disclosures, not a design choice —
@@ -479,16 +486,16 @@ export function ProductPageSection({
                       thing being switched. */}
                   <span className="flex min-w-0 flex-1 items-baseline gap-1.5">
                     <label htmlFor={rowId} className={cn(labelClass, "truncate")}>
-                      {PRODUCT_PAGE_SECTION_LABELS[entry.id]}
+                      {t(`productPage.sections.sectionLabels.${entry.id}`)}
                     </label>
                     {entry.id === "description" && (
                       <span className={cn(helpTextClass, "truncate")} aria-hidden="true">
-                        under the title
+                        {t("productPage.sections.underTheTitle")}
                       </span>
                     )}
                     {mandatory && (
                       <span className={cn(helpTextClass, "truncate")} aria-hidden="true">
-                        required by law
+                        {t("productPage.sections.requiredByLaw")}
                       </span>
                     )}
                   </span>
@@ -511,7 +518,7 @@ export function ProductPageSection({
 
             <li className="flex items-center justify-between gap-2">
               <label htmlFor={`${fieldId}-stock`} className={cn(labelClass, "min-w-0 flex-1 truncate")}>
-                Availability
+                {t("productPage.sections.availability")}
               </label>
               <Switch
                 id={`${fieldId}-stock`}
@@ -521,7 +528,7 @@ export function ProductPageSection({
             </li>
             <li className="flex items-center justify-between gap-2">
               <label htmlFor={`${fieldId}-soldby`} className={cn(labelClass, "min-w-0 flex-1 truncate")}>
-                &ldquo;Sold by&rdquo; byline
+                {t("productPage.sections.soldByByline")}
               </label>
               <Switch
                 id={`${fieldId}-soldby`}
@@ -546,15 +553,13 @@ export function ProductPageSection({
           prove it: what a buyer will read, and where to change it. What stays
           editable on this page is the DISPLAY decision, up in Sections. */}
       <CollapsibleSection
-        title="Shipping and returns"
+        title={t("productPage.shippingReturns.title")}
         collapsible
         defaultOpen={false}
         summon={summoned === "policies"}
         headerAction={
-          <InfoTip label="Why this lives in Settings, not here">
-            Set once for your whole account, so every storefront and every product sells under
-            the same terms. For EU sellers the page also states the 14-day cancellation right
-            and the 2-year guarantee, whatever you write.
+          <InfoTip label={t("productPage.shippingReturns.infoLabel")}>
+            {t("productPage.shippingReturns.infoContent")}
           </InfoTip>
         }
       >
@@ -566,7 +571,7 @@ export function ProductPageSection({
               )}
               {shippingProse.shipping && (
                 <div>
-                  <p className={helpTextClass}>Shipping</p>
+                  <p className={helpTextClass}>{t("productPage.shippingReturns.shippingLabel")}</p>
                   <p className="whitespace-pre-line text-muted-foreground">
                     {shippingProse.shipping}
                   </p>
@@ -574,7 +579,7 @@ export function ProductPageSection({
               )}
               {shippingProse.returns && (
                 <div>
-                  <p className={helpTextClass}>Returns</p>
+                  <p className={helpTextClass}>{t("productPage.shippingReturns.returnsLabel")}</p>
                   <p className="whitespace-pre-line text-muted-foreground">
                     {shippingProse.returns}
                   </p>
@@ -586,16 +591,13 @@ export function ProductPageSection({
                   straight back to the size this change removed. */}
               {profileCount > 0 && (
                 <p className={helpTextClass}>
-                  {profileCount === 1
-                    ? "1 shipping profile for products that ship differently."
-                    : `${profileCount} shipping profiles for products that ship differently.`}
+                  {t("productPage.shippingReturns.profileCount", { count: profileCount })}
                 </p>
               )}
             </div>
           ) : (
             <p className={helpTextClass}>
-              Nothing set yet. Until you add your terms, product pages say the seller has not
-              added shipping details.
+              {t("productPage.shippingReturns.nothingSet")}
             </p>
           )}
           {/* New tab, not routed through the leave guard like a real exit from
@@ -607,7 +609,9 @@ export function ProductPageSection({
             rel="noopener noreferrer"
             className={cn(secondaryButtonClass, "w-full justify-center")}
           >
-            {shippingIsSet ? "Edit in Settings" : "Add your shipping terms"}
+            {shippingIsSet
+              ? t("productPage.shippingReturns.editSettings")
+              : t("productPage.shippingReturns.addTerms")}
           </Link>
         </div>
       </CollapsibleSection>
@@ -620,15 +624,13 @@ export function ProductPageSection({
           Settings and every storefront just shows it. This panel's job is
           only to prove that: what a buyer will see, and where to change it. */}
       <CollapsibleSection
-        title="Seller details"
+        title={t("productPage.sellerDetails.title")}
         collapsible
         defaultOpen={false}
         summon={summoned === "seller"}
         headerAction={
-          <InfoTip label="Why this lives in Settings, not here">
-            Distance-selling law asks for the seller&apos;s name, address and a way to get in
-            touch next to every offer. Set once for your whole account — every storefront and
-            every product shows the same details, so there is nothing to repeat per store.
+          <InfoTip label={t("productPage.sellerDetails.infoLabel")}>
+            {t("productPage.sellerDetails.infoContent")}
           </InfoTip>
         }
       >
@@ -638,7 +640,7 @@ export function ProductPageSection({
               already handed, so nothing extra is read to show it. */}
           <SellerDetailsNotice
             missing={missingTraderIdentity(sellerIdentity)}
-            blocks="publish this storefront or sell from it"
+            blocks="publishStorefront"
             detailed={false}
             // Unsaved canvas work sits behind this panel.
             newTab
@@ -661,13 +663,14 @@ export function ProductPageSection({
                 <p className="text-muted-foreground">{sellerIdentity.phone}</p>
               )}
               {sellerIdentity.vatId && (
-                <p className="text-muted-foreground opacity-70">VAT ID {sellerIdentity.vatId}</p>
+                <p className="text-muted-foreground opacity-70">
+                  {t("productPage.sellerDetails.vatId", { vatId: sellerIdentity.vatId })}
+                </p>
               )}
             </address>
           ) : (
             <p className={helpTextClass}>
-              Nothing set yet. Until you add your business details, buyers only see the
-              &ldquo;Sold by&rdquo; line under the title.
+              {t("productPage.sellerDetails.nothingSet")}
             </p>
           )}
           {/* New tab, not routed through the leave guard like a real exit from
@@ -679,7 +682,9 @@ export function ProductPageSection({
             rel="noopener noreferrer"
             className={cn(secondaryButtonClass, "w-full justify-center")}
           >
-            {sellerIsSet ? "Edit in Settings" : "Add your business details"}
+            {sellerIsSet
+              ? t("productPage.sellerDetails.editSettings")
+              : t("productPage.sellerDetails.addDetails")}
           </Link>
         </div>
       </CollapsibleSection>

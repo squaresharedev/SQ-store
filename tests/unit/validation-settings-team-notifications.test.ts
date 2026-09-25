@@ -5,9 +5,10 @@ import {
   emailChangeSchema,
   legalAcceptSchema,
   notificationsSchema,
-  passwordChangeSchema,
   taxSchema,
 } from "@/lib/validation/settings";
+import { issueMessage } from "@/lib/validation/messages";
+import { english } from "../setup/translate";
 import { usernameSchema } from "@/lib/validation/auth";
 import {
   teamAcceptSchema,
@@ -67,38 +68,6 @@ describe("emailChangeSchema", () => {
     expect(emailChangeSchema.safeParse({ new_email: "not-an-email" }).success).toBe(false);
     expect(
       emailChangeSchema.safeParse({ new_email: `${"a".repeat(250)}@b.com` }).success,
-    ).toBe(false);
-  });
-});
-
-describe("passwordChangeSchema", () => {
-  const good = {
-    current_password: "old-password",
-    new_password: "new-password-123",
-    confirm_password: "new-password-123",
-  };
-  it("accepts matching valid passwords", () => {
-    expect(passwordChangeSchema.safeParse(good).success).toBe(true);
-  });
-  it("rejects mismatched confirmation", () => {
-    expect(
-      passwordChangeSchema.safeParse({ ...good, confirm_password: "different" }).success,
-    ).toBe(false);
-  });
-  it("enforces 8..72 length on the NEW password (bcrypt cap)", () => {
-    expect(
-      passwordChangeSchema.safeParse({ ...good, new_password: "short", confirm_password: "short" })
-        .success,
-    ).toBe(false);
-    const long = "x".repeat(73);
-    expect(
-      passwordChangeSchema.safeParse({ ...good, new_password: long, confirm_password: long })
-        .success,
-    ).toBe(false);
-  });
-  it("requires the current password", () => {
-    expect(
-      passwordChangeSchema.safeParse({ ...good, current_password: "" }).success,
     ).toBe(false);
   });
 });
@@ -257,7 +226,7 @@ describe("taxSchema", () => {
       seller_phone: "",
     });
     expect(r.success).toBe(false);
-    const messages = r.success ? [] : r.error.issues.map((issue) => issue.message);
+    const messages = r.success ? [] : r.error.issues.map((issue) => english(issueMessage(issue)));
     expect(messages.some((m) => m.includes("doesn't look like an email"))).toBe(true);
     expect(messages.some((m) => m.includes("placeholder"))).toBe(false);
   });

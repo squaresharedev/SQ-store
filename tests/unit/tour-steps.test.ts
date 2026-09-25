@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
+import { english } from "../setup/translate";
 import { STRIPE_CONNECT_AVAILABLE } from "@/lib/payments/availability";
+import { EDITOR_TOUR_STEPS } from "@/lib/onboarding/editor-tour-steps";
+import { MAIN_NAV, SETTINGS_LINK } from "@/lib/search/nav-constants";
 import {
   isTourStepId,
   tourStep,
@@ -13,8 +16,9 @@ import {
 /**
  * The guided tour's script. These pin what can quietly go wrong in data: a stop
  * on a page that redirects (the tour would never "arrive" and would end), a
- * selector that does not parse, a data-tour anchor nothing renders, a stop a
- * viewer cannot act on, and copy that drifts from the house rules.
+ * selector that does not parse, a selector that depends on translated words, a
+ * data-tour anchor nothing renders, a stop a viewer cannot act on, and copy
+ * that drifts from the house rules.
  */
 
 const APP_DIR = join(process.cwd(), "src", "app");
@@ -96,16 +100,54 @@ describe("tour steps", () => {
   it("points data-tour selectors only at anchors the app renders", () => {
     const rendered = new Set<string>();
     for (const file of sourceFiles(SRC_DIR)) {
+      // src/app/dev holds fixtures that mirror the anchors; they prove nothing.
+      if (file.includes(join("src", "app", "dev"))) continue;
       for (const match of readFileSync(file, "utf8").matchAll(/data-tour="([a-z-]+)"/g)) {
         rendered.add(match[1]);
       }
     }
-    const referenced = TOUR_STEPS.flatMap((step) => [
-      ...step.targets.map((target) => target.selector),
-      step.waitFor ?? "",
-    ]).flatMap((selector) => [...selector.matchAll(/data-tour="([a-z-]+)"/g)].map((m) => m[1]));
+    const referenced = [...TOUR_STEPS, ...EDITOR_TOUR_STEPS]
+      .flatMap((step) => [...step.targets.map((target) => target.selector), step.waitFor ?? ""])
+      .flatMap((selector) => [...selector.matchAll(/data-tour="([a-z-]+)"/g)].map((m) => m[1]));
     expect(referenced.length).toBeGreaterThan(0);
     for (const anchor of referenced) expect(rendered, anchor).toContain(anchor);
+  });
+
+  it("never finds a control by words a translation changes", () => {
+    // Labels, names and text are in the reader's language; a lookup by the
+    // English ones finds nothing in any other. data-* values, ids, hrefs and
+    // roles are never translated.
+    const LANGUAGE_DEPENDENT =
+      /aria-label|aria-description|aria-placeholder|aria-roledescription|aria-valuetext|\[(title|alt|placeholder|value|name)\b|:has-text|:contains|:text/i;
+    for (const step of [...TOUR_STEPS, ...EDITOR_TOUR_STEPS]) {
+      const selectors = [
+        ...step.targets.map((target) => target.selector),
+        ...(step.waitFor ? [step.waitFor] : []),
+      ];
+      for (const selector of selectors) {
+        expect(selector, `${step.id}: ${selector}`).not.toMatch(LANGUAGE_DEPENDENT);
+      }
+    }
+  });
+
+  it("names each page in the words of its own sidebar label", () => {
+    const opening = (page: string) =>
+      english("Onboarding.tourOverlay.openingPage", { page });
+    // Every sidebar destination has its own whole sentence, reading exactly as
+    // "Opening {label}…" always did.
+    const sidebarPages = [...MAIN_NAV, SETTINGS_LINK].map((entry) => {
+      const page = entry.label.split(".")[2];
+      expect(opening(page)).toBe(`Opening ${english(entry.label)}…`);
+      return page;
+    });
+    for (const step of TOUR_STEPS) {
+      expect(sidebarPages, step.id).toContain(step.page);
+    }
+    for (const step of EDITOR_TOUR_STEPS) {
+      expect(opening(step.page)).toBe(`Opening ${english("Storefront.sample.name")}…`);
+    }
+    expect(opening(tourStep("products-add")!.page)).toBe("Opening Products…");
+    expect(opening(tourStep("finish")!.page)).toBe("Opening Settings…");
   });
 
   it("drops the stops a viewer cannot act on, keeping the rest in order", () => {
@@ -129,28 +171,30 @@ describe("tour steps", () => {
       const copy = [
         step.title,
         step.body,
-        step.pageLabel,
-        step.fallbackBody ?? "",
-        ...step.targets.map((target) => target.body ?? ""),
-      ].join(" ");
+        ...(step.fallbackBody ? [step.fallbackBody] : []),
+        ...step.targets.flatMap((target) => (target.body ? [target.body] : [])),
+      ]
+        .map((key) => english(key))
+        .concat(english("Onboarding.tourOverlay.openingPage", { page: step.page }))
+        .join(" ");
       expect(copy, step.id).not.toMatch(DASHES);
     }
   });
 
   it("is honest about Stripe, in whichever state the switch is in", () => {
-    const payments = tourStep("payments")!;
+    const payments = english(tourStep("payments")!.body);
     if (STRIPE_CONNECT_AVAILABLE) {
-      expect(payments.body).toMatch(/connect stripe/i);
+      expect(payments).toMatch(/connect stripe/i);
     } else {
-      expect(payments.body).toMatch(/coming soon/i);
-      expect(payments.body).not.toMatch(/connect stripe here/i);
+      expect(payments).toMatch(/coming soon/i);
+      expect(payments).not.toMatch(/connect stripe here/i);
     }
   });
 
   it("says the embed widget is still in development, with or without a storefront", () => {
     const embed = tourStep("storefront-embed")!;
-    expect(embed.targets[0].body).toMatch(/still in development/i);
-    expect(embed.fallbackBody).toMatch(/still in development/i);
+    expect(english(embed.targets[0].body!)).toMatch(/still in development/i);
+    expect(english(embed.fallbackBody!)).toMatch(/still in development/i);
     expect(embed.targets[0].extra).toBe("embed-snippet");
     expect(embed.fallbackExtra).toBe("embed-snippet");
   });

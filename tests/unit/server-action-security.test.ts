@@ -57,7 +57,7 @@ const REGISTRY: Record<string, Classification> = {
     "Only removes an UNVERIFIED factor that the caller's own setup created. It creates nothing, and beginTwoFactorSetup (limited) bounds how many can ever exist.",
   ),
   "lib/auth/mfa-actions.ts::confirmIdentity": unlimited(
-    "Writes nothing of its own. Without 2FA it returns at once; with 2FA every code it checks goes through requireStepUp, which spends the second-factor budgets.",
+    "Writes nothing of its own. Without 2FA it returns at once; with 2FA every code it checks goes through requireStepUpState, which spends the second-factor budgets.",
   ),
   "lib/auth/mfa-actions.ts::signOutToReauthenticate": read(),
 
@@ -65,7 +65,6 @@ const REGISTRY: Record<string, Classification> = {
   "lib/settings/actions.ts::updateUsername": limited(),
   "lib/settings/actions.ts::updateBio": limited(),
   "lib/settings/actions.ts::requestEmailChange": limited(),
-  "lib/settings/actions.ts::changePassword": limited(),
   "lib/settings/actions.ts::sendPasswordReset": limited(),
   "lib/settings/actions.ts::saveTaxInfo": limited(),
   // Its OWN budget, tighter than settingsWrite (sellerEmailVerifySend): this
@@ -93,10 +92,6 @@ const REGISTRY: Record<string, Classification> = {
   // The finished setup card's "shown once" flag, on the caller's own profile.
   "lib/onboarding/actions.ts::markSetupCelebrated": unlimited(
     "First-write-wins timestamp on the caller's own row: once set, the update matches no row, so repeating it changes nothing and costs one indexed no-op.",
-  ),
-  // The sample storefront's "hidden from my list" toggle, on the caller's own profile.
-  "lib/onboarding/actions.ts::setSampleStorefrontHidden": unlimited(
-    "Boolean toggle of one nullable timestamp on the caller's own row: no fan-out, no new rows, and the last write simply wins, so repetition costs one indexed update.",
   ),
   // The storefront designer tour's "started once" flag, on the caller's own profile.
   "lib/onboarding/actions.ts::markEditorTourSeen": unlimited(
@@ -132,6 +127,11 @@ const REGISTRY: Record<string, Classification> = {
   ),
   "lib/team/actions.ts::setActiveAccount": unlimited(
     "Writes one cookie after checking membership. No DB write, nothing to exhaust.",
+  ),
+
+  // --- i18n ---------------------------------------------------------------
+  "i18n/actions.ts::setLocale": unlimited(
+    "Narrows the value to a fixed list, then writes one cookie and, when signed in, one column on the caller's own row. Idempotent: repeating it changes nothing and fans out to nothing.",
   ),
 
   // --- notifications ------------------------------------------------------
@@ -286,10 +286,12 @@ describe("credential-change invariants", () => {
     /updateUser\s*\(\s*\{[^}]*\bpassword\b/.test(body.replace(/\r?\n/g, " ")),
   );
 
-  it("finds the password-writing actions", () => {
+  it("finds the password-writing actions: the emailed-link reset, and nothing else", () => {
+    // Settings deliberately has no "change" action taking the current
+    // password: a field for it is one a browser fills and a toggle reveals.
+    // A new password is only ever set through the emailed link.
     expect(passwordWrites.map((a) => a.key).sort()).toEqual([
       "lib/auth/actions.ts::resetPassword",
-      "lib/settings/actions.ts::changePassword",
     ]);
   });
 
@@ -325,7 +327,6 @@ describe("re-authentication invariants", () => {
     // bounded by the per-client sign-in budget.
     expect(reauthing.map((a) => a.key).sort()).toEqual([
       "lib/auth/actions.ts::authenticate",
-      "lib/settings/actions.ts::changePassword",
       "lib/settings/actions.ts::requestEmailChange",
     ]);
   });
@@ -392,7 +393,6 @@ describe("two-factor step-up invariants", () => {
    * to do any of these on its own.
    */
   const STEP_UP_REQUIRED = [
-    "lib/settings/actions.ts::changePassword",
     "lib/settings/actions.ts::requestEmailChange",
     "lib/settings/actions.ts::saveTaxInfo",
     "lib/settings/actions.ts::requestAccountDeletion",
@@ -407,7 +407,7 @@ describe("two-factor step-up invariants", () => {
   it("every sensitive action calls requireStepUp", () => {
     const missing = STEP_UP_REQUIRED.filter((key) => {
       const action = ACTIONS.find((a) => a.key === key);
-      return !action || !/requireStepUp\s*\(/.test(action.body);
+      return !action || !/requireStepUp(State)?\s*\(/.test(action.body);
     });
     expect(missing).toEqual([]);
   });
@@ -418,7 +418,7 @@ describe("two-factor step-up invariants", () => {
       "lib/auth/mfa-actions.ts::regenerateRecoveryCodes",
     ]) {
       const action = ACTIONS.find((a) => a.key === key);
-      expect(action?.body, key).toMatch(/requireStepUp\([^)]*maxAgeSeconds:\s*0/);
+      expect(action?.body, key).toMatch(/requireStepUp(State)?\([^)]*maxAgeSeconds:\s*0/);
     }
   });
 
@@ -428,7 +428,7 @@ describe("two-factor step-up invariants", () => {
     const accepting = ACTIONS.filter(({ body }) => /STEP_UP_FIELDS/.test(body));
     expect(accepting.length).toBeGreaterThan(5);
     const unchecked = accepting
-      .filter(({ body }) => !/requireStepUp\s*\(/.test(body))
+      .filter(({ body }) => !/requireStepUp(State)?\s*\(/.test(body))
       .map((a) => a.key);
     expect(unchecked).toEqual([]);
   });
@@ -437,10 +437,7 @@ describe("two-factor step-up invariants", () => {
     // signInWithPassword on the live client swaps an aal2 session for an aal1
     // one. Where an action re-checks a password for a 2FA account it must use
     // checkPassword (a throwaway client) instead.
-    for (const key of [
-      "lib/settings/actions.ts::changePassword",
-      "lib/settings/actions.ts::requestEmailChange",
-    ]) {
+    for (const key of ["lib/settings/actions.ts::requestEmailChange"]) {
       const action = ACTIONS.find((a) => a.key === key);
       expect(action?.body, key).toMatch(/checkPassword\(/);
     }

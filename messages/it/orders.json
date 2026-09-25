@@ -1,0 +1,108 @@
+{
+  "metadata": {
+    "orders": {
+      "title": "Ordini"
+    }
+  },
+  "page": {
+    "title": "Ordini",
+    "subtitle": "Ogni ordine effettuato tramite Square Share."
+  },
+  "status": {
+    "paid": "Pagato",
+    "refunded": "Rimborsato",
+    "disputed": "Contestato",
+    "pending": "In sospeso"
+  },
+  "channel": {
+    "embed": "Incorporamento",
+    "marketplace": "Marketplace"
+  },
+  "empty": {
+    "filteredTitle": "Nessun ordine corrisponde a questi filtri",
+    "filteredHint": "Prova ad ampliare l’intervallo di date o a rimuovere i filtri.",
+    "clearFilters": "Rimuovi filtri",
+    "title": "Ancora nessun ordine",
+    "hint": "Il checkout di Square Share non è ancora aperto. Le vendite tramite il tuo link di acquisto personale o via email non compariranno qui.",
+    "goToProducts": "Vai ai prodotti"
+  },
+  "list": {
+    "updating": "Aggiornamento…",
+    "summary": "{total, plural, one {{total} ordine} many {{total} di ordini} other {{total} ordini}} · pagina {page} di {totalPages}",
+    "detailDialog": "Dettagli ordine",
+    "closeDetail": "Chiudi dettagli ordine"
+  },
+  "table": {
+    "product": "Prodotto",
+    "amount": "Importo",
+    "channel": "Canale",
+    "status": "Stato",
+    "buyer": "Acquirente",
+    "date": "Data"
+  },
+  "toolbar": {
+    "region": "filtri ordini",
+    "channel": "canale",
+    "buyerEmail": "email acquirente",
+    "searchPlaceholder": "cerca email acquirente",
+    "status": "stato",
+    "statusAriaLabel": "Filtra per stato",
+    "allStatuses": "Tutti gli stati",
+    "dateRange": "intervallo di date",
+    "datePlaceholder": "qualsiasi data",
+    "sort": "ordina",
+    "sortAriaLabel": "Ordina gli ordini",
+    "clearFilters": "rimuovi filtri"
+  },
+  "sort": {
+    "newest": "Più recenti prima",
+    "oldest": "Meno recenti prima",
+    "amountHigh": "Importo: dal più alto",
+    "amountLow": "Importo: dal più basso"
+  },
+  "detail": {
+    "close": "Chiudi dettagli ordine",
+    "version": "Versione",
+    "copyVersion": {
+      "copy": "Copia versione",
+      "copied": "Versione copiata",
+      "failed": "Non è stato possibile copiare la versione. Selezionala e copiala manualmente."
+    },
+    "amount": "Importo",
+    "platformFee": "Commissione della piattaforma",
+    "youReceive": "Ricevi",
+    "buyerEmail": "Email dell’acquirente",
+    "copyBuyerEmail": {
+      "copy": "Copia email acquirente",
+      "copied": "Email acquirente copiata",
+      "failed": "Non è stato possibile copiare l’email dell’acquirente. Selezionala e copiala manualmente."
+    },
+    "noEmail": "nessuna email",
+    "channel": "Canale",
+    "date": "Data",
+    "orderId": "ID ordine",
+    "copyOrderId": {
+      "copy": "Copia ID ordine",
+      "copied": "ID ordine copiato",
+      "failed": "Non è stato possibile copiare l’ID ordine. Selezionalo e copialo manualmente."
+    }
+  },
+  "actions": {
+    "refundNeedsStripe": "I rimborsi richiedono che Stripe sia collegato.",
+    "connectStripe": "Collega Stripe per abilitare i rimborsi",
+    "refundConfirm": "Rimborsare questo ordine? Una volta collegato Stripe, l’azione non potrà più essere annullata.",
+    "confirmRefund": "Conferma rimborso",
+    "refundOrder": "Rimborsa ordine",
+    "disputeInStripe": "Le contestazioni si gestiscono dalla tua dashboard Stripe una volta collegato Stripe.",
+    "disputeConfirm": "Aprire la gestione della contestazione per questo ordine?",
+    "handleDispute": "Gestisci contestazione",
+    "none": "Nessuna azione disponibile per questo ordine."
+  },
+  "skeleton": {
+    "loading": "caricamento ordini"
+  },
+  "loading": {
+    "title": "Ordini",
+    "subtitle": "Ogni vendita tra il tuo incorporamento e il marketplace."
+  }
+}

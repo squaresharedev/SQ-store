@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { Product, ProductDetail } from "@/types/product";
 import type { ShippingChoices } from "@/lib/storefront/queries";
 import type { SellerShippingPolicy } from "@/types/shipping-policy";
@@ -36,6 +37,7 @@ export function ProductFormView({
    *  lib/products/return-path.ts). Null keeps the products list. */
   returnTo?: string | null;
 }) {
+  const t = useTranslations("Products.page");
   return (
     // Widens only at `lg`, and only by exactly the room the section index in
     // ProductForm needs. Below that the reading column stays where it was —
@@ -51,7 +53,7 @@ export function ProductFormView({
           strokeWidth={2}
           aria-hidden="true"
         />
-        {returnTo ? "Storefront" : "Products"}
+        {returnTo ? t("backToStorefront") : t("back")}
       </Link>
 
       {/* The subtitle is gone. "Add a product to sell through your store and

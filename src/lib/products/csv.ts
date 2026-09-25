@@ -3,6 +3,7 @@ import { CURRENCIES, type Currency, type ProductStatus } from "@/types/product";
 // (import-actions.ts, tests) keep the same import path while the canonical
 // implementation lives in price.ts.
 import { parsePriceCents } from "./price";
+import { msg, type MessageRef } from "@/i18n/types";
 export { parsePriceCents };
 
 /**
@@ -252,6 +253,23 @@ export function htmlToText(html: string): string {
 // parsePriceCents is re-exported at the top of this file from ./price.ts.
 // The implementation lives there so the form and importer share one algorithm.
 
+/**
+ * Why a row cannot be imported. A code rather than a sentence: the preview and
+ * the import result both show it in the reader's language
+ * (Validation.productImport.<problem>).
+ */
+export type ImportProblem =
+  | "noTitle"
+  | "titleTooLong"
+  | "noPrice"
+  | "priceZero"
+  | "duplicateTitle";
+
+/** What a seller reads for a problem. */
+export function importProblemMessage(problem: ImportProblem): MessageRef {
+  return msg(`Validation.productImport.${problem}`);
+}
+
 /** One row as it will be written, or the reason it cannot be. */
 export type ImportRow = {
   /** 1-based line in the file, for a message that points at something. */
@@ -263,7 +281,7 @@ export type ImportRow = {
   stock: number | null;
   status: ProductStatus;
   /** Why this row will be skipped, or null when it is good to import. */
-  problem: string | null;
+  problem: ImportProblem | null;
 };
 
 export type ImportPlan = {
@@ -346,12 +364,12 @@ export function buildImportPlan(
     // live over there cannot arrive live over here by surprise.
     const status: ProductStatus = defaultStatus;
 
-    let problem: string | null = null;
-    if (!title) problem = "No title.";
-    else if (title.length > 200) problem = "Title is longer than 200 characters.";
-    else if (priceCents === null) problem = "No price we could read.";
-    else if (priceCents < 1) problem = "Price is zero.";
-    else if (seenTitles.has(title.toLowerCase())) problem = "Another row has this title.";
+    let problem: ImportProblem | null = null;
+    if (!title) problem = "noTitle";
+    else if (title.length > 200) problem = "titleTooLong";
+    else if (priceCents === null) problem = "noPrice";
+    else if (priceCents < 1) problem = "priceZero";
+    else if (seenTitles.has(title.toLowerCase())) problem = "duplicateTitle";
 
     if (!problem) seenTitles.add(title.toLowerCase());
 

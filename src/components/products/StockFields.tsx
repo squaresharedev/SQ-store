@@ -2,6 +2,7 @@
 
 import { useId } from "react";
 import { Minus, Plus } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Switch } from "@/components/ui/switch";
 import {
   errorTextClass,
@@ -36,6 +37,7 @@ interface Props {
 }
 
 export function StockFields({ values, errors, onChange }: Props) {
+  const t = useTranslations("Products.stockFields");
   const fieldId = useId();
 
   const switchId = `${fieldId}-track-stock`;
@@ -69,7 +71,7 @@ export function StockFields({ values, errors, onChange }: Props) {
             controls. The heading keeps the single explanation (it now names
             the alert too); see PRODUCT_FORM_SECTIONS. */}
         <label htmlFor={switchId} className={labelClass}>
-          Track stock
+          {t("trackStock")}
         </label>
         <Switch
           id={switchId}
@@ -87,7 +89,7 @@ export function StockFields({ values, errors, onChange }: Props) {
           <div className="space-y-1.5">
             <div className="flex items-center">
               <label htmlFor={stockQtyId} className={labelClass}>
-                In stock
+                {t("inStock")}
               </label>
               <RequiredMark />
             </div>
@@ -98,7 +100,7 @@ export function StockFields({ values, errors, onChange }: Props) {
             <div className="flex w-fit items-stretch">
               <button
                 type="button"
-                aria-label="Decrease stock"
+                aria-label={t("decrease")}
                 onClick={() => stepQuantity(-1)}
                 // Nothing below zero is a real stock level, and the stepper
                 // clamps there anyway — say so rather than letting the button
@@ -128,7 +130,7 @@ export function StockFields({ values, errors, onChange }: Props) {
               />
               <button
                 type="button"
-                aria-label="Increase stock"
+                aria-label={t("increase")}
                 onClick={() => stepQuantity(1)}
                 disabled={currentQuantity >= STOCK_QUANTITY_MAX}
                 className={stepperButtonClass}
@@ -146,7 +148,7 @@ export function StockFields({ values, errors, onChange }: Props) {
           {/* Low-stock threshold */}
           <div className="space-y-1.5 sm:max-w-xs">
             <label htmlFor={thresholdId} className={labelClass}>
-              Low-stock alert at
+              {t("lowStockAlert")}
             </label>
             <input
               id={thresholdId}
@@ -179,7 +181,7 @@ export function StockFields({ values, errors, onChange }: Props) {
           order is to start counting inventory you do not count. */}
       <div className="space-y-1.5 border-t border-border pt-4 sm:max-w-xs">
         <label htmlFor={maxPerOrderId} className={labelClass}>
-          Maximum per order
+          {t("maxPerOrder")}
         </label>
         <input
           id={maxPerOrderId}
@@ -202,9 +204,7 @@ export function StockFields({ values, errors, onChange }: Props) {
           </p>
         ) : (
           <p id={`${maxPerOrderId}-hint`} className="font-inter text-xs text-muted-foreground">
-            How many one buyer can take at once. Buyers pick from a list that
-            stops here, and the limit is checked again when they order. Up to{" "}
-            {PURCHASE_QUANTITY_MAX}; 1 sells them one at a time.
+            {t("maxPerOrderHint", { max: PURCHASE_QUANTITY_MAX })}
           </p>
         )}
       </div>

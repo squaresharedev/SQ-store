@@ -1,5 +1,6 @@
 // @vitest-environment node
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { traderIdentityRequired } from "@/lib/errors";
 
 // ---- mocks ---------------------------------------------------------------
 
@@ -575,12 +576,7 @@ describe("updateEmbedSettings - read-modify-write", () => {
   // does — a seller must always be able to pull a storefront back.
   it("refuses to switch embedding ON for a store that may not publish", async () => {
     getActiveAccountMock.mockResolvedValue(ownerAccount());
-    publishBlockedMock.mockResolvedValue({
-      code: "trader_identity_required",
-      message: "You can't publish or sell until your seller details are complete.",
-      fix: "Add your business address in Settings › Business & seller details, then publish.",
-      action: { href: "/settings/tax#address", label: "Add seller details" },
-    });
+    publishBlockedMock.mockResolvedValue(traderIdentityRequired(["address"]));
 
     const result = await updateEmbedSettings(STOREFRONT_ID, {
       enabled: true,
@@ -597,11 +593,7 @@ describe("updateEmbedSettings - read-modify-write", () => {
 
   it("still allows switching embedding OFF for the same store", async () => {
     getActiveAccountMock.mockResolvedValue(ownerAccount());
-    publishBlockedMock.mockResolvedValue({
-      code: "trader_identity_required",
-      message: "blocked",
-      fix: "blocked",
-    });
+    publishBlockedMock.mockResolvedValue(traderIdentityRequired(["address"]));
     dbFn.mockResolvedValueOnce({ data: { config: DEFAULT_STOREFRONT_CONFIG }, error: null });
     dbFn.mockResolvedValueOnce({ data: { id: STOREFRONT_ID }, error: null });
 

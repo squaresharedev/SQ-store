@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import { SearchX } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { emptyStateClass } from "@/components/ui/surface-styles";
 import type { Product, ProductSalesSummary } from "@/types/product";
 import { deleteProduct } from "@/lib/products/actions";
 import { useToast } from "@/components/ui/Toast";
+import { useActionErrorToast } from "@/components/ui/ActionErrorNotice";
 import { Modal } from "@/components/ui/modal";
 import {
   destructiveButtonClass,
@@ -48,7 +50,10 @@ export function ProductList({
   filtered?: boolean;
   onClearFilters?: () => void;
 }) {
+  const t = useTranslations("Products.list");
+  const tCommon = useTranslations("Common.actions");
   const toast = useToast();
+  const showActionError = useActionErrorToast();
   const [products, setProducts] = useState<Product[]>(initial);
   // The product awaiting confirmation. Deleting takes the product's file and
   // image with it and cannot be undone, so it is never a single click.
@@ -83,13 +88,13 @@ export function ProductList({
     setPendingDelete(null);
     if (!result.ok) {
       setProducts(previous);
-      toast.error(result.error.message, { lines: [result.error.fix] });
+      showActionError(result.error);
       return;
     }
     // The card leaving the grid is the only other evidence a delete worked,
     // and on a full page of similar cards that is easy to miss — especially
     // when the confirm modal was covering the one that went.
-    toast.success(`"${target.title}" was deleted.`);
+    toast.success(t("deleted", { title: target.title }));
   }
 
   /**
@@ -111,10 +116,10 @@ export function ProductList({
     // contexts even though we are in a secure origin).
     const url = productPageUrl(storefrontId, productId);
     navigator.clipboard.writeText(url).then(
-      () => toast.success("Link copied."),
+      () => toast.success(t("linkCopied")),
       () =>
-        toast.error("Could not copy.", {
-          lines: [`The URL is: ${productPagePath(storefrontId, productId)}`],
+        toast.error(t("copyFailed"), {
+          lines: [t("copyFailedUrl", { url: productPagePath(storefrontId, productId) })],
         }),
     );
   }
@@ -126,7 +131,7 @@ export function ProductList({
   function handleLinkAction(product: Product, action: "copy" | "open") {
     const sfList = placements[product.id] ?? [];
     if (sfList.length === 0) {
-      toast.info("This product is not on any storefront yet.");
+      toast.info(t("notOnStorefront"));
       return;
     }
     if (sfList.length === 1) {
@@ -150,11 +155,10 @@ export function ProductList({
             />
           </div>
           <p className="text-sm font-medium text-foreground">
-            No products match these filters
+            {t("noMatch.title")}
           </p>
           <p className="mt-1 max-w-xs font-inter text-sm text-muted-foreground">
-            Pick a different status, or clear the filters to see everything
-            again.
+            {t("noMatch.body")}
           </p>
           {onClearFilters && (
             <button
@@ -162,7 +166,7 @@ export function ProductList({
               onClick={onClearFilters}
               className={`${secondaryButtonClass} mt-4`}
             >
-              Clear filters
+              {t("noMatch.clear")}
             </button>
           )}
         </div>
@@ -177,12 +181,6 @@ export function ProductList({
   const deleteStorefronts = pendingDelete
     ? (placements[pendingDelete.id] ?? [])
     : [];
-  const deleteStorefrontNote =
-    deleteStorefronts.length === 1
-      ? ` It is on 1 storefront. The block stays until you remove it.`
-      : deleteStorefronts.length > 1
-        ? ` It is on ${deleteStorefronts.length} storefronts. The blocks stay until you remove them.`
-        : "";
 
   // Build the storefront chooser description.
   const linkTargetStorefronts = linkTarget
@@ -214,10 +212,13 @@ export function ProductList({
         onClose={() => {
           if (!deleting) setPendingDelete(null);
         }}
-        title="Delete this product?"
+        title={t("deleteDialog.title")}
         description={
           pendingDelete
-            ? `"${pendingDelete.title}" and its uploaded image and file will be permanently removed. Existing orders keep their record of the sale.${deleteStorefrontNote}`
+            ? t("deleteDialog.description", {
+                title: pendingDelete.title,
+                storefronts: deleteStorefronts.length,
+              })
             : undefined
         }
       >
@@ -228,7 +229,7 @@ export function ProductList({
             disabled={deleting}
             className={secondaryButtonClass}
           >
-            Cancel
+            {tCommon("cancel")}
           </button>
           <button
             type="button"
@@ -236,7 +237,7 @@ export function ProductList({
             disabled={deleting}
             className={destructiveButtonClass}
           >
-            {deleting ? "Deleting…" : "Delete product"}
+            {deleting ? tCommon("deleting") : t("deleteDialog.confirm")}
           </button>
         </div>
       </Modal>
@@ -247,10 +248,13 @@ export function ProductList({
       <Modal
         open={linkTarget !== null}
         onClose={() => setLinkTarget(null)}
-        title={linkTarget?.action === "open" ? "Open on which storefront?" : "Copy link for which storefront?"}
+        title={linkTarget?.action === "open" ? t("chooser.openTitle") : t("chooser.copyTitle")}
         description={
           linkTarget
-            ? `"${linkTarget.product.title}" is on ${linkTargetStorefronts.length} storefronts. Pick one.`
+            ? t("chooser.description", {
+                title: linkTarget.product.title,
+                count: linkTargetStorefronts.length,
+              })
             : undefined
         }
       >
@@ -270,14 +274,14 @@ export function ProductList({
             </button>
           ))}
           <p className={infoTextClass}>
-            Or cancel and use the storefront designer to choose a default.
+            {t("chooser.hint")}
           </p>
           <button
             type="button"
             onClick={() => setLinkTarget(null)}
             className={secondaryButtonClass}
           >
-            Cancel
+            {tCommon("cancel")}
           </button>
         </div>
       </Modal>

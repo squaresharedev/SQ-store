@@ -1,12 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, act, cleanup, fireEvent } from "@testing-library/react";
+import { renderWithoutToasts, screen, act, cleanup, fireEvent } from "../setup/render";
 import { useEffect, useState } from "react";
-import {
-  ToastProvider,
-  useActionToast,
-  useToast,
-  type ActionResultState,
-} from "@/components/ui/Toast";
+import { ToastProvider, useToast } from "@/components/ui/Toast";
+import { useActionStateToast } from "@/components/ui/ActionErrorNotice";
+import { actionError, type ActionState } from "@/lib/errors";
+import { msg } from "@/i18n/types";
+import { english } from "../setup/translate";
 
 afterEach(cleanup);
 
@@ -62,7 +61,7 @@ function Raise({
 }
 
 function renderToaster(onFire: (toast: ReturnType<typeof useToast>) => void) {
-  return render(
+  return renderWithoutToasts(
     <ToastProvider>
       <Raise onFire={onFire} />
     </ToastProvider>,
@@ -479,7 +478,7 @@ describe("Toast: unmounting", () => {
     // A toast that silently never appears is a confirmation the user waits
     // for forever. Failing loudly in development is the cheaper bug.
     const quiet = vi.spyOn(console, "error").mockImplementation(() => {});
-    expect(() => render(<Raise onFire={() => {}} />)).toThrow(/ToastProvider/);
+    expect(() => renderWithoutToasts(<Raise onFire={() => {}} />)).toThrow(/ToastProvider/);
     quiet.mockRestore();
   });
 
@@ -495,13 +494,17 @@ describe("Toast: unmounting", () => {
 });
 
 // ---------------------------------------------------------------------------
-// useActionToast: the bridge from a server action's result
+// useActionStateToast: the bridge from a server action's result
 // ---------------------------------------------------------------------------
 
-function ActionHarness({ results }: { results: ActionResultState[] }) {
+const USERNAME_SAVED = msg("Settings.account.success.usernameSaved");
+const USERNAME_TAKEN = actionError("invalid_input", msg("Errors.settings.usernameTaken"));
+const SAVE_FAILED = actionError("server_error", msg("Errors.form.saveFailed"));
+
+function ActionHarness({ results }: { results: ActionState[] }) {
   const [index, setIndex] = useState(-1);
   const state = index >= 0 ? results[index] : undefined;
-  useActionToast(state);
+  useActionStateToast(state);
   return (
     <button type="button" onClick={() => setIndex((i) => i + 1)}>
       submit
@@ -509,8 +512,8 @@ function ActionHarness({ results }: { results: ActionResultState[] }) {
   );
 }
 
-function renderAction(results: ActionResultState[]) {
-  return render(
+function renderAction(results: ActionState[]) {
+  return renderWithoutToasts(
     <ToastProvider>
       <ActionHarness results={results} />
     </ToastProvider>,
@@ -521,7 +524,7 @@ function submit() {
   fireEvent.click(screen.getByRole("button", { name: "submit" }));
 }
 
-describe("useActionToast", () => {
+describe("useActionStateToast", () => {
   it("says nothing on mount", () => {
     renderAction([]);
     // A result already present at first render is a page load, not something
@@ -530,20 +533,32 @@ describe("useActionToast", () => {
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
-  it("announces a settled success", () => {
-    renderAction([{ success: "Username saved." }]);
+  it("announces a settled success in the reader's language", () => {
+    renderAction([{ success: USERNAME_SAVED }]);
     submit();
 
-    expect(screen.getByRole("status")).toHaveTextContent("Username saved.");
+    expect(screen.getByRole("status")).toHaveTextContent(english(USERNAME_SAVED));
   });
 
   it("announces a settled failure as an error", () => {
-    renderAction([{ error: "That username is taken." }]);
+    renderAction([{ error: USERNAME_TAKEN }]);
     submit();
 
-    expect(screen.getByRole("alert")).toHaveTextContent(
-      "That username is taken.",
+    expect(screen.getByRole("alert")).toHaveTextContent(english(USERNAME_TAKEN.message));
+  });
+
+  it("puts the fix on the error's second line", () => {
+    const withFix = actionError(
+      "invalid_input",
+      msg("Errors.settings.usernameTaken"),
+      msg("Errors.form.saveFailed"),
     );
+    renderAction([{ error: withFix }]);
+    submit();
+
+    const alert = screen.getByRole("alert");
+    expect(alert).toHaveTextContent(english(withFix.message));
+    expect(alert).toHaveTextContent(english(withFix.fix!));
   });
 
   it("says nothing for a result that carries neither", () => {
@@ -554,35 +569,35 @@ describe("useActionToast", () => {
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
-  it("reports the second failure too, even worded identically", () => {
-    renderAction([
-      { error: "Could not save. Give it another try." },
-      { error: "Could not save. Give it another try." },
-    ]);
+  it("reports the second failure too, even when it is the same message", () => {
+    renderAction([{ error: SAVE_FAILED }, { error: SAVE_FAILED }]);
 
     submit();
     elapse(ERROR_MS - 500);
     submit();
 
-    // Watching the message TEXT would have swallowed this: the retry failed
-    // the same way, so the string never changed. The occurrence is the object.
+    // Comparing messages would have swallowed this: the retry failed the same
+    // way. Each dispatch settles into a fresh object, so the object is the
+    // occurrence.
     elapse(1000);
     expect(screen.getByRole("alert")).toBeInTheDocument();
   });
 
   it("prefers the error when a result somehow carries both", () => {
-    renderAction([{ error: "Rate limited.", success: "Saved." }]);
+    renderAction([{ error: SAVE_FAILED, success: USERNAME_SAVED }]);
     submit();
 
-    expect(screen.getByRole("alert")).toHaveTextContent("Rate limited.");
-    expect(screen.queryByText("Saved.")).not.toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent(english(SAVE_FAILED.message));
+    expect(screen.queryByText(english(USERNAME_SAVED))).not.toBeInTheDocument();
   });
 
   it("keeps the message when the component that raised it unmounts", () => {
+    const passwordUpdated = msg("Settings.account.success.passwordUpdated");
+
     function ClosesItself() {
-      const [state, setState] = useState<ActionResultState | undefined>();
+      const [state, setState] = useState<ActionState | undefined>();
       const [open, setOpen] = useState(true);
-      useActionToast(state);
+      useActionStateToast(state);
       // Stand-in for the password modal: it closes itself a moment after the
       // change lands, taking any inline confirmation down with it.
       useEffect(() => {
@@ -592,16 +607,13 @@ describe("useActionToast", () => {
       }, [state]);
       if (!open) return null;
       return (
-        <button
-          type="button"
-          onClick={() => setState({ success: "Password updated." })}
-        >
+        <button type="button" onClick={() => setState({ success: passwordUpdated })}>
           submit
         </button>
       );
     }
 
-    render(
+    renderWithoutToasts(
       <ToastProvider>
         <ClosesItself />
       </ToastProvider>,
@@ -609,11 +621,9 @@ describe("useActionToast", () => {
     submit();
 
     elapse(1300);
-    expect(
-      screen.queryByRole("button", { name: "submit" }),
-    ).not.toBeInTheDocument();
-    // The confirmation outlives the form it came from — which is the entire
+    expect(screen.queryByRole("button", { name: "submit" })).not.toBeInTheDocument();
+    // The confirmation outlives the form it came from, which is the entire
     // reason the provider lives at the root layout.
-    expect(screen.getByRole("status")).toHaveTextContent("Password updated.");
+    expect(screen.getByRole("status")).toHaveTextContent(english(passwordUpdated));
   });
 });

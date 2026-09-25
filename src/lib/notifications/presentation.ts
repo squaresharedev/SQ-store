@@ -1,3 +1,6 @@
+import type { Locale } from "@/i18n/locales";
+import { msg, type MessageKey, type MessageRef } from "@/i18n/types";
+import { formatOrderDate } from "@/lib/format/date";
 import type { NotificationType } from "@/lib/notifications/types";
 
 /**
@@ -23,21 +26,15 @@ export const TYPE_DOT: Record<NotificationType, string> = {
   policy: "bg-destructive",
 };
 
-export const TYPE_LABEL: Record<NotificationType, string> = {
-  team: "Team",
-  order: "Order",
-  payment: "Payment",
-  stock: "Stock",
-  system: "System",
-  security: "Security",
-  policy: "Policy",
+export const TYPE_LABEL: Record<NotificationType, MessageKey> = {
+  team: "Notifications.types.team",
+  order: "Notifications.types.order",
+  payment: "Notifications.types.payment",
+  stock: "Notifications.types.stock",
+  system: "Notifications.types.system",
+  security: "Notifications.types.security",
+  policy: "Notifications.types.policy",
 };
-
-const ABSOLUTE_DATE = new Intl.DateTimeFormat("en-IE", {
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-});
 
 const MINUTE = 60_000;
 const HOUR = 60 * MINUTE;
@@ -47,14 +44,26 @@ const DAY = 24 * HOUR;
  * Compact relative time: "just now", "5m ago", "3h ago", "2d ago", then an
  * absolute date past a week. Client-safe; render inside a <time> element with
  * `suppressHydrationWarning` since the value depends on the current clock.
+ *
+ * The relative forms are copy (`Notifications.time`), so they come back as a
+ * MessageRef for the render site to resolve in the reader's language. English
+ * is a compact form of its own, not Intl.RelativeTimeFormat output, which is
+ * why these are messages rather than a formatter. The absolute date is already
+ * in the reader's locale.
  */
-export function formatRelativeTime(iso: string, now: number = Date.now()): string {
+export function formatRelativeTime(
+  iso: string,
+  locale: Locale,
+  now: number = Date.now(),
+): MessageRef | string {
   const then = new Date(iso).getTime();
   if (Number.isNaN(then)) return "";
   const diff = now - then;
-  if (diff < 45_000) return "just now";
-  if (diff < HOUR) return `${Math.max(1, Math.round(diff / MINUTE))}m ago`;
-  if (diff < DAY) return `${Math.round(diff / HOUR)}h ago`;
-  if (diff < 7 * DAY) return `${Math.round(diff / DAY)}d ago`;
-  return ABSOLUTE_DATE.format(then);
+  if (diff < 45_000) return msg("Notifications.time.justNow");
+  if (diff < HOUR) {
+    return msg("Notifications.time.minutesAgo", { count: Math.max(1, Math.round(diff / MINUTE)) });
+  }
+  if (diff < DAY) return msg("Notifications.time.hoursAgo", { count: Math.round(diff / HOUR) });
+  if (diff < 7 * DAY) return msg("Notifications.time.daysAgo", { count: Math.round(diff / DAY) });
+  return formatOrderDate(iso, locale);
 }

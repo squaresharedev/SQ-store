@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
 import { buildObjectKey, hasR2Credentials, putObject } from "@/lib/r2";
@@ -44,24 +45,18 @@ function bad(status: number, error: string, fix?: string) {
   return Response.json({ error, fix }, { status });
 }
 
-/** What a seller is told when the bytes are neither a raster nor a safe SVG.
- *  Deliberately names the SVG rules: "not supported" alone would read as a
- *  format problem when the usual cause is an export carrying script. */
-const WRONG_TYPE_FIX =
-  "Use a PNG, JPEG, WebP, GIF, AVIF, or an SVG with no scripts, " +
-  "external links, or embedded images.";
-
 export async function POST(request: Request) {
+  const t = await getTranslations("Errors.uploadRoute");
   const account = await getActiveAccount();
-  if (!account) return bad(401, "Sign in to upload elements.");
+  if (!account) return bad(401, t("signIn.element"));
   if (!can(account.role, "storefront.write")) {
-    return bad(403, "You don't have permission to upload here.");
+    return bad(403, t("permissionDenied"));
   }
 
   // Same budget as every other route that authorises bytes into R2, and taken
   // after the permission checks so a caller who may not upload never spends it.
   if (!(await rateLimit("upload_presign", RATE_LIMITS.uploadPresign))) {
-    return bad(429, "Too many uploads right now. Try again shortly.");
+    return bad(429, t("rateLimited.shared"));
   }
 
   if (!hasR2Credentials()) {
@@ -69,33 +64,33 @@ export async function POST(request: Request) {
       "[uploads] R2 is not configured: set R2_ACCOUNT_ID, R2_BUCKET_NAME, " +
         "R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY in .env.local (see .env.example).",
     );
-    return bad(503, "Element uploads are not configured yet. Contact the site owner.");
+    return bad(503, t("notConfigured.element"));
   }
 
   let form: FormData;
   try {
     form = await request.formData();
   } catch {
-    return bad(400, "That upload could not be read.", "Try again.");
+    return bad(400, t("unreadable"), t("fix.tryAgain"));
   }
 
   // Unknown fields are a sign the caller is not our form; refuse rather than
   // ignore, so a future field can never be silently accepted.
   for (const key of form.keys()) {
-    if (key !== FIELD) return bad(400, "Unexpected upload fields.");
+    if (key !== FIELD) return bad(400, t("unexpectedFields"));
   }
 
   const file = form.get(FIELD);
-  if (!(file instanceof File)) return bad(400, "No image was uploaded.");
+  if (!(file instanceof File)) return bad(400, t("missing.image"));
 
   // Cheap rejection before reading the body into memory.
-  if (file.size <= 0) return bad(400, "That file is empty.", "Pick a different file.");
+  if (file.size <= 0) return bad(400, t("empty.file"), t("fix.pickFile"));
   const maxMb = Math.round(ELEMENT_MAX_BYTES / 1024 / 1024);
   if (file.size > ELEMENT_MAX_BYTES) {
     return bad(
       413,
-      "That image is too large.",
-      `Use an image under ${maxMb} MB. Compress or resize it, then try again.`,
+      t("tooLarge.image"),
+      t("tooLargeFix.image", { maxMb }),
     );
   }
 
@@ -103,7 +98,7 @@ export async function POST(request: Request) {
   // The measured length is the one that counts: `file.size` is a claim in the
   // multipart headers, this is what we actually received.
   if (bytes.byteLength > ELEMENT_MAX_BYTES || bytes.byteLength === 0) {
-    return bad(413, "That image is too large.");
+    return bad(413, t("tooLarge.image"));
   }
 
   // What the file IS, not what it says it is. SVG first: it is the only kind
@@ -113,7 +108,9 @@ export async function POST(request: Request) {
   const sniffed = svg ?? sniffImage(bytes);
   const allowed: readonly string[] = ELEMENT_CONTENT_TYPES;
   if (!sniffed || !allowed.includes(sniffed.mime)) {
-    return bad(415, "That file is not a supported image.", WRONG_TYPE_FIX);
+    // The fix deliberately names the SVG rules: "not supported" alone would
+    // read as a format problem when the usual cause is an export carrying script.
+    return bad(415, t("unsupported.image"), t("unsupportedFix.element"));
   }
 
   const key = buildObjectKey(
@@ -139,13 +136,13 @@ export async function POST(request: Request) {
       console.error("[uploads] element moderation failed", error);
       return bad(
         503,
-        "Images can't be checked right now.",
-        "Try again in a few minutes.",
+        t("moderationUnavailable"),
+        t("fix.tryAgainInAFewMinutes"),
       );
     }
 
     if (verdict.decision === "reject") {
-      return bad(422, verdict.reason, "Pick a different image.");
+      return bad(422, t(`moderationRejected.${verdict.code}`), t("fix.pickImage"));
     }
 
     if (verdict.decision === "review") {
@@ -161,8 +158,8 @@ export async function POST(request: Request) {
       // cannot attach it to anything.
       return bad(
         202,
-        "That image is being checked before it goes live.",
-        "You'll be able to use it once it's approved.",
+        t("inReview"),
+        t("inReviewFix"),
       );
     }
   }
@@ -179,7 +176,7 @@ export async function POST(request: Request) {
     );
   } catch (error) {
     console.error("[uploads] element store failed", error);
-    return bad(502, "The image could not be stored.", "Try again in a moment.");
+    return bad(502, t("storeFailed.image"), t("fix.tryAgainInAMoment"));
   }
 
   return Response.json({ key });

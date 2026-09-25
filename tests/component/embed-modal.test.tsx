@@ -11,6 +11,7 @@ vi.mock("@/lib/storefront/actions", () => ({
 }));
 
 import { EmbedModal } from "@/components/storefront/EmbedModal";
+import { permissionDenied, rateLimited } from "@/lib/errors";
 import type { StorefrontSummary } from "@/lib/storefront/queries";
 import { DEFAULT_STOREFRONT_CONFIG } from "@/types/storefront";
 
@@ -124,11 +125,7 @@ describe("EmbedModal - saving", () => {
   it("surfaces a server refusal instead of claiming success", async () => {
     updateEmbedSettingsMock.mockResolvedValue({
       ok: false,
-      error: {
-        code: "rate_limited",
-        message: "Too many attempts to save storefronts in a short time.",
-        fix: "Wait a few minutes and try again.",
-      },
+      error: rateLimited("saveStorefronts"),
     });
     const user = userEvent.setup();
     renderModal();
@@ -256,11 +253,7 @@ describe("EmbedModal - key rotation", () => {
   it("reports a failed rotation separately from the settings save", async () => {
     rotateEmbedKeyMock.mockResolvedValue({
       ok: false,
-      error: {
-        code: "permission_denied",
-        message: "Your Viewer role can't edit storefronts in this store.",
-        fix: "Ask the store owner to change your role.",
-      },
+      error: permissionDenied("viewer", "editStorefronts"),
     });
     const user = userEvent.setup();
     renderModal();

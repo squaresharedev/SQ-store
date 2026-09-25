@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import {
   errorTextClass,
@@ -30,6 +31,7 @@ export function SafetyFields({
 }) {
   // The three manufacturer fields only turn required once the block is
   // touched — before that the star would flag fields nothing is asking for.
+  const t = useTranslations("Products.safetyFields");
   const started = safetyStarted(values);
 
   const field = (
@@ -40,7 +42,8 @@ export function SafetyFields({
       type?: string;
       max: number;
       error?: string;
-      hint?: string;
+      /** The "?" beside the label: its accessible name and its text. */
+      hint?: { about: string; text: string };
       required?: boolean;
     },
   ) => (
@@ -50,7 +53,7 @@ export function SafetyFields({
           {label}
         </label>
         {options.required && <RequiredMark />}
-        {options.hint && <InfoTip label={`About ${label}`}>{options.hint}</InfoTip>}
+        {options.hint && <InfoTip label={options.hint.about}>{options.hint.text}</InfoTip>}
       </div>
       {options.multiline ? (
         <textarea
@@ -84,38 +87,38 @@ export function SafetyFields({
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-        {field("manufacturerName", "Manufacturer", {
+        {field("manufacturerName", t("manufacturer"), {
           max: 120,
           error: errors.manufacturerName,
           required: started,
         })}
-        {field("manufacturerEmail", "Manufacturer email", {
+        {field("manufacturerEmail", t("manufacturerEmail"), {
           type: "email",
           max: 254,
           error: errors.manufacturerEmail,
           required: started,
         })}
       </div>
-      {field("manufacturerAddress", "Manufacturer address", {
+      {field("manufacturerAddress", t("manufacturerAddress"), {
         multiline: true,
         max: 300,
         error: errors.manufacturerAddress,
         required: started,
       })}
       <div className={cn("grid grid-cols-1 gap-5 sm:grid-cols-2")}>
-        {field("responsibleName", "EU responsible person", {
+        {field("responsibleName", t("responsibleName"), {
           max: 120,
-          hint: "Only when the manufacturer is outside the EU.",
+          hint: { about: t("responsibleNameAbout"), text: t("responsibleNameHint") },
         })}
-        {field("responsibleEmail", "Responsible person email", {
+        {field("responsibleEmail", t("responsibleEmail"), {
           type: "email",
           max: 254,
           error: errors.responsibleEmail,
         })}
       </div>
-      {field("responsibleAddress", "Responsible person address", { multiline: true, max: 300 })}
-      {field("identifier", "Type, batch or serial number", { max: 80 })}
-      {field("warnings", "Warnings and safety information", { multiline: true, max: 2000 })}
+      {field("responsibleAddress", t("responsibleAddress"), { multiline: true, max: 300 })}
+      {field("identifier", t("identifier"), { max: 80 })}
+      {field("warnings", t("warnings"), { multiline: true, max: 2000 })}
     </div>
   );
 }

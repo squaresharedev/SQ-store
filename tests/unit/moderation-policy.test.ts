@@ -8,6 +8,7 @@ import {
   moderateUpload,
 } from "@/lib/moderation";
 import { isOwnedObjectKey } from "@/lib/validation/product";
+import { english } from "../setup/translate";
 
 /**
  * MODERATION POLICY.
@@ -42,15 +43,17 @@ describe("interpretModelVerdict", () => {
     expect(interpretModelVerdict("  Clean.\n")).toEqual({ decision: "allow" });
   });
 
-  it("rejects each unsafe category with copy the uploader can read", () => {
-    for (const label of ["sexual", "graphic_violence", "gore", "hate_symbol"]) {
-      const verdict = interpretModelVerdict(label);
-      expect(verdict.decision).toBe("reject");
-      if (verdict.decision === "reject") {
-        expect(verdict.reason.length).toBeGreaterThan(10);
-        // The uploader must not be shown a raw model label.
-        expect(verdict.reason).not.toContain("_");
-      }
+  it("rejects each unsafe category with a code the uploader's copy is keyed on", () => {
+    // The uploader must not be shown a raw model label: each maps onto one of
+    // the codes Errors.uploadRoute.moderationRejected has a sentence for.
+    for (const [label, code] of [
+      ["sexual", "explicit"],
+      ["graphic_violence", "violent"],
+      ["gore", "violent"],
+      ["hate_symbol", "hate"],
+    ] as const) {
+      expect(interpretModelVerdict(label)).toEqual({ decision: "reject", code });
+      expect(english(`Errors.uploadRoute.moderationRejected.${code}`)).not.toContain("_");
     }
   });
 

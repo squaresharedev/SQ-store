@@ -1,0 +1,116 @@
+{
+  "metadata": {
+    "app": {
+      "title": "Panel de Square Share",
+      "description": "Gestiona tus productos, diseña tu escaparate, conecta Stripe y consulta las estadísticas en Square Share."
+    },
+    "overview": {
+      "title": "Resumen"
+    },
+    "payments": {
+      "title": "Pagos"
+    }
+  },
+  "loading": {
+    "overview": {
+      "srLoading": "Cargando el resumen…"
+    },
+    "payments": {
+      "title": "Pagos",
+      "subtitle": "Tu saldo, tus transferencias y tu conexión con Stripe.",
+      "srLoading": "cargando pagos"
+    }
+  },
+  "shell": {
+    "accountFallback": "Cuenta",
+    "anotherStore": "otra tienda"
+  },
+  "overview": {
+    "title": "Resumen",
+    "addProduct": "Añadir producto",
+    "revenue30d": "Ingresos · 30 días",
+    "sales30d": "Ventas · 30 días",
+    "avgOrder30d": "Pedido medio · 30 días",
+    "revenueHeroLabel": "Ingresos, últimos 30 días",
+    "noSales": "Todavía sin ventas"
+  },
+  "metric": {
+    "zeroDefault": "Todavía sin ventas",
+    "pendingDefault": "Disponible en cuanto se conecten las estadísticas."
+  },
+  "sidebar": {
+    "openMenu": "Abrir menú",
+    "closeMenu": "Cerrar menú",
+    "navLabel": "Panel",
+    "title": "Panel"
+  },
+  "recentOrders": {
+    "title": "Pedidos recientes",
+    "empty": "Todavía sin pedidos. Las ventas hechas a través de tu propio enlace de compra o por correo no aparecerán aquí."
+  },
+  "attention": {
+    "title": "Necesita atención",
+    "allClear": "Todo en orden. No hay nada que necesite tu atención ahora mismo.",
+    "twoFactor": {
+      "label": "Activa la verificación en dos pasos",
+      "description": "Un código de tu móvil al iniciar sesión, para que una contraseña robada no baste para entrar en tu tienda.",
+      "action": "Activar"
+    },
+    "stripe": {
+      "label": "Conecta Stripe para cobrar",
+      "description": "Las transferencias seguirán bloqueadas hasta que conectes tu cuenta.",
+      "action": "Abrir pagos"
+    },
+    "legal": {
+      "label": "Acepta las condiciones de vendedor",
+      "labelUpdated": "Acepta las condiciones de vendedor actualizadas",
+      "description": "Lee los borradores del Acuerdo de vendedor, las Condiciones y la Privacidad, y acéptalos.",
+      "descriptionUpdated": "Las condiciones han cambiado desde que las aceptaste. Léelas y acepta la versión actual.",
+      "descriptionTerms": "Lee las Condiciones del servicio y acéptalas.",
+      "descriptionTermsUpdated": "Las Condiciones del servicio han cambiado desde que las aceptaste. Léelas y acepta la versión actual.",
+      "action": "Revisar condiciones"
+    },
+    "noBuyPath": {
+      "label": "{count, plural, one {{count} producto sin forma de comprarlo} many {{count} productos sin forma de comprarlos} other {{count} productos sin forma de comprarlos}}",
+      "description": "Añade un enlace de compra o indica un correo de contacto en Configuración para que los compradores puedan contactarte.",
+      "action": "Revisar productos"
+    },
+    "noShipping": {
+      "label": "Añade tus condiciones de envío",
+      "description": "Los productos físicos necesitan condiciones de envío y devoluciones antes de que los compradores vean todos los detalles.",
+      "action": "Añadir condiciones"
+    },
+    "storefront": {
+      "labelEmpty": "Tu escaparate está vacío",
+      "labelNone": "Crea tu escaparate",
+      "descriptionEmpty": "Añade un producto a su cuadrícula para darle una página que puedas compartir.",
+      "descriptionNone": "Elige un aspecto y luego añade tus productos a su cuadrícula.",
+      "actionOpen": "Abrir editor",
+      "actionCreate": "Crear escaparate"
+    },
+    "images": {
+      "label": "{count, plural, one {{count} producto sin imagen} many {{count} productos sin imagen} other {{count} productos sin imagen}}",
+      "descriptionSingle": "«{title}» todavía no tiene imagen principal.",
+      "descriptionMultiple": "Los productos sin imágenes se ven vacíos en tu escaparate.",
+      "actionSingle": "Añadir una imagen",
+      "actionMultiple": "Corregir productos"
+    },
+    "flaggedOrders": {
+      "label": "{count, plural, one {{count} pedido por revisar} many {{count} pedidos por revisar} other {{count} pedidos por revisar}}",
+      "descriptionBoth": "{disputed, plural, one {{disputed} en disputa} many {{disputed} en disputa} other {{disputed} en disputa}}, {refunded, plural, one {{refunded} reembolsado} many {{refunded} reembolsados} other {{refunded} reembolsados}}.",
+      "descriptionDisputed": "{count, plural, one {{count} en disputa} many {{count} en disputa} other {{count} en disputa}}.",
+      "descriptionRefunded": "{count, plural, one {{count} reembolsado} many {{count} reembolsados} other {{count} reembolsados}}.",
+      "action": "Revisar pedidos"
+    },
+    "noindexPages": {
+      "label": "Páginas de producto bloqueadas para los buscadores",
+      "description": "{count, plural, =1 {Un escaparate tiene desactivada la indexación de sus páginas de producto.} one {Un escaparate tiene desactivada la indexación de sus páginas de producto.} many {{count} escaparates tienen desactivada la indexación de sus páginas de producto.} other {{count} escaparates tienen desactivada la indexación de sus páginas de producto.}}",
+      "action": "Abrir editor"
+    },
+    "deadBlocks": {
+      "label": "{count, plural, one {{count} bloque del escaparate hace referencia a productos eliminados} many {{count} bloques del escaparate hacen referencia a productos eliminados} other {{count} bloques del escaparate hacen referencia a productos eliminados}}",
+      "description": "Estos bloques se ven vacíos para los visitantes. Elimínalos o sustitúyelos.",
+      "action": "Abrir escaparate"
+    }
+  }
+}

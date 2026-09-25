@@ -1,0 +1,189 @@
+{
+  "metadata": {
+    "analytics": {
+      "title": "Analityka"
+    }
+  },
+  "page": {
+    "title": "Analityka",
+    "subtitle": "Sprzedaż, wyświetlenia witryny i wszystko inne, co dzieje się w twoim sklepie."
+  },
+  "loading": {
+    "title": "Analityka",
+    "subtitle": "Jak radzi sobie twój sklep w osadzeniu i na marketplace.",
+    "srLoading": "wczytywanie analityki"
+  },
+  "firstRun": {
+    "title": "Jeszcze nic do zmierzenia",
+    "body": "Wizyty na stronach twoich produktów pojawią się tutaj, gdy tylko jedna zostanie opublikowana.",
+    "backToSetup": "Wróć do konfiguracji"
+  },
+  "range": {
+    "ariaLabel": "Zakres dat",
+    "last30Days": "Ostatnie 30 dni",
+    "allTime": "Cały czas",
+    "custom": "Niestandardowy",
+    "placeholder": "Wybierz zakres"
+  },
+  "section": {
+    "whatMeasures": "Co mierzy: {title}"
+  },
+  "chart": {
+    "howToRead": "Jak czytać: {title}",
+    "emptyDefault": "Brak sprzedaży w tym zakresie"
+  },
+  "sales": {
+    "label": "Sprzedaż",
+    "description": "Opłacone zamówienia złożone przez realizację zakupu Square Share.",
+    "revenue": {
+      "title": "Przychód",
+      "description": "Opłacony przychód w czasie.",
+      "series": "Przychód",
+      "ariaLabel": "Opłacony przychód w czasie"
+    },
+    "aov": {
+      "title": "Średnia wartość zamówienia",
+      "description": "Ile jest warte typowe zamówienie w czasie.",
+      "series": "Średnie zamówienie",
+      "ariaLabel": "Średnia wartość zamówienia w czasie"
+    },
+    "channels": {
+      "title": "Kanały",
+      "description": "Skąd pochodzi twoja sprzedaż.",
+      "ariaLabel": "Opłacony przychód według kanału"
+    },
+    "weekday": {
+      "title": "Sprzedaż według dnia tygodnia",
+      "description": "Tygodniowy rytm twojego sklepu.",
+      "series": "Sprzedaż",
+      "count": "{count, plural, one {{formatted} sprzedaż} few {{formatted} sprzedaże} many {{formatted} sprzedaży} other {{formatted} sprzedaży}}",
+      "ariaLabel": "Sprzedaż według dnia tygodnia"
+    },
+    "topProducts": {
+      "title": "Najlepiej sprzedające się produkty",
+      "description": "Twoje bestsellery według opłaconego przychodu.",
+      "series": "Przychód",
+      "ariaLabel": "Najlepiej sprzedające się produkty według opłaconego przychodu"
+    },
+    "orderStatus": {
+      "title": "Status zamówień",
+      "description": "Pełny rozkład zamówień, łącznie ze zwrotami i sporami.",
+      "empty": "Brak zamówień w tym zakresie",
+      "ariaLabel": "Rozkład statusów zamówień"
+    }
+  },
+  "tiles": {
+    "revenue": "Przychód",
+    "afterFees": "{amount} po opłatach",
+    "sales": "Sprzedaż",
+    "perDay": "Średnio {rate} dziennie",
+    "avgOrder": "Śr. zamówienie",
+    "uniqueBuyers": "Unikalni kupujący",
+    "repeatBuyers": "{count, plural, one {{count} kupujący z powtórnym zakupem} few {{count} kupujących z powtórnym zakupem} many {{count} kupujących z powtórnym zakupem} other {{count} kupującego z powtórnym zakupem}}",
+    "refundRate": "Wskaźnik zwrotów",
+    "refunded": "{count, plural, one {{count} zwrócone zamówienie, {amount}} few {{count} zwrócone zamówienia, {amount}} many {{count} zwróconych zamówień, {amount}} other {{count} zwróconego zamówienia, {amount}}}",
+    "noSales": "Jeszcze brak sprzedaży",
+    "noBuyers": "Jeszcze brak kupujących",
+    "noOrders": "Jeszcze brak zamówień"
+  },
+  "channels": {
+    "embed": "Osadzenie",
+    "marketplace": "Marketplace",
+    "direct": "Bezpośrednio"
+  },
+  "signalsUnavailable": {
+    "title": "Wyświetlenia i zapisy są teraz niedostępne",
+    "body": "Twoje dane sprzedaży powyżej pozostają bez zmian. Odśwież stronę, aby spróbować ponownie."
+  },
+  "upcoming": {
+    "needProducts": "{labels} pojawią się tutaj, gdy produkt znajdzie się w jednej z twoich witryn.",
+    "needBlocks": "{labels} pojawią się tutaj, gdy odpowiedni blok znajdzie się w jednej z twoich witryn."
+  },
+  "signal": {
+    "visitors": "Odwiedzający",
+    "perVisitor": "Średnio {rate} na odwiedzającego",
+    "notCounted": "Jeszcze nie liczone",
+    "value": "Wartość",
+    "noValue": "Jeszcze brak wartości",
+    "notMeasured": "Jeszcze nie mierzone.",
+    "panels": {
+      "trend": "W czasie",
+      "channels": "Kanały",
+      "weekdays": "Według dnia tygodnia",
+      "storefronts": "Według witryny"
+    },
+    "whereFrom": "Skąd pochodzą.",
+    "weeklyRhythm": "Tygodniowy rytm.",
+    "whichStorefront": "Z której witryny pochodzą.",
+    "deletedStorefront": "Usunięta witryna",
+    "deletedStorefrontNumbered": "Usunięta witryna ({number})"
+  },
+  "sources": {
+    "storefront_view": {
+      "label": "Wyświetlenia witryny",
+      "description": "Jak często twoja witryna była wczytywana przez odwiedzających.",
+      "count": "{count, plural, one {{formatted} wyświetlenie} few {{formatted} wyświetlenia} many {{formatted} wyświetleń} other {{formatted} wyświetlenia}}",
+      "total": "Łączne wyświetlenia",
+      "emptyRange": "Brak wyświetleń w tym zakresie",
+      "overTime": "Wyświetlenia witryny w czasie",
+      "acrossRange": "Wyświetlenia witryny w wybranym zakresie.",
+      "byChannel": "Wyświetlenia witryny według kanału",
+      "byWeekday": "Wyświetlenia witryny według dnia tygodnia",
+      "byStorefront": "Wyświetlenia witryny według witryny"
+    },
+    "product_click": {
+      "label": "Kliknięcia produktów",
+      "description": "Odwiedzający otwierający produkt z jednej z twoich witryn.",
+      "count": "{count, plural, one {{formatted} kliknięcie} few {{formatted} kliknięcia} many {{formatted} kliknięć} other {{formatted} kliknięcia}}",
+      "total": "Łączne kliknięcia",
+      "emptyRange": "Brak kliknięć w tym zakresie",
+      "overTime": "Kliknięcia produktów w czasie",
+      "acrossRange": "Kliknięcia produktów w wybranym zakresie.",
+      "byChannel": "Kliknięcia produktów według kanału",
+      "byWeekday": "Kliknięcia produktów według dnia tygodnia",
+      "byStorefront": "Kliknięcia produktów według witryny",
+      "awaiting": "Pojawi się, gdy widget osadzenia zacznie zgłaszać otwarcia produktów.",
+      "readyToChart": "Gotowe do wykresu, gdy tylko zaczną napływać kliknięcia."
+    },
+    "product_view": {
+      "label": "Wyświetlenia stron produktów",
+      "description": "Odwiedzający otwierający jedną z hostowanych stron twoich produktów.",
+      "count": "{count, plural, one {{formatted} wyświetlenie} few {{formatted} wyświetlenia} many {{formatted} wyświetleń} other {{formatted} wyświetlenia}}",
+      "total": "Łączne wyświetlenia",
+      "emptyRange": "Brak wyświetleń w tym zakresie",
+      "overTime": "Wyświetlenia stron produktów w czasie",
+      "acrossRange": "Wyświetlenia stron produktów w wybranym zakresie.",
+      "byChannel": "Wyświetlenia stron produktów według kanału",
+      "byWeekday": "Wyświetlenia stron produktów według dnia tygodnia",
+      "byStorefront": "Wyświetlenia stron produktów według witryny"
+    },
+    "email_signup": {
+      "label": "Zapisy na listę mailingową",
+      "description": "Osoby zapisujące się na twoją listę z witryny.",
+      "count": "{count, plural, one {{formatted} zapis} few {{formatted} zapisy} many {{formatted} zapisów} other {{formatted} zapisu}}",
+      "total": "Łączne zapisy",
+      "emptyRange": "Brak zapisów w tym zakresie",
+      "overTime": "Zapisy na listę mailingową w czasie",
+      "acrossRange": "Zapisy na listę mailingową w wybranym zakresie.",
+      "byChannel": "Zapisy na listę mailingową według kanału",
+      "byWeekday": "Zapisy na listę mailingową według dnia tygodnia",
+      "byStorefront": "Zapisy na listę mailingową według witryny",
+      "awaiting": "Pojawi się wraz z blokiem zapisu na listę mailingową.",
+      "readyToChart": "Gotowe do wykresu, gdy tylko zaczną napływać zapisy."
+    },
+    "booking": {
+      "label": "Rezerwacje",
+      "description": "Terminy zarezerwowane z witryny.",
+      "count": "{count, plural, one {{formatted} rezerwacja} few {{formatted} rezerwacje} many {{formatted} rezerwacji} other {{formatted} rezerwacji}}",
+      "total": "Łączne rezerwacje",
+      "emptyRange": "Brak rezerwacji w tym zakresie",
+      "overTime": "Rezerwacje w czasie",
+      "acrossRange": "Rezerwacje w wybranym zakresie.",
+      "byChannel": "Rezerwacje według kanału",
+      "byWeekday": "Rezerwacje według dnia tygodnia",
+      "byStorefront": "Rezerwacje według witryny",
+      "awaiting": "Pojawi się wraz z blokiem rezerwacji kalendarza.",
+      "readyToChart": "Gotowe do wykresu, gdy tylko zaczną napływać rezerwacje."
+    }
+  }
+}
