@@ -5,7 +5,9 @@ import { useTranslations } from "next-intl";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 
-export type FactorChoice = { id: string; name: string };
+/** A factor as the browser sees it. `type` is "passkey" for one confirmed with
+ *  a passkey (no code to type), "totp" (or absent) for an authenticator app. */
+export type FactorChoice = { id: string; name: string; type?: "totp" | "passkey" };
 
 /**
  * Which authenticator the code is from, for the (rare) account with more than

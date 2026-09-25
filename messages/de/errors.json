@@ -133,7 +133,10 @@
     "invalid": "Dieser Code hat nicht funktioniert. Prüfe deine Authenticator-App und versuche es noch einmal.",
     "rateLimited": "Zu viele Versuche. Warte ein paar Minuten und versuche es dann erneut.",
     "replayed": "Dieser Code wurde schon verwendet. Warte auf den nächsten in deiner App.",
-    "unavailable": "Wir konnten den Code gerade nicht prüfen. Versuche es gleich noch einmal."
+    "unavailable": "Wir konnten den Code gerade nicht prüfen. Versuche es gleich noch einmal.",
+    "passkeyRequired": "Bestätige zuerst mit deinem Passkey, dass du es bist.",
+    "passkeyInvalid": "Dieser Passkey hat nicht funktioniert. Versuche es noch einmal.",
+    "passkeyExpired": "Das hat zu lange gedauert. Bestätige noch einmal mit deinem Passkey."
   },
   "mfa": {
     "signInExpired": "Deine Anmeldung ist abgelaufen. Melde dich erneut an.",
@@ -532,5 +535,11 @@
     },
     "invalid": "Diese Produktseiteneinstellungen sind ungültig.",
     "invalidFix": "Überprüfe das oben genannte Feld anhand von `limits` aus einem GET dieser URL und versuche es dann erneut."
+  },
+  "passkey": {
+    "unavailable": "Passkeys sind gerade nicht verfügbar. Verwende stattdessen eine Authenticator-App.",
+    "createFailed": "Wir konnten diesen Passkey nicht prüfen. Versuche, ihn noch einmal zu erstellen.",
+    "signInFailed": "Dieser Passkey hat für dieses Konto nicht funktioniert. Versuche es noch einmal oder melde dich auf andere Weise an.",
+    "expired": "Das hat zu lange gedauert. Versuche es noch einmal mit deinem Passkey."
   }
 }

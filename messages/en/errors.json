@@ -133,7 +133,10 @@
     "invalid": "That code didn't work. Check your authenticator app and try again.",
     "rateLimited": "Too many attempts. Wait a few minutes, then try again.",
     "replayed": "That code has already been used. Wait for the next one in your app.",
-    "unavailable": "We couldn't check that code just now. Try again in a moment."
+    "unavailable": "We couldn't check that code just now. Try again in a moment.",
+    "passkeyRequired": "Confirm it's you with your passkey first.",
+    "passkeyInvalid": "That passkey didn't work. Try again.",
+    "passkeyExpired": "That took too long. Confirm with your passkey again."
   },
   "mfa": {
     "signInExpired": "Your sign-in expired. Sign in again.",
@@ -532,5 +535,11 @@
     },
     "invalid": "Those product page settings are invalid.",
     "invalidFix": "Check the field named above against `limits` from a GET of this URL, then try again."
+  },
+  "passkey": {
+    "unavailable": "Passkeys aren't available right now. Use an authenticator app instead.",
+    "createFailed": "We couldn't check that passkey. Try creating it again.",
+    "signInFailed": "That passkey didn't work for this account. Try again, or use another way to sign in.",
+    "expired": "That took too long. Try your passkey again."
   }
 }

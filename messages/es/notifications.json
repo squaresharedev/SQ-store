@@ -89,19 +89,19 @@
       },
       "twoFactorEnabled": {
         "title": "La verificación en dos pasos está activada",
-        "body": "Ahora, para iniciar sesión en tu cuenta hace falta un código de tu aplicación de autenticación, y se ha cerrado la sesión en todos los demás dispositivos. Si no has sido tú, cambia tu contraseña y contacta con el soporte."
+        "body": "Ahora, para iniciar sesión en tu cuenta hace falta tu llave de acceso o un código de tu aplicación de autenticación, y se ha cerrado la sesión en todos los demás dispositivos. Si no has sido tú, cambia tu contraseña y contacta con el soporte."
       },
       "factorAdded": {
-        "title": "Se ha añadido una aplicación de autenticación",
+        "title": "Se ha añadido una llave de acceso o una aplicación de autenticación",
         "body": "Ya se puede usar «{name}» para iniciar sesión en tu cuenta. Si no has sido tú, quítala en Configuración › Seguridad y cambia tu contraseña.",
         "bodyUnnamed": "Ya se puede usar «Aplicación de autenticación» para iniciar sesión en tu cuenta. Si no has sido tú, quítala en Configuración › Seguridad y cambia tu contraseña."
       },
       "twoFactorDisabled": {
         "title": "La verificación en dos pasos está desactivada",
-        "body": "Se ha quitado tu última aplicación de autenticación, así que ahora para iniciar sesión solo hace falta tu contraseña. Si no has sido tú, cambia tu contraseña y vuelve a activar la verificación en dos pasos."
+        "body": "Se ha quitado tu última llave de acceso o aplicación de autenticación, así que ahora para iniciar sesión solo hace falta tu contraseña. Si no has sido tú, cambia tu contraseña y vuelve a activar la verificación en dos pasos."
       },
       "factorRemoved": {
-        "title": "Se ha quitado una aplicación de autenticación",
+        "title": "Se ha quitado una llave de acceso o una aplicación de autenticación",
         "body": "Ya no se puede usar «{name}» para iniciar sesión en tu cuenta. Si no has sido tú, cambia tu contraseña ahora."
       },
       "recoveryCodesRegenerated": {

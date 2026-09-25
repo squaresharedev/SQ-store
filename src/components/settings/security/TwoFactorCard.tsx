@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useActionState } from "react";
-import { Check, Plus, ShieldCheck, Smartphone } from "lucide-react";
+import { Check, Fingerprint, Plus, ShieldCheck, Smartphone } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
@@ -49,6 +49,7 @@ export function TwoFactorCard({
   hasPassword,
   signedInRecently,
   signsInWithGoogle,
+  passkeysAvailable,
   openSetup,
 }: {
   enrolled: boolean;
@@ -56,6 +57,7 @@ export function TwoFactorCard({
   hasPassword: boolean;
   signedInRecently: boolean;
   signsInWithGoogle: boolean;
+  passkeysAvailable: boolean;
   openSetup: boolean;
 }) {
   const t = useTranslations("Settings.security.twoFactor");
@@ -95,13 +97,19 @@ export function TwoFactorCard({
                   key={factor.id}
                   className="flex flex-wrap items-center justify-between gap-3 py-3"
                 >
-                  <div className="flex min-w-0 items-center gap-2.5">
-                    <Smartphone aria-hidden className="size-4 shrink-0 text-muted-foreground" />
+                  <div className="flex min-w-0 items-center gap-2.5" data-factor-type={factor.type}>
+                    {factor.type === "passkey" ? (
+                      <Fingerprint aria-hidden className="size-4 shrink-0 text-muted-foreground" />
+                    ) : (
+                      <Smartphone aria-hidden className="size-4 shrink-0 text-muted-foreground" />
+                    )}
                     <div className="min-w-0">
                       <p className="truncate font-inter text-sm font-medium text-foreground">
                         {factor.name}
                       </p>
                       <p className={infoTextClass}>
+                        {factor.type === "passkey" ? t("kindPasskey") : t("kindApp")}
+                        {" · "}
                         {t("added", { date: formatDay(factor.createdAt, locale) })}
                       </p>
                     </div>
@@ -156,6 +164,7 @@ export function TwoFactorCard({
         hasPassword={hasPassword}
         signedInRecently={signedInRecently}
         signsInWithGoogle={signsInWithGoogle}
+        passkeysAvailable={passkeysAvailable}
         existingNames={factors.map((factor) => factor.name)}
       />
       <RemoveAuthenticatorModal

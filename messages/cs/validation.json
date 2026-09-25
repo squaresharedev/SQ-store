@@ -228,7 +228,8 @@
     "factorName": {
       "required": "Název je povinný.",
       "tooLong": "Název může mít nejvýše {maximum} znaků.",
-      "unsupported": "Název obsahuje nepodporované znaky."
+      "unsupported": "Název obsahuje nepodporované znaky.",
+      "reserved": "Zvolte název, který nezačíná „passkey:“."
     },
     "reportDetails": {
       "required": "Popis je povinný.",

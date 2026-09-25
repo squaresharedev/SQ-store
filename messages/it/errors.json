@@ -133,7 +133,10 @@
     "invalid": "Quel codice non ha funzionato. Controlla la tua app di autenticazione e riprova.",
     "rateLimited": "Troppi tentativi. Attendi qualche minuto, poi riprova.",
     "replayed": "Quel codice è già stato usato. Attendi il successivo nella tua app.",
-    "unavailable": "Non siamo riusciti a controllare quel codice in questo momento. Riprova tra un attimo."
+    "unavailable": "Non siamo riusciti a controllare quel codice in questo momento. Riprova tra un attimo.",
+    "passkeyRequired": "Prima conferma che sei tu con la tua passkey.",
+    "passkeyInvalid": "Questa passkey non ha funzionato. Riprova.",
+    "passkeyExpired": "Ci è voluto troppo tempo. Conferma di nuovo con la tua passkey."
   },
   "mfa": {
     "signInExpired": "L’accesso è scaduto. Accedi di nuovo.",
@@ -532,5 +535,11 @@
     },
     "invalid": "Quelle impostazioni della pagina prodotto non sono valide.",
     "invalidFix": "Controlla il campo indicato sopra rispetto a `limits` da una GET di questo URL, poi riprova."
+  },
+  "passkey": {
+    "unavailable": "Le passkey non sono disponibili in questo momento. Usa invece un’app di autenticazione.",
+    "createFailed": "Non siamo riusciti a verificare questa passkey. Prova a crearla di nuovo.",
+    "signInFailed": "Questa passkey non ha funzionato per questo account. Riprova oppure usa un altro modo per accedere.",
+    "expired": "Ci è voluto troppo tempo. Riprova con la tua passkey."
   }
 }

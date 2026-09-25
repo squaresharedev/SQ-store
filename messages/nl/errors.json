@@ -133,7 +133,10 @@
     "invalid": "Die code werkte niet. Controleer je authenticator-app en probeer het opnieuw.",
     "rateLimited": "Te veel pogingen. Wacht een paar minuten en probeer het dan opnieuw.",
     "replayed": "Die code is al gebruikt. Wacht op de volgende in je app.",
-    "unavailable": "We konden die code nu niet controleren. Probeer het zo meteen opnieuw."
+    "unavailable": "We konden die code nu niet controleren. Probeer het zo meteen opnieuw.",
+    "passkeyRequired": "Bevestig eerst met je toegangssleutel dat jij het bent.",
+    "passkeyInvalid": "Die toegangssleutel werkte niet. Probeer het opnieuw.",
+    "passkeyExpired": "Dat duurde te lang. Bevestig opnieuw met je toegangssleutel."
   },
   "mfa": {
     "signInExpired": "Je inlogsessie is verlopen. Log opnieuw in.",
@@ -532,5 +535,11 @@
     },
     "invalid": "Die productpagina-instellingen zijn ongeldig.",
     "invalidFix": "Controleer het hierboven genoemde veld tegen `limits` van een GET van deze URL, en probeer het opnieuw."
+  },
+  "passkey": {
+    "unavailable": "Toegangssleutels zijn nu niet beschikbaar. Gebruik in plaats daarvan een authenticator-app.",
+    "createFailed": "We konden die toegangssleutel niet controleren. Probeer hem opnieuw aan te maken.",
+    "signInFailed": "Die toegangssleutel werkte niet voor dit account. Probeer het opnieuw of log op een andere manier in.",
+    "expired": "Dat duurde te lang. Probeer je toegangssleutel opnieuw."
   }
 }

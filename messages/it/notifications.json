@@ -89,19 +89,19 @@
       },
       "twoFactorEnabled": {
         "title": "L’autenticazione a due fattori è attiva",
-        "body": "Ora per accedere al tuo account serve un codice dalla tua app di autenticazione, e tutti gli altri dispositivi sono stati disconnessi. Se non eri tu, cambia la password e contatta l’assistenza."
+        "body": "Ora per accedere al tuo account serve la tua passkey o un codice dalla tua app di autenticazione, e tutti gli altri dispositivi sono stati disconnessi. Se non eri tu, cambia la password e contatta l’assistenza."
       },
       "factorAdded": {
-        "title": "È stata aggiunta un’app di autenticazione",
+        "title": "È stata aggiunta una passkey o un’app di autenticazione",
         "body": "Ora puoi accedere al tuo account anche con «{name}». Se non eri tu, rimuovila in Impostazioni › Sicurezza e cambia la password.",
         "bodyUnnamed": "Ora puoi accedere al tuo account anche con «App di autenticazione». Se non eri tu, rimuovila in Impostazioni › Sicurezza e cambia la password."
       },
       "twoFactorDisabled": {
         "title": "L’autenticazione a due fattori è disattivata",
-        "body": "La tua ultima app di autenticazione è stata rimossa, quindi ora per accedere basta la password. Se non eri tu, cambia la password e riattiva l’autenticazione a due fattori."
+        "body": "La tua ultima passkey o app di autenticazione è stata rimossa, quindi ora per accedere basta la password. Se non eri tu, cambia la password e riattiva l’autenticazione a due fattori."
       },
       "factorRemoved": {
-        "title": "È stata rimossa un’app di autenticazione",
+        "title": "È stata rimossa una passkey o un’app di autenticazione",
         "body": "Non è più possibile accedere al tuo account con «{name}». Se non eri tu, cambia subito la password."
       },
       "recoveryCodesRegenerated": {

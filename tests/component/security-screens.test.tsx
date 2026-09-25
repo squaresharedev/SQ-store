@@ -24,6 +24,11 @@ vi.mock("@/lib/auth/mfa-actions", () => ({
   cancelTwoFactorSetup: vi.fn().mockResolvedValue(undefined),
   signOutToReauthenticate: vi.fn().mockResolvedValue(undefined),
   confirmIdentity: vi.fn().mockResolvedValue({}),
+  beginPasskeySetup: vi.fn().mockResolvedValue({}),
+  confirmPasskeySetup: vi.fn().mockResolvedValue({}),
+  passkeySignInOptions: vi.fn().mockResolvedValue({}),
+  passkeyStepUpOptions: vi.fn().mockResolvedValue({}),
+  verifyPasskeySignIn: vi.fn().mockResolvedValue({}),
 }));
 vi.mock("@/lib/auth/actions", () => ({ signOut: vi.fn() }));
 
@@ -167,10 +172,11 @@ describe("TwoFactorCard", () => {
     render(
       <TwoFactorCard
         enrolled
-        factors={[{ ...PHONE, createdAt }]}
+        factors={[{ ...PHONE, createdAt, type: "totp" }]}
         hasPassword
         signedInRecently
         signsInWithGoogle={false}
+        passkeysAvailable={false}
         openSetup={false}
       />,
     );
@@ -180,9 +186,34 @@ describe("TwoFactorCard", () => {
       year: "numeric",
       timeZone: "UTC",
     });
-    expect(screen.getByText(`Added ${before}`)).toBeInTheDocument();
+    expect(screen.getByText(`Authenticator app · Added ${before}`)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Remove Phone" })).toHaveTextContent("Remove");
-    expect(screen.getByRole("list", { name: "Authenticator apps" })).toBeInTheDocument();
+    expect(screen.getByRole("list", { name: "Passkeys and authenticator apps" })).toBeInTheDocument();
+  });
+
+  it("tells a passkey apart from an authenticator app", () => {
+    const createdAt = "2026-09-25T10:00:00Z";
+    render(
+      <TwoFactorCard
+        enrolled
+        factors={[
+          { ...PHONE, createdAt, type: "totp" },
+          { ...TABLET, name: "iPhone", createdAt, type: "passkey" },
+        ]}
+        hasPassword
+        signedInRecently
+        signsInWithGoogle={false}
+        passkeysAvailable
+        openSetup={false}
+      />,
+    );
+    const list = screen.getByRole("list", { name: "Passkeys and authenticator apps" });
+    const kinds = Array.from(list.querySelectorAll("[data-factor-type]")).map((row) =>
+      row.getAttribute("data-factor-type"),
+    );
+    expect(kinds).toEqual(["totp", "passkey"]);
+    expect(list).toHaveTextContent(/iPhone\s*Passkey · Added/);
+    expect(screen.getByRole("button", { name: "Add another passkey or app" })).toBeInTheDocument();
   });
 
   it("makes the case for turning it on", () => {
@@ -193,11 +224,12 @@ describe("TwoFactorCard", () => {
         hasPassword
         signedInRecently
         signsInWithGoogle={false}
+        passkeysAvailable={false}
         openSetup={false}
       />,
     );
     expect(
-      screen.getByText("Changes to your business details, your team and your account need a code from your phone."),
+      screen.getByText("Changes to your business details, your team and your account need your passkey or a code."),
     ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Set up two-factor authentication" })).toBeInTheDocument();
     expect(screen.getByText("Takes about a minute.")).toBeInTheDocument();
@@ -213,6 +245,7 @@ describe("SecuritySection", () => {
         hasPassword
         signedInRecently
         signsInWithGoogle={false}
+        passkeysAvailable={false}
         recoveryCodesRemaining={null}
         activity={[]}
         recovered
@@ -221,7 +254,7 @@ describe("SecuritySection", () => {
     );
     const status = screen.getByRole("status");
     expect(status.textContent).toBe(
-      "Two-factor authentication is off. You signed in with a recovery code, which removed your old authenticator and signed out your other devices. Set it up again now so your password isn’t the only thing protecting your account.",
+      "Two-factor authentication is off. You signed in with a recovery code, which removed your old passkeys and authenticator apps and signed out your other devices. Set it up again now so your password isn’t the only thing protecting your account.",
     );
     expect(status.querySelector(".font-semibold")?.textContent).toBe("Two-factor authentication is off.");
   });

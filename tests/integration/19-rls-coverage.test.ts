@@ -44,6 +44,12 @@ const POLICY_FREE_BY_DESIGN = new Set([
   // read them: a hijacked session that could count or see the hashes of its
   // own codes would learn something about the one way back past 2FA.
   "mfa_recovery_codes",
+  // Passkeys used as the second factor (20260925_passkey_factors): public
+  // keys and the TOTP secret each one unlocks, sealed under a Worker-only
+  // key. Read and written only by lib/auth/passkeys.ts through the service
+  // role. A client that could read its own rows would learn nothing it can
+  // use, but one that could WRITE them could plant a passkey of its own.
+  "mfa_passkeys",
 ]);
 
 afterAll(async () => {

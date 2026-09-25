@@ -7,7 +7,12 @@ import {
   type SecurityActivityItem,
 } from "@/components/settings/security/SecurityActivityCard";
 
-export type SecurityFactor = { id: string; name: string; createdAt: string };
+export type SecurityFactor = {
+  id: string;
+  name: string;
+  createdAt: string;
+  type: "totp" | "passkey";
+};
 
 /**
  * Settings › Security. The ids are universal search's landing points
@@ -19,6 +24,7 @@ export function SecuritySection({
   hasPassword,
   signedInRecently,
   signsInWithGoogle,
+  passkeysAvailable,
   recoveryCodesRemaining,
   activity,
   recovered,
@@ -29,6 +35,8 @@ export function SecuritySection({
   hasPassword: boolean;
   signedInRecently: boolean;
   signsInWithGoogle: boolean;
+  /** Passkeys are configured in this deployment. */
+  passkeysAvailable: boolean;
   /** Unused recovery codes, or null when 2FA is off or the count failed. */
   recoveryCodesRemaining: number | null;
   /** Null when the log could not be read (shown as such, never as "empty"). */
@@ -60,6 +68,7 @@ export function SecuritySection({
         hasPassword={hasPassword}
         signedInRecently={signedInRecently}
         signsInWithGoogle={signsInWithGoogle}
+        passkeysAvailable={passkeysAvailable}
         openSetup={openSetup && !enrolled}
       />
 

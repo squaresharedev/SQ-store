@@ -73,7 +73,7 @@ export default async function TwoFactorPage({
           <TwoFactorChallenge
             next={next}
             email={user.email ?? ""}
-            factors={assurance.factors.map(({ id, name }) => ({ id, name }))}
+            factors={assurance.factors.map(({ id, name, type }) => ({ id, name, type }))}
           />
         </div>
       </div>

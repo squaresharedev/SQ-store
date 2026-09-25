@@ -18,14 +18,30 @@ import type { Factor, User } from "@supabase/supabase-js";
 /** Unix seconds. */
 type Seconds = number;
 
-/** A second factor the account can actually sign in with. */
+/**
+ * A second factor the account can actually sign in with.
+ *
+ * Both kinds are TOTP factors at GoTrue. A PASSKEY factor's secret is held
+ * sealed by the server and only released by a verified passkey (see
+ * lib/auth/passkeys.ts), so nobody can type a code for it; an APP factor's
+ * secret is in the person's authenticator app.
+ */
 export type VerifiedFactor = {
   id: string;
   /** What the person called it, e.g. "Pixel 8". Never empty. */
   name: string;
-  type: "totp";
+  type: "totp" | "passkey";
   createdAt: string;
 };
+
+/**
+ * How a passkey's factor is named at GoTrue: this prefix, then the name the
+ * person chose. It tells the two kinds apart without a database round trip on
+ * every request, and decides ONLY which controls to show: every passkey check
+ * reads the service-role table, never the name. App factor names may not start
+ * with it (lib/validation/mfa.ts).
+ */
+export const PASSKEY_FACTOR_PREFIX = "passkey:";
 
 export type SessionAssurance = {
   /** The account has at least one VERIFIED second factor (2FA is on). */
@@ -130,18 +146,33 @@ function latest(entries: AmrEntry[]): Seconds | null {
   return best;
 }
 
-/** The account's usable TOTP factors, from the user GoTrue returned. */
+/** The account's usable factors (apps and passkeys), from the user GoTrue returned. */
 export function verifiedFactors(user: Pick<User, "factors">): VerifiedFactor[] {
   const factors: Factor[] = user.factors ?? [];
   return factors
     .filter((factor) => factor.status === "verified" && factor.factor_type === "totp")
     .sort((a, b) => a.created_at.localeCompare(b.created_at))
-    .map((factor, index) => ({
-      id: factor.id,
-      name: factor.friendly_name?.trim() || `Authenticator app ${index + 1}`,
-      type: "totp" as const,
-      createdAt: factor.created_at,
-    }));
+    .map((factor, index) => {
+      const raw = factor.friendly_name?.trim() ?? "";
+      const passkey = raw.startsWith(PASSKEY_FACTOR_PREFIX);
+      const name = passkey ? raw.slice(PASSKEY_FACTOR_PREFIX.length).trim() : raw;
+      return {
+        id: factor.id,
+        name: name || (passkey ? `Passkey ${index + 1}` : `Authenticator app ${index + 1}`),
+        type: passkey ? ("passkey" as const) : ("totp" as const),
+        createdAt: factor.created_at,
+      };
+    });
+}
+
+/** The factors a TYPED code can be for: authenticator apps, never passkeys. */
+export function appFactors<T extends Pick<VerifiedFactor, "type">>(factors: T[]): T[] {
+  return factors.filter((factor) => factor.type === "totp");
+}
+
+/** Whether the account can confirm with a passkey. */
+export function hasPasskeyFactor(factors: Pick<VerifiedFactor, "type">[]): boolean {
+  return factors.some((factor) => factor.type === "passkey");
 }
 
 /**

@@ -1,13 +1,20 @@
 "use client";
 
 import * as React from "react";
-import { ShieldCheck } from "lucide-react";
+import { Fingerprint, ShieldCheck } from "lucide-react";
 import { useTranslations } from "next-intl";
+import type { PublicKeyCredentialRequestOptionsJSON } from "@simplewebauthn/browser";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Spinner } from "@/components/ui/spinner";
+import { useResolveMessage } from "@/components/ui/ActionErrorNotice";
 import { infoTextClass } from "@/components/ui/control-styles";
 import { FactorPicker, type FactorChoice } from "@/components/auth/FactorPicker";
 import { OneTimeCodeInput } from "@/components/auth/OneTimeCodeInput";
 import { STEP_UP_HINT_COOKIE, STEP_UP_WINDOW_SECONDS } from "@/lib/auth/assurance";
+import { passkeyStepUpOptions } from "@/lib/auth/mfa-actions";
+import { assertPasskey, passkeysSupported } from "@/lib/auth/webauthn-client";
+import type { ActionError } from "@/lib/errors";
 
 /**
  * Client half of the step-up ("confirm it's you") check that sensitive
@@ -146,13 +153,22 @@ export function StepUpField({
    * without 2FA.
    */
   requireFresh?: boolean;
-  /** Why a code is asked for here. Defaults to the generic "sensitive change". */
+  /** Why a code is asked for here. Defaults to the generic "sensitive change".
+   *  An account confirming with a passkey sees the passkey wording instead. */
   description?: string;
 }) {
   const t = useTranslations("Auth.stepUp");
   const { enrolled, factors, markFresh } = React.useContext(StepUpContext);
   const required = useStepUpRequired();
   const show = always || (requireFresh && enrolled) || required || Boolean(state?.stepUp);
+
+  const apps = React.useMemo(() => factors.filter((f) => f.type !== "passkey"), [factors]);
+  const hasPasskey = factors.some((f) => f.type === "passkey");
+  // A passkey first whenever the account has one: it is one tap, and it is
+  // the stronger of the two. The app stays a click away for an account that
+  // also has one (a phone left at home).
+  const [method, setMethod] = React.useState<"passkey" | "code">(hasPasskey ? "passkey" : "code");
+  const usePasskey = hasPasskey && method === "passkey";
 
   // A submit that went through WITH a code reopened the server's window, so
   // the next sensitive form on the page need not ask again.
@@ -171,14 +187,151 @@ export function StepUpField({
     >
       <p className="flex items-start gap-2 font-inter text-sm text-foreground">
         <ShieldCheck aria-hidden className="mt-0.5 size-4 shrink-0" />
-        <span>{description ?? t("description")}</span>
+        <span>{usePasskey ? t("passkeyDescription") : (description ?? t("description"))}</span>
       </p>
-      <FactorPicker factors={factors} name="mfa_factor_id" id={`${id}-factor`} />
-      <div className="flex flex-col gap-2">
-        <Label htmlFor={`${id}-code`}>{t("codeLabel")}</Label>
-        <OneTimeCodeInput id={`${id}-code`} name="mfa_code" required />
-        <p className={infoTextClass}>{t("codeHint")}</p>
-      </div>
+      {usePasskey ? (
+        <PasskeyConfirm id={id} state={state} />
+      ) : (
+        <>
+          <FactorPicker factors={apps} name="mfa_factor_id" id={`${id}-factor`} />
+          <div className="flex flex-col gap-2">
+            <Label htmlFor={`${id}-code`}>{t("codeLabel")}</Label>
+            <OneTimeCodeInput id={`${id}-code`} name="mfa_code" required />
+            <p className={infoTextClass}>{t("codeHint")}</p>
+          </div>
+        </>
+      )}
+      {hasPasskey && apps.length > 0 && (
+        <button
+          type="button"
+          onClick={() => setMethod(usePasskey ? "code" : "passkey")}
+          className="w-fit font-inter text-xs text-muted-foreground underline decoration-border underline-offset-4 transition-colors duration-base ease-standard hover:text-foreground hover:decoration-foreground motion-reduce:transition-none"
+        >
+          {usePasskey ? t("useCodeInstead") : t("usePasskeyInstead")}
+        </button>
+      )}
+    </div>
+  );
+}
+
+type StepUpChallenge = { options: PublicKeyCredentialRequestOptionsJSON; slip: string };
+
+/**
+ * "Confirm with passkey": runs the passkey prompt, puts the signed result in
+ * the form (`mfa_passkey` + `mfa_passkey_slip`, which requireStepUpState
+ * verifies), and submits the form it sits in, so the confirmation IS the save.
+ *
+ * The options are fetched as soon as this shows, not on click: Safari refuses
+ * a passkey prompt that is not started directly by the click. Each challenge
+ * is single-use, so after a submit they are fetched again, but only once the
+ * action has answered (fetching while it runs could race it).
+ */
+function PasskeyConfirm({ id, state }: { id: string; state?: object }) {
+  const t = useTranslations("Auth.stepUp");
+  const resolve = useResolveMessage();
+  const wrapper = React.useRef<HTMLDivElement>(null);
+  const credentialInput = React.useRef<HTMLInputElement>(null);
+  const slipInput = React.useRef<HTMLInputElement>(null);
+  const [challenge, setChallenge] = React.useState<StepUpChallenge | null>(null);
+  const [error, setError] = React.useState<ActionError | string | null>(null);
+  // Loading the options failed; the button then retries the load.
+  const [loadFailed, setLoadFailed] = React.useState(false);
+  // idle: ready (or fetching); working: the prompt is open; sent: the form is
+  // submitting with a spent challenge, so nothing is fetched until it answers.
+  const [phase, setPhase] = React.useState<"idle" | "working" | "sent">("idle");
+
+  // The action answered (a new state object): the challenge it carried is
+  // spent either way, so start over. Adjusted during render, React's pattern
+  // for resetting state when a prop changes.
+  const [seenState, setSeenState] = React.useState(state);
+  if (seenState !== state) {
+    setSeenState(state);
+    setPhase("idle");
+    setChallenge(null);
+  }
+
+  React.useEffect(() => {
+    if (challenge || loadFailed || phase !== "idle") return;
+    let live = true;
+    void passkeyStepUpOptions().then((result) => {
+      if (!live) return;
+      if (result.options && result.slip) {
+        setChallenge({ options: result.options, slip: result.slip });
+      } else {
+        setLoadFailed(true);
+        setError(result.error ?? t("passkeyFailed"));
+      }
+    });
+    return () => {
+      live = false;
+    };
+  }, [challenge, loadFailed, phase, t]);
+
+  const loading = !challenge && !loadFailed && phase === "idle";
+
+  async function confirm() {
+    setError(null);
+    if (!passkeysSupported()) {
+      setError(t("passkeyUnsupported"));
+      return;
+    }
+    if (!challenge) {
+      // The load failed: this click tries it again.
+      setLoadFailed(false);
+      return;
+    }
+    setPhase("working");
+    const outcome = await assertPasskey(challenge.options);
+    if (!outcome.ok) {
+      setPhase("idle");
+      setError(
+        outcome.reason === "cancelled"
+          ? t("passkeyCancelled")
+          : outcome.reason === "unsupported"
+            ? t("passkeyUnsupported")
+            : t("passkeyFailed"),
+      );
+      return;
+    }
+    setPhase("sent");
+    if (credentialInput.current) credentialInput.current.value = outcome.credential;
+    if (slipInput.current) slipInput.current.value = challenge.slip;
+    wrapper.current?.closest("form")?.requestSubmit();
+  }
+
+  const working = phase !== "idle";
+
+  return (
+    <div ref={wrapper} className="flex flex-col gap-2" data-passkey-ready={challenge ? "" : undefined}>
+      {/* Uncontrolled on purpose: React resets the form after the action runs,
+          which empties these, and a spent assertion must not be sent twice. */}
+      <input ref={credentialInput} type="hidden" name="mfa_passkey" defaultValue="" />
+      <input ref={slipInput} type="hidden" name="mfa_passkey_slip" defaultValue="" />
+      <Button
+        type="button"
+        variant="secondary"
+        onClick={confirm}
+        disabled={working || loading}
+        className="w-full sm:w-fit"
+        data-passkey-confirm={id}
+      >
+        {working ? (
+          <>
+            <Spinner />
+            {t("passkeyWaiting")}
+          </>
+        ) : (
+          <>
+            <Fingerprint aria-hidden className="size-4" />
+            {t("passkeyButton")}
+          </>
+        )}
+      </Button>
+      {error && (
+        <p role="alert" className="font-inter text-sm font-medium text-destructive">
+          {typeof error === "string" ? error : resolve(error.message)}
+        </p>
+      )}
     </div>
   );
 }

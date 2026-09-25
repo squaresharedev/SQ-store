@@ -7,6 +7,7 @@ import {
   ageSession,
   authenticator,
   claimsOf,
+  chooseAuthenticatorApp,
   enableTwoFactor,
   markSignsInWithGoogle,
   nextCode,
@@ -73,6 +74,7 @@ test.describe("two-factor setup", () => {
     await expect(page.locator('[data-two-factor-status="off"]')).toBeVisible();
     await page.getByRole("button", { name: "Set up two-factor authentication" }).click();
     const dialog = page.getByRole("dialog");
+    await chooseAuthenticatorApp(dialog);
 
     // Step 1: a stolen session must not be able to enrol its own phone.
     await dialog.getByLabel("Current password").fill("not-my-password");
@@ -111,7 +113,7 @@ test.describe("two-factor setup", () => {
 
     // On, with the authenticator listed and the recovery-code count.
     await expect(page.locator('[data-two-factor-status="on"]')).toBeVisible({ timeout: 20_000 });
-    await expect(page.getByRole("list", { name: "Authenticator apps" })).toContainText("Authenticator app");
+    await expect(page.getByRole("list", { name: "Passkeys and authenticator apps" })).toContainText("Authenticator app");
     await expect(page.locator("[data-recovery-remaining]")).toHaveAttribute("data-recovery-remaining", "10");
 
     // This session was upgraded to aal2 on the spot.
@@ -160,6 +162,7 @@ test.describe("two-factor setup", () => {
     await page.waitForLoadState("networkidle").catch(() => {});
     await page.getByRole("button", { name: "Set up two-factor authentication" }).click();
     const dialog = page.getByRole("dialog");
+    await chooseAuthenticatorApp(dialog);
     await expect(dialog.getByText(/signed in a moment ago/i)).toBeVisible();
     await expect(dialog.getByLabel(/password/i)).toHaveCount(0);
     await dialog.getByRole("button", { name: "Continue" }).click();
@@ -181,6 +184,7 @@ test.describe("two-factor setup", () => {
     await page.waitForLoadState("networkidle").catch(() => {});
     await page.getByRole("button", { name: "Set up two-factor authentication" }).click();
     const dialog = page.getByRole("dialog");
+    await chooseAuthenticatorApp(dialog);
 
     // The prompt says which password, and offers the way they really sign in.
     await expect(dialog.getByLabel("Square Share password")).toBeVisible();
@@ -229,6 +233,7 @@ test.describe("two-factor setup", () => {
     await page.waitForLoadState("networkidle").catch(() => {});
     await page.getByRole("button", { name: "Set up two-factor authentication" }).click();
     const dialog = page.getByRole("dialog");
+    await chooseAuthenticatorApp(dialog);
     await dialog.getByLabel("Current password").fill(user.password);
     await dialog.getByRole("button", { name: "Continue" }).click();
     await expect(dialog.getByLabel("Setup key", { exact: true })).toBeVisible({ timeout: 20_000 });
@@ -291,6 +296,7 @@ test.describe("two-factor setup", () => {
 
     await page.getByRole("button", { name: "Set up two-factor authentication" }).click();
     const dialog = page.getByRole("dialog");
+    await chooseAuthenticatorApp(dialog);
     await expect(dialog).toBeVisible();
     await dialog.getByLabel("Current password").fill(user.password);
     await dialog.getByRole("button", { name: "Continue" }).click();
@@ -320,6 +326,7 @@ test.describe("two-factor setup on a phone", () => {
 
     await page.getByRole("button", { name: "Set up two-factor authentication" }).click();
     const dialog = page.getByRole("dialog");
+    await chooseAuthenticatorApp(dialog);
     await dialog.getByLabel("Current password").fill(user.password);
     await dialog.getByRole("button", { name: "Continue" }).click();
     await expect(dialog.getByLabel("Setup key", { exact: true })).toBeVisible({ timeout: 20_000 });

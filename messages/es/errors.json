@@ -133,7 +133,10 @@
     "invalid": "Ese código no ha funcionado. Revisa tu aplicación de autenticación e inténtalo de nuevo.",
     "rateLimited": "Demasiados intentos. Espera unos minutos y vuelve a intentarlo.",
     "replayed": "Ese código ya se ha usado. Espera al siguiente en tu aplicación.",
-    "unavailable": "No hemos podido comprobar ese código ahora mismo. Inténtalo de nuevo en un momento."
+    "unavailable": "No hemos podido comprobar ese código ahora mismo. Inténtalo de nuevo en un momento.",
+    "passkeyRequired": "Primero confirma con tu llave de acceso que eres tú.",
+    "passkeyInvalid": "Esa llave de acceso no ha funcionado. Inténtalo de nuevo.",
+    "passkeyExpired": "Ha tardado demasiado. Vuelve a confirmar con tu llave de acceso."
   },
   "mfa": {
     "signInExpired": "Tu inicio de sesión ha caducado. Inicia sesión de nuevo.",
@@ -532,5 +535,11 @@
     },
     "invalid": "Esos ajustes de la página de producto no son válidos.",
     "invalidFix": "Comprueba el campo indicado arriba contra `limits` en un GET de esta URL, e inténtalo de nuevo."
+  },
+  "passkey": {
+    "unavailable": "Las llaves de acceso no están disponibles ahora mismo. Usa una aplicación de autenticación.",
+    "createFailed": "No hemos podido comprobar esa llave de acceso. Intenta crearla de nuevo.",
+    "signInFailed": "Esa llave de acceso no ha funcionado con esta cuenta. Inténtalo de nuevo o usa otra forma de iniciar sesión.",
+    "expired": "Ha tardado demasiado. Vuelve a intentarlo con tu llave de acceso."
   }
 }

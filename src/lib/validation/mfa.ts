@@ -1,4 +1,6 @@
 import { oneTimeCode, singleLineText, uuidField } from "@/lib/validation/inputs";
+import { issueKey } from "@/lib/validation/messages";
+import { PASSKEY_FACTOR_PREFIX } from "@/lib/auth/assurance";
 
 /**
  * Two-factor inputs. The server boundary: every 2FA action re-parses through
@@ -11,7 +13,17 @@ export const FACTOR_NAME_MAX = 40;
 export const factorNameSchema = singleLineText({
   field: "factorName",
   max: FACTOR_NAME_MAX,
+}).refine((value) => !value.toLowerCase().startsWith(PASSKEY_FACTOR_PREFIX), {
+  // The prefix marks a passkey's factor at GoTrue (lib/auth/assurance.ts), so
+  // an app may not borrow it and be shown as one.
+  error: issueKey("Validation.text.factorName.reserved"),
 });
+
+/**
+ * The browser's WebAuthn response, as JSON text. Its shape is checked by the
+ * WebAuthn library; this only bounds how much text is even looked at.
+ */
+export const PASSKEY_CREDENTIAL_MAX = 16_000;
 
 /** A six-digit authenticator code, spaces tolerated. */
 export const totpCodeSchema = oneTimeCode("authenticator");

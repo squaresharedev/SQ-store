@@ -133,7 +133,10 @@
     "invalid": "Ten kod nie zadziałał. Sprawdź aplikację uwierzytelniającą i spróbuj ponownie.",
     "rateLimited": "Zbyt wiele prób. Odczekaj kilka minut i spróbuj ponownie.",
     "replayed": "Ten kod został już użyty. Poczekaj na następny w aplikacji.",
-    "unavailable": "Nie udało się teraz sprawdzić tego kodu. Spróbuj za chwilę."
+    "unavailable": "Nie udało się teraz sprawdzić tego kodu. Spróbuj za chwilę.",
+    "passkeyRequired": "Najpierw potwierdź kluczem dostępu, że to ty.",
+    "passkeyInvalid": "Ten klucz dostępu nie zadziałał. Spróbuj ponownie.",
+    "passkeyExpired": "Trwało to zbyt długo. Potwierdź ponownie kluczem dostępu."
   },
   "mfa": {
     "signInExpired": "Logowanie wygasło. Zaloguj się ponownie.",
@@ -532,5 +535,11 @@
     },
     "invalid": "Te ustawienia strony produktu są nieprawidłowe.",
     "invalidFix": "Sprawdź pole wskazane powyżej względem `limits` z zapytania GET pod tym adresem URL, a potem spróbuj ponownie."
+  },
+  "passkey": {
+    "unavailable": "Klucze dostępu są teraz niedostępne. Użyj zamiast tego aplikacji uwierzytelniającej.",
+    "createFailed": "Nie udało się sprawdzić tego klucza dostępu. Spróbuj utworzyć go ponownie.",
+    "signInFailed": "Ten klucz dostępu nie zadziałał dla tego konta. Spróbuj ponownie albo zaloguj się w inny sposób.",
+    "expired": "Trwało to zbyt długo. Spróbuj ponownie użyć klucza dostępu."
   }
 }

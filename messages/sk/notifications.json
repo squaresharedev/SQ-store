@@ -89,19 +89,19 @@
       },
       "twoFactorEnabled": {
         "title": "Dvojfaktorové overenie je zapnuté",
-        "body": "Prihlásenie do vášho účtu teraz vyžaduje kód z overovacej aplikácie a všetky ostatné zariadenia boli odhlásené. Ak ste to neboli vy, zmeňte heslo a kontaktujte podporu."
+        "body": "Prihlásenie do vášho účtu teraz vyžaduje prístupový kľúč alebo kód z overovacej aplikácie a všetky ostatné zariadenia boli odhlásené. Ak ste to neboli vy, zmeňte heslo a kontaktujte podporu."
       },
       "factorAdded": {
-        "title": "Bola pridaná overovacia aplikácia",
+        "title": "Bol pridaný prístupový kľúč alebo overovacia aplikácia",
         "body": "Aplikáciu „{name}“ je teraz možné použiť na prihlásenie do vášho účtu. Ak ste to neboli vy, odoberte ju v sekcii Nastavenia › Zabezpečenie a zmeňte heslo.",
         "bodyUnnamed": "Aplikáciu „Overovacia aplikácia“ je teraz možné použiť na prihlásenie do vášho účtu. Ak ste to neboli vy, odoberte ju v sekcii Nastavenia › Zabezpečenie a zmeňte heslo."
       },
       "twoFactorDisabled": {
         "title": "Dvojfaktorové overenie je vypnuté",
-        "body": "Vaša posledná overovacia aplikácia bola odobratá, takže prihlásenie teraz vyžaduje iba heslo. Ak ste to neboli vy, zmeňte heslo a dvojfaktorové overenie opäť zapnite."
+        "body": "Bol odobratý váš posledný prístupový kľúč alebo overovacia aplikácia, takže prihlásenie teraz vyžaduje iba heslo. Ak ste to neboli vy, zmeňte heslo a dvojfaktorové overenie opäť zapnite."
       },
       "factorRemoved": {
-        "title": "Overovacia aplikácia bola odobratá",
+        "title": "Bol odobratý prístupový kľúč alebo overovacia aplikácia",
         "body": "Aplikáciu „{name}“ už nie je možné použiť na prihlásenie do vášho účtu. Ak ste to neboli vy, ihneď zmeňte heslo."
       },
       "recoveryCodesRegenerated": {

@@ -89,19 +89,19 @@
       },
       "twoFactorEnabled": {
         "title": "L’authentification à deux facteurs est activée",
-        "body": "Se connecter à votre compte nécessite désormais un code de votre application d’authentification, et tous les autres appareils ont été déconnectés. Si ce n’était pas vous, changez votre mot de passe et contactez le support."
+        "body": "Se connecter à votre compte nécessite désormais votre clé d’accès ou un code de votre application d’authentification, et tous les autres appareils ont été déconnectés. Si ce n’était pas vous, changez votre mot de passe et contactez le support."
       },
       "factorAdded": {
-        "title": "Une application d’authentification a été ajoutée",
+        "title": "Une clé d’accès ou une application d’authentification a été ajoutée",
         "body": "« {name} » peut désormais servir à se connecter à votre compte. Si ce n’était pas vous, supprimez-la dans Paramètres › Sécurité et changez votre mot de passe.",
         "bodyUnnamed": "« Application d’authentification » peut désormais servir à se connecter à votre compte. Si ce n’était pas vous, supprimez-la dans Paramètres › Sécurité et changez votre mot de passe."
       },
       "twoFactorDisabled": {
         "title": "L’authentification à deux facteurs est désactivée",
-        "body": "Votre dernière application d’authentification a été supprimée : se connecter ne nécessite plus que votre mot de passe. Si ce n’était pas vous, changez votre mot de passe et réactivez l’authentification à deux facteurs."
+        "body": "Votre dernière clé d’accès ou application d’authentification a été supprimée : se connecter ne nécessite plus que votre mot de passe. Si ce n’était pas vous, changez votre mot de passe et réactivez l’authentification à deux facteurs."
       },
       "factorRemoved": {
-        "title": "Une application d’authentification a été supprimée",
+        "title": "Une clé d’accès ou une application d’authentification a été supprimée",
         "body": "« {name} » ne peut plus servir à se connecter à votre compte. Si ce n’était pas vous, changez votre mot de passe maintenant."
       },
       "recoveryCodesRegenerated": {

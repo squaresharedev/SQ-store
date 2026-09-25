@@ -89,19 +89,19 @@
       },
       "twoFactorEnabled": {
         "title": "Tweestapsverificatie staat aan",
-        "body": "Om in te loggen op je account is nu een code uit je authenticator-app nodig, en alle andere apparaten zijn uitgelogd. Was jij dit niet? Wijzig dan je wachtwoord en neem contact op met support."
+        "body": "Om in te loggen op je account is nu je toegangssleutel of een code uit je authenticator-app nodig, en alle andere apparaten zijn uitgelogd. Was jij dit niet? Wijzig dan je wachtwoord en neem contact op met support."
       },
       "factorAdded": {
-        "title": "Er is een authenticator-app toegevoegd",
+        "title": "Er is een toegangssleutel of authenticator-app toegevoegd",
         "body": "Met “{name}” kun je nu inloggen op je account. Was jij dit niet? Verwijder de app dan via Instellingen › Beveiliging en wijzig je wachtwoord.",
         "bodyUnnamed": "Met “Authenticator-app” kun je nu inloggen op je account. Was jij dit niet? Verwijder de app dan via Instellingen › Beveiliging en wijzig je wachtwoord."
       },
       "twoFactorDisabled": {
         "title": "Tweestapsverificatie staat uit",
-        "body": "Je laatste authenticator-app is verwijderd, dus inloggen gaat nu alleen met je wachtwoord. Was jij dit niet? Wijzig dan je wachtwoord en zet tweestapsverificatie weer aan."
+        "body": "Je laatste toegangssleutel of authenticator-app is verwijderd, dus inloggen gaat nu alleen met je wachtwoord. Was jij dit niet? Wijzig dan je wachtwoord en zet tweestapsverificatie weer aan."
       },
       "factorRemoved": {
-        "title": "Er is een authenticator-app verwijderd",
+        "title": "Er is een toegangssleutel of authenticator-app verwijderd",
         "body": "Met “{name}” kun je niet meer inloggen op je account. Was jij dit niet? Wijzig dan nu je wachtwoord."
       },
       "recoveryCodesRegenerated": {

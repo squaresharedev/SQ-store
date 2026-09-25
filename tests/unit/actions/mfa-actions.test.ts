@@ -61,6 +61,30 @@ vi.mock("@/lib/auth/mfa", async (importOriginal) => {
   };
 });
 
+// The passkey building blocks (WebAuthn verification, sealed storage, the
+// factor completion) are pinned in passkey-primitives and the e2e spec; here
+// they are stand-ins, and what is pinned is each passkey action's contract.
+const pk = vi.hoisted(() => ({
+  passkeysConfigured: vi.fn(),
+  registrationOptions: vi.fn(),
+  credentialIdsFor: vi.fn(),
+  verifyRegistration: vi.fn(),
+  storePasskey: vi.fn(),
+  forgetPasskey: vi.fn(),
+  completeFactor: vi.fn(),
+  authenticationOptions: vi.fn(),
+  verifyAssertion: vi.fn(),
+}));
+vi.mock("@/lib/auth/passkeys", async (importOriginal) => {
+  const real = await importOriginal<typeof import("@/lib/auth/passkeys")>();
+  return {
+    parseCredential: real.parseCredential,
+    ...Object.fromEntries(
+      Object.entries(pk).map(([name, fn]) => [name, (...args: unknown[]) => fn(...args)]),
+    ),
+  };
+});
+
 const hasPasswordMock = vi.fn();
 vi.mock("@/lib/auth/has-password", () => ({
   accountHasPassword: (...args: unknown[]) => hasPasswordMock(...args),
@@ -91,8 +115,11 @@ vi.mock("@/i18n/cookie", () => ({
 }));
 
 import {
+  beginPasskeySetup,
   beginTwoFactorSetup,
   cancelTwoFactorSetup,
+  confirmPasskeySetup,
+  verifyPasskeySignIn,
   confirmIdentity,
   confirmTwoFactorSetup,
   regenerateRecoveryCodes,
@@ -859,5 +886,214 @@ describe("English is unchanged", () => {
     expect(errorText(await regenerateRecoveryCodes({}, form({})))).toBe(
       "Turn on two-factor authentication first.",
     );
+  });
+});
+
+// ---- passkeys ---------------------------------------------------------------
+
+const CREDENTIAL = JSON.stringify({ id: "cred-1", type: "public-key", response: {} });
+const PASSKEY_SECRET = "JBSWY3DPEHPK3PXP";
+
+describe("passkeys", () => {
+  beforeEach(() => {
+    for (const fn of Object.values(pk)) fn.mockReset();
+    pk.passkeysConfigured.mockResolvedValue(true);
+    pk.registrationOptions.mockResolvedValue({ challenge: "reg-challenge", rp: { id: "localhost" } });
+    pk.credentialIdsFor.mockResolvedValue(["old-cred"]);
+    pk.verifyRegistration.mockResolvedValue({
+      ok: true,
+      passkey: {
+        factorId: PENDING,
+        secret: PASSKEY_SECRET,
+        name: "iPhone",
+        credentialId: "cred-1",
+        publicKey: "pk",
+        signCount: 0,
+        transports: ["internal"],
+        backedUp: true,
+      },
+    });
+    pk.storePasskey.mockResolvedValue(true);
+    pk.forgetPasskey.mockResolvedValue(undefined);
+    pk.completeFactor.mockResolvedValue({ ok: true });
+    pk.verifyAssertion.mockResolvedValue({ ok: true, factorId: FACTOR, secret: PASSKEY_SECRET });
+    enrollMock.mockResolvedValue({
+      data: {
+        id: PENDING,
+        type: "totp",
+        totp: { qr_code: "<svg/>", secret: PASSKEY_SECRET, uri: "otpauth://x" },
+      },
+      error: null,
+    });
+  });
+
+  describe("beginPasskeySetup", () => {
+    it("enrols a factor marked as a passkey and hands the browser options, never the secret", async () => {
+      sessionStateMock.mockResolvedValue(state("signed_in", { enrolled: false, signedInAt: now() - 60 }));
+      const result = await beginPasskeySetup({}, form({ name: "iPhone" }));
+
+      expect(enrollMock).toHaveBeenCalledWith({
+        factorType: "totp",
+        friendlyName: "passkey:iPhone",
+        issuer: "Square Share",
+      });
+      expect(pk.registrationOptions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          factorId: PENDING,
+          secret: PASSKEY_SECRET,
+          name: "iPhone",
+          excludeCredentialIds: ["old-cred"],
+        }),
+      );
+      expect(result.registration).toEqual({
+        factorId: PENDING,
+        options: { challenge: "reg-challenge", rp: { id: "localhost" } },
+      });
+      expect(JSON.stringify(result)).not.toContain(PASSKEY_SECRET);
+    });
+
+    it("adding one to an account with 2FA takes an existing factor in THIS request", async () => {
+      sessionStateMock.mockResolvedValue(state("signed_in"));
+      mfa.requireStepUpState.mockResolvedValue(CODE_PLEASE);
+      expect(await beginPasskeySetup({}, form({ name: "iPhone" }))).toEqual(CODE_PLEASE);
+      expect(mfa.requireStepUpState).toHaveBeenCalledWith(expect.any(FormData), { maxAgeSeconds: 0 });
+      expect(enrollMock).not.toHaveBeenCalled();
+    });
+
+    it("refuses when this deployment has no passkeys configured", async () => {
+      sessionStateMock.mockResolvedValue(state("signed_in", { enrolled: false }));
+      pk.passkeysConfigured.mockResolvedValue(false);
+      expect(errorText(await beginPasskeySetup({}, form({ name: "iPhone" })))).toMatch(/aren't available/);
+      expect(enrollMock).not.toHaveBeenCalled();
+    });
+
+    it("withdraws the factor if the options cannot be made", async () => {
+      sessionStateMock.mockResolvedValue(state("signed_in", { enrolled: false, signedInAt: now() - 60 }));
+      pk.registrationOptions.mockResolvedValue(null);
+      expect(errorText(await beginPasskeySetup({}, form({ name: "iPhone" })))).toMatch(/couldn't start setup/);
+      expect(unenrollMock).toHaveBeenCalledWith({ factorId: PENDING });
+    });
+  });
+
+  describe("confirmPasskeySetup", () => {
+    const pendingOnly = () =>
+      state("signed_in", { enrolled: false, factors: [{ ...pendingFactor, id: PENDING }] });
+
+    it("stores the passkey BEFORE the factor goes live, then issues recovery codes", async () => {
+      sessionStateMock.mockResolvedValue(pendingOnly());
+      const order: string[] = [];
+      pk.storePasskey.mockImplementation(async () => {
+        order.push("store");
+        return true;
+      });
+      pk.completeFactor.mockImplementation(async () => {
+        order.push("complete");
+        return { ok: true };
+      });
+
+      const result = await confirmPasskeySetup({}, form({ credential: CREDENTIAL }));
+
+      expect(order).toEqual(["store", "complete"]);
+      expect(pk.completeFactor).toHaveBeenCalledWith(client, PENDING, PASSKEY_SECRET);
+      expect(revokeOthersMock).toHaveBeenCalled();
+      expect(result).toEqual({ done: true, codes: ["aaaa-bbbb-cccc-dddd"] });
+    });
+
+    it("a factor that could not go live leaves no passkey behind", async () => {
+      sessionStateMock.mockResolvedValue(pendingOnly());
+      pk.completeFactor.mockResolvedValue({ ok: false, reason: "unavailable" });
+      expect(errorText(await confirmPasskeySetup({}, form({ credential: CREDENTIAL })))).toMatch(
+        /couldn't start setup/,
+      );
+      expect(pk.forgetPasskey).toHaveBeenCalledWith(USER_ID, PENDING);
+      expect(unenrollMock).toHaveBeenCalledWith({ factorId: PENDING });
+      expect(mfa.issueRecoveryCodes).not.toHaveBeenCalled();
+    });
+
+    it("a credential that does not verify stores nothing and switches nothing on", async () => {
+      sessionStateMock.mockResolvedValue(pendingOnly());
+      pk.verifyRegistration.mockResolvedValue({ ok: false, reason: "invalid" });
+      expect(errorText(await confirmPasskeySetup({}, form({ credential: CREDENTIAL })))).toMatch(
+        /couldn't check that passkey/,
+      );
+      expect(pk.storePasskey).not.toHaveBeenCalled();
+      expect(pk.completeFactor).not.toHaveBeenCalled();
+    });
+
+    it("only for this account's own PENDING factor", async () => {
+      // The slip names a factor that is already verified: not a setup any more.
+      sessionStateMock.mockResolvedValue(
+        state("signed_in", { enrolled: false, factors: [{ ...verifiedFactor, id: PENDING }] }),
+      );
+      expect(errorText(await confirmPasskeySetup({}, form({ credential: CREDENTIAL })))).toMatch(/expired/);
+      expect(pk.storePasskey).not.toHaveBeenCalled();
+    });
+
+    it("refuses anything that is not a credential, and any extra field", async () => {
+      sessionStateMock.mockResolvedValue(pendingOnly());
+      expect(errorText(await confirmPasskeySetup({}, form({ credential: "{}" })))).toMatch(
+        /couldn't check that passkey/,
+      );
+      expect(
+        errorText(await confirmPasskeySetup({}, form({ credential: CREDENTIAL, factor_id: PENDING }))),
+      ).toMatch(/unexpected field/i);
+      expect(pk.verifyRegistration).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("verifyPasskeySignIn", () => {
+    it("completes the factor the passkey unlocked, then goes on", async () => {
+      sessionStateMock.mockResolvedValue(state("needs_mfa"));
+      const url = await redirectOf(
+        verifyPasskeySignIn({}, form({ credential: CREDENTIAL, slip: "slip", next: "/orders" })),
+      );
+      expect(url).toBe("/orders");
+      expect(pk.verifyAssertion).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: USER_ID,
+          purpose: "sign_in",
+          slip: "slip",
+          verifiedFactorIds: [FACTOR],
+        }),
+      );
+      expect(pk.completeFactor).toHaveBeenCalledWith(client, FACTOR, PASSKEY_SECRET);
+    });
+
+    it("a passkey that does not verify is logged like a wrong code, and unlocks nothing", async () => {
+      sessionStateMock.mockResolvedValue(state("needs_mfa"));
+      pk.verifyAssertion.mockResolvedValue({ ok: false, reason: "invalid" });
+      const result = await verifyPasskeySignIn({}, form({ credential: CREDENTIAL, slip: "slip", next: "/" }));
+      expect(errorText(result)).toMatch(/didn't work for this account/);
+      expect(recordMock).toHaveBeenCalledWith({ userId: USER_ID, event: "mfa.challenge_failed" });
+      expect(pk.completeFactor).not.toHaveBeenCalled();
+    });
+
+    it("spends the same budget as a code, before checking anything", async () => {
+      sessionStateMock.mockResolvedValue(state("needs_mfa"));
+      mfa.takeSecondFactorAttempt.mockResolvedValue(false);
+      const result = await verifyPasskeySignIn({}, form({ credential: CREDENTIAL, slip: "slip", next: "/" }));
+      expect(errorText(result)).toMatch(/too many/i);
+      expect(pk.verifyAssertion).not.toHaveBeenCalled();
+    });
+
+    it("is only for a session that still owes its second factor", async () => {
+      sessionStateMock.mockResolvedValue(state("signed_in"));
+      expect(
+        await redirectOf(verifyPasskeySignIn({}, form({ credential: CREDENTIAL, slip: "s", next: "/x" }))),
+      ).toBe("/x");
+      expect(pk.verifyAssertion).not.toHaveBeenCalled();
+      sessionStateMock.mockResolvedValue({ kind: "signed_out" });
+      expect(
+        errorText(await verifyPasskeySignIn({}, form({ credential: CREDENTIAL, slip: "s", next: "/" }))),
+      ).toMatch(/expired/);
+    });
+
+    it("an assertion without its slip is refused as expired, before any check", async () => {
+      sessionStateMock.mockResolvedValue(state("needs_mfa"));
+      expect(errorText(await verifyPasskeySignIn({}, form({ credential: CREDENTIAL, next: "/" })))).toMatch(
+        /took too long/,
+      );
+      expect(pk.verifyAssertion).not.toHaveBeenCalled();
+    });
   });
 });

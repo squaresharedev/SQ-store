@@ -42,19 +42,23 @@ database-level enforcement.
 
 ## What the person sees
 
-- **Setup**: Settings › Security › "Set up two-factor authentication". Prove
-  it's you: a sign-in in the last 10 minutes counts on its own; otherwise the
-  account's password, or "Confirm with Google" for an account that signs in
-  with Google (it signs in again and comes straight back). Then scan the QR
-  code or type the key, enter the first code, save ten recovery codes. Every
-  other session is signed out when it turns on.
+- **Setup**: Settings › Security › "Set up two-factor authentication". Choose
+  a **passkey** (the default, marked Recommended: Face ID, a fingerprint or
+  the screen lock, nothing to install; on a computer the browser shows a QR
+  code to scan with the phone's own camera) or an **authenticator app**.
+  Prove it's you: a sign-in in the last 10 minutes counts on its own;
+  otherwise the account's password, or "Confirm with Google" for an account
+  that signs in with Google (it signs in again and comes straight back). Then
+  create the passkey (one tap), or scan the QR code and enter the first code.
+  Save ten recovery codes. Every other session is signed out when it turns on.
 - **Sign-in**: password (or Google, or a magic link), then
-  `/login/two-factor` for the code. "Use a recovery code instead" is there for
-  a lost phone.
+  `/login/two-factor`: "Use your passkey" first when the account has one, the
+  code box for an app, and "Use a recovery code instead" for a lost phone.
 - **Sensitive actions** (password, email, business details, team invites and
-  roles, account deletion, data export) ask for a fresh code once the last one
-  is more than 10 minutes old. Removing an authenticator, turning 2FA off and
-  generating new recovery codes ask for a code every time.
+  roles, account deletion, data export) ask to confirm it's you once the last
+  confirmation is more than 10 minutes old: "Confirm with passkey" (which also
+  submits the form) or a code. Removing an authenticator, turning 2FA off and
+  generating new recovery codes ask every time.
 - **Nudges while it's off**: a "Turn on two-factor authentication" row at the
   top of the dashboard's Needs attention list, a "Recommended" badge on
   Settings › Security, and a prompt under the password card on Settings ›
@@ -89,6 +93,49 @@ Three layers. Any one of them missing would leave a way round.
    after its owner signed in still cannot do the dangerous things without the
    phone. An account with no password (Google-only) needs a code in the same
    request to change its email, since the code is its only proof.
+
+## Passkeys
+
+**Why this shape.** Supabase's own WebAuthn second factor cannot be enabled
+on hosted projects (the Management API answers "Enabling of MFA with WebAuthn
+not currently supported", checked 2026-09-25). Its passkey *sign-in* can be,
+but it is a first factor: anyone holding the password could register their
+own passkey through GoTrue and walk past a second step built on it.
+
+**How it works.** Each passkey is backed by an ordinary GoTrue TOTP factor
+(named `passkey:<name>`) whose secret only the server knows, sealed with
+AES-GCM in `public.mfa_passkeys` (service role only, migration
+`20260925_passkey_factors.sql`). The browser proves possession of the passkey
+with a WebAuthn assertion (`@simplewebauthn`, user verification required);
+the server verifies it against the stored public key and only then computes
+the factor's current code and completes it at GoTrue. So GoTrue still issues
+`aal2`, still refuses factor, password and email changes to `aal1` sessions,
+and the app gate, the restrictive RLS, step-up and recovery codes all apply
+unchanged. `lib/auth/passkeys.ts` holds the design notes.
+
+- **Challenges** are minted by the server, bound to the account and purpose,
+  and spent once (`webauthn_challenge` in `rate_limit_keys`). Registration
+  carries its challenge and the pending factor's secret in a sealed HttpOnly
+  cookie; sign-in and step-up carry a sealed slip with the form, so a page
+  with several "Confirm with passkey" boxes cannot have them overwrite each
+  other.
+- **A typed code is never checked against a passkey's factor**
+  (`pickFactor`); nobody can know that secret.
+- **Removing a factor by any route removes its passkey**: the table's foreign
+  key to `auth.mfa_factors` cascades.
+
+**Configuration.**
+
+| Setting | Where | Value |
+| --- | --- | --- |
+| `MFA_PASSKEY_KEY` | Worker secret (`wrangler secret put`), `.env.local` for dev | 32 random bytes, base64. Set 2026-09-25. |
+| `WEBAUTHN_RP_ID` | `wrangler.jsonc` vars | `squareshare.eu`. Defaults to the app's host (`localhost` in dev). |
+| `WEBAUTHN_ORIGINS` | test stack only | Extra allowed origins (the e2e stack's `:3100`). |
+
+**Never change `WEBAUTHN_RP_ID` or `MFA_PASSKEY_KEY` once passkeys exist.**
+A new RP ID makes every registered passkey unusable; a new key makes every
+sealed secret unreadable. Either way every passkey user is down to their
+recovery codes.
 
 ## Verified against production GoTrue
 
@@ -182,17 +229,22 @@ Also:
 - **SQ-admin** signs staff in itself and does not ask for a second factor.
   Staff accounts are the highest-value accounts in the system; the admin panel
   should require `aal2`.
-- **Passkeys (WebAuthn)** are phishing-resistant where TOTP is not. Supabase
-  has WebAuthn MFA; adding it as a second factor type is the natural next step.
+- **Supabase's native WebAuthn MFA.** Once the hosted platform allows it
+  (`mfa_web_authn_enroll_enabled`), passkeys could move onto it and drop the
+  sealed-TOTP bridge. Not urgent: the bridge keeps every GoTrue guarantee.
 
 ## Tests
 
 - Unit: `tests/unit/mfa-assurance.test.ts`, `mfa-recovery-codes.test.ts`,
   `mfa-step-up.test.ts`, `auth-session-mfa-gate.test.ts`,
-  `auth-reauth.test.ts`, `actions/mfa-actions.test.ts`, plus the step-up
-  invariants in `server-action-security.test.ts`.
-- Database: `tests/integration/22-two-factor-rls.test.ts`.
-- End to end: `tests/e2e/67` to `71` (`*-two-factor-*`). The e2e stack's mock
+  `auth-reauth.test.ts`, `actions/mfa-actions.test.ts`,
+  `passkey-primitives.test.ts` (RFC 6238 vectors, sealing, relying party),
+  plus the step-up invariants in `server-action-security.test.ts`.
+- Database: `tests/integration/22-two-factor-rls.test.ts`,
+  `24-passkey-factors.test.ts`.
+- End to end: `tests/e2e/67` to `70` (`*-two-factor-*`) and
+  `73-two-factor-passkeys.spec.ts`, which drives Chromium's virtual WebAuthn
+  authenticator through real create()/get() ceremonies. The e2e stack's mock
   GoTrue (`tests/e2e/stack/server.mjs`) implements factors, challenges, TOTP
   verification, `aal`/`amr` claims, scoped logout and PKCE password recovery,
   and `tests/e2e/two-factor.ts` plays the part of the phone.

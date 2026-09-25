@@ -228,7 +228,8 @@
     "factorName": {
       "required": "Der Name ist erforderlich.",
       "tooLong": "Der Name darf höchstens {maximum} Zeichen lang sein.",
-      "unsupported": "Der Name enthält nicht unterstützte Zeichen."
+      "unsupported": "Der Name enthält nicht unterstützte Zeichen.",
+      "reserved": "Wähle einen Namen, der nicht mit „passkey:“ beginnt."
     },
     "reportDetails": {
       "required": "Deine Beschreibung ist erforderlich.",

@@ -23,7 +23,13 @@
   "vars": {
     "NEXT_PUBLIC_SUPABASE_URL": "https://vnyfndqpdllwhvhinjoi.supabase.co",
     "NEXT_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZueWZuZHFwZGxsd2h2aGluam9pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzMDExNTYsImV4cCI6MjA5ODg3NzE1Nn0.y_SUEDhSU6fmx2HU8r-DHe4XolwAo7JevqBTLtn6ebI",
-    "NEXT_PUBLIC_APP_URL": "https://dashboard.squareshare.eu"
+    "NEXT_PUBLIC_APP_URL": "https://dashboard.squareshare.eu",
+    // Passkeys (lib/auth/passkeys.ts): the domain every passkey is bound to.
+    // Public by nature (the browser shows it). The parent domain, so a
+    // passkey survives a move between subdomains. NEVER CHANGE IT once
+    // passkeys exist: every one registered would stop working. Its sealing
+    // key is a secret: `wrangler secret put MFA_PASSKEY_KEY`.
+    "WEBAUTHN_RP_ID": "squareshare.eu"
     // NEXT_PUBLIC_TURNSTILE_SITE_KEY: intentionally NOT set here yet. Add it
     // (plus `wrangler secret put TURNSTILE_SECRET_KEY`) once a Turnstile
     // widget exists in the Cloudflare dashboard for this zone — see

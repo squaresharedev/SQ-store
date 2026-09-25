@@ -133,7 +133,10 @@
     "invalid": "Ce code n’a pas fonctionné. Vérifiez votre application d’authentification et réessayez.",
     "rateLimited": "Trop de tentatives. Patientez quelques minutes, puis réessayez.",
     "replayed": "Ce code a déjà été utilisé. Attendez le suivant dans votre application.",
-    "unavailable": "Nous n’avons pas pu vérifier ce code à l’instant. Réessayez dans un moment."
+    "unavailable": "Nous n’avons pas pu vérifier ce code à l’instant. Réessayez dans un moment.",
+    "passkeyRequired": "Confirmez d’abord que c’est bien vous avec votre clé d’accès.",
+    "passkeyInvalid": "Cette clé d’accès n’a pas fonctionné. Réessayez.",
+    "passkeyExpired": "Cela a pris trop de temps. Confirmez à nouveau avec votre clé d’accès."
   },
   "mfa": {
     "signInExpired": "Votre connexion a expiré. Connectez-vous à nouveau.",
@@ -532,5 +535,11 @@
     },
     "invalid": "Ces paramètres de page produit ne sont pas valides.",
     "invalidFix": "Vérifiez le champ nommé ci-dessus par rapport à `limits` d’un GET de cette URL, puis réessayez."
+  },
+  "passkey": {
+    "unavailable": "Les clés d’accès ne sont pas disponibles pour le moment. Utilisez plutôt une application d’authentification.",
+    "createFailed": "Nous n’avons pas pu vérifier cette clé d’accès. Essayez de la créer à nouveau.",
+    "signInFailed": "Cette clé d’accès n’a pas fonctionné pour ce compte. Réessayez ou utilisez un autre moyen de connexion.",
+    "expired": "Cela a pris trop de temps. Réessayez avec votre clé d’accès."
   }
 }

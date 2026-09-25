@@ -3,10 +3,27 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import type {
+  AuthenticationResponseJSON,
+  PublicKeyCredentialCreationOptionsJSON,
+  PublicKeyCredentialRequestOptionsJSON,
+  RegistrationResponseJSON,
+} from "@simplewebauthn/server";
 import { getSessionState, revokeOtherSessions } from "@/lib/auth/session";
-import { RECENT_SIGN_IN_SECONDS, signedInRecently } from "@/lib/auth/assurance";
-import { accountHasPassword } from "@/lib/auth/has-password";
-import { checkPassword } from "@/lib/auth/reauth";
+import { proveSetupOwnership, readyToEnroll, unknownField } from "@/lib/auth/setup-guards";
+import { PASSKEY_FACTOR_PREFIX } from "@/lib/auth/assurance";
+import {
+  authenticationOptions,
+  completeFactor,
+  credentialIdsFor,
+  forgetPasskey,
+  parseCredential,
+  passkeysConfigured,
+  registrationOptions,
+  storePasskey,
+  verifyAssertion,
+  verifyRegistration,
+} from "@/lib/auth/passkeys";
 import {
   SECOND_FACTOR_ERRORS,
   STEP_UP_FIELDS,
@@ -16,7 +33,6 @@ import {
   discardPendingFactors,
   issueRecoveryCodes,
   pickFactor,
-  remainingRecoveryCodes,
   requireStepUpState,
   restoreRecoveryCode,
   spendRecoveryCode,
@@ -40,6 +56,7 @@ import {
   failed,
   invalidInput,
   succeeded,
+  type ActionError,
   type ActionState,
 } from "@/lib/errors";
 import { msg } from "@/i18n/types";
@@ -79,27 +96,6 @@ const RECOVERY_CODE_INVALID: ActionState = failed(
 const FACTOR_NAME_TAKEN: ActionState = failed(invalidInput(msg("Errors.mfa.factorNameTaken")));
 const SETUP_FAILED: ActionState = failed(actionError("server_error", msg("Errors.mfa.setupFailed")));
 const SETUP_EXPIRED: ActionState = failed(invalidInput(msg("Errors.mfa.setupExpired")));
-
-function unknownField(formData: FormData, allowed: readonly string[]): ActionState | null {
-  for (const key of formData.keys()) {
-    if (key.startsWith("$ACTION")) continue;
-    if (!allowed.includes(key)) {
-      return failed(invalidInput(msg("Errors.form.unexpectedField", { field: key })));
-    }
-  }
-  return null;
-}
-
-/** Does this account sign in with Google? Read from GoTrue's own record of
- *  the account's identities, never from anything the form sends. */
-function signsInWithGoogle(user: {
-  identities?: { provider: string }[] | null;
-  app_metadata?: { providers?: unknown };
-}): boolean {
-  if ((user.identities ?? []).some((identity) => identity.provider === "google")) return true;
-  const providers = user.app_metadata?.providers;
-  return Array.isArray(providers) && providers.includes("google");
-}
 
 /** A code that did not parse as six digits, in the schema's own words. */
 function malformedCode(error: z.ZodError): ActionState {
@@ -331,60 +327,12 @@ export async function beginTwoFactorSetup(
     return FACTOR_NAME_TAKEN;
   }
 
-  if (assurance.enrolled) {
-    const refused = await requireStepUpState(formData, { maxAgeSeconds: 0 });
-    if (refused) return refused;
-  } else if (signedInRecently(assurance, RECENT_SIGN_IN_SECONDS)) {
-    // Signed in (by whatever method this account uses) moments ago: that IS
-    // the proof, the same proof the password would give. It is also how a
-    // Google account that has a forgotten password on file gets through:
-    // "Confirm with Google" signs in again and lands back here.
-  } else if (await accountHasPassword(user.id)) {
-    const usesGoogle = signsInWithGoogle(user);
-    const password = String(formData.get("current_password") ?? "");
-    if (!password) {
-      return usesGoogle
-        ? { ...failed(invalidInput(msg("Errors.mfa.passwordRequiredGoogle"))), reauth: true }
-        : failed(invalidInput(msg("Errors.mfa.passwordRequired")));
-    }
-    if (password.length > 72) return failed(invalidInput(msg("Errors.settings.wrongPassword")));
-    // A password oracle, so it spends the same budget as every other re-auth.
-    if (!(await rateLimit("password_reauth", RATE_LIMITS.passwordReauth))) {
-      return failed(actionError("rate_limited", msg("Errors.settings.passwordReauthRateLimited")));
-    }
-    const check = await checkPassword(user.email ?? "", password);
-    if (check === "unavailable") {
-      return failed(actionError("server_error", msg("Errors.mfa.passwordCheckUnavailable")));
-    }
-    if (check === "incorrect") {
-      // The case that actually happened: an account that signs in with
-      // Google also has an old password on file, and the person typed the
-      // one they know (often their Google password). Point them at the way
-      // they really sign in rather than at a password they never use.
-      return usesGoogle
-        ? { ...failed(invalidInput(msg("Errors.mfa.wrongPasswordGoogle"))), reauth: true }
-        : failed(invalidInput(msg("Errors.settings.wrongPassword")));
-    }
-  } else {
-    return {
-      ...failed(actionError("session_expired", msg("Errors.mfa.reauthRequired"))),
-      reauth: true,
-    };
-  }
-
-  if (!(await rateLimit("mfa_enroll", RATE_LIMITS.mfaEnroll))) {
-    return failed(actionError("rate_limited", msg("Errors.mfa.setupRateLimited")));
-  }
-
-  // Turning 2FA ON must never succeed without recovery codes to go with it:
-  // a lost phone would then mean a locked account. So before anything is
-  // enrolled, make sure the code store answers at all (it will not if the
-  // database migration has not been applied yet). Adding a second
-  // authenticator keeps the existing codes, so it does not need this.
-  if (!assurance.enrolled && (await remainingRecoveryCodes(user.id)) === null) {
-    console.error("[mfa] recovery code store unreachable; refusing to start setup");
-    return failed(actionError("server_error", msg("Errors.mfa.setupUnavailable")));
-  }
+  // Who may enrol, and whether enrolling can go ahead at all: the same rules
+  // for an app as for a passkey (lib/auth/setup-guards.ts).
+  const unproven = await proveSetupOwnership(formData, user, assurance);
+  if (unproven) return unproven;
+  const notReady = await readyToEnroll(user.id, assurance);
+  if (notReady) return notReady;
 
   const supabase = await createClient();
   await discardPendingFactors(supabase, user.factors);
@@ -529,6 +477,244 @@ export async function cancelTwoFactorSetup(factorId: string): Promise<void> {
   if (!pending) return;
   const supabase = await createClient();
   await supabase.auth.mfa.unenroll({ factorId: pending.id }).catch(() => undefined);
+}
+
+// ---------------------------------------------------------------------------
+// Passkeys (see lib/auth/passkeys.ts for how a passkey is a second factor)
+// ---------------------------------------------------------------------------
+
+const PASSKEYS_UNAVAILABLE: ActionState = failed(
+  actionError("server_error", msg("Errors.passkey.unavailable")),
+);
+
+export type BeginPasskeySetupState = ActionState & {
+  reauth?: boolean;
+  /** Step 1 done: what the browser needs to create the passkey. */
+  registration?: {
+    factorId: string;
+    options: PublicKeyCredentialCreationOptionsJSON;
+  };
+};
+
+/**
+ * Step 1 of a passkey: the same proof of ownership as an authenticator app
+ * (lib/auth/setup-guards.ts), then a pending GoTrue factor whose secret stays
+ * on the server, and the options the browser creates the passkey from.
+ */
+export async function beginPasskeySetup(
+  _prev: BeginPasskeySetupState,
+  formData: FormData,
+): Promise<BeginPasskeySetupState> {
+  const rejected = unknownField(formData, ["name", "current_password", ...STEP_UP_FIELDS]);
+  if (rejected) return rejected;
+
+  const state = await getSessionState();
+  if (state.kind !== "signed_in") return SESSION_EXPIRED;
+  const { user, assurance } = state;
+  if (!(await passkeysConfigured())) return PASSKEYS_UNAVAILABLE;
+
+  const name = factorNameSchema.safeParse(String(formData.get("name") ?? ""));
+  if (!name.success) {
+    return failed(invalidInput(firstIssue(name.error, msg("Errors.mfa.factorNameRequired"))));
+  }
+  if (assurance.factors.some((f) => f.name.toLowerCase() === name.data.toLowerCase())) {
+    return FACTOR_NAME_TAKEN;
+  }
+
+  const unproven = await proveSetupOwnership(formData, user, assurance);
+  if (unproven) return unproven;
+  const notReady = await readyToEnroll(user.id, assurance);
+  if (notReady) return notReady;
+
+  const supabase = await createClient();
+  await discardPendingFactors(supabase, user.factors);
+
+  const { data, error } = await supabase.auth.mfa.enroll({
+    factorType: "totp",
+    friendlyName: `${PASSKEY_FACTOR_PREFIX}${name.data}`,
+    issuer: "Square Share",
+  });
+  if (error || !data || data.type !== "totp" || !data.totp.secret) {
+    if (error?.code === "mfa_factor_name_conflict") return FACTOR_NAME_TAKEN;
+    if (error?.code === "too_many_enrolled_mfa_factors") {
+      return failed(invalidInput(msg("Errors.mfa.tooManyFactors")));
+    }
+    console.warn("[passkeys] enroll failed:", error?.code, error?.message);
+    return SETUP_FAILED;
+  }
+
+  const options = await registrationOptions({
+    user,
+    factorId: data.id,
+    secret: data.totp.secret,
+    name: name.data,
+    excludeCredentialIds: await credentialIdsFor(user.id),
+  });
+  if (!options) {
+    await supabase.auth.mfa.unenroll({ factorId: data.id }).catch(() => undefined);
+    return SETUP_FAILED;
+  }
+  return { registration: { factorId: data.id, options } };
+}
+
+/**
+ * Step 2: the new passkey, straight from the browser. Verified, stored with
+ * its factor's secret sealed, and only then is the factor completed at
+ * GoTrue, which switches it on and makes THIS session aal2. In that order so
+ * that a factor can never be live without the passkey that unlocks it.
+ */
+export async function confirmPasskeySetup(
+  _prev: ConfirmSetupState,
+  formData: FormData,
+): Promise<ConfirmSetupState> {
+  const rejected = unknownField(formData, ["credential"]);
+  if (rejected) return rejected;
+
+  const state = await getSessionState();
+  if (state.kind !== "signed_in") return SESSION_EXPIRED;
+  const { user, assurance } = state;
+
+  const response = parseCredential<RegistrationResponseJSON>(formData.get("credential"));
+  if (!response) return failed(invalidInput(msg("Errors.passkey.createFailed")));
+  if (!(await takeSecondFactorAttempt(user.id, user.email, "setup"))) {
+    return failed(SECOND_FACTOR_ERRORS.rate_limited);
+  }
+
+  const result = await verifyRegistration({ userId: user.id, response });
+  if (!result.ok) {
+    if (result.reason === "expired") return SETUP_EXPIRED;
+    if (result.reason === "invalid") return failed(invalidInput(msg("Errors.passkey.createFailed")));
+    return SETUP_FAILED;
+  }
+  const { passkey } = result;
+  // THIS account's pending factor, the one the slip was minted for.
+  const pending = (user.factors ?? []).find(
+    (f) => f.id === passkey.factorId && f.status !== "verified",
+  );
+  if (!pending) return SETUP_EXPIRED;
+
+  const firstFactor = !assurance.enrolled;
+  const supabase = await createClient();
+  if (!(await storePasskey(user.id, passkey))) {
+    await supabase.auth.mfa.unenroll({ factorId: passkey.factorId }).catch(() => undefined);
+    return SETUP_FAILED;
+  }
+  const completed = await completeFactor(supabase, passkey.factorId, passkey.secret);
+  if (!completed.ok) {
+    await forgetPasskey(user.id, passkey.factorId);
+    await supabase.auth.mfa.unenroll({ factorId: passkey.factorId }).catch(() => undefined);
+    return SETUP_FAILED;
+  }
+
+  // From here exactly as for an authenticator app (confirmTwoFactorSetup).
+  await revokeOtherSessions(supabase);
+
+  let codes: string[] | null | undefined;
+  if (firstFactor) {
+    codes = await issueRecoveryCodes(user.id);
+    await alertTwoFactorChange(user, "mfa.enabled", {
+      title: { key: "Notifications.messages.security.twoFactorEnabled.title" },
+      body: { key: "Notifications.messages.security.twoFactorEnabled.body" },
+    });
+  } else {
+    await alertTwoFactorChange(user, "mfa.factor_added", {
+      title: { key: "Notifications.messages.security.factorAdded.title" },
+      body: {
+        key: "Notifications.messages.security.factorAdded.body",
+        values: { name: passkey.name },
+      },
+    });
+  }
+
+  revalidatePath("/settings", "layout");
+  return { done: true, codes };
+}
+
+export type PasskeyOptionsResult = {
+  options?: PublicKeyCredentialRequestOptionsJSON;
+  /** Sealed proof of the challenge, posted back with the assertion. */
+  slip?: string;
+  error?: ActionError;
+};
+
+/**
+ * Options for the sign-in challenge's "Use your passkey". Only for a session
+ * that has passed its first factor and still owes the second.
+ */
+export async function passkeySignInOptions(): Promise<PasskeyOptionsResult> {
+  const state = await getSessionState();
+  if (state.kind !== "needs_mfa") return { error: SESSION_EXPIRED.error };
+  const challenge = await authenticationOptions({
+    userId: state.user.id,
+    purpose: "sign_in",
+    verifiedFactorIds: state.assurance.factors.map((factor) => factor.id),
+  });
+  return challenge ?? { error: PASSKEYS_UNAVAILABLE.error };
+}
+
+/** Options for confirming a sensitive change with a passkey (StepUpField). */
+export async function passkeyStepUpOptions(): Promise<PasskeyOptionsResult> {
+  const state = await getSessionState();
+  if (state.kind !== "signed_in" || !state.assurance.enrolled) {
+    return { error: SESSION_EXPIRED.error };
+  }
+  const challenge = await authenticationOptions({
+    userId: state.user.id,
+    purpose: "step_up",
+    verifiedFactorIds: state.assurance.factors.map((factor) => factor.id),
+  });
+  return challenge ?? { error: PASSKEYS_UNAVAILABLE.error };
+}
+
+/**
+ * The second half of signing in, with a passkey instead of a typed code.
+ * Same budgets, same "someone has your password" alerting on failure.
+ */
+export async function verifyPasskeySignIn(
+  _prev: ChallengeState,
+  formData: FormData,
+): Promise<ChallengeState> {
+  const rejected = unknownField(formData, ["credential", "slip", "next"]);
+  if (rejected) return rejected;
+  const next = afterChallenge(formData.get("next"));
+
+  const state = await getSessionState();
+  if (state.kind === "unreachable") return UNREACHABLE;
+  if (state.kind === "signed_out") return challengeExpired();
+  if (state.kind === "signed_in") redirect(next);
+
+  const { user, assurance } = state;
+  const response = parseCredential<AuthenticationResponseJSON>(formData.get("credential"));
+  if (!response) return failed(invalidInput(msg("Errors.passkey.signInFailed")));
+  const slip = formData.get("slip");
+  if (typeof slip !== "string" || !slip) return failed(invalidInput(msg("Errors.passkey.expired")));
+  if (!(await takeSecondFactorAttempt(user.id, user.email, "sign_in"))) {
+    return failed(SECOND_FACTOR_ERRORS.rate_limited);
+  }
+
+  const assertion = await verifyAssertion({
+    userId: user.id,
+    purpose: "sign_in",
+    response,
+    slip,
+    verifiedFactorIds: assurance.factors.map((factor) => factor.id),
+  });
+  if (!assertion.ok) {
+    if (assertion.reason === "invalid") {
+      await recordSecurityEvent({ userId: user.id, event: "mfa.challenge_failed" });
+      return failed(invalidInput(msg("Errors.passkey.signInFailed")));
+    }
+    if (assertion.reason === "expired") return failed(invalidInput(msg("Errors.passkey.expired")));
+    return failed(SECOND_FACTOR_ERRORS.unavailable);
+  }
+
+  const supabase = await createClient();
+  const completed = await completeFactor(supabase, assertion.factorId, assertion.secret);
+  if (!completed.ok) return failed(SECOND_FACTOR_ERRORS.unavailable);
+
+  await syncAccountLocale(supabase, user.id);
+  // Outside every try/catch: redirect() works by throwing.
+  redirect(next);
 }
 
 // ---------------------------------------------------------------------------

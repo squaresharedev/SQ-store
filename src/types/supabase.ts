@@ -453,6 +453,51 @@ export type Database = {
         }
         Relationships: []
       }
+      mfa_passkeys: {
+        Row: {
+          backed_up: boolean
+          created_at: string
+          credential_id: string
+          factor_id: string
+          id: string
+          last_used_at: string | null
+          name: string
+          public_key: string
+          sealed_secret: string
+          sign_count: number
+          transports: string[]
+          user_id: string
+        }
+        Insert: {
+          backed_up?: boolean
+          created_at?: string
+          credential_id: string
+          factor_id: string
+          id?: string
+          last_used_at?: string | null
+          name: string
+          public_key: string
+          sealed_secret: string
+          sign_count?: number
+          transports?: string[]
+          user_id: string
+        }
+        Update: {
+          backed_up?: boolean
+          created_at?: string
+          credential_id?: string
+          factor_id?: string
+          id?: string
+          last_used_at?: string | null
+          name?: string
+          public_key?: string
+          sealed_secret?: string
+          sign_count?: number
+          transports?: string[]
+          user_id?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           body: string | null

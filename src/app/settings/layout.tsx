@@ -58,7 +58,7 @@ export default async function SettingsLayout({
       <StepUpProvider
         enrolled={assurance?.enrolled ?? false}
         freshUntil={stepUpFreshUntil(assurance)}
-        factors={(assurance?.factors ?? []).map(({ id, name }) => ({ id, name }))}
+        factors={(assurance?.factors ?? []).map(({ id, name, type }) => ({ id, name, type }))}
       >
         <SettingsShell securityRecommended={assurance ? !assurance.enrolled : false}>
           {children}

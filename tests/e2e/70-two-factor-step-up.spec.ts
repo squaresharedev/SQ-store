@@ -3,6 +3,7 @@ import { clearAuthRateLimits, devEmails, expectToast, freshUser, serviceRest, si
 import {
   ageSecondFactor,
   authenticator,
+  chooseAuthenticatorApp,
   enableTwoFactor,
   enterChallengeCode,
   markSignsInWithGoogle,
@@ -185,8 +186,9 @@ test.describe("two-factor step-up", () => {
 
     await page.goto("/settings/security");
     await page.waitForLoadState("networkidle").catch(() => {});
-    await page.getByRole("button", { name: "Add another authenticator" }).click();
-    const dialog = page.getByRole("dialog", { name: "Add an authenticator app" });
+    await page.getByRole("button", { name: "Add another passkey or app" }).click();
+    const dialog = page.getByRole("dialog", { name: "Add another way to sign in" });
+    await chooseAuthenticatorApp(dialog);
     await dialog.getByLabel("Name this authenticator").fill("Backup tablet");
     // A code from the EXISTING authenticator, not a password.
     await expect(dialog.getByLabel("Current password")).toHaveCount(0);
@@ -199,7 +201,7 @@ test.describe("two-factor step-up", () => {
     await dialog.getByLabel("6-digit code from the app").fill(await nextCode(tablet));
     await dialog.getByRole("button", { name: "Verify and add" }).click();
     await expectToast(page, /authenticator added/i);
-    await expect(page.getByRole("list", { name: "Authenticator apps" }).getByRole("listitem")).toHaveCount(2);
+    await expect(page.getByRole("list", { name: "Passkeys and authenticator apps" }).getByRole("listitem")).toHaveCount(2);
 
     // Sign-in now offers a choice, and either phone works.
     await context.clearCookies();
@@ -219,7 +221,7 @@ test.describe("two-factor step-up", () => {
     await remove.getByRole("button", { name: "Remove" }).click();
     await expectToast(page, /removed "backup tablet"/i);
     await expect(page.locator('[data-two-factor-status="on"]')).toBeVisible();
-    await expect(page.getByRole("list", { name: "Authenticator apps" }).getByRole("listitem")).toHaveCount(1);
+    await expect(page.getByRole("list", { name: "Passkeys and authenticator apps" }).getByRole("listitem")).toHaveCount(1);
 
     // And the first phone still signs in.
     await context.clearCookies();

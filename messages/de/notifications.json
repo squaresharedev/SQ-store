@@ -89,19 +89,19 @@
       },
       "twoFactorEnabled": {
         "title": "Die Zwei-Faktor-Authentifizierung ist eingeschaltet",
-        "body": "Für die Anmeldung in deinem Konto brauchst du jetzt einen Code aus deiner Authenticator-App, und alle anderen Geräte wurden abgemeldet. Wenn du das nicht warst, ändere dein Passwort und wende dich an den Support."
+        "body": "Für die Anmeldung in deinem Konto brauchst du jetzt deinen Passkey oder einen Code aus deiner Authenticator-App, und alle anderen Geräte wurden abgemeldet. Wenn du das nicht warst, ändere dein Passwort und wende dich an den Support."
       },
       "factorAdded": {
-        "title": "Eine Authenticator-App wurde hinzugefügt",
+        "title": "Ein Passkey oder eine Authenticator-App wurde hinzugefügt",
         "body": "„{name}“ kann jetzt zur Anmeldung in deinem Konto verwendet werden. Wenn du das nicht warst, entferne sie unter Einstellungen › Sicherheit und ändere dein Passwort.",
         "bodyUnnamed": "„Authenticator-App“ kann jetzt zur Anmeldung in deinem Konto verwendet werden. Wenn du das nicht warst, entferne sie unter Einstellungen › Sicherheit und ändere dein Passwort."
       },
       "twoFactorDisabled": {
         "title": "Die Zwei-Faktor-Authentifizierung ist ausgeschaltet",
-        "body": "Deine letzte Authenticator-App wurde entfernt, deshalb reicht für die Anmeldung jetzt dein Passwort. Wenn du das nicht warst, ändere dein Passwort und schalte die Zwei-Faktor-Authentifizierung wieder ein."
+        "body": "Dein letzter Passkey bzw. deine letzte Authenticator-App wurde entfernt, deshalb reicht für die Anmeldung jetzt dein Passwort. Wenn du das nicht warst, ändere dein Passwort und schalte die Zwei-Faktor-Authentifizierung wieder ein."
       },
       "factorRemoved": {
-        "title": "Eine Authenticator-App wurde entfernt",
+        "title": "Ein Passkey oder eine Authenticator-App wurde entfernt",
         "body": "„{name}“ kann nicht mehr zur Anmeldung in deinem Konto verwendet werden. Wenn du das nicht warst, ändere sofort dein Passwort."
       },
       "recoveryCodesRegenerated": {

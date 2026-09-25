@@ -56,6 +56,15 @@ const REGISTRY: Record<string, Classification> = {
   "lib/auth/mfa-actions.ts::cancelTwoFactorSetup": unlimited(
     "Only removes an UNVERIFIED factor that the caller's own setup created. It creates nothing, and beginTwoFactorSetup (limited) bounds how many can ever exist.",
   ),
+  "lib/auth/mfa-actions.ts::beginPasskeySetup": limited(),
+  "lib/auth/mfa-actions.ts::confirmPasskeySetup": limited(),
+  "lib/auth/mfa-actions.ts::verifyPasskeySignIn": limited(),
+  "lib/auth/mfa-actions.ts::passkeySignInOptions": unlimited(
+    "Only answers a session that has passed its first factor and still owes the second. It writes nothing (the challenge travels as a sealed, single-use slip) and proves nothing on its own: every use of it goes through verifyPasskeySignIn, which spends the second-factor budgets.",
+  ),
+  "lib/auth/mfa-actions.ts::passkeyStepUpOptions": unlimited(
+    "Only answers a fully signed-in account with 2FA on. It writes nothing (the challenge travels as a sealed, single-use slip), and every use of it goes through requireStepUpState, which spends the second-factor budgets.",
+  ),
   "lib/auth/mfa-actions.ts::confirmIdentity": unlimited(
     "Writes nothing of its own. Without 2FA it returns at once; with 2FA every code it checks goes through requireStepUpState, which spends the second-factor budgets.",
   ),
@@ -219,11 +228,36 @@ const ACTIONS = serverActions();
  */
 const SECOND_FACTOR_LIMITERS = ["takeSecondFactorAttempt", "verifySecondFactor"];
 
+/**
+ * The shared "add a second factor" guard (lib/auth/setup-guards.ts): it takes
+ * from the mfa_enroll budget before anything else. Pinned below, like the two
+ * above.
+ */
+const SETUP_LIMITERS = ["readyToEnroll"];
+
 /** Does this body take from a rate-limit budget? */
 function isRateLimited(body: string): boolean {
   if (/\brateLimit(?:Key)?\s*\(/.test(body)) return true;
-  return SECOND_FACTOR_LIMITERS.some((name) => new RegExp(`\\b${name}\\s*\\(`).test(body));
+  return [...SECOND_FACTOR_LIMITERS, ...SETUP_LIMITERS].some((name) =>
+    new RegExp(`\\b${name}\\s*\\(`).test(body),
+  );
 }
+
+describe("setup guards", () => {
+  // The registry and the step-up invariant trust these names, so pin that
+  // they do what they are trusted for.
+  const source = readFileSync(join(process.cwd(), "src", "lib", "auth", "setup-guards.ts"), "utf8");
+
+  it("readyToEnroll takes from the mfa_enroll budget first", () => {
+    const body = source.slice(source.indexOf("export async function readyToEnroll"));
+    expect(body).toMatch(/rateLimit\("mfa_enroll", RATE_LIMITS\.mfaEnroll\)/);
+  });
+
+  it("proveSetupOwnership demands a factor in THIS request once 2FA is on", () => {
+    const body = source.slice(source.indexOf("export async function proveSetupOwnership"));
+    expect(body).toMatch(/if \(assurance\.enrolled\) \{\s*return requireStepUpState\(formData, \{ maxAgeSeconds: 0 \}\);/);
+  });
+});
 
 describe("second-factor limiters", () => {
   // The registry trusts these two names as budgets, so pin that they are.
@@ -427,8 +461,10 @@ describe("two-factor step-up invariants", () => {
     // requireStepUp would be a form that LOOKS protected and is not.
     const accepting = ACTIONS.filter(({ body }) => /STEP_UP_FIELDS/.test(body));
     expect(accepting.length).toBeGreaterThan(5);
+    // proveSetupOwnership is requireStepUpState for an enrolled account
+    // (pinned in "setup guards" above).
     const unchecked = accepting
-      .filter(({ body }) => !/requireStepUp(State)?\s*\(/.test(body))
+      .filter(({ body }) => !/(requireStepUp(State)?|proveSetupOwnership)\s*\(/.test(body))
       .map((a) => a.key);
     expect(unchecked).toEqual([]);
   });

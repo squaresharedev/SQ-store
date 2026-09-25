@@ -4,6 +4,7 @@ import { SecuritySection } from "@/components/settings/security/SecuritySection"
 import { accountHasPassword } from "@/lib/auth/has-password";
 import { RECENT_SIGN_IN_SECONDS, signedInRecently } from "@/lib/auth/assurance";
 import { remainingRecoveryCodes } from "@/lib/auth/mfa";
+import { passkeysConfigured } from "@/lib/auth/passkeys";
 import { getAssurance, requireUser } from "@/lib/auth/session";
 import { SECURITY_EVENT_LABELS, isSecurityEvent } from "@/lib/security/events";
 import { createClient } from "@/lib/supabase/server";
@@ -28,10 +29,11 @@ export default async function SecuritySettingsPage({
   searchParams: Promise<{ recovered?: string; setup?: string }>;
 }) {
   const user = await requireUser("/settings/security");
-  const [assurance, hasPassword, params] = await Promise.all([
+  const [assurance, hasPassword, params, passkeysAvailable] = await Promise.all([
     getAssurance(),
     accountHasPassword(user.id),
     searchParams,
+    passkeysConfigured(),
   ]);
   const enrolled = assurance?.enrolled ?? false;
 
@@ -50,11 +52,13 @@ export default async function SecuritySettingsPage({
   return (
     <SecuritySection
       enrolled={enrolled}
-      factors={(assurance?.factors ?? []).map(({ id, name, createdAt }) => ({
+      factors={(assurance?.factors ?? []).map(({ id, name, createdAt, type }) => ({
         id,
         name,
         createdAt,
+        type,
       }))}
+      passkeysAvailable={passkeysAvailable}
       hasPassword={hasPassword}
       // A sign-in in the last few minutes is proof on its own: setup then asks
       // for no password (and a Google-only account need not sign in again).

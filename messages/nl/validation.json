@@ -228,7 +228,8 @@
     "factorName": {
       "required": "De naam is verplicht.",
       "tooLong": "De naam mag maximaal {maximum} tekens bevatten.",
-      "unsupported": "De naam bevat niet-ondersteunde tekens."
+      "unsupported": "De naam bevat niet-ondersteunde tekens.",
+      "reserved": "Kies een naam die niet begint met “passkey:”."
     },
     "reportDetails": {
       "required": "Je beschrijving is verplicht.",

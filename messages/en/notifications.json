@@ -89,19 +89,19 @@
       },
       "twoFactorEnabled": {
         "title": "Two-factor authentication is on",
-        "body": "Signing in to your account now needs a code from your authenticator app, and every other device was signed out. If this wasn't you, change your password and contact support."
+        "body": "Signing in to your account now needs your passkey or a code from your authenticator app, and every other device was signed out. If this wasn't you, change your password and contact support."
       },
       "factorAdded": {
-        "title": "An authenticator app was added",
+        "title": "A passkey or authenticator app was added",
         "body": "\"{name}\" can now be used to sign in to your account. If this wasn't you, remove it in Settings › Security and change your password.",
         "bodyUnnamed": "\"Authenticator app\" can now be used to sign in to your account. If this wasn't you, remove it in Settings › Security and change your password."
       },
       "twoFactorDisabled": {
         "title": "Two-factor authentication is off",
-        "body": "Your last authenticator app was removed, so signing in now needs only your password. If this wasn't you, change your password and turn two-factor back on."
+        "body": "Your last passkey or authenticator app was removed, so signing in now needs only your password. If this wasn't you, change your password and turn two-factor back on."
       },
       "factorRemoved": {
-        "title": "An authenticator app was removed",
+        "title": "A passkey or authenticator app was removed",
         "body": "\"{name}\" can no longer be used to sign in to your account. If this wasn't you, change your password now."
       },
       "recoveryCodesRegenerated": {

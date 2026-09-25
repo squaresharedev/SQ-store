@@ -89,19 +89,19 @@
       },
       "twoFactorEnabled": {
         "title": "Dvoufázové ověření je zapnuté",
-        "body": "K přihlášení do vašeho účtu teď potřebujete kód z ověřovací aplikace a všechna ostatní zařízení byla odhlášena. Pokud jste to nebyli vy, změňte heslo a kontaktujte podporu."
+        "body": "K přihlášení do vašeho účtu teď potřebujete přístupový klíč nebo kód z ověřovací aplikace a všechna ostatní zařízení byla odhlášena. Pokud jste to nebyli vy, změňte heslo a kontaktujte podporu."
       },
       "factorAdded": {
-        "title": "Byla přidána ověřovací aplikace",
+        "title": "Byl přidán přístupový klíč nebo ověřovací aplikace",
         "body": "„{name}“ se teď dá použít k přihlášení do vašeho účtu. Pokud jste to nebyli vy, odeberte ji v sekci Nastavení › Zabezpečení a změňte heslo.",
         "bodyUnnamed": "„Ověřovací aplikace“ se teď dá použít k přihlášení do vašeho účtu. Pokud jste to nebyli vy, odeberte ji v sekci Nastavení › Zabezpečení a změňte heslo."
       },
       "twoFactorDisabled": {
         "title": "Dvoufázové ověření je vypnuté",
-        "body": "Vaše poslední ověřovací aplikace byla odebrána, takže k přihlášení teď stačí jen heslo. Pokud jste to nebyli vy, změňte heslo a dvoufázové ověření znovu zapněte."
+        "body": "Byl odebrán váš poslední přístupový klíč nebo ověřovací aplikace, takže k přihlášení teď stačí jen heslo. Pokud jste to nebyli vy, změňte heslo a dvoufázové ověření znovu zapněte."
       },
       "factorRemoved": {
-        "title": "Byla odebrána ověřovací aplikace",
+        "title": "Byl odebrán přístupový klíč nebo ověřovací aplikace",
         "body": "„{name}“ už nelze použít k přihlášení do vašeho účtu. Pokud jste to nebyli vy, ihned změňte heslo."
       },
       "recoveryCodesRegenerated": {

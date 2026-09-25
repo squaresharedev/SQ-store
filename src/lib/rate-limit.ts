@@ -296,6 +296,12 @@ export const RATE_LIMITS = {
   mfaEnroll: { max: 10, windowSeconds: 60 * 60 },
   /** Removing authenticators and regenerating recovery codes. */
   mfaManage: { max: 20, windowSeconds: 60 * 60 },
+  /**
+   * Not a budget: each passkey challenge may be verified ONCE. Its slip cookie
+   * is deleted as it is read, and this remembers the challenge for longer than
+   * the slip lives, so even a replayed request carrying the old cookie fails.
+   */
+  webauthnChallenge: { max: 1, windowSeconds: 10 * 60 },
 } as const;
 
 export type RateLimitBudget = { max: number; windowSeconds: number };

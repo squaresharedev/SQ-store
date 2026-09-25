@@ -89,19 +89,19 @@
       },
       "twoFactorEnabled": {
         "title": "A autenticação de dois fatores está ativa",
-        "body": "Iniciar sessão na sua conta passa a exigir um código da sua aplicação de autenticação, e a sessão foi terminada em todos os outros dispositivos. Se não foi uma ação sua, altere a palavra-passe e contacte o suporte."
+        "body": "Iniciar sessão na sua conta passa a exigir a sua chave de acesso ou um código da sua aplicação de autenticação, e a sessão foi terminada em todos os outros dispositivos. Se não foi uma ação sua, altere a palavra-passe e contacte o suporte."
       },
       "factorAdded": {
-        "title": "Foi adicionada uma aplicação de autenticação",
+        "title": "Foi adicionada uma chave de acesso ou aplicação de autenticação",
         "body": "«{name}» já pode ser utilizada para iniciar sessão na sua conta. Se não foi uma ação sua, remova-a em Definições › Segurança e altere a palavra-passe.",
         "bodyUnnamed": "«Aplicação de autenticação» já pode ser utilizada para iniciar sessão na sua conta. Se não foi uma ação sua, remova-a em Definições › Segurança e altere a palavra-passe."
       },
       "twoFactorDisabled": {
         "title": "A autenticação de dois fatores está desativada",
-        "body": "A sua última aplicação de autenticação foi removida, pelo que iniciar sessão passa a exigir apenas a palavra-passe. Se não foi uma ação sua, altere a palavra-passe e volte a ativar os dois fatores."
+        "body": "A sua última chave de acesso ou aplicação de autenticação foi removida, pelo que iniciar sessão passa a exigir apenas a palavra-passe. Se não foi uma ação sua, altere a palavra-passe e volte a ativar os dois fatores."
       },
       "factorRemoved": {
-        "title": "Foi removida uma aplicação de autenticação",
+        "title": "Foi removida uma chave de acesso ou aplicação de autenticação",
         "body": "«{name}» já não pode ser utilizada para iniciar sessão na sua conta. Se não foi uma ação sua, altere já a palavra-passe."
       },
       "recoveryCodesRegenerated": {

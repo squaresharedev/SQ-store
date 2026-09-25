@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useActionState } from "react";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Fingerprint, Smartphone } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { CopyButton } from "@/components/ui/CopyButton";
@@ -19,23 +19,31 @@ import { OneTimeCodeInput } from "@/components/auth/OneTimeCodeInput";
 import { StepUpField } from "@/components/auth/StepUp";
 import { RecoveryCodesDisplay } from "@/components/settings/security/RecoveryCodesDisplay";
 import {
+  beginPasskeySetup,
   beginTwoFactorSetup,
   cancelTwoFactorSetup,
+  confirmPasskeySetup,
   confirmTwoFactorSetup,
   signOutToReauthenticate,
+  type BeginPasskeySetupState,
   type BeginSetupState,
   type ConfirmSetupState,
 } from "@/lib/auth/mfa-actions";
+import { createPasskey } from "@/lib/auth/webauthn-client";
 import { FACTOR_NAME_MAX } from "@/lib/validation/mfa";
+import { cn } from "@/lib/utils";
 
 const BEGIN_INITIAL: BeginSetupState = {};
+const PASSKEY_BEGIN_INITIAL: BeginPasskeySetupState = {};
 const CONFIRM_INITIAL: ConfirmSetupState = {};
 
 /** Where "Confirm with Google" comes back to: this page, with setup open. */
 const SETUP_RETURN = "/settings/security?setup=1";
 
+type Method = "passkey" | "app";
+
 /**
- * "Authenticator app", or the first numbered variant nobody has used yet. The
+ * The base name, or the first numbered variant nobody has used yet. The
  * words come from the caller, in the reader's language: the default name is
  * copy until the person keeps it.
  */
@@ -59,12 +67,14 @@ function groupSecret(secret: string): string {
 }
 
 /**
- * Turning 2FA on, or adding another authenticator. Three steps:
+ * Turning 2FA on, or adding another way to confirm it's you. Three steps:
  *
- *   1. Prove it's you (password; or, adding, a code from an existing app; or,
- *      for a Google-only account, a recent sign-in) and name the app.
- *   2. Scan the QR code (or type the key) and enter the first code, which is
- *      what actually switches it on.
+ *   1. Choose a passkey (the default: nothing to install) or an authenticator
+ *      app, name it, and prove it's you (password; or, adding, an existing
+ *      passkey or app; or, for a Google-only account, a recent sign-in).
+ *   2. Passkey: the browser's own prompt creates it (on a computer, with a
+ *      QR code for the phone). App: scan the QR code, enter the first code.
+ *      Either way that is what actually switches it on.
  *   3. First time only: the recovery codes, shown once.
  *
  * Closing during step 2 withdraws the half-made factor, so an abandoned setup
@@ -78,17 +88,20 @@ export function TwoFactorSetupModal({
   hasPassword,
   signedInRecently,
   signsInWithGoogle,
+  passkeysAvailable,
   existingNames,
 }: {
   open: boolean;
   onClose: () => void;
-  /** 2FA is already on and this adds another authenticator. */
+  /** 2FA is already on and this adds another passkey or app. */
   adding: boolean;
   hasPassword: boolean;
   /** Signed in within the last 10 minutes: that alone proves ownership. */
   signedInRecently: boolean;
   /** The account has a Google identity, so "Confirm with Google" is offered. */
   signsInWithGoogle: boolean;
+  /** Passkeys are configured in this deployment (server-side check). */
+  passkeysAvailable: boolean;
   existingNames: string[];
 }) {
   const t = useTranslations("Settings.security.setup");
@@ -98,35 +111,59 @@ export function TwoFactorSetupModal({
   // Captured once: the page re-renders with 2FA ON halfway through this flow,
   // and the steps must not change meaning under the person's feet.
   const [mode] = React.useState(adding ? "add" : "enable");
+  const [method, setMethod] = React.useState<Method>(passkeysAvailable ? "passkey" : "app");
+
   const [begin, beginAction, beginPending] = useActionState(beginTwoFactorSetup, BEGIN_INITIAL);
   const [confirm, confirmAction, confirmPending] = useActionState(
     confirmTwoFactorSetup,
     CONFIRM_INITIAL,
   );
+  const [passkeyBegin, passkeyBeginAction, passkeyBeginPending] = useActionState(
+    beginPasskeySetup,
+    PASSKEY_BEGIN_INITIAL,
+  );
+  const [passkeyConfirm, passkeyConfirmAction, passkeyConfirmPending] = useActionState(
+    confirmPasskeySetup,
+    CONFIRM_INITIAL,
+  );
 
   const enrollment = begin.enrollment;
-  const finished = Boolean(confirm.done);
-  const showCodes = finished && confirm.codes !== undefined;
-  const step: "start" | "scan" | "codes" = showCodes ? "codes" : enrollment ? "scan" : "start";
+  const registration = passkeyBegin.registration;
+  const done = confirm.done ? confirm : passkeyConfirm.done ? passkeyConfirm : null;
+  const finished = Boolean(done);
+  const showCodes = finished && done?.codes !== undefined;
+  const step: "start" | "scan" | "passkey" | "codes" = showCodes
+    ? "codes"
+    : registration
+      ? "passkey"
+      : enrollment
+        ? "scan"
+        : "start";
 
-  // Adding another authenticator has no codes step: done means done.
+  // Adding another way in has no codes step: done means done.
+  const addedByPasskey = Boolean(passkeyConfirm.done);
   React.useEffect(() => {
-    if (finished && confirm.codes === undefined) {
-      toast.success(t("added"));
+    if (finished && done?.codes === undefined) {
+      toast.success(addedByPasskey ? t("passkeyAdded") : t("added"));
       onClose();
     }
-  }, [finished, confirm.codes, onClose, toast, t]);
+  }, [finished, done, addedByPasskey, onClose, toast, t]);
 
   function close() {
     // Withdraw a factor that was created but never verified.
-    if (enrollment && !finished) {
-      void cancelTwoFactorSetup(enrollment.factorId);
-    }
+    const pending = registration?.factorId ?? enrollment?.factorId;
+    if (pending && !finished) void cancelTwoFactorSetup(pending);
     onClose();
   }
 
   const title =
-    step === "codes" ? t("titleCodes") : mode === "add" ? t("titleAdd") : t("titleEnable");
+    step === "codes"
+      ? t("titleCodes")
+      : step === "passkey"
+        ? t("titlePasskey")
+        : mode === "add"
+          ? t("titleAdd")
+          : t("titleEnable");
 
   const description =
     step === "start"
@@ -135,18 +172,23 @@ export function TwoFactorSetupModal({
         : t("descriptionEnable")
       : step === "scan"
         ? t("descriptionScan")
-        : t("descriptionCodes");
+        : step === "passkey"
+          ? t("descriptionPasskey")
+          : t("descriptionCodes");
 
-  // How this person proves it's them before a new phone can be enrolled.
+  // How this person proves it's them before a new factor can be enrolled.
   // A sign-in in the last 10 minutes is proof enough on its own. Otherwise a
   // password, if the account has one; and for a Google account, Google itself
   // ("Confirm with Google" signs in again and comes straight back here), which
   // is the way such a person actually signs in and may be the only one they
   // remember.
+  const reauthHint = Boolean(begin.reauth || passkeyBegin.reauth);
   const needsFreshSignIn = mode === "enable" && !hasPassword && !signedInRecently;
   const askPassword = mode === "enable" && hasPassword && !signedInRecently;
-  const offerGoogle =
-    mode === "enable" && !signedInRecently && (signsInWithGoogle || Boolean(begin.reauth));
+  const offerGoogle = mode === "enable" && !signedInRecently && (signsInWithGoogle || reauthHint);
+
+  const startError = method === "passkey" ? passkeyBegin.error : begin.error;
+  const startPending = beginPending || passkeyBeginPending;
 
   return (
     <Modal
@@ -178,26 +220,44 @@ export function TwoFactorSetupModal({
       )}
 
       {step === "start" && !needsFreshSignIn && (
-        <form action={beginAction} className="flex flex-col gap-4" noValidate>
+        <form
+          action={method === "passkey" ? passkeyBeginAction : beginAction}
+          className="flex flex-col gap-4"
+          noValidate
+        >
+          {passkeysAvailable && (
+            <MethodChoice method={method} onChange={setMethod} />
+          )}
+
           <div className="flex flex-col gap-2">
             <Label htmlFor="factor-name">{t("nameLabel")}</Label>
             <Input
+              // Re-keyed per method so the suggested name follows the choice.
+              key={method}
               id="factor-name"
               name="name"
-              defaultValue={suggestedName(existingNames, t("suggestedName"), (number) =>
-                t("suggestedNameNumbered", { number }),
-              )}
+              defaultValue={
+                method === "passkey"
+                  ? suggestedName(existingNames, t("suggestedPasskeyName"), (number) =>
+                      t("suggestedPasskeyNameNumbered", { number }),
+                    )
+                  : suggestedName(existingNames, t("suggestedName"), (number) =>
+                      t("suggestedNameNumbered", { number }),
+                    )
+              }
               maxLength={FACTOR_NAME_MAX}
               autoComplete="off"
               required
             />
-            <p className={infoTextClass}>{t("nameHint")}</p>
+            <p className={infoTextClass}>
+              {method === "passkey" ? t("passkeyNameHint") : t("nameHint")}
+            </p>
           </div>
 
           {mode === "add" ? (
             <StepUpField
               id="setup-step-up"
-              state={begin}
+              state={method === "passkey" ? passkeyBegin : begin}
               always
               description={t("stepUpDescription")}
             />
@@ -223,9 +283,9 @@ export function TwoFactorSetupModal({
             <p className={infoTextClass}>{t("signedInRecently")}</p>
           ) : null}
 
-          {begin.error && (
+          {startError && (
             <p role="alert" className="font-inter text-sm font-medium text-destructive">
-              {resolve(begin.error.message)}
+              {resolve(startError.message)}
             </p>
           )}
 
@@ -233,8 +293,8 @@ export function TwoFactorSetupModal({
             <Button type="button" variant="ghost" onClick={close}>
               {tCommon("cancel")}
             </Button>
-            <Button type="submit" disabled={beginPending} suppressHydrationWarning>
-              {beginPending ? (
+            <Button type="submit" disabled={startPending} suppressHydrationWarning>
+              {startPending ? (
                 <>
                   <Spinner />
                   {t("checking")}
@@ -258,6 +318,16 @@ export function TwoFactorSetupModal({
           </div>
           <GoogleButton next={SETUP_RETURN} intent="confirm" />
         </div>
+      )}
+
+      {step === "passkey" && registration && (
+        <CreatePasskey
+          registration={registration}
+          confirm={passkeyConfirm}
+          confirmAction={passkeyConfirmAction}
+          confirmPending={passkeyConfirmPending}
+          onCancel={close}
+        />
       )}
 
       {step === "scan" && enrollment && (
@@ -345,7 +415,7 @@ export function TwoFactorSetupModal({
 
       {step === "codes" && (
         <RecoveryCodesDisplay
-          codes={confirm.codes ?? null}
+          codes={done?.codes ?? null}
           onDone={() => {
             toast.success(t("enabled"));
             onClose();
@@ -353,5 +423,145 @@ export function TwoFactorSetupModal({
         />
       )}
     </Modal>
+  );
+}
+
+/**
+ * Passkey or authenticator app, as two large choices. A radio group, so the
+ * arrow keys move between them and the choice is announced as one.
+ */
+function MethodChoice({ method, onChange }: { method: Method; onChange: (method: Method) => void }) {
+  const t = useTranslations("Settings.security.setup");
+  const options: { value: Method; label: string; hint: string; icon: React.ReactNode }[] = [
+    {
+      value: "passkey",
+      label: t("methodPasskey"),
+      hint: t("methodPasskeyHint"),
+      icon: <Fingerprint aria-hidden className="size-5 shrink-0" />,
+    },
+    {
+      value: "app",
+      label: t("methodApp"),
+      hint: t("methodAppHint"),
+      icon: <Smartphone aria-hidden className="size-5 shrink-0" />,
+    },
+  ];
+  return (
+    <fieldset className="flex flex-col gap-2">
+      <legend className="mb-2 font-inter text-sm font-medium text-foreground">{t("methodLabel")}</legend>
+      {options.map((option) => (
+        <label
+          key={option.value}
+          className={cn(
+            "flex cursor-pointer items-start gap-3 border p-3 transition-colors duration-base ease-standard motion-reduce:transition-none",
+            method === option.value
+              ? "border-foreground bg-muted/40"
+              : "border-border hover:bg-accent/50",
+          )}
+        >
+          <input
+            type="radio"
+            name="setup-method"
+            value={option.value}
+            checked={method === option.value}
+            onChange={() => onChange(option.value)}
+            // Not a form field: which action runs is the choice itself.
+            form="__none__"
+            className="mt-1 accent-foreground"
+          />
+          <span className="mt-0.5 text-foreground">{option.icon}</span>
+          <span className="flex min-w-0 flex-col gap-0.5">
+            <span className="flex flex-wrap items-center gap-2 font-inter text-sm font-medium text-foreground">
+              {option.label}
+              {option.value === "passkey" && (
+                <span className="border border-foreground px-1.5 py-0.5 text-[11px] font-semibold leading-none">
+                  {t("recommended")}
+                </span>
+              )}
+            </span>
+            <span className={infoTextClass}>{option.hint}</span>
+          </span>
+        </label>
+      ))}
+    </fieldset>
+  );
+}
+
+/**
+ * Step 2 for a passkey: one button that opens the browser's own prompt. A
+ * click, not an automatic start, because Safari only opens that prompt from
+ * one. The options arrived with step 1, so nothing is fetched in between.
+ */
+function CreatePasskey({
+  registration,
+  confirm,
+  confirmAction,
+  confirmPending,
+  onCancel,
+}: {
+  registration: NonNullable<BeginPasskeySetupState["registration"]>;
+  confirm: ConfirmSetupState;
+  confirmAction: (data: FormData) => void;
+  confirmPending: boolean;
+  onCancel: () => void;
+}) {
+  const t = useTranslations("Settings.security.setup");
+  const tCommon = useTranslations("Common.actions");
+  const resolve = useResolveMessage();
+  const [problem, setProblem] = React.useState<string | null>(null);
+  const [working, setWorking] = React.useState(false);
+
+  async function create() {
+    setProblem(null);
+    setWorking(true);
+    const outcome = await createPasskey(registration.options);
+    setWorking(false);
+    if (!outcome.ok) {
+      setProblem(
+        outcome.reason === "cancelled"
+          ? t("passkeyCancelled")
+          : outcome.reason === "exists"
+            ? t("passkeyExists")
+            : outcome.reason === "unsupported"
+              ? t("passkeyUnsupported")
+              : t("passkeyFailed"),
+      );
+      return;
+    }
+    const data = new FormData();
+    data.set("credential", outcome.credential);
+    React.startTransition(() => confirmAction(data));
+  }
+
+  const busy = working || confirmPending;
+
+  return (
+    <div className="flex flex-col gap-5" data-passkey-setup>
+      <Button type="button" onClick={create} disabled={busy} className="w-full" suppressHydrationWarning>
+        {busy ? (
+          <>
+            <Spinner />
+            {t("creatingPasskey")}
+          </>
+        ) : (
+          <>
+            <Fingerprint aria-hidden className="size-4" />
+            {t("createPasskey")}
+          </>
+        )}
+      </Button>
+
+      {(problem || confirm.error) && (
+        <p role="alert" className="font-inter text-sm font-medium text-destructive">
+          {problem ?? resolve(confirm.error!.message)}
+        </p>
+      )}
+
+      <div className="flex justify-end">
+        <Button type="button" variant="ghost" onClick={onCancel}>
+          {tCommon("cancel")}
+        </Button>
+      </div>
+    </div>
   );
 }

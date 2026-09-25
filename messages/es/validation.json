@@ -228,7 +228,8 @@
     "factorName": {
       "required": "El nombre es obligatorio.",
       "tooLong": "El nombre no puede superar los {maximum} caracteres.",
-      "unsupported": "El nombre contiene caracteres no admitidos."
+      "unsupported": "El nombre contiene caracteres no admitidos.",
+      "reserved": "Elige un nombre que no empiece por «passkey:»."
     },
     "reportDetails": {
       "required": "La descripción es obligatoria.",

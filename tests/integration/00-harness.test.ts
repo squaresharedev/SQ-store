@@ -36,6 +36,9 @@ describe("embedded supabase replica", () => {
       "artifacts",
       "collections",
       "follows",
+      // Passkeys used as the second factor, each unlocking a sealed TOTP
+      // secret (20260925_passkey_factors). Service-role only.
+      "mfa_passkeys",
       // Hashed single-use 2FA recovery codes (20260923_two_factor_auth).
       // Service-role only.
       "mfa_recovery_codes",

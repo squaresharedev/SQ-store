@@ -12,9 +12,12 @@ import { getSessionState } from "@/lib/auth/session";
 import {
   STEP_UP_HINT_COOKIE,
   STEP_UP_WINDOW_SECONDS,
+  appFactors,
   secondFactorIsFresh,
   type SessionAssurance,
 } from "@/lib/auth/assurance";
+import { completeFactor, parseCredential, verifyAssertion } from "@/lib/auth/passkeys";
+import type { AuthenticationResponseJSON } from "@simplewebauthn/server";
 import {
   generateRecoveryCodes,
   hashRecoveryCode,
@@ -194,7 +197,7 @@ function failureFrom(error: { code?: string; status?: number } | null | undefine
  * The form fields a step-up adds to any sensitive form. Every action that calls
  * requireStepUpState must allow these in its field whitelist.
  */
-export const STEP_UP_FIELDS = ["mfa_code", "mfa_factor_id"] as const;
+export const STEP_UP_FIELDS = ["mfa_code", "mfa_factor_id", "mfa_passkey", "mfa_passkey_slip"] as const;
 
 /** Why a sensitive action may not run yet. */
 type StepUpProblem =
@@ -202,6 +205,9 @@ type StepUpProblem =
   | "code_required"
   | "code_malformed"
   | "factor_unknown"
+  | "passkey_required"
+  | "passkey_invalid"
+  | "passkey_expired"
   | SecondFactorFailure;
 
 /**
@@ -231,8 +237,19 @@ async function checkStepUp(
   const maxAge = options.maxAgeSeconds ?? STEP_UP_WINDOW_SECONDS;
   if (maxAge > 0 && secondFactorIsFresh(assurance, maxAge)) return null;
 
+  // A passkey, confirmed in the browser just before this submit: its signed
+  // assertion rides in the form and counts exactly like a code in the request
+  // (maxAgeSeconds: 0 included), because it is one, spent once.
+  const rawPasskey = formData.get("mfa_passkey");
+  if (typeof rawPasskey === "string" && rawPasskey !== "") {
+    return checkStepUpPasskey(rawPasskey, formData.get("mfa_passkey_slip"), user, assurance);
+  }
+
   const rawCode = String(formData.get("mfa_code") ?? "");
-  if (!rawCode.trim()) return { problem: "code_required" };
+  if (!rawCode.trim()) {
+    // Asked for in the terms of what the account actually has.
+    return { problem: appFactors(assurance.factors).length ? "code_required" : "passkey_required" };
+  }
   const code = totpCodeSchema.safeParse(rawCode);
   if (!code.success) return { problem: "code_malformed" };
 
@@ -253,10 +270,50 @@ async function checkStepUp(
   return null;
 }
 
+/**
+ * The passkey half of checkStepUp: the same budgets as a code, then the
+ * assertion checked against THIS account's passkeys and the step-up slip,
+ * then the factor it unlocks completed at GoTrue (which refreshes the
+ * session's second-factor time, reopening the window).
+ */
+async function checkStepUpPasskey(
+  raw: string,
+  slip: FormDataEntryValue | null,
+  user: { id: string; email?: string | null },
+  assurance: SessionAssurance,
+): Promise<{ problem: StepUpProblem } | null> {
+  const response = parseCredential<AuthenticationResponseJSON>(raw);
+  if (!response) return { problem: "passkey_invalid" };
+  if (typeof slip !== "string" || !slip) return { problem: "passkey_expired" };
+  if (!(await takeSecondFactorAttempt(user.id, user.email, "step_up"))) {
+    return { problem: "rate_limited" };
+  }
+  const assertion = await verifyAssertion({
+    userId: user.id,
+    purpose: "step_up",
+    response,
+    slip,
+    verifiedFactorIds: assurance.factors.map((factor) => factor.id),
+  });
+  if (!assertion.ok) {
+    if (assertion.reason === "expired") return { problem: "passkey_expired" };
+    if (assertion.reason === "invalid") return { problem: "passkey_invalid" };
+    return { problem: "unavailable" };
+  }
+  const supabase = await createClient();
+  const completed = await completeFactor(supabase, assertion.factorId, assertion.secret);
+  if (!completed.ok) return { problem: "unavailable" };
+  await setStepUpHint();
+  return null;
+}
+
 const STEP_UP_ERRORS: Record<Exclude<StepUpProblem, "signed_out">, ActionError> = {
   code_required: invalidInput(msg("Errors.stepUp.codeRequired")),
   code_malformed: invalidInput(msg("Errors.stepUp.codeMalformed")),
   factor_unknown: invalidInput(msg("Errors.stepUp.factorUnknown")),
+  passkey_required: invalidInput(msg("Errors.stepUp.passkeyRequired")),
+  passkey_invalid: invalidInput(msg("Errors.stepUp.passkeyInvalid")),
+  passkey_expired: invalidInput(msg("Errors.stepUp.passkeyExpired")),
   ...SECOND_FACTOR_ERRORS,
 };
 
@@ -306,15 +363,19 @@ export function pickFactor(
   assurance: Pick<SessionAssurance, "factors">,
   requested: FormDataEntryValue | null,
 ): string | null {
+  // A typed code can only be from an authenticator APP: a passkey's factor
+  // has no code anyone could read (lib/auth/passkeys.ts), so it is never a
+  // candidate here, named or by default.
+  const apps = appFactors(assurance.factors);
   const parsed = factorIdSchema.safeParse(typeof requested === "string" ? requested : "");
   if (parsed.success) {
-    return assurance.factors.some((f) => f.id === parsed.data) ? parsed.data : null;
+    return apps.some((f) => f.id === parsed.data) ? parsed.data : null;
   }
   // Nothing (or nothing usable) was named: the only unambiguous default is a
   // sole factor. With several, a blank choice is still resolved to the first,
   // which is what the picker shows selected by default.
   if (typeof requested === "string" && requested.trim() !== "") return null;
-  return assurance.factors[0]?.id ?? null;
+  return apps[0]?.id ?? null;
 }
 
 // ---------------------------------------------------------------------------

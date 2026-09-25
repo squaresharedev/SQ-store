@@ -133,7 +133,10 @@
     "invalid": "Tento kód nefunguje. Zkontrolujte ověřovací aplikaci a zkuste to znovu.",
     "rateLimited": "Příliš mnoho pokusů. Počkejte pár minut a zkuste to znovu.",
     "replayed": "Tento kód už byl použit. Počkejte na další kód v aplikaci.",
-    "unavailable": "Kód se teď nepodařilo zkontrolovat. Zkuste to za chvíli znovu."
+    "unavailable": "Kód se teď nepodařilo zkontrolovat. Zkuste to za chvíli znovu.",
+    "passkeyRequired": "Nejprve potvrďte přístupovým klíčem, že jste to vy.",
+    "passkeyInvalid": "Tento přístupový klíč nefungoval. Zkuste to znovu.",
+    "passkeyExpired": "Trvalo to příliš dlouho. Potvrďte to přístupovým klíčem znovu."
   },
   "mfa": {
     "signInExpired": "Platnost přihlášení vypršela. Přihlaste se znovu.",
@@ -532,5 +535,11 @@
     },
     "invalid": "Nastavení produktové stránky je neplatné.",
     "invalidFix": "Zkontrolujte výše uvedené pole podle `limits` z požadavku GET na tuto adresu URL a zkuste to znovu."
+  },
+  "passkey": {
+    "unavailable": "Přístupové klíče teď nejsou k dispozici. Použijte místo nich ověřovací aplikaci.",
+    "createFailed": "Tento přístupový klíč se nepodařilo ověřit. Zkuste ho vytvořit znovu.",
+    "signInFailed": "Tento přístupový klíč pro tento účet nefungoval. Zkuste to znovu, nebo se přihlaste jinak.",
+    "expired": "Trvalo to příliš dlouho. Zkuste přístupový klíč použít znovu."
   }
 }

@@ -89,19 +89,19 @@
       },
       "twoFactorEnabled": {
         "title": "Uwierzytelnianie dwuskładnikowe jest włączone",
-        "body": "Logowanie na twoje konto wymaga teraz kodu z aplikacji uwierzytelniającej, a wszystkie pozostałe urządzenia zostały wylogowane. Jeśli to nie ty, zmień hasło i skontaktuj się z pomocą."
+        "body": "Logowanie na twoje konto wymaga teraz klucza dostępu albo kodu z aplikacji uwierzytelniającej, a wszystkie pozostałe urządzenia zostały wylogowane. Jeśli to nie ty, zmień hasło i skontaktuj się z pomocą."
       },
       "factorAdded": {
-        "title": "Dodano aplikację uwierzytelniającą",
+        "title": "Dodano klucz dostępu lub aplikację uwierzytelniającą",
         "body": "Aplikacji „{name}” można teraz używać do logowania na twoje konto. Jeśli to nie ty, usuń ją w sekcji Ustawienia › Bezpieczeństwo i zmień hasło.",
         "bodyUnnamed": "Aplikacji „Aplikacja uwierzytelniająca” można teraz używać do logowania na twoje konto. Jeśli to nie ty, usuń ją w sekcji Ustawienia › Bezpieczeństwo i zmień hasło."
       },
       "twoFactorDisabled": {
         "title": "Uwierzytelnianie dwuskładnikowe jest wyłączone",
-        "body": "Ostatnia aplikacja uwierzytelniająca została usunięta, więc do logowania wystarczy teraz samo hasło. Jeśli to nie ty, zmień hasło i włącz uwierzytelnianie dwuskładnikowe ponownie."
+        "body": "Usunięto ostatni klucz dostępu lub aplikację uwierzytelniającą, więc do logowania wystarczy teraz samo hasło. Jeśli to nie ty, zmień hasło i włącz uwierzytelnianie dwuskładnikowe ponownie."
       },
       "factorRemoved": {
-        "title": "Usunięto aplikację uwierzytelniającą",
+        "title": "Usunięto klucz dostępu lub aplikację uwierzytelniającą",
         "body": "Aplikacji „{name}” nie można już używać do logowania na twoje konto. Jeśli to nie ty, zmień teraz hasło."
       },
       "recoveryCodesRegenerated": {

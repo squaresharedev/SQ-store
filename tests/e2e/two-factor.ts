@@ -1,4 +1,4 @@
-import { expect, type BrowserContext, type Page } from "@playwright/test";
+import { expect, type BrowserContext, type Locator, type Page } from "@playwright/test";
 import pg from "pg";
 import { ANON_KEY, DB_URL, GATEWAY_URL, signJwt } from "./stack/keys.mjs";
 import { STEP_SECONDS, stepAt, totp } from "./stack/totp.mjs";
@@ -70,6 +70,14 @@ export function wrongCode(app: Authenticator): string {
 }
 
 /**
+ * Setup offers a passkey first; the authenticator-app specs pick the app.
+ * Before the name is filled: switching method resets the suggested name.
+ */
+export async function chooseAuthenticatorApp(dialog: Locator) {
+  await dialog.getByRole("radio", { name: /Authenticator app/ }).check();
+}
+
+/**
  * Turn 2FA on through the real Settings › Security UI, for a signed-in user
  * who has a password. Returns the phone and the recovery codes shown.
  */
@@ -87,6 +95,7 @@ export async function enableTwoFactor(
     await expect(dialog).toBeVisible({ timeout: 2_000 });
   }).toPass({ timeout: 20_000 });
 
+  await chooseAuthenticatorApp(dialog);
   if (options.name) await dialog.getByLabel("Name this authenticator").fill(options.name);
   // Asked for only when the sign-in is not recent (a fresh sign-up is recent,
   // and counts as proof on its own). ageSession() forces the prompt.
