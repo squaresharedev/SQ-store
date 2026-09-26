@@ -2,10 +2,18 @@
 
 import * as React from "react";
 import { Download, TriangleAlert } from "lucide-react";
+import { motion, useReducedMotion } from "motion/react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { CopyButton } from "@/components/ui/CopyButton";
 import { helpTextClass } from "@/components/ui/control-styles";
+import { DURATION, EASE_ENTRANCE } from "@/components/ui/motion-tokens";
+
+/**
+ * Each code arrives this long after the one before it, the first a beat after
+ * the list mounts: a cascade, not a wait.
+ */
+const CODE_STAGGER = 0.035;
 
 /**
  * A freshly minted set of recovery codes, shown ONCE. The server keeps only
@@ -31,6 +39,7 @@ export function RecoveryCodesDisplay({
   const t = useTranslations("Settings.security.recoveryCodesDisplay");
   const tCommon = useTranslations("Common.actions");
   const [saved, setSaved] = React.useState(false);
+  const still = Boolean(useReducedMotion());
   const checkboxId = React.useId();
   const done = doneLabel ?? tCommon("done");
 
@@ -81,10 +90,20 @@ export function RecoveryCodesDisplay({
         aria-label={t("listLabel")}
         className="grid grid-cols-1 gap-x-6 gap-y-1.5 border border-border bg-background p-4 font-mono text-sm tabular-nums text-foreground min-[380px]:grid-cols-2"
       >
-        {codes.map((code) => (
-          <li key={code} className="select-all">
+        {codes.map((code, index) => (
+          <motion.li
+            key={code}
+            className="select-all"
+            initial={still ? false : { opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: DURATION.slow,
+              delay: DURATION.fast + index * CODE_STAGGER,
+              ease: EASE_ENTRANCE,
+            }}
+          >
             {code}
-          </li>
+          </motion.li>
         ))}
       </ol>
 

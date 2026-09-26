@@ -231,21 +231,21 @@ beforeEach(() => {
 // ---- the sign-in challenge ------------------------------------------------
 
 describe("verifyTwoFactorSignIn", () => {
-  it("verifies a code for a session that owes one, then redirects to next", async () => {
+  it("verifies a code for a session that owes one, then names where to go next", async () => {
     sessionStateMock.mockResolvedValue(state("needs_mfa"));
-    const url = await redirectOf(
-      verifyTwoFactorSignIn({}, form({ code: "123 456", next: "/orders" })),
-    );
-    expect(url).toBe("/orders");
+    // Returned, not redirected: the page plays its success mark, then goes.
+    const result = await verifyTwoFactorSignIn({}, form({ code: "123 456", next: "/orders" }));
+    expect(result).toEqual({ verified: { next: "/orders" } });
     expect(mfa.verifySecondFactor).toHaveBeenCalledWith(
       expect.objectContaining({ userId: USER_ID, factorId: FACTOR, code: "123456", context: "sign_in" }),
     );
   });
 
-  it("never redirects off-site or back into the sign-in pages", async () => {
+  it("never sends anyone off-site or back into the sign-in pages", async () => {
     sessionStateMock.mockResolvedValue(state("needs_mfa"));
     for (const next of ["https://evil.example", "//evil.example", "/\\evil.example", "/login", "/login/two-factor"]) {
-      expect(await redirectOf(verifyTwoFactorSignIn({}, form({ code: "123456", next })))).toBe("/");
+      const result = await verifyTwoFactorSignIn({}, form({ code: "123456", next }));
+      expect(result.verified).toEqual({ next: "/" });
     }
   });
 
@@ -260,7 +260,7 @@ describe("verifyTwoFactorSignIn", () => {
   it("copies the account's saved language onto a browser with none, once the code is accepted", async () => {
     sessionStateMock.mockResolvedValue(state("needs_mfa"));
     localeSyncMock.mockResolvedValue("cs");
-    await redirectOf(verifyTwoFactorSignIn({}, form({ code: "123456", next: "/" })));
+    await verifyTwoFactorSignIn({}, form({ code: "123456", next: "/" }));
     expect(localeSyncMock).toHaveBeenCalledWith(client, USER_ID, undefined);
     expect(writeLocaleMock).toHaveBeenCalledWith("cs");
   });
@@ -268,9 +268,8 @@ describe("verifyTwoFactorSignIn", () => {
   it("a failed language sync never fails the sign-in", async () => {
     sessionStateMock.mockResolvedValue(state("needs_mfa"));
     localeSyncMock.mockRejectedValue(new Error("boom"));
-    expect(await redirectOf(verifyTwoFactorSignIn({}, form({ code: "123456", next: "/orders" })))).toBe(
-      "/orders",
-    );
+    const result = await verifyTwoFactorSignIn({}, form({ code: "123456", next: "/orders" }));
+    expect(result.verified).toEqual({ next: "/orders" });
   });
 
   it("a signed-out session is told to sign in again, and nothing is verified", async () => {
@@ -1042,12 +1041,13 @@ describe("passkeys", () => {
   });
 
   describe("verifyPasskeySignIn", () => {
-    it("completes the factor the passkey unlocked, then goes on", async () => {
+    it("completes the factor the passkey unlocked, then names where to go next", async () => {
       sessionStateMock.mockResolvedValue(state("needs_mfa"));
-      const url = await redirectOf(
-        verifyPasskeySignIn({}, form({ credential: CREDENTIAL, slip: "slip", next: "/orders" })),
+      const result = await verifyPasskeySignIn(
+        {},
+        form({ credential: CREDENTIAL, slip: "slip", next: "/orders" }),
       );
-      expect(url).toBe("/orders");
+      expect(result).toEqual({ verified: { next: "/orders" } });
       expect(pk.verifyAssertion).toHaveBeenCalledWith(
         expect.objectContaining({
           userId: USER_ID,

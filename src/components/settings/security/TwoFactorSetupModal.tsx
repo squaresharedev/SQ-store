@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import { useActionState } from "react";
-import { ExternalLink, Fingerprint, Smartphone } from "lucide-react";
+import { ExternalLink, Smartphone } from "lucide-react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { CopyButton } from "@/components/ui/CopyButton";
@@ -14,9 +15,12 @@ import { Spinner } from "@/components/ui/spinner";
 import { useToast } from "@/components/ui/Toast";
 import { useResolveMessage } from "@/components/ui/ActionErrorNotice";
 import { helpTextClass, infoTextClass } from "@/components/ui/control-styles";
+import { STEP_SWAP } from "@/components/ui/motion-tokens";
+import { AnimatedFingerprint } from "@/components/auth/AnimatedFingerprint";
 import { GoogleButton } from "@/components/auth/GoogleButton";
 import { OneTimeCodeInput } from "@/components/auth/OneTimeCodeInput";
 import { StepUpField } from "@/components/auth/StepUp";
+import { SuccessMark } from "@/components/auth/SuccessMark";
 import { RecoveryCodesDisplay } from "@/components/settings/security/RecoveryCodesDisplay";
 import {
   beginPasskeySetup,
@@ -130,24 +134,30 @@ export function TwoFactorSetupModal({
   const enrollment = begin.enrollment;
   const registration = passkeyBegin.registration;
   const done = confirm.done ? confirm : passkeyConfirm.done ? passkeyConfirm : null;
-  const finished = Boolean(done);
-  const showCodes = finished && done?.codes !== undefined;
-  const step: "start" | "scan" | "passkey" | "codes" = showCodes
-    ? "codes"
+  const doneKind = passkeyConfirm.done ? "passkey" : "app";
+  // Turning 2FA ON ends on the recovery codes; adding another way in (no
+  // codes) ends on its own moment of success.
+  const step: "start" | "scan" | "passkey" | "codes" | "added" = done
+    ? done.codes !== undefined
+      ? "codes"
+      : "added"
     : registration
       ? "passkey"
       : enrollment
         ? "scan"
         : "start";
+  const finished = Boolean(done);
 
-  // Adding another way in has no codes step: done means done.
-  const addedByPasskey = Boolean(passkeyConfirm.done);
-  React.useEffect(() => {
-    if (finished && done?.codes === undefined) {
-      toast.success(addedByPasskey ? t("passkeyAdded") : t("added"));
-      onClose();
-    }
-  }, [finished, done, addedByPasskey, onClose, toast, t]);
+  const reducedMotion = useReducedMotion();
+  /**
+   * Focus onto each step as it arrives (AnimatePresence waits for the old one
+   * to leave, so only a callback ref knows when). Whatever the step itself
+   * focused on mount (the code box, the "Create passkey" button) keeps it;
+   * otherwise the step's container takes it, never the page behind.
+   */
+  const focusStep = React.useCallback((node: HTMLDivElement | null) => {
+    if (node && !node.contains(document.activeElement)) node.focus({ preventScroll: true });
+  }, []);
 
   function close() {
     // Withdraw a factor that was created but never verified.
@@ -199,229 +209,259 @@ export function TwoFactorSetupModal({
       // The auth surfaces keep hard corners (see PasswordModal).
       className="rounded-none sm:rounded-none"
     >
-      {step === "start" && needsFreshSignIn && (
-        <div className="flex flex-col gap-4">
-          <p className={helpTextClass}>
-            {signsInWithGoogle ? t("confirmWithGoogleFirst") : t("signInAgainFirst")}
-          </p>
-          {signsInWithGoogle ? (
-            <GoogleButton next={SETUP_RETURN} intent="confirm" />
-          ) : (
-            <form action={signOutToReauthenticate}>
-              <Button type="submit" className="w-full">
-                {t("signInAgain")}
+      {/* One step at a time, each easing in as the last one leaves. */}
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.div
+          key={step}
+          ref={focusStep}
+          tabIndex={-1}
+          data-setup-step={step}
+          className="outline-none"
+          initial={reducedMotion ? false : { opacity: 0, y: 8 }}
+          animate={reducedMotion ? {} : { opacity: 1, y: 0 }}
+          exit={reducedMotion ? {} : { opacity: 0, y: -8 }}
+          transition={STEP_SWAP}
+        >
+          {step === "start" && needsFreshSignIn && (
+            <div className="flex flex-col gap-4">
+              <p className={helpTextClass}>
+                {signsInWithGoogle ? t("confirmWithGoogleFirst") : t("signInAgainFirst")}
+              </p>
+              {signsInWithGoogle ? (
+                <GoogleButton next={SETUP_RETURN} intent="confirm" />
+              ) : (
+                <form action={signOutToReauthenticate}>
+                  <Button type="submit" className="w-full">
+                    {t("signInAgain")}
+                  </Button>
+                </form>
+              )}
+              <Button type="button" variant="ghost" onClick={close}>
+                {tCommon("cancel")}
               </Button>
+            </div>
+          )}
+
+          {step === "start" && !needsFreshSignIn && (
+            <form
+              action={method === "passkey" ? passkeyBeginAction : beginAction}
+              className="flex flex-col gap-4"
+              noValidate
+            >
+              {passkeysAvailable && (
+                <MethodChoice method={method} onChange={setMethod} />
+              )}
+
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="factor-name">{t("nameLabel")}</Label>
+                <Input
+                  // Re-keyed per method so the suggested name follows the choice.
+                  key={method}
+                  id="factor-name"
+                  name="name"
+                  defaultValue={
+                    method === "passkey"
+                      ? suggestedName(existingNames, t("suggestedPasskeyName"), (number) =>
+                          t("suggestedPasskeyNameNumbered", { number }),
+                        )
+                      : suggestedName(existingNames, t("suggestedName"), (number) =>
+                          t("suggestedNameNumbered", { number }),
+                        )
+                  }
+                  maxLength={FACTOR_NAME_MAX}
+                  autoComplete="off"
+                  required
+                />
+                <p className={infoTextClass}>
+                  {method === "passkey" ? t("passkeyNameHint") : t("nameHint")}
+                </p>
+              </div>
+
+              {mode === "add" ? (
+                <StepUpField
+                  id="setup-step-up"
+                  state={method === "passkey" ? passkeyBegin : begin}
+                  always
+                  description={t("stepUpDescription")}
+                />
+              ) : askPassword ? (
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="setup-password">
+                    {signsInWithGoogle ? t("squareSharePasswordLabel") : t("passwordLabel")}
+                  </Label>
+                  {/* Never revealable: it holds the account's existing password. */}
+                  <PasswordInput
+                    id="setup-password"
+                    name="current_password"
+                    revealable={false}
+                    autoComplete="current-password"
+                    placeholder="••••••••"
+                    required
+                  />
+                  <p className={infoTextClass}>
+                    {signsInWithGoogle ? t("notYourGooglePassword") : t("passwordHint")}
+                  </p>
+                </div>
+              ) : mode === "enable" ? (
+                <p className={infoTextClass}>{t("signedInRecently")}</p>
+              ) : null}
+
+              {startError && (
+                <p role="alert" className="font-inter text-sm font-medium text-destructive">
+                  {resolve(startError.message)}
+                </p>
+              )}
+
+              <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                <Button type="button" variant="ghost" onClick={close}>
+                  {tCommon("cancel")}
+                </Button>
+                <Button type="submit" disabled={startPending} suppressHydrationWarning>
+                  {startPending ? (
+                    <>
+                      <Spinner />
+                      {t("checking")}
+                    </>
+                  ) : (
+                    t("continue")
+                  )}
+                </Button>
+              </div>
             </form>
           )}
-          <Button type="button" variant="ghost" onClick={close}>
-            {tCommon("cancel")}
-          </Button>
-        </div>
-      )}
 
-      {step === "start" && !needsFreshSignIn && (
-        <form
-          action={method === "passkey" ? passkeyBeginAction : beginAction}
-          className="flex flex-col gap-4"
-          noValidate
-        >
-          {passkeysAvailable && (
-            <MethodChoice method={method} onChange={setMethod} />
-          )}
-
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="factor-name">{t("nameLabel")}</Label>
-            <Input
-              // Re-keyed per method so the suggested name follows the choice.
-              key={method}
-              id="factor-name"
-              name="name"
-              defaultValue={
-                method === "passkey"
-                  ? suggestedName(existingNames, t("suggestedPasskeyName"), (number) =>
-                      t("suggestedPasskeyNameNumbered", { number }),
-                    )
-                  : suggestedName(existingNames, t("suggestedName"), (number) =>
-                      t("suggestedNameNumbered", { number }),
-                    )
-              }
-              maxLength={FACTOR_NAME_MAX}
-              autoComplete="off"
-              required
-            />
-            <p className={infoTextClass}>
-              {method === "passkey" ? t("passkeyNameHint") : t("nameHint")}
-            </p>
-          </div>
-
-          {mode === "add" ? (
-            <StepUpField
-              id="setup-step-up"
-              state={method === "passkey" ? passkeyBegin : begin}
-              always
-              description={t("stepUpDescription")}
-            />
-          ) : askPassword ? (
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="setup-password">
-                {signsInWithGoogle ? t("squareSharePasswordLabel") : t("passwordLabel")}
-              </Label>
-              {/* Never revealable: it holds the account's existing password. */}
-              <PasswordInput
-                id="setup-password"
-                name="current_password"
-                revealable={false}
-                autoComplete="current-password"
-                placeholder="••••••••"
-                required
-              />
-              <p className={infoTextClass}>
-                {signsInWithGoogle ? t("notYourGooglePassword") : t("passwordHint")}
-              </p>
+          {/* Its own form, after the one above rather than inside it: forms
+              cannot nest, and this one leaves the page for Google. */}
+          {step === "start" && !needsFreshSignIn && offerGoogle && (
+            <div className="mt-5 flex flex-col gap-3">
+              <div className="flex items-center gap-4">
+                <span className="h-px flex-1 bg-border" />
+                <span className={infoTextClass}>{t("or")}</span>
+                <span className="h-px flex-1 bg-border" />
+              </div>
+              <GoogleButton next={SETUP_RETURN} intent="confirm" />
             </div>
-          ) : mode === "enable" ? (
-            <p className={infoTextClass}>{t("signedInRecently")}</p>
-          ) : null}
-
-          {startError && (
-            <p role="alert" className="font-inter text-sm font-medium text-destructive">
-              {resolve(startError.message)}
-            </p>
           )}
 
-          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-            <Button type="button" variant="ghost" onClick={close}>
-              {tCommon("cancel")}
-            </Button>
-            <Button type="submit" disabled={startPending} suppressHydrationWarning>
-              {startPending ? (
-                <>
-                  <Spinner />
-                  {t("checking")}
-                </>
-              ) : (
-                t("continue")
-              )}
-            </Button>
-          </div>
-        </form>
-      )}
-
-      {/* Its own form, after the one above rather than inside it: forms
-          cannot nest, and this one leaves the page for Google. */}
-      {step === "start" && !needsFreshSignIn && offerGoogle && (
-        <div className="mt-5 flex flex-col gap-3">
-          <div className="flex items-center gap-4">
-            <span className="h-px flex-1 bg-border" />
-            <span className={infoTextClass}>{t("or")}</span>
-            <span className="h-px flex-1 bg-border" />
-          </div>
-          <GoogleButton next={SETUP_RETURN} intent="confirm" />
-        </div>
-      )}
-
-      {step === "passkey" && registration && (
-        <CreatePasskey
-          registration={registration}
-          confirm={passkeyConfirm}
-          confirmAction={passkeyConfirmAction}
-          confirmPending={passkeyConfirmPending}
-          onCancel={close}
-        />
-      )}
-
-      {step === "scan" && enrollment && (
-        <form action={confirmAction} className="flex flex-col gap-5" noValidate>
-          <input type="hidden" name="factor_id" value={enrollment.factorId} />
-
-          <div className="flex flex-col items-center gap-3 sm:flex-row sm:items-start">
-            {/* A white tile in either theme: authenticator cameras read dark
-                modules on a light ground, not the other way round. */}
-            {/* eslint-disable-next-line @next/next/no-img-element -- a data: URL minted per setup; next/image cannot optimise it and must not cache it. */}
-            <img
-              src={enrollment.qrCode}
-              alt={t("qrAlt")}
-              width={176}
-              height={176}
-              className="size-44 shrink-0 border border-border bg-white p-2"
+          {step === "passkey" && registration && (
+            <CreatePasskey
+              registration={registration}
+              confirm={passkeyConfirm}
+              confirmAction={passkeyConfirmAction}
+              confirmPending={passkeyConfirmPending}
+              onCancel={close}
             />
-            <div className="flex min-w-0 flex-col gap-2">
-              <p className={helpTextClass}>{t("anyApp")}</p>
-              <p className={infoTextClass}>{t("cantScan")}</p>
-              <div className="flex items-center gap-2">
-                <code
-                  className="min-w-0 break-all border border-border bg-muted/40 px-2 py-1.5 font-mono text-sm text-foreground"
-                  aria-label={t("setupKeyLabel")}
-                >
-                  {groupSecret(enrollment.secret)}
-                </code>
-                <CopyButton
-                  value={enrollment.secret}
-                  messages={{
-                    copy: "Settings.security.copySetupKey.copy",
-                    copied: "Settings.security.copySetupKey.copied",
-                    failed: "Settings.security.copySetupKey.failed",
-                  }}
+          )}
+
+          {step === "scan" && enrollment && (
+            <form action={confirmAction} className="flex flex-col gap-5" noValidate>
+              <input type="hidden" name="factor_id" value={enrollment.factorId} />
+
+              <div className="flex flex-col items-center gap-3 sm:flex-row sm:items-start">
+                {/* A white tile in either theme: authenticator cameras read dark
+                    modules on a light ground, not the other way round. */}
+                {/* eslint-disable-next-line @next/next/no-img-element -- a data: URL minted per setup; next/image cannot optimise it and must not cache it. */}
+                <img
+                  src={enrollment.qrCode}
+                  alt={t("qrAlt")}
+                  width={176}
+                  height={176}
+                  className="size-44 shrink-0 border border-border bg-white p-2"
+                />
+                <div className="flex min-w-0 flex-col gap-2">
+                  <p className={helpTextClass}>{t("anyApp")}</p>
+                  <p className={infoTextClass}>{t("cantScan")}</p>
+                  <div className="flex items-center gap-2">
+                    <code
+                      className="min-w-0 break-all border border-border bg-muted/40 px-2 py-1.5 font-mono text-sm text-foreground"
+                      aria-label={t("setupKeyLabel")}
+                    >
+                      {groupSecret(enrollment.secret)}
+                    </code>
+                    <CopyButton
+                      value={enrollment.secret}
+                      messages={{
+                        copy: "Settings.security.copySetupKey.copy",
+                        copied: "Settings.security.copySetupKey.copied",
+                        failed: "Settings.security.copySetupKey.failed",
+                      }}
+                    />
+                  </div>
+                  {/* On a phone the app is on the same device, so a tap beats a
+                      scan. Harmless elsewhere, just less useful: hidden from sm. */}
+                  <a
+                    href={enrollment.uri}
+                    className="inline-flex items-center gap-1.5 font-inter text-sm font-medium text-foreground underline underline-offset-4 sm:hidden"
+                  >
+                    {t("openInApp")}
+                    <ExternalLink aria-hidden className="size-3.5" />
+                  </a>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="setup-code">{t("codeLabel")}</Label>
+                <OneTimeCodeInput
+                  id="setup-code"
+                  name="code"
+                  autoFocus
+                  required
+                  readOnly={confirmPending}
                 />
               </div>
-              {/* On a phone the app is on the same device, so a tap beats a
-                  scan. Harmless elsewhere, just less useful: hidden from sm. */}
-              <a
-                href={enrollment.uri}
-                className="inline-flex items-center gap-1.5 font-inter text-sm font-medium text-foreground underline underline-offset-4 sm:hidden"
-              >
-                {t("openInApp")}
-                <ExternalLink aria-hidden className="size-3.5" />
-              </a>
-            </div>
-          </div>
 
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="setup-code">{t("codeLabel")}</Label>
-            <OneTimeCodeInput
-              id="setup-code"
-              name="code"
-              autoFocus
-              required
-              readOnly={confirmPending}
-            />
-          </div>
+              {confirm.error && (
+                <p role="alert" className="font-inter text-sm font-medium text-destructive">
+                  {resolve(confirm.error.message)}
+                </p>
+              )}
 
-          {confirm.error && (
-            <p role="alert" className="font-inter text-sm font-medium text-destructive">
-              {resolve(confirm.error.message)}
-            </p>
+              <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                <Button type="button" variant="ghost" onClick={close}>
+                  {tCommon("cancel")}
+                </Button>
+                <Button type="submit" disabled={confirmPending} suppressHydrationWarning>
+                  {confirmPending ? (
+                    <>
+                      <Spinner />
+                      {t("verifying")}
+                    </>
+                  ) : mode === "add" ? (
+                    t("verifyAndAdd")
+                  ) : (
+                    t("verifyAndTurnOn")
+                  )}
+                </Button>
+              </div>
+            </form>
           )}
 
-          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-            <Button type="button" variant="ghost" onClick={close}>
-              {tCommon("cancel")}
-            </Button>
-            <Button type="submit" disabled={confirmPending} suppressHydrationWarning>
-              {confirmPending ? (
-                <>
-                  <Spinner />
-                  {t("verifying")}
-                </>
-              ) : mode === "add" ? (
-                t("verifyAndAdd")
-              ) : (
-                t("verifyAndTurnOn")
-              )}
-            </Button>
-          </div>
-        </form>
-      )}
+          {step === "codes" && (
+            <div className="flex flex-col gap-5">
+              <SuccessMark kind={doneKind} />
+              <RecoveryCodesDisplay
+                codes={done?.codes ?? null}
+                onDone={() => {
+                  toast.success(t("enabled"));
+                  onClose();
+                }}
+              />
+            </div>
+          )}
 
-      {step === "codes" && (
-        <RecoveryCodesDisplay
-          codes={done?.codes ?? null}
-          onDone={() => {
-            toast.success(t("enabled"));
-            onClose();
-          }}
-        />
-      )}
+          {step === "added" && (
+            <div className="flex flex-col items-center gap-4 pt-2 text-center" data-factor-added>
+              <SuccessMark kind={doneKind} />
+              <p role="status" className="font-inter text-sm font-medium text-foreground">
+                {doneKind === "passkey" ? t("passkeyAdded") : t("added")}
+              </p>
+              <Button type="button" onClick={onClose} autoFocus className="w-full sm:w-auto">
+                {tCommon("done")}
+              </Button>
+            </div>
+          )}
+        </motion.div>
+      </AnimatePresence>
     </Modal>
   );
 }
@@ -437,7 +477,8 @@ function MethodChoice({ method, onChange }: { method: Method; onChange: (method:
       value: "passkey",
       label: t("methodPasskey"),
       hint: t("methodPasskeyHint"),
-      icon: <Fingerprint aria-hidden className="size-5 shrink-0" />,
+      // Chosen, its ridges draw themselves in: a small "yes, this one".
+      icon: <AnimatedFingerprint state={method === "passkey" ? "success" : "idle"} className="size-5" />,
     },
     {
       value: "app",
@@ -510,6 +551,15 @@ function CreatePasskey({
   const resolve = useResolveMessage();
   const [problem, setProblem] = React.useState<string | null>(null);
   const [working, setWorking] = React.useState(false);
+  // Bumped on every failure: it keys the fingerprint, so its shake replays.
+  const [failures, setFailures] = React.useState(0);
+
+  // The server refused the new passkey: that is a failure too.
+  const [seenConfirm, setSeenConfirm] = React.useState(confirm);
+  if (seenConfirm !== confirm) {
+    setSeenConfirm(confirm);
+    if (confirm.error) setFailures((count) => count + 1);
+  }
 
   async function create() {
     setProblem(null);
@@ -517,6 +567,7 @@ function CreatePasskey({
     const outcome = await createPasskey(registration.options);
     setWorking(false);
     if (!outcome.ok) {
+      setFailures((count) => count + 1);
       setProblem(
         outcome.reason === "cancelled"
           ? t("passkeyCancelled")
@@ -534,26 +585,29 @@ function CreatePasskey({
   }
 
   const busy = working || confirmPending;
+  const shownError = problem ?? (confirm.error ? resolve(confirm.error.message) : null);
 
   return (
     <div className="flex flex-col gap-5" data-passkey-setup>
-      <Button type="button" onClick={create} disabled={busy} className="w-full" suppressHydrationWarning>
-        {busy ? (
-          <>
-            <Spinner />
-            {t("creatingPasskey")}
-          </>
-        ) : (
-          <>
-            <Fingerprint aria-hidden className="size-4" />
-            {t("createPasskey")}
-          </>
-        )}
+      <Button
+        type="button"
+        onClick={create}
+        disabled={busy}
+        // The one thing to do on this step, so it is where focus lands.
+        autoFocus
+        className="w-full"
+        suppressHydrationWarning
+      >
+        <AnimatedFingerprint
+          key={failures}
+          state={busy ? "scanning" : failures > 0 ? "error" : "idle"}
+        />
+        {busy ? t("creatingPasskey") : t("createPasskey")}
       </Button>
 
-      {(problem || confirm.error) && (
+      {shownError && (
         <p role="alert" className="font-inter text-sm font-medium text-destructive">
-          {problem ?? resolve(confirm.error!.message)}
+          {shownError}
         </p>
       )}
 

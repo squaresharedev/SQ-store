@@ -51,9 +51,21 @@ database-level enforcement.
   that signs in with Google (it signs in again and comes straight back). Then
   create the passkey (one tap), or scan the QR code and enter the first code.
   Save ten recovery codes. Every other session is signed out when it turns on.
+  Success is marked (`SuccessMark`: a ring draws round the fingerprint or
+  phone, then a check badge lands) above the codes, or on an "added" step when
+  adding another way in.
 - **Sign-in**: password (or Google, or a magic link), then
   `/login/two-factor`: "Use your passkey" first when the account has one, the
   code box for an app, and "Use a recovery code instead" for a lost phone.
+  Once through, "Signing you in…" and the success mark show for a moment
+  before it goes on. The verify actions therefore RETURN `{ verified: { next } }`
+  (sanitised server-side) instead of redirecting, and the page renders a
+  signed-in session instead of redirecting it: an action that sets cookies
+  re-renders the page in the same response, so a page-level redirect would
+  cut the moment off.
+- **The passkey button** (`AnimatedFingerprint`): the ridges pulse under a
+  sweeping line while the browser's prompt is open, and shake once when it
+  fails. Reduced motion shows the plain icon throughout.
 - **Sensitive actions** (password, email, business details, team invites and
   roles, account deletion, data export) ask to confirm it's you once the last
   confirmation is more than 10 minutes old: "Confirm with passkey" (which also

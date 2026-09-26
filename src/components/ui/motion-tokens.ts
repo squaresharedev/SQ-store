@@ -13,5 +13,14 @@ export const EASE_ENTRANCE: [number, number, number, number] = [
   0.16, 1, 0.3, 1,
 ];
 
+/** Seconds, mirroring --transition-duration-fast/base/slow. */
+export const DURATION = { fast: 0.12, base: 0.18, slow: 0.26 } as const;
+
 /** Return-to-idle when the cursor leaves mid-story: quick and quiet. */
-export const SETTLE = { duration: 0.18, ease: EASE_STANDARD };
+export const SETTLE = { duration: DURATION.base, ease: EASE_STANDARD };
+
+/** One step of a multi-step flow handing over to the next (wizards, setup). */
+export const STEP_SWAP = { duration: DURATION.base, ease: EASE_STANDARD };
+
+/** Something small landing with a little overshoot: a badge, a status. */
+export const POP = { type: "spring", stiffness: 420, damping: 18 } as const;

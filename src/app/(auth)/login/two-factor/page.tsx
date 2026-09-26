@@ -25,7 +25,7 @@ function sanitizeNext(value: string | string[] | undefined): string {
  * The second half of signing in, for an account with 2FA on. Reachable ONLY
  * by a session that has passed its first factor (password, Google, an emailed
  * link) and not yet its second: anyone signed out is sent to sign in, anyone
- * already through is sent on.
+ * already through is shown a moment of success and sent on.
  */
 export default async function TwoFactorPage({
   searchParams,
@@ -41,8 +41,12 @@ export default async function TwoFactorPage({
   if (session.kind === "signed_out") {
     redirect(`/login?next=${encodeURIComponent(next)}`);
   }
-  if (session.kind === "signed_in") redirect(next);
 
+  // Already through. Most often this render IS the refresh that follows the
+  // challenge's own success (an action that sets cookies re-renders the page),
+  // and redirecting from here would cut its success mark off mid-play. The
+  // page shows the mark and then goes on to the same sanitised `next`.
+  const through = session.kind === "signed_in";
   const { user, assurance } = session;
   const t = await getTranslations("Auth.brand");
 
@@ -74,6 +78,7 @@ export default async function TwoFactorPage({
             next={next}
             email={user.email ?? ""}
             factors={assurance.factors.map(({ id, name, type }) => ({ id, name, type }))}
+            through={through}
           />
         </div>
       </div>

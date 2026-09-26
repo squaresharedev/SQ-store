@@ -3,7 +3,9 @@
 import * as React from "react";
 import { useActionState } from "react";
 import { Check, Fingerprint, Plus, ShieldCheck, Smartphone } from "lucide-react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
+import { DURATION, EASE_ENTRANCE, POP, SETTLE } from "@/components/ui/motion-tokens";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { Spinner } from "@/components/ui/spinner";
@@ -67,6 +69,9 @@ export function TwoFactorCard({
   const [removing, setRemoving] = React.useState<SecurityFactor | null>(null);
   const closeSetup = React.useCallback(() => setSetupOpen(false), []);
   const closeRemove = React.useCallback(() => setRemoving(null), []);
+  // Changes animate (2FA turning on, a way in added or removed); the page as
+  // first drawn does not.
+  const still = Boolean(useReducedMotion());
 
   return (
     <SettingsCard
@@ -76,54 +81,70 @@ export function TwoFactorCard({
       decoration={enrolled ? undefined : "dots"}
     >
       <div className="flex flex-col gap-5">
-        <p
-          className={cn(
-            "inline-flex w-fit items-center gap-1.5 border px-2 py-1 font-inter text-xs font-semibold",
-            enrolled
-              ? "border-foreground text-foreground"
-              : "border-border text-muted-foreground",
-          )}
-          data-two-factor-status={enrolled ? "on" : "off"}
-        >
-          <ShieldCheck aria-hidden className="size-3.5" />
-          {enrolled ? t("statusOn") : t("statusOff")}
-        </p>
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.p
+            key={enrolled ? "on" : "off"}
+            className={cn(
+              "inline-flex w-fit items-center gap-1.5 border px-2 py-1 font-inter text-xs font-semibold",
+              enrolled
+                ? "border-foreground text-foreground"
+                : "border-border text-muted-foreground",
+            )}
+            data-two-factor-status={enrolled ? "on" : "off"}
+            // Turning on is the news: it pops. Turning off just changes.
+            initial={still ? false : { opacity: 0, scale: enrolled ? 0.8 : 1 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={still ? undefined : { opacity: 0, transition: { duration: DURATION.fast } }}
+            transition={enrolled ? POP : SETTLE}
+          >
+            <ShieldCheck aria-hidden className="size-3.5" />
+            {enrolled ? t("statusOn") : t("statusOff")}
+          </motion.p>
+        </AnimatePresence>
 
         {enrolled ? (
           <>
             <ul className="divide-y divide-border border-y border-border" aria-label={t("listLabel")}>
-              {factors.map((factor) => (
-                <li
-                  key={factor.id}
-                  className="flex flex-wrap items-center justify-between gap-3 py-3"
-                >
-                  <div className="flex min-w-0 items-center gap-2.5" data-factor-type={factor.type}>
-                    {factor.type === "passkey" ? (
-                      <Fingerprint aria-hidden className="size-4 shrink-0 text-muted-foreground" />
-                    ) : (
-                      <Smartphone aria-hidden className="size-4 shrink-0 text-muted-foreground" />
-                    )}
-                    <div className="min-w-0">
-                      <p className="truncate font-inter text-sm font-medium text-foreground">
-                        {factor.name}
-                      </p>
-                      <p className={infoTextClass}>
-                        {factor.type === "passkey" ? t("kindPasskey") : t("kindApp")}
-                        {" · "}
-                        {t("added", { date: formatDay(factor.createdAt, locale) })}
-                      </p>
-                    </div>
-                  </div>
-                  <Button
-                    type="button"
-                    variant="ghost-danger"
-                    onClick={() => setRemoving(factor)}
-                    aria-label={t("removeLabel", { name: factor.name })}
+              <AnimatePresence initial={false}>
+                {factors.map((factor) => (
+                  <motion.li
+                    key={factor.id}
+                    className="overflow-hidden"
+                    initial={still ? false : { opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={still ? undefined : { opacity: 0, height: 0 }}
+                    transition={{ duration: DURATION.slow, ease: EASE_ENTRANCE }}
                   >
-                    {tCommon("remove")}
-                  </Button>
-                </li>
-              ))}
+                    <div className="flex flex-wrap items-center justify-between gap-3 py-3">
+                      <div className="flex min-w-0 items-center gap-2.5" data-factor-type={factor.type}>
+                        {factor.type === "passkey" ? (
+                          <Fingerprint aria-hidden className="size-4 shrink-0 text-muted-foreground" />
+                        ) : (
+                          <Smartphone aria-hidden className="size-4 shrink-0 text-muted-foreground" />
+                        )}
+                        <div className="min-w-0">
+                          <p className="truncate font-inter text-sm font-medium text-foreground">
+                            {factor.name}
+                          </p>
+                          <p className={infoTextClass}>
+                            {factor.type === "passkey" ? t("kindPasskey") : t("kindApp")}
+                            {" · "}
+                            {t("added", { date: formatDay(factor.createdAt, locale) })}
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost-danger"
+                        onClick={() => setRemoving(factor)}
+                        aria-label={t("removeLabel", { name: factor.name })}
+                      >
+                        {tCommon("remove")}
+                      </Button>
+                    </div>
+                  </motion.li>
+                ))}
+              </AnimatePresence>
             </ul>
             <div>
               <Button type="button" variant="secondary" onClick={() => setSetupOpen(true)}>

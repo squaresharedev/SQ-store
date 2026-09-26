@@ -16,7 +16,7 @@ import {
   iconNudgeRightClass,
   labelClass,
 } from "@/components/ui/control-styles";
-import { EASE_STANDARD } from "@/components/dashboard/nav-icons/motion-tokens";
+import { STEP_SWAP } from "@/components/ui/motion-tokens";
 import { createStorefront } from "@/lib/storefront/actions";
 import { STOREFRONT_NAME_MAX } from "@/lib/validation/storefront";
 import { BRIEF_OTHER_CATEGORY_MAX } from "@/types/storefront-brief";
@@ -240,7 +240,7 @@ export function CreateStorefrontWizard({
             initial={reducedMotion ? false : { opacity: 0, x: back ? -12 : 12 }}
             animate={reducedMotion ? {} : { opacity: 1, x: 0 }}
             exit={reducedMotion ? {} : { opacity: 0, x: back ? 12 : -12 }}
-            transition={{ duration: 0.18, ease: EASE_STANDARD }}
+            transition={STEP_SWAP}
           >
             {step === "category" && (
               <>

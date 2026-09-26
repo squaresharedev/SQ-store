@@ -3,7 +3,9 @@
 import * as React from "react";
 import { useActionState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Fingerprint, KeyRound, Smartphone } from "lucide-react";
+import { useReducedMotion } from "motion/react";
 import { useTranslations } from "next-intl";
 import type { PublicKeyCredentialRequestOptionsJSON } from "@simplewebauthn/browser";
 import { Button } from "@/components/ui/button";
@@ -11,9 +13,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 import { useResolveMessage } from "@/components/ui/ActionErrorNotice";
-import { helpTextClass, infoTextClass } from "@/components/ui/control-styles";
+import { helpTextClass, infoTextClass, quietLinkClass } from "@/components/ui/control-styles";
+import { AnimatedFingerprint } from "@/components/auth/AnimatedFingerprint";
 import { FactorPicker, type FactorChoice } from "@/components/auth/FactorPicker";
 import { OneTimeCodeInput } from "@/components/auth/OneTimeCodeInput";
+import { SuccessMark } from "@/components/auth/SuccessMark";
 import { signOut } from "@/lib/auth/actions";
 import {
   passkeySignInOptions,
@@ -37,20 +41,42 @@ const SWITCH_CLASS =
  * (for someone whose phone is gone) one of their recovery codes. One form on
  * screen at a time, each with its own action, so nothing sent for one check
  * can ever reach another. A passkey comes first whenever the account has one.
+ *
+ * Once through, the page shows a moment of success and then goes on, whether
+ * it learned that from the form's action or from the server (`through`: the
+ * render that follows a successful action is a signed-in one, because the
+ * action set the upgraded session's cookies). Either way the destination is
+ * a path the server sanitised.
  */
 export function TwoFactorChallenge({
   next,
   email,
   factors,
+  through = false,
 }: {
   next: string;
   email: string;
   factors: FactorChoice[];
+  /** This session has already passed its second factor. */
+  through?: boolean;
 }) {
   const t = useTranslations("Auth.twoFactor");
   const apps = factors.filter((factor) => factor.type !== "passkey");
   const hasPasskey = factors.some((factor) => factor.type === "passkey");
   const [mode, setMode] = React.useState<Mode>(hasPasskey ? "passkey" : "code");
+  const [verifiedNext, setVerifiedNext] = React.useState<string | null>(null);
+  const onVerified = React.useCallback((to: string) => setVerifiedNext(to), []);
+  const destination = verifiedNext ?? (through ? next : null);
+  useContinueTo(destination);
+
+  if (destination) {
+    return (
+      <div className="flex flex-col gap-5">
+        <h1 className="text-xl font-semibold tracking-tight text-foreground">{t("heading")}</h1>
+        <SigningIn kind={mode === "passkey" ? "passkey" : "app"} />
+      </div>
+    );
+  }
 
   // The ways out of the current one, in the order a person would reach for them.
   const switches: { to: Mode; label: string; icon: React.ReactNode }[] = [];
@@ -67,9 +93,9 @@ export function TwoFactorChallenge({
   return (
     <div className="flex flex-col gap-5">
       {mode === "passkey" ? (
-        <PasskeyForm next={next} email={email} />
+        <PasskeyForm next={next} email={email} onVerified={onVerified} />
       ) : mode === "code" ? (
-        <CodeForm next={next} email={email} factors={apps} />
+        <CodeForm next={next} email={email} factors={apps} onVerified={onVerified} />
       ) : (
         <RecoveryForm next={next} />
       )}
@@ -92,7 +118,7 @@ export function TwoFactorChallenge({
         <form action={signOut}>
           <button
             type="submit"
-            className="font-inter text-xs text-muted-foreground underline decoration-border underline-offset-4 transition-colors duration-base ease-standard hover:text-foreground hover:decoration-foreground motion-reduce:transition-none"
+            className={quietLinkClass}
           >
             {t("notYou")}
           </button>
@@ -123,6 +149,51 @@ function Status({ state, next }: { state: ChallengeState; next: string }) {
   );
 }
 
+/** How long the success mark plays before the page moves on: long enough for
+ *  the check to land (SuccessMark finishes at ~1.1s), not a beat longer. */
+const SUCCESS_HOLD_MS = 1250;
+/** Reduced motion: nothing to watch, just long enough to read. */
+const SUCCESS_HOLD_REDUCED_MS = 300;
+
+/** Let the success mark play, then go to `destination` (null: stay). */
+function useContinueTo(destination: string | null) {
+  const router = useRouter();
+  const reducedMotion = useReducedMotion();
+  React.useEffect(() => {
+    if (!destination) return;
+    const timer = setTimeout(
+      () => router.replace(destination),
+      reducedMotion ? SUCCESS_HOLD_REDUCED_MS : SUCCESS_HOLD_MS,
+    );
+    return () => clearTimeout(timer);
+  }, [destination, reducedMotion, router]);
+}
+
+/**
+ * A form's action says the second factor went through: tell the page, before
+ * the browser paints the form again, so the success moment follows the click
+ * without a flash of the button in between.
+ */
+function useReportVerified(state: ChallengeState, onVerified: (next: string) => void) {
+  const next = state.verified?.next;
+  React.useLayoutEffect(() => {
+    if (next) onVerified(next);
+  }, [next, onVerified]);
+}
+
+/** The moment between "that worked" and the page it leads to. */
+function SigningIn({ kind }: { kind: "passkey" | "app" }) {
+  const t = useTranslations("Auth.twoFactor");
+  return (
+    <div className="flex flex-col items-center gap-4 py-4 text-center" data-two-factor-verified>
+      <SuccessMark kind={kind} size="md" />
+      <p role="status" className="font-inter text-sm font-medium text-foreground">
+        {t("signingIn")}
+      </p>
+    </div>
+  );
+}
+
 type SignInChallenge = { options: PublicKeyCredentialRequestOptionsJSON; slip: string };
 
 /**
@@ -131,7 +202,15 @@ type SignInChallenge = { options: PublicKeyCredentialRequestOptionsJSON; slip: s
  * started by the click itself). Each challenge is single-use: after an answer
  * from the server, a fresh one is fetched for the next try.
  */
-function PasskeyForm({ next, email }: { next: string; email: string }) {
+function PasskeyForm({
+  next,
+  email,
+  onVerified,
+}: {
+  next: string;
+  email: string;
+  onVerified: (next: string) => void;
+}) {
   const t = useTranslations("Auth.twoFactor");
   const tp = useTranslations("Auth.twoFactor.passkey");
   const resolve = useResolveMessage();
@@ -141,6 +220,8 @@ function PasskeyForm({ next, email }: { next: string; email: string }) {
   // Loading the options failed; the button then retries the load.
   const [loadFailed, setLoadFailed] = React.useState(false);
   const [phase, setPhase] = React.useState<"idle" | "working" | "sent">("idle");
+  // Bumped on every failure: it keys the fingerprint, so its shake replays.
+  const [failures, setFailures] = React.useState(0);
 
   // The server answered: the challenge it was sent is spent either way.
   const [seenState, setSeenState] = React.useState(state);
@@ -148,20 +229,27 @@ function PasskeyForm({ next, email }: { next: string; email: string }) {
     setSeenState(state);
     setPhase("idle");
     setChallenge(null);
+    if (state.error) setFailures((count) => count + 1);
   }
+
+  useReportVerified(state, onVerified);
 
   React.useEffect(() => {
     if (challenge || loadFailed || phase !== "idle") return;
     let live = true;
-    void passkeySignInOptions().then((result) => {
-      if (!live) return;
-      if (result.options && result.slip) {
-        setChallenge({ options: result.options, slip: result.slip });
-      } else {
-        setLoadFailed(true);
-        setProblem(result.error ?? tp("failed"));
-      }
-    });
+    // A request that failed outright (offline, a deploy mid-visit) is a failed
+    // load too, so the button offers to try again instead of staying disabled.
+    void passkeySignInOptions()
+      .catch(() => null)
+      .then((result) => {
+        if (!live) return;
+        if (result?.options && result.slip) {
+          setChallenge({ options: result.options, slip: result.slip });
+        } else {
+          setLoadFailed(true);
+          setProblem(result?.error ?? tp("failed"));
+        }
+      });
     return () => {
       live = false;
     };
@@ -184,6 +272,7 @@ function PasskeyForm({ next, email }: { next: string; email: string }) {
     const outcome = await assertPasskey(challenge.options);
     if (!outcome.ok) {
       setPhase("idle");
+      setFailures((count) => count + 1);
       setProblem(
         outcome.reason === "cancelled"
           ? tp("cancelled")
@@ -222,17 +311,12 @@ function PasskeyForm({ next, email }: { next: string; email: string }) {
         suppressHydrationWarning
         className="w-full px-8 py-3.5 text-base"
       >
-        {busy ? (
-          <>
-            <Spinner />
-            {tp("waiting")}
-          </>
-        ) : (
-          <>
-            <Fingerprint aria-hidden className="size-5" />
-            {tp("button")}
-          </>
-        )}
+        <AnimatedFingerprint
+          key={failures}
+          state={busy ? "scanning" : failures > 0 ? "error" : "idle"}
+          className="size-5"
+        />
+        {busy ? tp("waiting") : tp("button")}
       </Button>
       <p className={infoTextClass}>{tp("hint")}</p>
 
@@ -262,14 +346,17 @@ function CodeForm({
   next,
   email,
   factors,
+  onVerified,
 }: {
   next: string;
   email: string;
   factors: FactorChoice[];
+  onVerified: (next: string) => void;
 }) {
   const t = useTranslations("Auth.twoFactor");
   const [state, formAction, isPending] = useActionState(verifyTwoFactorSignIn, INITIAL);
   const single = factors.length < 2 ? factors[0] : null;
+  useReportVerified(state, onVerified);
 
   return (
     <form action={formAction} className="flex flex-col gap-5" noValidate>

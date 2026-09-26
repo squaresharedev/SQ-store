@@ -197,6 +197,10 @@ export const infoTextClass = "font-inter text-xs text-muted-foreground";
 /** Inline validation message. */
 export const errorTextClass = "font-inter text-sm text-destructive";
 
+/** A small way out or way around, set under the main control as a quiet
+ *  underlined link ("Not you? Sign out", "Use a code instead"). */
+export const quietLinkClass = `font-inter text-xs text-muted-foreground underline decoration-border underline-offset-4 hover:text-foreground hover:decoration-foreground ${TRANSITION} ${FOCUS_RING}`;
+
 /** "Last used" chip marking the sign-in option this browser used last.
  *
  *  Sentence case, not uppercase: this is a quiet aside to a returning user, and

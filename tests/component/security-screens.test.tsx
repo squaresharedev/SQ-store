@@ -14,6 +14,14 @@ import { msg } from "@/i18n/types";
 afterEach(cleanup);
 
 const verifyMock = vi.hoisted(() => vi.fn().mockResolvedValue({}));
+const signInOptionsMock = vi.hoisted(() => vi.fn().mockResolvedValue({}));
+// The challenge moves on with the router once its success mark has played.
+const replaceMock = vi.hoisted(() => vi.fn());
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ replace: replaceMock, push: vi.fn(), refresh: vi.fn() }),
+  usePathname: () => "/login/two-factor",
+  useSearchParams: () => new URLSearchParams(),
+}));
 vi.mock("@/lib/auth/mfa-actions", () => ({
   verifyTwoFactorSignIn: verifyMock,
   signInWithRecoveryCode: vi.fn().mockResolvedValue({}),
@@ -26,7 +34,7 @@ vi.mock("@/lib/auth/mfa-actions", () => ({
   confirmIdentity: vi.fn().mockResolvedValue({}),
   beginPasskeySetup: vi.fn().mockResolvedValue({}),
   confirmPasskeySetup: vi.fn().mockResolvedValue({}),
-  passkeySignInOptions: vi.fn().mockResolvedValue({}),
+  passkeySignInOptions: signInOptionsMock,
   passkeyStepUpOptions: vi.fn().mockResolvedValue({}),
   verifyPasskeySignIn: vi.fn().mockResolvedValue({}),
 }));
@@ -83,6 +91,32 @@ describe("TwoFactorChallenge", () => {
       "href",
       "/login?next=%2Forders",
     );
+  });
+
+  it("once the code is accepted, says so and goes where the server said", async () => {
+    // `next` comes back from the action (sanitised there), never from the page.
+    verifyMock.mockResolvedValue({ verified: { next: "/orders" } });
+    const user = userEvent.setup();
+    render(<TwoFactorChallenge next="/ignored" email="seller@example.com" factors={[PHONE]} />);
+    await user.type(screen.getByLabelText("Authentication code"), "123456");
+
+    expect(await screen.findByRole("status")).toHaveTextContent("Signing you in…");
+    // The other ways in are gone: nothing left to choose.
+    await vi.waitFor(() =>
+      expect(screen.queryByRole("button", { name: "Use a recovery code instead" })).not.toBeInTheDocument(),
+    );
+    await vi.waitFor(() => expect(replaceMock).toHaveBeenCalledWith("/orders"), { timeout: 3000 });
+  });
+
+  it("a passkey whose options request fails outright says so and can be tried again", async () => {
+    // Offline, or a deploy mid-visit: the request itself throws.
+    signInOptionsMock.mockRejectedValueOnce(new Error("Failed to fetch"));
+    render(
+      <TwoFactorChallenge next="/" email="" factors={[{ ...PHONE, name: "iPhone", type: "passkey" }]} />,
+    );
+    expect(await screen.findByRole("alert")).toHaveTextContent("Your device couldn't use the passkey. Try again.");
+    // Not stuck waiting on an answer that is never coming: a click retries.
+    expect(screen.getByRole("button", { name: "Use your passkey" })).toBeEnabled();
   });
 
   it("switches to the recovery-code form and back", async () => {

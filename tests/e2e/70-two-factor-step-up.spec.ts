@@ -200,7 +200,11 @@ test.describe("two-factor step-up", () => {
     const tablet: Authenticator = authenticator(((await key.textContent()) ?? "").replace(/\s+/g, ""));
     await dialog.getByLabel("6-digit code from the app").fill(await nextCode(tablet));
     await dialog.getByRole("button", { name: "Verify and add" }).click();
-    await expectToast(page, /authenticator added/i);
+    // Adding ends on its own moment of success, then Done.
+    await expect(dialog.getByRole("status")).toHaveText("Authenticator added.", { timeout: 20_000 });
+    await expect(dialog.locator('[data-success-mark="app"]')).toBeVisible();
+    await dialog.getByRole("button", { name: "Done" }).click();
+    await expect(dialog).toBeHidden();
     await expect(page.getByRole("list", { name: "Passkeys and authenticator apps" }).getByRole("listitem")).toHaveCount(2);
 
     // Sign-in now offers a choice, and either phone works.

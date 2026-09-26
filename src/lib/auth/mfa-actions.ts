@@ -141,6 +141,13 @@ function afterChallenge(raw: FormDataEntryValue | null): string {
 export type ChallengeState = ActionState & {
   /** The half-signed-in session is gone; the page offers "sign in again". */
   expired?: boolean;
+  /**
+   * The second factor went through: this session is aal2 already (the
+   * cookies in this response say so). The page shows its moment of success,
+   * then goes to `next`, which was sanitised here (afterChallenge) and is
+   * never taken from the browser.
+   */
+  verified?: { next: string };
 };
 
 /** The half-signed-in session is gone: say so, and offer "sign in again". */
@@ -187,8 +194,7 @@ export async function verifyTwoFactorSignIn(
   // aal1 session could not read the profile).
   await syncAccountLocale(supabase, state.user.id);
 
-  // Outside every try/catch: redirect() works by throwing.
-  redirect(next);
+  return { verified: { next } };
 }
 
 /**
@@ -713,8 +719,7 @@ export async function verifyPasskeySignIn(
   if (!completed.ok) return failed(SECOND_FACTOR_ERRORS.unavailable);
 
   await syncAccountLocale(supabase, user.id);
-  // Outside every try/catch: redirect() works by throwing.
-  redirect(next);
+  return { verified: { next } };
 }
 
 // ---------------------------------------------------------------------------

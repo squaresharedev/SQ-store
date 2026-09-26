@@ -61,6 +61,8 @@ test.describe("two-factor with a passkey", () => {
     const codes = dialog.getByRole("list", { name: "Recovery codes" });
     await expect(codes).toBeVisible({ timeout: 30_000 });
     await expect(codes.getByRole("listitem")).toHaveCount(10);
+    // The moment of success: the print recorded, above the codes.
+    await expect(dialog.locator('[data-success-mark="passkey"]')).toBeVisible();
     await dialog.getByLabel(/saved my recovery codes/i).check();
     await dialog.getByRole("button", { name: "Done" }).click();
     await expect(page.locator('[data-two-factor-status="on"]')).toBeVisible({ timeout: 20_000 });
@@ -93,10 +95,11 @@ test.describe("two-factor with a passkey", () => {
     const usePasskey = page.getByRole("button", { name: "Use your passkey" });
     // Enabled once the options have arrived (fetched as the page opens).
     await expect(usePasskey).toBeEnabled({ timeout: 20_000 });
-    await expect(async () => {
-      await usePasskey.click();
-      await page.waitForURL(/\/dashboard/, { timeout: 5_000 });
-    }).toPass({ timeout: 40_000 });
+    await usePasskey.click();
+    // Verified: a beat of success on the challenge page, then the dashboard.
+    await expect(page.getByRole("status")).toHaveText("Signing you in…", { timeout: 20_000 });
+    await expect(page.locator('[data-success-mark="passkey"]')).toBeVisible();
+    await page.waitForURL(/\/dashboard/, { timeout: 30_000 });
     const signedIn = claimsOf(await accessToken(context));
     expect(signedIn.aal).toBe("aal2");
 

@@ -13,7 +13,7 @@ import {
   iconNudgeRightClass,
   overlaySurfaceClass,
 } from "@/components/ui/control-styles";
-import { EASE_STANDARD } from "@/components/ui/motion-tokens";
+import { EASE_STANDARD, STEP_SWAP } from "@/components/ui/motion-tokens";
 import { useFocusTrap } from "@/lib/hooks/useFocusTrap";
 import { useIsMacPlatform } from "@/lib/hooks/useIsMacPlatform";
 import {
@@ -605,7 +605,7 @@ function ActiveTour({
             className="p-4"
             initial={reducedMotion ? false : { opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.18, ease: EASE_STANDARD }}
+            transition={STEP_SWAP}
           >
             <p id={counterId} className="font-inter text-xs text-muted-foreground">
               {tOverlay("progress", { current: index + 1, total: steps.length })}

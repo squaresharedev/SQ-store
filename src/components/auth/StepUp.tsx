@@ -1,14 +1,14 @@
 "use client";
 
 import * as React from "react";
-import { Fingerprint, ShieldCheck } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { PublicKeyCredentialRequestOptionsJSON } from "@simplewebauthn/browser";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Spinner } from "@/components/ui/spinner";
 import { useResolveMessage } from "@/components/ui/ActionErrorNotice";
-import { infoTextClass } from "@/components/ui/control-styles";
+import { infoTextClass, quietLinkClass } from "@/components/ui/control-styles";
+import { AnimatedFingerprint } from "@/components/auth/AnimatedFingerprint";
 import { FactorPicker, type FactorChoice } from "@/components/auth/FactorPicker";
 import { OneTimeCodeInput } from "@/components/auth/OneTimeCodeInput";
 import { STEP_UP_HINT_COOKIE, STEP_UP_WINDOW_SECONDS } from "@/lib/auth/assurance";
@@ -205,7 +205,7 @@ export function StepUpField({
         <button
           type="button"
           onClick={() => setMethod(usePasskey ? "code" : "passkey")}
-          className="w-fit font-inter text-xs text-muted-foreground underline decoration-border underline-offset-4 transition-colors duration-base ease-standard hover:text-foreground hover:decoration-foreground motion-reduce:transition-none"
+          className={`w-fit ${quietLinkClass}`}
         >
           {usePasskey ? t("useCodeInstead") : t("usePasskeyInstead")}
         </button>
@@ -226,7 +226,7 @@ type StepUpChallenge = { options: PublicKeyCredentialRequestOptionsJSON; slip: s
  * is single-use, so after a submit they are fetched again, but only once the
  * action has answered (fetching while it runs could race it).
  */
-function PasskeyConfirm({ id, state }: { id: string; state?: object }) {
+function PasskeyConfirm({ id, state }: { id: string; state?: { stepUp?: true } }) {
   const t = useTranslations("Auth.stepUp");
   const resolve = useResolveMessage();
   const wrapper = React.useRef<HTMLDivElement>(null);
@@ -239,6 +239,8 @@ function PasskeyConfirm({ id, state }: { id: string; state?: object }) {
   // idle: ready (or fetching); working: the prompt is open; sent: the form is
   // submitting with a spent challenge, so nothing is fetched until it answers.
   const [phase, setPhase] = React.useState<"idle" | "working" | "sent">("idle");
+  // Bumped on every failure: it keys the fingerprint, so its shake replays.
+  const [failures, setFailures] = React.useState(0);
 
   // The action answered (a new state object): the challenge it carried is
   // spent either way, so start over. Adjusted during render, React's pattern
@@ -248,20 +250,26 @@ function PasskeyConfirm({ id, state }: { id: string; state?: object }) {
     setSeenState(state);
     setPhase("idle");
     setChallenge(null);
+    // Refused as a step-up (not, say, a form field): the passkey did not take.
+    if (state?.stepUp) setFailures((count) => count + 1);
   }
 
   React.useEffect(() => {
     if (challenge || loadFailed || phase !== "idle") return;
     let live = true;
-    void passkeyStepUpOptions().then((result) => {
-      if (!live) return;
-      if (result.options && result.slip) {
-        setChallenge({ options: result.options, slip: result.slip });
-      } else {
-        setLoadFailed(true);
-        setError(result.error ?? t("passkeyFailed"));
-      }
-    });
+    // A request that failed outright (offline, a deploy mid-visit) is a failed
+    // load too, so the button offers to try again instead of staying disabled.
+    void passkeyStepUpOptions()
+      .catch(() => null)
+      .then((result) => {
+        if (!live) return;
+        if (result?.options && result.slip) {
+          setChallenge({ options: result.options, slip: result.slip });
+        } else {
+          setLoadFailed(true);
+          setError(result?.error ?? t("passkeyFailed"));
+        }
+      });
     return () => {
       live = false;
     };
@@ -284,6 +292,7 @@ function PasskeyConfirm({ id, state }: { id: string; state?: object }) {
     const outcome = await assertPasskey(challenge.options);
     if (!outcome.ok) {
       setPhase("idle");
+      setFailures((count) => count + 1);
       setError(
         outcome.reason === "cancelled"
           ? t("passkeyCancelled")
@@ -315,17 +324,11 @@ function PasskeyConfirm({ id, state }: { id: string; state?: object }) {
         className="w-full sm:w-fit"
         data-passkey-confirm={id}
       >
-        {working ? (
-          <>
-            <Spinner />
-            {t("passkeyWaiting")}
-          </>
-        ) : (
-          <>
-            <Fingerprint aria-hidden className="size-4" />
-            {t("passkeyButton")}
-          </>
-        )}
+        <AnimatedFingerprint
+          key={failures}
+          state={working ? "scanning" : failures > 0 ? "error" : "idle"}
+        />
+        {working ? t("passkeyWaiting") : t("passkeyButton")}
       </Button>
       {error && (
         <p role="alert" className="font-inter text-sm font-medium text-destructive">

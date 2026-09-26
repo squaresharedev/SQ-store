@@ -21,7 +21,7 @@ import {
   infoTextClass,
 } from "@/components/ui/control-styles";
 import { iconTileClass } from "@/components/ui/surface-styles";
-import { EASE_STANDARD } from "@/components/ui/motion-tokens";
+import { STEP_SWAP } from "@/components/ui/motion-tokens";
 import { TermsSummary } from "@/components/legal/TermsSummary";
 import type { ActionState } from "@/lib/errors";
 import {
@@ -369,7 +369,7 @@ export function WelcomeFlow({
             initial={reducedMotion ? false : { opacity: 0, x: back ? -12 : 12 }}
             animate={reducedMotion ? {} : { opacity: 1, x: 0 }}
             exit={reducedMotion ? {} : { opacity: 0, x: back ? 12 : -12 }}
-            transition={{ duration: 0.18, ease: EASE_STANDARD }}
+            transition={STEP_SWAP}
           >
             {step === "welcome" && (
               <div className="space-y-4 pb-1">
