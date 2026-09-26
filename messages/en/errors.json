@@ -69,7 +69,8 @@
     "rotateEmbedKeys": "Too many attempts to rotate embed keys in a short time.",
     "updateStock": "Too many attempts to update stock in a short time.",
     "readProductPageSettings": "Too many attempts to read product page settings in a short time.",
-    "requestReview": "Too many attempts to ask for a review in a short time."
+    "requestReview": "Too many attempts to ask for a review in a short time.",
+    "fileAppeal": "Too many attempts to send an appeal in a short time."
   },
   "serverError": {
     "fix": "This is usually temporary. Wait a moment and try again; if it keeps failing, refresh the page.",
@@ -95,13 +96,16 @@
     "checkSellerDetails": "Could not check your seller details because of a problem on our side.",
     "loadProductPageSettings": "Could not load your product page settings because of a problem on our side.",
     "saveProductPageSettings": "Could not save your product page settings because of a problem on our side.",
-    "sendForReview": "Could not send this for review because of a problem on our side."
+    "sendForReview": "Could not send this for review because of a problem on our side.",
+    "fileAppeal": "Could not send your appeal because of a problem on our side."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {This product was removed, not paused.} storefront {This storefront was removed, not paused.} other {This item was removed, not paused.}}",
-    "removedFix": "A removal is final. If you think it was wrong, use the appeal link to write to us.",
+    "removedFix": "A removal is final unless an appeal changes it. If you think it was wrong, use Appeal this decision.",
     "notPaused": "{target, select, product {This product is not paused.} storefront {This storefront is not paused.} other {This item is not paused.}}",
-    "notPausedFix": "There is nothing to review: it is already visible to buyers."
+    "notPausedFix": "There is nothing to review: it is already visible to buyers.",
+    "decisionSuperseded": "This decision no longer applies, so there is nothing to appeal.",
+    "decisionSupersededFix": "Reload the page to see where it stands now."
   },
   "traderIdentityRequired": {
     "message": "You can't publish or sell until your seller details are complete.",

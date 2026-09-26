@@ -95,10 +95,10 @@
   },
   "report": {
     "trigger": "{target, select, product {Denunciar este producto} other {Denunciar este escaparate}}",
-    "title": "{target, select, product {Denunciar este producto} other {Denunciar este escaparate}}",
+    "title": "{target, select, product {Denunciar este producto} storefront {Denunciar este escaparate} seller {Denunciar a este vendedor} other {Denunciar un problema}}",
     "description": "Cuéntanos qué pasa. Una persona revisa cada denuncia.",
     "sentTitle": "Denuncia enviada",
-    "sentBody": "{target, select, product {Gracias. Una persona revisará este producto. No compartimos con el vendedor quién ha denunciado.} other {Gracias. Una persona revisará este escaparate. No compartimos con el vendedor quién ha denunciado.}}",
+    "sentBody": "{target, select, product {Gracias. Una persona revisará este producto. No compartimos con el vendedor quién ha denunciado.} seller {Gracias. Una persona revisará a este vendedor. No compartimos quién ha denunciado con él.} other {Gracias. Una persona revisará este escaparate. No compartimos con el vendedor quién ha denunciado.}}",
     "reasonsLegend": "¿Qué ocurre?",
     "reasons": {
       "illegal": {
@@ -150,6 +150,22 @@
       "reason": "Elige qué ocurre.",
       "rateLimited": "Demasiadas denuncias desde aquí. Inténtalo más tarde.",
       "submitFailed": "No se ha podido enviar. Inténtalo de nuevo."
+    },
+    "triggerAny": "Denunciar un problema",
+    "scopeLegend": "¿Qué quieres denunciar?",
+    "scopes": {
+      "product": {
+        "label": "Este producto",
+        "hint": "{title}"
+      },
+      "storefront": {
+        "label": "Este escaparate",
+        "hint": "{name}, y todo lo que contiene"
+      },
+      "seller": {
+        "label": "Este vendedor",
+        "hint": "{name}, en todos sus escaparates"
+      }
     }
   },
   "shippingProse": {

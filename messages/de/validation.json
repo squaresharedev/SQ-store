@@ -235,6 +235,11 @@
       "required": "Deine Beschreibung ist erforderlich.",
       "tooLong": "Deine Beschreibung darf höchstens {maximum} Zeichen lang sein.",
       "unsupported": "Deine Beschreibung enthält nicht unterstützte Zeichen."
+    },
+    "appealMessage": {
+      "required": "Erkläre uns den Grund mit mindestens {minimum} Zeichen.",
+      "tooLong": "Dein Einspruch darf höchstens {maximum} Zeichen haben.",
+      "unsupported": "Dein Einspruch enthält nicht unterstützte Zeichen."
     }
   },
   "email": {
@@ -277,7 +282,8 @@
     "blockId": "Eine Block-ID ist ungültig.",
     "notificationRecipient": "Ein Benachrichtigungsempfänger ist ungültig.",
     "factor": "Dieser Authenticator ist ungültig.",
-    "reportTarget": "Dieses Element ist ungültig."
+    "reportTarget": "Dieses Element ist ungültig.",
+    "moderationDecision": "Diese Entscheidung ist ungültig."
   },
   "handle": {
     "username": "Ein Benutzername muss 3 bis 30 Zeichen lang sein und darf nur Buchstaben, Zahlen und Unterstriche enthalten."

@@ -69,7 +69,8 @@
     "rotateEmbedKeys": "Te veel pogingen om insluitingssleutels te vernieuwen in korte tijd.",
     "updateStock": "Te veel pogingen om de voorraad bij te werken in korte tijd.",
     "readProductPageSettings": "Te veel pogingen om productpagina-instellingen te lezen in korte tijd.",
-    "requestReview": "Je hebt in korte tijd te vaak om een beoordeling gevraagd."
+    "requestReview": "Je hebt in korte tijd te vaak om een beoordeling gevraagd.",
+    "fileAppeal": "Te veel pogingen om een bezwaar in korte tijd in te dienen."
   },
   "serverError": {
     "fix": "Dit is meestal tijdelijk. Wacht even en probeer het opnieuw; als het blijft mislukken, vernieuw dan de pagina.",
@@ -95,13 +96,16 @@
     "checkSellerDetails": "Je verkopersgegevens konden niet worden gecontroleerd door een probleem aan onze kant.",
     "loadProductPageSettings": "Je productpagina-instellingen konden niet worden geladen door een probleem aan onze kant.",
     "saveProductPageSettings": "Je productpagina-instellingen konden niet worden opgeslagen door een probleem aan onze kant.",
-    "sendForReview": "Dit kon niet ter beoordeling worden verstuurd vanwege een probleem aan onze kant."
+    "sendForReview": "Dit kon niet ter beoordeling worden verstuurd vanwege een probleem aan onze kant.",
+    "fileAppeal": "Je bezwaar kon niet worden verstuurd vanwege een probleem aan onze kant."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Dit product is verwijderd, niet gepauzeerd.} storefront {Deze etalage is verwijderd, niet gepauzeerd.} other {Dit item is verwijderd, niet gepauzeerd.}}",
-    "removedFix": "Een verwijdering is definitief. Denk je dat die onterecht was? Gebruik dan de bezwaarlink om ons te schrijven.",
+    "removedFix": "Een verwijdering is definitief, tenzij een bezwaar haar wijzigt. Als je denkt dat het onterecht was, gebruik dan \"Bezwaar aantekenen\".",
     "notPaused": "{target, select, product {Dit product is niet gepauzeerd.} storefront {Deze etalage is niet gepauzeerd.} other {Dit item is niet gepauzeerd.}}",
-    "notPausedFix": "Er is niets te beoordelen: het is al zichtbaar voor kopers."
+    "notPausedFix": "Er is niets te beoordelen: het is al zichtbaar voor kopers.",
+    "decisionSuperseded": "Deze beslissing is niet meer van toepassing, dus er valt niets te betwisten.",
+    "decisionSupersededFix": "Herlaad de pagina om te zien hoe het er nu voor staat."
   },
   "traderIdentityRequired": {
     "message": "Je kunt niet publiceren of verkopen totdat je verkopersgegevens compleet zijn.",

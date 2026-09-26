@@ -5,15 +5,26 @@ import { NotificationItem } from "@/components/notifications/NotificationItem";
 import type { Notification } from "@/lib/notifications/types";
 import { NextIntlClientProvider } from "next-intl";
 import messages from "../../messages/en";
+import { english } from "../setup/translate";
 
 afterEach(cleanup);
 
 const mockPush = vi.hoisted(() => vi.fn());
+const runActionMock = vi.hoisted(() => vi.fn());
+const setActiveAccountMock = vi.hoisted(() => vi.fn());
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockPush, replace: vi.fn(), refresh: vi.fn() }),
   usePathname: () => "/",
   useSearchParams: () => new URLSearchParams(),
+}));
+
+// The inline action's two server actions. The row itself calls neither.
+vi.mock("@/lib/notifications/actions", () => ({
+  runNotificationAction: (id: string) => runActionMock(id),
+}));
+vi.mock("@/lib/team/actions", () => ({
+  setActiveAccount: (id: string) => setActiveAccountMock(id),
 }));
 
 function makeNotification(overrides: Partial<Notification> = {}): Notification {
@@ -33,6 +44,8 @@ function makeNotification(overrides: Partial<Notification> = {}): Notification {
 describe("NotificationItem", () => {
   beforeEach(() => {
     mockPush.mockClear();
+    runActionMock.mockReset();
+    setActiveAccountMock.mockReset();
   });
 
   // --- Text-only rendering (XSS guard) ---
@@ -82,7 +95,7 @@ describe("NotificationItem", () => {
 
   // --- Safe in-app href ---
 
-  it("safe in-app href: navigates via router.push", async () => {
+  it("safe in-app href: the row is a real link, and a click navigates via router.push", async () => {
     const user = userEvent.setup();
     const onActivate = vi.fn();
     render(
@@ -91,9 +104,54 @@ describe("NotificationItem", () => {
         onActivate={onActivate}
       />,
     );
-    await user.click(screen.getByRole("button"));
+    const link = screen.getByRole("link");
+    // A real href, so middle-click and "open in new tab" work.
+    expect(link).toHaveAttribute("href", "/orders/123");
+    await user.click(link);
     expect(mockPush).toHaveBeenCalledWith("/orders/123");
     expect(onActivate).toHaveBeenCalledWith(expect.any(String), "/orders/123");
+  });
+
+  it("a modified click is left to the browser (new tab), but still marks the row read", async () => {
+    const user = userEvent.setup();
+    const onActivate = vi.fn();
+    render(
+      <NotificationItem
+        notification={makeNotification({ data: { href: "/orders/123" } })}
+        onActivate={onActivate}
+      />,
+    );
+    await user.keyboard("{Control>}");
+    await user.click(screen.getByRole("link"));
+    await user.keyboard("{/Control}");
+    expect(mockPush).not.toHaveBeenCalled();
+    expect(onActivate).toHaveBeenCalledWith("notif-1", "/orders/123");
+  });
+
+  // --- Category destinations (level 1: every row goes somewhere) ---
+
+  it.each([
+    ["team", "/settings/team"],
+    ["security", "/settings/security"],
+    ["order", "/orders"],
+    ["payment", "/payments"],
+    ["stock", "/products"],
+  ] as const)("a %s row with no link of its own opens %s", (type, href) => {
+    render(
+      <NotificationItem notification={makeNotification({ type, data: null })} onActivate={vi.fn()} />,
+    );
+    expect(screen.getByRole("link")).toHaveAttribute("href", href);
+  });
+
+  it("a rejected href does not fall back to the category page", () => {
+    render(
+      <NotificationItem
+        notification={makeNotification({ type: "team", data: { href: "https://evil.com" } })}
+        onActivate={vi.fn()}
+      />,
+    );
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+    expect(screen.getByRole("button")).toBeInTheDocument();
   });
 
   // --- Unsafe hrefs must NOT navigate ---
@@ -241,6 +299,121 @@ describe("NotificationItem", () => {
     renderStored(data);
     expect(screen.getByText(STALE)).toBeInTheDocument();
     expect(screen.queryByText(/Notifications./)).not.toBeInTheDocument();
+  });
+
+  // --- Inline action (level 2: act without leaving the list) ---
+
+  const OWNER = "10000000-0000-4000-8000-000000000001";
+
+  function renderInvite(
+    status: "pending" | "done" | "expired",
+    handlers: { onActivate?: () => void; onActionComplete?: (id: string) => void } = {},
+  ) {
+    render(
+      <NotificationItem
+        notification={makeNotification({
+          id: "notif-invite",
+          type: "team",
+          title: "You have a team invite",
+          data: { href: "/settings/team" },
+          action: { kind: "team.acceptInvite", status },
+        })}
+        onActivate={handlers.onActivate ?? vi.fn()}
+        onActionComplete={handlers.onActionComplete}
+      />,
+    );
+  }
+
+  it("a pending invite offers Accept, and accepting sends only the notification id", async () => {
+    const user = userEvent.setup();
+    const onActivate = vi.fn();
+    const onActionComplete = vi.fn();
+    runActionMock.mockResolvedValue({
+      ok: true,
+      accountOwnerId: OWNER,
+      message: { key: "Settings.team.success.inviteAccepted" },
+    });
+    renderInvite("pending", { onActivate, onActionComplete });
+
+    await user.click(screen.getByRole("button", { name: "Accept" }));
+
+    expect(runActionMock).toHaveBeenCalledWith("notif-invite");
+    expect(await screen.findByText("Accepted")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Accept" })).not.toBeInTheDocument();
+    expect(onActionComplete).toHaveBeenCalledWith("notif-invite");
+    // The button is its own control: accepting must not also open the row.
+    expect(onActivate).not.toHaveBeenCalled();
+    expect(mockPush).not.toHaveBeenCalled();
+    // The success is announced in words, not only by the button changing.
+    expect(await screen.findByText("Welcome to the team.")).toBeInTheDocument();
+  });
+
+  it("after accepting, Open store switches to the store just joined", async () => {
+    const user = userEvent.setup();
+    runActionMock.mockResolvedValue({
+      ok: true,
+      accountOwnerId: OWNER,
+      message: { key: "Settings.team.success.inviteAccepted" },
+    });
+    setActiveAccountMock.mockResolvedValue({ ok: true });
+    renderInvite("pending");
+
+    await user.click(screen.getByRole("button", { name: "Accept" }));
+    await user.click(await screen.findByRole("button", { name: /open store/i }));
+
+    expect(setActiveAccountMock).toHaveBeenCalledWith(OWNER);
+    await vi.waitFor(() => expect(mockPush).toHaveBeenCalledWith("/dashboard"));
+  });
+
+  it("a failed accept that can be retried keeps Accept and says why", async () => {
+    const user = userEvent.setup();
+    runActionMock.mockResolvedValue({
+      ok: false,
+      status: "pending",
+      error: { code: "server_error", message: { key: "Errors.team.acceptFailed" } },
+    });
+    renderInvite("pending");
+
+    await user.click(screen.getByRole("button", { name: "Accept" }));
+
+    expect(await screen.findByText(english({ key: "Errors.team.acceptFailed" }))).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Accept" })).toBeEnabled();
+  });
+
+  it("an invite that is gone stops offering Accept", async () => {
+    const user = userEvent.setup();
+    runActionMock.mockResolvedValue({
+      ok: false,
+      status: "expired",
+      error: { code: "not_found", message: { key: "Notifications.actions.unavailable" } },
+    });
+    renderInvite("pending");
+
+    await user.click(screen.getByRole("button", { name: "Accept" }));
+
+    await vi.waitFor(() =>
+      expect(screen.queryByRole("button", { name: "Accept" })).not.toBeInTheDocument(),
+    );
+    expect(screen.getAllByText("This invite is no longer available.").length).toBeGreaterThan(0);
+  });
+
+  it("an invite already accepted shows Accepted, with no button", () => {
+    renderInvite("done");
+    expect(screen.getByRole("status")).toHaveTextContent("Accepted");
+    expect(screen.queryByRole("button", { name: "Accept" })).not.toBeInTheDocument();
+  });
+
+  it("an expired invite says so, with no button", () => {
+    renderInvite("expired");
+    expect(screen.getByText("This invite is no longer available.")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Accept" })).not.toBeInTheDocument();
+  });
+
+  it("a row without an action renders no action strip", () => {
+    render(
+      <NotificationItem notification={makeNotification({ action: null })} onActivate={vi.fn()} />,
+    );
+    expect(screen.queryByRole("button", { name: "Accept" })).not.toBeInTheDocument();
   });
 
   it("refuses the whole payload when any part of it is invalid", () => {

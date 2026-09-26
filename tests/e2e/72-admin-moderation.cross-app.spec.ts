@@ -395,9 +395,14 @@ test("report, push, pause, fix, push, approve", async ({ browser }: { browser: B
     await staff
       .getByLabel("What should the seller change?")
       .fill("Remove the brand logo from the photos and the word authentic.");
+    // A pause has to point at the parts: the button stays off until it does.
+    await expect(staff.getByRole("button", { name: "Pause this product…" })).toBeDisabled();
+    await staff.locator('[data-fix-field="photos"]').click();
+    await staff.locator('[data-fix-field="description"]').click();
     const preview = staff.locator("[data-seller-preview]");
     await expect(preview).toContainText('Action needed: your product "Suspicious sneakers" is paused');
     await expect(preview).toContainText("Remove the brand logo from the photos");
+    await expect(preview).toContainText("What to change: Description, Photos.");
 
     await staff.getByRole("button", { name: "Pause this product…" }).click();
     await staff.getByRole("button", { name: "Pause and notify" }).click();
@@ -416,13 +421,26 @@ test("report, push, pause, fix, push, approve", async ({ browser }: { browser: B
 
     // --- The seller is told, and fixes it -------------------------------------
     await seller.goto("/notifications");
-    const row = seller.getByRole("button", { name: /Action needed/ });
+    const row = seller.getByRole("link", { name: /Action needed/ });
     await expect(row).toBeVisible();
     await expect(row).toContainText("Remove the brand logo from the photos");
     await row.click();
     await seller.waitForURL(new RegExp(`/products/${productId}/edit`));
     const notice = seller.locator('[data-takedown="paused"]');
     await expect(notice).toContainText("Remove the brand logo from the photos");
+    // The parts staff picked are what the seller's form lights up.
+    await expect(notice.locator("[data-fix-field]")).toHaveText(["Description", "Photos"]);
+    await expect(seller.locator('[data-product-section="photos"]')).toHaveAttribute(
+      "data-fix-flag",
+      "needs",
+    );
+    await expect(seller.locator('[data-fix-mark="description"]')).toBeVisible();
+    // And the decision behind it can be kept.
+    const statement = await seller.request.get(
+      (await notice.locator("[data-statement-download]").getAttribute("href"))!,
+    );
+    expect(statement.status()).toBe(200);
+    expect(statement.headers()["content-type"]).toBe("application/pdf");
     await notice.getByRole("button", { name: /I've made the changes, review it/i }).click();
     await expect(notice.locator("[data-review-requested]")).toBeVisible();
 
@@ -453,15 +471,240 @@ test("report, push, pause, fix, push, approve", async ({ browser }: { browser: B
 
     const notices = (await serviceRest(
       `/notifications?user_id=eq.${sellerId}&type=eq.policy&select=title,data&order=created_at.asc`,
-    )) as { title: string; data: { kind: string; href?: string } }[];
+    )) as {
+      title: string;
+      data: { kind: string; href?: string; fields?: string[]; decisionId?: string };
+    }[];
     expect(notices.map((n) => n.data.kind)).toEqual(["content_paused", "content_approved"]);
     expect(notices[1]!.title).toBe('Your product "Suspicious sneakers" is live again');
     expect(notices[0]!.data.href).toBe(`/products/${productId}/edit`);
+    expect(notices[0]!.data.fields).toEqual(["description", "photos"]);
+
+    // The decision is on record, with the facts the statement is built from.
+    const decisions = (await serviceRest(
+      `/moderation_decisions?target_id=eq.${productId}&select=id,action,fields,report_count,report_reasons`,
+    )) as { id: string; action: string; fields: string[]; report_count: number; report_reasons: string[] }[];
+    expect(decisions).toEqual([
+      {
+        id: notices[0]!.data.decisionId,
+        action: "paused",
+        fields: ["description", "photos"],
+        report_count: 1,
+        report_reasons: ["counterfeit"],
+      },
+    ]);
 
     // The history says who did what.
     await expect(staff.getByText("Changes approved")).toBeVisible();
     await expect(staff.getByText("Paused", { exact: true }).first()).toBeVisible();
 
+    await staffContext.close();
+  } finally {
+    await sink.close();
+    await sellerContext.close();
+  }
+});
+
+// ── Appeals ───────────────────────────────────────────────────────────────
+
+/**
+ * THE APPEAL LOOP, across both apps, both ways:
+ *
+ *   staff remove a product
+ *     -> the seller appeals from the banner
+ *     -> staff get a push, and the appeal heads the queue
+ *   staff turn it down, with a reason
+ *     -> the seller reads the answer on the banner
+ *   staff soften it to a pause (a NEW decision, so it can be appealed again)
+ *     -> the seller appeals again
+ *   staff accept it
+ *     -> the product is live, and the seller is told the appeal succeeded
+ */
+test("remove, appeal, turn down, pause, appeal, accept", async ({ browser }: { browser: Browser }) => {
+  await ensureAdminNotificationTables();
+
+  const sellerContext = await browser.newContext({ baseURL: "http://localhost:3100" });
+  const seller = await sellerContext.newPage();
+  const sellerUser = freshUser("xapp-appeal");
+  await signUp(seller, sellerUser);
+  const sellerId = await userIdByEmail(sellerUser.email);
+  await seedStorefronts(sellerId, [{ name: "Appeal studio" }]);
+  const storefrontId = ((await serviceRest(
+    `/storefronts?owner_id=eq.${sellerId}&select=id`,
+  )) as { id: string }[])[0]!.id;
+  await seedProducts(sellerId, [
+    { title: "Disputed print", price_cents: 3000, description: "An original print." },
+  ]);
+  const productId = ((await serviceRest(
+    `/products?owner_id=eq.${sellerId}&select=id`,
+  )) as { id: string }[])[0]!.id;
+  await seedSellerIdentity(sellerId, PUBLISHABLE_SELLER);
+  await serviceRest(`/storefronts?id=eq.${storefrontId}`, {
+    method: "PATCH",
+    body: {
+      config: {
+        theme: THEME,
+        productPage: PRODUCT_PAGE,
+        embed: { enabled: false, domains: [] },
+        blocks: [{ type: "product", productId, x: 0, y: 0, w: 2, h: 2 }],
+      },
+    },
+  });
+  const productPage = `/s/${storefrontId}/p/${productId}`;
+
+  const staffEmail = `xapp-appeal-staff-${Date.now()}@e2e.squareshare.to`;
+  const staffPassword = "e2e-password-123";
+  const staffUserId = await signUpViaGateway(staffEmail, staffPassword);
+  const [adminRow] = (await serviceRest(`/admin_users`, {
+    method: "POST",
+    body: [{ user_id: staffUserId, role: "staff" }],
+  })) as { id: string }[];
+  const sink = await pushSink();
+  await serviceRest(`/admin_push_subscriptions`, {
+    method: "POST",
+    body: [
+      {
+        admin_user_id: adminRow!.id,
+        endpoint: sink.endpoint,
+        p256dh: sink.p256dh,
+        auth: sink.auth,
+        device_label: "e2e sink",
+      },
+    ],
+  });
+  // Plants the new appeal source's watermark, like every other source's.
+  await adminNotify();
+
+  const appealsFor = (push: Push) => push.title === "Decision appealed" && push.url === `/moderation/product/${productId}`;
+
+  try {
+    const staffContext = await browser.newContext();
+    const staff = await staffContext.newPage();
+    await signInToAdmin(staff, staffEmail, staffPassword);
+
+    // --- Staff remove it --------------------------------------------------------
+    await staff.goto(`${ADMIN_URL}/moderation/product/${productId}`);
+    await staff.locator('[data-mode-option="remove"]').click();
+    await staff.getByLabel("Reason").selectOption("counterfeit");
+    // Optional for a removal: what it concerned, for the statement.
+    await staff.locator('[data-fix-field="photos"]').click();
+    await staff.getByRole("button", { name: "Remove this product…" }).click();
+    await staff.getByRole("button", { name: "Remove and notify" }).click();
+    await expect(staff.locator("[data-action-result]")).toContainText("Product removed.");
+    expect((await seller.request.get(productPage)).status()).toBe(404);
+
+    // --- The seller appeals -----------------------------------------------------
+    await seller.goto(`/products/${productId}/edit`);
+    const removed = seller.locator('[data-takedown="removed"]');
+    await expect(removed.locator("[data-fix-field]")).toHaveText(["Photos"]);
+    await removed.getByRole("button", { name: "Appeal this decision" }).click();
+    const first = seller.getByRole("dialog", { name: "Appeal this decision" });
+    await first
+      .getByLabel("Why do you think this decision is wrong?")
+      .fill("This is my own artwork. The original sketches are on my portfolio from 2024.");
+    await first.getByRole("button", { name: "Send appeal" }).click();
+    await expect(removed.locator('[data-appeal-status="open"]')).toBeVisible();
+
+    const firstPush = await waitForPush(sink.received, appealsFor, "push for the first appeal");
+    expect(firstPush.body).toContain('"Disputed print"');
+    expect(firstPush.body).toContain("appealed the removal");
+
+    // --- It heads the queue; staff turn it down, with a reason --------------------
+    await staff.goto(`${ADMIN_URL}/moderation`);
+    await expect(staff.getByRole("heading", { name: /Appeals waiting on you \(\d+\)/ })).toBeVisible();
+    await staff
+      .locator("[data-appeal-list]")
+      .locator(`a[href="/moderation/product/${productId}"]`)
+      .click();
+    await staff.waitForURL(new RegExp(`/moderation/product/${productId}`));
+    const panel = staff.locator("[data-appeal-panel]");
+    await expect(panel.locator("[data-appeal-message]")).toContainText("The original sketches");
+    await expect(panel.getByRole("button", { name: "Turn it down…" })).toBeDisabled();
+    await panel
+      .getByLabel("Your answer to the seller")
+      .fill("The same image is sold by the original artist's own shop.");
+    await panel.getByRole("button", { name: "Turn it down…" }).click();
+    await expect(staff.getByRole("dialog").locator("[data-seller-preview]")).toContainText(
+      "We looked at your appeal again and the decision stands.",
+    );
+    await staff.getByRole("button", { name: "Turn down and notify" }).click();
+    await expect(staff.locator("[data-appeal-panel]")).toContainText("Appeal turned down");
+
+    await seller.reload();
+    await expect(seller.locator('[data-appeal-status="upheld"]')).toContainText(
+      "Our answer: The same image is sold by the original artist's own shop.",
+    );
+    await expect(seller.getByRole("button", { name: "Appeal this decision" })).toHaveCount(0);
+
+    // --- Staff soften it to a pause: a new decision ------------------------------
+    await staff.goto(`${ADMIN_URL}/moderation/product/${productId}`);
+    await staff.getByText("Change to a pause, so the seller can fix it").click();
+    await staff.locator('[data-fix-field="photos"]').last().click();
+    await staff
+      .getByLabel("What should the seller change?")
+      .fill("Show a photo of your own original, not the reseller's image.");
+    await staff.getByRole("button", { name: "Pause this product…" }).click();
+    await staff.getByRole("button", { name: "Pause and notify" }).click();
+    await expect(staff.locator("[data-action-result]")).toContainText("Product paused.");
+
+    // --- The seller appeals the new decision --------------------------------------
+    await seller.reload();
+    const paused = seller.locator('[data-takedown="paused"]');
+    await expect(paused.locator("[data-fix-field]")).toHaveText(["Photos"]);
+    await paused.getByRole("button", { name: "Appeal this decision" }).click();
+    const second = seller.getByRole("dialog", { name: "Appeal this decision" });
+    await second
+      .getByLabel("Why do you think this decision is wrong?")
+      .fill("The photo already shows my own original, signed in the corner.");
+    await second.getByRole("button", { name: "Send appeal" }).click();
+    await expect(paused.locator('[data-appeal-status="open"]')).toBeVisible();
+    await expect
+      .poll(() => sink.received.filter(appealsFor).length, { timeout: 30_000 })
+      .toBe(2);
+
+    // --- Staff accept it -------------------------------------------------------------
+    await staff.goto(`${ADMIN_URL}/moderation/product/${productId}`);
+    await staff
+      .locator("[data-appeal-panel]")
+      .getByRole("button", { name: /Accept: put the product back live/ })
+      .click();
+    await expect(staff.getByRole("dialog").locator("[data-seller-preview]")).toContainText(
+      "We looked at your appeal and reversed our decision.",
+    );
+    await staff.getByRole("button", { name: "Accept and notify" }).click();
+    await expect(staff.getByText("Live", { exact: true }).first()).toBeVisible();
+    expect((await seller.request.get(productPage)).status()).toBe(200);
+
+    // --- The record ---------------------------------------------------------------
+    const notices = (await serviceRest(
+      `/notifications?user_id=eq.${sellerId}&type=eq.policy&select=data&order=created_at.asc`,
+    )) as { data: { kind: string } }[];
+    expect(notices.map((n) => n.data.kind)).toEqual([
+      "content_removed",
+      "content_appeal_upheld",
+      "content_paused",
+      "content_appeal_overturned",
+    ]);
+    const decisions = (await serviceRest(
+      `/moderation_decisions?target_id=eq.${productId}&select=action,fields&order=decided_at.asc`,
+    )) as { action: string; fields: string[] }[];
+    expect(decisions).toEqual([
+      { action: "removed", fields: ["photos"] },
+      { action: "paused", fields: ["photos"] },
+    ]);
+    const appeals = (await serviceRest(
+      `/moderation_appeals?target_id=eq.${productId}&select=status,decision_note&order=created_at.asc`,
+    )) as { status: string; decision_note: string | null }[];
+    expect(appeals).toEqual([
+      { status: "upheld", decision_note: "The same image is sold by the original artist's own shop." },
+      { status: "overturned", decision_note: null },
+    ]);
+
+    await seller.goto(`/products/${productId}/edit`);
+    await expect(seller.locator("[data-removal-notice]")).toHaveCount(0);
+
+    await expect(staff.getByText("Appeal turned down")).toBeVisible();
+    await expect(staff.getByText("Appeal accepted, put back live")).toBeVisible();
     await staffContext.close();
   } finally {
     await sink.close();

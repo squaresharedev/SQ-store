@@ -7,7 +7,6 @@ import { getSampleStorefrontFlags } from "@/lib/onboarding/queries";
 import { StorefrontsList } from "@/components/storefront/StorefrontsList";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
-import { getTraderIdentityStatus } from "@/lib/settings/seller-identity";
 
 export async function generateMetadata() {
   const t = await getTranslations("Storefront.metadata");
@@ -31,12 +30,6 @@ export default async function StorefrontsPage() {
   const canWrite = can(account?.role, "storefront.write");
   const { rows: storefrontRows, total: storefrontTotal } = storefronts;
 
-  // Read after the list rather than alongside it: the embed modal is the only
-  // consumer, and it is behind a click.
-  const identity = account
-    ? await getTraderIdentityStatus(account.accountId)
-    : { ok: true as const, missing: [] };
-
   return (
     <main className={pageShellClass}>
       <PageHeader
@@ -50,7 +43,6 @@ export default async function StorefrontsPage() {
         total={storefrontTotal}
         products={products}
         canWrite={canWrite}
-        missingTraderDetails={identity.ok ? identity.missing : []}
         // Offered to anyone who can build a storefront, and only on a flag we
         // could actually read: no answer means no sample, not a sample that
         // cannot be hidden.

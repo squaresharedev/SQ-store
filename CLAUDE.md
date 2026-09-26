@@ -1,5 +1,28 @@
 @AGENTS.md
 
+## Tokenize everything
+
+Anything that can be a token, is. The goal is a lean, clean codebase where a
+design or behaviour change is one edit in one place and reuse is the default.
+
+- **Look before you write.** Before hand-writing a class string, colour, size,
+  radius, duration, easing, route path, storage key, limit, or repeated piece of
+  markup, search for the token or shared component that already owns it
+  (`components/ui/control-styles.ts`, `ui/motion-tokens`, `surface-styles`,
+  `globals.css` theme tokens, `lib/**/paths.ts`, `ui/*` primitives) and use it.
+- **No new one-offs.** If the same value or markup appears (or will plausibly
+  appear) a second time, extract it to a named token or shared component
+  instead of pasting it. Put it where its siblings live, with a one-line doc
+  comment saying what it is for.
+- **Design values come from tokens**, never raw literals: Tailwind theme
+  tokens (`rounded-md`, `duration-base`, `ease-standard`, colour variables),
+  not `rounded-[6px]`, `duration-180`, `ease-[cubic-bezier(...)]`, or hex.
+- **Routes, storage keys and limits are named constants**, not inline strings.
+- **Copy is i18n keys**, reused where the meaning is the same rather than
+  duplicated.
+- When you touch code that hand-spells something a token now covers, move it
+  onto the token.
+
 ## Task tracking (Teamster via Operator MCP)
 
 **The default is NOT to create a task.** The board is a record of things worth

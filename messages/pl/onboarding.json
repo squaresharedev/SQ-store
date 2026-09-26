@@ -55,7 +55,6 @@
     "openPage": "Otwórz stronę",
     "opensInNewTab": " (otwiera się w nowej karcie)",
     "hide": "Ukryj",
-    "progressLabel": "Postęp konfiguracji",
     "progress": "{total, plural, one {Ukończono {done} z {total}} few {Ukończono {done} z {total}} many {Ukończono {done} z {total}} other {Ukończono {done} z {total}}}",
     "stepDone": " (gotowe)",
     "stepToDo": " (do zrobienia)"

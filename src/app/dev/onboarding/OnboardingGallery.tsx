@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/button";
 import { SellerDetailsBanner } from "@/components/settings/SellerDetailsNotice";
 import { SetupChecklist } from "@/components/onboarding/SetupChecklist";
 import { WelcomeFlow } from "@/components/onboarding/WelcomeFlow";
-import type { SetupChecklistData } from "@/lib/onboarding/steps";
+import type { SetupChecklistData, SetupStepId } from "@/lib/onboarding/steps";
 import { succeeded, type ActionState } from "@/lib/errors";
 import { msg } from "@/i18n/types";
+import { cn } from "@/lib/utils";
 
 type Scenario = {
   key: string;
@@ -70,9 +71,17 @@ async function fakeResend(): Promise<ActionState> {
 export function OnboardingGallery({
   checklists,
 }: {
-  checklists: { name: string; setup: SetupChecklistData; celebrate: boolean }[];
+  checklists: {
+    name: string;
+    setup: SetupChecklistData;
+    celebrate: boolean;
+    wide: boolean;
+    fresh: SetupStepId[];
+  }[];
 }) {
   const [active, setActive] = useState<Scenario | null>(null);
+  // Remounts the checklists, so the "just done" fixtures play again.
+  const [replay, setReplay] = useState(0);
   // The last way out of the dialog, published for scripts driving this page.
   const [exit, setExit] = useState<"none" | "skipped" | "tour">("none");
   const skip = useCallback(() => {
@@ -129,13 +138,24 @@ export function OnboardingGallery({
         <p className="font-inter text-sm text-muted-foreground">
           Collapsing is remembered per device under one key, so every card below
           shares it. The finished card shows once per person, recorded on the
-          profile; here that write is only logged.
+          profile; here that write is only logged. A step done since the last
+          visit plays its moment once the card is in view; on Overview the
+          setup-seen cookie decides which, here the fixture says.
         </p>
+        <Button variant="secondary" data-replay onClick={() => setReplay((n) => n + 1)}>
+          Replay the step animations
+        </Button>
         <div className="grid gap-6 md:grid-cols-2">
           {checklists.map((fixture) => (
-            <div key={fixture.name} className="space-y-2" data-fixture={fixture.name}>
+            <div
+              key={fixture.name}
+              className={cn("space-y-2", fixture.wide && "md:col-span-2")}
+              data-fixture={fixture.name}
+            >
               <p className="font-inter text-xs text-muted-foreground">{fixture.name}</p>
               <SetupChecklist
+                key={replay}
+                freshSteps={fixture.fresh}
                 setup={fixture.setup}
                 livePageUrl={fixture.setup.livePage?.path ?? null}
                 celebrate={fixture.celebrate}

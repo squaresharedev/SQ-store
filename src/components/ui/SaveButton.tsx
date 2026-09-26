@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 export type SaveResult = { success?: string; error?: string };
 
 /** How long the green/red result treatment lingers before reverting to idle. */
-const RESULT_MS = 2500;
+export const RESULT_MS = 2500;
 
 /**
  * THE submit button for forms across the app (settings, team, products): the sharp-corner primary CTA with a

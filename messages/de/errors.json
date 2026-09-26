@@ -69,7 +69,8 @@
     "rotateEmbedKeys": "Zu viele Versuche, in kurzer Zeit den Schlüssel zu erneuern.",
     "updateStock": "Zu viele Versuche, in kurzer Zeit den Lagerbestand zu aktualisieren.",
     "readProductPageSettings": "Zu viele Versuche, in kurzer Zeit die Produktseiteneinstellungen abzurufen.",
-    "requestReview": "Zu viele Überprüfungsanfragen in kurzer Zeit."
+    "requestReview": "Zu viele Überprüfungsanfragen in kurzer Zeit.",
+    "fileAppeal": "Zu viele Versuche, einen Einspruch in kurzer Zeit zu senden."
   },
   "serverError": {
     "fix": "Das ist meist vorübergehend. Warte kurz und versuche es erneut. Falls es weiterhin fehlschlägt, lade die Seite neu.",
@@ -95,13 +96,16 @@
     "checkSellerDetails": "Deine Verkäuferangaben konnten aufgrund eines Fehlers auf unserer Seite nicht geprüft werden.",
     "loadProductPageSettings": "Deine Produktseiteneinstellungen konnten aufgrund eines Fehlers auf unserer Seite nicht geladen werden.",
     "saveProductPageSettings": "Deine Produktseiteneinstellungen konnten aufgrund eines Fehlers auf unserer Seite nicht gespeichert werden.",
-    "sendForReview": "Die Überprüfungsanfrage konnte wegen eines Problems auf unserer Seite nicht gesendet werden."
+    "sendForReview": "Die Überprüfungsanfrage konnte wegen eines Problems auf unserer Seite nicht gesendet werden.",
+    "fileAppeal": "Dein Einspruch konnte aufgrund eines Problems auf unserer Seite nicht gesendet werden."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Dieses Produkt wurde entfernt, nicht pausiert.} storefront {Dieses Schaufenster wurde entfernt, nicht pausiert.} other {Dieses Element wurde entfernt, nicht pausiert.}}",
-    "removedFix": "Eine Entfernung ist endgültig. Wenn du sie für falsch hältst, schreib uns über den Link zum Widerspruch.",
+    "removedFix": "Eine Entfernung ist endgültig, sofern ein Einspruch sie nicht ändert. Wenn du sie für falsch hältst, nutze „Diese Entscheidung anfechten“.",
     "notPaused": "{target, select, product {Dieses Produkt ist nicht pausiert.} storefront {Dieses Schaufenster ist nicht pausiert.} other {Dieses Element ist nicht pausiert.}}",
-    "notPausedFix": "Es gibt nichts zu überprüfen: Es ist bereits für Käufer sichtbar."
+    "notPausedFix": "Es gibt nichts zu überprüfen: Es ist bereits für Käufer sichtbar.",
+    "decisionSuperseded": "Diese Entscheidung gilt nicht mehr, daher gibt es nichts anzufechten.",
+    "decisionSupersededFix": "Lade die Seite neu, um den aktuellen Stand zu sehen."
   },
   "traderIdentityRequired": {
     "message": "Du kannst nicht veröffentlichen oder verkaufen, bis deine Verkäuferangaben vollständig sind.",

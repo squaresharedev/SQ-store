@@ -26,6 +26,7 @@ export function NotificationBell({ className }: { className?: string }) {
     status,
     markRead,
     markAllRead,
+    completeAction,
   } = useNotificationsContext();
   const t = useTranslations("Notifications.bell");
   const [open, setOpen] = React.useState(false);
@@ -107,6 +108,7 @@ export function NotificationBell({ className }: { className?: string }) {
           loading={loading}
           live={status !== "error"}
           onActivate={handleActivate}
+          onActionComplete={completeAction}
           onMarkAll={markAllRead}
           onNavigateAway={() => setOpen(false)}
         />

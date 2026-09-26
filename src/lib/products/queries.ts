@@ -25,7 +25,8 @@ import {
   type ProductSort,
 } from "@/lib/products/sort";
 import { productQuantityCap } from "@/lib/products/quantity";
-import { takedownFromRow } from "@/lib/moderation/removal";
+import { MODERATION_DETAIL_SELECT, takedownFromRow } from "@/lib/moderation/removal";
+import { appealsByDecision, withAppeal } from "@/lib/moderation/appeals-read";
 import { productIdSchema } from "@/lib/validation/product";
 
 // Server-side reads for the ACTIVE account's products (your own store, or one
@@ -64,10 +65,12 @@ type ProductListRow = Pick<
   | "moderation_note"
   | "moderated_at"
   | "moderation_review_requested_at"
+  | "moderation_fields"
+  | "moderation_decision_id"
 >;
 
 const PRODUCT_LIST_COLUMNS =
-  "id, title, description, price_cents, currency, status, image_key, digital_file_key, track_stock, stock_quantity, low_stock_threshold, max_per_order, moderation_status, moderation_ground, moderation_note, moderated_at, moderation_review_requested_at";
+  `id, title, description, price_cents, currency, status, image_key, digital_file_key, track_stock, stock_quantity, low_stock_threshold, max_per_order, ${MODERATION_DETAIL_SELECT}` as const;
 
 /**
  * The list columns plus the product-page jsonb. Only the single-product read
@@ -85,7 +88,8 @@ type ProductDetailRow = ProductListRow &
     | "shipping_profile_id"
   >;
 
-const PRODUCT_DETAIL_COLUMNS = `${PRODUCT_LIST_COLUMNS}, gallery, option_groups, details, documents, purchase_url, shipping_profile_id`;
+const PRODUCT_DETAIL_COLUMNS =
+  `${PRODUCT_LIST_COLUMNS}, gallery, option_groups, details, documents, purchase_url, shipping_profile_id` as const;
 
 /**
  * Safety bound, not pagination. Every row costs an R2 presign (an HMAC) on top
@@ -443,5 +447,15 @@ export async function getProduct(id: string): Promise<ProductDetail | null> {
     .eq("owner_id", account.accountId)
     .maybeSingle();
   if (error) throw new Error(`Failed to load product: ${error.message}`);
-  return data ? await rowToProductDetail(data as ProductDetailRow) : null;
+  if (!data) return null;
+  const detail = await rowToProductDetail(data);
+  // The edit page is where a taken-down product's banner says where its
+  // appeal stands, so this read (and no list read) fetches it.
+  if (detail.removal?.decisionId) {
+    const appeals = await appealsByDecision(supabase, account.accountId, [
+      detail.removal.decisionId,
+    ]);
+    return { ...detail, removal: withAppeal(detail.removal, appeals) };
+  }
+  return detail;
 }

@@ -80,6 +80,20 @@ export const RATE_LIMITS = {
    */
   contentReport: { max: 10, windowSeconds: 60 * 60 },
   /**
+   * A seller appealing a moderation decision, per signed-in user. The
+   * database already allows one appeal per decision, so this does not bound
+   * appeals; it bounds a loop hammering the action (each call is two reads
+   * and an insert attempt) and the staff pings that follow.
+   */
+  moderationAppeal: { max: 10, windowSeconds: 60 * 60 },
+  /**
+   * Downloading a statement of reasons, per signed-in user. A read, but each
+   * one lays out and serialises a PDF, which is real CPU on a Worker. Far
+   * above anyone saving their own decisions; a loop regenerating one on
+   * repeat is what it stops.
+   */
+  moderationStatement: { max: 60, windowSeconds: 60 * 60 },
+  /**
    * Digital-file uploads specifically, which are capped at 200 MB EACH — an
    * order of magnitude larger than an image.
    *

@@ -113,19 +113,45 @@
     "pausedOn": "Pozastaveno dne",
     "statement": "{ground, select, illegal {Nelegální zboží nebo činnost. Nabízelo něco, co nelze legálně prodávat, nebo bylo využito k jeho zprostředkování.} sexual {Sexuální obsah. Obsahovalo explicitní sexuální obsah.} violence {Násilí nebo krveprolití. Obsahovalo drastické násilí.} hate {Nenávist nebo obtěžování. Útočilo na osobu nebo skupinu, nebo obsahovalo symboly nenávisti.} counterfeit {Padělky nebo ukradené zboží. Zřejmě nabízelo padělané zboží nebo cizí práci.} scam {Podvod. Zřejmě mělo vylákat platbu, aniž by se dodalo, co bylo slíbeno.} spam {Spam. Bylo opakující se nebo zavádějící, nikoli skutečná nabídka.} other {Něco jiného. Porušilo pravidla platformy.}}{noted, select, yes { {note}} other {}}",
     "statementUnlabelled": "{noted, select, yes {Porušilo pravidla platformy. {note}} other {Porušilo pravidla platformy.}}",
-    "fixHint": "{kind, select, product {Upravte produkt níže, uložte ho a pak nám ho pošlete zpět.} other {Otevřete výlohu, upravte ji, vraťte se sem a pošlete nám ji.}}",
+    "fixHint": "{kind, select, product {Upravte níže zvýrazněné části, uložte je a pošlete nám je zpět.} other {Otevřete výlohu, upravte to, co je uvedeno výše, vraťte se sem a pošlete nám ji.}}",
     "readOnlyHint": "{kind, select, product {Změnu musí provést a k posouzení odeslat někdo, kdo může tento produkt upravovat.} other {Změnu musí provést a k posouzení odeslat někdo, kdo může tuto výlohu upravovat.}}",
     "appeal": "{kind, select, product {Tento produkt můžete dál upravovat. Úpravou se nevrátí: pokud si myslíte, že šlo o omyl, <link>požádejte nás o nové posouzení</link>.} other {Tuto výlohu můžete dál upravovat. Úpravou se nevrátí: pokud si myslíte, že šlo o omyl, <link>požádejte nás o nové posouzení</link>.}}",
     "appealPaused": "Myslíte si, že jde o omyl? <link>Napište nám</link>.",
     "appealFinal": "Pokud si myslíte, že jsme se spletli, <link>požádejte nás o nové posouzení</link>.",
-    "appealSubject": "{kind, select, product {Odvolání: odstranění produktu ({title})} other {Odvolání: odstranění výlohy ({title})}}",
-    "appealBody": "{kind, select, product {Žádám o nové posouzení tohoto produktu.\n\nID produktu: {id}\nNázev: {title}\n\nProč si myslím, že šlo o omyl:\n} other {Žádám o nové posouzení této výlohy.\n\nID výlohy: {id}\nNázev: {title}\n\nProč si myslím, že šlo o omyl:\n}}",
     "reviewRequest": {
       "button": "Změny jsou hotové, zkontrolujte je",
       "sent": "Odesláno k posouzení dne <time>{date}</time>. Vaše změny zkontroluje člověk a odpověď dostanete tady i e-mailem.",
       "failed": "Odeslání se nepodařilo.",
       "failedFix": "Zkuste to za chvíli znovu."
-    }
+    },
+    "why": "Proč",
+    "whatToChange": "Co změnit",
+    "concerned": "Čeho se to týkalo",
+    "showField": "Zobrazit {field} na této stránce",
+    "fields": {
+      "product": "{field, select, title {Název} description {Popis} price {Cena} image {Zobrazovaný obrázek} file {Digitální soubor} purchaseLink {Odkaz na nákup} shipping {Doprava} options {Varianty} photos {Fotografie} specs {Specifikace} documents {Dokumenty} safety {Bezpečnost a shoda} other {Něco jiného}}",
+      "storefront": "{field, select, name {Název výlohy} header {Záhlaví} text {Text} images {Obrázky} products {Zobrazené produkty} background {Pozadí} productPage {Stránky produktů} other {Něco jiného}}"
+    },
+    "reference": "Reference",
+    "downloadStatement": "Stáhnout rozhodnutí (PDF)",
+    "openEditor": "Otevřít výlohu a upravit ji",
+    "appealButton": "Odvolat se proti tomuto rozhodnutí",
+    "appealForm": {
+      "title": "Odvolat se proti tomuto rozhodnutí",
+      "description": "Řekněte nám, proč si myslíte, že jsme se mýlili. Každé odvolání posuzuje člověk a odpověď dostanete tady i e-mailem. Obsah je skrytý, dokud ho budeme posuzovat.",
+      "label": "Proč si myslíte, že bylo toto rozhodnutí nesprávné?",
+      "placeholder": "Například: logo na fotografii je naše registrovaná ochranná známka a zde si to můžete ověřit.",
+      "help": "Alespoň {min} znaků. Přidejte cokoli, co nám pomůže ověřit, například odkaz nebo registrační číslo.",
+      "count": "{count} / {max}",
+      "submit": "Odeslat odvolání",
+      "sent": "Odvolání odesláno. Ozveme se vám."
+    },
+    "appealStatus": {
+      "open": "Odvolání jste podali dne <time>{date}</time>. Posoudí ho člověk a odpověď dostanete tady i e-mailem.",
+      "upheld": "Vaše odvolání jsme posoudili dne <time>{date}</time>. Rozhodnutí zůstává v platnosti.",
+      "answer": "Naše odpověď: {note}"
+    },
+    "editorDetails": "Proč a co dělat dál"
   },
   "import": {
     "fields": {
@@ -309,6 +335,21 @@
     "nav": {
       "label": "Sekce formuláře",
       "heading": "Na této stránce"
+    },
+    "moderation": {
+      "badge": "Vyžaduje úpravy",
+      "changed": "Změněno",
+      "callout": "Společnost SquareShare vás požádala, abyste zde upravili {fields}.",
+      "seeWhy": "Zobrazit důvod",
+      "fieldBadge": "Upravte toto",
+      "navHint": "vyžaduje úpravy",
+      "inReview": "Odesláno k posouzení",
+      "reviewPrompt": {
+        "title": "Uloženo. Odeslat zpět k posouzení?",
+        "body": "Pokud jste změnili vše, o co vás SquareShare požádal, odešlete to teď a člověk si to prohlédne. Pokud ne, pokračujte v úpravách a odešlete to, až budete hotovi.",
+        "keepEditing": "Pokračovat v úpravách",
+        "send": "Odeslat k posouzení"
+      }
     }
   },
   "stockFields": {
@@ -522,5 +563,76 @@
     "dropPrompt": "Přetáhněte sem soubor nebo klikněte a nahrajte",
     "hint": "ZIP, PDF a podobné, do {max} MB",
     "remove": "Odebrat digitální soubor"
+  },
+  "statement": {
+    "fileTitle": "Odůvodnění rozhodnutí {reference}",
+    "title": "Odůvodnění rozhodnutí",
+    "subtitle": "{action, select, paused {{target, select, product {Váš produkt byl pozastaven} other {Vaše výloha byla pozastavena}}} other {{target, select, product {Váš produkt byl odstraněn} other {Vaše výloha byla odstraněna}}}}",
+    "intro": "Toto odůvodnění vysvětluje rozhodnutí, které jsme přijali ohledně obsahu zveřejněného na platformě SquareShare, proč jsme ho přijali a jak ho můžete napadnout. Máte na něj nárok podle článku 17 aktu o digitálních službách (nařízení (EU) 2022/2065).",
+    "sections": {
+      "decision": "Rozhodnutí",
+      "reasons": "Proč jsme ho přijali",
+      "fix": "Co změnit",
+      "redress": "Jak ho napadnout",
+      "appeal": "Vaše odvolání"
+    },
+    "labels": {
+      "reference": "Reference",
+      "issued": "Odůvodnění vydáno",
+      "content": "Obsah",
+      "contentId": "ID obsahu",
+      "decision": "Rozhodnutí",
+      "decidedOn": "Rozhodnuto dne",
+      "scope": "Rozsah platnosti",
+      "duration": "Jak dlouho",
+      "status": "Aktuální stav",
+      "ground": "Důvod",
+      "note": "Poznámka posuzovatelů",
+      "facts": "Skutečnosti a okolnosti",
+      "automated": "Automatizované prostředky",
+      "legalBasis": "Právní základ rozhodnutí"
+    },
+    "content": "{target, select, product {Produkt} other {Výloha}}: {title}",
+    "decision": {
+      "paused": "Pozastaveno. Obsah je kupujícím skrytý, dokud neprovedete níže uvedené změny a my je neschválíme.",
+      "removed": "Odstraněno. Obsah již není kupujícím dostupný. Toto rozhodnutí je konečné, pokud ho odvolání nezmění."
+    },
+    "scope": "Všude, kde ho SquareShare zobrazuje: na vlastní stránce, ve vložených widgetech na jiných webech a ve sdílených odkazech, ve všech zemích.",
+    "duration": {
+      "paused": "Dokud neschválíme vaše úpravy.",
+      "removed": "Na dobu neurčitou."
+    },
+    "status": {
+      "inForce": "V platnosti.",
+      "replaced": "Nahrazeno pozdějším rozhodnutím.",
+      "reversed": "Zrušeno. Obsah je opět viditelný pro kupující.",
+      "deleted": "Obsah byl od té doby smazán."
+    },
+    "facts": {
+      "notices": "{count, plural, =0 {Toto jsme zjistili sami, bez podnětu od kohokoli mimo SquareShare.} one {Toto následovalo po # podnětu od osoby mimo SquareShare, ve věci: {reasons}.} few {Toto následovalo po # podnětech od osob mimo SquareShare, ve věci: {reasons}.} many {Toto následovalo po # podnětech od osob mimo SquareShare, ve věci: {reasons}.} other {Toto následovalo po # podnětech od osob mimo SquareShare, ve věci: {reasons}.}}",
+      "review": "Obsah samotný před rozhodnutím posoudil člen týmu SquareShare. Neprozrazujeme, kdo podnět zaslal."
+    },
+    "automated": "K odhalení tohoto obsahu ani k přijetí tohoto rozhodnutí nebyly použity žádné automatizované prostředky.",
+    "legalBasis": {
+      "contract": "Smluvní: Podmínky služby SquareShare, které takový obsah nedovolují ({url}).",
+      "illegal": "Právní: obsah jsme považovali za protiprávní podle práva, které se na něj vztahuje."
+    },
+    "noNote": "Žádná.",
+    "fixIntro": "{target, select, product {Změňte tyto části, pak na produktu v ovládacím panelu stiskněte „Změny jsou hotové, zkontrolujte je“ a my se znovu podíváme:} other {Změňte tyto části, pak na výloze v ovládacím panelu stiskněte „Změny jsou hotové, zkontrolujte je“ a my se znovu podíváme:}}",
+    "redress": {
+      "appeal": "Odvolání k nám, bezplatně: stiskněte „Odvolat se proti tomuto rozhodnutí“ na {target, select, product {produktu} other {výloze}} v ovládacím panelu do šesti měsíců od tohoto rozhodnutí. Každé odvolání posuzuje člověk a odpověď dostanete v ovládacím panelu i e-mailem.",
+      "settlement": "Mimosoudní řešení sporů: toto rozhodnutí můžete předložit subjektu pro řešení sporů certifikovanému podle článku 21 aktu o digitálních službách.",
+      "court": "Soudy: toto rozhodnutí můžete předložit příslušnému soudu. Využitím výše uvedených možností není toto právo dotčeno.",
+      "contact": "Dotazy: napište na adresu {email} a uveďte referenci {reference}."
+    },
+    "appeal": {
+      "open": "Odvolání jste podali dne {date}. Posuzuje ho člověk.",
+      "upheld": "Odvolání jste podali dne {date}. Odpověděli jsme dne {decided}: rozhodnutí zůstává v platnosti.",
+      "overturned": "Odvolání jste podali dne {date}. Odpověděli jsme dne {decided}: rozhodnutí bylo zrušeno.",
+      "answer": "Naše odpověď: {note}",
+      "message": "Co jste napsali: {message}"
+    },
+    "footer": "SquareShare · {reference} · Strana {page} z {total}",
+    "generated": "Vygenerováno dne {date}."
   }
 }

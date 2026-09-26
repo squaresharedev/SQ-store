@@ -235,6 +235,11 @@
       "required": "Votre description est obligatoire.",
       "tooLong": "Votre description ne doit pas dépasser {maximum} caractères.",
       "unsupported": "Votre description contient des caractères non pris en charge."
+    },
+    "appealMessage": {
+      "required": "Expliquez-nous pourquoi en au moins {minimum} caractères.",
+      "tooLong": "Limitez votre contestation à {maximum} caractères maximum.",
+      "unsupported": "Votre contestation contient des caractères non pris en charge."
     }
   },
   "email": {
@@ -277,7 +282,8 @@
     "blockId": "Un ID de bloc n’est pas valide.",
     "notificationRecipient": "Un destinataire de notification n’est pas valide.",
     "factor": "Cette application d’authentification n’est pas valide.",
-    "reportTarget": "Cet élément n’est pas valide."
+    "reportTarget": "Cet élément n’est pas valide.",
+    "moderationDecision": "Cette décision n'est pas valide."
   },
   "handle": {
     "username": "Un nom d’utilisateur doit comporter de 3 à 30 caractères, en utilisant uniquement des lettres, chiffres et tirets bas."

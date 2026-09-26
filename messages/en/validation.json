@@ -235,6 +235,11 @@
       "required": "Your description is required.",
       "tooLong": "Your description must be {maximum} characters or fewer.",
       "unsupported": "Your description contains unsupported characters."
+    },
+    "appealMessage": {
+      "required": "Tell us why in at least {minimum} characters.",
+      "tooLong": "Keep your appeal to {maximum} characters or fewer.",
+      "unsupported": "Your appeal contains unsupported characters."
     }
   },
   "email": {
@@ -277,7 +282,8 @@
     "blockId": "A block id is not valid.",
     "notificationRecipient": "A notification recipient is not valid.",
     "factor": "That authenticator is not valid.",
-    "reportTarget": "That item is not valid."
+    "reportTarget": "That item is not valid.",
+    "moderationDecision": "That decision is not valid."
   },
   "handle": {
     "username": "A username must be 3 to 30 characters, using only letters, numbers and underscores."

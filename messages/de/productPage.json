@@ -95,10 +95,10 @@
   },
   "report": {
     "trigger": "{target, select, product {Dieses Produkt melden} other {Dieses Schaufenster melden}}",
-    "title": "{target, select, product {Dieses Produkt melden} other {Dieses Schaufenster melden}}",
+    "title": "{target, select, product {Dieses Produkt melden} storefront {Dieses Schaufenster melden} seller {Diesen Verkäufer melden} other {Problem melden}}",
     "description": "Sag uns, was daran nicht stimmt. Jede Meldung prüft eine Person.",
     "sentTitle": "Meldung gesendet",
-    "sentBody": "{target, select, product {Danke. Eine Person prüft dieses Produkt. Wir teilen dem Verkäufer nicht mit, wer etwas gemeldet hat.} other {Danke. Eine Person prüft dieses Schaufenster. Wir teilen dem Verkäufer nicht mit, wer etwas gemeldet hat.}}",
+    "sentBody": "{target, select, product {Danke. Eine Person prüft dieses Produkt. Wir teilen dem Verkäufer nicht mit, wer etwas gemeldet hat.} seller {Danke. Eine Person prüft diesen Verkäufer. Wir teilen ihm nicht mit, wer etwas gemeldet hat.} other {Danke. Eine Person prüft dieses Schaufenster. Wir teilen dem Verkäufer nicht mit, wer etwas gemeldet hat.}}",
     "reasonsLegend": "Was stimmt daran nicht?",
     "reasons": {
       "illegal": {
@@ -150,6 +150,22 @@
       "reason": "Wähle aus, was nicht stimmt.",
       "rateLimited": "Zu viele Meldungen von hier. Versuche es später noch einmal.",
       "submitFailed": "Das konnte nicht gesendet werden. Versuche es noch einmal."
+    },
+    "triggerAny": "Problem melden",
+    "scopeLegend": "Was möchtest du melden?",
+    "scopes": {
+      "product": {
+        "label": "Dieses Produkt",
+        "hint": "{title}"
+      },
+      "storefront": {
+        "label": "Dieses Schaufenster",
+        "hint": "{name} und alles darauf"
+      },
+      "seller": {
+        "label": "Diesen Verkäufer",
+        "hint": "{name}, auf allen Schaufenstern"
+      }
     }
   },
   "shippingProse": {

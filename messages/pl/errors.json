@@ -69,7 +69,8 @@
     "rotateEmbedKeys": "Zbyt wiele prób wygenerowania nowego klucza osadzenia w krótkim czasie.",
     "updateStock": "Zbyt wiele prób aktualizacji stanu magazynowego w krótkim czasie.",
     "readProductPageSettings": "Zbyt wiele prób odczytania ustawień strony produktu w krótkim czasie.",
-    "requestReview": "Zbyt wiele próśb o ponowne sprawdzenie w krótkim czasie."
+    "requestReview": "Zbyt wiele próśb o ponowne sprawdzenie w krótkim czasie.",
+    "fileAppeal": "Zbyt wiele prób wysłania odwołania w krótkim czasie."
   },
   "serverError": {
     "fix": "Zwykle jest to problem tymczasowy. Odczekaj chwilę i spróbuj ponownie; jeśli nadal się nie udaje, odśwież stronę.",
@@ -95,13 +96,16 @@
     "checkSellerDetails": "Nie udało się sprawdzić danych sprzedawcy z powodu problemu po naszej stronie.",
     "loadProductPageSettings": "Nie udało się wczytać ustawień strony produktu z powodu problemu po naszej stronie.",
     "saveProductPageSettings": "Nie udało się zapisać ustawień strony produktu z powodu problemu po naszej stronie.",
-    "sendForReview": "Nie udało się wysłać tego do sprawdzenia z powodu problemu po naszej stronie."
+    "sendForReview": "Nie udało się wysłać tego do sprawdzenia z powodu problemu po naszej stronie.",
+    "fileAppeal": "Nie udało się wysłać odwołania z powodu błędu po naszej stronie."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Ten produkt został usunięty, a nie wstrzymany.} storefront {Ta witryna została usunięta, a nie wstrzymana.} other {Ten element został usunięty, a nie wstrzymany.}}",
-    "removedFix": "Usunięcie jest ostateczne. Jeśli uważasz, że to pomyłka, napisz do nas przez link do odwołania.",
+    "removedFix": "Usunięcie jest ostateczne, chyba że zmieni je odwołanie. Jeśli uważasz, że było błędne, użyj opcji Odwołaj się od tej decyzji.",
     "notPaused": "{target, select, product {Ten produkt nie jest wstrzymany.} storefront {Ta witryna nie jest wstrzymana.} other {Ten element nie jest wstrzymany.}}",
-    "notPausedFix": "Nie ma czego sprawdzać: jest już widoczny dla kupujących."
+    "notPausedFix": "Nie ma czego sprawdzać: jest już widoczny dla kupujących.",
+    "decisionSuperseded": "Ta decyzja nie ma już zastosowania, więc nie ma od czego się odwoływać.",
+    "decisionSupersededFix": "Załaduj ponownie stronę, aby zobaczyć aktualny status."
   },
   "traderIdentityRequired": {
     "message": "Nie możesz publikować ani sprzedawać, dopóki dane sprzedawcy nie są kompletne.",

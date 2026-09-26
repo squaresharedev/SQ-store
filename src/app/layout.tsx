@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import { getLocale, getTranslations } from "next-intl/server";
 import "./globals.css";
 import { ScopedIntlProvider } from "@/i18n/ScopedIntlProvider";
+import { LocaleSwitchProvider } from "@/i18n/LocaleSwitchProvider";
 import { ToastProvider } from "@/components/ui/Toast";
 import { THEME_BOOTSTRAP } from "@/lib/theme-mode";
 import { cn } from "@/lib/utils";
@@ -149,7 +150,9 @@ export default async function RootLayout({
             only the shared shell of the catalogue; each route group adds what
             its own client components need (src/i18n/scopes.ts). */}
         <ScopedIntlProvider scope="shell">
-          <ToastProvider>{children}</ToastProvider>
+          <ToastProvider>
+            <LocaleSwitchProvider>{children}</LocaleSwitchProvider>
+          </ToastProvider>
         </ScopedIntlProvider>
       </body>
     </html>

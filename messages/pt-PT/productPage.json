@@ -95,10 +95,10 @@
   },
   "report": {
     "trigger": "{target, select, product {Denunciar este produto} other {Denunciar esta montra}}",
-    "title": "{target, select, product {Denunciar este produto} other {Denunciar esta montra}}",
+    "title": "{target, select, product {Denunciar este produto} storefront {Denunciar esta montra} seller {Denunciar este vendedor} other {Comunicar um problema}}",
     "description": "Diga-nos o que está errado. Todas as denúncias são analisadas por uma pessoa.",
     "sentTitle": "Denúncia enviada",
-    "sentBody": "{target, select, product {Obrigado. Uma pessoa vai analisar este produto. Não revelamos ao vendedor quem denunciou.} other {Obrigado. Uma pessoa vai analisar esta montra. Não revelamos ao vendedor quem denunciou.}}",
+    "sentBody": "{target, select, product {Obrigado. Uma pessoa vai analisar este produto. Não revelamos ao vendedor quem fez a denúncia.} seller {Obrigado. Uma pessoa vai analisar este vendedor. Não revelamos a quem fez a denúncia.} other {Obrigado. Uma pessoa vai analisar esta montra. Não revelamos ao vendedor quem fez a denúncia.}}",
     "reasonsLegend": "O que está errado?",
     "reasons": {
       "illegal": {
@@ -150,6 +150,22 @@
       "reason": "Escolha o que está errado.",
       "rateLimited": "Demasiadas denúncias a partir daqui. Tente novamente mais tarde.",
       "submitFailed": "Não foi possível enviar. Tente novamente."
+    },
+    "triggerAny": "Comunicar um problema",
+    "scopeLegend": "O que pretende denunciar?",
+    "scopes": {
+      "product": {
+        "label": "Este produto",
+        "hint": "{title}"
+      },
+      "storefront": {
+        "label": "Esta montra",
+        "hint": "{name}, e tudo o que contém"
+      },
+      "seller": {
+        "label": "Este vendedor",
+        "hint": "{name}, em todas as suas montras"
+      }
     }
   },
   "shippingProse": {

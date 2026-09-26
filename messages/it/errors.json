@@ -69,7 +69,8 @@
     "rotateEmbedKeys": "Troppi tentativi di rigenerare chiavi di incorporamento in poco tempo.",
     "updateStock": "Troppi tentativi di aggiornare le scorte in poco tempo.",
     "readProductPageSettings": "Troppi tentativi di leggere le impostazioni della pagina prodotto in poco tempo.",
-    "requestReview": "Troppi tentativi di chiedere una revisione in poco tempo."
+    "requestReview": "Troppi tentativi di chiedere una revisione in poco tempo.",
+    "fileAppeal": "Troppi tentativi di inviare una contestazione in poco tempo."
   },
   "serverError": {
     "fix": "Di solito è temporaneo. Attendi un momento e riprova; se continua a non funzionare, aggiorna la pagina.",
@@ -95,13 +96,16 @@
     "checkSellerDetails": "Non è stato possibile verificare i tuoi dati venditore per un problema dalla nostra parte.",
     "loadProductPageSettings": "Non è stato possibile caricare le impostazioni della tua pagina prodotto per un problema dalla nostra parte.",
     "saveProductPageSettings": "Non è stato possibile salvare le impostazioni della tua pagina prodotto per un problema dalla nostra parte.",
-    "sendForReview": "Non è stato possibile inviare la richiesta di revisione per un problema dalla nostra parte."
+    "sendForReview": "Non è stato possibile inviare la richiesta di revisione per un problema dalla nostra parte.",
+    "fileAppeal": "Non è stato possibile inviare la tua contestazione a causa di un problema da parte nostra."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Questo prodotto è stato rimosso, non messo in pausa.} storefront {Questa vetrina è stata rimossa, non messa in pausa.} other {Questo elemento è stato rimosso, non messo in pausa.}}",
-    "removedFix": "Una rimozione è definitiva. Se pensi che sia stata un errore, usa il link per contestare la decisione e scrivici.",
+    "removedFix": "Una rimozione è definitiva, salvo che una contestazione la modifichi. Se pensi che sia stata un errore, usa «Contesta questa decisione».",
     "notPaused": "{target, select, product {Questo prodotto non è in pausa.} storefront {Questa vetrina non è in pausa.} other {Questo elemento non è in pausa.}}",
-    "notPausedFix": "Non c’è nulla da rivedere: è già visibile agli acquirenti."
+    "notPausedFix": "Non c’è nulla da rivedere: è già visibile agli acquirenti.",
+    "decisionSuperseded": "Questa decisione non è più in vigore, quindi non c'è nulla da contestare.",
+    "decisionSupersededFix": "Ricarica la pagina per vedere la situazione attuale."
   },
   "traderIdentityRequired": {
     "message": "Non puoi pubblicare o vendere finché i tuoi dati venditore non sono completi.",

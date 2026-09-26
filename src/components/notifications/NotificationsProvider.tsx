@@ -27,6 +27,15 @@ export function NotificationsProvider({
   );
 }
 
+/**
+ * The shared state when a provider is mounted, else null. For surfaces that
+ * keep their own list (the history page) but should still tell the bell when
+ * they change something, without the realtime round trip.
+ */
+export function useOptionalNotificationsContext(): UseNotifications | null {
+  return React.useContext(NotificationsContext);
+}
+
 export function useNotificationsContext(): UseNotifications {
   const ctx = React.useContext(NotificationsContext);
   if (!ctx) {

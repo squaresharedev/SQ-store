@@ -1,5 +1,7 @@
 {
   "label": "Language",
   "settingsTitle": "Language",
-  "settingsDescription": "The language your dashboard is shown in. Buyers see product pages in their own language, and anything you wrote yourself stays exactly as you wrote it."
+  "settingsDescription": "The language your dashboard is shown in. Buyers see product pages in their own language, and anything you wrote yourself stays exactly as you wrote it.",
+  "switching": "Changing the language to {language}…",
+  "failed": "Couldn't change the language. Try again."
 }

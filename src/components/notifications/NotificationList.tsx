@@ -26,6 +26,7 @@ export function NotificationList({
   loading,
   live = true,
   onActivate,
+  onActionComplete,
   onMarkAll,
   onNavigateAway,
 }: {
@@ -35,6 +36,8 @@ export function NotificationList({
   /** False when the realtime channel is down: the list is stale, say so. */
   live?: boolean;
   onActivate: (id: string, href: string | null) => void;
+  /** A row's inline action (e.g. accepting an invite) finished. */
+  onActionComplete?: (id: string) => void;
   onMarkAll: () => void;
   /** Called when the user follows a link out of the dropdown (to close it). */
   onNavigateAway: () => void;
@@ -99,7 +102,12 @@ export function NotificationList({
           <ul className="divide-y divide-border">
             {recent.map((n) => (
               <li key={n.id}>
-                <NotificationItem notification={n} onActivate={onActivate} />
+                <NotificationItem
+                  notification={n}
+                  onActivate={onActivate}
+                  onActionComplete={onActionComplete}
+                  onNavigate={onNavigateAway}
+                />
               </li>
             ))}
           </ul>

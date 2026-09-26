@@ -4,16 +4,27 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { completeOnboarding, markSetupCelebrated } from "@/lib/onboarding/actions";
-import type { SetupChecklistData } from "@/lib/onboarding/steps";
+import type { SetupChecklistData, SetupStepId } from "@/lib/onboarding/steps";
+import {
+  newlyDoneSteps,
+  serializeSeenSteps,
+  SETUP_SEEN_COOKIE,
+  SETUP_SEEN_MAX_AGE,
+} from "@/lib/onboarding/seen-steps";
 import { endTour, setTourNext, startTour, type TourNext } from "@/lib/onboarding/tour-store";
 import type { TraderIdentityField } from "@/lib/settings/trader-identity";
-import { SetupChecklist } from "./SetupChecklist";
+import { SETUP_ANIMATION_SETTLE_MS, SetupChecklist } from "./SetupChecklist";
 import { WelcomeFlow, type SellerPrefill } from "./WelcomeFlow";
 
 /** Everything Overview resolves on the server for the setup slot. */
 export type OnboardingData = {
   /** Null for a member on someone else's store, or when the gate read failed. */
   setup: SetupChecklistData | null;
+  /** The steps this device last saw done (the setup-seen cookie), or null with
+   *  no history. Steps done since then animate on the card. */
+  seenSteps: readonly SetupStepId[] | null;
+  /** Whose setup this is: the setup-seen cookie is kept per account. */
+  accountId: string;
   traderMissing: readonly TraderIdentityField[];
   /** The welcome flow has never been seen by this person. */
   welcomePending: boolean;
@@ -56,6 +67,8 @@ let celebratedInThisTab = false;
  */
 export function OnboardingPanel({
   setup,
+  seenSteps,
+  accountId,
   traderMissing,
   welcomePending,
   termsAccepted,
@@ -121,6 +134,34 @@ export function OnboardingPanel({
     startTour({ next: nextRef.current });
   }, [record]);
 
+  // Steps done since this device last looked animate on the card. The "before"
+  // is LATCHED for the visit, not re-read from each server render: the cookie
+  // written below comes back on the next refresh, and would otherwise wipe a
+  // step's animation the moment it is recorded. It only moves forward once the
+  // animation has had time to play (so folding the card away and back does not
+  // replay it), and a step finished DURING the visit (the welcome flow's seller
+  // save) still counts as new against it.
+  const [seenBefore, setSeenBefore] = useState(seenSteps);
+  const doneIds = (setup?.steps ?? []).filter((step) => step.done).map((step) => step.id);
+  const doneKey = doneIds.join("|");
+  const freshSteps = setup ? newlyDoneSteps(setup.steps, seenBefore) : [];
+
+  const settleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => {
+    if (settleTimer.current) clearTimeout(settleTimer.current);
+  }, []);
+
+  // The card is on screen, unfolded and not under the welcome: what it shows
+  // now has been seen. Recorded at once (a reload mid-animation must not replay
+  // it), settled locally once the animation is over.
+  const stepsSeen = useCallback(() => {
+    const done = doneKey === "" ? [] : (doneKey.split("|") as SetupStepId[]);
+    const secure = window.location.protocol === "https:" ? "; Secure" : "";
+    document.cookie = `${SETUP_SEEN_COOKIE}=${serializeSeenSteps(accountId, done)}; Path=/; Max-Age=${SETUP_SEEN_MAX_AGE}; SameSite=Lax${secure}`;
+    if (settleTimer.current) clearTimeout(settleTimer.current);
+    settleTimer.current = setTimeout(() => setSeenBefore(done), SETUP_ANIMATION_SETTLE_MS);
+  }, [doneKey, accountId]);
+
   const recordCelebration = useCallback(() => {
     if (celebratedInThisTab) return;
     celebratedInThisTab = true;
@@ -135,6 +176,9 @@ export function OnboardingPanel({
           livePageUrl={livePageUrl}
           celebrate={celebrate}
           onCelebrated={recordCelebration}
+          freshSteps={freshSteps}
+          paused={open}
+          onStepsSeen={stepsSeen}
         />
       )}
       <WelcomeFlow

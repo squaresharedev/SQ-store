@@ -95,10 +95,10 @@
   },
   "report": {
     "trigger": "{target, select, product {Zgłoś ten produkt} other {Zgłoś tę witrynę}}",
-    "title": "{target, select, product {Zgłoś ten produkt} other {Zgłoś tę witrynę}}",
+    "title": "{target, select, product {Zgłoś ten produkt} storefront {Zgłoś tę witrynę} seller {Zgłoś tego sprzedawcę} other {Zgłoś problem}}",
     "description": "Napisz, co jest nie tak. Każde zgłoszenie sprawdza człowiek.",
     "sentTitle": "Zgłoszenie wysłane",
-    "sentBody": "{target, select, product {Dziękujemy. Człowiek sprawdzi ten produkt. Nie ujawniamy sprzedawcy, kto coś zgłosił.} other {Dziękujemy. Człowiek sprawdzi tę witrynę. Nie ujawniamy sprzedawcy, kto coś zgłosił.}}",
+    "sentBody": "{target, select, product {Dziękujemy. Człowiek sprawdzi ten produkt. Nie ujawniamy sprzedawcy, kto coś zgłosił.} seller {Dziękujemy. Człowiek sprawdzi tego sprzedawcę. Nie ujawniamy im, kto coś zgłosił.} other {Dziękujemy. Człowiek sprawdzi tę witrynę. Nie ujawniamy sprzedawcy, kto coś zgłosił.}}",
     "reasonsLegend": "Co jest nie tak?",
     "reasons": {
       "illegal": {
@@ -150,6 +150,22 @@
       "reason": "Wybierz, co jest nie tak.",
       "rateLimited": "Zbyt wiele zgłoszeń stąd. Spróbuj ponownie później.",
       "submitFailed": "Nie udało się tego wysłać. Spróbuj ponownie."
+    },
+    "triggerAny": "Zgłoś problem",
+    "scopeLegend": "Co chcesz zgłosić?",
+    "scopes": {
+      "product": {
+        "label": "Ten produkt",
+        "hint": "{title}"
+      },
+      "storefront": {
+        "label": "Ta witryna",
+        "hint": "{name} i wszystko, co się na niej znajduje"
+      },
+      "seller": {
+        "label": "Ten sprzedawca",
+        "hint": "{name} we wszystkich swoich witrynach"
+      }
     }
   },
   "shippingProse": {

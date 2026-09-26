@@ -14,6 +14,7 @@ import {
   iconPopClass,
 } from "@/components/ui/control-styles";
 import { SAMPLE_STOREFRONT_PATH } from "@/lib/storefront/sample";
+import { storefrontEmbedPath } from "@/lib/storefront/paths";
 import { useToast } from "@/components/ui/Toast";
 import { useActionErrorToast } from "@/components/ui/ActionErrorNotice";
 import { Button } from "@/components/ui/button";
@@ -23,11 +24,9 @@ import {
   fetchStorefrontsPage,
 } from "@/lib/storefront/actions";
 import type { StorefrontSummary } from "@/lib/storefront/queries";
-import type { TraderIdentityField } from "@/lib/settings/trader-identity";
 import type { Product } from "@/types/product";
 import { StorefrontCard } from "./StorefrontCard";
 import { CreateStorefrontWizard } from "./CreateStorefrontWizard";
-import { EmbedModal } from "./EmbedModal";
 import { StorefrontEmptyState } from "./StorefrontEmptyState";
 import { RemovalNotice } from "@/components/products/RemovalNotice";
 
@@ -48,7 +47,6 @@ export function StorefrontsList({
   total,
   products,
   canWrite,
-  missingTraderDetails = [],
   sample = null,
 }: {
   /**
@@ -65,9 +63,6 @@ export function StorefrontsList({
   products: Product[];
   /** Hide create/delete/embed controls when the active role is read-only. */
   canWrite: boolean;
-  /** Trader details this store still owes buyers; passed to the embed modal,
-   *  which is where publishing a storefront actually happens. */
-  missingTraderDetails?: readonly TraderIdentityField[];
 }) {
   const t = useTranslations("Storefront.list");
   const tSample = useTranslations("Storefront.sample.card");
@@ -108,9 +103,6 @@ export function StorefrontsList({
     null,
   );
   const [deleting, setDeleting] = useState(false);
-  const [embedTarget, setEmbedTarget] = useState<StorefrontSummary | null>(
-    null,
-  );
 
   const productsById = useMemo(
     () => new Map(products.map((product) => [product.id, product])),
@@ -211,7 +203,7 @@ export function StorefrontsList({
                 storefront={storefront}
                 productsById={productsById}
                 canWrite={canWrite}
-                onEmbed={() => setEmbedTarget(storefront)}
+                onEmbed={() => router.push(storefrontEmbedPath(storefront.id))}
                 onDelete={() => setPendingDelete(storefront)}
               />
             </li>
@@ -271,19 +263,6 @@ export function StorefrontsList({
         // Newest-edited first, so [0] is the storefront they last worked on and
         // the likeliest source of answers that still hold.
         previousBrief={storefronts[0]?.brief}
-      />
-
-      <EmbedModal
-        storefront={embedTarget}
-        missingTraderDetails={missingTraderDetails}
-        onClose={() => setEmbedTarget(null)}
-        onSaved={(id, embed) =>
-          setStorefronts((current) =>
-            current.map((s) =>
-              s.id === id ? { ...s, config: { ...s.config, embed } } : s,
-            ),
-          )
-        }
       />
 
       <Modal

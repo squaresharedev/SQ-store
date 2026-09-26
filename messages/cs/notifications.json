@@ -32,6 +32,23 @@
     "loading": "Načítání",
     "loadMore": "Načíst další"
   },
+  "filters": {
+    "label": "Filtrovat oznámení",
+    "show": "Zobrazit",
+    "all": "Vše",
+    "unread": "Nepřečtené",
+    "category": "Kategorie",
+    "allCategories": "Všechny kategorie",
+    "clear": "Vymazat filtry",
+    "emptyUnreadTitle": "Žádná nepřečtená oznámení",
+    "emptyUnreadHint": "Máte vše přečteno.",
+    "emptyFilteredTitle": "Filtrům neodpovídá žádné oznámení",
+    "emptyFilteredHint": "Zkuste jinou kategorii, nebo vymažte filtry a zobrazí se vše."
+  },
+  "actions": {
+    "openStore": "Otevřít obchod",
+    "unavailable": "Tato pozvánka už není k dispozici."
+  },
   "types": {
     "team": "Tým",
     "order": "Objednávka",

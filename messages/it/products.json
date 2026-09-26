@@ -113,19 +113,45 @@
     "pausedOn": "In pausa dal",
     "statement": "{ground, select, illegal {Beni o attività illegali. Offriva qualcosa che non può essere venduto legalmente, o usava l’inserzione per organizzarne la vendita.} sexual {Contenuti sessuali. Conteneva contenuti sessuali espliciti.} violence {Violenza o contenuti cruenti. Conteneva violenza esplicita.} hate {Odio o molestie. Attaccava una persona o un gruppo, o riportava simboli d’odio.} counterfeit {Contraffatto o rubato. Sembrava offrire merce contraffatta o opere che appartengono ad altri.} scam {Truffa o frode. L’inserzione sembrava pensata per incassare pagamenti senza consegnare quanto promesso.} spam {Spam. Contenuti ripetitivi o fuorvianti, non un’inserzione genuina.} other {Altro. Ha violato le regole della piattaforma.}}{noted, select, yes { {note}} other {}}",
     "statementUnlabelled": "Non rispettava le regole della piattaforma.{noted, select, yes { {note}} other {}}",
-    "fixHint": "{kind, select, product {Modifica qui sotto il prodotto per risolvere, salvalo e poi rimandacelo.} other {Apri la vetrina per risolvere, poi torna qui e inviacela.}}",
+    "fixHint": "{kind, select, product {Modifica le parti evidenziate qui sotto, salva, poi rimandacelo.} other {Apri la vetrina, modifica quanto indicato sopra, poi torna qui e inviacela.}}",
     "readOnlyHint": "{kind, select, product {Una persona che può modificare questo prodotto deve fare la modifica e inviarlo per la revisione.} other {Una persona che può modificare questa vetrina deve fare la modifica e inviarla per la revisione.}}",
     "appeal": "{kind, select, product {Puoi ancora modificare questo prodotto. Modificarlo non lo ripristina: <link>chiedici di riesaminarlo</link> se pensi che sia stato un errore.} other {Puoi ancora modificare questa vetrina. Modificarla non la ripristina: <link>chiedici di riesaminarla</link> se pensi che sia stato un errore.}}",
     "appealPaused": "Pensi che sia un errore? <link>Scrivici</link>.",
     "appealFinal": "Se pensi che ci siamo sbagliati, <link>chiedici di riesaminare</link>.",
-    "appealSubject": "{kind, select, product {Contestazione: rimozione del prodotto ({title})} other {Contestazione: rimozione della vetrina ({title})}}",
-    "appealBody": "{kind, select, product {Vorrei che questo prodotto fosse riesaminato.\n\nID prodotto: {id}\nNome: {title}\n\nPerché penso che sia stato un errore:\n} other {Vorrei che questa vetrina fosse riesaminata.\n\nID vetrina: {id}\nNome: {title}\n\nPerché penso che sia stato un errore:\n}}",
     "reviewRequest": {
       "button": "Ho fatto le modifiche, rivedilo",
       "sent": "Inviato per la revisione il <time>{date}</time>. Una persona esaminerà le tue modifiche e riceverai una risposta qui e per email.",
       "failed": "Non è stato possibile inviarlo.",
       "failedFix": "Riprova tra poco."
-    }
+    },
+    "why": "Perché",
+    "whatToChange": "Cosa cambiare",
+    "concerned": "Riguardava",
+    "showField": "Mostra {field} in questa pagina",
+    "fields": {
+      "product": "{field, select, title {Titolo} description {Descrizione} price {Prezzo} image {Immagine principale} file {File digitale} purchaseLink {Link di acquisto} shipping {Spedizione} options {Opzioni} photos {Foto} specs {Specifiche} documents {Documenti} safety {Sicurezza e conformità} other {Altro}}",
+      "storefront": "{field, select, name {Nome della vetrina} header {Intestazione} text {Testo} images {Immagini} products {Prodotti mostrati} background {Sfondo} productPage {Pagine prodotto} other {Altro}}"
+    },
+    "reference": "Riferimento",
+    "downloadStatement": "Scarica la decisione (PDF)",
+    "openEditor": "Apri la vetrina per modificarla",
+    "appealButton": "Contesta questa decisione",
+    "appealForm": {
+      "title": "Contesta questa decisione",
+      "description": "Dicci perché pensi che abbiamo sbagliato. Una persona esamina ogni contestazione e riceverai una risposta qui e per email. Resta nascosto mentre verifichiamo.",
+      "label": "Perché pensi che questa decisione sia sbagliata?",
+      "placeholder": "Per esempio: il logo nella foto è il nostro marchio registrato e qui puoi verificarlo.",
+      "help": "Almeno {min} caratteri. Aggiungi qualsiasi cosa che ci aiuti a verificare, come un link o un numero di registrazione.",
+      "count": "{count} / {max}",
+      "submit": "Invia contestazione",
+      "sent": "Contestazione inviata. Ti risponderemo."
+    },
+    "appealStatus": {
+      "open": "Hai presentato contestazione il <time>{date}</time>. Una persona la esaminerà e riceverai una risposta qui e per email.",
+      "upheld": "Abbiamo esaminato la tua contestazione il <time>{date}</time>. La decisione è confermata.",
+      "answer": "La nostra risposta: {note}"
+    },
+    "editorDetails": "Perché e cosa fare dopo"
   },
   "import": {
     "fields": {
@@ -309,6 +335,21 @@
     "nav": {
       "label": "Sezioni del modulo",
       "heading": "In questa pagina"
+    },
+    "moderation": {
+      "badge": "Da modificare",
+      "changed": "Modificato",
+      "callout": "SquareShare ti ha chiesto di modificare {fields} qui.",
+      "seeWhy": "Vedi perché",
+      "fieldBadge": "Modifica questo",
+      "navHint": "da modificare",
+      "inReview": "Inviato per la revisione",
+      "reviewPrompt": {
+        "title": "Salvato. Inviarlo per la revisione?",
+        "body": "Se hai modificato tutto ciò che SquareShare ti ha chiesto, inviacelo ora e una persona lo esaminerà. Altrimenti, continua a modificare e invialo quando hai finito.",
+        "keepEditing": "Continua a modificare",
+        "send": "Invia per la revisione"
+      }
     }
   },
   "stockFields": {
@@ -522,5 +563,76 @@
     "dropPrompt": "Trascina un file o clicca per caricarlo",
     "hint": "ZIP, PDF e simili, fino a {max} MB",
     "remove": "Rimuovi file digitale"
+  },
+  "statement": {
+    "fileTitle": "Dichiarazione delle motivazioni {reference}",
+    "title": "Dichiarazione delle motivazioni",
+    "subtitle": "{action, select, paused {{target, select, product {Abbiamo messo in pausa il tuo prodotto} other {Abbiamo messo in pausa la tua vetrina}}} other {{target, select, product {Abbiamo rimosso il tuo prodotto} other {Abbiamo rimosso la tua vetrina}}}}",
+    "intro": "Questa dichiarazione illustra una decisione da noi adottata in merito a contenuti da te pubblicati su SquareShare, le ragioni di tale decisione e le modalità con cui puoi contestarla. Ne hai diritto ai sensi dell'articolo 17 del regolamento sui servizi digitali (Regolamento (UE) 2022/2065).",
+    "sections": {
+      "decision": "La decisione",
+      "reasons": "Perché l'abbiamo adottata",
+      "fix": "Cosa cambiare",
+      "redress": "Come contestarla",
+      "appeal": "La tua contestazione"
+    },
+    "labels": {
+      "reference": "Riferimento",
+      "issued": "Dichiarazione emessa",
+      "content": "Contenuto",
+      "contentId": "ID contenuto",
+      "decision": "Decisione",
+      "decidedOn": "Deciso il",
+      "scope": "Dove si applica",
+      "duration": "Durata",
+      "status": "Stato attuale",
+      "ground": "Motivo",
+      "note": "Nota del nostro revisore",
+      "facts": "Fatti e circostanze",
+      "automated": "Mezzi automatizzati",
+      "legalBasis": "Base della decisione"
+    },
+    "content": "{target, select, product {Prodotto} other {Vetrina}}: {title}",
+    "decision": {
+      "paused": "In pausa. Il contenuto è nascosto agli acquirenti finché non apporti le modifiche indicate di seguito e noi le approviamo.",
+      "removed": "Rimosso. Il contenuto non è più disponibile per gli acquirenti. La decisione è definitiva, salvo che una contestazione la modifichi."
+    },
+    "scope": "Ovunque SquareShare lo mostri: sulla sua pagina, negli incorporamenti su altri siti web e nei link condivisi, in ogni paese.",
+    "duration": {
+      "paused": "Fino all'approvazione delle tue modifiche.",
+      "removed": "Indeterminata."
+    },
+    "status": {
+      "inForce": "In vigore.",
+      "replaced": "Sostituita da una decisione successiva.",
+      "reversed": "Annullata. Il contenuto è di nuovo visibile agli acquirenti.",
+      "deleted": "Il contenuto è stato eliminato."
+    },
+    "facts": {
+      "notices": "{count, plural, =0 {Lo abbiamo rilevato autonomamente, senza alcuna segnalazione da parte di soggetti esterni a SquareShare.} one {Questo ha fatto seguito a # segnalazione proveniente da un soggetto esterno a SquareShare, riguardante: {reasons}.} other {Questo ha fatto seguito a # segnalazioni provenienti da soggetti esterni a SquareShare, riguardanti: {reasons}.}}",
+      "review": "Un membro dello staff di SquareShare ha esaminato il contenuto stesso prima di decidere. Non comunichiamo chi ha inviato una segnalazione."
+    },
+    "automated": "Non sono stati utilizzati mezzi automatizzati per rilevare questo contenuto o per adottare questa decisione.",
+    "legalBasis": {
+      "contract": "Contrattuale: le Condizioni d'uso di SquareShare, che non consentono contenuti di questo tipo ({url}).",
+      "illegal": "Legale: abbiamo ritenuto il contenuto illegale ai sensi della normativa applicabile."
+    },
+    "noNote": "Nessuna.",
+    "fixIntro": "{target, select, product {Modifica queste parti, poi premi «Ho fatto le modifiche, rivedilo» sul prodotto nella tua dashboard e daremo un'altra occhiata:} other {Modifica queste parti, poi premi «Ho fatto le modifiche, rivedilo» sulla vetrina nella tua dashboard e daremo un'altra occhiata:}}",
+    "redress": {
+      "appeal": "{target, select, product {Puoi contestarla a noi, gratuitamente: premi «Contesta questa decisione» sul prodotto nella tua dashboard entro sei mesi da questa decisione. Una persona esamina ogni contestazione e riceverai una risposta nella tua dashboard e per email.} other {Puoi contestarla a noi, gratuitamente: premi «Contesta questa decisione» sulla vetrina nella tua dashboard entro sei mesi da questa decisione. Una persona esamina ogni contestazione e riceverai una risposta nella tua dashboard e per email.}}",
+      "settlement": "Risoluzione extragiudiziale delle controversie: puoi portare questa decisione dinanzi a un organismo di risoluzione delle controversie certificato ai sensi dell'articolo 21 del regolamento sui servizi digitali.",
+      "court": "Tribunali: puoi impugnare questa decisione dinanzi a un tribunale competente. Il ricorso alle opzioni di cui sopra non pregiudica tale diritto.",
+      "contact": "Domande: scrivi a {email} e indica il riferimento {reference}."
+    },
+    "appeal": {
+      "open": "Hai presentato contestazione il {date}. Una persona la sta esaminando.",
+      "upheld": "Hai presentato contestazione il {date}. Abbiamo risposto il {decided}: la decisione è confermata.",
+      "overturned": "Hai presentato contestazione il {date}. Abbiamo risposto il {decided}: la decisione è stata annullata.",
+      "answer": "La nostra risposta: {note}",
+      "message": "Quello che hai scritto: {message}"
+    },
+    "footer": "SquareShare · {reference} · Pagina {page} di {total}",
+    "generated": "Generato il {date}."
   }
 }

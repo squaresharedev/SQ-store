@@ -1,10 +1,8 @@
 "use client";
 
-import { useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 import { Select, type SelectOption } from "@/components/ui/select";
-import { setLocale } from "@/i18n/actions";
+import { useLocaleSwitch } from "@/i18n/LocaleSwitchProvider";
 import { LOCALES, LOCALE_NAMES, type Locale } from "@/i18n/locales";
 
 const OPTIONS: readonly SelectOption<Locale>[] = LOCALES.map((code) => ({
@@ -17,8 +15,8 @@ const OPTIONS: readonly SelectOption<Locale>[] = LOCALES.map((code) => ({
  * Settings). The account menu lists languages inline instead.
  *
  * Label it from outside with a `<label htmlFor={id}>`, like every other Select.
- * Switching writes the cookie server-side, then refreshes so every Server
- * Component re-renders in the new language.
+ * Switching goes through LocaleSwitchProvider, which shows the language
+ * overlay while every Server Component re-renders in the new language.
  */
 export function LocaleSelect({
   id,
@@ -30,24 +28,15 @@ export function LocaleSelect({
   triggerClassName?: string;
 }) {
   const locale = useLocale();
-  const router = useRouter();
-  const [pending, startTransition] = useTransition();
-
-  function choose(next: Locale) {
-    if (next === locale) return;
-    startTransition(async () => {
-      const result = await setLocale(next);
-      if (result.ok) router.refresh();
-    });
-  }
+  const { switchLocale, switching } = useLocaleSwitch();
 
   return (
     <Select
       id={id}
       value={locale}
       options={OPTIONS}
-      onChange={choose}
-      disabled={pending}
+      onChange={switchLocale}
+      disabled={switching}
       align={align}
       triggerClassName={triggerClassName}
     />

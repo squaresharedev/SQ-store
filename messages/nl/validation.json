@@ -235,6 +235,11 @@
       "required": "Je beschrijving is verplicht.",
       "tooLong": "Je beschrijving mag maximaal {maximum} tekens bevatten.",
       "unsupported": "Je beschrijving bevat niet-ondersteunde tekens."
+    },
+    "appealMessage": {
+      "required": "Vertel ons waarom in minstens {minimum} tekens.",
+      "tooLong": "Houd je bezwaar beperkt tot {maximum} tekens.",
+      "unsupported": "Je bezwaar bevat niet-ondersteunde tekens."
     }
   },
   "email": {
@@ -277,7 +282,8 @@
     "blockId": "Een blok-id is niet geldig.",
     "notificationRecipient": "Een ontvanger van de melding is niet geldig.",
     "factor": "Die authenticator is niet geldig.",
-    "reportTarget": "Dat item is niet geldig."
+    "reportTarget": "Dat item is niet geldig.",
+    "moderationDecision": "Die beslissing is niet geldig."
   },
   "handle": {
     "username": "Een gebruikersnaam moet 3 tot 30 tekens lang zijn en mag alleen letters, cijfers en underscores bevatten."

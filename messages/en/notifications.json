@@ -32,6 +32,23 @@
     "loading": "Loading",
     "loadMore": "Load more"
   },
+  "filters": {
+    "label": "Filter notifications",
+    "show": "Show",
+    "all": "All",
+    "unread": "Unread",
+    "category": "Category",
+    "allCategories": "All categories",
+    "clear": "Clear filters",
+    "emptyUnreadTitle": "No unread notifications",
+    "emptyUnreadHint": "You're all caught up.",
+    "emptyFilteredTitle": "No notifications match",
+    "emptyFilteredHint": "Try another category, or clear the filters to see everything."
+  },
+  "actions": {
+    "openStore": "Open store",
+    "unavailable": "This invite is no longer available."
+  },
   "types": {
     "team": "Team",
     "order": "Order",

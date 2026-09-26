@@ -10,12 +10,25 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { AnimatedCheck } from "@/components/ui/animated-check";
 import type { MessageRef } from "@/i18n/types";
+import type { ProductPageReportScopes } from "@/types/product-page";
 import {
   REPORT_DETAILS_MAX,
   REPORT_REASONS,
   REPORT_REASON_COPY,
   type ReportReason,
 } from "@/lib/validation/reports";
+
+/** What the dialog can report. `seller` is filed against the seller's account,
+ *  resolved from the storefront on the server (app/api/report). */
+type ReportScope = "product" | ReportScopeOption;
+type ReportScopeOption = keyof ProductPageReportScopes;
+
+const NO_WIDER_SCOPES: ProductPageReportScopes = { storefront: false, seller: false };
+
+/** One choosable card, for both the target and the reason: the whole card is
+ *  the hit area, and the chosen one takes the ink border. */
+const REPORT_OPTION_CLASS =
+  "flex cursor-pointer items-start gap-3 rounded-md border border-border p-3 hover:bg-muted/40 has-[:checked]:border-foreground";
 
 /** The "(optional)" after a field label, a step quieter than the label. */
 function optionalMarker(chunks: React.ReactNode) {
@@ -49,6 +62,14 @@ function optionalMarker(chunks: React.ReactNode) {
  * the same way, for the same reason: what happened underneath is not the
  * reporter's to know.
  *
+ * WHAT IS BEING REPORTED comes first, when there is a choice. A buyer who has
+ * found one bad listing may have found a bad shop, or a bad seller running
+ * several; the dialog offers the wider targets only when they differ from the
+ * product (the storefront once the seller sells more than one thing, the
+ * seller once they run more than one storefront; see reportScopesFor). The
+ * seller is reported through the storefront's id and resolved to their
+ * account on the server, so this page never learns the account id.
+ *
  * INERT IN THE EDITOR (`preview`). The seller previewing their own page gets
  * the link rendered, so they can see what a buyer sees, and clicking it does
  * nothing. A live dialog there would let someone report their own product and
@@ -56,16 +77,24 @@ function optionalMarker(chunks: React.ReactNode) {
  * surface.
  */
 export function ReportDialog({
-  targetType,
-  targetId,
+  product,
+  storefront,
+  sellerName,
+  scopes = NO_WIDER_SCOPES,
   preview = false,
 }: {
-  targetType: "product" | "storefront";
-  targetId: string;
+  product: { id: string; title: string };
+  /** The storefront this page hangs off, as its buyers know it. */
+  storefront: { id: string; name: string };
+  /** Who the buyer is contracting with, as the page names them. */
+  sellerName: string;
+  /** Which wider targets this seller warrants. */
+  scopes?: ProductPageReportScopes;
   /** Editor preview: render the link, do nothing on click. */
   preview?: boolean;
 }) {
   const [open, setOpen] = React.useState(false);
+  const [scope, setScope] = React.useState<ReportScope>("product");
   const [reason, setReason] = React.useState<ReportReason | "">("");
   const [details, setDetails] = React.useState("");
   const [email, setEmail] = React.useState("");
@@ -77,12 +106,24 @@ export function ReportDialog({
   const tAll = useTranslations();
   const tActions = useTranslations("Common.actions");
   const resolve = (ref: MessageRef) => tAll(ref.key, ref.values);
+  const available: ReportScope[] = [
+    "product",
+    ...(scopes.storefront ? (["storefront"] as const) : []),
+    ...(scopes.seller ? (["seller"] as const) : []),
+  ];
+  const choosing = available.length > 1;
+  const scopeHints: Record<ReportScope, string> = {
+    product: t("scopes.product.hint", { title: product.title }),
+    storefront: t("scopes.storefront.hint", { name: storefront.name }),
+    seller: t("scopes.seller.hint", { name: sellerName }),
+  };
 
   function close() {
     setOpen(false);
     // Reset a beat later so the fields do not visibly empty during the close
     // transition. A reporter who reopens starts clean either way.
     window.setTimeout(() => {
+      setScope("product");
       setReason("");
       setDetails("");
       setEmail("");
@@ -102,8 +143,10 @@ export function ReportDialog({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          targetType,
-          targetId,
+          targetType: scope,
+          // The storefront names both the storefront and, resolved on the
+          // server, the seller behind it.
+          targetId: scope === "product" ? product.id : storefront.id,
           reason,
           details,
           reporterEmail: email,
@@ -135,10 +178,10 @@ export function ReportDialog({
         // link exactly where a buyer will.
         aria-disabled={preview || undefined}
         className="inline-flex items-center gap-1.5 underline-offset-2 hover:underline"
-        data-report-trigger={targetType}
+        data-report-trigger="product"
       >
         <Flag aria-hidden="true" className="size-3" />
-        {t("trigger", { target: targetType })}
+        {choosing ? t("triggerAny") : t("trigger", { target: "product" })}
       </button>
 
       <Modal
@@ -149,7 +192,7 @@ export function ReportDialog({
         // silently file the most serious category. Land on the inert panel so
         // choosing a reason is always deliberate.
         initialFocus="dialog"
-        title={state === "sent" ? t("sentTitle") : t("title", { target: targetType })}
+        title={state === "sent" ? t("sentTitle") : t("title", { target: scope })}
         description={state === "sent" ? undefined : t("description")}
       >
         {state === "sent" ? (
@@ -167,7 +210,7 @@ export function ReportDialog({
               <AnimatedCheck className="size-6" />
             </span>
             <p className="text-sm text-muted-foreground">
-              {t("sentBody", { target: targetType })}
+              {t("sentBody", { target: scope })}
             </p>
             <Button type="button" onClick={close} className="w-full sm:w-auto">
               {tActions("close")}
@@ -175,13 +218,38 @@ export function ReportDialog({
           </div>
         ) : (
           <form onSubmit={submit} className="flex flex-col gap-5">
+            {choosing && (
+              <fieldset className="flex flex-col gap-2" data-report-scopes="">
+                <legend className="pb-2 text-sm font-medium">{t("scopeLegend")}</legend>
+                {available.map((value) => (
+                  <label
+                    key={value}
+                    className={REPORT_OPTION_CLASS}
+                    data-report-scope={value}
+                  >
+                    <input
+                      type="radio"
+                      name="scope"
+                      value={value}
+                      checked={scope === value}
+                      onChange={() => setScope(value)}
+                      className="mt-0.5 size-4 shrink-0 accent-foreground"
+                    />
+                    <span className="flex min-w-0 flex-col gap-0.5">
+                      <span className="text-sm font-medium">{t(`scopes.${value}.label`)}</span>
+                      <span className="truncate text-xs text-muted-foreground">
+                        {scopeHints[value]}
+                      </span>
+                    </span>
+                  </label>
+                ))}
+              </fieldset>
+            )}
+
             <fieldset className="flex flex-col gap-2">
               <legend className="pb-2 text-sm font-medium">{t("reasonsLegend")}</legend>
               {REPORT_REASONS.map((value) => (
-                <label
-                  key={value}
-                  className="flex cursor-pointer items-start gap-3 rounded-md border border-border p-3 hover:bg-muted/40 has-[:checked]:border-foreground"
-                >
+                <label key={value} className={REPORT_OPTION_CLASS}>
                   <input
                     type="radio"
                     name="reason"

@@ -1,11 +1,21 @@
 import type { ReactNode } from "react";
-import { PauseCircle, ShieldAlert } from "lucide-react";
+import Link from "next/link";
+import { PauseCircle, PencilRuler, ShieldAlert } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import type { MessageRef } from "@/i18n/types";
 import { formatLongDate } from "@/lib/format/date";
-import { removalAppealHref, removalFinding } from "@/lib/moderation/removal";
+import {
+  REMOVAL_APPEAL_EMAIL,
+  decisionReference,
+  removalFinding,
+} from "@/lib/moderation/removal";
+import { moderationNoticeId } from "@/lib/moderation/paths";
+import { storefrontEditorPath } from "@/lib/storefront/paths";
+import { buttonClassName } from "@/components/ui/button";
 import type { ProductRemoval } from "@/types/product";
+import { DecisionActions } from "./DecisionActions";
+import { FixFieldChips } from "./FixFieldChips";
 import { ReviewRequestButton } from "./ReviewRequestButton";
 
 /**
@@ -20,16 +30,17 @@ import { ReviewRequestButton } from "./ReviewRequestButton";
  * TWO SHAPES, because staff chose one of two outcomes and they ask opposite
  * things of the seller:
  *
- *   paused   "fix this, then tell us". The reason is framed as what to
- *            change, and the banner carries the button that sends it back to
- *            a person. Neutral, not red: nothing is lost yet, and a red box
+ *   paused   "fix this, then tell us". It leads with WHAT to change, as chips
+ *            that jump to the matching part of the form (which is lit up the
+ *            same way), then why, then the button that sends it back to a
+ *            person. Neutral, not red: nothing is lost yet, and a red box
  *            reads as a verdict when this is a request.
- *   removed  "this is final". Red, no button, and an appeal link, because a
- *            removal notice missing a way to argue is a verdict rather than a
- *            decision (EU Digital Services Act, Art. 17 and Art. 20).
+ *   removed  "this is final". Red, no fix button.
  *
- * Both say what happened, when, the platform's finding in plain words and
- * whatever the reviewer added. None of that is optional.
+ * BOTH carry the decision's reference, a download of the full statement (EU
+ * Digital Services Act Art. 17) and a way to appeal it in-app (Art. 20), once
+ * the decision has a record (every decision since the decisions table; older
+ * takedowns fall back to a plain "write to us").
  */
 export function RemovalNotice({
   removal,
@@ -54,10 +65,11 @@ export function RemovalNotice({
   const resolve = (ref: MessageRef) => tAll(ref.key, ref.values);
   const paused = removal.kind === "paused";
   const headingId = `takedown-${id}`;
-  const appealLink = (chunks: ReactNode) => (
+  const fields = removal.fields;
+  const mailLink = (chunks: ReactNode) => (
     <a
       className="font-medium text-foreground underline underline-offset-2"
-      href={removalAppealHref(kind, id, title, resolve)}
+      href={`mailto:${REMOVAL_APPEAL_EMAIL}`}
     >
       {chunks}
     </a>
@@ -65,12 +77,13 @@ export function RemovalNotice({
 
   return (
     <section
+      id={moderationNoticeId(id)}
       // Not role="alert": this is standing state, not something that just
       // happened, and an alert would re-interrupt a screen reader on every
       // navigation back to the page.
       aria-labelledby={headingId}
       className={cn(
-        "flex flex-col gap-3 border-2 p-4",
+        "flex scroll-mt-20 flex-col gap-3 border-2 p-4",
         paused ? "border-foreground bg-muted" : "border-destructive bg-destructive/5",
         className,
       )}
@@ -87,39 +100,82 @@ export function RemovalNotice({
           <h2 id={headingId} className="text-sm font-semibold text-foreground">
             {paused ? t("titlePaused", { kind }) : t("title", { kind })}
           </h2>
+          {/* The item's own name, so a list of several banners says which is
+              which. Visible text rather than only a label: on the storefront
+              list there can be more than one. */}
+          <p id={`${headingId}-title`} className="text-sm font-medium text-foreground">
+            {title}
+          </p>
           <p className="text-sm text-muted-foreground">
             {paused ? t("hiddenPaused") : t("hiddenRemoved")}
           </p>
         </div>
       </div>
 
-      <dl className="flex flex-col gap-2 pl-8 text-sm">
-        <div className="flex flex-col gap-0.5">
-          <dt className="font-medium text-foreground">
-            {paused ? t("whatNeedsToChange") : t("reason")}
-          </dt>
-          <dd className="text-muted-foreground" data-takedown-reason="">
-            {resolve(removalFinding(removal.ground, removal.note))}
-          </dd>
-        </div>
-        {removal.at && (
-          <div className="flex flex-col gap-0.5">
+      <dl className="flex flex-col gap-3 pl-8 text-sm">
+        {fields.length > 0 && (
+          <div className="flex flex-col gap-1.5">
             <dt className="font-medium text-foreground">
-              {paused ? t("pausedOn") : t("when")}
+              {paused ? t("whatToChange") : t("concerned")}
             </dt>
-            <dd className="text-muted-foreground">
-              <time dateTime={removal.at}>{formatLongDate(removal.at, locale)}</time>
+            <dd>
+              <FixFieldChips
+                target={kind}
+                fields={fields}
+                // Only where the parts are on this page: a paused product's
+                // own edit form. The storefront's are in its editor.
+                interactive={paused && kind === "product"}
+              />
             </dd>
           </div>
         )}
+        <div className="flex flex-col gap-0.5">
+          <dt className="font-medium text-foreground">
+            {fields.length > 0 ? t("why") : paused ? t("whatNeedsToChange") : t("reason")}
+          </dt>
+          <dd className="whitespace-pre-line text-muted-foreground" data-takedown-reason="">
+            {resolve(removalFinding(removal.ground, removal.note))}
+          </dd>
+        </div>
+        <div className="flex flex-wrap gap-x-8 gap-y-3">
+          {removal.at && (
+            <div className="flex flex-col gap-0.5">
+              <dt className="font-medium text-foreground">
+                {paused ? t("pausedOn") : t("when")}
+              </dt>
+              <dd className="text-muted-foreground">
+                <time dateTime={removal.at}>{formatLongDate(removal.at, locale)}</time>
+              </dd>
+            </div>
+          )}
+          {removal.decisionId && (
+            <div className="flex flex-col gap-0.5">
+              <dt className="font-medium text-foreground">{t("reference")}</dt>
+              <dd className="font-mono text-muted-foreground" data-decision-reference="">
+                {decisionReference(removal.decisionId)}
+              </dd>
+            </div>
+          )}
+        </div>
       </dl>
 
-      {paused ? (
+      {paused && (
         <div className="flex flex-col gap-3 pl-8">
           {canRequestReview ? (
             <>
               {!removal.reviewRequestedAt && (
                 <p className="text-sm text-muted-foreground">{t("fixHint", { kind })}</p>
+              )}
+              {/* The storefront's parts live in its editor, one click away. */}
+              {kind === "storefront" && !removal.reviewRequestedAt && (
+                <Link
+                  href={storefrontEditorPath(id)}
+                  className={buttonClassName("secondary", "w-fit")}
+                  data-open-editor=""
+                >
+                  <PencilRuler className="size-4" strokeWidth={2} aria-hidden="true" />
+                  {t("openEditor")}
+                </Link>
               )}
               <ReviewRequestButton
                 kind={kind}
@@ -130,13 +186,22 @@ export function RemovalNotice({
           ) : (
             <p className="text-sm text-muted-foreground">{t("readOnlyHint", { kind })}</p>
           )}
-          <p className="text-sm text-muted-foreground">
-            {t.rich("appealPaused", { link: appealLink })}
-          </p>
+        </div>
+      )}
+
+      {removal.decisionId ? (
+        <div className="border-t border-border pt-3 pl-8">
+          <DecisionActions
+            decisionId={removal.decisionId}
+            appeal={removal.appeal}
+            canAppeal={canRequestReview}
+          />
         </div>
       ) : (
         <p className="pl-8 text-sm text-muted-foreground">
-          {t.rich("appealFinal", { link: appealLink })}
+          {paused
+            ? t.rich("appealPaused", { link: mailLink })
+            : t.rich("appealFinal", { link: mailLink })}
         </p>
       )}
     </section>

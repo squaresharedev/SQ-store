@@ -24,6 +24,8 @@ import { createClient } from "@/lib/supabase/server";
 import { getProfile, getUser } from "@/lib/auth/session";
 import { STEP_UP_FIELDS, requireStepUpState } from "@/lib/auth/mfa";
 import { createNotification, resolveUserIdByEmail } from "@/lib/notifications/create";
+import type { StoredNotificationAction } from "@/lib/notifications/inline-actions";
+import { acceptTeamInvite } from "@/lib/team/accept";
 import { can, canGrant } from "@/lib/team/permissions";
 import {
   getActorRole,
@@ -180,6 +182,18 @@ export async function inviteMember(
     if (inviteeUserId) {
       const inviterProfile = await getProfile();
       const store = inviterProfile?.username?.trim();
+      // The invite's id makes the notification ACTIONABLE: an Accept button
+      // on the row itself (lib/notifications/inline-actions.ts). Read back
+      // here rather than with insert(...).select(), so that a read problem
+      // can only cost the button, never the invite already written above.
+      // (account, email) is unique, so this is the row just inserted.
+      const { data: created } = await supabase
+        .from("team_members")
+        .select("id")
+        .eq("account_owner_id", account_owner_id)
+        .eq("invited_email", invited_email)
+        .eq("status", "invited")
+        .maybeSingle();
       await createNotification({
         userId: inviteeUserId,
         type: "team",
@@ -189,7 +203,18 @@ export async function inviteMember(
             ? { key: "Notifications.messages.teamInvite.body", values: { store, role } }
             : { key: "Notifications.messages.teamInvite.bodyUnnamedStore", values: { role } },
         },
-        data: { href: SETTINGS_TEAM_PATH },
+        data: {
+          href: SETTINGS_TEAM_PATH,
+          ...(created?.id
+            ? {
+                action: {
+                  kind: "team.acceptInvite",
+                  inviteId: created.id,
+                  accountOwnerId: account_owner_id,
+                } satisfies StoredNotificationAction,
+              }
+            : {}),
+        },
       });
       notifiedExistingUser = true;
     }
@@ -217,9 +242,9 @@ export async function inviteMember(
 /**
  * Accept a pending invite addressed to the calling user's verified email.
  *
- * We perform an identity check here (invited_email === user.email) in addition
- * to what the DB trigger enforces, so the user gets a friendly error rather
- * than a raw Postgres exception if something is off.
+ * The form half only: field whitelist and parse. The checks and the accept
+ * itself live in acceptTeamInvite (lib/team/accept.ts), shared with the
+ * Accept button on the invite's notification.
  */
 export async function acceptInvite(
   _prev: ActionState,
@@ -239,64 +264,8 @@ export async function acceptInvite(
   });
   if (!parsed.success) return invalid(parsed.error);
 
-  const { invite_id } = parsed.data;
-  const supabase = await createClient();
-
-  // Fetch the invite row — RLS permits the invitee to read their own pending
-  // invites, so a missing row means it doesn't exist or isn't theirs.
-  const { data: invite, error: fetchError } = await supabase
-    .from("team_members")
-    .select("id, status, invited_email, account_owner_id")
-    .eq("id", invite_id)
-    .maybeSingle();
-
-  if (fetchError || !invite) {
-    return failed(actionError("not_found", msg("Errors.team.inviteNotFound")));
-  }
-
-  // Server-side identity check before touching the row.
-  if (invite.status !== "invited") {
-    return failed(invalidInput(msg("Errors.team.inviteUsed")));
-  }
-  if (invite.invited_email !== user.email.toLowerCase()) {
-    return failed(actionError("permission_denied", msg("Errors.team.inviteWrongEmail")));
-  }
-
-  // Acceptance is an atomic, server-authoritative RPC: it re-verifies the JWT
-  // email matches invited_email and binds member_user_id = auth.uid() as the
-  // account owner (definer), with the guard trigger re-checking the same. The
-  // pre-checks above only exist to return friendly errors.
-  const { data: accepted, error: rpcError } = await supabase.rpc(
-    "team_accept_invite",
-    { p_invite_id: invite_id },
-  );
-
-  if (rpcError || !accepted) {
-    return failed(actionError("server_error", msg("Errors.team.acceptFailed")));
-  }
-
-  console.warn(
-    `[team] invite ACCEPTED invite_id=${invite_id} user_id=${user.id}`,
-  );
-
-  // Notify the store owner that someone joined their team. Best-effort — a
-  // notification failure must never fail the accept (createNotification never
-  // throws and returns false on error).
-  const profile = await getProfile();
-  const joinerName = profile?.username?.trim() || user.email?.split("@")[0];
-  await createNotification({
-    userId: invite.account_owner_id,
-    type: "team",
-    message: {
-      title: joinerName
-        ? { key: "Notifications.messages.teamJoined.title", values: { name: joinerName } }
-        : { key: "Notifications.messages.teamJoined.titleUnnamed" },
-      body: { key: "Notifications.messages.teamJoined.body" },
-    },
-    data: { href: SETTINGS_TEAM_PATH },
-  });
-
-  revalidatePath(SETTINGS_TEAM_PATH);
+  const result = await acceptTeamInvite(parsed.data.invite_id);
+  if (!result.ok) return failed(result.error);
   return succeeded(msg("Settings.team.success.inviteAccepted"));
 }
 

@@ -1,4 +1,5 @@
 import type { Tables } from "@/types";
+import type { NotificationActionView } from "@/lib/notifications/inline-actions";
 
 /**
  * Shared notification types. The DB row (`Tables<"notifications">`) types `type`
@@ -26,9 +27,16 @@ export const NOTIFICATION_TYPES = [
 
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number];
 
-/** A notification row as the app consumes it (type narrowed to the enum). */
+/**
+ * A notification row as the app consumes it (type narrowed to the enum), plus
+ * the inline action it offers, if any. `action` is not a column: the server
+ * resolves it against live state when it reads the row (see
+ * resolve-actions.ts), and a row that arrives over Realtime derives it from
+ * `data`. Absent or null means "nothing to do in place".
+ */
 export type Notification = Omit<Tables<"notifications">, "type"> & {
   type: NotificationType;
+  action?: NotificationActionView | null;
 };
 
 /** Recent list + authoritative unread count for the bell/provider. */

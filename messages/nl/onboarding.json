@@ -55,7 +55,6 @@
     "openPage": "Pagina openen",
     "opensInNewTab": " (opent in nieuw tabblad)",
     "hide": "Verbergen",
-    "progressLabel": "Installatievoortgang",
     "progress": "{total, plural, one {{done} van {total} voltooid} other {{done} van {total} voltooid}}",
     "stepDone": " (voltooid)",
     "stepToDo": " (te doen)"

@@ -18,13 +18,16 @@ async function switchToStore(page: Page, storeName: RegExp) {
 /** Accept the first pending invite (the prompt modal auto-opens on /settings/team). */
 async function acceptFirstInvite(page: Page) {
   await gotoApp(page, "/settings/team");
-  const accept = page.getByRole("button", { name: /^accept$/i }).first();
+  // Through the prompt: it is portalled over the page, so an unscoped
+  // `.first()` resolves to the card's Accept UNDER the modal's scrim.
+  const prompt = page.getByRole("dialog", { name: /team invite/i });
+  const accept = prompt.getByRole("button", { name: /^accept$/i }).first();
   await expect(accept).toBeVisible({ timeout: 20_000 });
   await accept.click();
   // Success shows either as the "Accepted" label or the row revalidating away.
   await expect(async () => {
-    const pending = await page.getByRole("button", { name: /^accept$/i }).count();
-    const accepted = await page.getByRole("button", { name: /^accepted$/i }).count();
+    const pending = await prompt.getByRole("button", { name: /^accept$/i }).count();
+    const accepted = await prompt.getByRole("button", { name: /^accepted$/i }).count();
     if (pending > 0 && accepted === 0) throw new Error("invite still pending");
   }).toPass({ timeout: 20_000 });
   // The prompt modal closes itself shortly after; dismiss if still open.

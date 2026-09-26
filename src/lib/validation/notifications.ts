@@ -34,8 +34,13 @@ export const markReadSchema = z.strictObject({
   id: z.uuid(issueKey("Validation.notifications.invalidReference")),
 });
 
-/** History pagination params (server-clamped). */
+/** Running a notification's inline action: the NOTIFICATION's id, nothing else. */
+export const notificationActionSchema = markReadSchema;
+
+/** History pagination + filter params (server-clamped). */
 export const notificationPageSchema = z.strictObject({
   cursor: z.iso.datetime({ offset: true }).nullable().optional(),
   limit: z.number().int().min(1).max(50).optional().default(20),
+  type: z.enum(NOTIFICATION_TYPES).nullable().optional().default(null),
+  unread: z.boolean().optional().default(false),
 });

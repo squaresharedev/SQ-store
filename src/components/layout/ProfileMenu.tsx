@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Check, ChevronRight, Languages, LogOut, Store, User } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { setLocale } from "@/i18n/actions";
+import { useLocaleSwitch } from "@/i18n/LocaleSwitchProvider";
 import { LOCALES, LOCALE_NAMES, type Locale } from "@/i18n/locales";
 import { Avatar } from "@/components/ui/avatar";
 import { Popover } from "@/components/ui/Popover";
@@ -47,6 +47,7 @@ export function ProfileMenu({
   const [pending, startTransition] = React.useTransition();
   const canSwitch = accounts.length > 1;
   const locale = useLocale();
+  const { switchLocale } = useLocaleSwitch();
   const tLocale = useTranslations("LocaleSwitcher");
   const t = useTranslations("Nav.profileMenu");
   const tAll = useTranslations();
@@ -62,11 +63,7 @@ export function ProfileMenu({
 
   function chooseLocale(next: Locale) {
     handleOpenChange(false);
-    if (next === locale) return;
-    startTransition(async () => {
-      const result = await setLocale(next);
-      if (result.ok) router.refresh();
-    });
+    switchLocale(next);
   }
 
   function switchTo(id: string) {

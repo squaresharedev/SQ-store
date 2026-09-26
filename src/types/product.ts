@@ -73,6 +73,26 @@ export interface ProductRemoval {
   note: string | null;
   /** When it came down. ISO 8601. */
   at: string | null;
+  /** The parts staff asked to be changed, in display order (FIX_FIELDS in
+   *  lib/moderation/fix-fields.ts). Empty when staff named none. */
+  fields: string[];
+  /** The decision behind it, for its statement of reasons and its appeal.
+   *  Null for a takedown older than the decision record. */
+  decisionId: string | null;
+  /** The seller's appeal against that decision, when they have filed one.
+   *  Only the edit page and the storefront list read it. */
+  appeal?: ModerationAppealSummary | null;
+}
+
+/** A seller's appeal, as the seller is shown it. */
+export interface ModerationAppealSummary {
+  status: "open" | "upheld" | "overturned";
+  /** When it was filed. ISO 8601. */
+  filedAt: string;
+  /** When staff answered. Null while open. ISO 8601. */
+  decidedAt: string | null;
+  /** Staff's answer, verbatim. Null while open. */
+  note: string | null;
 }
 
 // ── Product page detail ─────────────────────────────────────────────────

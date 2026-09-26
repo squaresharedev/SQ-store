@@ -55,7 +55,6 @@
     "openPage": "Seite öffnen",
     "opensInNewTab": " (öffnet in einem neuen Tab)",
     "hide": "Ausblenden",
-    "progressLabel": "Einrichtungsfortschritt",
     "progress": "{total, plural, one {{done} von {total} erledigt} other {{done} von {total} erledigt}}",
     "stepDone": " (erledigt)",
     "stepToDo": " (zu erledigen)"

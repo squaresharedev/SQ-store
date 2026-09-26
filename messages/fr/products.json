@@ -113,19 +113,45 @@
     "pausedOn": "Mis en pause le",
     "statement": "{ground, select, illegal {Biens ou activité illégaux. Il proposait un article dont la vente est illégale, ou l’annonce servait à l’organiser.} sexual {Contenu sexuel. Il contenait du contenu sexuel explicite.} violence {Violence ou images choquantes. Il contenait de la violence explicite.} hate {Haine ou harcèlement. Il attaquait une personne ou un groupe, ou comportait des symboles haineux.} counterfeit {Contrefaçon ou vol. Il semblait proposer des articles contrefaits, ou des créations appartenant à autrui.} scam {Arnaque ou fraude. Il semblait conçu pour encaisser un paiement sans livrer ce qui était promis.} spam {Spam. Il était répétitif ou trompeur plutôt qu’une véritable annonce.} other {Autre motif. Il enfreignait les règles de la plateforme.}}{noted, select, yes { {note}} other {}}",
     "statementUnlabelled": "Cela ne respecte pas les règles de la plateforme.{noted, select, yes { {note}} other {}}",
-    "fixHint": "{kind, select, product {Modifiez le produit ci-dessous pour corriger cela, enregistrez-le, puis renvoyez-le-nous.} other {Ouvrez la vitrine pour corriger cela, puis revenez ici et envoyez-la-nous.}}",
+    "fixHint": "{kind, select, product {Modifiez les parties surlignées ci-dessous, enregistrez, puis renvoyez-le-nous.} other {Ouvrez la vitrine, modifiez ce qui est indiqué ci-dessus, puis revenez ici et envoyez-la-nous.}}",
     "readOnlyHint": "{kind, select, product {Une personne autorisée à modifier ce produit doit apporter la modification et l’envoyer pour examen.} other {Une personne autorisée à modifier cette vitrine doit apporter la modification et l’envoyer pour examen.}}",
     "appeal": "{kind, select, product {Vous pouvez toujours modifier ce produit. Une modification ne le remet pas en ligne : <link>demandez-nous de le réexaminer</link> si vous pensez que ce retrait est une erreur.} other {Vous pouvez toujours modifier cette vitrine. Une modification ne la remet pas en ligne : <link>demandez-nous de la réexaminer</link> si vous pensez que ce retrait est une erreur.}}",
     "appealPaused": "Vous pensez qu’il s’agit d’une erreur ? <link>Écrivez-nous</link>.",
     "appealFinal": "Si vous pensez que nous nous sommes trompés, <link>demandez-nous de réexaminer la décision</link>.",
-    "appealSubject": "{kind, select, product {Contestation : retrait du produit ({title})} other {Contestation : retrait de la vitrine ({title})}}",
-    "appealBody": "{kind, select, product {Je souhaite que ce produit soit réexaminé.\n\nIdentifiant du produit : {id}\nNom : {title}\n\nPourquoi je pense qu’il s’agit d’une erreur :\n} other {Je souhaite que cette vitrine soit réexaminée.\n\nIdentifiant de la vitrine : {id}\nNom : {title}\n\nPourquoi je pense qu’il s’agit d’une erreur :\n}}",
     "reviewRequest": {
       "button": "J’ai fait les modifications, demander un examen",
       "sent": "Envoyé pour examen le <time>{date}</time>. Une personne examinera vos modifications, et vous recevrez la réponse ici et par e-mail.",
       "failed": "L’envoi a échoué.",
       "failedFix": "Réessayez dans un moment."
-    }
+    },
+    "why": "Pourquoi",
+    "whatToChange": "Ce qu'il faut changer",
+    "concerned": "Ce que cela concernait",
+    "showField": "Afficher {field} sur cette page",
+    "fields": {
+      "product": "{field, select, title {Titre} description {Description} price {Prix} image {Image principale} file {Fichier numérique} purchaseLink {Lien d'achat} shipping {Livraison} options {Options} photos {Photos} specs {Caractéristiques techniques} documents {Documents} safety {Sécurité et conformité} other {Autre chose}}",
+      "storefront": "{field, select, name {Nom de la vitrine} header {En-tête} text {Texte} images {Images} products {Produits affichés} background {Arrière-plan} productPage {Pages produit} other {Autre chose}}"
+    },
+    "reference": "Référence",
+    "downloadStatement": "Télécharger la décision (PDF)",
+    "openEditor": "Ouvrir la vitrine pour la modifier",
+    "appealButton": "Contester cette décision",
+    "appealForm": {
+      "title": "Contester cette décision",
+      "description": "Dites-nous pourquoi vous pensez que nous avons fait une erreur. Chaque contestation est examinée par une personne, et vous recevrez la réponse ici et par e-mail. Le contenu reste masqué pendant notre examen.",
+      "label": "Pourquoi pensez-vous que cette décision est erronée ?",
+      "placeholder": "Par exemple : le logo dans la photo est notre marque déposée, et voici où vous pouvez le vérifier.",
+      "help": "Au moins {min} caractères. Ajoutez tout ce qui peut nous aider à vérifier, comme un lien ou un numéro d'enregistrement.",
+      "count": "{count} / {max}",
+      "submit": "Envoyer la contestation",
+      "sent": "Contestation envoyée. Nous vous répondrons."
+    },
+    "appealStatus": {
+      "open": "Vous avez contesté le <time>{date}</time>. Une personne l'examinera, et vous recevrez la réponse ici et par e-mail.",
+      "upheld": "Nous avons examiné votre contestation le <time>{date}</time>. La décision est maintenue.",
+      "answer": "Notre réponse : {note}"
+    },
+    "editorDetails": "Pourquoi, et que faire ensuite"
   },
   "import": {
     "fields": {
@@ -309,6 +335,21 @@
     "nav": {
       "label": "Sections du formulaire",
       "heading": "Sur cette page"
+    },
+    "moderation": {
+      "badge": "À modifier",
+      "changed": "Modifié",
+      "callout": "SquareShare vous a demandé de modifier {fields} ici.",
+      "seeWhy": "Voir pourquoi",
+      "fieldBadge": "À modifier",
+      "navHint": "à modifier",
+      "inReview": "Envoyé pour examen",
+      "reviewPrompt": {
+        "title": "Enregistré. L'envoyer pour examen ?",
+        "body": "Si vous avez apporté toutes les modifications demandées par SquareShare, renvoyez-le maintenant et une personne l'examinera. Sinon, continuez à modifier et envoyez-le quand vous avez terminé.",
+        "keepEditing": "Continuer à modifier",
+        "send": "Envoyer pour examen"
+      }
     }
   },
   "stockFields": {
@@ -522,5 +563,76 @@
     "dropPrompt": "Déposez un fichier ou cliquez pour importer",
     "hint": "ZIP, PDF et formats similaires, jusqu’à {max} Mo",
     "remove": "Retirer le fichier numérique"
+  },
+  "statement": {
+    "fileTitle": "Déclaration de motifs {reference}",
+    "title": "Déclaration de motifs",
+    "subtitle": "{action, select, paused {Nous avons mis en pause votre {target, select, product {produit} other {vitrine}}} other {Nous avons retiré votre {target, select, product {produit} other {vitrine}}}}",
+    "intro": "Cette déclaration explique une décision que nous avons prise concernant un contenu que vous avez publié sur SquareShare, les raisons de cette décision et les voies de recours. Vous y avez droit en vertu de l'article 17 du règlement sur les services numériques (UE) 2022/2065.",
+    "sections": {
+      "decision": "La décision",
+      "reasons": "Pourquoi nous l'avons prise",
+      "fix": "Ce qu'il faut changer",
+      "redress": "Comment la contester",
+      "appeal": "Votre contestation"
+    },
+    "labels": {
+      "reference": "Référence",
+      "issued": "Déclaration émise",
+      "content": "Contenu",
+      "contentId": "Identifiant du contenu",
+      "decision": "Décision",
+      "decidedOn": "Décidé le",
+      "scope": "Portée",
+      "duration": "Durée",
+      "status": "Statut actuel",
+      "ground": "Motif",
+      "note": "Note de notre examinateur",
+      "facts": "Faits et circonstances",
+      "automated": "Moyens automatisés",
+      "legalBasis": "Fondement de la décision"
+    },
+    "content": "{target, select, product {Produit} other {Vitrine}} : {title}",
+    "decision": {
+      "paused": "Mis en pause. Le contenu est masqué aux acheteurs jusqu'à ce que vous apportiez les modifications indiquées ci-dessous et que nous les approuvions.",
+      "removed": "Retiré. Le contenu n'est plus accessible aux acheteurs. Cette décision est définitive, sauf si une contestation la modifie."
+    },
+    "scope": "Partout où SquareShare l'affiche : sa propre page, les intégrations sur d'autres sites et les liens partagés, dans tous les pays.",
+    "duration": {
+      "paused": "Jusqu'à l'approbation de vos modifications.",
+      "removed": "Indéfinie."
+    },
+    "status": {
+      "inForce": "En vigueur.",
+      "replaced": "Remplacée par une décision ultérieure.",
+      "reversed": "Annulée. Le contenu est à nouveau visible par les acheteurs.",
+      "deleted": "Le contenu a été supprimé depuis."
+    },
+    "facts": {
+      "notices": "{count, plural, =0 {Nous l'avons détecté nous-mêmes, sans signalement extérieur à SquareShare.} one {Cette décision fait suite à # signalement provenant d'une personne extérieure à SquareShare, concernant : {reasons}.} other {Cette décision fait suite à # signalements provenant de personnes extérieures à SquareShare, concernant : {reasons}.}}",
+      "review": "Un membre de l'équipe SquareShare a examiné le contenu avant de prendre cette décision. Nous ne communiquons pas l'identité des personnes ayant envoyé un signalement."
+    },
+    "automated": "Aucun moyen automatisé n'a été utilisé pour détecter ce contenu ni pour prendre cette décision.",
+    "legalBasis": {
+      "contract": "Contractuel : les Conditions d'utilisation de SquareShare, qui n'autorisent pas ce type de contenu ({url}).",
+      "illegal": "Légal : nous avons estimé que ce contenu était illégal au regard de la loi qui lui est applicable."
+    },
+    "noNote": "Aucune.",
+    "fixIntro": "{target, select, product {Modifiez ces éléments, puis cliquez sur « J'ai fait les modifications, demander un examen » sur le produit dans votre tableau de bord, et nous réexaminerons :} other {Modifiez ces éléments, puis cliquez sur « J'ai fait les modifications, demander un examen » sur la vitrine dans votre tableau de bord, et nous réexaminerons :}}",
+    "redress": {
+      "appeal": "Contestez auprès de nous, gratuitement : cliquez sur « Contester cette décision » {target, select, product {sur le produit} other {sur la vitrine}} dans votre tableau de bord, dans les six mois suivant cette décision. Chaque contestation est examinée par une personne, et vous recevrez la réponse dans votre tableau de bord et par e-mail.",
+      "settlement": "Règlement extrajudiciaire des litiges : vous pouvez soumettre cette décision à un organisme de règlement des litiges certifié au titre de l'article 21 du règlement sur les services numériques.",
+      "court": "Juridictions : vous pouvez porter cette décision devant une juridiction compétente. Le recours aux options ci-dessus ne remet pas en cause ce droit.",
+      "contact": "Questions : écrivez à {email} en indiquant la référence {reference}."
+    },
+    "appeal": {
+      "open": "Vous avez contesté le {date}. Une personne l'examine actuellement.",
+      "upheld": "Vous avez contesté le {date}. Nous avons répondu le {decided} : la décision est maintenue.",
+      "overturned": "Vous avez contesté le {date}. Nous avons répondu le {decided} : la décision a été annulée.",
+      "answer": "Notre réponse : {note}",
+      "message": "Ce que vous avez écrit : {message}"
+    },
+    "footer": "SquareShare · {reference} · Page {page} sur {total}",
+    "generated": "Généré le {date}."
   }
 }

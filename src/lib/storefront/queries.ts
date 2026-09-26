@@ -14,7 +14,8 @@ import {
   type StorefrontConfig,
 } from "@/types/storefront";
 import type { StorefrontBrief } from "@/types/storefront-brief";
-import { takedownFromRow } from "@/lib/moderation/removal";
+import { MODERATION_DETAIL_SELECT, takedownFromRow } from "@/lib/moderation/removal";
+import { appealsByDecision, withAppeal } from "@/lib/moderation/appeals-read";
 import type { ProductRemoval } from "@/types/product";
 
 // Server Components / Route Handlers only (cookies() is Node-only — never
@@ -29,6 +30,9 @@ export type StorefrontRecord = {
   id: string;
   name: string;
   config: StorefrontConfig;
+  /** Set while staff have it paused or removed, so the editor can say what
+   *  to change where the change is made. */
+  removal?: ProductRemoval;
 };
 
 /** A storefront as it appears in the list. */
@@ -69,7 +73,7 @@ const STOREFRONT_LIST_LIMIT = 100;
  * find out about from a buyer.
  */
 const MODERATION_LIST_SELECT =
-  "id, name, config, updated_at, embed_key, brief, moderation_status, moderation_ground, moderation_note, moderated_at, moderation_review_requested_at";
+  `id, name, config, updated_at, embed_key, brief, ${MODERATION_DETAIL_SELECT}` as const;
 
 /** The list page's read: one bounded page of summaries plus the EXACT total,
  *  so truncation is visible instead of silent. */
@@ -107,22 +111,70 @@ export async function listStorefronts(offset = 0): Promise<StorefrontsPage> {
     .range(from, from + STOREFRONT_LIST_LIMIT - 1);
   if (error) throw new Error(`Failed to load storefronts: ${error.message}`);
 
-  const rows = (data ?? []).map((row) => {
-    const config =
-      parseStoredStorefrontConfig(row.config) ?? DEFAULT_STOREFRONT_CONFIG;
-    const takedown = takedownFromRow(row);
-    return {
-      id: row.id,
-      name: row.name,
-      blockCount: config.blocks.length,
-      updatedAt: row.updated_at,
-      config,
-      embedKey: row.embed_key,
-      brief: parseStorefrontBrief(row.brief),
-      ...(takedown ? { removal: takedown } : {}),
-    };
-  });
-  return { rows, total: count ?? rows.length };
+  const rows = (data ?? []).map(toStorefrontSummary);
+  // A taken-down storefront's banner lives on this list (the editor is a
+  // full-screen canvas), so this is where its appeal is read. One query for
+  // the page, and none at all when nothing is taken down.
+  const decisionIds = rows.flatMap((row) =>
+    row.removal?.decisionId ? [row.removal.decisionId] : [],
+  );
+  if (decisionIds.length === 0) return { rows, total: count ?? rows.length };
+  const appeals = await appealsByDecision(supabase, account.accountId, decisionIds);
+  return {
+    rows: rows.map((row) =>
+      row.removal ? { ...row, removal: withAppeal(row.removal, appeals) } : row,
+    ),
+    total: count ?? rows.length,
+  };
+}
+
+/** A MODERATION_LIST_SELECT row as the list (and the embed page) shows it. */
+function toStorefrontSummary(
+  row: Parameters<typeof takedownFromRow>[0] & {
+    id: string;
+    name: string;
+    config: unknown;
+    updated_at: string;
+    embed_key: string;
+    brief: unknown;
+  },
+): StorefrontSummary {
+  const config =
+    parseStoredStorefrontConfig(row.config) ?? DEFAULT_STOREFRONT_CONFIG;
+  const takedown = takedownFromRow(row, "storefront");
+  return {
+    id: row.id,
+    name: row.name,
+    blockCount: config.blocks.length,
+    updatedAt: row.updated_at,
+    config,
+    embedKey: row.embed_key,
+    brief: parseStorefrontBrief(row.brief),
+    ...(takedown ? { removal: takedown } : {}),
+  };
+}
+
+/**
+ * One storefront in list shape (embed key and all), or null if it does not
+ * exist or is not the active account's. Same scoping as `getStorefront`; the
+ * embed page reads this rather than the editor's record because it needs the
+ * key.
+ */
+export async function getStorefrontSummary(
+  id: string,
+): Promise<StorefrontSummary | null> {
+  if (!storefrontIdSchema.safeParse(id).success) return null;
+  const account = await getActiveAccount();
+  if (!account) return null;
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("storefronts")
+    .select(MODERATION_LIST_SELECT)
+    .eq("id", id)
+    .eq("owner_id", account.accountId)
+    .maybeSingle();
+  if (error) throw new Error(`Failed to load storefront: ${error.message}`);
+  return data ? toStorefrontSummary(data) : null;
 }
 
 /**
@@ -222,17 +274,19 @@ export async function getStorefront(
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("storefronts")
-    .select("id, name, config")
+    .select(`id, name, config, ${MODERATION_DETAIL_SELECT}`)
     .eq("id", id)
     .eq("owner_id", account.accountId)
     .maybeSingle();
   if (error) throw new Error(`Failed to load storefront: ${error.message}`);
   if (!data) return null;
 
+  const takedown = takedownFromRow(data, "storefront");
   return {
     id: data.id,
     name: data.name,
     config:
       parseStoredStorefrontConfig(data.config) ?? DEFAULT_STOREFRONT_CONFIG,
+    ...(takedown ? { removal: takedown } : {}),
   };
 }

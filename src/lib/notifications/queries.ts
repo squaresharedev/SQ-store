@@ -1,5 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/session";
+import {
+  NO_NOTIFICATION_FILTER,
+  isNotificationType,
+  type NotificationFacets,
+  type NotificationFilter,
+} from "@/lib/notifications/filters";
+import { withResolvedActions } from "@/lib/notifications/resolve-actions";
 import type {
   Notification,
   NotificationPage,
@@ -52,7 +59,7 @@ export async function getNotificationSnapshot(): Promise<NotificationSnapshot | 
 
   return {
     userId: user.id,
-    notifications: (listResult.data ?? []) as Notification[],
+    notifications: await withResolvedActions((listResult.data ?? []) as Notification[]),
     unreadCount: countResult.count ?? 0,
   };
 }
@@ -74,15 +81,19 @@ export async function getUnreadCount(): Promise<number> {
 /**
  * One page of full history, newest-first, keyset-paginated by created_at.
  * `cursor` is the created_at of the last row already shown (exclusive).
+ * `filter` narrows it in the query itself, so every page of a filtered view
+ * is full and "load more" never skips a match.
  */
 export async function getNotificationPage(opts?: {
   cursor?: string | null;
   limit?: number;
+  filter?: NotificationFilter;
 }): Promise<NotificationPage> {
   const user = await getUser();
   if (!user) return { notifications: [], nextCursor: null };
 
   const limit = Math.min(Math.max(opts?.limit ?? HISTORY_PAGE_SIZE, 1), 50);
+  const filter = opts?.filter ?? NO_NOTIFICATION_FILTER;
   const supabase = await createClient();
   let query = supabase
     .from("notifications")
@@ -90,6 +101,8 @@ export async function getNotificationPage(opts?: {
     .eq("user_id", user.id) // explicit session-user qual for index use (RLS-equivalent)
     .order("created_at", { ascending: false })
     .limit(limit + 1); // fetch one extra to detect a next page
+  if (filter.type) query = query.eq("type", filter.type);
+  if (filter.unread) query = query.eq("read", false);
   if (opts?.cursor) query = query.lt("created_at", opts.cursor);
 
   const { data, error } = await query;
@@ -102,10 +115,57 @@ export async function getNotificationPage(opts?: {
 
   const rows = (data ?? []) as Notification[];
   const hasMore = rows.length > limit;
-  const notifications = hasMore ? rows.slice(0, limit) : rows;
+  const page = hasMore ? rows.slice(0, limit) : rows;
   const nextCursor = hasMore
-    ? notifications[notifications.length - 1]?.created_at ?? null
+    ? page[page.length - 1]?.created_at ?? null
     : null;
 
-  return { notifications, nextCursor };
+  return { notifications: await withResolvedActions(page), nextCursor };
+}
+
+/**
+ * How many rows the facet scan reads. The filter bar only needs to know which
+ * categories a reader has anything in and how many are unread; reading two
+ * narrow columns of the newest rows answers that in one request, where exact
+ * per-category counts would take one request per category. A reader past this
+ * many notifications still gets correct FILTERING (that is done in the query);
+ * only a category whose every row is older than the window drops off the bar.
+ */
+const FACET_SCAN_LIMIT = 1000;
+
+/** Which categories the reader has notifications in, and unread counts. */
+export async function getNotificationFacets(): Promise<NotificationFacets> {
+  const empty: NotificationFacets = { byType: {}, unread: 0 };
+  const user = await getUser();
+  if (!user) return empty;
+
+  const supabase = await createClient();
+  const [scan, unread] = await Promise.all([
+    supabase
+      .from("notifications")
+      .select("type, read")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(FACET_SCAN_LIMIT),
+    supabase
+      .from("notifications")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .eq("read", false),
+  ]);
+  if (scan.error) {
+    // The bar degrades to its status toggle alone; the list itself is read
+    // separately and still reports its own failure.
+    console.warn("[notifications] facet scan error", scan.error.message);
+    return { ...empty, unread: unread.count ?? 0 };
+  }
+
+  const byType: NotificationFacets["byType"] = {};
+  for (const row of scan.data ?? []) {
+    if (!isNotificationType(row.type)) continue;
+    const facet = (byType[row.type] ??= { total: 0, unread: 0 });
+    facet.total += 1;
+    if (!row.read) facet.unread += 1;
+  }
+  return { byType, unread: unread.count ?? 0 };
 }

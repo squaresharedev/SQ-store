@@ -32,6 +32,23 @@
     "loading": "Wird geladen",
     "loadMore": "Mehr laden"
   },
+  "filters": {
+    "label": "Benachrichtigungen filtern",
+    "show": "Anzeigen",
+    "all": "Alle",
+    "unread": "Ungelesen",
+    "category": "Kategorie",
+    "allCategories": "Alle Kategorien",
+    "clear": "Filter entfernen",
+    "emptyUnreadTitle": "Keine ungelesenen Benachrichtigungen",
+    "emptyUnreadHint": "Du bist auf dem neuesten Stand.",
+    "emptyFilteredTitle": "Keine passenden Benachrichtigungen",
+    "emptyFilteredHint": "Probier eine andere Kategorie oder entferne die Filter, um alles zu sehen."
+  },
+  "actions": {
+    "openStore": "Shop öffnen",
+    "unavailable": "Diese Einladung ist nicht mehr verfügbar."
+  },
   "types": {
     "team": "Team",
     "order": "Bestellung",

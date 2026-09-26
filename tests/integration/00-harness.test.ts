@@ -42,6 +42,11 @@ describe("embedded supabase replica", () => {
       // Hashed single-use 2FA recovery codes (20260923_two_factor_auth).
       // Service-role only.
       "mfa_recovery_codes",
+      // A seller's appeal against one moderation decision, and the decisions
+      // themselves (20260926_moderation_decisions_and_appeals). Read-only to
+      // the store's owner and team; written by service_role only.
+      "moderation_appeals",
+      "moderation_decisions",
       "notifications",
       "orders",
       "products",

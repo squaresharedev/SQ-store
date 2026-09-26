@@ -7,7 +7,7 @@ import {
   isContentVisible,
   isRemovalGround,
   isRowVisible,
-  removalAppealHref,
+  decisionReference,
   removalStatement,
   takedownFromRow,
   takedownKind,
@@ -18,6 +18,16 @@ import {
   REPORT_REASON_COPY,
   reportSchema,
 } from "@/lib/validation/reports";
+import {
+  PRODUCT_FIX_FIELDS,
+  PRODUCT_FIX_FIELD_SECTION,
+  STOREFRONT_FIX_FIELDS,
+  fixFieldLabel,
+  fixFieldsFor,
+  flaggedFieldsIn,
+  flaggedProductSections,
+} from "@/lib/moderation/fix-fields";
+import { PRODUCT_FORM_SECTIONS } from "@/lib/products/form-datapoints";
 import { english } from "../setup/translate";
 
 const TARGET = "0b1f7b1e-6d3a-4f4e-9f6c-1a2b3c4d5e6f";
@@ -91,7 +101,27 @@ describe("takedownFromRow", () => {
       note: "Replace the second photo.",
       at: "2026-09-23T10:00:00Z",
       reviewRequestedAt: "2026-09-23T12:00:00Z",
+      fields: [],
+      decisionId: null,
     });
+  });
+
+  it("carries what to change, in form order, and the decision behind it", () => {
+    const takedown = takedownFromRow({
+      ...base,
+      moderation_status: "paused",
+      // Out of order, with a duplicate and a value this build does not know.
+      moderation_fields: ["photos", "title", "photos", "hologram"],
+      moderation_decision_id: TARGET,
+    });
+    expect(takedown?.fields).toEqual(["title", "photos"]);
+    expect(takedown?.decisionId).toBe(TARGET);
+  });
+
+  it("reads a storefront's fields from the storefront's own list", () => {
+    const row = { ...base, moderation_status: "paused", moderation_fields: ["images", "title"] };
+    expect(takedownFromRow(row, "storefront")?.fields).toEqual(["images"]);
+    expect(takedownFromRow(row, "product")?.fields).toEqual(["title"]);
   });
 
   it("never shows a removal as waiting on anyone", () => {
@@ -186,44 +216,60 @@ describe("isRemovalGround", () => {
   });
 });
 
-describe("removalAppealHref", () => {
-  it("pre-addresses the mail with what it is about", () => {
-    const href = removalAppealHref("product", TARGET, "Brass lamp", english);
-    expect(href.startsWith("mailto:")).toBe(true);
-    expect(decodeURIComponent(href)).toContain("Brass lamp");
-    expect(decodeURIComponent(href)).toContain(TARGET);
+describe("decisionReference", () => {
+  it("is MD- and the first ten hex digits, upper-cased", () => {
+    expect(decisionReference("0b1f7b1e-6d3a-4f4e-9f6c-1a2b3c4d5e6f")).toBe("MD-0B1F7B1E6D");
+  });
+});
+
+describe("fix fields", () => {
+  it("places every product field in a real section of the form, or nowhere for other", () => {
+    const sections = new Set<string>(PRODUCT_FORM_SECTIONS.map((section) => section.id));
+    for (const field of PRODUCT_FIX_FIELDS) {
+      const section = PRODUCT_FIX_FIELD_SECTION[field];
+      if (field === "other") expect(section).toBeNull();
+      else expect(sections.has(section!)).toBe(true);
+    }
   });
 
-  it("says in English exactly what it always said", () => {
-    const url = new URL(removalAppealHref("product", TARGET, "Brass lamp", english));
-    expect(url.pathname).toBe("support@squareshare.eu");
-    expect(url.searchParams.get("subject")).toBe("Appeal: product removal (Brass lamp)");
-    expect(url.searchParams.get("body")).toBe(
+  it("mirrors the database CHECK lists exactly", () => {
+    // 20260926_moderation_decisions_and_appeals.sql; the admin panel writes
+    // these, so a value one list has and another lacks fails a takedown.
+    expect([...PRODUCT_FIX_FIELDS].sort()).toEqual(
       [
-        "I would like this product reviewed again.",
-        "",
-        `Product id: ${TARGET}`,
-        "Name: Brass lamp",
-        "",
-        "Why I think this was wrong:",
-        "",
-      ].join("\n"),
+        "title", "description", "price", "image", "photos", "file", "purchaseLink",
+        "options", "specs", "documents", "safety", "shipping", "other",
+      ].sort(),
     );
-
-    const storefront = new URL(removalAppealHref("storefront", TARGET, "Shop", english));
-    expect(storefront.searchParams.get("subject")).toBe("Appeal: storefront removal (Shop)");
-    expect(storefront.searchParams.get("body")).toContain(
-      `I would like this storefront reviewed again.\n\nStorefront id: ${TARGET}`,
+    expect([...STOREFRONT_FIX_FIELDS].sort()).toEqual(
+      ["name", "header", "text", "images", "products", "background", "productPage", "other"].sort(),
     );
   });
 
-  it("escapes a title that would otherwise break the URL", () => {
-    const href = removalAppealHref("product", TARGET, "Lamp & Co #1 ?sale", english);
-    // The raw characters must not survive into the href unencoded, or the
-    // mailto silently truncates at the first one.
-    expect(href).not.toContain("&subject");
-    expect(href).not.toContain("#1");
-    expect(decodeURIComponent(href)).toContain("Lamp & Co #1 ?sale");
+  it("names every field for the seller", () => {
+    for (const field of PRODUCT_FIX_FIELDS) {
+      expect(english(fixFieldLabel("product", field)).length).toBeGreaterThan(2);
+    }
+    for (const field of STOREFRONT_FIX_FIELDS) {
+      expect(english(fixFieldLabel("storefront", field)).length).toBeGreaterThan(2);
+    }
+    expect(english(fixFieldLabel("product", "purchaseLink"))).toBe("Purchase link");
+  });
+
+  it("keeps only known fields, deduplicated, in display order", () => {
+    expect(fixFieldsFor("product", ["documents", "title", "nope", "title"])).toEqual([
+      "title",
+      "documents",
+    ]);
+    expect(fixFieldsFor("product", null)).toEqual([]);
+  });
+
+  it("groups flagged fields by the section they live in", () => {
+    const fields = ["title", "price", "photos", "purchaseLink", "other"];
+    expect(flaggedProductSections(fields)).toEqual(["basics", "media", "photos"]);
+    expect(flaggedFieldsIn("basics", fields)).toEqual(["title", "price"]);
+    expect(flaggedFieldsIn("media", fields)).toEqual(["purchaseLink"]);
+    expect(flaggedFieldsIn("specs", fields)).toEqual([]);
   });
 });
 
@@ -253,10 +299,17 @@ describe("reportSchema", () => {
   });
 
   it("refuses target types this app cannot render", () => {
-    // artifact/profile are the marketplace's, and arrive at its own endpoint.
+    // artifact is the marketplace's, and arrives at its own endpoint. A
+    // profile is never named directly: a seller is reported as "seller",
+    // through the storefront, and resolved on the server.
     for (const targetType of ["artifact", "profile", "comment", "order"]) {
       expect(reportSchema.safeParse({ ...valid, targetType }).success).toBe(false);
     }
+  });
+
+  it("accepts a storefront or a seller, both named by a storefront id", () => {
+    expect(reportSchema.safeParse({ ...valid, targetType: "storefront" }).success).toBe(true);
+    expect(reportSchema.safeParse({ ...valid, targetType: "seller" }).success).toBe(true);
   });
 
   it("refuses a reason outside the shared vocabulary", () => {

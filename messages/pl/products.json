@@ -113,19 +113,45 @@
     "pausedOn": "Wstrzymano dnia",
     "statement": "{ground, select, illegal {Nielegalne towary lub działania. Oferowano coś, czego nie wolno legalnie sprzedawać, albo wykorzystano ofertę do zorganizowania takiej sprzedaży.} sexual {Treści seksualne. Zawierał treści o charakterze jednoznacznie seksualnym.} violence {Przemoc lub drastyczne treści. Zawierał drastyczne przedstawienia przemocy.} hate {Nienawiść lub nękanie. Atakował osobę lub grupę albo zawierał symbole nienawiści.} counterfeit {Podróbki lub skradzione treści. Wyglądał na ofertę podrabianych towarów albo cudzej pracy.} scam {Oszustwo. Wyglądał na zaprojektowany tak, by przyjąć płatność bez dostarczenia obiecanego towaru.} spam {Spam. Był powtarzalny lub wprowadzający w błąd, a nie prawdziwą ofertą.} other {Inny powód. Naruszał zasady platformy.}}{noted, select, yes { {note}} other {}}",
     "statementUnlabelled": "Naruszono zasady platformy.{noted, select, yes { {note}} other {}}",
-    "fixHint": "{kind, select, product {Popraw to, edytując poniższy produkt, zapisz zmiany, a potem odeślij go do nas.} other {Otwórz witrynę, aby to poprawić, potem wróć tutaj i wyślij ją do nas.}}",
+    "fixHint": "{kind, select, product {Zmień podkreślone części poniżej, zapisz, a następnie odeślij nam do sprawdzenia.} other {Otwórz witrynę, zmień to, co jest wymienione powyżej, a następnie wróć tutaj i wyślij ją do nas.}}",
     "readOnlyHint": "{kind, select, product {Osoba, która może edytować ten produkt, musi wprowadzić zmianę i wysłać go do sprawdzenia.} other {Osoba, która może edytować tę witrynę, musi wprowadzić zmianę i wysłać ją do sprawdzenia.}}",
     "appeal": "{kind, select, product {Nadal możesz edytować ten produkt. Edycja go nie przywraca: jeśli uważasz, że to pomyłka, <link>poproś nas o ponowne sprawdzenie</link>.} other {Nadal możesz edytować tę witrynę. Edycja jej nie przywraca: jeśli uważasz, że to pomyłka, <link>poproś nas o ponowne sprawdzenie</link>.}}",
     "appealPaused": "Uważasz, że to pomyłka? <link>Napisz do nas</link>.",
     "appealFinal": "Jeśli uważasz, że się pomyliliśmy, <link>poproś nas o ponowne sprawdzenie</link>.",
-    "appealSubject": "{kind, select, product {Odwołanie: usunięcie produktu ({title})} other {Odwołanie: usunięcie witryny ({title})}}",
-    "appealBody": "{kind, select, product {Proszę o ponowne sprawdzenie tego produktu.\n\nID produktu: {id}\nNazwa: {title}\n\nDlaczego uważam, że to pomyłka:\n} other {Proszę o ponowne sprawdzenie tej witryny.\n\nID witryny: {id}\nNazwa: {title}\n\nDlaczego uważam, że to pomyłka:\n}}",
     "reviewRequest": {
       "button": "Zmiany wprowadzone, wyślij do sprawdzenia",
       "sent": "Wysłano do sprawdzenia dnia <time>{date}</time>. Człowiek przejrzy twoje zmiany, a odpowiedź dostaniesz tutaj i e-mailem.",
       "failed": "Nie udało się tego wysłać.",
       "failedFix": "Spróbuj ponownie za chwilę."
-    }
+    },
+    "why": "Dlaczego",
+    "whatToChange": "Co zmienić",
+    "concerned": "Czego dotyczyło",
+    "showField": "Pokaż {field} na tej stronie",
+    "fields": {
+      "product": "{field, select, title {Nazwa} description {Opis} price {Cena} image {Zdjęcie główne} file {Plik cyfrowy} purchaseLink {Link zakupu} shipping {Wysyłka} options {Opcje} photos {Zdjęcia} specs {Specyfikacje} documents {Dokumenty} safety {Bezpieczeństwo i zgodność} other {Coś innego}}",
+      "storefront": "{field, select, name {Nazwa witryny} header {Nagłówek} text {Tekst} images {Zdjęcia} products {Wyświetlane produkty} background {Tło} productPage {Strony produktów} other {Coś innego}}"
+    },
+    "reference": "Numer referencyjny",
+    "downloadStatement": "Pobierz decyzję (PDF)",
+    "openEditor": "Otwórz witrynę, aby ją zmienić",
+    "appealButton": "Odwołaj się od tej decyzji",
+    "appealForm": {
+      "title": "Odwołaj się od tej decyzji",
+      "description": "Napisz, dlaczego uważasz, że się pomyliliśmy. Każde odwołanie sprawdza człowiek, a odpowiedź dostaniesz tutaj i e-mailem. Treść jest ukryta, dopóki ją sprawdzamy.",
+      "label": "Dlaczego uważasz, że ta decyzja jest błędna?",
+      "placeholder": "Na przykład: logo na zdjęciu to nasz własny zarejestrowany znak towarowy i możesz to tu sprawdzić.",
+      "help": "Co najmniej {min} znaków. Dodaj wszystko, co pomoże nam to sprawdzić, np. link lub numer rejestracyjny.",
+      "count": "{count} / {max}",
+      "submit": "Wyślij odwołanie",
+      "sent": "Odwołanie wysłane. Odezwiemy się do ciebie."
+    },
+    "appealStatus": {
+      "open": "Odwołanie złożone <time>{date}</time>. Człowiek je przejrzy, a odpowiedź dostaniesz tutaj i e-mailem.",
+      "upheld": "Twoje odwołanie rozpatrzono <time>{date}</time>. Decyzja pozostaje w mocy.",
+      "answer": "Nasza odpowiedź: {note}"
+    },
+    "editorDetails": "Dlaczego i co zrobić dalej"
   },
   "import": {
     "fields": {
@@ -309,6 +335,21 @@
     "nav": {
       "label": "Sekcje formularza",
       "heading": "Na tej stronie"
+    },
+    "moderation": {
+      "badge": "Wymaga zmian",
+      "changed": "Zmieniono",
+      "callout": "SquareShare prosi cię o zmianę {fields} tutaj.",
+      "seeWhy": "Sprawdź dlaczego",
+      "fieldBadge": "Zmień to",
+      "navHint": "wymaga zmian",
+      "inReview": "Wysłano do sprawdzenia",
+      "reviewPrompt": {
+        "title": "Zapisano. Wysłać do ponownego sprawdzenia?",
+        "body": "Jeśli zmieniłeś wszystko, o co prosił SquareShare, wyślij to teraz, a człowiek to sprawdzi. Jeśli nie, kontynuuj edycję i wyślij, gdy skończysz.",
+        "keepEditing": "Kontynuuj edycję",
+        "send": "Wyślij do sprawdzenia"
+      }
     }
   },
   "stockFields": {
@@ -522,5 +563,76 @@
     "dropPrompt": "Upuść plik albo kliknij, aby przesłać",
     "hint": "ZIP, PDF i podobne, maks. {max} MB",
     "remove": "Usuń plik cyfrowy"
+  },
+  "statement": {
+    "fileTitle": "Uzasadnienie decyzji {reference}",
+    "title": "Uzasadnienie decyzji",
+    "subtitle": "{action, select, paused {Wstrzymaliśmy {target, select, product {twój produkt} other {twoją witrynę}}} other {Usunęliśmy {target, select, product {twój produkt} other {twoją witrynę}}}}",
+    "intro": "Niniejsze uzasadnienie wyjaśnia decyzję, którą podjęliśmy w sprawie treści opublikowanych przez ciebie w SquareShare, powody jej podjęcia oraz sposób jej zaskarżenia. Przysługuje ci ono na podstawie artykułu 17 aktu o usługach cyfrowych (rozporządzenie (UE) 2022/2065).",
+    "sections": {
+      "decision": "Decyzja",
+      "reasons": "Dlaczego ją podjęliśmy",
+      "fix": "Co zmienić",
+      "redress": "Jak ją zaskarżyć",
+      "appeal": "Twoje odwołanie"
+    },
+    "labels": {
+      "reference": "Numer referencyjny",
+      "issued": "Uzasadnienie wydane",
+      "content": "Treść",
+      "contentId": "ID treści",
+      "decision": "Decyzja",
+      "decidedOn": "Data decyzji",
+      "scope": "Zakres stosowania",
+      "duration": "Czas trwania",
+      "status": "Aktualny status",
+      "ground": "Podstawa",
+      "note": "Uwaga od naszego recenzenta",
+      "facts": "Fakty i okoliczności",
+      "automated": "Środki automatyczne",
+      "legalBasis": "Podstawa decyzji"
+    },
+    "content": "{target, select, product {Produkt} other {Witryna}}: {title}",
+    "decision": {
+      "paused": "Wstrzymane. Treść jest ukryta przed kupującymi do czasu wprowadzenia poniższych zmian i ich zatwierdzenia przez nas.",
+      "removed": "Usunięte. Treść nie jest już dostępna dla kupujących. Decyzja jest ostateczna, chyba że zmieni ją odwołanie."
+    },
+    "scope": "Wszędzie tam, gdzie SquareShare to wyświetla: na własnej stronie, w osadzeniach na innych stronach internetowych i udostępnionych linkach, we wszystkich krajach.",
+    "duration": {
+      "paused": "Do zatwierdzenia twoich zmian przez nas.",
+      "removed": "Bezterminowo."
+    },
+    "status": {
+      "inForce": "Obowiązuje.",
+      "replaced": "Zastąpione późniejszą decyzją.",
+      "reversed": "Uchylone. Treść jest ponownie widoczna dla kupujących.",
+      "deleted": "Treść została od tamtego czasu usunięta."
+    },
+    "facts": {
+      "notices": "{count, plural, =0 {Stwierdziliśmy to sami, bez zgłoszenia od kogokolwiek spoza SquareShare.} one {Nastąpiło to po # zgłoszeniu od osoby spoza SquareShare, dotyczącym: {reasons}.} few {Nastąpiło to po # zgłoszeniach od osób spoza SquareShare, dotyczących: {reasons}.} many {Nastąpiło to po # zgłoszeniach od osób spoza SquareShare, dotyczących: {reasons}.} other {Nastąpiło to po # zgłoszeniu od osoby spoza SquareShare, dotyczącym: {reasons}.}}",
+      "review": "Członek personelu SquareShare zapoznał się z treścią przed podjęciem decyzji. Nie ujawniamy, kto wysłał zgłoszenie."
+    },
+    "automated": "Do wykrycia tej treści ani do podjęcia tej decyzji nie użyto żadnych środków automatycznych.",
+    "legalBasis": {
+      "contract": "Umowna: Regulamin usługi SquareShare, który nie zezwala na takie treści ({url}).",
+      "illegal": "Prawna: uznaliśmy tę treść za niezgodną z prawem mającym do niej zastosowanie."
+    },
+    "noNote": "Brak.",
+    "fixIntro": "{target, select, product {Zmień te elementy, a następnie naciśnij „Zmiany wprowadzone, wyślij do sprawdzenia” przy produkcie w swoim panelu, a my sprawdzimy ponownie:} other {Zmień te elementy, a następnie naciśnij „Zmiany wprowadzone, wyślij do sprawdzenia” przy witrynie w swoim panelu, a my sprawdzimy ponownie:}}",
+    "redress": {
+      "appeal": "Odwołanie do nas, bezpłatnie: naciśnij „Odwołaj się od tej decyzji” przy {target, select, product {produkcie} other {witrynie}} w swoim panelu, w ciągu sześciu miesięcy od tej decyzji. Każde odwołanie sprawdza człowiek, a odpowiedź dostaniesz w panelu i e-mailem.",
+      "settlement": "Pozasądowe rozstrzyganie sporów: możesz skierować tę decyzję do organu rozstrzygania sporów certyfikowanego na podstawie artykułu 21 aktu o usługach cyfrowych.",
+      "court": "Sądy: możesz skierować tę decyzję do właściwego sądu. Skorzystanie z powyższych opcji nie wpływa na to prawo.",
+      "contact": "Pytania: napisz na adres {email} i podaj numer referencyjny {reference}."
+    },
+    "appeal": {
+      "open": "Odwołanie złożone {date}. Człowiek je sprawdza.",
+      "upheld": "Odwołanie złożone {date}. Odpowiedziano {decided}: decyzja pozostaje w mocy.",
+      "overturned": "Odwołanie złożone {date}. Odpowiedziano {decided}: decyzja została uchylona.",
+      "answer": "Nasza odpowiedź: {note}",
+      "message": "Twoja wiadomość: {message}"
+    },
+    "footer": "SquareShare · {reference} · Strona {page} z {total}",
+    "generated": "Wygenerowano {date}."
   }
 }

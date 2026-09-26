@@ -102,6 +102,8 @@ const COMPLETE: SetupFacts = {
 function data(overrides: Partial<OnboardingData> = {}): OnboardingData {
   return {
     setup: buildSetupSteps(NEW_SELLER),
+    seenSteps: null,
+    accountId: "acct-1",
     traderMissing: ["businessName", "address", "email"],
     welcomePending: true,
     termsAccepted: true,
@@ -238,6 +240,74 @@ describe("OnboardingPanel", () => {
     );
     expect(screen.queryByRole("heading", { name: "You're set up" })).toBeNull();
     expect(actions.markSetupCelebrated).not.toHaveBeenCalled();
+  });
+
+  describe("steps done since the last look", () => {
+    const HALFWAY: SetupFacts = {
+      ...NEW_SELLER,
+      traderMissing: [],
+      productCount: 1,
+    };
+    let intersect: () => void = () => {};
+    const RealObserver = globalThis.IntersectionObserver;
+    beforeEach(() => {
+      document.cookie = "sq-setup-seen=; Max-Age=0; Path=/";
+      globalThis.IntersectionObserver = class {
+        constructor(callback: IntersectionObserverCallback) {
+          intersect = () =>
+            act(() =>
+              callback(
+                [{ isIntersecting: true } as IntersectionObserverEntry],
+                this as unknown as IntersectionObserver,
+              ),
+            );
+        }
+        observe() {}
+        disconnect() {}
+      } as unknown as typeof IntersectionObserver;
+    });
+    afterEach(() => {
+      globalThis.IntersectionObserver = RealObserver;
+    });
+
+    it("plays the new ones and records what was shown once the card is in view", () => {
+      const { container } = render(
+        <OnboardingPanel
+          {...data({
+            setup: buildSetupSteps(HALFWAY),
+            seenSteps: ["seller-details"],
+            traderMissing: [],
+            welcomePending: false,
+          })}
+        />,
+      );
+      expect(container.querySelector("[data-setup-checklist]")).toHaveAttribute(
+        "data-setup-fresh",
+        "product",
+      );
+      expect(document.cookie).not.toContain("sq-setup-seen=");
+      intersect();
+      expect(document.cookie).toContain("sq-setup-seen=acct-1:seller-details|product");
+    });
+
+    it("plays nothing without a history, but starts one", () => {
+      const { container } = render(
+        <OnboardingPanel
+          {...data({ setup: buildSetupSteps(HALFWAY), traderMissing: [], welcomePending: false })}
+        />,
+      );
+      expect(container.querySelector("[data-setup-checklist]")).not.toHaveAttribute(
+        "data-setup-fresh",
+      );
+      intersect();
+      expect(document.cookie).toContain("sq-setup-seen=acct-1:seller-details|product");
+    });
+
+    it("records nothing while the welcome covers the card", () => {
+      render(<OnboardingPanel {...data({ seenSteps: [] })} />);
+      intersect();
+      expect(document.cookie).not.toContain("sq-setup-seen=");
+    });
   });
 
   // Last on purpose: showing the card marks this TAB as having shown it (a

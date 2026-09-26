@@ -69,7 +69,8 @@
     "rotateEmbedKeys": "Demasiados intentos de renovar claves de incorporación en poco tiempo.",
     "updateStock": "Demasiados intentos de actualizar el stock en poco tiempo.",
     "readProductPageSettings": "Demasiados intentos de leer los ajustes de la página de producto en poco tiempo.",
-    "requestReview": "Demasiados intentos de solicitar una revisión en poco tiempo."
+    "requestReview": "Demasiados intentos de solicitar una revisión en poco tiempo.",
+    "fileAppeal": "Demasiados intentos de enviar un recurso en poco tiempo."
   },
   "serverError": {
     "fix": "Suele ser algo temporal. Espera un momento y vuelve a intentarlo; si sigue fallando, recarga la página.",
@@ -95,13 +96,16 @@
     "checkSellerDetails": "No se han podido comprobar tus datos de vendedor por un problema en nuestro sistema.",
     "loadProductPageSettings": "No se han podido cargar los ajustes de tu página de producto por un problema en nuestro sistema.",
     "saveProductPageSettings": "No se han podido guardar los ajustes de tu página de producto por un problema en nuestro sistema.",
-    "sendForReview": "No se ha podido enviar a revisión por un problema de nuestra parte."
+    "sendForReview": "No se ha podido enviar a revisión por un problema de nuestra parte.",
+    "fileAppeal": "No se ha podido enviar tu recurso por un problema en nuestro lado."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Este producto se ha retirado, no está en pausa.} storefront {Este escaparate se ha retirado, no está en pausa.} other {Este elemento se ha retirado, no está en pausa.}}",
-    "removedFix": "Una retirada es definitiva. Si crees que fue un error, usa el enlace de apelación para escribirnos.",
+    "removedFix": "Una retirada es definitiva, salvo que un recurso la modifique. Si crees que fue un error, usa «Recurrir esta decisión».",
     "notPaused": "{target, select, product {Este producto no está en pausa.} storefront {Este escaparate no está en pausa.} other {Este elemento no está en pausa.}}",
-    "notPausedFix": "No hay nada que revisar: ya lo ven los compradores."
+    "notPausedFix": "No hay nada que revisar: ya lo ven los compradores.",
+    "decisionSuperseded": "Esta decisión ya no está en vigor, por lo que no hay nada que recurrir.",
+    "decisionSupersededFix": "Recarga la página para ver el estado actual."
   },
   "traderIdentityRequired": {
     "message": "No puedes publicar ni vender hasta que completes tus datos de vendedor.",

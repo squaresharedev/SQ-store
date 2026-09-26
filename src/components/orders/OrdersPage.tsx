@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { usePathname, useRouter } from "next/navigation";
-import { helpTextClass, infoTextClass, overlayScrimClass, secondaryButtonClass } from "@/components/ui/control-styles";
+import { helpTextClass, infoTextClass, secondaryButtonClass } from "@/components/ui/control-styles";
 import { Spinner } from "@/components/ui/spinner";
 import { useTourReveal } from "@/lib/onboarding/tour-store";
 import { cn } from "@/lib/utils";
@@ -14,7 +14,7 @@ import type {
   OrderView,
   Paginated,
 } from "@/types/order-view";
-import { OrderDetail } from "./OrderDetail";
+import { OrderDetailSheet } from "./OrderDetailSheet";
 import { OrdersEmptyState } from "./OrdersEmptyState";
 import { OrdersTable } from "./OrdersTable";
 import { OrdersToolbar, type SortValue } from "./OrdersToolbar";
@@ -130,21 +130,11 @@ export function OrdersPage({
 
   /** Close the panel, and drop `?order=` with it — otherwise a refresh (or the
    *  next filter change, which rebuilds the URL) would reopen it. buildQuery
-   *  never emits that param, so re-navigating is the whole fix. Memoised
-   *  because the Escape listener below depends on it. */
-  const closeDetail = useCallback(() => {
+   *  never emits that param, so re-navigating is the whole fix. */
+  function closeDetail() {
     setSelected(null);
     if (deepLinkedId) navigate(draft, sort, data.page);
-  }, [data.page, deepLinkedId, draft, navigate, sort]);
-
-  useEffect(() => {
-    if (!selected) return;
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") closeDetail();
-    }
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [selected, closeDetail]);
+  }
 
   function handleFilters(next: OrderFilters) {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -263,19 +253,7 @@ export function OrdersPage({
         )}
       </div>
 
-      {selected && (
-        <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true" aria-label={t("list.detailDialog")}>
-          <button
-            type="button"
-            className={overlayScrimClass}
-            aria-label={t("list.closeDetail")}
-            onClick={closeDetail}
-          />
-          <div className="relative h-full w-full max-w-md shadow-lg">
-            <OrderDetail order={selected} onClose={closeDetail} />
-          </div>
-        </div>
-      )}
+      {selected && <OrderDetailSheet order={selected} onClose={closeDetail} />}
     </div>
   );
 }

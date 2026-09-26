@@ -1,12 +1,35 @@
 import type { ReactNode } from "react";
-import type { LucideIcon } from "lucide-react";
+import { Check, Flag, type LucideIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { InfoTip } from "@/components/ui/InfoTip";
 import { cn } from "@/lib/utils";
-import { cardClass, iconTileClass } from "@/components/ui/surface-styles";
+import {
+  cardClass,
+  flagChipClass,
+  flaggedSurfaceClass,
+  iconTileClass,
+} from "@/components/ui/surface-styles";
 import type {
   ProductFormSectionId,
   ProductFormSectionState,
 } from "@/lib/products/form-datapoints";
+import { jumpToElement } from "./jump-to";
+
+/**
+ * A section SquareShare staff asked the seller to change (a paused product).
+ *
+ *   needs    nothing flagged here has been touched yet.
+ *   changed  every flagged part here has been edited (this visit, or saved
+ *            earlier in this browser session).
+ *   review   the seller already sent it back; it is with a person now.
+ */
+export type SectionFlag = {
+  /** The flagged parts' names, in the seller's language ("Title, Price"). */
+  fields: string;
+  state: "needs" | "changed" | "review";
+  /** The banner's DOM id, for "See why". */
+  noticeId: string;
+};
 
 /** The DOM id a section anchors at, so the index rail and a `#hash` agree. */
 export function sectionAnchorId(id: string): string {
@@ -38,6 +61,7 @@ export function FormSection({
   about,
   state = "empty",
   summary,
+  flag,
   children,
 }: {
   id: ProductFormSectionId;
@@ -52,6 +76,8 @@ export function FormSection({
   state?: ProductFormSectionState;
   /** What this section currently holds, e.g. "3 photos". */
   summary?: string;
+  /** Set when staff asked for something in this section to change. */
+  flag?: SectionFlag;
   children: ReactNode;
 }) {
   return (
@@ -60,10 +86,11 @@ export function FormSection({
       aria-labelledby={`${sectionAnchorId(id)}-heading`}
       data-product-section={id}
       data-product-section-state={state}
+      data-fix-flag={flag?.state}
       // `scroll-mt` clears the sticky TopBar (h-14) when the index rail
       // jumps here; without it the anchor lands underneath the bar and the
       // heading you asked for is the one thing you cannot see.
-      className={cn(cardClass, "scroll-mt-20 p-5")}
+      className={cn(cardClass, "scroll-mt-20 p-5", flag && flaggedSurfaceClass)}
     >
       <div className="mb-4 flex items-center gap-3">
         <span className={cn(iconTileClass, "size-9")}>
@@ -102,7 +129,53 @@ export function FormSection({
           )}
         </div>
       </div>
+      {flag && <FlagCallout flag={flag} />}
       {children}
     </section>
+  );
+}
+
+/**
+ * What staff asked for, stated where it has to be done. The banner at the top
+ * says the same thing for the whole product; this is that sentence broken up
+ * and put next to the fields, so a seller scrolling a long form cannot pass
+ * the part that needs them without seeing it.
+ */
+function FlagCallout({ flag }: { flag: SectionFlag }) {
+  const t = useTranslations("Products.form.moderation");
+  return (
+    <div
+      className="mb-5 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-sm bg-muted px-3 py-2.5"
+      data-fix-callout=""
+    >
+      <span className={flagChipClass}>
+        {flag.state === "changed" ? (
+          <Check className="size-3" strokeWidth={2.5} aria-hidden="true" />
+        ) : (
+          <Flag className="size-3" strokeWidth={2.5} aria-hidden="true" />
+        )}
+        {flag.state === "changed"
+          ? t("changed")
+          : flag.state === "review"
+            ? t("inReview")
+            : t("badge")}
+      </span>
+      <p className="min-w-0 flex-1 font-inter text-sm text-foreground">
+        {t("callout", { fields: flag.fields })}{" "}
+        <a
+          href={`#${flag.noticeId}`}
+          // Scrolled by hand: a plain #hash click fires popstate, which the
+          // unsaved-changes guard reads as the Back button (FormSectionNav).
+          onClick={(event) => {
+            if (event.button !== 0 || event.metaKey || event.ctrlKey) return;
+            event.preventDefault();
+            jumpToElement(flag.noticeId);
+          }}
+          className="font-medium underline underline-offset-2 hover:no-underline"
+        >
+          {t("seeWhy")}
+        </a>
+      </p>
+    </div>
   );
 }

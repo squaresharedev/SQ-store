@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
 import { LEGAL_LINKS, SQUARESHARE_SITE } from "@/lib/legal/links";
+import type { ProductPageReportScopes } from "@/types/product-page";
 import { ReportDialog } from "./ReportDialog";
 
 // The foot of the buyer's page: who they are actually buying from, and the two
@@ -80,14 +81,21 @@ export function PoweredByFooter({
    *  name when no business name was given. Never empty. */
   sellerName,
   /** This page's product, so a report names what it is about. */
-  productId,
+  product,
+  /** The storefront it hangs off, as buyers know it: the other thing a buyer
+   *  may report, and the way to the seller behind it. */
+  storefront,
+  /** Which wider report targets apply (see ReportDialog). */
+  reportScopes,
   /** Editor preview: the report link renders but does nothing. See
    *  ReportDialog for why it is shown rather than hidden. */
   preview = false,
 }: {
   ruleColor: string;
   sellerName: string;
-  productId: string;
+  product: { id: string; title: string };
+  storefront: { id: string; name: string };
+  reportScopes?: ProductPageReportScopes;
   preview?: boolean;
 }) {
   const t = useTranslations("ProductPage.footer");
@@ -176,7 +184,13 @@ export function PoweredByFooter({
               unremarkable to everyone else. Making it louder would print a
               standing accusation under every honest listing. */}
           <Dot />
-          <ReportDialog targetType="product" targetId={productId} preview={preview} />
+          <ReportDialog
+            product={product}
+            storefront={storefront}
+            sellerName={sellerName}
+            scopes={reportScopes}
+            preview={preview}
+          />
         </div>
       </div>
     </footer>

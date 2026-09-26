@@ -32,6 +32,23 @@
     "loading": "Caricamento",
     "loadMore": "Carica altre"
   },
+  "filters": {
+    "label": "Filtra le notifiche",
+    "show": "Mostra",
+    "all": "Tutte",
+    "unread": "Non lette",
+    "category": "Categoria",
+    "allCategories": "Tutte le categorie",
+    "clear": "Rimuovi filtri",
+    "emptyUnreadTitle": "Nessuna notifica non letta",
+    "emptyUnreadHint": "Sei in pari con tutto.",
+    "emptyFilteredTitle": "Nessuna notifica corrispondente",
+    "emptyFilteredHint": "Prova un’altra categoria, oppure rimuovi i filtri per vedere tutto."
+  },
+  "actions": {
+    "openStore": "Apri il negozio",
+    "unavailable": "Questo invito non è più disponibile."
+  },
   "types": {
     "team": "Team",
     "order": "Ordine",

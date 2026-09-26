@@ -186,7 +186,8 @@ export type RateLimitedOperation =
   | "rotateEmbedKeys"
   | "updateStock"
   | "readProductPageSettings"
-  | "requestReview";
+  | "requestReview"
+  | "fileAppeal";
 
 /**
  * A signed-in write budget is spent (lib/rate-limit.ts).
@@ -250,7 +251,8 @@ export type ServerErrorOperation =
   | "checkSellerDetails"
   | "loadProductPageSettings"
   | "saveProductPageSettings"
-  | "sendForReview";
+  | "sendForReview"
+  | "fileAppeal";
 
 export function serverError(operation: ServerErrorOperation): ActionError {
   return {

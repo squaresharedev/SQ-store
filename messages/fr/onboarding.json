@@ -55,7 +55,6 @@
     "openPage": "Ouvrir la page",
     "opensInNewTab": " (ouvre un nouvel onglet)",
     "hide": "Masquer",
-    "progressLabel": "Progression de la configuration",
     "progress": "{total, plural, one {{done} sur {total} terminée} many {{done} sur {total} terminées} other {{done} sur {total} terminées}}",
     "stepDone": " (terminé)",
     "stepToDo": " (à faire)"

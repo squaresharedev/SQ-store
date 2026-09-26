@@ -66,6 +66,11 @@ const PRODUCT_PAGE = {
   ),
 };
 
+/** The footer link. It names the product when that is all a buyer can report,
+ *  and asks more generally once the dialog offers the storefront or the seller
+ *  too (this seller has two products, so it does). */
+const REPORT_TRIGGER = /^report (this product|a problem)$/i;
+
 /** The one site this storefront is allowed to embed on. The embed endpoint
  *  denies an empty allowlist AND a missing Origin header, so a spec that wants
  *  a 200 has to name a host and send it. */
@@ -178,7 +183,7 @@ test.describe("reporting a product", () => {
     await page.goto(`/s/${seeded.storefrontId}/p/${seeded.productId}`);
     await expect(page.getByRole("heading", { name: "Reported lamp" })).toBeVisible();
 
-    await page.getByRole("button", { name: /report this product/i }).click();
+    await page.getByRole("button", { name: REPORT_TRIGGER }).click();
 
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible();
@@ -223,7 +228,7 @@ test.describe("reporting a product", () => {
 
     for (const attempt of [1, 2]) {
       await page.goto(`/s/${seeded.storefrontId}/p/${seeded.productId}`);
-      await page.getByRole("button", { name: /report this product/i }).click();
+      await page.getByRole("button", { name: REPORT_TRIGGER }).click();
       const dialog = page.getByRole("dialog");
       await dialog.getByRole("radio", { name: /spam/i }).check();
       await dialog.getByRole("button", { name: /send report/i }).click();
@@ -264,7 +269,7 @@ test.describe("the report dialog", () => {
     await context.clearCookies();
     await page.goto(`/s/${seeded.storefrontId}/p/${seeded.productId}`);
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    await page.getByRole("button", { name: /report this product/i }).click();
+    await page.getByRole("button", { name: REPORT_TRIGGER }).click();
 
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible();
@@ -275,7 +280,7 @@ test.describe("the report dialog", () => {
     // dialog must stay open.
     await page.keyboard.press("Space");
     await expect(dialog).toBeVisible();
-    await expect(dialog.locator("input[type=radio]:checked")).toHaveCount(0);
+    await expect(dialog.locator("input[name=reason]:checked")).toHaveCount(0);
 
     const details = dialog.getByLabel(/anything else/i);
     await details.click();
@@ -303,7 +308,7 @@ test.describe("the report dialog", () => {
     const seeded = await seed(page, "report-check");
     await context.clearCookies();
     await page.goto(`/s/${seeded.storefrontId}/p/${seeded.productId}`);
-    await page.getByRole("button", { name: /report this product/i }).click();
+    await page.getByRole("button", { name: REPORT_TRIGGER }).click();
 
     const dialog = page.getByRole("dialog");
     await dialog.getByRole("radio", { name: /spam/i }).check();
@@ -484,7 +489,8 @@ test.describe("a removed product", () => {
     });
 
     await page.goto("/notifications");
-    const row = page.getByRole("button", { name: /was removed/i });
+    // A row with somewhere to go is a real link to it.
+    const row = page.getByRole("link", { name: /was removed/i });
     await expect(row).toBeVisible();
     await expect(row).toContainText("counterfeit goods");
     await expect(row).toContainText("The mark is registered.");

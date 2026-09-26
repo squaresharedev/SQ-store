@@ -22,6 +22,7 @@ function setContext(overrides: Partial<UseNotifications> = {}) {
     arrivalSeq: 0,
     markRead: vi.fn(),
     markAllRead: vi.fn(),
+    completeAction: vi.fn(),
     refresh: vi.fn(),
     ...overrides,
   };

@@ -107,9 +107,17 @@ test.describe("storefront designer", () => {
     await page.reload();
     await expect(page.getByText("Your text here").first()).toBeVisible({ timeout: 20_000 });
 
-    // --- embed modal from the storefront list ---
+    // --- embed page from the storefront list ---
     await page.goto("/storefront");
-    await page.getByRole("button", { name: /^Embed / }).first().click();
+    // Retried on purpose: the first client navigation to a route `next dev` has
+    // never compiled is dropped by the Fast Refresh its compile triggers (the
+    // second click lands). Dev-only; a production build compiles nothing here.
+    await expect(async () => {
+      await page.getByRole("button", { name: /^Embed / }).first().click();
+      await expect(page).toHaveURL(/\/storefront\/[0-9a-f-]{36}\/embed$/, {
+        timeout: 8_000,
+      });
+    }).toPass({ timeout: 40_000 });
     const snippet = page.locator("pre");
     // The snippet carries the storefront's rotatable EMBED KEY, never its id.
     // Publishing the id would make the embed impossible to revoke without
@@ -138,6 +146,10 @@ test.describe("storefront designer", () => {
     await expect(
       page.getByRole("alert").filter({ hasText: /bare lowercase domains/i }),
     ).toBeVisible();
+
+    // The back arrow returns to the list.
+    await page.getByRole("link", { name: /back to storefronts/i }).click();
+    await expect(page).toHaveURL(/\/storefront$/);
   });
 
   test("copy/paste duplicates shapes and text, never products", async ({ page }) => {

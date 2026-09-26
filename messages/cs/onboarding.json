@@ -55,7 +55,6 @@
     "openPage": "Otevřít stránku",
     "opensInNewTab": " (otevře se v nové kartě)",
     "hide": "Skrýt",
-    "progressLabel": "Postup nastavení",
     "progress": "{total, plural, one {Hotovo {done} z {total}} few {Hotovo {done} z {total}} many {Hotovo {done} z {total}} other {Hotovo {done} z {total}}}",
     "stepDone": " (hotovo)",
     "stepToDo": " (zbývá)"

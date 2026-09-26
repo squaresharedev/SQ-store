@@ -113,19 +113,45 @@
     "pausedOn": "Pausiert am",
     "statement": "{ground, select, illegal {Illegale Waren oder Aktivitäten. Es wurde etwas angeboten, das sich nicht legal verkaufen lässt, oder das Angebot diente dazu, so etwas zu vermitteln.} sexual {Sexuelle Inhalte. Es waren explizite sexuelle Inhalte enthalten.} violence {Gewalt oder Gore. Es waren drastische Gewaltdarstellungen enthalten.} hate {Hass oder Belästigung. Eine Person oder Gruppe wurde angegriffen, oder es waren Hasssymbole enthalten.} counterfeit {Fälschung oder Diebstahl. Es schienen gefälschte Waren oder die Werke anderer angeboten zu werden.} scam {Betrug. Es schien darauf angelegt, Zahlungen zu kassieren, ohne das Versprochene zu liefern.} spam {Spam. Es war repetitiv oder irreführend und kein echtes Angebot.} other {Sonstiges. Es verstieß gegen die Plattformregeln.}}{noted, select, yes { {note}} other {}}",
     "statementUnlabelled": "Es hat gegen die Plattformregeln verstoßen.{noted, select, yes { {note}} other {}}",
-    "fixHint": "{kind, select, product {Bearbeite das Produkt unten, um das zu beheben, speichere es und sende es dann wieder an uns.} other {Öffne das Schaufenster, um das zu beheben, komm dann hierher zurück und sende es an uns.}}",
+    "fixHint": "{kind, select, product {Ändere die hervorgehobenen Teile unten, speichere und sende das Produkt dann wieder an uns.} other {Öffne das Schaufenster, ändere was oben aufgelistet ist, komm dann hierher zurück und sende es an uns.}}",
     "readOnlyHint": "{kind, select, product {Jemand mit Bearbeitungsrechten für dieses Produkt muss die Änderung vornehmen und es zur Prüfung senden.} other {Jemand mit Bearbeitungsrechten für dieses Schaufenster muss die Änderung vornehmen und es zur Prüfung senden.}}",
     "appeal": "{kind, select, product {Du kannst dieses Produkt weiterhin bearbeiten. Eine Bearbeitung stellt es nicht wieder her: <link>Bitte uns, noch einmal hinzuschauen</link>, wenn du die Entfernung für falsch hältst.} other {Du kannst dieses Schaufenster weiterhin bearbeiten. Eine Bearbeitung stellt es nicht wieder her: <link>Bitte uns, noch einmal hinzuschauen</link>, wenn du die Entfernung für falsch hältst.}}",
     "appealPaused": "Denkst du, das ist ein Fehler? <link>Schreib uns</link>.",
     "appealFinal": "Wenn du denkst, dass wir uns geirrt haben, <link>bitte uns um eine erneute Prüfung</link>.",
-    "appealSubject": "{kind, select, product {Widerspruch: Entfernung eines Produkts ({title})} other {Widerspruch: Entfernung eines Schaufensters ({title})}}",
-    "appealBody": "{kind, select, product {Ich möchte, dass dieses Produkt erneut geprüft wird.\n\nProdukt-ID: {id}\nName: {title}\n\nWarum ich die Entfernung für falsch halte:\n} other {Ich möchte, dass dieses Schaufenster erneut geprüft wird.\n\nSchaufenster-ID: {id}\nName: {title}\n\nWarum ich die Entfernung für falsch halte:\n}}",
     "reviewRequest": {
       "button": "Ich habe die Änderungen vorgenommen, bitte prüfen",
       "sent": "Am <time>{date}</time> zur Prüfung gesendet. Eine Person sieht sich deine Änderungen an, und du hörst hier und per E-Mail von uns.",
       "failed": "Das konnte nicht gesendet werden.",
       "failedFix": "Versuche es gleich noch einmal."
-    }
+    },
+    "why": "Warum",
+    "whatToChange": "Was zu ändern ist",
+    "concerned": "Worum es geht",
+    "showField": "Zeige {field} auf dieser Seite",
+    "fields": {
+      "product": "{field, select, title {Titel} description {Beschreibung} price {Preis} image {Titelbild} file {Digitale Datei} purchaseLink {Kauflink} shipping {Versand} options {Optionen} photos {Fotos} specs {Technische Daten} documents {Dokumente} safety {Sicherheit und Konformität} other {Sonstiges}}",
+      "storefront": "{field, select, name {Schaufenstername} header {Kopfbereich} text {Text} images {Bilder} products {Angezeigte Produkte} background {Hintergrund} productPage {Produktseiten} other {Sonstiges}}"
+    },
+    "reference": "Referenz",
+    "downloadStatement": "Entscheidung herunterladen (PDF)",
+    "openEditor": "Schaufenster öffnen und ändern",
+    "appealButton": "Diese Entscheidung anfechten",
+    "appealForm": {
+      "title": "Diese Entscheidung anfechten",
+      "description": "Erkläre uns, warum du diese Entscheidung für falsch hältst. Eine Person prüft jeden Einspruch, und du hörst hier und per E-Mail von uns. Es bleibt verborgen, während wir prüfen.",
+      "label": "Warum hältst du diese Entscheidung für falsch?",
+      "placeholder": "Beispiel: Das Logo auf dem Foto ist unsere eigene eingetragene Marke, hier kannst du das nachprüfen.",
+      "help": "Mindestens {min} Zeichen. Füge alles hinzu, was uns hilft zu prüfen, z. B. einen Link oder eine Registrierungsnummer.",
+      "count": "{count} / {max}",
+      "submit": "Einspruch senden",
+      "sent": "Einspruch gesendet. Wir melden uns bei dir."
+    },
+    "appealStatus": {
+      "open": "Du hast am <time>{date}</time> Einspruch eingelegt. Eine Person prüft ihn, und du hörst hier und per E-Mail von uns.",
+      "upheld": "Wir haben deinen Einspruch am <time>{date}</time> geprüft. Die Entscheidung bleibt bestehen.",
+      "answer": "Unsere Antwort: {note}"
+    },
+    "editorDetails": "Warum, und wie es weitergeht"
   },
   "import": {
     "fields": {
@@ -309,6 +335,21 @@
     "nav": {
       "label": "Formularabschnitte",
       "heading": "Auf dieser Seite"
+    },
+    "moderation": {
+      "badge": "Änderungen erforderlich",
+      "changed": "Geändert",
+      "callout": "SquareShare hat dich gebeten, {fields} hier zu ändern.",
+      "seeWhy": "Warum erfahren",
+      "fieldBadge": "Dies ändern",
+      "navHint": "Änderungen erforderlich",
+      "inReview": "Zur Prüfung gesendet",
+      "reviewPrompt": {
+        "title": "Gespeichert. Zur Prüfung zurücksenden?",
+        "body": "Wenn du alles geändert hast, was SquareShare verlangt hat, sende es jetzt zurück und eine Person prüft es. Falls nicht, bearbeite es weiter und sende es, wenn du fertig bist.",
+        "keepEditing": "Weiter bearbeiten",
+        "send": "Zur Prüfung senden"
+      }
     }
   },
   "stockFields": {
@@ -522,5 +563,76 @@
     "dropPrompt": "Datei ablegen oder klicken, um hochzuladen",
     "hint": "ZIP, PDF und Ähnliches, bis zu {max} MB",
     "remove": "Digitale Datei entfernen"
+  },
+  "statement": {
+    "fileTitle": "Begründungsschreiben {reference}",
+    "title": "Begründungsschreiben",
+    "subtitle": "{action, select, paused {Wir haben dein {target, select, product {Produkt} other {Schaufenster}} pausiert} other {Wir haben dein {target, select, product {Produkt} other {Schaufenster}} entfernt}}",
+    "intro": "Dieses Schreiben erläutert eine Entscheidung, die wir über Inhalte getroffen haben, die du auf SquareShare veröffentlicht hast, warum wir sie getroffen haben und wie du sie anfechten kannst. Du hast darauf einen Anspruch nach Artikel 17 des Gesetzes über digitale Dienste (Verordnung (EU) 2022/2065).",
+    "sections": {
+      "decision": "Die Entscheidung",
+      "reasons": "Warum wir sie getroffen haben",
+      "fix": "Was zu ändern ist",
+      "redress": "Wie du sie anfechten kannst",
+      "appeal": "Dein Einspruch"
+    },
+    "labels": {
+      "reference": "Referenz",
+      "issued": "Schreiben ausgestellt",
+      "content": "Inhalt",
+      "contentId": "Inhalts-ID",
+      "decision": "Entscheidung",
+      "decidedOn": "Entschieden am",
+      "scope": "Wo es gilt",
+      "duration": "Wie lange",
+      "status": "Aktueller Status",
+      "ground": "Grundlage",
+      "note": "Hinweis unseres Prüfers",
+      "facts": "Sachverhalt und Umstände",
+      "automated": "Automatisierte Mittel",
+      "legalBasis": "Grundlage der Entscheidung"
+    },
+    "content": "{target, select, product {Produkt} other {Schaufenster}}: {title}",
+    "decision": {
+      "paused": "Pausiert. Der Inhalt ist für Käufer verborgen, bis du die unten aufgeführten Änderungen vorgenommen hast und wir sie genehmigt haben.",
+      "removed": "Entfernt. Der Inhalt ist für Käufer nicht mehr verfügbar. Diese Entscheidung ist endgültig, sofern ein Einspruch sie nicht ändert."
+    },
+    "scope": "Überall, wo SquareShare es anzeigt: auf seiner eigenen Seite, in Einbettungen auf anderen Websites und in geteilten Links, in jedem Land.",
+    "duration": {
+      "paused": "Bis wir deine Änderungen genehmigt haben.",
+      "removed": "Unbefristet."
+    },
+    "status": {
+      "inForce": "In Kraft.",
+      "replaced": "Durch eine spätere Entscheidung ersetzt.",
+      "reversed": "Aufgehoben. Der Inhalt ist für Käufer wieder sichtbar.",
+      "deleted": "Der Inhalt wurde inzwischen gelöscht."
+    },
+    "facts": {
+      "notices": "{count, plural, =0 {Wir haben das selbst festgestellt, ohne einen Hinweis von außerhalb von SquareShare.} one {Diesem ist # Hinweis von außerhalb von SquareShare vorausgegangen, mit folgendem Inhalt: {reasons}.} other {Diesem sind # Hinweise von außerhalb von SquareShare vorausgegangen, mit folgendem Inhalt: {reasons}.}}",
+      "review": "Ein Mitglied des SquareShare-Teams hat den Inhalt selbst geprüft, bevor eine Entscheidung getroffen wurde. Wir geben nicht bekannt, wer einen Hinweis gesendet hat."
+    },
+    "automated": "Es wurden keine automatisierten Mittel eingesetzt, um diesen Inhalt zu erkennen oder diese Entscheidung zu treffen.",
+    "legalBasis": {
+      "contract": "Vertraglich: die SquareShare Nutzungsbedingungen, die Inhalte dieser Art nicht erlauben ({url}).",
+      "illegal": "Rechtlich: Wir haben den Inhalt nach dem anwendbaren Recht als rechtswidrig eingestuft."
+    },
+    "noNote": "Keine.",
+    "fixIntro": "{target, select, product {Ändere diese Teile, drücke dann beim Produkt in deinem Dashboard auf „Ich habe die Änderungen vorgenommen, bitte prüfen“, und wir schauen noch einmal:} other {Ändere diese Teile, drücke dann beim Schaufenster in deinem Dashboard auf „Ich habe die Änderungen vorgenommen, bitte prüfen“, und wir schauen noch einmal:}}",
+    "redress": {
+      "appeal": "Einspruch bei uns einlegen, kostenlos: Drücke beim {target, select, product {Produkt} other {Schaufenster}} in deinem Dashboard auf „Diese Entscheidung anfechten“, innerhalb von sechs Monaten nach dieser Entscheidung. Eine Person prüft jeden Einspruch, und du hörst in deinem Dashboard und per E-Mail von uns.",
+      "settlement": "Außergerichtliche Streitbeilegung: Du kannst diese Entscheidung einer Streitbeilegungsstelle vorlegen, die nach Artikel 21 des Gesetzes über digitale Dienste zertifiziert ist.",
+      "court": "Gerichte: Du kannst diese Entscheidung einem zuständigen Gericht vorlegen. Die Nutzung der oben genannten Optionen berührt dieses Recht nicht.",
+      "contact": "Fragen: Schreibe an {email} und nenne die Referenz {reference}."
+    },
+    "appeal": {
+      "open": "Du hast am {date} Einspruch eingelegt. Eine Person prüft ihn.",
+      "upheld": "Du hast am {date} Einspruch eingelegt. Wir haben am {decided} geantwortet: Die Entscheidung bleibt bestehen.",
+      "overturned": "Du hast am {date} Einspruch eingelegt. Wir haben am {decided} geantwortet: Die Entscheidung wurde aufgehoben.",
+      "answer": "Unsere Antwort: {note}",
+      "message": "Was du geschrieben hast: {message}"
+    },
+    "footer": "SquareShare · {reference} · Seite {page} von {total}",
+    "generated": "Erstellt am {date}."
   }
 }

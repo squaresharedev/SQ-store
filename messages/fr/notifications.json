@@ -32,6 +32,23 @@
     "loading": "Chargement",
     "loadMore": "Charger plus"
   },
+  "filters": {
+    "label": "Filtrer les notifications",
+    "show": "Afficher",
+    "all": "Toutes",
+    "unread": "Non lues",
+    "category": "Catégorie",
+    "allCategories": "Toutes les catégories",
+    "clear": "Effacer les filtres",
+    "emptyUnreadTitle": "Aucune notification non lue",
+    "emptyUnreadHint": "Vous êtes à jour.",
+    "emptyFilteredTitle": "Aucune notification ne correspond",
+    "emptyFilteredHint": "Essayez une autre catégorie, ou effacez les filtres pour tout voir."
+  },
+  "actions": {
+    "openStore": "Ouvrir la boutique",
+    "unavailable": "Cette invitation n’est plus disponible."
+  },
   "types": {
     "team": "Équipe",
     "order": "Commande",

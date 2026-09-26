@@ -95,10 +95,10 @@
   },
   "report": {
     "trigger": "{target, select, product {Nahlásiť tento produkt} other {Nahlásiť tento výklad}}",
-    "title": "{target, select, product {Nahlásiť tento produkt} other {Nahlásiť tento výklad}}",
+    "title": "{target, select, product {Nahlásiť tento produkt} storefront {Nahlásiť tento výklad} seller {Nahlásiť tohto predajcu} other {Nahlásiť problém}}",
     "description": "Napíšte nám, čo je na ňom v neporiadku. Každé hlásenie posudzuje človek.",
     "sentTitle": "Hlásenie odoslané",
-    "sentBody": "{target, select, product {Ďakujeme. Tento produkt posúdi človek. Predajcovi nezverejňujeme, kto podnet podal.} other {Ďakujeme. Tento výklad posúdi človek. Predajcovi nezverejňujeme, kto podnet podal.}}",
+    "sentBody": "{target, select, product {Ďakujeme. Tento produkt posúdi človek. Predajcovi nezverejňujeme, kto podnet podal.} seller {Ďakujeme. Tohto predajcu posúdi človek. Nezverejňujeme, kto podnet podal.} other {Ďakujeme. Tento výklad posúdi človek. Predajcovi nezverejňujeme, kto podnet podal.}}",
     "reasonsLegend": "Čo je na ňom v neporiadku?",
     "reasons": {
       "illegal": {
@@ -150,6 +150,22 @@
       "reason": "Vyberte, čo je v neporiadku.",
       "rateLimited": "Príliš veľa hlásení z tohto miesta. Skúste to neskôr.",
       "submitFailed": "Odoslanie sa nepodarilo. Skúste to znova."
+    },
+    "triggerAny": "Nahlásiť problém",
+    "scopeLegend": "Čo chcete nahlásiť?",
+    "scopes": {
+      "product": {
+        "label": "Tento produkt",
+        "hint": "{title}"
+      },
+      "storefront": {
+        "label": "Tento výklad",
+        "hint": "{name} a všetko, čo je na ňom"
+      },
+      "seller": {
+        "label": "Tohto predajcu",
+        "hint": "{name}, vo všetkých ich výkladoch"
+      }
     }
   },
   "shippingProse": {

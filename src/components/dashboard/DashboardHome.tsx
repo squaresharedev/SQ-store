@@ -10,6 +10,7 @@ import {
   type StorefrontAttentionInfo,
 } from "@/lib/dashboard/attention";
 import { formatMoney } from "@/lib/dashboard/format";
+import type { OrderView } from "@/types/order-view";
 import { MetricTile } from "./MetricTile";
 import { MobileRevenueHero } from "./MobileRevenueHero";
 import { NeedsAttention } from "./NeedsAttention";
@@ -27,8 +28,11 @@ export function DashboardHome({
   stripeConnected,
   onboarding,
   twoFactorEnabled = true,
+  recentOrderDetails = [],
 }: {
   orders: DashboardOrdersData;
+  /** Full detail for the Recent orders rows, so each opens in place. */
+  recentOrderDetails?: OrderView[];
   products: ProductsSummary;
   storefronts: StorefrontAttentionInfo;
   /** Null when the profile read failed softly; profile attention rows are hidden. */
@@ -110,7 +114,11 @@ export function DashboardHome({
               twoFactorEnabled,
             })}
           />
-          <RecentOrders orders={orders.recentOrders} id={RECENT_ORDERS_ID} />
+          <RecentOrders
+            orders={orders.recentOrders}
+            details={recentOrderDetails}
+            id={RECENT_ORDERS_ID}
+          />
         </div>
         </div>
       </div>

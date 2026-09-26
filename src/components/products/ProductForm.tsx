@@ -83,9 +83,21 @@ import {
 } from "@/components/ui/control-styles";
 import { InfoTip } from "@/components/ui/InfoTip";
 import { RequiredMark } from "@/components/ui/RequiredMark";
+import { flagChipClass, flaggedFieldClass } from "@/components/ui/surface-styles";
 import { SellerDetailsNotice } from "@/components/settings/SellerDetailsNotice";
 import type { TraderIdentityField } from "@/lib/settings/trader-identity";
-import { FormSection } from "./FormSection";
+import {
+  fixFieldLabel,
+  flaggedFieldsIn,
+  flaggedProductSections,
+  type ProductFixField,
+} from "@/lib/moderation/fix-fields";
+import { moderationNoticeId } from "@/lib/moderation/paths";
+import { requestModerationReview } from "@/lib/moderation/review-request";
+import { formatList } from "@/lib/format/intl";
+import { productEditPath } from "@/lib/products/paths";
+import { FormSection, type SectionFlag } from "./FormSection";
+import { useFixProgress } from "./useFixProgress";
 import { FormSectionNav } from "./FormSectionNav";
 import { ProductFormSnapshotScript } from "./ProductFormSnapshotScript";
 import {
@@ -124,6 +136,9 @@ const STATUS_ORDER: readonly ProductStatus[] = ["active", "draft"];
 
 /** Long enough to read the green check before the list replaces the form. */
 const SAVED_HOLD_MS = 1100;
+
+/** No flagged parts: a live product, a draft, or a removal (nothing to fix). */
+const NO_FIX_FIELDS: readonly string[] = [];
 
 type FieldErrors = Partial<
   Record<
@@ -494,6 +509,10 @@ export function ProductForm({
   // Set the moment a save succeeds, so the redirect that follows is not itself
   // treated as abandoning unsaved work.
   const [saved, setSaved] = useState(false);
+  // A paused product's save asks "send it back now?" instead of leaving.
+  const [reviewPromptOpen, setReviewPromptOpen] = useState(false);
+  const [reviewPending, setReviewPending] = useState(false);
+  const [reviewError, setReviewError] = useState<ActionError | null>(null);
 
   // The pending "show Saved, then navigate" timer. Held in a ref and cleared
   // on unmount: a redirect that fires after this form is gone would yank a
@@ -601,6 +620,100 @@ export function ProductForm({
     snapshot.sections.map((section) => [section.id, section]),
   ) as Record<ProductFormSectionId, (typeof snapshot.sections)[number] | undefined>;
 
+  // ── WHAT STAFF ASKED TO CHANGE ──────────────────────────────────────────
+  // A paused product arrives with the parts staff named (the photos, the
+  // title). Each one's section is outlined and says so, the field itself is
+  // outlined, and the index marks the section: the banner at the top says
+  // WHAT, this is WHERE. A removal has nothing left to fix, so only a pause
+  // lights the form up.
+  const takedown = product?.removal;
+  const pausedForFix = takedown?.kind === "paused";
+  const fixFields = pausedForFix ? takedown.fields : NO_FIX_FIELDS;
+  const awaitingReview = Boolean(takedown?.reviewRequestedAt);
+  const fixProgress = useFixProgress(pausedForFix ? takedown.decisionId : null);
+  const initialPage = useMemo(() => JSON.parse(pristinePage) as Record<string, unknown>, [
+    pristinePage,
+  ]);
+  const pristineValues = useMemo(
+    () => JSON.parse(pristine) as ProductFormValues,
+    [pristine],
+  );
+
+  /** Whether the seller has edited one flagged part in this visit. */
+  function changedNow(field: ProductFixField): boolean {
+    const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
+    switch (field) {
+      case "title":
+      case "description":
+        return values[field] !== pristineValues[field];
+      case "price":
+        return values.price !== pristineValues.price || values.currency !== pristineValues.currency;
+      case "image":
+        return imageFile !== null;
+      case "file":
+        return digitalTouched;
+      case "purchaseLink":
+        return purchaseUrl !== initialPage.purchaseUrl;
+      case "shipping":
+        return shippingProfileId !== initialPage.shippingProfileId;
+      case "options":
+        return !same(optionGroups, initialPage.optionGroups);
+      case "photos":
+        return !same(
+          gallery.map(({ key, alt, optionId }) => ({ key, alt, optionId })),
+          initialPage.gallery,
+        );
+      case "documents":
+        return !same(
+          documents.map(({ key, label }) => ({ key, label })),
+          initialPage.documents,
+        );
+      case "specs": {
+        const { safety: _now, ...specsNow } = details;
+        const { safety: _then, ...specsThen } = initialPage.details as DetailsFormValues;
+        void _now;
+        void _then;
+        return !same(specsNow, specsThen) || !same(optionDetails, initialPage.optionDetails);
+      }
+      case "safety":
+        return !same(details.safety, (initialPage.details as DetailsFormValues).safety);
+      default:
+        return false;
+    }
+  }
+
+  /** Edited now, or edited and saved earlier in this browser session. */
+  const fixDone = (field: string) =>
+    changedNow(field as ProductFixField) || fixProgress.saved.has(field);
+
+  const flaggedSections = new Set<string>(flaggedProductSections(fixFields));
+
+  function sectionFlag(id: ProductFormSectionId): SectionFlag | undefined {
+    const inSection = flaggedFieldsIn(id, fixFields);
+    if (!product || inSection.length === 0) return undefined;
+    return {
+      fields: formatList(
+        inSection.map((field) => resolveMessage(fixFieldLabel("product", field))),
+        locale,
+        { englishSeparator: ", " },
+      ),
+      state: awaitingReview ? "review" : inSection.every(fixDone) ? "changed" : "needs",
+      noticeId: moderationNoticeId(product.id),
+    };
+  }
+
+  /** The outline for one flagged field's block, or nothing. */
+  const fieldFlagClass = (field: ProductFixField) =>
+    fixFields.includes(field) ? flaggedFieldClass : undefined;
+
+  /** "Change this" beside a flagged field's label, until it has been. */
+  const fixMark = (field: ProductFixField) =>
+    fixFields.includes(field) && !awaitingReview && !fixDone(field) ? (
+      <span className={cn(flagChipClass, "ml-2")} data-fix-mark={field}>
+        {t("form.moderation.fieldBadge")}
+      </span>
+    ) : null;
+
   function updateField<Key extends keyof ProductFormValues>(
     key: Key,
     value: ProductFormValues[Key],
@@ -673,8 +786,9 @@ export function ProductForm({
   /** The whole save flow (validate, upload, write, navigate on success).
    *  Shared by the submit button and the leave-guard's "Save and leave", and
    *  returns whether it succeeded so the guard can branch without re-reading
-   *  async state. */
-  async function performSave(): Promise<boolean> {
+   *  async state. `leaving` skips the paused product's review prompt: the
+   *  seller already said where they are going. */
+  async function performSave({ leaving = false }: { leaving?: boolean } = {}): Promise<boolean> {
     setSubmitAttempted(true);
     setSubmitError(null);
     setSaveResult(null);
@@ -836,6 +950,22 @@ export function ProductForm({
       // change — nothing ever said "saved", which is indistinguishable from a
       // no-op when the thing you were checking (an image) is easy to miss.
       setSaveResult({ success: tCommon("saved") });
+
+      // A PAUSED product's save is usually the fix itself, and the seller's
+      // next move is sending it back. Leaving for the list here would bury
+      // that button a page away, so they are asked on the spot instead. What
+      // they changed is remembered, so the parts stay "Changed" after the
+      // reload that follows either answer.
+      if (pausedForFix && !awaitingReview) {
+        fixProgress.remember(
+          fixFields.filter((field) => changedNow(field as ProductFixField)),
+        );
+        if (!leaving) {
+          setReviewPromptOpen(true);
+          return true;
+        }
+      }
+
       // Raised BEFORE the redirect on purpose: the toast provider lives at the
       // root layout, so this survives the navigation and lands on the product
       // list — where the seller can see the row it is talking about.
@@ -872,12 +1002,37 @@ export function ProductForm({
    *  visible instead of hidden behind the modal. Mirrors the storefront
    *  designer's three-button guard, which shipped first. */
   async function handleSaveAndLeave() {
-    await performSave();
+    await performSave({ leaving: true });
     // Close the prompt either way: on failure so the error and field messages
     // are readable, on success so the button's "Saved" confirmation is not
     // hidden behind the modal for the moment before the redirect. Success
     // needs no leave() — performSave has already scheduled the navigation.
     leaveGuard.cancel();
+  }
+
+  /**
+   * The paused product's post-save question, answered. Either way the page
+   * reloads in full: the form's own state still holds the files it just
+   * uploaded, and only a fresh load reads back what was actually stored (and
+   * shows the banner saying it went for review).
+   */
+  async function sendForReview() {
+    if (!product) return;
+    setReviewPending(true);
+    setReviewError(null);
+    const result = await requestModerationReview("product", product.id).catch(() => null);
+    if (!result || !result.ok) {
+      setReviewPending(false);
+      setReviewError(result ? result.error : unexpectedError());
+      return;
+    }
+    window.location.assign(productEditPath(product.id));
+  }
+
+  function keepEditing() {
+    if (!product) return;
+    setReviewPromptOpen(false);
+    window.location.assign(productEditPath(product.id));
   }
 
   const titleErrorId = `${fieldId}-title-error`;
@@ -912,6 +1067,7 @@ export function ProductForm({
     about: id === "media" ? "" : t(`form.sections.${id}.about`),
     state: sectionInfo[id]?.state ?? ("empty" as const),
     summary: sectionInfo[id] ? summaryText(summaries[id], resolveMessage) : undefined,
+    flag: sectionFlag(id),
   });
 
   return (
@@ -938,12 +1094,13 @@ export function ProductForm({
         // heading, that is the worst possible collision.
       >
         <div className="space-y-5">
-          <div className="space-y-1.5">
+          <div className={cn("space-y-1.5", fieldFlagClass("title"))} data-fix-field-block="title">
             <div className="flex items-center">
               <label htmlFor={`${fieldId}-title`} className={labelClass}>
                 {t("form.title")}
               </label>
               <RequiredMark />
+              {fixMark("title")}
             </div>
             {/* The one field every product needs — visually the biggest. */}
             <input
@@ -965,12 +1122,16 @@ export function ProductForm({
             )}
           </div>
 
-          <div className="space-y-1.5">
+          <div
+            className={cn("space-y-1.5", fieldFlagClass("description"))}
+            data-fix-field-block="description"
+          >
             <label htmlFor={`${fieldId}-description`} className={labelClass}>
               {t("form.description")}{" "}
               <span className="font-normal text-muted-foreground">
                 {t("form.optional")}
               </span>
+              {fixMark("description")}
             </label>
             <textarea
               id={`${fieldId}-description`}
@@ -987,7 +1148,10 @@ export function ProductForm({
               description and price are the three things every product needs
               before it can be saved, and splitting them put one field behind
               its own heading. */}
-          <div className="space-y-1.5 sm:max-w-sm">
+          <div
+            className={cn("space-y-1.5 sm:max-w-sm", fieldFlagClass("price"))}
+            data-fix-field-block="price"
+          >
             <PriceField
               id={`${fieldId}-price`}
               errorId={priceErrorId}
@@ -1053,7 +1217,7 @@ export function ProductForm({
         icon={ImageIcon}
       >
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-          <div className="space-y-1.5">
+          <div className={cn("space-y-1.5", fieldFlagClass("image"))} data-fix-field-block="image">
             <div className="flex items-center gap-1.5">
               <label htmlFor={`${fieldId}-image`} className={labelClass}>
                 {t("form.displayImage")}
@@ -1061,6 +1225,7 @@ export function ProductForm({
               <InfoTip label={t("form.displayImageAbout")}>
                 {t("form.displayImageHelp")}
               </InfoTip>
+              {fixMark("image")}
             </div>
             <ImageDropzone
               inputId={`${fieldId}-image`}
@@ -1069,7 +1234,7 @@ export function ProductForm({
             />
           </div>
 
-          <div className="space-y-1.5">
+          <div className={cn("space-y-1.5", fieldFlagClass("file"))} data-fix-field-block="file">
             <div className="flex items-center gap-1.5">
               <label htmlFor={`${fieldId}-file`} className={labelClass}>
                 {t("form.digitalFile")}
@@ -1077,6 +1242,7 @@ export function ProductForm({
               <InfoTip label={t("form.digitalFileAbout")}>
                 {t("form.digitalFileHelp")}
               </InfoTip>
+              {fixMark("file")}
             </div>
             <FileDropzone
               inputId={`${fieldId}-file`}
@@ -1093,7 +1259,10 @@ export function ProductForm({
             checkout yet, so this is the one way a page can sell: the seller's
             own checkout, payment link or marketplace listing. https only; the
             page prints the destination host beside the button. */}
-        <div className="mt-6 space-y-1.5">
+        <div
+          className={cn("mt-6 space-y-1.5", fieldFlagClass("purchaseLink"))}
+          data-fix-field-block="purchaseLink"
+        >
           <div className="flex items-center gap-1.5">
             <label htmlFor={`${fieldId}-purchase`} className={labelClass}>
               {t("form.purchaseLink")}
@@ -1101,6 +1270,7 @@ export function ProductForm({
             <InfoTip label={t("form.purchaseLinkAbout")}>
               {t("form.purchaseLinkHelp")}
             </InfoTip>
+            {fixMark("purchaseLink")}
           </div>
           <input
             id={`${fieldId}-purchase`}
@@ -1354,6 +1524,38 @@ export function ProductForm({
         </div>
       </div>
 
+      {pausedForFix && (
+        <Modal
+          open={reviewPromptOpen}
+          onClose={keepEditing}
+          title={t("form.moderation.reviewPrompt.title")}
+          description={t("form.moderation.reviewPrompt.body")}
+        >
+          <div className="flex flex-col gap-4" data-review-prompt="">
+            {reviewError && <ActionErrorNotice error={reviewError} />}
+            <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                onClick={keepEditing}
+                disabled={reviewPending}
+                className={cn(secondaryButtonClass, "whitespace-nowrap")}
+              >
+                {t("form.moderation.reviewPrompt.keepEditing")}
+              </button>
+              <button
+                type="button"
+                onClick={sendForReview}
+                disabled={reviewPending}
+                className={cn(primaryButtonClass, "whitespace-nowrap")}
+                data-review-prompt-send=""
+              >
+                {reviewPending ? tCommon("sending") : t("form.moderation.reviewPrompt.send")}
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
       <Modal
         open={leaveGuard.promptOpen}
         onClose={leaveGuard.cancel}
@@ -1405,6 +1607,7 @@ export function ProductForm({
           so nothing lives only here. */}
       <FormSectionNav
         sections={snapshot.sections}
+        flagged={flaggedSections}
         // Below the sticky TopBar (h-14), not under it.
         className="sticky top-20 hidden lg:block"
       />

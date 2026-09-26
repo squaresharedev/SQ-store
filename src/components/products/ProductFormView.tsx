@@ -1,11 +1,9 @@
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { Product, ProductDetail } from "@/types/product";
 import type { ShippingChoices } from "@/lib/storefront/queries";
 import type { SellerShippingPolicy } from "@/types/shipping-policy";
 import type { TraderIdentityField } from "@/lib/settings/trader-identity";
-import { iconNudgeLeftClass } from "@/components/ui/control-styles";
+import { BackLink } from "@/components/ui/BackLink";
 import { ProductForm } from "./ProductForm";
 import { RemovalNotice } from "./RemovalNotice";
 
@@ -44,17 +42,9 @@ export function ProductFormView({
     // a form that got wider on a medium screen would be a worse form, not a
     // better one.
     <main className="mx-auto max-w-3xl px-6 py-8 lg:max-w-5xl">
-      <Link
-        href={returnTo ?? "/products"}
-        className="group/btn inline-flex items-center gap-1.5 font-inter text-sm text-muted-foreground transition-colors duration-base ease-standard hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none"
-      >
-        <ArrowLeft
-          className={`size-4 ${iconNudgeLeftClass}`}
-          strokeWidth={2}
-          aria-hidden="true"
-        />
+      <BackLink href={returnTo ?? "/products"}>
         {returnTo ? t("backToStorefront") : t("back")}
-      </Link>
+      </BackLink>
 
       {/* The subtitle is gone. "Add a product to sell through your store and
           embeds" under a heading that says "New product" is a sentence nobody

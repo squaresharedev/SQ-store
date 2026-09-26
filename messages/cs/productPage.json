@@ -95,10 +95,10 @@
   },
   "report": {
     "trigger": "{target, select, product {Nahlásit tento produkt} other {Nahlásit tuto výlohu}}",
-    "title": "{target, select, product {Nahlásit tento produkt} other {Nahlásit tuto výlohu}}",
+    "title": "{target, select, product {Nahlásit tento produkt} storefront {Nahlásit tuto výlohu} seller {Nahlásit tohoto prodejce} other {Nahlásit problém}}",
     "description": "Napište nám, co je špatně. Každé nahlášení posuzuje člověk.",
     "sentTitle": "Nahlášení odesláno",
-    "sentBody": "{target, select, product {Děkujeme. Tento produkt posoudí člověk. Prodejci neprozrazujeme, kdo něco nahlásil.} other {Děkujeme. Tuto výlohu posoudí člověk. Prodejci neprozrazujeme, kdo něco nahlásil.}}",
+    "sentBody": "{target, select, product {Děkujeme. Tento produkt posoudí člověk. Prodejci neprozrazujeme, kdo něco nahlásil.} seller {Děkujeme. Tohoto prodejce posoudí člověk. Neprozrazujeme mu, kdo něco nahlásil.} other {Děkujeme. Tuto výlohu posoudí člověk. Prodejci neprozrazujeme, kdo něco nahlásil.}}",
     "reasonsLegend": "Co je na tom špatně?",
     "reasons": {
       "illegal": {
@@ -150,6 +150,22 @@
       "reason": "Vyberte, co je špatně.",
       "rateLimited": "Odsud přišlo příliš mnoho nahlášení. Zkuste to později.",
       "submitFailed": "Odeslání se nepodařilo. Zkuste to znovu."
+    },
+    "triggerAny": "Nahlásit problém",
+    "scopeLegend": "Co chcete nahlásit?",
+    "scopes": {
+      "product": {
+        "label": "Tento produkt",
+        "hint": "{title}"
+      },
+      "storefront": {
+        "label": "Tuto výlohu",
+        "hint": "{name} a vše, co je na ní"
+      },
+      "seller": {
+        "label": "Tohoto prodejce",
+        "hint": "{name} ve všech jejich výlohách"
+      }
     }
   },
   "shippingProse": {

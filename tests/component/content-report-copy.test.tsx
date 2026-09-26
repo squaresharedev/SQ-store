@@ -13,6 +13,13 @@ import { RemovalBadge, RemovalNotice } from "@/components/products/RemovalNotice
  */
 
 const TARGET = "0b1f7b1e-6d3a-4f4e-9f6c-1a2b3c4d5e6f";
+const STOREFRONT = "5f0e1a2b-3c4d-4e5f-8a6b-7c8d9e0f1a2b";
+
+const PAGE = {
+  product: { id: TARGET, title: "Brass lamp" },
+  storefront: { id: STOREFRONT, name: "Lamp studio" },
+  sellerName: "Lamp Studio s.r.o.",
+};
 
 afterEach(() => {
   cleanup();
@@ -20,9 +27,15 @@ afterEach(() => {
 });
 
 function openDialog() {
-  render(<ReportDialog targetType="product" targetId={TARGET} />);
+  render(<ReportDialog {...PAGE} />);
   fireEvent.click(screen.getByRole("button", { name: "Report this product" }));
   return screen.getByRole("dialog");
+}
+
+/** The body the dialog posted to /api/report. */
+function posted(fetchMock: ReturnType<typeof vi.fn>): Record<string, unknown> {
+  const init = fetchMock.mock.calls.at(-1)![1] as RequestInit;
+  return JSON.parse(init.body as string) as Record<string, unknown>;
 }
 
 describe("ReportDialog", () => {
@@ -107,10 +120,81 @@ describe("ReportDialog", () => {
     );
   });
 
-  it("names a storefront when that is what is being reported", () => {
-    render(<ReportDialog targetType="storefront" targetId={TARGET} />);
-    fireEvent.click(screen.getByRole("button", { name: "Report this storefront" }));
-    expect(screen.getByRole("heading", { name: "Report this storefront" })).toBeVisible();
+  it("offers only the product when the seller sells one thing from one storefront", () => {
+    const dialog = openDialog();
+    expect(dialog.querySelector("[data-report-scopes]")).toBeNull();
+    // The eight reasons, and nothing else to choose.
+    expect(within(dialog).getAllByRole("radio")).toHaveLength(8);
+  });
+
+  it("lets a buyer report the storefront or the seller when those differ from the product", async () => {
+    const fetchMock = vi.fn(async () => Response.json({ ok: true, message: "ok" }, { status: 202 }));
+    vi.stubGlobal("fetch", fetchMock);
+    render(<ReportDialog {...PAGE} scopes={{ storefront: true, seller: true }} />);
+    // With a choice to make, the link no longer claims to be about the product.
+    fireEvent.click(screen.getByRole("button", { name: "Report a problem" }));
+    const dialog = screen.getByRole("dialog");
+
+    const scopes = dialog.querySelector<HTMLElement>("[data-report-scopes]")!;
+    expect(within(scopes).getByText("What do you want to report?").tagName).toBe("LEGEND");
+    expect(
+      within(scopes).getAllByRole("radio").map((radio) => radio.closest("label")?.textContent),
+    ).toEqual([
+      "This productBrass lamp",
+      "This storefrontLamp studio, and everything on it",
+      "This sellerLamp Studio s.r.o., across all of their storefronts",
+    ]);
+    expect(within(scopes).getByRole("radio", { name: /This product/ })).toBeChecked();
+
+    fireEvent.click(within(scopes).getByRole("radio", { name: /This storefront/ }));
+    expect(within(dialog).getByRole("heading", { name: "Report this storefront" })).toBeVisible();
+
+    fireEvent.click(within(scopes).getByRole("radio", { name: /This seller/ }));
+    expect(within(dialog).getByRole("heading", { name: "Report this seller" })).toBeVisible();
+    fireEvent.click(within(dialog).getByRole("radio", { name: /Scam or fraud/ }));
+    fireEvent.click(within(dialog).getByRole("button", { name: "Send report" }));
+
+    // The seller is named by the storefront, never by an account id.
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    expect(posted(fetchMock)).toMatchObject({
+      targetType: "seller",
+      targetId: STOREFRONT,
+      reason: "scam",
+    });
+    expect(
+      await screen.findByText(
+        "Thanks. A person will review this seller. We do not share who reported something with them.",
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("reports the storefront by its own id", async () => {
+    const fetchMock = vi.fn(async () => Response.json({ ok: true, message: "ok" }, { status: 202 }));
+    vi.stubGlobal("fetch", fetchMock);
+    render(<ReportDialog {...PAGE} scopes={{ storefront: true, seller: false }} />);
+    fireEvent.click(screen.getByRole("button", { name: "Report a problem" }));
+    const dialog = screen.getByRole("dialog");
+    expect(
+      within(dialog.querySelector<HTMLElement>("[data-report-scopes]")!).getAllByRole("radio"),
+    ).toHaveLength(2);
+    fireEvent.click(within(dialog).getByRole("radio", { name: /This storefront/ }));
+    fireEvent.click(within(dialog).getByRole("radio", { name: /Spam/ }));
+    fireEvent.click(within(dialog).getByRole("button", { name: "Send report" }));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    expect(posted(fetchMock)).toMatchObject({ targetType: "storefront", targetId: STOREFRONT });
+  });
+
+  it("starts over on the product after closing", () => {
+    render(<ReportDialog {...PAGE} scopes={{ storefront: false, seller: true }} />);
+    fireEvent.click(screen.getByRole("button", { name: "Report a problem" }));
+    fireEvent.click(within(screen.getByRole("dialog")).getByRole("radio", { name: /This seller/ }));
+    fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Cancel" }));
+    return waitFor(() => {
+      fireEvent.click(screen.getByRole("button", { name: "Report a problem" }));
+      expect(
+        within(screen.getByRole("dialog")).getByRole("radio", { name: /This product/ }),
+      ).toBeChecked();
+    });
   });
 });
 
@@ -124,6 +208,8 @@ describe("RemovalNotice", () => {
           note: "The mark is registered.",
           at: "2026-09-17T10:00:00Z",
           reviewRequestedAt: null,
+          fields: [],
+          decisionId: null,
         }}
         kind="product"
         id={TARGET}
@@ -153,14 +239,23 @@ describe("RemovalNotice", () => {
     expect(link.parentElement?.textContent).toBe(
       "If you think we got this wrong, ask us to look again.",
     );
-    const href = new URL(link.getAttribute("href")!);
-    expect(href.searchParams.get("subject")).toBe("Appeal: product removal (Brass lamp)");
+    // A takedown from before the decision record: no in-app appeal exists
+    // for it, so the address to write to.
+    expect(link.getAttribute("href")).toBe("mailto:support@squareshare.eu");
   });
 
   it("falls back to the catch-all ground, and leaves out a missing date", () => {
     render(
       <RemovalNotice
-        removal={{ kind: "removed", ground: "nonsense", note: null, at: null, reviewRequestedAt: null }}
+        removal={{
+          kind: "removed",
+          ground: "nonsense",
+          note: null,
+          at: null,
+          reviewRequestedAt: null,
+          fields: [],
+          decisionId: null,
+        }}
         kind="storefront"
         id={TARGET}
         title="Shop"

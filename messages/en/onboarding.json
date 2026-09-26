@@ -55,7 +55,6 @@
     "openPage": "Open page",
     "opensInNewTab": " (opens in a new tab)",
     "hide": "Hide",
-    "progressLabel": "Setup progress",
     "progress": "{total, plural, other {{done} of {total} done}}",
     "stepDone": " (done)",
     "stepToDo": " (to do)"

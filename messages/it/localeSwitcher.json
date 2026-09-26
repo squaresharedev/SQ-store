@@ -1,5 +1,7 @@
 {
   "label": "Lingua",
   "settingsTitle": "Lingua",
-  "settingsDescription": "La lingua in cui è mostrata la tua dashboard. Gli acquirenti vedono le pagine prodotto nella propria lingua, e tutto ciò che hai scritto tu resta esattamente come lo hai scritto."
+  "settingsDescription": "La lingua in cui è mostrata la tua dashboard. Gli acquirenti vedono le pagine prodotto nella propria lingua, e tutto ciò che hai scritto tu resta esattamente come lo hai scritto.",
+  "switching": "Cambio della lingua: {language}…",
+  "failed": "Non è stato possibile cambiare la lingua. Riprova."
 }

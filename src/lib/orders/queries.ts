@@ -110,6 +110,34 @@ export async function getOrderById(id: string): Promise<OrderView | null> {
   return toOrderView(data as Record<string, unknown>);
 }
 
+/** The dashboard only ever asks about its Recent orders card's handful. */
+const MAX_BATCH_IDS = 20;
+
+/**
+ * Several orders by id in one query, scoped like getOrderById. Backs the
+ * overview's Recent orders card, which opens each row's detail panel in place
+ * and so needs the full order up front, not just the aggregate's summary.
+ * Soft-fails to [] (malformed ids are dropped): a row without its detail still
+ * links to /orders?order=<id>, so a failed read here costs speed, not access.
+ */
+export async function getOrdersByIds(ids: string[]): Promise<OrderView[]> {
+  const valid = Array.from(new Set(ids.filter((id) => UUID.test(id)))).slice(0, MAX_BATCH_IDS);
+  if (valid.length === 0) return [];
+
+  const account = await getActiveAccount();
+  if (!account) return [];
+
+  const supabase = await createClient();
+  const { data, error } = await (supabase as SupabaseClient)
+    .from("orders")
+    .select(ORDER_COLUMNS)
+    .eq("seller_id", account.accountId)
+    .in("id", valid);
+
+  if (error || !data) return [];
+  return (data as Record<string, unknown>[]).map(toOrderView);
+}
+
 /**
  * Owner-scoped, paginated order list. The seller id comes from the session
  * (never from the caller); RLS enforces the same boundary at the DB.

@@ -95,10 +95,10 @@
   },
   "report": {
     "trigger": "{target, select, product {Segnala questo prodotto} other {Segnala questa vetrina}}",
-    "title": "{target, select, product {Segnala questo prodotto} other {Segnala questa vetrina}}",
+    "title": "{target, select, product {Segnala questo prodotto} storefront {Segnala questa vetrina} seller {Segnala questo venditore} other {Segnala un problema}}",
     "description": "Dicci cosa non va. Ogni segnalazione viene esaminata da una persona.",
     "sentTitle": "Segnalazione inviata",
-    "sentBody": "{target, select, product {Grazie. Una persona esaminerà questo prodotto. Non comunichiamo al venditore chi ha fatto la segnalazione.} other {Grazie. Una persona esaminerà questa vetrina. Non comunichiamo al venditore chi ha fatto la segnalazione.}}",
+    "sentBody": "{target, select, product {Grazie. Una persona esaminerà questo prodotto. Non comunichiamo al venditore chi ha fatto la segnalazione.} seller {Grazie. Una persona esaminerà questo venditore. Non comunichiamo a lui chi ha fatto la segnalazione.} other {Grazie. Una persona esaminerà questa vetrina. Non comunichiamo al venditore chi ha fatto la segnalazione.}}",
     "reasonsLegend": "Cosa non va?",
     "reasons": {
       "illegal": {
@@ -150,6 +150,22 @@
       "reason": "Scegli cosa non va.",
       "rateLimited": "Troppe segnalazioni da qui. Riprova più tardi.",
       "submitFailed": "Non è stato possibile inviarla. Riprova."
+    },
+    "triggerAny": "Segnala un problema",
+    "scopeLegend": "Cosa vuoi segnalare?",
+    "scopes": {
+      "product": {
+        "label": "Questo prodotto",
+        "hint": "{title}"
+      },
+      "storefront": {
+        "label": "Questa vetrina",
+        "hint": "{name}, e tutto ciò che contiene"
+      },
+      "seller": {
+        "label": "Questo venditore",
+        "hint": "{name}, in tutte le sue vetrine"
+      }
     }
   },
   "shippingProse": {

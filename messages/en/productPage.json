@@ -95,10 +95,10 @@
   },
   "report": {
     "trigger": "{target, select, product {Report this product} other {Report this storefront}}",
-    "title": "{target, select, product {Report this product} other {Report this storefront}}",
+    "title": "{target, select, product {Report this product} storefront {Report this storefront} seller {Report this seller} other {Report a problem}}",
     "description": "Tell us what is wrong with it. A person reviews every report.",
     "sentTitle": "Report sent",
-    "sentBody": "{target, select, product {Thanks. A person will review this product. We do not share who reported something with the seller.} other {Thanks. A person will review this storefront. We do not share who reported something with the seller.}}",
+    "sentBody": "{target, select, product {Thanks. A person will review this product. We do not share who reported something with the seller.} seller {Thanks. A person will review this seller. We do not share who reported something with them.} other {Thanks. A person will review this storefront. We do not share who reported something with the seller.}}",
     "reasonsLegend": "What is wrong with it?",
     "reasons": {
       "illegal": {
@@ -150,6 +150,22 @@
       "reason": "Pick what is wrong with it.",
       "rateLimited": "Too many reports from here. Try again later.",
       "submitFailed": "That could not be submitted. Try again."
+    },
+    "triggerAny": "Report a problem",
+    "scopeLegend": "What do you want to report?",
+    "scopes": {
+      "product": {
+        "label": "This product",
+        "hint": "{title}"
+      },
+      "storefront": {
+        "label": "This storefront",
+        "hint": "{name}, and everything on it"
+      },
+      "seller": {
+        "label": "This seller",
+        "hint": "{name}, across all of their storefronts"
+      }
     }
   },
   "shippingProse": {

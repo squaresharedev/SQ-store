@@ -113,19 +113,45 @@
     "pausedOn": "Paused on",
     "statement": "{ground, select, illegal {Illegal goods or activity. It offered something that cannot be sold legally, or used the listing to arrange it.} sexual {Sexual content. It contained explicit sexual content.} violence {Violence or gore. It contained graphic violence.} hate {Hate or harassment. It attacked a person or group, or carried hate symbolism.} counterfeit {Counterfeit or stolen. It appeared to offer counterfeit goods, or work that belongs to someone else.} scam {Scam or fraud. It appeared designed to take payment without delivering what was promised.} spam {Spam. It was repetitive or misleading rather than a genuine listing.} other {Something else. It broke the platform rules.}}{noted, select, yes { {note}} other {}}",
     "statementUnlabelled": "It broke the platform rules.{noted, select, yes { {note}} other {}}",
-    "fixHint": "{kind, select, product {Edit the product below to fix this, save it, then send it back to us.} other {Open the storefront to fix this, then come back here and send it to us.}}",
+    "fixHint": "{kind, select, product {Change the highlighted parts below, save, then send it back to us.} other {Open the storefront, change what is listed above, then come back here and send it to us.}}",
     "readOnlyHint": "{kind, select, product {Someone who can edit this product has to make the change and send it for review.} other {Someone who can edit this storefront has to make the change and send it for review.}}",
     "appeal": "{kind, select, product {You can still edit this product. Editing does not put it back: <link>ask us to look again</link> if you think this was wrong.} other {You can still edit this storefront. Editing does not put it back: <link>ask us to look again</link> if you think this was wrong.}}",
     "appealPaused": "Think this is a mistake? <link>Write to us</link>.",
     "appealFinal": "If you think we got this wrong, <link>ask us to look again</link>.",
-    "appealSubject": "{kind, select, product {Appeal: product removal ({title})} other {Appeal: storefront removal ({title})}}",
-    "appealBody": "{kind, select, product {I would like this product reviewed again.\n\nProduct id: {id}\nName: {title}\n\nWhy I think this was wrong:\n} other {I would like this storefront reviewed again.\n\nStorefront id: {id}\nName: {title}\n\nWhy I think this was wrong:\n}}",
     "reviewRequest": {
       "button": "I've made the changes, review it",
       "sent": "Sent for review on <time>{date}</time>. A person will look at your changes, and you will hear back here and by email.",
       "failed": "That could not be sent.",
       "failedFix": "Try again in a moment."
-    }
+    },
+    "why": "Why",
+    "whatToChange": "What to change",
+    "concerned": "What it concerned",
+    "showField": "Show {field} on this page",
+    "fields": {
+      "product": "{field, select, title {Title} description {Description} price {Price} image {Display image} file {Digital file} purchaseLink {Purchase link} shipping {Shipping} options {Options} photos {Photos} specs {Specifications} documents {Documents} safety {Safety and compliance} other {Something else}}",
+      "storefront": "{field, select, name {Storefront name} header {Header} text {Text} images {Images} products {Products shown} background {Background} productPage {Product pages} other {Something else}}"
+    },
+    "reference": "Reference",
+    "downloadStatement": "Download the decision (PDF)",
+    "openEditor": "Open the storefront to change it",
+    "appealButton": "Appeal this decision",
+    "appealForm": {
+      "title": "Appeal this decision",
+      "description": "Tell us why you think we got this wrong. A person reviews every appeal, and you will hear back here and by email. It stays hidden while we look.",
+      "label": "Why do you think this decision is wrong?",
+      "placeholder": "For example: the logo in the photo is our own registered trademark, and this is where you can check it.",
+      "help": "At least {min} characters. Add anything that helps us check, like a link or a registration number.",
+      "count": "{count} / {max}",
+      "submit": "Send appeal",
+      "sent": "Appeal sent. We will get back to you."
+    },
+    "appealStatus": {
+      "open": "You appealed on <time>{date}</time>. A person will review it, and you will hear back here and by email.",
+      "upheld": "We reviewed your appeal on <time>{date}</time>. The decision stands.",
+      "answer": "Our answer: {note}"
+    },
+    "editorDetails": "Why, and what to do next"
   },
   "import": {
     "fields": {
@@ -309,6 +335,21 @@
     "nav": {
       "label": "Form sections",
       "heading": "On this page"
+    },
+    "moderation": {
+      "badge": "Needs changes",
+      "changed": "Changed",
+      "callout": "SquareShare asked you to change {fields} here.",
+      "seeWhy": "See why",
+      "fieldBadge": "Change this",
+      "navHint": "needs changes",
+      "inReview": "Sent for review",
+      "reviewPrompt": {
+        "title": "Saved. Send it back for review?",
+        "body": "If you have changed everything SquareShare asked for, send it back now and a person will look at it. If not, keep editing and send it when you are done.",
+        "keepEditing": "Keep editing",
+        "send": "Send for review"
+      }
     }
   },
   "stockFields": {
@@ -522,5 +563,76 @@
     "dropPrompt": "Drop a file or click to upload",
     "hint": "ZIP, PDF, and similar, up to {max} MB",
     "remove": "Remove digital file"
+  },
+  "statement": {
+    "fileTitle": "Statement of reasons {reference}",
+    "title": "Statement of reasons",
+    "subtitle": "{action, select, paused {We paused your {target, select, product {product} other {storefront}}} other {We removed your {target, select, product {product} other {storefront}}}}",
+    "intro": "This statement explains a decision we took about content you published on SquareShare, why we took it, and how you can challenge it. You are entitled to it under Article 17 of the EU Digital Services Act (Regulation (EU) 2022/2065).",
+    "sections": {
+      "decision": "The decision",
+      "reasons": "Why we took it",
+      "fix": "What to change",
+      "redress": "How to challenge it",
+      "appeal": "Your appeal"
+    },
+    "labels": {
+      "reference": "Reference",
+      "issued": "Statement issued",
+      "content": "Content",
+      "contentId": "Content ID",
+      "decision": "Decision",
+      "decidedOn": "Decided on",
+      "scope": "Where it applies",
+      "duration": "How long",
+      "status": "Status today",
+      "ground": "Ground",
+      "note": "Note from our reviewer",
+      "facts": "Facts and circumstances",
+      "automated": "Automated means",
+      "legalBasis": "Basis for the decision"
+    },
+    "content": "{target, select, product {Product} other {Storefront}}: {title}",
+    "decision": {
+      "paused": "Paused. The content is hidden from buyers until you make the changes listed below and we approve them.",
+      "removed": "Removed. The content is no longer available to buyers. This decision is final unless an appeal changes it."
+    },
+    "scope": "Everywhere SquareShare shows it: its own page, embeds on other websites and shared links, in every country.",
+    "duration": {
+      "paused": "Until we approve your changes.",
+      "removed": "Indefinite."
+    },
+    "status": {
+      "inForce": "In force.",
+      "replaced": "Replaced by a later decision.",
+      "reversed": "Reversed. The content is visible to buyers again.",
+      "deleted": "The content has since been deleted."
+    },
+    "facts": {
+      "notices": "{count, plural, =0 {We found this ourselves, without a notice from anyone outside SquareShare.} one {This followed # notice from someone outside SquareShare, about: {reasons}.} other {This followed # notices from people outside SquareShare, about: {reasons}.}}",
+      "review": "A member of SquareShare staff reviewed the content itself before deciding. We do not share who sent a notice."
+    },
+    "automated": "No automated means were used to detect this content or to take this decision.",
+    "legalBasis": {
+      "contract": "Contractual: the SquareShare Terms of Service, which do not allow content like this ({url}).",
+      "illegal": "Legal: we considered the content illegal under the law that applies to it."
+    },
+    "noNote": "None.",
+    "fixIntro": "{target, select, product {Change these parts, then press \"I've made the changes\" on the product in your dashboard, and we will look again:} other {Change these parts, then press \"I've made the changes\" on the storefront in your dashboard, and we will look again:}}",
+    "redress": {
+      "appeal": "Appeal to us, free of charge: press \"Appeal this decision\" on the {target, select, product {product} other {storefront}} in your dashboard, within six months of this decision. A person reviews every appeal, and you will hear back in your dashboard and by email.",
+      "settlement": "Out-of-court dispute settlement: you may take this decision to a dispute settlement body certified under Article 21 of the Digital Services Act.",
+      "court": "Courts: you may take this decision to a competent court. Using the options above does not affect that right.",
+      "contact": "Questions: write to {email} and quote reference {reference}."
+    },
+    "appeal": {
+      "open": "You appealed on {date}. A person is reviewing it.",
+      "upheld": "You appealed on {date}. We answered on {decided}: the decision stands.",
+      "overturned": "You appealed on {date}. We answered on {decided}: the decision was reversed.",
+      "answer": "Our answer: {note}",
+      "message": "What you wrote: {message}"
+    },
+    "footer": "SquareShare · {reference} · Page {page} of {total}",
+    "generated": "Generated on {date}."
   }
 }

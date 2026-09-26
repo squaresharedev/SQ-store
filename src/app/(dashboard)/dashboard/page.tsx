@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import { getTranslations } from "next-intl/server";
 import {
   getDashboardOrders,
@@ -7,6 +8,7 @@ import {
   getExistingProductIds,
 } from "@/lib/dashboard/queries";
 import { listStorefronts } from "@/lib/storefront/queries";
+import { getOrdersByIds } from "@/lib/orders/queries";
 import { getAccountStatus } from "@/lib/payments/mock";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { getAssurance, getProfile } from "@/lib/auth/session";
@@ -14,6 +16,7 @@ import { getTraderIdentityStatus } from "@/lib/settings/seller-identity";
 import { sellerEmailVerificationRequired } from "@/lib/settings/seller-email-verification";
 import { LEGAL_VERSION } from "@/lib/settings/constants";
 import { buildSetupSteps } from "@/lib/onboarding/steps";
+import { parseSeenSteps, SETUP_SEEN_COOKIE } from "@/lib/onboarding/seen-steps";
 import { productPageUrl } from "@/lib/storefront/product-page-url";
 import { DashboardHome } from "@/components/dashboard/DashboardHome";
 import type { OnboardingData } from "@/components/dashboard/OnboardingSlot";
@@ -62,8 +65,13 @@ export default async function DashboardOverviewPage({
     ),
   );
 
-  // One extra query (not N+1): check which referenced product IDs still exist.
-  const existingIds = await getExistingProductIds(referencedProductIds);
+  // One extra query each (not N+1), side by side: which referenced product IDs
+  // still exist, and the full detail behind the Recent orders rows, so a click
+  // on one opens its panel in place instead of a trip to /orders.
+  const [existingIds, recentOrderDetails] = await Promise.all([
+    getExistingProductIds(referencedProductIds),
+    getOrdersByIds(orders.recentOrders.map((order) => order.id).filter(Boolean)),
+  ]);
   const existingSet = new Set(existingIds);
   const deadBlockCount = referencedProductIds.filter(
     (id) => !existingSet.has(id),
@@ -111,6 +119,13 @@ export default async function DashboardOverviewPage({
       : null;
     onboarding = {
       setup,
+      // What this device showed last time, so a step done since plays its
+      // animation from the first paint (lib/onboarding/seen-steps.ts).
+      seenSteps: parseSeenSteps(
+        (await cookies()).get(SETUP_SEEN_COOKIE)?.value,
+        account.accountId,
+      ),
+      accountId: account.accountId,
       traderMissing: identity?.ok ? identity.missing : [],
       // STRICTLY null. A profile read that failed (no row) or a select that
       // does not carry the column (undefined) must never welcome an
@@ -138,6 +153,8 @@ export default async function DashboardOverviewPage({
     // The guided tour is useful to anyone; the setup is not theirs.
     onboarding = {
       setup: null,
+      seenSteps: null,
+      accountId: account.accountId,
       traderMissing: [],
       welcomePending: false,
       termsAccepted: true,
@@ -160,6 +177,7 @@ export default async function DashboardOverviewPage({
         onboarding={onboarding}
         // A failed read (null) counts as "on": never nag on a guess.
         twoFactorEnabled={assurance ? assurance.enrolled : true}
+        recentOrderDetails={recentOrderDetails}
       />
     </main>
   );

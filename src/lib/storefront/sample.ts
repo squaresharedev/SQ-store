@@ -29,9 +29,9 @@ import { VIBE_PRESETS } from "./presets";
  * signed URL.
  *
  * THE LOOK is deliberately plain and current: a light neutral canvas, the sans
- * face, near-black ink, white cards with softly rounded corners and the name
- * and price always under the picture. A first storefront gets copied, so the
- * example should be one worth copying.
+ * face, near-black ink, sharp tiles that are all picture, and the name and
+ * price on an overlay that arrives on hover. A first storefront gets copied,
+ * so the example should be one worth copying.
  *
  * IN THE SELLER'S LANGUAGE. It is an example of what they will make, so its
  * words (the name, the product titles and descriptions, the bio and text
@@ -135,15 +135,21 @@ function sampleConfig(t: Translate): StorefrontConfig {
   return {
     theme: {
       ...DEFAULT_STOREFRONT_CONFIG.theme,
-      // A shop: every tile labelled, all the time (the Classic behaviour), but
-      // in the sans face on a light neutral canvas rather than serif on cream.
-      ...VIBE_PRESETS.classic,
+      // Sharp tiles, pictures first: the name and the price arrive together on
+      // an overlay band when a tile is hovered, in the sans face, on a light
+      // neutral canvas.
+      ...VIBE_PRESETS.minimal,
       background: { kind: "solid", color: "#f4f4f5" },
       accent: "#0a0a0a",
       font: "sans",
-      priceTagFont: "inter",
-      cornerRadius: 14,
+      cornerRadius: 0,
       gridGap: 12,
+      titleStyle: "overlay",
+      titleDisplay: "hover",
+      priceDisplay: "hover",
+      // "below" is the title band, so the price rides in with the name.
+      priceTagPosition: "below",
+      priceTagFont: "inter",
       columns: 6,
       rows: 9,
     },

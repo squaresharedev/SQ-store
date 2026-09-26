@@ -235,6 +235,11 @@
       "required": "A descrição é obrigatória.",
       "tooLong": "A descrição não pode ter mais de {maximum} carateres.",
       "unsupported": "A descrição contém carateres não suportados."
+    },
+    "appealMessage": {
+      "required": "Diga-nos porquê em pelo menos {minimum} carateres.",
+      "tooLong": "Mantenha o seu recurso em {maximum} carateres ou menos.",
+      "unsupported": "O seu recurso contém carateres não suportados."
     }
   },
   "email": {
@@ -277,7 +282,8 @@
     "blockId": "Um ID de bloco não é válido.",
     "notificationRecipient": "Um destinatário de notificação não é válido.",
     "factor": "Esse autenticador não é válido.",
-    "reportTarget": "Esse item não é válido."
+    "reportTarget": "Esse item não é válido.",
+    "moderationDecision": "Essa decisão não é válida."
   },
   "handle": {
     "username": "Um nome de utilizador deve ter entre 3 e 30 carateres, usando apenas letras, números e sublinhados."

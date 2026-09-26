@@ -37,6 +37,12 @@ test("Settings has a Language tab that switches the whole UI and is remembered",
   // Switch to Czech.
   await page.locator("#language").click();
   await page.getByRole("option", { name: "Čeština" }).click();
+  // The switch plays behind the language overlay, which leaves on its own
+  // once the page is in Czech. Its status line is read out in whichever
+  // language the page is in at that moment, so only the target name is fixed.
+  const overlay = page.locator("[data-language-switch-overlay]");
+  await expect(overlay.getByRole("status")).toContainText("Čeština");
+  await expect(overlay).toHaveCount(0, { timeout: 20_000 });
 
   await expect(page.locator("html")).toHaveAttribute("lang", "cs", { timeout: 20_000 });
   await expect(page.getByRole("heading", { level: 1, name: "Jazyk" })).toBeVisible();

@@ -10,7 +10,7 @@ vi.mock("@/lib/storefront/actions", () => ({
   rotateEmbedKey: (id: string) => rotateEmbedKeyMock(id),
 }));
 
-import { EmbedModal } from "@/components/storefront/EmbedModal";
+import { EmbedSettings } from "@/components/storefront/EmbedSettings";
 import { permissionDenied, rateLimited } from "@/lib/errors";
 import type { StorefrontSummary } from "@/lib/storefront/queries";
 import { DEFAULT_STOREFRONT_CONFIG } from "@/types/storefront";
@@ -35,13 +35,12 @@ function storefront(embed?: { enabled: boolean; domains: string[] }) {
   } as unknown as StorefrontSummary;
 }
 
-function renderModal(sf = storefront()) {
+function renderSettings(sf = storefront()) {
   const onSaved = vi.fn();
-  const onClose = vi.fn();
   const utils = render(
-    <EmbedModal storefront={sf} onClose={onClose} onSaved={onSaved} />,
+    <EmbedSettings storefront={sf} onSaved={onSaved} />,
   );
-  return { ...utils, onSaved, onClose };
+  return { ...utils, onSaved };
 }
 
 /** The saved payload from the most recent action call. */
@@ -52,7 +51,7 @@ function savedPayload() {
 
 async function saveWithDomains(text: string) {
   const user = userEvent.setup();
-  renderModal();
+  renderSettings();
   const input = screen.getByLabelText(/allowed domains/i);
   await user.clear(input);
   if (text) await user.type(input, text);
@@ -67,14 +66,14 @@ beforeEach(() => {
   rotateEmbedKeyMock.mockResolvedValue({ ok: true, embedKey: NEW_KEY });
 });
 
-describe("EmbedModal - snippet", () => {
+describe("EmbedSettings - snippet", () => {
   it("shows a snippet keyed to this storefront's id", () => {
-    renderModal();
-    const dialog = screen.getByRole("dialog");
+    renderSettings();
+    const page = document.body;
     // Keyed by the ROTATABLE embed key, not the row id, so a leaked snippet
     // can be revoked without destroying the storefront.
-    expect(dialog).toHaveTextContent(`data-squareshare-storefront="${EMBED_KEY}"`);
-    expect(dialog).not.toHaveTextContent(STOREFRONT_ID);
+    expect(page).toHaveTextContent(`data-squareshare-storefront="${EMBED_KEY}"`);
+    expect(page).not.toHaveTextContent(STOREFRONT_ID);
   });
 
   it("shows a copy control that is disabled until embedding is configured", () => {
@@ -82,8 +81,8 @@ describe("EmbedModal - snippet", () => {
     // least one domain set. Handing someone the snippet before that makes it
     // look ready when it cannot load anywhere. The button is always rendered so
     // the seller can see it exists; its accessible label says it cannot be used yet.
-    renderModal();
-    const btn = within(screen.getByRole("dialog")).getByRole("button", {
+    renderSettings();
+    const btn = within(document.body).getByRole("button", {
       name: /embed snippet/i,
     });
     expect(btn).toBeInTheDocument();
@@ -91,10 +90,10 @@ describe("EmbedModal - snippet", () => {
   });
 });
 
-describe("EmbedModal - saving", () => {
+describe("EmbedSettings - saving", () => {
   it("persists the enable flag", async () => {
     const user = userEvent.setup();
-    renderModal();
+    renderSettings();
 
     await user.click(screen.getByRole("switch"));
     await user.click(screen.getByRole("button", { name: /save settings/i }));
@@ -106,7 +105,7 @@ describe("EmbedModal - saving", () => {
 
   it("reports a saved state and tells the caller", async () => {
     const user = userEvent.setup();
-    const { onSaved } = renderModal();
+    const { onSaved } = renderSettings();
 
     await user.click(screen.getByRole("button", { name: /save settings/i }));
 
@@ -116,8 +115,8 @@ describe("EmbedModal - saving", () => {
     }));
   });
 
-  it("adopts the stored settings when opened", () => {
-    renderModal(storefront({ enabled: true, domains: ["a.com", "b.com"] }));
+  it("adopts the stored settings on load", () => {
+    renderSettings(storefront({ enabled: true, domains: ["a.com", "b.com"] }));
     expect(screen.getByRole("switch")).toBeChecked();
     expect(screen.getByLabelText(/allowed domains/i)).toHaveValue("a.com, b.com");
   });
@@ -128,7 +127,7 @@ describe("EmbedModal - saving", () => {
       error: rateLimited("saveStorefronts"),
     });
     const user = userEvent.setup();
-    renderModal();
+    renderSettings();
 
     await user.click(screen.getByRole("button", { name: /save settings/i }));
 
@@ -139,7 +138,7 @@ describe("EmbedModal - saving", () => {
   });
 });
 
-describe("EmbedModal - domain sanitization", () => {
+describe("EmbedSettings - domain sanitization", () => {
   it("strips scheme and path from a pasted URL", async () => {
     await saveWithDomains("HTTPS://Shop.Example.com/products");
     await waitFor(() => expect(updateEmbedSettingsMock).toHaveBeenCalled());
@@ -192,31 +191,31 @@ describe("EmbedModal - domain sanitization", () => {
   });
 });
 
-describe("EmbedModal - empty allowlist", () => {
+describe("EmbedSettings - empty allowlist", () => {
   it("warns that an enabled embed with no domains serves nowhere", () => {
     // Deny-by-default: "enabled but blank" looks like it should work and
     // silently doesn't, so the modal has to say so.
-    renderModal(storefront({ enabled: true, domains: [] }));
+    renderSettings(storefront({ enabled: true, domains: [] }));
     expect(screen.getByRole("status")).toHaveTextContent(/won't load anywhere/i);
   });
 
   it("drops the warning once a domain is entered", async () => {
     const user = userEvent.setup();
-    renderModal(storefront({ enabled: true, domains: [] }));
+    renderSettings(storefront({ enabled: true, domains: [] }));
     await user.type(screen.getByLabelText(/allowed domains/i), "shop.example.com");
     expect(screen.queryByText(/won't load anywhere/i)).not.toBeInTheDocument();
   });
 
   it("says nothing when the embed is switched off", () => {
-    renderModal(storefront({ enabled: false, domains: [] }));
+    renderSettings(storefront({ enabled: false, domains: [] }));
     expect(screen.queryByText(/won't load anywhere/i)).not.toBeInTheDocument();
   });
 });
 
-describe("EmbedModal - key rotation", () => {
+describe("EmbedSettings - key rotation", () => {
   it("confirms before rotating, since every pasted snippet breaks", async () => {
     const user = userEvent.setup();
-    renderModal();
+    renderSettings();
 
     await user.click(screen.getByRole("button", { name: /rotate key/i }));
 
@@ -226,18 +225,18 @@ describe("EmbedModal - key rotation", () => {
 
   it("cancelling leaves the key alone", async () => {
     const user = userEvent.setup();
-    renderModal();
+    renderSettings();
 
     await user.click(screen.getByRole("button", { name: /rotate key/i }));
     await user.click(screen.getByRole("button", { name: /^cancel$/i }));
 
     expect(rotateEmbedKeyMock).not.toHaveBeenCalled();
-    expect(screen.getByRole("dialog")).toHaveTextContent(EMBED_KEY);
+    expect(document.body).toHaveTextContent(EMBED_KEY);
   });
 
   it("swaps the snippet to the new key on confirm", async () => {
     const user = userEvent.setup();
-    renderModal();
+    renderSettings();
 
     await user.click(screen.getByRole("button", { name: /rotate key/i }));
     const confirm = screen.getAllByRole("button", { name: /rotate key/i }).at(-1)!;
@@ -245,9 +244,9 @@ describe("EmbedModal - key rotation", () => {
 
     await waitFor(() => expect(rotateEmbedKeyMock).toHaveBeenCalledWith(STOREFRONT_ID));
     await waitFor(() =>
-      expect(screen.getByRole("dialog")).toHaveTextContent(NEW_KEY),
+      expect(document.body).toHaveTextContent(NEW_KEY),
     );
-    expect(screen.getByRole("dialog")).not.toHaveTextContent(EMBED_KEY);
+    expect(document.body).not.toHaveTextContent(EMBED_KEY);
   });
 
   it("reports a failed rotation separately from the settings save", async () => {
@@ -256,7 +255,7 @@ describe("EmbedModal - key rotation", () => {
       error: permissionDenied("viewer", "editStorefronts"),
     });
     const user = userEvent.setup();
-    renderModal();
+    renderSettings();
 
     await user.click(screen.getByRole("button", { name: /rotate key/i }));
     await user.click(screen.getAllByRole("button", { name: /rotate key/i }).at(-1)!);
@@ -265,7 +264,7 @@ describe("EmbedModal - key rotation", () => {
       expect(screen.getByRole("alert")).toHaveTextContent(/can't edit storefronts/i),
     );
     // The old key is still shown: nothing was rotated.
-    expect(screen.getByRole("dialog")).toHaveTextContent(EMBED_KEY);
+    expect(document.body).toHaveTextContent(EMBED_KEY);
   });
 
   // Switching embedding on publishes a storefront onto the open web, so the
@@ -274,9 +273,8 @@ describe("EmbedModal - key rotation", () => {
   describe("the publish gate", () => {
     it("bars the enable switch, and the snippet, while trader details are missing", () => {
       render(
-        <EmbedModal
+        <EmbedSettings
           storefront={storefront({ enabled: false, domains: ["shop.example.com"] })}
-          onClose={vi.fn()}
           onSaved={vi.fn()}
           missingTraderDetails={["address", "email"]}
         />,
@@ -294,9 +292,8 @@ describe("EmbedModal - key rotation", () => {
       // The one move that remains available: a storefront whose details lapsed
       // must be pullable back, or the seller is stuck published and blocked.
       render(
-        <EmbedModal
+        <EmbedSettings
           storefront={storefront({ enabled: true, domains: ["shop.example.com"] })}
-          onClose={vi.fn()}
           onSaved={vi.fn()}
           missingTraderDetails={["email"]}
         />,
@@ -305,7 +302,7 @@ describe("EmbedModal - key rotation", () => {
     });
 
     it("says nothing when the store may publish", () => {
-      renderModal(storefront({ enabled: true, domains: ["shop.example.com"] }));
+      renderSettings(storefront({ enabled: true, domains: ["shop.example.com"] }));
       expect(screen.queryByText(/until your seller details/i)).toBeNull();
       expect(screen.getByRole("switch", { name: /embed enabled/i })).toBeEnabled();
     });

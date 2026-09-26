@@ -69,7 +69,8 @@
     "rotateEmbedKeys": "Příliš mnoho pokusů o výměnu klíčů pro vložení na web v krátké době.",
     "updateStock": "Příliš mnoho pokusů o aktualizaci zásob v krátké době.",
     "readProductPageSettings": "Příliš mnoho pokusů o načtení nastavení produktové stránky v krátké době.",
-    "requestReview": "Příliš mnoho žádostí o kontrolu během krátké doby."
+    "requestReview": "Příliš mnoho žádostí o kontrolu během krátké doby.",
+    "fileAppeal": "Příliš mnoho pokusů o odeslání odvolání za krátkou dobu."
   },
   "serverError": {
     "fix": "Obvykle jde o dočasný problém. Chvíli počkejte a zkuste to znovu; pokud to stále nejde, obnovte stránku.",
@@ -95,13 +96,16 @@
     "checkSellerDetails": "Vaše údaje prodejce se kvůli problému na naší straně nepodařilo ověřit.",
     "loadProductPageSettings": "Nastavení produktové stránky se kvůli problému na naší straně nepodařilo načíst.",
     "saveProductPageSettings": "Nastavení produktové stránky se kvůli problému na naší straně nepodařilo uložit.",
-    "sendForReview": "Kontrolu se nepodařilo odeslat kvůli chybě na naší straně."
+    "sendForReview": "Kontrolu se nepodařilo odeslat kvůli chybě na naší straně.",
+    "fileAppeal": "Odvolání nebylo možné odeslat kvůli problému na naší straně."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Tento produkt byl odstraněn, nikoli pozastaven.} storefront {Tato výloha byla odstraněna, nikoli pozastavena.} other {Tato položka byla odstraněna, nikoli pozastavena.}}",
-    "removedFix": "Odstranění je konečné. Pokud si myslíte, že bylo neoprávněné, napište nám přes odkaz pro odvolání.",
+    "removedFix": "Odstranění je konečné, pokud ho odvolání nezmění. Pokud si myslíte, že šlo o omyl, použijte funkci Odvolat se proti tomuto rozhodnutí.",
     "notPaused": "{target, select, product {Tento produkt není pozastaven.} storefront {Tato výloha není pozastavena.} other {Tato položka není pozastavena.}}",
-    "notPausedFix": "Není co kontrolovat: kupující ji už vidí."
+    "notPausedFix": "Není co kontrolovat: kupující ji už vidí.",
+    "decisionSuperseded": "Toto rozhodnutí již neplatí, takže není co napadnout.",
+    "decisionSupersededFix": "Znovu načtěte stránku a zjistěte, jaký je aktuální stav."
   },
   "traderIdentityRequired": {
     "message": "Dokud nebudou vaše údaje prodejce kompletní, nemůžete zveřejňovat ani prodávat.",

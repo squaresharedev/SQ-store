@@ -1,30 +1,53 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { cn } from "@/lib/utils";
 import { emptyShowcaseClass } from "@/components/ui/surface-styles";
 import { AddShowcase } from "@/components/ui/AddShowcase";
 import type { Product } from "@/types/product";
 import {
   DEFAULT_STOREFRONT_CONFIG,
   EMPTY_STOREFRONT_HEADER,
+  type ShapeKind,
+  type StorefrontBlock,
   type StorefrontConfig,
+  type StorefrontFont,
 } from "@/types/storefront";
 import { StorefrontPreview } from "./StorefrontPreview";
 
 /**
- * The two storefronts either side of the create card. Kept deliberately plain:
- * three clean studio shots each (real product photos from /public/empty-state,
- * taken from the marketing site) on a light grey canvas with softly rounded
- * tiles, and no words, so they read as "a shop" at a glance and nothing on them
- * competes with the card. Drawn by the real StorefrontPreview, so they can
- * never drift from how a storefront actually renders.
+ * The two storefronts either side of the create card, as different from each
+ * other as two shops can be, so the picture says "yours can look like
+ * anything" as well as "yours goes here":
+ *  - left, KOBALT: a white canvas, blue wordmark, blue shapes, and light
+ *    studio shots of white gadgets on sharp tiles;
+ *  - right, PINOUT: an electronics-parts shop on a circuit-board green canvas,
+ *    gold type and gold rings for the board's pads, and parts all cut from one
+ *    flat-lay photo (Unsplash zP7X_B86xOg), so they share one background.
+ * Real photos (/public/empty-state), drawn by the real StorefrontPreview so
+ * they can never drift from how a storefront renders.
+ *
+ * Square boards on a fine 4x4 grid: more, smaller cells in the same space, so
+ * each board reads as a whole shop rather than three big pictures.
  *
  * Mirrored: each board's big tile is on its OUTER side, away from the card, so
- * the part tucked under the card is small tiles rather than the hero picture.
+ * the column tucked under the card is small tiles and shapes, never the hero.
  *
  * The products are display-only stand-ins: nothing reads them but the preview.
  */
-const PHOTOS = ["camera", "headphones", "mouse", "succulent-photo", "watch-photo", "watch-white"] as const;
+const PHOTOS = [
+  "camera",
+  "headphones",
+  "mouse",
+  "watch-white",
+  "uno",
+  "servo",
+  "joystick",
+  "pot",
+  "leds",
+  "lcd",
+  "battery",
+] as const;
 type Photo = (typeof PHOTOS)[number];
 
 const PRODUCTS = new Map<Photo, Product>(
@@ -50,45 +73,129 @@ const PRODUCTS_BY_ID: ReadonlyMap<string, Product> = new Map(
   [...PRODUCTS.values()].map((product) => [product.id, product]),
 );
 
-const tile = (key: Photo, x: number, y: number, w: number, h: number) =>
-  ({ type: "product", productId: PRODUCTS.get(key)!.id, x, y, w, h }) as const;
+/** Both boards' grid: square, and finer than a real storefront's default, so
+ *  a thumbnail-sized board still holds a whole shop. */
+const SHOWCASE_GRID = 4;
+const SHOWCASE_GAP = 4;
 
-function board(blocks: StorefrontConfig["blocks"]): StorefrontConfig {
+/** The shops' names. Brand names, so the same in every locale. */
+const KOBALT_NAME = "kobalt.";
+const PINOUT_NAME = "PINOUT";
+
+const KOBALT_WHITE = "#ffffff";
+const KOBALT_BLUE = "#1d4ed8";
+const PCB_GREEN = "#0b3b2c";
+const PAD_GOLD = "#fbbf24";
+
+type Cell = [x: number, y: number, w: number, h: number];
+
+// Every block needs an id of its own; a counter per board keeps them stable
+// and unique without hand-writing a uuid for each one.
+function blockId(board: number, index: number) {
+  return `d7c1e2a0-4b3f-4e6a-9c1d-${String(board * 100 + index).padStart(12, "0")}`;
+}
+
+function board(
+  index: number,
+  look: { canvas: string; accent: string },
+  blocks: (id: (n: number) => string) => StorefrontBlock[],
+): StorefrontConfig {
   return {
     ...DEFAULT_STOREFRONT_CONFIG,
     theme: {
       ...DEFAULT_STOREFRONT_CONFIG.theme,
-      background: { kind: "solid", color: "#f4f4f5" },
-      cornerRadius: 8,
-      gridGap: 6,
-      columns: 3,
-      rows: 2,
+      background: { kind: "solid", color: look.canvas },
+      accent: look.accent,
+      cornerRadius: 0,
+      gridGap: SHOWCASE_GAP,
+      columns: SHOWCASE_GRID,
+      rows: SHOWCASE_GRID,
+      // Pictures only on the tiles: a title or a price at this size is a
+      // smudge. The shop's words are its own text blocks.
+      showTitle: false,
+      priceTagPosition: "hidden",
+      soldOutBadge: false,
     },
     header: EMPTY_STOREFRONT_HEADER,
-    blocks,
+    blocks: blocks((n) => blockId(index, n)),
   };
 }
 
-const LEFT_SHOP = board([
-  tile("camera", 0, 0, 2, 2),
-  tile("headphones", 2, 0, 1, 1),
-  tile("mouse", 2, 1, 1, 1),
+const product = (key: Photo, [x, y, w, h]: Cell): StorefrontBlock => ({
+  type: "product",
+  productId: PRODUCTS.get(key)!.id,
+  x,
+  y,
+  w,
+  h,
+});
+
+const shape = (id: string, kind: ShapeKind, color: string, [x, y, w, h]: Cell): StorefrontBlock => ({
+  type: "shape",
+  id,
+  kind,
+  color,
+  x,
+  y,
+  w,
+  h,
+});
+
+const heading = (id: string, text: string, font: StorefrontFont, [x, y, w, h]: Cell): StorefrontBlock => ({
+  type: "text",
+  id,
+  text,
+  variant: "heading",
+  align: "left",
+  bold: true,
+  font,
+  x,
+  y,
+  w,
+  h,
+});
+
+const KOBALT = board(1, { canvas: KOBALT_WHITE, accent: KOBALT_BLUE }, (id) => [
+  heading(id(1), KOBALT_NAME, "sans", [0, 0, 3, 1]),
+  shape(id(2), "sparkle", KOBALT_BLUE, [3, 0, 1, 1]),
+  product("camera", [0, 1, 2, 2]),
+  product("headphones", [2, 1, 1, 1]),
+  shape(id(3), "circle", KOBALT_BLUE, [3, 1, 1, 1]),
+  product("mouse", [2, 2, 1, 1]),
+  shape(id(4), "quarter", KOBALT_BLUE, [3, 2, 1, 1]),
+  shape(id(5), "ring", KOBALT_BLUE, [0, 3, 1, 1]),
+  product("watch-white", [1, 3, 1, 1]),
+  shape(id(6), "half", KOBALT_BLUE, [2, 3, 1, 1]),
+  shape(id(7), "square", KOBALT_BLUE, [3, 3, 1, 1]),
 ]);
 
-const RIGHT_SHOP = board([
-  tile("watch-white", 0, 0, 1, 1),
-  tile("watch-photo", 0, 1, 1, 1),
-  tile("succulent-photo", 1, 0, 2, 2),
+const PINOUT = board(2, { canvas: PCB_GREEN, accent: PAD_GOLD }, (id) => [
+  shape(id(1), "ring", PAD_GOLD, [0, 0, 1, 1]),
+  heading(id(2), PINOUT_NAME, "mono", [1, 0, 3, 1]),
+  product("leds", [0, 1, 1, 1]),
+  product("servo", [1, 1, 1, 1]),
+  product("uno", [2, 1, 2, 2]),
+  shape(id(3), "circle", PAD_GOLD, [0, 2, 1, 1]),
+  product("joystick", [1, 2, 1, 1]),
+  product("pot", [0, 3, 1, 1]),
+  product("battery", [1, 3, 1, 1]),
+  product("lcd", [2, 3, 2, 1]),
 ]);
 
-function Board({ config }: { config: StorefrontConfig }) {
+function Board({ config, className }: { config: StorefrontConfig; className?: string }) {
   return (
-    // The rounding and the clip live here, not on the showcase's side slot.
-    <div className="size-full overflow-hidden rounded-lg shadow-lg ring-1 ring-black/5">
-      <StorefrontPreview config={config} productsById={PRODUCTS_BY_ID} textless />
+    // The frame and the clip live here, not on the showcase's side slot.
+    // Square, like every tile on both boards.
+    <div className={cn("size-full overflow-hidden shadow-lg", className)}>
+      <StorefrontPreview config={config} productsById={PRODUCTS_BY_ID} />
     </div>
   );
 }
+
+// A white board on a white page needs an edge of its own; the green one has
+// its canvas.
+const KOBALT_BOARD = <Board config={KOBALT} className="ring-1 ring-border" />;
+const PINOUT_BOARD = <Board config={PINOUT} />;
 
 /**
  * The storefront list with nothing in it. The create card is the call to
@@ -124,9 +231,9 @@ export function StorefrontEmptyState({
               : undefined
           }
           className="[--showcase-tuck:1.25rem] sm:[--showcase-tuck:2rem]"
-          exampleClassName="mt-10 aspect-[3/2] w-28 sm:w-56"
-          left={<Board config={LEFT_SHOP} />}
-          right={<Board config={RIGHT_SHOP} />}
+          exampleClassName="mt-10 aspect-square w-28 sm:w-52"
+          left={KOBALT_BOARD}
+          right={PINOUT_BOARD}
         />
         <h2 className="mt-10 text-lg font-semibold text-foreground">
           {t("emptyHeading")}

@@ -235,6 +235,11 @@
       "required": "Opis jest wymagany.",
       "tooLong": "Opis może mieć najwyżej {maximum} znaków.",
       "unsupported": "Opis zawiera nieobsługiwane znaki."
+    },
+    "appealMessage": {
+      "required": "Napisz przynajmniej {minimum} znaków wyjaśnienia.",
+      "tooLong": "Ogranicz odwołanie do {maximum} znaków.",
+      "unsupported": "Twoje odwołanie zawiera nieobsługiwane znaki."
     }
   },
   "email": {
@@ -277,7 +282,8 @@
     "blockId": "Identyfikator bloku jest nieprawidłowy.",
     "notificationRecipient": "Odbiorca powiadomienia jest nieprawidłowy.",
     "factor": "Ta aplikacja uwierzytelniająca jest nieprawidłowa.",
-    "reportTarget": "Ten element jest nieprawidłowy."
+    "reportTarget": "Ten element jest nieprawidłowy.",
+    "moderationDecision": "Ta decyzja jest nieprawidłowa."
   },
   "handle": {
     "username": "Nazwa użytkownika musi mieć od 3 do 30 znaków, tylko litery, cyfry i znaki podkreślenia."

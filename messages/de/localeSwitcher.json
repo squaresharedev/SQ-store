@@ -1,5 +1,7 @@
 {
   "label": "Sprache",
   "settingsTitle": "Sprache",
-  "settingsDescription": "Die Sprache, in der dein Dashboard angezeigt wird. Käufer sehen Produktseiten in ihrer eigenen Sprache, und alles, was du selbst geschrieben hast, bleibt genau so, wie du es geschrieben hast."
+  "settingsDescription": "Die Sprache, in der dein Dashboard angezeigt wird. Käufer sehen Produktseiten in ihrer eigenen Sprache, und alles, was du selbst geschrieben hast, bleibt genau so, wie du es geschrieben hast.",
+  "switching": "Sprache wird umgestellt: {language}…",
+  "failed": "Die Sprache konnte nicht geändert werden. Versuche es noch einmal."
 }

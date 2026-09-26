@@ -69,7 +69,8 @@
     "rotateEmbedKeys": "Demasiadas tentativas de renovar chaves de incorporação num curto espaço de tempo.",
     "updateStock": "Demasiadas tentativas de atualizar o stock num curto espaço de tempo.",
     "readProductPageSettings": "Demasiadas tentativas de ler as definições da página de produto num curto espaço de tempo.",
-    "requestReview": "Demasiadas tentativas de pedir uma revisão num curto espaço de tempo."
+    "requestReview": "Demasiadas tentativas de pedir uma revisão num curto espaço de tempo.",
+    "fileAppeal": "Demasiadas tentativas de enviar um recurso num curto espaço de tempo."
   },
   "serverError": {
     "fix": "Isto costuma ser temporário. Aguarde um momento e tente novamente; se continuar a falhar, atualize a página.",
@@ -95,13 +96,16 @@
     "checkSellerDetails": "Não foi possível verificar os seus dados de vendedor devido a um problema do nosso lado.",
     "loadProductPageSettings": "Não foi possível carregar as definições da página de produto devido a um problema do nosso lado.",
     "saveProductPageSettings": "Não foi possível guardar as definições da página de produto devido a um problema do nosso lado.",
-    "sendForReview": "Não foi possível enviar isto para revisão devido a um problema do nosso lado."
+    "sendForReview": "Não foi possível enviar isto para revisão devido a um problema do nosso lado.",
+    "fileAppeal": "Não foi possível enviar o seu recurso devido a um problema do nosso lado."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Este produto foi removido, não pausado.} storefront {Esta montra foi removida, não pausada.} other {Este item foi removido, não pausado.}}",
-    "removedFix": "Uma remoção é definitiva. Se considera que foi um erro, utilize o link de recurso para nos escrever.",
+    "removedFix": "Uma remoção é definitiva, salvo se um recurso a alterar. Se considera que foi um erro, utilize «Apelar desta decisão».",
     "notPaused": "{target, select, product {Este produto não está pausado.} storefront {Esta montra não está pausada.} other {Este item não está pausado.}}",
-    "notPausedFix": "Não há nada para rever: já está visível para os compradores."
+    "notPausedFix": "Não há nada para rever: já está visível para os compradores.",
+    "decisionSuperseded": "Esta decisão já não se aplica, pelo que não há nada a recorrer.",
+    "decisionSupersededFix": "Recarregue a página para ver a situação atual."
   },
   "traderIdentityRequired": {
     "message": "Não pode publicar nem vender enquanto os seus dados de vendedor não estiverem completos.",

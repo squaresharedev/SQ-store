@@ -13,7 +13,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, Search, Sparkles, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { formatList } from "@/lib/format/intl";
-import type { Product } from "@/types/product";
+import type { Product, ProductRemoval } from "@/types/product";
 import {
   CANVAS_COLUMNS_MAX,
   CANVAS_COLUMNS_MIN,
@@ -130,6 +130,7 @@ import {
 import { useEditorSurface } from "./useEditorSurface";
 import { DesignerCanvas } from "./DesignerCanvas";
 import { EditorToolbar } from "./EditorToolbar";
+import { TakedownStrip } from "./TakedownStrip";
 import { SelectionToolbar } from "./SelectionToolbar";
 import {
   SUMMON_FLASH_CLASS,
@@ -341,6 +342,7 @@ export function StorefrontDesigner({
   sellerIdentity = {},
   shippingPolicy = {},
   sample = null,
+  takedown = null,
 }: {
   /**
    * Set when this is the SAMPLE storefront (lib/storefront/sample.ts), never a
@@ -378,6 +380,8 @@ export function StorefrontDesigner({
   role?: TeamRole | null;
   /** Active account id, for universal search's snapshot cache. */
   accountId?: string | null;
+  /** Set while staff have this storefront paused or removed. */
+  takedown?: ProductRemoval | null;
 }) {
   const t = useTranslations("Storefront.designer");
   const locale = useLocale();
@@ -3696,6 +3700,13 @@ export function StorefrontDesigner({
           </div>
           )}
         </div>
+        {takedown && !isSample && (
+          <TakedownStrip
+            removal={takedown}
+            storefrontId={storefrontId}
+            onDetails={(href) => leaveGuard.requestLeave(href)}
+          />
+        )}
       </header>
 
       {/* The sample says what it is, once, where the phone notice would be. It

@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { buildSetupSteps, type SetupFacts } from "@/lib/onboarding/steps";
+import { buildSetupSteps, type SetupFacts, type SetupStepId } from "@/lib/onboarding/steps";
 import { DEFAULT_PRODUCT_PAGE_CONFIG, type StorefrontConfig } from "@/types/storefront";
 import { OnboardingGallery } from "./OnboardingGallery";
 
@@ -35,7 +35,41 @@ const PLACED: SetupFacts = {
 
 // Built here, on the server, from the real builder: the gallery shows exactly
 // what Overview would, never a hand-written imitation of it.
-const CHECKLISTS: { name: string; facts: SetupFacts; celebrate?: boolean }[] = [
+const HALFWAY: SetupFacts = {
+  ...NEW_SELLER,
+  traderMissing: [],
+  productCount: 2,
+  storefronts: [{ id: "sf-demo", config: { blocks: [] } }],
+};
+
+const CHECKLISTS: {
+  name: string;
+  facts: SetupFacts;
+  celebrate?: boolean;
+  wide?: boolean;
+  /** Steps played as just done (Overview works these out from the setup-seen
+   *  cookie; here they are given). */
+  fresh?: SetupStepId[];
+}[] = [
+  // Overview gives the card its full width, and the trail beside the steps
+  // widens with the card, so one fixture shows it at that size.
+  { name: "Halfway, full width (as on Overview)", facts: HALFWAY, wide: true },
+  {
+    name: "Just added a product (plays its moment)",
+    facts: HALFWAY,
+    fresh: ["product"],
+    wide: true,
+  },
+  {
+    name: "Details and a product since last visit (plays both, in order)",
+    facts: HALFWAY,
+    fresh: ["seller-details", "product"],
+  },
+  {
+    name: "Just placed on a storefront (plays its moment)",
+    facts: { ...PLACED, activeProductIds: [] },
+    fresh: ["storefront"],
+  },
   { name: "New seller", facts: NEW_SELLER },
   {
     name: "Details typed, email unconfirmed, one draft",
@@ -68,10 +102,12 @@ export default function OnboardingDevPage() {
   if (process.env.NODE_ENV === "production") notFound();
   return (
     <OnboardingGallery
-      checklists={CHECKLISTS.map(({ name, facts, celebrate }) => ({
+      checklists={CHECKLISTS.map(({ name, facts, celebrate, wide, fresh }) => ({
         name,
         setup: buildSetupSteps(facts),
         celebrate: celebrate ?? true,
+        wide: wide ?? false,
+        fresh: fresh ?? [],
       }))}
     />
   );

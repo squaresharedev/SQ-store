@@ -57,7 +57,7 @@ import type {
   ProductPageImage,
   ProductPageProduct,
 } from "@/types/product";
-import type { ProductPageData } from "@/types/product-page";
+import type { ProductPageData, ProductPageReportScopes } from "@/types/product-page";
 
 /**
  * Exactly the columns the builder reads. `digital_file_key` is here ONLY so
@@ -278,6 +278,7 @@ export const getPublicProductPage = cache(
     const [
       { data: row, error: productError },
       { data: sellerRow, error: sellerError },
+      reportScopes,
     ] = await Promise.all([
       admin
         .from("products")
@@ -295,6 +296,7 @@ export const getPublicProductPage = cache(
         .select(`${TRADER_GATE_SELECT}, ${SHIPPING_POLICY_SELECT}`)
         .eq("id", storefront.owner_id)
         .maybeSingle(),
+      reportScopesFor(admin, storefront.owner_id),
     ]);
     if (productError) {
       console.error("[product-page] product read failed", productError);
@@ -366,8 +368,47 @@ export const getPublicProductPage = cache(
         },
         product,
         productUrl: productPageUrl(storefront.id, product.id),
+        reportScopes,
       },
       ownerId: storefront.owner_id,
     };
   },
 );
+
+/**
+ * Which of the report dialog's wider options apply to this seller: the whole
+ * storefront once they sell more than one live product, the seller themselves
+ * once they run more than one storefront. Counted as a buyer could see them
+ * (live and not taken down), head-only, alongside the page's other reads.
+ *
+ * A failed count offers the narrower dialog: the product can always be
+ * reported, and a wider option the page cannot justify is noise.
+ */
+async function reportScopesFor(
+  admin: ReturnType<typeof createAdminClient>,
+  ownerId: string,
+): Promise<ProductPageReportScopes> {
+  const [products, storefronts] = await Promise.all([
+    admin
+      .from("products")
+      .select("id", { count: "exact", head: true })
+      .eq("owner_id", ownerId)
+      .eq("status", "active")
+      .eq("moderation_status", "ok"),
+    admin
+      .from("storefronts")
+      .select("id", { count: "exact", head: true })
+      .eq("owner_id", ownerId)
+      .eq("moderation_status", "ok"),
+  ]);
+  if (products.error || storefronts.error) {
+    console.error(
+      "[product-page] report scope counts failed",
+      products.error?.message ?? storefronts.error?.message,
+    );
+  }
+  return {
+    storefront: (products.count ?? 0) > 1,
+    seller: (storefronts.count ?? 0) > 1,
+  };
+}

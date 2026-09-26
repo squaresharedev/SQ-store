@@ -235,6 +235,11 @@
       "required": "Popis je povinný.",
       "tooLong": "Popis může mít nejvýše {maximum} znaků.",
       "unsupported": "Popis obsahuje nepodporované znaky."
+    },
+    "appealMessage": {
+      "required": "Řekněte nám proč alespoň v {minimum} znacích.",
+      "tooLong": "Odvolání musí mít nejvýše {maximum} znaků.",
+      "unsupported": "Odvolání obsahuje nepodporované znaky."
     }
   },
   "email": {
@@ -277,7 +282,8 @@
     "blockId": "ID bloku není platné.",
     "notificationRecipient": "Příjemce oznámení není platný.",
     "factor": "Tato ověřovací aplikace není platná.",
-    "reportTarget": "Tato položka není platná."
+    "reportTarget": "Tato položka není platná.",
+    "moderationDecision": "Toto rozhodnutí není platné."
   },
   "handle": {
     "username": "Uživatelské jméno musí mít 3 až 30 znaků a smí obsahovat jen písmena, číslice a podtržítka."

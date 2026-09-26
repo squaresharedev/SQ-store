@@ -12,6 +12,7 @@
 import type { Locale } from "@/i18n/locales";
 import { msg, type MessageRef } from "@/i18n/types";
 import { dateTimeFormat, intlTag } from "@/lib/format/intl";
+import { fixFieldsFor, type FixTarget } from "@/lib/moderation/fix-fields";
 //
 // MIRROR OF @squaresharedev/moderation. That package is the cross-repo
 // contract (the admin panel writes these values, the marketplace reads them);
@@ -36,7 +37,7 @@ export const MODERATION_GATE_SELECT = "moderation_status" as const;
  *  Never used on a public read: `moderation_note` is staff prose written for
  *  one person, and that person is not the buyer. */
 export const MODERATION_DETAIL_SELECT =
-  "moderation_status, moderation_ground, moderation_note, moderated_at, moderation_review_requested_at" as const;
+  "moderation_status, moderation_ground, moderation_note, moderated_at, moderation_review_requested_at, moderation_fields, moderation_decision_id" as const;
 
 /**
  * What the platform may do with a piece of content.
@@ -171,18 +172,25 @@ export function removalFinding(
  * edit page cannot disagree about which kind it is. Null when the content is
  * visible, which is what lets callers spread it straight into a row.
  */
-export function takedownFromRow(row: {
-  moderation_status?: string | null;
-  moderation_ground?: string | null;
-  moderation_note?: string | null;
-  moderated_at?: string | null;
-  moderation_review_requested_at?: string | null;
-}): {
+export function takedownFromRow(
+  row: {
+    moderation_status?: string | null;
+    moderation_ground?: string | null;
+    moderation_note?: string | null;
+    moderated_at?: string | null;
+    moderation_review_requested_at?: string | null;
+    moderation_fields?: readonly string[] | null;
+    moderation_decision_id?: string | null;
+  },
+  target: FixTarget = "product",
+): {
   kind: TakedownKind;
   ground: string | null;
   note: string | null;
   at: string | null;
   reviewRequestedAt: string | null;
+  fields: string[];
+  decisionId: string | null;
 } | null {
   const kind = takedownKind(row.moderation_status);
   if (!kind) return null;
@@ -191,6 +199,12 @@ export function takedownFromRow(row: {
     ground: row.moderation_ground ?? null,
     note: row.moderation_note ?? null,
     at: row.moderated_at ?? null,
+    // What staff pointed at, in the order the seller meets it. Kept for a
+    // removal too: it is part of the reasons, even with nothing left to fix.
+    fields: fixFieldsFor(target, row.moderation_fields),
+    // Null for a takedown older than the decisions table: it still shows, it
+    // just has no statement to download and no decision to appeal against.
+    decisionId: row.moderation_decision_id ?? null,
     // Only meaningful while paused. A removed row should never carry one (every
     // staff decision clears it), but if a stale one survived it must not make a
     // final decision look like it is waiting on someone.
@@ -212,23 +226,17 @@ export function formatTakedownDate(iso: string, locale: Locale): string {
   return dateTimeFormat(intlTag(locale, "en-IE"), TAKEDOWN_DATE).format(new Date(iso));
 }
 
-/** Where a seller goes to argue. MVP: a real inbox rather than an appeals
- *  workflow. Named here so every surface points at the same place and there is
- *  one line to change when the workflow lands. */
+/** Where a seller writes when the dashboard is not enough: a question about a
+ *  decision, or one the in-app appeal cannot take. The statement of reasons
+ *  prints it. Mirror of APPEAL_EMAIL in the admin panel. */
 export const REMOVAL_APPEAL_EMAIL = "support@squareshare.eu";
 
-/** The mailto a removal banner offers, pre-addressed so the person on the
- *  other end knows which listing is being argued about. `resolve` puts the
- *  subject and body in the seller's language; the id and title go in as data. */
-export function removalAppealHref(
-  kind: "product" | "storefront",
-  id: string,
-  title: string,
-  resolve: (ref: MessageRef) => string,
-): string {
-  const subject = resolve(msg("Products.removal.appealSubject", { kind, title }));
-  const body = resolve(msg("Products.removal.appealBody", { kind, id, title }));
-  return `mailto:${REMOVAL_APPEAL_EMAIL}?subject=${encodeURIComponent(
-    subject,
-  )}&body=${encodeURIComponent(body)}`;
+/**
+ * A decision's reference, as the statement, the banner and staff all quote
+ * it: "MD-" and the first ten hex digits of its id, upper-cased. Derived rather
+ * than stored so there is no second identifier to keep in step. Mirror of
+ * decisionReference in the admin panel.
+ */
+export function decisionReference(decisionId: string): string {
+  return `MD-${decisionId.replace(/-/g, "").slice(0, 10).toUpperCase()}`;
 }

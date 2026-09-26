@@ -95,10 +95,10 @@
   },
   "report": {
     "trigger": "{target, select, product {Dit product melden} other {Deze etalage melden}}",
-    "title": "{target, select, product {Dit product melden} other {Deze etalage melden}}",
+    "title": "{target, select, product {Dit product melden} storefront {Deze etalage melden} seller {Deze verkoper melden} other {Een probleem melden}}",
     "description": "Vertel ons wat er mis mee is. Elke melding wordt door een medewerker beoordeeld.",
     "sentTitle": "Melding verstuurd",
-    "sentBody": "{target, select, product {Bedankt. Een medewerker beoordeelt dit product. We delen niet met de verkoper wie iets heeft gemeld.} other {Bedankt. Een medewerker beoordeelt deze etalage. We delen niet met de verkoper wie iets heeft gemeld.}}",
+    "sentBody": "{target, select, product {Bedankt. Een medewerker beoordeelt dit product. We delen niet met de verkoper wie iets heeft gemeld.} seller {Bedankt. Een medewerker beoordeelt deze verkoper. We delen niet met hen wie iets heeft gemeld.} other {Bedankt. Een medewerker beoordeelt deze etalage. We delen niet met de verkoper wie iets heeft gemeld.}}",
     "reasonsLegend": "Wat is er mis mee?",
     "reasons": {
       "illegal": {
@@ -150,6 +150,22 @@
       "reason": "Kies wat er mis mee is.",
       "rateLimited": "Te veel meldingen vanaf hier. Probeer het later opnieuw.",
       "submitFailed": "Dat kon niet worden verstuurd. Probeer het opnieuw."
+    },
+    "triggerAny": "Een probleem melden",
+    "scopeLegend": "Wat wil je melden?",
+    "scopes": {
+      "product": {
+        "label": "Dit product",
+        "hint": "{title}"
+      },
+      "storefront": {
+        "label": "Deze etalage",
+        "hint": "{name}, en alles erop"
+      },
+      "seller": {
+        "label": "Deze verkoper",
+        "hint": "{name}, op al hun etalages"
+      }
     }
   },
   "shippingProse": {

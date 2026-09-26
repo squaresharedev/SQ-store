@@ -95,10 +95,15 @@ export const REPORT_REASON_COPY: Record<
   },
 };
 
-/** What SQ-store's own surfaces can report. The shared table also carries
- *  `artifact` and `profile`; those arrive from the marketplace, which is why
- *  they are absent here rather than accepted and ignored. */
-export const REPORT_TARGET_TYPES = ["product", "storefront"] as const;
+/**
+ * What SQ-store's own surfaces can report. `seller` arrives with the id of the
+ * STOREFRONT the buyer was looking at, never an account id (the page does not
+ * have one to give), and the endpoint files it against the account behind
+ * that storefront as the shared table's `profile` target. `artifact` reports
+ * arrive from the marketplace, which is why that is absent here rather than
+ * accepted and ignored.
+ */
+export const REPORT_TARGET_TYPES = ["product", "storefront", "seller"] as const;
 
 export type ReportTargetType = (typeof REPORT_TARGET_TYPES)[number];
 

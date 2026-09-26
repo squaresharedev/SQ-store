@@ -112,7 +112,7 @@ const RIGHT = [
 const GLOW = [
   // Sized off the card, but capped, so a wide card's rays still fade out
   // before they reach the frame's edge or the heading under the picture.
-  "pointer-events-none absolute left-1/2 top-1/2 -z-10 aspect-square w-[340%] max-w-[440px] -translate-x-1/2 -translate-y-1/2 opacity-80",
+  "pointer-events-none absolute left-1/2 top-1/2 -z-10 aspect-square w-[260%] max-w-[360px] -translate-x-1/2 -translate-y-1/2 opacity-80",
   "transition-[opacity,scale] duration-slow ease-standard motion-reduce:transition-none",
   "group-hover/add:scale-105 group-hover/add:opacity-100",
   "group-focus-visible/add:scale-105 group-focus-visible/add:opacity-100",
@@ -121,7 +121,7 @@ const GLOW = [
 const GLOW_COLOR = "#4ade80";
 const HALO_STYLE: CSSProperties = {
   background:
-    "radial-gradient(closest-side, rgba(74, 222, 128, 0.5), rgba(74, 222, 128, 0.18) 50%, rgba(74, 222, 128, 0) 100%)",
+    "radial-gradient(closest-side, rgba(74, 222, 128, 0.32), rgba(74, 222, 128, 0.1) 50%, rgba(74, 222, 128, 0) 100%)",
 };
 
 function Side({
@@ -175,7 +175,7 @@ export function AddShowcase({
         <div className="relative shrink-0">
           <div aria-hidden="true" data-showcase-glow="" className={GLOW}>
             <div className="absolute inset-0" style={HALO_STYLE} />
-            <RadialLightRays color={GLOW_COLOR} intensity={0.85} className="absolute inset-0" />
+            <RadialLightRays color={GLOW_COLOR} intensity={0.55} className="absolute inset-0" />
           </div>
           <AddCard card={card} />
         </div>

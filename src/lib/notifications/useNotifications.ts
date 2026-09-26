@@ -14,6 +14,7 @@ import {
   markAllNotificationsRead,
   markNotificationRead,
 } from "@/lib/notifications/actions";
+import { storedNotificationAction } from "@/lib/notifications/inline-actions";
 import type { Notification } from "@/lib/notifications/types";
 import type { Tables } from "@/types";
 
@@ -48,8 +49,18 @@ const COUNT_SYNC_DEBOUNCE_MS = 400;
 // postgres_changes listener to it throws "cannot add ... after subscribe()".
 let channelSeq = 0;
 
+/**
+ * A row as Realtime delivers it. Its inline action has not been resolved by
+ * the server, so it is read from `data`: a row that has only just been
+ * written is, by definition, still pending. Clicking it goes through the
+ * server regardless, which answers "already done" if that stopped being true.
+ */
 function asNotification(row: NotificationRow): Notification {
-  return row as Notification;
+  const stored = storedNotificationAction(row.data);
+  return {
+    ...(row as Notification),
+    action: stored ? { kind: stored.kind, status: "pending" } : null,
+  };
 }
 
 export type UseNotifications = {
@@ -65,6 +76,8 @@ export type UseNotifications = {
   arrivalSeq: number;
   markRead: (id: string) => void;
   markAllRead: () => void;
+  /** An inline action on this row finished: it is done, and read. */
+  completeAction: (id: string) => void;
   refresh: () => void;
 };
 
@@ -127,8 +140,11 @@ export function useNotifications(): UseNotifications {
   const applyUpdate = React.useCallback(
     (next: NotificationRow) => {
       const updated = asNotification(next);
+      // An UPDATE is a read-flag change. Keep the action the server resolved
+      // for this row; the one derived from `data` above would reset a "done"
+      // back to "pending".
       setNotifications((prev) =>
-        prev.map((n) => (n.id === updated.id ? updated : n)),
+        prev.map((n) => (n.id === updated.id ? { ...updated, action: n.action } : n)),
       );
       scheduleCountSync();
     },
@@ -240,6 +256,22 @@ export function useNotifications(): UseNotifications {
     });
   }, []);
 
+  // The server already marked the row read as part of the action; this only
+  // mirrors it, then reconciles the count rather than guessing a delta.
+  const completeAction = React.useCallback(
+    (id: string) => {
+      setNotifications((prev) =>
+        prev.map((n) =>
+          n.id === id
+            ? { ...n, read: true, action: n.action ? { ...n.action, status: "done" } : n.action }
+            : n,
+        ),
+      );
+      scheduleCountSync();
+    },
+    [scheduleCountSync],
+  );
+
   return {
     loading,
     notifications,
@@ -248,6 +280,7 @@ export function useNotifications(): UseNotifications {
     arrivalSeq,
     markRead,
     markAllRead,
+    completeAction,
     refresh,
   };
 }

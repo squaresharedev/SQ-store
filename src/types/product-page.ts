@@ -39,4 +39,15 @@ export type ProductPageData = {
   product: ProductPageProduct;
   /** The page's own canonical URL. */
   productUrl: string;
+  /**
+   * What else a buyer may report from this page besides the product. The
+   * whole storefront only when the seller has more than one live product (with
+   * one, the storefront and the product are the same complaint); the seller
+   * only when they have more than one storefront. Booleans, never the counts:
+   * a buyer has no business knowing the size of someone's catalogue. Absent
+   * in the editor preview, where reporting is inert anyway.
+   */
+  reportScopes?: ProductPageReportScopes;
 };
+
+export type ProductPageReportScopes = { storefront: boolean; seller: boolean };

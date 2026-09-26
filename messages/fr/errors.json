@@ -69,7 +69,8 @@
     "rotateEmbedKeys": "Trop de tentatives de renouvellement de clés d’intégration en peu de temps.",
     "updateStock": "Trop de tentatives de mise à jour du stock en peu de temps.",
     "readProductPageSettings": "Trop de tentatives de lecture des paramètres de page produit en peu de temps.",
-    "requestReview": "Trop de demandes de réexamen en peu de temps."
+    "requestReview": "Trop de demandes de réexamen en peu de temps.",
+    "fileAppeal": "Trop de tentatives d'envoi d'une contestation en peu de temps."
   },
   "serverError": {
     "fix": "C’est généralement temporaire. Attendez un instant puis réessayez ; si le problème persiste, actualisez la page.",
@@ -95,13 +96,16 @@
     "checkSellerDetails": "Impossible de vérifier vos informations vendeur en raison d’un problème de notre côté.",
     "loadProductPageSettings": "Impossible de charger vos paramètres de page produit en raison d’un problème de notre côté.",
     "saveProductPageSettings": "Impossible d’enregistrer vos paramètres de page produit en raison d’un problème de notre côté.",
-    "sendForReview": "Impossible d’envoyer cette demande de réexamen : un problème est survenu de notre côté."
+    "sendForReview": "Impossible d’envoyer cette demande de réexamen : un problème est survenu de notre côté.",
+    "fileAppeal": "Impossible d'envoyer votre contestation en raison d'un problème de notre côté."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Ce produit a été retiré, et non mis en pause.} storefront {Cette vitrine a été retirée, et non mise en pause.} other {Cet élément a été retiré, et non mis en pause.}}",
-    "removedFix": "Un retrait est définitif. Si vous pensez qu’il s’agit d’une erreur, utilisez le lien de contestation pour nous écrire.",
+    "removedFix": "Un retrait est définitif, sauf si une contestation le modifie. Si vous pensez qu'il est erroné, utilisez « Contester cette décision ».",
     "notPaused": "{target, select, product {Ce produit n’est pas en pause.} storefront {Cette vitrine n’est pas en pause.} other {Cet élément n’est pas en pause.}}",
-    "notPausedFix": "Il n’y a rien à réexaminer : il est déjà visible par les acheteurs."
+    "notPausedFix": "Il n’y a rien à réexaminer : il est déjà visible par les acheteurs.",
+    "decisionSuperseded": "Cette décision ne s'applique plus, il n'y a donc rien à contester.",
+    "decisionSupersededFix": "Rechargez la page pour voir la situation actuelle."
   },
   "traderIdentityRequired": {
     "message": "Vous ne pouvez ni publier ni vendre tant que vos informations vendeur ne sont pas complètes.",

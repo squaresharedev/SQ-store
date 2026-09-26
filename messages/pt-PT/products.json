@@ -113,19 +113,45 @@
     "pausedOn": "Pausado em",
     "statement": "{ground, select, illegal {Bens ou atividade ilegais. Oferecia algo que não pode ser vendido legalmente, ou servia-se do anúncio para o combinar.} sexual {Conteúdo sexual. Continha conteúdo sexual explícito.} violence {Violência ou conteúdo gráfico. Continha violência explícita.} hate {Ódio ou assédio. Atacava uma pessoa ou um grupo, ou continha simbologia de ódio.} counterfeit {Contrafação ou roubo. Aparentava oferecer artigos contrafeitos, ou trabalho que pertence a outra pessoa.} scam {Burla ou fraude. Aparentava ter sido concebido para receber pagamentos sem entregar o prometido.} spam {Spam. Era repetitivo ou enganador, em vez de um anúncio genuíno.} other {Outro motivo. Infringia as regras da plataforma.}}{noted, select, yes { {note}} other {}}",
     "statementUnlabelled": "Infringia as regras da plataforma.{noted, select, yes { {note}} other {}}",
-    "fixHint": "{kind, select, product {Edite o produto abaixo para corrigir isto, guarde-o e volte a enviá-lo para nós.} other {Abra a montra para corrigir isto, volte depois aqui e envie-a para nós.}}",
+    "fixHint": "{kind, select, product {Altere as partes destacadas abaixo, guarde e envie-nos de volta.} other {Abra a montra, altere o que está indicado acima, volte aqui e envie-nos.}}",
     "readOnlyHint": "{kind, select, product {Alguém que possa editar este produto tem de fazer a alteração e enviá-la para análise.} other {Alguém que possa editar esta montra tem de fazer a alteração e enviá-la para análise.}}",
     "appeal": "{kind, select, product {Ainda pode editar este produto. Editar não o repõe: <link>peça-nos que voltemos a analisar</link> se considera que foi um erro.} other {Ainda pode editar esta montra. Editar não a repõe: <link>peça-nos que voltemos a analisar</link> se considera que foi um erro.}}",
     "appealPaused": "Acha que é um erro? <link>Escreva-nos</link>.",
     "appealFinal": "Se considera que nos enganámos, <link>peça-nos que voltemos a analisar</link>.",
-    "appealSubject": "{kind, select, product {Recurso: remoção de produto ({title})} other {Recurso: remoção de montra ({title})}}",
-    "appealBody": "{kind, select, product {Gostaria que este produto fosse analisado novamente.\n\nID do produto: {id}\nNome: {title}\n\nPorque considero que foi um erro:\n} other {Gostaria que esta montra fosse analisada novamente.\n\nID da montra: {id}\nNome: {title}\n\nPorque considero que foi um erro:\n}}",
     "reviewRequest": {
       "button": "Fiz as alterações, enviar para análise",
       "sent": "Enviado para análise em <time>{date}</time>. Uma pessoa vai analisar as suas alterações e receberá resposta aqui e por e-mail.",
       "failed": "Não foi possível enviar.",
       "failedFix": "Tente novamente daqui a pouco."
-    }
+    },
+    "why": "Porquê",
+    "whatToChange": "O que alterar",
+    "concerned": "O que foi visado",
+    "showField": "Mostrar {field} nesta página",
+    "fields": {
+      "product": "{field, select, title {Título} description {Descrição} price {Preço} image {Imagem principal} file {Ficheiro digital} purchaseLink {Link de compra} shipping {Envio} options {Opções} photos {Fotografias} specs {Especificações} documents {Documentos} safety {Segurança e conformidade} other {Outra coisa}}",
+      "storefront": "{field, select, name {Nome da montra} header {Cabeçalho} text {Texto} images {Imagens} products {Produtos apresentados} background {Fundo} productPage {Páginas de produto} other {Outra coisa}}"
+    },
+    "reference": "Referência",
+    "downloadStatement": "Descarregar a decisão (PDF)",
+    "openEditor": "Abrir a montra para a alterar",
+    "appealButton": "Apelar desta decisão",
+    "appealForm": {
+      "title": "Apelar desta decisão",
+      "description": "Diga-nos porque considera que nos enganámos. Uma pessoa analisa cada recurso e receberá resposta aqui e por e-mail. O conteúdo fica oculto enquanto analisamos.",
+      "label": "Porque considera que esta decisão está errada?",
+      "placeholder": "Por exemplo: o logótipo na fotografia é uma marca registada nossa e aqui pode confirmar.",
+      "help": "Pelo menos {min} carateres. Inclua tudo o que nos ajude a verificar, como um link ou um número de registo.",
+      "count": "{count} / {max}",
+      "submit": "Enviar recurso",
+      "sent": "Recurso enviado. Entraremos em contacto consigo."
+    },
+    "appealStatus": {
+      "open": "Apresentou recurso em <time>{date}</time>. Uma pessoa vai analisá-lo e receberá resposta aqui e por e-mail.",
+      "upheld": "Analisámos o seu recurso em <time>{date}</time>. A decisão mantém-se.",
+      "answer": "A nossa resposta: {note}"
+    },
+    "editorDetails": "Porquê e o que fazer a seguir"
   },
   "import": {
     "fields": {
@@ -309,6 +335,21 @@
     "nav": {
       "label": "Secções do formulário",
       "heading": "Nesta página"
+    },
+    "moderation": {
+      "badge": "Precisa de alterações",
+      "changed": "Alterado",
+      "callout": "A SquareShare pediu-lhe que alterasse {fields} aqui.",
+      "seeWhy": "Ver porquê",
+      "fieldBadge": "Alterar isto",
+      "navHint": "precisa de alterações",
+      "inReview": "Enviado para análise",
+      "reviewPrompt": {
+        "title": "Guardado. Enviá-lo novamente para análise?",
+        "body": "Se alterou tudo o que a SquareShare pediu, envie agora e uma pessoa vai analisar. Se não, continue a editar e envie quando terminar.",
+        "keepEditing": "Continuar a editar",
+        "send": "Enviar para análise"
+      }
     }
   },
   "stockFields": {
@@ -522,5 +563,76 @@
     "dropPrompt": "Largue um ficheiro ou clique para carregar",
     "hint": "ZIP, PDF e semelhantes, até {max} MB",
     "remove": "Remover ficheiro digital"
+  },
+  "statement": {
+    "fileTitle": "Declaração de fundamentação {reference}",
+    "title": "Declaração de fundamentação",
+    "subtitle": "{action, select, paused {Pausámos {target, select, product {o seu produto} other {a sua montra}}} other {Removemos {target, select, product {o seu produto} other {a sua montra}}}}",
+    "intro": "Esta declaração explica uma decisão que tomámos sobre um conteúdo que publicou na SquareShare, os motivos pelos quais a tomámos e como pode contestá-la. Tem direito a recebê-la ao abrigo do artigo 17.º do Regulamento dos Serviços Digitais ((UE) 2022/2065).",
+    "sections": {
+      "decision": "A decisão",
+      "reasons": "Por que motivo a tomámos",
+      "fix": "O que alterar",
+      "redress": "Como contestar",
+      "appeal": "O seu recurso"
+    },
+    "labels": {
+      "reference": "Referência",
+      "issued": "Declaração emitida",
+      "content": "Conteúdo",
+      "contentId": "ID do conteúdo",
+      "decision": "Decisão",
+      "decidedOn": "Decidido em",
+      "scope": "Onde se aplica",
+      "duration": "Durante quanto tempo",
+      "status": "Estado atual",
+      "ground": "Fundamento",
+      "note": "Nota do nosso avaliador",
+      "facts": "Factos e circunstâncias",
+      "automated": "Meios automatizados",
+      "legalBasis": "Fundamento da decisão"
+    },
+    "content": "{target, select, product {Produto} other {Montra}}: {title}",
+    "decision": {
+      "paused": "Pausado. O conteúdo está oculto para os compradores até efetuar as alterações indicadas abaixo e estas serem aprovadas por nós.",
+      "removed": "Removido. O conteúdo já não está disponível para os compradores. Esta decisão é definitiva, salvo se um recurso a alterar."
+    },
+    "scope": "Em todos os locais onde a SquareShare o apresenta: na respetiva página, em incorporações noutros sítios web e em links partilhados, em todos os países.",
+    "duration": {
+      "paused": "Até aprovarmos as suas alterações.",
+      "removed": "Indefinido."
+    },
+    "status": {
+      "inForce": "Em vigor.",
+      "replaced": "Substituída por uma decisão posterior.",
+      "reversed": "Revertida. O conteúdo voltou a estar visível para os compradores.",
+      "deleted": "O conteúdo foi entretanto eliminado."
+    },
+    "facts": {
+      "notices": "{count, plural, =0 {Identificámos esta situação por conta própria, sem qualquer denúncia de terceiros exteriores à SquareShare.} one {Esta decisão resultou de # denúncia de um terceiro exterior à SquareShare, sobre: {reasons}.} other {Esta decisão resultou de # denúncias de terceiros exteriores à SquareShare, sobre: {reasons}.}}",
+      "review": "Um membro da equipa da SquareShare analisou o próprio conteúdo antes de decidir. Não revelamos a identidade de quem enviou uma denúncia."
+    },
+    "automated": "Não foram utilizados meios automatizados para detetar este conteúdo nem para tomar esta decisão.",
+    "legalBasis": {
+      "contract": "Contratual: os Termos de Serviço da SquareShare, que não permitem conteúdo como este ({url}).",
+      "illegal": "Legal: considerámos o conteúdo ilegal ao abrigo da lei que lhe é aplicável."
+    },
+    "noNote": "Nenhuma.",
+    "fixIntro": "{target, select, product {Altere estas partes e prima «Fiz as alterações, enviar para análise» no produto no seu painel, e voltaremos a analisar:} other {Altere estas partes e prima «Fiz as alterações, enviar para análise» na montra no seu painel, e voltaremos a analisar:}}",
+    "redress": {
+      "appeal": "{target, select, product {Recurso junto de nós, sem custos: prima «Apelar desta decisão» no produto no seu painel, no prazo de seis meses a contar desta decisão. Uma pessoa analisa cada recurso e receberá resposta no seu painel e por e-mail.} other {Recurso junto de nós, sem custos: prima «Apelar desta decisão» na montra no seu painel, no prazo de seis meses a contar desta decisão. Uma pessoa analisa cada recurso e receberá resposta no seu painel e por e-mail.}}",
+      "settlement": "Resolução extrajudicial de litígios: pode submeter esta decisão a um organismo de resolução de litígios certificado ao abrigo do artigo 21.º do Regulamento dos Serviços Digitais.",
+      "court": "Tribunais: pode submeter esta decisão a um tribunal competente. A utilização das opções acima não prejudica esse direito.",
+      "contact": "Questões: escreva para {email} e indique a referência {reference}."
+    },
+    "appeal": {
+      "open": "Apresentou recurso em {date}. Uma pessoa está a analisá-lo.",
+      "upheld": "Apresentou recurso em {date}. Respondemos em {decided}: a decisão mantém-se.",
+      "overturned": "Apresentou recurso em {date}. Respondemos em {decided}: a decisão foi revertida.",
+      "answer": "A nossa resposta: {note}",
+      "message": "O que escreveu: {message}"
+    },
+    "footer": "SquareShare · {reference} · Página {page} de {total}",
+    "generated": "Gerado em {date}."
   }
 }

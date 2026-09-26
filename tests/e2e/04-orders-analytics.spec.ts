@@ -121,7 +121,20 @@ test.describe("orders + analytics (seeded)", () => {
     }
     expect(new Set(hrefs).size).toBe(2);
 
-    // Follow the row's OWN href: it must land on that order's detail panel.
+    // A plain click opens the order's panel RIGHT HERE: the detail came with
+    // the page, so there is no trip to /orders and nothing to wait on.
+    await card.getByRole("link", { name: /Recent one/ }).click();
+    const inPlace = page.getByRole("dialog", { name: /order details/i });
+    await expect(inPlace).toBeVisible();
+    await expect(inPlace).toContainText("Recent one");
+    await expect(inPlace).toContainText("€11.00");
+    await expect(inPlace).toContainText("one@ex.com");
+    await expect(page).toHaveURL(/\/dashboard$/);
+    await page.keyboard.press("Escape");
+    await expect(inPlace).not.toBeVisible();
+
+    // Follow the row's OWN href (a new tab does this): it must land on that
+    // order's detail panel.
     // Navigated rather than clicked because <Link> clicks do not commit in
     // this dev stack at all — the sidebar's own links behave identically, so
     // clicking would test the dev server, not the card. The href is the part

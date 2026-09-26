@@ -69,7 +69,8 @@
     "rotateEmbedKeys": "Príliš veľa pokusov o obnovenie kľúčov na vloženie za krátky čas.",
     "updateStock": "Príliš veľa pokusov o aktualizáciu zásob za krátky čas.",
     "readProductPageSettings": "Príliš veľa pokusov o načítanie nastavení produktovej stránky za krátky čas.",
-    "requestReview": "Príliš veľa žiadostí o preskúmanie za krátky čas."
+    "requestReview": "Príliš veľa žiadostí o preskúmanie za krátky čas.",
+    "fileAppeal": "Príliš veľa pokusov o odoslanie odvolania za krátky čas."
   },
   "serverError": {
     "fix": "Zvyčajne je to dočasné. Chvíľu počkajte a skúste to znova. Ak sa problém opakuje, obnovte stránku.",
@@ -95,13 +96,16 @@
     "checkSellerDetails": "Údaje predajcu sa nepodarilo skontrolovať kvôli problému na našej strane.",
     "loadProductPageSettings": "Nastavenia produktovej stránky sa nepodarilo načítať kvôli problému na našej strane.",
     "saveProductPageSettings": "Nastavenia produktovej stránky sa nepodarilo uložiť kvôli problému na našej strane.",
-    "sendForReview": "Nepodarilo sa to odoslať na preskúmanie kvôli problému na našej strane."
+    "sendForReview": "Nepodarilo sa to odoslať na preskúmanie kvôli problému na našej strane.",
+    "fileAppeal": "Vaše odvolanie sa nepodarilo odoslať kvôli problému na našej strane."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Tento produkt bol odstránený, nie pozastavený.} storefront {Tento výklad bol odstránený, nie pozastavený.} other {Táto položka bola odstránená, nie pozastavená.}}",
-    "removedFix": "Odstránenie je konečné. Ak si myslíte, že bolo neoprávnené, napíšte nám cez odkaz na odvolanie.",
+    "removedFix": "Odstránenie je konečné, pokiaľ ho nezmení odvolanie. Ak si myslíte, že bolo neoprávnené, použite „Odvolať toto rozhodnutie“.",
     "notPaused": "{target, select, product {Tento produkt nie je pozastavený.} storefront {Tento výklad nie je pozastavený.} other {Táto položka nie je pozastavená.}}",
-    "notPausedFix": "Nie je čo preskúmavať: kupujúci ju už vidia."
+    "notPausedFix": "Nie je čo preskúmavať: kupujúci ju už vidia.",
+    "decisionSuperseded": "Toto rozhodnutie sa už neuplatuje, takže nie je čo odvolávať.",
+    "decisionSupersededFix": "Obnovte stránku, aby ste videli aktuálny stav."
   },
   "traderIdentityRequired": {
     "message": "Nemôžete zverejniť ani predávať, kým nie sú vaše údaje predajcu kompletné.",

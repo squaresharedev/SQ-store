@@ -520,7 +520,9 @@ export function ProductPageView({
           <PoweredByFooter
             ruleColor={rule}
             sellerName={soldBy}
-            productId={product.id}
+            product={{ id: product.id, title: product.title }}
+            storefront={{ id: storefront.id, name: storeName }}
+            reportScopes={page.reportScopes}
             preview={preview}
           />
 

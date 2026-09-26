@@ -113,19 +113,45 @@
     "pausedOn": "En pausa desde el",
     "statement": "{ground, select, illegal {Bienes o actividades ilegales. Ofrecía algo que no se puede vender legalmente, o usaba el anuncio para gestionarlo.} sexual {Contenido sexual. Contenía material sexual explícito.} violence {Violencia o contenido gráfico. Contenía violencia explícita.} hate {Odio o acoso. Atacaba a una persona o a un grupo, o incluía simbología de odio.} counterfeit {Falsificación o robo. Parecía ofrecer productos falsificados, o una obra que pertenece a otra persona.} scam {Estafa o fraude. Parecía diseñado para cobrar sin entregar lo prometido.} spam {Spam. Era repetitivo o engañoso, y no un anuncio genuino.} other {Otro motivo. Incumplía las normas de la plataforma.}}{noted, select, yes { {note}} other {}}",
     "statementUnlabelled": "Incumplía las normas de la plataforma.{noted, select, yes { {note}} other {}}",
-    "fixHint": "{kind, select, product {Edita el producto más abajo para corregirlo, guárdalo y vuelve a enviárnoslo.} other {Abre el escaparate para corregirlo, vuelve aquí y envíanoslo.}}",
+    "fixHint": "{kind, select, product {Cambia las partes marcadas más abajo, guarda y envíanoslo de nuevo.} other {Abre el escaparate, cambia lo que se indica arriba, vuelve aquí y envíanoslo.}}",
     "readOnlyHint": "{kind, select, product {Una persona que pueda editar este producto tiene que hacer el cambio y enviarlo a revisión.} other {Una persona que pueda editar este escaparate tiene que hacer el cambio y enviarlo a revisión.}}",
     "appeal": "{kind, select, product {Todavía puedes editar este producto. Editarlo no lo restablece: <link>pídenos que lo revisemos de nuevo</link> si crees que fue un error.} other {Todavía puedes editar este escaparate. Editarlo no lo restablece: <link>pídenos que lo revisemos de nuevo</link> si crees que fue un error.}}",
     "appealPaused": "¿Crees que es un error? <link>Escríbenos</link>.",
     "appealFinal": "Si crees que nos hemos equivocado, <link>pídenos que lo revisemos de nuevo</link>.",
-    "appealSubject": "{kind, select, product {Apelación: retirada de producto ({title})} other {Apelación: retirada de escaparate ({title})}}",
-    "appealBody": "{kind, select, product {Quiero que se revise de nuevo este producto.\n\nID del producto: {id}\nNombre: {title}\n\nPor qué creo que fue un error:\n} other {Quiero que se revise de nuevo este escaparate.\n\nID del escaparate: {id}\nNombre: {title}\n\nPor qué creo que fue un error:\n}}",
     "reviewRequest": {
       "button": "He hecho los cambios, revisadlo",
       "sent": "Enviado a revisión el <time>{date}</time>. Una persona revisará tus cambios y recibirás la respuesta aquí y por correo.",
       "failed": "No se ha podido enviar.",
       "failedFix": "Inténtalo de nuevo en unos instantes."
-    }
+    },
+    "why": "Por qué",
+    "whatToChange": "Qué hay que cambiar",
+    "concerned": "A qué afectaba",
+    "showField": "Mostrar {field} en esta página",
+    "fields": {
+      "product": "{field, select, title {Título} description {Descripción} price {Precio} image {Imagen de portada} file {Archivo digital} purchaseLink {Enlace de compra} shipping {Envío} options {Opciones} photos {Fotos} specs {Especificaciones} documents {Documentos} safety {Seguridad y cumplimiento} other {Otro}}",
+      "storefront": "{field, select, name {Nombre del escaparate} header {Cabecera} text {Texto} images {Imágenes} products {Productos mostrados} background {Fondo} productPage {Páginas de producto} other {Otro}}"
+    },
+    "reference": "Referencia",
+    "downloadStatement": "Descargar la decisión (PDF)",
+    "openEditor": "Abrir el escaparate para cambiarlo",
+    "appealButton": "Recurrir esta decisión",
+    "appealForm": {
+      "title": "Recurrir esta decisión",
+      "description": "Cuéntanos por qué crees que nos hemos equivocado. Una persona revisa cada recurso, y recibirás la respuesta aquí y por correo. Permanece oculto mientras lo revisamos.",
+      "label": "¿Por qué crees que esta decisión es incorrecta?",
+      "placeholder": "Por ejemplo: el logotipo de la foto es nuestra marca registrada, y aquí puedes comprobarlo.",
+      "help": "Al menos {min} caracteres. Añade cualquier cosa que nos ayude a verificarlo, como un enlace o un número de registro.",
+      "count": "{count} / {max}",
+      "submit": "Enviar recurso",
+      "sent": "Recurso enviado. Nos pondremos en contacto contigo."
+    },
+    "appealStatus": {
+      "open": "Recurriste el <time>{date}</time>. Una persona lo revisará, y recibirás la respuesta aquí y por correo.",
+      "upheld": "Revisamos tu recurso el <time>{date}</time>. La decisión se mantiene.",
+      "answer": "Nuestra respuesta: {note}"
+    },
+    "editorDetails": "Por qué, y qué hacer ahora"
   },
   "import": {
     "fields": {
@@ -309,6 +335,21 @@
     "nav": {
       "label": "Secciones del formulario",
       "heading": "En esta página"
+    },
+    "moderation": {
+      "badge": "Requiere cambios",
+      "changed": "Cambiado",
+      "callout": "SquareShare te pide que cambies {fields} aquí.",
+      "seeWhy": "Ver por qué",
+      "fieldBadge": "Cambia esto",
+      "navHint": "requiere cambios",
+      "inReview": "Enviado a revisión",
+      "reviewPrompt": {
+        "title": "Guardado. ¿Enviarlo a revisión?",
+        "body": "Si has cambiado todo lo que SquareShare pedía, envíalo ahora y una persona lo revisará. Si no, sigue editando y envíalo cuando hayas terminado.",
+        "keepEditing": "Seguir editando",
+        "send": "Enviar a revisión"
+      }
     }
   },
   "stockFields": {
@@ -522,5 +563,76 @@
     "dropPrompt": "Suelta un archivo o haz clic para subir",
     "hint": "ZIP, PDF y similares, hasta {max} MB",
     "remove": "Quitar archivo digital"
+  },
+  "statement": {
+    "fileTitle": "Declaración de motivos {reference}",
+    "title": "Declaración de motivos",
+    "subtitle": "{action, select, paused {Hemos pausado tu {target, select, product {producto} other {escaparate}}} other {Hemos retirado tu {target, select, product {producto} other {escaparate}}}}",
+    "intro": "Esta declaración explica una decisión que hemos tomado sobre contenido que publicaste en SquareShare, por qué la tomamos y cómo puedes impugnarla. Tienes derecho a ella en virtud del artículo 17 del Reglamento de Servicios Digitales (UE) 2022/2065.",
+    "sections": {
+      "decision": "La decisión",
+      "reasons": "Por qué la tomamos",
+      "fix": "Qué hay que cambiar",
+      "redress": "Cómo impugnarla",
+      "appeal": "Tu recurso"
+    },
+    "labels": {
+      "reference": "Referencia",
+      "issued": "Declaración emitida",
+      "content": "Contenido",
+      "contentId": "ID del contenido",
+      "decision": "Decisión",
+      "decidedOn": "Decidido el",
+      "scope": "Ámbito de aplicación",
+      "duration": "Duración",
+      "status": "Estado actual",
+      "ground": "Motivo",
+      "note": "Nota de nuestro revisor",
+      "facts": "Hechos y circunstancias",
+      "automated": "Medios automatizados",
+      "legalBasis": "Base de la decisión"
+    },
+    "content": "{target, select, product {Producto} other {Escaparate}}: {title}",
+    "decision": {
+      "paused": "En pausa. El contenido está oculto para los compradores hasta que realices los cambios indicados más abajo y los aprobemos.",
+      "removed": "Retirado. El contenido ya no está disponible para los compradores. Esta decisión es definitiva, salvo que un recurso la modifique."
+    },
+    "scope": "En todos los lugares donde SquareShare lo muestra: su propia página, incorporaciones en otros sitios web y enlaces compartidos, en todos los países.",
+    "duration": {
+      "paused": "Hasta que aprobemos tus cambios.",
+      "removed": "Indefinida."
+    },
+    "status": {
+      "inForce": "En vigor.",
+      "replaced": "Sustituida por una decisión posterior.",
+      "reversed": "Revocada. El contenido vuelve a ser visible para los compradores.",
+      "deleted": "El contenido ha sido eliminado desde entonces."
+    },
+    "facts": {
+      "notices": "{count, plural, =0 {Lo detectamos nosotros mismos, sin ninguna notificación de personas ajenas a SquareShare.} one {Esto se produjo tras # notificación de una persona ajena a SquareShare, sobre: {reasons}.} other {Esto se produjo tras # notificaciones de personas ajenas a SquareShare, sobre: {reasons}.}}",
+      "review": "Un miembro del equipo de SquareShare revisó el contenido en sí antes de decidir. No revelamos quién envió una notificación."
+    },
+    "automated": "No se utilizaron medios automatizados para detectar este contenido ni para tomar esta decisión.",
+    "legalBasis": {
+      "contract": "Contractual: las Condiciones de Servicio de SquareShare, que no permiten contenido de este tipo ({url}).",
+      "illegal": "Legal: consideramos que el contenido es ilegal conforme a la legislación que le resulta aplicable."
+    },
+    "noNote": "Ninguna.",
+    "fixIntro": "{target, select, product {Cambia estas partes, pulsa «He hecho los cambios, revisadlo» en el producto de tu panel y lo revisaremos de nuevo:} other {Cambia estas partes, pulsa «He hecho los cambios, revisadlo» en el escaparate de tu panel y lo revisaremos de nuevo:}}",
+    "redress": {
+      "appeal": "Recurre ante nosotros, de forma gratuita: pulsa «Recurrir esta decisión» en {target, select, product {el producto} other {el escaparate}} de tu panel, en un plazo de seis meses desde esta decisión. Una persona revisa cada recurso, y recibirás la respuesta en tu panel y por correo.",
+      "settlement": "Resolución extrajudicial de litigios: puedes someter esta decisión a un organismo de resolución de litigios certificado conforme al artículo 21 del Reglamento de Servicios Digitales.",
+      "court": "Tribunales: puedes impugnar esta decisión ante un tribunal competente. El uso de las opciones anteriores no afecta a ese derecho.",
+      "contact": "Consultas: escribe a {email} y cita la referencia {reference}."
+    },
+    "appeal": {
+      "open": "Recurriste el {date}. Una persona lo está revisando.",
+      "upheld": "Recurriste el {date}. Respondimos el {decided}: la decisión se mantiene.",
+      "overturned": "Recurriste el {date}. Respondimos el {decided}: la decisión fue revocada.",
+      "answer": "Nuestra respuesta: {note}",
+      "message": "Lo que escribiste: {message}"
+    },
+    "footer": "SquareShare · {reference} · Página {page} de {total}",
+    "generated": "Generado el {date}."
   }
 }

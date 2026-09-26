@@ -32,6 +32,23 @@
     "loading": "Wczytywanie",
     "loadMore": "Wczytaj więcej"
   },
+  "filters": {
+    "label": "Filtruj powiadomienia",
+    "show": "Pokaż",
+    "all": "Wszystkie",
+    "unread": "Nieprzeczytane",
+    "category": "Kategoria",
+    "allCategories": "Wszystkie kategorie",
+    "clear": "Wyczyść filtry",
+    "emptyUnreadTitle": "Brak nieprzeczytanych powiadomień",
+    "emptyUnreadHint": "Wszystko przeczytane.",
+    "emptyFilteredTitle": "Brak pasujących powiadomień",
+    "emptyFilteredHint": "Wybierz inną kategorię albo wyczyść filtry, żeby zobaczyć wszystko."
+  },
+  "actions": {
+    "openStore": "Otwórz sklep",
+    "unavailable": "To zaproszenie nie jest już dostępne."
+  },
   "types": {
     "team": "Zespół",
     "order": "Zamówienie",

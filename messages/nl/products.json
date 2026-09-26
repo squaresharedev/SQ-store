@@ -113,19 +113,45 @@
     "pausedOn": "Gepauzeerd op",
     "statement": "{ground, select, illegal {Illegale goederen of activiteiten. Er werd iets aangeboden dat niet legaal verkocht mag worden, of de advertentie werd gebruikt om dat te regelen.} sexual {Seksuele inhoud. Het bevatte expliciete seksuele inhoud.} violence {Geweld of bloederige beelden. Het bevatte grafisch geweld.} hate {Haat of intimidatie. Het viel een persoon of groep aan, of bevatte haatsymbolen.} counterfeit {Namaak of gestolen. Het leek namaakgoederen aan te bieden, of werk dat van iemand anders is.} scam {Oplichting of fraude. Het leek bedoeld om betalingen aan te nemen zonder te leveren wat was beloofd.} spam {Spam. Het was repetitief of misleidend en geen echte advertentie.} other {Iets anders. Het overtrad de regels van het platform.}}{noted, select, yes { {note}} other {}}",
     "statementUnlabelled": "Het overtrad de regels van het platform.{noted, select, yes { {note}} other {}}",
-    "fixHint": "{kind, select, product {Pas het product hieronder aan, sla het op en stuur het daarna terug naar ons.} other {Open de etalage om dit op te lossen, kom daarna terug en stuur hem naar ons.}}",
+    "fixHint": "{kind, select, product {Pas de gemarkeerde onderdelen hieronder aan, sla het op en stuur het dan terug naar ons.} other {Open de etalage, pas aan wat hierboven staat, kom dan hier terug en stuur hem naar ons.}}",
     "readOnlyHint": "{kind, select, product {Iemand die dit product mag bewerken, moet de aanpassing doen en het ter beoordeling insturen.} other {Iemand die deze etalage mag bewerken, moet de aanpassing doen en hem ter beoordeling insturen.}}",
     "appeal": "{kind, select, product {Je kunt dit product nog steeds bewerken. Bewerken zet het niet terug: <link>vraag ons om er opnieuw naar te kijken</link> als je denkt dat dit onterecht was.} other {Je kunt deze etalage nog steeds bewerken. Bewerken zet hem niet terug: <link>vraag ons om er opnieuw naar te kijken</link> als je denkt dat dit onterecht was.}}",
     "appealPaused": "Denk je dat dit een vergissing is? <link>Schrijf ons</link>.",
     "appealFinal": "Denk je dat we het bij het verkeerde eind hadden? <link>Vraag ons er opnieuw naar te kijken</link>.",
-    "appealSubject": "{kind, select, product {Bezwaar: verwijdering van product ({title})} other {Bezwaar: verwijdering van etalage ({title})}}",
-    "appealBody": "{kind, select, product {Ik wil graag dat dit product opnieuw wordt beoordeeld.\n\nProduct-ID: {id}\nNaam: {title}\n\nWaarom ik denk dat dit onterecht was:\n} other {Ik wil graag dat deze etalage opnieuw wordt beoordeeld.\n\nEtalage-ID: {id}\nNaam: {title}\n\nWaarom ik denk dat dit onterecht was:\n}}",
     "reviewRequest": {
       "button": "Ik heb de aanpassingen gedaan, beoordeel het",
       "sent": "Ter beoordeling ingestuurd op <time>{date}</time>. Iemand kijkt naar je aanpassingen en je hoort het hier en per e-mail.",
       "failed": "Dat kon niet worden verstuurd.",
       "failedFix": "Probeer het zo meteen opnieuw."
-    }
+    },
+    "why": "Waarom",
+    "whatToChange": "Wat er moet veranderen",
+    "concerned": "Waar het over ging",
+    "showField": "Toon {field} op deze pagina",
+    "fields": {
+      "product": "{field, select, title {Titel} description {Beschrijving} price {Prijs} image {Hoofdafbeelding} file {Digitaal bestand} purchaseLink {Aankooplink} shipping {Verzending} options {Opties} photos {Foto's} specs {Specificaties} documents {Documenten} safety {Veiligheid en conformiteit} other {Iets anders}}",
+      "storefront": "{field, select, name {Naam van de etalage} header {Koptekst} text {Tekst} images {Afbeeldingen} products {Getoonde producten} background {Achtergrond} productPage {Productpagina's} other {Iets anders}}"
+    },
+    "reference": "Referentie",
+    "downloadStatement": "Download de beslissing (PDF)",
+    "openEditor": "Open de etalage om deze te wijzigen",
+    "appealButton": "Bezwaar aantekenen",
+    "appealForm": {
+      "title": "Bezwaar aantekenen",
+      "description": "Vertel ons waarom je denkt dat we het fout hadden. Elk bezwaar wordt door een medewerker beoordeeld, en je hoort hier en per e-mail van ons. Het blijft verborgen terwijl we ernaar kijken.",
+      "label": "Waarom denk je dat deze beslissing onjuist is?",
+      "placeholder": "Bijv.: het logo op de foto is ons eigen geregistreerde handelsmerk, en hier kun je dat controleren.",
+      "help": "Minstens {min} tekens. Voeg alles toe wat ons helpt om dit te controleren, zoals een link of een registratienummer.",
+      "count": "{count} / {max}",
+      "submit": "Bezwaar versturen",
+      "sent": "Bezwaar verstuurd. We nemen contact met je op."
+    },
+    "appealStatus": {
+      "open": "Je hebt bezwaar aangetekend op <time>{date}</time>. Een medewerker beoordeelt het, en je hoort hier en per e-mail van ons.",
+      "upheld": "We hebben je bezwaar op <time>{date}</time> beoordeeld. De beslissing blijft staan.",
+      "answer": "Ons antwoord: {note}"
+    },
+    "editorDetails": "Waarom, en wat je nu kunt doen"
   },
   "import": {
     "fields": {
@@ -309,6 +335,21 @@
     "nav": {
       "label": "Formulieronderdelen",
       "heading": "Op deze pagina"
+    },
+    "moderation": {
+      "badge": "Aanpassingen vereist",
+      "changed": "Gewijzigd",
+      "callout": "SquareShare heeft je gevraagd {fields} hier te wijzigen.",
+      "seeWhy": "Zie waarom",
+      "fieldBadge": "Pas dit aan",
+      "navHint": "aanpassingen vereist",
+      "inReview": "Ter beoordeling verstuurd",
+      "reviewPrompt": {
+        "title": "Opgeslagen. Terugsturen voor beoordeling?",
+        "body": "Als je alles hebt aangepast wat SquareShare heeft gevraagd, stuur het dan nu terug en een medewerker kijkt ernaar. Zo niet, blijf dan bewerken en stuur het als je klaar bent.",
+        "keepEditing": "Blijven bewerken",
+        "send": "Ter beoordeling versturen"
+      }
     }
   },
   "stockFields": {
@@ -522,5 +563,76 @@
     "dropPrompt": "Sleep een bestand hierheen of klik om te uploaden",
     "hint": "ZIP, PDF en vergelijkbaar, tot {max} MB",
     "remove": "Digitaal bestand verwijderen"
+  },
+  "statement": {
+    "fileTitle": "Motiveringsverklaring {reference}",
+    "title": "Motiveringsverklaring",
+    "subtitle": "{action, select, paused {We hebben je {target, select, product {product} other {etalage}} gepauzeerd} other {We hebben je {target, select, product {product} other {etalage}} verwijderd}}",
+    "intro": "Deze verklaring legt een beslissing uit die we hebben genomen over content die je op SquareShare hebt gepubliceerd, waarom we die beslissing hebben genomen en hoe je die kunt aanvechten. Je hebt er recht op krachtens artikel 17 van de EU-digitaledienstenverordening (verordening (EU) 2022/2065).",
+    "sections": {
+      "decision": "De beslissing",
+      "reasons": "Waarom we haar hebben genomen",
+      "fix": "Wat er moet veranderen",
+      "redress": "Hoe je haar kunt aanvechten",
+      "appeal": "Je bezwaar"
+    },
+    "labels": {
+      "reference": "Referentie",
+      "issued": "Verklaring afgegeven",
+      "content": "Content",
+      "contentId": "Content-ID",
+      "decision": "Beslissing",
+      "decidedOn": "Beslist op",
+      "scope": "Waar van toepassing",
+      "duration": "Hoe lang",
+      "status": "Huidige status",
+      "ground": "Grond",
+      "note": "Noot van onze beoordelaar",
+      "facts": "Feiten en omstandigheden",
+      "automated": "Geautomatiseerde middelen",
+      "legalBasis": "Grondslag voor de beslissing"
+    },
+    "content": "{target, select, product {Product} other {Etalage}}: {title}",
+    "decision": {
+      "paused": "Gepauzeerd. De content is voor kopers verborgen totdat je de onderstaande wijzigingen hebt doorgevoerd en we ze hebben goedgekeurd.",
+      "removed": "Verwijderd. De content is niet langer beschikbaar voor kopers. Deze beslissing is definitief, tenzij een bezwaar haar wijzigt."
+    },
+    "scope": "Overal waar SquareShare het toont: op de eigen pagina, via insluitingen op andere websites en via gedeelde links, in alle landen.",
+    "duration": {
+      "paused": "Totdat we je wijzigingen hebben goedgekeurd.",
+      "removed": "Voor onbepaalde tijd."
+    },
+    "status": {
+      "inForce": "Van kracht.",
+      "replaced": "Vervangen door een latere beslissing.",
+      "reversed": "Teruggedraaid. De content is weer zichtbaar voor kopers.",
+      "deleted": "De content is nadien verwijderd."
+    },
+    "facts": {
+      "notices": "{count, plural, =0 {We hebben dit zelf gevonden, zonder een melding van buiten SquareShare.} one {Dit volgde op # melding van buiten SquareShare, over: {reasons}.} other {Dit volgde op # meldingen van buiten SquareShare, over: {reasons}.}}",
+      "review": "Een medewerker van SquareShare heeft de content zelf bekeken voordat er een beslissing werd genomen. We delen niet mee wie een melding heeft ingediend."
+    },
+    "automated": "Er zijn geen geautomatiseerde middelen gebruikt om deze content op te sporen of om deze beslissing te nemen.",
+    "legalBasis": {
+      "contract": "Contractueel: de Servicevoorwaarden van SquareShare, die dergelijke content niet toestaan ({url}).",
+      "illegal": "Juridisch: we hebben geoordeeld dat de content illegaal is op grond van het toepasselijke recht."
+    },
+    "noNote": "Geen.",
+    "fixIntro": "{target, select, product {Verander deze onderdelen, druk dan op \"Ik heb de aanpassingen gedaan, beoordeel het\" bij het product in je dashboard, en we kijken opnieuw:} other {Verander deze onderdelen, druk dan op \"Ik heb de aanpassingen gedaan, beoordeel het\" bij de etalage in je dashboard, en we kijken opnieuw:}}",
+    "redress": {
+      "appeal": "{target, select, product {Bezwaar bij ons, kosteloos: druk op \"Bezwaar aantekenen\" bij het product in je dashboard, binnen zes maanden na deze beslissing. Elk bezwaar wordt door een medewerker beoordeeld, en je hoort het in je dashboard en per e-mail.} other {Bezwaar bij ons, kosteloos: druk op \"Bezwaar aantekenen\" bij de etalage in je dashboard, binnen zes maanden na deze beslissing. Elk bezwaar wordt door een medewerker beoordeeld, en je hoort het in je dashboard en per e-mail.}}",
+      "settlement": "Buitengerechtelijke geschillenbeslechting: je kunt deze beslissing voorleggen aan een geschillenbeslechtingsinstantie die is gecertificeerd op grond van artikel 21 van de digitaledienstenverordening.",
+      "court": "Rechterlijke procedure: je kunt deze beslissing aan een bevoegde rechter voorleggen. Het gebruik van bovenstaande opties laat dat recht onverlet.",
+      "contact": "Vragen: schrijf naar {email} en vermeld referentie {reference}."
+    },
+    "appeal": {
+      "open": "Je hebt bezwaar aangetekend op {date}. Een medewerker beoordeelt het.",
+      "upheld": "Je hebt bezwaar aangetekend op {date}. We hebben op {decided} geantwoord: de beslissing blijft staan.",
+      "overturned": "Je hebt bezwaar aangetekend op {date}. We hebben op {decided} geantwoord: de beslissing is teruggedraaid.",
+      "answer": "Ons antwoord: {note}",
+      "message": "Wat je hebt geschreven: {message}"
+    },
+    "footer": "SquareShare · {reference} · Pagina {page} van {total}",
+    "generated": "Gegenereerd op {date}."
   }
 }

@@ -498,6 +498,122 @@ export type Database = {
         }
         Relationships: []
       }
+      moderation_appeals: {
+        Row: {
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          decision_id: string
+          decision_note: string | null
+          filed_by: string | null
+          id: string
+          message: string
+          owner_id: string
+          status: string
+          target_id: string
+          target_type: string
+        }
+        Insert: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_id: string
+          decision_note?: string | null
+          filed_by?: string | null
+          id?: string
+          message: string
+          owner_id: string
+          status?: string
+          target_id: string
+          target_type: string
+        }
+        Update: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_id?: string
+          decision_note?: string | null
+          filed_by?: string | null
+          id?: string
+          message?: string
+          owner_id?: string
+          status?: string
+          target_id?: string
+          target_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "moderation_appeals_decided_by_fkey"
+            columns: ["decided_by"]
+            isOneToOne: false
+            referencedRelation: "admin_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "moderation_appeals_decision_id_fkey"
+            columns: ["decision_id"]
+            isOneToOne: false
+            referencedRelation: "moderation_decisions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      moderation_decisions: {
+        Row: {
+          action: string
+          decided_at: string
+          decided_by: string | null
+          fields: string[]
+          ground: string
+          id: string
+          note: string | null
+          owner_id: string
+          report_count: number
+          report_reasons: string[]
+          target_id: string
+          target_title: string
+          target_type: string
+        }
+        Insert: {
+          action: string
+          decided_at?: string
+          decided_by?: string | null
+          fields?: string[]
+          ground: string
+          id?: string
+          note?: string | null
+          owner_id: string
+          report_count?: number
+          report_reasons?: string[]
+          target_id: string
+          target_title: string
+          target_type: string
+        }
+        Update: {
+          action?: string
+          decided_at?: string
+          decided_by?: string | null
+          fields?: string[]
+          ground?: string
+          id?: string
+          note?: string | null
+          owner_id?: string
+          report_count?: number
+          report_reasons?: string[]
+          target_id?: string
+          target_title?: string
+          target_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "moderation_decisions_decided_by_fkey"
+            columns: ["decided_by"]
+            isOneToOne: false
+            referencedRelation: "admin_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           body: string | null
@@ -627,6 +743,8 @@ export type Database = {
           max_per_order: number
           moderated_at: string | null
           moderated_by: string | null
+          moderation_decision_id: string | null
+          moderation_fields: string[] | null
           moderation_ground: string | null
           moderation_note: string | null
           moderation_review_requested_at: string | null
@@ -656,6 +774,8 @@ export type Database = {
           max_per_order?: number
           moderated_at?: string | null
           moderated_by?: string | null
+          moderation_decision_id?: string | null
+          moderation_fields?: string[] | null
           moderation_ground?: string | null
           moderation_note?: string | null
           moderation_review_requested_at?: string | null
@@ -685,6 +805,8 @@ export type Database = {
           max_per_order?: number
           moderated_at?: string | null
           moderated_by?: string | null
+          moderation_decision_id?: string | null
+          moderation_fields?: string[] | null
           moderation_ground?: string | null
           moderation_note?: string | null
           moderation_review_requested_at?: string | null
@@ -701,6 +823,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "products_moderation_decision_id_fkey"
+            columns: ["moderation_decision_id"]
+            isOneToOne: false
+            referencedRelation: "moderation_decisions"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "products_moderated_by_fkey"
             columns: ["moderated_by"]
@@ -1100,6 +1229,8 @@ export type Database = {
           id: string
           moderated_at: string | null
           moderated_by: string | null
+          moderation_decision_id: string | null
+          moderation_fields: string[] | null
           moderation_ground: string | null
           moderation_note: string | null
           moderation_review_requested_at: string | null
@@ -1116,6 +1247,8 @@ export type Database = {
           id?: string
           moderated_at?: string | null
           moderated_by?: string | null
+          moderation_decision_id?: string | null
+          moderation_fields?: string[] | null
           moderation_ground?: string | null
           moderation_note?: string | null
           moderation_review_requested_at?: string | null
@@ -1132,6 +1265,8 @@ export type Database = {
           id?: string
           moderated_at?: string | null
           moderated_by?: string | null
+          moderation_decision_id?: string | null
+          moderation_fields?: string[] | null
           moderation_ground?: string | null
           moderation_note?: string | null
           moderation_review_requested_at?: string | null
@@ -1141,6 +1276,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "storefronts_moderation_decision_id_fkey"
+            columns: ["moderation_decision_id"]
+            isOneToOne: false
+            referencedRelation: "moderation_decisions"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "storefronts_moderated_by_fkey"
             columns: ["moderated_by"]

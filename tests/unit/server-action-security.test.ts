@@ -120,6 +120,9 @@ const REGISTRY: Record<string, Classification> = {
   // A seller sending a paused item back to staff. Limited because each call
   // that lands pings the admin panel and can reach staff phones.
   "lib/moderation/review-request.ts::requestModerationReview": limited(),
+  // A seller appealing a moderation decision. Limited for the same reason:
+  // each appeal that lands pings the admin panel and staff phones.
+  "lib/moderation/appeals.ts::fileModerationAppeal": limited(),
   "lib/stock/actions.ts::updateStockSettings": limited(),
   "lib/storefront/actions.ts::createStorefront": limited(),
   "lib/storefront/actions.ts::saveStorefront": limited(),
@@ -171,6 +174,12 @@ const REGISTRY: Record<string, Classification> = {
   ),
   "lib/notifications/actions.ts::markAllNotificationsRead": unlimited(
     "Same path as markNotificationRead, one statement instead of many.",
+  ),
+  // The Accept button on an invite notification. The client names only the
+  // notification; the action is resolved from the caller's own row and run
+  // through acceptTeamInvite, the same core as acceptInvite above.
+  "lib/notifications/actions.ts::runNotificationAction": unlimited(
+    "Only ever consumes an invite the caller was already sent, via the same core as acceptInvite; the invite row is the scarce resource, and inviteMember (limited) bounds their creation.",
   ),
 };
 

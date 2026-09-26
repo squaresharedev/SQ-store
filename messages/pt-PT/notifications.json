@@ -32,6 +32,23 @@
     "loading": "A carregar",
     "loadMore": "Carregar mais"
   },
+  "filters": {
+    "label": "Filtrar notificações",
+    "show": "Mostrar",
+    "all": "Todas",
+    "unread": "Por ler",
+    "category": "Categoria",
+    "allCategories": "Todas as categorias",
+    "clear": "Limpar filtros",
+    "emptyUnreadTitle": "Não há notificações por ler",
+    "emptyUnreadHint": "Está tudo em dia.",
+    "emptyFilteredTitle": "Nenhuma notificação corresponde",
+    "emptyFilteredHint": "Experimente outra categoria ou limpe os filtros para ver tudo."
+  },
+  "actions": {
+    "openStore": "Abrir loja",
+    "unavailable": "Este convite já não está disponível."
+  },
   "types": {
     "team": "Equipa",
     "order": "Encomenda",

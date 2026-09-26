@@ -97,6 +97,7 @@ export default async function StorefrontEditorPage({
       // the dashboard shell), so it needs the role the shell would have given.
       role={account?.role ?? null}
       accountId={account?.accountId ?? null}
+      takedown={storefront.removal ?? null}
     />
   );
 }

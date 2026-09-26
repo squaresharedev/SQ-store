@@ -113,19 +113,45 @@
     "pausedOn": "Pozastavené dňa",
     "statement": "{ground, select, illegal {Nezákonný tovar alebo činnosť. Ponúkal niečo, čo sa nedá legálne predávať, alebo ponuku využíval na zjednanie takého predaja.} sexual {Sexuálny obsah. Obsahoval explicitný sexuálny obsah.} violence {Násilie alebo krviprelievanie. Obsahoval grafické násilie.} hate {Nenávisť alebo obťažovanie. Útočil na osobu alebo skupinu, prípadne obsahoval symboly nenávisti.} counterfeit {Falzifikáty alebo ukradnutý obsah. Zdalo sa, že ponúka falšovaný tovar alebo dielo, ktoré patrí niekomu inému.} scam {Podvod. Zdalo sa, že je navrhnutý tak, aby vylákal platbu bez dodania sľúbeného.} spam {Spam. Bol opakujúci sa alebo klamlivý, nie skutočná ponuka.} other {Iný dôvod. Porušoval pravidlá platformy.}}{noted, select, yes { {note}} other {}}",
     "statementUnlabelled": "Porušoval pravidlá platformy.{noted, select, yes { {note}} other {}}",
-    "fixHint": "{kind, select, product {Upravte produkt nižšie, aby ste to opravili, uložte ho a potom nám ho pošlite späť.} other {Otvorte výklad, aby ste to opravili, potom sa vráťte sem a pošlite nám ho.}}",
+    "fixHint": "{kind, select, product {Zmeňte zvýraznené časti nižšie, uložte a potom nám to pošlite späť.} other {Otvorte výklad, zmeňte čo je uvedené vyššie, potom sa vráťte sem a pošlite nám ho.}}",
     "readOnlyHint": "{kind, select, product {Zmenu musí urobiť niekto, kto môže tento produkt upravovať, a poslať ho na kontrolu.} other {Zmenu musí urobiť niekto, kto môže tento výklad upravovať, a poslať ho na kontrolu.}}",
     "appeal": "{kind, select, product {Tento produkt môžete stále upravovať. Úpravou sa však nevráti: ak si myslíte, že odstránenie bolo neoprávnené, <link>požiadajte nás o nové posúdenie</link>.} other {Tento výklad môžete stále upravovať. Úpravou sa však nevráti: ak si myslíte, že odstránenie bolo neoprávnené, <link>požiadajte nás o nové posúdenie</link>.}}",
     "appealPaused": "Myslíte si, že ide o omyl? <link>Napíšte nám</link>.",
     "appealFinal": "Ak si myslíte, že sme sa pomýlili, <link>požiadajte nás o nové posúdenie</link>.",
-    "appealSubject": "{kind, select, product {Odvolanie: odstránenie produktu ({title})} other {Odvolanie: odstránenie výkladu ({title})}}",
-    "appealBody": "{kind, select, product {Žiadam o opätovné preskúmanie tohto produktu.\n\nID produktu: {id}\nNázov: {title}\n\nPrečo si myslím, že to bolo neoprávnené:\n} other {Žiadam o opätovné preskúmanie tohto výkladu.\n\nID výkladu: {id}\nNázov: {title}\n\nPrečo si myslím, že to bolo neoprávnené:\n}}",
     "reviewRequest": {
       "button": "Zmeny sú hotové, skontrolovať",
       "sent": "Odoslané na kontrolu dňa <time>{date}</time>. Vaše zmeny si pozrie človek a odpoveď dostanete tu aj e-mailom.",
       "failed": "Toto sa nepodarilo odoslať.",
       "failedFix": "O chvíľu to skúste znova."
-    }
+    },
+    "why": "Prečo",
+    "whatToChange": "Čo zmeniť",
+    "concerned": "Čoho sa to týkalo",
+    "showField": "Zobraziť {field} na tejto stránke",
+    "fields": {
+      "product": "{field, select, title {Názov} description {Popis} price {Cena} image {Hlavný obrázok} file {Digitálny súbor} purchaseLink {Odkaz na nákup} shipping {Doprava} options {Možnosti} photos {Fotky} specs {Špecifikácie} documents {Dokumenty} safety {Bezpečnosť a zhoda} other {Niečo iné}}",
+      "storefront": "{field, select, name {Názov výkladu} header {Hlavička} text {Text} images {Obrázky} products {Zobrazené produkty} background {Pozadie} productPage {Stránky produktov} other {Niečo iné}}"
+    },
+    "reference": "Referencia",
+    "downloadStatement": "Stiahnuť rozhodnutie (PDF)",
+    "openEditor": "Otvoriť výklad a upraviť ho",
+    "appealButton": "Odvolať toto rozhodnutie",
+    "appealForm": {
+      "title": "Odvolať toto rozhodnutie",
+      "description": "Povedzte nám, prečo si myslíte, že sme sa pomýlili. Každé odvolanie posúdi človek a odpoveď dostanete tu aj e-mailom. Kým to preverujeme, zostane skrytý.",
+      "label": "Prečo si myslíte, že toto rozhodnutie je nesprávne?",
+      "placeholder": "Napríklad: logo na fotografii je naša registrovaná ochranná známka a tu si to môžete overiť.",
+      "help": "Aspoň {min} znakov. Priložte čokoľvek, čo nám pomôže to overiť, napríklad odkaz alebo registračné číslo.",
+      "count": "{count} / {max}",
+      "submit": "Odoslať odvolanie",
+      "sent": "Odvolanie odoslané. Ozveme sa vám."
+    },
+    "appealStatus": {
+      "open": "Odvolali ste sa dňa <time>{date}</time>. Posúdi to človek a odpoveď dostanete tu aj e-mailom.",
+      "upheld": "Vaše odvolanie sme preskúmali dňa <time>{date}</time>. Rozhodnutie zostáva v platnosti.",
+      "answer": "Naša odpoveď: {note}"
+    },
+    "editorDetails": "Prečo a čo robiť ďalej"
   },
   "import": {
     "fields": {
@@ -309,6 +335,21 @@
     "nav": {
       "label": "Sekcie formulára",
       "heading": "Na tejto stránke"
+    },
+    "moderation": {
+      "badge": "Vyžaduje zmeny",
+      "changed": "Zmenené",
+      "callout": "SquareShare vás požiadal, aby ste tu zmenili {fields}.",
+      "seeWhy": "Zistiť prečo",
+      "fieldBadge": "Zmeniť toto",
+      "navHint": "vyžaduje zmeny",
+      "inReview": "Odoslané na kontrolu",
+      "reviewPrompt": {
+        "title": "Uložené. Poslať späť na kontrolu?",
+        "body": "Ak ste zmenili všetko, o čo SquareShare požiadal, pošlite to teraz späť a pozrie sa na to človek. Ak nie, upravujte ďalej a pošlite to, keď budete hotoví.",
+        "keepEditing": "Pokračovať v úpravách",
+        "send": "Odoslať na kontrolu"
+      }
     }
   },
   "stockFields": {
@@ -522,5 +563,76 @@
     "dropPrompt": "Presuňte sem súbor alebo kliknutím nahrajte",
     "hint": "ZIP, PDF a podobné, najviac {max} MB",
     "remove": "Odobrať digitálny súbor"
+  },
+  "statement": {
+    "fileTitle": "Odôvodnenie rozhodnutia {reference}",
+    "title": "Odôvodnenie rozhodnutia",
+    "subtitle": "{action, select, paused {Pozastavili sme váš {target, select, product {produkt} other {výklad}}} other {Odstránili sme váš {target, select, product {produkt} other {výklad}}}}",
+    "intro": "Toto odôvodnenie vysvetľuje rozhodnutie, ktoré sme prijali v súvislosti s obsahom zverejneným vami na SquareShare, prečo sme ho prijali a ako ho môžete napadnúť. Máte naň nárok podľa článku 17 aktu o digitálnych službách (nariadenie (EÚ) 2022/2065).",
+    "sections": {
+      "decision": "Rozhodnutie",
+      "reasons": "Prečo sme ho prijali",
+      "fix": "Čo zmeniť",
+      "redress": "Ako ho napadnúť",
+      "appeal": "Vaše odvolanie"
+    },
+    "labels": {
+      "reference": "Referencia",
+      "issued": "Odôvodnenie vydané",
+      "content": "Obsah",
+      "contentId": "ID obsahu",
+      "decision": "Rozhodnutie",
+      "decidedOn": "Rozhodnuté dňa",
+      "scope": "Kde platí",
+      "duration": "Ako dlho",
+      "status": "Aktuálny stav",
+      "ground": "Dôvod",
+      "note": "Poznámka od nášho kontrolóra",
+      "facts": "Skutočnosti a okolnosti",
+      "automated": "Automatizované prostriedky",
+      "legalBasis": "Základ rozhodnutia"
+    },
+    "content": "{target, select, product {Produkt} other {Výklad}}: {title}",
+    "decision": {
+      "paused": "Pozastavené. Obsah je skrytý pred kupujúcimi, kým nevykonáte zmeny uvedené nižšie a my ich neschválime.",
+      "removed": "Odstránené. Obsah už nie je kupujúcim dostupný. Toto rozhodnutie je konečné, pokiaľ ho nezmení odvolanie."
+    },
+    "scope": "Všade, kde ho SquareShare zobrazuje: na jeho vlastnej stránke, vo vloženiach na iných webových stránkach a v zdieľaných odkazoch, vo všetkých krajinách.",
+    "duration": {
+      "paused": "Kým neschválime vaše zmeny.",
+      "removed": "Na neurčito."
+    },
+    "status": {
+      "inForce": "V platnosti.",
+      "replaced": "Nahradené neskorším rozhodnutím.",
+      "reversed": "Zrušené. Obsah je opäť viditeľný pre kupujúcich.",
+      "deleted": "Obsah bol odvtedy zmazaný."
+    },
+    "facts": {
+      "notices": "{count, plural, =0 {Toto sme zistili sami, bez podnetu od niekoho mimo SquareShare.} one {Tomuto predchádzal # podnet od niekoho mimo SquareShare, vo veci: {reasons}.} few {Tomuto predchádzali # podnety od ľudí mimo SquareShare, vo veci: {reasons}.} many {Tomuto predchádzalo # podnetov od ľudí mimo SquareShare, vo veci: {reasons}.} other {Tomuto predchádzalo # podnetov od ľudí mimo SquareShare, vo veci: {reasons}.}}",
+      "review": "Pred rozhodnutím obsah preskúmal člen tímu SquareShare. Nezverejňujeme, kto podnet zaslal."
+    },
+    "automated": "Na zistenie tohto obsahu ani na prijatie tohto rozhodnutia sa nepoužili žiadne automatizované prostriedky.",
+    "legalBasis": {
+      "contract": "Zmluvné: Podmienky používania SquareShare, ktoré nepovoľujú takýto obsah ({url}).",
+      "illegal": "Právne: obsah sme považovali za nezákonný podľa príslušného práva."
+    },
+    "noNote": "Žiadna.",
+    "fixIntro": "{target, select, product {Zmeňte tieto časti, potom stlačte „Zmeny sú hotové, skontrolovať“ pri produkte na vašom paneli a znova sa na to pozrieme:} other {Zmeňte tieto časti, potom stlačte „Zmeny sú hotové, skontrolovať“ pri výklade na vašom paneli a znova sa na to pozrieme:}}",
+    "redress": {
+      "appeal": "Odvolajte sa k nám bezplatne: stlačte „Odvolať toto rozhodnutie“ pri {target, select, product {produkte} other {výklade}} na vašom paneli do šiestich mesiacov od tohto rozhodnutia. Každé odvolanie posúdi človek a odpoveď dostanete na paneli aj e-mailom.",
+      "settlement": "Mimosúdne riešenie sporov: toto rozhodnutie môžete predložiť orgánu na riešenie sporov certifikovanému podľa článku 21 aktu o digitálnych službách.",
+      "court": "Súdy: toto rozhodnutie môžete predložiť príslušnému súdu. Využitie vyššie uvedených možností toto právo neovplyvňuje.",
+      "contact": "Otázky: napíšte na {email} a uveďte referenciu {reference}."
+    },
+    "appeal": {
+      "open": "Odvolali ste sa dňa {date}. Posudzuje to človek.",
+      "upheld": "Odvolali ste sa dňa {date}. Odpovedali sme dňa {decided}: rozhodnutie zostáva v platnosti.",
+      "overturned": "Odvolali ste sa dňa {date}. Odpovedali sme dňa {decided}: rozhodnutie bolo zrušené.",
+      "answer": "Naša odpoveď: {note}",
+      "message": "Čo ste napísali: {message}"
+    },
+    "footer": "SquareShare · {reference} · Strana {page} z {total}",
+    "generated": "Vygenerované dňa {date}."
   }
 }

@@ -233,6 +233,11 @@ export const iconNudgeRightClass =
 export const iconNudgeLeftClass =
   "transition-transform duration-base ease-entrance group-hover/btn:-translate-x-0.5 group-focus-visible/btn:-translate-x-0.5 motion-reduce:transition-none";
 
+/** The "back to where you came from" link a sub-page opens with. Pairs with
+ *  iconNudgeLeftClass on its arrow; see ui/BackLink. */
+export const backLinkClass =
+  "group/btn inline-flex items-center gap-1.5 font-inter text-sm text-muted-foreground transition-colors duration-base ease-standard hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none";
+
 /** Pop: "add / create / new" actions (a Plus). */
 export const iconPopClass =
   "transition-transform duration-base ease-entrance group-hover/btn:scale-110 group-focus-visible/btn:scale-110 motion-reduce:transition-none";

@@ -32,6 +32,23 @@
     "loading": "Laden",
     "loadMore": "Meer laden"
   },
+  "filters": {
+    "label": "Meldingen filteren",
+    "show": "Weergeven",
+    "all": "Alle",
+    "unread": "Ongelezen",
+    "category": "Categorie",
+    "allCategories": "Alle categorieën",
+    "clear": "Filters wissen",
+    "emptyUnreadTitle": "Geen ongelezen meldingen",
+    "emptyUnreadHint": "Je bent helemaal bij.",
+    "emptyFilteredTitle": "Geen meldingen gevonden",
+    "emptyFilteredHint": "Probeer een andere categorie, of wis de filters om alles te zien."
+  },
+  "actions": {
+    "openStore": "Winkel openen",
+    "unavailable": "Deze uitnodiging is niet meer beschikbaar."
+  },
   "types": {
     "team": "Team",
     "order": "Bestelling",

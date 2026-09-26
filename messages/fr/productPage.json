@@ -95,10 +95,10 @@
   },
   "report": {
     "trigger": "{target, select, product {Signaler ce produit} other {Signaler cette vitrine}}",
-    "title": "{target, select, product {Signaler ce produit} other {Signaler cette vitrine}}",
+    "title": "{target, select, product {Signaler ce produit} storefront {Signaler cette vitrine} seller {Signaler ce vendeur} other {Signaler un problème}}",
     "description": "Dites-nous ce qui ne va pas. Chaque signalement est examiné par une personne.",
     "sentTitle": "Signalement envoyé",
-    "sentBody": "{target, select, product {Merci. Une personne examinera ce produit. Nous ne communiquons pas au vendeur l’identité de l’auteur d’un signalement.} other {Merci. Une personne examinera cette vitrine. Nous ne communiquons pas au vendeur l’identité de l’auteur d’un signalement.}}",
+    "sentBody": "{target, select, product {Merci. Une personne examinera ce produit. Nous ne communiquons pas au vendeur l'identité de l'auteur d'un signalement.} seller {Merci. Une personne examinera ce vendeur. Nous ne leur communiquons pas l'identité de l'auteur d'un signalement.} other {Merci. Une personne examinera cette vitrine. Nous ne communiquons pas au vendeur l'identité de l'auteur d'un signalement.}}",
     "reasonsLegend": "Qu’est-ce qui ne va pas ?",
     "reasons": {
       "illegal": {
@@ -150,6 +150,22 @@
       "reason": "Choisissez ce qui ne va pas.",
       "rateLimited": "Trop de signalements depuis ce poste. Réessayez plus tard.",
       "submitFailed": "Envoi impossible. Réessayez."
+    },
+    "triggerAny": "Signaler un problème",
+    "scopeLegend": "Que souhaitez-vous signaler ?",
+    "scopes": {
+      "product": {
+        "label": "Ce produit",
+        "hint": "{title}"
+      },
+      "storefront": {
+        "label": "Cette vitrine",
+        "hint": "{name}, et tout ce qu'elle contient"
+      },
+      "seller": {
+        "label": "Ce vendeur",
+        "hint": "{name}, sur toutes leurs vitrines"
+      }
     }
   },
   "shippingProse": {

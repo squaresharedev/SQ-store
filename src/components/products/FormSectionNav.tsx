@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState, type MouseEvent } from "react";
-import { CircleCheck, CircleX } from "lucide-react";
+import { CircleCheck, CircleX, Flag } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { sectionAnchorId } from "./FormSection";
+import { jumpToElement } from "./jump-to";
 import {
   sectionLabel,
   type ProductFormSectionSnapshot,
@@ -28,9 +29,17 @@ function handleNavClick(event: MouseEvent<HTMLAnchorElement>, id: string) {
     return;
   }
   event.preventDefault();
-  const anchorId = sectionAnchorId(id);
-  document.getElementById(anchorId)?.scrollIntoView({ behavior: "smooth", block: "start" });
-  window.history.replaceState(null, "", `#${anchorId}`);
+  jumpToSection(id);
+}
+
+/**
+ * Scrolls a form section into view and records it in the URL, WITHOUT the
+ * `popstate` a plain `#hash` click fires (see above). Exported for every other
+ * control that sends the seller to a section: the index rail, and the parts a
+ * paused product's banner names.
+ */
+export function jumpToSection(id: string): void {
+  jumpToElement(sectionAnchorId(id));
 }
 
 /**
@@ -55,12 +64,17 @@ function handleNavClick(event: MouseEvent<HTMLAnchorElement>, id: string) {
  */
 export function FormSectionNav({
   sections,
+  flagged,
   className,
 }: {
   sections: ProductFormSectionSnapshot[];
+  /** Sections staff asked the seller to change (a paused product). A
+   *  validation problem still wins the icon: it is what blocks the save. */
+  flagged?: ReadonlySet<string>;
   className?: string;
 }) {
   const t = useTranslations("Products.form.nav");
+  const tFlag = useTranslations("Products.form.moderation");
   const resolve = useResolveMessage();
   const active = useActiveSection(sections.map((section) => section.id));
 
@@ -94,6 +108,13 @@ export function FormSectionNav({
                     strokeWidth={2}
                     aria-hidden="true"
                   />
+                ) : flagged?.has(section.id) ? (
+                  <Flag
+                    className="size-3.5 shrink-0 fill-current text-foreground"
+                    strokeWidth={2}
+                    aria-hidden="true"
+                    data-fix-flag=""
+                  />
                 ) : section.state === "filled" ? (
                   <CircleCheck
                     className="size-3.5 shrink-0 text-success"
@@ -104,6 +125,9 @@ export function FormSectionNav({
                   <span className="size-3.5 shrink-0" aria-hidden="true" />
                 )}
                 <span className="min-w-0 truncate">{resolve(sectionLabel(section.id))}</span>
+                {flagged?.has(section.id) && (
+                  <span className="sr-only">{`, ${tFlag("navHint")}`}</span>
+                )}
               </a>
             </li>
           );

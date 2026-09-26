@@ -1,5 +1,7 @@
 {
   "label": "Langue",
   "settingsTitle": "Langue",
-  "settingsDescription": "La langue d’affichage de votre tableau de bord. Les acheteurs voient les pages produit dans leur propre langue, et tout ce que vous avez rédigé vous-même reste exactement tel que vous l’avez écrit."
+  "settingsDescription": "La langue d’affichage de votre tableau de bord. Les acheteurs voient les pages produit dans leur propre langue, et tout ce que vous avez rédigé vous-même reste exactement tel que vous l’avez écrit.",
+  "switching": "Changement de langue : {language}…",
+  "failed": "Impossible de changer la langue. Réessayez."
 }

@@ -235,6 +235,11 @@
       "required": "Váš popis je povinný.",
       "tooLong": "Váš popis môže mať najviac {maximum} znakov.",
       "unsupported": "Váš popis obsahuje nepodporované znaky."
+    },
+    "appealMessage": {
+      "required": "Povedzte nám prečo, aspoň {minimum} znakov.",
+      "tooLong": "Odvolanie nesmí mať viac ako {maximum} znakov.",
+      "unsupported": "Vaše odvolanie obsahuje nepodporované znaky."
     }
   },
   "email": {
@@ -277,7 +282,8 @@
     "blockId": "ID bloku nie je platné.",
     "notificationRecipient": "Príjemca upozornenia nie je platný.",
     "factor": "Táto overovacia aplikácia nie je platná.",
-    "reportTarget": "Táto položka nie je platná."
+    "reportTarget": "Táto položka nie je platná.",
+    "moderationDecision": "Toto rozhodnutie nie je platné."
   },
   "handle": {
     "username": "Používateľské meno musí mať 3 až 30 znakov a môže obsahovať iba písmená, číslice a podčiarkovníky."

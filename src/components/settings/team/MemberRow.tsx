@@ -6,7 +6,7 @@ import { Crown, UserMinus, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { useActionStateToast, useSaveResult } from "@/components/ui/ActionErrorNotice";
-import { SaveButton } from "@/components/ui/SaveButton";
+import { RESULT_MS, SaveButton } from "@/components/ui/SaveButton";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
@@ -114,6 +114,24 @@ export function MemberRow({
     setPendingRole(null);
     setConfirmMode(null);
   }
+
+  // A successful role change leaves the confirm panel's SaveButton showing
+  // "Saved" for RESULT_MS, then the button alone reverts to idle — the panel
+  // itself doesn't know to close, so it snaps back to looking like the
+  // pre-confirm row underneath a button that says "Confirm" again. Close the
+  // panel on the same clock so it disappears together with the checkmark
+  // instead of outliving it.
+  const closedRoleState = React.useRef(roleState);
+  React.useEffect(() => {
+    if (roleState === closedRoleState.current) return;
+    closedRoleState.current = roleState;
+    if (!roleState.success) return;
+    const timer = setTimeout(() => {
+      setPendingRole(null);
+      setConfirmMode(null);
+    }, RESULT_MS);
+    return () => clearTimeout(timer);
+  }, [roleState]);
 
   const selectValue = confirmMode === "role" && pendingRole ? pendingRole : currentRole;
   const confirming = confirmMode !== null;
