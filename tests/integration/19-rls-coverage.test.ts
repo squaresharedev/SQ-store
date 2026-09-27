@@ -50,6 +50,14 @@ const POLICY_FREE_BY_DESIGN = new Set([
   // role. A client that could read its own rows would learn nothing it can
   // use, but one that could WRITE them could plant a passkey of its own.
   "mfa_passkeys",
+  // Sign-in approval (20260927_sign_in_approvals): the sealed secret behind
+  // the approval factor, the off switch, and the requests themselves. Only
+  // lib/auth/sign-in-approval.ts touches them, through the service role. A
+  // client that could write a request row could approve its own sign-in; one
+  // that could delete an opt-out could switch a way in back on.
+  "mfa_approval_factors",
+  "mfa_approval_opt_outs",
+  "mfa_sign_in_approvals",
 ]);
 
 afterAll(async () => {

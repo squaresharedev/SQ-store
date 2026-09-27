@@ -25,6 +25,7 @@ export function SecuritySection({
   signedInRecently,
   signsInWithGoogle,
   passkeysAvailable,
+  approvalsEnabled = null,
   recoveryCodesRemaining,
   activity,
   recovered,
@@ -37,6 +38,8 @@ export function SecuritySection({
   signsInWithGoogle: boolean;
   /** Passkeys are configured in this deployment. */
   passkeysAvailable: boolean;
+  /** Sign-in approval on or off; null (the default) when it is not available here. */
+  approvalsEnabled?: boolean | null;
   /** Unused recovery codes, or null when 2FA is off or the count failed. */
   recoveryCodesRemaining: number | null;
   /** Null when the log could not be read (shown as such, never as "empty"). */
@@ -69,6 +72,7 @@ export function SecuritySection({
         signedInRecently={signedInRecently}
         signsInWithGoogle={signsInWithGoogle}
         passkeysAvailable={passkeysAvailable}
+        approvalsEnabled={approvalsEnabled}
         openSetup={openSetup && !enrolled}
       />
 

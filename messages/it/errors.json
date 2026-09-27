@@ -544,6 +544,13 @@
     "unavailable": "Le passkey non sono disponibili in questo momento. Usa invece un’app di autenticazione.",
     "createFailed": "Non siamo riusciti a verificare questa passkey. Prova a crearla di nuovo.",
     "signInFailed": "Questa passkey non ha funzionato per questo account. Riprova oppure usa un altro modo per accedere.",
-    "expired": "Ci è voluto troppo tempo. Riprova con la tua passkey."
+    "expired": "Ci è voluto troppo tempo. Riprova con la tua passkey.",
+    "offerExpired": "È passato troppo tempo dall'accesso per aggiungere una passkey in questo modo. Aggiungine una in Impostazioni › Sicurezza."
+  },
+  "approval": {
+    "unavailable": "L'approvazione da un altro dispositivo non è disponibile in questo momento. Usa un altro metodo per accedere.",
+    "rateLimited": "Troppi codici in poco tempo. Attendi qualche minuto, poi riprova.",
+    "expired": "Questa richiesta di accesso è scaduta o è già stata risposta. Mostra un nuovo codice sul dispositivo da cui stai accedendo.",
+    "otherAccount": "Questa richiesta riguarda un account Square Share diverso da quello collegato qui."
   }
 }

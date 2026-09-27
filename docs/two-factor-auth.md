@@ -34,7 +34,12 @@ database-level enforcement.
 3. **Check the advisors** (`get_advisors`, security) after applying. The new
    functions set `search_path = ''` and have explicit grants, so nothing new
    should appear.
-4. **Security emails** go through Cloudflare Email Service (`lib/email/send.ts`),
+4. **Sign-in approval** needs `supabase/migrations/20260927_sign_in_approvals.sql`
+   (three service-role-only tables). Without it the feature fails closed:
+   `approvalsEnabled` cannot read the opt-out table, so the challenge never
+   offers approval and Settings hides the row. **Applied 2026-09-27** through
+   the Management API (no schema_migrations version, so nothing in `TRIAGE`).
+5. **Security emails** go through Cloudflare Email Service (`lib/email/send.ts`),
    which is off until the `EMAIL` binding and `TRANSACTIONAL_EMAIL_ENABLED` are
    set. Until then, 2FA alerts reach only the in-app bell and the Security
    activity log. Turning email on is strongly recommended: an alert that an
@@ -56,13 +61,21 @@ database-level enforcement.
   adding another way in.
 - **Sign-in**: password (or Google, or a magic link), then
   `/login/two-factor`: "Use your passkey" first when the account has one, the
-  code box for an app, and "Use a recovery code instead" for a lost phone.
+  code box for an app, "Approve from your phone instead" (see Sign-in
+  approval below), and "Use a recovery code instead" for a lost phone. When
+  the passkey prompt fails or is closed, the page says why that usually
+  happens (the phone scanned has no passkey because it lives on another
+  device) and offers approval from the phone in one tap.
   Once through, "Signing you in…" and the success mark show for a moment
   before it goes on. The verify actions therefore RETURN `{ verified: { next } }`
   (sanitised server-side) instead of redirecting, and the page renders a
   signed-in session instead of redirecting it: an action that sets cookies
   re-renders the page in the same response, so a page-level redirect would
   cut the moment off.
+- **After getting in through another device** (an approval, or an app code),
+  on a device that can hold a passkey of its own: "Skip the phone next time",
+  one tap to create a passkey here. Answered either way, it is not offered
+  again on that device (a localStorage flag).
 - **The passkey button** (`AnimatedFingerprint`): the ridges pulse under a
   sweeping line while the browser's prompt is open, and shake once when it
   fails. Reduced motion shows the plain icon throughout.
@@ -148,6 +161,64 @@ unchanged. `lib/auth/passkeys.ts` holds the design notes.
 A new RP ID makes every registered passkey unusable; a new key makes every
 sealed secret unreadable. Either way every passkey user is down to their
 recovery codes.
+
+## Sign-in approval
+
+**The problem it solves.** On a computer, the browser's passkey prompt offers
+"use a phone" with a QR code. When the passkey actually lives somewhere else
+(Windows Hello on another PC, a password manager the phone does not share),
+the phone says it has no passkey for Square Share and the person is stuck.
+
+**What the person does.** At the two-factor step, "Approve from your phone"
+shows a QR code. The phone's own camera opens it: `/approve/<token>` on this
+app, where the phone is already signed in (the session cookie is shared across
+squareshare.eu, so being signed in to the SQ app counts). The phone shows the
+device (browser and system), the country, the account, and a warning; one tap
+on Approve and the computer finishes signing in by itself. Deny tells the
+computer, records the event and alerts the owner (their password is known).
+Settings › Security has an on/off row; it is on for every account with 2FA.
+
+**How it keeps aal2 meaningful.** The passkey bridge again: one GoTrue TOTP
+factor per account (named `approval:signed-in-devices`, never listed as a way
+in, never checked against a typed code) whose secret is sealed under
+`MFA_PASSKEY_KEY` in `public.mfa_approval_factors`. A fully signed-in (aal2)
+session of the SAME account approving a request is what makes the server
+compute that factor's code and complete it, for the waiting session only.
+`lib/auth/sign-in-approval.ts` holds the design notes.
+
+**The GoTrue fact it is built around** (read in its source, `verifyTOTPFactor`):
+every factor verify deletes every OTHER aal1 session of the account
+(`InvalidateSessionsWithAALLessThan`) and every unverified TOTP factor. If the
+approving phone verified anything while the computer waited, the computer
+would be signed out. So the phone only ENROLS the factor the first time
+(allowed: it is aal2), and the waiting computer VERIFIES it when it collects
+the approval (GoTrue checks assurance at enrol, not at verify). After that the
+verified factor is reused. The e2e mock does exactly this (it used to sign out
+every session, aal2 included, on a new factor, which real GoTrue does not).
+
+- **Requests** (`public.mfa_sign_in_approvals`) are bound to the account and
+  the waiting session's GoTrue `session_id`, live 5 minutes, and carry a
+  256-bit token stored only as its SHA-256. Only that session can collect an
+  approval, once, by a conditional update; an approval not collected within 2
+  minutes lapses. Opening the page decides nothing (link previews open pages).
+- **Turning it off** (`public.mfa_approval_opt_outs`) withdraws every waiting
+  request and refuses new ones, but leaves the factor in place: removing it
+  would downgrade every session it once let in back to aal1. Removing the
+  account's last passkey or app removes it (approval is never a way in on its
+  own).
+- **Budgets**: 10 QR codes per account and 30 per client per 15 minutes;
+  30 decisions per approving account per hour; the status check is unbudgeted
+  (it answers only the waiting session about its own request).
+- **Creating a passkey here** after such a sign-in skips the usual
+  "second proof in the same request" (`proveSetupOwnership`), because the
+  proof is the challenge passed moments ago (`JUST_VERIFIED_SECONDS`, 5
+  minutes, from the token's amr). It also does not sign the other sessions
+  out, unlike Settings: that would sign out the very phone that approved it.
+
+**Not done here**: the phone has no in-app scanner; the phone's camera app is
+the scanner. A phone signed in only inside an installed web app (whose cookies
+the camera's browser does not share) has to sign in in its browser once, or
+use "Copy the approval link".
 
 ## Verified against production GoTrue
 
@@ -254,9 +325,15 @@ Also:
   plus the step-up invariants in `server-action-security.test.ts`.
 - Database: `tests/integration/22-two-factor-rls.test.ts`,
   `24-passkey-factors.test.ts`.
-- End to end: `tests/e2e/67` to `70` (`*-two-factor-*`) and
+- End to end: `tests/e2e/67` to `70` (`*-two-factor-*`),
   `73-two-factor-passkeys.spec.ts`, which drives Chromium's virtual WebAuthn
-  authenticator through real create()/get() ceremonies. The e2e stack's mock
+  authenticator through real create()/get() ceremonies, and
+  `76-two-factor-approval.spec.ts`, two browsers (the phone and the computer)
+  through approve, deny, other account, signed out and switched off.
+- Sign-in approval: `tests/unit/device-label.test.ts`, the approval pins in
+  `server-action-security.test.ts` (the approver never verifies a factor; the
+  waiting side completes only a just-spent approval) and
+  `tests/integration/27-sign-in-approvals.test.ts`. The e2e stack's mock
   GoTrue (`tests/e2e/stack/server.mjs`) implements factors, challenges, TOTP
   verification, `aal`/`amr` claims, scoped logout and PKCE password recovery,
   and `tests/e2e/two-factor.ts` plays the part of the phone.

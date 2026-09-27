@@ -544,6 +544,13 @@
     "unavailable": "Toegangssleutels zijn nu niet beschikbaar. Gebruik in plaats daarvan een authenticator-app.",
     "createFailed": "We konden die toegangssleutel niet controleren. Probeer hem opnieuw aan te maken.",
     "signInFailed": "Die toegangssleutel werkte niet voor dit account. Probeer het opnieuw of log op een andere manier in.",
-    "expired": "Dat duurde te lang. Probeer je toegangssleutel opnieuw."
+    "expired": "Dat duurde te lang. Probeer je toegangssleutel opnieuw.",
+    "offerExpired": "Je bent te lang geleden ingelogd om op deze manier een toegangssleutel toe te voegen. Voeg er een toe via Instellingen › Beveiliging."
+  },
+  "approval": {
+    "unavailable": "Goedkeuren vanaf een ander apparaat is nu niet beschikbaar. Gebruik een andere manier om in te loggen.",
+    "rateLimited": "Te veel codes in korte tijd. Wacht een paar minuten en probeer het dan opnieuw.",
+    "expired": "Dit inlogverzoek is verlopen of al beantwoord. Toon een nieuwe code op het apparaat waarop je wilt inloggen.",
+    "otherAccount": "Dit verzoek is voor een ander Square Share-account dan het account dat hier is ingelogd."
   }
 }

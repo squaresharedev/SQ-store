@@ -43,6 +43,23 @@ export type VerifiedFactor = {
  */
 export const PASSKEY_FACTOR_PREFIX = "passkey:";
 
+/**
+ * The prefix of the one factor per account that stands behind SIGN-IN
+ * APPROVAL (lib/auth/sign-in-approval.ts): a device where the person is
+ * already signed in approves a new sign-in, and the server completes this
+ * factor for the waiting session. It is never a way in on its own and never
+ * listed as one, so `verifiedFactors` leaves it out; `approvalFactorId`
+ * carries it instead. Like the passkey prefix, it decides only what to show:
+ * every approval check reads the service-role tables, never the name.
+ */
+export const APPROVAL_FACTOR_PREFIX = "approval:";
+
+/** The approval factor's full name at GoTrue (names are unique per account). */
+export const APPROVAL_FACTOR_NAME = `${APPROVAL_FACTOR_PREFIX}signed-in-devices`;
+
+/** Names a person may not give a factor of their own: each marks a kind. */
+export const RESERVED_FACTOR_PREFIXES = [PASSKEY_FACTOR_PREFIX, APPROVAL_FACTOR_PREFIX] as const;
+
 export type SessionAssurance = {
   /** The account has at least one VERIFIED second factor (2FA is on). */
   enrolled: boolean;
@@ -52,8 +69,12 @@ export type SessionAssurance = {
   secondFactorAt: Seconds | null;
   /** When this session last passed a FIRST factor (password, Google, link). */
   signedInAt: Seconds | null;
-  /** Verified TOTP factors, oldest first. */
+  /** Verified TOTP factors, oldest first. Never the approval factor. */
   factors: VerifiedFactor[];
+  /** The account's verified approval factor, if sign-in approval has been used. */
+  approvalFactorId: string | null;
+  /** GoTrue's id for THIS session (the token's `session_id` claim). */
+  sessionId: string | null;
 };
 
 /**
@@ -84,6 +105,15 @@ export const STEP_UP_HINT_COOKIE = "ss_step_up_until";
  * "Sign in again" both work by resetting this clock.
  */
 export const RECENT_SIGN_IN_SECONDS = 10 * 60;
+
+/**
+ * How recently the sign-in challenge must have been passed for "create a
+ * passkey on this device" to go ahead without a second proof in the same
+ * request. Offered at the end of the challenge itself, so five minutes is the
+ * moment the person is looking at, not a window a session found later could
+ * still use.
+ */
+export const JUST_VERIFIED_SECONDS = 5 * 60;
 
 /**
  * AMR methods that are a SECOND factor. GoTrue names TOTP "totp" (older
@@ -150,7 +180,12 @@ function latest(entries: AmrEntry[]): Seconds | null {
 export function verifiedFactors(user: Pick<User, "factors">): VerifiedFactor[] {
   const factors: Factor[] = user.factors ?? [];
   return factors
-    .filter((factor) => factor.status === "verified" && factor.factor_type === "totp")
+    .filter(
+      (factor) =>
+        factor.status === "verified" &&
+        factor.factor_type === "totp" &&
+        !isApprovalFactor(factor),
+    )
     .sort((a, b) => a.created_at.localeCompare(b.created_at))
     .map((factor, index) => {
       const raw = factor.friendly_name?.trim() ?? "";
@@ -163,6 +198,22 @@ export function verifiedFactors(user: Pick<User, "factors">): VerifiedFactor[] {
         createdAt: factor.created_at,
       };
     });
+}
+
+/** Whether a GoTrue factor is the account's sign-in approval factor. */
+export function isApprovalFactor(factor: Pick<Factor, "friendly_name">): boolean {
+  return (factor.friendly_name?.trim() ?? "").startsWith(APPROVAL_FACTOR_PREFIX);
+}
+
+/** The verified approval factor's id, or null when there is none. */
+export function approvalFactorId(user: Pick<User, "factors">): string | null {
+  const factor = (user.factors ?? []).find(
+    (candidate) =>
+      candidate.status === "verified" &&
+      candidate.factor_type === "totp" &&
+      isApprovalFactor(candidate),
+  );
+  return factor?.id ?? null;
 }
 
 /** The factors a TYPED code can be for: authenticator apps, never passkeys. */
@@ -198,6 +249,8 @@ export function assuranceFrom(
     secondFactorAt: latest(entries.filter((e) => SECOND_FACTOR_METHODS.has(e.method))),
     signedInAt: latest(entries.filter((e) => !SECOND_FACTOR_METHODS.has(e.method))),
     factors: verifiedFactors(user),
+    approvalFactorId: approvalFactorId(user),
+    sessionId: typeof payload?.session_id === "string" ? payload.session_id : null,
   };
 }
 

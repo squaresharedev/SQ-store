@@ -498,6 +498,90 @@ export type Database = {
         }
         Relationships: []
       }
+      mfa_approval_factors: {
+        Row: {
+          created_at: string
+          factor_id: string
+          sealed_secret: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          factor_id: string
+          sealed_secret: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          factor_id?: string
+          sealed_secret?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      mfa_approval_opt_outs: {
+        Row: {
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      mfa_sign_in_approvals: {
+        Row: {
+          browser: string | null
+          country: string | null
+          created_at: string
+          decided_at: string | null
+          expires_at: string
+          factor_id: string | null
+          id: string
+          os: string | null
+          session_id: string
+          status: string
+          token_hash: string
+          used_at: string | null
+          user_id: string
+        }
+        Insert: {
+          browser?: string | null
+          country?: string | null
+          created_at?: string
+          decided_at?: string | null
+          expires_at: string
+          factor_id?: string | null
+          id?: string
+          os?: string | null
+          session_id: string
+          status?: string
+          token_hash: string
+          used_at?: string | null
+          user_id: string
+        }
+        Update: {
+          browser?: string | null
+          country?: string | null
+          created_at?: string
+          decided_at?: string | null
+          expires_at?: string
+          factor_id?: string | null
+          id?: string
+          os?: string | null
+          session_id?: string
+          status?: string
+          token_hash?: string
+          used_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       moderation_appeals: {
         Row: {
           created_at: string

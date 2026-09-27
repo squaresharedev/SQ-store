@@ -124,6 +124,18 @@
       "recoveryCodesRegenerated": {
         "title": "Boli vytvorené nové záložné kódy",
         "body": "Vaše staré záložné kódy už nefungujú. Ak ste to neboli vy, ihneď zmeňte heslo."
+      },
+      "signInApproved": {
+        "title": "Prihlásenie bolo schválené z iného zariadenia",
+        "body": "Nové prihlásenie do vášho účtu bolo schválené zo zariadenia, na ktorom ste prihlásení. Ak ste to neboli vy, ihneď zmeňte heslo a vypnite schvaľovanie prihlásenia v sekcii Nastavenia › Zabezpečenie."
+      },
+      "signInDenied": {
+        "title": "Zamietli ste prihlásenie do svojho účtu",
+        "body": "Niekto správne zadal vaše heslo a požiadal o schválenie, ktoré bolo zamietnuté. Ak to neboli vy, vaše heslo pozná niekto iný: ihneď ho zmeňte."
+      },
+      "approvalsEnabled": {
+        "title": "Schvaľovanie prihlásenia je zapnuté",
+        "body": "Zariadenia, na ktorých ste prihlásení, môžu teraz schvaľovať nové prihlásenia do vášho účtu. Ak ste to neboli vy, ihneď zmeňte heslo."
       }
     }
   }

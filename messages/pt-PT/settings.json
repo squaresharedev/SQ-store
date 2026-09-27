@@ -629,14 +629,33 @@
         "recoveryCodesRegenerated": "Novos códigos de recuperação gerados",
         "recoveryCodeUsed": "Código de recuperação utilizado para iniciar sessão",
         "challengeFailed": "Código de dois fatores errado introduzido no início de sessão",
-        "lockedOut": "Início de sessão com dois fatores suspenso após códigos errados repetidos"
+        "lockedOut": "Início de sessão com dois fatores suspenso após códigos errados repetidos",
+        "signInApproved": "Início de sessão aprovado a partir de outro dispositivo",
+        "signInDenied": "Início de sessão recusado a partir de outro dispositivo",
+        "approvalsEnabled": "Aprovação de início de sessão ativada",
+        "approvalsDisabled": "Aprovação de início de sessão desativada"
       }
     },
     "success": {
       "twoFactorOff": "A autenticação de dois fatores está desativada.",
       "factorRemoved": "«{name}» removido.",
       "codesRegenerated": "Novos códigos de recuperação prontos. Os anteriores deixaram de funcionar.",
-      "confirmed": "Confirmado."
+      "confirmed": "Confirmado.",
+      "approvalsOn": "A aprovação de início de sessão está ativa.",
+      "approvalsOff": "A aprovação de início de sessão está desativada."
+    },
+    "approvals": {
+      "title": "Aprovar a partir de um dispositivo com sessão iniciada",
+      "description": "Quando iniciar sessão num local novo, leia o código QR com um telemóvel onde já tenha sessão iniciada e toque em Aprovar. Útil quando a sua chave de acesso está noutro dispositivo.",
+      "statusOn": "Ativa",
+      "statusOff": "Desativada",
+      "turnOn": "Ativar",
+      "turnOff": "Desativar",
+      "saving": "A guardar…",
+      "confirmOnTitle": "Ativar a aprovação de início de sessão?",
+      "confirmOnDescription": "Qualquer telemóvel ou computador onde tenha sessão iniciada poderá aprovar um novo início de sessão na sua conta.",
+      "confirmOffTitle": "Desativar a aprovação de início de sessão?",
+      "confirmOffDescription": "Os novos inícios de sessão precisarão da sua chave de acesso, da aplicação de autenticação ou de um código de recuperação. Os dispositivos já com sessão iniciada mantêm-na."
     }
   },
   "team": {

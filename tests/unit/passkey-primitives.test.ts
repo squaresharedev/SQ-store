@@ -128,6 +128,29 @@ describe("telling a passkey's factor apart", () => {
     expect(factorNameSchema.safeParse("PASSKEY:fake").success).toBe(false);
     expect(factorNameSchema.safeParse("My passkey").success).toBe(true);
   });
+
+  it("will not let any factor borrow the sign-in approval prefix (it would hide as one)", () => {
+    expect(factorNameSchema.safeParse("approval:signed-in-devices").success).toBe(false);
+    expect(factorNameSchema.safeParse("Approval:phone").success).toBe(false);
+    expect(factorNameSchema.safeParse("Approval phone").success).toBe(true);
+  });
+
+  it("never checks a typed code against the approval factor either", () => {
+    const withApproval = {
+      factors: [
+        {
+          id: "f-approval",
+          friendly_name: "approval:signed-in-devices",
+          factor_type: "totp" as const,
+          status: "verified" as const,
+          created_at: "2026-09-01T00:00:00Z",
+          updated_at: "2026-09-01T00:00:00Z",
+        },
+      ],
+    };
+    expect(pickFactor({ factors: verifiedFactors(withApproval) }, null)).toBeNull();
+    expect(pickFactor({ factors: verifiedFactors(withApproval) }, "f-approval")).toBeNull();
+  });
 });
 
 describe("relying party", () => {

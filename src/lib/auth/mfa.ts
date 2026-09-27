@@ -13,6 +13,7 @@ import {
   STEP_UP_HINT_COOKIE,
   STEP_UP_WINDOW_SECONDS,
   appFactors,
+  isApprovalFactor,
   secondFactorIsFresh,
   type SessionAssurance,
 } from "@/lib/auth/assurance";
@@ -519,13 +520,17 @@ export async function deleteAllFactors(userId: string): Promise<boolean> {
  * Drop factors a previous setup started and never finished. Each open setup
  * holds a factor at GoTrue (and its name), so abandoned ones would otherwise
  * pile up against the per-account limit and block reusing a name.
+ *
+ * Not a pending APPROVAL factor: that one is waiting for another device to
+ * collect an approval (lib/auth/sign-in-approval.ts), and removing it would
+ * strand that sign-in. It is cleared by the next approval if never collected.
  */
 export async function discardPendingFactors(
   supabase: ServerClient,
-  factors: { id: string; status: string }[] | undefined,
+  factors: { id: string; status: string; friendly_name?: string }[] | undefined,
 ): Promise<void> {
   for (const factor of factors ?? []) {
-    if (factor.status === "verified") continue;
+    if (factor.status === "verified" || isApprovalFactor(factor)) continue;
     await supabase.auth.mfa.unenroll({ factorId: factor.id }).catch(() => undefined);
   }
 }

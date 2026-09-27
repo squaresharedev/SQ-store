@@ -124,6 +124,18 @@
       "recoveryCodesRegenerated": {
         "title": "New recovery codes were generated",
         "body": "Your old recovery codes no longer work. If this wasn't you, change your password now."
+      },
+      "signInApproved": {
+        "title": "A sign-in was approved from another device",
+        "body": "A new sign-in to your account was approved from a device where you're signed in. If this wasn't you, change your password now and turn off sign-in approval in Settings › Security."
+      },
+      "signInDenied": {
+        "title": "You denied a sign-in to your account",
+        "body": "Someone entered your password correctly and asked for approval, and it was denied. If it wasn't you trying, your password is known to someone else: change it now."
+      },
+      "approvalsEnabled": {
+        "title": "Sign-in approval is on",
+        "body": "Devices where you're signed in can now approve new sign-ins to your account. If this wasn't you, change your password now."
       }
     }
   }

@@ -629,14 +629,33 @@
         "recoveryCodesRegenerated": "Neue Wiederherstellungscodes erstellt",
         "recoveryCodeUsed": "Wiederherstellungscode zur Anmeldung verwendet",
         "challengeFailed": "Falscher Zwei-Faktor-Code bei der Anmeldung eingegeben",
-        "lockedOut": "Zwei-Faktor-Anmeldung nach wiederholt falschen Codes pausiert"
+        "lockedOut": "Zwei-Faktor-Anmeldung nach wiederholt falschen Codes pausiert",
+        "signInApproved": "Anmeldung von einem anderen Gerät genehmigt",
+        "signInDenied": "Anmeldung von einem anderen Gerät abgelehnt",
+        "approvalsEnabled": "Anmeldebestätigung eingeschaltet",
+        "approvalsDisabled": "Anmeldebestätigung ausgeschaltet"
       }
     },
     "success": {
       "twoFactorOff": "Die Zwei-Faktor-Authentifizierung ist ausgeschaltet.",
       "factorRemoved": "„{name}“ entfernt.",
       "codesRegenerated": "Neue Wiederherstellungscodes sind bereit. Deine alten funktionieren nicht mehr.",
-      "confirmed": "Bestätigt."
+      "confirmed": "Bestätigt.",
+      "approvalsOn": "Anmeldebestätigung ist eingeschaltet.",
+      "approvalsOff": "Anmeldebestätigung ist ausgeschaltet."
+    },
+    "approvals": {
+      "title": "Von einem angemeldeten Gerät genehmigen",
+      "description": "Wenn du dich irgendwo neu anmeldest, scanne den QR-Code mit einem Handy, auf dem du bereits angemeldet bist, und tippe auf Genehmigen. Praktisch, wenn dein Passkey auf einem anderen Gerät ist.",
+      "statusOn": "Ein",
+      "statusOff": "Aus",
+      "turnOn": "Einschalten",
+      "turnOff": "Ausschalten",
+      "saving": "Wird gespeichert…",
+      "confirmOnTitle": "Anmeldebestätigung einschalten?",
+      "confirmOnDescription": "Jedes Handy oder jeder Computer, auf dem du angemeldet bist, kann eine neue Anmeldung bei deinem Konto genehmigen.",
+      "confirmOffTitle": "Anmeldebestätigung ausschalten?",
+      "confirmOffDescription": "Neue Anmeldungen benötigen deinen Passkey, deine Authenticator-App oder einen Wiederherstellungscode. Bereits angemeldete Geräte bleiben angemeldet."
     }
   },
   "team": {

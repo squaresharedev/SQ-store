@@ -629,14 +629,33 @@
         "recoveryCodesRegenerated": "Boli vytvorené nové záložné kódy",
         "recoveryCodeUsed": "Na prihlásenie sa použil záložný kód",
         "challengeFailed": "Pri prihlásení bol zadaný nesprávny kód dvojfaktorového overenia",
-        "lockedOut": "Prihlásenie s dvojfaktorovým overením sa pozastavilo po opakovaných nesprávnych kódoch"
+        "lockedOut": "Prihlásenie s dvojfaktorovým overením sa pozastavilo po opakovaných nesprávnych kódoch",
+        "signInApproved": "Prihlásenie schválené z iného zariadenia",
+        "signInDenied": "Prihlásenie zamietnuté z iného zariadenia",
+        "approvalsEnabled": "Schvaľovanie prihlásenia zapnuté",
+        "approvalsDisabled": "Schvaľovanie prihlásenia vypnuté"
       }
     },
     "success": {
       "twoFactorOff": "Dvojfaktorové overenie je vypnuté.",
       "factorRemoved": "Aplikácia „{name}“ bola odobratá.",
       "codesRegenerated": "Nové záložné kódy sú pripravené. Vaše staré už nefungujú.",
-      "confirmed": "Potvrdené."
+      "confirmed": "Potvrdené.",
+      "approvalsOn": "Schvaľovanie prihlásenia je zapnuté.",
+      "approvalsOff": "Schvaľovanie prihlásenia je vypnuté."
+    },
+    "approvals": {
+      "title": "Schváliť zo zariadenia, na ktorom ste prihlásení",
+      "description": "Pri novom prihlásení naskenujte QR kód telefónom, na ktorom ste už prihlásení, a ťuknite na Schváliť. Hodí sa, keď je váš prístupový kľúč na inom zariadení.",
+      "statusOn": "Zapnuté",
+      "statusOff": "Vypnuté",
+      "turnOn": "Zapnúť",
+      "turnOff": "Vypnúť",
+      "saving": "Ukladá sa…",
+      "confirmOnTitle": "Zapnúť schvaľovanie prihlásenia?",
+      "confirmOnDescription": "Každý telefón alebo počítač, na ktorom ste prihlásení, bude môcť schváliť nové prihlásenie do vášho účtu.",
+      "confirmOffTitle": "Vypnúť schvaľovanie prihlásenia?",
+      "confirmOffDescription": "Nové prihlásenia budú vyžadovať váš prístupový kľúč, overovaciu aplikáciu alebo záložný kód. Zariadenia, ktoré sú už prihlásené, zostanú prihlásené."
     }
   },
   "team": {

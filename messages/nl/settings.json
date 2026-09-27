@@ -629,14 +629,33 @@
         "recoveryCodesRegenerated": "Nieuwe herstelcodes gemaakt",
         "recoveryCodeUsed": "Herstelcode gebruikt om in te loggen",
         "challengeFailed": "Verkeerde tweestapscode ingevoerd bij het inloggen",
-        "lockedOut": "Inloggen met tweestapsverificatie gepauzeerd na herhaaldelijk foute codes"
+        "lockedOut": "Inloggen met tweestapsverificatie gepauzeerd na herhaaldelijk foute codes",
+        "signInApproved": "Inlogpoging goedgekeurd vanaf een ander apparaat",
+        "signInDenied": "Inlogpoging geweigerd vanaf een ander apparaat",
+        "approvalsEnabled": "Inloggoedkeuring aangezet",
+        "approvalsDisabled": "Inloggoedkeuring uitgezet"
       }
     },
     "success": {
       "twoFactorOff": "Tweestapsverificatie staat uit.",
       "factorRemoved": "“{name}” verwijderd.",
       "codesRegenerated": "Nieuwe herstelcodes staan klaar. Je oude werken niet meer.",
-      "confirmed": "Bevestigd."
+      "confirmed": "Bevestigd.",
+      "approvalsOn": "Inloggoedkeuring staat aan.",
+      "approvalsOff": "Inloggoedkeuring staat uit."
+    },
+    "approvals": {
+      "title": "Goedkeuren vanaf een ingelogd apparaat",
+      "description": "Wanneer je ergens nieuw inlogt, scan je de QR-code met een telefoon waarop je al bent ingelogd en tik je op Goedkeuren. Handig als je toegangssleutel op een ander apparaat staat.",
+      "statusOn": "Aan",
+      "statusOff": "Uit",
+      "turnOn": "Aanzetten",
+      "turnOff": "Uitzetten",
+      "saving": "Opslaan…",
+      "confirmOnTitle": "Inloggoedkeuring aanzetten?",
+      "confirmOnDescription": "Elke telefoon of computer waarop je bent ingelogd, kan een nieuwe inlogpoging op je account goedkeuren.",
+      "confirmOffTitle": "Inloggoedkeuring uitzetten?",
+      "confirmOffDescription": "Nieuwe inlogpogingen hebben je toegangssleutel, je authenticator-app of een herstelcode nodig. Apparaten die al zijn ingelogd, blijven ingelogd."
     }
   },
   "team": {

@@ -629,14 +629,33 @@
         "recoveryCodesRegenerated": "Wygenerowano nowe kody odzyskiwania",
         "recoveryCodeUsed": "Do logowania użyto kodu odzyskiwania",
         "challengeFailed": "Podano błędny kod dwuskładnikowy przy logowaniu",
-        "lockedOut": "Logowanie dwuskładnikowe wstrzymane po wielokrotnym podaniu błędnych kodów"
+        "lockedOut": "Logowanie dwuskładnikowe wstrzymane po wielokrotnym podaniu błędnych kodów",
+        "signInApproved": "Zatwierdzono logowanie z innego urządzenia",
+        "signInDenied": "Odrzucono logowanie z innego urządzenia",
+        "approvalsEnabled": "Włączono zatwierdzanie logowania",
+        "approvalsDisabled": "Wyłączono zatwierdzanie logowania"
       }
     },
     "success": {
       "twoFactorOff": "Uwierzytelnianie dwuskładnikowe jest wyłączone.",
       "factorRemoved": "Usunięto „{name}”.",
       "codesRegenerated": "Nowe kody odzyskiwania są gotowe. Dotychczasowe już nie działają.",
-      "confirmed": "Potwierdzono."
+      "confirmed": "Potwierdzono.",
+      "approvalsOn": "Zatwierdzanie logowania jest włączone.",
+      "approvalsOff": "Zatwierdzanie logowania jest wyłączone."
+    },
+    "approvals": {
+      "title": "Zatwierdź z zalogowanego urządzenia",
+      "description": "Gdy logujesz się w nowym miejscu, zeskanuj kod QR telefonem, na którym jesteś już zalogowany, i dotknij Zatwierdź. Przydatne, gdy klucz dostępu jest na innym urządzeniu.",
+      "statusOn": "Włączone",
+      "statusOff": "Wyłączone",
+      "turnOn": "Włącz",
+      "turnOff": "Wyłącz",
+      "saving": "Zapisywanie…",
+      "confirmOnTitle": "Włączyć zatwierdzanie logowania?",
+      "confirmOnDescription": "Każdy telefon lub komputer, na którym jesteś zalogowany, będzie mógł zatwierdzić nowe logowanie na twoje konto.",
+      "confirmOffTitle": "Wyłączyć zatwierdzanie logowania?",
+      "confirmOffDescription": "Nowe logowania będą wymagać klucza dostępu, aplikacji uwierzytelniającej lub kodu odzyskiwania. Urządzenia już zalogowane pozostają zalogowane."
     }
   },
   "team": {

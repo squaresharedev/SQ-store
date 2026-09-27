@@ -124,6 +124,18 @@
       "recoveryCodesRegenerated": {
         "title": "Wygenerowano nowe kody odzyskiwania",
         "body": "Twoje dotychczasowe kody odzyskiwania już nie działają. Jeśli to nie ty, zmień teraz hasło."
+      },
+      "signInApproved": {
+        "title": "Logowanie zostało zatwierdzone z innego urządzenia",
+        "body": "Nowe logowanie na twoje konto zostało zatwierdzone z urządzenia, na którym jesteś zalogowany. Jeśli to nie ty, zmień hasło teraz i wyłącz zatwierdzanie logowania w sekcji Ustawienia › Bezpieczeństwo."
+      },
+      "signInDenied": {
+        "title": "Odrzucono logowanie na twoje konto",
+        "body": "Ktoś poprawnie wpisał twoje hasło i poprosił o zatwierdzenie, ale prośba została odrzucona. Jeśli to nie ty próbowałeś, ktoś zna twoje hasło: zmień je teraz."
+      },
+      "approvalsEnabled": {
+        "title": "Zatwierdzanie logowania jest włączone",
+        "body": "Urządzenia, na których jesteś zalogowany, mogą teraz zatwierdzać nowe logowania na twoje konto. Jeśli to nie ty, zmień hasło teraz."
       }
     }
   }

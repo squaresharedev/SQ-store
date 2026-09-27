@@ -49,6 +49,14 @@ export const SECURITY_EVENTS = [
   "mfa.challenge_failed",
   /** Too many wrong codes; further attempts refused for a while. */
   "mfa.locked_out",
+  /** A signed-in device approved a sign-in waiting at the two-factor step. */
+  "mfa.sign_in_approved",
+  /** A signed-in device denied one: the password was RIGHT. */
+  "mfa.sign_in_denied",
+  /** Sign-in approval switched back on in Settings › Security. */
+  "mfa.approvals_enabled",
+  /** Sign-in approval switched off in Settings › Security. */
+  "mfa.approvals_disabled",
 ] as const;
 
 export type SecurityEvent = (typeof SECURITY_EVENTS)[number];
@@ -71,6 +79,10 @@ export const SECURITY_EVENT_LABELS: Record<SecurityEvent, MessageKey> = {
   "mfa.recovery_code_used": "Settings.security.activity.events.recoveryCodeUsed",
   "mfa.challenge_failed": "Settings.security.activity.events.challengeFailed",
   "mfa.locked_out": "Settings.security.activity.events.lockedOut",
+  "mfa.sign_in_approved": "Settings.security.activity.events.signInApproved",
+  "mfa.sign_in_denied": "Settings.security.activity.events.signInDenied",
+  "mfa.approvals_enabled": "Settings.security.activity.events.approvalsEnabled",
+  "mfa.approvals_disabled": "Settings.security.activity.events.approvalsDisabled",
 };
 
 export function isSecurityEvent(value: unknown): value is SecurityEvent {

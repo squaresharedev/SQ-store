@@ -19,6 +19,7 @@ import { STEP_SWAP } from "@/components/ui/motion-tokens";
 import { AnimatedFingerprint } from "@/components/auth/AnimatedFingerprint";
 import { GoogleButton } from "@/components/auth/GoogleButton";
 import { OneTimeCodeInput } from "@/components/auth/OneTimeCodeInput";
+import { QrTile } from "@/components/auth/QrTile";
 import { StepUpField } from "@/components/auth/StepUp";
 import { SuccessMark } from "@/components/auth/SuccessMark";
 import { RecoveryCodesDisplay } from "@/components/settings/security/RecoveryCodesDisplay";
@@ -33,6 +34,7 @@ import {
   type BeginSetupState,
   type ConfirmSetupState,
 } from "@/lib/auth/mfa-actions";
+import { suggestedName } from "@/lib/auth/factor-names";
 import { createPasskey } from "@/lib/auth/webauthn-client";
 import { FACTOR_NAME_MAX } from "@/lib/validation/mfa";
 import { cn } from "@/lib/utils";
@@ -45,25 +47,6 @@ const CONFIRM_INITIAL: ConfirmSetupState = {};
 const SETUP_RETURN = "/settings/security?setup=1";
 
 type Method = "passkey" | "app";
-
-/**
- * The base name, or the first numbered variant nobody has used yet. The
- * words come from the caller, in the reader's language: the default name is
- * copy until the person keeps it.
- */
-function suggestedName(
-  taken: string[],
-  base: string,
-  numbered: (number: number) => string,
-): string {
-  const used = new Set(taken.map((name) => name.toLowerCase()));
-  if (!used.has(base.toLowerCase())) return base;
-  for (let n = 2; n < 100; n += 1) {
-    const candidate = numbered(n);
-    if (!used.has(candidate.toLowerCase())) return candidate;
-  }
-  return "";
-}
 
 /** The secret in fours, the way authenticator apps display typed keys. */
 function groupSecret(secret: string): string {
@@ -358,16 +341,7 @@ export function TwoFactorSetupModal({
               <input type="hidden" name="factor_id" value={enrollment.factorId} />
 
               <div className="flex flex-col items-center gap-3 sm:flex-row sm:items-start">
-                {/* A white tile in either theme: authenticator cameras read dark
-                    modules on a light ground, not the other way round. */}
-                {/* eslint-disable-next-line @next/next/no-img-element -- a data: URL minted per setup; next/image cannot optimise it and must not cache it. */}
-                <img
-                  src={enrollment.qrCode}
-                  alt={t("qrAlt")}
-                  width={176}
-                  height={176}
-                  className="size-44 shrink-0 border border-border bg-white p-2"
-                />
+                <QrTile src={enrollment.qrCode} alt={t("qrAlt")} />
                 <div className="flex min-w-0 flex-col gap-2">
                   <p className={helpTextClass}>{t("anyApp")}</p>
                   <p className={infoTextClass}>{t("cantScan")}</p>

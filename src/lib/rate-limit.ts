@@ -316,6 +316,18 @@ export const RATE_LIMITS = {
    * the slip lives, so even a replayed request carrying the old cookie fails.
    */
   webauthnChallenge: { max: 1, windowSeconds: 10 * 60 },
+  /**
+   * Sign-in approval QR codes one account can ask for (lib/auth/
+   * sign-in-approval.ts). Only a session that already passed the password can
+   * ask, so this bounds rows and the phone-side noise, not guessing: each
+   * request is a 256-bit token nobody types. Ten per quarter hour covers a
+   * person letting a few codes expire while they hunt for their phone.
+   */
+  mfaApprovalStart: { max: 10, windowSeconds: 15 * 60 },
+  /** The same, from one client across every account it signs in to. */
+  mfaApprovalStartPerClient: { max: 30, windowSeconds: 15 * 60 },
+  /** Approve or deny taps by one signed-in account. */
+  mfaApprovalDecide: { max: 30, windowSeconds: 60 * 60 },
 } as const;
 
 export type RateLimitBudget = { max: number; windowSeconds: number };

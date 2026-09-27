@@ -124,6 +124,18 @@
       "recoveryCodesRegenerated": {
         "title": "Foram gerados novos códigos de recuperação",
         "body": "Os seus códigos de recuperação anteriores deixaram de funcionar. Se não foi uma ação sua, altere já a palavra-passe."
+      },
+      "signInApproved": {
+        "title": "Um início de sessão foi aprovado a partir de outro dispositivo",
+        "body": "Um novo início de sessão na sua conta foi aprovado a partir de um dispositivo onde tem sessão iniciada. Se não foi uma ação sua, altere a palavra-passe já e desative a aprovação de início de sessão em Definições › Segurança."
+      },
+      "signInDenied": {
+        "title": "Recusou um início de sessão na sua conta",
+        "body": "Alguém introduziu corretamente a sua palavra-passe e pediu aprovação, que foi recusada. Se não foi uma tentativa sua, outra pessoa conhece a sua palavra-passe: altere-a já."
+      },
+      "approvalsEnabled": {
+        "title": "A aprovação de início de sessão está ativa",
+        "body": "Os dispositivos onde tem sessão iniciada podem agora aprovar novos inícios de sessão na sua conta. Se não foi uma ação sua, altere a palavra-passe já."
       }
     }
   }

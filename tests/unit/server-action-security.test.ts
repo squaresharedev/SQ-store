@@ -69,6 +69,22 @@ const REGISTRY: Record<string, Classification> = {
     "Writes nothing of its own. Without 2FA it returns at once; with 2FA every code it checks goes through requireStepUpState, which spends the second-factor budgets.",
   ),
   "lib/auth/mfa-actions.ts::signOutToReauthenticate": read(),
+  // "Create a passkey on this device" at the end of a sign-in: enrolment
+  // takes the mfa_enroll budget (readyToEnroll), confirming it the
+  // second-factor budget, exactly like the Settings passkey setup.
+  "lib/auth/mfa-actions.ts::beginPasskeyHere": limited(),
+  "lib/auth/mfa-actions.ts::confirmPasskeyHere": limited(),
+
+  // --- sign-in approval (lib/auth/sign-in-approval.ts) ----------------------
+  "lib/auth/sign-in-approval-actions.ts::startSignInApproval": limited(),
+  "lib/auth/sign-in-approval-actions.ts::checkSignInApproval": unlimited(
+    "Asked every few seconds by the waiting page, so a budget would lock out the person it serves. It only answers a session that owes its second factor, about ITS OWN request (scoped to the account AND the GoTrue session id, so another session's id reads as unknown), and completes a sign-in only by spending an approval that a fully signed-in session of the same account granted, once, through a conditional update. Nothing it is asked can be guessed into a sign-in.",
+  ),
+  "lib/auth/sign-in-approval-actions.ts::cancelSignInApproval": unlimited(
+    "Only withdraws a still-pending request of the caller's own session. It creates nothing, and startSignInApproval (limited) bounds how many can exist.",
+  ),
+  "lib/auth/sign-in-approval-actions.ts::decideSignInApproval": limited(),
+  "lib/auth/sign-in-approval-actions.ts::setSignInApproval": limited(),
 
   // --- settings -----------------------------------------------------------
   "lib/settings/actions.ts::updateUsername": limited(),
@@ -445,6 +461,8 @@ describe("two-factor step-up invariants", () => {
     "lib/auth/mfa-actions.ts::removeAuthenticator",
     "lib/auth/mfa-actions.ts::regenerateRecoveryCodes",
     "lib/auth/mfa-actions.ts::confirmIdentity",
+    // Changes which ways past 2FA the account has.
+    "lib/auth/sign-in-approval-actions.ts::setSignInApproval",
   ];
 
   it("every sensitive action calls requireStepUp", () => {
@@ -486,5 +504,54 @@ describe("two-factor step-up invariants", () => {
       const action = ACTIONS.find((a) => a.key === key);
       expect(action?.body, key).toMatch(/checkPassword\(/);
     }
+  });
+});
+
+describe("sign-in approval invariants", () => {
+  /**
+   * The design this rests on (lib/auth/sign-in-approval.ts): GoTrue deletes
+   * every aal1 session of an account whenever ANY factor is verified, so the
+   * approving phone must never verify anything while the computer waits, and
+   * the waiting session must only ever complete an approval it has just
+   * spent. Pinned here because a well-meant refactor of either half would
+   * pass every other test and sign the waiting device out, or worse.
+   */
+  const body = (key: string) => ACTIONS.find((a) => a.key === key)?.body ?? "";
+  const approvalModule = readFileSync(join(SRC, "lib/auth/sign-in-approval.ts"), "utf8");
+  const moduleFunction = (name: string) => {
+    const start = approvalModule.indexOf(`export async function ${name}`);
+    const next = approvalModule.indexOf("\nexport ", start + 1);
+    return approvalModule.slice(start, next === -1 ? undefined : next);
+  };
+
+  it("the approving side never verifies or challenges a factor", () => {
+    const decide = body("lib/auth/sign-in-approval-actions.ts::decideSignInApproval");
+    expect(decide).toMatch(/prepareApprovalFactor\(/);
+    expect(decide).not.toMatch(/completeFactor\s*\(|mfa\.(verify|challenge)\s*\(/);
+    expect(moduleFunction("prepareApprovalFactor")).not.toMatch(/mfa\.(verify|challenge)\s*\(/);
+  });
+
+  it("only a fully signed-in session decides, and only a half-signed-in one asks", () => {
+    expect(body("lib/auth/sign-in-approval-actions.ts::decideSignInApproval")).toMatch(
+      /state\.kind !== "signed_in"/,
+    );
+    expect(body("lib/auth/sign-in-approval-actions.ts::startSignInApproval")).toMatch(
+      /state\.kind !== "needs_mfa"/,
+    );
+  });
+
+  it("the waiting side completes a factor only after spending the approval", () => {
+    const check = body("lib/auth/sign-in-approval-actions.ts::checkSignInApproval");
+    const spent = check.indexOf("collectApproval(");
+    expect(spent).toBeGreaterThan(-1);
+    expect(spent).toBeLessThan(check.indexOf("completeFactor("));
+  });
+
+  it("an approval is spent by one conditional update, scoped to the waiting session", () => {
+    const collect = moduleFunction("collectApproval");
+    for (const scope of ['.eq("session_id"', '.eq("user_id"', '.eq("status", "approved")']) {
+      expect(collect, scope).toContain(scope);
+    }
+    expect(collect).toMatch(/\.update\(/);
   });
 });

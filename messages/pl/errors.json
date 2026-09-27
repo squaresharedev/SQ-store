@@ -544,6 +544,13 @@
     "unavailable": "Klucze dostępu są teraz niedostępne. Użyj zamiast tego aplikacji uwierzytelniającej.",
     "createFailed": "Nie udało się sprawdzić tego klucza dostępu. Spróbuj utworzyć go ponownie.",
     "signInFailed": "Ten klucz dostępu nie zadziałał dla tego konta. Spróbuj ponownie albo zaloguj się w inny sposób.",
-    "expired": "Trwało to zbyt długo. Spróbuj ponownie użyć klucza dostępu."
+    "expired": "Trwało to zbyt długo. Spróbuj ponownie użyć klucza dostępu.",
+    "offerExpired": "Minęło zbyt wiele czasu od logowania, aby dodać klucz dostępu w ten sposób. Dodaj go zamiast tego w sekcji Ustawienia › Bezpieczeństwo."
+  },
+  "approval": {
+    "unavailable": "Zatwierdzanie z innego urządzenia nie jest teraz dostępne. Użyj innego sposobu logowania.",
+    "rateLimited": "Zbyt wiele kodów w krótkim czasie. Odczekaj kilka minut i spróbuj ponownie.",
+    "expired": "To żądanie logowania wygasło lub zostało już obsłużone. Pokaż nowy kod na urządzeniu, na którym się logujesz.",
+    "otherAccount": "To żądanie dotyczy innego konta Square Share niż to, na które jesteś tu zalogowany."
   }
 }

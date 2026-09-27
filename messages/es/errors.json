@@ -544,6 +544,13 @@
     "unavailable": "Las llaves de acceso no están disponibles ahora mismo. Usa una aplicación de autenticación.",
     "createFailed": "No hemos podido comprobar esa llave de acceso. Intenta crearla de nuevo.",
     "signInFailed": "Esa llave de acceso no ha funcionado con esta cuenta. Inténtalo de nuevo o usa otra forma de iniciar sesión.",
-    "expired": "Ha tardado demasiado. Vuelve a intentarlo con tu llave de acceso."
+    "expired": "Ha tardado demasiado. Vuelve a intentarlo con tu llave de acceso.",
+    "offerExpired": "Ha pasado demasiado tiempo desde que iniciaste sesión para añadir una llave de acceso de esta forma. Añádela en Configuración › Seguridad."
+  },
+  "approval": {
+    "unavailable": "La aprobación desde otro dispositivo no está disponible ahora mismo. Usa otra forma de iniciar sesión.",
+    "rateLimited": "Demasiados códigos en poco tiempo. Espera unos minutos y vuelve a intentarlo.",
+    "expired": "Esta solicitud de inicio de sesión ha caducado o ya fue respondida. Muestra un código nuevo en el dispositivo en el que estás iniciando sesión.",
+    "otherAccount": "Esta solicitud es para una cuenta de Square Share diferente a la que tiene sesión iniciada aquí."
   }
 }

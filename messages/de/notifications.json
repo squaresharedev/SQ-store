@@ -124,6 +124,18 @@
       "recoveryCodesRegenerated": {
         "title": "Neue Wiederherstellungscodes wurden erstellt",
         "body": "Deine alten Wiederherstellungscodes funktionieren nicht mehr. Wenn du das nicht warst, ändere sofort dein Passwort."
+      },
+      "signInApproved": {
+        "title": "Eine Anmeldung wurde von einem anderen Gerät genehmigt",
+        "body": "Eine neue Anmeldung bei deinem Konto wurde von einem Gerät genehmigt, auf dem du angemeldet bist. Wenn du das nicht warst, ändere jetzt dein Passwort und schalte die Anmeldebestätigung unter Einstellungen › Sicherheit aus."
+      },
+      "signInDenied": {
+        "title": "Du hast eine Anmeldung bei deinem Konto abgelehnt",
+        "body": "Jemand hat dein Passwort richtig eingegeben und um Genehmigung gebeten, und sie wurde abgelehnt. Wenn du es nicht warst, kennt jemand anderes dein Passwort: Ändere es jetzt."
+      },
+      "approvalsEnabled": {
+        "title": "Anmeldebestätigung ist eingeschaltet",
+        "body": "Geräte, auf denen du angemeldet bist, können jetzt neue Anmeldungen bei deinem Konto genehmigen. Wenn du das nicht warst, ändere jetzt dein Passwort."
       }
     }
   }

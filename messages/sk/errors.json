@@ -544,6 +544,13 @@
     "unavailable": "Prístupové kľúče teraz nie sú k dispozícii. Použite namiesto nich overovaciu aplikáciu.",
     "createFailed": "Tento prístupový kľúč sa nepodarilo overiť. Skúste ho vytvoriť znova.",
     "signInFailed": "Tento prístupový kľúč pre tento účet nefungoval. Skúste to znova alebo sa prihláste inak.",
-    "expired": "Trvalo to príliš dlho. Skúste prístupový kľúč použiť znova."
+    "expired": "Trvalo to príliš dlho. Skúste prístupový kľúč použiť znova.",
+    "offerExpired": "Od posledného prihlásenia ubehlo príliš veľa času na pridanie prístupového kľúča týmto spôsobom. Namiesto toho ho pridajte v sekcii Nastavenia › Zabezpečenie."
+  },
+  "approval": {
+    "unavailable": "Schvaľovanie z iného zariadenia momentálne nie je k dispozícii. Prihláste sa iným spôsobom.",
+    "rateLimited": "Príliš veľa kódov za krátky čas. Počkajte niekoľko minút a skúste to znova.",
+    "expired": "Táto žiadosť o prihlásenie vypršala alebo bola už zodpovedaná. Zobrazte nový kód na zariadení, na ktorom sa prihlasujete.",
+    "otherAccount": "Táto žiadosť je určená pre iný účet Square Share, než ten, ktorý je tu prihlásený."
   }
 }

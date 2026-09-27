@@ -36,6 +36,33 @@ export function countryName(code: string | null | undefined, locale: Locale): st
   return regionsFor(locale)?.of(known.code) ?? known.name;
 }
 
+const anyRegionNames = new Map<Locale, Intl.DisplayNames | null>();
+
+/**
+ * The printable name of ANY region by its ISO code (where a sign-in came
+ * from, which can be anywhere), in the reader's language. EU members read as
+ * countryName has them; null for a code the runtime has no name for.
+ */
+export function regionName(code: string | null | undefined, locale: Locale): string | null {
+  if (!code) return null;
+  const eu = countryName(code, locale);
+  if (eu) return eu;
+  if (!anyRegionNames.has(locale)) {
+    let regions: Intl.DisplayNames | null = null;
+    try {
+      regions = new Intl.DisplayNames([locale], { type: "region", fallback: "none" });
+    } catch {
+      regions = null;
+    }
+    anyRegionNames.set(locale, regions);
+  }
+  try {
+    return anyRegionNames.get(locale)?.of(code) ?? null;
+  } catch {
+    return null;
+  }
+}
+
 const sortedLists = new Map<Locale, readonly EuCountry[]>();
 
 /** The EU member states named in the reader's language, sorted the way that language sorts. */

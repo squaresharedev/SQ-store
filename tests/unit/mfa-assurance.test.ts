@@ -1,11 +1,15 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
 import {
+  APPROVAL_FACTOR_NAME,
+  PASSKEY_FACTOR_PREFIX,
   RECENT_SIGN_IN_SECONDS,
   STEP_UP_WINDOW_SECONDS,
+  approvalFactorId,
   assuranceFrom,
   decodeJwtPayload,
   hasVerifiedFactor,
+  isApprovalFactor,
   needsSecondFactor,
   secondFactorIsFresh,
   signedInRecently,
@@ -28,6 +32,9 @@ function token(payload: Record<string, unknown>): string {
 }
 
 const NOW = 1_800_000_000;
+
+/** The fields these rules never read, for fixtures built by hand. */
+const NO_EXTRAS = { approvalFactorId: null, sessionId: null };
 
 const verified = (id: string, created: string, name = "Phone") => ({
   id,
@@ -77,6 +84,34 @@ describe("verifiedFactors / hasVerifiedFactor", () => {
       factors: [{ ...verified("a", "2026-09-01T00:00:00Z"), friendly_name: "  " }],
     });
     expect(factor.name).toBe("Authenticator app 1");
+  });
+
+  it("never lists the sign-in approval factor as a way in, verified or not", () => {
+    const factors = verifiedFactors({
+      factors: [
+        verified("a", "2026-09-01T00:00:00Z", "Pixel"),
+        verified("ap", "2026-09-02T00:00:00Z", APPROVAL_FACTOR_NAME),
+        { ...verified("ap2", "2026-09-03T00:00:00Z", APPROVAL_FACTOR_NAME), status: "unverified" },
+      ],
+    });
+    expect(factors.map((f) => f.id)).toEqual(["a"]);
+  });
+
+  it("finds the VERIFIED approval factor, and only that", () => {
+    const pending = { ...verified("ap", "2026-09-01T00:00:00Z", APPROVAL_FACTOR_NAME), status: "unverified" as const };
+    expect(approvalFactorId({ factors: [pending] })).toBeNull();
+    expect(
+      approvalFactorId({ factors: [verified("ap", "2026-09-01T00:00:00Z", APPROVAL_FACTOR_NAME)] }),
+    ).toBe("ap");
+    expect(approvalFactorId({ factors: [verified("a", "2026-09-01T00:00:00Z", "approval")] })).toBeNull();
+    expect(isApprovalFactor({ friendly_name: APPROVAL_FACTOR_NAME })).toBe(true);
+    expect(isApprovalFactor({ friendly_name: `${PASSKEY_FACTOR_PREFIX}Laptop` })).toBe(false);
+  });
+
+  it("counts the approval factor as 2FA on (GoTrue asks for aal2 because of it too)", () => {
+    expect(
+      hasVerifiedFactor({ factors: [verified("ap", "2026-09-01T00:00:00Z", APPROVAL_FACTOR_NAME)] }),
+    ).toBe(true);
   });
 
   it("treats ANY verified factor type as 2FA on, like GoTrue does", () => {
@@ -131,6 +166,22 @@ describe("assuranceFrom", () => {
     expect(assuranceFrom(enrolledUser, token({ aal: "aal3" })).level).toBe("aal1");
   });
 
+  it("reads the session id, and the approval factor apart from the rest", () => {
+    const a = assuranceFrom(
+      {
+        factors: [
+          verified("f1", "2026-09-01T00:00:00Z"),
+          verified("ap", "2026-09-02T00:00:00Z", APPROVAL_FACTOR_NAME),
+        ],
+      },
+      token({ aal: "aal1", session_id: "5b0c6c4e-0000-4000-8000-000000000001" }),
+    );
+    expect(a.sessionId).toBe("5b0c6c4e-0000-4000-8000-000000000001");
+    expect(a.approvalFactorId).toBe("ap");
+    expect(a.factors.map((f) => f.id)).toEqual(["f1"]);
+    expect(assuranceFrom(enrolledUser, token({ session_id: 7 })).sessionId).toBeNull();
+  });
+
   it("FAILS CLOSED without a token: an enrolled account still owes its code", () => {
     const a = assuranceFrom(enrolledUser, null);
     expect(a.level).toBe("aal1");
@@ -162,7 +213,7 @@ describe("assuranceFrom", () => {
 });
 
 describe("needsSecondFactor", () => {
-  const base = { secondFactorAt: null, signedInAt: NOW, factors: [] };
+  const base = { secondFactorAt: null, signedInAt: NOW, factors: [], ...NO_EXTRAS };
 
   it("is true only for an enrolled account on an aal1 session", () => {
     expect(needsSecondFactor({ ...base, enrolled: true, level: "aal1" })).toBe(true);
@@ -179,6 +230,7 @@ describe("secondFactorIsFresh", () => {
     secondFactorAt,
     signedInAt: NOW - 3600,
     factors: [],
+    ...NO_EXTRAS,
     ...extra,
   });
 
@@ -203,7 +255,7 @@ describe("secondFactorIsFresh", () => {
 
 describe("stepUpFreshUntil", () => {
   it("is null without 2FA (never ask), 0 when nothing is fresh, else the window end", () => {
-    const common = { signedInAt: NOW, factors: [] };
+    const common = { signedInAt: NOW, factors: [], ...NO_EXTRAS };
     expect(stepUpFreshUntil({ ...common, enrolled: false, level: "aal1", secondFactorAt: null })).toBeNull();
     expect(stepUpFreshUntil(null)).toBeNull();
     expect(stepUpFreshUntil({ ...common, enrolled: true, level: "aal1", secondFactorAt: NOW })).toBe(0);
@@ -221,6 +273,7 @@ describe("signedInRecently", () => {
     secondFactorAt: null,
     signedInAt,
     factors: [],
+    ...NO_EXTRAS,
   });
 
   it("measures the FIRST factor's age", () => {

@@ -629,14 +629,33 @@
         "recoveryCodesRegenerated": "Vytvořeny nové záložní kódy",
         "recoveryCodeUsed": "K přihlášení použit záložní kód",
         "challengeFailed": "Při přihlášení zadán špatný kód dvoufázového ověření",
-        "lockedOut": "Přihlášení s dvoufázovým ověřením pozastaveno po opakovaných chybných kódech"
+        "lockedOut": "Přihlášení s dvoufázovým ověřením pozastaveno po opakovaných chybných kódech",
+        "signInApproved": "Přihlášení schváleno z jiného zařízení",
+        "signInDenied": "Přihlášení zamítnuto z jiného zařízení",
+        "approvalsEnabled": "Schvalování přihlášení zapnuto",
+        "approvalsDisabled": "Schvalování přihlášení vypnuto"
       }
     },
     "success": {
       "twoFactorOff": "Dvoufázové ověření je vypnuté.",
       "factorRemoved": "Aplikace „{name}“ odebrána.",
       "codesRegenerated": "Nové záložní kódy jsou připraveny. Vaše staré už nefungují.",
-      "confirmed": "Potvrzeno."
+      "confirmed": "Potvrzeno.",
+      "approvalsOn": "Schvalování přihlášení je zapnuté.",
+      "approvalsOff": "Schvalování přihlášení je vypnuté."
+    },
+    "approvals": {
+      "title": "Schválit ze zařízení, kde jste přihlášeni",
+      "description": "Když se přihlašujete na novém místě, naskenujte QR kód telefonem, kde jste již přihlášeni, a klepněte na Schválit. Praktické, když je váš přístupový klíč na jiném zařízení.",
+      "statusOn": "Zapnuto",
+      "statusOff": "Vypnuto",
+      "turnOn": "Zapnout",
+      "turnOff": "Vypnout",
+      "saving": "Ukládání…",
+      "confirmOnTitle": "Zapnout schvalování přihlášení?",
+      "confirmOnDescription": "Jakýkoli telefon nebo počítač, kde jste přihlášeni, bude moci schválit nové přihlášení k vašemu účtu.",
+      "confirmOffTitle": "Vypnout schvalování přihlášení?",
+      "confirmOffDescription": "Nová přihlášení budou vyžadovat váš přístupový klíč, ověřovací aplikaci nebo záložní kód. Zařízení, která jsou již přihlášena, přihlášena zůstanou."
     }
   },
   "team": {

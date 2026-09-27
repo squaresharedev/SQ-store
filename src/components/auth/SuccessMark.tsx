@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "motion/react";
-import { Smartphone } from "lucide-react";
+import { MonitorSmartphone, Smartphone } from "lucide-react";
 import { AnimatedFingerprint } from "@/components/auth/AnimatedFingerprint";
 import { DURATION, EASE_ENTRANCE, EASE_STANDARD, POP } from "@/components/ui/motion-tokens";
 import { cn } from "@/lib/utils";
@@ -32,18 +32,29 @@ const SIZES = {
  */
 const TIMING = { ring: 0.6, glyphAt: 0.15, glyph: 0.4, badgeAt: 0.7, ripple: 0.8 } as const;
 
+/** The glyph for each way through that is not a passkey (which has its own). */
+const GLYPHS = {
+  /** An authenticator app. */
+  app: Smartphone,
+  /** An approval from another signed-in device. */
+  device: MonitorSmartphone,
+} as const;
+
+export type SuccessKind = "passkey" | keyof typeof GLYPHS;
+
 export function SuccessMark({
   kind,
   size = "lg",
   className,
 }: {
-  kind: "passkey" | "app";
+  kind: SuccessKind;
   size?: keyof typeof SIZES;
   className?: string;
 }) {
   const reducedMotion = useReducedMotion();
   const s = SIZES[size];
   const still = Boolean(reducedMotion);
+  const Glyph = kind === "passkey" ? null : GLYPHS[kind];
 
   return (
     <div
@@ -76,7 +87,7 @@ export function SuccessMark({
         />
       </svg>
 
-      {kind === "passkey" ? (
+      {Glyph === null ? (
         // Its own choreography: the ridges draw in from the core outward.
         <AnimatedFingerprint state="success" className={s.glyph} />
       ) : (
@@ -86,7 +97,7 @@ export function SuccessMark({
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: TIMING.glyph, delay: TIMING.glyphAt, ease: EASE_ENTRANCE }}
         >
-          <Smartphone className={s.glyph} strokeWidth={1.75} />
+          <Glyph className={s.glyph} strokeWidth={1.75} />
         </motion.span>
       )}
 

@@ -5,7 +5,9 @@ import { accountHasPassword } from "@/lib/auth/has-password";
 import { RECENT_SIGN_IN_SECONDS, signedInRecently } from "@/lib/auth/assurance";
 import { remainingRecoveryCodes } from "@/lib/auth/mfa";
 import { passkeysConfigured } from "@/lib/auth/passkeys";
+import { SECURITY_SETTINGS_PATH } from "@/lib/auth/paths";
 import { getAssurance, requireUser } from "@/lib/auth/session";
+import { approvalsConfigured, approvalsEnabled } from "@/lib/auth/sign-in-approval";
 import { SECURITY_EVENT_LABELS, isSecurityEvent } from "@/lib/security/events";
 import { createClient } from "@/lib/supabase/server";
 
@@ -28,13 +30,16 @@ export default async function SecuritySettingsPage({
 }: {
   searchParams: Promise<{ recovered?: string; setup?: string }>;
 }) {
-  const user = await requireUser("/settings/security");
-  const [assurance, hasPassword, params, passkeysAvailable] = await Promise.all([
-    getAssurance(),
-    accountHasPassword(user.id),
-    searchParams,
-    passkeysConfigured(),
-  ]);
+  const user = await requireUser(SECURITY_SETTINGS_PATH);
+  const [assurance, hasPassword, params, passkeysAvailable, approvalReady, approvalOn] =
+    await Promise.all([
+      getAssurance(),
+      accountHasPassword(user.id),
+      searchParams,
+      passkeysConfigured(),
+      approvalsConfigured(),
+      approvalsEnabled(user.id),
+    ]);
   const enrolled = assurance?.enrolled ?? false;
 
   const supabase = await createClient();
@@ -59,6 +64,8 @@ export default async function SecuritySettingsPage({
         type,
       }))}
       passkeysAvailable={passkeysAvailable}
+      // Null (row hidden) where approval cannot work, or its state can't be read.
+      approvalsEnabled={approvalReady ? approvalOn : null}
       hasPassword={hasPassword}
       // A sign-in in the last few minutes is proof on its own: setup then asks
       // for no password (and a Google-only account need not sign in again).

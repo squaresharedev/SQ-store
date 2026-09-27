@@ -13,6 +13,7 @@ import { useActionStateToast, useResolveMessage } from "@/components/ui/ActionEr
 import { helpTextClass, infoTextClass } from "@/components/ui/control-styles";
 import { SettingsCard } from "@/components/settings/SettingsCard";
 import { StepUpField } from "@/components/auth/StepUp";
+import { SignInApprovalRow } from "@/components/settings/security/SignInApprovalRow";
 import { TwoFactorSetupModal } from "@/components/settings/security/TwoFactorSetupModal";
 import type { SecurityFactor } from "@/components/settings/security/SecuritySection";
 import type { Locale } from "@/i18n/locales";
@@ -52,6 +53,7 @@ export function TwoFactorCard({
   signedInRecently,
   signsInWithGoogle,
   passkeysAvailable,
+  approvalsEnabled = null,
   openSetup,
 }: {
   enrolled: boolean;
@@ -60,6 +62,8 @@ export function TwoFactorCard({
   signedInRecently: boolean;
   signsInWithGoogle: boolean;
   passkeysAvailable: boolean;
+  /** Sign-in approval on or off; null (the default) when it is not available here. */
+  approvalsEnabled?: boolean | null;
   openSetup: boolean;
 }) {
   const t = useTranslations("Settings.security.twoFactor");
@@ -152,6 +156,11 @@ export function TwoFactorCard({
                 {t("addAnother")}
               </Button>
             </div>
+            {approvalsEnabled !== null && (
+              <div className="border-t border-border pt-4">
+                <SignInApprovalRow enabled={approvalsEnabled} />
+              </div>
+            )}
           </>
         ) : (
           <>

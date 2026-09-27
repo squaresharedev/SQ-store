@@ -124,6 +124,18 @@
       "recoveryCodesRegenerated": {
         "title": "De nouveaux codes de récupération ont été générés",
         "body": "Vos anciens codes de récupération ne fonctionnent plus. Si ce n’était pas vous, changez votre mot de passe maintenant."
+      },
+      "signInApproved": {
+        "title": "Une connexion a été approuvée depuis un autre appareil",
+        "body": "Une nouvelle connexion à votre compte a été approuvée depuis un appareil sur lequel vous êtes connecté. Si ce n'était pas vous, changez votre mot de passe maintenant et désactivez l'approbation des connexions dans Paramètres › Sécurité."
+      },
+      "signInDenied": {
+        "title": "Vous avez refusé une connexion à votre compte",
+        "body": "Quelqu'un a saisi votre mot de passe correctement et a demandé une approbation, qui a été refusée. Si ce n'était pas vous, quelqu'un d'autre connaît votre mot de passe : changez-le maintenant."
+      },
+      "approvalsEnabled": {
+        "title": "L'approbation des connexions est activée",
+        "body": "Les appareils sur lesquels vous êtes connecté peuvent désormais approuver les nouvelles connexions à votre compte. Si ce n'était pas vous, changez votre mot de passe maintenant."
       }
     }
   }

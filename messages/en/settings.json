@@ -629,14 +629,33 @@
         "recoveryCodesRegenerated": "New recovery codes generated",
         "recoveryCodeUsed": "Recovery code used to sign in",
         "challengeFailed": "Wrong two-factor code entered at sign-in",
-        "lockedOut": "Two-factor sign-in paused after repeated wrong codes"
+        "lockedOut": "Two-factor sign-in paused after repeated wrong codes",
+        "signInApproved": "Sign-in approved from another device",
+        "signInDenied": "Sign-in denied from another device",
+        "approvalsEnabled": "Sign-in approval turned on",
+        "approvalsDisabled": "Sign-in approval turned off"
       }
     },
     "success": {
       "twoFactorOff": "Two-factor authentication is off.",
       "factorRemoved": "Removed \"{name}\".",
       "codesRegenerated": "New recovery codes ready. Your old ones no longer work.",
-      "confirmed": "Confirmed."
+      "confirmed": "Confirmed.",
+      "approvalsOn": "Sign-in approval is on.",
+      "approvalsOff": "Sign-in approval is off."
+    },
+    "approvals": {
+      "title": "Approve from a signed-in device",
+      "description": "When you sign in somewhere new, scan the QR code with a phone where you're already signed in and tap Approve. Handy when your passkey is on another device.",
+      "statusOn": "On",
+      "statusOff": "Off",
+      "turnOn": "Turn on",
+      "turnOff": "Turn off",
+      "saving": "Saving…",
+      "confirmOnTitle": "Turn on sign-in approval?",
+      "confirmOnDescription": "Any phone or computer where you're signed in will be able to approve a new sign-in to your account.",
+      "confirmOffTitle": "Turn off sign-in approval?",
+      "confirmOffDescription": "New sign-ins will need your passkey, your authenticator app or a recovery code. Devices already signed in stay signed in."
     }
   },
   "team": {

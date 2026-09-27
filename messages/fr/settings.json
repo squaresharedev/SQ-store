@@ -629,14 +629,33 @@
         "recoveryCodesRegenerated": "Nouveaux codes de récupération générés",
         "recoveryCodeUsed": "Code de récupération utilisé pour se connecter",
         "challengeFailed": "Code à deux facteurs erroné saisi à la connexion",
-        "lockedOut": "Connexion à deux facteurs suspendue après plusieurs codes erronés"
+        "lockedOut": "Connexion à deux facteurs suspendue après plusieurs codes erronés",
+        "signInApproved": "Connexion approuvée depuis un autre appareil",
+        "signInDenied": "Connexion refusée depuis un autre appareil",
+        "approvalsEnabled": "Approbation des connexions activée",
+        "approvalsDisabled": "Approbation des connexions désactivée"
       }
     },
     "success": {
       "twoFactorOff": "L’authentification à deux facteurs est désactivée.",
       "factorRemoved": "« {name} » supprimée.",
       "codesRegenerated": "Nouveaux codes de récupération prêts. Vos anciens codes ne fonctionnent plus.",
-      "confirmed": "Confirmé."
+      "confirmed": "Confirmé.",
+      "approvalsOn": "L'approbation des connexions est activée.",
+      "approvalsOff": "L'approbation des connexions est désactivée."
+    },
+    "approvals": {
+      "title": "Approuver depuis un appareil connecté",
+      "description": "Lorsque vous vous connectez depuis un nouvel appareil, scannez le code QR avec un téléphone sur lequel vous êtes déjà connecté et appuyez sur Approuver. Pratique lorsque votre clé d'accès est sur un autre appareil.",
+      "statusOn": "Activée",
+      "statusOff": "Désactivée",
+      "turnOn": "Activer",
+      "turnOff": "Désactiver",
+      "saving": "Enregistrement…",
+      "confirmOnTitle": "Activer l'approbation des connexions ?",
+      "confirmOnDescription": "Tout téléphone ou ordinateur sur lequel vous êtes connecté pourra approuver une nouvelle connexion à votre compte.",
+      "confirmOffTitle": "Désactiver l'approbation des connexions ?",
+      "confirmOffDescription": "Les nouvelles connexions nécessiteront votre clé d'accès, votre application d'authentification ou un code de récupération. Les appareils déjà connectés restent connectés."
     }
   },
   "team": {

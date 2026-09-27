@@ -258,10 +258,16 @@ export async function registrationOptions(input: {
   /** Credentials already on the account: the browser refuses to make a
    *  duplicate on an authenticator that holds one of these. */
   excludeCredentialIds: string[];
+  /**
+   * Make it on THIS device (Windows Hello, Touch ID, the phone's own lock),
+   * not on a phone reached through a QR code. For "create a passkey on this
+   * device" at the end of a sign-in that had to go through another device.
+   */
+  thisDevice?: boolean;
 }): Promise<PublicKeyCredentialCreationOptionsJSON | null> {
   const rp = relyingParty();
   if (!rp) return null;
-  const { user, factorId, secret, name, excludeCredentialIds } = input;
+  const { user, factorId, secret, name, excludeCredentialIds, thisDevice } = input;
   const options = await generateRegistrationOptions({
     rpName: RP_NAME,
     rpID: rp.rpID,
@@ -279,7 +285,10 @@ export async function registrationOptions(input: {
       // Face ID, a fingerprint or the device PIN: possession alone is not
       // enough, the person holding the phone must be able to unlock it.
       userVerification: "required",
+      ...(thisDevice ? { authenticatorAttachment: "platform" as const } : {}),
     },
+    // The browser's hint to go straight to this device's own authenticator.
+    ...(thisDevice ? { preferredAuthenticatorType: "localDevice" as const } : {}),
   });
   const written = await writeSlip("register", user.id, {
     challenge: options.challenge,

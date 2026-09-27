@@ -12,17 +12,6 @@ import { msg } from "@/i18n/types";
 // authenticator app, lib/auth/passkey-actions.ts for a passkey), kept in one
 // place so the two kinds can never drift apart on who may enrol.
 
-/** Refuse any form field the action does not expect, by name. */
-export function unknownField(formData: FormData, allowed: readonly string[]): ActionState | null {
-  for (const key of formData.keys()) {
-    if (key.startsWith("$ACTION")) continue;
-    if (!allowed.includes(key)) {
-      return failed(invalidInput(msg("Errors.form.unexpectedField", { field: key })));
-    }
-  }
-  return null;
-}
-
 /** Does this account sign in with Google? Read from GoTrue's own record of
  *  the account's identities, never from anything the form sends. */
 export function signsInWithGoogle(user: {

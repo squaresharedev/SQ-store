@@ -1,5 +1,6 @@
 import {
   browserSupportsWebAuthn,
+  platformAuthenticatorIsAvailable,
   startAuthentication,
   startRegistration,
   type PublicKeyCredentialCreationOptionsJSON,
@@ -33,6 +34,20 @@ export type CeremonyOutcome =
 export function passkeysSupported(): boolean {
   try {
     return browserSupportsWebAuthn();
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Whether THIS device can hold a passkey of its own (Windows Hello, Touch ID,
+ * the phone's screen lock), rather than only reach one on a phone by QR code.
+ * False on any doubt: it only decides whether to offer one.
+ */
+export async function devicePasskeysAvailable(): Promise<boolean> {
+  if (!passkeysSupported()) return false;
+  try {
+    return await platformAuthenticatorIsAvailable();
   } catch {
     return false;
   }

@@ -124,6 +124,18 @@
       "recoveryCodesRegenerated": {
         "title": "Se han generado códigos de recuperación nuevos",
         "body": "Tus códigos de recuperación anteriores ya no funcionan. Si no has sido tú, cambia tu contraseña ahora."
+      },
+      "signInApproved": {
+        "title": "Un inicio de sesión fue aprobado desde otro dispositivo",
+        "body": "Un nuevo inicio de sesión en tu cuenta fue aprobado desde un dispositivo donde tienes sesión iniciada. Si no has sido tú, cambia tu contraseña ahora y desactiva la aprobación de inicio de sesión en Configuración › Seguridad."
+      },
+      "signInDenied": {
+        "title": "Denegaste un inicio de sesión en tu cuenta",
+        "body": "Alguien introdujo tu contraseña correctamente y pidió aprobación, y fue denegada. Si no eras tú, alguien más conoce tu contraseña: cámbiala ahora."
+      },
+      "approvalsEnabled": {
+        "title": "La aprobación de inicio de sesión está activada",
+        "body": "Los dispositivos donde tienes sesión iniciada ya pueden aprobar nuevos inicios de sesión en tu cuenta. Si no has sido tú, cambia tu contraseña ahora."
       }
     }
   }

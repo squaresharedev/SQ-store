@@ -4,7 +4,7 @@ import * as React from "react";
 import { useActionState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Fingerprint, KeyRound, Smartphone } from "lucide-react";
+import { Fingerprint, KeyRound, MonitorSmartphone, Smartphone } from "lucide-react";
 import { useReducedMotion } from "motion/react";
 import { useTranslations } from "next-intl";
 import type { PublicKeyCredentialRequestOptionsJSON } from "@simplewebauthn/browser";
@@ -15,9 +15,11 @@ import { Spinner } from "@/components/ui/spinner";
 import { useResolveMessage } from "@/components/ui/ActionErrorNotice";
 import { helpTextClass, infoTextClass, quietLinkClass } from "@/components/ui/control-styles";
 import { AnimatedFingerprint } from "@/components/auth/AnimatedFingerprint";
+import { ApproveFromDevice } from "@/components/auth/ApproveFromDevice";
 import { FactorPicker, type FactorChoice } from "@/components/auth/FactorPicker";
 import { OneTimeCodeInput } from "@/components/auth/OneTimeCodeInput";
-import { SuccessMark } from "@/components/auth/SuccessMark";
+import { PasskeyHereOffer, usePasskeyHereDismissed } from "@/components/auth/PasskeyHereOffer";
+import { SuccessMark, type SuccessKind } from "@/components/auth/SuccessMark";
 import { signOut } from "@/lib/auth/actions";
 import {
   passkeySignInOptions,
@@ -26,62 +28,133 @@ import {
   verifyTwoFactorSignIn,
   type ChallengeState,
 } from "@/lib/auth/mfa-actions";
-import { assertPasskey, passkeysSupported } from "@/lib/auth/webauthn-client";
+import type { DeviceLabel } from "@/lib/auth/device-label";
+import { assertPasskey, devicePasskeysAvailable, passkeysSupported } from "@/lib/auth/webauthn-client";
 import type { ActionError } from "@/lib/errors";
 
 const INITIAL: ChallengeState = {};
 
-type Mode = "passkey" | "code" | "recovery";
+type Mode = "passkey" | "code" | "approve" | "recovery";
+
+const UNKNOWN_DEVICE: DeviceLabel = { browser: null, os: null };
+
+/** How each way through shows its moment of success. */
+const SUCCESS_KIND: Record<Exclude<Mode, "recovery">, SuccessKind> = {
+  passkey: "passkey",
+  code: "app",
+  approve: "device",
+};
 
 const SWITCH_CLASS =
   "inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 font-inter text-sm text-muted-foreground transition-colors duration-base ease-standard hover:bg-accent hover:text-foreground motion-reduce:transition-none";
 
 /**
- * The sign-in challenge: a passkey, a code from the authenticator app, or
- * (for someone whose phone is gone) one of their recovery codes. One form on
- * screen at a time, each with its own action, so nothing sent for one check
- * can ever reach another. A passkey comes first whenever the account has one.
+ * The sign-in challenge: a passkey, an approval from a phone (or computer)
+ * where the person is already signed in, a code from the authenticator app,
+ * or (for someone whose phone is gone) one of their recovery codes. One form
+ * on screen at a time, each with its own action, so nothing sent for one
+ * check can ever reach another. A passkey comes first whenever the account
+ * has one.
  *
  * Once through, the page shows a moment of success and then goes on, whether
  * it learned that from the form's action or from the server (`through`: the
  * render that follows a successful action is a signed-in one, because the
  * action set the upgraded session's cookies). Either way the destination is
- * a path the server sanitised.
+ * a path the server sanitised. A sign-in that had to go through another
+ * device first offers a passkey on this one (PasskeyHereOffer).
  */
 export function TwoFactorChallenge({
   next,
   email,
   factors,
   through = false,
+  approval = false,
+  device = UNKNOWN_DEVICE,
+  passkeysAvailable = false,
 }: {
   next: string;
   email: string;
   factors: FactorChoice[];
   /** This session has already passed its second factor. */
   through?: boolean;
+  /** "Approve from your phone" is on for this account and works here. */
+  approval?: boolean;
+  /** This device, as the server read it: names a passkey made here. */
+  device?: DeviceLabel;
+  /** Passkeys are configured in this deployment. */
+  passkeysAvailable?: boolean;
 }) {
   const t = useTranslations("Auth.twoFactor");
   const apps = factors.filter((factor) => factor.type !== "passkey");
   const hasPasskey = factors.some((factor) => factor.type === "passkey");
-  const [mode, setMode] = React.useState<Mode>(hasPasskey ? "passkey" : "code");
-  const [verifiedNext, setVerifiedNext] = React.useState<string | null>(null);
-  const onVerified = React.useCallback((to: string) => setVerifiedNext(to), []);
-  const destination = verifiedNext ?? (through ? next : null);
+  const [mode, setMode] = React.useState<Mode>(
+    hasPasskey ? "passkey" : apps.length > 0 ? "code" : approval ? "approve" : "recovery",
+  );
+
+  // Stable per kind: the approval wait keeps polling across renders.
+  const [verified, setVerified] = React.useState<{ next: string; kind: SuccessKind } | null>(null);
+  const onPasskey = React.useCallback((to: string) => setVerified({ next: to, kind: "passkey" }), []);
+  const onCode = React.useCallback((to: string) => setVerified({ next: to, kind: "app" }), []);
+  const onApproved = React.useCallback((to: string) => setVerified({ next: to, kind: "device" }), []);
+
+  // Can this device hold a passkey of its own? Asked up front, so the answer
+  // is ready by the time the sign-in succeeds.
+  const [dismissed] = usePasskeyHereDismissed();
+  const mayOffer = passkeysAvailable && !dismissed;
+  const [deviceCanHold, setDeviceCanHold] = React.useState<boolean | null>(null);
+  React.useEffect(() => {
+    if (!mayOffer) return;
+    let live = true;
+    void devicePasskeysAvailable().then((available) => {
+      if (live) setDeviceCanHold(available);
+    });
+    return () => {
+      live = false;
+    };
+  }, [mayOffer]);
+  const [offerAnswered, setOfferAnswered] = React.useState(false);
+  const finishOffer = React.useCallback(() => setOfferAnswered(true), []);
+  const offerKind = verified && verified.kind !== "passkey" ? verified.kind : null;
+  const offering = Boolean(offerKind && mayOffer && !offerAnswered);
+  const showOffer = offering && deviceCanHold === true;
+  // Still finding out whether to offer: hold on the success moment.
+  const holding = offering && deviceCanHold === null;
+
+  const destination = showOffer || holding ? null : (verified?.next ?? (through ? next : null));
   useContinueTo(destination);
 
-  if (destination) {
+  if (showOffer && offerKind) {
     return (
       <div className="flex flex-col gap-5">
         <h1 className="text-xl font-semibold tracking-tight text-foreground">{t("heading")}</h1>
-        <SigningIn kind={mode === "passkey" ? "passkey" : "app"} />
+        <PasskeyHereOffer
+          kind={offerKind}
+          device={device}
+          existingNames={factors.map((factor) => factor.name)}
+          onDone={finishOffer}
+        />
       </div>
     );
   }
+
+  if (destination || holding) {
+    return (
+      <div className="flex flex-col gap-5">
+        <h1 className="text-xl font-semibold tracking-tight text-foreground">{t("heading")}</h1>
+        <SigningIn kind={verified?.kind ?? (mode === "recovery" ? "app" : SUCCESS_KIND[mode])} />
+      </div>
+    );
+  }
+
+  const toApproval = approval ? () => setMode("approve") : undefined;
 
   // The ways out of the current one, in the order a person would reach for them.
   const switches: { to: Mode; label: string; icon: React.ReactNode }[] = [];
   if (mode !== "passkey" && hasPasskey) {
     switches.push({ to: "passkey", label: t("usePasskey"), icon: <Fingerprint aria-hidden className="size-4" /> });
+  }
+  if (mode !== "approve" && approval) {
+    switches.push({ to: "approve", label: t("useApproval"), icon: <MonitorSmartphone aria-hidden className="size-4" /> });
   }
   if (mode !== "code" && apps.length > 0) {
     switches.push({ to: "code", label: t("useAuthenticatorApp"), icon: <Smartphone aria-hidden className="size-4" /> });
@@ -93,9 +166,11 @@ export function TwoFactorChallenge({
   return (
     <div className="flex flex-col gap-5">
       {mode === "passkey" ? (
-        <PasskeyForm next={next} email={email} onVerified={onVerified} />
+        <PasskeyForm next={next} email={email} onVerified={onPasskey} onUseApproval={toApproval} />
       ) : mode === "code" ? (
-        <CodeForm next={next} email={email} factors={apps} onVerified={onVerified} />
+        <CodeForm next={next} email={email} factors={apps} onVerified={onCode} />
+      ) : mode === "approve" ? (
+        <ApproveFromDevice next={next} email={email} onVerified={onApproved} />
       ) : (
         <RecoveryForm next={next} />
       )}
@@ -182,7 +257,7 @@ function useReportVerified(state: ChallengeState, onVerified: (next: string) => 
 }
 
 /** The moment between "that worked" and the page it leads to. */
-function SigningIn({ kind }: { kind: "passkey" | "app" }) {
+function SigningIn({ kind }: { kind: SuccessKind }) {
   const t = useTranslations("Auth.twoFactor");
   return (
     <div className="flex flex-col items-center gap-4 py-4 text-center" data-two-factor-verified>
@@ -206,10 +281,13 @@ function PasskeyForm({
   next,
   email,
   onVerified,
+  onUseApproval,
 }: {
   next: string;
   email: string;
   onVerified: (next: string) => void;
+  /** Switch to "Approve from your phone", when the account can. */
+  onUseApproval?: () => void;
 }) {
   const t = useTranslations("Auth.twoFactor");
   const tp = useTranslations("Auth.twoFactor.passkey");
@@ -326,6 +404,19 @@ function PasskeyForm({
         </p>
       )}
       <Status state={state} next={next} />
+
+      {/* The case this is for: the computer offered its own "use a phone" QR
+          code and the phone said it has no passkey, because the passkey lives
+          on another device. After any miss, the way that needs no passkey. */}
+      {onUseApproval && failures > 0 && (
+        <div className="flex flex-col gap-3 border border-border p-4" data-passkey-elsewhere>
+          <p className={helpTextClass}>{tp("elsewhere")}</p>
+          <Button type="button" variant="secondary" onClick={onUseApproval}>
+            <MonitorSmartphone aria-hidden className="size-4" />
+            {tp("approveInstead")}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

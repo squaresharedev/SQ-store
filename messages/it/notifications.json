@@ -124,6 +124,18 @@
       "recoveryCodesRegenerated": {
         "title": "Sono stati generati nuovi codici di recupero",
         "body": "I tuoi vecchi codici di recupero non funzionano più. Se non eri tu, cambia subito la password."
+      },
+      "signInApproved": {
+        "title": "Un accesso è stato approvato da un altro dispositivo",
+        "body": "Un nuovo accesso al tuo account è stato approvato da un dispositivo in cui hai già effettuato l'accesso. Se non eri tu, cambia subito la password e disattiva l'approvazione degli accessi in Impostazioni › Sicurezza."
+      },
+      "signInDenied": {
+        "title": "Hai negato un accesso al tuo account",
+        "body": "Qualcuno ha inserito correttamente la tua password e ha chiesto un'approvazione, che è stata negata. Se non eri tu a tentare, qualcun altro conosce la tua password: cambiala subito."
+      },
+      "approvalsEnabled": {
+        "title": "L'approvazione degli accessi è attiva",
+        "body": "I dispositivi in cui hai già effettuato l'accesso possono ora approvare nuovi accessi al tuo account. Se non eri tu, cambia subito la password."
       }
     }
   }

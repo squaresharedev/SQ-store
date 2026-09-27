@@ -544,6 +544,13 @@
     "unavailable": "As chaves de acesso não estão disponíveis de momento. Utilize antes uma aplicação de autenticação.",
     "createFailed": "Não foi possível verificar essa chave de acesso. Tente criá-la novamente.",
     "signInFailed": "Essa chave de acesso não funcionou para esta conta. Tente novamente ou utilize outra forma de iniciar sessão.",
-    "expired": "Demorou demasiado tempo. Tente novamente com a sua chave de acesso."
+    "expired": "Demorou demasiado tempo. Tente novamente com a sua chave de acesso.",
+    "offerExpired": "Passou demasiado tempo desde que iniciou sessão para adicionar uma chave de acesso desta forma. Adicione uma em Definições › Segurança."
+  },
+  "approval": {
+    "unavailable": "A aprovação a partir de outro dispositivo não está disponível neste momento. Utilize outra forma de iniciar sessão.",
+    "rateLimited": "Demasiados códigos num curto espaço de tempo. Aguarde alguns minutos e tente novamente.",
+    "expired": "Este pedido de início de sessão expirou ou já foi respondido. Mostre um novo código no dispositivo onde está a iniciar sessão.",
+    "otherAccount": "Este pedido é para uma conta Square Share diferente da que tem sessão iniciada aqui."
   }
 }

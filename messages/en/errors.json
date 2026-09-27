@@ -544,6 +544,13 @@
     "unavailable": "Passkeys aren't available right now. Use an authenticator app instead.",
     "createFailed": "We couldn't check that passkey. Try creating it again.",
     "signInFailed": "That passkey didn't work for this account. Try again, or use another way to sign in.",
-    "expired": "That took too long. Try your passkey again."
+    "expired": "That took too long. Try your passkey again.",
+    "offerExpired": "It's been too long since you signed in to add a passkey this way. Add one in Settings › Security instead."
+  },
+  "approval": {
+    "unavailable": "Approving from another device isn't available right now. Use another way to sign in.",
+    "rateLimited": "Too many codes in a short time. Wait a few minutes, then try again.",
+    "expired": "This sign-in request has expired or was already answered. Show a new code on the device you're signing in on.",
+    "otherAccount": "This request is for a different Square Share account than the one signed in here."
   }
 }

@@ -124,6 +124,18 @@
       "recoveryCodesRegenerated": {
         "title": "Er zijn nieuwe herstelcodes gemaakt",
         "body": "Je oude herstelcodes werken niet meer. Was jij dit niet? Wijzig dan nu je wachtwoord."
+      },
+      "signInApproved": {
+        "title": "Een inlogpoging is goedgekeurd vanaf een ander apparaat",
+        "body": "Een nieuwe inlogpoging op je account is goedgekeurd vanaf een apparaat waarop je bent ingelogd. Was jij dit niet? Wijzig dan nu je wachtwoord en zet inloggoedkeuring uit via Instellingen › Beveiliging."
+      },
+      "signInDenied": {
+        "title": "Je hebt een inlogpoging op je account geweigerd",
+        "body": "Iemand heeft je wachtwoord goed ingevuld en om goedkeuring gevraagd, en die is geweigerd. Als jij dat niet was, kent iemand anders je wachtwoord: wijzig het nu."
+      },
+      "approvalsEnabled": {
+        "title": "Inloggoedkeuring staat aan",
+        "body": "Apparaten waarop je bent ingelogd, kunnen nu nieuwe inlogpogingen op je account goedkeuren. Was jij dit niet? Wijzig dan nu je wachtwoord."
       }
     }
   }

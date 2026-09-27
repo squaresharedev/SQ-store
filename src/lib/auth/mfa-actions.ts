@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import type {
   AuthenticationResponseJSON,
@@ -10,7 +11,8 @@ import type {
   RegistrationResponseJSON,
 } from "@simplewebauthn/server";
 import { getSessionState, revokeOtherSessions } from "@/lib/auth/session";
-import { proveSetupOwnership, readyToEnroll, unknownField } from "@/lib/auth/setup-guards";
+import { proveSetupOwnership, readyToEnroll } from "@/lib/auth/setup-guards";
+import { unknownField } from "@/lib/validation/form-fields";
 import { PASSKEY_FACTOR_PREFIX } from "@/lib/auth/assurance";
 import {
   authenticationOptions,
@@ -41,9 +43,13 @@ import {
 } from "@/lib/auth/mfa";
 import { recordSecurityEvent } from "@/lib/security/events";
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
-import { safeInternalPath } from "@/lib/utils/safe-path";
-import { readLocaleCookieValue, writeLocaleCookie } from "@/i18n/cookie";
-import { localeForSignedInBrowser } from "@/i18n/sign-in";
+import { afterChallenge, syncAccountLocale } from "@/lib/auth/challenge";
+import {
+  JUST_VERIFIED_SECONDS,
+  secondFactorIsFresh,
+  type SessionAssurance,
+} from "@/lib/auth/assurance";
+import { removeApprovalFactor } from "@/lib/auth/sign-in-approval";
 import {
   RECOVERY_CODE_INPUT_MAX,
   factorIdSchema,
@@ -100,38 +106,6 @@ const SETUP_EXPIRED: ActionState = failed(invalidInput(msg("Errors.mfa.setupExpi
 /** A code that did not parse as six digits, in the schema's own words. */
 function malformedCode(error: z.ZodError): ActionState {
   return failed(invalidInput(firstIssue(error, msg("Errors.mfa.enterCode"))));
-}
-
-/**
- * Copy the account's saved language onto a browser that has none, once the
- * challenge completes a sign-in. Best-effort: never fails the sign-in.
- */
-async function syncAccountLocale(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  userId: string,
-): Promise<void> {
-  try {
-    const accountLocale = await localeForSignedInBrowser(
-      supabase,
-      userId,
-      await readLocaleCookieValue(),
-    );
-    if (accountLocale) await writeLocaleCookie(accountLocale);
-  } catch (err) {
-    console.warn(
-      "[locale] challenge sync failed",
-      err instanceof Error ? err.message : String(err),
-    );
-  }
-}
-
-/**
- * Where to go after the challenge. Never back to a sign-in page (a loop), and
- * never off-site (safeInternalPath resolves the value the way a browser would).
- */
-function afterChallenge(raw: FormDataEntryValue | null): string {
-  const next = safeInternalPath(typeof raw === "string" ? raw : null);
-  return next.startsWith("/login") ? "/" : next;
 }
 
 // ---------------------------------------------------------------------------
@@ -532,12 +506,24 @@ export async function beginPasskeySetup(
   const notReady = await readyToEnroll(user.id, assurance);
   if (notReady) return notReady;
 
+  return enrolPasskey(user, name.data, { thisDevice: false });
+}
+
+/**
+ * A pending passkey factor at GoTrue and the options the browser creates the
+ * passkey from. Callers have already proven it is the owner.
+ */
+async function enrolPasskey(
+  user: Pick<User, "id" | "email" | "factors">,
+  name: string,
+  { thisDevice }: { thisDevice: boolean },
+): Promise<BeginPasskeySetupState> {
   const supabase = await createClient();
   await discardPendingFactors(supabase, user.factors);
 
   const { data, error } = await supabase.auth.mfa.enroll({
     factorType: "totp",
-    friendlyName: `${PASSKEY_FACTOR_PREFIX}${name.data}`,
+    friendlyName: `${PASSKEY_FACTOR_PREFIX}${name}`,
     issuer: "Square Share",
   });
   if (error || !data || data.type !== "totp" || !data.totp.secret) {
@@ -553,8 +539,9 @@ export async function beginPasskeySetup(
     user,
     factorId: data.id,
     secret: data.totp.secret,
-    name: name.data,
+    name,
     excludeCredentialIds: await credentialIdsFor(user.id),
+    thisDevice,
   });
   if (!options) {
     await supabase.auth.mfa.unenroll({ factorId: data.id }).catch(() => undefined);
@@ -575,16 +562,89 @@ export async function confirmPasskeySetup(
 ): Promise<ConfirmSetupState> {
   const rejected = unknownField(formData, ["credential"]);
   if (rejected) return rejected;
+  const state = await getSessionState();
+  if (state.kind !== "signed_in") return SESSION_EXPIRED;
+  if (!(await takeSecondFactorAttempt(state.user.id, state.user.email, "setup"))) {
+    return failed(SECOND_FACTOR_ERRORS.rate_limited);
+  }
+  return finishPasskeySetup(state, formData, { signOutOthers: true });
+}
+
+/**
+ * "Create a passkey on this device", offered at the end of a sign-in that had
+ * to go through ANOTHER device (an approval from the phone, or a code from an
+ * app), so that next time this device is one tap.
+ *
+ * THE PROOF IS THE CHALLENGE JUST PASSED. Adding a factor to an account with
+ * 2FA normally takes a second proof in the same request (proveSetupOwnership):
+ * a session found or stolen later must not be able to plant its own passkey.
+ * Here the offer sits on the challenge's own success screen, so the proof is
+ * the second factor this session passed moments ago (JUST_VERIFIED_SECONDS,
+ * read from the token's amr claim, which the browser cannot forge). A device
+ * that got in through another device usually has nothing else to prove with,
+ * which is exactly why it is being offered a passkey. The owner is alerted as
+ * for any added factor.
+ */
+export async function beginPasskeyHere(
+  _prev: BeginPasskeySetupState,
+  formData: FormData,
+): Promise<BeginPasskeySetupState> {
+  const rejected = unknownField(formData, ["name"]);
+  if (rejected) return rejected;
 
   const state = await getSessionState();
   if (state.kind !== "signed_in") return SESSION_EXPIRED;
   const { user, assurance } = state;
+  if (!assurance.enrolled || !secondFactorIsFresh(assurance, JUST_VERIFIED_SECONDS)) {
+    return failed(invalidInput(msg("Errors.passkey.offerExpired")));
+  }
+  if (!(await passkeysConfigured())) return PASSKEYS_UNAVAILABLE;
 
-  const response = parseCredential<RegistrationResponseJSON>(formData.get("credential"));
-  if (!response) return failed(invalidInput(msg("Errors.passkey.createFailed")));
-  if (!(await takeSecondFactorAttempt(user.id, user.email, "setup"))) {
+  const name = factorNameSchema.safeParse(String(formData.get("name") ?? ""));
+  if (!name.success) {
+    return failed(invalidInput(firstIssue(name.error, msg("Errors.mfa.factorNameRequired"))));
+  }
+  if (assurance.factors.some((f) => f.name.toLowerCase() === name.data.toLowerCase())) {
+    return FACTOR_NAME_TAKEN;
+  }
+  const notReady = await readyToEnroll(user.id, assurance);
+  if (notReady) return notReady;
+
+  return enrolPasskey(user, name.data, { thisDevice: true });
+}
+
+/**
+ * Step 2 of beginPasskeyHere. Unlike Settings, the account's other sessions
+ * stay signed in: the phone that approved this sign-in a moment ago is the
+ * person's own, and signing it out for adding a passkey would take away the
+ * very device they approve the next sign-in with.
+ */
+export async function confirmPasskeyHere(
+  _prev: ConfirmSetupState,
+  formData: FormData,
+): Promise<ConfirmSetupState> {
+  const rejected = unknownField(formData, ["credential"]);
+  if (rejected) return rejected;
+  const state = await getSessionState();
+  if (state.kind !== "signed_in") return SESSION_EXPIRED;
+  if (!(await takeSecondFactorAttempt(state.user.id, state.user.email, "setup"))) {
     return failed(SECOND_FACTOR_ERRORS.rate_limited);
   }
+  return finishPasskeySetup(state, formData, { signOutOthers: false });
+}
+
+/**
+ * The shared rest of both passkey confirms, for a caller that has already
+ * checked the fields and the session and spent a second-factor attempt (each
+ * does so in its own body, where the action registry test can see it).
+ */
+async function finishPasskeySetup(
+  { user, assurance }: { user: User; assurance: SessionAssurance },
+  formData: FormData,
+  { signOutOthers }: { signOutOthers: boolean },
+): Promise<ConfirmSetupState> {
+  const response = parseCredential<RegistrationResponseJSON>(formData.get("credential"));
+  if (!response) return failed(invalidInput(msg("Errors.passkey.createFailed")));
 
   const result = await verifyRegistration({ userId: user.id, response });
   if (!result.ok) {
@@ -613,7 +673,7 @@ export async function confirmPasskeySetup(
   }
 
   // From here exactly as for an authenticator app (confirmTwoFactorSetup).
-  await revokeOtherSessions(supabase);
+  if (signOutOthers) await revokeOtherSessions(supabase);
 
   let codes: string[] | null | undefined;
   if (firstFactor) {
@@ -766,6 +826,9 @@ export async function removeAuthenticator(
 
   const wasLast = assurance.factors.length === 1;
   if (wasLast) {
+    // Sign-in approval is never a way in on its own: with no passkey or app
+    // left, 2FA is off, and its factor goes too.
+    await removeApprovalFactor(user.id);
     await clearRecoveryCodes(user.id);
     await alertTwoFactorChange(user, "mfa.disabled", {
       title: { key: "Notifications.messages.security.twoFactorDisabled.title" },

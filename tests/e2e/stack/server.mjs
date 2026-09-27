@@ -571,11 +571,27 @@ async function handleAuth(req, res, url) {
         `update auth.mfa_factors set status = 'verified', updated_at = now() where id = $1`,
         [factor.id],
       );
-      // As GoTrue does: verifying a NEW factor signs out every other session.
-      revokeSessions(auth.claims.sub, { except: auth.sessionId });
     }
     auth.session.aal = "aal2";
     auth.session.amr.set("totp", nowSeconds());
+    // As GoTrue does on EVERY verify, new factor or not (verifyTOTPFactor,
+    // checked in its source): every OTHER aal1 session of the account is
+    // deleted (InvalidateSessionsWithAALLessThan) and so is every unverified
+    // TOTP factor (DeleteUnverifiedFactors). aal2 sessions survive: "other
+    // devices are signed out when 2FA turns on" is true because they are all
+    // aal1 at that moment, and the app revokes the rest itself
+    // (revokeOtherSessions after setup). Sign-in approval is built on exactly
+    // this difference (the approving phone is aal2 and must survive the
+    // waiting computer verifying the approval factor), so the mock must match.
+    for (const [id, other] of sessions) {
+      if (other.userId === auth.claims.sub && id !== auth.sessionId && other.aal !== "aal2") {
+        other.revoked = true;
+      }
+    }
+    await pool.query(
+      `delete from auth.mfa_factors where user_id = $1 and status = 'unverified' and factor_type = 'totp'`,
+      [auth.claims.sub],
+    );
     return json(res, 200, await sessionResponse(auth.sessionId));
   }
 

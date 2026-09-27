@@ -544,6 +544,13 @@
     "unavailable": "Les clés d’accès ne sont pas disponibles pour le moment. Utilisez plutôt une application d’authentification.",
     "createFailed": "Nous n’avons pas pu vérifier cette clé d’accès. Essayez de la créer à nouveau.",
     "signInFailed": "Cette clé d’accès n’a pas fonctionné pour ce compte. Réessayez ou utilisez un autre moyen de connexion.",
-    "expired": "Cela a pris trop de temps. Réessayez avec votre clé d’accès."
+    "expired": "Cela a pris trop de temps. Réessayez avec votre clé d’accès.",
+    "offerExpired": "Trop de temps s'est écoulé depuis votre connexion pour ajouter une clé d'accès de cette façon. Ajoutez-en une dans Paramètres › Sécurité à la place."
+  },
+  "approval": {
+    "unavailable": "L'approbation depuis un autre appareil n'est pas disponible pour le moment. Utilisez un autre moyen de connexion.",
+    "rateLimited": "Trop de codes générés en peu de temps. Attendez quelques minutes, puis réessayez.",
+    "expired": "Cette demande de connexion a expiré ou a déjà été traitée. Affichez un nouveau code sur l'appareil depuis lequel vous vous connectez.",
+    "otherAccount": "Cette demande concerne un compte Square Share différent de celui connecté ici."
   }
 }

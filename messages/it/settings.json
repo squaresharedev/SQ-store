@@ -629,14 +629,33 @@
         "recoveryCodesRegenerated": "Generati nuovi codici di recupero",
         "recoveryCodeUsed": "Codice di recupero usato per accedere",
         "challengeFailed": "Codice a due fattori sbagliato inserito all’accesso",
-        "lockedOut": "Accesso a due fattori sospeso dopo ripetuti codici sbagliati"
+        "lockedOut": "Accesso a due fattori sospeso dopo ripetuti codici sbagliati",
+        "signInApproved": "Accesso approvato da un altro dispositivo",
+        "signInDenied": "Accesso negato da un altro dispositivo",
+        "approvalsEnabled": "Approvazione degli accessi attivata",
+        "approvalsDisabled": "Approvazione degli accessi disattivata"
       }
     },
     "success": {
       "twoFactorOff": "L’autenticazione a due fattori è disattivata.",
       "factorRemoved": "Rimossa: «{name}».",
       "codesRegenerated": "Nuovi codici di recupero pronti. I vecchi non funzionano più.",
-      "confirmed": "Confermato."
+      "confirmed": "Confermato.",
+      "approvalsOn": "L'approvazione degli accessi è attiva.",
+      "approvalsOff": "L'approvazione degli accessi è disattivata."
+    },
+    "approvals": {
+      "title": "Approva da un dispositivo già connesso",
+      "description": "Quando accedi in un nuovo posto, scansiona il codice QR con un telefono in cui hai già effettuato l'accesso e tocca Approva. Utile quando la tua passkey è su un altro dispositivo.",
+      "statusOn": "Attiva",
+      "statusOff": "Disattivata",
+      "turnOn": "Attiva",
+      "turnOff": "Disattiva",
+      "saving": "Salvataggio…",
+      "confirmOnTitle": "Attivare l'approvazione degli accessi?",
+      "confirmOnDescription": "Qualsiasi telefono o computer in cui hai già effettuato l'accesso potrà approvare un nuovo accesso al tuo account.",
+      "confirmOffTitle": "Disattivare l'approvazione degli accessi?",
+      "confirmOffDescription": "I nuovi accessi richiederanno la tua passkey, la tua app di autenticazione o un codice di recupero. I dispositivi già connessi restano connessi."
     }
   },
   "team": {

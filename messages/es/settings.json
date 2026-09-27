@@ -629,14 +629,33 @@
         "recoveryCodesRegenerated": "Códigos de recuperación nuevos generados",
         "recoveryCodeUsed": "Código de recuperación usado para iniciar sesión",
         "challengeFailed": "Código de verificación en dos pasos incorrecto al iniciar sesión",
-        "lockedOut": "Inicio de sesión con verificación en dos pasos pausado tras varios códigos incorrectos"
+        "lockedOut": "Inicio de sesión con verificación en dos pasos pausado tras varios códigos incorrectos",
+        "signInApproved": "Inicio de sesión aprobado desde otro dispositivo",
+        "signInDenied": "Inicio de sesión denegado desde otro dispositivo",
+        "approvalsEnabled": "Aprobación de inicio de sesión activada",
+        "approvalsDisabled": "Aprobación de inicio de sesión desactivada"
       }
     },
     "success": {
       "twoFactorOff": "La verificación en dos pasos está desactivada.",
       "factorRemoved": "Se ha quitado «{name}».",
       "codesRegenerated": "Códigos de recuperación nuevos listos. Los anteriores ya no funcionan.",
-      "confirmed": "Confirmado."
+      "confirmed": "Confirmado.",
+      "approvalsOn": "La aprobación de inicio de sesión está activada.",
+      "approvalsOff": "La aprobación de inicio de sesión está desactivada."
+    },
+    "approvals": {
+      "title": "Aprobar desde un dispositivo con sesión iniciada",
+      "description": "Cuando inicias sesión en un lugar nuevo, escanea el código QR con un móvil donde ya tengas sesión iniciada y pulsa Aprobar. Útil cuando tu llave de acceso está en otro dispositivo.",
+      "statusOn": "Activada",
+      "statusOff": "Desactivada",
+      "turnOn": "Activar",
+      "turnOff": "Desactivar",
+      "saving": "Guardando…",
+      "confirmOnTitle": "¿Activar la aprobación de inicio de sesión?",
+      "confirmOnDescription": "Cualquier móvil u ordenador donde tengas sesión iniciada podrá aprobar un nuevo inicio de sesión en tu cuenta.",
+      "confirmOffTitle": "¿Desactivar la aprobación de inicio de sesión?",
+      "confirmOffDescription": "Los nuevos inicios de sesión necesitarán tu llave de acceso, tu aplicación de autenticación o un código de recuperación. Los dispositivos con sesión iniciada siguen con sesión iniciada."
     }
   },
   "team": {

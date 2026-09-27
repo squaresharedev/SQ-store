@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
+import { AuthPageShell } from "@/components/auth/AuthPageShell";
 import { TwoFactorChallenge } from "@/components/auth/TwoFactorChallenge";
-import { BackgroundArrow } from "@/components/ui/BackgroundArrow";
+import { afterChallenge } from "@/lib/auth/challenge";
+import { deviceFromUserAgent } from "@/lib/auth/device-label";
+import { passkeysConfigured } from "@/lib/auth/passkeys";
 import { AuthUnreachableError, getSessionState } from "@/lib/auth/session";
-import { safeInternalPath } from "@/lib/utils/safe-path";
+import { approvalsConfigured, approvalsEnabled } from "@/lib/auth/sign-in-approval";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Auth.metadata.twoFactor");
@@ -14,12 +18,6 @@ export async function generateMetadata(): Promise<Metadata> {
 // force-dynamic: reads session state (cookies) on every request. See
 // (dashboard)/layout.tsx for why implicit detection isn't relied on.
 export const dynamic = "force-dynamic";
-
-/** Same rule as the actions: internal only, and never back to a sign-in page. */
-function sanitizeNext(value: string | string[] | undefined): string {
-  const next = safeInternalPath(Array.isArray(value) ? value[0] : value);
-  return next.startsWith("/login") ? "/" : next;
-}
 
 /**
  * The second half of signing in, for an account with 2FA on. Reachable ONLY
@@ -33,7 +31,8 @@ export default async function TwoFactorPage({
   searchParams: Promise<{ next?: string | string[] }>;
 }) {
   const [session, sp] = await Promise.all([getSessionState(), searchParams]);
-  const next = sanitizeNext(sp.next);
+  // Same rule as the actions: internal only, and never back to a sign-in page.
+  const next = afterChallenge(sp.next);
 
   if (session.kind === "unreachable") {
     throw new AuthUnreachableError(new Error("Supabase Auth unreachable on the 2FA challenge."));
@@ -48,40 +47,24 @@ export default async function TwoFactorPage({
   // page shows the mark and then goes on to the same sanitised `next`.
   const through = session.kind === "signed_in";
   const { user, assurance } = session;
-  const t = await getTranslations("Auth.brand");
+  const [approvalReady, approvalOn, passkeysAvailable, head] = await Promise.all([
+    approvalsConfigured(),
+    approvalsEnabled(user.id),
+    passkeysConfigured(),
+    headers(),
+  ]);
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-x-hidden bg-muted px-6 py-8">
-      <div aria-hidden className="dot-grid pointer-events-none absolute inset-0" />
-      <BackgroundArrow side="left" />
-      <BackgroundArrow side="right" />
-
-      <div className="relative z-10 w-full max-w-md">
-        <div className="mb-3 flex items-center gap-3">
-          {/* eslint-disable-next-line @next/next/no-img-element -- static public asset; next/image adds no value here. */}
-          <img
-            src="/img/logo.png"
-            alt={t("logoAlt")}
-            className="h-8 w-8 shrink-0 object-contain"
-          />
-          <div className="flex flex-col leading-tight">
-            <span className="font-display text-lg font-black tracking-tight text-foreground">
-              Square Share
-            </span>
-            <span className="text-xs text-muted-foreground">{t("tagline")}</span>
-          </div>
-        </div>
-
-        {/* Hard corners, like the sign-in card this continues from. */}
-        <div className="border border-border bg-background px-6 pt-7 pb-6 shadow-lg sm:px-8 sm:pt-8 sm:pb-7">
-          <TwoFactorChallenge
-            next={next}
-            email={user.email ?? ""}
-            factors={assurance.factors.map(({ id, name, type }) => ({ id, name, type }))}
-            through={through}
-          />
-        </div>
-      </div>
-    </main>
+    <AuthPageShell>
+      <TwoFactorChallenge
+        next={next}
+        email={user.email ?? ""}
+        factors={assurance.factors.map(({ id, name, type }) => ({ id, name, type }))}
+        through={through}
+        approval={approvalReady && approvalOn === true}
+        device={deviceFromUserAgent(head.get("user-agent"))}
+        passkeysAvailable={passkeysAvailable}
+      />
+    </AuthPageShell>
   );
 }

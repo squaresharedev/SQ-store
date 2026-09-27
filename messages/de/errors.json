@@ -544,6 +544,13 @@
     "unavailable": "Passkeys sind gerade nicht verfügbar. Verwende stattdessen eine Authenticator-App.",
     "createFailed": "Wir konnten diesen Passkey nicht prüfen. Versuche, ihn noch einmal zu erstellen.",
     "signInFailed": "Dieser Passkey hat für dieses Konto nicht funktioniert. Versuche es noch einmal oder melde dich auf andere Weise an.",
-    "expired": "Das hat zu lange gedauert. Versuche es noch einmal mit deinem Passkey."
+    "expired": "Das hat zu lange gedauert. Versuche es noch einmal mit deinem Passkey.",
+    "offerExpired": "Es ist zu viel Zeit seit deiner Anmeldung vergangen, um einen Passkey auf diese Weise hinzuzufügen. Füge stattdessen unter Einstellungen › Sicherheit einen hinzu."
+  },
+  "approval": {
+    "unavailable": "Das Genehmigen von einem anderen Gerät ist gerade nicht verfügbar. Verwende eine andere Anmeldemethode.",
+    "rateLimited": "Zu viele Codes in kurzer Zeit. Warte ein paar Minuten und versuche es dann erneut.",
+    "expired": "Diese Anmeldeanfrage ist abgelaufen oder wurde bereits beantwortet. Zeige einen neuen Code auf dem Gerät an, auf dem du dich anmelden möchtest.",
+    "otherAccount": "Diese Anfrage gilt für ein anderes Square-Share-Konto als das hier angemeldete."
   }
 }
