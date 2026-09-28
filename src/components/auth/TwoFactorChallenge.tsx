@@ -5,7 +5,7 @@ import { useActionState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Fingerprint, KeyRound, MonitorSmartphone, Smartphone } from "lucide-react";
-import { useReducedMotion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { useTranslations } from "next-intl";
 import type { PublicKeyCredentialRequestOptionsJSON } from "@simplewebauthn/browser";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 import { useResolveMessage } from "@/components/ui/ActionErrorNotice";
+import { SETTLE } from "@/components/ui/motion-tokens";
 import { helpTextClass, infoTextClass, quietLinkClass } from "@/components/ui/control-styles";
 import { AnimatedFingerprint } from "@/components/auth/AnimatedFingerprint";
 import { ApproveFromDevice } from "@/components/auth/ApproveFromDevice";
@@ -31,6 +32,7 @@ import {
 import type { DeviceLabel } from "@/lib/auth/device-label";
 import { assertPasskey, devicePasskeysAvailable, passkeysSupported } from "@/lib/auth/webauthn-client";
 import type { ActionError } from "@/lib/errors";
+import { cn } from "@/lib/utils";
 
 const INITIAL: ChallengeState = {};
 
@@ -96,6 +98,9 @@ export function TwoFactorChallenge({
   const onPasskey = React.useCallback((to: string) => setVerified({ next: to, kind: "passkey" }), []);
   const onCode = React.useCallback((to: string) => setVerified({ next: to, kind: "app" }), []);
   const onApproved = React.useCallback((to: string) => setVerified({ next: to, kind: "device" }), []);
+  // The passkey missed: its form now offers approval itself, so the list below need not.
+  const [passkeyMissed, setPasskeyMissed] = React.useState(false);
+  const onPasskeyMiss = React.useCallback(() => setPasskeyMissed(true), []);
 
   // Can this device hold a passkey of its own? Asked up front, so the answer
   // is ready by the time the sign-in succeeds.
@@ -153,7 +158,7 @@ export function TwoFactorChallenge({
   if (mode !== "passkey" && hasPasskey) {
     switches.push({ to: "passkey", label: t("usePasskey"), icon: <Fingerprint aria-hidden className="size-4" /> });
   }
-  if (mode !== "approve" && approval) {
+  if (mode !== "approve" && approval && !(mode === "passkey" && passkeyMissed)) {
     switches.push({ to: "approve", label: t("useApproval"), icon: <MonitorSmartphone aria-hidden className="size-4" /> });
   }
   if (mode !== "code" && apps.length > 0) {
@@ -166,7 +171,13 @@ export function TwoFactorChallenge({
   return (
     <div className="flex flex-col gap-5">
       {mode === "passkey" ? (
-        <PasskeyForm next={next} email={email} onVerified={onPasskey} onUseApproval={toApproval} />
+        <PasskeyForm
+          next={next}
+          email={email}
+          onVerified={onPasskey}
+          onUseApproval={toApproval}
+          onMiss={onPasskeyMiss}
+        />
       ) : mode === "code" ? (
         <CodeForm next={next} email={email} factors={apps} onVerified={onCode} />
       ) : mode === "approve" ? (
@@ -282,19 +293,25 @@ function PasskeyForm({
   email,
   onVerified,
   onUseApproval,
+  onMiss,
 }: {
   next: string;
   email: string;
   onVerified: (next: string) => void;
   /** Switch to "Approve from your phone", when the account can. */
   onUseApproval?: () => void;
+  /** The passkey did not go through (closed, failed, refused). */
+  onMiss?: () => void;
 }) {
   const t = useTranslations("Auth.twoFactor");
   const tp = useTranslations("Auth.twoFactor.passkey");
+  const reducedMotion = useReducedMotion();
   const resolve = useResolveMessage();
   const [state, formAction, isPending] = useActionState(verifyPasskeySignIn, INITIAL);
   const [challenge, setChallenge] = React.useState<SignInChallenge | null>(null);
   const [problem, setProblem] = React.useState<ActionError | string | null>(null);
+  // The problem is the person closing the prompt: said in muted words, not red.
+  const [quietProblem, setQuietProblem] = React.useState(false);
   // Loading the options failed; the button then retries the load.
   const [loadFailed, setLoadFailed] = React.useState(false);
   const [phase, setPhase] = React.useState<"idle" | "working" | "sent">("idle");
@@ -311,6 +328,10 @@ function PasskeyForm({
   }
 
   useReportVerified(state, onVerified);
+
+  React.useEffect(() => {
+    if (failures > 0) onMiss?.();
+  }, [failures, onMiss]);
 
   React.useEffect(() => {
     if (challenge || loadFailed || phase !== "idle") return;
@@ -337,6 +358,7 @@ function PasskeyForm({
 
   async function confirmWithPasskey() {
     setProblem(null);
+    setQuietProblem(false);
     if (!passkeysSupported()) {
       setProblem(tp("unsupported"));
       return;
@@ -351,6 +373,7 @@ function PasskeyForm({
     if (!outcome.ok) {
       setPhase("idle");
       setFailures((count) => count + 1);
+      setQuietProblem(outcome.reason === "cancelled");
       setProblem(
         outcome.reason === "cancelled"
           ? tp("cancelled")
@@ -369,6 +392,7 @@ function PasskeyForm({
   }
 
   const busy = phase !== "idle" || isPending;
+  const offerApproval = Boolean(onUseApproval) && failures > 0;
   const strong = (chunks: React.ReactNode) => (
     <span className="font-medium text-foreground">{chunks}</span>
   );
@@ -382,40 +406,57 @@ function PasskeyForm({
         </p>
       </div>
 
-      <Button
-        type="button"
-        onClick={confirmWithPasskey}
-        disabled={busy || loading}
-        suppressHydrationWarning
-        className="w-full px-8 py-3.5 text-base"
-      >
-        <AnimatedFingerprint
-          key={failures}
-          state={busy ? "scanning" : failures > 0 ? "error" : "idle"}
-          className="size-5"
-        />
-        {busy ? tp("waiting") : tp("button")}
-      </Button>
-      <p className={infoTextClass}>{tp("hint")}</p>
+      <div className="flex flex-col gap-2">
+        <Button
+          type="button"
+          onClick={confirmWithPasskey}
+          disabled={busy || loading}
+          suppressHydrationWarning
+          className="w-full px-8 py-3.5 text-base"
+        >
+          <AnimatedFingerprint
+            key={failures}
+            state={busy ? "scanning" : failures > 0 ? "error" : "idle"}
+            className="size-5"
+          />
+          {busy ? tp("waiting") : tp("button")}
+        </Button>
+        {/* Right under the button it is about, and small: a closed prompt is
+            a choice, not an error, so only a real failure is red. */}
+        {problem && (
+          <p role="alert" className={cn(infoTextClass, !quietProblem && "text-destructive")}>
+            {typeof problem === "string" ? problem : resolve(problem.message)}
+          </p>
+        )}
+        {/* After a miss the way round below says it better: one explanation
+            on screen at a time. */}
+        {!offerApproval && <p className={infoTextClass}>{tp("hint")}</p>}
+      </div>
 
-      {problem && (
-        <p role="alert" className="text-sm font-medium text-destructive">
-          {typeof problem === "string" ? problem : resolve(problem.message)}
-        </p>
-      )}
       <Status state={state} next={next} />
 
       {/* The case this is for: the computer offered its own "use a phone" QR
           code and the phone said it has no passkey, because the passkey lives
           on another device. After any miss, the way that needs no passkey. */}
-      {onUseApproval && failures > 0 && (
-        <div className="flex flex-col gap-3 border border-border p-4" data-passkey-elsewhere>
-          <p className={helpTextClass}>{tp("elsewhere")}</p>
-          <Button type="button" variant="secondary" onClick={onUseApproval}>
+      {offerApproval && (
+        <motion.div
+          className="flex gap-3 bg-muted/60 p-4"
+          data-passkey-elsewhere
+          initial={reducedMotion ? false : { opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={SETTLE}
+        >
+          <span className="grid size-9 shrink-0 place-items-center bg-background text-foreground">
             <MonitorSmartphone aria-hidden className="size-4" />
-            {tp("approveInstead")}
-          </Button>
-        </div>
+          </span>
+          <div className="flex min-w-0 flex-1 flex-col gap-1">
+            <p className="font-inter text-sm font-medium text-foreground">{tp("elsewhereTitle")}</p>
+            <p className={infoTextClass}>{tp("elsewhereBody")}</p>
+            <Button type="button" variant="secondary" onClick={onUseApproval} className="mt-2 sm:self-start">
+              {tp("approveInstead")}
+            </Button>
+          </div>
+        </motion.div>
       )}
     </div>
   );
