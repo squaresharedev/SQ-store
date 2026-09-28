@@ -24,7 +24,10 @@
     "clearFilters": "Clear filters",
     "title": "No orders yet",
     "hint": "Square Share checkout isn't open yet. Sales through your own buy link or by email won't show up here.",
-    "goToProducts": "Go to products"
+    "goToProducts": "Go to products",
+    "toShipTitle": "Nothing to ship",
+    "toShipHint": "You're all caught up. Paid orders waiting to be sent show up here, oldest first.",
+    "seeAllOrders": "See all orders"
   },
   "list": {
     "updating": "Updating…",
@@ -38,7 +41,10 @@
     "channel": "Channel",
     "status": "Status",
     "buyer": "Buyer",
-    "date": "Date"
+    "date": "Date",
+    "shipping": "Shipping",
+    "shipTo": "Ship to",
+    "noAddress": "No address"
   },
   "toolbar": {
     "region": "order filters",
@@ -85,6 +91,39 @@
       "copy": "Copy order ID",
       "copied": "Copied order ID",
       "failed": "Couldn't copy order ID. Select and copy it manually."
+    },
+    "pack": "What to pack",
+    "packLine": "{quantity} × {title}",
+    "copyPack": {
+      "copy": "Copy what to pack",
+      "copied": "Copied what to pack",
+      "failed": "Couldn't copy what to pack. Select and copy it manually."
+    },
+    "shipTo": "Ship to",
+    "copyAddress": {
+      "copy": "Copy address",
+      "copied": "Copied address",
+      "failed": "Couldn't copy the address. Select and copy it manually."
+    },
+    "copyPhone": {
+      "copy": "Copy phone number",
+      "copied": "Copied phone number",
+      "failed": "Couldn't copy the phone number. Select and copy it manually."
+    },
+    "noAddress": "There's no delivery address on this order. Email the buyer to ask where it should go.",
+    "shipping": "Shipping",
+    "shippedOn": "Shipped {date}",
+    "trackingNumber": "Tracking number",
+    "copyTracking": {
+      "copy": "Copy tracking number",
+      "copied": "Copied tracking number",
+      "failed": "Couldn't copy the tracking number. Select and copy it manually."
+    },
+    "nothingToShip": "Nothing to ship for this order.",
+    "shipBlocked": {
+      "pending": "The payment hasn't gone through yet. Wait for it before you ship.",
+      "refunded": "This order was refunded, so there's nothing to ship.",
+      "disputed": "This payment is disputed. Settle the dispute before you ship."
     }
   },
   "actions": {
@@ -104,5 +143,59 @@
   "loading": {
     "title": "Orders",
     "subtitle": "Every sale across your embed and the marketplace."
+  },
+  "toShipCount": "{count, plural, one {{count} order to ship} other {{count} orders to ship}}",
+  "views": {
+    "label": "Which orders to show",
+    "toShip": "To ship",
+    "all": "All orders"
+  },
+  "fulfilment": {
+    "unfulfilled": "To ship",
+    "shipped": "Shipped",
+    "not_required": "No shipping"
+  },
+  "ship": {
+    "markShipped": "Mark as shipped",
+    "trackingLabel": "Tracking number (optional)",
+    "trackingPlaceholder": "e.g. RR123456789IE",
+    "tellsBuyer": "We'll email the buyer that it's on its way, with the tracking number if you add one.",
+    "noBuyerEmail": "This order has no buyer email, so the buyer won't be told.",
+    "confirm": "Mark shipped",
+    "shipped": "Marked as shipped. We've emailed the buyer.",
+    "shippedNoEmail": "Marked as shipped.",
+    "addTracking": "Add tracking number",
+    "editTracking": "Change tracking number",
+    "saveTracking": "Save tracking number",
+    "trackingSaved": "Tracking number saved. We've sent it to the buyer.",
+    "trackingSavedNoEmail": "Tracking number saved."
+  },
+  "email": {
+    "fromName": "{store} via Square Share",
+    "signOff": "Square Share",
+    "newOrder": {
+      "subjectShip": "New order: ship {quantity} × {title} to {city}",
+      "subjectDigital": "New order: {title}",
+      "introShip": "You have a new order to ship.",
+      "introDigital": "You sold {title}. It's a download, so there's nothing to ship.",
+      "pack": "What to pack",
+      "shipTo": "Ship to",
+      "phone": "Phone: {phone}",
+      "noAddress": "There's no delivery address on this order. Email the buyer to ask where it should go.",
+      "buyer": "Buyer: {email}",
+      "total": "Order total: {amount}",
+      "openShip": "Once it's on its way, mark it shipped here and we'll tell the buyer: {url}",
+      "openDigital": "See the order: {url}"
+    },
+    "shipped": {
+      "subject": "Your order from {store} is on its way",
+      "subjectTracking": "Tracking for your order from {store}",
+      "intro": "Good news: {store} has shipped your order.",
+      "introTracking": "{store} has added a tracking number to your order.",
+      "tracking": "Tracking number: {tracking}",
+      "shipTo": "It's going to:",
+      "questions": "Questions about your order? Reply to this email to reach {store}.",
+      "footer": "Sent by Square Share on behalf of {store}."
+    }
   }
 }

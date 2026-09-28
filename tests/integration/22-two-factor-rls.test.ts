@@ -293,6 +293,8 @@ describe("SECURITY DEFINER functions (RLS does not reach inside them)", () => {
     expect(callable).toEqual([
       "is_squareshare_staff",
       "mfa_session_ok",
+      // Guarded; its aal1 refusal is proven in 28-order-fulfilment.
+      "order_mark_shipped",
       "rl_take",
       "team_accept_invite",
       "team_actor_role",

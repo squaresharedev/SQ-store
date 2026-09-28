@@ -137,6 +137,17 @@
         "title": "A aprovação de início de sessão está ativa",
         "body": "Os dispositivos onde tem sessão iniciada podem agora aprovar novos inícios de sessão na sua conta. Se não foi uma ação sua, altere a palavra-passe já."
       }
+    },
+    "order": {
+      "newToShip": {
+        "title": "Nova encomenda: {quantity} × {title}",
+        "body": "Envie para {name} em {city}.",
+        "bodyNoAddress": "Ainda não tem morada de entrega. Envie um e-mail ao comprador para saber para onde deve ser enviada."
+      },
+      "newDigital": {
+        "title": "Nova encomenda: {title}",
+        "body": "É uma transferência, por isso não há nada para enviar."
+      }
     }
   }
 }

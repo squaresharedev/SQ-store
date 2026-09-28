@@ -273,6 +273,16 @@
     "placeholder": "Die Kontakt-E-Mail sieht nach einer Platzhalteradresse aus. Verwende eine Adresse, die du tatsächlich abrufst.",
     "disposable": "Die Kontakt-E-Mail gehört zu einem Wegwerfmail-Anbieter. Verwende eine dauerhafte Adresse."
   },
+  "phone": {
+    "needsCountryCode": "Füge die Ländervorwahl zur Telefonnummer hinzu, z. B. +353 87 123 4567, oder lege dein Land fest.",
+    "invalid": "Diese Telefonnummer existiert nicht. Prüfe die Ziffern und die Ländervorwahl.",
+    "unsupportedRegion": "Wir können nur Telefonnummern in der EU, dem EWR, der Schweiz und dem Vereinigten Königreich bestätigen.",
+    "notMobile": "Verwende eine Mobilnummer. Wir bestätigen sie per SMS, und ein Festnetzanschluss kann keine empfangen."
+  },
+  "address": {
+    "placeholder": "Die Adresse sieht nach einem Platzhalter aus. Verwende die echte Postanschrift, unter der du handelst.",
+    "incomplete": "Gib deine vollständige Postanschrift an: Straße und Hausnummer, dann Ort und Postleitzahl, jede auf einer eigenen Zeile."
+  },
   "uuid": {
     "id": "Diese ID ist ungültig.",
     "option": "Diese Option ist ungültig.",
@@ -292,10 +302,12 @@
     "domains": "Domains müssen einfache Domains in Kleinbuchstaben sein, z. B. yoursite.com, ohne https://, Port, Pfad oder Platzhalter."
   },
   "referenceCode": {
-    "vatId": "Eine USt-IdNr. hat {min} bis {max} Zeichen: Buchstaben, Ziffern, Leerzeichen, Punkte oder Bindestriche."
+    "vatId": "Eine USt-IdNr. hat {min} bis {max} Zeichen: Buchstaben, Ziffern, Leerzeichen, Punkte oder Bindestriche.",
+    "trackingNumber": "Eine Tracking-Nummer besteht aus {min} bis {max} Buchstaben, Ziffern, Leerzeichen, Punkten oder Bindestrichen."
   },
   "oneTimeCode": {
-    "authenticator": "Der Code besteht aus den 6 Ziffern, die deine Authenticator-App anzeigt."
+    "authenticator": "Der Code besteht aus den 6 Ziffern, die deine Authenticator-App anzeigt.",
+    "contact": "Der Code besteht aus {length} Ziffern, die wir dir gesendet haben."
   },
   "hexColor": {
     "colors": "Farben müssen 6-stellige Hex-Werte sein, z. B. #a855f7.",

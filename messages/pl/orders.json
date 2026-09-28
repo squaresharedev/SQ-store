@@ -24,7 +24,10 @@
     "clearFilters": "Wyczyść filtry",
     "title": "Jeszcze żadnych zamówień",
     "hint": "Realizacja zakupu Square Share nie jest jeszcze otwarta. Sprzedaż przez twój własny link do zakupu albo e-mail się tu nie pojawi.",
-    "goToProducts": "Przejdź do produktów"
+    "goToProducts": "Przejdź do produktów",
+    "toShipTitle": "Nic do wysłania",
+    "toShipHint": "Wszystko na bieżąco. Opłacone zamówienia czekające na wysłanie pojawiają się tutaj, od najstarszego.",
+    "seeAllOrders": "Zobacz wszystkie zamówienia"
   },
   "list": {
     "updating": "Aktualizowanie…",
@@ -38,7 +41,10 @@
     "channel": "Kanał",
     "status": "Status",
     "buyer": "Kupujący",
-    "date": "Data"
+    "date": "Data",
+    "shipping": "Wysyłka",
+    "shipTo": "Adresat",
+    "noAddress": "Brak adresu"
   },
   "toolbar": {
     "region": "filtry zamówień",
@@ -85,6 +91,39 @@
       "copy": "Kopiuj ID zamówienia",
       "copied": "Skopiowano ID zamówienia",
       "failed": "Nie udało się skopiować ID zamówienia. Zaznacz i skopiuj ręcznie."
+    },
+    "pack": "Co zapakować",
+    "packLine": "{quantity} × {title}",
+    "copyPack": {
+      "copy": "Kopiuj co zapakować",
+      "copied": "Skopiowano co zapakować",
+      "failed": "Nie udało się skopiować zawartości. Zaznacz i skopiuj ręcznie."
+    },
+    "shipTo": "Adres dostawy",
+    "copyAddress": {
+      "copy": "Kopiuj adres",
+      "copied": "Skopiowano adres",
+      "failed": "Nie udało się skopiować adresu. Zaznacz i skopiuj ręcznie."
+    },
+    "copyPhone": {
+      "copy": "Kopiuj numer telefonu",
+      "copied": "Skopiowano numer telefonu",
+      "failed": "Nie udało się skopiować numeru telefonu. Zaznacz i skopiuj ręcznie."
+    },
+    "noAddress": "To zamówienie nie ma adresu dostawy. Napisz do kupującego i zapytaj, gdzie wysłać.",
+    "shipping": "Wysyłka",
+    "shippedOn": "Wysłano {date}",
+    "trackingNumber": "Numer śledzenia",
+    "copyTracking": {
+      "copy": "Kopiuj numer śledzenia",
+      "copied": "Skopiowano numer śledzenia",
+      "failed": "Nie udało się skopiować numeru śledzenia. Zaznacz i skopiuj ręcznie."
+    },
+    "nothingToShip": "Brak produktów do wysłania w tym zamówieniu.",
+    "shipBlocked": {
+      "pending": "Płatność jeszcze nie przeszła. Poczekaj, zanim wyślesz.",
+      "refunded": "To zamówienie zostało zwrócone, więc nie ma czego wysyłać.",
+      "disputed": "Ta płatność jest sporna. Rozwiąż spór przed wysłaniem."
     }
   },
   "actions": {
@@ -104,5 +143,59 @@
   "loading": {
     "title": "Zamówienia",
     "subtitle": "Każda sprzedaż z twojego osadzenia i marketplace."
+  },
+  "toShipCount": "{count, plural, one {{count} zamówienie do wysłania} few {{count} zamówienia do wysłania} many {{count} zamówień do wysłania} other {{count} zamówienia do wysłania}}",
+  "views": {
+    "label": "Które zamówienia pokazać",
+    "toShip": "Do wysłania",
+    "all": "Wszystkie zamówienia"
+  },
+  "fulfilment": {
+    "unfulfilled": "Do wysłania",
+    "shipped": "Wysłane",
+    "not_required": "Bez wysyłki"
+  },
+  "ship": {
+    "markShipped": "Oznacz jako wysłane",
+    "trackingLabel": "Numer śledzenia (opcjonalny)",
+    "trackingPlaceholder": "np. RR123456789IE",
+    "tellsBuyer": "Wyślemy kupującemu e-mail, że przesyłka jest w drodze, z numerem śledzenia, jeśli go podasz.",
+    "noBuyerEmail": "To zamówienie nie ma adresu e-mail kupującego, więc kupujący nie zostanie powiadomiony.",
+    "confirm": "Oznacz jako wysłane",
+    "shipped": "Oznaczono jako wysłane. Wysłaliśmy e-mail do kupującego.",
+    "shippedNoEmail": "Oznaczono jako wysłane.",
+    "addTracking": "Dodaj numer śledzenia",
+    "editTracking": "Zmień numer śledzenia",
+    "saveTracking": "Zapisz numer śledzenia",
+    "trackingSaved": "Numer śledzenia zapisany. Wysłaliśmy go do kupującego.",
+    "trackingSavedNoEmail": "Numer śledzenia zapisany."
+  },
+  "email": {
+    "fromName": "{store} przez Square Share",
+    "signOff": "Square Share",
+    "newOrder": {
+      "subjectShip": "Nowe zamówienie: wyślij {quantity} × {title} do {city}",
+      "subjectDigital": "Nowe zamówienie: {title}",
+      "introShip": "Masz nowe zamówienie do wysłania.",
+      "introDigital": "Sprzedano: {title}. To plik do pobrania, więc nie ma czego wysyłać.",
+      "pack": "Co zapakować",
+      "shipTo": "Adres dostawy",
+      "phone": "Telefon: {phone}",
+      "noAddress": "To zamówienie nie ma adresu dostawy. Napisz do kupującego i zapytaj, gdzie wysłać.",
+      "buyer": "Kupujący: {email}",
+      "total": "Łączna kwota zamówienia: {amount}",
+      "openShip": "Gdy wyślesz, oznacz zamówienie jako wysłane, a my powiadomimy kupującego: {url}",
+      "openDigital": "Zobacz zamówienie: {url}"
+    },
+    "shipped": {
+      "subject": "Twoje zamówienie z {store} jest w drodze",
+      "subjectTracking": "Numer śledzenia do twojego zamówienia z {store}",
+      "intro": "Dobra wiadomość: {store} wysłało twoje zamówienie.",
+      "introTracking": "{store} dodało numer śledzenia do twojego zamówienia.",
+      "tracking": "Numer śledzenia: {tracking}",
+      "shipTo": "Zamówienie jedzie pod adres:",
+      "questions": "Pytania dotyczące zamówienia? Odpowiedz na tego e-maila, aby skontaktować się z {store}.",
+      "footer": "Wysłano przez Square Share w imieniu {store}."
+    }
   }
 }

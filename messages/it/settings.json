@@ -289,16 +289,9 @@
   "tax": {
     "cardTitle": "Attività e dati del venditore",
     "cardDescription": "Da impostare una volta sola per tutto il tuo account. Mostrato agli acquirenti su ogni pagina prodotto in cui vendi, e usato per le fatture e l’IVA.",
-    "verifyOutcome": {
-      "verified": "Email di contatto confermata. Ora puoi pubblicare.",
-      "expired": "Quel link di conferma è scaduto. Invia un nuovo link qui sotto.",
-      "stale": "Quel link era per un indirizzo diverso da quello salvato qui. Invia un nuovo link qui sotto.",
-      "invalid": "Quel link di conferma non è valido, oppure è già stato usato.",
-      "throttled": "Troppi tentativi di conferma. Attendi un momento, poi riapri il link."
-    },
     "gate": {
       "required": "<strong>La tua ragione sociale (o il tuo nome), l’indirizzo e l’email di contatto sono obbligatori prima di poter pubblicare o vendere qualsiasi cosa.</strong> Gli acquirenti devono poter vedere da chi stanno comprando e come contattarti prima di ordinare.",
-      "privacyNoteLinked": "Questi dati compaiono pubblicamente sulle tue pagine prodotto solo per questo motivo. Non li usiamo mai per il marketing e non li vendiamo né li condividiamo. L’unica email che inviamo al tuo indirizzo di contatto è il link che lo conferma. Consulta l’<link>Informativa sulla privacy di Squareshare</link>."
+      "privacyNoteLinked": "Questi dati compaiono pubblicamente sulle tue pagine prodotto solo per questo motivo. Non li usiamo mai per il marketing e non li vendiamo né li condividiamo. L'unico messaggio che inviamo alla tua email di contatto o al tuo telefono è il codice che li conferma. Consulta la <link>Informativa sulla privacy di Squareshare</link>."
     },
     "countryNotEu": "Fuori dall’UE / preferisco non specificare",
     "vatAdvisory": {
@@ -322,10 +315,7 @@
         "label": "Email di contatto",
         "tipLabel": "In cosa differisce dalla tua email di accesso",
         "tipBody": "Mostrata agli acquirenti come link mailto, e usata come alternativa al pulsante di acquisto quando un prodotto non ha un link di acquisto. Tenuta separata dalla tua email di accesso di proposito: usa l’indirizzo che preferisci farti scrivere dagli acquirenti. Deve essere un indirizzo che leggi davvero: indirizzi segnaposto, provider di email temporanee e indirizzi no-reply vengono rifiutati, così come un dominio che non accetta posta.",
-        "placeholder": "es. ciao@iltuonegozio.example",
-        "statusDirty": "Salva per inviare un link di conferma al nuovo indirizzo. Gli acquirenti lo vedranno solo dopo la conferma.",
-        "statusConfirmed": "Confermata: gli acquirenti possono contattarti qui.",
-        "statusUnconfirmed": "Non ancora confermata. Apri il link che ti abbiamo inviato a questo indirizzo."
+        "placeholder": "es. ciao@iltuonegozio.example"
       },
       "vatId": {
         "label": "Partita IVA",
@@ -335,7 +325,10 @@
         "label": "Paese"
       },
       "phone": {
-        "label": "Telefono"
+        "label": "Telefono",
+        "tipLabel": "Quando gli acquirenti lo vedono",
+        "tipBody": "Facoltativo. Gli acquirenti lo vedono solo dopo che l'hai confermato con un codice che ti inviamo via SMS, quindi usa un numero di cellulare nell'UE, nello SEE, in Svizzera o nel Regno Unito.",
+        "placeholder": "es. +353 87 123 4567"
       },
       "bio": {
         "label": "Bio",
@@ -345,14 +338,40 @@
         "charactersLeft": "{count, plural, one {# carattere rimasto} many {# caratteri rimasti} other {# caratteri rimasti}}"
       }
     },
-    "resend": {
-      "button": "Invia di nuovo l’email di conferma"
-    },
     "success": {
-      "savedCheckEmail": "Salvato. Controlla {email} per il link di conferma dell’indirizzo.",
       "sellerDetailsSaved": "Attività e dati del venditore salvati.",
-      "alreadyConfirmed": "Quell’indirizzo è già confermato.",
-      "confirmationSent": "Inviato. Controlla {email} per il link."
+      "savedCodeSent": "{which, select, email {Salvato. Abbiamo inviato un codice via email a {email}: inseriscilo qui sotto per confermare l'indirizzo.} phone {Salvato. Abbiamo inviato un codice via SMS a {phone}: inseriscilo qui sotto per confermare il numero.} other {Salvato. Abbiamo inviato codici a {email} e a {phone}: inseriscili qui sotto per confermare entrambi.}}"
+    }
+  },
+  "contactVerification": {
+    "heading": "Conferma i tuoi dati di contatto",
+    "description": "Gli acquirenti vedono solo i dati di contatto che hai dimostrato essere tuoi. Ti inviamo un codice e tu lo inserisci qui.",
+    "channel": {
+      "email": "Email di contatto",
+      "phone": "Telefono"
+    },
+    "badge": "Confermato",
+    "status": {
+      "confirmed": "Confermato. Gli acquirenti possono contattarti qui.",
+      "emailUnconfirmed": "Non ancora confermata. Non puoi pubblicare finché non lo è.",
+      "phoneUnconfirmed": "Non ancora confermato. Gli acquirenti non lo vedono.",
+      "dirty": "{channel, select, email {Hai modificato questo campo. Salva per inviare un codice al nuovo indirizzo.} other {Hai modificato questo campo. Salva per inviare un codice al nuovo numero.}}",
+      "phoneUnavailable": "Gli acquirenti vedono solo un numero confermato, e la conferma via SMS non è ancora disponibile."
+    },
+    "sendCode": "Invia codice",
+    "resend": "Invia un nuovo codice",
+    "enterCode": "{channel, select, email {Inserisci il codice a {length} cifre che ti abbiamo inviato via email a {target}.} other {Inserisci il codice a {length} cifre che ti abbiamo inviato via SMS a {target}.}}",
+    "codeLabel": "Codice di conferma",
+    "confirming": "Conferma in corso…",
+    "success": {
+      "sent": "{channel, select, email {Abbiamo inviato un codice via email a {target}.} other {Abbiamo inviato un codice via SMS a {target}.}}",
+      "alreadyConfirmed": "È già confermato.",
+      "confirmed": "{channel, select, email {Email di contatto confermata. Gli acquirenti possono contattarti lì.} other {Numero di telefono confermato. Gli acquirenti possono vederlo ora.}}"
+    },
+    "message": {
+      "emailSubject": "{code} è il tuo codice di conferma Squareshare",
+      "emailBody": "Il tuo codice per confermare questo indirizzo come email di contatto Squareshare:\n\n{code}\n\nInseriscilo in Impostazioni › Attività e dati del venditore. Vale una sola volta, per {minutes} minuti.\n\nNon condividere mai questo codice. Nessuno di Squareshare te lo chiederà mai.\n\nSe non hai richiesto questo, qualcuno potrebbe aver inserito il tuo indirizzo per errore. Ignora questa email: non succede nulla a meno che il codice non venga inserito.\n\nSquareshare",
+      "sms": "{code} è il tuo codice Squareshare per confermare questo numero. Scade tra {minutes} min. Non condividerlo."
     }
   },
   "shipping": {
@@ -479,7 +498,7 @@
       },
       "emailVerified": {
         "label": "Email di contatto confermata",
-        "why": "Inviamo un link a quell’indirizzo e tu lo clicchi. Nient’altro dimostra che un messaggio di un acquirente arriverebbe davvero a qualcuno."
+        "why": "Inviamo un codice a quell'indirizzo e tu lo reinserisci qui. Nient'altro dimostra che un messaggio di un acquirente arriverebbe davvero a qualcuno."
       }
     }
   },

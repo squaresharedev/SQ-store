@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { CONTACT_CODE_COOLDOWN_SECONDS } from "@/lib/contact-verification/policy";
 
 // SERVER ONLY. rateLimitKey uses the service-role admin client; this module must
 // never be imported from a Client Component. (Enforced by convention here — the
@@ -244,25 +245,50 @@ export const RATE_LIMITS = {
   productPageRead: { max: 600, windowSeconds: 60 * 60 },
   /** Stock edits: a single UPDATE, but trivially scriptable. */
   stockWrite: { max: 240, windowSeconds: 60 * 60 },
+  /**
+   * Marking orders shipped (or changing a tracking number). Each one can mail
+   * a BUYER, so it is bounded even though the database lets each order be
+   * shipped only once: a tracking number can be changed over and over. Sized
+   * for a seller clearing a busy day's queue in one sitting.
+   */
+  orderFulfil: { max: 240, windowSeconds: 60 * 60 },
   /** Profile / tax / notification-preference writes. */
   settingsWrite: { max: 60, windowSeconds: 60 * 60 },
+  // --- Contact verification ----------------------------------------------
+  // A code emailed or texted to the seller's buyer-facing contact details
+  // (lib/contact-verification). Sending is the expensive and abusable half:
+  // it puts a message in a stranger's inbox or phone if the seller typed
+  // theirs, and a text costs money (SMS pumping is a real fraud). So every send
+  // spends FIVE budgets, each closing a different hole, before anything goes out.
+
+  /** One code per channel per minute: a double-click is not two texts. */
+  contactCodeCooldown: { max: 1, windowSeconds: CONTACT_CODE_COOLDOWN_SECONDS },
+  /** Codes one account can ask for in an hour, both channels together. */
+  contactCodeSend: { max: 6, windowSeconds: 60 * 60 },
+  /** And in a day, so waiting out the hour cannot be scripted into a stream. */
+  contactCodeSendDaily: { max: 12, windowSeconds: 24 * 60 * 60 },
   /**
-   * Confirmation emails for the seller's buyer-facing contact address.
-   *
-   * Tight on purpose, and keyed on the SESSION: this is the one action in
-   * Settings that makes us send mail to an address of the caller's choosing,
-   * so an unbounded resend button is a mail cannon pointed at whoever the
-   * seller names. Five an hour is more than a real person needs to find an
-   * email that already arrived.
+   * Codes one ADDRESS or NUMBER can receive in a day, across every account.
+   * The per-account budgets reset with each new sign-up; this one does not, so
+   * nobody can flood a stranger's inbox or phone by opening accounts, and the
+   * guesses anyone can ever buy against one target stay bounded
+   * (5 codes x CONTACT_CODE_MAX_ATTEMPTS a day against a 10^8 space).
    */
-  sellerEmailVerifySend: { max: 5, windowSeconds: 60 * 60 },
+  contactCodePerTarget: { max: 5, windowSeconds: 24 * 60 * 60 },
+  /** Codes from one client, across every account it signs in to. */
+  contactCodePerClient: { max: 20, windowSeconds: 60 * 60 },
   /**
-   * Clicks on a confirmation link, keyed on the CLIENT because the route has
-   * no session by design (it is opened from an inbox). Without it, the route
-   * is an oracle for guessing a 64-hex token; with it, a guesser gets 20
-   * attempts an hour against a 2^256 space.
+   * Every text the platform sends in a day. A cost ceiling, not an access
+   * control: if something gets past all of the above, the bill still stops
+   * here. Sized far above what real sellers confirming a number need.
    */
-  sellerEmailVerify: { max: 20, windowSeconds: 60 * 60 },
+  contactSmsPlatformDaily: { max: 2000, windowSeconds: 24 * 60 * 60 },
+  /**
+   * Code checks per account, across codes. Each code already dies after
+   * CONTACT_CODE_MAX_ATTEMPTS wrong tries (counted in the database); this
+   * bounds the loop of "send, guess five, send again" in wall-clock time.
+   */
+  contactCodeVerify: { max: 20, windowSeconds: 60 * 60 },
   /**
    * GDPR data export. Reads the caller's ENTIRE account (profile + every
    * product + every storefront config) in three parallel queries and streams

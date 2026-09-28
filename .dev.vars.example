@@ -19,3 +19,10 @@ R2_BUCKET_NAME="squareshare-products"
 # `vars` (it's not a secret), not here. In production: `wrangler secret put
 # TURNSTILE_SECRET_KEY` / the CF dashboard, never committed.
 # TURNSTILE_SECRET_KEY="paste-turnstile-secret-key-here"
+
+# Contact verification (lib/contact-verification): the HMAC key codes are
+# stored under, and the Brevo REST key that sends them. In production:
+# `wrangler secret put CONTACT_VERIFICATION_KEY` / `BREVO_API_KEY`. The vars
+# that switch each channel on are listed in wrangler.jsonc.
+# CONTACT_VERIFICATION_KEY=...
+# BREVO_API_KEY=...

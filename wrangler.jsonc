@@ -44,27 +44,33 @@
   "ai": {
     "binding": "AI"
   }
-  // TRANSACTIONAL EMAIL — Cloudflare Email Service (Sending), used to confirm
-  // a seller's buyer-facing contact address before they may publish (see
-  // lib/email/send.ts and lib/settings/seller-email-verification.ts).
+  // CONTACT VERIFICATION: a code emailed or texted to the seller's buyer-facing
+  // contact email and phone, typed back to prove they own them (see
+  // lib/contact-verification). Mail and texts go out through Brevo's REST API
+  // (lib/email/send.ts, lib/sms/send.ts), the same account and verified sender
+  // domain that already relays Supabase Auth's mail.
   //
-  // NOT BOUND YET, on purpose, and this is a THREE-STEP human job:
-  //   1. Onboard the sending domain to Email Service in the Cloudflare
-  //      dashboard and let it verify (DNS records). Until it does, every send
-  //      is refused with E_SENDER_NOT_VERIFIED.
-  //   2. Uncomment the binding below.
-  //   3. Set the two vars: `TRANSACTIONAL_EMAIL_FROM` (an address on that
-  //      verified domain, e.g. no-reply@squareshare.eu) and
-  //      `TRANSACTIONAL_EMAIL_ENABLED=true`.
+  // OFF until switched on, and switching it on is deliberate:
+  //   Secrets (`wrangler secret put <NAME>`, never in this file):
+  //     BREVO_API_KEY             a Brevo REST API key (xkeysib-...), NOT the
+  //                               SMTP key the Auth relay uses
+  //     CONTACT_VERIFICATION_KEY  32 random bytes, base64url: the HMAC key
+  //                               codes are stored under. Rotating it only
+  //                               voids codes in flight (15 minutes' worth).
+  //   Email proof, vars:
+  //     TRANSACTIONAL_EMAIL_FROM     a sender verified in Brevo
+  //     TRANSACTIONAL_EMAIL_ENABLED  "true"
+  //   Phone proof, vars (plus SMS credit on the Brevo account):
+  //     SMS_SENDER   up to 11 letters/digits, e.g. "Squareshare"
+  //     SMS_ENABLED  "true"
   //
-  // Sending to arbitrary recipients needs the Workers PAID plan; sending only
-  // to addresses already verified in the account is free. Binding it before
-  // step 1 would turn a working publish flow into a broken one, which is why
-  // the code treats "no sender configured" as "verification is switched off"
-  // rather than as an error — a seller must never be blocked behind a link
-  // nobody can send.
+  // Turning EMAIL on makes a proven contact email a condition of publishing,
+  // for every seller (grandfathered proofs were cleared by
+  // 20260926_contact_verification). With TRANSACTIONAL_EMAIL_* set but
+  // CONTACT_VERIFICATION_KEY missing, nobody can publish and the logs say
+  // why: a missing secret must never quietly switch the requirement off.
+  // Phones are never required; an unproven one is simply not shown to buyers.
   //
-  // "send_email": [{ "name": "EMAIL" }]
   // Bindings (KV/R2/D1/Hyperdrive/secrets) get added here as the dashboard
   // grows. Secrets for the Workers runtime go in `.dev.vars` (local) and
   // `wrangler secret put` / the CF dashboard (production) — never in this file.

@@ -12,19 +12,29 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, cleanup, waitFor } from "../setup/render";
+import { render, screen, cleanup, waitFor, within } from "../setup/render";
 import userEvent from "@testing-library/user-event";
 import { failed, invalidInput, succeeded } from "@/lib/errors";
 import { msg } from "@/i18n/types";
 
 afterEach(cleanup);
 
-// Mock the server action — the component imports it from this path.
+// Mock the server actions — the component imports them from these paths.
 const mockSaveTaxInfo = vi.hoisted(() => vi.fn().mockResolvedValue({}));
-const mockResend = vi.hoisted(() => vi.fn().mockResolvedValue({}));
 vi.mock("@/lib/settings/actions", () => ({
   saveTaxInfo: mockSaveTaxInfo,
-  resendSellerEmailVerification: mockResend,
+}));
+const mockSendCode = vi.hoisted(() => vi.fn().mockResolvedValue({}));
+const mockConfirmCode = vi.hoisted(() => vi.fn().mockResolvedValue({}));
+vi.mock("@/lib/contact-verification/actions", () => ({
+  sendContactCode: mockSendCode,
+  confirmContactCode: mockConfirmCode,
+}));
+const mockRefresh = vi.hoisted(() => vi.fn());
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn(), refresh: mockRefresh }),
+  usePathname: () => "/settings/tax",
+  useSearchParams: () => new URLSearchParams(),
 }));
 
 const { TaxSection } = await import("@/components/settings/TaxSection");
@@ -35,13 +45,27 @@ const SAVED = {
   email: "hello@rootlabs.example",
   vatId: "",
   country: "",
-  phone: "+353 1 234 5678",
+  phone: "+353 87 123 4567",
   continueHref: "/storefront",
 } as const;
+
+/** A deployment that can prove both channels, with email proof required. */
+const PROVABLE = { email: true, phone: true, emailRequired: true };
 
 beforeEach(() => {
   vi.clearAllMocks();
   mockSaveTaxInfo.mockResolvedValue({});
+  mockSendCode.mockResolvedValue(
+    succeeded(
+      msg("Settings.contactVerification.success.sent", {
+        channel: "email",
+        target: "hello@rootlabs.example",
+      }),
+    ),
+  );
+  mockConfirmCode.mockResolvedValue(
+    succeeded(msg("Settings.contactVerification.success.confirmed", { channel: "email" })),
+  );
 });
 
 describe("TaxSection — initial state", () => {
@@ -51,7 +75,7 @@ describe("TaxSection — initial state", () => {
     expect(screen.getByLabelText(/Trader name/)).toHaveValue(
       "Root Labs Studio",
     );
-    expect(screen.getByLabelText("Phone")).toHaveValue("+353 1 234 5678");
+    expect(screen.getByLabelText("Phone")).toHaveValue("+353 87 123 4567");
     // Substring match: the three required fields carry a RequiredMark
     // asterisk inside their label, which lands in the label's text content.
     expect(screen.getByLabelText(/Contact email/)).toHaveValue(
@@ -201,5 +225,94 @@ describe("TaxSection — SET-04: VAT advisory", () => {
 
     // EL is Greece's VAT prefix even though the ISO code is GR — no advisory.
     expect(screen.queryByText(/looks like/i)).toBeNull();
+  });
+});
+
+describe("TaxSection — proving the contact details", () => {
+  const row = (channel: "email" | "phone") =>
+    document.querySelector<HTMLElement>(`[data-contact-verification="${channel}"]`);
+
+  it("offers a code for an unproven email, then asks for it", async () => {
+    const user = userEvent.setup();
+    render(<TaxSection {...SAVED} verification={PROVABLE} />);
+
+    expect(row("email")).toHaveAttribute("data-proof-state", "unconfirmed");
+    expect(row("email")).toHaveTextContent(/can't publish until it is/i);
+    await user.click(within(row("email")!).getByRole("button", { name: "Send code" }));
+
+    // The form carries the channel and nothing else: the recipient is never
+    // the browser's to name.
+    await waitFor(() => expect(mockSendCode).toHaveBeenCalledTimes(1));
+    const sent = mockSendCode.mock.calls[0]![1] as FormData;
+    expect([...sent.keys()]).toEqual(["channel"]);
+    expect(sent.get("channel")).toBe("email");
+
+    await waitFor(() => expect(row("email")).toHaveAttribute("data-proof-state", "awaitingCode"));
+    expect(row("email")).toHaveTextContent(
+      "Enter the 8-digit code we emailed to hello@rootlabs.example.",
+    );
+  });
+
+  it("submits the code on the last digit, and shows the proof", async () => {
+    const user = userEvent.setup();
+    render(
+      <TaxSection
+        {...SAVED}
+        verification={PROVABLE}
+        pendingCodes={{ email: true, phone: false }}
+      />,
+    );
+
+    await user.type(within(row("email")!).getByLabelText("Confirmation code"), "1234 5678");
+
+    await waitFor(() => expect(mockConfirmCode).toHaveBeenCalledTimes(1));
+    const posted = mockConfirmCode.mock.calls[0]![1] as FormData;
+    expect(posted.get("channel")).toBe("email");
+    expect(posted.get("code")).toBe("1234 5678");
+    await waitFor(() => expect(row("email")).toHaveAttribute("data-proof-state", "confirmed"));
+    // The gate and the buyer page are server-rendered: they are asked to refresh.
+    expect(mockRefresh).toHaveBeenCalled();
+  });
+
+  it("keeps the code box open after a wrong code", async () => {
+    mockConfirmCode.mockResolvedValue(
+      failed(invalidInput(msg("Errors.contactVerification.wrongCode"))),
+    );
+    const user = userEvent.setup();
+    render(
+      <TaxSection {...SAVED} verification={PROVABLE} pendingCodes={{ email: true, phone: false }} />,
+    );
+
+    await user.type(within(row("email")!).getByLabelText("Confirmation code"), "00000000");
+
+    await waitFor(() => expect(mockConfirmCode).toHaveBeenCalledTimes(1));
+    expect(row("email")).toHaveAttribute("data-proof-state", "awaitingCode");
+  });
+
+  it("never offers a code for an edit that has not been saved", async () => {
+    const user = userEvent.setup();
+    render(<TaxSection {...SAVED} verification={PROVABLE} />);
+
+    await user.type(screen.getByLabelText(/Contact email/), "x");
+
+    expect(row("email")).toHaveAttribute("data-proof-state", "dirty");
+    expect(row("email")).toHaveTextContent(/Save to send a code to the new address/i);
+    expect(within(row("email")!).queryByRole("button", { name: "Send code" })).toBeNull();
+  });
+
+  it("says a phone cannot be shown when this deployment cannot text", () => {
+    render(<TaxSection {...SAVED} verification={{ ...PROVABLE, phone: false }} />);
+    expect(row("phone")).toHaveAttribute("data-proof-state", "unavailable");
+    expect(row("phone")).toHaveTextContent(/confirming by text isn't available yet/i);
+  });
+
+  it("shows a proven phone as confirmed", () => {
+    render(<TaxSection {...SAVED} verification={PROVABLE} phoneVerified />);
+    expect(row("phone")).toHaveAttribute("data-proof-state", "confirmed");
+  });
+
+  it("has no email row where email proof is off entirely", () => {
+    render(<TaxSection {...SAVED} />);
+    expect(row("email")).toBeNull();
   });
 });

@@ -26,7 +26,9 @@ const COMPLETE_PROFILE = {
   tax_business_name: "Lamp Studio Ltd",
   tax_vat_id: null,
   tax_country: null,
-  seller_address: "12 Market Street",
+  // Street AND town: the gate re-checks plausibility on read, so a street on
+  // its own counts as no address at all.
+  seller_address: "12 Market Street\nDublin",
   seller_email: "hi@lamp-studio.ie",
   seller_phone: null,
 };

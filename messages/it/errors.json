@@ -48,13 +48,18 @@
     "editThisStorefront": {
       "withRole": "Il tuo ruolo {role, select, owner {Proprietario} editor {Editor} viewer {Visualizzatore} other {{role}}} non può modificare questa vetrina in questo negozio.",
       "noRole": "Non hai il permesso di modificare questa vetrina in questo negozio."
+    },
+    "fulfilOrders": {
+      "withRole": "Il tuo ruolo {role, select, owner {Proprietario} editor {Editor} viewer {Visualizzatore} other {{role}}} non può segnare gli ordini come spediti in questo negozio.",
+      "noRole": "Non hai il permesso di segnare gli ordini come spediti in questo negozio."
     }
   },
   "notFound": {
     "fix": "Potrebbe essere stato eliminato, oppure potresti aver cambiato negozio. Aggiorna la pagina per caricare i dati più recenti.",
     "product": "Non è stato possibile trovare quel prodotto.",
     "storefront": "Non è stato possibile trovare quella vetrina.",
-    "item": "Non è stato possibile trovare questo elemento."
+    "item": "Non è stato possibile trovare questo elemento.",
+    "order": "Non è stato possibile trovare quell'ordine."
   },
   "rateLimited": {
     "fix": "Attendi qualche minuto e riprova. Se non c’è nulla che si sta ritentando in background, aggiorna prima la pagina.",
@@ -70,7 +75,8 @@
     "updateStock": "Troppi tentativi di aggiornare le scorte in poco tempo.",
     "readProductPageSettings": "Troppi tentativi di leggere le impostazioni della pagina prodotto in poco tempo.",
     "requestReview": "Troppi tentativi di chiedere una revisione in poco tempo.",
-    "fileAppeal": "Troppi tentativi di inviare una contestazione in poco tempo."
+    "fileAppeal": "Troppi tentativi di inviare una contestazione in poco tempo.",
+    "fulfilOrders": "Troppi tentativi di segnare ordini come spediti in poco tempo."
   },
   "serverError": {
     "fix": "Di solito è temporaneo. Attendi un momento e riprova; se continua a non funzionare, aggiorna la pagina.",
@@ -97,7 +103,8 @@
     "loadProductPageSettings": "Non è stato possibile caricare le impostazioni della tua pagina prodotto per un problema dalla nostra parte.",
     "saveProductPageSettings": "Non è stato possibile salvare le impostazioni della tua pagina prodotto per un problema dalla nostra parte.",
     "sendForReview": "Non è stato possibile inviare la richiesta di revisione per un problema dalla nostra parte.",
-    "fileAppeal": "Non è stato possibile inviare la tua contestazione a causa di un problema da parte nostra."
+    "fileAppeal": "Non è stato possibile inviare la tua contestazione a causa di un problema da parte nostra.",
+    "markOrderShipped": "Non è stato possibile segnare l'ordine come spedito per un problema dalla nostra parte."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Questo prodotto è stato rimosso, non messo in pausa.} storefront {Questa vetrina è stata rimossa, non messa in pausa.} other {Questo elemento è stato rimosso, non messo in pausa.}}",
@@ -112,8 +119,8 @@
     "action": "Aggiungi dati venditore",
     "fix": {
       "add": "{fields, select, businessName {Aggiungi la tua ragione sociale o nome in Impostazioni › Attività e dati del venditore, poi pubblica.} address {Aggiungi il tuo indirizzo commerciale in Impostazioni › Attività e dati del venditore, poi pubblica.} email {Aggiungi la tua email di contatto in Impostazioni › Attività e dati del venditore, poi pubblica.} businessName_address {Aggiungi la tua ragione sociale o nome e il tuo indirizzo commerciale in Impostazioni › Attività e dati del venditore, poi pubblica.} businessName_email {Aggiungi la tua ragione sociale o nome e la tua email di contatto in Impostazioni › Attività e dati del venditore, poi pubblica.} address_email {Aggiungi il tuo indirizzo commerciale e la tua email di contatto in Impostazioni › Attività e dati del venditore, poi pubblica.} other {Aggiungi la tua ragione sociale o nome, l’indirizzo commerciale e l’email di contatto in Impostazioni › Attività e dati del venditore, poi pubblica.}}",
-      "addAndConfirm": "{fields, select, businessName {Aggiungi la tua ragione sociale o nome in Impostazioni › Attività e dati del venditore, e conferma la tua email di contatto tramite il link che ti abbiamo inviato.} address {Aggiungi il tuo indirizzo commerciale in Impostazioni › Attività e dati del venditore, e conferma la tua email di contatto tramite il link che ti abbiamo inviato.} email {Aggiungi la tua email di contatto in Impostazioni › Attività e dati del venditore, e conferma la tua email di contatto tramite il link che ti abbiamo inviato.} businessName_address {Aggiungi la tua ragione sociale o nome e il tuo indirizzo commerciale in Impostazioni › Attività e dati del venditore, e conferma la tua email di contatto tramite il link che ti abbiamo inviato.} businessName_email {Aggiungi la tua ragione sociale o nome e la tua email di contatto in Impostazioni › Attività e dati del venditore, e conferma la tua email di contatto tramite il link che ti abbiamo inviato.} address_email {Aggiungi il tuo indirizzo commerciale e la tua email di contatto in Impostazioni › Attività e dati del venditore, e conferma la tua email di contatto tramite il link che ti abbiamo inviato.} other {Aggiungi la tua ragione sociale o nome, l’indirizzo commerciale e l’email di contatto in Impostazioni › Attività e dati del venditore, e conferma la tua email di contatto tramite il link che ti abbiamo inviato.}}",
-      "confirm": "Apri il link di conferma che ti abbiamo inviato al tuo indirizzo di contatto. Puoi inviarne uno nuovo da Impostazioni › Attività e dati del venditore.",
+      "addAndConfirm": "{fields, select, businessName {Aggiungi la tua ragione sociale o nome in Impostazioni › Attività e dati del venditore, e conferma la tua email di contatto con il codice che ti inviamo.} address {Aggiungi il tuo indirizzo commerciale in Impostazioni › Attività e dati del venditore, e conferma la tua email di contatto con il codice che ti inviamo.} email {Aggiungi la tua email di contatto in Impostazioni › Attività e dati del venditore, e confermala con il codice che ti inviamo.} businessName_address {Aggiungi la tua ragione sociale o nome e il tuo indirizzo commerciale in Impostazioni › Attività e dati del venditore, e conferma la tua email di contatto con il codice che ti inviamo.} businessName_email {Aggiungi la tua ragione sociale o nome e la tua email di contatto in Impostazioni › Attività e dati del venditore, e conferma l'email con il codice che ti inviamo.} address_email {Aggiungi il tuo indirizzo commerciale e la tua email di contatto in Impostazioni › Attività e dati del venditore, e conferma l'email con il codice che ti inviamo.} other {Aggiungi la tua ragione sociale o nome, l'indirizzo commerciale e l'email di contatto in Impostazioni › Attività e dati del venditore, e conferma l'email con il codice che ti inviamo.}}",
+      "confirm": "Conferma la tua email di contatto: invia un codice da Impostazioni › Attività e dati del venditore, poi inseriscilo lì.",
       "complete": "Completa Impostazioni › Attività e dati del venditore, poi pubblica."
     }
   },
@@ -182,12 +189,23 @@
     "resetRateLimited": "Troppe email di reimpostazione. Attendi un po’ prima di riprovare.",
     "resetSendRateLimited": "Troppe richieste. Attendi un minuto e riprova.",
     "resetFailed": "Non è stato possibile inviare l’email di reimpostazione. Riprova.",
-    "contactEmailTakesNoMail": "Il dominio di quell’email di contatto non accetta posta. Controlla che sia scritta correttamente, oppure usa un indirizzo che gli acquirenti possano davvero raggiungere.",
-    "savedButConfirmationFailed": "{reason, select, startFailed {Salvato, ma l’email di conferma non è stata inviata. Non è stato possibile avviare la conferma via email. Prova «Invia di nuovo l’email di conferma» qui sotto.} unavailable {Salvato, ma l’email di conferma non è stata inviata. La conferma via email non è disponibile al momento. Prova «Invia di nuovo l’email di conferma» qui sotto.} other {Salvato, ma l’email di conferma non è stata inviata. Non siamo riusciti a inviare l’email di conferma. Controlla l’indirizzo e riprova. Prova «Invia di nuovo l’email di conferma» qui sotto.}}",
-    "confirmationFailed": "{reason, select, startFailed {Non è stato possibile avviare la conferma via email.} unavailable {La conferma via email non è disponibile al momento.} other {Non siamo riusciti a inviare l’email di conferma. Controlla l’indirizzo e riprova.}}",
-    "confirmationUnavailable": "La conferma via email non è disponibile al momento.",
-    "confirmationRateLimited": "Sono state inviate troppe email di conferma. Attendi un po’ prima di richiederne un’altra.",
-    "noContactEmail": "Aggiungi prima un’email di contatto, così potremo confermarla."
+    "contactEmailTakesNoMail": "Il dominio di quell’email di contatto non accetta posta. Controlla che sia scritta correttamente, oppure usa un indirizzo che gli acquirenti possano davvero raggiungere."
+  },
+  "contactVerification": {
+    "unavailable": "{channel, select, email {La conferma via email non è disponibile in questo momento.} other {La conferma via SMS non è disponibile in questo momento.}}",
+    "nothingToConfirm": "{channel, select, email {Aggiungi prima un'email di contatto e salvala.} other {Aggiungi prima un numero di telefono e salvalo.}}",
+    "phoneNeedsResave": "Salva di nuovo il tuo numero di telefono in formato internazionale completo, come +353 87 123 4567, poi richiedi un codice.",
+    "cooldown": "Un codice è stato appena inviato. Aspetta un minuto prima di richiederne un altro.",
+    "tooManyCodes": "Hai ricevuto molti codici. Aspetta un po' prima di richiederne un altro.",
+    "sendFailed": "{channel, select, email {Non siamo riusciti a inviare l'email. Controlla l'indirizzo e riprova.} other {Non siamo riusciti a inviare il messaggio. Controlla il numero e riprova.}}",
+    "savedButNotSent": "Salvato, ma non siamo riusciti a inviare il codice di conferma. Usa «Invia codice» qui sotto per riprovare.",
+    "wrongCode": "Quel codice non è corretto. Controllalo e riprova.",
+    "locked": "Troppi tentativi errati per quel codice. Inviati un nuovo codice.",
+    "expired": "Quel codice è scaduto. Inviati un nuovo codice.",
+    "noCode": "Prima inviati un codice.",
+    "stale": "I tuoi dati sono cambiati dopo l'invio di quel codice. Inviati un nuovo codice.",
+    "tooManyAttempts": "Troppi tentativi. Aspetta un po', poi riprova.",
+    "failed": "Non siamo riusciti a controllare quel codice in questo momento. Riprova."
   },
   "avatar": {
     "unexpectedData": "Sono stati rifiutati dati del modulo imprevisti.",
@@ -552,5 +570,11 @@
     "rateLimited": "Troppi codici in poco tempo. Attendi qualche minuto, poi riprova.",
     "expired": "Questa richiesta di accesso è scaduta o è già stata risposta. Mostra un nuovo codice sul dispositivo da cui stai accedendo.",
     "otherAccount": "Questa richiesta riguarda un account Square Share diverso da quello collegato qui."
+  },
+  "orders": {
+    "notShippable": {
+      "message": "Questo ordine non può essere segnato come spedito.",
+      "fix": "Solo gli ordini pagati con qualcosa da inviare possono essere spediti. Aggiorna la pagina per vedere lo stato di questo."
+    }
   }
 }

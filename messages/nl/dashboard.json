@@ -1,4 +1,9 @@
 {
+  "offline": {
+    "title": "Je bent offline",
+    "description": "Deze pagina heeft een internetverbinding nodig. Ze laadt vanzelf zodra je weer online bent, en je account en gegevens zijn in orde.",
+    "retry": "Opnieuw proberen"
+  },
   "metadata": {
     "app": {
       "title": "Square Share Dashboard",
@@ -111,6 +116,10 @@
       "label": "{count, plural, one {{count} etalageblok dat naar verwijderde producten verwijst} other {{count} etalageblokken die naar verwijderde producten verwijzen}}",
       "description": "Deze blokken lijken leeg voor bezoekers. Verwijder of vervang ze.",
       "action": "Etalage openen"
+    },
+    "toShip": {
+      "description": "Kopers wachten hierop. Pak ze in en markeer ze dan als verzonden.",
+      "action": "Bestellingen verzenden"
     }
   }
 }

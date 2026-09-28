@@ -1,4 +1,9 @@
 {
+  "offline": {
+    "title": "Jesteś offline",
+    "description": "Ta strona potrzebuje połączenia z internetem. Załaduje się sama, gdy tylko wrócisz do sieci, a twoje konto i dane są bezpieczne.",
+    "retry": "Spróbuj ponownie"
+  },
   "metadata": {
     "app": {
       "title": "Panel Square Share",
@@ -111,6 +116,10 @@
       "label": "{count, plural, one {{count} blok witryny odwołujący się do usuniętych produktów} few {{count} bloki witryny odwołujące się do usuniętych produktów} many {{count} bloków witryny odwołujących się do usuniętych produktów} other {{count} bloku witryny odwołującego się do usuniętych produktów}}",
       "description": "Te bloki wyglądają dla odwiedzających na puste. Usuń je lub zastąp innymi.",
       "action": "Otwórz witrynę"
+    },
+    "toShip": {
+      "description": "Kupujący czekają na przesyłki. Zapakuj i oznacz jako wysłane.",
+      "action": "Wyślij zamówienia"
     }
   }
 }

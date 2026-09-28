@@ -107,6 +107,7 @@ function build(overrides: {
   stripeConnected?: boolean;
   stripeConnectAvailable?: boolean;
   setupVisible?: boolean;
+  toShipCount?: number;
 } = {}) {
   const items = buildAttentionItems({
     orders: { ...NO_ORDERS, ...overrides.orders },
@@ -116,12 +117,15 @@ function build(overrides: {
     stripeConnected: overrides.stripeConnected ?? true,
     stripeConnectAvailable: overrides.stripeConnectAvailable,
     setupVisible: overrides.setupVisible,
+    toShipCount: overrides.toShipCount,
   });
   return new Map(items.map((item) => [item.key, item]));
 }
 
 /** Every branch of the builder, so the route check below covers them all. */
 const ALL_BRANCHES = [
+  // Orders waiting to ship
+  build({ toShipCount: 3 }),
   // Stripe not connected, on the day connecting is possible
   build({ stripeConnected: false, stripeConnectAvailable: true }),
   // Legal not accepted
@@ -189,6 +193,20 @@ const ALL_BRANCHES = [
 ];
 
 describe("needs-attention destinations", () => {
+  it("leads with orders waiting to ship, and lands on the To ship list", () => {
+    const items = build({ toShipCount: 3, stripeConnected: false, stripeConnectAvailable: true });
+    expect([...items.keys()][0]).toBe("to-ship");
+    const row = items.get("to-ship");
+    expect(row?.href).toBe("/orders?view=to-ship");
+    expect(text(row?.label)).toBe("3 orders to ship");
+    expect(text(row?.actionLabel)).toBe("Ship orders");
+  });
+
+  it("says nothing about shipping when nothing is waiting", () => {
+    expect(build({ toShipCount: 0 }).has("to-ship")).toBe(false);
+    expect(build().has("to-ship")).toBe(false);
+  });
+
   it("sends the Stripe row to /payments, where the connection lives", () => {
     // Not /settings: nothing on the account settings tabs connects Stripe.
     expect(

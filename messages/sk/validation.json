@@ -273,6 +273,16 @@
     "placeholder": "Kontaktný e-mail vyzerá ako zástupná adresa. Zadajte adresu, ktorú skutočne používate.",
     "disposable": "Kontaktný e-mail je od dočasného poskytovateľa. Zadajte trvalú adresu."
   },
+  "phone": {
+    "needsCountryCode": "Pridajte kód krajiny k telefónnemu číslu, napr. +353 87 123 4567, alebo nastavte svoju krajinu.",
+    "invalid": "Toto telefónne číslo neexistuje. Skontrolujte číslice a kód krajiny.",
+    "unsupportedRegion": "Telefónne čísla môžeme potvrdiť len v EÚ, EHP, Švajčiarsku a Spojenom kráľovstve.",
+    "notMobile": "Použite mobilné číslo. Potvrdenie posielame textovou správou a pevná linka ho nemôže prijať."
+  },
+  "address": {
+    "placeholder": "Adresa vyzerá ako zástupná hodnota. Použite skutočnú poštovú adresu, z ktorej obchodujete.",
+    "incomplete": "Zadajte úplnú poštovú adresu: ulicu a číslo, potom mesto a PSČ, každý údaj na vlastnom riadku."
+  },
   "uuid": {
     "id": "Toto ID nie je platné.",
     "option": "Táto možnosť nie je platná.",
@@ -292,10 +302,12 @@
     "domains": "Domény musia byť vo formáte yoursite.com (bez https://, portu, cesty ani zástupného znaku)."
   },
   "referenceCode": {
-    "vatId": "IČ DPH musí mať {min} až {max} znakov: písmená, číslice, medzery, bodky alebo spojovníky."
+    "vatId": "IČ DPH musí mať {min} až {max} znakov: písmená, číslice, medzery, bodky alebo spojovníky.",
+    "trackingNumber": "Sledovacie číslo má {min} až {max} znakov: písmená, číslice, medzery, bodky alebo spojovníky."
   },
   "oneTimeCode": {
-    "authenticator": "Kód tvorí 6 číslic zobrazených vo vašej overovacej aplikácii."
+    "authenticator": "Kód tvorí 6 číslic zobrazených vo vašej overovacej aplikácii.",
+    "contact": "Kód tvorí {length} číslic, ktoré sme vám poslali."
   },
   "hexColor": {
     "colors": "Farby musia byť 6-ciferný hex kód, napríklad #a855f7.",

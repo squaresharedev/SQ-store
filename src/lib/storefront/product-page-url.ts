@@ -1,3 +1,5 @@
+import { appUrl } from "@/lib/app-url";
+
 // Where a product page lives. One function, so the embed payload, the editor
 // and any future "copy link" all agree on the shape and the origin.
 //
@@ -26,16 +28,16 @@ export const OPTION_QUERY_PARAM = "o";
  *  the value was already an option id, so it needs no translation. */
 export const LEGACY_VARIANT_QUERY_PARAM = "v";
 
+/** Every buyer-facing page lives under this prefix: robots.txt opens it to
+ *  crawlers, and the dashboard's service worker is never registered from it. */
+export const PUBLIC_PAGES_PREFIX = "/s/";
+
 /** Path only, for same-origin links and tests. */
 export function productPagePath(storefrontId: string, productId: string): string {
-  return `/s/${encodeURIComponent(storefrontId)}/p/${encodeURIComponent(productId)}`;
+  return `${PUBLIC_PAGES_PREFIX}${encodeURIComponent(storefrontId)}/p/${encodeURIComponent(productId)}`;
 }
 
 /** Absolute URL on the app's own origin, for the embed payload and metadata. */
 export function productPageUrl(storefrontId: string, productId: string): string {
-  const origin = (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").replace(
-    /\/+$/,
-    "",
-  );
-  return `${origin}${productPagePath(storefrontId, productId)}`;
+  return appUrl(productPagePath(storefrontId, productId));
 }

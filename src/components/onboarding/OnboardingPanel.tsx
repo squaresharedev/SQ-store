@@ -13,7 +13,8 @@ import {
 } from "@/lib/onboarding/seen-steps";
 import { endTour, setTourNext, startTour, type TourNext } from "@/lib/onboarding/tour-store";
 import type { TraderIdentityField } from "@/lib/settings/trader-identity";
-import { SETUP_ANIMATION_SETTLE_MS, SetupChecklist } from "./SetupChecklist";
+import { SetupChecklist } from "./SetupChecklist";
+import { SETUP_ANIMATION_SETTLE_MS } from "./SetupMap";
 import { WelcomeFlow, type SellerPrefill } from "./WelcomeFlow";
 
 /** Everything Overview resolves on the server for the setup slot. */

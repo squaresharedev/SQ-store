@@ -273,6 +273,16 @@
     "placeholder": "The contact email looks like a placeholder. Use an address you actually read.",
     "disposable": "The contact email is at a temporary-mail provider. Use a permanent address."
   },
+  "phone": {
+    "needsCountryCode": "Add the country code to the phone number, like +353 87 123 4567, or set your country.",
+    "invalid": "That phone number doesn't exist. Check the digits and the country code.",
+    "unsupportedRegion": "We can only confirm phone numbers in the EU, the EEA, Switzerland and the UK.",
+    "notMobile": "Use a mobile number. We confirm it by text message, and a landline can't receive one."
+  },
+  "address": {
+    "placeholder": "The address looks like a placeholder. Use the real postal address you trade from.",
+    "incomplete": "Give your full postal address: street and number, then town and postcode, each on its own line."
+  },
   "uuid": {
     "id": "That id is not valid.",
     "option": "That option is not valid.",
@@ -292,10 +302,12 @@
     "domains": "Domains must be bare lowercase domains like yoursite.com — no https://, port, path, or wildcard."
   },
   "referenceCode": {
-    "vatId": "A VAT ID must be {min} to {max} letters, digits, spaces, dots or hyphens."
+    "vatId": "A VAT ID must be {min} to {max} letters, digits, spaces, dots or hyphens.",
+    "trackingNumber": "A tracking number is {min} to {max} letters, digits, spaces, dots or hyphens."
   },
   "oneTimeCode": {
-    "authenticator": "The code is the 6 digits shown in your authenticator app."
+    "authenticator": "The code is the 6 digits shown in your authenticator app.",
+    "contact": "The code is the {length} digits we sent you."
   },
   "hexColor": {
     "colors": "Colors must be 6-digit hex, like #a855f7.",

@@ -18,6 +18,11 @@ export default defineConfig({
     baseURL: "http://localhost:3100",
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
+    // The app registers a service worker (public/sw.js) on every page, and
+    // page.route() never sees a request the worker makes on the page's
+    // behalf. Blocked by default so specs mock exactly what they did before;
+    // a spec about the worker itself opts back in with `serviceWorkers: "allow"`.
+    serviceWorkers: "block",
   },
   projects: [
     {

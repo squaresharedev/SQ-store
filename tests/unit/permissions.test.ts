@@ -22,6 +22,7 @@ const EXPECTED: Record<TeamRole, Record<TeamAction, boolean>> = {
     "store.read": true,
     "products.write": true,
     "storefront.write": true,
+    "orders.fulfil": true,
   },
   editor: {
     "team.read": true,
@@ -31,6 +32,7 @@ const EXPECTED: Record<TeamRole, Record<TeamAction, boolean>> = {
     "store.read": true,
     "products.write": true,
     "storefront.write": true,
+    "orders.fulfil": true,
   },
   viewer: {
     "team.read": true,
@@ -40,6 +42,7 @@ const EXPECTED: Record<TeamRole, Record<TeamAction, boolean>> = {
     "store.read": true,
     "products.write": false,
     "storefront.write": false,
+    "orders.fulfil": false,
   },
 };
 

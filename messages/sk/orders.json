@@ -24,7 +24,10 @@
     "clearFilters": "Vymazať filtre",
     "title": "Zatiaľ žiadne objednávky",
     "hint": "Pokladňa Square Share ešte nie je spustená. Predaje cez váš vlastný odkaz na nákup alebo e-mailom sa tu nezobrazujú.",
-    "goToProducts": "Prejsť na produkty"
+    "goToProducts": "Prejsť na produkty",
+    "toShipTitle": "Nič na odoslanie",
+    "toShipHint": "Máte všetko v poriadku. Zaplatené objednávky čakajúce na odoslanie sa tu zobrazia, najstaršie ako prvé.",
+    "seeAllOrders": "Zobraziť všetky objednávky"
   },
   "list": {
     "updating": "Aktualizuje sa…",
@@ -38,7 +41,10 @@
     "channel": "Kanál",
     "status": "Stav",
     "buyer": "Kupujúci",
-    "date": "Dátum"
+    "date": "Dátum",
+    "shipping": "Doprava",
+    "shipTo": "Odoslať na",
+    "noAddress": "Bez adresy"
   },
   "toolbar": {
     "region": "filtre objednávok",
@@ -85,6 +91,39 @@
       "copy": "Kopírovať ID objednávky",
       "copied": "ID objednávky skopírované",
       "failed": "ID objednávky sa nepodarilo skopírovať. Vyberte ho ručne a skopírujte."
+    },
+    "pack": "Čo zbaliť",
+    "packLine": "{quantity} × {title}",
+    "copyPack": {
+      "copy": "Kopírovať zoznam balenia",
+      "copied": "Zoznam balenia skopírovaný",
+      "failed": "Zoznam balenia sa nepodarilo skopírovať. Vyberte ho ručne a skopírujte."
+    },
+    "shipTo": "Odoslať na",
+    "copyAddress": {
+      "copy": "Kopírovať adresu",
+      "copied": "Adresa skopírovaná",
+      "failed": "Adresu sa nepodarilo skopírovať. Vyberte ju ručne a skopírujte."
+    },
+    "copyPhone": {
+      "copy": "Kopírovať telefónne číslo",
+      "copied": "Telefónne číslo skopírované",
+      "failed": "Telefónne číslo sa nepodarilo skopírovať. Vyberte ho ručne a skopírujte."
+    },
+    "noAddress": "Táto objednávka nemá doručovaciu adresu. Pošlite kupujúcemu e-mail a opýtajte sa, kam to má ísť.",
+    "shipping": "Doprava",
+    "shippedOn": "Odoslané {date}",
+    "trackingNumber": "Sledovacie číslo",
+    "copyTracking": {
+      "copy": "Kopírovať sledovacie číslo",
+      "copied": "Sledovacie číslo skopírované",
+      "failed": "Sledovacie číslo sa nepodarilo skopírovať. Vyberte ho ručne a skopírujte."
+    },
+    "nothingToShip": "Pre túto objednávku nie je nič na odoslanie.",
+    "shipBlocked": {
+      "pending": "Platba ešte nebola prijatá. Počkajte na jej potvrdenie a potom odošlite.",
+      "refunded": "Táto objednávka bola refundovaná, takže nie je nič na odoslanie.",
+      "disputed": "Táto platba je napadnutá. Najprv vyriešte spor, potom odošlite."
     }
   },
   "actions": {
@@ -104,5 +143,59 @@
   "loading": {
     "title": "Objednávky",
     "subtitle": "Každý predaj cez vloženie na web a trhovisko."
+  },
+  "toShipCount": "{count, plural, one {{count} objednávka na odoslanie} few {{count} objednávky na odoslanie} many {{count} objednávky na odoslanie} other {{count} objednávok na odoslanie}}",
+  "views": {
+    "label": "Ktoré objednávky zobraziť",
+    "toShip": "Na odoslanie",
+    "all": "Všetky objednávky"
+  },
+  "fulfilment": {
+    "unfulfilled": "Na odoslanie",
+    "shipped": "Odoslané",
+    "not_required": "Bez dopravy"
+  },
+  "ship": {
+    "markShipped": "Označiť ako odoslané",
+    "trackingLabel": "Sledovacie číslo (voliteľné)",
+    "trackingPlaceholder": "napr. RR123456789IE",
+    "tellsBuyer": "Kupujúcemu pošleme e-mail, že balík je na ceste, a ak sledovacie číslo zadáte, priložíme ho.",
+    "noBuyerEmail": "Táto objednávka nemá e-mail kupujúceho, preto ho nebudeme informovať.",
+    "confirm": "Označiť ako odoslané",
+    "shipped": "Označené ako odoslané. Kupujúcemu sme poslali e-mail.",
+    "shippedNoEmail": "Označené ako odoslané.",
+    "addTracking": "Pridať sledovacie číslo",
+    "editTracking": "Zmeniť sledovacie číslo",
+    "saveTracking": "Uložiť sledovacie číslo",
+    "trackingSaved": "Sledovacie číslo uložené. Poslali sme ho kupujúcemu.",
+    "trackingSavedNoEmail": "Sledovacie číslo uložené."
+  },
+  "email": {
+    "fromName": "{store} cez Square Share",
+    "signOff": "Square Share",
+    "newOrder": {
+      "subjectShip": "Nová objednávka: odošlite {quantity} × {title} do {city}",
+      "subjectDigital": "Nová objednávka: {title}",
+      "introShip": "Máte novú objednávku na odoslanie.",
+      "introDigital": "Predali ste {title}. Je to stiahnutie, takže nie je nič na odoslanie.",
+      "pack": "Čo zbaliť",
+      "shipTo": "Odoslať na",
+      "phone": "Telefón: {phone}",
+      "noAddress": "Táto objednávka nemá doručovaciu adresu. Pošlite kupujúcemu e-mail a opýtajte sa, kam to má ísť.",
+      "buyer": "Kupujúci: {email}",
+      "total": "Celková suma objednávky: {amount}",
+      "openShip": "Keď balík odošlete, označte ho tu ako odoslané a kupujúceho budeme informovať: {url}",
+      "openDigital": "Zobraziť objednávku: {url}"
+    },
+    "shipped": {
+      "subject": "Vaša objednávka z {store} je na ceste",
+      "subjectTracking": "Sledovanie vašej objednávky z {store}",
+      "intro": "Dobrá správa: {store} odoslal vašu objednávku.",
+      "introTracking": "{store} pridal k vašej objednávke sledovacie číslo.",
+      "tracking": "Sledovacie číslo: {tracking}",
+      "shipTo": "Smeruje na:",
+      "questions": "Máte otázky o vašej objednávke? Odpovedzte na tento e-mail a dostanete sa k {store}.",
+      "footer": "Odoslané cez Square Share v mene {store}."
+    }
   }
 }

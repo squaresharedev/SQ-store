@@ -273,6 +273,16 @@
     "placeholder": "E-mail kontaktowy wygląda na przykładowy. Użyj adresu, który faktycznie czytasz.",
     "disposable": "E-mail kontaktowy znajduje się w domenie tymczasowej skrzynki. Użyj stałego adresu."
   },
+  "phone": {
+    "needsCountryCode": "Dodaj kod kraju do numeru telefonu, np. +353 87 123 4567, albo ustaw swój kraj.",
+    "invalid": "Ten numer telefonu nie istnieje. Sprawdź cyfry i kod kraju.",
+    "unsupportedRegion": "Możemy potwierdzić tylko numery telefonów z UE, EOG, Szwajcarii i Wielkiej Brytanii.",
+    "notMobile": "Użyj numeru komórkowego. Potwierdzamy go SMS-em, a stacjonarny nie może go odebrać."
+  },
+  "address": {
+    "placeholder": "Adres wygląda na przykładowy. Podaj prawdziwy adres pocztowy, z którego prowadzisz działalność.",
+    "incomplete": "Podaj pełny adres pocztowy: ulica i numer, potem miejscowość i kod pocztowy, każda część w osobnej linijce."
+  },
   "uuid": {
     "id": "Ten identyfikator jest nieprawidłowy.",
     "option": "Ta opcja jest nieprawidłowa.",
@@ -292,10 +302,12 @@
     "domains": "Domeny muszą być zwykłymi domenami pisanymi małymi literami, np. twojastrona.com: bez https://, portu, ścieżki czy symboli wieloznacznych."
   },
   "referenceCode": {
-    "vatId": "Numer VAT UE musi mieć od {min} do {max} znaków: liter, cyfr, spacji, kropek lub myślników."
+    "vatId": "Numer VAT UE musi mieć od {min} do {max} znaków: liter, cyfr, spacji, kropek lub myślników.",
+    "trackingNumber": "Numer śledzenia to {min} do {max} liter, cyfr, spacji, kropek lub myślników."
   },
   "oneTimeCode": {
-    "authenticator": "Kod to 6 cyfr widocznych w aplikacji uwierzytelniającej."
+    "authenticator": "Kod to 6 cyfr widocznych w aplikacji uwierzytelniającej.",
+    "contact": "Kod to {length} cyfr, które ci wysłaliśmy."
   },
   "hexColor": {
     "colors": "Kolory muszą być 6-cyfrowym kodem hex, np. #a855f7.",

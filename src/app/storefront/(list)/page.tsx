@@ -7,6 +7,7 @@ import { getSampleStorefrontFlags } from "@/lib/onboarding/queries";
 import { StorefrontsList } from "@/components/storefront/StorefrontsList";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
+import { DEV_PREVIEW_PARAM, previewsEmptyList } from "@/lib/dev/preview";
 
 export async function generateMetadata() {
   const t = await getTranslations("Storefront.metadata");
@@ -17,11 +18,17 @@ export async function generateMetadata() {
 // supplied by (list)/layout.tsx rather than here, so that loading.tsx renders
 // inside the same chrome instead of replacing it. The editor route sits outside
 // this group and stays full-screen.
-export default async function StorefrontsPage() {
+export default async function StorefrontsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
   const t = await getTranslations("Storefront.metadata");
+  // Dev only: `?preview=empty` shows the new-seller empty state on a real account.
+  const previewEmpty = previewsEmptyList((await searchParams)[DEV_PREVIEW_PARAM]);
   // Products feed the cards' live grid previews (image tiles).
   const [storefronts, products, account, sampleFlags] = await Promise.all([
-    listStorefronts(),
+    previewEmpty ? { rows: [], total: 0 } : listStorefronts(),
     listAllProducts(),
     getActiveAccount(),
     // The person's own flag, not the store's: see getSampleStorefrontFlags.

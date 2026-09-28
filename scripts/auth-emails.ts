@@ -3,6 +3,8 @@
 //
 //   node --env-file-if-exists=.env.local scripts/auth-emails.ts preview [dir]
 //       writes every template to HTML files so they can be opened in a browser
+//   node --env-file-if-exists=.env.local scripts/auth-emails.ts assets
+//       renders the icon PNGs and uploads them to the public email-assets bucket
 //   node --env-file-if-exists=.env.local scripts/auth-emails.ts apply
 //       pushes subjects + templates (and SMTP, when BREVO_SMTP_* is set) to the
 //       Supabase project through the Management API (needs SUPABASE_ACCESS_TOKEN)
@@ -12,6 +14,7 @@
 
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { ARROW_ICON, HERO_ICONS, svg } from "./auth-email-icons.ts";
 
 /** Visible sender: the address must be a verified sender/domain in Brevo. */
 const SENDER_EMAIL = "info@squareshare.eu";
@@ -20,18 +23,25 @@ const BREVO_HOST = "smtp-relay.brevo.com";
 const BREVO_PORT = "587";
 const SITE_URL = "https://squareshare.eu";
 /** The SQ mark (Store/public/img/logo.png), served from the marketing site. */
+/** Public Storage bucket holding the PNG icons (`assets` command uploads them). */
+const ASSET_URL = "https://vnyfndqpdllwhvhinjoi.supabase.co/storage/v1/object/public/email-assets";
 const LOGO_URL = `${SITE_URL}/img/logo.png`;
 
 /** Mirrors the globals.css theme tokens; email clients cannot read CSS variables. */
 const INK = "#0a0a0c"; // --color-card-base
 const PAPER = "#f9f9f9"; // --color-surface-light
-const ACID = "#a855f7"; // --color-acid
 const MUTED = "#6b7280";
 const RULE = "#e5e7eb";
+const DARK_PAPER = "#0a0a0c";
+const DARK_CARD = "#141416";
+const DARK_MUTED = "#a1a1aa";
+const DARK_RULE = "#2a2a2e";
 const FONT = "'Space Grotesk','Helvetica Neue',Helvetica,Arial,sans-serif";
 
 type Template = {
   subject: string;
+  /** Hero tile, a HERO_ICONS key (auth-email-icons.ts). */
+  icon: string;
   /** Small caps label above the headline. */
   eyebrow: string;
   title: string;
@@ -46,39 +56,62 @@ type Template = {
 };
 
 const p = (html: string) =>
-  `<p style="margin:0 0 16px;font:400 15px/1.6 ${FONT};color:${INK};">${html}</p>`;
+  `<p class="ink" style="margin:0 0 16px;font:400 15px/1.6 ${FONT};color:${INK};">${html}</p>`;
 
-/** The ONE layout every auth email shares. */
+/**
+ * Dark-mode overrides (Apple Mail, iOS, Outlook.com honour them; clients that
+ * do not simply keep the light design). Inline styles win unless !important.
+ */
+const DARK_CSS = `
+  @media (prefers-color-scheme: dark) {
+    .bg { background:${DARK_PAPER} !important; }
+    .card { background:${DARK_CARD} !important; border-color:${DARK_RULE} !important; }
+    .ink { color:#ffffff !important; }
+    .muted, .muted a { color:${DARK_MUTED} !important; }
+    .rule { border-color:${DARK_RULE} !important; }
+    .btn { background:#ffffff !important; }
+    .btn a { color:${INK} !important; }
+    .code { background:${DARK_PAPER} !important; border-color:${DARK_RULE} !important; color:#ffffff !important; }
+    .tile { border:1px solid ${DARK_RULE} !important; }
+    .arrow-light { display:none !important; }
+    .arrow-dark { display:inline-block !important; }
+  }`;
+
+/** The ONE layout every auth email shares. Sharp corners, black and white only. */
 function layout(t: Template): string {
+  const arrow = (name: string, cls: string, hidden: boolean) =>
+    `<img class="${cls}" src="${ASSET_URL}/${name}.png" width="18" height="18" alt="" style="${hidden ? "display:none;" : "display:inline-block;"}vertical-align:middle;margin-left:10px;border:0;">`;
   const button = t.cta
-    ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0 24px;"><tr><td style="background:${INK};border-radius:8px;"><a href="${t.cta.href}" style="display:inline-block;padding:14px 28px;font:600 15px/1 ${FONT};color:#ffffff;text-decoration:none;">${t.cta.label}</a></td></tr></table>
-       <p style="margin:0 0 24px;font:400 12px/1.6 ${FONT};color:${MUTED};">Button not working? Paste this link into your browser:<br><a href="${t.cta.href}" style="color:${ACID};word-break:break-all;">${t.cta.href}</a></p>`
+    ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0 24px;"><tr><td class="btn" style="background:${INK};"><a href="${t.cta.href}" style="display:inline-block;padding:15px 26px;font:600 15px/18px ${FONT};color:#ffffff;text-decoration:none;">${t.cta.label}${arrow("arrow", "arrow-light", false)}${arrow("arrow-dark", "arrow-dark", true)}</a></td></tr></table>
+       <p class="muted" style="margin:0 0 24px;font:400 12px/1.6 ${FONT};color:${MUTED};">Button not working? Paste this link into your browser:<br><a href="${t.cta.href}" style="color:${MUTED};word-break:break-all;">${t.cta.href}</a></p>`
     : "";
   const code = t.code
-    ? `<div style="margin:8px 0 24px;padding:18px 20px;background:${PAPER};border:1px solid ${RULE};border-radius:8px;text-align:center;font:600 30px/1 'JetBrains Mono',Menlo,Consolas,monospace;letter-spacing:6px;color:${INK};">${t.code}</div>`
+    ? `<div class="code" style="margin:8px 0 24px;padding:18px 20px;background:${PAPER};border:1px solid ${RULE};text-align:center;font:600 30px/1 'JetBrains Mono',Menlo,Consolas,monospace;letter-spacing:6px;color:${INK};">${t.code}</div>`
     : "";
   const foot = t.footnote
-    ? `<p style="margin:0;font:400 13px/1.6 ${FONT};color:${MUTED};">${t.footnote}</p>`
+    ? `<div class="muted rule" style="border-top:1px solid ${RULE};padding-top:18px;margin-top:8px;font:400 13px/1.6 ${FONT};color:${MUTED};">${t.footnote}</div>`
     : "";
   return `<!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>${t.subject}</title></head>
-<body style="margin:0;padding:0;background:${PAPER};">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${PAPER};"><tr><td align="center" style="padding:40px 16px;">
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light dark"><meta name="supported-color-schemes" content="light dark"><title>${t.subject}</title><style>${DARK_CSS}</style></head>
+<body class="bg" style="margin:0;padding:0;background:${PAPER};">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="bg" style="background:${PAPER};"><tr><td align="center" style="padding:40px 16px;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;">
-    <tr><td style="padding:0 4px 20px;">
+    <tr><td style="padding:0 0 20px;">
       <table role="presentation" cellpadding="0" cellspacing="0"><tr>
-        <td><img src="${LOGO_URL}" width="44" height="44" alt="Squareshare" style="display:block;border:1px solid ${RULE};border-radius:10px;"></td>
-        <td style="padding-left:6px;font:700 18px/1 ${FONT};color:${INK};letter-spacing:-0.3px;">Squareshare</td>
+        <td><img class="tile" src="${LOGO_URL}" width="44" height="44" alt="Squareshare" style="display:block;border:1px solid ${RULE};"></td>
+        <td class="ink" style="padding-left:12px;font:700 18px/1 ${FONT};color:${INK};letter-spacing:-0.3px;">Squareshare</td>
       </tr></table>
     </td></tr>
-    <tr><td style="background:#ffffff;border:1px solid ${RULE};border-radius:12px;padding:36px 32px;">
-      <div style="height:3px;width:36px;background:${ACID};margin:0 0 20px;"></div>
-      <div style="font:600 11px/1 ${FONT};letter-spacing:1.5px;text-transform:uppercase;color:${ACID};margin:0 0 12px;">${t.eyebrow}</div>
-      <h1 style="margin:0 0 20px;font:700 26px/1.2 ${FONT};color:${INK};letter-spacing:-0.5px;">${t.title}</h1>
+    <tr><td class="card" style="background:#ffffff;border:1px solid ${RULE};">
+      <div style="padding:36px 32px;">
+      <img class="tile" src="${ASSET_URL}/${t.icon}.png" width="56" height="56" alt="" style="display:block;border:0;margin:0 0 24px;">
+      <div class="muted" style="font:600 11px/1 ${FONT};letter-spacing:1.5px;text-transform:uppercase;color:${MUTED};margin:0 0 12px;">${t.eyebrow}</div>
+      <h1 class="ink" style="margin:0 0 20px;font:700 26px/1.2 ${FONT};color:${INK};letter-spacing:-0.5px;">${t.title}</h1>
       ${t.body.map(p).join("\n      ")}
       ${button}${code}${foot}
+      </div>
     </td></tr>
-    <tr><td style="padding:20px 4px 0;font:400 12px/1.6 ${FONT};color:${MUTED};">
+    <tr><td class="muted" style="padding:20px 0 0;font:400 12px/1.6 ${FONT};color:${MUTED};">
       Sent by <a href="${SITE_URL}" style="color:${MUTED};">Squareshare</a> &middot; <a href="mailto:${SENDER_EMAIL}" style="color:${MUTED};">${SENDER_EMAIL}</a><br>You received this because of activity on your Squareshare account.
     </td></tr>
   </table>
@@ -87,12 +120,13 @@ function layout(t: Template): string {
 }
 
 const IGNORE = "If you didn't request this, you can safely ignore this email.";
-const NOT_YOU = `If this wasn't you, <a href="mailto:${SENDER_EMAIL}" style="color:${ACID};">contact us</a> right away and reset your password.`;
+const NOT_YOU = `If this wasn't you, <a href="mailto:${SENDER_EMAIL}" style="color:inherit;text-decoration:underline;">contact us</a> right away and reset your password.`;
 const LINK = "{{ .ConfirmationURL }}";
 
 /** Keyed by Supabase's mailer config names (mailer_{subjects,templates}_<key>). */
 const TEMPLATES: Record<string, Template> = {
   confirmation: {
+    icon: "mail",
     subject: "Confirm your Squareshare email",
     eyebrow: "Welcome",
     title: "Confirm your email address",
@@ -101,6 +135,7 @@ const TEMPLATES: Record<string, Template> = {
     footnote: IGNORE,
   },
   invite: {
+    icon: "user-plus",
     subject: "You've been invited to Squareshare",
     eyebrow: "Invitation",
     title: "You've been invited",
@@ -109,6 +144,7 @@ const TEMPLATES: Record<string, Template> = {
     footnote: IGNORE,
   },
   magic_link: {
+    icon: "log-in",
     subject: "Your Squareshare sign-in link",
     eyebrow: "Sign in",
     title: "Your sign-in link",
@@ -117,6 +153,7 @@ const TEMPLATES: Record<string, Template> = {
     footnote: IGNORE,
   },
   recovery: {
+    icon: "key",
     subject: "Reset your Squareshare password",
     eyebrow: "Password",
     title: "Reset your password",
@@ -125,6 +162,7 @@ const TEMPLATES: Record<string, Template> = {
     footnote: IGNORE,
   },
   email_change: {
+    icon: "mail",
     subject: "Confirm your new Squareshare email",
     eyebrow: "Account",
     title: "Confirm your new email address",
@@ -133,6 +171,7 @@ const TEMPLATES: Record<string, Template> = {
     footnote: IGNORE,
   },
   reauthentication: {
+    icon: "shield",
     subject: "{{ .Token }} is your Squareshare verification code",
     eyebrow: "Security",
     title: "Your verification code",
@@ -141,6 +180,7 @@ const TEMPLATES: Record<string, Template> = {
     footnote: IGNORE,
   },
   password_changed_notification: {
+    icon: "lock",
     subject: "Your Squareshare password was changed",
     eyebrow: "Security",
     title: "Your password was changed",
@@ -148,6 +188,7 @@ const TEMPLATES: Record<string, Template> = {
     footnote: NOT_YOU,
   },
   email_changed_notification: {
+    icon: "mail",
     subject: "Your Squareshare email address was changed",
     eyebrow: "Security",
     title: "Your email address was changed",
@@ -155,6 +196,7 @@ const TEMPLATES: Record<string, Template> = {
     footnote: NOT_YOU,
   },
   phone_changed_notification: {
+    icon: "phone",
     subject: "Your Squareshare phone number was changed",
     eyebrow: "Security",
     title: "Your phone number was changed",
@@ -162,6 +204,7 @@ const TEMPLATES: Record<string, Template> = {
     footnote: NOT_YOU,
   },
   mfa_factor_enrolled_notification: {
+    icon: "shield-plus",
     subject: "A new verification method was added to your Squareshare account",
     eyebrow: "Security",
     title: "A verification method was added",
@@ -169,6 +212,7 @@ const TEMPLATES: Record<string, Template> = {
     footnote: NOT_YOU,
   },
   mfa_factor_unenrolled_notification: {
+    icon: "shield-minus",
     subject: "A verification method was removed from your Squareshare account",
     eyebrow: "Security",
     title: "A verification method was removed",
@@ -176,6 +220,7 @@ const TEMPLATES: Record<string, Template> = {
     footnote: NOT_YOU,
   },
   identity_linked_notification: {
+    icon: "link",
     subject: "A new sign-in method was linked to your Squareshare account",
     eyebrow: "Security",
     title: "A sign-in method was linked",
@@ -183,6 +228,7 @@ const TEMPLATES: Record<string, Template> = {
     footnote: NOT_YOU,
   },
   identity_unlinked_notification: {
+    icon: "unlink",
     subject: "A sign-in method was removed from your Squareshare account",
     eyebrow: "Security",
     title: "A sign-in method was removed",
@@ -229,6 +275,40 @@ async function apply(): Promise<void> {
   console.log(`Applied ${Object.keys(TEMPLATES).length} templates${smtpUser ? " + SMTP" : ""} to ${ref}.`);
 }
 
+async function assets(): Promise<void> {
+  const base = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!base || !key) throw new Error("NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required");
+  const headers = { Authorization: `Bearer ${key}`, apikey: key };
+  // Idempotent: a 400/409 just means the bucket exists already.
+  await fetch(`${base}/storage/v1/bucket`, {
+    method: "POST",
+    headers: { ...headers, "Content-Type": "application/json" },
+    body: JSON.stringify({ id: "email-assets", name: "email-assets", public: true }),
+  });
+  const { chromium } = await import("playwright");
+  const browser = await chromium.launch();
+  const page = await browser.newPage({ deviceScaleFactor: 2 });
+  const shots: [string, string, number, boolean][] = [
+    ...Object.entries(HERO_ICONS).map(([n, inner]): [string, string, number, boolean] => [n, svg(inner, "#ffffff", 56, INK), 56, false]),
+    ["arrow", svg(ARROW_ICON, "#ffffff", 18), 18, true],
+    ["arrow-dark", svg(ARROW_ICON, INK, 18), 18, true],
+  ];
+  for (const [name, markup, size, transparent] of shots) {
+    await page.setViewportSize({ width: size, height: size });
+    await page.setContent(`<body style="margin:0;background:transparent">${markup}</body>`);
+    const png = await page.screenshot({ omitBackground: transparent, clip: { x: 0, y: 0, width: size, height: size } });
+    const res = await fetch(`${base}/storage/v1/object/email-assets/${name}.png`, {
+      method: "POST",
+      headers: { ...headers, "Content-Type": "image/png", "x-upsert": "true", "cache-control": "max-age=31536000" },
+      body: new Uint8Array(png),
+    });
+    if (!res.ok) throw new Error(`upload ${name}: ${res.status} ${await res.text()}`);
+  }
+  await browser.close();
+  console.log(`Uploaded ${shots.length} icons to email-assets.`);
+}
+
 function preview(dir: string): void {
   mkdirSync(dir, { recursive: true });
   for (const [key, t] of Object.entries(TEMPLATES)) {
@@ -248,5 +328,6 @@ function preview(dir: string): void {
 
 const [cmd, arg] = process.argv.slice(2);
 if (cmd === "apply") await apply();
+else if (cmd === "assets") await assets();
 else if (cmd === "preview") preview(arg ?? "auth-email-previews");
-else console.log("usage: auth-emails.ts preview [dir] | apply");
+else console.log("usage: auth-emails.ts preview [dir] | apply | assets");

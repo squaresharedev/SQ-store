@@ -137,6 +137,17 @@
         "title": "L'approbation des connexions est activée",
         "body": "Les appareils sur lesquels vous êtes connecté peuvent désormais approuver les nouvelles connexions à votre compte. Si ce n'était pas vous, changez votre mot de passe maintenant."
       }
+    },
+    "order": {
+      "newToShip": {
+        "title": "Nouvelle commande : {quantity} × {title}",
+        "body": "À expédier à {name}, {city}.",
+        "bodyNoAddress": "Aucune adresse de livraison n'y est encore associée. Envoyez un e-mail à l'acheteur pour lui demander où l'envoyer."
+      },
+      "newDigital": {
+        "title": "Nouvelle commande : {title}",
+        "body": "C'est un téléchargement, il n'y a donc rien à expédier."
+      }
     }
   }
 }

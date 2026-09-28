@@ -1,3 +1,13 @@
+import {
+  CreditCard,
+  Info,
+  KeyRound,
+  Package,
+  Receipt,
+  Scale,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
 import type { Locale } from "@/i18n/locales";
 import { msg, type MessageKey, type MessageRef } from "@/i18n/types";
 import { formatOrderDate } from "@/lib/format/date";
@@ -5,25 +15,28 @@ import type { NotificationType } from "@/lib/notifications/types";
 
 /**
  * Presentation helpers for notifications — kept out of the components so the
- * type→visual mapping and time formatting live in one place. Colors are drawn
- * from semantic tokens only (styles.md): a single small "type dot" per row, no
- * decorative color beyond it.
+ * type→visual mapping and time formatting live in one place.
  */
 
-/** The type dot color. Neutral by default; success/destructive only where it aids scanning. */
-export const TYPE_DOT: Record<NotificationType, string> = {
-  team: "bg-foreground",
-  order: "bg-success",
-  payment: "bg-success",
-  stock: "bg-destructive",
-  system: "bg-muted-foreground",
-  // Destructive, like a stock warning: "your password changed" is the one row
-  // in this feed a person must not scroll past.
-  security: "bg-destructive",
-  // Destructive for the same reason: something of theirs came down, and the
-  // row carries the reason they are entitled to. Scrolling past it is the one
-  // outcome this notification exists to prevent.
-  policy: "bg-destructive",
+/**
+ * The glyph fronting each row, so the category reads at a glance without
+ * colour. Monochrome on purpose: the unread dot is the ONE attention cue a row
+ * carries, and a coloured category mark beside it made two dots competing for
+ * the same glance. Glyphs match the ones the dashboard already uses for the
+ * same things (Receipt for orders, as in search; the card and the box, as in
+ * the nav).
+ */
+export const TYPE_ICON: Record<NotificationType, LucideIcon> = {
+  team: Users,
+  order: Receipt,
+  payment: CreditCard,
+  stock: Package,
+  system: Info,
+  // Every security notice is about a credential: a password, a passkey, a
+  // recovery code.
+  security: KeyRound,
+  // A moderation decision, with the statement of reasons it comes with.
+  policy: Scale,
 };
 
 export const TYPE_LABEL: Record<NotificationType, MessageKey> = {

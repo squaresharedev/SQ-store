@@ -4,7 +4,7 @@
       "label": "Doplňte údaje prodejce",
       "detail": "Obchodní jméno, adresa a kontaktní e-mail se zobrazují na každé produktové stránce.",
       "detailDone": "Kupující vidí, od koho kupují.",
-      "detailUnconfirmed": "Otevřete odkaz, který jsme vám poslali, a potvrďte kontaktní e-mail.",
+      "detailUnconfirmed": "Potvrďte kontaktní e-mail kódem, který na něj pošleme.",
       "action": "Doplnit údaje",
       "actionUnconfirmed": "Potvrdit e-mail",
       "cta": "Doplňte údaje prodejce",
@@ -112,9 +112,7 @@
       "emailHelp": "Sem vám budou psát kupující. Může se lišit od přihlašovacího e-mailu."
     },
     "confirm": {
-      "check": "Na adrese {email} najdete potvrzovací odkaz.",
-      "goLive": "Jakmile ho otevřete, vaše produktové stránky se zveřejní.",
-      "sendNewLink": "Poslat nový odkaz"
+      "goLive": "Vaše produktové stránky se zveřejní, jakmile ho potvrdíte."
     },
     "tour": {
       "mobileMenu": "Na telefonu otevřete nabídku vlevo nahoře.",

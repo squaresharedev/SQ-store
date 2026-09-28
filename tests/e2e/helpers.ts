@@ -476,13 +476,19 @@ export async function seedStorefronts(
  * an `active` product and the hosted product page 404s, so any spec that wants
  * a buyer-visible page seeds these first.
  *
+ * The email is seeded as PROVEN (see seedSellerIdentity), so the page is live
+ * without a code round trip.
+ *
  * Spread it to vary a field, or drop one to exercise the gate:
  *   seedSellerIdentity(id, { ...PUBLISHABLE_SELLER, address: undefined })
  */
 export const PUBLISHABLE_SELLER = {
   businessName: "Lamp Studio Ltd",
   address: "12 Market Street\nDublin, D02 X285\nIreland",
-  email: "hi@lamp.example",
+  // A domain with real MX records: the settings save asks a resolver whether
+  // it takes mail, and the publish gate refuses a placeholder (.example) even
+  // when it was written straight to the row.
+  email: "lamp@squareshare.eu",
   country: "IE",
 } as const;
 
@@ -497,61 +503,115 @@ export async function seedSellerIdentity(
     phone?: string;
     bio?: string;
     /**
-     * Whether the contact address counts as PROVEN. Defaults to true whenever
+     * Whether the contact email counts as PROVEN. Defaults to true whenever
      * an address is seeded: a spec that seeds a seller is describing one who
-     * has finished onboarding, and the confirmation round trip itself is
+     * has finished onboarding, and the code round trip itself is
      * 50-publish-gate.spec.ts's subject, not a tax every other spec pays.
-     * Pass false to seed a seller who has typed an address but not clicked
-     * the link.
+     * Pass false to seed a seller who has typed an address but not proven it.
      */
     emailVerified?: boolean;
+    /** Same for the phone, which buyers only see once it is proven. */
+    phoneVerified?: boolean;
   },
 ) {
-  const verified = seller.email ? (seller.emailVerified ?? true) : false;
+  const now = new Date().toISOString();
+  const emailVerified = seller.email ? (seller.emailVerified ?? true) : false;
+  const phoneVerified = seller.phone ? (seller.phoneVerified ?? true) : false;
+  // Service role: the only writer the guard_contact_proof trigger lets set a
+  // proof, and it honours one set in the same statement as its value.
   await serviceRest(`/profiles?id=eq.${ownerId}`, {
     method: "PATCH",
     body: {
       tax_business_name: seller.businessName ?? null,
       seller_address: seller.address ?? null,
       seller_email: seller.email ?? null,
-      seller_email_verified_at: verified ? new Date().toISOString() : null,
+      seller_email_verified_at: emailVerified ? now : null,
       tax_vat_id: seller.vatId ?? null,
       tax_country: seller.country ?? null,
       seller_phone: seller.phone ?? null,
+      seller_phone_verified_at: phoneVerified ? now : null,
       seller_bio: seller.bio ?? null,
     },
   });
 }
 
-/** The dev outbox (app/dev/emails): what the app would have emailed. */
-export async function devEmails(to: string): Promise<
-  { to: string; subject: string; text: string; at: string }[]
-> {
-  const res = await fetch(`${APP_URL}/dev/emails?to=${encodeURIComponent(to)}`, {
+type DevMessage = {
+  channel: "email" | "sms";
+  to: string;
+  subject?: string;
+  /** Email sent on someone's behalf: where replies go, and the display name. */
+  replyTo?: string;
+  fromName?: string;
+  text: string;
+  at: string;
+};
+
+/** The dev outbox (app/dev/outbox): what the app would have sent, newest first. */
+async function devOutbox(channel: DevMessage["channel"], to: string): Promise<DevMessage[]> {
+  const query = new URLSearchParams({ channel, to });
+  const res = await fetch(`${APP_URL}/dev/outbox?${query}`, {
     headers: { "cache-control": "no-cache" },
   });
-  expect(res.ok, `/dev/emails -> ${res.status}`).toBe(true);
-  const body = (await res.json()) as {
-    emails: { to: string; subject: string; text: string; at: string }[];
-  };
-  return body.emails;
+  expect(res.ok, `/dev/outbox -> ${res.status}`).toBe(true);
+  return ((await res.json()) as { messages: DevMessage[] }).messages;
+}
+
+/** What the app would have emailed to `to`, newest first. */
+export async function devEmails(to: string): Promise<(DevMessage & { subject: string })[]> {
+  return (await devOutbox("email", to)) as (DevMessage & { subject: string })[];
+}
+
+/** What the app would have texted to `to` (E.164), newest first. */
+export async function devTexts(to: string): Promise<DevMessage[]> {
+  return devOutbox("sms", to);
 }
 
 /**
- * The confirmation link the app just "sent" to `to`, as a path.
+ * The contact-verification code the app just sent to `to`, digits only.
  *
- * Polls, because the send happens inside the server action that the click
- * returned from and the spec can reach the outbox before the action finishes
- * writing to it.
+ * Polls, because the send happens inside the server action the click returned
+ * from, and the spec can reach the outbox before the action finishes writing
+ * to it. `after` skips anything sent before a given moment, so a resend is
+ * never answered with the code it replaced.
  */
-export async function verificationLink(to: string): Promise<string> {
-  let link: string | undefined;
+export async function contactCode(
+  channel: DevMessage["channel"],
+  to: string,
+  after?: string,
+): Promise<string> {
+  let code: string | undefined;
   await expect(async () => {
-    const [latest] = await devEmails(to);
-    link = latest?.text.match(/https?:\/\/\S*\/settings\/verify-seller-email\?token=[0-9a-f]{64}/)?.[0];
-    expect(link, `no confirmation email for ${to}`).toBeTruthy();
+    const [latest] = (await devOutbox(channel, to)).filter((m) => !after || m.at > after);
+    code = latest?.text.match(/\b(\d{4}) ?(\d{4})\b/)?.slice(1, 3).join("");
+    expect(code, `no ${channel} code for ${to}`).toMatch(/^\d{8}$/);
   }).toPass({ timeout: 15_000 });
-  return new URL(link!).pathname + new URL(link!).search;
+  return code!;
+}
+
+/**
+ * Type a code into a contact detail's row (Settings or the welcome flow) and
+ * wait for the proof to land. The box submits itself on the last digit, the
+ * way a person meets it.
+ */
+export async function confirmContactCode(
+  scope: Page | Locator,
+  channel: "email" | "phone",
+  code: string,
+) {
+  const row = scope.locator(`[data-contact-verification="${channel}"]`);
+  await row.getByLabel("Confirmation code").fill(code);
+  await expect(row).toHaveAttribute("data-proof-state", "confirmed", { timeout: 20_000 });
+}
+
+/**
+ * Lift one account's one-code-a-minute cooldown, so a spec can ask for a
+ * second code without waiting out the minute. Only the ledger rows go; the
+ * budget itself stays at its production value.
+ */
+export async function clearContactCooldown(userId: string) {
+  await serviceRest(`/rate_limits?user_id=eq.${userId}&action=like.contact_code_cooldown*`, {
+    method: "DELETE",
+  });
 }
 
 /**
@@ -606,24 +666,39 @@ export async function seedOrders(
      *  stores it: [{ label: "Size", value: "Six seater" }]. */
     selected_options?: { label: string; value: string }[];
     created_at?: string;
+    quantity?: number;
+    /** Delivery address, in the shape src/lib/orders/ship-to.ts reads. */
+    ship_to?: Record<string, string> | null;
+    /** Defaults to "shipped": a seeded order is history, so only a spec about
+     *  the To ship queue puts one in it. */
+    fulfilment_status?: "unfulfilled" | "shipped" | "not_required";
+    tracking_number?: string | null;
   }>,
 ) {
   await serviceRest(`/orders`, {
     method: "POST",
-    body: orders.map((o) => ({
-      seller_id: sellerId,
-      channel: o.channel ?? "embed",
-      status: o.status ?? "paid",
-      amount_cents: o.amount_cents,
-      platform_fee_cents: Math.round(o.amount_cents * 0.05),
-      currency: "EUR",
-      buyer_email: o.buyer_email ?? "buyer@example.com",
-      product_title: o.product_title ?? "Seeded product",
-      product_price_cents: o.amount_cents,
-      // Always present, never conditional: PostgREST refuses a bulk insert
-      // whose objects do not share their keys.
-      selected_options: o.selected_options ?? [],
-      ...(o.created_at ? { created_at: o.created_at } : {}),
-    })),
+    body: orders.map((o) => {
+      const fulfilment = o.fulfilment_status ?? "shipped";
+      return {
+        seller_id: sellerId,
+        channel: o.channel ?? "embed",
+        status: o.status ?? "paid",
+        amount_cents: o.amount_cents,
+        platform_fee_cents: Math.round(o.amount_cents * 0.05),
+        currency: "EUR",
+        buyer_email: o.buyer_email ?? "buyer@example.com",
+        product_title: o.product_title ?? "Seeded product",
+        product_price_cents: o.amount_cents,
+        // Always present, never conditional: PostgREST refuses a bulk insert
+        // whose objects do not share their keys.
+        selected_options: o.selected_options ?? [],
+        quantity: o.quantity ?? 1,
+        ship_to: o.ship_to ?? null,
+        fulfilment_status: fulfilment,
+        shipped_at: fulfilment === "shipped" ? (o.created_at ?? new Date().toISOString()) : null,
+        tracking_number: o.tracking_number ?? null,
+        ...(o.created_at ? { created_at: o.created_at } : {}),
+      };
+    }),
   });
 }

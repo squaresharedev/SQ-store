@@ -8,6 +8,7 @@ import { useTranslations } from "next-intl";
 import { MotionConfig, motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { focusRingClass, overlayScrimClass, transitionClass } from "@/components/ui/control-styles";
+import { attentionCountClass } from "@/components/ui/surface-styles";
 import {
   MAIN_NAV,
   SETTINGS_LINK,
@@ -60,10 +61,13 @@ function NavLinkItem({
   item,
   pathname,
   onNavigate,
+  count,
 }: {
   item: NavLink;
   pathname: string;
   onNavigate: () => void;
+  /** Work waiting behind this destination (see Sidebar's `counts`). */
+  count?: NavCount;
 }) {
   const t = useTranslations();
   const active = isNavLinkActive(pathname, item.href);
@@ -91,13 +95,26 @@ function NavLinkItem({
     >
       <item.icon hoverCount={hoverCount} />
       {t(item.label)}
+      {count && count.value > 0 && (
+        <>
+          <span aria-hidden="true" className={cn(attentionCountClass, "ml-auto")}>
+            {count.value}
+          </span>
+          <span className="sr-only">{count.label}</span>
+        </>
+      )}
     </MotionLink>
   );
 }
 
+/** A number of things waiting behind a nav destination, and what they are in a
+ *  sentence for screen readers ("3 orders to ship"). */
+export type NavCount = { value: number; label: string };
+
 
 export function Sidebar({
   topBarSlot,
+  counts,
 }: {
   /**
    * Optional controls rendered at the right of the mobile top bar, beside the
@@ -105,6 +122,12 @@ export function Sidebar({
    * menu here). Left undefined by other consumers (e.g. settings).
    */
   topBarSlot?: React.ReactNode;
+  /**
+   * Work waiting behind a destination, keyed by its href: the dashboard shell
+   * passes the orders waiting to be shipped for /orders. A count of zero
+   * shows nothing; the rail only ever speaks up about something to do.
+   */
+  counts?: Partial<Record<string, NavCount>>;
 }) {
   const t = useTranslations();
   const pathname = usePathname();
@@ -241,6 +264,7 @@ export function Sidebar({
               item={item}
               pathname={pathname}
               onNavigate={closeDrawer}
+              count={counts?.[item.href]}
             />
           ))}
         </div>

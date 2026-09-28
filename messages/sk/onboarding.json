@@ -4,7 +4,7 @@
       "label": "Pridajte údaje predajcu",
       "detail": "Vaše obchodné meno, adresa a kontaktný e-mail sa zobrazujú na každej produktovej stránke.",
       "detailDone": "Kupujúci vidia, od koho nakupujú.",
-      "detailUnconfirmed": "Otvorte odkaz, ktorý sme vám zaslali, a potvrďte kontaktný e-mail.",
+      "detailUnconfirmed": "Potvrďte kontaktný e-mail kódom, ktorý naň pošleme.",
       "action": "Pridať údaje",
       "actionUnconfirmed": "Potvrdiť e-mail",
       "cta": "Pridať údaje predajcu",
@@ -112,9 +112,7 @@
       "emailHelp": "Na túto adresu vám píšu kupujúci. Môže sa líšiť od vášho prihlasovacieho e-mailu."
     },
     "confirm": {
-      "check": "Skontrolujte {email}: čaká tam potvrdzovací odkaz.",
-      "goLive": "Vaše produktové stránky budú zverejnené, keď ho otvoríte.",
-      "sendNewLink": "Odoslať nový odkaz"
+      "goLive": "Vaše produktové stránky budú zverejnené, akonáhle ho potvrdíte."
     },
     "tour": {
       "mobileMenu": "Na telefóne otvorte menu vľavo hore.",

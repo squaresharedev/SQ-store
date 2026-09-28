@@ -4,7 +4,7 @@
       "label": "Add your seller details",
       "detail": "Your trader name, address and contact email go on every product page.",
       "detailDone": "Buyers can see who they are buying from.",
-      "detailUnconfirmed": "Open the link we emailed to confirm your contact email.",
+      "detailUnconfirmed": "Confirm your contact email with the code we send to it.",
       "action": "Add details",
       "actionUnconfirmed": "Confirm email",
       "cta": "Add your seller details",
@@ -112,9 +112,7 @@
       "emailHelp": "Where buyers write to you. It can differ from your sign-in email."
     },
     "confirm": {
-      "check": "Check {email} for a confirmation link.",
-      "goLive": "Your product pages go live once you open it.",
-      "sendNewLink": "Send a new link"
+      "goLive": "Your product pages can go live once it's confirmed."
     },
     "tour": {
       "mobileMenu": "On your phone, open the menu at the top left.",

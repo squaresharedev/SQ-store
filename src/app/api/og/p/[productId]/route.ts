@@ -6,7 +6,7 @@ import {
   buildTraderIdentityInput,
   type TraderGateRow,
 } from "@/lib/settings/seller-identity";
-import { sellerEmailVerificationRequired } from "@/lib/settings/seller-email-verification";
+import { emailProofRequired } from "@/lib/contact-verification/availability";
 import { isTraderIdentityComplete } from "@/lib/settings/trader-identity";
 import { presignGetUrl } from "@/lib/r2";
 import {
@@ -95,7 +95,7 @@ export async function GET(
   if (
     !isTraderIdentityComplete(
       buildTraderIdentityInput(sellerRow as TraderGateRow | null),
-      { requireVerifiedEmail: sellerEmailVerificationRequired() },
+      { requireVerifiedEmail: emailProofRequired() },
     )
   ) {
     return new Response(null, { status: 404 });

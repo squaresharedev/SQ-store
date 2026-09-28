@@ -48,13 +48,18 @@
     "editThisStorefront": {
       "withRole": "Votre rôle {role, select, owner {Propriétaire} editor {Éditeur} viewer {Lecteur} other {{role}}} ne permet pas de modifier cette vitrine dans cette boutique.",
       "noRole": "Vous n’avez pas l’autorisation de modifier cette vitrine dans cette boutique."
+    },
+    "fulfilOrders": {
+      "withRole": "Votre rôle {role, select, owner {Propriétaire} editor {Éditeur} viewer {Lecteur} other {{role}}} ne permet pas de marquer les commandes comme expédiées dans cette boutique.",
+      "noRole": "Vous n'avez pas la permission de marquer les commandes comme expédiées dans cette boutique."
     }
   },
   "notFound": {
     "fix": "Il a peut-être été supprimé, ou vous avez peut-être changé de boutique. Actualisez la page pour charger les données actuelles.",
     "product": "Ce produit est introuvable.",
     "storefront": "Cette vitrine est introuvable.",
-    "item": "Cet élément est introuvable."
+    "item": "Cet élément est introuvable.",
+    "order": "Cette commande est introuvable."
   },
   "rateLimited": {
     "fix": "Attendez quelques minutes puis réessayez. Si rien ne se relance en arrière-plan, rechargez d’abord la page.",
@@ -70,7 +75,8 @@
     "updateStock": "Trop de tentatives de mise à jour du stock en peu de temps.",
     "readProductPageSettings": "Trop de tentatives de lecture des paramètres de page produit en peu de temps.",
     "requestReview": "Trop de demandes de réexamen en peu de temps.",
-    "fileAppeal": "Trop de tentatives d'envoi d'une contestation en peu de temps."
+    "fileAppeal": "Trop de tentatives d'envoi d'une contestation en peu de temps.",
+    "fulfilOrders": "Trop de tentatives pour marquer des commandes comme expédiées en peu de temps."
   },
   "serverError": {
     "fix": "C’est généralement temporaire. Attendez un instant puis réessayez ; si le problème persiste, actualisez la page.",
@@ -97,7 +103,8 @@
     "loadProductPageSettings": "Impossible de charger vos paramètres de page produit en raison d’un problème de notre côté.",
     "saveProductPageSettings": "Impossible d’enregistrer vos paramètres de page produit en raison d’un problème de notre côté.",
     "sendForReview": "Impossible d’envoyer cette demande de réexamen : un problème est survenu de notre côté.",
-    "fileAppeal": "Impossible d'envoyer votre contestation en raison d'un problème de notre côté."
+    "fileAppeal": "Impossible d'envoyer votre contestation en raison d'un problème de notre côté.",
+    "markOrderShipped": "Impossible de marquer la commande comme expédiée en raison d'un problème de notre côté."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Ce produit a été retiré, et non mis en pause.} storefront {Cette vitrine a été retirée, et non mise en pause.} other {Cet élément a été retiré, et non mis en pause.}}",
@@ -112,8 +119,8 @@
     "action": "Ajouter les informations vendeur",
     "fix": {
       "add": "{fields, select, businessName {Ajoutez votre raison sociale dans Paramètres › Entreprise et informations vendeur, puis publiez.} address {Ajoutez votre adresse professionnelle dans Paramètres › Entreprise et informations vendeur, puis publiez.} email {Ajoutez votre e-mail de contact dans Paramètres › Entreprise et informations vendeur, puis publiez.} businessName_address {Ajoutez votre raison sociale et votre adresse professionnelle dans Paramètres › Entreprise et informations vendeur, puis publiez.} businessName_email {Ajoutez votre raison sociale et votre e-mail de contact dans Paramètres › Entreprise et informations vendeur, puis publiez.} address_email {Ajoutez votre adresse professionnelle et votre e-mail de contact dans Paramètres › Entreprise et informations vendeur, puis publiez.} other {Ajoutez votre raison sociale, votre adresse professionnelle et votre e-mail de contact dans Paramètres › Entreprise et informations vendeur, puis publiez.}}",
-      "addAndConfirm": "{fields, select, businessName {Ajoutez votre raison sociale dans Paramètres › Entreprise et informations vendeur, et confirmez votre e-mail de contact via le lien que nous vous avons envoyé.} address {Ajoutez votre adresse professionnelle dans Paramètres › Entreprise et informations vendeur, et confirmez votre e-mail de contact via le lien que nous vous avons envoyé.} email {Ajoutez votre e-mail de contact dans Paramètres › Entreprise et informations vendeur, et confirmez votre e-mail de contact via le lien que nous vous avons envoyé.} businessName_address {Ajoutez votre raison sociale et votre adresse professionnelle dans Paramètres › Entreprise et informations vendeur, et confirmez votre e-mail de contact via le lien que nous vous avons envoyé.} businessName_email {Ajoutez votre raison sociale et votre e-mail de contact dans Paramètres › Entreprise et informations vendeur, et confirmez votre e-mail de contact via le lien que nous vous avons envoyé.} address_email {Ajoutez votre adresse professionnelle et votre e-mail de contact dans Paramètres › Entreprise et informations vendeur, et confirmez votre e-mail de contact via le lien que nous vous avons envoyé.} other {Ajoutez votre raison sociale, votre adresse professionnelle et votre e-mail de contact dans Paramètres › Entreprise et informations vendeur, et confirmez votre e-mail de contact via le lien que nous vous avons envoyé.}}",
-      "confirm": "Ouvrez le lien de confirmation que nous avons envoyé à votre adresse de contact. Vous pouvez en demander un nouveau depuis Paramètres › Entreprise et informations vendeur.",
+      "addAndConfirm": "{fields, select, businessName {Ajoutez votre raison sociale dans Paramètres › Entreprise et informations vendeur, et confirmez votre e-mail de contact avec le code que nous lui envoyons.} address {Ajoutez votre adresse professionnelle dans Paramètres › Entreprise et informations vendeur, et confirmez votre e-mail de contact avec le code que nous lui envoyons.} email {Ajoutez votre e-mail de contact dans Paramètres › Entreprise et informations vendeur, et confirmez-le avec le code que nous lui envoyons.} businessName_address {Ajoutez votre raison sociale et votre adresse professionnelle dans Paramètres › Entreprise et informations vendeur, et confirmez votre e-mail de contact avec le code que nous lui envoyons.} businessName_email {Ajoutez votre raison sociale et votre e-mail de contact dans Paramètres › Entreprise et informations vendeur, et confirmez l'e-mail avec le code que nous lui envoyons.} address_email {Ajoutez votre adresse professionnelle et votre e-mail de contact dans Paramètres › Entreprise et informations vendeur, et confirmez l'e-mail avec le code que nous lui envoyons.} other {Ajoutez votre raison sociale, votre adresse professionnelle et votre e-mail de contact dans Paramètres › Entreprise et informations vendeur, et confirmez l'e-mail avec le code que nous lui envoyons.}}",
+      "confirm": "Confirmez votre e-mail de contact : envoyez-vous un code depuis Paramètres › Entreprise et informations vendeur, puis saisissez-le.",
       "complete": "Complétez Paramètres › Entreprise et informations vendeur, puis publiez."
     }
   },
@@ -182,12 +189,23 @@
     "resetRateLimited": "Trop d’e-mails de réinitialisation. Attendez un moment avant de réessayer.",
     "resetSendRateLimited": "Trop de demandes. Attendez une minute et réessayez.",
     "resetFailed": "Impossible d’envoyer l’e-mail de réinitialisation. Réessayez.",
-    "contactEmailTakesNoMail": "Le domaine de cet e-mail de contact n’accepte aucun courrier. Vérifiez l’orthographe, ou utilisez une adresse que les acheteurs peuvent réellement joindre.",
-    "savedButConfirmationFailed": "{reason, select, startFailed {Enregistré, mais l’e-mail de confirmation n’a pas été envoyé. Impossible de démarrer la confirmation par e-mail. Essayez « Renvoyer l’e-mail de confirmation » ci-dessous.} unavailable {Enregistré, mais l’e-mail de confirmation n’a pas été envoyé. La confirmation par e-mail n’est pas disponible pour le moment. Essayez « Renvoyer l’e-mail de confirmation » ci-dessous.} other {Enregistré, mais l’e-mail de confirmation n’a pas été envoyé. Nous n’avons pas pu envoyer l’e-mail de confirmation. Vérifiez l’adresse et réessayez. Essayez « Renvoyer l’e-mail de confirmation » ci-dessous.}}",
-    "confirmationFailed": "{reason, select, startFailed {Impossible de démarrer la confirmation par e-mail.} unavailable {La confirmation par e-mail n’est pas disponible pour le moment.} other {Nous n’avons pas pu envoyer l’e-mail de confirmation. Vérifiez l’adresse et réessayez.}}",
-    "confirmationUnavailable": "La confirmation par e-mail n’est pas disponible pour le moment.",
-    "confirmationRateLimited": "Beaucoup d’e-mails de confirmation ont déjà été envoyés. Attendez un moment avant d’en demander un autre.",
-    "noContactEmail": "Ajoutez d’abord un e-mail de contact, nous pourrons ensuite le confirmer."
+    "contactEmailTakesNoMail": "Le domaine de cet e-mail de contact n’accepte aucun courrier. Vérifiez l’orthographe, ou utilisez une adresse que les acheteurs peuvent réellement joindre."
+  },
+  "contactVerification": {
+    "unavailable": "{channel, select, email {La confirmation par e-mail n'est pas disponible pour le moment.} other {La confirmation par SMS n'est pas disponible pour le moment.}}",
+    "nothingToConfirm": "{channel, select, email {Ajoutez d'abord un e-mail de contact et enregistrez-le.} other {Ajoutez d'abord un numéro de téléphone et enregistrez-le.}}",
+    "phoneNeedsResave": "Enregistrez à nouveau votre numéro de téléphone au format international complet, par exemple +353 87 123 4567, puis demandez un code.",
+    "cooldown": "Un code vient d'être envoyé. Attendez une minute avant d'en demander un autre.",
+    "tooManyCodes": "Beaucoup de codes ont été envoyés. Attendez un moment avant d'en demander un autre.",
+    "sendFailed": "{channel, select, email {Nous n'avons pas pu envoyer l'e-mail. Vérifiez l'adresse et réessayez.} other {Nous n'avons pas pu envoyer le SMS. Vérifiez le numéro et réessayez.}}",
+    "savedButNotSent": "Enregistré, mais nous n'avons pas pu envoyer votre code de confirmation. Utilisez « Envoyer le code » ci-dessous pour réessayer.",
+    "wrongCode": "Ce code n'est pas correct. Vérifiez-le et réessayez.",
+    "locked": "Trop de tentatives incorrectes pour ce code. Envoyez-vous-en un nouveau.",
+    "expired": "Ce code a expiré. Envoyez-vous-en un nouveau.",
+    "noCode": "Envoyez-vous d'abord un code.",
+    "stale": "Vos coordonnées ont changé après l'envoi de ce code. Envoyez-vous-en un nouveau.",
+    "tooManyAttempts": "Trop de tentatives. Attendez un moment, puis réessayez.",
+    "failed": "Nous n'avons pas pu vérifier ce code pour le moment. Réessayez."
   },
   "avatar": {
     "unexpectedData": "Des données de formulaire inattendues ont été rejetées.",
@@ -552,5 +570,11 @@
     "rateLimited": "Trop de codes générés en peu de temps. Attendez quelques minutes, puis réessayez.",
     "expired": "Cette demande de connexion a expiré ou a déjà été traitée. Affichez un nouveau code sur l'appareil depuis lequel vous vous connectez.",
     "otherAccount": "Cette demande concerne un compte Square Share différent de celui connecté ici."
+  },
+  "orders": {
+    "notShippable": {
+      "message": "Cette commande ne peut pas être marquée comme expédiée.",
+      "fix": "Seules les commandes payées avec quelque chose à envoyer peuvent être expédiées. Actualisez la page pour voir le statut de cette commande."
+    }
   }
 }

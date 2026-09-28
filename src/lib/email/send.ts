@@ -1,34 +1,35 @@
 // SERVER ONLY. The ONE place outbound transactional mail leaves this app.
 //
-// WHY CLOUDFLARE AND NOT A MAIL SDK. This deploys to Cloudflare Workers, which
-// has no SMTP and no `nodemailer`. Cloudflare Email Service's Sending binding
-// (public beta, Workers Paid plan) is `env.EMAIL.send({to, from, subject, ...})`
-// — an in-runtime call with no third-party API key to hold, rotate or leak, and
-// no extra vendor in the path of a legally required disclosure. That is the
-// whole reason it is preferred over Resend/Postmark/SES here; if it is ever
-// swapped out, replace {@link deliver} and nothing else changes.
+// THE PROVIDER is Brevo's transactional API (lib/outbound/brevo.ts), the same
+// account and verified sender domain that already relays Supabase Auth's mail
+// for this project. A plain HTTPS call, so it runs on Workers without SMTP. If
+// it is ever swapped out, replace {@link deliver} and nothing else changes.
 //
-// OFF UNLESS CONFIGURED, exactly like lib/turnstile.ts and lib/moderation. The
-// binding is not in wrangler.jsonc yet, because Cloudflare requires the SENDER
-// DOMAIN to be onboarded and verified in the Email Service dashboard first, and
-// binding it before that would only turn every send into a runtime failure.
-// Until someone does that, {@link emailSendingEnabled} is false everywhere and
-// callers fall back to whatever they do without mail.
+// OFF UNLESS CONFIGURED, exactly like lib/turnstile.ts, lib/moderation and
+// lib/sms/send.ts. Production needs all three of:
+//
+//   TRANSACTIONAL_EMAIL_FROM     an address on the domain verified in Brevo
+//   TRANSACTIONAL_EMAIL_ENABLED  "true"
+//   BREVO_API_KEY                Worker secret (wrangler secret put)
+//
+// Until the first two are set, {@link emailSendingEnabled} is false everywhere
+// and callers fall back to whatever they do without mail.
 //
 // FAILURE POLICY, mirroring lib/moderation's:
 //
-//   not configured        -> `{ sent: false, reason: "disabled" }`. The caller
-//                            decides; nothing is silently swallowed.
-//   configured, no binding-> throws. "Told to send and unable to" is a
-//                            deployment fault and must surface, not be absorbed.
-//   configured, send fails-> `{ sent: false, reason }`. The caller reports it.
-//   development, no binding-> the message is LOGGED, in full, including any
-//                            link in it. That is what makes a verification
-//                            flow drivable on a laptop and in the e2e stack,
-//                            and it is gated on NODE_ENV so it can never
-//                            become a production leak.
+//   not configured         -> `{ sent: false, reason: "disabled" }`. The caller
+//                             decides; nothing is silently swallowed.
+//   enabled, no API key    -> throws. "Told to send and unable to" is a
+//                             deployment fault and must surface, not be absorbed.
+//   configured, send fails -> `{ sent: false, reason }`. The caller reports it.
+//   development            -> NEVER sent. The message is printed and kept in
+//                             the dev outbox (app/dev/outbox), which is what makes
+//                             a verification flow drivable on a laptop and in
+//                             the e2e stack without mailing a stranger. Gated on
+//                             NODE_ENV so it can never become a production leak.
 
-import { recordDevEmail } from "@/lib/email/dev-outbox";
+import { OutboundMisconfiguredError, brevoPost } from "@/lib/outbound/brevo";
+import { printDevMessage, recordDevMessage } from "@/lib/outbound/dev-outbox";
 
 export type OutboundEmail = {
   to: string;
@@ -37,16 +38,27 @@ export type OutboundEmail = {
    *  still be able to act on the message. */
   text: string;
   html?: string;
+  /**
+   * Where a reply goes, when that is not us. Mail sent ON BEHALF of a seller
+   * (an order has shipped) sets the seller's contact address here: the seller
+   * is who the buyer bought from, so a reply must reach them, not Square Share.
+   */
+  replyTo?: string;
+  /** The display name mail arrives from; {@link SENDER_NAME} when absent.
+   *  The address itself is always {@link senderAddress}. */
+  fromName?: string;
 };
 
 export type SendResult =
   | { sent: true }
   | { sent: false; reason: "disabled" | "failed"; detail?: string };
 
+/** The name mail arrives from, beside {@link senderAddress}. */
+const SENDER_NAME = "Squareshare";
+
 /**
- * The address transactional mail is sent FROM. Must be on a domain onboarded
- * to Cloudflare Email Service, or every send is refused with
- * E_SENDER_NOT_VERIFIED.
+ * The address transactional mail is sent FROM. Must be a sender verified in
+ * Brevo, or every send is refused.
  */
 export function senderAddress(): string | undefined {
   return process.env.TRANSACTIONAL_EMAIL_FROM;
@@ -55,81 +67,42 @@ export function senderAddress(): string | undefined {
 /**
  * Can this deployment actually send mail?
  *
- * Both halves are required: an address to send from, and (outside development)
- * a binding to send with. Anything that gates a user's ability to sell on a
- * received email MUST check this first — see
- * lib/settings/seller-email-verification.ts, which switches its whole
- * requirement off when this is false rather than locking sellers out of a
- * mailbox nobody can write to.
+ * Anything that gates a user's ability to sell on a received email MUST check
+ * this first (see lib/contact-verification/availability.ts), which switches
+ * its whole requirement off when this is false rather than locking sellers out
+ * of a mailbox nobody can write to.
  */
 export function emailSendingEnabled(): boolean {
   if (!senderAddress()) return false;
-  // In development the console stands in for the mail, so no binding needed.
+  // In development the console and the dev outbox stand in for the mail.
   if (process.env.NODE_ENV === "development") return true;
   return process.env.TRANSACTIONAL_EMAIL_ENABLED === "true";
 }
 
-/** The Cloudflare Email Service binding, or undefined when not bound. */
-async function emailBinding(): Promise<
-  { send: (message: Record<string, unknown>) => Promise<unknown> } | undefined
-> {
-  try {
-    const { getCloudflareContext } = await import("@opennextjs/cloudflare");
-    const { env } = await getCloudflareContext({ async: true });
-    return (env as Record<string, unknown>).EMAIL as
-      | { send: (message: Record<string, unknown>) => Promise<unknown> }
-      | undefined;
-  } catch {
-    // No Cloudflare context at all (plain `next dev`, vitest, the e2e stack).
-    return undefined;
-  }
-}
-
-/** The one call that touches the binding. Swap this to change providers. */
+/** The one call that reaches the provider. Swap this to change providers. */
 async function deliver(message: OutboundEmail, from: string): Promise<void> {
-  const binding = await emailBinding();
-
-  if (!binding) {
-    if (process.env.NODE_ENV === "development") {
-      // The dev fallback. Printed rather than sent, so the link in it is
-      // usable from a terminal without any Cloudflare account at all, and
-      // kept in a bounded in-memory outbox so a browser (and the e2e suite)
-      // can reach it too. Both are development-only; see ./dev-outbox.ts.
-      recordDevEmail({ ...message, from, at: new Date().toISOString() });
-      console.info(
-        [
-          "",
-          "──────── outbound email (dev: not actually sent) ────────",
-          `from:    ${from}`,
-          `to:      ${message.to}`,
-          `subject: ${message.subject}`,
-          "",
-          message.text,
-          "────────────────────────────────────────────────────────",
-          "",
-        ].join("\n"),
-      );
-      return;
-    }
-    throw new Error(
-      "Transactional email is enabled but no EMAIL binding is present. Add a `send_email` binding to wrangler.jsonc and onboard the sender domain to Cloudflare Email Service.",
-    );
+  if (process.env.NODE_ENV === "development") {
+    const record = { channel: "email" as const, ...message, from, at: new Date().toISOString() };
+    recordDevMessage(record);
+    printDevMessage(record);
+    return;
   }
 
-  await binding.send({
-    to: message.to,
-    from,
+  await brevoPost("/smtp/email", {
+    sender: { email: from, name: message.fromName ?? SENDER_NAME },
+    to: [{ email: message.to }],
+    ...(message.replyTo ? { replyTo: { email: message.replyTo } } : {}),
     subject: message.subject,
-    text: message.text,
-    ...(message.html ? { html: message.html } : {}),
+    textContent: message.text,
+    ...(message.html ? { htmlContent: message.html } : {}),
   });
 }
 
 /**
  * Send one transactional email. Never throws for an ordinary delivery failure
- * — the caller gets a result and decides what to tell the user — but DOES
- * throw when the deployment is misconfigured, which is a different problem
- * and must not read as "the recipient's mail server was busy".
+ * (the caller gets a result and decides what to tell the user) but DOES throw
+ * when the deployment is misconfigured, which is a different problem and must
+ * not read as "the recipient's mail server was busy".
  */
 export async function sendEmail(message: OutboundEmail): Promise<SendResult> {
   const from = senderAddress();
@@ -139,8 +112,9 @@ export async function sendEmail(message: OutboundEmail): Promise<SendResult> {
     await deliver(message, from);
     return { sent: true };
   } catch (error) {
+    if (error instanceof OutboundMisconfiguredError) throw error;
     const detail = error instanceof Error ? error.message : String(error);
-    if (detail.includes("no EMAIL binding")) throw error;
+    // The message body is never logged: it may carry a verification code.
     console.error("[email] send failed:", detail);
     return { sent: false, reason: "failed", detail };
   }

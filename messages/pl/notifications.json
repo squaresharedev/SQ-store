@@ -137,6 +137,17 @@
         "title": "Zatwierdzanie logowania jest włączone",
         "body": "Urządzenia, na których jesteś zalogowany, mogą teraz zatwierdzać nowe logowania na twoje konto. Jeśli to nie ty, zmień hasło teraz."
       }
+    },
+    "order": {
+      "newToShip": {
+        "title": "Nowe zamówienie: {quantity} × {title}",
+        "body": "Wyślij do {name} w {city}.",
+        "bodyNoAddress": "To zamówienie nie ma jeszcze adresu dostawy. Napisz do kupującego i zapytaj, gdzie wysłać."
+      },
+      "newDigital": {
+        "title": "Nowe zamówienie: {title}",
+        "body": "To plik do pobrania, więc nie ma czego wysyłać."
+      }
     }
   }
 }

@@ -4,7 +4,7 @@
       "label": "Dodaj dane sprzedawcy",
       "detail": "Twoja nazwa przedsiębiorcy, adres i e-mail kontaktowy trafiają na każdą stronę produktu.",
       "detailDone": "Kupujący widzą, od kogo kupują.",
-      "detailUnconfirmed": "Otwórz link, który wysłaliśmy e-mailem, aby potwierdzić adres kontaktowy.",
+      "detailUnconfirmed": "Potwierdź e-mail kontaktowy za pomocą kodu, który na niego wysyłamy.",
       "action": "Dodaj dane",
       "actionUnconfirmed": "Potwierdź e-mail",
       "cta": "Dodaj dane sprzedawcy",
@@ -112,9 +112,7 @@
       "emailHelp": "Adres, na który piszą kupujący. Może różnić się od e-maila do logowania."
     },
     "confirm": {
-      "check": "Sprawdź {email}, żeby znaleźć link potwierdzający.",
-      "goLive": "Strony twoich produktów zostaną opublikowane, gdy go otworzysz.",
-      "sendNewLink": "Wyślij nowy link"
+      "goLive": "Strony twoich produktów zostaną opublikowane po jego potwierdzeniu."
     },
     "tour": {
       "mobileMenu": "Na telefonie otwórz menu w lewym górnym rogu.",

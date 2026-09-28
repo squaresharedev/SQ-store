@@ -33,7 +33,11 @@
 import { cache } from "react";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { serverError, traderIdentityRequired, type ActionError } from "@/lib/errors";
-import { sellerEmailVerificationRequired } from "@/lib/settings/seller-email-verification";
+import { emailProofRequired } from "@/lib/contact-verification/availability";
+import { emailAddress } from "@/lib/validation/inputs";
+import { emailQualityProblem } from "@/lib/validation/email-quality";
+import { addressQualityProblem } from "@/lib/validation/address-quality";
+import { formatPhoneInternational } from "@/lib/validation/phone";
 import {
   missingTraderIdentity,
   type TraderIdentityField,
@@ -41,9 +45,13 @@ import {
 } from "@/lib/settings/trader-identity";
 import type { StorefrontSeller } from "@/types/storefront";
 
-/** Exactly the profile columns a trader identity is built from. */
+/**
+ * Exactly the profile columns a trader identity is built from. The phone's
+ * PROOF rides along because it decides whether the phone is shown at all
+ * (see buildSellerIdentity); the timestamp itself never reaches a buyer.
+ */
 export const SELLER_IDENTITY_SELECT =
-  "tax_business_name, tax_vat_id, tax_country, seller_address, seller_email, seller_phone, seller_bio" as const;
+  "tax_business_name, tax_vat_id, tax_country, seller_address, seller_email, seller_phone, seller_phone_verified_at, seller_bio" as const;
 
 export type SellerIdentityRow = {
   tax_business_name: string | null;
@@ -52,17 +60,18 @@ export type SellerIdentityRow = {
   seller_address: string | null;
   seller_email: string | null;
   seller_phone: string | null;
+  seller_phone_verified_at: string | null;
   seller_bio: string | null;
 };
 
 /**
  * The identity columns PLUS the one the publish gate needs and a buyer must
- * never see: whether the contact address has been proven
- * (20260909_seller_email_verification).
+ * never see: whether the contact email has been proven
+ * (20260926_contact_verification).
  *
  * Kept as a separate constant rather than widened into
- * {@link SELLER_IDENTITY_SELECT} so the buyer-facing read stays exactly the
- * columns a buyer is shown. Anything selecting this must build the page's
+ * {@link SELLER_IDENTITY_SELECT} so the buyer-facing read stays the columns a
+ * buyer's view is built from. Anything selecting this must build the page's
  * seller block with `buildSellerIdentity` (which copies field by field and
  * therefore cannot carry the extra column) and the gate's input with
  * {@link buildTraderIdentityInput}.
@@ -74,13 +83,30 @@ export type TraderGateRow = SellerIdentityRow & {
   seller_email_verified_at: string | null;
 };
 
-/** A row -> what the publish gate asks about. Verification is a boolean here;
- *  when it was proven is nobody's business but the audit trail's. */
+/**
+ * Would the settings form accept this email today? The gate asks, rather than
+ * trusting that every stored value came through the form: `profiles` is
+ * writable by its owner over the REST API too, and a placeholder written that
+ * way must count as missing, not as present.
+ */
+function plausibleEmail(email: string): boolean {
+  return emailAddress("contactEmail").safeParse(email).success && !emailQualityProblem(email);
+}
+
+/**
+ * A row -> what the publish gate asks about. A stored value the settings form
+ * would refuse (see above, and addressQualityProblem) counts as absent, so the
+ * gate is the same wall whichever way the row was written. Verification is a
+ * boolean here; when it was proven is nobody's business but the audit trail's.
+ */
 export function buildTraderIdentityInput(
   row: TraderGateRow | null,
 ): TraderIdentityInput {
+  const { address, email, ...rest } = buildSellerIdentity(row);
   return {
-    ...buildSellerIdentity(row),
+    ...rest,
+    ...(address && !addressQualityProblem(address) ? { address } : {}),
+    ...(email && plausibleEmail(email) ? { email } : {}),
     emailVerified: Boolean(row?.seller_email_verified_at),
   };
 }
@@ -92,6 +118,12 @@ export function buildTraderIdentityInput(
  * `null` (no row, or the read failed) is a seller with nothing set yet — an
  * empty object, not an error, since every field here is optional everywhere
  * it is read.
+ *
+ * THE PHONE IS SHOWN ONLY ONCE PROVEN (a code texted to it and typed back,
+ * lib/contact-verification). It is optional and never part of the publish
+ * gate, so withholding an unproven one blocks nobody from selling; showing
+ * one would put a number on the page that nobody has shown they answer.
+ * Formatted for reading ("+353 87 123 4567"); stored as E.164.
  */
 export function buildSellerIdentity(row: SellerIdentityRow | null): StorefrontSeller {
   if (!row) return {};
@@ -101,7 +133,9 @@ export function buildSellerIdentity(row: SellerIdentityRow | null): StorefrontSe
     ...(row.seller_email ? { email: row.seller_email } : {}),
     ...(row.tax_vat_id ? { vatId: row.tax_vat_id } : {}),
     ...(row.tax_country ? { country: row.tax_country } : {}),
-    ...(row.seller_phone ? { phone: row.seller_phone } : {}),
+    ...(row.seller_phone && row.seller_phone_verified_at
+      ? { phone: formatPhoneInternational(row.seller_phone) }
+      : {}),
     ...(row.seller_bio ? { bio: row.seller_bio } : {}),
   };
 }
@@ -172,7 +206,7 @@ export const getTraderIdentityStatus = cache(
         ok: true,
         missing: missingTraderIdentity(
           buildTraderIdentityInput(data as TraderGateRow | null),
-          { requireVerifiedEmail: sellerEmailVerificationRequired() },
+          { requireVerifiedEmail: emailProofRequired() },
         ),
       };
     } catch (err) {

@@ -1,4 +1,9 @@
 {
+  "offline": {
+    "title": "Sei offline",
+    "description": "Questa pagina ha bisogno di una connessione a internet. Si caricherà da sola appena tornerai online, e il tuo account e i tuoi dati sono al sicuro.",
+    "retry": "Riprova"
+  },
   "metadata": {
     "app": {
       "title": "Square Share Dashboard",
@@ -111,6 +116,10 @@
       "label": "{count, plural, one {{count} blocco della vetrina che fa riferimento a prodotti eliminati} many {{count} blocchi della vetrina che fanno riferimento a prodotti eliminati} other {{count} blocchi della vetrina che fanno riferimento a prodotti eliminati}}",
       "description": "Questi blocchi appaiono vuoti ai visitatori. Rimuovili o sostituiscili.",
       "action": "Apri vetrina"
+    },
+    "toShip": {
+      "description": "Gli acquirenti li stanno aspettando. Imballali e segnali come spediti.",
+      "action": "Spedisci gli ordini"
     }
   }
 }

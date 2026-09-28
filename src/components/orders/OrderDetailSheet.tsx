@@ -15,9 +15,16 @@ import { OrderDetail } from "./OrderDetail";
 export function OrderDetailSheet({
   order,
   onClose,
+  canFulfil = false,
+  onOrderChange,
 }: {
   order: OrderView;
   onClose: () => void;
+  /** Whether this member may mark orders shipped (orders.fulfil). */
+  canFulfil?: boolean;
+  /** Called with the order as it stands after a shipping change, so the
+   *  caller's copy (and therefore this panel) shows it at once. */
+  onOrderChange?: (order: OrderView) => void;
 }) {
   const t = useTranslations("Orders.list");
   const panelRef = useRef<HTMLDivElement>(null);
@@ -66,7 +73,12 @@ export function OrderDetailSheet({
         tabIndex={-1}
         className="relative h-full w-full max-w-md shadow-lg outline-none"
       >
-        <OrderDetail order={order} onClose={onClose} />
+        <OrderDetail
+          order={order}
+          onClose={onClose}
+          canFulfil={canFulfil}
+          onOrderChange={onOrderChange}
+        />
       </div>
     </div>
   );

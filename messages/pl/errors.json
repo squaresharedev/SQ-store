@@ -48,13 +48,18 @@
     "editThisStorefront": {
       "withRole": "Rola {role, select, owner {Właściciel} editor {Edytor} viewer {Przeglądający} other {{role}}} nie pozwala edytować tej witryny w tym sklepie.",
       "noRole": "Nie masz uprawnień do edytowania tej witryny w tym sklepie."
+    },
+    "fulfilOrders": {
+      "withRole": "Twoja rola {role, select, owner {Właściciel} editor {Edytor} viewer {Przeglądający} other {{role}}} nie pozwala oznaczać zamówień jako wysłane w tym sklepie.",
+      "noRole": "Nie masz uprawnień, aby oznaczać zamówień jako wysłane w tym sklepie."
     }
   },
   "notFound": {
     "fix": "Mógł zostać usunięty albo mogło dojść do zmiany sklepu. Odśwież stronę, aby wczytać aktualne dane.",
     "product": "Nie znaleziono tego produktu.",
     "storefront": "Nie znaleziono tej witryny.",
-    "item": "Nie znaleziono tego elementu."
+    "item": "Nie znaleziono tego elementu.",
+    "order": "Nie znaleziono tego zamówienia."
   },
   "rateLimited": {
     "fix": "Odczekaj kilka minut i spróbuj ponownie. Jeśli nic nie ponawia próby w tle, najpierw odśwież stronę.",
@@ -70,7 +75,8 @@
     "updateStock": "Zbyt wiele prób aktualizacji stanu magazynowego w krótkim czasie.",
     "readProductPageSettings": "Zbyt wiele prób odczytania ustawień strony produktu w krótkim czasie.",
     "requestReview": "Zbyt wiele próśb o ponowne sprawdzenie w krótkim czasie.",
-    "fileAppeal": "Zbyt wiele prób wysłania odwołania w krótkim czasie."
+    "fileAppeal": "Zbyt wiele prób wysłania odwołania w krótkim czasie.",
+    "fulfilOrders": "Zbyt wiele prób oznaczania zamówień jako wysłane w krótkim czasie."
   },
   "serverError": {
     "fix": "Zwykle jest to problem tymczasowy. Odczekaj chwilę i spróbuj ponownie; jeśli nadal się nie udaje, odśwież stronę.",
@@ -97,7 +103,8 @@
     "loadProductPageSettings": "Nie udało się wczytać ustawień strony produktu z powodu problemu po naszej stronie.",
     "saveProductPageSettings": "Nie udało się zapisać ustawień strony produktu z powodu problemu po naszej stronie.",
     "sendForReview": "Nie udało się wysłać tego do sprawdzenia z powodu problemu po naszej stronie.",
-    "fileAppeal": "Nie udało się wysłać odwołania z powodu błędu po naszej stronie."
+    "fileAppeal": "Nie udało się wysłać odwołania z powodu błędu po naszej stronie.",
+    "markOrderShipped": "Nie udało się oznaczyć zamówienia jako wysłane z powodu problemu po naszej stronie."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Ten produkt został usunięty, a nie wstrzymany.} storefront {Ta witryna została usunięta, a nie wstrzymana.} other {Ten element został usunięty, a nie wstrzymany.}}",
@@ -112,8 +119,8 @@
     "action": "Dodaj dane sprzedawcy",
     "fix": {
       "add": "{fields, select, businessName {Dodaj nazwę przedsiębiorcy w sekcji Ustawienia › Firma i dane sprzedawcy, a potem opublikuj.} address {Dodaj adres firmy w sekcji Ustawienia › Firma i dane sprzedawcy, a potem opublikuj.} email {Dodaj e-mail kontaktowy w sekcji Ustawienia › Firma i dane sprzedawcy, a potem opublikuj.} businessName_address {Dodaj nazwę przedsiębiorcy i adres firmy w sekcji Ustawienia › Firma i dane sprzedawcy, a potem opublikuj.} businessName_email {Dodaj nazwę przedsiębiorcy i e-mail kontaktowy w sekcji Ustawienia › Firma i dane sprzedawcy, a potem opublikuj.} address_email {Dodaj adres firmy i e-mail kontaktowy w sekcji Ustawienia › Firma i dane sprzedawcy, a potem opublikuj.} other {Dodaj nazwę przedsiębiorcy, adres firmy i e-mail kontaktowy w sekcji Ustawienia › Firma i dane sprzedawcy, a potem opublikuj.}}",
-      "addAndConfirm": "{fields, select, businessName {Dodaj nazwę przedsiębiorcy w sekcji Ustawienia › Firma i dane sprzedawcy i potwierdź e-mail kontaktowy za pomocą linku, który wysłaliśmy.} address {Dodaj adres firmy w sekcji Ustawienia › Firma i dane sprzedawcy i potwierdź e-mail kontaktowy za pomocą linku, który wysłaliśmy.} email {Dodaj e-mail kontaktowy w sekcji Ustawienia › Firma i dane sprzedawcy i potwierdź go za pomocą linku, który wysłaliśmy.} businessName_address {Dodaj nazwę przedsiębiorcy i adres firmy w sekcji Ustawienia › Firma i dane sprzedawcy i potwierdź e-mail kontaktowy za pomocą linku, który wysłaliśmy.} businessName_email {Dodaj nazwę przedsiębiorcy i e-mail kontaktowy w sekcji Ustawienia › Firma i dane sprzedawcy i potwierdź go za pomocą linku, który wysłaliśmy.} address_email {Dodaj adres firmy i e-mail kontaktowy w sekcji Ustawienia › Firma i dane sprzedawcy i potwierdź go za pomocą linku, który wysłaliśmy.} other {Dodaj nazwę przedsiębiorcy, adres firmy i e-mail kontaktowy w sekcji Ustawienia › Firma i dane sprzedawcy i potwierdź go za pomocą linku, który wysłaliśmy.}}",
-      "confirm": "Otwórz link potwierdzający, który wysłaliśmy na twój adres kontaktowy. Nowy możesz wysłać w sekcji Ustawienia › Firma i dane sprzedawcy.",
+      "addAndConfirm": "{fields, select, businessName {Dodaj nazwę przedsiębiorcy w sekcji Ustawienia › Firma i dane sprzedawcy i potwierdź e-mail kontaktowy za pomocą kodu, który na niego wysyłamy.} address {Dodaj adres firmy w sekcji Ustawienia › Firma i dane sprzedawcy i potwierdź e-mail kontaktowy za pomocą kodu, który na niego wysyłamy.} email {Dodaj e-mail kontaktowy w sekcji Ustawienia › Firma i dane sprzedawcy i potwierdź go za pomocą kodu, który na niego wysyłamy.} businessName_address {Dodaj nazwę przedsiębiorcy i adres firmy w sekcji Ustawienia › Firma i dane sprzedawcy i potwierdź e-mail kontaktowy za pomocą kodu, który na niego wysyłamy.} businessName_email {Dodaj nazwę przedsiębiorcy i e-mail kontaktowy w sekcji Ustawienia › Firma i dane sprzedawcy i potwierdź go za pomocą kodu, który na niego wysyłamy.} address_email {Dodaj adres firmy i e-mail kontaktowy w sekcji Ustawienia › Firma i dane sprzedawcy i potwierdź go za pomocą kodu, który na niego wysyłamy.} other {Dodaj nazwę przedsiębiorcy, adres firmy i e-mail kontaktowy w sekcji Ustawienia › Firma i dane sprzedawcy i potwierdź go za pomocą kodu, który na niego wysyłamy.}}",
+      "confirm": "Potwierdź e-mail kontaktowy: wyślij sobie kod w sekcji Ustawienia › Firma i dane sprzedawcy, a potem wpisz go tam.",
       "complete": "Uzupełnij sekcję Ustawienia › Firma i dane sprzedawcy, a potem opublikuj."
     }
   },
@@ -182,12 +189,23 @@
     "resetRateLimited": "Zbyt wiele e-maili resetujących. Odczekaj chwilę przed kolejną próbą.",
     "resetSendRateLimited": "Zbyt wiele żądań. Odczekaj minutę i spróbuj ponownie.",
     "resetFailed": "Nie udało się wysłać e-maila resetującego. Spróbuj ponownie.",
-    "contactEmailTakesNoMail": "Domena tego e-maila kontaktowego nie przyjmuje poczty. Sprawdź pisownię albo użyj adresu, na który kupujący faktycznie mogą pisać.",
-    "savedButConfirmationFailed": "{reason, select, startFailed {Zapisano, ale e-mail potwierdzający nie został wysłany. Nie udało się rozpocząć potwierdzania e-maila. Spróbuj opcji „Wyślij e-mail potwierdzający ponownie” poniżej.} unavailable {Zapisano, ale e-mail potwierdzający nie został wysłany. Potwierdzanie e-maila jest teraz niedostępne. Spróbuj opcji „Wyślij e-mail potwierdzający ponownie” poniżej.} other {Zapisano, ale e-mail potwierdzający nie został wysłany. Nie udało się wysłać e-maila potwierdzającego. Sprawdź adres i spróbuj ponownie. Spróbuj opcji „Wyślij e-mail potwierdzający ponownie” poniżej.}}",
-    "confirmationFailed": "{reason, select, startFailed {Nie udało się rozpocząć potwierdzania e-maila.} unavailable {Potwierdzanie e-maila jest teraz niedostępne.} other {Nie udało się wysłać e-maila potwierdzającego. Sprawdź adres i spróbuj ponownie.}}",
-    "confirmationUnavailable": "Potwierdzanie e-maila jest teraz niedostępne.",
-    "confirmationRateLimited": "To dużo e-maili potwierdzających. Odczekaj chwilę przed poproszeniem o kolejny.",
-    "noContactEmail": "Najpierw dodaj e-mail kontaktowy, abyśmy mogli go potwierdzić."
+    "contactEmailTakesNoMail": "Domena tego e-maila kontaktowego nie przyjmuje poczty. Sprawdź pisownię albo użyj adresu, na który kupujący faktycznie mogą pisać."
+  },
+  "contactVerification": {
+    "unavailable": "{channel, select, email {Potwierdzanie e-mailem jest teraz niedostępne.} other {Potwierdzanie SMS-em jest teraz niedostępne.}}",
+    "nothingToConfirm": "{channel, select, email {Najpierw dodaj e-mail kontaktowy i go zapisz.} other {Najpierw dodaj numer telefonu i go zapisz.}}",
+    "phoneNeedsResave": "Zapisz numer telefonu ponownie w pełnym formacie międzynarodowym, np. +353 87 123 4567, a potem poproś o kod.",
+    "cooldown": "Kod właśnie został wysłany. Poczekaj chwilę przed poproszeniem o kolejny.",
+    "tooManyCodes": "Wysłano już dużo kodów. Odczekaj chwilę przed poproszeniem o kolejny.",
+    "sendFailed": "{channel, select, email {Nie udało się wysłać e-maila. Sprawdź adres i spróbuj ponownie.} other {Nie udało się wysłać SMS-a. Sprawdź numer i spróbuj ponownie.}}",
+    "savedButNotSent": "Zapisano, ale nie udało się teraz wysłać kodu potwierdzającego. Użyj przycisku „Wyślij kod” poniżej, aby spróbować ponownie.",
+    "wrongCode": "Ten kod jest nieprawidłowy. Sprawdź go i spróbuj ponownie.",
+    "locked": "Zbyt wiele błędnych prób dla tego kodu. Wyślij sobie nowy.",
+    "expired": "Ten kod wygasł. Wyślij sobie nowy.",
+    "noCode": "Najpierw wyślij sobie kod.",
+    "stale": "Twoje dane zmieniły się po wysłaniu tego kodu. Wyślij sobie nowy.",
+    "tooManyAttempts": "Zbyt wiele prób. Odczekaj chwilę i spróbuj ponownie.",
+    "failed": "Nie udało się teraz sprawdzić tego kodu. Spróbuj ponownie."
   },
   "avatar": {
     "unexpectedData": "Nieoczekiwane dane formularza zostały odrzucone.",
@@ -552,5 +570,11 @@
     "rateLimited": "Zbyt wiele kodów w krótkim czasie. Odczekaj kilka minut i spróbuj ponownie.",
     "expired": "To żądanie logowania wygasło lub zostało już obsłużone. Pokaż nowy kod na urządzeniu, na którym się logujesz.",
     "otherAccount": "To żądanie dotyczy innego konta Square Share niż to, na które jesteś tu zalogowany."
+  },
+  "orders": {
+    "notShippable": {
+      "message": "Tego zamówienia nie można oznaczyć jako wysłane.",
+      "fix": "Wysłać można tylko opłacone zamówienia zawierające produkty do wysłania. Odśwież stronę, aby sprawdzić status tego zamówienia."
+    }
   }
 }

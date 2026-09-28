@@ -30,6 +30,9 @@ export const TEAM_ACTIONS = [
   "store.read",
   "products.write",
   "storefront.write",
+  // Marking an order shipped (public.order_mark_shipped). Editors pack parcels
+  // too; viewers see the queue but do not change it.
+  "orders.fulfil",
 ] as const;
 
 export type TeamAction = (typeof TEAM_ACTIONS)[number];
@@ -44,6 +47,7 @@ export const TEAM_PERMISSIONS: Record<TeamRole, readonly TeamAction[]> = {
     "store.read",
     "products.write",
     "storefront.write",
+    "orders.fulfil",
   ],
   editor: [
     "team.read",
@@ -51,6 +55,7 @@ export const TEAM_PERMISSIONS: Record<TeamRole, readonly TeamAction[]> = {
     "store.read",
     "products.write",
     "storefront.write",
+    "orders.fulfil",
   ],
   viewer: ["team.read", "store.read"],
 };

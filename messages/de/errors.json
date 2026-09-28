@@ -48,13 +48,18 @@
     "editThisStorefront": {
       "withRole": "Mit deiner Rolle {role, select, owner {Inhaber} editor {Bearbeiter} viewer {Betrachter} other {{role}}} kannst du dieses Schaufenster in diesem Shop nicht bearbeiten.",
       "noRole": "Du hast keine Berechtigung, dieses Schaufenster in diesem Shop zu bearbeiten."
+    },
+    "fulfilOrders": {
+      "withRole": "Mit deiner Rolle als {role, select, owner {Inhaber} editor {Bearbeiter} viewer {Betrachter} other {{role}}} kannst du in diesem Shop keine Bestellungen als versandt markieren.",
+      "noRole": "Du hast keine Berechtigung, in diesem Shop Bestellungen als versandt zu markieren."
     }
   },
   "notFound": {
     "fix": "Es wurde möglicherweise gelöscht, oder du hast den Shop gewechselt. Lade die Seite neu, um die aktuellen Daten zu laden.",
     "product": "Dieses Produkt konnte nicht gefunden werden.",
     "storefront": "Dieses Schaufenster konnte nicht gefunden werden.",
-    "item": "Dieses Element wurde nicht gefunden."
+    "item": "Dieses Element wurde nicht gefunden.",
+    "order": "Diese Bestellung konnte nicht gefunden werden."
   },
   "rateLimited": {
     "fix": "Warte einige Minuten und versuche es erneut. Falls nichts im Hintergrund wiederholt wird, lade die Seite zuerst neu.",
@@ -70,7 +75,8 @@
     "updateStock": "Zu viele Versuche, in kurzer Zeit den Lagerbestand zu aktualisieren.",
     "readProductPageSettings": "Zu viele Versuche, in kurzer Zeit die Produktseiteneinstellungen abzurufen.",
     "requestReview": "Zu viele Überprüfungsanfragen in kurzer Zeit.",
-    "fileAppeal": "Zu viele Versuche, einen Einspruch in kurzer Zeit zu senden."
+    "fileAppeal": "Zu viele Versuche, einen Einspruch in kurzer Zeit zu senden.",
+    "fulfilOrders": "Zu viele Versuche, Bestellungen in kurzer Zeit als versandt zu markieren."
   },
   "serverError": {
     "fix": "Das ist meist vorübergehend. Warte kurz und versuche es erneut. Falls es weiterhin fehlschlägt, lade die Seite neu.",
@@ -97,7 +103,8 @@
     "loadProductPageSettings": "Deine Produktseiteneinstellungen konnten aufgrund eines Fehlers auf unserer Seite nicht geladen werden.",
     "saveProductPageSettings": "Deine Produktseiteneinstellungen konnten aufgrund eines Fehlers auf unserer Seite nicht gespeichert werden.",
     "sendForReview": "Die Überprüfungsanfrage konnte wegen eines Problems auf unserer Seite nicht gesendet werden.",
-    "fileAppeal": "Dein Einspruch konnte aufgrund eines Problems auf unserer Seite nicht gesendet werden."
+    "fileAppeal": "Dein Einspruch konnte aufgrund eines Problems auf unserer Seite nicht gesendet werden.",
+    "markOrderShipped": "Die Bestellung konnte aufgrund eines Problems auf unserer Seite nicht als versandt markiert werden."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Dieses Produkt wurde entfernt, nicht pausiert.} storefront {Dieses Schaufenster wurde entfernt, nicht pausiert.} other {Dieses Element wurde entfernt, nicht pausiert.}}",
@@ -112,8 +119,8 @@
     "action": "Verkäuferangaben hinzufügen",
     "fix": {
       "add": "{fields, select, businessName {Trage deinen Händlernamen unter Einstellungen › Unternehmen und Verkäuferangaben ein und veröffentliche dann.} address {Trage deine Geschäftsadresse unter Einstellungen › Unternehmen und Verkäuferangaben ein und veröffentliche dann.} email {Trage deine Kontakt-E-Mail unter Einstellungen › Unternehmen und Verkäuferangaben ein und veröffentliche dann.} businessName_address {Trage deinen Händlernamen und deine Geschäftsadresse unter Einstellungen › Unternehmen und Verkäuferangaben ein und veröffentliche dann.} businessName_email {Trage deinen Händlernamen und deine Kontakt-E-Mail unter Einstellungen › Unternehmen und Verkäuferangaben ein und veröffentliche dann.} address_email {Trage deine Geschäftsadresse und deine Kontakt-E-Mail unter Einstellungen › Unternehmen und Verkäuferangaben ein und veröffentliche dann.} other {Trage deinen Händlernamen, deine Geschäftsadresse und deine Kontakt-E-Mail unter Einstellungen › Unternehmen und Verkäuferangaben ein und veröffentliche dann.}}",
-      "addAndConfirm": "{fields, select, businessName {Trage deinen Händlernamen unter Einstellungen › Unternehmen und Verkäuferangaben ein und bestätige deine Kontakt-E-Mail über den Link, den wir dir geschickt haben.} address {Trage deine Geschäftsadresse unter Einstellungen › Unternehmen und Verkäuferangaben ein und bestätige deine Kontakt-E-Mail über den Link, den wir dir geschickt haben.} email {Trage deine Kontakt-E-Mail unter Einstellungen › Unternehmen und Verkäuferangaben ein und bestätige deine Kontakt-E-Mail über den Link, den wir dir geschickt haben.} businessName_address {Trage deinen Händlernamen und deine Geschäftsadresse unter Einstellungen › Unternehmen und Verkäuferangaben ein und bestätige deine Kontakt-E-Mail über den Link, den wir dir geschickt haben.} businessName_email {Trage deinen Händlernamen und deine Kontakt-E-Mail unter Einstellungen › Unternehmen und Verkäuferangaben ein und bestätige deine Kontakt-E-Mail über den Link, den wir dir geschickt haben.} address_email {Trage deine Geschäftsadresse und deine Kontakt-E-Mail unter Einstellungen › Unternehmen und Verkäuferangaben ein und bestätige deine Kontakt-E-Mail über den Link, den wir dir geschickt haben.} other {Trage deinen Händlernamen, deine Geschäftsadresse und deine Kontakt-E-Mail unter Einstellungen › Unternehmen und Verkäuferangaben ein und bestätige deine Kontakt-E-Mail über den Link, den wir dir geschickt haben.}}",
-      "confirm": "Öffne den Bestätigungslink, den wir an deine Kontaktadresse gesendet haben. Du kannst unter Einstellungen › Unternehmen und Verkäuferangaben einen neuen anfordern.",
+      "addAndConfirm": "{fields, select, businessName {Trage deinen Händlernamen unter Einstellungen › Unternehmen und Verkäuferangaben ein und bestätige deine Kontakt-E-Mail mit dem Code, den wir dorthin senden.} address {Trage deine Geschäftsadresse unter Einstellungen › Unternehmen und Verkäuferangaben ein und bestätige deine Kontakt-E-Mail mit dem Code, den wir dorthin senden.} email {Trage deine Kontakt-E-Mail unter Einstellungen › Unternehmen und Verkäuferangaben ein und bestätige sie mit dem Code, den wir dorthin senden.} businessName_address {Trage deinen Händlernamen und deine Geschäftsadresse unter Einstellungen › Unternehmen und Verkäuferangaben ein und bestätige deine Kontakt-E-Mail mit dem Code, den wir dorthin senden.} businessName_email {Trage deinen Händlernamen und deine Kontakt-E-Mail unter Einstellungen › Unternehmen und Verkäuferangaben ein und bestätige die E-Mail mit dem Code, den wir dorthin senden.} address_email {Trage deine Geschäftsadresse und deine Kontakt-E-Mail unter Einstellungen › Unternehmen und Verkäuferangaben ein und bestätige die E-Mail mit dem Code, den wir dorthin senden.} other {Trage deinen Händlernamen, deine Geschäftsadresse und deine Kontakt-E-Mail unter Einstellungen › Unternehmen und Verkäuferangaben ein und bestätige die E-Mail mit dem Code, den wir dorthin senden.}}",
+      "confirm": "Bestätige deine Kontakt-E-Mail: Sende dir unter Einstellungen › Unternehmen und Verkäuferangaben einen Code und gib ihn dort ein.",
       "complete": "Vervollständige Einstellungen › Unternehmen und Verkäuferangaben und veröffentliche dann."
     }
   },
@@ -182,12 +189,23 @@
     "resetRateLimited": "Zu viele Zurücksetzungs-E-Mails. Warte eine Weile, bevor du es erneut versuchst.",
     "resetSendRateLimited": "Zu viele Anfragen. Warte eine Minute und versuche es erneut.",
     "resetFailed": "Die Zurücksetzungs-E-Mail konnte nicht gesendet werden. Versuche es erneut.",
-    "contactEmailTakesNoMail": "Die Domain dieser Kontakt-E-Mail akzeptiert keine E-Mails. Überprüfe die Schreibweise oder verwende eine Adresse, die Käufer tatsächlich erreichen können.",
-    "savedButConfirmationFailed": "{reason, select, startFailed {Gespeichert, aber die Bestätigungs-E-Mail wurde nicht verschickt. Die E-Mail-Bestätigung konnte nicht gestartet werden. Klicke unten auf „Bestätigungs-E-Mail erneut senden“.} unavailable {Gespeichert, aber die Bestätigungs-E-Mail wurde nicht verschickt. Die E-Mail-Bestätigung ist derzeit nicht verfügbar. Klicke unten auf „Bestätigungs-E-Mail erneut senden“.} other {Gespeichert, aber die Bestätigungs-E-Mail wurde nicht verschickt. Die Bestätigungs-E-Mail konnte nicht gesendet werden. Überprüfe die Adresse und versuche es erneut. Klicke unten auf „Bestätigungs-E-Mail erneut senden“.}}",
-    "confirmationFailed": "{reason, select, startFailed {Die E-Mail-Bestätigung konnte nicht gestartet werden.} unavailable {Die E-Mail-Bestätigung ist derzeit nicht verfügbar.} other {Die Bestätigungs-E-Mail konnte nicht gesendet werden. Überprüfe die Adresse und versuche es erneut.}}",
-    "confirmationUnavailable": "Die E-Mail-Bestätigung ist derzeit nicht verfügbar.",
-    "confirmationRateLimited": "Das sind viele Bestätigungs-E-Mails. Warte eine Weile, bevor du eine weitere anforderst.",
-    "noContactEmail": "Füge zuerst eine Kontakt-E-Mail hinzu, damit wir sie bestätigen können."
+    "contactEmailTakesNoMail": "Die Domain dieser Kontakt-E-Mail akzeptiert keine E-Mails. Überprüfe die Schreibweise oder verwende eine Adresse, die Käufer tatsächlich erreichen können."
+  },
+  "contactVerification": {
+    "unavailable": "{channel, select, email {Die E-Mail-Bestätigung ist gerade nicht verfügbar.} other {Die Bestätigung per SMS ist gerade nicht verfügbar.}}",
+    "nothingToConfirm": "{channel, select, email {Füge zuerst eine Kontakt-E-Mail hinzu und speichere sie.} other {Füge zuerst eine Telefonnummer hinzu und speichere sie.}}",
+    "phoneNeedsResave": "Speichere deine Telefonnummer erneut in vollständiger internationaler Form, z. B. +353 87 123 4567, und fordere dann einen Code an.",
+    "cooldown": "Ein Code wurde gerade gesendet. Warte eine Minute, bevor du einen neuen anforderst.",
+    "tooManyCodes": "Das sind viele Codes. Warte eine Weile, bevor du einen neuen anforderst.",
+    "sendFailed": "{channel, select, email {Die E-Mail konnte nicht gesendet werden. Prüfe die Adresse und versuche es erneut.} other {Die SMS konnte nicht gesendet werden. Prüfe die Nummer und versuche es erneut.}}",
+    "savedButNotSent": "Gespeichert, aber dein Bestätigungscode konnte gerade nicht gesendet werden. Verwende unten \"Code senden\", um es erneut zu versuchen.",
+    "wrongCode": "Dieser Code stimmt nicht. Prüfe ihn und versuche es erneut.",
+    "locked": "Zu viele falsche Versuche für diesen Code. Sende dir einen neuen.",
+    "expired": "Dieser Code ist abgelaufen. Sende dir einen neuen.",
+    "noCode": "Sende dir zuerst einen Code.",
+    "stale": "Deine Angaben haben sich geändert, nachdem dieser Code gesendet wurde. Sende dir einen neuen.",
+    "tooManyAttempts": "Zu viele Versuche. Warte eine Weile und versuche es dann erneut.",
+    "failed": "Dieser Code konnte gerade nicht geprüft werden. Versuche es erneut."
   },
   "avatar": {
     "unexpectedData": "Unerwartete Formulardaten wurden abgelehnt.",
@@ -552,5 +570,11 @@
     "rateLimited": "Zu viele Codes in kurzer Zeit. Warte ein paar Minuten und versuche es dann erneut.",
     "expired": "Diese Anmeldeanfrage ist abgelaufen oder wurde bereits beantwortet. Zeige einen neuen Code auf dem Gerät an, auf dem du dich anmelden möchtest.",
     "otherAccount": "Diese Anfrage gilt für ein anderes Square-Share-Konto als das hier angemeldete."
+  },
+  "orders": {
+    "notShippable": {
+      "message": "Diese Bestellung kann nicht als versandt markiert werden.",
+      "fix": "Nur bezahlte Bestellungen mit Artikeln zum Versenden können als versandt markiert werden. Lade die Seite neu, um den aktuellen Status zu sehen."
+    }
   }
 }

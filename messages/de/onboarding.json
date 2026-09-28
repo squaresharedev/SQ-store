@@ -4,7 +4,7 @@
       "label": "Verkäuferangaben hinzufügen",
       "detail": "Dein Händlername, deine Adresse und deine Kontakt-E-Mail erscheinen auf jeder Produktseite.",
       "detailDone": "Käufer können sehen, von wem sie kaufen.",
-      "detailUnconfirmed": "Öffne den Link, den wir dir per E-Mail geschickt haben, um deine Kontakt-E-Mail zu bestätigen.",
+      "detailUnconfirmed": "Bestätige deine Kontakt-E-Mail mit dem Code, den wir dorthin senden.",
       "action": "Details hinzufügen",
       "actionUnconfirmed": "E-Mail bestätigen",
       "cta": "Verkäuferangaben hinzufügen",
@@ -112,9 +112,7 @@
       "emailHelp": "Wohin Käufer dir schreiben. Diese kann sich von deiner Anmelde-E-Mail unterscheiden."
     },
     "confirm": {
-      "check": "Prüfe {email} auf einen Bestätigungslink.",
-      "goLive": "Deine Produktseiten gehen online, sobald du ihn öffnest.",
-      "sendNewLink": "Neuen Link senden"
+      "goLive": "Deine Produktseiten gehen online, sobald sie bestätigt ist."
     },
     "tour": {
       "mobileMenu": "Öffne auf deinem Telefon das Menü oben links.",

@@ -48,13 +48,18 @@
     "editThisStorefront": {
       "withRole": "Tu rol de {role, select, owner {propietario} editor {editor} viewer {lector} other {{role}}} no permite editar este escaparate en esta tienda.",
       "noRole": "No tienes permiso para editar este escaparate en esta tienda."
+    },
+    "fulfilOrders": {
+      "withRole": "Tu rol de {role, select, owner {propietario} editor {editor} viewer {lector} other {{role}}} no te permite marcar pedidos como enviados en esta tienda.",
+      "noRole": "No tienes permiso para marcar pedidos como enviados en esta tienda."
     }
   },
   "notFound": {
     "fix": "Puede que se haya eliminado, o que hayas cambiado de tienda. Actualiza la página para cargar los datos actuales.",
     "product": "No se ha encontrado ese producto.",
     "storefront": "No se ha encontrado ese escaparate.",
-    "item": "No se ha encontrado ese elemento."
+    "item": "No se ha encontrado ese elemento.",
+    "order": "No se ha encontrado ese pedido."
   },
   "rateLimited": {
     "fix": "Espera unos minutos y vuelve a intentarlo. Si no hay nada reintentándolo en segundo plano, recarga la página primero.",
@@ -70,7 +75,8 @@
     "updateStock": "Demasiados intentos de actualizar el stock en poco tiempo.",
     "readProductPageSettings": "Demasiados intentos de leer los ajustes de la página de producto en poco tiempo.",
     "requestReview": "Demasiados intentos de solicitar una revisión en poco tiempo.",
-    "fileAppeal": "Demasiados intentos de enviar un recurso en poco tiempo."
+    "fileAppeal": "Demasiados intentos de enviar un recurso en poco tiempo.",
+    "fulfilOrders": "Demasiados intentos de marcar pedidos como enviados en poco tiempo."
   },
   "serverError": {
     "fix": "Suele ser algo temporal. Espera un momento y vuelve a intentarlo; si sigue fallando, recarga la página.",
@@ -97,7 +103,8 @@
     "loadProductPageSettings": "No se han podido cargar los ajustes de tu página de producto por un problema en nuestro sistema.",
     "saveProductPageSettings": "No se han podido guardar los ajustes de tu página de producto por un problema en nuestro sistema.",
     "sendForReview": "No se ha podido enviar a revisión por un problema de nuestra parte.",
-    "fileAppeal": "No se ha podido enviar tu recurso por un problema en nuestro lado."
+    "fileAppeal": "No se ha podido enviar tu recurso por un problema en nuestro lado.",
+    "markOrderShipped": "No se ha podido marcar el pedido como enviado por un problema en nuestro sistema."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Este producto se ha retirado, no está en pausa.} storefront {Este escaparate se ha retirado, no está en pausa.} other {Este elemento se ha retirado, no está en pausa.}}",
@@ -112,8 +119,8 @@
     "action": "Añadir datos de vendedor",
     "fix": {
       "add": "{fields, select, businessName {Añade tu nombre o razón social en Configuración › Empresa y datos del vendedor y publica.} address {Añade tu dirección comercial en Configuración › Empresa y datos del vendedor y publica.} email {Añade tu correo de contacto en Configuración › Empresa y datos del vendedor y publica.} businessName_address {Añade tu nombre o razón social y tu dirección comercial en Configuración › Empresa y datos del vendedor y publica.} businessName_email {Añade tu nombre o razón social y tu correo de contacto en Configuración › Empresa y datos del vendedor y publica.} address_email {Añade tu dirección comercial y tu correo de contacto en Configuración › Empresa y datos del vendedor y publica.} other {Añade tu nombre o razón social, tu dirección comercial y tu correo de contacto en Configuración › Empresa y datos del vendedor y publica.}}",
-      "addAndConfirm": "{fields, select, businessName {Añade tu nombre o razón social en Configuración › Empresa y datos del vendedor, y confirma tu correo de contacto con el enlace que te enviamos.} address {Añade tu dirección comercial en Configuración › Empresa y datos del vendedor, y confirma tu correo de contacto con el enlace que te enviamos.} email {Añade tu correo de contacto en Configuración › Empresa y datos del vendedor, y confirma tu correo de contacto con el enlace que te enviamos.} businessName_address {Añade tu nombre o razón social y tu dirección comercial en Configuración › Empresa y datos del vendedor, y confirma tu correo de contacto con el enlace que te enviamos.} businessName_email {Añade tu nombre o razón social y tu correo de contacto en Configuración › Empresa y datos del vendedor, y confirma tu correo de contacto con el enlace que te enviamos.} address_email {Añade tu dirección comercial y tu correo de contacto en Configuración › Empresa y datos del vendedor, y confirma tu correo de contacto con el enlace que te enviamos.} other {Añade tu nombre o razón social, tu dirección comercial y tu correo de contacto en Configuración › Empresa y datos del vendedor, y confirma tu correo de contacto con el enlace que te enviamos.}}",
-      "confirm": "Abre el enlace de confirmación que te enviamos a tu dirección de contacto. Puedes enviarte uno nuevo desde Configuración › Empresa y datos del vendedor.",
+      "addAndConfirm": "{fields, select, businessName {Añade tu nombre o razón social en Configuración › Empresa y datos del vendedor, y confirma tu correo de contacto con el código que te enviamos.} address {Añade tu dirección comercial en Configuración › Empresa y datos del vendedor, y confirma tu correo de contacto con el código que te enviamos.} email {Añade tu correo de contacto en Configuración › Empresa y datos del vendedor, y confírmalo con el código que te enviamos.} businessName_address {Añade tu nombre o razón social y tu dirección comercial en Configuración › Empresa y datos del vendedor, y confirma tu correo de contacto con el código que te enviamos.} businessName_email {Añade tu nombre o razón social y tu correo de contacto en Configuración › Empresa y datos del vendedor, y confirma el correo con el código que te enviamos.} address_email {Añade tu dirección comercial y tu correo de contacto en Configuración › Empresa y datos del vendedor, y confirma el correo con el código que te enviamos.} other {Añade tu nombre o razón social, tu dirección comercial y tu correo de contacto en Configuración › Empresa y datos del vendedor, y confirma el correo con el código que te enviamos.}}",
+      "confirm": "Confirma tu correo de contacto: envíate un código desde Configuración › Empresa y datos del vendedor e introdúcelo allí.",
       "complete": "Completa Configuración › Empresa y datos del vendedor y publica."
     }
   },
@@ -182,12 +189,23 @@
     "resetRateLimited": "Demasiados correos de restablecimiento. Espera un poco antes de volver a intentarlo.",
     "resetSendRateLimited": "Demasiadas solicitudes. Espera un minuto e inténtalo de nuevo.",
     "resetFailed": "No se ha podido enviar el correo de restablecimiento. Inténtalo de nuevo.",
-    "contactEmailTakesNoMail": "El dominio de ese correo de contacto no acepta correo. Revisa que esté bien escrito, o usa una dirección a la que los compradores puedan escribirte de verdad.",
-    "savedButConfirmationFailed": "{reason, select, startFailed {Guardado, pero el correo de confirmación no se ha enviado. No se ha podido iniciar la confirmación por correo. Prueba «Reenviar correo de confirmación» más abajo.} unavailable {Guardado, pero el correo de confirmación no se ha enviado. La confirmación por correo no está disponible ahora mismo. Prueba «Reenviar correo de confirmación» más abajo.} other {Guardado, pero el correo de confirmación no se ha enviado. No hemos podido enviar el correo de confirmación. Comprueba la dirección e inténtalo de nuevo. Prueba «Reenviar correo de confirmación» más abajo.}}",
-    "confirmationFailed": "{reason, select, startFailed {No se ha podido iniciar la confirmación por correo.} unavailable {La confirmación por correo no está disponible ahora mismo.} other {No hemos podido enviar el correo de confirmación. Comprueba la dirección e inténtalo de nuevo.}}",
-    "confirmationUnavailable": "La confirmación por correo no está disponible ahora mismo.",
-    "confirmationRateLimited": "Son muchos correos de confirmación. Espera un poco antes de pedir otro.",
-    "noContactEmail": "Añade primero un correo de contacto, y entonces podremos confirmarlo."
+    "contactEmailTakesNoMail": "El dominio de ese correo de contacto no acepta correo. Revisa que esté bien escrito, o usa una dirección a la que los compradores puedan escribirte de verdad."
+  },
+  "contactVerification": {
+    "unavailable": "{channel, select, email {La confirmación por correo no está disponible ahora mismo.} other {La confirmación por SMS no está disponible ahora mismo.}}",
+    "nothingToConfirm": "{channel, select, email {Añade primero un correo de contacto y guárdalo.} other {Añade primero un número de teléfono y guárdalo.}}",
+    "phoneNeedsResave": "Guarda de nuevo tu número de teléfono en formato internacional completo, como +353 87 123 4567, y luego pide un código.",
+    "cooldown": "Acabamos de enviar un código. Espera un minuto antes de pedir otro.",
+    "tooManyCodes": "Son muchos códigos. Espera un poco antes de pedir otro.",
+    "sendFailed": "{channel, select, email {No hemos podido enviar el correo. Comprueba la dirección e inténtalo de nuevo.} other {No hemos podido enviar el SMS. Comprueba el número e inténtalo de nuevo.}}",
+    "savedButNotSent": "Guardado, pero no hemos podido enviar el código de confirmación ahora mismo. Usa «Enviar código» más abajo para volver a intentarlo.",
+    "wrongCode": "Ese código no es correcto. Compruébalo e inténtalo de nuevo.",
+    "locked": "Demasiados intentos incorrectos para ese código. Envíate uno nuevo.",
+    "expired": "Ese código ha caducado. Envíate uno nuevo.",
+    "noCode": "Envíate primero un código.",
+    "stale": "Tus datos cambiaron después de que se enviara ese código. Envíate uno nuevo.",
+    "tooManyAttempts": "Demasiados intentos. Espera un poco y vuelve a intentarlo.",
+    "failed": "No hemos podido comprobar ese código ahora mismo. Inténtalo de nuevo."
   },
   "avatar": {
     "unexpectedData": "Se han rechazado datos de formulario inesperados.",
@@ -552,5 +570,11 @@
     "rateLimited": "Demasiados códigos en poco tiempo. Espera unos minutos y vuelve a intentarlo.",
     "expired": "Esta solicitud de inicio de sesión ha caducado o ya fue respondida. Muestra un código nuevo en el dispositivo en el que estás iniciando sesión.",
     "otherAccount": "Esta solicitud es para una cuenta de Square Share diferente a la que tiene sesión iniciada aquí."
+  },
+  "orders": {
+    "notShippable": {
+      "message": "Este pedido no se puede marcar como enviado.",
+      "fix": "Solo se pueden enviar los pedidos pagados con artículos que enviar. Actualiza la página para ver en qué estado está este."
+    }
   }
 }

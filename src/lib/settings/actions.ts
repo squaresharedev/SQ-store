@@ -19,10 +19,11 @@ import {
   taxSchema,
 } from "@/lib/validation/settings";
 import { hasMailExchanger } from "@/lib/validation/email-domain";
-import {
-  sellerEmailVerificationRequired,
-  startSellerEmailVerification,
-} from "@/lib/settings/seller-email-verification";
+import { normalizeSellerPhone } from "@/lib/validation/phone";
+import { unknownField } from "@/lib/validation/form-fields";
+import { contactChannelAvailable } from "@/lib/contact-verification/availability";
+import { issueContactCode } from "@/lib/contact-verification/service";
+import type { ContactChannel } from "@/lib/contact-verification/policy";
 import { usernameSchema } from "@/lib/validation/auth";
 import { firstIssue } from "@/lib/validation/messages";
 import {
@@ -33,7 +34,7 @@ import {
   type ActionState,
 } from "@/lib/errors";
 import { msg } from "@/i18n/types";
-import type { TablesUpdate } from "@/types";
+import type { Tables, TablesUpdate } from "@/types";
 import type { z } from "zod";
 
 const SIGNED_OUT: ActionState = failed(
@@ -87,25 +88,10 @@ function normalizeTextareaValue(raw: string): string {
   return raw.replace(/\r\n?/g, "\n");
 }
 
-/**
- * FIELD WHITELIST (privilege-escalation guard): reject any submitted field
- * that isn't explicitly expected by the form. Combined with the strict Zod
- * schemas and column-by-column update objects below, there is no path for a
- * user to touch `id`, `is_seller`, `avatar_url` or any other column through
- * settings. React's own `$ACTION_*` bookkeeping keys are ignored.
- */
-function unknownFieldError(
-  formData: FormData,
-  allowed: readonly string[],
-): ActionState | null {
-  for (const key of formData.keys()) {
-    if (key.startsWith("$ACTION")) continue;
-    if (!allowed.includes(key)) {
-      return failed(invalidInput(msg("Errors.form.unexpectedField", { field: key })));
-    }
-  }
-  return null;
-}
+// Every action below starts with `unknownField` (lib/validation/form-fields.ts),
+// the field whitelist: with the strict Zod schemas and column-by-column update
+// objects, there is no path for a user to touch `id`, `is_seller`,
+// `avatar_url`, a contact proof or any other column through settings.
 
 function invalid(error: z.ZodError): ActionState {
   return failed(invalidInput(firstIssue(error)));
@@ -161,7 +147,7 @@ export async function updateUsername(
 ): Promise<ActionState> {
   const user = await getUser();
   if (!user) return SIGNED_OUT;
-  const rejected = unknownFieldError(formData, ["username"]);
+  const rejected = unknownField(formData, ["username"]);
   if (rejected) return rejected;
 
   const parsed = usernameSchema.safeParse({
@@ -209,7 +195,7 @@ export async function updateBio(
 ): Promise<ActionState> {
   const user = await getUser();
   if (!user) return SIGNED_OUT;
-  const rejected = unknownFieldError(formData, ["seller_bio"]);
+  const rejected = unknownField(formData, ["seller_bio"]);
   if (rejected) return rejected;
 
   const parsed = bioSchema.safeParse({
@@ -242,7 +228,7 @@ export async function requestEmailChange(
 ): Promise<ActionState> {
   const user = await getUser();
   if (!user) return SIGNED_OUT;
-  const rejected = unknownFieldError(formData, [
+  const rejected = unknownField(formData, [
     "new_email",
     "current_password",
     ...STEP_UP_FIELDS,
@@ -347,7 +333,7 @@ export async function sendPasswordReset(
 ): Promise<ActionState> {
   const user = await getUser();
   if (!user?.email) return SIGNED_OUT;
-  const rejected = unknownFieldError(formData, []);
+  const rejected = unknownField(formData, []);
   if (rejected) return rejected;
 
   // TWO budgets, and the second is not redundant. The per-user one is spent by
@@ -406,7 +392,7 @@ export async function acceptLegal(
 ): Promise<ActionState> {
   const user = await getUser();
   if (!user) return SIGNED_OUT;
-  const rejected = unknownFieldError(formData, ["version"]);
+  const rejected = unknownField(formData, ["version"]);
   if (rejected) return rejected;
 
   const parsed = legalAcceptSchema.safeParse({
@@ -453,7 +439,7 @@ export async function saveTaxInfo(
 ): Promise<ActionState> {
   const user = await getUser();
   if (!user) return SIGNED_OUT;
-  const rejected = unknownFieldError(formData, [...TAX_FIELDS, ...STEP_UP_FIELDS]);
+  const rejected = unknownField(formData, [...TAX_FIELDS, ...STEP_UP_FIELDS]);
   if (rejected) return rejected;
 
   // ONLY WHAT WAS SENT IS WRITTEN. The settings form posts every field, so
@@ -498,119 +484,78 @@ export async function saveTaxInfo(
     }
   }
 
-  // Whether the buyer-facing address CHANGED decides two things: the stored
-  // proof must be dropped (it was proof of a different address), and a fresh
-  // confirmation link has to go out. Read before the write, since the write is
-  // what makes the answer unknowable.
-  //
-  // Only asked when the address was sent at all: a submission that leaves the
-  // contact email out cannot have changed it, so it must neither drop the
-  // stored proof nor send a link.
-  let emailChanged = false;
-  if (present.includes("seller_email")) {
+  // What is stored now decides two things: which contact details CHANGED (and
+  // so need a fresh code), and how a phone typed without its country code is
+  // read. Read before the write, since the write is what makes it unknowable.
+  // Only asked when a contact detail was sent at all: a submission that leaves
+  // both out (the welcome flow never shows the phone) cannot have changed them.
+  const sentContact = present.includes("seller_email") || present.includes("seller_phone");
+  let current: Pick<Tables<"profiles">, "seller_email" | "seller_phone" | "tax_country"> | null =
+    null;
+  if (sentContact) {
     const supabase = await createClient();
-    const { data: current } = await supabase
+    const { data } = await supabase
       .from("profiles")
-      .select("seller_email")
+      .select("seller_email, seller_phone, tax_country")
       .eq("id", user.id)
       .maybeSingle();
-    emailChanged =
-      (current?.seller_email ?? null) !== (parsed.data.seller_email ?? null);
+    current = data;
   }
 
   const update: TablesUpdate<"profiles"> = { ...parsed.data };
-  // Clearing the flag is unconditional on a change, and happens whether or not
-  // verification is switched on: a stored `verified_at` must never outlive the
-  // address it was granted for, or turning the feature on later would
-  // grandfather in an address nobody ever confirmed.
-  if (emailChanged) update.seller_email_verified_at = null;
+
+  // One canonical spelling per number (E.164), and only a number that can be
+  // proven by text: see lib/validation/phone.ts. "087 …" is read in the
+  // country this same form sets, or the one already on file.
+  if (parsed.data.seller_phone) {
+    const phone = normalizeSellerPhone(
+      parsed.data.seller_phone,
+      present.includes("tax_country") ? parsed.data.tax_country : current?.tax_country,
+    );
+    if (!phone.ok) return failed(invalidInput(msg(phone.problem)));
+    update.seller_phone = phone.e164;
+  }
+
+  // Which details now need proving. The proof itself is never touched here:
+  // the guard_contact_proof trigger drops it in the same statement that
+  // changes the value, whoever writes it, so no code path can forget to.
+  const changed = (["email", "phone"] as const satisfies readonly ContactChannel[]).filter(
+    (channel) => {
+      const column = channel === "email" ? "seller_email" : "seller_phone";
+      if (!present.includes(column)) return false;
+      const next = update[column] ?? null;
+      return next !== null && next !== (current?.[column] ?? null);
+    },
+  );
 
   if (!(await updateOwnProfile(user.id, update))) return SAVE_FAILED;
   revalidatePath("/settings/tax");
 
-  if (emailChanged && parsed.data.seller_email && sellerEmailVerificationRequired()) {
-    const started = await startSellerEmailVerification(
-      user.id,
-      parsed.data.seller_email,
-      await siteOrigin(),
-    );
-    // The DETAILS ARE SAVED either way — reporting a failed send as a failed
-    // save would be a lie, and would leave the seller re-typing an address
-    // that is already stored. The resend button is the recovery.
-    if (!started.ok) {
+  // A code goes out for each changed detail this deployment can prove. The
+  // DETAILS ARE SAVED either way: reporting a failed send as a failed save
+  // would be a lie, and "Send code" beside the field is the recovery.
+  const toProve = changed.filter(contactChannelAvailable);
+  const sent: Partial<Record<ContactChannel, string>> = {};
+  for (const channel of toProve) {
+    const issued = await issueContactCode(user.id, channel);
+    if (!issued.ok) {
       return failed(
-        actionError(
-          "server_error",
-          msg("Errors.settings.savedButConfirmationFailed", { reason: started.reason }),
-        ),
+        actionError("server_error", msg("Errors.contactVerification.savedButNotSent")),
       );
     }
+    if (issued.status === "sent") sent[channel] = issued.target;
+  }
+
+  if (sent.email || sent.phone) {
     return succeeded(
-      msg("Settings.tax.success.savedCheckEmail", { email: parsed.data.seller_email }),
+      msg("Settings.tax.success.savedCodeSent", {
+        which: sent.email && sent.phone ? "both" : sent.email ? "email" : "phone",
+        email: sent.email ?? "",
+        phone: sent.phone ?? "",
+      }),
     );
   }
-
   return succeeded(msg("Settings.tax.success.sellerDetailsSaved"));
-}
-
-/**
- * Send the confirmation link again.
- *
- * Its own action rather than a re-save, because the two are different asks: a
- * save may legitimately change nothing, and a seller who never received the
- * first mail should not have to re-submit a whole form (and re-run the DNS
- * check) to get another one.
- *
- * Nothing here is user-supplied: the address comes from the stored profile, so
- * this cannot be turned into a way to send mail to an arbitrary recipient.
- */
-export async function resendSellerEmailVerification(
-  _prev: ActionState,
-  formData: FormData,
-): Promise<ActionState> {
-  const user = await getUser();
-  if (!user) return SIGNED_OUT;
-  const rejected = unknownFieldError(formData, []);
-  if (rejected) return rejected;
-
-  if (!sellerEmailVerificationRequired()) {
-    return failed(actionError("server_error", msg("Errors.settings.confirmationUnavailable")));
-  }
-  // Its own budget, tighter than settingsWrite: this is the one control in
-  // Settings that makes us send mail on demand.
-  if (!(await rateLimit("seller_email_verify_send", RATE_LIMITS.sellerEmailVerifySend))) {
-    return failed(actionError("rate_limited", msg("Errors.settings.confirmationRateLimited")));
-  }
-
-  const supabase = await createClient();
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("seller_email, seller_email_verified_at")
-    .eq("id", user.id)
-    .maybeSingle();
-  if (!profile?.seller_email) {
-    return failed(invalidInput(msg("Errors.settings.noContactEmail")));
-  }
-  if (profile.seller_email_verified_at) {
-    return succeeded(msg("Settings.tax.success.alreadyConfirmed"));
-  }
-
-  const started = await startSellerEmailVerification(
-    user.id,
-    profile.seller_email,
-    await siteOrigin(),
-  );
-  if (!started.ok) {
-    return failed(
-      actionError(
-        "server_error",
-        msg("Errors.settings.confirmationFailed", { reason: started.reason }),
-      ),
-    );
-  }
-  return succeeded(
-    msg("Settings.tax.success.confirmationSent", { email: profile.seller_email }),
-  );
 }
 
 // --- Notifications ---------------------------------------------------------
@@ -621,7 +566,7 @@ export async function saveNotifications(
 ): Promise<ActionState> {
   const user = await getUser();
   if (!user) return SIGNED_OUT;
-  const rejected = unknownFieldError(formData, [
+  const rejected = unknownField(formData, [
     "notify_sales",
     "notify_product_updates",
     "notify_marketing",
@@ -659,7 +604,7 @@ export async function requestAccountDeletion(
 ): Promise<ActionState> {
   const user = await getUser();
   if (!user) return SIGNED_OUT;
-  const rejected = unknownFieldError(formData, ["confirm", ...STEP_UP_FIELDS]);
+  const rejected = unknownField(formData, ["confirm", ...STEP_UP_FIELDS]);
   if (rejected) return rejected;
 
   const parsed = deleteConfirmSchema.safeParse({
@@ -693,7 +638,7 @@ export async function cancelAccountDeletion(
 ): Promise<ActionState> {
   const user = await getUser();
   if (!user) return SIGNED_OUT;
-  const rejected = unknownFieldError(formData, []);
+  const rejected = unknownField(formData, []);
   if (rejected) return rejected;
 
   if (!(await updateOwnProfile(user.id, { deletion_requested_at: null }))) {

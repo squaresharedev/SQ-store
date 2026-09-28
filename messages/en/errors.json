@@ -48,13 +48,18 @@
     "editThisStorefront": {
       "withRole": "Your {role, select, owner {Owner} editor {Editor} viewer {Viewer} other {{role}}} role can't edit this storefront in this store.",
       "noRole": "You don't have permission to edit this storefront in this store."
+    },
+    "fulfilOrders": {
+      "withRole": "Your {role, select, owner {Owner} editor {Editor} viewer {Viewer} other {{role}}} role can't mark orders shipped in this store.",
+      "noRole": "You don't have permission to mark orders shipped in this store."
     }
   },
   "notFound": {
     "fix": "It may have been deleted, or you may have switched stores. Refresh the page to load the current data.",
     "product": "That product could not be found.",
     "storefront": "That storefront could not be found.",
-    "item": "That item could not be found."
+    "item": "That item could not be found.",
+    "order": "That order could not be found."
   },
   "rateLimited": {
     "fix": "Wait a few minutes and try again. If nothing is retrying in the background, reload the page first.",
@@ -70,7 +75,8 @@
     "updateStock": "Too many attempts to update stock in a short time.",
     "readProductPageSettings": "Too many attempts to read product page settings in a short time.",
     "requestReview": "Too many attempts to ask for a review in a short time.",
-    "fileAppeal": "Too many attempts to send an appeal in a short time."
+    "fileAppeal": "Too many attempts to send an appeal in a short time.",
+    "fulfilOrders": "Too many attempts to mark orders shipped in a short time."
   },
   "serverError": {
     "fix": "This is usually temporary. Wait a moment and try again; if it keeps failing, refresh the page.",
@@ -97,7 +103,8 @@
     "loadProductPageSettings": "Could not load your product page settings because of a problem on our side.",
     "saveProductPageSettings": "Could not save your product page settings because of a problem on our side.",
     "sendForReview": "Could not send this for review because of a problem on our side.",
-    "fileAppeal": "Could not send your appeal because of a problem on our side."
+    "fileAppeal": "Could not send your appeal because of a problem on our side.",
+    "markOrderShipped": "Could not mark the order shipped because of a problem on our side."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {This product was removed, not paused.} storefront {This storefront was removed, not paused.} other {This item was removed, not paused.}}",
@@ -112,8 +119,8 @@
     "action": "Add seller details",
     "fix": {
       "add": "{fields, select, businessName {Add your trader name in Settings › Business & seller details, then publish.} address {Add your business address in Settings › Business & seller details, then publish.} email {Add your contact email in Settings › Business & seller details, then publish.} businessName_address {Add your trader name and business address in Settings › Business & seller details, then publish.} businessName_email {Add your trader name and contact email in Settings › Business & seller details, then publish.} address_email {Add your business address and contact email in Settings › Business & seller details, then publish.} other {Add your trader name, business address and contact email in Settings › Business & seller details, then publish.}}",
-      "addAndConfirm": "{fields, select, businessName {Add your trader name in Settings › Business & seller details, and confirm your contact email from the link we sent you.} address {Add your business address in Settings › Business & seller details, and confirm your contact email from the link we sent you.} email {Add your contact email in Settings › Business & seller details, and confirm your contact email from the link we sent you.} businessName_address {Add your trader name and business address in Settings › Business & seller details, and confirm your contact email from the link we sent you.} businessName_email {Add your trader name and contact email in Settings › Business & seller details, and confirm your contact email from the link we sent you.} address_email {Add your business address and contact email in Settings › Business & seller details, and confirm your contact email from the link we sent you.} other {Add your trader name, business address and contact email in Settings › Business & seller details, and confirm your contact email from the link we sent you.}}",
-      "confirm": "Open the confirmation link we emailed to your contact address. You can send a new one from Settings › Business & seller details.",
+      "addAndConfirm": "{fields, select, businessName {Add your trader name in Settings › Business & seller details, and confirm your contact email with the code we send to it.} address {Add your business address in Settings › Business & seller details, and confirm your contact email with the code we send to it.} email {Add your contact email in Settings › Business & seller details, and confirm it with the code we send to it.} businessName_address {Add your trader name and business address in Settings › Business & seller details, and confirm your contact email with the code we send to it.} businessName_email {Add your trader name and contact email in Settings › Business & seller details, and confirm the email with the code we send to it.} address_email {Add your business address and contact email in Settings › Business & seller details, and confirm the email with the code we send to it.} other {Add your trader name, business address and contact email in Settings › Business & seller details, and confirm the email with the code we send to it.}}",
+      "confirm": "Confirm your contact email: send yourself a code from Settings › Business & seller details, then type it in there.",
       "complete": "Complete Settings › Business & seller details, then publish."
     }
   },
@@ -182,12 +189,23 @@
     "resetRateLimited": "Too many reset emails. Wait a while before trying again.",
     "resetSendRateLimited": "Too many requests. Wait a minute and try again.",
     "resetFailed": "Could not send the reset email. Try again.",
-    "contactEmailTakesNoMail": "That contact email's domain doesn't accept mail. Check the spelling, or use an address buyers can actually reach.",
-    "savedButConfirmationFailed": "{reason, select, startFailed {Saved, but the confirmation email didn't go out. Could not start email confirmation. Try \"Resend\" below.} unavailable {Saved, but the confirmation email didn't go out. Email confirmation is not available right now. Try \"Resend\" below.} other {Saved, but the confirmation email didn't go out. We couldn't send the confirmation email. Check the address and try again. Try \"Resend\" below.}}",
-    "confirmationFailed": "{reason, select, startFailed {Could not start email confirmation.} unavailable {Email confirmation is not available right now.} other {We couldn't send the confirmation email. Check the address and try again.}}",
-    "confirmationUnavailable": "Email confirmation is not available right now.",
-    "confirmationRateLimited": "That's a lot of confirmation emails. Wait a while before asking for another.",
-    "noContactEmail": "Add a contact email first, then we can confirm it."
+    "contactEmailTakesNoMail": "That contact email's domain doesn't accept mail. Check the spelling, or use an address buyers can actually reach."
+  },
+  "contactVerification": {
+    "unavailable": "{channel, select, email {Email confirmation isn't available right now.} other {Confirming by text isn't available right now.}}",
+    "nothingToConfirm": "{channel, select, email {Add a contact email and save it first.} other {Add a phone number and save it first.}}",
+    "phoneNeedsResave": "Save your phone number again in full international form, like +353 87 123 4567, then ask for a code.",
+    "cooldown": "A code was just sent. Wait a minute before asking for another.",
+    "tooManyCodes": "That's a lot of codes. Wait a while before asking for another.",
+    "sendFailed": "{channel, select, email {We couldn't send the email. Check the address and try again.} other {We couldn't send the text. Check the number and try again.}}",
+    "savedButNotSent": "Saved, but we couldn't send your confirmation code just now. Use \"Send code\" below to try again.",
+    "wrongCode": "That code isn't right. Check it and try again.",
+    "locked": "Too many wrong tries for that code. Send yourself a new one.",
+    "expired": "That code has expired. Send yourself a new one.",
+    "noCode": "Send yourself a code first.",
+    "stale": "Your details changed after that code was sent. Send yourself a new one.",
+    "tooManyAttempts": "Too many tries. Wait a while, then try again.",
+    "failed": "We couldn't check that code just now. Try again."
   },
   "avatar": {
     "unexpectedData": "Unexpected form data was rejected.",
@@ -552,5 +570,11 @@
     "rateLimited": "Too many codes in a short time. Wait a few minutes, then try again.",
     "expired": "This sign-in request has expired or was already answered. Show a new code on the device you're signing in on.",
     "otherAccount": "This request is for a different Square Share account than the one signed in here."
+  },
+  "orders": {
+    "notShippable": {
+      "message": "This order can't be marked shipped.",
+      "fix": "Only paid orders with something to send can be shipped. Refresh the page to see where this one stands."
+    }
   }
 }

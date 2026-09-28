@@ -273,6 +273,16 @@
     "placeholder": "L’e-mail de contact ressemble à une adresse factice. Utilisez une adresse que vous consultez réellement.",
     "disposable": "L’e-mail de contact utilise un fournisseur de messagerie temporaire. Utilisez une adresse permanente."
   },
+  "phone": {
+    "needsCountryCode": "Ajoutez l'indicatif pays au numéro de téléphone, par exemple +353 87 123 4567, ou définissez votre pays.",
+    "invalid": "Ce numéro de téléphone n'existe pas. Vérifiez les chiffres et l'indicatif pays.",
+    "unsupportedRegion": "Nous ne pouvons confirmer que les numéros de téléphone dans l'UE, l'EEE, la Suisse et le Royaume-Uni.",
+    "notMobile": "Utilisez un numéro de mobile. Nous le confirmons par SMS, et une ligne fixe ne peut pas en recevoir."
+  },
+  "address": {
+    "placeholder": "L'adresse ressemble à une valeur fictive. Utilisez votre véritable adresse postale depuis laquelle vous exercez.",
+    "incomplete": "Donnez votre adresse postale complète : rue et numéro, puis ville et code postal, chacun sur sa propre ligne."
+  },
   "uuid": {
     "id": "Cet ID n’est pas valide.",
     "option": "Cette option n’est pas valide.",
@@ -292,10 +302,12 @@
     "domains": "Les domaines doivent être de simples domaines en minuscules, comme yoursite.com (sans https://, port, chemin ni caractère générique)."
   },
   "referenceCode": {
-    "vatId": "Un numéro de TVA doit comporter de {min} à {max} lettres, chiffres, espaces, points ou tirets."
+    "vatId": "Un numéro de TVA doit comporter de {min} à {max} lettres, chiffres, espaces, points ou tirets.",
+    "trackingNumber": "Un numéro de suivi comporte entre {min} et {max} lettres, chiffres, espaces, points ou tirets."
   },
   "oneTimeCode": {
-    "authenticator": "Le code est composé des 6 chiffres affichés dans votre application d’authentification."
+    "authenticator": "Le code est composé des 6 chiffres affichés dans votre application d’authentification.",
+    "contact": "Le code est composé des {length} chiffres que nous vous avons envoyés."
   },
   "hexColor": {
     "colors": "Les couleurs doivent être un code hexadécimal à 6 chiffres, comme #a855f7.",

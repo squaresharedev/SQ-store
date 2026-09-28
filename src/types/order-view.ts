@@ -13,6 +13,65 @@ export type OrderChannel = "embed" | "marketplace";
 export type OrderStatus = "paid" | "refunded" | "disputed" | "pending";
 
 /**
+ * Whether the parcel has gone. Mirrors the orders.fulfilment_status CHECK.
+ * Separate from OrderStatus, which is about the MONEY: a paid order can still
+ * be waiting to ship, and a shipped one can later be refunded.
+ */
+export type FulfilmentStatus = "unfulfilled" | "shipped" | "not_required";
+
+/**
+ * WHERE THE PARCEL GOES, snapshotted at checkout (orders.ship_to).
+ *
+ * A snapshot for the same reason `productTitle` is one: a buyer who moves after
+ * ordering must not move a parcel that has already been addressed. Fields are
+ * the ones every carrier form asks for, in the buyer's own words; `country` is
+ * the ISO 3166-1 alpha-2 code, printed in the reader's language.
+ */
+export type ShipTo = {
+  name: string;
+  line1: string;
+  line2?: string;
+  city: string;
+  region?: string;
+  postalCode?: string;
+  country: string;
+  /** For the courier, when the buyer gave one. */
+  phone?: string;
+};
+
+/** Per-field caps for the stored address. Generous for any real address, and
+ *  small enough that the whole object stays under the column's 2 KB CHECK
+ *  even written entirely in four-byte characters. */
+export const SHIP_TO_MAX = {
+  name: 100,
+  line1: 100,
+  line2: 100,
+  city: 60,
+  region: 60,
+  postalCode: 16,
+  phone: 24,
+} as const;
+
+/** A carrier tracking number: the orders.tracking_number CHECK's bounds. */
+export const TRACKING_NUMBER_MIN = 4;
+export const TRACKING_NUMBER_MAX = 40;
+
+/** Whether an order's parcel has gone, and how the buyer can follow it. */
+export type OrderFulfilment = {
+  status: FulfilmentStatus;
+  /** ISO timestamp, set exactly when status is "shipped". */
+  shippedAt: string | null;
+  trackingNumber: string | null;
+};
+
+/**
+ * Which list the Orders page shows. "to-ship" is the work queue (paid, not
+ * sent yet, oldest first); "all" is the full history with its filters.
+ */
+export type OrdersView = "to-ship" | "all";
+export const ORDERS_VIEWS: readonly OrdersView[] = ["to-ship", "all"];
+
+/**
  * WHICH VERSION WAS BOUGHT, in words.
  *
  * `{ label: "Size", value: "Six seater" }`: the group's name and the chosen
@@ -41,6 +100,11 @@ export type OrderView = {
   /** What the buyer picked, in the seller's own words. Empty for a product
    *  sold in one version, which is most of them. */
   selection: OrderSelection[];
+  /** Units sold, 1 or more. */
+  quantity: number;
+  /** Null when nothing ships (a download), or the order predates addresses. */
+  shipTo: ShipTo | null;
+  fulfilment: OrderFulfilment;
   amountCents: number;
   platformFeeCents: number;
   /** "EUR" | "USD" today; keep string so new currencies are additive. */

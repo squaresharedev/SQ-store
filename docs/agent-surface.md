@@ -271,8 +271,12 @@ Both are already in good shape and should be reused rather than reinvented:
   correct agent behaviour is to keep working in `draft` and surface the error's
   `action` to the person, never to retry or to look for another route in.
   The `emailVerified` member of `missing` is the one an agent especially
-  cannot resolve on the seller's behalf: it clears only when a link sent to the
-  contact address is opened from that inbox. Report it and stop.
+  cannot resolve on the seller's behalf: it clears only when a code emailed to
+  the contact address is typed back by the account holder in their own
+  session (lib/contact-verification). An agent must never ask the seller for
+  that code or relay it: the code is the proof that the PERSON reads the
+  inbox. Report it and stop. The same goes for the phone, which buyers are
+  shown only once proven the same way (by text).
 - **Input validation** — the Zod schemas in `lib/validation/` are the single
   source of truth for what a valid write looks like. Agent tool input schemas
   must be derived from them, not hand-written alongside them, or the two will

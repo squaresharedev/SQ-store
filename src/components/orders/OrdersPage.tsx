@@ -4,14 +4,17 @@ import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { usePathname, useRouter } from "next/navigation";
 import { helpTextClass, infoTextClass, secondaryButtonClass } from "@/components/ui/control-styles";
+import { PageTabs } from "@/components/ui/PageTabs";
 import { Spinner } from "@/components/ui/spinner";
 import { useTourReveal } from "@/lib/onboarding/tour-store";
+import { ORDERS_VIEW_PARAM, ordersViewPath } from "@/lib/orders/paths";
 import { cn } from "@/lib/utils";
 import { TYPING_DEBOUNCE_MS } from "@/lib/typing-debounce";
 import type {
   OrderFilters,
   OrderSort,
   OrderView,
+  OrdersView,
   Paginated,
 } from "@/types/order-view";
 import { OrderDetailSheet } from "./OrderDetailSheet";
@@ -19,9 +22,9 @@ import { OrdersEmptyState } from "./OrdersEmptyState";
 import { OrdersTable } from "./OrdersTable";
 import { OrdersToolbar, type SortValue } from "./OrdersToolbar";
 
-// Composition only: filters/sort/page live in the URL (the server page reads
-// them and re-queries); this component just wires toolbar -> URL -> table ->
-// detail. No data access here.
+// Composition only: the view, filters, sort and page live in the URL (the
+// server page reads them and re-queries); this component just wires tabs ->
+// toolbar -> URL -> table -> detail. No data access here.
 
 
 function hasAnyFilter(filters: OrderFilters): boolean {
@@ -34,31 +37,50 @@ function hasAnyFilter(filters: OrderFilters): boolean {
   );
 }
 
-function buildQuery(filters: OrderFilters, sort: OrderSort, page: number): string {
+/** The URL for a list state. The view is always named once the seller has
+ *  moved, so a refresh stays on the list they chose rather than on the page's
+ *  own default; filters and sort only exist in the full list. */
+function buildQuery(
+  view: OrdersView,
+  filters: OrderFilters,
+  sort: OrderSort,
+  page: number,
+): string {
   const params = new URLSearchParams();
-  if (filters.status) params.set("status", filters.status);
-  if (filters.channel) params.set("channel", filters.channel);
-  if (filters.dateFrom) params.set("from", filters.dateFrom);
-  if (filters.dateTo) params.set("to", filters.dateTo);
-  if (filters.search && filters.search.trim() !== "") {
-    params.set("q", filters.search);
-  }
-  if (sort.field !== "createdAt" || sort.direction !== "desc") {
-    params.set("sort", sort.field);
-    params.set("dir", sort.direction);
+  params.set(ORDERS_VIEW_PARAM, view);
+  if (view === "all") {
+    if (filters.status) params.set("status", filters.status);
+    if (filters.channel) params.set("channel", filters.channel);
+    if (filters.dateFrom) params.set("from", filters.dateFrom);
+    if (filters.dateTo) params.set("to", filters.dateTo);
+    if (filters.search && filters.search.trim() !== "") {
+      params.set("q", filters.search);
+    }
+    if (sort.field !== "createdAt" || sort.direction !== "desc") {
+      params.set("sort", sort.field);
+      params.set("dir", sort.direction);
+    }
   }
   if (page > 1) params.set("page", String(page));
-  const query = params.toString();
-  return query === "" ? "" : `?${query}`;
+  return `?${params.toString()}`;
 }
 
 export function OrdersPage({
+  view,
+  toShipCount,
+  canFulfil = false,
   data,
   filters,
   sort,
   deepLinkedOrder = null,
   highlightId = null,
 }: {
+  /** Which list is showing (resolved by the page; see resolveView there). */
+  view: OrdersView;
+  /** Orders waiting to be shipped, for the To ship tab's count. */
+  toShipCount: number;
+  /** Whether the viewer may mark orders shipped. */
+  canFulfil?: boolean;
   data: Paginated<OrderView>;
   filters: OrderFilters;
   sort: OrderSort;
@@ -116,16 +138,24 @@ export function OrdersPage({
     };
   }, []);
 
-  const navigate = useCallback(
-    (next: OrderFilters, nextSort: OrderSort, page: number) => {
+  /** Go to a URL inside the busy treatment (see above). */
+  const go = useCallback(
+    (href: string) => {
       setQueued(false);
       startTransition(() => {
-        router.replace(`${pathname}${buildQuery(next, nextSort, page)}`, {
-          scroll: false,
-        });
+        router.replace(href, { scroll: false });
       });
     },
-    [pathname, router],
+    [router],
+  );
+
+  /** Filters, sort and page all belong to the full list, so any of them
+   *  lands there: filtering from the To ship queue is asking about history. */
+  const navigate = useCallback(
+    (next: OrderFilters, nextSort: OrderSort, page: number, nextView: OrdersView = "all") => {
+      go(`${pathname}${buildQuery(nextView, next, nextSort, page)}`);
+    },
+    [go, pathname],
   );
 
   /** Close the panel, and drop `?order=` with it — otherwise a refresh (or the
@@ -133,7 +163,7 @@ export function OrdersPage({
    *  never emits that param, so re-navigating is the whole fix. */
   function closeDetail() {
     setSelected(null);
-    if (deepLinkedId) navigate(draft, sort, data.page);
+    if (deepLinkedId) navigate(draft, sort, data.page, view);
   }
 
   function handleFilters(next: OrderFilters) {
@@ -163,7 +193,7 @@ export function OrdersPage({
   }
 
   function handlePage(page: number) {
-    navigate(draft, sort, page);
+    navigate(draft, sort, page, view);
   }
 
   const totalPages = Math.max(1, Math.ceil(data.total / data.pageSize));
@@ -173,7 +203,8 @@ export function OrdersPage({
   // products list hides its toolbar the same way). Judged on the SERVER's
   // filters rather than the draft, so a filter being typed into never makes
   // the toolbar vanish under the cursor.
-  const accountEmpty = data.total === 0 && !hasAnyFilter(filters);
+  const toShip = view === "to-ship";
+  const accountEmpty = !toShip && toShipCount === 0 && data.total === 0 && !hasAnyFilter(filters);
   // Except while the guided tour is pointing at it: a new seller has no orders,
   // and a tour stop about search and filters needs the real ones on screen
   // (lib/onboarding/tour-steps.ts). It hides again when the tour moves on.
@@ -181,7 +212,26 @@ export function OrdersPage({
 
   return (
     <div className="space-y-4">
-      {(!accountEmpty || tourShowsToolbar) && (
+      {/* The two lists. Hidden only for an account with no orders at all,
+          where there is nothing to switch between. */}
+      {!accountEmpty && (
+        <PageTabs
+          ariaLabel={t("views.label")}
+          onNavigate={go}
+          tabs={[
+            {
+              href: ordersViewPath("to-ship"),
+              label: t("views.toShip"),
+              active: toShip,
+              count: toShipCount,
+              countLabel: t("toShipCount", { count: toShipCount }),
+            },
+            { href: ordersViewPath("all"), label: t("views.all"), active: !toShip },
+          ]}
+        />
+      )}
+
+      {((!toShip && !accountEmpty) || tourShowsToolbar) && (
         <OrdersToolbar
           filters={draft}
           onChange={handleFilters}
@@ -214,6 +264,8 @@ export function OrdersPage({
           <OrdersEmptyState
             filtered={filtered}
             onClear={() => handleFilters({})}
+            toShip={toShip}
+            onSeeAll={() => go(ordersViewPath("all"))}
           />
         ) : (
           <div className="border border-border bg-card">
@@ -221,6 +273,7 @@ export function OrdersPage({
               orders={data.rows}
               onSelect={setSelected}
               highlightId={highlightId}
+              view={view}
             />
             <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-4 py-3">
               <p className={helpTextClass}>
@@ -253,7 +306,14 @@ export function OrdersPage({
         )}
       </div>
 
-      {selected && <OrderDetailSheet order={selected} onClose={closeDetail} />}
+      {selected && (
+        <OrderDetailSheet
+          order={selected}
+          onClose={closeDetail}
+          canFulfil={canFulfil}
+          onOrderChange={setSelected}
+        />
+      )}
     </div>
   );
 }

@@ -289,16 +289,9 @@
   "tax": {
     "cardTitle": "Bedrijfs- en verkopersgegevens",
     "cardDescription": "Eenmalig ingesteld voor je hele account. Wordt getoond aan kopers op elke productpagina waarop je verkoopt, en gebruikt voor facturen en btw.",
-    "verifyOutcome": {
-      "verified": "Contact-e-mailadres bevestigd. Je kunt nu publiceren.",
-      "expired": "Die bevestigingslink is verlopen. Stuur hieronder een nieuwe naar jezelf.",
-      "stale": "Die link was voor een ander adres dan het adres dat hier is opgeslagen. Stuur hieronder een nieuwe.",
-      "invalid": "Die bevestigingslink is niet geldig, of is al gebruikt.",
-      "throttled": "Te veel bevestigingspogingen. Wacht even en open de link dan opnieuw."
-    },
     "gate": {
       "required": "<strong>Je handelsnaam, adres en contact-e-mailadres zijn verplicht voordat je iets kunt publiceren of verkopen.</strong> Kopers moeten kunnen zien van wie ze kopen en hoe ze je kunnen bereiken voordat ze bestellen.",
-      "privacyNoteLinked": "Deze gegevens verschijnen alleen daarom openbaar op je productpagina's. We gebruiken ze nooit voor marketing, en verkopen of delen ze nooit. De enige e-mail die we naar je contactadres sturen, is de link die dit bevestigt. Zie het <link>Squareshare-privacybeleid</link>."
+      "privacyNoteLinked": "Deze gegevens verschijnen alleen daarom openbaar op je productpagina's. We gebruiken ze nooit voor marketing, en verkopen of delen ze nooit. Het enige bericht dat we naar je contact-e-mailadres of telefoonnummer sturen, is de code die het bevestigt. Zie het <link>Squareshare-privacybeleid</link>."
     },
     "countryNotEu": "Niet in de EU / geef ik liever niet aan",
     "vatAdvisory": {
@@ -322,10 +315,7 @@
         "label": "Contact-e-mailadres",
         "tipLabel": "Hoe dit verschilt van je inlog-e-mailadres",
         "tipBody": "Wordt aan kopers getoond als mailto-link, en gebruikt als terugvaloptie voor de koopknop wanneer een product geen aankooplink heeft. Bewust gescheiden van je inlog-e-mailadres: gebruik het adres waarop je wilt dat kopers je schrijven. Het moet een adres zijn dat je ook echt leest: placeholders, tijdelijke-e-mailproviders en no-reply-adressen worden geweigerd, net als een domein dat geen e-mail accepteert.",
-        "placeholder": "bijv. hallo@jouwwinkel.example",
-        "statusDirty": "Sla op om een bevestigingslink naar het nieuwe adres te sturen. Kopers zien het pas zodra het is bevestigd.",
-        "statusConfirmed": "Bevestigd: kopers kunnen je hier bereiken.",
-        "statusUnconfirmed": "Nog niet bevestigd. Open de link die we naar dit adres hebben gemaild."
+        "placeholder": "bijv. hallo@jouwwinkel.example"
       },
       "vatId": {
         "label": "Btw-id",
@@ -335,7 +325,10 @@
         "label": "Land"
       },
       "phone": {
-        "label": "Telefoon"
+        "label": "Telefoon",
+        "tipLabel": "Wanneer kopers dit zien",
+        "tipBody": "Optioneel. Kopers zien het pas zodra je het hebt bevestigd met een code die we er per sms naartoe sturen, dus gebruik een mobiel nummer in de EU, de EER, Zwitserland of het VK.",
+        "placeholder": "bijv. +353 87 123 4567"
       },
       "bio": {
         "label": "Bio",
@@ -345,14 +338,40 @@
         "charactersLeft": "{count, plural, one {# teken over} other {# tekens over}}"
       }
     },
-    "resend": {
-      "button": "Bevestigingsmail opnieuw verzenden"
-    },
     "success": {
-      "savedCheckEmail": "Opgeslagen. Controleer {email} voor een link om het adres te bevestigen.",
       "sellerDetailsSaved": "Bedrijfs- en verkopersgegevens opgeslagen.",
-      "alreadyConfirmed": "Dat adres is al bevestigd.",
-      "confirmationSent": "Verzonden. Controleer {email} voor de link."
+      "savedCodeSent": "{which, select, email {Opgeslagen. We hebben een code gemaild naar {email}: voer hem hieronder in om het adres te bevestigen.} phone {Opgeslagen. We hebben een code per sms gestuurd naar {phone}: voer hem hieronder in om het nummer te bevestigen.} other {Opgeslagen. We hebben codes gestuurd naar {email} en {phone}: voer ze hieronder in om beide te bevestigen.}}"
+    }
+  },
+  "contactVerification": {
+    "heading": "Bevestig je contactgegevens",
+    "description": "Kopers zien alleen contactgegevens die je hebt bewezen van jou te zijn. We sturen een code, en jij typt hem hier in.",
+    "channel": {
+      "email": "Contact-e-mailadres",
+      "phone": "Telefoon"
+    },
+    "badge": "Bevestigd",
+    "status": {
+      "confirmed": "Bevestigd. Kopers kunnen je hier bereiken.",
+      "emailUnconfirmed": "Nog niet bevestigd. Je kunt niet publiceren totdat het is bevestigd.",
+      "phoneUnconfirmed": "Nog niet bevestigd, dus kopers zien het niet.",
+      "dirty": "{channel, select, email {Je hebt dit gewijzigd. Sla op om een code naar het nieuwe adres te sturen.} other {Je hebt dit gewijzigd. Sla op om een code naar het nieuwe nummer te sturen.}}",
+      "phoneUnavailable": "Kopers zien alleen een bevestigd nummer, en bevestigen per sms is nog niet beschikbaar."
+    },
+    "sendCode": "Code versturen",
+    "resend": "Nieuwe code versturen",
+    "enterCode": "{channel, select, email {Voer de {length}-cijferige code in die we naar {target} hebben gemaild.} other {Voer de {length}-cijferige code in die we per sms naar {target} hebben gestuurd.}}",
+    "codeLabel": "Bevestigingscode",
+    "confirming": "Bevestigen…",
+    "success": {
+      "sent": "{channel, select, email {We hebben een code gemaild naar {target}.} other {We hebben een code per sms gestuurd naar {target}.}}",
+      "alreadyConfirmed": "Dat is al bevestigd.",
+      "confirmed": "{channel, select, email {Contact-e-mailadres bevestigd. Kopers kunnen je daar bereiken.} other {Telefoonnummer bevestigd. Kopers kunnen het nu zien.}}"
+    },
+    "message": {
+      "emailSubject": "{code} is je Squareshare-bevestigingscode",
+      "emailBody": "Je code om dit adres te bevestigen als je Squareshare contact-e-mailadres:\n\n{code}\n\nVoer hem in bij Instellingen › Bedrijfs- en verkopersgegevens. De code werkt eenmalig, {minutes} minuten lang.\n\nDeel deze code nooit. Niemand van Squareshare zal je er ooit om vragen.\n\nAls je hier niet om hebt gevraagd, heeft iemand je adres mogelijk per ongeluk ingetypt. Negeer deze e-mail: er gebeurt niets tenzij de code wordt ingevoerd.\n\nSquareshare",
+      "sms": "{code} is je Squareshare-code om dit nummer te bevestigen. Verloopt over {minutes} min. Deel hem nooit."
     }
   },
   "shipping": {
@@ -479,7 +498,7 @@
       },
       "emailVerified": {
         "label": "Bevestigd contact-e-mailadres",
-        "why": "We sturen een link naar dat adres en jij klikt erop. Niets anders bewijst dat een bericht van een koper daadwerkelijk iemand bereikt."
+        "why": "We sturen een code naar dat adres en jij typt hem hier in. Niets anders bewijst dat een bericht van een koper je ook echt bereikt."
       }
     }
   },

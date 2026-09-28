@@ -273,6 +273,16 @@
     "placeholder": "Kontaktní e-mail vypadá jako zástupná adresa. Použijte adresu, kterou opravdu čtete.",
     "disposable": "Kontaktní e-mail je u poskytovatele dočasných schránek. Použijte trvalou adresu."
   },
+  "phone": {
+    "needsCountryCode": "Přidejte k telefonnímu číslu kód země, například +353 87 123 4567, nebo nastavte svou zemi.",
+    "invalid": "Toto telefonní číslo neexistuje. Zkontrolujte číslice a kód země.",
+    "unsupportedRegion": "Telefonní čísla lze potvrdit pouze pro EU, EHP, Švýcarsko a Spojené království.",
+    "notMobile": "Použijte mobilní číslo. Potvrzujeme ho textovou zprávou a pevná linka ji nemůže přijmout."
+  },
+  "address": {
+    "placeholder": "Adresa vypadá jako zástupný text. Použijte skutečnou poštovní adresu, ze které obchodujete.",
+    "incomplete": "Uveďte celou poštovní adresu: ulici a číslo, pak město a poštovní směrovací číslo, každé na vlastním řádku."
+  },
   "uuid": {
     "id": "Toto ID není platné.",
     "option": "Tato možnost není platná.",
@@ -292,10 +302,12 @@
     "domains": "Domény zadávejte jen jako holé domény malými písmeny, např. vasweb.cz (bez https://, portu, cesty a zástupných znaků)."
   },
   "referenceCode": {
-    "vatId": "DIČ musí mít {min} až {max} znaků: písmena, číslice, mezery, tečky nebo pomlčky."
+    "vatId": "DIČ musí mít {min} až {max} znaků: písmena, číslice, mezery, tečky nebo pomlčky.",
+    "trackingNumber": "Číslo zásilky musí mít {min} až {max} znaků: písmena, číslice, mezery, tečky nebo pomlčky."
   },
   "oneTimeCode": {
-    "authenticator": "Kód tvoří 6 číslic zobrazených ve vaší ověřovací aplikaci."
+    "authenticator": "Kód tvoří 6 číslic zobrazených ve vaší ověřovací aplikaci.",
+    "contact": "Kód tvoří {length} číslic, které jsme vám zaslali."
   },
   "hexColor": {
     "colors": "Barvy musí být šestimístné v hex, např. #a855f7.",

@@ -133,7 +133,8 @@ export type PermissionCapability =
   | "deleteStorefronts"
   | "viewStorefronts"
   | "editThisProduct"
-  | "editThisStorefront";
+  | "editThisStorefront"
+  | "fulfilOrders";
 
 /**
  * Role-aware permission error: names the caller's actual role, what it can't
@@ -154,7 +155,7 @@ export function permissionDenied(
 }
 
 /** What can be missing. Each has its own sentence (see PermissionCapability). */
-export type NotFoundEntity = "product" | "storefront" | "item";
+export type NotFoundEntity = "product" | "storefront" | "order" | "item";
 
 export function notFound(entity: NotFoundEntity): ActionError {
   return {
@@ -187,7 +188,8 @@ export type RateLimitedOperation =
   | "updateStock"
   | "readProductPageSettings"
   | "requestReview"
-  | "fileAppeal";
+  | "fileAppeal"
+  | "fulfilOrders";
 
 /**
  * A signed-in write budget is spent (lib/rate-limit.ts).
@@ -252,7 +254,8 @@ export type ServerErrorOperation =
   | "loadProductPageSettings"
   | "saveProductPageSettings"
   | "sendForReview"
-  | "fileAppeal";
+  | "fileAppeal"
+  | "markOrderShipped";
 
 export function serverError(operation: ServerErrorOperation): ActionError {
   return {

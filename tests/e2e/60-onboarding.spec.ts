@@ -1,6 +1,8 @@
 import { expect, test } from "@playwright/test";
 import {
   agreeToTerms,
+  confirmContactCode,
+  contactCode,
   createStorefrontViaUI,
   expectToast,
   expectTourStep,
@@ -19,7 +21,6 @@ import {
   TOUR_LAYER,
   tourButton,
   userIdByEmail,
-  verificationLink,
   WELCOME_DIALOG,
 } from "./helpers";
 
@@ -33,7 +34,7 @@ import {
  * through the same action as Settings, and that action now writes only the
  * fields it is sent, so the partial save is proven against a column the step
  * never shows. The checklist is derived, never stored, so "done" is asserted
- * after the real change (a clicked confirmation link, a placed product) rather
+ * after the real change (a typed confirmation code, a placed product) rather
  * than after anything the flow itself wrote. And "seen once" (the welcome, and
  * the finished card) is asserted by coming back. The tour's own walk through
  * every page is 63-guided-tour.
@@ -97,15 +98,18 @@ test.describe("onboarding", () => {
     await dialog.getByLabel("Trader name").fill("Welcome Studio Ltd");
     await dialog.getByLabel("Business address").fill("12 Market Street\nDublin\nIreland");
     // squareshare.eu, because the save asks a resolver whether the domain takes
-    // mail. (PUBLISHABLE_SELLER's .example address can be seeded, not typed.)
+    // mail.
     const contact = "hello@squareshare.eu";
     await dialog.getByLabel("Contact email").fill(contact);
     await dialog.getByRole("button", { name: "Save and continue" }).click();
 
-    // Confirmation is switched on in the stack, so a link is now on its way,
-    // and the flow says where rather than moving on as if it were finished.
-    await expectToast(page, /Check hello@squareshare\.eu for a link to confirm/i);
-    await expect(dialog).toContainText(`Check ${contact} for a confirmation link.`);
+    // Proof is switched on in the stack, so a code is now on its way, and the
+    // flow asks for it rather than moving on as if it were finished.
+    await expectToast(page, /We emailed a code to hello@squareshare\.eu/i);
+    const codeRow = dialog.locator('[data-contact-verification="email"]');
+    await expect(codeRow).toHaveAttribute("data-proof-state", "awaitingCode");
+    await expect(codeRow).toContainText(`Enter the 8-digit code we emailed to ${contact}.`);
+    // Not typed yet: a seller can carry on and prove it later from Settings.
     await dialog.getByRole("button", { name: "Continue" }).click();
 
     // Forward out of the welcome is into the guided tour, starting on this page.
@@ -131,9 +135,9 @@ test.describe("onboarding", () => {
     await expect(sellerStep).toHaveAttribute("data-setup-state", "todo");
     await expect(sellerStep).toContainText(/confirm/i);
 
-    // Clicking the real link is what completes the step.
-    await page.goto(await verificationLink(contact));
-    await page.waitForURL(/\/settings\/tax/, { timeout: 30_000 });
+    // Typing the real code, in the seller's own session, completes the step.
+    await gotoApp(page, "/settings/tax");
+    await confirmContactCode(page, "email", await contactCode("email", contact));
     await gotoApp(page, "/dashboard");
     await expect(
       page.locator('[data-setup-step="seller-details"]'),

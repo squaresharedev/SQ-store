@@ -12,6 +12,7 @@ import { PRODUCT_SORTS, type ProductSort } from "@/lib/products/sort";
 import { PRODUCT_STATUSES, type ProductFilters, type ProductStatus } from "@/types/product";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
+import { DEV_PREVIEW_PARAM, previewsEmptyList } from "@/lib/dev/preview";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Products.metadata.list");
@@ -59,13 +60,18 @@ export default async function ProductsPage({
 }: {
   searchParams: Promise<SearchParams>;
 }) {
-  const { filters, sort, page } = parseParams(await searchParams);
+  const params = await searchParams;
+  const { filters, sort, page } = parseParams(params);
+  // Dev only: `?preview=empty` shows the new-seller empty state on a real account.
+  const previewEmpty = previewsEmptyList(params[DEV_PREVIEW_PARAM]);
 
   // Placements ride along in the same round trip as the list itself: the card
   // needs them for the copy-link action, and the delete dialog needs them to
   // say which storefronts still carry a block for the product being removed.
   const [data, account, sales, placements] = await Promise.all([
-    listProducts({ filters, sort, page, pageSize: PRODUCTS_DEFAULT_PAGE_SIZE }),
+    previewEmpty
+      ? { rows: [], total: 0, page: 1, pageSize: PRODUCTS_DEFAULT_PAGE_SIZE }
+      : listProducts({ filters, sort, page, pageSize: PRODUCTS_DEFAULT_PAGE_SIZE }),
     getActiveAccount(),
     getProductSales(),
     getProductPlacements(),

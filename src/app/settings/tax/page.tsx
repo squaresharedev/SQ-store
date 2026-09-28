@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { TaxSection } from "@/components/settings/TaxSection";
 import { requireProfile, requireUser } from "@/lib/auth/session";
-import { sellerEmailVerificationRequired } from "@/lib/settings/seller-email-verification";
+import { contactVerificationStatus } from "@/lib/contact-verification/availability";
+import { pendingContactCodes } from "@/lib/contact-verification/service";
+import { formatPhoneInternational } from "@/lib/validation/phone";
 import { getPrimaryStorefrontId } from "@/lib/storefront/queries";
 
 // The nav label, the page h1 and this title all say the same thing so a
@@ -14,23 +16,14 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t("title") };
 }
 
-export default async function TaxSettingsPage({
-  searchParams,
-}: {
-  /** `?verified=…` is where the confirmation link lands (see
-   *  app/settings/verify-seller-email/route.ts). The route redirects here
-   *  rather than rendering, so one place describes what happened. */
-  searchParams: Promise<{ verified?: string | string[] }>;
-}) {
-  await requireUser("/settings/tax");
-  const [profile, params, storefrontId] = await Promise.all([
+export default async function TaxSettingsPage() {
+  const user = await requireUser("/settings/tax");
+  const [profile, storefrontId, pendingCodes] = await Promise.all([
     requireProfile(),
-    searchParams,
     getPrimaryStorefrontId(),
+    // Reopens on the code box after a reload, instead of offering another send.
+    pendingContactCodes(user.id),
   ]);
-  const verified = Array.isArray(params.verified)
-    ? params.verified[0]
-    : params.verified;
 
   return (
     <TaxSection
@@ -39,12 +32,11 @@ export default async function TaxSettingsPage({
       email={profile?.seller_email ?? ""}
       vatId={profile?.tax_vat_id ?? ""}
       country={profile?.tax_country ?? ""}
-      phone={profile?.seller_phone ?? ""}
+      phone={profile?.seller_phone ? formatPhoneInternational(profile.seller_phone) : ""}
       emailVerified={Boolean(profile?.seller_email_verified_at)}
-      // Off entirely where the platform cannot send mail: a "confirm your
-      // address" panel with no way to send the link would be a dead end.
-      verificationOn={sellerEmailVerificationRequired()}
-      verifyOutcome={verified}
+      phoneVerified={Boolean(profile?.seller_phone_verified_at)}
+      verification={contactVerificationStatus()}
+      pendingCodes={pendingCodes}
       // Where "Continue to your storefront" goes after a successful save: the
       // storefront the seller last worked on, or the list if they have none.
       continueHref={storefrontId ? `/storefront/${storefrontId}` : "/storefront"}

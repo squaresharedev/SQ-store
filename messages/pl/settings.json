@@ -289,16 +289,9 @@
   "tax": {
     "cardTitle": "Firma i dane sprzedawcy",
     "cardDescription": "Ustawiane raz dla całego konta. Widoczne dla kupujących na każdej stronie produktu, na której sprzedajesz, i używane do faktur oraz VAT.",
-    "verifyOutcome": {
-      "verified": "Potwierdzono e-mail kontaktowy. Możesz teraz publikować.",
-      "expired": "Ten link potwierdzający wygasł. Wyślij sobie nowy poniżej.",
-      "stale": "Ten link dotyczył innego adresu niż zapisany tutaj. Wyślij nowy poniżej.",
-      "invalid": "Ten link potwierdzający jest nieprawidłowy albo został już użyty.",
-      "throttled": "Zbyt wiele prób potwierdzenia. Odczekaj chwilę, a potem otwórz link ponownie."
-    },
     "gate": {
       "required": "<strong>Twoja nazwa przedsiębiorcy, adres i e-mail kontaktowy są wymagane, aby móc cokolwiek opublikować lub sprzedać.</strong> Kupujący muszą wiedzieć, od kogo kupują, i jak się z tobą skontaktować, zanim złożą zamówienie.",
-      "privacyNoteLinked": "Te dane są publicznie widoczne na stronach twoich produktów wyłącznie z tego powodu. Nigdy nie używamy ich do marketingu i nigdy ich nie sprzedajemy ani nie udostępniamy. Jedyna wiadomość, jaką wysyłamy na twój adres kontaktowy, to link potwierdzający go. Zobacz <link>Politykę prywatności Squareshare</link>."
+      "privacyNoteLinked": "Te dane są publicznie widoczne na stronach twoich produktów wyłącznie z tego powodu. Nigdy nie używamy ich do marketingu i nigdy ich nie sprzedajemy ani nie udostępniamy. Jedyna wiadomość, jaką wysyłamy na twój e-mail kontaktowy lub telefon, to kod potwierdzający. Zobacz <link>Politykę prywatności Squareshare</link>."
     },
     "countryNotEu": "Poza UE / wolę nie podawać",
     "vatAdvisory": {
@@ -322,10 +315,7 @@
         "label": "E-mail kontaktowy",
         "tipLabel": "Czym różni się od e-maila do logowania",
         "tipBody": "Widoczny dla kupujących jako link mailto i używany jako zapasowy przycisk zakupu, gdy produkt nie ma linku do zakupu. Celowo oddzielony od e-maila do logowania: użyj adresu, na który chcesz, żeby kupujący pisali. Musi to być adres, który faktycznie czytasz: adresy zastępcze, tymczasowe skrzynki i adresy no-reply są odrzucane, podobnie jak domena, która nie przyjmuje poczty.",
-        "placeholder": "np. kontakt@twojsklep.example",
-        "statusDirty": "Zapisz, aby wysłać link potwierdzający na nowy adres. Kupujący zobaczą go dopiero po potwierdzeniu.",
-        "statusConfirmed": "Potwierdzony: kupujący mogą się tu z tobą skontaktować.",
-        "statusUnconfirmed": "Jeszcze niepotwierdzony. Otwórz link, który wysłaliśmy na ten adres."
+        "placeholder": "np. kontakt@twojsklep.example"
       },
       "vatId": {
         "label": "Numer VAT UE",
@@ -335,7 +325,10 @@
         "label": "Kraj"
       },
       "phone": {
-        "label": "Telefon"
+        "label": "Telefon",
+        "tipLabel": "Kiedy kupujący to widzą",
+        "tipBody": "Opcjonalnie. Kupujący widzą go dopiero po potwierdzeniu kodem, który wysyłamy SMS-em, więc użyj numeru komórkowego z UE, EOG, Szwajcarii lub Wielkiej Brytanii.",
+        "placeholder": "np. +353 87 123 4567"
       },
       "bio": {
         "label": "Bio",
@@ -345,14 +338,40 @@
         "charactersLeft": "{count, plural, one {Pozostał # znak} few {Pozostały # znaki} many {Pozostało # znaków} other {Pozostało # znaku}}"
       }
     },
-    "resend": {
-      "button": "Wyślij e-mail potwierdzający ponownie"
-    },
     "success": {
-      "savedCheckEmail": "Zapisano. Sprawdź {email}, żeby znaleźć link do potwierdzenia adresu.",
       "sellerDetailsSaved": "Zapisano dane firmy i sprzedawcy.",
-      "alreadyConfirmed": "Ten adres jest już potwierdzony.",
-      "confirmationSent": "Wysłano. Sprawdź {email}, żeby znaleźć link."
+      "savedCodeSent": "{which, select, email {Zapisano. Wysłaliśmy kod e-mailem na {email}: wpisz go poniżej, aby potwierdzić adres.} phone {Zapisano. Wysłaliśmy kod SMS-em na {phone}: wpisz go poniżej, aby potwierdzić numer.} other {Zapisano. Wysłaliśmy kody na {email} i {phone}: wpisz je poniżej, aby potwierdzić oba.}}"
+    }
+  },
+  "contactVerification": {
+    "heading": "Potwierdź dane kontaktowe",
+    "description": "Kupujący widzą tylko dane kontaktowe, które zostały potwierdzone jako twoje. Wysyłamy kod, a ty wpisujesz go tutaj.",
+    "channel": {
+      "email": "E-mail kontaktowy",
+      "phone": "Telefon"
+    },
+    "badge": "Potwierdzony",
+    "status": {
+      "confirmed": "Potwierdzony. Kupujący mogą się tu z tobą skontaktować.",
+      "emailUnconfirmed": "Jeszcze niepotwierdzony. Nie możesz publikować, dopóki go nie potwierdzisz.",
+      "phoneUnconfirmed": "Jeszcze niepotwierdzony, więc kupujący go nie widzą.",
+      "dirty": "{channel, select, email {Zmieniono ten adres. Zapisz, aby wysłać kod na nowy.} other {Zmieniono ten numer. Zapisz, aby wysłać kod na nowy.}}",
+      "phoneUnavailable": "Kupujący widzą tylko potwierdzony numer, a potwierdzanie SMS-em nie jest jeszcze dostępne."
+    },
+    "sendCode": "Wyślij kod",
+    "resend": "Wyślij nowy kod",
+    "enterCode": "{channel, select, email {Wpisz {length}-cyfrowy kod, który wysłaliśmy e-mailem na {target}.} other {Wpisz {length}-cyfrowy kod, który wysłaliśmy SMS-em na {target}.}}",
+    "codeLabel": "Kod potwierdzający",
+    "confirming": "Potwierdzanie…",
+    "success": {
+      "sent": "{channel, select, email {Wysłaliśmy kod e-mailem na {target}.} other {Wysłaliśmy kod SMS-em na {target}.}}",
+      "alreadyConfirmed": "To jest już potwierdzone.",
+      "confirmed": "{channel, select, email {E-mail kontaktowy potwierdzony. Kupujący mogą się tam z tobą skontaktować.} other {Numer telefonu potwierdzony. Kupujący mogą go teraz zobaczyć.}}"
+    },
+    "message": {
+      "emailSubject": "{code} to twój kod potwierdzający Squareshare",
+      "emailBody": "Twój kod do potwierdzenia tego adresu jako e-maila kontaktowego Squareshare:\n\n{code}\n\nWpisz go w sekcji Ustawienia › Firma i dane sprzedawcy. Działa raz, przez {minutes} minut.\n\nNigdy nie udostępniaj tego kodu. Nikt ze Squareshare nigdy cię o niego nie poprosi.\n\nJeśli nie prosiłeś o ten kod, ktoś mógł wpisać twój adres przez pomyłkę. Zignoruj tę wiadomość: nic się nie stanie, dopóki kod nie zostanie wpisany.\n\nSquareshare",
+      "sms": "{code} to kod Squareshare do potwierdzenia tego numeru. Wygasa za {minutes} min. Nie udostępniaj."
     }
   },
   "shipping": {
@@ -479,7 +498,7 @@
       },
       "emailVerified": {
         "label": "Potwierdzony e-mail kontaktowy",
-        "why": "Wysyłamy link na ten adres, a ty go klikasz. Nic innego nie dowodzi, że wiadomość od kupującego rzeczywiście do kogoś dotrze."
+        "why": "Wysyłamy kod na ten adres, a ty wpisujesz go tutaj. Nic innego nie dowodzi, że wiadomość od kupującego rzeczywiście do ciebie dotrze."
       }
     }
   },

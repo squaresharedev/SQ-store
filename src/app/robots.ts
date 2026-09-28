@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { PUBLIC_PAGES_PREFIX } from "@/lib/storefront/product-page-url";
 
 /**
  * /robots.txt — tell crawlers that the only publicly indexable surface is the
@@ -10,7 +11,7 @@ export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: "*",
-      allow: "/s/",
+      allow: PUBLIC_PAGES_PREFIX,
       disallow: "/",
     },
   };

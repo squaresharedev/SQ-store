@@ -16,6 +16,7 @@ import {
   type TextField,
 } from "@/lib/validation/inputs";
 import { emailQualityProblem } from "@/lib/validation/email-quality";
+import { addressQualityProblem } from "@/lib/validation/address-quality";
 import { issueKey } from "@/lib/validation/messages";
 
 /**
@@ -59,6 +60,19 @@ const optionalTrimmed = (max: number, field: TextField) =>
 /** Same as above but newlines survive — for the postal address. */
 const optionalMultiLine = (max: number, field: TextField) =>
   multiLineText({ field, max, min: 0 }).transform((v) => (v === "" ? null : v));
+
+/**
+ * The trader's PUBLISHED postal address: printed beside every offer, so a
+ * placeholder or a town on its own is refused (lib/validation/address-quality.ts).
+ * Runs after the text gate's transform, so it only ever sees a clean,
+ * non-empty string; clearing the field (null) is the publish gate's business.
+ */
+const publishedAddress = () =>
+  optionalMultiLine(SELLER_FIELD_MAX.address, "businessAddress").superRefine((value, ctx) => {
+    if (value === null) return;
+    const problem = addressQualityProblem(value);
+    if (problem) ctx.addIssue({ code: "custom", message: problem });
+  });
 
 /** Empty clears the field; anything else must actually look like an email.
  *  Reuses `emailAddress`'s own format + control-character gate rather than a
@@ -109,7 +123,7 @@ const publishedContactEmail = () =>
  */
 export const taxSchema = z.strictObject({
   tax_business_name: optionalTrimmed(200, "businessName"),
-  seller_address: optionalMultiLine(SELLER_FIELD_MAX.address, "businessAddress"),
+  seller_address: publishedAddress(),
   seller_email: publishedContactEmail(),
   tax_vat_id: referenceCode({ field: "vatId", min: 2, max: 32 }).transform(
     (v) => (v === "" ? null : v.toUpperCase()),

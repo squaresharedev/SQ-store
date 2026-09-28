@@ -3,6 +3,7 @@
 import { X } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import {
+  helpTextClass,
   iconButtonClass,
   overlaySurfaceClass,
 } from "@/components/ui/control-styles";
@@ -10,10 +11,13 @@ import { cn } from "@/lib/utils";
 import { CopyButton, type CopyButtonMessages } from "@/components/ui/CopyButton";
 import { formatOrderDateTime } from "@/lib/format/date";
 import { formatCents } from "@/lib/format/money";
+import { regionName } from "@/lib/format/country";
 import { formatOrderSelection } from "@/lib/orders/selection";
+import { formatShipTo } from "@/lib/orders/ship-to";
 import type { OrderView } from "@/types/order-view";
 import { OrderStatusBadge } from "./OrderStatusBadge";
 import { OrderActions } from "./OrderActions";
+import { OrderShipping } from "./OrderShipping";
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -32,6 +36,21 @@ const copyMessages = {
     copied: "Orders.detail.copyVersion.copied",
     failed: "Orders.detail.copyVersion.failed",
   },
+  copyPack: {
+    copy: "Orders.detail.copyPack.copy",
+    copied: "Orders.detail.copyPack.copied",
+    failed: "Orders.detail.copyPack.failed",
+  },
+  copyAddress: {
+    copy: "Orders.detail.copyAddress.copy",
+    copied: "Orders.detail.copyAddress.copied",
+    failed: "Orders.detail.copyAddress.failed",
+  },
+  copyPhone: {
+    copy: "Orders.detail.copyPhone.copy",
+    copied: "Orders.detail.copyPhone.copied",
+    failed: "Orders.detail.copyPhone.failed",
+  },
   copyBuyerEmail: {
     copy: "Orders.detail.copyBuyerEmail.copy",
     copied: "Orders.detail.copyBuyerEmail.copied",
@@ -44,16 +63,45 @@ const copyMessages = {
   },
 } satisfies Record<string, CopyButtonMessages>;
 
+/** The version the buyer chose, as label/value pairs. */
+function SelectionList({ order }: { order: OrderView }) {
+  return (
+    <dl className="text-sm text-foreground" data-order-selection="">
+      {order.selection.map((entry) => (
+        <div key={entry.label} className="flex flex-wrap gap-x-1.5">
+          <dt className="text-muted-foreground">{entry.label}:</dt>
+          <dd className="min-w-0 break-words font-medium">{entry.value}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
 export function OrderDetail({
   order,
   onClose,
+  canFulfil = false,
+  onOrderChange,
 }: {
   order: OrderView;
   onClose: () => void;
+  /** Whether this member may mark orders shipped (orders.fulfil). */
+  canFulfil?: boolean;
+  /** Called with the order as it stands after a shipping change. */
+  onOrderChange?: (order: OrderView) => void;
 }) {
   const t = useTranslations("Orders");
   const locale = useLocale();
   const youReceiveCents = order.amountCents - order.platformFeeCents;
+  const ships = order.fulfilment.status !== "not_required";
+  const packLine = t("detail.packLine", { quantity: order.quantity, title: order.productTitle });
+  const packText = [
+    packLine,
+    ...(order.selection.length > 0 ? [formatOrderSelection(order.selection)] : []),
+  ].join("\n");
+  const address = order.shipTo
+    ? formatShipTo(order.shipTo, regionName(order.shipTo.country, locale))
+    : null;
 
   return (
     <div className={cn(overlaySurfaceClass, "flex h-full flex-col shadow-none")}>
@@ -82,27 +130,90 @@ export function OrderDetail({
         </div>
       </div>
 
-      {/* Body */}
+      {/* Body. THE PARCEL FIRST, top to bottom in the order it is made up: what
+          goes in the box, where it goes, then the button that says it has
+          gone. This panel is what a seller has open while packing, so the
+          money (for the books) and the ids (for support) come after. */}
       <div className="flex flex-col gap-4 overflow-y-auto p-4">
-        {/* WHAT TO PACK, first and copyable. This panel is what a seller has
-            open while making the parcel up, so the version the buyer chose
-            leads it: the money below is for the books, this is for the box.
-            Absent entirely for a product sold in one version. */}
-        {order.selection.length > 0 && (
-          <Row label={t("detail.version")}>
+        {ships ? (
+          <Row label={t("detail.pack")}>
             <div className="flex items-start gap-1">
-              <dl className="min-w-0 flex-1 text-sm text-foreground" data-order-selection="">
-                {order.selection.map((entry) => (
-                  <div key={entry.label} className="flex flex-wrap gap-x-1.5">
-                    <dt className="text-muted-foreground">{entry.label}:</dt>
-                    <dd className="min-w-0 break-words font-medium">{entry.value}</dd>
-                  </div>
-                ))}
-              </dl>
-              <CopyButton value={formatOrderSelection(order.selection)} messages={copyMessages.copyVersion} />
+              <div className="min-w-0 flex-1">
+                <p className="break-words text-sm font-medium text-foreground" data-order-pack="">
+                  {packLine}
+                </p>
+                {order.selection.length > 0 && <SelectionList order={order} />}
+              </div>
+              <CopyButton value={packText} messages={copyMessages.copyPack} />
             </div>
           </Row>
+        ) : (
+          // Nothing to pack for a download, but the version still says which
+          // file the buyer paid for. Absent for a product sold in one version.
+          order.selection.length > 0 && (
+            <Row label={t("detail.version")}>
+              <div className="flex items-start gap-1">
+                <div className="min-w-0 flex-1">
+                  <SelectionList order={order} />
+                </div>
+                <CopyButton
+                  value={formatOrderSelection(order.selection)}
+                  messages={copyMessages.copyVersion}
+                />
+              </div>
+            </Row>
+          )
         )}
+
+        {ships && (
+          <Row label={t("detail.shipTo")}>
+            {address ? (
+              <div className="flex flex-col gap-1">
+                <div className="flex items-start gap-1">
+                  {/* One copy button for the whole label, laid out as the
+                      destination's post expects: paste it straight into a
+                      carrier's form or onto a label. */}
+                  <address
+                    className="min-w-0 flex-1 whitespace-pre-line break-words text-sm not-italic text-foreground"
+                    data-order-ship-to=""
+                  >
+                    {address}
+                  </address>
+                  <CopyButton value={address} messages={copyMessages.copyAddress} />
+                </div>
+                {order.shipTo?.phone && (
+                  <div className="flex items-center gap-1">
+                    <span className="min-w-0 break-all text-sm text-foreground">
+                      {order.shipTo.phone}
+                    </span>
+                    <CopyButton value={order.shipTo.phone} messages={copyMessages.copyPhone} />
+                  </div>
+                )}
+              </div>
+            ) : (
+              <p className={helpTextClass}>{t("detail.noAddress")}</p>
+            )}
+          </Row>
+        )}
+
+        <Row label={t("detail.shipping")}>
+          <OrderShipping order={order} canFulfil={canFulfil} onOrderChange={onOrderChange} />
+        </Row>
+
+        <Row label={t("detail.buyerEmail")}>
+          {order.buyerEmail ? (
+            // Copyable: the buyer's email is the thing a seller reaches for
+            // when answering a support message about this order.
+            <div className="flex items-center gap-1">
+              <span className="min-w-0 break-all text-sm text-foreground">
+                {order.buyerEmail}
+              </span>
+              <CopyButton value={order.buyerEmail} messages={copyMessages.copyBuyerEmail} />
+            </div>
+          ) : (
+            <span className="text-sm text-muted-foreground">{t("detail.noEmail")}</span>
+          )}
+        </Row>
 
         <Row label={t("detail.amount")}>
           <span className="text-sm text-foreground">
@@ -120,21 +231,6 @@ export function OrderDetail({
           <span className="text-sm text-foreground">
             {formatCents(youReceiveCents, order.currency, locale)}
           </span>
-        </Row>
-
-        <Row label={t("detail.buyerEmail")}>
-          {order.buyerEmail ? (
-            // Copyable: the buyer's email is the thing a seller reaches for
-            // when answering a support message about this order.
-            <div className="flex items-center gap-1">
-              <span className="min-w-0 break-all text-sm text-foreground">
-                {order.buyerEmail}
-              </span>
-              <CopyButton value={order.buyerEmail} messages={copyMessages.copyBuyerEmail} />
-            </div>
-          ) : (
-            <span className="text-sm text-muted-foreground">{t("detail.noEmail")}</span>
-          )}
         </Row>
 
         <Row label={t("detail.channel")}>

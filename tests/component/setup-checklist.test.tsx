@@ -223,14 +223,19 @@ describe("SetupChecklist", () => {
       expect(root).not.toHaveAttribute("data-setup-playing");
 
       const row = container.querySelector('[data-setup-step="product"]') as HTMLElement;
-      // The done point pops in over the numbered one it replaces...
+      // The done coin pops in over the "current" coin it was...
       expect(row.querySelector('[data-setup-point="done"]')).toHaveClass("setup-point-pop");
-      expect(row.querySelector("span.setup-fade-out")).toHaveTextContent("2");
-      // ...and the green flag goes up as the old one drops.
-      expect(row.querySelector('[data-setup-flag="done"] path')).toHaveClass("setup-flag-raise");
-      // ...after the leg into it has drawn (drawn from the row above).
+      expect(row.querySelector('[data-setup-point-old="current"]')).toHaveClass("setup-fade-out");
+      // ...after the road into it has filled (drawn from the row above)...
       const sellerRow = container.querySelector('[data-setup-step="seller-details"]') as HTMLElement;
       expect(sellerRow.querySelector('[data-setup-leg="done"]')).toHaveClass("setup-leg-draw");
+      // ...and then the next step takes over as current, from plain.
+      const next = container.querySelector('[data-setup-step="storefront"]') as HTMLElement;
+      expect(next.querySelector('[data-setup-point="current"]')).toHaveClass("setup-point-pop");
+      expect(next.querySelector('[data-setup-point-old="todo"]')).toBeInTheDocument();
+      expect(row.querySelector('[data-setup-leg="next"]')).toHaveClass("setup-fade-in");
+      // Only the step that was DONE plays in the list; the new current's row does not.
+      expect(next.querySelector(".setup-label-settle")).toBeNull();
       // Nothing is recorded while it is off screen.
       expect(onStepsSeen).not.toHaveBeenCalled();
 

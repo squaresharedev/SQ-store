@@ -289,16 +289,9 @@
   "tax": {
     "cardTitle": "Firma a údaje predajcu",
     "cardDescription": "Nastavte raz pre celé konto. Zobrazuje sa kupujúcim na každej stránke produktu, na ktorej predávate, a používa sa pre faktúry a DPH.",
-    "verifyOutcome": {
-      "verified": "Kontaktný e-mail potvrdený. Teraz môžete zverejňovať.",
-      "expired": "Platnosť tohto potvrdzovacieho odkazu vypršala. Nižšie si pošlite nový.",
-      "stale": "Tento odkaz bol pre inú adresu, než je tu uložená. Nižšie si pošlite nový.",
-      "invalid": "Tento potvrdzovací odkaz nie je platný alebo bol už použitý.",
-      "throttled": "Príliš veľa pokusov o potvrdenie. Chvíľu počkajte a znova otvorte odkaz."
-    },
     "gate": {
       "required": "<strong>Pred zverejnením alebo predajom čohokoľvek je povinné uviesť obchodné meno, adresu a kontaktný e-mail.</strong> Kupujúci musia vedieť, od koho nakupujú a ako vás kontaktovať pred objednávkou.",
-      "privacyNoteLinked": "Tieto údaje sa na stránkach vašich produktov zobrazujú verejne iba z tohto dôvodu. Nikdy ich nepoužívame na marketing a nikdy ich nepredávame ani neposkytujeme ďalej. Jediný e-mail, ktorý na vašu kontaktnú adresu posielame, je odkaz na jej potvrdenie. Pozrite si <link>Zásady ochrany osobných údajov Squareshare</link>."
+      "privacyNoteLinked": "Tieto údaje sa na stránkach vašich produktov zobrazujú verejne iba z tohto dôvodu. Nikdy ich nepoužívame na marketing a nikdy ich nepredávame ani neposkytujeme ďalej. Jediná správa, ktorú posielame na váš kontaktný e-mail alebo telefón, je kód na jeho potvrdenie. Pozrite si <link>Zásady ochrany osobných údajov Squareshare</link>."
     },
     "countryNotEu": "Mimo EÚ / radšej neuvádzam",
     "vatAdvisory": {
@@ -322,10 +315,7 @@
         "label": "Kontaktný e-mail",
         "tipLabel": "Ako sa líši od prihlasovacieho e-mailu",
         "tipBody": "Zobrazuje sa kupujúcim ako odkaz mailto a slúži ako záložná adresa tlačidla nákupu, keď produkt nemá odkaz na nákup. Zámerne sa uchováva oddelene od prihlasovacieho e-mailu: použite adresu, na ktorú chcete dostávať správy od kupujúcich. Musí to byť adresa, ktorú skutočne čítate, zástupné symboly, dočasné e-mailové adresy a adresy no-reply sú odmietnuté, rovnako ako doména, ktorá neprijíma poštu.",
-        "placeholder": "napr. ahoj@vasaobchod.example",
-        "statusDirty": "Uložte, aby ste odoslali potvrdzovací odkaz na novú adresu. Kupujúci ju uvidia až po potvrdení.",
-        "statusConfirmed": "Potvrdené, kupujúci vás tu môžu kontaktovať.",
-        "statusUnconfirmed": "Zatiaľ nepotvrdené. Otvorte odkaz, ktorý sme odoslali na túto adresu."
+        "placeholder": "napr. ahoj@vasaobchod.example"
       },
       "vatId": {
         "label": "IČ DPH",
@@ -335,7 +325,10 @@
         "label": "Krajina"
       },
       "phone": {
-        "label": "Telefón"
+        "label": "Telefón",
+        "tipLabel": "Kedy to kupujúci uvidia",
+        "tipBody": "Voliteľné. Kupujúci ho uvidia až po potvrdení kódom, ktorý vám naň pošleme, preto používajte mobilné číslo v EÚ, EHP, Švajčiarsku alebo Spojenom kráľovstve.",
+        "placeholder": "napr. +353 87 123 4567"
       },
       "bio": {
         "label": "Medailón",
@@ -345,14 +338,40 @@
         "charactersLeft": "{count, plural, one {# znak zostáva} few {# znaky zostávajú} many {# znaku zostáva} other {# znakov zostáva}}"
       }
     },
-    "resend": {
-      "button": "Znova odoslať potvrdzovací e-mail"
-    },
     "success": {
-      "savedCheckEmail": "Uložené. Skontrolujte {email} a kliknite na odkaz na potvrdenie adresy.",
       "sellerDetailsSaved": "Firma a údaje predajcu uložené.",
-      "alreadyConfirmed": "Táto adresa je už potvrdená.",
-      "confirmationSent": "Odoslané. Skontrolujte {email} a nájdite odkaz."
+      "savedCodeSent": "{which, select, email {Uložené. Kód sme poslali na {email}: zadajte ho nižšie a potvrďte adresu.} phone {Uložené. Kód sme zaslali na {phone}: zadajte ho nižšie a potvrďte číslo.} other {Uložené. Kódy sme odoslali na {email} a {phone}: zadajte ich nižšie a potvrďte obe.}}"
+    }
+  },
+  "contactVerification": {
+    "heading": "Potvrďte svoje kontaktné údaje",
+    "description": "Kupujúci vidia iba kontaktné údaje, ktoré ste preukázali, že sú vaše. Pošleme kód a vy ho tu zadáte.",
+    "channel": {
+      "email": "Kontaktný e-mail",
+      "phone": "Telefón"
+    },
+    "badge": "Potvrdené",
+    "status": {
+      "confirmed": "Potvrdené. Kupujúci vás tu môžu kontaktovať.",
+      "emailUnconfirmed": "Zatiaľ nepotvrdené. Nemôžete zverejniť, kým to nepotvrdíte.",
+      "phoneUnconfirmed": "Zatiaľ nepotvrdené, takže kupujúci ho nevidia.",
+      "dirty": "{channel, select, email {Zmenili ste túto hodnotu. Uložte, aby sme odoslali kód na novú adresu.} other {Zmenili ste túto hodnotu. Uložte, aby sme odoslali kód na nové číslo.}}",
+      "phoneUnavailable": "Kupujúci vidia iba potvrdené číslo, ale potvrdenie textovou správou zatiaľ nie je k dispozícii."
+    },
+    "sendCode": "Odoslať kód",
+    "resend": "Odoslať nový kód",
+    "enterCode": "{channel, select, email {Zadajte {length}-miestny kód, ktorý sme poslali na {target}.} other {Zadajte {length}-miestny kód, ktorý sme zaslali na {target}.}}",
+    "codeLabel": "Potvrdzovací kód",
+    "confirming": "Potvrdzuje sa…",
+    "success": {
+      "sent": "{channel, select, email {Kód sme poslali na {target}.} other {Kód sme zaslali textovou správou na {target}.}}",
+      "alreadyConfirmed": "Toto je už potvrdené.",
+      "confirmed": "{channel, select, email {Kontaktný e-mail potvrdený. Kupujúci vás tam môžu kontaktovať.} other {Telefónne číslo potvrdené. Kupujúci ho teraz vidia.}}"
+    },
+    "message": {
+      "emailSubject": "{code} je váš potvrdzovací kód Squareshare",
+      "emailBody": "Váš kód na potvrdenie tejto adresy ako kontaktného e-mailu Squareshare:\n\n{code}\n\nZadajte ho v sekcii Nastavenia › Firma a údaje predajcu. Funguje raz, po dobu {minutes} minút.\n\nTento kód nikomu neposielajte. Nikto zo Squareshare ho od vás nikdy nebude žiadať.\n\nAk ste o toto nepožiadali, niekto mohol omylom zadať vašu adresu. Ignorujte tento e-mail: nič sa nestane, kým nebude kód zadaný.\n\nSquareshare",
+      "sms": "{code} je kód Squareshare pre toto číslo. Platí {minutes} min. Nikomu ho neposkytujte."
     }
   },
   "shipping": {
@@ -479,7 +498,7 @@
       },
       "emailVerified": {
         "label": "Potvrdený kontaktný e-mail",
-        "why": "Na túto adresu pošleme odkaz a vy ho kliknete. Nič iné nedokáže overiť, že správa od kupujúceho skutočne niekoho dosiahne."
+        "why": "Na túto adresu pošleme kód a vy ho tu zadáte. Nič iné nepreukáže, že správa od kupujúceho vás skutočne dosiahne."
       }
     }
   },

@@ -64,7 +64,10 @@ vi.mock("@/lib/onboarding/actions", () => actions);
 vi.mock("@/lib/settings/actions", () => ({
   acceptLegal: vi.fn(async () => ({ success: { key: "Settings.legal.success.termsAgreed" } })),
   saveTaxInfo: vi.fn(),
-  resendSellerEmailVerification: vi.fn(),
+}));
+vi.mock("@/lib/contact-verification/actions", () => ({
+  sendContactCode: vi.fn(),
+  confirmContactCode: vi.fn(),
 }));
 
 vi.mock("motion/react", async (importOriginal) => ({

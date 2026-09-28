@@ -82,10 +82,10 @@ describe("ActionError factories: English is unchanged", () => {
       "Add your trader name, business address and contact email in Settings › Business & seller details, then publish.",
     );
     expect(fix(["address", "emailVerified"])).toBe(
-      "Add your business address in Settings › Business & seller details, and confirm your contact email from the link we sent you.",
+      "Add your business address in Settings › Business & seller details, and confirm your contact email with the code we send to it.",
     );
     expect(fix(["emailVerified"])).toBe(
-      "Open the confirmation link we emailed to your contact address. You can send a new one from Settings › Business & seller details.",
+      "Confirm your contact email: send yourself a code from Settings › Business & seller details, then type it in there.",
     );
     expect(fix([])).toBe("Complete Settings › Business & seller details, then publish.");
 

@@ -24,7 +24,7 @@ import {
   type SellerIdentityRow,
   type TraderGateRow,
 } from "@/lib/settings/seller-identity";
-import { sellerEmailVerificationRequired } from "@/lib/settings/seller-email-verification";
+import { emailProofRequired } from "@/lib/contact-verification/availability";
 import { isTraderIdentityComplete } from "@/lib/settings/trader-identity";
 import {
   SHIPPING_POLICY_SELECT,
@@ -335,7 +335,7 @@ export const getPublicProductPage = cache(
     const seller = buildSellerIdentity(gateRow as SellerIdentityRow | null);
     if (
       !isTraderIdentityComplete(buildTraderIdentityInput(gateRow), {
-        requireVerifiedEmail: sellerEmailVerificationRequired(),
+        requireVerifiedEmail: emailProofRequired(),
       })
     ) {
       return null;

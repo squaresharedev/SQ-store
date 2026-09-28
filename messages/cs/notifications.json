@@ -137,6 +137,17 @@
         "title": "Schvalování přihlášení je zapnuté",
         "body": "Zařízení, kde jste přihlášeni, teď mohou schvalovat nová přihlášení k vašemu účtu. Pokud jste to nebyli vy, ihned změňte heslo."
       }
+    },
+    "order": {
+      "newToShip": {
+        "title": "Nová objednávka: {quantity} × {title}",
+        "body": "Odešlete zásilku: {name}, {city}.",
+        "bodyNoAddress": "K objednávce zatím není adresa doručení. Napište kupujícímu a zeptejte se, kam zásilku poslat."
+      },
+      "newDigital": {
+        "title": "Nová objednávka: {title}",
+        "body": "Jde o stažení, takže nic neodesíláte."
+      }
     }
   }
 }

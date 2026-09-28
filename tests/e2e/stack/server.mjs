@@ -729,12 +729,15 @@ const next = spawn(
       // "localhost", which covers both.
       MFA_PASSKEY_KEY: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
       WEBAUTHN_ORIGINS: `http://localhost:${NEXT_PORT}`,
-      // Contact-address confirmation ON, which is what makes the publish gate
-      // demand a CLICKED link rather than just a typed address. There is no
-      // Cloudflare binding here, so under NODE_ENV=development the message
-      // goes to the in-memory dev outbox instead of a mail server, and specs
-      // read the link back from /dev/emails. Nothing leaves the machine.
+      // Contact verification ON for both channels, which is what makes the
+      // publish gate demand a PROVEN email and product pages show only a
+      // proven phone. Under NODE_ENV=development nothing is ever sent: codes
+      // go to the in-memory dev outbox, and specs read them back from
+      // /dev/outbox. The HMAC key is a fixed test value (32 x 0x01), never a
+      // real one. Nothing leaves the machine.
       TRANSACTIONAL_EMAIL_FROM: "no-reply@e2e.squareshare.to",
+      SMS_SENDER: "Squareshare",
+      CONTACT_VERIFICATION_KEY: "AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE",
       // R2 deliberately unset by default, so a normal run stays hermetic and
       // the presign route's "not configured" path (503 -> graceful degrade) is
       // what gets exercised. E2E_REAL_R2=1 passes the configured bucket

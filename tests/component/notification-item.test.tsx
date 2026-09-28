@@ -61,9 +61,47 @@ describe("NotificationItem", () => {
     );
     // The literal string must appear as text content...
     expect(screen.getByText(xssTitle)).toBeInTheDocument();
-    // ...and no <img> element should have been injected (the brand logo is
-    // the only image the row renders).
-    expect(document.querySelector("img:not([src='/img/logo.png'])")).toBeNull();
+    // ...and no <img> element should have been injected (the row renders none
+    // of its own: its icon is an inline SVG).
+    expect(document.querySelector("img")).toBeNull();
+  });
+
+  // --- Category glyph ---
+
+  it.each([
+    ["security", "lucide-key-round"],
+    ["team", "lucide-users"],
+    ["order", "lucide-receipt"],
+    ["stock", "lucide-package"],
+  ] as const)("a %s row is fronted by its category glyph (%s)", (type, glyph) => {
+    const { container } = render(
+      <NotificationItem notification={makeNotification({ type })} onActivate={vi.fn()} />,
+    );
+    expect(container.querySelector(`svg.${glyph}`)).not.toBeNull();
+  });
+
+  it("the unread dot is the only coloured mark: no brand logo, no category dot", () => {
+    const { container } = render(
+      <NotificationItem
+        notification={makeNotification({ type: "security", read: false })}
+        onActivate={vi.fn()}
+      />,
+    );
+    const row = container.querySelector("[data-notification-id]")!;
+    expect(row.querySelectorAll(".rounded-full")).toHaveLength(1);
+    expect(screen.getByRole("img", { name: "Unread" })).toBeInTheDocument();
+  });
+
+  // --- Body length ---
+
+  it("compact (the bell dropdown) clamps the body; the full page does not", () => {
+    const body = "A long security notice.";
+    const { rerender } = render(
+      <NotificationItem notification={makeNotification({ body })} compact onActivate={vi.fn()} />,
+    );
+    expect(screen.getByText(body)).toHaveClass("line-clamp-2");
+    rerender(<NotificationItem notification={makeNotification({ body })} onActivate={vi.fn()} />);
+    expect(screen.getByText(body)).not.toHaveClass("line-clamp-2");
   });
 
   it("renders body as plain text when present", () => {

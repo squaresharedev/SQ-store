@@ -4,7 +4,7 @@ import {
   buildTraderIdentityInput,
   type TraderGateRow,
 } from "@/lib/settings/seller-identity";
-import { sellerEmailVerificationRequired } from "@/lib/settings/seller-email-verification";
+import { emailProofRequired } from "@/lib/contact-verification/availability";
 import { isTraderIdentityComplete } from "@/lib/settings/trader-identity";
 import { RATE_LIMITS, clientKey, rateLimitKey } from "@/lib/rate-limit";
 import { recordSignal, viewDedupeKey, visitorHash } from "@/lib/analytics/record";
@@ -67,7 +67,7 @@ async function canPublish(ownerId: string): Promise<boolean> {
     }
     return isTraderIdentityComplete(
       buildTraderIdentityInput(data as TraderGateRow | null),
-      { requireVerifiedEmail: sellerEmailVerificationRequired() },
+      { requireVerifiedEmail: emailProofRequired() },
     );
   } catch (err) {
     console.error(

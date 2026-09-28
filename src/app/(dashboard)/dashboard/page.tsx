@@ -8,12 +8,13 @@ import {
   getExistingProductIds,
 } from "@/lib/dashboard/queries";
 import { listStorefronts } from "@/lib/storefront/queries";
-import { getOrdersByIds } from "@/lib/orders/queries";
+import { countOrdersToShip, getOrdersByIds } from "@/lib/orders/queries";
 import { getAccountStatus } from "@/lib/payments/mock";
 import { getActiveAccount } from "@/lib/team/account-context";
+import { can } from "@/lib/team/permissions";
 import { getAssurance, getProfile } from "@/lib/auth/session";
 import { getTraderIdentityStatus } from "@/lib/settings/seller-identity";
-import { sellerEmailVerificationRequired } from "@/lib/settings/seller-email-verification";
+import { emailProofRequired } from "@/lib/contact-verification/availability";
 import { LEGAL_VERSION } from "@/lib/settings/constants";
 import { buildSetupSteps } from "@/lib/onboarding/steps";
 import { parseSeenSteps, SETUP_SEEN_COOKIE } from "@/lib/onboarding/seen-steps";
@@ -34,7 +35,7 @@ export default async function DashboardOverviewPage({
 }: {
   searchParams: Promise<{ tour?: string | string[] }>;
 }) {
-  const [orders, products, storefronts, profile, payments, account, ownProfile, params, assurance] =
+  const [orders, products, storefronts, profile, payments, account, ownProfile, params, assurance, toShipCount] =
     await Promise.all([
       getDashboardOrders(),
       getProductsSummary(),
@@ -49,6 +50,8 @@ export default async function DashboardOverviewPage({
       // The signed-in PERSON's 2FA state (the layout's gate already read it,
       // so this is the cached answer, not another round trip).
       getAssurance(),
+      // Shared with the sidebar's count in the same render (cached).
+      countOrdersToShip(),
     ]);
 
   // Collect all product IDs referenced by storefront blocks so we can detect
@@ -143,7 +146,7 @@ export default async function DashboardOverviewPage({
             email: ownProfile.seller_email ?? "",
           }
         : null,
-      verificationOn: sellerEmailVerificationRequired(),
+      verificationOn: emailProofRequired(),
       livePageUrl: setup?.livePage
         ? productPageUrl(setup.livePage.storefrontId, setup.livePage.productId)
         : null,
@@ -178,6 +181,8 @@ export default async function DashboardOverviewPage({
         // A failed read (null) counts as "on": never nag on a guess.
         twoFactorEnabled={assurance ? assurance.enrolled : true}
         recentOrderDetails={recentOrderDetails}
+        toShipCount={toShipCount}
+        canFulfil={can(account?.role, "orders.fulfil")}
       />
     </main>
   );

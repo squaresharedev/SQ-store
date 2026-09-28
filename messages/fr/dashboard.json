@@ -1,4 +1,9 @@
 {
+  "offline": {
+    "title": "Vous êtes hors ligne",
+    "description": "Cette page a besoin d’une connexion internet. Elle se chargera d’elle-même dès que vous serez de nouveau en ligne, et votre compte et vos données n’ont rien.",
+    "retry": "Réessayer"
+  },
   "metadata": {
     "app": {
       "title": "Tableau de bord Square Share",
@@ -111,6 +116,10 @@
       "label": "{count, plural, one {{count} bloc de vitrine référençant un produit supprimé} many {{count} blocs de vitrine référençant des produits supprimés} other {{count} blocs de vitrine référençant des produits supprimés}}",
       "description": "Ces blocs apparaissent vides pour les visiteurs. Supprimez-les ou remplacez-les.",
       "action": "Ouvrir la vitrine"
+    },
+    "toShip": {
+      "description": "Des acheteurs attendent ces commandes. Préparez-les, puis marquez-les comme expédiées.",
+      "action": "Expédier les commandes"
     }
   }
 }

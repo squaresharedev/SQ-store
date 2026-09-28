@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type MouseEvent } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
@@ -8,6 +8,9 @@ import { iconNudgeRightClass, infoTextClass } from "@/components/ui/control-styl
 import { badgeClass } from "@/components/ui/surface-styles";
 import { OrderDetailSheet } from "@/components/orders/OrderDetailSheet";
 import { cn } from "@/lib/utils";
+import { isModifiedClick } from "@/lib/utils/modified-click";
+import { ORDERS_PATH } from "@/lib/dashboard/paths";
+import { orderDetailPath } from "@/lib/orders/paths";
 import type { DashboardOrder, OrderStatus } from "@/lib/dashboard/queries";
 import { formatCents, formatOrderDate } from "@/lib/dashboard/format";
 import type { OrderView } from "@/types/order-view";
@@ -36,22 +39,20 @@ function StatusBadge({ status }: { status: OrderStatus }) {
   );
 }
 
-/** A click the browser should keep: new tab, new window, download, etc. */
-function isModifiedClick(event: MouseEvent) {
-  return event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey;
-}
-
 /** The latest ~5 orders across all statuses. */
 export function RecentOrders({
   orders,
   details = [],
   id,
+  canFulfil = false,
 }: {
   orders: DashboardOrder[];
   /** Full detail for these rows, read with the page. A row found here opens
    *  its panel in place, instantly; one that is not falls back to its link. */
   details?: OrderView[];
   id?: string;
+  /** Whether the viewer may mark orders shipped from the panel. */
+  canFulfil?: boolean;
 }) {
   const t = useTranslations();
   const locale = useLocale();
@@ -79,7 +80,7 @@ export function RecentOrders({
                     row (an older cached RPC payload) lands on the list rather
                     than a dead link. */}
                 <Link
-                  href={order.id ? `/orders?order=${order.id}` : "/orders"}
+                  href={order.id ? orderDetailPath(order.id) : ORDERS_PATH}
                   onClick={(event) => {
                     if (!detail || isModifiedClick(event)) return;
                     event.preventDefault();
@@ -122,7 +123,12 @@ export function RecentOrders({
         </ul>
       )}
       {selected && (
-        <OrderDetailSheet order={selected} onClose={() => setSelected(null)} />
+        <OrderDetailSheet
+          order={selected}
+          onClose={() => setSelected(null)}
+          canFulfil={canFulfil}
+          onOrderChange={setSelected}
+        />
       )}
     </ModuleCard>
   );

@@ -47,7 +47,7 @@ export function NotificationList({
 
   return (
     <div className="flex max-h-[75vh] w-full flex-col sm:max-h-[26rem]">
-      <div className="flex items-center justify-between gap-2 border-b border-border px-3 py-2.5">
+      <div className="flex items-center justify-between gap-2 border-b border-border py-2.5 pl-4 pr-2.5">
         <h2 className="flex items-center text-sm font-semibold text-foreground">
           {/* eslint-disable-next-line @next/next/no-img-element -- static public asset; next/image adds no value here. */}
           <img
@@ -83,7 +83,7 @@ export function NotificationList({
       {!live && (
         <p
           role="status"
-          className="border-b border-border bg-muted px-3 py-1.5 font-inter text-xs text-muted-foreground"
+          className="border-b border-border bg-muted px-4 py-1.5 font-inter text-xs text-muted-foreground"
         >
           {t("livePaused")}
         </p>
@@ -95,7 +95,7 @@ export function NotificationList({
             <Spinner />
           </div>
         ) : recent.length === 0 ? (
-          <p className="px-3 py-10 text-center font-inter text-sm text-muted-foreground">
+          <p className="px-4 py-10 text-center font-inter text-sm text-muted-foreground">
             {t("empty")}
           </p>
         ) : (
@@ -104,6 +104,7 @@ export function NotificationList({
               <li key={n.id}>
                 <NotificationItem
                   notification={n}
+                  compact
                   onActivate={onActivate}
                   onActionComplete={onActionComplete}
                   onNavigate={onNavigateAway}

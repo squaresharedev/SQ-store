@@ -96,6 +96,7 @@ describe("missingTraderIdentity", () => {
       seller_address: null,
       seller_email: "hello@studio-builderboy.at",
       seller_phone: null,
+      seller_phone_verified_at: null,
       seller_bio: null,
     });
     expect(missingTraderIdentity(seller)).toEqual(["address"]);
@@ -117,21 +118,21 @@ describe("the copy the gate hands every surface", () => {
 
   it("every field's anchor exists on the settings page", () => {
     // The hrefs are only worth anything if they land on the field. These ids
-    // are on TaxSection's field wrappers; confirmation shares the contact
-    // email's, because that is where its status line and resend button live.
+    // are on TaxSection's field wrappers; confirmation lands on the section
+    // below the form where the code is typed.
     expect(TRADER_IDENTITY_FIELDS.map((field) => field.anchor)).toEqual([
       "business-name",
       "address",
       "contact-email",
-      "contact-email",
+      "confirm-contact",
     ]);
   });
 
-  it("tells an unconfirmed seller to click a link, not to type something", () => {
+  it("tells an unconfirmed seller to prove it with a code, not to type the address again", () => {
     // "Add your confirmed contact email" would be advice to fill in a field
     // that is already filled in.
     const fix = english(traderIdentityFix(["emailVerified"]));
-    expect(fix).toMatch(/confirmation link/i);
+    expect(fix).toMatch(/send yourself a code/i);
     expect(fix).not.toMatch(/^Add your/);
     // With typed fields missing too, both asks are made, once each.
     const both = english(traderIdentityFix(["address", "emailVerified"]));

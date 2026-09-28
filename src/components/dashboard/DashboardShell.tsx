@@ -17,6 +17,8 @@ import {
 } from "@/lib/team/account-context";
 import { getTraderIdentityStatus } from "@/lib/settings/seller-identity";
 import { getProfile, getUser } from "@/lib/auth/session";
+import { countOrdersToShip } from "@/lib/orders/queries";
+import { ORDERS_PATH } from "@/lib/dashboard/paths";
 
 /** Where the seller-details banner stands down for owners: the setup checklist
  *  on Overview states the same gap as a step. */
@@ -37,13 +39,21 @@ export async function DashboardShell({
   username: string;
   children: ReactNode;
 }) {
-  const [account, accounts, profile, user] = await Promise.all([
+  const [account, accounts, profile, user, toShipCount] = await Promise.all([
     getActiveAccount(),
     getAccessibleAccounts(),
     getProfile(),
     getUser(),
+    // Cached per request, so the Orders page and the overview reuse it.
+    countOrdersToShip(),
   ]);
   const t = await getTranslations("Dashboard.shell");
+  const tOrders = await getTranslations("Orders");
+  // Parcels people have paid for and are waiting on, beside Orders on the
+  // rail, from whichever page the seller is on.
+  const navCounts = {
+    [ORDERS_PATH]: { value: toShipCount, label: tOrders("toShipCount", { count: toShipCount }) },
+  };
 
   const currentAccountId = account?.accountId ?? "";
   const email = user?.email ?? "";
@@ -101,7 +111,7 @@ export async function DashboardShell({
         accountId={account?.accountId ?? null}
       >
         <div className="min-h-screen bg-background">
-          <Sidebar topBarSlot={mobileControls} />
+          <Sidebar topBarSlot={mobileControls} counts={navCounts} />
           <div className="md:pl-64">
             <TopBar
               accounts={accounts}

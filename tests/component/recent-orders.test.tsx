@@ -3,6 +3,7 @@ import { render, screen, cleanup, fireEvent } from "../setup/render";
 import { RecentOrders } from "@/components/dashboard/RecentOrders";
 import type { DashboardOrder } from "@/lib/dashboard/queries";
 import type { OrderView } from "@/types/order-view";
+import { orderView } from "../setup/order-view";
 
 // The card's whole job beyond display: every row is a link into the order it
 // names, and a plain click opens that order right here. A row that renders but
@@ -75,19 +76,7 @@ describe("RecentOrders", () => {
     const LAMP_ID = "aaaaaaaa-1111-4111-8111-111111111111";
 
     function detail(overrides: Partial<OrderView> = {}): OrderView {
-      return {
-        id: LAMP_ID,
-        productTitle: "Lamp",
-        selection: [],
-        amountCents: 2500,
-        platformFeeCents: 125,
-        currency: "EUR",
-        channel: "embed",
-        status: "paid",
-        buyerEmail: "buyer@example.com",
-        createdAt: "2026-08-01T10:00:00.000Z",
-        ...overrides,
-      };
+      return orderView({ id: LAMP_ID, platformFeeCents: 125, ...overrides });
     }
 
     it("a plain click opens the order's detail panel without leaving the page", () => {

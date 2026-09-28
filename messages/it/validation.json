@@ -273,6 +273,16 @@
     "placeholder": "L’email di contatto sembra un indirizzo segnaposto. Usa un indirizzo che leggi davvero.",
     "disposable": "L’email di contatto è di un provider di posta temporanea. Usa un indirizzo permanente."
   },
+  "phone": {
+    "needsCountryCode": "Aggiungi il prefisso internazionale al numero di telefono, ad esempio +353 87 123 4567, oppure imposta il tuo paese.",
+    "invalid": "Quel numero di telefono non esiste. Controlla le cifre e il prefisso internazionale.",
+    "unsupportedRegion": "Possiamo confermare solo i numeri di telefono nell'UE, nello SEE, in Svizzera e nel Regno Unito.",
+    "notMobile": "Usa un numero di cellulare. Lo confirmiamo via SMS, e un numero fisso non può riceverne uno."
+  },
+  "address": {
+    "placeholder": "L'indirizzo sembra un segnaposto. Usa il vero indirizzo postale da cui operi.",
+    "incomplete": "Inserisci l'indirizzo postale completo: via e numero civico, poi città e CAP, ciascuno su una riga separata."
+  },
   "uuid": {
     "id": "Quell’ID non è valido.",
     "option": "Quell’opzione non è valida.",
@@ -292,10 +302,12 @@
     "domains": "I domini devono essere semplici domini minuscoli come iltuosito.com: niente https://, porta, percorso o carattere jolly."
   },
   "referenceCode": {
-    "vatId": "Una partita IVA deve avere da {min} a {max} lettere, cifre, spazi, punti o trattini."
+    "vatId": "Una partita IVA deve avere da {min} a {max} lettere, cifre, spazi, punti o trattini.",
+    "trackingNumber": "Un numero di tracciamento è composto da {min} a {max} lettere, cifre, spazi, punti o trattini."
   },
   "oneTimeCode": {
-    "authenticator": "Il codice è formato dalle 6 cifre mostrate nella tua app di autenticazione."
+    "authenticator": "Il codice è formato dalle 6 cifre mostrate nella tua app di autenticazione.",
+    "contact": "Il codice è formato dalle {length} cifre che ti abbiamo inviato."
   },
   "hexColor": {
     "colors": "I colori devono essere esadecimali a 6 cifre, come #a855f7.",

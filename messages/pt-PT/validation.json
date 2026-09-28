@@ -273,6 +273,16 @@
     "placeholder": "O e-mail de contacto parece ser um endereço de exemplo. Utilize um endereço que realmente leia.",
     "disposable": "O e-mail de contacto está num fornecedor de e-mail temporário. Utilize um endereço permanente."
   },
+  "phone": {
+    "needsCountryCode": "Adicione o indicativo do país ao número de telefone, como +353 87 123 4567, ou defina o seu país.",
+    "invalid": "Esse número de telefone não existe. Verifique os dígitos e o indicativo do país.",
+    "unsupportedRegion": "Só podemos confirmar números de telefone na UE, no EEE, na Suíça e no Reino Unido.",
+    "notMobile": "Utilize um número de telemóvel. Confirmamos por mensagem de texto, e uma linha fixa não a consegue receber."
+  },
+  "address": {
+    "placeholder": "A morada parece ser um exemplo. Utilize a morada postal real a partir da qual vende.",
+    "incomplete": "Indique a sua morada postal completa: rua e número, depois localidade e código postal, cada um na sua própria linha."
+  },
   "uuid": {
     "id": "Esse ID não é válido.",
     "option": "Essa opção não é válida.",
@@ -292,10 +302,12 @@
     "domains": "Os domínios devem ser domínios simples em minúsculas, como oseusite.com (sem https://, porta, caminho ou caráter universal)."
   },
   "referenceCode": {
-    "vatId": "Um NIF deve ter entre {min} e {max} letras, dígitos, espaços, pontos ou hífenes."
+    "vatId": "Um NIF deve ter entre {min} e {max} letras, dígitos, espaços, pontos ou hífenes.",
+    "trackingNumber": "Um número de rastreio tem entre {min} e {max} letras, dígitos, espaços, pontos ou hífenes."
   },
   "oneTimeCode": {
-    "authenticator": "O código são os 6 dígitos que a aplicação de autenticação mostra."
+    "authenticator": "O código são os 6 dígitos que a aplicação de autenticação mostra.",
+    "contact": "O código são os {length} dígitos que lhe enviámos."
   },
   "hexColor": {
     "colors": "As cores devem ser um hexadecimal de 6 dígitos, como #a855f7.",

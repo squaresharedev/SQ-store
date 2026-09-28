@@ -22,7 +22,8 @@
 //     field is account-level and many single-person sellers genuinely have no
 //     business line; blocking on it would lock out sellers who are otherwise
 //     fully contactable. It stays strongly recommended (the dashboard's
-//     attention list asks for it) and is shown to buyers whenever it is set.
+//     attention list asks for it) and is shown to buyers once the seller has
+//     proven it with a texted code (lib/contact-verification).
 //   - Country. The picker lists EU member states only, so a seller outside the
 //     EU cannot answer it truthfully. Requiring it would be a gate no non-EU
 //     seller could pass.
@@ -88,7 +89,8 @@ export const TRADER_IDENTITY_FIELDS: readonly {
   {
     key: "emailVerified",
     label: "Settings.sellerDetails.fields.emailVerified.label",
-    anchor: "contact-email",
+    // The code box, below the form (TaxSection's "confirm-contact" section).
+    anchor: "confirm-contact",
     why: "Settings.sellerDetails.fields.emailVerified.why",
   },
 ] as const;
@@ -111,9 +113,9 @@ export function missingTraderIdentity(
   seller: TraderIdentityInput,
   options: {
     /**
-     * Also require the contact address to have been PROVEN by a clicked link.
-     * The caller decides, because a deployment that cannot send mail must not
-     * demand one — see lib/settings/seller-email-verification.ts.
+     * Also require the contact address to have been PROVEN, by a code sent to
+     * it and typed back. The caller decides, because a deployment that cannot
+     * send mail must not demand one: see lib/contact-verification/availability.ts.
      */
     requireVerifiedEmail?: boolean;
   } = {},

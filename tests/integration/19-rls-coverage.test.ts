@@ -31,14 +31,13 @@ const POLICY_FREE_BY_DESIGN = new Set([
   // budgets, and one that could write them could clear its own.
   "rate_limits",
   "rate_limit_keys",
-  // Pending confirmation tokens for a seller's buyer-facing contact address
-  // (20260909_seller_email_verification). Written and claimed only by
-  // lib/settings/seller-email-verification.ts through the service role. Even
-  // the OWNER must not read this row: it is the token store, and a policy
-  // letting an account see its own would hand a compromised session a
-  // credential it would otherwise have to fetch from the inbox — which is the
-  // one thing the confirmation proves.
-  "seller_email_verifications",
+  // Pending codes proving a seller owns their buyer-facing email and phone
+  // (20260926_contact_verification). Issued and redeemed only through the
+  // service role (lib/contact-verification). Even the OWNER must not read
+  // this row: a policy letting an account see its own would tell a
+  // compromised session when a code is live and how many guesses it has
+  // left, which is exactly what the inbox or phone is meant to gate.
+  "contact_verifications",
   // Hashed 2FA recovery codes (20260923_two_factor_auth). Written and spent
   // only through the service role (lib/auth/mfa.ts). Not even the owner may
   // read them: a hijacked session that could count or see the hashes of its
@@ -146,10 +145,10 @@ describe("RLS coverage", () => {
     expect(anonReadable).toEqual([]);
   });
 
-  it("keeps the seller-email token store off both public roles entirely", async () => {
+  it("keeps the contact-code store off both public roles entirely", async () => {
     // Deny-all RLS is only half of it: PostgREST auto-grants on new objects
     // have published tables in this schema to `anon` before, and a GRANT plus
-    // a future policy is all it would take for a live confirmation token to
+    // a future policy is all it would take for a live confirmation code to
     // become readable. This asserts the grants themselves, which is the fence
     // the migration's explicit REVOKEs put up.
     const grants = await asSuper(async (q) => {
@@ -157,7 +156,7 @@ describe("RLS coverage", () => {
         `select grantee, privilege_type
            from information_schema.role_table_grants
           where table_schema = 'public'
-            and table_name = 'seller_email_verifications'
+            and table_name = 'contact_verifications'
             and grantee in ('anon', 'authenticated')
           order by grantee, privilege_type`,
       );

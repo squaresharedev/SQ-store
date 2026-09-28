@@ -48,13 +48,18 @@
     "editThisStorefront": {
       "withRole": "Vaše role {role, select, owner {vlastníka} editor {editora} viewer {čtenáře} other {{role}}} nedovoluje upravovat tuto výlohu v tomto obchodě.",
       "noRole": "Nemáte oprávnění upravovat tuto výlohu v tomto obchodě."
+    },
+    "fulfilOrders": {
+      "withRole": "Vaše role {role, select, owner {Vlastník} editor {Editor} viewer {Čtenář} other {{role}}} neumožňuje v tomto obchodě označovat objednávky jako odeslané.",
+      "noRole": "Nemáte oprávnění označovat objednávky jako odeslané v tomto obchodě."
     }
   },
   "notFound": {
     "fix": "Mohlo to být smazáno, nebo došlo k přepnutí obchodu. Obnovte stránku a načtou se aktuální data.",
     "product": "Tento produkt se nepodařilo najít.",
     "storefront": "Tuto výlohu se nepodařilo najít.",
-    "item": "Tuto položku se nepodařilo najít."
+    "item": "Tuto položku se nepodařilo najít.",
+    "order": "Tuto objednávku se nepodařilo najít."
   },
   "rateLimited": {
     "fix": "Počkejte pár minut a zkuste to znovu. Pokud se nic nezkouší znovu na pozadí, nejdřív obnovte stránku.",
@@ -70,7 +75,8 @@
     "updateStock": "Příliš mnoho pokusů o aktualizaci zásob v krátké době.",
     "readProductPageSettings": "Příliš mnoho pokusů o načtení nastavení produktové stránky v krátké době.",
     "requestReview": "Příliš mnoho žádostí o kontrolu během krátké doby.",
-    "fileAppeal": "Příliš mnoho pokusů o odeslání odvolání za krátkou dobu."
+    "fileAppeal": "Příliš mnoho pokusů o odeslání odvolání za krátkou dobu.",
+    "fulfilOrders": "Příliš mnoho pokusů o označení objednávek jako odeslaných v krátké době."
   },
   "serverError": {
     "fix": "Obvykle jde o dočasný problém. Chvíli počkejte a zkuste to znovu; pokud to stále nejde, obnovte stránku.",
@@ -97,7 +103,8 @@
     "loadProductPageSettings": "Nastavení produktové stránky se kvůli problému na naší straně nepodařilo načíst.",
     "saveProductPageSettings": "Nastavení produktové stránky se kvůli problému na naší straně nepodařilo uložit.",
     "sendForReview": "Kontrolu se nepodařilo odeslat kvůli chybě na naší straně.",
-    "fileAppeal": "Odvolání nebylo možné odeslat kvůli problému na naší straně."
+    "fileAppeal": "Odvolání nebylo možné odeslat kvůli problému na naší straně.",
+    "markOrderShipped": "Objednávku se nepodařilo označit jako odeslanou kvůli problému na naší straně."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Tento produkt byl odstraněn, nikoli pozastaven.} storefront {Tato výloha byla odstraněna, nikoli pozastavena.} other {Tato položka byla odstraněna, nikoli pozastavena.}}",
@@ -112,8 +119,8 @@
     "action": "Doplnit údaje prodejce",
     "fix": {
       "add": "{fields, select, businessName {Doplňte obchodní jméno v sekci Nastavení › Firma a údaje prodejce a pak zveřejněte.} address {Doplňte adresu sídla v sekci Nastavení › Firma a údaje prodejce a pak zveřejněte.} email {Doplňte kontaktní e-mail v sekci Nastavení › Firma a údaje prodejce a pak zveřejněte.} businessName_address {Doplňte obchodní jméno a adresu sídla v sekci Nastavení › Firma a údaje prodejce a pak zveřejněte.} businessName_email {Doplňte obchodní jméno a kontaktní e-mail v sekci Nastavení › Firma a údaje prodejce a pak zveřejněte.} address_email {Doplňte adresu sídla a kontaktní e-mail v sekci Nastavení › Firma a údaje prodejce a pak zveřejněte.} other {Doplňte obchodní jméno, adresu sídla a kontaktní e-mail v sekci Nastavení › Firma a údaje prodejce a pak zveřejněte.}}",
-      "addAndConfirm": "{fields, select, businessName {Doplňte obchodní jméno v sekci Nastavení › Firma a údaje prodejce a potvrďte kontaktní e-mail odkazem, který jsme vám poslali.} address {Doplňte adresu sídla v sekci Nastavení › Firma a údaje prodejce a potvrďte kontaktní e-mail odkazem, který jsme vám poslali.} email {Doplňte kontaktní e-mail v sekci Nastavení › Firma a údaje prodejce a potvrďte ho odkazem, který jsme vám poslali.} businessName_address {Doplňte obchodní jméno a adresu sídla v sekci Nastavení › Firma a údaje prodejce a potvrďte kontaktní e-mail odkazem, který jsme vám poslali.} businessName_email {Doplňte obchodní jméno a kontaktní e-mail v sekci Nastavení › Firma a údaje prodejce a potvrďte kontaktní e-mail odkazem, který jsme vám poslali.} address_email {Doplňte adresu sídla a kontaktní e-mail v sekci Nastavení › Firma a údaje prodejce a potvrďte kontaktní e-mail odkazem, který jsme vám poslali.} other {Doplňte obchodní jméno, adresu sídla a kontaktní e-mail v sekci Nastavení › Firma a údaje prodejce a potvrďte kontaktní e-mail odkazem, který jsme vám poslali.}}",
-      "confirm": "Otevřete potvrzovací odkaz, který jsme poslali na vaši kontaktní adresu. Nový si můžete poslat v sekci Nastavení › Firma a údaje prodejce.",
+      "addAndConfirm": "{fields, select, businessName {Doplňte obchodní jméno v sekci Nastavení › Firma a údaje prodejce a potvrďte kontaktní e-mail kódem, který na něj pošleme.} address {Doplňte adresu sídla v sekci Nastavení › Firma a údaje prodejce a potvrďte kontaktní e-mail kódem, který na něj pošleme.} email {Doplňte kontaktní e-mail v sekci Nastavení › Firma a údaje prodejce a potvrďte ho kódem, který na něj pošleme.} businessName_address {Doplňte obchodní jméno a adresu sídla v sekci Nastavení › Firma a údaje prodejce a potvrďte kontaktní e-mail kódem, který na něj pošleme.} businessName_email {Doplňte obchodní jméno a kontaktní e-mail v sekci Nastavení › Firma a údaje prodejce a potvrďte e-mail kódem, který na něj pošleme.} address_email {Doplňte adresu sídla a kontaktní e-mail v sekci Nastavení › Firma a údaje prodejce a potvrďte e-mail kódem, který na něj pošleme.} other {Doplňte obchodní jméno, adresu sídla a kontaktní e-mail v sekci Nastavení › Firma a údaje prodejce a potvrďte e-mail kódem, který na něj pošleme.}}",
+      "confirm": "Potvrďte kontaktní e-mail: pošlete si kód ze sekce Nastavení › Firma a údaje prodejce a pak ho tam zadejte.",
       "complete": "Vyplňte sekci Nastavení › Firma a údaje prodejce a pak zveřejněte."
     }
   },
@@ -182,12 +189,23 @@
     "resetRateLimited": "Příliš mnoho e-mailů pro obnovení hesla. Chvíli počkejte a zkuste to znovu.",
     "resetSendRateLimited": "Příliš mnoho požadavků. Počkejte minutu a zkuste to znovu.",
     "resetFailed": "E-mail pro obnovení hesla se nepodařilo odeslat. Zkuste to znovu.",
-    "contactEmailTakesNoMail": "Doména tohoto kontaktního e-mailu nepřijímá poštu. Zkontrolujte, zda je adresa napsaná správně, nebo použijte adresu, na kterou vám kupující opravdu mohou napsat.",
-    "savedButConfirmationFailed": "{reason, select, startFailed {Uloženo, ale potvrzovací e-mail se neodeslal. Potvrzení e-mailu se nepodařilo zahájit. Zkuste níže „Znovu poslat potvrzovací e-mail“.} unavailable {Uloženo, ale potvrzovací e-mail se neodeslal. Potvrzení e-mailu teď není k dispozici. Zkuste níže „Znovu poslat potvrzovací e-mail“.} other {Uloženo, ale potvrzovací e-mail se neodeslal. Potvrzovací e-mail se nepodařilo odeslat. Zkontrolujte adresu a zkuste níže „Znovu poslat potvrzovací e-mail“.}}",
-    "confirmationFailed": "{reason, select, startFailed {Potvrzení e-mailu se nepodařilo zahájit.} unavailable {Potvrzení e-mailu teď není k dispozici.} other {Potvrzovací e-mail se nepodařilo odeslat. Zkontrolujte adresu a zkuste to znovu.}}",
-    "confirmationUnavailable": "Potvrzení e-mailu teď není k dispozici.",
-    "confirmationRateLimited": "To je hodně potvrzovacích e-mailů. Chvíli počkejte, než si vyžádáte další.",
-    "noContactEmail": "Nejdřív doplňte kontaktní e-mail, pak ho můžeme potvrdit."
+    "contactEmailTakesNoMail": "Doména tohoto kontaktního e-mailu nepřijímá poštu. Zkontrolujte, zda je adresa napsaná správně, nebo použijte adresu, na kterou vám kupující opravdu mohou napsat."
+  },
+  "contactVerification": {
+    "unavailable": "{channel, select, email {Potvrzení e-mailem momentálně není k dispozici.} other {Potvrzení textovou zprávou momentálně není k dispozici.}}",
+    "nothingToConfirm": "{channel, select, email {Nejdřív doplňte kontaktní e-mail a uložte ho.} other {Nejdřív doplňte telefonní číslo a uložte ho.}}",
+    "phoneNeedsResave": "Uložte telefonní číslo znovu v plném mezinárodním formátu, například +353 87 123 4567, a pak si vyžádejte kód.",
+    "cooldown": "Kód byl právě odeslán. Než si vyžádáte další, chvíli počkejte.",
+    "tooManyCodes": "To je hodně kódů. Než si vyžádáte další, chvíli počkejte.",
+    "sendFailed": "{channel, select, email {E-mail se nepodařilo odeslat. Zkontrolujte adresu a zkuste to znovu.} other {Textovou zprávu se nepodařilo odeslat. Zkontrolujte číslo a zkuste to znovu.}}",
+    "savedButNotSent": "Uloženo, ale potvrzovací kód se teď nepodařilo odeslat. Zkuste to znovu tlačítkem Poslat kód níže.",
+    "wrongCode": "Tento kód není správný. Zkontrolujte ho a zkuste to znovu.",
+    "locked": "Příliš mnoho chybných pokusů pro tento kód. Pošlete si nový.",
+    "expired": "Platnost tohoto kódu vypršela. Pošlete si nový.",
+    "noCode": "Nejdřív si pošlete kód.",
+    "stale": "Vaše údaje se změnily po odeslání tohoto kódu. Pošlete si nový.",
+    "tooManyAttempts": "Příliš mnoho pokusů. Chvíli počkejte a zkuste to znovu.",
+    "failed": "Kód se teď nepodařilo ověřit. Zkuste to znovu."
   },
   "avatar": {
     "unexpectedData": "Neočekávaná data formuláře byla odmítnuta.",
@@ -552,5 +570,11 @@
     "rateLimited": "Příliš mnoho kódů za krátkou dobu. Počkejte několik minut a zkuste to znovu.",
     "expired": "Platnost tohoto požadavku na přihlášení vypršela nebo byl již zodpovězen. Zobrazte nový kód na zařízení, na kterém se přihlašujete.",
     "otherAccount": "Tento požadavek je pro jiný účet Square Share, než který je zde přihlášen."
+  },
+  "orders": {
+    "notShippable": {
+      "message": "Tuto objednávku nelze označit jako odeslanou.",
+      "fix": "Odesílat lze jen zaplacené objednávky s položkou k odeslání. Obnovte stránku a zjistěte, v jakém je tato objednávka stavu."
+    }
   }
 }

@@ -21,6 +21,15 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import type { MessageKey } from "@/i18n/types";
+import {
+  ANALYTICS_PATH,
+  ORDERS_PATH,
+  OVERVIEW_PATH,
+  PAYMENTS_PATH,
+  SETTINGS_PATH,
+} from "@/lib/dashboard/paths";
+import { PRODUCTS_PATH } from "@/lib/products/paths";
+import { STOREFRONT_LIST_PATH } from "@/lib/storefront/paths";
 
 /**
  * THE APP'S NAVIGATION MAP: declared once, consumed three times.
@@ -59,17 +68,17 @@ export type SettingsNavEntry = {
 export const MAIN_NAV: NavEntry[] = [
   // The Overview page lives at /dashboard ("/" merely redirects there);
   // linking it directly keeps the active state working and skips the hop.
-  { label: "Nav.main.overview.label", href: "/dashboard", icon: OverviewIcon },
-  { label: "Nav.main.products.label", href: "/products", icon: ProductsIcon },
-  { label: "Nav.main.storefront.label", href: "/storefront", icon: StorefrontIcon },
-  { label: "Nav.main.orders.label", href: "/orders", icon: OrdersIcon },
-  { label: "Nav.main.analytics.label", href: "/analytics", icon: AnalyticsIcon },
-  { label: "Nav.main.payments.label", href: "/payments", icon: PaymentsIcon },
+  { label: "Nav.main.overview.label", href: OVERVIEW_PATH, icon: OverviewIcon },
+  { label: "Nav.main.products.label", href: PRODUCTS_PATH, icon: ProductsIcon },
+  { label: "Nav.main.storefront.label", href: STOREFRONT_LIST_PATH, icon: StorefrontIcon },
+  { label: "Nav.main.orders.label", href: ORDERS_PATH, icon: OrdersIcon },
+  { label: "Nav.main.analytics.label", href: ANALYTICS_PATH, icon: AnalyticsIcon },
+  { label: "Nav.main.payments.label", href: PAYMENTS_PATH, icon: PaymentsIcon },
 ];
 
 export const SETTINGS_LINK: NavEntry = {
   label: "Nav.main.settings.label",
-  href: "/settings",
+  href: SETTINGS_PATH,
   icon: SettingsIcon,
 };
 

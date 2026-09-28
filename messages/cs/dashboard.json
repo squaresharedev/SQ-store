@@ -1,4 +1,9 @@
 {
+  "offline": {
+    "title": "Jste offline",
+    "description": "Tato stránka potřebuje připojení k internetu. Načte se sama, jakmile budete znovu online, a váš účet i data jsou v pořádku.",
+    "retry": "Zkusit znovu"
+  },
   "metadata": {
     "app": {
       "title": "Panel Square Share",
@@ -111,6 +116,10 @@
       "label": "{count, plural, one {{count} blok výlohy odkazuje na smazané produkty} few {{count} bloky výlohy odkazují na smazané produkty} many {{count} bloku výlohy odkazuje na smazané produkty} other {{count} bloků výlohy odkazuje na smazané produkty}}",
       "description": "Návštěvníkům se tyto bloky zobrazují prázdné. Odeberte je nebo nahraďte.",
       "action": "Otevřít výlohu"
+    },
+    "toShip": {
+      "description": "Kupující čekají na zásilky. Zabalte je a označte jako odeslané.",
+      "action": "Odeslat objednávky"
     }
   }
 }

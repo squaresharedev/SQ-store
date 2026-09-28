@@ -92,12 +92,14 @@ const REGISTRY: Record<string, Classification> = {
   "lib/settings/actions.ts::requestEmailChange": limited(),
   "lib/settings/actions.ts::sendPasswordReset": limited(),
   "lib/settings/actions.ts::saveTaxInfo": limited(),
-  // Its OWN budget, tighter than settingsWrite (sellerEmailVerifySend): this
-  // is the one control in Settings that makes the platform send mail on
-  // demand. The recipient is read from the stored profile, never from the
-  // request, so it cannot be aimed — but an unbounded resend would still be a
-  // way to hammer one address.
-  "lib/settings/actions.ts::resendSellerEmailVerification": limited(),
+  // Contact proof. Sending spends five budgets inside issueContactCode (own
+  // cooldown, own hourly and daily, the TARGET's across all accounts, the
+  // client's, plus the platform's SMS ceiling); checking spends the per-account
+  // attempt budget inside redeemContactCode, on top of the per-code attempt
+  // counter in the database. Both named in CONTACT_LIMITERS below. The
+  // recipient is always read from the stored profile, never the request.
+  "lib/contact-verification/actions.ts::sendContactCode": limited(),
+  "lib/contact-verification/actions.ts::confirmContactCode": limited(),
   // Its own module because it writes a jsonb document rather than columns, but
   // the same budget as every other settings write: a signed-in seller editing
   // their own row.
@@ -145,6 +147,11 @@ const REGISTRY: Record<string, Classification> = {
   "lib/storefront/actions.ts::updateEmbedSettings": limited(),
   "lib/storefront/actions.ts::deleteStorefront": limited(),
   "lib/storefront/actions.ts::rotateEmbedKey": limited(),
+
+  // --- orders -------------------------------------------------------------
+  // Marking an order shipped mails the BUYER, so it is bounded like every
+  // other action that can put mail in a stranger's inbox.
+  "lib/orders/actions.ts::markOrderShipped": limited(),
 
   // --- team ---------------------------------------------------------------
   "lib/team/actions.ts::inviteMember": limited(),
@@ -260,13 +267,59 @@ const SECOND_FACTOR_LIMITERS = ["takeSecondFactorAttempt", "verifySecondFactor"]
  */
 const SETUP_LIMITERS = ["readyToEnroll"];
 
+/**
+ * The contact-proof service (lib/contact-verification/service.ts): both take
+ * from their budgets before any database work or send. Pinned below.
+ */
+const CONTACT_LIMITERS = ["issueContactCode", "redeemContactCode"];
+
 /** Does this body take from a rate-limit budget? */
 function isRateLimited(body: string): boolean {
   if (/\brateLimit(?:Key)?\s*\(/.test(body)) return true;
-  return [...SECOND_FACTOR_LIMITERS, ...SETUP_LIMITERS].some((name) =>
+  return [...SECOND_FACTOR_LIMITERS, ...SETUP_LIMITERS, ...CONTACT_LIMITERS].some((name) =>
     new RegExp(`\\b${name}\\s*\\(`).test(body),
   );
 }
+
+describe("contact-proof limiters", () => {
+  // The registry trusts these two names as budgets, so pin that they are, and
+  // that the budget comes FIRST: before the profile is read, before a code is
+  // minted, before anything is sent or checked.
+  const source = readFileSync(
+    join(process.cwd(), "src", "lib", "contact-verification", "service.ts"),
+    "utf8",
+  );
+  const body = (name: string) => {
+    const start = source.indexOf(`export async function ${name}`);
+    const next = source.indexOf("\nexport ", start + 1);
+    return source.slice(start, next === -1 ? undefined : next);
+  };
+
+  it("issueContactCode spends all five send budgets before it mints or sends", () => {
+    const issue = body("issueContactCode");
+    for (const budget of [
+      "contactCodeCooldown",
+      "contactCodeSend",
+      "contactCodeSendDaily",
+      "contactCodePerTarget",
+      "contactCodePerClient",
+      "contactSmsPlatformDaily",
+    ]) {
+      const at = issue.indexOf(`RATE_LIMITS.${budget}`);
+      expect(at, budget).toBeGreaterThan(-1);
+      expect(at, budget).toBeLessThan(issue.indexOf("mintContactCode("));
+    }
+    expect(issue.indexOf("RATE_LIMITS.contactCodeCooldown")).toBeLessThan(issue.indexOf('.from("profiles")'));
+  });
+
+  it("redeemContactCode spends the attempt budget before asking the database", () => {
+    const redeem = body("redeemContactCode");
+    expect(redeem.indexOf("RATE_LIMITS.contactCodeVerify")).toBeGreaterThan(-1);
+    expect(redeem.indexOf("RATE_LIMITS.contactCodeVerify")).toBeLessThan(
+      redeem.indexOf("redeem_contact_verification"),
+    );
+  });
+});
 
 describe("setup guards", () => {
   // The registry and the step-up invariant trust these names, so pin that

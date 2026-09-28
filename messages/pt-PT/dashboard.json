@@ -1,4 +1,9 @@
 {
+  "offline": {
+    "title": "Está offline",
+    "description": "Esta página precisa de ligação à internet. Vai carregar sozinha assim que voltar a estar online, e a sua conta e os seus dados estão bem.",
+    "retry": "Tentar novamente"
+  },
   "metadata": {
     "app": {
       "title": "Painel Square Share",
@@ -111,6 +116,10 @@
       "label": "{count, plural, one {{count} bloco de montra a referenciar produtos eliminados} many {{count} de blocos de montra a referenciar produtos eliminados} other {{count} blocos de montra a referenciar produtos eliminados}}",
       "description": "Estes blocos aparecem vazios para os visitantes. Remova-os ou substitua-os.",
       "action": "Abrir montra"
+    },
+    "toShip": {
+      "description": "Os compradores estão à espera. Embale-as e marque-as como enviadas.",
+      "action": "Enviar encomendas"
     }
   }
 }

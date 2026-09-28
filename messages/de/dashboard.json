@@ -1,4 +1,9 @@
 {
+  "offline": {
+    "title": "Du bist offline",
+    "description": "Diese Seite braucht eine Internetverbindung. Sie lädt von selbst, sobald du wieder online bist, und dein Konto und deine Daten sind in Ordnung.",
+    "retry": "Erneut versuchen"
+  },
   "metadata": {
     "app": {
       "title": "Square Share Dashboard",
@@ -111,6 +116,10 @@
       "label": "{count, plural, one {{count} Schaufenster-Block mit Verweis auf gelöschte Produkte} other {{count} Schaufenster-Blöcke mit Verweis auf gelöschte Produkte}}",
       "description": "Diese Blöcke erscheinen Besuchern leer. Entferne oder ersetze sie.",
       "action": "Schaufenster öffnen"
+    },
+    "toShip": {
+      "description": "Käufer warten auf diese Bestellungen. Packe sie ein und markiere sie als versandt.",
+      "action": "Bestellungen versenden"
     }
   }
 }

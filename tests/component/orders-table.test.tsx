@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeAll, afterEach } from "vitest";
 import { render, screen, cleanup, waitFor } from "../setup/render";
 import userEvent from "@testing-library/user-event";
 import { OrdersTable } from "@/components/orders/OrdersTable";
-import type { OrderView } from "@/types/order-view";
+import { orderView } from "../setup/order-view";
 
 // Arriving from universal search MARKS a row, it does not open one. These
 // guard the difference: the highlight is announced, it is reachable without
@@ -28,21 +28,7 @@ beforeAll(() => {
   });
 });
 
-function order(overrides: Partial<OrderView> = {}): OrderView {
-  return {
-    id: "aaaaaaaa-1111-4111-8111-111111111111",
-    productTitle: "Lamp",
-    selection: [],
-    amountCents: 2500,
-    platformFeeCents: 250,
-    currency: "EUR",
-    channel: "embed",
-    status: "paid",
-    buyerEmail: "buyer@example.com",
-    createdAt: "2026-08-01T10:00:00.000Z",
-    ...overrides,
-  };
-}
+const order = orderView;
 
 const ROWS = [
   order({ id: "aaaaaaaa-1111-4111-8111-111111111111", productTitle: "Lamp" }),

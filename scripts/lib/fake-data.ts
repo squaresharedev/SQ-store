@@ -819,11 +819,70 @@ export interface OrderInsert {
    *  a product sold in one version. */
   selected_options: { label: string; value: string }[];
   created_at: string;
+  /** Units sold; amount_cents is the unit price times this. */
+  quantity: number;
+  /** Delivery address, in the shape src/lib/orders/ship-to.ts reads. */
+  ship_to: SeedShipTo;
+  /** Mirrors orders.fulfilment_status (20260927_order_fulfilment). */
+  fulfilment_status: "unfulfilled" | "shipped";
+  /** Set exactly when fulfilment_status is "shipped" (a CHECK holds them together). */
+  shipped_at: string | null;
+  tracking_number: string | null;
 }
+
+/** Mirrors ShipTo in src/types/order-view.ts, kept local like the rest of this
+ *  file (scripts/ never imports from src/). A type alias rather than an
+ *  interface so it stays assignable to the jsonb column's Json type. */
+export type SeedShipTo = {
+  name: string;
+  line1: string;
+  city: string;
+  postalCode: string;
+  country: string;
+};
 
 /** Small, realistic platform take rate applied to the gross amount. */
 const PLATFORM_TAKE_RATE = 0.05;
 const DAY_MS = 86_400_000;
+
+/**
+ * How long a seeded seller takes to ship. Orders placed more recently than
+ * this are still waiting (the To ship queue a demo store shows); older ones
+ * went out a day or so after they were placed. Mirrors demo.sales_sim_ship in
+ * 20260927_demo_sales_sim_fulfilment.sql, so a seeded day and a simulated day
+ * look the same.
+ */
+const SHIPS_WITHIN_MS = 2 * DAY_MS;
+
+/** Where seeded parcels go: one plausible EU address per city, chosen per
+ *  buyer so a returning buyer ships to the same place. Mirrors demo.ship_to. */
+const SEED_ADDRESSES: readonly Omit<SeedShipTo, "name">[] = [
+  { line1: "12 Harbour Road", city: "Dublin", postalCode: "D02 X285", country: "IE" },
+  { line1: "Lindenstrasse 14", city: "Berlin", postalCode: "10115", country: "DE" },
+  { line1: "7 Rue des Lilas", city: "Lyon", postalCode: "69003", country: "FR" },
+  { line1: "Keizersgracht 221", city: "Amsterdam", postalCode: "1016 DV", country: "NL" },
+  { line1: "Via Roma 45", city: "Bologna", postalCode: "40121", country: "IT" },
+  { line1: "Calle Mayor 8, 2B", city: "Madrid", postalCode: "28013", country: "ES" },
+  { line1: "Vinohradska 112", city: "Praha 2", postalCode: "120 00", country: "CZ" },
+  { line1: "ul. Mokotowska 19", city: "Warszawa", postalCode: "00-561", country: "PL" },
+  { line1: "Rua das Flores 27", city: "Porto", postalCode: "4050-265", country: "PT" },
+  { line1: "Obchodna 31", city: "Bratislava", postalCode: "811 06", country: "SK" },
+];
+
+/** "alex.wong123@example.test" -> "Alex Wong": the name on the parcel matches
+ *  the buyer the order is attributed to. */
+function buyerName(email: string): string {
+  const [first = "", last = ""] = email.split("@")[0]!.split(".");
+  const cap = (word: string) => word.charAt(0).toUpperCase() + word.slice(1);
+  return `${cap(first)} ${cap(last.replace(/[0-9]+$/, ""))}`.trim();
+}
+
+/** A stable address for a buyer: the same email always ships to the same place. */
+export function shipToForBuyer(email: string): SeedShipTo {
+  let hash = 0;
+  for (const char of email) hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
+  return { name: buyerName(email), ...SEED_ADDRESSES[hash % SEED_ADDRESSES.length]! };
+}
 
 const BUYER_FIRST = [
   "alex", "sam", "jordan", "riley", "casey", "noa", "mika", "lee", "robin",
@@ -951,7 +1010,9 @@ function makeOrder(
     ["disputed", 3],
     ["pending", 6],
   ]);
-  const amount_cents = product.price_cents; // gross, drawn from the product price
+  // Mostly one unit, sometimes two or three: the same split as the simulator.
+  const quantity = weightedPick<number>(rng, [[1, 82], [2, 14], [3, 4]]);
+  const amount_cents = product.price_cents * quantity; // gross
   const platform_fee_cents = Math.round(amount_cents * PLATFORM_TAKE_RATE);
   // Embed sales flow through the seller's storefront widget; marketplace sales
   // come from the (future) discovery feed and aren't tied to a storefront.
@@ -959,6 +1020,16 @@ function makeOrder(
   // Time-of-day follows the hour shape, clamped so "today" never lands in the
   // future (the current day is only partly elapsed).
   const at = Math.min(dayStart.getTime() + pickSecondOfDay(rng) * 1000, now.getTime());
+  const buyer_email = pickBuyerEmail(rng);
+  const selected_options = pickSelection(rng, product);
+  // Shipped a day to a day and a half after the sale, once old enough; about
+  // half of those with a tracking number, in the S10 shape (two letters, nine
+  // digits, a country) most EU posts use.
+  const shipped = now.getTime() - at > SHIPS_WITHIN_MS;
+  const shippedAt = at + DAY_MS + Math.floor(rng() * DAY_MS * 0.5);
+  const tracking = shipped && rng() < 0.5
+    ? `RR${String(Math.floor(rng() * 1e9)).padStart(9, "0")}IE`
+    : null;
   return {
     seller_id: sellerId,
     product_id: product.id,
@@ -968,11 +1039,16 @@ function makeOrder(
     amount_cents,
     platform_fee_cents,
     currency: product.currency,
-    buyer_email: pickBuyerEmail(rng),
+    buyer_email,
     product_title: product.title,
     product_price_cents: product.price_cents,
-    selected_options: pickSelection(rng, product),
+    selected_options,
     created_at: new Date(at).toISOString(),
+    quantity,
+    ship_to: shipToForBuyer(buyer_email),
+    fulfilment_status: shipped ? "shipped" : "unfulfilled",
+    shipped_at: shipped ? new Date(shippedAt).toISOString() : null,
+    tracking_number: tracking,
   };
 }
 

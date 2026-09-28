@@ -1,4 +1,9 @@
 {
+  "offline": {
+    "title": "You're offline",
+    "description": "This page needs an internet connection. It will load by itself as soon as you're back online, and your account and data are fine.",
+    "retry": "Try again"
+  },
   "metadata": {
     "app": {
       "title": "Square Share Dashboard",
@@ -111,6 +116,10 @@
       "label": "{count, plural, one {{count} storefront block referencing deleted products} other {{count} storefront blocks referencing deleted products}}",
       "description": "These blocks appear empty to visitors. Remove or replace them.",
       "action": "Open storefront"
+    },
+    "toShip": {
+      "description": "Buyers are waiting on these. Pack them, then mark them shipped.",
+      "action": "Ship orders"
     }
   }
 }

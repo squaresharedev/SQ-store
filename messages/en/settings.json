@@ -289,16 +289,9 @@
   "tax": {
     "cardTitle": "Business & seller details",
     "cardDescription": "Set once for your whole account. Shown to buyers on every product page you sell on, and used for invoices and VAT.",
-    "verifyOutcome": {
-      "verified": "Contact email confirmed. You can publish now.",
-      "expired": "That confirmation link has expired. Send yourself a new one below.",
-      "stale": "That link was for a different address than the one saved here. Send a new one below.",
-      "invalid": "That confirmation link is not valid, or has already been used.",
-      "throttled": "Too many confirmation attempts. Wait a while, then open the link again."
-    },
     "gate": {
       "required": "<strong>Your trader name, address and contact email are required before you can publish or sell anything.</strong> Buyers have to be able to see who they are buying from and how to reach you before they order.",
-      "privacyNoteLinked": "These details appear publicly on your product pages for that reason alone. We never use them for marketing, and never sell or share them. The one email we send to your contact address is the link that confirms it. See the <link>Squareshare Privacy Policy</link>."
+      "privacyNoteLinked": "These details appear publicly on your product pages for that reason alone. We never use them for marketing, and never sell or share them. The only message we send to your contact email or phone is the code that confirms it. See the <link>Squareshare Privacy Policy</link>."
     },
     "countryNotEu": "Not in the EU / prefer not to say",
     "vatAdvisory": {
@@ -322,10 +315,7 @@
         "label": "Contact email",
         "tipLabel": "How this differs from your sign-in email",
         "tipBody": "Shown to buyers as a mailto link, and used as the buy button's fallback when a product has no purchase link. Kept separate from your sign-in email on purpose: use whichever address you want buyers writing to. It has to be an address you actually read — placeholders, temp-mail providers and no-reply addresses are refused, and so is a domain that takes no mail.",
-        "placeholder": "e.g. hello@yourshop.example",
-        "statusDirty": "Save to send a confirmation link to the new address. Buyers see it only once it is confirmed.",
-        "statusConfirmed": "Confirmed — buyers can reach you here.",
-        "statusUnconfirmed": "Not confirmed yet. Open the link we emailed to this address."
+        "placeholder": "e.g. hello@yourshop.example"
       },
       "vatId": {
         "label": "VAT ID",
@@ -335,7 +325,10 @@
         "label": "Country"
       },
       "phone": {
-        "label": "Phone"
+        "label": "Phone",
+        "tipLabel": "When buyers see this",
+        "tipBody": "Optional. Buyers only see it once you've confirmed it with a code we text to it, so use a mobile number in the EU, the EEA, Switzerland or the UK.",
+        "placeholder": "e.g. +353 87 123 4567"
       },
       "bio": {
         "label": "Bio",
@@ -345,14 +338,40 @@
         "charactersLeft": "{count, plural, one {# characters left} other {# characters left}}"
       }
     },
-    "resend": {
-      "button": "Resend confirmation email"
-    },
     "success": {
-      "savedCheckEmail": "Saved. Check {email} for a link to confirm the address.",
       "sellerDetailsSaved": "Business & seller details saved.",
-      "alreadyConfirmed": "That address is already confirmed.",
-      "confirmationSent": "Sent. Check {email} for the link."
+      "savedCodeSent": "{which, select, email {Saved. We emailed a code to {email}: enter it below to confirm the address.} phone {Saved. We texted a code to {phone}: enter it below to confirm the number.} other {Saved. We sent codes to {email} and {phone}: enter them below to confirm both.}}"
+    }
+  },
+  "contactVerification": {
+    "heading": "Confirm your contact details",
+    "description": "Buyers only see contact details you've proven are yours. We send a code, and you type it here.",
+    "channel": {
+      "email": "Contact email",
+      "phone": "Phone"
+    },
+    "badge": "Confirmed",
+    "status": {
+      "confirmed": "Confirmed. Buyers can reach you here.",
+      "emailUnconfirmed": "Not confirmed yet. You can't publish until it is.",
+      "phoneUnconfirmed": "Not confirmed yet, so buyers don't see it.",
+      "dirty": "{channel, select, email {You've changed this. Save to send a code to the new address.} other {You've changed this. Save to send a code to the new number.}}",
+      "phoneUnavailable": "Buyers only see a confirmed number, and confirming by text isn't available yet."
+    },
+    "sendCode": "Send code",
+    "resend": "Send a new code",
+    "enterCode": "{channel, select, email {Enter the {length}-digit code we emailed to {target}.} other {Enter the {length}-digit code we texted to {target}.}}",
+    "codeLabel": "Confirmation code",
+    "confirming": "Confirming…",
+    "success": {
+      "sent": "{channel, select, email {We emailed a code to {target}.} other {We texted a code to {target}.}}",
+      "alreadyConfirmed": "That's already confirmed.",
+      "confirmed": "{channel, select, email {Contact email confirmed. Buyers can reach you there.} other {Phone number confirmed. Buyers can see it now.}}"
+    },
+    "message": {
+      "emailSubject": "{code} is your Squareshare confirmation code",
+      "emailBody": "Your code to confirm this address as your Squareshare contact email:\n\n{code}\n\nType it in Settings › Business & seller details. It works once, for {minutes} minutes.\n\nNever share this code. Nobody from Squareshare will ever ask you for it.\n\nIf you didn't ask for this, someone may have typed your address by mistake. Ignore this email: nothing happens unless the code is entered.\n\nSquareshare",
+      "sms": "{code} is your Squareshare code to confirm this number. It expires in {minutes} min. Never share it."
     }
   },
   "shipping": {
@@ -479,7 +498,7 @@
       },
       "emailVerified": {
         "label": "Confirmed contact email",
-        "why": "We send a link to that address and you click it. Nothing else proves a buyer's message would actually reach someone."
+        "why": "We send a code to that address and you type it back here. Nothing else proves a buyer's message would actually reach you."
       }
     }
   },

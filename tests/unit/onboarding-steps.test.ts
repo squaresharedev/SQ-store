@@ -130,14 +130,14 @@ describe("buildSetupSteps", () => {
     expect(step(data, "storefront").action?.href).toBe("/storefront");
   });
 
-  it("asks for the confirmation click, not more typing, when only that is left", () => {
+  it("asks for the confirmation code, not more typing, when only that is left", () => {
     const data = buildSetupSteps({ ...NEW_SELLER, traderMissing: ["emailVerified"] });
     const seller = step(data, "seller-details");
 
     expect(data.seller).toBe("unconfirmed");
     expect(seller.done).toBe(false);
     expect(action(seller.action)).toEqual({
-      href: "/settings/tax#contact-email",
+      href: "/settings/tax#confirm-contact",
       label: "Confirm email",
     });
     expect(text(seller.cta)).toBe("Confirm your email");

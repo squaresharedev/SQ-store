@@ -137,6 +137,17 @@
         "title": "L'approvazione degli accessi è attiva",
         "body": "I dispositivi in cui hai già effettuato l'accesso possono ora approvare nuovi accessi al tuo account. Se non eri tu, cambia subito la password."
       }
+    },
+    "order": {
+      "newToShip": {
+        "title": "Nuovo ordine: {quantity} × {title}",
+        "body": "Spediscilo a {name} a {city}.",
+        "bodyNoAddress": "Non ha ancora un indirizzo di consegna. Scrivi all'acquirente per sapere dove inviarlo."
+      },
+      "newDigital": {
+        "title": "Nuovo ordine: {title}",
+        "body": "È un download, quindi non c'è niente da spedire."
+      }
     }
   }
 }

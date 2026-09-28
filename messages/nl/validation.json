@@ -273,6 +273,16 @@
     "placeholder": "Het contact-e-mailadres lijkt een placeholder. Gebruik een adres dat je ook echt leest.",
     "disposable": "Het contact-e-mailadres staat bij een tijdelijke-e-mailprovider. Gebruik een permanent adres."
   },
+  "phone": {
+    "needsCountryCode": "Voeg de landcode toe aan het telefoonnummer, zoals +353 87 123 4567, of stel je land in.",
+    "invalid": "Dat telefoonnummer bestaat niet. Controleer de cijfers en de landcode.",
+    "unsupportedRegion": "We kunnen alleen telefoonnummers bevestigen in de EU, de EER, Zwitserland en het VK.",
+    "notMobile": "Gebruik een mobiel nummer. We bevestigen het per sms, en een vaste lijn kan die niet ontvangen."
+  },
+  "address": {
+    "placeholder": "Het adres lijkt een placeholder. Gebruik het echte postadres van waaruit je handelt.",
+    "incomplete": "Geef je volledige postadres: straat en huisnummer, en dan plaats en postcode, elk op een eigen regel."
+  },
   "uuid": {
     "id": "Dat id is niet geldig.",
     "option": "Die optie is niet geldig.",
@@ -292,10 +302,12 @@
     "domains": "Domeinen moeten kale, kleine letters zijn, zoals jouwsite.com: geen https://, poort, pad of jokerteken."
   },
   "referenceCode": {
-    "vatId": "Een btw-id moet {min} tot {max} letters, cijfers, spaties, punten of streepjes bevatten."
+    "vatId": "Een btw-id moet {min} tot {max} letters, cijfers, spaties, punten of streepjes bevatten.",
+    "trackingNumber": "Een trackingnummer is {min} tot {max} letters, cijfers, spaties, punten of streepjes."
   },
   "oneTimeCode": {
-    "authenticator": "De code bestaat uit de 6 cijfers die je authenticator-app toont."
+    "authenticator": "De code bestaat uit de 6 cijfers die je authenticator-app toont.",
+    "contact": "De code bestaat uit de {length} cijfers die we je hebben gestuurd."
   },
   "hexColor": {
     "colors": "Kleuren moeten 6-cijferige hexcodes zijn, zoals #a855f7.",

@@ -5,7 +5,7 @@ import type { MessageKey } from "@/i18n/types";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { ArrowLeft, ArrowRight, MailCheck } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { SaveButton } from "@/components/ui/SaveButton";
@@ -20,15 +20,12 @@ import {
   iconNudgeRightClass,
   infoTextClass,
 } from "@/components/ui/control-styles";
-import { iconTileClass } from "@/components/ui/surface-styles";
 import { STEP_SWAP } from "@/components/ui/motion-tokens";
 import { TermsSummary } from "@/components/legal/TermsSummary";
+import { ContactVerification } from "@/components/settings/ContactVerification";
 import type { ActionState } from "@/lib/errors";
-import {
-  acceptLegal,
-  resendSellerEmailVerification,
-  saveTaxInfo,
-} from "@/lib/settings/actions";
+import { acceptLegal, saveTaxInfo } from "@/lib/settings/actions";
+import { confirmContactCode, sendContactCode } from "@/lib/contact-verification/actions";
 import { LEGAL_VERSION, SELLER_FIELD_MAX } from "@/lib/settings/constants";
 import {
   TRADER_IDENTITY_FIELDS,
@@ -55,7 +52,7 @@ import { SetupPath, WelcomeHero } from "./WelcomeVisuals";
  *   4. Seller details. The three trader-identity fields the publish gate needs
  *      (lib/settings/trader-identity.ts), asked as an ordinary setup step.
  *      Saved through the SAME action as Settings (saveTaxInfo), so every check
- *      and the confirmation email apply unchanged; the action writes only the
+ *      and the confirmation code apply unchanged; the action writes only the
  *      fields it is sent. Skippable: drafts never need these, and the checklist
  *      keeps the step. Left out when the details are already on file.
  * Every way FORWARD out of the dialog starts the guided tour
@@ -130,7 +127,8 @@ export function WelcomeFlow({
   verificationOn,
   acceptAction = acceptLegal,
   saveAction = saveTaxInfo,
-  resendAction = resendSellerEmailVerification,
+  sendCodeAction = sendContactCode,
+  confirmCodeAction = confirmContactCode,
 }: {
   open: boolean;
   /** Skip everything: "Skip onboarding", the close button, Esc. Must be
@@ -147,14 +145,15 @@ export function WelcomeFlow({
    *  opens, so a save that completes it does not remove the step being shown. */
   includeSellerStep: boolean;
   seller: SellerPrefill;
-  /** The stored contact email is already proven by a clicked link. */
+  /** The stored contact email is already proven with a code. */
   emailVerified: boolean;
-  /** Confirmation links can be sent (lib/settings/seller-email-verification). */
+  /** A code can be emailed from here (lib/contact-verification/availability). */
   verificationOn: boolean;
   /** Injectable for the dev gallery and tests; production uses Settings' own. */
   acceptAction?: FormAction;
   saveAction?: FormAction;
-  resendAction?: FormAction;
+  sendCodeAction?: FormAction;
+  confirmCodeAction?: FormAction;
 }) {
   const t = useTranslations();
   const router = useRouter();
@@ -176,8 +175,16 @@ export function WelcomeFlow({
   const [businessName, setBusinessName] = useState(seller.businessName);
   const [address, setAddress] = useState(seller.address);
   const [email, setEmail] = useState(seller.email);
-  // The address a confirmation link is waiting on, once the details are saved.
-  const [confirming, setConfirming] = useState<string | null>(null);
+  // The address on file when the dialog opened. Frozen, like the steps: the
+  // save refreshes the page, so by the time its result is handled the
+  // `seller` prop already holds the NEW address and could not say whether
+  // it changed.
+  const [emailAtOpen, setEmailAtOpen] = useState(seller.email);
+  // The address waiting to be proven once the details are saved, and whether
+  // the save already sent it a code (it does when the address is new).
+  const [confirming, setConfirming] = useState<{ email: string; codeSent: boolean } | null>(
+    null,
+  );
   // A save that needs no confirmation is the end of the dialog.
   const [finished, setFinished] = useState(false);
 
@@ -186,18 +193,12 @@ export function WelcomeFlow({
     INITIAL,
   );
   const [saveState, saveFormAction, savePending] = useActionState(saveAction, INITIAL);
-  const [resendState, resendFormAction, resendPending] = useActionState(
-    resendAction,
-    INITIAL,
-  );
-  // The outcome of each save or resend, success and failure alike, is a
-  // toast (styles.md §8.12); only the confirmation to act on stays inline.
+  // The outcome of each save, success and failure alike, is a toast
+  // (styles.md §8.12); only the code to act on stays inline.
   useActionStateToast(acceptState);
   useActionStateToast(saveState);
-  useActionStateToast(resendState);
   const acceptResult = useSaveResult(acceptState);
   const saveResult = useSaveResult(saveState);
-  const resendResult = useSaveResult(resendState);
 
   // Reset on every open, adjusted during render like CreateStorefrontWizard:
   // an effect would paint the previous visit's step for a frame first.
@@ -213,6 +214,7 @@ export function WelcomeFlow({
       setBusinessName(seller.businessName);
       setAddress(seller.address);
       setEmail(seller.email);
+      setEmailAtOpen(seller.email);
       setConfirming(null);
       setFinished(false);
     }
@@ -244,22 +246,26 @@ export function WelcomeFlow({
     termsPendingRef.current = termsPending;
   }, [termsPending]);
 
-  // A settled save moves the flow on: to the confirmation panel when a link is
-  // now waiting on that address, otherwise out to the tour. Adjusted during
-  // render against the state object itself, so each save is handled once. The
-  // tour itself starts from an effect below: a parent's callback has no
-  // business running in the middle of this component's render.
+  // A settled save moves the flow on: to the code box when the address still
+  // has to be proven, otherwise out to the tour. Adjusted during render
+  // against the state object itself, so each save is handled once. The tour
+  // itself starts from an effect below: a parent's callback has no business
+  // running in the middle of this component's render.
   const [handledSave, setHandledSave] = useState(saveState);
   if (saveState !== handledSave) {
     setHandledSave(saveState);
     if (saveState.success) {
       const saved = email.trim();
-      const waitingOnLink =
-        verificationOn && saved !== "" && (saved !== seller.email.trim() || !emailVerified);
-      if (waitingOnLink) setConfirming(saved);
+      const changed = saved !== emailAtOpen.trim();
+      const needsProof = verificationOn && saved !== "" && (changed || !emailVerified);
+      if (needsProof) setConfirming({ email: saved, codeSent: changed });
       else setFinished(true);
     }
   }
+
+  // A proven address is the end of the dialog, the same as a save that
+  // needed no proof. Stable, because ContactVerification runs it from an effect.
+  const finish = useCallback(() => setFinished(true), []);
 
   useEffect(() => {
     if (finished) onStartTour();
@@ -467,34 +473,22 @@ export function WelcomeFlow({
             )}
 
             {step === "seller" && confirming && (
-              <div className="space-y-4">
-                <div className="flex gap-3">
-                  <span className={cn(iconTileClass, "size-9 shrink-0")}>
-                    <MailCheck className="size-4" strokeWidth={2} aria-hidden />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="break-words text-sm font-medium text-foreground">
-                      {t("Onboarding.welcome.confirm.check", { email: confirming })}
-                    </p>
-                    <p className="mt-0.5 font-inter text-sm text-muted-foreground">
-                      {t("Onboarding.welcome.confirm.goLive")}
-                    </p>
-                  </div>
-                </div>
-                {/* Its own form, beside the save rather than inside it: a
-                    resend is a different ask from a save, and nested forms
-                    break both. */}
-                <form action={resendFormAction}>
-                  <SaveButton
-                    variant="secondary"
-                    pending={resendPending}
-                    state={resendResult}
-                    pendingLabel={t("Common.actions.sending")}
-                    savedLabel={t("Common.actions.sent")}
-                  >
-                    {t("Onboarding.welcome.confirm.sendNewLink")}
-                  </SaveButton>
-                </form>
+              <div className="space-y-4 pb-1">
+                <p className="font-inter text-sm text-muted-foreground">
+                  {t("Onboarding.welcome.confirm.goLive")}
+                </p>
+                {/* The same control as Settings, so the code typed here is
+                    checked, budgeted and worded exactly as it is there. */}
+                <ContactVerification
+                  channel="email"
+                  target={confirming.email}
+                  verified={false}
+                  available={verificationOn}
+                  codePending={confirming.codeSent}
+                  sendAction={sendCodeAction}
+                  confirmAction={confirmCodeAction}
+                  onConfirmed={finish}
+                />
               </div>
             )}
           </motion.div>

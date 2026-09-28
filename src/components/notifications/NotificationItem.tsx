@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { transitionClass } from "@/components/ui/control-styles";
-import { TYPE_DOT, TYPE_LABEL, formatRelativeTime } from "@/lib/notifications/presentation";
+import { iconTileClass } from "@/components/ui/surface-styles";
+import { TYPE_ICON, TYPE_LABEL, formatRelativeTime } from "@/lib/notifications/presentation";
 import { notificationDestination } from "@/lib/notifications/inline-actions";
 import type { Notification } from "@/lib/notifications/types";
 import { NotificationInlineAction } from "./NotificationInlineAction";
@@ -25,14 +26,21 @@ import { useNotificationText } from "./useNotificationText";
  *
  * Title and body are rendered as TEXT only, never as HTML, including when they
  * are resolved from the stored message keys.
+ *
+ * One attention cue per row: a dot beside the time while it is unread. The
+ * category is a monochrome glyph, never a second coloured mark.
  */
 export function NotificationItem({
   notification,
+  compact = false,
   onActivate,
   onActionComplete,
   onNavigate,
 }: {
   notification: Notification;
+  /** The bell's dropdown: the body is clamped to two lines, so one long
+   *  security notice cannot fill the panel. The full text is on /notifications. */
+  compact?: boolean;
   /** Called on click with the id and the destination, if the row has one. */
   onActivate: (id: string, href: string | null) => void;
   /** The row's inline action finished (it is now done, and read). */
@@ -47,6 +55,7 @@ export function NotificationItem({
   const locale = useLocale();
   const time = formatRelativeTime(created_at, locale);
   const href = notificationDestination(type, data);
+  const Icon = TYPE_ICON[type];
 
   function handleLinkClick(event: React.MouseEvent<HTMLAnchorElement>) {
     onActivate(id, href);
@@ -68,7 +77,7 @@ export function NotificationItem({
   }
 
   const rowClass = cn(
-    "flex w-full items-start gap-3 px-3 py-3 text-left focus-visible:outline-none",
+    "flex w-full items-start gap-3 px-4 py-3 text-left focus-visible:outline-none",
     // Stretched over the whole row (the action strip included), so any click
     // on the row that is not on the action button opens it. The focus ring is
     // drawn on the same layer, so it frames the whole row too.
@@ -78,45 +87,47 @@ export function NotificationItem({
 
   const content = (
     <>
-      {/* Brand mark as the notification icon; the type colour rides on a dot
-          in its corner so the category cue survives. */}
-      <span aria-hidden className="relative mt-0.5 size-8 shrink-0">
-        {/* eslint-disable-next-line @next/next/no-img-element -- static public asset; next/image adds no value here. */}
-        <img
-          src="/img/logo.png"
-          alt=""
-          className="size-8 rounded-md border border-border bg-white object-contain"
-        />
-        <span
-          className={cn(
-            "absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full ring-2 ring-background",
-            TYPE_DOT[type],
-          )}
-        />
+      <span aria-hidden className={cn(iconTileClass, "mt-0.5 size-8 text-muted-foreground")}>
+        <Icon className="size-4" strokeWidth={2} />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="flex items-baseline justify-between gap-2">
-          <span className="truncate text-sm font-medium text-foreground">
+        <span className="flex items-baseline justify-between gap-3">
+          <span className="min-w-0 text-pretty break-words text-sm font-medium text-foreground">
             {title}
           </span>
-          <time
-            dateTime={created_at}
-            suppressHydrationWarning
-            className="shrink-0 font-inter text-xs text-muted-foreground"
-          >
-            {typeof time === "string" ? time : t(time.key, time.values)}
-          </time>
+          {/* The unread dot sits right after the time. Its slot is always
+              reserved (empty when read), so times line up across rows. */}
+          <span className="flex shrink-0 items-center gap-1.5">
+            <time
+              dateTime={created_at}
+              suppressHydrationWarning
+              className="font-inter text-xs text-muted-foreground"
+            >
+              {typeof time === "string" ? time : t(time.key, time.values)}
+            </time>
+            <span className="size-2 shrink-0">
+              {!read && (
+                <span
+                  role="img"
+                  aria-label={t("Notifications.item.unread")}
+                  className="block size-2 rounded-full bg-foreground"
+                />
+              )}
+            </span>
+          </span>
         </span>
         {body && (
-          <span className="mt-0.5 block font-inter text-sm text-muted-foreground">
+          <span
+            className={cn(
+              "mt-0.5 font-inter text-sm text-muted-foreground",
+              compact ? "line-clamp-2" : "block",
+            )}
+          >
             {body}
           </span>
         )}
         <span className="sr-only">{t(TYPE_LABEL[type])}</span>
       </span>
-      {!read && (
-        <span aria-label={t("Notifications.item.unread")} className="mt-1.5 size-2 shrink-0 rounded-full bg-foreground" />
-      )}
     </>
   );
 
@@ -124,12 +135,7 @@ export function NotificationItem({
     <div
       data-notification-id={id}
       data-notification-type={type}
-      className={cn(
-        "relative",
-        transitionClass,
-        "hover:bg-accent",
-        !read && "bg-accent/40",
-      )}
+      className={cn("relative", transitionClass, "hover:bg-accent")}
     >
       {href ? (
         <a href={href} onClick={handleLinkClick} className={rowClass}>
@@ -141,10 +147,10 @@ export function NotificationItem({
         </button>
       )}
       {action && (
-        // Indented to the text column (icon 2rem + gap 0.75rem + gutter
-        // 0.75rem). pointer-events-none on the strip itself, so a click beside
-        // the button still falls through to the row link under it.
-        <div className="pointer-events-none relative z-10 -mt-1 flex flex-wrap items-center gap-2 pb-3 pl-14 pr-3">
+        // Indented to the text column (gutter 1rem + icon 2rem + gap 0.75rem).
+        // pointer-events-none on the strip itself, so a click beside the
+        // button still falls through to the row link under it.
+        <div className="pointer-events-none relative z-10 -mt-1 flex flex-wrap items-center gap-2 pb-3 pl-15 pr-4">
           <NotificationInlineAction
             notificationId={id}
             action={action}

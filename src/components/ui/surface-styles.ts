@@ -53,6 +53,15 @@ export const iconTileClass =
 export const badgeClass =
   "rounded-full bg-secondary px-2 py-0.5 font-inter text-xs font-medium";
 
+/**
+ * A count that is asking for work (orders waiting to ship): an ink pill, the
+ * same ink as the "To ship" chip, so the number on the nav rail and on the
+ * Orders tab read as the same thing. Pair it with a screen-reader sentence;
+ * the digit alone says nothing about what it counts.
+ */
+export const attentionCountClass =
+  "inline-flex min-w-5 items-center justify-center rounded-full bg-foreground px-1.5 font-inter text-xs font-medium leading-5 tabular-nums text-background";
+
 /** Dashboard page column: centred, capped, with the page gutters. */
 export const pageShellClass = "mx-auto max-w-7xl px-6 py-8";
 

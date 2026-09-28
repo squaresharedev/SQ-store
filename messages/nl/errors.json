@@ -48,13 +48,18 @@
     "editThisStorefront": {
       "withRole": "Met jouw rol als {role, select, owner {Eigenaar} editor {Bewerker} viewer {Lezer} other {{role}}} kun je deze etalage in deze winkel niet bewerken.",
       "noRole": "Je hebt geen toestemming om deze etalage in deze winkel te bewerken."
+    },
+    "fulfilOrders": {
+      "withRole": "Je rol als {role, select, owner {eigenaar} editor {bewerker} viewer {lezer} other {{role}}} kan bestellingen niet als verzonden markeren in deze winkel.",
+      "noRole": "Je hebt geen toestemming om bestellingen als verzonden te markeren in deze winkel."
     }
   },
   "notFound": {
     "fix": "Het is mogelijk verwijderd, of je bent misschien van winkel gewisseld. Vernieuw de pagina om de huidige gegevens te laden.",
     "product": "Dat product kon niet worden gevonden.",
     "storefront": "Die etalage kon niet worden gevonden.",
-    "item": "Dat item is niet gevonden."
+    "item": "Dat item is niet gevonden.",
+    "order": "Die bestelling kon niet worden gevonden."
   },
   "rateLimited": {
     "fix": "Wacht een paar minuten en probeer het opnieuw. Als er niets op de achtergrond opnieuw wordt geprobeerd, laad de pagina dan eerst opnieuw.",
@@ -70,7 +75,8 @@
     "updateStock": "Te veel pogingen om de voorraad bij te werken in korte tijd.",
     "readProductPageSettings": "Te veel pogingen om productpagina-instellingen te lezen in korte tijd.",
     "requestReview": "Je hebt in korte tijd te vaak om een beoordeling gevraagd.",
-    "fileAppeal": "Te veel pogingen om een bezwaar in korte tijd in te dienen."
+    "fileAppeal": "Te veel pogingen om een bezwaar in korte tijd in te dienen.",
+    "fulfilOrders": "Te veel pogingen om bestellingen als verzonden te markeren in korte tijd."
   },
   "serverError": {
     "fix": "Dit is meestal tijdelijk. Wacht even en probeer het opnieuw; als het blijft mislukken, vernieuw dan de pagina.",
@@ -97,7 +103,8 @@
     "loadProductPageSettings": "Je productpagina-instellingen konden niet worden geladen door een probleem aan onze kant.",
     "saveProductPageSettings": "Je productpagina-instellingen konden niet worden opgeslagen door een probleem aan onze kant.",
     "sendForReview": "Dit kon niet ter beoordeling worden verstuurd vanwege een probleem aan onze kant.",
-    "fileAppeal": "Je bezwaar kon niet worden verstuurd vanwege een probleem aan onze kant."
+    "fileAppeal": "Je bezwaar kon niet worden verstuurd vanwege een probleem aan onze kant.",
+    "markOrderShipped": "De bestelling kon niet als verzonden worden gemarkeerd door een probleem aan onze kant."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Dit product is verwijderd, niet gepauzeerd.} storefront {Deze etalage is verwijderd, niet gepauzeerd.} other {Dit item is verwijderd, niet gepauzeerd.}}",
@@ -112,8 +119,8 @@
     "action": "Verkopersgegevens toevoegen",
     "fix": {
       "add": "{fields, select, businessName {Voeg je handelsnaam toe in Instellingen › Bedrijfs- en verkopersgegevens en publiceer dan.} address {Voeg je vestigingsadres toe in Instellingen › Bedrijfs- en verkopersgegevens en publiceer dan.} email {Voeg je contact-e-mailadres toe in Instellingen › Bedrijfs- en verkopersgegevens en publiceer dan.} businessName_address {Voeg je handelsnaam en vestigingsadres toe in Instellingen › Bedrijfs- en verkopersgegevens en publiceer dan.} businessName_email {Voeg je handelsnaam en contact-e-mailadres toe in Instellingen › Bedrijfs- en verkopersgegevens en publiceer dan.} address_email {Voeg je vestigingsadres en contact-e-mailadres toe in Instellingen › Bedrijfs- en verkopersgegevens en publiceer dan.} other {Voeg je handelsnaam, vestigingsadres en contact-e-mailadres toe in Instellingen › Bedrijfs- en verkopersgegevens en publiceer dan.}}",
-      "addAndConfirm": "{fields, select, businessName {Voeg je handelsnaam toe in Instellingen › Bedrijfs- en verkopersgegevens, en bevestig je contact-e-mailadres via de link die we je hebben gestuurd.} address {Voeg je vestigingsadres toe in Instellingen › Bedrijfs- en verkopersgegevens, en bevestig je contact-e-mailadres via de link die we je hebben gestuurd.} email {Voeg je contact-e-mailadres toe in Instellingen › Bedrijfs- en verkopersgegevens, en bevestig je contact-e-mailadres via de link die we je hebben gestuurd.} businessName_address {Voeg je handelsnaam en vestigingsadres toe in Instellingen › Bedrijfs- en verkopersgegevens, en bevestig je contact-e-mailadres via de link die we je hebben gestuurd.} businessName_email {Voeg je handelsnaam en contact-e-mailadres toe in Instellingen › Bedrijfs- en verkopersgegevens, en bevestig je contact-e-mailadres via de link die we je hebben gestuurd.} address_email {Voeg je vestigingsadres en contact-e-mailadres toe in Instellingen › Bedrijfs- en verkopersgegevens, en bevestig je contact-e-mailadres via de link die we je hebben gestuurd.} other {Voeg je handelsnaam, vestigingsadres en contact-e-mailadres toe in Instellingen › Bedrijfs- en verkopersgegevens, en bevestig je contact-e-mailadres via de link die we je hebben gestuurd.}}",
-      "confirm": "Open de bevestigingslink die we naar je contactadres hebben gemaild. Je kunt een nieuwe versturen vanuit Instellingen › Bedrijfs- en verkopersgegevens.",
+      "addAndConfirm": "{fields, select, businessName {Voeg je handelsnaam toe in Instellingen › Bedrijfs- en verkopersgegevens, en bevestig je contact-e-mailadres met de code die we ernaar sturen.} address {Voeg je vestigingsadres toe in Instellingen › Bedrijfs- en verkopersgegevens, en bevestig je contact-e-mailadres met de code die we ernaar sturen.} email {Voeg je contact-e-mailadres toe in Instellingen › Bedrijfs- en verkopersgegevens, en bevestig het met de code die we ernaar sturen.} businessName_address {Voeg je handelsnaam en vestigingsadres toe in Instellingen › Bedrijfs- en verkopersgegevens, en bevestig je contact-e-mailadres met de code die we ernaar sturen.} businessName_email {Voeg je handelsnaam en contact-e-mailadres toe in Instellingen › Bedrijfs- en verkopersgegevens, en bevestig het e-mailadres met de code die we ernaar sturen.} address_email {Voeg je vestigingsadres en contact-e-mailadres toe in Instellingen › Bedrijfs- en verkopersgegevens, en bevestig het e-mailadres met de code die we ernaar sturen.} other {Voeg je handelsnaam, vestigingsadres en contact-e-mailadres toe in Instellingen › Bedrijfs- en verkopersgegevens, en bevestig het e-mailadres met de code die we ernaar sturen.}}",
+      "confirm": "Bevestig je contact-e-mailadres: stuur jezelf een code vanuit Instellingen › Bedrijfs- en verkopersgegevens, en typ hem daar in.",
       "complete": "Rond Instellingen › Bedrijfs- en verkopersgegevens af en publiceer dan."
     }
   },
@@ -182,12 +189,23 @@
     "resetRateLimited": "Te veel herstel-e-mails. Wacht even voordat je het opnieuw probeert.",
     "resetSendRateLimited": "Te veel verzoeken. Wacht een minuut en probeer het opnieuw.",
     "resetFailed": "De herstel-e-mail kon niet worden verzonden. Probeer het opnieuw.",
-    "contactEmailTakesNoMail": "Het domein van dat contact-e-mailadres accepteert geen e-mail. Controleer de spelling, of gebruik een adres dat kopers echt kunnen bereiken.",
-    "savedButConfirmationFailed": "{reason, select, startFailed {Opgeslagen, maar de bevestigingsmail is niet verstuurd. E-mailbevestiging kon niet worden gestart. Probeer hieronder \"Bevestigingsmail opnieuw verzenden\".} unavailable {Opgeslagen, maar de bevestigingsmail is niet verstuurd. E-mailbevestiging is nu niet beschikbaar. Probeer hieronder \"Bevestigingsmail opnieuw verzenden\".} other {Opgeslagen, maar de bevestigingsmail is niet verstuurd. We konden de bevestigingsmail niet versturen. Controleer het adres en probeer het opnieuw. Probeer hieronder \"Bevestigingsmail opnieuw verzenden\".}}",
-    "confirmationFailed": "{reason, select, startFailed {E-mailbevestiging kon niet worden gestart.} unavailable {E-mailbevestiging is nu niet beschikbaar.} other {We konden de bevestigingsmail niet versturen. Controleer het adres en probeer het opnieuw.}}",
-    "confirmationUnavailable": "E-mailbevestiging is nu niet beschikbaar.",
-    "confirmationRateLimited": "Dat zijn veel bevestigingsmails. Wacht even voordat je om een nieuwe vraagt.",
-    "noContactEmail": "Voeg eerst een contact-e-mailadres toe, dan kunnen we het bevestigen."
+    "contactEmailTakesNoMail": "Het domein van dat contact-e-mailadres accepteert geen e-mail. Controleer de spelling, of gebruik een adres dat kopers echt kunnen bereiken."
+  },
+  "contactVerification": {
+    "unavailable": "{channel, select, email {E-mailbevestiging is nu niet beschikbaar.} other {Bevestiging per sms is nu niet beschikbaar.}}",
+    "nothingToConfirm": "{channel, select, email {Voeg eerst een contact-e-mailadres toe en sla het op.} other {Voeg eerst een telefoonnummer toe en sla het op.}}",
+    "phoneNeedsResave": "Sla je telefoonnummer opnieuw op in volledig internationaal formaat, zoals +353 87 123 4567, en vraag dan een code aan.",
+    "cooldown": "Er is net een code verstuurd. Wacht even voor je een nieuwe aanvraagt.",
+    "tooManyCodes": "Dat zijn veel codes. Wacht even voor je een nieuwe aanvraagt.",
+    "sendFailed": "{channel, select, email {We konden de e-mail niet versturen. Controleer het adres en probeer het opnieuw.} other {We konden de sms niet versturen. Controleer het nummer en probeer het opnieuw.}}",
+    "savedButNotSent": "Opgeslagen, maar we konden je bevestigingscode nu niet versturen. Gebruik hieronder \"Code versturen\" om het opnieuw te proberen.",
+    "wrongCode": "Die code klopt niet. Controleer hem en probeer het opnieuw.",
+    "locked": "Te veel foute pogingen voor die code. Stuur jezelf een nieuwe.",
+    "expired": "Die code is verlopen. Stuur jezelf een nieuwe.",
+    "noCode": "Stuur jezelf eerst een code.",
+    "stale": "Je gegevens zijn gewijzigd nadat die code is verstuurd. Stuur jezelf een nieuwe.",
+    "tooManyAttempts": "Te veel pogingen. Wacht even en probeer het dan opnieuw.",
+    "failed": "We konden die code nu niet controleren. Probeer het opnieuw."
   },
   "avatar": {
     "unexpectedData": "Onverwachte formuliergegevens zijn geweigerd.",
@@ -552,5 +570,11 @@
     "rateLimited": "Te veel codes in korte tijd. Wacht een paar minuten en probeer het dan opnieuw.",
     "expired": "Dit inlogverzoek is verlopen of al beantwoord. Toon een nieuwe code op het apparaat waarop je wilt inloggen.",
     "otherAccount": "Dit verzoek is voor een ander Square Share-account dan het account dat hier is ingelogd."
+  },
+  "orders": {
+    "notShippable": {
+      "message": "Deze bestelling kan niet als verzonden worden gemarkeerd.",
+      "fix": "Alleen betaalde bestellingen met iets te verzenden kunnen worden verzonden. Vernieuw de pagina om te zien hoe het staat met deze bestelling."
+    }
   }
 }

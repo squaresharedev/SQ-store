@@ -24,7 +24,10 @@
     "clearFilters": "Filters wissen",
     "title": "Nog geen bestellingen",
     "hint": "De kassa van Square Share is nog niet open. Verkopen via je eigen aankooplink of per e-mail verschijnen hier niet.",
-    "goToProducts": "Naar producten"
+    "goToProducts": "Naar producten",
+    "toShipTitle": "Niets te verzenden",
+    "toShipHint": "Je bent helemaal bij. Betaalde bestellingen die wachten om te worden verstuurd, verschijnen hier, oudste eerst.",
+    "seeAllOrders": "Alle bestellingen bekijken"
   },
   "list": {
     "updating": "Bijwerken…",
@@ -38,7 +41,10 @@
     "channel": "Kanaal",
     "status": "Status",
     "buyer": "Koper",
-    "date": "Datum"
+    "date": "Datum",
+    "shipping": "Verzending",
+    "shipTo": "Verzenden naar",
+    "noAddress": "Geen adres"
   },
   "toolbar": {
     "region": "bestelfilters",
@@ -85,6 +91,39 @@
       "copy": "Bestel-ID kopiëren",
       "copied": "Bestel-ID gekopieerd",
       "failed": "Kopiëren van bestel-ID is mislukt. Selecteer en kopieer het handmatig."
+    },
+    "pack": "Wat te inpakken",
+    "packLine": "{quantity} × {title}",
+    "copyPack": {
+      "copy": "Kopieer wat te inpakken",
+      "copied": "Gekopieerd wat te inpakken",
+      "failed": "Kopiëren van wat te inpakken is mislukt. Selecteer en kopieer het handmatig."
+    },
+    "shipTo": "Verzenden naar",
+    "copyAddress": {
+      "copy": "Adres kopiëren",
+      "copied": "Adres gekopieerd",
+      "failed": "Kopiëren van het adres is mislukt. Selecteer en kopieer het handmatig."
+    },
+    "copyPhone": {
+      "copy": "Telefoonnummer kopiëren",
+      "copied": "Telefoonnummer gekopieerd",
+      "failed": "Kopiëren van het telefoonnummer is mislukt. Selecteer en kopieer het handmatig."
+    },
+    "noAddress": "Er staat geen leveringsadres op deze bestelling. Stuur de koper een e-mail om te vragen waar het naartoe moet.",
+    "shipping": "Verzending",
+    "shippedOn": "Verzonden {date}",
+    "trackingNumber": "Trackingnummer",
+    "copyTracking": {
+      "copy": "Trackingnummer kopiëren",
+      "copied": "Trackingnummer gekopieerd",
+      "failed": "Kopiëren van het trackingnummer is mislukt. Selecteer en kopieer het handmatig."
+    },
+    "nothingToShip": "Niets te verzenden voor deze bestelling.",
+    "shipBlocked": {
+      "pending": "De betaling is nog niet verwerkt. Wacht tot die klaar is voordat je verzendt.",
+      "refunded": "Deze bestelling is terugbetaald, dus er valt niets te verzenden.",
+      "disputed": "Deze betaling is betwist. Los het geschil op voordat je verzendt."
     }
   },
   "actions": {
@@ -104,5 +143,59 @@
   "loading": {
     "title": "Bestellingen",
     "subtitle": "Elke verkoop via je insluiting en de marketplace."
+  },
+  "toShipCount": "{count, plural, one {{count} bestelling te verzenden} other {{count} bestellingen te verzenden}}",
+  "views": {
+    "label": "Welke bestellingen weergeven",
+    "toShip": "Te verzenden",
+    "all": "Alle bestellingen"
+  },
+  "fulfilment": {
+    "unfulfilled": "Te verzenden",
+    "shipped": "Verzonden",
+    "not_required": "Geen verzending"
+  },
+  "ship": {
+    "markShipped": "Markeer als verzonden",
+    "trackingLabel": "Trackingnummer (optioneel)",
+    "trackingPlaceholder": "bijv. RR123456789IE",
+    "tellsBuyer": "We sturen de koper een e-mail dat het onderweg is, met het trackingnummer als je dat invult.",
+    "noBuyerEmail": "Deze bestelling heeft geen e-mailadres van de koper, dus die wordt niet op de hoogte gesteld.",
+    "confirm": "Markeer als verzonden",
+    "shipped": "Gemarkeerd als verzonden. We hebben de koper een e-mail gestuurd.",
+    "shippedNoEmail": "Gemarkeerd als verzonden.",
+    "addTracking": "Trackingnummer toevoegen",
+    "editTracking": "Trackingnummer wijzigen",
+    "saveTracking": "Trackingnummer opslaan",
+    "trackingSaved": "Trackingnummer opgeslagen. We hebben het naar de koper gestuurd.",
+    "trackingSavedNoEmail": "Trackingnummer opgeslagen."
+  },
+  "email": {
+    "fromName": "{store} via Square Share",
+    "signOff": "Square Share",
+    "newOrder": {
+      "subjectShip": "Nieuwe bestelling: verzend {quantity} × {title} naar {city}",
+      "subjectDigital": "Nieuwe bestelling: {title}",
+      "introShip": "Je hebt een nieuwe bestelling om te verzenden.",
+      "introDigital": "Je hebt {title} verkocht. Het is een download, dus er valt niets te verzenden.",
+      "pack": "Wat te inpakken",
+      "shipTo": "Verzenden naar",
+      "phone": "Telefoon: {phone}",
+      "noAddress": "Er staat geen leveringsadres op deze bestelling. Stuur de koper een e-mail om te vragen waar het naartoe moet.",
+      "buyer": "Koper: {email}",
+      "total": "Totaal bestelling: {amount}",
+      "openShip": "Zodra het onderweg is, markeer het dan hier als verzonden en we laten de koper weten: {url}",
+      "openDigital": "Zie de bestelling: {url}"
+    },
+    "shipped": {
+      "subject": "Je bestelling van {store} is onderweg",
+      "subjectTracking": "Trackingnummer voor je bestelling van {store}",
+      "intro": "Goed nieuws: {store} heeft je bestelling verzonden.",
+      "introTracking": "{store} heeft een trackingnummer toegevoegd aan je bestelling.",
+      "tracking": "Trackingnummer: {tracking}",
+      "shipTo": "Het gaat naar:",
+      "questions": "Vragen over je bestelling? Beantwoord deze e-mail om {store} te bereiken.",
+      "footer": "Verstuurd door Square Share namens {store}."
+    }
   }
 }

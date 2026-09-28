@@ -3,14 +3,24 @@ import { getTranslations } from "next-intl/server";
 import { pageShellClass } from "@/components/ui/surface-styles";
 import { cn } from "@/lib/utils";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { DEFAULT_PAGE_SIZE, getOrderById, listOrders } from "@/lib/orders/queries";
+import {
+  DEFAULT_PAGE_SIZE,
+  countOrdersToShip,
+  getOrderById,
+  listOrders,
+} from "@/lib/orders/queries";
+import { ORDER_DETAIL_PARAM, ORDERS_VIEW_PARAM } from "@/lib/orders/paths";
+import { getActiveAccount } from "@/lib/team/account-context";
+import { can } from "@/lib/team/permissions";
 import { OrdersPage } from "@/components/orders/OrdersPage";
 import {
   ORDERS_SEARCH_MAX_LENGTH,
+  ORDERS_VIEWS,
   type OrderChannel,
   type OrderFilters,
   type OrderSort,
   type OrderStatus,
+  type OrdersView,
 } from "@/types/order-view";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -33,6 +43,10 @@ export async function generateMetadata(): Promise<Metadata> {
 // and "take me into this order" — and the caller is the only one who knows
 // which it meant. Unlike `order`, this needs no fetch: the id is only ever
 // compared against the rows already on screen.
+//
+// `?view=to-ship|all` picks the list (see resolveView). With no view named, the
+// page opens on what needs doing: the To ship queue when anything is waiting,
+// the full list when nothing is.
 
 type SearchParams = { [key: string]: string | string[] | undefined };
 
@@ -89,6 +103,26 @@ function parseParams(params: SearchParams): {
   return { filters, sort, page };
 }
 
+/**
+ * Which list to show. A named view wins. Otherwise anything that only means
+ * something in the full list (a filter, a sort, a highlighted search result)
+ * implies it; and with nothing asked for, the page opens on the To ship queue
+ * when there is anything in it. A seller who comes here with parcels to send
+ * lands on them, and one with none lands on their history.
+ */
+function resolveView(
+  params: SearchParams,
+  filters: OrderFilters,
+  toShipCount: number,
+): OrdersView {
+  const named = first(params[ORDERS_VIEW_PARAM]);
+  const view = ORDERS_VIEWS.find((value) => value === named);
+  if (view) return view;
+  const asksForTheLedger =
+    Object.keys(filters).length > 0 || params.sort !== undefined || params.highlight !== undefined;
+  return !asksForTheLedger && toShipCount > 0 ? "to-ship" : "all";
+}
+
 export default async function OrdersRoutePage({
   searchParams,
 }: {
@@ -96,11 +130,14 @@ export default async function OrdersRoutePage({
 }) {
   const params = await searchParams;
   const { filters, sort, page } = parseParams(params);
-  const deepLinkedId = first(params.order);
+  const deepLinkedId = first(params[ORDER_DETAIL_PARAM]);
   const t = await getTranslations("Orders.page");
 
+  const [toShipCount, account] = await Promise.all([countOrdersToShip(), getActiveAccount()]);
+  const view = resolveView(params, filters, toShipCount);
+
   const [data, deepLinked] = await Promise.all([
-    listOrders({ filters, sort, page, pageSize: DEFAULT_PAGE_SIZE }),
+    listOrders({ view, filters, sort, page, pageSize: DEFAULT_PAGE_SIZE }),
     // A stale or foreign id resolves to null: the list still renders, just
     // without a detail panel.
     deepLinkedId ? getOrderById(deepLinkedId) : Promise.resolve(null),
@@ -113,8 +150,11 @@ export default async function OrdersRoutePage({
         subtitle={t("subtitle")}
       />
       <OrdersPage
+        view={view}
+        toShipCount={toShipCount}
+        canFulfil={can(account?.role, "orders.fulfil")}
         data={data}
-        filters={filters}
+        filters={view === "all" ? filters : {}}
         sort={sort}
         deepLinkedOrder={deepLinked}
         highlightId={first(params.highlight) ?? null}

@@ -137,6 +137,17 @@
         "title": "Schvaľovanie prihlásenia je zapnuté",
         "body": "Zariadenia, na ktorých ste prihlásení, môžu teraz schvaľovať nové prihlásenia do vášho účtu. Ak ste to neboli vy, ihneď zmeňte heslo."
       }
+    },
+    "order": {
+      "newToShip": {
+        "title": "Nová objednávka: {quantity} × {title}",
+        "body": "Odošlite to {name} v {city}.",
+        "bodyNoAddress": "Zatiaľ nemá doručovaciu adresu. Pošlite kupujúcemu e-mail a opýtajte sa, kam to má ísť."
+      },
+      "newDigital": {
+        "title": "Nová objednávka: {title}",
+        "body": "Je to stiahnutie, takže nie je nič na odoslanie."
+      }
     }
   }
 }

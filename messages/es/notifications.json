@@ -137,6 +137,17 @@
         "title": "La aprobación de inicio de sesión está activada",
         "body": "Los dispositivos donde tienes sesión iniciada ya pueden aprobar nuevos inicios de sesión en tu cuenta. Si no has sido tú, cambia tu contraseña ahora."
       }
+    },
+    "order": {
+      "newToShip": {
+        "title": "Nuevo pedido: {quantity} × {title}",
+        "body": "Envíalo a {name} en {city}.",
+        "bodyNoAddress": "Aún no tiene dirección de entrega. Escribe al comprador para preguntarle adónde enviarlo."
+      },
+      "newDigital": {
+        "title": "Nuevo pedido: {title}",
+        "body": "Es una descarga, así que no hay nada que enviar."
+      }
     }
   }
 }

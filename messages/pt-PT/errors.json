@@ -48,13 +48,18 @@
     "editThisStorefront": {
       "withRole": "A sua função de {role, select, owner {proprietário} editor {editor} viewer {leitor} other {{role}}} não permite editar esta montra nesta loja.",
       "noRole": "Não tem permissão para editar esta montra nesta loja."
+    },
+    "fulfilOrders": {
+      "withRole": "A sua função de {role, select, owner {proprietário} editor {editor} viewer {leitor} other {{role}}} não permite marcar encomendas como enviadas nesta loja.",
+      "noRole": "Não tem permissão para marcar encomendas como enviadas nesta loja."
     }
   },
   "notFound": {
     "fix": "Pode ter sido eliminado, ou pode ter mudado de loja. Atualize a página para carregar os dados atuais.",
     "product": "Esse produto não foi encontrado.",
     "storefront": "Essa montra não foi encontrada.",
-    "item": "Não foi possível encontrar esse item."
+    "item": "Não foi possível encontrar esse item.",
+    "order": "Essa encomenda não foi encontrada."
   },
   "rateLimited": {
     "fix": "Aguarde alguns minutos e tente novamente. Se nada estiver a repetir a tentativa em segundo plano, recarregue primeiro a página.",
@@ -70,7 +75,8 @@
     "updateStock": "Demasiadas tentativas de atualizar o stock num curto espaço de tempo.",
     "readProductPageSettings": "Demasiadas tentativas de ler as definições da página de produto num curto espaço de tempo.",
     "requestReview": "Demasiadas tentativas de pedir uma revisão num curto espaço de tempo.",
-    "fileAppeal": "Demasiadas tentativas de enviar um recurso num curto espaço de tempo."
+    "fileAppeal": "Demasiadas tentativas de enviar um recurso num curto espaço de tempo.",
+    "fulfilOrders": "Demasiadas tentativas de marcar encomendas como enviadas num curto espaço de tempo."
   },
   "serverError": {
     "fix": "Isto costuma ser temporário. Aguarde um momento e tente novamente; se continuar a falhar, atualize a página.",
@@ -97,7 +103,8 @@
     "loadProductPageSettings": "Não foi possível carregar as definições da página de produto devido a um problema do nosso lado.",
     "saveProductPageSettings": "Não foi possível guardar as definições da página de produto devido a um problema do nosso lado.",
     "sendForReview": "Não foi possível enviar isto para revisão devido a um problema do nosso lado.",
-    "fileAppeal": "Não foi possível enviar o seu recurso devido a um problema do nosso lado."
+    "fileAppeal": "Não foi possível enviar o seu recurso devido a um problema do nosso lado.",
+    "markOrderShipped": "Não foi possível marcar a encomenda como enviada devido a um problema do nosso lado."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Este produto foi removido, não pausado.} storefront {Esta montra foi removida, não pausada.} other {Este item foi removido, não pausado.}}",
@@ -112,8 +119,8 @@
     "action": "Adicionar dados de vendedor",
     "fix": {
       "add": "{fields, select, businessName {Adicione o seu nome ou denominação social em Definições › Empresa e dados do vendedor e depois publique.} address {Adicione a sua morada comercial em Definições › Empresa e dados do vendedor e depois publique.} email {Adicione o seu e-mail de contacto em Definições › Empresa e dados do vendedor e depois publique.} businessName_address {Adicione o seu nome ou denominação social e a morada comercial em Definições › Empresa e dados do vendedor e depois publique.} businessName_email {Adicione o seu nome ou denominação social e o e-mail de contacto em Definições › Empresa e dados do vendedor e depois publique.} address_email {Adicione a sua morada comercial e o e-mail de contacto em Definições › Empresa e dados do vendedor e depois publique.} other {Adicione o seu nome ou denominação social, morada comercial e e-mail de contacto em Definições › Empresa e dados do vendedor e depois publique.}}",
-      "addAndConfirm": "{fields, select, businessName {Adicione o seu nome ou denominação social em Definições › Empresa e dados do vendedor, e confirme o seu e-mail de contacto através do link que lhe enviámos.} address {Adicione a sua morada comercial em Definições › Empresa e dados do vendedor, e confirme o seu e-mail de contacto através do link que lhe enviámos.} email {Adicione o seu e-mail de contacto em Definições › Empresa e dados do vendedor, e confirme o seu e-mail de contacto através do link que lhe enviámos.} businessName_address {Adicione o seu nome ou denominação social e a morada comercial em Definições › Empresa e dados do vendedor, e confirme o seu e-mail de contacto através do link que lhe enviámos.} businessName_email {Adicione o seu nome ou denominação social e o e-mail de contacto em Definições › Empresa e dados do vendedor, e confirme o seu e-mail de contacto através do link que lhe enviámos.} address_email {Adicione a sua morada comercial e o e-mail de contacto em Definições › Empresa e dados do vendedor, e confirme o seu e-mail de contacto através do link que lhe enviámos.} other {Adicione o seu nome ou denominação social, morada comercial e e-mail de contacto em Definições › Empresa e dados do vendedor, e confirme o seu e-mail de contacto através do link que lhe enviámos.}}",
-      "confirm": "Abra o link de confirmação que enviámos para o seu endereço de contacto. Pode enviar um novo a partir de Definições › Empresa e dados do vendedor.",
+      "addAndConfirm": "{fields, select, businessName {Adicione o seu nome ou denominação social em Definições › Empresa e dados do vendedor, e confirme o seu e-mail de contacto com o código que lhe enviámos.} address {Adicione a sua morada comercial em Definições › Empresa e dados do vendedor, e confirme o seu e-mail de contacto com o código que lhe enviámos.} email {Adicione o seu e-mail de contacto em Definições › Empresa e dados do vendedor, e confirme-o com o código que lhe enviámos.} businessName_address {Adicione o seu nome ou denominação social e a morada comercial em Definições › Empresa e dados do vendedor, e confirme o seu e-mail de contacto com o código que lhe enviámos.} businessName_email {Adicione o seu nome ou denominação social e o e-mail de contacto em Definições › Empresa e dados do vendedor, e confirme o e-mail com o código que lhe enviámos.} address_email {Adicione a sua morada comercial e o e-mail de contacto em Definições › Empresa e dados do vendedor, e confirme o e-mail com o código que lhe enviámos.} other {Adicione o seu nome ou denominação social, morada comercial e e-mail de contacto em Definições › Empresa e dados do vendedor, e confirme o e-mail com o código que lhe enviámos.}}",
+      "confirm": "Confirme o seu e-mail de contacto: envie a si próprio um código a partir de Definições › Empresa e dados do vendedor e introduza-o lá.",
       "complete": "Complete Definições › Empresa e dados do vendedor e depois publique."
     }
   },
@@ -182,12 +189,23 @@
     "resetRateLimited": "Demasiados e-mails de redefinição. Aguarde um pouco antes de tentar novamente.",
     "resetSendRateLimited": "Demasiados pedidos. Aguarde um minuto e tente novamente.",
     "resetFailed": "Não foi possível enviar o e-mail de redefinição. Tente novamente.",
-    "contactEmailTakesNoMail": "O domínio desse e-mail de contacto não aceita correio. Verifique a ortografia, ou utilize um endereço que os compradores consigam realmente contactar.",
-    "savedButConfirmationFailed": "{reason, select, startFailed {Guardado, mas o e-mail de confirmação não foi enviado. Não foi possível iniciar a confirmação por e-mail. Experimente «Reenviar e-mail de confirmação» abaixo.} unavailable {Guardado, mas o e-mail de confirmação não foi enviado. A confirmação por e-mail não está disponível neste momento. Experimente «Reenviar e-mail de confirmação» abaixo.} other {Guardado, mas o e-mail de confirmação não foi enviado. Não foi possível enviar o e-mail de confirmação. Verifique o endereço e tente novamente. Experimente «Reenviar e-mail de confirmação» abaixo.}}",
-    "confirmationFailed": "{reason, select, startFailed {Não foi possível iniciar a confirmação por e-mail.} unavailable {A confirmação por e-mail não está disponível neste momento.} other {Não foi possível enviar o e-mail de confirmação. Verifique o endereço e tente novamente.}}",
-    "confirmationUnavailable": "A confirmação por e-mail não está disponível neste momento.",
-    "confirmationRateLimited": "São muitos e-mails de confirmação. Aguarde um pouco antes de pedir outro.",
-    "noContactEmail": "Adicione primeiro um e-mail de contacto para o podermos confirmar."
+    "contactEmailTakesNoMail": "O domínio desse e-mail de contacto não aceita correio. Verifique a ortografia, ou utilize um endereço que os compradores consigam realmente contactar."
+  },
+  "contactVerification": {
+    "unavailable": "{channel, select, email {A confirmação por e-mail não está disponível neste momento.} other {A confirmação por mensagem de texto não está disponível neste momento.}}",
+    "nothingToConfirm": "{channel, select, email {Adicione primeiro um e-mail de contacto e guarde.} other {Adicione primeiro um número de telefone e guarde.}}",
+    "phoneNeedsResave": "Guarde novamente o seu número de telefone no formato internacional completo, como +353 87 123 4567, e depois peça um código.",
+    "cooldown": "Acabou de ser enviado um código. Aguarde um minuto antes de pedir outro.",
+    "tooManyCodes": "Já foram enviados muitos códigos. Aguarde um pouco antes de pedir outro.",
+    "sendFailed": "{channel, select, email {Não foi possível enviar o e-mail. Verifique o endereço e tente novamente.} other {Não foi possível enviar a mensagem. Verifique o número e tente novamente.}}",
+    "savedButNotSent": "Guardado, mas não foi possível enviar o seu código de confirmação neste momento. Utilize «Enviar código» abaixo para tentar novamente.",
+    "wrongCode": "Esse código não está correto. Verifique-o e tente novamente.",
+    "locked": "Demasiadas tentativas erradas para esse código. Envie a si próprio um novo.",
+    "expired": "Esse código expirou. Envie a si próprio um novo.",
+    "noCode": "Envie primeiro um código a si próprio.",
+    "stale": "Os seus dados foram alterados depois de esse código ter sido enviado. Envie a si próprio um novo.",
+    "tooManyAttempts": "Demasiadas tentativas. Aguarde um pouco e tente novamente.",
+    "failed": "Não foi possível verificar esse código neste momento. Tente novamente."
   },
   "avatar": {
     "unexpectedData": "Os dados inesperados do formulário foram rejeitados.",
@@ -552,5 +570,11 @@
     "rateLimited": "Demasiados códigos num curto espaço de tempo. Aguarde alguns minutos e tente novamente.",
     "expired": "Este pedido de início de sessão expirou ou já foi respondido. Mostre um novo código no dispositivo onde está a iniciar sessão.",
     "otherAccount": "Este pedido é para uma conta Square Share diferente da que tem sessão iniciada aqui."
+  },
+  "orders": {
+    "notShippable": {
+      "message": "Esta encomenda não pode ser marcada como enviada.",
+      "fix": "Só as encomendas pagas com algo para enviar podem ser marcadas como enviadas. Atualize a página para ver o estado desta encomenda."
+    }
   }
 }

@@ -39,9 +39,10 @@ database-level enforcement.
    `approvalsEnabled` cannot read the opt-out table, so the challenge never
    offers approval and Settings hides the row. **Applied 2026-09-27** through
    the Management API (no schema_migrations version, so nothing in `TRIAGE`).
-5. **Security emails** go through Cloudflare Email Service (`lib/email/send.ts`),
-   which is off until the `EMAIL` binding and `TRANSACTIONAL_EMAIL_ENABLED` are
-   set. Until then, 2FA alerts reach only the in-app bell and the Security
+5. **Security emails** go through Brevo's transactional API (`lib/email/send.ts`),
+   which is off until `TRANSACTIONAL_EMAIL_FROM`, `TRANSACTIONAL_EMAIL_ENABLED`
+   and the `BREVO_API_KEY` secret are set (see wrangler.jsonc). Until then,
+   2FA alerts reach only the in-app bell and the Security
    activity log. Turning email on is strongly recommended: an alert that an
    intruder can dismiss inside the dashboard is not much of an alert.
 

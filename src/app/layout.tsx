@@ -5,6 +5,8 @@ import "./globals.css";
 import { ScopedIntlProvider } from "@/i18n/ScopedIntlProvider";
 import { LocaleSwitchProvider } from "@/i18n/LocaleSwitchProvider";
 import { ToastProvider } from "@/components/ui/Toast";
+import { ServiceWorkerRegistrar } from "@/components/pwa/ServiceWorkerRegistrar";
+import { BRAND_NAME, BRAND_SURFACE, BRAND_TITLE_TEMPLATE } from "@/lib/brand";
 import { THEME_BOOTSTRAP } from "@/lib/theme-mode";
 import { cn } from "@/lib/utils";
 
@@ -70,15 +72,25 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: {
       default: t("title"),
-      template: "%s | Square Share",
+      template: BRAND_TITLE_TEMPLATE,
     },
     description: t("description"),
     robots: { index: false, follow: false }, // dashboard is private
+    // Installable as an app. The manifest (app/manifest.ts) covers Chrome,
+    // Edge and Android; iOS ignores it and reads these instead, with the
+    // touch icon coming from app/apple-icon.png. Buyer pages switch both off
+    // in (public)/layout.tsx.
+    applicationName: BRAND_NAME,
+    appleWebApp: {
+      capable: true,
+      title: BRAND_NAME,
+      statusBarStyle: "default",
+    },
   };
 }
 
 export const viewport: Viewport = {
-  themeColor: "#ffffff",
+  themeColor: BRAND_SURFACE,
 };
 
 export default async function RootLayout({
@@ -153,6 +165,7 @@ export default async function RootLayout({
           <ToastProvider>
             <LocaleSwitchProvider>{children}</LocaleSwitchProvider>
           </ToastProvider>
+          <ServiceWorkerRegistrar />
         </ScopedIntlProvider>
       </body>
     </html>

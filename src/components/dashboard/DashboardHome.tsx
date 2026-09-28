@@ -29,10 +29,16 @@ export function DashboardHome({
   onboarding,
   twoFactorEnabled = true,
   recentOrderDetails = [],
+  toShipCount = 0,
+  canFulfil = false,
 }: {
   orders: DashboardOrdersData;
   /** Full detail for the Recent orders rows, so each opens in place. */
   recentOrderDetails?: OrderView[];
+  /** Paid orders waiting to be shipped; above zero adds the row that says so. */
+  toShipCount?: number;
+  /** Whether the viewer may mark orders shipped from an opened order. */
+  canFulfil?: boolean;
   products: ProductsSummary;
   storefronts: StorefrontAttentionInfo;
   /** Null when the profile read failed softly; profile attention rows are hidden. */
@@ -112,12 +118,14 @@ export function DashboardHome({
               stripeConnected,
               setupVisible,
               twoFactorEnabled,
+              toShipCount,
             })}
           />
           <RecentOrders
             orders={orders.recentOrders}
             details={recentOrderDetails}
             id={RECENT_ORDERS_ID}
+            canFulfil={canFulfil}
           />
         </div>
         </div>

@@ -9,7 +9,7 @@
  * "Skip onboarding" never doing so; the seller step posting EXACTLY the three
  * trader-identity fields (the save action writes only what it is sent, so a
  * stray fourth key here would blank a column the step never showed); and the
- * confirmation panel when a link is on its way.
+ * code box when the address still has to be proven.
  */
 
 import type { ComponentProps } from "react";
@@ -52,7 +52,10 @@ vi.mock("next/navigation", () => ({
 vi.mock("@/lib/settings/actions", () => ({
   acceptLegal: vi.fn(),
   saveTaxInfo: vi.fn(),
-  resendSellerEmailVerification: vi.fn(),
+}));
+vi.mock("@/lib/contact-verification/actions", () => ({
+  sendContactCode: vi.fn(),
+  confirmContactCode: vi.fn(),
 }));
 
 // Steps swap instantly under reduced motion, so no test waits on an exit
@@ -82,8 +85,14 @@ function renderFlow(overrides: Partial<Props> = {}) {
     verificationOn: false,
     acceptAction: vi.fn(async () => ({ success: msg("Settings.legal.success.termsAgreed") })),
     saveAction: vi.fn(async () => ({ success: msg("Settings.tax.success.sellerDetailsSaved") })),
-    resendAction: vi.fn(async () => ({
-      success: msg("Settings.tax.success.confirmationSent", { email: "shop@example.com" }),
+    sendCodeAction: vi.fn(async () => ({
+      success: msg("Settings.contactVerification.success.sent", {
+        channel: "email",
+        target: "hello@studio.eu",
+      }),
+    })),
+    confirmCodeAction: vi.fn(async () => ({
+      success: msg("Settings.contactVerification.success.confirmed", { channel: "email" }),
     })),
     ...overrides,
   };
@@ -234,7 +243,7 @@ describe("WelcomeFlow", () => {
     await waitFor(() => expect(mockRefresh).toHaveBeenCalled());
   });
 
-  it("says where the confirmation link went, with a resend, before the tour", async () => {
+  it("asks for the code the save sent, and a right one ends the dialog", async () => {
     const user = userEvent.setup();
     const props = renderFlow({ verificationOn: true });
     await toSellerStep(user);
@@ -243,12 +252,69 @@ describe("WelcomeFlow", () => {
 
     const dialog = screen.getByRole("dialog", { name: "Add your seller details" });
     expect(
-      await within(dialog).findByText("Check hello@studio.eu for a confirmation link."),
+      await within(dialog).findByText("Enter the 8-digit code we emailed to hello@studio.eu."),
     ).toBeInTheDocument();
-    // Waiting on the link is not the end of the dialog.
+    // Waiting on the code is not the end of the dialog.
     expect(props.onStartTour).not.toHaveBeenCalled();
-    await user.click(within(dialog).getByRole("button", { name: "Send a new link" }));
-    await waitFor(() => expect(props.resendAction).toHaveBeenCalledTimes(1));
+
+    await user.type(within(dialog).getByLabelText("Confirmation code"), "12345678");
+    await waitFor(() => expect(props.confirmCodeAction).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(props.onStartTour).toHaveBeenCalledTimes(1));
+  });
+
+  it("still asks for the code when the page refreshes with the new address first", async () => {
+    // A save refreshes the page, so the server's new `seller` prop (already
+    // holding the address just saved) can land before the save result is
+    // handled. "Did the address change?" must not be asked of that prop.
+    const user = userEvent.setup();
+    const base = {
+      open: true,
+      onClose: vi.fn(),
+      onStartTour: vi.fn(),
+      includeTermsStep: false,
+      includeSellerStep: true,
+      seller: { businessName: "", address: "", email: "" },
+      emailVerified: false,
+      verificationOn: true,
+      sendCodeAction: vi.fn(),
+      confirmCodeAction: vi.fn(),
+    } satisfies Partial<Props>;
+    let refreshWithSaved = () => {};
+    const saveAction = vi.fn(async () => {
+      refreshWithSaved();
+      return { success: msg("Settings.tax.success.sellerDetailsSaved") };
+    });
+    const view = render(<WelcomeFlow {...base} saveAction={saveAction} />);
+    refreshWithSaved = () =>
+      view.rerender(
+        <WelcomeFlow
+          {...base}
+          saveAction={saveAction}
+          seller={{ businessName: "Welcome Studio", address: "12 Market Street", email: "hello@studio.eu" }}
+        />,
+      );
+
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    await user.click(screen.getByRole("button", { name: "Get started" }));
+    await fillSellerDetails(user);
+    await user.click(screen.getByRole("button", { name: "Save and continue" }));
+
+    const dialog = screen.getByRole("dialog", { name: "Add your seller details" });
+    expect(
+      await within(dialog).findByText("Enter the 8-digit code we emailed to hello@studio.eu."),
+    ).toBeInTheDocument();
+  });
+
+  it("lets a seller carry on without the code, with a new one a click away", async () => {
+    const user = userEvent.setup();
+    const props = renderFlow({ verificationOn: true });
+    await toSellerStep(user);
+    await fillSellerDetails(user);
+    await user.click(screen.getByRole("button", { name: "Save and continue" }));
+
+    const dialog = screen.getByRole("dialog", { name: "Add your seller details" });
+    await user.click(await within(dialog).findByRole("button", { name: "Send a new code" }));
+    await waitFor(() => expect(props.sendCodeAction).toHaveBeenCalledTimes(1));
 
     await user.click(within(dialog).getByRole("button", { name: "Continue" }));
     expect(props.onStartTour).toHaveBeenCalledTimes(1);

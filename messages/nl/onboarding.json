@@ -4,7 +4,7 @@
       "label": "Voeg je verkopersgegevens toe",
       "detail": "Je handelsnaam, vestigingsadres en contact-e-mailadres staan op elke productpagina.",
       "detailDone": "Kopers kunnen zien van wie ze kopen.",
-      "detailUnconfirmed": "Open de link die we je hebben gemaild om je contact-e-mailadres te bevestigen.",
+      "detailUnconfirmed": "Bevestig je contact-e-mailadres met de code die we ernaar sturen.",
       "action": "Gegevens toevoegen",
       "actionUnconfirmed": "E-mail bevestigen",
       "cta": "Voeg je verkopersgegevens toe",
@@ -112,9 +112,7 @@
       "emailHelp": "Waar kopers je kunnen bereiken. Dit mag afwijken van je inlog-e-mailadres."
     },
     "confirm": {
-      "check": "Controleer {email} voor een bevestigingslink.",
-      "goLive": "Je productpagina's gaan online zodra je de link opent.",
-      "sendNewLink": "Nieuwe link verzenden"
+      "goLive": "Je productpagina's kunnen online gaan zodra het is bevestigd."
     },
     "tour": {
       "mobileMenu": "Open op je telefoon het menu linksboven.",

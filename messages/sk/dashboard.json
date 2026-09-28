@@ -1,4 +1,9 @@
 {
+  "offline": {
+    "title": "Ste offline",
+    "description": "Táto stránka potrebuje pripojenie na internet. Načíta sa sama, hneď ako budete znova online, a váš účet aj údaje sú v poriadku.",
+    "retry": "Skúsiť znova"
+  },
   "metadata": {
     "app": {
       "title": "Square Share Dashboard",
@@ -111,6 +116,10 @@
       "label": "{count, plural, one {{count} blok výkladu odkazujúci na zmazané produkty} few {{count} bloky výkladu odkazujúce na zmazané produkty} many {{count} bloku výkladu odkazujúceho na zmazané produkty} other {{count} blokov výkladu odkazujúcich na zmazané produkty}}",
       "description": "Tieto bloky sa návštevníkom zobrazujú prázdne. Odoberte ich alebo nahraďte.",
       "action": "Otvoriť výklad"
+    },
+    "toShip": {
+      "description": "Kupujúci to čakajú. Zabaľte to a potom označte ako odoslané.",
+      "action": "Odoslať objednávky"
     }
   }
 }

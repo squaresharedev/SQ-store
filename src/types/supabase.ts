@@ -393,6 +393,50 @@ export type Database = {
           },
         ]
       }
+      contact_verifications: {
+        Row: {
+          attempts: number
+          channel: string
+          code_hash: string
+          consumed_at: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          owner_id: string
+          target: string
+        }
+        Insert: {
+          attempts?: number
+          channel: string
+          code_hash: string
+          consumed_at?: string | null
+          created_at?: string
+          expires_at: string
+          id?: string
+          owner_id: string
+          target: string
+        }
+        Update: {
+          attempts?: number
+          channel?: string
+          code_hash?: string
+          consumed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          owner_id?: string
+          target?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_verifications_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "admin_user_directory"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       follows: {
         Row: {
           created_at: string
@@ -743,50 +787,71 @@ export type Database = {
         Row: {
           amount_cents: number
           buyer_email: string | null
+          buyer_locale: string | null
           channel: string
+          checkout_session_id: string | null
           created_at: string
           currency: string
+          fulfilment_status: string
           id: string
           platform_fee_cents: number
           product_id: string | null
           product_price_cents: number
           product_title: string
+          quantity: number
           selected_options: Json
           seller_id: string
+          ship_to: Json | null
+          shipped_at: string | null
           status: string
           storefront_id: string | null
+          tracking_number: string | null
         }
         Insert: {
           amount_cents: number
           buyer_email?: string | null
+          buyer_locale?: string | null
           channel: string
+          checkout_session_id?: string | null
           created_at?: string
           currency?: string
+          fulfilment_status?: string
           id?: string
           platform_fee_cents?: number
           product_id?: string | null
           product_price_cents: number
           product_title: string
+          quantity?: number
           selected_options?: Json
           seller_id: string
+          ship_to?: Json | null
+          shipped_at?: string | null
           status?: string
           storefront_id?: string | null
+          tracking_number?: string | null
         }
         Update: {
           amount_cents?: number
           buyer_email?: string | null
+          buyer_locale?: string | null
           channel?: string
+          checkout_session_id?: string | null
           created_at?: string
           currency?: string
+          fulfilment_status?: string
           id?: string
           platform_fee_cents?: number
           product_id?: string | null
           product_price_cents?: number
           product_title?: string
+          quantity?: number
           selected_options?: Json
           seller_id?: string
+          ship_to?: Json | null
+          shipped_at?: string | null
           status?: string
           storefront_id?: string | null
+          tracking_number?: string | null
         }
         Relationships: [
           {
@@ -978,6 +1043,7 @@ export type Database = {
           seller_email: string | null
           seller_email_verified_at: string | null
           seller_phone: string | null
+          seller_phone_verified_at: string | null
           setup_celebrated_at: string | null
           shipping_policy: Json | null
           tax_business_name: string | null
@@ -1007,6 +1073,7 @@ export type Database = {
           seller_email?: string | null
           seller_email_verified_at?: string | null
           seller_phone?: string | null
+          seller_phone_verified_at?: string | null
           setup_celebrated_at?: string | null
           shipping_policy?: Json | null
           tax_business_name?: string | null
@@ -1036,6 +1103,7 @@ export type Database = {
           seller_email?: string | null
           seller_email_verified_at?: string | null
           seller_phone?: string | null
+          seller_phone_verified_at?: string | null
           setup_celebrated_at?: string | null
           shipping_policy?: Json | null
           tax_business_name?: string | null
@@ -1193,44 +1261,6 @@ export type Database = {
           {
             foreignKeyName: "security_events_user_id_fkey"
             columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "admin_user_directory"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      seller_email_verifications: {
-        Row: {
-          consumed_at: string | null
-          created_at: string
-          email: string
-          expires_at: string
-          id: string
-          owner_id: string
-          token_hash: string
-        }
-        Insert: {
-          consumed_at?: string | null
-          created_at?: string
-          email: string
-          expires_at: string
-          id?: string
-          owner_id: string
-          token_hash: string
-        }
-        Update: {
-          consumed_at?: string | null
-          created_at?: string
-          email?: string
-          expires_at?: string
-          id?: string
-          owner_id?: string
-          token_hash?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "seller_email_verifications_owner_id_fkey"
-            columns: ["owner_id"]
             isOneToOne: false
             referencedRelation: "admin_user_directory"
             referencedColumns: ["id"]
@@ -1563,6 +1593,15 @@ export type Database = {
       }
       email_by_username: { Args: { p_username: string }; Returns: string }
       is_squareshare_staff: { Args: never; Returns: boolean }
+      issue_contact_verification: {
+        Args: {
+          p_channel: string
+          p_code_hash: string
+          p_owner: string
+          p_ttl_seconds: number
+        }
+        Returns: string
+      }
       mfa_consume_recovery_code: {
         Args: { p_hash: string; p_user_id: string }
         Returns: boolean
@@ -1572,6 +1611,10 @@ export type Database = {
         Returns: number
       }
       mfa_session_ok: { Args: never; Returns: boolean }
+      order_mark_shipped: {
+        Args: { p_order_id: string; p_tracking_number?: string | null }
+        Returns: string
+      }
       product_sales_aggregate: { Args: { p_seller_id: string }; Returns: Json }
       products_ranked_by_metric: {
         Args: {
@@ -1583,6 +1626,15 @@ export type Database = {
           p_status?: string
         }
         Returns: Json
+      }
+      redeem_contact_verification: {
+        Args: {
+          p_channel: string
+          p_code_hash: string
+          p_max_attempts: number
+          p_owner: string
+        }
+        Returns: string
       }
       rl_gc_keys: { Args: never; Returns: number }
       rl_take: {

@@ -136,6 +136,21 @@ vi.mock("@/lib/security/events", () => ({
   alertSecurityEvent: (...args: unknown[]) => alertMock(...args),
 }));
 
+/**
+ * Contact proof has its own suite (tests/unit/contact-verification.test.ts).
+ * Here the question is only WHEN a save asks for a code: which channels are
+ * provable in this deployment (off by default, like a deployment with no mail)
+ * and what issuing answered.
+ */
+const channelAvailableMock = vi.fn((_channel: string) => false);
+vi.mock("@/lib/contact-verification/availability", () => ({
+  contactChannelAvailable: (channel: string) => channelAvailableMock(channel),
+}));
+const issueContactCodeMock = vi.fn();
+vi.mock("@/lib/contact-verification/service", () => ({
+  issueContactCode: (...args: unknown[]) => issueContactCodeMock(...args),
+}));
+
 // ---- imports -------------------------------------------------------------
 
 import {
@@ -172,6 +187,8 @@ beforeEach(() => {
   hasPasswordMock.mockResolvedValue(true);
   mailExchangerMock.mockResolvedValue("unknown");
   alertMock.mockResolvedValue(undefined);
+  channelAvailableMock.mockReturnValue(false);
+  issueContactCodeMock.mockResolvedValue({ ok: true, status: "sent", target: "sent-to" });
   dbFn.mockResolvedValue({ error: null });
   for (const m of ["from", "select", "insert", "update", "delete", "eq", "neq", "in"]) {
     db[m].mockReturnValue(db);
@@ -366,7 +383,7 @@ describe("saveTaxInfo - happy path", () => {
     fd.append("seller_email", "hello@acme-prints.de");
     fd.append("tax_vat_id", "DE123456789");
     fd.append("tax_country", "DE");
-    fd.append("seller_phone", "+353 1 234 5678");
+    fd.append("seller_phone", "+353 87 123 4567");
 
     const result = await saveTaxInfo(PREV, fd);
 
@@ -374,7 +391,11 @@ describe("saveTaxInfo - happy path", () => {
     const updatePayload = db.update.mock.calls[0][0] as Record<string, unknown>;
     expect(updatePayload.seller_address).toBe("12 Market Street\nDublin, D02 X285");
     expect(updatePayload.seller_email).toBe("hello@acme-prints.de");
-    expect(updatePayload.seller_phone).toBe("+353 1 234 5678");
+    // One canonical spelling per number: E.164.
+    expect(updatePayload.seller_phone).toBe("+353871234567");
+    // The proofs are never written from here: the DB trigger owns them.
+    expect(updatePayload).not.toHaveProperty("seller_email_verified_at");
+    expect(updatePayload).not.toHaveProperty("seller_phone_verified_at");
   });
 
   it("accepts a real <textarea>'s CRLF line breaks instead of rejecting them as header injection", async () => {
@@ -441,7 +462,7 @@ describe("saveTaxInfo - happy path", () => {
   function taxForm(seller_email: string) {
     const fd = new FormData();
     fd.append("tax_business_name", "ACME Corp");
-    fd.append("seller_address", "12 Market Street");
+    fd.append("seller_address", "12 Market Street\nDublin");
     fd.append("seller_email", seller_email);
     fd.append("tax_vat_id", "");
     fd.append("tax_country", "");
@@ -500,7 +521,7 @@ describe("saveTaxInfo - partial writes", () => {
     getUserMock.mockResolvedValue(USER);
     const fd = new FormData();
     fd.append("tax_business_name", "ACME Corp");
-    fd.append("seller_address", "12 Market Street");
+    fd.append("seller_address", "12 Market Street\nDublin");
     fd.append("seller_email", "hello@acme-prints.de");
 
     const result = await saveTaxInfo(PREV, fd);
@@ -508,7 +529,7 @@ describe("saveTaxInfo - partial writes", () => {
     expect(result.success).toBeTruthy();
     const payload = db.update.mock.calls[0][0] as Record<string, unknown>;
     expect(payload.tax_business_name).toBe("ACME Corp");
-    expect(payload.seller_address).toBe("12 Market Street");
+    expect(payload.seller_address).toBe("12 Market Street\nDublin");
     expect(payload.seller_email).toBe("hello@acme-prints.de");
     for (const untouched of ["tax_vat_id", "tax_country", "seller_phone"]) {
       expect(payload, untouched).not.toHaveProperty(untouched);
@@ -538,6 +559,118 @@ describe("saveTaxInfo - partial writes", () => {
 
     expect(errorText(result)).toBeTruthy();
     expect(db.update).not.toHaveBeenCalled();
+  });
+});
+
+// The contact details buyers see: plausible when typed, proven afterwards.
+describe("saveTaxInfo - contact details", () => {
+  function contactForm(fields: Partial<Record<string, string>>) {
+    const fd = new FormData();
+    for (const [name, value] of Object.entries({
+      tax_business_name: "ACME Corp",
+      seller_address: "12 Market Street\nDublin",
+      seller_email: "hello@acme-prints.de",
+      tax_vat_id: "",
+      tax_country: "IE",
+      seller_phone: "",
+      ...fields,
+    })) {
+      fd.append(name, value!);
+    }
+    return fd;
+  }
+
+  const payload = () => db.update.mock.calls[0]?.[0] as Record<string, unknown> | undefined;
+
+  beforeEach(() => getUserMock.mockResolvedValue(USER));
+
+  it("reads a national number in the country the same form sets", async () => {
+    const result = await saveTaxInfo(PREV, contactForm({ seller_phone: "087 123 4567" }));
+    expect(result.success).toBeTruthy();
+    expect(payload()?.seller_phone).toBe("+353871234567");
+  });
+
+  it("falls back to the stored country when the form does not send one", async () => {
+    dbFn.mockResolvedValue({ data: { seller_email: null, seller_phone: null, tax_country: "IE" }, error: null });
+    const fd = new FormData();
+    fd.append("seller_phone", "087 123 4567");
+    const result = await saveTaxInfo(PREV, fd);
+    expect(result.success).toBeTruthy();
+    expect(payload()?.seller_phone).toBe("+353871234567");
+  });
+
+  it.each([
+    ["087 123 4567", "", /country code/i],
+    ["+353 1 234 5678", "IE", /mobile number/i],
+    ["+1 202 555 0143", "", /EU, the EEA, Switzerland and the UK/i],
+    ["+44 7700 900123", "", /doesn't exist/i],
+  ])("refuses %s (country %s) without writing", async (phone, country, message) => {
+    const result = await saveTaxInfo(PREV, contactForm({ seller_phone: phone, tax_country: country }));
+    expect(errorText(result)).toMatch(message);
+    expect(db.update).not.toHaveBeenCalled();
+  });
+
+  it.each(["123 Fake Street\nSpringfield", "Dublin", "n/a", "asdf asdf\nasdf"])(
+    "refuses the address %j without writing",
+    async (address) => {
+      const result = await saveTaxInfo(PREV, contactForm({ seller_address: address }));
+      expect(errorText(result)).toBeTruthy();
+      expect(db.update).not.toHaveBeenCalled();
+    },
+  );
+
+  it("sends a code for a CHANGED email when email can be proven here", async () => {
+    channelAvailableMock.mockImplementation((channel) => channel === "email");
+    issueContactCodeMock.mockResolvedValue({ ok: true, status: "sent", target: "hello@acme-prints.de" });
+
+    const result = await saveTaxInfo(PREV, contactForm({}));
+
+    expect(issueContactCodeMock).toHaveBeenCalledExactlyOnceWith(USER_ID, "email");
+    expect(english(result.success!)).toMatch(/We emailed a code to hello@acme-prints\.de/);
+  });
+
+  it("sends codes for both when both changed, and says so", async () => {
+    channelAvailableMock.mockReturnValue(true);
+    issueContactCodeMock
+      .mockResolvedValueOnce({ ok: true, status: "sent", target: "hello@acme-prints.de" })
+      .mockResolvedValueOnce({ ok: true, status: "sent", target: "+353 87 123 4567" });
+
+    const result = await saveTaxInfo(PREV, contactForm({ seller_phone: "+353871234567" }));
+
+    expect(issueContactCodeMock.mock.calls.map((call) => call[1])).toEqual(["email", "phone"]);
+    expect(english(result.success!)).toMatch(/codes to hello@acme-prints\.de and \+353 87 123 4567/);
+  });
+
+  it("sends nothing for an unchanged value", async () => {
+    channelAvailableMock.mockReturnValue(true);
+    dbFn.mockResolvedValue({
+      data: { seller_email: "hello@acme-prints.de", seller_phone: null, tax_country: "IE" },
+      error: null,
+    });
+
+    const result = await saveTaxInfo(PREV, contactForm({}));
+
+    expect(result.success).toBeTruthy();
+    expect(issueContactCodeMock).not.toHaveBeenCalled();
+  });
+
+  it("sends nothing where the channel cannot be proven, and still saves", async () => {
+    const result = await saveTaxInfo(PREV, contactForm({ seller_phone: "+353871234567" }));
+    expect(english(result.success!)).toMatch(/details saved/i);
+    expect(issueContactCodeMock).not.toHaveBeenCalled();
+  });
+
+  it("reports a failed send as saved-but-not-sent, never as a failed save", async () => {
+    channelAvailableMock.mockReturnValue(true);
+    issueContactCodeMock.mockResolvedValue({
+      ok: false,
+      error: { code: "rate_limited", message: { key: "Errors.contactVerification.cooldown" } },
+    });
+
+    const result = await saveTaxInfo(PREV, contactForm({}));
+
+    expect(db.update).toHaveBeenCalled();
+    expect(errorText(result)).toMatch(/Saved, but we couldn't send/i);
   });
 });
 

@@ -3,6 +3,8 @@ import { expect, test, type Page } from "@playwright/test";
 import {
   anonRest,
   canvasStill,
+  confirmContactCode,
+  contactCode,
   expectToast,
   freshUser,
   gotoApp,
@@ -13,7 +15,6 @@ import {
   serviceRest,
   signUp,
   userIdByEmail,
-  verificationLink,
 } from "./helpers";
 
 // The hosted product page, end to end: what a buyer gets, what they must NOT
@@ -329,7 +330,7 @@ test.describe("hosted product page", () => {
     const sellerBlock = page.locator("[data-product-section='seller']");
     await expect(sellerBlock).toBeVisible();
     await expect(sellerBlock.getByText("Lamp Studio Ltd")).toBeVisible();
-    await expect(sellerBlock.getByRole("link", { name: "hi@lamp.example" })).toBeVisible();
+    await expect(sellerBlock.getByRole("link", { name: "lamp@squareshare.eu" })).toBeVisible();
     await expect(sellerBlock.locator("summary")).toHaveCount(0);
 
     // The store's default terms, which this product never had to be told.
@@ -753,16 +754,18 @@ test.describe("hosted product page", () => {
     // A real, resolvable domain: the save refuses a placeholder or a reserved
     // TLD, and asks a public resolver whether the domain takes mail at all.
     await page.getByLabel(/Contact email/).fill("support@squareshare.eu");
-    await page.getByLabel("Phone", { exact: true }).fill("+353 1 234 5678");
+    // A mobile: a number is only accepted if it can be proven by text.
+    await page.getByLabel("Phone", { exact: true }).fill("+353 87 123 4567");
     await page.getByRole("button", { name: /^save$/i }).click();
-    await expectToast(page, /saved/i);
+    await expectToast(page, /We sent codes to support@squareshare\.eu and \+353 87 123 4567/i);
 
-    // A CHANGED contact address is unconfirmed again, and an unconfirmed one
-    // takes the page down — which is the point of the confirmation step, and
-    // is why this test has to complete it rather than skip past it.
+    // A CHANGED contact address is unproven again, and an unproven one takes
+    // the page down: the point of the code, and why this test has to type it
+    // rather than skip past it. The phone is proven too, or buyers never see it.
     expect((await page.goto(pagePath(s, s.active)))?.status()).toBe(404);
-    await page.goto(await verificationLink("support@squareshare.eu"));
-    await page.waitForURL(/\/settings\/tax/, { timeout: 30_000 });
+    await gotoApp(page, "/settings/tax");
+    await confirmContactCode(page, "email", await contactCode("email", "support@squareshare.eu"));
+    await confirmContactCode(page, "phone", await contactCode("sms", "+353871234567"));
 
     // No storefront save happens here at all — the buyer page still picks up
     // the new details, because they were never the storefront's to carry.
@@ -774,7 +777,7 @@ test.describe("hosted product page", () => {
     await expect(
       sellerBlock.getByRole("link", { name: "support@squareshare.eu" }),
     ).toBeVisible();
-    await expect(sellerBlock.getByText("+353 1 234 5678")).toBeVisible();
+    await expect(sellerBlock.getByText("+353 87 123 4567")).toBeVisible();
   });
 
   test("gives the page its own face, or follows the storefront's", async ({ page }) => {

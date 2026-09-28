@@ -220,19 +220,23 @@ export function referenceCode(options: {
 }
 
 /**
- * A six-digit one-time code from an authenticator app. Spaces anywhere are
- * dropped first ("123 456" is how most apps display it, and how people type
- * it back), then exactly six ASCII digits are required: never a longer string
- * that happens to start with six, and never a non-ASCII digit that a lax
- * `\d` could let through.
+ * A one-time code of `length` digits: six from an authenticator app, eight
+ * from a contact-verification message. Spaces anywhere are dropped first
+ * ("123 456" is how most apps display it, and how people type it back), then
+ * exactly `length` ASCII digits are required: never a longer string that
+ * happens to start with them, and never a non-ASCII digit that a lax `\d`
+ * could let through. The length rides along as a message value, so the copy
+ * says "{length} digits" and the number lives only here.
  */
-export function oneTimeCode(field: OneTimeCodeField = "authenticator") {
+export function oneTimeCode(field: OneTimeCodeField = "authenticator", length = 6) {
+  const exact = new RegExp(`^[0-9]{${length}}$`);
   return z
     .string()
     .transform((value) => value.replace(/\s+/g, ""))
     .pipe(
-      z.string().regex(/^[0-9]{6}$/, {
+      z.string().refine((value) => exact.test(value), {
         error: issueKey(`Validation.oneTimeCode.${field}`),
+        params: { length },
       }),
     );
 }

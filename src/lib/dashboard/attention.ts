@@ -1,6 +1,7 @@
 import { LEGAL_VERSION } from "@/lib/settings/constants";
 import { STRIPE_CONNECT_AVAILABLE } from "@/lib/payments/availability";
 import { msg, type MessageRef } from "@/i18n/types";
+import { ordersViewPath } from "@/lib/orders/paths";
 import type { DashboardOrdersData, ProductsSummary, ProfileSummary } from "./queries";
 
 /**
@@ -76,6 +77,7 @@ export function buildAttentionItems({
   stripeConnectAvailable = STRIPE_CONNECT_AVAILABLE,
   setupVisible = false,
   twoFactorEnabled = true,
+  toShipCount = 0,
 }: {
   orders: DashboardOrdersData;
   products: ProductsSummary;
@@ -106,8 +108,26 @@ export function buildAttentionItems({
    * Defaults to true (no row) so a caller that cannot tell never nags.
    */
   twoFactorEnabled?: boolean;
+  /** Paid orders waiting to be shipped (lib/orders/queries.ts countOrdersToShip). */
+  toShipCount?: number;
 }): AttentionItem[] {
   const items: AttentionItem[] = [];
+
+  // --- Orders to ship ---------------------------------------------------
+
+  // FIRST, above everything: every other row is about the seller's own setup,
+  // and this one is about people who have paid and are waiting. It lands on
+  // the To ship list, oldest first, rather than on whatever the Orders page
+  // would pick by itself.
+  if (toShipCount > 0) {
+    items.push({
+      key: "to-ship",
+      label: msg("Orders.toShipCount", { count: toShipCount }),
+      description: msg("Dashboard.attention.toShip.description"),
+      href: ordersViewPath("to-ship"),
+      actionLabel: msg("Dashboard.attention.toShip.action"),
+    });
+  }
 
   // --- Account security -----------------------------------------------
 

@@ -137,6 +137,17 @@
         "title": "Sign-in approval is on",
         "body": "Devices where you're signed in can now approve new sign-ins to your account. If this wasn't you, change your password now."
       }
+    },
+    "order": {
+      "newToShip": {
+        "title": "New order: {quantity} × {title}",
+        "body": "Ship it to {name} in {city}.",
+        "bodyNoAddress": "There's no delivery address on it yet. Email the buyer to ask where it should go."
+      },
+      "newDigital": {
+        "title": "New order: {title}",
+        "body": "It's a download, so there's nothing to ship."
+      }
     }
   }
 }

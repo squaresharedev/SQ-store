@@ -1,4 +1,9 @@
 {
+  "offline": {
+    "title": "Estás sin conexión",
+    "description": "Esta página necesita conexión a internet. Se cargará sola en cuanto vuelvas a estar en línea, y tu cuenta y tus datos están bien.",
+    "retry": "Inténtalo de nuevo"
+  },
   "metadata": {
     "app": {
       "title": "Panel de Square Share",
@@ -111,6 +116,10 @@
       "label": "{count, plural, one {{count} bloque del escaparate hace referencia a productos eliminados} many {{count} bloques del escaparate hacen referencia a productos eliminados} other {{count} bloques del escaparate hacen referencia a productos eliminados}}",
       "description": "Estos bloques se ven vacíos para los visitantes. Elimínalos o sustitúyelos.",
       "action": "Abrir escaparate"
+    },
+    "toShip": {
+      "description": "Los compradores están esperando. Empaquétalos y márcalos como enviados.",
+      "action": "Enviar pedidos"
     }
   }
 }

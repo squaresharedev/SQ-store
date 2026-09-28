@@ -273,6 +273,16 @@
     "placeholder": "El correo de contacto parece un marcador de posición. Usa una dirección que realmente leas.",
     "disposable": "El correo de contacto es de un proveedor de correo temporal. Usa una dirección permanente."
   },
+  "phone": {
+    "needsCountryCode": "Añade el prefijo internacional al número de teléfono, como +353 87 123 4567, o indica tu país.",
+    "invalid": "Ese número de teléfono no existe. Comprueba los dígitos y el prefijo internacional.",
+    "unsupportedRegion": "Solo podemos confirmar números de teléfono de la UE, el EEE, Suiza y el Reino Unido.",
+    "notMobile": "Usa un número de móvil. Lo confirmamos por SMS, y un fijo no puede recibirlo."
+  },
+  "address": {
+    "placeholder": "La dirección parece un marcador de posición. Usa la dirección postal real desde la que operas.",
+    "incomplete": "Escribe tu dirección postal completa: calle y número, y luego localidad y código postal, cada uno en su propia línea."
+  },
   "uuid": {
     "id": "Ese ID no es válido.",
     "option": "Esa opción no es válida.",
@@ -292,10 +302,12 @@
     "domains": "Los dominios deben ser dominios simples en minúsculas, como tusitio.com: sin https://, puerto, ruta ni comodín."
   },
   "referenceCode": {
-    "vatId": "Un NIF-IVA debe tener de {min} a {max} letras, dígitos, espacios, puntos o guiones."
+    "vatId": "Un NIF-IVA debe tener de {min} a {max} letras, dígitos, espacios, puntos o guiones.",
+    "trackingNumber": "Un número de seguimiento tiene de {min} a {max} letras, dígitos, espacios, puntos o guiones."
   },
   "oneTimeCode": {
-    "authenticator": "El código son los 6 dígitos que muestra tu aplicación de autenticación."
+    "authenticator": "El código son los 6 dígitos que muestra tu aplicación de autenticación.",
+    "contact": "El código son los {length} dígitos que te enviamos."
   },
   "hexColor": {
     "colors": "Los colores deben ser un valor hexadecimal de 6 dígitos, como #a855f7.",

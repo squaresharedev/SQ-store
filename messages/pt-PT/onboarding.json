@@ -4,7 +4,7 @@
       "label": "Adicione os seus dados de vendedor",
       "detail": "O seu nome ou denominação social, morada e e-mail de contacto aparecem em todas as páginas de produto.",
       "detailDone": "Os compradores conseguem ver a quem estão a comprar.",
-      "detailUnconfirmed": "Abra o link que enviámos para confirmar o seu e-mail de contacto.",
+      "detailUnconfirmed": "Confirme o seu e-mail de contacto através do código que enviámos para esse endereço.",
       "action": "Adicionar dados",
       "actionUnconfirmed": "Confirmar e-mail",
       "cta": "Adicione os seus dados de vendedor",
@@ -112,9 +112,7 @@
       "emailHelp": "Para onde os compradores lhe escrevem. Pode ser diferente do seu e-mail de início de sessão."
     },
     "confirm": {
-      "check": "Verifique {email} para encontrar um link de confirmação.",
-      "goLive": "As suas páginas de produto ficam publicadas assim que o abrir.",
-      "sendNewLink": "Enviar um novo link"
+      "goLive": "As suas páginas de produto ficam publicadas assim que o confirmar."
     },
     "tour": {
       "mobileMenu": "No telemóvel, abra o menu no canto superior esquerdo.",

@@ -4,7 +4,7 @@
       "label": "Ajoutez vos informations vendeur",
       "detail": "Votre raison sociale, votre adresse et votre e-mail de contact figurent sur chaque page produit.",
       "detailDone": "Les acheteurs peuvent voir à qui ils achètent.",
-      "detailUnconfirmed": "Ouvrez le lien que nous vous avons envoyé pour confirmer votre e-mail de contact.",
+      "detailUnconfirmed": "Confirmez votre e-mail de contact avec le code que nous lui envoyons.",
       "action": "Ajouter les informations",
       "actionUnconfirmed": "Confirmer l’e-mail",
       "cta": "Ajoutez vos informations vendeur",
@@ -112,9 +112,7 @@
       "emailHelp": "L’adresse à laquelle les acheteurs vous écrivent. Elle peut différer de votre e-mail de connexion."
     },
     "confirm": {
-      "check": "Consultez {email} pour un lien de confirmation.",
-      "goLive": "Vos pages produit passent en ligne dès que vous l’ouvrez.",
-      "sendNewLink": "Envoyer un nouveau lien"
+      "goLive": "Vos pages produit pourront être mises en ligne une fois confirmé."
     },
     "tour": {
       "mobileMenu": "Sur votre téléphone, ouvrez le menu en haut à gauche.",

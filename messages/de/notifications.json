@@ -137,6 +137,17 @@
         "title": "Anmeldebestätigung ist eingeschaltet",
         "body": "Geräte, auf denen du angemeldet bist, können jetzt neue Anmeldungen bei deinem Konto genehmigen. Wenn du das nicht warst, ändere jetzt dein Passwort."
       }
+    },
+    "order": {
+      "newToShip": {
+        "title": "Neue Bestellung: {quantity} × {title}",
+        "body": "Versende es an {name} in {city}.",
+        "bodyNoAddress": "Es gibt noch keine Lieferadresse dafür. Schreibe dem Käufer eine E-Mail und frage, wohin es gehen soll."
+      },
+      "newDigital": {
+        "title": "Neue Bestellung: {title}",
+        "body": "Es ist ein Download, daher ist nichts zu versenden."
+      }
     }
   }
 }

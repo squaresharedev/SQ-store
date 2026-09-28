@@ -2,17 +2,20 @@
 
 import { useEffect, useRef } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import type { OrderView } from "@/types/order-view";
+import type { OrderView, OrdersView } from "@/types/order-view";
 import { cn } from "@/lib/utils";
 import { OrderStatusBadge } from "./OrderStatusBadge";
+import { FulfilmentBadge } from "./FulfilmentBadge";
 import { formatCents } from "@/lib/format/money";
 import { formatOrderDate } from "@/lib/format/date";
+import { regionName } from "@/lib/format/country";
 import { formatOrderSelection } from "@/lib/orders/selection";
 
 export function OrderRow({
   order,
   onSelect,
   highlighted = false,
+  view = "all",
 }: {
   order: OrderView;
   onSelect: (order: OrderView) => void;
@@ -20,10 +23,12 @@ export function OrderRow({
    *  marked, scrolled to and focused — but NOT opened: the detail panel is one
    *  Enter or one click away, and that press is the user's to make. */
   highlighted?: boolean;
+  /** Which list this row is in; decides its middle columns (see OrdersTable). */
+  view?: OrdersView;
 }) {
-  const t = useTranslations("Orders.channel");
+  const t = useTranslations("Orders");
   const locale = useLocale();
-  const channelLabel = t(order.channel === "marketplace" ? "marketplace" : "embed");
+  const channelLabel = t(order.channel === "marketplace" ? "channel.marketplace" : "channel.embed");
 
   // Bring the row to the user rather than making them find the marked one:
   // it can be well down a filtered list. Focus goes with the scroll so the
@@ -75,8 +80,12 @@ export function OrderRow({
           column that is blank on nine rows in ten is a column that earns
           nothing. */}
       <td className="py-2.5 px-3 max-w-xs text-sm">
+        {/* "2 × Lamp" when more than one was bought; a lone unit is just
+            its name, which is what nearly every row is. */}
         <span className="block truncate font-medium text-foreground">
-          {order.productTitle}
+          {order.quantity > 1
+            ? t("detail.packLine", { quantity: order.quantity, title: order.productTitle })
+            : order.productTitle}
         </span>
         {order.selection.length > 0 && (
           <span
@@ -88,20 +97,44 @@ export function OrderRow({
         )}
       </td>
 
-      {/* amount */}
-      <td className="py-2.5 px-3 font-inter text-sm text-foreground whitespace-nowrap">
-        {formatCents(order.amountCents, order.currency, locale)}
-      </td>
+      {view === "to-ship" ? (
+        // Where it goes: the name, and the town and country a seller sorts a
+        // pile of parcels by. The full label is one click away.
+        <td className="py-2.5 px-3 max-w-xs text-sm" data-order-ship-to-summary="">
+          {order.shipTo ? (
+            <>
+              <span className="block truncate text-foreground">{order.shipTo.name}</span>
+              <span className="block truncate font-inter text-xs text-muted-foreground">
+                {order.shipTo.city}, {regionName(order.shipTo.country, locale) ?? order.shipTo.country}
+              </span>
+            </>
+          ) : (
+            <span className="font-inter text-xs text-muted-foreground">{t("table.noAddress")}</span>
+          )}
+        </td>
+      ) : (
+        <>
+          {/* amount */}
+          <td className="py-2.5 px-3 font-inter text-sm text-foreground whitespace-nowrap">
+            {formatCents(order.amountCents, order.currency, locale)}
+          </td>
 
-      {/* channel — hidden below md */}
-      <td className="hidden md:table-cell py-2.5 px-3 font-inter text-sm text-muted-foreground">
-        {channelLabel}
-      </td>
+          {/* channel — hidden below md */}
+          <td className="hidden md:table-cell py-2.5 px-3 font-inter text-sm text-muted-foreground">
+            {channelLabel}
+          </td>
 
-      {/* status */}
-      <td className="py-2.5 px-3">
-        <OrderStatusBadge status={order.status} />
-      </td>
+          {/* status */}
+          <td className="py-2.5 px-3">
+            <OrderStatusBadge status={order.status} />
+          </td>
+
+          {/* shipping */}
+          <td className="py-2.5 px-3">
+            <FulfilmentBadge status={order.fulfilment.status} />
+          </td>
+        </>
+      )}
 
       {/* buyer — hidden below md */}
       <td className="hidden md:table-cell py-2.5 px-3 font-inter text-sm text-muted-foreground max-w-xs truncate">

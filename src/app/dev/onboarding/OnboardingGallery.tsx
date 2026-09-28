@@ -63,9 +63,16 @@ async function fakeSave(): Promise<ActionState> {
   return succeeded(msg("Settings.tax.success.sellerDetailsSaved"));
 }
 
-async function fakeResend(): Promise<ActionState> {
+async function fakeSendCode(): Promise<ActionState> {
   await new Promise((resolve) => setTimeout(resolve, 600));
-  return succeeded(msg("Settings.tax.success.confirmationSent", { email: "your inbox" }));
+  return succeeded(
+    msg("Settings.contactVerification.success.sent", { channel: "email", target: "your inbox" }),
+  );
+}
+
+async function fakeConfirmCode(): Promise<ActionState> {
+  await new Promise((resolve) => setTimeout(resolve, 600));
+  return succeeded(msg("Settings.contactVerification.success.confirmed", { channel: "email" }));
 }
 
 export function OnboardingGallery({
@@ -193,7 +200,8 @@ export function OnboardingGallery({
         verificationOn={active?.verificationOn ?? false}
         acceptAction={fakeAccept}
         saveAction={fakeSave}
-        resendAction={fakeResend}
+        sendCodeAction={fakeSendCode}
+        confirmCodeAction={fakeConfirmCode}
       />
     </main>
   );

@@ -137,6 +137,17 @@
         "title": "Inloggoedkeuring staat aan",
         "body": "Apparaten waarop je bent ingelogd, kunnen nu nieuwe inlogpogingen op je account goedkeuren. Was jij dit niet? Wijzig dan nu je wachtwoord."
       }
+    },
+    "order": {
+      "newToShip": {
+        "title": "Nieuwe bestelling: {quantity} × {title}",
+        "body": "Verzend naar {name} in {city}.",
+        "bodyNoAddress": "Er staat nog geen leveringsadres op. Stuur de koper een e-mail om te vragen waar het naartoe moet."
+      },
+      "newDigital": {
+        "title": "Nieuwe bestelling: {title}",
+        "body": "Het is een download, dus er valt niets te verzenden."
+      }
     }
   }
 }

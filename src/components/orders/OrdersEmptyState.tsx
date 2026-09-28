@@ -12,7 +12,8 @@ import {
 /**
  * What the orders list says when it has no rows.
  *
- * A filter that matched nothing offers to clear it. An empty list otherwise
+ * An empty To ship queue says the seller is caught up, and offers the full
+ * list. A filter that matched nothing offers to clear it. An empty list otherwise
  * says why, honestly: checkout on Square Share is not open yet, so a sale made
  * through a product's own buy link or by email happens somewhere this page
  * cannot see. Promising "your first sale shows up here" to a seller whose sales
@@ -22,14 +23,34 @@ import {
 export function OrdersEmptyState({
   filtered,
   onClear,
+  toShip = false,
+  onSeeAll,
 }: {
   filtered: boolean;
   onClear?: () => void;
+  /** The To ship queue is empty: a finished job, not a missing feature. */
+  toShip?: boolean;
+  /** Switch to the full list (shown with `toShip`). */
+  onSeeAll?: () => void;
 }) {
   const t = useTranslations("Orders.empty");
   return (
     <div className="border border-border bg-card px-4 py-16 text-center">
-      {filtered ? (
+      {toShip ? (
+        <>
+          <p className="text-base font-semibold text-foreground">{t("toShipTitle")}</p>
+          <p className={cn(helpTextClass, "mx-auto mt-1 max-w-md")}>{t("toShipHint")}</p>
+          {onSeeAll && (
+            <button
+              type="button"
+              className={cn(secondaryButtonClass, "mt-4")}
+              onClick={onSeeAll}
+            >
+              {t("seeAllOrders")}
+            </button>
+          )}
+        </>
+      ) : filtered ? (
         <>
           <p className="text-base font-semibold text-foreground">
             {t("filteredTitle")}

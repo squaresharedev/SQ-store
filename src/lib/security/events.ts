@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createNotification, notificationInEnglish } from "@/lib/notifications/create";
 import { sendEmail } from "@/lib/email/send";
+import { appUrl } from "@/lib/app-url";
 import type { NotificationMessageRef } from "@/lib/notifications/message";
 import { clientKey } from "@/lib/rate-limit";
 import type { MessageKey } from "@/i18n/types";
@@ -160,9 +161,9 @@ export async function recordSecurityEvent(input: {
  * The bell alone is a weak channel for a credential alert: someone who changes
  * a password and revokes sessions locks the owner out before they can read it.
  * Pass `emailTo` for the events where that matters (the 2FA ones do); the
- * email goes through the transactional mailer, which is off in production
- * until Cloudflare Email Service is configured, so until then the bell and the
- * activity log are what the owner has.
+ * email goes through the transactional mailer (lib/email/send.ts), which is
+ * off in production until it is switched on (see wrangler.jsonc), so until
+ * then the bell and the activity log are what the owner has.
  */
 export type SecurityNotice = {
   /** Keys, like every notification: the bell resolves them for the reader. */
@@ -174,8 +175,8 @@ export type SecurityNotice = {
    * Also email this to the account's address. For the events where the
    * in-app bell is the WRONG channel: if an intruder just turned 2FA off,
    * the owner may never see the dashboard again, but they will see their
-   * inbox. Goes through lib/email/send.ts, so it is off until Cloudflare
-   * Email Service is configured, and lands in the dev outbox locally.
+   * inbox. Goes through lib/email/send.ts, so it is off until transactional
+   * mail is switched on, and lands in the dev outbox locally.
    */
   emailTo?: string | null;
 };
@@ -225,11 +226,7 @@ async function emailSecurityNotice(to: string, notify: SecurityNotice): Promise<
       body: notificationInEnglish(notify.body),
       href: notify.href,
     };
-    const origin = (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").replace(
-      /\/+$/,
-      "",
-    );
-    const link = `${origin}${notice.href ?? "/settings/security"}`;
+    const link = appUrl(notice.href ?? "/settings/security");
     const result = await sendEmail({
       to,
       subject: `Security alert: ${notice.title}`,

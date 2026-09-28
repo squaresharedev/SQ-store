@@ -408,6 +408,12 @@ function printSummary(args: {
   console.log(line("Orders created", String(orders.length)));
   console.log(
     line(
+      "Waiting to ship",
+      String(orders.filter((o) => o.status === "paid" && o.fulfilment_status === "unfulfilled").length),
+    ),
+  );
+  console.log(
+    line(
       "Date range",
       orders.length
         ? `${new Date(minDate).toISOString().slice(0, 10)} → ${new Date(maxDate)

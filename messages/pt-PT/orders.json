@@ -24,7 +24,10 @@
     "clearFilters": "Limpar filtros",
     "title": "Ainda sem encomendas",
     "hint": "A finalização de compra do Square Share ainda não está disponível. As vendas feitas através do seu próprio link de compra ou por e-mail não aparecem aqui.",
-    "goToProducts": "Ir para produtos"
+    "goToProducts": "Ir para produtos",
+    "toShipTitle": "Nada para enviar",
+    "toShipHint": "Está tudo em dia. As encomendas pagas à espera de envio aparecem aqui, da mais antiga para a mais recente.",
+    "seeAllOrders": "Ver todas as encomendas"
   },
   "list": {
     "updating": "A atualizar…",
@@ -38,7 +41,10 @@
     "channel": "Canal",
     "status": "Estado",
     "buyer": "Comprador",
-    "date": "Data"
+    "date": "Data",
+    "shipping": "Envio",
+    "shipTo": "Enviar para",
+    "noAddress": "Sem morada"
   },
   "toolbar": {
     "region": "filtros de encomendas",
@@ -85,6 +91,39 @@
       "copy": "Copiar ID da encomenda",
       "copied": "ID da encomenda copiado",
       "failed": "Não foi possível copiar o ID da encomenda. Selecione-o e copie-o manualmente."
+    },
+    "pack": "O que embalar",
+    "packLine": "{quantity} × {title}",
+    "copyPack": {
+      "copy": "Copiar o que embalar",
+      "copied": "O que embalar copiado",
+      "failed": "Não foi possível copiar o que embalar. Selecione-o e copie-o manualmente."
+    },
+    "shipTo": "Enviar para",
+    "copyAddress": {
+      "copy": "Copiar morada",
+      "copied": "Morada copiada",
+      "failed": "Não foi possível copiar a morada. Selecione-a e copie-a manualmente."
+    },
+    "copyPhone": {
+      "copy": "Copiar número de telefone",
+      "copied": "Número de telefone copiado",
+      "failed": "Não foi possível copiar o número de telefone. Selecione-o e copie-o manualmente."
+    },
+    "noAddress": "Esta encomenda não tem morada de entrega. Envie um e-mail ao comprador para saber para onde deve ser enviada.",
+    "shipping": "Envio",
+    "shippedOn": "Enviada em {date}",
+    "trackingNumber": "Número de rastreio",
+    "copyTracking": {
+      "copy": "Copiar número de rastreio",
+      "copied": "Número de rastreio copiado",
+      "failed": "Não foi possível copiar o número de rastreio. Selecione-o e copie-o manualmente."
+    },
+    "nothingToShip": "Não há nada para enviar nesta encomenda.",
+    "shipBlocked": {
+      "pending": "O pagamento ainda não foi processado. Aguarde antes de enviar.",
+      "refunded": "Esta encomenda foi reembolsada, pelo que não há nada para enviar.",
+      "disputed": "Este pagamento está em disputa. Resolva a disputa antes de enviar."
     }
   },
   "actions": {
@@ -104,5 +143,59 @@
   "loading": {
     "title": "Encomendas",
     "subtitle": "Todas as vendas através da sua incorporação e do marketplace."
+  },
+  "toShipCount": "{count, plural, one {{count} encomenda para enviar} many {{count} de encomendas para enviar} other {{count} encomendas para enviar}}",
+  "views": {
+    "label": "Que encomendas mostrar",
+    "toShip": "Para enviar",
+    "all": "Todas as encomendas"
+  },
+  "fulfilment": {
+    "unfulfilled": "Para enviar",
+    "shipped": "Enviada",
+    "not_required": "Sem envio"
+  },
+  "ship": {
+    "markShipped": "Marcar como enviada",
+    "trackingLabel": "Número de rastreio (opcional)",
+    "trackingPlaceholder": "p. ex. RR123456789IE",
+    "tellsBuyer": "Vamos enviar um e-mail ao comprador a informar que está a caminho, com o número de rastreio se o adicionar.",
+    "noBuyerEmail": "Esta encomenda não tem e-mail do comprador, por isso o comprador não será notificado.",
+    "confirm": "Marcar como enviada",
+    "shipped": "Marcada como enviada. Enviámos um e-mail ao comprador.",
+    "shippedNoEmail": "Marcada como enviada.",
+    "addTracking": "Adicionar número de rastreio",
+    "editTracking": "Alterar número de rastreio",
+    "saveTracking": "Guardar número de rastreio",
+    "trackingSaved": "Número de rastreio guardado. Enviámos ao comprador.",
+    "trackingSavedNoEmail": "Número de rastreio guardado."
+  },
+  "email": {
+    "fromName": "{store} via Square Share",
+    "signOff": "Square Share",
+    "newOrder": {
+      "subjectShip": "Nova encomenda: enviar {quantity} × {title} para {city}",
+      "subjectDigital": "Nova encomenda: {title}",
+      "introShip": "Tem uma nova encomenda para enviar.",
+      "introDigital": "Vendeu {title}. É uma transferência, por isso não há nada para enviar.",
+      "pack": "O que embalar",
+      "shipTo": "Enviar para",
+      "phone": "Telefone: {phone}",
+      "noAddress": "Esta encomenda não tem morada de entrega. Envie um e-mail ao comprador para saber para onde deve ser enviada.",
+      "buyer": "Comprador: {email}",
+      "total": "Total da encomenda: {amount}",
+      "openShip": "Assim que estiver a caminho, marque-a como enviada aqui e avisaremos o comprador: {url}",
+      "openDigital": "Ver a encomenda: {url}"
+    },
+    "shipped": {
+      "subject": "A sua encomenda de {store} está a caminho",
+      "subjectTracking": "Rastreio da sua encomenda de {store}",
+      "intro": "Boas notícias: {store} enviou a sua encomenda.",
+      "introTracking": "{store} adicionou um número de rastreio à sua encomenda.",
+      "tracking": "Número de rastreio: {tracking}",
+      "shipTo": "Vai para:",
+      "questions": "Tem dúvidas sobre a sua encomenda? Responda a este e-mail para contactar {store}.",
+      "footer": "Enviado pelo Square Share em nome de {store}."
+    }
   }
 }

@@ -4,7 +4,7 @@
       "label": "Aggiungi i tuoi dati venditore",
       "detail": "La tua ragione sociale, l’indirizzo e l’email di contatto compaiono su ogni pagina prodotto.",
       "detailDone": "Gli acquirenti possono vedere da chi stanno comprando.",
-      "detailUnconfirmed": "Apri il link che ti abbiamo inviato per confermare la tua email di contatto.",
+      "detailUnconfirmed": "Conferma la tua email di contatto con il codice che ti inviamo.",
       "action": "Aggiungi dati",
       "actionUnconfirmed": "Conferma email",
       "cta": "Aggiungi i tuoi dati venditore",
@@ -112,9 +112,7 @@
       "emailHelp": "Dove gli acquirenti ti scrivono. Può essere diversa dalla tua email di accesso."
     },
     "confirm": {
-      "check": "Controlla {email} per un link di conferma.",
-      "goLive": "Le tue pagine prodotto vengono pubblicate non appena lo apri.",
-      "sendNewLink": "Invia un nuovo link"
+      "goLive": "Le tue pagine prodotto possono essere pubblicate non appena è confermata."
     },
     "tour": {
       "mobileMenu": "Sul telefono, apri il menu in alto a sinistra.",

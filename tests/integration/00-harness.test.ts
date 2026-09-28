@@ -35,6 +35,9 @@ describe("embedded supabase replica", () => {
       "artifact_likes",
       "artifacts",
       "collections",
+      // Pending codes proving a seller owns their buyer-facing email and
+      // phone (20260926_contact_verification). Service-role only.
+      "contact_verifications",
       "follows",
       // Sign-in approval from a signed-in device: its sealed factor secret,
       // the off switch, and the requests (20260927_sign_in_approvals).
@@ -64,9 +67,6 @@ describe("embedded supabase replica", () => {
       "rate_limits",
       "reports",
       "security_events",
-      // Pending confirmation tokens for a seller's contact address
-      // (20260909_seller_email_verification). Service-role only.
-      "seller_email_verifications",
       "storefront_signals",
       "storefronts",
       "team_members",
