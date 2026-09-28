@@ -170,7 +170,7 @@ export function TwoFactorChallenge({
       ) : mode === "code" ? (
         <CodeForm next={next} email={email} factors={apps} onVerified={onCode} />
       ) : mode === "approve" ? (
-        <ApproveFromDevice next={next} email={email} onVerified={onApproved} />
+        <ApproveFromDevice next={next} onVerified={onApproved} />
       ) : (
         <RecoveryForm next={next} />
       )}

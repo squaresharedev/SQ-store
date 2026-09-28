@@ -44,10 +44,12 @@ const COPIED_MS = 1600;
  * then reverts. The check is keyed on a counter so copying twice in a row
  * replays the draw instead of sitting there already-drawn.
  *
- * Two shapes, one behaviour:
+ * Three shapes, one behaviour:
  * - `icon` (default): a bare icon button for sitting beside a value.
  * - `labelled`: the shared secondary button, for when copying is the point of
  *   the control rather than an affordance on something else.
+ * - `quiet`: icon plus the caller's own `copy` message as small muted text,
+ *   for a secondary way out that should not compete with the main action.
  *
  * Clipboard access can be denied (insecure context, permissions policy), so a
  * failure becomes a visible state rather than being silently swallowed — the
@@ -64,7 +66,7 @@ export function CopyButton({
 }: {
   /** Text placed on the clipboard. */
   value: string;
-  variant?: "icon" | "labelled";
+  variant?: "icon" | "labelled" | "quiet";
   className?: string;
 } & CopyButtonState) {
   const t = useTranslations();
@@ -89,7 +91,14 @@ export function CopyButton({
   }
 
   const isCopied = copied > 0;
-  const iconSize = variant === "labelled" ? "size-3.5" : "size-4";
+  const iconSize = variant === "icon" ? "size-4" : "size-3.5";
+  const accessibleName = state.disabled
+    ? t(state.messages.cannotCopyYet)
+    : failed
+      ? t(state.messages.failed)
+      : isCopied
+        ? t(state.messages.copied)
+        : t(state.messages.copy);
 
   // Remounted per copy (the key) so the draw animation replays.
   const icon = isCopied ? (
@@ -103,24 +112,23 @@ export function CopyButton({
       type="button"
       onClick={handleCopy}
       disabled={disabled}
-      aria-label={
-        state.disabled
-          ? t(state.messages.cannotCopyYet)
-          : failed
-            ? t(state.messages.failed)
-            : isCopied
-              ? t(state.messages.copied)
-              : t(state.messages.copy)
-      }
+      aria-label={accessibleName}
       className={cn(
         variant === "labelled"
           ? `${secondaryButtonClass} shrink-0 px-3 py-1.5 text-xs`
-          : cn(
-              "inline-flex size-8 shrink-0 items-center justify-center rounded-sm",
-              "text-muted-foreground hover:bg-accent hover:text-foreground",
-              transitionClass,
-              focusRingClass,
-            ),
+          : variant === "quiet"
+            ? cn(
+                "inline-flex shrink-0 items-center gap-1.5 rounded-sm px-1.5 py-1 font-inter text-xs",
+                "text-muted-foreground hover:text-foreground",
+                transitionClass,
+                focusRingClass,
+              )
+            : cn(
+                "inline-flex size-8 shrink-0 items-center justify-center rounded-sm",
+                "text-muted-foreground hover:bg-accent hover:text-foreground",
+                transitionClass,
+                focusRingClass,
+              ),
         isCopied && "text-success hover:text-success",
         failed && "text-destructive hover:text-destructive",
         disabled && "pointer-events-none opacity-40",
@@ -128,6 +136,8 @@ export function CopyButton({
       )}
     >
       {icon}
+      {/* Quiet: the caller's own words, so it can say WHAT it copies ("Copy link"). */}
+      {variant === "quiet" && accessibleName}
       {variant === "labelled" &&
         (failed
           ? t("Common.actions.copyFailed")

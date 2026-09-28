@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { RefreshCw } from "lucide-react";
+import { QrCode, RefreshCw } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { CopyButton } from "@/components/ui/CopyButton";
@@ -18,6 +18,7 @@ import {
   type StartApprovalResult,
 } from "@/lib/auth/sign-in-approval-actions";
 import type { ActionError } from "@/lib/errors";
+import { cn } from "@/lib/utils";
 
 /** How often the page asks whether the phone has answered. */
 const POLL_MS = 2000;
@@ -33,8 +34,6 @@ type Phase =
   | { kind: "lapsed" }
   | { kind: "failed"; error: ActionError | null; signedOut?: boolean };
 
-const THE_STEPS = ["camera", "open", "approve"] as const;
-
 /**
  * "Approve from your phone": a QR code that opens Square Share on a phone
  * where the person is already signed in, and a quiet wait until they tap
@@ -45,14 +44,16 @@ const THE_STEPS = ["camera", "open", "approve"] as const;
  * make this session aal2, and `onVerified` hands over to the moment of success.
  * Leaving (another method, a new code) withdraws the request, so a QR code
  * still on screen elsewhere stops working.
+ *
+ * Kept to one line of words: the viewfinder corners say "scan this", the
+ * phone's own page says who is asking and what to tap, and a phone that is
+ * not signed in is told so there.
  */
 export function ApproveFromDevice({
   next,
-  email,
   onVerified,
 }: {
   next: string;
-  email: string;
   onVerified: (next: string) => void;
 }) {
   const t = useTranslations("Auth.twoFactor");
@@ -131,91 +132,103 @@ export function ApproveFromDevice({
     setAttempt((count) => count + 1);
   }
 
-  const strong = (chunks: React.ReactNode) => (
-    <span className="font-medium text-foreground">{chunks}</span>
-  );
+  const failed = phase.kind === "denied" || phase.kind === "lapsed" || phase.kind === "failed";
 
   return (
     <div className="flex flex-col gap-5" data-approval-challenge={phase.kind}>
       <div>
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">{t("heading")}</h1>
-        <p className={`${helpTextClass} mt-1`}>
-          {email ? ta.rich("introAs", { email, strong }) : ta("intro")}
-        </p>
+        <h1 className="text-xl font-semibold tracking-tight text-foreground">{ta("heading")}</h1>
+        <p className={`${helpTextClass} mt-1`}>{ta("hint")}</p>
       </div>
 
-      {phase.kind === "loading" && (
-        <div className="flex items-center gap-3" role="status">
-          <span className="grid size-44 shrink-0 place-items-center border border-border bg-muted/40">
-            <Spinner />
-          </span>
-          <span className={infoTextClass}>{ta("loading")}</span>
-        </div>
-      )}
-
-      {phase.kind === "waiting" && (
-        <>
-          <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
-            <QrTile src={phase.request.qrCode} alt={ta("qrAlt")} />
-            <ol className="flex min-w-0 list-decimal flex-col gap-2 pl-5">
-              {THE_STEPS.map((step) => (
-                <li key={step} className={helpTextClass}>
-                  {ta(`steps.${step}`)}
-                </li>
-              ))}
-            </ol>
-          </div>
-          <p
-            role="status"
-            className="inline-flex items-center gap-2 font-inter text-sm font-medium text-foreground"
-            data-approval-url={phase.request.url}
-          >
-            <span aria-hidden className="size-2 animate-pulse rounded-full bg-foreground motion-reduce:animate-none" />
-            {ta("waiting")}
-          </p>
-          <div className="flex flex-col gap-2">
-            <p className={infoTextClass}>{ta("signedInThere")}</p>
-            <div className="flex items-center gap-2">
-              <span className={infoTextClass}>{ta("cantScan")}</span>
-              <CopyButton
-                value={phase.request.url}
-                messages={{
-                  copy: "Auth.twoFactor.approval.copyLink.copy",
-                  copied: "Auth.twoFactor.approval.copyLink.copied",
-                  failed: "Auth.twoFactor.approval.copyLink.failed",
-                }}
-              />
-            </div>
-          </div>
-        </>
-      )}
-
-      {phase.kind !== "loading" && phase.kind !== "waiting" && (
-        <div className="flex flex-col items-start gap-3">
-          <p role="alert" className="text-sm font-medium text-destructive">
-            {phase.kind === "denied"
-              ? ta("denied")
-              : phase.kind === "lapsed"
-                ? ta("lapsed")
-                : phase.error
-                  ? resolve(phase.error.message)
-                  : ta("failed")}
-          </p>
-          {phase.kind === "failed" && phase.signedOut ? (
-            <Link
-              href={`/login?next=${encodeURIComponent(next)}`}
-              className="font-inter text-sm font-medium text-foreground underline underline-offset-4"
-            >
-              {t("signInAgain")}
-            </Link>
+      <div className="flex flex-col items-center gap-4">
+        <ScanFrame>
+          {phase.kind === "waiting" ? (
+            <QrTile src={phase.request.qrCode} alt={ta("qrAlt")} className="size-48 border-0" />
           ) : (
-            <Button type="button" variant="secondary" onClick={newCode}>
-              <RefreshCw aria-hidden className="size-4" />
-              {ta("newCode")}
-            </Button>
+            <span className="grid size-48 place-items-center bg-muted/40 text-muted-foreground">
+              {phase.kind === "loading" ? <Spinner /> : <QrCode aria-hidden className="size-10 opacity-40" />}
+            </span>
           )}
-        </div>
-      )}
+        </ScanFrame>
+
+        {phase.kind === "loading" && (
+          <p role="status" className={infoTextClass}>
+            {ta("loading")}
+          </p>
+        )}
+
+        {phase.kind === "waiting" && (
+          <div className="flex flex-col items-center gap-1">
+            <p
+              role="status"
+              className="inline-flex items-center gap-2 font-inter text-sm font-medium text-foreground"
+              data-approval-url={phase.request.url}
+            >
+              <span aria-hidden className="size-2 animate-pulse rounded-full bg-foreground motion-reduce:animate-none" />
+              {ta("waiting")}
+            </p>
+            {/* For a phone that cannot scan it, or is signed in somewhere the
+                camera does not open (an installed app). */}
+            <CopyButton
+              variant="quiet"
+              value={phase.request.url}
+              messages={{
+                copy: "Auth.twoFactor.approval.copyLink.copy",
+                copied: "Auth.twoFactor.approval.copyLink.copied",
+                failed: "Auth.twoFactor.approval.copyLink.failed",
+              }}
+            />
+          </div>
+        )}
+
+        {failed && (
+          <div className="flex flex-col items-center gap-3 text-center">
+            <p role="alert" className="text-sm font-medium text-destructive">
+              {phase.kind === "denied"
+                ? ta("denied")
+                : phase.kind === "lapsed"
+                  ? ta("lapsed")
+                  : phase.error
+                    ? resolve(phase.error.message)
+                    : ta("failed")}
+            </p>
+            {phase.kind === "failed" && phase.signedOut ? (
+              <Link
+                href={`/login?next=${encodeURIComponent(next)}`}
+                className="font-inter text-sm font-medium text-foreground underline underline-offset-4"
+              >
+                {t("signInAgain")}
+              </Link>
+            ) : (
+              <Button type="button" variant="secondary" onClick={newCode}>
+                <RefreshCw aria-hidden className="size-4" />
+                {ta("newCode")}
+              </Button>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/** Where each viewfinder corner sits, and which two edges it draws. */
+const CORNERS = [
+  "left-0 top-0 border-l-2 border-t-2",
+  "right-0 top-0 border-r-2 border-t-2",
+  "bottom-0 left-0 border-b-2 border-l-2",
+  "bottom-0 right-0 border-b-2 border-r-2",
+] as const;
+
+/** Viewfinder corners round the code: "point a camera here", without words. */
+function ScanFrame({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="relative p-3">
+      {CORNERS.map((corner) => (
+        <span key={corner} aria-hidden className={cn("absolute size-5 border-foreground", corner)} />
+      ))}
+      {children}
     </div>
   );
 }
