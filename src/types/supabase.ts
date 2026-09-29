@@ -580,6 +580,7 @@ export type Database = {
       }
       mfa_sign_in_approvals: {
         Row: {
+          approval_code: string | null
           browser: string | null
           country: string | null
           created_at: string
@@ -595,6 +596,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          approval_code?: string | null
           browser?: string | null
           country?: string | null
           created_at?: string
@@ -610,6 +612,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          approval_code?: string | null
           browser?: string | null
           country?: string | null
           created_at?: string

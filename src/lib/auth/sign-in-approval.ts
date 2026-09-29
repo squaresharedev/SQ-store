@@ -5,6 +5,7 @@ import type { createClient } from "@/lib/supabase/server";
 import { APPROVAL_FACTOR_NAME, isApprovalFactor } from "@/lib/auth/assurance";
 import type { DeviceLabel } from "@/lib/auth/device-label";
 import { base64UrlEncode, open, passkeySealingConfigured, seal } from "@/lib/auth/passkey-crypto";
+import { TOTP_STEP_SECONDS, totpCode } from "@/lib/auth/totp";
 import { approveSignInPath } from "@/lib/auth/paths";
 
 /**
@@ -25,6 +26,13 @@ import { approveSignInPath } from "@/lib/auth/paths";
  * the server compute that factor's code and complete it, for the waiting
  * session only. GoTrue therefore still issues aal2, and the app gate, the
  * restrictive RLS and step-up all keep working unchanged.
+ *
+ * WHO HOLDS THE SECRET. Only the APPROVING side ever opens the factor's sealed
+ * secret: at the moment of approval it computes ONE code and leaves it on the
+ * request (approval_code). The waiting session spends that code at GoTrue,
+ * within seconds, and never sees the secret. So the waiting server needs no
+ * sealing key at all (a local dev server can finish a sign-in the live site
+ * approved), and a leaked row is worth one code for under a minute.
  *
  * WHO COMPLETES THE FACTOR MATTERS. GoTrue deletes every aal1 session of an
  * account whenever any factor is verified (InvalidateSessionsWithAALLessThan,
@@ -49,11 +57,14 @@ type ServerClient = Awaited<ReturnType<typeof createClient>>;
 export const APPROVAL_REQUEST_SECONDS = 5 * 60;
 
 /**
- * How long an approval waits for the waiting session to collect it. That page
- * checks every few seconds, so this is slack for a tab the browser throttled,
- * not a window anyone should need.
+ * How long an approval waits for the waiting session to collect it, which is
+ * also how long its code must stay good. The code is for the step AFTER the
+ * current one and GoTrue accepts a step either side of its own, so it is valid
+ * for at least 60 seconds from when it was made; 50 leaves margin for clock
+ * drift. The waiting page asks every couple of seconds (six in a background
+ * tab), so this is slack, not a window anyone should need.
  */
-const COLLECT_SECONDS = 2 * 60;
+const COLLECT_SECONDS = 50;
 
 /** Finished requests are kept this long (the account's own housekeeping). */
 const KEEP_SECONDS = 24 * 60 * 60;
@@ -66,13 +77,58 @@ const OPT_OUTS = "mfa_approval_opt_outs";
 // Configuration
 // ---------------------------------------------------------------------------
 
-/** The app's own origin, which the QR code points at. Never the request's Host. */
+/** The app's own origin. Never the request's Host. */
 function appOrigin(): string | null {
   try {
     return new URL(process.env.NEXT_PUBLIC_APP_URL ?? "").origin;
   } catch {
     return null;
   }
+}
+
+/**
+ * Where a QR code's link points: this app's own /approve page, except on a
+ * DEVELOPMENT server, where APPROVAL_ORIGIN may name the deployed app instead.
+ *
+ * Why: a local dev server runs on localhost against the same Supabase project
+ * as production. A phone cannot open localhost, and the account's passkeys
+ * belong to squareshare.eu, which a browser refuses on localhost, so without
+ * this there is no way through 2FA locally. With it, the phone approves on the
+ * real site, where it is signed in; the request lives in the shared database,
+ * and the dev server collects it like any other.
+ *
+ * Nothing about WHO may approve changes: the approving page is production's,
+ * with all its checks, and only a server holding the service role and sealing
+ * keys (the dev server's own .env.local) can collect. Guarded so it can never
+ * redirect production's links: ignored in a production build, and only an
+ * https origin with no path is accepted. Pure, so it is tested directly.
+ */
+export function approvalLinkOrigin(
+  // Spelled out, not `process.env` whole: the build inlines NODE_ENV and
+  // NEXT_PUBLIC_* only where they are written literally, and the production
+  // guard below must not depend on the Worker's runtime env having NODE_ENV.
+  env: { NODE_ENV?: string; NEXT_PUBLIC_APP_URL?: string; APPROVAL_ORIGIN?: string } = {
+    NODE_ENV: process.env.NODE_ENV,
+    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+    APPROVAL_ORIGIN: process.env.APPROVAL_ORIGIN,
+  },
+): string | null {
+  let own: string | null;
+  try {
+    own = new URL(env.NEXT_PUBLIC_APP_URL ?? "").origin;
+  } catch {
+    own = null;
+  }
+  const override = env.APPROVAL_ORIGIN?.trim();
+  if (!override || env.NODE_ENV === "production") return own;
+  try {
+    const url = new URL(override);
+    if (url.protocol === "https:" && url.origin === override.replace(/\/+$/, "")) return url.origin;
+  } catch {
+    // Falls through to the warning.
+  }
+  console.warn("[approval] APPROVAL_ORIGIN ignored: it must be a bare https origin");
+  return own;
 }
 
 /** Whether approval can work in this deployment at all (an origin + the sealing key). */
@@ -187,7 +243,7 @@ export async function createApprovalRequest(input: {
   device: DeviceLabel;
   country: string | null;
 }): Promise<NewApprovalRequest | null> {
-  const origin = appOrigin();
+  const origin = approvalLinkOrigin();
   if (!origin) return null;
   try {
     const admin = createAdminClient();
@@ -276,6 +332,8 @@ export async function decideApprovalRequest(input: {
   userId: string;
   decision: "approve" | "deny";
   factorId?: string;
+  /** Approve only: the one code for that factor (see approvalCodeFrom). */
+  code?: string;
 }): Promise<boolean> {
   try {
     const admin = createAdminClient();
@@ -285,6 +343,7 @@ export async function decideApprovalRequest(input: {
         status: input.decision === "approve" ? "approved" : "denied",
         decided_at: new Date().toISOString(),
         factor_id: input.decision === "approve" ? (input.factorId ?? null) : null,
+        approval_code: input.decision === "approve" ? (input.code ?? null) : null,
       })
       .eq("id", input.id)
       .eq("user_id", input.userId)
@@ -335,9 +394,12 @@ export async function waitingStatus(request: OwnRequest): Promise<WaitingStatus 
 /**
  * Collect an approval, once: one conditional UPDATE marks it used, so two
  * tabs of the same session racing each other cannot both spend it. Returns
- * the factor to complete, or null (not approved, too late, not this session's).
+ * the factor to complete and the code to complete it with, or null (not
+ * approved, too late, not this session's). The code is wiped straight after.
  */
-export async function collectApproval(request: OwnRequest): Promise<string | null> {
+export async function collectApproval(
+  request: OwnRequest,
+): Promise<{ factorId: string; code: string } | null> {
   try {
     const admin = createAdminClient();
     const { data, error } = await admin
@@ -349,9 +411,13 @@ export async function collectApproval(request: OwnRequest): Promise<string | nul
       .eq("status", "approved")
       .gt("decided_at", new Date(Date.now() - COLLECT_SECONDS * 1000).toISOString())
       .not("factor_id", "is", null)
-      .select("factor_id");
+      .not("approval_code", "is", null)
+      .select("factor_id, approval_code");
     if (error || !data || data.length !== 1) return null;
-    return data[0].factor_id;
+    // Spent: nothing left on the row that could be used again. Best-effort,
+    // because the code expires within a minute regardless.
+    await admin.from(REQUESTS).update({ approval_code: null }).eq("id", request.id);
+    return { factorId: data[0].factor_id as string, code: data[0].approval_code as string };
   } catch {
     return null;
   }
@@ -391,13 +457,13 @@ function secretContext(userId: string, factorId: string): string {
 export async function prepareApprovalFactor(
   supabase: ServerClient,
   user: Pick<User, "id" | "factors">,
-): Promise<string | null> {
+): Promise<{ factorId: string; code: string } | null> {
   const factors = user.factors ?? [];
   try {
     const admin = createAdminClient();
     const { data: stored, error } = await admin
       .from(FACTORS)
-      .select("factor_id")
+      .select("factor_id, sealed_secret")
       .eq("user_id", user.id)
       .maybeSingle();
     if (error) {
@@ -407,7 +473,14 @@ export async function prepareApprovalFactor(
     // Verified, or still pending from an approval not yet collected: either
     // can be completed, and replacing a pending one would strand that approval.
     if (stored && factors.some((factor) => factor.id === stored.factor_id)) {
-      return stored.factor_id;
+      const secret = await open(stored.sealed_secret, secretContext(user.id, stored.factor_id));
+      if (!secret) {
+        // Sealed under another key: never destroyed on a guess (removing a
+        // verified factor would sign out every device it let in).
+        console.error("[approval] sealed secret would not open (key changed?)");
+        return null;
+      }
+      return { factorId: stored.factor_id, code: await approvalCodeFrom(secret) };
     }
 
     // Nothing usable. Clear what is left (GoTrue names are unique per account,
@@ -440,30 +513,21 @@ export async function prepareApprovalFactor(
       await supabase.auth.mfa.unenroll({ factorId: data.id }).catch(() => undefined);
       return null;
     }
-    return data.id;
+    return { factorId: data.id, code: await approvalCodeFrom(data.totp.secret) };
   } catch (err) {
     console.error("[approval] preparing the factor threw:", err instanceof Error ? err.message : String(err));
     return null;
   }
 }
 
-/** The approval factor's secret, for completeFactor. Null if it is not this account's. */
-export async function approvalSecret(userId: string, factorId: string): Promise<string | null> {
-  try {
-    const admin = createAdminClient();
-    const { data, error } = await admin
-      .from(FACTORS)
-      .select("sealed_secret")
-      .eq("user_id", userId)
-      .eq("factor_id", factorId)
-      .maybeSingle();
-    if (error || !data) return null;
-    const secret = await open(data.sealed_secret, secretContext(userId, factorId));
-    if (!secret) console.error("[approval] sealed secret would not open (key changed?)");
-    return secret;
-  } catch {
-    return null;
-  }
+/**
+ * The ONE code handed to the waiting session: the factor's code for the step
+ * AFTER the current one. GoTrue accepts a step either side of its own, so it
+ * is good from now until the end of the step after that (at least 60 seconds),
+ * which is what COLLECT_SECONDS assumes.
+ */
+export async function approvalCodeFrom(secret: string): Promise<string> {
+  return totpCode(secret, Math.floor(Date.now() / 1000 / TOTP_STEP_SECONDS) + 1);
 }
 
 /**

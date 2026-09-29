@@ -187,6 +187,17 @@ session of the SAME account approving a request is what makes the server
 compute that factor's code and complete it, for the waiting session only.
 `lib/auth/sign-in-approval.ts` holds the design notes.
 
+**Who holds the secret.** Only the APPROVING device opens the factor's
+sealed secret. At the moment of approval it computes ONE code (for the step
+after the current one, so good for 60+ seconds) and leaves it on the request
+(`approval_code`, migration `20260929_approval_code.sql`). The waiting
+session spends that code once at GoTrue and the row is wiped; it never sees
+the secret, so the waiting server needs no `MFA_PASSKEY_KEY`. That is what
+lets a local dev server (own key) finish a sign-in the live site approved:
+set `APPROVAL_ORIGIN=https://dashboard.squareshare.eu` in `.env.local` and its
+QR codes open the live approve page (dev builds only, https origin only,
+ignored in production; `approvalLinkOrigin`).
+
 **The GoTrue fact it is built around** (read in its source, `verifyTOTPFactor`):
 every factor verify deletes every OTHER aal1 session of the account
 (`InvalidateSessionsWithAALLessThan`) and every unverified TOTP factor. If the

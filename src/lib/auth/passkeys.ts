@@ -520,6 +520,19 @@ export async function completeFactor(
   factorId: string,
   secret: string,
 ): Promise<{ ok: true } | { ok: false; reason: "invalid" | "unavailable" }> {
+  return completeFactorWithCode(supabase, factorId, await totpCode(secret));
+}
+
+/**
+ * The same with a code someone else computed: sign-in approval, where the
+ * APPROVING device opens the secret and hands the waiting session one
+ * short-lived code (lib/auth/sign-in-approval.ts).
+ */
+export async function completeFactorWithCode(
+  supabase: ServerClient,
+  factorId: string,
+  code: string,
+): Promise<{ ok: true } | { ok: false; reason: "invalid" | "unavailable" }> {
   try {
     const challenge = await supabase.auth.mfa.challenge({ factorId });
     if (challenge.error || !challenge.data) {
@@ -529,7 +542,7 @@ export async function completeFactor(
     const verified = await supabase.auth.mfa.verify({
       factorId,
       challengeId: challenge.data.id,
-      code: await totpCode(secret),
+      code,
     });
     if (verified.error) {
       console.warn("[passkeys] factor verify failed:", verified.error.code, verified.error.message);

@@ -6,11 +6,10 @@ import { createClient } from "@/lib/supabase/server";
 import { getSessionState } from "@/lib/auth/session";
 import { afterChallenge, syncAccountLocale } from "@/lib/auth/challenge";
 import { alertTwoFactorChange, requireStepUpState, STEP_UP_FIELDS } from "@/lib/auth/mfa";
-import { completeFactor } from "@/lib/auth/passkeys";
+import { completeFactorWithCode } from "@/lib/auth/passkeys";
 import { PASSWORD_SETTINGS_PATH } from "@/lib/auth/paths";
 import { countryFromHeader, deviceFromUserAgent } from "@/lib/auth/device-label";
 import {
-  approvalSecret,
   approvalsConfigured,
   approvalsEnabled,
   cancelApprovalRequest,
@@ -147,13 +146,11 @@ export async function checkSignInApproval(
 
   // Approved. Switched off since? Then it no longer counts.
   if ((await approvalsEnabled(user.id)) !== true) return { error: UNAVAILABLE, lapsed: true };
-  const factorId = await collectApproval(own);
-  if (!factorId) return { lapsed: true };
-  const secret = await approvalSecret(user.id, factorId);
-  if (!secret) return { error: UNAVAILABLE, lapsed: true };
+  const collected = await collectApproval(own);
+  if (!collected) return { lapsed: true };
 
   const supabase = await createClient();
-  const completed = await completeFactor(supabase, factorId, secret);
+  const completed = await completeFactorWithCode(supabase, collected.factorId, collected.code);
   if (!completed.ok) return { error: UNAVAILABLE, lapsed: true };
 
   await syncAccountLocale(supabase, user.id);
@@ -236,9 +233,17 @@ export async function decideSignInApproval(
     return failed(UNAVAILABLE);
   }
   const supabase = await createClient();
-  const factorId = await prepareApprovalFactor(supabase, user);
-  if (!factorId) return failed(UNAVAILABLE);
-  if (!(await decideApprovalRequest({ id: request.id, userId: user.id, decision, factorId }))) {
+  const prepared = await prepareApprovalFactor(supabase, user);
+  if (!prepared) return failed(UNAVAILABLE);
+  if (
+    !(await decideApprovalRequest({
+      id: request.id,
+      userId: user.id,
+      decision,
+      factorId: prepared.factorId,
+      code: prepared.code,
+    }))
+  ) {
     return failed(invalidInput(msg("Errors.approval.expired")));
   }
   // A new device is getting in on this say-so. Told by email too, so an

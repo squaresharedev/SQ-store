@@ -580,7 +580,7 @@ describe("sign-in approval invariants", () => {
   it("the approving side never verifies or challenges a factor", () => {
     const decide = body("lib/auth/sign-in-approval-actions.ts::decideSignInApproval");
     expect(decide).toMatch(/prepareApprovalFactor\(/);
-    expect(decide).not.toMatch(/completeFactor\s*\(|mfa\.(verify|challenge)\s*\(/);
+    expect(decide).not.toMatch(/completeFactor\w*\s*\(|mfa\.(verify|challenge)\s*\(/);
     expect(moduleFunction("prepareApprovalFactor")).not.toMatch(/mfa\.(verify|challenge)\s*\(/);
   });
 
@@ -597,7 +597,14 @@ describe("sign-in approval invariants", () => {
     const check = body("lib/auth/sign-in-approval-actions.ts::checkSignInApproval");
     const spent = check.indexOf("collectApproval(");
     expect(spent).toBeGreaterThan(-1);
-    expect(spent).toBeLessThan(check.indexOf("completeFactor("));
+    expect(spent).toBeLessThan(check.indexOf("completeFactorWithCode("));
+  });
+
+  it("the waiting side never opens the sealed secret: it spends the one code it was handed", () => {
+    const check = body("lib/auth/sign-in-approval-actions.ts::checkSignInApproval");
+    expect(check).not.toMatch(/\bopen\s*\(|approvalSecret|sealed_secret|passkey-crypto/);
+    // And the collect wipes the code once it is spent.
+    expect(moduleFunction("collectApproval")).toMatch(/approval_code:\s*null/);
   });
 
   it("an approval is spent by one conditional update, scoped to the waiting session", () => {
