@@ -1,13 +1,21 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { SecuritySection } from "@/components/settings/security/SecuritySection";
+import {
+  SecuritySection,
+  type SecurityFactor,
+} from "@/components/settings/security/SecuritySection";
+import { accountFactors } from "@/lib/auth/account-factors";
 import { accountHasPassword } from "@/lib/auth/has-password";
 import { RECENT_SIGN_IN_SECONDS, signedInRecently } from "@/lib/auth/assurance";
 import { remainingRecoveryCodes } from "@/lib/auth/mfa";
 import { passkeysConfigured } from "@/lib/auth/passkeys";
 import { SECURITY_SETTINGS_PATH } from "@/lib/auth/paths";
 import { getAssurance, requireUser } from "@/lib/auth/session";
-import { approvalsConfigured, approvalsEnabled } from "@/lib/auth/sign-in-approval";
+import {
+  approvalsConfigured,
+  approvalsEnabled,
+  approvalsOnByDefault,
+} from "@/lib/auth/sign-in-approval";
 import { SECURITY_EVENT_LABELS, isSecurityEvent } from "@/lib/security/events";
 import { createClient } from "@/lib/supabase/server";
 
@@ -31,16 +39,34 @@ export default async function SecuritySettingsPage({
   searchParams: Promise<{ recovered?: string; setup?: string }>;
 }) {
   const user = await requireUser(SECURITY_SETTINGS_PATH);
-  const [assurance, hasPassword, params, passkeysAvailable, approvalReady, approvalOn] =
+  const [assurance, hasPassword, params, passkeysAvailable, approvalReady, recorded] =
     await Promise.all([
       getAssurance(),
       accountHasPassword(user.id),
       searchParams,
       passkeysConfigured(),
       approvalsConfigured(),
-      approvalsEnabled(user.id),
+      accountFactors(user),
     ]);
   const enrolled = assurance?.enrolled ?? false;
+  const approvalOn = assurance ? await approvalsEnabled(user.id, assurance) : null;
+
+  // Every factor on the account, checked against the app's own records, so one
+  // made around the app (straight at the auth server) is shown, never hidden.
+  // Only the approval factor stays out of the list: it has a row of its own.
+  // When the records can't be read, the names alone are the fallback.
+  const factors: SecurityFactor[] = recorded
+    ? recorded.flatMap(({ id, name, createdAt, kind }) =>
+        kind === "approval"
+          ? []
+          : [{ id, name, createdAt, type: kind === "app" ? ("totp" as const) : kind }],
+      )
+    : (assurance?.factors ?? []).map(({ id, name, createdAt, type }) => ({
+        id,
+        name,
+        createdAt,
+        type,
+      }));
 
   const supabase = await createClient();
   const [remaining, activity] = await Promise.all([
@@ -57,15 +83,12 @@ export default async function SecuritySettingsPage({
   return (
     <SecuritySection
       enrolled={enrolled}
-      factors={(assurance?.factors ?? []).map(({ id, name, createdAt, type }) => ({
-        id,
-        name,
-        createdAt,
-        type,
-      }))}
+      factors={factors}
       passkeysAvailable={passkeysAvailable}
       // Null (row hidden) where approval cannot work, or its state can't be read.
       approvalsEnabled={approvalReady ? approvalOn : null}
+      // Off unless asked for when the account's only ways in are passkeys.
+      approvalsOffByDefault={assurance ? !approvalsOnByDefault(assurance) : false}
       hasPassword={hasPassword}
       // A sign-in in the last few minutes is proof on its own: setup then asks
       // for no password (and a Google-only account need not sign in again).

@@ -136,6 +136,10 @@
       "approvalsEnabled": {
         "title": "Zatwierdzanie logowania jest włączone",
         "body": "Urządzenia, na których jesteś zalogowany, mogą teraz zatwierdzać nowe logowania na twoje konto. Jeśli to nie ty, zmień hasło teraz."
+      },
+      "stepUpLockedOut": {
+        "title": "Zbyt wiele błędnych kodów dwuskładnikowych",
+        "body": "Ktoś zalogowany na twoje konto podał zbyt wiele błędnych kodów dwuskładnikowych, próbując zmienić ustawienie, więc ta czynność jest wstrzymana na kilka minut. Jeśli to nie ty, zmień hasło i wyloguj się ze wszystkich urządzeń."
       }
     },
     "order": {

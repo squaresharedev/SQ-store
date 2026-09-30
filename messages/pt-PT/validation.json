@@ -347,7 +347,8 @@
     "repeated": "Essa palavra-passe é demasiado fácil de adivinhar. Experimente uma combinação mais longa de palavras.",
     "sequence": "Essa palavra-passe contém uma sequência de teclado comum. Experimente outra coisa.",
     "containsIdentity": "A palavra-passe não pode conter o seu endereço de e-mail ou nome de utilizador.",
-    "weakMix": "Combine maiúsculas e minúsculas, um número ou um símbolo, ou utilize {length} ou mais carateres."
+    "weakMix": "Combine maiúsculas e minúsculas, um número ou um símbolo, ou utilize {length} ou mais carateres.",
+    "breached": "Esta palavra-passe apareceu numa fuga de dados, por isso os atacantes já a experimentam. Escolha outra."
   },
   "team": {
     "invalidStore": "Referência de loja inválida.",

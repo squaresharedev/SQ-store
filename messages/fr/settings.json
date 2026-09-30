@@ -539,7 +539,9 @@
       "setUp": "Configurer l’authentification à deux facteurs",
       "takesAMinute": "Prend environ une minute.",
       "kindPasskey": "Clé d’accès",
-      "kindApp": "Application d’authentification"
+      "kindApp": "Application d’authentification",
+      "kindUnknown": "Non ajouté dans Square Share",
+      "unknownWarning": "Votre compte a un moyen de connexion qui n’a pas été ajouté dans Square Share. Si ce n’est pas vous qui l’avez ajouté, supprimez-le maintenant et changez votre mot de passe."
     },
     "remove": {
       "titleLast": "Désactiver l’authentification à deux facteurs ?",
@@ -665,7 +667,7 @@
     },
     "approvals": {
       "title": "Approuver depuis un appareil connecté",
-      "description": "Lorsque vous vous connectez depuis un nouvel appareil, scannez le code QR avec un téléphone sur lequel vous êtes déjà connecté et appuyez sur Approuver. Pratique lorsque votre clé d'accès est sur un autre appareil.",
+      "description": "Lorsque vous vous connectez depuis un nouvel endroit, scannez le code QR avec un téléphone sur lequel vous êtes déjà connecté et appuyez sur le numéro correspondant. Pratique lorsque votre clé d’accès est sur un autre appareil.",
       "statusOn": "Activée",
       "statusOff": "Désactivée",
       "turnOn": "Activer",
@@ -674,7 +676,8 @@
       "confirmOnTitle": "Activer l'approbation des connexions ?",
       "confirmOnDescription": "Tout téléphone ou ordinateur sur lequel vous êtes connecté pourra approuver une nouvelle connexion à votre compte.",
       "confirmOffTitle": "Désactiver l'approbation des connexions ?",
-      "confirmOffDescription": "Les nouvelles connexions nécessiteront votre clé d'accès, votre application d'authentification ou un code de récupération. Les appareils déjà connectés restent connectés."
+      "confirmOffDescription": "Les nouvelles connexions nécessiteront votre clé d'accès, votre application d'authentification ou un code de récupération. Les appareils déjà connectés restent connectés.",
+      "offByDefault": "Désactivée par défaut, car vous vous connectez avec des clés d’accès, qui ne peuvent pas être hameçonnées. Activez-la si vous la souhaitez en secours."
     }
   },
   "team": {

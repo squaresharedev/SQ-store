@@ -539,7 +539,9 @@
       "setUp": "Nastavit dvoufázové ověření",
       "takesAMinute": "Zabere to asi minutu.",
       "kindPasskey": "Přístupový klíč",
-      "kindApp": "Ověřovací aplikace"
+      "kindApp": "Ověřovací aplikace",
+      "kindUnknown": "Nepřidáno v Square Share",
+      "unknownWarning": "Váš účet má způsob přihlášení, který nebyl přidán v Square Share. Pokud jste ho nepřidali vy, ihned ho odeberte a změňte si heslo."
     },
     "remove": {
       "titleLast": "Vypnout dvoufázové ověření?",
@@ -665,7 +667,7 @@
     },
     "approvals": {
       "title": "Schválit ze zařízení, kde jste přihlášeni",
-      "description": "Když se přihlašujete na novém místě, naskenujte QR kód telefonem, kde jste již přihlášeni, a klepněte na Schválit. Praktické, když je váš přístupový klíč na jiném zařízení.",
+      "description": "Když se přihlašujete na novém místě, naskenujte QR kód telefonem, kde jste již přihlášeni, a klepněte na odpovídající číslo. Praktické, když je váš přístupový klíč na jiném zařízení.",
       "statusOn": "Zapnuto",
       "statusOff": "Vypnuto",
       "turnOn": "Zapnout",
@@ -674,7 +676,8 @@
       "confirmOnTitle": "Zapnout schvalování přihlášení?",
       "confirmOnDescription": "Jakýkoli telefon nebo počítač, kde jste přihlášeni, bude moci schválit nové přihlášení k vašemu účtu.",
       "confirmOffTitle": "Vypnout schvalování přihlášení?",
-      "confirmOffDescription": "Nová přihlášení budou vyžadovat váš přístupový klíč, ověřovací aplikaci nebo záložní kód. Zařízení, která jsou již přihlášena, přihlášena zůstanou."
+      "confirmOffDescription": "Nová přihlášení budou vyžadovat váš přístupový klíč, ověřovací aplikaci nebo záložní kód. Zařízení, která jsou již přihlášena, přihlášena zůstanou.",
+      "offByDefault": "Ve výchozím nastavení je vypnuto, protože se přihlašujete přístupovými klíči, na které phishing neplatí. Zapněte to, pokud to chcete mít jako zálohu."
     }
   },
   "team": {

@@ -2,14 +2,17 @@
 
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getSessionState } from "@/lib/auth/session";
 import { afterChallenge, syncAccountLocale } from "@/lib/auth/challenge";
+import { secondFactorIsFresh } from "@/lib/auth/assurance";
 import { alertTwoFactorChange, requireStepUpState, STEP_UP_FIELDS } from "@/lib/auth/mfa";
 import { completeFactorWithCode } from "@/lib/auth/passkeys";
-import { PASSWORD_SETTINGS_PATH } from "@/lib/auth/paths";
+import { PASSWORD_SETTINGS_PATH, approveSignInPath, signInPath } from "@/lib/auth/paths";
 import { countryFromHeader, deviceFromUserAgent } from "@/lib/auth/device-label";
 import {
+  APPROVER_MAX_AGE_SECONDS,
   approvalsConfigured,
   approvalsEnabled,
   cancelApprovalRequest,
@@ -80,7 +83,7 @@ export async function startSignInApproval(): Promise<StartApprovalResult> {
   if (state.kind !== "needs_mfa") return { error: SESSION_EXPIRED };
   const { user, assurance } = state;
   if (!assurance.sessionId) return { error: SESSION_EXPIRED };
-  if (!(await approvalsConfigured()) || (await approvalsEnabled(user.id)) !== true) {
+  if (!(await approvalsConfigured()) || (await approvalsEnabled(user.id, assurance)) !== true) {
     return { error: UNAVAILABLE };
   }
 
@@ -145,7 +148,7 @@ export async function checkSignInApproval(
   if (status === "expired" || status === "gone") return { lapsed: true };
 
   // Approved. Switched off since? Then it no longer counts.
-  if ((await approvalsEnabled(user.id)) !== true) return { error: UNAVAILABLE, lapsed: true };
+  if ((await approvalsEnabled(user.id, assurance)) !== true) return { error: UNAVAILABLE, lapsed: true };
   const collected = await collectApproval(own);
   if (!collected) return { lapsed: true };
 
@@ -175,32 +178,66 @@ export async function cancelSignInApproval(requestId: string): Promise<void> {
 // ---------------------------------------------------------------------------
 
 export type DecideApprovalState = ActionState & {
-  /** What was decided, for the page's closing words. */
-  decided?: "approve" | "deny";
+  /** What was decided, for the page's closing words. "mismatch": the wrong
+   *  number was picked, so the request was denied. */
+  decided?: "approve" | "deny" | "mismatch";
 };
+
+/**
+ * Tell the owner a sign-in was refused here: the password was right, so it is
+ * worth the inbox as well as the log. At most one alert per quarter hour: an
+ * attacker holding the password can start ten requests in that time, and each
+ * refusal must not become a separate message. Every refusal is still logged.
+ */
+async function alertDenied(user: { id: string; email?: string | null }): Promise<void> {
+  const firstInWindow = await rateLimitKey(
+    `approval-deny-alert:${user.id}`,
+    "mfa_approval_deny_alert",
+    RATE_LIMITS.mfaApprovalDenyAlert,
+  );
+  if (!firstInWindow) {
+    await recordSecurityEvent({ userId: user.id, event: "mfa.sign_in_denied" });
+    return;
+  }
+  await alertSecurityEvent(user.id, "mfa.sign_in_denied", {
+    title: { key: "Notifications.messages.security.signInDenied.title" },
+    body: { key: "Notifications.messages.security.signInDenied.body" },
+    href: PASSWORD_SETTINGS_PATH,
+    emailTo: user.email ?? null,
+  });
+}
 
 /**
  * Approve or deny, from the /approve page on a signed-in device. The token is
  * the QR code's own; the request it names must belong to the account signed
- * in HERE and still be open. Approving first prepares the approval factor on
- * this (aal2) session's client, and never verifies anything: see
- * lib/auth/sign-in-approval.ts for why that would sign the waiting device out.
+ * in HERE and still be open.
+ *
+ * NUMBER MATCHING. Approving means picking the number the waiting device shows
+ * (`number`). Someone who talked the owner into opening a link cannot see
+ * that screen, so a wrong pick is treated as a refusal, never as a retry.
+ *
+ * Approving also needs THIS device to have passed two-factor within
+ * APPROVER_MAX_AGE_SECONDS: sessions never expire on this plan, and a phone
+ * signed in long ago must not approve sign-ins forever. It then prepares the
+ * approval factor on this (aal2) session's client, and never verifies anything:
+ * see lib/auth/sign-in-approval.ts for why that would sign the waiting device out.
  */
 export async function decideSignInApproval(
   _prev: DecideApprovalState,
   formData: FormData,
 ): Promise<DecideApprovalState> {
-  const rejected = unknownField(formData, ["token", "decision"]);
+  const rejected = unknownField(formData, ["token", "decision", "number"]);
   if (rejected) return rejected;
 
   const state = await getSessionState();
   if (state.kind !== "signed_in") {
     return failed(actionError("session_expired", msg("Errors.form.sessionExpired")));
   }
-  const { user } = state;
+  const { user, assurance } = state;
 
-  const decision = formData.get("decision");
-  if (decision !== "approve" && decision !== "deny") {
+  const denying = formData.get("decision") === "deny";
+  const picked = formData.get("number");
+  if (!denying && typeof picked !== "string") {
     return failed(invalidInput(msg("Errors.approval.expired")));
   }
   const token = formData.get("token");
@@ -211,25 +248,25 @@ export async function decideSignInApproval(
   }
 
   const request = await findApprovalRequest(token);
-  if (!request || !request.open) return failed(invalidInput(msg("Errors.approval.expired")));
+  if (!request || !request.open || request.matchCode === null) {
+    return failed(invalidInput(msg("Errors.approval.expired")));
+  }
   if (request.userId !== user.id) return failed(invalidInput(msg("Errors.approval.otherAccount")));
 
-  if (decision === "deny") {
-    if (!(await decideApprovalRequest({ id: request.id, userId: user.id, decision }))) {
+  const matched =
+    !denying && /^\d{2}$/.test(String(picked)) && Number(picked) === request.matchCode;
+  if (!matched) {
+    if (!(await decideApprovalRequest({ id: request.id, userId: user.id, decision: "deny" }))) {
       return failed(invalidInput(msg("Errors.approval.expired")));
     }
-    // The password was right and the person says it was not them: worth the
-    // inbox as well as the log, like a lockout.
-    await alertSecurityEvent(user.id, "mfa.sign_in_denied", {
-      title: { key: "Notifications.messages.security.signInDenied.title" },
-      body: { key: "Notifications.messages.security.signInDenied.body" },
-      href: PASSWORD_SETTINGS_PATH,
-      emailTo: user.email ?? null,
-    });
-    return { decided: "deny" };
+    await alertDenied(user);
+    return { decided: denying ? "deny" : "mismatch" };
   }
 
-  if ((await approvalsEnabled(user.id)) !== true || !(await approvalsConfigured())) {
+  if (!secondFactorIsFresh(assurance, APPROVER_MAX_AGE_SECONDS)) {
+    return failed(invalidInput(msg("Errors.approval.approverStale")));
+  }
+  if ((await approvalsEnabled(user.id, assurance)) !== true || !(await approvalsConfigured())) {
     return failed(UNAVAILABLE);
   }
   const supabase = await createClient();
@@ -239,7 +276,7 @@ export async function decideSignInApproval(
     !(await decideApprovalRequest({
       id: request.id,
       userId: user.id,
-      decision,
+      decision: "approve",
       factorId: prepared.factorId,
       code: prepared.code,
     }))
@@ -253,6 +290,21 @@ export async function decideSignInApproval(
     body: { key: "Notifications.messages.security.signInApproved.body" },
   });
   return { decided: "approve" };
+}
+
+/**
+ * This device's two-factor is too old to approve anything: end THIS session
+ * (nothing else about the account changes) and come back through sign-in to
+ * the same request. The token only chooses where to land, so a malformed one
+ * lands on the plain sign-in page.
+ */
+export async function reconfirmToApprove(formData: FormData): Promise<void> {
+  if (unknownField(formData, ["token"])) return;
+  const token = formData.get("token");
+  const back = isApprovalToken(token) ? approveSignInPath(token) : null;
+  const supabase = await createClient();
+  await supabase.auth.signOut({ scope: "local" });
+  redirect(back ? signInPath(back) : "/login");
 }
 
 // ---------------------------------------------------------------------------

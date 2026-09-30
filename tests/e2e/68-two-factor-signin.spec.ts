@@ -5,6 +5,7 @@ import {
   accessToken,
   claimsOf,
   enableTwoFactor,
+  continuePastPasskeyOffer,
   enterChallengeCode,
   nextCode,
   signInToChallenge,
@@ -82,7 +83,7 @@ test.describe("two-factor sign-in", () => {
   test("the right code finishes signing in and goes where the person was headed", async () => {
     await signInToChallenge(page, user, "/orders");
     await enterChallengeCode(page, await nextCode(app));
-    await page.waitForURL(/\/orders/, { timeout: 30_000 });
+    await continuePastPasskeyOffer(page, /\/orders/);
     const claims = claimsOf(await accessToken(context));
     expect(claims.aal).toBe("aal2");
     expect((claims.amr as { method: string }[]).map((e) => e.method)).toContain("totp");
@@ -92,7 +93,7 @@ test.describe("two-factor sign-in", () => {
     await signInToChallenge(page, user);
     const code = await nextCode(app);
     await enterChallengeCode(page, code);
-    await page.waitForURL(/\/dashboard/, { timeout: 30_000 });
+    await continuePastPasskeyOffer(page, /\/dashboard/);
 
     // Someone who watched it being typed tries it on their own sign-in. The
     // rate-limit ledger is NOT cleared here: it is where the replay guard
@@ -111,7 +112,7 @@ test.describe("two-factor sign-in", () => {
     await page.locator('button[name="intent"]').click();
     await page.waitForURL(/\/login\/two-factor/);
     await enterChallengeCode(page, await nextCode(app));
-    await page.waitForURL((url) => url.origin === "http://localhost:3100", { timeout: 30_000 });
+    await continuePastPasskeyOffer(page, (url) => url.origin === "http://localhost:3100");
     await expect(page).not.toHaveURL(/evil\.example/);
 
     // And the challenge page itself refuses to send anyone back into sign-in.

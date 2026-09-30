@@ -85,6 +85,9 @@ const REGISTRY: Record<string, Classification> = {
   ),
   "lib/auth/sign-in-approval-actions.ts::decideSignInApproval": limited(),
   "lib/auth/sign-in-approval-actions.ts::setSignInApproval": limited(),
+  // The approving phone's two-factor is too old: sign THIS session out and
+  // come back through sign-in. Session teardown, like signOutToReauthenticate.
+  "lib/auth/sign-in-approval-actions.ts::reconfirmToApprove": read(),
 
   // --- settings -----------------------------------------------------------
   "lib/settings/actions.ts::updateUsername": limited(),
@@ -607,11 +610,93 @@ describe("sign-in approval invariants", () => {
     expect(moduleFunction("collectApproval")).toMatch(/approval_code:\s*null/);
   });
 
+  it("approving needs the waiting device's number, and a wrong one refuses the request", () => {
+    const decide = body("lib/auth/sign-in-approval-actions.ts::decideSignInApproval");
+    const prepare = decide.indexOf("prepareApprovalFactor(");
+    expect(decide).toContain("Number(picked) === request.matchCode");
+    expect(decide.indexOf("request.matchCode")).toBeLessThan(prepare);
+    // The refusal is written before anything could be approved.
+    expect(decide.indexOf('decision: "deny"')).toBeGreaterThan(-1);
+    expect(decide.indexOf('decision: "deny"')).toBeLessThan(prepare);
+  });
+
+  it("approving needs a recent second factor on the approving device", () => {
+    const decide = body("lib/auth/sign-in-approval-actions.ts::decideSignInApproval");
+    const fresh = decide.indexOf("secondFactorIsFresh(assurance, APPROVER_MAX_AGE_SECONDS)");
+    expect(fresh).toBeGreaterThan(-1);
+    expect(fresh).toBeLessThan(decide.indexOf("prepareApprovalFactor("));
+  });
+
   it("an approval is spent by one conditional update, scoped to the waiting session", () => {
     const collect = moduleFunction("collectApproval");
     for (const scope of ['.eq("session_id"', '.eq("user_id"', '.eq("status", "approved")']) {
       expect(collect, scope).toContain(scope);
     }
     expect(collect).toMatch(/\.update\(/);
+  });
+});
+
+describe("second-factor completion invariants", () => {
+  /**
+   * The custom access token hook (supabase/migrations/20260930_two_factor_
+   * hardening.sql) refuses every second-factor token that the app did not
+   * authorise first, so a code guessed straight at the auth server is worth
+   * nothing. The flip side: any verify the app makes WITHOUT an intent fails
+   * in production, so every one must write one first.
+   */
+  const files = walk(SRC).filter((file) => /\.(ts|tsx)$/.test(file));
+  const sources = files.map((file) => ({ file: relative(file), text: readFileSync(file, "utf8") }));
+  const actionBody = (key: string) => ACTIONS.find((a) => a.key === key)?.body ?? "";
+
+  it("every factor verify is preceded by an intent", () => {
+    let verifies = 0;
+    for (const { file, text } of sources) {
+      for (const match of text.matchAll(/\.mfa\.verify\(/g)) {
+        verifies += 1;
+        const at = match.index ?? 0;
+        const before = text.slice(Math.max(0, at - 1500), at);
+        expect(before, file).toContain("authorizeFactorVerify(");
+      }
+    }
+    expect(verifies).toBeGreaterThan(0);
+  });
+
+  it("nothing uses challengeAndVerify, which would skip the intent", () => {
+    for (const { file, text } of sources) {
+      expect(text, file).not.toMatch(/challengeAndVerify\(/);
+    }
+  });
+
+  it("the hook gates every second-factor method", () => {
+    const migration = readFileSync(
+      join(process.cwd(), "supabase/migrations/20260930_two_factor_hardening.sql"),
+      "utf8",
+    );
+    expect(migration).toMatch(/function public\.mfa_access_token_gate\(event jsonb\)/);
+    for (const method of ["'totp'", "'mfa/totp'", "'mfa/phone'", "'mfa/webauthn'"]) {
+      expect(migration, method).toContain(method);
+    }
+  });
+
+  it("only a sign-in passed with an authenticator code grants the passkey-here ticket", () => {
+    const granting = sources.filter(({ text }) => /grantPasskeyOffer\(/.test(text));
+    expect(granting.map(({ file }) => file)).toEqual(
+      expect.arrayContaining(["lib/auth/mfa-actions.ts", "lib/auth/passkey-offer.ts"]),
+    );
+    expect(granting).toHaveLength(2);
+    expect(actionBody("lib/auth/mfa-actions.ts::verifyTwoFactorSignIn")).toMatch(/grantPasskeyOffer\(/);
+    for (const key of [
+      "lib/auth/mfa-actions.ts::beginPasskeyHere",
+      "lib/auth/mfa-actions.ts::confirmPasskeyHere",
+    ]) {
+      expect(actionBody(key), key).toMatch(/hasPasskeyOffer\(/);
+    }
+  });
+
+  it("removing the last real factor takes the approval factor first, and stops if it can't", () => {
+    const remove = actionBody("lib/auth/mfa-actions.ts::removeAuthenticator");
+    const approvalGone = remove.indexOf("!(await removeApprovalFactor(");
+    expect(approvalGone).toBeGreaterThan(-1);
+    expect(approvalGone).toBeLessThan(remove.indexOf("mfa.unenroll("));
   });
 });

@@ -14,6 +14,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import type { createClient } from "@/lib/supabase/server";
 import { RATE_LIMITS, rateLimitKey } from "@/lib/rate-limit";
 import { totpCode } from "@/lib/auth/totp";
+import { authorizeFactorVerify, withdrawFactorVerify } from "@/lib/auth/verify-intent";
 import {
   base64UrlDecode,
   base64UrlEncode,
@@ -80,7 +81,11 @@ export function relyingParty(): RelyingParty | null {
     return null;
   }
   const rpID = process.env.WEBAUTHN_RP_ID?.trim() || app.hostname;
-  const extra = (process.env.WEBAUTHN_ORIGINS ?? "")
+  // Extra origins exist for the TEST stack (served on another port). A
+  // production build never accepts assertions from anywhere but the app
+  // itself, whatever the environment says: another squareshare.eu subdomain
+  // (the marketplace, a future host) must not be able to confirm sign-ins.
+  const extra = (process.env.NODE_ENV === "production" ? "" : (process.env.WEBAUTHN_ORIGINS ?? ""))
     .split(",")
     .map((value) => value.trim())
     .filter(Boolean);
@@ -499,13 +504,15 @@ export async function verifyAssertion(input: {
 
   try {
     const admin = createAdminClient();
-    await admin
+    const { error } = await admin
       .from("mfa_passkeys")
       .update({ sign_count: newCounter, last_used_at: new Date().toISOString() })
       .eq("id", row.id);
-  } catch {
+    if (error) console.warn("[passkeys] counter update failed:", error.message);
+  } catch (err) {
     // The counter is a clone detector, not the gate: a missed update only
-    // weakens that one heuristic for one use.
+    // weakens that one heuristic for one use. Logged so it is not invisible.
+    console.warn("[passkeys] counter update threw:", err instanceof Error ? err.message : String(err));
   }
   return { ok: true, factorId: row.factor_id, secret };
 }
@@ -539,12 +546,17 @@ export async function completeFactorWithCode(
       console.warn("[passkeys] challenge failed:", challenge.error?.code, challenge.error?.message);
       return { ok: false, reason: "unavailable" };
     }
+    // The app's permission for GoTrue to issue this second-factor token
+    // (lib/auth/verify-intent.ts); every caller has already done its checks.
+    const intent = await authorizeFactorVerify(supabase);
+    if (!intent) return { ok: false, reason: "unavailable" };
     const verified = await supabase.auth.mfa.verify({
       factorId,
       challengeId: challenge.data.id,
       code,
     });
     if (verified.error) {
+      await withdrawFactorVerify(intent);
       console.warn("[passkeys] factor verify failed:", verified.error.code, verified.error.message);
       return { ok: false, reason: verified.error.status === 422 ? "invalid" : "unavailable" };
     }

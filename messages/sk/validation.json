@@ -347,7 +347,8 @@
     "repeated": "Toto heslo je príliš ľahko uhádnuteľné. Skúste dlhšiu kombináciu slov.",
     "sequence": "Toto heslo obsahuje bežnú sekvenciu klávesov. Skúste niečo iné.",
     "containsIdentity": "Heslo nesmie obsahovať vašu e-mailovú adresu ani používateľské meno.",
-    "weakMix": "Použite veľké a malé písmená, číslicu alebo symbol, alebo zadajte {length}+ znakov."
+    "weakMix": "Použite veľké a malé písmená, číslicu alebo symbol, alebo zadajte {length}+ znakov.",
+    "breached": "Toto heslo sa objavilo pri úniku údajov, takže ho útočníci už skúšajú. Zvoľte iné."
   },
   "team": {
     "invalidStore": "Neplatný odkaz na obchod.",

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { CopyButton } from "@/components/ui/CopyButton";
 import { Spinner } from "@/components/ui/spinner";
 import { useResolveMessage } from "@/components/ui/ActionErrorNotice";
+import { signInPath } from "@/lib/auth/paths";
 import { helpTextClass, infoTextClass } from "@/components/ui/control-styles";
 import { QrTile } from "@/components/auth/QrTile";
 import {
@@ -48,6 +49,11 @@ type Phase =
  * Kept to one line of words: the viewfinder corners say "scan this", the
  * phone's own page says who is asking and what to tap, and a phone that is
  * not signed in is told so there.
+ *
+ * NUMBER MATCHING. Under the code sits a two-digit number, and the phone
+ * approves by tapping that same number among three. Someone tricked into
+ * scanning a code from a stranger's screen cannot see this one, so a guess
+ * refuses the sign-in instead of letting it through.
  */
 export function ApproveFromDevice({
   next,
@@ -161,6 +167,13 @@ export function ApproveFromDevice({
         {phase.kind === "waiting" && (
           <div className="flex flex-col items-center gap-1">
             <p
+              className="font-inter text-4xl font-semibold tabular-nums tracking-widest text-foreground"
+              aria-label={ta("numberAria", { number: phase.request.matchCode })}
+              data-approval-number={phase.request.matchCode}
+            >
+              {phase.request.matchCode}
+            </p>
+            <p
               role="status"
               className="inline-flex items-center gap-2 font-inter text-sm font-medium text-foreground"
               data-approval-url={phase.request.url}
@@ -195,7 +208,7 @@ export function ApproveFromDevice({
             </p>
             {phase.kind === "failed" && phase.signedOut ? (
               <Link
-                href={`/login?next=${encodeURIComponent(next)}`}
+                href={signInPath(next)}
                 className="font-inter text-sm font-medium text-foreground underline underline-offset-4"
               >
                 {t("signInAgain")}

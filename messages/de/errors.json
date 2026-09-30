@@ -172,7 +172,8 @@
     "factorNotOnAccount": "Dieser Authenticator gehört nicht zu deinem Konto.",
     "removeFailed": "Wir konnten diesen Authenticator nicht entfernen. Versuche es noch einmal.",
     "notEnrolled": "Schalte zuerst die Zwei-Faktor-Authentifizierung ein.",
-    "codesNotCreated": "Wir konnten keine neuen Codes erstellen. Deine alten funktionieren weiterhin."
+    "codesNotCreated": "Wir konnten keine neuen Codes erstellen. Deine alten funktionieren weiterhin.",
+    "removeUnknownFirst": "Entferne zuerst die Anmeldemöglichkeit, die nicht in Square Share hinzugefügt wurde. Danach kannst du diese hier entfernen."
   },
   "settings": {
     "usernameTaken": "Dieser Benutzername ist bereits vergeben. Versuche einen anderen.",
@@ -569,7 +570,8 @@
     "unavailable": "Das Genehmigen von einem anderen Gerät ist gerade nicht verfügbar. Verwende eine andere Anmeldemethode.",
     "rateLimited": "Zu viele Codes in kurzer Zeit. Warte ein paar Minuten und versuche es dann erneut.",
     "expired": "Diese Anmeldeanfrage ist abgelaufen oder wurde bereits beantwortet. Zeige einen neuen Code auf dem Gerät an, auf dem du dich anmelden möchtest.",
-    "otherAccount": "Diese Anfrage gilt für ein anderes Square-Share-Konto als das hier angemeldete."
+    "otherAccount": "Diese Anfrage gilt für ein anderes Square-Share-Konto als das hier angemeldete.",
+    "approverStale": "Dieses Gerät muss sich erneut anmelden, bevor es Anmeldungen genehmigen kann."
   },
   "orders": {
     "notShippable": {

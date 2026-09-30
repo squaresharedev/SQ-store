@@ -136,6 +136,10 @@
       "approvalsEnabled": {
         "title": "Schvalování přihlášení je zapnuté",
         "body": "Zařízení, kde jste přihlášeni, teď mohou schvalovat nová přihlášení k vašemu účtu. Pokud jste to nebyli vy, ihned změňte heslo."
+      },
+      "stepUpLockedOut": {
+        "title": "Příliš mnoho chybných kódů dvoufázového ověření",
+        "body": "V přihlášeném účtu někdo zadal příliš mnoho chybných kódů dvoufázového ověření při pokusu změnit nastavení, a proto je to na několik minut pozastaveno. Pokud jste to nebyli vy, změňte si heslo a odhlaste se ze všech zařízení."
       }
     },
     "order": {

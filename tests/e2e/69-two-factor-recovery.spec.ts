@@ -4,6 +4,7 @@ import {
   accessToken,
   claimsOf,
   enableTwoFactor,
+  continuePastPasskeyOffer,
   enterChallengeCode,
   nextCode,
   recoveryLinkFor,
@@ -124,7 +125,7 @@ test.describe("two-factor recovery", () => {
     // The authenticator still works, and 2FA is still on.
     await page.getByRole("button", { name: "Use your authenticator app instead" }).click();
     await enterChallengeCode(page, await nextCode(app));
-    await page.waitForURL(/\/dashboard/, { timeout: 30_000 });
+    await continuePastPasskeyOffer(page, /\/dashboard/);
     await page.goto("/settings/security");
     await expect(page.locator('[data-two-factor-status="on"]')).toBeVisible();
     await context.close();
@@ -162,7 +163,7 @@ test.describe("two-factor recovery", () => {
 
     // With the phone, it proceeds to the form, which works.
     await enterChallengeCode(page, await nextCode(app));
-    await page.waitForURL(/\/reset-password/, { timeout: 30_000 });
+    await continuePastPasskeyOffer(page, /\/reset-password/);
     await page.locator('input[name="password"]').fill("Brand-New-Pass-42");
     await page.locator('input[name="confirm_password"]').fill("Brand-New-Pass-42");
     await page.getByRole("button", { name: "Update password" }).click();

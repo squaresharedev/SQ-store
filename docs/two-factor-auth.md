@@ -45,6 +45,20 @@ database-level enforcement.
    2FA alerts reach only the in-app bell and the Security
    activity log. Turning email on is strongly recommended: an alert that an
    intruder can dismiss inside the dashboard is not much of an alert.
+   GoTrue's own security notifications (factor added, factor removed,
+   password changed) are ON since 2026-09-30, as a second channel that fires
+   even for changes made straight at the auth server.
+6. **Hardening** (`supabase/migrations/20260930_two_factor_hardening.sql`), in
+   this order: apply the migration; deploy the app (it writes the verify
+   intents); THEN switch on the Custom Access Token hook
+   (`hook_custom_access_token_enabled: true`,
+   `hook_custom_access_token_uri: "pg-functions://postgres/public/mfa_access_token_gate"`,
+   Management API `PATCH /v1/projects/<ref>/config/auth`, or Dashboard →
+   Authentication → Hooks). Switched on before the app is live, it refuses
+   every second factor. **Switching it off is the kill switch** if a sign-in
+   ever breaks. `security_update_password_require_current_password` is ON
+   (a reset link's recovery session is exempt, which is the only way the app
+   sets a password).
 
 ## What the person sees
 
@@ -176,8 +190,26 @@ app, where the phone is already signed in (the session cookie is shared across
 squareshare.eu, so being signed in to the SQ app counts). The phone shows the
 device (browser and system), the country, the account, and a warning; one tap
 on Approve and the computer finishes signing in by itself. Deny tells the
-computer, records the event and alerts the owner (their password is known).
-Settings › Security has an on/off row; it is on for every account with 2FA.
+computer, records the event and alerts the owner (their password is known;
+at most one alert per 15 minutes, every refusal is still logged).
+
+**Number matching.** Under the QR code the computer shows a two-digit number
+(`match_code`); the phone approves by tapping that number among three. A
+wrong pick denies the request outright, never a retry: someone who talked the
+owner into scanning a code from their own screen cannot see the number.
+
+**Who has it.** Settings › Security has an on/off row. It is ON by default for
+an account with an authenticator app, and OFF until asked for when the only
+ways in are passkeys (`approvalsOnByDefault`; an account that has already
+used approval keeps it). An approval can be talked out of someone; a passkey
+cannot, so it must not quietly weaken a passkey-only account. The switch is
+stored as an opt-out (`mfa_approval_opt_outs`) or an opt-in
+(`mfa_approval_opt_ins`).
+
+**Who may approve.** Only a device whose own second factor is under 30 days
+old (`APPROVER_MAX_AGE_SECONDS`): sessions never expire on this plan, and a
+phone signed in once long ago must not approve sign-ins forever. An older one
+is asked to sign in again first.
 
 **How it keeps aal2 meaningful.** The passkey bridge again: one GoTrue TOTP
 factor per account (named `approval:signed-in-devices`, never listed as a way
@@ -221,16 +253,46 @@ every session, aal2 included, on a new factor, which real GoTrue does not).
 - **Budgets**: 10 QR codes per account and 30 per client per 15 minutes;
   30 decisions per approving account per hour; the status check is unbudgeted
   (it answers only the waiting session about its own request).
-- **Creating a passkey here** after such a sign-in skips the usual
-  "second proof in the same request" (`proveSetupOwnership`), because the
-  proof is the challenge passed moments ago (`JUST_VERIFIED_SECONDS`, 5
-  minutes, from the token's amr). It also does not sign the other sessions
-  out, unlike Settings: that would sign out the very phone that approved it.
+- **Creating a passkey here** is offered only after a sign-in passed with
+  a code from the authenticator app: never after an approval (a phished
+  approval must not become a permanent passkey) and never from a later
+  step-up. The code challenge mints a sealed, HttpOnly, 5-minute ticket bound
+  to the account and session (`lib/auth/passkey-offer.ts`); both passkey-here
+  actions refuse without it. It skips the usual "second proof in the same
+  request" because the proof is the challenge passed moments ago
+  (`JUST_VERIFIED_SECONDS`), and does not sign the other sessions out.
 
 **Not done here**: the phone has no in-app scanner; the phone's camera app is
 the scanner. A phone signed in only inside an installed web app (whose cookies
 the camera's browser does not share) has to sign in in its browser once, or
 use "Copy the approval link".
+
+## Completing a factor only through the app
+
+GoTrue's own verify endpoint is limited per IP address (15 a minute) and
+never locks an account. On 2026-09-30 a throwaway account on production took
+twelve wrong codes and then the right one straight at GoTrue, and got
+`aal2`: the app's budgets, replay guard and alerts were simply not in the
+path. The same endpoint let a stolen signed-in session switch on a factor of
+its own.
+
+The fix is the **Custom Access Token hook** `public.mfa_access_token_gate`
+(available on the Free plan). GoTrue calls it inside the verify transaction.
+For a token claiming a second factor (`totp`, `mfa/phone`, `mfa/webauthn`)
+it demands a single-use row in `mfa_verify_intents` for that exact account and
+session; the app writes one (`authorizeFactorVerify`, 60 seconds) only after
+its own checks pass, and withdraws it if GoTrue refuses the code. No intent,
+no token, and GoTrue rolls the whole verify back: the challenge stays open,
+a new factor stays unverified. Password, link, OAuth and refresh tokens pass
+through untouched. Every `mfa.verify` in `src` is pinned to be preceded by an
+intent (`server-action-security.test.ts`); nothing may use
+`challengeAndVerify`. No other repo on this project verifies factors.
+
+**Factors made around the app** (by a stolen session before the hook, or
+any other way) are never hidden: Settings lists every verified factor checked
+against the app's own records (`lib/auth/account-factors.ts`), marks one it
+did not make as "Not added in Square Share" with a warning, and lets it be
+removed. The last real way in cannot be removed while such a factor remains.
 
 ## Verified against production GoTrue
 
@@ -269,6 +331,34 @@ An adversarial review of the whole system (2026-09-24) reported:
 Everything else it examined (the app gate, attempt limits and replay guard,
 2FA controls needing a code every time, password-reset and magic-link paths,
 recovery-code storage and spending, redirect sanitising) held.
+
+A second sweep (2026-09-30) found, and this round fixed:
+
+- **High**: codes could be guessed straight at GoTrue (proven on prod).
+  Fixed by the access token hook above.
+- **High**: SQ-admin never asked staff for a second factor, and the staff
+  tables had no `aal2` rule. Fixed: the `admin_*` tables now carry a
+  restrictive "Staff need two-factor" policy (`aal2` only), and SQ-admin's
+  `requireStaff` requires an enrolled account on an `aal2` session.
+- **High**: sign-in approval was phishable. Fixed with number matching, off
+  by default for passkey-only accounts, and a 30-day limit on the approver.
+- **High**: "create a passkey here" accepted any fresh second factor,
+  including an approval. Fixed with the code-challenge-only ticket.
+- **High**: a stolen `aal2` session could add or remove factors, or set a
+  password, at GoTrue with no alert. Fixed: the hook blocks new factors,
+  GoTrue's own emails for factor and password changes are on, a current
+  password is required outside a reset link, and unknown factors are shown.
+- **Medium**: removing the last factor could fail to remove the approval
+  factor silently and strand the account; now it stops instead.
+- **Low**: a step-up lockout now alerts the owner; email links are built from
+  `NEXT_PUBLIC_APP_URL`, never the request's Host or Origin; new passwords
+  are checked against Have I Been Pwned (k-anonymity range API, fail-open,
+  `lib/auth/breached-password.ts`); approval-denied alerts are capped;
+  `WEBAUTHN_ORIGINS` is ignored in production.
+
+Still open, outside the code: security emails need the Brevo secrets; session
+inactivity timeouts and Supabase's own leaked-password check need a paid plan;
+the prod `uri_allow_list` still lists localhost.
 
 Also:
 
@@ -317,13 +407,9 @@ Also:
 
 - **SQ-app (marketplace)** shares the session cookie and has no login of its
   own. While someone is between their password and their code, the database
-  already hides their data from it. But `worker/lib/supabase.ts`
-  `requireUser` should also answer 401 for an `aal1` session with a verified
-  factor, so the SPA sends them to the central login (which forwards to the
-  challenge) instead of showing an error.
-- **SQ-admin** signs staff in itself and does not ask for a second factor.
-  Staff accounts are the highest-value accounts in the system; the admin panel
-  should require `aal2`.
+  already hides their data from it. `worker/lib/supabase.ts` `requireUser`
+  now answers 401 with `aal2Required` for an `aal1` session with a verified
+  factor (in the SQ-app working tree, shipped with its next deploy).
 - **Supabase's native WebAuthn MFA.** Once the hosted platform allows it
   (`mfa_web_authn_enroll_enabled`), passkeys could move onto it and drop the
   sealed-TOTP bridge. Not urgent: the bridge keeps every GoTrue guarantee.
@@ -336,12 +422,16 @@ Also:
   `passkey-primitives.test.ts` (RFC 6238 vectors, sealing, relying party),
   plus the step-up invariants in `server-action-security.test.ts`.
 - Database: `tests/integration/22-two-factor-rls.test.ts`,
-  `24-passkey-factors.test.ts`.
+  `24-passkey-factors.test.ts`, `30-two-factor-hardening.test.ts` (the
+  token hook, the intents, `match_code`, the staff `aal2` rule).
+- Hardening: `tests/unit/two-factor-hardening.test.ts` (approval defaults,
+  number choices, factor classification, the breached-password check).
 - End to end: `tests/e2e/67` to `70` (`*-two-factor-*`),
   `73-two-factor-passkeys.spec.ts`, which drives Chromium's virtual WebAuthn
   authenticator through real create()/get() ceremonies, and
   `76-two-factor-approval.spec.ts`, two browsers (the phone and the computer)
-  through approve, deny, other account, signed out and switched off.
+  through the matching number, a wrong number, deny, other account, signed
+  out, switched off, and the passkey-only opt-in.
 - Sign-in approval: `tests/unit/device-label.test.ts`, the approval pins in
   `server-action-security.test.ts` (the approver never verifies a factor; the
   waiting side completes only a just-spent approval) and

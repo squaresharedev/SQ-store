@@ -1,5 +1,6 @@
 import { TriangleAlert } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { dangerNoticeClass } from "@/components/ui/control-styles";
 import { TwoFactorCard } from "@/components/settings/security/TwoFactorCard";
 import { RecoveryCodesCard } from "@/components/settings/security/RecoveryCodesCard";
 import {
@@ -11,7 +12,8 @@ export type SecurityFactor = {
   id: string;
   name: string;
   createdAt: string;
-  type: "totp" | "passkey";
+  /** "unknown": a factor the app has no record of making (see lib/auth/account-factors.ts). */
+  type: "totp" | "passkey" | "unknown";
 };
 
 /**
@@ -26,6 +28,7 @@ export function SecuritySection({
   signsInWithGoogle,
   passkeysAvailable,
   approvalsEnabled = null,
+  approvalsOffByDefault = false,
   recoveryCodesRemaining,
   activity,
   recovered,
@@ -40,6 +43,8 @@ export function SecuritySection({
   passkeysAvailable: boolean;
   /** Sign-in approval on or off; null (the default) when it is not available here. */
   approvalsEnabled?: boolean | null;
+  /** Approval is off unless asked for on this account (passkeys only). */
+  approvalsOffByDefault?: boolean;
   /** Unused recovery codes, or null when 2FA is off or the count failed. */
   recoveryCodesRemaining: number | null;
   /** Null when the log could not be read (shown as such, never as "empty"). */
@@ -52,10 +57,7 @@ export function SecuritySection({
   return (
     <div className="flex flex-col gap-6">
       {recovered && !enrolled && (
-        <div
-          role="status"
-          className="flex items-start gap-3 border border-destructive/40 bg-destructive/5 px-4 py-3"
-        >
+        <div role="status" className={dangerNoticeClass}>
           <TriangleAlert aria-hidden className="mt-0.5 size-4 shrink-0 text-destructive" />
           <p className="font-inter text-sm text-foreground">
             {t.rich("recoveredNotice", {
@@ -73,6 +75,7 @@ export function SecuritySection({
         signsInWithGoogle={signsInWithGoogle}
         passkeysAvailable={passkeysAvailable}
         approvalsEnabled={approvalsEnabled}
+        approvalsOffByDefault={approvalsOffByDefault}
         openSetup={openSetup && !enrolled}
       />
 

@@ -1,12 +1,21 @@
 import { expect, test, type Browser, type Page } from "@playwright/test";
 import { freshUser, signUp, userIdByEmail } from "./helpers";
-import { accessToken, claimsOf, enableTwoFactor, signInToChallenge, sql } from "./two-factor";
+import {
+  accessToken,
+  claimsOf,
+  enableTwoFactor,
+  enterChallengeCode,
+  nextCode,
+  signInToChallenge,
+  sql,
+} from "./two-factor";
 
 /**
  * Sign-in approval, end to end, with two browsers: the "phone" (already fully
  * signed in, 2FA on) and the "computer" (password done, waiting at the
- * two-factor step). The computer shows a QR code; the phone opens its link
- * and taps Approve; the computer finishes signing in by itself.
+ * two-factor step). The computer shows a QR code and a two-digit number; the
+ * phone opens the link and taps that number; the computer finishes signing in
+ * by itself. A wrong number refuses the sign-in, like Deny.
  *
  * What makes it worth two browsers: GoTrue deletes every aal1 session of an
  * account whenever ANY factor is verified (the mock does the same), so if the
@@ -43,62 +52,78 @@ async function newComputer(browser: Browser, options: { passkeyHardware?: boolea
   return { context, page };
 }
 
-/** From the challenge's code form to a QR code on screen; returns its link. */
-async function showApprovalCode(computer: Page): Promise<string> {
-  await computer.getByRole("button", { name: "Approve from your phone instead" }).click();
+/** The QR code's link and the number shown under it, once they are on screen. */
+async function waitingCode(computer: Page): Promise<{ link: string; number: string }> {
   const waiting = computer.locator("[data-approval-url]");
   await expect(waiting).toBeVisible({ timeout: 20_000 });
-  await expect(computer.getByRole("img", { name: /QR code/ })).toBeVisible();
   const url = await waiting.getAttribute("data-approval-url");
   expect(url).toMatch(/\/approve\/[A-Za-z0-9_-]{43}$/);
-  return new URL(url!).pathname;
+  const number = await computer.locator("[data-approval-number]").getAttribute("data-approval-number");
+  expect(number).toMatch(/^[1-9][0-9]$/);
+  return { link: new URL(url!).pathname, number: number! };
+}
+
+/** From the challenge's code form to a QR code on screen. */
+async function showApprovalCode(computer: Page): Promise<{ link: string; number: string }> {
+  await computer.getByRole("button", { name: "Approve from your phone instead" }).click();
+  const shown = await waitingCode(computer);
+  await expect(computer.getByRole("img", { name: /QR code/ })).toBeVisible();
+  return shown;
+}
+
+/** On the phone: open the link and tap the number the computer shows. */
+async function approve(phone: Page, { link, number }: { link: string; number: string }) {
+  await phone.goto(link);
+  await phone.getByRole("button", { name: `Approve with ${number}` }).click();
+  await expect(phone.getByRole("heading", { name: "Sign-in approved" })).toBeVisible({ timeout: 20_000 });
 }
 
 test.describe("sign-in approval from a signed-in device", () => {
-  test("the phone approves, the computer gets in, and can keep a passkey of its own", async ({
+  test("the phone taps the number, the computer gets in, and only an app code offers a passkey", async ({
     page: phone,
     browser,
   }) => {
     const user = freshUser("approve");
     await signUp(phone, user);
-    await enableTwoFactor(phone, user.password);
+    const { app } = await enableTwoFactor(phone, user.password);
     const userId = await userIdByEmail(user.email);
 
     const computer = await newComputer(browser, { passkeyHardware: true });
     await signInToChallenge(computer.page, user);
-    const link = await showApprovalCode(computer.page);
+    const shown = await showApprovalCode(computer.page);
+    const { link, number } = shown;
+    const [stored] = await sql(
+      `select match_code from public.mfa_sign_in_approvals where user_id = $1 and status = 'pending'`,
+      [userId],
+    );
+    expect(String(stored.match_code)).toBe(number);
     await expect(computer.page.getByText("Waiting for your phone…")).toBeVisible();
     // Still only half signed in while it waits.
     expect(claimsOf(await accessToken(computer.context)).aal).toBe("aal1");
 
-    // ---- The phone: who is asking, and Approve ----
+    // ---- The phone: who is asking, and three numbers to pick from ----
     await phone.goto(link);
     await expect(phone.getByRole("heading", { name: "Sign in on another device?" })).toBeVisible({
       timeout: 20_000,
     });
     await expect(phone.locator("[data-approve-device]")).toHaveText("Chrome on Windows");
     await expect(phone.getByText(user.email)).toBeVisible();
-    await phone.getByRole("button", { name: "Approve sign-in" }).click();
+    await expect(phone.locator("[data-approve-number]")).toHaveCount(3);
+    await phone.getByRole("button", { name: `Approve with ${number}` }).click();
     await expect(phone.getByRole("heading", { name: "Sign-in approved" })).toBeVisible({ timeout: 20_000 });
     await expect(phone.locator('[data-success-mark="device"]')).toBeVisible();
 
-    // ---- The computer: through by itself, then offered a passkey here ----
-    const offer = computer.page.locator('[data-passkey-here="offer"]');
-    await expect(offer).toBeVisible({ timeout: 30_000 });
-    await expect(computer.page.getByText("You're signed in.")).toBeVisible();
-    expect(claimsOf(await accessToken(computer.context)).aal).toBe("aal2");
-    await computer.page.getByRole("button", { name: "Create a passkey here" }).click();
-    await expect(computer.page.locator('[data-passkey-here="added"]')).toBeVisible({ timeout: 30_000 });
-    await computer.page.getByRole("button", { name: "Continue" }).click();
+    // ---- The computer: through by itself. An approval never offers a passkey
+    // here (someone talked into approving must not hand over a lasting key) ----
     await computer.page.waitForURL(/\/dashboard/, { timeout: 30_000 });
+    expect(claimsOf(await accessToken(computer.context)).aal).toBe("aal2");
+    await expect(computer.page.locator('[data-passkey-here="offer"]')).toHaveCount(0);
 
     // ---- Nothing signed the phone out: approving verified nothing on it ----
     await phone.goto("/settings/security");
     await expect(phone.locator('[data-two-factor-status="on"]')).toBeVisible({ timeout: 20_000 });
     await expect(phone.locator('[data-sign-in-approval="on"]')).toBeVisible();
     await expect(phone.getByText("Sign-in approved from another device")).toBeVisible();
-    // The new passkey is named for the computer, and listed beside the app.
-    await expect(phone.locator('[data-factor-type="passkey"]')).toContainText("Chrome on Windows");
 
     // ---- Underneath ----
     const factors = await sql(
@@ -110,7 +135,8 @@ test.describe("sign-in approval from a signed-in device", () => {
     // Listed nowhere as a way in of its own.
     await expect(phone.getByText("approval:", { exact: false })).toHaveCount(0);
     const [request] = await sql(
-      `select status, factor_id, browser, os from public.mfa_sign_in_approvals where user_id = $1`,
+      `select status, factor_id, browser, os from public.mfa_sign_in_approvals
+       where user_id = $1 order by created_at desc limit 1`,
       [userId],
     );
     expect(request).toMatchObject({ status: "used", factor_id: approvalFactor?.id, browser: "Chrome", os: "Windows" });
@@ -123,17 +149,28 @@ test.describe("sign-in approval from a signed-in device", () => {
       timeout: 20_000,
     });
 
+    // ---- A sign-in with the app's code is what offers a passkey here ----
+    await computer.context.clearCookies();
+    await signInToChallenge(computer.page, user);
+    await enterChallengeCode(computer.page, await nextCode(app));
+    await expect(computer.page.locator('[data-passkey-here="offer"]')).toBeVisible({ timeout: 30_000 });
+    await expect(computer.page.getByText("You're signed in.")).toBeVisible();
+    await computer.page.getByRole("button", { name: "Create a passkey here" }).click();
+    await expect(computer.page.locator('[data-passkey-here="added"]')).toBeVisible({ timeout: 30_000 });
+    await computer.page.getByRole("button", { name: "Continue" }).click();
+    await computer.page.waitForURL(/\/dashboard/, { timeout: 30_000 });
+    // Named for the computer, and listed beside the app.
+    await phone.goto("/settings/security");
+    await expect(phone.locator('[data-factor-type="passkey"]')).toContainText("Chrome on Windows", {
+      timeout: 20_000,
+    });
+
     // ---- And the approval factor is reused, not re-made, next time ----
     await computer.context.clearCookies();
     await signInToChallenge(computer.page, user);
     // The computer has a passkey now, so that is what it is offered first.
     await expect(computer.page.getByRole("button", { name: "Use your passkey" })).toBeVisible();
-    await computer.page.getByRole("button", { name: "Approve from your phone instead" }).click();
-    const second = computer.page.locator("[data-approval-url]");
-    await expect(second).toBeVisible({ timeout: 20_000 });
-    await phone.goto(new URL((await second.getAttribute("data-approval-url"))!).pathname);
-    await phone.getByRole("button", { name: "Approve sign-in" }).click();
-    await expect(phone.getByRole("heading", { name: "Sign-in approved" })).toBeVisible({ timeout: 20_000 });
+    await approve(phone, await showApprovalCode(computer.page));
     await computer.page.waitForURL(/\/dashboard/, { timeout: 30_000 });
     const approvalFactors = await sql(
       `select id from auth.mfa_factors where user_id = $1 and friendly_name like 'approval:%'`,
@@ -153,6 +190,7 @@ test.describe("sign-in approval from a signed-in device", () => {
     const user = freshUser("elsewhere");
     await signUp(phone, user);
     await addPlatformAuthenticator(phone);
+    const userId = await userIdByEmail(user.email);
     await phone.goto("/settings/security");
     await phone.waitForLoadState("networkidle").catch(() => {});
     const dialog = phone.getByRole("dialog");
@@ -166,6 +204,17 @@ test.describe("sign-in approval from a signed-in device", () => {
     await dialog.getByLabel(/saved my recovery codes/i).check();
     await dialog.getByRole("button", { name: "Done" }).click();
 
+    // Passkeys only: approval is off until asked for, and says why.
+    const row = phone.locator("[data-sign-in-approval]");
+    await expect(row).toHaveAttribute("data-sign-in-approval", "off", { timeout: 20_000 });
+    await expect(row).toContainText("Off by default because you sign in with passkeys");
+    await row.getByRole("button", { name: "Turn on" }).click();
+    const confirm = phone.getByRole("dialog", { name: "Turn on sign-in approval?" });
+    await expect(confirm).toBeVisible();
+    await confirm.getByRole("button", { name: "Turn on" }).click();
+    await expect(row).toHaveAttribute("data-sign-in-approval", "on", { timeout: 20_000 });
+    expect(await sql(`select user_id from public.mfa_approval_opt_ins where user_id = $1`, [userId])).toHaveLength(1);
+
     // A computer with passkey hardware of its own, which does not hold this passkey.
     const computer = await newComputer(browser, { passkeyHardware: true });
     await signInToChallenge(computer.page, user);
@@ -176,18 +225,12 @@ test.describe("sign-in approval from a signed-in device", () => {
     await expect(elsewhere).toBeVisible({ timeout: 60_000 });
     await expect(elsewhere).toContainText("no passkey for Square Share");
     await elsewhere.getByRole("button", { name: "Approve from your phone" }).click();
+    await approve(phone, await waitingCode(computer.page));
 
-    const waiting = computer.page.locator("[data-approval-url]");
-    await expect(waiting).toBeVisible({ timeout: 20_000 });
-    await phone.goto(new URL((await waiting.getAttribute("data-approval-url"))!).pathname);
-    await phone.getByRole("button", { name: "Approve sign-in" }).click();
-    await expect(phone.getByRole("heading", { name: "Sign-in approved" })).toBeVisible({ timeout: 20_000 });
-
-    // Offered a passkey of its own; "Not now" is remembered on this device.
-    await expect(computer.page.locator('[data-passkey-here="offer"]')).toBeVisible({ timeout: 30_000 });
-    await computer.page.getByRole("button", { name: "Not now" }).click();
+    // Straight through, with no passkey offered on the back of an approval.
     await computer.page.waitForURL(/\/dashboard/, { timeout: 30_000 });
     expect(claimsOf(await accessToken(computer.context)).aal).toBe("aal2");
+    await expect(computer.page.locator('[data-passkey-here="offer"]')).toHaveCount(0);
     await computer.context.close();
   });
 
@@ -199,7 +242,7 @@ test.describe("sign-in approval from a signed-in device", () => {
 
     const computer = await newComputer(browser);
     await signInToChallenge(computer.page, user);
-    const link = await showApprovalCode(computer.page);
+    const { link } = await showApprovalCode(computer.page);
 
     await phone.goto(link);
     await phone.getByRole("button", { name: "Deny" }).click();
@@ -220,6 +263,41 @@ test.describe("sign-in approval from a signed-in device", () => {
     await computer.context.close();
   });
 
+  test("a wrong number refuses the sign-in, like Deny", async ({ page: phone, browser }) => {
+    const user = freshUser("mismatch");
+    await signUp(phone, user);
+    await enableTwoFactor(phone, user.password);
+    const userId = await userIdByEmail(user.email);
+
+    const computer = await newComputer(browser);
+    await signInToChallenge(computer.page, user);
+    const { link, number } = await showApprovalCode(computer.page);
+
+    await phone.goto(link);
+    const choices = await phone
+      .locator("[data-approve-number]")
+      .evaluateAll((buttons) => buttons.map((button) => button.getAttribute("data-approve-number")));
+    expect(choices).toHaveLength(3);
+    expect(choices).toContain(number);
+    const wrong = choices.find((choice) => choice !== number)!;
+    await phone.getByRole("button", { name: `Approve with ${wrong}` }).click();
+    await expect(phone.getByRole("heading", { name: "Sign-in refused" })).toBeVisible({ timeout: 20_000 });
+    await expect(phone.getByRole("link", { name: "Change password" })).toBeVisible();
+
+    await expect(computer.page.getByText("The sign-in was denied on your other device.")).toBeVisible({
+      timeout: 20_000,
+    });
+    expect(claimsOf(await accessToken(computer.context)).aal).toBe("aal1");
+    const [request] = await sql(`select status from public.mfa_sign_in_approvals where user_id = $1`, [userId]);
+    expect(request.status).toBe("denied");
+    // The link is spent: a second guess finds nothing to answer.
+    await phone.goto(link);
+    await expect(phone.getByRole("heading", { name: "This request has expired" })).toBeVisible({
+      timeout: 20_000,
+    });
+    await computer.context.close();
+  });
+
   test("only the same account, signed in, with approval on, can approve", async ({ page: phone, browser }) => {
     const owner = freshUser("owner");
     await signUp(phone, owner);
@@ -227,7 +305,7 @@ test.describe("sign-in approval from a signed-in device", () => {
 
     const computer = await newComputer(browser);
     await signInToChallenge(computer.page, owner);
-    const link = await showApprovalCode(computer.page);
+    const { link } = await showApprovalCode(computer.page);
 
     // Someone else's account, signed in: refused, and told why.
     const strangerContext = await browser.newContext();
@@ -237,7 +315,7 @@ test.describe("sign-in approval from a signed-in device", () => {
     await expect(stranger.getByRole("heading", { name: "This request is for another account" })).toBeVisible({
       timeout: 20_000,
     });
-    await expect(stranger.getByRole("button", { name: "Approve sign-in" })).toHaveCount(0);
+    await expect(stranger.getByRole("button", { name: /^Approve with/ })).toHaveCount(0);
     await strangerContext.close();
 
     // Signed out: asked to sign in first, and brought back here after.

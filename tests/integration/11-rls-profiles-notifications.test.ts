@@ -8,6 +8,7 @@ import {
   asService,
   asSuper,
   asUser,
+  asUserWithClaims,
   closePool,
   createUser,
   expectDbError,
@@ -335,8 +336,12 @@ describe("admin + waitlist surfaces", () => {
     await asService((q) =>
       q.query(`insert into public.admin_users (user_id, role) values ($1, 'staff')`, [staff.id]),
     );
-    const rows = await asUser(staff, (q) => q.query(`select user_id from public.admin_users`));
-    expect(rows.rows.map((r) => r.user_id)).toContain(staff.id);
+    // A fully verified (aal2) staff session reads; the same account on its
+    // password alone reads nothing (20260930_two_factor_hardening).
+    const read = (aal: string) =>
+      asUserWithClaims(staff, { aal }, (q) => q.query(`select user_id from public.admin_users`));
+    expect((await read("aal2")).rows.map((r) => r.user_id)).toContain(staff.id);
+    expect((await read("aal1")).rows).toHaveLength(0);
   });
 });
 

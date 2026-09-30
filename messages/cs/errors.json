@@ -172,7 +172,8 @@
     "factorNotOnAccount": "Tato ověřovací aplikace není ve vašem účtu.",
     "removeFailed": "Tuto ověřovací aplikaci se nepodařilo odebrat. Zkuste to znovu.",
     "notEnrolled": "Nejdřív zapněte dvoufázové ověření.",
-    "codesNotCreated": "Nové kódy se nepodařilo vytvořit. Vaše staré kódy stále platí."
+    "codesNotCreated": "Nové kódy se nepodařilo vytvořit. Vaše staré kódy stále platí.",
+    "removeUnknownFirst": "Nejdřív odeberte způsob přihlášení, který nebyl přidán v Square Share. Potom půjde odebrat i tento."
   },
   "settings": {
     "usernameTaken": "Toto uživatelské jméno je obsazené. Zkuste jiné.",
@@ -569,7 +570,8 @@
     "unavailable": "Schvalování z jiného zařízení teď není k dispozici. Použijte jiný způsob přihlášení.",
     "rateLimited": "Příliš mnoho kódů za krátkou dobu. Počkejte několik minut a zkuste to znovu.",
     "expired": "Platnost tohoto požadavku na přihlášení vypršela nebo byl již zodpovězen. Zobrazte nový kód na zařízení, na kterém se přihlašujete.",
-    "otherAccount": "Tento požadavek je pro jiný účet Square Share, než který je zde přihlášen."
+    "otherAccount": "Tento požadavek je pro jiný účet Square Share, než který je zde přihlášen.",
+    "approverStale": "Toto zařízení se musí znovu přihlásit, než bude moci schvalovat přihlášení."
   },
   "orders": {
     "notShippable": {

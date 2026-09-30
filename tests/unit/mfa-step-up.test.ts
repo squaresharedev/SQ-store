@@ -37,6 +37,14 @@ vi.mock("@/lib/supabase/admin", () => ({
   }),
 }));
 
+// The app's permission slip for GoTrue's token hook (lib/auth/verify-intent.ts).
+const authorizeMock = vi.fn(async (_supabase: unknown): Promise<string | null> => "intent-1");
+const withdrawMock = vi.fn(async (_id: string) => undefined);
+vi.mock("@/lib/auth/verify-intent", () => ({
+  authorizeFactorVerify: (supabase: unknown) => authorizeMock(supabase),
+  withdrawFactorVerify: (id: string) => withdrawMock(id),
+}));
+
 /** Every keyed take, recorded as its action name, so a test can see which
  *  budgets were spent and in what order. */
 const takes: string[] = [];
@@ -117,6 +125,7 @@ beforeEach(() => {
   sessionStateMock.mockResolvedValue(signedIn());
   challengeMock.mockResolvedValue({ data: { id: "challenge-1" }, error: null });
   verifyMock.mockResolvedValue({ data: {}, error: null });
+  authorizeMock.mockResolvedValue("intent-1");
 });
 
 // ---- requireStepUpState -----------------------------------------------------
@@ -310,8 +319,9 @@ describe("verifySecondFactor", () => {
     });
     expect(await verify("step_up")).toEqual({ ok: false, reason: "rate_limited" });
     expect(challengeMock).not.toHaveBeenCalled();
-    // A short-window refusal must not also eat the day's allowance.
-    expect(takes).toEqual(["mfa_verify_user"]);
+    // A short-window refusal must not also eat the day's allowance (the only
+    // other take is the owner's alert budget).
+    expect(takes).toEqual(["mfa_verify_user", "mfa_lockout_alert"]);
   });
 
   it("a lockout at SIGN-IN alerts the owner (once per hour, by its own key)", async () => {
@@ -328,12 +338,30 @@ describe("verifySecondFactor", () => {
     );
   });
 
-  it("does not alert on a lockout during a step-up (the session already passed 2FA)", async () => {
+  it("a lockout during a step-up alerts the owner too, in its own words and by its own key", async () => {
     rateLimitKeyMock.mockImplementation(async (_k: string, action: string) => {
       takes.push(action);
       return action !== "mfa_verify_user";
     });
     await verify("step_up");
+    const alertKey = rateLimitKeyMock.mock.calls.find(([, action]) => action === "mfa_lockout_alert")?.[0];
+    expect(alertKey).toBe(`mfa-stepup-lockout:${USER.id}`);
+    expect(alertMock).toHaveBeenCalledWith(
+      USER.id,
+      "mfa.locked_out",
+      expect.objectContaining({
+        title: { key: "Notifications.messages.security.stepUpLockedOut.title" },
+        emailTo: USER.email,
+      }),
+    );
+  });
+
+  it("no lockout alert for a code typed during setup", async () => {
+    rateLimitKeyMock.mockImplementation(async (_k: string, action: string) => {
+      takes.push(action);
+      return action !== "mfa_verify_user";
+    });
+    await verify("setup");
     expect(alertMock).not.toHaveBeenCalled();
   });
 
@@ -382,6 +410,37 @@ describe("verifySecondFactor", () => {
   it("an expired challenge reads as a wrong code (ask again), not an outage", async () => {
     verifyMock.mockResolvedValue({ data: null, error: { code: "mfa_challenge_expired", status: 422 } });
     expect(await verify("step_up")).toEqual({ ok: false, reason: "invalid" });
+  });
+
+  it("writes the verify intent only after every budget, and before GoTrue verifies", async () => {
+    expect(await verify()).toEqual({ ok: true });
+    expect(authorizeMock).toHaveBeenCalledTimes(1);
+    expect(authorizeMock.mock.invocationCallOrder[0]).toBeLessThan(verifyMock.mock.invocationCallOrder[0]);
+    expect(Math.max(...rateLimitKeyMock.mock.invocationCallOrder)).toBeLessThan(
+      authorizeMock.mock.invocationCallOrder[0],
+    );
+    expect(withdrawMock).not.toHaveBeenCalled();
+  });
+
+  it("withdraws the intent when GoTrue refuses the code", async () => {
+    verifyMock.mockResolvedValue({ data: null, error: { code: "mfa_verification_failed", status: 422 } });
+    await verify("step_up");
+    expect(withdrawMock).toHaveBeenCalledWith("intent-1");
+  });
+
+  it("never verifies without an intent", async () => {
+    authorizeMock.mockResolvedValue(null);
+    expect(await verify()).toEqual({ ok: false, reason: "unavailable" });
+    expect(verifyMock).not.toHaveBeenCalled();
+  });
+
+  it("a budget refusal writes no intent", async () => {
+    rateLimitKeyMock.mockImplementation(async (_k: string, action: string) => {
+      takes.push(action);
+      return action !== "mfa_verify_user";
+    });
+    await verify("sign_in");
+    expect(authorizeMock).not.toHaveBeenCalled();
   });
 });
 

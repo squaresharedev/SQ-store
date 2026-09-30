@@ -10,11 +10,13 @@ import {
   twoFactorChallengePath,
 } from "@/lib/auth/session";
 import { hasVerifiedFactor } from "@/lib/auth/assurance";
+import { appOrigin } from "@/lib/app-url";
 import { rememberSignInMethod } from "@/lib/auth/last-method";
 import { readLocaleCookieValue, writeLocaleCookie } from "@/i18n/cookie";
 import { localeForSignedInBrowser } from "@/i18n/sign-in";
 import { emailForUsername, isUsernameTaken } from "@/lib/auth/handles";
 import { passwordProblem } from "@/lib/auth/password";
+import { passwordIsBreached } from "@/lib/auth/breached-password";
 import { accountHasPassword } from "@/lib/auth/has-password";
 import { alertSecurityEvent } from "@/lib/security/events";
 import { safeInternalPath } from "@/lib/utils/safe-path";
@@ -70,19 +72,6 @@ const RESET_LINK_ON_ITS_WAY: ActionState = succeeded(msg("Auth.success.resetLink
 /** Only allow internal, absolute paths as post-login redirect targets. */
 function sanitizeNext(next: FormDataEntryValue | null): string {
   return safeInternalPath(next);
-}
-
-/** Absolute origin for building email redirect links. */
-async function siteOrigin(): Promise<string> {
-  const h = await headers();
-  const origin = h.get("origin");
-  if (origin) return origin;
-  const host = h.get("x-forwarded-host") ?? h.get("host");
-  if (!host) return process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-  const proto =
-    h.get("x-forwarded-proto") ??
-    (host.startsWith("localhost") ? "http" : "https");
-  return `${proto}://${host}`;
 }
 
 /** Shown whenever a limiter denies — deliberately identical everywhere so it
@@ -282,7 +271,7 @@ export async function authenticate(
     if (!email) return failed(invalidInput(msg("Errors.auth.emailRequired")));
     // Deny BEFORE calling Supabase: the email is the side effect to prevent.
     if (!(await allowAuthEmail(email))) return TOO_MANY;
-    const origin = await siteOrigin();
+    const origin = appOrigin();
     let result;
     try {
       result = await supabase.auth.signInWithOtp({
@@ -314,7 +303,7 @@ export async function authenticate(
       // here would reintroduce that oracle for anyone probing addresses.
       return RESET_LINK_ON_ITS_WAY;
     }
-    const origin = await siteOrigin();
+    const origin = appOrigin();
     // The recovery link always lands on /reset-password (where the new password
     // is chosen), regardless of the page's own post-login `next`.
     let result;
@@ -394,7 +383,12 @@ export async function authenticate(
     if (await isUsernameTaken(username)) {
       return failed(invalidInput(msg("Errors.auth.usernameTaken")));
     }
-    const origin = await siteOrigin();
+    // Last of the checks, as the only one that asks another service. Placed
+    // after the bot check and the budgets so it can't be used as a free oracle.
+    if (await passwordIsBreached(password)) {
+      return failed(invalidInput(msg("Validation.password.breached")));
+    }
+    const origin = appOrigin();
     let result;
     try {
       result = await supabase.auth.signUp({
@@ -561,6 +555,9 @@ export async function resetPassword(
         : undefined,
   });
   if (weakForUser) return failed(invalidInput(weakForUser));
+  if (await passwordIsBreached(password)) {
+    return failed(invalidInput(msg("Validation.password.breached")));
+  }
 
   // Captured BEFORE the update, since afterwards every account has one. Tells
   // "an OAuth user set their first password" apart from "an existing password
@@ -575,9 +572,15 @@ export async function resetPassword(
     return failed(actionError("unexpected", msg("Errors.auth.passwordUpdateFailed")));
   }
   if (result.error) {
-    return result.error.code === "same_password"
-      ? failed(invalidInput(msg("Errors.auth.samePassword")))
-      : failed(friendly(result.error));
+    if (result.error.code === "same_password") {
+      return failed(invalidInput(msg("Errors.auth.samePassword")));
+    }
+    // The auth server takes a new password without the old one only from a
+    // session that came in through a reset link. Anyone else is sent for one.
+    if (result.error.code === "current_password_required") {
+      return failed(actionError("session_expired", msg("Errors.auth.resetLinkExpired")));
+    }
+    return failed(friendly(result.error));
   }
 
   // A recovery reset is the flow people reach for when they think someone
@@ -616,7 +619,7 @@ export async function resetPassword(
  */
 export async function signInWithGoogle(formData: FormData): Promise<void> {
   const next = sanitizeNext(formData.get("next"));
-  const origin = await siteOrigin();
+  const origin = appOrigin();
 
   let supabase;
   try {

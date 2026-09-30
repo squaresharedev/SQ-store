@@ -539,7 +539,9 @@
       "setUp": "Configurar a autenticação de dois fatores",
       "takesAMinute": "Demora cerca de um minuto.",
       "kindPasskey": "Chave de acesso",
-      "kindApp": "Aplicação de autenticação"
+      "kindApp": "Aplicação de autenticação",
+      "kindUnknown": "Não adicionada na Square Share",
+      "unknownWarning": "A sua conta tem uma forma de iniciar sessão que não foi adicionada na Square Share. Se não foi uma ação sua, remova-a já e altere a palavra-passe."
     },
     "remove": {
       "titleLast": "Desativar a autenticação de dois fatores?",
@@ -665,7 +667,7 @@
     },
     "approvals": {
       "title": "Aprovar a partir de um dispositivo com sessão iniciada",
-      "description": "Quando iniciar sessão num local novo, leia o código QR com um telemóvel onde já tenha sessão iniciada e toque em Aprovar. Útil quando a sua chave de acesso está noutro dispositivo.",
+      "description": "Quando iniciar sessão num local novo, leia o código QR com um telemóvel onde já tenha sessão iniciada e toque no número correspondente. Útil quando a sua chave de acesso está noutro dispositivo.",
       "statusOn": "Ativa",
       "statusOff": "Desativada",
       "turnOn": "Ativar",
@@ -674,7 +676,8 @@
       "confirmOnTitle": "Ativar a aprovação de início de sessão?",
       "confirmOnDescription": "Qualquer telemóvel ou computador onde tenha sessão iniciada poderá aprovar um novo início de sessão na sua conta.",
       "confirmOffTitle": "Desativar a aprovação de início de sessão?",
-      "confirmOffDescription": "Os novos inícios de sessão precisarão da sua chave de acesso, da aplicação de autenticação ou de um código de recuperação. Os dispositivos já com sessão iniciada mantêm-na."
+      "confirmOffDescription": "Os novos inícios de sessão precisarão da sua chave de acesso, da aplicação de autenticação ou de um código de recuperação. Os dispositivos já com sessão iniciada mantêm-na.",
+      "offByDefault": "Desativada por predefinição porque inicia sessão com chaves de acesso, que não podem ser alvo de phishing. Ative-a se a quiser como alternativa."
     }
   },
   "team": {

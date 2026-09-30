@@ -18,12 +18,21 @@ const INITIAL: ActionState = {};
 
 /**
  * Sign-in approval, as one of the account's ways through 2FA: "approve from a
- * signed-in device" (lib/auth/sign-in-approval.ts), on unless switched off.
+ * signed-in device" (lib/auth/sign-in-approval.ts). On unless switched off
+ * for an account with an authenticator app; OFF until asked for when the only
+ * ways in are passkeys, since approving is weaker than a passkey on its own.
  * Shown under the passkeys and apps it sits beside, because it changes who
  * can let a new sign-in through, and switching it either way takes a recent
  * second factor like any other sensitive setting.
  */
-export function SignInApprovalRow({ enabled }: { enabled: boolean }) {
+export function SignInApprovalRow({
+  enabled,
+  offByDefault = false,
+}: {
+  enabled: boolean;
+  /** This account's default is off (passkeys only), so say why it is. */
+  offByDefault?: boolean;
+}) {
   const t = useTranslations("Settings.security.approvals");
   const [confirming, setConfirming] = React.useState(false);
   const close = React.useCallback(() => setConfirming(false), []);
@@ -50,6 +59,7 @@ export function SignInApprovalRow({ enabled }: { enabled: boolean }) {
             </span>
           </p>
           <p className={infoTextClass}>{t("description")}</p>
+          {!enabled && offByDefault && <p className={infoTextClass}>{t("offByDefault")}</p>}
         </div>
       </div>
       <Button type="button" variant="secondary" onClick={() => setConfirming(true)}>

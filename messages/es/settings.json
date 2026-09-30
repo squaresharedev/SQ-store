@@ -539,7 +539,9 @@
       "setUp": "Configurar la verificación en dos pasos",
       "takesAMinute": "Lleva un minuto.",
       "kindPasskey": "Llave de acceso",
-      "kindApp": "Aplicación de autenticación"
+      "kindApp": "Aplicación de autenticación",
+      "kindUnknown": "No añadida en Square Share",
+      "unknownWarning": "Tu cuenta tiene una forma de iniciar sesión que no se añadió en Square Share. Si no la añadiste tú, quítala ahora y cambia tu contraseña."
     },
     "remove": {
       "titleLast": "¿Desactivar la verificación en dos pasos?",
@@ -665,7 +667,7 @@
     },
     "approvals": {
       "title": "Aprobar desde un dispositivo con sesión iniciada",
-      "description": "Cuando inicias sesión en un lugar nuevo, escanea el código QR con un móvil donde ya tengas sesión iniciada y pulsa Aprobar. Útil cuando tu llave de acceso está en otro dispositivo.",
+      "description": "Cuando inicias sesión en un lugar nuevo, escanea el código QR con un móvil donde ya tengas sesión iniciada y pulsa el número que coincida. Útil cuando tu llave de acceso está en otro dispositivo.",
       "statusOn": "Activada",
       "statusOff": "Desactivada",
       "turnOn": "Activar",
@@ -674,7 +676,8 @@
       "confirmOnTitle": "¿Activar la aprobación de inicio de sesión?",
       "confirmOnDescription": "Cualquier móvil u ordenador donde tengas sesión iniciada podrá aprobar un nuevo inicio de sesión en tu cuenta.",
       "confirmOffTitle": "¿Desactivar la aprobación de inicio de sesión?",
-      "confirmOffDescription": "Los nuevos inicios de sesión necesitarán tu llave de acceso, tu aplicación de autenticación o un código de recuperación. Los dispositivos con sesión iniciada siguen con sesión iniciada."
+      "confirmOffDescription": "Los nuevos inicios de sesión necesitarán tu llave de acceso, tu aplicación de autenticación o un código de recuperación. Los dispositivos con sesión iniciada siguen con sesión iniciada.",
+      "offByDefault": "Desactivada por defecto porque inicias sesión con llaves de acceso, que no se pueden robar con phishing. Actívala si quieres tenerla como respaldo."
     }
   },
   "team": {

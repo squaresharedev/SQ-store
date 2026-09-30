@@ -85,6 +85,36 @@ vi.mock("@/lib/auth/passkeys", async (importOriginal) => {
   };
 });
 
+// The account's factors as the app's records classify them
+// (lib/auth/account-factors.ts): by default every verified factor on the user
+// is an authenticator app. A test that needs another kind says so.
+type RawFactor = { id: string; friendly_name?: string; status: string; created_at: string };
+const accountFactorsMock = vi.fn(async (user: { factors?: RawFactor[] }) =>
+  (user.factors ?? [])
+    .filter((f) => f.status === "verified")
+    .map((f) => ({ id: f.id, name: f.friendly_name ?? "", kind: "app", createdAt: f.created_at })),
+);
+vi.mock("@/lib/auth/account-factors", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/auth/account-factors")>()),
+  accountFactors: (user: { factors?: RawFactor[] }) => accountFactorsMock(user),
+}));
+const removeApprovalFactorMock = vi.fn(async (_userId: string) => true);
+vi.mock("@/lib/auth/sign-in-approval", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/auth/sign-in-approval")>()),
+  removeApprovalFactor: (userId: string) => removeApprovalFactorMock(userId),
+}));
+// The "create a passkey here" ticket (lib/auth/passkey-offer.ts).
+const offer = vi.hoisted(() => ({
+  grantPasskeyOffer: vi.fn(async () => undefined),
+  hasPasskeyOffer: vi.fn(async () => false),
+  spendPasskeyOffer: vi.fn(async () => undefined),
+}));
+vi.mock("@/lib/auth/passkey-offer", () => ({
+  grantPasskeyOffer: (...args: unknown[]) => offer.grantPasskeyOffer(...(args as [])),
+  hasPasskeyOffer: (...args: unknown[]) => offer.hasPasskeyOffer(...(args as [])),
+  spendPasskeyOffer: () => offer.spendPasskeyOffer(),
+}));
+
 const hasPasswordMock = vi.fn();
 vi.mock("@/lib/auth/has-password", () => ({
   accountHasPassword: (...args: unknown[]) => hasPasswordMock(...args),
@@ -115,6 +145,7 @@ vi.mock("@/i18n/cookie", () => ({
 }));
 
 import {
+  beginPasskeyHere,
   beginPasskeySetup,
   beginTwoFactorSetup,
   cancelTwoFactorSetup,
@@ -226,6 +257,8 @@ beforeEach(() => {
   unenrollMock.mockResolvedValue({ data: {}, error: null });
   localeSyncMock.mockResolvedValue(null);
   writeLocaleMock.mockResolvedValue(undefined);
+  removeApprovalFactorMock.mockResolvedValue(true);
+  offer.hasPasskeyOffer.mockResolvedValue(false);
 });
 
 // ---- the sign-in challenge ------------------------------------------------
@@ -652,6 +685,76 @@ describe("removeAuthenticator", () => {
     expect(errorText(result)).toMatch(/isn't on your account/);
     expect(unenrollMock).not.toHaveBeenCalled();
   });
+
+  it("removing the last one takes the approval factor FIRST, and stops if it can't", async () => {
+    sessionStateMock.mockResolvedValue(state("signed_in"));
+    removeApprovalFactorMock.mockResolvedValue(false);
+    const result = await removeAuthenticator({}, form({ factor_id: FACTOR, mfa_code: "123456" }));
+    expect(removeApprovalFactorMock).toHaveBeenCalledWith(USER_ID);
+    expect(errorText(result)).toBe("We couldn't remove that authenticator. Try again.");
+    expect(unenrollMock).not.toHaveBeenCalled();
+    expect(mfa.clearRecoveryCodes).not.toHaveBeenCalled();
+  });
+
+  it("the last real way in can't go while an unrecognised factor is on the account", async () => {
+    sessionStateMock.mockResolvedValue(state("signed_in"));
+    accountFactorsMock.mockResolvedValueOnce([
+      { id: FACTOR, name: "Phone", kind: "app", createdAt: "2026-09-01T00:00:00Z" },
+      { id: PENDING, name: "passkey:Mine", kind: "unknown", createdAt: "2026-09-02T00:00:00Z" },
+    ]);
+    const result = await removeAuthenticator({}, form({ factor_id: FACTOR, mfa_code: "123456" }));
+    expect(errorText(result)).toMatch(/wasn't added in Square Share/);
+    expect(unenrollMock).not.toHaveBeenCalled();
+  });
+
+  it("an unrecognised factor can be removed, and that never turns 2FA off", async () => {
+    sessionStateMock.mockResolvedValue(state("signed_in"));
+    accountFactorsMock.mockResolvedValueOnce([
+      { id: FACTOR, name: "Phone", kind: "app", createdAt: "2026-09-01T00:00:00Z" },
+      { id: PENDING, name: "approval:hidden", kind: "unknown", createdAt: "2026-09-02T00:00:00Z" },
+    ]);
+    await removeAuthenticator({}, form({ factor_id: PENDING, mfa_code: "123456" }));
+    expect(unenrollMock).toHaveBeenCalledWith({ factorId: PENDING });
+    expect(removeApprovalFactorMock).not.toHaveBeenCalled();
+    expect(mfa.clearRecoveryCodes).not.toHaveBeenCalled();
+  });
+
+  it("the approval factor is not removable here (it has its own switch)", async () => {
+    sessionStateMock.mockResolvedValue(state("signed_in"));
+    accountFactorsMock.mockResolvedValueOnce([
+      { id: FACTOR, name: "Phone", kind: "app", createdAt: "2026-09-01T00:00:00Z" },
+      { id: PENDING, name: "approval:signed-in-devices", kind: "approval", createdAt: "2026-09-02T00:00:00Z" },
+    ]);
+    const result = await removeAuthenticator({}, form({ factor_id: PENDING, mfa_code: "123456" }));
+    expect(errorText(result)).toMatch(/isn't on your account/);
+    expect(unenrollMock).not.toHaveBeenCalled();
+  });
+});
+
+describe("beginPasskeyHere", () => {
+  /** Signed in a moment ago, with a code a moment ago: everything but the ticket. */
+  function justSignedIn() {
+    const s = state("signed_in");
+    return {
+      ...s,
+      assurance: { ...s.assurance, secondFactorAt: now() - 30, signedInAt: now() - 60, sessionId: "s-1" },
+    };
+  }
+
+  it("is refused without the ticket a code-typed sign-in grants", async () => {
+    sessionStateMock.mockResolvedValue(justSignedIn());
+    const result = await beginPasskeyHere({}, form({ name: "Laptop" }));
+    expect(offer.hasPasskeyOffer).toHaveBeenCalledWith(USER_ID, "s-1");
+    expect(result.error).toBeDefined();
+    expect(pk.registrationOptions).not.toHaveBeenCalled();
+  });
+
+  it("the sign-in challenge grants the ticket for this session", async () => {
+    const needs = state("needs_mfa");
+    sessionStateMock.mockResolvedValue({ ...needs, assurance: { ...needs.assurance, sessionId: "s-1" } });
+    await verifyTwoFactorSignIn({}, form({ code: "123456", next: "/orders" }));
+    expect(offer.grantPasskeyOffer).toHaveBeenCalledWith(USER_ID, "s-1");
+  });
 });
 
 describe("regenerateRecoveryCodes", () => {
@@ -843,7 +946,9 @@ describe("English is unchanged", () => {
   });
 
   it("managing it", async () => {
-    const twoFactors = state("signed_in");
+    const twoFactors = state("signed_in", {
+      factors: [verifiedFactor, { ...pendingFactor, status: "verified" }],
+    });
     twoFactors.assurance.factors.push({
       id: PENDING,
       name: "Tablet",

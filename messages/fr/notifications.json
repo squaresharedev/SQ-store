@@ -136,6 +136,10 @@
       "approvalsEnabled": {
         "title": "L'approbation des connexions est activée",
         "body": "Les appareils sur lesquels vous êtes connecté peuvent désormais approuver les nouvelles connexions à votre compte. Si ce n'était pas vous, changez votre mot de passe maintenant."
+      },
+      "stepUpLockedOut": {
+        "title": "Trop de codes à deux facteurs erronés",
+        "body": "Pendant que vous étiez connecté à votre compte, quelqu’un a saisi trop de codes à deux facteurs erronés en essayant de modifier un paramètre : cette action est suspendue pendant quelques minutes. Si ce n’était pas vous, changez votre mot de passe et déconnectez-vous de tous vos appareils."
       }
     },
     "order": {

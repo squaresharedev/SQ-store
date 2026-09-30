@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { appOrigin } from "@/lib/app-url";
 import { getAssurance, getUser } from "@/lib/auth/session";
 import { STEP_UP_FIELDS, requireStepUpState } from "@/lib/auth/mfa";
 import { checkPassword } from "@/lib/auth/reauth";
@@ -108,19 +109,6 @@ async function updateOwnProfile(
     .update({ ...update, updated_at: new Date().toISOString() })
     .eq("id", userId); // owner id from the session, RLS enforces it again
   return !error;
-}
-
-/** Absolute origin for email links (mirrors the auth slice's helper). */
-async function siteOrigin(): Promise<string> {
-  const h = await headers();
-  const origin = h.get("origin");
-  if (origin) return origin;
-  const host = h.get("x-forwarded-host") ?? h.get("host");
-  if (!host) return process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-  const proto =
-    h.get("x-forwarded-proto") ??
-    (host.startsWith("localhost") ? "http" : "https");
-  return `${proto}://${host}`;
 }
 
 // --- Account ---------------------------------------------------------------
@@ -263,7 +251,7 @@ export async function requestEmailChange(
   const stepUp = await requireStepUpState(formData, hasPassword ? {} : { maxAgeSeconds: 0 });
   if (stepUp) return stepUp;
 
-  const origin = await siteOrigin();
+  const origin = appOrigin();
   const supabase = await createClient();
   const twoFactor = (await getAssurance())?.enrolled === true;
 
@@ -352,7 +340,7 @@ export async function sendPasswordReset(
   );
   if (!perClient) return RESET_RATE_LIMITED;
 
-  const origin = await siteOrigin();
+  const origin = appOrigin();
   const supabase = await createClient();
   const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
     redirectTo: `${origin}/auth/callback?next=${encodeURIComponent("/reset-password")}`,

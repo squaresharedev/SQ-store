@@ -172,7 +172,8 @@
     "factorNotOnAccount": "Esa aplicación de autenticación no está en tu cuenta.",
     "removeFailed": "No hemos podido quitar esa aplicación de autenticación. Inténtalo de nuevo.",
     "notEnrolled": "Activa primero la verificación en dos pasos.",
-    "codesNotCreated": "No hemos podido crear códigos nuevos. Los anteriores siguen funcionando."
+    "codesNotCreated": "No hemos podido crear códigos nuevos. Los anteriores siguen funcionando.",
+    "removeUnknownFirst": "Primero quita la forma de iniciar sesión que no se añadió en Square Share. Después podrás quitar esta."
   },
   "settings": {
     "usernameTaken": "Ese nombre de usuario ya está en uso. Prueba con otro.",
@@ -569,7 +570,8 @@
     "unavailable": "La aprobación desde otro dispositivo no está disponible ahora mismo. Usa otra forma de iniciar sesión.",
     "rateLimited": "Demasiados códigos en poco tiempo. Espera unos minutos y vuelve a intentarlo.",
     "expired": "Esta solicitud de inicio de sesión ha caducado o ya fue respondida. Muestra un código nuevo en el dispositivo en el que estás iniciando sesión.",
-    "otherAccount": "Esta solicitud es para una cuenta de Square Share diferente a la que tiene sesión iniciada aquí."
+    "otherAccount": "Esta solicitud es para una cuenta de Square Share diferente a la que tiene sesión iniciada aquí.",
+    "approverStale": "Este dispositivo necesita iniciar sesión de nuevo antes de poder aprobar inicios de sesión."
   },
   "orders": {
     "notShippable": {

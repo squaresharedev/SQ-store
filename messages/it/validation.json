@@ -347,7 +347,8 @@
     "repeated": "Quella password è troppo facile da indovinare. Prova un mix più lungo di parole.",
     "sequence": "Quella password contiene una sequenza di tastiera comune. Prova qualcos’altro.",
     "containsIdentity": "La password non deve contenere il tuo indirizzo email o nome utente.",
-    "weakMix": "Mescola maiuscole e minuscole, un numero o un simbolo, oppure usa {length}+ caratteri."
+    "weakMix": "Mescola maiuscole e minuscole, un numero o un simbolo, oppure usa {length}+ caratteri.",
+    "breached": "Questa password è comparsa in una violazione di dati, quindi gli attaccanti la provano già. Scegline un’altra."
   },
   "team": {
     "invalidStore": "Riferimento al negozio non valido.",

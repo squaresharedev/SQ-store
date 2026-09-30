@@ -172,7 +172,8 @@
     "factorNotOnAccount": "Quell’app di autenticazione non è collegata al tuo account.",
     "removeFailed": "Non siamo riusciti a rimuovere quell’app di autenticazione. Riprova.",
     "notEnrolled": "Attiva prima l’autenticazione a due fattori.",
-    "codesNotCreated": "Non siamo riusciti a creare nuovi codici. Quelli vecchi funzionano ancora."
+    "codesNotCreated": "Non siamo riusciti a creare nuovi codici. Quelli vecchi funzionano ancora.",
+    "removeUnknownFirst": "Prima rimuovi il modo di accedere che non è stato aggiunto in Square Share. Poi potrai rimuovere questo."
   },
   "settings": {
     "usernameTaken": "Quel nome utente è già in uso. Provane un altro.",
@@ -569,7 +570,8 @@
     "unavailable": "L'approvazione da un altro dispositivo non è disponibile in questo momento. Usa un altro metodo per accedere.",
     "rateLimited": "Troppi codici in poco tempo. Attendi qualche minuto, poi riprova.",
     "expired": "Questa richiesta di accesso è scaduta o è già stata risposta. Mostra un nuovo codice sul dispositivo da cui stai accedendo.",
-    "otherAccount": "Questa richiesta riguarda un account Square Share diverso da quello collegato qui."
+    "otherAccount": "Questa richiesta riguarda un account Square Share diverso da quello collegato qui.",
+    "approverStale": "Questo dispositivo deve accedere di nuovo prima di poter approvare accessi."
   },
   "orders": {
     "notShippable": {

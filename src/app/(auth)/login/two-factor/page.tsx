@@ -6,6 +6,7 @@ import { AuthPageShell } from "@/components/auth/AuthPageShell";
 import { TwoFactorChallenge } from "@/components/auth/TwoFactorChallenge";
 import { afterChallenge } from "@/lib/auth/challenge";
 import { deviceFromUserAgent } from "@/lib/auth/device-label";
+import { hasPasskeyOffer } from "@/lib/auth/passkey-offer";
 import { passkeysConfigured } from "@/lib/auth/passkeys";
 import { AuthUnreachableError, getSessionState } from "@/lib/auth/session";
 import { approvalsConfigured, approvalsEnabled } from "@/lib/auth/sign-in-approval";
@@ -47,11 +48,13 @@ export default async function TwoFactorPage({
   // page shows the mark and then goes on to the same sanitised `next`.
   const through = session.kind === "signed_in";
   const { user, assurance } = session;
-  const [approvalReady, approvalOn, passkeysAvailable, head] = await Promise.all([
+  const [approvalReady, approvalOn, passkeysAvailable, head, passkeyOffered] = await Promise.all([
     approvalsConfigured(),
-    approvalsEnabled(user.id),
+    approvalsEnabled(user.id, assurance),
     passkeysConfigured(),
     headers(),
+    // Only a session that just got through with an app code holds the ticket.
+    through ? hasPasskeyOffer(user.id, assurance.sessionId) : Promise.resolve(false),
   ]);
 
   return (
@@ -64,6 +67,7 @@ export default async function TwoFactorPage({
         approval={approvalReady && approvalOn === true}
         device={deviceFromUserAgent(head.get("user-agent"))}
         passkeysAvailable={passkeysAvailable}
+        passkeyOffered={passkeyOffered}
       />
     </AuthPageShell>
   );

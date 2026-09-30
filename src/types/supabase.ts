@@ -563,6 +563,45 @@ export type Database = {
         }
         Relationships: []
       }
+      mfa_approval_opt_ins: {
+        Row: {
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      mfa_verify_intents: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          id?: string
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       mfa_approval_opt_outs: {
         Row: {
           created_at: string
@@ -588,6 +627,7 @@ export type Database = {
           expires_at: string
           factor_id: string | null
           id: string
+          match_code: number | null
           os: string | null
           session_id: string
           status: string
@@ -604,6 +644,7 @@ export type Database = {
           expires_at: string
           factor_id?: string | null
           id?: string
+          match_code?: number | null
           os?: string | null
           session_id: string
           status?: string
@@ -620,6 +661,7 @@ export type Database = {
           expires_at?: string
           factor_id?: string | null
           id?: string
+          match_code?: number | null
           os?: string | null
           session_id?: string
           status?: string

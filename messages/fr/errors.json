@@ -172,7 +172,8 @@
     "factorNotOnAccount": "Cette application d’authentification n’est pas associée à votre compte.",
     "removeFailed": "Nous n’avons pas pu supprimer cette application d’authentification. Réessayez.",
     "notEnrolled": "Activez d’abord l’authentification à deux facteurs.",
-    "codesNotCreated": "Nous n’avons pas pu créer de nouveaux codes. Vos anciens codes fonctionnent toujours."
+    "codesNotCreated": "Nous n’avons pas pu créer de nouveaux codes. Vos anciens codes fonctionnent toujours.",
+    "removeUnknownFirst": "Supprimez d’abord le moyen de connexion qui n’a pas été ajouté dans Square Share. Ensuite, vous pourrez supprimer celui-ci."
   },
   "settings": {
     "usernameTaken": "Ce nom d’utilisateur est déjà pris. Essayez-en un autre.",
@@ -569,7 +570,8 @@
     "unavailable": "L'approbation depuis un autre appareil n'est pas disponible pour le moment. Utilisez un autre moyen de connexion.",
     "rateLimited": "Trop de codes générés en peu de temps. Attendez quelques minutes, puis réessayez.",
     "expired": "Cette demande de connexion a expiré ou a déjà été traitée. Affichez un nouveau code sur l'appareil depuis lequel vous vous connectez.",
-    "otherAccount": "Cette demande concerne un compte Square Share différent de celui connecté ici."
+    "otherAccount": "Cette demande concerne un compte Square Share différent de celui connecté ici.",
+    "approverStale": "Cet appareil doit se reconnecter avant de pouvoir approuver des connexions."
   },
   "orders": {
     "notShippable": {

@@ -136,6 +136,10 @@
       "approvalsEnabled": {
         "title": "Inloggoedkeuring staat aan",
         "body": "Apparaten waarop je bent ingelogd, kunnen nu nieuwe inlogpogingen op je account goedkeuren. Was jij dit niet? Wijzig dan nu je wachtwoord."
+      },
+      "stepUpLockedOut": {
+        "title": "Te veel foute tweestapscodes",
+        "body": "Terwijl er in je account was ingelogd, heeft iemand te veel foute tweestapscodes ingevoerd om een instelling te wijzigen. Daarom is dat een paar minuten gepauzeerd. Was jij dit niet? Wijzig dan je wachtwoord en log uit op al je apparaten."
       }
     },
     "order": {

@@ -46,10 +46,14 @@ import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
 import { afterChallenge, syncAccountLocale } from "@/lib/auth/challenge";
 import {
   JUST_VERIFIED_SECONDS,
+  RECENT_SIGN_IN_SECONDS,
   secondFactorIsFresh,
+  signedInRecently,
   type SessionAssurance,
 } from "@/lib/auth/assurance";
 import { removeApprovalFactor } from "@/lib/auth/sign-in-approval";
+import { grantPasskeyOffer, hasPasskeyOffer, spendPasskeyOffer } from "@/lib/auth/passkey-offer";
+import { accountFactors, realFactors } from "@/lib/auth/account-factors";
 import {
   RECOVERY_CODE_INPUT_MAX,
   factorIdSchema,
@@ -167,6 +171,9 @@ export async function verifyTwoFactorSignIn(
   // of its own picks up the account's (the first-factor step skipped it: that
   // aal1 session could not read the profile).
   await syncAccountLocale(supabase, state.user.id);
+  // This sign-in came through the person's own authenticator app, so this
+  // device may be offered a passkey of its own (lib/auth/passkey-offer.ts).
+  await grantPasskeyOffer(state.user.id, state.assurance.sessionId);
 
   return { verified: { next } };
 }
@@ -571,19 +578,22 @@ export async function confirmPasskeySetup(
 }
 
 /**
- * "Create a passkey on this device", offered at the end of a sign-in that had
- * to go through ANOTHER device (an approval from the phone, or a code from an
- * app), so that next time this device is one tap.
+ * "Create a passkey on this device", offered at the end of a sign-in that was
+ * completed with a code from the person's authenticator app, so that next time
+ * this device is one tap.
  *
  * THE PROOF IS THE CHALLENGE JUST PASSED. Adding a factor to an account with
  * 2FA normally takes a second proof in the same request (proveSetupOwnership):
  * a session found or stolen later must not be able to plant its own passkey.
- * Here the offer sits on the challenge's own success screen, so the proof is
- * the second factor this session passed moments ago (JUST_VERIFIED_SECONDS,
- * read from the token's amr claim, which the browser cannot forge). A device
- * that got in through another device usually has nothing else to prove with,
- * which is exactly why it is being offered a passkey. The owner is alerted as
- * for any added factor.
+ * Here all of these must hold:
+ *   - a ticket minted ONLY by that code challenge, for this session
+ *     (lib/auth/passkey-offer.ts). Never after a sign-in approval (someone
+ *     talked into approving would hand over a permanent passkey) and never
+ *     from a later step-up;
+ *   - the second factor passed within JUST_VERIFIED_SECONDS and the password
+ *     (or Google, or link) within RECENT_SIGN_IN_SECONDS, both from the
+ *     token's amr claim, which the browser cannot forge.
+ * The owner is alerted as for any added factor.
  */
 export async function beginPasskeyHere(
   _prev: BeginPasskeySetupState,
@@ -595,7 +605,12 @@ export async function beginPasskeyHere(
   const state = await getSessionState();
   if (state.kind !== "signed_in") return SESSION_EXPIRED;
   const { user, assurance } = state;
-  if (!assurance.enrolled || !secondFactorIsFresh(assurance, JUST_VERIFIED_SECONDS)) {
+  if (
+    !assurance.enrolled ||
+    !secondFactorIsFresh(assurance, JUST_VERIFIED_SECONDS) ||
+    !signedInRecently(assurance, RECENT_SIGN_IN_SECONDS) ||
+    !(await hasPasskeyOffer(user.id, assurance.sessionId))
+  ) {
     return failed(invalidInput(msg("Errors.passkey.offerExpired")));
   }
   if (!(await passkeysConfigured())) return PASSKEYS_UNAVAILABLE;
@@ -614,10 +629,9 @@ export async function beginPasskeyHere(
 }
 
 /**
- * Step 2 of beginPasskeyHere. Unlike Settings, the account's other sessions
- * stay signed in: the phone that approved this sign-in a moment ago is the
- * person's own, and signing it out for adding a passkey would take away the
- * very device they approve the next sign-in with.
+ * Step 2 of beginPasskeyHere, under the same ticket, which it spends. Unlike
+ * Settings, the account's other sessions stay signed in: this is the person
+ * finishing their own sign-in, not a credential change made in alarm.
  */
 export async function confirmPasskeyHere(
   _prev: ConfirmSetupState,
@@ -627,10 +641,15 @@ export async function confirmPasskeyHere(
   if (rejected) return rejected;
   const state = await getSessionState();
   if (state.kind !== "signed_in") return SESSION_EXPIRED;
+  if (!(await hasPasskeyOffer(state.user.id, state.assurance.sessionId))) {
+    return failed(invalidInput(msg("Errors.passkey.offerExpired")));
+  }
   if (!(await takeSecondFactorAttempt(state.user.id, state.user.email, "setup"))) {
     return failed(SECOND_FACTOR_ERRORS.rate_limited);
   }
-  return finishPasskeySetup(state, formData, { signOutOthers: false });
+  const result = await finishPasskeySetup(state, formData, { signOutOthers: false });
+  if (result.done) await spendPasskeyOffer();
+  return result;
 }
 
 /**
@@ -794,6 +813,11 @@ export type ManageState = ActionState & {
 /**
  * Remove one authenticator. Removing the last one turns 2FA off, which also
  * voids the recovery codes. Always needs a code in the request itself.
+ *
+ * Any factor on the account can be removed here, including one the app does
+ * not recognise (lib/auth/account-factors.ts), except the approval factor,
+ * which belongs to the sign-in approval switch. "Last" counts only real ways
+ * in (apps and passkeys).
  */
 export async function removeAuthenticator(
   _prev: ManageState,
@@ -804,18 +828,36 @@ export async function removeAuthenticator(
 
   const state = await getSessionState();
   if (state.kind !== "signed_in") return SESSION_EXPIRED;
-  const { user, assurance } = state;
+  const { user } = state;
 
   const factorId = factorIdSchema.safeParse(String(formData.get("factor_id") ?? ""));
+  const all = await accountFactors(user);
+  if (!all) return failed(actionError("server_error", msg("Errors.mfa.removeFailed")));
   const target = factorId.success
-    ? assurance.factors.find((f) => f.id === factorId.data)
+    ? all.find((f) => f.id === factorId.data && f.kind !== "approval")
     : undefined;
   if (!target) return failed(actionError("not_found", msg("Errors.mfa.factorNotOnAccount")));
+  const real = realFactors(all);
+  const wasLast = real.length === 1 && real[0].id === target.id;
+  // Not while a factor the app doesn't know is still there: 2FA would stay on
+  // with only that one left to sign in with. It is listed with its own Remove.
+  if (wasLast && all.some((f) => f.kind === "unknown")) {
+    return failed(invalidInput(msg("Errors.mfa.removeUnknownFirst")));
+  }
 
   const refused = await requireStepUpState(formData, { maxAgeSeconds: 0 });
   if (refused) return refused;
 
   if (!(await rateLimit("mfa_manage", RATE_LIMITS.mfaManage))) return TOO_MANY_CHANGES;
+
+  // Sign-in approval is never a way in on its own: with no passkey or app
+  // left, 2FA is off, and its factor goes too. FIRST, and only on success
+  // does the last real factor go: the other order could leave a hidden
+  // verified factor as the account's only one (2FA still on, nothing to sign
+  // in with, recovery codes cleared).
+  if (wasLast && !(await removeApprovalFactor(user.id))) {
+    return failed(actionError("server_error", msg("Errors.mfa.removeFailed")));
+  }
 
   const supabase = await createClient();
   const { error } = await supabase.auth.mfa.unenroll({ factorId: target.id });
@@ -824,11 +866,7 @@ export async function removeAuthenticator(
     return failed(actionError("server_error", msg("Errors.mfa.removeFailed")));
   }
 
-  const wasLast = assurance.factors.length === 1;
   if (wasLast) {
-    // Sign-in approval is never a way in on its own: with no passkey or app
-    // left, 2FA is off, and its factor goes too.
-    await removeApprovalFactor(user.id);
     await clearRecoveryCodes(user.id);
     await alertTwoFactorChange(user, "mfa.disabled", {
       title: { key: "Notifications.messages.security.twoFactorDisabled.title" },

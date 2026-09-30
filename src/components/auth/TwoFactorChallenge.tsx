@@ -73,6 +73,7 @@ export function TwoFactorChallenge({
   approval = false,
   device = UNKNOWN_DEVICE,
   passkeysAvailable = false,
+  passkeyOffered = false,
 }: {
   next: string;
   email: string;
@@ -85,6 +86,13 @@ export function TwoFactorChallenge({
   device?: DeviceLabel;
   /** Passkeys are configured in this deployment. */
   passkeysAvailable?: boolean;
+  /**
+   * This session is through AND holds the passkey-here ticket, which only a
+   * sign-in with an authenticator-app code grants (lib/auth/passkey-offer.ts).
+   * The server's word for it, because the page usually re-renders as signed
+   * in before the code form can say how the sign-in went.
+   */
+  passkeyOffered?: boolean;
 }) {
   const t = useTranslations("Auth.twoFactor");
   const apps = factors.filter((factor) => factor.type !== "passkey");
@@ -119,7 +127,14 @@ export function TwoFactorChallenge({
   }, [mayOffer]);
   const [offerAnswered, setOfferAnswered] = React.useState(false);
   const finishOffer = React.useCallback(() => setOfferAnswered(true), []);
-  const offerKind = verified && verified.kind !== "passkey" ? verified.kind : null;
+  // Only after a code from the person's own authenticator app: never after an
+  // approval (someone talked into approving must not also hand over a
+  // permanent passkey). The server holds the same line (passkey-offer.ts).
+  // Latched once true: making the passkey spends the ticket, the page then
+  // re-renders without it, and the offer must stay for its "added" moment.
+  const [offerEarned, setOfferEarned] = React.useState(false);
+  if (!offerEarned && (verified?.kind === "app" || passkeyOffered)) setOfferEarned(true);
+  const offerKind = offerEarned ? "app" : null;
   const offering = Boolean(offerKind && mayOffer && !offerAnswered);
   const showOffer = offering && deviceCanHold === true;
   // Still finding out whether to offer: hold on the success moment.

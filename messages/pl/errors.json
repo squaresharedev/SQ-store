@@ -172,7 +172,8 @@
     "factorNotOnAccount": "Tej aplikacji uwierzytelniającej nie ma na twoim koncie.",
     "removeFailed": "Nie udało się usunąć tej aplikacji uwierzytelniającej. Spróbuj ponownie.",
     "notEnrolled": "Najpierw włącz uwierzytelnianie dwuskładnikowe.",
-    "codesNotCreated": "Nie udało się utworzyć nowych kodów. Dotychczasowe nadal działają."
+    "codesNotCreated": "Nie udało się utworzyć nowych kodów. Dotychczasowe nadal działają.",
+    "removeUnknownFirst": "Najpierw usuń sposób logowania, który nie został dodany w Square Share. Wtedy będzie można usunąć ten."
   },
   "settings": {
     "usernameTaken": "Ta nazwa użytkownika jest zajęta. Spróbuj innej.",
@@ -569,7 +570,8 @@
     "unavailable": "Zatwierdzanie z innego urządzenia nie jest teraz dostępne. Użyj innego sposobu logowania.",
     "rateLimited": "Zbyt wiele kodów w krótkim czasie. Odczekaj kilka minut i spróbuj ponownie.",
     "expired": "To żądanie logowania wygasło lub zostało już obsłużone. Pokaż nowy kod na urządzeniu, na którym się logujesz.",
-    "otherAccount": "To żądanie dotyczy innego konta Square Share niż to, na które jesteś tu zalogowany."
+    "otherAccount": "To żądanie dotyczy innego konta Square Share niż to, na które jesteś tu zalogowany.",
+    "approverStale": "To urządzenie musi się ponownie zalogować, zanim będzie mogło zatwierdzać logowania."
   },
   "orders": {
     "notShippable": {

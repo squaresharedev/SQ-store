@@ -539,7 +539,9 @@
       "setUp": "Configura l’autenticazione a due fattori",
       "takesAMinute": "Ci vuole circa un minuto.",
       "kindPasskey": "Passkey",
-      "kindApp": "App di autenticazione"
+      "kindApp": "App di autenticazione",
+      "kindUnknown": "Non aggiunto in Square Share",
+      "unknownWarning": "Il tuo account ha un modo di accedere che non è stato aggiunto in Square Share. Se non l’hai aggiunto tu, rimuovilo subito e cambia la password."
     },
     "remove": {
       "titleLast": "Disattivare l’autenticazione a due fattori?",
@@ -665,7 +667,7 @@
     },
     "approvals": {
       "title": "Approva da un dispositivo già connesso",
-      "description": "Quando accedi in un nuovo posto, scansiona il codice QR con un telefono in cui hai già effettuato l'accesso e tocca Approva. Utile quando la tua passkey è su un altro dispositivo.",
+      "description": "Quando accedi in un nuovo posto, scansiona il codice QR con un telefono in cui hai già effettuato l’accesso e tocca il numero corrispondente. Utile quando la tua passkey è su un altro dispositivo.",
       "statusOn": "Attiva",
       "statusOff": "Disattivata",
       "turnOn": "Attiva",
@@ -674,7 +676,8 @@
       "confirmOnTitle": "Attivare l'approvazione degli accessi?",
       "confirmOnDescription": "Qualsiasi telefono o computer in cui hai già effettuato l'accesso potrà approvare un nuovo accesso al tuo account.",
       "confirmOffTitle": "Disattivare l'approvazione degli accessi?",
-      "confirmOffDescription": "I nuovi accessi richiederanno la tua passkey, la tua app di autenticazione o un codice di recupero. I dispositivi già connessi restano connessi."
+      "confirmOffDescription": "I nuovi accessi richiederanno la tua passkey, la tua app di autenticazione o un codice di recupero. I dispositivi già connessi restano connessi.",
+      "offByDefault": "Disattivata per impostazione predefinita perché accedi con le passkey, che non possono essere sottratte con il phishing. Attivala se la vuoi come alternativa di riserva."
     }
   },
   "team": {

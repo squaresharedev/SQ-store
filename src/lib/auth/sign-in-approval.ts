@@ -2,7 +2,12 @@ import type { User } from "@supabase/supabase-js";
 import { renderSVG } from "uqr";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { createClient } from "@/lib/supabase/server";
-import { APPROVAL_FACTOR_NAME, isApprovalFactor } from "@/lib/auth/assurance";
+import {
+  APPROVAL_FACTOR_NAME,
+  appFactors,
+  isApprovalFactor,
+  type SessionAssurance,
+} from "@/lib/auth/assurance";
 import type { DeviceLabel } from "@/lib/auth/device-label";
 import { base64UrlEncode, open, passkeySealingConfigured, seal } from "@/lib/auth/passkey-crypto";
 import { TOTP_STEP_SECONDS, totpCode } from "@/lib/auth/totp";
@@ -72,6 +77,14 @@ const KEEP_SECONDS = 24 * 60 * 60;
 const REQUESTS = "mfa_sign_in_approvals";
 const FACTORS = "mfa_approval_factors";
 const OPT_OUTS = "mfa_approval_opt_outs";
+const OPT_INS = "mfa_approval_opt_ins";
+
+/**
+ * How recently the APPROVING device must itself have passed two-factor.
+ * Sessions never expire on this plan, so without it a phone signed in once,
+ * years ago, could approve sign-ins forever.
+ */
+export const APPROVER_MAX_AGE_SECONDS = 30 * 24 * 60 * 60;
 
 // ---------------------------------------------------------------------------
 // Configuration
@@ -137,27 +150,42 @@ export async function approvalsConfigured(): Promise<boolean> {
 }
 
 /**
- * Whether the account has sign-in approval on (it is, unless it was turned off
- * in Settings › Security). Null when that cannot be read, which every caller
- * treats as "not available": a way in is never offered on a guess.
+ * Whether the account has sign-in approval on. An explicit choice in Settings
+ * wins; otherwise it is ON for an account that can already type a code from
+ * an authenticator app (approval adds no new way to be phished: a code can be
+ * read out too) or has used approval before, and OFF for a passkey-only
+ * account, which is phishing-resistant and must not quietly stop being so.
+ * Null when that cannot be read, which every caller treats as "not
+ * available": a way in is never offered on a guess.
  */
-export async function approvalsEnabled(userId: string): Promise<boolean | null> {
+export async function approvalsEnabled(
+  userId: string,
+  assurance: Pick<SessionAssurance, "factors" | "approvalFactorId">,
+): Promise<boolean | null> {
   try {
     const admin = createAdminClient();
-    const { data, error } = await admin
-      .from(OPT_OUTS)
-      .select("user_id")
-      .eq("user_id", userId)
-      .maybeSingle();
-    if (error) {
-      console.error("[approval] reading the opt-out failed:", error.message);
+    const [out, into] = await Promise.all([
+      admin.from(OPT_OUTS).select("user_id").eq("user_id", userId).maybeSingle(),
+      admin.from(OPT_INS).select("user_id").eq("user_id", userId).maybeSingle(),
+    ]);
+    if (out.error || into.error) {
+      console.error("[approval] reading the setting failed:", (out.error ?? into.error)?.message);
       return null;
     }
-    return data === null;
+    if (out.data) return false;
+    if (into.data) return true;
+    return approvalsOnByDefault(assurance);
   } catch (err) {
-    console.error("[approval] reading the opt-out threw:", err instanceof Error ? err.message : String(err));
+    console.error("[approval] reading the setting threw:", err instanceof Error ? err.message : String(err));
     return null;
   }
+}
+
+/** The default when the account never chose (see approvalsEnabled). Pure. */
+export function approvalsOnByDefault(
+  assurance: Pick<SessionAssurance, "factors" | "approvalFactorId">,
+): boolean {
+  return appFactors(assurance.factors).length > 0 || assurance.approvalFactorId !== null;
 }
 
 /**
@@ -171,13 +199,18 @@ export async function setApprovalsEnabled(userId: string, enabled: boolean): Pro
   try {
     const admin = createAdminClient();
     if (enabled) {
-      const { error } = await admin.from(OPT_OUTS).delete().eq("user_id", userId);
-      return !error;
+      const { error } = await admin
+        .from(OPT_INS)
+        .upsert({ user_id: userId }, { onConflict: "user_id", ignoreDuplicates: true });
+      if (error) return false;
+      const removed = await admin.from(OPT_OUTS).delete().eq("user_id", userId);
+      return !removed.error;
     }
     const { error } = await admin
       .from(OPT_OUTS)
       .upsert({ user_id: userId }, { onConflict: "user_id", ignoreDuplicates: true });
     if (error) return false;
+    await admin.from(OPT_INS).delete().eq("user_id", userId);
     await admin
       .from(REQUESTS)
       .update({ status: "cancelled" })
@@ -231,7 +264,33 @@ export type NewApprovalRequest = {
   qrCode: string;
   /** Unix seconds. */
   expiresAt: number;
+  /** The number the phone must pick (number matching). */
+  matchCode: number;
 };
+
+/** A two-digit number, 10 to 99, from the CSPRNG. */
+function newMatchCode(): number {
+  const bytes = new Uint32Array(1);
+  crypto.getRandomValues(bytes);
+  return 10 + (bytes[0] % 90);
+}
+
+/**
+ * The three numbers the approving phone offers: the right one and two others,
+ * in a random order. Only the right one approves; picking another denies.
+ */
+export function matchChoices(matchCode: number): number[] {
+  const choices = new Set([matchCode]);
+  while (choices.size < 3) choices.add(newMatchCode());
+  const list = [...choices];
+  for (let i = list.length - 1; i > 0; i -= 1) {
+    const bytes = new Uint32Array(1);
+    crypto.getRandomValues(bytes);
+    const j = bytes[0] % (i + 1);
+    [list[i], list[j]] = [list[j], list[i]];
+  }
+  return list;
+}
 
 /**
  * A new request for the waiting session, retiring any it had before (one live
@@ -259,6 +318,7 @@ export async function createApprovalRequest(input: {
       .lt("created_at", new Date(Date.now() - KEEP_SECONDS * 1000).toISOString());
 
     const token = newToken();
+    const matchCode = newMatchCode();
     const expiresAt = Math.floor(Date.now() / 1000) + APPROVAL_REQUEST_SECONDS;
     const { data, error } = await admin
       .from(REQUESTS)
@@ -269,6 +329,7 @@ export async function createApprovalRequest(input: {
         browser: input.device.browser,
         os: input.device.os,
         country: input.country,
+        match_code: matchCode,
         expires_at: new Date(expiresAt * 1000).toISOString(),
       })
       .select("id")
@@ -278,7 +339,7 @@ export async function createApprovalRequest(input: {
       return null;
     }
     const url = `${origin}${approveSignInPath(token)}`;
-    return { id: data.id, url, qrCode: approvalQrCode(url), expiresAt };
+    return { id: data.id, url, qrCode: approvalQrCode(url), expiresAt, matchCode };
   } catch (err) {
     console.error("[approval] creating a request threw:", err instanceof Error ? err.message : String(err));
     return null;
@@ -295,6 +356,8 @@ export type ApprovalRequestView = {
   os: string | null;
   country: string | null;
   createdAt: string;
+  /** Null only for a request made before number matching: never approvable. */
+  matchCode: number | null;
 };
 
 /** The request a QR code's token names, or null (unknown, malformed, unreadable). */
@@ -304,7 +367,7 @@ export async function findApprovalRequest(token: string): Promise<ApprovalReques
     const admin = createAdminClient();
     const { data, error } = await admin
       .from(REQUESTS)
-      .select("id, user_id, status, browser, os, country, created_at, expires_at")
+      .select("id, user_id, status, browser, os, country, created_at, expires_at, match_code")
       .eq("token_hash", await hashToken(token))
       .maybeSingle();
     if (error || !data) return null;
@@ -316,6 +379,7 @@ export async function findApprovalRequest(token: string): Promise<ApprovalReques
       os: data.os,
       country: data.country,
       createdAt: data.created_at,
+      matchCode: data.match_code ?? null,
     };
   } catch {
     return null;
@@ -533,19 +597,31 @@ export async function approvalCodeFrom(secret: string): Promise<string> {
 /**
  * Remove the approval factor through the admin API, for when the account's
  * last real factor goes: approval is never a way in on its own, so with no
- * passkey or app left, 2FA is off and this goes too.
+ * passkey or app left, 2FA is off and this goes too. Called BEFORE the last
+ * real factor is removed, and that removal only goes ahead on true: the other
+ * order could leave a hidden verified factor as the account's only one, 2FA
+ * still on, nothing to sign in with, and the recovery codes already cleared.
  */
-export async function removeApprovalFactor(userId: string): Promise<void> {
+export async function removeApprovalFactor(userId: string): Promise<boolean> {
   try {
     const admin = createAdminClient();
     const { data, error } = await admin.auth.admin.mfa.listFactors({ userId });
-    if (error || !data) return;
+    if (error || !data) {
+      console.error("[approval] listing factors failed:", error?.message);
+      return false;
+    }
+    let ok = true;
     for (const factor of data.factors) {
       if (!isApprovalFactor(factor)) continue;
       const removed = await admin.auth.admin.mfa.deleteFactor({ id: factor.id, userId });
-      if (removed.error) console.error("[approval] removing the factor failed:", removed.error.message);
+      if (removed.error) {
+        console.error("[approval] removing the factor failed:", removed.error.message);
+        ok = false;
+      }
     }
+    return ok;
   } catch (err) {
     console.error("[approval] removing the factor threw:", err instanceof Error ? err.message : String(err));
+    return false;
   }
 }

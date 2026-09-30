@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useActionState } from "react";
-import { Check, Fingerprint, Plus, ShieldCheck, Smartphone } from "lucide-react";
+import { Check, Fingerprint, Plus, ShieldCheck, Smartphone, TriangleAlert } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
 import { DURATION, EASE_ENTRANCE, POP, SETTLE } from "@/components/ui/motion-tokens";
@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { Spinner } from "@/components/ui/spinner";
 import { useActionStateToast, useResolveMessage } from "@/components/ui/ActionErrorNotice";
-import { helpTextClass, infoTextClass } from "@/components/ui/control-styles";
+import { dangerNoticeClass, helpTextClass, infoTextClass } from "@/components/ui/control-styles";
 import { SettingsCard } from "@/components/settings/SettingsCard";
 import { StepUpField } from "@/components/auth/StepUp";
 import { SignInApprovalRow } from "@/components/settings/security/SignInApprovalRow";
@@ -38,6 +38,20 @@ function formatDay(iso: string, locale: Locale): string {
     : dateTimeFormat(intlTag(locale, "en-GB"), ADDED_DAY).format(date);
 }
 
+/** The glyph for each kind of factor in the list. */
+const FACTOR_ICON = {
+  passkey: Fingerprint,
+  totp: Smartphone,
+  unknown: TriangleAlert,
+} as const satisfies Record<SecurityFactor["type"], unknown>;
+
+/** Its kind, as the line under the name says it. */
+const FACTOR_KIND_LABEL = {
+  passkey: "kindPasskey",
+  totp: "kindApp",
+  unknown: "kindUnknown",
+} as const satisfies Record<SecurityFactor["type"], string>;
+
 /** Why bother, in the three sentences a busy seller will actually read. */
 const BENEFITS = ["password", "changesBusiness", "alerts"] as const;
 
@@ -54,6 +68,7 @@ export function TwoFactorCard({
   signsInWithGoogle,
   passkeysAvailable,
   approvalsEnabled = null,
+  approvalsOffByDefault = false,
   openSetup,
 }: {
   enrolled: boolean;
@@ -64,6 +79,8 @@ export function TwoFactorCard({
   passkeysAvailable: boolean;
   /** Sign-in approval on or off; null (the default) when it is not available here. */
   approvalsEnabled?: boolean | null;
+  /** Approval is off unless asked for on this account (passkeys only). */
+  approvalsOffByDefault?: boolean;
   openSetup: boolean;
 }) {
   const t = useTranslations("Settings.security.twoFactor");
@@ -76,6 +93,10 @@ export function TwoFactorCard({
   // Changes animate (2FA turning on, a way in added or removed); the page as
   // first drawn does not.
   const still = Boolean(useReducedMotion());
+  // The ways in the app itself made. An unknown factor is listed (so it can be
+  // seen and removed) but is never counted as one of them.
+  const knownCount = factors.filter((factor) => factor.type !== "unknown").length;
+  const hasUnknown = knownCount < factors.length;
 
   return (
     <SettingsCard
@@ -108,9 +129,17 @@ export function TwoFactorCard({
 
         {enrolled ? (
           <>
+            {hasUnknown && (
+              <div role="alert" className={dangerNoticeClass} data-unknown-factor-warning>
+                <TriangleAlert aria-hidden className="mt-0.5 size-4 shrink-0 text-destructive" />
+                <p className="font-inter text-sm text-foreground">{t("unknownWarning")}</p>
+              </div>
+            )}
             <ul className="divide-y divide-border border-y border-border" aria-label={t("listLabel")}>
               <AnimatePresence initial={false}>
-                {factors.map((factor) => (
+                {factors.map((factor) => {
+                  const Icon = FACTOR_ICON[factor.type];
+                  return (
                   <motion.li
                     key={factor.id}
                     className="overflow-hidden"
@@ -121,17 +150,19 @@ export function TwoFactorCard({
                   >
                     <div className="flex flex-wrap items-center justify-between gap-3 py-3">
                       <div className="flex min-w-0 items-center gap-2.5" data-factor-type={factor.type}>
-                        {factor.type === "passkey" ? (
-                          <Fingerprint aria-hidden className="size-4 shrink-0 text-muted-foreground" />
-                        ) : (
-                          <Smartphone aria-hidden className="size-4 shrink-0 text-muted-foreground" />
-                        )}
+                        <Icon
+                          aria-hidden
+                          className={cn(
+                            "size-4 shrink-0",
+                            factor.type === "unknown" ? "text-destructive" : "text-muted-foreground",
+                          )}
+                        />
                         <div className="min-w-0">
                           <p className="truncate font-inter text-sm font-medium text-foreground">
                             {factor.name}
                           </p>
                           <p className={infoTextClass}>
-                            {factor.type === "passkey" ? t("kindPasskey") : t("kindApp")}
+                            {t(FACTOR_KIND_LABEL[factor.type])}
                             {" · "}
                             {t("added", { date: formatDay(factor.createdAt, locale) })}
                           </p>
@@ -147,7 +178,8 @@ export function TwoFactorCard({
                       </Button>
                     </div>
                   </motion.li>
-                ))}
+                  );
+                })}
               </AnimatePresence>
             </ul>
             <div>
@@ -158,7 +190,10 @@ export function TwoFactorCard({
             </div>
             {approvalsEnabled !== null && (
               <div className="border-t border-border pt-4">
-                <SignInApprovalRow enabled={approvalsEnabled} />
+                <SignInApprovalRow
+                  enabled={approvalsEnabled}
+                  offByDefault={approvalsOffByDefault}
+                />
               </div>
             )}
           </>
@@ -200,7 +235,8 @@ export function TwoFactorCard({
       <RemoveAuthenticatorModal
         key={removing?.id ?? "none"}
         factor={removing}
-        isLast={factors.length <= 1}
+        // Removing the last KNOWN way in turns 2FA off; an unknown one never does.
+        isLast={removing?.type !== "unknown" && knownCount <= 1}
         onClose={closeRemove}
       />
     </SettingsCard>

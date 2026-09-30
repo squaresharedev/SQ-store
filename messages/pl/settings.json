@@ -539,7 +539,9 @@
       "setUp": "Skonfiguruj uwierzytelnianie dwuskładnikowe",
       "takesAMinute": "Zajmuje około minuty.",
       "kindPasskey": "Klucz dostępu",
-      "kindApp": "Aplikacja uwierzytelniająca"
+      "kindApp": "Aplikacja uwierzytelniająca",
+      "kindUnknown": "Nie dodano w Square Share",
+      "unknownWarning": "Twoje konto ma sposób logowania, który nie został dodany w Square Share. Jeśli nie został dodany przez ciebie, usuń go teraz i zmień hasło."
     },
     "remove": {
       "titleLast": "Wyłączyć uwierzytelnianie dwuskładnikowe?",
@@ -665,7 +667,7 @@
     },
     "approvals": {
       "title": "Zatwierdź z zalogowanego urządzenia",
-      "description": "Gdy logujesz się w nowym miejscu, zeskanuj kod QR telefonem, na którym jesteś już zalogowany, i dotknij Zatwierdź. Przydatne, gdy klucz dostępu jest na innym urządzeniu.",
+      "description": "Gdy logujesz się w nowym miejscu, zeskanuj kod QR telefonem, na którym jesteś już zalogowany, i dotknij pasującego numeru. Przydatne, gdy klucz dostępu jest na innym urządzeniu.",
       "statusOn": "Włączone",
       "statusOff": "Wyłączone",
       "turnOn": "Włącz",
@@ -674,7 +676,8 @@
       "confirmOnTitle": "Włączyć zatwierdzanie logowania?",
       "confirmOnDescription": "Każdy telefon lub komputer, na którym jesteś zalogowany, będzie mógł zatwierdzić nowe logowanie na twoje konto.",
       "confirmOffTitle": "Wyłączyć zatwierdzanie logowania?",
-      "confirmOffDescription": "Nowe logowania będą wymagać klucza dostępu, aplikacji uwierzytelniającej lub kodu odzyskiwania. Urządzenia już zalogowane pozostają zalogowane."
+      "confirmOffDescription": "Nowe logowania będą wymagać klucza dostępu, aplikacji uwierzytelniającej lub kodu odzyskiwania. Urządzenia już zalogowane pozostają zalogowane.",
+      "offByDefault": "Domyślnie wyłączone, bo logujesz się kluczami dostępu, które są odporne na phishing. Włącz, jeśli chcesz mieć to jako opcję zapasową."
     }
   },
   "team": {

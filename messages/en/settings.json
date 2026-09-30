@@ -539,7 +539,9 @@
       "setUp": "Set up two-factor authentication",
       "takesAMinute": "Takes about a minute.",
       "kindPasskey": "Passkey",
-      "kindApp": "Authenticator app"
+      "kindApp": "Authenticator app",
+      "kindUnknown": "Not added in Square Share",
+      "unknownWarning": "Your account has a way to sign in that wasn't added in Square Share. If you didn't add it, remove it now and change your password."
     },
     "remove": {
       "titleLast": "Turn off two-factor authentication?",
@@ -665,7 +667,7 @@
     },
     "approvals": {
       "title": "Approve from a signed-in device",
-      "description": "When you sign in somewhere new, scan the QR code with a phone where you're already signed in and tap Approve. Handy when your passkey is on another device.",
+      "description": "When you sign in somewhere new, scan the QR code with a phone where you're already signed in and tap the matching number. Handy when your passkey is on another device.",
       "statusOn": "On",
       "statusOff": "Off",
       "turnOn": "Turn on",
@@ -674,7 +676,8 @@
       "confirmOnTitle": "Turn on sign-in approval?",
       "confirmOnDescription": "Any phone or computer where you're signed in will be able to approve a new sign-in to your account.",
       "confirmOffTitle": "Turn off sign-in approval?",
-      "confirmOffDescription": "New sign-ins will need your passkey, your authenticator app or a recovery code. Devices already signed in stay signed in."
+      "confirmOffDescription": "New sign-ins will need your passkey, your authenticator app or a recovery code. Devices already signed in stay signed in.",
+      "offByDefault": "Off by default because you sign in with passkeys, which can't be phished. Turn it on if you'd like it as a backup."
     }
   },
   "team": {

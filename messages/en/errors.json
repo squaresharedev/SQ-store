@@ -172,7 +172,8 @@
     "factorNotOnAccount": "That authenticator isn't on your account.",
     "removeFailed": "We couldn't remove that authenticator. Try again.",
     "notEnrolled": "Turn on two-factor authentication first.",
-    "codesNotCreated": "We couldn't create new codes. Your old ones still work."
+    "codesNotCreated": "We couldn't create new codes. Your old ones still work.",
+    "removeUnknownFirst": "First remove the way to sign in that wasn't added in Square Share. Then this one can go."
   },
   "settings": {
     "usernameTaken": "That username is taken. Try another.",
@@ -569,7 +570,8 @@
     "unavailable": "Approving from another device isn't available right now. Use another way to sign in.",
     "rateLimited": "Too many codes in a short time. Wait a few minutes, then try again.",
     "expired": "This sign-in request has expired or was already answered. Show a new code on the device you're signing in on.",
-    "otherAccount": "This request is for a different Square Share account than the one signed in here."
+    "otherAccount": "This request is for a different Square Share account than the one signed in here.",
+    "approverStale": "This device needs to sign in again before it can approve sign-ins."
   },
   "orders": {
     "notShippable": {

@@ -539,7 +539,9 @@
       "setUp": "Zwei-Faktor-Authentifizierung einrichten",
       "takesAMinute": "Dauert etwa eine Minute.",
       "kindPasskey": "Passkey",
-      "kindApp": "Authenticator-App"
+      "kindApp": "Authenticator-App",
+      "kindUnknown": "Nicht in Square Share hinzugefügt",
+      "unknownWarning": "Dein Konto hat eine Anmeldemöglichkeit, die nicht in Square Share hinzugefügt wurde. Wenn du sie nicht hinzugefügt hast, entferne sie jetzt und ändere dein Passwort."
     },
     "remove": {
       "titleLast": "Zwei-Faktor-Authentifizierung ausschalten?",
@@ -665,7 +667,7 @@
     },
     "approvals": {
       "title": "Von einem angemeldeten Gerät genehmigen",
-      "description": "Wenn du dich irgendwo neu anmeldest, scanne den QR-Code mit einem Handy, auf dem du bereits angemeldet bist, und tippe auf Genehmigen. Praktisch, wenn dein Passkey auf einem anderen Gerät ist.",
+      "description": "Wenn du dich irgendwo neu anmeldest, scanne den QR-Code mit einem Handy, auf dem du bereits angemeldet bist, und tippe auf die passende Zahl. Praktisch, wenn dein Passkey auf einem anderen Gerät ist.",
       "statusOn": "Ein",
       "statusOff": "Aus",
       "turnOn": "Einschalten",
@@ -674,7 +676,8 @@
       "confirmOnTitle": "Anmeldebestätigung einschalten?",
       "confirmOnDescription": "Jedes Handy oder jeder Computer, auf dem du angemeldet bist, kann eine neue Anmeldung bei deinem Konto genehmigen.",
       "confirmOffTitle": "Anmeldebestätigung ausschalten?",
-      "confirmOffDescription": "Neue Anmeldungen benötigen deinen Passkey, deine Authenticator-App oder einen Wiederherstellungscode. Bereits angemeldete Geräte bleiben angemeldet."
+      "confirmOffDescription": "Neue Anmeldungen benötigen deinen Passkey, deine Authenticator-App oder einen Wiederherstellungscode. Bereits angemeldete Geräte bleiben angemeldet.",
+      "offByDefault": "Standardmäßig ausgeschaltet, weil du dich mit Passkeys anmeldest, die sich nicht phishen lassen. Schalte es ein, wenn du es als Absicherung möchtest."
     }
   },
   "team": {

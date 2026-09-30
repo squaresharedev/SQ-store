@@ -158,7 +158,28 @@ export async function signInWithTwoFactor(
 ) {
   await signInToChallenge(page, user);
   await enterChallengeCode(page, await nextCode(app));
-  await page.waitForURL(next, { timeout: 30_000 });
+  await continuePastPasskeyOffer(page, next);
+}
+
+/**
+ * After a code from the app, a device that can hold a passkey of its own is
+ * offered one (Windows Chrome reports Windows Hello, so locally it usually
+ * can; a CI Chromium usually cannot). A spec about something else answers
+ * "Not now", which this device then remembers, and carries on to `next`.
+ */
+export async function continuePastPasskeyOffer(
+  page: Page,
+  next: RegExp | ((url: URL) => boolean) = /\/dashboard/,
+) {
+  const offer = page.locator('[data-passkey-here="offer"]');
+  const arrived = () => {
+    const url = new URL(page.url());
+    return typeof next === "function" ? next(url) : next.test(url.href);
+  };
+  await expect(async () => {
+    if (await offer.isVisible()) await offer.getByRole("button", { name: "Not now" }).click();
+    expect(arrived()).toBe(true);
+  }).toPass({ timeout: 30_000 });
 }
 
 // ---------------------------------------------------------------------------

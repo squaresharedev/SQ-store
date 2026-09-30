@@ -1,6 +1,11 @@
 /** Where the sign-in routes that other surfaces link to live, in one place.
  *  Pure strings, safe on the server and the client. */
 
+/** Sign in, then carry on to `next` (an internal path). */
+export function signInPath(next: string): string {
+  return `/login?next=${encodeURIComponent(next)}`;
+}
+
 /** Settings › Security, where 2FA is managed and its activity is listed. */
 export const SECURITY_SETTINGS_PATH = "/settings/security";
 

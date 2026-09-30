@@ -57,6 +57,12 @@ const POLICY_FREE_BY_DESIGN = new Set([
   "mfa_approval_factors",
   "mfa_approval_opt_outs",
   "mfa_sign_in_approvals",
+  // Two-factor hardening (20260930_two_factor_hardening): the opt-in switch
+  // for approval, and the single-use intents the token hook spends. A client
+  // that could write an intent could let a guessed code through; one that
+  // could write an opt-in could switch a way in on.
+  "mfa_approval_opt_ins",
+  "mfa_verify_intents",
 ]);
 
 afterAll(async () => {

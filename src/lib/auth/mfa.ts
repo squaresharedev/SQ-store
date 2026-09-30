@@ -18,6 +18,8 @@ import {
   type SessionAssurance,
 } from "@/lib/auth/assurance";
 import { completeFactor, parseCredential, verifyAssertion } from "@/lib/auth/passkeys";
+import { authorizeFactorVerify, withdrawFactorVerify } from "@/lib/auth/verify-intent";
+import { SECURITY_SETTINGS_PATH } from "@/lib/auth/paths";
 import type { AuthenticationResponseJSON } from "@simplewebauthn/server";
 import {
   generateRecoveryCodes,
@@ -98,6 +100,27 @@ async function alertLockout(userId: string, email: string | null | undefined): P
 }
 
 /**
+ * Out of attempts while CONFIRMING a change from a signed-in session: someone
+ * who is already in (a stolen session, a borrowed laptop) is guessing codes to
+ * get past step-up. At least as urgent as the sign-in case, and told the same
+ * way, at most hourly.
+ */
+async function alertStepUpLockout(userId: string, email: string | null | undefined): Promise<void> {
+  const firstThisHour = await rateLimitKey(
+    `mfa-stepup-lockout:${userId}`,
+    "mfa_lockout_alert",
+    RATE_LIMITS.mfaLockoutAlert,
+  );
+  if (!firstThisHour) return;
+  await alertSecurityEvent(userId, "mfa.locked_out", {
+    title: { key: "Notifications.messages.security.stepUpLockedOut.title" },
+    body: { key: "Notifications.messages.security.stepUpLockedOut.body" },
+    href: SECURITY_SETTINGS_PATH,
+    emailTo: email,
+  });
+}
+
+/**
  * Check a six-digit code against one of the account's factors, on the
  * request's own Supabase client. On success GoTrue re-issues the session with
  * a fresh second-factor timestamp (aal2), and auth-js writes it to the
@@ -123,6 +146,7 @@ export async function takeSecondFactorAttempt(
 ): Promise<boolean> {
   if (await takeVerifyBudget(userId)) return true;
   if (context === "sign_in") await alertLockout(userId, email);
+  if (context === "step_up") await alertStepUpLockout(userId, email);
   return false;
 }
 
@@ -155,12 +179,17 @@ export async function verifySecondFactor(input: {
       console.warn("[mfa] challenge failed:", challenge.error?.code, challenge.error?.message);
       return { ok: false, reason: failureFrom(challenge.error) };
     }
+    // Only now, with every budget and the replay guard passed, does the app
+    // let GoTrue issue a second-factor token (lib/auth/verify-intent.ts).
+    const intent = await authorizeFactorVerify(supabase);
+    if (!intent) return { ok: false, reason: "unavailable" };
     const verified = await supabase.auth.mfa.verify({
       factorId,
       challengeId: challenge.data.id,
       code,
     });
     if (verified.error) {
+      await withdrawFactorVerify(intent);
       const reason = failureFrom(verified.error);
       if (reason === "invalid" && context === "sign_in") {
         await recordSecurityEvent({ userId, event: "mfa.challenge_failed" });

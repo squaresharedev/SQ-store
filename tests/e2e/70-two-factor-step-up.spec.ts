@@ -5,6 +5,7 @@ import {
   authenticator,
   chooseAuthenticatorApp,
   enableTwoFactor,
+  continuePastPasskeyOffer,
   enterChallengeCode,
   markSignsInWithGoogle,
   nextCode,
@@ -214,7 +215,7 @@ test.describe("two-factor step-up", () => {
     await page.getByLabel("Authenticator").click();
     await page.getByRole("option", { name: "Backup tablet" }).click();
     await enterChallengeCode(page, await nextCode(tablet));
-    await page.waitForURL(/\/dashboard/, { timeout: 30_000 });
+    await continuePastPasskeyOffer(page, /\/dashboard/);
 
     // Removing ONE of two leaves 2FA on.
     await page.goto("/settings/security");

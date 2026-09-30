@@ -347,7 +347,8 @@
     "repeated": "Dieses Passwort ist zu leicht zu erraten. Versuche eine längere Kombination aus Wörtern.",
     "sequence": "Dieses Passwort enthält eine häufige Tastatursequenz. Versuche etwas anderes.",
     "containsIdentity": "Passwort darf weder deine E-Mail-Adresse noch deinen Benutzernamen enthalten.",
-    "weakMix": "Kombiniere Groß- und Kleinbuchstaben, Zahlen oder Sonderzeichen, oder verwende {length}+ Zeichen."
+    "weakMix": "Kombiniere Groß- und Kleinbuchstaben, Zahlen oder Sonderzeichen, oder verwende {length}+ Zeichen.",
+    "breached": "Dieses Passwort ist in einem Datenleck aufgetaucht, deshalb probieren Angreifer es bereits aus. Wähle ein anderes."
   },
   "team": {
     "invalidStore": "Ungültige Shop-Referenz.",

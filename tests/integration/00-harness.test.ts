@@ -43,6 +43,7 @@ describe("embedded supabase replica", () => {
       // the off switch, and the requests (20260927_sign_in_approvals).
       // Service-role only.
       "mfa_approval_factors",
+      "mfa_approval_opt_ins",
       "mfa_approval_opt_outs",
       // Passkeys used as the second factor, each unlocking a sealed TOTP
       // secret (20260925_passkey_factors). Service-role only.
@@ -51,6 +52,10 @@ describe("embedded supabase replica", () => {
       // Service-role only.
       "mfa_recovery_codes",
       "mfa_sign_in_approvals",
+      // Single-use permissions the app writes before it completes a second
+      // factor, spent by the access token hook (20260930_two_factor_hardening).
+      // Service-role only.
+      "mfa_verify_intents",
       // A seller's appeal against one moderation decision, and the decisions
       // themselves (20260926_moderation_decisions_and_appeals). Read-only to
       // the store's owner and team; written by service_role only.

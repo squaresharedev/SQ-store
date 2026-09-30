@@ -136,6 +136,10 @@
       "approvalsEnabled": {
         "title": "Sign-in approval is on",
         "body": "Devices where you're signed in can now approve new sign-ins to your account. If this wasn't you, change your password now."
+      },
+      "stepUpLockedOut": {
+        "title": "Too many wrong two-factor codes",
+        "body": "While signed in to your account, someone entered too many wrong two-factor codes trying to change a setting, so that's paused for a few minutes. If this wasn't you, change your password and sign out of every device."
       }
     },
     "order": {

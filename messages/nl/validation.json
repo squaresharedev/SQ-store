@@ -347,7 +347,8 @@
     "repeated": "Dat wachtwoord is te makkelijk te raden. Probeer een langere combinatie van woorden.",
     "sequence": "Dat wachtwoord bevat een veelgebruikte toetsenbordreeks. Probeer iets anders.",
     "containsIdentity": "Het wachtwoord mag je e-mailadres of gebruikersnaam niet bevatten.",
-    "weakMix": "Combineer hoofd- en kleine letters, een cijfer of een symbool, of gebruik {length}+ tekens."
+    "weakMix": "Combineer hoofd- en kleine letters, een cijfer of een symbool, of gebruik {length}+ tekens.",
+    "breached": "Dit wachtwoord is opgedoken in een datalek, dus aanvallers proberen het al. Kies een ander wachtwoord."
   },
   "team": {
     "invalidStore": "Ongeldige winkelverwijzing.",

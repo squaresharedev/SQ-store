@@ -347,7 +347,8 @@
     "repeated": "Toto heslo se dá snadno uhodnout. Zkuste delší kombinaci slov.",
     "sequence": "Heslo obsahuje běžnou posloupnost kláves. Zkuste něco jiného.",
     "containsIdentity": "Heslo nesmí obsahovat vaši e-mailovou adresu ani uživatelské jméno.",
-    "weakMix": "Zkombinujte velká a malá písmena, číslici nebo symbol (nebo použijte alespoň {length} znaků)."
+    "weakMix": "Zkombinujte velká a malá písmena, číslici nebo symbol (nebo použijte alespoň {length} znaků).",
+    "breached": "Toto heslo se objevilo v úniku dat, takže ho útočníci už zkoušejí. Zvolte jiné."
   },
   "team": {
     "invalidStore": "Neplatný odkaz na obchod.",

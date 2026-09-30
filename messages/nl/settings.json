@@ -539,7 +539,9 @@
       "setUp": "Tweestapsverificatie instellen",
       "takesAMinute": "Kost ongeveer een minuut.",
       "kindPasskey": "Toegangssleutel",
-      "kindApp": "Authenticator-app"
+      "kindApp": "Authenticator-app",
+      "kindUnknown": "Niet toegevoegd in Square Share",
+      "unknownWarning": "Je account heeft een manier om in te loggen die niet in Square Share is toegevoegd. Heb jij die niet toegevoegd? Verwijder hem dan nu en wijzig je wachtwoord."
     },
     "remove": {
       "titleLast": "Tweestapsverificatie uitzetten?",
@@ -665,7 +667,7 @@
     },
     "approvals": {
       "title": "Goedkeuren vanaf een ingelogd apparaat",
-      "description": "Wanneer je ergens nieuw inlogt, scan je de QR-code met een telefoon waarop je al bent ingelogd en tik je op Goedkeuren. Handig als je toegangssleutel op een ander apparaat staat.",
+      "description": "Wanneer je ergens nieuw inlogt, scan je de QR-code met een telefoon waarop je al bent ingelogd en tik je op het bijbehorende nummer. Handig als je toegangssleutel op een ander apparaat staat.",
       "statusOn": "Aan",
       "statusOff": "Uit",
       "turnOn": "Aanzetten",
@@ -674,7 +676,8 @@
       "confirmOnTitle": "Inloggoedkeuring aanzetten?",
       "confirmOnDescription": "Elke telefoon of computer waarop je bent ingelogd, kan een nieuwe inlogpoging op je account goedkeuren.",
       "confirmOffTitle": "Inloggoedkeuring uitzetten?",
-      "confirmOffDescription": "Nieuwe inlogpogingen hebben je toegangssleutel, je authenticator-app of een herstelcode nodig. Apparaten die al zijn ingelogd, blijven ingelogd."
+      "confirmOffDescription": "Nieuwe inlogpogingen hebben je toegangssleutel, je authenticator-app of een herstelcode nodig. Apparaten die al zijn ingelogd, blijven ingelogd.",
+      "offByDefault": "Standaard uit, omdat je inlogt met toegangssleutels en die niet te phishen zijn. Zet het aan als je het als back-up wilt hebben."
     }
   },
   "team": {

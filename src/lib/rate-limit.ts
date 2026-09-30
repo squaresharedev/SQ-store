@@ -354,6 +354,12 @@ export const RATE_LIMITS = {
   mfaApprovalStartPerClient: { max: 30, windowSeconds: 15 * 60 },
   /** Approve or deny taps by one signed-in account. */
   mfaApprovalDecide: { max: 30, windowSeconds: 60 * 60 },
+  /**
+   * Not a budget: at most one "a sign-in was refused" alert per account per
+   * quarter hour. Someone holding the password can start ten requests in that
+   * time; each refusal is logged, but the owner gets one message, not ten.
+   */
+  mfaApprovalDenyAlert: { max: 1, windowSeconds: 15 * 60 },
 } as const;
 
 export type RateLimitBudget = { max: number; windowSeconds: number };

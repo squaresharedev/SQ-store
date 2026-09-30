@@ -347,7 +347,8 @@
     "repeated": "Ce mot de passe est trop facile à deviner. Essayez un mélange de mots plus long.",
     "sequence": "Ce mot de passe contient une séquence de clavier courante. Essayez autre chose.",
     "containsIdentity": "Le mot de passe ne doit pas contenir votre adresse e-mail ni votre nom d’utilisateur.",
-    "weakMix": "Mélangez majuscules et minuscules, un chiffre ou un symbole, ou utilisez {length} caractères ou plus."
+    "weakMix": "Mélangez majuscules et minuscules, un chiffre ou un symbole, ou utilisez {length} caractères ou plus.",
+    "breached": "Ce mot de passe est apparu dans une fuite de données, les pirates l’essaient donc déjà. Choisissez-en un autre."
   },
   "team": {
     "invalidStore": "Référence de boutique non valide.",

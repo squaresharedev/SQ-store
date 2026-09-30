@@ -136,6 +136,10 @@
       "approvalsEnabled": {
         "title": "L'approvazione degli accessi è attiva",
         "body": "I dispositivi in cui hai già effettuato l'accesso possono ora approvare nuovi accessi al tuo account. Se non eri tu, cambia subito la password."
+      },
+      "stepUpLockedOut": {
+        "title": "Troppi codici a due fattori sbagliati",
+        "body": "Mentre l’account era connesso, qualcuno ha inserito troppi codici a due fattori sbagliati cercando di modificare un’impostazione, quindi ora è tutto in pausa per qualche minuto. Se non eri tu, cambia la password ed esci da ogni dispositivo."
       }
     },
     "order": {

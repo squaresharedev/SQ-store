@@ -539,7 +539,9 @@
       "setUp": "Nastaviť dvojfaktorové overenie",
       "takesAMinute": "Trvá to asi minútu.",
       "kindPasskey": "Prístupový kľúč",
-      "kindApp": "Overovacia aplikácia"
+      "kindApp": "Overovacia aplikácia",
+      "kindUnknown": "Nepridané v Square Share",
+      "unknownWarning": "Váš účet má spôsob prihlásenia, ktorý nebol pridaný v Square Share. Ak ste ho nepridali vy, ihneď ho odoberte a zmeňte heslo."
     },
     "remove": {
       "titleLast": "Vypnúť dvojfaktorové overenie?",
@@ -665,7 +667,7 @@
     },
     "approvals": {
       "title": "Schváliť zo zariadenia, na ktorom ste prihlásení",
-      "description": "Pri novom prihlásení naskenujte QR kód telefónom, na ktorom ste už prihlásení, a ťuknite na Schváliť. Hodí sa, keď je váš prístupový kľúč na inom zariadení.",
+      "description": "Pri novom prihlásení naskenujte QR kód telefónom, na ktorom ste už prihlásení, a ťuknite na zodpovedajúce číslo. Hodí sa, keď je váš prístupový kľúč na inom zariadení.",
       "statusOn": "Zapnuté",
       "statusOff": "Vypnuté",
       "turnOn": "Zapnúť",
@@ -674,7 +676,8 @@
       "confirmOnTitle": "Zapnúť schvaľovanie prihlásenia?",
       "confirmOnDescription": "Každý telefón alebo počítač, na ktorom ste prihlásení, bude môcť schváliť nové prihlásenie do vášho účtu.",
       "confirmOffTitle": "Vypnúť schvaľovanie prihlásenia?",
-      "confirmOffDescription": "Nové prihlásenia budú vyžadovať váš prístupový kľúč, overovaciu aplikáciu alebo záložný kód. Zariadenia, ktoré sú už prihlásené, zostanú prihlásené."
+      "confirmOffDescription": "Nové prihlásenia budú vyžadovať váš prístupový kľúč, overovaciu aplikáciu alebo záložný kód. Zariadenia, ktoré sú už prihlásené, zostanú prihlásené.",
+      "offByDefault": "Predvolene vypnuté, pretože sa prihlasujete prístupovými kľúčmi, ktoré sa nedajú vylákať phishingom. Zapnite to, ak to chcete mať ako zálohu."
     }
   },
   "team": {

@@ -347,7 +347,8 @@
     "repeated": "Esa contraseña es demasiado fácil de adivinar. Prueba una combinación más larga de palabras.",
     "sequence": "Esa contraseña contiene una secuencia de teclado habitual. Prueba con otra.",
     "containsIdentity": "La contraseña no puede contener tu correo electrónico ni tu nombre de usuario.",
-    "weakMix": "Combina mayúsculas y minúsculas, un número o un símbolo, o usa {length} caracteres o más."
+    "weakMix": "Combina mayúsculas y minúsculas, un número o un símbolo, o usa {length} caracteres o más.",
+    "breached": "Esta contraseña ha aparecido en una filtración de datos, así que los atacantes ya la prueban. Elige otra distinta."
   },
   "team": {
     "invalidStore": "Referencia de tienda no válida.",

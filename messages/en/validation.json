@@ -347,7 +347,8 @@
     "repeated": "That password is too easy to guess. Try a longer mix of words.",
     "sequence": "That password contains a common keyboard sequence. Try something else.",
     "containsIdentity": "Password must not contain your email address or username.",
-    "weakMix": "Mix in upper and lower case, a number or a symbol — or use {length}+ characters."
+    "weakMix": "Mix in upper and lower case, a number or a symbol — or use {length}+ characters.",
+    "breached": "This password has turned up in a data breach, so attackers already try it. Choose a different one."
   },
   "team": {
     "invalidStore": "Invalid store reference.",

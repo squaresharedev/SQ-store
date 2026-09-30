@@ -197,6 +197,11 @@ export const infoTextClass = "font-inter text-xs text-muted-foreground";
 /** Inline validation message. */
 export const errorTextClass = "font-inter text-sm text-destructive";
 
+/** A square-cornered warning strip in a settings card: icon then words, for
+ *  something the person must act on (2FA off after recovery, an unknown factor). */
+export const dangerNoticeClass =
+  "flex items-start gap-3 border border-destructive/40 bg-destructive/5 px-4 py-3";
+
 /** A small way out or way around, set under the main control as a quiet
  *  underlined link ("Not you? Sign out", "Use a code instead"). */
 export const quietLinkClass = `font-inter text-xs text-muted-foreground underline decoration-border underline-offset-4 hover:text-foreground hover:decoration-foreground ${TRANSITION} ${FOCUS_RING}`;

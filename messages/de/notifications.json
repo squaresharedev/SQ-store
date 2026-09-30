@@ -136,6 +136,10 @@
       "approvalsEnabled": {
         "title": "Anmeldebestätigung ist eingeschaltet",
         "body": "Geräte, auf denen du angemeldet bist, können jetzt neue Anmeldungen bei deinem Konto genehmigen. Wenn du das nicht warst, ändere jetzt dein Passwort."
+      },
+      "stepUpLockedOut": {
+        "title": "Zu viele falsche Zwei-Faktor-Codes",
+        "body": "Während du in deinem Konto angemeldet warst, hat jemand zu viele falsche Zwei-Faktor-Codes eingegeben, um eine Einstellung zu ändern, deshalb ist das für ein paar Minuten pausiert. Wenn du das nicht warst, ändere dein Passwort und melde dich auf allen Geräten ab."
       }
     },
     "order": {

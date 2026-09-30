@@ -39,6 +39,15 @@ vi.mock("@/lib/auth/mfa-actions", () => ({
   verifyPasskeySignIn: vi.fn().mockResolvedValue({}),
 }));
 vi.mock("@/lib/auth/actions", () => ({ signOut: vi.fn() }));
+const decideMock = vi.hoisted(() => vi.fn().mockResolvedValue({}));
+vi.mock("@/lib/auth/sign-in-approval-actions", () => ({
+  decideSignInApproval: decideMock,
+  setSignInApproval: vi.fn().mockResolvedValue({}),
+  startSignInApproval: vi.fn().mockResolvedValue({}),
+  checkSignInApproval: vi.fn().mockResolvedValue({ waiting: true }),
+  cancelSignInApproval: vi.fn().mockResolvedValue(undefined),
+  reconfirmToApprove: vi.fn().mockResolvedValue(undefined),
+}));
 
 const { TwoFactorChallenge } = await import("@/components/auth/TwoFactorChallenge");
 const { RecoveryCodesCard } = await import("@/components/settings/security/RecoveryCodesCard");
@@ -46,6 +55,7 @@ const { RecoveryCodesDisplay } = await import("@/components/settings/security/Re
 const { SecurityActivityCard } = await import("@/components/settings/security/SecurityActivityCard");
 const { SecuritySection } = await import("@/components/settings/security/SecuritySection");
 const { TwoFactorCard } = await import("@/components/settings/security/TwoFactorCard");
+const { ApproveSignIn } = await import("@/components/auth/ApproveSignIn");
 
 const PHONE = { id: "a0000000-0000-4000-8000-00000000000a", name: "Phone" };
 const TABLET = { id: "b0000000-0000-4000-8000-00000000000b", name: "Tablet" };
@@ -250,6 +260,56 @@ describe("TwoFactorCard", () => {
     expect(screen.getByRole("button", { name: "Add another passkey or app" })).toBeInTheDocument();
   });
 
+  it("shows a way in the app didn't make, with a warning and its own Remove", () => {
+    const createdAt = "2026-09-25T10:00:00Z";
+    render(
+      <TwoFactorCard
+        enrolled
+        factors={[
+          { ...PHONE, createdAt, type: "totp" },
+          { ...TABLET, name: "approval:hidden", createdAt, type: "unknown" },
+        ]}
+        hasPassword
+        signedInRecently
+        signsInWithGoogle={false}
+        passkeysAvailable={false}
+        openSetup={false}
+      />,
+    );
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Your account has a way to sign in that wasn't added in Square Share. If you didn't add it, remove it now and change your password.",
+    );
+    const list = screen.getByRole("list", { name: "Passkeys and authenticator apps" });
+    const kinds = Array.from(list.querySelectorAll("[data-factor-type]")).map((row) =>
+      row.getAttribute("data-factor-type"),
+    );
+    expect(kinds).toEqual(["totp", "unknown"]);
+    expect(list).toHaveTextContent("approval:hiddenNot added in Square Share · Added");
+    expect(screen.getByRole("button", { name: "Remove approval:hidden" })).toBeInTheDocument();
+  });
+
+  it("says why approval is off on a passkey-only account", () => {
+    const createdAt = "2026-09-25T10:00:00Z";
+    render(
+      <TwoFactorCard
+        enrolled
+        factors={[{ ...TABLET, name: "iPhone", createdAt, type: "passkey" }]}
+        hasPassword
+        signedInRecently
+        signsInWithGoogle={false}
+        passkeysAvailable
+        approvalsEnabled={false}
+        approvalsOffByDefault
+        openSetup={false}
+      />,
+    );
+    expect(
+      screen.getByText(
+        "Off by default because you sign in with passkeys, which can't be phished. Turn it on if you'd like it as a backup.",
+      ),
+    ).toBeInTheDocument();
+  });
+
   it("makes the case for turning it on", () => {
     render(
       <TwoFactorCard
@@ -291,5 +351,38 @@ describe("SecuritySection", () => {
       "Two-factor authentication is off. You signed in with a recovery code, which removed your old passkeys and authenticator apps and signed out your other devices. Set it up again now so your password isn’t the only thing protecting your account.",
     );
     expect(status.querySelector(".font-semibold")?.textContent).toBe("Two-factor authentication is off.");
+  });
+});
+
+describe("ApproveSignIn", () => {
+  const props = {
+    token: "t",
+    email: "seller@example.com",
+    device: { browser: "Chrome", os: "Windows" },
+    location: "Portugal",
+    choices: [42, 17, 88],
+  };
+
+  it("asks for the number on the device signing in, one button per choice, and offers Deny", () => {
+    render(<ApproveSignIn {...props} />);
+    expect(screen.getByText("Tap the number shown on the device that's signing in")).toBeInTheDocument();
+    for (const number of props.choices) {
+      const button = screen.getByRole("button", { name: `Approve with ${number}` });
+      expect(button).toHaveAttribute("name", "number");
+      expect(button).toHaveAttribute("value", String(number));
+      expect(button).toHaveTextContent(String(number));
+    }
+    expect(screen.getByRole("button", { name: "Deny" })).toHaveAttribute("value", "deny");
+  });
+
+  it("a wrong number reads as a refused sign-in, with the way to change the password", async () => {
+    decideMock.mockResolvedValueOnce({ decided: "mismatch" });
+    render(<ApproveSignIn {...props} />);
+    await userEvent.click(screen.getByRole("button", { name: "Approve with 17" }));
+    expect(await screen.findByRole("heading", { name: "Sign-in refused" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Change password" })).toBeInTheDocument();
+    const sent = decideMock.mock.calls[0][1] as FormData;
+    expect(sent.get("number")).toBe("17");
+    expect(sent.get("decision")).toBeNull();
   });
 });

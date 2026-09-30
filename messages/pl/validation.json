@@ -347,7 +347,8 @@
     "repeated": "To hasło jest zbyt łatwe do odgadnięcia. Spróbuj dłuższej kombinacji słów.",
     "sequence": "To hasło zawiera popularny ciąg znaków z klawiatury. Spróbuj czegoś innego.",
     "containsIdentity": "Hasło nie może zawierać twojego adresu e-mail ani nazwy użytkownika.",
-    "weakMix": "Użyj wielkich i małych liter, cyfry lub symbolu, albo co najmniej {length} znaków."
+    "weakMix": "Użyj wielkich i małych liter, cyfry lub symbolu, albo co najmniej {length} znaków.",
+    "breached": "To hasło pojawiło się w wycieku danych, więc atakujący już je wypróbowują. Wybierz inne."
   },
   "team": {
     "invalidStore": "Nieprawidłowe odwołanie do sklepu.",

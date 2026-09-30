@@ -8,7 +8,7 @@ import { useTranslations } from "next-intl";
 import { Button, buttonClassName } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { useResolveMessage } from "@/components/ui/ActionErrorNotice";
-import { helpTextClass, infoTextClass } from "@/components/ui/control-styles";
+import { helpTextClass, infoTextClass, labelClass } from "@/components/ui/control-styles";
 import { SuccessMark } from "@/components/auth/SuccessMark";
 import { useDeviceName } from "@/components/auth/useDeviceName";
 import type { DeviceLabel } from "@/lib/auth/device-label";
@@ -22,28 +22,34 @@ const INITIAL: DecideApprovalState = {};
 
 /**
  * The phone's half of sign-in approval: who is asking (a browser, a system, a
- * country, the account), a plain warning, and Approve or Deny. Approving lets
- * the waiting device finish signing in by itself; there is nothing to type or
- * carry back. Denying says what it means: someone has the password.
+ * country, the account), a plain warning, then the number shown on the device
+ * signing in, picked from three, or Deny. The right number lets the waiting
+ * device finish signing in by itself; there is nothing to type or carry back.
+ * A wrong one refuses the sign-in, like Deny: someone who talked the owner
+ * into scanning cannot see that screen, so a guess must not get through.
+ * Denying says what it means: someone has the password.
  */
 export function ApproveSignIn({
   token,
   email,
   device,
   location,
+  choices,
 }: {
   token: string;
   email: string;
   device: DeviceLabel;
   /** The country the request came from, in the reader's language, if known. */
   location: string | null;
+  /** Three numbers, one of them the waiting device's, in random order. */
+  choices: number[];
 }) {
   const t = useTranslations("Auth.approve");
   const resolve = useResolveMessage();
   const deviceName = useDeviceName();
   const [state, formAction, isPending] = useActionState(decideSignInApproval, INITIAL);
   // Which button was pressed, for its own "working" label.
-  const [choice, setChoice] = React.useState<"approve" | "deny" | null>(null);
+  const [choice, setChoice] = React.useState<number | "deny" | null>(null);
 
   if (state.decided === "approve") {
     return (
@@ -57,13 +63,16 @@ export function ApproveSignIn({
     );
   }
 
-  if (state.decided === "deny") {
+  if (state.decided === "deny" || state.decided === "mismatch") {
+    const outcome = state.decided === "deny" ? "denied" : "mismatch";
     return (
-      <div className="flex flex-col gap-5" data-approve-state="denied">
+      <div className="flex flex-col gap-5" data-approve-state={outcome}>
         <div>
-          <h1 className="text-xl font-semibold tracking-tight text-foreground">{t("denied.heading")}</h1>
+          <h1 className="text-xl font-semibold tracking-tight text-foreground">
+            {t(`${outcome}.heading`)}
+          </h1>
           <p role="status" className={`${helpTextClass} mt-1`}>
-            {t("denied.body")}
+            {t(`${outcome}.body`)}
           </p>
         </div>
         <Link href={PASSWORD_SETTINGS_PATH} className={buttonClassName("primary", "w-full")}>
@@ -108,24 +117,28 @@ export function ApproveSignIn({
       )}
 
       <div className="flex flex-col gap-2">
-        <Button
-          type="submit"
-          name="decision"
-          value="approve"
-          disabled={isPending}
-          onClick={() => setChoice("approve")}
-          className="w-full px-8 py-3.5 text-base"
-          suppressHydrationWarning
-        >
-          {isPending && choice === "approve" ? (
-            <>
-              <Spinner />
-              {t("approving")}
-            </>
-          ) : (
-            t("approve")
-          )}
-        </Button>
+        <fieldset className="flex flex-col gap-3">
+          <legend className={`${labelClass} mb-3`}>{t("pickNumber")}</legend>
+          <div className="grid grid-cols-3 gap-2">
+            {choices.map((number) => (
+              <Button
+                key={number}
+                type="submit"
+                name="number"
+                value={String(number)}
+                variant="secondary"
+                disabled={isPending}
+                onClick={() => setChoice(number)}
+                aria-label={t("numberButton", { number })}
+                className="h-16 text-2xl font-semibold tabular-nums"
+                data-approve-number={number}
+                suppressHydrationWarning
+              >
+                {isPending && choice === number ? <Spinner /> : number}
+              </Button>
+            ))}
+          </div>
+        </fieldset>
         <Button
           type="submit"
           name="decision"

@@ -136,6 +136,10 @@
       "approvalsEnabled": {
         "title": "La aprobación de inicio de sesión está activada",
         "body": "Los dispositivos donde tienes sesión iniciada ya pueden aprobar nuevos inicios de sesión en tu cuenta. Si no has sido tú, cambia tu contraseña ahora."
+      },
+      "stepUpLockedOut": {
+        "title": "Demasiados códigos de verificación en dos pasos incorrectos",
+        "body": "Con la sesión iniciada en tu cuenta, alguien introdujo demasiados códigos de verificación en dos pasos incorrectos al intentar cambiar un ajuste, así que se ha pausado unos minutos. Si no has sido tú, cambia tu contraseña y cierra la sesión en todos los dispositivos."
       }
     },
     "order": {
